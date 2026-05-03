@@ -17,7 +17,7 @@ Cada mod tem:
 
 - **Origem:** mods criados pela equipe são prefixados com `🏠` no nome (ex: `🏠 IdleSprintFix`). Demais são da comunidade.
 - **Tipo:** 🖥️ Client (C# / BepInEx) · 🌐 Server (TypeScript/JS) · 🔀 Misto (ambos) · 🔍 a classificar
-- **Cenário:** ver enum "Cenários" abaixo (onde o mod atua: hideout, raid, geral, ambos)
+- **Atuação:** ver enum "Atuação" abaixo (onde o mod atua: hideout, raid, geral, ambos)
 - **Forge:** URL no [forge.sp-tarkov.com](https://forge.sp-tarkov.com/mods) (1 página por mod, lista todas as versões). Formato: `[id](url)` · `🔍` (a buscar) · `—` (confirmado ausente)
 - **Repo 3.x:** URL do repositório fonte na versão SPT 3.x (último release pré-4.0). Aceita GitHub, GitLab ou similar. Formato: `[autor/repo](url)` · `🔍` (a buscar) · `—` (não há repo público)
 - **Repo 4.0:** URL do repositório fonte na versão SPT 4.0+. Pode ser repo separado (autor manteve nomes diferentes), branch/tag específica, ou mesmo repo do 3.x se autor migrou no mesmo. Aceita GitHub, GitLab, etc. Formato: `[autor/repo](url)` · `🔍` · `—` (autor não publicou 4.0)
@@ -52,7 +52,7 @@ Cada mod tem:
 - 🔻 **Baixa** — nice-to-have, pouco impacto se ausente
 - 🔍 — a definir (default)
 
-## Cenários
+## Atuação
 
 Onde o mod atua dentro do jogo:
 
@@ -70,7 +70,7 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 |---|---|
 | **Origem** | 🏠 Interno (criado pela equipe) |
 | **Tipo** | 🖥️ Client (C# / BepInEx) |
-| **Cenário** | 🔀 Ambos (multiplayer afeta hideout + raid) |
+| **Atuação** | 🔀 Ambos (multiplayer afeta hideout + raid) |
 | **Função** | Cliente multiplayer (fork de Fika) |
 | **Forge** | — (não publicado) |
 | **Repo 3.x** | — (não público — fork privado) |
@@ -82,7 +82,7 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 
 ## Inventário completo
 
-| Mod | Tipo | Cenário | Forge | Repo 3.x | Repo 4.0 | Função | Status | Prioridade |
+| Mod | Tipo | Atuação | Forge | Repo 3.x | Repo 4.0 | Função | Status | Prioridade |
 |---|---|---|---|---|---|---|---|---|
 | [SVM] Server Value Modifier | 🌐 Server | 🌐 Geral | [236](https://forge.sp-tarkov.com/mod/236/server-value-modifier-svm) | [GhostFenixx/SVM](https://github.com/GhostFenixx/SVM) | — | Modifica valores do servidor (loot, traders, hideout) — último release SPT 3.11 | 🟠 Aguardar upstream | 🔍 |
 | AAAArtem-WTT | 🔍 | 🌐 Geral | [1023](https://forge.sp-tarkov.com/mod/1023/wtt-artem) | 🔍 | 🔍 | 🔍 (relacionado ao WTT) | 🟡 Avaliar | 🔍 |
@@ -224,3 +224,4 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | 2026-05-03 | Guilherme | docs(migration): research forge URLs for ~80 mods with 🔍 status |
 | 2026-05-03 | Guilherme | docs(migration): move internal mods (🏠) to end of inventory table in alphabetical order |
 | 2026-05-03 | Guilherme | docs(migration): research forge URLs for ~80 mods + scenario taxonomy |
+| 2026-05-03 | Guilherme | docs(migration): add Cenário column (Hideout/Raid/Ambos/Geral) to inventory |
