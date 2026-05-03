@@ -55,7 +55,7 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | Band-Aid | 🔍 | 🔍 | 🔍 | 🔍 | 🔍 (fix/patch) | 🔵 Avaliar |
 | BeltSlot | 🖥️ Client | 🔍 | [Trench-foot/BeltSlot](https://github.com/Trench-foot/BeltSlot) | 🔍 | Slot extra de cinto no inventário | 🔵 Avaliar |
 | BetterRearSights | 🔍 | 🔍 | 🔍 | 🔍 | Mira traseira melhorada | 🔵 Avaliar |
-| BorkelRNVG | 🔍 | 🔍 | 🔍 | 🔍 | RNVG (night vision) | 🔵 Avaliar |
+| BorkelRNVG | 🖥️ Client | [954/borkels-realistic-nvgs](https://forge.sp-tarkov.com/mod/954/borkels-realistic-night-vision-goggles-nvgs-and-t-7) | 🔍 | ✅ 4.0.13 (v2.1.1) | NVGs realistas com máscaras + luz natural | 🟢 Portar |
 | BRNVG_N-15Adapter | 🔍 | 🔍 | 🔍 | 🔍 | Adaptador N-15 para BRNVG | 🔵 Avaliar |
 | ChooChoo-TraderModding | 🔍 | 🔍 | 🔍 | 🔍 | Modding via traders | 🔵 Avaliar |
 | ContinuousLoadAmmo | 🔍 | 🔍 | 🔍 | 🔍 | Carregamento contínuo de munição | 🔵 Avaliar |
@@ -80,19 +80,19 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | Fika (fika-server / Fika.Core) | 🔀 Misto | [2326/project-fika](https://forge.sp-tarkov.com/mod/2326/project-fika) | [project-fika/Fika-Plugin](https://github.com/project-fika/Fika-Plugin) | ✅ 4.0.13 (v2.2.5) | Multiplayer base (BepInEx + server) | 🟢 Portar |
 | FikaTransitFix (FikaTransitFixServer) | 🌐 Server | 🔍 | 🔍 | 🔍 | Fix de transit em raids do Fika | 🔵 Avaliar |
 | FixReloadUltraFika | 🔍 | 🔍 | 🔍 | 🔍 | Fix de reload no UltraFika (provável fix proprietário) | 🔵 Avaliar |
-| flir-betterkeysng | 🔍 | 🔍 | 🔍 | 🔍 | UI melhorada para keys (next-gen) | 🔵 Avaliar |
+| flir-betterkeysng | 🔍 (provável Client, mesmo autor de Time & Weather) | 🔍 | 🔍 | 🔍 | UI melhorada para keys (autor: flir, mesmo de Tarkov Weather) | 🔵 Avaliar |
 | ForceSync | 🔍 | 🔍 | 🔍 | 🔍 | Força sincronização (Fika?) | 🔵 Avaliar |
 | FOVFix | 🖥️ Client | 🔍 | [space-commits/SPT-FOV-Fix](https://github.com/space-commits/SPT-FOV-Fix) | ✅ 4.x.x | Fix de FOV (Fontaine's FOV Fix) | 🟢 Portar |
 | gaylatea-deadlyblades | 🔍 | 🔍 | 🔍 | 🔍 | Lâminas mais letais | 🔵 Avaliar |
 | Gaylatea-UseLooseLoot | 🖥️ Client | 🔍 | [DrakiaXYZ/SPT-UseLooseLoot](https://github.com/DrakiaXYZ/SPT-UseLooseLoot) | 🔍 | Usa loose loot direto sem entrar no inventário | 🔵 Avaliar |
 | GhostMercenaries | 🔍 | 🔍 | 🔍 | 🔍 | 🔍 (mercenários invisíveis?) | 🔵 Avaliar |
 | HandsAreNotBusy | 🔍 | 🔍 | 🔍 | 🔍 | Mãos não ficam ocupadas (animação) | 🔵 Avaliar |
-| HollywoodFX | 🔍 | 🔍 | 🔍 | 🔍 | FX visuais cinematográficos | 🔵 Avaliar |
-| HollywoodGraphics | 🔍 | 🔍 | 🔍 | 🔍 | Gráficos cinematográficos | 🔵 Avaliar |
-| IcyClawz.CustomInteractions | 🔍 | 🔍 | — (não tem GitHub público) | 🔍 | Interações customizadas | 🔵 Avaliar |
-| IcyClawz.ItemContextMenuExt | 🔍 | 🔍 | — | 🔍 | Menu de contexto estendido em itens | 🔵 Avaliar |
-| IcyClawz.ItemSellPrice | 🔍 | 🔍 | — | 🔍 | Mostra preço de venda dos itens | 🔵 Avaliar |
-| IcyClawz.MunitionsExpert | 🔍 | 🔍 | — | 🔍 | Info detalhada de munição | 🔵 Avaliar |
+| HollywoodFX | 🖥️ Client | [2003/hollywoodfx](https://forge.sp-tarkov.com/mod/2003/hollywoodfx) | 🔍 | ✅ 4.0.13 (v1.8.4) | FX cinematográficos (impactos, blood) por JankyTheClown | 🟢 Portar |
+| HollywoodGraphics | 🔍 (provável JankyTheClown) | 🔍 | 🔍 | 🔍 | Gráficos cinematográficos (mesmo autor de HollywoodFX/HollywoodCam) | 🔵 Avaliar |
+| IcyClawz.CustomInteractions | 🖥️ Client | 🔍 (na hub.sp-tarkov.com/user/34778-icyclawz/) | — | 🔍 | Interações customizadas | 🔵 Avaliar |
+| IcyClawz.ItemContextMenuExt | 🖥️ Client | [hub: 1283](https://hub.sp-tarkov.com/files/file/1283-item-context-menu-extended/) | — | ✅ 4.0.13 | Menu de contexto estendido em itens (18.1K downloads) | 🟢 Portar |
+| IcyClawz.ItemSellPrice | 🖥️ Client | [hub: 1230](https://hub.sp-tarkov.com/files/file/1230-item-sell-price/) | — | ✅ 4.0.13 | Mostra preços de venda em todos os traders (81.5K downloads) | 🟢 Portar |
+| IcyClawz.MunitionsExpert | 🖥️ Client | 🔍 (na hub.sp-tarkov.com/user/34778-icyclawz/) | — | 🔍 | Info detalhada de munição | 🔵 Avaliar |
 | IdleSprintFix | 🔍 | 🔍 | 🔍 (não encontrado em busca) | 🔍 | Fix do bug de sprint travado | 🔵 Avaliar |
 | IhanaMies-LootValueBackend | 🖥️ Client | 🔍 | [IhanaMies/LootValue](https://github.com/IhanaMies/LootValue) | ❌ (3.11) | Mostra valor de loot na UI | 🟠 Aguardar upstream |
 | inory-agonysfx | 🔍 | 🔍 | 🔍 | 🔍 | SFX de dor/agonia | 🔵 Avaliar |
@@ -127,7 +127,7 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | StashSearch | 🖥️ Client | 🔍 | [DrakiaXYZ/SPT-StashSearch](https://github.com/DrakiaXYZ/SPT-StashSearch) | 🔍 | Busca dentro do stash | 🔵 Avaliar |
 | SwiftXP.ShowMeTheMoney | 🔍 | 🔍 | [swiftxp-hub/spt-show-me-the-money](https://github.com/swiftxp-hub/spt-show-me-the-money) | 🔍 | Mostra dinheiro/valores em UI | 🔵 Avaliar |
 | TacticalToasterUNTARGH | 🌐 Server | 🔍 | [TacticalToaster/TacticalToasterUNTARGH](https://github.com/TacticalToaster/TacticalToasterUNTARGH) | 🔍 | Adiciona UNTAR como faction com bots customizados | 🔵 Avaliar |
-| Tarkov Weather System | 🔍 | 🔍 | 🔍 | 🔍 | Sistema de clima dinâmico | 🔵 Avaliar |
+| Tarkov Weather System | 🖥️ Client | [2120/time-weather-changer-ng](https://forge.sp-tarkov.com/mod/2120/time-weather-changer-ng) | 🔍 | ✅ 4.0.13 (v2.4.0) | Time & Weather Changer NG (autor: flir) | 🟢 Portar |
 | TarkovRedLine (TarkovRedLine-ServerMod) | 🌐 Server | — (privado) | — (privado) | ❌ | Mod do servidor RedLine — provável customização proprietária do projeto | 🔧 Desenvolver |
 | TellTheTime | 🔍 | 🔍 | 🔍 | 🔍 | Mostra hora atual | 🔵 Avaliar |
 | Terkoiz.Freecam | 🖥️ Client | 🔍 | [TerkoizLT/SPT-Freecam](https://github.com/TerkoizLT/SPT-Freecam) | ❌ (3.11, v1.4.6) | Câmera livre (debug/replay) | 🟠 Aguardar upstream |
@@ -166,10 +166,11 @@ Itens listados que **não são mods** propriamente ditos — são pastas ou util
 
 ## Progresso da pesquisa
 
-- **Forge URLs encontrados:** ~7 (SAIN, BigBrain, Waypoints, Fika, WTT-Armory, WTT-PackNStrap)
+- **Forge URLs encontrados:** ~12 (SAIN, BigBrain, Waypoints, Fika, WTT-Armory, WTT-PackNStrap, HollywoodFX, BorkelRNVG, Tarkov Weather, IcyClawz mods)
 - **GitHub URLs encontrados:** ~40+
-- **Tipo classificado (não 🔍):** ~30 mods
-- **Restante** (`🔍` em todas as colunas): ~50 mods — autores menores ou nomes ambíguos
+- **Tipo classificado (não 🔍):** ~40 mods
+- **Restante** (`🔍` em todas ou maioria das colunas): ~45 mods — autores menores, mods proprietários, ou nomes ambíguos
+- **Mods proprietários do projeto** (`🔧 Desenvolver`): UltraFika-Plugin, TarkovRedLine — não estão em forge/github públicos
 
 ## Próximos passos
 
@@ -198,3 +199,4 @@ Itens listados que **não são mods** propriamente ditos — são pastas ou util
 | 2026-05-03 | Guilherme | +32 / -17 linhas |
 | 2026-05-03 | Guilherme | +130 / -26 linhas |
 | 2026-05-03 | Guilherme | docs(wiki): add sp-tarkov/wiki snapshot under wiki/spt/ |
+| 2026-05-03 | Guilherme | docs(migration): add Forge+GitHub research findings for ~50 mods (1st batch) |
