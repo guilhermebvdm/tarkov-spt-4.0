@@ -5,20 +5,21 @@
 
 set -euo pipefail
 
-# Verifica dependência jq
-if ! command -v jq >/dev/null 2>&1; then
-  echo "⚠️  jq não está instalado. Hook não pode extrair file_path do stdin."
-  echo "   Instale com: winget install jqlang.jq (Windows) ou apt install jq (Linux)"
-  exit 0  # Não bloqueia, apenas avisa
-fi
+# Prioriza $1 (chamada manual). Só tenta parsear stdin se $1 não vier.
+FILE="${1:-}"
 
-# Extrai file_path do JSON do Claude Code (stdin) ou usa $1
-if [ -t 0 ]; then
-  FILE="${1:-}"
-else
-  INPUT=$(cat)
-  FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null || true)
-  FILE="${FILE:-${1:-}}"
+if [ -z "$FILE" ]; then
+  # Sem argumento — provavelmente Claude Code passando JSON via stdin
+  if command -v jq >/dev/null 2>&1; then
+    INPUT=$(cat 2>/dev/null || true)
+    if [ -n "$INPUT" ]; then
+      FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null || true)
+    fi
+  else
+    echo "⚠️  jq não está instalado. Hook do Claude Code não pode extrair file_path do stdin."
+    echo "   Instale com: winget install jqlang.jq (Windows) ou apt install jq (Linux)"
+    exit 0  # Não bloqueia, apenas avisa
+  fi
 fi
 
 # Sem arquivo → encerra silenciosamente
