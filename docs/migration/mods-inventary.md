@@ -18,8 +18,8 @@ Cada mod tem:
 - **Origem:** mods criados pela equipe são prefixados com `🏠` no nome (ex: `🏠 IdleSprintFix`). Demais são da comunidade.
 - **Tipo:** 🖥️ Client (C# / BepInEx) · 🌐 Server (TypeScript/JS) · 🔀 Misto (ambos) · 🔍 a classificar
 - **Forge:** URL no [forge.sp-tarkov.com](https://forge.sp-tarkov.com/mods) (1 página por mod, lista todas as versões). Formato: `[id](url)` · `🔍` (a buscar) · `—` (confirmado ausente)
-- **GitHub 3.x:** URL do repo na versão SPT 3.x (último release pré-4.0). Formato: `[autor/repo](url)` · `🔍` · `—`
-- **GitHub 4.0:** URL do repo na versão SPT 4.0+. Pode ser repo separado (autor manteve nomes diferentes), branch/tag, ou mesmo repo do 3.x se autor migrou no mesmo. Formato: `[autor/repo](url)` · `🔍` · `—` (autor não publicou 4.0)
+- **Repo 3.x:** URL do repositório fonte na versão SPT 3.x (último release pré-4.0). Aceita GitHub, GitLab ou similar. Formato: `[autor/repo](url)` · `🔍` (a buscar) · `—` (não há repo público)
+- **Repo 4.0:** URL do repositório fonte na versão SPT 4.0+. Pode ser repo separado (autor manteve nomes diferentes), branch/tag específica, ou mesmo repo do 3.x se autor migrou no mesmo. Aceita GitHub, GitLab, etc. Formato: `[autor/repo](url)` · `🔍` · `—` (autor não publicou 4.0)
 - **Status:** ver enum "Status disponíveis" abaixo. **Notas e aliases** (forks, autor, dependências) vão na coluna **Função**, não em outras colunas.
 - **Prioridade:** ver enum "Prioridades" abaixo.
 
@@ -61,8 +61,8 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | **Tipo** | 🖥️ Client (C# / BepInEx) |
 | **Função** | Cliente multiplayer (fork de Fika) |
 | **Forge** | — (não publicado) |
-| **GitHub 3.x** | — (não público — fork privado) |
-| **GitHub 4.0** | — (a desenvolver) |
+| **Repo 3.x** | — (não público — fork privado) |
+| **Repo 4.0** | — (a desenvolver) |
 | **Upstream** | [Project Fika](https://forge.sp-tarkov.com/mod/2326/project-fika) — base de onde foi forkado |
 | **Prioridade** | 🔥 Crítica — primeiro mod a ser migrado |
 | **Status** | ⬆️ Evoluir p/ 4.0 (adaptar código 3.x existente para 4.0) |
@@ -70,7 +70,7 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 
 ## Inventário completo
 
-| Mod | Tipo | Forge | GitHub 3.x | GitHub 4.0 | Função | Status | Prioridade |
+| Mod | Tipo | Forge | Repo 3.x | Repo 4.0 | Função | Status | Prioridade |
 |---|---|---|---|---|---|---|---|
 | [SVM] Server Value Modifier | 🌐 Server | 🔍 | [GhostFenixx/SVM](https://github.com/GhostFenixx/SVM) | — | Modifica valores do servidor (loot, traders, hideout) — último release SPT 3.11 | 🟠 Aguardar upstream | 🔍 |
 | AAAArtem-WTT | 🔍 | 🔍 | 🔍 | 🔍 | 🔍 (relacionado ao WTT) | 🟡 Avaliar | 🔍 |
@@ -159,7 +159,7 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | StashSearch | 🖥️ Client | 🔍 | 🔍 | [DrakiaXYZ/SPT-StashSearch](https://github.com/DrakiaXYZ/SPT-StashSearch) | Busca dentro do stash | 🟡 Avaliar | 🔍 |
 | SwiftXP.ShowMeTheMoney | 🔍 | 🔍 | 🔍 | [swiftxp-hub/spt-show-me-the-money](https://github.com/swiftxp-hub/spt-show-me-the-money) | Mostra dinheiro/valores em UI | 🟡 Avaliar | 🔍 |
 | TacticalToasterUNTARGH | 🌐 Server | 🔍 | 🔍 | [TacticalToaster/TacticalToasterUNTARGH](https://github.com/TacticalToaster/TacticalToasterUNTARGH) | Adiciona UNTAR como faction com bots customizados | 🟡 Avaliar | 🔍 |
-| Tarkov Weather System | 🖥️ Client | [2120](https://forge.sp-tarkov.com/mod/2120/time-weather-changer-ng) | — | [gitlab.com/flir063-spt/timeweatherchanger](https://gitlab.com/flir063-spt/timeweatherchanger) | Time & Weather Changer NG — v2.4.0 (SPT 4.0.13). Autor: flir. **Hospedado no GitLab**, não GitHub | 🟢 Instalar | 🔍 |
+| Tarkov Weather System | 🖥️ Client | [2120](https://forge.sp-tarkov.com/mod/2120/time-weather-changer-ng) | [flir063-spt @ v2.3.3.0](https://gitlab.com/flir063-spt/timeweatherchanger/-/tree/v2.3.3.0) | [flir063-spt/timeweatherchanger](https://gitlab.com/flir063-spt/timeweatherchanger) | Time & Weather Changer NG — v2.4.0 (SPT 4.0.13). Autor: flir. Hospedado no **GitLab** | 🟢 Instalar | 🔍 |
 | 🏠 TarkovRedLine (TarkovRedLine-ServerMod) | 🌐 Server | — | — | — | Mod do servidor RedLine — customização proprietária do projeto | ⬆️ Evoluir p/ 4.0 | 🔍 |
 | TellTheTime | 🔍 | 🔍 | 🔍 | 🔍 | Mostra hora atual | 🟡 Avaliar | 🔍 |
 | Terkoiz.Freecam | 🖥️ Client | 🔍 | [TerkoizLT/SPT-Freecam](https://github.com/TerkoizLT/SPT-Freecam) | — | Câmera livre (debug/replay) — v1.4.6 (último release SPT 3.11) | 🟠 Aguardar upstream | 🔍 |
@@ -180,7 +180,7 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 ## Próximos passos
 
 1. **Continuar pesquisa para mods 🔍 restantes** (~40 mods — autores menores, mods sem presença pública clara):
-   - IcyClawz.CustomInteractions, IcyClawz.MunitionsExpert (sem GitHub público — buscar no forge)
+   - IcyClawz.CustomInteractions, IcyClawz.MunitionsExpert (sem repo público — buscar no forge)
    - HollywoodGraphics, VolumetricBloodFX, VisceralCombat (FX/visuais)
    - desze-*, somtam.*, redlaser42-*, MusicManiac-*, Wara-*, yellowdoge-*
    - ContinuousLoadAmmo, BetterRearSights, AirFilterWarning, BRNVG_N-15Adapter
@@ -192,7 +192,7 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 
 4. **Mapear dependências entre mods** (ex: SAIN → BigBrain + Waypoints; Skwizzy-LootingBots → BigBrain) — adicionar coluna `Depende de` ou notas estruturadas
 
-5. **Validar tipos `🔍`** abrindo cada repo encontrado (priorizar mods com GitHub identificado)
+5. **Validar tipos `🔍`** abrindo cada repo encontrado (priorizar mods com GitHub/GitLab identificado)
 
 ## Histórico
 
@@ -207,3 +207,4 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | 2026-05-03 | Guilherme | docs(migration): expand research with Forge URLs (HollywoodFX, BorkelRNVG, IcyClawz, Weather) |
 | 2026-05-03 | Guilherme | docs(migration): revise status enum (Atualizar/Migrar/Desenvolver/Aguardar) + mark 11 internal mods |
 | 2026-05-03 | Guilherme | docs(migration): rename Atualizar→Instalar, fix contradictions, standardize column formats |
+| 2026-05-03 | Guilherme | docs(migration): split GitHub into 3.x/4.0 cols + add Prioridade + hideoutcat + research 11 forge mods |
