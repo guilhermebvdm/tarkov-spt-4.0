@@ -41,7 +41,11 @@ authors: Nome
 
 ### Histórico
 
-A seção `## Histórico` no rodapé é gerada automaticamente pelo git pre-commit hook. Não edite manualmente — se precisar corrigir, edite a tabela diretamente.
+A seção `## Histórico` no rodapé é gerada automaticamente pelo git pre-commit hook a cada commit que toca arquivos em `docs/`. A coluna **Descrição** é preenchida com a primeira linha da mensagem de commit.
+
+- Use `git commit -m "mensagem descritiva"` para que o histórico fique útil
+- Para `git commit` interativo (sem `-m`), a descrição vai como `(sem mensagem)` (limitação do git: o pre-commit roda antes do editor abrir)
+- Não edite a tabela `## Histórico` manualmente — se precisar corrigir, edite após o commit
 
 ## Validação manual de headers
 
