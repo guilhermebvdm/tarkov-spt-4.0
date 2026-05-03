@@ -1,0 +1,27 @@
+# Auto detect text files and normalize line endings
+* text=auto eol=lf
+
+# Force LF on shell scripts and text files
+*.sh    text eol=lf
+*.bash  text eol=lf
+*.md    text eol=lf
+*.json  text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+
+# C# / .NET files (Windows convention)
+*.cs     text eol=crlf
+*.csproj text eol=crlf
+*.sln    text eol=crlf
+
+# TypeScript / JavaScript
+*.ts  text eol=lf
+*.tsx text eol=lf
+*.js  text eol=lf
+
+# Binary files (no normalization)
+*.dll binary
+*.pdb binary
+*.png binary
+*.jpg binary
+*.ico binary
