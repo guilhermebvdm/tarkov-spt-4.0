@@ -83,14 +83,12 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | AirFilterWarning | 🔍 | 🔍 | 🔍 | 🔍 | Aviso de filtro de ar gerador | 🟡 Avaliar | 🔍 |
 | AmandsGraphics | 🖥️ Client | 🔍 | [Amands2Mello/AmandsGraphics](https://github.com/Amands2Mello/AmandsGraphics) | — | Configurações gráficas avançadas — último release SPT 3.10 | 🟠 Aguardar upstream | 🔍 |
 | aMoxoPixel-Painter | 🌐 Server | 🔍 | 🔍 | [emilanderss0n/Painter](https://github.com/emilanderss0n/Painter) | Trader que vende mods de armas pintados | 🟡 Avaliar | 🔍 |
-| 🏠 Band-Aid | 🔍 | — | — | — | Fix/patch interno do projeto | ⬆️ Evoluir p/ 4.0 | 🔍 |
 | BeltSlot | 🖥️ Client | 🔍 | 🔍 | [Trench-foot/BeltSlot](https://github.com/Trench-foot/BeltSlot) | Slot extra de cinto no inventário | 🟡 Avaliar | 🔍 |
 | BetterRearSights | 🔍 | 🔍 | 🔍 | 🔍 | Mira traseira melhorada | 🟡 Avaliar | 🔍 |
 | BorkelRNVG | 🖥️ Client | [954](https://forge.sp-tarkov.com/mod/954/borkels-realistic-night-vision-goggles-nvgs-and-t-7) | [Borkel/RealisticNVG-client-2](https://github.com/Borkel/RealisticNVG-client-2) | [Borkel/RealisticNVG-client-2](https://github.com/Borkel/RealisticNVG-client-2) | NVGs realistas com máscaras + luz natural — v2.1.1 (SPT 4.0.13). Mesmo repo serve 3.x e 4.0 (versão por release) | 🟢 Instalar | 🔍 |
 | BRNVG_N-15Adapter | 🔍 | 🔍 | 🔍 | 🔍 | Adaptador N-15 para BRNVG | 🟡 Avaliar | 🔍 |
 | ChooChoo-TraderModding | 🔍 | 🔍 | 🔍 | 🔍 | Modding via traders | 🟡 Avaliar | 🔍 |
 | ContinuousLoadAmmo | 🔍 | 🔍 | 🔍 | 🔍 | Carregamento contínuo de munição | 🟡 Avaliar | 🔍 |
-| 🏠 CoordLogger | 🔍 | — | — | — | Logger de coordenadas (utilitário interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
 | CWX | 🔍 | 🔍 | 🔍 | [CWXDEV/CWX-Mods](https://github.com/CWXDEV/CWX-Mods) | Coleção de mods do CWX (verificar conteúdo) | 🟡 Avaliar | 🔍 |
 | DanW-SPTQuestingBots | 🌐 Server | 🔍 | 🔍 | [dwesterwick/SPTQuestingBots](https://github.com/dwesterwick/SPTQuestingBots) | Bots fazendo quests + spawns PMC mimic live | 🟡 Avaliar | 🔍 |
 | DeadzoneMod | 🔍 | 🔍 | 🔍 | 🔍 | 🔍 (deadzone de mira?) | 🟡 Avaliar | 🔍 |
@@ -109,14 +107,10 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | Eco-Attachment Emporium | 🔍 | 🔍 | 🔍 | 🔍 | Mais attachments para armas | 🟡 Avaliar | 🔍 |
 | ExpandedFpsLimit | 🔍 | 🔍 | 🔍 | 🔍 | Aumenta limite de FPS | 🟡 Avaliar | 🔍 |
 | Fika | 🔀 Misto | [2326](https://forge.sp-tarkov.com/mod/2326/project-fika) | [project-fika/Fika-Plugin](https://github.com/project-fika/Fika-Plugin) | [project-fika/Fika-Plugin](https://github.com/project-fika/Fika-Plugin) | Multiplayer base (BepInEx + server) — v2.2.5 (SPT 4.0.13). Mesmo repo. Aliases: `fika-server`, `Fika.Core` | 🟢 Instalar | 🔍 |
-| 🏠 FikaTransitFix (FikaTransitFixServer) | 🌐 Server | — | — | — | Fix de transit em raids do Fika (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
-| 🏠 FixReloadUltraFika | 🔍 | — | — | — | Fix de reload no UltraFika (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
 | flir-betterkeysng | 🔍 | 🔍 | 🔍 | 🔍 | UI melhorada para keys — autor `flir` (mesmo de Tarkov Weather System); provável Client | 🟡 Avaliar | 🔍 |
-| 🏠 ForceSync | 🔍 | — | — | — | Força sincronização (interno, relacionado ao UltraFika) | ⬆️ Evoluir p/ 4.0 | 🔍 |
 | FOVFix | 🖥️ Client | 🔍 | 🔍 | [space-commits/SPT-FOV-Fix](https://github.com/space-commits/SPT-FOV-Fix) | Fix de FOV (Fontaine's FOV Fix) — releases para SPT 4.x | 🟢 Instalar | 🔍 |
 | gaylatea-deadlyblades | 🔍 | 🔍 | 🔍 | 🔍 | Lâminas mais letais | 🟡 Avaliar | 🔍 |
 | Gaylatea-UseLooseLoot | 🖥️ Client | 🔍 | 🔍 | [DrakiaXYZ/SPT-UseLooseLoot](https://github.com/DrakiaXYZ/SPT-UseLooseLoot) | Usa loose loot direto sem entrar no inventário | 🟡 Avaliar | 🔍 |
-| 🏠 GhostMercenaries | 🔍 | — | — | — | Mercenários customizados (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
 | HandsAreNotBusy | 🔍 | 🔍 | 🔍 | 🔍 | Mãos não ficam ocupadas (animação) | 🟡 Avaliar | 🔍 |
 | hideoutcat | 🔍 | 🔍 | 🔍 | 🔍 | 🔍 (relacionado ao hideout) | 🟡 Avaliar | 🔍 |
 | HollywoodFX | 🖥️ Client | [2003](https://forge.sp-tarkov.com/mod/2003/hollywoodfx) | [SleepingPills/HollywoodFX](https://github.com/SleepingPills/HollywoodFX) | [SleepingPills/HollywoodFX](https://github.com/SleepingPills/HollywoodFX) | FX cinematográficos (impactos, blood) — v1.8.4 (SPT 4.0.13). Autor: JankyTheClown / SleepingPills. Mesmo repo | 🟢 Instalar | 🔍 |
@@ -125,7 +119,6 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | IcyClawz.ItemContextMenuExt | 🖥️ Client | [forge/1283](https://forge.sp-tarkov.com/files/file/1283-item-context-menu-extended/) | [IgorEisberg/SPT-ClientMods](https://github.com/IgorEisberg/SPT-ClientMods) | [IgorEisberg/SPT-ClientMods](https://github.com/IgorEisberg/SPT-ClientMods) | Menu de contexto estendido em itens (SPT 4.0.13, 18.1K downloads). Repo monorepo do autor | 🟢 Instalar | 🔍 |
 | IcyClawz.ItemSellPrice | 🖥️ Client | [forge/1230](https://forge.sp-tarkov.com/files/file/1230-item-sell-price/) | [IgorEisberg/SPT-ClientMods](https://github.com/IgorEisberg/SPT-ClientMods) | [IgorEisberg/SPT-ClientMods](https://github.com/IgorEisberg/SPT-ClientMods) | Preços de venda em todos os traders (SPT 4.0.13, 81.5K downloads). Repo monorepo do autor | 🟢 Instalar | 🔍 |
 | IcyClawz.MunitionsExpert | 🖥️ Client | 🔍 | 🔍 | 🔍 | Info detalhada de munição — perfil do autor: hub.sp-tarkov.com/user/34778-icyclawz (autor IgorEisberg) | 🟡 Avaliar | 🔍 |
-| 🏠 IdleSprintFix | 🖥️ Client | — | — | — | Fix do bug de sprint travado (interno, v1.2.2) | ⬆️ Evoluir p/ 4.0 | 🔍 |
 | IhanaMies-LootValueBackend | 🖥️ Client | 🔍 | [IhanaMies/LootValue](https://github.com/IhanaMies/LootValue) | — | Mostra valor de loot na UI — último release SPT 3.11 | 🟠 Aguardar upstream | 🔍 |
 | inory-agonysfx | 🔍 | 🔍 | 🔍 | 🔍 | SFX de dor/agonia | 🟡 Avaliar | 🔍 |
 | JBOBYH_ItemPreviewQoL | 🔍 | 🔍 | 🔍 | 🔍 | QoL de preview de itens | 🟡 Avaliar | 🔍 |
@@ -160,14 +153,11 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | SwiftXP.ShowMeTheMoney | 🔍 | 🔍 | 🔍 | [swiftxp-hub/spt-show-me-the-money](https://github.com/swiftxp-hub/spt-show-me-the-money) | Mostra dinheiro/valores em UI | 🟡 Avaliar | 🔍 |
 | TacticalToasterUNTARGH | 🌐 Server | 🔍 | 🔍 | [TacticalToaster/TacticalToasterUNTARGH](https://github.com/TacticalToaster/TacticalToasterUNTARGH) | Adiciona UNTAR como faction com bots customizados | 🟡 Avaliar | 🔍 |
 | Tarkov Weather System | 🖥️ Client | [2120](https://forge.sp-tarkov.com/mod/2120/time-weather-changer-ng) | [flir063-spt @ v2.3.3.0](https://gitlab.com/flir063-spt/timeweatherchanger/-/tree/v2.3.3.0) | [flir063-spt/timeweatherchanger](https://gitlab.com/flir063-spt/timeweatherchanger) | Time & Weather Changer NG — v2.4.0 (SPT 4.0.13). Autor: flir. Hospedado no **GitLab** | 🟢 Instalar | 🔍 |
-| 🏠 TarkovRedLine (TarkovRedLine-ServerMod) | 🌐 Server | — | — | — | Mod do servidor RedLine — customização proprietária do projeto | ⬆️ Evoluir p/ 4.0 | 🔍 |
 | TellTheTime | 🔍 | 🔍 | 🔍 | 🔍 | Mostra hora atual | 🟡 Avaliar | 🔍 |
 | Terkoiz.Freecam | 🖥️ Client | 🔍 | [TerkoizLT/SPT-Freecam](https://github.com/TerkoizLT/SPT-Freecam) | — | Câmera livre (debug/replay) — v1.4.6 (último release SPT 3.11) | 🟠 Aguardar upstream | 🔍 |
 | tyfon-hideoutinprogress | 🖥️ Client | 🔍 | 🔍 | [tyfon7/hip](https://github.com/tyfon7/hip) | Botão "Transfer Items" no hideout (SPT 4.0). Alias: `Tyfon.HideoutInProgress` | 🟢 Instalar | 🔍 |
 | tyfon-uifixes | 🖥️ Client | 🔍 | 🔍 | [tyfon7/UIFixes](https://github.com/tyfon7/UIFixes) | Coleção de QoL fixes de UI. Aliases: `Tyfon.UIFixes`, `Tyfon.UIFixes.Net` | 🟡 Avaliar | 🔍 |
 | tyfon-weaponcustomizer | 🖥️ Client | 🔍 | 🔍 | [tyfon7/WeaponCustomizer](https://github.com/tyfon7/WeaponCustomizer) | Fine tune de attachments. Alias: `Tyfon.WeaponCustomizer` | 🟡 Avaliar | 🔍 |
-| 🏠 UmbigoPreto-Face the Knight - Mask Fix | 🔍 | — | — | — | Fix da máscara do Knight (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
-| 🏠 UmbigoPreto-TrueTrauma | 🔍 | — | — | — | Sistema de trauma realista (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
 | Virtual's Custom Quest Loader | 🌐 Server | 🔍 | 🔍 | [VirtualAE/Virtuals-Custom-Quest-Loader](https://github.com/VirtualAE/Virtuals-Custom-Quest-Loader) | Dependência para mods importarem custom quests. Alias: `VCQL`, `VCQLQuestZones` | 🟡 Avaliar | 🔍 |
 | VisceralCombat | 🔍 | 🔍 | 🔍 | 🔍 | Efeitos viscerais de combate | 🟡 Avaliar | 🔍 |
 | VolumetricBloodFX | 🔍 | 🔍 | 🔍 | 🔍 | FX de sangue volumétrico | 🟡 Avaliar | 🔍 |
@@ -176,6 +166,16 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | WTT-PackNStrap | 🌐 Server | [1278](https://forge.sp-tarkov.com/mod/1278/wtt-pack-n-strap) | [WelcomeToTarkov/PackNStrap](https://github.com/WelcomeToTarkov/PackNStrap) | [WelcomeToTarkov/PackNStrap](https://github.com/WelcomeToTarkov/PackNStrap) | Battle belt + small cases (WTT team) — v2.0.4 (SPT 4.0.13). Mesmo repo | 🟢 Instalar | 🔍 |
 | yellowdoge-tarkovrarecollectibles | 🔍 | 🔍 | 🔍 | 🔍 | Itens raros colecionáveis | 🟡 Avaliar | 🔍 |
 | zzDrakiaXYZ-LiveFleaPrices | 🌐 Server | 🔍 | 🔍 | [DrakiaXYZ/SPT-LiveFleaPrices-CSharp](https://github.com/DrakiaXYZ/SPT-LiveFleaPrices-CSharp) | Preços do flea ao vivo (live data) — versão C# do mesmo autor | 🟢 Instalar | 🔍 |
+| 🏠 Band-Aid | 🔍 | — | — | — | Fix/patch interno do projeto | ⬆️ Evoluir p/ 4.0 | 🔍 |
+| 🏠 CoordLogger | 🔍 | — | — | — | Logger de coordenadas (utilitário interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
+| 🏠 FikaTransitFix (FikaTransitFixServer) | 🌐 Server | — | — | — | Fix de transit em raids do Fika (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
+| 🏠 FixReloadUltraFika | 🔍 | — | — | — | Fix de reload no UltraFika (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
+| 🏠 ForceSync | 🔍 | — | — | — | Força sincronização (interno, relacionado ao UltraFika) | ⬆️ Evoluir p/ 4.0 | 🔍 |
+| 🏠 GhostMercenaries | 🔍 | — | — | — | Mercenários customizados (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
+| 🏠 IdleSprintFix | 🖥️ Client | — | — | — | Fix do bug de sprint travado (interno, v1.2.2) | ⬆️ Evoluir p/ 4.0 | 🔍 |
+| 🏠 TarkovRedLine (TarkovRedLine-ServerMod) | 🌐 Server | — | — | — | Mod do servidor RedLine — customização proprietária do projeto | ⬆️ Evoluir p/ 4.0 | 🔍 |
+| 🏠 UmbigoPreto-Face the Knight - Mask Fix | 🔍 | — | — | — | Fix da máscara do Knight (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
+| 🏠 UmbigoPreto-TrueTrauma | 🔍 | — | — | — | Sistema de trauma realista (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
 
 ## Próximos passos
 
@@ -208,3 +208,4 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | 2026-05-03 | Guilherme | docs(migration): revise status enum (Atualizar/Migrar/Desenvolver/Aguardar) + mark 11 internal mods |
 | 2026-05-03 | Guilherme | docs(migration): rename Atualizar→Instalar, fix contradictions, standardize column formats |
 | 2026-05-03 | Guilherme | docs(migration): split GitHub into 3.x/4.0 cols + add Prioridade + hideoutcat + research 11 forge mods |
+| 2026-05-03 | Guilherme | docs(migration): rename GitHub cols to Repo (accept GitLab) + add Tarkov Weather 3.x v2.3.3.0 link |
