@@ -127,11 +127,11 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | 1 | [SVM] Server Value Modifier | 🌐 Server | 🌐 Geral | ⚖️ Balanceamento | 🧩 Framework | [236](https://forge.sp-tarkov.com/mod/236/server-value-modifier-svm) | [GhostFenixx/SVM](https://github.com/GhostFenixx/SVM) | — | Modifica valores do servidor (loot, traders, hideout) — último release SPT 3.11 | 🟠 Aguardar upstream | 🔍 |
 | 2 | AAAArtem-WTT | 🖥️ Client | 🌐 Geral | 🔍 | 🔍 | [1023](https://forge.sp-tarkov.com/mod/1023/wtt-artem) | 🔍 | 🔍 | 🔍 (relacionado ao WTT) | 🟡 Avaliar | 🔍 |
-| 3 | acidphantasm-DelayedFleaSales | 🌐 Server | 🌐 Geral | 🔥 Hardcore | 💰 Mercado | [2016](https://forge.sp-tarkov.com/mod/2016/delayed-flea-sales) | 🔍 | [acidphantasm/delayedfleasales-csharp](https://github.com/acidphantasm/delayedfleasales-csharp) | Atrasa vendas no flea market | 🟢 Instalar | 🔍 |
+| 3 | acidphantasm-DelayedFleaSales | 🖥️ Client | 🌐 Geral | 🔥 Hardcore | 💰 Mercado | [2016](https://forge.sp-tarkov.com/mod/2016/delayed-flea-sales) | 🔍 | [acidphantasm/delayedfleasales-csharp](https://github.com/acidphantasm/delayedfleasales-csharp) | Atrasa vendas no flea market (era Server/TS em 3.x, reescrito como BepInEx C# para 4.0) | 🟢 Instalar | 🔍 |
 | 4 | acidphantasm-moretagcolours | 🖥️ Client | 🌐 Geral | 🛋️ QoL | 🖼️ UI | [1533](https://forge.sp-tarkov.com/mod/1533/more-tag-colours) | 🔍 | 🔍 | Mais cores para tags de itens | 🟡 Avaliar | 🔍 |
 | 5 | acidphantasm-previewsizer | 🖥️ Client | 🌐 Geral | 🛋️ QoL | 🖼️ UI | [2339](https://forge.sp-tarkov.com/mod/2339/preview-sizer) | 🔍 | [acidphantasm/acidphantasm-previewsizer](https://github.com/acidphantasm/acidphantasm-previewsizer) | Redimensiona preview de itens | 🟡 Avaliar | 🔍 |
-| 6 | acidphantasm-progressivebotsystem | 🌐 Server | ⚔️ Raid | ⚖️ Balanceamento | 🤖 IA | [1594](https://forge.sp-tarkov.com/mod/1594/apbs-acids-progressive-bot-system) | 🔍 | [acidphantasm/progressivebotsystem-csharp](https://github.com/acidphantasm/progressivebotsystem-csharp) | Sistema progressivo de bots | 🟢 Instalar | 🔍 |
-| 7 | acidphantasm-refsptfriendlyquests | 🌐 Server | 🌐 Geral | ⚖️ Balanceamento | 📜 Quests | [1538](https://forge.sp-tarkov.com/mod/1538/ref-spt-friendly-quests) | 🔍 | [acidphantasm/reffriendlyquests-csharp](https://github.com/acidphantasm/reffriendlyquests-csharp) | Quests amigáveis (compatível com Ref) | 🟢 Instalar | 🔍 |
+| 6 | acidphantasm-progressivebotsystem | 🖥️ Client | ⚔️ Raid | ⚖️ Balanceamento | 🤖 IA | [1594](https://forge.sp-tarkov.com/mod/1594/apbs-acids-progressive-bot-system) | 🔍 | [acidphantasm/progressivebotsystem-csharp](https://github.com/acidphantasm/progressivebotsystem-csharp) | Sistema progressivo de bots (era Server/TS em 3.x, reescrito como BepInEx C# para 4.0) | 🟢 Instalar | 🔍 |
+| 7 | acidphantasm-refsptfriendlyquests | 🖥️ Client | 🌐 Geral | ⚖️ Balanceamento | 📜 Quests | [1538](https://forge.sp-tarkov.com/mod/1538/ref-spt-friendly-quests) | 🔍 | [acidphantasm/reffriendlyquests-csharp](https://github.com/acidphantasm/reffriendlyquests-csharp) | Quests amigáveis (compatível com Ref — era Server/TS em 3.x, reescrito como BepInEx C# para 4.0) | 🟢 Instalar | 🔍 |
 | 8 | acidphantasm-simpleworkoutqte | 🌐 Server | 🏚️ Hideout | 🛋️ QoL | 🏚️ Hideout | [1437](https://forge.sp-tarkov.com/mod/1437/simple-workout-qte) | 🔍 | [acidphantasm/acidphantasm-simpleworkoutqte](https://github.com/acidphantasm/acidphantasm-simpleworkoutqte) | QTE de workout no hideout | 🟡 Avaliar | 🔍 |
 | 9 | AirFilterWarning | 🖥️ Client | 🏚️ Hideout | 🛋️ QoL | 🏚️ Hideout | [2129](https://forge.sp-tarkov.com/mod/2129/air-filter-warning) | 🔍 | 🔍 | Aviso de filtro de ar gerador | 🟡 Avaliar | 🔍 |
 | 10 | AmandsGraphics | 🖥️ Client | ⚔️ Raid | 🎨 Cosmético | ✨ Gráficos | [592](https://forge.sp-tarkov.com/mod/592/amandss-graphics) | [Amands2Mello/AmandsGraphics](https://github.com/Amands2Mello/AmandsGraphics) | — | Configurações gráficas avançadas — último release SPT 3.10 | 🟠 Aguardar upstream | 🔍 |
@@ -142,7 +142,7 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | 15 | BRNVG_N-15Adapter | 🔍 | ⚔️ Raid | 🩸 Realismo | 🛡️ Equipamentos | — | 🔍 | 🔍 | Adaptador N-15 para BRNVG (sub-pasta interna do mod BorkelRNVG, não publicado separado) | 🟡 Avaliar | 🔍 |
 | 16 | ChooChoo-TraderModding | 🔀 Misto | 🌐 Geral | 🛋️ QoL | 💰 Mercado · 🔫 Armas | [1283](https://forge.sp-tarkov.com/mod/1283/trader-modding-and-improved-weapon-building) | 🔍 | 🔍 | Modding via traders | 🟡 Avaliar | 🔍 |
 | 17 | ContinuousLoadAmmo | 🖥️ Client | ⚔️ Raid | 🛋️ QoL | 🎯 Munições | [2112](https://forge.sp-tarkov.com/mod/2112/continuous-load-ammo) | 🔍 | 🔍 | Carregamento contínuo de munição | 🟡 Avaliar | 🔍 |
-| 18 | CWX | 🖥️ Client | 🔍 | ➕ Conteúdo | 🧩 Framework | [1454](https://forge.sp-tarkov.com/mod/1454/cwx-megamod) | 🔍 | [CWXDEV/CWX-Mods](https://github.com/CWXDEV/CWX-Mods) | Coleção de mods do CWX (CWX-MegaMod) | 🟡 Avaliar | 🔍 |
+| 18 | CWX | 🖥️ Client | 🌐 Geral | ➕ Conteúdo | 🧩 Framework | [1454](https://forge.sp-tarkov.com/mod/1454/cwx-megamod) | 🔍 | [CWXDEV/CWX-Mods](https://github.com/CWXDEV/CWX-Mods) | Coleção de mods do CWX (CWX-MegaMod) | 🟡 Avaliar | 🔍 |
 | 19 | DanW-SPTQuestingBots | 🌐 Server | ⚔️ Raid | 🩸 Realismo | 🤖 IA | [1109](https://forge.sp-tarkov.com/mod/1109/questing-bots) | 🔍 | [dwesterwick/SPTQuestingBots](https://github.com/dwesterwick/SPTQuestingBots) | Bots fazendo quests + spawns PMC mimic live | 🟡 Avaliar | 🔍 |
 | 20 | DeadzoneMod | 🖥️ Client | ⚔️ Raid | 🩸 Realismo | 🔫 Armas | [1001](https://forge.sp-tarkov.com/mod/1001/deadzone) | 🔍 | 🔍 | Deadzone/free aim style insurgency | 🟡 Avaliar | 🔍 |
 | 21 | desze-UnlockHideoutCustomization | 🌐 Server | 🏚️ Hideout | 🛋️ QoL | 🏚️ Hideout | [2053](https://forge.sp-tarkov.com/mod/2053/unlock-all-hideout-customization) | 🔍 | 🔍 | Desbloqueia customização do hideout | 🟡 Avaliar | 🔍 |
@@ -184,14 +184,14 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | 57 | MoreCheckmarks | 🔀 Misto | 🔀 Ambos | 🛋️ QoL | 🖼️ UI | [861](https://forge.sp-tarkov.com/mod/861/morecheckmarks) | 🔍 | [TommySoucy/MoreCheckmarks](https://github.com/TommySoucy/MoreCheckmarks) | Checkmarks coloridos em itens (quests, hideout, barters) — v2.1.0 (SPT 4.0.11). Alias: `MoreCheckmarksBackend` | 🟢 Instalar | 🔍 |
 | 58 | MoxoPixel-MagTape | 🌐 Server | 🌐 Geral | 🎨 Cosmético | 🎯 Munições | [1018](https://forge.sp-tarkov.com/mod/1018/mag-tape) | 🔍 | [emilanderss0n/MagTape](https://github.com/emilanderss0n/MagTape) | Magazines com tape (visual + tagging) | 🟡 Avaliar | 🔍 |
 | 59 | MoxoPixel-TacticalGearComponent | 🌐 Server | 🌐 Geral | ➕ Conteúdo | 🛡️ Equipamentos | [1125](https://forge.sp-tarkov.com/mod/1125/tactical-gear-component) | 🔍 | [emilanderss0n/TGC](https://github.com/emilanderss0n/TGC) | Componente de equipamento tático | 🟡 Avaliar | 🔍 |
-| 60 | MusicManiac-LessRestrictingHeadwear | 🔍 | 🌐 Geral | ⚖️ Balanceamento | 🛡️ Equipamentos | [930](https://forge.sp-tarkov.com/mod/930/less-restricting-headwear) | 🔍 | 🔍 | Headwear menos restritivo | 🟡 Avaliar | 🔍 |
+| 60 | MusicManiac-LessRestrictingHeadwear | 🌐 Server | 🌐 Geral | ⚖️ Balanceamento | 🛡️ Equipamentos | [922](https://forge.sp-tarkov.com/mod/922/less-restricting-headwear) | 🔍 | [MusicManiac/LessRestrictingHeadwear](https://github.com/MusicManiac/LessRestrictingHeadwear) | Headwear menos restritivo — v4.0.13 disponível | 🟢 Instalar | 🔍 |
 | 61 | platinum-theblacklist | 🔀 Misto | 🌐 Geral | ⚖️ Balanceamento | 💰 Mercado | [755](https://forge.sp-tarkov.com/mod/755/the-blacklist-flea-market-enhancements) | 🔍 | 🔍 | Blacklist de itens (flea market enhancements) | 🟡 Avaliar | 🔍 |
-| 62 | PlayerEncumbranceBar | 🖥️ Client | 🔀 Ambos | 🛋️ QoL | 🖼️ UI · 📦 Inventário | [1374](https://forge.sp-tarkov.com/mod/1374/player-encumbrance-bar) | [mpstark/SPT-PlayerEncumbranceBar](https://github.com/mpstark/SPT-PlayerEncumbranceBar) | — | Barra de encumbrance no inventário — v1.2.2 (SPT 4.0.13, mantido por Lacyway) | 🟢 Instalar | 🔍 |
+| 62 | PlayerEncumbranceBar | 🖥️ Client | 🔀 Ambos | 🛋️ QoL | 🖼️ UI · 📦 Inventário | [1374](https://forge.sp-tarkov.com/mod/1374/player-encumbrance-bar) | [mpstark/SPT-PlayerEncumbranceBar](https://github.com/mpstark/SPT-PlayerEncumbranceBar) | [Lacyway/SPT-PlayerEncumbranceBar](https://github.com/Lacyway/SPT-PlayerEncumbranceBar) | Barra de encumbrance no inventário — v1.2.2 (SPT 4.0.13, maintainer 4.0: Lacyway) | 🟢 Instalar | 🔍 |
 | 63 | Pluto! - SPT Battlepass | 🌐 Server | 🌐 Geral | 📈 Progressão | 📜 Quests · 📊 Progressão | [2098](https://forge.sp-tarkov.com/mod/2098/spt-battlepass) | 🔍 | 🔍 | Battlepass para SPT (Arena Season 0) | 🟡 Avaliar | 🔍 |
 | 64 | QuickSell | 🖥️ Client | 🌐 Geral | 🛋️ QoL | 💰 Mercado | [1732](https://forge.sp-tarkov.com/mod/1732/quicksell) | 🔍 | [TadMaj/Tarkov-QuickSell](https://github.com/TadMaj/Tarkov-QuickSell) | Venda rápida de itens (context menu) | 🟡 Avaliar | 🔍 |
 | 65 | RaiRai.ColorConverterAPI | 🖥️ Client | 🌐 Geral | 🧩 Framework | 🖼️ UI | [1090](https://forge.sp-tarkov.com/mod/1090/color-converter-api) | 🔍 | 🔍 | API utilitária de conversão de cores | 🟡 Avaliar | 🔍 |
 | 66 | Realism | 🔀 Misto | 🔀 Ambos | 🩸 Realismo | 🧩 Framework | [416](https://forge.sp-tarkov.com/mod/416/spt-realism-mod) | [space-commits/SPT-Realism-Mod-Client](https://github.com/space-commits/SPT-Realism-Mod-Client) · [SPT-Realism-Mod-Server](https://github.com/space-commits/SPT-Realism-Mod-Server) | — | Overhaul de realismo (balística, médica, hazards) — último release SPT 3.9.x. Aliases: `SPT-Realism`, `RealismMod` | 🟠 Aguardar upstream | 🔍 |
-| 67 | redlaser42-Better Headset Descriptions | 🔍 | 🌐 Geral | 🛋️ QoL | 🖼️ UI · 🛡️ Equipamentos | [2199](https://forge.sp-tarkov.com/mod/2199/better-headset-descriptions) | 🔍 | 🔍 | Descrições melhoradas de headsets | 🟡 Avaliar | 🔍 |
+| 67 | redlaser42-Better Headset Descriptions | 🖥️ Client | 🌐 Geral | 🛋️ QoL | 🖼️ UI · 🛡️ Equipamentos | [2199](https://forge.sp-tarkov.com/mod/2199/better-headset-descriptions) | 🔍 | — | Adiciona stats de headsets às descrições dos itens — sem repo público | 🟡 Avaliar | 🔍 |
 | 68 | redlaser42-Increase Climb Height | 🌐 Server | ⚔️ Raid | ⚖️ Balanceamento | 🎬 Animações | [1575](https://forge.sp-tarkov.com/mod/1575/increase-climb-height) | 🔍 | 🔍 | Aumenta altura máxima de escalada | 🟡 Avaliar | 🔍 |
 | 69 | SAIN | 🖥️ Client | ⚔️ Raid | 🩸 Realismo | 🤖 IA | [791](https://forge.sp-tarkov.com/mod/791/sain-solarints-ai-modifications-full-ai-combat-system-replacement) | [Solarint/SAIN](https://github.com/Solarint/SAIN) | [ArchangelWTF/SAIN](https://github.com/ArchangelWTF/SAIN) | Substituição completa de IA dos bots — v4.4.3 (SPT 4.0.13). **3.x: repo Solarint original** · **4.2.0+: fork ArchangelWTF**. Depende de BigBrain + Waypoints | 🟢 Instalar | 🔍 |
 | 70 | seasoniterator | 🔍 | 🔍 | 🔍 | 🔍 | 🔍 | 🔍 | 🔍 | 🔍 (estações/seasonal?) — não confirmado no Forge | 🟡 Avaliar | 🔍 |
@@ -219,33 +219,42 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | 92 | WTT-PackNStrap | 🌐 Server | 🔀 Ambos | ➕ Conteúdo | 🛡️ Equipamentos | [1278](https://forge.sp-tarkov.com/mod/1278/wtt-pack-n-strap) | [WelcomeToTarkov/PackNStrap](https://github.com/WelcomeToTarkov/PackNStrap) | [WelcomeToTarkov/PackNStrap](https://github.com/WelcomeToTarkov/PackNStrap) | Battle belt + small cases (WTT team) — v2.0.4 (SPT 4.0.13). Mesmo repo | 🟢 Instalar | 🔍 |
 | 93 | yellowdoge-tarkovrarecollectibles | 🌐 Server | 🌐 Geral | ➕ Conteúdo | 🎒 Loot | [2318](https://forge.sp-tarkov.com/mod/2318/tarkov-rare-collectibles) | 🔍 | 🔍 | Itens raros colecionáveis | 🟡 Avaliar | 🔍 |
 | 94 | zzDrakiaXYZ-LiveFleaPrices | 🌐 Server | 🌐 Geral | ⚖️ Balanceamento | 💰 Mercado | [1131](https://forge.sp-tarkov.com/mod/1131/live-flea-prices) | 🔍 | [DrakiaXYZ/SPT-LiveFleaPrices-CSharp](https://github.com/DrakiaXYZ/SPT-LiveFleaPrices-CSharp) | Preços do flea ao vivo (live data) — versão C# do mesmo autor | 🟢 Instalar | 🔍 |
-| 95 | 🏠 Band-Aid | 🔍 | 🔍 | 🔍 | 🔍 | — | — | — | Fix/patch interno do projeto | ⬆️ Evoluir p/ 4.0 | 🔍 |
-| 96 | 🏠 CoordLogger | 🔍 | 🔍 | 🧩 Framework | 🧩 Framework | — | — | — | Logger de coordenadas (utilitário interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
+| 95 | 🏠 Band-Aid | 🖥️ Client | ⚔️ Raid | 🛋️ QoL | 🧩 Framework | — | — | — | Fix/patch interno do projeto | ⬆️ Evoluir p/ 4.0 | 🔍 |
+| 96 | 🏠 CoordLogger | 🖥️ Client | ⚔️ Raid | 🧩 Framework | 🧩 Framework | — | — | — | Logger de coordenadas (utilitário interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
 | 97 | 🏠 FikaTransitFix (FikaTransitFixServer) | 🌐 Server | ⚔️ Raid | 🧩 Framework | 🌐 Multiplayer | — | — | — | Fix de transit em raids do Fika (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
-| 98 | 🏠 FixReloadUltraFika | 🔍 | ⚔️ Raid | 🧩 Framework | 🌐 Multiplayer | — | — | — | Fix de reload no UltraFika (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
-| 99 | 🏠 ForceSync | 🔍 | 🔀 Ambos | 🧩 Framework | 🌐 Multiplayer | — | — | — | Força sincronização (interno, relacionado ao UltraFika) | ⬆️ Evoluir p/ 4.0 | 🔍 |
-| 100 | 🏠 GhostMercenaries | 🔍 | ⚔️ Raid | ➕ Conteúdo | 🤖 IA | — | — | — | Mercenários customizados (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
+| 98 | 🏠 FixReloadUltraFika | 🖥️ Client | ⚔️ Raid | 🧩 Framework | 🌐 Multiplayer · 🎬 Animações | — | — | — | Fix de reload no UltraFika (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
+| 99 | 🏠 ForceSync | 🔀 Misto | 🔀 Ambos | 🧩 Framework | 🌐 Multiplayer | — | — | — | Força sincronização (interno, relacionado ao UltraFika) | ⬆️ Evoluir p/ 4.0 | 🔍 |
+| 100 | 🏠 GhostMercenaries | 🌐 Server | ⚔️ Raid | ➕ Conteúdo | 🤖 IA | — | — | — | Mercenários customizados (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
 | 101 | 🏠 IdleSprintFix | 🖥️ Client | ⚔️ Raid | 🛋️ QoL | 🎬 Animações | — | — | — | Fix do bug de sprint travado (interno, v1.2.2) | ⬆️ Evoluir p/ 4.0 | 🔍 |
-| 102 | 🏠 TarkovRedLine (TarkovRedLine-ServerMod) | 🌐 Server | 🔍 | 🔍 | 🔍 | — | — | — | Mod do servidor RedLine — customização proprietária do projeto | ⬆️ Evoluir p/ 4.0 | 🔍 |
-| 103 | 🏠 UmbigoPreto-Face the Knight - Mask Fix | 🔍 | ⚔️ Raid | 🛋️ QoL | 🛡️ Equipamentos | — | — | — | Fix da máscara do Knight (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
-| 104 | 🏠 UmbigoPreto-TrueTrauma | 🔍 | ⚔️ Raid | 🩸 Realismo | 🧩 Framework | — | — | — | Sistema de trauma realista (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
+| 102 | 🏠 TarkovRedLine (TarkovRedLine-ServerMod) | 🌐 Server | 🌐 Geral | ⚖️ Balanceamento | 🧩 Framework | — | — | — | Mod do servidor RedLine — customização proprietária do projeto | ⬆️ Evoluir p/ 4.0 | 🔍 |
+| 103 | 🏠 UmbigoPreto-Face the Knight - Mask Fix | 🖥️ Client | ⚔️ Raid | 🛋️ QoL | 🛡️ Equipamentos | — | — | — | Fix da máscara do Knight (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
+| 104 | 🏠 UmbigoPreto-TrueTrauma | 🔀 Misto | ⚔️ Raid | 🩸 Realismo | 🧩 Framework | — | — | — | Sistema de trauma realista (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
 
 ## Próximos passos
 
-1. **Continuar pesquisa para mods 🔍 restantes** (~40 mods — autores menores, mods sem presença pública clara):
-   - IcyClawz.CustomInteractions, IcyClawz.MunitionsExpert (sem repo público — buscar no forge)
-   - HollywoodGraphics, VolumetricBloodFX, VisceralCombat (FX/visuais)
-   - desze-*, somtam.*, redlaser42-*, MusicManiac-*, Wara-*, yellowdoge-*
-   - ContinuousLoadAmmo, BetterRearSights, AirFilterWarning, BRNVG_N-15Adapter
-   - Pluto Battlepass, RaiRai.ColorConverterAPI, lacyway-mergeconsumables, etc.
+1. **Mods ainda com campos `🔍` críticos** (Tipo, Forge ou Repo 4.0 desconhecido):
+   - `BRNVG_N-15Adapter`, `HollywoodGraphics`, `VisceralCombat`, `VolumetricBloodFX` — sem presença pública no Forge; confirmar se são standalone ou sub-pastas de outros mods
+   - `seasoniterator` — não localizado; pode ser mod privado/Discord-only
+   - Mods internos `🏠`: Band-Aid, CoordLogger, FixReloadUltraFika, ForceSync, GhostMercenaries, UmbigoPreto-* — preencher Prioridade quando stack UltraFika for definida
 
-2. **Decidir destino dos `🟠 Aguardar upstream`:** SVM (3.11), AmandsGraphics (3.10), PlayerEncumbranceBar (3.8), Realism (3.9.x), IhanaMies-LootValue (3.11), Terkoiz.Freecam (3.11). Por mod: aguardar autor OU mudar para `🔧 Desenvolver` OU `⚫ Não incluir`.
+2. **Decidir destino dos `🟠 Aguardar upstream`** (5 mods pendentes):
 
-3. **Criar specs individuais** em `docs/migration/<mod-name>/` para os 11 mods `🏠` com status `⬆️ Evoluir p/ 4.0` (ver tabela acima)
+   | Mod | Último SPT | Decisão sugerida |
+   |---|---|---|
+   | SVM | 3.11 | Aguardar — comunidade depende |
+   | AmandsGraphics | 3.10 | Aguardar ou ⚫ Não incluir |
+   | Realism | 3.9.x | Aguardar — scope grande |
+   | IhanaMies-LootValue | 3.11 | Aguardar |
+   | Terkoiz.Freecam | 3.11 | Aguardar (acidphantasm mantém) |
 
-4. **Mapear dependências entre mods** (ex: SAIN → BigBrain + Waypoints; Skwizzy-LootingBots → BigBrain) — adicionar coluna `Depende de` ou notas estruturadas
+3. **Criar specs individuais** em `docs/migration/<mod-name>/` para os 10 mods `🏠` com status `⬆️ Evoluir p/ 4.0` — começar por UltraFika-Plugin (bloqueia tudo)
 
-5. **Validar tipos `🔍`** abrindo cada repo encontrado (priorizar mods com GitHub/GitLab identificado)
+4. **Mapear dependências entre mods** — dependências conhecidas:
+   - SAIN → BigBrain + Waypoints
+   - Skwizzy-LootingBots → BigBrain
+   - UltraFika-Plugin → Fika (upstream)
+
+5. **Definir Prioridade** — coluna ainda `🔍` em todos os 104 mods; priorizar pelo menos os `🟢 Instalar` que serão instalados na primeira build
 
 ## Histórico
 
@@ -269,4 +278,5 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | 2026-05-03 | Guilherme | docs(migration): rename Cenário column to Atuação |
 | 2026-05-03 | Guilherme | docs(migration): add # counter + Categoria/Escopo taxonomy classifying all 104 mods |
 | 2026-05-03 | Guilherme | docs(migration): classify Tipo for ~40 mods using Forge metadata and GitHub repo inspection |
-| 2026-05-03 | Guilherme | docs(migration): rename Cenário column to Atuação |
+| 2026-05-03 | Guilherme | docs(migration): review pass — fix acidphantasm Tipo (Server→Client 4.0), internal mods Tipo, wrong Forge ID #930→#922 (LessRestrictingHeadwear), PlayerEncumbranceBar Repo 4.0, Próximos passos |
+| 2026-05-03 | Guilherme | docs(migration): classify Tipo for 41 mods + add Atuação/Categoria/Escopo columns |
