@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SPT 4.0 — Inventário de Mods</title>
+<style>
+:root {
+  --bg:      #09090b; --bg2:#0d0e10; --bg3:#121416; --bg4:#181a1e; --bg5:#1e2126;
+  --border:  #1c1f24; --border2:#252a32;
+  --gold:    #c8a96e; --gold2:#a88950;
+  --text:    #7a8290; --text2:#a8b0bc; --text3:#d0d8e4;
+  --green2:  #5aa050;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text2);font-family:'Segoe UI',system-ui,sans-serif;font-size:13px}
+
+/* ── HEADER ── */
+.hdr{
+  background:linear-gradient(180deg,#0e0f11 0%,#09090b 100%);
+  border-bottom:1px solid var(--gold2);
+  padding:14px 24px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+}
+.hdr-left{display:flex;align-items:baseline;gap:14px}
+.hdr-left h1{font-size:16px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);text-shadow:0 0 24px rgba(200,169,110,.25)}
+.hdr-sub{color:var(--text);font-size:11px;letter-spacing:.06em}
+.hdr-badge{background:var(--bg3);border:1px solid var(--border2);color:var(--gold);font-size:10px;font-weight:700;letter-spacing:.12em;padding:4px 10px;text-transform:uppercase}
+
+/* ── STATS ── */
+.stats{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.sc{display:flex;align-items:center;gap:7px;background:var(--bg3);border:1px solid var(--border);padding:5px 10px}
+.sc .lbl{color:var(--text);font-size:9px;letter-spacing:.1em;text-transform:uppercase}
+.sc .val{font-weight:700;font-size:14px}
+.sc .val.gold{color:var(--gold)} .sc .val.gr{color:#5aa050} .sc .val.or{color:#c07030}
+.sc .val.re{color:#c04040} .sc .val.bl{color:#5080c8} .sc .val.pu{color:#9070c8}
+.stats-sep{width:1px;height:28px;background:var(--border2)}
+.prog-wrap{display:flex;gap:2px;height:4px;width:100%;overflow:hidden}
+.prog-seg{height:100%}
+
+/* ── FILTERS ── */
+.filters{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fg>.lbl{color:var(--text);font-size:9px;letter-spacing:.12em;text-transform:uppercase;font-weight:700}
+.fr{display:flex;gap:3px;flex-wrap:wrap}
+.fb{background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-size:11px;padding:3px 8px;cursor:pointer;transition:all .12s;font-family:inherit;white-space:nowrap}
+.fb:hover{border-color:var(--gold2);color:var(--text2)}
+.fb.on{background:var(--bg5);border-color:var(--gold);color:var(--gold)}
+.search-wrap{display:flex;flex-direction:column;gap:4px}
+.search-wrap>.lbl{color:var(--text);font-size:9px;letter-spacing:.12em;text-transform:uppercase;font-weight:700}
+input[type=text]{background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:12px;padding:5px 10px;outline:none;font-family:inherit;width:220px;transition:border-color .12s}
+input[type=text]:focus{border-color:var(--gold2)}
+input[type=text]::placeholder{color:var(--text)}
+
+/* ── TABLE ── */
+.tbl-wrap{padding:14px 24px 40px;overflow-x:auto}
+.count-row{color:var(--text);font-size:11px;letter-spacing:.04em;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.count-row strong{color:var(--gold)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{
+  background:var(--bg3);color:var(--gold);font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  padding:8px 10px;text-align:left;border-bottom:1px solid var(--gold2);border-right:1px solid var(--border);
+  white-space:nowrap;cursor:pointer;-webkit-user-select:none;user-select:none;position:sticky;top:0;z-index:10;
+}
+thead th:last-child{border-right:none}
+thead th:hover{background:var(--bg4)}
+thead th .si{margin-left:4px;opacity:.3;font-size:8px}
+thead th.asc .si::after{content:'▲';opacity:1} thead th.desc .si::after{content:'▼';opacity:1}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:nth-child(even){background:rgba(255,255,255,.012)}
+tbody tr:hover{background:rgba(200,169,110,.04)}
+tbody td{padding:6px 10px;border-right:1px solid var(--border);vertical-align:middle}
+tbody td:last-child{border-right:none}
+
+/* Col widths */
+.c-num{width:30px;min-width:30px;text-align:right;color:var(--text);font-size:11px;font-variant-numeric:tabular-nums}
+.c-name{min-width:175px;max-width:220px}
+.c-tipo,.c-atu,.c-cat,.c-pri,.c-status{white-space:nowrap}
+.c-esc{min-width:120px}
+.c-forge{min-width:65px;white-space:nowrap}
+.c-repo{min-width:140px}
+.c-fn{min-width:180px;max-width:260px}
+
+/* Mod name */
+.mod-name{color:var(--text3);font-weight:500;line-height:1.3;display:flex;align-items:center;gap:5px}
+.mod-name.int{color:#7aaad4}
+.review-dot{width:5px;height:5px;border-radius:50%;background:#c07030;flex-shrink:0}
+
+/* ── BADGES (shared base) ── */
+.b{display:inline-flex;align-items:center;padding:2px 6px;font-size:10px;font-weight:600;letter-spacing:.04em;white-space:nowrap;border:1px solid transparent;gap:3px}
+
+/* STATUS */
+.bs-Avaliar    {background:rgba(200,144,26,.12);color:#e8b040;border-color:rgba(200,144,26,.28)}
+.bs-Instalar   {background:rgba(58,128,64,.12);color:#50b060;border-color:rgba(58,128,64,.28)}
+.bs-Evoluir    {background:rgba(30,96,176,.12);color:#4080d0;border-color:rgba(30,96,176,.28)}
+.bs-Desenvolver{background:rgba(80,64,160,.12);color:#8878cc;border-color:rgba(80,64,160,.28)}
+.bs-Aguardar   {background:rgba(120,64,32,.12);color:#c07040;border-color:rgba(120,64,32,.28)}
+.bs-Bloqueado  {background:rgba(136,32,32,.14);color:#cc4848;border-color:rgba(136,32,32,.3)}
+.bs-NaoIncluir {background:rgba(56,60,66,.25);color:#5a6070;border-color:rgba(56,60,66,.45)}
+
+/* TIPO */
+.bt-Client{background:rgba(38,78,128,.2);color:#5a90cc;border-color:rgba(38,78,128,.4)}
+.bt-Server{background:rgba(38,100,58,.2);color:#50a870;border-color:rgba(38,100,58,.4)}
+.bt-Misto {background:rgba(100,58,128,.2);color:#a070cc;border-color:rgba(100,58,128,.4)}
+.bt-q     {background:rgba(50,50,60,.2);color:#606878;border-color:rgba(50,50,60,.3);font-style:italic}
+
+/* ATUAÇÃO */
+.ba-Hideout{background:rgba(80,60,18,.2);color:#b89040;border-color:rgba(80,60,18,.4)}
+.ba-Raid   {background:rgba(100,28,28,.2);color:#cc5858;border-color:rgba(100,28,28,.4)}
+.ba-Ambos  {background:rgba(38,80,80,.2);color:#50b0b0;border-color:rgba(38,80,80,.4)}
+.ba-Geral  {background:rgba(38,60,100,.2);color:#6090cc;border-color:rgba(38,60,100,.4)}
+.ba-q      {background:rgba(50,50,60,.2);color:#606878;border-color:rgba(50,50,60,.3);font-style:italic}
+
+/* CATEGORIA — mesmo visual em filtro E tabela */
+.bk-QoL          {background:rgba(58,100,160,.15);color:#70a0d8;border-color:rgba(58,100,160,.32)}
+.bk-Realismo     {background:rgba(140,28,28,.15);color:#d06060;border-color:rgba(140,28,28,.32)}
+.bk-Hardcore     {background:rgba(160,20,20,.2);color:#e04848;border-color:rgba(160,20,20,.42)}
+.bk-Balanceamento{background:rgba(100,78,18,.15);color:#c8a840;border-color:rgba(100,78,18,.32)}
+.bk-Progressão   {background:rgba(58,100,58,.15);color:#70c070;border-color:rgba(58,100,58,.32)}
+.bk-Conteúdo     {background:rgba(78,48,120,.15);color:#a080d8;border-color:rgba(78,48,120,.32)}
+.bk-Framework    {background:rgba(38,42,50,.3);color:#8090a0;border-color:rgba(58,62,72,.5)}
+.bk-Cosmético    {background:rgba(140,58,100,.15);color:#d08098;border-color:rgba(140,58,100,.32)}
+.bk-q            {background:rgba(50,50,60,.2);color:#606878;border-color:rgba(50,50,60,.3);font-style:italic}
+
+/* PRIORIDADE */
+.bp-Crítica{color:#ff6060;border-color:rgba(200,50,50,.4);background:rgba(200,50,50,.1)}
+.bp-Alta   {color:#f0a050;border-color:rgba(200,140,50,.4);background:rgba(200,140,50,.1)}
+.bp-Média  {color:#909090;border-color:rgba(110,110,110,.3);background:rgba(70,70,70,.1)}
+.bp-Baixa  {color:#505860;border-color:rgba(70,72,80,.3);background:rgba(50,52,58,.1)}
+.bp-q      {color:#505860;border-color:rgba(60,60,60,.2);background:transparent;font-style:italic}
+
+/* ESCOPO chips — visual diferente da categoria: outline, sem fill */
+.esc-chips{display:flex;gap:3px;flex-wrap:wrap}
+.ec{
+  display:inline-flex;align-items:center;gap:3px;
+  border:1px solid rgba(70,85,100,.45);color:var(--text);
+  font-size:9px;padding:1px 5px;white-space:nowrap;
+  background:rgba(30,38,48,.5);
+}
+
+/* FORGE & REPO links */
+.forge-link{
+  display:inline-flex;align-items:center;gap:5px;
+  color:var(--gold);font-size:11px;font-weight:600;text-decoration:none;
+  border-bottom:1px solid rgba(200,169,110,.3);transition:color .12s,border-color .12s;
+}
+.forge-link:hover{color:var(--gold2);border-color:var(--gold)}
+.forge-check{font-size:10px;color:#5aa050}
+.repo-link{
+  display:inline-flex;align-items:center;gap:4px;
+  color:#6090c8;font-size:11px;text-decoration:none;
+  border-bottom:1px solid rgba(80,120,180,.25);transition:color .12s,border-color .12s;
+  word-break:break-all;
+}
+.repo-link:hover{color:#80aae0;border-color:#80aae0}
+.repo-link svg{flex-shrink:0;opacity:.7}
+.repo-absent{color:var(--text);font-size:11px;opacity:.5}
+.repo-search{color:#7a5030;font-size:11px}
+
+/* Fn text */
+.fn{color:var(--text);font-size:11px;line-height:1.45}
+
+/* TOOLTIP (forge popover) */
+.has-tip{position:relative;display:inline-block}
+.tip{
+  display:none;position:absolute;left:0;top:calc(100% + 6px);z-index:999;
+  background:#0e1014;border:1px solid var(--gold2);
+  padding:10px 12px;min-width:240px;max-width:320px;
+  box-shadow:0 8px 24px rgba(0,0,0,.7);
+  pointer-events:none;
+}
+.has-tip:hover .tip{display:block}
+.tip-title{color:var(--gold);font-weight:700;font-size:11px;margin-bottom:6px;letter-spacing:.05em}
+.tip-row{display:flex;align-items:flex-start;gap:6px;margin-bottom:4px}
+.tip-row .lk{color:var(--text);font-size:10px}
+.tip-row .lk a{color:#6090c8;font-size:10px;text-decoration:none;word-break:break-all}
+.tip-row .lk a:hover{color:#80aae0;text-decoration:underline}
+.tip-tag{display:inline-block;background:rgba(200,169,110,.1);border:1px solid rgba(200,169,110,.2);color:var(--gold2);font-size:9px;padding:1px 5px;margin-bottom:6px}
+
+/* No results */
+.no-results{text-align:center;padding:60px 24px;color:var(--text);letter-spacing:.12em;text-transform:uppercase;font-size:11px}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border2)}
+::-webkit-scrollbar-thumb:hover{background:var(--gold2)}
+
+/* Footer */
+.footer{border-top:1px solid var(--border);padding:10px 24px;color:var(--text);font-size:10px;letter-spacing:.06em;display:flex;align-items:center;justify-content:space-between}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-left">
+    <h1>SPT 4.0 — Inventário de Mods</h1>
+    <span class="hdr-sub">Migração 3.x → 4.0 · docs/migration/mods-inventary.md</span>
+  </div>
+  <div class="hdr-badge">SPT 4.0.x · EFT 0.16.9</div>
+</div>
+
+<div class="stats" id="stats"></div>
+
+<div class="filters">
+  <div class="search-wrap">
+    <div class="lbl">Busca</div>
+    <input type="text" id="search" placeholder="Nome do mod..." oninput="render()">
+  </div>
+  <div class="fg">
+    <div class="lbl">Status</div>
+    <div class="fr" id="f-status"></div>
+  </div>
+  <div class="fg">
+    <div class="lbl">Tipo</div>
+    <div class="fr" id="f-tipo"></div>
+  </div>
+  <div class="fg">
+    <div class="lbl">Atuação</div>
+    <div class="fr" id="f-atu"></div>
+  </div>
+  <div class="fg">
+    <div class="lbl">Categoria</div>
+    <div class="fr" id="f-cat"></div>
+  </div>
+  <div class="fg">
+    <div class="lbl">Escopo</div>
+    <div class="fr" id="f-esc"></div>
+  </div>
+  <div class="fg">
+    <div class="lbl">Origem</div>
+    <div class="fr" id="f-origin"></div>
+  </div>
+  <div class="fg">
+    <div class="lbl">Revisão</div>
+    <div class="fr">
+      <button type="button" class="fb" id="f-review" onclick="toggleReview()">⚠ Precisa revisão</button>
+    </div>
+  </div>
+  <div class="fg" style="margin-left:auto">
+    <div class="lbl">Ações</div>
+    <div class="fr">
+      <button type="button" class="fb" onclick="clearAll()" style="border-color:#444">✕ Limpar filtros</button>
+    </div>
+  </div>
+</div>
+
+<div class="tbl-wrap">
+  <div class="count-row" id="count-row"></div>
+  <table>
+    <thead id="thead"></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<div class="footer">
+  <span>SPT 4.0 Mod Inventory · Gerado de docs/migration/mods-inventary.md</span>
+  <span id="footer-date"></span>
+</div>
+
+<script>
+// ── DATA FORMAT ───────────────────────────────────────────────────────────────
+// [n, name, tipo, atuacao, cat, esc_csv, forge_id, r4_path, fn, status, pri, intern]
+// forge_id : null=absent  ""=unknown  "123"=forge mod ID
+// r4_path  : null=absent  ""=unknown  "user/repo"=github  "https://..."=other
+const MODS = [
+[0,"🏠 UltraFika-Plugin","Client","Ambos","Framework","Multiplayer",null,null,"Cliente multiplayer (fork de Fika)","Evoluir","Crítica",true],
+[1,"[SVM] Server Value Modifier","Server","Geral","Balanceamento","Framework","236",null,"Modifica valores do servidor (loot, traders, hideout) — último release SPT 3.11","Aguardar","?",false],
+[2,"AAAArtem-WTT","Client","Geral","?","?","1023","","🔍 (relacionado ao WTT)","Avaliar","?",false],
+[3,"acidphantasm-DelayedFleaSales","Client","Geral","Hardcore","Mercado","2016","acidphantasm/delayedfleasales-csharp","Atrasa vendas no flea market (era Server/TS em 3.x, reescrito como BepInEx C# para 4.0)","Instalar","?",false],
+[4,"acidphantasm-moretagcolours","Client","Geral","QoL","UI","1533","","Mais cores para tags de itens","Avaliar","?",false],
+[5,"acidphantasm-previewsizer","Client","Geral","QoL","UI","2339","acidphantasm/acidphantasm-previewsizer","Redimensiona preview de itens","Avaliar","?",false],
+[6,"acidphantasm-progressivebotsystem","Client","Raid","Balanceamento","IA","1594","acidphantasm/progressivebotsystem-csharp","Sistema progressivo de bots (era Server/TS em 3.x, reescrito como BepInEx C# para 4.0)","Instalar","?",false],
+[7,"acidphantasm-refsptfriendlyquests","Client","Geral","Balanceamento","Quests","1538","acidphantasm/reffriendlyquests-csharp","Quests amigáveis (compatível com Ref — era Server/TS em 3.x, reescrito como BepInEx C# para 4.0)","Instalar","?",false],
+[8,"acidphantasm-simpleworkoutqte","Server","Hideout","QoL","Hideout","1437","acidphantasm/acidphantasm-simpleworkoutqte","QTE de workout no hideout","Avaliar","?",false],
+[9,"AirFilterWarning","Client","Hideout","QoL","Hideout","2129","","Aviso de filtro de ar gerador","Avaliar","?",false],
+[10,"AmandsGraphics","Client","Raid","Cosmético","Gráficos","592",null,"Configurações gráficas avançadas — último release SPT 3.10","Aguardar","?",false],
+[11,"aMoxoPixel-Painter","Server","Geral","Conteúdo","Mercado,Armas","1025","emilanderss0n/Painter","Trader que vende mods de armas pintados","Avaliar","?",false],
+[12,"BeltSlot","Client","Ambos","QoL","Inventário,Equipamentos","2181","Trench-foot/BeltSlot","Slot extra de cinto no inventário","Avaliar","?",false],
+[13,"BetterRearSights","Client","Raid","Realismo","Armas","1591","","Mira traseira melhorada","Avaliar","?",false],
+[14,"BorkelRNVG","Client","Raid","Realismo","Equipamentos","954","Borkel/RealisticNVG-client-2","NVGs realistas com máscaras + luz natural — v2.1.1 (SPT 4.0.13). Mesmo repo serve 3.x e 4.0 (versão por release)","Instalar","?",false],
+[15,"BRNVG_N-15Adapter","?","Raid","Realismo","Equipamentos",null,"","Adaptador N-15 para BRNVG (sub-pasta interna do mod BorkelRNVG, não publicado separado)","Avaliar","?",false],
+[16,"ChooChoo-TraderModding","Misto","Geral","QoL","Mercado,Armas","1283","","Modding via traders","Avaliar","?",false],
+[17,"ContinuousLoadAmmo","Client","Raid","QoL","Munições","2112","","Carregamento contínuo de munição","Avaliar","?",false],
+[18,"CWX","Client","Geral","Conteúdo","Framework","1454","CWXDEV/CWX-Mods","Coleção de mods do CWX (CWX-MegaMod)","Avaliar","?",false],
+[19,"DanW-SPTQuestingBots","Server","Raid","Realismo","IA","1109","dwesterwick/SPTQuestingBots","Bots fazendo quests + spawns PMC mimic live","Avaliar","?",false],
+[20,"DeadzoneMod","Client","Raid","Realismo","Armas","1001","","Deadzone/free aim style insurgency","Avaliar","?",false],
+[21,"desze-UnlockHideoutCustomization","Server","Hideout","QoL","Hideout","2053","","Desbloqueia customização do hideout","Avaliar","?",false],
+[22,"DewardianDev-MOAR","Server","Raid","Balanceamento","IA","789","Andrewgdewar/MOAR","Bot spawning system","Avaliar","?",false],
+[23,"dk.SeparateHostility","Client","Raid","Realismo","IA","2248","","Separa hostilidade entre facções","Avaliar","?",false],
+[24,"doordash","Client","Raid","Realismo","Mapas","2214","","Breaching de portas trancadas (SPT 4.0)","Avaliar","?",false],
+[25,"DrakiaXYZ-BigBrain","Client","Raid","Framework","IA","902","DrakiaXYZ/SPT-BigBrain","Library de combat layers para bots (dep. de SAIN) — v1.4.0 (SPT 4.0.13). Mesmo repo, versionado por tags","Instalar","?",false],
+[26,"DrakiaXYZ-EquipFromWeaponRack","Client","Hideout","QoL","Hideout,Armas","1136","DrakiaXYZ/SPT-EquipFromWeaponRack","Equipar arma direto do rack do hideout","Avaliar","?",false],
+[27,"DrakiaXYZ-LootRadius","Client","Raid","QoL","Loot","1349","","Aumenta raio de loot","Avaliar","?",false],
+[28,"DrakiaXYZ-QuickMoveToContainer","Client","Ambos","QoL","Inventário","1341","DrakiaXYZ/SPT-QuickMoveToContainer","Ctrl+Click move item para container aberto","Avaliar","?",false],
+[29,"DrakiaXYZ-SearchOpenContainers","Client","Ambos","QoL","Inventário","934","DrakiaXYZ/SPT-SearchOpenContainers","Buscar dentro de containers abertos","Avaliar","?",false],
+[30,"DrakiaXYZ-Waypoints","Client","Raid","Framework","IA,Mapas","827","DrakiaXYZ/SPT-Waypoints","Expande navmesh dos mapas (dep. de SAIN) — v1.8.2 (SPT 4.0.13). Mesmo repo, versionado por tags","Instalar","?",false],
+[31,"DynamicExternalResolution","Client","Geral","QoL","Gráficos","929","","Resolução externa dinâmica (DERP)","Avaliar","?",false],
+[32,"DynamicMaps (SPTDynamicMaps)","Client","Raid","QoL","UI,Mapas","1431","mpstark/SPT-DynamicMaps","UI custom de mapas com tracking de quests","Avaliar","?",false],
+[33,"Eco-Attachment Emporium","Server","Geral","Conteúdo","Armas","2288","","Mais attachments para armas","Avaliar","?",false],
+[34,"ExpandedFpsLimit","Client","Geral","QoL","Gráficos","2066","","Aumenta limite de FPS (até 360)","Avaliar","?",false],
+[35,"Fika","Misto","Ambos","Framework","Multiplayer","2326","project-fika/Fika-Plugin","Multiplayer base (BepInEx + server) — v2.2.5 (SPT 4.0.13). Mesmo repo. Aliases: `fika-server`, `Fika.Core`","Instalar","?",false],
+[36,"flir-betterkeysng","Client","Geral","QoL","UI","1888","","UI melhorada para keys — autor `flir` (mesmo de Tarkov Weather System); provável Client","Avaliar","?",false],
+[37,"FOVFix","Client","Raid","QoL","Gráficos","701","space-commits/SPT-FOV-Fix","Fix de FOV (Fontaine's FOV Fix) — releases para SPT 4.x","Instalar","?",false],
+[38,"gaylatea-deadlyblades","Server","Raid","Balanceamento","Armas","819","","Lâminas mais letais","Avaliar","?",false],
+[39,"Gaylatea-UseLooseLoot","Client","Raid","QoL","Loot","933","DrakiaXYZ/SPT-UseLooseLoot","Usa loose loot direto sem entrar no inventário","Avaliar","?",false],
+[40,"HandsAreNotBusy","Client","Raid","QoL","Animações","1298","","Mãos não ficam ocupadas (animação)","Avaliar","?",false],
+[41,"hideoutcat","Client","Hideout","Cosmético","Hideout","2038","","Gato no hideout (5 texturas configuráveis)","Avaliar","?",false],
+[42,"HollywoodFX","Client","Raid","Cosmético","Gráficos","2003","SleepingPills/HollywoodFX","FX cinematográficos (impactos, blood) — v1.8.4 (SPT 4.0.13). Autor: JankyTheClown / SleepingPills. Mesmo repo","Instalar","?",false],
+[43,"HollywoodGraphics","?","Raid","Cosmético","Gráficos",null,"","Gráficos cinematográficos — sem mod separado no Forge (provavelmente pasta interna do HollywoodFX)","Avaliar","?",false],
+[44,"IcyClawz.CustomInteractions","Client","Ambos","QoL","UI","938","","Interações customizadas — perfil do autor: hub.sp-tarkov.com/user/34778-icyclawz (autor IgorEisberg)","Avaliar","?",false],
+[45,"IcyClawz.ItemContextMenuExt","Client","Ambos","QoL","UI","940","IgorEisberg/SPT-ClientMods","Menu de contexto estendido em itens (SPT 4.0.13, 18.1K downloads). Repo monorepo do autor","Instalar","?",false],
+[46,"IcyClawz.ItemSellPrice","Client","Geral","QoL","Mercado,UI","909","IgorEisberg/SPT-ClientMods","Preços de venda em todos os traders (SPT 4.0.13, 81.5K downloads). Repo monorepo do autor","Instalar","?",false],
+[47,"IcyClawz.MunitionsExpert","Client","Geral","QoL","Munições,UI","972","","Info detalhada de munição — perfil do autor: hub.sp-tarkov.com/user/34778-icyclawz (autor IgorEisberg)","Avaliar","?",false],
+[48,"IhanaMies-LootValueBackend","Client","Ambos","QoL","Loot,UI","1155",null,"Mostra valor de loot na UI — último release SPT 3.11","Aguardar","?",false],
+[49,"inory-agonysfx","Client","Raid","Realismo","Gráficos","1831","","SFX de dor/agonia","Avaliar","?",false],
+[50,"JBOBYH_ItemPreviewQoL","Client","Geral","QoL","UI","2206","","QoL de preview de itens","Avaliar","?",false],
+[51,"Jehree-GildedKeyStorage","Client","Ambos","QoL","Inventário","865","DrakiaXYZ/SPT-GildedKeyStorage-CSharp","Storage especializado para keys — original do Jehree (3.x), fork C# do DrakiaXYZ é o de 4.0","Instalar","?",false],
+[52,"Kaeno-TraderScrolling","Client","Geral","QoL","Mercado,UI","1089","","Scroll na lista de traders","Avaliar","?",false],
+[53,"Kat.BetterAmmoLoadingList","Client","Ambos","QoL","Munições,UI","2221","","Lista melhorada de loading de munição","Avaliar","?",false],
+[54,"kmyuhkyuk-EnvironmentReplace","Client","Raid","Conteúdo","Mapas","1371","","Substitui ambientes/mapas","Avaliar","?",false],
+[55,"kmyuhkyuk-KmyTarkovApi","Client","Geral","Framework","Framework","898","kmyuhkyuk/KmyTarkovApi","Framework para client mods","Avaliar","?",false],
+[56,"lacyway-mergeconsumables (MergeConsumables)","Misto","Ambos","QoL","Inventário","1657","","Merge de consumíveis (médicos, comida)","Avaliar","?",false],
+[57,"MoreCheckmarks","Misto","Ambos","QoL","UI","861","TommySoucy/MoreCheckmarks","Checkmarks coloridos em itens (quests, hideout, barters) — v2.1.0 (SPT 4.0.11). Alias: `MoreCheckmarksBackend`","Instalar","?",false],
+[58,"MoxoPixel-MagTape","Server","Geral","Cosmético","Munições","1018","emilanderss0n/MagTape","Magazines com tape (visual + tagging)","Avaliar","?",false],
+[59,"MoxoPixel-TacticalGearComponent","Server","Geral","Conteúdo","Equipamentos","1125","emilanderss0n/TGC","Componente de equipamento tático","Avaliar","?",false],
+[60,"MusicManiac-LessRestrictingHeadwear","Server","Geral","Balanceamento","Equipamentos","922","MusicManiac/LessRestrictingHeadwear","Headwear menos restritivo — v4.0.13 disponível","Instalar","?",false],
+[61,"platinum-theblacklist","Misto","Geral","Balanceamento","Mercado","755","","Blacklist de itens (flea market enhancements)","Avaliar","?",false],
+[62,"PlayerEncumbranceBar","Client","Ambos","QoL","UI,Inventário","1374","Lacyway/SPT-PlayerEncumbranceBar","Barra de encumbrance no inventário — v1.2.2 (SPT 4.0.13, maintainer 4.0: Lacyway)","Instalar","?",false],
+[63,"Pluto! - SPT Battlepass","Server","Geral","Progressão","Quests,Progressão","2098","","Battlepass para SPT (Arena Season 0)","Avaliar","?",false],
+[64,"QuickSell","Client","Geral","QoL","Mercado","1732","TadMaj/Tarkov-QuickSell","Venda rápida de itens (context menu)","Avaliar","?",false],
+[65,"RaiRai.ColorConverterAPI","Client","Geral","Framework","UI","1090","","API utilitária de conversão de cores","Avaliar","?",false],
+[66,"Realism","Misto","Ambos","Realismo","Framework","416",null,"Overhaul de realismo (balística, médica, hazards) — último release SPT 3.9.x. Aliases: `SPT-Realism`, `RealismMod`","Aguardar","?",false],
+[67,"redlaser42-Better Headset Descriptions","Client","Geral","QoL","UI,Equipamentos","2199",null,"Adiciona stats de headsets às descrições dos itens — sem repo público","Avaliar","?",false],
+[68,"redlaser42-Increase Climb Height","Server","Raid","Balanceamento","Animações","1575","","Aumenta altura máxima de escalada","Avaliar","?",false],
+[69,"SAIN","Client","Raid","Realismo","IA","791","ArchangelWTF/SAIN","Substituição completa de IA dos bots — v4.4.3 (SPT 4.0.13). **3.x: repo Solarint original** · **4.2.0+: fork ArchangelWTF**. Depende de BigBrain + Waypoints","Instalar","?",false],
+[70,"seasoniterator","?","?","?","?","","","🔍 (estações/seasonal?) — não confirmado no Forge","Avaliar","?",false],
+[71,"shibdib-NoTransitTasks","Server","Raid","Balanceamento","Quests","1944","","Remove tasks de transit","Avaliar","?",false],
+[72,"Skwizzy-LootingBots","Misto","Raid","Realismo","IA,Loot","812","Skwizzy/SPT-LootingBots","Bots fazendo loot (BepInEx + server)","Avaliar","?",false],
+[73,"somtam.NoBush","Client","Raid","Realismo","IA","2123","","Para AI atirar em quem está na bush","Avaliar","?",false],
+[74,"somtam.SimpleDeClutter","Client","Raid","QoL","Gráficos","2139","","Reduz clutter visual","Avaliar","?",false],
+[75,"SPT-FreshContentBackport","Server","Geral","Conteúdo","Framework","2187","","Backport de conteúdo novo","Avaliar","?",false],
+[76,"SPT-InsuranceFraud","Server","Geral","Balanceamento","Mercado","1792","ibxccc123/SPT-InsuranceFraud","Fraude no seguro (loot dropado retorna)","Avaliar","?",false],
+[77,"SPTVRAMCleaner","Client","Geral","QoL","Gráficos","2173","","Limpeza de VRAM (autor matsixx, não swiftxp)","Avaliar","?",false],
+[78,"StashSearch","Client","Hideout","QoL","Inventário","2148","DrakiaXYZ/SPT-StashSearch","Busca dentro do stash","Avaliar","?",false],
+[79,"SwiftXP.ShowMeTheMoney","Misto","Geral","QoL","UI,Mercado","2299","swiftxp-hub/spt-show-me-the-money","Mostra dinheiro/valores em UI","Avaliar","?",false],
+[80,"TacticalToasterUNTARGH","Server","Raid","Conteúdo","IA","2342","TacticalToaster/TacticalToasterUNTARGH","Adiciona UNTAR como faction com bots customizados","Avaliar","?",false],
+[81,"Tarkov Weather System","Client","Raid","QoL","Mapas","2120","https://gitlab.com/flir063-spt/timeweatherchanger","Time & Weather Changer NG — v2.4.0 (SPT 4.0.13). Autor: flir. Hospedado no **GitLab**","Instalar","?",false],
+[82,"TellTheTime","Client","Geral","QoL","UI","2202","","Mostra hora atual","Avaliar","?",false],
+[83,"Terkoiz.Freecam","Client","Raid","QoL","UI","164",null,"Câmera livre (debug/replay) — v1.4.6 (último release SPT 3.11). Mantido por acidphantasm","Aguardar","?",false],
+[84,"tyfon-hideoutinprogress","Client","Hideout","QoL","Hideout,Inventário","2076","tyfon7/hip","Botão \"Transfer Items\" no hideout (SPT 4.0). Alias: `Tyfon.HideoutInProgress`","Instalar","?",false],
+[85,"tyfon-uifixes","Client","Geral","QoL","UI","1342","tyfon7/UIFixes","Coleção de QoL fixes de UI. Aliases: `Tyfon.UIFixes`, `Tyfon.UIFixes.Net`","Avaliar","?",false],
+[86,"tyfon-weaponcustomizer","Client","Geral","QoL","Armas","1950","tyfon7/WeaponCustomizer","Fine tune de attachments. Alias: `Tyfon.WeaponCustomizer`","Avaliar","?",false],
+[87,"Virtual's Custom Quest Loader","Server","Geral","Framework","Quests","649","VirtualAE/Virtuals-Custom-Quest-Loader","Dependência para mods importarem custom quests. Alias: `VCQL`, `VCQLQuestZones`","Avaliar","?",false],
+[88,"VisceralCombat","?","Raid","Realismo","Gráficos",null,"","Efeitos viscerais de combate — distribuído via Patreon/Discord (Valentin The Mad), não publicado no Forge","Avaliar","?",false],
+[89,"VolumetricBloodFX","?","Raid","Cosmético","Gráficos",null,"","FX de sangue volumétrico — distribuído via Patreon/Discord (Valentin The Mad), não publicado no Forge","Avaliar","?",false],
+[90,"Wara-ModdingStatsHelper","Client","Geral","QoL","UI,Armas","1300","","Helper de stats em modding","Avaliar","?",false],
+[91,"WTT-Armory","Server","Geral","Conteúdo","Armas,Quests","2246","WelcomeToTarkov/WTT-Armory","Pack de 50+ armas + quests (WTT team) — v2.0.5 (SPT 4.0.13). 4.0 está em branch separada","Instalar","?",false],
+[92,"WTT-PackNStrap","Server","Ambos","Conteúdo","Equipamentos","1278","WelcomeToTarkov/PackNStrap","Battle belt + small cases (WTT team) — v2.0.4 (SPT 4.0.13). Mesmo repo","Instalar","?",false],
+[93,"yellowdoge-tarkovrarecollectibles","Server","Geral","Conteúdo","Loot","2318","","Itens raros colecionáveis","Avaliar","?",false],
+[94,"zzDrakiaXYZ-LiveFleaPrices","Server","Geral","Balanceamento","Mercado","1131","DrakiaXYZ/SPT-LiveFleaPrices-CSharp","Preços do flea ao vivo (live data) — versão C# do mesmo autor","Instalar","?",false],
+[95,"🏠 Band-Aid","Client","Raid","QoL","Framework",null,null,"Fix/patch interno do projeto","Evoluir","?",true],
+[96,"🏠 CoordLogger","Client","Raid","Framework","Framework",null,null,"Logger de coordenadas (utilitário interno)","Evoluir","?",true],
+[97,"🏠 FikaTransitFix (FikaTransitFixServer)","Server","Raid","Framework","Multiplayer",null,null,"Fix de transit em raids do Fika (interno)","Evoluir","?",true],
+[98,"🏠 FixReloadUltraFika","Client","Raid","Framework","Multiplayer,Animações",null,null,"Fix de reload no UltraFika (interno)","Evoluir","?",true],
+[99,"🏠 ForceSync","Misto","Ambos","Framework","Multiplayer",null,null,"Força sincronização (interno, relacionado ao UltraFika)","Evoluir","?",true],
+[100,"🏠 GhostMercenaries","Server","Raid","Conteúdo","IA",null,null,"Mercenários customizados (interno)","Evoluir","?",true],
+[101,"🏠 IdleSprintFix","Client","Raid","QoL","Animações",null,null,"Fix do bug de sprint travado (interno, v1.2.2)","NaoIncluir","?",true],
+[102,"🏠 TarkovRedLine (TarkovRedLine-ServerMod)","Server","Geral","Balanceamento","Framework",null,null,"Mod do servidor RedLine — customização proprietária do projeto","Evoluir","?",true],
+[103,"🏠 UmbigoPreto-Face the Knight - Mask Fix","Client","Raid","QoL","Equipamentos",null,null,"Fix da máscara do Knight (interno)","Evoluir","?",true],
+[104,"🏠 UmbigoPreto-TrueTrauma","Misto","Raid","Realismo","Framework",null,null,"Sistema de trauma realista (interno)","Evoluir","?",true],
+];
+
+// ── INDICES ───────────────────────────────────────────────────────────────────
+const I = {n:0,name:1,tipo:2,atu:3,cat:4,esc:5,forge:6,r4:7,fn:8,status:9,pri:10,intern:11};
+
+// ── LABELS & ICONS ────────────────────────────────────────────────────────────
+const CAT_META = {
+  'QoL':           {icon:'🛋️', label:'QoL'},
+  'Realismo':      {icon:'🩸', label:'Realismo'},
+  'Hardcore':      {icon:'🔥', label:'Hardcore'},
+  'Balanceamento': {icon:'⚖️', label:'Balanc.'},
+  'Progressão':    {icon:'📈', label:'Progressão'},
+  'Conteúdo':      {icon:'➕', label:'Conteúdo'},
+  'Framework':     {icon:'🧩', label:'Framework'},
+  'Cosmético':     {icon:'🎨', label:'Cosmético'},
+  '?':             {icon:'',   label:'?'},
+};
+
+const ESC_META = {
+  'IA':           {icon:'🤖'}, 'Loot':        {icon:'🎒'},
+  'UI':           {icon:'🖼️'}, 'Mapas':       {icon:'🗺️'},
+  'Armas':        {icon:'🔫'}, 'Munições':    {icon:'🎯'},
+  'Equipamentos': {icon:'🛡️'}, 'Mercado':     {icon:'💰'},
+  'Quests':       {icon:'📜'}, 'Hideout':     {icon:'🏚️'},
+  'Progressão':   {icon:'📊'}, 'Gráficos':    {icon:'✨'},
+  'Multiplayer':  {icon:'🌐'}, 'Inventário':  {icon:'📦'},
+  'Animações':    {icon:'🎬'}, 'Framework':   {icon:'🧩'},
+};
+
+const STATUS_LABELS = {
+  'Avaliar':'AVALIAR','Instalar':'INSTALAR','Evoluir':'EVOLUIR',
+  'Desenvolver':'DESENVOLVER','Aguardar':'AGUARDAR',
+  'Bloqueado':'BLOQUEADO','NaoIncluir':'NÃO INCLUIR',
+};
+
+const TIPO_META = {
+  'Client': {icon:'🖥️'}, 'Server': {icon:'🌐'},
+  'Misto':  {icon:'🔀'}, '?':      {icon:''},
+};
+
+const ATU_META = {
+  'Raid':    {icon:'⚔️'}, 'Ambos':  {icon:'🔀'},
+  'Geral':   {icon:'🌐'}, 'Hideout':{icon:'🏚️'}, '?':{icon:''},
+};
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+const state = {
+  sort: {col:'n', dir:1},
+  filters: {status:new Set(), tipo:new Set(), atu:new Set(), cat:new Set(), esc:new Set(), origin:new Set()},
+  review: false,
+};
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function escArr(m) {
+  const v = m[I.esc];
+  return (!v || v==='?') ? [] : v.split(',');
+}
+
+function needsReview(m) {
+  return m[I.cat]==='?' || m[I.esc]==='?' || m[I.tipo]==='?' ||
+         m[I.status]==='Avaliar' || m[I.r4]==='';
+}
+
+// ── BUILD FILTERS ─────────────────────────────────────────────────────────────
+function buildFilters() {
+  // Status
+  const statusOrder = ['Instalar','Evoluir','Avaliar','Aguardar','Desenvolver','Bloqueado','NaoIncluir'];
+  const statusIcons = {Instalar:'🟢',Evoluir:'⬆️',Avaliar:'🟡',Aguardar:'🟠',Desenvolver:'🔧',Bloqueado:'🔴',NaoIncluir:'⚫'};
+  buildGroup('f-status', statusOrder, k => (statusIcons[k]||'')+' '+STATUS_LABELS[k], 'status');
+
+  // Tipo
+  buildGroup('f-tipo', ['Client','Server','Misto','?'],
+    k => (TIPO_META[k]?.icon||'')+' '+k, 'tipo');
+
+  // Atuação
+  buildGroup('f-atu', ['Raid','Ambos','Geral','Hideout','?'],
+    k => (ATU_META[k]?.icon||'')+' '+k, 'atu');
+
+  // Categoria
+  buildGroup('f-cat', Object.keys(CAT_META),
+    k => { const m=CAT_META[k]; return (m.icon?m.icon+' ':'')+m.label; }, 'cat');
+
+  // Escopo
+  buildGroup('f-esc', Object.keys(ESC_META),
+    k => { const m=ESC_META[k]; return (m.icon?m.icon+' ':'')+k; }, 'esc');
+
+  // Origem
+  buildGroup('f-origin', ['community','internal'],
+    k => k==='community'?'🌍 Comunidade':'🏠 Internos', 'origin');
+}
+
+function buildGroup(id, keys, labelFn, fk) {
+  const el = document.getElementById(id);
+  el.innerHTML = '';
+  keys.forEach(k => {
+    const b = document.createElement('button');
+    b.className = 'fb';
+    b.textContent = labelFn(k);
+    b.onclick = () => { toggleFilter(fk, k, b); };
+    el.appendChild(b);
+  });
+}
+
+function toggleFilter(fk, k, btn) {
+  const s = state.filters[fk];
+  if (s.has(k)) { s.delete(k); btn.classList.remove('on'); }
+  else { s.add(k); btn.classList.add('on'); }
+  render();
+}
+
+function toggleReview() {
+  state.review = !state.review;
+  document.getElementById('f-review').classList.toggle('on', state.review);
+  render();
+}
+
+function clearAll() {
+  Object.values(state.filters).forEach(s => s.clear());
+  state.review = false;
+  document.getElementById('search').value = '';
+  document.querySelectorAll('.fb').forEach(b => b.classList.remove('on'));
+  render();
+}
+
+// ── FILTER + SORT ─────────────────────────────────────────────────────────────
+function filtered() {
+  const q = document.getElementById('search').value.toLowerCase();
+  return MODS.filter(m => {
+    if (q && !m[I.name].toLowerCase().includes(q) && !m[I.fn].toLowerCase().includes(q)) return false;
+    const {status,tipo,atu,cat,esc,origin} = state.filters;
+    if (status.size && !status.has(m[I.status])) return false;
+    if (tipo.size && !tipo.has(m[I.tipo])) return false;
+    if (atu.size && !atu.has(m[I.atu])) return false;
+    if (cat.size && !cat.has(m[I.cat])) return false;
+    if (esc.size) {
+      const modEscs = escArr(m);
+      if (!modEscs.some(e => esc.has(e))) return false;
+    }
+    if (origin.size) {
+      if (origin.has('internal') && !origin.has('community') && !m[I.intern]) return false;
+      if (origin.has('community') && !origin.has('internal') && m[I.intern]) return false;
+    }
+    if (state.review && !needsReview(m)) return false;
+    return true;
+  });
+}
+
+const SORT_IDX = {n:I.n,name:I.name,tipo:I.tipo,atu:I.atu,cat:I.cat,
+                  esc:I.esc,forge:I.forge,r4:I.r4,fn:I.fn,status:I.status,pri:I.pri};
+
+function sorted(list) {
+  const {col,dir} = state.sort;
+  return [...list].sort((a,b) => {
+    const av = String(a[SORT_IDX[col]]??''), bv = String(b[SORT_IDX[col]]??'');
+    if (col==='n') return (Number(av)-Number(bv))*dir;
+    return av.localeCompare(bv,'pt')*dir;
+  });
+}
+
+function sortBy(col) {
+  if (state.sort.col===col) state.sort.dir*=-1;
+  else { state.sort.col=col; state.sort.dir=1; }
+  document.querySelectorAll('thead th').forEach(th => {
+    th.classList.remove('asc','desc');
+    if (th.dataset.col===col) th.classList.add(state.sort.dir===1?'asc':'desc');
+  });
+  render();
+}
+
+// ── CELL BUILDERS ─────────────────────────────────────────────────────────────
+function b(cls, ...parts) {
+  return `<span class="b ${cls}">${parts.join('')}</span>`;
+}
+
+function tipoBadge(v) {
+  const cls = v==='?'?'bt-q':`bt-${v}`;
+  const icon = TIPO_META[v]?.icon||'';
+  return b(cls, icon?`<span>${icon}</span>`:'', v);
+}
+
+function atuBadge(v) {
+  const cls = v==='?'?'ba-q':`ba-${v}`;
+  const icon = ATU_META[v]?.icon||'';
+  return b(cls, icon?`<span>${icon}</span>`:'', v);
+}
+
+function catBadge(v) {
+  const cls = v==='?'?'bk-q':`bk-${v}`;
+  const meta = CAT_META[v]||{icon:'',label:v};
+  return b(cls, meta.icon?`<span>${meta.icon}</span> `:'', meta.label);
+}
+
+function statusBadge(v) {
+  return b('bs-'+v, STATUS_LABELS[v]||v);
+}
+
+function priBadge(v) {
+  const cls = v==='?'?'bp-q':`bp-${v}`;
+  return b(cls, v);
+}
+
+function escCell(m) {
+  const arr = escArr(m);
+  if (!arr.length && m[I.esc]==='?') return b('bk-q','?');
+  if (!arr.length) return '<span class="repo-absent">—</span>';
+  return '<div class="esc-chips">'+arr.map(e => {
+    const meta = ESC_META[e]||{icon:''};
+    return `<span class="ec">${meta.icon?meta.icon+' ':''}${e}</span>`;
+  }).join('')+'</div>';
+}
+
+function forgeCell(m) {
+  const id = m[I.forge];
+  const name = m[I.name].replace(/🏠\s*/,'');
+  const cat = m[I.cat];
+  const catMeta = CAT_META[cat]||{icon:'',label:cat};
+  const status = m[I.status];
+
+  if (id === null) return '<span class="repo-absent">—</span>';
+  if (id === '')   return '<span class="repo-search">🔍</span>';
+
+  const forgeUrl = `https://forge.sp-tarkov.com/mod/${id}/`;
+
+  return `<div class="has-tip">
+    <a href="${forgeUrl}" target="_blank" class="forge-link" title="Abrir Forge #${id}">
+      <span class="forge-check">✓</span>#${id}
+    </a>
+    <div class="tip">
+      <div class="tip-title">${name}</div>
+      <span class="tip-tag">${catMeta.icon} ${catMeta.label}</span>
+      <span class="tip-tag bs-${status}" style="margin-left:4px;font-size:9px">${STATUS_LABELS[status]||status}</span>
+      <div class="tip-row"><span class="lk">forge.sp-tarkov.com/mod/<strong style="color:var(--gold)">${id}</strong> →
+        <a href="${forgeUrl}" target="_blank">${forgeUrl}</a>
+      </span></div>
+    </div>
+  </div>`;
+}
+
+function r4Cell(m) {
+  const path = m[I.r4];
+  if (path === null) return '<span class="repo-absent">—</span>';
+  if (path === '')   return '<span class="repo-search">🔍</span>';
+
+  let url, display;
+  if (path.startsWith('https://')) {
+    url = path;
+    // gitlab — show shortened path
+    display = path.replace('https://gitlab.com/','').replace('https://github.com/','');
+    const parts = display.split('/');
+    display = parts.slice(0,2).join('/');
+  } else {
+    url = 'https://github.com/' + path;
+    // Show just repo name (after /)
+    display = path.split('/')[1] || path;
+  }
+
+  const isGitlab = path.startsWith('https://gitlab');
+  const icon = isGitlab
+    ? `<svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.88-1.17-.88-1.17-.72-.49.05-.48.05-.48.8.06 1.22.82 1.22.82.71 1.21 1.87.86 2.32.66.07-.51.28-.86.5-1.06-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.7 7.7 0 018 3.8c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.19c0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>`
+    : `<svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.88-1.17-.88-1.17-.72-.49.05-.48.05-.48.8.06 1.22.82 1.22.82.71 1.21 1.87.86 2.32.66.07-.51.28-.86.5-1.06-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.7 7.7 0 018 3.8c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.19c0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>`;
+
+  return `<a href="${url}" target="_blank" class="repo-link" title="${path}">${icon}${display}</a>`;
+}
+
+// ── COLUMNS ───────────────────────────────────────────────────────────────────
+const COLS = [
+  {key:'n',      label:'#',         cls:'c-num'},
+  {key:'name',   label:'Mod',       cls:'c-name'},
+  {key:'tipo',   label:'Tipo',      cls:'c-tipo'},
+  {key:'atu',    label:'Atuação',   cls:'c-atu'},
+  {key:'cat',    label:'Categoria', cls:'c-cat'},
+  {key:'esc',    label:'Escopo',    cls:'c-esc'},
+  {key:'forge',  label:'Forge',     cls:'c-forge'},
+  {key:'r4',     label:'Repo 4.0',  cls:'c-repo'},
+  {key:'fn',     label:'Função',    cls:'c-fn'},
+  {key:'status', label:'Status',    cls:'c-status'},
+  {key:'pri',    label:'Prior.',    cls:'c-pri'},
+];
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function render() {
+  const list = sorted(filtered());
+  document.getElementById('count-row').innerHTML =
+    `Exibindo <strong>${list.length}</strong> de <strong>${MODS.length}</strong> mods`;
+
+  // thead
+  document.getElementById('thead').innerHTML = '<tr>' + COLS.map(c => {
+    const sc = state.sort.col===c.key ? (state.sort.dir===1?'asc':'desc') : '';
+    return `<th class="${sc}" data-col="${c.key}" onclick="sortBy('${c.key}')">${c.label}<span class="si"></span></th>`;
+  }).join('') + '</tr>';
+
+  if (!list.length) {
+    document.getElementById('tbody').innerHTML =
+      `<tr><td colspan="${COLS.length}" class="no-results">Nenhum mod encontrado</td></tr>`;
+    return;
+  }
+
+  document.getElementById('tbody').innerHTML = list.map(m => {
+    const rv = needsReview(m);
+    const nameCls = m[I.intern] ? 'mod-name int' : 'mod-name';
+    const revDot = rv ? '<span class="review-dot"></span>' : '';
+    return `<tr>
+      <td class="c-num">${m[I.n]}</td>
+      <td class="c-name"><div class="${nameCls}">${revDot}${m[I.name]}</div></td>
+      <td class="c-tipo">${tipoBadge(m[I.tipo])}</td>
+      <td class="c-atu">${atuBadge(m[I.atu])}</td>
+      <td class="c-cat">${catBadge(m[I.cat])}</td>
+      <td class="c-esc">${escCell(m)}</td>
+      <td class="c-forge">${forgeCell(m)}</td>
+      <td class="c-repo">${r4Cell(m)}</td>
+      <td class="c-fn"><div class="fn">${m[I.fn]}</div></td>
+      <td class="c-status">${statusBadge(m[I.status])}</td>
+      <td class="c-pri">${priBadge(m[I.pri])}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── STATS ──────────────────────────────────────────────────────────────────────
+function renderStats() {
+  const byStatus = {};
+  MODS.forEach(m => { byStatus[m[I.status]] = (byStatus[m[I.status]]||0)+1; });
+  const r4present = MODS.filter(m => m[I.r4] && m[I.r4]!=='').length;
+  const needsRev  = MODS.filter(needsReview).length;
+  const internal  = MODS.filter(m => m[I.intern]).length;
+  const total = MODS.length;
+
+  function sc(label, val, cls) {
+    return `<div class="sc"><span class="lbl">${label}</span><span class="val ${cls}">${val}</span></div>`;
+  }
+
+  document.getElementById('stats').innerHTML = [
+    sc('Total', total, 'gold'),
+    '<div class="stats-sep"></div>',
+    sc('Instalar', byStatus.Instalar||0, 'gr'),
+    sc('Evoluir', byStatus.Evoluir||0, 'bl'),
+    sc('Avaliar', byStatus.Avaliar||0, 'or'),
+    sc('Aguardar', byStatus.Aguardar||0, 'or'),
+    sc('Desenvolver', byStatus.Desenvolver||0, 'pu'),
+    byStatus.Bloqueado ? sc('Bloqueado', byStatus.Bloqueado, 're') : '',
+    '<div class="stats-sep"></div>',
+    sc('Repo 4.0', r4present, 'gr'),
+    sc('Internos 🏠', internal, 'bl'),
+    sc('⚠ Revisão', needsRev, 'or'),
+    `<div style="flex:1 1 100%;padding:2px 0 0 0"><div class="prog-wrap">${
+      Object.entries(byStatus).map(([k,v]) => {
+        const colors = {Instalar:'#3a8040',Evoluir:'#1e60b0',Avaliar:'#c89020',
+                        Aguardar:'#784020',Desenvolver:'#503a90',Bloqueado:'#882020',NaoIncluir:'#3a3f48'};
+        return `<div class="prog-seg" style="width:${(v/total*100).toFixed(1)}%;background:${colors[k]||'#444'}"></div>`;
+      }).join('')
+    }</div></div>`,
+  ].join('');
+}
+
+// ── BOOT ──────────────────────────────────────────────────────────────────────
+buildFilters();
+renderStats();
+render();
+document.getElementById('footer-date').textContent =
+  'Atualizado: ' + new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+</script>
+</body>
+</html>

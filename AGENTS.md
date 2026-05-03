@@ -5,8 +5,9 @@ Repositório de mods para SPT 4.0 (Single Player Tarkov). Lido por qualquer assi
 ## Workspace
 
 - **SPT Version:** 4.0.x — Tarkov [PREENCHER versão]
+- **Game Version:** Escape From Tarkov 0.16.9
 - **Game install path:** [PREENCHER]
-- **Mod types:** Client (C# / BepInEx) e Server (TypeScript)
+- **Mod types:** Client e Server
 - **Compatibilidade:** SPT 3.x e 4.0 são arquiteturalmente incompatíveis — nunca misturar padrões
 
 ## Estrutura

@@ -225,7 +225,7 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | 98 | 🏠 FixReloadUltraFika | 🖥️ Client | ⚔️ Raid | 🧩 Framework | 🌐 Multiplayer · 🎬 Animações | — | — | — | Fix de reload no UltraFika (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
 | 99 | 🏠 ForceSync | 🔀 Misto | 🔀 Ambos | 🧩 Framework | 🌐 Multiplayer | — | — | — | Força sincronização (interno, relacionado ao UltraFika) | ⬆️ Evoluir p/ 4.0 | 🔍 |
 | 100 | 🏠 GhostMercenaries | 🌐 Server | ⚔️ Raid | ➕ Conteúdo | 🤖 IA | — | — | — | Mercenários customizados (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
-| 101 | 🏠 IdleSprintFix | 🖥️ Client | ⚔️ Raid | 🛋️ QoL | 🎬 Animações | — | — | — | Fix do bug de sprint travado (interno, v1.2.2) | ⬆️ Evoluir p/ 4.0 | 🔍 |
+| 101 | 🏠 IdleSprintFix | 🖥️ Client | ⚔️ Raid | 🛋️ QoL | 🎬 Animações | — | — | — | Fix do bug de sprint travado (interno, v1.2.2) | ⚫ Não incluir | 🔍 |
 | 102 | 🏠 TarkovRedLine (TarkovRedLine-ServerMod) | 🌐 Server | 🌐 Geral | ⚖️ Balanceamento | 🧩 Framework | — | — | — | Mod do servidor RedLine — customização proprietária do projeto | ⬆️ Evoluir p/ 4.0 | 🔍 |
 | 103 | 🏠 UmbigoPreto-Face the Knight - Mask Fix | 🖥️ Client | ⚔️ Raid | 🛋️ QoL | 🛡️ Equipamentos | — | — | — | Fix da máscara do Knight (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
 | 104 | 🏠 UmbigoPreto-TrueTrauma | 🔀 Misto | ⚔️ Raid | 🩸 Realismo | 🧩 Framework | — | — | — | Sistema de trauma realista (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
@@ -280,3 +280,8 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | 2026-05-03 | Guilherme | docs(migration): classify Tipo for ~40 mods using Forge metadata and GitHub repo inspection |
 | 2026-05-03 | Guilherme | docs(migration): review pass — fix acidphantasm Tipo (Server→Client 4.0), internal mods Tipo, wrong Forge ID #930→#922 (LessRestrictingHeadwear), PlayerEncumbranceBar Repo 4.0, Próximos passos |
 | 2026-05-03 | Guilherme | docs(migration): classify Tipo for 41 mods + add Atuação/Categoria/Escopo columns |
+| 2026-05-03 | Guilherme | docs(migration): sync mods-inventary.html from markdown |
+| 2026-05-03 | sync-script | docs(migration): sync mods-inventary.html from markdown |
+| 2026-05-03 | sync-script | docs(migration): sync mods-inventary.html from markdown |
+| 2026-05-03 | sync-script | docs(migration): sync mods-inventary.html from markdown |
+| 2026-05-03 | Guilherme | docs(migration): review pass — fix 7 issue categories |
