@@ -15,13 +15,11 @@ Catálogo dos mods atualmente em uso no `tarkov-spt-3.0` que precisam ser avalia
 
 Cada mod tem:
 
-- **Tipo:** 🖥️ Client (C# / BepInEx) · 🌐 Server (TypeScript) · 🔀 Misto (ambos) · 🔍 a classificar
-- **Link 3.x** e **Link 4.x:** `[texto](url)` quando encontrado · `🔍 buscar` quando pendente · `—` quando confirmado ausente
+- **Tipo:** 🖥️ Client (C# / BepInEx) · 🌐 Server (TypeScript/JS) · 🔀 Misto (ambos) · 🔍 a classificar
+- **Forge:** URL no [forge.sp-tarkov.com](https://forge.sp-tarkov.com/mods) (página única lista todas as versões) · `🔍 buscar` · `—` (confirmado ausente)
+- **GitHub:** URL do repositório fonte · `🔍 buscar` · `—` (privado/não-existe)
+- **4.x?:** ✅ tem versão SPT 4.0+ · ❌ só tem 3.x · 🔍 verificar
 - **Status:** ver enum abaixo
-
-Quando o link 4.x for `—`, decidir entre `🔧 Desenvolver`, `🟠 Aguardar upstream` ou `⚫ Não incluir`.
-
-Tipos pré-classificados aqui são **chutes** baseados no nome (`Server`, `ServerMod`, `Backend` no nome → 🌐). Sempre validar consultando o repositório real antes de portar.
 
 ## Base — UltraFika-Plugin
 
@@ -29,121 +27,123 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 
 | Item | Detalhe |
 |---|---|
-| **Tipo** | Client (C# / BepInEx) |
-| **Função** | Cliente multiplayer (Fika) |
-| **Link 3.x** | 🔍 buscar |
-| **Link 4.x** | 🔍 buscar |
+| **Tipo** | 🖥️ Client (C# / BepInEx) |
+| **Função** | Cliente multiplayer (fork de Fika) |
+| **Forge** | — (não publicado) |
+| **GitHub** | — (não público — provável fork privado) |
+| **4.x?** | ❌ |
+| **Upstream** | [Project Fika](https://forge.sp-tarkov.com/mod/2326/project-fika) — base de onde provavelmente foi forkado |
 | **Prioridade** | 🔥 Crítica — primeiro mod a ser migrado |
-| **Status migração** | 🔵 Avaliar |
+| **Status migração** | 🔧 Desenvolver (precisa recriar do zero ou portar funcionalidades do Fika upstream) |
 | **Bloqueia** | Todos os demais mods do projeto dependem desta base estar funcional |
 
 ## Inventário completo
 
-| Mod | Tipo | Link 3.x | Link 4.x | Função | Status |
-|---|---|---|---|---|---|
-| [SVM] Server Value Modifier | 🌐 Server | 🔍 buscar | 🔍 buscar | Modifica valores do servidor (loot, traders, etc.) | 🔵 Avaliar |
-| AAAArtem-WTT | 🔍 | 🔍 buscar | 🔍 buscar | 🔍 (relacionado ao WTT) | 🔵 Avaliar |
-| acidphantasm-DelayedFleaSales | 🔍 | 🔍 buscar | 🔍 buscar | Atrasa vendas no flea market | 🔵 Avaliar |
-| acidphantasm-moretagcolours | 🔍 | 🔍 buscar | 🔍 buscar | Mais cores para tags de itens | 🔵 Avaliar |
-| acidphantasm-previewsizer | 🔍 | 🔍 buscar | 🔍 buscar | Redimensiona preview de itens | 🔵 Avaliar |
-| acidphantasm-progressivebotsystem | 🔍 | 🔍 buscar | 🔍 buscar | Sistema progressivo de bots | 🔵 Avaliar |
-| acidphantasm-refsptfriendlyquests | 🔍 | 🔍 buscar | 🔍 buscar | Quests amigáveis ao SPT | 🔵 Avaliar |
-| acidphantasm-simpleworkoutqte | 🔍 | 🔍 buscar | 🔍 buscar | QTE de workout no hideout | 🔵 Avaliar |
-| AirFilterWarning | 🔍 | 🔍 buscar | 🔍 buscar | Aviso de filtro de ar gerador | 🔵 Avaliar |
-| AmandsGraphics | 🔍 | 🔍 buscar | 🔍 buscar | Configurações gráficas avançadas | 🔵 Avaliar |
-| aMoxoPixel-Painter | 🔍 | 🔍 buscar | 🔍 buscar | Customização visual (skins/pintura) | 🔵 Avaliar |
-| Band-Aid | 🔍 | 🔍 buscar | 🔍 buscar | 🔍 (fix/patch) | 🔵 Avaliar |
-| BeltSlot | 🔍 | 🔍 buscar | 🔍 buscar | Slot extra de cinto no inventário | 🔵 Avaliar |
-| BetterRearSights | 🔍 | 🔍 buscar | 🔍 buscar | Mira traseira melhorada | 🔵 Avaliar |
-| BorkelRNVG | 🔍 | 🔍 buscar | 🔍 buscar | RNVG (night vision) | 🔵 Avaliar |
-| BRNVG_N-15Adapter | 🔍 | 🔍 buscar | 🔍 buscar | Adaptador N-15 para BRNVG | 🔵 Avaliar |
-| ChooChoo-TraderModding | 🔍 | 🔍 buscar | 🔍 buscar | Modding via traders | 🔵 Avaliar |
-| ContinuousLoadAmmo | 🔍 | 🔍 buscar | 🔍 buscar | Carregamento contínuo de munição | 🔵 Avaliar |
-| CoordLogger | 🔍 | 🔍 buscar | 🔍 buscar | Logger de coordenadas | 🔵 Avaliar |
-| CWX | 🔍 | 🔍 buscar | 🔍 buscar | 🔍 | 🔵 Avaliar |
-| DanW-SPTQuestingBots | 🔍 | 🔍 buscar | 🔍 buscar | Bots fazendo quests | 🔵 Avaliar |
-| DeadzoneMod | 🔍 | 🔍 buscar | 🔍 buscar | 🔍 (deadzone de mira?) | 🔵 Avaliar |
-| desze-UnlockHideoutCustomization | 🔍 | 🔍 buscar | 🔍 buscar | Desbloqueia customização do hideout | 🔵 Avaliar |
-| DewardianDev-MOAR | 🔍 | 🔍 buscar | 🔍 buscar | Mais bots/spawns (MOAR) | 🔵 Avaliar |
-| dk.SeparateHostility | 🔍 | 🔍 buscar | 🔍 buscar | Separa hostilidade entre facções | 🔵 Avaliar |
-| doordash | 🔍 | 🔍 buscar | 🔍 buscar | 🔍 | 🔵 Avaliar |
-| DrakiaXYZ-BigBrain | 🔍 | 🔍 buscar (v1.3.2) | 🔍 buscar | Sistema de combat layers (dependência de SAIN) | 🔵 Avaliar |
-| DrakiaXYZ-EquipFromWeaponRack | 🔍 | 🔍 buscar | 🔍 buscar | Equipar arma do rack do hideout | 🔵 Avaliar |
-| DrakiaXYZ-LootRadius | 🔍 | 🔍 buscar | 🔍 buscar | Aumenta raio de loot | 🔵 Avaliar |
-| DrakiaXYZ-QuickMoveToContainer | 🔍 | 🔍 buscar | 🔍 buscar | Mover itens rápido para container | 🔵 Avaliar |
-| DrakiaXYZ-SearchOpenContainers | 🔍 | 🔍 buscar | 🔍 buscar | Buscar containers abertos | 🔵 Avaliar |
-| DrakiaXYZ-Waypoints | 🔍 | 🔍 buscar (v1.7.1) | 🔍 buscar | Waypoints de patrulha (dependência de SAIN) | 🔵 Avaliar |
-| DynamicExternalResolution | 🔍 | 🔍 buscar | 🔍 buscar | Resolução externa dinâmica | 🔵 Avaliar |
-| DynamicMaps (SPTDynamicMaps) | 🖥️ Client | 🔍 buscar (v0.5.7) | 🔍 buscar | UI de mapas dinâmicos com tracking de quests | 🔵 Avaliar |
-| Eco-Attachment Emporium | 🔍 | 🔍 buscar | 🔍 buscar | Mais attachments para armas | 🔵 Avaliar |
-| ExpandedFpsLimit | 🔍 | 🔍 buscar | 🔍 buscar | Aumenta limite de FPS | 🔵 Avaliar |
-| Fika (fika-server / Fika.Core) | 🔀 Misto | 🔍 buscar | 🔍 buscar | Multiplayer base (upstream) | 🔵 Avaliar |
-| FikaTransitFix (FikaTransitFixServer) | 🌐 Server | 🔍 buscar | 🔍 buscar | Fix de transit em raids do Fika | 🔵 Avaliar |
-| FixReloadUltraFika | 🔍 | 🔍 buscar | 🔍 buscar | Fix de reload no UltraFika | 🔵 Avaliar |
-| flir-betterkeysng | 🔍 | 🔍 buscar | 🔍 buscar | UI melhorada para keys (next-gen) | 🔵 Avaliar |
-| ForceSync | 🔍 | 🔍 buscar | 🔍 buscar | Força sincronização (Fika?) | 🔵 Avaliar |
-| FOVFix | 🔍 | 🔍 buscar | 🔍 buscar | Fix de FOV | 🔵 Avaliar |
-| gaylatea-deadlyblades | 🔍 | 🔍 buscar | 🔍 buscar | Lâminas mais letais | 🔵 Avaliar |
-| Gaylatea-UseLooseLoot | 🔍 | 🔍 buscar | 🔍 buscar | Usa loose loot (loot solto no chão) | 🔵 Avaliar |
-| GhostMercenaries | 🔍 | 🔍 buscar | 🔍 buscar | 🔍 (mercenários invisíveis?) | 🔵 Avaliar |
-| HandsAreNotBusy | 🔍 | 🔍 buscar | 🔍 buscar | Mãos não ficam ocupadas (animação) | 🔵 Avaliar |
-| HollywoodFX | 🔍 | 🔍 buscar | 🔍 buscar | FX visuais cinematográficos | 🔵 Avaliar |
-| HollywoodGraphics | 🔍 | 🔍 buscar | 🔍 buscar | Gráficos cinematográficos | 🔵 Avaliar |
-| IcyClawz.CustomInteractions | 🔍 | 🔍 buscar | 🔍 buscar | Interações customizadas | 🔵 Avaliar |
-| IcyClawz.ItemContextMenuExt | 🔍 | 🔍 buscar | 🔍 buscar | Menu de contexto estendido em itens | 🔵 Avaliar |
-| IcyClawz.ItemSellPrice | 🔍 | 🔍 buscar | 🔍 buscar | Mostra preço de venda dos itens | 🔵 Avaliar |
-| IcyClawz.MunitionsExpert | 🔍 | 🔍 buscar | 🔍 buscar | Info detalhada de munição | 🔵 Avaliar |
-| IdleSprintFix | 🔍 | 🔍 buscar (v1.2.2) | 🔍 buscar | Fix do bug de sprint travado | 🔵 Avaliar |
-| IhanaMies-LootValueBackend | 🌐 Server | 🔍 buscar | 🔍 buscar | Backend para cálculo de valor de loot | 🔵 Avaliar |
-| inory-agonysfx | 🔍 | 🔍 buscar | 🔍 buscar | SFX de dor/agonia | 🔵 Avaliar |
-| JBOBYH_ItemPreviewQoL | 🔍 | 🔍 buscar | 🔍 buscar | QoL de preview de itens | 🔵 Avaliar |
-| Jehree-GildedKeyStorage (DrakiaXYZ-GildedKeyStorage) | 🔍 | 🔍 buscar | 🔍 buscar | Storage especializado para keys | 🔵 Avaliar |
-| Kaeno-TraderScrolling | 🔍 | 🔍 buscar | 🔍 buscar | Scroll na lista de traders | 🔵 Avaliar |
-| Kat.BetterAmmoLoadingList | 🔍 | 🔍 buscar | 🔍 buscar | Lista melhorada de loading de munição | 🔵 Avaliar |
-| kmyuhkyuk-EnvironmentReplace | 🔍 | 🔍 buscar | 🔍 buscar | Substitui ambientes/mapas | 🔵 Avaliar |
-| kmyuhkyuk-KmyTarkovApi | 🔍 | 🔍 buscar | 🔍 buscar | API utilitária | 🔵 Avaliar |
-| lacyway-mergeconsumables (MergeConsumables) | 🔍 | 🔍 buscar | 🔍 buscar | Merge de consumíveis (médicos, comida) | 🔵 Avaliar |
-| MoreCheckmarks (MoreCheckmarksBackend) | 🔀 Misto | 🔍 buscar | 🔍 buscar | Mais checkmarks no inventário | 🔵 Avaliar |
-| MoxoPixel-MagTape | 🔍 | 🔍 buscar | 🔍 buscar | Visual de tape em magazines | 🔵 Avaliar |
-| MoxoPixel-TacticalGearComponent | 🔍 | 🔍 buscar | 🔍 buscar | Componente de equipamento tático | 🔵 Avaliar |
-| MusicManiac-LessRestrictingHeadwear | 🔍 | 🔍 buscar | 🔍 buscar | Headwear menos restritivo | 🔵 Avaliar |
-| platinum-theblacklist | 🔍 | 🔍 buscar | 🔍 buscar | Blacklist de itens | 🔵 Avaliar |
-| PlayerEncumbranceBar | 🔍 | 🔍 buscar | 🔍 buscar | Barra de encumbrance (peso) do player | 🔵 Avaliar |
-| Pluto! - SPT Battlepass | 🔍 | 🔍 buscar | 🔍 buscar | Battlepass para SPT | 🔵 Avaliar |
-| QuickSell | 🔍 | 🔍 buscar | 🔍 buscar | Venda rápida de itens | 🔵 Avaliar |
-| RaiRai.ColorConverterAPI | 🔍 | 🔍 buscar | 🔍 buscar | API utilitária de conversão de cores | 🔵 Avaliar |
-| Realism (SPT-Realism / RealismMod) | 🔀 Misto | 🔍 buscar | 🔍 buscar | Overhaul de realismo (balística, médica, etc.) | 🔵 Avaliar |
-| redlaser42-Better Headset Descriptions | 🔍 | 🔍 buscar | 🔍 buscar | Descrições melhoradas de headsets | 🔵 Avaliar |
-| redlaser42-Increase Climb Height | 🔍 | 🔍 buscar | 🔍 buscar | Aumenta altura máxima de escalada | 🔵 Avaliar |
-| SAIN (zSolarint-SAIN-ServerMod) | 🌐 Server | 🔍 buscar | 🔍 buscar | Substituição do sistema de IA dos bots | 🔵 Avaliar |
-| seasoniterator | 🔍 | 🔍 buscar | 🔍 buscar | 🔍 (estações/seasonal?) | 🔵 Avaliar |
-| shibdib-NoTransitTasks | 🔍 | 🔍 buscar | 🔍 buscar | Remove tasks de transit | 🔵 Avaliar |
-| Skwizzy-LootingBots (Skwizzy-LootingBots-ServerMod) | 🌐 Server | 🔍 buscar | 🔍 buscar | Bots fazendo loot | 🔵 Avaliar |
-| somtam.NoBush | 🔍 | 🔍 buscar | 🔍 buscar | Remove arbustos densos | 🔵 Avaliar |
-| somtam.SimpleDeClutter | 🔍 | 🔍 buscar | 🔍 buscar | Reduz clutter visual | 🔵 Avaliar |
-| SPT-FreshContentBackport | 🔍 | 🔍 buscar | 🔍 buscar | Backport de conteúdo novo | 🔵 Avaliar |
-| SPT-InsuranceFraud | 🔍 | 🔍 buscar | 🔍 buscar | Mecânica de fraude no seguro | 🔵 Avaliar |
-| SPTVRAMCleaner | 🔍 | 🔍 buscar | 🔍 buscar | Limpeza de VRAM | 🔵 Avaliar |
-| StashSearch | 🔍 | 🔍 buscar | 🔍 buscar | Busca dentro do stash | 🔵 Avaliar |
-| SwiftXP.ShowMeTheMoney | 🔍 | 🔍 buscar | 🔍 buscar | Mostra dinheiro/valores em UI | 🔵 Avaliar |
-| TacticalToasterUNTARGH | 🔍 | 🔍 buscar | 🔍 buscar | 🔍 (relacionado a UNTAR/GO HOME?) | 🔵 Avaliar |
-| Tarkov Weather System | 🔍 | 🔍 buscar | 🔍 buscar | Sistema de clima dinâmico | 🔵 Avaliar |
-| TarkovRedLine (TarkovRedLine-ServerMod) | 🌐 Server | 🔍 buscar | 🔍 buscar | Mod do servidor RedLine (privado?) | 🔵 Avaliar |
-| TellTheTime | 🔍 | 🔍 buscar | 🔍 buscar | Mostra hora atual | 🔵 Avaliar |
-| Terkoiz.Freecam | 🔍 | 🔍 buscar | 🔍 buscar | Câmera livre (debug/replay) | 🔵 Avaliar |
-| tyfon-hideoutinprogress (Tyfon.HideoutInProgress) | 🔍 | 🔍 buscar | 🔍 buscar | Indica progresso no hideout | 🔵 Avaliar |
-| tyfon-uifixes (Tyfon.UIFixes / Tyfon.UIFixes.Net) | 🔍 | 🔍 buscar | 🔍 buscar | Coleção de fixes de UI | 🔵 Avaliar |
-| tyfon-weaponcustomizer (Tyfon.WeaponCustomizer) | 🔍 | 🔍 buscar | 🔍 buscar | Customizador de armas | 🔵 Avaliar |
-| UmbigoPreto-Face the Knight - Mask Fix | 🔍 | 🔍 buscar | 🔍 buscar | Fix da máscara do Knight | 🔵 Avaliar |
-| UmbigoPreto-TrueTrauma | 🔍 | 🔍 buscar | 🔍 buscar | Sistema de trauma realista | 🔵 Avaliar |
-| Virtual's Custom Quest Loader (VCQLQuestZones) | 🌐 Server | 🔍 buscar | 🔍 buscar | Loader de quests customizadas (VCQL) | 🔵 Avaliar |
-| VisceralCombat | 🔍 | 🔍 buscar | 🔍 buscar | Efeitos viscerais de combate | 🔵 Avaliar |
-| VolumetricBloodFX | 🔍 | 🔍 buscar | 🔍 buscar | FX de sangue volumétrico | 🔵 Avaliar |
-| Wara-ModdingStatsHelper | 🔍 | 🔍 buscar | 🔍 buscar | Helper de stats em modding | 🔵 Avaliar |
-| WTT-Armory | 🔍 | 🔍 buscar | 🔍 buscar | Pack de armas (WTT) | 🔵 Avaliar |
-| WTT-PackNStrap | 🔍 | 🔍 buscar | 🔍 buscar | Pack de equipamento (WTT) | 🔵 Avaliar |
-| yellowdoge-tarkovrarecollectibles | 🔍 | 🔍 buscar | 🔍 buscar | Itens raros colecionáveis | 🔵 Avaliar |
-| zzDrakiaXYZ-LiveFleaPrices | 🔍 | 🔍 buscar | 🔍 buscar | Preços do flea ao vivo (live data) | 🔵 Avaliar |
+| Mod | Tipo | Forge | GitHub | 4.x? | Função | Status |
+|---|---|---|---|---|---|---|
+| [SVM] Server Value Modifier | 🌐 Server | 🔍 | [GhostFenixx/SVM](https://github.com/GhostFenixx/SVM) | ❌ (latest 3.11) | Modifica valores do servidor (loot, traders, hideout) | 🟠 Aguardar upstream |
+| AAAArtem-WTT | 🔍 | 🔍 | 🔍 | 🔍 | 🔍 (relacionado ao WTT) | 🔵 Avaliar |
+| acidphantasm-DelayedFleaSales | 🌐 Server | 🔍 | [acidphantasm/delayedfleasales-csharp](https://github.com/acidphantasm/delayedfleasales-csharp) | ✅ | Atrasa vendas no flea market | 🟢 Portar |
+| acidphantasm-moretagcolours | 🔍 | 🔍 | 🔍 | 🔍 | Mais cores para tags de itens | 🔵 Avaliar |
+| acidphantasm-previewsizer | 🔍 | 🔍 | [acidphantasm/acidphantasm-previewsizer](https://github.com/acidphantasm/acidphantasm-previewsizer) | 🔍 | Redimensiona preview de itens | 🔵 Avaliar |
+| acidphantasm-progressivebotsystem | 🌐 Server | 🔍 | [acidphantasm/progressivebotsystem-csharp](https://github.com/acidphantasm/progressivebotsystem-csharp) | ✅ | Sistema progressivo de bots | 🟢 Portar |
+| acidphantasm-refsptfriendlyquests | 🌐 Server | 🔍 | [acidphantasm/reffriendlyquests-csharp](https://github.com/acidphantasm/reffriendlyquests-csharp) | ✅ | Quests amigáveis (compatível com Ref) | 🟢 Portar |
+| acidphantasm-simpleworkoutqte | 🌐 Server | 🔍 | [acidphantasm/acidphantasm-simpleworkoutqte](https://github.com/acidphantasm/acidphantasm-simpleworkoutqte) | 🔍 | QTE de workout no hideout | 🔵 Avaliar |
+| AirFilterWarning | 🔍 | 🔍 | 🔍 | 🔍 | Aviso de filtro de ar gerador | 🔵 Avaliar |
+| AmandsGraphics | 🖥️ Client | 🔍 | [Amands2Mello/AmandsGraphics](https://github.com/Amands2Mello/AmandsGraphics) | ❌ (3.10) | Configurações gráficas avançadas | 🟠 Aguardar upstream |
+| aMoxoPixel-Painter | 🌐 Server | 🔍 | [emilanderss0n/Painter](https://github.com/emilanderss0n/Painter) | 🔍 | Trader que vende mods de armas pintados | 🔵 Avaliar |
+| Band-Aid | 🔍 | 🔍 | 🔍 | 🔍 | 🔍 (fix/patch) | 🔵 Avaliar |
+| BeltSlot | 🖥️ Client | 🔍 | [Trench-foot/BeltSlot](https://github.com/Trench-foot/BeltSlot) | 🔍 | Slot extra de cinto no inventário | 🔵 Avaliar |
+| BetterRearSights | 🔍 | 🔍 | 🔍 | 🔍 | Mira traseira melhorada | 🔵 Avaliar |
+| BorkelRNVG | 🔍 | 🔍 | 🔍 | 🔍 | RNVG (night vision) | 🔵 Avaliar |
+| BRNVG_N-15Adapter | 🔍 | 🔍 | 🔍 | 🔍 | Adaptador N-15 para BRNVG | 🔵 Avaliar |
+| ChooChoo-TraderModding | 🔍 | 🔍 | 🔍 | 🔍 | Modding via traders | 🔵 Avaliar |
+| ContinuousLoadAmmo | 🔍 | 🔍 | 🔍 | 🔍 | Carregamento contínuo de munição | 🔵 Avaliar |
+| CoordLogger | 🔍 | 🔍 | 🔍 | 🔍 | Logger de coordenadas | 🔵 Avaliar |
+| CWX | 🔍 | 🔍 | [CWXDEV/CWX-Mods](https://github.com/CWXDEV/CWX-Mods) | 🔍 | Coleção de mods do CWX (verificar conteúdo) | 🔵 Avaliar |
+| DanW-SPTQuestingBots | 🌐 Server | 🔍 | [dwesterwick/SPTQuestingBots](https://github.com/dwesterwick/SPTQuestingBots) | 🔍 | Bots fazendo quests + spawns PMC mimic live | 🔵 Avaliar |
+| DeadzoneMod | 🔍 | 🔍 | 🔍 | 🔍 | 🔍 (deadzone de mira?) | 🔵 Avaliar |
+| desze-UnlockHideoutCustomization | 🔍 | 🔍 | 🔍 | 🔍 | Desbloqueia customização do hideout | 🔵 Avaliar |
+| DewardianDev-MOAR | 🌐 Server | 🔍 | [Andrewgdewar/MOAR](https://github.com/Andrewgdewar/MOAR) | 🔍 | Bot spawning system | 🔵 Avaliar |
+| dk.SeparateHostility | 🔍 | 🔍 | 🔍 | 🔍 | Separa hostilidade entre facções | 🔵 Avaliar |
+| doordash | 🔍 | 🔍 | 🔍 | 🔍 | 🔍 | 🔵 Avaliar |
+| DrakiaXYZ-BigBrain | 🖥️ Client | [902/bigbrain](https://forge.sp-tarkov.com/mod/902/bigbrain) | [DrakiaXYZ/SPT-BigBrain](https://github.com/DrakiaXYZ/SPT-BigBrain) | ✅ 4.0.13 (v1.4.0) | Library de combat layers para bots (dep. de SAIN) | 🟢 Portar |
+| DrakiaXYZ-EquipFromWeaponRack | 🖥️ Client | 🔍 | [DrakiaXYZ/SPT-EquipFromWeaponRack](https://github.com/DrakiaXYZ/SPT-EquipFromWeaponRack) | 🔍 | Equipar arma direto do rack do hideout | 🔵 Avaliar |
+| DrakiaXYZ-LootRadius | 🔍 | 🔍 | 🔍 | 🔍 | Aumenta raio de loot | 🔵 Avaliar |
+| DrakiaXYZ-QuickMoveToContainer | 🖥️ Client | 🔍 | [DrakiaXYZ/SPT-QuickMoveToContainer](https://github.com/DrakiaXYZ/SPT-QuickMoveToContainer) | 🔍 | Ctrl+Click move item para container aberto | 🔵 Avaliar |
+| DrakiaXYZ-SearchOpenContainers | 🖥️ Client | 🔍 | [DrakiaXYZ/SPT-SearchOpenContainers](https://github.com/DrakiaXYZ/SPT-SearchOpenContainers) | 🔍 | Buscar dentro de containers abertos | 🔵 Avaliar |
+| DrakiaXYZ-Waypoints | 🖥️ Client | [827/waypoints-expanded-navmesh](https://forge.sp-tarkov.com/mod/827/waypoints-expanded-navmesh) | [DrakiaXYZ/SPT-Waypoints](https://github.com/DrakiaXYZ/SPT-Waypoints) | ✅ 4.0.13 (v1.8.2) | Expande navmesh dos mapas (dep. de SAIN) | 🟢 Portar |
+| DynamicExternalResolution | 🔍 | 🔍 | 🔍 | 🔍 | Resolução externa dinâmica | 🔵 Avaliar |
+| DynamicMaps (SPTDynamicMaps) | 🖥️ Client | 🔍 | [mpstark/SPT-DynamicMaps](https://github.com/mpstark/SPT-DynamicMaps) | 🔍 | UI custom de mapas com tracking de quests | 🔵 Avaliar |
+| Eco-Attachment Emporium | 🔍 | 🔍 | 🔍 | 🔍 | Mais attachments para armas | 🔵 Avaliar |
+| ExpandedFpsLimit | 🔍 | 🔍 | 🔍 | 🔍 | Aumenta limite de FPS | 🔵 Avaliar |
+| Fika (fika-server / Fika.Core) | 🔀 Misto | [2326/project-fika](https://forge.sp-tarkov.com/mod/2326/project-fika) | [project-fika/Fika-Plugin](https://github.com/project-fika/Fika-Plugin) | ✅ 4.0.13 (v2.2.5) | Multiplayer base (BepInEx + server) | 🟢 Portar |
+| FikaTransitFix (FikaTransitFixServer) | 🌐 Server | 🔍 | 🔍 | 🔍 | Fix de transit em raids do Fika | 🔵 Avaliar |
+| FixReloadUltraFika | 🔍 | 🔍 | 🔍 | 🔍 | Fix de reload no UltraFika (provável fix proprietário) | 🔵 Avaliar |
+| flir-betterkeysng | 🔍 | 🔍 | 🔍 | 🔍 | UI melhorada para keys (next-gen) | 🔵 Avaliar |
+| ForceSync | 🔍 | 🔍 | 🔍 | 🔍 | Força sincronização (Fika?) | 🔵 Avaliar |
+| FOVFix | 🖥️ Client | 🔍 | [space-commits/SPT-FOV-Fix](https://github.com/space-commits/SPT-FOV-Fix) | ✅ 4.x.x | Fix de FOV (Fontaine's FOV Fix) | 🟢 Portar |
+| gaylatea-deadlyblades | 🔍 | 🔍 | 🔍 | 🔍 | Lâminas mais letais | 🔵 Avaliar |
+| Gaylatea-UseLooseLoot | 🖥️ Client | 🔍 | [DrakiaXYZ/SPT-UseLooseLoot](https://github.com/DrakiaXYZ/SPT-UseLooseLoot) | 🔍 | Usa loose loot direto sem entrar no inventário | 🔵 Avaliar |
+| GhostMercenaries | 🔍 | 🔍 | 🔍 | 🔍 | 🔍 (mercenários invisíveis?) | 🔵 Avaliar |
+| HandsAreNotBusy | 🔍 | 🔍 | 🔍 | 🔍 | Mãos não ficam ocupadas (animação) | 🔵 Avaliar |
+| HollywoodFX | 🔍 | 🔍 | 🔍 | 🔍 | FX visuais cinematográficos | 🔵 Avaliar |
+| HollywoodGraphics | 🔍 | 🔍 | 🔍 | 🔍 | Gráficos cinematográficos | 🔵 Avaliar |
+| IcyClawz.CustomInteractions | 🔍 | 🔍 | — (não tem GitHub público) | 🔍 | Interações customizadas | 🔵 Avaliar |
+| IcyClawz.ItemContextMenuExt | 🔍 | 🔍 | — | 🔍 | Menu de contexto estendido em itens | 🔵 Avaliar |
+| IcyClawz.ItemSellPrice | 🔍 | 🔍 | — | 🔍 | Mostra preço de venda dos itens | 🔵 Avaliar |
+| IcyClawz.MunitionsExpert | 🔍 | 🔍 | — | 🔍 | Info detalhada de munição | 🔵 Avaliar |
+| IdleSprintFix | 🔍 | 🔍 | 🔍 (não encontrado em busca) | 🔍 | Fix do bug de sprint travado | 🔵 Avaliar |
+| IhanaMies-LootValueBackend | 🖥️ Client | 🔍 | [IhanaMies/LootValue](https://github.com/IhanaMies/LootValue) | ❌ (3.11) | Mostra valor de loot na UI | 🟠 Aguardar upstream |
+| inory-agonysfx | 🔍 | 🔍 | 🔍 | 🔍 | SFX de dor/agonia | 🔵 Avaliar |
+| JBOBYH_ItemPreviewQoL | 🔍 | 🔍 | 🔍 | 🔍 | QoL de preview de itens | 🔵 Avaliar |
+| Jehree-GildedKeyStorage (DrakiaXYZ-GildedKeyStorage) | 🖥️ Client | 🔍 | [Jehree/SPT-Gilded_Key_Storage](https://github.com/Jehree/SPT-Gilded_Key_Storage) (orig) · [DrakiaXYZ/SPT-GildedKeyStorage-CSharp](https://github.com/DrakiaXYZ/SPT-GildedKeyStorage-CSharp) (4.0 fork) | ✅ (fork C#) | Storage especializado para keys | 🟢 Portar |
+| Kaeno-TraderScrolling | 🔍 | 🔍 | 🔍 | 🔍 | Scroll na lista de traders | 🔵 Avaliar |
+| Kat.BetterAmmoLoadingList | 🔍 | 🔍 | 🔍 | 🔍 | Lista melhorada de loading de munição | 🔵 Avaliar |
+| kmyuhkyuk-EnvironmentReplace | 🔍 | 🔍 | 🔍 | 🔍 | Substitui ambientes/mapas | 🔵 Avaliar |
+| kmyuhkyuk-KmyTarkovApi | 🖥️ Client | 🔍 | [kmyuhkyuk/KmyTarkovApi](https://github.com/kmyuhkyuk/KmyTarkovApi) | 🔍 | Framework para client mods | 🔵 Avaliar |
+| lacyway-mergeconsumables (MergeConsumables) | 🔍 | 🔍 | 🔍 | 🔍 | Merge de consumíveis (médicos, comida) | 🔵 Avaliar |
+| MoreCheckmarks (MoreCheckmarksBackend) | 🔀 Misto | 🔍 | [TommySoucy/MoreCheckmarks](https://github.com/TommySoucy/MoreCheckmarks) | ✅ 4.0.11 (v2.1.0) | Checkmarks coloridos em itens (quests, hideout, barters) | 🟢 Portar |
+| MoxoPixel-MagTape | 🌐 Server | 🔍 | [emilanderss0n/MagTape](https://github.com/emilanderss0n/MagTape) | 🔍 | Magazines com tape (visual + tagging) | 🔵 Avaliar |
+| MoxoPixel-TacticalGearComponent | 🌐 Server | 🔍 | [emilanderss0n/TGC](https://github.com/emilanderss0n/TGC) | 🔍 | Componente de equipamento tático | 🔵 Avaliar |
+| MusicManiac-LessRestrictingHeadwear | 🔍 | 🔍 | 🔍 | 🔍 | Headwear menos restritivo | 🔵 Avaliar |
+| platinum-theblacklist | 🔍 | 🔍 | 🔍 | 🔍 | Blacklist de itens | 🔵 Avaliar |
+| PlayerEncumbranceBar | 🖥️ Client | 🔍 | [mpstark/SPT-PlayerEncumbranceBar](https://github.com/mpstark/SPT-PlayerEncumbranceBar) | ❌ (3.8) | Barra de encumbrance no inventário | 🟠 Aguardar upstream |
+| Pluto! - SPT Battlepass | 🔍 | 🔍 | 🔍 (não encontrado em busca) | 🔍 | Battlepass para SPT | 🔵 Avaliar |
+| QuickSell | 🔍 | 🔍 | [TadMaj/Tarkov-QuickSell](https://github.com/TadMaj/Tarkov-QuickSell) | 🔍 | Venda rápida de itens (context menu) | 🔵 Avaliar |
+| RaiRai.ColorConverterAPI | 🔍 | 🔍 | 🔍 | 🔍 | API utilitária de conversão de cores | 🔵 Avaliar |
+| Realism (SPT-Realism / RealismMod) | 🔀 Misto | 🔍 | [space-commits/SPT-Realism-Mod-Client](https://github.com/space-commits/SPT-Realism-Mod-Client) · [SPT-Realism-Mod-Server](https://github.com/space-commits/SPT-Realism-Mod-Server) | ❌ (3.9.x) | Overhaul de realismo (balística, médica, hazards) | 🟠 Aguardar upstream |
+| redlaser42-Better Headset Descriptions | 🔍 | 🔍 | 🔍 | 🔍 | Descrições melhoradas de headsets | 🔵 Avaliar |
+| redlaser42-Increase Climb Height | 🔍 | 🔍 | 🔍 | 🔍 | Aumenta altura máxima de escalada | 🔵 Avaliar |
+| SAIN | 🖥️ Client | [791/sain-solarints-ai](https://forge.sp-tarkov.com/mod/791/sain-solarints-ai-modifications-full-ai-combat-system-replacement) | [Solarint/SAIN](https://github.com/Solarint/SAIN) | ✅ 4.0.13 (v4.4.3) | Substituição completa de IA dos bots | 🟢 Portar |
+| seasoniterator | 🔍 | 🔍 | 🔍 | 🔍 | 🔍 (estações/seasonal?) | 🔵 Avaliar |
+| shibdib-NoTransitTasks | 🔍 | 🔍 | 🔍 | 🔍 | Remove tasks de transit | 🔵 Avaliar |
+| Skwizzy-LootingBots | 🔀 Misto | 🔍 | [Skwizzy/SPT-LootingBots](https://github.com/Skwizzy/SPT-LootingBots) | 🔍 | Bots fazendo loot (BepInEx + server) | 🔵 Avaliar |
+| somtam.NoBush | 🔍 | 🔍 | 🔍 | 🔍 | Remove arbustos densos | 🔵 Avaliar |
+| somtam.SimpleDeClutter | 🔍 | 🔍 | 🔍 | 🔍 | Reduz clutter visual | 🔵 Avaliar |
+| SPT-FreshContentBackport | 🔍 | 🔍 | 🔍 | 🔍 | Backport de conteúdo novo | 🔵 Avaliar |
+| SPT-InsuranceFraud | 🔍 | 🔍 | [ibxccc123/SPT-InsuranceFraud](https://github.com/ibxccc123/SPT-InsuranceFraud) | 🔍 | Fraude no seguro (loot dropado retorna) | 🔵 Avaliar |
+| SPTVRAMCleaner | 🔍 | 🔍 | 🔍 | 🔍 | Limpeza de VRAM (talvez relacionado a swiftxp-hub/spt-server-memory-cleaner) | 🔵 Avaliar |
+| StashSearch | 🖥️ Client | 🔍 | [DrakiaXYZ/SPT-StashSearch](https://github.com/DrakiaXYZ/SPT-StashSearch) | 🔍 | Busca dentro do stash | 🔵 Avaliar |
+| SwiftXP.ShowMeTheMoney | 🔍 | 🔍 | [swiftxp-hub/spt-show-me-the-money](https://github.com/swiftxp-hub/spt-show-me-the-money) | 🔍 | Mostra dinheiro/valores em UI | 🔵 Avaliar |
+| TacticalToasterUNTARGH | 🌐 Server | 🔍 | [TacticalToaster/TacticalToasterUNTARGH](https://github.com/TacticalToaster/TacticalToasterUNTARGH) | 🔍 | Adiciona UNTAR como faction com bots customizados | 🔵 Avaliar |
+| Tarkov Weather System | 🔍 | 🔍 | 🔍 | 🔍 | Sistema de clima dinâmico | 🔵 Avaliar |
+| TarkovRedLine (TarkovRedLine-ServerMod) | 🌐 Server | — (privado) | — (privado) | ❌ | Mod do servidor RedLine — provável customização proprietária do projeto | 🔧 Desenvolver |
+| TellTheTime | 🔍 | 🔍 | 🔍 | 🔍 | Mostra hora atual | 🔵 Avaliar |
+| Terkoiz.Freecam | 🖥️ Client | 🔍 | [TerkoizLT/SPT-Freecam](https://github.com/TerkoizLT/SPT-Freecam) | ❌ (3.11, v1.4.6) | Câmera livre (debug/replay) | 🟠 Aguardar upstream |
+| tyfon-hideoutinprogress (Tyfon.HideoutInProgress) | 🖥️ Client | 🔍 | [tyfon7/hip](https://github.com/tyfon7/hip) | ✅ 4.0 | Botão "Transfer Items" no hideout | 🟢 Portar |
+| tyfon-uifixes (Tyfon.UIFixes) | 🖥️ Client | 🔍 | [tyfon7/UIFixes](https://github.com/tyfon7/UIFixes) | 🔍 | Coleção de QoL fixes de UI | 🔵 Avaliar |
+| tyfon-weaponcustomizer (Tyfon.WeaponCustomizer) | 🖥️ Client | 🔍 | [tyfon7/WeaponCustomizer](https://github.com/tyfon7/WeaponCustomizer) | 🔍 | Fine tune de attachments | 🔵 Avaliar |
+| UmbigoPreto-Face the Knight - Mask Fix | 🔍 | 🔍 | 🔍 | 🔍 | Fix da máscara do Knight | 🔵 Avaliar |
+| UmbigoPreto-TrueTrauma | 🔍 | 🔍 | 🔍 | 🔍 | Sistema de trauma realista | 🔵 Avaliar |
+| Virtual's Custom Quest Loader (VCQL) | 🌐 Server | 🔍 | [VirtualAE/Virtuals-Custom-Quest-Loader](https://github.com/VirtualAE/Virtuals-Custom-Quest-Loader) | 🔍 | Dependência para mods importarem custom quests | 🔵 Avaliar |
+| VisceralCombat | 🔍 | 🔍 | 🔍 | 🔍 | Efeitos viscerais de combate | 🔵 Avaliar |
+| VolumetricBloodFX | 🔍 | 🔍 | 🔍 | 🔍 | FX de sangue volumétrico | 🔵 Avaliar |
+| Wara-ModdingStatsHelper | 🔍 | 🔍 | 🔍 | 🔍 | Helper de stats em modding | 🔵 Avaliar |
+| WTT-Armory | 🌐 Server | [2246/wtt-armory](https://forge.sp-tarkov.com/mod/2246/wtt-armory) | [WelcomeToTarkov](https://github.com/WelcomeToTarkov) | 🔍 | Pack de 50+ armas + quests (WTT team) | 🔵 Avaliar |
+| WTT-PackNStrap | 🌐 Server | [1278/wtt-pack-n-strap](https://forge.sp-tarkov.com/mod/1278/wtt-pack-n-strap) | [WelcomeToTarkov](https://github.com/WelcomeToTarkov) | 🔍 | Battle belt + small cases (WTT team) | 🔵 Avaliar |
+| yellowdoge-tarkovrarecollectibles | 🔍 | 🔍 | 🔍 | 🔍 | Itens raros colecionáveis | 🔵 Avaliar |
+| zzDrakiaXYZ-LiveFleaPrices | 🌐 Server | 🔍 | [DrakiaXYZ/SPT-LiveFleaPrices-CSharp](https://github.com/DrakiaXYZ/SPT-LiveFleaPrices-CSharp) | ✅ (versão C#) | Preços do flea ao vivo (live data) | 🟢 Portar |
 
 ## Utilitários / pastas
 
@@ -164,16 +164,30 @@ Itens listados que **não são mods** propriamente ditos — são pastas ou util
 - 🔴 **Bloqueado** — incompatibilidade arquitetural sem workaround conhecido
 - ⚫ **Não incluir** — fora do escopo do projeto
 
+## Progresso da pesquisa
+
+- **Forge URLs encontrados:** ~7 (SAIN, BigBrain, Waypoints, Fika, WTT-Armory, WTT-PackNStrap)
+- **GitHub URLs encontrados:** ~40+
+- **Tipo classificado (não 🔍):** ~30 mods
+- **Restante** (`🔍` em todas as colunas): ~50 mods — autores menores ou nomes ambíguos
+
 ## Próximos passos
 
-1. **Classificar tipo (🔍 → 🖥️ / 🌐 / 🔀):** abrir cada repo e identificar se é Client (C#/BepInEx), Server (TypeScript/JS) ou Misto
-2. **Preencher Link 3.x** de cada mod (SPT Hub, GitHub, etc.)
-3. **Preencher Link 4.x** — quando ausente, decidir entre `🔧 Desenvolver`, `🟠 Aguardar upstream` ou `⚫ Não incluir`
-4. **Validar funções:** corrigir os `🔍` na coluna Função após inspecionar o repo de cada mod
-5. **Identificar dependências entre mods** (ex: SAIN ↔ BigBrain ↔ Waypoints) e adicionar coluna ou notas
-6. **Identificar dependências de Assembly-CSharp** que mudaram entre 3.x e 4.0
-7. Criar specs individuais em `docs/migration/<mod-name>/` para os que serão portados ou desenvolvidos
-8. Atualizar este inventário conforme decisões forem tomadas
+1. **Continuar pesquisa para mods 🔍 restantes** (próxima rodada de research):
+   - IcyClawz.* (4 mods sem repo público — buscar no forge)
+   - HollywoodFX, HollywoodGraphics, VolumetricBloodFX (FX/visuais)
+   - desze-*, somtam.*, UmbigoPreto-*, redlaser42-*, MusicManiac-*
+   - ContinuousLoadAmmo, BorkelRNVG, BetterRearSights, AirFilterWarning, etc.
+
+2. **Mods sem 4.x confirmado (status `🟠 Aguardar upstream`):**
+   - SVM (3.11 latest), AmandsGraphics (3.10), PlayerEncumbranceBar (3.8), Realism (3.9.x), IhanaMies-LootValue (3.11), Terkoiz.Freecam (3.11)
+   - Decidir por mod: aguardar autor original OU portar manualmente OU descartar
+
+3. **TarkovRedLine + UltraFika-Plugin:** mods proprietários do projeto — `🔧 Desenvolver` confirmado, criar specs
+
+4. **Identificar dependências entre mods** (ex: SAIN → BigBrain + Waypoints) — adicionar coluna ou notas
+5. Criar specs individuais em `docs/migration/<mod-name>/` para os mods com status `🟢 Portar` ou `🔧 Desenvolver`
+6. Atualizar este inventário conforme decisões forem tomadas
 
 ## Histórico
 
@@ -183,3 +197,4 @@ Itens listados que **não são mods** propriamente ditos — são pastas ou util
 | 2026-05-02 | Guilherme | +15 / -7 linhas |
 | 2026-05-03 | Guilherme | +32 / -17 linhas |
 | 2026-05-03 | Guilherme | +130 / -26 linhas |
+| 2026-05-03 | Guilherme | docs(wiki): add sp-tarkov/wiki snapshot under wiki/spt/ |
