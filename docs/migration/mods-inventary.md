@@ -11,20 +11,28 @@ Catálogo dos mods atualmente em uso no `tarkov-spt-3.0` que precisam ser avalia
 
 > **Atenção:** SPT 4.0 tem arquitetura incompatível com 3.x. Este documento serve como ponto de partida para decidir o que migrar, refazer ou descartar.
 
+## Base — UltraFika-Plugin
+
+Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre a qual os demais mods rodam. **Migração prioritária zero** — sem ele, o restante do ecossistema não tem sentido.
+
+| Item | Detalhe |
+|---|---|
+| **Versão 3.x** | — |
+| **Tipo** | Client (C# / BepInEx) |
+| **Função** | Cliente multiplayer (Fika) |
+| **Prioridade** | 🔥 Crítica — primeiro mod a ser migrado |
+| **Status migração** | 🔵 Avaliar |
+| **Bloqueia** | Todos os demais mods do projeto dependem desta base estar funcional |
+
 ## Mods Client (C# / BepInEx)
+
+Mods que rodam em cima da base do UltraFika-Plugin.
 
 | Mod | Versão 3.x | Função | Prioridade | Status migração |
 |---|---|---|---|---|
 | SAIN | — | Substituição do sistema de IA dos bots | Alta | 🔵 Avaliar |
 | SPT-DynamicMaps | 0.5.7 | UI de mapas dinâmicos com tracking de quests | Alta | 🔵 Avaliar |
 | IdleSprintFix | 1.2.2 | Fix do bug de sprint travado | Média | 🔵 Avaliar |
-| UltraFika-Plugin | — | Cliente multiplayer | Alta | 🔵 Avaliar |
-
-## Mods Server (TypeScript)
-
-| Mod | Versão 3.x | Função | Prioridade | Status migração |
-|---|---|---|---|---|
-| UltraFika-Server | — | Servidor multiplayer | Alta | 🔵 Avaliar |
 
 ## Dependências
 
@@ -53,3 +61,4 @@ Catálogo dos mods atualmente em uso no `tarkov-spt-3.0` que precisam ser avalia
 | Data | Autor | Descrição |
 |---|---|---|
 | 2026-05-02 | Guilherme | +49 / -0 linhas |
+| 2026-05-02 | Guilherme | +15 / -7 linhas |
