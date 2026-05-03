@@ -280,8 +280,8 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | 2026-05-03 | Guilherme | docs(migration): classify Tipo for ~40 mods using Forge metadata and GitHub repo inspection |
 | 2026-05-03 | Guilherme | docs(migration): review pass — fix acidphantasm Tipo (Server→Client 4.0), internal mods Tipo, wrong Forge ID #930→#922 (LessRestrictingHeadwear), PlayerEncumbranceBar Repo 4.0, Próximos passos |
 | 2026-05-03 | Guilherme | docs(migration): classify Tipo for 41 mods + add Atuação/Categoria/Escopo columns |
-| 2026-05-03 | Guilherme | docs(migration): sync mods-inventary.html from markdown |
-| 2026-05-03 | sync-script | docs(migration): sync mods-inventary.html from markdown |
-| 2026-05-03 | sync-script | docs(migration): sync mods-inventary.html from markdown |
-| 2026-05-03 | sync-script | docs(migration): sync mods-inventary.html from markdown |
+| 2026-05-03 | Guilherme | docs(migration): sync mods-inventory.html from markdown |
+| 2026-05-03 | sync-script | docs(migration): sync mods-inventory.html from markdown |
+| 2026-05-03 | sync-script | docs(migration): sync mods-inventory.html from markdown |
+| 2026-05-03 | sync-script | docs(migration): sync mods-inventory.html from markdown |
 | 2026-05-03 | Guilherme | docs(migration): review pass — fix 7 issue categories |

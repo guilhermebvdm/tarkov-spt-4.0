@@ -1,6 +1,6 @@
-# /update-mods-inventary
+# /update-mods-inventory
 
-Atualiza `docs/migration/mods-inventary.html` com os dados mais recentes de `docs/migration/mods-inventary.md`.
+Atualiza `docs/migration/mods-inventory.html` com os dados mais recentes de `docs/migration/mods-inventory.md`.
 
 ## O que fazer
 
@@ -18,7 +18,7 @@ Atualiza `docs/migration/mods-inventary.html` com os dados mais recentes de `doc
 - Lê o markdown e parseia a tabela `## Inventário completo` + o bloco vertical do UltraFika (mod #0)
 - Extrai os 12 campos por mod: `n, name, tipo, atuacao, categoria, escopo, forge_id, r4_path, fn, status, prioridade, interno`
 - Substitui apenas o bloco `const MODS = [...]` no HTML — CSS, JS e layout não são tocados
-- Adiciona uma linha no `## Histórico` do markdown com a data e descrição `docs(migration): sync mods-inventary.html from markdown`
+- Adiciona uma linha no `## Histórico` do markdown com a data e descrição `docs(migration): sync mods-inventory.html from markdown`
 
 ## Regras de parse (implementadas no script)
 

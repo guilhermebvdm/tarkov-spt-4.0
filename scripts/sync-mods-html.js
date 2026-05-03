@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
  * sync-mods-html.js
- * Parses docs/migration/mods-inventary.md and updates the const MODS array
- * in docs/migration/mods-inventary.html.
+ * Parses docs/migration/mods-inventory.md and updates the const MODS array
+ * in docs/migration/mods-inventory.html.
  *
  * Usage: node scripts/sync-mods-html.js
  */
@@ -13,8 +13,8 @@ const fs   = require('fs');
 const path = require('path');
 
 const ROOT      = path.resolve(__dirname, '..');
-const MD_FILE   = path.join(ROOT, 'docs/migration/mods-inventary.md');
-const HTML_FILE = path.join(ROOT, 'docs/migration/mods-inventary.html');
+const MD_FILE   = path.join(ROOT, 'docs/migration/mods-inventory.md');
+const HTML_FILE = path.join(ROOT, 'docs/migration/mods-inventory.html');
 
 // ── Text helpers ──────────────────────────────────────────────────────────────
 
@@ -195,7 +195,7 @@ function formatMods(mods) {
 
 function addHistory(md) {
   const date  = new Date().toISOString().slice(0, 10);
-  const entry = `| ${date} | sync-script | docs(migration): sync mods-inventary.html from markdown |`;
+  const entry = `| ${date} | sync-script | docs(migration): sync mods-inventory.html from markdown |`;
   // Insert after the last history row (any line starting with "| 20")
   const lastRow = md.lastIndexOf('\n| 20');
   if (lastRow === -1) return md;
