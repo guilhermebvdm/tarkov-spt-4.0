@@ -1,0 +1,8 @@
+{
+  "Enabled": false,
+
+  "BaseOverweightLimits":      { "X": 26, "Y": 77 },
+  "WalkOverweightLimits":      { "X": 45, "Y": 86 },
+  "SprintOverweightLimits":    { "X": 26, "Y": 72 },
+  "WalkSpeedOverweightLimits": { "X": 35, "Y": 80 }
+}

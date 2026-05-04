@@ -1,0 +1,88 @@
+RZCustomEconomy — Patcher Run Sequence
+===============================================================================
+Priority values are relative to OnLoadOrder.RagfairCallbacks.
+Higher priority number = runs earlier.
+Within the same priority slot, execution order is not guaranteed.
+===============================================================================
+
+
+── RagfairCallbacks - 4 ────────────────────────────────────────────────────────
+
+   [Patcher_Handbook.cs]        HandbookPatcher
+                                  Overrides handbook prices before any trader injection reads them.
+                                  Must run first — routed offers are priced from handbook at -3/-2,
+                                  so overrides must be applied before that happens.
+
+
+── RagfairCallbacks - 3 ────────────────────────────────────────────────────────
+
+   [Patcher_Ragfair.cs]         RagfairPatcher
+                                  · DisableFleaMarket
+                                    Zeroes dynamic offer counts + sets unreachable expiry threshold.
+                                    Dynamic offers already present are purged later by RagfairPostPatcher.
+                                  · ApplyDynamicItemFilter
+                                    Patches CanSellOnRagfair on item templates.
+                                    Blacklist mode : sets false on listed TPLs only.
+                                    Whitelist mode : sets false on all items, then restores listed TPLs.
+                                    Mutually exclusive — blacklist takes priority if both are non-empty.
+
+   [Patcher_Trades_Default.cs]  DefaultTradesPatcher
+                                  · ClearDefaultAssorts           (if EnableDefaultTrades = false)
+                                    Wipes all non-Fence trader assorts to a clean slate.
+                                    ──── early return if disabled ────
+                                  · ApplyBlacklist
+                                    Removes blacklisted TPLs from all trader assorts.
+                                  · ApplyPriceMultipliers
+                                    Multiplies cash-only offer prices per trader. Barters ignored.
+                                  · ReplaceBarterTrades
+                                    Converts remaining barter schemes to straight cash at handbook price.
+
+── RagfairCallbacks - 2 ────────────────────────────────────────────────────────
+
+   [Patcher_Trades_Routed.cs]   RoutedTradesPatcher
+                                  Rebuilds trader offers from scratch via handbook category routing.
+                                  Prices are read from handbook — HandbookPatcher has already run at -4.
+
+   [Patcher_Trades_Manual.cs]   ManualOffersPatcher
+                                  Injects manually configured offers on top of routed ones.
+
+── RagfairCallbacks - 1 ────────────────────────────────────────────────────────
+
+   [Patcher_Main.cs]            MasterPatcherRagfairCallbacksMinusOne
+                                  · RemoveEmptyTraders
+                                    Drops traders with empty assorts from the ragfair config
+                                    to prevent flea market errors at boot.
+
+   [Patcher_Supply.cs]          SupplyPatcher
+                                  · PatchRestockTimes
+                                  · PatchStockMultipliers
+                                    Runs after all assort injections are complete.
+
+   [Patcher_Buyback.cs]         BuybackPatcher
+                                  Patches trader ItemsBuy policies. No dependency on assort state.
+
+   [Patcher_Insurance.cs]       InsurancePatcher
+                                  Patches insurance blacklists. No dependency on assort state.
+
+   [Patcher_Hideout.cs]         HideoutPatcher
+                                  Patches hideout area requirements, construction times, bitcoin farm.
+                                  No dependency on assort state.
+
+   [Patcher_Crafting.cs]        CraftingPatcher
+                                  Injects/clears crafting recipes. No dependency on assort state.
+
+   [Patcher_Fence.cs]           FencePatcher
+                                  Patches Fence-specific config (item pool, assort injections).
+                                  Fence is excluded from DefaultTradesPatcher and handled here.
+
+── RagfairCallbacks (vanilla) ──────────────────────────────────────────────────
+
+   SPT RagfairCallbacks boots here and indexes all trader assorts into the flea.
+
+
+── RagfairCallbacks + 1 ────────────────────────────────────────────────────────
+
+   [Patcher_Ragfair.cs]         RagfairPostPatcher
+                                  · PurgeFleaMarketOffers
+                                    Removes any dynamic player/bot offers that slipped through
+                                    before DisableFleaMarket took full effect.

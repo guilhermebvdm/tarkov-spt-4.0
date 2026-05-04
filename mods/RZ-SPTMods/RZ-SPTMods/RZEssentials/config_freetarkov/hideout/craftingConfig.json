@@ -1,0 +1,1008 @@
+{
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // MASTER TOGGLE - Set to true to enable this config.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "EnableCraftingConfig": true,
+
+  // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // CLEAR AREAS
+  // List of hideout areas whose vanilla recipes will be wiped before injection.
+  // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "ClearAreas": [
+    "Workbench",
+    "IntelligenceCenter",
+    "MedStation",
+    "WaterCloset",
+    "Kitchen",
+    "Heating",
+    "BoozeGenerator",
+  ],
+
+  // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // RECIPES
+  // Crafting recipes grouped by hideout area.
+  // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "Recipes": {
+
+    // WORKBENCH RECIPES
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "Workbench": [
+      {
+        "EndProduct": "59e35ef086f7741777737012", // Pack of screws
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Item", "TemplateId": "590c31c586f774245e3141b2", "Count": 1 }, // Pack of nails
+        ]
+      },
+      {
+        "EndProduct": "590c31c586f774245e3141b2", // Pack of nails
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Item", "TemplateId": "59e35ef086f7741777737012", "Count": 1 }, // Pack of screws
+        ]
+      },
+      {
+        "EndProduct": "57347c5b245977448d35f6e1", // Bolts
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Item", "TemplateId": "57347c77245977448d35f6e2", "Count": 1 }, // Screws
+        ]
+      },
+      {
+        "EndProduct": "57347c77245977448d35f6e2", // Screws
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Item", "TemplateId": "57347c5b245977448d35f6e1", "Count": 1 }, // Bolts
+        ]
+      },
+      {
+        "EndProduct": "5c06779c86f77426e00dd782", // Bundle of wires
+        "Count": 2,
+        "Requirements": [
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Item", "TemplateId": "59e36c6f86f774176c10a2a7", "Count": 1 }, // Power cord
+        ]
+      },
+      {
+        "EndProduct": "59e36c6f86f774176c10a2a7", // Power cord
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Item", "TemplateId": "5c06779c86f77426e00dd782", "Count": 2 }, // Bundle of wires
+        ]
+      },
+      {
+        "EndProduct": "590a3cd386f77436f20848cb", // Energy-saving lamp
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Item", "TemplateId": "590a3d9c86f774385926e510", "Count": 1 }, // Ultraviolet lamp
+        ]
+      },
+      {
+        "EndProduct": "590c5bbd86f774785762df04", // WD-40 (100ml)
+        "Count": 2,
+        "Requirements": [
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Item", "TemplateId": "590c5c9f86f77477c91c36e7", "Count": 1 }, // WD-40 (400ml)
+        ]
+      },
+      {
+        "EndProduct": "590c5c9f86f77477c91c36e7", // WD-40 (400ml)
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Item", "TemplateId": "590c5bbd86f774785762df04", "Count": 2 }, // WD-40 (100ml)
+        ]
+      },
+      {
+        "EndProduct": "61bf7b6302b3924be92fa8c3", // Metal spare parts
+        "Count": 4,
+        "Requirements": [
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Item", "TemplateId": "59fafb5d86f774067a6f2084", "Count": 1 }, // Propane tank
+        ]
+      },
+      {
+        "EndProduct": "59e35cbb86f7741778269d83", // Corrugated hose
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Workbench", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Tool", "TemplateId": "62a0a0bb621468534a797ad5", "Count": 1 }, // Set of files Master
+          { "Type": "Item", "TemplateId": "5d1b39a386f774252339976f", "Count": 1 }, // Silicon tube
+        ]
+      },
+      {
+        "EndProduct": "5d1b39a386f774252339976f", // Silicon tube
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Workbench", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Tool", "TemplateId": "62a0a0bb621468534a797ad5", "Count": 1 }, // Set of files Master
+          { "Type": "Item", "TemplateId": "59e35cbb86f7741778269d83", "Count": 1 }, // Corrugated hose
+        ]
+      },
+      {
+        "EndProduct": "590c35a486f774273531c822", // Shustrilo
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Workbench", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Tool", "TemplateId": "62a0a0bb621468534a797ad5", "Count": 1 }, // Set of files Master
+          { "Type": "Item", "TemplateId": "590c346786f77423e50ed342", "Count": 1 }, // Xenomorph
+        ]
+      },
+      {
+        "EndProduct": "590c346786f77423e50ed342", // Xenomorph
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Workbench", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Tool", "TemplateId": "62a0a0bb621468534a797ad5", "Count": 1 }, // Set of files Master
+          { "Type": "Item", "TemplateId": "590c35a486f774273531c822", "Count": 1 }, // Shustrilo
+        ]
+      },
+      {
+        "EndProduct": "590a3b0486f7743954552bdb", // Printed circuit board
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Workbench", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Item", "TemplateId": "573477e124597737dd42e191", "Count": 1 }, // CPU
+        ]
+      },
+      {
+        "EndProduct": "590a3b0486f7743954552bdb", // Printed circuit board
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Workbench", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Item", "TemplateId": "56742c324bdc2d150f8b456d", "Count": 1 }, // Broken GPhone smartphone
+        ]
+      },
+      {
+        "EndProduct": "5672cb304bdc2dc2088b456a", // D Size Battery
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Workbench", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Tool", "TemplateId": "5af04b6486f774195a3ebb49", "Count": 1 }, // Pliers Elite
+          { "Type": "Item", "TemplateId": "5672cb124bdc2d1a0f8b4568", "Count": 2 }, // AA Battery
+        ]
+      },
+      {
+        "EndProduct": "5672cb304bdc2dc2088b456a", // D Size Battery
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Workbench", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Tool", "TemplateId": "5af04b6486f774195a3ebb49", "Count": 1 }, // Pliers Elite
+          { "Type": "Item", "TemplateId": "590a358486f77429692b2790", "Count": 1 }, // Rechargeable battery
+        ]
+      },
+      {
+        "EndProduct": "5672cb304bdc2dc2088b456a", // D Size Battery
+        "Count": 2,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Workbench", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Tool", "TemplateId": "5af04b6486f774195a3ebb49", "Count": 1 }, // Pliers Elite
+          { "Type": "Item", "TemplateId": "5af0561e86f7745f5f3ad6ac", "Count": 1 }, // Portable Powerbank
+        ]
+      },
+      {
+        "EndProduct": "5672cb304bdc2dc2088b456a", // D Size Battery
+        "Count": 4,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Workbench", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Tool", "TemplateId": "5af04b6486f774195a3ebb49", "Count": 1 }, // Pliers Elite
+          { "Type": "Item", "TemplateId": "5e2aedd986f7746d404f3aa4", "Count": 1 }, // GreenBat lithium battery
+        ]
+      },
+      {
+        "EndProduct": "5672cb304bdc2dc2088b456a", // D Size Battery
+        "Count": 8,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Workbench", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Tool", "TemplateId": "5af04b6486f774195a3ebb49", "Count": 1 }, // Pliers Elite
+          { "Type": "Item", "TemplateId": "5e2aee0a86f774755a234b62", "Count": 1 }, // Cyclon rechargeable battery
+        ]
+      },
+      {
+        "EndProduct": "5733279d245977289b77ec24", // Car battery
+        "Count": 4,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Workbench", "RequiredLevel": 3 },
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Tool", "TemplateId": "59e35de086f7741778269d84", "Count": 1 }, // Electric drill
+          { "Type": "Item", "TemplateId": "5d03794386f77420415576f5", "Count": 1 }, // Military battery
+        ]
+      },
+      {
+        "EndProduct": "5d03794386f77420415576f5", // Military battery
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Workbench", "RequiredLevel": 3 },
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Tool", "TemplateId": "59e35de086f7741778269d84", "Count": 1 }, // Electric drill
+          { "Type": "Item", "TemplateId": "5733279d245977289b77ec24", "Count": 4 }, // Car battery
+        ]
+      },
+      {
+        "EndProduct": "57347c2e24597744902c94a1", // Power supply unit
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Workbench", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Item", "TemplateId": "590a3b0486f7743954552bdb", "Count": 1 }, // Printed circuit board
+          { "Type": "Item", "TemplateId": "5c06782b86f77426df5407d2", "Count": 1 }, // Capacitors
+          { "Type": "Item", "TemplateId": "59e36c6f86f774176c10a2a7", "Count": 1 }, // Power cord
+          { "Type": "Item", "TemplateId": "5734779624597737e04bf329", "Count": 2 }, // CPU Fan
+        ]
+      },
+      {
+        "EndProduct": "5d1b2fa286f77425227d1674", // Electric motor
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Workbench", "RequiredLevel": 3 },
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Tool", "TemplateId": "59e35de086f7741778269d84", "Count": 1 }, // Electric drill
+          { "Type": "Item", "TemplateId": "5c06782b86f77426df5407d2", "Count": 2 }, // Capacitors
+          { "Type": "Item", "TemplateId": "5c06779c86f77426e00dd782", "Count": 2 }, // Bundle of wires
+          { "Type": "Item", "TemplateId": "6389c70ca33d8c4cdf4932c6", "Count": 1 }, // Electronic components
+          { "Type": "Item", "TemplateId": "590a391c86f774385a33c404", "Count": 1 }, // Magnet
+        ]
+      }
+    ],
+
+    // INTELLIGENCE CENTER RECIPES
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "IntelligenceCenter": [
+      {
+        "EndProduct": "5d2dc3e548f035404a1a4798", // Monstrum Tactical Compact Prism Scope 2x32 - 40k
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "IntelligenceCenter", "RequiredLevel": 1 },
+          { "Type": "Tool", "TemplateId": "590c639286f774151567fa95", "Count": 1 }, // Tech manual
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Item", "TemplateId": "59e366c186f7741778269d85", "Count": 2 }, // Plexiglass
+          { "Type": "Item", "TemplateId": "61bf7b6302b3924be92fa8c3", "Count": 2 }, // Metal spare parts
+          { "Type": "Item", "TemplateId": "59e35ef086f7741777737012", "Count": 2 }, // Pack of screws
+        ]
+      },
+      {
+        "EndProduct": "626bb8532c923541184624b4", // SwampFox Trihawk Prism Scope 3x30 - 40k
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "IntelligenceCenter", "RequiredLevel": 1 },
+          { "Type": "Tool", "TemplateId": "590c639286f774151567fa95", "Count": 1 }, // Tech manual
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Item", "TemplateId": "59e366c186f7741778269d85", "Count": 2 }, // Plexiglass
+          { "Type": "Item", "TemplateId": "61bf7b6302b3924be92fa8c3", "Count": 2 }, // Metal spare parts
+          { "Type": "Item", "TemplateId": "59e35ef086f7741777737012", "Count": 2 }, // Pack of screws
+        ]
+      },
+      {
+        "EndProduct": "5c05293e0db83400232fff80", // Trijicon ACOG TA01NSN 4x32 scope (Black) - 40k
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "IntelligenceCenter", "RequiredLevel": 1 },
+          { "Type": "Tool", "TemplateId": "590c639286f774151567fa95", "Count": 1 }, // Tech manual
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Item", "TemplateId": "59e366c186f7741778269d85", "Count": 2 }, // Plexiglass
+          { "Type": "Item", "TemplateId": "61bf7b6302b3924be92fa8c3", "Count": 2 }, // Metal spare parts
+          { "Type": "Item", "TemplateId": "59e35ef086f7741777737012", "Count": 2 }, // Pack of screws
+        ]
+      },
+      {
+        "EndProduct": "57ac965c24597706be5f975c", // ELCAN SpecterDR 1x/4x scope - 50k
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "IntelligenceCenter", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "590c639286f774151567fa95", "Count": 1 }, // Tech manual
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Item", "TemplateId": "59e366c186f7741778269d85", "Count": 2 }, // Plexiglass
+          { "Type": "Item", "TemplateId": "61bf7b6302b3924be92fa8c3", "Count": 2 }, // Metal spare parts
+          { "Type": "Item", "TemplateId": "59e35ef086f7741777737012", "Count": 2 }, // Pack of screws
+          { "Type": "Item", "TemplateId": "5672cb304bdc2dc2088b456a", "Count": 2 }, // D Size battery
+        ]
+      },
+      {
+        "EndProduct": "5c0517910db83400232ffee5", // Valday PS-320 1/6x scope - 60k
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "IntelligenceCenter", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "590c639286f774151567fa95", "Count": 1 }, // Tech manual
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Item", "TemplateId": "59e366c186f7741778269d85", "Count": 2 }, // Plexiglass
+          { "Type": "Item", "TemplateId": "61bf7b6302b3924be92fa8c3", "Count": 2 }, // Metal spare parts
+          { "Type": "Item", "TemplateId": "59e35ef086f7741777737012", "Count": 2 }, // Pack of screws
+          { "Type": "Item", "TemplateId": "5672cb304bdc2dc2088b456a", "Count": 4 }, // D Size battery
+        ]
+      },
+      {
+        "EndProduct": "5c07dd120db834001c39092d", // EOTech HHS-1 hybrid sight - 60k
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "IntelligenceCenter", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "590c639286f774151567fa95", "Count": 1 }, // Tech manual
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Item", "TemplateId": "59e366c186f7741778269d85", "Count": 2 }, // Plexiglass
+          { "Type": "Item", "TemplateId": "61bf7b6302b3924be92fa8c3", "Count": 2 }, // Metal spare parts
+          { "Type": "Item", "TemplateId": "59e35ef086f7741777737012", "Count": 2 }, // Pack of screws
+          { "Type": "Item", "TemplateId": "5672cb304bdc2dc2088b456a", "Count": 4 }, // D Size battery
+        ]
+      },
+      {
+        "EndProduct": "5b3b99475acfc432ff4dcbee", // EOTech Vudu 1-6x24 30mm riflescope - 80k
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "IntelligenceCenter", "RequiredLevel": 3 },
+          { "Type": "Tool", "TemplateId": "590c639286f774151567fa95", "Count": 1 }, // Tech manual
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Item", "TemplateId": "59e366c186f7741778269d85", "Count": 2 }, // Plexiglass
+          { "Type": "Item", "TemplateId": "61bf7b6302b3924be92fa8c3", "Count": 2 }, // Metal spare parts
+          { "Type": "Item", "TemplateId": "59e35ef086f7741777737012", "Count": 2 }, // Pack of screws
+          { "Type": "Item", "TemplateId": "5d1b2ffd86f77425243e8d17", "Count": 2 }, // Nixxor lens
+        ]
+      },
+      {
+        "EndProduct": "617151c1d92c473c770214ab", // Schmidt & Bender PM II 1-8x24 30mm riflescope - 80k
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "IntelligenceCenter", "RequiredLevel": 3 },
+          { "Type": "Tool", "TemplateId": "590c639286f774151567fa95", "Count": 1 }, // Tech manual
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Item", "TemplateId": "59e366c186f7741778269d85", "Count": 2 }, // Plexiglass
+          { "Type": "Item", "TemplateId": "61bf7b6302b3924be92fa8c3", "Count": 2 }, // Metal spare parts
+          { "Type": "Item", "TemplateId": "59e35ef086f7741777737012", "Count": 2 }, // Pack of screws
+          { "Type": "Item", "TemplateId": "5d1b2ffd86f77425243e8d17", "Count": 2 }, // Nixxor lens
+        ]
+      },
+      {
+        "EndProduct": "618ba27d9008e4636a67f61d", // Vortex Razor HD Gen.2 1-6x24 30mm riflescope - 100k
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "IntelligenceCenter", "RequiredLevel": 3 },
+          { "Type": "Tool", "TemplateId": "590c639286f774151567fa95", "Count": 1 }, // Tech manual
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Item", "TemplateId": "59e366c186f7741778269d85", "Count": 2 }, // Plexiglass
+          { "Type": "Item", "TemplateId": "61bf7b6302b3924be92fa8c3", "Count": 2 }, // Metal spare parts
+          { "Type": "Item", "TemplateId": "59e35ef086f7741777737012", "Count": 2 }, // Pack of screws
+          { "Type": "Item", "TemplateId": "5d1b2ffd86f77425243e8d17", "Count": 3 }, // Nixxor lens
+        ]
+      },
+
+      // 1x Portable defibrillator <= 8x D Size Battery + 2x Electronic components + 2x Capacitors + 1x Virtex
+      /*{
+        "EndProduct": "5c052e6986f7746b207bc3c9", // Portable defibrillator
+        "Count": 1,
+        "ProductionTime": 30,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "IntelligenceCenter", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "5d1b31ce86f7742523398394", "Count": 1 }, // Round pliers
+          { "Type": "Tool", "TemplateId": "5af04b6486f774195a3ebb49", "Count": 1 }, // Pliers Elite
+          { "Type": "Tool", "TemplateId": "6389c92d52123d5dd17f8876", "Count": 1 }, // Advanced Electronic Materials textbook
+          { "Type": "Item", "TemplateId": "5672cb304bdc2dc2088b456a", "Count": 8 }, // D Size Battery
+          { "Type": "Item", "TemplateId": "5c06782b86f77426df5407d2", "Count": 2 }, // Capacitors
+          { "Type": "Item", "TemplateId": "6389c70ca33d8c4cdf4932c6", "Count": 2 }, // Electronic components
+          { "Type": "Item", "TemplateId": "5c05308086f7746b2101e90b", "Count": 1 }, // Virtex programmable processor
+        ]
+      },
+
+      // 1x Portable defibrillator <= 2x Electronic components + 2x Capacitors + 1x VPX
+      {
+        "EndProduct": "5c052e6986f7746b207bc3c9", // Portable defibrillator
+        "Count": 1,
+        "ProductionTime": 30,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "IntelligenceCenter", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "5d1b31ce86f7742523398394", "Count": 1 }, // Round pliers
+          { "Type": "Tool", "TemplateId": "5af04b6486f774195a3ebb49", "Count": 1 }, // Pliers Elite
+          { "Type": "Tool", "TemplateId": "6389c92d52123d5dd17f8876", "Count": 1 }, // Advanced Electronic Materials textbook
+          { "Type": "Item", "TemplateId": "5672cb304bdc2dc2088b456a", "Count": 8 }, // D Size Battery
+          { "Type": "Item", "TemplateId": "5c06782b86f77426df5407d2", "Count": 2 }, // Capacitors
+          { "Type": "Item", "TemplateId": "6389c70ca33d8c4cdf4932c6", "Count": 2 }, // Electronic components
+          { "Type": "Item", "TemplateId": "5c05300686f7746dce784e5d", "Count": 1 }, // VPX
+        ]
+      },
+
+      // 1x Portable defibrillator <= 2x Electronic components + 2x Capacitors + 1x Military COFDM Wireless Signal Transmitter
+      {
+        "EndProduct": "5c052e6986f7746b207bc3c9", // Portable defibrillator
+        "Count": 1,
+        "ProductionTime": 30,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "IntelligenceCenter", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "5d1b31ce86f7742523398394", "Count": 1 }, // Round pliers
+          { "Type": "Tool", "TemplateId": "5af04b6486f774195a3ebb49", "Count": 1 }, // Pliers Elite
+          { "Type": "Tool", "TemplateId": "6389c92d52123d5dd17f8876", "Count": 1 }, // Advanced Electronic Materials textbook
+          { "Type": "Item", "TemplateId": "5672cb304bdc2dc2088b456a", "Count": 8 }, // D Size Battery
+          { "Type": "Item", "TemplateId": "5c06782b86f77426df5407d2", "Count": 2 }, // Capacitors
+          { "Type": "Item", "TemplateId": "6389c70ca33d8c4cdf4932c6", "Count": 2 }, // Electronic components
+          { "Type": "Item", "TemplateId": "5c052f6886f7746b1e3db148", "Count": 1 }, // Military COFDM Wireless Signal Transmitter
+        ]
+      },*/
+
+      // 1x L3Harris GPNVG-18 night vision goggles <= 2x Electronic components + 2x Capacitors + 1x VPX
+      {
+        "EndProduct": "5c0558060db834001b735271", // L3Harris GPNVG-18 night vision goggles
+        "Count": 8,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "IntelligenceCenter", "RequiredLevel": 3 },
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Tool", "TemplateId": "5af04b6486f774195a3ebb49", "Count": 1 }, // Pliers Elite
+          { "Type": "Tool", "TemplateId": "6389c92d52123d5dd17f8876", "Count": 1 }, // Advanced Electronic Materials textbook
+          { "Type": "Tool", "TemplateId": "5d1b2ffd86f77425243e8d17", "Count": 99 }, // NIXXOR lens
+        ]
+      },
+
+      // 1x T-7 Thermal Goggles with a Night Vision mount <= 2x Electronic components + 2x Capacitors + 1x VPX
+      {
+        "EndProduct": "5c110624d174af029e69734c", // T-7 Thermal Goggles with a Night Vision mount
+        "Count": 8,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "IntelligenceCenter", "RequiredLevel": 3 },
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Tool", "TemplateId": "5af04b6486f774195a3ebb49", "Count": 1 }, // Pliers Elite
+          { "Type": "Tool", "TemplateId": "6389c92d52123d5dd17f8876", "Count": 1 }, // Advanced Electronic Materials textbook
+          { "Type": "Tool", "TemplateId": "5d1b2ffd86f77425243e8d17", "Count": 99 }, // NIXXOR lens
+        ]
+      },
+
+      // 1x Trijicon REAP-IR thermal scope <= 2x Electronic components + 2x Capacitors + 1x VPX
+      {
+        "EndProduct": "5a1eaa87fcdbcb001865f75e", // Trijicon REAP-IR thermal scope
+        "Count": 8,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "IntelligenceCenter", "RequiredLevel": 3 },
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Tool", "TemplateId": "5af04b6486f774195a3ebb49", "Count": 1 }, // Pliers Elite
+          { "Type": "Tool", "TemplateId": "6389c92d52123d5dd17f8876", "Count": 1 }, // Advanced Electronic Materials textbook
+          { "Type": "Tool", "TemplateId": "5d1b2ffd86f77425243e8d17", "Count": 99 }, // NIXXOR lens
+        ]
+      },
+
+      // 1x Armasight Vulcan MG 3.5x Bravo night vision scope <=
+      {
+        "EndProduct": "5b3b6e495acfc4330140bd88", // Armasight Vulcan MG 3.5x Bravo night vision scope
+        "Count": 8,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "IntelligenceCenter", "RequiredLevel": 3 },
+          { "Type": "Tool", "TemplateId": "590c2e1186f77425357b6124", "Count": 1 }, // Toolset
+          { "Type": "Tool", "TemplateId": "5af04b6486f774195a3ebb49", "Count": 1 }, // Pliers Elite
+          { "Type": "Tool", "TemplateId": "6389c92d52123d5dd17f8876", "Count": 1 }, // Advanced Electronic Materials textbook
+          { "Type": "Tool", "TemplateId": "5d1b2ffd86f77425243e8d17", "Count": 99 }, // NIXXOR lens
+        ]
+      }
+    ],
+
+    // MEDSTATION RECIPES
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "MedStation": [
+      {
+        "EndProduct": "590c678286f77426c9660122", // IFAK - 15k
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Tool", "TemplateId": "5d1b31ce86f7742523398394", "Count": 1 }, // Round pliers
+          { "Type": "Item", "TemplateId": "5d1b3a5d86f774252167ba22", "Count": 1 }, // Pile Of Meds
+          { "Type": "Item", "TemplateId": "5d1b3f2d86f774253763b735", "Count": 1 }, // Medical Bloodset
+        ]
+      },
+      {
+        "EndProduct": "590c678286f77426c9660122", // IFAK - 15k
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Tool", "TemplateId": "5d1b31ce86f7742523398394", "Count": 1 }, // Round pliers
+          { "Type": "Item", "TemplateId": "5d1b3a5d86f774252167ba22", "Count": 1 }, // Pile Of Meds
+          { "Type": "Item", "TemplateId": "59e3606886f77417674759a5", "Count": 1 }, // Bottle of saline solution
+        ]
+      },
+      {
+        "EndProduct": "590c678286f77426c9660122", // IFAK - 15k
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Tool", "TemplateId": "5d1b31ce86f7742523398394", "Count": 1 }, // Round pliers
+          { "Type": "Item", "TemplateId": "5d1b3a5d86f774252167ba22", "Count": 1 }, // Pile Of Meds
+          { "Type": "Item", "TemplateId": "59e361e886f774176c10a2a5", "Count": 1 }, // Bottle of hydrogen peroxide
+        ]
+      },
+      {
+        "EndProduct": "60098ad7c2240c0fe85c570a", // AFAK - 25k
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "MedStation", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "5d1b31ce86f7742523398394", "Count": 1 }, // Round pliers
+          { "Type": "Item", "TemplateId": "5d1b3a5d86f774252167ba22", "Count": 1 }, // Pile Of Meds
+          { "Type": "Item", "TemplateId": "5d1b3f2d86f774253763b735", "Count": 1 }, // Medical Bloodset
+          { "Type": "Item", "TemplateId": "59e3606886f77417674759a5", "Count": 1 }, // Bottle of saline solution
+        ]
+      },
+      {
+        "EndProduct": "60098ad7c2240c0fe85c570a", // AFAK - 25k
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "MedStation", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "5d1b31ce86f7742523398394", "Count": 1 }, // Round pliers
+          { "Type": "Item", "TemplateId": "5d1b3a5d86f774252167ba22", "Count": 2 }, // Pile Of Meds
+          { "Type": "Item", "TemplateId": "5d1b3f2d86f774253763b735", "Count": 1 }, // Medical Bloodset
+          { "Type": "Item", "TemplateId": "59e361e886f774176c10a2a5", "Count": 1 }, // Bottle of hydrogen peroxide
+        ]
+      },
+      {
+        "EndProduct": "60098ad7c2240c0fe85c570a", // AFAK - 25k
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "MedStation", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "5d1b31ce86f7742523398394", "Count": 1 }, // Round pliers
+          { "Type": "Item", "TemplateId": "5d1b3a5d86f774252167ba22", "Count": 2 }, // Pile Of Meds
+          { "Type": "Item", "TemplateId": "59e3606886f77417674759a5", "Count": 1 }, // Bottle of saline solution
+          { "Type": "Item", "TemplateId": "59e361e886f774176c10a2a5", "Count": 1 }, // Bottle of hydrogen peroxide
+        ]
+      },
+      {
+        "EndProduct": "590c657e86f77412b013051d", // Grizzly - 35k
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "MedStation", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "5d1b31ce86f7742523398394", "Count": 1 }, // Round pliers
+          { "Type": "Item", "TemplateId": "5d1b3a5d86f774252167ba22", "Count": 1 }, // Pile Of Meds
+          { "Type": "Item", "TemplateId": "5d1b3f2d86f774253763b735", "Count": 1 }, // Medical Bloodset
+          { "Type": "Item", "TemplateId": "59e3606886f77417674759a5", "Count": 1 }, // Bottle of saline solution
+          { "Type": "Item", "TemplateId": "59e361e886f774176c10a2a5", "Count": 1 }, // Bottle of hydrogen peroxide
+        ]
+      },
+
+      // 1x Surv12 <= 1x CMS + 3x Medical Tools + 1x Bottle of hydrogen peroxide + 1x Bottle of saline solution
+      {
+        "EndProduct": "5d02797c86f774203f38e30a", // Surv12 - 70k
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "MedStation", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "5d1b31ce86f7742523398394", "Count": 1 }, // Round pliers
+          { "Type": "Item", "TemplateId": "5d02778e86f774203e7dedbe", "Count": 1 }, // CMS
+          { "Type": "Item", "TemplateId": "619cc01e0a7c3a1a2731940c", "Count": 1 }, // Medical Tools
+          { "Type": "Item", "TemplateId": "59e361e886f774176c10a2a5", "Count": 2 }, // Bottle of hydrogen peroxide
+          { "Type": "Item", "TemplateId": "59e3606886f77417674759a5", "Count": 1 }, // Bottle of saline solution
+        ]
+      },
+      {
+        "EndProduct": "5d02797c86f774203f38e30a", // Surv12 - 70k
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "MedStation", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "5d1b31ce86f7742523398394", "Count": 1 }, // Round pliers
+          { "Type": "Item", "TemplateId": "5d02778e86f774203e7dedbe", "Count": 1 }, // CMS
+          { "Type": "Item", "TemplateId": "619cc01e0a7c3a1a2731940c", "Count": 1 }, // Medical Tools
+          { "Type": "Item", "TemplateId": "59e361e886f774176c10a2a5", "Count": 1 }, // Bottle of hydrogen peroxide
+          { "Type": "Item", "TemplateId": "59e3606886f77417674759a5", "Count": 2 }, // Bottle of saline solution
+        ]
+      },
+
+      { // ?
+        "EndProduct": "5c10c8fd86f7743d7d706df3", // Adrenaline
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "MedStation", "RequiredLevel": 3 },
+          { "Type": "Tool", "TemplateId": "5d1b31ce86f7742523398394", "Count": 1 }, // Round pliers
+          { "Type": "Item", "TemplateId": "62a0a043cf4a99369e2624a5", "Count": 1 }, // Bottle of OLOLO Multivitamins
+          { "Type": "Item", "TemplateId": "5d1b3f2d86f774253763b735", "Count": 1 }, // Disposable syringe
+        ]
+      },
+
+      // 1x eTG-c <= 1x Bottle of OLOLO Multivitamins + 1x Disposable syringe
+      {
+        "EndProduct": "5c0e534186f7747fa1419867", // eTG-c
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "MedStation", "RequiredLevel": 3 },
+          { "Type": "Tool", "TemplateId": "5d1b31ce86f7742523398394", "Count": 1 }, // Round pliers
+          { "Type": "Item", "TemplateId": "62a0a043cf4a99369e2624a5", "Count": 1 }, // Bottle of OLOLO Multivitamins
+          { "Type": "Item", "TemplateId": "5d1b3f2d86f774253763b735", "Count": 1 }, // Disposable syringe
+        ]
+      },
+
+      // 1x Perfotoran <= 1x Bottle of OLOLO Multivitamins + 1x Disposable syringe
+      {
+        "EndProduct": "637b6251104668754b72f8f9", // Perfotoran
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "MedStation", "RequiredLevel": 3 },
+          { "Type": "Tool", "TemplateId": "5d1b31ce86f7742523398394", "Count": 1 }, // Round pliers
+          { "Type": "Item", "TemplateId": "62a0a043cf4a99369e2624a5", "Count": 1 }, // Bottle of OLOLO Multivitamins
+          { "Type": "Item", "TemplateId": "5d1b3f2d86f774253763b735", "Count": 1 }, // Disposable syringe
+        ]
+      },
+
+      // 1x Obdolbos <= 1x Bottle of OLOLO Multivitamins + 1x Disposable syringe
+      {
+        "EndProduct": "5ed5166ad380ab312177c100", // Obdolbos
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "MedStation", "RequiredLevel": 3 },
+          { "Type": "Tool", "TemplateId": "5d1b31ce86f7742523398394", "Count": 1 }, // Round pliers
+          { "Type": "Item", "TemplateId": "62a0a043cf4a99369e2624a5", "Count": 1 }, // Bottle of OLOLO Multivitamins
+          { "Type": "Item", "TemplateId": "5d1b3f2d86f774253763b735", "Count": 1 }, // Disposable syringe
+        ]
+      },
+    ],
+
+    // WATER CLOSET RECIPES
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "WaterCloset": [
+
+    ],
+
+    // KITCHEN RECIPES
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "Kitchen": [
+
+      // 1x KVASS <= 1x Water Bottle + 1x Hot Rod
+      {
+        "EndProduct": "5e8f3423fd7471236e6e3b64", // KVASS
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Tool", "TemplateId": "6389c6c7dbfd5e4b95197e68", "Count": 1 }, // Aquapeps water purification tablets
+          { "Type": "Item", "TemplateId": "5448fee04bdc2dbc018b4567", "Count": 1 }, // Water Bottle
+          { "Type": "Item", "TemplateId": "5751496424597720a27126da", "Count": 1 }, // Hot Rod
+        ]
+      },
+
+      // 1x KVASS <= 1x Water Bottle + 1x Max Energy
+      {
+        "EndProduct": "5e8f3423fd7471236e6e3b64", // KVASS
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Tool", "TemplateId": "6389c6c7dbfd5e4b95197e68", "Count": 1 }, // Aquapeps water purification tablets
+          { "Type": "Item", "TemplateId": "5448fee04bdc2dbc018b4567", "Count": 1 }, // Water Bottle
+          { "Type": "Item", "TemplateId": "5751435d24597720a27126d1", "Count": 1 }, // Max Energy
+        ]
+      },
+
+      // 1x KVASS <= 1x Water Bottle + 1x Tar Cola
+      {
+        "EndProduct": "5e8f3423fd7471236e6e3b64", // KVASS
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Tool", "TemplateId": "6389c6c7dbfd5e4b95197e68", "Count": 1 }, // Aquapeps water purification tablets
+          { "Type": "Item", "TemplateId": "5448fee04bdc2dbc018b4567", "Count": 1 }, // Water Bottle
+          { "Type": "Item", "TemplateId": "57514643245977207f2c2d09", "Count": 1 }, // Tar Cola
+        ]
+      },
+
+      // 1x Aquamari <= 1x KVASS + 1x Hot Rod + 1x Ice Green Tea
+      {
+        "EndProduct": "5c0fa877d174af02a012e1cf", // Aquamari
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Kitchen", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "6389c6c7dbfd5e4b95197e68", "Count": 1 }, // Aquapeps water purification tablets
+          { "Type": "Item", "TemplateId": "5e8f3423fd7471236e6e3b64", "Count": 1 }, // KVASS
+          { "Type": "Item", "TemplateId": "5751496424597720a27126da", "Count": 1 }, // Hot Rod
+          { "Type": "Item", "TemplateId": "575062b524597720a31c09a1", "Count": 1 }, // Ice Green Tea
+        ]
+      },
+
+      // 1x Aquamari <= 1x KVASS + 1x Max Energy + 1x Ice Green Tea
+      {
+        "EndProduct": "5c0fa877d174af02a012e1cf", // Aquamari
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Kitchen", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "6389c6c7dbfd5e4b95197e68", "Count": 1 }, // Aquapeps water purification tablets
+          { "Type": "Item", "TemplateId": "5e8f3423fd7471236e6e3b64", "Count": 1 }, // KVASS
+          { "Type": "Item", "TemplateId": "5751435d24597720a27126d1", "Count": 1 }, // Max Energy
+          { "Type": "Item", "TemplateId": "575062b524597720a31c09a1", "Count": 1 }, // Ice Green Tea
+        ]
+      },
+
+      // 1x Aquamari <= 1x KVASS + 1x Tar Cola + 1x Ice Green Tea
+      {
+        "EndProduct": "5c0fa877d174af02a012e1cf", // Aquamari
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Kitchen", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "6389c6c7dbfd5e4b95197e68", "Count": 1 }, // Aquapeps water purification tablets
+          { "Type": "Item", "TemplateId": "5e8f3423fd7471236e6e3b64", "Count": 1 }, // KVASS
+          { "Type": "Item", "TemplateId": "57514643245977207f2c2d09", "Count": 1 }, // Tar Cola
+          { "Type": "Item", "TemplateId": "575062b524597720a31c09a1", "Count": 1 }, // Ice Green Tea
+        ]
+      },
+
+      // 1x MRE <= 1x Can of beef stew (Large) + 1x Pack of instant noodles
+      {
+        "EndProduct": "590c5f0d86f77413997acfab", // MRE
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Kitchen", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "59e35abd86f7741778269d82", "Count": 1 }, // Pack of sodium bicarbonate
+          { "Type": "Item", "TemplateId": "57347da92459774491567cf5", "Count": 1 }, // Can of beef stew (Large)
+          { "Type": "Item", "TemplateId": "656df4fec921ad01000481a2", "Count": 1 }, // Pack of instant noodles
+        ]
+      },
+
+      // 1x MRE <= 1x Can of squash spread + 1x Pack of instant noodles
+      {
+        "EndProduct": "590c5f0d86f77413997acfab", // MRE
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Kitchen", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "59e35abd86f7741778269d82", "Count": 1 }, // Pack of sodium bicarbonate
+          { "Type": "Item", "TemplateId": "57347d8724597744596b4e76", "Count": 1 }, // Can of squash spread
+          { "Type": "Item", "TemplateId": "656df4fec921ad01000481a2", "Count": 1 }, // Pack of instant noodles
+        ]
+      },
+
+      // 1x OLOLO <= 1x Apple juice + 1x Grand juice + 1x Vita juice
+      {
+        "EndProduct": "62a0a043cf4a99369e2624a5", // OLOLO
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Kitchen", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "62a09e73af34e73a266d932a", "Count": 1 }, // BakeEzy cook book
+          { "Type": "Tool", "TemplateId": "59e35abd86f7741778269d82", "Count": 1 }, // Pack of sodium bicarbonate
+          { "Type": "Tool", "TemplateId": "6389c6c7dbfd5e4b95197e68", "Count": 1 }, // Aquapeps water purification tablets
+          { "Type": "Item", "TemplateId": "57513f07245977207e26a311", "Count": 1 }, // Apple juice
+          { "Type": "Item", "TemplateId": "57513f9324597720a7128161", "Count": 1 }, // Grand juice
+          { "Type": "Item", "TemplateId": "57513fcc24597720a31c09a6", "Count": 1 }, // Vita juice
+        ]
+      },
+
+      // 1x OLOLO <= 1x Apple juice + 1x Grand juice + 1x Pineaple juice
+      {
+        "EndProduct": "62a0a043cf4a99369e2624a5", // OLOLO
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Kitchen", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "62a09e73af34e73a266d932a", "Count": 1 }, // BakeEzy cook book
+          { "Type": "Tool", "TemplateId": "59e35abd86f7741778269d82", "Count": 1 }, // Pack of sodium bicarbonate
+          { "Type": "Tool", "TemplateId": "6389c6c7dbfd5e4b95197e68", "Count": 1 }, // Aquapeps water purification tablets
+          { "Type": "Item", "TemplateId": "57513f07245977207e26a311", "Count": 1 }, // Apple juice
+          { "Type": "Item", "TemplateId": "57513f9324597720a7128161", "Count": 1 }, // Grand juice
+          { "Type": "Item", "TemplateId": "544fb62a4bdc2dfb738b4568", "Count": 1 }, // Pineaple juice
+        ]
+      },
+
+      // 1x OLOLO <= 1x Apple juice + 1x Grand juice + 1x Pineaple juice
+      {
+        "EndProduct": "62a0a043cf4a99369e2624a5", // OLOLO
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Kitchen", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "62a09e73af34e73a266d932a", "Count": 1 }, // BakeEzy cook book
+          { "Type": "Tool", "TemplateId": "59e35abd86f7741778269d82", "Count": 1 }, // Pack of sodium bicarbonate
+          { "Type": "Tool", "TemplateId": "6389c6c7dbfd5e4b95197e68", "Count": 1 }, // Aquapeps water purification tablets
+          { "Type": "Item", "TemplateId": "57513f07245977207e26a311", "Count": 1 }, // Apple juice
+          { "Type": "Item", "TemplateId": "57513fcc24597720a31c09a6", "Count": 1 }, // Vita juice
+          { "Type": "Item", "TemplateId": "544fb62a4bdc2dfb738b4568", "Count": 1 }, // Pineaple juice
+        ]
+      },
+
+      // 1x OLOLO <= 1x Apple juice + 1x Grand juice + 1x Pineaple juice
+      {
+        "EndProduct": "62a0a043cf4a99369e2624a5", // OLOLO
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Kitchen", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "62a09e73af34e73a266d932a", "Count": 1 }, // BakeEzy cook book
+          { "Type": "Tool", "TemplateId": "59e35abd86f7741778269d82", "Count": 1 }, // Pack of sodium bicarbonate
+          { "Type": "Tool", "TemplateId": "6389c6c7dbfd5e4b95197e68", "Count": 1 }, // Aquapeps water purification tablets
+          { "Type": "Item", "TemplateId": "57513f9324597720a7128161", "Count": 1 }, // Grand juice
+          { "Type": "Item", "TemplateId": "57513fcc24597720a31c09a6", "Count": 1 }, // Vita juice
+          { "Type": "Item", "TemplateId": "544fb62a4bdc2dfb738b4568", "Count": 1 }, // Pineaple juice
+        ]
+      },
+
+      // 2x Alyonka <= 1x Sugar
+      {
+        "EndProduct": "59e3577886f774176a362503",
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Kitchen", "RequiredLevel": 3 },
+          { "Type": "Tool", "TemplateId": "62a09e73af34e73a266d932a", "Count": 1, }, // BakeEzy cook book
+          { "Type": "Tool", "TemplateId": "59e35abd86f7741778269d82", "Count": 1 }, // Pack of sodium bicarbonate
+          { "Type": "Item", "TemplateId": "57505f6224597709a92585a9", "Count": 2 }, // Alyonka
+        ]
+      },
+    ],
+
+    // HEATING RECIPES
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "Heating": [
+      {
+        "EndProduct": "5d6fc78386f77449d825f9dc", // Gunpowder "Eagle"
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Item", "TemplateId": "590c5a7286f7747884343aea", "Count": 2, }, // Gunpowder "Kite"
+        ]
+      },
+      {
+        "EndProduct": "5d6fc87386f77449db3db94e", // Gunpowder "Hawk"
+        "Count": 1,
+        "Requirements": [
+          { "Type": "Item", "TemplateId": "5d6fc78386f77449d825f9dc", "Count": 3, }, // Gunpowder "Eagle"
+        ]
+      },
+      {
+        "EndProduct": "5fd20ff893a8961fc660a954", // .300 Blackout AP
+        "Count": 100,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Heating", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "5d1b317c86f7742523398392", "Count": 1, }, // Hand drill
+          { "Type": "Item", "TemplateId": "5d6fc78386f77449d825f9dc", "Count": 2, }, // Gunpowder "Eagle"
+          { "Type": "Item", "TemplateId": "64b8725c4b75259c590fa899", "Count": 200, } // .300 Blackout CBJ
+        ]
+      },
+      {
+        "EndProduct": "5c0d688c86f77413ae3407b2", // 9x39mm BP gs
+        "Count": 100,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Heating", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "5d1b317c86f7742523398392", "Count": 1, }, // Hand drill
+          { "Type": "Item", "TemplateId": "5d6fc78386f77449d825f9dc", "Count": 2, }, // Gunpowder "Eagle"
+          { "Type": "Item", "TemplateId": "61962d879bb3d20b0946d385", "Count": 200, } // 9x39mm PAB-9 gs
+        ]
+      },
+      {
+        "EndProduct": "5ba26835d4351e0035628ff5", // 4.6x30mm AP SX
+        "Count": 100,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Heating", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "5d1b317c86f7742523398392", "Count": 1, }, // Hand drill
+          { "Type": "Item", "TemplateId": "5d6fc78386f77449d825f9dc", "Count": 2, }, // Gunpowder "Eagle"
+          { "Type": "Item", "TemplateId": "5ba2678ad4351e44f824b344", "Count": 200, } // 4.6x30mm FMJ SX
+        ]
+      },
+      {
+        "EndProduct": "5c0d5e4486f77478390952fe", // 5.45x39mm PPBS gs Igolnik
+        "Count": 100,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Heating", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "5d1b317c86f7742523398392", "Count": 1, }, // Hand drill
+          { "Type": "Item", "TemplateId": "5d6fc78386f77449d825f9dc", "Count": 2, }, // Gunpowder "Eagle"
+          { "Type": "Item", "TemplateId": "56dfef82d2720bbd668b4567", "Count": 200, } // 5.45x39mm BP gs
+        ]
+      },
+      {
+        "EndProduct": "56dff026d2720bb8668b4567", // 5.45x39mm BP gs Igolnik
+        "Count": 100,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Heating", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "5d1b317c86f7742523398392", "Count": 1, }, // Hand drill
+          { "Type": "Item", "TemplateId": "5d6fc78386f77449d825f9dc", "Count": 2, }, // Gunpowder "Eagle"
+          { "Type": "Item", "TemplateId": "56dfef82d2720bbd668b4567", "Count": 200, } // 5.45x39mm BP gs
+        ]
+      },
+      {
+        "EndProduct": "601949593ae8f707c4608daa", // 5.56x45mm SSA AP
+        "Count": 100,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Heating", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "5d1b317c86f7742523398392", "Count": 1, }, // Hand drill
+          { "Type": "Item", "TemplateId": "5d6fc78386f77449d825f9dc", "Count": 2, }, // Gunpowder "Eagle"
+          { "Type": "Item", "TemplateId": "54527ac44bdc2d36668b4567", "Count": 200, } // 5.56x45mm M855A1
+        ]
+      },
+      {
+        "EndProduct": "59e690b686f7746c9f75e848", // 5.56x45mm M995
+        "Count": 100,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Heating", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "5d1b317c86f7742523398392", "Count": 1, }, // Hand drill
+          { "Type": "Item", "TemplateId": "5d6fc78386f77449d825f9dc", "Count": 2, }, // Gunpowder "Eagle"
+          { "Type": "Item", "TemplateId": "54527ac44bdc2d36668b4567", "Count": 200, } // 5.56x45mm M855A1
+        ]
+      },
+      {
+        "EndProduct": "601aa3d2b2bcb34913271e6d", // 7.62x39mm MAI AP
+        "Count": 100,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Heating", "RequiredLevel": 2 },
+          { "Type": "Tool", "TemplateId": "5d1b317c86f7742523398392", "Count": 1, }, // Hand drill
+          { "Type": "Item", "TemplateId": "5d6fc78386f77449d825f9dc", "Count": 2, }, // Gunpowder "Eagle"
+          { "Type": "Item", "TemplateId": "59e0d99486f7744a32234762", "Count": 200, } // 7.62x39mm BP gzh
+        ]
+      },
+      {
+        "EndProduct": "5efb0c1bd79ff02a1f5e68d9", // 7.62x51mm M993
+        "Count": 100,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Heating", "RequiredLevel": 3 },
+          { "Type": "Tool", "TemplateId": "5d1b317c86f7742523398392", "Count": 1, }, // Hand drill
+          { "Type": "Item", "TemplateId": "5d6fc87386f77449db3db94e", "Count": 2, }, // Gunpowder "Hawk"
+          { "Type": "Item", "TemplateId": "5a6086ea4f39f99cd479502f", "Count": 200, } // 7.62x51mm M61
+        ]
+      },
+      {
+        "EndProduct": "6768c25aa7b238f14a08d3f6", // 7.62x51mm M80A1
+        "Count": 100,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Heating", "RequiredLevel": 3 },
+          { "Type": "Tool", "TemplateId": "5d1b317c86f7742523398392", "Count": 1, }, // Hand drill
+          { "Type": "Item", "TemplateId": "5d6fc87386f77449db3db94e", "Count": 2, }, // Gunpowder "Hawk"
+          { "Type": "Item", "TemplateId": "5a6086ea4f39f99cd479502f", "Count": 200, } // 7.62x51mm M61
+        ]
+      },
+      {
+        "EndProduct": "560d61e84bdc2da74d8b4571", // 7.62x54mm R SNB gzh
+        "Count": 50,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Heating", "RequiredLevel": 3 },
+          { "Type": "Tool", "TemplateId": "5d1b317c86f7742523398392", "Count": 1, }, // Hand drill
+          { "Type": "Item", "TemplateId": "5d6fc87386f77449db3db94e", "Count": 2, }, // Gunpowder "Hawk"
+          { "Type": "Item", "TemplateId": "5e023d34e8a400319a28ed44", "Count": 100, } // 7.62x54mm R BT gzh
+        ]
+      },
+      {
+        "EndProduct": "5e023d48186a883be655e551", // 7.62x54mm R BS gs
+        "Count": 50,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Heating", "RequiredLevel": 3 },
+          { "Type": "Tool", "TemplateId": "5d1b317c86f7742523398392", "Count": 1, }, // Hand drill
+          { "Type": "Item", "TemplateId": "5d6fc87386f77449db3db94e", "Count": 2, }, // Gunpowder "Hawk"
+          { "Type": "Item", "TemplateId": "5e023d34e8a400319a28ed44", "Count": 200, } // 7.62x54mm R BT gzh
+        ]
+      },
+      {
+        "EndProduct": "68bad8376cb22acf1107a586", // 9.3x64mm 7N33
+        "Count": 50,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Heating", "RequiredLevel": 3 },
+          { "Type": "Tool", "TemplateId": "5d1b317c86f7742523398392", "Count": 1, }, // Hand drill
+          { "Type": "Item", "TemplateId": "5d6fc87386f77449db3db94e", "Count": 2, }, // Gunpowder "Hawk"
+          { "Type": "Item", "TemplateId": "68bac6ca653ee6b1e406d978", "Count": 100, } // 9.3x64mm FMJ
+        ]
+      },
+      {
+        "EndProduct": "5fc382a9d724d907e2077dab", // .338 Lapua Magnum AP
+        "Count": 50,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Heating", "RequiredLevel": 3 },
+          { "Type": "Tool", "TemplateId": "5d1b317c86f7742523398392", "Count": 1, }, // Hand drill
+          { "Type": "Item", "TemplateId": "5d6fc87386f77449db3db94e", "Count": 2, }, // Gunpowder "Hawk"
+          { "Type": "Item", "TemplateId": "5fc275cf85fd526b824a571a", "Count": 100, } // .338 Lapua Magnum FMJ
+        ]
+      },
+      {
+        "EndProduct": "67dc2648ba5b79876906a166", // .50 BMG M903 SLAP
+        "Count": 50,
+        "Requirements": [
+          { "Type": "Area", "AreaType": "Heating", "RequiredLevel": 3 },
+          { "Type": "Tool", "TemplateId": "5d1b317c86f7742523398392", "Count": 1, }, // Hand drill
+          { "Type": "Item", "TemplateId": "5d6fc87386f77449db3db94e", "Count": 2, }, // Gunpowder "Hawk"
+          { "Type": "Item", "TemplateId": "67dc255ee3028a8b120efc48", "Count": 100, } // .50 BMG M33
+        ]
+      }
+    ],
+
+    // BOOZE GENERATOR RECIPES
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "BoozeGenerator": [
+
+      // 1x Bottle of Fierce Hatchling moonshine <= 2x Pack of sugar + 1x Canister with purified water
+      {
+        "EndProduct":                   "5d1b376e86f774252519444e",
+        "Count":                        1,
+        "ProductionTime":               1200,
+        "Locked":                       false,
+        "Continuous":                   false,
+        "Requirements": [
+          { "Type": "Item", "TemplateId": "59e3577886f774176a362503", "Count": 2, }, // Pack of sugar
+          { "Type": "Item", "TemplateId": "5d1b33a686f7742523398398", "Count": 1, } // Canister with purified water
+        ]
+      }
+
+    ]
+  }
+}
+

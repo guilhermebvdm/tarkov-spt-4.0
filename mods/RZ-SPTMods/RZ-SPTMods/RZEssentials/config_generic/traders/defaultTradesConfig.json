@@ -1,0 +1,110 @@
+{
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // PRICE MULTIPLIERS
+  //
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "ClearAllDefaultTrades": false,
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // PRICE MULTIPLIERS
+  //
+  // Multiply the cash price of all cash-only offers for the specified traders.
+  // Barter schemes (items as payment) are ignored, only rub/usd/eur offers are affected.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "PriceMultipliers": {
+    "54cb50c76803fa8b248b4571": 1.0, // PRAPOR
+    "54cb57776803fa99248b456e": 1.0, // THERAPIST
+    "58330581ace78e27b8b10cee": 1.0, // SKIER
+    "5935c25fb3acc3127c3d8cd9": 1.0, // PEACEKEEPER
+    "5a7c2eca46aef81a7ca2145d": 1.0, // MECHANIC
+    "5ac3b934156ae10c4430e83c": 1.0, // RAGMAN
+    "5c0647fdd443bc2504c2d371": 1.0, // JAEGER
+    "6617beeaa9cfa777ca915b7c": 1.0, // REF
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // NO BARTER TRADERS
+  //
+  // Replace vanilla barter trades with a straight cash payment at handbook price.
+  // Only affects default trader assorts : auto-routing and manual offers are not impacted.
+  //
+  // Currency : "rub" | "eur" | "usd"
+  // ExcludedBarterTpls : if every item in a barter scheme belongs to this list, the scheme is left untouched. Leave empty to convert
+  // all barters for that trader.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "NoBarterTraders": {
+
+    // PRAPOR
+    "54cb50c76803fa8b248b4571": {
+      "Enabled": false,
+      "Currency": "rub",
+      "ExcludedBarterTpls": []
+    },
+
+    // THERAPIST
+    "54cb57776803fa99248b456e": {
+      "Enabled": false,
+      "Currency": "rub",
+      "ExcludedBarterTpls": []
+    },
+
+    // SKIER
+    "58330581ace78e27b8b10cee": {
+      "Enabled": false,
+      "Currency": "eur",
+      "ExcludedBarterTpls": []
+    },
+
+    // PEACEKEEPER
+    "5935c25fb3acc3127c3d8cd9": {
+      "Enabled": false,
+      "Currency": "usd",
+      "ExcludedBarterTpls": []
+    },
+
+    // MECHANIC
+    "5a7c2eca46aef81a7ca2145d": {
+      "Enabled": false,
+      "Currency": "rub",
+      "ExcludedBarterTpls": []
+    },
+
+    // RAGMAN
+    "5ac3b934156ae10c4430e83c": {
+      "Enabled": false,
+      "Currency": "rub",
+      "ExcludedBarterTpls": []
+    },
+
+    // JAEGER
+    "5c0647fdd443bc2504c2d371": {
+      "Enabled": false,
+      "Currency": "rub",
+      "ExcludedBarterTpls": []
+    },
+
+    // REF
+    "6617beeaa9cfa777ca915b7c": {
+      "Enabled": false,
+      "Currency": "rub",
+      "ExcludedBarterTpls": [
+        "6656560053eaaa7a23349c86", // Lega Medal
+        //"5d235b4d86f7742e017bc88a", // GP Coin
+      ]
+    },
+
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // BLACKLIST
+  //
+  // TPLs to remove from all trader assorts unconditionally.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "Blacklist": [
+    // "5696686a4bdc2da3298b456a", // example
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  // MASTER SWITCH - Set to true to enable this config file.
+  "Enabled": false,
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // SEASON
+  // A season is drawn randomly at the start of each raid.
+  // Set a weight to 0 to exclude a season entirely.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "Season": {
+    "Enabled": true,
+    "Weights": {
+      "Winter":      5,
+      "EarlySpring": 10,
+      "Spring":      15,
+      "Summer":      40,
+      "Autumn":      20,
+      "LateAutumn":  10
+    }
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // WEATHER PRESETS
+  // Controls weather conditions during raids.
+  //
+  // FixedForRaid   - true  : one preset is drawn per raid, conditions stay consistent from start to finish.
+  //                - false : one preset is drawn per weather period (~15-30 min), vanilla-style variation within the raid.
+  //
+  // Rain           - 0 = no rain, 1-3 = light rain, 3+ = heavy rain
+  // RainIntensity  - 0.0 to 1.0, probably controls rain particle density / sound
+  // Fog            - 0.0 to 1.0
+  // Cloud          - below -0.4 = clear sky, 0.0+ = overcast
+  // WindSpeed      - arbitrary units, vanilla values roughly 0.0 to 1.0
+  // WindGustiness  - arbitrary units, vanilla values roughly 0.0 to 1.0
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "Presets": {
+    "Enabled": true,
+    "FixedForRaid": false,
+    "Pool": [
+      {
+        "Name": "Clear",
+        "Weight": 70,
+        "Rain": 0,
+        "RainIntensity": 0.0,
+        "Fog": 0.0,
+        "Cloud": -0.5
+      },
+      {
+        "Name": "Overcast",
+        "Weight": 20,
+        "Rain": 0,
+        "Fog": 0.0,
+        "Cloud": 0.5
+      },
+      {
+        "Name": "LightRain",
+        "Weight": 3,
+        "Rain": 2,
+        "RainIntensity": 0.5,
+        "Fog": 0.2,
+        "Cloud": 0.7
+      },
+      {
+        "Name": "HeavyRain",
+        "Weight": 2,
+        "Rain": 4,
+        "RainIntensity": 1.0,
+        "Fog": 0.2,
+        "Cloud": 0.9
+      },
+      {
+        "Name": "Foggy",
+        "Weight": 5,
+        "Rain": 0,
+        "Fog": 0.8,
+        "Cloud": 0.3
+      }
+    ]
+  }
+}

@@ -1,0 +1,470 @@
+{
+  // MASTER TOGGLE - Set to true to enable this config.
+  "Enabled": true,
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // HANDBOOK PRICES OVERRIDES
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "Prices": {
+
+    // Money
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "569668774bdc2da2298b4568": 150, // Euro
+    "5696686a4bdc2da3298b456a": 100, // Dollars
+    "5d235b4d86f7742e017bc88a": 10000, // GP coin
+    "59faff1d86f7746c51718c9c": 200000, // BTC
+    "6656560053eaaa7a23349c86": 300000, // Lega Medal
+
+    // SCOPES
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    // Collimators
+    "5c07dd120db834001c39092d": 60000, // EOTech HHS-1 hybrid sight
+    "5c0a2cec0db834001b7ce47d": 60000, // EOTech HHS-1 hybrid sight (Tan)
+    // Assault scopes
+    "5d2dc3e548f035404a1a4798": 40000, // Monstrum Tactical Compact Prism Scope 2x32
+    "626bb8532c923541184624b4": 40000, // SwampFox Trihawk Prism Scope 3x30
+    "5c05293e0db83400232fff80": 40000, // Trijicon ACOG TA01NSN 4x32 scope (Black)
+    "5c052a900db834001a66acbd": 40000, // Trijicon ACOG TA01NSN 4x32 scope (Tan)
+    "57ac965c24597706be5f975c": 50000, // ELCAN SpecterDR 1x/4x scope
+    "57aca93d2459771f2c7e26db": 50000, // ELCAN SpecterDR 1x/4x scope (FDE)
+    "5c0517910db83400232ffee5": 60000, // Valday PS-320 1/6x scope
+    //
+    "5c1cdd512e22161b267d91ae": 30000, // Kiba Arms Short Prism 2.5x scope
+    "544a3f024bdc2d1d388b4568": 30000, // ELCAN Specter OS4x assault scope
+    "59db7e1086f77448be30ddf3": 30000, // Trijicon ACOG TA11D 3.5x35 scope
+    "544a3a774bdc2d3a388b4567": 50000, // Leupold Mark 4 HAMR 4x24 DeltaPoint hybrid assault scope
+    "57adff4f24597737f373b6e6": 50000, // SIG Sauer BRAVO4 4x30 scope
+    //Optics
+    "5b3b99475acfc432ff4dcbee": 80000, // EOTech Vudu 1-6x24 30mm riflescope
+    "617151c1d92c473c770214ab": 80000, // Schmidt & Bender PM II 1-8x24 30mm riflescope
+    "618ba27d9008e4636a67f61d": 100000, // Vortex Razor HD Gen.2 1-6x24 30mm riflescope
+    //
+    "5c82342f2e221644f31c060e": 17784, // BelOMO PSO-1 4x24 scope
+    "5c82343a2e221644f31c0611": 18784, // BelOMO PSO-1M2 4x24 scope
+    "576fd4ec2459777f0b518431": 19784, // BelOMO PSO-1M2-1 4x24 scope
+    "5b2388675acfc4771e1be0be": 31468, // Burris FullField TAC30 1-4x24 30mm riflescope
+    "56ea70acd2720b844b8b4594": 55784, // Hensoldt FF 4-16x56 34mm riflescope
+    "5d0a3a58d7ad1a669c15ca14": 22200, // KMZ 1P59 3-10x riflescope
+    "5d0a3e8cd7ad1a6f6a3d35bd": 25200, // KMZ 1P69 3-10x riflescope
+    "5a37cb10c4a282329a73b4e7": 58580, // Leupold Mark 4 LR 6.5-20x50 30mm riflescope
+    "68caad7f933990601c07f47c": 62000, // Leupold Mark 4 MR/T TS-30A2 2.5-8x36 30mm riflescope
+    "676175789dcee773150c6925": 102529, // Leupold Mark 5HD 5-25x56mm 35mm riflescope (FDE)
+    "57c5ac0824597754771e88a9": 41616, // March Tactical 3-24x42 FFP 30mm riflescope
+    "5dfe6104585a0c3e995c7b82": 51344, // NcSTAR ADO P4 Sniper 3-9x42 riflescope
+    "5aa66be6e5b5b0214e506e97": 87797, // Nightforce ATACR 7-35x56 34mm riflescope
+    "544a3d0a4bdc2d1b388b4567": 609, // Nightforce NXS 2.5-10x24 scope
+    "618a75f0bd321d49084cd399": 20500, // NPZ 1P78-1 2.8x scope
+    "5cf638cbd7f00c06595bc936": 14500, // NPZ USP-1 Tyulpan 4x scope
+    "5d53f4b7a4b936793d58c780": 609, // PAG-17 scope
+    "5b3f7c1c5acfc40dc5296b1d": 12335, // PU 3.5x riflescope
+    "61714eec290d254f5e6b2ffc": 65000, // Schmidt & Bender PM II 3-20x50 34mm riflescope
+    "62850c28da09541f43158cca": 95000, // Schmidt & Bender PM II 5-25x56 34mm riflescope
+    "6567e7681265c8a131069b0f": 68601, // SIG Sauer TANGO6T 1-6x24 30mm riflescope
+    "5dff772da3651922b360bf91": 14468, // VOMZ Pilad 4x32 25.4mm riflescope
+
+    // HELMET MODS
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "5f60bf4558eff926626a60f2": 30000, // Galvion Caiman Fixed Arm Visor
+    "5f60b85bbdb8e27dee3dc985": 80000, // Galvion Caiman Hybrid Ballistic Applique
+    "693be0ee50fafa102607aebd": 80000, // Galvion Caiman Hybrid Ballistic Applique (MultiCam Alpine)
+    "68a9b601863d2a71fa0494ae": 80000, // Galvion Caiman Hybrid Ballistic Applique (MultiCam)
+    "68a9b669fa39b6976e07de96": 80000, // Galvion Caiman Hybrid Ballistic Applique (Mutualist)
+    "5f60c076f2bcbb675b00dac2": 30000, // Galvion Caiman Hybrid Ballistic Mandible Guard
+    "693be056fd3a5c751e00de04": 30000, // Galvion Caiman Hybrid Ballistic Mandible Guard (MultiCam Alpine)
+    "68a9b6c8d3a061d8b6058346": 30000, // Galvion Caiman Hybrid Ballistic Mandible Guard (MultiCam)
+    "68a9b73bd3a061d8b6058348": 30000, // Galvion Caiman Hybrid Ballistic Mandible Guard (Mutualist)
+    "5ea18c84ecf1982c7712d9a2": 120000, // Diamond Age Bastion helmet armor plate
+    "6570a88c8f221f3b210353b7": 40000, // Diamond Age NeoSteel helmet ballistic mandible
+    "68a9c0ed6d47c49b700faaf9": 40000, // Diamond Age NeoSteel helmet ballistic mandible (Aces)
+    "68a9bf7d9f4c45817b0d83b6": 40000, // Diamond Age NeoSteel helmet ballistic mandible (Black)
+    "5a16ba61fcdbcb098008728a": 30000, // Ops-Core FAST Gunsight Mandible
+    "5a16b7e1fcdbcb00165aa6c9": 40000, // Ops-Core FAST multi-hit ballistic face shield
+    "5a16badafcdbcb001865f72d": 40000, // Ops-Core FAST Side Armor
+    "5a16b672fcdbcb001912fa83": 20000, // Ops-Core FAST Visor
+    "5c0e66e2d174af02a96252f4": 120000, // Ops-Core SLAAP armor helmet plate (Tan)
+
+    // HEADSETS
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "5b432b965acfc47a8774094e": 20000, // GSSh-01 active headset
+    "6033fa48ffd42c541047f728": 30000, // OPSMEN Earmor M32 headset
+    "693bb59250fafa102607aeb7": 30000, // OPSMEN Earmor M32 headset (White)
+    "5e4d34ca86f774264f758330": 40000, // Walker's Razor Digital headset
+    "5645bcc04bdc2d363b8b4572": 40000, // Peltor ComTac II headset (OD Green)
+    "66b5f68de98be930d701c00e": 40000, // Safariland Liberator HP 2.0 Hearing Protection Headset (FDE)
+    "68bf405779c8186398099017": 40000, // Peltor TEP-300 tactical earplug (Coyote Brown)
+    "5aa2ba71e5b5b000137b758f": 50000, // MSA Sordin Supreme PRO-X/L headset
+    "5c165d832e2216398b5a7e36": 50000, // Peltor Tactical Sport headset
+    "5a16b9fffcdbcb0176308b34": 50000, // Ops-Core FAST RAC Headset
+    "5f60cd6cf2bcbb675b00dac6": 60000, // Walker's XCEL 500BT Digital headset
+    "66b5f69ea7f72d197e70bcdb": 60000, // TW EXFIL Peltor ComTac V headset (OD Green)
+    "66b5f693acff495a294927e3": 70000, // Peltor ComTac V headset (OD Green)
+    "66b5f6a28ca68c6461709ed8": 70000, // TW EXFIL Peltor ComTac VI headset (Coyote Brown)
+    "628e4e576d783146b124c64d": 80000, // Peltor ComTac IV Hybrid headset (Coyote Brown)
+    "66b5f6985891c84aab75ca76": 80000, // Peltor ComTac VI headset (Coyote Brown)
+    "69413241b1ce1e5fbb09ed0a": 90000, // CENS ProFlex DX5 tactical earplug
+
+    // BACKPACKS
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "5ab8f04f86f774585f4237d8": 20000,   // Tactical sling bag (Khaki)              [6 slots]
+    "5ab8ee7786f7742d8f33f0b9": 30000,   // VKBO army bag                           [8 slots]
+    "56e33680d2720be2748b4576": 30000,   // Transformer Bag                         [9 slots]
+    "56e33634d2720bd8058b456b": 40000,   // Duffle bag                              [12 slots]
+    "5f5e45cc5021ce62144be7aa": 40000,   // LolKek 3F Transfer tourist backpack     [12 slots]
+    "628bc7fb408e2b2e9c0801b1": 50000,   // Mystery Ranch NICE COMM 3 BVS frame     [14 slots]
+    "544a5cde4bdc2d39388b456b": 60000,   // Flyye MBSS backpack (UCP)               [16 slots]
+    "66b5f247af44ca0014063c02": 60000,   // Vertx Ready Pack backpack (Red)         [16 slots]
+    "5e997f0b86f7741ac73993e2": 60000,   // Sanitar's bag                           [16 slots]
+    "60a2828e8689911a226117f9": 70000,   // Hazard 4 Pillbox backpack (Black)       [20 slots]
+    "5e9dcf5986f7746c417435b3": 70000,   // LBT-8005A Day Pack (MultiCam Black)     [20 slots]
+    "56e335e4d2720b6c058b456d": 70000,   // Scav backpack                           [20 slots]
+    "5ca20d5986f774331e7c9602": 70000,   // WARTECH Berkut BB-102 (A-TACS FG)       [20 slots]
+    "66a9f98f3bd5a41b162030f4": 70000,   // Partisan's bag                          [20 slots]
+    "6034d103ca006d2dca39b3f0": 80000,   // Hazard 4 Takedown sling (Black)         [24 slots]
+    "6038d614d10cbf667352dd44": 80000,   // Hazard 4 Takedown sling (MultiCam)      [24 slots]
+    "619cf0335771dd3c390269ae": 90000,   // Gruppa 99 T20 (MultiCam)                [25 slots]
+    "618bb76513f5097c8d5aa2d5": 90000,   // Gruppa 99 T20 (Umber Brown)             [25 slots]
+    "60a272cc93ef783291411d8e": 90000,   // Hazard 4 Drawbridge (Coyote Tan)        [25 slots]
+    "67458794e21e5d724e066976": 90000,   // LBT-1476A 3Day Pack (MultiCam Alpine)   [25 slots]
+    "618cfae774bb2d036a049e7c": 90000,   // LBT-1476A 3Day Pack (Woodland)          [25 slots]
+    "656f198fb27298d6fd005466": 80000,   // Direct Action Dragon Egg Mk II (Black)  [25 slots, multi-grid]
+    "656ddcf0f02d7bcea90bf395": 80000,   // Tehinkom RK-PT-25 (EMR)                 [25 slots, multi-grid]
+    "5b44c6ae86f7742d1627baea": 110000,  // ANA Tactical Beta 2 (Olive Drab)        [30 slots]
+    "545cdae64bdc2d39198b4568": 110000,  // Camelbak Tri-Zip (Foliage)              [30 slots]
+    "66b5f22b78bbc0200425f904": 110000,  // Camelbak Tri-Zip (MultiCam)             [30 slots]
+    "5f5e467b0bc58666c37e7821": 110000,  // Eberlestock F5 Switchblade (Dry Earth)  [30 slots]
+    "628e1ffc83ec92260c0f437f": 110000,  // Gruppa 99 T30 (Black)                   [30 slots]
+    "62a1b7fbc30cfa1d366af586": 110000,  // Gruppa 99 T30 (MultiCam)                [30 slots]
+    "674da9cf0cb4bcde7103c07b": 100000,  // Mystery Ranch Terraframe (Christmas)    [30 slots, multi-grid]
+    "674da107c512807d1a0e7436": 100000,  // Mystery Ranch Terraframe (Olive Drab)   [30 slots, multi-grid]
+    "5d5d940f86f7742797262046": 100000,  // Oakley Mechanism (Black)                [32 slots, multi-grid]
+    "5c0e805e86f774683f3dd637": 120000,  // 3V Gear Paratus 3-Day (Foliage Grey)    [35 slots, multi-grid]
+    "6034d2d697633951dc245ea6": 120000,  // Eberlestock G2 Gunslinger II            [35 slots, multi-grid]
+    "59e763f286f7742ee57895da": 130000,  // Pilgrim tourist backpack                [35 slots]
+    "61b9e1aaef9a1b5d6a79899a": 130000,  // Santa's bag                             [35 slots]
+    "5ab8ebf186f7742d8b372e80": 130000,  // SSO Attack 2 raid backpack (Khaki)      [35 slots]
+    "639346cc1c8f182ad90c8972": 130000,  // Tasmanian Tiger Trooper 35 (Khaki)      [35 slots]
+    "656e0436d44a1bb4220303a0": 130000,  // Mystery Ranch SATL Bridger (Foliage)    [36 slots, multi-grid]
+    "5f5e46b96bdad616ad46d613": 150000,  // Eberlestock F4 Terminator (Tiger)       [40 slots, multi-grid]
+    "67458730df3c1da90b0b052b": 180000,  // 5.11 Tactical RUSH 100 (Black)          [45 slots, multi-grid]
+
+    "68947ad3e4bf255d1b0ca75c": 150000,  // Mystery Ranch NICE Frame Load Sling     [35 slots]
+    "68947ab5a733b1602007e2fe": 150000,  // Mystery Ranch 2 Day Assault Pack        [30 slots]
+    "5c0e774286f77468413cc5b2": 150000,  // Mystery Ranch Blackjack 50 (MultiCam)   [42 slots]
+    "68947a8ce4bf255d1b0ca759": 150000,  // Tasmanian Tiger Modular Pack 45 Plus    [40 slots]
+    "5df8a4d786f77412672a1e3b": 150000,  // 6Sh118 raid backpack (EMR)              [48 slots]
+
+    "5e4abc6786f77406812bd572": 60000,   // LBT-2670 Slim Field Med Pack (Black)    [48 slots, med only]
+    //"56e294cdd2720b603a8b4575": 1,       // Mystery Ranch Terraplane                [300 slots, special]
+
+    // VESTS
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "572b7adb24597762ae139821": 10000, // Scav Vest                                                          [6 slots]
+    "5fd4c5477a8d854fa0105061": 10000, // Security vest                                                      [6 slots]
+    "64be7095047e826eae02b0c1": 10000, // Zulu Nylon Gear M4 Reduced Signature Chest Rig (Ranger Green)      [6 slots]
+    "5fd4c4fa16cac650092f6771": 20000, // DIY IDEA chest rig                                                 [8 slots]
+    "5d5d8ca986f7742798716522": 20000, // SOE Micro Rig (MultiCam)                                           [8 slots]
+    "674589d98dd67746010329e6": 20000, // Spiritus Systems Bank Robber chest rig (MultiCam Alpine)           [8 slots]
+    "5e4abc1f86f774069619fbaa": 20000, // Spiritus Systems Bank Robber chest rig (MultiCam Black)            [8 slots]
+    "6034d0230ca681766b6a0fb5": 30000, // CSA chest rig (Black)                                              [10 slots]
+    "64be7110bf597ba84a0a41ea": 30000, // Type 56 Chicom chest harness                                       [10 slots]
+    "59e7643b86f7742cbf2c109a": 30000, // WARTECH TV-109 + TV-106 chest rig (A-TACS FG)                      [10 slots]
+    "5929a2a086f7744f4b234d43": 40000, // UMTBS 6Sh112 Scout-Sniper chest rig (EMR)                          [12 slots]
+    "5e4abfed86f77406a2713cf7": 50000, // Splav Tarzan M22 chest rig (Smog)                                  [14 slots]
+    "5c0e9f2c86f77432297fe0a3": 60000, // BlackHawk! Commando chest harness (Black)                          [16 slots]
+    "5b44c8ea86f7742d1627baf1": 60000, // BlackHawk! Commando chest harness (Desert Tan)                     [16 slots]
+    "5f5f41f56760b4138443b352": 60000, // Direct Action Thunderbolt compact chest rig (Shadow Grey)          [16 slots]
+    "5ca20abf86f77418567a43f2": 60000, // Dynaforce Triton M43-A chest harness (Black)                       [16 slots]
+    "5fd4c60f875c30179f5d04c2": 60000, // Gear Craft GC-BSS-MK1 chest rig (A-TACS FG)                        [16 slots]
+    "5d5d85c586f774279a21cbdb": 60000, // Haley Strategic D3CRX Chest Harness (Ranger Green)                 [16 slots]
+    "6034cf5fffd42c541047f72e": 60000, // Umka M33-SET1 hunter vest (Olive Drab)                             [16 slots]
+    "68bee2b431902bb4d90c3a2a": 70000, // LBT-1961A Load Bearing Chest Rig (AOR1)                            [18 slots]
+    "628baf0b967de16aab5a4f36": 70000, // LBT-1961A Load Bearing Chest Rig (Goons Edition)                   [18 slots]
+    "5e9db13186f7742f845ee9d3": 70000, // LBT-1961A Load Bearing Chest Rig (MAS Grey)                        [18 slots]
+    "60a621c49c197e4e8c4455e6": 70000, // Stich Profi Chest Rig MK2 (Assault, A-TACS FG)                     [18 slots]
+    "60a6220e953894617404b00a": 70000, // Stich Profi Chest Rig MK2 (Recon, A-TACS FG)                       [18 slots]
+    "68a85ac615a5769d50029cd9": 80000, // ANA Tactical Alpha chest rig (A-TACS AU)                           [20 slots]
+    "67ab3ea96d7ece17bf0096f6": 80000, // ANA Tactical Alpha chest rig (MultiCam)                            [20 slots]
+    "592c2d1a86f7746dbe2af32a": 80000, // ANA Tactical Alpha chest rig (Olive Drab)                          [20 slots]
+    "603648ff5a45383c122086ac": 80000, // Azimut SS Zhuk chest harness (Black)                               [20 slots]
+    "6040dd4ddcf9592f401632d2": 80000, // Azimut SS Zhuk chest harness (SURPAT)                              [20 slots]
+    "5648a69d4bdc2ded0b8b457b": 80000, // BlackRock chest rig (Gray)                                         [20 slots]
+    "67ab3f146d7ece17bf0096ff": 80000, // BlackRock chest rig (Khaki)                                        [20 slots]
+    "68a986615db8a4a66404ff9a": 80000, // WARTECH MK3 TV-104 chest rig (Moss)                                [20 slots]
+    "5ab8dab586f77441cd04f2a2": 80000, // WARTECH MK3 TV-104 chest rig (MultiCam)                            [20 slots]
+    "5df8a42886f77412640e2e75": 90000, // Velocity Systems MPPV Multi-Purpose Patrol Vest (Wolf Grey)        [24 slots]
+    "5c0e6a1586f77404597b4965": 100000, // Poyas-A + Poyas-B gear rig                                        [25 slots]
+
+    // WATER
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "5d1b33a686f7742523398398": 50000, // Canister with purified water
+    "5d1b376e86f774252519444e": 200000, // Bottle of Fierce Hatchling moonshine
+
+    "575062b524597720a31c09a1": 5000, // Can of Ice Green tea
+    "5751496424597720a27126da": 10000, // Can of Hot Rod energy drink
+    "5751435d24597720a27126d1": 10000, // Can of Max Energy energy drink
+    "57514643245977207f2c2d09": 10000, // Can of TarCola soda
+    "5448fee04bdc2dbc018b4567": 5000, // Bottle of water (0.6L)
+    "5e8f3423fd7471236e6e3b64": 15000, // Bottle of Norvinsky Yadreniy premium kvass (0.6L)
+    "5c0fa877d174af02a012e1cf": 30000, // Aquamari water bottle with filter
+    "60098b1705871270cd5352a1": 15000, // Emergency Water Ration
+    "60b0f93284c20f0feb453da7": 15000, // Can of RatCola soda
+
+    "62a09f32621468534a797acb": 15000, // Pevko
+    "575146b724597720a27126d5": 10000, // Pack of milk
+
+    "57513f07245977207e26a311": 10000, // Pack of apple juice
+    "57513f9324597720a7128161": 10000, // Pack of Grand juice
+    "57513fcc24597720a31c09a6": 10000, // Pack of Vita juice
+    "544fb62a4bdc2dfb738b4568": 10000, // Pack of Russian Army pineapple juice
+
+
+    // FOOD
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "5448ff904bdc2d6f028b456e": 2500, // Army crackers
+    "5751487e245977207e26a315": 2500, // Emelya rye croutons
+    "57347d3d245977448f7b7f61": 5000, // Rye croutons
+    "544fb6cc4bdc2d34748b456e": 7500, // Slickers chocolate bar
+    "656df4fec921ad01000481a2": 7500, // Pack of instant noodles
+
+    "57347d90245977448f7b7f65": 10000, // Pack of oat flakes
+    "5bc9c29cd4351e003562b8a3": 10000, // Can of sprats
+    "57347d692459774491567cf1": 10000, // Can of green peas
+    "5673de654bdc2d180f8b456d": 10000, // Can of pacific saury
+    "57347d5f245977448b40fa81": 10000, // Can of humpback salmon
+    "57347d9c245977448b40fa85": 10000, // Can of herring
+    "57347d7224597744596b4e72": 10000, // Can of beef stew (Small)
+    "57347da92459774491567cf5": 15000, // Can of beef stew (Large)
+    "57347d8724597744596b4e76": 15000, // Can of squash spread
+    "5bc9b156d4351e00367fbce9": 15000, // Jar of DevilDog mayo
+    "65815f0e647e3d7246384e14": 20000, // Pack of Tarker dried meat
+    "5734773724597737fd047c14": 25000, // Can of condensed milk
+    "590c5f0d86f77413997acfab": 25000, // MRE
+    "590c5d4b86f774784e1b9c45": 25000, // Iskra
+
+    "57505f6224597709a92585a9": 15000, // Alyonka chocolate bar
+    "59e3577886f774176a362503": 30000, // Pack of sugar
+
+    // MEDICAL
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "5755356824597772cb798962": 5000, // AI-2
+    "590c661e86f7741e566b646a": 10000, // CAR
+    "544fb45d4bdc2dee738b4568": 15000, // Salewa
+    "590c678286f77426c9660122": 15000, // IFAK
+    "60098ad7c2240c0fe85c570a": 25000, // AFAK
+    "590c657e86f77412b013051d": 35000, // Grizzly
+    "5d02778e86f774203e7dedbe": 35000, // CMS
+    "5d02797c86f774203f38e30a": 70000, // Surv12
+
+    "544fb25a4bdc2dfb738b4567": 1500, // Aseptic bandage
+    "5751a25924597722c463c472": 2000, // Army bandage
+    "5e831507ea0a7c419c2f9bd9": 2000, // Esmarch tourniquet
+    "60098af40accd37ef2175f27": 3000, // CAT hemostatic tourniquet
+    "5e8488fa988a8701445df1e4": 6000, // CALOK-B hemostatic applicator
+    "544fb3364bdc2d34748b456a": 3000, // Immobilizing splint
+    "5af0454c86f7746bf20992e8": 8000, // Aluminum splint
+    "6937ecf8628ee476240c07cb": 10000, // Tigzresq splint
+
+    "544fb37f4bdc2dee738b4567": 5000, // Analgin painkillers
+    "590c695186f7741e566b64a2": 15000, // Augmentin antibiotic pills
+    "5af0548586f7743a532b7e99": 25000, // Ibuprofen painkillers
+    "5755383e24597772cb798966": 15000, // Vaseline balm
+    "5751a89d24597722aa0e8db0": 30000, // Golden Star balm
+
+    "5d1b3a5d86f774252167ba22": 5000, // Pile of meds
+    "619cc01e0a7c3a1a2731940c": 5000, // Medical tools
+    "5d1b3f2d86f774253763b735": 10000, // Disposable syringe
+    "5b4335ba86f7744d2837a264": 10000, // Medical bloodset
+    "59e361e886f774176c10a2a5": 10000, // Bottle of hydrogen peroxide
+    "59e3606886f77417674759a5": 10000, // Bottle of saline solution
+    "62a0a043cf4a99369e2624a5": 30000, // Bottle of OLOLO Multivitamins
+    "6389c6c7dbfd5e4b95197e68": 30000, // Aquapeps
+
+    "544fb3f34bdc2d03748b456a": 20000, // Morphine injector
+    "5c10c8fd86f7743d7d706df3": 30000, // Adrenaline
+    "5c0e530286f7747fa1419862": 30000, // Propital
+    "5c0e531d86f7747fa23f4d42": 30000, // SJ6
+    "5ed515f6915ec335206e4152": 30000, // AHF1-M
+    "5c0e533786f7747fa23f4d47": 35000, // Zagustin
+    "5c0e534186f7747fa1419867": 40000, // eTG-c
+    "5ed51652f6c34d2cc26336a1": 50000, // Mule
+    "5ed515c8d380ab312177c0fa": 10000, // 3-(b-TG)
+    "5ed515e03a40a50460332579": 10000, // L1
+    "5c0e531286f7747fa54205c2": 10000, // SJ1
+    "5fca13ca637ee0341a484f46": 20000, // SJ9
+    "637b612fb7afa97bfc3d7005": 30000, // SJ12
+    "5ed515ece452db0eb56fc028": 30000, // P22
+    "637b620db7afa97bfc3d7009": 30000, // Trimadol
+    "637b6179104668754b72f8f5": 30000, // PNB
+    "5fca138c2a7b221b2852a5c6": 30000, // XTG-12
+    "5ed5160a87bb8443d10680b5": 40000, // Meldonin
+    "637b6251104668754b72f8f9": 40000, // Perfotoran
+    "66507eabf5ddb0818b085b68": 50000, // 2A2-(b-TG)
+    "5ed5166ad380ab312177c100": 40000, // Obdolbos
+    "637b60c3b7afa97bfc3d7001": 60000, // Obdolbos 2
+
+    // CRAFTING
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "5af0534a86f7743b6f354284": 100000, // Ophthalmoscope
+    "5c052e6986f7746b207bc3c9": 250000, // Portable defibrillator
+    "5c0530ee86f774697952d952": 1000000, // LEDX
+
+    "57347c1124597737fb1379e3": 2500, // Duct tape
+    "5734795124597738002c6176": 2500, // Insulating tape
+    "61bf7b6302b3924be92fa8c3": 5000, // Metal spare parts
+    "59e35ef086f7741777737012": 5000, // Pack of screws
+    "590c31c586f774245e3141b2": 5000, // Pack of nails
+    "5c06779c86f77426e00dd782": 5000, // Bundle of wires
+    "5734779624597737e04bf329": 5000, // CPU Fan
+    "5d1b313086f77425227d1678": 5000, // Phase control relay
+    "57347c5b245977448d35f6e1": 10000, // Bolts
+    "57347c77245977448d35f6e2": 10000, // Screw nuts
+    "59e36c6f86f774176c10a2a7": 10000, // Power cord
+    "590a3cd386f77436f20848cb": 10000, // Energy-saving lamp
+    "590a3d9c86f774385926e510": 15000, // Ultraviolet lamp
+    "590a391c86f774385a33c404": 15000, // Magnet
+    //"590c745b86f7743cc433c5f2": 15000, // Weapon parts
+    "59e35cbb86f7741778269d83": 20000, // Corrugated hose
+    "5d1b39a386f774252339976f": 20000, // Silicone tube
+    "57347c2e24597744902c94a1": 20000, // Power supply unit
+    "5d1b2fa286f77425227d1674": 40000, // Electric motor
+
+    "590c5bbd86f774785762df04": 10000, // WD-40 (100ml)
+    "590c5c9f86f77477c91c36e7": 20000, // WD-40 (400ml)
+    "590c35a486f774273531c822": 40000, // Shustrilo sealing foam
+    "590c346786f77423e50ed342": 40000, // Xenomorph sealing foam
+
+    "5733279d245977289b77ec24": 100000, // Car battery
+    "5d03794386f77420415576f5": 400000, // 6-STEN-140-M military battery
+
+    "544fb5454bdc2df8738b456a": 20000, // Leatherman multitool
+    "666b11055a706400b717cfa5": 25000, // Tripwire installation kit
+    "5b4391a586f7745321235ab2": 40000, // WI-FI Camera
+
+    "5e2af47786f7746d404f3aaa": 10000, // Fleece fabric
+    "5e2af4a786f7746d3f3c3400": 10000, // Ripstop fabric
+    "5e2af41e86f774755a234b67": 20000, // Cordura polyamide fabric
+    "5e2af4d286f7746d4159f07a": 20000, // Aramid fiber fabric
+    "5e2af29386f7746d4159f077": 30000, // KEKTAPE duct tape
+    "5c12688486f77426843c7d32": 30000, // Paracord
+
+    "590c5a7286f7747884343aea": 10000, // Gunpowder "Kite"
+    "5d6fc78386f77449d825f9dc": 20000, // Gunpowder "Eagle"
+    "5d6fc87386f77449db3db94e": 60000, // Gunpowder "Hawk"
+
+    "59e366c186f7741778269d85": 10000, // Plexiglass
+    "59fafb5d86f774067a6f2084": 20000, // Propane tank (5L)
+
+    // TOOLS
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "5af04b6486f774195a3ebb49": 30000, // Pliers Elite
+
+    // FLAMMABLE MATERIALS
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "56742c2e4bdc2d95058b456d": 10000, // Zibbo lighter
+    "590a373286f774287540368b": 40000, // Dry fuel
+    "60391b0fb847c71012789415": 40000, // TP-200 TNT brick
+
+    // HOUSEHOLD MATERIALS
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "5d4041f086f7743cac3f22a7": 5000, // Ortodontox toothpaste
+    "59e35abd86f7741778269d82": 5000, // Pack of sodium bicarbonate
+    "59faf98186f774067b6be103": 10000, // Alkaline cleaner for heat exchangers
+    "62a09ee4cf4a99369e262453": 10000, // Can of white salt
+    "5e2af00086f7746d3f3c33f7": 10000, // Smoked Chimney drain cleaner
+    "59e358a886f7741776641ac3": 10000, // Clin window cleaner
+    "59e3596386f774176c10a2a2": 10000, // PAID AntiRoach spray
+    "5e2af02c86f7746d420957d4": 10000, // Pack of chlorine
+    "5e2aef7986f7746d3f3c33f5": 10000, // Repellent
+
+    // ELECTRONICS
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "5672cb124bdc2d1a0f8b4568": 2500, // AA battery
+    "5672cb304bdc2dc2088b456a": 5000, // D Size battery
+    "590a358486f77429692b2790": 10000, // Rechargeable battery
+    "5af0561e86f7745f5f3ad6ac": 20000, // Portable Powerbank
+    "5e2aedd986f7746d404f3aa4": 40000, // GreenBat lithium battery
+    "5e2aee0a86f774755a234b62": 50000, // Cyclon rechargeable battery
+
+    "5c06782b86f77426df5407d2": 2500, // Capacitors
+    "57347baf24597738002c6178": 10000, // RAM stick
+    "6389c70ca33d8c4cdf4932c6": 10000, // Electronic components
+    "590a3b0486f7743954552bdb": 15000, // Printed circuit board
+    "56742c324bdc2d150f8b456d": 20000, // Broken GPhone smartphone
+    "573477e124597737dd42e191": 20000, // PC CPU
+    "5d1b2ffd86f77425243e8d17": 40000, // NIXXOR lens
+    "5d0376a486f7747d8050965c": 50000, // Military circuit board
+    "5c052fb986f7746b2101e909": 50000, // UHF RFID Reader
+    "5c05300686f7746dce784e5d": 150000, // VPX Flash Storage Module
+    "5c05308086f7746b2101e90b": 150000, // Virtex programmable processor
+    "6389c7750ef44505c87f5996": 150000, // Microcontroller board
+    "6389c7f115805221fb410466": 150000, // Far-forward GPS Signal Amplifier Unit
+    "5c052f6886f7746b1e3db148": 150000, // Military COFDM Wireless Signal Transmitter
+
+
+    "5c12620d86f7743f8b198b72": 150000, // Tetriz
+    "5d03775b86f774203e7e0c4b": 200000, // Phased array element
+    "6389c85357baa773a825b356": 300000, // Advanced current converter
+    "57347ca924597744596b4e71": 300000, // Graphics card
+
+    // VALUABLES
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "573474f924597738002c6174": 10000, // Chainlet
+    "590c621186f774138d11ea29": 50000, // Secure Flash drive
+    "5c12613b86f7743bbe2c3f76": 200000, // Intelligence folder
+
+    "573478bc24597738002c6175": 20000, // Horse figurine
+    "590de71386f774347051a052": 40000, // Antique teapot
+    "62a091170b9d3c46de5b6cf2": 40000, // Axel parrot figurine
+    "59e3658a86f7741776641ac4": 40000, // Cat figurine
+    "5e54f62086f774219b0f1937": 40000, // Raven figurine
+    "5bc9bc53d4351e00367fbcee": 120000, // Golden rooster figurine
+    "59e3639286f7741777737013": 200000, // Bronze lion figurine
+    "5bc9bdb8d4351e003562b8a1": 40000, // Silver Badge
+    "5f745ee30acaeb0d490d8c5b": 40000, // Veritas guitar pick
+    "66b37eb4acff495a29492407": 40000, // Viibiin sneaker
+    "5734758f24597738025ee253": 40000, // Golden neck chain
+    "59faf7ca86f7740dbe19f6c2": 80000, // Roler Submariner gold wrist watch
+    "5bc9c377d4351e3bac12251b": 80000, // Old firesteel
+    "59e3647686f774176a362507": 120000, // Wooden clock
+
+    // KEYS
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "5efde6b4f5448336730dbd61": 50000, // Keycard with a blue marking
+    "679b9819a2f2dd4da9023512": 120000, // Labrys access keycard
+    "5e42c81886f7742a01529f57": 100000, // Object #11SR keycard
+    "5e42c83786f7742a021fdf3c": 50000, // Object #21WS keycard
+
+    "6711039f9e648049e50b3307": 165000, // TerraGroup Labs residential unit keycard
+    "5c94bbff86f7747ee735c08f": 100000, // TerraGroup Labs access keycard
+    "5c1d0d6d86f7744bb2683e1f": 350000, // TerraGroup Labs keycard (Yellow)
+    "5c1e495a86f7743109743dfb": 600000, // TerraGroup Labs keycard (Violet)
+    "5c1d0f4986f7744bb01837fa": 750000, // TerraGroup Labs keycard (Black)
+    "5c1d0c5f86f7744bb2683cf0": 900000, // TerraGroup Labs keycard (Blue)
+    "5c1d0dc586f7744baf2e7b79": 1250000, // TerraGroup Labs keycard (Green)
+    "5c1d0efb86f7744baf2e7b7b": 1500000, // TerraGroup Labs keycard (Red)
+    "66acd6702b17692df20144c0": 850000, // TerraGroup storage room keycard
+
+    // CONTAINERS
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "59fafd4b86f7745ca07e1232": 100000, // Key Tool
+    "590c60fc86f77412b13fddcf": 100000, // Documents Case
+  },
+}

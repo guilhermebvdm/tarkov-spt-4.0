@@ -1,0 +1,62 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>RZEssentials</AssemblyName>
+    <RootNamespace>RZEssentials</RootNamespace>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <ModExportPath>D:\Games\SPT_4_0_11\SPT\user\mods\RZEssentials\</ModExportPath>
+    <SourceExportPath>D:\SPT\RZ-SPTMods\RZEssentials</SourceExportPath>
+    <NoWarn>CS0618;IDE0025</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SPTarkov.Server.Core" Version="4.0.*"/>
+    <PackageReference Include="SPTarkov.DI" Version="4.0.*"/>
+    <PackageReference Include="HarmonyX" Version="2.15.0"/>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+    <ConfigFiles Include="$(ProjectDir)config_freetarkov\**\*"/>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)' != 'Debug'">
+    <ConfigFiles Include="$(ProjectDir)config_generic\**\*"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Extras Include="$(ProjectDir)extras\**\*"/>
+    <DbFiles Include="$(ProjectDir)db\**\*"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="docs\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ConfigFiles Include="config_generic\ui\clientConfig.json" />
+  </ItemGroup>
+
+  <Target Name="ExportMod" AfterTargets="Build" Condition="'$(ModExportPath)' != ''">
+    <Message Text="→ Cleaning $(ModExportPath)" Importance="High"/>
+    <RemoveDir Directories="$(ModExportPath)"/>
+    <MakeDir Directories="$(ModExportPath)"/>
+    <Message Text="→ Copying to $(ModExportPath) [$(Configuration)]" Importance="High"/>
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(ModExportPath)" SkipUnchangedFiles="false"/>
+    <Copy SourceFiles="@(ConfigFiles)" DestinationFiles="@(ConfigFiles->'$(ModExportPath)config\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="false"/>
+    <Copy SourceFiles="@(Extras)" DestinationFiles="@(Extras->'$(ModExportPath)extras\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="false"/>
+    <Copy SourceFiles="@(DbFiles)" DestinationFiles="@(DbFiles->'$(ModExportPath)db\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="false"/>
+    <Message Text="→ Mod exported." Importance="High"/>
+  </Target>
+
+  <Target Name="ExportSources" AfterTargets="Build" Condition="'$(SourceExportPath)' != ''">
+    <Message Text="→ Exporting sources to $(SourceExportPath)" Importance="High"/>
+    <Exec
+      Command="robocopy &quot;$(ProjectDir.TrimEnd('\'))&quot; &quot;$(SourceExportPath.TrimEnd('\'))&quot; /E /XD bin obj .idea config_freetarkov /XF *.user /NFL /NDL /NJH /NJS /NC /NS &amp;&amp; exit 0 || if %ERRORLEVEL% LEQ 7 (exit 0) else (exit %ERRORLEVEL%)"
+      IgnoreExitCode="true"
+    />
+    <Message Text="→ Sources exported." Importance="High"/>
+  </Target>
+</Project>

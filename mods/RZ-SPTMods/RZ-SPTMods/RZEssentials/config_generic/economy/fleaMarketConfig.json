@@ -1,0 +1,20 @@
+{
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // FLEA MARKET CONFIGURATION
+  //
+  // Controls dynamic flea market offer generation. Trader flea offers are not affected by any of these settings.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  // Disable all dynamic flea market offer generation entirely. Dynamic offers already present at server start are also purged.
+  "DisableFleaMarket": false,
+
+  // Sets CanSellOnRagfair = false on listed TPLs.
+  "DynamicForceDisable": [
+    // "5696686a4bdc2da3298b456a", // example
+  ],
+
+  // Sets CanSellOnRagfair = true on listed TPLs.
+  "DynamicForceEnable": [
+    // "5696686a4bdc2da3298b456a", // example
+  ],
+}

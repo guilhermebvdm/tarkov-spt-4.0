@@ -1,0 +1,221 @@
+{
+  // Whether this profile is registered and visible in the launcher.
+  "Enabled": true,
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // Base profile to clone
+  //
+  // 0 = Standard        1 = Left Behind       2 = Prepare To Escape   3 = Edge Of Darkness
+  // 4 = Unheard         5 = Tournament        6 = SPT Developer       7 = SPT Easy start
+  // 8 = SPT Zero to hero
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "BaseProfile": 0,
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // Profile identity
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  // Profile name
+  "Name": "Free Tarkov",
+
+  // Profile description
+  "Description": "No grind. All glory.",
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // Progression
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  // Examine all items in the game on character creation
+  "AllItemsExamined": true,
+
+  // Start at max level
+  "MaxLevel": true,
+
+  // Start at a specific level (1 to max). Ignored if MaxLevel is true. null = leave unchanged from base profile.
+  "StartingLevel": null,
+
+  // Starting prestige level (1-4). null = no prestige applied.
+  "StartingPrestigeLevel": 4,
+
+  // Skip prestige reward mails on character creation. Default true.
+  "SkipPrestigeRewards": true,
+
+  //
+  "UnlockAllAchievements": true,
+
+  // Max out all skills
+  "MaxSkills": true,
+
+  // Override specific skills individually (0-51). Ignored if MaxSkills is true.
+  "SkillOverrides": {
+
+    "Endurance": 0,
+    "Strength": 0,
+    "Vitality": 0,
+    "Health": 0,
+    "StressResistance": 0,
+    "Metabolism": 0,
+    "Immunity": 0,
+
+    "Perception": 0,
+    "Intellect": 0,
+    "Attention": 0,
+    "Charisma": 0,
+    "Memory": 0,
+
+    "Pistol": 0,
+    "Revolver": 0,
+    "SMG": 0,
+    "Assault": 0,
+    "Shotgun": 0,
+    "Sniper": 0,
+    "LMG": 0,
+    "HMG": 0,
+    "Launcher": 0,
+    "AttachedLauncher": 0,
+    "Throwing": 0,
+    "Melee": 0,
+    "DMR": 0,
+    "RecoilControl": 0,
+    "AimDrills": 0,
+    "TroubleShooting": 0,
+
+    "Surgery": 0,
+    "CovertMovement": 0,
+    "Search": 0,
+    "MagDrills": 0,
+    "Sniping": 0,
+    "ProneMovement": 0,
+    "FieldMedicine": 0,
+    "FirstAid": 0,
+    "LightVests": 0,
+    "HeavyVests": 0,
+    "WeaponModding": 0,
+    "AdvancedModding": 0,
+    "NightOps": 0,
+    "SilentOps": 0,
+    "Lockpicking": 0,
+    "WeaponTreatment": 0,
+
+    "Freetrading": 0,
+    "Auctions": 0,
+    "Cleanoperations": 0,
+    "Barter": 0,
+    "Shadowconnections": 0,
+    "Taskperformance": 0,
+
+    "Crafting": 0,
+    "HideoutManagement": 0,
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // Inventory
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  // Clear equipped items from the base profile
+  "ClearEquipment": true,
+
+  // Clear stash items from the base profile before injecting ours
+  "ClearStash": true,
+
+  // 0 = Default
+  // 1 = SECURE_WAIST_POUCH,
+  // 2 = SECURE_CONTAINER_ALPHA,
+  // 3 = SECURE_CONTAINER_BETA,
+  // 4 = SECURE_CONTAINER_EPSILON,
+  // 5 = SECURE_CONTAINER_GAMMA,
+  // 6 = SECURE_CONTAINER_THETA,
+  // 7 = SECURE_CONTAINER_KAPPA,
+  // 8 = SECURE_CONTAINER_KAPPA_DESECRATED,
+  // 9 = SECURE_CONTAINER_BOSS,
+  // 10 = SECURE_CONTAINER_GAMMA_TUE,
+  // 11 = SECURE_DEVELOPER_SECURE_CONTAINER,
+  // 12 = SECURE_TOURNAMENT_SECURED_CONTAINER,
+  "SecureContainer": 1,
+
+  // Additional starting items
+  "AdditionalStartingItems": {
+    "Enabled": true,
+    "Items": [
+      { "Tpl": "5bffdc370db834001d23eca8", "Count": 1 }, // 6Kh5 Bayonet
+      { "Tpl": "590c678286f77426c9660122", "Count": 3 }, // IFAK
+      { "Tpl": "544fb3364bdc2d34748b456a", "Count": 3 }, // Immobilizing splint
+    ]
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // Traders
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "TradersLoyalty": {
+
+    // Prapor
+    "54cb50c76803fa8b248b4571": { "Standing": 0.0, "SalesSum": 0 },
+
+    // Therapist
+    "54cb57776803fa99248b456e": { "Standing": 0.0, "SalesSum": 0 },
+
+    // Fence
+    "579dc571d53a0658a154fbec": { "Standing": 0.0, "SalesSum": 0 },
+
+    // Skier
+    "58330581ace78e27b8b10cee": { "Standing": 0.0, "SalesSum": 0 },
+
+    // Peacekeeper
+    "5935c25fb3acc3127c3d8cd9": { "Standing": 0.0, "SalesSum": 0 },
+
+    // Mechanic
+    "5a7c2eca46aef81a7ca2145d": { "Standing": 0.0, "SalesSum": 0 },
+
+    // Ragman
+    "5ac3b934156ae10c4430e83c": { "Standing": 0.0, "SalesSum": 0 },
+
+    // Jaeger
+    "5c0647fdd443bc2504c2d371": { "Standing": 0.0, "SalesSum": 0 },
+
+    // Ref
+    "6617beeaa9cfa777ca915b7c": { "Standing": 0.0, "SalesSum": 0 },
+
+    // BTR
+    "656f0f98d80a697f855d34b1": { "Standing": 0.0, "SalesSum": 0 },
+
+    // Lighthousekeeper
+    "638f541a29ffd1183d187f57": { "Standing": 0.0, "SalesSum": 0 },
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // Hideout
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "HideoutStartingLevels": {
+    "Stash": 1,
+    //"Generator": 0,
+    "Vents": 3,
+    "Security": 3,
+    //"WaterCloset": 0,
+    //"Heating": 0,
+    "WaterCollector": 3,
+    //"MedStation": 0,
+    //"Kitchen": 0,
+    //"RestSpace": 0,
+    //"Workbench": 0,
+    //"IntelligenceCenter": 0,
+    //"ShootingRange": 0,
+    "Library": 1,
+    "ScavCase": 1,
+    "Illumination": 3,
+    //"PlaceOfFame": 0,
+    "AirFilteringUnit": 1,
+    //"SolarPower": 0,
+    //"BoozeGenerator": 0,
+    //"BitcoinFarm": 0,
+    //"ChristmasIllumination": 0,
+    //"EmergencyWall": 0,
+    //"Gym": 0,
+    //"WeaponStand": 0,
+    //"WeaponStandSecondary": 0,
+    //"EquipmentPresetsStand": 0,
+    //"CircleOfCultists": 0
+  }
+}

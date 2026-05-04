@@ -1,0 +1,10 @@
+{
+  // Enable/disable this config.
+  "Enabled": false,
+
+  //
+  "Overrides": {
+    "624c09cfbc2e27219346d955": "Elite", // Signal flare (Red)
+    "62389ba9a63f32501b1b4451": "Elite", // 26x75mm flare cartridge (Red)
+  }
+}

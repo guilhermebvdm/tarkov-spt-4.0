@@ -1,0 +1,70 @@
+{
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // SKIP SCREENS
+  // Automatically skip the listed pre and post raid screens.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  // Skip the PMC / Scav selection screen before entering a raid.
+  "SkipSideSelectionScreen": false,
+
+  // Skip the insurance selection screen before entering a raid.
+  "SkipInsuranceScreen": false,
+
+  // Skip the raid settings screen before a raid.
+  "SkipRaidSettingsScreen": false,
+
+  // Skip the experience summary screen at the end of a raid.
+  "SkipExperienceScreen": false,
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // TRADER GRID SORTING
+  // Controls how items are sorted in trader inventories.
+  // The three passes are applied in order : Category → Item → Alphabetical.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  // Sort items by handbook category. Order is defined by CategoryOrder below.
+  // Items belonging to the first category come first, and so on.
+  "EnableCategorySort": false,
+  "CategoryOrder": [
+
+    "543be6564bdc2df4348b4568", // ThrowWeap
+    "5485a8684bdc2da71d8b4567", // Ammo
+    "5448bc234bdc2d3c308b4569", // Magazine
+
+    "5448f3a14bdc2d27728b4569", // Drugs
+    "5448f3ac4bdc2dce718b4569", // Medical
+    "5448f39d4bdc2d0a728b4568", // MedKit
+    "5448f3a64bdc2d60728b456a", // Stimulator
+    "5448e8d04bdc2ddf718b4569", // Drink
+    "5448e8d64bdc2dce718b4568", // Food
+    "5c164d2286f774194c5e69fa", // Keycard
+    "5c99f98d86f7745c314214b3", // KeyMechanical
+
+    "5a341c4686f77469e155819e", // FaceCover
+    "5a341c4086f77401f2541505", // Headwear
+    "57bef4c42459772e8d35a53b", // Armored Equipment
+    "5645bcb74bdc2ded0b8b4578", // Headphones
+
+  ],
+
+  // Sort specific items to the top, regardless of category. Order is defined by ItemOrder below.
+  // These items are placed at the top of the list, in the order defined here.
+  "EnableItemSort": false,
+  "ItemOrder": [
+    "5c0530ee86f774697952d952", // LEDX Skin Transilluminator
+  ],
+
+  // After the two passes above, sort remaining items alphabetically
+  // by their localized name.
+  "EnableAlphabeticalSort": false,
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // VERSION LABEL
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  // Set to true to enable modification.
+  "EnableVersionLabelOverride": false,
+
+  // The string to display or append.
+  "VersionLabelText": "RZE"
+}

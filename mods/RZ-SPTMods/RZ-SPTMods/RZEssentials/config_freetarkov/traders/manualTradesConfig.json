@@ -1,0 +1,1033 @@
+{
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // Manual offers grouped by trader ID. Always injected on top of auto-routing.
+  // Each offer supports rouble price, barter items, stack count, loyalty level, durability, and explicit children.
+  // If no price and no barter items are specified, falls back to the item's handbook price.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "ManualOffers": [
+    {
+      // PRAPOR
+      // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+      "Id": "54cb50c76803fa8b248b4571",
+      "Offers": [
+        {
+          "Tpl": "5ede474b0c226a66f5402622", // 40x46mm M381 (HE) grenade
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 3 } ] // GP
+        },
+        {
+          "Tpl": "5ede47405b097655935d7d16", // 40x46mm M441 (HE) grenade
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 3 } ] // GP
+        },
+        {
+          "Tpl": "5f0c892565703e5c461894e9", // 40x46mm M433 (HEDP) grenade
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 2 } ] // GP
+        },
+        {
+          "Tpl": "5ede475b549eed7c6d5c18fb", // 40x46mm M386 (HE) grenade
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 1 } ] // GP
+        },
+        {
+          "Tpl": "5ede4739e0350d05467f73e8", // 40x46mm M406 (HE) grenade
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 1 } ] // GP
+        }
+      ]
+    },
+    {
+      // THERAPIST
+      // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+      "Id": "54cb57776803fa99248b456e",
+      "Offers": [
+        {
+          "Tpl": "5d1b33a686f7742523398398", // Canister with purified water
+          "PriceRoubles": 50000
+        }
+      ]
+    },
+    {
+      // PEACEKEEPER
+      // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+      "Id": "5935c25fb3acc3127c3d8cd9",
+      "Offers": [
+
+        // FACECOVERS
+        {
+          "Tpl": "6570aead4d84f81fd002a033", // Death Shadow lightweight armored mask
+          "BarterItems": [ { "Tpl": "657089638db3adca1009f4ca", "Count": 1 } ]
+        },
+        {
+          "Tpl": "68a9b821cdf661cc5a0626c6", // Death Shadow lightweight armored mask (Gold)
+          "BarterItems": [ { "Tpl": "657089638db3adca1009f4ca", "Count": 1 } ]
+        },
+        {
+          "Tpl": "68a9b852cdf661cc5a0626c9", // Death Shadow lightweight armored mask (Gray)
+          "BarterItems": [ { "Tpl": "657089638db3adca1009f4ca", "Count": 1 } ]
+        },
+        {
+          "Tpl": "68a9b873a4b28d56c80a1818", // Death Shadow lightweight armored mask (White)
+          "BarterItems": [ { "Tpl": "657089638db3adca1009f4ca", "Count": 1 } ]
+        },
+        {
+          "Tpl": "657089638db3adca1009f4ca", // Atomic Defense CQCM up armored ballistic mask (Black)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 10 } ]
+        },
+        {
+          "Tpl": "67a4b71ad3228756b6088ee2", // Atomic Defense CQCM ballistic mask (Smile)
+          "BarterItems": [ { "Tpl": "657089638db3adca1009f4ca", "Count": 1 } ]
+        },
+        {
+          "Tpl": "67a5c5b6dfdf568c9009af66", // Atomic Defense CQCM ballistic mask (Stop Me)
+          "BarterItems": [ { "Tpl": "657089638db3adca1009f4ca", "Count": 1 } ]
+        },
+        {
+          "Tpl": "67a5c5df782ce4655104db14", // Atomic Defense CQCM ballistic mask (Scars)
+          "BarterItems": [ { "Tpl": "657089638db3adca1009f4ca", "Count": 1 } ]
+        },
+        {
+          "Tpl": "67a5c5f37f52620c5b05b4d6", // Atomic Defense CQCM ballistic mask (Target)
+          "BarterItems": [ { "Tpl": "657089638db3adca1009f4ca", "Count": 1 } ]
+        },
+        {
+          "Tpl": "67a5c6068fcd9fb73f0752cf", // Atomic Defense CQCM ballistic mask (Skull)
+          "BarterItems": [ { "Tpl": "657089638db3adca1009f4ca", "Count": 1 } ]
+        },
+        {
+          "Tpl": "67a5c61c7f52620c5b05b4d8", // Atomic Defense CQCM ballistic mask (Demon)
+          "BarterItems": [ { "Tpl": "657089638db3adca1009f4ca", "Count": 1 } ]
+        },
+        {
+          "Tpl": "67a5c657782ce4655104db16", // Atomic Defense CQCM ballistic mask (El Día de Muertos)
+          "BarterItems": [ { "Tpl": "657089638db3adca1009f4ca", "Count": 1 } ]
+        },
+        {
+          "Tpl": "688b3bfa1ed594eccd0c45ee", // Atomic Defense CQCM ballistic mask (Ping)
+          "BarterItems": [ { "Tpl": "657089638db3adca1009f4ca", "Count": 1 } ]
+        },
+        {
+          "Tpl": "68a9a1223e1ee5a70504c126", // Atomic Defense CQCM ballistic mask (Crash Tested)
+          "BarterItems": [ { "Tpl": "657089638db3adca1009f4ca", "Count": 1 } ]
+        },
+        {
+          "Tpl": "68a9a15d73d52d47830759c9", // Atomic Defense CQCM ballistic mask (Demonic Face)
+          "BarterItems": [ { "Tpl": "657089638db3adca1009f4ca", "Count": 1 } ]
+        },
+        {
+          "Tpl": "68d54d0525ac8590a8075ac3", // Atomic Defense CQCM ballistic mask (Loui Peeton)
+          "BarterItems": [ { "Tpl": "657089638db3adca1009f4ca", "Count": 1 } ]
+        },
+        {
+          "Tpl": "68a9a0b01696fb8c1e0ee9cc", // Atomic Defense CQCM ballistic mask (Toxic)
+          "BarterItems": [ { "Tpl": "657089638db3adca1009f4ca", "Count": 1 } ]
+        },
+        {
+          "Tpl": "6936ff8734029a096c06f95a", // Atomic Defense CQCM ballistic mask (Blasted Ice)
+          "BarterItems": [ { "Tpl": "657089638db3adca1009f4ca", "Count": 1 } ]
+        },
+        {
+          "Tpl": "66bdc28a0b603c26902b2011", // DevTac Ronin ballistic helmet
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 5 } ] // GP
+        },
+        {
+          "Tpl": "5b4329f05acfc47a86086aa1", // DevTac Ronin Respirator
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 10 } ] // GP
+        },
+        {
+          "Tpl": "68a9a85c3e1ee5a70504c12e", // DevTac Ronin Respirator (Beast)
+          "BarterItems": [ { "Tpl": "66bdc28a0b603c26902b2011", "Count": 1 } ]
+        },
+        {
+          "Tpl": "68a9a92b838d65bcb3050176", // DevTac Ronin Respirator (Eternal Green)
+          "BarterItems": [ { "Tpl": "66bdc28a0b603c26902b2011", "Count": 1 } ]
+        },
+
+        // HELMETS
+        { "Tpl": "6745895717824b1ec20570a6" }, // 6B47 Ratnik-BSh helmet (EMR Arctic cover)
+        { "Tpl": "5aa7cfc0e5b5b00015693143" }, // 6B47 Ratnik-BSh helmet (EMR cover)
+        { "Tpl": "5a7c4850e899ef00150be885" }, // 6B47 Ratnik-BSh helmet (Olive Drab)
+        { "Tpl": "5b432d215acfc4771e1c6624" }, // LShZ lightweight helmet (Olive Drab)
+        { "Tpl": "65719f0775149d62ce0a670b" }, // NPP KlASS Tor-2 helmet (Olive Drab)
+        { "Tpl": "61bca7cda0eae612383adf57" }, // NFM HJELM helmet (Hellhound Grey)
+        { "Tpl": "5c06c6a80db834001b735491" }, // SSh-68 steel helmet (Olive Drab)
+        { "Tpl": "5aa7d03ae5b5b00016327db5" }, // UNTAR helmet
+        { "Tpl": "5c066ef40db834001966a595" }, // Armasight NVG head strap
+        { "Tpl": "5a16bb52fcdbcb001a3b00dc" }, // Wilcox Skull Lock head mount
+
+        {
+          "Tpl": "5f60b34a41e30a4ab12a6947", // Galvion Caiman Hybrid helmet (Grey)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 5 } ] // GP
+        },
+        {
+          "Tpl": "693be003582cc8870b090b41", // Galvion Caiman Hybrid helmet (MultiCam Alpine)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 5 } ] // GP
+        },
+        {
+          "Tpl": "68a9b3ca0a9c4f9398032c46", // Galvion Caiman Hybrid helmet (MultiCam)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 5 } ] // GP
+        },
+        {
+          "Tpl": "68a9b5a5863d2a71fa0494a6", // Galvion Caiman Hybrid helmet (Mutualist)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 5 } ] // GP
+        },
+        {
+          "Tpl": "5b40e2bc5acfc40016388216", // HighCom Striker ULACH IIIA helmet (Desert Tan)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 5 } ] // GP
+        },
+        {
+          "Tpl": "5b40e1525acfc4771e1c6611", // HighCom Striker ULACH IIIA helmet (Black)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "68bee2e876e02b9e340ef113", // HighCom Striker ULACH IIIA helmet (Coyote Stripes)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "68bee2d9af253218c00ebbb4", // HighCom Striker ULACH IIIA helmet (Green Stripes)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "68bee2e0ede5c8489f08e1b5", // HighCom Striker ULACH IIIA helmet (Mesh Spray)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "68bee2ccd6da72c13f03db95", // HighCom Striker ULACH IIIA helmet (Sand)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "693be8f650fafa102607aed4", // HighCom Striker ULACH IIIA helmet (Winter Mesh Spray)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "5b40e3f35acfc40016388218", // HighCom Striker ACHHC IIIA helmet (Black)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 5 } ] // GP
+        },
+        {
+          "Tpl": "5b40e4035acfc47a87740943", // HighCom Striker ACHHC IIIA helmet (Olive Drab)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 5 } ] // GP
+        },
+        {
+          "Tpl": "675956062f6ddfe8ff0e2806", // MTEK FLUX Ballistic helmet (MultiCam Alpine)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "6759655674aa5e0825040d62", // MTEK FLUX Ballistic helmet (Olive Drab)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "67597ceea35600b4c10cea86", // MTEK STRIKE Ballistic helmet (Coyote)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "67597d241d5a44f2f605df06", // MTEK STRIKE Ballistic helmet (Coyote/MultiCam Arid)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "5ea17ca01412a1425304d1c0", // Diamond Age Bastion helmet (Black)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "68a9beecbba00932ed0bc256", // Diamond Age NeoSteel High Cut helmet (Aces)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "65709d2d21b9f815e208ff95", // Diamond Age NeoSteel High Cut helmet (Black)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "68a9be93f260f4e1c2038686", // Diamond Age NeoSteel High Cut helmet (Orange Stains)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "5e00c1ad86f774747333222c", // Team Wendy EXFIL Ballistic Helmet (Black)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "5e01ef6886f77445f643baa4", // Team Wendy EXFIL Ballistic Helmet (Coyote Brown)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "66b5f65ca7f72d197e70bcd6", // Ballistic Armor Co. Bastion helmet (Armor Black)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "66b5f666cad6f002ab7214c2", // Ballistic Armor Co. Bastion helmet (MultiCam)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "66b5f661af44ca0014063c05", // Ballistic Armor Co. Bastion helmet (OD Green)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "5c17a7ed2e2216152142459c", // Crye Precision AirFrame helmet (Tan)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "5a154d5cfcdbcb001a3b00da", // Ops-Core FAST MT Super High Cut helmet (Black)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "5ac8d6885acfc400180ae7b0", // Ops-Core FAST MT Super High Cut helmet (Urban Tan)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "5e4bfc1586f774264f7582d3", // MSA Gallet TC 800 High Cut combat helmet (Black)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "5d5e7d28a4b936645d161203", // MSA ACH TC-2001 MICH Series helmet (Olive Drab)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "5d5e9c74a4b9364855191c40", // MSA ACH TC-2002 MICH Series helmet (Olive Drab)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "5aa7e4a4e5b5b000137b76f2", // ZSh-1-2M helmet (Black cover)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 10 } ] // GP
+        },
+        {
+          "Tpl": "5aa7e454e5b5b0214e506fa2", // ZSh-1-2M helmet (Olive Drab)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 10 } ] // GP
+        },
+        {
+          "Tpl": "6759af0f9c8a538dd70bfae6", // Maska-1SCh bulletproof helmet (Christmas Edition)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 10 } ] // GP
+        },
+        {
+          "Tpl": "5c0e874186f7745dc7616606", // Maska-1SCh bulletproof helmet (Killa Edition)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 10 } ] // GP
+        },
+        {
+          "Tpl": "5c091a4e0db834001d5addc8", // Maska-1SCh bulletproof helmet (Olive Drab)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 10 } ] // GP
+        },
+        {
+          "Tpl": "5d6d3716a4b9361bc8618872", // BNTI LShZ-2DTM helmet (Black)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 10 } ] // GP
+        },
+        {
+          "Tpl": "5ca20ee186f774799474abc2", // Vulkan-5 LShZ-5 bulletproof helmet (Black)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "68a987a1609a5cb2120ebd2f", // Vulkan-5 LShZ-5 bulletproof helmet (Camouflage)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "68a986ca5c0073fa2d0d8cb8", // Vulkan-5 LShZ-5 bulletproof helmet (Eight-ball)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "68a98762609a5cb2120ebd26", // Vulkan-5 LShZ-5 bulletproof helmet (Flame)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "5aa7e276e5b5b000171d0647", // Altyn bulletproof helmet (Olive Drab)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "5f60c74e3b85f6263c145586", // Rys-T bulletproof helmet (Black)
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "68bee28f79c8186398098e6f", // Champion's helmet
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 10 } ] // GP
+        },
+
+        // HELMET MODS
+        { "Tpl": "5f60bf4558eff926626a60f2" }, // Galvion Caiman Fixed Arm Visor
+        { "Tpl": "5f60b85bbdb8e27dee3dc985" }, // Galvion Caiman Hybrid Ballistic Applique
+        { "Tpl": "693be0ee50fafa102607aebd" }, // Galvion Caiman Hybrid Ballistic Applique (MultiCam Alpine)
+        { "Tpl": "68a9b601863d2a71fa0494ae" }, // Galvion Caiman Hybrid Ballistic Applique (MultiCam)
+        { "Tpl": "68a9b669fa39b6976e07de96" }, // Galvion Caiman Hybrid Ballistic Applique (Mutualist)
+        { "Tpl": "5f60c076f2bcbb675b00dac2" }, // Galvion Caiman Hybrid Ballistic Mandible Guard
+        { "Tpl": "693be056fd3a5c751e00de04" }, // Galvion Caiman Hybrid Ballistic Mandible Guard (MultiCam Alpine)
+        { "Tpl": "68a9b6c8d3a061d8b6058346" }, // Galvion Caiman Hybrid Ballistic Mandible Guard (MultiCam)
+        { "Tpl": "68a9b73bd3a061d8b6058348" }, // Galvion Caiman Hybrid Ballistic Mandible Guard (Mutualist)
+        { "Tpl": "5ea18c84ecf1982c7712d9a2" }, // Diamond Age Bastion helmet armor plate
+        { "Tpl": "6570a88c8f221f3b210353b7" }, // Diamond Age NeoSteel helmet ballistic mandible
+        { "Tpl": "68a9c0ed6d47c49b700faaf9" }, // Diamond Age NeoSteel helmet ballistic mandible (Aces)
+        { "Tpl": "68a9bf7d9f4c45817b0d83b6" }, // Diamond Age NeoSteel helmet ballistic mandible (Black)
+        { "Tpl": "5a16ba61fcdbcb098008728a" }, // Ops-Core FAST Gunsight Mandible
+        { "Tpl": "5a16b7e1fcdbcb00165aa6c9" }, // Ops-Core FAST multi-hit ballistic face shield
+        { "Tpl": "5a16badafcdbcb001865f72d" }, // Ops-Core FAST Side Armor
+        { "Tpl": "5a16b672fcdbcb001912fa83" }, // Ops-Core FAST Visor
+        { "Tpl": "5c0e66e2d174af02a96252f4" }, // Ops-Core SLAAP armor helmet plate (Tan)
+      ]
+    },
+    {
+      // SKIER
+      // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+      "Id": "58330581ace78e27b8b10cee",
+      "Offers": [
+
+        { "Tpl": "5df8a2ca86f7740bfe6df777" }, // 6B2 body armor (Flora)
+        { "Tpl": "5ab8e4ed86f7742d8e50c7fa" }, // MF-UNTAR body armor
+        { "Tpl": "5648a7494bdc2d9d488b4583" }, // PACA Soft Armor
+        { "Tpl": "607f20859ee58b18e41ecd90" }, // PACA Soft Armor (Rivals Edition)
+        { "Tpl": "5c0e446786f7742013381639" }, // 6B5-15 Zh-86 Uley armored rig (Flora)
+        { "Tpl": "5c0e3eb886f7742015526062" }, // 6B5-16 Zh-86 Uley armored rig (Khaki) <= 17 GP
+
+        { // 5.11 Tactical Hexgrid plate carrier <= 4 GP
+          "Tpl": "5fd4c474dd870108a754b241", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 4 } ] },
+        { // Hexatac HPC Plate Carrier (MultiCam Black) <= 4 GP
+          "Tpl": "63737f448b28897f2802b874", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 4 } ] },
+        { // Hexatac HPC Plate Carrier (MultiCam) <= 4 GP
+          "Tpl": "67ab2eecfe82855dcc0f2af6", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 4 } ] },
+        { // HighCom Trooper TFO body armor (Coyote) <= 13 GP
+          "Tpl": "67ab2f94dafe3b22670c912c", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 13 } ] },
+        { // HighCom Trooper TFO body armor (MultiCam) <= 13 GP
+          "Tpl": "5c0e655586f774045612eeb2", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 13 } ] },
+        { // LBT-6094A Slick Plate Carrier (Black) <= 13 GP
+          "Tpl": "5e4abb5086f77406975c9342", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 13 } ] },
+        { // LBT-6094A Slick Plate Carrier (Coyote Tan) <= 13 GP
+          "Tpl": "6038b4b292ec1c3103795a0b", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 13 } ] },
+        { // LBT-6094A Slick Plate Carrier (Olive Drab) <= 13 GP
+          "Tpl": "6038b4ca92ec1c3103795a0d", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 13 } ] },
+        { // NPP KlASS Kora-Kulon body armor (Black) <= 9 GP
+          "Tpl": "64be79c487d1510151095552", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 9 } ] },
+        { // NPP KlASS Kora-Kulon body armor (EMR) <= 9 GP
+          "Tpl": "64be79e2bf8412471d0d9bcc", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 9 } ] },
+        { // BNTI Module-3M body armor <= 12 GP
+          "Tpl": "59e7635f86f7742cbf2c1095", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 12 } ] },
+        { // Interceptor OTV body armor (UCP) <= 16 GP
+          "Tpl": "64abd93857958b4249003418", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 16 } ] },
+        { // Interceptor OTV body armor (Woodland) <= 16 GP
+          "Tpl": "68a89942431252e29a02dbf6", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 16 } ] },
+        { // BNTI Kirasa-N body armor <= 19 GP
+          "Tpl": "5b44d22286f774172b0c9de8", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 19 } ] },
+        { // BNTI Kirasa-N body armor (Green) <= 19 GP
+          "Tpl": "67ab2f28dafe3b22670c9116", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 19 } ] },
+        { // BNTI Zhuk body armor (Press) <= 24 GP
+          "Tpl": "5c0e5edb86f77461f55ed1f7", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 24 } ] },
+       // { // 6B13 assault armor (EMR) <= 22 GP
+       //   "Tpl": "5c0e53c886f7747fa141986d", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 22 } ] },
+        { // 6B13 assault armor (Flora) <= 22 GP
+          "Tpl": "5c0e51be86f774598e797894", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 22 } ] },
+        { // DRD body armor <= 18 GP
+          "Tpl": "62a09d79de7ac81993580530", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 18 } ] },
+        { // NFM THOR Concealable Reinforced Vest body armor <= 27 GP
+          "Tpl": "609e8540d5c319764c2bc2e9", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 27 } ] },
+        { // NFM THOR Concealable Reinforced Vest body armor (Head Eyes) <= 27 GP
+          "Tpl": "68a89146212dbbeead0d5636", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 27 } ] },
+        { // 6B23-1 body armor (EMR) <= 25 GP
+          "Tpl": "5c0e5bab86f77461f55ed1f3", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 25 } ] },
+        { // 6B23-2 body armor (Mountain Flora) <= 25 GP
+          "Tpl": "5c0e57ba86f7747fa141986d", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 25 } ] },
+        { // NPP KlASS Korund-VM body armor (Black) <= 30 GP
+          "Tpl": "5f5f41476bdad616ad46d631", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 30 } ] },
+        { // NPP KlASS Korund-VM body armor (Kamysh) <= 30 GP
+          "Tpl": "68a97093431252e29a02dc06", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 30 } ] },
+        { // 6B45 body armor <= 31 GP
+          "Tpl": "68948a95d8f2b85fb705e2a6", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 31 } ] },
+        { // BNTI Gzhel-K body armor <= 31 GP
+          "Tpl": "5ab8e79e86f7742d8b372e78", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 31 } ] },
+        { // BNTI Zhuk body armor (EMR) <= 31 GP
+          "Tpl": "5c0e625a86f7742d77340f62", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 31 } ] },
+        { // 6B13 M assault armor (Christmas Edition) <= 31 GP
+          "Tpl": "674d91ce6e862d5a95059ed6", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 31 } ] },
+        { // 6B13 M assault armor (Killa Edition) <= 31 GP
+          "Tpl": "5c0e541586f7747fa54205c9", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 31 } ] },
+        { // FORT Defender-2 body armor <= 31 GP
+          "Tpl": "5e9dacf986f774054d6b89f4", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 31 } ] },
+        { // FORT Redut-M body armor <= 40 GP
+          "Tpl": "5ca2151486f774244a3b8d30", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 40 } ] },
+        { // FORT Redut-M body armor (SK Woodland) <= 40 GP
+          "Tpl": "67ab2f5adafe3b22670c911f", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 40 } ] },
+        { // IOTV Gen4 body armor (Assault Kit, MultiCam) <= 40 GP
+          "Tpl": "5b44cf1486f77431723e3d05", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 40 } ] },
+        { // IOTV Gen4 body armor (High Mobility Kit, MultiCam) <= 40 GP
+          "Tpl": "5b44d0de86f774503d30cba8", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 40 } ] },
+        { // 6B43 Zabralo-Sh body armor (EMR) <= 44 GP
+          "Tpl": "545cdb794bdc2d3a198b456a", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 44 } ] },
+        { // NFM THOR Integrated Carrier body armor <= 44 GP
+          "Tpl": "60a283193cb70855c43a381d", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 44 } ] },
+        { // FORT Redut-T5 body armor (Smog) <= 49 GP
+          "Tpl": "5ca21c6986f77479963115a7", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 49 } ] },
+        { // IOTV Gen4 body armor (Full Protection Kit, MultiCam) <= 49 GP
+          "Tpl": "5b44cd8b86f774503d30cba2", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 49 } ] },
+        { // Azimut SS Khamelion chest harness (Olive) <= 3 GP
+          "Tpl": "63611865ba5b90db0c0399d1", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 3 } ] },
+        { // Crye Precision JPC Plate Carrier (MultiCam) <= 10 GP
+          "Tpl": "693fd0e9deee848f70054999", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 10 } ] },
+        { // Eagle Allied Industries MBSS plate carrier (Coyote Brown) <= 7 GP
+          "Tpl": "64a5366719bab53bd203bf33", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 7 } ] },
+        { // S&S Precision PlateFrame plate carrier (Goons Edition) <= 11 GP
+          "Tpl": "628b9784bcf6e2659e09b8a2", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 11 } ] },
+        { // Tac-Kek JayPC plate carrier (Black) <= 7 GP
+          "Tpl": "693fd1200ec97e98040bd3f9", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 7 } ] },
+        { // Tac-Kek JayPC plate carrier (OD Green) <= 8 GP
+          "Tpl": "693fd13aa490096a05028cc8", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 8 } ] },
+        { // Tasmanian Tiger Plate Carrier MKIII (Coyote Brown) <= 8 GP
+          "Tpl": "66b6295a8ca68c6461709efa", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 8 } ] },
+        { // Tasmanian Tiger SK plate carrier (MultiCam Black) <= 6 GP
+          "Tpl": "628cd624459354321c4b7fa2", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 6 } ] },
+        { // WARTECH TV-110 plate carrier (Coyote) <= 15 GP
+          "Tpl": "5c0e746986f7741453628fe5", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] },
+        { // WARTECH TV-115 plate carrier (Olive Drab) <= 13 GP
+          "Tpl": "64a536392d2c4e6e970f4121", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 13 } ] },
+        { // 5.11 Tactical TacTec plate carrier (Ranger Green) <= 17 GP
+          "Tpl": "5b44cad286f77402a54ae7e5", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 17 } ] },
+        { // 5.11 Tactical TacTec plate carrier (Storm) <= 17 GP
+          "Tpl": "67ab4b2d6f7ae4aa550bbcf6", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 17 } ] },
+        { // Crye Precision AVS plate carrier (Tagilla Edition) <= 16 GP
+          "Tpl": "609e860ebd219504d8507525", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 16 } ] },
+        { // Spiritus Systems LV-119 Plate Carrier (Black Division V2) <= 19 GP
+          "Tpl": "689479eb30cc5ba7be00f5ff", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 19 } ] },
+        { // ANA Tactical M1 plate carrier (Olive Drab) <= 25 GP
+          "Tpl": "5c0e722886f7740458316a57", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 25 } ] },
+        { // Ars Arma A18 Skanda plate carrier (MultiCam) <= 26 GP
+          "Tpl": "5d5d87f786f77427997cfaef", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 26 } ] },
+        { // Eagle Industries MMAC plate carrier (Ranger Green) <= 24 GP
+          "Tpl": "61bc85697113f767765c7fe7", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 24 } ] },
+        { // Shellback Tactical Banshee plate carrier (A-TACS AU) <= 24 GP
+          "Tpl": "639343fce101f4caa40a4ef3", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 24 } ] },
+        { // Crye Precision AVS plate carrier (MultiCam) <= 23 GP
+          "Tpl": "67ab49aab9c7a1e18c095686", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 23 } ] },
+        { // Crye Precision AVS plate carrier (Ranger Green) <= 23 GP
+          "Tpl": "544a5caa4bdc2d1a388b4568", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 23 } ] },
+        { // ECLiPSE RBAV-AF plate carrier (Ranger Green) <= 28 GP
+          "Tpl": "628dc750b910320f4c27a732", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 28 } ] },
+        { // First Spear Strandhogg plate carrier (ABUPAT) <= 27 GP
+          "Tpl": "68a85ab8ef22d08bf401fa68", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 27 } ] },
+        { // First Spear Strandhogg plate carrier (Ranger Green) <= 27 GP
+          "Tpl": "61bcc89aef0f505f0c6cd0fc", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 27 } ] },
+        { // Stich Profi Plate Carrier V2 (Black) <= 28 GP
+          "Tpl": "66b6296d7994640992013b17", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 28 } ] },
+        { // Stich Profi Plate Carrier V2 (MARPAT Woodland) <= 28 GP
+          "Tpl": "68a99207aa809946e507c2f6", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 28 } ] },
+        { // 6B3TM-01 armored rig (Khaki) <= 20 GP
+          "Tpl": "5d5d646386f7742797261fd9", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 20 } ] },
+        { // ANA Tactical M2 plate carrier (EMR) <= 31 GP
+          "Tpl": "5ab8dced86f774646209ec87", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 31 } ] },
+        { // ANA Tactical M2 plate carrier (MultiCam Alpine) <= 31 GP
+          "Tpl": "69412e5573dcf473e50be464", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 31 } ] },
+        { // Ars Arma CPC MOD.1 plate carrier (A-TACS FG) <= 32 GP
+          "Tpl": "5e4ac41886f77406a511c9a8", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 32 } ] },
+        { // Crye Precision CPC plate carrier (Goons Edition) <= 31 GP
+          "Tpl": "628b9c7d45122232a872358f", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 31 } ] },
+        { // NPP KlASS Bagariy plate carrier (EMR) <= 32 GP
+          "Tpl": "628d0618d1ba6e4fa07ce5a4", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 32 } ] },
+        { // Stich Profi Stich Defense mod.2 plate carrier (MultiCam) <= 30 GP
+          "Tpl": "66b6295178bbc0200425f995", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 30 } ] },
+        { // CQC Osprey MK4A plate carrier (Assault, MTP) <= 35 GP
+          "Tpl": "60a3c70cde5f453f634816a3", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 35 } ] },
+        { // Ferro Concepts FCPC V5 Plate Carrier (Black Division) <= 28 GP
+          "Tpl": "689479cb47e5acd1e10be986", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 28 } ] },
+        { // Spiritus Systems LV-119 Plate Carrier (Black Division V1) <= 31 GP
+          "Tpl": "689479a4a733b1602007e2eb", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 31 } ] },
+        { // 6B45 armored rig (Assault) <= 35 GP
+          "Tpl": "68948b118c57a8a52301d7ae", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 35 } ] },
+        { // 6B45 armored rig (General Purpose) <= 35 GP
+          "Tpl": "68948ad72c87773b9f06d73f", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 35 } ] },
+        { // 6B45 armored rig (Medic) <= 35 GP
+          "Tpl": "68948aebd8f2b85fb705e2b0", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 35 } ] },
+        { // CQC Osprey MK4A plate carrier (Protection, MTP) <= 45 GP
+          "Tpl": "60a3c68c37ea821725773ef5", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 45 } ] },
+        { // First Spear Siege-R Optimized M.A.S.S. Plate Carrier (Black Division) <= 50 GP
+          "Tpl": "68947a4be4bf255d1b0ca746", "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 50 } ] }
+      ]
+    },
+    {
+      // MECHANIC
+      // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+      "Id": "5a7c2eca46aef81a7ca2145d",
+      "Offers": [
+        {
+          "Tpl": "5c07dd120db834001c39092d", // EOTech HHS-1 hybrid sight
+          "BarterItems": [ { "Tpl": "5c0a2cec0db834001b7ce47d", "Count": 1 } ] // EOTech HHS-1 hybrid sight (Tan)
+        },
+        {
+          "Tpl": "5c0a2cec0db834001b7ce47d", // EOTech HHS-1 hybrid sight (Tan)
+          "BarterItems": [ { "Tpl": "5c07dd120db834001c39092d", "Count": 1 } ] // EOTech HHS-1 hybrid sight
+        }
+      ]
+    },
+    {
+      // RAGMAN
+      // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+      "Id": "5ac3b934156ae10c4430e83c",
+      "Offers": [
+        {
+          "Tpl": "572b7adb24597762ae139821"
+        },
+        {
+          "Tpl": "5fd4c5477a8d854fa0105061"
+        },
+        {
+          "Tpl": "64be7095047e826eae02b0c1"
+        },
+        // BAGS
+        {
+          "Tpl": "628e1ffc83ec92260c0f437f", // Gruppa 99 T30 backpack (Black)
+          "BarterItems": [ { "Tpl": "59e3647686f774176a362507", "Count": 1 } ] // Wooden clock
+        },
+        {
+          "Tpl": "62a1b7fbc30cfa1d366af586", // Gruppa 99 T30 backpack (MultiCam)
+          "BarterItems": [ { "Tpl": "59e3647686f774176a362507", "Count": 1 } ] // Wooden clock
+        },
+        {
+          "Tpl": "68947a8ce4bf255d1b0ca759", // Tasmanian Tiger Trooper 35 backpack (Khaki)
+          "BarterItems": [ { "Tpl": "59e3647686f774176a362507", "Count": 1 } ] // Wooden clock
+        },
+        {
+          "Tpl": "5f5e467b0bc58666c37e7821", // Eberlestock F5 Switchblade backpack (Dry Earth)
+          "BarterItems": [ { "Tpl": "59e3647686f774176a362507", "Count": 1 } ] // Wooden clock
+        },
+        {
+          "Tpl": "68947ad3e4bf255d1b0ca75c", // Mystery Ranch NICE Frame Load Sling
+          "BarterItems": [ { "Tpl": "59e3647686f774176a362507", "Count": 1 } ] // Wooden clock
+        },
+        {
+          "Tpl": "5c0e774286f77468413cc5b2", // Mystery Ranch Blackjack 50 backpack (MultiCam)
+          "BarterItems": [ { "Tpl": "59e3647686f774176a362507", "Count": 1 } ] // Wooden clock
+        },
+        {
+          "Tpl": "68947ab5a733b1602007e2fe", // Mystery Ranch 2 Day Assault Pack (Black)
+          "BarterItems": [ { "Tpl": "59e3647686f774176a362507", "Count": 1 } ] // Wooden clock
+        },
+        {
+          "Tpl": "68947a8ce4bf255d1b0ca759", // Tasmanian Tiger Modular Pack 45 Plus
+          "BarterItems": [ { "Tpl": "59e3647686f774176a362507", "Count": 1 } ] // Wooden clock
+        },
+        {
+          "Tpl": "5df8a4d786f77412672a1e3b", // 6Sh118 raid backpack
+          "BarterItems": [ { "Tpl": "59e3647686f774176a362507", "Count": 1 } ] // Wooden clock
+        },
+        // VESTS
+        {
+          "Tpl": "68bee2b431902bb4d90c3a2a", // LBT-1961A Load Bearing Chest Rig (AOR1)
+          "BarterItems": [ { "Tpl": "59faf7ca86f7740dbe19f6c2", "Count": 1 } ] // Roler Submariner gold wrist watch
+        },
+        {
+          "Tpl": "628baf0b967de16aab5a4f36", // LBT-1961A Load Bearing Chest Rig (Goons Edition)
+          "BarterItems": [ { "Tpl": "59faf7ca86f7740dbe19f6c2", "Count": 1 } ] // Roler Submariner gold wrist watch
+        },
+        {
+          "Tpl": "5e9db13186f7742f845ee9d3", // LBT-1961A Load Bearing Chest Rig (MAS Grey)
+          "BarterItems": [ { "Tpl": "59faf7ca86f7740dbe19f6c2", "Count": 1 } ] // Roler Submariner gold wrist watch
+        },
+        {
+          "Tpl": "5648a69d4bdc2ded0b8b457b", // BlackRock chest rig (Gray)
+          "BarterItems": [ { "Tpl": "59faf7ca86f7740dbe19f6c2", "Count": 1 } ] // Roler Submariner gold wrist watch
+        },
+        {
+          "Tpl": "67ab3f146d7ece17bf0096ff", // BlackRock chest rig (Khaki)
+          "BarterItems": [ { "Tpl": "59faf7ca86f7740dbe19f6c2", "Count": 1 } ] // Roler Submariner gold wrist watch
+        },
+        {
+          "Tpl": "68a986615db8a4a66404ff9a", // WARTECH MK3 TV-104 chest rig (Moss)
+          "BarterItems": [ { "Tpl": "59faf7ca86f7740dbe19f6c2", "Count": 1 } ] // Roler Submariner gold wrist watch
+        },
+        {
+          "Tpl": "5ab8dab586f77441cd04f2a2", // WARTECH MK3 TV-104 chest rig (MultiCam)
+          "BarterItems": [ { "Tpl": "59faf7ca86f7740dbe19f6c2", "Count": 1 } ] // Roler Submariner gold wrist watch
+        },
+        {
+          "Tpl": "5df8a42886f77412640e2e75", // Velocity Systems MPPV Multi-Purpose Patrol Vest (Wolf Grey)
+          "BarterItems": [ { "Tpl": "59faf7ca86f7740dbe19f6c2", "Count": 1 } ] // Roler Submariner gold wrist watch
+        },
+        {
+          "Tpl": "5c0e6a1586f77404597b4965", // Poyas-A + Poyas-B gear rig
+          "BarterItems": [ { "Tpl": "59faf7ca86f7740dbe19f6c2", "Count": 1 } ] // Roler Submariner gold wrist watch
+        }
+      ]
+    },
+    {
+      // JAEGER
+      // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+      "Id": "5c0647fdd443bc2504c2d371",
+      "Offers": [
+        {
+          "Tpl": "666b11055a706400b717cfa5" // Tripwire installation kit
+        },
+        {
+          "Tpl": "5d1b36a186f7742523398433" // Metal Fuel Tank
+        },
+        {
+          "Tpl": "5b4391a586f7745321235ab2" // WI-FI Camera
+        },
+        {
+          "Tpl": "61605e13ffa6e502ac5e7eef" // Vortex Ranger 1500 rangefinder
+        }
+      ]
+    },
+    {
+      // REF
+      // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+      "Id": "6617beeaa9cfa777ca915b7c",
+      "Offers": [
+
+        { "Tpl": "59fafd4b86f7745ca07e1232" }, // Key Tool
+        { "Tpl": "590c60fc86f77412b13fddcf" }, // Documents Case
+
+        {
+          "Tpl": "67d3ed3271c17ff82e0a5b0b", // Key Case
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 25 } ] // GP
+        },
+        {
+          "Tpl": "619cbf9e0a7c3a1a2731940a", // Keycard holder case
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 25 } ] // GP
+        },
+        {
+          "Tpl": "5aafbcd986f7745e590fff23", // Medicine Case
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 30 } ] // GP
+        },
+        {
+          "Tpl": "567143bf4bdc2d1a0f8b4567", // Pistol case
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 10 } ] // GP
+        },
+        {
+          "Tpl": "5c093e3486f77430cb02e593", // Dogtag Case
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 20 } ] // GP
+        },
+        {
+          "Tpl": "5aafbde786f774389d0cbc0f", // Ammunition Case
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "5e2af55f86f7746d4159f07c", // Grenade Case
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 25 } ] // GP
+        },
+        {
+          "Tpl": "5c127c4486f7745625356c13", // Magazine Case
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 15 } ] // GP
+        },
+        {
+          "Tpl": "5c093db286f7740a1b2617e3", // Mr. Holodilnick thermal bag
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 30 } ] // GP
+        },
+        {
+          "Tpl": "59fb016586f7746d0d4b423a", // Money Case
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 30 } ] // GP
+        },
+        {
+
+          "Tpl": "67600929bd0a0549d70993f6", // Ballistic Plate Case
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 80 } ] // GP
+        },
+        {
+
+          "Tpl": "5d235bb686f77443f4331278", // SICC organizational pouch -> 200x GP + 1x Documents Case
+          "BarterItems": [
+            { "Tpl": "590c60fc86f77412b13fddcf", "Count": 1 }, // Documents Case
+            { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 150 } // GP
+          ]
+        },
+        {
+          "Tpl": "619cbf7d23893217ec30b689", // Injector Case
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 100 } ] // GP
+        },
+        {
+
+          "Tpl": "59fb042886f7746c5005a7b2", // Item Case
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 100 } ] // GP
+        },
+        {
+
+          "Tpl": "5c0a840b86f7742ffa4f2482", // THICC Item Case -> 1x  + 200x GP
+          "BarterItems": [
+            { "Tpl": "59fb042886f7746c5005a7b2", "Count": 1 }, // Item Case
+            { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 200 } // GP
+          ]
+        },
+        {
+          "Tpl": "59fb023c86f7746d0d4b423c", // Weapon Case
+          "BarterItems": [ { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 100 } ] // GP
+        },
+        {
+          "Tpl": "5b6d9ce188a4501afc1b2b25", // THICC Weapon Case
+          "BarterItems": [
+            { "Tpl": "59fb023c86f7746d0d4b423c", "Count": 1 }, // Weapon Case
+            { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 200 } // GP
+          ]
+        },
+        {
+          // Secure Container Alpha -> 1 Lega
+          "Tpl": "544a11ac4bdc2d470e8b456a",
+          "BarterItems": [
+            { "Tpl": "6656560053eaaa7a23349c86", "Count": 1 }
+          ]
+        },
+        {
+          // Secure Container Beta -> SC Alpha + 5 Lega
+          "Tpl": "5857a8b324597729ab0a0e7d",
+          "BarterItems": [
+            { "Tpl": "544a11ac4bdc2d470e8b456a", "Count": 1 },
+            { "Tpl": "6656560053eaaa7a23349c86", "Count": 5 }
+          ]
+        },
+        {
+          // Secure Container Epsilon -> SC Beta + 10 Lega
+          "Tpl": "59db794186f77448bc595262",
+          "BarterItems": [
+            { "Tpl": "5857a8b324597729ab0a0e7d", "Count": 1 },
+            { "Tpl": "6656560053eaaa7a23349c86", "Count": 10 }
+          ]
+        },
+        {
+          // Secure Container Gamma -> SC Epsilon + 20 Lega
+          "Tpl": "5857a8bc2459772bad15db29",
+          "BarterItems": [
+            { "Tpl": "59db794186f77448bc595262", "Count": 1 },
+            { "Tpl": "6656560053eaaa7a23349c86", "Count": 20 }
+          ]
+        },
+        {
+          // Secure Container Theta -> SC Gamma + 30 Lega
+          "Tpl": "664a55d84a90fc2c8a6305c9",
+          "BarterItems": [
+            { "Tpl": "5857a8bc2459772bad15db29", "Count": 1 },
+            { "Tpl": "6656560053eaaa7a23349c86", "Count": 30 }
+          ]
+        },
+        {
+          // Secure Container Kappa -> SC Theta + 40 Lega
+          "Tpl": "5c093ca986f7740a1867ab12",
+          "BarterItems": [
+            { "Tpl": "664a55d84a90fc2c8a6305c9", "Count": 1 },
+            { "Tpl": "6656560053eaaa7a23349c86", "Count": 40 }
+          ]
+        },
+        {
+          // Secure Container Kappa Desecrated -> SC Kappa + 50 Lega
+          "Tpl": "676008db84e242067d0dc4c9",
+          "BarterItems": [
+            { "Tpl": "5c093ca986f7740a1867ab12", "Count": 1 },
+            { "Tpl": "6656560053eaaa7a23349c86", "Count": 50 }
+          ]
+        }
+      ]
+    },
+    {
+      // SABLE
+      // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+      "Id": "fa363fc015e07b5f7828c9f7",
+      "Offers": [
+        { // 10k
+          "Tpl": "573474f924597738002c6174", // Chainlet
+          "BarterItems": [ { "Tpl": "62a09ee4cf4a99369e262453", "Count": 1 } ] // Can of white salt
+        },
+        { // 10k
+          "Tpl": "573474f924597738002c6174", // Chainlet
+          "BarterItems": [ { "Tpl": "57347baf24597738002c6178", "Count": 1 } ] // RAM
+        },
+        { // 10k
+          "Tpl": "573474f924597738002c6174", // Chainlet
+          "BarterItems": [ { "Tpl": "59faf98186f774067b6be103", "Count": 1 } ] // Alkaline cleaner for heat exchangers
+        },
+        { // 10k
+          "Tpl": "573474f924597738002c6174", // Chainlet
+          "BarterItems": [ { "Tpl": "5e2aef7986f7746d3f3c33f5", "Count": 1 } ] // Repellent
+        },
+        { // 10k
+          "Tpl": "573474f924597738002c6174", // Chainlet
+          "BarterItems": [ { "Tpl": "56742c2e4bdc2d95058b456d", "Count": 1 } ] // // Zibbo lighter
+        },
+        { // 10k
+          "Tpl": "573474f924597738002c6174", // Chainlet
+          "BarterItems": [ { "Tpl": "5e2af02c86f7746d420957d4", "Count": 1 } ] // Pack of chlorine
+        },
+        { // 10k
+          "Tpl": "573474f924597738002c6174", // Chainlet
+          "BarterItems": [ { "Tpl": "573478bc24597738002c6175", "Count": 1 } ] // Horse figurine
+        },
+        { // 10k
+          "Tpl": "573474f924597738002c6174", // Chainlet
+          "BarterItems": [ { "Tpl": "5e2af00086f7746d3f3c33f7", "Count": 1 } ] // Smoked Chimney drain cleaner
+        },
+        { // 10k
+          "Tpl": "573474f924597738002c6174", // Chainlet
+          "BarterItems": [ { "Tpl": "59e358a886f7741776641ac3", "Count": 1 } ] // Clin window cleaner
+        },
+        { // 10k
+          "Tpl": "573474f924597738002c6174", // Chainlet
+          "BarterItems": [ { "Tpl": "59e3596386f774176c10a2a2", "Count": 1 } ] // PAID AntiRoach spray
+        },
+        { // 5k
+          "Tpl": "5d1b3a5d86f774252167ba22", // Pile of meds
+          "BarterItems": [ { "Tpl": "573474f924597738002c6174", "Count": 1 } ] // Chainlet
+        },
+        { // 10k
+          "Tpl": "5d1b3f2d86f774253763b735", // Disposable syringe
+          "BarterItems": [ { "Tpl": "573474f924597738002c6174", "Count": 2 } ] // Chainlet
+        },
+        { // 10k
+          "Tpl": "5b4335ba86f7744d2837a264", // Medical bloodset
+          "BarterItems": [ { "Tpl": "573474f924597738002c6174", "Count": 2 } ] // Chainlet
+        },
+        { // 10k
+          "Tpl": "59e361e886f774176c10a2a5", // Bottle of hydrogen peroxide
+          "BarterItems": [ { "Tpl": "573474f924597738002c6174", "Count": 2 } ] // Chainlet
+        },
+        { // 10k
+          "Tpl": "59e3606886f77417674759a5", // Bottle of saline solution
+          "BarterItems": [ { "Tpl": "573474f924597738002c6174", "Count": 2 } ] // Chainlet
+        },
+        { // 10k
+          "Tpl": "59e366c186f7741778269d85", // Plexiglass
+          "BarterItems": [ { "Tpl": "573474f924597738002c6174", "Count": 2 } ] // Chainlet
+        },
+        { // 40k
+          "Tpl": "5734758f24597738025ee253", // Golden neck chain
+          "BarterItems": [ { "Tpl": "573478bc24597738002c6175", "Count": 2 } ] // Horse figurine
+        },
+        { // 40k
+          "Tpl": "5734758f24597738025ee253", // Golden neck chain
+          "BarterItems": [ { "Tpl": "590de71386f774347051a052", "Count": 1 } ] // Antique teapot
+        },
+        { // 40k
+          "Tpl": "5734758f24597738025ee253", // Golden neck chain
+          "BarterItems": [ { "Tpl": "62a091170b9d3c46de5b6cf2", "Count": 1 } ] // Axel parrot figurine
+        },
+        { // 40k
+          "Tpl": "5734758f24597738025ee253", // Golden neck chain
+          "BarterItems": [ { "Tpl": "59e3658a86f7741776641ac4", "Count": 1 } ] // Cat figurine
+        },
+        { // 40k
+          "Tpl": "5734758f24597738025ee253", // Golden neck chain
+          "BarterItems": [ { "Tpl": "5e54f62086f774219b0f1937", "Count": 1 } ] // Raven figurine
+        },
+        { // 40k
+          "Tpl": "5734758f24597738025ee253", // Golden neck chain
+          "BarterItems": [ { "Tpl": "5bc9bdb8d4351e003562b8a1", "Count": 1 } ] // Silver Badge
+        },
+        { // 40k
+          "Tpl": "5734758f24597738025ee253", // Golden neck chain
+          "BarterItems": [ { "Tpl": "5f745ee30acaeb0d490d8c5b", "Count": 1 } ] // Veritas guitar pick
+        },
+        { // 40k
+          "Tpl": "5734758f24597738025ee253", // Golden neck chain
+          "BarterItems": [ { "Tpl": "66b37eb4acff495a29492407", "Count": 1 } ] // Viibiin sneaker
+        },
+        { // 40k
+          "Tpl": "5734758f24597738025ee253", // Golden neck chain
+          "BarterItems": [ { "Tpl": "590a373286f774287540368b", "Count": 1 } ] // Dry fuel
+        },
+        { // 40k
+          "Tpl": "5734758f24597738025ee253", // Golden neck chain
+          "BarterItems": [ { "Tpl": "60391b0fb847c71012789415", "Count": 1 } ] // TP-200 TNT brick
+        },
+        {
+          "Tpl": "59faf7ca86f7740dbe19f6c2", // Roler Submariner gold wrist watch
+          "BarterItems": [ { "Tpl": "68bee2b431902bb4d90c3a2a", "Count": 1 } ] // LBT-1961A Load Bearing Chest Rig (AOR1)
+        },
+        {
+          "Tpl": "59faf7ca86f7740dbe19f6c2", // Roler Submariner gold wrist watch
+          "BarterItems": [ { "Tpl": "628baf0b967de16aab5a4f36", "Count": 1 } ] // LBT-1961A Load Bearing Chest Rig (Goons Edition)
+        },
+        {
+          "Tpl": "59faf7ca86f7740dbe19f6c2", // Roler Submariner gold wrist watch
+          "BarterItems": [ { "Tpl": "5e9db13186f7742f845ee9d3", "Count": 1 } ] // LBT-1961A Load Bearing Chest Rig (MAS Grey)
+        },
+        {
+          "Tpl": "59faf7ca86f7740dbe19f6c2", // Roler Submariner gold wrist watch
+          "BarterItems": [ { "Tpl": "5648a69d4bdc2ded0b8b457b", "Count": 1 } ] // BlackRock chest rig (Gray)
+        },
+        {
+          "Tpl": "59faf7ca86f7740dbe19f6c2", // Roler Submariner gold wrist watch
+          "BarterItems": [ { "Tpl": "67ab3f146d7ece17bf0096ff", "Count": 1 } ] // BlackRock chest rig (Khaki)
+        },
+        {
+          "Tpl": "59faf7ca86f7740dbe19f6c2", // Roler Submariner gold wrist watch
+          "BarterItems": [ { "Tpl": "68a986615db8a4a66404ff9a", "Count": 1 } ] // WARTECH MK3 TV-104 chest rig (Moss)
+        },
+        {
+          "Tpl": "59faf7ca86f7740dbe19f6c2", // Roler Submariner gold wrist watch
+          "BarterItems": [ { "Tpl": "5ab8dab586f77441cd04f2a2", "Count": 1 } ] // WARTECH MK3 TV-104 chest rig (MultiCam)
+        },
+        {
+          "Tpl": "59faf7ca86f7740dbe19f6c2", // Roler Submariner gold wrist watch
+          "BarterItems": [ { "Tpl": "5df8a42886f77412640e2e75", "Count": 1 } ] // Velocity Systems MPPV Multi-Purpose Patrol Vest (Wolf Grey)
+        },
+        {
+          "Tpl": "59faf7ca86f7740dbe19f6c2", // Roler Submariner gold wrist watch
+          "BarterItems": [ { "Tpl": "5c0e6a1586f77404597b4965", "Count": 1 } ] // Poyas-A + Poyas-B gear rig
+        },
+        {
+          "Tpl": "59faf7ca86f7740dbe19f6c2", // Roler Submariner gold wrist watch
+          "BarterItems": [ { "Tpl": "5bc9c377d4351e3bac12251b", "Count": 1 } ] // Old firesteel
+        },
+        {
+          "Tpl": "59e3647686f774176a362507", // Wooden clock
+          "BarterItems": [ { "Tpl": "5f5e46b96bdad616ad46d613", "Count": 1 } ] // Eberlestock F4 Terminator
+        },
+        {
+          "Tpl": "59e3647686f774176a362507", // Wooden clock
+          "BarterItems": [ { "Tpl": "656e0436d44a1bb4220303a0", "Count": 1 } ] // Mystery Ranch SATL Bridger
+        },
+        {
+          "Tpl": "59e3647686f774176a362507", // Wooden clock
+          "BarterItems": [ { "Tpl": "68947ad3e4bf255d1b0ca75c", "Count": 1 } ] // Mystery Ranch NICE Frame Load Sling
+        },
+        {
+          "Tpl": "59e3647686f774176a362507", // Wooden clock
+          "BarterItems": [ { "Tpl": "5c0e774286f77468413cc5b2", "Count": 1 } ] // Mystery Ranch Blackjack 50 backpack (MultiCam)
+        },
+        {
+          "Tpl": "59e3647686f774176a362507", // Wooden clock
+          "BarterItems": [ { "Tpl": "68947ab5a733b1602007e2fe", "Count": 1 } ] // Mystery Ranch 2 Day Assault Pack (Black)
+        },
+        {
+          "Tpl": "59e3647686f774176a362507", // Wooden clock
+          "BarterItems": [ { "Tpl": "68947a8ce4bf255d1b0ca759", "Count": 1 } ] // Tasmanian Tiger Modular Pack 45 Plus
+        },
+        {
+          "Tpl": "59e3647686f774176a362507", // Wooden clock
+          "BarterItems": [ { "Tpl": "67458730df3c1da90b0b052b", "Count": 1 } ] // 5.11 Tactical RUSH 100 backpack
+        },
+        {
+          "Tpl": "59e3647686f774176a362507", // Wooden clock
+          "BarterItems": [ { "Tpl": "5df8a4d786f77412672a1e3b", "Count": 1 } ] // 6Sh118 raid backpack
+        },
+        {
+          "Tpl": "59e3647686f774176a362507", // Wooden clock
+          "BarterItems": [ { "Tpl": "59e3639286f7741777737013", "Count": 1 } ] // Bronze lion figurine
+        },
+        {
+          "Tpl": "59e3647686f774176a362507", // Wooden clock
+          "BarterItems": [ { "Tpl": "6937ed118715e9fd1b0f286d", "Count": 1 } ] // Tangerine
+        },
+        {
+          "Tpl": "59e3647686f774176a362507", // Wooden clock
+          "BarterItems": [ { "Tpl": "5f5e467b0bc58666c37e7821", "Count": 1 } ] // Eberlestock F5 Switchblade backpack (Dry Earth)
+        },
+        {
+          "Tpl": "59e3647686f774176a362507", // Wooden clock
+          "BarterItems": [ { "Tpl": "639346cc1c8f182ad90c8972", "Count": 1 } ] // Tasmanian Tiger Trooper 35 backpack (Khaki)
+        },
+        {
+          "Tpl": "59e3647686f774176a362507", // Wooden clock
+          "BarterItems": [ { "Tpl": "628e1ffc83ec92260c0f437f", "Count": 1 } ] // Gruppa 99 T30 backpack (Black)
+        },
+        {
+          "Tpl": "59e3647686f774176a362507", // Wooden clock
+          "BarterItems": [ { "Tpl": "62a1b7fbc30cfa1d366af586", "Count": 1 } ] // Gruppa 99 T30 backpack (MultiCam)
+        },
+        {
+          "Tpl": "59e3647686f774176a362507", // Wooden clock
+          "BarterItems": [ { "Tpl": "5bc9bc53d4351e00367fbcee", "Count": 1 } ] // Golden rooster figurine
+        },
+        //
+        {
+          "Tpl": "5c12613b86f7743bbe2c3f76", // Intelligence folder
+          "BarterItems": [
+            { "Tpl": "590c621186f774138d11ea29", "Count": 5 }, // Secure flash drive
+            { "Tpl": "577e1c9d2459773cd707c525", "Count": 1 } // Printer paper
+          ]
+        },
+        {
+          "Tpl": "5c0530ee86f774697952d952", // LEDX
+          "BarterItems": [
+            { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 150 }, // GP
+          ]
+        },
+        {
+          "Tpl": "57347ca924597744596b4e71", // Graphics Card
+          "BarterItems": [
+            { "Tpl": "6656560053eaaa7a23349c86", "Count": 5 } // Lega
+          ]
+        }
+      ]
+    }
+  ]
+}

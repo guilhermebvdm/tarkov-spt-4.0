@@ -1,0 +1,18 @@
+{
+  // MASTER TOGGLE - Set to true to enable this config.
+  "EnableAvatarOverrides": false,
+
+  // Trader ID -> image filename (file must be in db/ folder).
+  // After changing portraits, press "Clean Temp Files" in the SPT launcher.
+  "AvatarOverrides": {
+    "59b91ca086f77469a81232e4": "prapor_01.png",
+    "59b91cab86f77469aa5343ca": "therapist_01.png",
+    "579dc571d53a0658a154fbec": "fence_01.png",
+    "59b91cb486f77469a81232e5": "skier_01.png",
+    "59b91cbd86f77469aa5343cb": "peacekeeper_01.png",
+    "5a7c2ebb86f7746e324a06ab": "mechanic_01.png",
+    "5ac3b86a86f77461491d1ad8": "ragman_01.png",
+    "5c06531a86f7746319710e1b": "jaeger_01.png",
+    "6617beeaa9cfa777ca915b7c": "ref_01.png",
+  },
+}

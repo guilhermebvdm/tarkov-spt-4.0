@@ -1,0 +1,13 @@
+{
+  "Enabled": true,
+
+  "CategoryOverrides": {
+    "5448e53e4bdc2d60728b4567": { // Backpack
+      "Ops": {
+        "speedPenaltyPercent":    { "Value": 0 },
+        "mousePenalty":           { "Value": 0 },
+        "weaponErgonomicPenalty": { "Value": 0 }
+      }
+    }
+  },
+}

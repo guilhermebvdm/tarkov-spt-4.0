@@ -1,0 +1,74 @@
+{
+  // MASTER TOGGLE : Set to false to disable all item tiers features entirely.
+  "EnableItemTiers": false,
+
+  // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // TIER DEFINITIONS
+  //
+  // Maps tier names to background colors.
+  //
+  // Default    — Unassigned or garbage tier
+  // Notable    — Better than garbage
+  // Superior   — Good
+  // Excellent  — Very good
+  // Elite      — Best in slot
+  // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  // "dark" or "bright" (or you can make your own)
+  "Theme": "dark",
+
+  //
+  "ThemePresets": {
+    "dark": {
+      "Default":     "black",
+      "Notable":     "blue",
+      "Superior":    "violet",
+      "Excellent":   "tracerYellow",
+      "Elite":       "tracerRed",
+      "Situational": "#555555",
+      "Quest":       "green"
+    },
+    "bright": {
+      "Default":     "black",
+      "Notable":     "#0000bf",
+      "Superior":    "#7f00bf",
+      "Excellent":   "#bfbf00",
+      "Elite":       "#bf0000",
+      "Situational": "#888888",
+      "Quest":       "tracerGreen"
+    },
+    "verybright": {
+      "Default":     "#555555",
+      "Notable":     "#0000ff",
+      "Superior":    "#aa00ff",
+      "Excellent":   "#ffff00",
+      "Elite":       "#ff0000",
+      "Situational": "#cccccc",
+      "Quest":       "tracerGreen"
+    }
+  },
+
+  // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // PRICE THRESHOLDS
+  // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "PriceThresholds": [
+    { "MinPrice": 200000, "Tier": "Elite"     },
+    { "MinPrice": 90000, "Tier":  "Excellent" },
+    { "MinPrice": 60000,  "Tier": "Superior"  },
+    { "MinPrice": 30000,  "Tier": "Notable"   }
+  ],
+}
+
+// SPT native background color values:
+// "default"       — grey
+// "blue"          — blue
+// "violet"        — violet/purple
+// "yellow"        — pale yellow
+// "tracerYellow"  — vivid gold
+// "red"           — red
+// "tracerRed"     — vivid red
+// "orange"        — renders as pale brown in-game
+// "green"         — green
+// "tracerGreen"   — neon green
+// "black"         — black

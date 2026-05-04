@@ -1,0 +1,94 @@
+{
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // BUYBACK CONFIGURATION
+  //
+  // Controls what each trader will buy from the player.
+  //
+  // Modes:
+  //    Default          - Leave the trader's vanilla buyback config untouched.
+  //    Disabled         - Trader does not buy anything from the player.
+  //    Categories       - Trader buys items belonging to the specified category IDs (sub-categories included). See extras/category_dump.json.
+  //    AllWithBlacklist - Trader buys all handbook items except those in the blacklist (TPLs).
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "Rules": {
+
+    // PRAPOR
+    "54cb50c76803fa8b248b4571": {
+      "Mode": "Disabled"
+    },
+
+    // THERAPIST
+    "54cb57776803fa99248b456e": {
+      "Mode": "Disabled"
+    },
+
+    // FENCE
+    "579dc571d53a0658a154fbec": {
+      "Mode": "AllWithBlacklist",
+      "Blacklist": [
+
+        //"59faff1d86f7746c51718c9c", // Physical bitcoin
+
+        // Secure containers
+        "5732ee6a24597719ae0c0281", // Pouch_Waist
+        "544a11ac4bdc2d470e8b456a", // Pouch_Alpha
+        "5857a8b324597729ab0a0e7d", // Pouch_Beta
+        "59db794186f77448bc595262", // Pouch_Epsilon
+        "5857a8bc2459772bad15db29", // Pouch_Gamma
+        "664a55d84a90fc2c8a6305c9", // Pouch_Theta
+        "5c093ca986f7740a1867ab12", // Pouch_Kappa
+        "676008db84e242067d0dc4c9", // Pouch_Kappa_Desecrated
+
+        // Defibrillator & its crafting components
+        "5c052e6986f7746b207bc3c9", // Portable defibrillator
+        "5c05300686f7746dce784e5d", // VPX Flash Storage Module
+        "5c05308086f7746b2101e90b", // Virtex programmable processor
+        "5c052f6886f7746b1e3db148", // Military COFDM Wireless Signal Transmitter
+
+        // AMMO
+        "5ede474b0c226a66f5402622", // 40x46mm M381 (HE) grenade
+        "5ede475b549eed7c6d5c18fb", // 40x46mm M386 (HE) grenade
+        "5ede4739e0350d05467f73e8", // 40x46mm M406 (HE) grenade
+        "5f0c892565703e5c461894e9", // 40x46mm M433 (HEDP) grenade
+        "5ede47405b097655935d7d16", // 40x46mm M441 (HE) grenade
+        "5ede475339ee016e8c534742", // 40x46mm M576 (MP-APERS) grenade
+      ]
+    },
+
+    // PEACEKEEPER
+    "5935c25fb3acc3127c3d8cd9": {
+      "Mode": "Disabled"
+    },
+
+    // SKIER
+    "58330581ace78e27b8b10cee": {
+      "Mode": "Disabled"
+    },
+
+    // MECHANIC
+    "5a7c2eca46aef81a7ca2145d": {
+      "Mode": "Disabled"
+    },
+
+    // RAGMAN
+    "5ac3b934156ae10c4430e83c": {
+      "Mode": "Disabled"
+    },
+
+    // JAEGER
+    "5c0647fdd443bc2504c2d371": {
+      "Mode": "Disabled"
+    },
+
+    // REF
+    "6617beeaa9cfa777ca915b7c": {
+      "Mode": "Disabled"
+    },
+
+    // SABLE (custom trader, ignored if not enabled)
+    "fa363fc015e07b5f7828c9f7": {
+      "Mode": "Disabled"
+    }
+  }
+}

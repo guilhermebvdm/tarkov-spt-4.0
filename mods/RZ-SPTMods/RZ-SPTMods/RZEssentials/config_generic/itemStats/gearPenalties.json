@@ -1,0 +1,27 @@
+{
+  "Enabled": false,
+
+  "CategoryOverrides": {
+    "57bef4c42459772e8d35a53b": { // ArmoredEquipment
+      "Ops": {
+        "speedPenaltyPercent":    { "Op": "multiply", "Value": 0.5 },
+        "mousePenalty":           { "Op": "multiply", "Value": 0.5 },
+        "weaponErgonomicPenalty": { "Op": "multiply", "Value": 0.5 }
+      }
+    },
+    "5448e5284bdc2dcb718b4567": { // Vest
+      "Ops": {
+        "speedPenaltyPercent":    { "Op": "multiply", "Value": 0.5 },
+        "mousePenalty":           { "Op": "multiply", "Value": 0.5 },
+        "weaponErgonomicPenalty": { "Op": "multiply", "Value": 0.5 }
+      }
+    },
+    "5448e53e4bdc2d60728b4567": { // Backpack
+      "Ops": {
+        "speedPenaltyPercent":    { "Value": 0 },
+        "mousePenalty":           { "Value": 0 },
+        "weaponErgonomicPenalty": { "Value": 0 }
+      }
+    }
+  },
+}

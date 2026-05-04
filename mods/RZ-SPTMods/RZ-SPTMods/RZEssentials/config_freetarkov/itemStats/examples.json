@@ -1,0 +1,65 @@
+{
+  "Enabled": false,
+
+  "Overrides": {
+
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────
+    // ARMOR — example (6B43 body armor)
+    // Ops: ArmorClass, BluntThroughput, Indestructibility, weaponErgonomicPenalty,
+    //      speedPenaltyPercent, mousePenalty, MaxDurability
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    //"5c0e541586f7747fa54205c9": {
+    //  "Ops": {
+    //    "ArmorClass":               { "Value": 6     },
+    //    "BluntThroughput":          { "Value": 0.18  },
+    //    "Indestructibility":        { "Value": 0.0   },
+    //    "weaponErgonomicPenalty":   { "Value": -4.0  },
+    //    "speedPenaltyPercent":      { "Value": -5.0  },
+    //    "mousePenalty":             { "Value": 0.0   },
+    //    "MaxDurability":            { "Value": 85.0  }
+    //  }
+    //},
+
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────
+    // AMMO — example (M855A1)
+    // Ops: Damage, PenetrationPower, ArmorDamage, InitialSpeed,
+    //      FragmentationChance, RicochetChance, StackMaxSize
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    //"54527ac44bdc2d36668b4567": {
+    //  "Ops": {
+    //    "Damage":              { "Value": 55.0  },
+    //    "PenetrationPower":    { "Value": 45    },
+    //    "ArmorDamage":         { "Value": 50.0  },
+    //    "InitialSpeed":        { "Value": 961.0 },
+    //    "FragmentationChance": { "Value": 0.5   },
+    //    "StackMaxSize":        { "Value": 60    }
+    //  }
+    //},
+
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────
+    // WEAPON MOD — example (receiver/barrel)
+    // Ops: Ergonomics, Recoil, Accuracy, Weight, DurabilityBurnModificator
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    //"618405198004cc50514c3594": {
+    //  "Ops": {
+    //    "Ergonomics":               { "Value": 10.0  },
+    //    "Recoil":                   { "Value": -5.0  },
+    //    "Weight":                   { "Value": 0.15  },
+    //    "DurabilityBurnModificator": { "Value": 1.0  }
+    //  }
+    //},
+
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────
+    // KEY — example (Labs keycard)
+    // Ops: MaximumNumberOfUsage (0 = unlimited)
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    //"5c94bbff86f7747ee735c08a": {
+    //  "Ops": { "MaximumNumberOfUsage": { "Value": 0 } }
+    //}
+
+  }
+}

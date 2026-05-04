@@ -1,0 +1,227 @@
+{
+  // MASTER SWITCH - Set to true to enable this config file.
+  "Enabled": false,
+
+  //
+  "Settings": {
+
+    "AimDrills": {
+      "WeaponShotAction": 0.2
+    },
+
+    "Assault": {
+      "WeaponChamberAction": 0.1,
+      "WeaponFixAction": 0.1,
+      "WeaponReloadAction": 0.025,
+      "WeaponShotAction": 0.1
+    },
+
+    "Attention": {
+      "ExamineWithInstruction": 3,
+      "FindActionFalse": 0.334,
+      "FindActionTrue": 0.167
+    },
+
+    "Charisma": {
+      "SkillProgressAtn": 0.5,
+      "SkillProgressInt": 0.5,
+      "SkillProgressPer": 0.5
+    },
+
+    "CovertMovement": {
+      "MovementAction": 0.025
+    },
+
+    "Crafting": {
+      "CraftingCycleHours": 8,
+      "CraftingPointsToIntelligence": 15,
+      "CraftTimeReductionPerLevel": 0.75,
+      "EliteExtraProductions": 1,
+      "PointsPerCraftingCycle": 2,
+      "PointsPerUniqueCraftCycle": 3.75,
+      "ProductionTimeReductionPerLevel": 0.75,
+      "UniqueCraftsPerCycle": 1
+    },
+
+    "DMR": {
+      "WeaponChamberAction": 0.025,
+      "WeaponFixAction": 0.2,
+      "WeaponReloadAction": 0.02,
+      "WeaponShotAction": 0.2
+    },
+
+    "Endurance": {
+      "GainPerFatigueStack": 0.05,
+      "MovementAction": 0.005,
+      "SprintAction": 0.04
+    },
+
+    "Health": {
+      "SkillProgress": 0.5
+    },
+
+    "HeavyVests": {
+      "BluntThroughputDamageHVestsReducePerLevel": 0.004,
+      "BuffMaxCount": 1,
+      "MeleeDamageLVestsReducePerLevel": 0,
+      "MoveSpeedPenaltyReductionHVestsReducePerLevel": 0.005,
+      "MoveSpeedPenaltyReductionLVestsReducePerLevel": 0,
+      "RicochetChanceHVestsCurrentDurabilityThreshold": 0.5,
+      "RicochetChanceHVestsEliteLevel": 0.05,
+      "RicochetChanceHVestsMaxDurabilityThreshold": 0.2,
+      "WearAmountRepairHVestsReducePerLevel": 0.01,
+      "WearAmountRepairLVestsReducePerLevel": 0,
+      "WearChanceRepairHVestsReduceEliteLevel": 0.5,
+      "WearChanceRepairLVestsReduceEliteLevel": 0
+    },
+
+    "HideoutManagement": {
+      "CircleOfCultistsBonusPercent": 0.01,
+      "ConsumptionReductionPerLevel": 0.5,
+      "SkillBoostPercent": 1,
+      "SkillPointsPerAreaUpgrade": 30,
+      "SkillPointsPerCraft": 2
+    },
+
+    "Immunity": {
+      "HealthNegativeEffect": 0.5,
+      "ImmunityMiscEffects": 1,
+      "ImmunityPainKiller": 1,
+      "ImmunityPoisonBuff": 1,
+      "StimulatorNegativeBuff": 0.011
+    },
+
+    "Intellect": {
+      "ExamineAction": 20,
+      "RepairAction": 0.005,
+      "RepairPointsCostReduction": 0.004,
+      "SkillProgress": 0.5,
+      "WearAmountReducePerLevel": 0.004,
+      "WearChanceReduceEliteLevel": 0.5
+    },
+
+    "LightVests": {
+      "BluntThroughputDamageHVestsReducePerLevel": 0,
+      "BuffMaxCount": 1,
+      "MeleeDamageLVestsReducePerLevel": 0.006,
+      "MoveSpeedPenaltyReductionHVestsReducePerLevel": 0,
+      "MoveSpeedPenaltyReductionLVestsReducePerLevel": 0.006,
+      "RicochetChanceHVestsCurrentDurabilityThreshold": 0,
+      "RicochetChanceHVestsEliteLevel": 0,
+      "RicochetChanceHVestsMaxDurabilityThreshold": 0,
+      "WearAmountRepairHVestsReducePerLevel": 0,
+      "WearAmountRepairLVestsReducePerLevel": 0.008,
+      "WearChanceRepairHVestsReduceEliteLevel": 0,
+      "WearChanceRepairLVestsReduceEliteLevel": 0.5
+    },
+
+    "MagDrills": {
+      "MagazineCheckAction": 0.05,
+      "RaidLoadedAmmoAction": 0.02,
+      "RaidUnloadedAmmoAction": 0.01
+    },
+
+    "Memory": {
+      "AnySkillUp": 5,
+      "SkillProgress": 0.4
+    },
+
+    "Metabolism": {
+      "DecreaseNegativeEffectDurationRate": 1,
+      "DecreasePoisonDurationRate": 1,
+      "EnergyRecoveryRate": 20,
+      "HydrationRecoveryRate": 20,
+      "IncreasePositiveEffectDurationRate": 1
+    },
+
+    "Perception": {
+      "OnlineAction": 2.5,
+      "UniqueLoot": 0.334
+    },
+
+    "Pistol": {
+      "WeaponChamberAction": 0.1,
+      "WeaponFixAction": 0.1,
+      "WeaponReloadAction": 0.025,
+      "WeaponShotAction": 0.1
+    },
+
+    "RecoilControl": {
+      "RecoilAction": 0.00015,
+      "RecoilBonusPerLevel": 0.003
+    },
+
+    "Revolver": {
+      "WeaponChamberAction": 0.1,
+      "WeaponFixAction": 0.2,
+      "WeaponReloadAction": 0.025,
+      "WeaponShotAction": 0.1
+    },
+
+    "Search": {
+      "FindAction": 0.166,
+      "SearchAction": 0.33
+    },
+
+    "Shotgun": {
+      "WeaponChamberAction": 0.1,
+      "WeaponFixAction": 0.2,
+      "WeaponReloadAction": 0.01,
+      "WeaponShotAction": 0.1
+    },
+
+    "Sniper": {
+      "WeaponChamberAction": 0.025,
+      "WeaponFixAction": 0.2,
+      "WeaponReloadAction": 0.02,
+      "WeaponShotAction": 0.2
+    },
+
+    "Strength": {
+      "FistfightAction": 0.2,
+      "MovementActionMax": 0.015,
+      "MovementActionMin": 0.005,
+      "PushUpMax": 0.1,
+      "PushUpMin": 0.033,
+      "SprintActionMax": 0.12,
+      "SprintActionMin": 0.04,
+      "ThrowAction": 0.2
+    },
+
+    "StressResistance": {
+      "HealthNegativeEffect": 0.33,
+      "LowHPDuration": 0.033
+    },
+
+    "Surgery": {
+      "SkillProgress": 0.5,
+      "SurgeryAction": 3
+    },
+
+    "Throwing": {
+      "ThrowAction": 0.25
+    },
+
+    "TroubleShooting": {
+      "EliteAmmoChanceReduceMult": 0.3,
+      "EliteDurabilityChanceReduceMult": 0.3,
+      "EliteMagChanceReduceMult": 0.3,
+      "MalfRepairSpeedBonusPerLevel": 0.005,
+      "SkillPointsPerMalfFix": 3.2
+    },
+
+    "Vitality": {
+      "DamageTakenAction": 0.005,
+      "HealthNegativeEffect": 0.5
+    },
+
+    "WeaponTreatment": {
+      "BuffMaxCount": 2,
+      "DurLossReducePerLevel": 0.005,
+      "SkillPointsPerRepair": 3,
+      "WearAmountRepairGunsReducePerLevel": 0.01,
+      "WearChanceRepairGunsReduceEliteLevel": 0.5
+    }
+
+  }
+}

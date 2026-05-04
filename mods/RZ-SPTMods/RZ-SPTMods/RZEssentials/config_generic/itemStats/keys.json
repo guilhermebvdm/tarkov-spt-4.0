@@ -1,0 +1,21 @@
+{
+  "Enabled": false,
+
+  "CategoryOverrides": {
+
+    // Mechanical keys - set to unlimited uses (0 = unlimited).
+    "5c99f98d86f7745c314214b3": {
+      "Ops": {
+        "MaximumNumberOfUsage": { "Op": "set", "Value": 0 }
+      }
+    },
+
+    // Keycards - double the number of uses.
+    "5c164d2286f774194c5e69fa": {
+      "Ops": {
+        "MaximumNumberOfUsage": { "Op": "multiply", "Value": 2 }
+      }
+    },
+
+  },
+}

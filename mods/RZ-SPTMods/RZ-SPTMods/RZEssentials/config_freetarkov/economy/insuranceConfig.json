@@ -1,0 +1,73 @@
+{
+  // Disable insurance on every item in the game. If true, the blacklists below are ignored.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  "DisableAll": true,
+
+  // Disable insurance on all items belonging to the specified categories.
+  // The parent chain is walked automatically, disabling a root category covers all children.
+  // Full category hierarchy available in extras/category_dump.json.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  "CategoryBlacklist": [
+
+    // Ammo & weapons
+    { "CategoryId": "5485a8684bdc2da71d8b4567", "Enabled": false }, // Ammo
+    { "CategoryId": "543be6564bdc2df4348b4568", "Enabled": false }, // ThrowWeap
+    { "CategoryId": "543be5cb4bdc2deb348b4568", "Enabled": false }, // AmmoBox
+    { "CategoryId": "677ae5df4be46b83620bf055", "Enabled": false }, // Rocket
+    { "CategoryId": "5448bc234bdc2d3c308b4569", "Enabled": false }, // Magazine
+    { "CategoryId": "610720f290b75a49ff2e5e25", "Enabled": false }, // CylinderMagazine
+    { "CategoryId": "627a137bf21bc425b06ab944", "Enabled": false }, // SpringDrivenCylinder
+    { "CategoryId": "5447b5fc4bdc2d87278b4567", "Enabled": false }, // AssaultCarbine
+    { "CategoryId": "5447b5f14bdc2d61278b4567", "Enabled": false }, // AssaultRifle
+    { "CategoryId": "5447b6194bdc2d67278b4567", "Enabled": false }, // MarksmanRifle
+    { "CategoryId": "5447b6094bdc2dc3278b4567", "Enabled": false }, // Shotgun
+    { "CategoryId": "5447b5e04bdc2d62278b4567", "Enabled": false }, // Smg
+    { "CategoryId": "5447b6254bdc2dc3278b4568", "Enabled": false }, // SniperRifle
+    { "CategoryId": "5447bed64bdc2d97278b4568", "Enabled": false }, // MachineGun
+    { "CategoryId": "5447bedf4bdc2d87278b4568", "Enabled": false }, // GrenadeLauncher
+    { "CategoryId": "67446d4f04141c10630604e7", "Enabled": false }, // RocketLauncher
+    { "CategoryId": "5447bee84bdc2dc3278b4569", "Enabled": false }, // SpecialWeapon
+    { "CategoryId": "5447e1d04bdc2dff2f8b4567", "Enabled": false }, // Knife
+    { "CategoryId": "5447b5cf4bdc2d65278b4567", "Enabled": false }, // Pistol
+    { "CategoryId": "617f1ef5e8b54b0998387733", "Enabled": false }, // Revolver
+
+    // Meds
+    { "CategoryId": "5448f39d4bdc2d0a728b4568", "Enabled": false }, // MedKit
+    { "CategoryId": "5448f3ac4bdc2dce718b4569", "Enabled": false }, // Medical
+    { "CategoryId": "57864c8c245977548867e7f1", "Enabled": false }, // MedicalSupplies
+    { "CategoryId": "5448f3a14bdc2d27728b4569", "Enabled": false }, // Drugs
+    { "CategoryId": "5448f3a64bdc2d60728b456a", "Enabled": false }, // Stimulator
+    { "CategoryId": "5448e8d64bdc2dce718b4568", "Enabled": false }, // Drink
+    { "CategoryId": "5448e8d04bdc2ddf718b4569", "Enabled": false }, // Food
+
+    // Gear
+    { "CategoryId": "5448e54d4bdc2dcc718b4568", "Enabled": false }, // Armor
+    { "CategoryId": "5a341c4686f77469e155819e", "Enabled": false }, // FaceCover
+    { "CategoryId": "5a341c4086f77401f2541505", "Enabled": false }, // Headwear
+    { "CategoryId": "5448e5724bdc2ddf718b4568", "Enabled": false }, // Visors
+    { "CategoryId": "5645bcb74bdc2ded0b8b4578", "Enabled": false }, // Headphones
+    { "CategoryId": "5448e5284bdc2dcb718b4567", "Enabled": false }, // Vest
+    { "CategoryId": "5448e53e4bdc2d60728b4567", "Enabled": false }, // Backpack
+    { "CategoryId": "5b3f15d486f77432d0509248", "Enabled": false }, // ArmBand
+    { "CategoryId": "644120aa86ffbe10ee032b6f", "Enabled": false }, // ArmorPlate
+
+    // Keys & info
+    { "CategoryId": "5c99f98d86f7745c314214b3", "Enabled": false }, // KeyMechanical
+    { "CategoryId": "5c164d2286f774194c5e69fa", "Enabled": false }, // Keycard
+    { "CategoryId": "5448ecbe4bdc2d60728b4568", "Enabled": false }, // Info
+    { "CategoryId": "567849dd4bdc2d150f8b456e", "Enabled": false }, // Map
+
+    // Barter & misc
+    { "CategoryId": "5448eb774bdc2d0a728b4567", "Enabled": false }, // BarterItem
+    { "CategoryId": "5448bf274bdc2dfc2f8b456a", "Enabled": false }, // MobContainer
+    { "CategoryId": "566965d44bdc2d814c8b4571", "Enabled": false }, // LootContainer
+    { "CategoryId": "5671435f4bdc2d96058b4569", "Enabled": false }, // LockableContainer
+    { "CategoryId": "590c745b86f7743cc433c5f2", "Enabled": false }, // Other
+  ],
+
+  // Disable insurance on specific items by TPL.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  "TplBlacklist": [
+    "59faff1d86f7746c51718c9c" // Bitcoin
+  ]
+}

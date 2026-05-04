@@ -1,0 +1,302 @@
+{
+  // Whether this profile is registered and visible in the launcher.
+  "Enabled": true,
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // Base profile to clone
+  //
+  // 0 = Standard        1 = Left Behind       2 = Prepare To Escape   3 = Edge Of Darkness
+  // 4 = Unheard         5 = Tournament        6 = SPT Developer       7 = SPT Easy start
+  // 8 = SPT Zero to hero
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "BaseProfile": 6,
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // Profile identity
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  // Profile name
+  "Name": "Free Tarkov - Dev - Hideout",
+
+  // Profile description
+  "Description": "No grind. All glory.",
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // Progression
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  // Examine all items in the game on character creation
+  "AllItemsExamined": true,
+
+  // Start at max level
+  "MaxLevel": true,
+
+  // Start at a specific level (1 to max). Ignored if MaxLevel is true. null = leave unchanged from base profile.
+  "StartingLevel": null,
+
+  // Starting prestige level (1-4). null = no prestige applied.
+  "StartingPrestigeLevel": 4,
+
+  // Skip prestige reward mails on character creation. Default true.
+  "SkipPrestigeRewards": true,
+
+  //
+  "UnlockAllAchievements": true,
+
+  // Max out all skills
+  "MaxSkills": true,
+
+  // Override specific skills individually (0-51). Ignored if MaxSkills is true.
+  "SkillOverrides": {
+
+    "Endurance": 0,
+    "Strength": 0,
+    "Vitality": 0,
+    "Health": 0,
+    "StressResistance": 0,
+    "Metabolism": 0,
+    "Immunity": 0,
+
+    "Perception": 0,
+    "Intellect": 0,
+    "Attention": 0,
+    "Charisma": 0,
+    "Memory": 0,
+
+    "Pistol": 0,
+    "Revolver": 0,
+    "SMG": 0,
+    "Assault": 0,
+    "Shotgun": 0,
+    "Sniper": 0,
+    "LMG": 0,
+    "HMG": 0,
+    "Launcher": 0,
+    "AttachedLauncher": 0,
+    "Throwing": 0,
+    "Melee": 0,
+    "DMR": 0,
+    "RecoilControl": 0,
+    "AimDrills": 0,
+    "TroubleShooting": 0,
+
+    "Surgery": 0,
+    "CovertMovement": 0,
+    "Search": 0,
+    "MagDrills": 0,
+    "Sniping": 0,
+    "ProneMovement": 0,
+    "FieldMedicine": 0,
+    "FirstAid": 0,
+    "LightVests": 0,
+    "HeavyVests": 0,
+    "WeaponModding": 0,
+    "AdvancedModding": 0,
+    "NightOps": 0,
+    "SilentOps": 0,
+    "Lockpicking": 0,
+    "WeaponTreatment": 0,
+
+    "Freetrading": 0,
+    "Auctions": 0,
+    "Cleanoperations": 0,
+    "Barter": 0,
+    "Shadowconnections": 0,
+    "Taskperformance": 0,
+
+    "Crafting": 0,
+    "HideoutManagement": 0,
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // Inventory
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  // Clear equipped items from the base profile
+  "ClearEquipment": true,
+
+  // Clear stash items from the base profile before injecting ours
+  "ClearStash": true,
+
+  // 0 = Default
+  // 1 = SECURE_WAIST_POUCH,
+  // 2 = SECURE_CONTAINER_ALPHA,
+  // 3 = SECURE_CONTAINER_BETA,
+  // 4 = SECURE_CONTAINER_EPSILON,
+  // 5 = SECURE_CONTAINER_GAMMA,
+  // 6 = SECURE_CONTAINER_THETA,
+  // 7 = SECURE_CONTAINER_KAPPA,
+  // 8 = SECURE_CONTAINER_KAPPA_DESECRATED,
+  // 9 = SECURE_CONTAINER_BOSS,
+  // 10 = SECURE_CONTAINER_GAMMA_TUE,
+  // 11 = SECURE_DEVELOPER_SECURE_CONTAINER,
+  // 12 = SECURE_TOURNAMENT_SECURED_CONTAINER,
+  "SecureContainer": 12,
+
+  // Additional starting items
+  "AdditionalStartingItems": {
+    "Enabled": true,
+    "Items": [
+      { "Tpl": "5449016a4bdc2d6f028b456f", "Count": 10000000 }, // Roubles
+      { "Tpl": "5449016a4bdc2d6f028b456f", "Count": 10000000 }, // Roubles
+      { "Tpl": "5449016a4bdc2d6f028b456f", "Count": 10000000 }, // Roubles
+      { "Tpl": "5449016a4bdc2d6f028b456f", "Count": 10000000 }, // Roubles
+      { "Tpl": "5449016a4bdc2d6f028b456f", "Count": 10000000 }, // Roubles
+      { "Tpl": "57347c77245977448d35f6e2", "Count": 40 }, // Screw nuts
+      { "Tpl": "59e35ef086f7741777737012", "Count": 40 }, // Pack of screws
+      { "Tpl": "57347c5b245977448d35f6e1", "Count": 40 }, // Bolts
+      { "Tpl": "61bf7b6302b3924be92fa8c3", "Count": 40 }, // Metal spare parts
+      { "Tpl": "5734779624597737e04bf329", "Count": 30 }, // CPU fan
+      { "Tpl": "57347c2e24597744902c94a1", "Count": 20 }, // Power supply unit
+      { "Tpl": "59e36c6f86f774176c10a2a7", "Count": 30 }, // Power cord
+      { "Tpl": "5c06779c86f77426e00dd782", "Count": 30 }, // Bundle of wires
+      { "Tpl": "57347cd0245977445a2d6ff1", "Count": 30 }, // T-shaped plug
+      { "Tpl": "590a3b0486f7743954552bdb", "Count": 30 }, // Printed circuit board
+      { "Tpl": "5d1b313086f77425227d1678", "Count": 30 }, // Phase control relay
+      { "Tpl": "5d0378d486f77420421a5ff4", "Count": 10 }, // Military power filter
+      { "Tpl": "590a3cd386f77436f20848cb", "Count": 20 }, // Energy saving lamp
+      { "Tpl": "590a3c0a86f774385a33c450", "Count": 20 }, // Spark plug
+      { "Tpl": "5d1b39a386f774252339976f", "Count": 20 }, // Silicone tube
+      { "Tpl": "5d1b327086f7742525194449", "Count": 20 }, // Pressure gauge
+      { "Tpl": "590c2e1186f77425357b6124", "Count": 4 }, // Toolset
+      { "Tpl": "62a0a0bb621468534a797ad5", "Count": 2 }, // Sets of file master
+      { "Tpl": "5d1b317c86f7742523398392", "Count": 2 }, // Hand drill
+      { "Tpl": "59e35de086f7741778269d84", "Count": 5 }, // Electric drill
+      { "Tpl": "5d1b2fa286f77425227d1674", "Count": 20 }, // Electric motor
+      { "Tpl": "590c2c9c86f774245b1f03f2", "Count": 5 }, // Construction measuring tape
+      { "Tpl": "5e2af22086f7746d3f3c33fa", "Count": 5 }, // Poxeram
+      { "Tpl": "590c5bbd86f774785762df04", "Count": 5 }, // WD-40 (100 ml)
+      { "Tpl": "590c31c586f774245e3141b2", "Count": 25 }, // Pack of nails
+      { "Tpl": "5c05300686f7746dce784e5d", "Count": 15 }, // VPX
+      { "Tpl": "5b4391a586f7745321235ab2", "Count": 5 }, // WifiCamera
+      { "Tpl": "619cbfeb6b8a1b37a54eebfa", "Count": 5 }, // Bulbex
+      { "Tpl": "590c346786f77423e50ed342", "Count": 5 }, // Xenomorph
+      { "Tpl": "5d40419286f774318526545f", "Count": 2 }, // Metal cutting scissors
+      { "Tpl": "5734795124597738002c6176", "Count": 10 }, // Insuling tape
+      { "Tpl": "57347c1124597737fb1379e3", "Count": 10 }, // Duct tape
+      { "Tpl": "59e3577886f774176a362503", "Count": 9 }, // Pack of sugar
+      { "Tpl": "5d1b33a686f7742523398398", "Count": 3 }, // Canister with purified water
+      { "Tpl": "62a09ee4cf4a99369e262453", "Count": 1 }, // Can of white salt
+      { "Tpl": "5d1c819a86f774771b0acd6c", "Count": 10 }, // Weapon parts
+      { "Tpl": "5d1b3f2d86f774253763b735", "Count": 5 }, // Disposable syringe
+      { "Tpl": "5d1b3a5d86f774252167ba22", "Count": 5 }, // Pile of meds
+      { "Tpl": "62a0a043cf4a99369e2624a5", "Count": 3 }, // Bottle of OLOLO Multivitamins
+      { "Tpl": "544fb5454bdc2df8738b456a", "Count": 1 }, // Leatherman multitool
+      { "Tpl": "544fb25a4bdc2dfb738b4567", "Count": 2 }, // Aseptic bandage
+      { "Tpl": "590c311186f77424d1667482", "Count": 5 }, // Wrench
+      { "Tpl": "59e35cbb86f7741778269d83", "Count": 10 }, // Corrugated hose
+      { "Tpl": "59faf98186f774067b6be103", "Count": 4 }, // Alkaline
+      { "Tpl": "5af0484c86f7740f02001f7f", "Count": 5 }, // Can of Majaica coffee beans
+      { "Tpl": "59e35abd86f7741778269d82", "Count": 5 }, // Pack of sodium bicarbonate
+      { "Tpl": "5e2af00086f7746d3f3c33f7", "Count": 2 }, // Smoked Chimney drain cleaner
+      { "Tpl": "5c052e6986f7746b207bc3c9", "Count": 2 }, // Defibrilator
+      { "Tpl": "5c12613b86f7743bbe2c3f76", "Count": 1 }, // Intelligence folder
+      { "Tpl": "62a0a124de7ac81993580542", "Count": 1 }, // Topographic survey maps
+      { "Tpl": "574eb85c245977648157eec3", "Count": 1 }, // Factory plan map
+      { "Tpl": "5c13cef886f774072e618e82", "Count": 1 }, // Toilet paper
+      { "Tpl": "57347c93245977448d35f6e3", "Count": 1 }, // Toothpaste
+      { "Tpl": "5c13cd2486f774072c757944", "Count": 1 }, // Soap
+      { "Tpl": "62a0a098de7ac8199358053b", "Count": 2 }, // Awl
+      { "Tpl": "5e2af29386f7746d4159f077", "Count": 5 }, // KEKTape
+      { "Tpl": "61bf83814088ec1a363d7097", "Count": 3 }, // Sewing kit
+      { "Tpl": "57347b8b24597737dd42e192", "Count": 3 }, // Classic matches
+      { "Tpl": "590a391c86f774385a33c404", "Count": 1 }, // Magnet
+      { "Tpl": "5734781f24597737e04bf32a", "Count": 2 }, // DVD drive
+      { "Tpl": "5d1b32c186f774252167a530", "Count": 2 }, // Analog thermometer
+      { "Tpl": "5d1c774f86f7746d6620f8db", "Count": 3 }, // Radiator helix
+      { "Tpl": "619cbfccbedcde2f5b3f7bdd", "Count": 2 }, // Pipe grip wrench
+      { "Tpl": "56742c284bdc2d98058b456d", "Count": 3 }, // Crickent lighter
+      { "Tpl": "590a373286f774287540368b", "Count": 3 }, // Dry fuel
+      { "Tpl": "5e2af2bc86f7746d3f3c33fc", "Count": 2 }, // Hunting matches
+      { "Tpl": "5c06782b86f77426df5407d2", "Count": 3 }, // Capacitors
+      { "Tpl": "5e2aedd986f7746d404f3aa4", "Count": 4 }, // GreenBat lithium battery
+      { "Tpl": "6389c85357baa773a825b356", "Count": 1 }, // Advanced current converter
+      { "Tpl": "5d03775b86f774203e7e0c4b", "Count": 4 }, // Phased array element
+      { "Tpl": "5fd4c4fa16cac650092f6771", "Count": 3 }, // DYI IKEA Chest rig
+      { "Tpl": "5d5d8ca986f7742798716522", "Count": 3 }, // SOE micro rig
+      { "Tpl": "60391a8b3364dc22b04d0ce5", "Count": 2 }, // Can of thermite
+      { "Tpl": "5bc9b355d4351e6d1509862a", "Count": 1 }, // Fireklean
+      { "Tpl": "5af04b6486f774195a3ebb49", "Count": 3 }, // Pliers elite
+      { "Tpl": "5d40425986f7743185265461", "Count": 1 }, // Nippers
+      { "Tpl": "5d235b4d86f7742e017bc88a", "Count": 500 }, // GP
+      { "Tpl": "5696686a4bdc2da3298b456a", "Count": 500 }, // USD
+      { "Tpl": "569668774bdc2da2298b4568", "Count": 500 }, // EUR
+    ]
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // Traders
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "TradersLoyalty": {
+
+    // Prapor
+    "54cb50c76803fa8b248b4571": { "Standing": 99.0, "SalesSum": 9000000 },
+
+    // Therapist
+    "54cb57776803fa99248b456e": { "Standing": 99.0, "SalesSum": 9000000 },
+
+    // Fence
+    "579dc571d53a0658a154fbec": { "Standing": 99.0, "SalesSum": 9000000 },
+
+    // Skier
+    "58330581ace78e27b8b10cee": { "Standing": 99.0, "SalesSum": 9000000 },
+
+    // Peacekeeper
+    "5935c25fb3acc3127c3d8cd9": { "Standing": 99.0, "SalesSum": 9000000 },
+
+    // Mechanic
+    "5a7c2eca46aef81a7ca2145d": { "Standing": 99.0, "SalesSum": 9000000 },
+
+    // Ragman
+    "5ac3b934156ae10c4430e83c": { "Standing": 99.0, "SalesSum": 9000000 },
+
+    // Jaeger
+    "5c0647fdd443bc2504c2d371": { "Standing": 99.0, "SalesSum": 9000000 },
+
+    // Ref
+    "6617beeaa9cfa777ca915b7c": { "Standing": 99.0, "SalesSum": 9000000 },
+
+    // BTR
+    "656f0f98d80a697f855d34b1": { "Standing": 99.0, "SalesSum": 9000000 },
+
+    // Lighthousekeeper
+    "638f541a29ffd1183d187f57": { "Standing": 99.0, "SalesSum": 9000000 },
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // Hideout
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "HideoutStartingLevels": {
+    "Stash": 1,
+    "Generator": 0,
+    "Vents": 3,
+    "Security": 3,
+    "WaterCloset": 0,
+    "Heating": 0,
+    "WaterCollector": 3,
+    "MedStation": 0,
+    "Kitchen": 0,
+    "RestSpace": 0,
+    "Workbench": 0,
+    "IntelligenceCenter": 0,
+    "ShootingRange": 0,
+    "Library": 1,
+    "ScavCase": 1,
+    "Illumination": 3,
+    //"PlaceOfFame": 0,
+    "AirFilteringUnit": 1,
+    "SolarPower": 0,
+    "BoozeGenerator": 0,
+    "BitcoinFarm": 0,
+    "ChristmasIllumination": 0,
+    //"EmergencyWall": 0,
+    //"Gym": 0,
+    "WeaponStand": 0,
+    "WeaponStandSecondary": 0,
+    //"EquipmentPresetsStand": 0,
+    //"CircleOfCultists": 0
+  }
+}

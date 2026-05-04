@@ -1,0 +1,106 @@
+{
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // RESTOCK TIMES
+  //
+  // Restock interval in seconds for each trader.
+  // If the configured interval is shorter than the trader's current timer, the timer is clamped immediately on server start.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  // Master switch for restock timer overrides.
+  "EnableRestockTimes": false,
+
+  // Restock times.
+  "RestockTimes": {
+    "54cb50c76803fa8b248b4571": 3600, // Prapor
+    "54cb57776803fa99248b456e": 3600, // Therapist
+    "579dc571d53a0658a154fbec": 3600, // Fence
+    "58330581ace78e27b8b10cee": 3600, // Skier
+    "5935c25fb3acc3127c3d8cd9": 3600, // Peacekeeper
+    "5a7c2eca46aef81a7ca2145d": 3600, // Mechanic
+    "5ac3b934156ae10c4430e83c": 3600, // Ragman
+    "5c0647fdd443bc2504c2d371": 3600, // Jaeger
+    "6617beeaa9cfa777ca915b7c": 3600, // Ref
+    "fa363fc015e07b5f7828c9f7": 3600, // Sable
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // STOCK MULTIPLIERS
+  //
+  // Multiplies the BuyRestrictionMax of trader items (the actual purchasable quantity per restock cycle).
+  // Items with no BuyRestrictionMax (truly unlimited) are not affected.
+  //
+  // EnableByTrader : apply a multiplier per trader.
+  // EnableByCategory : apply a multiplier per handbook category (supports parent inheritance).
+  // Both can be active simultaneously : multipliers are combined.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  // Stock amount multipliers.
+  "StockMultipliers": {
+
+    // BY TRADER (Fence's stock is managed by fenceConfig.json).
+    "EnableByTrader": true,
+    "ByTrader": {
+      "54cb50c76803fa8b248b4571": 1.0, // Prapor
+      "54cb57776803fa99248b456e": 1.0, // Therapist
+      "58330581ace78e27b8b10cee": 1.0, // Skier
+      "5935c25fb3acc3127c3d8cd9": 1.0, // Peacekeeper
+      "5a7c2eca46aef81a7ca2145d": 1.0, // Mechanic
+      "5ac3b934156ae10c4430e83c": 1.0, // Ragman
+      "5c0647fdd443bc2504c2d371": 1.0, // Jaeger
+      "6617beeaa9cfa777ca915b7c": 1.0  // Ref
+    },
+
+    // BY CATEGORY
+    "EnableByCategory": true,
+    "ByCategory": {
+      "5b47574386f77428ca22b33b": 1.0, // Rounds
+      "5b47574386f77428ca22b33c": 1.0, // Ammo packs
+      "5b5f754a86f774094242f19b": 1.0, // Magazines
+      "5b5f7a2386f774093f2ed3c4": 1.0, // Throwables
+      "5b47574386f77428ca22b338": 1.0, // Medkits
+      "5b47574386f77428ca22b339": 1.0, // Injury treatment
+      "5b47574386f77428ca22b33a": 1.0, // Injectors
+      "5b47574386f77428ca22b337": 1.0, // Pills
+      "5b47574386f77428ca22b335": 1.0, // Drinks
+      "5b47574386f77428ca22b336": 1.0, // Food
+      "5b47574386f77428ca22b2f3": 1.0, // Medical supplies
+      "5b5f7a0886f77409407a7f96": 1.0, // Melee weapons
+      "5b5f792486f77447ed5636b3": 1.0, // Pistols
+      "5b5f78e986f77447ed5636b1": 1.0, // Assault carbines
+      "5b5f78fc86f77409407a7f90": 1.0, // Assault rifles
+      "5b5f791486f774093f2ed3be": 1.0, // Marksman rifles
+      "5b5f794b86f77409407a7f92": 1.0, // Shotguns
+      "5b5f796a86f774093f2ed3c0": 1.0, // Submachine guns
+      "5b5f798886f77447ed5636b5": 1.0, // Bolt-action rifles
+      "5b5f79a486f77409407a7f94": 1.0, // Machine guns
+      "5b5f79d186f774093f2ed3c2": 1.0, // Grenade launchers
+      "5b5f79eb86f77447ed5636b7": 1.0, // Special weapons
+      "5b5f78b786f77447ed5636af": 1.0, // Money
+      "5b47574386f77428ca22b342": 1.0, // Keys
+      "5b47574386f77428ca22b343": 1.0, // Maps
+      "5b5f71a686f77447ed5636ab": 1.0, // Weapon parts & mods
+      "5b5f71b386f774093f2ecf11": 1.0, // Functional mods
+      "5b5f701386f774093f2ecf0f": 1.0, // Body armors
+      "5b5f6f8786f77447ed563642": 1.0, // Tactical rigs
+      "5b5f6f6c86f774093f2ecf0b": 1.0, // Backpacks
+      "5b5f6f3c86f774094242ef87": 1.0, // Headsets
+      "5b5f704686f77447ec5d76d7": 1.0, // Gear components
+      "5b47574386f77428ca22b32f": 1.0, // Facecovers
+      "5b47574386f77428ca22b330": 1.0, // Headgear
+      "5b47574386f77428ca22b331": 1.0, // Eyewear
+      "5b5f6fa186f77409407a7eb7": 1.0, // Storage containers
+      "5b5f6fd286f774093f2ecf0d": 1.0, // Secure containers
+      "5b47574386f77428ca22b341": 1.0, // Info items
+      "5b47574386f77428ca22b33e": 1.0, // Barter items
+      "5b47574386f77428ca22b2ed": 1.0, // Energy elements
+      "5b47574386f77428ca22b2ef": 1.0, // Electronics
+      "5b47574386f77428ca22b2ee": 1.0, // Building materials
+      "5b47574386f77428ca22b2f0": 1.0, // Household materials
+      "5b47574386f77428ca22b2f2": 1.0, // Flammable materials
+      "5b47574386f77428ca22b2f1": 1.0, // Valuables
+      "5b47574386f77428ca22b2f6": 1.0, // Tools
+      "5b47574386f77428ca22b345": 1.0, // Special equipment
+      "5b47574386f77428ca22b2f4": 1.0  // Others
+    }
+  }
+}

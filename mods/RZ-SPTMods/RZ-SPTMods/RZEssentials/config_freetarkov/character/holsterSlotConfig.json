@@ -1,0 +1,34 @@
+{
+  // MASTER SWITCH - Set to true to enable this config file.
+  "Enabled": true,
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // CATEGORIES
+  //
+  // Toggle each weapon category on or off independently.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "Categories": {
+    "Pistol":           true,
+    "Revolver":         true,
+    "Smg":              true,
+    "Shotgun":          true,
+    "AssaultCarbine":   false,
+    "AssaultRifle":     false,
+    "MarksmanRifle":    false,
+    "SniperRifle":      false,
+    "MachineGun":       false,
+    "GrenadeLauncher":  false,
+    "RocketLauncher":   false,
+    "SpecialWeapon":    false,
+    "Knife":            true,
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // ALLOWED TPLS
+  //
+  // Individual item TPLs to allow in the holster slot, regardless of category.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "AllowedTpls": []
+}

@@ -1,0 +1,234 @@
+{
+  // MASTER SWITCH - Set to true to enable this config file.
+  "EnableItemContext": false,
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // AMMO NAME ENRICHMENT
+  //
+  // Appends [dmg:x/pen:x] color-coded stats to ammo item names.
+  // ShowPrefixes : Ahow "dmg:" / "pen:" labels, or just the values.
+  // Thresholds : Applied top-down, first match wins. Values below the lowest threshold get no color.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "AmmoNameEnrichment": {
+
+    "Enabled": true,
+
+    "ShowPrefixes": true,
+
+    "DamageThresholds": [
+      { "Min": 90, "Color": "#cc4444" },
+      { "Min": 70, "Color": "#cccc44" },
+      { "Min": 50, "Color": "#8844cc" },
+      { "Min": 30, "Color": "#4444cc" }
+    ],
+
+    "PenetrationThresholds": [
+      { "Min": 60, "Color": "#cc4444" },
+      { "Min": 50, "Color": "#cccc44" },
+      { "Min": 40, "Color": "#8844cc" },
+      { "Min": 30, "Color": "#4444cc" }
+    ]
+
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // BASE PRICE DISPLAY
+  //
+  // Appends a color-coded [x₽] suffix to item names for the listed categories.
+  // Thresholds : Applied top-down, first match wins.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "BasePriceDisplay": {
+
+    "Enabled": true,
+
+    "Categories": {
+      "566162e44bdc2d3f298b4573": true, // CompoundItem (Containers, Equipment, Mods)
+      "5448eb774bdc2d0a728b4567": true, // BarterItem
+      "5661632d4bdc2d903d8b456b": true, // StackableItem (Ammo, Money)
+      "543be6674bdc2df1348b4569": true, // FoodDrink
+      "543be5e94bdc2df1348b4568": true, // Key
+      "543be5664bdc2dd4348b4569": true, // Meds
+      "5447e0e74bdc2d3c308b4567": true, // SpecItem
+      "5447e1d04bdc2dff2f8b4567": true, // Knife
+      "567849dd4bdc2d150f8b456e": true, // Map
+      "5448ecbe4bdc2d60728b4568": true, // Info
+      "543be6564bdc2df4348b4568": true, // ThrowWeap
+      "6759673c76e93d8eb20b2080": true, // Flyer
+    },
+
+    "PriceThresholds": [
+      { "Min": 150000, "Color": "#cc4444" },
+      { "Min": 70000, "Color": "#cccc44" },
+      { "Min": 50000, "Color": "#8844cc" },
+      { "Min": 30000, "Color": "#4444cc" },
+      { "Min": 0, "Color": "#ffffff" }
+    ]
+
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // DESCRIPTION CLEANUP
+  //
+  // Removes the vanilla description for items in the listed categories.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "DescriptionCleanup": {
+    "Enabled": true,
+    "Categories": [
+      "5485a8684bdc2da71d8b4567", // Ammo
+      "644120aa86ffbe10ee032b6f", // ArmorPlate
+    ]
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // ITEM INFO SECTIONS
+  //
+  // Each section adds a block to item descriptions when relevant data exists.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  // [Crafting Components] — Recipes where this item is required as an ingredient.
+  "EnableCraftingInfo": true,
+
+  // [Crafting Tools] — Recipes where this item is required as a tool (e.g. Toolset, Screwdriver...).
+  "EnableCraftingToolInfo": true,
+
+  // [HIDEOUT] Hideout construction stages that require this item
+  "EnableHideoutInfo": true,
+  // Areas to exclude from hideout info.
+  "HideoutExcludedAreas": [
+    "WaterCollector",
+    "Library",
+    "ScavCase",
+    "Illumination",
+    "PlaceOfFame",
+    "AirFilteringUnit",
+    "ChristmasIllumination",
+    "EmergencyWall",
+    "Gym",
+    "EquipmentPresetsStand",
+    "CircleOfCultists",
+  ],
+
+  // [BARTER] Barter trades where this item is part of the payment
+  "EnableBarterInfo": true,
+  // Show the loyalty level required for each barter.
+  "ShowBarterLoyaltyLevel": false,
+
+  // [QUESTS] Quests that require this item.
+  "EnableQuestInfo": true,
+
+  // [SIZE] Show container size and efficiency.
+  "EnableContainerInfo": true,
+
+  //
+  "EnableArmorPlateInfo": true,
+
+  // [AUDIO]
+  "EnableHeadsetInfo": true,
+
+  // [KEY]
+  "EnableKeyInfo": true,
+  "KeyStats": {
+    "5448ba0b4bdc2d02308b456c": "[Customs/Factory] Opens Factory exits (Gate 0, Cellars), Guard Building Customs | Quest: Scout",
+    "59136a4486f774447a1ed172": "[Customs] Opens Dorm Guard Desk 2-story - ammo boxes, weapon box, weapon rack",
+    "591383f186f7744a4c5edcf3": "[Customs] Opens Dorm 104 2-story - 2x Jackets, Toolbox",
+    "59136e1e86f774432f15d133": "[Customs] Opens Dorm 110 2-story - Safe, Secure Flash Drive, Fuel Conditioner",
+    "59387a4986f77401cc236e62": "[Customs] Opens Dorm 114 2-story - Safe, Medcase, PC Block | Quest: Pharmacist",
+    "5938504186f7740991483f30": "[Customs] Opens Dorm 203 3-story - Sports Bag | Quest: Shaking up Teller",
+    "5938603e86f77435642354f4": "[Customs] Opens Dorm 206 2-story - empty | Quest: Operation Aquarius Pt1",
+    "5780cf942459777df90dcb72": "[Customs] Opens Dorm 214 3-story - Safe, Room 203 key | Quest: Shaking up Teller",
+    "5780cf9e2459777df90dcb73": "[Customs] Opens Dorm 218 3-story - weapon spawns, weapon mods",
+    "5780cfa52459777dfb276eb1": "[Customs] Opens Dorm 220 3-story - Jacket, ZB-014 key | Quest: Chemical Pt1 & Pt2",
+    "593aa4be86f77457f56379f8": "[Customs] Opens Dorm 303 3-story - weapon spawns, weapon crate | Quest: Golden Swag",
+    "5780cf7f2459777de4559322": "[Customs] Opens Dorm 314 Marked Room 3-story - rare loot | Quest: The Cult Pt2",
+    "590de52486f774226a0c24c2": "[Customs] Opens fuel truck cabin - Bronze pocket watch | Quest: Checking",
+    "5780d0652459777df90dcb74": "[Customs] Opens Tarcone Director Office | Quest: Delivery from the Past, Farming Pt3",
+    "5780d07a2459777de4559324": "[Customs] Opens portable cabin construction area - weapon box | Quest: Bad Rep Evidence",
+    "5913611c86f77479e0084092": "[Customs] Opens trailer park cabin | Quest: Golden Swag",
+    "593962ca86f774197930e983": "[Customs] Opens crane yard cabin - quest area only | Quest: The Extortionist",
+    "5913915886f774123603c392": "[Customs] Opens military checkpoint - ammo boxes, grenades, weapon rack",
+    "5913877a86f774123569ffa4": "[Customs] Opens gas station storage - Medbag, Medcase",
+    "591afe0186f774311bd616a11": "[Customs/Woods] Opens ZB-014 bunker extract + locked room - weapon box | Quest: Ice Cream Cones",
+
+    "5d08d21286f774736e7c94c3": "[Woods] Opens Shturman's stash | Quest: Huntsman Path - Woods Keeper",
+
+    "5a0ea64786f7741707720468": "[Shoreline] Opens East Wing 107 - LEDX, Medcase, Medbag, Sports Bag",
+    "5a144bdb86f7741d374bbde0": "[Shoreline] Opens East Wing 205 - AKM+AKS spawns, 2x weapon boxes",
+    "5a0ee4b586f7743698200d22": "[Shoreline] Opens East Wing 206 - weapon spawns, 2x weapon boxes, balcony to 205",
+    "5a13f24186f77413ef1436b0": "[Shoreline] Opens East Wing 222 - LEDX, weapon box, Gun Locker, balcony to 226",
+    "5a13f35286f77413ef1436b0": "[Shoreline] Opens East Wing 226 - LEDX, 3x weapon spawns, 2x weapon boxes, balcony to 222",
+    "5a145d4786f7744cbb6f4a12": "[Shoreline] Opens East Wing 306 - 4x PC Block, weapon box, DVL-10 | Quest: Cargo X Pt1, Lend Lease Pt1",
+    "5a145d7b86f7744cbb6f4a13": "[Shoreline] Opens East Wing 308 - Medcase, weapon rack, balcony to 306 | Quest: Cargo X Pt1, Lend Lease Pt1",
+    "5a0eec9686f77402ac5c39f2": "[Shoreline] Opens East Wing 310 - jewelry, Bitcoins, 2x Sports Bag",
+    "5a0eecf686f7740350630097": "[Shoreline] Opens East Wing 313 - Medbag, weapon box",
+    "5a0eed4386f77405112912aa": "[Shoreline] Opens East Wing 314 - weapon spawn, weapon box, balcony to 313",
+    "5a145ebb86f77458f1796f05": "[Shoreline] Opens East Wing 316 - SV-98, Medbag, 2x weapon boxes",
+    "5a0eee1486f77402aa773226": "[Shoreline] Opens East Wing 328 - LEDX, PC Block, Sports Bag | Quest: Wet Job Pt5",
+    "5eff09cd30a7dc22fd1ddfed": "[Shoreline] Opens West Wing 110 Blue Tape - rare loot | Quest: Chemistry Closet",
+    "5a0dc45586f7742f6b0b73e3": "[Shoreline] Opens West Wing 104 - Blue Keycard, LEDX",
+    "5a0dc95c86f774197930e983": "[Shoreline] Opens West Wing 112 - Blue Keycard, 2x Sports Bag | Quest: Vitamins Pt1",
+    "5a144dfd86f77445cb5a0982": "[Shoreline] Opens West Wing 203 - AR spawn, Medcase, Medbag, weapon box, balcony to 205",
+    "5a0ec6d286f7742c0b518fb5": "[Shoreline] Opens West Wing 205 - LEDX, Medcase, Toolbox, balcony to 203",
+    "5a0ee30786f774023b6ee08f": "[Shoreline] Opens West Wing 216 - M4A1, loaded mags, 2x weapon boxes | Quest: Lend Lease Pt1",
+    "5a13eebd86f7746fd639aa93": "[Shoreline] Opens West Wing 218 - RSASS+VSS spawns, 2x weapon cabinets, Red Keycard",
+    "5a13ef0686f7746e5a411744": "[Shoreline] Opens West Wing 219 - armor spawn, weapon box, balcony to 220 | Quest: Spa Tour Pt4",
+    "5a0ee34586f774023b6ee092": "[Shoreline] Opens West Wing 220 - jewelry, Bitcoins, 3x weapon boxes | Quest: Spa Tour Pt4",
+    "5a0ee37f86f774023657a86f": "[Shoreline] Opens West Wing 221 - M4A1+M1A spawn, weapon box, balcony to 218+220",
+    "5a1452ee86f7746f33111763": "[Shoreline] Opens West Wing 222 - rare loot, weapon spawn",
+    "5a13ef7e86f7741290491063": "[Shoreline] Opens West Wing 301 - LEDX, balcony to 304: SV-98, 2x PC Block, weapon box",
+    "5a13f46386f7741dd7384b04": "[Shoreline] Opens West Wing 306 - M4A1, weapon boxes",
+    "5a0ea79b86f7741d4a35298e": "[Shoreline] Opens 3x utility rooms Health Resort | Quest: Wet Job Pt5",
+    "5a0eb38b86f774153b320eb0": "[Shoreline] Opens cottage back door - Safe, Jacket, PC Block | Quest: Colleagues Pt2",
+    "5a0f068686f7745b0d4ea242": "[Shoreline] Opens cottage safe - Safe contents",
+
+    "5ad5db3786f7743568421cce": "[Interchange] Opens EMERCOM medical unit - 3x Medbag, Jacket, rare items | Quest: Vitamins Pt1",
+    "5ad7247386f7747487619dc3": "[Interchange] Opens Goshan cash registers (30x) | Quest: Supervisor",
+    "5ad5cfbd86f7742c825d6104": "[Interchange] Opens OLI logistics office - PC Block, electronics | Quest: Database Pt2",
+    "5ad5ccd186f774446d5706e9": "[Interchange] Opens OLI admin office - PC Block",
+    "5addaffe86f77470b455f900": "[Interchange] Opens KIBA inner grate - weapons, armor, weapon boxes (needs outer key too)",
+    "5ad5d7d286f77450166e0a89": "[Interchange] Opens KIBA outer door (needs inner grate key too)",
+    "5ad5d64486f774079b080af8": "[Interchange] Opens NecrusPharm pharmacy - medical supplies",
+    "5ad5d49886f77455f9731921": "[Interchange] Opens power substation utility room - weapon box, MP-153",
+
+    "5c1d0f4986f7744bb01837fa": "[Labs] Black Keycard - Opens G12 test room - Medcase, medical supplies",
+    "5c1d0c5f86f7746319710e1b": "[Labs] Blue Keycard - Opens G11 quarantine zone - Medcase, medical supplies | Quest: Colleagues Pt3",
+    "5c1d0dc586f7744baf2e7b79": "[Labs] Green Keycard - Opens G22 sterile lab - MP5, weapon box, Black Keycard | Quest: Colleagues Pt3",
+    "5c1d0efb86f7746319710e1c": "[Labs] Red Keycard - Opens R23 security arsenal - M4A1, MP5, weapon mods, intel folder",
+    "5c1e495a86f7743109743dfb": "[Labs] Violet Keycard - Opens R23 security post - M4A1, MP5SD, 3x weapon boxes, VXP module",
+    "5c1d0d6d86f7744bb2683e1f": "[Labs] Yellow Keycard - Opens Y21 security - weapon mods, Drawer, Weapon Safe",
+    "5c1e2a1e86f77431ea0ea84c": "[Labs] Opens manager office O21 - 4x rare spawns, weapon box, Safe",
+    "5c1e2d1f86f77431e9280bee": "[Labs] Opens weapon testing room O11 - weapons, 2x weapon boxes",
+    "5c1f79a086f7746ed066fb8f": "[Labs] Opens arsenal storage - rare weapon spawns",
+
+    "5d80c60f86f77440373c4ece": "[Reserve] RB-BK - Opens Black Pawn basement - weapons, grenades, rare loot",
+    "5ede7a8229445733cb4c18e2": "[Reserve] RB-PKPM - Opens marked room - rare loot",
+    "5d80ca9086f774403a401e40": "[Reserve] RB-MP21 - Opens White Knight 2F - intel folder, weapon box, battery",
+    "5d80cab086f77440535be201": "[Reserve] RB-MP22 - Opens White Knight 2F - battery, weapon racks, Toolbox",
+    "5d9f1fa686f774726974a992": "[Reserve] RB-ST - Opens Knight garages - car batteries, 3x weapon boxes",
+    "5d80ccdd86f77474f7575e02": "[Reserve] RB-ORB2 - Opens North Barracks grate 2F - 2x weapon boxes | Quest: Inventory Check",
+    "5d80cd1a86f77402aa362f42": "[Reserve] RB-ORB3 - Opens East Barracks 2F - 3x AK-74 racks | Quest: Inventory Check",
+    "5d80ccac86f77470841ff452": "[Reserve] RB-ORB1 - Opens White Pawn 4F - 2x Drawers, weapon racks | Quest: Inventory Check",
+    "5d80c6fc86f774403a401e3c": "[Reserve] RB-TB - Opens Black Pawn roof barracks - 3x AK-74 racks",
+    "5d80c6c586f77440351beef1": "[Reserve] RB-OB - Opens East Barracks 3F south - intel folder, Drawer | Quest: Inventory Check",
+    "5d80c66d86f774403a401e3c": "[Reserve] RB-AO - Opens Military Guard Barracks - weapon spawns, weapon mods",
+    "5d80c8f586f77440373c4ed0": "[Reserve] RB-OP - Opens White King basement - Drawer, intel folder",
+    "5d8e0e0e86f774321140eb56": "[Reserve] RB-KPRL - Opens radar station guard building - weapon box, weapon cabinet, Safe",
+    "5d8e0db586f7744450412a42": "[Reserve] RB-KORL - Opens radar station 2F - intel folder, 2x Drawers",
+    "5da5cdcd86f774529238fb9b": "[Reserve] RB-RH - Opens White Queen 3F - weapon box, weapon rack",
+    "5da46e3886f774653b7a83fe": "[Reserve] RB-RS - Opens radar station 2F - 2x Toolboxes",
+    "5d947d3886f774447b415893": "[Reserve] RB-SMP - Opens White Bishop 2F - medical supplies | Quest: Disease History",
+    "5d947d4e86f774447b415895": "[Reserve] RB-KSM - Opens White Bishop 2F - medical supplies | Quest: Disease History",
+    "5d80c88d86f77440556dbf07": "[Reserve] RB-AM - Opens Black Bishop 1F - Jacket, 3x Toolboxes, weapon mods",
+    "5d80cbd886f77470855c26c2": "[Reserve] RB-MP13 - Opens White Knight 1F - intel folder, battery, Drawer",
+    "5d80c93086f7744036212b41": "[Reserve] RB-MP11 - Opens White Knight area",
+    "5d80c95986f77440351beef3": "[Reserve] RB-MP12 - Opens White Knight area",
+    "5d80cb3886f77440556dbf09": "[Reserve] RB-PSP1 - Opens underground bunker A - Toolbox, supply crates",
+    "5d95d6be86f77424444eb3a7": "[Reserve] RB-PSV2 - Opens underground bunker - supply crates",
+    "5d80cb5686f77440545d1286": "[Reserve] RB-PSV1 - Opens underground bunker - supply crates",
+    "5d80cb8786f774405611c7d9": "[Reserve] RB-PP - Opens Knight garages ground floor - Tools, locker",
+    "5ede7b0c6d23e5473e6e8c66": "[Reserve] RB-RLSA - Opens Reserve area",
+    "5d3a3fce86f774186372edd4": "[Reserve] RB-AK - Opens south apartment building - ammo, PC Blocks"
+  }
+}

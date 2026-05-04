@@ -1,0 +1,27 @@
+{
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // FOUND IN RAID
+  //
+  // Forces IsSpawnedInSession on every item requirement across all areas and all stages, after all custom patches have been applied.
+  // true : FIR required on all item requirements
+  // false : FIR removed from all item requirements
+  // null : vanilla values preserved
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "RequireFoundInRaid": false,
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // UNLOCK HIDEOUT CUSTOMIZATIONS
+  //
+  // Unlocks hideout customizations for every profile on server start.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "UnlockHideoutCustomizations": {
+    "Wall": true,
+    "Floor": true,
+    "Ceiling": true,
+    "Light": true,
+    "MannequinPose": true,
+    "ShootingRangeMark": true,
+  },
+}

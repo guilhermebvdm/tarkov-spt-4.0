@@ -1,0 +1,54 @@
+{
+  // Removes requirements on special extractions.
+  "FreeSpecialExtracts": true,
+
+  // Removes in-raid item restrictions (e.g. GP coin carry limits, etc...).
+  "RemoveRaidRestrictions": true,
+
+  // Removes the "Run-Through" status : no longer need to survive a certain time or earn a certain amount of XP for the raid to count
+  // as a survival.
+  "NoRunThrough": true,
+
+  // Magazine load/unload speed multipliers.
+  // 1.0 = vanilla, 2.0 = twice as fast, 0.5 = twice as slow.
+  "MagazineLoadSpeedMultiplier": 1.5,
+  "MagazineUnloadSpeedMultiplier": 2.0,
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // RAID TIMES
+  //
+  // Override raid duration (in minutes) per map.
+  // Only maps listed here will be affected.
+  //
+  // Map IDs :
+  //   bigmap          — Customs       (default: 35)
+  //   Woods           — Woods         (default: 40)
+  //   Shoreline       — Shoreline     (default: 45)
+  //   Interchange     — Interchange   (default: 45)
+  //   RezervBase      — Reserve       (default: 40)
+  //   Lighthouse      — Lighthouse    (default: 45)
+  //   TarkovStreets   — Streets       (default: 50)
+  //   Sandbox         — Ground Zero   (default: 15)
+  //   Sandbox_high    — Ground Zero + (default: 20)
+  //   laboratory      — The Lab       (default: 35)
+  //   factory4_day    — Factory day   (default: 20)
+  //   factory4_night  — Factory night (default: 20)
+  // ─────────────────────────────────────────────────────────────────────────
+
+  "EnableRaidTimes": true,
+
+  "RaidTimes": {
+    "bigmap":         240,
+    "Woods":          240,
+    "Shoreline":      240,
+    "Interchange":    240,
+    "RezervBase":     240,
+    "Lighthouse":     240,
+    "TarkovStreets":  240,
+    "Sandbox":        240,
+    "Sandbox_high":   240,
+    "laboratory":     240,
+    "factory4_day":   240,
+    "factory4_night": 240,
+  }
+}

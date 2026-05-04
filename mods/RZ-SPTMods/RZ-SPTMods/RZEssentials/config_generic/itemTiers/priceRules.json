@@ -1,0 +1,16 @@
+{
+  // Enable/disable this config.
+  "Enabled": false,
+
+  // Categories listed here will have their tier assigned automatically based on their handbook price and the PriceThresholds
+  // in masterConfig.json. Sub-categories are included automatically.
+
+  "Categories": [
+    "5448eb774bdc2d0a728b4567", // Barter items
+    "5c164d2286f774194c5e69fa", // KeyCard
+    "5c99f98d86f7745c314214b3", // KeyMechanical
+    "5448ecbe4bdc2d60728b4568", // Info
+    "5447e1d04bdc2dff2f8b4567", // Knife
+    "543be6674bdc2df1348b4569", // FoodDrink
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // BUYBACK CONFIGURATION
+  //
+  // Controls what each trader will buy from the player.
+  //
+  // Modes:
+  //    Default          - Leave the trader's vanilla buyback config untouched.
+  //    Disabled         - Trader does not buy anything from the player.
+  //    Categories       - Trader buys items belonging to the specified category IDs (sub-categories included). See extras/category_dump.json.
+  //    AllWithBlacklist - Trader buys all handbook items except those in the blacklist (TPLs).
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "Rules": {
+
+    // PRAPOR
+    "54cb50c76803fa8b248b4571": {
+      "Mode": "Default"
+    },
+
+    // THERAPIST
+    "54cb57776803fa99248b456e": {
+      "Mode": "Default"
+    },
+
+    // FENCE
+    "579dc571d53a0658a154fbec": {
+      "Mode": "Default"
+    },
+
+    // PEACEKEEPER
+    "5935c25fb3acc3127c3d8cd9": {
+      "Mode": "Default"
+    },
+
+    // SKIER
+    "58330581ace78e27b8b10cee": {
+      "Mode": "Default"
+    },
+
+    // MECHANIC
+    "5a7c2eca46aef81a7ca2145d": {
+      "Mode": "Default"
+    },
+
+    // RAGMAN
+    "5ac3b934156ae10c4430e83c": {
+      "Mode": "Default"
+    },
+
+    // JAEGER
+    "5c0647fdd443bc2504c2d371": {
+      "Mode": "Default"
+    },
+
+    // REF
+    "6617beeaa9cfa777ca915b7c": {
+      "Mode": "Default"
+    },
+
+    // SABLE (custom trader, ignored if not enabled)
+    "fa363fc015e07b5f7828c9f7": {
+      "Mode": "AllWithBlacklist",
+      "Blacklist": [
+        "59faff1d86f7746c51718c9c", // Physical bitcoin
+        "5732ee6a24597719ae0c0281", // Pouch_Waist
+        "544a11ac4bdc2d470e8b456a", // Pouch_Alpha
+        "5857a8b324597729ab0a0e7d", // Pouch_Beta
+        "59db794186f77448bc595262", // Pouch_Epsilon
+        "5857a8bc2459772bad15db29", // Pouch_Gamma
+        "664a55d84a90fc2c8a6305c9", // Pouch_Theta
+        "5c093ca986f7740a1867ab12", // Pouch_Kappa
+        "676008db84e242067d0dc4c9" // Pouch_Kappa_Desecrated
+      ]
+    },
+
+  }
+}

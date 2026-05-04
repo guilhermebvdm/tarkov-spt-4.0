@@ -1,0 +1,29 @@
+{
+  "Enabled": false,
+
+  "Overrides": {
+
+    "590de52486f774226a0c24c2": "Quest", // Machinery key
+    "5937ee6486f77408994ba448": "Quest", // Machinery key
+    "5938144586f77473c2087145": "Quest", // Portable bunkhouse key
+    "5780d0532459777a5108b9a2": "Quest", // Tarcone Director's office key
+    "59387a4986f77401cc236e62": "Quest", // Dorm room 114 key (Pharmacist)
+    "5938603e86f77435642354f4": "Quest", // Dorm room 206 key (Operation Aquarius)
+    "5938504186f7740991483f30": "Quest", // Dorm room 203 key (Shaking up the Teller)
+    "5780cfa52459777dfb276eb1": "Quest", // Dorm room 220 key (Chemical Part 1, Chemical Part 2)
+    "593aa4be86f77457f56379f8": "Quest", // Dorm room 303 key (Golden Swag, Trust Regain)
+    "664d4b0103ef2c61246afb56": "Quest", // Dorm overseer key (Against the Conscience Part 1, Between Two Fires, Decisions Decisions, Surprise Gift)
+    "5913611c86f77479e0084092": "Quest", // Trailer park portable cabin key (The Extortionist)
+    "593962ca86f774068014d9af": "Quest", // Unknown key (Colleagues Part 3)
+
+    "5d947d4e86f774447b415895": "Quest", // RB-KSM key (Disease History)
+    "5d947d3886f774447b415893": "Quest", // RB-SMP key (Disease History)
+    "5d9f1fa686f774726974a992": "Quest", // RB-ST key (Surplus Goods, Revision - Reserve)
+    "5d80c8f586f77440373c4ed0": "Quest", // RB-OP key (Inventory Check)
+    "5d80ccac86f77470841ff452": "Quest", // RB-ORB1 key (Inventory Check)
+    "5d80ccdd86f77474f7575e02": "Quest", // RB-ORB2 key (Inventory Check)
+    "5d80cd1a86f77402aa362f42": "Quest", // RB-ORB3 key (Inventory Check)
+
+    //"5780cf7f2459777de4559322": "Quest", // Dorm room 314 marked key  (The Cult Part 2)
+  }
+}

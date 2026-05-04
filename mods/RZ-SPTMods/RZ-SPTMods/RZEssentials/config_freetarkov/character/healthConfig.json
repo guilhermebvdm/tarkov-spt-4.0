@@ -1,0 +1,34 @@
+{
+  // MASTER SWITCH - Set to true to enable this config file.
+  "Enabled": true,
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // BODY PARTS
+  //
+  // Maximum HP per body part. Applied to profile templates and existing saves on startup.
+  // null = leave unchanged from the base profile.
+  // Vanilla defaults : Head = 35, Chest = 85, Stomach = 70, Arms = 60, Legs = 65.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  // Applies HP overrides to existing save files on every server start.
+  // Disabling the config or this option later will not restore the previous HP values in existing saves.
+  "ApplyToExistingSaves": false,
+
+  // HP values.
+  "Head": 75,
+  "Chest": 85,
+  "Stomach": 70,
+  "LeftArm": 65,
+  "RightArm": 65,
+  "LeftLeg": 70,
+  "RightLeg": 70,
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // REGENERATION
+  //
+  // Base energy and hydration regeneration rates (out of raid).
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "BaseEnergyRegeneration": 100,
+  "BaseHydrationRegeneration": 100,
+}

@@ -1,0 +1,15 @@
+{
+  // Enable the custom trader.
+  "EnableCustomTrader": true,
+
+  // Image filename - file must be placed in the db/ folder of the mod.
+  // After changing the portrait, press "Clean Temp Files" in the SPT launcher.
+  "AvatarFile": "sable_01.png",
+
+  // Locale - applied to all languages.
+  "FullName": "Sable",
+  "FirstName": "Sable",
+  "Nickname": "Sable",
+  "Location": "",
+  "Description": "Officially declared dead after a black site operation went dark in 2018. No body, no report, no explanation, just a name quietly removed from the FSB's active roster and buried under six layers of classified. She resurfaced in Tarkov two years later with a supply line nobody can trace, allegiance to nobody, and enough operational knowledge to make the people who burned her file very uncomfortable."
+}

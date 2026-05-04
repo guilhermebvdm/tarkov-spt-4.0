@@ -1,0 +1,13 @@
+{
+  "Enabled": false,
+
+  "CategoryOverrides": {
+    "54009119af1c881c07000029": { // Item (Root category)
+      "Ops": {
+        "Weight": { "Op": "multiply", "Value": 0.5 }
+      }
+    }
+  },
+
+  "Overrides": {}
+}

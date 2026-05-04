@@ -1,0 +1,28 @@
+{
+  // ─────────────────────────────────────────────────────────────────────────
+  // ITEM DUMP
+  // Dumps the full handbook as a nested JSON structure to dev/item_dump.json.
+  // Items are grouped by category hierarchy, formatted as "tpl": price, // Name
+  // ─────────────────────────────────────────────────────────────────────────
+
+  // Master switch.
+  "DumpItemsEnabled": true,
+
+  // Filter mode.
+  // 0 — all items
+  // 1 — vanilla only  (requires vanilla_handbook.json at mod root)
+  // 2 — modded only   (requires vanilla_handbook.json at mod root)
+  "DumpItemsMode": 0,
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // CATEGORY DUMP
+  // Dumps all handbook categories to dev/category_dump.txt as an indented tree.
+  // Useful to find category IDs for use in other mods.
+  // ─────────────────────────────────────────────────────────────────────────
+
+  // Master switch.
+  "DumpCategoriesEnabled": true,
+
+  // Hideout
+  "DumpHideoutEnabled": true,
+}

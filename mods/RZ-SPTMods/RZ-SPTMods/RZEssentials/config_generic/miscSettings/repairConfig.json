@@ -1,0 +1,112 @@
+{
+  // Removes max durability loss when repairing weapons and armor.
+  // Items are restored to their template maximum rather than their degraded maximum, completely eliminating the durability penalty that
+  // accumulates over successive repairs.
+  "NoRepairDegradation": false,
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // REPAIR KIT BUFFS
+  //
+  // Controls the bonus effects applied to items when repaired with a repair kit.
+  // Each equipment type is configured independently : Armor, Vest, Headwear, and Weapon.
+  //
+  // RarityWeight    — Relative probability of rolling a Common vs Rare buff.
+  // BonusTypeWeight — Relative probability of each bonus type being selected within the rolled rarity.
+  //                   Set a value to 0 to remove that bonus type from the pool entirely.
+  // ValuesMinMax    — The min/max range of the buff multiplier. For DamageReduction, lower = better (0.8 = 20% less damage).
+  //                   For weapon buffs (WeaponSpread, MalfunctionProtections), lower = better as well.
+  // ActiveDurabilityPercentMinMax — The durability window (% of current max) within which the buff remains active.
+  //                                 Once durability drops below the threshold, the buff is removed.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "RepairKit": {
+
+    // MASTER SWITCH
+    "Enabled": false,
+
+    // Armor
+    "Armor": {
+      "RarityWeight":    { "Common": 5, "Rare": 1 },
+      "BonusTypeWeight": { "DamageReduction": 1 },
+      "Common": {
+        "DamageReduction": {
+          "ValuesMinMax":                  { "Min": 0.9,  "Max": 0.98 },
+          "ActiveDurabilityPercentMinMax": { "Min": 75,   "Max": 90   }
+        }
+      },
+      "Rare": {
+        "DamageReduction": {
+          "ValuesMinMax":                  { "Min": 0.8, "Max": 0.9 },
+          "ActiveDurabilityPercentMinMax": { "Min": 75,  "Max": 90  }
+        }
+      }
+    },
+
+    // Vest
+    "Vest": {
+      "RarityWeight":    { "Common": 5, "Rare": 1 },
+      "BonusTypeWeight": { "DamageReduction": 1 },
+      "Common": {
+        "DamageReduction": {
+          "ValuesMinMax":                  { "Min": 0.9,  "Max": 0.98 },
+          "ActiveDurabilityPercentMinMax": { "Min": 75,   "Max": 90   }
+        }
+      },
+      "Rare": {
+        "DamageReduction": {
+          "ValuesMinMax":                  { "Min": 0.8, "Max": 0.9 },
+          "ActiveDurabilityPercentMinMax": { "Min": 75,  "Max": 90  }
+        }
+      }
+    },
+
+    // Headwear
+    "Headwear": {
+      "RarityWeight":    { "Common": 5, "Rare": 1 },
+      "BonusTypeWeight": { "DamageReduction": 1 },
+      "Common": {
+        "DamageReduction": {
+          "ValuesMinMax":                  { "Min": 0.9,  "Max": 0.98 },
+          "ActiveDurabilityPercentMinMax": { "Min": 75,   "Max": 90   }
+        }
+      },
+      "Rare": {
+        "DamageReduction": {
+          "ValuesMinMax":                  { "Min": 0.8, "Max": 0.9 },
+          "ActiveDurabilityPercentMinMax": { "Min": 75,  "Max": 90  }
+        }
+      }
+    },
+
+    // Weapon
+    "Weapon": {
+      "RarityWeight":    { "Common": 5, "Rare": 1 },
+      "BonusTypeWeight": { "WeaponSpread": 1, "MalfunctionProtections": 1 },
+      "Common": {
+        "WeaponSpread": {
+          "ValuesMinMax":                  { "Min": 0.9,  "Max": 0.99 },
+          "ActiveDurabilityPercentMinMax": { "Min": 75,   "Max": 90   }
+        },
+        "MalfunctionProtections": {
+          "ValuesMinMax":                  { "Min": 0.94, "Max": 0.96 },
+          "ActiveDurabilityPercentMinMax": { "Min": 75,   "Max": 90   }
+        }
+      },
+      "Rare": {
+        "WeaponSpread": {
+          "ValuesMinMax":                  { "Min": 0.8, "Max": 0.9 },
+          "ActiveDurabilityPercentMinMax": { "Min": 75,  "Max": 90  }
+        },
+        "MalfunctionProtections": {
+          "ValuesMinMax":                  { "Min": 0.75, "Max": 0.9 },
+          "ActiveDurabilityPercentMinMax": { "Min": 75,   "Max": 90  }
+        },
+        "WeaponDamage": {
+          "ValuesMinMax":                  { "Min": 0.3, "Max": 0.6 },
+          "ActiveDurabilityPercentMinMax": { "Min": 75,  "Max": 90  }
+        }
+      }
+    },
+
+  }
+}

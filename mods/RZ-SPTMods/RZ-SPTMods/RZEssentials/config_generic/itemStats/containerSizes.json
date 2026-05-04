@@ -1,0 +1,387 @@
+{
+  "Enabled": false,
+
+  "Overrides": {
+
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    // POCKETS
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    // Base pockets (1x1 + 1x1 + 1x1 + 1x1)
+    "627a4e6b255f7527fb05a0f6": { "Grids": { "0": { "CellsH": 1, "CellsV": 1 }, "1": { "CellsH": 1, "CellsV": 1 }, "2": { "CellsH": 1, "CellsV": 1 }, "3": { "CellsH": 1, "CellsV": 1 } } },
+    // Ragman's quest pockets (1x1 + 1x2 + 1x2 + 1x1)
+    "65e080be269cbd5c5005e529": { "Grids": { "0": { "CellsH": 1, "CellsV": 1 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 1 } } },
+
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    // STASHES
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    // Stash_Standard (10x30)
+    "566abbc34bdc2d92178b4576": { "Grids": { "0": { "CellsH": 10, "CellsV": 30 } } },
+    // Stash_LeftBehind (10x40)
+    "5811ce572459770cba1a34ea": { "Grids": { "0": { "CellsH": 10, "CellsV": 50 } } },
+    // Stash_PrepareForEscape (10x50)
+    "5811ce662459770f6f490f32": { "Grids": { "0": { "CellsH": 10, "CellsV": 70 } } },
+    // Stash_EdgeOfDarkness (10x68)
+    "5811ce772459770e9e5f9532": { "Grids": { "0": { "CellsH": 10, "CellsV": 100 } } },
+
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    // SECURE CONTAINERS
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    // Waist pouch (2x2)
+    "5732ee6a24597719ae0c0281": { "Grids": { "0": { "CellsH": 2, "CellsV": 2 } } },
+    // Secure container Alpha (2x2)
+    "544a11ac4bdc2d470e8b456a": { "Grids": { "0": { "CellsH": 2, "CellsV": 2 } } },
+    // Fanny pack (Loui Peeton) (3x2)
+    "68d55968ca9935b3f10607a9": { "Grids": { "0": { "CellsH": 3, "CellsV": 2 } } },
+    // Secure container Beta (3x2)
+    "5857a8b324597729ab0a0e7d": { "Grids": { "0": { "CellsH": 3, "CellsV": 2 } } },
+    // Secure container Epsilon (4x2)
+    "59db794186f77448bc595262": { "Grids": { "0": { "CellsH": 4, "CellsV": 2 } } },
+    // Secure container Gamma (3x3)
+    "5857a8bc2459772bad15db29": { "Grids": { "0": { "CellsH": 3, "CellsV": 3 } } },
+    // Secure container Gamma (Loui Peeton) (3x3)
+    "68f117b8121d878a2303eee0": { "Grids": { "0": { "CellsH": 3, "CellsV": 3 } } },
+    // Tournament secured container (3x3)
+    "64f6f4c5911bcdfe8b03b0dc": { "Grids": { "0": { "CellsH": 3, "CellsV": 3 } } },
+    // Secure container Theta (4x2 + 1x2)
+    "664a55d84a90fc2c8a6305c9": { "Grids": { "0": { "CellsH": 4, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 } } },
+    // Secure container Kappa (3x4)
+    "5c093ca986f7740a1867ab12": { "Grids": { "0": { "CellsH": 3, "CellsV": 4 } } },
+    // Secure container Kappa (Desecrated) (3x4)
+    "676008db84e242067d0dc4c9": { "Grids": { "0": { "CellsH": 3, "CellsV": 4 } } },
+    // Secure container Boss (4x90)
+    "5c0a794586f77461c458f892": { "Grids": { "0": { "CellsH": 4, "CellsV": 90 } } },
+    // DEVELOPER secure container (10x60)
+    "5c0a5a5986f77476aa30ae64": { "Grids": { "0": { "CellsH": 10, "CellsV": 60 } } },
+
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    // STORAGE CASES
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    // Simple wallet (2x2)
+    "5783c43d2459774bbe137486": { "Grids": { "0": { "CellsH": 2, "CellsV": 2 } } },
+    // WZ Wallet (2x2)
+    "60b0f6c058e0b0481a09ad11": { "Grids": { "0": { "CellsH": 2, "CellsV": 2 } } },
+    // Gingy keychain (2x2)
+    "62a09d3bcf4a99369e262447": { "Grids": { "0": { "CellsH": 2, "CellsV": 2 } } },
+    // Loui Peeton deluxe wallet (3x2)
+    "6937eccbfd921faceb0dfecd": { "Grids": { "0": { "CellsH": 3, "CellsV": 2 } } },
+    // Injector case (3x3)
+    "619cbf7d23893217ec30b689": { "Grids": { "0": { "CellsH": 3, "CellsV": 3 } } },
+    // Keycard holder case (3x3)
+    "619cbf9e0a7c3a1a2731940a": { "Grids": { "0": { "CellsH": 3, "CellsV": 3 } } },
+    // Nut can (3x3)
+    "693bfb50d5c25889e701d444": { "Grids": { "0": { "CellsH": 3, "CellsV": 3 } } },
+    // Documents case (4x4)
+    "590c60fc86f77412b13fddcf": { "Grids": { "0": { "CellsH": 4, "CellsV": 4 } } },
+    // Key tool (4x4)
+    "59fafd4b86f7745ca07e1232": { "Grids": { "0": { "CellsH": 4, "CellsV": 4 } } },
+    // S I C C organizational pouch (5x5)
+    "5d235bb686f77443f4331278": { "Grids": { "0": { "CellsH": 5, "CellsV": 5 } } },
+    // Twitch rare dogtag case (5x5)
+    "6937ecc3dbdccab44605fcf0": { "Grids": { "0": { "CellsH": 5, "CellsV": 5 } } },
+    // Toolbox (Discord Version) (6x6)
+    "688b2dba67bf6fa26c07e918": { "Grids": { "0": { "CellsH": 6, "CellsV": 6 } } },
+    // Ammunition case (7x7)
+    "5aafbde786f774389d0cbc0f": { "Grids": { "0": { "CellsH": 7, "CellsV": 7 } } },
+    // Hot Rod beverage cooler bag (7x7)
+    "6937ecd37713b904480013ac": { "Grids": { "0": { "CellsH": 7, "CellsV": 7 } } },
+    // Magazine case (7x7)
+    "5c127c4486f7745625356c13": { "Grids": { "0": { "CellsH": 7, "CellsV": 7 } } },
+    // Medicine case (7x7)
+    "5aafbcd986f7745e590fff23": { "Grids": { "0": { "CellsH": 7, "CellsV": 7 } } },
+    // Money case (7x7)
+    "59fb016586f7746d0d4b423a": { "Grids": { "0": { "CellsH": 7, "CellsV": 7 } } },
+    // Weapon case (5x10)
+    "59fb023c86f7746d0d4b423c": { "Grids": { "0": { "CellsH": 5, "CellsV": 10 } } },
+    // Grenade case (8x8)
+    "5e2af55f86f7746d4159f07c": { "Grids": { "0": { "CellsH": 8, "CellsV": 8 } } },
+    // Item case (8x8)
+    "59fb042886f7746c5005a7b2": { "Grids": { "0": { "CellsH": 8, "CellsV": 8 } } },
+    // Mr. Holodilnick thermal bag (8x8)
+    "5c093db286f7740a1b2617e3": { "Grids": { "0": { "CellsH": 8, "CellsV": 8 } } },
+    // Key case (11x7)
+    "67d3ed3271c17ff82e0a5b0b": { "Grids": { "0": { "CellsH": 11, "CellsV": 7 } } },
+    // Streamer item case (7x11)
+    "66bc98a01a47be227a5e956e": { "Grids": { "0": { "CellsH": 7, "CellsV": 11 } } },
+    // T H I C C Weapon case (6x15)
+    "5b6d9ce188a4501afc1b2b25": { "Grids": { "0": { "CellsH": 6, "CellsV": 15 } } },
+    // Ballistic plate case (8x12)
+    "67600929bd0a0549d70993f6": { "Grids": { "0": { "CellsH": 8, "CellsV": 12 } } },
+    // Dogtag case (10x10)
+    "5c093e3486f77430cb02e593": { "Grids": { "0": { "CellsH": 10, "CellsV": 10 } } },
+    // Lucky Scav Junk box (14x14)
+    "5b7c710788a4506dec015957": { "Grids": { "0": { "CellsH": 14, "CellsV": 14 } } },
+    // T H I C C item case (14x14)
+    "5c0a840b86f7742ffa4f2482": { "Grids": { "0": { "CellsH": 14, "CellsV": 14 } } },
+    // Lucky DEVELOPER junkbox (20x12)
+    "5c0a5f6c86f774753654890e": { "Grids": { "0": { "CellsH": 20, "CellsV": 12 } } },
+
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    // BACKPACKS
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    // Tactical sling bag (Khaki) (3x2)
+    "5ab8f04f86f774585f4237d8": { "Grids": { "0": { "CellsH": 3, "CellsV": 2 } } },
+    // VKBO army bag (4x2)
+    "5ab8ee7786f7742d8f33f0b9": { "Grids": { "0": { "CellsH": 4, "CellsV": 2 } } },
+    // Transformer Bag (3x3)
+    "56e33680d2720be2748b4576": { "Grids": { "0": { "CellsH": 3, "CellsV": 3 } } },
+    // Duffle bag (4x3)
+    "56e33634d2720bd8058b456b": { "Grids": { "0": { "CellsH": 4, "CellsV": 3 } } },
+    // LolKek 3F Transfer tourist backpack (3x4)
+    "5f5e45cc5021ce62144be7aa": { "Grids": { "0": { "CellsH": 3, "CellsV": 4 } } },
+    // Mystery Ranch NICE COMM 3 BVS frame system (Coyote) (2x7)
+    "628bc7fb408e2b2e9c0801b1": { "Grids": { "0": { "CellsH": 2, "CellsV": 7 } } },
+    // Flyye MBSS backpack (UCP) (4x4)
+    "544a5cde4bdc2d39388b456b": { "Grids": { "0": { "CellsH": 4, "CellsV": 4 } } },
+    // Sanitar's bag (4x4)
+    "5e997f0b86f7741ac73993e2": { "Grids": { "0": { "CellsH": 4, "CellsV": 4 } } },
+    // Vertx Ready Pack backpack (Red) (4x4)
+    "66b5f247af44ca0014063c02": { "Grids": { "0": { "CellsH": 4, "CellsV": 4 } } },
+    // Hazard 4 Pillbox backpack (Black) (4x5)
+    "60a2828e8689911a226117f9": { "Grids": { "0": { "CellsH": 4, "CellsV": 5 } } },
+    // LBT-8005A Day Pack backpack (MultiCam Black) (4x5)
+    "5e9dcf5986f7746c417435b3": { "Grids": { "0": { "CellsH": 4, "CellsV": 5 } } },
+    // Partisan's bag (5x4)
+    "66a9f98f3bd5a41b162030f4": { "Grids": { "0": { "CellsH": 5, "CellsV": 4 } } },
+    // Scav backpack (4x5)
+    "56e335e4d2720b6c058b456d": { "Grids": { "0": { "CellsH": 4, "CellsV": 5 } } },
+    // WARTECH Berkut BB-102 backpack (A-TACS FG) (4x5)
+    "5ca20d5986f774331e7c9602": { "Grids": { "0": { "CellsH": 4, "CellsV": 5 } } },
+    // Hazard 4 Takedown sling backpack (Black) (3x8)
+    "6034d103ca006d2dca39b3f0": { "Grids": { "0": { "CellsH": 3, "CellsV": 8 } } },
+    // Hazard 4 Takedown sling backpack (MultiCam) (3x8)
+    "6038d614d10cbf667352dd44": { "Grids": { "0": { "CellsH": 3, "CellsV": 8 } } },
+    // Direct Action Dragon Egg Mark II backpack (Black) (2x2 + 3x2 + 5x3)
+    "656f198fb27298d6fd005466": { "Grids": { "0": { "CellsH": 2, "CellsV": 2 }, "1": { "CellsH": 3, "CellsV": 2 }, "2": { "CellsH": 5, "CellsV": 3 } } },
+    // Gruppa 99 T20 backpack (MultiCam) (5x5)
+    "619cf0335771dd3c390269ae": { "Grids": { "0": { "CellsH": 5, "CellsV": 5 } } },
+    // Gruppa 99 T20 backpack (Umber Brown) (5x5)
+    "618bb76513f5097c8d5aa2d5": { "Grids": { "0": { "CellsH": 5, "CellsV": 5 } } },
+    // Hazard 4 Drawbridge backpack (Coyote Tan) (5x5)
+    "60a272cc93ef783291411d8e": { "Grids": { "0": { "CellsH": 5, "CellsV": 5 } } },
+    // LBT-1476A 3Day Pack (MultiCam Alpine) (5x5)
+    "67458794e21e5d724e066976": { "Grids": { "0": { "CellsH": 5, "CellsV": 5 } } },
+    // LBT-1476A 3Day Pack (Woodland) (5x5)
+    "618cfae774bb2d036a049e7c": { "Grids": { "0": { "CellsH": 5, "CellsV": 5 } } },
+    // Tehinkom RK-PT-25 patrol backpack (EMR) (1x2 + 1x2 + 1x3 + 1x3 + 3x2 + 3x3)
+    "656ddcf0f02d7bcea90bf395": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 3 }, "3": { "CellsH": 1, "CellsV": 3 }, "4": { "CellsH": 3, "CellsV": 2 }, "5": { "CellsH": 3, "CellsV": 3 } } },
+    // ANA Tactical Beta 2 Battle backpack (Olive Drab) (5x6)
+    "5b44c6ae86f7742d1627baea": { "Grids": { "0": { "CellsH": 5, "CellsV": 6 } } },
+    // Camelbak Tri-Zip assault backpack (Foliage) (5x6)
+    "545cdae64bdc2d39198b4568": { "Grids": { "0": { "CellsH": 5, "CellsV": 6 } } },
+    // Camelbak Tri-Zip assault backpack (MultiCam) (5x6)
+    "66b5f22b78bbc0200425f904": { "Grids": { "0": { "CellsH": 5, "CellsV": 6 } } },
+    // Eberlestock F5 Switchblade backpack (Dry Earth) (5x6)
+    "5f5e467b0bc58666c37e7821": { "Grids": { "0": { "CellsH": 5, "CellsV": 6 } } },
+    // Gruppa 99 T30 backpack (Black) (5x6)
+    "628e1ffc83ec92260c0f437f": { "Grids": { "0": { "CellsH": 5, "CellsV": 6 } } },
+    // Gruppa 99 T30 backpack (MultiCam) (5x6)
+    "62a1b7fbc30cfa1d366af586": { "Grids": { "0": { "CellsH": 5, "CellsV": 6 } } },
+    // Mystery Ranch 2 Day Assault Pack (Black) (5x6)
+    "68947ab5a733b1602007e2fe": { "Grids": { "0": { "CellsH": 5, "CellsV": 6 } } },
+    // Mystery Ranch Terraframe backpack (Christmas Edition) (2x5 + 4x5)
+    "674da9cf0cb4bcde7103c07b": { "Grids": { "0": { "CellsH": 2, "CellsV": 5 }, "1": { "CellsH": 4, "CellsV": 5 } } },
+    // Mystery Ranch Terraframe backpack (Olive Drab) (2x5 + 4x5)
+    "674da107c512807d1a0e7436": { "Grids": { "0": { "CellsH": 2, "CellsV": 5 }, "1": { "CellsH": 4, "CellsV": 5 } } },
+    // Oakley Mechanism heavy duty backpack (Black) (4x4 + 2x2 + 2x2 + 2x2 + 2x2)
+    "5d5d940f86f7742797262046": { "Grids": { "0": { "CellsH": 4, "CellsV": 4 }, "1": { "CellsH": 2, "CellsV": 2 }, "2": { "CellsH": 2, "CellsV": 2 }, "3": { "CellsH": 2, "CellsV": 2 }, "4": { "CellsH": 2, "CellsV": 2 } } },
+    // 3V Gear Paratus 3-Day Operator's Tactical backpack (Foliage) (5x5 + 1x2 + 1x2 + 3x2)
+    "5c0e805e86f774683f3dd637": { "Grids": { "0": { "CellsH": 5, "CellsV": 5 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 3, "CellsV": 2 } } },
+    // Eberlestock G2 Gunslinger II backpack (Dry Earth) (3x5 + 2x7 + 3x2)
+    "6034d2d697633951dc245ea6": { "Grids": { "0": { "CellsH": 3, "CellsV": 5 }, "1": { "CellsH": 2, "CellsV": 7 }, "2": { "CellsH": 3, "CellsV": 2 } } },
+    // Mystery Ranch NICE Frame Load Sling (5x7)
+    "68947ad3e4bf255d1b0ca75c": { "Grids": { "0": { "CellsH": 5, "CellsV": 7 } } },
+    // Pilgrim tourist backpack (5x7)
+    "59e763f286f7742ee57895da": { "Grids": { "0": { "CellsH": 5, "CellsV": 7 } } },
+    // Santa's bag (5x7)
+    "61b9e1aaef9a1b5d6a79899a": { "Grids": { "0": { "CellsH": 5, "CellsV": 7 } } },
+    // SSO Attack 2 raid backpack (Khaki) (5x7)
+    "5ab8ebf186f7742d8b372e80": { "Grids": { "0": { "CellsH": 5, "CellsV": 7 } } },
+    // Tasmanian Tiger Trooper 35 backpack (Khaki) (5x7)
+    "639346cc1c8f182ad90c8972": { "Grids": { "0": { "CellsH": 5, "CellsV": 7 } } },
+    // Mystery Ranch SATL Bridger Assault Pack (Foliage) (6x2 + 3x4 + 3x4)
+    "656e0436d44a1bb4220303a0": { "Grids": { "0": { "CellsH": 6, "CellsV": 2 }, "1": { "CellsH": 3, "CellsV": 4 }, "2": { "CellsH": 3, "CellsV": 4 } } },
+    // Eberlestock F4 Terminator load bearing backpack (Tiger Stripe) (5x4 + 5x2 + 5x2)
+    "5f5e46b96bdad616ad46d613": { "Grids": { "0": { "CellsH": 5, "CellsV": 4 }, "1": { "CellsH": 5, "CellsV": 2 }, "2": { "CellsH": 5, "CellsV": 2 } } },
+    // Tasmanian Tiger Modular Pack 45 Plus (MultiCam Black) (5x8)
+    "68947a8ce4bf255d1b0ca759": { "Grids": { "0": { "CellsH": 5, "CellsV": 8 } } },
+    // Mystery Ranch Blackjack 50 backpack (MultiCam) (6x7)
+    "5c0e774286f77468413cc5b2": { "Grids": { "0": { "CellsH": 6, "CellsV": 7 } } },
+    // 5.11 Tactical RUSH 100 backpack (Black) (1x2 + 2x2 + 2x2 + 5x7)
+    "67458730df3c1da90b0b052b": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 2, "CellsV": 2 }, "2": { "CellsH": 2, "CellsV": 2 }, "3": { "CellsH": 5, "CellsV": 7 } } },
+    // 6Sh118 raid backpack (EMR) (6x8)
+    "5df8a4d786f77412672a1e3b": { "Grids": { "0": { "CellsH": 6, "CellsV": 8 } } },
+    // LBT-2670 Slim Field Med Pack (Black) (6x8)
+    "5e4abc6786f77406812bd572": { "Grids": { "0": { "CellsH": 6, "CellsV": 8 } } },
+    // Mystery Ranch Terraplane backpack (6x50)
+    "56e294cdd2720b603a8b4575": { "Grids": { "0": { "CellsH": 6, "CellsV": 50 } } },
+
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    // VESTS
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    // Scav Vest (1x1 + 1x2 + 1x2 + 1x1)
+    "572b7adb24597762ae139821": { "Grids": { "0": { "CellsH": 1, "CellsV": 1 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 1 } } },
+    // Security vest (1x1 + 1x2 + 1x2 + 1x1)
+    "5fd4c5477a8d854fa0105061": { "Grids": { "0": { "CellsH": 1, "CellsV": 1 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 1 } } },
+    // Zulu Nylon Gear M4 Reduced Signature Chest Rig (Ranger Green) (1x2 + 1x2 + 1x2)
+    "64be7095047e826eae02b0c1": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 } } },
+    // DIY IDEA chest rig (1x2 + 1x2 + 1x2 + 1x2)
+    "5fd4c4fa16cac650092f6771": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 } } },
+    // SOE Micro Rig (MultiCam) (2x2 + 1x2 + 1x2)
+    "5d5d8ca986f7742798716522": { "Grids": { "0": { "CellsH": 2, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 } } },
+    // Spiritus Systems Bank Robber chest rig (MultiCam Alpine) (1x2 + 1x2 + 1x2 + 1x2)
+    "674589d98dd67746010329e6": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 } } },
+    // Spiritus Systems Bank Robber chest rig (MultiCam Black) (1x2 + 1x2 + 1x2 + 1x2)
+    "5e4abc1f86f774069619fbaa": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 } } },
+    // CSA chest rig (Black) (1x3 + 1x2 + 1x2 + 1x3)
+    "6034d0230ca681766b6a0fb5": { "Grids": { "0": { "CellsH": 1, "CellsV": 3 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 3 } } },
+    // Type 56 Chicom chest harness (1x1 + 1x1 + 1x1 + 1x1 + 1x2 + 1x2 + 1x2)
+    "64be7110bf597ba84a0a41ea": { "Grids": { "0": { "CellsH": 1, "CellsV": 1 }, "1": { "CellsH": 1, "CellsV": 1 }, "2": { "CellsH": 1, "CellsV": 1 }, "3": { "CellsH": 1, "CellsV": 1 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 2 } } },
+    // WARTECH TV-109 + TV-106 chest rig (A-TACS FG) (2x2 + 1x2 + 1x2 + 1x1 + 1x1)
+    "59e7643b86f7742cbf2c109a": { "Grids": { "0": { "CellsH": 2, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 1 }, "4": { "CellsH": 1, "CellsV": 1 } } },
+    // UMTBS 6Sh112 Scout-Sniper chest rig (EMR) (1x1 + 1x1 + 1x2 + 1x2 + 1x2 + 1x2 + 1x1 + 1x1)
+    "5929a2a086f7744f4b234d43": { "Grids": { "0": { "CellsH": 1, "CellsV": 1 }, "1": { "CellsH": 1, "CellsV": 1 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 1, "CellsV": 1 } } },
+    // Splav Tarzan M22 chest rig (Smog) (1x2 + 1x2 + 1x2 + 1x2 + 1x1 + 1x1 + 1x1 + 1x1 + 1x1 + 1x1)
+    "5e4abfed86f77406a2713cf7": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 1 }, "5": { "CellsH": 1, "CellsV": 1 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 1, "CellsV": 1 }, "8": { "CellsH": 1, "CellsV": 1 }, "9": { "CellsH": 1, "CellsV": 1 } } },
+    // BlackHawk! Commando chest harness (Black) (1x2 x8)
+    "5c0e9f2c86f77432297fe0a3": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 2 }, "7": { "CellsH": 1, "CellsV": 2 } } },
+    // BlackHawk! Commando chest harness (Desert Tan) (1x2 x8)
+    "5b44c8ea86f7742d1627baf1": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 2 }, "7": { "CellsH": 1, "CellsV": 2 } } },
+    // Direct Action Thunderbolt compact chest rig (Shadow Grey) (1x2 x7 + 1x1 + 1x1)
+    "5f5f41f56760b4138443b352": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 2 }, "7": { "CellsH": 1, "CellsV": 1 }, "8": { "CellsH": 1, "CellsV": 1 } } },
+    // Dynaforce Triton M43-A chest harness (Black) (1x2 x8)
+    "5ca20abf86f77418567a43f2": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 2 }, "7": { "CellsH": 1, "CellsV": 2 } } },
+    // Gear Craft GC-BSS-MK1 chest rig (A-TACS FG) (1x2 x6 + 1x1 x4)
+    "5fd4c60f875c30179f5d04c2": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 1, "CellsV": 1 }, "8": { "CellsH": 1, "CellsV": 1 }, "9": { "CellsH": 1, "CellsV": 1 } } },
+    // Haley Strategic D3CRX Chest Harness (Ranger Green) (1x2 x6 + 1x1 x4)
+    "5d5d85c586f774279a21cbdb": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 1, "CellsV": 1 }, "8": { "CellsH": 1, "CellsV": 1 }, "9": { "CellsH": 1, "CellsV": 1 } } },
+    // Umka M33-SET1 hunter vest (Olive Drab) (1x2 x4 + 2x2 + 1x1 x4)
+    "6034cf5fffd42c541047f72e": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 2, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 1 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 1, "CellsV": 1 }, "8": { "CellsH": 1, "CellsV": 1 } } },
+    // LBT-1961A Load Bearing Chest Rig (AOR1) (2x2 + 2x2 + 1x2 x4 + 1x1 + 1x1)
+    "68bee2b431902bb4d90c3a2a": { "Grids": { "0": { "CellsH": 2, "CellsV": 2 }, "1": { "CellsH": 2, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 1, "CellsV": 1 } } },
+    // LBT-1961A Load Bearing Chest Rig (Goons Edition) (2x2 + 2x2 + 1x2 x4 + 1x1 + 1x1)
+    "628baf0b967de16aab5a4f36": { "Grids": { "0": { "CellsH": 2, "CellsV": 2 }, "1": { "CellsH": 2, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 1, "CellsV": 1 } } },
+    // LBT-1961A Load Bearing Chest Rig (MAS Grey) (2x2 + 2x2 + 1x2 x4 + 1x1 + 1x1)
+    "5e9db13186f7742f845ee9d3": { "Grids": { "0": { "CellsH": 2, "CellsV": 2 }, "1": { "CellsH": 2, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 1, "CellsV": 1 } } },
+    // Stich Profi Chest Rig MK2 (Assault, A-TACS FG) (1x1 + 1x2 x3 + 1x1 x3 + 1x2 x3 + 1x1 + 1x1)
+    "60a621c49c197e4e8c4455e6": { "Grids": { "0": { "CellsH": 1, "CellsV": 1 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 1 }, "5": { "CellsH": 1, "CellsV": 1 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 1, "CellsV": 2 }, "8": { "CellsH": 1, "CellsV": 2 }, "9": { "CellsH": 1, "CellsV": 2 }, "10": { "CellsH": 1, "CellsV": 1 }, "11": { "CellsH": 1, "CellsV": 1 } } },
+    // Stich Profi Chest Rig MK2 (Recon, A-TACS FG) (1x2 x4 + 1x1 x5 + 1x2 + 1x2 + 1x1)
+    "60a6220e953894617404b00a": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 1 }, "5": { "CellsH": 1, "CellsV": 1 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 1, "CellsV": 1 }, "8": { "CellsH": 1, "CellsV": 1 }, "9": { "CellsH": 1, "CellsV": 2 }, "10": { "CellsH": 1, "CellsV": 2 }, "11": { "CellsH": 1, "CellsV": 1 } } },
+    // ANA Tactical Alpha chest rig (A-TACS AU) (1x2 + 1x2 + 1x3 x4 + 2x2)
+    "68a85ac615a5769d50029cd9": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 3 }, "3": { "CellsH": 1, "CellsV": 3 }, "4": { "CellsH": 1, "CellsV": 3 }, "5": { "CellsH": 1, "CellsV": 3 }, "6": { "CellsH": 2, "CellsV": 2 } } },
+    // ANA Tactical Alpha chest rig (MultiCam) (1x2 + 1x2 + 1x3 x4 + 2x2)
+    "67ab3ea96d7ece17bf0096f6": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 3 }, "3": { "CellsH": 1, "CellsV": 3 }, "4": { "CellsH": 1, "CellsV": 3 }, "5": { "CellsH": 1, "CellsV": 3 }, "6": { "CellsH": 2, "CellsV": 2 } } },
+    // ANA Tactical Alpha chest rig (Olive Drab) (1x2 + 1x2 + 1x3 x4 + 2x2)
+    "592c2d1a86f7746dbe2af32a": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 3 }, "3": { "CellsH": 1, "CellsV": 3 }, "4": { "CellsH": 1, "CellsV": 3 }, "5": { "CellsH": 1, "CellsV": 3 }, "6": { "CellsH": 2, "CellsV": 2 } } },
+    // Azimut SS Zhuk chest harness (Black) (1x2 x10)
+    "603648ff5a45383c122086ac": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 2 }, "7": { "CellsH": 1, "CellsV": 2 }, "8": { "CellsH": 1, "CellsV": 2 }, "9": { "CellsH": 1, "CellsV": 2 } } },
+    // Azimut SS Zhuk chest harness (SURPAT) (1x2 x10)
+    "6040dd4ddcf9592f401632d2": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 2 }, "7": { "CellsH": 1, "CellsV": 2 }, "8": { "CellsH": 1, "CellsV": 2 }, "9": { "CellsH": 1, "CellsV": 2 } } },
+    // BlackRock chest rig (Gray) (1x2 x4 + 2x2 + 1x1 x4 + 1x2 + 1x2)
+    "5648a69d4bdc2ded0b8b457b": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 2, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 1 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 1, "CellsV": 1 }, "8": { "CellsH": 1, "CellsV": 1 }, "9": { "CellsH": 1, "CellsV": 2 }, "10": { "CellsH": 1, "CellsV": 2 } } },
+    // BlackRock chest rig (Khaki) (1x2 x4 + 2x2 + 1x1 x4 + 1x2 + 1x2)
+    "67ab3f146d7ece17bf0096ff": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 2, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 1 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 1, "CellsV": 1 }, "8": { "CellsH": 1, "CellsV": 1 }, "9": { "CellsH": 1, "CellsV": 2 }, "10": { "CellsH": 1, "CellsV": 2 } } },
+    // WARTECH MK3 TV-104 chest rig (Moss) (1x2 x8 + 1x1 + 1x1 + 2x1)
+    "68a986615db8a4a66404ff9a": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 2 }, "7": { "CellsH": 1, "CellsV": 2 }, "8": { "CellsH": 1, "CellsV": 1 }, "9": { "CellsH": 1, "CellsV": 1 }, "10": { "CellsH": 2, "CellsV": 1 } } },
+    // WARTECH MK3 TV-104 chest rig (MultiCam) (1x2 x8 + 1x1 + 1x1 + 2x1)
+    "5ab8dab586f77441cd04f2a2": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 2 }, "7": { "CellsH": 1, "CellsV": 2 }, "8": { "CellsH": 1, "CellsV": 1 }, "9": { "CellsH": 1, "CellsV": 1 }, "10": { "CellsH": 2, "CellsV": 1 } } },
+    // Velocity Systems MPPV Multi-Purpose Patrol Vest (Wolf Grey) (1x2 x8 + 1x1 + 1x1 + 1x2 + 1x2 + 1x1 + 1x1)
+    "5df8a42886f77412640e2e75": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 2 }, "7": { "CellsH": 1, "CellsV": 2 }, "8": { "CellsH": 1, "CellsV": 1 }, "9": { "CellsH": 1, "CellsV": 1 }, "10": { "CellsH": 1, "CellsV": 2 }, "11": { "CellsH": 1, "CellsV": 2 }, "12": { "CellsH": 1, "CellsV": 1 }, "13": { "CellsH": 1, "CellsV": 1 } } },
+    // Poyas-A + Poyas-B gear rig (1x2 x6 + 1x1 x13)
+    "5c0e6a1586f77404597b4965": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 1, "CellsV": 1 }, "8": { "CellsH": 1, "CellsV": 1 }, "9": { "CellsH": 1, "CellsV": 1 }, "10": { "CellsH": 1, "CellsV": 1 }, "11": { "CellsH": 1, "CellsV": 1 }, "12": { "CellsH": 1, "CellsV": 1 }, "13": { "CellsH": 1, "CellsV": 1 }, "14": { "CellsH": 1, "CellsV": 1 }, "15": { "CellsH": 1, "CellsV": 1 }, "16": { "CellsH": 1, "CellsV": 1 }, "17": { "CellsH": 1, "CellsV": 1 }, "18": { "CellsH": 1, "CellsV": 1 } } },
+
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    // ARMORED RIGS
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    // Tasmanian Tiger SK plate carrier (MultiCam Black) (1x2 x4)
+    "628cd624459354321c4b7fa2": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 } } },
+    // 6B5-15 Zh-86 Uley armored rig (Flora) (1x2 x4 + 1x1 + 1x1)
+    "5c0e446786f7742013381639": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 1 }, "5": { "CellsH": 1, "CellsV": 1 } } },
+    // 6B5-16 Zh-86 Uley armored rig (Khaki) (1x2 x4 + 1x1 + 1x1)
+    "5c0e3eb886f7742015526062": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 1 }, "5": { "CellsH": 1, "CellsV": 1 } } },
+    // S&S Precision PlateFrame plate carrier (Goons Edition) (1x2 x5)
+    "628b9784bcf6e2659e09b8a2": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 } } },
+    // 6B3TM-01 armored rig (Khaki) (1x1 + 1x1 + 1x2 x4 + 1x1 + 1x1)
+    "5d5d646386f7742797261fd9": { "Grids": { "0": { "CellsH": 1, "CellsV": 1 }, "1": { "CellsH": 1, "CellsV": 1 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 1, "CellsV": 1 } } },
+    // Azimut SS "Khamelion" chest harness (Olive) (1x1 + 1x1 + 1x2 x4 + 1x1 + 1x1)
+    "63611865ba5b90db0c0399d1": { "Grids": { "0": { "CellsH": 1, "CellsV": 1 }, "1": { "CellsH": 1, "CellsV": 1 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 1, "CellsV": 1 } } },
+    // Crye Precision AVS plate carrier (Tagilla Edition) (1x2 x6)
+    "609e860ebd219504d8507525": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 2 } } },
+    // Eagle Allied Industries MBSS plate carrier (Coyote Brown) (1x1 x3 + 1x2 + 1x2 + 2x1 + 1x3)
+    "64a5366719bab53bd203bf33": { "Grids": { "0": { "CellsH": 1, "CellsV": 1 }, "1": { "CellsH": 1, "CellsV": 1 }, "2": { "CellsH": 1, "CellsV": 1 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 2, "CellsV": 1 }, "6": { "CellsH": 1, "CellsV": 3 } } },
+    // Tac-Kek JayPC plate carrier (Black) (1x2 x4 + 1x1 x3 + 1x2)
+    "693fd1200ec97e98040bd3f9": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 1 }, "5": { "CellsH": 1, "CellsV": 1 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 1, "CellsV": 2 } } },
+    // WARTECH TV-115 plate carrier (Olive Drab) (1x2 + 1x2 + 1x3 x3)
+    "64a536392d2c4e6e970f4121": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 3 }, "3": { "CellsH": 1, "CellsV": 3 }, "4": { "CellsH": 1, "CellsV": 3 } } },
+    // Eagle Industries MMAC plate carrier (Ranger Green) (1x2 x6 + 1x1 + 1x1)
+    "61bc85697113f767765c7fe7": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 1, "CellsV": 1 } } },
+    // Ferro Concepts FCPC V5 Plate Carrier (Black Division) (1x2 + 1x2 + 1x2 + 2x2 + 1x2 + 1x2)
+    "689479cb47e5acd1e10be986": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 2, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 2 } } },
+    // Stich Profi Stich Defense mod.2 plate carrier (MultiCam) (1x1 + 1x1 + 1x2 + 1x2 + 2x1 + 1x3 + 1x3)
+    "66b6295178bbc0200425f995": { "Grids": { "0": { "CellsH": 1, "CellsV": 1 }, "1": { "CellsH": 1, "CellsV": 1 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 2, "CellsV": 1 }, "5": { "CellsH": 1, "CellsV": 3 }, "6": { "CellsH": 1, "CellsV": 3 } } },
+    // Tac-Kek JayPC plate carrier (OD Green) (1x2 x4 + 2x2 + 1x1 + 1x2)
+    "693fd13aa490096a05028cc8": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 2, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 1 }, "6": { "CellsH": 1, "CellsV": 2 } } },
+    // Tasmanian Tiger Plate Carrier MKIII (Coyote Brown) (1x2 + 1x2 + 1x2 + 1x3 x3)
+    "66b6295a8ca68c6461709efa": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 3 }, "4": { "CellsH": 1, "CellsV": 3 }, "5": { "CellsH": 1, "CellsV": 3 } } },
+    // 6B45 armored rig (General Purpose) (1x2 x4 + 2x2 + 1x1 x4)
+    "68948ad72c87773b9f06d73f": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 2, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 1 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 1, "CellsV": 1 }, "8": { "CellsH": 1, "CellsV": 1 } } },
+    // 6B45 armored rig (Medic) (1x2 + 1x2 + 1x4 + 2x2 + 1x1 x4)
+    "68948aebd8f2b85fb705e2b0": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 4 }, "3": { "CellsH": 2, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 1 }, "5": { "CellsH": 1, "CellsV": 1 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 1, "CellsV": 1 } } },
+    // Shellback Tactical Banshee plate carrier (A-TACS AU) (1x2 + 1x3 + 1x3 + 1x2 + 1x1 + 1x1 + 1x2 + 1x2)
+    "639343fce101f4caa40a4ef3": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 3 }, "2": { "CellsH": 1, "CellsV": 3 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 1 }, "5": { "CellsH": 1, "CellsV": 1 }, "6": { "CellsH": 1, "CellsV": 2 }, "7": { "CellsH": 1, "CellsV": 2 } } },
+    // First Spear Strandhogg plate carrier (ABUPAT) (1x3 x3 + 1x1 x4 + 2x2)
+    "68a85ab8ef22d08bf401fa68": { "Grids": { "0": { "CellsH": 1, "CellsV": 3 }, "1": { "CellsH": 1, "CellsV": 3 }, "2": { "CellsH": 1, "CellsV": 3 }, "3": { "CellsH": 1, "CellsV": 1 }, "4": { "CellsH": 1, "CellsV": 1 }, "5": { "CellsH": 1, "CellsV": 1 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 2, "CellsV": 2 } } },
+    // First Spear Strandhogg plate carrier (Ranger Green) (1x3 x3 + 1x1 x4 + 2x2)
+    "61bcc89aef0f505f0c6cd0fc": { "Grids": { "0": { "CellsH": 1, "CellsV": 3 }, "1": { "CellsH": 1, "CellsV": 3 }, "2": { "CellsH": 1, "CellsV": 3 }, "3": { "CellsH": 1, "CellsV": 1 }, "4": { "CellsH": 1, "CellsV": 1 }, "5": { "CellsH": 1, "CellsV": 1 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 2, "CellsV": 2 } } },
+    // 5.11 Tactical TacTec plate carrier (Ranger Green) (1x2 x4 + 1x1 x4 + 1x2 + 1x1 + 1x1 + 1x2)
+    "5b44cad286f77402a54ae7e5": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 1 }, "5": { "CellsH": 1, "CellsV": 1 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 1, "CellsV": 1 }, "8": { "CellsH": 1, "CellsV": 2 }, "9": { "CellsH": 1, "CellsV": 1 }, "10": { "CellsH": 1, "CellsV": 1 }, "11": { "CellsH": 1, "CellsV": 2 } } },
+    // 5.11 Tactical TacTec plate carrier (Storm) (1x2 x4 + 1x1 x4 + 1x2 + 1x1 + 1x1 + 1x2)
+    "67ab4b2d6f7ae4aa550bbcf6": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 1 }, "5": { "CellsH": 1, "CellsV": 1 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 1, "CellsV": 1 }, "8": { "CellsH": 1, "CellsV": 2 }, "9": { "CellsH": 1, "CellsV": 1 }, "10": { "CellsH": 1, "CellsV": 1 }, "11": { "CellsH": 1, "CellsV": 2 } } },
+    // ANA Tactical M2 plate carrier (EMR) (1x2 x8 + 2x1)
+    "5ab8dced86f774646209ec87": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 2 }, "7": { "CellsH": 1, "CellsV": 2 }, "8": { "CellsH": 2, "CellsV": 1 } } },
+    // ANA Tactical M2 plate carrier (MultiCam Alpine) (1x2 x8 + 2x1)
+    "69412e5573dcf473e50be464": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 2 }, "7": { "CellsH": 1, "CellsV": 2 }, "8": { "CellsH": 2, "CellsV": 1 } } },
+    // Crye Precision CPC plate carrier (Goons Edition) (1x3 + 1x2 x3 + 1x3 + 1x2 x3)
+    "628b9c7d45122232a872358f": { "Grids": { "0": { "CellsH": 1, "CellsV": 3 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 3 }, "5": { "CellsH": 1, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 2 }, "7": { "CellsH": 1, "CellsV": 2 } } },
+    // 6B45 armored rig (Assault) (1x2 x4 + 1x1 x3 + 1x2 x4)
+    "68948b118c57a8a52301d7ae": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 1 }, "5": { "CellsH": 1, "CellsV": 1 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 1, "CellsV": 2 }, "8": { "CellsH": 1, "CellsV": 2 }, "9": { "CellsH": 1, "CellsV": 2 }, "10": { "CellsH": 1, "CellsV": 2 } } },
+    // ECLiPSE RBAV-AF plate carrier (Ranger Green) (1x3 x3 + 1x1 x4 + 2x2 + 1x1 + 1x1)
+    "628dc750b910320f4c27a732": { "Grids": { "0": { "CellsH": 1, "CellsV": 3 }, "1": { "CellsH": 1, "CellsV": 3 }, "2": { "CellsH": 1, "CellsV": 3 }, "3": { "CellsH": 1, "CellsV": 1 }, "4": { "CellsH": 1, "CellsV": 1 }, "5": { "CellsH": 1, "CellsV": 1 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 2, "CellsV": 2 }, "8": { "CellsH": 1, "CellsV": 1 }, "9": { "CellsH": 1, "CellsV": 1 } } },
+    // ANA Tactical M1 plate carrier (Olive Drab) (1x2 x4 + 2x2 + 2x2 + 1x1 x4)
+    "5c0e722886f7740458316a57": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 2, "CellsV": 2 }, "5": { "CellsH": 2, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 1, "CellsV": 1 }, "8": { "CellsH": 1, "CellsV": 1 }, "9": { "CellsH": 1, "CellsV": 1 } } },
+    // Stich Profi Plate Carrier V2 (Black) (2x1 + 2x1 + 1x3 x4 + 2x2)
+    "66b6296d7994640992013b17": { "Grids": { "0": { "CellsH": 2, "CellsV": 1 }, "1": { "CellsH": 2, "CellsV": 1 }, "2": { "CellsH": 1, "CellsV": 3 }, "3": { "CellsH": 1, "CellsV": 3 }, "4": { "CellsH": 1, "CellsV": 3 }, "5": { "CellsH": 1, "CellsV": 3 }, "6": { "CellsH": 2, "CellsV": 2 } } },
+    // Stich Profi Plate Carrier V2 (MARPAT Woodland) (2x1 + 2x1 + 1x3 x4 + 2x2)
+    "68a99207aa809946e507c2f6": { "Grids": { "0": { "CellsH": 2, "CellsV": 1 }, "1": { "CellsH": 2, "CellsV": 1 }, "2": { "CellsH": 1, "CellsV": 3 }, "3": { "CellsH": 1, "CellsV": 3 }, "4": { "CellsH": 1, "CellsV": 3 }, "5": { "CellsH": 1, "CellsV": 3 }, "6": { "CellsH": 2, "CellsV": 2 } } },
+    // Ars Arma CPC MOD.1 plate carrier (A-TACS FG) (1x2 x3 + 1x3 + 1x3 + 2x2 + 1x2 + 1x2 + 1x1 x3)
+    "5e4ac41886f77406a511c9a8": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 3 }, "4": { "CellsH": 1, "CellsV": 3 }, "5": { "CellsH": 2, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 2 }, "7": { "CellsH": 1, "CellsV": 2 }, "8": { "CellsH": 1, "CellsV": 1 }, "9": { "CellsH": 1, "CellsV": 1 }, "10": { "CellsH": 1, "CellsV": 1 } } },
+    // Crye Precision AVS plate carrier (MultiCam) (1x2 x4 + 2x2 + 2x2 + 1x1 x4 + 1x2 + 1x1)
+    "67ab49aab9c7a1e18c095686": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 2, "CellsV": 2 }, "5": { "CellsH": 2, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 1, "CellsV": 1 }, "8": { "CellsH": 1, "CellsV": 1 }, "9": { "CellsH": 1, "CellsV": 1 }, "10": { "CellsH": 1, "CellsV": 2 }, "11": { "CellsH": 1, "CellsV": 1 } } },
+    // Crye Precision AVS plate carrier (Ranger Green) (1x2 x4 + 2x2 + 2x2 + 1x1 x4 + 1x2 + 1x1)
+    "544a5caa4bdc2d1a388b4568": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 2, "CellsV": 2 }, "5": { "CellsH": 2, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 1, "CellsV": 1 }, "8": { "CellsH": 1, "CellsV": 1 }, "9": { "CellsH": 1, "CellsV": 1 }, "10": { "CellsH": 1, "CellsV": 2 }, "11": { "CellsH": 1, "CellsV": 1 } } },
+    // WARTECH TV-110 plate carrier (Coyote) (1x3 x3 + 1x2 + 1x2 + 1x1 + 1x1 + 2x2 + 2x2)
+    "5c0e746986f7741453628fe5": { "Grids": { "0": { "CellsH": 1, "CellsV": 3 }, "1": { "CellsH": 1, "CellsV": 3 }, "2": { "CellsH": 1, "CellsV": 3 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 1 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 2, "CellsV": 2 }, "8": { "CellsH": 2, "CellsV": 2 } } },
+    // CQC Osprey MK4A plate carrier (Protection, MTP) (1x3 + 1x2 x3 + 1x3 + 1x2 x3 + 1x1 + 2x2 + 1x1)
+    "60a3c68c37ea821725773ef5": { "Grids": { "0": { "CellsH": 1, "CellsV": 3 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 3 }, "5": { "CellsH": 1, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 2 }, "7": { "CellsH": 1, "CellsV": 2 }, "8": { "CellsH": 1, "CellsV": 1 }, "9": { "CellsH": 2, "CellsV": 2 }, "10": { "CellsH": 1, "CellsV": 1 } } },
+    // Crye Precision JPC Plate Carrier (MultiCam) (1x2 x4 + 2x2 + 2x2 + 1x2 x4)
+    "693fd0e9deee848f70054999": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 2, "CellsV": 2 }, "5": { "CellsH": 2, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 2 }, "7": { "CellsH": 1, "CellsV": 2 }, "8": { "CellsH": 1, "CellsV": 2 }, "9": { "CellsH": 1, "CellsV": 2 } } },
+    // Spiritus Systems LV-119 Plate Carrier (Black Division V1) (1x2 x5 + 2x2 + 1x2 x3 + 1x1 x4)
+    "689479a4a733b1602007e2eb": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 2, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 2 }, "7": { "CellsH": 1, "CellsV": 2 }, "8": { "CellsH": 1, "CellsV": 2 }, "9": { "CellsH": 1, "CellsV": 1 }, "10": { "CellsH": 1, "CellsV": 1 }, "11": { "CellsH": 1, "CellsV": 1 }, "12": { "CellsH": 1, "CellsV": 1 } } },
+    // Ars Arma A18 Skanda plate carrier (MultiCam) (1x2 x10 + 1x1 x5)
+    "5d5d87f786f77427997cfaef": { "Grids": { "0": { "CellsH": 1, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 2 }, "2": { "CellsH": 1, "CellsV": 2 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 2 }, "7": { "CellsH": 1, "CellsV": 2 }, "8": { "CellsH": 1, "CellsV": 2 }, "9": { "CellsH": 1, "CellsV": 2 }, "10": { "CellsH": 1, "CellsV": 1 }, "11": { "CellsH": 1, "CellsV": 1 }, "12": { "CellsH": 1, "CellsV": 1 }, "13": { "CellsH": 1, "CellsV": 1 }, "14": { "CellsH": 1, "CellsV": 1 } } },
+    // CQC Osprey MK4A plate carrier (Assault, MTP) (1x1 x5 + 1x2 x7 + 2x2 + 1x2)
+    "60a3c70cde5f453f634816a3": { "Grids": { "0": { "CellsH": 1, "CellsV": 1 }, "1": { "CellsH": 1, "CellsV": 1 }, "2": { "CellsH": 1, "CellsV": 1 }, "3": { "CellsH": 1, "CellsV": 1 }, "4": { "CellsH": 1, "CellsV": 1 }, "5": { "CellsH": 1, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 2 }, "7": { "CellsH": 1, "CellsV": 2 }, "8": { "CellsH": 1, "CellsV": 2 }, "9": { "CellsH": 1, "CellsV": 2 }, "10": { "CellsH": 1, "CellsV": 2 }, "11": { "CellsH": 1, "CellsV": 2 }, "12": { "CellsH": 2, "CellsV": 2 }, "13": { "CellsH": 1, "CellsV": 2 } } },
+    // First Spear Siege-R Optimized M.A.S.S. Plate Carrier (Black Division) (2x3 + 1x3 x3 + 2x2 + 1x1 x6)
+    "68947a4be4bf255d1b0ca746": { "Grids": { "0": { "CellsH": 2, "CellsV": 3 }, "1": { "CellsH": 1, "CellsV": 3 }, "2": { "CellsH": 1, "CellsV": 3 }, "3": { "CellsH": 1, "CellsV": 3 }, "4": { "CellsH": 2, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 1 }, "6": { "CellsH": 1, "CellsV": 1 }, "7": { "CellsH": 1, "CellsV": 1 }, "8": { "CellsH": 1, "CellsV": 1 }, "9": { "CellsH": 1, "CellsV": 1 }, "10": { "CellsH": 1, "CellsV": 1 } } },
+    // NPP KlASS Bagariy plate carrier (EMR) (1x1 x5 + 1x2 x5 + 2x2 + 1x2 + 2x2)
+    "628d0618d1ba6e4fa07ce5a4": { "Grids": { "0": { "CellsH": 1, "CellsV": 1 }, "1": { "CellsH": 1, "CellsV": 1 }, "2": { "CellsH": 1, "CellsV": 1 }, "3": { "CellsH": 1, "CellsV": 1 }, "4": { "CellsH": 1, "CellsV": 1 }, "5": { "CellsH": 1, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 2 }, "7": { "CellsH": 1, "CellsV": 2 }, "8": { "CellsH": 1, "CellsV": 2 }, "9": { "CellsH": 1, "CellsV": 2 }, "10": { "CellsH": 2, "CellsV": 2 }, "11": { "CellsH": 1, "CellsV": 2 }, "12": { "CellsH": 2, "CellsV": 2 } } },
+    // Spiritus Systems LV-119 Plate Carrier (Black Division V2) (3x2 + 1x1 + 1x1 + 1x2 x4 + 1x3 x3)
+    "689479eb30cc5ba7be00f5ff": { "Grids": { "0": { "CellsH": 3, "CellsV": 2 }, "1": { "CellsH": 1, "CellsV": 1 }, "2": { "CellsH": 1, "CellsV": 1 }, "3": { "CellsH": 1, "CellsV": 2 }, "4": { "CellsH": 1, "CellsV": 2 }, "5": { "CellsH": 1, "CellsV": 2 }, "6": { "CellsH": 1, "CellsV": 2 }, "7": { "CellsH": 1, "CellsV": 3 }, "8": { "CellsH": 1, "CellsV": 3 }, "9": { "CellsH": 1, "CellsV": 3 } } }
+  }
+}

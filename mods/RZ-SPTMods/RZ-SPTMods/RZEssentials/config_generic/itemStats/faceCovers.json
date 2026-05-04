@@ -1,0 +1,168 @@
+{
+  "Enabled": false,
+
+  "Overrides": {
+    "6570aead4d84f81fd002a033": { // Death Shadow lightweight armored mask
+      "Ops": {
+        "armorClass":             { "Value": 3 },
+        "BluntThroughput":        { "Value": 0.198 },
+        "mousePenalty":           { "Value": 0 },
+        "speedPenaltyPercent":    { "Value": 0 },
+        "weaponErgonomicPenalty": { "Value": -4 }
+      }
+    },
+    "68a9b821cdf661cc5a0626c6": { // Death Shadow lightweight armored mask (Gold)
+      "Ops": {
+        "armorClass":             { "Value": 3 },
+        "BluntThroughput":        { "Value": 0.198 },
+        "mousePenalty":           { "Value": 0 },
+        "speedPenaltyPercent":    { "Value": 0 },
+        "weaponErgonomicPenalty": { "Value": -4 }
+      }
+    },
+    "68a9b852cdf661cc5a0626c9": { // Death Shadow lightweight armored mask (Gray)
+      "Ops": {
+        "armorClass":             { "Value": 3 },
+        "BluntThroughput":        { "Value": 0.198 },
+        "mousePenalty":           { "Value": 0 },
+        "speedPenaltyPercent":    { "Value": 0 },
+        "weaponErgonomicPenalty": { "Value": -4 }
+      }
+    },
+    "68a9b873a4b28d56c80a1818": { // Death Shadow lightweight armored mask (White)
+      "Ops": {
+        "armorClass":             { "Value": 3 },
+        "BluntThroughput":        { "Value": 0.198 },
+        "mousePenalty":           { "Value": 0 },
+        "speedPenaltyPercent":    { "Value": 0 },
+        "weaponErgonomicPenalty": { "Value": -4 }
+      }
+    },
+    "657089638db3adca1009f4ca": { // Atomic Defense CQCM up armored ballistic mask (Black)
+      "Ops": {
+        "armorClass":             { "Value": 4 },
+        "BluntThroughput":        { "Value": 0.198 },
+        "mousePenalty":           { "Value": -3 },
+        "speedPenaltyPercent":    { "Value": -1 },
+        "weaponErgonomicPenalty": { "Value": -2 }
+      }
+    },
+    "67a4b71ad3228756b6088ee2": { // Atomic Defense CQCM ballistic mask (Smile)
+      "Ops": {
+        "armorClass":             { "Value": 4 },
+        "BluntThroughput":        { "Value": 0.198 },
+        "mousePenalty":           { "Value": -3 },
+        "speedPenaltyPercent":    { "Value": -1 },
+        "weaponErgonomicPenalty": { "Value": -2 }
+      }
+    },
+    "67a5c5b6dfdf568c9009af66": { // Atomic Defense CQCM ballistic mask (Stop Me)
+      "Ops": {
+        "armorClass":             { "Value": 4 },
+        "BluntThroughput":        { "Value": 0.198 },
+        "mousePenalty":           { "Value": -3 },
+        "speedPenaltyPercent":    { "Value": -1 },
+        "weaponErgonomicPenalty": { "Value": -2 }
+      }
+    },
+    "67a5c5df782ce4655104db14": { // Atomic Defense CQCM ballistic mask (Scars)
+      "Ops": {
+        "armorClass":             { "Value": 4 },
+        "BluntThroughput":        { "Value": 0.198 },
+        "mousePenalty":           { "Value": -3 },
+        "speedPenaltyPercent":    { "Value": -1 },
+        "weaponErgonomicPenalty": { "Value": -2 }
+      }
+    },
+    "67a5c5f37f52620c5b05b4d6": { // Atomic Defense CQCM ballistic mask (Target)
+      "Ops": {
+        "armorClass":             { "Value": 4 },
+        "BluntThroughput":        { "Value": 0.198 },
+        "mousePenalty":           { "Value": -3 },
+        "speedPenaltyPercent":    { "Value": -1 },
+        "weaponErgonomicPenalty": { "Value": -2 }
+      }
+    },
+    "67a5c6068fcd9fb73f0752cf": { // Atomic Defense CQCM ballistic mask (Skull)
+      "Ops": {
+        "armorClass":             { "Value": 4 },
+        "BluntThroughput":        { "Value": 0.198 },
+        "mousePenalty":           { "Value": -3 },
+        "speedPenaltyPercent":    { "Value": -1 },
+        "weaponErgonomicPenalty": { "Value": -2 }
+      }
+    },
+    "67a5c61c7f52620c5b05b4d8": { // Atomic Defense CQCM ballistic mask (Demon)
+      "Ops": {
+        "armorClass":             { "Value": 4 },
+        "BluntThroughput":        { "Value": 0.198 },
+        "mousePenalty":           { "Value": -3 },
+        "speedPenaltyPercent":    { "Value": -1 },
+        "weaponErgonomicPenalty": { "Value": -2 }
+      }
+    },
+    "67a5c657782ce4655104db16": { // Atomic Defense CQCM ballistic mask (El Día de Muertos)
+      "Ops": {
+        "armorClass":             { "Value": 4 },
+        "BluntThroughput":        { "Value": 0.198 },
+        "mousePenalty":           { "Value": -3 },
+        "speedPenaltyPercent":    { "Value": -1 },
+        "weaponErgonomicPenalty": { "Value": -2 }
+      }
+    },
+    "688b3bfa1ed594eccd0c45ee": { // Atomic Defense CQCM ballistic mask (Ping)
+      "Ops": {
+        "armorClass":             { "Value": 4 },
+        "BluntThroughput":        { "Value": 0.198 },
+        "mousePenalty":           { "Value": -3 },
+        "speedPenaltyPercent":    { "Value": -1 },
+        "weaponErgonomicPenalty": { "Value": -2 }
+      }
+    },
+    "68a9a1223e1ee5a70504c126": { // Atomic Defense CQCM ballistic mask (Crash Tested)
+      "Ops": {
+        "armorClass":             { "Value": 4 },
+        "BluntThroughput":        { "Value": 0.198 },
+        "mousePenalty":           { "Value": -3 },
+        "speedPenaltyPercent":    { "Value": -1 },
+        "weaponErgonomicPenalty": { "Value": -2 }
+      }
+    },
+    "68a9a15d73d52d47830759c9": { // Atomic Defense CQCM ballistic mask (Demonic Face)
+      "Ops": {
+        "armorClass":             { "Value": 4 },
+        "BluntThroughput":        { "Value": 0.198 },
+        "mousePenalty":           { "Value": -3 },
+        "speedPenaltyPercent":    { "Value": -1 },
+        "weaponErgonomicPenalty": { "Value": -2 }
+      }
+    },
+    "68d54d0525ac8590a8075ac3": { // Atomic Defense CQCM ballistic mask (Loui Peeton)
+      "Ops": {
+        "armorClass":             { "Value": 4 },
+        "BluntThroughput":        { "Value": 0.198 },
+        "mousePenalty":           { "Value": -3 },
+        "speedPenaltyPercent":    { "Value": -1 },
+        "weaponErgonomicPenalty": { "Value": -2 }
+      }
+    },
+    "68a9a0b01696fb8c1e0ee9cc": { // Atomic Defense CQCM ballistic mask (Toxic)
+      "Ops": {
+        "armorClass":             { "Value": 4 },
+        "BluntThroughput":        { "Value": 0.198 },
+        "mousePenalty":           { "Value": -3 },
+        "speedPenaltyPercent":    { "Value": -1 },
+        "weaponErgonomicPenalty": { "Value": -2 }
+      }
+    },
+    "6936ff8734029a096c06f95a": { // Atomic Defense CQCM ballistic mask (Blasted Ice)
+      "Ops": {
+        "armorClass":             { "Value": 4 },
+        "BluntThroughput":        { "Value": 0.198 },
+        "mousePenalty":           { "Value": -3 },
+        "speedPenaltyPercent":    { "Value": -1 },
+        "weaponErgonomicPenalty": { "Value": -2 }
+      }
+    },
+  }
+}

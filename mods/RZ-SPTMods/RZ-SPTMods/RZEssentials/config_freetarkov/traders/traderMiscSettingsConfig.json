@@ -1,0 +1,432 @@
+{
+  // Unlock Jaeger by default.
+  "UnlockJaeger": true,
+
+  // Unlock Ref by default.
+  "UnlockRef": true,
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // REPAIR OVERRIDES
+  //
+  // Partial patch of the repair block. Only non-null fields are applied.
+  // Field names match SPT's TraderRepair JsonPropertyName attributes:
+  //   availability         — enable/disable repair service (true/false)
+  //   quality              — repair quality as a double (0.0 to 1.0)
+  //   currency             — currency TPL or "RUB" | "USD" | "EUR"
+  //   currency_coefficient — coefficient applied to currency price
+  //   price_rate           — base price rate for repair
+  //   excluded_id_list     — item TPL strings that cannot be repaired (replaces existing list)
+  //   excluded_category    — MongoId strings of categories excluded from repair (replaces existing list)
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  //
+  "EnableRepairOverrides": true,
+  "RepairOverrides": {
+    // Prapor
+    "54cb50c76803fa8b248b4571": {
+      "availability": true,
+      "quality": 1.20,
+      "currency": "5449016a4bdc2d6f028b456f",
+      "currency_coefficient": 1,
+      "price_rate": 0
+    },
+    // Skif
+    "58330581ace78e27b8b10cee": {
+      "availability": false,
+      "quality": 1.00,
+      "currency": "5449016a4bdc2d6f028b456f",
+      "currency_coefficient": 1,
+      "price_rate": 0
+    },
+    // Mechanic
+    "5a7c2eca46aef81a7ca2145d": {
+      "availability": false,
+      "quality": 0.70,
+      "currency": "5449016a4bdc2d6f028b456f",
+      "currency_coefficient": 1,
+      "price_rate": 0
+    },
+    // Sable
+    "fa363fc015e07b5f7828c9f7": {
+      "availability": false,
+      "quality": 0.70,
+      "currency": "5449016a4bdc2d6f028b456f",
+      "currency_coefficient": 1,
+      "price_rate": 0
+    }
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // LOYALTY LEVELS
+  //
+  // Each entry replaces the FULL loyaltyLevels array for the given trader.
+  // Field names match SPT's TraderLoyaltyLevel JsonPropertyName attributes:
+  //   minLevel             — player level required
+  //   minStanding          — standing required (0.0 → 1.0)
+  //   minSalesSum          — total sales required in roubles
+  //   buy_price_coef       — buy price coefficient
+  //   repair_price_coef    — repair price coefficient
+  //   insurance_price_coef — insurance price coefficient
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  //
+  "EnableLoyaltyLevels": true,
+  "LoyaltyLevelsOverrides": {
+    // Prapor
+    "54cb50c76803fa8b248b4571": [
+      {
+        "minLevel": 1,
+        "minStanding": 0.00,
+        "minSalesSum": 0,
+        "buy_price_coef": 50,
+        "heal_price_coef": 0,
+        "repair_price_coef": 80,
+        "insurance_price_coef": 16
+      },
+      {
+        "minLevel": 15,
+        "minStanding": 0.20,
+        "minSalesSum": 750000,
+        "buy_price_coef": 50,
+        "heal_price_coef": 0,
+        "repair_price_coef": 90,
+        "insurance_price_coef": 17
+      },
+      {
+        "minLevel": 26,
+        "minStanding": 0.35,
+        "minSalesSum": 1500000,
+        "buy_price_coef": 50,
+        "heal_price_coef": 0,
+        "repair_price_coef": 95,
+        "insurance_price_coef": 18
+      },
+      {
+        "minLevel": 36,
+        "minStanding": 0.50,
+        "minSalesSum": 2300000,
+        "buy_price_coef": 50,
+        "heal_price_coef": 0,
+        "repair_price_coef": 100,
+        "insurance_price_coef": 19
+      }
+    ],
+    // Therapist
+    "54cb57776803fa99248b456e": [
+      {
+        "minLevel": 0,
+        "minStanding": 0.00,
+        "minSalesSum": 0,
+        "buy_price_coef": 37,
+        "heal_price_coef": 100,
+        "repair_price_coef": 0,
+        "insurance_price_coef": 20
+      },
+      {
+        "minLevel": 13,
+        "minStanding": 0.15,
+        "minSalesSum": 400000,
+        "buy_price_coef": 37,
+        "heal_price_coef": 110,
+        "repair_price_coef": 0,
+        "insurance_price_coef": 21
+      },
+      {
+        "minLevel": 24,
+        "minStanding": 0.30,
+        "minSalesSum": 700000,
+        "buy_price_coef": 37,
+        "heal_price_coef": 120,
+        "repair_price_coef": 0,
+        "insurance_price_coef": 22
+      },
+      {
+        "minLevel": 35,
+        "minStanding": 0.60,
+        "minSalesSum": 900000,
+        "buy_price_coef": 37,
+        "heal_price_coef": 135,
+        "repair_price_coef": 0,
+        "insurance_price_coef": 23
+      }
+    ],
+    // Fence
+    "579dc571d53a0658a154fbec": [
+      { "minLevel": 1, "minStanding": 0.00, "minSalesSum": 0, "buy_price_coef": 60, "repair_price_coef": 300, "insurance_price_coef": 30 },
+      { "minLevel": 1, "minStanding": 6.00, "minSalesSum": 0, "buy_price_coef": 60, "repair_price_coef": 250, "insurance_price_coef": 30 }
+    ],
+    // Skier
+    "58330581ace78e27b8b10cee": [
+      {
+        "minLevel": 1,
+        "minStanding": 0.00,
+        "minSalesSum": 0,
+        "buy_price_coef": 51,
+        "heal_price_coef": 0,
+        "repair_price_coef": 110,
+        "insurance_price_coef": 0
+      },
+      {
+        "minLevel": 15,
+        "minStanding": 0.20,
+        "minSalesSum": 800000,
+        "buy_price_coef": 51,
+        "heal_price_coef": 0,
+        "repair_price_coef": 120,
+        "insurance_price_coef": 0
+      },
+      {
+        "minLevel": 28,
+        "minStanding": 0.40,
+        "minSalesSum": 1600000,
+        "buy_price_coef": 51,
+        "heal_price_coef": 0,
+        "repair_price_coef": 130,
+        "insurance_price_coef": 0
+      },
+      {
+        "minLevel": 38,
+        "minStanding": 0.75,
+        "minSalesSum": 2600000,
+        "buy_price_coef": 51,
+        "heal_price_coef": 0,
+        "repair_price_coef": 140,
+        "insurance_price_coef": 0
+      }
+    ],
+    // Peacekeeper
+    "5935c25fb3acc3127c3d8cd9": [
+      {
+        "minLevel": 1,
+        "minStanding": 0.00,
+        "minSalesSum": 0,
+        "buy_price_coef": 55,
+        "heal_price_coef": 0,
+        "repair_price_coef": 0,
+        "insurance_price_coef": 5
+      },
+      {
+        "minLevel": 14,
+        "minStanding": 0.00,
+        "minSalesSum": 11000,
+        "buy_price_coef": 55,
+        "heal_price_coef": 0,
+        "repair_price_coef": 0,
+        "insurance_price_coef": 0
+      },
+      {
+        "minLevel": 23,
+        "minStanding": 0.30,
+        "minSalesSum": 25000,
+        "buy_price_coef": 55,
+        "heal_price_coef": 0,
+        "repair_price_coef": 0,
+        "insurance_price_coef": 0
+      },
+      {
+        "minLevel": 37,
+        "minStanding": 0.60,
+        "minSalesSum": 32000,
+        "buy_price_coef": 55,
+        "heal_price_coef": 0,
+        "repair_price_coef": 0,
+        "insurance_price_coef": 0
+      }
+    ],
+    // Mechanic
+    "5a7c2eca46aef81a7ca2145d": [
+      {
+        "minLevel": 1,
+        "minStanding": 0.00,
+        "minSalesSum": 0,
+        "buy_price_coef": 44,
+        "heal_price_coef": 0,
+        "repair_price_coef": 175,
+        "insurance_price_coef": 10
+      },
+      {
+        "minLevel": 20,
+        "minStanding": 0.15,
+        "minSalesSum": 750000,
+        "buy_price_coef": 44,
+        "heal_price_coef": 0,
+        "repair_price_coef": 180,
+        "insurance_price_coef": 11
+      },
+      {
+        "minLevel": 30,
+        "minStanding": 0.30,
+        "minSalesSum": 1600000,
+        "buy_price_coef": 44,
+        "heal_price_coef": 0,
+        "repair_price_coef": 185,
+        "insurance_price_coef": 12
+      },
+      {
+        "minLevel": 40,
+        "minStanding": 0.60,
+        "minSalesSum": 2500000,
+        "buy_price_coef": 44,
+        "heal_price_coef": 0,
+        "repair_price_coef": 195,
+        "insurance_price_coef": 13
+      }
+    ],
+    // Ragman
+    "5ac3b934156ae10c4430e83c": [
+      {
+        "minLevel": 1,
+        "minStanding": 0.00,
+        "minSalesSum": 0,
+        "buy_price_coef": 38,
+        "heal_price_coef": 0,
+        "repair_price_coef": 175,
+        "insurance_price_coef": 10
+      },
+      {
+        "minLevel": 17,
+        "minStanding": 0.00,
+        "minSalesSum": 750000,
+        "buy_price_coef": 38,
+        "heal_price_coef": 0,
+        "repair_price_coef": 170,
+        "insurance_price_coef": 12
+      },
+      {
+        "minLevel": 32,
+        "minStanding": 0.30,
+        "minSalesSum": 1600000,
+        "buy_price_coef": 38,
+        "heal_price_coef": 0,
+        "repair_price_coef": 165,
+        "insurance_price_coef": 14
+      },
+      {
+        "minLevel": 42,
+        "minStanding": 0.60,
+        "minSalesSum": 2500000,
+        "buy_price_coef": 38,
+        "heal_price_coef": 0,
+        "repair_price_coef": 160,
+        "insurance_price_coef": 17
+      }
+    ],
+    // Jaeger
+    "5c0647fdd443bc2504c2d371": [
+      {
+        "minLevel": 1,
+        "minStanding": 0.00,
+        "minSalesSum": 0,
+        "buy_price_coef": 40,
+        "heal_price_coef": 0,
+        "repair_price_coef": 0,
+        "insurance_price_coef": 10
+      },
+      {
+        "minLevel": 15,
+        "minStanding": 0.20,
+        "minSalesSum": 560000,
+        "buy_price_coef": 40,
+        "heal_price_coef": 0,
+        "repair_price_coef": 0,
+        "insurance_price_coef": 8
+      },
+      {
+        "minLevel": 22,
+        "minStanding": 0.35,
+        "minSalesSum": 1125000,
+        "buy_price_coef": 40,
+        "heal_price_coef": 0,
+        "repair_price_coef": 0,
+        "insurance_price_coef": 6
+      },
+      {
+        "minLevel": 33,
+        "minStanding": 0.50,
+        "minSalesSum": 1725000,
+        "buy_price_coef": 40,
+        "heal_price_coef": 0,
+        "repair_price_coef": 0,
+        "insurance_price_coef": 4
+      }
+    ],
+    // Ref
+    "6617beeaa9cfa777ca915b7c": [
+      {
+        "minLevel": 1,
+        "minStanding": 0.00,
+        "minSalesSum": 0,
+        "buy_price_coef": 50,
+        "heal_price_coef": 0,
+        "repair_price_coef": 0,
+        "insurance_price_coef": 0
+      },
+      {
+        "minLevel": 15,
+        "minStanding": 0.25,
+        "minSalesSum": 0,
+        "buy_price_coef": 44,
+        "heal_price_coef": 0,
+        "repair_price_coef": 0,
+        "insurance_price_coef": 0
+      },
+      {
+        "minLevel": 25,
+        "minStanding": 0.50,
+        "minSalesSum": 0,
+        "buy_price_coef": 44,
+        "heal_price_coef": 0,
+        "repair_price_coef": 0,
+        "insurance_price_coef": 0
+      },
+      {
+        "minLevel": 35,
+        "minStanding": 1.20,
+        "minSalesSum": 0,
+        "buy_price_coef": 38,
+        "heal_price_coef": 0,
+        "repair_price_coef": 0,
+        "insurance_price_coef": 0
+      }
+    ],
+    // Sable (custom)
+    "fa363fc015e07b5f7828c9f7": [
+      {
+        "minLevel": 1,
+        "minStanding": 0.00,
+        "minSalesSum": 0,
+        "buy_price_coef": 0,
+        "heal_price_coef": 0,
+        "repair_price_coef": 0,
+        "insurance_price_coef": 0
+      },
+      {
+        "minLevel": 15,
+        "minStanding": 0.20,
+        "minSalesSum": 100000,
+        "buy_price_coef": 0,
+        "heal_price_coef": 0,
+        "repair_price_coef": 0,
+        "insurance_price_coef": 0
+      },
+      {
+        "minLevel": 25,
+        "minStanding": 0.40,
+        "minSalesSum": 500000,
+        "buy_price_coef": 0,
+        "heal_price_coef": 0,
+        "repair_price_coef": 0,
+        "insurance_price_coef": 0
+      },
+      {
+        "minLevel": 40,
+        "minStanding": 0.70,
+        "minSalesSum": 1000000,
+        "buy_price_coef": 0,
+        "heal_price_coef": 0,
+        "repair_price_coef": 0,
+        "insurance_price_coef": 0
+      }
+    ]
+  }
+}

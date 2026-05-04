@@ -1,0 +1,348 @@
+{
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // MASTER TOGGLE - Set to true to enable this config.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "EnableFenceConfig": false,
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // DEFAULT ITEM POOL
+  //
+  // SPT's native fence generation system. On each refresh, SPT randomly picks items from a built-in pool and generates offers from them.
+  // Discount variants apply to the secondary tab (unlocked at rep level 6).
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  // Master switch. If false, zeroes all native generation counts and ignores both this entire section AND DefaultItemPoolAdditions.
+  "EnableDefaultItemPool": false,
+
+  // Number of regular items (ammo, meds, gear...) per refresh. Default: 120.
+  "AssortSize": 120,
+
+  // Number of preconfigured weapons with mods per refresh. Default: min 12, max 19.
+  "WeaponPresetMinMax": { "Min": 12, "Max": 19 },
+
+  // Number of preconfigured armor rigs with plates per refresh. Default: min 8, max 15.
+  "EquipmentPresetMinMax": { "Min": 8, "Max": 15 },
+
+  // Price multiplier applied to all regular items. Default: 1.3.
+  "ItemPriceMult": 1.3,
+
+  // Price multiplier applied to all weapon and equipment presets. Default: 1.3.
+  "PresetPriceMult": 1.3,
+
+  // Number of regular items in the discount tab per refresh. Default: 45.
+  "DiscountAssortSize": 45,
+
+  // Number of preconfigured weapons in the discount tab per refresh. Default: min 5, max 12.
+  "DiscountWeaponPresetMinMax": { "Min": 5, "Max": 12 },
+
+  // Number of preconfigured armors in the discount tab per refresh. Default: min 5, max 12.
+  "DiscountEquipmentPresetMinMax": { "Min": 5, "Max": 12 },
+
+  // Price multiplier applied to all regular items in the discount tab. Default: 0.8.
+  "DiscountItemPriceMult": 0.8,
+
+  // Price multiplier applied to all weapon and equipment presets in the discount tab. Default: 1.15.
+  "DiscountPresetPriceMult": 1.15,
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // DEFAULT ITEM POOL ADDITIONS
+  //
+  // Extends the built-in pool with extra items. Only active if EnableDefaultItemPool is also true.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  // Switch for this sub-section only.
+  "EnableDefaultItemPoolAdditions": false,
+
+  // DefaultItemPoolAdditions — items to add to the pool. LoyaltyLevel = rep level required (1 = always visible or 2 = above 6 rep)
+  "DefaultItemPoolAdditions": [
+    { "Tpl": "5c0530ee86f774697952d952", "RoublePrice": 800000, "LoyaltyLevel": 1 }, // LEDX
+  ],
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // CUSTOM ITEM POOL
+  //
+  // Completely independent from the default pool. Defines a weighted pool of offers that are injected directly into fence assorts each
+  // refresh, on top of whatever the default pool generates.
+  //
+  // CustomItemPool — the pool to draw from. Each offer supports:
+  //   Tpl          — item template ID
+  //   Weight       — relative draw chance (higher = more likely to be picked)
+  //   StackSize    — quantity per offer slot
+  //   CurrencyTpl  — currency TPL (roubles / dollars / euros / GP coin / etc.)
+  //   Price        — price in the chosen currency
+  //   LoyaltyLevel — fence rep level required (1 = always visible)
+  // ─────────────────────────────────────────────────────────────────────────
+
+  // Switch for this sub-section only.
+  "EnableCustomItemPool": false,
+
+  // How many offers to draw from the pool per refresh.
+  "CustomItemCount": 20,
+
+  // Price multiplier.
+  "CustomItemPriceMultiplier": 10.0,
+
+  "CustomItemPool": [
+    // Colt M4A1 5.56x45  (18397)
+    { "Tpl": "5447a9cd4bdc2dbd208b4567", "Weight": 70, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // MP-133 12ga pump-action  (14443)
+    { "Tpl": "54491c4f4bdc2db1078b4568", "Weight": 85, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 3,  "LoyaltyLevel": 1 },
+    // SV-98 7.62x54R bolt-action  (24989)
+    { "Tpl": "55801eed4bdc2d89578b4588", "Weight": 50, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 5,  "LoyaltyLevel": 1 },
+    // MP-43-1C 12ga double-barrel  (5800)
+    { "Tpl": "5580223e4bdc2d1c128b457f", "Weight": 100, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 1, "LoyaltyLevel": 1 },
+    // AK-74N 5.45x39  (23147)
+    { "Tpl": "5644bd2b4bdc2d3b4c8b4572", "Weight": 60, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 5,  "LoyaltyLevel": 1 },
+    // MP-153 12ga semi-auto  (14981)
+    { "Tpl": "56dee2bdd2720bc8328b4567", "Weight": 80, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 3,  "LoyaltyLevel": 1 },
+    // SKS 7.62x39  (19331)
+    { "Tpl": "574d967124597745970e7c94", "Weight": 75, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // Saiga-12K  (16517)
+    { "Tpl": "576165642459773c7a400233", "Weight": 80, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 3,  "LoyaltyLevel": 1 },
+    // VSS Vintorez 9x39  (65203)
+    { "Tpl": "57838ad32459774a17445cd2", "Weight": 10, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 26, "LoyaltyLevel": 1 },
+    // AS VAL 9x39  (66869)
+    { "Tpl": "57c44b372459772d2b39b8ce", "Weight": 8,  "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 27, "LoyaltyLevel": 1 },
+    // PP-91 Kedr 9x18PM  (18846)
+    { "Tpl": "57d14d2524597714373db789", "Weight": 75, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // AKS-74U 5.45x39  (13643)
+    { "Tpl": "57dc2fa62459775949412633", "Weight": 90, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 3,  "LoyaltyLevel": 1 },
+    // PP-91-01 Kedr-B  (20238)
+    { "Tpl": "57f3c6bd24597738e730fa2f", "Weight": 70, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // PP-9 Klin 9x18PMM  (24460)
+    { "Tpl": "57f4c844245977379d5c14d1", "Weight": 55, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 5,  "LoyaltyLevel": 1 },
+    // AKS-74UN  (19345)
+    { "Tpl": "583990e32459771419544dd2", "Weight": 75, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // AKS-74UB  (21746)
+    { "Tpl": "5839a40f24597726f856b511", "Weight": 65, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // OP-SKS 7.62x39  (21814)
+    { "Tpl": "587e02ff24597743df3deaeb", "Weight": 65, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // DVL-10 7.62x51 bolt-action  (42974)
+    { "Tpl": "588892092459774ac91d4b11", "Weight": 20, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 9,  "LoyaltyLevel": 1 },
+    // SIG MPX 9x19  (18907)
+    { "Tpl": "58948c8e86f77409493f7266", "Weight": 75, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // HK MP5 9x19 Navy  (12132)
+    { "Tpl": "5926bb2186f7744b1c6c6e60", "Weight": 90, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 2,  "LoyaltyLevel": 1 },
+    // PP-19-01 Vityaz 9x19  (14751)
+    { "Tpl": "59984ab886f7743e98271174", "Weight": 85, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 3,  "LoyaltyLevel": 1 },
+    // AKM 7.62x39  (29513)
+    { "Tpl": "59d6088586f774275f37482f", "Weight": 45, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 6,  "LoyaltyLevel": 1 },
+    // VPO-136 Vepr-KM  (18978)
+    { "Tpl": "59e6152586f77473dc057aa1", "Weight": 75, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // VPO-209 .366 TKM  (21585)
+    { "Tpl": "59e6687d86f77411d949b251", "Weight": 65, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // Saiga-9 9x19  (9946)
+    { "Tpl": "59f9cabd86f7743a10721f46", "Weight": 100, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 2, "LoyaltyLevel": 1 },
+    // AKMS 7.62x39  (27871)
+    { "Tpl": "59ff346386f77477562ff5e2", "Weight": 50, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 6,  "LoyaltyLevel": 1 },
+    // AKMN 7.62x39  (34003)
+    { "Tpl": "5a0ec13bfcdbcb00165aa685", "Weight": 35, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 7,  "LoyaltyLevel": 1 },
+    // Remington R11 RSASS 7.62x51  (41605)
+    { "Tpl": "5a367e5dc4a282000e49738f", "Weight": 22, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 9,  "LoyaltyLevel": 1 },
+    // TOZ-106 20ga bolt-action  (3526)
+    { "Tpl": "5a38e6bac4a2826c6e06d79b", "Weight": 100, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 1, "LoyaltyLevel": 1 },
+    // Remington Model 870  (15202)
+    { "Tpl": "5a7828548dc32e5a9c28b516", "Weight": 80, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 3,  "LoyaltyLevel": 1 },
+    // Springfield M1A 7.62x51  (30264)
+    { "Tpl": "5aafa857e5b5b00018480968", "Weight": 45, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 6,  "LoyaltyLevel": 1 },
+    // AKS-74N  (25490)
+    { "Tpl": "5ab8e9fcd8ce870019439434", "Weight": 55, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 5,  "LoyaltyLevel": 1 },
+    // AKMSN 7.62x39  (28972)
+    { "Tpl": "5abcbc27d8ce8700182eceeb", "Weight": 47, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 6,  "LoyaltyLevel": 1 },
+    // AK-74M 5.45x39  (26181)
+    { "Tpl": "5ac4cd105acfc40016339859", "Weight": 52, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 5,  "LoyaltyLevel": 1 },
+    // AK-101 5.56x45  (35663)
+    { "Tpl": "5ac66cb05acfc40198510a10", "Weight": 32, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 7,  "LoyaltyLevel": 1 },
+    // AK-102 5.56x45  (51648)
+    { "Tpl": "5ac66d015acfc400180ae6e4", "Weight": 15, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 15, "LoyaltyLevel": 1 },
+    // AK-103 7.62x39  (34311)
+    { "Tpl": "5ac66d2e5acfc43b321d4b53", "Weight": 35, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 7,  "LoyaltyLevel": 1 },
+    // AK-104 7.62x39  (39912)
+    { "Tpl": "5ac66d725acfc43b321d4b60", "Weight": 25, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 8,  "LoyaltyLevel": 1 },
+    // AK-105 5.45x39  (30862)
+    { "Tpl": "5ac66d9b5acfc4001633997a", "Weight": 43, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 6,  "LoyaltyLevel": 1 },
+    // Mosin Sniper 7.62x54R  (15577)
+    { "Tpl": "5ae08f0a5acfc408fb1398a1", "Weight": 80, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 3,  "LoyaltyLevel": 1 },
+    // DS Arms SA58 7.62x51  (31093)
+    { "Tpl": "5b0bbe4e5acfc40dc528a72d", "Weight": 42, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 6,  "LoyaltyLevel": 1 },
+    // HK MP7A1 4.6x30  (44288)
+    { "Tpl": "5ba26383d4351e00334c93d9", "Weight": 18, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 11, "LoyaltyLevel": 1 },
+    // HK 416A5 5.56x45  (21800)
+    { "Tpl": "5bb2475ed4351e00853264e3", "Weight": 65, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // HK MP7A2 4.6x30  (45230)
+    { "Tpl": "5bd70322209c4d00d7167b8f", "Weight": 17, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 12, "LoyaltyLevel": 1 },
+    // RPK-16 5.45x39  (22360)
+    { "Tpl": "5beed0f50db834001c062b12", "Weight": 62, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 5,  "LoyaltyLevel": 1 },
+    // AK-74 5.45x39  (21750)
+    { "Tpl": "5bf3e03b0db834001d2c4a9c", "Weight": 65, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // AKS-74 5.45x39  (23660)
+    { "Tpl": "5bf3e0490db83400196199af", "Weight": 58, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 5,  "LoyaltyLevel": 1 },
+    // Mosin Infantry 7.62x54R  (11500)
+    { "Tpl": "5bfd297f0db834001a669119", "Weight": 95, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 2,  "LoyaltyLevel": 1 },
+    // Remington Model 700 7.62x51  (17500)
+    { "Tpl": "5bfea6e90db834001b7347f3", "Weight": 78, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // ADAR 2-15 5.56x45  (6300)
+    { "Tpl": "5c07c60e0db834002330051f", "Weight": 100, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 1, "LoyaltyLevel": 1 },
+    // SVDS 7.62x54R  (42800)
+    { "Tpl": "5c46fbd72e2216398b5a8c9c", "Weight": 20, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 9,  "LoyaltyLevel": 1 },
+    // Desert Tech MDR 5.56x45  (45230)
+    { "Tpl": "5c488a752e221602b412af63", "Weight": 17, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 12, "LoyaltyLevel": 1 },
+    // VPO-101 Vepr-Hunter 7.62x51  (38978)
+    { "Tpl": "5c501a4d2e221602b412b540", "Weight": 27, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 8,  "LoyaltyLevel": 1 },
+    // ASh-12 12.7x55  (93800)
+    { "Tpl": "5cadfbf7ae92152ac412eeef", "Weight": 3,  "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 47, "LoyaltyLevel": 1 },
+    // FN P90 5.7x28  (45200)
+    { "Tpl": "5cc82d76e24e8d00134b4b83", "Weight": 17, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 12, "LoyaltyLevel": 1 },
+    // HK MP5K 9x19  (9500)
+    { "Tpl": "5d2f0d8048f0356c925bc3b0", "Weight": 100, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 2, "LoyaltyLevel": 1 },
+    // Lone Star TX-15 DML 5.56x45  (24397)
+    { "Tpl": "5d43021ca4b9362eab4b5e25", "Weight": 55, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 5,  "LoyaltyLevel": 1 },
+    // Desert Tech MDR 7.62x51  (63230)
+    { "Tpl": "5dcbd56fdbd3d91b3e5468d5", "Weight": 8,  "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 22, "LoyaltyLevel": 1 },
+    // VPO-215 Gornostay .366 TKM  (7350)
+    { "Tpl": "5de652c31b7e3716273428be", "Weight": 100, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 1, "LoyaltyLevel": 1 },
+    // B&T MP9-N 9x19  (18500)
+    { "Tpl": "5de7bd7bfd6b4e6e2276dc25", "Weight": 75, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // ORSIS T-5000M 7.62x51  (26974)
+    { "Tpl": "5df24cf80dee1b22f862e9bc", "Weight": 50, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 6,  "LoyaltyLevel": 1 },
+    // KAC SR-25 7.62x51  (24605)
+    { "Tpl": "5df8ce05b11454561e39243b", "Weight": 55, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 5,  "LoyaltyLevel": 1 },
+    // B&T MP9 9x19  (14288)
+    { "Tpl": "5e00903ae9dc277128008b87", "Weight": 85, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 3,  "LoyaltyLevel": 1 },
+    // FN40GL Mk2 40mm grenade launcher  (110000)
+    { "Tpl": "5e81ebcd8e146c7080625e15", "Weight": 2,  "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 66, "LoyaltyLevel": 1 },
+    // TOZ KS-23M 23x75mm  (18402)
+    { "Tpl": "5e848cc2988a8701445df1e8", "Weight": 75, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // Mossberg 590A1 12ga  (14402)
+    { "Tpl": "5e870397991fd70db46995c8", "Weight": 85, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 3,  "LoyaltyLevel": 1 },
+    // PPSh-41 7.62x25  (10251)
+    { "Tpl": "5ea03f7400685063ec28bfa8", "Weight": 95, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 2,  "LoyaltyLevel": 1 },
+    // Kel-Tec RFB 7.62x51  (23300)
+    { "Tpl": "5f2a9575926fd9352339381f", "Weight": 58, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 5,  "LoyaltyLevel": 1 },
+    // KRISS Vector .45 ACP  (31650)
+    { "Tpl": "5fb64bc92b1b027b1f50bcf2", "Weight": 40, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 7,  "LoyaltyLevel": 1 },
+    // SIG MCX .300 Blackout  (21300)
+    { "Tpl": "5fbcc1d9016cce60e8341ab3", "Weight": 65, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // SWORD Mk-18 .338 LM  (64400)
+    { "Tpl": "5fc22d7c187fea44d52eda44", "Weight": 7,  "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 23, "LoyaltyLevel": 1 },
+    // HK UMP .45 ACP  (26500)
+    { "Tpl": "5fc3e272f8b6a877a729eac5", "Weight": 52, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 5,  "LoyaltyLevel": 1 },
+    // KRISS Vector 9x19  (27800)
+    { "Tpl": "5fc3f2d5900b1d5091531e57", "Weight": 50, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 6,  "LoyaltyLevel": 1 },
+    // Soyuz-TM STM-9 Gen.2 9x19  (12500)
+    { "Tpl": "60339954d62c9b14ed777c06", "Weight": 90, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 2,  "LoyaltyLevel": 1 },
+    // CMMG Mk47 Mutant 7.62x39  (25197)
+    { "Tpl": "606587252535c57a13424cfd", "Weight": 55, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 5,  "LoyaltyLevel": 1 },
+    // MP-155 12ga semi-auto  (18900)
+    { "Tpl": "606dae0ab0e443224b421bb7", "Weight": 75, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // MTs-255-12 12ga  (9600)
+    { "Tpl": "60db29ce99594040e04c4a27", "Weight": 100, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 2, "LoyaltyLevel": 1 },
+    // FN SCAR-H 7.62x51 FDE  (25800)
+    { "Tpl": "6165ac306ef05c2ce828ef74", "Weight": 53, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 5,  "LoyaltyLevel": 1 },
+    // HK G28 7.62x51  (30500)
+    { "Tpl": "6176aca650224f204c1da3fb", "Weight": 43, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 6,  "LoyaltyLevel": 1 },
+    // FN SCAR-H 7.62x51  (24400)
+    { "Tpl": "6183afd850224f204c1da514", "Weight": 55, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 5,  "LoyaltyLevel": 1 },
+    // FN SCAR-L 5.56x45  (17000)
+    { "Tpl": "6184055050224f204c1da540", "Weight": 78, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // FN SCAR-L 5.56x45 FDE  (18000)
+    { "Tpl": "618428466ef05c2ce828f218", "Weight": 75, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // MP-18 7.62x54R single-shot  (7800)
+    { "Tpl": "61f7c9e189e6fb1a5e3ea78d", "Weight": 100, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 1, "LoyaltyLevel": 1 },
+    // HK G36 5.56x45  (13000)
+    { "Tpl": "623063e994fc3f7b302a9696", "Weight": 88, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 3,  "LoyaltyLevel": 1 },
+    // Benelli M3 Super 90 12ga  (14102)
+    { "Tpl": "6259b864ebedf17603599e88", "Weight": 85, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 3,  "LoyaltyLevel": 1 },
+    // Milkor M32A1 MSGL 40mm  (185000)
+    { "Tpl": "6275303a9f372d6ea97f9ec7", "Weight": 1,  "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 111, "LoyaltyLevel": 1 },
+    // AI AXMC .338 LM bolt-action  (22500)
+    { "Tpl": "627e14b21713922ded6f2c15", "Weight": 62, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 5,  "LoyaltyLevel": 1 },
+    // RD-704 7.62x39  (45000)
+    { "Tpl": "628a60ae6b1d481ff772e9c8", "Weight": 17, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 12, "LoyaltyLevel": 1 },
+    // SAG AK-545 5.45x39  (28300)
+    { "Tpl": "628b5638ad252a16da6dd245", "Weight": 48, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 6,  "LoyaltyLevel": 1 },
+    // SAG AK-545 Short  (31000)
+    { "Tpl": "628b9c37a733087d0d7fe84b", "Weight": 42, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 7,  "LoyaltyLevel": 1 },
+    // SR-2M Veresk 9x21  (31000)
+    { "Tpl": "62e14904c2699c0ec93adc47", "Weight": 42, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 7,  "LoyaltyLevel": 1 },
+    // Steyr AUG A1 5.56x45  (26230)
+    { "Tpl": "62e7c4fba689e8c9c50dfc38", "Weight": 52, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 5,  "LoyaltyLevel": 1 },
+    // Steyr AUG A3 5.56x45  (31000)
+    { "Tpl": "63171672192e68c5460cebc5", "Weight": 42, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 7,  "LoyaltyLevel": 1 },
+    // Tokarev AVT-40 7.62x54R  (19331)
+    { "Tpl": "6410733d5dd49d77bd07847e", "Weight": 72, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // Tokarev SVT-40 7.62x54R  (19331)
+    { "Tpl": "643ea5b23db6f9f57107d9fd", "Weight": 72, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // KBP 9A-91 9x39  (19370)
+    { "Tpl": "644674a13d52156624001fbc", "Weight": 72, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // KBP VSK-94 9x39  (19370)
+    { "Tpl": "645e0c6b3b381ede770e1cc9", "Weight": 72, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // Kalashnikov PKM 7.62x54R  (72360)
+    { "Tpl": "64637076203536ad5600c990", "Weight": 7,  "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 29, "LoyaltyLevel": 1 },
+    // MP-43 12ga sawed-off  (7843)
+    { "Tpl": "64748cb8de82c85eaf0a273a", "Weight": 100, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 1, "LoyaltyLevel": 1 },
+    // AK-12 5.45x39  (45162)
+    { "Tpl": "6499849fc93611967b034949", "Weight": 17, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 12, "LoyaltyLevel": 1 },
+    // Kalashnikov PKP 7.62x54R  (80143)
+    { "Tpl": "64ca3d3954fc657e230529cc", "Weight": 5,  "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 40, "LoyaltyLevel": 1 },
+    // Degtyarev RPD 7.62x39  (22638)
+    { "Tpl": "6513ef33e06849f06c0957ca", "Weight": 60, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 5,  "LoyaltyLevel": 1 },
+    // SR-3M 9x39  (70412)
+    { "Tpl": "651450ce0e00edc794068371", "Weight": 7,  "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 28, "LoyaltyLevel": 1 },
+    // Degtyarev RPDN 7.62x39  (23769)
+    { "Tpl": "65268d8ecb944ff1e90ea385", "Weight": 58, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 5,  "LoyaltyLevel": 1 },
+    // SIG MCX-SPEAR 6.8x51  (21300)
+    { "Tpl": "65290f395ae2ae97b80fdf2d", "Weight": 65, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // M60E4 7.62x51  (63423)
+    { "Tpl": "65fb023261d5829b2d090755", "Weight": 8,  "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 22, "LoyaltyLevel": 1 },
+    // M60E6 7.62x51  (69835)
+    { "Tpl": "661ceb1b9311543c7104149b", "Weight": 7,  "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 28, "LoyaltyLevel": 1 },
+    // M60E6 FDE  (69835)
+    { "Tpl": "661cec09b2c6356b4d0c7a36", "Weight": 7,  "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 28, "LoyaltyLevel": 1 },
+    // IWI UZI PRO Pistol 9x19  (19523)
+    { "Tpl": "6680304edadb7aa61d00cef0", "Weight": 72, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // IWI UZI PRO SMG 9x19  (22415)
+    { "Tpl": "668e71a8dadf42204c032ce1", "Weight": 62, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 5,  "LoyaltyLevel": 1 },
+    // IWI UZI 9x19  (16322)
+    { "Tpl": "66992b349950f5f4cd06029f", "Weight": 80, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 3,  "LoyaltyLevel": 1 },
+    // MPS AA-12 Gen1 12ga  (44513)
+    { "Tpl": "66ffa9b66e19cc902401c5e8", "Weight": 18, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 11, "LoyaltyLevel": 1 },
+    // MPS AA-12 Gen2 12ga  (46527)
+    { "Tpl": "67124dcfa3541f2a1f0e788b", "Weight": 16, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 13, "LoyaltyLevel": 1 },
+    // Steyr AUG A3 Black  (31000)
+    { "Tpl": "6718817435e3cfd9550d2c27", "Weight": 42, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 7,  "LoyaltyLevel": 1 },
+    // Sako TRG M10 .338 LM  (25000)
+    { "Tpl": "673cab3e03c6a20581028bc1", "Weight": 55, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 5,  "LoyaltyLevel": 1 },
+    // Aklys Velociraptor .300 Blackout  (63453)
+    { "Tpl": "674d6121c09f69dfb201a888", "Weight": 8,  "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 22, "LoyaltyLevel": 1 },
+    // Saiga-12K auto 12ga  (34639)
+    { "Tpl": "674fe9a75e51f1c47c04ec23", "Weight": 35, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 7,  "LoyaltyLevel": 1 },
+    // FN SCAR-H X-17 7.62x51  (29422)
+    { "Tpl": "676176d362e0497044079f4c", "Weight": 46, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 6,  "LoyaltyLevel": 1 },
+    // RShG-2 72.5mm rocket launcher  (42500)
+    { "Tpl": "676bf44c5539167c3603e869", "Weight": 20, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 9,  "LoyaltyLevel": 1 },
+    // Marlin MXLR .308 ME  (15577)
+    { "Tpl": "67c6de3ce39861860909e8e5", "Weight": 80, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 3,  "LoyaltyLevel": 1 },
+    // AK-50 .50 BMG  (99981)
+    { "Tpl": "67d0576f29f580ebc10efd08", "Weight": 2,  "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 60, "LoyaltyLevel": 1 },
+    // AS VAL MOD.4 9x39  (75054)
+    { "Tpl": "6871284e9a353bb50606f3ed", "Weight": 6,  "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 30, "LoyaltyLevel": 1 },
+    // AK-308 7.62x51  (52500)
+    { "Tpl": "689166b6c2d6fa42e7044756", "Weight": 14, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 16, "LoyaltyLevel": 1 },
+    // Radian Model 1 FA 5.56x45  (26397)
+    { "Tpl": "6895bb82c4519957df062f82", "Weight": 52, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 5,  "LoyaltyLevel": 1 },
+    // Colt M16A1 5.56x45  (17650)
+    { "Tpl": "68a639748e1fe612970728e9", "Weight": 78, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // Colt M16A2 5.56x45  (16950)
+    { "Tpl": "68a6399922b1e0bd360afe56", "Weight": 80, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // TKPD 9.3x64 carbine  (72100)
+    { "Tpl": "68aee763130c00663d08aea8", "Weight": 7,  "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 29, "LoyaltyLevel": 1 },
+    // NL545 DI 5.45x39  (19600)
+    { "Tpl": "68c16b9ab6b75a8a480520a6", "Weight": 72, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // NL545 GP 5.45x39  (21900)
+    { "Tpl": "68c2940aecc41cc5490bd40e", "Weight": 65, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 4,  "LoyaltyLevel": 1 },
+    // KAC SR-25 Taupe  (24605)
+    { "Tpl": "6932abeb5403890d0c09c926", "Weight": 55, "StackSize": 1, "CurrencyTpl": "5d235b4d86f7742e017bc88a", "Price": 5,  "LoyaltyLevel": 1 }
+  ]
+}

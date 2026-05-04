@@ -1,0 +1,1467 @@
+{
+  // MASTER TOGGLE - Set to true to enable this config.
+  "Enabled": false,
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // BITCOIN FARM
+  //
+  // ProductionSpeedMultiplier : divides the base production time. e.g. 2.0 = twice as fast. (default: 1.0 → 145000s per bitcoin)
+  // GpuBoostRate              : GPU boost rate per card. (default: 0.041225)
+  // MaxCapacity               : maximum number of bitcoins that can accumulate. (default: 3)
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "BitcoinFarm": {
+    "ProductionSpeedMultiplier": 1.0,
+    "GpuBoostRate": 0.041225,
+    "MaxCapacity": 3
+  },
+
+  // Unlocks hideout customizations for every profile on server start.
+  "UnlockHideoutCustomizations": {
+    "Wall": true,
+    "Floor": true,
+    "Ceiling": true,
+    "Light": true,
+    "MannequinPose": true,
+    "ShootingRangeMark": true,
+  },
+
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // HIDEOUT AREAS
+  //
+  // This file was generated with all UseCustom* toggles set to true and all requirement dicts populated with vanilla values.
+  // This means every area is fully overwriting vanilla data, but since the injected values are the vanilla values, nothing changes in-game
+  // out of the box.
+  //
+  // The intent is to give you a ready-to-edit baseline : every requirement is already here, visible, and explicitly controlled.
+  // Just change what you need, leave the rest as-is.
+  //
+  // FIELDS
+  //    RemoveFromDb  : removes the area from the DB entirely — visually looks like it's built at max level.
+  //    Enabled       : makes the area available to the player.
+  //    DisplayLevel  : whether the current level is shown in the UI.
+  //
+  // CONSTRUCTION TIME
+  //    UseCustomConstructionTime  : if true, applies ConstructionTime per stage. Vanilla values untouched if false.
+  //    ConstructionTime           : dict of stage level → time in seconds. e.g. { "1": 0, "2": 3600 }
+  //
+  // REQUIREMENTS
+  //    If Use* is true  : vanilla requirements of that type are cleared on every stage, then the dict is injected per stage.
+  //    If Use* is false : vanilla requirements of that type are left completely untouched.
+  //    Keys are stage level strings ("1", "2", "3"...). Missing stages are silently skipped.
+  //
+  // ⚠ Disabling certain areas such as CircleOfCultists can cause crashes or infinite loading screens.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "Areas": {
+
+    // VENTS
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "Vents": {
+      "RemoveFromDb": false,
+      "Enabled": true,
+      "DisplayLevel": true,
+      "UseCustomConstructionTime": true,
+      "ConstructionTime": {
+        "2": 10800,
+        "3": 36000
+      },
+      "UseCustomItemRequirements": true,
+      "ItemRequirements": {
+        "1": [
+          { "ItemTpl": "5449016a4bdc2d6f028b456f", "ItemCount": 25000 }
+        ],
+        "2": [
+          { "ItemTpl": "5d1b2fa286f77425227d1674", "ItemCount": 1 },
+          { "ItemTpl": "5733279d245977289b77ec24", "ItemCount": 1 },
+          { "ItemTpl": "5734779624597737e04bf329", "ItemCount": 3 },
+          { "ItemTpl": "61bf7b6302b3924be92fa8c3", "ItemCount": 2 }
+        ],
+        "3": [
+          { "ItemTpl": "5d1b2fa286f77425227d1674", "ItemCount": 4 },
+          { "ItemTpl": "5c06779c86f77426e00dd782", "ItemCount": 14 },
+          { "ItemTpl": "590a3b0486f7743954552bdb", "ItemCount": 5 },
+          { "ItemTpl": "5733279d245977289b77ec24", "ItemCount": 4 },
+          { "ItemTpl": "61bf7b6302b3924be92fa8c3", "ItemCount": 5 }
+        ]
+      },
+      "UseCustomAreaRequirements": true,
+      "AreaRequirements": {
+        "2": [
+          { "AreaName": "Vents", "AreaLevel": 1 }
+        ],
+        "3": [
+          { "AreaName": "Generator", "AreaLevel": 2 },
+          { "AreaName": "Vents", "AreaLevel": 2 }
+        ]
+      },
+      "UseCustomSkillRequirements": true,
+      "SkillRequirements": {
+        "3": [
+          { "SkillName": "Strength", "SkillLevel": 2 }
+        ]
+      },
+      "UseCustomTraderRequirements": true,
+      "TraderRequirements": {}
+    },
+
+    // SECURITY
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "Security": {
+      "RemoveFromDb": false,
+      "Enabled": true,
+      "DisplayLevel": true,
+      "UseCustomConstructionTime": true,
+      "ConstructionTime": {
+        "2": 10800,
+        "3": 61200
+      },
+      "UseCustomItemRequirements": true,
+      "ItemRequirements": {
+        "1": [
+          { "ItemTpl": "5449016a4bdc2d6f028b456f", "ItemCount": 20000 },
+          { "ItemTpl": "590c2c9c86f774245b1f03f2", "ItemCount": 1 }
+        ],
+        "2": [
+          { "ItemTpl": "5449016a4bdc2d6f028b456f", "ItemCount": 45000 },
+          { "ItemTpl": "5af04b6486f774195a3ebb49", "ItemCount": 1 },
+          { "ItemTpl": "590c5bbd86f774785762df04", "ItemCount": 1 },
+          { "ItemTpl": "60391b0fb847c71012789415", "ItemCount": 1 }
+        ],
+        "3": [
+          { "ItemTpl": "5d1b304286f774253763a528", "ItemCount": 2 },
+          { "ItemTpl": "5c06779c86f77426e00dd782", "ItemCount": 4 },
+          { "ItemTpl": "5d1b2ffd86f77425243e8d17", "ItemCount": 8 },
+          { "ItemTpl": "590c392f86f77444754deb29", "ItemCount": 1 }
+        ]
+      },
+      "UseCustomAreaRequirements": true,
+      "AreaRequirements": {
+        "2": [
+          { "AreaName": "Illumination", "AreaLevel": 1 },
+          { "AreaName": "Security", "AreaLevel": 1 }
+        ],
+        "3": [
+          { "AreaName": "Illumination", "AreaLevel": 3 },
+          { "AreaName": "Security", "AreaLevel": 2 }
+        ]
+      },
+      "UseCustomSkillRequirements": true,
+      "SkillRequirements": {
+        "2": [
+          { "SkillName": "Endurance", "SkillLevel": 2 }
+        ]
+      },
+      "UseCustomTraderRequirements": true,
+      "TraderRequirements": {
+        "3": [
+          { "TraderName": "Mechanic", "TraderLoyalty": 2 }
+        ]
+      }
+    },
+
+    // WATERCLOSET
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "WaterCloset": {
+      "RemoveFromDb": false,
+      "Enabled": true,
+      "DisplayLevel": true,
+      "UseCustomConstructionTime": true,
+      "ConstructionTime": {
+        "2": 10800,
+        "3": 25200
+      },
+      "UseCustomItemRequirements": true,
+      "ItemRequirements": {
+        "1": [
+          { "ItemTpl": "5449016a4bdc2d6f028b456f", "ItemCount": 2000 },
+          { "ItemTpl": "5c13cef886f774072e618e82", "ItemCount": 1 },
+          { "ItemTpl": "57347c93245977448d35f6e3", "ItemCount": 1 },
+          { "ItemTpl": "5c13cd2486f774072c757944", "ItemCount": 1 },
+          { "ItemTpl": "62a0a098de7ac8199358053b", "ItemCount": 1 }
+        ],
+        "2": [
+          { "ItemTpl": "59e35cbb86f7741778269d83", "ItemCount": 3 },
+          { "ItemTpl": "59e35ef086f7741777737012", "ItemCount": 5 },
+          { "ItemTpl": "59e35de086f7741778269d84", "ItemCount": 1 },
+          { "ItemTpl": "5e2af29386f7746d4159f077", "ItemCount": 1 },
+          { "ItemTpl": "61bf83814088ec1a363d7097", "ItemCount": 2 }
+        ],
+        "3": [
+          { "ItemTpl": "59e35cbb86f7741778269d83", "ItemCount": 6 },
+          { "ItemTpl": "5d1b327086f7742525194449", "ItemCount": 2 },
+          { "ItemTpl": "590c2e1186f77425357b6124", "ItemCount": 1 },
+          { "ItemTpl": "590c346786f77423e50ed342", "ItemCount": 3 }
+        ]
+      },
+      "UseCustomAreaRequirements": true,
+      "AreaRequirements": {
+        "2": [
+          { "AreaName": "WaterCollector", "AreaLevel": 1 },
+          { "AreaName": "Vents", "AreaLevel": 1 },
+          { "AreaName": "WaterCloset", "AreaLevel": 1 }
+        ],
+        "3": [
+          { "AreaName": "Vents", "AreaLevel": 2 },
+          { "AreaName": "WaterCollector", "AreaLevel": 2 },
+          { "AreaName": "WaterCloset", "AreaLevel": 2 }
+        ]
+      },
+      "UseCustomSkillRequirements": true,
+      "SkillRequirements": {},
+      "UseCustomTraderRequirements": true,
+      "TraderRequirements": {}
+    },
+
+    // STASH
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "Stash": {
+      "RemoveFromDb": false,
+      "Enabled": true,
+      "DisplayLevel": true,
+      "UseCustomConstructionTime": true,
+      "ConstructionTime": {
+        "2": 86400,
+        "3": 172800,
+        "4": 345600
+      },
+      "UseCustomItemRequirements": true,
+      "ItemRequirements": {
+        "2": [
+          { "ItemTpl": "5d1b317c86f7742523398392", "ItemCount": 1 },
+          { "ItemTpl": "59e35ef086f7741777737012", "ItemCount": 10 },
+          { "ItemTpl": "590c5bbd86f774785762df04", "ItemCount": 4 },
+          { "ItemTpl": "5449016a4bdc2d6f028b456f", "ItemCount": 2500000 },
+          { "ItemTpl": "590c31c586f774245e3141b2", "ItemCount": 5 }
+        ],
+        "3": [
+          { "ItemTpl": "59e35de086f7741778269d84", "ItemCount": 2 },
+          { "ItemTpl": "59e35ef086f7741777737012", "ItemCount": 15 },
+          { "ItemTpl": "5449016a4bdc2d6f028b456f", "ItemCount": 8500000 },
+          { "ItemTpl": "590c31c586f774245e3141b2", "ItemCount": 7 }
+        ],
+        "4": [
+          { "ItemTpl": "569668774bdc2da2298b4568", "ItemCount": 200000 },
+          { "ItemTpl": "57347c5b245977448d35f6e1", "ItemCount": 10 },
+          { "ItemTpl": "57347c77245977448d35f6e2", "ItemCount": 10 },
+          { "ItemTpl": "590c35a486f774273531c822", "ItemCount": 5 },
+          { "ItemTpl": "60391afc25aff57af81f7085", "ItemCount": 2 }
+        ]
+      },
+      "UseCustomAreaRequirements": true,
+      "AreaRequirements": {
+        "2": [
+          { "AreaName": "Vents", "AreaLevel": 1 },
+          { "AreaName": "Stash", "AreaLevel": 0 }
+        ],
+        "3": [
+          { "AreaName": "Vents", "AreaLevel": 2 },
+          { "AreaName": "Heating", "AreaLevel": 2 },
+          { "AreaName": "Stash", "AreaLevel": 1 }
+        ],
+        "4": [
+          { "AreaName": "Generator", "AreaLevel": 3 },
+          { "AreaName": "Workbench", "AreaLevel": 3 },
+          { "AreaName": "Heating", "AreaLevel": 3 },
+          { "AreaName": "Stash", "AreaLevel": 2 },
+          { "AreaName": "IntelligenceCenter", "AreaLevel": 2 }
+        ]
+      },
+      "UseCustomSkillRequirements": true,
+      "SkillRequirements": {},
+      "UseCustomTraderRequirements": true,
+      "TraderRequirements": {
+        "3": [
+          { "TraderName": "Prapor", "TraderLoyalty": 3 },
+          { "TraderName": "Ragman", "TraderLoyalty": 3 }
+        ],
+        "4": [
+          { "TraderName": "Peacekeeper", "TraderLoyalty": 4 },
+          { "TraderName": "Ragman", "TraderLoyalty": 4 }
+        ]
+      }
+    },
+
+    // GENERATOR
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "Generator": {
+      "RemoveFromDb": false,
+      "Enabled": true,
+      "DisplayLevel": true,
+      "UseCustomConstructionTime": true,
+      "ConstructionTime": {
+        "2": 18000,
+        "3": 57600
+      },
+      "UseCustomItemRequirements": true,
+      "ItemRequirements": {
+        "1": [
+          { "ItemTpl": "5449016a4bdc2d6f028b456f", "ItemCount": 100000 },
+          { "ItemTpl": "590a3c0a86f774385a33c450", "ItemCount": 1 }
+        ],
+        "2": [
+          { "ItemTpl": "5d1b313086f77425227d1678", "ItemCount": 5 },
+          { "ItemTpl": "5d1b2fa286f77425227d1674", "ItemCount": 1 },
+          { "ItemTpl": "5c06779c86f77426e00dd782", "ItemCount": 15 },
+          { "ItemTpl": "619cbfeb6b8a1b37a54eebfa", "ItemCount": 1 }
+        ],
+        "3": [
+          { "ItemTpl": "5d1b313086f77425227d1678", "ItemCount": 6 },
+          { "ItemTpl": "5d1b2fa286f77425227d1674", "ItemCount": 3 },
+          { "ItemTpl": "590a3c0a86f774385a33c450", "ItemCount": 10 },
+          { "ItemTpl": "57347c2e24597744902c94a1", "ItemCount": 5 },
+          { "ItemTpl": "61bf7b6302b3924be92fa8c3", "ItemCount": 7 }
+        ]
+      },
+      "UseCustomAreaRequirements": true,
+      "AreaRequirements": {
+        "1": [
+          { "AreaName": "Security", "AreaLevel": 1 }
+        ],
+        "2": [
+          { "AreaName": "Security", "AreaLevel": 2 },
+          { "AreaName": "Vents", "AreaLevel": 2 },
+          { "AreaName": "Generator", "AreaLevel": 1 }
+        ],
+        "3": [
+          { "AreaName": "Security", "AreaLevel": 3 },
+          { "AreaName": "Vents", "AreaLevel": 3 },
+          { "AreaName": "Generator", "AreaLevel": 2 }
+        ]
+      },
+      "UseCustomSkillRequirements": true,
+      "SkillRequirements": {},
+      "UseCustomTraderRequirements": true,
+      "TraderRequirements": {
+        "3": [
+          { "TraderName": "Mechanic", "TraderLoyalty": 3 }
+        ]
+      }
+    },
+
+    // HEATING
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "Heating": {
+      "RemoveFromDb": false,
+      "Enabled": true,
+      "DisplayLevel": true,
+      "UseCustomConstructionTime": true,
+      "ConstructionTime": {
+        "2": 7200,
+        "3": 28800
+      },
+      "UseCustomItemRequirements": true,
+      "ItemRequirements": {
+        "1": [
+          { "ItemTpl": "5449016a4bdc2d6f028b456f", "ItemCount": 25000 },
+          { "ItemTpl": "57347b8b24597737dd42e192", "ItemCount": 2 }
+        ],
+        "2": [
+          { "ItemTpl": "5449016a4bdc2d6f028b456f", "ItemCount": 50000 },
+          { "ItemTpl": "5e2af2bc86f7746d3f3c33fc", "ItemCount": 2 },
+          { "ItemTpl": "590a373286f774287540368b", "ItemCount": 3 },
+          { "ItemTpl": "56742c284bdc2d98058b456d", "ItemCount": 3 }
+        ],
+        "3": [
+          { "ItemTpl": "5d1c774f86f7746d6620f8db", "ItemCount": 8 },
+          { "ItemTpl": "5c06779c86f77426e00dd782", "ItemCount": 8 },
+          { "ItemTpl": "5d1b313086f77425227d1678", "ItemCount": 4 },
+          { "ItemTpl": "619cbf476b8a1b37a54eebf8", "ItemCount": 2 }
+        ]
+      },
+      "UseCustomAreaRequirements": true,
+      "AreaRequirements": {
+        "2": [
+          { "AreaName": "Vents", "AreaLevel": 1 },
+          { "AreaName": "Heating", "AreaLevel": 1 }
+        ],
+        "3": [
+          { "AreaName": "Generator", "AreaLevel": 2 },
+          { "AreaName": "Workbench", "AreaLevel": 2 },
+          { "AreaName": "Heating", "AreaLevel": 2 }
+        ]
+      },
+      "UseCustomSkillRequirements": true,
+      "SkillRequirements": {
+        "2": [
+          { "SkillName": "Endurance", "SkillLevel": 1 }
+        ]
+      },
+      "UseCustomTraderRequirements": true,
+      "TraderRequirements": {
+        "3": [
+          { "TraderName": "Ragman", "TraderLoyalty": 2 }
+        ]
+      }
+    },
+
+    // WATER COLLECTOR
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "WaterCollector": {
+      "RemoveFromDb": false,
+      "Enabled": true,
+      "DisplayLevel": true,
+      "UseCustomConstructionTime": true,
+      "ConstructionTime": {
+        "1": 7200,
+        "2": 28800,
+        "3": 57600
+      },
+      "UseCustomItemRequirements": true,
+      "ItemRequirements": {
+        "1": [
+          { "ItemTpl": "59e35cbb86f7741778269d83", "ItemCount": 4 },
+          { "ItemTpl": "57347c5b245977448d35f6e1", "ItemCount": 5 },
+          { "ItemTpl": "57347c77245977448d35f6e2", "ItemCount": 5 },
+          { "ItemTpl": "57347c1124597737fb1379e3", "ItemCount": 3 }
+        ],
+        "2": [
+          { "ItemTpl": "59e35cbb86f7741778269d83", "ItemCount": 6 },
+          { "ItemTpl": "5d1b2fa286f77425227d1674", "ItemCount": 2 },
+          { "ItemTpl": "590c2e1186f77425357b6124", "ItemCount": 2 },
+          { "ItemTpl": "5e2af29386f7746d4159f077", "ItemCount": 2 }
+        ],
+        "3": [
+          { "ItemTpl": "5449016a4bdc2d6f028b456f", "ItemCount": 20000 },
+          { "ItemTpl": "5af04b6486f774195a3ebb49", "ItemCount": 2 },
+          { "ItemTpl": "590c35a486f774273531c822", "ItemCount": 5 },
+          { "ItemTpl": "60391afc25aff57af81f7085", "ItemCount": 1 }
+        ]
+      },
+      "UseCustomAreaRequirements": true,
+      "AreaRequirements": {
+        "1": [
+          { "AreaName": "Security", "AreaLevel": 1 }
+        ],
+        "2": [
+          { "AreaName": "Workbench", "AreaLevel": 2 },
+          { "AreaName": "WaterCollector", "AreaLevel": 1 }
+        ],
+        "3": [
+          { "AreaName": "Generator", "AreaLevel": 3 },
+          { "AreaName": "WaterCollector", "AreaLevel": 2 },
+          { "AreaName": "Heating", "AreaLevel": 3 }
+        ]
+      },
+      "UseCustomSkillRequirements": true,
+      "SkillRequirements": {
+        "2": [
+          { "SkillName": "Attention", "SkillLevel": 3 }
+        ]
+      },
+      "UseCustomTraderRequirements": true,
+      "TraderRequirements": {
+        "2": [
+          { "TraderName": "Jaeger", "TraderLoyalty": 2 }
+        ],
+        "3": [
+          { "TraderName": "Jaeger", "TraderLoyalty": 3 }
+        ]
+      }
+    },
+
+    // MEDSTATION
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "MedStation": {
+      "RemoveFromDb": false,
+      "Enabled": true,
+      "DisplayLevel": true,
+      "UseCustomConstructionTime": true,
+      "ConstructionTime": {
+        "2": 10800,
+        "3": 43200
+      },
+      "UseCustomItemRequirements": true,
+      "ItemRequirements": {
+        "1": [
+          { "ItemTpl": "5449016a4bdc2d6f028b456f", "ItemCount": 50000 },
+          { "ItemTpl": "5d1b3f2d86f774253763b735", "ItemCount": 1 },
+          { "ItemTpl": "5d1b3a5d86f774252167ba22", "ItemCount": 1 },
+          { "ItemTpl": "544fb25a4bdc2dfb738b4567", "ItemCount": 2 },
+          { "ItemTpl": "62a0a043cf4a99369e2624a5", "ItemCount": 1 }
+        ],
+        "2": [
+          { "ItemTpl": "5449016a4bdc2d6f028b456f", "ItemCount": 150000 },
+          { "ItemTpl": "5b4335ba86f7744d2837a264", "ItemCount": 2 },
+          { "ItemTpl": "59e3606886f77417674759a5", "ItemCount": 3 },
+          { "ItemTpl": "5e831507ea0a7c419c2f9bd9", "ItemCount": 5 },
+          { "ItemTpl": "619cc01e0a7c3a1a2731940c", "ItemCount": 3 }
+        ],
+        "3": [
+          { "ItemTpl": "5449016a4bdc2d6f028b456f", "ItemCount": 500000 },
+          { "ItemTpl": "59e3606886f77417674759a5", "ItemCount": 4 },
+          { "ItemTpl": "5c0530ee86f774697952d952", "ItemCount": 1 },
+          { "ItemTpl": "5af0534a86f7743b6f354284", "ItemCount": 1 }
+        ]
+      },
+      "UseCustomAreaRequirements": true,
+      "AreaRequirements": {
+        "2": [
+          { "AreaName": "Generator", "AreaLevel": 1 },
+          { "AreaName": "MedStation", "AreaLevel": 1 }
+        ],
+        "3": [
+          { "AreaName": "Generator", "AreaLevel": 2 },
+          { "AreaName": "WaterCloset", "AreaLevel": 2 },
+          { "AreaName": "MedStation", "AreaLevel": 2 }
+        ]
+      },
+      "UseCustomSkillRequirements": true,
+      "SkillRequirements": {
+        "2": [
+          { "SkillName": "Health", "SkillLevel": 2 }
+        ],
+        "3": [
+          { "SkillName": "Vitality", "SkillLevel": 3 }
+        ]
+      },
+      "UseCustomTraderRequirements": true,
+      "TraderRequirements": {
+        "2": [
+          { "TraderName": "Therapist", "TraderLoyalty": 2 }
+        ],
+        "3": [
+          { "TraderName": "Therapist", "TraderLoyalty": 3 },
+          { "TraderName": "Skier", "TraderLoyalty": 2 }
+        ]
+      }
+    },
+
+    // KITCHEN
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "Kitchen": {
+      "RemoveFromDb": false,
+      "Enabled": true,
+      "DisplayLevel": true,
+      "UseCustomConstructionTime": true,
+      "ConstructionTime": {
+        "2": 14400,
+        "3": 50400
+      },
+      "UseCustomItemRequirements": true,
+      "ItemRequirements": {
+        "1": [
+          { "ItemTpl": "5449016a4bdc2d6f028b456f", "ItemCount": 25000 },
+          { "ItemTpl": "5d1b313086f77425227d1678", "ItemCount": 2 },
+          { "ItemTpl": "59e36c6f86f774176c10a2a7", "ItemCount": 1 },
+          { "ItemTpl": "62a09ee4cf4a99369e262453", "ItemCount": 1 }
+        ],
+        "2": [
+          { "ItemTpl": "590c311186f77424d1667482", "ItemCount": 4 },
+          { "ItemTpl": "59e35cbb86f7741778269d83", "ItemCount": 2 },
+          { "ItemTpl": "59faf98186f774067b6be103", "ItemCount": 2 },
+          { "ItemTpl": "5d1b313086f77425227d1678", "ItemCount": 1 }
+        ],
+        "3": [
+          { "ItemTpl": "5449016a4bdc2d6f028b456f", "ItemCount": 125000 },
+          { "ItemTpl": "5af0484c86f7740f02001f7f", "ItemCount": 3 },
+          { "ItemTpl": "59e35abd86f7741778269d82", "ItemCount": 3 },
+          { "ItemTpl": "5e2af00086f7746d3f3c33f7", "ItemCount": 2 }
+        ]
+      },
+      "UseCustomAreaRequirements": true,
+      "AreaRequirements": {
+        "1": [
+          { "AreaName": "Generator", "AreaLevel": 1 }
+        ],
+        "2": [
+          { "AreaName": "WaterCloset", "AreaLevel": 2 },
+          { "AreaName": "Kitchen", "AreaLevel": 1 }
+        ],
+        "3": [
+          { "AreaName": "Generator", "AreaLevel": 2 },
+          { "AreaName": "WaterCloset", "AreaLevel": 3 },
+          { "AreaName": "Stash", "AreaLevel": 2 },
+          { "AreaName": "Kitchen", "AreaLevel": 2 }
+        ]
+      },
+      "UseCustomSkillRequirements": true,
+      "SkillRequirements": {
+        "3": [
+          { "SkillName": "Metabolism", "SkillLevel": 3 }
+        ]
+      },
+      "UseCustomTraderRequirements": true,
+      "TraderRequirements": {}
+    },
+
+    // RESTSPACE
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "RestSpace": {
+      "RemoveFromDb": false,
+      "Enabled": true,
+      "DisplayLevel": true,
+      "UseCustomConstructionTime": true,
+      "ConstructionTime": {
+        "2": 3600,
+        "3": 7200
+      },
+      "UseCustomItemRequirements": true,
+      "ItemRequirements": {
+        "1": [
+          { "ItemTpl": "5449016a4bdc2d6f028b456f", "ItemCount": 10000 },
+          { "ItemTpl": "57347c1124597737fb1379e3", "ItemCount": 1 },
+          { "ItemTpl": "57347b8b24597737dd42e192", "ItemCount": 1 }
+        ],
+        "2": [
+          { "ItemTpl": "5449016a4bdc2d6f028b456f", "ItemCount": 75000 },
+          { "ItemTpl": "5734781f24597737e04bf32a", "ItemCount": 1 },
+          { "ItemTpl": "590a391c86f774385a33c404", "ItemCount": 1 },
+          { "ItemTpl": "590a3cd386f77436f20848cb", "ItemCount": 2 }
+        ],
+        "3": [
+          { "ItemTpl": "59e36c6f86f774176c10a2a7", "ItemCount": 3 },
+          { "ItemTpl": "5c06782b86f77426df5407d2", "ItemCount": 3 },
+          { "ItemTpl": "5c06779c86f77426e00dd782", "ItemCount": 5 },
+          { "ItemTpl": "5e2aedd986f7746d404f3aa4", "ItemCount": 4 }
+        ]
+      },
+      "UseCustomAreaRequirements": true,
+      "AreaRequirements": {
+        "1": [
+          { "AreaName": "Vents", "AreaLevel": 1 }
+        ],
+        "2": [
+          { "AreaName": "Generator", "AreaLevel": 1 },
+          { "AreaName": "RestSpace", "AreaLevel": 1 }
+        ],
+        "3": [
+          { "AreaName": "RestSpace", "AreaLevel": 2 }
+        ]
+      },
+      "UseCustomSkillRequirements": true,
+      "SkillRequirements": {},
+      "UseCustomTraderRequirements": true,
+      "TraderRequirements": {}
+    },
+
+    // WORKBENCH
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "Workbench": {
+      "RemoveFromDb": false,
+      "Enabled": true,
+      "DisplayLevel": true,
+      "UseCustomConstructionTime": true,
+      "ConstructionTime": {
+        "2": 10800,
+        "3": 39600
+      },
+      "UseCustomItemRequirements": true,
+      "ItemRequirements": {
+        "1": [
+          { "ItemTpl": "57347c77245977448d35f6e2", "ItemCount": 2 },
+          { "ItemTpl": "57347c5b245977448d35f6e1", "ItemCount": 2 },
+          { "ItemTpl": "544fb5454bdc2df8738b456a", "ItemCount": 1 }
+        ],
+        "2": [
+          { "ItemTpl": "590c2e1186f77425357b6124", "ItemCount": 3 },
+          { "ItemTpl": "59e35de086f7741778269d84", "ItemCount": 2 },
+          { "ItemTpl": "57347c5b245977448d35f6e1", "ItemCount": 6 },
+          { "ItemTpl": "5d1c819a86f774771b0acd6c", "ItemCount": 3 },
+          { "ItemTpl": "62a0a0bb621468534a797ad5", "ItemCount": 1 }
+        ],
+        "3": [
+          { "ItemTpl": "5449016a4bdc2d6f028b456f", "ItemCount": 395000 },
+          { "ItemTpl": "5af04b6486f774195a3ebb49", "ItemCount": 2 },
+          { "ItemTpl": "5bc9b355d4351e6d1509862a", "ItemCount": 1 },
+          { "ItemTpl": "60391a8b3364dc22b04d0ce5", "ItemCount": 2 }
+        ]
+      },
+      "UseCustomAreaRequirements": true,
+      "AreaRequirements": {
+        "2": [
+          { "AreaName": "Illumination", "AreaLevel": 2 },
+          { "AreaName": "Workbench", "AreaLevel": 1 }
+        ],
+        "3": [
+          { "AreaName": "Generator", "AreaLevel": 2 },
+          { "AreaName": "Stash", "AreaLevel": 2 },
+          { "AreaName": "Workbench", "AreaLevel": 2 }
+        ]
+      },
+      "UseCustomSkillRequirements": true,
+      "SkillRequirements": {},
+      "UseCustomTraderRequirements": true,
+      "TraderRequirements": {
+        "2": [
+          { "TraderName": "Mechanic", "TraderLoyalty": 2 }
+        ],
+        "3": [
+          { "TraderName": "Mechanic", "TraderLoyalty": 3 }
+        ]
+      }
+    },
+
+    // INTELLIGENCE CENTER
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "IntelligenceCenter": {
+      "RemoveFromDb": false,
+      "Enabled": true,
+      "DisplayLevel": true,
+      "UseCustomConstructionTime": true,
+      "ConstructionTime": {
+        "2": 21600,
+        "3": 86400
+      },
+      "UseCustomItemRequirements": true,
+      "ItemRequirements": {
+        "1": [
+          { "ItemTpl": "5c12613b86f7743bbe2c3f76", "ItemCount": 1 },
+          { "ItemTpl": "62a0a124de7ac81993580542", "ItemCount": 1 },
+          { "ItemTpl": "574eb85c245977648157eec3", "ItemCount": 1 }
+        ],
+        "2": [
+          { "ItemTpl": "5c12613b86f7743bbe2c3f76", "ItemCount": 3 },
+          { "ItemTpl": "590c621186f774138d11ea29", "ItemCount": 3 },
+          { "ItemTpl": "59e36c6f86f774176c10a2a7", "ItemCount": 7 },
+          { "ItemTpl": "590a386e86f77429692b27ab", "ItemCount": 4 }
+        ],
+        "3": [
+          { "ItemTpl": "5c052f6886f7746b1e3db148", "ItemCount": 2 },
+          { "ItemTpl": "5c05300686f7746dce784e5d", "ItemCount": 2 },
+          { "ItemTpl": "62a0a16d0b9d3c46de5b6e97", "ItemCount": 5 },
+          { "ItemTpl": "5d0375ff86f774186372f685", "ItemCount": 5 },
+          { "ItemTpl": "61bf7c024770ee6f9c6b8b53", "ItemCount": 2 },
+          { "ItemTpl": "6389c7f115805221fb410466", "ItemCount": 1 }
+        ]
+      },
+      "UseCustomAreaRequirements": true,
+      "AreaRequirements": {
+        "1": [
+          { "AreaName": "Security", "AreaLevel": 1 },
+          { "AreaName": "Vents", "AreaLevel": 1 }
+        ],
+        "2": [
+          { "AreaName": "Security", "AreaLevel": 3 },
+          { "AreaName": "MedStation", "AreaLevel": 3 },
+          { "AreaName": "Kitchen", "AreaLevel": 3 },
+          { "AreaName": "IntelligenceCenter", "AreaLevel": 1 }
+        ],
+        "3": [
+          { "AreaName": "Workbench", "AreaLevel": 3 },
+          { "AreaName": "Generator", "AreaLevel": 3 },
+          { "AreaName": "IntelligenceCenter", "AreaLevel": 2 }
+        ]
+      },
+      "UseCustomSkillRequirements": true,
+      "SkillRequirements": {
+        "2": [
+          { "SkillName": "Attention", "SkillLevel": 3 }
+        ]
+      },
+      "UseCustomTraderRequirements": true,
+      "TraderRequirements": {
+        "2": [
+          { "TraderName": "Mechanic", "TraderLoyalty": 2 }
+        ],
+        "3": [
+          { "TraderName": "Prapor", "TraderLoyalty": 3 }
+        ]
+      }
+    },
+
+    // SHOOTING RANGE
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "ShootingRange": {
+      "RemoveFromDb": false,
+      "Enabled": true,
+      "DisplayLevel": true,
+      "UseCustomConstructionTime": true,
+      "ConstructionTime": {
+        "1": 3600,
+        "2": 86400,
+        "3": 86400
+      },
+      "UseCustomItemRequirements": true,
+      "ItemRequirements": {
+        "1": [
+          { "ItemTpl": "57347c77245977448d35f6e2", "ItemCount": 1 },
+          { "ItemTpl": "57347c5b245977448d35f6e1", "ItemCount": 1 },
+          { "ItemTpl": "61bf7b6302b3924be92fa8c3", "ItemCount": 1 },
+          { "ItemTpl": "5449016a4bdc2d6f028b456f", "ItemCount": 20000 }
+        ],
+        "2": [
+          { "ItemTpl": "590c2e1186f77425357b6124", "ItemCount": 1 },
+          { "ItemTpl": "61bf7b6302b3924be92fa8c3", "ItemCount": 5 },
+          { "ItemTpl": "590c2c9c86f774245b1f03f2", "ItemCount": 1 },
+          { "ItemTpl": "5c06779c86f77426e00dd782", "ItemCount": 3 },
+          { "ItemTpl": "59e35ef086f7741777737012", "ItemCount": 3 },
+          { "ItemTpl": "5e2af22086f7746d3f3c33fa", "ItemCount": 1 },
+          { "ItemTpl": "5d1b2fa286f77425227d1674", "ItemCount": 3 },
+          { "ItemTpl": "590a3cd386f77436f20848cb", "ItemCount": 6 },
+          { "ItemTpl": "5b4391a586f7745321235ab2", "ItemCount": 3 },
+          { "ItemTpl": "59e35de086f7741778269d84", "ItemCount": 1 }
+        ],
+        "3": [
+          { "ItemTpl": "62a0a0bb621468534a797ad5", "ItemCount": 1 },
+          { "ItemTpl": "5c06779c86f77426e00dd782", "ItemCount": 5 },
+          { "ItemTpl": "590a3b0486f7743954552bdb", "ItemCount": 3 },
+          { "ItemTpl": "61bf7b6302b3924be92fa8c3", "ItemCount": 5 },
+          { "ItemTpl": "5c06782b86f77426df5407d2", "ItemCount": 5 },
+          { "ItemTpl": "5d1b313086f77425227d1678", "ItemCount": 3 },
+          { "ItemTpl": "59e36c6f86f774176c10a2a7", "ItemCount": 5 },
+          { "ItemTpl": "544fb5454bdc2df8738b456a", "ItemCount": 1 },
+          { "ItemTpl": "590c639286f774151567fa95", "ItemCount": 1 }
+        ]
+      },
+      "UseCustomAreaRequirements": true,
+      "AreaRequirements": {
+        "1": [
+          { "AreaName": "Illumination", "AreaLevel": 1 }
+        ],
+        "2": [
+          { "AreaName": "Illumination", "AreaLevel": 3 },
+          { "AreaName": "Workbench", "AreaLevel": 2 }
+        ]
+      },
+      "UseCustomSkillRequirements": true,
+      "SkillRequirements": {},
+      "UseCustomTraderRequirements": true,
+      "TraderRequirements": {}
+    },
+
+    // LIBRARY
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "Library": {
+      "RemoveFromDb": false,
+      "Enabled": true,
+      "DisplayLevel": true,
+      "UseCustomConstructionTime": true,
+      "ConstructionTime": {
+        "1": 194400
+      },
+      "UseCustomItemRequirements": true,
+      "ItemRequirements": {
+        "1": [
+          { "ItemTpl": "5449016a4bdc2d6f028b456f", "ItemCount": 400000 },
+          { "ItemTpl": "573478bc24597738002c6175", "ItemCount": 1 },
+          { "ItemTpl": "573474f924597738002c6174", "ItemCount": 2 },
+          { "ItemTpl": "590c639286f774151567fa95", "ItemCount": 5 },
+          { "ItemTpl": "590c645c86f77412b01304d9", "ItemCount": 2 },
+          { "ItemTpl": "590c651286f7741e566b6461", "ItemCount": 2 },
+          { "ItemTpl": "62a09e73af34e73a266d932a", "ItemCount": 1 }
+        ]
+      },
+      "UseCustomAreaRequirements": true,
+      "AreaRequirements": {
+        "1": [
+          { "AreaName": "RestSpace", "AreaLevel": 3 }
+        ]
+      },
+      "UseCustomSkillRequirements": true,
+      "SkillRequirements": {
+        "1": [
+          { "SkillName": "HideoutManagement", "SkillLevel": 5 }
+        ]
+      },
+      "UseCustomTraderRequirements": true,
+      "TraderRequirements": {}
+    },
+
+    // SCAVCASE
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "ScavCase": {
+      "RemoveFromDb": false,
+      "Enabled": true,
+      "DisplayLevel": true,
+      "UseCustomConstructionTime": true,
+      "ConstructionTime": {
+        "1": 288000
+      },
+      "UseCustomItemRequirements": true,
+      "ItemRequirements": {
+        "1": [
+          { "ItemTpl": "59e3639286f7741777737013", "ItemCount": 3 },
+          { "ItemTpl": "5d235a5986f77443f6329bc6", "ItemCount": 6 },
+          { "ItemTpl": "5734758f24597738025ee253", "ItemCount": 8 },
+          { "ItemTpl": "59faf7ca86f7740dbe19f6c2", "ItemCount": 4 },
+          { "ItemTpl": "5d1b376e86f774252519444e", "ItemCount": 3 },
+          { "ItemTpl": "5b7c710788a4506dec015957", "ItemCount": 1 },
+          { "ItemTpl": "5bc9bc53d4351e00367fbcee", "ItemCount": 1 }
+        ]
+      },
+      "UseCustomAreaRequirements": true,
+      "AreaRequirements": {
+        "1": [
+          { "AreaName": "IntelligenceCenter", "AreaLevel": 2 }
+        ]
+      },
+      "UseCustomSkillRequirements": true,
+      "SkillRequirements": {},
+      "UseCustomTraderRequirements": true,
+      "TraderRequirements": {}
+    },
+
+    // ILLUMINATION
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "Illumination": {
+      "RemoveFromDb": false,
+      "Enabled": true,
+      "DisplayLevel": true,
+      "UseCustomConstructionTime": true,
+      "ConstructionTime": {
+        "3": 21600
+      },
+      "UseCustomItemRequirements": true,
+      "ItemRequirements": {
+        "1": [
+          { "ItemTpl": "5449016a4bdc2d6f028b456f", "ItemCount": 10000 },
+          { "ItemTpl": "56742c284bdc2d98058b456d", "ItemCount": 1 }
+        ],
+        "2": [
+          { "ItemTpl": "5d1b392c86f77425243e98fe", "ItemCount": 14 },
+          { "ItemTpl": "5c06779c86f77426e00dd782", "ItemCount": 10 }
+        ],
+        "3": [
+          { "ItemTpl": "5449016a4bdc2d6f028b456f", "ItemCount": 50000 },
+          { "ItemTpl": "5c06782b86f77426df5407d2", "ItemCount": 7 },
+          { "ItemTpl": "5c06779c86f77426e00dd782", "ItemCount": 6 },
+          { "ItemTpl": "590a3cd386f77436f20848cb", "ItemCount": 12 }
+        ]
+      },
+      "UseCustomAreaRequirements": true,
+      "AreaRequirements": {
+        "2": [
+          { "AreaName": "Generator", "AreaLevel": 1 },
+          { "AreaName": "Illumination", "AreaLevel": 1 }
+        ],
+        "3": [
+          { "AreaName": "Generator", "AreaLevel": 2 },
+          { "AreaName": "Workbench", "AreaLevel": 1 },
+          { "AreaName": "Illumination", "AreaLevel": 2 }
+        ]
+      },
+      "UseCustomSkillRequirements": true,
+      "SkillRequirements": {},
+      "UseCustomTraderRequirements": true,
+      "TraderRequirements": {
+        "3": [
+          { "TraderName": "Mechanic", "TraderLoyalty": 2 }
+        ]
+      }
+    },
+
+    // PLACE OF FAME
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "PlaceOfFame": {
+      "RemoveFromDb": false,
+      "Enabled": true,
+      "DisplayLevel": true,
+      "UseCustomConstructionTime": true,
+      "ConstructionTime": {
+        "1": 43207,
+        "2": 64800,
+        "3": 86400
+      },
+      "UseCustomItemRequirements": true,
+      "ItemRequirements": {
+        "1": [
+          { "ItemTpl": "5d1b31ce86f7742523398394", "ItemCount": 1 },
+          { "ItemTpl": "5e2af47786f7746d404f3aaa", "ItemCount": 5 },
+          { "ItemTpl": "59e3658a86f7741776641ac4", "ItemCount": 1 },
+          { "ItemTpl": "5d1b392c86f77425243e98fe", "ItemCount": 5 },
+          { "ItemTpl": "590c31c586f774245e3141b2", "ItemCount": 5 },
+          { "ItemTpl": "5734795124597738002c6176", "ItemCount": 2 }
+        ],
+        "2": [
+          { "ItemTpl": "590c639286f774151567fa95", "ItemCount": 1 },
+          { "ItemTpl": "5af04b6486f774195a3ebb49", "ItemCount": 1 },
+          { "ItemTpl": "590c2e1186f77425357b6124", "ItemCount": 1 },
+          { "ItemTpl": "5bc9bc53d4351e00367fbcee", "ItemCount": 1 },
+          { "ItemTpl": "590a3cd386f77436f20848cb", "ItemCount": 10 },
+          { "ItemTpl": "59e35ef086f7741777737012", "ItemCount": 6 },
+          { "ItemTpl": "57347c1124597737fb1379e3", "ItemCount": 3 },
+          { "ItemTpl": "590c346786f77423e50ed342", "ItemCount": 2 },
+          { "ItemTpl": "5e2af22086f7746d3f3c33fa", "ItemCount": 2 }
+        ],
+        "3": [
+          { "ItemTpl": "62a0a0bb621468534a797ad5", "ItemCount": 1 },
+          { "ItemTpl": "59e35de086f7741778269d84", "ItemCount": 1 },
+          { "ItemTpl": "59e3639286f7741777737013", "ItemCount": 1 },
+          { "ItemTpl": "590a3cd386f77436f20848cb", "ItemCount": 15 },
+          { "ItemTpl": "5e2af29386f7746d4159f077", "ItemCount": 3 },
+          { "ItemTpl": "57347cd0245977445a2d6ff1", "ItemCount": 3 },
+          { "ItemTpl": "61bf7b6302b3924be92fa8c3", "ItemCount": 15 },
+          { "ItemTpl": "59e36c6f86f774176c10a2a7", "ItemCount": 5 }
+        ]
+      },
+      "UseCustomAreaRequirements": true,
+      "AreaRequirements": {
+        "1": [
+          { "AreaName": "Illumination", "AreaLevel": 2 }
+        ]
+      },
+      "UseCustomSkillRequirements": true,
+      "SkillRequirements": {},
+      "UseCustomTraderRequirements": true,
+      "TraderRequirements": {
+        "1": [
+          { "TraderName": "Mechanic", "TraderLoyalty": 2 }
+        ]
+      }
+    },
+
+    // AIR FILTERING UNIT
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "AirFilteringUnit": {
+      "RemoveFromDb": false,
+      "Enabled": true,
+      "DisplayLevel": true,
+      "UseCustomConstructionTime": true,
+      "ConstructionTime": {
+        "1": 172800
+      },
+      "UseCustomItemRequirements": true,
+      "ItemRequirements": {
+        "1": [
+          { "ItemTpl": "5696686a4bdc2da3298b456a", "ItemCount": 25000 },
+          { "ItemTpl": "5d0378d486f77420421a5ff4", "ItemCount": 5 },
+          { "ItemTpl": "590c595c86f7747884343ad7", "ItemCount": 5 },
+          { "ItemTpl": "619cbf476b8a1b37a54eebf8", "ItemCount": 3 }
+        ]
+      },
+      "UseCustomAreaRequirements": true,
+      "AreaRequirements": {
+        "1": [
+          { "AreaName": "Generator", "AreaLevel": 3 },
+          { "AreaName": "Vents", "AreaLevel": 3 }
+        ]
+      },
+      "UseCustomSkillRequirements": true,
+      "SkillRequirements": {},
+      "UseCustomTraderRequirements": true,
+      "TraderRequirements": {
+        "1": [
+          { "TraderName": "Skier", "TraderLoyalty": 3 }
+        ]
+      }
+    },
+
+    // SOLAR POWER
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "SolarPower": {
+      "RemoveFromDb": false,
+      "Enabled": true,
+      "DisplayLevel": true,
+      "UseCustomConstructionTime": true,
+      "ConstructionTime": {
+        "1": 259200
+      },
+      "UseCustomItemRequirements": true,
+      "ItemRequirements": {
+        "1": [
+          { "ItemTpl": "569668774bdc2da2298b4568", "ItemCount": 25000 },
+          { "ItemTpl": "5d0375ff86f774186372f685", "ItemCount": 10 },
+          { "ItemTpl": "5d03775b86f774203e7e0c4b", "ItemCount": 4 },
+          { "ItemTpl": "5d0378d486f77420421a5ff4", "ItemCount": 10 },
+          { "ItemTpl": "5d1b304286f774253763a528", "ItemCount": 3 },
+          { "ItemTpl": "6389c85357baa773a825b356", "ItemCount": 1 }
+        ]
+      },
+      "UseCustomAreaRequirements": true,
+      "AreaRequirements": {
+        "1": [
+          { "AreaName": "Generator", "AreaLevel": 3 },
+          { "AreaName": "Workbench", "AreaLevel": 3 }
+        ]
+      },
+      "UseCustomSkillRequirements": true,
+      "SkillRequirements": {},
+      "UseCustomTraderRequirements": true,
+      "TraderRequirements": {
+        "1": [
+          { "TraderName": "Peacekeeper", "TraderLoyalty": 4 }
+        ]
+      }
+    },
+
+    // BOOZE GENERATOR
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "BoozeGenerator": {
+      "RemoveFromDb": false,
+      "Enabled": true,
+      "DisplayLevel": true,
+      "UseCustomConstructionTime": true,
+      "ConstructionTime": {
+        "1": 172800
+      },
+      "UseCustomItemRequirements": true,
+      "ItemRequirements": {
+        "1": [
+          { "ItemTpl": "5d1b39a386f774252339976f", "ItemCount": 4 },
+          { "ItemTpl": "5d1b32c186f774252167a530", "ItemCount": 2 },
+          { "ItemTpl": "5d1b327086f7742525194449", "ItemCount": 2 },
+          { "ItemTpl": "59e35cbb86f7741778269d83", "ItemCount": 5 },
+          { "ItemTpl": "619cbfccbedcde2f5b3f7bdd", "ItemCount": 1 },
+          { "ItemTpl": "5d1c774f86f7746d6620f8db", "ItemCount": 3 },
+          { "ItemTpl": "61bf7b6302b3924be92fa8c3", "ItemCount": 2 }
+        ]
+      },
+      "UseCustomAreaRequirements": true,
+      "AreaRequirements": {
+        "1": [
+          { "AreaName": "WaterCollector", "AreaLevel": 3 },
+          { "AreaName": "Kitchen", "AreaLevel": 3 }
+        ]
+      },
+      "UseCustomSkillRequirements": true,
+      "SkillRequirements": {},
+      "UseCustomTraderRequirements": true,
+      "TraderRequirements": {}
+    },
+
+    // BITCOIN FARM
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "BitcoinFarm": {
+      "RemoveFromDb": false,
+      "Enabled": true,
+      "DisplayLevel": true,
+      "UseCustomConstructionTime": true,
+      "ConstructionTime": {
+        "1": 122400,
+        "2": 180000,
+        "3": 381600
+      },
+      "UseCustomItemRequirements": true,
+      "ItemRequirements": {
+        "1": [
+          { "ItemTpl": "5734779624597737e04bf329", "ItemCount": 15 },
+          { "ItemTpl": "57347c2e24597744902c94a1", "ItemCount": 10 },
+          { "ItemTpl": "59e36c6f86f774176c10a2a7", "ItemCount": 10 },
+          { "ItemTpl": "5c05300686f7746dce784e5d", "ItemCount": 1 },
+          { "ItemTpl": "57347cd0245977445a2d6ff1", "ItemCount": 5 }
+        ],
+        "2": [
+          { "ItemTpl": "5734779624597737e04bf329", "ItemCount": 15 },
+          { "ItemTpl": "57347c2e24597744902c94a1", "ItemCount": 10 },
+          { "ItemTpl": "590a3b0486f7743954552bdb", "ItemCount": 15 },
+          { "ItemTpl": "5d1b313086f77425227d1678", "ItemCount": 5 },
+          { "ItemTpl": "5d0378d486f77420421a5ff4", "ItemCount": 2 }
+        ],
+        "3": [
+          { "ItemTpl": "5734779624597737e04bf329", "ItemCount": 25 },
+          { "ItemTpl": "5d1b39a386f774252339976f", "ItemCount": 15 },
+          { "ItemTpl": "5d1b2fa286f77425227d1674", "ItemCount": 10 },
+          { "ItemTpl": "5d1b327086f7742525194449", "ItemCount": 10 },
+          { "ItemTpl": "5d03794386f77420415576f5", "ItemCount": 1 }
+        ]
+      },
+      "UseCustomAreaRequirements": true,
+      "AreaRequirements": {
+        "1": [
+          { "AreaName": "IntelligenceCenter", "AreaLevel": 2 }
+        ],
+        "2": [
+          { "AreaName": "BitcoinFarm", "AreaLevel": 1 },
+          { "AreaName": "Generator", "AreaLevel": 3 }
+        ],
+        "3": [
+          { "AreaName": "BitcoinFarm", "AreaLevel": 2 },
+          { "AreaName": "SolarPower", "AreaLevel": 1 },
+          { "AreaName": "WaterCollector", "AreaLevel": 3 }
+        ]
+      },
+      "UseCustomSkillRequirements": true,
+      "SkillRequirements": {},
+      "UseCustomTraderRequirements": true,
+      "TraderRequirements": {}
+    },
+
+    // CHRISTMAS ILLUMINATION
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "ChristmasIllumination": {
+      "RemoveFromDb": false,
+      "Enabled": true,
+      "DisplayLevel": true,
+      "UseCustomConstructionTime": true,
+      "ConstructionTime": {},
+      "UseCustomItemRequirements": true,
+      "ItemRequirements": {
+        "1": [
+          { "ItemTpl": "5449016a4bdc2d6f028b456f", "ItemCount": 10000 },
+          { "ItemTpl": "5df8a77486f77412672a1e3f", "ItemCount": 1 },
+          { "ItemTpl": "5df8a72c86f77412640e2e83", "ItemCount": 1 },
+          { "ItemTpl": "5df8a6a186f77412640e2e80", "ItemCount": 1 }
+        ]
+      },
+      "UseCustomAreaRequirements": true,
+      "AreaRequirements": {
+        "1": [
+          { "AreaName": "Generator", "AreaLevel": 1 }
+        ]
+      },
+      "UseCustomSkillRequirements": true,
+      "SkillRequirements": {},
+      "UseCustomTraderRequirements": true,
+      "TraderRequirements": {}
+    },
+
+    // EMERGENCY WALL
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "EmergencyWall": {
+      "RemoveFromDb": false,
+      "Enabled": true,
+      "DisplayLevel": true,
+      "UseCustomConstructionTime": true,
+      "ConstructionTime": {
+        "2": 43200,
+        "3": 86400,
+        "4": 10800,
+        "5": 10800,
+        "6": 43200
+      },
+      "UseCustomItemRequirements": true,
+      "ItemRequirements": {
+        "4": [
+          { "ItemTpl": "63a0b208f444d32d6f03ea1e", "ItemCount": 1 }
+        ],
+        "5": [
+          { "ItemTpl": "5d40419286f774318526545f", "ItemCount": 1 },
+          { "ItemTpl": "590c2e1186f77425357b6124", "ItemCount": 1 }
+        ],
+        "6": [
+          { "ItemTpl": "59e35cbb86f7741778269d83", "ItemCount": 2 },
+          { "ItemTpl": "57347c1124597737fb1379e3", "ItemCount": 1 },
+          { "ItemTpl": "590c2e1186f77425357b6124", "ItemCount": 1 },
+          { "ItemTpl": "5af04b6486f774195a3ebb49", "ItemCount": 1 },
+          { "ItemTpl": "61bf7b6302b3924be92fa8c3", "ItemCount": 5 },
+          { "ItemTpl": "590c346786f77423e50ed342", "ItemCount": 1 },
+          { "ItemTpl": "5c06779c86f77426e00dd782", "ItemCount": 2 },
+          { "ItemTpl": "5d1b392c86f77425243e98fe", "ItemCount": 2 }
+        ]
+      },
+      "UseCustomAreaRequirements": true,
+      "AreaRequirements": {
+        "1": [
+          { "AreaName": "MedStation", "AreaLevel": 1 },
+          { "AreaName": "WaterCollector", "AreaLevel": 1 }
+        ]
+      },
+      "UseCustomSkillRequirements": true,
+      "SkillRequirements": {},
+      "UseCustomTraderRequirements": true,
+      "TraderRequirements": {}
+    },
+
+    // GYM
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "Gym": {
+      "RemoveFromDb": false,
+      "Enabled": true,
+      "DisplayLevel": true,
+      "UseCustomConstructionTime": true,
+      "ConstructionTime": {
+        "1": 14400
+      },
+      "UseCustomItemRequirements": true,
+      "ItemRequirements": {
+        "1": [
+          { "ItemTpl": "590c2e1186f77425357b6124", "ItemCount": 1 },
+          { "ItemTpl": "59e35de086f7741778269d84", "ItemCount": 1 },
+          { "ItemTpl": "5d40419286f774318526545f", "ItemCount": 1 },
+          { "ItemTpl": "57347c77245977448d35f6e2", "ItemCount": 3 },
+          { "ItemTpl": "57347c5b245977448d35f6e1", "ItemCount": 3 },
+          { "ItemTpl": "590c5bbd86f774785762df04", "ItemCount": 1 },
+          { "ItemTpl": "5734795124597738002c6176", "ItemCount": 1 }
+        ]
+      },
+      "UseCustomAreaRequirements": true,
+      "AreaRequirements": {
+        "1": [
+          { "AreaName": "Illumination", "AreaLevel": 2 },
+          { "AreaName": "Vents", "AreaLevel": 2 }
+        ]
+      },
+      "UseCustomSkillRequirements": true,
+      "SkillRequirements": {},
+      "UseCustomTraderRequirements": true,
+      "TraderRequirements": {}
+    },
+
+    // WEAPON STAND
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "WeaponStand": {
+      "RemoveFromDb": false,
+      "Enabled": true,
+      "DisplayLevel": true,
+      "UseCustomConstructionTime": true,
+      "ConstructionTime": {
+        "1": 43200,
+        "2": 64800,
+        "3": 86400
+      },
+      "UseCustomItemRequirements": true,
+      "ItemRequirements": {
+        "1": [
+          { "ItemTpl": "5d1b317c86f7742523398392", "ItemCount": 1 },
+          { "ItemTpl": "5d40419286f774318526545f", "ItemCount": 1 },
+          { "ItemTpl": "590a3cd386f77436f20848cb", "ItemCount": 5 },
+          { "ItemTpl": "590c346786f77423e50ed342", "ItemCount": 3 },
+          { "ItemTpl": "57347c5b245977448d35f6e1", "ItemCount": 15 },
+          { "ItemTpl": "5734795124597738002c6176", "ItemCount": 5 },
+          { "ItemTpl": "590c31c586f774245e3141b2", "ItemCount": 5 }
+        ],
+        "2": [
+          { "ItemTpl": "59e35de086f7741778269d84", "ItemCount": 1 },
+          { "ItemTpl": "62a0a0bb621468534a797ad5", "ItemCount": 1 },
+          { "ItemTpl": "590a3cd386f77436f20848cb", "ItemCount": 10 },
+          { "ItemTpl": "59e35ef086f7741777737012", "ItemCount": 10 },
+          { "ItemTpl": "57347c1124597737fb1379e3", "ItemCount": 5 },
+          { "ItemTpl": "5c06779c86f77426e00dd782", "ItemCount": 10 },
+          { "ItemTpl": "61bf7b6302b3924be92fa8c3", "ItemCount": 5 },
+          { "ItemTpl": "5d1c819a86f774771b0acd6c", "ItemCount": 5 },
+          { "ItemTpl": "5e2af22086f7746d3f3c33fa", "ItemCount": 3 }
+        ],
+        "3": [
+          { "ItemTpl": "59e35de086f7741778269d84", "ItemCount": 1 },
+          { "ItemTpl": "590a3cd386f77436f20848cb", "ItemCount": 15 },
+          { "ItemTpl": "61bf7b6302b3924be92fa8c3", "ItemCount": 10 },
+          { "ItemTpl": "5e2af29386f7746d4159f077", "ItemCount": 5 },
+          { "ItemTpl": "5c06779c86f77426e00dd782", "ItemCount": 15 },
+          { "ItemTpl": "590c35a486f774273531c822", "ItemCount": 3 },
+          { "ItemTpl": "590c639286f774151567fa95", "ItemCount": 1 },
+          { "ItemTpl": "5bc9b355d4351e6d1509862a", "ItemCount": 1 }
+        ]
+      },
+      "UseCustomAreaRequirements": true,
+      "AreaRequirements": {
+        "1": [
+          { "AreaName": "Illumination", "AreaLevel": 3 },
+          { "AreaName": "Stash", "AreaLevel": 2 }
+        ],
+        "2": [
+          { "AreaName": "ShootingRange", "AreaLevel": 2 },
+          { "AreaName": "Workbench", "AreaLevel": 2 },
+          { "AreaName": "Stash", "AreaLevel": 3 }
+        ],
+        "3": [
+          { "AreaName": "ShootingRange", "AreaLevel": 3 },
+          { "AreaName": "Workbench", "AreaLevel": 3 }
+        ]
+      },
+      "UseCustomSkillRequirements": true,
+      "SkillRequirements": {},
+      "UseCustomTraderRequirements": true,
+      "TraderRequirements": {
+        "1": [
+          { "TraderName": "Mechanic", "TraderLoyalty": 2 }
+        ],
+        "2": [
+          { "TraderName": "Mechanic", "TraderLoyalty": 3 }
+        ],
+        "3": [
+          { "TraderName": "Mechanic", "TraderLoyalty": 4 }
+        ]
+      }
+    },
+
+    // EQUIPMENT PRESET STAND
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "EquipmentPresetsStand": {
+      "RemoveFromDb": false,
+      "Enabled": true,
+      "DisplayLevel": true,
+      "UseCustomConstructionTime": true,
+      "ConstructionTime": {
+        "1": 21600,
+        "2": 43200,
+        "3": 86400
+      },
+      "UseCustomItemRequirements": true,
+      "ItemRequirements": {
+        "1": [
+          { "ItemTpl": "544fb5454bdc2df8738b456a", "ItemCount": 1 },
+          { "ItemTpl": "5e2af47786f7746d404f3aaa", "ItemCount": 10 },
+          { "ItemTpl": "61bf83814088ec1a363d7097", "ItemCount": 1 },
+          { "ItemTpl": "590a3cd386f77436f20848cb", "ItemCount": 8 },
+          { "ItemTpl": "57347c5b245977448d35f6e1", "ItemCount": 15 },
+          { "ItemTpl": "62a0a098de7ac8199358053b", "ItemCount": 1 },
+          { "ItemTpl": "59e35de086f7741778269d84", "ItemCount": 1 },
+          { "ItemTpl": "5449016a4bdc2d6f028b456f", "ItemCount": 300000 }
+        ],
+        "2": [
+          { "ItemTpl": "590c311186f77424d1667482", "ItemCount": 1 },
+          { "ItemTpl": "5e2af4d286f7746d4159f07a", "ItemCount": 10 },
+          { "ItemTpl": "590a3cd386f77436f20848cb", "ItemCount": 12 },
+          { "ItemTpl": "590c31c586f774245e3141b2", "ItemCount": 8 },
+          { "ItemTpl": "590c35a486f774273531c822", "ItemCount": 3 },
+          { "ItemTpl": "57347c1124597737fb1379e3", "ItemCount": 5 },
+          { "ItemTpl": "59e35de086f7741778269d84", "ItemCount": 1 },
+          { "ItemTpl": "5449016a4bdc2d6f028b456f", "ItemCount": 800000 }
+        ],
+        "3": [
+          { "ItemTpl": "60391afc25aff57af81f7085", "ItemCount": 1 },
+          { "ItemTpl": "62a0a0bb621468534a797ad5", "ItemCount": 1 },
+          { "ItemTpl": "590a3cd386f77436f20848cb", "ItemCount": 15 },
+          { "ItemTpl": "5e2af29386f7746d4159f077", "ItemCount": 5 },
+          { "ItemTpl": "61bf7b6302b3924be92fa8c3", "ItemCount": 15 },
+          { "ItemTpl": "5e2af41e86f774755a234b67", "ItemCount": 10 },
+          { "ItemTpl": "591094e086f7747caa7bb2ef", "ItemCount": 1 },
+          { "ItemTpl": "5449016a4bdc2d6f028b456f", "ItemCount": 1200000 }
+        ]
+      },
+      "UseCustomAreaRequirements": true,
+      "AreaRequirements": {
+        "1": [
+          { "AreaName": "EmergencyWall", "AreaLevel": 6 },
+          { "AreaName": "Illumination", "AreaLevel": 2 }
+        ],
+        "2": [
+          { "AreaName": "PlaceOfFame", "AreaLevel": 1 }
+        ],
+        "3": [
+          { "AreaName": "PlaceOfFame", "AreaLevel": 2 }
+        ]
+      },
+      "UseCustomSkillRequirements": true,
+      "SkillRequirements": {},
+      "UseCustomTraderRequirements": true,
+      "TraderRequirements": {
+        "1": [
+          { "TraderName": "Ragman", "TraderLoyalty": 2 }
+        ],
+        "2": [
+          { "TraderName": "Ragman", "TraderLoyalty": 3 }
+        ],
+        "3": [
+          { "TraderName": "Ragman", "TraderLoyalty": 4 }
+        ]
+      }
+    },
+
+    // CIRCLE OF CULTISTS
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "CircleOfCultists": {
+      "RemoveFromDb": false,
+      "Enabled": true,
+      "DisplayLevel": true,
+      "UseCustomConstructionTime": true,
+      "ConstructionTime": {
+        "1": 3600
+      },
+      "UseCustomItemRequirements": true,
+      "ItemRequirements": {
+        "1": [
+          { "ItemTpl": "5b4391a586f7745321235ab2", "ItemCount": 1 },
+          { "ItemTpl": "590c2c9c86f774245b1f03f2", "ItemCount": 1 },
+          { "ItemTpl": "5e2af37686f774755a234b65", "ItemCount": 1 },
+          { "ItemTpl": "62a09ee4cf4a99369e262453", "ItemCount": 3 },
+          { "ItemTpl": "5d1b392c86f77425243e98fe", "ItemCount": 5 },
+          { "ItemTpl": "59e3596386f774176c10a2a2", "ItemCount": 1 }
+        ]
+      },
+      "UseCustomAreaRequirements": true,
+      "AreaRequirements": {
+        "1": [
+          { "AreaName": "Security", "AreaLevel": 1 }
+        ]
+      },
+      "UseCustomSkillRequirements": true,
+      "SkillRequirements": {},
+      "UseCustomTraderRequirements": true,
+      "TraderRequirements": {}
+    }
+
+  }
+}

@@ -1,0 +1,40 @@
+{
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // ENABLED BASE PROFILES
+  //
+  // 0 = Standard        1 = Left Behind       2 = Prepare To Escape   3 = Edge Of Darkness
+  // 4 = Unheard         5 = Tournament        6 = SPT Developer       7 = SPT Easy start
+  // 8 = SPT Zero to hero
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "EnabledBaseProfiles": [
+    0, 1, 2, 3, 4, 5, 6,
+  ],
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // EXAMINED BLACKLIST
+  //
+  // Items excluded from AllItemsExamined regardless of the profile setting.
+  // ExaminedCategoryBlacklist (categories) and ExaminedBlacklist (TPLs) are cumulative.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "ExaminedCategoryBlacklist": [
+    { "CategoryId": "543be5e94bdc2df1348b4568", "Enabled": false }, // Key
+    { "CategoryId": "543be5f84bdc2dd4348b456a", "Enabled": false }, // Equipment
+    { "CategoryId": "5422acb9af1c889c16000029", "Enabled": false }, // Weapons
+    { "CategoryId": "5448fe124bdc2da5018b4567", "Enabled": false }, // Weapon mod
+    { "CategoryId": "5485a8684bdc2da71d8b4567", "Enabled": false }, // Ammo
+  ],
+
+  "ExaminedBlacklist": [
+    "62811d61578c54356d6d67ea", // !!!DO_NOT_USE!!!AI AXMC 7.62x51mm bolt assembly
+    "628120415631d45211793c99", // !!!DO_NOT_USE!!!AI AXMC 7.62x51mm chassis
+    "6281214c1d5df4475f46a33a", // !!!DO_NOT_USE!!!AI AXMC 7.62x51 26 inch barrel
+    "6281215b4fa03b6b6c35dc6c", // !!!DO_NOT_USE!!!AI AXMC 7.62x51 24 inch barrel
+    "628121651d5df4475f46a33c", // !!!DO_NOT_USE!!!AI AXMC 7.62x51 20 inch barrel
+    "5648b62b4bdc2d9d488b4585", // GP-34 40mm underbarrel grenade launcher
+    "54490a4d4bdc2dbc018b4573", // SilencerCo Sparrow 22 sound suppressor
+    "55d617094bdc2d89028b4568", // KAC QDC 6.5x35 sound suppressor
+    "544a3d0a4bdc2d1b388b4567", // Nightforce NXS 2.5-10x24 scope
+  ]
+}

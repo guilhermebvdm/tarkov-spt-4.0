@@ -1,0 +1,13 @@
+{
+  // Removes the cost of post-raid healing at the start of each session.
+  "FreePostRaidHeal": true,
+
+  // Unlocks all Ragman outfits without requiring quests or purchases.
+  "UnlockAllOutfits": true,
+
+  // Disables PMC chat responses after killing or being killed by a PMC.
+  "DisablePmcMailResponses": true,
+
+  // Disables the starting gifts sent by traders on character creation.
+  "DisableStartingGifts": true
+}

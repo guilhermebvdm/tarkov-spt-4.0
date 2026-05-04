@@ -1,0 +1,18 @@
+{
+  // Enable/disable this config.
+  "Enabled": false,
+
+  //
+  "Overrides": {
+
+    "5c0e534186f7747fa1419867": "Excellent",  // eTG-c
+    "5c0e530286f7747fa1419862": "Excellent",  // Propital
+    "637b6251104668754b72f8f9": "Excellent",  // Perfotoran
+    "5c0e533786f7747fa23f4d47": "Superior",   // Zagustin
+    "5c0e531d86f7747fa23f4d42": "Superior",   // SJ6
+    "5ed51652f6c34d2cc26336a1": "Superior",   // Mule
+    "5ed5166ad380ab312177c100": "Superior",   // Obdolbos
+    "5c10c8fd86f7743d7d706df3": "Notable",    // Adrenaline
+    "544fb3f34bdc2d03748b456a": "Notable",    // Morphine
+  }
+}

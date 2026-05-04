@@ -1,0 +1,282 @@
+{
+  "Enabled": true,
+
+  "Overrides": {
+
+    // 20x1mm
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "6601546f86889319850bd566": "Default",  // Disk                     pen:0    dmg:1    recoil:+1    accuracy:+0
+
+    // 23x75mm
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "5e85aa1a988a8701445df1f5": "Superior",  // Barrikada            pen:39   dmg:192  recoil:+25   accuracy:-5
+    "5e85a9a6eacf8c039e4e2ac1": "Default",   // Shrap-10             pen:11   dmg:87   recoil:+0    accuracy:+0
+    "5f647f31b6238e5dd066e196": "Default",  // Shrap-25             pen:10   dmg:78   recoil:+10   accuracy:+20
+    "5e85a9f4add9fe03027d9bf1": "Situational",// Zvezda flashbang pen:0
+
+    // 9x18PM  [pen max: 28 — weak pistol, no Elite]
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "573719df2459775a626ccbc2": "Excellent",    // PBM                  pen:28   dmg:40   recoil:+4    accuracy:+0
+    "57371aab2459775a77142f22": "Excellent",    // PstM                 pen:24   dmg:58   recoil:+5    accuracy:+0
+    "573718ba2459775a75491131": "Superior",     // BZhT                 pen:18   dmg:53   recoil:+0    accuracy:+0
+    "573720e02459776143012541": "Notable",      // RG028                pen:13   dmg:65   recoil:+0    accuracy:+0
+    "5737201124597760fc4431f1": "Notable",      // Pst                  pen:12   dmg:50   recoil:+0    accuracy:+0
+    "57371e4124597760ff7b25f1": "Default",      // PPT                  pen:8    dmg:59   recoil:-7    accuracy:-5
+    "57371b192459775a9f58a5e0": "Default",      // PPe                  pen:7    dmg:61   recoil:+0    accuracy:+0
+    "57371eb62459776125652ac1": "Default",      // PRS                  pen:6    dmg:58   recoil:+0    accuracy:+0
+    "57371f2b24597761224311f1": "Default",      // PS PPO               pen:6    dmg:55   recoil:+0    accuracy:+0
+    "573719762459775a626ccbc1": "Default",      // P                    pen:5    dmg:50   recoil:+0    accuracy:+0
+    "57371f8d24597761006c6a81": "Default",      // PSO                  pen:5    dmg:54   recoil:+0    accuracy:+10
+    "5737207f24597760ff7b25f2": "Default",      // PSV                  pen:3    dmg:69   recoil:+0    accuracy:+0
+    "57372140245977611f70ee91": "Situational",  // SP7                  pen:2    dmg:77   recoil:+0    accuracy:+0
+    "5737218f245977612125ba51": "Default",      // SP8                  pen:1    dmg:67   recoil:+0    accuracy:+0
+
+    // 9x19PARA  [pen max: 39 — weak pistol, no Elite]
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "5efb0da7a29a85116f6ea05f": "Excellent",    // PBP                  pen:39   dmg:44   recoil:+5    accuracy:+5
+    "5c925fa22e221601da359b7b": "Superior",     // AP 6.3               pen:30   dmg:52   recoil:+0    accuracy:+0
+    "56d59d3ad2720bdb418b4577": "Notable",      // Pst                  pen:20   dmg:54   recoil:+0    accuracy:+0
+    "64b7bbb74b75259c590fa897": "Notable",      // M882                 pen:18   dmg:56   recoil:+0    accuracy:+0
+    "5c3df7d588a4501f290594e5": "Default",      // GT                   pen:14   dmg:58   recoil:-6    accuracy:-5
+    "58864a4f2459770fcc257101": "Default",      // PSO                  pen:10   dmg:59   recoil:+0    accuracy:+0
+    "5a3c16fe86f77452b62de32a": "Default",      // Luger CCI            pen:10   dmg:70   recoil:+0    accuracy:+0
+    "5efb0e16aeb21837e749c7ff": "Default",      // QuakeMaker           pen:8    dmg:85   recoil:+10   accuracy:+10
+    "5c0d56a986f774449d5de529": "Situational",  // RIP                  pen:2    dmg:102  recoil:+5    accuracy:+0
+
+    // 9x21  [pen max: 38 — weak pistol, no Elite]
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "6576f4708ca9c4381d16cd9d": "Excellent",    // 7N42                 pen:38   dmg:49   recoil:+10   accuracy:-3
+    "5a26ac0ec4a28200741e1e18": "Superior",     // BT                   pen:32   dmg:52   recoil:+5    accuracy:-5
+    "6576f93989f0062e741ba952": "Superior",     // 7U4                  pen:27   dmg:53   recoil:+0    accuracy:+0
+    "5a269f97c4a282000b151807": "Notable",      // PS                   pen:22   dmg:59   recoil:+0    accuracy:+0
+    "5a26abfac4a28232980eabff": "Default",      // P                    pen:18   dmg:65   recoil:-3    accuracy:+1
+    "5a26ac06c4a282000c5a90a8": "Situational",  // PE                   pen:15   dmg:80   recoil:-5    accuracy:+3
+
+    // 9x33R  [pen max: 35 — weak pistol/revolver, no Elite]
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "62330b3ed4dc74626d570b95": "Excellent",    // FMJ                  pen:35   dmg:70   recoil:+12   accuracy:+0
+    "62330c18744e5e31df12f516": "Superior",     // JHP                  pen:24   dmg:88   recoil:+8    accuracy:+15
+    "62330bfadc5883093563729b": "Notable",      // HP                   pen:18   dmg:99   recoil:+15   accuracy:+15
+    "62330c40bdd19b369e1e53d1": "Situational",  // SP                   pen:12   dmg:108  recoil:-29   accuracy:+27
+
+    // 762x25TT  [pen max: 37 — weak pistol, no Elite]
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "68c15f77ed3d7df9220debd6": "Excellent",    // TT 995               pen:37   dmg:32   recoil:+0    accuracy:+0
+    "68c15a033173b556890b5959": "Superior",     // TT 855A1             pen:31   dmg:34   recoil:+0    accuracy:+0
+    "68c15b4bb30038a118088bd6": "Notable",      // TT 856A1             pen:27   dmg:36   recoil:+0    accuracy:+0
+    "573603562459776430731618": "Notable",      // Pst                  pen:25   dmg:50   recoil:+0    accuracy:+0
+    "573603c924597764442bd9cb": "Default",      // PT                   pen:18   dmg:55   recoil:+0    accuracy:-10
+    "5736026a245977644601dc61": "Default",      // P                    pen:14   dmg:58   recoil:+0    accuracy:+0
+    "5735fdcd2459776445391d61": "Default",      // AKBS                 pen:12   dmg:58   recoil:-15   accuracy:+15
+    "5735ff5c245977640e39ba7e": "Default",      // FMJ43                pen:11   dmg:60   recoil:+0    accuracy:+0
+    "573601b42459776410737435": "Default",      // LRN                  pen:8    dmg:64   recoil:-5    accuracy:+5
+    "573602322459776445391df1": "Default",      // LRNPC                pen:7    dmg:66   recoil:-10   accuracy:+10
+
+    // 1143x23ACP  [pen max: 38 — weak pistol, no Elite]
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "5efb0cabfb3e451d70735af5": "Excellent",    // AP                   pen:38   dmg:66   recoil:+7    accuracy:-5
+    "5e81f423763d9f754677bf2e": "Superior",     // FMJ                  pen:25   dmg:72   recoil:+0    accuracy:+0
+    "5efb0d4f4bc50b58e81710f3": "Superior",     // Lasermatch           pen:19   dmg:76   recoil:+0    accuracy:+10
+    "5efb0fc6aeb21837e749c801": "Notable",      // HydraShok            pen:13   dmg:100  recoil:+0    accuracy:+0
+    "5ea2a8e200685063ec28c05a": "Situational",  // RIP                  pen:3    dmg:130  recoil:+0    accuracy:-5
+
+    // 127x33  [pen max: 40 — intermediate, no Elite]
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "668fe62ac62660a5d8071446": "Excellent",    // FMJ                  pen:40   dmg:85   recoil:+10   accuracy:+0
+    "66a0d1e0ed648d72fe064d06": "Superior",     // Copper               pen:33   dmg:94   recoil:+8    accuracy:+5
+    "66a0d1f88486c69fce00fdf6": "Notable",      // Hawk JSP             pen:26   dmg:122  recoil:+2    accuracy:-5
+    "66a0d1c87d0d369e270bb9de": "Situational",  // JHP                  pen:12   dmg:147  recoil:+5    accuracy:-10
+
+    // 127x55  [pen max: 46 — intermediate, no Elite]
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "5cadf6eeae921500134b2799": "Excellent",    // PS12B                pen:46   dmg:102  recoil:+15   accuracy:+0
+    "5cadf6ddae9215051e1c23b2": "Notable",      // PS12                 pen:28   dmg:115  recoil:+0    accuracy:+10
+    "5cadf6e5ae921500113bb973": "Situational",  // PS12A                pen:10   dmg:165  recoil:-12   accuracy:-15
+
+    // .50  [pen max: 115 — most powerful]
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "67dc2648ba5b79876906a166": "Elite",        // M903                 pen:115  dmg:160  recoil:+28   accuracy:-10
+    "67dc255ee3028a8b120efc48": "Excellent",    // M33                  pen:56   dmg:190  recoil:+25   accuracy:-5
+    "67dc212493ce32834b0fa446": "Superior",     // M21                  pen:45   dmg:220  recoil:+20   accuracy:+0
+    "67d41936f378a36c4706eeb9": "Default",      // HP                   pen:34   dmg:260  recoil:+15   accuracy:+15
+
+    // 12g  [pen max: 37 — shotgun, no Elite]
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "5d6e68a8a4b9360b6c0d54e2": "Excellent",    // AP-20                pen:37   dmg:164  recoil:+50   accuracy:+80
+    "5d6e6911a4b9361bd5780d52": "Superior",     // Flechette            pen:31   dmg:25   recoil:+0    accuracy:-10
+    "5d6e68c4a4b9361b93413f79": "Notable",      // .50 BMG              pen:26   dmg:197  recoil:+25   accuracy:+90
+    "64b8ee384b75259c590fa89b": "Default",      // Piranha              pen:24   dmg:25   recoil:+0    accuracy:-5
+    "5d6e68e6a4b9361c140bcfe0": "Notable",      // FTX                  pen:20   dmg:183  recoil:-25   accuracy:+135
+    "5d6e689ca4b9361bc8618956": "Default",      // Poleva-6u            pen:20   dmg:150  recoil:-10   accuracy:+115
+    "5d6e6891a4b9361bd473feea": "Default",      // Poleva-3             pen:17   dmg:140  recoil:-15   accuracy:+110
+    "5d6e68dea4b9361bcc29e659": "Default",      // DualSabot            pen:17   dmg:85   recoil:+15   accuracy:+100
+    "58820d1224597753c90aeb13": "Default",      // Slug                 pen:15   dmg:167  recoil:+0    accuracy:+120
+    "5d6e68b3a4b9361bca7e50b5": "Default",      // CSP                  pen:14   dmg:206  recoil:+10   accuracy:+150
+    "5d6e6869a4b9361c140bcfde": "Default",      // Grizzly 40           pen:12   dmg:190  recoil:+20   accuracy:+80
+    "5d6e68d1a4b93622fe60e845": "Default",      // SFormance            pen:5    dmg:220  recoil:-15   accuracy:+170
+    "560d5e524bdc2d25448b4571": "Default",      // 7mm                  pen:3    dmg:39   recoil:+0    accuracy:+0
+    "5d6e67fba4b9361bc73bc779": "Default",      // Express              pen:3    dmg:35   recoil:+0    accuracy:+15
+    "5c0d591486f7744c505b416f": "Default",      // RIP                  pen:2    dmg:265  recoil:+35   accuracy:+80
+    "5d6e6806a4b936088465b17e": "Default",      // Magnum               pen:2    dmg:50   recoil:+115  accuracy:-15
+    "5d6e6772a4b936088465b17c": "Default",      // 5.25mm               pen:1    dmg:37   recoil:+0    accuracy:+0
+
+    // 20g  [pen max: 30 — shotgun, no Elite]
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "660137d8481cc6907a0c5cda": "Excellent",    // TSS AP               pen:30   dmg:155  recoil:+48   accuracy:+64
+    "660137ef76c1b56143052be8": "Notable",      // DGS                  pen:25   dmg:143  recoil:+40   accuracy:+60
+    "6601380580e77cfd080e3418": "Notable",      // Flechette            pen:24   dmg:20   recoil:+0    accuracy:-10
+    "5d6e6a42a4b9364f07165f52": "Default",      // Poleva-6u            pen:17   dmg:135  recoil:-10   accuracy:+110
+    "5d6e6a05a4b93618084f58d0": "Default",      // Star                 pen:16   dmg:154  recoil:+5    accuracy:+130
+    "5d6e6a53a4b9361bd473feec": "Default",      // Poleva-3             pen:14   dmg:120  recoil:-15   accuracy:+110
+    "5d6e6a5fa4b93614ec501745": "Situational",  // Devastator           pen:5    dmg:198  recoil:+30   accuracy:+125
+    "5a38ebd9c4a282000d722a5b": "Default",      // 7.5mm                pen:3    dmg:25   recoil:+0    accuracy:+0
+    "5d6e69c7a4b9360b6c0d54e4": "Default",      // 7.3mm                pen:3    dmg:23   recoil:+15   accuracy:+0
+    "5d6e69b9a4b9361bc8618958": "Default",      // 6.2mm                pen:2    dmg:22   recoil:+0    accuracy:+0
+    "5d6e695fa4b936359b35d852": "Default",      // 5.6mm                pen:1    dmg:26   recoil:+10   accuracy:-10
+
+    // 57x28  [pen max: 37 — PDW, no Elite]
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "5cc80f38e4a949001152b560": "Excellent",    // SS190                pen:37   dmg:49   recoil:+0    accuracy:+0
+    "5cc80f53e4a949000e1ea4f8": "Superior",     // L191                 pen:33   dmg:53   recoil:+0    accuracy:-4
+    "5cc80f67e4a949035e43bbba": "Notable",      // SB193                pen:27   dmg:59   recoil:-15   accuracy:+5
+    "5cc80f8fe4a949033b0224a2": "Notable",      // SS197SR              pen:25   dmg:62   recoil:+0    accuracy:+10
+    "5cc80f79e4a949033c7343b2": "Default",      // SS198LF              pen:17   dmg:70   recoil:+0    accuracy:+0
+    "5cc86840d7f00c002412c56c": "Default",      // R37.X                pen:11   dmg:81   recoil:+0    accuracy:-5
+    "5cc86832d7f00c000d3a6e6c": "Situational",  // R37.F                pen:8    dmg:98   recoil:+0    accuracy:+0
+
+    // 4.6x30mm
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "5ba26835d4351e0035628ff5": "Elite",      // AP SX            pen:53
+    "5ba2678ad4351e44f824b344": "Excellent",  // FMJ SX           pen:40
+    "64b6979341772715af0f9c39": "Superior",   // JSP SX           pen:32
+    "5ba26844d4351e00334c9475": "Notable",    // Subsonic SX      pen:23
+    "5ba26812d4351e003201fef1": "Default",    // Action SX        pen:18
+
+    // 9x39  [pen max: 54 — subsonic rifle, Elite allowed]
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "5c0d688c86f77413ae3407b2": "Elite",        // BP                   pen:54   dmg:58   recoil:+15   accuracy:+10
+    "57a0e5022459774d1673f889": "Excellent",    // SP-6                 pen:48   dmg:60   recoil:+5    accuracy:+0
+    "61962d879bb3d20b0946d385": "Superior",    // PAB-9                pen:43   dmg:62   recoil:+10   accuracy:-15
+    "5c0d668f86f7747ccb7f13b2": "Notable",     // SPP                  pen:35   dmg:68   recoil:+7    accuracy:+10
+    "57a0dfb82459774d3078b56c": "Default",      // SP-5                 pen:28   dmg:71   recoil:+0    accuracy:+0
+    "6576f96220d53a5b8f3e395e": "Default",      // FMJ                  pen:17   dmg:75   recoil:-5    accuracy:+5
+
+    // .366 TKM
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "5f0596629e22f464da6bbdd9": "Excellent",  // AP-M             pen:42
+    "59e655cb86f77411dc52a77b": "Superior",   // EKO              pen:30
+    "59e6542b86f77411dc52a77a": "Notable",    // FMJ              pen:23
+    "59e6658b86f77411d949b250": "Default",    // Geksa            pen:14
+
+    // 5.45x39mm
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "5c0d5e4486f77478390952fe": "Elite",      // PPBS Igolnik     pen:62
+    "56dff026d2720bb8668b4567": "Elite",      // BS gs            pen:54
+    "56dfef82d2720bbd668b4567": "Excellent",  // BP gs            pen:45
+    "61962b617c6c7b169525f168": "Excellent",  // 7N40             pen:42
+    "56dff061d2720bb5668b4567": "Superior",   // BT gs            pen:37
+    "56dff2ced2720bb4668b4567": "Superior",   // PP gs            pen:34
+    "56dff3afd2720bba668b4567": "Notable",    // PS gs            pen:28
+    "56dff4a2d2720bbd668b456a": "Default",    // T gs             pen:20
+    "56dff4ecd2720b5f5a8b4568": "Default",    // US gs            pen:17
+    "56dff421d2720b5f5a8b4567": "Default",    // SP               pen:15
+    "56dff338d2720bbd668b4569": "Default",    // PRS gs           pen:13
+    "56dff216d2720bbd668b4568": "Default",    // HP               pen:9
+    "56dff0bed2720bb0668b4567": "Default",    // FMJ              pen:7
+
+    // 5.56x45mm
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "601949593ae8f707c4608daa": "Elite",      // SSA AP           pen:57
+    "59e690b686f7746c9f75e848": "Elite",      // M995             pen:53
+    "54527ac44bdc2d36668b4567": "Excellent",  // M855A1           pen:44
+    "59e6906286f7746c9f75e847": "Excellent",  // M856A1           pen:38
+    "60194943740c5d77f6705eea": "Superior",   // MK318 Mod 0      pen:33
+    "54527a984bdc2d4e668b4567": "Superior",   // M855             pen:31
+    "59e6920f86f77411d82aa167": "Notable",    // FMJ              pen:23
+    "59e68f6f86f7746c9f75e846": "Default",    // M856             pen:18
+    "59e6918f86f7746c9f75e849": "Default",    // MK255 RRLP       pen:11
+    "59e6927d86f77411da468256": "Default",    // HP               pen:7
+    "5c0d5ae286f7741e46554302": "Situational",// Warmageddon      pen:3
+
+    // 7.62x39mm
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "601aa3d2b2bcb34913271e6d": "Elite",      // MAI AP           pen:58
+    "59e0d99486f7744a32234762": "Excellent",  // BP gzh           pen:47
+    "64b7af434b75259c590fa893": "Superior",   // PP gzh           pen:41
+    "5656d7c34bdc2d9d198b4587": "Superior",   // PS gzh           pen:35
+    "59e4cf5286f7741778269d8a": "Default",    // T-45M1 gzh       pen:30
+    "59e4d24686f7741776641ac7": "Notable",    // US gzh           pen:29
+    "64b7af5a8532cf95ee0a0dbd": "Default",    // FMJ              pen:26
+    "59e4d3d286f774176a36250a": "Default",    // HP               pen:20
+    "64b7af734b75259c590fa895": "Default",    // SP               pen:15
+
+    // .300 Blackout
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "5fd20ff893a8961fc660a954": "Excellent",  // AP                   pen:48   dmg:51   recoil:+3    accuracy:+0
+    "64b8725c4b75259c590fa899": "Superior",  // CBJ                  pen:43   dmg:58   recoil:+5    accuracy:+0
+    "619636be6db0f2477964e710": "Notable",  // M62                  pen:36   dmg:54   recoil:+1    accuracy:+0
+    "5fbe3ffdf8b6a877a729ea82": "Default",  // BCP FMJ              pen:30   dmg:60   recoil:+0    accuracy:+0
+    "6196364158ef8c428c287d9f": "Default",  // V-Max                pen:20   dmg:72   recoil:-10   accuracy:+30
+    "6196365d58ef8c428c287da1": "Default",  // Whisper              pen:14   dmg:90   recoil:-5    accuracy:+5
+
+    // 6.8x51mm
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "6529243824cbe3c74a05e5c1": "Excellent",  // SIG Hybrid       pen:47
+    "6529302b8c26af6326029fb7": "Superior",   // SIG FMJ          pen:36
+
+    // 7.62x51mm
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "5efb0c1bd79ff02a1f5e68d9": "Elite",      // M993             pen:65
+    "6768c25aa7b238f14a08d3f6": "Elite",      // M80A1            pen:60
+    "5a6086ea4f39f99cd479502f": "Excellent",  // M61              pen:55
+    "58dd3ad986f77403051cba8f": "Superior",   // M80              pen:43
+    "5a608bf24f39f98ffc77720e": "Superior",   // M62 Tracer       pen:42
+    "5e023e53d4353e3302577c4c": "Notable",    // BCP FMJ          pen:37
+    "5e023e6e34d52a55c3304f71": "Default",    // TCW SP           pen:30
+    "5e023e88277cce2b522ff2b1": "Default",    // Ultra Nosler     pen:15
+
+    // 7.62x54mm R
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "5e023d48186a883be655e551": "Elite",      // BS gs            pen:70
+    "560d61e84bdc2da74d8b4571": "Elite",      // SNB gzh          pen:62
+    "5e023d34e8a400319a28ed44": "Excellent",  // BT gzh           pen:55
+    "59e77a2386f7742ee578960a": "Superior",   // PS gzh           pen:45
+    "5887431f2459777e1612938f": "Superior",   // LPS gzh          pen:42
+    "5e023cf8186a883be655e54f": "Superior",   // T-46M gzh        pen:41
+    "64b8f7968532cf95ee0a0dbf": "Notable",    // FMJ              pen:33
+    "64b8f7b5389d7ffd620ccba2": "Default",    // SP BT            pen:27
+    "64b8f7c241772715af0f9c3d": "Default",    // HP BT            pen:23
+
+    // .338 Lapua Magnum
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "5fc382a9d724d907e2077dab": "Elite",      // AP               pen:79
+    "5fc275cf85fd526b824a571a": "Excellent",  // FMJ              pen:47
+    "5fc382c1016cce60e8341b20": "Superior",   // UCW              pen:32
+    "5fc382b6d6fa9c00c571bbc3": "Default",    // TAC-X            pen:18
+
+    // .308 Marlin Express
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "67c540c3d0538d12ec036c08": "Excellent",      // ME               pen:42
+    "67c540cfb032bbdb530201b8": "Notable",    // ME LOKT          pen:24
+
+    // 9.3x64mm
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "68bad8376cb22acf1107a586": "Elite",      // 7N33             pen:56
+    "68bac6ca653ee6b1e406d978": "Superior",   // FMJ              pen:44
+    "68aeed8a8906b00bc800fdd6": "Notable"     // SP               pen:37
+  }
+}

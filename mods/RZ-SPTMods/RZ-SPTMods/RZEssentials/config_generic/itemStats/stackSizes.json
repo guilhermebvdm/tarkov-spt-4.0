@@ -1,0 +1,21 @@
+{
+  "Enabled": false,
+
+  "CategoryOverrides": {
+    "5485a8684bdc2da71d8b4567": { "Ops": { "StackMaxSize": { "Value": 100 } } }, // Ammo
+  },
+
+  "Overrides": {
+    "5656eb674bdc2d35148b457c": { "Ops": { "StackMaxSize": { "Value": 10 } } }, // 40mm VOG-25 grenade
+    "5ede474b0c226a66f5402622": { "Ops": { "StackMaxSize": { "Value": 10 } } }, // 40x46mm M381
+    "5ede475b549eed7c6d5c18fb": { "Ops": { "StackMaxSize": { "Value": 10 } } }, // 40x46mm M386
+    "5ede4739e0350d05467f73e8": { "Ops": { "StackMaxSize": { "Value": 10 } } }, // 40x46mm M406
+    "5f0c892565703e5c461894e9": { "Ops": { "StackMaxSize": { "Value": 10 } } }, // 40x46mm M433
+    "5ede47405b097655935d7d16": { "Ops": { "StackMaxSize": { "Value": 10 } } }, // 40x46mm M441
+
+    "5449016a4bdc2d6f028b456f": { "Ops": { "StackMaxSize": { "Value": 1000000 } } }, // Roubles
+    "5696686a4bdc2da3298b456a": { "Ops": { "StackMaxSize": { "Value": 50000 } } }, // USD
+    "569668774bdc2da2298b4568": { "Ops": { "StackMaxSize": { "Value": 50000 } } }, // Euros
+    "6656560053eaaa7a23349c86": { "Ops": { "StackMaxSize": { "Value": 1 } } }, // Lega
+  }
+}

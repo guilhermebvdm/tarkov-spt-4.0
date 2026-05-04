@@ -1,0 +1,341 @@
+{
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // ROUTED TRADES
+  // Controls how items are automatically assigned to traders.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  // Route every handbook item regardless of category routes and blacklists.
+  "ForceRouteAll": false,
+
+  // Only route items not present in vanilla_items.json (modded items). Mutually exclusive with RouteVanillaItemsOnly.
+  "RouteModdedItemsOnly": false,
+
+  // Only route items present in vanilla_items.json (vanilla items). Mutually exclusive with RouteModdedItemsOnly.
+  "RouteVanillaItemsOnly": false,
+
+  // Currency used per trader for routed offers. "rub" | "eur" | "usd". Traders not listed here default to rub.
+  "TraderCurrencies": {
+    "54cb50c76803fa8b248b4571": "rub", // PRAPOR
+    "54cb57776803fa99248b456e": "rub", // THERAPIST
+    "58330581ace78e27b8b10cee": "eur", // SKIER
+    "5935c25fb3acc3127c3d8cd9": "usd", // PEACEKEEPER
+    "5a7c2eca46aef81a7ca2145d": "rub", // MECHANIC
+    "5ac3b934156ae10c4430e83c": "rub", // RAGMAN
+    "5c0647fdd443bc2504c2d371": "rub", // JAEGER
+    "6617beeaa9cfa777ca915b7c": "rub", // REF
+    "fa363fc015e07b5f7828c9f7": "rub", // SABLE (custom trader, ignore if not enabled)
+  },
+
+  // When ForceRouteAll is true, items with no matching category route go here.
+  "FallbackTrader": "6617beeaa9cfa777ca915b7c", // Ref
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // ROUTES
+  //
+  // Keyed by trader ID. Each entry is a list of handbook category routes for that trader.
+  // Sub-categories inherit the parent route automatically.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "CategoryRoutes": {
+
+    // PRAPOR
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "54cb50c76803fa8b248b4571": [
+      { "CategoryId": "543be6564bdc2df4348b4568", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // ThrowWeap
+      { "CategoryId": "5485a8684bdc2da71d8b4567", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Ammo
+      { "CategoryId": "677ae5df4be46b83620bf055", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Rocket
+      { "CategoryId": "543be5cb4bdc2deb348b4568", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // AmmoBox
+      { "CategoryId": "5448bc234bdc2d3c308b4569", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Magazine
+      { "CategoryId": "610720f290b75a49ff2e5e25", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // CylinderMagazine
+      { "CategoryId": "627a137bf21bc425b06ab944", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // SpringDrivenCylinder
+    ],
+
+    // THERAPIST
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "54cb57776803fa99248b456e": [
+      { "CategoryId": "5448f39d4bdc2d0a728b4568", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // MedKit
+      { "CategoryId": "5448f3ac4bdc2dce718b4569", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Medical
+      { "CategoryId": "57864c8c245977548867e7f1", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // MedicalSupplies
+      { "CategoryId": "5448f3a14bdc2d27728b4569", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Drugs
+      { "CategoryId": "5448f3a64bdc2d60728b456a", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Stimulator
+      { "CategoryId": "5448e8d64bdc2dce718b4568", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Drink
+      { "CategoryId": "5448e8d04bdc2ddf718b4569", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Food
+      { "CategoryId": "5c99f98d86f7745c314214b3", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // KeyMechanical
+      { "CategoryId": "5c164d2286f774194c5e69fa", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Keycard
+      { "CategoryId": "567849dd4bdc2d150f8b456e", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Map
+      { "CategoryId": "5448ecbe4bdc2d60728b4568", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Info
+    ],
+
+    // PEACEKEEPER
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "5935c25fb3acc3127c3d8cd9": [
+      { "CategoryId": "5447e1d04bdc2dff2f8b4567", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Knife
+      { "CategoryId": "5447b5cf4bdc2d65278b4567", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Pistol
+      { "CategoryId": "617f1ef5e8b54b0998387733", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Revolver
+      { "CategoryId": "5447b5fc4bdc2d87278b4567", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // AssaultCarbine
+      { "CategoryId": "5447b5f14bdc2d61278b4567", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // AssaultRifle
+      { "CategoryId": "5447b6194bdc2d67278b4567", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // MarksmanRifle
+      { "CategoryId": "5447b6094bdc2dc3278b4567", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Shotgun
+      { "CategoryId": "5447b5e04bdc2d62278b4567", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Smg
+      { "CategoryId": "5447b6254bdc2dc3278b4568", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // SniperRifle
+      { "CategoryId": "5447bed64bdc2d97278b4568", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // MachineGun
+      { "CategoryId": "5447bedf4bdc2d87278b4568", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // GrenadeLauncher
+      { "CategoryId": "67446d4f04141c10630604e7", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // RocketLauncher
+      { "CategoryId": "5447bee84bdc2dc3278b4569", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // SpecialWeapon
+    ],
+
+    // SKIER
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "58330581ace78e27b8b10cee": [
+      { "CategoryId": "543be5dd4bdc2deb348b4569", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Money
+      { "CategoryId": "57864a3d24597754843f8721", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Jewelry
+      { "CategoryId": "590c745b86f7743cc433c5f2", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Other (barter)
+      { "CategoryId": "5448eb774bdc2d0a728b4567", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // BarterItem (root)
+    ],
+
+    // MECHANIC
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "5a7c2eca46aef81a7ca2145d": [
+      { "CategoryId": "550aa4154bdc2dd8348b456b", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // FunctionalMod
+      { "CategoryId": "5a74651486f7744e73386dd1", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // AuxiliaryMod
+      { "CategoryId": "55818afb4bdc2dde698b456d", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Bipod
+      { "CategoryId": "55818b084bdc2d5b648b4571", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Flashlight
+      { "CategoryId": "55818af64bdc2d5b648b4570", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Foregrip
+      { "CategoryId": "56ea9461d2720b67698b456f", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Gasblock
+      { "CategoryId": "55818b0e4bdc2dde698b456e", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // LightLaser
+      { "CategoryId": "5448fe394bdc2d0d028b456c", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Muzzle
+      { "CategoryId": "550aa4af4bdc2dd4348b456e", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Compensator
+      { "CategoryId": "550aa4bf4bdc2dd6348b456b", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // FlashHider
+      { "CategoryId": "550aa4dd4bdc2dc9348b4569", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // MuzzleCombo
+      { "CategoryId": "550ad14d4bdc2dd5348b456c", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Pms
+      { "CategoryId": "550aa4cd4bdc2dd8348b456c", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Silencer
+      { "CategoryId": "55818b1d4bdc2d5b648b4572", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // RailCovers
+      { "CategoryId": "5448fe7a4bdc2d6f028b456b", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Sights
+      { "CategoryId": "55818add4bdc2d5b648b456f", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // AssaultScope
+      { "CategoryId": "55818ad54bdc2ddc698b4569", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Collimator
+      { "CategoryId": "55818acf4bdc2dde698b456b", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // CompactCollimator
+      { "CategoryId": "55818ac54bdc2d5b648b456e", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // IronSight
+      { "CategoryId": "55818ae44bdc2dde698b456c", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // OpticScope
+      { "CategoryId": "55818aeb4bdc2ddc698b456a", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // SpecialScope
+      { "CategoryId": "5a2c3a9486f774688b05e574", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // NightVision
+      { "CategoryId": "5d21f59b6dbe99052b54ef83", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // ThermalVision
+      { "CategoryId": "55818b164bdc2ddc698b456c", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // TacticalCombo
+      { "CategoryId": "55802f3e4bdc2de7118b4584", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // GearMod
+      { "CategoryId": "55818a6f4bdc2db9688b456b", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Charge
+      { "CategoryId": "55818b014bdc2ddc698b456b", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Launcher
+      { "CategoryId": "55818b224bdc2dde698b456f", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Mount
+      { "CategoryId": "55818a604bdc2db5418b457e", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Shaft
+      { "CategoryId": "55818a594bdc2db9688b456a", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Stock
+      { "CategoryId": "55802f4a4bdc2ddb688b4569", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // MasterMod
+      { "CategoryId": "555ef6e44bdc2de9068b457e", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Barrel
+      { "CategoryId": "55818a104bdc2db9688b4569", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Handguard
+      { "CategoryId": "55818a684bdc2ddd698b456d", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // PistolGrip
+      { "CategoryId": "55818a304bdc2db5418b457d", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Receiver
+    ],
+
+    // RAGMAN
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "5ac3b934156ae10c4430e83c": [
+      { "CategoryId": "5448e54d4bdc2dcc718b4568", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Armor
+      { "CategoryId": "5a341c4686f77469e155819e", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // FaceCover
+      { "CategoryId": "5a341c4086f77401f2541505", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Headwear
+      { "CategoryId": "5448e5724bdc2ddf718b4568", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Visors
+      { "CategoryId": "5645bcb74bdc2ded0b8b4578", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Headphones
+      { "CategoryId": "5448e5284bdc2dcb718b4567", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Vest
+      { "CategoryId": "5448e53e4bdc2d60728b4567", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Backpack
+      { "CategoryId": "5b3f15d486f77432d0509248", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // ArmBand
+      { "CategoryId": "644120aa86ffbe10ee032b6f", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // ArmorPlate
+    ],
+
+    // JAEGER
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "5c0647fdd443bc2504c2d371": [
+      { "CategoryId": "5448eb774bdc2d0a728b4567", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // BarterItem (root)
+      { "CategoryId": "57864ee62459775490116fc1", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Battery
+      { "CategoryId": "57864ada245977548638de91", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // BuildingMaterial
+      { "CategoryId": "57864a66245977548f04a81f", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Electronics
+      { "CategoryId": "57864c322459775490116fbf", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // HouseholdGoods
+      { "CategoryId": "57864a3d24597754843f8721", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Jewelry
+      { "CategoryId": "57864e4c24597754843f8723", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Lubricant
+      { "CategoryId": "5d650c3e815116009f6201d2", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Fuel
+      { "CategoryId": "57864bb7245977548b3b66c2", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Tool
+      { "CategoryId": "66abb0743f4d8b145b1612c1", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Multitools
+      { "CategoryId": "616eb7aea207f41933308f46", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // RepairKits
+      { "CategoryId": "5f4fbaaca5573a5ac31db429", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Compass
+      { "CategoryId": "6672e40ebb23210ae87d39eb", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // PlantingKits
+      { "CategoryId": "61605ddea09d851a0a0c1bbc", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // PortableRangeFinder
+      { "CategoryId": "62e9103049c018f425059f38", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // RadioTransmitter
+    ],
+
+    // REF
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "6617beeaa9cfa777ca915b7c": [
+      { "CategoryId": "5448bf274bdc2dfc2f8b456a", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // MobContainer (secure)
+      { "CategoryId": "566965d44bdc2d814c8b4571", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // LootContainer
+      { "CategoryId": "5671435f4bdc2d96058b4569", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // LockableContainer
+      { "CategoryId": "65ddcc7aef36f6413d0829b9", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // MarkOfUnknown
+      { "CategoryId": "64b69b0c8f3be32ed22682f8", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // CultistAmulet
+      { "CategoryId": "590c745b86f7743cc433c5f2", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Other
+      { "CategoryId": "65649eb40bf0ed77b8044453", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // BuiltInInserts
+      { "CategoryId": "684070bd2f743ae53b0b80ec", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // DialogItem
+    ],
+
+
+    // SABLE - Modded trader from my CustomTraders mods, ignored if not installed.
+    // All categories are listed here for convenience, just flip enabled to true for the ones you want.
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "fa363fc015e07b5f7828c9f7": [
+      { "CategoryId": "543be6564bdc2df4348b4568", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // ThrowWeap
+      { "CategoryId": "5485a8684bdc2da71d8b4567", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Ammo
+      { "CategoryId": "677ae5df4be46b83620bf055", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Rocket
+      { "CategoryId": "543be5cb4bdc2deb348b4568", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // AmmoBox
+      { "CategoryId": "5448bc234bdc2d3c308b4569", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Magazine
+      { "CategoryId": "610720f290b75a49ff2e5e25", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // CylinderMagazine
+      { "CategoryId": "627a137bf21bc425b06ab944", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // SpringDrivenCylinder
+      { "CategoryId": "5448f39d4bdc2d0a728b4568", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // MedKit
+      { "CategoryId": "5448f3ac4bdc2dce718b4569", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Medical
+      { "CategoryId": "57864c8c245977548867e7f1", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // MedicalSupplies
+      { "CategoryId": "5448f3a14bdc2d27728b4569", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Drugs
+      { "CategoryId": "5448f3a64bdc2d60728b456a", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Stimulator
+      { "CategoryId": "5448e8d64bdc2dce718b4568", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Drink
+      { "CategoryId": "5448e8d04bdc2ddf718b4569", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Food
+      { "CategoryId": "5c99f98d86f7745c314214b3", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": true }, // KeyMechanical
+      { "CategoryId": "5c164d2286f774194c5e69fa", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Keycard
+      { "CategoryId": "567849dd4bdc2d150f8b456e", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Map
+      { "CategoryId": "5448ecbe4bdc2d60728b4568", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Info
+      { "CategoryId": "5447e1d04bdc2dff2f8b4567", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Knife
+      { "CategoryId": "5447b5cf4bdc2d65278b4567", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Pistol
+      { "CategoryId": "617f1ef5e8b54b0998387733", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Revolver
+      { "CategoryId": "5447b5fc4bdc2d87278b4567", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // AssaultCarbine
+      { "CategoryId": "5447b5f14bdc2d61278b4567", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // AssaultRifle
+      { "CategoryId": "5447b6194bdc2d67278b4567", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // MarksmanRifle
+      { "CategoryId": "5447b6094bdc2dc3278b4567", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Shotgun
+      { "CategoryId": "5447b5e04bdc2d62278b4567", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Smg
+      { "CategoryId": "5447b6254bdc2dc3278b4568", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // SniperRifle
+      { "CategoryId": "5447bed64bdc2d97278b4568", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // MachineGun
+      { "CategoryId": "5447bedf4bdc2d87278b4568", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // GrenadeLauncher
+      { "CategoryId": "67446d4f04141c10630604e7", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // RocketLauncher
+      { "CategoryId": "5447bee84bdc2dc3278b4569", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // SpecialWeapon
+      { "CategoryId": "543be5dd4bdc2deb348b4569", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Money
+      { "CategoryId": "57864a3d24597754843f8721", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Jewelry
+      { "CategoryId": "590c745b86f7743cc433c5f2", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Other (barter)
+      { "CategoryId": "5448eb774bdc2d0a728b4567", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // BarterItem (root)
+      { "CategoryId": "550aa4154bdc2dd8348b456b", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // FunctionalMod
+      { "CategoryId": "5a74651486f7744e73386dd1", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // AuxiliaryMod
+      { "CategoryId": "55818afb4bdc2dde698b456d", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Bipod
+      { "CategoryId": "55818b084bdc2d5b648b4571", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Flashlight
+      { "CategoryId": "55818af64bdc2d5b648b4570", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Foregrip
+      { "CategoryId": "56ea9461d2720b67698b456f", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Gasblock
+      { "CategoryId": "55818b0e4bdc2dde698b456e", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // LightLaser
+      { "CategoryId": "5448fe394bdc2d0d028b456c", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Muzzle
+      { "CategoryId": "550aa4af4bdc2dd4348b456e", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Compensator
+      { "CategoryId": "550aa4bf4bdc2dd6348b456b", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // FlashHider
+      { "CategoryId": "550aa4dd4bdc2dc9348b4569", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // MuzzleCombo
+      { "CategoryId": "550ad14d4bdc2dd5348b456c", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Pms
+      { "CategoryId": "550aa4cd4bdc2dd8348b456c", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Silencer
+      { "CategoryId": "55818b1d4bdc2d5b648b4572", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // RailCovers
+      { "CategoryId": "5448fe7a4bdc2d6f028b456b", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Sights
+      { "CategoryId": "55818add4bdc2d5b648b456f", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // AssaultScope
+      { "CategoryId": "55818ad54bdc2ddc698b4569", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Collimator
+      { "CategoryId": "55818acf4bdc2dde698b456b", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // CompactCollimator
+      { "CategoryId": "55818ac54bdc2d5b648b456e", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // IronSight
+      { "CategoryId": "55818ae44bdc2dde698b456c", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // OpticScope
+      { "CategoryId": "55818aeb4bdc2ddc698b456a", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // SpecialScope
+      { "CategoryId": "5a2c3a9486f774688b05e574", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // NightVision
+      { "CategoryId": "5d21f59b6dbe99052b54ef83", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // ThermalVision
+      { "CategoryId": "55818b164bdc2ddc698b456c", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // TacticalCombo
+      { "CategoryId": "55802f3e4bdc2de7118b4584", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // GearMod
+      { "CategoryId": "55818a6f4bdc2db9688b456b", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Charge
+      { "CategoryId": "55818b014bdc2ddc698b456b", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Launcher
+      { "CategoryId": "55818b224bdc2dde698b456f", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Mount
+      { "CategoryId": "55818a604bdc2db5418b457e", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Shaft
+      { "CategoryId": "55818a594bdc2db9688b456a", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Stock
+      { "CategoryId": "55802f4a4bdc2ddb688b4569", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // MasterMod
+      { "CategoryId": "555ef6e44bdc2de9068b457e", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Barrel
+      { "CategoryId": "55818a104bdc2db9688b4569", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Handguard
+      { "CategoryId": "55818a684bdc2ddd698b456d", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // PistolGrip
+      { "CategoryId": "55818a304bdc2db5418b457d", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Receiver
+      { "CategoryId": "5448e54d4bdc2dcc718b4568", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Armor
+      { "CategoryId": "5a341c4686f77469e155819e", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // FaceCover
+      { "CategoryId": "5a341c4086f77401f2541505", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Headwear
+      { "CategoryId": "5448e5724bdc2ddf718b4568", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Visors
+      { "CategoryId": "5645bcb74bdc2ded0b8b4578", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Headphones
+      { "CategoryId": "5448e5284bdc2dcb718b4567", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Vest
+      { "CategoryId": "5448e53e4bdc2d60728b4567", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Backpack
+      { "CategoryId": "5b3f15d486f77432d0509248", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // ArmBand
+      { "CategoryId": "644120aa86ffbe10ee032b6f", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // ArmorPlate
+      { "CategoryId": "5448eb774bdc2d0a728b4567", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // BarterItem (root)
+      { "CategoryId": "57864ee62459775490116fc1", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Battery
+      { "CategoryId": "57864ada245977548638de91", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // BuildingMaterial
+      { "CategoryId": "57864a66245977548f04a81f", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Electronics
+      { "CategoryId": "57864c322459775490116fbf", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // HouseholdGoods
+      { "CategoryId": "57864a3d24597754843f8721", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Jewelry
+      { "CategoryId": "57864e4c24597754843f8723", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Lubricant
+      { "CategoryId": "5d650c3e815116009f6201d2", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Fuel
+      { "CategoryId": "57864bb7245977548b3b66c2", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Tool
+      { "CategoryId": "66abb0743f4d8b145b1612c1", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Multitools
+      { "CategoryId": "616eb7aea207f41933308f46", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // RepairKits
+      { "CategoryId": "5f4fbaaca5573a5ac31db429", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Compass
+      { "CategoryId": "6672e40ebb23210ae87d39eb", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // PlantingKits
+      { "CategoryId": "61605ddea09d851a0a0c1bbc", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // PortableRangeFinder
+      { "CategoryId": "62e9103049c018f425059f38", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // RadioTransmitter
+      { "CategoryId": "5448bf274bdc2dfc2f8b456a", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // MobContainer (secure)
+      { "CategoryId": "566965d44bdc2d814c8b4571", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // LootContainer
+      { "CategoryId": "5671435f4bdc2d96058b4569", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // LockableContainer
+      { "CategoryId": "65ddcc7aef36f6413d0829b9", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // MarkOfUnknown
+      { "CategoryId": "64b69b0c8f3be32ed22682f8", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // CultistAmulet
+      { "CategoryId": "590c745b86f7743cc433c5f2", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // Other
+      { "CategoryId": "65649eb40bf0ed77b8044453", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // BuiltInInserts
+      { "CategoryId": "684070bd2f743ae53b0b80ec", "PriceMultiplier": 1.0, "LoyaltyLevel": 1, "Enabled": false }, // DialogItem
+    ]
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // BLACKLIST
+  //
+  // Exclude items from routed trades.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "Blacklist": [
+
+    "5449016a4bdc2d6f028b456f", // Rouble
+
+    "62811d61578c54356d6d67ea", // !!!DO_NOT_USE!!!AI AXMC 7.62x51mm bolt assembly
+    "628120415631d45211793c99", // !!!DO_NOT_USE!!!AI AXMC 7.62x51mm chassis
+    "6281214c1d5df4475f46a33a", // !!!DO_NOT_USE!!!AI AXMC 7.62x51 26 inch barrel
+    "6281215b4fa03b6b6c35dc6c", // !!!DO_NOT_USE!!!AI AXMC 7.62x51 24 inch barrel
+    "628121651d5df4475f46a33c", // !!!DO_NOT_USE!!!AI AXMC 7.62x51 20 inch barrel
+    "54490a4d4bdc2dbc018b4573", // SilencerCo Sparrow 22 sound suppressor
+    "55d617094bdc2d89028b4568", // KAC QDC 6.5x35 sound suppressor
+    "5648b62b4bdc2d9d488b4585", // GP-34 40mm underbarrel grenade launcher
+    "5943d9c186f7745a13413ac9", // Shrapnel
+    "5996f6d686f77467977ba6cc", // MON-50 Shrapnel
+    "5996f6fc86f7745e585b4de3", // M67 Shrapnel
+    "5996f6cb86f774678763a6ca", // RGD-5 Shrapnel
+    "67654a6759116d347b0bfb86", // V40 Shrapnel
+    "5751961824597720a31c09ac", // (off)Black Keycard
+    "5ae083b25acfc4001a5fc702", // Master Hand
+    "5ae089fb5acfc408fb13989b", // Trophy
+    "678fa929819ddc4c350c0317", // Valve handwheel
+    "67ab3d4b83869afd170fdd3f", // BBQ-S43 gas torch
+    "63a8970d7108f713591149f5", // Small Christmas gift
+    "63a898a328e385334e0640a5", // Christmas gift
+    "63a897c6b1ff6e29734fcc95", // Large Christmas gift
+    "634959225289190e5e773b3b", // Pumpkin with sweets
+
+    "58ac60eb86f77401897560ff", // Balaclava_dev
+    "59e8936686f77467ce798647", // Balaclava_test
+
+    "6087e570b998180e9f76dc24", // Superfors DB 2020 Dead Blow Hammer
+    "63495c500c297e20065a08b1", // Old hand scythe
+    "679ba90d269ddfea47012159", // Chained Labrys
+    "5fc64ea372b0dd78d51159dc", // Cultist knife
+
+    "60a7ad2a2198820d95707a2e", // Tagilla's welding mask "UBEY"
+    "60a7ad3a0c5cb24b0134664a", // Tagilla's welding mask "Gorilla"
+    "678f84bb9e85556ca60f0362", // Tagilla's welding mask "ZABEY"
+    "62963c18dbc8ab5f0d382d0b", // Death Knight mask
+    "6530e8587cbfc1e309011e37", // Vengeful Zryachiy's balaclava
+    "6531119b9afebff7ff0a1769", // Vengeful Zryachiy's balaclava (folded)
+  ]
+}

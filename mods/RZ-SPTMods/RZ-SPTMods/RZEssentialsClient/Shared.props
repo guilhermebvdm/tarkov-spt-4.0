@@ -1,0 +1,12 @@
+<Project>
+  <PropertyGroup>
+    <SPTPath>D:\Games\SPT_4_0_11</SPTPath>
+    <AssemblySearchPaths>
+      $(SPTPath)\EscapeFromTarkov_Data\Managed;
+      $(SPTPath)\BepInEx\plugins\spt;
+      $(AssemblySearchPaths)
+    </AssemblySearchPaths>
+  </PropertyGroup>
+
+  <Import Project="Shared.props.user" Condition="Exists('Shared.props.user')" />
+</Project>

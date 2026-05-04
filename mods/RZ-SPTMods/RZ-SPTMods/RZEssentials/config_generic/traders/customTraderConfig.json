@@ -1,0 +1,40 @@
+{
+  // ─────────────────────────────────────────────────────────────────────────
+  // CUSTOM TRADER — SABLE
+  // ─────────────────────────────────────────────────────────────────────────
+
+  "EnableCustomTrader": false,
+
+  // Image file — must be placed in the db/ folder of the mod.
+  "AvatarFile": "sable_01.png",
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // LOCALE
+  // ─────────────────────────────────────────────────────────────────────────
+
+  "Locale": {
+    "FullName": "Sable",
+    "FirstName": "Sable",
+    "Nickname": "Sable",
+    "Location": "",
+    "Description": "Officially declared dead after a black site operation went dark in 2018. No body, no report, no explanation, just a name quietly removed from the FSB's active roster and buried under six layers of classified. She resurfaced in Tarkov two years later with a supply line nobody can trace, allegiance to nobody, and enough operational knowledge to make the people who burned her file very uncomfortable."
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // LOYALTY LEVELS
+  //
+  // minLevel             — player level required
+  // minStanding          — standing required (0.0 → 1.0)
+  // minSalesSum          — total sales required in roubles
+  // BuyPriceCoef         — buy price coefficient
+  // RepairPriceCoef      — repair price coefficient
+  // InsurancePriceCoef   — insurance price coefficient
+  // ─────────────────────────────────────────────────────────────────────────
+
+  "LoyaltyLevels": [
+    { "MinLevel": 1, "MinStanding": 0.00, "MinSalesSum": 0, "BuyPriceCoef": 0, "RepairPriceCoef": 0, "InsurancePriceCoef": 0 },
+    { "MinLevel": 10, "MinStanding": 0.00, "MinSalesSum": 0, "BuyPriceCoef": 0, "RepairPriceCoef": 0, "InsurancePriceCoef": 0 },
+    { "MinLevel": 20, "MinStanding": 0.00, "MinSalesSum": 0, "BuyPriceCoef": 0, "RepairPriceCoef": 0, "InsurancePriceCoef": 0 },
+    { "MinLevel": 30, "MinStanding": 0.00, "MinSalesSum": 0, "BuyPriceCoef": 0, "RepairPriceCoef": 0, "InsurancePriceCoef": 0 },
+  ],
+}

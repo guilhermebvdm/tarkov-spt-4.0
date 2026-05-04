@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>RZDataDump</AssemblyName>
+    <RootNamespace>RZDataDump</RootNamespace>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <ModExportPath>D:\Games\SPT_4_0_11\SPT\user\mods\RZDataDump\</ModExportPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SPTarkov.Server.Core" Version="4.0.*" />
+    <PackageReference Include="SPTarkov.DI" Version="4.0.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ConfigFiles Include="$(ProjectDir)config\**\*"/>
+  </ItemGroup>
+
+  <Target Name="ExportMod" AfterTargets="Build" Condition="'$(ModExportPath)' != ''">
+    <Message Text="→ Copying to $(ModExportPath)" Importance="High" />
+    <MakeDir Directories="$(ModExportPath)" />
+    <MakeDir Directories="$(ModExportPath)config\" />
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(ModExportPath)" SkipUnchangedFiles="false" />
+    <Copy SourceFiles="@(ConfigFiles)" DestinationFiles="@(ConfigFiles->'$(ModExportPath)config\%(Filename)%(Extension)')" SkipUnchangedFiles="true"/>
+	<Message Text="→ Mod exported." Importance="High"/>
+  </Target>
+</Project>

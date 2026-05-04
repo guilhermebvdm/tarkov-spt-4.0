@@ -1,0 +1,33 @@
+{
+  // Removes requirements on special extractions.
+  "FreeSpecialExtracts": false,
+
+  // Removes in-raid item restrictions (e.g. GP coin carry limits, etc...).
+  "RemoveRaidRestrictions": false,
+
+  // Removes the "Run-Through" status : no longer need to survive a certain time or earn a certain amount of XP for the raid to count
+  // as a survival.
+  "NoRunThrough": false,
+
+  // Magazine load/unload speed multipliers.
+  // 1.0 = vanilla, 2.0 = twice as fast, 0.5 = twice as slow.
+  "MagazineLoadSpeedMultiplier": 1.0,
+  "MagazineUnloadSpeedMultiplier": 1.0,
+
+  // Raid times - Override raid duration (in minutes) per map. Only maps listed here will be affected.
+  "EnableRaidTimes": false,
+  "RaidTimes": {
+    "bigmap":         35, // Customs (default: 35)
+    "Woods":          40, // Woods (default: 40)
+    "Shoreline":      45, // Shoreline (default: 45)
+    "Interchange":    45, // Interchange (default: 45)
+    "RezervBase":     40, // Reserve (default: 40)
+    "Lighthouse":     45, // Lighthouse (default: 45)
+    "TarkovStreets":  50, // Streets (default: 50)
+    "Sandbox":        15, // Ground Zero (default: 15)
+    "Sandbox_high":   20, // Ground Zero + (default: 20)
+    "laboratory":     35, // The Lab (default: 35)
+    "factory4_day":   20, // Factory day (default: 20)
+    "factory4_night": 20, // Factory night (default: 20)
+  }
+}

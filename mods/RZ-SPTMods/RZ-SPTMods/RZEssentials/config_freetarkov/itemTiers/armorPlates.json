@@ -1,0 +1,66 @@
+{
+  "Enabled": true,
+
+  "Overrides": {
+
+    // Class 1
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "6943c85be2f21398e70378cc": "Default",    // Tac-Kek SAPI III+ Replica   eff dura:267  1.1kg
+
+    // Class 3
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "656fac30c6baea13cd07e10c": "Notable",    // PRTCTR Lightweight           eff dura:104  0.43kg  UHMWP
+    "656f57dc27aed95beb08f628": "Default",    // Zhuk-3 Front                 eff dura:119  2.4kg
+    "656f9d5900d62bcd2e02407c": "Default",    // AR500 Legacy Plate           eff dura:120  3.85kg
+    "654a4dea7c17dec2f50cc86a": "Default",    // 6B12 Front                   eff dura:95   4.6kg
+
+    // Class 4
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "656fa25e94b480b8a500c0e0": "Superior",   // Kiba Arms Titan              eff dura:133  2.25kg  titan
+    "656fad8c498d1b7e3e071da0": "Superior",   // Monoclete PE                 eff dura:119  1.35kg  UHMWP
+    "656f9fa0498d1b7e3e071d98": "Notable",    // SPRTN Omega                  eff dura:133  4.39kg  heavy
+    "656fb21fa0dce000a2020f7c": "Notable",    // NewSphereTech                eff dura:100  2.15kg  aluminum
+    "656fb0bd7c2d57afe200c0dc": "Default",    // SPRTN Elaphros               eff dura:75   1.6kg   ceramic
+    "656f603f94b480b8a500c0d6": "Default",    // 6B33 Front                   eff dura:95   3.7kg
+    "656efd66034e8e01c407f35c": "Default",    // 6B13 Back                    eff dura:86   4.1kg
+    "656fa0fb498d1b7e3e071d9c": "Default",    // Global Armor Steel           eff dura:86   3.4kg
+    "657b22485f444d6dff0c6c2f": "Default",    // 6B23-2 Back                  eff dura:76   3.5kg
+
+    // Class 5
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "656fa8d700d62bcd2e024084": "Excellent",  // Cult Locust                  eff dura:145  2.56kg  titan
+    "656fae5f7c2d57afe200c0d7": "Excellent",  // GAC 3s15m                    eff dura:133  0.97kg  UHMWP
+    "656fa53d94b480b8a500c0e4": "Excellent",  // TallCom Guardian             eff dura:147  3.5kg   combined
+    "656f664200d62bcd2e024077": "Superior",   // Korund-VM Front              eff dura:114  3.4kg   steel
+    "65573fa5655447403702a816": "Notable",    // Granit Br4                   eff dura:92   2.9kg   ceramic
+    "655746010177119f4a097ff7": "Notable",    // SAPI III+                    eff dura:83   1.82kg  ceramic
+    "657b2797c3dbcb01d60c35ea": "Default",    // Korund-VM Back               eff dura:76   2.3kg
+    "656f611f94b480b8a500c0db": "Default",    // Granit 4 Front               eff dura:83   3.05kg
+    "656efaf54772930db4031ff5": "Default",    // Granit 4 Back                eff dura:75   3.3kg
+
+    "654a4f8bc721968a4404ef18": "Superior",   // Korund-VM Side               eff dura:48   1.1kg
+    "6557458f83942d705f0c4962": "Notable",    // SSAPI III+ Side              eff dura:25   1.0kg
+
+    // Class 6
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    "656fa99800d62bcd2e024088": "Elite",      // Cult Termite                 eff dura:158  3.85kg  titan
+    "656fa61e94b480b8a500c0e8": "Elite",      // NESCO 4400-SA-MC             eff dura:160  3.6kg   combined
+    "656faf0ca0dce000a2020f77": "Elite",      // GAC 4sss2                    eff dura:148  2.7kg   UHMWP
+    "656fafe3498d1b7e3e071da4": "Excellent",  // KITECO SC-IV SA              eff dura:133  2.45kg  UHMWP
+    "64afc71497cf3a403c01ff38": "Superior",   // Granit Br5                   eff dura:100  3.3kg   ceramic
+    "656f66b5c6baea13cd07e108": "Superior",   // Korund-VM-K Front            eff dura:100  4.0kg   ceramic
+    "64afdcb83efdfea28601d041": "Superior",   // ESAPI level IV               eff dura:92   3.2kg   ceramic
+    "656f63c027aed95beb08f62c": "Notable",    // Granit 4RS Front             eff dura:92   3.5kg   ceramic
+    "654a4a964b446df1ad03f192": "Notable",    // Granit 4RS Back              eff dura:83   3.8kg   ceramic
+    "656fa76500d62bcd2e024080": "Notable",    // Kiba Arms Steel              eff dura:95   5.1kg   steel
+    "657b28d25f444d6dff0c6c77": "Default",    // Korund-VM-K Back             eff dura:75   2.7kg
+
+    "64afd81707e2cf40e903a316": "Excellent",  // Granit Side                  eff dura:33   1.3kg
+    "64afdb577bb3bfe8fe03fd1d": "Superior",   // ESBI Side                    eff dura:30   1.15kg
+  }
+}

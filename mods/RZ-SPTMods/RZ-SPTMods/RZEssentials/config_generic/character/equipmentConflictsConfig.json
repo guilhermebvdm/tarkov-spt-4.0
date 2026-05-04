@@ -1,0 +1,100 @@
+{
+  // MASTER SWITCH - Set to true to enable this config file.
+  "Enabled": false,
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // CATEGORY SETTINGS
+  //
+  // Controls the Blocks* flags on items, by category.
+  // Set an Unblock* flag to true to remove that block from all items in the category.
+  // Items listed in ExcludedTpls are never touched by this section.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "CategorySettings": {
+
+    // Headwear
+    "5a341c4086f77401f2541505": {
+      "UnblockEarpiece": false,
+      "UnblockFaceCover": true,
+      "UnblockEyewear": true
+    },
+
+    // Headphones (Earpiece)
+    "5645bcb74bdc2ded0b8b4578": {
+      "UnblockHeadwear": false,
+      "UnblockFaceCover": true,
+      "UnblockEyewear": true
+    },
+
+    // FaceCover
+    "5a341c4686f77469e155819e": {
+      "UnblockHeadwear": true,
+      "UnblockEarpiece": true,
+      "UnblockEyewear": true
+    },
+
+    // Visors (Eyewear)
+    "5448e5724bdc2ddf718b4568": {
+      "UnblockHeadwear": true,
+      "UnblockEarpiece": true,
+      "UnblockFaceCover": true
+    }
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // EXCLUDED TPLS
+  //
+  // Items listed here are skipped by CategorySettings only. ClearConflictingItems is not affected.
+  // Use this for items whose vanilla conflict behaviour must be preserved
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "ExcludedTpls": [
+    "66bdc28a0b603c26902b2011", // DevTac Ronin ballistic helmet
+    "5b4329f05acfc47a86086aa1", // DevTac Ronin Respirator
+    "68a9a85c3e1ee5a70504c12e", // DevTac Ronin Respirator (Beast)
+    "68a9a92b838d65bcb3050176", // DevTac Ronin Respirator (Eternal Green)
+    "68bee28f79c8186398098e6f", // Champion's helmet
+  ],
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // CLEAR CONFLICTING ITEMS
+  //
+  // Fine-grained control over the ConflictingItems array on specific TPLs.
+  // CategorySettings handles Blocks* flags globally, but some items have hardcoded ConflictingItems entries that also need to be cleared.
+  //
+  // Each rule clears conflicts in both directions:
+  //   Forward : On each FromTpl, removes ConflictingItems entries that belong to any of the ToCategories.
+  //   Reverse : On each item in ToCategories, removes ConflictingItems entries that match any of the FromTpls.
+  //
+  // FromTpls     - Specific item TPLs to patch. Empty = applies to all items.
+  // ToCategories - Category IDs whose members will be removed from ConflictingItems. Empty = clears ConflictingItems entirely.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "ClearConflictingItems": [
+    {
+      "FromTpls": [
+        "5e00c1ad86f774747333222c", // Team Wendy EXFIL Ballistic Helmet (Black)
+        "5e01ef6886f77445f643baa4", // Team Wendy EXFIL Ballistic Helmet (Coyote Brown)
+        "66b5f65ca7f72d197e70bcd6", // Ballistic Armor Co. Bastion helmet (Armor Black)
+        "66b5f666cad6f002ab7214c2", // Ballistic Armor Co. Bastion helmet (MultiCam)
+        "66b5f661af44ca0014063c05", // Ballistic Armor Co. Bastion helmet (OD Green)
+      ],
+      "ToCategories": [
+        "5a341c4686f77469e155819e", // FaceCover
+        "5448e5724bdc2ddf718b4568", // Visors (Eyewear)
+      ]
+    },
+    {
+      "FromTpls": [
+        "5f60c076f2bcbb675b00dac2", // Galvion Caiman Hybrid Ballistic Mandible Guard
+        "693be056fd3a5c751e00de04", // Galvion Caiman Hybrid Ballistic Mandible Guard (MultiCam Alpine)
+        "68a9b6c8d3a061d8b6058346", // Galvion Caiman Hybrid Ballistic Mandible Guard (MultiCam)
+        "68a9b73bd3a061d8b6058348", // Galvion Caiman Hybrid Ballistic Mandible Guard (Mutualist)
+        "5c178a942e22164bef5ceca3", // Crye Precision AirFrame Chops
+      ],
+      "ToCategories": [
+        "5645bcb74bdc2ded0b8b4578", // Headphones (Earpiece)
+      ]
+    }
+  ]
+}

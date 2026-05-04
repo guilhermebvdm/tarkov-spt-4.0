@@ -1,0 +1,16 @@
+{
+  "Channels": {
+    "Character":    true,
+    "Economy":      true,
+    "Hideout":      true,
+    "ItemContext":  true,
+    "ItemStats":    true,
+    "ItemTiers":    true,
+    "Loot":         true,
+    "MiscSettings": true,
+    "Profiles":     true,
+    "Raids":        true,
+    "Traders":      true,
+    "UI":           true,
+  }
+}

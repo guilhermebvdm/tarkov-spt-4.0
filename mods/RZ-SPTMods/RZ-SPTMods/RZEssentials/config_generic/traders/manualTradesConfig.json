@@ -1,0 +1,161 @@
+{
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // Manual offers grouped by trader ID. Always injected on top of auto-routing.
+  // Each offer supports rouble price, barter items, stack count, loyalty level, durability, and explicit children.
+  // If no price and no barter items are specified, falls back to the item's handbook price.
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "ManualOffers": [
+
+    // PRAPOR
+    // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    {
+      "Id": "54cb50c76803fa8b248b4571",
+      "Offers": [
+
+      ]
+    },
+
+    // THERAPIST
+    // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    {
+      "Id": "54cb57776803fa99248b456e",
+      "Offers": [
+
+      ]
+    },
+
+    // PEACEKEEPER
+    // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    {
+      "Id": "5935c25fb3acc3127c3d8cd9",
+      "Offers": [
+
+      ]
+    },
+
+    // SKIER
+    // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    {
+      "Id": "58330581ace78e27b8b10cee",
+      "Offers": [
+
+      ]
+    },
+
+    // MECHANIC
+    // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    {
+      "Id": "5a7c2eca46aef81a7ca2145d",
+      "Offers": [
+
+      ]
+    },
+
+    // RAGMAN
+    // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    {
+      "Id": "5ac3b934156ae10c4430e83c",
+      "Offers": [
+
+      ]
+    },
+
+    // JAEGER
+    // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    {
+      "Id": "5c0647fdd443bc2504c2d371",
+      "Offers": [
+
+      ]
+    },
+
+    // REF
+    // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    {
+      "Id": "6617beeaa9cfa777ca915b7c",
+      "Offers": [
+
+      ]
+    },
+
+    // SABLE (custom trader, ignored if not enabled)
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    {
+      "Id": "fa363fc015e07b5f7828c9f7",
+      "Offers": [
+        /*{
+          // Graphics Card -> 5 Lega
+          "ItemTpl": "57347ca924597744596b4e71",
+          "LoyaltyLevel": 1,
+          "BarterItems": [
+            { "ItemTpl": "6656560053eaaa7a23349c86", "Count": 5 }
+          ]
+        },
+        {
+          // Secure Container Alpha -> 10 Lega
+          "ItemTpl": "544a11ac4bdc2d470e8b456a",
+          "LoyaltyLevel": 1,
+          "BarterItems": [
+            { "ItemTpl": "6656560053eaaa7a23349c86", "Count": 10 }
+          ]
+        },
+        {
+          // Secure Container Beta -> SC Alpha + 20 Lega
+          "ItemTpl": "5857a8b324597729ab0a0e7d",
+          "LoyaltyLevel": 1,
+          "BarterItems": [
+            { "ItemTpl": "544a11ac4bdc2d470e8b456a", "Count": 1 },
+            { "ItemTpl": "6656560053eaaa7a23349c86", "Count": 20 }
+          ]
+        },
+        {
+          // Secure Container Epsilon -> SC Beta + 30 Lega
+          "ItemTpl": "59db794186f77448bc595262",
+          "LoyaltyLevel": 1,
+          "BarterItems": [
+            { "ItemTpl": "5857a8b324597729ab0a0e7d", "Count": 1 },
+            { "ItemTpl": "6656560053eaaa7a23349c86", "Count": 30 }
+          ]
+        },
+        {
+          // Secure Container Gamma -> SC Epsilon + 40 Lega
+          "ItemTpl": "5857a8bc2459772bad15db29",
+          "LoyaltyLevel": 1,
+          "BarterItems": [
+            { "ItemTpl": "59db794186f77448bc595262", "Count": 1 },
+            { "ItemTpl": "6656560053eaaa7a23349c86", "Count": 40 }
+          ]
+        },
+        {
+          // Secure Container Theta -> SC Gamma + 50 Lega
+          "ItemTpl": "664a55d84a90fc2c8a6305c9",
+          "LoyaltyLevel": 1,
+          "BarterItems": [
+            { "ItemTpl": "5857a8bc2459772bad15db29", "Count": 1 },
+            { "ItemTpl": "6656560053eaaa7a23349c86", "Count": 50 }
+          ]
+        },
+        {
+          // Secure Container Kappa -> SC Theta + 75 Lega
+          "ItemTpl": "5c093ca986f7740a1867ab12",
+          "LoyaltyLevel": 1,
+          "BarterItems": [
+            { "ItemTpl": "664a55d84a90fc2c8a6305c9", "Count": 1 },
+            { "ItemTpl": "6656560053eaaa7a23349c86", "Count": 75 }
+          ]
+        },
+        {
+          // Secure Container Kappa Desecrated -> SC Kappa + 100 Lega
+          "ItemTpl": "676008db84e242067d0dc4c9",
+          "LoyaltyLevel": 1,
+          "BarterItems": [
+            { "ItemTpl": "5c093ca986f7740a1867ab12", "Count": 1 },
+            { "ItemTpl": "6656560053eaaa7a23349c86", "Count": 100 }
+          ]
+        }*/
+      ]
+    }
+
+  ]
+}

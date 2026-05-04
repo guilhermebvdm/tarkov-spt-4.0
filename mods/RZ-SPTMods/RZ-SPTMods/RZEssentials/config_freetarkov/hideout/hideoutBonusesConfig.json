@@ -1,0 +1,242 @@
+{
+  // MASTER TOGGLE - Set to true to enable this config.
+  "EnableBonusesConfig": true,
+
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // HIDEOUT BONUSES
+  //
+  // Overrides bonuses granted by hideout areas at each stage.
+  // Each stage entry replaces the entire bonus list for that stage.
+  // Vanilla values are provided below as a ready-to-edit baseline.
+  //
+  // BONUS TYPES (common)
+  //   UnlockArmorRepair           — unlocks armor repair at this station
+  //   UnlockWeaponRepair          — unlocks weapon repair at this station
+  //   UnlockWeaponModification    — unlocks weapon modding at this station
+  //   RepairArmorBonus            — armor repair quality bonus (%)
+  //   RepairWeaponBonus           — weapon repair quality bonus (%)
+  //   StashSize                   — extra stash rows
+  //   AdditionalSlots             — additional GPU/bitcoin/generator slots
+  //   EnergyRegeneration          — passive energy regen (per hour)
+  //   HealthRegeneration          — passive health regen (per hour)
+  //   HydrationRegeneration       — passive hydration regen (per hour)
+  //   MaximumEnergyReserve        — increases max energy pool
+  //   DebuffEndDelay              — reduces debuff duration (%)
+  //   ScavCooldownTimer           — reduces scav cooldown (%)
+  //   InsuranceReturnTime         — reduces insurance return time (%)
+  //   QuestMoneyReward            — increases quest money rewards (%)
+  //   RagfairCommission           — reduces flea market commission (%)
+  //   FuelConsumption             — reduces generator fuel consumption (%)
+  //   SkillGroupLevelingBoost     — boosts skill XP gain (%)
+  //   TextBonus                   — tooltip-only display bonus, no gameplay effect
+  // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  "Areas": {
+
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "WaterCloset": {
+      "1": [
+        { "Id": "64f5b9e5fa34f11b380756ba", "Type": "UnlockArmorRepair", "Value": 1, "IsVisible": true }
+      ],
+      "2": [
+        { "Id": "64f5b9e5fa34f11b380756bc", "Type": "RepairArmorBonus", "Value": 0, "IsVisible": false }
+      ],
+      "3": [
+        { "Id": "64f5b9e5fa34f11b380756be", "Type": "RepairArmorBonus", "Value": 0, "IsVisible": false }
+      ]
+    },
+
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "Stash": {
+      "1": [
+        { "Id": "64f5b9e5fa34f11b380756c0", "Type": "StashSize", "Value": 0, "IsVisible": true }
+      ],
+      "2": [
+        { "Id": "64f5b9e5fa34f11b380756c2", "Type": "StashSize", "Value": 0, "IsVisible": true }
+      ],
+      "3": [
+        { "Id": "64f5b9e5fa34f11b380756c4", "Type": "StashSize", "Value": 0, "IsVisible": true }
+      ],
+      "4": [
+        { "Id": "64f5b9e5fa34f11b380756c6", "Type": "StashSize", "Value": 0, "IsVisible": true }
+      ]
+    },
+
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "Generator": {
+      "1": [
+        { "Id": "64f5b9e5fa34f11b380756b4", "Type": "AdditionalSlots", "Value": 2, "IsVisible": true }
+      ],
+      "2": [
+        { "Id": "64f5b9e5fa34f11b380756b6", "Type": "AdditionalSlots", "Value": 2, "IsVisible": true }
+      ],
+      "3": [
+        { "Id": "64f5b9e5fa34f11b380756b8", "Type": "AdditionalSlots", "Value": 2, "IsVisible": true }
+      ]
+    },
+
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "Heating": {
+      "1": [
+        { "Id": "64f5b9e5fa34f11b380756ac", "Type": "EnergyRegeneration", "Value": 0, "IsVisible": false }
+      ],
+      "2": [
+        { "Id": "64f5b9e5fa34f11b380756ae", "Type": "EnergyRegeneration", "Value": 0, "IsVisible": false }
+      ],
+      "3": [
+        { "Id": "64f5b9e5fa34f11b380756b1", "Type": "EnergyRegeneration", "Value": 0, "IsVisible": false },
+        { "Id": "64f5b9e5fa34f11b380756b2", "Type": "DebuffEndDelay", "Value": 0, "IsVisible": false }
+      ]
+    },
+
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "MedStation": {
+      "1": [
+        { "Id": "64f5b9e5fa34f11b380756d0", "Type": "HealthRegeneration", "Value": 0, "IsVisible": false },
+        { "Id": "5d8b89addfc57a648453e89d", "Type": "TextBonus", "Value": 0, "IsVisible": false }
+      ],
+      "2": [
+        { "Id": "64f5b9e5fa34f11b380756d2", "Type": "HealthRegeneration", "Value": 0, "IsVisible": false }
+      ],
+      "3": [
+        { "Id": "64f5b9e5fa34f11b380756d4", "Type": "HealthRegeneration", "Value": 0, "IsVisible": false }
+      ]
+    },
+
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "Kitchen": {
+      "1": [
+        { "Id": "64f5b9e5fa34f11b380756d6", "Type": "EnergyRegeneration", "Value": 0, "IsVisible": false }
+      ],
+      "2": [
+        { "Id": "64f5b9e5fa34f11b380756d9", "Type": "EnergyRegeneration", "Value": 0, "IsVisible": false },
+        { "Id": "64f5b9e5fa34f11b380756da", "Type": "HealthRegeneration", "Value": 0, "IsVisible": false }
+      ],
+      "3": [
+        { "Id": "64f5b9e5fa34f11b380756dd", "Type": "EnergyRegeneration", "Value": 0, "IsVisible": false },
+        { "Id": "64f5b9e5fa34f11b380756de", "Type": "HydrationRegeneration", "Value": 0, "IsVisible": false }
+      ]
+    },
+
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "RestSpace": {
+      "1": [
+        { "Id": "64f5b9e5fa34f11b380756e0", "Type": "DebuffEndDelay", "Value": -10, "IsVisible": true }
+      ],
+      "2": [
+        { "Id": "64f5b9e5fa34f11b380756e3", "Type": "EnergyRegeneration", "Value": 0, "IsVisible": false },
+        { "Id": "64f5b9e5fa34f11b380756e4", "Type": "HealthRegeneration", "Value": 0, "IsVisible": false }
+      ],
+      "3": [
+        { "Id": "64f5b9e5fa34f11b380756e7", "Type": "HealthRegeneration", "Value": 0, "IsVisible": false },
+        { "Id": "64f5b9e5fa34f11b380756e8", "Type": "MaximumEnergyReserve", "Value": 0, "IsVisible": false },
+        { "Id": "684160627de758fa180b3728", "Type": "AdditionalSlots", "Value": 1, "IsVisible": true }
+      ]
+    },
+
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "Workbench": {
+      "1": [
+        { "Id": "64f5b9e5fa34f11b38075707", "Type": "UnlockWeaponModification", "Value": 1, "IsVisible": false },
+        { "Id": "5d78c1461d79cb822a38b5f7", "Type": "TextBonus", "Value": 0, "IsVisible": true },
+        { "Id": "64f5b9e5fa34f11b38075708", "Type": "UnlockWeaponRepair", "Value": 1, "IsVisible": true }
+      ],
+      "2": [
+        { "Id": "64f5b9e5fa34f11b3807570a", "Type": "RepairWeaponBonus", "Value": 3, "IsVisible": true }
+      ],
+      "3": [
+        { "Id": "64f5b9e5fa34f11b3807570c", "Type": "RepairWeaponBonus", "Value": 6, "IsVisible": true }
+      ]
+    },
+
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "IntelligenceCenter": {
+      "1": [
+        { "Id": "64f5b9e5fa34f11b380756eb", "Type": "ScavCooldownTimer", "Value": -15, "IsVisible": false },
+        { "Id": "64f5b9e5fa34f11b380756ec", "Type": "QuestMoneyReward", "Value": 5, "IsVisible": false }
+      ],
+      "2": [
+        { "Id": "64f5b9e5fa34f11b380756ef", "Type": "QuestMoneyReward", "Value": 10, "IsVisible": false },
+        { "Id": "64f5b9e5fa34f11b380756f0", "Type": "InsuranceReturnTime", "Value": -20, "IsVisible": false }
+      ],
+      "3": [
+        { "Id": "64f5b9e5fa34f11b380756f3", "Type": "ScavCooldownTimer", "Value": -20, "IsVisible": false },
+        { "Id": "64f5b9e5fa34f11b380756f4", "Type": "RagfairCommission", "Value": -30, "IsVisible": false }
+      ]
+    },
+
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "ShootingRange": {
+      "1": [
+        { "Id": "5d6282a3b9c45949bb2992d6", "Type": "TextBonus", "Value": 0, "IsVisible": false }
+      ],
+      "3": [
+        { "Id": "64f5b9e5fa34f11b3807570e", "Type": "SkillGroupLevelingBoost", "Value": 10, "IsVisible": false }
+      ]
+    },
+
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "PlaceOfFame": {
+      "1": [
+        { "Id": "6548ae1b0d23be12146d70ee", "Type": "SkillGroupLevelingBoost", "Value": 0, "IsVisible": true },
+        { "Id": "6548afcae28f7800b02d2004", "Type": "TextBonus", "Value": 3, "IsVisible": true },
+        { "Id": "6548afd9eb937c71d7776652", "Type": "TextBonus", "Value": 6, "IsVisible": true },
+        { "Id": "6548afe3e7726b6d1b4317d5", "Type": "TextBonus", "Value": 6, "IsVisible": true }
+      ],
+      "2": [
+        { "Id": "6548ae2c84d9162bba1fbb04", "Type": "SkillGroupLevelingBoost", "Value": 0, "IsVisible": true },
+        { "Id": "6549f1926b29cf3df65ea139", "Type": "TextBonus", "Value": 6, "IsVisible": true },
+        { "Id": "6549f19ae28f7800b02d204f", "Type": "TextBonus", "Value": 12, "IsVisible": true },
+        { "Id": "6549f1a284d9162bba1fbbb1", "Type": "TextBonus", "Value": 12, "IsVisible": true }
+      ],
+      "3": [
+        { "Id": "6548ad85d520b562b66d65d9", "Type": "SkillGroupLevelingBoost", "Value": 0, "IsVisible": true },
+        { "Id": "6549f1c405b256642e3e9131", "Type": "TextBonus", "Value": 10, "IsVisible": true },
+        { "Id": "6549f1cdde376a2fc737e8a8", "Type": "TextBonus", "Value": 24, "IsVisible": true },
+        { "Id": "6549f1d37d6e4756c83afa77", "Type": "TextBonus", "Value": 24, "IsVisible": true }
+      ]
+    },
+
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "SolarPower": {
+      "1": [
+        { "Id": "64f5b9e5fa34f11b380756fe", "Type": "FuelConsumption", "Value": -50, "IsVisible": true }
+      ]
+    },
+
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "BoozeGenerator": {
+      "1": [
+        { "Id": "5d8b82b854358e8b7383cf4f", "Type": "TextBonus", "Value": 0, "IsVisible": false }
+      ]
+    },
+
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "BitcoinFarm": {
+      "1": [
+        { "Id": "64f5b9e5fa34f11b38075700", "Type": "AdditionalSlots", "Value": 10, "IsVisible": true },
+        { "Id": "5d8b8310270eff88e1f47beb", "Type": "TextBonus", "Value": 0, "IsVisible": true }
+      ],
+      "2": [
+        { "Id": "64f5b9e5fa34f11b38075702", "Type": "AdditionalSlots", "Value": 15, "IsVisible": true }
+      ],
+      "3": [
+        { "Id": "64f5b9e5fa34f11b38075704", "Type": "AdditionalSlots", "Value": 25, "IsVisible": true }
+      ]
+    },
+
+    // ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    "EquipmentPresetsStand": {
+      "1": [
+        { "Id": "6698e6d817b8f677b3077ef0", "Type": "TextBonus", "Value": 1, "IsVisible": true }
+      ],
+      "2": [
+        { "Id": "6698e72c17b8f677b3077ef1", "Type": "TextBonus", "Value": 2, "IsVisible": true }
+      ],
+      "3": [
+        { "Id": "6698e73c0ab2cbb83904ee2a", "Type": "TextBonus", "Value": 3, "IsVisible": true }
+      ]
+    }
+
+  }
+}
