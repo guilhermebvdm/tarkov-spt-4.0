@@ -106,6 +106,12 @@ function parsePrioridade(cell) {
   return VALID.includes(word) ? word : '?';
 }
 
+function parseSpt4(cell) {
+  if (cell.includes('✅')) return true;
+  if (cell.includes('❌')) return false;
+  return null;
+}
+
 // ── UltraFika (vertical table, mod #0) ────────────────────────────────────────
 
 function parseUltraFika(md) {
@@ -132,6 +138,7 @@ function parseUltraFika(md) {
     parseStatus(row('Status')),
     parsePrioridade(row('Prioridade')),
     true,
+    parseSpt4(row('SPT 4[.]0\\?')),
   ];
 }
 
@@ -148,8 +155,8 @@ function parseTable(md) {
 
   while ((match = lineRe.exec(md)) !== null) {
     const cols = match[2].split('|').map(c => c.trim());
-    // cols: [Mod, Tipo, Atuação, Categoria, Escopo, Forge, Repo3x, Repo4.0, Função, Status, Prioridade, ...]
-    if (cols.length < 11) continue;
+    // cols: [Mod, Tipo, Atuação, Categoria, Escopo, Forge, Repo3x, Repo4.0, SPT4?, Função, Status, Prioridade, ...]
+    if (cols.length < 12) continue;
 
     const n      = parseInt(match[1]);
     const name   = parseFn(cols[0]); // strip any markdown links in mod name
@@ -165,10 +172,11 @@ function parseTable(md) {
       parseForge(cols[5]),
       // cols[6] = Repo 3.x — skipped
       parseR4(cols[7]),
-      parseFn(cols[8]),
-      parseStatus(cols[9]),
-      parsePrioridade(cols[10]),
+      parseFn(cols[9]),
+      parseStatus(cols[10]),
+      parsePrioridade(cols[11]),
       interno,
+      parseSpt4(cols[8]),
     ]);
   }
 

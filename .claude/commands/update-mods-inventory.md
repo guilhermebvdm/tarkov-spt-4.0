@@ -16,7 +16,7 @@ Atualiza `docs/migration/mods-inventory.html` com os dados mais recentes de `doc
 ## O que o script faz
 
 - Lê o markdown e parseia a tabela `## Inventário completo` + o bloco vertical do UltraFika (mod #0)
-- Extrai os 12 campos por mod: `n, name, tipo, atuacao, categoria, escopo, forge_id, r4_path, fn, status, prioridade, interno`
+- Extrai os 13 campos por mod: `n, name, tipo, atuacao, categoria, escopo, forge_id, r4_path, fn, status, prioridade, interno, spt4`
 - Substitui apenas o bloco `const MODS = [...]` no HTML — CSS, JS e layout não são tocados
 - Adiciona uma linha no `## Histórico` do markdown com a data e descrição `docs(migration): sync mods-inventory.html from markdown`
 
@@ -27,4 +27,5 @@ Atualiza `docs/migration/mods-inventory.html` com os dados mais recentes de `doc
 - `tipo/atuacao/categoria`: remove emoji do início, extrai primeira palavra
 - `escopo`: separa por ` · `, remove emoji de cada parte, une com vírgula
 - `status`: detecta palavra-chave na célula (`Instalar`, `Evoluir`, `Aguardar`, etc.)
+- `spt4`: `✅` → `true`, `❌` → `false`, outro → `null`
 - Coluna `Repo 3.x` é ignorada (não usada no HTML)
