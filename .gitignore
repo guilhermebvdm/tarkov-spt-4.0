@@ -33,3 +33,6 @@ desktop.ini
 # Claude Code (gitignored — preferências pessoais)
 .claude/settings.local.json
 .tmp-research.md
+
+# Local API caches (third-party data, refetchable)
+scripts/cache/
