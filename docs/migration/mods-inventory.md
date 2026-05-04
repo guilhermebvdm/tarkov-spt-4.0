@@ -116,6 +116,7 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | **Forge** | — (não publicado) |
 | **Repo 3.x** | — (não público — fork privado) |
 | **Repo 4.0** | — (a desenvolver) |
+| **SPT 4.0?** | ❌ |
 | **Upstream** | [Project Fika](https://forge.sp-tarkov.com/mod/2326/project-fika) — base de onde foi forkado |
 | **Prioridade** | 🔥 Crítica — primeiro mod a ser migrado |
 | **Status** | ⬆️ Evoluir p/ 4.0 (adaptar código 3.x existente para 4.0) |
@@ -219,16 +220,16 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | 92 | WTT-PackNStrap | 🌐 Server | 🔀 Ambos | ➕ Conteúdo | 🛡️ Equipamentos | [1278](https://forge.sp-tarkov.com/mod/1278/wtt-pack-n-strap) | [WelcomeToTarkov/PackNStrap](https://github.com/WelcomeToTarkov/PackNStrap) | [WelcomeToTarkov/PackNStrap](https://github.com/WelcomeToTarkov/PackNStrap) | ✅ | Battle belt + small cases (WTT team) — v2.0.4 (SPT 4.0.13). Mesmo repo | 🟢 Instalar | 🔍 |
 | 93 | yellowdoge-tarkovrarecollectibles | 🌐 Server | 🌐 Geral | ➕ Conteúdo | 🎒 Loot | [2318](https://forge.sp-tarkov.com/mod/2318/tarkov-rare-collectibles) | [TheYellowDoge/YellowDoge-TarkovRareCollectibles](https://github.com/TheYellowDoge/YellowDoge-TarkovRareCollectibles) | [TheYellowDoge/YellowDoge-TarkovRareCollectibles](https://github.com/TheYellowDoge/YellowDoge-TarkovRareCollectibles) | ✅ | Itens raros colecionáveis | 🟡 Avaliar | 🔍 |
 | 94 | zzDrakiaXYZ-LiveFleaPrices | 🌐 Server | 🌐 Geral | ⚖️ Balanceamento | 💰 Mercado | [1131](https://forge.sp-tarkov.com/mod/1131/live-flea-prices) | [DrakiaXYZ/SPT-LiveFleaPrices](https://github.com/DrakiaXYZ/SPT-LiveFleaPrices) | [DrakiaXYZ/SPT-LiveFleaPrices-CSharp](https://github.com/DrakiaXYZ/SPT-LiveFleaPrices-CSharp) | ✅ | Preços do flea ao vivo (live data) — versão C# do mesmo autor | 🟢 Instalar | 🔍 |
-| 95 | 🏠 Band-Aid | 🖥️ Client | ⚔️ Raid | 🛋️ QoL | 🧩 Framework | — | — | — | ✅ | Fix/patch interno do projeto | ⬆️ Evoluir p/ 4.0 | 🔍 |
-| 96 | 🏠 CoordLogger | 🖥️ Client | ⚔️ Raid | 🧩 Framework | 🧩 Framework | — | — | — | ✅ | Logger de coordenadas (utilitário interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
-| 97 | 🏠 FikaTransitFix (FikaTransitFixServer) | 🌐 Server | ⚔️ Raid | 🧩 Framework | 🌐 Multiplayer | — | — | — | ✅ | Fix de transit em raids do Fika (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
-| 98 | 🏠 FixReloadUltraFika | 🖥️ Client | ⚔️ Raid | 🧩 Framework | 🌐 Multiplayer · 🎬 Animações | — | — | — | ✅ | Fix de reload no UltraFika (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
-| 99 | 🏠 ForceSync | 🔀 Misto | 🔀 Ambos | 🧩 Framework | 🌐 Multiplayer | — | — | — | ✅ | Força sincronização (interno, relacionado ao UltraFika) | ⬆️ Evoluir p/ 4.0 | 🔍 |
-| 100 | 🏠 GhostMercenaries | 🌐 Server | ⚔️ Raid | ➕ Conteúdo | 🤖 IA | — | — | — | ✅ | Mercenários customizados (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
+| 95 | 🏠 Band-Aid | 🖥️ Client | ⚔️ Raid | 🛋️ QoL | 🧩 Framework | — | — | — | ❌ | Fix/patch interno do projeto | ⬆️ Evoluir p/ 4.0 | 🔍 |
+| 96 | 🏠 CoordLogger | 🖥️ Client | ⚔️ Raid | 🧩 Framework | 🧩 Framework | — | — | — | ❌ | Logger de coordenadas (utilitário interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
+| 97 | 🏠 FikaTransitFix (FikaTransitFixServer) | 🌐 Server | ⚔️ Raid | 🧩 Framework | 🌐 Multiplayer | — | — | — | ❌ | Fix de transit em raids do Fika (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
+| 98 | 🏠 FixReloadUltraFika | 🖥️ Client | ⚔️ Raid | 🧩 Framework | 🌐 Multiplayer · 🎬 Animações | — | — | — | ❌ | Fix de reload no UltraFika (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
+| 99 | 🏠 ForceSync | 🔀 Misto | 🔀 Ambos | 🧩 Framework | 🌐 Multiplayer | — | — | — | ❌ | Força sincronização (interno, relacionado ao UltraFika) | ⬆️ Evoluir p/ 4.0 | 🔍 |
+| 100 | 🏠 GhostMercenaries | 🌐 Server | ⚔️ Raid | ➕ Conteúdo | 🤖 IA | — | — | — | ❌ | Mercenários customizados (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
 | 101 | 🏠 IdleSprintFix | 🖥️ Client | ⚔️ Raid | 🛋️ QoL | 🎬 Animações | — | — | — | ❌ | Fix do bug de sprint travado (interno, v1.2.2) | ⚫ Não incluir | 🔍 |
-| 102 | 🏠 TarkovRedLine (TarkovRedLine-ServerMod) | 🌐 Server | 🌐 Geral | ⚖️ Balanceamento | 🧩 Framework | — | — | — | ✅ | Mod do servidor RedLine — customização proprietária do projeto | ⬆️ Evoluir p/ 4.0 | 🔍 |
-| 103 | 🏠 UmbigoPreto-Face the Knight - Mask Fix | 🖥️ Client | ⚔️ Raid | 🛋️ QoL | 🛡️ Equipamentos | — | — | — | ✅ | Fix da máscara do Knight (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
-| 104 | 🏠 UmbigoPreto-TrueTrauma | 🔀 Misto | ⚔️ Raid | 🩸 Realismo | 🧩 Framework | — | — | — | ✅ | Sistema de trauma realista (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
+| 102 | 🏠 TarkovRedLine (TarkovRedLine-ServerMod) | 🌐 Server | 🌐 Geral | ⚖️ Balanceamento | 🧩 Framework | — | — | — | ❌ | Mod do servidor RedLine — customização proprietária do projeto | ⬆️ Evoluir p/ 4.0 | 🔍 |
+| 103 | 🏠 UmbigoPreto-Face the Knight - Mask Fix | 🖥️ Client | ⚔️ Raid | 🛋️ QoL | 🛡️ Equipamentos | — | — | — | ❌ | Fix da máscara do Knight (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
+| 104 | 🏠 UmbigoPreto-TrueTrauma | 🔀 Misto | ⚔️ Raid | 🩸 Realismo | 🧩 Framework | — | — | — | ❌ | Sistema de trauma realista (interno) | ⬆️ Evoluir p/ 4.0 | 🔍 |
 
 ## Próximos passos
 
@@ -289,3 +290,5 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | 2026-05-03 | Guilherme | refactor(migration): rename inventary → inventory across all files |
 | 2026-05-04 | sync-script | docs(migration): sync mods-inventory.html from markdown |
 | 2026-05-03 | Guilherme | docs(migration): fill Repo 3.x / 4.0 for 76 mods — replace 🔍 with links or Não encontrado |
+| 2026-05-04 | sync-script | docs(migration): sync mods-inventory.html from markdown |
+| 2026-05-03 | Guilherme | feat(migration): add SPT 4.0? column to mods inventory |
