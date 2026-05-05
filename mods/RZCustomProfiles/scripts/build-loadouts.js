@@ -3,7 +3,7 @@
  * build-loadouts.js (one-shot — delete after loadouts stable)
  *
  * Reads anchor-items.json and renders the "Inventário inicial" section
- * for mods/RZCustomProfiles/backlog/001-custom-profiles.md.
+ * for ../backlog/001-custom-profiles.md.
  *
  * Each profile defines: baseline (shared), primary (1× worn), backup
  * (3× in stash, except Armeiro = 2×), and item-tema (specialty).
@@ -18,9 +18,9 @@
 const fs   = require('fs');
 const path = require('path');
 
-const ROOT = path.resolve(__dirname, '..');
+const MOD_ROOT = path.resolve(__dirname, '..');
 const J = JSON.parse(fs.readFileSync(
-  path.join(ROOT, 'mods/RZCustomProfiles/backlog/anchor-items.json'), 'utf8'
+  path.join(MOD_ROOT, 'backlog/anchor-items.json'), 'utf8'
 ));
 
 function priceOf(id) {

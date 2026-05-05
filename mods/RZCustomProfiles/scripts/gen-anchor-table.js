@@ -8,7 +8,7 @@ const fs = require('fs');
 const path = require('path');
 
 const J = JSON.parse(fs.readFileSync(
-  path.join(__dirname, '..', 'mods/RZCustomProfiles/backlog/anchor-items.json'),
+  path.join(__dirname, '..', 'backlog/anchor-items.json'),
   'utf8'
 ));
 

@@ -4,7 +4,7 @@
  *
  * Resolves each anchor query against the local PVE cache, picks the
  * best match, and writes full records (incl. image URLs) to
- *   mods/RZCustomProfiles/backlog/anchor-items.json
+ *   ../backlog/anchor-items.json
  *
  * Match priority:
  *   1. shortName === q (case-insensitive exact)
@@ -22,9 +22,9 @@
 const fs   = require('fs');
 const path = require('path');
 
-const ROOT  = path.resolve(__dirname, '..');
-const CACHE = path.join(__dirname, 'cache', 'tarkov-pve-items.json');
-const OUT   = path.join(ROOT, 'mods/RZCustomProfiles/backlog/anchor-items.json');
+const MOD_ROOT = path.resolve(__dirname, '..');
+const CACHE    = path.join(__dirname, 'cache', 'tarkov-pve-items.json');
+const OUT      = path.join(MOD_ROOT, 'backlog/anchor-items.json');
 
 // ── Anchor definitions ──────────────────────────────────────────────────────
 // id → internal name we'll use in loadout tables and code

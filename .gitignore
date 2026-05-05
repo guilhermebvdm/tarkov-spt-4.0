@@ -35,4 +35,4 @@ desktop.ini
 .tmp-research.md
 
 # Local API caches (third-party data, refetchable)
-scripts/cache/
+mods/RZCustomProfiles/scripts/cache/
