@@ -15,9 +15,11 @@ Repositório de mods para SPT 4.0 (Single Player Tarkov). Lido por qualquer assi
 - `.agents/` — contexto e workflows compartilhados (este é o hub principal)
 - `.agents/workspace.md` — detalhes técnicos do workspace
 - `.agents/conventions.md` — convenções do projeto
+- `.agents/resources.md` — onde buscar informação (wiki local, APIs, DBs, deepwiki)
 - `.agents/workflows/` — workflows reutilizáveis (manuais)
-- `.agents/hooks/` — scripts compartilhados (validação, pre-commit)
+- `.agents/hooks/` — scripts compartilhados (validação, pre-commit, sync da wiki)
 - `docs/` — documentação técnica e arquitetural
+- `wiki/` — snapshot read-only de github.com/sp-tarkov/wiki (CC BY-NC-ND 4.0; sincronizado via `.agents/hooks/sync-wiki.sh` — não editar)
 - `.claude/settings.json` — config do Claude Code (referencia hooks em .agents/)
 
 ## Convenções
@@ -57,7 +59,10 @@ GIT_AMEND=1 git commit --amend
 ## Para AI assistants
 
 Antes de qualquer tarefa, leia:
-1. `.agents/workspace.md` — contexto técnico SPT 4.0
-2. `.agents/conventions.md` — regras do projeto
+1. [.agents/workspace.md](.agents/workspace.md) — contexto técnico SPT 4.0
+2. [.agents/conventions.md](.agents/conventions.md) — regras do projeto
+3. [.agents/resources.md](.agents/resources.md) — onde buscar informação (wiki local, APIs, DBs, deepwiki)
+
+A pasta [wiki/spt/](wiki/spt/) é um snapshot read-only do upstream (sincronizado via `.agents/hooks/sync-wiki.sh`) — **não editar**.
 
 Para tarefas específicas, consulte `.agents/workflows/` (quando existirem).

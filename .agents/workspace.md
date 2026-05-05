@@ -13,10 +13,12 @@
 - **Compilação:** `dotnet build` → DLL em `bin/Release/net471/`
 - **Deploy:** copiar DLL para `<game-path>/BepInEx/plugins/`
 
-### Server (TypeScript)
+### Server (C# / SPTarkov.Server.Core)
 - **Local:** `mods/server/<NomeDoMod>/`
-- **Requisitos:** `package.json` com campo `sptVersion: 4.0.x`
-- **Deploy:** copiar pasta para `<game-path>/user/mods/`
+- **Compilação:** `dotnet build` (referencia NuGet `SPTarkov.Server.Core` e `SPTarkov.DI`, ambos `4.0.*`)
+- **Padrão:** classes anotadas com `[Injectable]` + `IOnLoad` (lifecycle); configs via `ConfigLoader<T>` lendo JSONC
+- **Deploy:** copiar pasta/DLL para `<game-path>/SPT/user/mods/`
+- **Nota:** TypeScript foi o padrão em SPT 3.x — em 4.0 tudo migrou para C# (single language no server)
 
 ### Dependências
 - **Local:** `mods/deps/<NomeDep>/`
@@ -31,3 +33,4 @@
 ## Referências
 
 - Assembly-CSharp do jogo: `deps/Assembly-CSharp/` (read-only, quando existir)
+- Onde buscar dados de itens/quests/APIs externas: [resources.md](resources.md)
