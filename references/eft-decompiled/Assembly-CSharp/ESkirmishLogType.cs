@@ -1,0 +1,26 @@
+public enum ESkirmishLogType
+{
+	shotNotApproved,
+	knifeHit,
+	applyShot,
+	shotApproved,
+	onBeenKilledBy,
+	death,
+	missArmor,
+	hitArmor,
+	malfMisfireRepared,
+	malfunctionRepairedManually,
+	knifeHitMarkedAsMissed,
+	knifeHitNotApproved,
+	clientTimeBroken,
+	frameTooFarFromPast,
+	frameFromUnknownFuture,
+	footprintNotFound,
+	selfHit,
+	malfunctionDesync,
+	malfunctionOccured,
+	none,
+	healthController,
+	fall,
+	throwGrenade
+}

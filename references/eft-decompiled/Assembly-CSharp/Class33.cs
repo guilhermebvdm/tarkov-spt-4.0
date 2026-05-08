@@ -1,0 +1,59 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+
+[CompilerGenerated]
+public class Class33<T, U>
+{
+	[NonSerialized]
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	public T Gparam_0;
+
+	[NonSerialized]
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	public U Gparam_1;
+
+	public T limit => Gparam_0;
+
+	public U offset => Gparam_1;
+
+	[DebuggerHidden]
+	public Class33(T limit, U offset)
+	{
+		Gparam_0 = limit;
+		Gparam_1 = offset;
+	}
+
+	[DebuggerHidden]
+	public override bool Equals(object value)
+	{
+		Class33<T, U> @class = value as Class33<T, U>;
+		if (this != @class)
+		{
+			if (@class != null && EqualityComparer<T>.Default.Equals(Gparam_0, @class.Gparam_0))
+			{
+				return EqualityComparer<U>.Default.Equals(Gparam_1, @class.Gparam_1);
+			}
+			return false;
+		}
+		return true;
+	}
+
+	[DebuggerHidden]
+	public override int GetHashCode()
+	{
+		return (2086201636 + EqualityComparer<T>.Default.GetHashCode(Gparam_0)) * -1521134295 + EqualityComparer<U>.Default.GetHashCode(Gparam_1);
+	}
+
+	[DebuggerHidden]
+	public override string ToString()
+	{
+		object[] array = new object[2];
+		T val = Gparam_0;
+		array[0] = ((val != null) ? val.ToString() : null);
+		U val2 = Gparam_1;
+		array[1] = ((val2 != null) ? val2.ToString() : null);
+		return string.Format(null, "{{ limit = {0}, offset = {1} }}", array);
+	}
+}
