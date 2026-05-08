@@ -1,0 +1,11 @@
+{
+  "name": "stancesAndCameraPositionSPT4.0.11",
+  "upstream_url": "https://github.com/shengzhanzhe/stancesAndCameraPositionSPT4.0.11.git",
+  "upstream_sha": "3304278846d0eb83eea8a6a00f060bf3526b2e90",
+  "upstream_branch": "main",
+  "forge_url": "",
+  "license": "see LICENSE",
+  "version_base": "unknown",
+  "spt_version": "",
+  "created_at": "2026-05-07T23:26:28Z"
+}
