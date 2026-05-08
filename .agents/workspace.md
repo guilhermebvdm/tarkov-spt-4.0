@@ -2,9 +2,9 @@
 
 ## Versões
 
-- **SPT:** 4.0.x — [PREENCHER versão exata]
-- **Tarkov:** [PREENCHER]
-- **Game install path:** `[PREENCHER]` (ex: `C:\Program Files (x86)\Tarkov`)
+- **SPT:** 4.0.13
+- **Tarkov:** 0.16.9
+- **Game install path:** `D:\SPT\`
 
 ## Tipos de mod
 
