@@ -1,0 +1,85 @@
+# {{NUM}} — {{TITLE}} · Spec Técnica
+
+**Mod:** {{MOD}}
+**Spec funcional:** [{{NUM}}-{{SLUG}}-spec.md]({{NUM}}-{{SLUG}}-spec.md)
+**Criado:** {{CREATED_AT}}
+
+> Fonte primária de verdade para qualquer assinatura, fórmula ou ponto de patch: [references/eft-decompiled/Assembly-CSharp/](../../../../references/eft-decompiled/Assembly-CSharp/). Toda referência ao código do EFT deve citar `arquivo.cs:linha`. Wiki SPT e fontes externas só como complemento.
+
+## 1. Estratégia
+
+[Tipo de patch (Prefix / Postfix / Transpiler / Replace), classe.método alvo no Assembly, e justificativa breve sobre alternativas descartadas.]
+
+## 2. Pontos de patch
+
+| Alvo (Assembly) | Tipo | Motivo |
+|---|---|---|
+| [`<arquivo>:<linha>`](../../../../references/eft-decompiled/Assembly-CSharp/<arquivo>#L<linha>) | Postfix | [O que faz] |
+
+## 3. Novas propriedades F12 (BepInEx)
+
+> Omitir esta seção se a feature não introduz `ConfigEntry`.
+
+| Seção | Nome (EN) | Tipo | Padrão | Faixa | Avançado | Tooltip (pt-BR) |
+|---|---|---|---|---|---|---|
+| `<Section>` | `Property Name` | float | `1.0` | 0 a 2 | — | [Texto exato do tooltip] |
+
+## 4. Arquivos do mod
+
+| Arquivo | Ação | Resumo |
+|---|---|---|
+| `modded/Plugin.cs` | MODIFICAR | [O que muda em uma frase] |
+| `modded/Patches/<Novo>Patch.cs` | CRIAR | [O que é] |
+
+## 5. Stubs de código
+
+> Blocos compiláveis com assinatura completa e corpo mínimo plausível. Cada referência a algo do EFT deve ter um comentário `// ref: Assembly-CSharp/<arquivo>:<linha>`.
+
+```csharp
+// modded/Patches/<Novo>Patch.cs
+using HarmonyLib;
+using SPT.Reflection.Patching;
+
+namespace <Namespace>.Patches;
+
+public class <Novo>Patch : ModulePatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        // ref: Assembly-CSharp/PlayerPhysicalClass.cs:288
+        return AccessTools.Method(typeof(<Type>), "<method>");
+    }
+
+    [PatchPostfix]
+    private static void Postfix(ref float __result)
+    {
+        // [Lógica mínima]
+    }
+}
+```
+
+## 6. Fluxo de dados
+
+```
+[A] usuário/jogador → [B] hook do mod → [C] cálculo do EFT → [D] output
+```
+
+[Explicar passo a passo, citando linhas tanto do mod quanto do Assembly.]
+
+## 7. Riscos e dependências
+
+- **Patches existentes em `modded/Patches/`** que podem conflitar: [lista]
+- **Compatibilidade com outros mods** que tocam o mesmo sistema: [lista]
+- **Ordem de inicialização:** [se relevante]
+
+## 8. Checklist de implementação
+
+- [ ] [Tarefa atômica 1]
+- [ ] [Tarefa atômica 2]
+- [ ] [Tarefa atômica 3]
+
+## Histórico
+
+| Data | Evento |
+|---|---|
+| {{CREATED_AT}} | Spec técnica criada via `/create-technical-spec` |

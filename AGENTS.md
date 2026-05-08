@@ -28,6 +28,7 @@ Repositório de mods para SPT 4.0 (Single Player Tarkov). Lido por qualquer assi
 - **Commits:** Conventional Commits em inglês (`feat:`, `fix:`, `chore:`, `docs:`)
 - **Status de docs:** 🟢 Vivo · 🔵 Em andamento · 🟠 Desatualizado · ⚫ Arquivado
 - **Frontmatter obrigatório** em `docs/**/*.md` (exceto README): `title`, `date`, `status`, `authors`
+- **Comunicação:** Seja breve e objetivo nas respostas. Explique o raciocínio apenas quando necessário. Tenha preferencia por respostas estruturadas em bullets e tabelas.
 
 ## Setup (todo dev novo no repo)
 
@@ -66,3 +67,25 @@ Antes de qualquer tarefa, leia:
 A pasta [wiki/spt/](wiki/spt/) é um snapshot read-only do upstream (sincronizado via `.agents/hooks/sync-wiki.sh`) — **não editar**.
 
 Para tarefas específicas, consulte `.agents/workflows/` (quando existirem).
+
+## Fluxo de backlog (slash commands)
+
+Cada item de backlog vive em `mods/<mod>/backlog/NNN-<slug>/` (numeração local por mod, 3 dígitos). O índice é `mods/<mod>/backlog/mod-backlog.md`.
+
+| Comando | Ação | Output |
+|---|---|---|
+| [`/add-backlog-item`](.claude/commands/add-backlog-item.md) `<mod> <descrição>` | Cria entrada e pasta; invoca `/create-spec` | `mod-backlog.md` + pasta `NNN-<slug>/` |
+| [`/create-spec`](.claude/commands/create-spec.md) `<ref>` | Spec funcional (critérios + corner cases) | `NNN-<slug>-spec.md` |
+| [`/review-spec`](.claude/commands/review-spec.md) `<ref>` | Edita inline a spec — gaps/contradições | mesmo arquivo |
+| [`/create-technical-spec`](.claude/commands/create-technical-spec.md) `<ref>` | Pré-código com refs ao Assembly | `NNN-<slug>-technical-spec.md` |
+| [`/review-technical-spec`](.claude/commands/review-technical-spec.md) `<ref>` | Análise crítica incremental | `NNN-<slug>-technical-review-NN.md` (NN +1 a cada run) |
+| [`/code-mod`](.claude/commands/code-mod.md) `<ref>` | Implementa em `modded/` | mudanças em `mods/<mod>/modded/` |
+
+`<ref>` aceita: path da pasta, path de arquivo dentro da pasta, ou forma curta `<mod> <NNN>`.
+
+## Hierarquia de referências (spec/review técnicas)
+
+1. **🥇 Assembly descompilado** — [references/eft-decompiled/Assembly-CSharp/](references/eft-decompiled/Assembly-CSharp/). Toda assinatura, fórmula, ponto de patch deve vir daqui com `arquivo.cs:linha`.
+2. **🥈 Código do mod** — `mods/<mod>/original/` (upstream) e `mods/<mod>/modded/` (fork local).
+3. **🥉 Wiki SPT** — [wiki/spt/](wiki/spt/) para SPT install/modding/server APIs.
+4. **🪛 Web** — último recurso. Marcar `[fonte externa]`.
