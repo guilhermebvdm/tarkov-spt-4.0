@@ -1,0 +1,5533 @@
+{
+    "FactoryGasZones": [
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "FactoryGate0",
+                    "strength": 80.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisSpeedModi": 2,
+                    "VisParticleRate": 40,
+                    "position": {
+                        "x": -58.33056,
+                        "y": 2.550519,
+                        "z": 55.94485
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 268.9662,
+                        "z": 0
+                    },
+                    "size": {
+                        "x": 6.43313,
+                        "y": 3.030291,
+                        "z": 21.92288
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1,
+            "zones": [
+                {
+                    "name": "FactoryTent",
+                    "strength": 25.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 1.5,
+                    "VisParticleRate": 35,
+                    "VisSpeedModi": 2,
+                    "visZoneSizeMulti": 1.1,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": -17.5,
+                        "y": 2,
+                        "z": -41.4
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 6.5,
+                        "y": 4.0,
+                        "z": 40.0
+                    }
+                }
+            ],
+            "loot": [
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 25,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -15.74548,
+                        "y": 0.538038,
+                        "z": -38.9163
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 25,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -15.61411,
+                        "y": 0.7755781,
+                        "z": -29.29719
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "FactoryWaterBasement",
+                    "strength": 70.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisSpeedModi": 2,
+                    "VisOpacityModi": 2,
+                    "VisParticleRate": 55,
+                    "position": {
+                        "x": -6.0,
+                        "y": -3.6,
+                        "z": -20.5
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 25.0,
+                        "y": 3.0,
+                        "z": 36.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1,
+            "zones": [
+                {
+                    "name": "FactoryTanksArea",
+                    "strength": 32.5,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 2,
+                    "VisParticleRate": 50,
+                    "VisSpeedModi": 2,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": 7.0,
+                        "y": -2.5,
+                        "z": 17.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 38.0,
+                        "y": 3.0,
+                        "z": 12
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1,
+            "zones": [
+                {
+                    "name": "FactoryExposedTank",
+                    "strength": 15.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 2,
+                    "VisParticleRate": 16,
+                    "VisSpeedModi": 2,
+                    "visZoneSizeMulti": 1.25,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": -4.278955,
+                        "y": -1.427074,
+                        "z": 16.5095
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
+                    "size": {
+                        "x": 8.496026,
+                        "y": 4.314496,
+                        "z": 7.346806
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "FactoryVitamins",
+                    "strength": 25.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.75,
+                    "VisParticleRate": 10,
+                    "position": {
+                        "x": 24.7,
+                        "y": 8.3,
+                        "z": 38.4
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": -2.5,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 4.5,
+                        "y": 2.0,
+                        "z": 4.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1,
+            "zones": [
+                {
+                    "name": "FactoryCrash1",
+                    "strength": 35.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 1,
+                    "VisParticleRate": 15,
+                    "VisSpeedModi": 2,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": 12.81379,
+                        "y": 2.409422,
+                        "z": -6.531208
+                    },
+                    "rotation": {
+                        "x": 356.8341,
+                        "y": 89.66108,
+                        "z": -1.068848
+                    },
+                    "size": {
+                        "x": 7.89787,
+                        "y": 4.235707,
+                        "z": 7.916856
+                    }
+                },
+                {
+                    "name": "FactoryCrash2",
+                    "strength": 35.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 1,
+                    "VisParticleRate": 15,
+                    "VisSpeedModi": 2,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": -5.707,
+                        "y": 2.152529,
+                        "z": -27.34132
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 92.73984,
+                        "z": 0
+                    },
+                    "size": {
+                        "x": 9.629996,
+                        "y": 3.608712,
+                        "z": 8.636473
+                    }
+                },
+                {
+                    "name": "FactoryCrash3",
+                    "strength": 35.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 1,
+                    "VisParticleRate": 15,
+                    "VisSpeedModi": 2,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": -2.605214,
+                        "y": 1.483384,
+                        "z": -16.47433
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 158.8986,
+                        "z": 0
+                    },
+                    "size": {
+                        "x": 5.559856,
+                        "y": 3.479087,
+                        "z": 7.13476
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "FactoryCellar",
+                    "strength": 60.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisSpeedModi": 2,
+                    "VisParticleRate": 65,
+                    "VisOpacityModi": 2,
+                    "position": {
+                        "x": 62.20975,
+                        "y": -3.123563,
+                        "z": -23.79253
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 358.7099,
+                        "z": 0
+                    },
+                    "size": {
+                        "x": 32.90185,
+                        "y": 5.272452,
+                        "z": 18.02072
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "FactoryTanksByMainExtract",
+                    "strength": 50.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisSpeedModi": 2,
+                    "VisParticleRate": 20,
+                    "VisOpacityModi": 2,
+                    "position": {
+                        "x": 55.13283,
+                        "y": -1.343695,
+                        "z": 6.100966
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 269.7137,
+                        "z": 0
+                    },
+                    "size": {
+                        "x": 16.5,
+                        "y": 2.58591,
+                        "z": 20
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "FactorySewer",
+                    "strength": 150.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisSpeedModi": 3,
+                    "VisParticleRate": 70,
+                    "position": {
+                        "x": -26.25799,
+                        "y": -4.00285,
+                        "z": -42.75625
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 177.0831,
+                        "z": 0
+                    },
+                    "size": {
+                        "x": 9.254366,
+                        "y": 3.774888,
+                        "z": 105.8367
+                    }
+                }
+            ]
+        }
+    ],
+    "CustomsGasZones": [
+        {
+            "spawnChance": 1,
+            "zones": [
+                {
+                    "name": "CustomsSwitchBasement",
+                    "strength": 61.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": 335.0,
+                        "y": -3.1,
+                        "z": -60.3
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 25.0,
+                        "y": 6.5,
+                        "z": 50.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.35,
+            "zones": [
+                {
+                    "name": "CustomsWarehouse5",
+                    "strength": 85.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.75,
+                    "position": {
+                        "x": 474.5,
+                        "y": 4,
+                        "z": -67.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 9.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 24.0,
+                        "y": 2.5,
+                        "z": 49.0
+                    }
+                }
+            ],
+            "loot": [
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 463.5573,
+                        "y": 3.168857,
+                        "z": -62.16566
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 476.5449,
+                        "y": 3.935148,
+                        "z": -58.87809
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "CustomsWarehouse5Van",
+                    "strength": 26.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisParticleRate": 8,
+                    "VisOpacityModi": 0.8,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": 480.0,
+                        "y": 3.0,
+                        "z": -76.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 60.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 12.0,
+                        "y": 4.0,
+                        "z": 7.0
+                    }
+                }
+            ],
+            "loot": [
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 480.7755,
+                        "y": 3.282138,
+                        "z": -77.16057
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 480.4549,
+                        "y": 3.281565,
+                        "z": -75.14371
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "CustomsGasTrain1",
+                    "strength": 45.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisSpeedModi": 2,
+                    "VisParticleRate": 50,
+                    "VisOpacityModi": 1.15,
+                    "position": {
+                        "x": 460.0,
+                        "y": 2.0,
+                        "z": 185.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 40.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 10.0,
+                        "y": 10.0,
+                        "z": 45.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "CustomsGasTrain2",
+                    "strength": 22.5,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisParticleRate": 15,
+                    "VisSpeedModi": 2,
+                    "position": {
+                        "x": 466.0,
+                        "y": 0.0,
+                        "z": 208.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 10.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 5.0,
+                        "y": 3.0,
+                        "z": 10.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.7,
+            "zones": [
+                {
+                    "name": "CustomsCrackDen",
+                    "strength": 35.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.75,
+                    "position": {
+                        "x": 84.401,
+                        "y": 5,
+                        "z": -157.23
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": -12.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 15.0,
+                        "y": 2.0,
+                        "z": 27.0
+                    }
+                }
+            ],
+            "loot": [
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 86.01225,
+                        "y": 5.539095,
+                        "z": -143.732
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 85.92617,
+                        "y": 5.64405,
+                        "z": -156.4426
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 30,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 88.22353,
+                        "y": 5.178807,
+                        "z": -146.7731
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 30,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 76.21817,
+                        "y": 5.894176,
+                        "z": -150.0847
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.45,
+            "zones": [
+                {
+                    "name": "CustomsPumpWarehouse",
+                    "strength": 66.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.75,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": 557.0,
+                        "y": 1.5,
+                        "z": -120.5
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 7.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 40.0,
+                        "y": 15.0,
+                        "z": 23.0
+                    }
+                }
+            ],
+            "loot": [
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 40,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 574.0182,
+                        "y": 2.259076,
+                        "z": -118.1261
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 40,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 570.2092,
+                        "y": 2.289912,
+                        "z": -111.0734
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 40,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 553.2926,
+                        "y": 6.697593,
+                        "z": -128.6233
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 40,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 567.4476,
+                        "y": 6.697594,
+                        "z": -130.1187
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 40,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 570.4379,
+                        "y": 9.183576,
+                        "z": -124.729
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1,
+            "zones": [
+                {
+                    "name": "CustomsPumpRoom",
+                    "strength": 55.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.75,
+                    "position": {
+                        "x": 612.0,
+                        "y": 3,
+                        "z": -129.8
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 6.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 23.5,
+                        "y": 8.5,
+                        "z": 15.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "CustomsWarehouse3",
+                    "strength": 77.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.85,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": 391.5,
+                        "y": 1.0,
+                        "z": -97.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 8.5,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 53.5,
+                        "y": 6.5,
+                        "z": 29.0
+                    }
+                }
+            ],
+            "loot": [
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 30,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 412.0856,
+                        "y": 2.576203,
+                        "z": -101.4441
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 30,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 389.8264,
+                        "y": 1.341126,
+                        "z": -87.21757
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 380.0403,
+                        "y": 1.341127,
+                        "z": -102.4501
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 30,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 390.2241,
+                        "y": 1.341125,
+                        "z": -83.66653
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 412.9359,
+                        "y": 1.341128,
+                        "z": -110.148
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 30,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 415.8232,
+                        "y": 1.341126,
+                        "z": -91.27972
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "CustomsRiverContainer",
+                    "strength": 20,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisParticleRate": 30,
+                    "visZoneSizeMulti": 1.15,
+                    "VisSpeedModi": 2,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": -96.0,
+                        "y": -10.0,
+                        "z": -16.5
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 25.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 12.0,
+                        "y": 4.0,
+                        "z": 25.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.15,
+            "zones": [
+                {
+                    "name": "CustomsFortBarrels",
+                    "strength": 99,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "position": {
+                        "x": 206.0,
+                        "y": 2.0,
+                        "z": -111.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": -10.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 12.0,
+                        "y": 1.0,
+                        "z": 32.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "CustomsChemTrain1",
+                    "strength": 80,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisSpeedModi": 2,
+                    "VisParticleRate": 45,
+                    "position": {
+                        "x": 514.8,
+                        "y": 3.0,
+                        "z": -72.1
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 10.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 10.0,
+                        "y": 10.0,
+                        "z": 55.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "CustomsChemTrain2",
+                    "strength": 80,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisSpeedModi": 2,
+                    "VisParticleRate": 35,
+                    "position": {
+                        "x": 506.4,
+                        "y": 3.0,
+                        "z": -60.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 10.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 10.0,
+                        "y": 10.0,
+                        "z": 20.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "CustomsChemTanks",
+                    "strength": 140.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisSpeedModi": 2,
+                    "VisParticleRate": 45,
+                    "visZoneSizeMulti": 1.1,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": 530.4,
+                        "y": 1.2,
+                        "z": -65.6
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 10.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 15.0,
+                        "y": 10.0,
+                        "z": 40.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1,
+            "zones": [
+                {
+                    "name": "CustomsSwitchWarehouse",
+                    "strength": 77.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.75,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": 336.0,
+                        "y": 6.0,
+                        "z": -63.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 9.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 30.0,
+                        "y": 12.0,
+                        "z": 66.0
+                    }
+                }
+            ],
+            "loot": [
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 27,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 339.0341,
+                        "y": 2.108909,
+                        "z": -55.75212
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 27,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 341.7204,
+                        "y": 2.026434,
+                        "z": -46.54643
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 28,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 341.6727,
+                        "y": 1.697466,
+                        "z": -46.88087
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 27,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 343.2003,
+                        "y": -2.181298,
+                        "z": -48.17278
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 27,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 333.1381,
+                        "y": 2.0462,
+                        "z": -50.31069
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 28,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 325.4472,
+                        "y": 2.243292,
+                        "z": -57.51084
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 27,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 352.6747,
+                        "y": 2.44269,
+                        "z": -44.45595
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 28,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 354.0426,
+                        "y": 4.923943,
+                        "z": -32.82374
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 27,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 348.3693,
+                        "y": 1.228476,
+                        "z": -71.81971
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 28,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 321.1343,
+                        "y": 2.470848,
+                        "z": -92.75384
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 27,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 331.9443,
+                        "y": 10.31863,
+                        "z": -65.89564
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                }
+            ]
+        }
+    ],
+    "GZGasZones": [
+        {
+            "spawnChance": 0.35,
+            "zones": [
+                {
+                    "name": "GZUnderground1",
+                    "strength": 250.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 2,
+                    "VisSpeedModi": 2,
+                    "VisParticleRate": 80,
+                    "position": {
+                        "x": 80.0,
+                        "y": 15.0,
+                        "z": -20.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 50.0,
+                        "y": 4.0,
+                        "z": 120.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.35,
+            "zones": [
+                {
+                    "name": "GZUnderground2",
+                    "strength": 250.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 2,
+                    "VisSpeedModi": 2,
+                    "VisParticleRate": 80,
+                    "position": {
+                        "x": 82.0,
+                        "y": 15.0,
+                        "z": 132.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 45.0,
+                        "y": 4.0,
+                        "z": 95.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.2,
+            "zones": [
+                {
+                    "name": "GZTerragroupBuilding1",
+                    "strength": 175.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 2,
+                    "VisSpeedModi": 2,
+                    "VisParticleRate": 60,
+                    "position": {
+                        "x": -45.0,
+                        "y": 25.0,
+                        "z": 19.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 45.0,
+                        "y": 7.0,
+                        "z": 100.0
+                    }
+                }
+            ]
+        }
+    ],
+    "ShorelineGasZones": [
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "ShorelinePool",
+                    "strength": 150.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisParticleRate": 60,
+                    "VisOpacityModi": 1.05,
+                    "position": {
+                        "x": -185.0,
+                        "y": -9.4,
+                        "z": -84.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 100.0,
+                        "y": 8.0,
+                        "z": 40.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "ShorelineTunnel",
+                    "strength": 50.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "position": {
+                        "x": 385.0,
+                        "y": -59.9,
+                        "z": 310.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 35.0,
+                        "y": 8.0,
+                        "z": 15.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "ShorelineSwamp1",
+                    "strength": 100.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisParticleRate": 15,
+                    "VisSpeedModi": 2,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": 273.0,
+                        "y": -55.0,
+                        "z": -125.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 18.0,
+                        "y": 5.0,
+                        "z": 20.0
+                    }
+                },
+                {
+                    "name": "ShorelineSwamp2",
+                    "strength": 100.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisSpeedModi": 2,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": 240.0,
+                        "y": -55.0,
+                        "z": -86.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 8.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 45.0,
+                        "y": 5.0,
+                        "z": 23.0
+                    }
+                },
+                {
+                    "name": "ShorelineSwamp3",
+                    "strength": 100.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisSpeedModi": 2,
+                    "VisParticleRate": 50,
+                    "position": {
+                        "x": 240.0,
+                        "y": -54.0,
+                        "z": -165.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 20.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 40.0,
+                        "y": 5.0,
+                        "z": 75.0
+                    }
+                },
+                {
+                    "name": "ShorelineSwamp4",
+                    "strength": 200.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisSpeedModi": 2,
+                    "position": {
+                        "x": 305.0,
+                        "y": -55.3,
+                        "z": -150.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": -7.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 25.0,
+                        "y": 5.0,
+                        "z": 75.0
+                    }
+                },
+                {
+                    "name": "ShorelineSwamp5",
+                    "strength": 100.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisSpeedModi": 2,
+                    "position": {
+                        "x": 295.0,
+                        "y": -53.0,
+                        "z": -85.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 10.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 28.0,
+                        "y": 5.0,
+                        "z": 45.0
+                    }
+                },
+                {
+                    "name": "ShorelineSwamp6",
+                    "strength": 100.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisSpeedModi": 2,
+                    "position": {
+                        "x": 360.0,
+                        "y": -55.0,
+                        "z": -155.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 45.0,
+                        "y": 5.0,
+                        "z": 30.0
+                    }
+                },
+                {
+                    "name": "ShorelineSwamp7",
+                    "strength": 100.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisParticleRate": 20,
+                    "VisSpeedModi": 2,
+                    "position": {
+                        "x": 374.0,
+                        "y": -54.0,
+                        "z": -107.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 35.0,
+                        "y": 5.0,
+                        "z": 30.0
+                    }
+                },
+                {
+                    "name": "ShorelineSwamp8",
+                    "strength": 100.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisSpeedModi": 2,
+                    "position": {
+                        "x": 340.0,
+                        "y": -55.0,
+                        "z": -90.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 45.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 30.0,
+                        "y": 5.0,
+                        "z": 60.0
+                    }
+                },
+                {
+                    "name": "ShorelineSwamp9",
+                    "strength": 100.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisParticleRate": 10,
+                    "VisSpeedModi": 2,
+                    "position": {
+                        "x": 326.5557,
+                        "y": -55.27278,
+                        "z": -65.67287
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 75.06538,
+                        "z": 0
+                    },
+                    "size": {
+                        "x": 9.642211,
+                        "y": 1,
+                        "z": 15.72881
+                    }
+                },
+                {
+                    "name": "ShorelineSwamp10",
+                    "strength": 100.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisParticleRate": 10,
+                    "VisSpeedModi": 2,
+                    "position": {
+                        "x": 311.7151,
+                        "y": -54.89543,
+                        "z": -74.45139
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 72.924,
+                        "z": 0
+                    },
+                    "size": {
+                        "x": 14.94433,
+                        "y": 1,
+                        "z": 9.055908
+                    }
+                },
+                {
+                    "name": "ShorelineSwamp11",
+                    "strength": 100.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisParticleRate": 14,
+                    "VisSpeedModi": 2,
+                    "position": {
+                        "x": 250.2841,
+                        "y": -54.91777,
+                        "z": -118.6838
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 187.0385,
+                        "z": 0
+                    },
+                    "size": {
+                        "x": 23.69137,
+                        "y": 1,
+                        "z": 14.98706
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "ShorelineSanitarOffice",
+                    "strength": 15.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "position": {
+                        "x": -321.0,
+                        "y": -3.6,
+                        "z": -77.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 8.0,
+                        "y": 2.0,
+                        "z": 6.0
+                    }
+                }
+            ],
+            "loot": [
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 50,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -324.4012,
+                        "y": -3.069603,
+                        "z": -75.28909
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 50,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -324.7566,
+                        "y": -2.571537,
+                        "z": -79.01474
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "ShorelineTrench1",
+                    "strength": 50.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "position": {
+                        "x": -615.0,
+                        "y": -29.6,
+                        "z": -250.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 20.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 7.0,
+                        "y": 1.0,
+                        "z": 90.0
+                    }
+                },
+                {
+                    "name": "ShorelineTrench2",
+                    "strength": 50.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "position": {
+                        "x": -555.0,
+                        "y": -29.6,
+                        "z": -212.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": -80.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 7.0,
+                        "y": 1.0,
+                        "z": 90.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.95,
+            "zones": [
+                {
+                    "name": "ShorelineVitamins",
+                    "strength": 20.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "position": {
+                        "x": -188.3,
+                        "y": -3.7,
+                        "z": -88.5
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 5.8,
+                        "y": 1.5,
+                        "z": 6.0
+                    }
+                }
+            ],
+            "loot": [
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -333.489,
+                        "y": -2.851022,
+                        "z": -88.98059
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -342.9325,
+                        "y": -2.850999,
+                        "z": -89.87773
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -348.6547,
+                        "y": -3.240291,
+                        "z": -86.12643
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "Shoreline108",
+                    "strength": 80.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": -337.0,
+                        "y": -3.0,
+                        "z": -83.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 40.0,
+                        "y": 3.0,
+                        "z": 17.5
+                    }
+                }
+            ]
+        }
+    ],
+    "StreetsGasZones": [
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "StreetsDrugs1",
+                    "strength": 17.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "VisSpeedModi": 2,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": 93.0,
+                        "y": 2.6,
+                        "z": 320.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 10.5,
+                        "y": 3.0,
+                        "z": 8.0
+                    }
+                }
+            ],
+            "loot": [
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 97.27769,
+                        "y": 3.518028,
+                        "z": 320.8312
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 97.681,
+                        "y": 3.212816,
+                        "z": 316.6074
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 90.71358,
+                        "y": 3.518028,
+                        "z": 319.3371
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "StreetsPigs",
+                    "strength": 25.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.25,
+                    "position": {
+                        "x": 137.6,
+                        "y": 3.8,
+                        "z": 314.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 3.5,
+                        "y": 2.0,
+                        "z": 5.5
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "StreetsSewer",
+                    "strength": 70.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "position": {
+                        "x": -262.0,
+                        "y": -2.7,
+                        "z": 211.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 20.0,
+                        "y": 2.0,
+                        "z": 40.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "StreetsFactoryMain",
+                    "strength": 50.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": -120.0,
+                        "y": 2.2,
+                        "z": 288.5
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 34.0,
+                        "y": 4.8,
+                        "z": 11.0
+                    }
+                },
+                {
+                    "name": "StreetsFactoryUpper",
+                    "strength": 60.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 2,
+                    "VisSpeedModi": 1.5,
+                    "VisParticleRate": 55,
+                    "position": {
+                        "x": -120.0,
+                        "y": 10.0,
+                        "z": 288.5
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 34.0,
+                        "y": 4.0,
+                        "z": 11.0
+                    }
+                },
+                {
+                    "name": "StreetsFactoryBigRoom",
+                    "strength": 120.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 1,
+                    "position": {
+                        "x": -147.0,
+                        "y": 6.0,
+                        "z": 292.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 29.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 20.0,
+                        "y": 7.0,
+                        "z": 12.5
+                    }
+                },
+                {
+                    "name": "StreetsFactoryBigRoomBack",
+                    "strength": 120.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 1,
+                    "position": {
+                        "x": -89.5,
+                        "y": 6.0,
+                        "z": 278.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 11.0,
+                        "y": 7.0,
+                        "z": 23.0
+                    }
+                }
+            ],
+            "loot": [
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -134.1192,
+                        "y": 9.159794,
+                        "z": 293.6476
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -119.5982,
+                        "y": 3.584442,
+                        "z": 288.5995
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -111.8639,
+                        "y": 3.57505,
+                        "z": 283.7463
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -138.0841,
+                        "y": 9.301025,
+                        "z": 294.2939
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -133.1194,
+                        "y": 9.137812,
+                        "z": 286.6637
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -93.74731,
+                        "y": 4.3686,
+                        "z": 285.4087
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -89.3847,
+                        "y": 9.390376,
+                        "z": 285.3134
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.35,
+            "zones": [
+                {
+                    "name": "StreetsFactoryCourtyard",
+                    "strength": 90.0,
+                    "blockNav": false,
+                    "usesDistanceFalloff": true,
+                    "position": {
+                        "x": -111.0,
+                        "y": 2.2,
+                        "z": 275.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 30.0,
+                        "y": 3.0,
+                        "z": 16.0
+                    }
+                }
+            ],
+            "loot": [
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 45,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -117.5369,
+                        "y": 2.514596,
+                        "z": 271.8116
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 45,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -126.129,
+                        "y": 2.514851,
+                        "z": 275.2943
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.75,
+            "zones": [
+                {
+                    "name": "StreetsFactoryMarkedBuilding",
+                    "strength": 120.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 1,
+                    "VisParticleRate": 55,
+                    "position": {
+                        "x": -135.0,
+                        "y": 3.0,
+                        "z": 269.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 13.0,
+                        "y": 8.0,
+                        "z": 12.5
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "StreetsTerragroupOffice1",
+                    "strength": 100.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "position": {
+                        "x": 53.0,
+                        "y": 1.0,
+                        "z": -74.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 22.0,
+                        "y": 2.0,
+                        "z": 13.0
+                    }
+                },
+                {
+                    "name": "StreetsTerragroupOffice2",
+                    "strength": 100.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "position": {
+                        "x": 60.0,
+                        "y": 1.0,
+                        "z": -62.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 15.0,
+                        "y": 2.0,
+                        "z": 9.0
+                    }
+                },
+                {
+                    "name": "StreetsTerragroupOffice3",
+                    "strength": 100.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "position": {
+                        "x": 45.5,
+                        "y": 1.0,
+                        "z": -53.5
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 8.5,
+                        "y": 2.0,
+                        "z": 14.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.35,
+            "zones": [
+                {
+                    "name": "StreetsUndergroundCarpark",
+                    "strength": 350.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 2,
+                    "VisParticleRate": 80,
+                    "VisSpeedModi": 2.5,
+                    "position": {
+                        "x": 208.0,
+                        "y": 0.0,
+                        "z": 375.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 140.0,
+                        "y": 3.0,
+                        "z": 70.0
+                    }
+                }
+            ]
+        }
+    ],
+    "LabsGasZones": [
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "Labs-3",
+                    "strength": 140.0,
+                    "blockNav": false,
+                    "usesDistanceFalloff": false,
+                    "position": {
+                        "x": -193.5,
+                        "y": 8.654,
+                        "z": -339.8252
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
+                    "size": {
+                        "x": 250,
+                        "y": 8.86452,
+                        "z": 250
+                    }
+                },
+                {
+                    "name": "Labs-4",
+                    "strength": 180.0,
+                    "blockNav": false,
+                    "usesDistanceFalloff": false,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": -193.5,
+                        "y": 0.773,
+                        "z": -339.8252
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
+                    "size": {
+                        "x": 250,
+                        "y": 4.92,
+                        "z": 250
+                    }
+                },
+                {
+                    "name": "Labs-5",
+                    "strength": 500.0,
+                    "blockNav": false,
+                    "usesDistanceFalloff": true,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": -193.5,
+                        "y": -4.422,
+                        "z": -339.8252
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
+                    "size": {
+                        "x": 250,
+                        "y": 4.92,
+                        "z": 250
+                    }
+                }
+            ],
+            "loot": [
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 80,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -128.5338,
+                        "y": 1.074402,
+                        "z": -411.3052
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -135.4622,
+                        "y": 0.9068336,
+                        "z": -411.3052
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -121.9286,
+                        "y": 0.9920465,
+                        "z": -386.6487
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -124.4554,
+                        "y": 0.8970636,
+                        "z": -391.8325
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -130.5826,
+                        "y": 0.8970635,
+                        "z": -393.4842
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 80,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -139.8871,
+                        "y": 0.8607036,
+                        "z": -390.7687
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -114.9281,
+                        "y": 0.5182816,
+                        "z": -359.465
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -122.7369,
+                        "y": 4.987041,
+                        "z": -395.569
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -128.743,
+                        "y": 4.986045,
+                        "z": -386.6505
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -127.5119,
+                        "y": 4.798163,
+                        "z": -394.2878
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -132.289,
+                        "y": 4.655313,
+                        "z": -387.6608
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -136.1563,
+                        "y": 4.986044,
+                        "z": -386.703
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -139.8457,
+                        "y": 5.004721,
+                        "z": -398.9495
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -138.9629,
+                        "y": 4.6851,
+                        "z": -406.6241
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -132.9608,
+                        "y": 5.090358,
+                        "z": -399.8681
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -131.7024,
+                        "y": 5.00474,
+                        "z": -402.6094
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -126.9625,
+                        "y": 4.984555,
+                        "z": -396.5783
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -126.9781,
+                        "y": 5.00474,
+                        "z": -402.6094
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -114.935,
+                        "y": 4.996693,
+                        "z": -401.1795
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -138.0678,
+                        "y": 4.993185,
+                        "z": -411.1658
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -134.6676,
+                        "y": 4.960686,
+                        "z": -407.974
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 80,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -122.0852,
+                        "y": 4.960655,
+                        "z": -407.9738
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -115.1894,
+                        "y": 4.914263,
+                        "z": -333.5916
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -165.1859,
+                        "y": 0.5756414,
+                        "z": -370.162
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -172.6675,
+                        "y": 0.4194782,
+                        "z": -360.7444
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -179.8647,
+                        "y": 1.038577,
+                        "z": -363.1367
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -183.7701,
+                        "y": 1.039605,
+                        "z": -361.9737
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -184.757,
+                        "y": 0.5741549,
+                        "z": -353.2389
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -193.3813,
+                        "y": 0.5837643,
+                        "z": -355.0201
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -187.7176,
+                        "y": 1.042322,
+                        "z": -375.136
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -181.542,
+                        "y": 1.81578,
+                        "z": -376.218
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                }
+            ]
+        }
+    ],
+    "InterchangeGas": [
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "InterchangeOliBackGas1",
+                    "strength": 50.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "visZoneSizeMulti": 1.15,
+                    "VisParticleRate": 5,
+                    "position": {
+                        "x": -164.5138,
+                        "y": 28.1303,
+                        "z": 73.38993
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 182.7459,
+                        "z": 0
+                    },
+                    "size": {
+                        "x": 9.730119,
+                        "y": 3.100002,
+                        "z": 6.120352
+                    }
+                },
+                {
+                    "name": "InterchangeOliBackGas2",
+                    "strength": 50.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "visZoneSizeMulti": 1.15,
+                    "VisParticleRate": 5,
+                    "position": {
+                        "x": -185.1275,
+                        "y": 28.58481,
+                        "z": 73.24497
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 157.3736,
+                        "z": 0
+                    },
+                    "size": {
+                        "x": 9.580954,
+                        "y": 2.998365,
+                        "z": 7.513923
+                    }
+                },
+                {
+                    "name": "InterchangeOliBackGas3",
+                    "strength": 50.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "visZoneSizeMulti": 1.15,
+                    "VisParticleRate": 5,
+                    "position": {
+                        "x": -154.2543,
+                        "y": 28.99461,
+                        "z": 98.38326
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 180.8303,
+                        "z": 0
+                    },
+                    "size": {
+                        "x": 7.989232,
+                        "y": 4.487775,
+                        "z": 18.87185
+                    }
+                },
+                {
+                    "name": "InterchangeOliBackGas4",
+                    "strength": 50.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "visZoneSizeMulti": 1.15,
+                    "VisParticleRate": 5,
+                    "position": {
+                        "x": -149.3852,
+                        "y": 27.50573,
+                        "z": 101.9906
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 216.5368,
+                        "z": 0
+                    },
+                    "size": {
+                        "x": 6.763559,
+                        "y": 3.715353,
+                        "z": 7.985561
+                    }
+                },
+                {
+                    "name": "InterchangeOliBackGas5",
+                    "strength": 50.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "visZoneSizeMulti": 1.15,
+                    "VisParticleRate": 5,
+                    "position": {
+                        "x": -178.6268,
+                        "y": 21.71892,
+                        "z": 98.02219
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 200.1872,
+                        "z": 0
+                    },
+                    "size": {
+                        "x": 17.45048,
+                        "y": 5.060022,
+                        "z": 7.506932
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "InterchangeSaferoom",
+                    "strength": 10.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "visZoneSizeMulti": 0.9,
+                    "VisParticleRate": 10,
+                    "VisOpacityModi": 0.75,
+                    "position": {
+                        "x": -48.4,
+                        "y": 22.0,
+                        "z": 43.6
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 10.0,
+                        "y": 3.0,
+                        "z": 4.5
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.6,
+            "zones": [
+                {
+                    "name": "InterchangeMantis",
+                    "strength": 50.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "visZoneSizeMulti": 1,
+                    "VisParticleRate": 10,
+                    "VisOpacityModi": 0.5,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": 17.5,
+                        "y": 28.1,
+                        "z": -72.3
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 28.0,
+                        "y": 4.0,
+                        "z": 21.0
+                    }
+                }
+            ],
+            "loot": [
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 20.54907,
+                        "y": 27.99103,
+                        "z": -76.21941
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 5.281286,
+                        "y": 27.66889,
+                        "z": -77.49367
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 29.56493,
+                        "y": 27.97397,
+                        "z": -62.88906
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 23.09542,
+                        "y": 27.60415,
+                        "z": -75.09789
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "InterchangeMed1",
+                    "strength": 20.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "visZoneSizeMulti": 0.8,
+                    "VisParticleRate": 10,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": 23.0,
+                        "y": 28.1,
+                        "z": -106.6
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 22.0,
+                        "y": 4.0,
+                        "z": 12.0
+                    }
+                },
+                {
+                    "name": "InterchangeMed2",
+                    "strength": 20.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "visZoneSizeMulti": 0.75,
+                    "VisParticleRate": 10,
+                    "position": {
+                        "x": 10.5,
+                        "y": 28.1,
+                        "z": -105.6
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 45.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 13.0,
+                        "y": 4.0,
+                        "z": 7.0
+                    }
+                },
+                {
+                    "name": "InterchangeMed3",
+                    "strength": 20.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "visZoneSizeMulti": 0.7,
+                    "VisParticleRate": 10,
+                    "position": {
+                        "x": 11.6,
+                        "y": 28.1,
+                        "z": -102.5
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 15.5,
+                        "y": 4.0,
+                        "z": 3.5
+                    }
+                }
+            ],
+            "loot": [
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 45,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 5.676567,
+                        "y": 27.98297,
+                        "z": -105.3043
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 45,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 17.40607,
+                        "y": 27.98903,
+                        "z": -105.1409
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 45,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 26.09529,
+                        "y": 27.98903,
+                        "z": -112.0864
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 45,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 29.23366,
+                        "y": 27.98045,
+                        "z": -100.9651
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.5,
+            "zones": [
+                {
+                    "name": "InterchangeMedOpp",
+                    "strength": 50.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "visZoneSizeMulti": 0.95,
+                    "VisParticleRate": 10,
+                    "VisOpacityModi": 0.5,
+                    "position": {
+                        "x": 23.0,
+                        "y": 28.1,
+                        "z": -134.8
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 22.0,
+                        "y": 4.0,
+                        "z": 15.0
+                    }
+                }
+            ],
+            "loot": [
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 30,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 22.23123,
+                        "y": 27.38924,
+                        "z": -137.2928
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 30,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 25.88472,
+                        "y": 27.23032,
+                        "z": -127.7838
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 30,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 33.43198,
+                        "y": 27.95024,
+                        "z": -131.3594
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.4,
+            "zones": [
+                {
+                    "name": "InterchangeBasementGoshan",
+                    "strength": 125.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "visZoneSizeMulti": 0.6,
+                    "position": {
+                        "x": -18.0,
+                        "y": 22.0,
+                        "z": -55.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 70.0,
+                        "y": 4.0,
+                        "z": 50.0
+                    }
+                }
+            ]
+        }
+    ],
+    "LighthouseGasZones": [
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "LighthouseTunnel",
+                    "strength": 100.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "position": {
+                        "x": -67.0,
+                        "y": 6.0,
+                        "z": 330.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 8.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 25.0,
+                        "y": 8.0,
+                        "z": 30.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.75,
+            "zones": [
+                {
+                    "name": "LighthouseTrench",
+                    "strength": 100.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": -98.0,
+                        "y": 1.0,
+                        "z": -584.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 80.0,
+                        "y": 3.0,
+                        "z": 6.0
+                    }
+                }
+            ],
+            "loot": [
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 30,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -58.41108,
+                        "y": 2.247343,
+                        "z": -585.351
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 30,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -58.5584,
+                        "y": 2.296748,
+                        "z": -585.4216
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 30,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -57.93681,
+                        "y": 2.258472,
+                        "z": -582.6968
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 30,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -58.08678,
+                        "y": 2.247376,
+                        "z": -582.5787
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.5,
+            "zones": [
+                {
+                    "name": "LighthouseWarehouse1",
+                    "strength": 100.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": 33.0,
+                        "y": 5.0,
+                        "z": -610.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 10.0,
+                        "y": 4.0,
+                        "z": 40.8
+                    }
+                },
+                {
+                    "name": "LighthouseWarehouse2",
+                    "strength": 100.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": 51.0,
+                        "y": 5.0,
+                        "z": -610.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 10.0,
+                        "y": 4.0,
+                        "z": 40.8
+                    }
+                }
+            ],
+            "loot": [
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 28.32307,
+                        "y": 5.507505,
+                        "z": -610.059
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 29.2561,
+                        "y": 4.906983,
+                        "z": -634.102
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 56.16414,
+                        "y": 8.204339,
+                        "z": -616.6399
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 28.2099,
+                        "y": 8.24952,
+                        "z": -635.5419
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.5,
+            "zones": [
+                {
+                    "name": "LighthouseWarehouse3",
+                    "strength": 100.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": -89.1,
+                        "y": 5.0,
+                        "z": -733.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 27.0,
+                        "y": 4.0,
+                        "z": 10.0
+                    }
+                },
+                {
+                    "name": "LighthouseWarehouse4",
+                    "strength": 100.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": -95.0,
+                        "y": 5.0,
+                        "z": -750.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 25.0,
+                        "y": 4.0,
+                        "z": 15.0
+                    }
+                }
+            ],
+            "loot": [
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 40,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -64.66137,
+                        "y": 7.142772,
+                        "z": -746.301
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 40,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -64.37728,
+                        "y": 7.200827,
+                        "z": -746.4418
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 40,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -64.22814,
+                        "y": 7.184833,
+                        "z": -746.2377
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 40,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -111.2939,
+                        "y": 9.094776,
+                        "z": -750.5838
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 40,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -132.1245,
+                        "y": 8.674996,
+                        "z": -731.8469
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 40,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -111.3687,
+                        "y": 9.130604,
+                        "z": -730.1121
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 40,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -93.95831,
+                        "y": 5.988306,
+                        "z": -728.3474
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 40,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -64.28651,
+                        "y": 5.715007,
+                        "z": -748.9305
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 40,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -87.46187,
+                        "y": 8.640406,
+                        "z": -756.5841
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 40,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -104.359,
+                        "y": 5.896115,
+                        "z": -748.0432
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.5,
+            "zones": [
+                {
+                    "name": "LighthouseWarehouse5",
+                    "strength": 100.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": -182.0,
+                        "y": 5.0,
+                        "z": -676.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 17.0,
+                        "y": 4.0,
+                        "z": 32.0
+                    }
+                }
+            ],
+            "loot": [
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -182.003,
+                        "y": 6.258677,
+                        "z": -659.1797
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -198.945,
+                        "y": 5.401966,
+                        "z": -662.0022
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -195.9814,
+                        "y": 6.061682,
+                        "z": -674.8846
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -176.7823,
+                        "y": 5.962278,
+                        "z": -680.4156
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -193.0507,
+                        "y": 9.075647,
+                        "z": -652.758
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -199.9872,
+                        "y": 8.996524,
+                        "z": -637.6088
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -175.3231,
+                        "y": 9.850851,
+                        "z": -644.9418
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "LighthouseTank1",
+                    "strength": 100.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "position": {
+                        "x": -22.0,
+                        "y": 6.0,
+                        "z": -670.2
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 15.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 50.0,
+                        "y": 4.0,
+                        "z": 5.0
+                    }
+                },
+                {
+                    "name": "LighthouseTank2",
+                    "strength": 100.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "position": {
+                        "x": -95.7,
+                        "y": 6.0,
+                        "z": -670.2
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": -15.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 50.0,
+                        "y": 4.0,
+                        "z": 5.0
+                    }
+                },
+                {
+                    "name": "LighthouseTank3",
+                    "strength": 100.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "position": {
+                        "x": -21.7,
+                        "y": 6.0,
+                        "z": -615.2
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": -45.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 45.0,
+                        "y": 4.0,
+                        "z": 5.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "LighthouseDrugLab",
+                    "strength": 100.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": -119.0,
+                        "y": 10.5,
+                        "z": -841.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 15.0,
+                        "y": 4.0,
+                        "z": 10.0
+                    }
+                }
+            ],
+            "loot": [
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -113.6055,
+                        "y": 11.4856,
+                        "z": -844.2732
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 40,
+                    "randomizeRotation": false,
+                    "position": {
+                        "x": -114.9205,
+                        "y": 12.7166,
+                        "z": -843.0657
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 213.1144,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -119.5128,
+                        "y": 11.53585,
+                        "z": -836.6907
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 40,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -114.727,
+                        "y": 11.39239,
+                        "z": -837.3319
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 35,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -121.6693,
+                        "y": 10.75789,
+                        "z": -845.3126
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.5,
+            "zones": [
+                {
+                    "name": "LighthouseTrainWarehouse",
+                    "strength": 250.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "position": {
+                        "x": 46.0,
+                        "y": 12.0,
+                        "z": -850.5
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 23.5,
+                        "y": 5.0,
+                        "z": 48.0
+                    }
+                }
+            ],
+            "loot": [
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 30,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 54.26496,
+                        "y": 13.29238,
+                        "z": -846.6274
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 30,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 53.9633,
+                        "y": 13.89112,
+                        "z": -873.8478
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 30,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 34.79755,
+                        "y": 12.96381,
+                        "z": -867.8937
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 30,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 43.09722,
+                        "y": 13.90343,
+                        "z": -855.4189
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 30,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 44.80856,
+                        "y": 12.81003,
+                        "z": -849.0646
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 30,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": 47.22198,
+                        "y": 12.96381,
+                        "z": -827.2198
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                }
+            ]
+        }
+    ],
+    "WoodsGasZones": [
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "WoodsBloodSample",
+                    "strength": 10.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "position": {
+                        "x": -96.0,
+                        "y": -15.0,
+                        "z": 220.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 3.0,
+                        "y": 3.0,
+                        "z": 4.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.75,
+            "zones": [
+                {
+                    "name": "WoodsScavBunker",
+                    "strength": 50.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "position": {
+                        "x": 230.0,
+                        "y": 20.0,
+                        "z": -708.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 5.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 25.0,
+                        "y": 3.0,
+                        "z": 10.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "WoodsBodiesContainer",
+                    "strength": 25.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": -201.8,
+                        "y": -1.0,
+                        "z": 233.7
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": -27.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 2.0,
+                        "y": 2.5,
+                        "z": 12.0
+                    }
+                }
+            ],
+            "loot": [
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 45,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -203.6191,
+                        "y": -0.8530318,
+                        "z": 238.5981
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.15,
+            "zones": [
+                {
+                    "name": "WoodsMedCampTent",
+                    "strength": 100.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "position": {
+                        "x": -185.0,
+                        "y": -1.0,
+                        "z": 218.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 10.0,
+                        "y": 2.0,
+                        "z": 25.0
+                    }
+                },
+                {
+                    "name": "WoodsMedContainers",
+                    "strength": 100.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "position": {
+                        "x": -205.0,
+                        "y": -1.0,
+                        "z": 215.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 12.0,
+                        "y": 2.0,
+                        "z": 27.0
+                    }
+                },
+                {
+                    "name": "WoodsMedAmbulances",
+                    "strength": 100.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "position": {
+                        "x": -185.0,
+                        "y": -1.0,
+                        "z": 244.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 20.0,
+                        "y": 2.5,
+                        "z": 20.0
+                    }
+                }
+            ],
+            "loot": [
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 30,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -204.2771,
+                        "y": -0.7918317,
+                        "z": 209.5313
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 30,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -203.6598,
+                        "y": -0.9083184,
+                        "z": 208.6296
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 30,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -212.5377,
+                        "y": -1.014761,
+                        "z": 207.2003
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 75,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -193.1324,
+                        "y": -1.156402,
+                        "z": 245.5047
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 30,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -180.434,
+                        "y": -1.066609,
+                        "z": 246.5495
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 30,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -203.6191,
+                        "y": -0.8530318,
+                        "z": 238.5981
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                },
+                {
+                    "type": "",
+                    "lootOverride": {
+                        "66fd588956f73c4f38dd07ae": 100
+                    },
+                    "odds": 30,
+                    "randomizeRotation": true,
+                    "position": {
+                        "x": -182.3288,
+                        "y": -0.7621626,
+                        "z": 215.2906
+                    },
+                    "rotation": {
+                        "x": 0,
+                        "y": 247.577,
+                        "z": 0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.25,
+            "zones": [
+                {
+                    "name": "WoodsZB14",
+                    "strength": 100.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "position": {
+                        "x": 446.5,
+                        "y": -13.0,
+                        "z": 60.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 25.0,
+                        "y": 3.0,
+                        "z": 27.0
+                    }
+                }
+            ]
+        }
+    ],
+    "ReserveGasZones": [
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "ReserveHallway1",
+                    "strength": 50.0,
+                    "blockNav": false,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.75,
+                    "VisParticleRate": 15,
+                    "position": {
+                        "x": -68.4,
+                        "y": -15.0,
+                        "z": 162.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 30.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 35.0,
+                        "y": 3.0,
+                        "z": 25.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "ReserveHallway2",
+                    "strength": 50.0,
+                    "blockNav": false,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "VisParticleRate": 5,
+                    "position": {
+                        "x": -85.5,
+                        "y": -15.0,
+                        "z": 132.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 30.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 4.0,
+                        "y": 3.0,
+                        "z": 20.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "ReserveShaft",
+                    "strength": 60.0,
+                    "blockNav": false,
+                    "usesDistanceFalloff": true,
+                    "VisParticleRate": 60,
+                    "position": {
+                        "x": -58.9,
+                        "y": -15.9,
+                        "z": 179.9
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 14.0,
+                        "y": 55.0,
+                        "z": 16.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "ReserveStairsToD2",
+                    "strength": 80.0,
+                    "blockNav": false,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.75,
+                    "VisParticleRate": 20,
+                    "position": {
+                        "x": -70.0,
+                        "y": -16.0,
+                        "z": 78.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 20.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 11.0,
+                        "y": 8.0,
+                        "z": 38.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "ReserveD2Rat",
+                    "strength": 30.0,
+                    "blockNav": false,
+                    "usesDistanceFalloff": true,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": -63.0,
+                        "y": -18.6,
+                        "z": 139.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 30.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 50.0,
+                        "y": 15.0,
+                        "z": 14.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 1.0,
+            "zones": [
+                {
+                    "name": "ReserveD2Tank",
+                    "strength": 20.0,
+                    "blockNav": false,
+                    "usesDistanceFalloff": true,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": -78.5,
+                        "y": -19.8,
+                        "z": 113.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 30.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 55.0,
+                        "y": 10.0,
+                        "z": 15.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.35,
+            "zones": [
+                {
+                    "name": "ReserveBunker",
+                    "strength": 200.0,
+                    "blockNav": false,
+                    "usesDistanceFalloff": true,
+                    "position": {
+                        "x": -105.0,
+                        "y": -14.5,
+                        "z": 40.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 15.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 65.0,
+                        "y": 4.5,
+                        "z": 45.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.05,
+            "zones": [
+                {
+                    "name": "ReserveStorage",
+                    "strength": 500.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "position": {
+                        "x": 50.0,
+                        "y": -13.5,
+                        "z": -110.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 90.0,
+                        "y": 6.0,
+                        "z": 190.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.85,
+            "zones": [
+                {
+                    "name": "ReserveStorageSide1",
+                    "strength": 50.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": 76.0,
+                        "y": -12.0,
+                        "z": -136.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 15.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 16.0,
+                        "y": 3.0,
+                        "z": 29.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.85,
+            "zones": [
+                {
+                    "name": "ReserveStorageSide2",
+                    "strength": 50.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "analysable": {
+                        "enabledBy": [],
+                        "disabledBy": [],
+                        "noRequirement": true
+                    },
+                    "position": {
+                        "x": 40.0,
+                        "y": -12.0,
+                        "z": -126.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 15.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 16.0,
+                        "y": 3.0,
+                        "z": 29.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.5,
+            "zones": [
+                {
+                    "name": "ReserveWhiteBishop",
+                    "strength": 150.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "position": {
+                        "x": -66.0,
+                        "y": -9.0,
+                        "z": -32.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 15.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 35.0,
+                        "y": 3.0,
+                        "z": 20.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.5,
+            "zones": [
+                {
+                    "name": "ReserveBlackBishop",
+                    "strength": 150.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "position": {
+                        "x": -138.0,
+                        "y": -9.0,
+                        "z": -9.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 15.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 69.0,
+                        "y": 3.0,
+                        "z": 23.5
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.35,
+            "zones": [
+                {
+                    "name": "ReserveBlackBishopHall",
+                    "strength": 200.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "position": {
+                        "x": -134.0,
+                        "y": -12.0,
+                        "z": 14.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 15.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 50.0,
+                        "y": 4.0,
+                        "z": 23.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.35,
+            "zones": [
+                {
+                    "name": "ReserveBlackPawnHall",
+                    "strength": 200.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "position": {
+                        "x": -146.0,
+                        "y": -11.0,
+                        "z": 49.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 15.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 30.0,
+                        "y": 4.0,
+                        "z": 50.0
+                    }
+                }
+            ]
+        },
+        {
+            "spawnChance": 0.35,
+            "zones": [
+                {
+                    "name": "ReserveWhitePawnHall",
+                    "strength": 200.0,
+                    "blockNav": true,
+                    "usesDistanceFalloff": true,
+                    "VisOpacityModi": 0.5,
+                    "position": {
+                        "x": -103.0,
+                        "y": -10.0,
+                        "z": 72.5
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 15.0,
+                        "z": 0.0
+                    },
+                    "size": {
+                        "x": 70.0,
+                        "y": 4.0,
+                        "z": 25.0
+                    }
+                }
+            ]
+        }
+    ]
+}

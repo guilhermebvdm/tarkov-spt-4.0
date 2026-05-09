@@ -1,0 +1,11 @@
+{
+  "name": "SPT-Realism-Mod-Client",
+  "upstream_url": "https://github.com/space-commits/SPT-Realism-Mod-Client.git",
+  "upstream_sha": "7e7ee3443efa07b0a97b522cf89b43096c637cee",
+  "upstream_branch": "main",
+  "forge_url": "",
+  "license": "see LICENSE.txt",
+  "version_base": "0.14.8",
+  "spt_version": "",
+  "created_at": "2026-05-09T20:46:14Z"
+}

@@ -1,0 +1,58 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.1</TargetFramework>
+		<AssemblyName>RealismMod</AssemblyName>
+		<Description></Description>
+		<Version>0.14.8</Version>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<LangVersion>latest</LangVersion>
+		<OutDir>F:\SP EFT\SPT-311\BepInEx\plugins\</OutDir>
+		<CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+		<CopyProjectReferencesToOutputDirectory>false</CopyProjectReferencesToOutputDirectory>
+	</PropertyGroup>
+
+	<Target Name="Build Cleanup" AfterTargets="Build">
+		<Delete Files="$(OutDir)$(AssemblyName).pdb" />
+		<Delete Files="$(OutDir)$(AssemblyName).deps.json" />
+	</Target>
+
+	<ItemGroup>				
+		<Reference Include="UnityEngine.IMGUIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL"></Reference>
+		<Reference Include="spt-reflection" />
+		<Reference Include="spt-common" />
+		<Reference Include="ItemComponent.Types" />
+		<Reference Include="Comfort" />
+		<Reference Include="Assembly-CSharp" />
+		<Reference Include="UnityEngine" />
+		<Reference Include="Microsoft.CSharp" />
+		<Reference Include="UnityEngine.CoreModule" />
+		<Reference Include="UnityEngine.InputLegacyModule" />
+		<Reference Include="UnityEngine.JSONSerializeModule" />
+		<Reference Include="UnityEngine.UnityWebRequestModule" />
+		<Reference Include="UnityEngine.UnityWebRequestTextureModule" />
+		<Reference Include="UnityEngine.UnityWebRequestWWWModule" />
+		<Reference Include="UnityEngine.UnityWebRequestAudioModule" />
+		<Reference Include="AnimationSystem.Types" />
+		<Reference Include="Newtonsoft.Json" />
+		<Reference Include="UnityEngine.AudioModule" />
+		<Reference Include="Unity.Postprocessing.Runtime" />
+		<Reference Include="UnityEngine.PhysicsModule" />
+		<Reference Include="ItemTemplate.Types" />
+		<Reference Include="UnityEngine.UI" />
+		<Reference Include="Sirenix.Serialization" />
+		<Reference Include="Unity.TextMeshPro" />
+		<Reference Include="UnityEngine.ImageConversionModule" />
+		<Reference Include="UnityEngine.TerrainPhysicsModule" />
+		<Reference Include="UnityEngine.AssetBundleModule" />
+		<Reference Include="UnityEngine.ParticleSystemModule" />
+		<Reference Include="UnityEngine.AIModule" />
+		<PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
+		<PackageReference Include="BepInEx.Core" Version="5.*" />
+		<PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
+	</ItemGroup> 
+  
+  <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
+  </ItemGroup>
+</Project>
