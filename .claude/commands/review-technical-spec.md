@@ -2,7 +2,7 @@
 
 Análise crítica da spec técnica. **Cria** um arquivo novo `NNN-<slug>-technical-review-NN.md` a cada execução (NN incremental). Resolver até zerar bloqueadores antes de `/code-mod`.
 
-> **Skills obrigatórias:** carregar `spt-mod-best-practices` e `csharp-mod-best-practices` antes de revisar. Use os checklists ao fim de cada skill como base mínima da revisão.
+> **Skills obrigatórias:** carregar `spt-mod-best-practices`, `csharp-mod-best-practices` e `repo-workflow-best-practices` antes de revisar. Use os checklists ao fim de cada skill como base mínima da revisão.
 
 ## Uso
 
@@ -16,14 +16,14 @@ Análise crítica da spec técnica. **Cria** um arquivo novo `NNN-<slug>-technic
 
 1. **Resolver `<ref>`** → `<path-pasta>`, `<NNN>`, `<slug>`, `<mod>`.
 
-2. **Pré-condição.** Existir `<NNN>-<slug>-technical-spec.md` com conteúdo real. Se não, parar.
+2. **Pré-condição.** Existir `<NNN>-<slug>-02-spec-tech.md` com conteúdo real. Se não, parar.
 
-3. **Calcular `NN` da review.** Listar arquivos `<NNN>-<slug>-technical-review-*.md` na pasta. Próximo NN = maior + 1, padded a 2 dígitos. Primeira review = `01`.
+3. **Calcular `NN` da review.** Listar arquivos `<NNN>-<slug>-03-spec-tech-review-*.md` na pasta. Próximo NN = maior + 1, padded a 2 dígitos. Primeira review = `01`.
 
 4. **Ler:**
    - A spec técnica completa.
    - A spec funcional (`<NNN>-<slug>-spec.md`) — para conferir se a spec técnica responde aos critérios de aceite.
-   - Reviews anteriores `<NNN>-<slug>-technical-review-*.md` — pontos já resolvidos não devem ser refeitos; pontos pendentes podem ser revalidados.
+   - Reviews anteriores `<NNN>-<slug>-03-spec-tech-review-*.md` — pontos já resolvidos não devem ser refeitos; pontos pendentes podem ser revalidados.
    - Os arquivos do Assembly citados na spec técnica — confirmar que as linhas batem com o que a spec afirma.
    - `mods/<mod>/modded/` — checar conflitos com patches existentes.
 

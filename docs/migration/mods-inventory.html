@@ -11,6 +11,8 @@
   --gold:    #c8a96e; --gold2:#a88950;
   --text:    #7a8290; --text2:#a8b0bc; --text3:#d0d8e4;
   --green2:  #5aa050;
+  --inst-bg: rgba(36,90,46,.22);
+  --inst-bg-hover: rgba(36,90,46,.34);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:var(--bg);color:var(--text2);font-family:'Segoe UI',system-ui,sans-serif;font-size:13px}
@@ -34,6 +36,7 @@ html,body{height:100%;background:var(--bg);color:var(--text2);font-family:'Segoe
 .sc .val{font-weight:700;font-size:14px}
 .sc .val.gold{color:var(--gold)} .sc .val.gr{color:#5aa050} .sc .val.or{color:#c07030}
 .sc .val.re{color:#c04040} .sc .val.bl{color:#5080c8} .sc .val.pu{color:#9070c8}
+.sc .val.tl{color:#38b2b8} .sc .val.ya{color:#d4a820} .sc .val.inst{color:#4caf72}
 .stats-sep{width:1px;height:28px;background:var(--border2)}
 .prog-wrap{display:flex;gap:2px;height:4px;width:100%;overflow:hidden}
 .prog-seg{height:100%}
@@ -69,6 +72,8 @@ thead th.asc .si::after{content:'▲';opacity:1} thead th.desc .si::after{conten
 tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
 tbody tr:nth-child(even){background:rgba(255,255,255,.012)}
 tbody tr:hover{background:rgba(200,169,110,.04)}
+tbody tr.installed{background:var(--inst-bg) !important}
+tbody tr.installed:hover{background:var(--inst-bg-hover) !important}
 tbody td{padding:6px 10px;border-right:1px solid var(--border);vertical-align:middle}
 tbody td:last-child{border-right:none}
 
@@ -83,6 +88,13 @@ tbody td:last-child{border-right:none}
 .c-forge{min-width:65px;white-space:nowrap}
 .c-repo{min-width:140px}
 .c-fn{min-width:180px;max-width:260px}
+.c-inst{width:80px;min-width:80px;text-align:center}
+.c-trl{width:60px;min-width:60px;text-align:center;white-space:nowrap}
+
+/* TRL 3.0? badges */
+.btrl-Sim{background:rgba(55,75,120,.18);color:#7090c0;border-color:rgba(55,75,120,.38)}
+.btrl-New{background:rgba(75,125,25,.18);color:#88c030;border-color:rgba(75,125,25,.38)}
+.btrl-q  {background:rgba(50,50,60,.2);color:#606878;border-color:rgba(50,50,60,.3);font-style:italic}
 
 /* Mod name */
 .mod-name{color:var(--text3);font-weight:500;line-height:1.3;display:flex;align-items:center;gap:5px}
@@ -93,13 +105,40 @@ tbody td:last-child{border-right:none}
 .b{display:inline-flex;align-items:center;padding:2px 6px;font-size:10px;font-weight:600;letter-spacing:.04em;white-space:nowrap;border:1px solid transparent;gap:3px}
 
 /* STATUS */
-.bs-Avaliar    {background:rgba(200,144,26,.12);color:#e8b040;border-color:rgba(200,144,26,.28)}
-.bs-Instalar   {background:rgba(58,128,64,.12);color:#50b060;border-color:rgba(58,128,64,.28)}
-.bs-Evoluir    {background:rgba(30,96,176,.12);color:#4080d0;border-color:rgba(30,96,176,.28)}
-.bs-Desenvolver{background:rgba(80,64,160,.12);color:#8878cc;border-color:rgba(80,64,160,.28)}
-.bs-Aguardar   {background:rgba(120,64,32,.12);color:#c07040;border-color:rgba(120,64,32,.28)}
-.bs-Bloqueado  {background:rgba(136,32,32,.14);color:#cc4848;border-color:rgba(136,32,32,.3)}
-.bs-NaoIncluir {background:rgba(56,60,66,.25);color:#5a6070;border-color:rgba(56,60,66,.45)}
+.bs-Avaliar    {background-color:rgba(200,144,26,.12);color:#e8b040;border-color:rgba(200,144,26,.28)}
+.bs-Instalar   {background-color:rgba(20,110,115,.14);color:#38b2b8;border-color:rgba(20,110,115,.38)}
+.bs-Evoluir    {background-color:rgba(30,96,176,.12);color:#4080d0;border-color:rgba(30,96,176,.28)}
+.bs-Desenvolver{background-color:rgba(80,64,160,.12);color:#8878cc;border-color:rgba(80,64,160,.28)}
+.bs-Aguardar   {background-color:rgba(120,64,32,.12);color:#c07040;border-color:rgba(120,64,32,.28)}
+.bs-Bloqueado  {background-color:rgba(136,32,32,.14);color:#cc4848;border-color:rgba(136,32,32,.3)}
+.bs-NaoIncluir {background-color:rgba(56,60,66,.25);color:#5a6070;border-color:rgba(56,60,66,.45)}
+.bs-Instalado  {background-color:rgba(36,90,46,.28);color:#4caf72;border-color:rgba(36,90,46,.55);font-weight:700}
+/* STATUS DROPDOWN */
+.sdd{position:relative;display:inline-block}
+.sdd-trg{cursor:pointer;-webkit-user-select:none;user-select:none;gap:5px;padding-right:7px;transition:filter .1s}
+.sdd-trg:hover{filter:brightness(1.15)}
+.sdd-arr{font-size:9px;opacity:.45;transition:transform .18s,opacity .18s;line-height:1}
+.sdd.open .sdd-trg .sdd-arr{transform:rotate(180deg);opacity:.9}
+@keyframes sdd-in{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+.sdd-menu{
+  display:none;position:fixed;z-index:300;
+  background:#0b0c0f;border:1px solid var(--gold2);
+  padding:5px;flex-direction:column;gap:2px;min-width:165px;
+  box-shadow:0 10px 36px rgba(0,0,0,.8);
+}
+.sdd.open .sdd-menu{display:flex;animation:sdd-in .12s ease}
+.sdd-head{color:var(--text);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;
+  padding:2px 6px 5px;border-bottom:1px solid var(--border);margin-bottom:1px;font-weight:700}
+.sdd-sep{height:1px;background:var(--border);margin:2px 0}
+.sdd-item{
+  cursor:pointer;width:100%;box-sizing:border-box;
+  justify-content:space-between;padding:3px 8px;
+  transition:filter .1s;
+}
+.sdd-item:hover{filter:brightness(1.3)}
+.sdd-item.cur{box-shadow:inset 0 0 0 1px currentColor;filter:brightness(1.2)}
+.sdd-chk{opacity:0;font-size:9px;font-weight:900;margin-left:6px;flex-shrink:0}
+.sdd-item.cur .sdd-chk{opacity:1}
 
 /* TIPO */
 .bt-Client{background:rgba(38,78,128,.2);color:#5a90cc;border-color:rgba(38,78,128,.4)}
@@ -163,22 +202,40 @@ tbody td:last-child{border-right:none}
 /* Fn text */
 .fn{color:var(--text);font-size:11px;line-height:1.45}
 
-/* TOOLTIP (forge popover) */
-.has-tip{position:relative;display:inline-block}
-.tip{
-  display:none;position:absolute;left:0;top:calc(100% + 6px);z-index:999;
-  background:#0e1014;border:1px solid var(--gold2);
-  padding:10px 12px;min-width:240px;max-width:320px;
-  box-shadow:0 8px 24px rgba(0,0,0,.7);
-  pointer-events:none;
+/* INSTALLED BUTTON */
+.btn-inst{
+  background:transparent;border:1px solid rgba(70,85,100,.5);
+  color:var(--text);font-size:10px;font-weight:600;letter-spacing:.04em;
+  padding:3px 8px;cursor:pointer;font-family:inherit;
+  transition:all .15s;white-space:nowrap;
 }
-.has-tip:hover .tip{display:block}
-.tip-title{color:var(--gold);font-weight:700;font-size:11px;margin-bottom:6px;letter-spacing:.05em}
-.tip-row{display:flex;align-items:flex-start;gap:6px;margin-bottom:4px}
-.tip-row .lk{color:var(--text);font-size:10px}
-.tip-row .lk a{color:#6090c8;font-size:10px;text-decoration:none;word-break:break-all}
-.tip-row .lk a:hover{color:#80aae0;text-decoration:underline}
-.tip-tag{display:inline-block;background:rgba(200,169,110,.1);border:1px solid rgba(200,169,110,.2);color:var(--gold2);font-size:9px;padding:1px 5px;margin-bottom:6px}
+.btn-inst:hover{border-color:#4caf72;color:#4caf72}
+.btn-inst.on{background:rgba(36,90,46,.35);border-color:#4caf72;color:#4caf72}
+
+/* FORGE POPOVER */
+.fpop{
+  display:none;position:fixed;z-index:500;
+  background:#0c0d10;border:1px solid var(--gold2);
+  width:280px;box-shadow:0 12px 40px rgba(0,0,0,.85);
+  pointer-events:auto;
+}
+.fpop.visible{display:block}
+.fpop-thumb{width:100%;height:118px;overflow:hidden;background:var(--bg3);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:center}
+.fpop-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.fpop-thumb-placeholder{color:var(--border2);font-size:32px;opacity:.5}
+.fpop-body{padding:10px 12px 12px}
+.fpop-name{color:var(--gold);font-weight:700;font-size:12px;letter-spacing:.04em;line-height:1.3;margin-bottom:7px}
+.fpop-badges{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px}
+.fpop-divider{height:1px;background:var(--border);margin-bottom:8px}
+.fpop-id{color:var(--text);font-size:10px;margin-bottom:4px}
+.fpop-id strong{color:var(--gold2)}
+.fpop-link{display:flex;align-items:center;gap:5px;font-size:10px}
+.fpop-link a{color:#6090c8;text-decoration:none;word-break:break-all;line-height:1.4}
+.fpop-link a:hover{color:#80aae0;text-decoration:underline}
+.fpop-arrow{color:var(--text);font-size:9px;flex-shrink:0}
+.fpop-ph-hidden{display:none}
+.fpop-img-hidden{display:none}
+.fpop-cat{background:rgba(200,169,110,.08);border:1px solid rgba(200,169,110,.2);color:var(--gold2);font-size:10px}
 
 /* No results */
 .no-results{text-align:center;padding:60px 24px;color:var(--text);letter-spacing:.12em;text-transform:uppercase;font-size:11px}
@@ -239,6 +296,14 @@ tbody td:last-child{border-right:none}
     <div class="fr" id="f-spt4"></div>
   </div>
   <div class="fg">
+    <div class="lbl">Instalado</div>
+    <div class="fr" id="f-inst"></div>
+  </div>
+  <div class="fg">
+    <div class="lbl">TRL 3.0?</div>
+    <div class="fr" id="f-trl"></div>
+  </div>
+  <div class="fg">
     <div class="lbl">Revisão</div>
     <div class="fr">
       <button type="button" class="fb" id="f-review" onclick="toggleReview()">⚠ Precisa revisão</button>
@@ -267,119 +332,280 @@ tbody td:last-child{border-right:none}
 
 <script>
 // ── DATA FORMAT ───────────────────────────────────────────────────────────────
-// [n, name, tipo, atuacao, cat, esc_csv, forge_id, r4_path, fn, status, pri, intern]
+// [n, name, tipo, atuacao, cat, esc_csv, forge_id, r4_path, fn, status, pri, intern, spt4]
 // forge_id : null=absent  ""=unknown  "123"=forge mod ID
 // r4_path  : null=absent  ""=unknown  "user/repo"=github  "https://..."=other
 const MODS = [
-[0,"🏠 UltraFika-Plugin","Client","Ambos","Framework","Multiplayer",null,null,"Cliente multiplayer (fork de Fika)","Evoluir","Crítica",true,false],
-[1,"[SVM] Server Value Modifier","Server","Geral","Balanceamento","Framework","236","GhostFenixx/svm-csharp","Modifica valores do servidor (loot, traders, hideout) — último release SPT 3.11","Aguardar","?",false,true],
-[2,"AAAArtem-WTT","Client","Geral","?","?","1023","WelcomeToTarkov/WTT-Artem","🔍 (relacionado ao WTT)","Avaliar","?",false,true],
-[3,"acidphantasm-DelayedFleaSales","Client","Geral","Hardcore","Mercado","2016","acidphantasm/delayedfleasales-csharp","Atrasa vendas no flea market (era Server/TS em 3.x, reescrito como BepInEx C# para 4.0)","Instalar","?",false,true],
-[4,"acidphantasm-moretagcolours","Client","Geral","QoL","UI","1533","acidphantasm/acidphantasm-moretagcolours","Mais cores para tags de itens","Avaliar","?",false,true],
-[5,"acidphantasm-previewsizer","Client","Geral","QoL","UI","2339","acidphantasm/acidphantasm-previewsizer","Redimensiona preview de itens","Avaliar","?",false,true],
-[6,"acidphantasm-progressivebotsystem","Client","Raid","Balanceamento","IA","1594","acidphantasm/progressivebotsystem-csharp","Sistema progressivo de bots (era Server/TS em 3.x, reescrito como BepInEx C# para 4.0)","Instalar","?",false,true],
-[7,"acidphantasm-refsptfriendlyquests","Client","Geral","Balanceamento","Quests","1538","acidphantasm/reffriendlyquests-csharp","Quests amigáveis (compatível com Ref — era Server/TS em 3.x, reescrito como BepInEx C# para 4.0)","Instalar","?",false,true],
-[8,"acidphantasm-simpleworkoutqte","Server","Hideout","QoL","Hideout","1437","acidphantasm/acidphantasm-simpleworkoutqte","QTE de workout no hideout","Avaliar","?",false,true],
-[9,"AirFilterWarning","Client","Hideout","QoL","Hideout","2129","danx91/AirFilterWarning","Aviso de filtro de ar gerador","Avaliar","?",false,true],
-[10,"AmandsGraphics","Client","Raid","Cosmético","Gráficos","592",null,"Configurações gráficas avançadas — último release SPT 3.10","Aguardar","?",false,false],
-[11,"aMoxoPixel-Painter","Server","Geral","Conteúdo","Mercado,Armas","1025","emilanderss0n/Painter","Trader que vende mods de armas pintados","Avaliar","?",false,true],
-[12,"BeltSlot","Client","Ambos","QoL","Inventário,Equipamentos","2181","Trench-foot/BeltSlot","Slot extra de cinto no inventário","Avaliar","?",false,true],
-[13,"BetterRearSights","Client","Raid","Realismo","Armas","1591","peinwastaken/PeinBetterRearSights","Mira traseira melhorada","Avaliar","?",false,true],
-[14,"BorkelRNVG","Client","Raid","Realismo","Equipamentos","954","Borkel/RealisticNVG-client-2","NVGs realistas com máscaras + luz natural — v2.1.1 (SPT 4.0.13). Mesmo repo serve 3.x e 4.0 (versão por release)","Instalar","?",false,true],
-[15,"BRNVG_N-15Adapter","?","Raid","Realismo","Equipamentos",null,"","Adaptador N-15 para BRNVG (sub-pasta interna do mod BorkelRNVG, não publicado separado)","Avaliar","?",false,false],
-[16,"ChooChoo-TraderModding","Misto","Geral","QoL","Mercado,Armas","1283","Soulztorm/ChooChoo-TraderModding","Modding via traders","Avaliar","?",false,true],
-[17,"ContinuousLoadAmmo","Client","Raid","QoL","Munições","2112","ozen-m/SPT-ContinuousLoadAmmo","Carregamento contínuo de munição","Avaliar","?",false,true],
-[18,"CWX","Client","Geral","Conteúdo","Framework","1454","CWXDEV/CWX-Mods","Coleção de mods do CWX (CWX-MegaMod)","Avaliar","?",false,true],
-[19,"DanW-SPTQuestingBots","Server","Raid","Realismo","IA","1109","dwesterwick/SPTQuestingBots","Bots fazendo quests + spawns PMC mimic live","Avaliar","?",false,true],
-[20,"DeadzoneMod","Client","Raid","Realismo","Armas","1001",null,"Deadzone/free aim style insurgency","Avaliar","?",false,false],
-[21,"desze-UnlockHideoutCustomization","Server","Hideout","QoL","Hideout","2053",null,"Desbloqueia customização do hideout","Avaliar","?",false,false],
-[22,"DewardianDev-MOAR","Server","Raid","Balanceamento","IA","789","Andrewgdewar/MOAR","Bot spawning system","Avaliar","?",false,true],
-[23,"dk.SeparateHostility","Client","Raid","Realismo","IA","2248",null,"Separa hostilidade entre facções","Avaliar","?",false,false],
-[24,"doordash","Client","Raid","Realismo","Mapas","2214","bmpq/spt-doordash","Breaching de portas trancadas (SPT 4.0)","Avaliar","?",false,true],
-[25,"DrakiaXYZ-BigBrain","Client","Raid","Framework","IA","902","DrakiaXYZ/SPT-BigBrain","Library de combat layers para bots (dep. de SAIN) — v1.4.0 (SPT 4.0.13). Mesmo repo, versionado por tags","Instalar","?",false,true],
-[26,"DrakiaXYZ-EquipFromWeaponRack","Client","Hideout","QoL","Hideout,Armas","1136","DrakiaXYZ/SPT-EquipFromWeaponRack","Equipar arma direto do rack do hideout","Avaliar","?",false,true],
-[27,"DrakiaXYZ-LootRadius","Client","Raid","QoL","Loot","1349",null,"Aumenta raio de loot","Avaliar","?",false,false],
-[28,"DrakiaXYZ-QuickMoveToContainer","Client","Ambos","QoL","Inventário","1341","DrakiaXYZ/SPT-QuickMoveToContainer","Ctrl+Click move item para container aberto","Avaliar","?",false,true],
-[29,"DrakiaXYZ-SearchOpenContainers","Client","Ambos","QoL","Inventário","934","DrakiaXYZ/SPT-SearchOpenContainers","Buscar dentro de containers abertos","Avaliar","?",false,true],
-[30,"DrakiaXYZ-Waypoints","Client","Raid","Framework","IA,Mapas","827","DrakiaXYZ/SPT-Waypoints","Expande navmesh dos mapas (dep. de SAIN) — v1.8.2 (SPT 4.0.13). Mesmo repo, versionado por tags","Instalar","?",false,true],
-[31,"DynamicExternalResolution","Client","Geral","QoL","Gráficos","929",null,"Resolução externa dinâmica (DERP)","Avaliar","?",false,false],
-[32,"DynamicMaps (SPTDynamicMaps)","Client","Raid","QoL","UI,Mapas","1431","mpstark/SPT-DynamicMaps","UI custom de mapas com tracking de quests","Avaliar","?",false,true],
-[33,"Eco-Attachment Emporium","Server","Geral","Conteúdo","Armas","2288","Eco9341/tarkovMods","Mais attachments para armas","Avaliar","?",false,true],
-[34,"ExpandedFpsLimit","Client","Geral","QoL","Gráficos","2066","Mugnum/SPT_ExpandedFpsLimit","Aumenta limite de FPS (até 360)","Avaliar","?",false,true],
-[35,"Fika","Misto","Ambos","Framework","Multiplayer","2326","project-fika/Fika-Plugin","Multiplayer base (BepInEx + server) — v2.2.5 (SPT 4.0.13). Mesmo repo. Aliases: `fika-server`, `Fika.Core`","Instalar","?",false,true],
-[36,"flir-betterkeysng","Client","Geral","QoL","UI","1888","https://gitlab.com/flir063-spt/betterkeys-ng","UI melhorada para keys — autor `flir` (mesmo de Tarkov Weather System); provável Client","Avaliar","?",false,true],
-[37,"FOVFix","Client","Raid","QoL","Gráficos","701","space-commits/SPT-FOV-Fix","Fix de FOV (Fontaine's FOV Fix) — releases para SPT 4.x","Instalar","?",false,true],
-[38,"gaylatea-deadlyblades","Server","Raid","Balanceamento","Armas","819",null,"Lâminas mais letais","Avaliar","?",false,false],
-[39,"Gaylatea-UseLooseLoot","Client","Raid","QoL","Loot","933","DrakiaXYZ/SPT-UseLooseLoot","Usa loose loot direto sem entrar no inventário","Avaliar","?",false,true],
-[40,"HandsAreNotBusy","Client","Raid","QoL","Animações","1298","Lacyway/HandsAreNotBusy","Mãos não ficam ocupadas (animação)","Avaliar","?",false,true],
-[41,"hideoutcat","Client","Hideout","Cosmético","Hideout","2038",null,"Gato no hideout (5 texturas configuráveis)","Avaliar","?",false,false],
-[42,"HollywoodFX","Client","Raid","Cosmético","Gráficos","2003","SleepingPills/HollywoodFX","FX cinematográficos (impactos, blood) — v1.8.4 (SPT 4.0.13). Autor: JankyTheClown / SleepingPills. Mesmo repo","Instalar","?",false,true],
-[43,"HollywoodGraphics","?","Raid","Cosmético","Gráficos",null,"","Gráficos cinematográficos — sem mod separado no Forge (provavelmente pasta interna do HollywoodFX)","Avaliar","?",false,false],
-[44,"IcyClawz.CustomInteractions","Client","Ambos","QoL","UI","938","IgorEisberg/SPT-ClientMods","Interações customizadas — perfil do autor: hub.sp-tarkov.com/user/34778-icyclawz (autor IgorEisberg)","Avaliar","?",false,true],
-[45,"IcyClawz.ItemContextMenuExt","Client","Ambos","QoL","UI","940","IgorEisberg/SPT-ClientMods","Menu de contexto estendido em itens (SPT 4.0.13, 18.1K downloads). Repo monorepo do autor","Instalar","?",false,true],
-[46,"IcyClawz.ItemSellPrice","Client","Geral","QoL","Mercado,UI","909","IgorEisberg/SPT-ClientMods","Preços de venda em todos os traders (SPT 4.0.13, 81.5K downloads). Repo monorepo do autor","Instalar","?",false,true],
-[47,"IcyClawz.MunitionsExpert","Client","Geral","QoL","Munições,UI","972","IgorEisberg/SPT-ClientMods","Info detalhada de munição — perfil do autor: hub.sp-tarkov.com/user/34778-icyclawz (autor IgorEisberg)","Avaliar","?",false,true],
-[48,"IhanaMies-LootValueBackend","Client","Ambos","QoL","Loot,UI","1155",null,"Mostra valor de loot na UI — último release SPT 3.11","Aguardar","?",false,false],
-[49,"inory-agonysfx","Client","Raid","Realismo","Gráficos","1831","ppowa/agonysfx","SFX de dor/agonia","Avaliar","?",false,true],
-[50,"JBOBYH_ItemPreviewQoL","Client","Geral","QoL","UI","2206","jbobyh/JBOBYH_ItemPreviewQoL","QoL de preview de itens","Avaliar","?",false,true],
-[51,"Jehree-GildedKeyStorage","Client","Ambos","QoL","Inventário","865","DrakiaXYZ/SPT-GildedKeyStorage-CSharp","Storage especializado para keys — original do Jehree (3.x), fork C# do DrakiaXYZ é o de 4.0","Instalar","?",false,true],
-[52,"Kaeno-TraderScrolling","Client","Geral","QoL","Mercado,UI","1089","CWXDEV/Kaeno-TraderScrolling","Scroll na lista de traders","Avaliar","?",false,true],
-[53,"Kat.BetterAmmoLoadingList","Client","Ambos","QoL","Munições,UI","2221","Katrin0522/SPT-BetterAmmoLoadingList","Lista melhorada de loading de munição","Avaliar","?",false,true],
-[54,"kmyuhkyuk-EnvironmentReplace","Client","Raid","Conteúdo","Mapas","1371","minihazel/EnvironmentReplace","Substitui ambientes/mapas","Avaliar","?",false,true],
-[55,"kmyuhkyuk-KmyTarkovApi","Client","Geral","Framework","Framework","898","kmyuhkyuk/KmyTarkovApi","Framework para client mods","Avaliar","?",false,true],
-[56,"lacyway-mergeconsumables (MergeConsumables)","Misto","Ambos","QoL","Inventário","1657","Lacyway/MergeConsumables","Merge de consumíveis (médicos, comida)","Avaliar","?",false,true],
-[57,"MoreCheckmarks","Misto","Ambos","QoL","UI","861","TommySoucy/MoreCheckmarks","Checkmarks coloridos em itens (quests, hideout, barters) — v2.1.0 (SPT 4.0.11). Alias: `MoreCheckmarksBackend`","Instalar","?",false,true],
-[58,"MoxoPixel-MagTape","Server","Geral","Cosmético","Munições","1018","emilanderss0n/MagTape","Magazines com tape (visual + tagging)","Avaliar","?",false,true],
-[59,"MoxoPixel-TacticalGearComponent","Server","Geral","Conteúdo","Equipamentos","1125","emilanderss0n/TGC","Componente de equipamento tático","Avaliar","?",false,true],
-[60,"MusicManiac-LessRestrictingHeadwear","Server","Geral","Balanceamento","Equipamentos","922","MusicManiac/LessRestrictingHeadwear","Headwear menos restritivo — v4.0.13 disponível","Instalar","?",false,true],
-[61,"platinum-theblacklist","Misto","Geral","Balanceamento","Mercado","755","ArchangelWTF/spt-the-blacklist","Blacklist de itens (flea market enhancements)","Avaliar","?",false,true],
-[62,"PlayerEncumbranceBar","Client","Ambos","QoL","UI,Inventário","1374","Lacyway/SPT-PlayerEncumbranceBar","Barra de encumbrance no inventário — v1.2.2 (SPT 4.0.13, maintainer 4.0: Lacyway)","Instalar","?",false,true],
-[63,"Pluto! - SPT Battlepass","Server","Geral","Progressão","Quests,Progressão","2098",null,"Battlepass para SPT (Arena Season 0)","Avaliar","?",false,false],
-[64,"QuickSell","Client","Geral","QoL","Mercado","1732","TadMaj/Tarkov-QuickSell","Venda rápida de itens (context menu)","Avaliar","?",false,true],
-[65,"RaiRai.ColorConverterAPI","Client","Geral","Framework","UI","1090","RaiRaiTheRaichu/ColorConverterAPI","API utilitária de conversão de cores","Avaliar","?",false,true],
-[66,"Realism","Misto","Ambos","Realismo","Framework","416",null,"Overhaul de realismo (balística, médica, hazards) — último release SPT 3.9.x. Aliases: `SPT-Realism`, `RealismMod`","Aguardar","?",false,false],
-[67,"redlaser42-Better Headset Descriptions","Client","Geral","QoL","UI,Equipamentos","2199",null,"Adiciona stats de headsets às descrições dos itens — sem repo público","Avaliar","?",false,false],
-[68,"redlaser42-Increase Climb Height","Server","Raid","Balanceamento","Animações","1575","","Aumenta altura máxima de escalada","Avaliar","?",false,true],
-[69,"SAIN","Client","Raid","Realismo","IA","791","ArchangelWTF/SAIN","Substituição completa de IA dos bots — v4.4.3 (SPT 4.0.13). **3.x: repo Solarint original** · **4.2.0+: fork ArchangelWTF**. Depende de BigBrain + Waypoints","Instalar","?",false,true],
-[70,"seasoniterator","?","?","?","?","","","🔍 (estações/seasonal?) — não confirmado no Forge","Avaliar","?",false,false],
-[71,"shibdib-NoTransitTasks","Server","Raid","Balanceamento","Quests","1944",null,"Remove tasks de transit","Avaliar","?",false,false],
-[72,"Skwizzy-LootingBots","Misto","Raid","Realismo","IA,Loot","812","Skwizzy/SPT-LootingBots","Bots fazendo loot (BepInEx + server)","Avaliar","?",false,true],
-[73,"somtam.NoBush","Client","Raid","Realismo","IA","2123",null,"Para AI atirar em quem está na bush","Avaliar","?",false,false],
-[74,"somtam.SimpleDeClutter","Client","Raid","QoL","Gráficos","2139",null,"Reduz clutter visual","Avaliar","?",false,false],
-[75,"SPT-FreshContentBackport","Server","Geral","Conteúdo","Framework","2187",null,"Backport de conteúdo novo","Avaliar","?",false,false],
-[76,"SPT-InsuranceFraud","Server","Geral","Balanceamento","Mercado","1792","ibxccc123/SPT-InsuranceFraud","Fraude no seguro (loot dropado retorna)","Avaliar","?",false,true],
-[77,"SPTVRAMCleaner","Client","Geral","QoL","Gráficos","2173","matsixx/SPTVRAMCleaner","Limpeza de VRAM (autor matsixx, não swiftxp)","Avaliar","?",false,true],
-[78,"StashSearch","Client","Hideout","QoL","Inventário","2148","DrakiaXYZ/SPT-StashSearch","Busca dentro do stash","Avaliar","?",false,true],
-[79,"SwiftXP.ShowMeTheMoney","Misto","Geral","QoL","UI,Mercado","2299","swiftxp-hub/spt-show-me-the-money","Mostra dinheiro/valores em UI","Avaliar","?",false,true],
-[80,"TacticalToasterUNTARGH","Server","Raid","Conteúdo","IA","2342","TacticalToaster/TacticalToasterUNTARGH","Adiciona UNTAR como faction com bots customizados","Avaliar","?",false,true],
-[81,"Tarkov Weather System","Client","Raid","QoL","Mapas","2120","https://gitlab.com/flir063-spt/timeweatherchanger","Time & Weather Changer NG — v2.4.0 (SPT 4.0.13). Autor: flir. Hospedado no **GitLab**","Instalar","?",false,true],
-[82,"TellTheTime","Client","Geral","QoL","UI","2202",null,"Mostra hora atual","Avaliar","?",false,false],
-[83,"Terkoiz.Freecam","Client","Raid","QoL","UI","164","acidphantasm/SPT-Freecam","Câmera livre (debug/replay) — v1.4.6 (último release SPT 3.11). Mantido por acidphantasm","Aguardar","?",false,true],
-[84,"tyfon-hideoutinprogress","Client","Hideout","QoL","Hideout,Inventário","2076","tyfon7/hip","Botão \"Transfer Items\" no hideout (SPT 4.0). Alias: `Tyfon.HideoutInProgress`","Instalar","?",false,true],
-[85,"tyfon-uifixes","Client","Geral","QoL","UI","1342","tyfon7/UIFixes","Coleção de QoL fixes de UI. Aliases: `Tyfon.UIFixes`, `Tyfon.UIFixes.Net`","Avaliar","?",false,true],
-[86,"tyfon-weaponcustomizer","Client","Geral","QoL","Armas","1950","tyfon7/WeaponCustomizer","Fine tune de attachments. Alias: `Tyfon.WeaponCustomizer`","Avaliar","?",false,true],
-[87,"Virtual's Custom Quest Loader","Server","Geral","Framework","Quests","649","VirtualAE/Virtuals-Custom-Quest-Loader","Dependência para mods importarem custom quests. Alias: `VCQL`, `VCQLQuestZones`","Avaliar","?",false,true],
-[88,"VisceralCombat","?","Raid","Realismo","Gráficos",null,"","Efeitos viscerais de combate — distribuído via Patreon/Discord (Valentin The Mad), não publicado no Forge","Avaliar","?",false,false],
-[89,"VolumetricBloodFX","?","Raid","Cosmético","Gráficos",null,"","FX de sangue volumétrico — distribuído via Patreon/Discord (Valentin The Mad), não publicado no Forge","Avaliar","?",false,false],
-[90,"Wara-ModdingStatsHelper","Client","Geral","QoL","UI,Armas","1300","Soulztorm/Wara-ModdingStatsHelper","Helper de stats em modding","Avaliar","?",false,true],
-[91,"WTT-Armory","Server","Geral","Conteúdo","Armas,Quests","2246","WelcomeToTarkov/WTT-Armory","Pack de 50+ armas + quests (WTT team) — v2.0.5 (SPT 4.0.13). 4.0 está em branch separada","Instalar","?",false,true],
-[92,"WTT-PackNStrap","Server","Ambos","Conteúdo","Equipamentos","1278","WelcomeToTarkov/PackNStrap","Battle belt + small cases (WTT team) — v2.0.4 (SPT 4.0.13). Mesmo repo","Instalar","?",false,true],
-[93,"yellowdoge-tarkovrarecollectibles","Server","Geral","Conteúdo","Loot","2318","TheYellowDoge/YellowDoge-TarkovRareCollectibles","Itens raros colecionáveis","Avaliar","?",false,true],
-[94,"zzDrakiaXYZ-LiveFleaPrices","Server","Geral","Balanceamento","Mercado","1131","DrakiaXYZ/SPT-LiveFleaPrices-CSharp","Preços do flea ao vivo (live data) — versão C# do mesmo autor","Instalar","?",false,true],
-[95,"🏠 Band-Aid","Client","Raid","QoL","Framework",null,null,"Fix/patch interno do projeto","Evoluir","?",true,false],
-[96,"🏠 CoordLogger","Client","Raid","Framework","Framework",null,null,"Logger de coordenadas (utilitário interno)","Evoluir","?",true,false],
-[97,"🏠 FikaTransitFix (FikaTransitFixServer)","Server","Raid","Framework","Multiplayer",null,null,"Fix de transit em raids do Fika (interno)","Evoluir","?",true,false],
-[98,"🏠 FixReloadUltraFika","Client","Raid","Framework","Multiplayer,Animações",null,null,"Fix de reload no UltraFika (interno)","Evoluir","?",true,false],
-[99,"🏠 ForceSync","Misto","Ambos","Framework","Multiplayer",null,null,"Força sincronização (interno, relacionado ao UltraFika)","Evoluir","?",true,false],
-[100,"🏠 GhostMercenaries","Server","Raid","Conteúdo","IA",null,null,"Mercenários customizados (interno)","Evoluir","?",true,false],
-[101,"🏠 IdleSprintFix","Client","Raid","QoL","Animações",null,null,"Fix do bug de sprint travado (interno, v1.2.2)","NaoIncluir","?",true,false],
-[102,"🏠 TarkovRedLine (TarkovRedLine-ServerMod)","Server","Geral","Balanceamento","Framework",null,null,"Mod do servidor RedLine — customização proprietária do projeto","Evoluir","?",true,false],
-[103,"🏠 UmbigoPreto-Face the Knight - Mask Fix","Client","Raid","QoL","Equipamentos",null,null,"Fix da máscara do Knight (interno)","Evoluir","?",true,false],
-[104,"🏠 UmbigoPreto-TrueTrauma","Misto","Raid","Realismo","Framework",null,null,"Sistema de trauma realista (interno)","Evoluir","?",true,false],
+[0,"🏠 UltraFika-Plugin","Client","Ambos","Framework","Multiplayer",null,null,"Cliente multiplayer (fork de Fika)","Evoluir","Crítica",true,false,"Sim"],
+[1,"[SVM] Server Value Modifier","Server","Geral","Balanceamento","Framework","236","GhostFenixx/svm-csharp","Modifica valores do servidor (loot, traders, hideout) — último release SPT 3.11","Aguardar","?",false,true,"Sim"],
+[2,"AAAArtem-WTT","Client","Geral","?","?","1023","WelcomeToTarkov/WTT-Artem","🔍 (relacionado ao WTT)","Avaliar","?",false,true,"Sim"],
+[3,"acidphantasm-DelayedFleaSales","Client","Geral","Hardcore","Mercado","2016","acidphantasm/delayedfleasales-csharp","Atrasa vendas no flea market (era Server/TS em 3.x, reescrito como BepInEx C# para 4.0)","Instalar","?",false,true,"Sim"],
+[4,"acidphantasm-moretagcolours","Client","Geral","QoL","UI","1533","acidphantasm/acidphantasm-moretagcolours","Mais cores para tags de itens","Avaliar","?",false,true,"Sim"],
+[5,"acidphantasm-previewsizer","Client","Geral","QoL","UI","2339","acidphantasm/acidphantasm-previewsizer","Redimensiona preview de itens","Avaliar","?",false,true,"Sim"],
+[6,"acidphantasm-progressivebotsystem","Client","Raid","Balanceamento","IA","1594","acidphantasm/progressivebotsystem-csharp","Sistema progressivo de bots (era Server/TS em 3.x, reescrito como BepInEx C# para 4.0)","Instalar","?",false,true,"Sim"],
+[7,"acidphantasm-refsptfriendlyquests","Client","Geral","Balanceamento","Quests","1538","acidphantasm/reffriendlyquests-csharp","Quests amigáveis (compatível com Ref — era Server/TS em 3.x, reescrito como BepInEx C# para 4.0)","Instalar","?",false,true,"Sim"],
+[8,"acidphantasm-simpleworkoutqte","Server","Hideout","QoL","Hideout","1437","acidphantasm/acidphantasm-simpleworkoutqte","QTE de workout no hideout","Avaliar","?",false,true,"Sim"],
+[9,"AirFilterWarning","Client","Hideout","QoL","Hideout","2129","danx91/AirFilterWarning","Aviso de filtro de ar gerador","Avaliar","?",false,true,"Sim"],
+[10,"AmandsGraphics","Client","Raid","Cosmético","Gráficos","592",null,"Configurações gráficas avançadas — último release SPT 3.10","Aguardar","?",false,false,"Sim"],
+[11,"aMoxoPixel-Painter","Server","Geral","Conteúdo","Mercado,Armas","1025","emilanderss0n/Painter","Trader que vende mods de armas pintados","Avaliar","?",false,true,"Sim"],
+[12,"BeltSlot","Client","Ambos","QoL","Inventário,Equipamentos","2181","Trench-foot/BeltSlot","Slot extra de cinto no inventário","Avaliar","?",false,true,"Sim"],
+[13,"BetterRearSights","Client","Raid","Realismo","Armas","1591","peinwastaken/PeinBetterRearSights","Mira traseira melhorada","Avaliar","?",false,true,"Sim"],
+[14,"BorkelRNVG","Client","Raid","Realismo","Equipamentos","954","Borkel/RealisticNVG-client-2","NVGs realistas com máscaras + luz natural — v2.1.1 (SPT 4.0.13). Mesmo repo serve 3.x e 4.0 (versão por release)","Instalar","?",false,true,"Sim"],
+[15,"BRNVG_N-15Adapter","?","Raid","Realismo","Equipamentos",null,"","Adaptador N-15 para BRNVG (sub-pasta interna do mod BorkelRNVG, não publicado separado)","Avaliar","?",false,false,"Sim"],
+[16,"ChooChoo-TraderModding","Misto","Geral","QoL","Mercado,Armas","1283","Soulztorm/ChooChoo-TraderModding","Modding via traders","Avaliar","?",false,true,"Sim"],
+[17,"ContinuousLoadAmmo","Client","Raid","QoL","Munições","2112","ozen-m/SPT-ContinuousLoadAmmo","Carregamento contínuo de munição","Avaliar","?",false,true,"Sim"],
+[18,"CWX","Client","Geral","Conteúdo","Framework","1454","CWXDEV/CWX-Mods","Coleção de mods do CWX (CWX-MegaMod)","Avaliar","?",false,true,"Sim"],
+[19,"DanW-SPTQuestingBots","Server","Raid","Realismo","IA","1109","dwesterwick/SPTQuestingBots","Bots fazendo quests + spawns PMC mimic live","Avaliar","?",false,true,"Sim"],
+[20,"DeadzoneMod","Client","Raid","Realismo","Armas","1001",null,"Deadzone/free aim style insurgency","Avaliar","?",false,false,"Sim"],
+[21,"desze-UnlockHideoutCustomization","Server","Hideout","QoL","Hideout","2053",null,"Desbloqueia customização do hideout","Avaliar","?",false,false,"Sim"],
+[22,"DewardianDev-MOAR","Server","Raid","Balanceamento","IA","789","Andrewgdewar/MOAR","Bot spawning system","Avaliar","?",false,true,"Sim"],
+[23,"dk.SeparateHostility","Client","Raid","Realismo","IA","2248",null,"Separa hostilidade entre facções","Avaliar","?",false,false,"Sim"],
+[24,"doordash","Client","Raid","Realismo","Mapas","2214","bmpq/spt-doordash","Breaching de portas trancadas (SPT 4.0)","Avaliar","?",false,true,"Sim"],
+[25,"DrakiaXYZ-BigBrain","Client","Raid","Framework","IA","902","DrakiaXYZ/SPT-BigBrain","Library de combat layers para bots (dep. de SAIN) — v1.4.0 (SPT 4.0.13). Mesmo repo, versionado por tags","Instalar","?",false,true,"Sim"],
+[26,"DrakiaXYZ-EquipFromWeaponRack","Client","Hideout","QoL","Hideout,Armas","1136","DrakiaXYZ/SPT-EquipFromWeaponRack","Equipar arma direto do rack do hideout","Avaliar","?",false,true,"Sim"],
+[27,"DrakiaXYZ-LootRadius","Client","Raid","QoL","Loot","1349",null,"Aumenta raio de loot","Avaliar","?",false,false,"Sim"],
+[28,"DrakiaXYZ-QuickMoveToContainer","Client","Ambos","QoL","Inventário","1341","DrakiaXYZ/SPT-QuickMoveToContainer","Ctrl+Click move item para container aberto","Avaliar","?",false,true,"Sim"],
+[29,"DrakiaXYZ-SearchOpenContainers","Client","Ambos","QoL","Inventário","934","DrakiaXYZ/SPT-SearchOpenContainers","Buscar dentro de containers abertos","Avaliar","?",false,true,"Sim"],
+[30,"DrakiaXYZ-Waypoints","Client","Raid","Framework","IA,Mapas","827","DrakiaXYZ/SPT-Waypoints","Expande navmesh dos mapas (dep. de SAIN) — v1.8.2 (SPT 4.0.13). Mesmo repo, versionado por tags","Instalar","?",false,true,"Sim"],
+[31,"DynamicExternalResolution","Client","Geral","QoL","Gráficos","929",null,"Resolução externa dinâmica (DERP)","Avaliar","?",false,false,"Sim"],
+[32,"DynamicMaps (SPTDynamicMaps)","Client","Raid","QoL","UI,Mapas","1431","mpstark/SPT-DynamicMaps","UI custom de mapas com tracking de quests","Avaliar","?",false,true,"Sim"],
+[33,"Eco-Attachment Emporium","Server","Geral","Conteúdo","Armas","2288","Eco9341/tarkovMods","Mais attachments para armas","Avaliar","?",false,true,"Sim"],
+[34,"ExpandedFpsLimit","Client","Geral","QoL","Gráficos","2066","Mugnum/SPT_ExpandedFpsLimit","Aumenta limite de FPS (até 360)","Avaliar","?",false,true,"Sim"],
+[35,"Fika","Misto","Ambos","Framework","Multiplayer","2326","project-fika/Fika-Plugin","Multiplayer base (BepInEx + server) — v2.2.5 (SPT 4.0.13). Mesmo repo. Aliases: `fika-server`, `Fika.Core`","Instalar","?",false,true,"Sim"],
+[36,"flir-betterkeysng","Client","Geral","QoL","UI","1888","https://gitlab.com/flir063-spt/betterkeys-ng","UI melhorada para keys — autor `flir` (mesmo de Tarkov Weather System); provável Client","Avaliar","?",false,true,"Sim"],
+[37,"FOVFix","Client","Raid","QoL","Gráficos","701","space-commits/SPT-FOV-Fix","Fix de FOV (Fontaine's FOV Fix) — releases para SPT 4.x","Instalar","?",false,true,"Sim"],
+[38,"gaylatea-deadlyblades","Server","Raid","Balanceamento","Armas","819",null,"Lâminas mais letais","Avaliar","?",false,false,"Sim"],
+[39,"Gaylatea-UseLooseLoot","Client","Raid","QoL","Loot","933","DrakiaXYZ/SPT-UseLooseLoot","Usa loose loot direto sem entrar no inventário","Avaliar","?",false,true,"Sim"],
+[40,"HandsAreNotBusy","Client","Raid","QoL","Animações","1298","Lacyway/HandsAreNotBusy","Mãos não ficam ocupadas (animação)","Avaliar","?",false,true,"Sim"],
+[41,"hideoutcat","Client","Hideout","Cosmético","Hideout","2038",null,"Gato no hideout (5 texturas configuráveis)","Avaliar","?",false,false,"Sim"],
+[42,"HollywoodFX","Client","Raid","Cosmético","Gráficos","2003","SleepingPills/HollywoodFX","FX cinematográficos (impactos, blood) — v1.8.4 (SPT 4.0.13). Autor: JankyTheClown / SleepingPills. Mesmo repo","Instalar","?",false,true,"Sim"],
+[43,"HollywoodGraphics","?","Raid","Cosmético","Gráficos",null,"","Gráficos cinematográficos — sem mod separado no Forge (provavelmente pasta interna do HollywoodFX)","Avaliar","?",false,false,"Sim"],
+[44,"IcyClawz.CustomInteractions","Client","Ambos","QoL","UI","938","IgorEisberg/SPT-ClientMods","Interações customizadas — perfil do autor: hub.sp-tarkov.com/user/34778-icyclawz (autor IgorEisberg)","Avaliar","?",false,true,"Sim"],
+[45,"IcyClawz.ItemContextMenuExt","Client","Ambos","QoL","UI","940","IgorEisberg/SPT-ClientMods","Menu de contexto estendido em itens (SPT 4.0.13, 18.1K downloads). Repo monorepo do autor","Instalar","?",false,true,"Sim"],
+[46,"IcyClawz.ItemSellPrice","Client","Geral","QoL","Mercado,UI","909","IgorEisberg/SPT-ClientMods","Preços de venda em todos os traders (SPT 4.0.13, 81.5K downloads). Repo monorepo do autor","Instalar","?",false,true,"Sim"],
+[47,"IcyClawz.MunitionsExpert","Client","Geral","QoL","Munições,UI","972","IgorEisberg/SPT-ClientMods","Info detalhada de munição — perfil do autor: hub.sp-tarkov.com/user/34778-icyclawz (autor IgorEisberg)","Avaliar","?",false,true,"Sim"],
+[48,"IhanaMies-LootValueBackend","Client","Ambos","QoL","Loot,UI","1155",null,"Mostra valor de loot na UI — último release SPT 3.11","Aguardar","?",false,false,"Sim"],
+[49,"inory-agonysfx","Client","Raid","Realismo","Gráficos","1831","ppowa/agonysfx","SFX de dor/agonia","Avaliar","?",false,true,"Sim"],
+[50,"JBOBYH_ItemPreviewQoL","Client","Geral","QoL","UI","2206","jbobyh/JBOBYH_ItemPreviewQoL","QoL de preview de itens","Avaliar","?",false,true,"Sim"],
+[51,"Jehree-GildedKeyStorage","Client","Ambos","QoL","Inventário","865","DrakiaXYZ/SPT-GildedKeyStorage-CSharp","Storage especializado para keys — original do Jehree (3.x), fork C# do DrakiaXYZ é o de 4.0","Instalar","?",false,true,"Sim"],
+[52,"Kaeno-TraderScrolling","Client","Geral","QoL","Mercado,UI","1089","CWXDEV/Kaeno-TraderScrolling","Scroll na lista de traders","Avaliar","?",false,true,"Sim"],
+[53,"Kat.BetterAmmoLoadingList","Client","Ambos","QoL","Munições,UI","2221","Katrin0522/SPT-BetterAmmoLoadingList","Lista melhorada de loading de munição","Avaliar","?",false,true,"Sim"],
+[54,"kmyuhkyuk-EnvironmentReplace","Client","Raid","Conteúdo","Mapas","1371","minihazel/EnvironmentReplace","Substitui ambientes/mapas","Avaliar","?",false,true,"Sim"],
+[55,"kmyuhkyuk-KmyTarkovApi","Client","Geral","Framework","Framework","898","kmyuhkyuk/KmyTarkovApi","Framework para client mods","Avaliar","?",false,true,"Sim"],
+[56,"lacyway-mergeconsumables (MergeConsumables)","Misto","Ambos","QoL","Inventário","1657","Lacyway/MergeConsumables","Merge de consumíveis (médicos, comida)","Avaliar","?",false,true,"Sim"],
+[57,"MoreCheckmarks","Misto","Ambos","QoL","UI","861","TommySoucy/MoreCheckmarks","Checkmarks coloridos em itens (quests, hideout, barters) — v2.1.0 (SPT 4.0.11). Alias: `MoreCheckmarksBackend`","Instalar","?",false,true,"Sim"],
+[58,"MoxoPixel-MagTape","Server","Geral","Cosmético","Munições","1018","emilanderss0n/MagTape","Magazines com tape (visual + tagging)","Avaliar","?",false,true,"Sim"],
+[59,"MoxoPixel-TacticalGearComponent","Server","Geral","Conteúdo","Equipamentos","1125","emilanderss0n/TGC","Componente de equipamento tático","Avaliar","?",false,true,"Sim"],
+[60,"MusicManiac-LessRestrictingHeadwear","Server","Geral","Balanceamento","Equipamentos","922","MusicManiac/LessRestrictingHeadwear","Headwear menos restritivo — v4.0.13 disponível","Instalar","?",false,true,"Sim"],
+[61,"platinum-theblacklist","Misto","Geral","Balanceamento","Mercado","755","ArchangelWTF/spt-the-blacklist","Blacklist de itens (flea market enhancements)","Avaliar","?",false,true,"Sim"],
+[62,"PlayerEncumbranceBar","Client","Ambos","QoL","UI,Inventário","1374","Lacyway/SPT-PlayerEncumbranceBar","Barra de encumbrance no inventário — v1.2.2 (SPT 4.0.13, maintainer 4.0: Lacyway)","Instalar","?",false,true,"Sim"],
+[63,"Pluto! - SPT Battlepass","Server","Geral","Progressão","Quests,Progressão","2098",null,"Battlepass para SPT (Arena Season 0)","Avaliar","?",false,false,"Sim"],
+[64,"QuickSell","Client","Geral","QoL","Mercado","1732","TadMaj/Tarkov-QuickSell","Venda rápida de itens (context menu)","Avaliar","?",false,true,"Sim"],
+[65,"RaiRai.ColorConverterAPI","Client","Geral","Framework","UI","1090","RaiRaiTheRaichu/ColorConverterAPI","API utilitária de conversão de cores","Avaliar","?",false,true,"Sim"],
+[66,"Realism","Misto","Ambos","Realismo","Framework","416",null,"Overhaul de realismo (balística, médica, hazards) — último release SPT 3.9.x. Aliases: `SPT-Realism`, `RealismMod`","Aguardar","?",false,false,"Sim"],
+[67,"redlaser42-Better Headset Descriptions","Client","Geral","QoL","UI,Equipamentos","2199",null,"Adiciona stats de headsets às descrições dos itens — sem repo público","Avaliar","?",false,false,"Sim"],
+[68,"redlaser42-Increase Climb Height","Server","Raid","Balanceamento","Animações","1575","","Aumenta altura máxima de escalada","Avaliar","?",false,true,"Sim"],
+[69,"SAIN","Client","Raid","Realismo","IA","791","ArchangelWTF/SAIN","Substituição completa de IA dos bots — v4.4.3 (SPT 4.0.13). **3.x: repo Solarint original** · **4.2.0+: fork ArchangelWTF**. Depende de BigBrain + Waypoints","Instalar","?",false,true,"Sim"],
+[70,"seasoniterator","?","?","?","?","","","🔍 (estações/seasonal?) — não confirmado no Forge","Avaliar","?",false,false,"Sim"],
+[71,"shibdib-NoTransitTasks","Server","Raid","Balanceamento","Quests","1944",null,"Remove tasks de transit","Avaliar","?",false,false,"Sim"],
+[72,"Skwizzy-LootingBots","Misto","Raid","Realismo","IA,Loot","812","Skwizzy/SPT-LootingBots","Bots fazendo loot (BepInEx + server)","Avaliar","?",false,true,"Sim"],
+[73,"somtam.NoBush","Client","Raid","Realismo","IA","2123",null,"Para AI atirar em quem está na bush","Avaliar","?",false,false,"Sim"],
+[74,"somtam.SimpleDeClutter","Client","Raid","QoL","Gráficos","2139",null,"Reduz clutter visual","Avaliar","?",false,false,"Sim"],
+[75,"SPT-FreshContentBackport","Server","Geral","Conteúdo","Framework","2187",null,"Backport de conteúdo novo","Avaliar","?",false,false,"Sim"],
+[76,"SPT-InsuranceFraud","Server","Geral","Balanceamento","Mercado","1792","ibxccc123/SPT-InsuranceFraud","Fraude no seguro (loot dropado retorna)","Avaliar","?",false,true,"Sim"],
+[77,"SPTVRAMCleaner","Client","Geral","QoL","Gráficos","2173","matsixx/SPTVRAMCleaner","Limpeza de VRAM (autor matsixx, não swiftxp)","Avaliar","?",false,true,"Sim"],
+[78,"StashSearch","Client","Hideout","QoL","Inventário","2148","DrakiaXYZ/SPT-StashSearch","Busca dentro do stash","Avaliar","?",false,true,"Sim"],
+[79,"SwiftXP.ShowMeTheMoney","Misto","Geral","QoL","UI,Mercado","2299","swiftxp-hub/spt-show-me-the-money","Mostra dinheiro/valores em UI","Avaliar","?",false,true,"Sim"],
+[80,"TacticalToasterUNTARGH","Server","Raid","Conteúdo","IA","2342","TacticalToaster/TacticalToasterUNTARGH","Adiciona UNTAR como faction com bots customizados","Avaliar","?",false,true,"Sim"],
+[81,"Tarkov Weather System","Client","Raid","QoL","Mapas","2120","https://gitlab.com/flir063-spt/timeweatherchanger","Time & Weather Changer NG — v2.4.0 (SPT 4.0.13). Autor: flir. Hospedado no **GitLab**","Instalar","?",false,true,"Sim"],
+[82,"TellTheTime","Client","Geral","QoL","UI","2202",null,"Mostra hora atual","Avaliar","?",false,false,"Sim"],
+[83,"Terkoiz.Freecam","Client","Raid","QoL","UI","164","acidphantasm/SPT-Freecam","Câmera livre (debug/replay) — v1.4.6 (último release SPT 3.11). Mantido por acidphantasm","Aguardar","?",false,true,"Sim"],
+[84,"tyfon-hideoutinprogress","Client","Hideout","QoL","Hideout,Inventário","2076","tyfon7/hip","Botão \"Transfer Items\" no hideout (SPT 4.0). Alias: `Tyfon.HideoutInProgress`","Instalar","?",false,true,"Sim"],
+[85,"tyfon-uifixes","Client","Geral","QoL","UI","1342","tyfon7/UIFixes","Coleção de QoL fixes de UI. Aliases: `Tyfon.UIFixes`, `Tyfon.UIFixes.Net`","Avaliar","?",false,true,"Sim"],
+[86,"tyfon-weaponcustomizer","Client","Geral","QoL","Armas","1950","tyfon7/WeaponCustomizer","Fine tune de attachments. Alias: `Tyfon.WeaponCustomizer`","Avaliar","?",false,true,"Sim"],
+[87,"Virtual's Custom Quest Loader","Server","Geral","Framework","Quests","649","VirtualAE/Virtuals-Custom-Quest-Loader","Dependência para mods importarem custom quests. Alias: `VCQL`, `VCQLQuestZones`","Avaliar","?",false,true,"Sim"],
+[88,"VisceralCombat","?","Raid","Realismo","Gráficos",null,"","Efeitos viscerais de combate — distribuído via Patreon/Discord (Valentin The Mad), não publicado no Forge","Avaliar","?",false,false,"Sim"],
+[89,"VolumetricBloodFX","?","Raid","Cosmético","Gráficos",null,"","FX de sangue volumétrico — distribuído via Patreon/Discord (Valentin The Mad), não publicado no Forge","Avaliar","?",false,false,"Sim"],
+[90,"Wara-ModdingStatsHelper","Client","Geral","QoL","UI,Armas","1300","Soulztorm/Wara-ModdingStatsHelper","Helper de stats em modding","Avaliar","?",false,true,"Sim"],
+[91,"WTT-Armory","Server","Geral","Conteúdo","Armas,Quests","2246","WelcomeToTarkov/WTT-Armory","Pack de 50+ armas + quests (WTT team) — v2.0.5 (SPT 4.0.13). 4.0 está em branch separada","Instalar","?",false,true,"Sim"],
+[92,"WTT-PackNStrap","Server","Ambos","Conteúdo","Equipamentos","1278","WelcomeToTarkov/PackNStrap","Battle belt + small cases (WTT team) — v2.0.4 (SPT 4.0.13). Mesmo repo","Instalar","?",false,true,"Sim"],
+[93,"yellowdoge-tarkovrarecollectibles","Server","Geral","Conteúdo","Loot","2318","TheYellowDoge/YellowDoge-TarkovRareCollectibles","Itens raros colecionáveis","Avaliar","?",false,true,"Sim"],
+[94,"zzDrakiaXYZ-LiveFleaPrices","Server","Geral","Balanceamento","Mercado","1131","DrakiaXYZ/SPT-LiveFleaPrices-CSharp","Preços do flea ao vivo (live data) — versão C# do mesmo autor","Instalar","?",false,true,"Sim"],
+[95,"🏠 Band-Aid","Client","Raid","QoL","Framework",null,null,"Fix/patch interno do projeto","Evoluir","?",true,false,"Sim"],
+[96,"🏠 CoordLogger","Client","Raid","Framework","Framework",null,null,"Logger de coordenadas (utilitário interno)","Evoluir","?",true,false,"Sim"],
+[97,"🏠 FikaTransitFix (FikaTransitFixServer)","Server","Raid","Framework","Multiplayer",null,null,"Fix de transit em raids do Fika (interno)","Evoluir","?",true,false,"Sim"],
+[98,"🏠 FixReloadUltraFika","Client","Raid","Framework","Multiplayer,Animações",null,null,"Fix de reload no UltraFika (interno)","Evoluir","?",true,false,"Sim"],
+[99,"🏠 ForceSync","Misto","Ambos","Framework","Multiplayer",null,null,"Força sincronização (interno, relacionado ao UltraFika)","Evoluir","?",true,false,"Sim"],
+[100,"🏠 GhostMercenaries","Server","Raid","Conteúdo","IA",null,null,"Mercenários customizados (interno)","Evoluir","?",true,false,"Sim"],
+[101,"🏠 IdleSprintFix","Client","Raid","QoL","Animações",null,null,"Fix do bug de sprint travado (interno, v1.2.2)","NaoIncluir","?",true,false,"Sim"],
+[102,"🏠 TarkovRedLine (TarkovRedLine-ServerMod)","Server","Geral","Balanceamento","Framework",null,null,"Mod do servidor RedLine — customização proprietária do projeto","Evoluir","?",true,false,"Sim"],
+[103,"🏠 UmbigoPreto-Face the Knight - Mask Fix","Client","Raid","QoL","Equipamentos",null,null,"Fix da máscara do Knight (interno)","Evoluir","?",true,false,"Sim"],
+[104,"🏠 UmbigoPreto-TrueTrauma","Misto","Raid","Realismo","Framework",null,null,"Sistema de trauma realista (interno)","Evoluir","?",true,false,"Sim"],
+[105,"Climbable Ladders","Client","Raid","Realismo","Mapas,Animações","2649","bmpq/spt-ladders","Habilita escalada de escadas em vários mapas (woods bunker, customs watchtower etc.) — SPT 4.0.13","Instalar","?",false,true,"New"],
+[106,"Magazine Check Interrupt","Client","Raid","QoL","Munições,Animações","2643","ozen-m/SPT-MagCheckInterrupt","Transição contínua de magazine check para reload sem sair da animação — SPT 4.0.13","Instalar","?",false,true,"New"],
+[107,"Stance Sync","Client","Raid","QoL","Animações,Armas","2639","minihazel/StanceSync","Sincroniza lean e shoulder swap; opção para desabilitar lean sincronizado ao mirar — SPT 4.0.13","Instalar","?",false,true,"New"],
+[108,"Stat Rewards","Client","Geral","Progressão","Progressão","2655","Chazut/StatRewards","Recompensas aleatórias ao atingir marcos de stats (kills, dano, loot etc.) — 48 milestones repetíveis, configurável — SPT 4.0.13","Instalar","?",false,true,"New"],
+[109,"Brighter Interiors","Client","Raid","QoL","Gráficos","2613","7Bpencil/SPT-ReduceFakeInteriorShadow","Reduz intensidade de sombras internas para melhorar visibilidade em ambientes fechados — SPT 4.0.13","Instalar","?",false,true,"New"],
+[110,"RZCustomProfiles","Client","Geral","QoL","UI","2614","remzdnb/RZ-SPTMods","Gerenciamento de templates de perfil de personagem — v1.1.0 (SPT 4.0.13). Autor: RemzDNB","Instalar","?",false,true,"New"],
+[111,"LoadBundleEvenFaster","Client","Geral","QoL","Gráficos","2599","s8ga/SPT_LoadBundleEvenFaster","Reduz tempo de carregamento de bundles — camada extra sobre LoadBundleFaster. **Dep:** LoadBundleFaster ≥ v1.0.0. SPT 4.0.13","Instalar","?",false,true,"New"],
+[112,"Recoil Rework (Legacy)","Server","Raid","Realismo","Armas","2190","peinwastaken/SPTRecoilRework","Reescreve mecânica de recoil das armas (autor: pein) — v1.10.0 recompilada para SPT 4.0.13","Instalar","?",false,true,"New"],
+[113,"Gunsmith Barters","Server","Geral","Hardcore","Mercado,Armas","1963","Solethia/Kipperworks.GunsmithBarters","Adiciona barters no Mecânico voltados a runs hardcore — v2.0.2 (SPT 4.0.13). ⚠️ pode fazer alterações permanentes no perfil","Instalar","?",false,true,"New"],
+[114,"Camera Position Control & Custom Weapon Stances","Client","Raid","QoL","Animações,Armas","2572","shengzhanzhe/stancesAndCameraPositionSPT4.0.11","Controle customizável de posição da câmera FPV e stances de arma — v1.1.5 (SPT 4.0.13). ⚠️ ao atualizar de ≤0.9.7 remover `CameraRotationMod.dll` antigo","Instalar","?",false,true,"New"],
+[115,"Manimal's Ammo Loading Animations","Client","Raid","Realismo","Munições,Animações","2681","danauraborealis/ManimalAmmoLoadingAnimations","Animações em primeira pessoa para carregar munição em magazines — v1.5.0 (SPT 4.0.13). **Dep:** WTT-CommonLib ≥ v2.0.20. ⚠️ incompatível com Fika","Instalar","?",false,true,"New"],
+[116,"Refined Flea Offer List","Client","Geral","QoL","Mercado,UI","2623","Klamist/RefinedFleaOfferList","Exibe apenas a oferta mais barata por item no flea market; display inteligente de rublos e variantes de arma/armadura — v1.0.1 (SPT 4.0.13). Autor: ciallomako","Instalar","?",false,true,"New"],
+[117,"Knight Mask Fix (4.0+)","Client","Raid","Cosmético","Equipamentos","2685","TheOfficialSkull/FW---Knight-Mask-Fix---4.0.13","Corrige textura ausente da máscara 'Death Knight' no PMC Knight e em modelos de jogador — SPT 4.0.13+. Autor: Flex Wayne","Instalar","?",false,true,"New"],
+[118,"Peltor TEP-300 earplugs backport and fixes","Client","Raid","Conteúdo","Equipamentos","2420","Dight67/TEP-300-Backport-Fixes","Restaura os fones militares TEP-300 do EFT Live no SPT, com correções — SPT 4.0.13. Autor: nem","Instalar","?",false,true,"New"],
+[119,"Skills Extended","Server","Geral","?","?","2383","CJ-SPT/Skills-Extended","Expande e aprimora o sistema de skills do personagem com mecânicas mais impactantes — compatível com Fika, SPT 4.0.13","Instalar","?",false,true,"New"],
+[120,"Wolfik's Heavy Trooper Masks - Reupload","Client","Raid","Conteúdo","Equipamentos","1569","Hood26/WolfiksHeavyTroopers","Adiciona cinco máscaras pesadas em variantes de cor (Black, Tan, Black/Coyote, Wolf, Cult) com proteção real de armadura e desbloqueio por quests — SPT 4.0.13","Instalar","?",false,true,"New"],
 ];
 
+// ── FORGE SLUGS ───────────────────────────────────────────────────────────────
+// Maps forge_id → URL slug so links resolve to the full mod page
+// Maps forge_id → forge-static image file stem (number or hash string)
+const FORGE_IMG = {
+  '164':279,'236':379,'416':606,'592':813,'649':885,'701':942,
+  '791':1119,'812':1096,'819':1106,'827':1119,'861':1159,'865':1166,
+  '898':1215,'909':1230,'922':1247,'929':1259,'933':1264,
+  '934':1265,'938':1278,'940':1283,'954':1303,'972':1324,'1001':1381,
+  '1018':1404,'1023':1410,'1025':1412,'1089':1508,'1090':1509,'1109':1119,
+  '1125':1555,'1131':1561,'1136':1567,'1155':1606,'1278':1790,'1283':1795,
+  '1298':1810,'1300':1814,
+  '1341':1859,'1342':1860,'1349':1870,'1371':1895,'1374':1898,'1431':1981,
+  '1437':1989,'1454':2010,'1533':2100,'1538':2108,'1575':2154,'1591':2176,
+  '1594':2180,'1657':2262,'1732':2364,'1792':2433,'1888':2550,'1944':2616,
+  '1950':2622,'1963':2640,'2003':2683,'2016':2696,'2038':2720,'2053':2736,
+  '2066':2750,'2076':2760,'2098':2783,'2112':2798,'2120':2807,'2123':2811,
+  '2129':2820,'2139':2838,'2148':2848,'2173':2876,'2181':2884,'2187':2890,
+  '2190':2893,'2199':2902,'2202':2905,'2206':2909,'2214':2917,'2221':2924,
+  '2246':2952,'2288':3002,'2318':3034,
+  '2299':'yPa3Rvkdi3qKUN2pWd0JqVkHyAwz4DbCLV4YLMAV',
+  '2326':'RhGQs4svMQ3MWGiEwn8WUQXxP3GUdVhLorptQcXA',
+  '2339':'Pidu179c2KNZq23FqafCqyoXbHfRQ8XatisK1VZw',
+  '2342':'VNaKN1GqxSIjIbbS8an0ESaicQV3wCU9pQgO3uIu',
+  '2572':'sNoth36sbfxMe1IHH8ZvIiYJhl2O55nJ8Cdvxgee',
+  '2599':'RHxI0ReYobqwolgwO02NEHtuFQFBfYLMYLNDS6f7',
+  '2613':'VejclLjdj2rgw60sdA8i87aGLItCNiGSW9BVeQRu',
+  '2614':'32xyvFVK2NIrQ2oEDa6b7Ln9dtR2MYRiCIbPiT6V',
+  '2639':'PTaUXehk53O1vXxNfCuDqUzyn1rdKDpLOn0GWRD0',
+  '2643':'K6k2gHXRlaOCGFfCheE5OOvPSLQpj1JdvZ2COTiT',
+  '2649':'MuwWR4Wk4gWeYJOl8yw4h4Kn2ZCsPGM11Sbwsvtl',
+  '2655':'LBFkAE3PgpVUoY3RjXaPOAUcEU1hEygvP4FcrZWQ',
+  '2681':'K449U2CG8oTyYLQzrGfB7aGMH9mvOsM0y53lhJx4',
+  '2623':'fNhv6FnvWx2a7LyqYtRCYQhy48ui9hqTCtNifOf0',
+  '2685':'3mzkHXwJbLde5zuHDdlrh4xJOV5UIm2eC37JfVKv',
+  '2420':'9CpnqY1byslN23Dsv4BvsK0kMLTxBU6pJSTSbyiy',
+  '1569':2145,
+};
+
+const FORGE_SLUGS = {
+  '164':'freecam',
+  '236':'server-value-modifier-svm',
+  '416':'spt-realism-mod',
+  '592':'amandss-graphics',
+  '649':'virtuals-custom-quest-loader',
+  '701':'fontaines-fov-fix',
+  '755':'the-blacklist-flea-market-enhancements',
+  '789':'moar-bagels-ultra-lite-spawn-mod',
+  '791':'sain-solarints-ai-modifications-full-ai-combat-system-replacement',
+  '812':'looting-bots',
+  '819':'deadly-blades',
+  '827':'waypoints-expanded-navmesh',
+  '861':'morecheckmarks',
+  '865':'gilded-key-storage',
+  '898':'kmy-tarkov-api',
+  '902':'bigbrain',
+  '909':'item-sell-price',
+  '922':'less-restricting-headwear',
+  '929':'dynamic-external-resolution-patch-derp',
+  '933':'use-loose-loot',
+  '934':'search-open-containers',
+  '938':'custom-interactions',
+  '940':'item-context-menu-extended',
+  '954':'borkels-realistic-night-vision-goggles-nvgs-and-t-7',
+  '972':'munitions-expert-reboot',
+  '1001':'deadzone',
+  '1018':'mag-tape',
+  '1023':'wtt-artem',
+  '1025':'painter',
+  '1089':'kaeno-traderscrolling',
+  '1090':'color-converter-api',
+  '1109':'questing-bots',
+  '1125':'tactical-gear-component',
+  '1131':'live-flea-prices',
+  '1136':'equip-from-weapon-rack',
+  '1155':'lootvalue',
+  '1278':'wtt-pack-n-strap',
+  '1283':'trader-modding-and-improved-weapon-building',
+  '1298':'handsarenotbusy',
+  '1300':'modding-stats-helper-by-wara',
+  '1341':'quick-move-to-containers',
+  '1342':'ui-fixes',
+  '1349':'loot-radius',
+  '1371':'environment-replace',
+  '1374':'player-encumbrance-bar',
+  '1431':'dynamic-maps',
+  '1437':'simple-workout-qte',
+  '1454':'cwx-megamod',
+  '1533':'more-tag-colours',
+  '1538':'ref-spt-friendly-quests',
+  '1575':'increase-climb-height',
+  '1591':'better-rear-sights',
+  '1594':'apbs-acids-progressive-bot-system',
+  '1657':'mergeconsumables',
+  '1732':'quicksell',
+  '1792':'insurance-fraud',
+  '1831':'agony-sfx',
+  '1888':'better-keys-ng',
+  '1944':'no-transit-tasks',
+  '1950':'weapon-customizer',
+  '2003':'hollywoodfx',
+  '2016':'delayed-flea-sales',
+  '2038':'hideout-cat',
+  '2053':'unlock-all-hideout-customization',
+  '2066':'expanded-fps-limit',
+  '2076':'hideout-in-progress',
+  '2098':'spt-battlepass',
+  '2112':'continuous-load-ammo',
+  '2120':'time-weather-changer-ng',
+  '2123':'no-bush-updated-for-311',
+  '2129':'air-filter-warning',
+  '2139':'simple-declutter',
+  '2148':'stash-search',
+  '2173':'vram-cleaner',
+  '2181':'belt-slot',
+  '2187':'fresh-content-backport',
+  '2199':'better-headset-descriptions',
+  '2202':'tell-the-time',
+  '2206':'item-preview-qol-screenshots',
+  '2214':'doordash',
+  '2221':'ball-better-ammo-loading-list',
+  '2246':'wtt-armory',
+  '2248':'separate-hostility',
+  '2288':'ecos-attachment-emporium',
+  '2299':'show-me-the-money',
+  '2318':'tarkov-rare-collectibles',
+  '2326':'project-fika',
+  '2339':'preview-sizer',
+  '2342':'untar-go-home',
+  '1963':'gunsmith-barters',
+  '2190':'recoil-rework-legacy',
+  '2572':'camera-position-control-custom-weapon-stances',
+  '2599':'loadbundleevenfaster',
+  '2613':'brighter-interiors',
+  '2614':'rzcustomprofiles',
+  '2639':'stance-sync',
+  '2643':'magazine-check-interrupt',
+  '2649':'climbable-ladders',
+  '2655':'stat-rewards',
+  '2681':'manimals-ammo-loading-animations',
+  '2623':'refined-flea-offer-list',
+  '2685':'knight-mask-fix-40',
+  '2420':'peltor-tep-300-earplugs-backport-and-fixes',
+  '1569':'wolfiks-heavy-trooper-masks-reupload',
+};
+
 // ── INDICES ───────────────────────────────────────────────────────────────────
-const I = {n:0,name:1,tipo:2,atu:3,cat:4,esc:5,forge:6,r4:7,fn:8,status:9,pri:10,intern:11,spt4:12};
+const I = {n:0,name:1,tipo:2,atu:3,cat:4,esc:5,forge:6,r4:7,fn:8,status:9,pri:10,intern:11,spt4:12,trl:13};
 
 // ── LABELS & ICONS ────────────────────────────────────────────────────────────
 const CAT_META = {
@@ -406,9 +632,9 @@ const ESC_META = {
 };
 
 const STATUS_LABELS = {
-  'Avaliar':'AVALIAR','Instalar':'INSTALAR','Evoluir':'EVOLUIR',
+  'Avaliar':'AVALIAR','Instalar':'À INSTALAR','Evoluir':'EVOLUIR',
   'Desenvolver':'DESENVOLVER','Aguardar':'AGUARDAR',
-  'Bloqueado':'BLOQUEADO','NaoIncluir':'NÃO INCLUIR',
+  'Bloqueado':'BLOQUEADO','NaoIncluir':'NÃO INCLUIR','Instalado':'INSTALADO',
 };
 
 const TIPO_META = {
@@ -421,11 +647,50 @@ const ATU_META = {
   'Geral':   {icon:'🌐'}, 'Hideout':{icon:'🏚️'}, '?':{icon:''},
 };
 
+// ── STATUS OVERRIDES ──────────────────────────────────────────────────────────
+const STATUS_OVR_KEY = 'spt4-mods-status';
+function loadStatusOverrides() {
+  try { return new Map(Object.entries(JSON.parse(localStorage.getItem(STATUS_OVR_KEY)||'{}')).map(([k,v])=>[+k,v])); }
+  catch { return new Map(); }
+}
+function saveStatusOverrides() {
+  const obj = {}; state.statusOverrides.forEach((v,k) => { obj[k]=v; });
+  localStorage.setItem(STATUS_OVR_KEY, JSON.stringify(obj));
+}
+function setStatusOverride(n, status) {
+  state.statusOverrides.set(n, status);
+  saveStatusOverrides();
+  renderStats();
+  render();
+}
+function effectiveStatus(m) {
+  return state.statusOverrides.get(m[I.n]) || m[I.status];
+}
+
+// ── INSTALLED STATE ───────────────────────────────────────────────────────────
+const INST_KEY = 'spt4-mods-installed';
+function loadInstalled() {
+  try { return new Set(JSON.parse(localStorage.getItem(INST_KEY) || '[]')); }
+  catch { return new Set(); }
+}
+function saveInstalled() {
+  localStorage.setItem(INST_KEY, JSON.stringify([...state.installed]));
+}
+function toggleInstalled(n) {
+  if (state.installed.has(n)) state.installed.delete(n);
+  else state.installed.add(n);
+  saveInstalled();
+  renderStats();
+  render();
+}
+
 // ── STATE ─────────────────────────────────────────────────────────────────────
 const state = {
   sort: {col:'n', dir:1},
-  filters: {status:new Set(), tipo:new Set(), atu:new Set(), cat:new Set(), esc:new Set(), origin:new Set(), spt4:new Set()},
+  filters: {status:new Set(), tipo:new Set(), atu:new Set(), cat:new Set(), esc:new Set(), origin:new Set(), spt4:new Set(), inst:new Set(), trl:new Set()},
   review: false,
+  installed: loadInstalled(),
+  statusOverrides: loadStatusOverrides(),
 };
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
@@ -442,8 +707,8 @@ function needsReview(m) {
 // ── BUILD FILTERS ─────────────────────────────────────────────────────────────
 function buildFilters() {
   // Status
-  const statusOrder = ['Instalar','Evoluir','Avaliar','Aguardar','Desenvolver','Bloqueado','NaoIncluir'];
-  const statusIcons = {Instalar:'🟢',Evoluir:'⬆️',Avaliar:'🟡',Aguardar:'🟠',Desenvolver:'🔧',Bloqueado:'🔴',NaoIncluir:'⚫'};
+  const statusOrder = ['Instalado','Instalar','Evoluir','Avaliar','Aguardar','Desenvolver','Bloqueado','NaoIncluir'];
+  const statusIcons = {Instalado:'🟢',Instalar:'🔵',Evoluir:'⬆️',Avaliar:'🟡',Aguardar:'🟠',Desenvolver:'🔧',Bloqueado:'🔴',NaoIncluir:'⚫'};
   buildGroup('f-status', statusOrder, k => (statusIcons[k]||'')+' '+STATUS_LABELS[k], 'status');
 
   // Tipo
@@ -469,6 +734,14 @@ function buildFilters() {
   // SPT 4.0
   buildGroup('f-spt4', ['yes','no'],
     k => k==='yes'?'✅ Tem 4.0':'❌ Sem 4.0', 'spt4');
+
+  // Instalado
+  buildGroup('f-inst', ['yes','no'],
+    k => k==='yes'?'✓ Instalados':'— Não instalados', 'inst');
+
+  // TRL 3.0?
+  buildGroup('f-trl', ['Sim','New'],
+    k => k==='Sim'?'TRL 3.0':'New', 'trl');
 }
 
 function buildGroup(id, keys, labelFn, fk) {
@@ -509,8 +782,12 @@ function filtered() {
   const q = document.getElementById('search').value.toLowerCase();
   return MODS.filter(m => {
     if (q && !m[I.name].toLowerCase().includes(q) && !m[I.fn].toLowerCase().includes(q)) return false;
-    const {status,tipo,atu,cat,esc,origin,spt4} = state.filters;
-    if (status.size && !status.has(m[I.status])) return false;
+    const {status,tipo,atu,cat,esc,origin,spt4,inst,trl} = state.filters;
+    if (status.size) {
+      const isInst = state.installed.has(m[I.n]);
+      const eff = effectiveStatus(m);
+      if (!(status.has('Instalado') && isInst) && !status.has(eff)) return false;
+    }
     if (tipo.size && !tipo.has(m[I.tipo])) return false;
     if (atu.size && !atu.has(m[I.atu])) return false;
     if (cat.size && !cat.has(m[I.cat])) return false;
@@ -526,18 +803,32 @@ function filtered() {
       if (spt4.has('yes') && !spt4.has('no') && m[I.spt4] !== true) return false;
       if (spt4.has('no') && !spt4.has('yes') && m[I.spt4] !== false) return false;
     }
+    if (inst.size) {
+      const isInst = state.installed.has(m[I.n]);
+      if (inst.has('yes') && !inst.has('no') && !isInst) return false;
+      if (inst.has('no') && !inst.has('yes') && isInst) return false;
+    }
+    if (trl.size && !trl.has(m[I.trl])) return false;
     if (state.review && !needsReview(m)) return false;
     return true;
   });
 }
 
 const SORT_IDX = {n:I.n,name:I.name,tipo:I.tipo,atu:I.atu,cat:I.cat,
-                  esc:I.esc,forge:I.forge,r4:I.r4,spt4:I.spt4,fn:I.fn,status:I.status,pri:I.pri};
+                  esc:I.esc,forge:I.forge,r4:I.r4,spt4:I.spt4,fn:I.fn,status:I.status,pri:I.pri,trl:I.trl};
 
 function sorted(list) {
   const {col,dir} = state.sort;
+  if (col === 'inst') {
+    return [...list].sort((a,b) => {
+      const av = state.installed.has(a[I.n]) ? 1 : 0;
+      const bv = state.installed.has(b[I.n]) ? 1 : 0;
+      return (bv - av) * dir;
+    });
+  }
   return [...list].sort((a,b) => {
-    const av = String(a[SORT_IDX[col]]??''), bv = String(b[SORT_IDX[col]]??'');
+    const av = col==='status' ? effectiveStatus(a) : String(a[SORT_IDX[col]]??'');
+    const bv = col==='status' ? effectiveStatus(b) : String(b[SORT_IDX[col]]??'');
     if (col==='n') return (Number(av)-Number(bv))*dir;
     return av.localeCompare(bv,'pt')*dir;
   });
@@ -597,29 +888,18 @@ function escCell(m) {
 
 function forgeCell(m) {
   const id = m[I.forge];
-  const name = m[I.name].replace(/🏠\s*/,'');
-  const cat = m[I.cat];
-  const catMeta = CAT_META[cat]||{icon:'',label:cat};
-  const status = m[I.status];
-
   if (id === null) return '<span class="repo-absent">—</span>';
   if (id === '')   return '<span class="repo-search">🔍</span>';
 
-  const forgeUrl = `https://forge.sp-tarkov.com/mod/${id}/`;
+  const slug = FORGE_SLUGS[id] || '';
+  const forgeUrl = slug
+    ? `https://forge.sp-tarkov.com/mod/${id}/${slug}`
+    : `https://forge.sp-tarkov.com/mod/${id}/`;
 
-  return `<div class="has-tip">
-    <a href="${forgeUrl}" target="_blank" class="forge-link" title="Abrir Forge #${id}">
-      <span class="forge-check">✓</span>#${id}
-    </a>
-    <div class="tip">
-      <div class="tip-title">${name}</div>
-      <span class="tip-tag">${catMeta.icon} ${catMeta.label}</span>
-      <span class="tip-tag bs-${status}" style="margin-left:4px;font-size:9px">${STATUS_LABELS[status]||status}</span>
-      <div class="tip-row"><span class="lk">forge.sp-tarkov.com/mod/<strong style="color:var(--gold)">${id}</strong> →
-        <a href="${forgeUrl}" target="_blank">${forgeUrl}</a>
-      </span></div>
-    </div>
-  </div>`;
+  return `<a href="${forgeUrl}" target="_blank" class="forge-link"
+    onmouseenter="fpopShow(${m[I.n]},this)" onmouseleave="fpopHide()">
+    <span class="forge-check">✓</span>#${id}
+  </a>`;
 }
 
 function spt4Cell(m) {
@@ -637,13 +917,11 @@ function r4Cell(m) {
   let url, display;
   if (path.startsWith('https://')) {
     url = path;
-    // gitlab — show shortened path
     display = path.replace('https://gitlab.com/','').replace('https://github.com/','');
     const parts = display.split('/');
     display = parts.slice(0,2).join('/');
   } else {
     url = 'https://github.com/' + path;
-    // Show just repo name (after /)
     display = path.split('/')[1] || path;
   }
 
@@ -655,9 +933,41 @@ function r4Cell(m) {
   return `<a href="${url}" target="_blank" class="repo-link" title="${path}">${icon}${display}</a>`;
 }
 
+function trlCell(m) {
+  const v = m[I.trl];
+  if (v === 'Sim') return b('btrl-Sim', 'TRL 3.0');
+  if (v === 'New') return b('btrl-New', 'New');
+  return b('btrl-q', '?');
+}
+
+function instCell(m) {
+  const on = state.installed.has(m[I.n]);
+  return `<button class="btn-inst${on?' on':''}" onclick="event.stopPropagation();toggleInstalled(${m[I.n]})">${on?'✓ Sim':'—'}</button>`;
+}
+
+const STATUS_OPTS = ['Instalar','Evoluir','Avaliar','Aguardar','Desenvolver','Bloqueado','NaoIncluir'];
+function statusCell(m) {
+  if (state.installed.has(m[I.n])) return b('bs-Instalado', 'INSTALADO');
+  const n = m[I.n];
+  const eff = effectiveStatus(m);
+  const lbl = STATUS_LABELS[eff] || eff;
+  const DESTRUCTIVE = new Set(['Bloqueado','NaoIncluir']);
+  let sepDone = false;
+  const items = STATUS_OPTS.map(s => {
+    let pre = '';
+    if (!sepDone && DESTRUCTIVE.has(s)) { sepDone = true; pre = '<div class="sdd-sep"></div>'; }
+    return pre + `<div class="sdd-item b bs-${s}${s===eff?' cur':''}" onclick="event.stopPropagation();pickStatus(${n},'${s}')">${STATUS_LABELS[s]||s}<span class="sdd-chk">✓</span></div>`;
+  }).join('');
+  return `<div class="sdd" id="sdd-${n}">
+    <div class="sdd-trg b bs-${eff}" onclick="event.stopPropagation();openSdd(${n})">${lbl}<span class="sdd-arr">▼</span></div>
+    <div class="sdd-menu"><div class="sdd-head">Alterar status</div>${items}</div>
+  </div>`;
+}
+
 // ── COLUMNS ───────────────────────────────────────────────────────────────────
 const COLS = [
   {key:'n',      label:'#',         cls:'c-num'},
+  {key:'inst',   label:'Inst.',     cls:'c-inst'},
   {key:'name',   label:'Mod',       cls:'c-name'},
   {key:'tipo',   label:'Tipo',      cls:'c-tipo'},
   {key:'atu',    label:'Atuação',   cls:'c-atu'},
@@ -669,6 +979,7 @@ const COLS = [
   {key:'fn',     label:'Função',    cls:'c-fn'},
   {key:'status', label:'Status',    cls:'c-status'},
   {key:'pri',    label:'Prior.',    cls:'c-pri'},
+  {key:'trl',    label:'TRL 3.0?', cls:'c-trl'},
 ];
 
 // ── RENDER ────────────────────────────────────────────────────────────────────
@@ -691,10 +1002,13 @@ function render() {
 
   document.getElementById('tbody').innerHTML = list.map(m => {
     const rv = needsReview(m);
+    const isInst = state.installed.has(m[I.n]);
     const nameCls = m[I.intern] ? 'mod-name int' : 'mod-name';
     const revDot = rv ? '<span class="review-dot"></span>' : '';
-    return `<tr>
+    const rowCls = isInst ? ' class="installed"' : '';
+    return `<tr${rowCls}>
       <td class="c-num">${m[I.n]}</td>
+      <td class="c-inst">${instCell(m)}</td>
       <td class="c-name"><div class="${nameCls}">${revDot}${m[I.name]}</div></td>
       <td class="c-tipo">${tipoBadge(m[I.tipo])}</td>
       <td class="c-atu">${atuBadge(m[I.atu])}</td>
@@ -704,8 +1018,9 @@ function render() {
       <td class="c-repo">${r4Cell(m)}</td>
       <td class="c-spt4">${spt4Cell(m)}</td>
       <td class="c-fn"><div class="fn">${m[I.fn]}</div></td>
-      <td class="c-status">${statusBadge(m[I.status])}</td>
+      <td class="c-status">${statusCell(m)}</td>
       <td class="c-pri">${priBadge(m[I.pri])}</td>
+      <td class="c-trl">${trlCell(m)}</td>
     </tr>`;
   }).join('');
 }
@@ -713,11 +1028,12 @@ function render() {
 // ── STATS ──────────────────────────────────────────────────────────────────────
 function renderStats() {
   const byStatus = {};
-  MODS.forEach(m => { byStatus[m[I.status]] = (byStatus[m[I.status]]||0)+1; });
+  MODS.forEach(m => { const s = effectiveStatus(m); byStatus[s] = (byStatus[s]||0)+1; });
   const r4present = MODS.filter(m => m[I.r4] && m[I.r4]!=='').length;
   const spt4count = MODS.filter(m => m[I.spt4] === true).length;
   const needsRev  = MODS.filter(needsReview).length;
   const internal  = MODS.filter(m => m[I.intern]).length;
+  const instCount = state.installed.size;
   const total = MODS.length;
 
   function sc(label, val, cls) {
@@ -726,10 +1042,11 @@ function renderStats() {
 
   document.getElementById('stats').innerHTML = [
     sc('Total', total, 'gold'),
+    sc('Instalados ✓', instCount, 'inst'),
     '<div class="stats-sep"></div>',
-    sc('Instalar', byStatus.Instalar||0, 'gr'),
+    sc('À Instalar', byStatus.Instalar||0, 'tl'),
     sc('Evoluir', byStatus.Evoluir||0, 'bl'),
-    sc('Avaliar', byStatus.Avaliar||0, 'or'),
+    sc('Avaliar', byStatus.Avaliar||0, 'ya'),
     sc('Aguardar', byStatus.Aguardar||0, 'or'),
     sc('Desenvolver', byStatus.Desenvolver||0, 'pu'),
     byStatus.Bloqueado ? sc('Bloqueado', byStatus.Bloqueado, 're') : '',
@@ -737,23 +1054,133 @@ function renderStats() {
     sc('Repo 4.0', r4present, 'gr'),
     sc('SPT 4.0 ✅', spt4count, 'gr'),
     sc('Internos 🏠', internal, 'bl'),
-    sc('⚠ Revisão', needsRev, 'or'),
+    sc('Revisão ⚠', needsRev, 'or'),
     `<div style="flex:1 1 100%;padding:2px 0 0 0"><div class="prog-wrap">${
-      Object.entries(byStatus).map(([k,v]) => {
-        const colors = {Instalar:'#3a8040',Evoluir:'#1e60b0',Avaliar:'#c89020',
-                        Aguardar:'#784020',Desenvolver:'#503a90',Bloqueado:'#882020',NaoIncluir:'#3a3f48'};
-        return `<div class="prog-seg" style="width:${(v/total*100).toFixed(1)}%;background:${colors[k]||'#444'}"></div>`;
-      }).join('')
+      [
+        ...Object.entries(byStatus).map(([k,v]) => {
+          const colors = {Instalar:'#1a7a80',Evoluir:'#1e60b0',Avaliar:'#c89020',
+                          Aguardar:'#784020',Desenvolver:'#503a90',Bloqueado:'#882020',NaoIncluir:'#3a3f48'};
+          return `<div class="prog-seg" style="width:${(v/total*100).toFixed(1)}%;background:${colors[k]||'#444'}"></div>`;
+        }),
+        instCount ? `<div class="prog-seg" style="width:${(instCount/total*100).toFixed(1)}%;background:#4caf72;opacity:.7"></div>` : '',
+      ].join('')
     }</div></div>`,
   ].join('');
 }
 
+// ── FORGE POPOVER ─────────────────────────────────────────────────────────────
+const _fpop = {el:null, timer:null};
+function _fpopSetImg(id) {
+  const img  = document.getElementById('fpop-img');
+  const ph   = document.getElementById('fpop-ph');
+  const stem = FORGE_IMG[id];
+  if (stem) {
+    img.src = `https://forge-static.sp-tarkov.com/mods/${stem}.png`;
+    img.classList.remove('fpop-img-hidden');
+    ph.classList.add('fpop-ph-hidden');
+  } else {
+    img.classList.add('fpop-img-hidden');
+    ph.classList.remove('fpop-ph-hidden');
+  }
+}
+
+function fpopShow(n, anchor) {
+  clearTimeout(_fpop.timer);
+  const m = MODS.find(x => x[I.n] === n);
+  if (!m) return;
+  if (!_fpop.el) _fpop.el = document.getElementById('forge-pop');
+
+  const id       = m[I.forge];
+  const slug     = FORGE_SLUGS[id] || '';
+  const forgeUrl = slug
+    ? `https://forge.sp-tarkov.com/mod/${id}/${slug}`
+    : `https://forge.sp-tarkov.com/mod/${id}/`;
+  const name     = m[I.name].replace(/🏠\s*/,'');
+  const catMeta  = CAT_META[m[I.cat]] || {icon:'', label: m[I.cat]};
+  const eff      = effectiveStatus(m);
+
+  _fpopSetImg(id);
+
+  document.getElementById('fpop-name').textContent = name;
+  document.getElementById('fpop-badges').innerHTML =
+    `<span class="b bt-${m[I.tipo]}">${m[I.tipo]}</span>` +
+    `<span class="b ba-${m[I.atu]}">${m[I.atu]}</span>` +
+    (catMeta.icon ? `<span class="b fpop-cat">${catMeta.icon} ${catMeta.label}</span>` : '') +
+    `<span class="b bs-${eff}">${STATUS_LABELS[eff]||eff}</span>`;
+  document.getElementById('fpop-id').innerHTML =
+    `forge.sp-tarkov.com / mod / <strong>${id}</strong>${slug ? ' / '+slug : ''}`;
+  document.getElementById('fpop-url').innerHTML =
+    `<a href="${forgeUrl}" target="_blank">${forgeUrl}</a>`;
+
+  // Position: below anchor, avoid right-edge overflow
+  const r = anchor.getBoundingClientRect();
+  const pw = 280;
+  let left = r.left;
+  if (left + pw > window.innerWidth - 8) left = window.innerWidth - pw - 8;
+  _fpop.el.style.left = left + 'px';
+  _fpop.el.style.top  = (r.bottom + 6) + 'px';
+  _fpop.el.classList.add('visible');
+}
+function fpopHide() {
+  _fpop.timer = setTimeout(() => { _fpop.el && _fpop.el.classList.remove('visible'); }, 140);
+}
+function fpopKeep() { clearTimeout(_fpop.timer); }
+
+// ── STATUS DROPDOWN CONTROL ───────────────────────────────────────────────────
+let _openSdd = null;
+function openSdd(n) {
+  const el = document.getElementById('sdd-'+n);
+  if (!el) return;
+  if (_openSdd && _openSdd !== el) _openSdd.classList.remove('open');
+  const isOpen = el.classList.contains('open');
+  if (!isOpen) {
+    const trg  = el.querySelector('.sdd-trg');
+    const menu = el.querySelector('.sdd-menu');
+    const r = trg.getBoundingClientRect();
+    menu.style.top  = (r.bottom + 4) + 'px';
+    menu.style.left = r.left + 'px';
+  }
+  el.classList.toggle('open');
+  _openSdd = el.classList.contains('open') ? el : null;
+}
+function pickStatus(n, status) {
+  if (_openSdd) { _openSdd.classList.remove('open'); _openSdd = null; }
+  setStatusOverride(n, status);
+}
+document.addEventListener('click', () => {
+  if (_openSdd) { _openSdd.classList.remove('open'); _openSdd = null; }
+});
+
 // ── BOOT ──────────────────────────────────────────────────────────────────────
+// One-time pre-install seeding — runs once per mod, respects manual uninstall thereafter
+[{n:116, key:'spt4-seed-116'}].forEach(({n, key}) => {
+  if (!localStorage.getItem(key)) {
+    state.installed.add(n); saveInstalled();
+    localStorage.setItem(key, '1');
+  }
+});
 buildFilters();
 renderStats();
 render();
 document.getElementById('footer-date').textContent =
   'Atualizado: ' + new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
 </script>
+<!-- Forge popover (global singleton) -->
+<div id="forge-pop" class="fpop"
+  onmouseenter="fpopKeep()" onmouseleave="fpopHide()">
+  <div class="fpop-thumb" id="fpop-thumb">
+    <img id="fpop-img" src="" alt=""
+      onload="this.classList.remove('fpop-img-hidden')"
+      onerror="this.classList.add('fpop-img-hidden');document.getElementById('fpop-ph').classList.remove('fpop-ph-hidden')">
+    <span class="fpop-thumb-placeholder fpop-ph-hidden" id="fpop-ph">⚙</span>
+  </div>
+  <div class="fpop-body">
+    <div class="fpop-name" id="fpop-name"></div>
+    <div class="fpop-badges" id="fpop-badges"></div>
+    <div class="fpop-divider"></div>
+    <div class="fpop-id" id="fpop-id"></div>
+    <div class="fpop-link"><span class="fpop-arrow">↗</span><span id="fpop-url"></span></div>
+  </div>
+</div>
 </body>
 </html>

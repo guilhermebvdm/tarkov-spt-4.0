@@ -2,7 +2,7 @@
 
 Cria a **spec técnica** (pré-código) de um item do backlog, usando o Assembly descompilado como fonte primária.
 
-> **Skills obrigatórias:** carregar `spt-mod-best-practices` e `csharp-mod-best-practices` antes de redigir. Toda decisão técnica (lifecycle, leaks, hot paths, patches, threading) deve ser ancorada nelas.
+> **Skills obrigatórias:** carregar `spt-mod-best-practices`, `csharp-mod-best-practices` e `repo-workflow-best-practices` antes de redigir. Toda decisão técnica (lifecycle, leaks, hot paths, patches, threading) deve ser ancorada nelas.
 
 ## Uso
 
@@ -23,9 +23,9 @@ Cria a **spec técnica** (pré-código) de um item do backlog, usando o Assembly
 
 1. **Resolver `<ref>`** → `<mod>`, `<NNN>`, `<slug>`, `<path-pasta>`.
 
-2. **Pré-condição.** A spec funcional `<NNN>-<slug>-spec.md` precisa existir e ter conteúdo real (não placeholders). Se não, avisar que `/create-spec` precisa rodar antes.
+2. **Pré-condição.** A spec funcional `<NNN>-<slug>-01-spec.md` precisa existir e ter conteúdo real (não placeholders). Se não, avisar que `/create-spec` precisa rodar antes.
 
-3. **Verificar duplicata.** Se `<NNN>-<slug>-technical-spec.md` já existe, perguntar se o usuário quer **sobrescrever** ou **abortar**.
+3. **Verificar duplicata.** Se `<NNN>-<slug>-02-spec-tech.md` já existe, perguntar se o usuário quer **sobrescrever** ou **abortar**.
 
 4. **Ler contexto:**
    - A spec funcional inteira (critérios de aceite e corner cases pautam a busca).
@@ -52,7 +52,7 @@ Cria a **spec técnica** (pré-código) de um item do backlog, usando o Assembly
    7. **Riscos e dependências** — patches existentes em `modded/`, mods externos relacionados, ordem de inicialização.
    8. **Checklist de implementação** — tarefas atômicas em ordem (cada uma rodável e verificável).
 
-8. **Salvar** como `<path-pasta>/<NNN>-<slug>-technical-spec.md`.
+8. **Salvar** como `<path-pasta>/<NNN>-<slug>-02-spec-tech.md`.
 
 9. **Confirmar:**
    ```

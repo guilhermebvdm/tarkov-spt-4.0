@@ -112,6 +112,13 @@ function parseSpt4(cell) {
   return null;
 }
 
+function parseTrl(cell) {
+  const t = cell.trim();
+  if (t === 'New') return 'New';
+  if (t === 'Sim') return 'Sim';
+  return null;
+}
+
 // ── UltraFika (vertical table, mod #0) ────────────────────────────────────────
 
 function parseUltraFika(md) {
@@ -139,6 +146,7 @@ function parseUltraFika(md) {
     parsePrioridade(row('Prioridade')),
     true,
     parseSpt4(row('SPT 4[.]0\\?')),
+    'Sim',
   ];
 }
 
@@ -155,7 +163,7 @@ function parseTable(md) {
 
   while ((match = lineRe.exec(md)) !== null) {
     const cols = match[2].split('|').map(c => c.trim());
-    // cols: [Mod, Tipo, Atuação, Categoria, Escopo, Forge, Repo3x, Repo4.0, SPT4?, Função, Status, Prioridade, ...]
+    // cols: [Mod, Tipo, Atuação, Categoria, Escopo, Forge, Repo3x, Repo4.0, SPT4?, Função, Status, Prioridade, TRL3?, ...]
     if (cols.length < 12) continue;
 
     const n      = parseInt(match[1]);
@@ -177,6 +185,7 @@ function parseTable(md) {
       parsePrioridade(cols[11]),
       interno,
       parseSpt4(cols[8]),
+      parseTrl(cols[12] || ''),
     ]);
   }
 

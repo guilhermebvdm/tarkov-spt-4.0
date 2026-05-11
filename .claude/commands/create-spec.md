@@ -24,7 +24,7 @@ Cria a **spec funcional** de um item do backlog (sem código — foca em intenç
 
 1. **Resolver `<ref>`** → `<mod>`, `<NNN>`, `<slug>`, `<path-pasta>`.
 
-2. **Verificar pré-condição.** Se `<path-pasta>/<NNN>-<slug>-spec.md` já existe: avisar e perguntar se o usuário quer **sobrescrever** ou **abortar**. Não modificar sem permissão.
+2. **Verificar pré-condição.** Se `<path-pasta>/<NNN>-<slug>-01-spec.md` já existe: avisar e perguntar se o usuário quer **sobrescrever** ou **abortar**. Não modificar sem permissão.
 
 3. **Buscar contexto.** Ler:
    - `mods/<mod>/backlog/mod-backlog.md` — pegar resumo e título do item.
@@ -45,11 +45,11 @@ Cria a **spec funcional** de um item do backlog (sem código — foca em intenç
    - **Corner cases:** pelo menos 3, pensando em estados-limite (nulo/vazio, race condition, interação com outros sistemas do EFT, troca rápida de estado, sair de raid).
    - **Fora de escopo:** deixar `[ ] A definir` se não for óbvio. **Nunca inferir.**
 
-6. **Salvar** como `mods/<mod>/backlog/<NNN>-<slug>/<NNN>-<slug>-spec.md`.
+6. **Salvar** como `mods/<mod>/backlog/<NNN>-<slug>/<NNN>-<slug>-01-spec.md`.
 
 7. **Confirmar:**
    ```
-   ✓ Spec funcional criada: mods/<mod>/backlog/<NNN>-<slug>/<NNN>-<slug>-spec.md
+   ✓ Spec funcional criada: mods/<mod>/backlog/<NNN>-<slug>/<NNN>-<slug>-01-spec.md
    Próximo: revise o conteúdo e rode /review-spec <ref>
    ```
 

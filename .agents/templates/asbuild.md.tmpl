@@ -1,0 +1,36 @@
+# {{NUM}} — {{TITLE}} · As-Built
+
+**Mod:** {{MOD}}
+**Spec funcional:** [{{NUM}}-{{SLUG}}-01-spec.md]({{NUM}}-{{SLUG}}-01-spec.md)
+**Spec técnica:** [{{NUM}}-{{SLUG}}-02-spec-tech.md]({{NUM}}-{{SLUG}}-02-spec-tech.md)
+**Última review técnica:** [{{NUM}}-{{SLUG}}-03-spec-tech-review-{{LAST_REVIEW_NN}}.md]({{NUM}}-{{SLUG}}-03-spec-tech-review-{{LAST_REVIEW_NN}}.md)
+**Build inicial:** {{CREATED_AT}}
+
+> Documentação **pós-implementação**. Reflete o estado real do código entregue pelo `/code-mod` e atualizado por `/apply-code-review`. Quando o conteúdo aqui diverge da spec técnica, este documento ganha — a spec é planejamento, o asbuild é o que foi feito.
+
+## Arquivos alterados (build inicial)
+
+| Ação | Path | Resumo |
+| --- | --- | --- |
+| CRIADO | `mods/{{MOD}}/modded/<arquivo>.cs` | [1 linha do que faz] |
+| MODIFICADO | `mods/{{MOD}}/modded/<arquivo>.cs` | [1 linha do que mudou] |
+
+## PA-NN-MM resolvidos durante o build
+
+> Pontos da última review técnica que foram **aplicados como parte da implementação** (não como /apply-code-review posterior).
+
+| ID | Categoria · Impacto | Resumo da resolução |
+| --- | --- | --- |
+| PA-{{LAST_REVIEW_NN}}-01 | A — Gap · 🔴 | [como foi tratado no código] |
+
+## Mudanças posteriores
+
+> Atualizado por `/apply-code-review` a cada rodada. Cada entrada lista os achados aplicados/rejeitados/pulados naquela rodada e os arquivos tocados.
+
+(vazio inicialmente — preenchido por `/apply-code-review`)
+
+## Histórico
+
+| Data | Evento |
+| --- | --- |
+| {{CREATED_AT}} | Build concluído via `/code-mod` |

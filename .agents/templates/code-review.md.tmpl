@@ -1,0 +1,66 @@
+# {{NUM}} — {{TITLE}} · Code Review {{REVIEW_NN}}
+
+**Mod:** {{MOD}}
+**Spec funcional:** [{{NUM}}-{{SLUG}}-01-spec.md]({{NUM}}-{{SLUG}}-01-spec.md)
+**Spec técnica:** [{{NUM}}-{{SLUG}}-02-spec-tech.md]({{NUM}}-{{SLUG}}-02-spec-tech.md)
+**Asbuild:** [{{NUM}}-{{SLUG}}-05-asbuild.md]({{NUM}}-{{SLUG}}-05-asbuild.md)
+**Data:** {{CREATED_AT}}
+
+> Análise crítica do código implementado por `/code-mod`. Cada achado recebe um ID `CR-{{REVIEW_NN}}-MM` permanente. Resolver bloqueadores 🔴 via `/apply-code-review` antes de fechar o item.
+
+## Resumo
+
+> 🔴 Bloqueadores: 0 · 🟠 Fortes: 0 · 🟡 Médios: 0 · 🟢 Menores: 0 · ✅ Resolvidos: 0 · Total: 0
+
+## Índice
+
+| ID | Categoria | Impacto | Título | Status |
+| --- | --- | --- | --- | --- |
+
+## Categorias
+
+- **A — Crítico** — bug grave, crash garantido, corrupção de estado, security issue.
+- **B — Bug latente** — comportamento errado em cenário plausível, não acionado pelo caminho golden.
+- **C — Gap vs. spec** — código não implementa critério de aceite, corner case, ou AC da spec.
+- **D — Arquitetura** — viola padrões do repo, duplica código, leak de estado, abuso de reflection.
+- **E — Legibilidade/manutenção** — nomes ruins, comentário "porquê" ausente, código morto, complexidade desnecessária.
+- **F — Melhoria opcional** — refactor de qualidade, micro-otimização, simplificação.
+
+## Impacto
+
+- 🔴 **Bloqueador** — fix obrigatório antes de fechar o item.
+- 🟠 **Forte** — fix recomendado; pode ser deferido para `06-fix-NN.md` futuro.
+- 🟡 **Médio** — anotar, decidir caso a caso.
+- 🟢 **Menor** — opcional.
+
+---
+
+## Pontos
+
+### CR-{{REVIEW_NN}}-01 · Cat — Tipo · Impacto
+
+**[Título resumido]**
+
+**Local:** [`mods/{{MOD}}/modded/<arquivo>.cs:<linha-faixa>`](../../modded/<arquivo>.cs#L<linha>)
+
+**Problema:** [Descrição precisa, com snippet de 3–6 linhas quando aplicável.]
+
+**Por que importa:** [Consequência concreta — sintoma observável ou risco.]
+
+**Sugestão:** [Proposta acionável — diff ou descrição do que mudar. Específica o suficiente para o usuário aceitar com um "ok" ou contrapor com outro caminho.]
+
+**Decisão:**
+- `[ ]` Pendente
+- `[ ]` Aceitar sugestão
+- `[ ]` Aceitar com modificação: _________________
+- `[ ]` Rejeitar (deferir / aceitar como dívida): _________________
+
+<!-- Após /apply-code-review: marcar a opção escolhida, trocar título para ✅ Aplicado em YYYY-MM-DD e adicionar **Resolução:** ... + **Aplicação:** descrição do que foi feito + paths -->
+
+---
+
+## Histórico
+
+| Data | Evento |
+| --- | --- |
+| {{CREATED_AT}} | Code review {{REVIEW_NN}} criada via `/code-review` |

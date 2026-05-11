@@ -9,6 +9,7 @@ namespace CameraRotationMod.Patches
     /// <summary>
     /// Postfix em GameWorld.OnGameStarted — dispara StanceManager.OnRaidStart().
     /// ref: Assembly-CSharp/EFT/GameWorld.cs:2584 (public virtual)
+    /// backlog 002 F5: também enfileira a stance inicial (Stance 3 - Low Ready) quando o toggle estiver on.
     /// </summary>
     public class GameWorldOnGameStartedPatch : ModulePatch
     {
@@ -18,7 +19,16 @@ namespace CameraRotationMod.Patches
         [PatchPostfix]
         private static void Postfix()
         {
-            try { StanceManager.OnRaidStart(); }
+            try
+            {
+                StanceManager.OnRaidStart();
+
+                // backlog 002 F5 + 06-fix-01 — iniciar em Stance 2 - Low Ready quando habilitado.
+                // Após swap (06-fix-01), Stance 2 passou a ser Low Ready (era Stance 3).
+                // A aplicação efetiva acontece no primeiro Update em que PWA.HandsContainer estiver pronto.
+                if (Plugin._StartInLowReadyOnRaidBegin?.Value == true)
+                    StanceManager.QueueInitialStance(Stance.Stance2);
+            }
             catch (Exception ex) { Plugin.Logger.LogError($"[GameWorldOnGameStartedPatch] {ex}"); }
         }
     }

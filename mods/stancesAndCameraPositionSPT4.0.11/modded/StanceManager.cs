@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using BepInEx.Configuration;
+using CameraRotationMod.Patches;
 using Comfort.Common;
 using EFT;
 using HarmonyLib;
@@ -99,11 +100,25 @@ namespace CameraRotationMod
 
         public static void Update()
         {
+            // backlog 002 F5 — aplicar stance inicial pendente (raid begin) no primeiro frame em
+            // que ProceduralWeaponAnimation.HandsContainer estiver disponível.
+            TryApplyPendingInitialStance();
+
+            // backlog 002 F4 — despachar 2-frame pulse agendado (resurrect/reset).
+            TryDispatchPendingResurrect();
+
+            // backlog 002 F4 — guard de stale para weapon swap durante hold (sem button-up).
+            EvaluateSnapStaleTimeout();
+
             // Block stance switching while sprinting
             var gameWorld = GetCachedGameWorld();
             if (gameWorld?.MainPlayer?.IsSprintEnabled == true)
                 return;
-            
+
+            // backlog 002 F3 (PA-04-02): hotkeys F3 PRIMEIRO — se uma matcha, return early.
+            // Garante prioridade de hotkey sobre tecla V quando coincidem.
+            if (HandleStanceHotkeys()) return;
+
             // GetKeyDown already returns true for only one frame, no manual edge-detect needed
             if (UnityEngine.Input.GetKeyDown(_stanceToggleKeyConfig.Value))
             {
@@ -117,19 +132,21 @@ namespace CameraRotationMod
                 if (UnityEngine.Input.GetKey(_mouseWheelModifierKeyConfig.Value))
                 {
                     float scrollDelta = UnityEngine.Input.GetAxis("Mouse ScrollWheel");
-                    
+
                     // Check cooldown to prevent rapid cycling
                     if (scrollDelta != 0 && Time.time - _lastScrollTime > ScrollCooldown)
                     {
-                        if (scrollDelta > 0)
+                        // backlog 002 F2 — branch por modo de scroll.
+                        switch (Plugin._MouseWheelScrollMode?.Value ?? ScrollMode.Linear)
                         {
-                            // Scroll up - cycle forward
-                            CurrentStance = GetNextStance(CurrentStance);
-                        }
-                        else
-                        {
-                            // Scroll down - cycle backward
-                            CurrentStance = GetPreviousStance(CurrentStance);
+                            case ScrollMode.Cycle:
+                                CurrentStance = scrollDelta > 0
+                                    ? GetNextStance(CurrentStance)
+                                    : GetPreviousStance(CurrentStance);
+                                break;
+                            case ScrollMode.Linear:
+                                HandleLinearScroll(scrollDelta);
+                                break;
                         }
                         _lastScrollTime = Time.time;
                     }
@@ -137,17 +154,320 @@ namespace CameraRotationMod
             }
         }
 
+        // ==========================================================================
+        // backlog 002 F2 — modo Linear de scroll
+        // ==========================================================================
+
         /// <summary>
-        /// Get the next enabled stance in the cycle, skipping disabled stances
+        /// Eixo fixo: Stance 1 (topo) ↔ Stance 0 (centro) ↔ Stance 2 (fundo).
+        /// Stance 3 é off-axis: scroll-up vai pra Stance 1, scroll-down vai pra Stance 2.
+        /// Toggles `_EnableStance*InCycle` são ignorados em Linear.
+        /// </summary>
+        private static void HandleLinearScroll(float scrollDelta)
+        {
+            Stance next = CurrentStance;
+            if (scrollDelta > 0) // scroll-up
+            {
+                next = CurrentStance switch
+                {
+                    Stance.Stance2 => Stance.Default,
+                    Stance.Default => Stance.Stance1,
+                    Stance.Stance1 => Stance.Stance1,        // já no topo, no-op
+                    Stance.Stance3 => Stance.Stance1,        // off-axis → topo
+                    _ => CurrentStance,
+                };
+            }
+            else if (scrollDelta < 0) // scroll-down
+            {
+                next = CurrentStance switch
+                {
+                    Stance.Stance1 => Stance.Default,
+                    Stance.Default => Stance.Stance2,
+                    Stance.Stance2 => Stance.Stance2,        // já no fundo, no-op
+                    Stance.Stance3 => Stance.Stance2,        // off-axis → fundo
+                    _ => CurrentStance,
+                };
+            }
+            if (next != CurrentStance) CurrentStance = next;
+        }
+
+        // ==========================================================================
+        // backlog 002 F3 — hotkeys dedicadas por stance
+        // ==========================================================================
+
+        /// <summary>
+        /// Processa as 4 hotkeys (Stance0..Stance3). Retorna true se uma matchou — caller
+        /// usa para early-return e evitar double-fire com tecla V (PA-04-02).
+        /// Ordem crescente garante que hotkey de menor índice prioriza quando duas teclas coincidem (PA-01-04).
+        /// </summary>
+        private static bool HandleStanceHotkeys()
+        {
+            var gw = GetCachedGameWorld();
+            if (gw?.MainPlayer == null) return false;
+            if (gw.MainPlayer.IsSprintEnabled) return false;                                  // bloqueio sprint
+            if (gw.MainPlayer.ProceduralWeaponAnimation?.IsAiming == true) return false;      // ignora em ADS
+
+            if (TryHotkey(Plugin._Stance0Hotkey, Stance.Default)) return true;
+            if (TryHotkey(Plugin._Stance1Hotkey, Stance.Stance1)) return true;
+            if (TryHotkey(Plugin._Stance2Hotkey, Stance.Stance2)) return true;
+            if (TryHotkey(Plugin._Stance3Hotkey, Stance.Stance3)) return true;
+            return false;
+        }
+
+        private static bool TryHotkey(ConfigEntry<KeyCode> entry, Stance target)
+        {
+            var key = entry?.Value ?? KeyCode.None;
+            if (key == KeyCode.None) return false;
+            if (!UnityEngine.Input.GetKeyDown(key)) return false;
+
+            // Toggle: pressionar a tecla da stance ativa retorna a Default — exceto a própria Default.
+            if (CurrentStance == target)
+            {
+                if (target != Stance.Default) CurrentStance = Stance.Default;
+                return true;
+            }
+            CurrentStance = target;
+            return true;
+        }
+
+        // ==========================================================================
+        // backlog 002 F4 — Snap to Stance 0 on Fire (intercept-and-resurrect)
+        // ==========================================================================
+        // Estratégia: Prefix em SetTriggerPressed da nested operation-base de FirearmController.
+        // - press=true em snap-elegível → bloqueia trigger (return false), snap imediato.
+        // - press=false: agenda ressurreição para o próximo frame se elapsed >= threshold.
+        // - Frame N+1: dispatch synthetic true. Frame N+2: dispatch synthetic false (para fullauto não runaway).
+        // - Reentry guard via `[ThreadStatic] _inSyntheticCall` no patch.
+
+        private const float SnapIdleSentinel = -1f;
+        // ref: CR-01-06 — fallback default; o valor efetivo vem de Plugin._SnapStaleTimeoutSec.
+        private const float SnapStaleTimeoutDefaultSec = 2f;
+        private static float _triggerDownTimeUnscaled = SnapIdleSentinel;
+        private static bool  _snapInterceptActive;
+        // ref: CR-01-02 — FirearmController que disparou o intercept; OnTriggerUpAfterIntercept valida que
+        // o button-up vem do MESMO FC, evitando tiro espúrio se houver weapon swap mid-intercept.
+        // 06-fix-01: trocado de `object operationInstance` para `Player.FirearmController` (patch target mudou).
+        private static Player.FirearmController _interceptFc;
+
+        // PA-02-03: deferred resurrection (frame N+1: synthetic true).
+        private static Player.FirearmController _pendingResurrectFc;
+        private static MethodBase                _pendingResurrectMethod;
+        // PA-03-01: 2-frame pulse (frame N+2: synthetic false → para fullauto após ~1 tiro).
+        private static Player.FirearmController _pendingResetFc;
+        private static MethodBase                _pendingResetMethod;
+        // 06-fix-04: snapshot do IsTriggerPressed natural ANTES do synthetic true (frame N+1).
+        // Necessário porque o synthetic true seta fc.IsTriggerPressed=true como side-effect, então
+        // checar IsTriggerPressedNaturally() no frame N+2 não distingue "synthetic" de "natural".
+        // Se este snapshot for false e IsTriggerPressedNaturally() for true no N+2 → é o synthetic
+        // (envia false pra parar fullauto). Se for true em ambos → usuário re-apertou natural antes
+        // do nosso synthetic (double-tap real — preserva sem reset).
+        private static bool _wasNaturallyPressedBeforeResurrect;
+
+        /// <summary>
+        /// Chamado pelo Prefix de SetTriggerPressed quando press==true. Retorna true se deve
+        /// BLOQUEAR o original (skip) — quando snap é elegível.
+        /// 06-fix-01: parâmetro agora é Player.FirearmController (patch target trocado).
+        /// ref: CR-01-04 — `IsHoldingFirearm()` removido; o caller (SnapFireTriggerPatch.Prefix)
+        /// já validou que `fc == MainPlayer.HandsController` é `Player.FirearmController` antes
+        /// de chamar esta função.
+        /// </summary>
+        public static bool TryInterceptTriggerDown(Player.FirearmController fc)
+        {
+            var gw = GetCachedGameWorld();
+            if (gw?.MainPlayer == null) return false;
+            if (gw.MainPlayer.ProceduralWeaponAnimation?.IsAiming == true) return false; // sem snap em ADS
+            if (CurrentStance == Stance.Default) return false;                            // sem snap em Stance 0
+            if (!Plugin._stanceConfigs.TryGetValue(CurrentStance, out var cfg)) return false;
+            if (cfg.SnapToStance0OnFire == null) return false;                            // sentinel (Stance 0)
+            if (!cfg.SnapToStance0OnFire.Value) return false;                             // toggle off
+
+            // Snap imediato — comportamento desejado em todos os caminhos.
+            CurrentStance = Stance.Default;
+
+            // Marcar intercept ativo: timer começa, próximo button-up decide se ressuscita.
+            _triggerDownTimeUnscaled = Time.unscaledTime;
+            _snapInterceptActive = true;
+            _interceptFc = fc;  // ref: CR-01-02 — anti-swap
+            return true;   // Prefix retorna false → operation NÃO recebe trigger=true → tiro NÃO sai.
+        }
+
+        /// <summary>
+        /// Chamado pelo Prefix de SetTriggerPressed quando press==false (button-up).
+        /// Se elapsed >= threshold, agenda ressurreição para o próximo frame (PA-02-03).
+        /// 06-fix-01: parâmetro agora é Player.FirearmController. Anti-swap valida `fc == _interceptFc`.
+        /// </summary>
+        public static void OnTriggerUpAfterIntercept(Player.FirearmController fc, MethodBase originalMethod)
+        {
+            if (!_snapInterceptActive) return;
+
+            // ref: CR-01-02 — abortar se o FirearmController mudou entre down e up (weapon swap).
+            if (fc != _interceptFc)
+            {
+                _snapInterceptActive = false;
+                _triggerDownTimeUnscaled = SnapIdleSentinel;
+                _interceptFc = null;
+                Plugin.Logger.LogDebug("[F4] intercept abortado: FirearmController mudou entre button-down e button-up");
+                return;
+            }
+
+            _snapInterceptActive = false;
+            _interceptFc = null;
+
+            float elapsedMs = (Time.unscaledTime - _triggerDownTimeUnscaled) * 1000f;
+            _triggerDownTimeUnscaled = SnapIdleSentinel;
+
+            int threshold = Plugin._SnapFireThreshold?.Value ?? 200;
+            if (elapsedMs < threshold) return; // clique único — snap já aconteceu no down, sem fire.
+
+            // Hold >= threshold → agendar synthetic true (frame N+1).
+            _pendingResurrectFc      = fc;
+            _pendingResurrectMethod  = originalMethod;
+        }
+
+        /// <summary>
+        /// PA-03-01: chamado no início de Update. Despacha o 2-frame pulse:
+        /// 1) frame N+2: synthetic false (reset do hold do frame N+1) — para fullauto após ~1 tiro.
+        /// 2) frame N+1: synthetic true (resurrect) e agenda o reset do próximo frame.
+        /// PA-03-02: valida que operation ainda é a CurrentOperation antes de cada Invoke.
+        /// PA-04-03: skipa o reset se trigger está pressionado naturalmente (double-tap).
+        /// </summary>
+        private static void TryDispatchPendingResurrect()
+        {
+            // 1. Frame N+2: synthetic false (reset agendado no frame anterior).
+            if (_pendingResetMethod != null)
+            {
+                var resetFc = _pendingResetFc;
+                var resetMethod = _pendingResetMethod;
+                _pendingResetFc = null;
+                _pendingResetMethod = null;
+
+                if (!IsFirearmControllerStillCurrent(resetFc))
+                {
+                    // PA-03-02: weapon swap / FC change — drop.
+                }
+                else if (_wasNaturallyPressedBeforeResurrect && IsTriggerPressedNaturally())
+                {
+                    // 06-fix-04: double-tap real — usuário re-apertou naturalmente ANTES do nosso
+                    // synthetic true (frame N+0 do resurrect). Preserva o fire natural.
+                    // Bug anterior (PA-04-03): checava só IsTriggerPressedNaturally(), que retorna
+                    // true como side-effect do nosso próprio synthetic → reset era sempre skipado
+                    // → fullauto runaway sem parar até esvaziar o magazine.
+                }
+                else
+                {
+                    SnapFireTriggerPatch.RaiseSyntheticTrigger(resetFc, pressed: false);
+                }
+                _wasNaturallyPressedBeforeResurrect = false;
+            }
+
+            // 2. Frame N+1: synthetic true (resurrect) + agenda reset.
+            if (_pendingResurrectMethod != null)
+            {
+                var fc = _pendingResurrectFc;
+                var method = _pendingResurrectMethod;
+                _pendingResurrectFc = null;
+                _pendingResurrectMethod = null;
+
+                if (!IsFirearmControllerStillCurrent(fc))
+                {
+                    Plugin.Logger.LogDebug("[F4] resurrect skipped: FirearmController mudou entre frames");
+                    return;
+                }
+                // 06-fix-04: snapshot ANTES do synthetic — usado no frame N+2 para distinguir
+                // double-tap natural do side-effect do nosso próprio synthetic.
+                _wasNaturallyPressedBeforeResurrect = IsTriggerPressedNaturally();
+                SnapFireTriggerPatch.RaiseSyntheticTrigger(fc, pressed: true);
+                _pendingResetFc = fc;
+                _pendingResetMethod = method;
+            }
+        }
+
+        /// <summary>
+        /// PA-01-05: limpa intercept ativo se ficar pendurado > 2s sem button-up
+        /// (provável weapon swap durante hold).
+        /// </summary>
+        private static void EvaluateSnapStaleTimeout()
+        {
+            if (!_snapInterceptActive) return;
+            // ref: CR-01-06 — timeout agora vem de ConfigEntry advanced, com fallback ao default.
+            float timeout = Plugin._SnapStaleTimeoutSec?.Value ?? SnapStaleTimeoutDefaultSec;
+            if (Time.unscaledTime - _triggerDownTimeUnscaled <= timeout) return;
+            _snapInterceptActive = false;
+            _triggerDownTimeUnscaled = SnapIdleSentinel;
+            _interceptFc = null;  // ref: CR-01-02 + 06-fix-01
+            Plugin.Logger.LogDebug("[F4] snap intercept timed out (likely weapon swap during hold).");
+        }
+
+        /// <summary>
+        /// PA-04-03: detecta se o gatilho está pressionado por input natural (double-tap rápido).
+        /// ref: Player.cs:2714 — FirearmController.IsTriggerPressed.
+        /// </summary>
+        private static bool IsTriggerPressedNaturally()
+        {
+            var gw = GetCachedGameWorld();
+            var fc = gw?.MainPlayer?.HandsController as Player.FirearmController;
+            return fc?.IsTriggerPressed == true;
+        }
+
+        /// <summary>
+        /// PA-03-02 + 06-fix-01: valida que `fc` ainda é o FirearmController ativo no MainPlayer.
+        /// Cobre weapon swap entre frames. Simplificado vs versão anterior (não precisa de
+        /// CurrentOperationGetter porque comparamos diretamente HandsController == fc).
+        /// </summary>
+        private static bool IsFirearmControllerStillCurrent(Player.FirearmController fc)
+        {
+            if (fc == null) return false;
+            var gw = GetCachedGameWorld();
+            return gw?.MainPlayer?.HandsController == fc;
+        }
+
+        // ==========================================================================
+        // backlog 002 F5 — iniciar raid em Stance 3 - Low Ready
+        // ==========================================================================
+
+        private static Stance? _pendingInitialStance;
+
+        /// <summary>
+        /// Chamado por GameWorldOnGameStartedPatch (raid begin) quando o toggle F5 está habilitado.
+        /// A aplicação efetiva é adiada para o primeiro frame em que ProceduralWeaponAnimation.HandsContainer
+        /// estiver pronto (TryApplyPendingInitialStance).
+        /// </summary>
+        public static void QueueInitialStance(Stance s) => _pendingInitialStance = s;
+
+        /// <summary>
+        /// Aplica a stance inicial pendente assim que PWA.HandsContainer existir. Set imediato
+        /// (sem animação) — SpringGetPatch.ResetState() seguido de CurrentStance = target faz
+        /// o próximo postfix de Spring.Get inicializar com `_currentRotation = desiredRotation`.
+        /// </summary>
+        private static void TryApplyPendingInitialStance()
+        {
+            if (_pendingInitialStance == null) return;
+            var gw = GetCachedGameWorld();
+            if (gw?.MainPlayer?.ProceduralWeaponAnimation?.HandsContainer == null) return;
+            // PA-04-04: F5 só em raid. Hideout não deve receber stance inicial.
+            if (gw.MainPlayer is HideoutPlayer) return;
+
+            var target = _pendingInitialStance.Value;
+            _pendingInitialStance = null;
+
+            // Set imediato — bypass spring lerp.
+            // PA-04-04: ResetState pode interromper transição em vôo, mas só relevante em hot-reload
+            // de dev (raid start normal não tem transição em vôo). Aceitável.
+            SpringGetPatch.ResetState();
+            CurrentStance = target;
+        }
+
+        /// <summary>
+        /// Get the next enabled stance in the cycle, skipping disabled stances.
+        /// backlog 002 F1: usa `_IncludeStance0InCycle` (lógica explícita) em vez de `_UseOnlyStances` (invertida).
         /// </summary>
         private static Stance GetNextStance(Stance current)
         {
-            bool useOnlyStances = Plugin._UseOnlyStances?.Value ?? false;
             int maxAttempts = 5; // Prevent infinite loops
             int attempts = 0;
-            
+
             Stance next = current;
-            
+
             do
             {
                 // Move to next stance in sequence
@@ -159,30 +479,28 @@ namespace CameraRotationMod
                     Stance.Stance3 => Stance.Default,
                     _ => Stance.Default
                 };
-                
+
                 attempts++;
-                
-                // Check if this stance should be included in cycle
-                if (IsStanceEnabled(next, useOnlyStances))
+
+                if (IsStanceEnabled(next))
                     return next;
-                    
+
             } while (attempts < maxAttempts && next != current);
-            
+
             // If we cycled through everything and nothing is enabled, return current
             return current;
         }
 
         /// <summary>
-        /// Get the previous enabled stance in the cycle, skipping disabled stances (for scroll down)
+        /// Get the previous enabled stance in the cycle, skipping disabled stances (for scroll down).
         /// </summary>
         private static Stance GetPreviousStance(Stance current)
         {
-            bool useOnlyStances = Plugin._UseOnlyStances?.Value ?? false;
             int maxAttempts = 5; // Prevent infinite loops
             int attempts = 0;
-            
+
             Stance prev = current;
-            
+
             do
             {
                 // Move to previous stance in sequence (reverse order)
@@ -194,42 +512,32 @@ namespace CameraRotationMod
                     Stance.Stance3 => Stance.Stance2,
                     _ => Stance.Default
                 };
-                
+
                 attempts++;
-                
-                // Check if this stance should be included in cycle
-                if (IsStanceEnabled(prev, useOnlyStances))
+
+                if (IsStanceEnabled(prev))
                     return prev;
-                    
+
             } while (attempts < maxAttempts && prev != current);
-            
+
             // If we cycled through everything and nothing is enabled, return current
             return current;
         }
-        
+
         /// <summary>
-        /// Check if a stance is enabled and should be included in the cycle
+        /// Check if a stance is enabled and should be included in the cycle.
+        /// backlog 002 F1: Stance.Default usa `_IncludeStance0InCycle` (default false).
         /// </summary>
-        private static bool IsStanceEnabled(Stance stance, bool useOnlyStances)
+        private static bool IsStanceEnabled(Stance stance)
         {
-            switch (stance)
+            return stance switch
             {
-                case Stance.Default:
-                    // Default is included unless "use only stances" is enabled
-                    return !useOnlyStances;
-                    
-                case Stance.Stance1:
-                    return Plugin._EnableStance1?.Value ?? true;
-                    
-                case Stance.Stance2:
-                    return Plugin._EnableStance2?.Value ?? true;
-                    
-                case Stance.Stance3:
-                    return Plugin._EnableStance3?.Value ?? true;
-                    
-                default:
-                    return false;
-            }
+                Stance.Default => Plugin._IncludeStance0InCycle?.Value ?? false,
+                Stance.Stance1 => Plugin._EnableStance1?.Value ?? true,
+                Stance.Stance2 => Plugin._EnableStance2?.Value ?? true,
+                Stance.Stance3 => Plugin._EnableStance3?.Value ?? true,
+                _ => false,
+            };
         }
         
         /// <summary>
@@ -394,6 +702,19 @@ namespace CameraRotationMod
             _lastFirearmController = null;
             _cachedIsBullpup = false;
             _cachedWeaponCellSizeX = 1;
+
+            // backlog 002 F4 — snap state (06-fix-01: campos passaram para Player.FirearmController)
+            _triggerDownTimeUnscaled = SnapIdleSentinel;
+            _snapInterceptActive = false;
+            _interceptFc = null;                  // ref: CR-01-02 + 06-fix-01
+            _pendingResurrectFc = null;
+            _pendingResurrectMethod = null;
+            _pendingResetFc = null;
+            _wasNaturallyPressedBeforeResurrect = false;  // 06-fix-04
+            _pendingResetMethod = null;
+
+            // backlog 002 F5 — initial stance pending
+            _pendingInitialStance = null;
         }
         
         /// <summary>
@@ -715,7 +1036,9 @@ namespace CameraRotationMod
         {
             var gw = Singleton<GameWorld>.Instance;
             if (gw == null || gw.MainPlayer == null) return false;
-            return !(gw.MainPlayer is HideoutPlayer);
+            if (gw.MainPlayer is HideoutPlayer)
+                return Plugin._DebugApplyInHideout?.Value == true;
+            return true;
         }
 
         public static void OnRaidStart()
@@ -770,8 +1093,7 @@ namespace CameraRotationMod
             mc.RemoveStateSpeedLimit(Plugin.StanceSpeedLimitCause);
             _lastAppliedSpeedLimit = -1f;
 
-            StanceStaminaState.Mode = cfg.StaminaMode.Value;
-            StanceStaminaState.Intensity = cfg.StaminaIntensity.Value;
+            StanceStaminaState.Multiplier = cfg.StaminaMultiplier.Value;
 
             bool inProne = Singleton<GameWorld>.Instance.MainPlayer.IsInPronePose;
             StanceStaminaState.IsSuspendedByProne = inProne && !cfg.ApplyWhenProne.Value;
@@ -797,7 +1119,12 @@ namespace CameraRotationMod
             catch (Exception ex) { Plugin.Logger.LogError($"[StanceManager.OnStanceChanged] {ex}"); }
         }
 
-        /// <summary>Drain manual em hipfire (modo Drain) — atualiza HUD por frame.</summary>
+        /// <summary>
+        /// Controla delta de stamina das mãos por frame (drain e recovery).
+        /// Multiplier &lt;1.0 = drain, 1.0 = vanilla (no-op), &gt;1.0 = recovery.
+        /// Em ADS o vanilla toma conta — tick faz no-op.
+        /// ref: fix-01 — fórmula unificada substituindo Drain-only anterior.
+        /// </summary>
         public static void TickStanceStamina()
         {
             try
@@ -807,32 +1134,33 @@ namespace CameraRotationMod
 
                 if (!IsActiveContext()) return;
                 if (!StanceStaminaState.ShouldApplyStamina) return;
-                if (StanceStaminaState.Mode != EStanceStaminaMode.Drain) return;
 
                 var player = Singleton<GameWorld>.Instance.MainPlayer;
 
-                // Em ADS o drain vanilla do EFT toma conta — nosso tick faz no-op.
+                // Em ADS o vanilla do EFT toma conta — nosso tick faz no-op.
                 if (player.ProceduralWeaponAnimation?.IsAiming == true) return;
 
                 var hands = player.Physical?.HandsStamina;
                 if (hands == null) return;
 
                 if (hands.Multiplier <= 0f) return;
-                // Honra ForceMode do GClass774 — Consume() vanilla pula redução de Current quando ForceMode = true
+                // Honra ForceMode do GClass774 — Consume() vanilla pula quando ForceMode = true
                 if (hands.ForceMode) return;
 
+                // delta: negativo = drain, positivo = recovery
                 // _cachedAimDrainRate populado em OnRaidStart (constante imutável)
-                float drain = _cachedAimDrainRate * StanceStaminaState.Intensity * hands.Multiplier * Time.deltaTime;
-                if (float.IsNaN(drain) || float.IsInfinity(drain) || drain < 0.0001f) return;
+                float mult = StanceStaminaState.Multiplier;
+                float delta = _cachedAimDrainRate * (mult - 1.0f) * hands.Multiplier * Time.deltaTime;
+                if (float.IsNaN(delta) || float.IsInfinity(delta) || Mathf.Abs(delta) < 0.0001f) return;
 
-                // Mutação direta de Current — drain suave por frame, HUD atualiza fluido.
                 float prev = hands.Current;
-                float target = Mathf.Max(0f, prev - drain);
+                float target = Mathf.Clamp(prev + delta, 0f, (float)hands.TotalCapacity);
+                if (Mathf.Abs(target - prev) < 0.0001f) return;
                 hands.Current = target;
                 NotifyHandsStaminaChanged(hands, prev);
 
-                // Replica HandleExpiration vanilla para disparar OnExpired event quando hits 0
-                if (target <= 0f && prev > 0f)
+                // Replica HandleExpiration vanilla para disparar OnExpired event ao atingir 0
+                if (delta < 0 && target <= 0f && prev > 0f)
                     hands.HandleExpiration();
             }
             catch (Exception ex) { Plugin.Logger.LogError($"[StanceManager.TickStanceStamina] {ex}"); }

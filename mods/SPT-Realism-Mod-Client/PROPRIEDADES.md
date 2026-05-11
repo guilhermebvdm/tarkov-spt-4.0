@@ -4,30 +4,30 @@
 **Código:** [original/Plugin.cs](original/Plugin.cs) | [original/PluginConfig.cs](original/PluginConfig.cs)  
 > Itens **(Avançado)** só aparecem com "Advanced settings" ligado no F12.
 
+---
+
 ## Índice
 
-| # | Seção |
-| --- | ------- |
-| 0 | [Testing](#0-testing) |
-| 1 | [Misc. Settings.](#1-misc-settings) |
-| 2 | [Ballistics Settings.](#2-ballistics-settings) |
-| 3 | [Recoil Settings.](#3-recoil-settings) |
-| 4 | [Advanced Recoil Settings.](#4-advanced-recoil-settings) |
-| 5 | [Stat Display Settings.](#5-stat-display-settings) |
-| 6 | [Weapon Settings.](#6-weapon-settings) |
-| 7 | [Health and Meds Settings.](#7-health-and-meds-settings) |
-| 8 | [Hazard Zone Settings.](#8-hazard-zone-settings) |
-| 9 | [Movement Settings.](#9-movement-settings) |
-| 10 | [Deafening and Audio.](#10-deafening-and-audio) |
-| 11 | [Weapon Speed Modifiers.](#11-weapon-speed-modifiers) |
-| 12 | [Weapon Stances And Position.](#12-weapon-stances-and-position) |
-| 13 | [Weapon Stances Keybinds.](#13-weapon-stances-keybinds) |
-| 14 | [Active Aim.](#14-active-aim) |
-| 15 | [High Ready.](#15-high-ready) |
-| 16 | [Low Ready.](#16-low-ready) |
-| 17 | [Pistol Position And Stance.](#17-pistol-position-and-stance) |
-| 18 | [Short-Stocking.](#18-short-stocking) |
-| 19 | [Third Person Animations.](#19-third-person-animations) |
+1. [.0. Testing](#0-testing)
+2. [.1. Misc. Settings.](#1-misc-settings)
+3. [.2. Ballistics Settings.](#2-ballistics-settings)
+4. [.3. Recoil Settings.](#3-recoil-settings)
+5. [.4. Advanced Recoil Settings.](#4-advanced-recoil-settings)
+6. [.5. Stat Display Settings.](#5-stat-display-settings)
+7. [.6. Weapon Settings.](#6-weapon-settings)
+8. [.7. Health and Meds Settings.](#7-health-and-meds-settings)
+9. [.8. Hazard Zone Settings.](#8-hazard-zone-settings)
+10. [.9. Movement Settings.](#9-movement-settings)
+11. [.10. Deafening and Audio.](#10-deafening-and-audio)
+12. [11. Weapon Speed Modifiers.](#11-weapon-speed-modifiers)
+13. [12. Weapon Stances And Position.](#12-weapon-stances-and-position)
+14. [13. Weapon Stances Keybinds.](#13-weapon-stances-keybinds)
+15. [14. Active Aim.](#14-active-aim)
+16. [15. High Ready.](#15-high-ready)
+17. [16. Low Ready.](#16-low-ready)
+18. [17. Pistol Position And Stance.](#17-pistol-position-and-stance)
+19. [18. Short-Stocking.](#18-short-stocking)
+20. [19. Third Person Animations.](#19-third-person-animations)
 
 ---
 
@@ -61,7 +61,7 @@
 
 ---
 
-## .1. Misc. Settings
+## .1. Misc. Settings.
 
 | Nome (EN) | Nome (PT-BR) | Tipo | Padrão | Faixa | Avançado | Tooltip (PT-BR) |
 |-----------|-------------|------|--------|-------|----------|-----------------|
@@ -72,7 +72,7 @@
 
 ---
 
-## .2. Ballistics Settings
+## .2. Ballistics Settings.
 
 | Nome (EN) | Nome (PT-BR) | Tipo | Padrão | Faixa | Avançado | Tooltip (PT-BR) |
 |-----------|-------------|------|--------|-------|----------|-----------------|
@@ -97,7 +97,7 @@
 
 ---
 
-## .3. Recoil Settings
+## .3. Recoil Settings.
 
 | Nome (EN) | Nome (PT-BR) | Tipo | Padrão | Faixa | Avançado | Tooltip (PT-BR) |
 |-----------|-------------|------|--------|-------|----------|-----------------|
@@ -116,7 +116,7 @@
 
 ---
 
-## .4. Advanced Recoil Settings
+## .4. Advanced Recoil Settings.
 
 | Nome (EN) | Nome (PT-BR) | Tipo | Padrão | Faixa | Avançado | Tooltip (PT-BR) |
 |-----------|-------------|------|--------|-------|----------|-----------------|
@@ -141,7 +141,7 @@
 
 ---
 
-## .5. Stat Display Settings
+## .5. Stat Display Settings.
 
 | Nome (EN) | Nome (PT-BR) | Tipo | Padrão | Faixa | Avançado | Tooltip (PT-BR) |
 |-----------|-------------|------|--------|-------|----------|-----------------|
@@ -153,7 +153,7 @@
 
 ---
 
-## .6. Weapon Settings
+## .6. Weapon Settings.
 
 | Nome (EN) | Nome (PT-BR) | Tipo | Padrão | Faixa | Avançado | Tooltip (PT-BR) |
 |-----------|-------------|------|--------|-------|----------|-----------------|
@@ -168,7 +168,7 @@
 
 ---
 
-## .7. Health and Meds Settings
+## .7. Health and Meds Settings.
 
 | Nome (EN) | Nome (PT-BR) | Tipo | Padrão | Faixa | Avançado | Tooltip (PT-BR) |
 |-----------|-------------|------|--------|-------|----------|-----------------|
@@ -186,7 +186,7 @@
 
 ---
 
-## .8. Hazard Zone Settings
+## .8. Hazard Zone Settings.
 
 | Nome (EN) | Nome (PT-BR) | Tipo | Padrão | Faixa | Avançado | Tooltip (PT-BR) |
 |-----------|-------------|------|--------|-------|----------|-----------------|
@@ -201,7 +201,7 @@
 
 ---
 
-## .9. Movement Settings
+## .9. Movement Settings.
 
 | Nome (EN) | Nome (PT-BR) | Tipo | Padrão | Faixa | Avançado | Tooltip (PT-BR) |
 |-----------|-------------|------|--------|-------|----------|-----------------|
@@ -211,7 +211,7 @@
 
 ---
 
-## .10. Deafening and Audio
+## .10. Deafening and Audio.
 
 | Nome (EN) | Nome (PT-BR) | Tipo | Padrão | Faixa | Avançado | Tooltip (PT-BR) |
 |-----------|-------------|------|--------|-------|----------|-----------------|
@@ -231,7 +231,7 @@
 
 ---
 
-## 11. Weapon Speed Modifiers
+## 11. Weapon Speed Modifiers.
 
 | Nome (EN) | Nome (PT-BR) | Tipo | Padrão | Faixa | Avançado | Tooltip (PT-BR) |
 |-----------|-------------|------|--------|-------|----------|-----------------|
@@ -254,7 +254,7 @@
 
 ---
 
-## 12. Weapon Stances And Position
+## 12. Weapon Stances And Position.
 
 | Nome (EN) | Nome (PT-BR) | Tipo | Padrão | Faixa | Avançado | Tooltip (PT-BR) |
 |-----------|-------------|------|--------|-------|----------|-----------------|
@@ -283,7 +283,7 @@
 
 ---
 
-## 13. Weapon Stances Keybinds
+## 13. Weapon Stances Keybinds.
 
 | Nome (EN) | Nome (PT-BR) | Tipo | Padrão | Faixa | Avançado | Tooltip (PT-BR) |
 |-----------|-------------|------|--------|-------|----------|-----------------|
@@ -301,7 +301,7 @@
 
 ---
 
-## 14. Active Aim
+## 14. Active Aim.
 
 | Nome (EN) | Nome (PT-BR) | Tipo | Padrão | Faixa | Avançado | Tooltip (PT-BR) |
 |-----------|-------------|------|--------|-------|----------|-----------------|
@@ -317,7 +317,7 @@
 
 ---
 
-## 15. High Ready
+## 15. High Ready.
 
 | Nome (EN) | Nome (PT-BR) | Tipo | Padrão | Faixa | Avançado | Tooltip (PT-BR) |
 |-----------|-------------|------|--------|-------|----------|-----------------|
@@ -333,7 +333,7 @@
 
 ---
 
-## 16. Low Ready
+## 16. Low Ready.
 
 | Nome (EN) | Nome (PT-BR) | Tipo | Padrão | Faixa | Avançado | Tooltip (PT-BR) |
 |-----------|-------------|------|--------|-------|----------|-----------------|
@@ -349,7 +349,7 @@
 
 ---
 
-## 17. Pistol Position And Stance
+## 17. Pistol Position And Stance.
 
 | Nome (EN) | Nome (PT-BR) | Tipo | Padrão | Faixa | Avançado | Tooltip (PT-BR) |
 |-----------|-------------|------|--------|-------|----------|-----------------|
@@ -365,7 +365,7 @@
 
 ---
 
-## 18. Short-Stocking
+## 18. Short-Stocking.
 
 | Nome (EN) | Nome (PT-BR) | Tipo | Padrão | Faixa | Avançado | Tooltip (PT-BR) |
 |-----------|-------------|------|--------|-------|----------|-----------------|
@@ -381,7 +381,7 @@
 
 ---
 
-## 19. Third Person Animations
+## 19. Third Person Animations.
 
 | Nome (EN) | Nome (PT-BR) | Tipo | Padrão | Faixa | Avançado | Tooltip (PT-BR) |
 |-----------|-------------|------|--------|-------|----------|-----------------|

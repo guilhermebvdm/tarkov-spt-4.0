@@ -8,11 +8,13 @@ set -euo pipefail
 MOD=""
 SPT_PATH="${SPT_PATH:-D:/SPT}"
 FLAT_INSTALL=0
+CLEAN_BUILD=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --spt-path) SPT_PATH="${2:-}"; shift 2 ;;
     --flat)     FLAT_INSTALL=1; shift ;;
+    --clean)    CLEAN_BUILD=1; shift ;;
     -h|--help)
       sed -n '2,4p' "$0" | sed 's|^# \{0,1\}||'
       exit 0 ;;
@@ -99,6 +101,10 @@ resolve_references() {
 }
 
 # ---------- build ----------
+if [[ "$CLEAN_BUILD" == "1" && -d "$BUILDS" ]]; then
+  echo "→ --clean: removendo $BUILDS"
+  rm -rf "$BUILDS"
+fi
 mkdir -p "$BUILDS"
 
 case "$MOD_TYPE" in
@@ -122,17 +128,36 @@ case "$MOD_TYPE" in
     DLL="$BUILDS/$ASSEMBLY_NAME.dll"
     [[ -f "$DLL" ]] || { echo "Erro: DLL não gerada em $DLL" >&2; exit 1; }
 
+    # Cópia versionada com timestamp YYMMDD-HHMM (arquivo histórico em builds/)
+    TS="$(date '+%y%m%d-%H%M')"
+    VERSIONED_DLL="$BUILDS/$ASSEMBLY_NAME-$TS.dll"
+    cp -f "$DLL" "$VERSIONED_DLL"
+    echo "→ Versão arquivada: $VERSIONED_DLL"
+
     echo "✓ Build OK: $DLL ($(stat -c%s "$DLL" 2>/dev/null || stat -f%z "$DLL") bytes)"
 
     if [[ -d "$SPT_PATH" ]]; then
       if [[ "$FLAT_INSTALL" == "1" ]]; then
         DEST_DIR="$SPT_PATH/BepInEx/plugins"
         DEST_DLL="$DEST_DIR/$ASSEMBLY_NAME.dll"
+        # Remover instalação subfolder conflitante para evitar duplo carregamento pelo BepInEx
+        CONFLICT_DIR="$SPT_PATH/BepInEx/plugins/$ASSEMBLY_NAME"
+        if [[ -d "$CONFLICT_DIR" ]]; then
+          echo "→ Removendo subfolder conflitante: $CONFLICT_DIR"
+          rm -rf "$CONFLICT_DIR"
+        fi
       else
         DEST_DIR="$SPT_PATH/BepInEx/plugins/$ASSEMBLY_NAME"
         DEST_DLL="$DEST_DIR/$ASSEMBLY_NAME.dll"
+        # Remover instalação flat conflitante para evitar duplo carregamento pelo BepInEx
+        CONFLICT_FLAT="$SPT_PATH/BepInEx/plugins/$ASSEMBLY_NAME.dll"
+        if [[ -f "$CONFLICT_FLAT" ]]; then
+          echo "→ Removendo DLL flat conflitante: $CONFLICT_FLAT"
+          rm -f "$CONFLICT_FLAT" "${CONFLICT_FLAT}.bak" "${CONFLICT_FLAT%.dll}.pdb"
+        fi
       fi
       mkdir -p "$DEST_DIR"
+      [[ -f "$DEST_DLL" ]] && cp -f "$DEST_DLL" "$DEST_DLL.bak" && echo "→ Backup: $DEST_DLL.bak" || true
       cp -f "$DLL" "$DEST_DLL"
       [[ -f "${DLL%.dll}.pdb" ]] && cp -f "${DLL%.dll}.pdb" "$DEST_DIR/" 2>/dev/null || true
       echo "✓ Instalado: $DEST_DLL"

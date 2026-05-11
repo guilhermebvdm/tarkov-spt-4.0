@@ -5,12 +5,13 @@ Compila um mod (client BepInEx ou server TypeScript) e instala automaticamente e
 ## Uso
 
 ```
-/compile-mod <ref> [--spt-path <path>] [--flat]
+/compile-mod <ref> [--spt-path <path>] [--flat] [--clean]
 ```
 
 - `<ref>` — nome da pasta em `mods/`, path da pasta do mod, ou path de qualquer arquivo dentro.
 - `--spt-path <path>` — sobrescreve o path do SPT (default: `D:/SPT`, ou env var `SPT_PATH`).
 - `--flat` — (somente client) instala o `.dll` direto em `BepInEx/plugins/` sem subfolder.
+- `--clean` — apaga `mods/<mod>/builds/` antes de compilar, forçando rebuild completo (útil quando o cache do MSBuild gera artefatos stale).
 
 ## O que fazer
 
@@ -35,6 +36,18 @@ Compila um mod (client BepInEx ou server TypeScript) e instala automaticamente e
 | `package.json` (TypeScript) | **server-typescript** |
 | `*.csproj` sem BepInEx (server-side C#) | **server-csharp** (não suportado ainda) |
 
+### Resolução automática de referências (client-csharp)
+
+Antes de compilar, o script verifica se `modded/References/` tem os DLLs necessários. Se estiverem faltando, copia automaticamente até 13 DLLs do SPT install:
+
+| DLL | Origem |
+|---|---|
+| `BepInEx.dll`, `0Harmony.dll` | `D:/SPT/BepInEx/core/` |
+| `Assembly-CSharp.dll`, `UnityEngine*.dll`, `Comfort.dll`, `Sirenix.Serialization.dll`, `AnimationSystem.Types.dll` | `D:/SPT/EscapeFromTarkov_Data/Managed/` |
+| `SPT.Reflection.dll`, `SPT.Common.dll` | `D:/SPT/BepInEx/plugins/spt/` |
+
+Não sobrescreve DLLs que já existem em `References/`. Se o SPT install não existir, o passo é silenciosamente ignorado (o build vai falhar com erro de referência do MSBuild).
+
 ### Build
 
 - **client-csharp:**
@@ -54,7 +67,8 @@ Compila um mod (client BepInEx ou server TypeScript) e instala automaticamente e
 | client-csharp | `D:/SPT/BepInEx/plugins/<AssemblyName>/<AssemblyName>.dll` | `D:/SPT/BepInEx/plugins/<AssemblyName>.dll` |
 | server-typescript | `D:/SPT/SPT/user/mods/<mod>/` | — |
 
-- Pasta `.pdb` (símbolos de debug) é copiada junto se existir.
+- Se já existir um `.dll` no destino, é feito backup automático como `<AssemblyName>.dll.bak` antes de sobrescrever.
+- `.pdb` (símbolos de debug) é copiado junto se existir.
 - Para server TS, instalação usa `rsync --delete` para sincronizar (apaga arquivos órfãos no destino).
 
 ## Regras
@@ -72,6 +86,9 @@ Compila um mod (client BepInEx ou server TypeScript) e instala automaticamente e
 
 # Mesmo, com instalação flat (DLL direto na raiz de plugins/)
 /compile-mod stancesAndCameraPositionSPT4.0.11 --flat
+
+# Rebuild completo (limpa cache do MSBuild)
+/compile-mod stancesAndCameraPositionSPT4.0.11 --flat --clean
 
 # SPT em outro lugar
 /compile-mod meuModServer --spt-path E:/SPT-Dev

@@ -1,0 +1,11 @@
+{
+  "name": "SPT-DynamicMaps",
+  "upstream_url": "https://github.com/mpstark/SPT-DynamicMaps",
+  "upstream_sha": "b6d8bf85ecc231af4c61d9ed6649d9a5cf241fde",
+  "upstream_branch": "main",
+  "forge_url": "",
+  "license": "MIT",
+  "version_base": "unknown",
+  "spt_version": "",
+  "created_at": "2026-05-10T01:13:35Z"
+}

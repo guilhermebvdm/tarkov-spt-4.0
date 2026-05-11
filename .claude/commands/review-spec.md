@@ -14,7 +14,7 @@ Revisão crítica e **edição inline** da spec funcional. Não cria arquivo nov
 
 ## O que fazer
 
-1. **Resolver `<ref>`** → `<path-pasta>` e localizar `<NNN>-<slug>-spec.md`. Se não existir, parar.
+1. **Resolver `<ref>`** → `<path-pasta>` e localizar `<NNN>-<slug>-01-spec.md`. Se não existir, parar.
 
 2. **Ler todo o conteúdo** da spec.
 
