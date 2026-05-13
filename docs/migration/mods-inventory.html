@@ -74,6 +74,10 @@ tbody tr:nth-child(even){background:rgba(255,255,255,.012)}
 tbody tr:hover{background:rgba(200,169,110,.04)}
 tbody tr.installed{background:var(--inst-bg) !important}
 tbody tr.installed:hover{background:var(--inst-bg-hover) !important}
+tbody tr.naoincluir{background:rgba(70,75,85,.18) !important}
+tbody tr.naoincluir:hover{background:rgba(70,75,85,.28) !important}
+tbody tr.naoincluir td{color:var(--text);opacity:.62}
+tbody tr.naoincluir td .mod-name{color:var(--text)}
 tbody td{padding:6px 10px;border-right:1px solid var(--border);vertical-align:middle}
 tbody td:last-child{border-right:none}
 
@@ -211,6 +215,8 @@ tbody td:last-child{border-right:none}
 }
 .btn-inst:hover{border-color:#4caf72;color:#4caf72}
 .btn-inst.on{background:rgba(36,90,46,.35);border-color:#4caf72;color:#4caf72}
+.btn-inst.disabled{cursor:not-allowed;opacity:.45;border-color:rgba(70,85,100,.3);color:var(--text)}
+.btn-inst.disabled:hover{border-color:rgba(70,85,100,.3);color:var(--text)}
 
 /* FORGE POPOVER */
 .fpop{
@@ -348,7 +354,7 @@ const MODS = [
 [9,"AirFilterWarning","Client","Hideout","QoL","Hideout","2129","danx91/AirFilterWarning","Aviso de filtro de ar gerador","Avaliar","?",false,true,"Sim"],
 [10,"AmandsGraphics","Client","Raid","Cosmético","Gráficos","592",null,"Configurações gráficas avançadas — último release SPT 3.10","Aguardar","?",false,false,"Sim"],
 [11,"aMoxoPixel-Painter","Server","Geral","Conteúdo","Mercado,Armas","1025","emilanderss0n/Painter","Trader que vende mods de armas pintados","Avaliar","?",false,true,"Sim"],
-[12,"BeltSlot","Client","Ambos","QoL","Inventário,Equipamentos","2181","Trench-foot/BeltSlot","Slot extra de cinto no inventário","Avaliar","?",false,true,"Sim"],
+[12,"BeltSlot","Client","Ambos","QoL","Inventário,Equipamentos","2181","Trench-foot/BeltSlot","Slot extra de cinto no inventário — último release v1.0.1 (SPT 3.11.4, jul/2025); sem build 4.0","Aguardar","?",false,false,"Sim"],
 [13,"BetterRearSights","Client","Raid","Realismo","Armas","1591","peinwastaken/PeinBetterRearSights","Mira traseira melhorada","Avaliar","?",false,true,"Sim"],
 [14,"BorkelRNVG","Client","Raid","Realismo","Equipamentos","954","Borkel/RealisticNVG-client-2","NVGs realistas com máscaras + luz natural — v2.1.1 (SPT 4.0.13). Mesmo repo serve 3.x e 4.0 (versão por release)","Instalar","?",false,true,"Sim"],
 [15,"BRNVG_N-15Adapter","?","Raid","Realismo","Equipamentos",null,"","Adaptador N-15 para BRNVG (sub-pasta interna do mod BorkelRNVG, não publicado separado)","Avaliar","?",false,false,"Sim"],
@@ -414,7 +420,7 @@ const MODS = [
 [75,"SPT-FreshContentBackport","Server","Geral","Conteúdo","Framework","2187",null,"Backport de conteúdo novo","Avaliar","?",false,false,"Sim"],
 [76,"SPT-InsuranceFraud","Server","Geral","Balanceamento","Mercado","1792","ibxccc123/SPT-InsuranceFraud","Fraude no seguro (loot dropado retorna)","Avaliar","?",false,true,"Sim"],
 [77,"SPTVRAMCleaner","Client","Geral","QoL","Gráficos","2173","matsixx/SPTVRAMCleaner","Limpeza de VRAM (autor matsixx, não swiftxp)","Avaliar","?",false,true,"Sim"],
-[78,"StashSearch","Client","Hideout","QoL","Inventário","2148","DrakiaXYZ/SPT-StashSearch","Busca dentro do stash","Avaliar","?",false,true,"Sim"],
+[78,"StashSearch","Client","Hideout","QoL","Inventário","2148","DrakiaXYZ/SPT-StashSearch","Busca dentro do stash — último release v1.4.2 (SPT 3.11.4, mai/2025); DrakiaXYZ fork sem commits desde 2024-03","Aguardar","?",false,false,"Sim"],
 [79,"SwiftXP.ShowMeTheMoney","Misto","Geral","QoL","UI,Mercado","2299","swiftxp-hub/spt-show-me-the-money","Mostra dinheiro/valores em UI","Avaliar","?",false,true,"Sim"],
 [80,"TacticalToasterUNTARGH","Server","Raid","Conteúdo","IA","2342","TacticalToaster/TacticalToasterUNTARGH","Adiciona UNTAR como faction com bots customizados","Avaliar","?",false,true,"Sim"],
 [81,"Tarkov Weather System","Client","Raid","QoL","Mapas","2120","https://gitlab.com/flir063-spt/timeweatherchanger","Time & Weather Changer NG — v2.4.0 (SPT 4.0.13). Autor: flir. Hospedado no **GitLab**","Instalar","?",false,true,"Sim"],
@@ -457,6 +463,13 @@ const MODS = [
 [118,"Peltor TEP-300 earplugs backport and fixes","Client","Raid","Conteúdo","Equipamentos","2420","Dight67/TEP-300-Backport-Fixes","Restaura os fones militares TEP-300 do EFT Live no SPT, com correções — SPT 4.0.13. Autor: nem","Instalar","?",false,true,"New"],
 [119,"Skills Extended","Server","Geral","?","?","2383","CJ-SPT/Skills-Extended","Expande e aprimora o sistema de skills do personagem com mecânicas mais impactantes — compatível com Fika, SPT 4.0.13","Instalar","?",false,true,"New"],
 [120,"Wolfik's Heavy Trooper Masks - Reupload","Client","Raid","Conteúdo","Equipamentos","1569","Hood26/WolfiksHeavyTroopers","Adiciona cinco máscaras pesadas em variantes de cor (Black, Tan, Black/Coyote, Wolf, Cult) com proteção real de armadura e desbloqueio por quests — SPT 4.0.13","Instalar","?",false,true,"New"],
+[121,"Couturier - gear and clothing pack","Misto","Raid","Conteúdo","Equipamentos,Vestuário","2239","turbodestroyer1337/spt_couturier","Pack de equipamento e vestuário: mochilas, capacetes, armaduras, coletes táticos retexturizados e roupas adicionais — SPT 4.0.13","Instalar","?",false,true,"New"],
+[122,"Foldables","Client","Geral","?","Inventário,Equipamentos","2422","ozen-m/SPT-Foldables","Permite dobrar mochilas e coletes, reduzindo seu tamanho quando guardados no inventário — v1.0.3, SPT 4.0.13. Autor: ozen","Instalar","?",false,true,"New"],
+[123,"Change Helmet Visor","Misto","Raid","QoL","Equipamentos,UI","2554","Trinagan/ChangeHelmetVisor","Ajusta a renderização do visor de capacete com controle de escala de textura via plugin BepInEx — v2.0.0, SPT 4.0.13","Instalar","?",false,true,"New"],
+[124,"WTT - CommonLib","Server","Geral","?","Dev","2310","WelcomeToTarkov/WTT-CommonLib","Biblioteca utilitária de modding: reduz boilerplate ao adicionar itens, missões e personagens personalizados — v2.0.20, SPT 4.0.13","Instalar","?",false,true,"New"],
+[125,"Easy Ammo Names","Server","Geral","QoL","UI,Inventário","1262","DrakiaXYZ/SPT-EasyAmmoNames-CSharp","Renomeia munições no SPT para identificação mais fácil dos tipos de projéteis — SPT 4.0.13","Instalar","?",false,true,"New"],
+[126,"Quest Tracker","Client","Raid","QoL","UI,Quests","1140","DrakiaXYZ/SPT-QuestTracker","Overlay alternável para acompanhar progresso de missões em tempo real durante incursões — SPT 4.0.13","Instalar","?",false,true,"New"],
+[127,"Use Items Anywhere","Client","Raid","QoL","Inventário","2386","CJ-SPT/UseItemsAnywhere","Permite usar e vincular itens de qualquer lugar do inventário durante a raid — SPT 4.0.13","Instalar","?",false,true,"New"],
 ];
 
 // ── FORGE SLUGS ───────────────────────────────────────────────────────────────
@@ -495,6 +508,13 @@ const FORGE_IMG = {
   '2685':'3mzkHXwJbLde5zuHDdlrh4xJOV5UIm2eC37JfVKv',
   '2420':'9CpnqY1byslN23Dsv4BvsK0kMLTxBU6pJSTSbyiy',
   '1569':2145,
+  '2239':'eEfD1LSVG1ZleGGq90e91iDfCzxt8Kezg6YV28MY',
+  '2422':'pSj6ZQVoi3V3aZ8fVtZ8LDcvkw6OFiF6sMHfTMD2',
+  '2554':'AzyGDhQEEzdMvSSol4Nx4VNFwC6B5mmpy6b4jyFR',
+  '2310':'FVbVeBHaQuaij0cbN9akYctRp36WNPNU6FYzarMw',
+  '1262':1763,
+  '1140':1574,
+  '2386':'QFT3IUEWMKU90z1iyMFKtR2fgscGNQxVG7zMpR5u',
 };
 
 const FORGE_SLUGS = {
@@ -602,6 +622,13 @@ const FORGE_SLUGS = {
   '2685':'knight-mask-fix-40',
   '2420':'peltor-tep-300-earplugs-backport-and-fixes',
   '1569':'wolfiks-heavy-trooper-masks-reupload',
+  '2239':'couturier-gear-and-clothing-pack',
+  '2422':'foldables',
+  '2554':'change-helmet-visor',
+  '2310':'wtt-commonlib',
+  '1262':'easy-ammo-names',
+  '1140':'quest-tracker',
+  '2386':'use-items-anywhere',
 };
 
 // ── INDICES ───────────────────────────────────────────────────────────────────
@@ -677,6 +704,10 @@ function saveInstalled() {
   localStorage.setItem(INST_KEY, JSON.stringify([...state.installed]));
 }
 function toggleInstalled(n) {
+  if (!state.installed.has(n)) {
+    const m = MODS.find(x => x[I.n] === n);
+    if (m && effectiveStatus(m) === 'NaoIncluir') return;
+  }
   if (state.installed.has(n)) state.installed.delete(n);
   else state.installed.add(n);
   saveInstalled();
@@ -942,6 +973,10 @@ function trlCell(m) {
 
 function instCell(m) {
   const on = state.installed.has(m[I.n]);
+  const blocked = effectiveStatus(m) === 'NaoIncluir' && !on;
+  if (blocked) {
+    return `<button class="btn-inst disabled" disabled title="Mod marcado como NÃO INCLUIR">—</button>`;
+  }
   return `<button class="btn-inst${on?' on':''}" onclick="event.stopPropagation();toggleInstalled(${m[I.n]})">${on?'✓ Sim':'—'}</button>`;
 }
 
@@ -1003,9 +1038,10 @@ function render() {
   document.getElementById('tbody').innerHTML = list.map(m => {
     const rv = needsReview(m);
     const isInst = state.installed.has(m[I.n]);
+    const isNaoIncluir = !isInst && effectiveStatus(m) === 'NaoIncluir';
     const nameCls = m[I.intern] ? 'mod-name int' : 'mod-name';
     const revDot = rv ? '<span class="review-dot"></span>' : '';
-    const rowCls = isInst ? ' class="installed"' : '';
+    const rowCls = isInst ? ' class="installed"' : (isNaoIncluir ? ' class="naoincluir"' : '');
     return `<tr${rowCls}>
       <td class="c-num">${m[I.n]}</td>
       <td class="c-inst">${instCell(m)}</td>
