@@ -1,0 +1,114 @@
+/* ============================================================================
+ * Design tokens — derived from EFT/SPT flea-market UI references in
+ * `tools/tarkov-itemdb/assets/`. Raw values only; no component rules here.
+ *
+ * Naming convention:
+ *   --color-<role>           -> palette
+ *   --bg-<surface>           -> backgrounds
+ *   --fg-<weight>            -> foregrounds (text)
+ *   --border-<weight>        -> rules / dividers
+ *   --accent-<variant>       -> the khaki/yellow EFT signature
+ *   --space-<n>              -> 4px grid spacing
+ *   --radius-<size>          -> corner radii
+ *   --font-<role>            -> typography stack & sizes
+ * ============================================================================ */
+:root {
+  /* ── Surfaces (NEUTRAL dark grey — the warm/green tint comes from the
+   * body background image bleeding through semi-transparent panels, exactly
+   * like EFT does it). Panels use rgba so the gradient shows through. */
+  --bg-app:        #161616;   /* base behind everything */
+  --bg-panel:      rgba(22, 22, 22, 0.62);   /* sidebar, main panels (transparent enough to see bg) */
+  --bg-row:        rgba(20, 20, 20, 0.45);   /* table base row */
+  --bg-row-alt:    rgba(32, 32, 32, 0.45);   /* zebra stripe */
+  --bg-hover:      rgba(56, 56, 56, 0.7);    /* hover */
+  --bg-active:     rgba(120, 95, 40, 0.55);  /* selected (khaki tint) */
+  --bg-input:      rgba(8, 8, 8, 0.75);      /* darker than app */
+  --bg-elevated:   rgba(28, 28, 28, 0.95);   /* tooltips, toasts (solid for readability) */
+  --bg-header:     rgba(14, 14, 14, 0.78);   /* topbar / table header */
+
+  /* ── Foregrounds (warm-neutral cream, not olive) ─────────────────────────── */
+  --fg-primary:    #c4c2b8;   /* main text */
+  --fg-secondary:  #918e82;   /* secondary / labels */
+  --fg-dim:        #66645a;   /* tertiary */
+  --fg-faint:      #45433c;   /* placeholders, separators */
+  --fg-on-accent:  #1a1814;   /* text on accent backgrounds */
+
+  /* ── Borders (transparent dark lines — EFT uses shadows, not highlights) ── */
+  --border-subtle: rgba(0, 0, 0, 0.25);
+  --border-medium: rgba(0, 0, 0, 0.45);
+  --border-strong: rgba(0, 0, 0, 0.7);
+
+  /* ── EFT signature accent (muted khaki, not bright mustard) ──────────────── */
+  --accent:          #a08543;
+  --accent-bright:   #c2a056;
+  --accent-dim:      #6c5828;
+  --accent-deep:     #3a2f15;
+
+  /* ── Semantic colors (muted, EFT-style — not saturated) ──────────────────── */
+  --color-currency-rub: #b8983e;   /* roubles use the muted khaki */
+  --color-currency-usd: #6e9a3f;   /* dollars: olive green */
+  --color-currency-eur: #5e84b8;   /* euros: muted blue */
+  --color-success:      #6e9a3f;
+  --color-success-dim:  #4a6630;
+  --color-warning:      #c29638;
+  --color-danger:       #a04a3a;
+  --color-danger-bright:#bd5a48;
+
+  /* Price-trend colors (used by ▲ ▼ indicators) */
+  --color-up:           #6e9a3f;
+  --color-down:         #a04a3a;
+
+  /* ── Spacing (4px grid) ──────────────────────────────────────────────────── */
+  --space-0: 0;
+  --space-1: 2px;
+  --space-2: 4px;
+  --space-3: 6px;
+  --space-4: 8px;
+  --space-5: 10px;
+  --space-6: 12px;
+  --space-7: 14px;
+  --space-8: 16px;
+  --space-10: 20px;
+  --space-12: 24px;
+  --space-16: 32px;
+
+  /* ── Radii ───────────────────────────────────────────────────────────────── */
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+  --radius-pill: 999px;
+
+  /* ── Typography ──────────────────────────────────────────────────────────── */
+  /* EFT uses Bender (proprietary). Fallback to condensed system sans. */
+  --font-sans:    'Roboto Condensed', 'Bahnschrift', 'Bender', 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'Roboto Condensed', 'Bahnschrift Condensed', 'Bahnschrift', 'Bender', 'Oswald', sans-serif;
+  --font-mono:    ui-monospace, 'Cascadia Mono', 'Consolas', monospace;
+
+  --fs-xs:   12px;
+  --fs-sm:   13px;
+  --fs-md:   14px;
+  --fs-lg:   15px;
+  --fs-xl:   17px;
+  --fs-2xl:  19px;
+
+  --lh-tight:  1.2;
+  --lh-base:   1.4;
+
+  /* ── Effects ─────────────────────────────────────────────────────────────── */
+  --shadow-sm:  0 1px 2px rgba(0,0,0,.4);
+  --shadow-md:  0 4px 12px rgba(0,0,0,.5);
+  --shadow-lg:  0 8px 24px rgba(0,0,0,.6);
+
+  --transition-fast: 100ms ease;
+  --transition-base: 150ms ease;
+
+  /* ── Sidebar geometry ────────────────────────────────────────────────────── */
+  --sidebar-w:   280px;
+  --topbar-h:    44px;
+  --row-h:       40px;
+
+  /* ── Z-index scale ───────────────────────────────────────────────────────── */
+  --z-sticky:   10;
+  --z-overlay:  100;
+  --z-toast:    200;
+}

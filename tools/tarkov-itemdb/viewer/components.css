@@ -1,0 +1,708 @@
+/* ============================================================================
+ * Components — semantic UI patterns built on tokens.css.
+ * Match the EFT/SPT flea-market visual language. Component classes only;
+ * no design tokens inlined here (always reference --vars from tokens.css).
+ * ============================================================================ */
+
+/* ── Reset / base ──────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0; padding: 0;
+  color: var(--fg-primary);
+  font-family: var(--font-sans);
+  font-size: var(--fs-md);
+  line-height: var(--lh-base);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+/* EFT menu background photo (bg4.png copied from kmyuhkyuk-EnvironmentReplace).
+ * Panels overlay this with semi-transparent grey, so the warm/cool tones a
+ * player sees through the UI are this photograph bleeding through — not
+ * solid UI colors. A dark overlay tames the image so foreground stays readable. */
+body {
+  background-color: var(--bg-app);
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.65)),
+    url("bg.png");
+  background-size: cover;
+  background-position: center center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+/* ── Layout shell ──────────────────────────────────────────────────────────── */
+.app {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  grid-template-rows: var(--topbar-h) 1fr;
+  height: 100vh;
+}
+
+/* Narrow viewports: shrink sidebar; very narrow: collapse to icons only. */
+@media (max-width: 1280px) {
+  .app { grid-template-columns: 220px 1fr; }
+}
+@media (max-width: 1000px) {
+  .app { grid-template-columns: 56px 1fr; }
+  .sidebar { padding: var(--space-3) 0; }
+  .tree-node .label, .tree-node .count, .tree-node .chev { display: none; }
+  .tree-node { justify-content: center; padding: var(--space-3) 0; }
+  .tree-node.tree-all .label { display: none; }
+  .tree-node.tree-all::before {
+    content: "★"; color: var(--accent); font-size: var(--fs-md);
+  }
+  .tree-children { display: none !important; } /* collapsed mode hides subtree always */
+}
+
+/* ── Topbar ────────────────────────────────────────────────────────────────── */
+.topbar {
+  grid-column: 1 / 3;
+  display: flex; align-items: center; gap: var(--space-6);
+  padding: 0 var(--space-8);
+  background: var(--bg-header);
+  border-bottom: 1px solid var(--border-medium);
+  position: relative;
+  box-shadow: 0 1px 0 0 var(--accent-deep), 0 2px 0 0 var(--border-subtle);
+}
+/* Thin accent bar across the bottom of the topbar — EFT signature divider. */
+.topbar::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-dim) 20%, var(--accent-dim) 80%, transparent);
+  opacity: .6;
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  letter-spacing: 1px;
+  color: var(--accent);
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-right: var(--space-4);
+}
+
+.search {
+  flex: 0 1 360px;
+  position: relative;
+}
+.search input {
+  width: 100%;
+  padding: var(--space-3) var(--space-4) var(--space-3) var(--space-10);
+  background: var(--bg-input);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  color: var(--fg-primary);
+  font: inherit;
+  font-size: var(--fs-sm);
+  transition: border-color var(--transition-fast);
+}
+.search input:focus {
+  outline: none;
+  border-color: var(--accent-dim);
+}
+.search input::placeholder { color: var(--fg-dim); font-style: italic; }
+.search::before {
+  content: "⌕";
+  position: absolute; left: var(--space-3); top: 50%; transform: translateY(-50%);
+  color: var(--fg-dim); font-size: 14px; pointer-events: none;
+}
+
+/* ── Pills / select / checkbox ─────────────────────────────────────────────── */
+.pill, select.pill {
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-input);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  color: var(--fg-secondary);
+  font: inherit;
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+.pill:hover, select.pill:hover { color: var(--fg-primary); border-color: var(--border-strong); }
+select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--space-7); background-image: linear-gradient(45deg, transparent 50%, var(--fg-dim) 50%), linear-gradient(135deg, var(--fg-dim) 50%, transparent 50%); background-position: calc(100% - 12px) 50%, calc(100% - 7px) 50%; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; }
+
+.check {
+  display: inline-flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-input);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  color: var(--fg-secondary);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+.check:hover { color: var(--fg-primary); border-color: var(--border-strong); }
+.check input { margin: 0; accent-color: var(--accent); }
+
+/* ── Stats / right-side info on topbar ─────────────────────────────────────── */
+.topbar .stats {
+  margin-left: auto;
+  color: var(--fg-secondary);
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Sidebar (handbook tree) ───────────────────────────────────────────────── */
+.sidebar {
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border-medium);
+  overflow: auto;
+  padding: var(--space-4) 0;
+  font-size: var(--fs-md);
+}
+.sidebar::-webkit-scrollbar { width: 8px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border-medium); border-radius: 4px; }
+.sidebar::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+
+.tree-node {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-3) var(--space-5) var(--space-3) var(--space-3);
+  color: var(--fg-primary);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  white-space: nowrap;
+  position: relative;
+  transition: background var(--transition-fast);
+}
+.tree-node:hover { background: var(--bg-hover); }
+.tree-node.is-active {
+  background: var(--bg-active);
+  color: var(--accent-bright);
+}
+/* Accent strip on the left — same pattern as the main table row hover/expanded */
+.tree-node:hover:not(.is-active)::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+  background: var(--accent-dim);
+}
+.tree-node.is-active::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+  background: var(--accent);
+}
+
+.tree-node .chev {
+  width: 12px; height: 12px;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  color: var(--fg-dim);
+  transition: transform 180ms cubic-bezier(.4, 0, .2, 1), color var(--transition-fast);
+}
+.tree-node:hover .chev { color: var(--fg-secondary); }
+.tree-node.is-active .chev { color: var(--accent); }
+.tree-node:not(.has-children) .chev { visibility: hidden; }
+.tree-node.has-children .chev::before {
+  content: "";
+  width: 6px; height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  margin-top: -2px;
+}
+.tree-node.is-open .chev { transform: rotate(45deg); }
+
+.tree-node .icon {
+  display: inline-flex; width: 22px; height: 22px;
+  align-items: center; justify-content: center;
+  flex-shrink: 0; opacity: .9;
+}
+.tree-node .icon img {
+  width: 22px; height: 22px; object-fit: contain;
+  image-rendering: -webkit-optimize-contrast;
+}
+.tree-node .label { overflow: hidden; text-overflow: ellipsis; flex: 1; }
+.tree-node .count {
+  color: var(--fg-dim);
+  font-size: var(--fs-xs);
+  margin-left: auto;
+  padding-left: var(--space-3);
+  font-variant-numeric: tabular-nums;
+}
+.tree-node.is-active .count { color: var(--accent); }
+
+.tree-node.tree-all {
+  color: var(--accent);
+  font-weight: 600;
+  padding-left: 18px;
+  text-transform: uppercase;
+  font-size: var(--fs-sm);
+  letter-spacing: .5px;
+  margin-bottom: var(--space-2);
+}
+
+.tree-children.is-hidden { display: none; }
+
+/* ── Main area ─────────────────────────────────────────────────────────────── */
+.main { overflow: auto; background: transparent; }
+.main::-webkit-scrollbar { width: 10px; height: 10px; }
+.main::-webkit-scrollbar-track { background: transparent; }
+.main::-webkit-scrollbar-thumb { background: var(--border-medium); border-radius: 4px; }
+.main::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+
+/* ── Table ─────────────────────────────────────────────────────────────────── */
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+}
+/* Sticky header: with border-collapse: collapse the thead background doesn't
+ * render in all browsers, so we put the opaque/blur fill on each <th>. */
+.tbl thead { position: sticky; top: 0; z-index: var(--z-sticky); }
+.tbl thead th {
+  position: sticky; top: 0;
+  background: rgba(10, 10, 10, 0.96);   /* opaque enough to hide rows scrolling underneath */
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+.tbl th {
+  text-align: left;
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  border-bottom: 1px solid var(--border-strong);
+  font-family: var(--font-display);
+  font-weight: 500;
+  color: var(--fg-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: var(--fs-xs);
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  white-space: nowrap;
+  position: relative;
+  transition: color var(--transition-fast);
+}
+.tbl th:hover { color: var(--fg-primary); }
+.tbl th.num, .tbl td.num { text-align: right; }
+/* Active-sort gets a 2px accent underline replacing the inline ▲▼ arrow */
+.tbl th.is-sorted { color: var(--accent-bright); }
+.tbl th.is-sorted::after {
+  content: ""; position: absolute; left: var(--space-5); right: var(--space-5); bottom: -1px;
+  height: 2px; background: var(--accent);
+}
+.tbl th .sort {
+  color: var(--accent);
+  font-size: 9px;
+  margin-left: var(--space-2);
+  opacity: .8;
+}
+
+.tbl tbody tr {
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-row);
+  cursor: pointer;
+  position: relative;
+  transition: background var(--transition-fast);
+}
+.tbl tbody tr:nth-child(even) { background: var(--bg-row-alt); }
+.tbl tbody tr:hover { background: var(--bg-hover); }
+.tbl tbody tr.is-expanded { background: var(--bg-elevated); }
+
+/* Yellow accent strip on the left of hovered / expanded rows — EFT-style
+ * focus indicator. Uses td-on-first-column box-shadow inset so it doesn't
+ * shift cell content. */
+.tbl tbody tr:hover td:first-child {
+  box-shadow: inset 2px 0 0 0 var(--accent-dim);
+}
+.tbl tbody tr.is-expanded td:first-child {
+  box-shadow: inset 3px 0 0 0 var(--accent);
+}
+.tbl tbody tr.is-banned td.col-name .name { text-decoration: line-through; text-decoration-color: rgba(184,85,68,.55); }
+
+/* All cells in a row share the same vertical metrics: middle-aligned content,
+ * consistent padding-top/bottom, and a min-height matching the largest cell
+ * (the 48px item image + its padding). */
+.tbl tbody tr td { vertical-align: middle; padding: var(--space-3) var(--space-5); }
+.tbl tbody tr { height: 60px; }
+
+/* Image cell — slightly larger, with subtle inset grid background mimicking
+ * the in-game inventory slot. The grid is purely decorative (linear-gradients). */
+.col-img { width: 60px; padding: var(--space-2) var(--space-3); }
+.col-img img, .col-img .no-img {
+  width: 48px; height: 48px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-input);
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 8px 8px;
+  background-position: 0 0;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.4);
+}
+.col-img img { object-fit: contain; image-rendering: -webkit-optimize-contrast; }
+.col-img .no-img {
+  display: flex; align-items: center; justify-content: center;
+  color: var(--fg-faint); font-size: var(--fs-xs);
+}
+
+/* Name cell — capped width so price columns can occupy the right half of
+ * the table. With table-layout flexible, ellipsis on overflow keeps rows tight. */
+.col-name {
+  max-width: 280px;
+  overflow: hidden;
+}
+.col-name .name {
+  color: var(--fg-primary); font-size: var(--fs-md);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.col-name .short { color: var(--fg-secondary); font-size: var(--fs-xs); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Force the price columns to take meaningful real estate — together with the
+ * capped name column above, this pushes prices into the right half. */
+.tbl tbody td.num,
+.tbl thead th.num {
+  min-width: 130px;
+}
+
+/* Group cell — handbook category icon (16px) + name */
+.group { display: inline-flex; align-items: center; gap: var(--space-3); }
+.group-icon { width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; opacity: .9; image-rendering: -webkit-optimize-contrast; }
+.group-icon--empty { background: transparent; }
+.group__name { color: var(--fg-primary); }
+.col-group .muted { color: var(--fg-dim); }
+
+/* Price cell */
+.price { font-variant-numeric: tabular-nums; }
+.price.is-null { color: var(--fg-faint); }
+.price.is-canonical { font-weight: 600; color: var(--accent-bright); }
+.price small {
+  color: var(--fg-dim);
+  display: block; font-size: var(--fs-xs);
+  line-height: 1.3;
+}
+.price.is-banned { color: var(--fg-dim); font-style: italic; }
+
+/* Uniform money-cell layout — every cell reserves a consistent vertical block
+ * (value + optional secondary slot) so values stay at the same baseline AND
+ * the block itself is centered in the row. The reserved min-height matches a
+ * value+pct stack; cells without secondary leave it empty but the value still
+ * sits at the top of the reserved area, centered in the row by td middle-align. */
+.tbl tbody td.num { vertical-align: middle; padding-top: var(--space-3); padding-bottom: var(--space-3); }
+.cell-num {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-start;
+  gap: 2px;
+  line-height: 1;
+  min-height: 30px;   /* reserve space for value + secondary slot */
+}
+.cell-num__value {
+  font-size: var(--fs-md);
+  line-height: 1.2;
+}
+
+/* Trader cell — circular avatar aligned to the value's vertical center */
+.cell-trader {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  justify-content: flex-end;
+}
+.cell-trader__num {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 2px;
+  line-height: 1;
+  min-height: 30px;
+}
+.cell-trader__value { font-size: var(--fs-md); line-height: 1.2; }
+
+.trader-avatar {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border-medium);
+  background: var(--bg-input);
+  flex-shrink: 0;
+  image-rendering: -webkit-optimize-contrast;
+}
+.trader-avatar--placeholder {
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  color: var(--fg-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Render the trailing "₽" / "$" / "€" sigil in the accent color, EFT-style */
+.tbl tbody td.num,
+.detail-section td.v {
+  color: var(--fg-primary);
+}
+.tbl tbody td.num.price.is-canonical { color: var(--accent-bright); }
+
+/* Currency sigil — small inline pill that visually separates the number from
+ * the unit. RUB uses the EFT khaki accent, USD green, EUR blue. */
+.currency {
+  display: inline-block;
+  margin-left: 3px;
+  padding: 0 5px;
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.4;
+  vertical-align: 1px;
+}
+.currency--rub { background: var(--accent-deep); color: var(--accent-bright); }
+.currency--usd { background: #2c4a25; color: var(--color-currency-usd); }
+.currency--eur { background: #1f3c5e; color: var(--color-currency-eur); }
+.price.is-canonical .currency--rub { background: var(--accent-dim); color: var(--fg-on-accent); }
+.price.is-banned .currency--rub { opacity: .6; }
+
+/* % indicator under price */
+.pct {
+  display: block; font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  margin-top: 1px;
+  line-height: 1.2;
+}
+.pct.is-up   { color: var(--color-up); }
+.pct.is-down { color: var(--color-down); }
+.pct.is-zero { color: var(--fg-faint); }
+
+/* ── Badges ────────────────────────────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  white-space: nowrap;
+}
+.badge--uses       { background: #5a2a2a; color: #e0a0a0; }
+.badge--durability { background: #2c3445; color: #93a8c8; }
+.badge--resource   { background: #2e4a2e; color: #93c894; }
+.badge--none       { background: #2a2924; color: var(--fg-dim); }
+.badge--unknown    { background: #1f1e1a; color: var(--fg-faint); }
+
+.badge--src-tarkov-market-avg24h { background: #2c3a48; color: #93b3d0; }
+.badge--src-tarkov-dev-avg24h    { background: #3c2c48; color: #c89adf; }
+.badge--src-tarkov-dev-lastLow   { background: #4a2c4a; color: #c89ac8; }
+.badge--src-spt                  { background: #4a3a1c; color: var(--accent-bright); }
+
+.banned-icon {
+  color: var(--color-danger-bright);
+  font-size: var(--fs-xs);
+  cursor: help;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: -2px;
+}
+.icon-banned { display: inline-block; }
+
+/* ── Edit form (inline on price cell) ──────────────────────────────────────── */
+.cell-edit { cursor: cell; position: relative; }
+.cell-edit:hover::after {
+  content: "✎";
+  position: absolute; top: var(--space-1); right: var(--space-2);
+  color: var(--fg-dim); font-size: 10px;
+}
+.cell-edit .edit-form {
+  display: flex; gap: var(--space-1); align-items: center; justify-content: flex-end;
+}
+.cell-edit input {
+  width: 96px;
+  padding: var(--space-1) var(--space-3);
+  background: var(--bg-input);
+  color: var(--fg-primary);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: var(--fs-sm);
+  text-align: right;
+}
+.cell-edit button {
+  padding: var(--space-1) var(--space-3);
+  background: var(--accent-dim);
+  color: var(--fg-on-accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+}
+.cell-edit button.cancel { background: var(--bg-hover); color: var(--fg-secondary); }
+.cell-edit button:hover { filter: brightness(1.15); }
+.cell-edit button:disabled { opacity: .5; cursor: wait; }
+
+/* ── Detail row (expanded) ─────────────────────────────────────────────────── */
+.detail td {
+  padding: var(--space-7) var(--space-8);
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border-strong);
+}
+.detail-grid {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: var(--space-8);
+}
+.detail-img img {
+  width: 200px; height: 200px;
+  object-fit: contain;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+.detail-img .no-img {
+  width: 200px; height: 200px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--fg-faint);
+}
+.detail-sections {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-8);
+}
+.detail-section h3 {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-xs);
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: .8px;
+}
+.detail-section table { font-size: var(--fs-xs); width: 100%; }
+.detail-section td { padding: 2px var(--space-3); border: none; }
+.detail-section td.k { color: var(--fg-secondary); white-space: nowrap; }
+.detail-section td.v { color: var(--fg-primary); }
+.meta-line { color: var(--fg-dim); font-size: var(--fs-xs); margin: var(--space-2) 0; }
+.meta-line a { color: var(--color-currency-eur); text-decoration: none; }
+.meta-line a:hover { text-decoration: underline; color: #8eb6e0; }
+.meta-line code { font-family: var(--font-mono); font-size: 10px; }
+.types { color: var(--fg-dim); font-size: 10px; }
+
+/* ── Empty / loading states ────────────────────────────────────────────────── */
+.empty {
+  padding: var(--space-16);
+  color: var(--fg-dim);
+  text-align: center;
+  font-size: var(--fs-md);
+}
+
+/* Shimmer skeleton for initial load. ~14 MB JSON parse takes 200-500ms;
+ * skeleton gives perceived speed boost vs blank screen. */
+.loading {
+  padding: var(--space-6) var(--space-8);
+}
+.loading__hint {
+  text-align: center;
+  color: var(--fg-dim);
+  font-size: var(--fs-sm);
+  margin-bottom: var(--space-6);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.loading__rows { display: flex; flex-direction: column; gap: var(--space-2); }
+.skel-row {
+  display: grid;
+  grid-template-columns: 60px 2fr 1fr 70px repeat(5, 1fr);
+  gap: var(--space-5);
+  align-items: center;
+  padding: var(--space-3) var(--space-5);
+  background: var(--bg-row);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.skel-row:nth-child(even) { background: var(--bg-row-alt); }
+.skel-box {
+  height: 14px;
+  background: linear-gradient(90deg,
+    var(--bg-hover) 0%,
+    var(--bg-elevated) 50%,
+    var(--bg-hover) 100%);
+  background-size: 200% 100%;
+  border-radius: var(--radius-sm);
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+.skel-box--img { height: 44px; width: 44px; border-radius: var(--radius-sm); }
+.skel-box--tall { height: 26px; }
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Toasts ────────────────────────────────────────────────────────────────── */
+.toast-container {
+  position: fixed;
+  top: calc(var(--topbar-h) + var(--space-4));
+  right: var(--space-4);
+  z-index: var(--z-toast);
+  display: flex; flex-direction: column; gap: var(--space-3);
+  pointer-events: none;
+}
+.toast {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-left: 3px solid var(--color-success);
+  padding: var(--space-4) var(--space-6);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-sm);
+  color: var(--fg-primary);
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  transform: translateX(20px);
+  transition: opacity var(--transition-base), transform var(--transition-base);
+  pointer-events: auto;
+  min-width: 240px;
+}
+.toast.is-show { opacity: 1; transform: translateX(0); }
+.toast.is-error { border-left-color: var(--color-danger); }
+.toast small { display: block; color: var(--fg-dim); font-size: 10px; margin-top: 2px; }
+
+/* ── Utility: tabular nums for prices everywhere ───────────────────────────── */
+.num-tab { font-variant-numeric: tabular-nums; }
+
+/* ── Tooltips (CSS-only) ───────────────────────────────────────────────────── */
+/* Replace native `title` attribute (slow, unstyled). Apply `data-tip="..."`
+ * to any element. Optional `data-tip-pos="top|bottom|left|right"`. */
+[data-tip] { position: relative; }
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translate(-50%, 4px);
+  background: var(--bg-elevated);
+  color: var(--fg-primary);
+  border: 1px solid var(--border-strong);
+  border-bottom-color: var(--accent-dim);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-xs);
+  font-weight: 400;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 120ms ease, transform 120ms ease, visibility 120ms;
+  z-index: var(--z-overlay);
+  box-shadow: var(--shadow-md);
+}
+[data-tip]:hover::after, [data-tip]:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+  transition-delay: 250ms;
+}
+[data-tip-pos="bottom"]::after {
+  bottom: auto; top: calc(100% + 6px);
+  transform: translate(-50%, -4px);
+}
+[data-tip-pos="bottom"]:hover::after, [data-tip-pos="bottom"]:focus-visible::after {
+  transform: translate(-50%, 0);
+}

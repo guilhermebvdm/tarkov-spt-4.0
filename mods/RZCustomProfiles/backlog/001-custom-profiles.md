@@ -1,39 +1,138 @@
 # Perfis customizados — planejamento
 
-> **Premissa:** skills começam no nível 0. Cada perfil distribui até **35 pontos** em até **5 skills**, com teto de **10 por skill**. Nenhum perfil altera traders, itens, quests ou nível inicial — apenas o ponto de partida de skills específicas, como se o personagem tivesse experiência anterior.
+> **Premissa:** skills começam no nível 0. Cada perfil distribui até **6 skills** com teto de **10 por skill**, calibrado por um **budget de 28 a 32 pontos ponderados** (ver "Modelo de balanceamento" abaixo). Além disso, cada classe pode receber:
+> - **1 estação inicial de hideout em nível 1** (ver "Hideout inicial")
+> - **Loadout inicial** (~2M ₽) com itens no stash (ver "Inventário inicial")
+>
+> Nenhum perfil altera traders, nível inicial do personagem ou quests.
+
+---
+
+## Classes em resumo
+
+| # | Classe | Conceito | Estilo de jogo |
+|---|--------|----------|----------------|
+| 1 | **Médico de Combate** | Combat Medic — medicina tática de campo | Sobrevive a ferimentos que matariam outros. Trata dano severo rápido e continua operacional. |
+| 2 | **Caçador** | Sniper — engajamentos de longa distância | Paciente e preciso. Domina posições elevadas, minimiza movimento e elimina antes de ser detectado. |
+| 3 | **Fuzileiro** | Assault Rifleman — combate direto | Agressivo. Entra em contato, sustenta fogo e empurra posições com recargas rápidas e controle de recuo. |
+| 4 | **Batedor** | Scout / Recon — informação e mobilidade | Entra rápido, coleta informação, sai antes de ser detectado. Move-se em silêncio e identifica inimigos à distância. |
+| 5 | **Operador Noturno** | Night Ops — operações sob escuridão | Domina o ambiente noturno. Usa NVG e supressores enquanto inimigos lutam contra a visibilidade. |
+| 6 | **Armeiro** | Field Armorer — manutenção de armamento | Mantém armas funcionando por mais tempo, corrige encravamentos e modifica equipamento em campo. |
+| 7 | **Operador Tático** | Special Forces — generalista de elite | Sem fraquezas evidentes. Físico superior, mira rápida e adaptação a qualquer tipo de combate. |
+| 8 | **Sobrevivencialista** | Survivalist — autossuficiência no longo prazo | Fica em raid por mais tempo que qualquer outro. Drena recursos devagar e resiste a efeitos negativos. |
+| 9 | **Saqueador** | Scavenger — extração de valor | Esvazia containers em segundos, detecta loot à distância e identifica itens valiosos instantaneamente. |
+| 10 | **Gerente de Operações** *(bônus)* | Operations Manager — logística e produção | Maximiza rendimento do hideout e progride skills mais rápido. Vantagem cumulativa, não imediata em raid. |
+
+---
+
+## Modelo de balanceamento
+
+Tratar 1 ponto = 1 nível para todas as skills é injusto: subir Metabolism para 10 é trivial (sobe comendo/bebendo), enquanto subir Endurance ou FirstAid para 10 representa dezenas de horas de raid focada. Para equilibrar isso, cada skill recebe um **multiplicador de custo** derivado empiricamente de um personagem de referência lvl 43 (screenshots em [../assets/](../assets/)).
+
+### Fórmula
+
+```text
+multiplicador_skill = BASELINE / nivel_observado_no_lvl_43
+custo_skill          = nivel_atribuído × multiplicador_skill
+custo_classe         = Σ custo_skill
+```
+
+- `BASELINE = 15` (mediana das skills neutras do personagem de referência — Assault e Endurance ficaram exatamente nesse valor).
+- Resultado em `[0.25, 3.00]` por clamp.
+- **Budget alvo por classe: 28 a 32 pontos ponderados.**
+
+### Multiplicadores — skills observadas no personagem de referência
+
+| Skill | Nível @ lvl 43 | Multiplicador |
+|-------|---------------:|--------------:|
+| `Metabolism` | 51 (ELITE) | 0.29 |
+| `Crafting` | 45 | 0.33 |
+| `HideoutManagement` | 38 | 0.39 |
+| `Search` | 35 | 0.43 |
+| `Strength` | 32 | 0.47 |
+| `Attention` | 25 | 0.60 |
+| `Intellect` | 22 | 0.68 |
+| `Revolver` | 21 | 0.71 |
+| `Throwing` | 18 | 0.83 |
+| `StressResistance` | 17 | 0.88 |
+| `Perception` | 17 | 0.88 |
+| `CovertMovement` | 16 | 0.94 |
+| `MagDrills` | 16 | 0.94 |
+| `Assault` | 15 | 1.00 |
+| `Endurance` | 15 | 1.00 |
+| `AimDrills` | 13 | 1.15 |
+| `Surgery` | 12 | 1.25 |
+| `WeaponTreatment` | 12 | 1.25 |
+| `Vitality` | 9 | 1.67 |
+| `Health` | 9 | 1.67 |
+| `Melee` | 8 | 1.88 |
+| `Shotgun` | 6 | 2.50 |
+| `TroubleShooting` | 6 | 2.50 |
+| `Pistol`, `SMG` | 5 | 3.00 |
+| `DMR`, `Bolt-action` | 4 | 3.00 |
+| `Immunity` | 4 | 3.00 |
+| `LightVests` | 4 | 3.00 |
+| `HeavyVests` | 4 | 3.00 |
+| `LMG` | 2 | 3.00 |
+| `HMG`, `Launcher`, `AttachedLauncher` | 0 | 3.00 |
+
+### Multiplicadores — skills não observadas (premissas)
+
+| Skill | Multiplicador | Premissa |
+|-------|--------------:|----------|
+| `FirstAid` | 1.25 | Análoga a Surgery (uso ativo de meds) |
+| `FieldMedicine` | 1.50 | Mais rara — meds caros em movimento |
+| `Sniper` | 1.50 | Mastering raro de bolt-action longo |
+| `Sniping` | 1.50 | Exige paciência e scope |
+| `ProneMovement` | 1.50 | Análoga a CovertMovement mas usada menos |
+| `RecoilControl` | 1.00 | Sobe naturalmente atirando — baseline |
+| `WeaponModding` | 1.00 | Pode ser farmado no workbench |
+| `AdvancedModding` | 2.00 | Gated por WeaponModding alto |
+| `NightOps` | 2.50 | Gear-gated (precisa NVG) |
+| `SilentOps` | 2.50 | Gear-gated (precisa supressor) |
+| `Lockpicking` | 2.50 | Ação rara |
+| `Memory` | 0.50 | Sobe junto com todas as outras skills |
+| `Charisma` | 0.40 | Passiva em trades/quests |
+| `Barter` | 1.50 | Depende de trades de barter ativas |
+| `Freetrading`, `Auctions` | 2.00 | Depende de uso da flea |
+| `Cleanoperations`, `Shadowconnections` | 2.50 | Rotas específicas de quest |
+| `Taskperformance` | 2.00 | Sobe com quests completadas |
+
+> Recalibração futura: rodar a fórmula com um personagem de referência mais recente atualiza toda a tabela.
 
 ---
 
 ## Perfis propostos
 
-### 1. Sanitarista
+### 1. Médico de Combate
 *Combat Medic — especialista em medicina tática de campo*
 
 **Estilo de jogo:** Sobrevive a situações que matariam outros jogadores. Trata ferimentos com mais velocidade e eficiência, permitindo continuar operacional mesmo após tomar dano severo.
 
-| Skill | Nível | Justificativa |
-|-------|-------|---------------|
-| `FirstAid` | 10 | Uso rápido de bandagens, splints e hemostáticos — base de qualquer médico |
-| `FieldMedicine` | 8 | Aplicar curativos em movimento, sem parar em cobertura |
-| `Surgery` | 8 | Reparar membros com kit cirúrgico mais rápido |
-| `Vitality` | 5 | HP máximo maior e menor chance de sangramento |
-| `Health` | 4 | Regeneração passiva: sai de raids em melhor condição |
-| **Total** | **35** | |
+| Skill | Nível | Mult. | Custo | Justificativa |
+|-------|------:|------:|------:|---------------|
+| `FirstAid` | 7 | 1.25 | 8.75 | Uso rápido de bandagens, splints e hemostáticos — base de qualquer médico |
+| `FieldMedicine` | 5 | 1.50 | 7.50 | Aplicar curativos em movimento, sem parar em cobertura |
+| `Surgery` | 5 | 1.25 | 6.25 | Reparar membros com kit cirúrgico mais rápido |
+| `Vitality` | 3 | 1.67 | 5.01 | HP máximo maior e menor chance de sangramento |
+| `Health` | 2 | 1.67 | 3.34 | Regeneração passiva: sai de raids em melhor condição |
+| **Custo ponderado** | | | **30.85 / 32** | |
 
 ---
 
-### 2. Franco-Atirador
+### 2. Caçador
 *Sniper — especialista em engajamentos de longa distância*
 
 **Estilo de jogo:** Paciente e preciso. Domina posições elevadas, minimiza movimento após se posicionar e entrega tiros certeiros antes de ser detectado.
 
-| Skill | Nível | Justificativa |
-|-------|-------|---------------|
-| `Sniper` | 10 | Maestria com rifles de precisão: menos recuo, melhor ergonomia |
-| `Sniping` | 10 | Redução de oscilação de scope — essencial para acertar a distâncias extremas |
-| `ProneMovement` | 8 | Se reposicionar de bruços sem sair da posição fetal |
-| `CovertMovement` | 7 | Aproximar-se da posição de sniping sem ser ouvido |
-| **Total** | **35** | |
+| Skill | Nível | Mult. | Custo | Justificativa |
+|-------|------:|------:|------:|---------------|
+| `Sniper` | 5 | 1.50 | 7.50 | Maestria com rifles de precisão: menos recuo, melhor ergonomia |
+| `Sniping` | 5 | 1.50 | 7.50 | Redução de oscilação de scope — essencial para acertar a distâncias extremas |
+| `ProneMovement` | 5 | 1.50 | 7.50 | Se reposicionar de bruços sem sair da posição fetal |
+| `CovertMovement` | 4 | 0.94 | 3.76 | Aproximar-se da posição de sniping sem ser ouvido |
+| `Perception` | 4 | 0.88 | 3.52 | Detectar inimigos pelo som antes de revelar a posição |
+| **Custo ponderado** | | | **29.78 / 32** | |
 
 ---
 
@@ -42,13 +141,14 @@
 
 **Estilo de jogo:** Agressivo e direto. Entra em contato com o inimigo, sustenta o fogo e empurra posições. Depende de recargas rápidas e controle de recuo para ganhar trocas de tiro.
 
-| Skill | Nível | Justificativa |
-|-------|-------|---------------|
-| `Assault` | 10 | Maestria com rifles de assalto — a arma principal da classe |
-| `MagDrills` | 10 | Troca de carregador rápida é diferencial decisivo em firefights |
-| `RecoilControl` | 8 | Controle de recuo em rajadas, especialmente com ARs baratas |
-| `Endurance` | 7 | Stamina para flanquear, empurrar e sair de situações adversas |
-| **Total** | **35** | |
+| Skill | Nível | Mult. | Custo | Justificativa |
+|-------|------:|------:|------:|---------------|
+| `Assault` | 10 | 1.00 | 10.00 | Maestria com rifles de assalto — a arma principal da classe |
+| `MagDrills` | 8 | 0.94 | 7.52 | Troca de carregador rápida é diferencial decisivo em firefights |
+| `RecoilControl` | 5 | 1.00 | 5.00 | Controle de recuo em rajadas, especialmente com ARs baratas |
+| `AimDrills` | 4 | 1.15 | 4.60 | Mira rápida em movimento — diferencial em close quarters |
+| `Endurance` | 3 | 1.00 | 3.00 | Stamina para flanquear, empurrar e sair de situações adversas |
+| **Custo ponderado** | | | **30.12 / 32** | |
 
 ---
 
@@ -57,13 +157,14 @@
 
 **Estilo de jogo:** Entra rápido, coleta informações e sai antes de ser detectado. Identifica inimigos e loot à distância, e se move em silêncio absoluto pelo mapa.
 
-| Skill | Nível | Justificativa |
-|-------|-------|---------------|
-| `CovertMovement` | 10 | Silêncio total em movimento — a base do reconhecimento |
-| `Perception` | 10 | Maior raio de escuta e detecção de sons de inimigos e loot |
-| `Endurance` | 8 | Sprint longo para cobrir distâncias e escapar rapidamente |
-| `Search` | 7 | Saque rápido durante janelas de oportunidade curtas |
-| **Total** | **35** | |
+| Skill | Nível | Mult. | Custo | Justificativa |
+|-------|------:|------:|------:|---------------|
+| `CovertMovement` | 8 | 0.94 | 7.52 | Silêncio total em movimento — a base do reconhecimento |
+| `Perception` | 10 | 0.88 | 8.80 | Maior raio de escuta e detecção de sons de inimigos e loot |
+| `Endurance` | 5 | 1.00 | 5.00 | Sprint longo para cobrir distâncias e escapar rapidamente |
+| `Search` | 10 | 0.43 | 4.30 | Saque rápido durante janelas de oportunidade curtas |
+| `Attention` | 7 | 0.60 | 4.20 | Detecta itens escondidos durante o reconhecimento |
+| **Custo ponderado** | | | **29.82 / 32** | |
 
 ---
 
@@ -72,13 +173,14 @@
 
 **Estilo de jogo:** Domina o ambiente noturno e usa silenciadores com maestria. Transforma a escuridão em vantagem tática enquanto inimigos lutam contra a visibilidade.
 
-| Skill | Nível | Justificativa |
-|-------|-------|---------------|
-| `NightOps` | 10 | Desempenho máximo com visão noturna e em ambientes escuros |
-| `SilentOps` | 10 | Bônus com silenciadores — a principal ferramenta da classe |
-| `CovertMovement` | 8 | Silêncio em movimento complementa a invisibilidade noturna |
-| `ProneMovement` | 7 | Movimentação de bruços para aproximações táticas no escuro |
-| **Total** | **35** | |
+| Skill | Nível | Mult. | Custo | Justificativa |
+|-------|------:|------:|------:|---------------|
+| `NightOps` | 4 | 2.50 | 10.00 | Desempenho máximo com visão noturna e em ambientes escuros |
+| `SilentOps` | 4 | 2.50 | 10.00 | Bônus com silenciadores — a principal ferramenta da classe |
+| `CovertMovement` | 4 | 0.94 | 3.76 | Silêncio em movimento complementa a invisibilidade noturna |
+| `ProneMovement` | 3 | 1.50 | 4.50 | Movimentação de bruços para aproximações táticas no escuro |
+| `Perception` | 2 | 0.88 | 1.76 | Detecta sons na escuridão antes do inimigo reagir |
+| **Custo ponderado** | | | **30.02 / 32** | |
 
 ---
 
@@ -87,13 +189,13 @@
 
 **Estilo de jogo:** Mantém as armas funcionando por mais tempo, corrige encravamentos sob pressão e modifica equipamento em campo. Tira mais valor de cada arma encontrada.
 
-| Skill | Nível | Justificativa |
-|-------|-------|---------------|
-| `WeaponTreatment` | 10 | Armas degradam mais lentamente — crucial com armas de baixa durabilidade |
-| `TroubleShooting` | 10 | Limpar encravamentos em segundos em vez de morrer com a arma travada |
-| `WeaponModding` | 8 | Modificar armas no campo mais rapidamente |
-| `Intellect` | 7 | Melhor qualidade de reparo e exame de itens mais rápido |
-| **Total** | **35** | |
+| Skill | Nível | Mult. | Custo | Justificativa |
+|-------|------:|------:|------:|---------------|
+| `WeaponTreatment` | 8 | 1.25 | 10.00 | Armas degradam mais lentamente — crucial com armas de baixa durabilidade |
+| `TroubleShooting` | 4 | 2.50 | 10.00 | Limpar encravamentos em segundos em vez de morrer com a arma travada |
+| `WeaponModding` | 6 | 1.00 | 6.00 | Modificar armas no campo mais rapidamente |
+| `Intellect` | 6 | 0.68 | 4.08 | Melhor qualidade de reparo e exame de itens mais rápido |
+| **Custo ponderado** | | | **30.08 / 32** | |
 
 ---
 
@@ -102,14 +204,14 @@
 
 **Estilo de jogo:** Generalista de alto nível. Sem fraquezas evidentes. Físico superior, mira rápida e adaptação a qualquer tipo de combate ou equipamento.
 
-| Skill | Nível | Justificativa |
-|-------|-------|---------------|
-| `Strength` | 8 | Carrega mais equipamento sem penalidade de stamina |
-| `Endurance` | 8 | Stamina para manter o ritmo em operações longas |
-| `AimDrills` | 7 | Mira extremamente rápida — diferencial no primeiro tiro |
-| `LightVests` | 6 | Bônus com armadura leve, o padrão de operações especiais |
-| `MagDrills` | 6 | Recargas rápidas para manter pressão de fogo |
-| **Total** | **35** | |
+| Skill | Nível | Mult. | Custo | Justificativa |
+|-------|------:|------:|------:|---------------|
+| `Strength` | 10 | 0.47 | 4.70 | Carrega mais equipamento sem penalidade de stamina |
+| `Endurance` | 7 | 1.00 | 7.00 | Stamina para manter o ritmo em operações longas |
+| `AimDrills` | 6 | 1.15 | 6.90 | Mira extremamente rápida — diferencial no primeiro tiro |
+| `MagDrills` | 6 | 0.94 | 5.64 | Recargas rápidas para manter pressão de fogo |
+| `LightVests` | 2 | 3.00 | 6.00 | Bônus com armadura leve, o padrão de operações especiais |
+| **Custo ponderado** | | | **30.24 / 32** | |
 
 ---
 
@@ -118,14 +220,14 @@
 
 **Estilo de jogo:** Fica em raid por mais tempo do que qualquer outro. Drena recursos mais lentamente, resiste a efeitos negativos e se recupera de situações que eliminariam outros jogadores.
 
-| Skill | Nível | Justificativa |
-|-------|-------|---------------|
-| `Metabolism` | 10 | Energia e hidratação drenam muito mais devagar — mais tempo em raid |
-| `Vitality` | 8 | HP máximo maior e menor chance de sangramento grave |
-| `Immunity` | 8 | Resistência a venenos, toxinas e efeitos negativos |
-| `StressResistance` | 5 | Reduz tremores e efeitos de dor — mantém a mira estável |
-| `Health` | 4 | Regeneração passiva de HP entre confrontos |
-| **Total** | **35** | |
+| Skill | Nível | Mult. | Custo | Justificativa |
+|-------|------:|------:|------:|---------------|
+| `Metabolism` | 10 | 0.29 | 2.90 | Energia e hidratação drenam muito mais devagar — mais tempo em raid |
+| `Vitality` | 5 | 1.67 | 8.35 | HP máximo maior e menor chance de sangramento grave |
+| `Immunity` | 3 | 3.00 | 9.00 | Resistência a venenos, toxinas e efeitos negativos |
+| `StressResistance` | 5 | 0.88 | 4.40 | Reduz tremores e efeitos de dor — mantém a mira estável |
+| `Health` | 3 | 1.67 | 5.01 | Regeneração passiva de HP entre confrontos |
+| **Custo ponderado** | | | **29.66 / 32** | |
 
 ---
 
@@ -134,13 +236,14 @@
 
 **Estilo de jogo:** Esvazia containers em segundos, detecta loot à distância e identifica itens valiosos instantaneamente. Maximiza o retorno por raid.
 
-| Skill | Nível | Justificativa |
-|-------|-------|---------------|
-| `Attention` | 10 | Velocidade de saque e chance de encontrar itens extras |
-| `Search` | 10 | Busca em containers em fração do tempo normal |
-| `Perception` | 8 | Detecta loot e sons de containers a maior distância |
-| `Intellect` | 7 | Examina itens desconhecidos mais rápido |
-| **Total** | **35** | |
+| Skill | Nível | Mult. | Custo | Justificativa |
+|-------|------:|------:|------:|---------------|
+| `Attention` | 10 | 0.60 | 6.00 | Velocidade de saque e chance de encontrar itens extras |
+| `Search` | 10 | 0.43 | 4.30 | Busca em containers em fração do tempo normal |
+| `Perception` | 10 | 0.88 | 8.80 | Detecta loot e sons de containers a maior distância |
+| `Intellect` | 10 | 0.68 | 6.80 | Examina itens desconhecidos mais rápido |
+| `Memory` | 8 | 0.50 | 4.00 | Skills sobem mais rápido — benefício composto durante runs de loot |
+| **Custo ponderado** | | | **29.90 / 32** | |
 
 ---
 
@@ -149,30 +252,57 @@
 
 **Estilo de jogo:** Maximiza o rendimento do hideout e sobe skills com mais eficiência. Menos impacto imediato em raid, mas vantagem cumulativa significativa na progressão.
 
-| Skill | Nível | Justificativa |
-|-------|-------|---------------|
-| `Crafting` | 10 | Crafting de itens mais rápido desde o início |
-| `HideoutManagement` | 10 | Produção do hideout mais eficiente (menos combustível, mais output) |
-| `Memory` | 8 | Todas as outras skills sobem mais rápido — benefício composto |
-| `Intellect` | 7 | Examina e repara itens com melhor qualidade |
-| **Total** | **35** | |
+| Skill | Nível | Mult. | Custo | Justificativa |
+|-------|------:|------:|------:|---------------|
+| `Crafting` | 10 | 0.33 | 3.30 | Crafting de itens mais rápido desde o início |
+| `HideoutManagement` | 10 | 0.39 | 3.90 | Produção do hideout mais eficiente (menos combustível, mais output) |
+| `Memory` | 10 | 0.50 | 5.00 | Todas as outras skills sobem mais rápido — benefício composto |
+| `Intellect` | 10 | 0.68 | 6.80 | Examina e repara itens com melhor qualidade |
+| `Charisma` | 10 | 0.40 | 4.00 | Desconto em traders e melhores condições de quest |
+| `WeaponModding` | 7 | 1.00 | 7.00 | Workbench/mod stand mais produtivo desde o início |
+| **Custo ponderado** | | | **30.00 / 32** | |
 
 ---
 
 ## Referência rápida
 
-| Perfil | Skills principais | Total |
-|--------|------------------|-------|
-| Sanitarista | FirstAid 10, FieldMedicine 8, Surgery 8, Vitality 5, Health 4 | 35 |
-| Franco-Atirador | Sniper 10, Sniping 10, ProneMovement 8, CovertMovement 7 | 35 |
-| Fuzileiro | Assault 10, MagDrills 10, RecoilControl 8, Endurance 7 | 35 |
-| Batedor | CovertMovement 10, Perception 10, Endurance 8, Search 7 | 35 |
-| Operador Noturno | NightOps 10, SilentOps 10, CovertMovement 8, ProneMovement 7 | 35 |
-| Armeiro | WeaponTreatment 10, TroubleShooting 10, WeaponModding 8, Intellect 7 | 35 |
-| Operador Tático | Strength 8, Endurance 8, AimDrills 7, LightVests 6, MagDrills 6 | 35 |
-| Sobrevivencialista | Metabolism 10, Vitality 8, Immunity 8, StressResistance 5, Health 4 | 35 |
-| Saqueador | Attention 10, Search 10, Perception 8, Intellect 7 | 35 |
-| Gerente de Operações | Crafting 10, HideoutManagement 10, Memory 8, Intellect 7 | 35 |
+| Perfil | Skills principais | Custo ponderado |
+|--------|------------------|----------------:|
+| Médico de Combate | FirstAid 7, FieldMedicine 5, Surgery 5, Vitality 3, Health 2 | 30.85 |
+| Caçador | Sniper 5, Sniping 5, ProneMovement 5, CovertMovement 4, Perception 4 | 29.78 |
+| Fuzileiro | Assault 10, MagDrills 8, RecoilControl 5, AimDrills 4, Endurance 3 | 30.12 |
+| Batedor | CovertMovement 8, Perception 10, Endurance 5, Search 10, Attention 7 | 29.82 |
+| Operador Noturno | NightOps 4, SilentOps 4, CovertMovement 4, ProneMovement 3, Perception 2 | 30.02 |
+| Armeiro | WeaponTreatment 8, TroubleShooting 4, WeaponModding 6, Intellect 6 | 30.08 |
+| Operador Tático | Strength 10, Endurance 7, AimDrills 6, MagDrills 6, LightVests 2 | 30.24 |
+| Sobrevivencialista | Metabolism 10, Vitality 5, Immunity 3, StressResistance 5, Health 3 | 29.66 |
+| Saqueador | Attention 10, Search 10, Perception 10, Intellect 10, Memory 8 | 29.90 |
+| Gerente de Operações | Crafting 10, HideoutManagement 10, Memory 10, Intellect 10, Charisma 10, WeaponModding 7 | 30.00 |
+
+---
+
+## Hideout inicial (estação temática)
+
+Cada classe começa com **1 estação extra do hideout em nível 1** (além de `Stash: 1` que é padrão). A escolha reflete a identidade da classe — head-start prático mas modesto.
+
+**Restrição de design:** apenas estações **sem pré-requisitos** são elegíveis (podem ser construídas direto, sem cadeia de dependências). Estações como `ShootingRange` (← Illumination L2), `IntelligenceCenter` (← Security L2 + Vents L2) e `ScavCase` (← IntelligenceCenter L2) foram **descartadas** porque pré-setá-las em L1 sem os requisitos resultaria em UI quebrada ou valor silenciosamente ignorado [fonte externa: [playerassist.com — Hideout Guide](https://playerassist.com/escape-from-tarkov-hideout-guide/)].
+
+**Estações elegíveis (sem pré-requisitos):** `MedStation`, `Workbench`, `RestSpace`, `WaterCollector`, `Generator`, `Heating`, `Vents`, `Security`.
+
+| Classe | Estação extra | Racional |
+|--------|--------------|----------|
+| Médico de Combate | `MedStation: 1` | Posto médico básico — coerente com a função |
+| Caçador | `Heating: 1` | Caça em ambientes hostis/frios — controle térmico do esconderijo |
+| Fuzileiro | `Workbench: 1` | Manutenção e mods básicos do AR |
+| Batedor | `Security: 1` | Vigilância e perímetro — alinhado ao tema de recon e detecção |
+| Operador Noturno | `Generator: 1` | NVG/equipamento elétrico demanda energia |
+| Armeiro | `Workbench: 1` | Workbench é a estação-mãe do armeiro |
+| Operador Tático | `RestSpace: 1` | Recuperação entre operações longas |
+| Sobrevivencialista | `WaterCollector: 1` | Auto-suficiência hídrica |
+| Saqueador | `Security: 1` | Proteger o loot acumulado no esconderijo |
+| Gerente de Operações | `Generator: 1` + `Heating: 1` | Infraestrutura elétrica + térmica — fundação do hideout (recebe 2 estações como bônus de identidade) |
+
+> Todas as outras estações permanecem em nível 0. `Stash: 1` é mantido em todas as classes (idêntico ao Standard base). Repetições intencionais: `Workbench` (Fuzileiro + Armeiro), `Security` (Batedor + Saqueador) — classes diferentes podem compartilhar afinidade.
 
 ---
 
@@ -289,7 +419,7 @@ Tier-cap: armor classe 1-2 dominante, classe 3 raro (apenas no primary de alguns
 
 ---
 
-### Sanitarista
+### Médico de Combate
 
 **Item-tema (sanitarista):**
 
@@ -354,18 +484,17 @@ Tier-cap: armor classe 1-2 dominante, classe 3 raro (apenas no primary de alguns
 
 ---
 
-### Franco-Atirador
+### Caçador
 
-**Item-tema (franco-atirador):**
+**Item-tema (caçador):**
 
 | Item | ID | Qtd | Unit ₽ | Subtotal ₽ |
 |------|----|----:|-------:|-----------:|
 | Compass | `COMPASS` | 1 | 91.212 | 91.212 |
-| Woods | `WOODS_MAP` | 1 | 6.638 | 6.638 |
-| Interchange | `INTERCHANGE_MAP` | 1 | 6.728 | 6.728 |
+| Vaseline | `VASELINE` | 1 | 23.942 | 23.942 |
 | Tushonka | `TUSHONKA` | 3 | 41.447 | 124.341 |
 | Augmentin | `AUGMENTIN` | 3 | 37.189 | 111.567 |
-| **Subtotal item-tema** | | | | **340.486** |
+| **Subtotal item-tema** | | | | **351.062** |
 
 **Primary loadout** (vestido):
 
@@ -414,11 +543,11 @@ Tier-cap: armor classe 1-2 dominante, classe 3 raro (apenas no primary de alguns
 | Bloco | Subtotal ₽ |
 |-------|-----------:|
 | Baseline universal | 266.223 |
-| Item-tema | 340.486 |
+| Item-tema | 351.062 |
 | Primary loadout | 598.553 |
 | Backup × 3 | 800.355 |
-| **Total perfil** | **2.005.617** |
-| Distância de 2.000.000 ₽ | 5.617 |
+| **Total perfil** | **2.016.193** |
+| Distância de 2.000.000 ₽ | 16.193 |
 
 ---
 
@@ -493,10 +622,9 @@ Tier-cap: armor classe 1-2 dominante, classe 3 raro (apenas no primary de alguns
 | Item | ID | Qtd | Unit ₽ | Subtotal ₽ |
 |------|----|----:|-------:|-----------:|
 | Compass | `COMPASS` | 1 | 91.212 | 91.212 |
-| Woods | `WOODS_MAP` | 1 | 6.638 | 6.638 |
-| Interchange | `INTERCHANGE_MAP` | 1 | 6.728 | 6.728 |
+| Aquamari | `AQUAMARI` | 1 | 27.100 | 27.100 |
 | eTG-c | `ETG_CHANGE` | 1 | 304.556 | 304.556 |
-| **Subtotal item-tema** | | | | **409.134** |
+| **Subtotal item-tema** | | | | **422.868** |
 
 **Primary loadout** (vestido):
 
@@ -544,11 +672,11 @@ Tier-cap: armor classe 1-2 dominante, classe 3 raro (apenas no primary de alguns
 | Bloco | Subtotal ₽ |
 |-------|-----------:|
 | Baseline universal | 266.223 |
-| Item-tema | 409.134 |
+| Item-tema | 422.868 |
 | Primary loadout | 460.367 |
 | Backup × 3 | 821.640 |
-| **Total perfil** | **1.957.364** |
-| Distância de 2.000.000 ₽ | -42.636 |
+| **Total perfil** | **1.971.098** |
+| Distância de 2.000.000 ₽ | -28.902 |
 
 ---
 
@@ -827,11 +955,12 @@ Tier-cap: armor classe 1-2 dominante, classe 3 raro (apenas no primary de alguns
 | Item | ID | Qtd | Unit ₽ | Subtotal ₽ |
 |------|----|----:|-------:|-----------:|
 | Docs | `DOCUMENTS_CASE` | 2 | 106.323 | 212.646 |
-| Customs | `CUSTOMS_MAP` | 1 | 118.512 | 118.512 |
-| Interchange | `INTERCHANGE_MAP` | 1 | 6.728 | 6.728 |
-| Woods | `WOODS_MAP` | 1 | 6.638 | 6.638 |
+| MultiTool | `MULTITOOL` | 1 | 30.567 | 30.567 |
+| Screws | `SCREWS` | 1 | 33.050 | 33.050 |
+| Wires | `WIRES` | 1 | 29.459 | 29.459 |
+| Duct tape | `DUCT_TAPE` | 1 | 38.690 | 38.690 |
 | RUB | `ROUBLES` | 200.000 | 1 | 200.000 |
-| **Subtotal item-tema** | | | | **544.524** |
+| **Subtotal item-tema** | | | | **544.412** |
 
 **Primary loadout** (vestido):
 
@@ -879,11 +1008,11 @@ Tier-cap: armor classe 1-2 dominante, classe 3 raro (apenas no primary de alguns
 | Bloco | Subtotal ₽ |
 |-------|-----------:|
 | Baseline universal | 266.223 |
-| Item-tema | 544.524 |
+| Item-tema | 544.412 |
 | Primary loadout | 415.374 |
 | Backup × 3 | 751.296 |
-| **Total perfil** | **1.977.417** |
-| Distância de 2.000.000 ₽ | -22.583 |
+| **Total perfil** | **1.977.305** |
+| Distância de 2.000.000 ₽ | -22.695 |
 
 ---
 
@@ -959,14 +1088,14 @@ Tier-cap: armor classe 1-2 dominante, classe 3 raro (apenas no primary de alguns
 
 | Perfil | Total ₽ | Δ 2M |
 |--------|--------:|-----:|
-| Sanitarista | 1.977.163 | -22.837 ✓ |
-| Franco-Atirador | 2.005.617 | 5.617 ✓ |
+| Médico de Combate | 1.977.163 | -22.837 ✓ |
+| Caçador | 2.016.193 | 16.193 ✓ |
 | Fuzileiro | 1.968.560 | -31.440 ✓ |
-| Batedor | 1.957.364 | -42.636 ✓ |
+| Batedor | 1.971.098 | -28.902 ✓ |
 | Operador Noturno | 2.014.170 | 14.170 ✓ |
 | Armeiro | 2.020.499 | 20.499 ✓ |
 | Operador Tático | 1.985.284 | -14.716 ✓ |
 | Sobrevivencialista | 2.009.967 | 9.967 ✓ |
-| Saqueador | 1.977.417 | -22.583 ✓ |
+| Saqueador | 1.977.305 | -22.695 ✓ |
 | Gerente de Operações | 1.991.918 | -8.082 ✓ |
 

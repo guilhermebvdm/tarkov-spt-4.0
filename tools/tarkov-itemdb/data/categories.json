@@ -1,0 +1,622 @@
+{
+  "id": null,
+  "name": "Item",
+  "children": [
+    {
+      "id": "5b5f78dc86f77409407a7f8e",
+      "name": "Weapons",
+      "icon": "/spt-images/handbook/icon_weapons.png",
+      "order": 10,
+      "children": [
+        {
+          "id": "5b5f78e986f77447ed5636b1",
+          "name": "Assault carbines",
+          "icon": "/spt-images/handbook/icon_weapons_carbines.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b5f78fc86f77409407a7f90",
+          "name": "Assault rifles",
+          "icon": "/spt-images/handbook/icon_weapons_assaultrifles.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b5f798886f77447ed5636b5",
+          "name": "Bolt-action rifles",
+          "icon": "/spt-images/handbook/icon_weapons_botaction.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b5f79d186f774093f2ed3c2",
+          "name": "Grenade launchers",
+          "icon": "/spt-images/handbook/icon_weapons_gl.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b5f79a486f77409407a7f94",
+          "name": "Machine guns",
+          "icon": "/spt-images/handbook/icon_weapons_mg.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b5f791486f774093f2ed3be",
+          "name": "Marksman rifles",
+          "icon": "/spt-images/handbook/icon_weapons_dmr.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b5f7a0886f77409407a7f96",
+          "name": "Melee weapons",
+          "icon": "/spt-images/handbook/icon_weapons_melee.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b5f792486f77447ed5636b3",
+          "name": "Pistols",
+          "icon": "/spt-images/handbook/icon_weapons_pistols.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b5f794b86f77409407a7f92",
+          "name": "Shotguns",
+          "icon": "/spt-images/handbook/icon_weapons_shotguns.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b5f79eb86f77447ed5636b7",
+          "name": "Special weapons",
+          "icon": "/spt-images/handbook/icon_weapons_special.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b5f796a86f774093f2ed3c0",
+          "name": "Submachine guns",
+          "icon": "/spt-images/handbook/icon_weapons_smg.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b5f7a2386f774093f2ed3c4",
+          "name": "Throwables",
+          "icon": "/spt-images/handbook/icon_weapons_throw.png",
+          "order": 100,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "5b5f71a686f77447ed5636ab",
+      "name": "Weapon parts & mods",
+      "icon": "/spt-images/handbook/icon_mods.png",
+      "order": 11,
+      "children": [
+        {
+          "id": "5b5f71b386f774093f2ecf11",
+          "name": "Functional mods",
+          "icon": "/spt-images/handbook/icon_mods_functional.png",
+          "order": 100,
+          "children": [
+            {
+              "id": "5b5f74cc86f77447ec5d770a",
+              "name": "Auxiliary parts",
+              "icon": "/spt-images/handbook/icon_mod_aux.png",
+              "order": 100,
+              "children": []
+            },
+            {
+              "id": "5b5f71c186f77409407a7ec0",
+              "name": "Bipods",
+              "icon": "/spt-images/handbook/icon_mod_bipod.png",
+              "order": 100,
+              "children": []
+            },
+            {
+              "id": "5b5f71de86f774093f2ecf13",
+              "name": "Foregrips",
+              "icon": "/spt-images/handbook/icon_mod_tactical.png",
+              "order": 100,
+              "children": []
+            },
+            {
+              "id": "5b5f736886f774094242f193",
+              "name": "Light & laser devices",
+              "icon": "/spt-images/handbook/icon_mod_lightlaser.png",
+              "order": 100,
+              "children": [
+                {
+                  "id": "5b5f73ab86f774094242f195",
+                  "name": "Flashlights",
+                  "icon": "/spt-images/handbook/",
+                  "order": 100,
+                  "children": []
+                },
+                {
+                  "id": "5b5f73c486f77447ec5d7704",
+                  "name": "Laser aiming modules",
+                  "icon": "/spt-images/handbook/",
+                  "order": 100,
+                  "children": []
+                },
+                {
+                  "id": "5b5f737886f774093e6cb4fb",
+                  "name": "Tactical combo devices",
+                  "icon": "/spt-images/handbook/",
+                  "order": 100,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "5b5f724186f77447ed5636ad",
+              "name": "Muzzle devices",
+              "icon": "/spt-images/handbook/icon_mod_muzzle.png",
+              "order": 100,
+              "children": [
+                {
+                  "id": "5b5f724c86f774093f2ecf15",
+                  "name": "Flashhiders & brakes",
+                  "icon": "/spt-images/handbook/",
+                  "order": 100,
+                  "children": []
+                },
+                {
+                  "id": "5b5f72f786f77447ec5d7702",
+                  "name": "Muzzle adapters",
+                  "icon": "/spt-images/handbook/",
+                  "order": 100,
+                  "children": []
+                },
+                {
+                  "id": "5b5f731a86f774093e6cb4f9",
+                  "name": "Suppressors",
+                  "icon": "/spt-images/handbook/",
+                  "order": 100,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "5b5f73ec86f774093e6cb4fd",
+              "name": "Sights",
+              "icon": "/spt-images/handbook/icon_mod_sight.png",
+              "order": 100,
+              "children": [
+                {
+                  "id": "5b5f740a86f77447ec5d7706",
+                  "name": "Assault scopes",
+                  "icon": "/spt-images/handbook/",
+                  "order": 100,
+                  "children": []
+                },
+                {
+                  "id": "5b5f742686f774093e6cb4ff",
+                  "name": "Collimators",
+                  "icon": "/spt-images/handbook/",
+                  "order": 100,
+                  "children": []
+                },
+                {
+                  "id": "5b5f744786f774094242f197",
+                  "name": "Compact collimators",
+                  "icon": "/spt-images/handbook/",
+                  "order": 100,
+                  "children": []
+                },
+                {
+                  "id": "5b5f746686f77447ec5d7708",
+                  "name": "Iron sights",
+                  "icon": "/spt-images/handbook/",
+                  "order": 100,
+                  "children": []
+                },
+                {
+                  "id": "5b5f748386f774093e6cb501",
+                  "name": "Optics",
+                  "icon": "/spt-images/handbook/",
+                  "order": 100,
+                  "children": []
+                },
+                {
+                  "id": "5b5f749986f774094242f199",
+                  "name": "Special purpose sights",
+                  "icon": "/spt-images/handbook/",
+                  "order": 100,
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "5b5f750686f774093e6cb503",
+          "name": "Gear mods",
+          "icon": "/spt-images/handbook/icon_mods_gear.png",
+          "order": 100,
+          "children": [
+            {
+              "id": "5b5f751486f77447ec5d770c",
+              "name": "Charging handles",
+              "icon": "/spt-images/handbook/icon_mod_charge.png",
+              "order": 100,
+              "children": []
+            },
+            {
+              "id": "5b5f752e86f774093e6cb505",
+              "name": "Launchers",
+              "icon": "/spt-images/handbook/icon_mod_launcher.png",
+              "order": 100,
+              "children": []
+            },
+            {
+              "id": "5b5f754a86f774094242f19b",
+              "name": "Magazines",
+              "icon": "/spt-images/handbook/icon_mod_magazine.png",
+              "order": 100,
+              "children": []
+            },
+            {
+              "id": "5b5f759686f774094242f19d",
+              "name": "Magwells",
+              "icon": "/spt-images/handbook/icon_mod_tactical.png",
+              "order": 100,
+              "children": []
+            },
+            {
+              "id": "5b5f755f86f77447ec5d770e",
+              "name": "Mounts",
+              "icon": "/spt-images/handbook/icon_mod_mount.png",
+              "order": 100,
+              "children": []
+            },
+            {
+              "id": "5b5f757486f774093e6cb507",
+              "name": "Stocks & chassis",
+              "icon": "/spt-images/handbook/icon_mod_stock.png",
+              "order": 100,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "5b5f75b986f77447ec5d7710",
+          "name": "Vital parts",
+          "icon": "/spt-images/handbook/icon_mods_vital.png",
+          "order": 100,
+          "children": [
+            {
+              "id": "5b5f75c686f774094242f19f",
+              "name": "Barrels",
+              "icon": "/spt-images/handbook/icon_mod_barrel.png",
+              "order": 100,
+              "children": []
+            },
+            {
+              "id": "5b5f760586f774093e6cb509",
+              "name": "Gas blocks",
+              "icon": "/spt-images/handbook/icon_mod_gasblock.png",
+              "order": 100,
+              "children": []
+            },
+            {
+              "id": "5b5f75e486f77447ec5d7712",
+              "name": "Handguards",
+              "icon": "/spt-images/handbook/icon_mod_handguard.png",
+              "order": 100,
+              "children": []
+            },
+            {
+              "id": "5b5f761f86f774094242f1a1",
+              "name": "Pistol grips",
+              "icon": "/spt-images/handbook/icon_mod_pistolgrip.png",
+              "order": 100,
+              "children": []
+            },
+            {
+              "id": "5b5f764186f77447ec5d7714",
+              "name": "Receivers & slides",
+              "icon": "/spt-images/handbook/icon_mod_reciever.png",
+              "order": 100,
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "5b47574386f77428ca22b33e",
+      "name": "Barter items",
+      "icon": "/spt-images/handbook/icon_barter.png",
+      "order": 13,
+      "children": [
+        {
+          "id": "5b47574386f77428ca22b2ee",
+          "name": "Building materials",
+          "icon": "/spt-images/handbook/icon_barter_building.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b47574386f77428ca22b2ef",
+          "name": "Electronics",
+          "icon": "/spt-images/handbook/icon_barter_electronics.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b47574386f77428ca22b2ed",
+          "name": "Energy elements",
+          "icon": "/spt-images/handbook/icon_barter_energy.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b47574386f77428ca22b2f2",
+          "name": "Flammable materials",
+          "icon": "/spt-images/handbook/icon_barter_flammable.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b47574386f77428ca22b2f0",
+          "name": "Household materials",
+          "icon": "/spt-images/handbook/icon_barter_household.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b47574386f77428ca22b2f3",
+          "name": "Medical supplies",
+          "icon": "/spt-images/handbook/icon_barter_medical.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b47574386f77428ca22b2f6",
+          "name": "Tools",
+          "icon": "/spt-images/handbook/icon_barter_tools.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b47574386f77428ca22b2f1",
+          "name": "Valuables",
+          "icon": "/spt-images/handbook/icon_barter_valuables.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b47574386f77428ca22b2f4",
+          "name": "Others",
+          "icon": "/spt-images/handbook/icon_barter_others.png",
+          "order": 110,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "5b47574386f77428ca22b33f",
+      "name": "Gear",
+      "icon": "/spt-images/handbook/icon_gear.png",
+      "order": 12,
+      "children": [
+        {
+          "id": "5b5f6f6c86f774093f2ecf0b",
+          "name": "Backpacks",
+          "icon": "/spt-images/handbook/icon_gear_backpacks.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b5f701386f774093f2ecf0f",
+          "name": "Body armor",
+          "icon": "/spt-images/handbook/icon_gear_armor.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b47574386f77428ca22b331",
+          "name": "Eyewear",
+          "icon": "/spt-images/handbook/icon_gear_visors.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b47574386f77428ca22b32f",
+          "name": "Facecovers",
+          "icon": "/spt-images/handbook/icon_gear_facecovers.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b5f704686f77447ec5d76d7",
+          "name": "Gear components",
+          "icon": "/spt-images/handbook/icon_gear_components.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b47574386f77428ca22b330",
+          "name": "Headgear",
+          "icon": "/spt-images/handbook/icon_gear_headwear.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b5f6f3c86f774094242ef87",
+          "name": "Headsets",
+          "icon": "/spt-images/handbook/icon_gear_headsets.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b5f6fd286f774093f2ecf0d",
+          "name": "Secure containers",
+          "icon": "/spt-images/handbook/icon_gear_secured.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b5f6fa186f77409407a7eb7",
+          "name": "Storage containers",
+          "icon": "/spt-images/handbook/icon_gear_cases.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b5f6f8786f77447ed563642",
+          "name": "Tactical rigs",
+          "icon": "/spt-images/handbook/icon_gear_rigs.png",
+          "order": 100,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "5b47574386f77428ca22b346",
+      "name": "Ammo",
+      "icon": "/spt-images/handbook/icon_ammo.png",
+      "order": 9,
+      "children": [
+        {
+          "id": "5b47574386f77428ca22b33c",
+          "name": "Ammo packs",
+          "icon": "/spt-images/handbook/icon_ammo_boxes.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b47574386f77428ca22b33b",
+          "name": "Rounds",
+          "icon": "/spt-images/handbook/icon_ammo_rounds.png",
+          "order": 100,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "5b47574386f77428ca22b340",
+      "name": "Provisions",
+      "icon": "/spt-images/handbook/icon_provisions.png",
+      "order": 8,
+      "children": [
+        {
+          "id": "5b47574386f77428ca22b335",
+          "name": "Drinks",
+          "icon": "/spt-images/handbook/icon_provisions_drinks.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b47574386f77428ca22b336",
+          "name": "Food",
+          "icon": "/spt-images/handbook/icon_provisions_food.png",
+          "order": 100,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "5b47574386f77428ca22b344",
+      "name": "Medication",
+      "icon": "/spt-images/handbook/icon_medical.png",
+      "order": 7,
+      "children": [
+        {
+          "id": "5b47574386f77428ca22b33a",
+          "name": "Injectors",
+          "icon": "/spt-images/handbook/icon_medical_injectors.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b47574386f77428ca22b339",
+          "name": "Injury treatment",
+          "icon": "/spt-images/handbook/icon_medical_injury.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b47574386f77428ca22b338",
+          "name": "Medkits",
+          "icon": "/spt-images/handbook/icon_medical_medkits.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5b47574386f77428ca22b337",
+          "name": "Pills",
+          "icon": "/spt-images/handbook/icon_medical_pills.png",
+          "order": 100,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "5b47574386f77428ca22b342",
+      "name": "Keys",
+      "icon": "/spt-images/handbook/icon_keys.png",
+      "order": 6,
+      "children": [
+        {
+          "id": "5c518ed586f774119a772aee",
+          "name": "Electronic keys",
+          "icon": "/spt-images/handbook/icon_keys_electronic.png",
+          "order": 100,
+          "children": []
+        },
+        {
+          "id": "5c518ec986f7743b68682ce2",
+          "name": "Mechanical keys",
+          "icon": "/spt-images/handbook/icon_keys_mechanic.png",
+          "order": 100,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "5b47574386f77428ca22b341",
+      "name": "Info items",
+      "icon": "/spt-images/handbook/icon_info.png",
+      "order": 5,
+      "children": []
+    },
+    {
+      "id": "5b47574386f77428ca22b345",
+      "name": "Special equipment",
+      "icon": "/spt-images/handbook/icon_spec.png",
+      "order": 4,
+      "children": []
+    },
+    {
+      "id": "5b47574386f77428ca22b343",
+      "name": "Maps",
+      "icon": "/spt-images/handbook/icon_maps.png",
+      "order": 3,
+      "children": []
+    },
+    {
+      "id": "5b5f78b786f77447ed5636af",
+      "name": "Money",
+      "icon": "/spt-images/handbook/icon_money.png",
+      "order": 2,
+      "children": []
+    },
+    {
+      "id": "5b619f1a86f77450a702a6f3",
+      "name": "Task items",
+      "icon": "/spt-images/handbook/icon_quest.png",
+      "order": 1,
+      "children": []
+    }
+  ]
+}

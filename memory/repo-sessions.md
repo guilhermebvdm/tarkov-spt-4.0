@@ -17,6 +17,8 @@ Trabalho específico de cada mod fica em `mods/<mod>/memory/sessions.md`. Este a
   - `memory-curation` — regras de redação para `sessions.md` / `repo-sessions.md`.
 - **Commands custom:** `/add-backlog-item`, `/create-spec`, `/review-spec`, `/create-technical-spec`, `/review-technical-spec`, `/code-mod`, `/code-review`, `/apply-code-review`, `/compile-mod`, `/add-mod-repo-for-modding`, `/update-mods-inventory`, `/add-mod-inventory-list`, `/update-memory`.
 - **Mods no repo (5):** `stancesAndCameraPositionSPT4.0.11` (ativo), `SPT-Realism-Mod-Client` (vendor pinned), `SPT-DynamicMaps` (vendor pinned), `RZCustomProfiles` (vendor pinned), `RZ-SPTMods` (vendor pinned).
+- **Tools cross-cutting:** `tools/tarkov-itemdb/` — DB unificada (SPT + tarkov.dev + tarkov-market) com viewer HTML pra calibração manual do flea. Edit pelo viewer atualiza `prices.json` + `checks.dat` (MD5) + audit log. Env: `SPT_PATH`, `TARKOV_MARKET_API_KEY`. Detalhes em [tools/tarkov-itemdb/README.md](../tools/tarkov-itemdb/README.md) + [tools/tarkov-itemdb/docs/spt-internals.md](../tools/tarkov-itemdb/docs/spt-internals.md).
+- **LiveFleaPrices mod:** **desativado** (renomeado `<SPT>/user/mods/DrakiaXYZ-LiveFleaPrices.disabled/`) — substituído por calibração manual via viewer. `prices.json` hoje é autoral.
 - **Memory system:** ativo. 5 pastas `mods/*/memory/` + 1 top-level. Sessions com timestamps GMT-3 HH:MM (relógio do sistema via `Bash date '+%Y-%m-%d %H:%M'`).
 
 ## Pendências / próximos passos conhecidos
@@ -106,3 +108,51 @@ Trabalho específico de cada mod fica em `mods/<mod>/memory/sessions.md`. Este a
 **Cross-refs:**
 
 - Aplicação prática no item 002 do stances: ver `mods/stancesAndCameraPositionSPT4.0.11/memory/sessions.md` §"2026-05-10 — Sessão 2" (CR-01-01 a CR-01-06).
+
+## 2026-05-16/17 (GMT-3) — Sessão: criação do `tools/tarkov-itemdb/` + calibração de flea
+
+**Tema central:** construir uma base de dados unificada de itens (SPT local + tarkov.dev + tarkov-market) com viewer HTML, e usá-la pra desativar o mod `DrakiaXYZ-LiveFleaPrices` e calibrar `prices.json` manualmente. Originalmente nasceu como suporte ao RZCustomProfiles (precisávamos de imagens + preços validados pra montar loadouts), mas evoluiu pra meta-DB pessoal antes da integração com o mod.
+
+**Decisões-chave:**
+
+- **Pipeline em camadas** (`tools/tarkov-itemdb/scripts/`): `fetch-tarkov-dev` → `fetch-tarkov-market` → `load-spt` → `normalize` → `build.js` (orquestrador). Caches `cache/*-raw.json` gitignored, output `data/items.json` versionado em formato "1 linha por Tpl" (diffs estáveis em ~14 MB).
+- **`priceFleaCanonical` com prioridade `tarkov-market avg24h > tarkov.dev avg24h > tarkov.dev lastLow > spt`** — sem blending. SPT é o último fallback **por design** (canonical existe pra servir de referência externa durante calibração; usar SPT seria circular).
+- **Sufixo de métrica nos nomes** (`priceFleaDevLastLow` vs `priceFleaDevAvg24h`) — explícito pra evitar comparações enviesadas entre fontes que medem coisas diferentes.
+- **Validação `checks.dat` reverse-engineered**: base64 + JSON 2-space + MD5 hex uppercase + trailing newline. Hash refresh automático no startup do `serve.js` e após cada edit do viewer.
+- **Source of truth do flea = `<SPT>/SPT_Data/database/templates/prices.json`** (não o cache do mod, não o `data/items.json`). Viewer reescreve esse arquivo + atualiza `checks.dat` + sincroniza `data/items.json` + grava audit log em `logs/price-edits.jsonl`.
+- **LiveFleaPrices desativado renomeando DLL** (`.dll.disabled`), não deletado — reversível. Folder também renomeada (`.disabled`) pra dupla segurança contra varredura recursiva do loader.
+- **Convenção viewer**: click em célula de preço (Flea SPT) abre editor inline; click em outras células expande detalhe (linha-detail). Toast no canto pra feedback.
+
+**Atividade cronológica:**
+
+1. **Planejamento iterativo (5 passes de revisão do plano):** corrigiu naming bug crítico (`priceFleaSptLastLow` baked-in assumption que SPT é lastLow — sobreviveria só enquanto LiveFleaPrices ativo; renomeado para `priceFleaSpt` agnóstico).
+2. **Probe schema tarkov.dev** via GraphQL: confirmou `id`, `normalizedName`, imagens (3 tamanhos), `sellFor`/`buyFor` por vendor com `priceRUB`. Categorias via root query `itemCategories` (não `categories`).
+3. **`load-spt.js`** parseou items.json (4.462 reais, 120 nodes descartados), prices.json (2.613 entries inicial), handbook (4.216 itens + 87 categorias), 12 traders + assorts. Resolveu nome via locale `en.json`. Detectou flea-banned via `_props.CanSellOnRagfair` (649) + `ragfair.dynamic.blacklist.custom` (8).
+4. **Pipeline rodou**: 5.630 Tpls na union, 3.650 com 3 fontes, 4.339 tradeable.
+5. **Spot checks** revelaram bug: IFAK `conditionType: "none"` — meds usam `MaxHpResource`, não `MaxResource`. Fix em `deriveConditionType`.
+6. **Viewer HTML construído**: sidebar de categorias (com ícones emoji + auto-expand depth ≤ 0 + skip de intermediários "Compound item" / "Searchable item"), tabela com 9 colunas + filtros + busca, click expande detalhe, indicadores ▲▼ % vs Flea SPT.
+7. **Investigação do mod LiveFleaPrices** (fonte do prices.json desfasado): código no GitHub revelou que mod baixa de repo estático do Drakia (`SPT-LiveFleaPriceDB`), não tarkov.dev direto. Refresh hardcoded em 1h via background task após boot. Config tinha `pvePrices: false` (puxando PVP) + última sync em 2026-03-02 (76 dias antes).
+8. **Confusão temporária com duplicidade `<SPT>/user/` vs `<SPT>/SPT/user/`**: o caminho ativo é o segundo. Usuário deletou o primeiro confirmando que amigos não tinham essa pasta.
+9. **Calibração definitiva:** copiou `prices-pve.json` (fresh, 3.245 entries) sobre `prices.json` no SPT_Data. Desativou mod (rename DLL + folder). `load-spt.js` revertido pra ler só `prices.json` canônico (sem mais lógica de cache do mod).
+10. **`checks.dat` validation reverse-engineered** após erro de boot do SPT: MD5 hex uppercase em base64 JSON. Função `updateSptChecks()` em `serve.js` atualiza hashes idempotentemente, chamada no startup e após cada edit. Também resolve warning preexistente de `items.json` (modificado por algum mod desde 10/maio — origem desconhecida, hash apenas atualizado).
+11. **Edit endpoint `POST /api/price`**: valida tpl + price, escreve prices.json com indent 4 + newline, sincroniza items.json, recalcula `consolidated`, atualiza checks.dat, anexa JSONL ao audit log. Frontend com edit-form inline (Enter/Esc), toast de feedback (verde 3s / vermelho 5s).
+12. **Fika Discord Presence** quebrou porque `<SPT>/user/logs/` sumiu junto com a pasta deletada. Corrigido `LogFolderPath` no config pra `<SPT>/SPT/user/logs/`.
+13. **Documentação consolidada** ao fim da sessão: README expandido (setup, viewer/edit, troubleshoot, re-habilitar mod), novo `docs/spt-internals.md` (checks.dat, LiveFleaPrices upstream, trader assort gotchas, 3 taxonomias de categoria, locale shape), apêndice em `.agents/workspace.md` (env vars + tool registrado), esta entrada.
+
+**Pendências abertas nesta sessão:**
+
+- [P-2.1 🟡] Cache do tarkov-market é o snapshot de 2026-05-04 (copiado do `mods/RZCustomProfiles/scripts/cache/`). Refetch real exige `TARKOV_MARKET_API_KEY` — usuário tem mas não setou env nesta sessão.
+- [P-2.2 🟡] Integração de volta com `mods/RZCustomProfiles/`: o backlog tem 10 perfis montados com `anchor-items.json`, mas o `data/items.json` é mais rico. Substituir referências do backlog e gerar os `.json` reais dos perfis fica pra próxima sessão.
+- [P-2.3 🟢] Outra máquina rodando o server SPT: outros 2 colaboradores precisam de `SPT_PATH` correto + chave de API + pipeline build. Setup documentado no README "Setup em máquina nova".
+
+**Cross-refs:**
+
+- Workspace registrou o tool: `.agents/workspace.md` §"Tools de apoio" e §"Env vars".
+- Reverse-engineering reusável: `tools/tarkov-itemdb/docs/spt-internals.md` (consulta futura em sessões de debug do SPT mesmo sem o tool — checks.dat e LiveFleaPrices são gerais).
+- Item 002 do stances continua aberto (P-1.3 da Sessão 1b) — sem progresso aqui.
+
+**O que NÃO foi feito (escopo cortado intencionalmente):**
+
+- `prices.json` semantics presumida = lastLow: presunção empiricamente quebrada (M4A1 SPT=132k vs dev-lastLow=30k antes da troca). Mod escrevia mistura de avg + multiplier histórico. Documentado como "semântica opaca" em vez de bake-in.
+- Filtro real "só 10/10" pra itens com condição variável (chaves, durabilidade) — não exposto pelas APIs públicas, fora de escopo. Mitigação atual: campo `conditionType` ("none" / "uses" / "durability" / "resource") + badge visual.
+- Câmbio dinâmico USD/EUR → RUB: lido do handbook (USD=120, EUR=133 em SPT 4.0.13). Estático. Re-rodar `build.js` re-lê se valores mudarem.

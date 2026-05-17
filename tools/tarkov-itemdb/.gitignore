@@ -1,0 +1,5 @@
+cache/
+logs/
+probe-schema.js
+.serve.log
+assets/snapshot-*.png

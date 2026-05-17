@@ -1,0 +1,37 @@
+{
+  "generatedAt": "2026-05-17T06:04:00.885Z",
+  "sources": {
+    "tarkovDev": {
+      "fetchedAt": "2026-05-17T03:44:53.537Z",
+      "pveCount": 4947,
+      "regularCount": 4947,
+      "categoryCount": 110
+    },
+    "tarkovMarket": {
+      "fetchedAt": "2026-05-17T02:48:12.191Z",
+      "count": 4279
+    },
+    "spt": {
+      "loadedAt": "2026-05-17T06:04:00.558Z",
+      "path": "D:\\SPT\\SPT\\SPT_Data",
+      "itemCount": 4462,
+      "priceCount": 3245,
+      "traderCount": 12,
+      "offerCount": 2854,
+      "currencyRates": {
+        "source": "handbook",
+        "USD": 120,
+        "EUR": 133
+      }
+    }
+  },
+  "stats": {
+    "totalTpls": 5630,
+    "withAllThree": 3650,
+    "withSptOnly": 643,
+    "withTarkovDevOnly": 720,
+    "withTarkovMarketOnly": 21,
+    "tradeable": 4339,
+    "onlySptNoImage": 662
+  }
+}

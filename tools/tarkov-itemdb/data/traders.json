@@ -1,0 +1,50 @@
+{
+  "Prapor": {
+    "id": "54cb50c76803fa8b248b4571",
+    "avatar": "/spt-images/trader/avatar/59b91ca086f77469a81232e4.png"
+  },
+  "Therapist": {
+    "id": "54cb57776803fa99248b456e",
+    "avatar": "/spt-images/trader/avatar/59b91cab86f77469aa5343ca.png"
+  },
+  "Fence": {
+    "id": "579dc571d53a0658a154fbec",
+    "avatar": "/spt-images/trader/avatar/579dc571d53a0658a154fbec.png"
+  },
+  "Skier": {
+    "id": "58330581ace78e27b8b10cee",
+    "avatar": "/spt-images/trader/avatar/59b91cb486f77469a81232e5.png"
+  },
+  "Peacekeeper": {
+    "id": "5935c25fb3acc3127c3d8cd9",
+    "avatar": "/spt-images/trader/avatar/59b91cbd86f77469aa5343cb.png"
+  },
+  "Mechanic": {
+    "id": "5a7c2eca46aef81a7ca2145d",
+    "avatar": "/spt-images/trader/avatar/5a7c2ebb86f7746e324a06ab.png"
+  },
+  "Ragman": {
+    "id": "5ac3b934156ae10c4430e83c",
+    "avatar": "/spt-images/trader/avatar/5ac3b86a86f77461491d1ad8.png"
+  },
+  "Jaeger": {
+    "id": "5c0647fdd443bc2504c2d371",
+    "avatar": "/spt-images/trader/avatar/5c06531a86f7746319710e1b.png"
+  },
+  "caretaker": {
+    "id": "638f541a29ffd1183d187f57",
+    "avatar": "/spt-images/trader/avatar/638f541a29ffd1183d187f57.png"
+  },
+  "БТР": {
+    "id": "656f0f98d80a697f855d34b1",
+    "avatar": "/spt-images/trader/avatar/656f0f98d80a697f855d34b1.png"
+  },
+  "Arena": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "avatar": "/spt-images/trader/avatar/6617beeaa9cfa777ca915b7c.png"
+  },
+  "Storyteller": {
+    "id": "6864e812f9fe664cb8b8e152",
+    "avatar": null
+  }
+}

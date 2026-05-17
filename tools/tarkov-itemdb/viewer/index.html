@@ -1,0 +1,741 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tarkov Item DB</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="components.css">
+</head>
+
+<body>
+
+<div class="app">
+
+<header class="topbar">
+  <span class="brand">Tarkov Item DB</span>
+
+  <div class="search">
+    <input type="search" id="q" placeholder="Buscar por nome ou short name..." autocomplete="off" autofocus>
+  </div>
+
+  <select id="condition" class="pill" title="Filtro de tipo de condição">
+    <option value="">Toda condição</option>
+    <option value="none">Sem variância (none)</option>
+    <option value="durability">Durability</option>
+    <option value="resource">Resource</option>
+    <option value="uses">Uses</option>
+    <option value="unknown">Unknown</option>
+  </select>
+
+  <label class="check"><input type="checkbox" id="hasFlea"> Só com flea</label>
+  <label class="check"><input type="checkbox" id="hasTrader"> Só com trader</label>
+
+  <select id="ban" class="pill" title="Filtro de banidos no flea">
+    <option value="">Banidos: todos</option>
+    <option value="ok">Só não-banidos</option>
+    <option value="banned">Só banidos</option>
+    <option value="bsg">Só BSG-banidos</option>
+    <option value="custom">Só custom-banidos</option>
+  </select>
+
+  <span class="stats" id="stats">carregando…</span>
+</header>
+
+<aside class="sidebar" id="sidebar"></aside>
+
+<main class="main" id="main">
+  <div class="loading" id="loading">
+    <div class="loading__hint">Carregando data/items.json (14 MB)…</div>
+    <div class="loading__rows" id="skel"></div>
+  </div>
+</main>
+
+</div>
+
+<div class="toast-container" id="toasts"></div>
+
+<script>
+'use strict';
+
+let ITEMS = null;       // raw object
+let ITEM_LIST = [];     // array form
+let CATEGORIES = null;
+let CATEGORY_ICONS = {}; // category id → icon URL (also keyed by name as fallback)
+let TRADERS = {};       // nickname → { id, avatar }
+let META = null;
+let CAT_COUNTS = {};    // categoryId -> count of items
+let activeCategoryId = null;
+
+// Persisted sort (defaults: Trader sell descending). Restored on load.
+const SORT_STORAGE_KEY = 'tarkov-itemdb.sort';
+function loadSortPref() {
+  try {
+    const raw = localStorage.getItem(SORT_STORAGE_KEY);
+    if (!raw) return null;
+    const p = JSON.parse(raw);
+    if (typeof p.key === 'string' && (p.dir === 1 || p.dir === -1)) return p;
+  } catch (e) { /* corrupt entry — ignore */ }
+  return null;
+}
+function saveSortPref() {
+  try { localStorage.setItem(SORT_STORAGE_KEY, JSON.stringify({ key: sortKey, dir: sortDir })); }
+  catch (e) { /* quota / private mode — fail silently */ }
+}
+const _initSort = loadSortPref() || { key: 'priceTraderSell', dir: -1 };
+let sortKey = _initSort.key;
+let sortDir = _initSort.dir; // -1 desc, 1 asc
+const RENDER_LIMIT = 1500;
+
+// Handbook tree (used now) has no synthetic intermediates, so the skip set is empty.
+// Kept as an empty Set so existing code paths remain valid.
+const SKIP_CATEGORIES = new Set();
+
+// Emoji fallback by category name — only used if a category has no `icon` path
+// (e.g. categories that come from tarkov.dev fallback for SPT-orphan items).
+const CAT_ICONS = {
+  'Weapon': '🔫', 'Assault rifle': '🔫', 'Assault carbine': '🔫',
+  'Handgun': '🔫', 'SMG': '🔫', 'Sniper rifle': '🎯', 'Marksman rifle': '🎯',
+  'Shotgun': '🔫', 'Machine gun': '🔫', 'Special weapon': '🔫',
+  'Weapon mod': '🔧', 'Functional mod': '🔧', 'Gear mod': '🔧',
+  'Muzzle device': '🔧', 'Sights': '🔭', 'Auxiliary mod': '🔧',
+  'Equipment': '🦺', 'Armor': '🦺', 'Body armor': '🦺', 'Armored equipment': '🦺',
+  'Headwear': '⛑️', 'Headphones': '🎧', 'Visors': '🕶️', 'FaceCover': '😷',
+  'Backpack': '🎒', 'Chest rig': '🎽',
+  'Container': '📦', 'Common container': '📦', 'Locking container': '🔒',
+  'Pockets': '👖',
+  'Stackable item': '📚', 'Ammo': '💥', 'Ammo container': '🗃️', 'Money': '💰', 'Currency': '💰',
+  'Magazine': '📦',
+  'Key': '🔑', 'Mechanical Key': '🔑', 'Keycard': '💳',
+  'Meds': '💊', 'Drug': '💊', 'Medikit': '🩹', 'Medical item': '🏥', 'Stimulator': '💉',
+  'Food and drink': '🍔', 'Food': '🍔', 'Drink': '🥤',
+  'Throwable weapon': '💣', 'Grenade': '💣',
+  'Knife': '🔪',
+  'Map': '🗺️',
+  'Info': 'ℹ️', 'Dialog Item': '💬',
+  'Flyer': '📄',
+  'Barter item': '🔄', 'Battery': '🔋', 'Building material': '🧱', 'Electronics': '🖥️',
+  'Tool': '🔧', 'Household material': '🧴', 'Energy element': '⚡',
+  'Other': '📎', 'Valuable': '💎', 'Lubricant': '🧴', 'Medical supplies': '🧪', 'Fuel': '⛽',
+  'Special item': '⭐', 'Compass': '🧭',
+  'Completable': '📋', 'Quest item': '📋', 'Notes': '📝', 'Tapes': '📼',
+  'Item': '📦',
+};
+const ICON_DEFAULT = '·';
+
+// "Forbidden" SVG mark for flea-banned items. Inline = crisp at any size and
+// inherits color via currentColor (matches --color-danger from tokens).
+const ICON_BANNED = '<svg class="icon-banned" width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true">'
+  + '<circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/>'
+  + '<line x1="2.75" y1="2.75" x2="11.25" y2="11.25" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>'
+  + '</svg>';
+
+// ── Number formatting ───────────────────────────────────────────────────────
+const fmt    = (n) => n == null ? '—' : n.toLocaleString('pt-BR');
+const fmtRub = (n) => n == null ? '—' : n.toLocaleString('pt-BR') + ' <span class="currency currency--rub">₽</span>';
+
+// Percent vs SPT reference. Returns HTML span. Empty string when not computable.
+function pctVsSpt(value, sptValue) {
+  if (value == null || sptValue == null || sptValue === 0) return '';
+  const pct = ((value - sptValue) / sptValue) * 100;
+  if (Math.abs(pct) < 0.05) return '<span class="pct is-zero">= 0%</span>';
+  const cls = pct > 0 ? 'is-up' : 'is-down';
+  const arrow = pct > 0 ? '▲' : '▼';
+  const sign  = pct > 0 ? '+' : '';
+  return `<span class="pct ${cls}">${arrow} ${sign}${pct.toFixed(1)}%</span>`;
+}
+
+// ── Load ────────────────────────────────────────────────────────────────────
+// Render skeleton rows synchronously, before kicking off fetch — first paint
+// shows shimmer placeholders instead of blank/text.
+function renderSkeleton(count) {
+  const skel = document.getElementById('skel');
+  if (!skel) return;
+  const rows = [];
+  for (let i = 0; i < count; i++) {
+    rows.push(
+      '<div class="skel-row">' +
+        '<div class="skel-box skel-box--img"></div>' +
+        '<div><div class="skel-box" style="width:70%"></div><div class="skel-box" style="width:35%;height:9px;margin-top:4px"></div></div>' +
+        '<div class="skel-box" style="width:60%"></div>' +
+        '<div class="skel-box skel-box--tall" style="width:50%"></div>' +
+        '<div class="skel-box" style="width:80%"></div>' +
+        '<div class="skel-box" style="width:80%"></div>' +
+        '<div class="skel-box" style="width:80%"></div>' +
+        '<div class="skel-box" style="width:80%"></div>' +
+        '<div class="skel-box" style="width:80%"></div>' +
+      '</div>');
+  }
+  skel.innerHTML = rows.join('');
+}
+
+async function load() {
+  renderSkeleton(14);
+  try {
+    const [items, cats, meta, traders] = await Promise.all([
+      fetch('../data/items.json').then(r => r.json()),
+      fetch('../data/categories.json').then(r => r.json()),
+      fetch('../data/meta.json').then(r => r.json()),
+      fetch('../data/traders.json').then(r => r.json()).catch(() => ({})),
+    ]);
+    ITEMS = items;
+    CATEGORIES = cats;
+    META = meta;
+    TRADERS = traders || {};
+
+    // Walk category tree once and index icon URLs by both id and name so the
+    // table's Group column can find the right icon for any item.
+    (function indexIcons(node) {
+      if (!node) return;
+      if (node.id && node.icon)   CATEGORY_ICONS[node.id] = node.icon;
+      if (node.name && node.icon) CATEGORY_ICONS[node.name] = node.icon;
+      if (node.children) node.children.forEach(indexIcons);
+    })(CATEGORIES);
+    ITEM_LIST = Object.values(items);
+    countCategories();
+    renderSidebar();
+    bindControls();
+    render();
+  } catch (e) {
+    document.getElementById('main').innerHTML =
+      '<div class="empty">Falha ao carregar JSONs.<br>Use <code>node viewer/serve.js</code> e abra http://localhost:8080/viewer/<br><br>' + e.message + '</div>';
+  }
+}
+
+function countCategories() {
+  for (const it of ITEM_LIST) {
+    if (!it.category) continue;
+    // count this category and all ancestors
+    let id = it.category.id;
+    while (id) {
+      CAT_COUNTS[id] = (CAT_COUNTS[id] || 0) + 1;
+      const node = findCatNode(CATEGORIES, id);
+      id = node && node.parentId ? node.parentId : null;
+      // categories.json doesn't store parentId on node, so walk via tree
+      break; // we count only the leaf; ancestors via tree walk in render
+    }
+  }
+  // walk tree to propagate counts upward
+  function walk(node) {
+    let total = CAT_COUNTS[node.id] || 0;
+    if (node.children) for (const c of node.children) total += walk(c);
+    CAT_COUNTS[node.id] = total;
+    return total;
+  }
+  walk(CATEGORIES);
+}
+
+function findCatNode(node, id) {
+  if (!node) return null;
+  if (node.id === id) return node;
+  if (node.children) for (const c of node.children) {
+    const r = findCatNode(c, id);
+    if (r) return r;
+  }
+  return null;
+}
+
+// ── Sidebar ─────────────────────────────────────────────────────────────────
+function renderSidebar() {
+  const sb = document.getElementById('sidebar');
+  sb.innerHTML = '';
+  const all = document.createElement('div');
+  all.className = 'tree-node tree-all' + (activeCategoryId === null ? ' is-active' : '');
+  all.innerHTML = '<span class="label">Todos os itens</span><span class="count">' + ITEM_LIST.length + '</span>';
+  all.onclick = () => { activeCategoryId = null; render(); refreshActiveCat(); };
+  sb.appendChild(all);
+
+  // Skip the synthetic root "Item" — render its children at depth 0
+  const rootChildren = CATEGORIES.children || [];
+  for (const c of rootChildren) renderCatNode(sb, c, 0);
+}
+
+// Flatten skipped intermediates: returns children with non-zero counts,
+// recursively promoting children of SKIP_CATEGORIES nodes.
+function effectiveChildren(node) {
+  if (!node || !node.children) return [];
+  const out = [];
+  for (const c of node.children) {
+    if (SKIP_CATEGORIES.has(c.name)) {
+      out.push(...effectiveChildren(c));
+    } else if ((CAT_COUNTS[c.id] || 0) > 0) {
+      out.push(c);
+    }
+  }
+  return out;
+}
+
+function renderCatNode(parent, node, depth) {
+  if (!node) return;
+  const count = CAT_COUNTS[node.id] || 0;
+  if (count === 0) return;
+
+  // Skip synthetic intermediates — render their (effective) children at this level.
+  if (SKIP_CATEGORIES.has(node.name)) {
+    for (const c of effectiveChildren(node)) renderCatNode(parent, c, depth);
+    return;
+  }
+
+  const visibleChildren = effectiveChildren(node);
+  const hasChildren = visibleChildren.length > 0;
+  const autoOpen = false; // tree starts fully collapsed; user expands on click
+
+  const el = document.createElement('div');
+  el.className = 'tree-node' + (hasChildren ? ' has-children' : '') + (autoOpen && hasChildren ? ' is-open' : '') + (activeCategoryId === node.id ? ' is-active' : '');
+  el.style.paddingLeft = (6 + depth * 12) + 'px';
+  el.dataset.catId = node.id;
+  const iconHtml = node.icon
+    ? '<img src="' + escapeAttr(node.icon) + '" alt="" loading="lazy">'
+    : (CAT_ICONS[node.name] || ICON_DEFAULT);
+  el.innerHTML =
+    '<span class="chev"></span>' +
+    '<span class="icon">' + iconHtml + '</span>' +
+    '<span class="label">' + escapeHtml(node.name || node.id) + '</span>' +
+    '<span class="count">' + count + '</span>';
+
+  let childrenWrap = null;
+  if (hasChildren) {
+    childrenWrap = document.createElement('div');
+    childrenWrap.className = 'tree-children' + (autoOpen ? '' : ' is-hidden');
+    for (const c of visibleChildren) renderCatNode(childrenWrap, c, depth + 1);
+  }
+
+  el.onclick = (e) => {
+    e.stopPropagation();
+    if (hasChildren) {
+      el.classList.toggle('is-open');
+      childrenWrap.classList.toggle('is-hidden');
+    }
+    activeCategoryId = node.id;
+    render();
+    refreshActiveCat();
+  };
+
+  parent.appendChild(el);
+  if (childrenWrap) parent.appendChild(childrenWrap);
+}
+
+function refreshActiveCat() {
+  document.querySelectorAll('.tree-node').forEach(el => el.classList.remove('is-active'));
+  if (activeCategoryId === null) {
+    const a = document.querySelector('.tree-node.tree-all'); if (a) a.classList.add('is-active');
+  } else {
+    const a = document.querySelector('.tree-node[data-cat-id="' + activeCategoryId + '"]'); if (a) a.classList.add('is-active');
+  }
+}
+
+// ── Controls ────────────────────────────────────────────────────────────────
+function bindControls() {
+  document.getElementById('q').addEventListener('input', debounce(render, 300));
+  document.getElementById('condition').addEventListener('change', render);
+  document.getElementById('hasFlea').addEventListener('change', render);
+  document.getElementById('hasTrader').addEventListener('change', render);
+  document.getElementById('ban').addEventListener('change', render);
+}
+
+function debounce(fn, ms) {
+  let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+}
+
+// ── Filter / sort ───────────────────────────────────────────────────────────
+function isInCategorySubtree(item, rootId) {
+  if (!rootId) return true;
+  if (!item.category) return false;
+  // Walk up category tree from item leaf
+  let current = item.category.id;
+  if (current === rootId) return true;
+  // Find node and check if rootId is an ancestor
+  // Build ancestors of item.category.id once per category? Cache.
+  if (!ANCESTOR_CACHE[current]) {
+    ANCESTOR_CACHE[current] = collectAncestors(CATEGORIES, current);
+  }
+  return ANCESTOR_CACHE[current].has(rootId);
+}
+const ANCESTOR_CACHE = {};
+function collectAncestors(node, target, path) {
+  path = path || [];
+  if (!node) return new Set();
+  if (node.id === target) return new Set([target, ...path]);
+  if (node.children) {
+    for (const c of node.children) {
+      const r = collectAncestors(c, target, [node.id, ...path]);
+      if (r.size) return r;
+    }
+  }
+  return new Set();
+}
+
+function filterItems() {
+  const q = document.getElementById('q').value.trim().toLowerCase();
+  const cond = document.getElementById('condition').value;
+  const hasFlea = document.getElementById('hasFlea').checked;
+  const hasTrader = document.getElementById('hasTrader').checked;
+  const ban = document.getElementById('ban').value;
+
+  const out = [];
+  for (const it of ITEM_LIST) {
+    if (q) {
+      const hay = ((it.name||'') + ' ' + (it.shortName||'') + ' ' + it.id).toLowerCase();
+      if (!hay.includes(q)) continue;
+    }
+    if (cond && it.consolidated.conditionType !== cond) continue;
+    if (hasFlea && it.consolidated.priceFleaCanonical == null) continue;
+    if (hasTrader && (!it.consolidated.priceTraderSell || it.consolidated.priceTraderSell.value == null)) continue;
+    if (ban) {
+      const banned = it.spt && it.spt.fleaBanned;
+      const reasons = (it.spt && it.spt.fleaBanReasons) || [];
+      if (ban === 'ok'     && banned) continue;
+      if (ban === 'banned' && !banned) continue;
+      if (ban === 'bsg'    && !reasons.includes('bsg')) continue;
+      if (ban === 'custom' && !reasons.includes('custom')) continue;
+    }
+    if (activeCategoryId && !isInCategorySubtree(it, activeCategoryId)) continue;
+    out.push(it);
+  }
+  return out;
+}
+
+function sortItems(list) {
+  const dir = sortDir;
+  const key = sortKey;
+  list.sort((a, b) => {
+    const va = getSortValue(a, key);
+    const vb = getSortValue(b, key);
+    if (va == null && vb == null) return 0;
+    if (va == null) return 1;  // nulls last
+    if (vb == null) return -1;
+    if (typeof va === 'string') return dir * va.localeCompare(vb);
+    return dir * (va - vb);
+  });
+  return list;
+}
+
+function getSortValue(it, key) {
+  switch (key) {
+    case 'name':                  return (it.name || '').toLowerCase();
+    case 'group':                 return (it.consolidated.group || '').toLowerCase();
+    case 'priceTraderSell':       return it.consolidated.priceTraderSell ? it.consolidated.priceTraderSell.value : null;
+    case 'priceFleaSpt':          return it.consolidated.priceFleaSpt;
+    case 'priceFleaDevAvg24h':    return it.consolidated.priceFleaDevAvg24h;
+    case 'priceFleaMarketAvg24h': return it.consolidated.priceFleaMarketAvg24h;
+    case 'priceFleaCanonical':    return it.consolidated.priceFleaCanonical;
+    default:                      return null;
+  }
+}
+
+// ── Render ──────────────────────────────────────────────────────────────────
+function render() {
+  const filtered = sortItems(filterItems());
+  const total = ITEM_LIST.length;
+  const shown = Math.min(filtered.length, RENDER_LIMIT);
+  document.getElementById('stats').textContent =
+    `${filtered.length.toLocaleString('pt-BR')} / ${total.toLocaleString('pt-BR')} itens` +
+    (filtered.length > RENDER_LIMIT ? ` (mostrando ${RENDER_LIMIT})` : '');
+
+  const main = document.getElementById('main');
+  if (filtered.length === 0) {
+    main.innerHTML = '<div class="empty">Nenhum item corresponde aos filtros.</div>';
+    return;
+  }
+
+  const rows = filtered.slice(0, RENDER_LIMIT);
+  const html = ['<table class="tbl"><thead><tr>',
+    '<th></th>',
+    th('name', 'Item'),
+    th('group', 'Group'),
+    '<th>Cond.</th>',
+    th('priceTraderSell', 'Trader (sell)', 'num'),
+    th('priceFleaSpt', 'Flea SPT', 'num'),
+    th('priceFleaDevAvg24h', 'Flea Dev', 'num'),
+    th('priceFleaMarketAvg24h', 'Flea Market', 'num'),
+    // canonical column hidden — still computed/exposed in row detail
+    // th('priceFleaCanonical', 'Canonical', 'num'),
+    '</tr></thead><tbody>'];
+
+  for (const it of rows) html.push(renderRow(it));
+  html.push('</tbody></table>');
+  main.innerHTML = html.join('');
+
+  // Click handlers (delegated)
+  main.querySelector('table').addEventListener('click', onTableClick);
+  main.querySelectorAll('th').forEach(th => {
+    th.addEventListener('click', () => {
+      const k = th.dataset.sort;
+      if (!k) return;
+      if (sortKey === k) sortDir = -sortDir;
+      else { sortKey = k; sortDir = (k === 'name' || k === 'group') ? 1 : -1; }
+      saveSortPref();
+      render();
+    });
+  });
+}
+
+// Group cell: icon + name. Resolves icon by category id first, then by name
+// (handbook tree feeds both keys). Falls back to no icon if not in tree.
+function renderGroupCell(item, groupName) {
+  if (!groupName) return '<span class="muted">—</span>';
+  const id  = item.category && item.category.id;
+  const url = (id && CATEGORY_ICONS[id]) || CATEGORY_ICONS[groupName] || null;
+  const icon = url
+    ? `<img class="group-icon" src="${escapeAttr(url)}" alt="" loading="lazy">`
+    : '<span class="group-icon group-icon--empty"></span>';
+  return `<span class="group">${icon}<span class="group__name">${escapeHtml(groupName)}</span></span>`;
+}
+
+function th(key, label, klass) {
+  const isSorted = sortKey === key;
+  const sortMark = isSorted ? (sortDir === 1 ? ' <span class="sort">▲</span>' : ' <span class="sort">▼</span>') : '';
+  const classes = [klass, isSorted ? 'is-sorted' : ''].filter(Boolean).join(' ');
+  return `<th data-sort="${key}"${classes ? ' class="'+classes+'"' : ''}>${label}${sortMark}</th>`;
+}
+
+function renderRow(it) {
+  const c = it.consolidated;
+  const img = (it.image && it.image.icon)
+    ? `<img src="${escapeAttr(it.image.icon)}" alt="" loading="lazy">`
+    : '<div class="no-img">—</div>';
+  const cond = c.conditionType || 'unknown';
+  const condBadge = `<span class="badge badge--${cond}">${cond}</span>`;
+  const traderValue = c.priceTraderSell ? c.priceTraderSell.value : null;
+  const traderName  = c.priceTraderSell ? c.priceTraderSell.vendor : null;
+  const traderMeta  = traderName ? TRADERS[traderName] : null;
+  const traderAvatar = (traderMeta && traderMeta.avatar)
+    ? `<img class="trader-avatar" src="${escapeAttr(traderMeta.avatar)}" alt="${escapeAttr(traderName)}" title="${escapeAttr(traderName)}" loading="lazy">`
+    : (traderName ? `<span class="trader-avatar trader-avatar--placeholder" title="${escapeAttr(traderName)}">${escapeHtml(traderName.charAt(0))}</span>` : '');
+  const trader = c.priceTraderSell
+    ? `<div class="cell-trader"><div class="cell-trader__num"><div class="cell-trader__value">${fmtRub(traderValue)}</div>${pctVsSpt(traderValue, c.priceFleaSpt)}</div>${traderAvatar}</div>`
+    : '<span class="price is-null">—</span>';
+  const sourceBadge = c.priceFleaSource
+    ? `<small><span class="badge badge--src-${c.priceFleaSource.replace(/\./g,'-')}">${c.priceFleaSource}</span></small>`
+    : '';
+
+  const banned = it.spt && it.spt.fleaBanned;
+  const banReasons = (it.spt && it.spt.fleaBanReasons) || [];
+  const banIcon = banned
+    ? `<span class="banned-icon" data-tip="Banido do flea: ${banReasons.join(', ')}" tabindex="0">${ICON_BANNED}</span> `
+    : '';
+
+  const fleaSptCell = banned
+    ? `<span class="price is-banned">${banIcon}${c.priceFleaSpt != null ? fmtRub(c.priceFleaSpt) : '—'}</span>`
+    : fmtRub(c.priceFleaSpt);
+
+  return `<tr data-id="${it.id}" class="${banned?'is-banned':''}">
+    <td class="col-img">${img}</td>
+    <td class="col-name"><div class="name">${escapeHtml(it.name || it.id)}</div><div class="short">${escapeHtml(it.shortName || '')}</div></td>
+    <td class="col-group">${renderGroupCell(it, c.group)}</td>
+    <td>${condBadge}</td>
+    <td class="num">${trader}</td>
+    <td class="num cell-edit ${c.priceFleaSpt==null && !banned?'price is-null':'price'}" data-edit-tpl="${it.id}" data-tip="Clique para editar" data-tip-pos="bottom"><div class="cell-num"><div class="cell-num__value">${fleaSptCell}</div></div></td>
+    <td class="num ${c.priceFleaDevAvg24h==null?'price is-null':'price'}"><div class="cell-num"><div class="cell-num__value">${fmtRub(c.priceFleaDevAvg24h)}</div>${pctVsSpt(c.priceFleaDevAvg24h, c.priceFleaSpt)}</div></td>
+    <td class="num ${c.priceFleaMarketAvg24h==null?'price is-null':'price'}"><div class="cell-num"><div class="cell-num__value">${fmtRub(c.priceFleaMarketAvg24h)}</div>${pctVsSpt(c.priceFleaMarketAvg24h, c.priceFleaSpt)}</div></td>
+  </tr>`;
+}
+
+function onTableClick(e) {
+  // Click on Flea SPT cell → inline edit (don't expand detail)
+  const sptCell = e.target.closest('td.cell-edit');
+  if (sptCell && !sptCell.querySelector('.edit-form')) {
+    e.stopPropagation();
+    openInlineEdit(sptCell);
+    return;
+  }
+  // Don't toggle detail when clicking inside the edit form
+  if (e.target.closest('.edit-form')) { e.stopPropagation(); return; }
+
+  const row = e.target.closest('tr[data-id]');
+  if (!row) return;
+  const id = row.dataset.id;
+  const existing = row.nextElementSibling;
+  if (existing && existing.classList.contains('detail')) {
+    existing.remove();
+    row.classList.remove('is-expanded');
+    return;
+  }
+  // Close any open detail
+  document.querySelectorAll('tr.detail').forEach(d => d.remove());
+  document.querySelectorAll('tr.is-expanded').forEach(t => t.classList.remove('is-expanded'));
+  // Open new
+  row.classList.add('is-expanded');
+  const detail = document.createElement('tr');
+  detail.className = 'detail';
+  detail.innerHTML = `<td colspan="8">${renderDetail(ITEMS[id])}</td>`;
+  row.parentNode.insertBefore(detail, row.nextSibling);
+}
+
+function openInlineEdit(cell) {
+  const tpl = cell.dataset.editTpl;
+  const item = ITEMS[tpl];
+  if (!item) return;
+  const current = item.spt && item.spt.fleaPrice != null ? item.spt.fleaPrice : '';
+  const original = cell.innerHTML; // keep so we can restore on cancel
+
+  cell.innerHTML = `
+    <form class="edit-form" onsubmit="return false">
+      <input type="number" min="0" step="1" value="${current}" autofocus>
+      <button class="save" type="button" title="Salvar (Enter)">Salvar</button>
+      <button class="cancel" type="button" title="Cancelar (Esc)">×</button>
+    </form>`;
+  const input  = cell.querySelector('input');
+  const save   = cell.querySelector('button.save');
+  const cancel = cell.querySelector('button.cancel');
+  input.focus(); input.select();
+
+  function restore() { cell.innerHTML = original; }
+
+  cancel.onclick = restore;
+  input.onkeydown = (ev) => {
+    if (ev.key === 'Escape') { restore(); }
+    if (ev.key === 'Enter')  { ev.preventDefault(); save.click(); }
+  };
+
+  save.onclick = async () => {
+    const price = parseInt(input.value, 10);
+    if (!Number.isFinite(price) || price < 0) {
+      toast('Valor inválido', 'err');
+      input.focus();
+      return;
+    }
+    save.disabled = true; cancel.disabled = true;
+    try {
+      const r = await fetch('/api/price', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tpl, price }),
+      });
+      const data = await r.json();
+      if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP '+r.status));
+
+      // Update in-memory state
+      if (!item.spt) item.spt = { basePrice: null, fleaPrice: null, fleaBanned: false, fleaBanReasons: [], traders: [] };
+      item.spt.fleaPrice = data.current;
+      item.consolidated = data.consolidated;
+
+      // Re-render this row in place
+      const row = cell.closest('tr[data-id]');
+      if (row) {
+        const tmp = document.createElement('tbody');
+        tmp.innerHTML = renderRow(item);
+        row.replaceWith(tmp.firstElementChild);
+      }
+
+      const delta = data.previous != null ? ` (era ${data.previous.toLocaleString('pt-BR')} ₽)` : '';
+      toast(`${item.shortName || tpl}: ${data.current.toLocaleString('pt-BR')} ₽${delta}`, 'ok');
+    } catch (err) {
+      toast('Falha ao salvar: ' + err.message, 'err');
+      save.disabled = false; cancel.disabled = false;
+    }
+  };
+}
+
+function toast(msg, kind) {
+  const c = document.getElementById('toasts');
+  const t = document.createElement('div');
+  t.className = 'toast' + (kind === 'err' ? ' is-error' : '');
+  t.innerHTML = (kind === 'err' ? '⚠ ' : '✓ ') + escapeHtml(msg);
+  c.appendChild(t);
+  requestAnimationFrame(() => t.classList.add('is-show'));
+  setTimeout(() => {
+    t.classList.remove('is-show');
+    setTimeout(() => t.remove(), 300);
+  }, kind === 'err' ? 5000 : 3000);
+}
+
+function renderDetail(it) {
+  const c = it.consolidated;
+  const dev = it.tarkovDev && it.tarkovDev.pve;
+  const reg = it.tarkovDev && it.tarkovDev.regular;
+  const mkt = it.tarkovMarket && it.tarkovMarket.pve;
+  const spt = it.spt;
+
+  const traderSell = dev && dev.sellFor
+    ? dev.sellFor.filter(s => s.vendor.normalizedName !== 'flea-market')
+      .sort((a,b) => (b.priceRUB||0) - (a.priceRUB||0))
+    : [];
+
+  const sptTraders = spt && spt.traders ? spt.traders : [];
+
+  return `<div class="detail-grid">
+    <div class="detail-img">
+      ${it.image && it.image.large ? `<img src="${escapeAttr(it.image.large)}" alt="">` : '<div class="no-img" style="width:200px;height:200px">sem imagem</div>'}
+      <div class="meta-line">
+        <b>${escapeHtml(it.name || '')}</b><br>
+        <span class="types">${(it.types||[]).join(', ')}</span><br>
+        ${it.wikiLink ? `<a href="${escapeAttr(it.wikiLink)}" target="_blank">Wiki ↗</a> · ` : ''}
+        ${mkt && mkt.link ? `<a href="${escapeAttr(mkt.link)}" target="_blank">Market ↗</a>` : `<a href="https://tarkov-market.com/?search=${escapeAttr(it.id)}" target="_blank">Market ↗</a>`} ·
+        <a href="${it.normalizedName ? 'https://tarkov.dev/item/'+escapeAttr(it.normalizedName) : 'https://tarkov.dev/?search='+escapeAttr(it.id)}" target="_blank">tarkov.dev ↗</a>
+      </div>
+      <div class="meta-line">
+        ID: <code>${escapeHtml(it.id)}</code><br>
+        Dims: ${it.dims ? `${it.dims.weight}kg · ${it.dims.width}×${it.dims.height}` : '—'}
+      </div>
+    </div>
+    <div class="detail-sections">
+
+      <div class="detail-section">
+        <h3>Preços flea por fonte</h3>
+        <table>
+          <tr><td class="k">SPT (fleaPrice)</td><td class="v">${fmt(c.priceFleaSpt)} ₽</td></tr>
+          <tr><td class="k">tarkov.dev lastLow</td><td class="v">${fmt(c.priceFleaDevLastLow)} ₽</td></tr>
+          <tr><td class="k">tarkov.dev avg24h</td><td class="v">${fmt(c.priceFleaDevAvg24h)} ₽</td></tr>
+          <tr><td class="k">tarkov.dev low24h</td><td class="v">${fmt(dev && dev.low24h)} ₽</td></tr>
+          <tr><td class="k">tarkov.dev high24h</td><td class="v">${fmt(dev && dev.high24h)} ₽</td></tr>
+          <tr><td class="k">tarkov-market avg24h</td><td class="v">${fmt(c.priceFleaMarketAvg24h)} ₽</td></tr>
+          <tr><td class="k">tarkov-market avg7d</td><td class="v">${fmt(mkt && mkt.avg7days)} ₽</td></tr>
+          <tr><td class="k">Canonical</td><td class="v"><span class="price is-canonical">${fmt(c.priceFleaCanonical)} ₽</span> <small class="vendor">(${c.priceFleaSource||'—'})</small></td></tr>
+        </table>
+      </div>
+
+      <div class="detail-section">
+        <h3>SPT base / handbook</h3>
+        <table>
+          <tr><td class="k">basePrice</td><td class="v">${fmt(spt && spt.basePrice)} ₽</td></tr>
+          <tr><td class="k">condition</td><td class="v">${c.conditionType}</td></tr>
+          <tr><td class="k">group</td><td class="v">${escapeHtml(c.group||'—')}</td></tr>
+          <tr><td class="k">path</td><td class="v">${(it.category && it.category.path || []).join(' › ')}</td></tr>
+          <tr><td class="k">flea ban</td><td class="v">${spt && spt.fleaBanned ? '<span class="banned-icon">'+ICON_BANNED+'</span> banido ('+spt.fleaBanReasons.join(', ')+')' : '✓ permitido'}</td></tr>
+        </table>
+      </div>
+
+      <div class="detail-section">
+        <h3>Trader sell (tarkov.dev) — best: <span class="price is-canonical">${c.priceTraderSell ? fmt(c.priceTraderSell.value)+' ₽ ('+escapeHtml(c.priceTraderSell.vendor)+')' : '—'}</span></h3>
+        <table>
+          ${traderSell.length === 0 ? '<tr><td>—</td></tr>' :
+            traderSell.map(s => `<tr><td class="k">${escapeHtml(s.vendor.name)}</td><td class="v">${fmt(s.priceRUB)} ₽ ${s.currency!=='RUB' ? '<small class="vendor">('+s.price+' '+s.currency+')</small>' : ''}</td></tr>`).join('')}
+        </table>
+      </div>
+
+      <div class="detail-section">
+        <h3>Trader buy (SPT assort)</h3>
+        <table>
+          ${sptTraders.length === 0 ? '<tr><td>—</td></tr>' :
+            sptTraders.map(t => `<tr><td class="k">${escapeHtml(t.name)} <small class="vendor">L${t.loyaltyLevel}${t.questLocked?' · 🔒':''}${t.unlimited?' · ∞':''}</small></td><td class="v">${t.currency==='BARTER' ? '<span class="vendor">barter</span>' : fmt(t.priceRUB)+' ₽'}</td></tr>`).join('')}
+        </table>
+      </div>
+
+      <div class="detail-section">
+        <h3>Modo regular (PVP) — flea</h3>
+        <table>
+          <tr><td class="k">avg24h</td><td class="v">${fmt(reg && reg.avg24h)} ₽</td></tr>
+          <tr><td class="k">lastLow</td><td class="v">${fmt(reg && reg.lastLow)} ₽</td></tr>
+          <tr><td class="k">low24h</td><td class="v">${fmt(reg && reg.low24h)} ₽</td></tr>
+          <tr><td class="k">high24h</td><td class="v">${fmt(reg && reg.high24h)} ₽</td></tr>
+        </table>
+      </div>
+
+    </div>
+  </div>`;
+}
+
+// ── Utilities ───────────────────────────────────────────────────────────────
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s) { return escapeHtml(s); }
+
+load();
+</script>
+</body>
+</html>
