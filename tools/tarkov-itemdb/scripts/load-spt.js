@@ -7,9 +7,19 @@
  * SPT root or the SPT_Data subfolder.
  *
  * Output schema (per Tpl):
- *   { id, name, shortName, basePrice, fleaPrice, weight, width, height,
- *     stackMaxSize, conditionType, handbookCategoryId, parentClassId,
+ *   { id, name, shortName, basePrice, fleaPrice, fleaMultiplier,
+ *     isHideoutCraftItem, fleaOverride, effectiveFleaPrice,
+ *     weight, width, height, stackMaxSize, conditionType,
+ *     handbookCategoryId, parentClassId,
  *     traders: [{ name, priceRUB, currency, loyaltyLevel, unlimited, stock, questLocked }] }
+ *
+ * Flea price math (SPT 4.0, validated in docs/flea-formula-validation.md):
+ *   fleaMultiplier      = 1.5 + (0.8 if tpl is a hideout craft ingredient, else 0)
+ *   fleaPrice (vanilla) = round(basePrice × fleaMultiplier)
+ *   fleaOverride        = ragfair.json:dynamic.itemPriceOverrideRouble[tpl]  (or null)
+ *   effectiveFleaPrice  = fleaOverride ?? fleaPrice
+ * The viewer edits effectiveFleaPrice by writing to fleaOverride (passo 3 do boot
+ * sobrescreve toda a matemática vanilla). See docs/spt-internals.md.
  *
  * Usage:  node scripts/load-spt.js
  * Output: cache/spt-raw.json
@@ -33,6 +43,13 @@ const FALLBACK_EUR_RATE = 133; // RUB per EUR; verified from handbook
 function readJson(p) {
   const txt = fs.readFileSync(p, 'utf8').replace(/^﻿/, '');
   return JSON.parse(txt);
+}
+
+function readJsonc(p) {
+  const txt = fs.readFileSync(p, 'utf8').replace(/^﻿/, '');
+  // Strip block comments then line comments
+  const stripped = txt.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  return JSON.parse(stripped);
 }
 
 function resolveSptDataDir(sptPath) {
@@ -74,6 +91,18 @@ function main() {
     const it = itemsRaw[id];
     if (it._type !== 'Item') { nodeCount++; continue; }
     const p = it._props || {};
+    // Storage grids — containers, rigs, backpacks have internal cells.
+    // Shape: [{ name, cellsH, cellsV }] (only items that declare grids).
+    let grids = null;
+    if (Array.isArray(p.Grids) && p.Grids.length > 0) {
+      grids = p.Grids.map(g => ({
+        name: g._name || null,
+        cellsH: g._props && g._props.cellsH || 0,
+        cellsV: g._props && g._props.cellsV || 0,
+      })).filter(g => g.cellsH > 0 && g.cellsV > 0);
+      if (!grids.length) grids = null;
+    }
+
     items[id] = {
       id,
       internalName: it._name,
@@ -85,6 +114,7 @@ function main() {
       width: p.Width ?? null,
       height: p.Height ?? null,
       stackMaxSize: p.StackMaxSize ?? null,
+      grids,
       conditionType: deriveConditionType(p),
       canSellOnRagfair: p.CanSellOnRagfair !== false, // per-item BSG flag
     };
@@ -116,37 +146,95 @@ function main() {
     delete items[id]._shortNameKey;
   }
 
-  // 3. Flea prices — source of truth is SPT's prices.json on disk. Edits via
-  // the viewer (future) will write back to this file.
-  const pricesPath = path.join(dataDir, 'database', 'templates', 'prices.json');
-  const pricesSource = 'spt-prices.json';
-  console.error(`Reading prices from ${pricesPath}...`);
-  const prices = readJson(pricesPath);
-  let priceCount = 0;
-  for (const id of Object.keys(prices)) {
-    if (items[id]) { items[id].fleaPrice = prices[id]; priceCount++; }
+  // 3a. Hideout crafts — set of tpls that appear as ingredients in any recipe.
+  // These items get an extra +0.8 to fleaMultiplier (SPT default config:
+  // dynamic.generateBaseFleaPrices.hideoutCraftMultiplier=0.8, useHideoutCraftMultiplier=true).
+  // Vanilla fleaMultiplier becomes 1.5 + 0.8 = 2.3 for craft items. See
+  // RagfairPriceService.cs:73-103 in references/spt-source.
+  console.error('Reading database/hideout/production.json (craft items)...');
+  const productionPath = path.join(dataDir, 'database', 'hideout', 'production.json');
+  const production = readJson(productionPath);
+  const hideoutCraftItems = new Set();
+  // SPT vanilla uses camelCase; tolerate PascalCase from forks/mods just in case.
+  const recipes = production.recipes || production.Recipes || [];
+  for (const recipe of recipes) {
+    const reqs = recipe.requirements || recipe.Requirements || [];
+    for (const req of reqs) {
+      const type = req.type || req.Type;
+      const tpl  = req.templateId || req.TemplateId;
+      if (type === 'Item' && tpl) hideoutCraftItems.add(tpl);
+    }
   }
-  for (const id of Object.keys(items)) {
-    if (items[id].fleaPrice === undefined) items[id].fleaPrice = null;
-  }
-  console.error(`  fleaPrice set on ${priceCount} items`);
+  console.error(`  ${hideoutCraftItems.size} unique tpls are hideout craft ingredients (from ${recipes.length} recipes)`);
 
-  // 4. Handbook (base prices + categories)
+  // Audit trail: dump the craft set so we can diff between SPT versions.
+  const hideoutCraftsOut = path.join(__dirname, '..', 'data', 'hideout-crafts.json');
+  fs.mkdirSync(path.dirname(hideoutCraftsOut), { recursive: true });
+  fs.writeFileSync(hideoutCraftsOut, JSON.stringify({
+    generatedAt: new Date().toISOString(),
+    sptDataDir: dataDir,
+    recipeCount: recipes.length,
+    craftItemCount: hideoutCraftItems.size,
+    tpls: Array.from(hideoutCraftItems).sort(),
+  }, null, 2) + '\n', 'utf8');
+
+  // 3b. Ragfair config — read overrides and blacklist together (used later for
+  // both flea price math and blacklist tagging).
+  console.error('Reading configs/ragfair.json (overrides + blacklist)...');
+  const ragfair = readJson(path.join(dataDir, 'configs', 'ragfair.json'));
+  const fleaOverridesMap = (ragfair.dynamic && ragfair.dynamic.itemPriceOverrideRouble) || {};
+  console.error(`  ${Object.keys(fleaOverridesMap).length} flea overrides active in ragfair.json`);
+
+  // 3c. Handbook (base prices + flea price math + categories)
+  // Real SPT flea price uses the vanilla formula (handbook × fleaMultiplier),
+  // possibly overridden by ragfair.json:itemPriceOverrideRouble in passo 3 of boot.
+  // We expose both `fleaPrice` (vanilla expected) and `effectiveFleaPrice` (post-override).
+  const handbookPath = path.join(dataDir, 'database', 'templates', 'handbook.json');
   console.error('Reading handbook.json...');
-  const handbook = readJson(path.join(dataDir, 'database', 'templates', 'handbook.json'));
+  const handbook = readJson(handbookPath);
   let baseCount = 0;
+  let priceCount = 0;
+  let craftItemsWithPrice = 0;
+  let overridesApplied = 0;
+  const FLEA_BASE_MULTIPLIER     = 1.5; // ragfair.json:dynamic.generateBaseFleaPrices.priceMultiplier
+  const HIDEOUT_CRAFT_MULTIPLIER = 0.8; // ragfair.json:dynamic.generateBaseFleaPrices.hideoutCraftMultiplier
+  // TODO: read these from ragfair.json itself (defensive, for installs that tuned the config).
   for (const e of handbook.Items) {
     if (items[e.Id]) {
       items[e.Id].basePrice = e.Price;
       items[e.Id].handbookCategoryId = e.ParentId;
+      const isCraft = hideoutCraftItems.has(e.Id);
+      const multiplier = FLEA_BASE_MULTIPLIER + (isCraft ? HIDEOUT_CRAFT_MULTIPLIER : 0);
+      items[e.Id].isHideoutCraftItem = isCraft;
+      items[e.Id].fleaMultiplier = multiplier;
+      if (e.Price != null) {
+        items[e.Id].fleaPrice = Math.round(e.Price * multiplier);
+        priceCount++;
+        if (isCraft) craftItemsWithPrice++;
+      }
+      const ov = fleaOverridesMap[e.Id];
+      if (ov != null) {
+        items[e.Id].fleaOverride = ov;
+        overridesApplied++;
+      } else {
+        items[e.Id].fleaOverride = null;
+      }
+      items[e.Id].effectiveFleaPrice = items[e.Id].fleaOverride != null
+        ? items[e.Id].fleaOverride
+        : items[e.Id].fleaPrice;
       baseCount++;
     }
   }
   for (const id of Object.keys(items)) {
-    if (items[id].basePrice === undefined)         items[id].basePrice = null;
+    if (items[id].basePrice          === undefined) items[id].basePrice          = null;
     if (items[id].handbookCategoryId === undefined) items[id].handbookCategoryId = null;
+    if (items[id].fleaPrice          === undefined) items[id].fleaPrice          = null;
+    if (items[id].fleaMultiplier     === undefined) items[id].fleaMultiplier     = null;
+    if (items[id].isHideoutCraftItem === undefined) items[id].isHideoutCraftItem = false;
+    if (items[id].fleaOverride       === undefined) items[id].fleaOverride       = null;
+    if (items[id].effectiveFleaPrice === undefined) items[id].effectiveFleaPrice = items[id].fleaPrice;
   }
-  console.error(`  basePrice set on ${baseCount} items`);
+  console.error(`  basePrice on ${baseCount}, fleaPrice on ${priceCount} (${craftItemsWithPrice} craft items @ ×2.3), overrides applied: ${overridesApplied}`);
 
   // Currency rates from handbook
   const usdEntry = handbook.Items.find(x => x.Id === CURRENCY_USD);
@@ -156,11 +244,24 @@ function main() {
   const rateSource = (usdEntry && eurEntry) ? 'handbook' : 'fallback';
   console.error(`  currency rates (${rateSource}): USD=${usdRate}, EUR=${eurRate}`);
 
-  // 4b. Flea blacklist (ragfair.json + per-item CanSellOnRagfair)
-  console.error('Reading configs/ragfair.json (flea blacklist)...');
-  const ragfair = readJson(path.join(dataDir, 'configs', 'ragfair.json'));
+  // 4a. Global flea config (player level gate)
+  let fleaMinUserLevel = null;
+  try {
+    const globals = readJson(path.join(dataDir, 'database', 'globals.json'));
+    fleaMinUserLevel = globals && globals.config && globals.config.RagFair && globals.config.RagFair.minUserLevel || null;
+    console.error(`  flea unlock: minUserLevel = ${fleaMinUserLevel}`);
+  } catch (e) {
+    console.error('  WARNING: failed to read globals.json for minUserLevel:', e.message);
+  }
+
+  // 4b. Flea blacklist (per-item CanSellOnRagfair + ragfair.json:dynamic.blacklist.custom)
+  // ragfair object already loaded above in step 3b.
   const blacklist = (ragfair.dynamic && ragfair.dynamic.blacklist) || {};
   const bsgListEnabled = blacklist.enableBsgList !== false;
+  // blacklist.custom is a Set/array of tpls; in SPT 4.0 it both bans the tpl
+  // from offer generation AND acts as an exception list in
+  // PostDbLoadService.SetAllDbItemsAsSellableOnFlea (items not in custom get
+  // their CanSellOnRagfair forced to true at boot).
   const customBanned = new Set(Array.isArray(blacklist.custom) ? blacklist.custom : []);
   let bannedBsg = 0, bannedCustom = 0;
   for (const id of Object.keys(items)) {
@@ -173,6 +274,119 @@ function main() {
   console.error(`  flea blacklist: bsgList=${bsgListEnabled?'ON':'OFF'}, bsg-banned=${bannedBsg}, custom-banned=${bannedCustom} (${customBanned.size} in config)`);
   // Note: questList and traderItems flags in the blacklist are not yet resolved
   // (would require quest-active-state + trader exclusivity logic). Documented as a limitation.
+
+  // 4c. Mod-added items from user/mods/*/db/CustomItems/*.json(c)
+  // Mod items define name, price and traders inline — no assort.json involvement.
+  // Loaded after handbook (need currency rates) and ragfair blacklist (need customBanned).
+  const modsDir = path.join(SPT_PATH, 'user', 'mods');
+  const MOD_CURRENCY_TPL = {
+    MONEY_ROUBLES: CURRENCY_RUB,
+    MONEY_DOLLARS: CURRENCY_USD,
+    MONEY_EUROS:   CURRENCY_EUR,
+  };
+  // Normalize mod trader name: RAGMAN → Ragman (single-word trader names)
+  function normTraderName(s) {
+    return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+  }
+
+  let modItemCount = 0;
+  if (fs.existsSync(modsDir)) {
+    for (const modName of fs.readdirSync(modsDir)) {
+      const ciDir = path.join(modsDir, modName, 'db', 'CustomItems');
+      if (!fs.existsSync(ciDir)) continue;
+
+      const files = fs.readdirSync(ciDir).filter(f => /\.jsonc?$/i.test(f));
+      let modFilesCount = 0;
+      for (const file of files) {
+        const fp = path.join(ciDir, file);
+        let raw;
+        try {
+          raw = file.toLowerCase().endsWith('.jsonc') ? readJsonc(fp) : readJson(fp);
+        } catch (e) {
+          console.error(`  WARNING: ${modName}/${file}: parse error: ${e.message}`);
+          continue;
+        }
+
+        for (const [tpl, def] of Object.entries(raw)) {
+          if (items[tpl]) {
+            console.error(`  WARNING: ${modName}/${file}: tpl ${tpl} already exists, skipping`);
+            continue;
+          }
+          const op  = def.overrideProperties || {};
+          const loc = (def.locales && def.locales.en) || {};
+
+          let grids = null;
+          if (Array.isArray(op.Grids) && op.Grids.length > 0) {
+            grids = op.Grids
+              .map(g => ({ name: g._name || null, cellsH: (g._props && g._props.cellsH) || 0, cellsV: (g._props && g._props.cellsV) || 0 }))
+              .filter(g => g.cellsH > 0 && g.cellsV > 0);
+            if (!grids.length) grids = null;
+          }
+
+          // Trader offers from mod JSON: { TRADERNAME: { assortId: { barterSettings, barters } } }
+          const modTraders = [];
+          if (def.addtoTraders && def.traders) {
+            for (const [nameUpper, offers] of Object.entries(def.traders)) {
+              for (const offer of Object.values(offers)) {
+                const bs      = offer.barterSettings || {};
+                const barters = offer.barters || [];
+                if (barters.length !== 1) continue; // skip multi-req barters
+                const req = barters[0];
+                const currTpl = MOD_CURRENCY_TPL[req._tpl] || req._tpl;
+                let priceRUB = null;
+                let currency = 'BARTER';
+                if      (currTpl === CURRENCY_RUB) { priceRUB = req.count;                          currency = 'RUB'; }
+                else if (currTpl === CURRENCY_USD) { priceRUB = Math.round(req.count * usdRate);   currency = 'USD'; }
+                else if (currTpl === CURRENCY_EUR) { priceRUB = Math.round(req.count * eurRate);   currency = 'EUR'; }
+                modTraders.push({
+                  name: normTraderName(nameUpper),
+                  priceRUB,
+                  currency,
+                  loyaltyLevel: bs.loyalLevel ?? 1,
+                  unlimited: !!bs.unlimitedCount,
+                  stock: bs.unlimitedCount ? null : (bs.stackObjectsCount ?? 0),
+                  questLocked: false,
+                });
+              }
+            }
+          }
+
+          const canSellOnRagfair = op.CanSellOnRagfair !== false && !op.QuestItem;
+          const fleaBanReasons   = [];
+          if (!canSellOnRagfair)    fleaBanReasons.push('bsg');
+          if (customBanned.has(tpl)) fleaBanReasons.push('custom');
+
+          items[tpl] = {
+            id: tpl,
+            internalName: tpl,
+            parentClassId: def.parentId || null,
+            name:      loc.name      || tpl,
+            shortName: loc.shortName || loc.name || tpl,
+            weight:       op.Weight       ?? null,
+            width:        op.Width        ?? null,
+            height:       op.Height       ?? null,
+            stackMaxSize: op.StackMaxSize ?? null,
+            grids,
+            conditionType: deriveConditionType(op),
+            canSellOnRagfair,
+            basePrice:         def.handbookPriceRoubles ?? null,
+            handbookCategoryId: def.handbookParentId    || null,
+            fleaPrice:         def.fleaPriceRoubles     ?? null,
+            fleaBanned:        fleaBanReasons.length > 0,
+            fleaBanReasons,
+            traders: modTraders,
+            modSource: modName,
+          };
+          modFilesCount++;
+          modItemCount++;
+        }
+      }
+      if (modFilesCount > 0) console.error(`  ${modName}: +${modFilesCount} items`);
+    }
+  } else {
+    console.error(`  WARNING: user/mods dir not found at ${modsDir}`);
+  }
+  console.error(`Mod items total: ${modItemCount}`);
 
   // 5. Traders
   const tradersDir = path.join(dataDir, 'database', 'traders');
@@ -242,7 +456,7 @@ function main() {
     let traderOffers = 0;
     for (const offer of topItems) {
       const tpl = offer._tpl;
-      if (!items[tpl]) continue; // unknown to items.json (mods may add these)
+      if (!items[tpl]) continue; // not in base items or known mods
 
       // Resolve price
       const scheme = assort.barter_scheme[offer._id];
@@ -303,12 +517,49 @@ function main() {
 
   console.error(`Trader offers: ${totalOffers} total, ${barterOffers} barter, ${questLockedOffers} quest-locked, ${dedupRemoved} dedup-removed`);
 
+  // 5.qr Quest item rewards — build map { tpl: [{ questId, name, trader, count }] }
+  console.error('Reading quests.json (item rewards)...');
+  try {
+    const quests = readJson(path.join(dataDir, 'database', 'templates', 'quests.json'));
+    const questRewardsByTpl = {};
+    let questsWithRewards = 0, rewardEntries = 0;
+    const traderNameById = {};
+    for (const [nick, t] of Object.entries(traders)) traderNameById[t.id] = nick;
+    for (const [qid, q] of Object.entries(quests)) {
+      const succ = q.rewards && q.rewards.Success;
+      if (!Array.isArray(succ)) continue;
+      let hadAny = false;
+      for (const r of succ) {
+        if (r.type !== 'Item' || !Array.isArray(r.items) || !r.items[0]) continue;
+        const it0 = r.items[0];
+        const tpl = it0._tpl;
+        if (!tpl || !items[tpl]) continue;
+        const count = (it0.upd && it0.upd.StackObjectsCount) || 1;
+        const qname = locale[qid + ' name'] || q.QuestName || qid;
+        const tname = traderNameById[q.traderId] || null;
+        if (!questRewardsByTpl[tpl]) questRewardsByTpl[tpl] = [];
+        questRewardsByTpl[tpl].push({ questId: qid, name: qname, trader: tname, count });
+        hadAny = true; rewardEntries++;
+      }
+      if (hadAny) questsWithRewards++;
+    }
+    console.error(`  quests: ${Object.keys(quests).length}, with item rewards: ${questsWithRewards}, total entries: ${rewardEntries}, distinct tpls: ${Object.keys(questRewardsByTpl).length}`);
+    for (const tpl of Object.keys(questRewardsByTpl)) {
+      if (items[tpl]) items[tpl].questRewards = questRewardsByTpl[tpl];
+    }
+  } catch (e) {
+    console.error('  WARNING: failed to read quests.json:', e.message);
+  }
+
   // 6. Emit cache
   const out = {
     loadedAt: new Date().toISOString(),
     sptDataPath: dataDir,
     currencyRates: { source: rateSource, USD: usdRate, EUR: eurRate },
-    fleaPricesSource: pricesSource,
+    fleaPricesSource: 'handbook',
+    // mtime of handbook.json — answers "when were base prices last edited?"
+    fleaPricesMtime: fs.statSync(handbookPath).mtime.toISOString(),
+    fleaMinUserLevel,
     fleaBlacklist: {
       bsgListEnabled,
       customCount: customBanned.size,
@@ -318,6 +569,7 @@ function main() {
     },
     counts: {
       items: Object.keys(items).length,
+      modItems: modItemCount,
       withFleaPrice: priceCount,
       withBasePrice: baseCount,
       traders: traderIds.length,

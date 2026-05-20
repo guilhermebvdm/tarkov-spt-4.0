@@ -1,31 +1,36 @@
 # tarkov-itemdb
 
-> **Para detalhes de como o SPT armazena/valida esses dados** (formato do `checks.dat`, comportamento do mod LiveFleaPrices, gotchas do trader assort, taxonomia de categorias), ver [docs/spt-internals.md](docs/spt-internals.md).
+> **Para detalhes do SPT internals** (checks.dat, handbook/prices semântica, assort gotchas, categorias, flea blacklist) ver [docs/spt-internals.md](docs/spt-internals.md).
 
 Base de dados unificada de itens do Tarkov, combinando 3 fontes:
 
-- **SPT local** (instalação em `D:/SPT/SPT`) — preços base, flea atual, ofertas de trader
+- **SPT local** (`D:/SPT/SPT`) — template de item, preços base + flea (derivados do handbook), assort de traders, itens de mods
 - **[tarkov.dev](https://tarkov.dev)** (GraphQL, sem chave) — preços flea PVE+regular, imagens, categorias, `sellFor`/`buyFor`
 - **[tarkov-market.com](https://tarkov-market.com)** (REST, requer chave) — preços flea PVE alternativos
 
-Saída: `data/items.json` normalizado por BSG Tpl, com bloco `consolidated` que serve como view direta para a tabela final (Item | Group | Trader | Flea SPT | Flea Dev | Flea Market).
+Saída: `data/items.json` normalizado por BSG Tpl, com bloco `consolidated` que serve como view direta para a tabela (Item | Group | Trader | Flea SPT | Flea Dev | Flea Market).
+
+Inclui viewer com edição de preços ao vivo, ban/unban de itens no flea, e integração com o pipeline de perfis (`mods/RZCustomProfiles`).
+
+---
 
 ## Setup em máquina nova
 
-1. **Configurar `SPT_PATH`** (env var) apontando para a raiz do SPT install (a pasta que contém `SPT_Data/`). Exemplo Windows: `setx SPT_PATH "D:\SPT\SPT"`. Default: `D:/SPT/SPT`. O script aceita tanto a raiz quanto a subpasta `SPT_Data/`.
-2. **Configurar `TARKOV_MARKET_API_KEY`** (env var) — obter chave em [tarkov-market.com](https://tarkov-market.com) (precisa de Patreon Tier 1+). Sem ela o `fetch-tarkov-market.js` aborta com erro claro.
-3. **Verificar layout do SPT**: deve haver **apenas uma** pasta `user/mods/`. Em alguns installs aparece duplicidade (`<SPT>/user/` paralela à `<SPT>/SPT/user/`) — geralmente a externa é resíduo, pode deletar após confirmar com os outros.
-4. **Rodar pipeline**: `node scripts/build.js` (~6s no primeiro run, mais rápido em re-runs com cache fresco).
-5. **Abrir viewer**: `node viewer/serve.js [porta]` → `http://localhost:8080/viewer/`.
+1. **`SPT_PATH`** (env var) — raiz do SPT install (a pasta que contém `SPT_Data/`). Default: `D:/SPT/SPT`. O script aceita tanto a raiz quanto a subpasta `SPT_Data/`.
+2. **`TARKOV_MARKET_API_KEY`** (env var) — chave de [tarkov-market.com](https://tarkov-market.com) (requer Patreon Tier 1+). Sem ela `fetch-tarkov-market.js` aborta com erro claro.
+3. **Rodar pipeline**: `cd tools/tarkov-itemdb && node scripts/build.js` (~6s no primeiro run, rápido em re-runs com cache fresco).
+4. **Abrir viewer**: `node viewer/serve.js [porta]` → `http://localhost:8080/viewer/`.
+
+---
 
 ## Comandos
 
 ```bash
-node scripts/build.js            # pipeline completo (usa cache se fresco)
-node scripts/build.js --force    # ignora cache e re-baixa tudo
+node scripts/build.js             # pipeline completo (usa cache se fresco)
+node scripts/build.js --force     # refetch tudo + regenera data/
 ```
 
-Etapas individuais:
+Etapas individuais (úteis para debug):
 
 ```bash
 node scripts/fetch-tarkov-dev.js [--force]      # → cache/tarkov-dev-raw.json
@@ -34,152 +39,307 @@ node scripts/load-spt.js                        # → cache/spt-raw.json
 node scripts/normalize.js                       # → data/{items,categories,meta}.json
 ```
 
+`load-spt` e `normalize` sempre rodam mesmo sem `--force` (são rápidos; seus inputs mudam com calibração manual).
+
+---
+
 ## Variáveis de ambiente
 
 | Variável | Default | Necessária para |
-|---|---|---|
-| `SPT_PATH` | `D:/SPT/SPT` | `load-spt.js` (aceita tanto raiz quanto subpasta `SPT_Data`) |
+| --- | --- | --- |
+| `SPT_PATH` | `D:/SPT/SPT` | `load-spt.js` — aceita raiz ou subpasta `SPT_Data` |
 | `TARKOV_MARKET_API_KEY` | — | `fetch-tarkov-market.js` (obrigatória) |
 
-## Estrutura
+---
+
+## Estrutura de arquivos
 
 ```text
 tools/tarkov-itemdb/
-├── scripts/      # fetch + load + normalize + build
-├── cache/        # gitignored; outputs intermediários, regeneráveis
-├── data/         # versionado; source of truth
-│   ├── items.json       1 linha por Tpl, ordenado, ~14 MB
-│   ├── categories.json  árvore única (dev backbone + handbook SPT anotado)
-│   └── meta.json        timestamps + estatísticas por fonte
-└── README.md
+├── scripts/
+│   ├── build.js                  orquestrador: chama os 4 em sequência
+│   ├── fetch-tarkov-dev.js       GraphQL tarkov.dev → cache/
+│   ├── fetch-tarkov-market.js    REST tarkov-market → cache/
+│   ├── load-spt.js               lê D:/SPT → cache/spt-raw.json
+│   └── normalize.js              merge das 3 fontes → data/
+├── cache/                        gitignored; regeneráveis
+│   ├── tarkov-dev-raw.json
+│   ├── tarkov-market-raw.json
+│   └── spt-raw.json
+├── data/                         versionado; source of truth
+│   ├── items.json                ~14 MB, 1 linha por Tpl, ordenado por Tpl
+│   ├── categories.json           árvore única (tarkov.dev + handbook SPT)
+│   ├── meta.json                 timestamps + estatísticas por fonte
+│   ├── traders.json              metadados dos traders (nome, avatar URL)
+│   └── handbook-prices-log.json  histórico de edições de preço via viewer
+├── viewer/
+│   ├── serve.js                  servidor HTTP + APIs de escrita (/api/price, /api/ban, /api/flea-min-level)
+│   ├── index.html                tabela principal
+│   └── components.css / tokens.css
+├── docs/
+│   └── spt-internals.md          internals do SPT relevantes ao pipeline
+└── logs/
+    ├── price-edits.jsonl         audit log de edições de preço (append-only)
+    └── ban-edits.jsonl           audit log de ban/unban (append-only)
 ```
+
+---
 
 ## Schema (`data/items.json`)
 
-Objeto top-level chaveado por BSG Tpl. Cada item:
+Objeto top-level `{ "<bsgTpl>": { ... } }` para lookup O(1). 1 linha por Tpl (diffs legíveis).
 
 ```jsonc
 {
-  "id": "<bsgTpl>",
-  "name": "...",
-  "shortName": "...",
-  "wikiLink": "...",
-  "image": { "icon": "...", "grid": "...", "large": "..." },  // null se item só no SPT
-  "category": { "id", "name", "normalizedName", "path": [...] },
-  "types": ["gun", "wearable", ...],
-  "dims": { "weight", "width", "height" },
+  "id": "5447a9cd4bdc2dbd208b4567",
+  "name": "Colt M4A1 5.56x45 assault rifle",
+  "shortName": "M4A1",
+  "wikiLink": "https://...",
+  "image": { "icon": "...", "grid": "...", "large": "..." },  // null se item só no SPT/mods
+  "category": { "id", "name", "normalizedName", "path": ["Weapon", "Assault rifle"] },
+  "types": ["gun", "wearable"],
+  "dims": { "weight": 3.7, "width": 1, "height": 1 },
+  "grids": null,                            // ou [{ name, cellsH, cellsV }] para containers
+  "modSource": null,                        // nome do mod (ex: "WTT-PackNStrap") ou null se item base
   "spt": {
-    "basePrice": <RUB>,
-    "fleaPrice": <RUB>,                                       // null se não está em prices.json
-    "traders": [ { "name", "priceRUB", "currency", "loyaltyLevel", "unlimited", "stock", "questLocked" } ]
+    "basePrice": 18397,                     // handbook.Items[].Price
+    "fleaPrice": 27596,                     // = basePrice × fleaMultiplier (vanilla esperado)
+    "fleaMultiplier": 1.5,                  // 1.5 (default) ou 2.3 (item de craft do hideout)
+    "isHideoutCraftItem": false,            // true se é ingrediente em alguma receita
+    "fleaOverride": null,                   // número se há override em ragfair.json, senão null
+    "effectiveFleaPrice": 27596,            // = fleaOverride ?? fleaPrice
+    "fleaBanned": false,
+    "fleaBanReasons": [],                   // [] | ["bsg"] | ["custom"] | ["bsg","custom"]
+    "questRewards": [{ "questId", "name", "trader", "count" }],  // [] se não é reward
+    "traders": [
+      { "name": "Mechanic", "priceRUB": 18397, "currency": "RUB",
+        "loyaltyLevel": 1, "unlimited": false, "stock": 3, "questLocked": false }
+    ]
   },
   "tarkovDev": {
     "pve":     { "lastLow", "avg24h", "low24h", "high24h", "updated", "sellFor": [...], "buyFor": [...] },
-    "regular": { ... }
+    "regular": { "lastLow", "avg24h", "low24h", "high24h", "updated" }
   },
   "tarkovMarket": {
     "pve": { "avg24h", "avg7days", "price", "traderName", "traderPrice", "updated" }
   },
   "consolidated": {
-    "group": "<category.name>",
-    "conditionType": "uses" | "durability" | "resource" | "none" | "unknown",
-    "priceTraderSell": { "value": <RUB>, "vendor": "..." },   // max sellFor entre vendors não-flea
-    "priceFleaSpt":          <RUB>,
-    "priceFleaDevLastLow":   <RUB>,
-    "priceFleaDevAvg24h":    <RUB>,
-    "priceFleaMarketAvg24h": <RUB>,
-    "priceFleaCanonical":    <RUB>,                            // priority chain (ver abaixo)
-    "priceFleaSource":       "tarkov-market-avg24h" | "tarkov.dev-avg24h" | "tarkov.dev-lastLow" | "spt"
+    "group": "Assault rifle",
+    "conditionType": "durability",
+    "priceTraderSell": { "value": 10302, "vendor": "Mechanic" },
+    "priceFleaSpt":          27596,         // = spt.effectiveFleaPrice (vanilla ou override)
+    "priceFleaDevLastLow":   30000,
+    "priceFleaDevAvg24h":    41000,
+    "priceFleaMarketAvg24h": 40500,
+    "priceFleaCanonical":    40500,
+    "priceFleaSource":       "tarkov-market-avg24h"
   }
 }
 ```
 
 Campos nulos quando a fonte não cobre o item. **Sem blending entre fontes** — divergência visível é o ponto.
 
+---
+
+## Semântica de preço — crítico
+
+### `spt.fleaPrice` — preço vanilla esperado (referência)
+
+**`spt.fleaPrice = Math.round(handbook.Items[tpl].Price × fleaMultiplier)`**
+
+Onde `fleaMultiplier = 1.5` para items normais e `1.5 + 0.8 = 2.3` para items que aparecem como ingrediente em ≥1 receita do hideout (`isHideoutCraftItem === true`). O multiplier composto vem da fórmula real do SPT 4.0 — ver [docs/spt-internals.md](docs/spt-internals.md) para os 3 passos do boot.
+
+### `spt.effectiveFleaPrice` — preço que o flea vai usar de fato
+
+**`spt.effectiveFleaPrice = spt.fleaOverride ?? spt.fleaPrice`**
+
+Quando há override ativo em `ragfair.json:dynamic.itemPriceOverrideRouble[tpl]`, ele **sobrescreve total** o cálculo vanilla (passo 3 do boot, atribuição direta — não soma). Quando não há, vale o `fleaPrice` vanilla.
+
+`prices.json` **não é lido** pelo `load-spt.js`. Mesmo que exista no disco com valores não-triviais, o pipeline ignora — mas o SPT em runtime soma esses valores ao bonus do handbook (gotcha do `AddOrUpdate +=`). Por isso o viewer escreve em `ragfair.json` (override), não em `handbook.json` nem `prices.json`.
+
+| Quando | `spt.effectiveFleaPrice` |
+|---|---|
+| Nenhum override | `basePrice × fleaMultiplier` (vanilla) |
+| Override ativo | Valor exato escrito em `ragfair.json` |
+
+### Edição de preço via viewer — escrita em override
+
+O viewer exibe `spt.effectiveFleaPrice` na coluna "Flea SPT" (com badge "Override" se houver). Quando o usuário edita:
+
+1. Usuário entra o **preço flea desejado** (ex: `50000`)
+2. Viewer escreve `50000` em `ragfair.json:dynamic.itemPriceOverrideRouble[tpl]`
+3. Recalcula MD5 e atualiza `checks.dat`
+4. Sync `data/items.json`: `spt.fleaOverride = 50000`, `spt.effectiveFleaPrice = 50000`
+5. Na próxima rodada do SPT, o passo 3 do boot aplica o override; ofertas saem em `50000 × 0.8..1.2 ≈ 40K..60K`
+
+**Tradeoff aceito**: o handbook in-game (menu "Handbook" do EFT) **não muda** — só o flea reflete o preço editado. Para reverter um override, o viewer expõe um botão "Restaurar default" que deleta a key.
+
+### `consolidated.priceTraderSell` vs `spt.traders[]`
+
+- **`spt.traders[]`**: o que o player **paga** ao comprar do trader (buy-from-trader). Vem de `assort.json`.
+- **`consolidated.priceTraderSell`**: o que o trader **paga** ao comprar do player (sell-to-trader). Vem de `tarkovDev.pve.sellFor`.
+
 ### Regra de prioridade do `priceFleaCanonical`
 
 1. `tarkov-market avg24h` — fonte independente, métrica estável
-2. `tarkov.dev avg24h` — fallback se item não está no tarkov-market
-3. `tarkov.dev lastLow` — fallback se nem `avg24h` existe
-4. `spt.fleaPrice` — último recurso
+2. `tarkov.dev avg24h` — fallback
+3. `tarkov.dev lastLow` — fallback se não há avg24h
+4. `spt.fleaPrice` — último recurso (circular durante calibração, mas útil para itens raros)
 
-## Semânticas de preço — importante
-
-- **`prices.json` (SPT)**: hoje é mantido pelo mod `DrakiaXYZ-LiveFleaPrices`. **Validação empírica deste pipeline mostrou divergência significativa de `dev.lastLow`** (M4A1: SPT=132k vs dev-lastLow=30k) — o mod aparenta não estar escrevendo `lastLow` puro (talvez aplica `priceMultiplier`, ou está stale, ou usa outra métrica). Tratar `spt.fleaPrice` como **valor canônico do SPT, semântica opaca**, não comparar 1:1 com `dev.lastLow`. Quando você desativar o mod e calibrar manualmente, vira valor autoral.
-- **`avg24h`**: média ponderada das últimas 24h. Sempre maior que `lastLow` em itens líquidos.
-- **`lastLow`**: menor listing ativo. Volátil.
-- **`spt.traders[]`**: o que o player **paga** ao comprar do trader (buy-from-trader).
-- **`consolidated.priceTraderSell`**: o que o trader **paga** ao comprar do player (sell-to-trader). Vem de `tarkov.dev sellFor`.
+---
 
 ## Variância de condição (`conditionType`)
 
-Chaves 1/10 vs 10/10, armaduras danificadas, meds parciais — as APIs públicas agregam **todas as condições**, então preços de itens com condição variável são "ruidosos".
+APIs públicas agregam **todas as condições** — chave 1/10 e 10/10 no mesmo avg24h.
 
 | `conditionType` | Detectado por | Exemplos |
-|---|---|---|
+| --- | --- | --- |
 | `"uses"`       | `_props.MaximumNumberOfUsage > 0` | Chaves, keycards |
 | `"durability"` | `_props.MaxDurability > 0` | Armas, armaduras, capacetes |
-| `"resource"`   | `_props.MaxHpResource > 0` OU `_props.MaxResource > 0` | Meds, food, bag of bolts |
-| `"none"`       | nenhum dos acima | Munição, currency, info, attachments |
+| `"resource"`   | `_props.MaxHpResource > 0` ou `MaxResource > 0` | Meds, food |
+| `"none"`       | nenhum dos acima | Munição, currency, attachments |
+| `"unknown"`    | item só de mod sem `_props` base | — |
 
-Comparação justa só é segura entre itens `conditionType === "none"`. Filtro real "só 10/10" exigiria scrape de listings individuais (fora de escopo).
+Comparação de preços é segura apenas entre `conditionType === "none"`.
+
+---
+
+## Itens de mods (`modSource != null`)
+
+`load-spt.js` escaneia `<SPT_PATH>/user/mods/*/db/CustomItems/*.json(c)` após o passo de flea blacklist (passo 4c). Todos os mods que adicionam itens usam esse padrão.
+
+**Mods atualmente instalados com itens customizados:**
+
+| Mod | Itens | Observação |
+| --- | --- | --- |
+| `WTT-PackNStrap` | 44 | Belts e containers de cintura (slot ArmBand) |
+| `TEP300Backport` | 1 | Headset Peltor TEP-300 |
+| `LoadAmmoAnimServer` | 1 | Item interno de animação (QuestItem, sem flea) |
+
+**Schema do arquivo de mod** (`db/CustomItems/*.json`):
+
+- Chave = BSG Tpl ID
+- `overrideProperties` → props do item (Width, Height, Weight, Grids, CanSellOnRagfair…)
+- `locales.en.{name,shortName}` → nome exibido (inline, não usa en.json do SPT)
+- `handbookPriceRoubles` → `spt.basePrice`
+- `fleaPriceRoubles` → `spt.fleaPrice` (direto, não usa multiplicador handbook)
+- `traders.TRADERNAME.assortId.{barterSettings,barters}` → `spt.traders[]`
+  - `"MONEY_ROUBLES"` no `_tpl` de barters = moeda RUB
+- `parentId` → `parentClassId`; `handbookParentId` → `handbookCategoryId`
+
+Mod items têm campo `modSource` com o nome da pasta do mod.
+
+---
+
+## Viewer — funcionalidades
+
+```bash
+node viewer/serve.js [port]   # default 8080
+# Abrir: http://localhost:8080/viewer/
+```
+
+| Feature | Como funciona |
+|---|---|
+| Árvore de categorias (sidebar) | Click filtra por categoria; "Todos os itens" reseta |
+| Busca | Filtra por `name` ou `shortName` com debounce 300ms |
+| Dropdowns (Group, Condition, Ban) | Multi-select; estado persistido no `localStorage` |
+| **Flea Level widget (topbar)** | Botão "Flea Lvl N+" no topbar; click abre editor inline; salva em `globals.json` via `/api/flea-min-level`; **não** está embutido no `<th>` da tabela |
+| Indicadores ▲▼ % | Comparam Trader / Flea Dev / Flea Market vs Flea SPT (referência de calibração) |
+| **Edição de preço** | Click na célula Flea SPT → input inline; Enter salva; back-calcula para handbook |
+| **Ban/Unban** | Click na célula → menu (Edit / Ban / Unban); confirmação com botão "×" para cancelar |
+| **Reward popover** | Badge de reward: hover por 300ms abre tooltip com lista de quests; mouse leave fecha (grace 80ms para mover ao popover) |
+| Ordenação | Click no `<th>` ordena; segundo click inverte |
+| Toast | Sucesso (verde 3s) / Erro (vermelho 5s) no canto superior direito |
+
+### APIs do servidor
+
+| Endpoint | Método | O que faz |
+| --- | --- | --- |
+| `GET /data/:file` | — | Serve arquivos de `data/` |
+| `GET /spt-images/*` | — | Proxy de imagens do SPT (avatars, etc.) |
+| `PATCH /api/price` | JSON `{ tpl, price }` | Back-calcula handbook price, escreve `handbook.json`, atualiza `data/items.json`, refresha hash em `checks.dat`, grava em `handbook-prices-log.json` e `logs/price-edits.jsonl` |
+| `POST /api/ban` | JSON `{ tpl, banned }` | Togla `CanSellOnRagfair` em `items.json` do SPT, atualiza `data/items.json`, refresha hash em `checks.dat`, grava em `logs/ban-edits.jsonl` |
+| `POST /api/flea-min-level` | JSON `{ minUserLevel }` | Edita `globals.json:config.RagFair.minUserLevel`, refresha hash |
+
+### `data/handbook-prices-log.json`
+
+Tracking de edições de preço por tpl (persistido entre sessões):
+
+```jsonc
+{
+  "<tpl>": {
+    "name": "...", "shortName": "...",
+    "originalFleaPrice": 27596,    // valor antes da primeira edição
+    "currentFleaPrice":  50000,    // valor atual
+    "history": [
+      { "ts": "2026-05-18T...", "fromFlea": 27596, "toFlea": 50000, "handbookPrice": 33333 }
+    ]
+  }
+}
+```
+
+---
 
 ## Limitações conhecidas
 
-- **Preset weapons**: ofertas de traders com presets (M4A1 já modificada) têm `priceRUB` refletindo o kit inteiro, não a arma "nua".
-- **Barters**: ofertas que pedem item por item (`currency: "BARTER"`) ficam em `spt.traders[]` como informativas, mas `priceRUB` = `null`.
-- **`barter_scheme` composto**: pegamos só o primeiro requisito (`[0][0]`). Offers que pedem "item + dinheiro" subestimam preço.
-- **Items só no SPT** (mods custom): `image: null`, `category` com fallback fraco (id do handbook como name).
-- **Câmbio USD/EUR → RUB**: lido do handbook do SPT (USD=120, EUR=133 atualmente). Não há refresh dinâmico — re-rode o build.
-- **`prices.json` semantics presumida**: enquanto LiveFleaPrices estiver ativo, é `lastLow`. Validação empírica no log do normalize (top divergências SPT × dev-lastLow).
+- **Preset weapons**: traders vendem M4A1 já modificada — `priceRUB` reflere o kit inteiro, não a arma "nua".
+- **Barters complexos**: pegamos só `barter_scheme[id][0][0]`. Offers "item + dinheiro" subestimam preço.
+- **`barter_scheme` de mods** com múltiplos requisitos: pulados (`continue`).
+- **Imagens de itens de mods**: `image: null` (assets são bundles Unity, não URLs de CDN).
+- **Câmbio USD/EUR → RUB**: lido do `handbook.json` do SPT (USD=120, EUR=133 em SPT 4.0.13). Re-rodar `build.js` atualiza.
+- **`conditionType: "unknown"`**: itens de mods sem `_props` base no SPT.
+- **Quest-locked de mods**: sempre `false` (mods definem isso em runtime, fora do `questassort.json`).
+- **Filtro "só 10/10"**: exigiria scrape de listings individuais. `conditionType` é a única mitigação.
+
+---
+
+## Escrita em arquivos do SPT — QA obrigatório
+
+Toda mudança no fluxo de escrita (`/api/price`, `/api/ban`, `load-spt.js`) precisa de spot-check **no jogo**, não só por write+hash. SPT silenciosamente ignora campos JSON fora do schema esperado — write bem-sucedido + hash correto em `checks.dat` não garante efeito real.
+
+**Checklist mínimo após mexer em ban/price:**
+
+1. Reload do server SPT.
+2. Boot limpo (sem "validação de arquivo falhou").
+3. **Ban**: tentar listar o item no flea → deve aparecer "Item is prohibited".
+4. **Unban**: confirmar que o item volta ao flea.
+5. **Edição de preço**: confirmar que o preço novo aparece no flea (delay de 1-2 min).
+
+A lição foi vivida: ban via `dynamic.blacklist.custom` "funcionou" por dias até a descoberta in-game de que não tinha efeito real (SPT 4.0 dropou esse campo). Ver [memory/feedback_spt_validation.md](../../memory/feedback_spt_validation.md).
+
+---
 
 ## Manutenção
 
-`probe-schema.js` é one-shot — schema confirmado, pode ser deletado.
+### Re-habilitar LiveFleaPrices (se desativado)
 
-Cache TTL = 6h. Para forçar refetch após mudança no SPT (preços calibrados manualmente, novos mods):
+```bash
+mv "<SPT>/user/mods/DrakiaXYZ-LiveFleaPrices.disabled" "<SPT>/user/mods/DrakiaXYZ-LiveFleaPrices"
+```
+
+**Atenção**: re-habilitar vai **sobreescrever `prices.json` em memória** no próximo boot, mas o pipeline agora **ignora `prices.json`** — a calibração via `handbook.json` permanece intacta. O LiveFleaPrices também desabilita `useHandbookPrice` em memória, o que pode subverter os preços do flea. Mantenha desativado se a calibração importa.
+
+### Novos mods com itens
+
+Se instalar um novo mod, rodar `node scripts/load-spt.js` é suficiente (sem refetch das APIs). O scan de `user/mods/*/db/CustomItems/` é automático.
+
+### Re-pipeline completo
 
 ```bash
 node scripts/build.js --force
 ```
 
-`load-spt` e `normalize` sempre rodam (são baratos); só os fetches honram TTL.
+Cache TTL = 6h. Só os fetches honram TTL; `load-spt` e `normalize` sempre rodam.
 
-## Viewer & edição de preços
-
-```bash
-node viewer/serve.js [port]   # default 8080
-```
-
-Abrir `http://localhost:<port>/viewer/`. Features:
-
-- Árvore de categorias (estilo flea-market), busca, filtros (conditionType, has flea, has trader, banidos)
-- Indicadores ▲▼ % comparando Trader / Flea Dev / Flea Market vs Flea SPT (referência durante calibração)
-- Click numa célula da coluna **Flea SPT** abre editor inline (Enter salva, Esc cancela)
-- Edição dispara `POST /api/price` que:
-  1. Escreve em `<SPT>/SPT_Data/database/templates/prices.json`
-  2. Sincroniza `data/items.json` (mesmo schema, mesma serialização "1 linha por Tpl")
-  3. Atualiza o hash MD5 do arquivo em `<SPT>/SPT_Data/checks.dat` para a validação de boot do SPT passar
-  4. Anexa entrada em `logs/price-edits.jsonl` (audit log JSONL, append-only)
-- Toast no canto superior direito confirma sucesso (verde 3s) ou erro (vermelho 5s)
-
-**Backup**: na primeira execução o `serve.js` faz um diff dos hashes ao startar e loga `checks.dat refresh: [...]`. O backup `checks.dat.bak` é criado manualmente quando você reinstala/troca de máquina.
-
-## Re-habilitar o mod LiveFleaPrices
-
-Desativamos renomeando a DLL + pasta (sem deletar). Pra reativar:
-
-```bash
-mv "<SPT>/user/mods/DrakiaXYZ-LiveFleaPrices.disabled" "<SPT>/user/mods/DrakiaXYZ-LiveFleaPrices"
-mv "<SPT>/user/mods/DrakiaXYZ-LiveFleaPrices/DrakiaXYZ-LiveFleaPrices.dll.disabled" "<SPT>/user/mods/DrakiaXYZ-LiveFleaPrices/DrakiaXYZ-LiveFleaPrices.dll"
-```
-
-**Atenção**: re-habilitar **vai sobrescrever** os preços que você editou via viewer no próximo boot do server (mod aplica o snapshot do repo do Drakia em memória). Mantenha desativado se a calibração autoral importa.
+---
 
 ## Troubleshooting
 
-- **Boot do SPT loga "validação de arquivo falhou para ./SPT_Data/database/templates/prices.json"**: hash do arquivo divergiu do `checks.dat`. Subir o `serve.js` uma vez resolve — ele rerresca o hash na inicialização. Inevitável depois de cada edição via viewer; o próprio `serve.js` reconcilia automaticamente.
-- **`load-spt.js` lê 2k itens em vez de 3k+**: você está com o `prices.json` original (não substituído pelo snapshot PVE). Ver [docs/spt-internals.md](docs/spt-internals.md) seção "Como o `prices.json` foi calibrado pela primeira vez".
-- **Viewer mostra "Falha ao carregar JSONs"**: `fetch()` não funciona em `file://`. Use `node viewer/serve.js`, não abra o HTML direto.
-- **Endpoint `/api/price` retorna 500**: cheque `.serve.log` (criado quando inicia via PowerShell hidden) ou rode `node viewer/serve.js` em foreground.
-- **`prices.json` voltou ao snapshot antigo**: SPT só persiste in-memory no shutdown limpo. Se rodou o server com LiveFleaPrices habilitado, o snapshot pode ter sido reescrito. Workflow seguro: editar via viewer com SPT desligado.
+| Sintoma | Causa | Solução |
+| --- | --- | --- |
+| Boot SPT: "validação de arquivo falhou para handbook.json" | `serve.js` não rodou desde a última edição | Subir `serve.js` uma vez — ele refresha os hashes na inicialização |
+| Viewer: "Falha ao carregar JSONs" | `fetch()` não funciona em `file://` | Usar `node viewer/serve.js`, não abrir HTML direto |
+| `/api/price` retorna 500 | Erro no `serve.js` | Ver `.serve.log` ou rodar em foreground |
+| Mod items não aparecem | Pasta do mod não tem `db/CustomItems/` | Verificar se o mod segue o padrão WTT/SPT 4.0 |
+| `spt.fleaPrice` zerado em itens de mod | `fleaPriceRoubles: 0` no JSON do mod | Normal para itens internos (ex: LoadAmmoAnimServer) |
+| Preço editado não muda o flea in-game | SPT server não reiniciado | Reiniciar o SPT server após editar |
