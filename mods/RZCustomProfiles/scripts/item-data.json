@@ -1,0 +1,602 @@
+{
+  "5910968f86f77425cf569c32": {
+    "name": "Weapon repair kit",
+    "stackMax": 1,
+    "width": 3,
+    "height": 2
+  },
+  "590c678286f77426c9660122": {
+    "name": "IFAK individual first aid kit",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "544fb45d4bdc2dee738b4568": {
+    "name": "Salewa first aid kit",
+    "stackMax": 1,
+    "width": 1,
+    "height": 2
+  },
+  "5755356824597772cb798962": {
+    "name": "AI-2 medkit",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "590c661e86f7741e566b646a": {
+    "name": "Car first aid kit",
+    "stackMax": 1,
+    "width": 2,
+    "height": 1
+  },
+  "5d02797c86f774203f38e30a": {
+    "name": "Surv12 field surgical kit",
+    "stackMax": 1,
+    "width": 3,
+    "height": 1
+  },
+  "590c657e86f77412b013051d": {
+    "name": "Grizzly medical kit",
+    "stackMax": 1,
+    "width": 2,
+    "height": 2
+  },
+  "5d02778e86f774203e7dedbe": {
+    "name": "CMS surgical kit",
+    "stackMax": 1,
+    "width": 2,
+    "height": 1
+  },
+  "5e8488fa988a8701445df1e4": {
+    "name": "CALOK-B hemostatic applicator",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "5e831507ea0a7c419c2f9bd9": {
+    "name": "Esmarch tourniquet",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "60098af40accd37ef2175f27": {
+    "name": "CAT hemostatic tourniquet",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "5c0e533786f7747fa23f4d47": {
+    "name": "Zagustin hemostatic drug injector",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "5751a25924597722c463c472": {
+    "name": "Army bandage",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "5af0454c86f7746bf20992e8": {
+    "name": "Aluminum splint",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "544fb37f4bdc2dee738b4567": {
+    "name": "Analgin painkillers",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "5c0e530286f7747fa1419862": {
+    "name": "Propital regenerative stimulant injector",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "5c0e534186f7747fa1419867": {
+    "name": "eTG-change regenerative stimulant injector",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "544fb3f34bdc2d03748b456a": {
+    "name": "Morphine injector",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "5755383e24597772cb798966": {
+    "name": "Vaseline balm",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "590c695186f7741e566b64a2": {
+    "name": "Augmentin antibiotic pills",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "59d6088586f774275f37482f": {
+    "name": "Kalashnikov AKM 7.62x39 assault rifle",
+    "stackMax": 1,
+    "width": 4,
+    "height": 1
+  },
+  "5644bd2b4bdc2d3b4c8b4572": {
+    "name": "Kalashnikov AK-74N 5.45x39 assault rifle",
+    "stackMax": 1,
+    "width": 4,
+    "height": 1
+  },
+  "59ff346386f77477562ff5e2": {
+    "name": "Kalashnikov AKMS 7.62x39 assault rifle",
+    "stackMax": 1,
+    "width": 4,
+    "height": 1
+  },
+  "57dc2fa62459775949412633": {
+    "name": "Kalashnikov AKS-74U 5.45x39 assault rifle",
+    "stackMax": 1,
+    "width": 3,
+    "height": 1
+  },
+  "5447a9cd4bdc2dbd208b4567": {
+    "name": "Colt M4A1 5.56x45 assault rifle",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "5bfd297f0db834001a669119": {
+    "name": "Mosin 7.62x54R bolt-action rifle (Infantry)",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "55801eed4bdc2d89578b4588": {
+    "name": "SV-98 7.62x54R bolt-action sniper rifle",
+    "stackMax": 1,
+    "width": 4,
+    "height": 1
+  },
+  "5a38e6bac4a2826c6e06d79b": {
+    "name": "TOZ-106 20ga bolt-action shotgun",
+    "stackMax": 1,
+    "width": 3,
+    "height": 1
+  },
+  "576165642459773c7a400233": {
+    "name": "Saiga-12K ver.10 12ga semi-automatic shotgun",
+    "stackMax": 1,
+    "width": 4,
+    "height": 1
+  },
+  "59f9cabd86f7743a10721f46": {
+    "name": "Saiga-9 9x19 carbine",
+    "stackMax": 1,
+    "width": 3,
+    "height": 1
+  },
+  "5448bd6b4bdc2dfc2f8b4569": {
+    "name": "Makarov PM 9x18PM pistol",
+    "stackMax": 1,
+    "width": 2,
+    "height": 1
+  },
+  "576a581d2459771e7b1bc4f1": {
+    "name": "Yarygin MP-443 Grach 9x19 pistol",
+    "stackMax": 1,
+    "width": 2,
+    "height": 1
+  },
+  "56dee2bdd2720bc8328b4567": {
+    "name": "MP-153 12ga semi-automatic shotgun",
+    "stackMax": 1,
+    "width": 3,
+    "height": 1
+  },
+  "5648a7494bdc2d9d488b4583": {
+    "name": "PACA Soft Armor",
+    "stackMax": 1,
+    "width": 3,
+    "height": 3
+  },
+  "5df8a2ca86f7740bfe6df777": {
+    "name": "6B2 body armor (Flora)",
+    "stackMax": 1,
+    "width": 3,
+    "height": 3
+  },
+  "5b44d22286f774172b0c9de8": {
+    "name": "BNTI Kirasa-N body armor",
+    "stackMax": 1,
+    "width": 3,
+    "height": 3
+  },
+  "5c0e5bab86f77461f55ed1f3": {
+    "name": "6B23-1 body armor (EMR)",
+    "stackMax": 1,
+    "width": 3,
+    "height": 4
+  },
+  "5c06c6a80db834001b735491": {
+    "name": "SSh-68 steel helmet (Olive Drab)",
+    "stackMax": 1,
+    "width": 2,
+    "height": 2
+  },
+  "5ea05cf85ad9772e6624305d": {
+    "name": "Tac-Kek FAST MT helmet (Replica)",
+    "stackMax": 1,
+    "width": 2,
+    "height": 2
+  },
+  "5b432d215acfc4771e1c6624": {
+    "name": "LShZ lightweight helmet (Olive Drab)",
+    "stackMax": 1,
+    "width": 2,
+    "height": 2
+  },
+  "5d5e7d28a4b936645d161203": {
+    "name": "MSA ACH TC-2001 MICH Series helmet (Olive Drab)",
+    "stackMax": 1,
+    "width": 2,
+    "height": 2
+  },
+  "5648a69d4bdc2ded0b8b457b": {
+    "name": "BlackRock chest rig (Gray)",
+    "stackMax": 1,
+    "width": 3,
+    "height": 4
+  },
+  "5c0e746986f7741453628fe5": {
+    "name": "WARTECH TV-110 plate carrier (Coyote)",
+    "stackMax": 1,
+    "width": 4,
+    "height": 3
+  },
+  "545cdae64bdc2d39198b4568": {
+    "name": "Camelbak Tri-Zip assault backpack (Foliage)",
+    "stackMax": 1,
+    "width": 5,
+    "height": 6
+  },
+  "59e763f286f7742ee57895da": {
+    "name": "Pilgrim tourist backpack",
+    "stackMax": 1,
+    "width": 5,
+    "height": 7
+  },
+  "544a5cde4bdc2d39388b456b": {
+    "name": "Flyye MBSS backpack (UCP)",
+    "stackMax": 1,
+    "width": 4,
+    "height": 4
+  },
+  "5c0e805e86f774683f3dd637": {
+    "name": "3V Gear Paratus 3-Day Operator's Tactical backpack (Foliage Grey)",
+    "stackMax": 1,
+    "width": 5,
+    "height": 7
+  },
+  "56e335e4d2720b6c058b456d": {
+    "name": "Scav backpack",
+    "stackMax": 1,
+    "width": 4,
+    "height": 5
+  },
+  "5df8a4d786f77412672a1e3b": {
+    "name": "6Sh118 raid backpack (EMR)",
+    "stackMax": 1,
+    "width": 6,
+    "height": 7
+  },
+  "5e4abc6786f77406812bd572": {
+    "name": "LBT-2670 Slim Field Med Pack (Black)",
+    "stackMax": 1,
+    "width": 4,
+    "height": 5
+  },
+  "5c82342f2e221644f31c060e": {
+    "name": "BelOMO PSO-1 4x24 scope",
+    "stackMax": 1,
+    "width": 2,
+    "height": 1
+  },
+  "570fd6c2d2720bc6458b457f": {
+    "name": "EOTech 553 holographic sight",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "570fd79bd2720bc7458b4583": {
+    "name": "OKP-7 reflex sight",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "57ae0171245977343c27bfcf": {
+    "name": "BelOMO PK-06 reflex sight",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "5a0d63621526d8dba31fe3bf": {
+    "name": "AKM PBS-1 7.62x39 sound suppressor",
+    "stackMax": 1,
+    "width": 2,
+    "height": 1
+  },
+  "5c0696830db834001d23f5da": {
+    "name": "PNV-10T night vision goggles",
+    "stackMax": 1,
+    "width": 2,
+    "height": 1
+  },
+  "671126a210d67adb5b08e925": {
+    "name": "AI AXMC KeySlot Harris bipod mount",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "590c2e1186f77425357b6124": {
+    "name": "Toolset",
+    "stackMax": 1,
+    "width": 2,
+    "height": 2
+  },
+  "590c60fc86f77412b13fddcf": {
+    "name": "Documents case",
+    "stackMax": 1,
+    "width": 1,
+    "height": 2
+  },
+  "567143bf4bdc2d1a0f8b4567": {
+    "name": "Pistol case",
+    "stackMax": 1,
+    "width": 2,
+    "height": 2
+  },
+  "590c5bbd86f774785762df04": {
+    "name": "WD-40 (100ml)",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "544fb5454bdc2df8738b456a": {
+    "name": "Leatherman Multitool",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "5f4f9eb969cdc30ff33f09db": {
+    "name": "EYE MK.2 professional hand-held compass",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "5798a2832459774b53341029": {
+    "name": "Customs plan map",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "5900b89686f7744e704a8747": {
+    "name": "Woods plan map",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "5be4038986f774527d3fae60": {
+    "name": "Interchange plan map",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "590c5f0d86f77413997acfab": {
+    "name": "MRE ration pack",
+    "stackMax": 1,
+    "width": 1,
+    "height": 2
+  },
+  "57347da92459774491567cf5": {
+    "name": "Can of beef stew (Large)",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "5448ff904bdc2d6f028b456e": {
+    "name": "Army crackers",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "5c0fa877d174af02a012e1cf": {
+    "name": "Aquamari water bottle with filter",
+    "stackMax": 1,
+    "width": 1,
+    "height": 2
+  },
+  "57513fcc24597720a31c09a6": {
+    "name": "Pack of Vita juice",
+    "stackMax": 1,
+    "width": 1,
+    "height": 2
+  },
+  "57513f07245977207e26a311": {
+    "name": "Pack of apple juice",
+    "stackMax": 1,
+    "width": 1,
+    "height": 2
+  },
+  "5bffdc370db834001d23eca8": {
+    "name": "6Kh5 Bayonet",
+    "stackMax": 1,
+    "width": 2,
+    "height": 1
+  },
+  "57347c1124597737fb1379e3": {
+    "name": "Duct tape",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "5c06779c86f77426e00dd782": {
+    "name": "Bundle of wires",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "5734779624597737e04bf329": {
+    "name": "CPU fan",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "57347c5b245977448d35f6e1": {
+    "name": "Bolts",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "59e35ef086f7741777737012": {
+    "name": "Pack of screws",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "5449016a4bdc2d6f028b456f": {
+    "name": "Roubles",
+    "stackMax": 1000000,
+    "width": 1,
+    "height": 1
+  },
+  "5bed61680db834001d2c45ab": {
+    "name": "AK-12 5.45x39 30-round magazine",
+    "stackMax": 1,
+    "width": 1,
+    "height": 2
+  },
+  "59d625f086f774661516605d": {
+    "name": "AK 7.62x39 30-round magazine (issued '55 or later)",
+    "stackMax": 1,
+    "width": 1,
+    "height": 2
+  },
+  "5aaa5dfee5b5b000140293d3": {
+    "name": "AR-15 5.56x45 Magpul PMAG 30 GEN M3 STANAG 30-round magazine",
+    "stackMax": 1,
+    "width": 1,
+    "height": 2
+  },
+  "559ba5b34bdc2d1f1a8b4582": {
+    "name": "SV-98 7.62x54R 10-round magazine",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "5998529a86f774647f44f421": {
+    "name": "Saiga-9 9x19 sb.7 10-round magazine",
+    "stackMax": 1,
+    "width": 1,
+    "height": 2
+  },
+  "5a38ed75c4a28232996e40c6": {
+    "name": "TOZ-106 20ga MTs 20-01 Sb.3 4-shot magazine",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "5448c12b4bdc2d02308b456f": {
+    "name": "PM 9x18PM 90-93 8-round magazine",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "576a5ed62459771e9c2096cb": {
+    "name": "MP-443 Grach 9x19 18-round magazine",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "5656d7c34bdc2d9d198b4587": {
+    "name": "7.62x39mm PS gzh",
+    "stackMax": 60,
+    "width": 1,
+    "height": 1
+  },
+  "59e0d99486f7744a32234762": {
+    "name": "7.62x39mm BP gzh",
+    "stackMax": 60,
+    "width": 1,
+    "height": 1
+  },
+  "59e4d24686f7741776641ac7": {
+    "name": "7.62x39mm US gzh",
+    "stackMax": 60,
+    "width": 1,
+    "height": 1
+  },
+  "56dff3afd2720bba668b4567": {
+    "name": "5.45x39mm PS gs",
+    "stackMax": 60,
+    "width": 1,
+    "height": 1
+  },
+  "56dff026d2720bb8668b4567": {
+    "name": "5.45x39mm BS gs",
+    "stackMax": 60,
+    "width": 1,
+    "height": 1
+  },
+  "54527a984bdc2d4e668b4567": {
+    "name": "5.56x45mm M855",
+    "stackMax": 60,
+    "width": 1,
+    "height": 1
+  },
+  "5887431f2459777e1612938f": {
+    "name": "7.62x54mm R LPS gzh",
+    "stackMax": 40,
+    "width": 1,
+    "height": 1
+  },
+  "560d61e84bdc2da74d8b4571": {
+    "name": "7.62x54mm R SNB gzh",
+    "stackMax": 40,
+    "width": 1,
+    "height": 1
+  },
+  "560d5e524bdc2d25448b4571": {
+    "name": "12/70 7mm buckshot",
+    "stackMax": 20,
+    "width": 1,
+    "height": 1
+  },
+  "65702495c5d7d4cb4d078561": {
+    "name": "20/70 7.5mm buckshot ammo pack (25 pcs)",
+    "stackMax": 1,
+    "width": 1,
+    "height": 1
+  },
+  "5737201124597760fc4431f1": {
+    "name": "9x18mm PM Pst gzh",
+    "stackMax": 50,
+    "width": 1,
+    "height": 1
+  },
+  "56d59d3ad2720bdb418b4577": {
+    "name": "9x19mm Pst gzh",
+    "stackMax": 50,
+    "width": 1,
+    "height": 1
+  },
+  "58864a4f2459770fcc257101": {
+    "name": "9x19mm PSO gzh",
+    "stackMax": 50,
+    "width": 1,
+    "height": 1
+  }
+}

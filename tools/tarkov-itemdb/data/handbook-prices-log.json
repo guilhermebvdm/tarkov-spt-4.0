@@ -1,0 +1,16 @@
+{
+  "674d90b55704568fe60bc8f5": {
+    "name": "Akula push dagger",
+    "shortName": "Akula",
+    "originalFleaPrice": 42060,
+    "currentFleaPrice": 10000000,
+    "history": [
+      {
+        "ts": "2026-05-19T01:15:21.237Z",
+        "fromFlea": 42060,
+        "toFlea": 10000000,
+        "handbookPrice": 6666667
+      }
+    ]
+  }
+}

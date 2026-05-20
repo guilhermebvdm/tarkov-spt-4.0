@@ -1,0 +1,433 @@
+{
+  "Enabled": true,
+  "BaseProfile": 8,
+  "Name": "Armeiro",
+  "Description": "Field Armorer. Mantém armas funcionando por mais tempo, corrige encravamentos e modifica equipamento em campo.",
+  "AllItemsExamined": false,
+  "MaxLevel": false,
+  "StartingLevel": null,
+  "StartingPrestigeLevel": null,
+  "MaxSkills": false,
+  "SkillOverrides": {
+    "Endurance": 0,
+    "Strength": 3,
+    "Vitality": 0,
+    "Health": 0,
+    "StressResistance": 0,
+    "Metabolism": 0,
+    "Immunity": 0,
+    "Perception": 0,
+    "Intellect": 6,
+    "Attention": 0,
+    "Charisma": 0,
+    "Memory": 0,
+    "Pistol": 0,
+    "Revolver": 0,
+    "SMG": 0,
+    "Assault": 4,
+    "Shotgun": 0,
+    "Sniper": 0,
+    "LMG": 0,
+    "HMG": 0,
+    "Launcher": 0,
+    "AttachedLauncher": 0,
+    "Throwing": 0,
+    "Melee": 0,
+    "DMR": 0,
+    "RecoilControl": 0,
+    "AimDrills": 0,
+    "TroubleShooting": 4,
+    "Surgery": 0,
+    "CovertMovement": 0,
+    "Search": 0,
+    "MagDrills": 0,
+    "Sniping": 0,
+    "ProneMovement": 0,
+    "FieldMedicine": 0,
+    "FirstAid": 0,
+    "LightVests": 0,
+    "HeavyVests": 0,
+    "WeaponModding": 0,
+    "AdvancedModding": 0,
+    "NightOps": 0,
+    "SilentOps": 0,
+    "Lockpicking": 0,
+    "WeaponTreatment": 8,
+    "Freetrading": 0,
+    "Auctions": 0,
+    "Cleanoperations": 0,
+    "Barter": 0,
+    "Shadowconnections": 0,
+    "Taskperformance": 0,
+    "Crafting": 0,
+    "HideoutManagement": 0
+  },
+  "ClearEquipment": false,
+  "ClearStash": false,
+  "SecureContainer": 0,
+  "AdditionalStartingItems": {
+    "Enabled": true,
+    "Items": [
+      {
+        "Tpl": "5449016a4bdc2d6f028b456f",
+        "Count": 100000
+      },
+      {
+        "Tpl": "544fb45d4bdc2dee738b4568",
+        "Count": 1
+      },
+      {
+        "Tpl": "544fb45d4bdc2dee738b4568",
+        "Count": 1
+      },
+      {
+        "Tpl": "5751a25924597722c463c472",
+        "Count": 1
+      },
+      {
+        "Tpl": "5751a25924597722c463c472",
+        "Count": 1
+      },
+      {
+        "Tpl": "5751a25924597722c463c472",
+        "Count": 1
+      },
+      {
+        "Tpl": "5751a25924597722c463c472",
+        "Count": 1
+      },
+      {
+        "Tpl": "5751a25924597722c463c472",
+        "Count": 1
+      },
+      {
+        "Tpl": "5751a25924597722c463c472",
+        "Count": 1
+      },
+      {
+        "Tpl": "5af0454c86f7746bf20992e8",
+        "Count": 1
+      },
+      {
+        "Tpl": "544fb37f4bdc2dee738b4567",
+        "Count": 1
+      },
+      {
+        "Tpl": "544fb37f4bdc2dee738b4567",
+        "Count": 1
+      },
+      {
+        "Tpl": "590c5f0d86f77413997acfab",
+        "Count": 1
+      },
+      {
+        "Tpl": "590c5f0d86f77413997acfab",
+        "Count": 1
+      },
+      {
+        "Tpl": "5448ff904bdc2d6f028b456e",
+        "Count": 1
+      },
+      {
+        "Tpl": "5c0fa877d174af02a012e1cf",
+        "Count": 1
+      },
+      {
+        "Tpl": "5c0fa877d174af02a012e1cf",
+        "Count": 1
+      },
+      {
+        "Tpl": "5bffdc370db834001d23eca8",
+        "Count": 1
+      },
+      {
+        "Tpl": "5910968f86f77425cf569c32",
+        "Count": 1
+      },
+      {
+        "Tpl": "590c2e1186f77425357b6124",
+        "Count": 1
+      },
+      {
+        "Tpl": "590c5bbd86f774785762df04",
+        "Count": 1
+      },
+      {
+        "Tpl": "544fb5454bdc2df8738b456a",
+        "Count": 1
+      },
+      {
+        "Tpl": "57347c5b245977448d35f6e1",
+        "Count": 1
+      },
+      {
+        "Tpl": "59d6088586f774275f37482f",
+        "Count": 1
+      },
+      {
+        "Tpl": "59d6088586f774275f37482f",
+        "Count": 1
+      },
+      {
+        "Tpl": "59d6088586f774275f37482f",
+        "Count": 1
+      },
+      {
+        "Tpl": "59d625f086f774661516605d",
+        "Count": 1
+      },
+      {
+        "Tpl": "59d625f086f774661516605d",
+        "Count": 1
+      },
+      {
+        "Tpl": "59d625f086f774661516605d",
+        "Count": 1
+      },
+      {
+        "Tpl": "59d625f086f774661516605d",
+        "Count": 1
+      },
+      {
+        "Tpl": "59d625f086f774661516605d",
+        "Count": 1
+      },
+      {
+        "Tpl": "59d625f086f774661516605d",
+        "Count": 1
+      },
+      {
+        "Tpl": "59d625f086f774661516605d",
+        "Count": 1
+      },
+      {
+        "Tpl": "59d625f086f774661516605d",
+        "Count": 1
+      },
+      {
+        "Tpl": "59d625f086f774661516605d",
+        "Count": 1
+      },
+      {
+        "Tpl": "59d625f086f774661516605d",
+        "Count": 1
+      },
+      {
+        "Tpl": "59d625f086f774661516605d",
+        "Count": 1
+      },
+      {
+        "Tpl": "59d625f086f774661516605d",
+        "Count": 1
+      },
+      {
+        "Tpl": "5656d7c34bdc2d9d198b4587",
+        "Count": 60
+      },
+      {
+        "Tpl": "5656d7c34bdc2d9d198b4587",
+        "Count": 60
+      },
+      {
+        "Tpl": "5656d7c34bdc2d9d198b4587",
+        "Count": 60
+      },
+      {
+        "Tpl": "5656d7c34bdc2d9d198b4587",
+        "Count": 60
+      },
+      {
+        "Tpl": "5656d7c34bdc2d9d198b4587",
+        "Count": 60
+      },
+      {
+        "Tpl": "5448bd6b4bdc2dfc2f8b4569",
+        "Count": 1
+      },
+      {
+        "Tpl": "5448bd6b4bdc2dfc2f8b4569",
+        "Count": 1
+      },
+      {
+        "Tpl": "5448bd6b4bdc2dfc2f8b4569",
+        "Count": 1
+      },
+      {
+        "Tpl": "5448c12b4bdc2d02308b456f",
+        "Count": 1
+      },
+      {
+        "Tpl": "5448c12b4bdc2d02308b456f",
+        "Count": 1
+      },
+      {
+        "Tpl": "5448c12b4bdc2d02308b456f",
+        "Count": 1
+      },
+      {
+        "Tpl": "5448c12b4bdc2d02308b456f",
+        "Count": 1
+      },
+      {
+        "Tpl": "5448c12b4bdc2d02308b456f",
+        "Count": 1
+      },
+      {
+        "Tpl": "5448c12b4bdc2d02308b456f",
+        "Count": 1
+      },
+      {
+        "Tpl": "5737201124597760fc4431f1",
+        "Count": 50
+      },
+      {
+        "Tpl": "5737201124597760fc4431f1",
+        "Count": 10
+      },
+      {
+        "Tpl": "5ea05cf85ad9772e6624305d",
+        "Count": 1
+      },
+      {
+        "Tpl": "5df8a2ca86f7740bfe6df777",
+        "Count": 1
+      },
+      {
+        "Tpl": "5648a69d4bdc2ded0b8b457b",
+        "Count": 1
+      },
+      {
+        "Tpl": "5648a69d4bdc2ded0b8b457b",
+        "Count": 1
+      },
+      {
+        "Tpl": "5648a69d4bdc2ded0b8b457b",
+        "Count": 1
+      },
+      {
+        "Tpl": "544a5cde4bdc2d39388b456b",
+        "Count": 1
+      },
+      {
+        "Tpl": "590c678286f77426c9660122",
+        "Count": 1
+      },
+      {
+        "Tpl": "590c678286f77426c9660122",
+        "Count": 1
+      },
+      {
+        "Tpl": "590c678286f77426c9660122",
+        "Count": 1
+      },
+      {
+        "Tpl": "5648a7494bdc2d9d488b4583",
+        "Count": 1
+      },
+      {
+        "Tpl": "5648a7494bdc2d9d488b4583",
+        "Count": 1
+      },
+      {
+        "Tpl": "5c06c6a80db834001b735491",
+        "Count": 1
+      },
+      {
+        "Tpl": "5c06c6a80db834001b735491",
+        "Count": 1
+      },
+      {
+        "Tpl": "56e335e4d2720b6c058b456d",
+        "Count": 1
+      },
+      {
+        "Tpl": "56e335e4d2720b6c058b456d",
+        "Count": 1
+      },
+      {
+        "Tpl": "57513f07245977207e26a311",
+        "Count": 1
+      },
+      {
+        "Tpl": "57513f07245977207e26a311",
+        "Count": 1
+      }
+    ]
+  },
+  "TradersLoyalty": {
+    "54cb50c76803fa8b248b4571": {
+      "Standing": 0,
+      "SalesSum": 0
+    },
+    "54cb57776803fa99248b456e": {
+      "Standing": 0,
+      "SalesSum": 0
+    },
+    "579dc571d53a0658a154fbec": {
+      "Standing": 0,
+      "SalesSum": 0
+    },
+    "58330581ace78e27b8b10cee": {
+      "Standing": 0,
+      "SalesSum": 0
+    },
+    "5935c25fb3acc3127c3d8cd9": {
+      "Standing": 0,
+      "SalesSum": 0
+    },
+    "5a7c2eca46aef81a7ca2145d": {
+      "Standing": 0,
+      "SalesSum": 0
+    },
+    "5ac3b934156ae10c4430e83c": {
+      "Standing": 0,
+      "SalesSum": 0
+    },
+    "5c0647fdd443bc2504c2d371": {
+      "Standing": 0,
+      "SalesSum": 0
+    },
+    "6617beeaa9cfa777ca915b7c": {
+      "Standing": 0,
+      "SalesSum": 0
+    },
+    "656f0f98d80a697f855d34b1": {
+      "Standing": 0,
+      "SalesSum": 0
+    },
+    "638f541a29ffd1183d187f57": {
+      "Standing": 0,
+      "SalesSum": 0
+    }
+  },
+  "HideoutStartingLevels": {
+    "Stash": 1,
+    "Generator": 0,
+    "Vents": 0,
+    "Security": 0,
+    "WaterCloset": 0,
+    "Heating": 0,
+    "WaterCollector": 0,
+    "MedStation": 0,
+    "Kitchen": 0,
+    "RestSpace": 0,
+    "Workbench": 1,
+    "IntelligenceCenter": 0,
+    "ShootingRange": 0,
+    "Library": 0,
+    "ScavCase": 0,
+    "Illumination": 0,
+    "PlaceOfFame": 0,
+    "AirFilteringUnit": 0,
+    "SolarPower": 0,
+    "BoozeGenerator": 0,
+    "BitcoinFarm": 0,
+    "ChristmasIllumination": 0,
+    "EmergencyWall": 0,
+    "Gym": 0,
+    "WeaponStand": 0,
+    "WeaponStandSecondary": 0,
+    "EquipmentPresetsStand": 0,
+    "CircleOfCultists": 0
+  }
+}

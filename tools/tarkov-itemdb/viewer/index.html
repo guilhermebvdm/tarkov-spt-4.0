@@ -17,29 +17,25 @@
 <header class="topbar">
   <span class="brand">Tarkov Item DB</span>
 
-  <div class="search">
-    <input type="search" id="q" placeholder="Buscar por nome ou short name..." autocomplete="off" autofocus>
+  <div class="topbar-controls">
+    <div class="search">
+      <input type="search" id="q" placeholder="Buscar por nome ou short name..." autocomplete="off" autofocus>
+      <button type="button" id="q-clear" class="search__clear" data-tip="Limpar busca (Esc)" tabindex="-1" aria-label="Limpar busca">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+          <path d="M1.5 1.5 L8.5 8.5 M8.5 1.5 L1.5 8.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <div id="group-filter"></div>
+    <div id="condition-filter"></div>
+    <div id="ban-filter"></div>
+    <div id="delta-filter"></div>
   </div>
 
-  <select id="condition" class="pill" title="Filtro de tipo de condição">
-    <option value="">Toda condição</option>
-    <option value="none">Sem variância (none)</option>
-    <option value="durability">Durability</option>
-    <option value="resource">Resource</option>
-    <option value="uses">Uses</option>
-    <option value="unknown">Unknown</option>
-  </select>
-
-  <label class="check"><input type="checkbox" id="hasFlea"> Só com flea</label>
-  <label class="check"><input type="checkbox" id="hasTrader"> Só com trader</label>
-
-  <select id="ban" class="pill" title="Filtro de banidos no flea">
-    <option value="">Banidos: todos</option>
-    <option value="ok">Só não-banidos</option>
-    <option value="banned">Só banidos</option>
-    <option value="bsg">Só BSG-banidos</option>
-    <option value="custom">Só custom-banidos</option>
-  </select>
+  <button type="button" class="flea-level-widget" id="flea-level-widget" title="Editar nível mínimo do flea (globals.json)">
+    Flea Lvl <span id="flea-level-num">15</span>+
+  </button>
 
   <span class="stats" id="stats">carregando…</span>
 </header>
@@ -68,6 +64,157 @@ let TRADERS = {};       // nickname → { id, avatar }
 let META = null;
 let CAT_COUNTS = {};    // categoryId -> count of items
 let activeCategoryId = null;
+const selectedGroups     = new Set();  // names selected in Group multiselect
+const selectedConditions = new Set();  // conditionType values selected
+const selectedBans       = new Set();  // ban filter values: 'ok' | 'bsg' | 'custom'
+const DELTA_STORAGE_KEY  = 'tarkov-itemdb.delta';
+let deltaSource = 'dev';   // 'dev' | 'market'
+let deltaMin    = null;    // number or null
+let deltaMax    = null;    // number or null
+
+// Reusable dropdown component (single or multi-select). Options shape:
+//   [{ value: string, label: string, icon?: string, count?: number }]
+// Returns { root, getValue, setValue, refresh } where value is an array.
+function createDropdown({ placeholder, options, multi = false, searchable = false, onChange }) {
+  const selected = new Set();
+  const root = document.createElement('div');
+  root.className = 'dropdown' + (multi ? ' dropdown--multi' : '');
+
+  const trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'dropdown__trigger';
+  trigger.innerHTML = '<span class="dropdown__label"></span><span class="dropdown__badge" style="display:none">0</span><span class="chev"></span>';
+  root.appendChild(trigger);
+
+  const panel = document.createElement('div');
+  panel.className = 'dropdown__panel';
+  root.appendChild(panel);
+
+  // Optional search input
+  let searchInput = null;
+  if (searchable) {
+    searchInput = document.createElement('input');
+    searchInput.type = 'text';
+    searchInput.className = 'dropdown__search';
+    searchInput.placeholder = 'Filtrar…';
+    panel.appendChild(searchInput);
+  }
+
+  // Action buttons (only for multi)
+  if (multi) {
+    const actions = document.createElement('div');
+    actions.className = 'dropdown__actions';
+    const clearBtn = document.createElement('button');
+    clearBtn.type = 'button'; clearBtn.className = 'dropdown__action'; clearBtn.textContent = 'Limpar';
+    clearBtn.onclick = (e) => { e.stopPropagation(); selected.clear(); refresh(); emit(); };
+    const selectAllBtn = document.createElement('button');
+    selectAllBtn.type = 'button'; selectAllBtn.className = 'dropdown__action'; selectAllBtn.textContent = 'Todos';
+    selectAllBtn.onclick = (e) => { e.stopPropagation(); options.forEach(o => selected.add(o.value)); refresh(); emit(); };
+    actions.appendChild(clearBtn);
+    actions.appendChild(selectAllBtn);
+    panel.appendChild(actions);
+  }
+
+  const optionsList = document.createElement('div');
+  optionsList.className = 'dropdown__options';
+  panel.appendChild(optionsList);
+
+  function renderOptions() {
+    optionsList.innerHTML = '';
+    if (!options.length) {
+      const empty = document.createElement('div');
+      empty.className = 'dropdown__empty';
+      empty.textContent = 'Sem opções';
+      optionsList.appendChild(empty);
+      return;
+    }
+    for (const opt of options) {
+      const item = document.createElement('div');
+      item.className = 'dropdown__option' + (selected.has(opt.value) ? ' is-selected' : '');
+      item.dataset.value = opt.value;
+      item.dataset.label = (opt.label || '').toLowerCase();
+      const check = multi ? '<span class="check"></span>' : '';
+      // Icon: prefer raw HTML (`iconHtml`) for inline SVG/symbols, fall back to URL (`icon`)
+      let icon = '';
+      if (opt.iconHtml)      icon = `<span class="icon">${opt.iconHtml}</span>`;
+      else if (opt.icon)     icon = `<span class="icon"><img src="${escapeAttr(opt.icon)}" alt="" loading="lazy"></span>`;
+      const count = opt.count != null ? `<span class="count">${opt.count}</span>` : '';
+      // Label: if opt.badge is set, render the table-style badge instead of plain text
+      const labelText = opt.label || opt.value;
+      const label = opt.badge
+        ? `<span class="label"><span class="badge badge--${escapeAttr(opt.badge)}">${escapeHtml(labelText)}</span></span>`
+        : `<span class="label">${escapeHtml(labelText)}</span>`;
+      item.innerHTML = check + icon + label + count;
+      item.onclick = (e) => {
+        e.stopPropagation();
+        if (multi) {
+          if (selected.has(opt.value)) selected.delete(opt.value);
+          else selected.add(opt.value);
+          item.classList.toggle('is-selected');
+        } else {
+          selected.clear();
+          selected.add(opt.value);
+          close();
+        }
+        refresh();
+        emit();
+      };
+      optionsList.appendChild(item);
+    }
+  }
+
+  function refresh() {
+    const label = root.querySelector('.dropdown__label');
+    const badge = root.querySelector('.dropdown__badge');
+    if (selected.size === 0) {
+      label.textContent = placeholder;
+      label.style.color = '';
+      badge.style.display = 'none';
+    } else if (multi) {
+      label.textContent = placeholder;
+      badge.textContent = selected.size;
+      badge.style.display = '';
+    } else {
+      const first = [...selected][0];
+      const opt = options.find(o => o.value === first);
+      label.textContent = opt ? (opt.label || opt.value) : first;
+      label.style.color = 'var(--fg-primary)';
+      badge.style.display = 'none';
+    }
+    // Update selected visual on existing option elements
+    for (const el of optionsList.querySelectorAll('.dropdown__option')) {
+      el.classList.toggle('is-selected', selected.has(el.dataset.value));
+    }
+  }
+
+  function emit() { if (onChange) onChange([...selected]); }
+
+  function open()  { root.classList.add('is-open'); if (searchInput) { searchInput.value=''; applySearch(''); setTimeout(() => searchInput.focus(), 0); } }
+  function close() { root.classList.remove('is-open'); }
+  function toggle() { root.classList.contains('is-open') ? close() : open(); }
+
+  function applySearch(q) {
+    q = q.toLowerCase();
+    for (const el of optionsList.querySelectorAll('.dropdown__option')) {
+      el.classList.toggle('is-hidden', q && !el.dataset.label.includes(q));
+    }
+  }
+
+  trigger.addEventListener('click', (e) => { e.stopPropagation(); toggle(); });
+  if (searchInput) searchInput.addEventListener('input', () => applySearch(searchInput.value));
+  document.addEventListener('click', (e) => { if (!root.contains(e.target)) close(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+
+  renderOptions();
+  refresh();
+
+  return {
+    root,
+    getValue: () => [...selected],
+    setValue: (vals) => { selected.clear(); (vals||[]).forEach(v => selected.add(v)); renderOptions(); refresh(); },
+    setOptions: (newOpts) => { options = newOpts; renderOptions(); refresh(); },
+  };
+}
 
 // Persisted sort (defaults: Trader sell descending). Restored on load.
 const SORT_STORAGE_KEY = 'tarkov-itemdb.sort';
@@ -127,14 +274,50 @@ const ICON_DEFAULT = '·';
 
 // "Forbidden" SVG mark for flea-banned items. Inline = crisp at any size and
 // inherits color via currentColor (matches --color-danger from tokens).
-const ICON_BANNED = '<svg class="icon-banned" width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true">'
+const ICON_BANNED = '<svg class="icon-banned" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">'
   + '<circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/>'
   + '<line x1="2.75" y1="2.75" x2="11.25" y2="11.25" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>'
+  + '</svg>';
+
+// Green check SVG for "permitido" state in the Banidos filter.
+const ICON_OK = '<svg class="icon-ok" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">'
+  + '<path d="M2 7.5 L5.5 11 L12 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>'
+  + '</svg>';
+
+// Pencil/edit SVG shown on hover over editable cells.
+const ICON_EDIT = '<svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">'
+  + '<path d="M9.5 1.8 L12.2 4.5 L4.5 12.2 L1.5 12.5 L1.8 9.5 Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" fill="none"/>'
+  + '<path d="M8.5 2.8 L11.2 5.5" stroke="currentColor" stroke-width="1.3"/>'
+  + '</svg>';
+
+// Refresh / reload arrow used on the Flea Dev cell to re-pull from tarkov.dev
+const ICON_REFRESH = '<svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">'
+  + '<path d="M12 7 a5 5 0 1 1 -1.5 -3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" fill="none"/>'
+  + '<path d="M12 1.5 L12 4 L9.5 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'
   + '</svg>';
 
 // ── Number formatting ───────────────────────────────────────────────────────
 const fmt    = (n) => n == null ? '—' : n.toLocaleString('pt-BR');
 const fmtRub = (n) => n == null ? '—' : n.toLocaleString('pt-BR') + ' <span class="currency currency--rub">₽</span>';
+
+// Relative time for "last updated" displays. Returns short label + ISO tooltip.
+function fmtRelTime(iso) {
+  if (!iso) return '—';
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return '—';
+  const diffMs = Date.now() - t;
+  const abs = Math.abs(diffMs);
+  const m = Math.round(abs / 60000);
+  const h = Math.round(abs / 3600000);
+  const d = Math.round(abs / 86400000);
+  let label;
+  if (abs < 60000) label = 'agora';
+  else if (m < 60) label = `há ${m} min`;
+  else if (h < 24) label = `há ${h}h`;
+  else if (d < 30) label = `há ${d}d`;
+  else label = new Date(iso).toLocaleDateString('pt-BR');
+  return `<span title="${escapeAttr(iso)}">${label}</span>`;
+}
 
 // Percent vs SPT reference. Returns HTML span. Empty string when not computable.
 function pctVsSpt(value, sptValue) {
@@ -196,12 +379,214 @@ async function load() {
     ITEM_LIST = Object.values(items);
     countCategories();
     renderSidebar();
+    buildGroupFilter();
+    buildConditionFilter();
+    buildBanFilter();
+    buildDeltaFilter();
     bindControls();
     render();
   } catch (e) {
     document.getElementById('main').innerHTML =
       '<div class="empty">Falha ao carregar JSONs.<br>Use <code>node viewer/serve.js</code> e abra http://localhost:8080/viewer/<br><br>' + e.message + '</div>';
   }
+}
+
+const GROUP_STORAGE_KEY     = 'tarkov-itemdb.groups';
+const CONDITION_STORAGE_KEY = 'tarkov-itemdb.conditions';
+const BAN_STORAGE_KEY       = 'tarkov-itemdb.bans';
+let groupDropdown = null;
+let conditionDropdown = null;
+let banDropdown = null;
+
+function buildDeltaFilter() {
+  // Restore persisted state
+  try {
+    const saved = JSON.parse(localStorage.getItem(DELTA_STORAGE_KEY) || 'null');
+    if (saved) {
+      if (saved.source === 'dev' || saved.source === 'market') deltaSource = saved.source;
+      if (typeof saved.min === 'number') deltaMin = saved.min;
+      if (typeof saved.max === 'number') deltaMax = saved.max;
+    }
+  } catch (e) {}
+
+  function saveDelta() {
+    try { localStorage.setItem(DELTA_STORAGE_KEY, JSON.stringify({ source: deltaSource, min: deltaMin, max: deltaMax })); } catch (e) {}
+  }
+
+  const root = document.createElement('div');
+  root.className = 'delta-filter';
+
+  root.innerHTML =
+    '<span class="delta-filter__label">Δ%</span>' +
+    '<button type="button" class="delta-filter__src" data-src="dev"  title="Comparar vs tarkov.dev avg24h">Dev</button>' +
+    '<button type="button" class="delta-filter__src" data-src="market" title="Comparar vs tarkov-market avg24h">Market</button>' +
+    '<span class="delta-filter__sep">·</span>' +
+    '<input class="delta-filter__input" id="delta-min" type="number" placeholder="min%" step="1" title="Delta mínimo (ex: -50)">' +
+    '<span class="delta-filter__range-sep">…</span>' +
+    '<input class="delta-filter__input" id="delta-max" type="number" placeholder="max%" step="1" title="Delta máximo (ex: +200)">' +
+    '<button type="button" class="delta-filter__clear" id="delta-clear" title="Limpar filtro de delta">×</button>';
+
+  const btnDev    = root.querySelector('[data-src="dev"]');
+  const btnMarket = root.querySelector('[data-src="market"]');
+  const inputMin  = root.querySelector('#delta-min');
+  const inputMax  = root.querySelector('#delta-max');
+  const btnClear  = root.querySelector('#delta-clear');
+
+  function updateSrcButtons() {
+    btnDev.classList.toggle('is-active',    deltaSource === 'dev');
+    btnMarket.classList.toggle('is-active', deltaSource === 'market');
+  }
+  function updateClearVisibility() {
+    btnClear.style.display = (deltaMin !== null || deltaMax !== null) ? '' : 'none';
+  }
+
+  // Restore inputs
+  if (deltaMin !== null) inputMin.value = deltaMin;
+  if (deltaMax !== null) inputMax.value = deltaMax;
+  updateSrcButtons();
+  updateClearVisibility();
+
+  btnDev.addEventListener('click', () => {
+    deltaSource = 'dev'; updateSrcButtons(); saveDelta(); render();
+  });
+  btnMarket.addEventListener('click', () => {
+    deltaSource = 'market'; updateSrcButtons(); saveDelta(); render();
+  });
+
+  function onInputChange(inputEl, setter) {
+    const raw = inputEl.value.trim();
+    setter(raw === '' ? null : parseFloat(raw));
+    saveDelta();
+    updateClearVisibility();
+    render();
+  }
+
+  inputMin.addEventListener('change', () => onInputChange(inputMin, v => { deltaMin = v; }));
+  inputMax.addEventListener('change', () => onInputChange(inputMax, v => { deltaMax = v; }));
+  inputMin.addEventListener('keydown', (e) => { if (e.key === 'Enter') inputMin.blur(); });
+  inputMax.addEventListener('keydown', (e) => { if (e.key === 'Enter') inputMax.blur(); });
+
+  btnClear.addEventListener('click', () => {
+    deltaMin = null; deltaMax = null;
+    inputMin.value = ''; inputMax.value = '';
+    saveDelta(); updateClearVisibility(); render();
+  });
+
+  document.getElementById('delta-filter').appendChild(root);
+}
+
+function buildBanFilter() {
+  // Count items by ban state so user sees distribution at-a-glance
+  let okCount = 0, bsgCount = 0, customCount = 0;
+  for (const it of ITEM_LIST) {
+    const banned  = it.spt && it.spt.fleaBanned;
+    const reasons = (it.spt && it.spt.fleaBanReasons) || [];
+    if (!banned) okCount++;
+    if (reasons.includes('bsg')) bsgCount++;
+    if (reasons.includes('custom')) customCount++;
+  }
+  const options = [
+    { value: 'ok',     label: 'Permitido',     iconHtml: '<span class="ban-ico ban-ico--ok">'+ICON_OK+'</span>',         count: okCount },
+    { value: 'bsg',    label: 'Banido (BSG)',  iconHtml: '<span class="ban-ico ban-ico--banned">'+ICON_BANNED+'</span>', count: bsgCount },
+    { value: 'custom', label: 'Banido (custom)', iconHtml: '<span class="ban-ico ban-ico--banned">'+ICON_BANNED+'</span>', count: customCount },
+  ];
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(BAN_STORAGE_KEY) || '[]');
+    if (Array.isArray(saved)) saved.forEach(v => selectedBans.add(v));
+  } catch (e) {}
+
+  banDropdown = createDropdown({
+    placeholder: 'Banidos',
+    options,
+    multi: true,
+    onChange: (vals) => {
+      selectedBans.clear();
+      vals.forEach(v => selectedBans.add(v));
+      try { localStorage.setItem(BAN_STORAGE_KEY, JSON.stringify(vals)); } catch (e) {}
+      render();
+    },
+  });
+  banDropdown.setValue([...selectedBans]);
+  document.getElementById('ban-filter').appendChild(banDropdown.root);
+}
+
+function buildConditionFilter() {
+  // Count items per condition type so user can see distribution
+  const counts = {};
+  for (const it of ITEM_LIST) {
+    const c = it.consolidated && it.consolidated.conditionType;
+    if (!c) continue;
+    counts[c] = (counts[c] || 0) + 1;
+  }
+  // Fixed order matching badge severity / table column visual hierarchy
+  const order = ['none', 'durability', 'resource', 'uses', 'unknown'];
+  const options = order.filter(c => counts[c] > 0).map(c => ({
+    value: c,
+    label: c.charAt(0).toUpperCase() + c.slice(1),
+    badge: c,
+    count: counts[c],
+  }));
+
+  // Restore persisted selection
+  try {
+    const saved = JSON.parse(localStorage.getItem(CONDITION_STORAGE_KEY) || '[]');
+    if (Array.isArray(saved)) saved.forEach(v => selectedConditions.add(v));
+  } catch (e) {}
+
+  conditionDropdown = createDropdown({
+    placeholder: 'Condition',
+    options,
+    multi: true,
+    onChange: (vals) => {
+      selectedConditions.clear();
+      vals.forEach(v => selectedConditions.add(v));
+      try { localStorage.setItem(CONDITION_STORAGE_KEY, JSON.stringify(vals)); } catch (e) {}
+      render();
+    },
+  });
+  conditionDropdown.setValue([...selectedConditions]);
+  document.getElementById('condition-filter').appendChild(conditionDropdown.root);
+}
+
+function buildGroupFilter() {
+  // Collect unique group names from items, with counts and icons.
+  const counts = {};
+  const icons = {};
+  for (const it of ITEM_LIST) {
+    const g = it.consolidated && it.consolidated.group;
+    if (!g) continue;
+    if (/^[a-f0-9]{24}$/i.test(g)) continue; // skip handbook entries without a locale name
+    counts[g] = (counts[g] || 0) + 1;
+    if (!icons[g] && it.category && it.category.icon) icons[g] = it.category.icon;
+  }
+  const options = Object.keys(counts).sort((a,b) => counts[b] - counts[a]).map(name => ({
+    value: name,
+    label: name,
+    icon: icons[name] || CATEGORY_ICONS[name] || null,
+    count: counts[name],
+  }));
+
+  // Restore persisted selection
+  try {
+    const saved = JSON.parse(localStorage.getItem(GROUP_STORAGE_KEY) || '[]');
+    if (Array.isArray(saved)) saved.forEach(v => selectedGroups.add(v));
+  } catch (e) { /* ignore */ }
+
+  groupDropdown = createDropdown({
+    placeholder: 'Group',
+    options,
+    multi: true,
+    searchable: true,
+    onChange: (vals) => {
+      selectedGroups.clear();
+      vals.forEach(v => selectedGroups.add(v));
+      try { localStorage.setItem(GROUP_STORAGE_KEY, JSON.stringify(vals)); } catch (e) {}
+      render();
+    },
+  });
+  groupDropdown.setValue([...selectedGroups]);
+  document.getElementById('group-filter').appendChild(groupDropdown.root);
 }
 
 function countCategories() {
@@ -328,11 +713,42 @@ function refreshActiveCat() {
 
 // ── Controls ────────────────────────────────────────────────────────────────
 function bindControls() {
-  document.getElementById('q').addEventListener('input', debounce(render, 300));
-  document.getElementById('condition').addEventListener('change', render);
-  document.getElementById('hasFlea').addEventListener('change', render);
-  document.getElementById('hasTrader').addEventListener('change', render);
-  document.getElementById('ban').addEventListener('change', render);
+  const q       = document.getElementById('q');
+  const qWrap   = q.closest('.search');
+  const qClear  = document.getElementById('q-clear');
+
+  function updateClearVisibility() {
+    qWrap.classList.toggle('has-value', q.value.length > 0);
+  }
+  updateClearVisibility(); // initial (in case browser restored input)
+
+  q.addEventListener('input', () => { updateClearVisibility(); });
+  q.addEventListener('input', debounce(render, 300));
+  q.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && q.value) {
+      q.value = '';
+      updateClearVisibility();
+      render();
+      e.preventDefault();
+    }
+  });
+  qClear.addEventListener('click', () => {
+    q.value = '';
+    updateClearVisibility();
+    q.focus();
+    render();
+  });
+
+  // Flea level widget in topbar
+  const fleaWidget = document.getElementById('flea-level-widget');
+  const fleaNumEl  = document.getElementById('flea-level-num');
+  if (fleaNumEl && META && META.sources && META.sources.spt) {
+    fleaNumEl.textContent = META.sources.spt.fleaMinUserLevel || 15;
+  }
+  fleaWidget.addEventListener('click', () => openFleaMinLevelEditor(fleaWidget));
+
+  // Condition / Group / Ban are handled by multi-select dropdowns
+  // (buildConditionFilter / buildGroupFilter / buildBanFilter).
 }
 
 function debounce(fn, ms) {
@@ -369,10 +785,6 @@ function collectAncestors(node, target, path) {
 
 function filterItems() {
   const q = document.getElementById('q').value.trim().toLowerCase();
-  const cond = document.getElementById('condition').value;
-  const hasFlea = document.getElementById('hasFlea').checked;
-  const hasTrader = document.getElementById('hasTrader').checked;
-  const ban = document.getElementById('ban').value;
 
   const out = [];
   for (const it of ITEM_LIST) {
@@ -380,16 +792,31 @@ function filterItems() {
       const hay = ((it.name||'') + ' ' + (it.shortName||'') + ' ' + it.id).toLowerCase();
       if (!hay.includes(q)) continue;
     }
-    if (cond && it.consolidated.conditionType !== cond) continue;
-    if (hasFlea && it.consolidated.priceFleaCanonical == null) continue;
-    if (hasTrader && (!it.consolidated.priceTraderSell || it.consolidated.priceTraderSell.value == null)) continue;
-    if (ban) {
+    if (selectedConditions.size > 0) {
+      const c = it.consolidated && it.consolidated.conditionType;
+      if (!c || !selectedConditions.has(c)) continue;
+    }
+    if (selectedGroups.size > 0) {
+      const g = it.consolidated && it.consolidated.group;
+      if (!g || !selectedGroups.has(g)) continue;
+    }
+    if (selectedBans.size > 0) {
       const banned = it.spt && it.spt.fleaBanned;
       const reasons = (it.spt && it.spt.fleaBanReasons) || [];
-      if (ban === 'ok'     && banned) continue;
-      if (ban === 'banned' && !banned) continue;
-      if (ban === 'bsg'    && !reasons.includes('bsg')) continue;
-      if (ban === 'custom' && !reasons.includes('custom')) continue;
+      let match = false;
+      if (selectedBans.has('ok')     && !banned) match = true;
+      if (selectedBans.has('bsg')    && reasons.includes('bsg')) match = true;
+      if (selectedBans.has('custom') && reasons.includes('custom')) match = true;
+      if (!match) continue;
+    }
+    if (deltaMin !== null || deltaMax !== null) {
+      const c  = it.consolidated;
+      const spt   = c && c.priceFleaSpt;
+      const other = c && (deltaSource === 'dev' ? c.priceFleaDevAvg24h : c.priceFleaMarketAvg24h);
+      if (spt == null || spt === 0 || other == null) continue;
+      const pct = ((other - spt) / spt) * 100;
+      if (deltaMin !== null && pct < deltaMin) continue;
+      if (deltaMax !== null && pct > deltaMax) continue;
     }
     if (activeCategoryId && !isInCategorySubtree(it, activeCategoryId)) continue;
     out.push(it);
@@ -421,8 +848,20 @@ function getSortValue(it, key) {
     case 'priceFleaDevAvg24h':    return it.consolidated.priceFleaDevAvg24h;
     case 'priceFleaMarketAvg24h': return it.consolidated.priceFleaMarketAvg24h;
     case 'priceFleaCanonical':    return it.consolidated.priceFleaCanonical;
+    case 'deltaFleaDev':          return computeDelta(it, 'priceFleaDevAvg24h');
+    case 'deltaFleaMarket':       return computeDelta(it, 'priceFleaMarketAvg24h');
     default:                      return null;
   }
+}
+
+// Delta % vs SPT Flea — same formula as the visible ▲▼ indicator (pctVsSpt).
+function computeDelta(it, valueKey) {
+  const c = it.consolidated;
+  if (!c) return null;
+  const spt = c.priceFleaSpt;
+  const val = c[valueKey];
+  if (spt == null || spt === 0 || val == null) return null;
+  return ((val - spt) / spt) * 100;
 }
 
 // ── Render ──────────────────────────────────────────────────────────────────
@@ -446,10 +885,11 @@ function render() {
     th('name', 'Item'),
     th('group', 'Group'),
     '<th>Cond.</th>',
-    th('priceTraderSell', 'Trader (sell)', 'num'),
-    th('priceFleaSpt', 'Flea SPT', 'num'),
-    th('priceFleaDevAvg24h', 'Flea Dev', 'num'),
-    th('priceFleaMarketAvg24h', 'Flea Market', 'num'),
+    '<th class="col-reward">Reward</th>',
+    th('priceTraderSell', 'Trader', 'num'),
+    th('priceFleaSpt', 'Flea SPT', 'num col-flea-spt'),
+    thWithDelta('priceFleaDevAvg24h',    'deltaFleaDev',    'Flea tarkov.dev',    'num col-flea-dev'),
+    thWithDelta('priceFleaMarketAvg24h', 'deltaFleaMarket', 'Flea tarkov-market', 'num col-flea-market'),
     // canonical column hidden — still computed/exposed in row detail
     // th('priceFleaCanonical', 'Canonical', 'num'),
     '</tr></thead><tbody>'];
@@ -459,17 +899,72 @@ function render() {
   main.innerHTML = html.join('');
 
   // Click handlers (delegated)
-  main.querySelector('table').addEventListener('click', onTableClick);
+  const tbl = main.querySelector('table');
+  tbl.addEventListener('click', onTableClick);
+  bindRewardHover(tbl);
   main.querySelectorAll('th').forEach(th => {
-    th.addEventListener('click', () => {
-      const k = th.dataset.sort;
-      if (!k) return;
+    th.addEventListener('click', (ev) => {
+      // For multi-sort headers (thWithDelta), the data-sort lives on inner spans;
+      // for simple headers, it's on the <th> itself. closest() handles both.
+      const sortEl = ev.target.closest('[data-sort]');
+      if (!sortEl) return;
+      const k = sortEl.dataset.sort;
       if (sortKey === k) sortDir = -sortDir;
       else { sortKey = k; sortDir = (k === 'name' || k === 'group') ? 1 : -1; }
       saveSortPref();
       render();
     });
   });
+}
+
+function openFleaMinLevelEditor(trigger) {
+  if (trigger.classList.contains('is-editing')) return;
+  const numEl  = document.getElementById('flea-level-num');
+  const current = parseInt((numEl && numEl.textContent) || '15', 10);
+  trigger.classList.add('is-editing');
+  trigger.innerHTML =
+    `Flea Lvl <input class="flea-level-widget__input" type="number" min="1" max="99" value="${current}">+` +
+    `<button class="flea-level-widget__btn is-save"   type="button" title="Salvar">${ICON_OK}</button>` +
+    `<button class="flea-level-widget__btn is-cancel" type="button" title="Cancelar">×</button>`;
+  const input = trigger.querySelector('input');
+  input.focus(); input.select();
+
+  const cancel = () => {
+    trigger.classList.remove('is-editing');
+    trigger.innerHTML = `Flea Lvl <span id="flea-level-num">${current}</span>+`;
+  };
+  const save = async () => {
+    const val = parseInt(input.value, 10);
+    if (!Number.isInteger(val) || val < 1 || val > 99) {
+      toast('Level inválido (1..99)', 'err');
+      return;
+    }
+    if (val === current) { cancel(); return; }
+    try {
+      const r = await fetch('/api/flea-min-level', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ minUserLevel: val }),
+      });
+      const data = await r.json();
+      if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+      if (META && META.sources && META.sources.spt) META.sources.spt.fleaMinUserLevel = val;
+      trigger.classList.remove('is-editing');
+      trigger.innerHTML = `Flea Lvl <span id="flea-level-num">${val}</span>+`;
+      toast(`Flea unlock level: ${current} → ${val}`, 'ok');
+    } catch (err) {
+      toast('Falha: ' + err.message, 'err');
+      cancel();
+    }
+  };
+  trigger.querySelector('.is-save').onclick   = (ev) => { ev.stopPropagation(); save(); };
+  trigger.querySelector('.is-cancel').onclick = (ev) => { ev.stopPropagation(); cancel(); };
+  input.onkeydown = (ev) => {
+    if (ev.key === 'Enter') { ev.preventDefault(); save(); }
+    else if (ev.key === 'Escape') { ev.preventDefault(); cancel(); }
+    ev.stopPropagation();
+  };
+  input.onclick = (ev) => ev.stopPropagation();
 }
 
 // Group cell: icon + name. Resolves icon by category id first, then by name
@@ -491,6 +986,22 @@ function th(key, label, klass) {
   return `<th data-sort="${key}"${classes ? ' class="'+classes+'"' : ''}>${label}${sortMark}</th>`;
 }
 
+// Header com duas opções de ordenação: por valor e por Δ% vs SPT Flea.
+// Ambos clicáveis independentemente; a seta segue o sort key ativo.
+function thWithDelta(valueKey, deltaKey, label, klass) {
+  const isValueSorted = sortKey === valueKey;
+  const isDeltaSorted = sortKey === deltaKey;
+  const isSorted = isValueSorted || isDeltaSorted;
+  const arrow = sortDir === 1 ? '▲' : '▼';
+  const valueMark = isValueSorted ? ` <span class="sort">${arrow}</span>` : '';
+  const deltaMark = isDeltaSorted ? ` <span class="sort">${arrow}</span>` : '';
+  const classes = [klass, isSorted ? 'is-sorted' : ''].filter(Boolean).join(' ');
+  return `<th${classes ? ' class="'+classes+'"' : ''}>` +
+    `<span class="th-sort-key${isValueSorted?' is-active':''}" data-sort="${valueKey}" title="Ordenar pelo valor">${label}${valueMark}</span>` +
+    `<span class="th-sort-key th-sort-key--delta${isDeltaSorted?' is-active':''}" data-sort="${deltaKey}" title="Ordenar pela variação % vs SPT Flea">Δ%${deltaMark}</span>` +
+  `</th>`;
+}
+
 function renderRow(it) {
   const c = it.consolidated;
   const img = (it.image && it.image.icon)
@@ -498,23 +1009,51 @@ function renderRow(it) {
     : '<div class="no-img">—</div>';
   const cond = c.conditionType || 'unknown';
   const condBadge = `<span class="badge badge--${cond}">${cond}</span>`;
-  const traderValue = c.priceTraderSell ? c.priceTraderSell.value : null;
-  const traderName  = c.priceTraderSell ? c.priceTraderSell.vendor : null;
-  const traderMeta  = traderName ? TRADERS[traderName] : null;
-  const traderAvatar = (traderMeta && traderMeta.avatar)
-    ? `<img class="trader-avatar" src="${escapeAttr(traderMeta.avatar)}" alt="${escapeAttr(traderName)}" title="${escapeAttr(traderName)}" loading="lazy">`
-    : (traderName ? `<span class="trader-avatar trader-avatar--placeholder" title="${escapeAttr(traderName)}">${escapeHtml(traderName.charAt(0))}</span>` : '');
-  const trader = c.priceTraderSell
-    ? `<div class="cell-trader"><div class="cell-trader__num"><div class="cell-trader__value">${fmtRub(traderValue)}</div>${pctVsSpt(traderValue, c.priceFleaSpt)}</div>${traderAvatar}</div>`
-    : '<span class="price is-null">—</span>';
-  const sourceBadge = c.priceFleaSource
-    ? `<small><span class="badge badge--src-${c.priceFleaSource.replace(/\./g,'-')}">${c.priceFleaSource}</span></small>`
-    : '';
-
   const banned = it.spt && it.spt.fleaBanned;
   const banReasons = (it.spt && it.spt.fleaBanReasons) || [];
   const banIcon = banned
     ? `<span class="banned-icon" data-tip="Banido do flea: ${banReasons.join(', ')}" tabindex="0">${ICON_BANNED}</span> `
+    : '';
+  // Trader cell — stacked SELL (player→trader, tarkov.dev) and BUY (trader→player, SPT assort)
+  const traderSellValue = c.priceTraderSell ? c.priceTraderSell.value : null;
+  const traderSellName  = c.priceTraderSell ? c.priceTraderSell.vendor : null;
+  // Best buy = cheapest non-BARTER trader offer in spt.traders[], with its loyaltyLevel
+  let traderBuy = null;
+  if (it.spt && Array.isArray(it.spt.traders) && it.spt.traders.length) {
+    const candidates = it.spt.traders.filter(t => t.currency !== 'BARTER' && t.priceRUB != null);
+    if (candidates.length) {
+      candidates.sort((a, b) => a.priceRUB - b.priceRUB);
+      traderBuy = candidates[0];
+    }
+  }
+  function avatarFor(name) {
+    const meta = name ? TRADERS[name] : null;
+    if (meta && meta.avatar) return `<img class="trader-avatar trader-avatar--xs" src="${escapeAttr(meta.avatar)}" alt="${escapeAttr(name)}" title="${escapeAttr(name)}" loading="lazy">`;
+    if (name) return `<span class="trader-avatar trader-avatar--xs trader-avatar--placeholder" title="${escapeAttr(name)}">${escapeHtml(name.charAt(0))}</span>`;
+    return '';
+  }
+  const trader = (traderSellValue != null || traderBuy)
+    ? `<div class="cell-trader cell-trader--stacked">` +
+        (traderSellValue != null
+          ? `<div class="cell-trader__line"><span class="cell-trader__dir" title="Player sells to trader">↓</span>${avatarFor(traderSellName)}<span class="cell-trader__num">${fmtRub(traderSellValue)}</span></div>`
+          : '') +
+        (traderBuy
+          ? `<div class="cell-trader__line"><span class="cell-trader__dir" title="Player buys from trader">↑</span>${avatarFor(traderBuy.name)}<span class="cell-trader__num">${fmtRub(traderBuy.priceRUB)}</span><small class="cell-trader__ll">LL${traderBuy.loyaltyLevel}${traderBuy.questLocked?' 🔒':''}</small></div>`
+          : '') +
+      `</div>`
+    : '<span class="price is-null">—</span>';
+
+  // Reward cell — quest rewards that grant this item
+  const rewards = (it.spt && it.spt.questRewards) || [];
+  let rewardCell = '<span class="muted">—</span>';
+  if (rewards.length) {
+    const first = rewards[0];
+    const extra = rewards.length > 1 ? ` <small class="vendor">+${rewards.length - 1}</small>` : '';
+    const tipText = rewards.map(r => `${r.name} (${r.trader || '?'}) ×${r.count}`).join(' · ');
+    rewardCell = `<span class="reward-badge" data-tip="${escapeAttr(tipText)}" tabindex="0">🎁 <span class="reward-name">${escapeHtml(first.name)}</span>${first.count > 1 ? ` ×${first.count}` : ''}${extra}</span>`;
+  }
+  const sourceBadge = c.priceFleaSource
+    ? `<small><span class="badge badge--src-${c.priceFleaSource.replace(/\./g,'-')}">${c.priceFleaSource}</span></small>`
     : '';
 
   const fleaSptCell = banned
@@ -526,23 +1065,143 @@ function renderRow(it) {
     <td class="col-name"><div class="name">${escapeHtml(it.name || it.id)}</div><div class="short">${escapeHtml(it.shortName || '')}</div></td>
     <td class="col-group">${renderGroupCell(it, c.group)}</td>
     <td>${condBadge}</td>
+    <td class="col-reward">${rewardCell}</td>
     <td class="num">${trader}</td>
-    <td class="num cell-edit ${c.priceFleaSpt==null && !banned?'price is-null':'price'}" data-edit-tpl="${it.id}" data-tip="Clique para editar" data-tip-pos="bottom"><div class="cell-num"><div class="cell-num__value">${fleaSptCell}</div></div></td>
-    <td class="num ${c.priceFleaDevAvg24h==null?'price is-null':'price'}"><div class="cell-num"><div class="cell-num__value">${fmtRub(c.priceFleaDevAvg24h)}</div>${pctVsSpt(c.priceFleaDevAvg24h, c.priceFleaSpt)}</div></td>
+    <td class="num cell-edit ${c.priceFleaSpt==null && !banned?'price is-null':'price'}" data-edit-tpl="${it.id}" data-tip="Click for actions (edit price / ban)" data-tip-pos="bottom"><div class="cell-num"><div class="cell-num__value">${fleaSptCell}</div></div><span class="cell-edit__icon" aria-hidden="true">${ICON_EDIT}</span></td>
+    <td class="num cell-refresh ${c.priceFleaDevAvg24h==null?'price is-null':'price'}" data-refresh-tpl="${it.id}" data-tip="Click to update price on tarkov.dev" data-tip-pos="bottom"><div class="cell-num"><div class="cell-num__value">${fmtRub(c.priceFleaDevAvg24h)}</div>${pctVsSpt(c.priceFleaDevAvg24h, c.priceFleaSpt)}</div><span class="cell-refresh__icon" aria-hidden="true">${ICON_REFRESH}</span><span class="cell-refresh__spinner" aria-hidden="true"></span></td>
     <td class="num ${c.priceFleaMarketAvg24h==null?'price is-null':'price'}"><div class="cell-num"><div class="cell-num__value">${fmtRub(c.priceFleaMarketAvg24h)}</div>${pctVsSpt(c.priceFleaMarketAvg24h, c.priceFleaSpt)}</div></td>
   </tr>`;
 }
 
+let _rewardOpenTimer  = null;
+let _rewardCloseTimer = null;
+
+function closeRewardPopover() {
+  clearTimeout(_rewardCloseTimer);
+  clearTimeout(_rewardOpenTimer);
+  const existing = document.querySelector('.reward-popover');
+  if (existing) existing.remove();
+}
+
+function openRewardPopover(badge, rewards) {
+  closeRewardPopover();
+  const pop = document.createElement('div');
+  pop.className = 'reward-popover';
+  const rows = rewards.map(r => {
+    const meta = r.trader ? TRADERS[r.trader] : null;
+    const avatar = meta && meta.avatar
+      ? `<img class="trader-avatar trader-avatar--xs" src="${escapeAttr(meta.avatar)}" alt="${escapeAttr(r.trader)}" title="${escapeAttr(r.trader)}" loading="lazy">`
+      : r.trader
+        ? `<span class="trader-avatar trader-avatar--xs trader-avatar--placeholder" title="${escapeAttr(r.trader)}">${escapeHtml(r.trader.charAt(0))}</span>`
+        : `<span class="trader-avatar trader-avatar--xs trader-avatar--placeholder">?</span>`;
+    return `<li class="reward-popover__item">
+      ${avatar}
+      <span class="reward-popover__name">${escapeHtml(r.name)}</span>
+      ${r.count > 1 ? `<span class="reward-popover__count">×${r.count}</span>` : ''}
+    </li>`;
+  }).join('');
+  pop.innerHTML =
+    `<div class="reward-popover__header">🎁 ${rewards.length} missão${rewards.length > 1 ? 'ões' : ''}</div>` +
+    `<ul class="reward-popover__list">${rows}</ul>`;
+  document.body.appendChild(pop);
+
+  // Position below the badge, flip if near viewport edge
+  const rect = badge.getBoundingClientRect();
+  const scrollY = window.scrollY || document.documentElement.scrollTop;
+  const scrollX = window.scrollX || document.documentElement.scrollLeft;
+  pop.style.top  = (rect.bottom + scrollY + 6) + 'px';
+  pop.style.left = (rect.left  + scrollX) + 'px';
+  requestAnimationFrame(() => {
+    const pr = pop.getBoundingClientRect();
+    if (pr.bottom > window.innerHeight - 8)
+      pop.style.top  = (rect.top  + scrollY - pr.height - 6) + 'px';
+    if (pr.right  > window.innerWidth  - 8)
+      pop.style.left = (window.innerWidth - pr.width - 8 + scrollX) + 'px';
+  });
+
+  // Keep popover open while mouse is over it; close on leave
+  pop.addEventListener('mouseenter', () => clearTimeout(_rewardCloseTimer));
+  pop.addEventListener('mouseleave', () => {
+    _rewardCloseTimer = setTimeout(closeRewardPopover, 80);
+  });
+}
+
+// Called by render() after the table is inserted into the DOM
+function bindRewardHover(tableEl) {
+  tableEl.addEventListener('mouseover', (e) => {
+    const badge = e.target.closest('.reward-badge');
+    if (!badge) return;
+    clearTimeout(_rewardCloseTimer);
+    // Already showing for this exact badge — do nothing
+    if (document.querySelector('.reward-popover') && badge._rewardActive) return;
+    clearTimeout(_rewardOpenTimer);
+    _rewardOpenTimer = setTimeout(() => {
+      const row = badge.closest('tr[data-id]');
+      const id  = row && row.dataset.id;
+      const rewards = id && ITEMS[id] && ITEMS[id].spt && ITEMS[id].spt.questRewards;
+      if (rewards && rewards.length) {
+        badge._rewardActive = true;
+        openRewardPopover(badge, rewards);
+      }
+    }, 300);
+  });
+  tableEl.addEventListener('mouseout', (e) => {
+    const badge = e.target.closest('.reward-badge');
+    if (!badge) return;
+    // Only start close timer if cursor left the badge area entirely
+    if (badge.contains(e.relatedTarget)) return;
+    badge._rewardActive = false;
+    clearTimeout(_rewardOpenTimer);
+    _rewardCloseTimer = setTimeout(closeRewardPopover, 80);
+  });
+}
+
 function onTableClick(e) {
-  // Click on Flea SPT cell → inline edit (don't expand detail)
-  const sptCell = e.target.closest('td.cell-edit');
-  if (sptCell && !sptCell.querySelector('.edit-form')) {
+  // Click on reward badge → toggle reward popover
+  const rewardBadge = e.target.closest('.reward-badge');
+  if (rewardBadge) {
     e.stopPropagation();
-    openInlineEdit(sptCell);
+    const row = rewardBadge.closest('tr[data-id]');
+    const id  = row && row.dataset.id;
+    const rewards = id && ITEMS[id] && ITEMS[id].spt && ITEMS[id].spt.questRewards;
+    if (rewards && rewards.length) {
+      if (document.querySelector('.reward-popover')) { closeRewardPopover(); return; }
+      openRewardPopover(rewardBadge, rewards);
+    }
     return;
   }
-  // Don't toggle detail when clicking inside the edit form
-  if (e.target.closest('.edit-form')) { e.stopPropagation(); return; }
+
+  // Click on Flea Dev cell → refresh from tarkov.dev API
+  const devCell = e.target.closest('td.cell-refresh');
+  if (devCell) {
+    e.stopPropagation();
+    if (devCell.classList.contains('is-loading')) return; // already in-flight
+    refreshDevCell(devCell);
+    return;
+  }
+
+  const sptCell = e.target.closest('td.cell-edit');
+  if (sptCell) {
+    e.stopPropagation();
+    if (sptCell.classList.contains('is-editing')) {
+      // Click inside the edit form — let its own handlers fire
+      if (e.target.closest('.edit-form')) return;
+      // Click on the cell outside the form → cancel the edit (same as Esc)
+      const cancelBtn = sptCell.querySelector('button.cancel');
+      if (cancelBtn) cancelBtn.click();
+      return;
+    }
+    if (sptCell.classList.contains('has-actions')) {
+      // Click on the action menu itself — let buttons handle it
+      if (e.target.closest('.cell-actions')) return;
+      // Click on the cell outside the menu → close menu
+      closeCellActions(sptCell);
+      return;
+    }
+    // Otherwise: open the action menu (which can launch edit or ban)
+    openCellActions(sptCell);
+    return;
+  }
 
   const row = e.target.closest('tr[data-id]');
   if (!row) return;
@@ -560,35 +1219,189 @@ function onTableClick(e) {
   row.classList.add('is-expanded');
   const detail = document.createElement('tr');
   detail.className = 'detail';
-  detail.innerHTML = `<td colspan="8">${renderDetail(ITEMS[id])}</td>`;
+  detail.innerHTML = `<td colspan="9">${renderDetail(ITEMS[id])}</td>`;
   row.parentNode.insertBefore(detail, row.nextSibling);
+}
+
+// ── Refresh single item from tarkov.dev (Flea Dev cell click) ───────────────
+async function refreshDevCell(cell) {
+  const tpl = cell.dataset.refreshTpl;
+  const item = ITEMS[tpl];
+  if (!item) return;
+  cell.classList.add('is-loading');
+  try {
+    const r = await fetch('/api/refresh-dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tpl }),
+    });
+    const data = await r.json();
+    if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+
+    // Update in-memory item and re-render the row
+    item.tarkovDev = data.tarkovDev;
+    item.consolidated = data.consolidated;
+    const row = cell.closest('tr[data-id]');
+    if (row) {
+      const tmp = document.createElement('tbody');
+      tmp.innerHTML = renderRow(item);
+      row.replaceWith(tmp.firstElementChild);
+    }
+    const prev = data.previous && data.previous.avg24h;
+    const curr = data.tarkovDev && data.tarkovDev.pve && data.tarkovDev.pve.avg24h;
+    const deltaTxt = (prev != null && curr != null && prev !== curr)
+      ? ` (era ${prev.toLocaleString('pt-BR')} ₽ → ${curr.toLocaleString('pt-BR')} ₽)`
+      : '';
+    toast(`${item.shortName || tpl}: preços atualizados via tarkov.dev${deltaTxt}`, 'ok');
+  } catch (err) {
+    cell.classList.remove('is-loading');
+    toast('Falha ao atualizar via tarkov.dev: ' + err.message, 'err');
+  }
+}
+
+// ── Cell action menu (Edit price / Ban / Unban) ─────────────────────────────
+// Click cell → 2 actions appear. Ban / Unban require an in-place confirmation
+// step. Inline edit launches from "Edit price".
+function openCellActions(cell) {
+  if (cell.querySelector('.cell-actions')) return;
+  const tpl = cell.dataset.editTpl;
+  const item = ITEMS[tpl];
+  if (!item) return;
+  const isBanned = !!(item.spt && item.spt.fleaBanned);
+  const banLabel = isBanned ? 'Unban item' : 'Ban item';
+  const banIcon  = isBanned ? ICON_OK : ICON_BANNED;
+  const banClass = isBanned ? 'is-unban' : 'is-ban';
+
+  cell.classList.add('has-actions');
+  const menu = document.createElement('div');
+  menu.className = 'cell-actions';
+  menu.innerHTML =
+    `<button class="cell-actions__item" data-action="edit" type="button">` +
+      `<span class="ico">${ICON_EDIT}</span><span>Edit price</span>` +
+    `</button>` +
+    `<button class="cell-actions__item ${banClass}" data-action="ban" type="button">` +
+      `<span class="ico">${banIcon}</span><span>${banLabel}</span>` +
+    `</button>`;
+  cell.appendChild(menu);
+
+  function close() {
+    cell.classList.remove('has-actions');
+    menu.remove();
+    document.removeEventListener('mousedown', onDocClick, true);
+    document.removeEventListener('keydown', onKey);
+  }
+  function onDocClick(ev) { if (!cell.contains(ev.target)) close(); }
+  function onKey(ev) { if (ev.key === 'Escape') close(); }
+  setTimeout(() => document.addEventListener('mousedown', onDocClick, true), 0);
+  document.addEventListener('keydown', onKey);
+
+  menu.querySelector('[data-action="edit"]').onclick = (ev) => {
+    ev.stopPropagation();
+    close();
+    openInlineEdit(cell);
+  };
+  menu.querySelector('[data-action="ban"]').onclick = (ev) => {
+    ev.stopPropagation();
+    confirmBanAction(cell, menu, !isBanned);
+  };
+}
+
+function closeCellActions(cell) {
+  const m = cell.querySelector('.cell-actions');
+  if (m) m.remove();
+  cell.classList.remove('has-actions');
+}
+
+function confirmBanAction(cell, menu, banning) {
+  const tpl = cell.dataset.editTpl;
+  const item = ITEMS[tpl];
+  if (!item) return;
+  const verb = banning ? 'Banir' : 'Desbanir';
+  menu.classList.add('is-confirming');
+  menu.innerHTML =
+    `<div class="cell-actions__prompt">${escapeHtml(verb)} <b>${escapeHtml(item.shortName || item.name || tpl)}</b>?</div>` +
+    `<div class="cell-actions__confirm">` +
+      `<button class="cell-actions__btn cancel" type="button" title="Cancelar">×</button>` +
+      `<button class="cell-actions__btn confirm ${banning?'is-danger':'is-success'}" type="button">${verb}</button>` +
+    `</div>`;
+  menu.querySelector('.cancel').onclick = (ev) => { ev.stopPropagation(); closeCellActions(cell); };
+  menu.querySelector('.confirm').onclick = async (ev) => {
+    ev.stopPropagation();
+    const btn = ev.currentTarget;
+    btn.disabled = true; btn.textContent = '…';
+    try {
+      const r = await fetch('/api/ban', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tpl, banned: banning }),
+      });
+      const data = await r.json();
+      if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+      // Update in-memory state
+      if (!item.spt) item.spt = { basePrice: null, fleaPrice: null, fleaBanned: false, fleaBanReasons: [], traders: [] };
+      item.spt.fleaBanned = data.fleaBanned;
+      item.spt.fleaBanReasons = data.fleaBanReasons;
+      // Re-render this row
+      const row = cell.closest('tr[data-id]');
+      if (row) {
+        const tmp = document.createElement('tbody');
+        tmp.innerHTML = renderRow(item);
+        row.replaceWith(tmp.firstElementChild);
+      }
+      toast(`${item.shortName || tpl}: ${banning ? 'banido' : 'desbanido'}`, 'ok');
+    } catch (err) {
+      toast('Falha: ' + err.message, 'err');
+      closeCellActions(cell);
+    }
+  };
 }
 
 function openInlineEdit(cell) {
   const tpl = cell.dataset.editTpl;
   const item = ITEMS[tpl];
   if (!item) return;
+  if (cell.querySelector('.edit-form')) return; // already editing
   const current = item.spt && item.spt.fleaPrice != null ? item.spt.fleaPrice : '';
-  const original = cell.innerHTML; // keep so we can restore on cancel
 
-  cell.innerHTML = `
-    <form class="edit-form" onsubmit="return false">
-      <input type="number" min="0" step="1" value="${current}" autofocus>
-      <button class="save" type="button" title="Salvar (Enter)">Salvar</button>
-      <button class="cancel" type="button" title="Cancelar (Esc)">×</button>
-    </form>`;
-  const input  = cell.querySelector('input');
-  const save   = cell.querySelector('button.save');
-  const cancel = cell.querySelector('button.cancel');
+  // Append the form as an absolute overlay so the cell keeps its original
+  // dimensions and surrounding rows don't reflow when we enter edit mode.
+  cell.classList.add('is-editing');
+  const form = document.createElement('form');
+  form.className = 'edit-form';
+  form.onsubmit = (e) => { e.preventDefault(); return false; };
+  form.innerHTML =
+    `<input type="number" min="0" step="1" value="${current}" autofocus>` +
+    `<div class="edit-form__actions">` +
+      `<button class="save" type="button" title="Salvar (Enter)">Salvar</button>` +
+      `<button class="cancel" type="button" title="Cancelar (Esc)">×</button>` +
+    `</div>`;
+  cell.appendChild(form);
+
+  const input  = form.querySelector('input');
+  const save   = form.querySelector('button.save');
+  const cancel = form.querySelector('button.cancel');
   input.focus(); input.select();
 
-  function restore() { cell.innerHTML = original; }
+  let docClickHandler = null;
+  function restore() {
+    cell.classList.remove('is-editing');
+    form.remove();
+    if (docClickHandler) document.removeEventListener('mousedown', docClickHandler, true);
+  }
 
   cancel.onclick = restore;
   input.onkeydown = (ev) => {
     if (ev.key === 'Escape') { restore(); }
     if (ev.key === 'Enter')  { ev.preventDefault(); save.click(); }
   };
+
+  // Click anywhere outside the cell cancels the edit. Capture phase so we
+  // get the event before any other handler. Deferred to next tick so the
+  // click that opened the form isn't caught.
+  docClickHandler = (ev) => {
+    if (!cell.contains(ev.target)) restore();
+  };
+  setTimeout(() => document.addEventListener('mousedown', docClickHandler, true), 0);
 
   save.onclick = async () => {
     const price = parseInt(input.value, 10);
@@ -609,7 +1422,7 @@ function openInlineEdit(cell) {
 
       // Update in-memory state
       if (!item.spt) item.spt = { basePrice: null, fleaPrice: null, fleaBanned: false, fleaBanReasons: [], traders: [] };
-      item.spt.fleaPrice = data.current;
+      item.spt.fleaPrice = data.currentFlea;
       item.consolidated = data.consolidated;
 
       // Re-render this row in place
@@ -620,8 +1433,8 @@ function openInlineEdit(cell) {
         row.replaceWith(tmp.firstElementChild);
       }
 
-      const delta = data.previous != null ? ` (era ${data.previous.toLocaleString('pt-BR')} ₽)` : '';
-      toast(`${item.shortName || tpl}: ${data.current.toLocaleString('pt-BR')} ₽${delta}`, 'ok');
+      const delta = data.previousFlea != null ? ` (era ${data.previousFlea.toLocaleString('pt-BR')} ₽)` : '';
+      toast(`${item.shortName || tpl}: ${data.currentFlea.toLocaleString('pt-BR')} ₽${delta}`, 'ok');
     } catch (err) {
       toast('Falha ao salvar: ' + err.message, 'err');
       save.disabled = false; cancel.disabled = false;
@@ -669,23 +1482,12 @@ function renderDetail(it) {
       <div class="meta-line">
         ID: <code>${escapeHtml(it.id)}</code><br>
         Dims: ${it.dims ? `${it.dims.weight}kg · ${it.dims.width}×${it.dims.height}` : '—'}
+        ${it.grids && it.grids.length ? '<br>Grid: ' + it.grids.map(g =>
+          `${g.cellsH}×${g.cellsV}` + (g.name && it.grids.length > 1 ? ` (${escapeHtml(g.name)})` : '')
+        ).join(' · ') + ` <span class="vendor">= ${it.grids.reduce((sum,g) => sum + g.cellsH*g.cellsV, 0)} slots</span>` : ''}
       </div>
     </div>
     <div class="detail-sections">
-
-      <div class="detail-section">
-        <h3>Preços flea por fonte</h3>
-        <table>
-          <tr><td class="k">SPT (fleaPrice)</td><td class="v">${fmt(c.priceFleaSpt)} ₽</td></tr>
-          <tr><td class="k">tarkov.dev lastLow</td><td class="v">${fmt(c.priceFleaDevLastLow)} ₽</td></tr>
-          <tr><td class="k">tarkov.dev avg24h</td><td class="v">${fmt(c.priceFleaDevAvg24h)} ₽</td></tr>
-          <tr><td class="k">tarkov.dev low24h</td><td class="v">${fmt(dev && dev.low24h)} ₽</td></tr>
-          <tr><td class="k">tarkov.dev high24h</td><td class="v">${fmt(dev && dev.high24h)} ₽</td></tr>
-          <tr><td class="k">tarkov-market avg24h</td><td class="v">${fmt(c.priceFleaMarketAvg24h)} ₽</td></tr>
-          <tr><td class="k">tarkov-market avg7d</td><td class="v">${fmt(mkt && mkt.avg7days)} ₽</td></tr>
-          <tr><td class="k">Canonical</td><td class="v"><span class="price is-canonical">${fmt(c.priceFleaCanonical)} ₽</span> <small class="vendor">(${c.priceFleaSource||'—'})</small></td></tr>
-        </table>
-      </div>
 
       <div class="detail-section">
         <h3>SPT base / handbook</h3>
@@ -695,6 +1497,35 @@ function renderDetail(it) {
           <tr><td class="k">group</td><td class="v">${escapeHtml(c.group||'—')}</td></tr>
           <tr><td class="k">path</td><td class="v">${(it.category && it.category.path || []).join(' › ')}</td></tr>
           <tr><td class="k">flea ban</td><td class="v">${spt && spt.fleaBanned ? '<span class="banned-icon">'+ICON_BANNED+'</span> banido ('+spt.fleaBanReasons.join(', ')+')' : '✓ permitido'}</td></tr>
+        </table>
+      </div>
+
+      <div class="detail-section source-card source-card--spt">
+        <h3>SPT <small class="source-card__when">${fmtRelTime(META && META.sources && META.sources.spt && META.sources.spt.fleaPricesMtime)}</small></h3>
+        <table>
+          <tr><td class="k">fleaPrice</td><td class="v">${fmt(c.priceFleaSpt)} ₽</td></tr>
+          <tr><td class="k">fonte</td><td class="v">${META && META.sources && META.sources.spt && escapeHtml(META.sources.spt.fleaPricesSource || '—')}</td></tr>
+        </table>
+      </div>
+
+      <div class="detail-section source-card source-card--dev">
+        <h3>tarkov.dev <small class="source-card__when">${fmtRelTime(dev && dev.updated)}</small></h3>
+        <table>
+          <tr><td class="k">avg 24h</td><td class="v">${fmt(c.priceFleaDevAvg24h)} ₽</td></tr>
+          <tr><td class="k">lastLow</td><td class="v">${fmt(c.priceFleaDevLastLow)} ₽</td></tr>
+          <tr><td class="k">low 24h</td><td class="v">${fmt(dev && dev.low24h)} ₽</td></tr>
+          <tr><td class="k">high 24h</td><td class="v">${fmt(dev && dev.high24h)} ₽</td></tr>
+          <tr><td class="k">change 48h</td><td class="v">${dev && dev.change48h != null ? (dev.change48h>0?'+':'') + fmt(dev.change48h) + ' ₽ ' + (dev.change48hPct != null ? `<small class="vendor">(${(dev.change48hPct>0?'+':'')+dev.change48hPct.toFixed(1)}%)</small>` : '') : '—'}</td></tr>
+        </table>
+      </div>
+
+      <div class="detail-section source-card source-card--market">
+        <h3>tarkov-market <small class="source-card__when">${fmtRelTime(mkt && mkt.updated)}</small></h3>
+        <table>
+          <tr><td class="k">avg 24h</td><td class="v">${fmt(c.priceFleaMarketAvg24h)} ₽</td></tr>
+          <tr><td class="k">avg 7d</td><td class="v">${fmt(mkt && mkt.avg7days)} ₽</td></tr>
+          <tr><td class="k">price (last)</td><td class="v">${fmt(mkt && mkt.price)} ₽</td></tr>
+          <tr><td class="k">trader (best)</td><td class="v">${mkt && mkt.traderName ? escapeHtml(mkt.traderName) + ' · ' + fmt(mkt.traderPrice) + ' ₽' : '—'}</td></tr>
         </table>
       </div>
 
@@ -711,16 +1542,6 @@ function renderDetail(it) {
         <table>
           ${sptTraders.length === 0 ? '<tr><td>—</td></tr>' :
             sptTraders.map(t => `<tr><td class="k">${escapeHtml(t.name)} <small class="vendor">L${t.loyaltyLevel}${t.questLocked?' · 🔒':''}${t.unlimited?' · ∞':''}</small></td><td class="v">${t.currency==='BARTER' ? '<span class="vendor">barter</span>' : fmt(t.priceRUB)+' ₽'}</td></tr>`).join('')}
-        </table>
-      </div>
-
-      <div class="detail-section">
-        <h3>Modo regular (PVP) — flea</h3>
-        <table>
-          <tr><td class="k">avg24h</td><td class="v">${fmt(reg && reg.avg24h)} ₽</td></tr>
-          <tr><td class="k">lastLow</td><td class="v">${fmt(reg && reg.lastLow)} ₽</td></tr>
-          <tr><td class="k">low24h</td><td class="v">${fmt(reg && reg.low24h)} ₽</td></tr>
-          <tr><td class="k">high24h</td><td class="v">${fmt(reg && reg.high24h)} ₽</td></tr>
         </table>
       </div>
 

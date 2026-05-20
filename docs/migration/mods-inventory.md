@@ -261,6 +261,8 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | 133 | Un-flashbang Hideout | 🖥️ Client | 🏚️ Hideout | 🛋️ QoL | ✨ Gráficos · 🏚️ Hideout | [1425](https://forge.sp-tarkov.com/mod/1425/un-flashbang-hideout) | — | [ArchangelWTF/Un-flashbangHideout](https://github.com/ArchangelWTF/Un-flashbangHideout) | ✅ | Remove o efeito de flashbang no hideout ao retornar de sessões noturnas com super sampling ativo — v1.0.4, SPT 4.0.13 | 🟢 Instalar | 🔍 | New |
 | 134 | Task List Fixes | 🖥️ Client | 🌐 Geral | 🛋️ QoL | 🖼️ UI · 🗺️ Quests | [824](https://forge.sp-tarkov.com/mod/824/task-list-fixes) | — | [DrakiaXYZ/SPT-TaskListFixes](https://github.com/DrakiaXYZ/SPT-TaskListFixes) | ✅ | Corrige classificação de tarefas e melhora desempenho/organização da lista de missões — SPT 4.0.13. Autor: DrakiaXYZ | 🟢 Instalar | 🔍 | New |
 | 135 | Dragon Den - Dev Tool | 🖥️ Client | ⚔️ Raid | 🛠️ Dev | 🧰 Dev/Lib | [2336](https://forge.sp-tarkov.com/mod/2336/dragon-den-dev-tool) | — | [Drexira/DragonDen-DevTool](https://github.com/Drexira/DragonDen-DevTool) | ✅ | Ferramenta dev para testes em raid: heal, modo deus, spawn de itens, gestão de bots e teleporte (225 locais) — SPT 4.0.13. Autor: Drexira | 🟢 Instalar | 🔍 | New |
+| 136 | Camo And Stickers | 🖥️ Client | 🌐 Geral | 🎨 Cosmético | 🔫 Armas | [2658](https://forge.sp-tarkov.com/mod/2658/camo-and-stickers) | — | [7Bpencil/SPT.WeaponCamoAndStickers](https://github.com/7Bpencil/SPT.WeaponCamoAndStickers) | ✅ | Personaliza armas com camuflagem e adesivos, oferecendo opções estéticas para equipamentos — SPT 4.0.13 | 🟢 Instalar | 🔍 | New |
+| 137 | SPTarkovSpeedLoader | 🖥️ Client | 🌐 Geral | 🛋️ QoL | 🎒 Inventário | [2440](https://forge.sp-tarkov.com/mod/2440/sptarkovspeedloader) | — | [ragnaroks/SPTarkovSpeedLoader](https://github.com/ragnaroks/SPTarkovSpeedLoader) | ✅ | Acelera o carregamento de munição em magazines, abastecendo equipamentos mais rápido — SPT 4.0.13 | 🟢 Instalar | 🔍 | New |
 
 ## Próximos passos
 
@@ -348,3 +350,5 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | 2026-05-17 | sync-script | docs(migration): sync mods-inventory.html from markdown |
 | 2026-05-17 | sync-script | docs(migration): sync mods-inventory.html from markdown |
 | 2026-05-17 | Guilherme | docs(migration): add 6 mods, correct SPT 4.0 status for StashSearch/BeltSlot, gray out NaoIncluir rows |
+| 2026-05-20 | sync-script | docs(migration): sync mods-inventory.html from markdown |
+| 2026-05-20 | Guilherme | docs(tarkov-itemdb): consolidate flea price formula investigation + override-only plan |

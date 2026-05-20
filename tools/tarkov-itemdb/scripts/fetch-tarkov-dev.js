@@ -31,13 +31,13 @@ query Dump {
     types
     category   { id name normalizedName parent { id name } }
     categories { id name normalizedName }
-    avg24hPrice lastLowPrice low24hPrice high24hPrice changeLast48hPercent updated
+    avg24hPrice lastLowPrice low24hPrice high24hPrice changeLast48h changeLast48hPercent updated
     buyFor  { vendor { name normalizedName } price priceRUB currency }
     sellFor { vendor { name normalizedName } price priceRUB currency }
   }
   regular: items(gameMode: regular, limit: 100000) {
     id
-    avg24hPrice lastLowPrice low24hPrice high24hPrice changeLast48hPercent updated
+    avg24hPrice lastLowPrice low24hPrice high24hPrice changeLast48h changeLast48hPercent updated
     buyFor  { vendor { name normalizedName } price priceRUB currency }
     sellFor { vendor { name normalizedName } price priceRUB currency }
   }
