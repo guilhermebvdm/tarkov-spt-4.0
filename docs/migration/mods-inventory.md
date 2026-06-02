@@ -263,6 +263,8 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | 135 | Dragon Den - Dev Tool | 🖥️ Client | ⚔️ Raid | 🛠️ Dev | 🧰 Dev/Lib | [2336](https://forge.sp-tarkov.com/mod/2336/dragon-den-dev-tool) | — | [Drexira/DragonDen-DevTool](https://github.com/Drexira/DragonDen-DevTool) | ✅ | Ferramenta dev para testes em raid: heal, modo deus, spawn de itens, gestão de bots e teleporte (225 locais) — SPT 4.0.13. Autor: Drexira | 🟢 Instalar | 🔍 | New |
 | 136 | Camo And Stickers | 🖥️ Client | 🌐 Geral | 🎨 Cosmético | 🔫 Armas | [2658](https://forge.sp-tarkov.com/mod/2658/camo-and-stickers) | — | [7Bpencil/SPT.WeaponCamoAndStickers](https://github.com/7Bpencil/SPT.WeaponCamoAndStickers) | ✅ | Personaliza armas com camuflagem e adesivos, oferecendo opções estéticas para equipamentos — SPT 4.0.13 | 🟢 Instalar | 🔍 | New |
 | 137 | SPTarkovSpeedLoader | 🖥️ Client | 🌐 Geral | 🛋️ QoL | 🎒 Inventário | [2440](https://forge.sp-tarkov.com/mod/2440/sptarkovspeedloader) | — | [ragnaroks/SPTarkovSpeedLoader](https://github.com/ragnaroks/SPTarkovSpeedLoader) | ✅ | Acelera o carregamento de munição em magazines, abastecendo equipamentos mais rápido — SPT 4.0.13 | 🟢 Instalar | 🔍 | New |
+| 138 | WTT - Menu Overhaul | 🖥️ Client | 🌐 Geral | 🎨 Cosmético | 🖼️ UI | [1775](https://forge.sp-tarkov.com/mod/1775/wtt-menu-overhaul) | — | [emilanderss0n/SPT-Menu-Overhaul](https://github.com/emilanderss0n/SPT-Menu-Overhaul) | ✅ | Novo layout de menu com o personagem na tela inicial (modelo rotacionável) — SPT 4.0.13 | 🟢 Instalar | 🔍 | New |
+| 139 | Discord Raid Map | 🖥️ Client | ⚔️ Raid | 🛋️ QoL | 🌐 Multiplayer | [2714](https://forge.sp-tarkov.com/mod/2714/discord-raid-map) | — | [Fiodorwellfme/DiscordRaidMap](https://github.com/Fiodorwellfme/DiscordRaidMap) | ✅ | Posta mapa da raid no Discord via webhook (jogadores, kills, bosses, airdrop, extrações, tempo) — SPT 4.0.13 | 🟢 Instalar | 🔍 | New |
 
 ## Próximos passos
 
@@ -352,3 +354,5 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | 2026-05-17 | Guilherme | docs(migration): add 6 mods, correct SPT 4.0 status for StashSearch/BeltSlot, gray out NaoIncluir rows |
 | 2026-05-20 | sync-script | docs(migration): sync mods-inventory.html from markdown |
 | 2026-05-20 | Guilherme | docs(tarkov-itemdb): consolidate flea price formula investigation + override-only plan |
+| 2026-06-02 | sync-script | docs(migration): sync mods-inventory.html from markdown |
+| 2026-06-02 | Guilherme | chore: commit pending work across tarkov-itemdb viewer, pipeline and RZCustomProfiles |
