@@ -15,16 +15,18 @@ Trabalho específico de cada mod fica em `mods/<mod>/memory/sessions.md`. Este a
   - `csharp-mod-best-practices` — C# / runtime para BepInEx.
   - `repo-workflow-best-practices` — convenção de naming, rastreabilidade PA-NN-MM/CR-NN-MM, sandbox `modded/` vs `original/`.
   - `memory-curation` — regras de redação para `sessions.md` / `repo-sessions.md`.
-- **Commands custom:** `/add-backlog-item`, `/create-spec`, `/review-spec`, `/create-technical-spec`, `/review-technical-spec`, `/code-mod`, `/code-review`, `/apply-code-review`, `/compile-mod`, `/add-mod-repo-for-modding`, `/update-mods-inventory`, `/add-mod-inventory-list`, `/update-memory`.
+- **Commands custom:** `/add-backlog-item`, `/create-spec`, `/review-spec`, `/create-technical-spec`, `/review-technical-spec`, `/code-mod`, `/code-review`, `/apply-code-review`, `/compile-mod`, `/add-mod-repo-for-modding`, `/update-mods-inventory`, `/add-mod-inventory-list`, `/serve-inventory`, `/update-memory`.
 - **Mods no repo (5):** `stancesAndCameraPositionSPT4.0.11` (ativo), `SPT-Realism-Mod-Client` (vendor pinned), `SPT-DynamicMaps` (vendor pinned), `RZCustomProfiles` (vendor pinned), `RZ-SPTMods` (vendor pinned).
 - **Tools cross-cutting:** `tools/tarkov-itemdb/` — DB unificada (SPT + tarkov.dev + tarkov-market) com viewer HTML pra calibração manual do flea. Edit pelo viewer atualiza `prices.json` + `checks.dat` (MD5) + audit log. Env: `SPT_PATH`, `TARKOV_MARKET_API_KEY`. Detalhes em [tools/tarkov-itemdb/README.md](../tools/tarkov-itemdb/README.md) + [tools/tarkov-itemdb/docs/spt-internals.md](../tools/tarkov-itemdb/docs/spt-internals.md).
 - **LiveFleaPrices mod:** **desativado** (renomeado `<SPT>/user/mods/DrakiaXYZ-LiveFleaPrices.disabled/`) — substituído por calibração manual via viewer. `prices.json` hoje é autoral.
 - **Memory system:** ativo. 5 pastas `mods/*/memory/` + 1 top-level. Sessions com timestamps GMT-3 HH:MM (relógio do sistema via `Bash date '+%Y-%m-%d %H:%M'`).
+- **Inventário de mods editável:** `docs/migration/mods-inventory.md` é fonte de verdade; `mods-inventory.html` é gerado (`scripts/sync-mods-html.js`). Estado **Instalado** (coluna no `.md`, índice `inst` no `const MODS`) e **Status** editáveis no navegador via servidor local `scripts/serve-inventory.js` (`/serve-inventory`, http://localhost:8787, bind 127.0.0.1) que grava no `.md` e re-sincroniza. `file://`=preview (não salva). Docs: [docs/migration/README.md](../docs/migration/README.md). `new-mods.md` arquivado em `docs/migration/.archived/`.
 
 ## Pendências / próximos passos conhecidos
 
 - **Item 002 do stances mod aguarda validação in-raid de F4** após 06-fix-01 (ver `mods/stancesAndCameraPositionSPT4.0.11/memory/sessions.md`).
 - **Drift potencial no asbuild do stances mod** (referência a `06-fix-02` não rastreável nesta sessão) — investigar antes de gerar fix-02 novo com numeração duplicada.
+- **Ramificar features novas a partir de `main`** — `flea-price-formula-fix` virou ancestral da `main` via PR#2 (trabalho de tarkov-itemdb/RZCustomProfiles/docs flea agora está na main por carona do branch base).
 
 ## 2026-05-11 02:00 (GMT-3) — Sessão 1b: validação end-to-end do memory system
 
@@ -156,3 +158,41 @@ Trabalho específico de cada mod fica em `mods/<mod>/memory/sessions.md`. Este a
 - `prices.json` semantics presumida = lastLow: presunção empiricamente quebrada (M4A1 SPT=132k vs dev-lastLow=30k antes da troca). Mod escrevia mistura de avg + multiplier histórico. Documentado como "semântica opaca" em vez de bake-in.
 - Filtro real "só 10/10" pra itens com condição variável (chaves, durabilidade) — não exposto pelas APIs públicas, fora de escopo. Mitigação atual: campo `conditionType` ("none" / "uses" / "durability" / "resource") + badge visual.
 - Câmbio dinâmico USD/EUR → RUB: lido do handbook (USD=120, EUR=133 em SPT 4.0.13). Estático. Re-rodar `build.js` re-lê se valores mudarem.
+
+## 2026-06-03 01:13 (GMT-3) — Sessão 2: sistema de edição do inventário de mods (coluna Instalado + servidor local + Status)
+
+**Tema central:** tirar o estado "Instalado" do `localStorage` do navegador e transformar o `docs/migration/mods-inventory.html` num sistema editável e versionado — coluna no `.md` como fonte de verdade + servidor Node local que grava de volta. O git é a camada de sync entre editores.
+
+**Decisões-chave:**
+
+- **Estado "Instalado" vira coluna no `.md`** (`docs/migration/mods-inventory.md`), não mais `localStorage['spt4-mods-installed']`. Por quê: localStorage é por-navegador/máquina, não versiona nem sincroniza; a coluna entra no git e o sync carrega pro campo `inst` (índice 14) do `const MODS`. Ref: [scripts/sync-mods-html.js](../scripts/sync-mods-html.js).
+- **JSON sidecar via `fetch` descartado** — abrir o HTML como `file://` bloqueia `fetch` por CORS. Embutir nos dados (via sync) é a única via que sincroniza **e** mantém o "abrir clicando".
+- **Servidor Node local `serve-inventory.js`** (stdlib, sem `npm install`) como bridge de escrita: navegador não grava em disco sob `file://`, então o toggle/dropdown faz `POST` → servidor edita a coluna no `.md` → re-sincroniza o HTML. `history:false` por clique (não polui `## Histórico`; só o sync manual adiciona linha). Bind em `127.0.0.1`. Ref: [scripts/serve-inventory.js](../scripts/serve-inventory.js).
+- **Status também editável (Opção 1 — texto canônico):** `POST /api/status` reescreve a célula Status inteira pelo texto canônico do mapa (`Instalar`→`🟢 À Instalar`, `Aguardar`→`🟠 Aguardar upstream`, etc.), round-trip estável via `parseStatus`. Trade-off aceito pelo usuário: apaga notas livres na célula.
+- **`sync-mods-html.js` refatorado** em `syncHtml({history})` reutilizável + `module.exports` + guard `require.main === module` pra CLI. O servidor importa e reusa em vez de spawnar processo.
+- **`SERVER_MODE` no HTML** (`location.protocol`): `http://`=edita+persiste, `file://`=preview. Em server mode, overrides de status do `localStorage` são limpos no boot (`.md` é autoritativo). Toggle/dropdown otimistas com revert em falha + badge de conexão.
+- **`/code-review` do projeto não serve pra tooling JS** — é do backlog de mods SPT (exige specs `01`/`02` + `mods/<mod>/modded/`); pré-condições falhariam. Revisão feita direto no diff.
+- **Lição de branch hygiene:** a feature saiu de `flea-price-formula-fix` (branch atual na hora, escolha do usuário), então o PR#2 → `main` levou junto o trabalho daquela branch (tarkov-itemdb, RZCustomProfiles, docs flea). Usuário aceitou manter na main. Ramificar features novas a partir de `main`.
+
+**Atividade cronológica:**
+
+1. Diagnóstico: marcas de instalado viviam só em `localStorage['spt4-mods-installed']` — não versionado, por-navegador.
+2. Migração: coluna `Instalado` (`✓`/`—`, última coluna) adicionada às 139 linhas + header/separator via script descartável idempotente. Seed inicial #116; depois as **50 marcas reais** do usuário recuperadas via one-liner no console (não consigo ler o perfil real do Chrome — chrome-devtools MCP sobe perfil isolado vazio).
+3. Sync estendido: `parseInstalado` → campo `inst`; HTML deriva `state.installed` dos dados, removidos `loadInstalled`/`saveInstalled` + seed de boot do localStorage.
+4. `serve-inventory.js` criado + toggle ligado; validado via chrome-devtools (50/50, badge verde, console limpo, write+revert no `.md`).
+5. `/api/status` + mapa canônico; `pickStatus` server-aware (otimista + revert); `setCellInMd(n, col, value)` genérico serve as duas colunas (guard de shape `!== 15 cols`).
+6. Code-review do diff → 4 fixes: bind `127.0.0.1` (API de escrita não exposta na LAN), 400 em JSON malformado, reject de body grande, doc drift.
+7. Dropdown de status passa a abrir pra cima perto do rodapé (`openSdd` mede `offsetHeight` e flipa + clamp horizontal).
+8. Smoke test: 7/7 status escrevem o texto canônico correto + restore (endpoint e UI), toggle instalado isolado da coluna Status, console limpo, baseline restaurado. Passou.
+9. `new-mods.md` arquivado em `docs/migration/.archived/` (absorvido no `mods-inventory.md`); `docs/migration/README.md` criado; `/add-mod-inventory-list` corrigido (referenciava o seed de localStorage removido + faltava a coluna Instalado); refs em `.agents/resources.md`, `.agents/skills-backlog.md` e README raiz atualizadas.
+10. 4 commits → PR#2 → merge na `main` (carregou o trabalho da flea-price-formula-fix junto) → branch `feat/mods-inventory-edit-server` deletada (local+remote) → servidor parado.
+
+**Pendências abertas nesta sessão:**
+
+- [P-2.1 🟡] Edição de Status pela UI é lossy (Opção 1 reescreve a célula inteira, apaga notas livres tipo `🟠 Aguardar (esperando PR #42)`). Upgrade pra Opção 2 (preservar nota via regex) se virar necessidade.
+- [P-2.2 🟢] `main` agora contém o trabalho da `flea-price-formula-fix` por carona do branch base — ramificar features novas a partir de `main` daqui pra frente.
+
+**Cross-refs:**
+
+- Tooling do inventário: ver [docs/migration/README.md](../docs/migration/README.md) e command `/serve-inventory`.
+- Trabalho da flea/tarkov-itemdb que entrou na main junto: ver Sessão "2026-05-16/17" deste arquivo.
