@@ -8,9 +8,9 @@
 
 Criar **10 perfis customizados** selecionáveis no launcher do SPT, cada um representando uma classe temática (médico, caçador, fuzileiro, etc.) com:
 
-1. **Skills iniciais** calibradas por um modelo de custo ponderado (28–32 pontos / classe, ver [planejamento §Modelo de balanceamento](../001-custom-profiles.md))
-2. **1 estação extra de hideout em nível 1** alinhada ao tema da classe (ver [planejamento §Hideout inicial](../001-custom-profiles.md))
-3. **Loadout inicial (~2M ₽)** com itens depositados no stash (ver [planejamento §Inventário inicial](../001-custom-profiles.md))
+1. **Skills iniciais** calibradas por um modelo de custo ponderado (28–32 pontos / classe, ver [planejamento §Modelo de balanceamento](./001-custom-profiles-00-planejamento.md))
+2. **1 estação extra de hideout em nível 1** alinhada ao tema da classe (ver [planejamento §Hideout inicial](./001-custom-profiles-00-planejamento.md))
+3. **Loadout inicial (~2M ₽)** com itens depositados no stash (ver [planejamento §Inventário inicial](./001-custom-profiles-00-planejamento.md))
 
 Itens entram no stash em formato **plano** (`{ Tpl, Count }`), sem distinção entre equipped/stash, sem itens aninhados (mag carregada com munição), sem posicionamento em slot — limitação aceita do schema atual do `AdditionalStartingItems`. Traders, nível inicial do personagem e quests permanecem inalterados.
 
@@ -29,9 +29,9 @@ Itens entram no stash em formato **plano** (`{ Tpl, Count }`), sem distinção e
   - `BaseProfile: 0` (Standard)
   - `Name` em PT-BR conforme tabela de classes
   - `Description` em PT-BR descrevendo o estilo de jogo
-  - `SkillOverrides` com os níveis exatos definidos no [planejamento §Modelo de balanceamento](../001-custom-profiles.md)
+  - `SkillOverrides` com os níveis exatos definidos no [planejamento §Modelo de balanceamento](./001-custom-profiles-00-planejamento.md)
   - `AdditionalStartingItems.Enabled: true` com `Items` enumerando **todos** os itens (baseline + tema + primary + 3 backups) como entradas planas `{ Tpl, Count }`. Total alvo ~2M ₽ por classe.
-  - `HideoutStartingLevels` com `Stash: 1` (padrão) + **1 estação extra da classe em nível 1** conforme [planejamento §Hideout inicial](../001-custom-profiles.md). Gerente de Operações recebe 2 estações como bônus de identidade.
+  - `HideoutStartingLevels` com `Stash: 1` (padrão) + **1 estação extra da classe em nível 1** conforme [planejamento §Hideout inicial](./001-custom-profiles-00-planejamento.md). Gerente de Operações recebe 2 estações como bônus de identidade.
   - `TradersLoyalty` com `Standing: 0.0, SalesSum: 0` para todos os traders (idêntico ao exampleProfile, equivalente a "sem alteração")
   - `ClearEquipment: false`, `ClearStash: false`, `MaxLevel: false`, `MaxSkills: false`, `AllItemsExamined: false`, `StartingLevel: null`, `StartingPrestigeLevel: null`, `SecureContainer: 0` (todos com valores neutros = sem alteração)
 - Ao abrir o launcher do SPT após instalar o mod, os 10 novos perfis aparecem como opção de criação de personagem.
@@ -80,7 +80,7 @@ Itens entram no stash em formato **plano** (`{ Tpl, Count }`), sem distinção e
 
 ## Referências
 
-- [001-custom-profiles-00-planejamento.md](../001-custom-profiles.md) — modelo de balanceamento ponderado, tabela de multiplicadores e composição completa das 10 classes.
+- [001-custom-profiles-00-planejamento.md](./001-custom-profiles-00-planejamento.md) — modelo de balanceamento ponderado, tabela de multiplicadores e composição completa das 10 classes.
 - [../../modded/profiles/exampleProfile.json](../../modded/profiles/exampleProfile.json) — template de referência do mod.
 - [../../README.md](../../README.md) — documentação do RZCustomProfiles upstream (v1.1.0 / SPT 4.0.13).
 - [../../assets/](../../assets/) — screenshots do personagem lvl 43 usado como referência de balanceamento.

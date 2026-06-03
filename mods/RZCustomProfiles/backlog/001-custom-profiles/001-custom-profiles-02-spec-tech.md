@@ -12,9 +12,9 @@ Gerar **10 arquivos `.json` em `modded/profiles/`** seguindo o schema completo d
 
 1. `Name` — nome em PT-BR da classe
 2. `Description` — descrição do estilo de jogo
-3. `SkillOverrides` — níveis das skills conforme [planejamento §Modelo de balanceamento](../001-custom-profiles.md)
-4. `HideoutStartingLevels` — `Stash: 1` (padrão) + **1 estação temática em nível 1** conforme [planejamento §Hideout inicial](../001-custom-profiles.md); Gerente recebe 2 estações
-5. `AdditionalStartingItems` — `Enabled: true` + `Items[]` com **todos os TPLs do loadout** (baseline + tema + primary + 3 backups) em formato plano `{ Tpl, Count }` conforme [planejamento §Inventário inicial](../001-custom-profiles.md). TPLs resolvidos via [anchor-items.json](../anchor-items.json).
+3. `SkillOverrides` — níveis das skills conforme [planejamento §Modelo de balanceamento](./001-custom-profiles-00-planejamento.md)
+4. `HideoutStartingLevels` — `Stash: 1` (padrão) + **1 estação temática em nível 1** conforme [planejamento §Hideout inicial](./001-custom-profiles-00-planejamento.md); Gerente recebe 2 estações
+5. `AdditionalStartingItems` — `Enabled: true` + `Items[]` com **todos os TPLs do loadout** (baseline + tema + primary + 3 backups) em formato plano `{ Tpl, Count }` conforme [planejamento §Inventário inicial](./001-custom-profiles-00-planejamento.md). TPLs resolvidos via [anchor-items.json](../anchor-items.json).
 
 Todos os demais campos (`Enabled`, `BaseProfile`, `TradersLoyalty`, `ClearEquipment`, etc.) replicam exatamente o `exampleProfile.json` com valores neutros. Nenhum patch C# é necessário; o `RZCustomProfiles.dll` upstream faz a leitura e exposição ao launcher.
 
@@ -31,9 +31,9 @@ Todos os demais campos (`Enabled`, `BaseProfile`, `TradersLoyalty`, `ClearEquipm
 | [modded/profiles/exampleProfile.json](../../modded/profiles/exampleProfile.json) | Schema canônico do mod (todos os campos e seus tipos). Copiar 1:1 e modificar os 5 pontos de variação. |
 | [README.md §"Skills disponíveis"](../../README.md) | Lista oficial dos 53 nomes de skill aceitos. Mapeamento PT→EN obrigatório. |
 | [modded/config/masterConfig.json](../../modded/config/masterConfig.json) | Confirma suporte a JSONC (comentários `//` e vírgulas pendentes). |
-| [planejamento §Referência rápida](../001-custom-profiles.md) | Composição final (skill + nível) das 10 classes após balanceamento ponderado. |
-| [planejamento §Hideout inicial](../001-custom-profiles.md) | Estação temática de hideout por classe. |
-| [planejamento §Inventário inicial](../001-custom-profiles.md) | Loadout completo (baseline + tema + primary + 3 backups) por classe com totais ~2M ₽. |
+| [planejamento §Referência rápida](./001-custom-profiles-00-planejamento.md) | Composição final (skill + nível) das 10 classes após balanceamento ponderado. |
+| [planejamento §Hideout inicial](./001-custom-profiles-00-planejamento.md) | Estação temática de hideout por classe. |
+| [planejamento §Inventário inicial](./001-custom-profiles-00-planejamento.md) | Loadout completo (baseline + tema + primary + 3 backups) por classe com totais ~2M ₽. |
 | [anchor-items.json](../anchor-items.json) | Mapa de IDs simbólicos (`AKM`, `MAG_AKM_30`, `AMMO_762x39_PS`, etc.) → TPL EFT (`bsgId`). Fonte primária para resolver IDs do planejamento. |
 | [tools/tarkov-itemdb](../../../../tools/tarkov-itemdb/) | **Fonte autoritativa de metadados por TPL** — 5630 itens com `stackMaxSize`, dimensões, peso, categoria, preços. Necessária para resolver consolidação de itens (ver §7 Riscos e checklist). Acessar via `cache/spt-raw.json` (`items[tpl].stackMaxSize`) ou `data/items.json`. |
 
@@ -167,6 +167,22 @@ Template a ser usado para cada um dos 10 arquivos. Substituir os 3 blocos marcad
 >
 > **Limite de design (`Description`):** ≤ 200 caracteres. Truncamento no launcher ainda não confirmado empiricamente; 200 é margem segura para a maioria dos widgets de seleção de perfil.
 
+### Geração mecânica via script
+
+Em vez de enumerar manualmente os ~50-90 itens de cada loadout (que com a regra de stack acima viraria erro humano garantido), a implementação **estende o [scripts/build-loadouts.js](../../scripts/build-loadouts.js)** existente:
+
+- Esse script já contém as **recipes por classe** (`baseline`, `primary`, `backup × N`, `tema`) com IDs simbólicos e quantidades — fonte de verdade que já gerou as tabelas markdown da §Inventário inicial do planejamento.
+- Para esta entrega, adicionar um novo modo `--emit-jsons` (ou criar `scripts/build-profile-jsons.js` derivado) que:
+  1. Carrega as recipes de cada classe
+  2. Resolve ID simbólico → TPL via [anchor-items.json](../anchor-items.json)
+  3. Consulta `stackMaxSize` de cada TPL em [tools/tarkov-itemdb/cache/spt-raw.json](../../../../tools/tarkov-itemdb/cache/spt-raw.json)
+  4. Aplica a regra de stack acima e emite `AdditionalStartingItems.Items[]`
+  5. Combina com `Name`/`Description`/`SkillOverrides`/`HideoutStartingLevels` da classe
+  6. Serializa em `modded/profiles/<classe>.json` (UTF-8 sem BOM, JSONC)
+- **Pré-requisito:** atualizar as recipes do script para PT-BR atual (`Sanitarista` → `Médico de Combate`, `Franco-Atirador` → `Caçador`) e adicionar as 7 classes restantes que ainda não estão nele.
+
+Vantagens: (a) recipes versionadas e revisáveis no diff, (b) regeneração trivial após mudanças no planejamento, (c) impossível introduzir erro de stack ou typo de TPL manualmente.
+
 ### Composições por classe
 
 | Classe (arquivo) | Name (PT-BR) | SkillOverrides com valor > 0 | Hideout extra (lvl 1) | Loadout total |
@@ -182,7 +198,7 @@ Template a ser usado para cada um dos 10 arquivos. Substituir os 3 blocos marcad
 | saqueador | `Saqueador` | `Attention: 10, Search: 10, Perception: 10, Intellect: 10, Memory: 8` | `Security` | ~1.977.305 ₽ |
 | gerenteDeOperacoes | `Gerente de Operações` | `Crafting: 10, HideoutManagement: 10, Memory: 10, Intellect: 10, Charisma: 10, WeaponModding: 7` | `Generator` + `Heating` | ~1.991.918 ₽ |
 
-> Loadout total = baseline universal + item-tema + primary + backup×3, conforme tabela do planejamento. Composição completa de itens (TPLs + Count) deve ser extraída por classe da [§Inventário inicial](../001-custom-profiles.md) durante a implementação.
+> Loadout total = baseline universal + item-tema + primary + backup×3, conforme tabela do planejamento. Composição completa de itens (TPLs + Count) deve ser extraída por classe da [§Inventário inicial](./001-custom-profiles-00-planejamento.md) durante a implementação.
 
 ## 6. Fluxo de dados
 
@@ -209,6 +225,8 @@ modded/profiles/*.json   --copy-->   BepInEx/plugins/RZCustomProfiles/    --load
 
 ## 7. Riscos e dependências
 
+> **Premissa fixa do schema:** todos os 10 perfis usam `BaseProfile: 0` (Standard). Os zeros explícitos em `TradersLoyalty`/`HideoutStartingLevels`/`SkillOverrides` são **identidade do Standard** (que já começa com tudo em zero). Mudar para `BaseProfile` Unheard (4) ou EOD (3) requer auditoria — esses base profiles dão hideout/traders/skills adiantados, e nossos zeros causariam **downgrade silencioso**. Esta premissa precisa ser revalidada se algum perfil futuro mudar `BaseProfile`.
+
 - **Versão upstream do RZCustomProfiles:** `1.1.0 / SPT 4.0.13` (confirmado em [README.md](../../README.md)). Mudanças de schema em versões futuras quebrariam silenciosamente os 10 JSONs.
 - **Encoding UTF-8 sem BOM obrigatório:** `Name`/`Description` têm acentos (Médico, Caçador, Operações). Editores Windows (Notepad) podem salvar com BOM ou em CP1252, corrompendo os caracteres. Validar com `file -i` ou hex viewer.
 - **Hot-reload vs. restart:** comportamento ainda não validado (corner case na spec funcional). Padrão defensivo é avisar usuário para reiniciar servidor SPT após adicionar/editar perfis.
@@ -217,17 +235,27 @@ modded/profiles/*.json   --copy-->   BepInEx/plugins/RZCustomProfiles/    --load
 - **Conflito com outros mods de perfil:** se outro mod (ex: `Profile Editor`, `SAIN`) também injetar `SkillOverrides`, ordem de carregamento define quem vence. Sem mods conflitantes vendorados em `mods/` no momento.
 - **Stash inicial (10×28 slots) pode não comportar o loadout:** 1 primary + 3 backups com armas, mochilas, coletes e meds são ~150-200 slots equivalentes. Validar empiricamente — se transbordar, opções: (a) reduzir backups de 3 para 2, (b) elevar `HideoutStartingLevels.Stash` para 2 ou 3 (mais slots), (c) consolidar itens repetidos via `Count` (já recomendado no skeleton).
 - **TPLs inválidos em `AdditionalStartingItems.Items`:** TPLs hex são frágeis a updates do EFT — itens podem ser renomeados/removidos entre patches. Validar a lista da [anchor-items.json](../anchor-items.json) contra a versão atual do EFT 0.16.x antes de gerar os JSONs.
-- **Hideout — dependências entre estações:** **mitigado por design.** Apenas estações sem pré-requisitos foram selecionadas (`MedStation`, `Workbench`, `RestSpace`, `WaterCollector`, `Generator`, `Heating`, `Vents`, `Security`). Estações com cadeia de dependências (`ShootingRange`, `IntelligenceCenter`, `ScavCase`, `Library`) foram excluídas do design — ver [planejamento §Hideout inicial](../001-custom-profiles.md) para detalhes.
+- **Hideout — dependências entre estações:** **mitigado por design.** Apenas estações sem pré-requisitos foram selecionadas (`MedStation`, `Workbench`, `RestSpace`, `WaterCollector`, `Generator`, `Heating`, `Vents`, `Security`). Estações com cadeia de dependências (`ShootingRange`, `IntelligenceCenter`, `ScavCase`, `Library`) foram excluídas do design — ver [planejamento §Hideout inicial](./001-custom-profiles-00-planejamento.md) para detalhes.
 - **Sandbox:** edits exclusivamente em `modded/profiles/`. `original/` permanece intocado por convenção do repo ([AGENTS.md §"Hierarquia"](../../../../AGENTS.md)).
 
 ## 8. Checklist de implementação
 
 - [ ] Validar versão do mod em `modded/RZCustomProfiles.dll` vs README (confirmar 1.1.0 / SPT 4.0.13).
-- [ ] Validar [anchor-items.json](../anchor-items.json) contra EFT 0.16.x atual — todos os TPLs ainda existem e correspondem aos itens esperados (smoke test: 5 TPLs aleatórios na wiki/EFT-DB).
+- [ ] Cross-check: extrair todos os IDs simbólicos usados nas recipes do `build-loadouts.js` e validar que cada um (a) existe como chave em [anchor-items.json](../anchor-items.json) e (b) o `bsgId` resolvido existe como TPL em [tools/tarkov-itemdb/cache/spt-raw.json](../../../../tools/tarkov-itemdb/cache/spt-raw.json) com `stackMaxSize` definido. Pode ser one-liner Node usando ambos JSONs como input.
+- [ ] **Smoke test do comportamento `Count > stackMaxSize`:** criar um perfil dummy `_test.json` com `AdditionalStartingItems.Items: [{ Tpl: "<IFAK_TPL>", Count: 5 }]`. Criar personagem, abrir stash, contar IFAKs. Resultado define se a regra de stack do §5 é necessária (esperado: sim — confirmar empiricamente).
 - [ ] Verificar pré-requisitos de cada estação de hideout temática (`MedStation`, `ShootingRange`, `Workbench`, `IntelligenceCenter`, `Generator`, `RestSpace`, `WaterCollector`, `ScavCase`). Listar quais exigem estação adicional em nível 1 e ajustar JSONs ou trocar estação.
-- [ ] Criar `modded/profiles/medicoDeCombate.json` a partir do skeleton: ajustar `Name`, `Description`, `SkillOverrides`, `HideoutStartingLevels.MedStation: 1`, e preencher `AdditionalStartingItems.Items` com todos os TPLs da §Inventário inicial do planejamento (consolidando duplicatas via `Count`).
-- [ ] Repetir para os 9 demais arquivos (`cacador.json`, `fuzileiro.json`, `batedor.json`, `operadorNoturno.json`, `armeiro.json`, `operadorTatico.json`, `sobrevivencialista.json`, `saqueador.json`, `gerenteDeOperacoes.json`) — cada um com seu próprio mapeamento de skills + estação de hideout + loadout.
-- [ ] Garantir encoding **UTF-8 sem BOM** em todos os 10 arquivos (`file -i mods/RZCustomProfiles/modded/profiles/*.json` deve retornar `charset=utf-8`).
+- [ ] Estender [scripts/build-loadouts.js](../../scripts/build-loadouts.js) (ou criar `scripts/build-profile-jsons.js`): renomear recipes existentes para nomenclatura atual (Médico de Combate, Caçador), adicionar as 7 classes restantes, e implementar emissão de `.json` por classe aplicando a regra de stack do §5.
+- [ ] Rodar o script e produzir os 10 arquivos em `modded/profiles/`.
+- [ ] Garantir encoding **UTF-8 sem BOM** em todos os 10 arquivos. **Windows (PowerShell):**
+  ```powershell
+  Get-ChildItem mods/RZCustomProfiles/modded/profiles/*.json | ForEach-Object {
+    $bytes = [System.IO.File]::ReadAllBytes($_.FullName)
+    if ($bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF) {
+      Write-Host "BOM detectado: $($_.Name)" -ForegroundColor Red
+    } else { Write-Host "OK: $($_.Name)" }
+  }
+  ```
+  Alternativa com Git Bash/WSL: `file -i mods/RZCustomProfiles/modded/profiles/*.json` deve retornar `charset=utf-8`.
 - [ ] Validar sintaxe JSON de cada arquivo (parser tolerante a JSONC).
 - [ ] Validar que cada `SkillOverrides` lista exatamente os mesmos 51 nomes do `exampleProfile.json` (sem typos, sem skills extras).
 - [ ] Verificar custo ponderado de cada arquivo contra o planejamento (faixa `[28, 32]`). Script ou planilha.

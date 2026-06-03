@@ -19,6 +19,7 @@ Repositório de mods para SPT 4.0 (Single Player Tarkov). Lido por qualquer assi
 - `.agents/workflows/` — workflows reutilizáveis (manuais)
 - `.agents/hooks/` — scripts compartilhados (validação, pre-commit, sync da wiki)
 - `docs/` — documentação técnica e arquitetural
+- `references/` — fontes read-only de verdade (não editar): `eft-decompiled/` (Assembly EFT) e `spt-source/` (código-fonte do servidor SPT)
 - `wiki/` — snapshot read-only de github.com/sp-tarkov/wiki (CC BY-NC-ND 4.0; sincronizado via `.agents/hooks/sync-wiki.sh` — não editar)
 - `.claude/settings.json` — config do Claude Code (referencia hooks em .agents/)
 
@@ -41,6 +42,8 @@ bash .agents/hooks/install-hooks.sh    # Instala git pre-commit hook
 Dependência opcional (recomendada): `jq` para o hook do Claude Code funcionar.
 - Windows: `winget install jqlang.jq`
 - Linux: `apt install jq`
+
+`references/spt-source/` é **gitignored** (~856 MB). Em máquina nova, obter o código-fonte do servidor SPT seguindo [references/README.md](references/README.md) — necessário para investigar lógica interna do SPT.
 
 ## Comandos úteis
 
@@ -85,7 +88,12 @@ Cada item de backlog vive em `mods/<mod>/backlog/NNN-<slug>/` (numeração local
 
 ## Hierarquia de referências (spec/review técnicas)
 
-1. **🥇 Assembly descompilado** — [references/eft-decompiled/Assembly-CSharp/](references/eft-decompiled/Assembly-CSharp/). Toda assinatura, fórmula, ponto de patch deve vir daqui com `arquivo.cs:linha`.
-2. **🥈 Código do mod** — `mods/<mod>/original/` (upstream) e `mods/<mod>/modded/` (fork local).
-3. **🥉 Wiki SPT** — [wiki/spt/](wiki/spt/) para SPT install/modding/server APIs.
-4. **🪛 Web** — último recurso. Marcar `[fonte externa]`.
+1. **🥇 Assembly descompilado (cliente EFT)** — [references/eft-decompiled/Assembly-CSharp/](references/eft-decompiled/Assembly-CSharp/). Toda assinatura, fórmula, ponto de patch do **cliente** deve vir daqui com `arquivo.cs:linha`.
+2. **🥇 Código-fonte do servidor SPT** — `references/spt-source/` (gitignored, ~856 MB — obter via [references/README.md](references/README.md)). Fonte de verdade para lógica de **servidor** (serviços, helpers, fórmulas, rotas). Snapshot read-only do upstream `sp-tarkov/server-csharp`. Citar com `arquivo.cs:linha`.
+3. **🥈 Código do mod** — `mods/<mod>/original/` (upstream) e `mods/<mod>/modded/` (fork local).
+4. **🥉 Wiki SPT** — [wiki/spt/](wiki/spt/) para SPT install/modding/server APIs.
+5. **🪛 Web** — último recurso. Marcar `[fonte externa]`.
+
+## ⚠️ Observações importantes
+
+- **Nunca editar `SPT_Data/database/` direto.** Esses arquivos fazem parte da distribuição do SPT — qualquer atualização do SPT os sobrescreve e a edição se perde. Além disso, alterar a database em disco invalida o `SPT_Data/checks.dat` (integridade) e gera arquivos pesados (`looseLoot.json` ~42 MB, `items.json` ~19 MB) difíceis de versionar/distribuir. O jeito correto é um **mod de servidor** que aplica os patches em memória no `postDBLoad` (modelo usado por SVM e pela maioria dos mods de servidor): sobrevive a updates, pesa quase nada e é diffável.

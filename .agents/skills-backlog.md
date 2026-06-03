@@ -96,9 +96,9 @@ Preenche linha do [mods-inventory.md](../docs/migration/mods-inventory.md) (Tipo
 2. Cross-check em [forge.sp-tarkov.com](https://forge.sp-tarkov.com/) — existe versão 4.0? Quem mantém? Última atualização?
 3. Decide Status: 🟢 Instalar (4.0 publicado, estável) · ⬆️ Evoluir (interno, precisa update) · 🔧 Desenvolver (não há 4.0) · 🟠 Aguardar (autor anunciou WIP) · 🔴 Bloqueado · ⚫ Não incluir.
 4. Sugere Prioridade baseada em [Recommended_Mods_40.md](../wiki/spt/Recommended_Mods_40.md) e dependências de outros mods do inventário.
-5. Edita linha (com confirmação) ou cria nova em [new-mods.md](../docs/migration/new-mods.md).
+5. Edita linha (com confirmação) ou cria nova em [mods-inventory.md](../docs/migration/mods-inventory.md), depois roda `node scripts/sync-mods-html.js`.
 
-**Material:** [mods-inventory.md](../docs/migration/mods-inventory.md) (taxonomia), [new-mods.md](../docs/migration/new-mods.md), forge.sp-tarkov.com, Recommended_Mods_40.md.
+**Material:** [mods-inventory.md](../docs/migration/mods-inventory.md) (taxonomia + fonte única), forge.sp-tarkov.com, Recommended_Mods_40.md.
 
 ---
 

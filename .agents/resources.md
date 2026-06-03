@@ -25,11 +25,11 @@ Guia de "onde buscar o quê" ao analisar mods, planejar features ou responder d�
 | Criação de itens (SDK/WTT) | [wiki/spt/modding/tutorials/WTT_Vol1.md](../wiki/spt/modding/tutorials/WTT_Vol1.md) | WTT Discord |
 | FAQ / problemas comuns SPT 4.0 | [wiki/spt/FAQs_40.md](../wiki/spt/FAQs_40.md) | SPT Discord #support |
 | Mods recomendados (curadoria) | [wiki/spt/Recommended_Mods_40.md](../wiki/spt/Recommended_Mods_40.md) | forge.sp-tarkov.com |
-| Inventário de mods deste repo | [docs/migration/mods-inventory.md](../docs/migration/mods-inventory.md) · [docs/migration/new-mods.md](../docs/migration/new-mods.md) | — |
+| Inventário de mods deste repo | [docs/migration/mods-inventory.md](../docs/migration/mods-inventory.md) · [README](../docs/migration/README.md) | — |
 | **Item lookup por ID/nome** | _(wiki não cobre)_ | **db.sp-tarkov.com/search** |
 | **Preços / economia / flea (EFT live)** | _(wiki não cobre)_ | **tarkov-market.com/dev/api** (PVP/PVE) · api.tarkov.dev |
 | **Mecânicas EFT vivas (loot, hideout, weapon mods)** | _(wiki não cobre)_ | **tarkov.dev · Tarkynator** |
-| **API C# do server SPT** | _(parcial em referências)_ | **deepwiki.com/sp-tarkov/server-csharp** |
+| **Código-fonte do servidor SPT** | **[references/spt-source/](../references/spt-source/)** (vendorizado, read-only) | deepwiki.com/sp-tarkov/server-csharp |
 | **Mods publicados / instalador** | — | **forge.sp-tarkov.com** |
 
 ## Fontes externas — quando usar cada uma
@@ -38,7 +38,8 @@ Guia de "onde buscar o quê" ao analisar mods, planejar features ou responder d�
 - **[api.tarkov.dev](https://api.tarkov.dev/)** — GraphQL ao vivo do EFT (preços, traders, quests, loot, mapas). Lembre que reflete EFT **online**, não SPT — checar se o build do SPT está alinhado.
 - **[tarkov-market.com/dev/api](https://tarkov-market.com/dev/api)** — preços do flea ao vivo, suporta **PVP e PVE** separadamente (no projeto usamos mais o **PVE**). Requer header `x-api-key: slnpflSLOoYTJJG4` (token público de uso, sem ações sensíveis). Mesma ressalva da api.tarkov.dev: reflete EFT online, não SPT.
 - **[tarkynator.com](https://tarkynator.com/)** — busca rápida de itens e dados; útil quando a UI do db.sp-tarkov.com pesa.
-- **[deepwiki.com/sp-tarkov/server-csharp](https://deepwiki.com/sp-tarkov/server-csharp/1-overview)** — documentação técnica gerada do server C# (SPT 4.0). **Primeira parada** para arquitetura interna do server.
+- **[references/spt-source/](../references/spt-source/)** — código-fonte C# do servidor SPT vendorizado no repo (read-only). **Primeira parada** para lógica de servidor: serviços, helpers, fórmulas, rotas. Citar com `arquivo.cs:linha`. Ver [VENDORED.md](../references/spt-source/VENDORED.md) para commit/versão.
+- **[deepwiki.com/sp-tarkov/server-csharp](https://deepwiki.com/sp-tarkov/server-csharp/1-overview)** — documentação técnica gerada do server C# (SPT 4.0). Útil para visão arquitetural de alto nível quando o código fonte vendorizado for denso demais.
 - **[forge.sp-tarkov.com](https://forge.sp-tarkov.com/)** — repositório oficial de mods; consultar para versão atual, downloads, deps.
 - **[github.com/sp-tarkov](https://github.com/sp-tarkov/)** — código-fonte oficial; em especial [server-mod-examples](https://github.com/sp-tarkov/server-mod-examples).
 - **[docs.bepinex.dev](https://docs.bepinex.dev/)** — framework de mods client (C#). Consultar para hooks, plugin lifecycle, configs.

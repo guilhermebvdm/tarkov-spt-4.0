@@ -8,19 +8,19 @@
 
 ## Resumo
 
-> 🔴 Bloqueadores: 0 · 🟡 Importantes: 4 · 🟢 Menores: 2 · ✅ Resolvidos: 1 · Total: 7
+> 🔴 Bloqueadores: 0 · 🟡 Importantes: 0 · 🟢 Menores: 0 · ✅ Resolvidos: 7 · Total: 7
 
 ## Índice
 
 | ID | Categoria | Impacto | Título | Status |
 |---|---|---|---|---|
 | PA-01-01 | C — Lógica | 🔴 Bloqueador | Hideout: estações temáticas com pré-requisitos não resolvidos | ✅ Resolvido 2026-05-17 |
-| PA-01-02 | A — Gap | 🟡 Importante | Skeleton JSONC tem `Items` apenas com placeholders — falta exemplo completo | Pendente |
-| PA-01-03 | B — Edge Case | 🟡 Importante | Stack limits do EFT podem quebrar consolidação via `Count` | Pendente |
-| PA-01-04 | A — Gap | 🟡 Importante | Validação prévia do `anchor-items.json` contra TPLs realmente usados no loadout | Pendente |
-| PA-01-05 | C — Lógica | 🟡 Importante | Checklist usa `file -i` (Unix) num ambiente Windows | Pendente |
-| PA-01-06 | A — Gap | 🟢 Menor | Limite numérico para `Description` não definido | Pendente |
-| PA-01-07 | B — Edge Case | 🟢 Menor | Comportamento se BaseProfile ≠ 0 não documentado | Pendente |
+| PA-01-02 | A — Gap | 🟡 Importante | Skeleton JSONC tem `Items` apenas com placeholders — falta exemplo completo | ✅ Resolvido 2026-05-17 |
+| PA-01-03 | B — Edge Case | 🟡 Importante | Stack limits do EFT podem quebrar consolidação via `Count` | ✅ Resolvido 2026-05-17 |
+| PA-01-04 | A — Gap | 🟡 Importante | Validação prévia do `anchor-items.json` contra TPLs realmente usados no loadout | ✅ Resolvido 2026-05-17 |
+| PA-01-05 | C — Lógica | 🟡 Importante | Checklist usa `file -i` (Unix) num ambiente Windows | ✅ Resolvido 2026-05-17 |
+| PA-01-06 | A — Gap | 🟢 Menor | Limite numérico para `Description` não definido | ✅ Resolvido 2026-05-17 |
+| PA-01-07 | B — Edge Case | 🟢 Menor | Comportamento se BaseProfile ≠ 0 não documentado | ✅ Resolvido 2026-05-17 |
 
 ## Categorias
 
@@ -42,9 +42,9 @@
 
 **Hideout: 4 das 10 classes têm estação temática com pré-requisitos não resolvidos**
 
-**Resolução:** opção (B) aceita — adotada restrição de design "apenas estações sem pré-requisitos". As 4 classes afetadas foram remapeadas: Caçador → `Heating`, Batedor → `Security`, Saqueador → `Security`, Gerente → `Generator` + `Heating`. Lista de estações elegíveis e racional registrados no [planejamento §Hideout inicial](../001-custom-profiles.md). Tabelas da spec técnica (§4 Arquivos e §Composições por classe) e §7 Riscos atualizados.
+**Resolução:** opção (B) aceita — adotada restrição de design "apenas estações sem pré-requisitos". As 4 classes afetadas foram remapeadas: Caçador → `Heating`, Batedor → `Security`, Saqueador → `Security`, Gerente → `Generator` + `Heating`. Lista de estações elegíveis e racional registrados no [planejamento §Hideout inicial](./001-custom-profiles-00-planejamento.md). Tabelas da spec técnica (§4 Arquivos e §Composições por classe) e §7 Riscos atualizados.
 
-**Problema:** A spec técnica define `HideoutStartingLevels` por classe (§5 Skeleton, §Composições por classe) com base no [planejamento §Hideout inicial](../001-custom-profiles.md). Quatro classes definem estações que **exigem outras estações já construídas em vanilla EFT 0.16.x** [fonte externa: [playerassist.com — Hideout Guide](https://playerassist.com/escape-from-tarkov-hideout-guide/)]:
+**Problema:** A spec técnica define `HideoutStartingLevels` por classe (§5 Skeleton, §Composições por classe) com base no [planejamento §Hideout inicial](./001-custom-profiles-00-planejamento.md). Quatro classes definem estações que **exigem outras estações já construídas em vanilla EFT 0.16.x** [fonte externa: [playerassist.com — Hideout Guide](https://playerassist.com/escape-from-tarkov-hideout-guide/)]:
 
 | Classe | Estação proposta | Pré-requisito para L1 (não setado) |
 |--------|------------------|-----------------------------------|
@@ -68,7 +68,7 @@ Para o `Gerente de Operações` (que já recebe 2 estações), a situação é e
 - **(B) Trocar as 4 estações problemáticas por alternativas sem pré-requisitos.** Sugestões: Caçador → `RestSpace: 1` (recuperação pós-tiro longo) ou `Workbench: 1`; Batedor → `WaterCollector: 1` (sustento de recon longo) ou `RestSpace: 1`; Saqueador → `MedStation: 1` ou `Workbench: 1`; Gerente → `Generator: 1` + `Workbench: 1` (mantém 2 estações sem cadeia).
 - **(C) Manter o planejamento e validar empiricamente.** Setar como está, testar em ambiente SPT, e ajustar caso falhe. Risco de retrabalho mas confirma comportamento real do mod.
 
-Recomendação: **opção (B)** — atualizar o [planejamento §Hideout inicial](../001-custom-profiles.md) com as estações revistas, propagar para a spec funcional, técnica e tabelas.
+Recomendação: **opção (B)** — atualizar o [planejamento §Hideout inicial](./001-custom-profiles-00-planejamento.md) com as estações revistas, propagar para a spec funcional, técnica e tabelas.
 
 **Decisão:**
 - `[ ]` Pendente
@@ -77,9 +77,11 @@ Recomendação: **opção (B)** — atualizar o [planejamento §Hideout inicial]
 
 ---
 
-### PA-01-02 · A — Gap · 🟡 Importante
+### PA-01-02 · A — Gap · ✅ Resolvido em 2026-05-17
 
 **Skeleton JSONC tem `Items` apenas com placeholders — implementador precisa inferir estrutura completa**
+
+**Resolução:** caminho alternativo — em vez de inflar o skeleton com 90+ linhas manuais (sujeitas a erro), adotada **geração mecânica via script**. Spec técnica §5.1 nova ("Geração mecânica via script") aponta para o existente [scripts/build-loadouts.js](../../scripts/build-loadouts.js), que já contém as recipes por classe. Implementação estende esse script para emitir `.json` por classe aplicando a regra de stack (PA-01-03). Checklist atualizado.
 
 **Problema:** O skeleton em [§5](001-custom-profiles-02-spec-tech.md) mostra `AdditionalStartingItems.Items` com a baseline universal preenchida (9 itens), mas os blocos de tema, primary e backup×3 estão apenas comentados `// ...`. O implementador precisa abrir o planejamento, ler 4 tabelas (tema + primary + 3 backups idênticos), resolver TPLs no anchor JSON e consolidar — sem garantia de que a saída casa com a intenção.
 
@@ -103,9 +105,14 @@ Os outros 9 arquivos derivam da mesma estrutura, então 1 exemplo completo é su
 
 ---
 
-### PA-01-03 · B — Edge Case · 🟡 Importante
+### PA-01-03 · B — Edge Case · ✅ Resolvido em 2026-05-17
 
 **Stack limits do EFT podem quebrar consolidação via `Count`**
+
+**Resolução:** confirmado empiricamente via [tools/tarkov-itemdb/cache/spt-raw.json](../../../../tools/tarkov-itemdb/cache/spt-raw.json) que itens críticos têm `stackMaxSize: 1` (IFAK, Salewa, MRE, Bandage, Aquamari, Crackers, Aluminum splint, Analgin, Bayonet, todas as magazines, weapons, armor) — consolidação via `Count > 1` para eles é **inviável**. Ammo tem stack 60, Roubles 1.000.000. Regra de stack stack-aware adicionada em §5 do skeleton:
+- `stackMax == 1` → emitir N linhas com `Count: 1`
+- `stackMax > 1` → emitir `ceil(qty/stackMax)` linhas com `Count` = stackMax
+Smoke test do comportamento do mod ao receber `Count > stackMax` adicionado ao checklist como confirmação de proteção.
 
 **Problema:** A spec técnica (§5, nota final do skeleton) recomenda consolidar itens duplicados via `Count` somado: "5 IFAKs no total → uma única entrada com `Count: 5`". Em EFT 0.16.x, **cada tipo de item tem um stack limit interno**:
 - IFAK, Salewa, MRE, Aquamari, Bandages → stack 1 (não empilha)
@@ -133,9 +140,11 @@ Se `AdditionalStartingItems.Items[].Count` for `> stack_limit` para o item, trê
 
 ---
 
-### PA-01-04 · A — Gap · 🟡 Importante
+### PA-01-04 · A — Gap · ✅ Resolvido em 2026-05-17
 
 **Validação prévia do `anchor-items.json` contra TPLs realmente usados no loadout**
+
+**Resolução:** elevado o nível de validação. Em vez de validar só contra `anchor-items.json` (100 itens), validar contra [tools/tarkov-itemdb](../../../../tools/tarkov-itemdb/) (5630 TPLs com metadados completos). §2 Fontes da spec técnica atualizada para listar o itemdb como fonte autoritativa. Checklist atualizado com cross-check: cada ID simbólico do `build-loadouts.js` → bsgId no anchor → TPL existe no itemdb com `stackMaxSize` definido.
 
 **Problema:** A spec aponta [anchor-items.json](../anchor-items.json) como fonte autoritativa de TPLs (§2 e §5). Confirmei via grep que mags (`MAG_AKM_30`, `MAG_PM_8`) e ammo (`AMMO_762x39_PS`, `AMMO_545x39_BS`) **estão** no anchor JSON. Mas a spec não exige validar **antes da implementação** que **todos** os IDs simbólicos referenciados nos loadouts de todas as 10 classes existem no anchor.
 
@@ -153,9 +162,11 @@ Custo da tarefa: 10-15 min. Evita retrabalho de horas em playtest.
 
 ---
 
-### PA-01-05 · C — Lógica · 🟡 Importante
+### PA-01-05 · C — Lógica · ✅ Resolvido em 2026-05-17
 
 **Checklist usa `file -i` que é Unix-only — falha no ambiente nativo Windows**
+
+**Resolução:** checklist atualizado com snippet PowerShell nativo que lê os 3 primeiros bytes e detecta BOM. Comando `file -i` mantido como alternativa entre parênteses para usuários com Git Bash/WSL.
 
 **Problema:** Em [§8 Checklist](001-custom-profiles-02-spec-tech.md), o item de validação de encoding usa:
 > `file -i mods/RZCustomProfiles/modded/profiles/*.json` deve retornar `charset=utf-8`
@@ -190,9 +201,11 @@ Recomendação: PowerShell como primário (alinhado ao ambiente nativo) + nota "
 
 ---
 
-### PA-01-06 · A — Gap · 🟢 Menor
+### PA-01-06 · A — Gap · ✅ Resolvido em 2026-05-17
 
 **Limite numérico para `Description` não definido**
+
+**Resolução:** nota "Limite de design: Description ≤ 200 caracteres" adicionada no bloco final do skeleton em §5 da spec técnica.
 
 **Problema:** A spec funcional (corner case) menciona "≤ 200 chars" para Description longa. O skeleton da spec técnica mostra a Description do Médico de Combate com 117 chars — OK, mas não há critério numérico explícito reaplicável às outras 9.
 
@@ -208,9 +221,11 @@ Recomendação: PowerShell como primário (alinhado ao ambiente nativo) + nota "
 
 ---
 
-### PA-01-07 · B — Edge Case · 🟢 Menor
+### PA-01-07 · B — Edge Case · ✅ Resolvido em 2026-05-17
 
 **Comportamento se BaseProfile ≠ 0 não documentado**
+
+**Resolução:** bloco "Premissa fixa do schema" adicionado no topo do §7 Riscos da spec técnica explicitando que todos os 10 perfis usam `BaseProfile: 0` e que mudar para Unheard/EOD requer re-auditoria dos zeros explícitos.
 
 **Problema:** A spec funcional ([§Comportamento desejado](001-custom-profiles-01-spec.md)) reza que zeros explícitos em `TradersLoyalty`/`HideoutStartingLevels`/`SkillOverrides` são "identidade do Standard". Isso é verdade **apenas** se `BaseProfile: 0` (Standard). Se algum dia algum dos 10 perfis usar `BaseProfile: 4` (Unheard — começa com Stash 3, várias estações em L1+, traders elevados), os zeros do JSON podem fazer **downgrade silencioso**.
 

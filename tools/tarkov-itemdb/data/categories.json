@@ -136,21 +136,21 @@
                 {
                   "id": "5b5f73ab86f774094242f195",
                   "name": "Flashlights",
-                  "icon": "/spt-images/handbook/",
+                  "icon": "/spt-images/handbook/icon_mod_lightlaser.png",
                   "order": 100,
                   "children": []
                 },
                 {
                   "id": "5b5f73c486f77447ec5d7704",
                   "name": "Laser aiming modules",
-                  "icon": "/spt-images/handbook/",
+                  "icon": "/spt-images/handbook/icon_mod_lightlaser.png",
                   "order": 100,
                   "children": []
                 },
                 {
                   "id": "5b5f737886f774093e6cb4fb",
                   "name": "Tactical combo devices",
-                  "icon": "/spt-images/handbook/",
+                  "icon": "/spt-images/handbook/icon_mod_lightlaser.png",
                   "order": 100,
                   "children": []
                 }
@@ -165,21 +165,21 @@
                 {
                   "id": "5b5f724c86f774093f2ecf15",
                   "name": "Flashhiders & brakes",
-                  "icon": "/spt-images/handbook/",
+                  "icon": "/spt-images/handbook/icon_mod_muzzle.png",
                   "order": 100,
                   "children": []
                 },
                 {
                   "id": "5b5f72f786f77447ec5d7702",
                   "name": "Muzzle adapters",
-                  "icon": "/spt-images/handbook/",
+                  "icon": "/spt-images/handbook/icon_mod_muzzle.png",
                   "order": 100,
                   "children": []
                 },
                 {
                   "id": "5b5f731a86f774093e6cb4f9",
                   "name": "Suppressors",
-                  "icon": "/spt-images/handbook/",
+                  "icon": "/spt-images/handbook/icon_mod_muzzle.png",
                   "order": 100,
                   "children": []
                 }
@@ -194,42 +194,42 @@
                 {
                   "id": "5b5f740a86f77447ec5d7706",
                   "name": "Assault scopes",
-                  "icon": "/spt-images/handbook/",
+                  "icon": "/spt-images/handbook/icon_mod_sight.png",
                   "order": 100,
                   "children": []
                 },
                 {
                   "id": "5b5f742686f774093e6cb4ff",
                   "name": "Collimators",
-                  "icon": "/spt-images/handbook/",
+                  "icon": "/spt-images/handbook/icon_mod_sight.png",
                   "order": 100,
                   "children": []
                 },
                 {
                   "id": "5b5f744786f774094242f197",
                   "name": "Compact collimators",
-                  "icon": "/spt-images/handbook/",
+                  "icon": "/spt-images/handbook/icon_mod_sight.png",
                   "order": 100,
                   "children": []
                 },
                 {
                   "id": "5b5f746686f77447ec5d7708",
                   "name": "Iron sights",
-                  "icon": "/spt-images/handbook/",
+                  "icon": "/spt-images/handbook/icon_mod_sight.png",
                   "order": 100,
                   "children": []
                 },
                 {
                   "id": "5b5f748386f774093e6cb501",
                   "name": "Optics",
-                  "icon": "/spt-images/handbook/",
+                  "icon": "/spt-images/handbook/icon_mod_sight.png",
                   "order": 100,
                   "children": []
                 },
                 {
                   "id": "5b5f749986f774094242f199",
                   "name": "Special purpose sights",
-                  "icon": "/spt-images/handbook/",
+                  "icon": "/viewer/icons/icon_mod_sight_hd.png",
                   "order": 100,
                   "children": []
                 }

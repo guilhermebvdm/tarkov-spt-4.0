@@ -342,142 +342,146 @@ tbody td:last-child{border-right:none}
 // forge_id : null=absent  ""=unknown  "123"=forge mod ID
 // r4_path  : null=absent  ""=unknown  "user/repo"=github  "https://..."=other
 const MODS = [
-[0,"🏠 UltraFika-Plugin","Client","Ambos","Framework","Multiplayer",null,null,"Cliente multiplayer (fork de Fika)","Evoluir","Crítica",true,false,"Sim"],
-[1,"[SVM] Server Value Modifier","Server","Geral","Balanceamento","Framework","236","GhostFenixx/svm-csharp","Modifica valores do servidor (loot, traders, hideout) — último release SPT 3.11","Aguardar","?",false,true,"Sim"],
-[2,"AAAArtem-WTT","Client","Geral","?","?","1023","WelcomeToTarkov/WTT-Artem","🔍 (relacionado ao WTT)","Avaliar","?",false,true,"Sim"],
-[3,"acidphantasm-DelayedFleaSales","Client","Geral","Hardcore","Mercado","2016","acidphantasm/delayedfleasales-csharp","Atrasa vendas no flea market (era Server/TS em 3.x, reescrito como BepInEx C# para 4.0)","Instalar","?",false,true,"Sim"],
-[4,"acidphantasm-moretagcolours","Client","Geral","QoL","UI","1533","acidphantasm/acidphantasm-moretagcolours","Mais cores para tags de itens","Avaliar","?",false,true,"Sim"],
-[5,"acidphantasm-previewsizer","Client","Geral","QoL","UI","2339","acidphantasm/acidphantasm-previewsizer","Redimensiona preview de itens","Avaliar","?",false,true,"Sim"],
-[6,"acidphantasm-progressivebotsystem","Client","Raid","Balanceamento","IA","1594","acidphantasm/progressivebotsystem-csharp","Sistema progressivo de bots (era Server/TS em 3.x, reescrito como BepInEx C# para 4.0)","Instalar","?",false,true,"Sim"],
-[7,"acidphantasm-refsptfriendlyquests","Client","Geral","Balanceamento","Quests","1538","acidphantasm/reffriendlyquests-csharp","Quests amigáveis (compatível com Ref — era Server/TS em 3.x, reescrito como BepInEx C# para 4.0)","Instalar","?",false,true,"Sim"],
-[8,"acidphantasm-simpleworkoutqte","Server","Hideout","QoL","Hideout","1437","acidphantasm/acidphantasm-simpleworkoutqte","QTE de workout no hideout","Avaliar","?",false,true,"Sim"],
-[9,"AirFilterWarning","Client","Hideout","QoL","Hideout","2129","danx91/AirFilterWarning","Aviso de filtro de ar gerador","Avaliar","?",false,true,"Sim"],
-[10,"AmandsGraphics","Client","Raid","Cosmético","Gráficos","592",null,"Configurações gráficas avançadas — último release SPT 3.10","Aguardar","?",false,false,"Sim"],
-[11,"aMoxoPixel-Painter","Server","Geral","Conteúdo","Mercado,Armas","1025","emilanderss0n/Painter","Trader que vende mods de armas pintados","Avaliar","?",false,true,"Sim"],
-[12,"BeltSlot","Client","Ambos","QoL","Inventário,Equipamentos","2181","Trench-foot/BeltSlot","Slot extra de cinto no inventário — último release v1.0.1 (SPT 3.11.4, jul/2025); sem build 4.0","Aguardar","?",false,false,"Sim"],
-[13,"BetterRearSights","Client","Raid","Realismo","Armas","1591","peinwastaken/PeinBetterRearSights","Mira traseira melhorada","Avaliar","?",false,true,"Sim"],
-[14,"BorkelRNVG","Client","Raid","Realismo","Equipamentos","954","Borkel/RealisticNVG-client-2","NVGs realistas com máscaras + luz natural — v2.1.1 (SPT 4.0.13). Mesmo repo serve 3.x e 4.0 (versão por release)","Instalar","?",false,true,"Sim"],
-[15,"BRNVG_N-15Adapter","Client","Raid","Realismo","Equipamentos","954","Borkel/RealisticNVG-client-2","Adaptador N-15 para BRNVG — incluído no pacote BorkelRNVG v2.1.1 (#14), SPT 4.0.13","Instalar","?",false,true,"Sim"],
-[16,"ChooChoo-TraderModding","Misto","Geral","QoL","Mercado,Armas","1283","Soulztorm/ChooChoo-TraderModding","Modding via traders","Avaliar","?",false,true,"Sim"],
-[17,"ContinuousLoadAmmo","Client","Raid","QoL","Munições","2112","ozen-m/SPT-ContinuousLoadAmmo","Carregamento contínuo de munição","Avaliar","?",false,true,"Sim"],
-[18,"CWX","Client","Geral","Conteúdo","Framework","1454","CWXDEV/CWX-Mods","Coleção de mods do CWX (CWX-MegaMod)","Avaliar","?",false,true,"Sim"],
-[19,"DanW-SPTQuestingBots","Server","Raid","Realismo","IA","1109","dwesterwick/SPTQuestingBots","Bots fazendo quests + spawns PMC mimic live","Avaliar","?",false,true,"Sim"],
-[20,"DeadzoneMod","Client","Raid","Realismo","Armas","1001",null,"Deadzone/free aim style insurgency","Avaliar","?",false,false,"Sim"],
-[21,"desze-UnlockHideoutCustomization","Server","Hideout","QoL","Hideout","2053",null,"Desbloqueia customização do hideout","Avaliar","?",false,false,"Sim"],
-[22,"DewardianDev-MOAR","Server","Raid","Balanceamento","IA","789","Andrewgdewar/MOAR","Bot spawning system","Avaliar","?",false,true,"Sim"],
-[23,"dk.SeparateHostility","Client","Raid","Realismo","IA","2248",null,"Separa hostilidade entre facções","Avaliar","?",false,false,"Sim"],
-[24,"doordash","Client","Raid","Realismo","Mapas","2214","bmpq/spt-doordash","Breaching de portas trancadas (SPT 4.0)","Avaliar","?",false,true,"Sim"],
-[25,"DrakiaXYZ-BigBrain","Client","Raid","Framework","IA","902","DrakiaXYZ/SPT-BigBrain","Library de combat layers para bots (dep. de SAIN) — v1.4.0 (SPT 4.0.13). Mesmo repo, versionado por tags","Instalar","?",false,true,"Sim"],
-[26,"DrakiaXYZ-EquipFromWeaponRack","Client","Hideout","QoL","Hideout,Armas","1136","DrakiaXYZ/SPT-EquipFromWeaponRack","Equipar arma direto do rack do hideout","Avaliar","?",false,true,"Sim"],
-[27,"DrakiaXYZ-LootRadius","Client","Raid","QoL","Loot","1349",null,"Aumenta raio de loot","Avaliar","?",false,false,"Sim"],
-[28,"DrakiaXYZ-QuickMoveToContainer","Client","Ambos","QoL","Inventário","1341","DrakiaXYZ/SPT-QuickMoveToContainer","Ctrl+Click move item para container aberto","Avaliar","?",false,true,"Sim"],
-[29,"DrakiaXYZ-SearchOpenContainers","Client","Ambos","QoL","Inventário","934","DrakiaXYZ/SPT-SearchOpenContainers","Buscar dentro de containers abertos","Avaliar","?",false,true,"Sim"],
-[30,"DrakiaXYZ-Waypoints","Client","Raid","Framework","IA,Mapas","827","DrakiaXYZ/SPT-Waypoints","Expande navmesh dos mapas (dep. de SAIN) — v1.8.2 (SPT 4.0.13). Mesmo repo, versionado por tags","Instalar","?",false,true,"Sim"],
-[31,"DynamicExternalResolution","Client","Geral","QoL","Gráficos","929",null,"Resolução externa dinâmica (DERP)","Avaliar","?",false,false,"Sim"],
-[32,"DynamicMaps (SPTDynamicMaps)","Client","Raid","QoL","UI,Mapas","1431","mpstark/SPT-DynamicMaps","UI custom de mapas com tracking de quests","Avaliar","?",false,true,"Sim"],
-[33,"Eco-Attachment Emporium","Server","Geral","Conteúdo","Armas","2288","Eco9341/tarkovMods","Mais attachments para armas","Avaliar","?",false,true,"Sim"],
-[34,"ExpandedFpsLimit","Client","Geral","QoL","Gráficos","2066","Mugnum/SPT_ExpandedFpsLimit","Aumenta limite de FPS (até 360)","Avaliar","?",false,true,"Sim"],
-[35,"Fika","Misto","Ambos","Framework","Multiplayer","2326","project-fika/Fika-Plugin","Multiplayer base (BepInEx + server) — v2.2.5 (SPT 4.0.13). Mesmo repo. Aliases: `fika-server`, `Fika.Core`","Instalar","?",false,true,"Sim"],
-[36,"flir-betterkeysng","Client","Geral","QoL","UI","1888","https://gitlab.com/flir063-spt/betterkeys-ng","UI melhorada para keys — autor `flir` (mesmo de Tarkov Weather System); provável Client","Avaliar","?",false,true,"Sim"],
-[37,"FOVFix","Client","Raid","QoL","Gráficos","701","space-commits/SPT-FOV-Fix","Fix de FOV (Fontaine's FOV Fix) — releases para SPT 4.x","Instalar","?",false,true,"Sim"],
-[38,"gaylatea-deadlyblades","Server","Raid","Balanceamento","Armas","819",null,"Lâminas mais letais","Avaliar","?",false,false,"Sim"],
-[39,"Gaylatea-UseLooseLoot","Client","Raid","QoL","Loot","933","DrakiaXYZ/SPT-UseLooseLoot","Usa loose loot direto sem entrar no inventário","Avaliar","?",false,true,"Sim"],
-[40,"HandsAreNotBusy","Client","Raid","QoL","Animações","1298","Lacyway/HandsAreNotBusy","Mãos não ficam ocupadas (animação)","Avaliar","?",false,true,"Sim"],
-[41,"hideoutcat","Client","Hideout","Cosmético","Hideout","2038",null,"Gato no hideout (5 texturas configuráveis)","Avaliar","?",false,false,"Sim"],
-[42,"HollywoodFX","Client","Raid","Cosmético","Gráficos","2003","SleepingPills/HollywoodFX","FX cinematográficos (impactos, blood) — v1.8.4 (SPT 4.0.13). Autor: JankyTheClown / SleepingPills. Mesmo repo","Instalar","?",false,true,"Sim"],
-[43,"HollywoodGraphics","Client","Raid","Cosmético","Gráficos","2003","SleepingPills/HollywoodFX","Gráficos cinematográficos — incluído no pacote HollywoodFX v1.8.4 (#42), SPT 4.0.13","Instalar","?",false,true,"Sim"],
-[44,"IcyClawz.CustomInteractions","Client","Ambos","QoL","UI","938","IgorEisberg/SPT-ClientMods","Interações customizadas — perfil do autor: hub.sp-tarkov.com/user/34778-icyclawz (autor IgorEisberg)","Avaliar","?",false,true,"Sim"],
-[45,"IcyClawz.ItemContextMenuExt","Client","Ambos","QoL","UI","940","IgorEisberg/SPT-ClientMods","Menu de contexto estendido em itens (SPT 4.0.13, 18.1K downloads). Repo monorepo do autor","Instalar","?",false,true,"Sim"],
-[46,"IcyClawz.ItemSellPrice","Client","Geral","QoL","Mercado,UI","909","IgorEisberg/SPT-ClientMods","Preços de venda em todos os traders (SPT 4.0.13, 81.5K downloads). Repo monorepo do autor","Instalar","?",false,true,"Sim"],
-[47,"IcyClawz.MunitionsExpert","Client","Geral","QoL","Munições,UI","972","IgorEisberg/SPT-ClientMods","Info detalhada de munição — perfil do autor: hub.sp-tarkov.com/user/34778-icyclawz (autor IgorEisberg)","Avaliar","?",false,true,"Sim"],
-[48,"IhanaMies-LootValueBackend","Client","Ambos","QoL","Loot,UI","1155",null,"Mostra valor de loot na UI — último release SPT 3.11","Aguardar","?",false,false,"Sim"],
-[49,"inory-agonysfx","Client","Raid","Realismo","Gráficos","1831","ppowa/agonysfx","SFX de dor/agonia","Avaliar","?",false,true,"Sim"],
-[50,"JBOBYH_ItemPreviewQoL","Client","Geral","QoL","UI","2206","jbobyh/JBOBYH_ItemPreviewQoL","QoL de preview de itens","Avaliar","?",false,true,"Sim"],
-[51,"Jehree-GildedKeyStorage","Client","Ambos","QoL","Inventário","865","DrakiaXYZ/SPT-GildedKeyStorage-CSharp","Storage especializado para keys — original do Jehree (3.x), fork C# do DrakiaXYZ é o de 4.0","Instalar","?",false,true,"Sim"],
-[52,"Kaeno-TraderScrolling","Client","Geral","QoL","Mercado,UI","1089","CWXDEV/Kaeno-TraderScrolling","Scroll na lista de traders","Avaliar","?",false,true,"Sim"],
-[53,"Kat.BetterAmmoLoadingList","Client","Ambos","QoL","Munições,UI","2221","Katrin0522/SPT-BetterAmmoLoadingList","Lista melhorada de loading de munição","Avaliar","?",false,true,"Sim"],
-[54,"kmyuhkyuk-EnvironmentReplace","Client","Raid","Conteúdo","Mapas","1371","minihazel/EnvironmentReplace","Substitui ambientes/mapas","Avaliar","?",false,true,"Sim"],
-[55,"kmyuhkyuk-KmyTarkovApi","Client","Geral","Framework","Framework","898","kmyuhkyuk/KmyTarkovApi","Framework para client mods","Avaliar","?",false,true,"Sim"],
-[56,"lacyway-mergeconsumables (MergeConsumables)","Misto","Ambos","QoL","Inventário","1657","Lacyway/MergeConsumables","Merge de consumíveis (médicos, comida)","Avaliar","?",false,true,"Sim"],
-[57,"MoreCheckmarks","Misto","Ambos","QoL","UI","861","TommySoucy/MoreCheckmarks","Checkmarks coloridos em itens (quests, hideout, barters) — v2.1.0 (SPT 4.0.11). Alias: `MoreCheckmarksBackend`","Instalar","?",false,true,"Sim"],
-[58,"MoxoPixel-MagTape","Server","Geral","Cosmético","Munições","1018","emilanderss0n/MagTape","Magazines com tape (visual + tagging)","Avaliar","?",false,true,"Sim"],
-[59,"MoxoPixel-TacticalGearComponent","Server","Geral","Conteúdo","Equipamentos","1125","emilanderss0n/TGC","Componente de equipamento tático","Avaliar","?",false,true,"Sim"],
-[60,"MusicManiac-LessRestrictingHeadwear","Server","Geral","Balanceamento","Equipamentos","922","MusicManiac/LessRestrictingHeadwear","Headwear menos restritivo — v4.0.13 disponível","Instalar","?",false,true,"Sim"],
-[61,"platinum-theblacklist","Misto","Geral","Balanceamento","Mercado","755","ArchangelWTF/spt-the-blacklist","Blacklist de itens (flea market enhancements)","Avaliar","?",false,true,"Sim"],
-[62,"PlayerEncumbranceBar","Client","Ambos","QoL","UI,Inventário","1374","Lacyway/SPT-PlayerEncumbranceBar","Barra de encumbrance no inventário — v1.2.2 (SPT 4.0.13, maintainer 4.0: Lacyway)","Instalar","?",false,true,"Sim"],
-[63,"Pluto! - SPT Battlepass","Server","Geral","Progressão","Quests,Progressão","2098",null,"Battlepass para SPT (Arena Season 0)","Avaliar","?",false,false,"Sim"],
-[64,"QuickSell","Client","Geral","QoL","Mercado","1732","TadMaj/Tarkov-QuickSell","Venda rápida de itens (context menu)","Avaliar","?",false,true,"Sim"],
-[65,"RaiRai.ColorConverterAPI","Client","Geral","Framework","UI","1090","RaiRaiTheRaichu/ColorConverterAPI","API utilitária de conversão de cores","Avaliar","?",false,true,"Sim"],
-[66,"Realism","Misto","Ambos","Realismo","Framework","416",null,"Overhaul de realismo (balística, médica, hazards) — último release SPT 3.9.x. Aliases: `SPT-Realism`, `RealismMod`","Aguardar","?",false,false,"Sim"],
-[67,"redlaser42-Better Headset Descriptions","Client","Geral","QoL","UI,Equipamentos","2199",null,"Adiciona stats de headsets às descrições dos itens — sem repo público","Avaliar","?",false,false,"Sim"],
-[68,"redlaser42-Increase Climb Height","Server","Raid","Balanceamento","Animações","1575","","Aumenta altura máxima de escalada","Avaliar","?",false,true,"Sim"],
-[69,"SAIN","Client","Raid","Realismo","IA","791","ArchangelWTF/SAIN","Substituição completa de IA dos bots — v4.4.3 (SPT 4.0.13). **3.x: repo Solarint original** · **4.2.0+: fork ArchangelWTF**. Depende de BigBrain + Waypoints","Instalar","?",false,true,"Sim"],
-[70,"seasoniterator","?","?","?","?","","","🔍 (estações/seasonal?) — não confirmado no Forge","Avaliar","?",false,false,"Sim"],
-[71,"shibdib-NoTransitTasks","Server","Raid","Balanceamento","Quests","1944",null,"Remove tasks de transit","Avaliar","?",false,false,"Sim"],
-[72,"Skwizzy-LootingBots","Misto","Raid","Realismo","IA,Loot","812","Skwizzy/SPT-LootingBots","Bots fazendo loot (BepInEx + server)","Avaliar","?",false,true,"Sim"],
-[73,"somtam.NoBush","Client","Raid","Realismo","IA","2123",null,"Para AI atirar em quem está na bush","Avaliar","?",false,false,"Sim"],
-[74,"somtam.SimpleDeClutter","Client","Raid","QoL","Gráficos","2139",null,"Reduz clutter visual","Avaliar","?",false,false,"Sim"],
-[75,"SPT-FreshContentBackport","Server","Geral","Conteúdo","Framework","2187",null,"Backport de conteúdo novo","Avaliar","?",false,false,"Sim"],
-[76,"SPT-InsuranceFraud","Server","Geral","Balanceamento","Mercado","1792","ibxccc123/SPT-InsuranceFraud","Fraude no seguro (loot dropado retorna) — único release v1.0.0 (SPT 3.9.8, out/2024); repo original removido; sem build 4.0","Aguardar","?",false,false,"Sim"],
-[77,"SPTVRAMCleaner","Client","Geral","QoL","Gráficos","2173","matsixx/SPTVRAMCleaner","Limpeza de VRAM (autor matsixx, não swiftxp)","Avaliar","?",false,true,"Sim"],
-[78,"StashSearch","Client","Hideout","QoL","Inventário","2148","DrakiaXYZ/SPT-StashSearch","Busca dentro do stash — último release v1.4.2 (SPT 3.11.4, mai/2025); DrakiaXYZ fork sem commits desde 2024-03","Aguardar","?",false,false,"Sim"],
-[79,"SwiftXP.ShowMeTheMoney","Misto","Geral","QoL","UI,Mercado","2299","swiftxp-hub/spt-show-me-the-money","Mostra dinheiro/valores em UI","Avaliar","?",false,true,"Sim"],
-[80,"TacticalToasterUNTARGH","Server","Raid","Conteúdo","IA","2342","TacticalToaster/TacticalToasterUNTARGH","Adiciona UNTAR como faction com bots customizados","Avaliar","?",false,true,"Sim"],
-[81,"Tarkov Weather System","Client","Raid","QoL","Mapas","2120","https://gitlab.com/flir063-spt/timeweatherchanger","Time & Weather Changer NG — v2.4.0 (SPT 4.0.13). Autor: flir. Hospedado no **GitLab**","Instalar","?",false,true,"Sim"],
-[82,"TellTheTime","Client","Geral","QoL","UI","2202",null,"Mostra hora atual","Avaliar","?",false,false,"Sim"],
-[83,"Terkoiz.Freecam","Client","Raid","QoL","UI","164","acidphantasm/SPT-Freecam","Câmera livre (debug/replay) — v1.4.6 (último release SPT 3.11). Mantido por acidphantasm","Aguardar","?",false,true,"Sim"],
-[84,"tyfon-hideoutinprogress","Client","Hideout","QoL","Hideout,Inventário","2076","tyfon7/hip","Botão \"Transfer Items\" no hideout (SPT 4.0). Alias: `Tyfon.HideoutInProgress`","Instalar","?",false,true,"Sim"],
-[85,"tyfon-uifixes","Client","Geral","QoL","UI","1342","tyfon7/UIFixes","Coleção de QoL fixes de UI. Aliases: `Tyfon.UIFixes`, `Tyfon.UIFixes.Net`","Avaliar","?",false,true,"Sim"],
-[86,"tyfon-weaponcustomizer","Client","Geral","QoL","Armas","1950","tyfon7/WeaponCustomizer","Fine tune de attachments. Alias: `Tyfon.WeaponCustomizer`","Avaliar","?",false,true,"Sim"],
-[87,"Virtual's Custom Quest Loader","Server","Geral","Framework","Quests","649","VirtualAE/Virtuals-Custom-Quest-Loader","Dependência para mods importarem custom quests. Alias: `VCQL`, `VCQLQuestZones`","Avaliar","?",false,true,"Sim"],
-[88,"VisceralCombat","?","Raid","Realismo","Gráficos",null,"","Efeitos viscerais de combate — distribuído via Patreon/Discord (Valentin The Mad), não publicado no Forge","Avaliar","?",false,false,"Sim"],
-[89,"VolumetricBloodFX","?","Raid","Cosmético","Gráficos",null,"","FX de sangue volumétrico — distribuído via Patreon/Discord (Valentin The Mad), não publicado no Forge","Avaliar","?",false,false,"Sim"],
-[90,"Wara-ModdingStatsHelper","Client","Geral","QoL","UI,Armas","1300","Soulztorm/Wara-ModdingStatsHelper","Helper de stats em modding","Avaliar","?",false,true,"Sim"],
-[91,"WTT-Armory","Server","Geral","Conteúdo","Armas,Quests","2246","WelcomeToTarkov/WTT-Armory","Pack de 50+ armas + quests (WTT team) — v2.0.5 (SPT 4.0.13). 4.0 está em branch separada","Instalar","?",false,true,"Sim"],
-[92,"WTT-PackNStrap","Server","Ambos","Conteúdo","Equipamentos","1278","WelcomeToTarkov/PackNStrap","Battle belt + small cases (WTT team) — v2.0.4 (SPT 4.0.13). Mesmo repo","Instalar","?",false,true,"Sim"],
-[93,"yellowdoge-tarkovrarecollectibles","Server","Geral","Conteúdo","Loot","2318","TheYellowDoge/YellowDoge-TarkovRareCollectibles","Itens raros colecionáveis","Avaliar","?",false,true,"Sim"],
-[94,"zzDrakiaXYZ-LiveFleaPrices","Server","Geral","Balanceamento","Mercado","1131","DrakiaXYZ/SPT-LiveFleaPrices-CSharp","Preços do flea ao vivo (live data) — versão C# do mesmo autor","Instalar","?",false,true,"Sim"],
-[95,"🏠 Band-Aid","Client","Raid","QoL","Framework",null,null,"Fix/patch interno do projeto","Evoluir","?",true,false,"Sim"],
-[96,"🏠 CoordLogger","Client","Raid","Framework","Framework",null,null,"Logger de coordenadas (utilitário interno)","Evoluir","?",true,false,"Sim"],
-[97,"🏠 FikaTransitFix (FikaTransitFixServer)","Server","Raid","Framework","Multiplayer",null,null,"Fix de transit em raids do Fika (interno)","Evoluir","?",true,false,"Sim"],
-[98,"🏠 FixReloadUltraFika","Client","Raid","Framework","Multiplayer,Animações",null,null,"Fix de reload no UltraFika (interno)","Evoluir","?",true,false,"Sim"],
-[99,"🏠 ForceSync","Misto","Ambos","Framework","Multiplayer",null,null,"Força sincronização (interno, relacionado ao UltraFika)","Evoluir","?",true,false,"Sim"],
-[100,"🏠 GhostMercenaries","Server","Raid","Conteúdo","IA",null,null,"Mercenários customizados (interno)","Evoluir","?",true,false,"Sim"],
-[101,"🏠 IdleSprintFix","Client","Raid","QoL","Animações",null,null,"Fix do bug de sprint travado (interno, v1.2.2)","NaoIncluir","?",true,false,"Sim"],
-[102,"🏠 TarkovRedLine (TarkovRedLine-ServerMod)","Server","Geral","Balanceamento","Framework",null,null,"Mod do servidor RedLine — customização proprietária do projeto","Evoluir","?",true,false,"Sim"],
-[103,"🏠 UmbigoPreto-Face the Knight - Mask Fix","Client","Raid","QoL","Equipamentos",null,null,"Fix da máscara do Knight (interno)","Evoluir","?",true,false,"Sim"],
-[104,"🏠 UmbigoPreto-TrueTrauma","Misto","Raid","Realismo","Framework",null,null,"Sistema de trauma realista (interno)","Evoluir","?",true,false,"Sim"],
-[105,"Climbable Ladders","Client","Raid","Realismo","Mapas,Animações","2649","bmpq/spt-ladders","Habilita escalada de escadas em vários mapas (woods bunker, customs watchtower etc.) — SPT 4.0.13","Instalar","?",false,true,"New"],
-[106,"Magazine Check Interrupt","Client","Raid","QoL","Munições,Animações","2643","ozen-m/SPT-MagCheckInterrupt","Transição contínua de magazine check para reload sem sair da animação — SPT 4.0.13","Instalar","?",false,true,"New"],
-[107,"Stance Sync","Client","Raid","QoL","Animações,Armas","2639","minihazel/StanceSync","Sincroniza lean e shoulder swap; opção para desabilitar lean sincronizado ao mirar — SPT 4.0.13","Instalar","?",false,true,"New"],
-[108,"Stat Rewards","Client","Geral","Progressão","Progressão","2655","Chazut/StatRewards","Recompensas aleatórias ao atingir marcos de stats (kills, dano, loot etc.) — 48 milestones repetíveis, configurável — SPT 4.0.13","Instalar","?",false,true,"New"],
-[109,"Brighter Interiors","Client","Raid","QoL","Gráficos","2613","7Bpencil/SPT-ReduceFakeInteriorShadow","Reduz intensidade de sombras internas para melhorar visibilidade em ambientes fechados — SPT 4.0.13","Instalar","?",false,true,"New"],
-[110,"RZCustomProfiles","Client","Geral","QoL","UI","2614","remzdnb/RZ-SPTMods","Gerenciamento de templates de perfil de personagem — v1.1.0 (SPT 4.0.13). Autor: RemzDNB","Instalar","?",false,true,"New"],
-[111,"LoadBundleEvenFaster","Client","Geral","QoL","Gráficos","2599","s8ga/SPT_LoadBundleEvenFaster","Reduz tempo de carregamento de bundles — camada extra sobre LoadBundleFaster. **Dep:** LoadBundleFaster ≥ v1.0.0. SPT 4.0.13","Instalar","?",false,true,"New"],
-[112,"Recoil Rework (Legacy)","Server","Raid","Realismo","Armas","2190","peinwastaken/SPTRecoilRework","Reescreve mecânica de recoil das armas (autor: pein) — v1.10.0 recompilada para SPT 4.0.13","Instalar","?",false,true,"New"],
-[113,"Gunsmith Barters","Server","Geral","Hardcore","Mercado,Armas","1963","Solethia/Kipperworks.GunsmithBarters","Adiciona barters no Mecânico voltados a runs hardcore — v2.0.2 (SPT 4.0.13). ⚠️ pode fazer alterações permanentes no perfil","Instalar","?",false,true,"New"],
-[114,"Camera Position Control & Custom Weapon Stances","Client","Raid","QoL","Animações,Armas","2572","shengzhanzhe/stancesAndCameraPositionSPT4.0.11","Controle customizável de posição da câmera FPV e stances de arma — v1.1.5 (SPT 4.0.13). ⚠️ ao atualizar de ≤0.9.7 remover `CameraRotationMod.dll` antigo","Instalar","?",false,true,"New"],
-[115,"Manimal's Ammo Loading Animations","Client","Raid","Realismo","Munições,Animações","2681","danauraborealis/ManimalAmmoLoadingAnimations","Animações em primeira pessoa para carregar munição em magazines — v1.5.0 (SPT 4.0.13). **Dep:** WTT-CommonLib ≥ v2.0.20. ⚠️ incompatível com Fika","Instalar","?",false,true,"New"],
-[116,"Refined Flea Offer List","Client","Geral","QoL","Mercado,UI","2623","Klamist/RefinedFleaOfferList","Exibe apenas a oferta mais barata por item no flea market; display inteligente de rublos e variantes de arma/armadura — v1.0.1 (SPT 4.0.13). Autor: ciallomako","Instalar","?",false,true,"New"],
-[117,"Knight Mask Fix (4.0+)","Client","Raid","Cosmético","Equipamentos","2685","TheOfficialSkull/FW---Knight-Mask-Fix---4.0.13","Corrige textura ausente da máscara 'Death Knight' no PMC Knight e em modelos de jogador — SPT 4.0.13+. Autor: Flex Wayne","Instalar","?",false,true,"New"],
-[118,"Peltor TEP-300 earplugs backport and fixes","Client","Raid","Conteúdo","Equipamentos","2420","Dight67/TEP-300-Backport-Fixes","Restaura os fones militares TEP-300 do EFT Live no SPT, com correções — SPT 4.0.13. Autor: nem","Instalar","?",false,true,"New"],
-[119,"Skills Extended","Server","Geral","?","?","2383","CJ-SPT/Skills-Extended","Expande e aprimora o sistema de skills do personagem com mecânicas mais impactantes — compatível com Fika, SPT 4.0.13","Instalar","?",false,true,"New"],
-[120,"Wolfik's Heavy Trooper Masks - Reupload","Client","Raid","Conteúdo","Equipamentos","1569","Hood26/WolfiksHeavyTroopers","Adiciona cinco máscaras pesadas em variantes de cor (Black, Tan, Black/Coyote, Wolf, Cult) com proteção real de armadura e desbloqueio por quests — SPT 4.0.13","Instalar","?",false,true,"New"],
-[121,"Couturier - gear and clothing pack","Misto","Raid","Conteúdo","Equipamentos,Vestuário","2239","turbodestroyer1337/spt_couturier","Pack de equipamento e vestuário: mochilas, capacetes, armaduras, coletes táticos retexturizados e roupas adicionais — SPT 4.0.13","Instalar","?",false,true,"New"],
-[122,"Foldables","Client","Geral","?","Inventário,Equipamentos","2422","ozen-m/SPT-Foldables","Permite dobrar mochilas e coletes, reduzindo seu tamanho quando guardados no inventário — v1.0.3, SPT 4.0.13. Autor: ozen","Instalar","?",false,true,"New"],
-[123,"Change Helmet Visor","Misto","Raid","QoL","Equipamentos,UI","2554","Trinagan/ChangeHelmetVisor","Ajusta a renderização do visor de capacete com controle de escala de textura via plugin BepInEx — v2.0.0, SPT 4.0.13","Instalar","?",false,true,"New"],
-[124,"WTT - CommonLib","Server","Geral","?","Dev","2310","WelcomeToTarkov/WTT-CommonLib","Biblioteca utilitária de modding: reduz boilerplate ao adicionar itens, missões e personagens personalizados — v2.0.20, SPT 4.0.13","Instalar","?",false,true,"New"],
-[125,"Easy Ammo Names","Server","Geral","QoL","UI,Inventário","1262","DrakiaXYZ/SPT-EasyAmmoNames-CSharp","Renomeia munições no SPT para identificação mais fácil dos tipos de projéteis — SPT 4.0.13","Instalar","?",false,true,"New"],
-[126,"Quest Tracker","Client","Raid","QoL","UI,Quests","1140","DrakiaXYZ/SPT-QuestTracker","Overlay alternável para acompanhar progresso de missões em tempo real durante incursões — SPT 4.0.13","Instalar","?",false,true,"New"],
-[127,"Use Items Anywhere","Client","Raid","QoL","Inventário","2386","CJ-SPT/UseItemsAnywhere","Permite usar e vincular itens de qualquer lugar do inventário durante a raid — SPT 4.0.13","Instalar","?",false,true,"New"],
-[128,"Hideout Recipe Framework","Server","Hideout","?","Dev,Hideout","2520","arcustarkov-sys/hideout-recipe-framework","Framework para criar facilmente receitas personalizadas do Esconderijo, expandindo opções de produção — SPT 4.0.13","Instalar","?",false,true,"New"],
-[129,"Dynamic External Resolution Patch (DERP)","Client","Geral","QoL","Gráficos","2200","Shibatsui/SPT-Dynamic-External-Resolution","Altera resolução dinamicamente ao usar miras ópticas, aumentando FPS — v1.1.1, SPT 4.0.13. Autor: Sh1ba (port 4.0 do DERP original, ver #31)","Instalar","?",false,true,"New"],
-[130,"AutoDeposit","Client","Hideout","QoL","Inventário","1469","tyfon7/AutoDeposit","Transfere itens para contêineres do stash que já contêm itens correspondentes (estilo Quick Stack do Terraria) — SPT 4.0.13","Instalar","?",false,true,"New"],
-[131,"Bring Back Concussion","Client","Raid","Realismo","Áudio","2550","harmonyzt/BringBackConcussion","Restaura efeitos sonoros de concussão e sons pós-morte do EFT (tinido, cegueira temporária) — v1.0.3, SPT 4.0.13","Instalar","?",false,true,"New"],
-[132,"LetMeRightClick","Client","Geral","QoL","UI,Inventário","2405","Lacyway/LetMeRightClick","Permite usar botão direito do mouse ao buscar itens, eliminando a restrição anterior — v1.0.0, SPT 4.0.13","Instalar","?",false,true,"New"],
-[133,"Un-flashbang Hideout","Client","Hideout","QoL","Gráficos,Hideout","1425","ArchangelWTF/Un-flashbangHideout","Remove o efeito de flashbang no hideout ao retornar de sessões noturnas com super sampling ativo — v1.0.4, SPT 4.0.13","Instalar","?",false,true,"New"],
-[134,"Task List Fixes","Client","Geral","QoL","UI,Quests","824","DrakiaXYZ/SPT-TaskListFixes","Corrige classificação de tarefas e melhora desempenho/organização da lista de missões — SPT 4.0.13. Autor: DrakiaXYZ","Instalar","?",false,true,"New"],
-[135,"Dragon Den - Dev Tool","Client","Raid","?","Dev","2336","Drexira/DragonDen-DevTool","Ferramenta dev para testes em raid: heal, modo deus, spawn de itens, gestão de bots e teleporte (225 locais) — SPT 4.0.13. Autor: Drexira","Instalar","?",false,true,"New"],
+[0,"🏠 UltraFika-Plugin","Client","Ambos","Framework","Multiplayer",null,null,"Cliente multiplayer (fork de Fika)","Evoluir","Crítica",true,false,"Sim",false],
+[1,"[SVM] Server Value Modifier","Server","Geral","Balanceamento","Framework","236","GhostFenixx/svm-csharp","Modifica valores do servidor (loot, traders, hideout) — último release SPT 3.11","Aguardar","?",false,true,"Sim",true],
+[2,"AAAArtem-WTT","Client","Geral","?","?","1023","WelcomeToTarkov/WTT-Artem","🔍 (relacionado ao WTT)","Avaliar","?",false,true,"Sim",false],
+[3,"acidphantasm-DelayedFleaSales","Client","Geral","Hardcore","Mercado","2016","acidphantasm/delayedfleasales-csharp","Atrasa vendas no flea market (era Server/TS em 3.x, reescrito como BepInEx C# para 4.0)","Instalar","?",false,true,"Sim",false],
+[4,"acidphantasm-moretagcolours","Client","Geral","QoL","UI","1533","acidphantasm/acidphantasm-moretagcolours","Mais cores para tags de itens","Avaliar","?",false,true,"Sim",false],
+[5,"acidphantasm-previewsizer","Client","Geral","QoL","UI","2339","acidphantasm/acidphantasm-previewsizer","Redimensiona preview de itens","Avaliar","?",false,true,"Sim",false],
+[6,"acidphantasm-progressivebotsystem","Client","Raid","Balanceamento","IA","1594","acidphantasm/progressivebotsystem-csharp","Sistema progressivo de bots (era Server/TS em 3.x, reescrito como BepInEx C# para 4.0)","Instalar","?",false,true,"Sim",false],
+[7,"acidphantasm-refsptfriendlyquests","Client","Geral","Balanceamento","Quests","1538","acidphantasm/reffriendlyquests-csharp","Quests amigáveis (compatível com Ref — era Server/TS em 3.x, reescrito como BepInEx C# para 4.0)","Instalar","?",false,true,"Sim",false],
+[8,"acidphantasm-simpleworkoutqte","Server","Hideout","QoL","Hideout","1437","acidphantasm/acidphantasm-simpleworkoutqte","QTE de workout no hideout","Avaliar","?",false,true,"Sim",false],
+[9,"AirFilterWarning","Client","Hideout","QoL","Hideout","2129","danx91/AirFilterWarning","Aviso de filtro de ar gerador","Avaliar","?",false,true,"Sim",true],
+[10,"AmandsGraphics","Client","Raid","Cosmético","Gráficos","592",null,"Configurações gráficas avançadas — último release SPT 3.10","Aguardar","?",false,false,"Sim",false],
+[11,"aMoxoPixel-Painter","Server","Geral","Conteúdo","Mercado,Armas","1025","emilanderss0n/Painter","Trader que vende mods de armas pintados","Avaliar","?",false,true,"Sim",false],
+[12,"BeltSlot","Client","Ambos","QoL","Inventário,Equipamentos","2181","Trench-foot/BeltSlot","Slot extra de cinto no inventário — último release v1.0.1 (SPT 3.11.4, jul/2025); sem build 4.0","Aguardar","?",false,false,"Sim",false],
+[13,"BetterRearSights","Client","Raid","Realismo","Armas","1591","peinwastaken/PeinBetterRearSights","Mira traseira melhorada","Avaliar","?",false,true,"Sim",false],
+[14,"BorkelRNVG","Client","Raid","Realismo","Equipamentos","954","Borkel/RealisticNVG-client-2","NVGs realistas com máscaras + luz natural — v2.1.1 (SPT 4.0.13). Mesmo repo serve 3.x e 4.0 (versão por release)","Instalar","?",false,true,"Sim",false],
+[15,"BRNVG_N-15Adapter","Client","Raid","Realismo","Equipamentos","954","Borkel/RealisticNVG-client-2","Adaptador N-15 para BRNVG — incluído no pacote BorkelRNVG v2.1.1 (#14), SPT 4.0.13","Instalar","?",false,true,"Sim",false],
+[16,"ChooChoo-TraderModding","Misto","Geral","QoL","Mercado,Armas","1283","Soulztorm/ChooChoo-TraderModding","Modding via traders","Avaliar","?",false,true,"Sim",false],
+[17,"ContinuousLoadAmmo","Client","Raid","QoL","Munições","2112","ozen-m/SPT-ContinuousLoadAmmo","Carregamento contínuo de munição","Avaliar","?",false,true,"Sim",true],
+[18,"CWX","Client","Geral","Conteúdo","Framework","1454","CWXDEV/CWX-Mods","Coleção de mods do CWX (CWX-MegaMod)","Avaliar","?",false,true,"Sim",true],
+[19,"DanW-SPTQuestingBots","Server","Raid","Realismo","IA","1109","dwesterwick/SPTQuestingBots","Bots fazendo quests + spawns PMC mimic live","Avaliar","?",false,true,"Sim",false],
+[20,"DeadzoneMod","Client","Raid","Realismo","Armas","1001",null,"Deadzone/free aim style insurgency","Avaliar","?",false,false,"Sim",false],
+[21,"desze-UnlockHideoutCustomization","Server","Hideout","QoL","Hideout","2053",null,"Desbloqueia customização do hideout","Avaliar","?",false,false,"Sim",false],
+[22,"DewardianDev-MOAR","Server","Raid","Balanceamento","IA","789","Andrewgdewar/MOAR","Bot spawning system","Avaliar","?",false,true,"Sim",false],
+[23,"dk.SeparateHostility","Client","Raid","Realismo","IA","2248",null,"Separa hostilidade entre facções","Avaliar","?",false,false,"Sim",false],
+[24,"doordash","Client","Raid","Realismo","Mapas","2214","bmpq/spt-doordash","Breaching de portas trancadas (SPT 4.0)","Avaliar","?",false,true,"Sim",false],
+[25,"DrakiaXYZ-BigBrain","Client","Raid","Framework","IA","902","DrakiaXYZ/SPT-BigBrain","Library de combat layers para bots (dep. de SAIN) — v1.4.0 (SPT 4.0.13). Mesmo repo, versionado por tags","Instalar","?",false,true,"Sim",false],
+[26,"DrakiaXYZ-EquipFromWeaponRack","Client","Hideout","QoL","Hideout,Armas","1136","DrakiaXYZ/SPT-EquipFromWeaponRack","Equipar arma direto do rack do hideout","Avaliar","?",false,true,"Sim",false],
+[27,"DrakiaXYZ-LootRadius","Client","Raid","QoL","Loot","1349",null,"Aumenta raio de loot","Avaliar","?",false,false,"Sim",false],
+[28,"DrakiaXYZ-QuickMoveToContainer","Client","Ambos","QoL","Inventário","1341","DrakiaXYZ/SPT-QuickMoveToContainer","Ctrl+Click move item para container aberto","Avaliar","?",false,true,"Sim",false],
+[29,"DrakiaXYZ-SearchOpenContainers","Client","Ambos","QoL","Inventário","934","DrakiaXYZ/SPT-SearchOpenContainers","Buscar dentro de containers abertos","Avaliar","?",false,true,"Sim",true],
+[30,"DrakiaXYZ-Waypoints","Client","Raid","Framework","IA,Mapas","827","DrakiaXYZ/SPT-Waypoints","Expande navmesh dos mapas (dep. de SAIN) — v1.8.2 (SPT 4.0.13). Mesmo repo, versionado por tags","Instalar","?",false,true,"Sim",false],
+[31,"DynamicExternalResolution","Client","Geral","QoL","Gráficos","929",null,"Resolução externa dinâmica (DERP)","Avaliar","?",false,false,"Sim",false],
+[32,"DynamicMaps (SPTDynamicMaps)","Client","Raid","QoL","UI,Mapas","1431","mpstark/SPT-DynamicMaps","UI custom de mapas com tracking de quests","Avaliar","?",false,true,"Sim",true],
+[33,"Eco-Attachment Emporium","Server","Geral","Conteúdo","Armas","2288","Eco9341/tarkovMods","Mais attachments para armas","Avaliar","?",false,true,"Sim",false],
+[34,"ExpandedFpsLimit","Client","Geral","QoL","Gráficos","2066","Mugnum/SPT_ExpandedFpsLimit","Aumenta limite de FPS (até 360)","Avaliar","?",false,true,"Sim",false],
+[35,"Fika","Misto","Ambos","Framework","Multiplayer","2326","project-fika/Fika-Plugin","Multiplayer base (BepInEx + server) — v2.2.5 (SPT 4.0.13). Mesmo repo. Aliases: `fika-server`, `Fika.Core`","Instalar","?",false,true,"Sim",true],
+[36,"flir-betterkeysng","Client","Geral","QoL","UI","1888","https://gitlab.com/flir063-spt/betterkeys-ng","UI melhorada para keys — autor `flir` (mesmo de Tarkov Weather System); provável Client","Avaliar","?",false,true,"Sim",true],
+[37,"FOVFix","Client","Raid","QoL","Gráficos","701","space-commits/SPT-FOV-Fix","Fix de FOV (Fontaine's FOV Fix) — releases para SPT 4.x","Instalar","?",false,true,"Sim",true],
+[38,"gaylatea-deadlyblades","Server","Raid","Balanceamento","Armas","819",null,"Lâminas mais letais","Avaliar","?",false,false,"Sim",false],
+[39,"Gaylatea-UseLooseLoot","Client","Raid","QoL","Loot","933","DrakiaXYZ/SPT-UseLooseLoot","Usa loose loot direto sem entrar no inventário","Avaliar","?",false,true,"Sim",true],
+[40,"HandsAreNotBusy","Client","Raid","QoL","Animações","1298","Lacyway/HandsAreNotBusy","Mãos não ficam ocupadas (animação)","Avaliar","?",false,true,"Sim",true],
+[41,"hideoutcat","Client","Hideout","Cosmético","Hideout","2038",null,"Gato no hideout (5 texturas configuráveis)","Avaliar","?",false,false,"Sim",false],
+[42,"HollywoodFX","Client","Raid","Cosmético","Gráficos","2003","SleepingPills/HollywoodFX","FX cinematográficos (impactos, blood) — v1.8.4 (SPT 4.0.13). Autor: JankyTheClown / SleepingPills. Mesmo repo","Instalar","?",false,true,"Sim",false],
+[43,"HollywoodGraphics","Client","Raid","Cosmético","Gráficos","2003","SleepingPills/HollywoodFX","Gráficos cinematográficos — incluído no pacote HollywoodFX v1.8.4 (#42), SPT 4.0.13","Instalar","?",false,true,"Sim",false],
+[44,"IcyClawz.CustomInteractions","Client","Ambos","QoL","UI","938","IgorEisberg/SPT-ClientMods","Interações customizadas — perfil do autor: hub.sp-tarkov.com/user/34778-icyclawz (autor IgorEisberg)","Avaliar","?",false,true,"Sim",true],
+[45,"IcyClawz.ItemContextMenuExt","Client","Ambos","QoL","UI","940","IgorEisberg/SPT-ClientMods","Menu de contexto estendido em itens (SPT 4.0.13, 18.1K downloads). Repo monorepo do autor","Instalar","?",false,true,"Sim",true],
+[46,"IcyClawz.ItemSellPrice","Client","Geral","QoL","Mercado,UI","909","IgorEisberg/SPT-ClientMods","Preços de venda em todos os traders (SPT 4.0.13, 81.5K downloads). Repo monorepo do autor","Instalar","?",false,true,"Sim",false],
+[47,"IcyClawz.MunitionsExpert","Client","Geral","QoL","Munições,UI","972","IgorEisberg/SPT-ClientMods","Info detalhada de munição — perfil do autor: hub.sp-tarkov.com/user/34778-icyclawz (autor IgorEisberg)","Avaliar","?",false,true,"Sim",false],
+[48,"IhanaMies-LootValueBackend","Client","Ambos","QoL","Loot,UI","1155",null,"Mostra valor de loot na UI — último release SPT 3.11","Aguardar","?",false,false,"Sim",false],
+[49,"inory-agonysfx","Client","Raid","Realismo","Gráficos","1831","ppowa/agonysfx","SFX de dor/agonia","Avaliar","?",false,true,"Sim",true],
+[50,"JBOBYH_ItemPreviewQoL","Client","Geral","QoL","UI","2206","jbobyh/JBOBYH_ItemPreviewQoL","QoL de preview de itens","Avaliar","?",false,true,"Sim",true],
+[51,"Jehree-GildedKeyStorage","Client","Ambos","QoL","Inventário","865","DrakiaXYZ/SPT-GildedKeyStorage-CSharp","Storage especializado para keys — original do Jehree (3.x), fork C# do DrakiaXYZ é o de 4.0","Instalar","?",false,true,"Sim",true],
+[52,"Kaeno-TraderScrolling","Client","Geral","QoL","Mercado,UI","1089","CWXDEV/Kaeno-TraderScrolling","Scroll na lista de traders","Avaliar","?",false,true,"Sim",true],
+[53,"Kat.BetterAmmoLoadingList","Client","Ambos","QoL","Munições,UI","2221","Katrin0522/SPT-BetterAmmoLoadingList","Lista melhorada de loading de munição","Avaliar","?",false,true,"Sim",false],
+[54,"kmyuhkyuk-EnvironmentReplace","Client","Raid","Conteúdo","Mapas","1371","minihazel/EnvironmentReplace","Substitui ambientes/mapas","Avaliar","?",false,true,"Sim",false],
+[55,"kmyuhkyuk-KmyTarkovApi","Client","Geral","Framework","Framework","898","kmyuhkyuk/KmyTarkovApi","Framework para client mods","Avaliar","?",false,true,"Sim",false],
+[56,"lacyway-mergeconsumables (MergeConsumables)","Misto","Ambos","QoL","Inventário","1657","Lacyway/MergeConsumables","Merge de consumíveis (médicos, comida)","Avaliar","?",false,true,"Sim",true],
+[57,"MoreCheckmarks","Misto","Ambos","QoL","UI","861","TommySoucy/MoreCheckmarks","Checkmarks coloridos em itens (quests, hideout, barters) — v2.1.0 (SPT 4.0.11). Alias: `MoreCheckmarksBackend`","Instalar","?",false,true,"Sim",false],
+[58,"MoxoPixel-MagTape","Server","Geral","Cosmético","Munições","1018","emilanderss0n/MagTape","Magazines com tape (visual + tagging)","Avaliar","?",false,true,"Sim",false],
+[59,"MoxoPixel-TacticalGearComponent","Server","Geral","Conteúdo","Equipamentos","1125","emilanderss0n/TGC","Componente de equipamento tático","Avaliar","?",false,true,"Sim",false],
+[60,"MusicManiac-LessRestrictingHeadwear","Server","Geral","Balanceamento","Equipamentos","922","MusicManiac/LessRestrictingHeadwear","Headwear menos restritivo — v4.0.13 disponível","Instalar","?",false,true,"Sim",false],
+[61,"platinum-theblacklist","Misto","Geral","Balanceamento","Mercado","755","ArchangelWTF/spt-the-blacklist","Blacklist de itens (flea market enhancements)","Avaliar","?",false,true,"Sim",false],
+[62,"PlayerEncumbranceBar","Client","Ambos","QoL","UI,Inventário","1374","Lacyway/SPT-PlayerEncumbranceBar","Barra de encumbrance no inventário — v1.2.2 (SPT 4.0.13, maintainer 4.0: Lacyway)","Instalar","?",false,true,"Sim",true],
+[63,"Pluto! - SPT Battlepass","Server","Geral","Progressão","Quests,Progressão","2098",null,"Battlepass para SPT (Arena Season 0)","Avaliar","?",false,false,"Sim",false],
+[64,"QuickSell","Client","Geral","QoL","Mercado","1732","TadMaj/Tarkov-QuickSell","Venda rápida de itens (context menu)","Avaliar","?",false,true,"Sim",false],
+[65,"RaiRai.ColorConverterAPI","Client","Geral","Framework","UI","1090","RaiRaiTheRaichu/ColorConverterAPI","API utilitária de conversão de cores","Avaliar","?",false,true,"Sim",false],
+[66,"Realism","Misto","Ambos","Realismo","Framework","416",null,"Overhaul de realismo (balística, médica, hazards) — último release SPT 3.9.x. Aliases: `SPT-Realism`, `RealismMod`","Aguardar","?",false,false,"Sim",false],
+[67,"redlaser42-Better Headset Descriptions","Client","Geral","QoL","UI,Equipamentos","2199",null,"Adiciona stats de headsets às descrições dos itens — sem repo público","Avaliar","?",false,false,"Sim",false],
+[68,"redlaser42-Increase Climb Height","Server","Raid","Balanceamento","Animações","1575","","Aumenta altura máxima de escalada","Avaliar","?",false,true,"Sim",true],
+[69,"SAIN","Client","Raid","Realismo","IA","791","ArchangelWTF/SAIN","Substituição completa de IA dos bots — v4.4.3 (SPT 4.0.13). **3.x: repo Solarint original** · **4.2.0+: fork ArchangelWTF**. Depende de BigBrain + Waypoints","Instalar","?",false,true,"Sim",false],
+[70,"seasoniterator","?","?","?","?","","","🔍 (estações/seasonal?) — não confirmado no Forge","Avaliar","?",false,false,"Sim",false],
+[71,"shibdib-NoTransitTasks","Server","Raid","Balanceamento","Quests","1944",null,"Remove tasks de transit","Avaliar","?",false,false,"Sim",false],
+[72,"Skwizzy-LootingBots","Misto","Raid","Realismo","IA,Loot","812","Skwizzy/SPT-LootingBots","Bots fazendo loot (BepInEx + server)","Avaliar","?",false,true,"Sim",false],
+[73,"somtam.NoBush","Client","Raid","Realismo","IA","2123",null,"Para AI atirar em quem está na bush","Avaliar","?",false,false,"Sim",false],
+[74,"somtam.SimpleDeClutter","Client","Raid","QoL","Gráficos","2139",null,"Reduz clutter visual","Avaliar","?",false,false,"Sim",false],
+[75,"SPT-FreshContentBackport","Server","Geral","Conteúdo","Framework","2187",null,"Backport de conteúdo novo","Avaliar","?",false,false,"Sim",false],
+[76,"SPT-InsuranceFraud","Server","Geral","Balanceamento","Mercado","1792","ibxccc123/SPT-InsuranceFraud","Fraude no seguro (loot dropado retorna) — único release v1.0.0 (SPT 3.9.8, out/2024); repo original removido; sem build 4.0","Aguardar","?",false,false,"Sim",false],
+[77,"SPTVRAMCleaner","Client","Geral","QoL","Gráficos","2173","matsixx/SPTVRAMCleaner","Limpeza de VRAM (autor matsixx, não swiftxp)","Avaliar","?",false,true,"Sim",true],
+[78,"StashSearch","Client","Hideout","QoL","Inventário","2148","DrakiaXYZ/SPT-StashSearch","Busca dentro do stash — último release v1.4.2 (SPT 3.11.4, mai/2025); DrakiaXYZ fork sem commits desde 2024-03","Aguardar","?",false,false,"Sim",false],
+[79,"SwiftXP.ShowMeTheMoney","Misto","Geral","QoL","UI,Mercado","2299","swiftxp-hub/spt-show-me-the-money","Mostra dinheiro/valores em UI","Avaliar","?",false,true,"Sim",true],
+[80,"TacticalToasterUNTARGH","Server","Raid","Conteúdo","IA","2342","TacticalToaster/TacticalToasterUNTARGH","Adiciona UNTAR como faction com bots customizados","Avaliar","?",false,true,"Sim",false],
+[81,"Tarkov Weather System","Client","Raid","QoL","Mapas","2120","https://gitlab.com/flir063-spt/timeweatherchanger","Time & Weather Changer NG — v2.4.0 (SPT 4.0.13). Autor: flir. Hospedado no **GitLab**","Instalar","?",false,true,"Sim",false],
+[82,"TellTheTime","Client","Geral","QoL","UI","2202",null,"Mostra hora atual","Avaliar","?",false,false,"Sim",false],
+[83,"Terkoiz.Freecam","Client","Raid","QoL","UI","164","acidphantasm/SPT-Freecam","Câmera livre (debug/replay) — v1.4.6 (último release SPT 3.11). Mantido por acidphantasm","Aguardar","?",false,true,"Sim",true],
+[84,"tyfon-hideoutinprogress","Client","Hideout","QoL","Hideout,Inventário","2076","tyfon7/hip","Botão \"Transfer Items\" no hideout (SPT 4.0). Alias: `Tyfon.HideoutInProgress`","Instalar","?",false,true,"Sim",false],
+[85,"tyfon-uifixes","Client","Geral","QoL","UI","1342","tyfon7/UIFixes","Coleção de QoL fixes de UI. Aliases: `Tyfon.UIFixes`, `Tyfon.UIFixes.Net`","Avaliar","?",false,true,"Sim",true],
+[86,"tyfon-weaponcustomizer","Client","Geral","QoL","Armas","1950","tyfon7/WeaponCustomizer","Fine tune de attachments. Alias: `Tyfon.WeaponCustomizer`","Avaliar","?",false,true,"Sim",false],
+[87,"Virtual's Custom Quest Loader","Server","Geral","Framework","Quests","649","VirtualAE/Virtuals-Custom-Quest-Loader","Dependência para mods importarem custom quests. Alias: `VCQL`, `VCQLQuestZones`","Avaliar","?",false,true,"Sim",false],
+[88,"VisceralCombat","?","Raid","Realismo","Gráficos",null,"","Efeitos viscerais de combate — distribuído via Patreon/Discord (Valentin The Mad), não publicado no Forge","Avaliar","?",false,false,"Sim",false],
+[89,"VolumetricBloodFX","?","Raid","Cosmético","Gráficos",null,"","FX de sangue volumétrico — distribuído via Patreon/Discord (Valentin The Mad), não publicado no Forge","Avaliar","?",false,false,"Sim",false],
+[90,"Wara-ModdingStatsHelper","Client","Geral","QoL","UI,Armas","1300","Soulztorm/Wara-ModdingStatsHelper","Helper de stats em modding","Avaliar","?",false,true,"Sim",false],
+[91,"WTT-Armory","Server","Geral","Conteúdo","Armas,Quests","2246","WelcomeToTarkov/WTT-Armory","Pack de 50+ armas + quests (WTT team) — v2.0.5 (SPT 4.0.13). 4.0 está em branch separada","Instalar","?",false,true,"Sim",false],
+[92,"WTT-PackNStrap","Server","Ambos","Conteúdo","Equipamentos","1278","WelcomeToTarkov/PackNStrap","Battle belt + small cases (WTT team) — v2.0.4 (SPT 4.0.13). Mesmo repo","Instalar","?",false,true,"Sim",true],
+[93,"yellowdoge-tarkovrarecollectibles","Server","Geral","Conteúdo","Loot","2318","TheYellowDoge/YellowDoge-TarkovRareCollectibles","Itens raros colecionáveis","Avaliar","?",false,true,"Sim",false],
+[94,"zzDrakiaXYZ-LiveFleaPrices","Server","Geral","Balanceamento","Mercado","1131","DrakiaXYZ/SPT-LiveFleaPrices-CSharp","Preços do flea ao vivo (live data) — versão C# do mesmo autor","Instalar","?",false,true,"Sim",true],
+[95,"🏠 Band-Aid","Client","Raid","QoL","Framework",null,null,"Fix/patch interno do projeto","Evoluir","?",true,false,"Sim",false],
+[96,"🏠 CoordLogger","Client","Raid","Framework","Framework",null,null,"Logger de coordenadas (utilitário interno)","Evoluir","?",true,false,"Sim",false],
+[97,"🏠 FikaTransitFix (FikaTransitFixServer)","Server","Raid","Framework","Multiplayer",null,null,"Fix de transit em raids do Fika (interno)","Evoluir","?",true,false,"Sim",false],
+[98,"🏠 FixReloadUltraFika","Client","Raid","Framework","Multiplayer,Animações",null,null,"Fix de reload no UltraFika (interno)","Evoluir","?",true,false,"Sim",false],
+[99,"🏠 ForceSync","Misto","Ambos","Framework","Multiplayer",null,null,"Força sincronização (interno, relacionado ao UltraFika)","Evoluir","?",true,false,"Sim",false],
+[100,"🏠 GhostMercenaries","Server","Raid","Conteúdo","IA",null,null,"Mercenários customizados (interno)","Evoluir","?",true,false,"Sim",false],
+[101,"🏠 IdleSprintFix","Client","Raid","QoL","Animações",null,null,"Fix do bug de sprint travado (interno, v1.2.2)","NaoIncluir","?",true,false,"Sim",false],
+[102,"🏠 TarkovRedLine (TarkovRedLine-ServerMod)","Server","Geral","Balanceamento","Framework",null,null,"Mod do servidor RedLine — customização proprietária do projeto","Evoluir","?",true,false,"Sim",false],
+[103,"🏠 UmbigoPreto-Face the Knight - Mask Fix","Client","Raid","QoL","Equipamentos",null,null,"Fix da máscara do Knight (interno)","Evoluir","?",true,false,"Sim",false],
+[104,"🏠 UmbigoPreto-TrueTrauma","Misto","Raid","Realismo","Framework",null,null,"Sistema de trauma realista (interno)","Evoluir","?",true,false,"Sim",false],
+[105,"Climbable Ladders","Client","Raid","Realismo","Mapas,Animações","2649","bmpq/spt-ladders","Habilita escalada de escadas em vários mapas (woods bunker, customs watchtower etc.) — SPT 4.0.13","Instalar","?",false,true,"New",true],
+[106,"Magazine Check Interrupt","Client","Raid","QoL","Munições,Animações","2643","ozen-m/SPT-MagCheckInterrupt","Transição contínua de magazine check para reload sem sair da animação — SPT 4.0.13","Instalar","?",false,true,"New",true],
+[107,"Stance Sync","Client","Raid","QoL","Animações,Armas","2639","minihazel/StanceSync","Sincroniza lean e shoulder swap; opção para desabilitar lean sincronizado ao mirar — SPT 4.0.13","Instalar","?",false,true,"New",true],
+[108,"Stat Rewards","Client","Geral","Progressão","Progressão","2655","Chazut/StatRewards","Recompensas aleatórias ao atingir marcos de stats (kills, dano, loot etc.) — 48 milestones repetíveis, configurável — SPT 4.0.13","Instalar","?",false,true,"New",false],
+[109,"Brighter Interiors","Client","Raid","QoL","Gráficos","2613","7Bpencil/SPT-ReduceFakeInteriorShadow","Reduz intensidade de sombras internas para melhorar visibilidade em ambientes fechados — SPT 4.0.13","Instalar","?",false,true,"New",false],
+[110,"RZCustomProfiles","Client","Geral","QoL","UI","2614","remzdnb/RZ-SPTMods","Gerenciamento de templates de perfil de personagem — v1.1.0 (SPT 4.0.13). Autor: RemzDNB","Instalar","?",false,true,"New",true],
+[111,"LoadBundleEvenFaster","Client","Geral","QoL","Gráficos","2599","s8ga/SPT_LoadBundleEvenFaster","Reduz tempo de carregamento de bundles — camada extra sobre LoadBundleFaster. **Dep:** LoadBundleFaster ≥ v1.0.0. SPT 4.0.13","Instalar","?",false,true,"New",false],
+[112,"Recoil Rework (Legacy)","Server","Raid","Realismo","Armas","2190","peinwastaken/SPTRecoilRework","Reescreve mecânica de recoil das armas (autor: pein) — v1.10.0 recompilada para SPT 4.0.13","Instalar","?",false,true,"New",false],
+[113,"Gunsmith Barters","Server","Geral","Hardcore","Mercado,Armas","1963","Solethia/Kipperworks.GunsmithBarters","Adiciona barters no Mecânico voltados a runs hardcore — v2.0.2 (SPT 4.0.13). ⚠️ pode fazer alterações permanentes no perfil","Instalar","?",false,true,"New",false],
+[114,"Camera Position Control & Custom Weapon Stances","Client","Raid","QoL","Animações,Armas","2572","shengzhanzhe/stancesAndCameraPositionSPT4.0.11","Controle customizável de posição da câmera FPV e stances de arma — v1.1.5 (SPT 4.0.13). ⚠️ ao atualizar de ≤0.9.7 remover `CameraRotationMod.dll` antigo","Instalar","?",false,true,"New",true],
+[115,"Manimal's Ammo Loading Animations","Client","Raid","Realismo","Munições,Animações","2681","danauraborealis/ManimalAmmoLoadingAnimations","Animações em primeira pessoa para carregar munição em magazines — v1.5.0 (SPT 4.0.13). **Dep:** WTT-CommonLib ≥ v2.0.20. ⚠️ incompatível com Fika","Instalar","?",false,true,"New",true],
+[116,"Refined Flea Offer List","Client","Geral","QoL","Mercado,UI","2623","Klamist/RefinedFleaOfferList","Exibe apenas a oferta mais barata por item no flea market; display inteligente de rublos e variantes de arma/armadura — v1.0.1 (SPT 4.0.13). Autor: ciallomako","Instalar","?",false,true,"New",true],
+[117,"Knight Mask Fix (4.0+)","Client","Raid","Cosmético","Equipamentos","2685","TheOfficialSkull/FW---Knight-Mask-Fix---4.0.13","Corrige textura ausente da máscara 'Death Knight' no PMC Knight e em modelos de jogador — SPT 4.0.13+. Autor: Flex Wayne","Instalar","?",false,true,"New",true],
+[118,"Peltor TEP-300 earplugs backport and fixes","Client","Raid","Conteúdo","Equipamentos","2420","Dight67/TEP-300-Backport-Fixes","Restaura os fones militares TEP-300 do EFT Live no SPT, com correções — SPT 4.0.13. Autor: nem","Instalar","?",false,true,"New",true],
+[119,"Skills Extended","Server","Geral","?","?","2383","CJ-SPT/Skills-Extended","Expande e aprimora o sistema de skills do personagem com mecânicas mais impactantes — compatível com Fika, SPT 4.0.13","Instalar","?",false,true,"New",false],
+[120,"Wolfik's Heavy Trooper Masks - Reupload","Client","Raid","Conteúdo","Equipamentos","1569","Hood26/WolfiksHeavyTroopers","Adiciona cinco máscaras pesadas em variantes de cor (Black, Tan, Black/Coyote, Wolf, Cult) com proteção real de armadura e desbloqueio por quests — SPT 4.0.13","Instalar","?",false,true,"New",true],
+[121,"Couturier - gear and clothing pack","Misto","Raid","Conteúdo","Equipamentos,Vestuário","2239","turbodestroyer1337/spt_couturier","Pack de equipamento e vestuário: mochilas, capacetes, armaduras, coletes táticos retexturizados e roupas adicionais — SPT 4.0.13","Instalar","?",false,true,"New",false],
+[122,"Foldables","Client","Geral","?","Inventário,Equipamentos","2422","ozen-m/SPT-Foldables","Permite dobrar mochilas e coletes, reduzindo seu tamanho quando guardados no inventário — v1.0.3, SPT 4.0.13. Autor: ozen","Instalar","?",false,true,"New",true],
+[123,"Change Helmet Visor","Misto","Raid","QoL","Equipamentos,UI","2554","Trinagan/ChangeHelmetVisor","Ajusta a renderização do visor de capacete com controle de escala de textura via plugin BepInEx — v2.0.0, SPT 4.0.13","Instalar","?",false,true,"New",true],
+[124,"WTT - CommonLib","Server","Geral","?","Dev","2310","WelcomeToTarkov/WTT-CommonLib","Biblioteca utilitária de modding: reduz boilerplate ao adicionar itens, missões e personagens personalizados — v2.0.20, SPT 4.0.13","Instalar","?",false,true,"New",true],
+[125,"Easy Ammo Names","Server","Geral","QoL","UI,Inventário","1262","DrakiaXYZ/SPT-EasyAmmoNames-CSharp","Renomeia munições no SPT para identificação mais fácil dos tipos de projéteis — SPT 4.0.13","Instalar","?",false,true,"New",true],
+[126,"Quest Tracker","Client","Raid","QoL","UI,Quests","1140","DrakiaXYZ/SPT-QuestTracker","Overlay alternável para acompanhar progresso de missões em tempo real durante incursões — SPT 4.0.13","Instalar","?",false,true,"New",false],
+[127,"Use Items Anywhere","Client","Raid","QoL","Inventário","2386","CJ-SPT/UseItemsAnywhere","Permite usar e vincular itens de qualquer lugar do inventário durante a raid — SPT 4.0.13","Instalar","?",false,true,"New",true],
+[128,"Hideout Recipe Framework","Server","Hideout","?","Dev,Hideout","2520","arcustarkov-sys/hideout-recipe-framework","Framework para criar facilmente receitas personalizadas do Esconderijo, expandindo opções de produção — SPT 4.0.13","Instalar","?",false,true,"New",false],
+[129,"Dynamic External Resolution Patch (DERP)","Client","Geral","QoL","Gráficos","2200","Shibatsui/SPT-Dynamic-External-Resolution","Altera resolução dinamicamente ao usar miras ópticas, aumentando FPS — v1.1.1, SPT 4.0.13. Autor: Sh1ba (port 4.0 do DERP original, ver #31)","Instalar","?",false,true,"New",true],
+[130,"AutoDeposit","Client","Hideout","QoL","Inventário","1469","tyfon7/AutoDeposit","Transfere itens para contêineres do stash que já contêm itens correspondentes (estilo Quick Stack do Terraria) — SPT 4.0.13","Instalar","?",false,true,"New",true],
+[131,"Bring Back Concussion","Client","Raid","Realismo","Áudio","2550","harmonyzt/BringBackConcussion","Restaura efeitos sonoros de concussão e sons pós-morte do EFT (tinido, cegueira temporária) — v1.0.3, SPT 4.0.13","Instalar","?",false,true,"New",true],
+[132,"LetMeRightClick","Client","Geral","QoL","UI,Inventário","2405","Lacyway/LetMeRightClick","Permite usar botão direito do mouse ao buscar itens, eliminando a restrição anterior — v1.0.0, SPT 4.0.13","Instalar","?",false,true,"New",true],
+[133,"Un-flashbang Hideout","Client","Hideout","QoL","Gráficos,Hideout","1425","ArchangelWTF/Un-flashbangHideout","Remove o efeito de flashbang no hideout ao retornar de sessões noturnas com super sampling ativo — v1.0.4, SPT 4.0.13","Instalar","?",false,true,"New",true],
+[134,"Task List Fixes","Client","Geral","QoL","UI,Quests","824","DrakiaXYZ/SPT-TaskListFixes","Corrige classificação de tarefas e melhora desempenho/organização da lista de missões — SPT 4.0.13. Autor: DrakiaXYZ","Instalar","?",false,true,"New",true],
+[135,"Dragon Den - Dev Tool","Client","Raid","?","Dev","2336","Drexira/DragonDen-DevTool","Ferramenta dev para testes em raid: heal, modo deus, spawn de itens, gestão de bots e teleporte (225 locais) — SPT 4.0.13. Autor: Drexira","Instalar","?",false,true,"New",true],
+[136,"Camo And Stickers","Client","Geral","Cosmético","Armas","2658","7Bpencil/SPT.WeaponCamoAndStickers","Personaliza armas com camuflagem e adesivos, oferecendo opções estéticas para equipamentos — SPT 4.0.13","Instalar","?",false,true,"New",false],
+[137,"SPTarkovSpeedLoader","Client","Geral","QoL","Inventário","2440","ragnaroks/SPTarkovSpeedLoader","Acelera o carregamento de munição em magazines, abastecendo equipamentos mais rápido — SPT 4.0.13","Instalar","?",false,true,"New",false],
+[138,"WTT - Menu Overhaul","Client","Geral","Cosmético","UI","1775","emilanderss0n/SPT-Menu-Overhaul","Novo layout de menu com o personagem na tela inicial (modelo rotacionável) — SPT 4.0.13","Instalar","?",false,true,"New",true],
+[139,"Discord Raid Map","Client","Raid","QoL","Multiplayer","2714","Fiodorwellfme/DiscordRaidMap","Posta mapa da raid no Discord via webhook (jogadores, kills, bosses, airdrop, extrações, tempo) — SPT 4.0.13","Instalar","?",false,true,"New",true],
 ];
 
 // ── FORGE SLUGS ───────────────────────────────────────────────────────────────
@@ -530,6 +534,10 @@ const FORGE_IMG = {
   '2550':'sFGMEeN9ASdoQ3nrcWjp0apSZPeNndO4vnJma3hP',
   '2405':'6zLllXtIZ2qbTCJtba4FWy0amAstYp8nHwtXD5Fz',
   '1425':1975,
+  '2658':'N0BlfVxbKixOJ4zdWgkksXG602dMNegT12HlUwnv',
+  '2440':'ObjaUCPCdkRnAbixVqlsItD2PHewf3YIQkNoDULy',
+  '1775':'2412',
+  '2714':'TZMZv149WfuveHpFX3TX6TOij5dlqNZ1lW87SGZA',
 };
 
 const FORGE_SLUGS = {
@@ -652,10 +660,15 @@ const FORGE_SLUGS = {
   '2550':'bring-back-concussion',
   '2405':'letmerightclick',
   '1425':'un-flashbang-hideout',
+  '2383':'skills-extended',
+  '2658':'camo-and-stickers',
+  '2440':'sptarkovspeedloader',
+  '1775':'wtt-menu-overhaul',
+  '2714':'discord-raid-map',
 };
 
 // ── INDICES ───────────────────────────────────────────────────────────────────
-const I = {n:0,name:1,tipo:2,atu:3,cat:4,esc:5,forge:6,r4:7,fn:8,status:9,pri:10,intern:11,spt4:12,trl:13};
+const I = {n:0,name:1,tipo:2,atu:3,cat:4,esc:5,forge:6,r4:7,fn:8,status:9,pri:10,intern:11,spt4:12,trl:13,inst:14};
 
 // ── LABELS & ICONS ────────────────────────────────────────────────────────────
 const CAT_META = {
@@ -718,24 +731,48 @@ function effectiveStatus(m) {
 }
 
 // ── INSTALLED STATE ───────────────────────────────────────────────────────────
-const INST_KEY = 'spt4-mods-installed';
-function loadInstalled() {
-  try { return new Set(JSON.parse(localStorage.getItem(INST_KEY) || '[]')); }
-  catch { return new Set(); }
-}
-function saveInstalled() {
-  localStorage.setItem(INST_KEY, JSON.stringify([...state.installed]));
+// Source of truth: the "Instalado" column in mods-inventory.md (carried into the
+// MODS data by the sync). state.installed is derived from that data at boot.
+//
+// SERVER_MODE (page served by `node scripts/serve-inventory.js` over http://):
+//   toggling writes the column in the .md and re-syncs the HTML — persisted + git.
+// file:// (page opened directly): toggling is an IN-SESSION PREVIEW only.
+const SERVER_MODE = location.protocol === 'http:' || location.protocol === 'https:';
+
+function deriveInstalled() {
+  return new Set(MODS.filter(m => m[I.inst]).map(m => m[I.n]));
 }
 function toggleInstalled(n) {
   if (!state.installed.has(n)) {
     const m = MODS.find(x => x[I.n] === n);
     if (m && effectiveStatus(m) === 'NaoIncluir') return;
   }
-  if (state.installed.has(n)) state.installed.delete(n);
-  else state.installed.add(n);
-  saveInstalled();
+  const willInstall = !state.installed.has(n);
+  // optimistic UI
+  if (willInstall) state.installed.add(n); else state.installed.delete(n);
   renderStats();
   render();
+
+  if (!SERVER_MODE) return; // file:// — preview only, not persisted
+
+  fetch('/api/installed', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ n, installed: willInstall }),
+  })
+    .then(r => r.json())
+    .then(res => {
+      if (!res.ok) throw new Error(res.error || 'falha ao salvar');
+      const m = MODS.find(x => x[I.n] === n); // keep in-memory data consistent
+      if (m) m[I.inst] = willInstall;
+    })
+    .catch(err => {
+      // revert optimistic change
+      if (willInstall) state.installed.delete(n); else state.installed.add(n);
+      renderStats();
+      render();
+      alert('Não foi possível salvar no .md: ' + err.message);
+    });
 }
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
@@ -743,7 +780,7 @@ const state = {
   sort: {col:'n', dir:1},
   filters: {status:new Set(), tipo:new Set(), atu:new Set(), cat:new Set(), esc:new Set(), origin:new Set(), spt4:new Set(), inst:new Set(), trl:new Set()},
   review: false,
-  installed: loadInstalled(),
+  installed: deriveInstalled(),
   statusOverrides: loadStatusOverrides(),
 };
 
@@ -1000,7 +1037,7 @@ function instCell(m) {
   if (blocked) {
     return `<button class="btn-inst disabled" disabled title="Mod marcado como NÃO INCLUIR">—</button>`;
   }
-  return `<button class="btn-inst${on?' on':''}" onclick="event.stopPropagation();toggleInstalled(${m[I.n]})">${on?'✓ Sim':'—'}</button>`;
+  return `<button class="btn-inst${on?' on':''}" title="Preview na sessão — para salvar/sincronizar, edite a coluna Instalado no .md e rode o sync" onclick="event.stopPropagation();toggleInstalled(${m[I.n]})">${on?'✓ Sim':'—'}</button>`;
 }
 
 const STATUS_OPTS = ['Instalar','Evoluir','Avaliar','Aguardar','Desenvolver','Bloqueado','NaoIncluir'];
@@ -1191,38 +1228,77 @@ function openSdd(n) {
   const el = document.getElementById('sdd-'+n);
   if (!el) return;
   if (_openSdd && _openSdd !== el) _openSdd.classList.remove('open');
-  const isOpen = el.classList.contains('open');
-  if (!isOpen) {
-    const trg  = el.querySelector('.sdd-trg');
-    const menu = el.querySelector('.sdd-menu');
-    const r = trg.getBoundingClientRect();
-    menu.style.top  = (r.bottom + 4) + 'px';
-    menu.style.left = r.left + 'px';
+  if (el.classList.contains('open')) { el.classList.remove('open'); _openSdd = null; return; }
+
+  const trg  = el.querySelector('.sdd-trg');
+  const menu = el.querySelector('.sdd-menu');
+  const r = trg.getBoundingClientRect();
+  // tentative: open below the trigger, then measure and adjust to stay on-screen
+  menu.style.top  = (r.bottom + 4) + 'px';
+  menu.style.left = r.left + 'px';
+  el.classList.add('open');                       // render so offsetHeight/Width are real
+
+  const mh = menu.offsetHeight, mw = menu.offsetWidth;
+  const spaceBelow = window.innerHeight - r.bottom;
+  if (spaceBelow < mh + 8 && r.top > spaceBelow) {           // not enough room below → flip up
+    menu.style.top = Math.max(4, r.top - 4 - mh) + 'px';
   }
-  el.classList.toggle('open');
-  _openSdd = el.classList.contains('open') ? el : null;
+  menu.style.left = Math.max(4, Math.min(r.left, window.innerWidth - mw - 4)) + 'px'; // keep on-screen
+  _openSdd = el;
 }
 function pickStatus(n, status) {
   if (_openSdd) { _openSdd.classList.remove('open'); _openSdd = null; }
-  setStatusOverride(n, status);
+  if (!SERVER_MODE) { setStatusOverride(n, status); return; } // file:// — preview only
+
+  const m = MODS.find(x => x[I.n] === n);
+  const prev = m ? m[I.status] : null;
+  // optimistic: write the canonical status into the in-memory data (no override)
+  if (m) m[I.status] = status;
+  renderStats();
+  render();
+
+  fetch('/api/status', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ n, status }),
+  })
+    .then(r => r.json())
+    .then(res => { if (!res.ok) throw new Error(res.error || 'falha ao salvar'); })
+    .catch(err => {
+      if (m) m[I.status] = prev; // revert
+      renderStats();
+      render();
+      alert('Não foi possível salvar o status no .md: ' + err.message);
+    });
 }
 document.addEventListener('click', () => {
   if (_openSdd) { _openSdd.classList.remove('open'); _openSdd = null; }
 });
 
 // ── BOOT ──────────────────────────────────────────────────────────────────────
-// One-time pre-install seeding — runs once per mod, respects manual uninstall thereafter
-[{n:116, key:'spt4-seed-116'}].forEach(({n, key}) => {
-  if (!localStorage.getItem(key)) {
-    state.installed.add(n); saveInstalled();
-    localStorage.setItem(key, '1');
-  }
-});
+// Installed state is data-driven (Instalado column in the .md) — no localStorage seeding.
+// In SERVER_MODE the .md is authoritative for status too: ignore any localStorage
+// status overrides (those are only a file:// preview), so the table reflects the .md.
+if (SERVER_MODE) state.statusOverrides.clear();
 buildFilters();
 renderStats();
 render();
 document.getElementById('footer-date').textContent =
   'Atualizado: ' + new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+
+// ── CONNECTION BADGE ────────────────────────────────────────────────────────────
+(function connBadge() {
+  const b = document.createElement('div');
+  b.style.cssText = 'position:fixed;bottom:10px;right:12px;z-index:9998;font:12px system-ui,sans-serif;'
+    + 'padding:6px 12px;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,.4);'
+    + (SERVER_MODE
+        ? 'background:#173d23;color:#5fd08a;border:1px solid #2e7d46'
+        : 'background:#3a2410;color:#e0a94c;border:1px solid #8a5a1a');
+  b.textContent = SERVER_MODE
+    ? '● Servidor — cliques salvam no .md'
+    : '○ file:// — preview (não salva). Rode: node scripts/serve-inventory.js';
+  document.body.appendChild(b);
+})();
 </script>
 <!-- Forge popover (global singleton) -->
 <div id="forge-pop" class="fpop"

@@ -399,7 +399,13 @@ Registros completos com URLs de imagem, wiki, slot, tags em [`anchor-items.json`
 
 ## Inventário inicial
 
-Cada perfil recebe 4 loadouts (Armeiro 3) — 1 vestido + N no stash, calibrados para ~2.000.000 ₽ totais (preços avg 24h PVE flea via tarkov-market.com).
+> **Atualização 2026-05-17:** após a entrega do item 001 com `AdditionalStartingItems` plano (Opção 1 simplificada — todos os itens no stash sem equipped/nested/slot), foi detectado **overflow do stash inicial L1** (280 slots) em playtest real, mesmo com a soma teórica de slots cabendo nominalmente. Causa raiz: o `BaseProfile: 0` (Standard) já traz itens iniciais que ocupam slots do stash, **somando** com o nosso loadout adicional.
+>
+> **Decisão de design final:** mudar para `BaseProfile: 8` (**SPT Zero to Hero**), que começa com **stash VAZIO** — toda a capacidade de 280 slots fica disponível para nosso loadout. Como mitigação adicional do tamanho do loadout, mantemos `backup × 2` (reduzido de × 3 originalmente). Stash:1 preservado em todas as 10 classes. Total ₽ por classe: 1.63M–2.02M (faixa: 1.5M–2.05M).
+>
+> Armeiro permanece com `backup × 2` original (já tinha esse valor por causa do tema caríssimo). As tabelas abaixo ainda mostram a estrutura original (backup × 3) como referência histórica — o gerador [build-profile-jsons.js](../scripts/build-profile-jsons.js) aplica `backupCount: 2` + `BaseProfile: 8` em runtime para todas as classes.
+
+Cada perfil recebe **3 loadouts** (1 vestido + 2 no stash) — calibrados originalmente para ~2.000.000 ₽ totais (preços avg 24h PVE flea via tarkov-market.com); após a redução de backups o intervalo real ficou em 1.63M–2.02M ₽.
 Tier-cap: armor classe 1-2 dominante, classe 3 raro (apenas no primary de alguns perfis); helmets até MICH 2001; sem plate hard, sem GPNVG-18.
 
 ### Baseline universal (todos os perfis recebem)

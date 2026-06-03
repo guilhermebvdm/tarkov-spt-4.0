@@ -3,7 +3,7 @@
  * fetch-tarkov-prices.js (one-shot — delete after use)
  *
  * Fetches PVE flea prices for the ~30 anchor items used in
- * mods/RZCustomProfiles/backlog/001-custom-profiles.md.
+ * mods/RZCustomProfiles/backlog/001-custom-profiles/001-custom-profiles-00-planejamento.md.
  *
  * Strategy:
  *  - Single bulk call to /pve/items/all (rate-limited 5/min).

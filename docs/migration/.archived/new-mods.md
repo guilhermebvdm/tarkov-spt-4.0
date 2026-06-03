@@ -1,11 +1,13 @@
 ---
 title: Novos mods — SPT 4.0
 date: 2026-05-03
-status: 🔵 Em andamento
+status: ⚫ Arquivado
 authors: Guilherme
 ---
 
 # Novos mods — SPT 4.0
+
+> **⚫ Arquivado (2026-06-03).** Lista obsoleta — estes mods foram absorvidos no inventário único [`mods-inventory.md`](../mods-inventory.md). Novos mods agora entram direto lá (via `/add-mod-inventory-list` ou edição manual + `node scripts/sync-mods-html.js`). Mantido só por histórico.
 
 Mods selecionados para entrar na stack do SPT 4.0 que **não estavam** no inventário original de migração (`mods-inventory.md`). Todos já têm versão 4.0 disponível — status padrão: 🟢 Instalar.
 

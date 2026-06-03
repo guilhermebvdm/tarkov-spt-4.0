@@ -22,7 +22,8 @@ const DATA_DIR  = path.join(__dirname, '..', 'data');
 
 const ITEM_KEYS = [
   'id', 'name', 'shortName', 'normalizedName', 'wikiLink',
-  'image', 'category', 'types', 'dims',
+  'image', 'category', 'types', 'dims', 'grids',
+  'modSource',
   'spt', 'tarkovDev', 'tarkovMarket', 'consolidated',
 ];
 
@@ -68,6 +69,14 @@ function resolvePath(categoryMap, leafId) {
   return names;
 }
 
+// Per-category icon overrides — used when the SPT-shipped PNG is too low-res
+// for crisp display (some are 11x11 originals). Lanczos-upscaled versions
+// live under `tools/tarkov-itemdb/viewer/icons/` and are served by serve.js
+// at /viewer/icons/<filename>.
+const ICON_OVERRIDES = {
+  '5b5f749986f774094242f199': '/viewer/icons/icon_mod_sight_hd.png', // Special purpose sights
+};
+
 // In-game EFT/SPT 4.0 handbook display order (top → bottom). Handbook.json's
 // `Order` field numbers categories 1..13 but the Unity client uses a different
 // hardcoded order. This list mirrors what the in-game Handbook actually shows.
@@ -105,11 +114,31 @@ function buildHandbookTree(handbookCategories) {
     nodes.set(c.id, {
       id: c.id,
       name,
-      icon: c.icon ? c.icon.replace(/^\/files\//, '/spt-images/') : null,
+      icon: (c.icon && /\.\w+$/.test(c.icon)) ? c.icon.replace(/^\/files\//, '/spt-images/') : null,
       order: c.order != null ? c.order : 9999,
       children: [],
     });
   }
+  // Build parentId map for icon-inheritance walks (some sub-cats in handbook
+  // have empty Icon fields; we fall back to the nearest ancestor with one).
+  const parentIdById = new Map(handbookCategories.map(c => [c.id, c.ParentId || c.parentId || null]));
+  function inheritIcon(id) {
+    let cur = id;
+    const seen = new Set();
+    while (cur && !seen.has(cur)) {
+      seen.add(cur);
+      const node = nodes.get(cur);
+      if (node && node.icon) return node.icon;
+      cur = parentIdById.get(cur);
+    }
+    return null;
+  }
+  // Second pass: fill empty icons from ancestors, then apply per-id overrides.
+  for (const node of nodes.values()) {
+    if (!node.icon) node.icon = inheritIcon(node.id);
+    if (ICON_OVERRIDES[node.id]) node.icon = ICON_OVERRIDES[node.id];
+  }
+
   const roots = [];
   for (const c of handbookCategories) {
     const node = nodes.get(c.id);
@@ -261,6 +290,9 @@ function main() {
       height: s.height ?? null,
     } : null);
 
+    // Storage grids (containers, rigs, backpacks). Only present on items with grids.
+    const grids = (s && s.grids) || null;
+
     const types = d ? (d.types || []) : [];
 
     // Category — prefer handbook (UI taxonomy matching in-game Handbook).
@@ -280,10 +312,21 @@ function main() {
         if (nm && !/^[a-f0-9]{24}$/i.test(nm)) pathNames.unshift(nm);
         cur = node.parentId || node.ParentId;
       }
+      // Inherit icon from nearest ancestor when this category's icon is empty
+      let iconCur = hb.id;
+      let iconUrl = null;
+      const iconSeen = new Set();
+      while (iconCur && !iconSeen.has(iconCur)) {
+        iconSeen.add(iconCur);
+        const n = handbookById.get(iconCur);
+        if (!n) break;
+        if (n.icon && /\.\w+$/.test(n.icon)) { iconUrl = n.icon.replace(/^\/files\//, '/spt-images/'); break; }
+        iconCur = n.parentId || n.ParentId;
+      }
       category = {
         id: hb.id,
         name: (hb.name && hb.name.trim()) || hb.id,
-        icon: hb.icon ? hb.icon.replace(/^\/files\//, '/spt-images/') : null,
+        icon: ICON_OVERRIDES[hb.id] || iconUrl,
         path: pathNames,
         source: 'handbook',
       };
@@ -304,27 +347,32 @@ function main() {
       fleaBanned:     s.fleaBanned === true,
       fleaBanReasons: s.fleaBanReasons || [],
       traders:        s.traders || [],
+      questRewards:   s.questRewards || [],
     } : null;
 
     // tarkov.dev block
     const tarkovDev = (d || r) ? {
       pve:     d ? {
-        lastLow:  d.lastLowPrice  ?? null,
-        avg24h:   d.avg24hPrice   ?? null,
-        low24h:   d.low24hPrice   ?? null,
-        high24h:  d.high24hPrice  ?? null,
-        updated:  d.updated       ?? null,
-        sellFor:  d.sellFor       || [],
-        buyFor:   d.buyFor        || [],
+        lastLow:        d.lastLowPrice         ?? null,
+        avg24h:         d.avg24hPrice          ?? null,
+        low24h:         d.low24hPrice          ?? null,
+        high24h:        d.high24hPrice         ?? null,
+        change48h:      d.changeLast48h        ?? null,
+        change48hPct:   d.changeLast48hPercent ?? null,
+        updated:        d.updated              ?? null,
+        sellFor:        d.sellFor              || [],
+        buyFor:         d.buyFor               || [],
       } : null,
       regular: r ? {
-        lastLow:  r.lastLowPrice  ?? null,
-        avg24h:   r.avg24hPrice   ?? null,
-        low24h:   r.low24hPrice   ?? null,
-        high24h:  r.high24hPrice  ?? null,
-        updated:  r.updated       ?? null,
-        sellFor:  r.sellFor       || [],
-        buyFor:   r.buyFor        || [],
+        lastLow:        r.lastLowPrice         ?? null,
+        avg24h:         r.avg24hPrice          ?? null,
+        low24h:         r.low24hPrice          ?? null,
+        high24h:        r.high24hPrice         ?? null,
+        change48h:      r.changeLast48h        ?? null,
+        change48hPct:   r.changeLast48hPercent ?? null,
+        updated:        r.updated              ?? null,
+        sellFor:        r.sellFor              || [],
+        buyFor:         r.buyFor               || [],
       } : null,
     } : null;
 
@@ -350,6 +398,8 @@ function main() {
       category,
       types,
       dims,
+      grids,
+      modSource: (s && s.modSource) || null,
       spt,
       tarkovDev,
       tarkovMarket,
@@ -398,7 +448,7 @@ function main() {
     sources: {
       tarkovDev:    { fetchedAt: devCacheStat.mtime.toISOString(), pveCount: dev.pve.length, regularCount: dev.regular.length, categoryCount: (dev.categories || []).length },
       tarkovMarket: { fetchedAt: mktCacheStat.mtime.toISOString(), count: market.length },
-      spt:          { loadedAt: sptRaw.loadedAt, path: sptRaw.sptDataPath, itemCount: sptRaw.counts.items, priceCount: sptRaw.counts.withFleaPrice, traderCount: sptRaw.counts.traders, offerCount: sptRaw.counts.offers, currencyRates: sptRaw.currencyRates },
+      spt:          { loadedAt: sptRaw.loadedAt, fleaPricesMtime: sptRaw.fleaPricesMtime || null, fleaPricesSource: sptRaw.fleaPricesSource || null, fleaMinUserLevel: sptRaw.fleaMinUserLevel || null, path: sptRaw.sptDataPath, itemCount: sptRaw.counts.items, priceCount: sptRaw.counts.withFleaPrice, traderCount: sptRaw.counts.traders, offerCount: sptRaw.counts.offers, currencyRates: sptRaw.currencyRates },
     },
     stats: {
       totalTpls: allTpls.size,

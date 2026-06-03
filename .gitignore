@@ -36,3 +36,7 @@ desktop.ini
 
 # Local API caches (third-party data, refetchable)
 mods/RZCustomProfiles/scripts/cache/
+
+# SPT server source code — vendored read-only reference, ~856 MB.
+# Re-fetch instructions in references/README.md
+references/spt-source/
