@@ -9,7 +9,7 @@ Adiciona um ou mais mods ao inventário (`mods-inventory.md` + `mods-inventory.h
 /add-mod-inventory-list <forge-url> --instalado
 ```
 
-`--instalado` — marca o mod como pré-instalado via localStorage na primeira abertura do HTML.
+`--instalado` — marca o mod como instalado (coluna `Instalado` = `✓` no `.md`; versionado no git).
 
 ## O que fazer
 
@@ -39,7 +39,7 @@ Abra `docs/migration/mods-inventory.md`, encontre a última linha numerada em `#
 
 ### 4. Montar a linha do markdown
 
-Colunas: `# | Mod | Tipo | Atuação | Categoria | Escopo | Forge | Repo 3.x | Repo 4.0 | SPT 4.0? | Função | Status | Prioridade | TRL 3.0?`
+Colunas: `# | Mod | Tipo | Atuação | Categoria | Escopo | Forge | Repo 3.x | Repo 4.0 | SPT 4.0? | Função | Status | Prioridade | TRL 3.0? | Instalado`
 
 Valores padrão para mods novos:
 
@@ -56,6 +56,7 @@ Valores padrão para mods novos:
 | Status | `🟢 Instalar` |
 | Prioridade | `🔍` |
 | TRL 3.0? | `New` |
+| Instalado | `—` (ou `✓` com `--instalado`) |
 
 ### 5. Adicionar ao markdown
 
@@ -91,12 +92,9 @@ O stem pode ser número (`279`) ou hash (`'yPa3Rv...'`). Se não for possível d
 
 ### 9. Pré-instalar (somente com `--instalado`)
 
-Localize o bloco de seeding no boot do HTML (array `[{n:..., key:...}]` seguido de `.forEach`).
-Adicione o novo mod ao array existente:
-
-```js
-{n: N, key: 'spt4-seed-N'}
-```
+A marcação de instalado vive na coluna `Instalado` do `.md` (não há mais seeding via
+localStorage). Com `--instalado`, basta a nova linha já ter `✓` nessa coluna (passo 4) —
+o sync do passo 6 carrega para o campo `inst` do `const MODS`. Nada a editar no HTML.
 
 ### 10. Confirmar ao usuário
 

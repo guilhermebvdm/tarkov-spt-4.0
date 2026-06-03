@@ -25,7 +25,7 @@ Guia de "onde buscar o quê" ao analisar mods, planejar features ou responder d�
 | Criação de itens (SDK/WTT) | [wiki/spt/modding/tutorials/WTT_Vol1.md](../wiki/spt/modding/tutorials/WTT_Vol1.md) | WTT Discord |
 | FAQ / problemas comuns SPT 4.0 | [wiki/spt/FAQs_40.md](../wiki/spt/FAQs_40.md) | SPT Discord #support |
 | Mods recomendados (curadoria) | [wiki/spt/Recommended_Mods_40.md](../wiki/spt/Recommended_Mods_40.md) | forge.sp-tarkov.com |
-| Inventário de mods deste repo | [docs/migration/mods-inventory.md](../docs/migration/mods-inventory.md) · [docs/migration/new-mods.md](../docs/migration/new-mods.md) | — |
+| Inventário de mods deste repo | [docs/migration/mods-inventory.md](../docs/migration/mods-inventory.md) · [README](../docs/migration/README.md) | — |
 | **Item lookup por ID/nome** | _(wiki não cobre)_ | **db.sp-tarkov.com/search** |
 | **Preços / economia / flea (EFT live)** | _(wiki não cobre)_ | **tarkov-market.com/dev/api** (PVP/PVE) · api.tarkov.dev |
 | **Mecânicas EFT vivas (loot, hideout, weapon mods)** | _(wiki não cobre)_ | **tarkov.dev · Tarkynator** |

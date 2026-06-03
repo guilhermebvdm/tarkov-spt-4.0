@@ -28,9 +28,10 @@ Dependência opcional (recomendada): `jq` para o pre-commit hook.
 │   └── workspace.md       # detalhes técnicos do workspace
 ├── .claude/               # config do Claude Code (hooks, settings)
 ├── docs/                  # docs técnicas e tracking da migração 3.x → 4.0
-│   └── migration/
-│       ├── mods-inventory.md
-│       └── new-mods.md
+│   └── migration/          # inventário de mods (ver migration/README.md)
+│       ├── README.md
+│       ├── mods-inventory.md   # fonte de verdade do inventário
+│       └── mods-inventory.html # viewer gerado (sync-mods-html.js)
 ├── mods/                  # mods do projeto (client C#/BepInEx, server C#/SPTarkov.Server.Core)
 ├── wiki/                  # snapshot read-only de github.com/sp-tarkov/wiki
 │                          # (CC BY-NC-ND 4.0; sync via .agents/hooks/sync-wiki.sh)
