@@ -18,14 +18,36 @@ const { syncHtml, MD_FILE, HTML_FILE } = require('./sync-mods-html');
 
 const PORT = Number(process.env.PORT) || 8787;
 
-// ── Write the Instalado cell (last column) for mod #n in the markdown ────────────
-function setInstalledInMd(n, installed) {
+// Column indices within the inventory table (after the leading "| N |"):
+// Mod(0) Tipo(1) Atuação(2) Categoria(3) Escopo(4) Forge(5) Repo3x(6) Repo4.0(7)
+// SPT4?(8) Função(9) Status(10) Prioridade(11) TRL(12) Instalado(13) + trailing(14)
+const COL_STATUS    = 10;
+const COL_INSTALLED = 13;
+
+// Canonical status-key → markdown cell text (Option 1). Writing a status via the
+// server replaces the whole Status cell with this text, so free-form notes in the
+// cell (e.g. "🟠 Aguardar upstream" → kept; "...| 🟠 Aguardar (nota) |" → loses the
+// note). Each value round-trips back to its key through parseStatus in the sync.
+const STATUS_MD = {
+  Avaliar:     '🟡 Avaliar',
+  Instalar:    '🟢 À Instalar',
+  Evoluir:     '⬆️ Evoluir p/ 4.0',
+  Desenvolver: '🔧 Desenvolver',
+  Aguardar:    '🟠 Aguardar upstream',
+  Bloqueado:   '🔴 Bloqueado',
+  NaoIncluir:  '⚫ Não incluir',
+};
+
+// ── Write a single column cell (by index) for mod #n in the markdown table ───────
+function setCellInMd(n, colIndex, value) {
   const lines = fs.readFileSync(MD_FILE, 'utf8').split('\n');
-  const cell  = installed ? ' ✓ |' : ' — |';
   for (let i = 0; i < lines.length; i++) {
-    const m = lines[i].match(/^\|\s*(\d+)\s*\|/);
+    const m = lines[i].match(/^\|\s*(\d+)\s*\|(.+)$/);
     if (m && parseInt(m[1]) === n) {
-      lines[i] = lines[i].replace(/\|[^|]*\|\s*$/, '|' + cell); // replace last cell
+      const cols = m[2].split('|');          // Mod(0) … Instalado(13), trailing ''(14)
+      if (cols.length !== 15) return false;  // unexpected row shape — bail (avoid corruption)
+      cols[colIndex] = ` ${value} `;
+      lines[i] = `| ${m[1]} |` + cols.join('|');
       fs.writeFileSync(MD_FILE, lines.join('\n'), 'utf8');
       return true;
     }
@@ -71,12 +93,27 @@ const server = http.createServer(async (req, res) => {
       const installed = !!payload.installed;
       if (!Number.isInteger(n)) return sendJson(res, 400, { ok: false, error: 'n must be an integer' });
 
-      if (!setInstalledInMd(n, installed)) {
+      if (!setCellInMd(n, COL_INSTALLED, installed ? '✓' : '—')) {
         return sendJson(res, 404, { ok: false, error: `mod #${n} não encontrado na tabela` });
       }
       const count = syncHtml({ history: false }); // regen HTML, no history spam per click
       console.log(`[installed] #${n} → ${installed ? '✓' : '—'} (synced ${count} mods)`);
       return sendJson(res, 200, { ok: true, n, installed });
+    }
+
+    if (req.method === 'POST' && req.url === '/api/status') {
+      const payload = JSON.parse(await readBody(req) || '{}');
+      const n = Number(payload.n);
+      const status = String(payload.status || '');
+      if (!Number.isInteger(n)) return sendJson(res, 400, { ok: false, error: 'n must be an integer' });
+      if (!STATUS_MD[status]) return sendJson(res, 400, { ok: false, error: `status inválido: ${status}` });
+
+      if (!setCellInMd(n, COL_STATUS, STATUS_MD[status])) {
+        return sendJson(res, 404, { ok: false, error: `mod #${n} não encontrado na tabela` });
+      }
+      const count = syncHtml({ history: false });
+      console.log(`[status] #${n} → ${status} (synced ${count} mods)`);
+      return sendJson(res, 200, { ok: true, n, status });
     }
 
     sendJson(res, 404, { ok: false, error: 'not found' });

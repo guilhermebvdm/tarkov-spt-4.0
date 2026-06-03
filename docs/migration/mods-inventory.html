@@ -1241,7 +1241,28 @@ function openSdd(n) {
 }
 function pickStatus(n, status) {
   if (_openSdd) { _openSdd.classList.remove('open'); _openSdd = null; }
-  setStatusOverride(n, status);
+  if (!SERVER_MODE) { setStatusOverride(n, status); return; } // file:// — preview only
+
+  const m = MODS.find(x => x[I.n] === n);
+  const prev = m ? m[I.status] : null;
+  // optimistic: write the canonical status into the in-memory data (no override)
+  if (m) m[I.status] = status;
+  renderStats();
+  render();
+
+  fetch('/api/status', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ n, status }),
+  })
+    .then(r => r.json())
+    .then(res => { if (!res.ok) throw new Error(res.error || 'falha ao salvar'); })
+    .catch(err => {
+      if (m) m[I.status] = prev; // revert
+      renderStats();
+      render();
+      alert('Não foi possível salvar o status no .md: ' + err.message);
+    });
 }
 document.addEventListener('click', () => {
   if (_openSdd) { _openSdd.classList.remove('open'); _openSdd = null; }
@@ -1249,6 +1270,9 @@ document.addEventListener('click', () => {
 
 // ── BOOT ──────────────────────────────────────────────────────────────────────
 // Installed state is data-driven (Instalado column in the .md) — no localStorage seeding.
+// In SERVER_MODE the .md is authoritative for status too: ignore any localStorage
+// status overrides (those are only a file:// preview), so the table reflects the .md.
+if (SERVER_MODE) state.statusOverrides.clear();
 buildFilters();
 renderStats();
 render();
