@@ -2,10 +2,10 @@
 /**
  * serve-inventory.js
  * Local Node server (stdlib only — no npm install) that turns the mods inventory
- * page into a small editing system: clicking the "Instalado" toggle in the HTML
- * writes the Instalado column in docs/migration/mods-inventory.md (the source of
- * truth / "database") and re-syncs the HTML. Commit + push to share with other
- * editors — git is the sync layer between machines.
+ * page into a small editing system: changing the "Instalado" toggle or the "Status"
+ * dropdown in the HTML writes the matching column in docs/migration/mods-inventory.md
+ * (the source of truth / "database") and re-syncs the HTML. Commit + push to share
+ * with other editors — git is the sync layer between machines. Binds to 127.0.0.1.
  *
  * Usage:  node scripts/serve-inventory.js   (then open http://localhost:8787)
  *         PORT=9000 node scripts/serve-inventory.js
@@ -61,13 +61,24 @@ function sendJson(res, code, obj) {
   res.end(JSON.stringify(obj));
 }
 
+function badRequest(msg) { const e = new Error(msg); e.statusCode = 400; return e; }
+
 function readBody(req) {
   return new Promise((resolve, reject) => {
     let data = '';
-    req.on('data', c => { data += c; if (data.length > 1e6) req.destroy(); });
+    req.on('data', c => {
+      data += c;
+      if (data.length > 1e6) { req.destroy(); reject(badRequest('corpo da requisição muito grande')); }
+    });
     req.on('end', () => resolve(data));
     req.on('error', reject);
   });
+}
+
+async function readJson(req) {
+  const raw = await readBody(req);
+  try { return JSON.parse(raw || '{}'); }
+  catch { throw badRequest('corpo JSON inválido'); }
 }
 
 // ── Server ────────────────────────────────────────────────────────────────────────
@@ -88,7 +99,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (req.method === 'POST' && req.url === '/api/installed') {
-      const payload = JSON.parse(await readBody(req) || '{}');
+      const payload = await readJson(req);
       const n = Number(payload.n);
       const installed = !!payload.installed;
       if (!Number.isInteger(n)) return sendJson(res, 400, { ok: false, error: 'n must be an integer' });
@@ -102,7 +113,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (req.method === 'POST' && req.url === '/api/status') {
-      const payload = JSON.parse(await readBody(req) || '{}');
+      const payload = await readJson(req);
       const n = Number(payload.n);
       const status = String(payload.status || '');
       if (!Number.isInteger(n)) return sendJson(res, 400, { ok: false, error: 'n must be an integer' });
@@ -118,6 +129,7 @@ const server = http.createServer(async (req, res) => {
 
     sendJson(res, 404, { ok: false, error: 'not found' });
   } catch (err) {
+    if (err && err.statusCode) return sendJson(res, err.statusCode, { ok: false, error: err.message });
     console.error(err);
     sendJson(res, 500, { ok: false, error: String((err && err.message) || err) });
   }
@@ -131,12 +143,12 @@ server.on('error', (err) => {
   throw err;
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, '127.0.0.1', () => {
   console.log(`
   Mods Inventory — servidor de edição
   → http://localhost:${PORT}
 
-  Clicar em "Instalado" na página escreve a coluna Instalado em:
+  Mexer em "Instalado" ou "Status" na página escreve a coluna correspondente em:
     ${MD_FILE}
   e re-sincroniza o HTML. Faça commit + push para compartilhar com os outros editores.
   Pare com Ctrl+C.

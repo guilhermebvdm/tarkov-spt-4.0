@@ -1228,16 +1228,23 @@ function openSdd(n) {
   const el = document.getElementById('sdd-'+n);
   if (!el) return;
   if (_openSdd && _openSdd !== el) _openSdd.classList.remove('open');
-  const isOpen = el.classList.contains('open');
-  if (!isOpen) {
-    const trg  = el.querySelector('.sdd-trg');
-    const menu = el.querySelector('.sdd-menu');
-    const r = trg.getBoundingClientRect();
-    menu.style.top  = (r.bottom + 4) + 'px';
-    menu.style.left = r.left + 'px';
+  if (el.classList.contains('open')) { el.classList.remove('open'); _openSdd = null; return; }
+
+  const trg  = el.querySelector('.sdd-trg');
+  const menu = el.querySelector('.sdd-menu');
+  const r = trg.getBoundingClientRect();
+  // tentative: open below the trigger, then measure and adjust to stay on-screen
+  menu.style.top  = (r.bottom + 4) + 'px';
+  menu.style.left = r.left + 'px';
+  el.classList.add('open');                       // render so offsetHeight/Width are real
+
+  const mh = menu.offsetHeight, mw = menu.offsetWidth;
+  const spaceBelow = window.innerHeight - r.bottom;
+  if (spaceBelow < mh + 8 && r.top > spaceBelow) {           // not enough room below → flip up
+    menu.style.top = Math.max(4, r.top - 4 - mh) + 'px';
   }
-  el.classList.toggle('open');
-  _openSdd = el.classList.contains('open') ? el : null;
+  menu.style.left = Math.max(4, Math.min(r.left, window.innerWidth - mw - 4)) + 'px'; // keep on-screen
+  _openSdd = el;
 }
 function pickStatus(n, status) {
   if (_openSdd) { _openSdd.classList.remove('open'); _openSdd = null; }
