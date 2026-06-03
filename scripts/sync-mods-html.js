@@ -119,6 +119,11 @@ function parseTrl(cell) {
   return null;
 }
 
+// Installed column: "✓" → true, anything else ("—", empty, missing) → false
+function parseInstalado(cell) {
+  return (cell || '').includes('✓');
+}
+
 // ── UltraFika (vertical table, mod #0) ────────────────────────────────────────
 
 function parseUltraFika(md) {
@@ -147,6 +152,7 @@ function parseUltraFika(md) {
     true,
     parseSpt4(row('SPT 4[.]0\\?')),
     'Sim',
+    parseInstalado(row('Instalado')),
   ];
 }
 
@@ -163,7 +169,7 @@ function parseTable(md) {
 
   while ((match = lineRe.exec(md)) !== null) {
     const cols = match[2].split('|').map(c => c.trim());
-    // cols: [Mod, Tipo, Atuação, Categoria, Escopo, Forge, Repo3x, Repo4.0, SPT4?, Função, Status, Prioridade, TRL3?, ...]
+    // cols: [Mod, Tipo, Atuação, Categoria, Escopo, Forge, Repo3x, Repo4.0, SPT4?, Função, Status, Prioridade, TRL3?, Instalado, ...]
     if (cols.length < 12) continue;
 
     const n      = parseInt(match[1]);
@@ -186,6 +192,7 @@ function parseTable(md) {
       interno,
       parseSpt4(cols[8]),
       parseTrl(cols[12] || ''),
+      parseInstalado(cols[13]),
     ]);
   }
 
@@ -220,9 +227,13 @@ function addHistory(md) {
   return md.slice(0, lineEnd + 1) + entry + '\n' + md.slice(lineEnd + 1);
 }
 
-// ── Main ──────────────────────────────────────────────────────────────────────
+// ── Sync (md → html) ────────────────────────────────────────────────────────────
 
-function main() {
+// Regenerates the `const MODS` block in the HTML from the markdown.
+// history:true appends a row to the markdown "## Histórico" (use for manual/CLI
+// publishing). history:false skips it (use for per-click writes from the server,
+// to avoid spamming the history on every toggle). Returns the mod count.
+function syncHtml({ history = true } = {}) {
   const md   = fs.readFileSync(MD_FILE,   'utf8');
   let   html = fs.readFileSync(HTML_FILE, 'utf8');
 
@@ -230,19 +241,24 @@ function main() {
   const rows  = parseTable(md);
   const mods  = [ultra, ...rows];
 
-  console.log(`Parsed ${mods.length} mods (0–${mods.length - 1})`);
-
   const modsBlock = formatMods(mods);
   const MODS_RE   = /const MODS = \[[\s\S]*?\];/;
   if (!MODS_RE.test(html)) throw new Error('const MODS block not found in HTML');
 
   html = html.replace(MODS_RE, modsBlock);
   fs.writeFileSync(HTML_FILE, html, 'utf8');
-  console.log(`✓ Updated ${HTML_FILE}`);
 
-  const updatedMd = addHistory(md);
-  fs.writeFileSync(MD_FILE, updatedMd, 'utf8');
-  console.log(`✓ History entry added to ${MD_FILE}`);
+  if (history) fs.writeFileSync(MD_FILE, addHistory(md), 'utf8');
+
+  return mods.length;
 }
 
-main();
+module.exports = { syncHtml, MD_FILE, HTML_FILE };
+
+// ── CLI ─────────────────────────────────────────────────────────────────────────
+if (require.main === module) {
+  const count = syncHtml({ history: true });
+  console.log(`Parsed ${count} mods (0–${count - 1})`);
+  console.log(`✓ Updated ${HTML_FILE}`);
+  console.log(`✓ History entry added to ${MD_FILE}`);
+}
