@@ -40,3 +40,8 @@ mods/RZCustomProfiles/scripts/cache/
 # SPT server source code — vendored read-only reference, ~856 MB.
 # Re-fetch instructions in references/README.md
 references/spt-source/
+
+# Fika server, plugin and headless sources - vendored read-only reference
+references/fika-server/
+references/fika-plugin/
+references/fika-headless/

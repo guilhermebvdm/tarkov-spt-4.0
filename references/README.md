@@ -36,3 +36,28 @@ Esse commit corresponde ao SPT 4.0.13 instalado em `D:/SPT/SPT/`. Se atualizar o
 | `Libraries/SPTarkov.Server.Core/Services/PostDbLoadService.cs` | `ApplyFleaPriceOverrides`, blacklist |
 | `Libraries/SPTarkov.Server.Assets/SPT_Data/database/hideout/production.json` | Receitas do hideout (craft items) |
 | `Libraries/SPTarkov.Server.Assets/SPT_Data/configs/ragfair.json` | Config default do flea |
+
+## Códigos do FIKA (conexão coop)
+
+Repositórios contendo os códigos do Fika (servidor e cliente), usados para habilitar conexão cooperativa (multiplayer) no SPT.
+
+### `fika-server/` — Fika Server (C#)
+Código-fonte do lado do servidor do Fika (Server C#).
+- **Upstream:** `https://github.com/project-fika/Fika-Server-CSharp.git`
+
+### `fika-plugin/` — Fika Plugin (C#)
+Código-fonte do lado do cliente do Fika (Plugin C#). Contém a pasta `Fika.Core`, recomendada para validar classes, métodos e variáveis relacionados à lógica cooperativa cliente/servidor.
+- **Upstream:** `https://github.com/project-fika/Fika-Plugin.git`
+
+### `fika-headless/` — Fika Headless (TypeScript)
+Código-fonte do cliente headless do Fika (usado para clientes/bots dedicados de coop).
+- **Upstream:** `https://github.com/project-fika/Fika-Headless.git`
+
+### Como obter
+
+```bash
+cd references
+git clone https://github.com/project-fika/Fika-Server-CSharp.git fika-server
+git clone https://github.com/project-fika/Fika-Plugin.git fika-plugin
+git clone https://github.com/project-fika/Fika-Headless.git fika-headless
+```

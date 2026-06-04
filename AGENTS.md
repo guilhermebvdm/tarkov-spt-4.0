@@ -19,7 +19,7 @@ Repositório de mods para SPT 4.0 (Single Player Tarkov). Lido por qualquer assi
 - `.agents/workflows/` — workflows reutilizáveis (manuais)
 - `.agents/hooks/` — scripts compartilhados (validação, pre-commit, sync da wiki)
 - `docs/` — documentação técnica e arquitetural
-- `references/` — fontes read-only de verdade (não editar): `eft-decompiled/` (Assembly EFT) e `spt-source/` (código-fonte do servidor SPT)
+- `references/` — fontes read-only de verdade (não editar): `eft-decompiled/` (Assembly EFT), `spt-source/` (código-fonte do servidor SPT) e repositórios do FIKA (conexão coop: `fika-server/`, `fika-plugin/` e `fika-headless/`)
 - `wiki/` — snapshot read-only de github.com/sp-tarkov/wiki (CC BY-NC-ND 4.0; sincronizado via `.agents/hooks/sync-wiki.sh` — não editar)
 - `.claude/settings.json` — config do Claude Code (referencia hooks em .agents/)
 
@@ -43,7 +43,7 @@ Dependência opcional (recomendada): `jq` para o hook do Claude Code funcionar.
 - Windows: `winget install jqlang.jq`
 - Linux: `apt install jq`
 
-`references/spt-source/` é **gitignored** (~856 MB). Em máquina nova, obter o código-fonte do servidor SPT seguindo [references/README.md](references/README.md) — necessário para investigar lógica interna do SPT.
+`references/spt-source/` e os repositórios do FIKA (`fika-server/`, `fika-plugin/`, `fika-headless/`) são **gitignored** (referências locais). Em máquina nova, obter os códigos-fonte do servidor SPT e do FIKA seguindo [references/README.md](references/README.md) — necessário para investigar a lógica interna do SPT e da conexão cooperativa.
 
 ## Comandos úteis
 
@@ -90,9 +90,10 @@ Cada item de backlog vive em `mods/<mod>/backlog/NNN-<slug>/` (numeração local
 
 1. **🥇 Assembly descompilado (cliente EFT)** — [references/eft-decompiled/Assembly-CSharp/](references/eft-decompiled/Assembly-CSharp/). Toda assinatura, fórmula, ponto de patch do **cliente** deve vir daqui com `arquivo.cs:linha`.
 2. **🥇 Código-fonte do servidor SPT** — `references/spt-source/` (gitignored, ~856 MB — obter via [references/README.md](references/README.md)). Fonte de verdade para lógica de **servidor** (serviços, helpers, fórmulas, rotas). Snapshot read-only do upstream `sp-tarkov/server-csharp`. Citar com `arquivo.cs:linha`.
-3. **🥈 Código do mod** — `mods/<mod>/original/` (upstream) e `mods/<mod>/modded/` (fork local).
-4. **🥉 Wiki SPT** — [wiki/spt/](wiki/spt/) para SPT install/modding/server APIs.
-5. **🪛 Web** — último recurso. Marcar `[fonte externa]`.
+3. **🥇 Códigos do FIKA (conexão coop)** — `references/fika-server/` (servidor), `references/fika-plugin/` (cliente contendo a pasta `Fika.Core`) e `references/fika-headless/` (cliente headless). Fonte de verdade para a lógica cooperativa multiplayer e validação de classes, métodos e variáveis específicos de coop.
+4. **🥈 Código do mod** — `mods/<mod>/original/` (upstream) e `mods/<mod>/modded/` (fork local).
+5. **🥉 Wiki SPT** — [wiki/spt/](wiki/spt/) para SPT install/modding/server APIs.
+6. **🪛 Web** — último recurso. Marcar `[fonte externa]`.
 
 ## ⚠️ Observações importantes
 
