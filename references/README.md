@@ -2,30 +2,22 @@
 
 Material de referência **read-only** — não é código do projeto, não é versionado quando volumoso.
 
-## `spt-source/` — código-fonte do servidor SPT (C#)
+## Obter as referências (máquina nova)
 
-**Gitignored** (~856 MB). Necessário para investigar a lógica interna do SPT 4.0 — usado, por exemplo, na descoberta da fórmula de preço do flea (ver [tools/tarkov-itemdb/docs/flea-override-plan.md](../tools/tarkov-itemdb/docs/flea-override-plan.md)).
-
-### Como obter (versão pinada)
+As fontes vendorizadas (gitignored) são descritas no inventário canônico [manifest.json](./manifest.json) e obtidas com **um comando**:
 
 ```bash
-cd references
-git clone https://github.com/sp-tarkov/server-csharp.git spt-source
-cd spt-source
-git checkout c87cc3c6853c622fd2addaf961f58467cd9754f2
-git lfs pull
+node scripts/setup-references.js           # clona o que faltar
+node scripts/setup-references.js --check    # só confere o que está presente/faltando
 ```
 
-| Campo | Valor |
-| --- | --- |
-| Upstream | `https://github.com/sp-tarkov/server-csharp.git` |
-| Branch | `main` |
-| Commit pinado | `c87cc3c6853c622fd2addaf961f58467cd9754f2` |
-| SPT version | 4.0.13 (`Build.props:SptVersion`) |
-| Git LFS | `.lfsconfig` → `https://spt-lfs.sp-tarkov.com/sp-tarkov/server-csharp` |
-| Licença | CC BY-NC-SA 4.0 (autor: Refringe) |
+O metadado canônico (upstream, commit pinado, LFS, licença) vive no `manifest.json` — **não duplicar aqui**. O script clona cada fonte conforme o `pin` (commit fixo p/ `spt-source`, branch `main` p/ os repos do FIKA), roda `git lfs pull` quando aplicável e remove o `.git` dos snapshots.
 
-Esse commit corresponde ao SPT 4.0.13 instalado em `D:/SPT/SPT/`. Se atualizar o SPT, re-clonar no commit/tag da nova versão — senão a lógica diverge do runtime testado.
+## `spt-source/` — código-fonte do servidor SPT (C#)
+
+**Gitignored** (~856 MB). Necessário para investigar a lógica interna do SPT 4.0 — usado, por exemplo, na descoberta da fórmula de preço do flea (ver [tools/tarkov-itemdb/docs/flea-override-plan.md](../tools/tarkov-itemdb/docs/flea-override-plan.md)). Metadado (commit pinado, versão SPT, LFS): [manifest.json](./manifest.json) → `id: spt-source`.
+
+O commit pinado corresponde ao SPT 4.0.13 instalado em `D:/SPT/SPT/`. Se atualizar o SPT, atualizar o `pin` no `manifest.json` e re-rodar o setup — senão a lógica diverge do runtime testado.
 
 ### Arquivos consultados com mais frequência
 
@@ -53,11 +45,4 @@ Código-fonte do lado do cliente do Fika (Plugin C#). Contém a pasta `Fika.Core
 Código-fonte do cliente headless do Fika (usado para clientes/bots dedicados de coop).
 - **Upstream:** `https://github.com/project-fika/Fika-Headless.git`
 
-### Como obter
-
-```bash
-cd references
-git clone https://github.com/project-fika/Fika-Server-CSharp.git fika-server
-git clone https://github.com/project-fika/Fika-Plugin.git fika-plugin
-git clone https://github.com/project-fika/Fika-Headless.git fika-headless
-```
+> Obter os três (e o `spt-source`) de uma vez: `node scripts/setup-references.js`. Upstreams e pins canônicos em [manifest.json](./manifest.json).

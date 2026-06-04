@@ -14,10 +14,14 @@ Cria a **spec técnica** (pré-código) de um item do backlog, usando o Assembly
 
 ## Hierarquia de fontes (obrigatória, nesta ordem)
 
-1. **🥇 Assembly descompilado** — [references/eft-decompiled/Assembly-CSharp/](../../references/eft-decompiled/Assembly-CSharp/). Toda assinatura, fórmula, constante, ponto de patch citado **deve** vir daqui com `arquivo.cs:linha`.
-2. **🥈 Código do mod** — `mods/<mod>/original/` (upstream intocado, mostra padrões já aplicados) e `mods/<mod>/modded/` (nosso fork; identificar patches existentes para evitar conflito).
-3. **🥉 Wiki SPT** — [wiki/spt/](../../wiki/spt/) para questões de SPT (instalação, modding, profile, server APIs).
-4. **🪛 Web** — só como último recurso. Marcar `[fonte externa]` no texto.
+Fonte de verdade desta ordem: [.agents/resources.md](../../.agents/resources.md) → §"Hierarquia de evidência (spec/review técnicas)". Resumo (toda assinatura/fórmula/constante/ponto de patch citado vem com `arquivo.cs:linha`):
+
+1. **🥇 Assembly descompilado (cliente EFT)** — [references/eft-decompiled/Assembly-CSharp/](../../references/eft-decompiled/Assembly-CSharp/).
+2. **🥇 Código-fonte do servidor SPT** — `references/spt-source/` (gitignored — obter via [references/README.md](../../references/README.md)). Verdade para lógica de **servidor**.
+3. **🥇 Códigos do FIKA (coop)** — `references/fika-server/`, `references/fika-plugin/` (contém `Fika.Core`), `references/fika-headless/`. Verdade para lógica cooperativa.
+4. **🥈 Código do mod** — `mods/<mod>/original/` (upstream intocado, padrões já aplicados) e `mods/<mod>/modded/` (nosso fork; identificar patches existentes).
+5. **🥉 Wiki SPT** — [wiki/spt/](../../wiki/spt/) para SPT (instalação, modding, profile, server APIs).
+6. **🪛 Web** — só como último recurso. Marcar `[fonte externa]` no texto.
 
 ## O que fazer
 

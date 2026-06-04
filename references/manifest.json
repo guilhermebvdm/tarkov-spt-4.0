@@ -1,0 +1,79 @@
+{
+  "description": "Inventário canônico das referências read-only vendorizadas em references/. Consumido por scripts/setup-references.js. JSON estrito (sem comentários) — use o campo 'note'. Guia humano: references/README.md. Os campos 'fetch' (auto-clonável) e 'tracked' (versionado no git) são independentes: normalmente inversos, mas uma fonte futura poderia ser não-clonável e não-versionada.",
+  "sources": [
+    {
+      "id": "eft-decompiled",
+      "path": "references/eft-decompiled",
+      "role": "client",
+      "tier": 1,
+      "fetch": false,
+      "tracked": true,
+      "eftVersion": "0.16.x",
+      "license": "BSG IP — interno, não redistribuir",
+      "note": "Assembly C# do cliente EFT descompilado. Versionado no repo (vem junto, não é clonado). Build exato (SHA256 da DLL + data) em references/eft-decompiled/README.md."
+    },
+    {
+      "id": "spt-source",
+      "path": "references/spt-source",
+      "role": "server",
+      "tier": 1,
+      "fetch": true,
+      "tracked": false,
+      "upstream": "https://github.com/sp-tarkov/server-csharp.git",
+      "pin": { "type": "commit", "ref": "c87cc3c6853c622fd2addaf961f58467cd9754f2" },
+      "branch": "main",
+      "lfs": true,
+      "stripGit": true,
+      "sptVersion": "4.0.13",
+      "license": "CC BY-NC-SA 4.0",
+      "vendoredAt": "2026-05-19",
+      "sizeApprox": "856 MB",
+      "note": "Snapshot read-only pinado por commit, armazenado sem .git. Verdade para lógica de servidor (serviços, helpers, fórmulas, rotas). Atualizar: re-clonar no novo commit, rodar git lfs pull, remover .git, atualizar pin+vendoredAt."
+    },
+    {
+      "id": "fika-server",
+      "path": "references/fika-server",
+      "role": "server-coop",
+      "tier": 1,
+      "fetch": true,
+      "tracked": false,
+      "upstream": "https://github.com/project-fika/Fika-Server-CSharp.git",
+      "pin": { "type": "commit", "ref": "4a78c1338994ba023696bb4a536bafa3aee8b98e" },
+      "branch": "main",
+      "lfs": false,
+      "stripGit": false,
+      "vendoredAt": "2026-06-04",
+      "note": "Lado servidor da conexão cooperativa (Fika). Pinado por commit para citações arquivo.cs:linha reprodutíveis entre máquinas."
+    },
+    {
+      "id": "fika-plugin",
+      "path": "references/fika-plugin",
+      "role": "client-coop",
+      "tier": 1,
+      "fetch": true,
+      "tracked": false,
+      "upstream": "https://github.com/project-fika/Fika-Plugin.git",
+      "pin": { "type": "commit", "ref": "02c0de7ad77c1a46436f4189e7e369dc88312fdd" },
+      "branch": "main",
+      "lfs": false,
+      "stripGit": false,
+      "vendoredAt": "2026-06-04",
+      "note": "Lado cliente da coop; contém a pasta Fika.Core (verdade para classes/métodos/variáveis de coop). Pinado por commit para reprodutibilidade."
+    },
+    {
+      "id": "fika-headless",
+      "path": "references/fika-headless",
+      "role": "client-coop-headless",
+      "tier": 1,
+      "fetch": true,
+      "tracked": false,
+      "upstream": "https://github.com/project-fika/Fika-Headless.git",
+      "pin": { "type": "commit", "ref": "9aafe3627d5f2c7e9bf2f2e6c02dfa678a1240f2" },
+      "branch": "main",
+      "lfs": false,
+      "stripGit": false,
+      "vendoredAt": "2026-06-04",
+      "note": "Cliente headless (TypeScript) para clientes/bots dedicados de coop. Pinado por commit para reprodutibilidade."
+    }
+  ]
+}

@@ -7,8 +7,10 @@ description: Technical best practices for SPT 4.0 / EFT 0.16.x client and server
 
 Apply this skill whenever the task touches code in `mods/<mod>/modded/` or its specs/reviews. Pair with `csharp-mod-best-practices` for language-level rules.
 
-Authoritative references (in this repo):
-- Decompiled assembly: `references/eft-decompiled/Assembly-CSharp/`
+Authoritative references (in this repo) — full evidence hierarchy in `.agents/resources.md` → "Hierarquia de evidência":
+- Decompiled client assembly: `references/eft-decompiled/Assembly-CSharp/`
+- SPT server source: `references/spt-source/` (server-side logic; gitignored — see `references/README.md`)
+- FIKA (coop): `references/fika-server/`, `references/fika-plugin/` (`Fika.Core`), `references/fika-headless/`
 - Wiki snapshot: `wiki/spt/` (read-only)
 - Mod conventions: `AGENTS.md`, `.agents/conventions.md`
 

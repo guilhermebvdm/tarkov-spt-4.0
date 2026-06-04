@@ -2,7 +2,9 @@
 
 Guia de "onde buscar o quê" ao analisar mods, planejar features ou responder dúvidas técnicas sobre SPT 4.0 / EFT 0.16.9.
 
-## Hierarquia de consulta (use nesta ordem)
+## Hierarquia de consulta (geral)
+
+Ordem ao **responder dúvidas** sobre SPT/EFT:
 
 1. **Repo local** — código dos mods em `mods/`, docs em `docs/`
 2. **Wiki sincronizada** — `wiki/spt/` (snapshot read-only do upstream)
@@ -10,11 +12,26 @@ Guia de "onde buscar o quê" ao analisar mods, planejar features ou responder d�
 
 > ⚠️ `wiki/spt/` é sincronizada de github.com/sp-tarkov/wiki via [.agents/hooks/sync-wiki.sh](hooks/sync-wiki.sh) (CC BY-NC-ND 4.0). **Nunca editar** arquivos dentro de `wiki/` — mudanças serão sobrescritas no próximo sync.
 
+## Hierarquia de evidência (spec/review técnicas)
+
+**Fonte de verdade canônica** desta ordem — os demais arquivos (AGENTS.md, slash commands, skills) apontam para cá. Ao **citar evidência** numa spec técnica ou code review, toda assinatura, fórmula ou ponto de patch vem com `arquivo.cs:linha`.
+
+1. 🥇 **Assembly descompilado (cliente EFT)** — [references/eft-decompiled/Assembly-CSharp/](../references/eft-decompiled/Assembly-CSharp/). Fonte de verdade do **cliente**.
+2. 🥇 **Código-fonte do servidor SPT** — [references/spt-source/](../references/spt-source/) (gitignored, ~856 MB — obter via [references/README.md](../references/README.md)). Fonte de verdade do **servidor** (serviços, helpers, fórmulas, rotas).
+3. 🥇 **Códigos do FIKA (coop)** — `references/fika-server/` (servidor), `references/fika-plugin/` (cliente, contém `Fika.Core`), `references/fika-headless/` (headless). Fonte de verdade da lógica cooperativa multiplayer.
+4. 🥈 **Código do mod** — `mods/<mod>/original/` (upstream intocado) e `mods/<mod>/modded/` (fork local).
+5. 🥉 **Wiki SPT** — [wiki/spt/](../wiki/spt/) para install/modding/server APIs.
+6. 🪛 **Web** — último recurso. Marcar `[fonte externa]`.
+
+> Distinta da **Hierarquia de consulta (geral)** acima: aquela é pra responder dúvidas; esta é pra **citar evidência** em specs/reviews.
+
 ## Mapa rápido por tipo de dúvida
 
 | Tipo de informação | Onde buscar primeiro | Fallback externo |
 |---|---|---|
 | Modding (entry point, links) | [wiki/spt/modding/Modding_Resources.md](../wiki/spt/modding/Modding_Resources.md) | SPT Discord #mods-development |
+| **Criar mod SPT 4.0 (server + client)** | **[docs/technical/criar-mod-spt4.md](../docs/technical/criar-mod-spt4.md)** | server-mod-examples · deepwiki |
+| **Migrar mod 3.x → 4.0** | **[docs/technical/atualizar-mod-spt3-para-spt4.md](../docs/technical/atualizar-mod-spt3-para-spt4.md)** | — |
 | IDs de traders | [wiki/spt/modding/references/trader-information.md](../wiki/spt/modding/references/trader-information.md) | db.sp-tarkov.com |
 | Estrutura de quests | [wiki/spt/modding/references/quest-values.md](../wiki/spt/modding/references/quest-values.md) | tarkov.dev API |
 | IDs de mapas / locations | [wiki/spt/modding/references/location-information.md](../wiki/spt/modding/references/location-information.md) | tarkov.dev / Tarkynator |
@@ -46,7 +63,7 @@ Guia de "onde buscar o quê" ao analisar mods, planejar features ou responder d�
 - **[harmony.pardeike.net](https://harmony.pardeike.net/)** — patching de IL para mods client.
 - **[SPT Discord](http://discord.sp-tarkov.com/)** — canais `#mods-development` e `#mods-resources` quando docs falham.
 
-## Boas práticas e dicas (wiki upstream)
+## Páginas-chave da wiki
 
 Páginas da wiki que ensinam **como fazer** (não só tabelas de IDs). Leitura recomendada antes de iniciar qualquer mod ou dar suporte:
 
@@ -61,9 +78,9 @@ Páginas da wiki que ensinam **como fazer** (não só tabelas de IDs). Leitura r
 | [wiki/spt/Style_Guide.md](../wiki/spt/Style_Guide.md) | Padrão de docs (markdown, paths, version disclaimer) |
 | [wiki/spt/Recommended_Mods_40.md](../wiki/spt/Recommended_Mods_40.md) | Curadoria oficial — referência ao decidir "vale criar do zero ou usar existente?" |
 
-> **Gap importante:** a wiki **não** tem tutorial de server mod 4.0 nem doc de `[Injectable]` / `IOnLoad` / `ConfigLoader<T>`. Para isso use **deepwiki** + [github.com/sp-tarkov/server-mod-examples](https://github.com/sp-tarkov/server-mod-examples) + código real em [mods/RZ-SPTMods/](../mods/RZ-SPTMods/).
+> **Gap importante:** a wiki **não** tem tutorial de server mod 4.0 nem doc de `[Injectable]` / `IOnLoad` / `ConfigLoader<T>`. Guias internos preenchem isso: [docs/technical/criar-mod-spt4.md](../docs/technical/criar-mod-spt4.md) e [atualizar-mod-spt3-para-spt4.md](../docs/technical/atualizar-mod-spt3-para-spt4.md). Para detalhes além deles, use **deepwiki** + [github.com/sp-tarkov/server-mod-examples](https://github.com/sp-tarkov/server-mod-examples) + código real em [mods/RZ-SPTMods/](../mods/RZ-SPTMods/).
 
-## Boas práticas ao consultar fontes externas
+## Regras ao usar fontes externas
 
 1. **Cite a fonte** ao trazer dado externo para uma resposta ou commit message (ex: "ID via db.sp-tarkov.com").
 2. **Confronte versão** — `api.tarkov.dev` e wikis comunitárias refletem EFT atual; SPT pode estar atrás. Em conflito, o que está no `Assembly-CSharp` do build instalado vence.

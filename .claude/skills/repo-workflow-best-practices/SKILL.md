@@ -11,11 +11,13 @@ Convenções de organização e integração entre commands/specs/reviews/implem
 
 - **`mods/<mod>/modded/`** é o **único** diretório editável dentro de cada mod. Todo trabalho de implementação acontece aqui.
 - **`mods/<mod>/original/`** é o upstream intocado. **Nunca modificar.** Se precisar de algo de lá, copiar para `modded/` e marcar com `// ref: original/<arquivo>:<linha>`.
-- **Hierarquia de fontes obrigatória** ao buscar evidência para spec técnica ou code review:
-  1. 🥇 **Assembly descompilado** — `references/eft-decompiled/Assembly-CSharp/` (cite `arquivo.cs:linha` exato).
-  2. 🥈 **Código do mod** — `mods/<mod>/original/` (padrões upstream) e `mods/<mod>/modded/` (fork em progresso).
-  3. 🥉 **Wiki SPT** — `wiki/spt/` para questões de modding/profile/server.
-  4. 🪛 **Web** — só último recurso. Marcar `[fonte externa]` no texto.
+- **Hierarquia de evidência obrigatória** ao buscar evidência para spec técnica ou code review (canônica em `.agents/resources.md` → §"Hierarquia de evidência"):
+  1. 🥇 **Assembly descompilado (cliente EFT)** — `references/eft-decompiled/Assembly-CSharp/` (cite `arquivo.cs:linha` exato).
+  2. 🥇 **Servidor SPT** — `references/spt-source/` (lógica de servidor: serviços, helpers, fórmulas, rotas).
+  3. 🥇 **FIKA (coop)** — `references/fika-server/`, `references/fika-plugin/` (`Fika.Core`), `references/fika-headless/`.
+  4. 🥈 **Código do mod** — `mods/<mod>/original/` (padrões upstream) e `mods/<mod>/modded/` (fork em progresso).
+  5. 🥉 **Wiki SPT** — `wiki/spt/` para questões de modding/profile/server.
+  6. 🪛 **Web** — só último recurso. Marcar `[fonte externa]` no texto.
 
 ## 2. Convenção de nomenclatura de artefatos
 

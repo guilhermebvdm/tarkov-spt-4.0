@@ -8,6 +8,19 @@ if [ "${GIT_AMEND:-}" = "1" ]; then
   exit 0
 fi
 
+# Valida o manifesto de referencias quando ele estiver staged (abortar commit se invalido)
+MANIFEST_STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep -E '^references/manifest\.json$' || true)
+if [ -n "$MANIFEST_STAGED" ]; then
+  if command -v node >/dev/null 2>&1; then
+    node scripts/setup-references.js --check-manifest || {
+      echo "❌ references/manifest.json invalido — commit abortado." >&2
+      exit 1
+    }
+  else
+    echo "⚠ node nao encontrado — pulando validacao de references/manifest.json" >&2
+  fi
+fi
+
 AUTHOR=$(git config user.name 2>/dev/null || echo "unknown")
 DATE=$(date +%Y-%m-%d)
 
