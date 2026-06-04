@@ -1,3 +1,10 @@
+---
+title: Criar Mods para o SPT 4.0
+date: 2026-06-04
+status: 🔵 Em andamento
+authors: Guilherme
+---
+
 # Como Criar Mods para o SPT 4.0
 
 Criar mods para o Single Player Tarkov (SPT) na versão 4.0 foi unificado em uma única linguagem, facilitando o desenvolvimento cross-layer (servidor e cliente). O SPT 4.0 abandonou o Node.js/TypeScript no backend e agora utiliza **C# e .NET 9** tanto no Servidor quanto no Cliente.

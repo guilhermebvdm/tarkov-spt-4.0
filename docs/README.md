@@ -26,4 +26,5 @@ Ver `.agents/conventions.md` para detalhes.
 
 | Documento | Status | Última atualização |
 |---|---|---|
-| _vazio — adicionar conforme docs forem criados_ | — | — |
+| [technical/criar-mod-spt4.md](technical/criar-mod-spt4.md) | 🔵 Em andamento | 2026-06-04 |
+| [technical/atualizar-mod-spt3-para-spt4.md](technical/atualizar-mod-spt3-para-spt4.md) | 🔵 Em andamento | 2026-06-04 |

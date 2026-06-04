@@ -1,3 +1,10 @@
+---
+title: Atualizar um Mod do SPT 3.x para o SPT 4.0
+date: 2026-06-04
+status: 🔵 Em andamento
+authors: Guilherme
+---
+
 # Como Atualizar um Mod do SPT 3.x para o SPT 4.0
 
 A transição da versão 3.x para a versão 4.0 do Single Player Tarkov (SPT) representa a maior e mais profunda mudança arquitetural na história do projeto. O que era antes conhecido como "SPT-AKI" agora se chama apenas "SPT", e o motor base do servidor sofreu um *Rewrite* (Reescrita) completo.
