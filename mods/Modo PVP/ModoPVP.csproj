@@ -1,0 +1,54 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <AssemblyName>ModoPVP</AssemblyName>
+    <Description>Mod de Respawn e Modo PVP para o Fika</Description>
+    <Version>1.0.0</Version>
+    <Authors>Umbigo Preto</Authors>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- BepInEx & Harmony -->
+    <Reference Include="BepInEx">
+      <HintPath>E:\TORRENT\Escape from Tarkov\BepInEx\core\BepInEx.dll</HintPath>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>E:\TORRENT\Escape from Tarkov\BepInEx\core\0Harmony.dll</HintPath>
+    </Reference>
+
+    <!-- Tarkov & Unity -->
+    <Reference Include="Assembly-CSharp">
+      <HintPath>E:\TORRENT\Escape from Tarkov\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>E:\TORRENT\Escape from Tarkov\EscapeFromTarkov_Data\Managed\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>E:\TORRENT\Escape from Tarkov\EscapeFromTarkov_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+
+    <!-- SPT & Utils -->
+    <Reference Include="spt-reflection">
+      <HintPath>E:\TORRENT\Escape from Tarkov\BepInEx\plugins\spt\spt-reflection.dll</HintPath>
+    </Reference>
+    <Reference Include="Comfort">
+      <HintPath>E:\TORRENT\Escape from Tarkov\EscapeFromTarkov_Data\Managed\Comfort.dll</HintPath>
+    </Reference>
+    <Reference Include="Sirenix.Serialization">
+      <HintPath>E:\TORRENT\Escape from Tarkov\EscapeFromTarkov_Data\Managed\Sirenix.Serialization.dll</HintPath>
+    </Reference>
+    
+    <!-- Fika Plugin -->
+    <Reference Include="Fika.Core">
+      <HintPath>E:\TORRENT\Escape from Tarkov\BepInEx\plugins\Fika\Fika.Core.dll</HintPath>
+    </Reference>
+    
+    <!-- Audio / VOIP -->
+    <Reference Include="DissonanceVoip">
+      <HintPath>E:\TORRENT\Escape from Tarkov\EscapeFromTarkov_Data\Managed\DissonanceVoip.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>
