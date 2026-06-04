@@ -1,4 +1,4 @@
-﻿---
+---
 title: Inventário de mods para migração SPT 3.x → 4.0
 date: 2026-05-02
 status: 🔵 Em andamento
@@ -126,9 +126,10 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 
 | # | Mod | Tipo | Atuação | Categoria | Escopo | Forge | Repo 3.x | Repo 4.0 | SPT 4.0? | Função | Status | Prioridade | TRL 3.0? | Instalado |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 0 | ?? UltraFika-Plugin | 🖥️ Client | 🔀 Ambos | 🧩 Framework/Base | 🌐 Multiplayer | — | — | — | ❌ | Cliente multiplayer (fork de Fika) | ⬆️ Evoluir | 🔥 Crítica | Sim | — |
 | 1 | [SVM] Server Value Modifier | 🌐 Server | 🌐 Geral | ⚖️ Balanceamento | 🧩 Framework | [236](https://forge.sp-tarkov.com/mod/236/server-value-modifier-svm) | [GhostFenixx/SVM](https://github.com/GhostFenixx/SVM) | [GhostFenixx/svm-csharp](https://github.com/GhostFenixx/svm-csharp) | ✅ | Modifica valores do servidor (loot, traders, hideout) — último release SPT 3.11 | 🟠 Aguardar upstream | 🔍 | Sim | ✓ |
 | 2 | AAAArtem-WTT | 🖥️ Client | 🌐 Geral | 🔍 | 🔍 | [1023](https://forge.sp-tarkov.com/mod/1023/wtt-artem) | [WelcomeToTarkov/WTT-Artem](https://github.com/WelcomeToTarkov/WTT-Artem) | [WelcomeToTarkov/WTT-Artem](https://github.com/WelcomeToTarkov/WTT-Artem) | ✅ | 🔍 (relacionado ao WTT) | 🟡 Avaliar | 🔍 | Sim | — |
-| 3 | acidphantasm-DelayedFleaSales | 🖥️ Client | 🌐 Geral | 🔥 Hardcore | 💰 Mercado | [2016](https://forge.sp-tarkov.com/mod/2016/delayed-flea-sales) | [acidphantasm/acidphantasm-delayedfleasales](https://github.com/acidphantasm/acidphantasm-delayedfleasales) | [acidphantasm/delayedfleasales-csharp](https://github.com/acidphantasm/delayedfleasales-csharp) | ✅ | Atrasa vendas no flea market (era Server/TS em 3.x, reescrito como BepInEx C# para 4.0) | 🟢 À Instalar | 🔍 | Sim | — |
+| 3 | acidphantasm-DelayedFleaSales | 🖥️ Client | 🌐 Geral | 🔥 Hardcore | 💰 Mercado | [2016](https://forge.sp-tarkov.com/mod/2016/delayed-flea-sales) | [acidphantasm/acidphantasm-delayedfleasales](https://github.com/acidphantasm/acidphantasm-delayedfleasales) | [acidphantasm/delayedfleasales-csharp](https://github.com/acidphantasm/delayedfleasales-csharp) | ✅ | Atrasa vendas no flea market (era Server/TS em 3.x, reescrito como BepInEx C# para 4.0) | ⚫ Não incluir | 🔍 | Sim | — |
 | 4 | acidphantasm-moretagcolours | 🖥️ Client | 🌐 Geral | 🛋️ QoL | 🖼️ UI | [1533](https://forge.sp-tarkov.com/mod/1533/more-tag-colours) | [acidphantasm/acidphantasm-moretagcolours](https://github.com/acidphantasm/acidphantasm-moretagcolours) | [acidphantasm/acidphantasm-moretagcolours](https://github.com/acidphantasm/acidphantasm-moretagcolours) | ✅ | Mais cores para tags de itens | 🟡 Avaliar | 🔍 | Sim | — |
 | 5 | acidphantasm-previewsizer | 🖥️ Client | 🌐 Geral | 🛋️ QoL | 🖼️ UI | [2339](https://forge.sp-tarkov.com/mod/2339/preview-sizer) | [acidphantasm/acidphantasm-previewsizer](https://github.com/acidphantasm/acidphantasm-previewsizer) | [acidphantasm/acidphantasm-previewsizer](https://github.com/acidphantasm/acidphantasm-previewsizer) | ✅ | Redimensiona preview de itens | 🟡 Avaliar | 🔍 | Sim | — |
 | 6 | acidphantasm-progressivebotsystem | 🖥️ Client | ⚔️ Raid | ⚖️ Balanceamento | 🤖 IA | [1594](https://forge.sp-tarkov.com/mod/1594/apbs-acids-progressive-bot-system) | [acidphantasm/acidphantasm-apbs](https://github.com/acidphantasm/acidphantasm-apbs) | [acidphantasm/progressivebotsystem-csharp](https://github.com/acidphantasm/progressivebotsystem-csharp) | ✅ | Sistema progressivo de bots (era Server/TS em 3.x, reescrito como BepInEx C# para 4.0) | 🟢 À Instalar | 🔍 | Sim | — |
@@ -363,3 +364,4 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | 2026-06-03 | Guilherme | docs(migration): add mods 138 (WTT Menu Overhaul) + 139 (Discord Raid Map) |
 | 2026-06-04 | sync-script | docs(migration): sync mods-inventory.html from markdown |
 | 2026-06-04 | Guilherme | chore(claude): allow inventory scripts and chrome-devtools MCP without prompts |
+| 2026-06-04 | sync-script | docs(migration): sync mods-inventory.html from markdown |
