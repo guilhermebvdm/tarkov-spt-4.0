@@ -1,6 +1,10 @@
 {
   "permissions": {
-    "allow": [],
+    "allow": [
+      "Bash(node scripts/serve-inventory.js:*)",
+      "Bash(node scripts/sync-mods-html.js:*)",
+      "mcp__chrome-devtools"
+    ],
     "deny": [],
     "defaultMode": "bypassPermissions"
   },
