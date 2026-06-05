@@ -6,6 +6,7 @@
 
 - `technical/` — guias técnicos (client mods, server mods, harmony patches)
 - `architecture/` — decisões de arquitetura
+- `discord-mods-topics/` — transcrições e análises de threads do Discord sobre mods (ex.: ORBIT)
 
 ## Convenção
 
@@ -28,3 +29,5 @@ Ver `.agents/conventions.md` para detalhes.
 |---|---|---|
 | [technical/criar-mod-spt4.md](technical/criar-mod-spt4.md) | 🔵 Em andamento | 2026-06-04 |
 | [technical/atualizar-mod-spt3-para-spt4.md](technical/atualizar-mod-spt3-para-spt4.md) | 🔵 Em andamento | 2026-06-04 |
+| [discord-mods-topics/orbit/01-transcricao.md](discord-mods-topics/orbit/01-transcricao.md) | 🔵 Em andamento | 2026-06-04 |
+| [discord-mods-topics/orbit/02-analise.md](discord-mods-topics/orbit/02-analise.md) | 🔵 Em andamento | 2026-06-04 |
