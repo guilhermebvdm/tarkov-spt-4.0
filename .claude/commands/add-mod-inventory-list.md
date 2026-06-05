@@ -46,9 +46,9 @@ Valores padrão para mods novos:
 | Coluna | Valor padrão |
 |---|---|
 | Tipo | `🖥️ Client` / `🌐 Server` / `🔀 Misto` |
-| Atuação | inferir do mod, ou `🔍` |
-| Categoria | inferir do mod, ou `🔍` |
-| Escopo | inferir do mod, ou `🔍` |
+| Atuação | Inferir com emojis do projeto (ex: `⚔️ Raid`, `🌐 Geral`, `🏚️ Hideout`). Use `🔍` só se impossível |
+| Categoria | Inferir com emojis do projeto (ex: `⚖️ Balanceamento`, `🛋️ QoL`, `⚙️ Core`). Use `🔍` só se impossível |
+| Escopo | Inferir com emojis do projeto (ex: `🤖 IA`, `🔫 Armas`, `🖼️ UI`). Use `🔍` só se impossível |
 | Forge | `[{id}](https://forge.sp-tarkov.com/mod/{id}/{slug})` |
 | Repo 3.x | `—` |
 | Repo 4.0 | `[user/repo](https://github.com/user/repo)` |
@@ -110,3 +110,4 @@ Informe:
 - O sync script substitui apenas `const MODS = [...]` — CSS, JS e layout não são tocados
 - `mods-inventory.md` é a fonte de verdade; o HTML é derivado — dados vão no markdown, depois sync
 - TRL sempre `New` para mods sem versão 3.x no inventário original
+- **⚠️ CUIDADO COM ENCODING:** Nunca use comandos do PowerShell (`Add-Content`, `Set-Content`, etc) para adicionar linhas no `.md`, pois isso corrompe os emojis e o encoding UTF-8. Utilize *exclusivamente* as ferramentas nativas de manipulação de arquivo do seu ambiente (`replace_file_content`, `write_to_file`) ou scripts Node.js (`fs.writeFileSync(..., 'utf8')`).

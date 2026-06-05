@@ -38,9 +38,22 @@ const STATUS_MD = {
   NaoIncluir:  '⚫ Não incluir',
 };
 
-// ── Write a single column cell (by index) for mod #n in the markdown table ───────
+// ━━━ Write a single column cell (by index) for mod #n in the markdown table ━━━━━━━
 function setCellInMd(n, colIndex, value) {
   const lines = fs.readFileSync(MD_FILE, 'utf8').split('\n');
+  
+  if (n === 0 && colIndex === COL_STATUS) {
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].startsWith('## Inventário completo')) break;
+      if (lines[i].startsWith('| **Status** |')) {
+        lines[i] = `| **Status** | ${value} |`;
+        fs.writeFileSync(MD_FILE, lines.join('\n'), 'utf8');
+        return true;
+      }
+    }
+    return false;
+  }
+
   for (let i = 0; i < lines.length; i++) {
     const m = lines[i].match(/^\|\s*(\d+)\s*\|(.+)$/);
     if (m && parseInt(m[1]) === n) {

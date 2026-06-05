@@ -268,6 +268,7 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | 139 | Discord Raid Map | 🖥️ Client | ⚔️ Raid | 🛋️ QoL | 🌐 Multiplayer | [2714](https://forge.sp-tarkov.com/mod/2714/discord-raid-map) | — | [Fiodorwellfme/DiscordRaidMap](https://github.com/Fiodorwellfme/DiscordRaidMap) | ✅ | Posta mapa da raid no Discord via webhook (jogadores, kills, bosses, airdrop, extrações, tempo) — SPT 4.0.13 | 🟢 Instalar | 🔍 | New | ✓ |
 | 140 | UnderFire - An Adrenaline Effect | 🖥️ Client | ⚔️ Raid | 🩸 Realismo | ✨ Gráficos/FX | [2063](https://forge.sp-tarkov.com/mod/2063/underfire-an-adrenaline-effect) | — | [rpmwpm/UnderFire](https://github.com/rpmwpm/UnderFire) | ✅ | Efeito de adrenalina (visão/FX) ao levar tiros ou ser atingido em combate — SPT 4.0.13 | 🟢 Instalar | 🔍 | New | ✓ |
 | 141 | Career Log | 🖥️ Client | 🌐 Geral | 🛋️ QoL | 🖼️ UI | [2713](https://forge.sp-tarkov.com/mod/2713/career-log) | — | [FallegaHQ/SPT-CareerLog](https://github.com/FallegaHQ/SPT-CareerLog) | ✅ | Histórico de carreira: log de cada raid, stats vitalícios, finanças e stash, acessível no menu — SPT 4.0.13 | 🟢 Instalar | 🔍 | New | ✓ |
+| 142 | ABPS - Acid's Bot Placement System | 🖥️ Client | ⚔️ Raid | ⚖️ Balanceamento | 🤖 IA/Bots | [2097](https://forge.sp-tarkov.com/mod/2097/abps-acids-bot-placement-system) | — | [acidphantasm/botplacementsystem-csharp](https://github.com/acidphantasm/botplacementsystem-csharp) | ✅ | Sistema configurável de spawn de bots (waves, bosses, chances) | 🟢 Instalar | 🔍 | New | ✓ |
 
 ## Próximos passos
 
@@ -364,4 +365,6 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | 2026-06-03 | Guilherme | docs(migration): add mods 138 (WTT Menu Overhaul) + 139 (Discord Raid Map) |
 | 2026-06-04 | sync-script | docs(migration): sync mods-inventory.html from markdown |
 | 2026-06-04 | Guilherme | chore(claude): allow inventory scripts and chrome-devtools MCP without prompts |
+| 2026-06-04 | sync-script | docs(migration): sync mods-inventory.html from markdown |
+| 2026-06-04 | sync-script | docs(migration): sync mods-inventory.html from markdown |
 | 2026-06-04 | sync-script | docs(migration): sync mods-inventory.html from markdown |
