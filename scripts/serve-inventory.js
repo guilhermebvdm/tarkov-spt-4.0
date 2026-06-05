@@ -41,18 +41,6 @@ const STATUS_MD = {
 // ━━━ Write a single column cell (by index) for mod #n in the markdown table ━━━━━━━
 function setCellInMd(n, colIndex, value) {
   const lines = fs.readFileSync(MD_FILE, 'utf8').split('\n');
-  
-  if (n === 0 && colIndex === COL_STATUS) {
-    for (let i = 0; i < lines.length; i++) {
-      if (lines[i].startsWith('## Inventário completo')) break;
-      if (lines[i].startsWith('| **Status** |')) {
-        lines[i] = `| **Status** | ${value} |`;
-        fs.writeFileSync(MD_FILE, lines.join('\n'), 'utf8');
-        return true;
-      }
-    }
-    return false;
-  }
 
   for (let i = 0; i < lines.length; i++) {
     const m = lines[i].match(/^\|\s*(\d+)\s*\|(.+)$/);
@@ -65,7 +53,7 @@ function setCellInMd(n, colIndex, value) {
       return true;
     }
   }
-  return false; // no matching row (e.g. #0 UltraFika lives in a separate block)
+  return false; // no matching row for #n in the inventory table
 }
 
 // ── HTTP helpers ─────────────────────────────────────────────────────────────────
@@ -118,11 +106,20 @@ const server = http.createServer(async (req, res) => {
       if (!Number.isInteger(n)) return sendJson(res, 400, { ok: false, error: 'n must be an integer' });
 
       if (!setCellInMd(n, COL_INSTALLED, installed ? '✓' : '—')) {
-        return sendJson(res, 404, { ok: false, error: `mod #${n} não encontrado na tabela` });
+        return sendJson(res, 404, { ok: false, error: `mod #${n} não encontrado na tabela (.md NÃO alterado)` });
       }
-      const count = syncHtml({ history: false }); // regen HTML, no history spam per click
-      console.log(`[installed] #${n} → ${installed ? '✓' : '—'} (synced ${count} mods)`);
-      return sendJson(res, 200, { ok: true, n, installed });
+      // .md (source of truth) is now persisted. Regenerating the HTML is best-effort:
+      // if it throws, the data is already safe — report success WITH a warning so the
+      // client never reverts a write that actually landed.
+      try {
+        const count = syncHtml({ history: false }); // regen HTML, no history spam per click
+        console.log(`[installed] #${n} → ${installed ? '✓' : '—'} (synced ${count} mods)`);
+        return sendJson(res, 200, { ok: true, n, installed });
+      } catch (e) {
+        console.error(`[installed] #${n} gravado no .md, mas syncHtml falhou:`, e);
+        return sendJson(res, 200, { ok: true, n, installed,
+          warning: 'gravado no .md, mas a regeneração do HTML falhou — recarregue depois de corrigir' });
+      }
     }
 
     if (req.method === 'POST' && req.url === '/api/status') {
@@ -133,11 +130,18 @@ const server = http.createServer(async (req, res) => {
       if (!STATUS_MD[status]) return sendJson(res, 400, { ok: false, error: `status inválido: ${status}` });
 
       if (!setCellInMd(n, COL_STATUS, STATUS_MD[status])) {
-        return sendJson(res, 404, { ok: false, error: `mod #${n} não encontrado na tabela` });
+        return sendJson(res, 404, { ok: false, error: `mod #${n} não encontrado na tabela (.md NÃO alterado)` });
       }
-      const count = syncHtml({ history: false });
-      console.log(`[status] #${n} → ${status} (synced ${count} mods)`);
-      return sendJson(res, 200, { ok: true, n, status });
+      // Same best-effort regen as /api/installed — the .md write already succeeded.
+      try {
+        const count = syncHtml({ history: false });
+        console.log(`[status] #${n} → ${status} (synced ${count} mods)`);
+        return sendJson(res, 200, { ok: true, n, status });
+      } catch (e) {
+        console.error(`[status] #${n} gravado no .md, mas syncHtml falhou:`, e);
+        return sendJson(res, 200, { ok: true, n, status,
+          warning: 'gravado no .md, mas a regeneração do HTML falhou — recarregue depois de corrigir' });
+      }
     }
 
     sendJson(res, 404, { ok: false, error: 'not found' });

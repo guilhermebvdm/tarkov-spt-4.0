@@ -254,6 +254,70 @@ tbody td:last-child{border-right:none}
 
 /* Footer */
 .footer{border-top:1px solid var(--border);padding:10px 24px;color:var(--text);font-size:10px;letter-spacing:.06em;display:flex;align-items:center;justify-content:space-between}
+
+/* ── OFFLINE (file://) BANNER ── */
+#offline-banner{
+  background:repeating-linear-gradient(45deg,#3a2410,#3a2410 14px,#2e1c0c 14px,#2e1c0c 28px);
+  border-bottom:2px solid #e0a94c;color:#f0c070;
+  padding:11px 24px;text-align:center;font-size:13px;font-weight:700;letter-spacing:.03em;
+}
+#offline-banner code{background:rgba(0,0,0,.35);padding:2px 7px;color:#ffd890;font-size:12px}
+
+/* ── TOASTS / ACTIVITY LOG ── */
+/* Per-action feedback so a meticulous editing session never loses a write silently.
+   Success auto-dismisses; errors stick until dismissed; everything is also recorded
+   in a persisted activity log (audit trail). */
+#toast-wrap{position:fixed;bottom:84px;right:12px;z-index:9999;display:flex;flex-direction:column-reverse;gap:8px;width:330px;max-width:calc(100vw - 24px)}
+.toast{
+  display:flex;align-items:flex-start;gap:9px;
+  background:#0c0d10;border:1px solid var(--border2);border-left-width:3px;
+  padding:9px 10px 9px 11px;box-shadow:0 6px 22px rgba(0,0,0,.6);
+  font-size:12px;line-height:1.4;color:var(--text2);
+  animation:toast-in .16s ease;
+}
+@keyframes toast-in{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+.toast.out{animation:toast-out .22s ease forwards}
+@keyframes toast-out{to{opacity:0;transform:translateX(18px);margin-bottom:-44px}}
+.toast-ico{font-size:13px;line-height:1.25;flex-shrink:0}
+.toast-body{flex:1;min-width:0}
+.toast-title{font-weight:700;color:var(--text3);word-break:break-word}
+.toast-detail{color:var(--text);font-size:11px;margin-top:1px;word-break:break-word}
+.toast-x{cursor:pointer;color:var(--text);opacity:.45;font-size:13px;line-height:1;padding:0 1px;flex-shrink:0}
+.toast-x:hover{opacity:1;color:var(--text2)}
+.toast.ok  {border-left-color:#4caf72} .toast.ok   .toast-ico{color:#4caf72}
+.toast.err {border-left-color:#cc4848;border-color:rgba(136,32,32,.5)} .toast.err .toast-ico{color:#cc4848}
+.toast.warn{border-left-color:#d4a820} .toast.warn .toast-ico{color:#d4a820}
+.toast.pend{border-left-color:#5a6070} .toast.pend .toast-ico{color:#7a8290}
+
+#log-btn{
+  position:fixed;bottom:46px;right:12px;z-index:9998;cursor:pointer;
+  font:12px system-ui,sans-serif;padding:6px 12px;border-radius:20px;
+  background:#15171b;color:var(--text2);border:1px solid var(--border2);
+  box-shadow:0 2px 8px rgba(0,0,0,.4);display:flex;align-items:center;gap:7px;white-space:nowrap;
+}
+#log-btn:hover{border-color:var(--gold2);color:var(--gold)}
+#log-btn .lb-err{color:#cc4848;font-weight:700}
+#log-panel{
+  position:fixed;bottom:84px;right:12px;z-index:10000;width:380px;max-width:calc(100vw - 24px);max-height:58vh;
+  background:#0b0c0f;border:1px solid var(--gold2);box-shadow:0 12px 40px rgba(0,0,0,.85);
+  display:none;flex-direction:column;
+}
+#log-panel.open{display:flex}
+.log-head{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid var(--border);background:var(--bg3)}
+.log-head .lh-title{color:var(--gold);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.log-head .lh-actions{display:flex;gap:6px}
+.log-head button{background:var(--bg4);border:1px solid var(--border2);color:var(--text);font-size:10px;padding:3px 8px;cursor:pointer;font-family:inherit}
+.log-head button:hover{border-color:var(--gold2);color:var(--text2)}
+.log-list{overflow-y:auto;padding:3px 0}
+.log-empty{color:var(--text);font-size:11px;text-align:center;padding:24px 12px;letter-spacing:.06em}
+.log-row{display:flex;gap:8px;align-items:baseline;padding:5px 12px;border-bottom:1px solid rgba(255,255,255,.03);font-size:11px;line-height:1.4}
+.log-row:hover{background:rgba(255,255,255,.02)}
+.log-time{color:var(--text);font-variant-numeric:tabular-nums;font-size:10px;flex-shrink:0}
+.log-ico{flex-shrink:0}
+.log-txt{flex:1;color:var(--text2);word-break:break-word}
+.log-row.ok   .log-ico{color:#4caf72}
+.log-row.err  .log-ico{color:#cc4848} .log-row.err .log-txt{color:#d98a8a}
+.log-row.warn .log-ico{color:#d4a820}
 </style>
 </head>
 <body>
@@ -342,8 +406,6 @@ tbody td:last-child{border-right:none}
 // forge_id : null=absent  ""=unknown  "123"=forge mod ID
 // r4_path  : null=absent  ""=unknown  "user/repo"=github  "https://..."=other
 const MODS = [
-[0,"🏠 UltraFika-Plugin","Client","Ambos","Framework","Multiplayer",null,null,"Cliente multiplayer (fork de Fika)","Evoluir","Crítica",true,false,"Sim",false],
-[0,"?? UltraFika-Plugin","Client","Ambos","Framework","Multiplayer",null,null,"Cliente multiplayer (fork de Fika)","Evoluir","Crítica",false,false,"Sim",false],
 [1,"[SVM] Server Value Modifier","Server","Geral","Balanceamento","Framework","236","GhostFenixx/svm-csharp","Modifica valores do servidor (loot, traders, hideout) — último release SPT 3.11","Aguardar","?",false,true,"Sim",true],
 [2,"AAAArtem-WTT","Client","Geral","?","?","1023","WelcomeToTarkov/WTT-Artem","🔍 (relacionado ao WTT)","Avaliar","?",false,true,"Sim",false],
 [3,"acidphantasm-DelayedFleaSales","Client","Geral","Hardcore","Mercado","2016","acidphantasm/delayedfleasales-csharp","Atrasa vendas no flea market (era Server/TS em 3.x, reescrito como BepInEx C# para 4.0)","NaoIncluir","?",false,true,"Sim",false],
@@ -751,19 +813,28 @@ const SERVER_MODE = location.protocol === 'http:' || location.protocol === 'http
 function deriveInstalled() {
   return new Set(MODS.filter(m => m[I.inst]).map(m => m[I.n]));
 }
+
+// Mods with a save POST in flight. While a mod is here its Instalado/Status controls
+// render disabled and re-entry is ignored — prevents rapid clicks on the same row
+// from racing optimistic state against a slower response (UI ↔ .md desync).
+const inFlight = new Set();
+
 function toggleInstalled(n) {
+  if (!SERVER_MODE) return; // no servidor → bloqueado: o botão é renderizado disabled (sem perda silenciosa)
+  if (inFlight.has(n)) return; // já há uma gravação em andamento para este mod
   if (!state.installed.has(n)) {
     const m = MODS.find(x => x[I.n] === n);
     if (m && effectiveStatus(m) === 'NaoIncluir') return;
   }
   const willInstall = !state.installed.has(n);
-  // optimistic UI
+  // optimistic UI + trava a linha até a resposta chegar
   if (willInstall) state.installed.add(n); else state.installed.delete(n);
+  inFlight.add(n);
   renderStats();
   render();
 
-  if (!SERVER_MODE) return; // file:// — preview only, not persisted
-
+  const verb = willInstall ? 'Instalado' : 'Removido';
+  const t = Notify.pending(`Salvando #${n}…`);
   fetch('/api/installed', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -774,14 +845,15 @@ function toggleInstalled(n) {
       if (!res.ok) throw new Error(res.error || 'falha ao salvar');
       const m = MODS.find(x => x[I.n] === n); // keep in-memory data consistent
       if (m) m[I.inst] = willInstall;
+      if (res.warning) t.warn(`#${n} ${modName(n)} → ${verb}`, res.warning);
+      else             t.ok(`#${n} ${modName(n)} → ${verb}`, 'salvo no .md');
     })
     .catch(err => {
       // revert optimistic change
       if (willInstall) state.installed.delete(n); else state.installed.add(n);
-      renderStats();
-      render();
-      alert('Não foi possível salvar no .md: ' + err.message);
-    });
+      t.fail(`#${n} ${modName(n)} — falha ao salvar`, err.message);
+    })
+    .finally(() => { inFlight.delete(n); renderStats(); render(); }); // destrava + reflete o estado final
 }
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
@@ -1042,11 +1114,17 @@ function trlCell(m) {
 
 function instCell(m) {
   const on = state.installed.has(m[I.n]);
+  if (!SERVER_MODE) { // sem servidor → leitura apenas (não há como salvar)
+    return `<button class="btn-inst${on?' on':''} disabled" disabled title="Sem servidor — edição desativada. Rode node scripts/serve-inventory.js e abra http://localhost:8787">${on?'✓ Sim':'—'}</button>`;
+  }
+  if (inFlight.has(m[I.n])) { // gravação em andamento → trava até a resposta
+    return `<button class="btn-inst${on?' on':''} disabled" disabled title="Salvando…">${on?'✓ Sim':'—'}</button>`;
+  }
   const blocked = effectiveStatus(m) === 'NaoIncluir' && !on;
   if (blocked) {
     return `<button class="btn-inst disabled" disabled title="Mod marcado como NÃO INCLUIR">—</button>`;
   }
-  return `<button class="btn-inst${on?' on':''}" title="Preview na sessão — para salvar/sincronizar, edite a coluna Instalado no .md e rode o sync" onclick="event.stopPropagation();toggleInstalled(${m[I.n]})">${on?'✓ Sim':'—'}</button>`;
+  return `<button class="btn-inst${on?' on':''}" title="Clique salva no .md via servidor" onclick="event.stopPropagation();toggleInstalled(${m[I.n]})">${on?'✓ Sim':'—'}</button>`;
 }
 
 const STATUS_OPTS = ['Instalar','Evoluir','Avaliar','Aguardar','Desenvolver','Bloqueado','NaoIncluir'];
@@ -1055,6 +1133,12 @@ function statusCell(m) {
   const n = m[I.n];
   const eff = effectiveStatus(m);
   const lbl = STATUS_LABELS[eff] || eff;
+  if (!SERVER_MODE) { // sem servidor → badge estático (edição desativada)
+    return `<span class="b bs-${eff}" title="Sem servidor — edição desativada. Rode o servidor para alterar o status">${lbl}</span>`;
+  }
+  if (inFlight.has(n)) { // gravação em andamento → trava o dropdown
+    return `<span class="b bs-${eff}" title="Salvando…">${lbl}</span>`;
+  }
   const DESTRUCTIVE = new Set(['Bloqueado','NaoIncluir']);
   let sepDone = false;
   const items = STATUS_OPTS.map(s => {
@@ -1257,28 +1341,35 @@ function openSdd(n) {
 }
 function pickStatus(n, status) {
   if (_openSdd) { _openSdd.classList.remove('open'); _openSdd = null; }
-  if (!SERVER_MODE) { setStatusOverride(n, status); return; } // file:// — preview only
+  if (!SERVER_MODE) return; // no servidor → bloqueado: o dropdown é renderizado como badge estático
+  if (inFlight.has(n)) return; // já há uma gravação em andamento para este mod
 
   const m = MODS.find(x => x[I.n] === n);
   const prev = m ? m[I.status] : null;
-  // optimistic: write the canonical status into the in-memory data (no override)
+  // optimistic: write the canonical status into the in-memory data (no override) + trava a linha
   if (m) m[I.status] = status;
+  inFlight.add(n);
   renderStats();
   render();
 
+  const label = STATUS_LABELS[status] || status;
+  const t = Notify.pending(`Salvando #${n}…`);
   fetch('/api/status', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ n, status }),
   })
     .then(r => r.json())
-    .then(res => { if (!res.ok) throw new Error(res.error || 'falha ao salvar'); })
+    .then(res => {
+      if (!res.ok) throw new Error(res.error || 'falha ao salvar');
+      if (res.warning) t.warn(`#${n} ${modName(n)} → ${label}`, res.warning);
+      else             t.ok(`#${n} ${modName(n)} → ${label}`, 'status salvo no .md');
+    })
     .catch(err => {
       if (m) m[I.status] = prev; // revert
-      renderStats();
-      render();
-      alert('Não foi possível salvar o status no .md: ' + err.message);
-    });
+      t.fail(`#${n} ${modName(n)} — falha ao salvar status`, err.message);
+    })
+    .finally(() => { inFlight.delete(n); renderStats(); render(); }); // destrava + reflete o estado final
 }
 document.addEventListener('click', () => {
   if (_openSdd) { _openSdd.classList.remove('open'); _openSdd = null; }
@@ -1305,9 +1396,132 @@ document.getElementById('footer-date').textContent =
         : 'background:#3a2410;color:#e0a94c;border:1px solid #8a5a1a');
   b.textContent = SERVER_MODE
     ? '● Servidor — cliques salvam no .md'
-    : '○ file:// — preview (não salva). Rode: node scripts/serve-inventory.js';
+    : '○ file:// — edição desativada (sem servidor)';
   document.body.appendChild(b);
 })();
+
+// ── OFFLINE BANNER ──────────────────────────────────────────────────────────────
+// Without the server the page is read-only (Instalado/Status controls render
+// disabled). A loud top banner makes it impossible to mistake file:// for a saving
+// session — the failure mode that silently dropped a whole batch of edits before.
+if (!SERVER_MODE) {
+  const banner = document.createElement('div');
+  banner.id = 'offline-banner';
+  banner.innerHTML = '⛔ Aberto via <code>file://</code> — edição DESATIVADA, nada é salvo. '
+    + 'Rode <code>node scripts/serve-inventory.js</code> e abra <code>http://localhost:8787</code> para editar.';
+  document.body.insertBefore(banner, document.body.firstChild);
+}
+
+// ── NOTIFICATIONS (toasts + activity log) ──────────────────────────────────────
+// Every data-changing action (Instalado toggle / Status pick) reports through here
+// so a meticulous editing session never silently loses a write. A pending toast
+// flips to ✓ (auto-dismiss) or ✗ (sticky); a persisted log keeps the full audit
+// trail of the session, surviving reloads.
+function modName(n) { const m = MODS.find(x => x[I.n] === n); return m ? m[I.name] : ''; }
+
+const Notify = (function () {
+  const LOG_KEY = 'spt4-mods-activity';
+  const ICO = { ok:'✓', err:'✗', warn:'⚠', pend:'○' };
+  let wrap, panel, list, btn;
+  let log = [];
+  try { log = JSON.parse(localStorage.getItem(LOG_KEY) || '[]'); } catch { log = []; }
+
+  function now()  { return new Date().toLocaleTimeString('pt-BR', { hour12:false }); }
+  function esc(s) { return String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+  function persist() {
+    if (log.length > 200) log = log.slice(-200); // cap the audit trail
+    try { localStorage.setItem(LOG_KEY, JSON.stringify(log)); } catch {}
+  }
+
+  function ensure() {
+    if (wrap) return;
+    wrap = document.createElement('div'); wrap.id = 'toast-wrap';
+    document.body.appendChild(wrap);
+
+    btn = document.createElement('div'); btn.id = 'log-btn';
+    btn.title = 'Histórico de alterações desta sessão';
+    btn.addEventListener('click', togglePanel);
+    document.body.appendChild(btn);
+
+    panel = document.createElement('div'); panel.id = 'log-panel';
+    panel.innerHTML =
+        '<div class="log-head">'
+      +   '<span class="lh-title">Atividade da sessão</span>'
+      +   '<span class="lh-actions"><button id="log-clear">Limpar</button>'
+      +   '<button id="log-close">Fechar</button></span>'
+      + '</div><div class="log-list" id="log-list"></div>';
+    document.body.appendChild(panel);
+    list = panel.querySelector('#log-list');
+    panel.querySelector('#log-close').addEventListener('click', () => panel.classList.remove('open'));
+    panel.querySelector('#log-clear').addEventListener('click', () => { log = []; persist(); renderLog(); renderBtn(); });
+    renderBtn(); renderLog();
+  }
+
+  function renderBtn() {
+    const errs = log.filter(e => e.kind === 'err').length;
+    btn.innerHTML = '📋 Atividade · ' + log.length
+      + (errs ? ' · <span class="lb-err">' + errs + ' erro' + (errs > 1 ? 's' : '') + '</span>' : '');
+  }
+  function renderLog() {
+    if (!log.length) { list.innerHTML = '<div class="log-empty">Sem alterações nesta sessão</div>'; return; }
+    list.innerHTML = log.slice().reverse().map(e =>
+        '<div class="log-row ' + e.kind + '">'
+      +   '<span class="log-time">' + e.t + '</span>'
+      +   '<span class="log-ico">' + (ICO[e.kind] || '') + '</span>'
+      +   '<span class="log-txt">' + esc(e.txt) + '</span>'
+      + '</div>'
+    ).join('');
+  }
+  function togglePanel() { ensure(); panel.classList.toggle('open'); if (panel.classList.contains('open')) renderLog(); }
+
+  function addLog(kind, txt) {
+    log.push({ t: now(), kind, txt });
+    persist(); renderBtn();
+    if (panel && panel.classList.contains('open')) renderLog();
+  }
+
+  function makeToast(kind, title, detail) {
+    ensure();
+    const el = document.createElement('div');
+    el.className = 'toast ' + kind;
+    el.innerHTML = '<span class="toast-ico"></span><div class="toast-body">'
+      + '<div class="toast-title"></div><div class="toast-detail"></div></div>'
+      + '<span class="toast-x">✕</span>';
+    setToast(el, kind, title, detail);
+    el.querySelector('.toast-x').addEventListener('click', () => dismiss(el));
+    wrap.appendChild(el);
+    return el;
+  }
+  function setToast(el, kind, title, detail) {
+    el.className = 'toast ' + kind;
+    el.querySelector('.toast-ico').textContent = ICO[kind] || '';
+    el.querySelector('.toast-title').textContent = title;
+    const d = el.querySelector('.toast-detail');
+    d.textContent = detail || '';
+    d.style.display = detail ? '' : 'none';
+  }
+  function dismiss(el) {
+    if (!el || el._gone) return; el._gone = true;
+    el.classList.add('out');
+    setTimeout(() => el.remove(), 240);
+  }
+
+  // Start a pending action; returns a handle to resolve it.
+  function pending(title) {
+    const el = makeToast('pend', title, '');
+    const line = (t, d) => d ? (t + ' — ' + d) : t;
+    return {
+      ok(t, d)   { setToast(el, 'ok',   t, d); addLog('ok',   line(t, d)); setTimeout(() => dismiss(el), 3500); },
+      warn(t, d) { setToast(el, 'warn', t, d); addLog('warn', line(t, d)); setTimeout(() => dismiss(el), 8000); },
+      fail(t, d) { setToast(el, 'err',  t, d); addLog('err',  line(t, d)); /* sticky — manual dismiss */ },
+    };
+  }
+
+  return { pending, log: addLog, init: ensure };
+})();
+// Build the activity affordance up-front so the button (and any persisted log from
+// previous sessions) is visible before the first action.
+Notify.init();
 </script>
 <!-- Forge popover (global singleton) -->
 <div id="forge-pop" class="fpop"

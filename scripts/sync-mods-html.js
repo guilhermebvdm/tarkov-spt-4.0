@@ -124,38 +124,6 @@ function parseInstalado(cell) {
   return (cell || '').includes('✓');
 }
 
-// ── UltraFika (vertical table, mod #0) ────────────────────────────────────────
-
-function parseUltraFika(md) {
-  const sec = md.match(/## Base — 🏠 UltraFika-Plugin[\s\S]*?(?=\n## )/);
-  if (!sec) throw new Error('UltraFika section not found');
-  const text = sec[0];
-
-  function row(label) {
-    const re = new RegExp(`\\|\\s*\\*\\*${label}\\*\\*\\s*\\|\\s*(.+?)\\s*\\|`);
-    const m = text.match(re);
-    return m ? m[1].trim() : '';
-  }
-
-  return [
-    0,
-    '🏠 UltraFika-Plugin',
-    parseTipo(row('Tipo')),
-    parseAtuacao(row('Atuação')),
-    parseCategoria(row('Categoria')),
-    parseEscopo(row('Escopo')),
-    parseForge(row('Forge')),
-    parseR4(row('Repo 4[.]0')),
-    parseFn(row('Função')),
-    parseStatus(row('Status')),
-    parsePrioridade(row('Prioridade')),
-    true,
-    parseSpt4(row('SPT 4[.]0\\?')),
-    'Sim',
-    parseInstalado(row('Instalado')),
-  ];
-}
-
 // ── Main table (mods #1–N) ────────────────────────────────────────────────────
 
 function parseTable(md) {
@@ -227,6 +195,38 @@ function addHistory(md) {
   return md.slice(0, lineEnd + 1) + entry + '\n' + md.slice(lineEnd + 1);
 }
 
+// ── Validation ──────────────────────────────────────────────────────────────────
+
+// Surfaces issues that would silently corrupt the HTML or make a row uneditable by
+// the server: a '|' inside a cell (shifts every column → wrong fields parsed) or a
+// reused mod number (#n matches the first row only on write, and the HTML gets two
+// entries for the same n). Advisory by design: the server still regenerates and the
+// .md write already landed, but the CLI fails loudly so add-mod surfaces it.
+function collectIssues(md, mods) {
+  const issues = [];
+
+  const start = md.indexOf('## Inventário completo');
+  if (start !== -1) {
+    const re = /^\|\s*(\d+)\s*\|(.+)$/gm;
+    re.lastIndex = start;
+    let m;
+    while ((m = re.exec(md)) !== null) {
+      const cols = m[2].split('|'); // 14 cells + trailing '' = 15 when well-formed
+      if (cols.length !== 15) {
+        issues.push(`linha #${m[1]}: ${cols.length} colunas (esperado 15) — provável '|' dentro de uma célula; o servidor não conseguirá editá-la`);
+      }
+    }
+  }
+
+  const seen = new Set();
+  for (const r of mods) {
+    if (seen.has(r[0])) issues.push(`número de mod duplicado: #${r[0]}`);
+    else seen.add(r[0]);
+  }
+
+  return issues;
+}
+
 // ── Sync (md → html) ────────────────────────────────────────────────────────────
 
 // Regenerates the `const MODS` block in the HTML from the markdown.
@@ -237,9 +237,11 @@ function syncHtml({ history = true } = {}) {
   const md   = fs.readFileSync(MD_FILE,   'utf8');
   let   html = fs.readFileSync(HTML_FILE, 'utf8');
 
-  const ultra = parseUltraFika(md);
-  const rows  = parseTable(md);
-  const mods  = [ultra, ...rows];
+  const mods = parseTable(md); // inventory starts at mod #1 (no separate base block)
+
+  const issues = collectIssues(md, mods);
+  syncHtml.lastIssues = issues;                       // CLI reads this to set its exit code
+  issues.forEach(w => console.warn('  ⚠ validação: ' + w));
 
   const modsBlock = formatMods(mods);
   const MODS_RE   = /const MODS = \[[\s\S]*?\];/;
@@ -253,12 +255,19 @@ function syncHtml({ history = true } = {}) {
   return mods.length;
 }
 
-module.exports = { syncHtml, MD_FILE, HTML_FILE };
+module.exports = { syncHtml, collectIssues, MD_FILE, HTML_FILE };
 
 // ── CLI ─────────────────────────────────────────────────────────────────────────
 if (require.main === module) {
   const count = syncHtml({ history: true });
-  console.log(`Parsed ${count} mods (0–${count - 1})`);
+  console.log(`Parsed ${count} mods (starting at #1)`);
   console.log(`✓ Updated ${HTML_FILE}`);
   console.log(`✓ History entry added to ${MD_FILE}`);
+
+  const issues = syncHtml.lastIssues || [];
+  if (issues.length) {
+    console.error(`\n✗ ${issues.length} problema(s) de validação — corrija o .md antes de prosseguir:`);
+    issues.forEach(w => console.error('  • ' + w));
+    process.exit(1);
+  }
 }

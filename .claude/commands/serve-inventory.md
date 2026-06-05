@@ -36,4 +36,4 @@ não o servidor.
   **apaga notas livres** na célula (ex.: `🟠 Aguardar upstream` editado vira `🟠 Aguardar upstream`,
   mas `🟠 Aguardar (nota custom)` perderia a nota). Para preservar notas, edite o Status à mão no `.md`.
 - As demais colunas (Categoria, Escopo, Função, etc.) continuam editadas à mão no `.md` + sync.
-- O mod `#0` (UltraFika) fica num bloco vertical separado e não é alvo dos toggles.
+- O inventário começa no mod **#1** — não há bloco vertical separado.

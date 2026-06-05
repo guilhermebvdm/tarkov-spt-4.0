@@ -58,6 +58,8 @@ Valores padrão para mods novos:
 | TRL 3.0? | `New` |
 | Instalado | `—` (ou `✓` com `--instalado`) |
 
+> ⚠️ **Nunca use `|` literal dentro de uma célula** (nem em Função, nem em nome): o `|` é o separador de colunas do markdown — um `|` extra desloca todas as colunas, faz o parser ler campos errados e deixa a linha **ineditável** pelo servidor. Reescreva (ex.: use `/` ou `·`) ou escape.
+
 ### 5. Adicionar ao markdown
 
 Insira a nova linha no final da tabela em `## Inventário completo` do `mods-inventory.md`.
@@ -68,7 +70,9 @@ Insira a nova linha no final da tabela em `## Inventário completo` do `mods-inv
 node scripts/sync-mods-html.js
 ```
 
-Confirme a saída: `Parsed N mods (0–N-1) ✓`.
+Confirme a saída: `Parsed N mods (starting at #1)`.
+
+Se o script imprimir `⚠ validação:` e **sair com código ≠ 0**, há um **número duplicado** ou uma **célula com `\|`** — corrija o `.md` e rode de novo **antes** de prosseguir. Não ignore.
 
 ### 7. Atualizar `FORGE_SLUGS` no HTML
 
@@ -107,7 +111,10 @@ Informe:
 ## Regras
 
 - Nunca duplicar um `forge_id` já presente em `const MODS`
+- Cada número `n` é **único** — sempre `último_n + 1`, nunca reutilizar (o sync falha com exit ≠ 0 em número duplicado; e o servidor só edita a 1ª linha que casa com `#n`)
+- Nunca usar `|` literal dentro de uma célula (quebra o parser — ver passo 4)
 - O sync script substitui apenas `const MODS = [...]` — CSS, JS e layout não são tocados
 - `mods-inventory.md` é a fonte de verdade; o HTML é derivado — dados vão no markdown, depois sync
+- A tabela `## Inventário completo` é a **única** fonte de dados do sync (começa no mod **#1**). Não há mais bloco vertical "## Base" separado — não é preciso olhar nenhum outro trecho do `.md` para atualizar o HTML
 - TRL sempre `New` para mods sem versão 3.x no inventário original
 - **⚠️ CUIDADO COM ENCODING:** Nunca use comandos do PowerShell (`Add-Content`, `Set-Content`, etc) para adicionar linhas no `.md`, pois isso corrompe os emojis e o encoding UTF-8. Utilize *exclusivamente* as ferramentas nativas de manipulação de arquivo do seu ambiente (`replace_file_content`, `write_to_file`) ou scripts Node.js (`fs.writeFileSync(..., 'utf8')`).

@@ -101,32 +101,10 @@ Sistemas do jogo afetados (1–2 valores separados por `·`; se 3+ usar **🧩 F
 - 🧩 **Framework** — afeta múltiplos sistemas ou serve de base para outros mods
 - 🔍 — a categorizar (default)
 
-## Base — 🏠 UltraFika-Plugin
-
-Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre a qual os demais mods rodam. **Migração prioritária zero** — sem ele, o restante do ecossistema não tem sentido.
-
-| Item | Detalhe |
-|---|---|
-| **Origem** | 🏠 Interno (criado pela equipe) |
-| **Tipo** | 🖥️ Client (C# / BepInEx) |
-| **Atuação** | 🔀 Ambos (multiplayer afeta hideout + raid) |
-| **Categoria** | 🧩 Framework/Base |
-| **Escopo** | 🌐 Multiplayer |
-| **Função** | Cliente multiplayer (fork de Fika) |
-| **Forge** | — (não publicado) |
-| **Repo 3.x** | — (não público — fork privado) |
-| **Repo 4.0** | — (a desenvolver) |
-| **SPT 4.0?** | ❌ |
-| **Upstream** | [Project Fika](https://forge.sp-tarkov.com/mod/2326/project-fika) — base de onde foi forkado |
-| **Prioridade** | 🔥 Crítica — primeiro mod a ser migrado |
-| **Status** | ⬆️ Evoluir p/ 4.0 (adaptar código 3.x existente para 4.0) |
-| **Bloqueia** | Todos os demais mods do projeto dependem desta base estar funcional |
-
 ## Inventário completo
 
 | # | Mod | Tipo | Atuação | Categoria | Escopo | Forge | Repo 3.x | Repo 4.0 | SPT 4.0? | Função | Status | Prioridade | TRL 3.0? | Instalado |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 0 | ?? UltraFika-Plugin | 🖥️ Client | 🔀 Ambos | 🧩 Framework/Base | 🌐 Multiplayer | — | — | — | ❌ | Cliente multiplayer (fork de Fika) | ⬆️ Evoluir | 🔥 Crítica | Sim | — |
 | 1 | [SVM] Server Value Modifier | 🌐 Server | 🌐 Geral | ⚖️ Balanceamento | 🧩 Framework | [236](https://forge.sp-tarkov.com/mod/236/server-value-modifier-svm) | [GhostFenixx/SVM](https://github.com/GhostFenixx/SVM) | [GhostFenixx/svm-csharp](https://github.com/GhostFenixx/svm-csharp) | ✅ | Modifica valores do servidor (loot, traders, hideout) — último release SPT 3.11 | 🟠 Aguardar upstream | 🔍 | Sim | ✓ |
 | 2 | AAAArtem-WTT | 🖥️ Client | 🌐 Geral | 🔍 | 🔍 | [1023](https://forge.sp-tarkov.com/mod/1023/wtt-artem) | [WelcomeToTarkov/WTT-Artem](https://github.com/WelcomeToTarkov/WTT-Artem) | [WelcomeToTarkov/WTT-Artem](https://github.com/WelcomeToTarkov/WTT-Artem) | ✅ | 🔍 (relacionado ao WTT) | 🟡 Avaliar | 🔍 | Sim | — |
 | 3 | acidphantasm-DelayedFleaSales | 🖥️ Client | 🌐 Geral | 🔥 Hardcore | 💰 Mercado | [2016](https://forge.sp-tarkov.com/mod/2016/delayed-flea-sales) | [acidphantasm/acidphantasm-delayedfleasales](https://github.com/acidphantasm/acidphantasm-delayedfleasales) | [acidphantasm/delayedfleasales-csharp](https://github.com/acidphantasm/delayedfleasales-csharp) | ✅ | Atrasa vendas no flea market (era Server/TS em 3.x, reescrito como BepInEx C# para 4.0) | ⚫ Não incluir | 🔍 | Sim | — |
@@ -368,3 +346,4 @@ Mod fundamental do projeto. Habilita multiplayer no SPT e serve como base sobre 
 | 2026-06-04 | sync-script | docs(migration): sync mods-inventory.html from markdown |
 | 2026-06-04 | sync-script | docs(migration): sync mods-inventory.html from markdown |
 | 2026-06-04 | sync-script | docs(migration): sync mods-inventory.html from markdown |
+| 2026-06-04 | Guilherme | feat: add /extract-discord-mods-topic command |

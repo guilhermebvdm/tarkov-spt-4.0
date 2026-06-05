@@ -9,13 +9,13 @@ Atualiza `docs/migration/mods-inventory.html` com os dados mais recentes de `doc
    node scripts/sync-mods-html.js
    ```
 
-2. Confirme que a saída mostra **140 mods (0–139)** e que ambos os arquivos foram atualizados com ✓.
+2. Confirme que a saída mostra `Parsed N mods (starting at #1)` e que ambos os arquivos foram atualizados com ✓.
 
 3. Se o script falhar, relate o erro ao usuário. Não tente fazer o parse manual da tabela.
 
 ## O que o script faz
 
-- Lê o markdown e parseia a tabela `## Inventário completo` + o bloco vertical do UltraFika (mod #0)
+- Lê o markdown e parseia a tabela `## Inventário completo` (mods a partir do #1)
 - Extrai os 15 campos por mod: `n, name, tipo, atuacao, categoria, escopo, forge_id, r4_path, fn, status, prioridade, interno, spt4, trl, inst`
 - `inst` (instalado) vem da coluna **Instalado** (`✓`/`—`, última coluna da tabela) — fonte de verdade versionada no git. O toggle no HTML é apenas preview de sessão (não persiste); marcar de verdade = editar a coluna no `.md` e rodar o sync
 - Substitui apenas o bloco `const MODS = [...]` no HTML — CSS, JS e layout não são tocados
