@@ -37,6 +37,10 @@ desktop.ini
 # Local API caches (third-party data, refetchable)
 mods/RZCustomProfiles/scripts/cache/
 
+# Discord topic captures — assets (imagens/vídeos/JSONs brutos) podem somar centenas de MB
+# e são rebaixáveis do Discord. Só os .md (transcrição/análise) são versionados.
+docs/discord-mods-topics/*/assets/
+
 # SPT server source code — vendored read-only reference, ~856 MB.
 # Re-fetch instructions in references/README.md
 references/spt-source/
