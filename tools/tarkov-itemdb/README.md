@@ -253,7 +253,7 @@ node viewer/serve.js [port]   # default 8080
 | Dropdowns (Group, Condition, Ban) | Multi-select; estado persistido no `localStorage` |
 | **Flea Level widget (topbar)** | Botão "Flea Lvl N+" no topbar; click abre editor inline; salva em `globals.json` via `/api/flea-min-level`; **não** está embutido no `<th>` da tabela |
 | Indicadores ▲▼ % | Comparam Trader / Flea Dev / Flea Market vs Flea SPT (referência de calibração) |
-| **Edição de preço** | Click na célula Flea SPT → menu → Edit price → input inline (mín/máx = piso/teto); grava override compensado em `ragfair.json`; badge **OVR** + botão **↺ Restaurar default** |
+| **Edição de preço** | Click na célula Flea SPT → menu (Edit price / **Restaurar default** se há override / Ban); Edit abre input inline (mín/máx = piso/teto), grava override compensado em `ragfair.json`; badge **OVR** marca itens com override; **Restaurar default** (menu ou ↺ no form) remove o override → vanilla |
 | **Ban/Unban** | Click na célula → menu (Edit / Ban / Unban); confirmação com botão "×" para cancelar |
 | **Reward popover** | Badge de reward: hover por 300ms abre tooltip com lista de quests; mouse leave fecha (grace 80ms para mover ao popover) |
 | Ordenação | Click no `<th>` ordena; segundo click inverte |

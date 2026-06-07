@@ -1165,6 +1165,7 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
 }
 .cell-actions__item.is-ban   .ico { color: var(--color-danger-bright); }
 .cell-actions__item.is-unban .ico { color: var(--color-success); }
+.cell-actions__item.is-restore .ico { color: var(--accent-bright); }
 .cell-actions__item.is-ban:hover   { color: var(--color-danger-bright); }
 .cell-actions__item.is-unban:hover { color: var(--color-success); }
 
