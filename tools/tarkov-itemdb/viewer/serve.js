@@ -113,14 +113,18 @@ function withWriteLock(fn) {
   return run;
 }
 
-// The flea offer base for a tpl = max((override ?? prices.json ?? 0) + bonus, floor).
-// bonus = spt.fleaPrice (handbook × M), floor = spt.fleaFloor (handbook × K_trader).
-// Both come from data/items.json (produced by load-spt.js, validated vs source +
-// in-game). The viewer sets a desired flea price X by writing
-// override = X − bonus into ragfair.json:dynamic.itemPriceOverrideRouble[tpl].
-function effectivePrice(overrideOrNull, bonus, floor, pricesDiskVal) {
+// The flea offer base for a tpl = clamp((override ?? prices.json ?? 0) + bonus,
+// floor, ceiling). bonus = spt.fleaPrice (handbook × M), floor = spt.fleaFloor
+// (handbook × K_trader), ceiling = spt.fleaCeiling (handbook × unreasonableMult
+// for Weapon Mods/Electronics, else null). All from data/items.json (load-spt.js,
+// validated vs source + in-game). The viewer sets a desired price X by writing
+// override = X − bonus into ragfair.json:dynamic.itemPriceOverrideRouble[tpl]
+// (valid for floor ≤ X ≤ ceiling).
+function effectivePrice(overrideOrNull, bonus, floor, ceiling, pricesDiskVal) {
   const base = (overrideOrNull != null ? overrideOrNull : (pricesDiskVal ?? 0)) + bonus;
-  return Math.max(base, floor || 0);
+  let eff = Math.max(base, floor || 0);
+  if (ceiling != null && eff > ceiling) eff = ceiling;
+  return eff;
 }
 
 function appendBanLog(entry) {
@@ -346,8 +350,9 @@ function handlePatchPrice(req, res) {
       if (!item) {
         return sendJson(res, 404, { error: 'tpl not in data/items.json — run normalize.js first' });
       }
-      const bonus = item.spt ? item.spt.fleaPrice : null;     // handbook × M
-      const floor = (item.spt && item.spt.fleaFloor) || 0;    // handbook × K_trader
+      const bonus = item.spt ? item.spt.fleaPrice : null;          // handbook × M
+      const floor = (item.spt && item.spt.fleaFloor) || 0;         // handbook × K_trader
+      const ceiling = item.spt ? (item.spt.fleaCeiling ?? null) : null;  // handbook × unreasonableMult, or null
       if (bonus == null) {
         return sendJson(res, 422, { error: 'no handbook-derived bonus for this tpl (mod item / not in handbook) — override unsupported' });
       }
@@ -355,6 +360,12 @@ function handlePatchPrice(req, res) {
         return sendJson(res, 422, {
           error: `price ${price} is below the flea floor ${floor} (= handbook × trader buyback). The flea cannot go below this for this item.`,
           floor,
+        });
+      }
+      if (ceiling != null && price > ceiling) {
+        return sendJson(res, 422, {
+          error: `price ${price} is above the flea ceiling ${ceiling} (Weapon Mod / Electronics are capped at handbook × multiplier by SPT's unreasonableModPrices). The flea cannot exceed this for this item.`,
+          ceiling,
         });
       }
 
@@ -372,7 +383,7 @@ function handlePatchPrice(req, res) {
 
       // 4. Sync data/items.json — override replaces prices.json, so effective = X.
       item.spt.fleaOverride = override;
-      item.spt.effectiveFleaPrice = effectivePrice(override, bonus, floor);  // = price
+      item.spt.effectiveFleaPrice = effectivePrice(override, bonus, floor, ceiling);  // = price (floor ≤ price ≤ ceiling)
       recomputeConsolidated(item);
       fs.writeFileSync(ITEMS_JSON, serializeItems(items), 'utf8');
 
@@ -392,7 +403,7 @@ function handlePatchPrice(req, res) {
         ok: true, tpl,
         override, previousOverride,
         effectiveFleaPrice: item.spt.effectiveFleaPrice,
-        bonus, floor,
+        bonus, floor, ceiling,
         consolidated: item.consolidated,
         checks: checksResult,
       });
@@ -432,14 +443,15 @@ function handleDeletePrice(req, res) {
       writeJsonPreservingStyle(RAGFAIR_JSON, ragfair);
       const checksResult = updateSptChecks({ 'configs/ragfair.json': RAGFAIR_JSON });
 
-      // Restore vanilla effective price (prices.json + bonus, floored).
+      // Restore vanilla effective price (prices.json + bonus, clamped floor/ceiling).
       const bonus = item.spt ? item.spt.fleaPrice : null;
       const floor = (item.spt && item.spt.fleaFloor) || 0;
+      const ceiling = item.spt ? (item.spt.fleaCeiling ?? null) : null;
       let pricesDiskVal = null;
       try { pricesDiskVal = readJsonFile(PRICES_JSON)[tpl] ?? null; } catch (_) {}
       if (item.spt) {
         item.spt.fleaOverride = null;
-        item.spt.effectiveFleaPrice = bonus != null ? effectivePrice(null, bonus, floor, pricesDiskVal) : null;
+        item.spt.effectiveFleaPrice = bonus != null ? effectivePrice(null, bonus, floor, ceiling, pricesDiskVal) : null;
         recomputeConsolidated(item);
       }
       fs.writeFileSync(ITEMS_JSON, serializeItems(items), 'utf8');

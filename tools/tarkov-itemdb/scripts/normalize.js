@@ -349,6 +349,7 @@ function main() {
       basePrice:          s.basePrice ?? null,
       fleaPrice:          s.fleaPrice ?? null,            // additive bonus = basePrice × M (what the viewer subtracts)
       fleaFloor:          s.fleaFloor ?? 0,               // offer base can't drop below this (basePrice × K_trader)
+      fleaCeiling:        s.fleaCeiling ?? null,          // cap for mods ×6 / electronics ×11 (unreasonableModPrices), or null
       fleaMultiplier:     s.fleaMultiplier ?? null,       // M: 1.5/2.3 std/craft, or 1.8/2.5 tpl/type overrides
       isHideoutCraftItem: s.isHideoutCraftItem === true,
       fleaOverride:       s.fleaOverride ?? null,         // ragfair.json:itemPriceOverrideRouble[tpl], or null

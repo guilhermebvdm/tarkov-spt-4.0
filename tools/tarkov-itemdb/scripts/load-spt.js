@@ -19,8 +19,10 @@
  *                    | priceMultiplier(1.5)   + (hideoutCraftMultiplier 0.8 if craft)
  *   fleaPrice      = round(basePrice × M)                      ← the ADDITIVE bonus term
  *   fleaFloor      = round(basePrice × K_trader)               ← offer base can't drop below this
+ *   fleaCeiling    = round(basePrice × unreasonableMult)       ← cap for Weapon Mods (×6) /
+ *                    Electronics (×11); null otherwise (unreasonableModPrices)
  *   fleaOverride   = ragfair.json:dynamic.itemPriceOverrideRouble[tpl]  (or null)
- *   effectiveFleaPrice = max( (fleaOverride ?? prices.json[tpl] ?? 0) + fleaPrice , fleaFloor )
+ *   effectiveFleaPrice = clamp( (fleaOverride ?? prices.json[tpl] ?? 0) + fleaPrice , fleaFloor , fleaCeiling )
  * KEY: the override does NOT overwrite — ApplyFleaPriceOverrides assigns the override
  * into the prices dict, then ReplaceFleaBasePrices ADDS the bonus (AddOrUpdate +=),
  * then the offer generator floors to handbook×K_trader. So the viewer sets a desired
@@ -214,6 +216,23 @@ function main() {
     return FLEA_BASE_MULTIPLIER;
   }
 
+  // Flea CEILING — RagfairPriceService.AdjustUnreasonablePrice caps "unreasonably
+  // priced" baseclasses: if the offer price exceeds handbook × overMult it is set
+  // to handbook × newMult. Default config caps Weapon Mods (×6) and Electronics
+  // (×11). Discovered in-game: a GPU (Electronics) override targeting 3.0M was
+  // capped to handbook×11 = 2.178M. fleaCeiling = round(handbook × newMult), or
+  // null when the item is in no capped baseclass.
+  const UNREASONABLE = Object.entries(dyn.unreasonableModPrices || {})
+    .filter(([, c]) => c && c.enabled)
+    .map(([base, c]) => [base, c.handbookPriceOverMultiplier, c.newPriceHandbookMultiplier]);
+  function fleaCeilingFor(tpl, hb) {
+    if (hb == null) return null;
+    for (const [base, overMult, newMult] of UNREASONABLE) {
+      if (isOfBaseclass(tpl, base)) return Math.round(hb * (newMult ?? overMult));
+    }
+    return null;
+  }
+
   // Trader buyback FLOOR. SPT's GetHighestSellToTraderPrice has no category
   // filter, so traderSell = handbook × K_trader, where K_trader = max over
   // traders of (100 - loyaltyLevels[0].buy_price_coef)/100. Special traders
@@ -257,7 +276,7 @@ function main() {
   const handbookPath = path.join(dataDir, 'database', 'templates', 'handbook.json');
   console.error('Reading handbook.json...');
   const handbook = readJson(handbookPath);
-  let baseCount = 0, priceCount = 0, craftItemsWithPrice = 0, overridesApplied = 0, flooredCount = 0;
+  let baseCount = 0, priceCount = 0, craftItemsWithPrice = 0, overridesApplied = 0, flooredCount = 0, cappedCount = 0;
   for (const e of handbook.Items) {
     if (!items[e.Id]) continue;
     items[e.Id].basePrice = e.Price;
@@ -269,16 +288,19 @@ function main() {
     const hb = e.Price;
     const bonus = hb != null ? Math.round(hb * multiplier) : null;
     const floor = (hb != null && USE_TRADER_FLOOR) ? Math.round(hb * K_trader) : 0;
-    items[e.Id].fleaPrice = bonus;   // additive term = handbook × M (what the viewer subtracts)
-    items[e.Id].fleaFloor = floor;   // offer base can't drop below this (handbook × K_trader)
+    const ceiling = fleaCeilingFor(e.Id, hb);   // null unless capped baseclass (mods ×6 / electronics ×11)
+    items[e.Id].fleaPrice = bonus;     // additive term = handbook × M (what the viewer subtracts)
+    items[e.Id].fleaFloor = floor;     // offer base can't drop below this (handbook × K_trader)
+    items[e.Id].fleaCeiling = ceiling; // offer base can't rise above this (handbook × unreasonableMult), or null
     const ov = fleaOverridesMap[e.Id];
     items[e.Id].fleaOverride = ov != null ? ov : null;
     if (ov != null) overridesApplied++;
     if (bonus != null) {
       const dynBase = (ov != null ? ov : (pricesDisk[e.Id] ?? 0)) + bonus;
-      const eff = Math.max(dynBase, floor);
+      let eff = Math.max(dynBase, floor);
+      if (ceiling != null && eff > ceiling) { eff = ceiling; cappedCount++; }
+      else if (eff > dynBase) flooredCount++;
       items[e.Id].effectiveFleaPrice = eff;
-      if (eff > dynBase) flooredCount++;
       priceCount++;
       if (isCraft) craftItemsWithPrice++;
     } else {
@@ -291,12 +313,13 @@ function main() {
     if (items[id].handbookCategoryId === undefined) items[id].handbookCategoryId = null;
     if (items[id].fleaPrice          === undefined) items[id].fleaPrice          = null;
     if (items[id].fleaFloor          === undefined) items[id].fleaFloor          = 0;
+    if (items[id].fleaCeiling        === undefined) items[id].fleaCeiling        = null;
     if (items[id].fleaMultiplier     === undefined) items[id].fleaMultiplier     = null;
     if (items[id].isHideoutCraftItem === undefined) items[id].isHideoutCraftItem = false;
     if (items[id].fleaOverride       === undefined) items[id].fleaOverride       = null;
     if (items[id].effectiveFleaPrice === undefined) items[id].effectiveFleaPrice = items[id].fleaPrice;
   }
-  console.error(`  basePrice on ${baseCount}, fleaPrice on ${priceCount} (${craftItemsWithPrice} craft), overrides: ${overridesApplied}, trader-floored: ${flooredCount}, K_trader=${K_trader}`);
+  console.error(`  basePrice on ${baseCount}, fleaPrice on ${priceCount} (${craftItemsWithPrice} craft), overrides: ${overridesApplied}, trader-floored: ${flooredCount}, ceiling-capped: ${cappedCount}, K_trader=${K_trader}`);
 
   // Currency rates from handbook
   const usdEntry = handbook.Items.find(x => x.Id === CURRENCY_USD);

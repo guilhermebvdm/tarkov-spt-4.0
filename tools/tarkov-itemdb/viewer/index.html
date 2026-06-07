@@ -1374,6 +1374,7 @@ function openInlineEdit(cell) {
   const current = spt.effectiveFleaPrice != null ? spt.effectiveFleaPrice : '';
   const bonus = spt.fleaPrice;          // additive term (handbook × M); override = X − bonus
   const floor = spt.fleaFloor || 0;     // flea can't go below this
+  const ceiling = spt.fleaCeiling != null ? spt.fleaCeiling : null;  // flea can't go above this (mods/electronics)
   const hasOverride = spt.fleaOverride != null;
 
   // Append the form as an absolute overlay so the cell keeps its original
@@ -1383,15 +1384,19 @@ function openInlineEdit(cell) {
   form.className = 'edit-form';
   form.onsubmit = (e) => { e.preventDefault(); return false; };
   const inputTip = `Preço flea desejado. Grava override = preço − ${bonus != null ? bonus.toLocaleString('en-US') : '?'} em ragfair.json:itemPriceOverrideRouble. ` +
-                   (floor > 0 ? `Mínimo ${floor.toLocaleString('en-US')} ₽ (piso = handbook × trader).` : '');
+                   (floor > 0 ? `Mín ${floor.toLocaleString('en-US')} ₽ (piso = handbook × trader). ` : '') +
+                   (ceiling != null ? `Máx ${ceiling.toLocaleString('en-US')} ₽ (teto Electronics/Weapon Mod = handbook × multiplicador).` : '');
+  const hintParts = [];
+  if (floor > 0)      hintParts.push(`mín ${floor.toLocaleString('en-US')}`);
+  if (ceiling != null) hintParts.push(`máx ${ceiling.toLocaleString('en-US')}`);
   form.innerHTML =
-    `<input type="number" min="${floor || 0}" step="1" value="${current}" autofocus data-tip="${escapeAttr(inputTip)}">` +
+    `<input type="number" min="${floor || 0}"${ceiling != null ? ` max="${ceiling}"` : ''} step="1" value="${current}" autofocus data-tip="${escapeAttr(inputTip)}">` +
     `<div class="edit-form__actions">` +
       `<button class="save" type="button" title="Salvar (Enter)">Salvar</button>` +
       (hasOverride ? `<button class="restore" type="button" title="Restaurar preço vanilla (remove o override)">↺</button>` : '') +
       `<button class="cancel" type="button" title="Cancelar (Esc)">×</button>` +
     `</div>` +
-    (floor > 0 ? `<div class="edit-form__hint">mín ${floor.toLocaleString('en-US')}</div>` : '');
+    (hintParts.length ? `<div class="edit-form__hint">${hintParts.join(' · ')}</div>` : '');
   cell.appendChild(form);
 
   const input   = form.querySelector('input');
@@ -1446,12 +1451,14 @@ function openInlineEdit(cell) {
       const data = await r.json();
       if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP '+r.status));
 
+      const prevEff = item.spt && item.spt.effectiveFleaPrice != null ? item.spt.effectiveFleaPrice : null;
       if (!item.spt) item.spt = { basePrice: null, fleaPrice: null, fleaFloor: 0, fleaOverride: null, effectiveFleaPrice: null, fleaBanned: false, fleaBanReasons: [], traders: [] };
       item.spt.fleaOverride = data.override;
       item.spt.effectiveFleaPrice = data.effectiveFleaPrice;
       item.consolidated = data.consolidated;
       rerenderRow();
-      toast(`${item.shortName || tpl}: flea → ${data.effectiveFleaPrice.toLocaleString('pt-BR')} ₽ (override ${data.override.toLocaleString('pt-BR')})`, 'ok');
+      const fromStr = (prevEff != null && prevEff !== data.effectiveFleaPrice) ? `${prevEff.toLocaleString('pt-BR')} → ` : '';
+      toast(`${item.shortName || tpl}: flea ${fromStr}${data.effectiveFleaPrice.toLocaleString('pt-BR')} ₽`, 'ok');
     } catch (err) {
       toast('Falha ao salvar: ' + err.message, 'err');
       save.disabled = false; cancel.disabled = false; if (restore) restore.disabled = false;

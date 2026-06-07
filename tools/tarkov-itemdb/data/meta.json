@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-07T05:37:33.354Z",
+  "generatedAt": "2026-06-07T06:12:31.476Z",
   "sources": {
     "tarkovDev": {
       "fetchedAt": "2026-05-17T19:04:37.671Z",
@@ -12,7 +12,7 @@
       "count": 4279
     },
     "spt": {
-      "loadedAt": "2026-06-07T05:37:33.023Z",
+      "loadedAt": "2026-06-07T06:12:31.110Z",
       "fleaPricesMtime": "2026-06-07T05:35:40.763Z",
       "fleaPricesSource": "handbook",
       "fleaMinUserLevel": 15,
