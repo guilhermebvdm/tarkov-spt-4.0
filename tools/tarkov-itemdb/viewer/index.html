@@ -1157,7 +1157,7 @@ function renderRow(it) {
     <td class="num">${trader}</td>
     <td class="num cell-edit ${c.priceFleaSpt==null && !banned?'price is-null':'price'}" data-edit-tpl="${it.id}" data-tip="Click for actions (edit price / ban)" data-tip-pos="bottom"><div class="cell-num"><div class="cell-num__value">${fleaSptCell}</div></div><span class="cell-edit__icon" aria-hidden="true">${ICON_EDIT}</span></td>
     <td class="num cell-refresh ${c.priceFleaDevAvg24h==null?'price is-null':'price'}" data-refresh-tpl="${it.id}" data-tip="Click to update price on tarkov.dev" data-tip-pos="bottom"><div class="cell-num"><div class="cell-num__value">${fmtRub(c.priceFleaDevAvg24h)}</div>${pctVsSpt(c.priceFleaDevAvg24h, c.priceFleaSpt)}</div><span class="cell-refresh__icon" aria-hidden="true">${ICON_REFRESH}</span><span class="cell-refresh__spinner" aria-hidden="true"></span></td>
-    <td class="num ${c.priceFleaMarketAvg24h==null?'price is-null':'price'}"><div class="cell-num"><div class="cell-num__value">${fmtRub(c.priceFleaMarketAvg24h)}</div>${pctVsSpt(c.priceFleaMarketAvg24h, c.priceFleaSpt)}</div></td>
+    <td class="num cell-refresh cell-refresh-market ${c.priceFleaMarketAvg24h==null?'price is-null':'price'}" data-refresh-tpl="${it.id}" data-tip="Click para atualizar via tarkov-market" data-tip-pos="bottom"><div class="cell-num"><div class="cell-num__value">${fmtRub(c.priceFleaMarketAvg24h)}</div>${pctVsSpt(c.priceFleaMarketAvg24h, c.priceFleaSpt)}</div><span class="cell-refresh__icon" aria-hidden="true">${ICON_REFRESH}</span><span class="cell-refresh__spinner" aria-hidden="true"></span></td>
   </tr>`;
 }
 
@@ -1259,12 +1259,13 @@ function onTableClick(e) {
     return;
   }
 
-  // Click on Flea Dev cell → refresh from tarkov.dev API
-  const devCell = e.target.closest('td.cell-refresh');
-  if (devCell) {
+  // Click on Flea Dev / Flea Market cell → refresh from the respective API
+  const refreshCell = e.target.closest('td.cell-refresh');
+  if (refreshCell) {
     e.stopPropagation();
-    if (devCell.classList.contains('is-loading')) return; // already in-flight
-    refreshDevCell(devCell);
+    if (refreshCell.classList.contains('is-loading')) return; // already in-flight
+    if (refreshCell.classList.contains('cell-refresh-market')) refreshMarketCell(refreshCell);
+    else refreshDevCell(refreshCell);
     return;
   }
 
@@ -1344,6 +1345,40 @@ async function refreshDevCell(cell) {
   } catch (err) {
     cell.classList.remove('is-loading');
     toast('Falha ao atualizar via tarkov.dev: ' + err.message, 'err');
+  }
+}
+
+async function refreshMarketCell(cell) {
+  const tpl = cell.dataset.refreshTpl;
+  const item = ITEMS[tpl];
+  if (!item) return;
+  cell.classList.add('is-loading');
+  try {
+    const r = await fetch('/api/refresh-market', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tpl }),
+    });
+    const data = await r.json();
+    if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+
+    item.tarkovMarket = data.tarkovMarket;
+    item.consolidated = data.consolidated;
+    const row = cell.closest('tr[data-id]');
+    if (row) {
+      const tmp = document.createElement('tbody');
+      tmp.innerHTML = renderRow(item);
+      row.replaceWith(tmp.firstElementChild);
+    }
+    const prev = data.previous && data.previous.avg24h;
+    const curr = data.tarkovMarket && data.tarkovMarket.pve && data.tarkovMarket.pve.avg24h;
+    const deltaTxt = (prev != null && curr != null && prev !== curr)
+      ? ` (era ${prev.toLocaleString('pt-BR')} ₽ → ${curr.toLocaleString('pt-BR')} ₽)`
+      : '';
+    toast(`${item.shortName || tpl}: preços atualizados via tarkov-market${deltaTxt}`, 'ok');
+  } catch (err) {
+    cell.classList.remove('is-loading');
+    toast('Falha ao atualizar via tarkov-market: ' + err.message, 'err');
   }
 }
 

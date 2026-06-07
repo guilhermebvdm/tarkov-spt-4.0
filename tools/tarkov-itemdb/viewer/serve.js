@@ -187,6 +187,43 @@ function fetchTarkovDevItem(tpl) {
   });
 }
 
+// Fetch a single item from tarkov-market.com (PVE prices). The API has no
+// bsgId lookup — only by name (q) or uid — so we query by name and filter the
+// results by bsgId to pin the exact tpl. Requires TARKOV_MARKET_API_KEY.
+function fetchTarkovMarketItem(name, tpl) {
+  return new Promise((resolve, reject) => {
+    const apiKey = process.env.TARKOV_MARKET_API_KEY;
+    if (!apiKey) return reject(new Error('TARKOV_MARKET_API_KEY not set — restart serve.js with the env var to use tarkov-market refresh'));
+    if (!name)   return reject(new Error('item has no name to query tarkov-market'));
+    const u = new URL('https://api.tarkov-market.app/api/v1/pve/item');
+    u.searchParams.set('q', name);
+    const req = https.request({
+      method: 'GET', hostname: u.hostname, path: u.pathname + u.search,
+      headers: { 'x-api-key': apiKey },
+    }, (res) => {
+      const chunks = [];
+      res.on('data', c => chunks.push(c));
+      res.on('end', () => {
+        if (res.statusCode !== 200) {
+          return reject(new Error(`tarkov-market HTTP ${res.statusCode}` + (res.statusCode === 401 ? ' (bad/missing API key)' : '')));
+        }
+        try {
+          const data = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+          const arr = Array.isArray(data) ? data : (data ? [data] : []);
+          // Prefer the exact bsgId match; fall back to the sole result if the
+          // name query returned exactly one item.
+          const match = arr.find(x => x && x.bsgId === tpl) || (arr.length === 1 ? arr[0] : null);
+          if (!match) return reject(new Error(`item not found on tarkov-market (q="${name}", ${arr.length} results)`));
+          resolve(match);
+        } catch (e) { reject(e); }
+      });
+    });
+    req.on('error', reject);
+    req.setTimeout(15000, () => { req.destroy(new Error('tarkov-market timeout')); });
+    req.end();
+  });
+}
+
 function handleRefreshDev(req, res) {
   let body = '';
   req.on('data', c => { body += c; if (body.length > 1e6) req.destroy(); });
@@ -265,6 +302,65 @@ function handleRefreshDev(req, res) {
       });
     } catch (e) {
       console.error('refresh-dev failed:', e);
+      return sendJson(res, 502, { error: e.message });
+    }
+  });
+}
+
+// POST /api/refresh-market — re-fetch one item's PVE prices from tarkov-market
+// and update item.tarkovMarket.pve + consolidated. Mirrors /api/refresh-dev.
+function handleRefreshMarket(req, res) {
+  let body = '';
+  req.on('data', c => { body += c; if (body.length > 1e6) req.destroy(); });
+  req.on('end', async () => {
+    let payload;
+    try { payload = JSON.parse(body); }
+    catch (e) { return sendJson(res, 400, { error: 'invalid JSON' }); }
+    const tpl = payload.tpl;
+    if (typeof tpl !== 'string' || !/^[a-f0-9]{24}$/i.test(tpl)) {
+      return sendJson(res, 400, { error: 'invalid tpl' });
+    }
+    try {
+      // Read the name to query tarkov-market (network happens OUTSIDE the write lock).
+      const pre = readJsonFile(ITEMS_JSON)[tpl];
+      if (!pre) return sendJson(res, 404, { error: 'tpl not in data/items.json' });
+      const m = await fetchTarkovMarketItem(pre.name, tpl);
+      const mapped = {
+        avg24h:      m.avg24hPrice   ?? null,
+        avg7days:    m.avg7daysPrice ?? null,
+        price:       m.price         ?? null,
+        traderName:  m.traderName    ?? null,
+        traderPrice: m.traderPrice   ?? null,
+        link:        m.link          ?? null,
+        updated:     m.updated       ?? null,
+      };
+      return withWriteLock(() => {
+        const items = readJsonFile(ITEMS_JSON);
+        const item = items[tpl];
+        if (!item) return sendJson(res, 404, { error: 'tpl not in data/items.json' });
+        const prev = item.tarkovMarket && item.tarkovMarket.pve
+          ? { avg24h: item.tarkovMarket.pve.avg24h, price: item.tarkovMarket.pve.price, updated: item.tarkovMarket.pve.updated }
+          : null;
+        item.tarkovMarket = { pve: mapped };
+        recomputeConsolidated(item);
+        fs.writeFileSync(ITEMS_JSON, serializeItems(items), 'utf8');
+        appendHistory({
+          at: new Date().toISOString(), tpl,
+          name: item.name || null, shortName: item.shortName || null,
+          source: 'tarkov-market', previous: prev, current: mapped,
+          ip: req.socket.remoteAddress || null,
+        });
+        return sendJson(res, 200, {
+          ok: true, tpl, previous: prev,
+          tarkovMarket: item.tarkovMarket,
+          consolidated: item.consolidated,
+        });
+      }).catch(e => {
+        console.error('refresh-market write failed:', e);
+        if (!res.headersSent) return sendJson(res, 500, { error: e.message });
+      });
+    } catch (e) {
+      console.error('refresh-market failed:', e);
       return sendJson(res, 502, { error: e.message });
     }
   });
@@ -634,6 +730,7 @@ http.createServer((req, res) => {
   if (req.method === 'GET'    && req.url === '/api/overrides')    return handleGetOverrides(req, res);
   if (req.method === 'POST' && req.url === '/api/ban')            return handleBanToggle(req, res);
   if (req.method === 'POST' && req.url === '/api/refresh-dev')    return handleRefreshDev(req, res);
+  if (req.method === 'POST' && req.url === '/api/refresh-market') return handleRefreshMarket(req, res);
   if (req.method === 'POST' && req.url === '/api/flea-min-level') return handleFleaMinLevel(req, res);
 
   let urlPath = decodeURIComponent(req.url.split('?')[0]);
