@@ -30,6 +30,7 @@
     <div id="group-filter"></div>
     <div id="condition-filter"></div>
     <div id="ban-filter"></div>
+    <div id="override-filter"></div>
     <div id="delta-filter"></div>
   </div>
 
@@ -67,6 +68,7 @@ let activeCategoryId = null;
 const selectedGroups     = new Set();  // names selected in Group multiselect
 const selectedConditions = new Set();  // conditionType values selected
 const selectedBans       = new Set();  // ban filter values: 'ok' | 'bsg' | 'custom'
+const selectedOverrides  = new Set();  // override filter values: 'override' | 'vanilla'
 const DELTA_STORAGE_KEY  = 'tarkov-itemdb.delta';
 let deltaSource = 'dev';   // 'dev' | 'market'
 let deltaMin    = null;    // number or null
@@ -382,6 +384,7 @@ async function load() {
     buildGroupFilter();
     buildConditionFilter();
     buildBanFilter();
+    buildOverrideFilter();
     buildDeltaFilter();
     bindControls();
     render();
@@ -394,9 +397,11 @@ async function load() {
 const GROUP_STORAGE_KEY     = 'tarkov-itemdb.groups';
 const CONDITION_STORAGE_KEY = 'tarkov-itemdb.conditions';
 const BAN_STORAGE_KEY       = 'tarkov-itemdb.bans';
+const OVERRIDE_STORAGE_KEY  = 'tarkov-itemdb.overrides';
 let groupDropdown = null;
 let conditionDropdown = null;
 let banDropdown = null;
+let overrideDropdown = null;
 
 function buildDeltaFilter() {
   // Restore persisted state
@@ -509,6 +514,37 @@ function buildBanFilter() {
   });
   banDropdown.setValue([...selectedBans]);
   document.getElementById('ban-filter').appendChild(banDropdown.root);
+}
+
+function buildOverrideFilter() {
+  // Count items by override state (fleaOverride != null = price pinned via ragfair.json).
+  let overrideCount = 0, vanillaCount = 0;
+  for (const it of ITEM_LIST) {
+    if (it.spt && it.spt.fleaOverride != null) overrideCount++; else vanillaCount++;
+  }
+  const options = [
+    { value: 'override', label: 'Com override', iconHtml: '<span class="badge badge--override">OVR</span>', count: overrideCount },
+    { value: 'vanilla',  label: 'Sem override', count: vanillaCount },
+  ];
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(OVERRIDE_STORAGE_KEY) || '[]');
+    if (Array.isArray(saved)) saved.forEach(v => selectedOverrides.add(v));
+  } catch (e) {}
+
+  overrideDropdown = createDropdown({
+    placeholder: 'Override',
+    options,
+    multi: true,
+    onChange: (vals) => {
+      selectedOverrides.clear();
+      vals.forEach(v => selectedOverrides.add(v));
+      try { localStorage.setItem(OVERRIDE_STORAGE_KEY, JSON.stringify(vals)); } catch (e) {}
+      render();
+    },
+  });
+  overrideDropdown.setValue([...selectedOverrides]);
+  document.getElementById('override-filter').appendChild(overrideDropdown.root);
 }
 
 function buildConditionFilter() {
@@ -807,6 +843,13 @@ function filterItems() {
       if (selectedBans.has('ok')     && !banned) match = true;
       if (selectedBans.has('bsg')    && reasons.includes('bsg')) match = true;
       if (selectedBans.has('custom') && reasons.includes('custom')) match = true;
+      if (!match) continue;
+    }
+    if (selectedOverrides.size > 0) {
+      const hasOverride = !!(it.spt && it.spt.fleaOverride != null);
+      let match = false;
+      if (selectedOverrides.has('override') && hasOverride)  match = true;
+      if (selectedOverrides.has('vanilla')  && !hasOverride) match = true;
       if (!match) continue;
     }
     if (deltaMin !== null || deltaMax !== null) {
