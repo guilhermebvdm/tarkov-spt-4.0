@@ -31,6 +31,7 @@
     <div id="condition-filter"></div>
     <div id="ban-filter"></div>
     <div id="override-filter"></div>
+    <div id="mod-filter"></div>
     <div id="delta-filter"></div>
   </div>
 
@@ -69,6 +70,7 @@ const selectedGroups     = new Set();  // names selected in Group multiselect
 const selectedConditions = new Set();  // conditionType values selected
 const selectedBans       = new Set();  // ban filter values: 'ok' | 'bsg' | 'custom'
 const selectedOverrides  = new Set();  // override filter values: 'override' | 'vanilla'
+const selectedMods       = new Set();  // modSource names selected (custom items from mods)
 const DELTA_STORAGE_KEY  = 'tarkov-itemdb.delta';
 let deltaSource = 'dev';   // 'dev' | 'market'
 let deltaMin    = null;    // number or null
@@ -385,6 +387,7 @@ async function load() {
     buildConditionFilter();
     buildBanFilter();
     buildOverrideFilter();
+    buildModFilter();
     buildDeltaFilter();
     bindControls();
     render();
@@ -398,10 +401,12 @@ const GROUP_STORAGE_KEY     = 'tarkov-itemdb.groups';
 const CONDITION_STORAGE_KEY = 'tarkov-itemdb.conditions';
 const BAN_STORAGE_KEY       = 'tarkov-itemdb.bans';
 const OVERRIDE_STORAGE_KEY  = 'tarkov-itemdb.overrides';
+const MOD_STORAGE_KEY       = 'tarkov-itemdb.mods';
 let groupDropdown = null;
 let conditionDropdown = null;
 let banDropdown = null;
 let overrideDropdown = null;
+let modDropdown = null;
 
 function buildDeltaFilter() {
   // Restore persisted state
@@ -545,6 +550,36 @@ function buildOverrideFilter() {
   });
   overrideDropdown.setValue([...selectedOverrides]);
   document.getElementById('override-filter').appendChild(overrideDropdown.root);
+}
+
+function buildModFilter() {
+  // Custom items added by server mods (modSource set in load-spt from
+  // user/mods/*/db/CustomItems/). No mod items → no filter rendered.
+  const counts = {};
+  for (const it of ITEM_LIST) { if (it.modSource) counts[it.modSource] = (counts[it.modSource] || 0) + 1; }
+  const names = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+  if (names.length === 0) return;
+  const options = names.map(n => ({ value: n, label: n, count: counts[n] }));
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(MOD_STORAGE_KEY) || '[]');
+    if (Array.isArray(saved)) saved.forEach(v => selectedMods.add(v));
+  } catch (e) {}
+
+  modDropdown = createDropdown({
+    placeholder: 'Mod',
+    options,
+    multi: true,
+    searchable: names.length > 12,
+    onChange: (vals) => {
+      selectedMods.clear();
+      vals.forEach(v => selectedMods.add(v));
+      try { localStorage.setItem(MOD_STORAGE_KEY, JSON.stringify(vals)); } catch (e) {}
+      render();
+    },
+  });
+  modDropdown.setValue([...selectedMods]);
+  document.getElementById('mod-filter').appendChild(modDropdown.root);
 }
 
 function buildConditionFilter() {
@@ -851,6 +886,9 @@ function filterItems() {
       if (selectedOverrides.has('override') && hasOverride)  match = true;
       if (selectedOverrides.has('vanilla')  && !hasOverride) match = true;
       if (!match) continue;
+    }
+    if (selectedMods.size > 0) {
+      if (!it.modSource || !selectedMods.has(it.modSource)) continue;
     }
     if (deltaMin !== null || deltaMax !== null) {
       const c  = it.consolidated;
