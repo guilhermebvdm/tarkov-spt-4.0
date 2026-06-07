@@ -1395,13 +1395,11 @@ function openCellActions(cell) {
   const restoreBtn = menu.querySelector('[data-action="restore"]');
   if (restoreBtn) restoreBtn.onclick = async (ev) => {
     ev.stopPropagation();
-    restoreBtn.disabled = true;
+    close();   // remove the menu + its capture-phase doc listener before the row is replaced
     try {
-      await restoreOverride(cell);   // re-renders the row (this menu's cell is replaced)
+      await restoreOverride(cell);   // re-renders the row
     } catch (err) {
       toast('Falha ao restaurar: ' + err.message, 'err');
-      restoreBtn.disabled = false;
-      close();
     }
   };
   menu.querySelector('[data-action="ban"]').onclick = (ev) => {
@@ -1577,6 +1575,7 @@ function openInlineEdit(cell) {
       item.spt.fleaOverride = data.override;
       item.spt.effectiveFleaPrice = data.effectiveFleaPrice;
       item.consolidated = data.consolidated;
+      closeForm();   // remove the form + its capture-phase doc listener before the row is replaced
       rerenderRow();
       const fromStr = (prevEff != null && prevEff !== data.effectiveFleaPrice) ? `${prevEff.toLocaleString('pt-BR')} → ` : '';
       toast(`${item.shortName || tpl}: flea ${fromStr}${data.effectiveFleaPrice.toLocaleString('pt-BR')} ₽`, 'ok');
@@ -1587,12 +1586,11 @@ function openInlineEdit(cell) {
   };
 
   if (restore) restore.onclick = async () => {
-    save.disabled = true; cancel.disabled = true; restore.disabled = true;
+    closeForm();   // remove the form + its capture-phase doc listener before the row is replaced
     try {
-      await restoreOverride(cell);   // re-renders row (this form's cell is replaced)
+      await restoreOverride(cell);   // re-renders the row
     } catch (err) {
       toast('Falha ao restaurar: ' + err.message, 'err');
-      save.disabled = false; cancel.disabled = false; restore.disabled = false;
     }
   };
 }

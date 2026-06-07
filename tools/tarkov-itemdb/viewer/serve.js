@@ -29,7 +29,6 @@ const CHECKS_DAT   = path.join(SPT_DATA, 'checks.dat');
 const LOG_FILE              = path.join(ROOT, 'logs', 'price-edits.jsonl');
 const BAN_LOG_FILE          = path.join(ROOT, 'logs', 'ban-edits.jsonl');
 const HISTORY_LOG_FILE      = path.join(ROOT, 'logs', 'price-history.jsonl');
-const HANDBOOK_PRICES_LOG   = path.join(ROOT, 'data', 'handbook-prices-log.json');
 const TARKOV_DEV_URL   = 'https://api.tarkov.dev/graphql';
 
 const MIME = {
@@ -296,26 +295,6 @@ function serializeItems(items) {
   return '{\n' + tpls.map(t => JSON.stringify(t) + ':' + JSON.stringify(items[t])).join(',\n') + '\n}\n';
 }
 
-// Update handbook-prices-log.json with a new price change entry.
-// Creates the entry for the tpl on first edit (originalPrice = from).
-// from/to are flea prices (user intent); handbookPrice is what was written to handbook.json.
-function updateHandbookPricesLog(tpl, name, shortName, from, to, handbookPrice) {
-  let log = {};
-  try { log = readJsonFile(HANDBOOK_PRICES_LOG); } catch (_) {}
-  const ts = new Date().toISOString();
-  if (!log[tpl]) {
-    log[tpl] = { name, shortName, originalFleaPrice: from, currentFleaPrice: to, history: [] };
-  } else {
-    log[tpl].name            = name;
-    log[tpl].shortName       = shortName;
-    log[tpl].currentFleaPrice = to;
-  }
-  log[tpl].history.push({ ts, fromFlea: from, toFlea: to, handbookPrice });
-  const tmp = HANDBOOK_PRICES_LOG + '.tmp';
-  fs.writeFileSync(tmp, JSON.stringify(log, null, 2) + '\n', 'utf8');
-  fs.renameSync(tmp, HANDBOOK_PRICES_LOG);
-}
-
 // POST /api/price — set a desired flea price X for a tpl by writing a COMPENSATED
 // override into ragfair.json:dynamic.itemPriceOverrideRouble[tpl].
 //
@@ -509,7 +488,7 @@ function handleBanToggle(req, res) {
     if (typeof tpl !== 'string' || !/^[a-f0-9]{24}$/i.test(tpl)) {
       return sendJson(res, 400, { error: 'invalid tpl' });
     }
-    try {
+    withWriteLock(() => {
       // 1. Precondition: enableBsgList must be true, else CanSellOnRagfair is
       //    ignored by SPT and the toggle would silently no-op in-game.
       const ragfair = readJsonFile(RAGFAIR_JSON);
@@ -573,10 +552,10 @@ function handleBanToggle(req, res) {
         fleaBanReasons: items[tpl].spt.fleaBanReasons,
         checks: checksResult,
       });
-    } catch (e) {
+    }).catch(e => {
       console.error('ban toggle failed:', e);
-      return sendJson(res, 500, { error: e.message });
-    }
+      if (!res.headersSent) return sendJson(res, 500, { error: e.message });
+    });
   });
 }
 
@@ -595,7 +574,7 @@ function handleFleaMinLevel(req, res) {
     if (!Number.isInteger(lvl) || lvl < 1 || lvl > 99) {
       return sendJson(res, 400, { error: 'minUserLevel must be integer 1..99' });
     }
-    try {
+    withWriteLock(() => {
       const globals = readJsonFile(GLOBALS_JSON);
       if (!globals.config || !globals.config.RagFair) {
         return sendJson(res, 500, { error: 'globals.json missing config.RagFair' });
@@ -621,10 +600,10 @@ function handleFleaMinLevel(req, res) {
 
       const checksResult = updateSptChecks({ 'database/globals.json': GLOBALS_JSON });
       return sendJson(res, 200, { ok: true, minUserLevel: lvl, previous, checks: checksResult });
-    } catch (e) {
+    }).catch(e => {
       console.error('flea min level update failed:', e);
-      return sendJson(res, 500, { error: e.message });
-    }
+      if (!res.headersSent) return sendJson(res, 500, { error: e.message });
+    });
   });
 }
 
