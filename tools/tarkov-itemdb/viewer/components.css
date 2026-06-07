@@ -61,7 +61,12 @@ body {
   height: var(--topbar-h);
   display: flex; align-items: center; gap: var(--space-6);
   padding: 0 var(--space-8);
-  overflow: hidden;
+  /* overflow MUST stay visible: the dropdown panels are absolute children that
+   * overlay the table below. With overflow:hidden the topbar became a scroll
+   * container (the tall, always-laid-out panels make scrollHeight ≫ 44px), and
+   * focusing a panel's search input scrolled the topbar — pushing every filter
+   * off-screen so none could be opened. See viewer/index.html dropdown open(). */
+  overflow: visible;
   background: var(--bg-header);
   border-bottom: 1px solid var(--border-medium);
   position: relative;
