@@ -8,23 +8,23 @@
 
 A fórmula real do flea do SPT 4.0 foi descoberta (análise do código-fonte + 12 testes empíricos). A decisão arquitetural é: **o viewer passa a escrever apenas em `ragfair.json:dynamic.itemPriceOverrideRouble[tpl]`**, em vez de `handbook.json`.
 
-### Status de execução
+### Status de execução — ✅ CONCLUÍDO (2026-06-07, commits `140c016` + `bbce32c`)
 
-| Ação | Estado | O que falta |
+| Ação | Estado | Nota |
 | --- | --- | --- |
-| **0 — Smoke test do override** (BLOQUEANTE) | 🟡 Preparada, não rodada | Rodar `action0-override-smoke-test.js prep`, reiniciar SPT, observar Bolts/GPU in-game, preencher [flea-override-validation.md](flea-override-validation.md) |
-| **1 — `load-spt.js`** | ✅ Feita | — (lê `production.json`, detecta craft items, gera `data/hideout-crafts.json`, expõe 4 campos novos) |
-| **2 — `normalize.js` + `items.json`** | ❌ Não feita | Propagar `fleaMultiplier`/`isHideoutCraftItem`/`fleaOverride`/`effectiveFleaPrice` do `spt-raw.json` para o `items.json` |
-| **3 — `serve.js` `/api/price`** | ❌ Não feita | Reescrever para gravar `ragfair.json` override; adicionar `DELETE /api/price` e `GET /api/overrides` |
-| **4 — `index.html` UI** | ❌ Não feita | Badges Override/Vanilla, botão "Restaurar default", tooltip |
-| **5 — Docs** | 🟡 Parcial | `spt-internals.md` ✅, `README.md` ✅. Falta: conclusão no `flea-formula-validation.md`, finalizar `flea-override-validation.md` |
-| **6 — Memory** | ❌ Não feita | Reescrever `project_flea_price_formula.md` + ajustar `feedback_spt_validation.md` |
+| **0 — Smoke test do override** | ✅ Rodado | Override **funciona**, mas a premissa "sobrescreve" foi **falsificada** — é **aditivo** (override + bonus), com **piso** e **teto**. Ver fórmula corrigida abaixo. |
+| **1 — `load-spt.js`** | ✅ Feita | Computa `fleaMultiplier` (M real, incl. overrides tpl/tipo), `fleaPrice` (bonus = handbook×M), `fleaFloor` (handbook×K_trader), `fleaCeiling` (handbook×unreasonableMult), `fleaOverride`, `effectiveFleaPrice` (clamp). |
+| **2 — `normalize.js` + `items.json`** | ✅ Feita | Propaga os 7 campos; `consolidated.priceFleaSpt = effectiveFleaPrice`. |
+| **3 — `serve.js` `/api/price`** | ✅ Feita | `POST` grava `override = X − bonus` em `ragfair.json` (rejeita X<floor e X>ceiling), `DELETE` remove, `GET /api/overrides`, mutex, escrita atômica TAB, refresh checks.dat. |
+| **4 — `index.html` UI** | ✅ Feita | Badge **OVR**, botão **Restaurar default** (↺), hint mín/máx, toast com transição. |
+| **5 — Docs** | ✅ Feita | Este arquivo + `flea-formula-validation.md` + `flea-override-validation.md` + `README.md` + `spt-internals.md`. |
+| **6 — Memory** | ✅ Feita | `project_flea_price_formula.md` reescrita com a fórmula aditivo+piso+teto. |
 
-**Regra do plano:** não avançar para a Ação 1+ sem a Ação 0 verde. As Ações 1/5 foram feitas adiantadas (com base na análise de código, que é sólida), mas o smoke test empírico do override ainda não foi rodado.
+**Lição (atualiza a regra antiga):** a Ação 0 era bloqueante e cumpriu o papel — **falsificou** a premissa central do plano (override "sobrescreve"). A análise de código inicial estava certa sobre os passos, mas errada sobre a **ordem** (override entra ANTES do `AddOrUpdate +=`, não depois) e omitia o piso de trader e o teto de `unreasonableModPrices`. Ver §"A fórmula real" abaixo, reescrita.
 
 ### Estado do SPT install
 
-Os 12 itens de teste em `D:/SPT/SPT/SPT_Data/` foram **revertidos** aos valores originais (`prices.json` + `handbook.json` limpos). Estado vanilla, pronto para a Ação 0. Backups dos arquivos em `*.test-backup`. Valores originais em [`.revert-state.json`](../.revert-state.json) e [`.test-validation-state.json`](../.test-validation-state.json).
+`D:/SPT/SPT/SPT_Data/` em **vanilla** (5 overrides default no `ragfair.json`, handbook/prices intactos). Os edits de teste foram revertidos. O viewer (`serve.js`) escreve **apenas** em `ragfair.json:itemPriceOverrideRouble` + refresca `checks.dat`.
 
 ---
 
@@ -43,64 +43,68 @@ Validada contra `references/spt-source/Libraries/SPTarkov.Server.Core/` e 12 cen
 | `T(tpl)` | `highestSellToTraderPrice(tpl)` — só se `PreventPriceBeingBelowTraderBuyPrice=true` |
 | `O(tpl)` | `ragfair.json:dynamic.itemPriceOverrideRouble[tpl]` (ou ausente) |
 
-### 3 passos no boot do server
+### Boot do server — ordem REAL (validada por código + 7 cenários in-game)
+
+> ⚠️ Corrigido: o override **NÃO sobrescreve**. Ele entra no dicionário de prices **antes** do bonus, e o bonus é **somado** por cima.
 
 ```text
-Passo 1 — carrega prices.json para memória:
-  P_mem(tpl) = P_disco(tpl)   se a key existe
-             = indefinido      caso contrário
+Passo A — PostDbLoadService.ApplyFleaPriceOverrides  (roda PRIMEIRO):
+  se O(tpl) existe: Templates.Prices[tpl] = O(tpl)     ← assignment (substitui prices.json)
 
-Passo 2 — RagfairPriceService.ReplaceFleaBasePrices:
-  bonus(tpl) = H(tpl) × (m + c(tpl))
-  se PreventPriceBeingBelowTraderBuyPrice=true e T(tpl) > bonus(tpl):
-      bonus(tpl) ← T(tpl)
-  se P_mem(tpl) indefinido:
-      P_mem(tpl) ← bonus(tpl)            (cria via TryAdd)
-  senão:
-      P_mem(tpl) ← P_mem(tpl) + bonus(tpl)   ← SOMA, não substitui (AddOrUpdate +=)
+Passo B — RagfairPriceService.ReplaceFleaBasePrices  (roda DEPOIS):
+  bonus(tpl) = H(tpl) × (M(tpl) + c(tpl))               M = tplOverride|tipoOverride|1.5 ; c = 0.8 se craft
+  se PreventPriceBeingBelowTraderBuyPrice e T(tpl) > bonus: bonus = T(tpl)
+  Templates.Prices.AddOrUpdate(tpl, bonus)              ← += (key já existe via Passo A ou prices.json)
 
-Passo 3 — PostDbLoadService.ApplyFleaPriceOverrides:
-  se O(tpl) existe:
-      P_mem(tpl) ← O(tpl)                ← atribuição direta, sobrescreve total
+⇒ base_mem(tpl) = (O(tpl) ?? P_disco(tpl) ?? 0) + bonus(tpl)
 ```
 
-**O gotcha central:** `AddOrUpdate` em `DictionaryExtensions.cs:12-19` tem nome enganoso — se a key já existe faz `dict[key] += value`, não `dict[key] = value`.
+**Gotcha central:** `AddOrUpdate` ([DictionaryExtensions.cs:12-19](../../../references/spt-source/Libraries/SPTarkov.Server.Core/Extensions/DictionaryExtensions.cs#L12-L19)) faz `+=` se a key existe. Como o Passo A já pôs o override na key, o Passo B **soma** o bonus.
 
-### Geração de oferta (runtime)
+### Geração de oferta (runtime) — piso e teto
 
 ```text
-base     = P_mem(tpl)
-quality  = qualityModifier do item (1.0 full HP; < 1 dano/resource parcial)
-           — não aplica se tpl ∈ IgnoreQualityPriceVarianceBlacklist
-range    = priceRanges.default (0.8..1.2)
-         | priceRanges.preset  (0.95..1.05) se preset de arma
-         | priceRanges.pack    (0.75..0.96) se ammo pack
-variance = random com bias 2,2 dentro do range (favor centro)
-oferta_final = base × quality × variance
+price = GetFleaPriceForItem(tpl) = base_mem(tpl)
+se useTraderPriceForOffersIfHigher e traderSell > price: price = traderSell   ← PISO (= H × K_trader ≈ H)
+se tpl ∈ unreasonableModPrices e price > H × overMult:   price = H × newMult   ← TETO (mods ×6, electronics ×11)
+(adjustPriceWhenBelowHandbookPrice está OFF neste install)
+price ×= ItemPriceMultiplier[tpl]   (mapa manual, 2 tpls)
+price ×= qualityModifier            (se não em IgnoreQualityPriceVarianceBlacklist)
+oferta = price × variância(0.8..1.2, bias 2,2; clamp RÍGIDO — re-rola fora do range)
 ```
+
+### Fórmula consolidada (o que o viewer usa)
+
+```text
+offerBase = clamp( (override ?? prices.json ?? 0) + bonus ,  floor ,  ceiling )
+  bonus   = H × M
+  floor   = H × K_trader        (K_trader = max(100 − buy_price_coef[LL0])/100 ; =1.0 → floor ≈ handbook)
+  ceiling = H × unreasonableMult (Weapon Mod ×6, Electronics ×11; senão ∞)
+```
+
+Para cravar o preço `X`: **`override = X − bonus`**, válido para `floor ≤ X ≤ ceiling`.
 
 ### Por que os testes 6/7 pareciam mostrar 2 padrões
 
-Leitura empírica inicial sugeriu "prices=0 → k≈2.0" e "prices missing → k≈1.5". A causa real **não era** o estado de `prices.json` — era se o item é **craft do hideout** (`c=0.8` → multiplier 2.3 vs `c=0` → 1.5). Por coincidência todos os items "prices=0" testados eram craft e os "ausentes" não-craft. O estado `prices=0` vs `missing` tem efeito idêntico no resultado final.
+Leitura empírica inicial sugeriu "prices=0 → k≈2.0" e "prices missing → k≈1.5". A causa real era se o item é **craft do hideout** (`c=0.8` → 2.3 vs 1.5). `prices=0` vs `missing` tem efeito idêntico.
 
 ---
 
 ## Decisão arquitetural
 
-**Viewer escreve apenas em `ragfair.json:dynamic.itemPriceOverrideRouble[tpl]`.** Não toca `handbook.json` nem `prices.json`.
+**Viewer escreve apenas em `ragfair.json:dynamic.itemPriceOverrideRouble[tpl]`** (override **compensado** = X − bonus). Não toca `handbook.json` nem `prices.json`.
 
 ### Por quê
 
-- Override é atribuição direta (passo 3) — sobrescreve toda matemática anterior. Resultado determinístico: `oferta = X × variance × quality`.
-- Elimina o gap do `AddOrUpdate +=` — não precisa zerar `prices.json` nem detectar craft para back-calc.
-- Reversível: deletar a key restaura o vanilla. Não precisa lembrar handbook original.
-- `prices.json` preservado como histórico/cache (útil para coexistência com LiveFleaPrices).
-- Multiplier de craft (`×2.3`) vira info-only na UI.
+- Mantém handbook/prices.json intactos; reversível deletando a key.
+- A compensação (`X − bonus`) faz `base_mem = X` exato; piso/teto são respeitados pelo viewer (rejeita X fora de `[floor, ceiling]`).
 
-### Tradeoff aceito
+### Tradeoffs / limites
 
-- **Handbook in-game (menu "Handbook" do EFT) NÃO reflete o preço editado.** Só o flea muda.
-- Se LiveFleaPrices estiver ativo e mutar `prices.json` em runtime, o override do passo 3 ainda vence (presume ordem de boot correta — validar via Ação 0).
+- **Handbook in-game (menu do EFT) NÃO reflete o preço** — só o flea.
+- **Teto:** Electronics/Weapon Mods não passam de `H × 11` / `H × 6` (cap do SPT, não contornável por override).
+- **Piso:** nada desce abaixo de `H × K_trader` (≈ handbook).
+- Se LiveFleaPrices for reativado, ele muta `prices.json` em memória no boot — mas o override (Passo A) ainda vira a base e o piso/teto continuam valendo.
 
 ---
 

@@ -2,7 +2,32 @@
 
 Validação prévia para o plano de override-only em `C:\Users\guime\.claude\plans\curried-dreaming-marble.md`.
 
-**Objetivo**: confirmar que `ragfair.json:dynamic.itemPriceOverrideRouble` sobrescreve toda a matemática vanilla do flea (passos 1+2 do boot) e produz oferta = `override × variance`.
+**Objetivo (original)**: confirmar que `ragfair.json:dynamic.itemPriceOverrideRouble` sobrescreve toda a matemática vanilla do flea e produz oferta = `override × variance`.
+
+---
+
+## ✅ RESULTADO (2026-06-07) — premissa FALSIFICADA, fórmula corrigida
+
+O override **funciona** (é lido e aplicado), mas **NÃO sobrescreve** — a hipótese original caiu. Validado por código (`references/spt-source/`) + **7 cenários in-game** (matriz em `scripts/smoke-matrix.js`).
+
+**Fórmula real:**
+```text
+offerBase = clamp( (override ?? prices.json ?? 0) + bonus ,  floor ,  ceiling )
+  bonus   = handbook × M           (M = 1.5/2.3 craft, ou 1.8/2.5 override tpl/tipo)
+  floor   = handbook × K_trader    (≈ handbook; useTraderPriceForOffersIfHigher)
+  ceiling = handbook × mult        (Weapon Mod ×6, Electronics ×11; senão ∞)
+oferta    = offerBase × variância(0.8..1.2, clamp rígido)
+```
+
+**Evidências in-game (smoke-matrix):**
+- **Aditivo:** Bolts override `123456` → oferta exata `148.756` = `123456 + 25300 (handbook 11000 × 2.3)`. O `=` do override entra ANTES do `+= bonus`.
+- **Multiplicadores:** Keycard Blue confirmou M=2.5 (oferta mín 2.61M > 2.1M×1.2 → impossível com M=1.5).
+- **Piso:** LEDX com override negativo (alvo abaixo do handbook) foi pousado no trader-buyback (≈ handbook), não no alvo.
+- **Teto:** GPU (Electronics) override mirando 3.0M foi **capado em handbook 198000 × 11 = 2.178.000**; todas as 11 ofertas bateram `2.178M × 0.97..1.14`.
+
+**Correção do viewer:** grava `override = X − bonus` (compensação), válido para `floor ≤ X ≤ ceiling`. Detalhe em [flea-override-plan.md](flea-override-plan.md) e [flea-formula-validation.md](flea-formula-validation.md).
+
+> O procedimento original (2-itens Bolts/GPU) abaixo foi superado pela matriz de 9 itens (`smoke-matrix.js`), mas fica como registro histórico.
 
 ## Pré-requisitos
 

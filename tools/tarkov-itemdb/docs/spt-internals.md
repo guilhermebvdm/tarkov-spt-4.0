@@ -40,37 +40,37 @@ Validado contra o código fonte vendored em `references/spt-source/` (SHA `c87cc
 
 ### Fórmula em 3 passos no boot do server
 
-```text
-Passo 1 — carrega prices.json:
-  P_mem(tpl) = P_disco(tpl)  se a key existe; senão indefinido
+> ⚠️ **Ordem corrigida (2026-06-07, validada in-game):** o override entra **ANTES** do bonus e é **somado**, não sobrescreve. A versão anterior deste doc dizia "passo 3 sobrescreve total" — **errado**.
 
-Passo 2 — RagfairPriceService.ReplaceFleaBasePrices:
-  bonus(tpl) = H(tpl) × (m + c(tpl))
+```text
+Passo A — PostDbLoadService.ApplyFleaPriceOverrides  (roda PRIMEIRO):
+  se O(tpl) existe: Templates.Prices[tpl] = O(tpl)     ← assignment (substitui prices.json)
+
+Passo B — RagfairPriceService.ReplaceFleaBasePrices  (roda DEPOIS):
+  bonus(tpl) = H(tpl) × (M(tpl) + c(tpl))              M = tplOverride|tipoOverride|m(1.5) ; c = 0.8 se craft
   se PreventPriceBeingBelowTraderBuyPrice e T(tpl) > bonus: bonus ← T(tpl)
-  se P_mem(tpl) indefinido:
-      P_mem(tpl) ← bonus
-  senão:
-      P_mem(tpl) ← P_mem(tpl) + bonus     ← SOMA, não substitui
+  Templates.Prices.AddOrUpdate(tpl, bonus)             ← += (key já existe via Passo A / prices.json)
 
-Passo 3 — PostDbLoadService.ApplyFleaPriceOverrides:
-  se O(tpl) existe:
-      P_mem(tpl) ← O(tpl)                  ← atribuição direta, sobrescreve total
+⇒ base_mem(tpl) = (O(tpl) ?? P_disco(tpl) ?? 0) + bonus(tpl)
 ```
 
-O passo 2 **soma** (não substitui) por causa do `AddOrUpdate` em [`DictionaryExtensions.cs:12-19`](../../../references/spt-source/Libraries/SPTarkov.Server.Core/Extensions/DictionaryExtensions.cs#L12-L19) — o nome mente; se a key existe faz `dict[key] += value`.
+O passo B **soma** por causa do `AddOrUpdate` em [`DictionaryExtensions.cs:12-19`](../../../references/spt-source/Libraries/SPTarkov.Server.Core/Extensions/DictionaryExtensions.cs#L12-L19) — se a key existe faz `dict[key] += value`. Como o Passo A já pôs o override na key, o bonus é somado por cima.
 
-### Geração de oferta (runtime)
+### Geração de oferta (runtime) — com piso e teto
 
 ```text
-base     = P_mem(tpl)
-quality  = qualityModifier do item (1.0 full HP; < 1 dano/resource parcial)
-           — não aplica se tpl ∈ IgnoreQualityPriceVarianceBlacklist
-range    = priceRanges.default (0.8..1.2)
-         | priceRanges.preset  (0.95..1.05) se preset de arma
-         | priceRanges.pack    (0.75..0.96) se ammo pack
-variance = random com bias 2,2 dentro do range (favor centro)
-oferta_final = base × quality × variance
+price = base_mem(tpl)
+se useTraderPriceForOffersIfHigher e T(tpl) > price: price = T(tpl)            ← PISO (T = H × K_trader ≈ H)
+se tpl ∈ unreasonableModPrices e price > H × overMult: price = H × newMult     ← TETO (mods ×6, electronics ×11)
+(adjustPriceWhenBelowHandbookPrice = OFF neste install)
+price ×= ItemPriceMultiplier[tpl]   (mapa manual)
+price ×= qualityModifier            (se não em IgnoreQualityPriceVarianceBlacklist)
+range    = priceRanges.default (0.8..1.2) | preset (0.95..1.05) | pack (0.75..0.96)
+variance = GetBiasedRandomNumber(min,max,2,2) — re-rola fora do range (clamp RÍGIDO)
+oferta   = price × variance
 ```
+
+**Consolidado:** `offerBase = clamp((override ?? prices.json ?? 0) + bonus, floor, ceiling)`, com `floor = H × K_trader`, `ceiling = H × unreasonableMult` (ou ∞).
 
 ### Referências no código fonte
 
@@ -80,13 +80,17 @@ oferta_final = base × quality × variance
 | Passo 2 (ReplaceFleaBasePrices) | [Services/RagfairPriceService.cs:73-103](../../../references/spt-source/Libraries/SPTarkov.Server.Core/Services/RagfairPriceService.cs#L73-L103) |
 | Passo 3 (overrides) | [Services/PostDbLoadService.cs:122,789-796](../../../references/spt-source/Libraries/SPTarkov.Server.Core/Services/PostDbLoadService.cs#L789-L796) |
 | Multiplier por baseclass / per-item | [Services/RagfairPriceService.cs:148-166](../../../references/spt-source/Libraries/SPTarkov.Server.Core/Services/RagfairPriceService.cs#L148-L166) |
-| Trader-buy-floor | [Services/RagfairPriceService.cs:90-99](../../../references/spt-source/Libraries/SPTarkov.Server.Core/Services/RagfairPriceService.cs#L90-L99) |
+| Trader-buy-floor (bonus, Passo B) | [Services/RagfairPriceService.cs:90-99](../../../references/spt-source/Libraries/SPTarkov.Server.Core/Services/RagfairPriceService.cs#L90-L99) |
+| Piso de oferta (useTraderPriceForOffersIfHigher) | [Services/RagfairPriceService.cs:316-323](../../../references/spt-source/Libraries/SPTarkov.Server.Core/Services/RagfairPriceService.cs#L316-L323) |
+| Teto (AdjustUnreasonablePrice / unreasonableModPrices) | [Services/RagfairPriceService.cs:389-407](../../../references/spt-source/Libraries/SPTarkov.Server.Core/Services/RagfairPriceService.cs#L389-L407) |
+| `GetHighestSellToTraderPrice` (K_trader) | [Helpers/TraderHelper.cs:485-520](../../../references/spt-source/Libraries/SPTarkov.Server.Core/Helpers/TraderHelper.cs#L485-L520) |
+| Variância (clamp rígido) | [Utils/RandomUtil.cs GetBiasedRandomNumber](../../../references/spt-source/Libraries/SPTarkov.Server.Core/Utils/RandomUtil.cs) |
 | Quality modifier | [Services/RagfairPriceService.cs:298-380](../../../references/spt-source/Libraries/SPTarkov.Server.Core/Services/RagfairPriceService.cs#L298-L380) |
 | Set de craft items do hideout | `database/hideout/production.json` (campos `recipes[].requirements[]` onde `type === "Item"`) |
 
 ### Caminhos para editar preço de flea programaticamente
 
-1. **Override (recomendado pelo viewer)** — escrever em `ragfair.json:dynamic.itemPriceOverrideRouble[tpl] = X`. Sobrescreve tudo no passo 3. Resultado: oferta = `X × quality × variance`. Reversível removendo a key. **Não muda handbook in-game.**
+1. **Override compensado (usado pelo viewer)** — escrever `ragfair.json:dynamic.itemPriceOverrideRouble[tpl] = X − bonus`. O boot soma o bonus de volta → `base = X`; oferta = `X × variance`. Válido para `floor ≤ X ≤ ceiling`. Reversível removendo a key. **Não muda handbook in-game.**
 2. **Handbook + zerar prices.json** — escrever `handbook[tpl] = X / (m + c)` E garantir `prices.json[tpl]` ausente ou 0. Resultado: oferta ≈ `X × variance` (sem quality, se aplicável). Muda handbook in-game.
 3. **Handbook puro (sem zerar prices.json)** — risco silencioso: se `prices.json[tpl]` tem valor não-trivial, a soma do passo 2 mantém o legado e a edição vira `X + legado`. Resultado imprevisível. **Não recomendado.**
 

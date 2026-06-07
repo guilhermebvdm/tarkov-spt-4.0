@@ -327,6 +327,8 @@ Passo 2: bonus = handbook × (1.5 + 0.8 se tpl é craft do hideout, senão 0)
          se P_mem indefinido → P_mem = bonus
          senão              → P_mem = P_mem + bonus       ← SOMA (AddOrUpdate +=)
 Passo 3: se ragfair.json:itemPriceOverrideRouble[tpl] existe → P_mem = override (atribui)
+         ⚠️ CORRIGIDO 2026-06-07: ApplyFleaPriceOverrides roda ANTES de ReplaceFleaBasePrices,
+         então o override entra como base e o bonus é SOMADO por cima. Ver §"Override" no fim.
 Oferta:  P_mem × qualityModifier × random(0.8..1.2, bias 2,2)
 ```
 
@@ -373,7 +375,30 @@ A semântica de `prices.json[tpl] = 0` vs ausente, na prática, é **irrelevante
 
 ### Caminho recomendado para editar preço de flea programaticamente
 
-Escrever em `ragfair.json:dynamic.itemPriceOverrideRouble[tpl] = X`. O passo 3 sobrescreve tudo (atribuição direta). Oferta no flea = `X × variance × quality`. Reversível removendo a key. Veja [flea-override-validation.md](flea-override-validation.md) para o smoke test que valida essa abordagem em SPT 4.0.13.
+Escrever **`ragfair.json:dynamic.itemPriceOverrideRouble[tpl] = X − bonus`** (override **compensado**). Ver §"Override" abaixo para o porquê do `− bonus`. Reversível removendo a key. Não muda handbook in-game.
+
+---
+
+## Override — validação (2026-06-07, 7 cenários in-game)
+
+A premissa "override sobrescreve" foi **falsificada**. A ordem real de boot é `ApplyFleaPriceOverrides` (assignment) **antes** de `ReplaceFleaBasePrices` (`AddOrUpdate +=`), então:
+
+```text
+base = (override ?? prices.json ?? 0) + bonus,   depois clamp(base, floor, ceiling)
+  bonus   = handbook × M       (M incl. overrides tpl 1.8 / tipo 2.5, + craft 0.8)
+  floor   = handbook × K_trader (≈ handbook; useTraderPriceForOffersIfHigher)
+  ceiling = handbook × mult     (Weapon Mod ×6, Electronics ×11; senão ∞ — unreasonableModPrices)
+```
+
+| Cenário | Item | Evidência |
+|---|---|---|
+| **Aditivo** | Bolts ov=123456 | oferta exata 148.756 = 123456 + (11000×2.3) → bonus somado APÓS override |
+| **Substitui prices.json** | Money case | ov + bonus = alvo; não somou o `prices.json`=1.4M (senão daria 3.4M) |
+| **M de tipo** | Keycard Blue | M=2.5 confirmado (oferta mín > alvo×1.5×1.2 → impossível com 1.5) |
+| **Piso** | LEDX (alvo < handbook) | pousou em ~handbook (trader buyback), não no alvo |
+| **Teto** | GPU → 3.0M | capado em handbook 198000 × 11 = 2.178.000 (Electronics) |
+
+**Compensação do viewer:** `override = X − bonus` → `base = X`, válido para `floor ≤ X ≤ ceiling`. Harness: [`scripts/smoke-matrix.js`](../scripts/smoke-matrix.js).
 
 ## Estado de revert
 

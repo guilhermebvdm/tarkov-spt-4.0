@@ -103,11 +103,13 @@ Objeto top-level `{ "<bsgTpl>": { ... } }` para lookup O(1). 1 linha por Tpl (di
   "modSource": null,                        // nome do mod (ex: "WTT-PackNStrap") ou null se item base
   "spt": {
     "basePrice": 18397,                     // handbook.Items[].Price
-    "fleaPrice": 27596,                     // = basePrice × fleaMultiplier (vanilla esperado)
-    "fleaMultiplier": 1.5,                  // 1.5 (default) ou 2.3 (item de craft do hideout)
+    "fleaPrice": 27596,                     // bonus ADITIVO = basePrice × fleaMultiplier (o viewer subtrai isto)
+    "fleaFloor": 18397,                     // piso = basePrice × K_trader (oferta não desce abaixo)
+    "fleaCeiling": null,                    // teto = basePrice × mult (Weapon Mod ×6 / Electronics ×11), senão null
+    "fleaMultiplier": 1.5,                  // M: 1.5/2.3 (craft) ou 1.8/2.5 (override tpl/tipo)
     "isHideoutCraftItem": false,            // true se é ingrediente em alguma receita
-    "fleaOverride": null,                   // número se há override em ragfair.json, senão null
-    "effectiveFleaPrice": 27596,            // = fleaOverride ?? fleaPrice
+    "fleaOverride": null,                   // número em ragfair.json:itemPriceOverrideRouble[tpl], senão null
+    "effectiveFleaPrice": 27596,            // = clamp((fleaOverride ?? prices.json ?? 0) + fleaPrice, fleaFloor, fleaCeiling)
     "fleaBanned": false,
     "fleaBanReasons": [],                   // [] | ["bsg"] | ["custom"] | ["bsg","custom"]
     "questRewards": [{ "questId", "name", "trader", "count" }],  // [] se não é reward
@@ -143,36 +145,42 @@ Campos nulos quando a fonte não cobre o item. **Sem blending entre fontes** —
 
 ## Semântica de preço — crítico
 
-### `spt.fleaPrice` — preço vanilla esperado (referência)
+> Validada vs código-fonte (`references/spt-source/`) + 7 cenários in-game. Detalhe completo do boot em [docs/flea-formula-validation.md](docs/flea-formula-validation.md) e [docs/flea-override-plan.md](docs/flea-override-plan.md).
 
-**`spt.fleaPrice = Math.round(handbook.Items[tpl].Price × fleaMultiplier)`**
+A fórmula real do flea (oferta base, qualidade cheia):
 
-Onde `fleaMultiplier = 1.5` para items normais e `1.5 + 0.8 = 2.3` para items que aparecem como ingrediente em ≥1 receita do hideout (`isHideoutCraftItem === true`). O multiplier composto vem da fórmula real do SPT 4.0 — ver [docs/spt-internals.md](docs/spt-internals.md) para os 3 passos do boot.
+```text
+offerBase = clamp( (override ?? prices.json[tpl] ?? 0) + bonus ,  fleaFloor ,  fleaCeiling )
+oferta    = offerBase × variância(0.8..1.2)
+```
 
-### `spt.effectiveFleaPrice` — preço que o flea vai usar de fato
+### Campos derivados
 
-**`spt.effectiveFleaPrice = spt.fleaOverride ?? spt.fleaPrice`**
+| Campo | Fórmula | Papel |
+|---|---|---|
+| `fleaPrice` | `round(basePrice × M)` | **bonus aditivo** — o que o viewer subtrai. `M` = 1.5/2.3 (craft) ou 1.8/2.5 (override de tpl/tipo no `ragfair.json:generateBaseFleaPrices`) |
+| `fleaFloor` | `round(basePrice × K_trader)` | **piso** — oferta não desce abaixo (via `useTraderPriceForOffersIfHigher`). `K_trader = max(100 − buy_price_coef[LL0])/100` ≈ 1.0 → piso ≈ handbook |
+| `fleaCeiling` | `round(basePrice × mult)` ou `null` | **teto** — `unreasonableModPrices` capa Weapon Mods (×6) e Electronics (×11); `null` no resto |
+| `fleaOverride` | valor em `ragfair.json` ou `null` | override compensado escrito pelo viewer |
+| `effectiveFleaPrice` | `clamp((fleaOverride ?? prices.json ?? 0) + fleaPrice, fleaFloor, fleaCeiling)` | preço que o flea usa de fato |
 
-Quando há override ativo em `ragfair.json:dynamic.itemPriceOverrideRouble[tpl]`, ele **sobrescreve total** o cálculo vanilla (passo 3 do boot, atribuição direta — não soma). Quando não há, vale o `fleaPrice` vanilla.
+### O ponto crítico: o override é ADITIVO, não substitui
 
-`prices.json` **não é lido** pelo `load-spt.js`. Mesmo que exista no disco com valores não-triviais, o pipeline ignora — mas o SPT em runtime soma esses valores ao bonus do handbook (gotcha do `AddOrUpdate +=`). Por isso o viewer escreve em `ragfair.json` (override), não em `handbook.json` nem `prices.json`.
+No boot, `ApplyFleaPriceOverrides` faz `Prices[tpl] = override` (assignment, **antes**), e `ReplaceFleaBasePrices` faz `Prices.AddOrUpdate(tpl, bonus)` = **`+=`** (**depois**). Resultado: `base = override + bonus`. Por isso o viewer grava o **override compensado**:
 
-| Quando | `spt.effectiveFleaPrice` |
-|---|---|
-| Nenhum override | `basePrice × fleaMultiplier` (vanilla) |
-| Override ativo | Valor exato escrito em `ragfair.json` |
+**`override = preçoDesejado − fleaPrice(bonus)`**  →  `base = (X − bonus) + bonus = X`.
 
-### Edição de preço via viewer — escrita em override
+### Edição de preço via viewer
 
-O viewer exibe `spt.effectiveFleaPrice` na coluna "Flea SPT" (com badge "Override" se houver). Quando o usuário edita:
+O viewer exibe `effectiveFleaPrice` na coluna "Flea SPT" (badge **OVR** se há override). Ao editar para o preço `X`:
 
-1. Usuário entra o **preço flea desejado** (ex: `50000`)
-2. Viewer escreve `50000` em `ragfair.json:dynamic.itemPriceOverrideRouble[tpl]`
-3. Recalcula MD5 e atualiza `checks.dat`
-4. Sync `data/items.json`: `spt.fleaOverride = 50000`, `spt.effectiveFleaPrice = 50000`
-5. Na próxima rodada do SPT, o passo 3 do boot aplica o override; ofertas saem em `50000 × 0.8..1.2 ≈ 40K..60K`
+1. Valida `fleaFloor ≤ X ≤ fleaCeiling` (senão `422` com o limite).
+2. Escreve `override = X − bonus` em `ragfair.json:dynamic.itemPriceOverrideRouble[tpl]`.
+3. Recalcula MD5 → `checks.dat`.
+4. Sync `data/items.json`: `fleaOverride`, `effectiveFleaPrice = X`.
+5. No próximo boot do SPT: `base = override + bonus = X`; ofertas em `X × 0.8..1.2`.
 
-**Tradeoff aceito**: o handbook in-game (menu "Handbook" do EFT) **não muda** — só o flea reflete o preço editado. Para reverter um override, o viewer expõe um botão "Restaurar default" que deleta a key.
+**Tradeoff/limites:** handbook in-game não muda (só o flea); Electronics/Weapon Mods têm teto (`X ≤ handbook × 11/6`); nada desce abaixo do piso. Botão **Restaurar default** (↺) deleta a key → volta ao vanilla.
 
 ### `consolidated.priceTraderSell` vs `spt.traders[]`
 
@@ -245,7 +253,7 @@ node viewer/serve.js [port]   # default 8080
 | Dropdowns (Group, Condition, Ban) | Multi-select; estado persistido no `localStorage` |
 | **Flea Level widget (topbar)** | Botão "Flea Lvl N+" no topbar; click abre editor inline; salva em `globals.json` via `/api/flea-min-level`; **não** está embutido no `<th>` da tabela |
 | Indicadores ▲▼ % | Comparam Trader / Flea Dev / Flea Market vs Flea SPT (referência de calibração) |
-| **Edição de preço** | Click na célula Flea SPT → input inline; Enter salva; back-calcula para handbook |
+| **Edição de preço** | Click na célula Flea SPT → menu → Edit price → input inline (mín/máx = piso/teto); grava override compensado em `ragfair.json`; badge **OVR** + botão **↺ Restaurar default** |
 | **Ban/Unban** | Click na célula → menu (Edit / Ban / Unban); confirmação com botão "×" para cancelar |
 | **Reward popover** | Badge de reward: hover por 300ms abre tooltip com lista de quests; mouse leave fecha (grace 80ms para mover ao popover) |
 | Ordenação | Click no `<th>` ordena; segundo click inverte |
@@ -257,7 +265,9 @@ node viewer/serve.js [port]   # default 8080
 | --- | --- | --- |
 | `GET /data/:file` | — | Serve arquivos de `data/` |
 | `GET /spt-images/*` | — | Proxy de imagens do SPT (avatars, etc.) |
-| `PATCH /api/price` | JSON `{ tpl, price }` | Back-calcula handbook price, escreve `handbook.json`, atualiza `data/items.json`, refresha hash em `checks.dat`, grava em `handbook-prices-log.json` e `logs/price-edits.jsonl` |
+| `POST /api/price` | JSON `{ tpl, price }` | Grava `override = price − bonus` em `ragfair.json:itemPriceOverrideRouble` (rejeita `price` fora de `[fleaFloor, fleaCeiling]` com `422`), atualiza `data/items.json`, refresha `checks.dat`, grava em `logs/price-edits.jsonl`. Mutex + escrita atômica. |
+| `DELETE /api/price` | JSON `{ tpl }` | Remove o override (restaura vanilla `prices.json + bonus`, com clamp), atualiza `data/items.json`, refresha `checks.dat` |
+| `GET /api/overrides` | — | Mapa `itemPriceOverrideRouble` atual do `ragfair.json` |
 | `POST /api/ban` | JSON `{ tpl, banned }` | Togla `CanSellOnRagfair` em `items.json` do SPT, atualiza `data/items.json`, refresha hash em `checks.dat`, grava em `logs/ban-edits.jsonl` |
 | `POST /api/flea-min-level` | JSON `{ minUserLevel }` | Edita `globals.json:config.RagFair.minUserLevel`, refresha hash |
 
