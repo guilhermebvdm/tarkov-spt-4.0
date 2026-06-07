@@ -270,18 +270,39 @@ function handleRefreshDev(req, res) {
   });
 }
 
-// Recompute consolidated fields that depend on spt.fleaPrice.
-// Other consolidated fields (group, conditionType, priceTraderSell, dev/market columns)
-// don't depend on SPT, so leave them alone.
+// Recompute the `consolidated` view from the raw source blocks (spt / tarkovDev /
+// tarkovMarket). Mirrors normalize.js:deriveConsolidated exactly so a live edit
+// or a per-item refresh produces the same result as a full pipeline run. Must
+// re-derive ALL price columns — a previous version only touched priceFleaSpt,
+// so /api/refresh-dev (and /api/refresh-market) left the dev/market columns +
+// canonical stale (the visible column reads consolidated, not the raw block).
+// `group` and `conditionType` don't change at runtime, so they're left as-is.
 function recomputeConsolidated(item) {
   const c = item.consolidated;
-  c.priceFleaSpt = item.spt ? (item.spt.effectiveFleaPrice ?? item.spt.fleaPrice ?? null) : null;
+  const dev    = item.tarkovDev && item.tarkovDev.pve;
+  const market = item.tarkovMarket && item.tarkovMarket.pve;
+  const spt    = item.spt;
 
-  // Canonical priority chain (must match normalize.js)
-  const mkt = c.priceFleaMarketAvg24h;
-  const devA = c.priceFleaDevAvg24h;
-  const devL = c.priceFleaDevLastLow;
-  const sptP = c.priceFleaSpt;
+  // priceTraderSell: highest sell-to-trader price (from tarkov.dev pve sellFor).
+  let priceTraderSell = null;
+  if (dev && Array.isArray(dev.sellFor)) {
+    let best = -1, vendor = null;
+    for (const s of dev.sellFor) {
+      if (!s.vendor || s.vendor.normalizedName === 'flea-market') continue;
+      const p = s.priceRUB ?? 0;
+      if (p > best) { best = p; vendor = s.vendor.name; }
+    }
+    if (vendor) priceTraderSell = { value: best, vendor };
+  }
+  c.priceTraderSell = priceTraderSell;
+
+  c.priceFleaSpt          = spt    ? (spt.effectiveFleaPrice ?? spt.fleaPrice ?? null) : null;
+  c.priceFleaDevLastLow   = dev    ? (dev.lastLow   ?? null) : null;
+  c.priceFleaDevAvg24h    = dev    ? (dev.avg24h    ?? null) : null;
+  c.priceFleaMarketAvg24h = market ? (market.avg24h ?? null) : null;
+
+  // Canonical priority chain (must match normalize.js).
+  const mkt = c.priceFleaMarketAvg24h, devA = c.priceFleaDevAvg24h, devL = c.priceFleaDevLastLow, sptP = c.priceFleaSpt;
   if (mkt != null)        { c.priceFleaCanonical = mkt;  c.priceFleaSource = 'tarkov-market-avg24h'; }
   else if (devA != null)  { c.priceFleaCanonical = devA; c.priceFleaSource = 'tarkov.dev-avg24h'; }
   else if (devL != null)  { c.priceFleaCanonical = devL; c.priceFleaSource = 'tarkov.dev-lastLow'; }
