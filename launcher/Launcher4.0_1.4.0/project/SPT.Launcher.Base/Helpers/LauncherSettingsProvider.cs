@@ -35,7 +35,7 @@ namespace SPT.Launcher.Helpers
             // Se o launcher está na mesma pasta que EscapeFromTarkov.exe, auto-corrigir GamePath
             try
             {
-                string detectedPath = AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                string detectedPath = AppContext.BaseDirectory;
                 string exePath = Path.Combine(detectedPath, "EscapeFromTarkov.exe");
 
                 if (File.Exists(exePath) && !string.Equals(settings.GamePath, detectedPath, StringComparison.OrdinalIgnoreCase))

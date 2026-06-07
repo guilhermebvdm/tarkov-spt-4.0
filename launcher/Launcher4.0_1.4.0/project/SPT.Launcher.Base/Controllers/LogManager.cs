@@ -24,7 +24,7 @@ namespace SPT.Launcher.Controllers
 
         private LogManager()
         {
-            _filePath = Path.Combine(AppContext.BaseDirectory, "user", "logs");
+            _filePath = Path.Combine(AppContext.BaseDirectory, "SPT", "user", "logs");
             LogFile = Path.Combine(_filePath, "launcher.log");
 
             // Rotação: manter o log anterior para diagnóstico de travamentos

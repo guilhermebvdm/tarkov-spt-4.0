@@ -64,9 +64,9 @@ namespace SPT.Launcher
             LogManager.Instance.Info($">>> Account: {account.username}");
             LogManager.Instance.Info($">>> Server : {server.backendUrl}");
             // setup directories
-            if (IsInstalledInLive())
+            if (IsInstalledInLive(gamePath))
             {
-                LogManager.Instance.Error("[LaunchGame] Installed in Live :: YES");
+                LogManager.Instance.Error("[LaunchGame] PERIGO: Mod instalado na pasta do jogo oficial! Launch cancelado para evitar banimento.");
                 return GameStarterResult.FromError(-1);
             }
 
@@ -93,8 +93,8 @@ namespace SPT.Launcher
             if (account.wipe)
             {
                 LogManager.Instance.Info("[LaunchGame] Wipe profile requested");
-                RemoveProfileRegistryKeys(account.id);
-                CleanTempFiles();
+                RemoveProfileRegistryKeys(account.id, gamePath);
+                CleanTempFiles(gamePath);
             }
 
             // check game path
@@ -142,6 +142,9 @@ namespace SPT.Launcher
                     WorkingDirectory = gamePath,
                 };
 
+                // Workaround for .NET 9 SingleFile DLL hijacking mitigations (SetDefaultDllDirectories)
+                clientProcess.EnvironmentVariables["PATH"] = gamePath + ";" + Environment.GetEnvironmentVariable("PATH");
+
                 try
                 {
                     Process.Start(clientProcess);
@@ -157,10 +160,27 @@ namespace SPT.Launcher
             return GameStarterResult.FromSuccess();
         }
 
-        bool IsInstalledInLive()
+        bool IsInstalledInLive(string currentPath)
         {
-            // Desativa a exclusão perigosa de arquivos que o SPT aciona
-            // acreditando estar dentro da pasta da Live.
+            if (string.IsNullOrWhiteSpace(_originalGamePath))
+                return false;
+
+            try
+            {
+                var livePathNormalized = Path.GetFullPath(_originalGamePath).TrimEnd('\\', '/');
+                var currentPathNormalized = Path.GetFullPath(currentPath).TrimEnd('\\', '/');
+
+                if (string.Equals(livePathNormalized, currentPathNormalized, StringComparison.OrdinalIgnoreCase) || 
+                    currentPathNormalized.StartsWith(livePathNormalized, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogManager.Instance.Exception(ex);
+            }
+
             return false;
         }
 
@@ -207,24 +227,32 @@ namespace SPT.Launcher
                 GetFileForCleanup("EscapeFromTarkov_BE.exe", gamePath),
                 GetFileForCleanup("Uninstall.exe", gamePath),
                 GetFileForCleanup("UnityCrashHandler64.exe", gamePath),
-                GetFileForCleanup("WinPixEventRuntime.dll", gamePath)
+                GetFileForCleanup("WinPixEventRuntime.dll", gamePath),
+                Path.Combine(gamePath, @"EscapeFromTarkov_Data\Plugins\x86_64\hwecho.dll")
             };
 
             foreach (var file in files)
             {
-                if (file == null)
+                try
                 {
-                    continue;
-                }
+                    if (file == null)
+                    {
+                        continue;
+                    }
 
-                if (Directory.Exists(file))
-                {
-                    RemoveFilesRecurse(new DirectoryInfo(file));
-                }
+                    if (Directory.Exists(file))
+                    {
+                        RemoveFilesRecurse(new DirectoryInfo(file));
+                    }
 
-                if (File.Exists(file))
+                    if (File.Exists(file))
+                    {
+                        File.Delete(file);
+                    }
+                }
+                catch (Exception ex)
                 {
-                    File.Delete(file);
+                    LogManager.Instance.Error($"[SetupGameFiles] Falha ao tentar limpar o arquivo/diretorio: {file} - {ex.Message}");
                 }
             }
         }
@@ -243,9 +271,9 @@ namespace SPT.Launcher
         /// <summary>
         /// Remove the SPT JSON-based registry keys associated with the given profile ID
         /// </summary>
-		public void RemoveProfileRegistryKeys(string profileId)
+		public void RemoveProfileRegistryKeys(string profileId, string gamePath)
         {
-            var registryFile = new FileInfo(Path.Combine(Environment.CurrentDirectory, "user\\sptRegistry\\registry.json"));
+            var registryFile = new FileInfo(Path.Combine(gamePath, "SPT", "user", "sptRegistry", "registry.json"));
 
             if (!registryFile.Exists)
             {
@@ -265,9 +293,9 @@ namespace SPT.Launcher
         /// Clean the temp folder
         /// </summary>
         /// <returns>returns true if the temp folder was cleaned succefully or doesn't exist. returns false if something went wrong.</returns>
-		public bool CleanTempFiles()
+		public bool CleanTempFiles(string gamePath)
         {
-            var rootdir = new DirectoryInfo(Path.Combine(Environment.CurrentDirectory, "user\\sptappdata"));
+            var rootdir = new DirectoryInfo(Path.Combine(gamePath, "SPT", "user", "sptappdata"));
 
             if (!rootdir.Exists)
             {

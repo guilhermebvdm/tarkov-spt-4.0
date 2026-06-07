@@ -51,7 +51,7 @@ namespace SPT.Launcher.ViewModels
                     {
                         using var client = new System.Net.Http.HttpClient();
                         client.Timeout = TimeSpan.FromSeconds(10);
-                        string pastebinUrl = await client.GetStringAsync("https://pastebin.com/raw/PT4cMwLB");
+                        string pastebinUrl = await client.GetStringAsync("https://pastebin.com/raw/SHmXENmb");
                         if (!string.IsNullOrWhiteSpace(pastebinUrl))
                         {
                             LauncherSettingsProvider.Instance.Server.Url = pastebinUrl.Trim();
@@ -68,64 +68,16 @@ namespace SPT.Launcher.ViewModels
                     LogManager.Instance.Info($"[Connect] Dev Mode Ativo: Ignorando Pastebin e usando URL atual: {LauncherSettingsProvider.Instance.Server.Url}");
                 }
 
-                // 2. Automação da VPN (WireGuard): Instala, gera chaves, conecta ao Hub e configura Fika
+                // Automação do Tailscale: Verifica, instala, autentica e configura Fika (Apenas se o Path do jogo for válido)
                 if (!string.IsNullOrEmpty(LauncherSettingsProvider.Instance.GamePath))
                 {
-                    // Checar se Tailscale está instalado e sugerir desinstalação
-                    if (File.Exists(@"C:\Program Files\Tailscale\tailscale.exe"))
-                    {
-                        var dialog = new ConfirmationDialogViewModel(null, "Detectamos que você ainda tem o TailScale VPN instalado. O Tarkov Red Line não utiliza mais este VPN.\n\nGostaria de desinstalá-lo agora para evitar conflitos de rede?");
-                        var result = await Dispatcher.UIThread.InvokeAsync(async () => await ShowDialog(dialog));
-                        
-                        if (result is bool confirm && confirm)
-                        {
-                            connectModel.InfoText = "Desinstalando Tailscale...";
-                            LogManager.Instance.Info("[Connect] Desinstalando Tailscale pelo Winget...");
-                            try
-                            {
-                                var uninstallProc = new Process
-                                {
-                                    StartInfo = new ProcessStartInfo
-                                    {
-                                        FileName = "powershell.exe",
-                                        Arguments = "-Command \"winget uninstall Tailscale --silent --accept-source-agreements\"",
-                                        UseShellExecute = true,
-                                        Verb = "runas",
-                                        CreateNoWindow = true
-                                    }
-                                };
-                                uninstallProc.Start();
-                                await uninstallProc.WaitForExitAsync();
-                                LogManager.Instance.Info("[Connect] Comando de desinstalação do Tailscale concluído.");
-                                
-                                // Apagar atalhos de sobra (mesmo que falhe o winget)
-                                try {
-                                    foreach (var p in Process.GetProcessesByName("tailscale-ipn")) p.Kill();
-                                    foreach (var p in Process.GetProcessesByName("tailscale")) p.Kill();
-                                    
-                                    string startupFolder = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
-                                    string tsShortcut = Path.Combine(startupFolder, "Tailscale.lnk");
-                                    if (File.Exists(tsShortcut)) File.Delete(tsShortcut);
-                                    
-                                    string commonStartup = Environment.GetFolderPath(Environment.SpecialFolder.CommonStartup);
-                                    string commonTsShortcut = Path.Combine(commonStartup, "Tailscale.lnk");
-                                    if (File.Exists(commonTsShortcut)) File.Delete(commonTsShortcut);
-                                } catch { }
-                            }
-                            catch (Exception ex)
-                            {
-                                LogManager.Instance.Warning($"[Connect] Falha ao desinstalar Tailscale: {ex.Message}");
-                            }
-                        }
-                    }
-
-                    connectModel.InfoText = "Conectando na rede P2P (WireGuard)...";
-                    LogManager.Instance.Info("[Connect] Verificando e conectando WireGuard...");
-                    await WireGuardHelper.EnsureWireGuardConnected();
+                    connectModel.InfoText = "Conectando na rede P2P (Tailscale)...";
+                    LogManager.Instance.Info("[Connect] Verificando e conectando Tailscale...");
+                    await TailscaleHelper.EnsureTailscaleConnected();
 
                     connectModel.InfoText = "Atualizando configurações de rede (Fika)...";
                     LogManager.Instance.Info("[Connect] Configurando IP do Fika...");
-                    await WireGuardHelper.ConfigureFikaAsync(LauncherSettingsProvider.Instance.GamePath);
+                    await TailscaleHelper.ConfigureFikaAsync(LauncherSettingsProvider.Instance.GamePath);
                 }
 
                 if (!LauncherSettingsProvider.Instance.DisableUpdates)

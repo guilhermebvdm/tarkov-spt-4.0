@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "module": "CommonJS",
+        "target": "ES2022",
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "downlevelIteration": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "resolveJsonModule": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "rootDir": "./src",
+        "baseUrl": "./",
+        "paths": {
+            "@spt/*": ["../../../UltraFika-Server/types/*"]
+        }
+    },
+    "include": [
+        "src/**/*.ts",
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}

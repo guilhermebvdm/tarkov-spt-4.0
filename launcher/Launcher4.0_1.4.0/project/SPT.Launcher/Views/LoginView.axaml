@@ -48,7 +48,7 @@
 
             <Grid RowDefinitions="*,Auto,20" ColumnDefinitions="*,Auto,*">
 
-                <!-- Perfis Salvos Existentes -->
+                <!-- Perfis Salvos Existentes
                 <ScrollViewer Grid.Row="0" Grid.Column="1" Margin="0,50,0,20" VerticalScrollBarVisibility="Auto">
                     <ItemsControl ItemsSource="{Binding ExistingProfiles}" VerticalAlignment="Center">
                         <ItemsControl.ItemsPanel>
@@ -66,6 +66,7 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </ScrollViewer>
+                -->
                 
                 <!-- Login box reestilizado implicitamente no Background escuro -->
                 <Border Grid.Row="1" Grid.Column="1" Classes="PanelCard" Padding="15,5,15,5" Margin="0,0,0,0">

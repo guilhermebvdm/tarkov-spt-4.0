@@ -20,7 +20,7 @@ namespace SPT.Launcher.Helpers
                 
                 // O mod.js roda um servidor HTTP puro na porta 7075
                 var uri = new Uri(serverUrl);
-                string updateServerUrl = $"http://{uri.Host}:7075";
+                string updateServerUrl = $"http://{uri.Host}";
                 
                 string versionUrl = $"{updateServerUrl}/redline/launcher/version";
                 var response = await client.GetAsync(versionUrl);

@@ -168,7 +168,7 @@ namespace SPT.Launcher
             try
             {
                 var backendUri = new Uri(request.RemoteEndPoint);
-                string url = $"http://{backendUri.Host}:7075/launcher/mods/download?file={Uri.EscapeDataString(filePath)}";
+                string url = $"http://{backendUri.Host}/launcher/mods/download?file={Uri.EscapeDataString(filePath)}";
 
                 var httpRequest = WebRequest.Create(new Uri(url));
                 httpRequest.Method = "GET";
@@ -198,7 +198,7 @@ namespace SPT.Launcher
             {
                 // Extrair host do endpoint principal (ex: https://127.0.0.1:6969 -> 127.0.0.1)
                 var backendUri = new Uri(request.RemoteEndPoint);
-                string hwidUrl = $"http://{backendUri.Host}:7075{path}";
+                string hwidUrl = $"http://{backendUri.Host}{path}";
 
                 var httpRequest = WebRequest.Create(new Uri(hwidUrl));
                 httpRequest.Method = "POST";
@@ -245,7 +245,7 @@ namespace SPT.Launcher
             try
             {
                 var backendUri = new Uri(request.RemoteEndPoint);
-                string hwidUrl = $"http://{backendUri.Host}:7075{path}";
+                string hwidUrl = $"http://{backendUri.Host}{path}";
 
                 var httpRequest = WebRequest.Create(new Uri(hwidUrl));
                 httpRequest.Method = "GET";

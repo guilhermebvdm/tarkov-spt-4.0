@@ -216,7 +216,7 @@ namespace SPT.Launcher.ViewModels
         {
             try
             {
-                string configPath = Path.Combine(LauncherSettingsProvider.Instance.GamePath, "user", "mods", "TarkovRedLine-ServerMod", "config.json");
+                string configPath = Path.Combine(LauncherSettingsProvider.Instance.GamePath, "SPT", "user", "mods", "TarkovRedLine-ServerMod", "config.json");
                 if (File.Exists(configPath))
                 {
                     var config = JObject.Parse(File.ReadAllText(configPath));
@@ -298,7 +298,7 @@ namespace SPT.Launcher.ViewModels
         /// </summary>
         private async Task ForceCheckForUpdates()
         {
-            string gamePath = AppContext.BaseDirectory;
+            string gamePath = Path.Combine(AppContext.BaseDirectory, "SPT");
             string hashFilePath = Path.Combine(gamePath, "user", "launcher", "manifest_hash.txt");
 
             // Deletar hash local para forçar scan completo
@@ -318,7 +318,7 @@ namespace SPT.Launcher.ViewModels
         private async Task CheckForUpdates()
         {
             // Sempre usa a pasta onde o launcher está (raiz do jogo)
-            string gamePath = AppContext.BaseDirectory;
+            string gamePath = Path.Combine(AppContext.BaseDirectory, "SPT");
 
             bool manifestFailed = false;
 
@@ -599,7 +599,7 @@ namespace SPT.Launcher.ViewModels
             if (_filesToUpdate.Count == 0 && _filesToDelete.Count == 0) return;
 
             LogManager.Instance.Info($"[Profile] Iniciando atualização: {_filesToUpdate.Count} arquivos para baixar, {_filesToDelete.Count} para deletar");
-            string gamePath = AppContext.BaseDirectory;
+            string gamePath = Path.Combine(AppContext.BaseDirectory, "SPT");
             CanUpdate = false;
             LauncherSettingsProvider.Instance.IsUpdating = true;
             int totalActions = _filesToUpdate.Count + _filesToDelete.Count;
