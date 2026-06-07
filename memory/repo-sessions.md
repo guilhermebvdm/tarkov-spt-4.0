@@ -196,3 +196,50 @@ Trabalho específico de cada mod fica em `mods/<mod>/memory/sessions.md`. Este a
 
 - Tooling do inventário: ver [docs/migration/README.md](../docs/migration/README.md) e command `/serve-inventory`.
 - Trabalho da flea/tarkov-itemdb que entrou na main junto: ver Sessão "2026-05-16/17" deste arquivo.
+
+## 2026-06-07 (GMT-3) — Sessão 3: tarkov-itemdb — editor de override de flea + filtros + refresh de preços
+
+**Descoberta técnica central (corrige a premissa antiga do override):** a fórmula real do flea do SPT 4.0 é **aditiva**, não "override sobrescreve". Validada por código (`references/spt-source/`) + 7 cenários in-game:
+
+```
+offerBase = clamp( (override ?? prices.json ?? 0) + bonus , floor , ceiling )
+  bonus   = handbook × M        M = itemTplMultiplierOverride | itemTypeMultiplierOverride(baseclass) | 1.5  + 0.8 se craft
+  floor   = handbook × K_trader  (K_trader = max(100−buy_price_coef[LL0])/100 ≈ 1.0 → piso ≈ handbook)
+  ceiling = handbook × mult      (unreasonableModPrices: Electronics ×11, Weapon Mod ×6; senão ∞)
+```
+
+`ApplyFleaPriceOverrides` (assign) roda ANTES de `ReplaceFleaBasePrices` (`AddOrUpdate +=` o bonus). Por isso o viewer grava **`override = X − bonus`** (compensado). Evidências: Bolts ov=123456 → oferta exata 148.756 (=123456+11000×2.3); GPU mirando 3M foi capado em 198000×11=2.178M (Electronics). Detalhe em `tools/tarkov-itemdb/docs/flea-override-plan.md` + `flea-formula-validation.md` + `spt-internals.md`.
+
+**Atividade cronológica (11 commits de código + 1 de docs):**
+
+1. `140c016` editor via override compensado em `ragfair.json` (load-spt computa bonus/floor/M; normalize propaga; serve.js POST/DELETE/GET; UI badge OVR + editor).
+2. `bbce32c` teto (`unreasonableModPrices`) — descoberto pelo teste in-game do GPU.
+3. `f598815` docs reconciliados (aditivo+piso+teto).
+4. `6d6fbf2` "Restaurar default" no menu da célula.
+5. `69b94f5` **fix** topbar `overflow:hidden` virava scroll container → `focus()` rolava o topbar e sumia com TODOS os filtros. → `overflow:visible`.
+6. `5104b6e` filtro **Override** · `0b38b7b` filtro **Mod** (por `modSource`).
+7. `542471f` code-review fixes (mutex no ban/flea-level, cleanup de listeners, dead code).
+8. `3b15342` **fix** refresh: `recomputeConsolidated` não re-derivava as colunas dev/market → coluna ficava stale. Agora espelha `normalize.js`.
+9. `c72b45a` refresh por-item **tarkov-market** (`/pve/item?q=<name>` filtrado por bsgId; sem lookup por bsgId na API).
+10. `96a3764` **atualizar todos** (topbar ↻ dev/market) → modal de confirmação → `fetch(--force)→load-spt→normalize` (child processes sob mutex) → reload. NÃO é item-a-item (tarkov-market = 5 req/min). Bulk dev verificado e2e (5679→5776 itens).
+11. docs: README (lacunas de refresh/filtros/bulk) + esta entrada.
+
+**Pendências abertas:**
+
+- [P-3.1 🔴 bloqueia edição de item de mod] Smoke test de item de mod NÃO rodado. Overrides crus injetados em `D:/SPT/.../ragfair.json`: Thermaster (`669c1a420c8342338269dd86`)=1.000.000, Citadel (`6761b213607f9a6f79017af1`)=2.000.000; Fanny Pack (`6761b213607f9a6f79017aef`) = controle sem override. Rodar SPT, conferir `thermaster`/`citadel`/`fanny` no flea, reportar centros. Previsão (fonte `CustomItemService` adiciona item ao handbook): bonus = basePrice×M, igual base items. Reverter: `node tools/tarkov-itemdb/scripts/smoke-matrix.js revert`.
+- [P-3.2 🟠] Editar preço de item de mod hoje usa bonus errado (`fleaPriceRoubles` ≠ `handbook×M`) + floor/ceiling não computados em `load-spt`. Corrigir após P-3.1.
+- [P-3.3 🟡] `TARKOV_MARKET_API_KEY` ausente no ambiente do agente → refresh de market (por-item e bulk) não testável pelo agente; o caminho sem-chave erra limpo. Verificar na máquina do user (env var setada no serve.js).
+- [P-3.4 🟢] `items.json` commitado em **5679** itens (revertido o churn de teste do bulk). Rodar "↻ dev" leva a 5776; commitar dados quando quiser.
+- [P-3.5 🟡] Dívida do code-review, nenhuma bloqueia: CR-4 (floor ignora `adjustPriceWhenBelowHandbookPrice`, off no install), CR-5 (`ItemPriceMultiplier` 2 tpls não compensado), CR-6 (itens com quality: alvo é carga cheia), CR-7 (filtro/badge Override conta os 5 defaults vanilla do SPT).
+
+**Lições:**
+
+- Análise de código acerta os *mecanismos* mas pode errar a *ordem de execução* e os *adjustments de runtime* (piso/teto na geração de oferta). Smoke test in-game é gate **bloqueante** — reforça `feedback_spt_validation` (memória pessoal).
+- `git pull --rebase` paralelo (outra sessão) reverteu trabalho **não-commitado** 2× nesta sessão. Commitar cedo; não trocar de branch quando outra sessão trabalha na mesma pasta (branch é por-checkout, afeta as duas).
+- `/code-review` do projeto é do backlog de mods (exige specs/`modded/`) — não serve pra tooling JS; revisão feita direto no diff.
+
+**Cross-refs:**
+
+- Fórmula/override/internals: `tools/tarkov-itemdb/docs/{flea-override-plan,flea-formula-validation,spt-internals}.md`.
+- Harness do smoke test: `tools/tarkov-itemdb/scripts/smoke-matrix.js`.
+- Memória pessoal (não versionada, não vai pro outro PC): `project_flea_price_formula.md`.

@@ -250,9 +250,11 @@ node viewer/serve.js [port]   # default 8080
 |---|---|
 | Árvore de categorias (sidebar) | Click filtra por categoria; "Todos os itens" reseta |
 | Busca | Filtra por `name` ou `shortName` com debounce 300ms |
-| Dropdowns (Group, Condition, Ban) | Multi-select; estado persistido no `localStorage` |
+| Dropdowns (Group, Condition, Ban, **Override**, **Mod**) | Multi-select; estado persistido no `localStorage`. **Override** filtra itens com/sem override de flea; **Mod** filtra itens customizados por `modSource` |
 | **Flea Level widget (topbar)** | Botão "Flea Lvl N+" no topbar; click abre editor inline; salva em `globals.json` via `/api/flea-min-level`; **não** está embutido no `<th>` da tabela |
 | Indicadores ▲▼ % | Comparam Trader / Flea Dev / Flea Market vs Flea SPT (referência de calibração) |
+| **Atualizar preço (por item)** | Click na célula **Flea tarkov.dev** ou **Flea tarkov-market** → re-busca aquele item naquela fonte (spinner na célula + toast "era X → Y"). Via `/api/refresh-dev` / `/api/refresh-market` |
+| **Atualizar todos (topbar)** | Botões **↻ dev** / **↻ market** → modal de confirmação → re-baixa o dump inteiro da fonte e re-mescla (`/api/refresh-all`). Não é item-a-item (tarkov-market = 5 req/min). UI fica busy (botões off + tabela dimmed), toast início/fim, recarrega ao terminar |
 | **Edição de preço** | Click na célula Flea SPT → menu (Edit price / **Restaurar default** se há override / Ban); Edit abre input inline (mín/máx = piso/teto), grava override compensado em `ragfair.json`; badge **OVR** marca itens com override; **Restaurar default** (menu ou ↺ no form) remove o override → vanilla |
 | **Ban/Unban** | Click na célula → menu (Edit / Ban / Unban); confirmação com botão "×" para cancelar |
 | **Reward popover** | Badge de reward: hover por 300ms abre tooltip com lista de quests; mouse leave fecha (grace 80ms para mover ao popover) |
@@ -270,23 +272,19 @@ node viewer/serve.js [port]   # default 8080
 | `GET /api/overrides` | — | Mapa `itemPriceOverrideRouble` atual do `ragfair.json` |
 | `POST /api/ban` | JSON `{ tpl, banned }` | Togla `CanSellOnRagfair` em `items.json` do SPT, atualiza `data/items.json`, refresha hash em `checks.dat`, grava em `logs/ban-edits.jsonl` |
 | `POST /api/flea-min-level` | JSON `{ minUserLevel }` | Edita `globals.json:config.RagFair.minUserLevel`, refresha hash |
+| `POST /api/refresh-dev` | JSON `{ tpl }` | Re-busca 1 item no tarkov.dev (GraphQL pve+regular), atualiza `tarkovDev` + `consolidated`, grava `logs/price-history.jsonl` |
+| `POST /api/refresh-market` | JSON `{ tpl }` | Re-busca 1 item no tarkov-market (`/pve/item?q=<name>` filtrado por bsgId; requer `TARKOV_MARKET_API_KEY`), atualiza `tarkovMarket` + `consolidated` |
+| `POST /api/refresh-all` | JSON `{ source: 'dev'\|'market' }` | Bulk: roda `fetch(--force) → load-spt → normalize` (child processes, sob mutex) e reconstrói `data/items.json`. Retorna `{ itemCount, durationMs }`. O cliente recarrega ao terminar |
 
-### `data/handbook-prices-log.json`
+### Logs de auditoria (`logs/`, gitignored)
 
-Tracking de edições de preço por tpl (persistido entre sessões):
+Append-only JSONL, um evento por linha:
 
-```jsonc
-{
-  "<tpl>": {
-    "name": "...", "shortName": "...",
-    "originalFleaPrice": 27596,    // valor antes da primeira edição
-    "currentFleaPrice":  50000,    // valor atual
-    "history": [
-      { "ts": "2026-05-18T...", "fromFlea": 27596, "toFlea": 50000, "handbookPrice": 33333 }
-    ]
-  }
-}
-```
+- `logs/price-edits.jsonl` — override set/delete (`action`, `tpl`, `desiredFlea`, `bonus`, `floor`, `override`, `previousOverride`).
+- `logs/ban-edits.jsonl` — ban/unban (`action`, `tpl`, `method: CanSellOnRagfair`).
+- `logs/price-history.jsonl` — refreshes de preço (dev/market) com `previous`/`current`, fácil de plotar depois.
+
+> O antigo `data/handbook-prices-log.json` foi descontinuado quando o editor migrou de back-calc no handbook para override em `ragfair.json`.
 
 ---
 
