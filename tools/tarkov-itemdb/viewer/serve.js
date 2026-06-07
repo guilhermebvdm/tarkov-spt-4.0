@@ -366,6 +366,58 @@ function handleRefreshMarket(req, res) {
   });
 }
 
+// Run a pipeline script as a child process, inheriting env (so the API key
+// reaches fetch-tarkov-market). Resolves on exit 0, rejects with tail of stderr.
+function runScript(scriptName, args) {
+  return new Promise((resolve, reject) => {
+    const { spawn } = require('child_process');
+    const child = spawn(process.execPath, [path.join(ROOT, 'scripts', scriptName), ...args], {
+      cwd: ROOT, env: process.env,
+    });
+    let stderr = '';
+    child.stderr.on('data', d => { stderr += d.toString(); });
+    child.on('error', reject);
+    child.on('close', code => {
+      if (code === 0) return resolve();
+      const tail = stderr.trim().split('\n').slice(-3).join(' | ').slice(0, 400);
+      reject(new Error(`${scriptName} exited ${code}: ${tail}`));
+    });
+  });
+}
+
+// POST /api/refresh-all — bulk update ALL items from one source by re-fetching
+// the full dump and re-merging. NOT per-item (tarkov-market is 5 req/min → per
+// item would take hours); the bulk endpoints pull everything in one shot.
+// Runs fetch(--force) → load-spt → normalize, rebuilding data/items.json. The
+// client reloads afterwards. Held under withWriteLock for the whole run.
+// Body: { source: 'dev' | 'market' }.
+function handleRefreshAll(req, res) {
+  let body = '';
+  req.on('data', c => { body += c; if (body.length > 1e6) req.destroy(); });
+  req.on('end', () => {
+    let payload;
+    try { payload = JSON.parse(body || '{}'); }
+    catch (e) { return sendJson(res, 400, { error: 'invalid JSON' }); }
+    const source = payload.source;
+    if (source !== 'dev' && source !== 'market') {
+      return sendJson(res, 400, { error: "source must be 'dev' or 'market'" });
+    }
+    const fetchScript = source === 'market' ? 'fetch-tarkov-market.js' : 'fetch-tarkov-dev.js';
+    const t0 = Date.now();
+    withWriteLock(async () => {
+      await runScript(fetchScript, ['--force']);   // refresh that source's cache
+      await runScript('load-spt.js', []);          // pick up current SPT state + overrides
+      await runScript('normalize.js', []);         // re-merge all caches → items.json
+      let itemCount = null;
+      try { itemCount = Object.keys(readJsonFile(ITEMS_JSON)).length; } catch (_) {}
+      return sendJson(res, 200, { ok: true, source, itemCount, durationMs: Date.now() - t0 });
+    }).catch(e => {
+      console.error('refresh-all failed:', e);
+      if (!res.headersSent) return sendJson(res, 502, { error: e.message });
+    });
+  });
+}
+
 // Recompute the `consolidated` view from the raw source blocks (spt / tarkovDev /
 // tarkovMarket). Mirrors normalize.js:deriveConsolidated exactly so a live edit
 // or a per-item refresh produces the same result as a full pipeline run. Must
@@ -731,6 +783,7 @@ http.createServer((req, res) => {
   if (req.method === 'POST' && req.url === '/api/ban')            return handleBanToggle(req, res);
   if (req.method === 'POST' && req.url === '/api/refresh-dev')    return handleRefreshDev(req, res);
   if (req.method === 'POST' && req.url === '/api/refresh-market') return handleRefreshMarket(req, res);
+  if (req.method === 'POST' && req.url === '/api/refresh-all')    return handleRefreshAll(req, res);
   if (req.method === 'POST' && req.url === '/api/flea-min-level') return handleFleaMinLevel(req, res);
 
   let urlPath = decodeURIComponent(req.url.split('?')[0]);

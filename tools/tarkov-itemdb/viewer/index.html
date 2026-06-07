@@ -35,6 +35,11 @@
     <div id="delta-filter"></div>
   </div>
 
+  <div class="bulk-refresh">
+    <button type="button" class="bulk-btn" id="refresh-all-dev" data-tip="Atualizar TODOS os preços via tarkov.dev" data-tip-pos="bottom">↻ dev</button>
+    <button type="button" class="bulk-btn" id="refresh-all-market" data-tip="Atualizar TODOS os preços via tarkov-market" data-tip-pos="bottom">↻ market</button>
+  </div>
+
   <button type="button" class="flea-level-widget" id="flea-level-widget" title="Editar nível mínimo do flea (globals.json)">
     Flea Lvl <span id="flea-level-num">15</span>+
   </button>
@@ -817,6 +822,12 @@ function bindControls() {
     fleaNumEl.textContent = META.sources.spt.fleaMinUserLevel || 15;
   }
   fleaWidget.addEventListener('click', () => openFleaMinLevelEditor(fleaWidget));
+
+  // Bulk "update all" buttons (topbar)
+  const devAllBtn = document.getElementById('refresh-all-dev');
+  const mktAllBtn = document.getElementById('refresh-all-market');
+  if (devAllBtn) devAllBtn.addEventListener('click', () => refreshAll('dev'));
+  if (mktAllBtn) mktAllBtn.addEventListener('click', () => refreshAll('market'));
 
   // Condition / Group / Ban are handled by multi-select dropdowns
   // (buildConditionFilter / buildGroupFilter / buildBanFilter).
@@ -1641,6 +1652,70 @@ function toast(msg, kind) {
     t.classList.remove('is-show');
     setTimeout(() => t.remove(), 300);
   }, kind === 'err' ? 5000 : 3000);
+}
+
+// Promise-based confirmation modal. Resolves true (confirm) / false (cancel/Esc).
+function confirmDialog({ title, body, confirmText = 'Confirmar', cancelText = 'Cancelar' }) {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML =
+      `<div class="modal" role="dialog" aria-modal="true">` +
+        `<div class="modal__title">${escapeHtml(title)}</div>` +
+        `<div class="modal__body">${escapeHtml(body)}</div>` +
+        `<div class="modal__actions">` +
+          `<button type="button" class="modal__btn modal__btn--cancel">${escapeHtml(cancelText)}</button>` +
+          `<button type="button" class="modal__btn modal__btn--confirm">${escapeHtml(confirmText)}</button>` +
+        `</div>` +
+      `</div>`;
+    document.body.appendChild(overlay);
+    const done = (val) => { overlay.remove(); document.removeEventListener('keydown', onKey); resolve(val); };
+    const onKey = (e) => { if (e.key === 'Escape') done(false); else if (e.key === 'Enter') done(true); };
+    overlay.querySelector('.modal__btn--cancel').onclick = () => done(false);
+    overlay.querySelector('.modal__btn--confirm').onclick = () => done(true);
+    overlay.addEventListener('mousedown', (e) => { if (e.target === overlay) done(false); });
+    document.addEventListener('keydown', onKey);
+    requestAnimationFrame(() => overlay.classList.add('is-show'));
+    setTimeout(() => overlay.querySelector('.modal__btn--confirm').focus(), 0);
+  });
+}
+
+function setBulkBusy(busy) {
+  for (const id of ['refresh-all-dev', 'refresh-all-market']) {
+    const b = document.getElementById(id);
+    if (b) { b.disabled = busy; b.classList.toggle('is-busy', busy); }
+  }
+  document.body.classList.toggle('is-bulk-busy', busy);
+}
+
+// Bulk update all items from one source (dev | market): confirm → busy → POST
+// /api/refresh-all (server re-fetches the full dump + re-merges) → reload.
+async function refreshAll(source) {
+  const label = source === 'market' ? 'tarkov-market' : 'tarkov.dev';
+  const count = (typeof ITEM_LIST !== 'undefined' && ITEM_LIST) ? ITEM_LIST.length : 0;
+  const ok = await confirmDialog({
+    title: `Atualizar TODOS os preços via ${label}?`,
+    body: `Re-baixa os ~${count.toLocaleString('pt-BR')} itens de uma vez (geralmente alguns segundos, ~5–15s). A edição de preços fica bloqueada enquanto roda; a página recarrega ao terminar.`,
+    confirmText: 'Atualizar todos',
+  });
+  if (!ok) return;
+  setBulkBusy(true);
+  toast(`Atualizando todos via ${label}… (alguns segundos)`, 'ok');
+  try {
+    const r = await fetch('/api/refresh-all', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ source }),
+    });
+    const data = await r.json();
+    if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+    const secs = data.durationMs != null ? ` em ${(data.durationMs / 1000).toFixed(1)}s` : '';
+    toast(`${(data.itemCount || count).toLocaleString('pt-BR')} itens atualizados via ${label}${secs} — recarregando…`, 'ok');
+    setTimeout(() => location.reload(), 1000);
+  } catch (err) {
+    setBulkBusy(false);
+    toast(`Falha ao atualizar todos via ${label}: ${err.message}`, 'err');
+  }
 }
 
 function renderDetail(it) {
