@@ -3,3 +3,4 @@ logs/
 probe-schema.js
 .serve.log
 assets/snapshot-*.png
+.smoke-matrix.json

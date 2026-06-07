@@ -22,6 +22,7 @@ const SPT_ITEMS_JSON = path.join(SPT_DATA, 'database', 'templates', 'items.json'
 const HANDBOOK_JSON  = path.join(SPT_DATA, 'database', 'templates', 'handbook.json');
 const GLOBALS_JSON   = path.join(SPT_DATA, 'database', 'globals.json');
 const RAGFAIR_JSON   = path.join(SPT_DATA, 'configs', 'ragfair.json');
+const PRICES_JSON    = path.join(SPT_DATA, 'database', 'templates', 'prices.json');
 const META_JSON      = path.resolve(__dirname, '..', 'data', 'meta.json');
 const ITEMS_JSON   = path.join(ROOT, 'data', 'items.json');
 const CHECKS_DAT   = path.join(SPT_DATA, 'checks.dat');
@@ -86,6 +87,40 @@ function appendEditLog(entry) {
   } catch (e) {
     console.error('audit log write failed:', e.message);
   }
+}
+
+// Write a JSON file preserving the original indent style (SPT vanilla configs
+// use TAB) and trailing-newline state, atomically (tmp + rename). Keeps diffs
+// against vanilla minimal and avoids partial writes.
+function writeJsonPreservingStyle(p, obj) {
+  const original = fs.readFileSync(p, 'utf8').replace(/^﻿/, '');
+  const m = original.match(/^([\t ]+)"/m);
+  const indent = !m ? '\t' : (m[1][0] === '\t' ? '\t' : m[1].length);
+  let serialized = JSON.stringify(obj, null, indent);
+  if (original.endsWith('\n')) serialized += '\n';
+  const tmp = p + '.tmp';
+  fs.writeFileSync(tmp, serialized, 'utf8');
+  fs.renameSync(tmp, p);
+}
+
+// In-process mutex so concurrent override writes don't read-modify-write the
+// same ragfair.json / items.json and lose updates. Serialises the price APIs.
+let _writeChain = Promise.resolve();
+function withWriteLock(fn) {
+  const run = _writeChain.then(fn, fn);
+  // Keep the chain alive regardless of success/failure of fn.
+  _writeChain = run.then(() => {}, () => {});
+  return run;
+}
+
+// The flea offer base for a tpl = max((override ?? prices.json ?? 0) + bonus, floor).
+// bonus = spt.fleaPrice (handbook × M), floor = spt.fleaFloor (handbook × K_trader).
+// Both come from data/items.json (produced by load-spt.js, validated vs source +
+// in-game). The viewer sets a desired flea price X by writing
+// override = X − bonus into ragfair.json:dynamic.itemPriceOverrideRouble[tpl].
+function effectivePrice(overrideOrNull, bonus, floor, pricesDiskVal) {
+  const base = (overrideOrNull != null ? overrideOrNull : (pricesDiskVal ?? 0)) + bonus;
+  return Math.max(base, floor || 0);
 }
 
 function appendBanLog(entry) {
@@ -237,7 +272,7 @@ function handleRefreshDev(req, res) {
 // don't depend on SPT, so leave them alone.
 function recomputeConsolidated(item) {
   const c = item.consolidated;
-  c.priceFleaSpt = item.spt ? (item.spt.fleaPrice ?? null) : null;
+  c.priceFleaSpt = item.spt ? (item.spt.effectiveFleaPrice ?? item.spt.fleaPrice ?? null) : null;
 
   // Canonical priority chain (must match normalize.js)
   const mkt = c.priceFleaMarketAvg24h;
@@ -277,6 +312,16 @@ function updateHandbookPricesLog(tpl, name, shortName, from, to, handbookPrice) 
   fs.renameSync(tmp, HANDBOOK_PRICES_LOG);
 }
 
+// POST /api/price — set a desired flea price X for a tpl by writing a COMPENSATED
+// override into ragfair.json:dynamic.itemPriceOverrideRouble[tpl].
+//
+// Formula (validated vs source + 7 in-game scenarios, see docs/flea-override-plan.md):
+//   the boot does Templates.Prices[tpl] = override (assign), THEN += handbook×M
+//   (AddOrUpdate), THEN the offer generator floors to handbook×K_trader. So:
+//       offerBase = max(override + bonus, floor)
+//   To land on X we write  override = X − bonus  (bonus = spt.fleaPrice).
+//   Valid only for X ≥ floor (spt.fleaFloor); below that the flea floors to `floor`.
+// Body: { tpl, price }  (price = desired flea price X, positive integer).
 function handlePatchPrice(req, res) {
   let body = '';
   req.on('data', c => { body += c; if (body.length > 1e6) { req.destroy(); }});
@@ -294,71 +339,140 @@ function handlePatchPrice(req, res) {
       return sendJson(res, 400, { error: 'invalid price (expected positive integer)' });
     }
 
-    try {
-      // 1. Validate data/items.json has the tpl before touching SPT files.
+    withWriteLock(() => {
+      // 1. Validate data/items.json has the tpl + a handbook-derived bonus.
       const items = readJsonFile(ITEMS_JSON);
-      if (!items[tpl]) {
+      const item = items[tpl];
+      if (!item) {
         return sendJson(res, 404, { error: 'tpl not in data/items.json — run normalize.js first' });
       }
-
-      // 2. Update handbook.json. The user supplies the desired flea price; we
-      //    back-calculate the handbook price (fleaPrice / 1.5) so that SPT's
-      //    offer generator produces offers at the intended value.
-      const FLEA_MULTIPLIER = 1.5;
-      const handbookPrice = Math.round(price / FLEA_MULTIPLIER);
-      const handbook = readJsonFile(HANDBOOK_JSON);
-      const entry = (handbook.Items || []).find(i => i.Id === tpl);
-      if (!entry) {
-        return sendJson(res, 404, { error: 'tpl not found in handbook.json' });
+      const bonus = item.spt ? item.spt.fleaPrice : null;     // handbook × M
+      const floor = (item.spt && item.spt.fleaFloor) || 0;    // handbook × K_trader
+      if (bonus == null) {
+        return sendJson(res, 422, { error: 'no handbook-derived bonus for this tpl (mod item / not in handbook) — override unsupported' });
       }
-      const previousHandbook = entry.Price;
-      const previousFlea     = Math.round(previousHandbook * FLEA_MULTIPLIER);
-      entry.Price = handbookPrice;
-      const handbookTmp = HANDBOOK_JSON + '.tmp';
-      fs.writeFileSync(handbookTmp, JSON.stringify(handbook, null, 2) + '\n', 'utf8');
-      fs.renameSync(handbookTmp, HANDBOOK_JSON);
+      if (price < floor) {
+        return sendJson(res, 422, {
+          error: `price ${price} is below the flea floor ${floor} (= handbook × trader buyback). The flea cannot go below this for this item.`,
+          floor,
+        });
+      }
 
-      // 3. Update data/items.json — store intended flea price directly; basePrice
-      //    is the derived handbook value written above.
-      if (!items[tpl].spt) items[tpl].spt = { basePrice: null, fleaPrice: null, fleaBanned: false, fleaBanReasons: [], traders: [] };
-      items[tpl].spt.basePrice = handbookPrice;
-      items[tpl].spt.fleaPrice = price;
-      recomputeConsolidated(items[tpl]);
+      // 2. Compute the compensated override and write it to ragfair.json.
+      const override = price - bonus;  // integer; may be negative when floor ≤ price < bonus
+      const ragfair = readJsonFile(RAGFAIR_JSON);
+      if (!ragfair.dynamic) return sendJson(res, 500, { error: 'ragfair.json missing .dynamic' });
+      ragfair.dynamic.itemPriceOverrideRouble = ragfair.dynamic.itemPriceOverrideRouble || {};
+      const previousOverride = ragfair.dynamic.itemPriceOverrideRouble[tpl] ?? null;
+      ragfair.dynamic.itemPriceOverrideRouble[tpl] = override;
+      writeJsonPreservingStyle(RAGFAIR_JSON, ragfair);
+
+      // 3. Refresh checks.dat for ragfair.json.
+      const checksResult = updateSptChecks({ 'configs/ragfair.json': RAGFAIR_JSON });
+
+      // 4. Sync data/items.json — override replaces prices.json, so effective = X.
+      item.spt.fleaOverride = override;
+      item.spt.effectiveFleaPrice = effectivePrice(override, bonus, floor);  // = price
+      recomputeConsolidated(item);
       fs.writeFileSync(ITEMS_JSON, serializeItems(items), 'utf8');
 
-      // 4. Refresh checks.dat for handbook.json.
-      const checksResult = updateSptChecks({ 'database/templates/handbook.json': HANDBOOK_JSON });
-
-      // 5. Update handbook-prices-log.json — track flea prices (user intent) +
-      //    the derived handbook price actually written to disk.
-      updateHandbookPricesLog(tpl, items[tpl].name || null, items[tpl].shortName || null, previousFlea, price, handbookPrice);
-
-      // 6. Append to audit log.
+      // 5. Audit log.
       appendEditLog({
-        at:           new Date().toISOString(),
+        at:        new Date().toISOString(),
+        action:    'set-override',
         tpl,
-        name:         items[tpl].name || null,
-        shortName:    items[tpl].shortName || null,
-        previousFlea,
-        currentFlea:  price,
-        handbookPrice,
-        delta:        price - previousFlea,
-        source:       'handbook',
-        ip:           req.socket.remoteAddress || null,
+        name:      item.name || null,
+        shortName: item.shortName || null,
+        desiredFlea: price,
+        bonus, floor, override, previousOverride,
+        ip:        req.socket.remoteAddress || null,
       });
 
       return sendJson(res, 200, {
-        ok: true,
-        tpl,
-        previousFlea, currentFlea: price, handbookPrice,
-        consolidated: items[tpl].consolidated,
+        ok: true, tpl,
+        override, previousOverride,
+        effectiveFleaPrice: item.spt.effectiveFleaPrice,
+        bonus, floor,
+        consolidated: item.consolidated,
         checks: checksResult,
       });
-    } catch (e) {
-      console.error('patch-price failed:', e);
-      return sendJson(res, 500, { error: e.message });
-    }
+    }).catch(e => {
+      console.error('set-override failed:', e);
+      if (!res.headersSent) return sendJson(res, 500, { error: e.message });
+    });
   });
+}
+
+// DELETE /api/price — remove the override for a tpl, restoring the vanilla flea
+// price (max((prices.json[tpl] ?? 0) + bonus, floor)). Body: { tpl }.
+function handleDeletePrice(req, res) {
+  let body = '';
+  req.on('data', c => { body += c; if (body.length > 1e6) { req.destroy(); }});
+  req.on('end', () => {
+    let payload;
+    try { payload = JSON.parse(body || '{}'); }
+    catch (e) { return sendJson(res, 400, { error: 'invalid JSON' }); }
+    const tpl = payload.tpl;
+    if (typeof tpl !== 'string' || !/^[a-f0-9]{24}$/i.test(tpl)) {
+      return sendJson(res, 400, { error: 'invalid tpl (expected 24-char hex BSG id)' });
+    }
+
+    withWriteLock(() => {
+      const items = readJsonFile(ITEMS_JSON);
+      const item = items[tpl];
+      if (!item) return sendJson(res, 404, { error: 'tpl not in data/items.json' });
+
+      const ragfair = readJsonFile(RAGFAIR_JSON);
+      const map = (ragfair.dynamic && ragfair.dynamic.itemPriceOverrideRouble) || {};
+      const previousOverride = map[tpl] ?? null;
+      if (previousOverride == null) {
+        return sendJson(res, 200, { ok: true, tpl, noop: true, message: 'no override to remove' });
+      }
+      delete map[tpl];
+      writeJsonPreservingStyle(RAGFAIR_JSON, ragfair);
+      const checksResult = updateSptChecks({ 'configs/ragfair.json': RAGFAIR_JSON });
+
+      // Restore vanilla effective price (prices.json + bonus, floored).
+      const bonus = item.spt ? item.spt.fleaPrice : null;
+      const floor = (item.spt && item.spt.fleaFloor) || 0;
+      let pricesDiskVal = null;
+      try { pricesDiskVal = readJsonFile(PRICES_JSON)[tpl] ?? null; } catch (_) {}
+      if (item.spt) {
+        item.spt.fleaOverride = null;
+        item.spt.effectiveFleaPrice = bonus != null ? effectivePrice(null, bonus, floor, pricesDiskVal) : null;
+        recomputeConsolidated(item);
+      }
+      fs.writeFileSync(ITEMS_JSON, serializeItems(items), 'utf8');
+
+      appendEditLog({
+        at: new Date().toISOString(), action: 'delete-override', tpl,
+        name: item.name || null, shortName: item.shortName || null,
+        previousOverride, effectiveFleaPrice: item.spt ? item.spt.effectiveFleaPrice : null,
+        ip: req.socket.remoteAddress || null,
+      });
+
+      return sendJson(res, 200, {
+        ok: true, tpl, removed: true, previousOverride,
+        effectiveFleaPrice: item.spt ? item.spt.effectiveFleaPrice : null,
+        consolidated: item.consolidated, checks: checksResult,
+      });
+    }).catch(e => {
+      console.error('delete-override failed:', e);
+      if (!res.headersSent) return sendJson(res, 500, { error: e.message });
+    });
+  });
+}
+
+// GET /api/overrides — current ragfair.json:dynamic.itemPriceOverrideRouble map.
+// Includes SPT's vanilla defaults (a handful of gift items) alongside user edits.
+function handleGetOverrides(req, res) {
+  try {
+    const ragfair = readJsonFile(RAGFAIR_JSON);
+    const overrides = (ragfair.dynamic && ragfair.dynamic.itemPriceOverrideRouble) || {};
+    return sendJson(res, 200, { ok: true, overrides });
+  } catch (e) {
+    return sendJson(res, 500, { error: e.message });
+  }
 }
 
 // POST /api/ban — toggles _props.CanSellOnRagfair in SPT's items.json.
@@ -503,7 +617,9 @@ function handleFleaMinLevel(req, res) {
 }
 
 http.createServer((req, res) => {
-  if (req.method === 'POST' && req.url === '/api/price')          return handlePatchPrice(req, res);
+  if (req.method === 'POST'   && req.url === '/api/price')        return handlePatchPrice(req, res);
+  if (req.method === 'DELETE' && req.url === '/api/price')        return handleDeletePrice(req, res);
+  if (req.method === 'GET'    && req.url === '/api/overrides')    return handleGetOverrides(req, res);
   if (req.method === 'POST' && req.url === '/api/ban')            return handleBanToggle(req, res);
   if (req.method === 'POST' && req.url === '/api/refresh-dev')    return handleRefreshDev(req, res);
   if (req.method === 'POST' && req.url === '/api/flea-min-level') return handleFleaMinLevel(req, res);
@@ -537,14 +653,16 @@ http.createServer((req, res) => {
   });
 }).listen(PORT, () => {
   console.error(`Serving ${ROOT} at http://localhost:${PORT}/viewer/`);
-  console.error(`POST /api/price → writes ${HANDBOOK_JSON}`);
+  console.error(`POST/DELETE /api/price → writes override in ${RAGFAIR_JSON}`);
 
   // On startup: refresh hashes for tracked SPT files that may be divergent.
-  // handbook.json changes from our edits; items.json from prior mod or ban toggle.
+  // ragfair.json changes from override edits; items.json from ban toggles;
+  // handbook.json kept for legacy/manual edits.
   const sptItems = path.join(SPT_DATA, 'database', 'templates', 'items.json');
   const result = updateSptChecks({
-    'database/templates/handbook.json': HANDBOOK_JSON,
+    'configs/ragfair.json':             RAGFAIR_JSON,
     'database/templates/items.json':    sptItems,
+    'database/templates/handbook.json': HANDBOOK_JSON,
   });
   console.error('checks.dat refresh:', JSON.stringify(result.changes));
 });

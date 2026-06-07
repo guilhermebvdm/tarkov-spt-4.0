@@ -181,7 +181,9 @@ function deriveConsolidated(item, conditionType) {
     if (bestVendor) priceTraderSell = { value: bestPrice, vendor: bestVendor };
   }
 
-  const priceFleaSpt          = spt    ? (spt.fleaPrice  ?? null) : null;
+  // Effective flea price = what the flea actually uses (override+bonus or vanilla,
+  // floored). Falls back to fleaPrice for items.json built before these fields.
+  const priceFleaSpt          = spt    ? (spt.effectiveFleaPrice ?? spt.fleaPrice ?? null) : null;
   const priceFleaDevLastLow   = dev    ? (dev.lastLow    ?? null) : null;
   const priceFleaDevAvg24h    = dev    ? (dev.avg24h     ?? null) : null;
   const priceFleaMarketAvg24h = market ? (market.avg24h  ?? null) : null;
@@ -340,14 +342,21 @@ function main() {
       };
     }
 
-    // SPT block
+    // SPT block. Flea fields validated vs source + 7 in-game scenarios — see
+    // docs/flea-override-plan.md. fleaPrice = additive bonus (handbook × M);
+    // effectiveFleaPrice = max((override ?? pricesDisk ?? 0) + bonus, fleaFloor).
     const spt = s ? {
-      basePrice:      s.basePrice ?? null,
-      fleaPrice:      s.fleaPrice ?? null,
-      fleaBanned:     s.fleaBanned === true,
-      fleaBanReasons: s.fleaBanReasons || [],
-      traders:        s.traders || [],
-      questRewards:   s.questRewards || [],
+      basePrice:          s.basePrice ?? null,
+      fleaPrice:          s.fleaPrice ?? null,            // additive bonus = basePrice × M (what the viewer subtracts)
+      fleaFloor:          s.fleaFloor ?? 0,               // offer base can't drop below this (basePrice × K_trader)
+      fleaMultiplier:     s.fleaMultiplier ?? null,       // M: 1.5/2.3 std/craft, or 1.8/2.5 tpl/type overrides
+      isHideoutCraftItem: s.isHideoutCraftItem === true,
+      fleaOverride:       s.fleaOverride ?? null,         // ragfair.json:itemPriceOverrideRouble[tpl], or null
+      effectiveFleaPrice: s.effectiveFleaPrice ?? null,   // max((override ?? pricesDisk ?? 0) + bonus, floor)
+      fleaBanned:         s.fleaBanned === true,
+      fleaBanReasons:     s.fleaBanReasons || [],
+      traders:            s.traders || [],
+      questRewards:       s.questRewards || [],
     } : null;
 
     // tarkov.dev block

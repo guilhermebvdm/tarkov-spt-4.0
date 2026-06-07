@@ -1056,9 +1056,16 @@ function renderRow(it) {
     ? `<small><span class="badge badge--src-${c.priceFleaSource.replace(/\./g,'-')}">${c.priceFleaSource}</span></small>`
     : '';
 
-  const fleaSptCell = banned
+  const hasOverride = it.spt && it.spt.fleaOverride != null;
+  const overrideTip = hasOverride
+    ? `Override ativo em ragfair.json — flea fixado em ${c.priceFleaSpt != null ? c.priceFleaSpt.toLocaleString('en-US') + ' ₽' : '?'} (override=${it.spt.fleaOverride.toLocaleString('en-US')}). Click na célula para editar / restaurar.`
+    : '';
+  const overrideBadge = hasOverride
+    ? ` <small><span class="badge badge--override" data-tip="${escapeAttr(overrideTip)}">OVR</span></small>`
+    : '';
+  const fleaSptCell = (banned
     ? `<span class="price is-banned">${banIcon}${c.priceFleaSpt != null ? fmtRub(c.priceFleaSpt) : '—'}</span>`
-    : fmtRub(c.priceFleaSpt);
+    : fmtRub(c.priceFleaSpt)) + overrideBadge;
 
   return `<tr data-id="${it.id}" class="${banned?'is-banned':''}">
     <td class="col-img">${img}</td>
@@ -1361,7 +1368,13 @@ function openInlineEdit(cell) {
   const item = ITEMS[tpl];
   if (!item) return;
   if (cell.querySelector('.edit-form')) return; // already editing
-  const current = item.spt && item.spt.fleaPrice != null ? item.spt.fleaPrice : '';
+  const spt = item.spt || {};
+  // Show the EFFECTIVE flea price (override or vanilla, floored) — that's what
+  // the cell displays and what the user is adjusting.
+  const current = spt.effectiveFleaPrice != null ? spt.effectiveFleaPrice : '';
+  const bonus = spt.fleaPrice;          // additive term (handbook × M); override = X − bonus
+  const floor = spt.fleaFloor || 0;     // flea can't go below this
+  const hasOverride = spt.fleaOverride != null;
 
   // Append the form as an absolute overlay so the cell keeps its original
   // dimensions and surrounding rows don't reflow when we enter edit mode.
@@ -1369,29 +1382,42 @@ function openInlineEdit(cell) {
   const form = document.createElement('form');
   form.className = 'edit-form';
   form.onsubmit = (e) => { e.preventDefault(); return false; };
+  const inputTip = `Preço flea desejado. Grava override = preço − ${bonus != null ? bonus.toLocaleString('en-US') : '?'} em ragfair.json:itemPriceOverrideRouble. ` +
+                   (floor > 0 ? `Mínimo ${floor.toLocaleString('en-US')} ₽ (piso = handbook × trader).` : '');
   form.innerHTML =
-    `<input type="number" min="0" step="1" value="${current}" autofocus>` +
+    `<input type="number" min="${floor || 0}" step="1" value="${current}" autofocus data-tip="${escapeAttr(inputTip)}">` +
     `<div class="edit-form__actions">` +
       `<button class="save" type="button" title="Salvar (Enter)">Salvar</button>` +
+      (hasOverride ? `<button class="restore" type="button" title="Restaurar preço vanilla (remove o override)">↺</button>` : '') +
       `<button class="cancel" type="button" title="Cancelar (Esc)">×</button>` +
-    `</div>`;
+    `</div>` +
+    (floor > 0 ? `<div class="edit-form__hint">mín ${floor.toLocaleString('en-US')}</div>` : '');
   cell.appendChild(form);
 
-  const input  = form.querySelector('input');
-  const save   = form.querySelector('button.save');
-  const cancel = form.querySelector('button.cancel');
+  const input   = form.querySelector('input');
+  const save    = form.querySelector('button.save');
+  const cancel  = form.querySelector('button.cancel');
+  const restore = form.querySelector('button.restore');
   input.focus(); input.select();
 
   let docClickHandler = null;
-  function restore() {
+  function closeForm() {
     cell.classList.remove('is-editing');
     form.remove();
     if (docClickHandler) document.removeEventListener('mousedown', docClickHandler, true);
   }
+  function rerenderRow() {
+    const row = cell.closest('tr[data-id]');
+    if (row) {
+      const tmp = document.createElement('tbody');
+      tmp.innerHTML = renderRow(item);
+      row.replaceWith(tmp.firstElementChild);
+    }
+  }
 
-  cancel.onclick = restore;
+  cancel.onclick = closeForm;
   input.onkeydown = (ev) => {
-    if (ev.key === 'Escape') { restore(); }
+    if (ev.key === 'Escape') { closeForm(); }
     if (ev.key === 'Enter')  { ev.preventDefault(); save.click(); }
   };
 
@@ -1399,18 +1425,18 @@ function openInlineEdit(cell) {
   // get the event before any other handler. Deferred to next tick so the
   // click that opened the form isn't caught.
   docClickHandler = (ev) => {
-    if (!cell.contains(ev.target)) restore();
+    if (!cell.contains(ev.target)) closeForm();
   };
   setTimeout(() => document.addEventListener('mousedown', docClickHandler, true), 0);
 
   save.onclick = async () => {
     const price = parseInt(input.value, 10);
-    if (!Number.isFinite(price) || price < 0) {
+    if (!Number.isFinite(price) || price <= 0) {
       toast('Valor inválido', 'err');
       input.focus();
       return;
     }
-    save.disabled = true; cancel.disabled = true;
+    save.disabled = true; cancel.disabled = true; if (restore) restore.disabled = true;
     try {
       const r = await fetch('/api/price', {
         method: 'POST',
@@ -1420,24 +1446,36 @@ function openInlineEdit(cell) {
       const data = await r.json();
       if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP '+r.status));
 
-      // Update in-memory state
-      if (!item.spt) item.spt = { basePrice: null, fleaPrice: null, fleaBanned: false, fleaBanReasons: [], traders: [] };
-      item.spt.fleaPrice = data.currentFlea;
+      if (!item.spt) item.spt = { basePrice: null, fleaPrice: null, fleaFloor: 0, fleaOverride: null, effectiveFleaPrice: null, fleaBanned: false, fleaBanReasons: [], traders: [] };
+      item.spt.fleaOverride = data.override;
+      item.spt.effectiveFleaPrice = data.effectiveFleaPrice;
       item.consolidated = data.consolidated;
-
-      // Re-render this row in place
-      const row = cell.closest('tr[data-id]');
-      if (row) {
-        const tmp = document.createElement('tbody');
-        tmp.innerHTML = renderRow(item);
-        row.replaceWith(tmp.firstElementChild);
-      }
-
-      const delta = data.previousFlea != null ? ` (era ${data.previousFlea.toLocaleString('pt-BR')} ₽)` : '';
-      toast(`${item.shortName || tpl}: ${data.currentFlea.toLocaleString('pt-BR')} ₽${delta}`, 'ok');
+      rerenderRow();
+      toast(`${item.shortName || tpl}: flea → ${data.effectiveFleaPrice.toLocaleString('pt-BR')} ₽ (override ${data.override.toLocaleString('pt-BR')})`, 'ok');
     } catch (err) {
       toast('Falha ao salvar: ' + err.message, 'err');
-      save.disabled = false; cancel.disabled = false;
+      save.disabled = false; cancel.disabled = false; if (restore) restore.disabled = false;
+    }
+  };
+
+  if (restore) restore.onclick = async () => {
+    save.disabled = true; cancel.disabled = true; restore.disabled = true;
+    try {
+      const r = await fetch('/api/price', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tpl }),
+      });
+      const data = await r.json();
+      if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP '+r.status));
+      item.spt.fleaOverride = null;
+      item.spt.effectiveFleaPrice = data.effectiveFleaPrice;
+      item.consolidated = data.consolidated;
+      rerenderRow();
+      toast(`${item.shortName || tpl}: override removido → vanilla ${data.effectiveFleaPrice != null ? data.effectiveFleaPrice.toLocaleString('pt-BR') : '—'} ₽`, 'ok');
+    } catch (err) {
+      toast('Falha ao restaurar: ' + err.message, 'err');
+      save.disabled = false; cancel.disabled = false; restore.disabled = false;
     }
   };
 }

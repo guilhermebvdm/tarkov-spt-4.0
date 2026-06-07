@@ -7,19 +7,24 @@
  * SPT root or the SPT_Data subfolder.
  *
  * Output schema (per Tpl):
- *   { id, name, shortName, basePrice, fleaPrice, fleaMultiplier,
+ *   { id, name, shortName, basePrice, fleaPrice, fleaFloor, fleaMultiplier,
  *     isHideoutCraftItem, fleaOverride, effectiveFleaPrice,
  *     weight, width, height, stackMaxSize, conditionType,
  *     handbookCategoryId, parentClassId,
  *     traders: [{ name, priceRUB, currency, loyaltyLevel, unlimited, stock, questLocked }] }
  *
- * Flea price math (SPT 4.0, validated in docs/flea-formula-validation.md):
- *   fleaMultiplier      = 1.5 + (0.8 if tpl is a hideout craft ingredient, else 0)
- *   fleaPrice (vanilla) = round(basePrice × fleaMultiplier)
- *   fleaOverride        = ragfair.json:dynamic.itemPriceOverrideRouble[tpl]  (or null)
- *   effectiveFleaPrice  = fleaOverride ?? fleaPrice
- * The viewer edits effectiveFleaPrice by writing to fleaOverride (passo 3 do boot
- * sobrescreve toda a matemática vanilla). See docs/spt-internals.md.
+ * Flea price math (SPT 4.0, validated vs source + 7 in-game scenarios; see
+ * docs/flea-formula-validation.md + docs/flea-override-plan.md):
+ *   fleaMultiplier = M(tpl) = itemTplMultiplierOverride | itemTypeMultiplierOverride(baseclass)
+ *                    | priceMultiplier(1.5)   + (hideoutCraftMultiplier 0.8 if craft)
+ *   fleaPrice      = round(basePrice × M)                      ← the ADDITIVE bonus term
+ *   fleaFloor      = round(basePrice × K_trader)               ← offer base can't drop below this
+ *   fleaOverride   = ragfair.json:dynamic.itemPriceOverrideRouble[tpl]  (or null)
+ *   effectiveFleaPrice = max( (fleaOverride ?? prices.json[tpl] ?? 0) + fleaPrice , fleaFloor )
+ * KEY: the override does NOT overwrite — ApplyFleaPriceOverrides assigns the override
+ * into the prices dict, then ReplaceFleaBasePrices ADDS the bonus (AddOrUpdate +=),
+ * then the offer generator floors to handbook×K_trader. So the viewer sets a desired
+ * price X by writing override = X − fleaPrice (valid for X ≥ fleaFloor). See docs/spt-internals.md.
  *
  * Usage:  node scripts/load-spt.js
  * Output: cache/spt-raw.json
@@ -178,63 +183,120 @@ function main() {
     tpls: Array.from(hideoutCraftItems).sort(),
   }, null, 2) + '\n', 'utf8');
 
-  // 3b. Ragfair config — read overrides and blacklist together (used later for
-  // both flea price math and blacklist tagging).
-  console.error('Reading configs/ragfair.json (overrides + blacklist)...');
+  // 3b. Ragfair config — overrides, blacklist, AND the flea base-price multiplier
+  // config. Read defensively from the file (installs may tune these).
+  console.error('Reading configs/ragfair.json (overrides + multiplier config + blacklist)...');
   const ragfair = readJson(path.join(dataDir, 'configs', 'ragfair.json'));
-  const fleaOverridesMap = (ragfair.dynamic && ragfair.dynamic.itemPriceOverrideRouble) || {};
+  const dyn = ragfair.dynamic || {};
+  const fleaOverridesMap = dyn.itemPriceOverrideRouble || {};
   console.error(`  ${Object.keys(fleaOverridesMap).length} flea overrides active in ragfair.json`);
 
-  // 3c. Handbook (base prices + flea price math + categories)
-  // Real SPT flea price uses the vanilla formula (handbook × fleaMultiplier),
-  // possibly overridden by ragfair.json:itemPriceOverrideRouble in passo 3 of boot.
-  // We expose both `fleaPrice` (vanilla expected) and `effectiveFleaPrice` (post-override).
+  const gbfp = dyn.generateBaseFleaPrices || {};
+  const FLEA_BASE_MULTIPLIER     = gbfp.priceMultiplier ?? 1.5;
+  const HIDEOUT_CRAFT_MULTIPLIER = (gbfp.useHideoutCraftMultiplier ?? true) ? (gbfp.hideoutCraftMultiplier ?? 0.8) : 0;
+  const TPL_MULT_OVERRIDE        = gbfp.itemTplMultiplierOverride || {};                  // { tpl: multiplier }
+  const TYPE_MULT_OVERRIDE       = Object.entries(gbfp.itemTypeMultiplierOverride || {}); // [[baseclassTpl, multiplier]]
+  const USE_TRADER_FLOOR         = dyn.useTraderPriceForOffersIfHigher === true;
+
+  // M(tpl): per-tpl override wins, then per-baseclass override, then the base
+  // multiplier. Mirrors RagfairPriceService.GetFleaBasePriceMultiplier (source).
+  // Baseclass test walks the _parent chain in the raw template DB.
+  const parentById = new Map();
+  for (const id of Object.keys(itemsRaw)) parentById.set(id, itemsRaw[id]._parent || null);
+  function isOfBaseclass(tpl, base) {
+    let cur = tpl, guard = 0;
+    while (cur && guard++ < 64) { if (cur === base) return true; cur = parentById.get(cur); }
+    return false;
+  }
+  function fleaMultiplierFor(tpl) {
+    if (TPL_MULT_OVERRIDE[tpl] != null) return TPL_MULT_OVERRIDE[tpl];
+    for (const [base, mult] of TYPE_MULT_OVERRIDE) if (isOfBaseclass(tpl, base)) return mult;
+    return FLEA_BASE_MULTIPLIER;
+  }
+
+  // Trader buyback FLOOR. SPT's GetHighestSellToTraderPrice has no category
+  // filter, so traderSell = handbook × K_trader, where K_trader = max over
+  // traders of (100 - loyaltyLevels[0].buy_price_coef)/100. Special traders
+  // (caretaker/БТР/Storyteller) ship coef 0 → K_trader = 1.0 → floor = handbook.
+  // The offer generator applies this via useTraderPriceForOffersIfHigher
+  // (RagfairPriceService.GetDynamicItemPrice). Validated in-game: an override
+  // pushing LEDX base to 400k still floored to handbook (~970k).
+  let K_trader = 0;
+  if (USE_TRADER_FLOOR) {
+    const tdir = path.join(dataDir, 'database', 'traders');
+    for (const tid of fs.readdirSync(tdir)) {
+      const bp = path.join(tdir, tid, 'base.json');
+      if (!fs.existsSync(bp)) continue;
+      let b; try { b = readJson(bp); } catch (_) { continue; }
+      const ll = b.loyaltyLevels || b.LoyaltyLevels;
+      if (!ll || !ll.length) continue;
+      const coef = ll[0].buy_price_coef ?? ll[0].BuyPriceCoefficient;
+      if (coef == null) continue;
+      const buyback = (100 - coef) / 100;
+      if (buyback > K_trader) K_trader = buyback;
+    }
+  }
+  console.error(`  K_trader (flea floor multiplier) = ${K_trader}${USE_TRADER_FLOOR ? '' : ' (trader floor disabled)'}`);
+
+  // prices.json — on-disk dynamic prices. Contributes to the VANILLA flea base
+  // (RagfairPriceService.ReplaceFleaBasePrices does pricePool.AddOrUpdate += bonus
+  // on top of any existing value). An override REPLACES the prices.json value
+  // (ApplyFleaPriceOverrides assigns into the same dict BEFORE the +=).
+  // Caveat: if LiveFleaPrices is re-enabled it mutates this dict in memory at
+  // boot, making the on-disk value stale for the vanilla-base display.
+  const pricesPath = path.join(dataDir, 'database', 'templates', 'prices.json');
+  const pricesDisk = fs.existsSync(pricesPath) ? readJson(pricesPath) : {};
+
+  // 3c. Handbook → base price + flea formula (validated vs source + 7 in-game scenarios).
+  //   bonus  = round(handbook × M(tpl))                         additive term, M incl. overrides + craft
+  //   floor  = round(handbook × K_trader)                       offer base can't drop below this
+  //   dynBase= (override ?? pricesDisk[tpl] ?? 0) + bonus       override replaces pricesDisk
+  //   effectiveFleaPrice = max(dynBase, floor)                  what the flea actually uses
+  // Viewer sets a desired price X by writing override = X − bonus (= fleaPrice).
+  // See docs/flea-override-plan.md + docs/flea-formula-validation.md.
   const handbookPath = path.join(dataDir, 'database', 'templates', 'handbook.json');
   console.error('Reading handbook.json...');
   const handbook = readJson(handbookPath);
-  let baseCount = 0;
-  let priceCount = 0;
-  let craftItemsWithPrice = 0;
-  let overridesApplied = 0;
-  const FLEA_BASE_MULTIPLIER     = 1.5; // ragfair.json:dynamic.generateBaseFleaPrices.priceMultiplier
-  const HIDEOUT_CRAFT_MULTIPLIER = 0.8; // ragfair.json:dynamic.generateBaseFleaPrices.hideoutCraftMultiplier
-  // TODO: read these from ragfair.json itself (defensive, for installs that tuned the config).
+  let baseCount = 0, priceCount = 0, craftItemsWithPrice = 0, overridesApplied = 0, flooredCount = 0;
   for (const e of handbook.Items) {
-    if (items[e.Id]) {
-      items[e.Id].basePrice = e.Price;
-      items[e.Id].handbookCategoryId = e.ParentId;
-      const isCraft = hideoutCraftItems.has(e.Id);
-      const multiplier = FLEA_BASE_MULTIPLIER + (isCraft ? HIDEOUT_CRAFT_MULTIPLIER : 0);
-      items[e.Id].isHideoutCraftItem = isCraft;
-      items[e.Id].fleaMultiplier = multiplier;
-      if (e.Price != null) {
-        items[e.Id].fleaPrice = Math.round(e.Price * multiplier);
-        priceCount++;
-        if (isCraft) craftItemsWithPrice++;
-      }
-      const ov = fleaOverridesMap[e.Id];
-      if (ov != null) {
-        items[e.Id].fleaOverride = ov;
-        overridesApplied++;
-      } else {
-        items[e.Id].fleaOverride = null;
-      }
-      items[e.Id].effectiveFleaPrice = items[e.Id].fleaOverride != null
-        ? items[e.Id].fleaOverride
-        : items[e.Id].fleaPrice;
-      baseCount++;
+    if (!items[e.Id]) continue;
+    items[e.Id].basePrice = e.Price;
+    items[e.Id].handbookCategoryId = e.ParentId;
+    const isCraft = hideoutCraftItems.has(e.Id);
+    const multiplier = fleaMultiplierFor(e.Id) + (isCraft ? HIDEOUT_CRAFT_MULTIPLIER : 0);
+    items[e.Id].isHideoutCraftItem = isCraft;
+    items[e.Id].fleaMultiplier = multiplier;
+    const hb = e.Price;
+    const bonus = hb != null ? Math.round(hb * multiplier) : null;
+    const floor = (hb != null && USE_TRADER_FLOOR) ? Math.round(hb * K_trader) : 0;
+    items[e.Id].fleaPrice = bonus;   // additive term = handbook × M (what the viewer subtracts)
+    items[e.Id].fleaFloor = floor;   // offer base can't drop below this (handbook × K_trader)
+    const ov = fleaOverridesMap[e.Id];
+    items[e.Id].fleaOverride = ov != null ? ov : null;
+    if (ov != null) overridesApplied++;
+    if (bonus != null) {
+      const dynBase = (ov != null ? ov : (pricesDisk[e.Id] ?? 0)) + bonus;
+      const eff = Math.max(dynBase, floor);
+      items[e.Id].effectiveFleaPrice = eff;
+      if (eff > dynBase) flooredCount++;
+      priceCount++;
+      if (isCraft) craftItemsWithPrice++;
+    } else {
+      items[e.Id].effectiveFleaPrice = null;
     }
+    baseCount++;
   }
   for (const id of Object.keys(items)) {
     if (items[id].basePrice          === undefined) items[id].basePrice          = null;
     if (items[id].handbookCategoryId === undefined) items[id].handbookCategoryId = null;
     if (items[id].fleaPrice          === undefined) items[id].fleaPrice          = null;
+    if (items[id].fleaFloor          === undefined) items[id].fleaFloor          = 0;
     if (items[id].fleaMultiplier     === undefined) items[id].fleaMultiplier     = null;
     if (items[id].isHideoutCraftItem === undefined) items[id].isHideoutCraftItem = false;
     if (items[id].fleaOverride       === undefined) items[id].fleaOverride       = null;
     if (items[id].effectiveFleaPrice === undefined) items[id].effectiveFleaPrice = items[id].fleaPrice;
   }
-  console.error(`  basePrice on ${baseCount}, fleaPrice on ${priceCount} (${craftItemsWithPrice} craft items @ ×2.3), overrides applied: ${overridesApplied}`);
+  console.error(`  basePrice on ${baseCount}, fleaPrice on ${priceCount} (${craftItemsWithPrice} craft), overrides: ${overridesApplied}, trader-floored: ${flooredCount}, K_trader=${K_trader}`);
 
   // Currency rates from handbook
   const usdEntry = handbook.Items.find(x => x.Id === CURRENCY_USD);

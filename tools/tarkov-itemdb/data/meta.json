@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-18T03:58:32.924Z",
+  "generatedAt": "2026-06-07T05:37:33.354Z",
   "sources": {
     "tarkovDev": {
       "fetchedAt": "2026-05-17T19:04:37.671Z",
@@ -12,12 +12,12 @@
       "count": 4279
     },
     "spt": {
-      "loadedAt": "2026-05-18T03:42:20.917Z",
-      "fleaPricesMtime": "2026-03-02T21:37:38.985Z",
+      "loadedAt": "2026-06-07T05:37:33.023Z",
+      "fleaPricesMtime": "2026-06-07T05:35:40.763Z",
       "fleaPricesSource": "handbook",
       "fleaMinUserLevel": 15,
       "path": "D:\\SPT\\SPT\\SPT_Data",
-      "itemCount": 4508,
+      "itemCount": 4511,
       "priceCount": 4216,
       "traderCount": 12,
       "offerCount": 2854,
@@ -29,12 +29,12 @@
     }
   },
   "stats": {
-    "totalTpls": 5676,
+    "totalTpls": 5679,
     "withAllThree": 3650,
-    "withSptOnly": 689,
+    "withSptOnly": 692,
     "withTarkovDevOnly": 720,
     "withTarkovMarketOnly": 21,
-    "tradeable": 4937,
-    "onlySptNoImage": 708
+    "tradeable": 4940,
+    "onlySptNoImage": 711
   }
 }
