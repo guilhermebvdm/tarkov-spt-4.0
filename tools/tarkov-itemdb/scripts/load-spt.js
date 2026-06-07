@@ -441,6 +441,29 @@ function main() {
           if (!canSellOnRagfair)    fleaBanReasons.push('bsg');
           if (customBanned.has(tpl)) fleaBanReasons.push('custom');
 
+          // Flea math for mod items (validated in-game 2026-06-07): SPT's
+          // CustomItemService adds the item to the handbook (handbookPriceRoubles)
+          // AND sets Prices[tpl] = fleaPriceRoubles. That mod write runs AFTER
+          // ApplyFleaPriceOverrides, so ragfair overrides are WIPED for mod items
+          // (fleaOverride stays null — the viewer can't override these). Then
+          // ReplaceFleaBasePrices adds handbook×M. Net:
+          //   effectiveFleaPrice = clamp( fleaPriceRoubles + basePrice×M , floor , ceiling )
+          // Confirmed: Thermaster 125921+75945×1.5=239839; Citadel 15850+12000×1.5=33850;
+          // Fanny 10900+7250×1.5=21775.
+          const mhb   = def.handbookPriceRoubles ?? null;   // basePrice
+          const mflea = def.fleaPriceRoubles     ?? null;   // mod's prices.json contribution
+          if (mhb != null) parentById.set(tpl, def.parentId || null);  // let isOfBaseclass walk mod items
+          const mIsCraft = hideoutCraftItems.has(tpl);
+          const mMult    = mhb != null ? fleaMultiplierFor(tpl) + (mIsCraft ? HIDEOUT_CRAFT_MULTIPLIER : 0) : null;
+          const mBonus   = (mhb != null && mMult != null) ? Math.round(mhb * mMult) : null;
+          const mFloor   = (mhb != null && USE_TRADER_FLOOR) ? Math.round(mhb * K_trader) : 0;
+          const mCeiling = fleaCeilingFor(tpl, mhb);
+          let mEff = null;
+          if (mBonus != null) {
+            mEff = Math.max((mflea ?? 0) + mBonus, mFloor);
+            if (mCeiling != null && mEff > mCeiling) mEff = mCeiling;
+          }
+
           items[tpl] = {
             id: tpl,
             internalName: tpl,
@@ -454,9 +477,15 @@ function main() {
             grids,
             conditionType: deriveConditionType(op),
             canSellOnRagfair,
-            basePrice:         def.handbookPriceRoubles ?? null,
+            basePrice:          mhb,
             handbookCategoryId: def.handbookParentId    || null,
-            fleaPrice:         def.fleaPriceRoubles     ?? null,
+            fleaPrice:          mBonus,        // additive bonus = basePrice × M (consistent w/ base items)
+            fleaFloor:          mFloor,
+            fleaCeiling:        mCeiling,
+            fleaMultiplier:     mMult,
+            isHideoutCraftItem: mIsCraft,
+            fleaOverride:       null,          // override has no effect on mod items (mod re-sets the price)
+            effectiveFleaPrice: mEff,          // = fleaPriceRoubles + basePrice×M (clamped)
             fleaBanned:        fleaBanReasons.length > 0,
             fleaBanReasons,
             traders: modTraders,

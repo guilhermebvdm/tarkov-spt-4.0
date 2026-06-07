@@ -498,6 +498,11 @@ function handlePatchPrice(req, res) {
       if (!item) {
         return sendJson(res, 404, { error: 'tpl not in data/items.json — run normalize.js first' });
       }
+      if (item.modSource) {
+        return sendJson(res, 422, {
+          error: `"${item.shortName || tpl}" é item do mod ${item.modSource} — não dá pra editar via override. O CustomItemService do mod re-define o preço (Prices[tpl] = fleaPriceRoubles) DEPOIS do override, apagando-o (validado in-game). Pra mudar, edite o fleaPriceRoubles no db/CustomItems do mod.`,
+        });
+      }
       const bonus = item.spt ? item.spt.fleaPrice : null;          // handbook × M
       const floor = (item.spt && item.spt.fleaFloor) || 0;         // handbook × K_trader
       const ceiling = item.spt ? (item.spt.fleaCeiling ?? null) : null;  // handbook × unreasonableMult, or null
