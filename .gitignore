@@ -49,3 +49,4 @@ references/spt-source/
 references/fika-server/
 references/fika-plugin/
 references/fika-headless/
+*.exe

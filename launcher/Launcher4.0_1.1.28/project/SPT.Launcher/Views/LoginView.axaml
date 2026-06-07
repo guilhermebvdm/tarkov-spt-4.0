@@ -1,0 +1,82 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:launcher="using:SPT.Launcher.Models.Launcher"
+             xmlns:cc="using:SPT.Launcher.CustomControls"
+             xmlns:cvt="using:SPT.Launcher.Converters"
+             mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="720"
+             x:Class="SPT.Launcher.Views.LoginView">
+
+    <UserControl.Resources>
+        <cvt:ImageSourceConverter x:Key="imageSourceCvt"/>
+    </UserControl.Resources>
+
+    <UserControl.Styles>
+        <Style Selector="Border.PanelCard">
+            <Setter Property="Background" Value="#CC111111"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#333333"/>
+            <Setter Property="CornerRadius" Value="0"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid ColumnDefinitions="250, *">
+
+        <!-- 1. BARRA LATERAL ESQUERDA (SIDEBAR - CLEAN PARA LOGIN) -->
+        <Border Grid.Column="0" Background="#111111" BorderThickness="0,0,1,0" BorderBrush="#222">
+            <Grid RowDefinitions="120, *, AUTO">
+                
+                <!-- Logo Topo -->
+                <Image Grid.Row="0" Margin="15" Source="/Assets/logo-redline.png" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+                <!-- Área de Informação de Login -->
+                <StackPanel Grid.Row="1" Spacing="20" Margin="20,50,20,0">
+                    <TextBlock Text="AUTENTICAÇÃO" Foreground="DarkGray" FontWeight="Bold" FontSize="16" />
+                    <TextBlock Text="Faça login com seu perfil local ou cadastre uma nova conta para iniciar o protocolo Red Line." 
+                               Foreground="#555555" TextWrapping="Wrap" FontSize="12" LineHeight="18"/>
+                </StackPanel>
+
+            </Grid>
+        </Border>
+
+        <!-- 2. ÁREA CENTRAL (LOGIN) -->
+        <Grid Grid.Column="1">
+            
+            <!-- Imagem de Fundo Estática -->
+            <Image Source="{Binding Background.Path, Converter={StaticResource imageSourceCvt}}" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+
+            <Grid RowDefinitions="*,Auto,20" ColumnDefinitions="*,Auto,*">
+
+                <!-- Perfis Salvos Existentes -->
+                <ScrollViewer Grid.Row="0" Grid.Column="1" Margin="0,50,0,20" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding ExistingProfiles}" VerticalAlignment="Center">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel HorizontalAlignment="Center" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="launcher:ProfileInfo">
+                                <cc:DetailedProfileCard 
+                                    ProfileInfo="{Binding }"
+                                    LoginCommand="{Binding $parent[ItemsControl].DataContext.LoginProfileCommand}"
+                                    />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+                
+                <!-- Login box reestilizado implicitamente no Background escuro -->
+                <Border Grid.Row="1" Grid.Column="1" Classes="PanelCard" Padding="15,5,15,5" Margin="0,0,0,0">
+                    <cc:LoginBox Username="{Binding Login.Username, Mode=TwoWay}"
+                                 Password="{Binding Login.Password, Mode=TwoWay}"
+                                 LoginCommand="{Binding LoginCommand}"
+                                 ResetPasswordCommand="{Binding ResetPasswordCommand}"
+                                 IsLoggedIn="{Binding IsLoggedIn}"
+                                 />
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

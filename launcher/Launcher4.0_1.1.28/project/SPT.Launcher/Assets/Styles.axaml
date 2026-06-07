@@ -1,0 +1,338 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:cc="using:SPT.Launcher.CustomControls"
+        >
+	<Design.PreviewWith>
+		<Border Classes="card">
+		<StackPanel Spacing="5" Margin="50">
+			<Label Content="Some label here"/>
+			<Label Content="Some acc label here" Classes="acc"/>
+			<Label Content="Some alt label here" Classes="alt"/>
+			<Label Classes="versionMismatch" Content="invalid version tag" />
+			<Button Content="button" />
+			<Button Content="outlined button" Classes="outlined"></Button>
+			<Button Content="Icon button" Classes="icon"/>
+			<Button Content="acc button" Classes="acc"/>
+			<Button Content="alt button" Classes="alt"/>
+			<Button IsEnabled="False" Content="disabled button"/>
+			<Button Content="link button" Classes="link"/>
+			<Button Content="underline link button" Classes="ulink"/>
+			<ComboBox SelectedIndex="0">
+				<ComboBoxItem>Item 1</ComboBoxItem>
+				<ComboBoxItem>Item 2</ComboBoxItem>
+				<ComboBoxItem>Item 3</ComboBoxItem>
+			</ComboBox>
+			<TextBox Text="Some cool text here" Margin="5" />
+			<TextBox Watermark="This is a watermark" Margin="5" />
+			<CheckBox Content="unchecked" />
+			<CheckBox Content="checked" IsChecked="True"/>
+			<ProgressBar Value="40" />
+			<ProgressBar IsIndeterminate="True" />
+			<ProgressBar Classes="error" />
+		</StackPanel>
+		</Border>
+	</Design.PreviewWith>
+
+	<!-- Add Styles Here -->
+	
+	<!-- Textblock Styles -->
+	
+	<Style Selector="TextBlock.alt">
+		<Setter Property="Foreground" Value="{DynamicResource AltAccentBrush}"/>
+	</Style>
+	
+	<!-- Border Styles -->
+	<Style Selector="Border.card">
+		<Setter Property="CornerRadius" Value="5"/>
+		<Setter Property="BoxShadow" Value="2 5 5 black"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource AltBackgroundBrush}"/>
+		<Setter Property="Background" Value="{DynamicResource BackgroundBrush}"/>
+		<Setter Property="BorderThickness" Value="1"/>
+		<Setter Property="Margin" Value="10"></Setter>
+	</Style>
+		<!-- BoxShadow="2 5 5 black"></Setter> CornerRadius="5" -->
+		<!-- BorderBrush="{DynamicResource AltBackgroundBrush}" -->
+		<!-- Background="{DynamicResource BackgroundBrush}" -->
+		<!-- Margin="15" -->
+		<!-- BorderThickness="1" -->
+
+	<!-- Notification Manager Styles -->
+	<Style Selector="WindowNotificationManager">
+		<Setter Property="Margin" Value="0 35 0 0"/>
+		<Setter Property="MaxItems" Value="2"/>
+	</Style>
+
+	<!-- NotificationCard Styles -->
+	<Style Selector="NotificationCard">
+		<Setter Property="Template">
+			<ControlTemplate>
+				<LayoutTransformControl Name="PART_LayoutTransformControl" UseRenderTransform="True">
+					<Border CornerRadius="{DynamicResource ControlCornerRadius}" BoxShadow="0 6 8 0 #4F000000" Margin="5 5 5 10">
+						<Border Background="{TemplateBinding Background}"
+											BorderBrush="{TemplateBinding BorderBrush}"
+											BorderThickness="{TemplateBinding BorderThickness}"
+											CornerRadius="{DynamicResource ControlCornerRadius}" ClipToBounds="True">
+							<DockPanel>
+								<ContentControl Name="PART_Content" Content="{TemplateBinding Content}" />
+							</DockPanel>
+						</Border>
+					</Border>
+				</LayoutTransformControl>
+			</ControlTemplate>
+		</Setter>
+	</Style>
+
+	<!-- TitleBar Styles -->
+	<Style Selector="cc|TitleBar">
+		<Setter Property="Background" Value="{DynamicResource BackgroundBrush}"/>
+		<Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+		<Setter Property="ButtonForeground" Value="{DynamicResource AltAccentBrush}"/>
+	</Style>
+
+	<Style Selector="cc|TitleBar.versiontag">
+		<Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+		<Setter Property="BorderThickness" Value="0 0 0 2"/>
+	</Style>
+		   
+	<!-- TextBox Styles -->
+	<Style Selector="TextBox">
+		<Setter Property="Background" Value="{DynamicResource BackgroundBrush2}"/>
+		<Setter Property="FontWeight" Value="SemiBold"/>
+		<Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+	</Style>
+	
+	<Style Selector="TextBox:focus">
+		<Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+	</Style>
+	
+	<Style Selector="TextBox:pointerover">
+		<Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+	</Style>
+	
+	<Style Selector="TextBox:pointerover /template/ Border#PART_BorderElement">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource AltAccentBrush}"/>
+	</Style>
+	
+	<Style Selector="TextBox:pointerover /template/ TextBlock#PART_Watermark, TextBox:focus /template/ TextBlock#PART_FloatingWatermark">
+		<Setter Property="Foreground" Value="{DynamicResource AltAccentBrush2}"/>
+	</Style>
+	
+	<Style Selector="TextBox:focus /template/ TextBlock#PART_Watermark, TextBox:focus /template/ TextBlock#PART_FloatingWatermark">
+		<Setter Property="Foreground" Value="{DynamicResource AltAccentBrush3}"/>
+	</Style>
+	
+	<Style Selector="TextBox /template/ TextBlock#PART_Watermark, TextBox:focus /template/ TextBlock#PART_FloatingWatermark">
+		<Setter Property="Foreground" Value="White"/>
+	</Style>
+	
+	<Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+		<Setter Property="BorderThickness" Value="1"/>
+	</Style>
+	
+	<!-- Label Styles -->
+	<Style Selector="Label">
+		<Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+	</Style>
+	
+	<Style Selector="Label.acc">
+		<Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+	</Style>
+	
+	<Style Selector="Label.alt">
+		<Setter Property="Foreground" Value="{DynamicResource AltAccentBrush}"/>
+	</Style>
+	
+	<Style Selector="Label.versionMismatch">
+		<Setter Property="Foreground" Value="OrangeRed"/>
+	</Style>
+	
+	<!-- ProgressBar Styles -->
+	<Style Selector="ProgressBar">
+		<Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+		<Setter Property="Background" Value="{DynamicResource BackgroundBrush2}"/>
+	</Style>
+	
+	<Style Selector="ProgressBar.error">
+		<Setter Property="Foreground" Value="Red"/>
+		<Style.Animations>
+			<Animation Duration="0:0:0.5" FillMode="Forward">
+				<KeyFrame Cue="0%">
+					<Setter Property="Value" Value="0"/>
+				</KeyFrame>
+				<KeyFrame Cue="100%">
+					<Setter Property="Value" Value="100"/>
+				</KeyFrame>
+			</Animation>
+		</Style.Animations>
+	</Style>
+	
+	<!-- Seperator Styles -->
+	<Style Selector="Separator">
+		<Setter Property="Background" Value="{DynamicResource BackgroundBrush}"/>
+	</Style>
+
+	<!-- Button Styles -->
+	<Style Selector="Button">
+		<Setter Property="Background" Value="{DynamicResource BackgroundBrush2}"/>
+		<Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+	</Style>
+	
+	<Style Selector="Button:pointerover /template/ ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource BackgroundBrush2}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource AccentBrush2}"/>
+		<Setter Property="BorderThickness" Value="1"/>
+	</Style>
+
+	<Style Selector="Button:pressed /template/ ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+	</Style>
+	
+	<Style Selector="Button:disabled /template/ ContentPresenter">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource BackgroundBrush2}"/>
+	</Style>
+
+	<!-- Button acc -->
+	<Style Selector="Button.acc">
+		<Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+		<Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+	</Style>
+	
+	<Style Selector="Button.acc:pointerover /template/ ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource AccentBrush2}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource BackgroundBrush2}"/>
+		<Setter Property="BorderThickness" Value="1"/>
+	</Style>
+	
+	<Style Selector="Button.acc:pressed /template/ ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource AccentBrush3}"/>
+	</Style>
+	
+	<Style Selector="Button.acc:disabled /template/ ContentPresenter">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource BackgroundBrush2}"/>
+	</Style>
+	
+	<!-- Button alt -->
+	<Style Selector="Button.alt">
+		<Setter Property="Background" Value="{DynamicResource AltAccentBrush}"/>
+		<Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+	</Style>
+	
+	<Style Selector="Button.alt:pointerover /template/ ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource AltAccentBrush2}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource BackgroundBrush2}"/>
+		<Setter Property="BorderThickness" Value="1"/>
+	</Style>
+	
+	<Style Selector="Button.alt:pressed /template/ ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource AltAccentBrush3}"/>
+	</Style>
+	
+	<Style Selector="Button.alt:disabled /template/ ContentPresenter">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource BackgroundBrush2}"/>
+	</Style>
+
+	<!-- Button Link Styles -->
+	<Style Selector="Button.ulink">
+		<Setter Property="TextBlock.TextDecorations" Value="Underline"/>
+	</Style>
+	
+	<Style Selector="Button.link, Button.ulink">
+		<Setter Property="Foreground" Value="{DynamicResource AltAccentBrush}"/>
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="BorderBrush" Value="Transparent"/>
+		<Setter Property="BorderThickness" Value="0"/>
+	</Style>
+
+	<Style Selector="Button.link:pointerover /template/ ContentPresenter, Button.ulink:pointerover /template/ ContentPresenter">
+		<Setter Property="TextBlock.Foreground" Value="{DynamicResource AccentBrush}"/>
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="BorderBrush" Value="Transparent"/>
+		<Setter Property="BorderThickness" Value="0"/>
+	</Style>
+
+	<Style Selector="Button.link:pressed /template/ ContentPresenter, Button.ulink:pressed /template/ ContentPresenter">
+		<Setter Property="TextBlock.Foreground" Value="{DynamicResource AccentBrush3}"/>
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="BorderBrush" Value="Transparent"/>
+		<Setter Property="BorderThickness" Value="0"/>
+	</Style>
+	
+	<!-- Outlined Button -->
+	<Style Selector="Button.outlined">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+		<Setter Property="BorderThickness" Value="1"/>
+	</Style>
+	
+	<Style Selector="Button.outlined:pointerover /template/ ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource AltBackgroundBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource AccentBrush2}"/>
+		<Setter Property="BorderThickness" Value="1"/>
+	</Style>
+	
+	<Style Selector="Button.outlined:pressed /template/ ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource AccentBrush3}"/>
+	</Style>
+	
+	<Style Selector="Button.outlined:disabled /template/ ContentPresenter">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource BackgroundBrush2}"/>
+	</Style>
+	
+	<!-- Icon button -->
+	<Style Selector="Button.icon">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="BorderBrush" Value="Transparent"/>
+		<Setter Property="BorderThickness" Value="1"/>
+	</Style>
+	
+	<Style Selector="Button.icon:pointerover /template/ ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource AltBackgroundBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource AccentBrush2}"/>
+		<Setter Property="BorderThickness" Value="1"/>
+	</Style>
+	
+	<Style Selector="Button.icon:pressed /template/ ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource AccentBrush3}"/>
+	</Style>
+	
+	<Style Selector="Button.icon:disabled /template/ ContentPresenter">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource BackgroundBrush2}"/>
+	</Style>
+
+    <!-- Checkbox styles -->
+	<Style Selector="CheckBox">
+		<Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+	</Style>
+
+	<Style Selector="CheckBox /template/ Border#NormalRectangle">
+		<Setter Property="BorderBrush" Value="{DynamicResource BackgroundBrush2}"/>
+	</Style>
+
+	<Style Selector="CheckBox:pointerover /template/ Border#NormalRectangle">
+		<Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+	</Style>
+
+	<Style Selector="CheckBox:checked">
+		<Setter Property="FontWeight" Value="SemiBold"/>
+		<Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+	</Style>
+
+	<Style Selector="CheckBox:checked /template/ Border#NormalRectangle">
+		<Setter Property="Background" Value="{DynamicResource BackgroundBrush2}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+	</Style>
+
+	<Style Selector="CheckBox:checked /template/ Path#CheckGlyph">
+		<Setter Property="Fill" Value="{DynamicResource AccentBrush}"/>
+	</Style>
+
+</Styles>

@@ -1,0 +1,174 @@
+using SPT.Launcher.Models.SPT;
+using SPT.Launcher.Helpers;
+using SPT.Launcher.Models.Launcher;
+using ReactiveUI;
+using Splat;
+using System;
+using System.Reactive.Disposables;
+using System.Threading.Tasks;
+using SPT.Launcher.Controllers;
+using SPT.Launcher.ViewModels.Dialogs;
+
+namespace SPT.Launcher.ViewModels
+{
+    public class ConnectServerViewModel : ViewModelBase
+    {
+        private bool noAutoLogin = false;
+
+        public ConnectServerModel connectModel { get; set; } = new ConnectServerModel()
+        {
+            InfoText = LocalizationProvider.Instance.server_connecting
+        };
+
+        public ConnectServerViewModel(IScreen Host, bool NoAutoLogin = false) : base(Host)
+        {
+            noAutoLogin = NoAutoLogin;
+
+            this.WhenActivated((CompositeDisposable disposables) =>
+            {
+                Task.Run(async () =>
+                {
+                   await ConnectServer();
+                });
+            });
+        }
+
+        public async Task ConnectServer()
+        {
+            try
+            {
+                LauncherSettingsProvider.Instance.AllowSettings = false;
+                LogManager.Instance.Info("[Connect] Iniciando conexão ao servidor...");
+
+                // Automação do Tailscale: Verifica, instala, autentica e configura Fika (Apenas se o Path do jogo for válido)
+                if (!string.IsNullOrEmpty(LauncherSettingsProvider.Instance.GamePath))
+                {
+                    connectModel.InfoText = "Conectando na rede P2P (Tailscale)...";
+                    LogManager.Instance.Info("[Connect] Verificando e conectando Tailscale...");
+                    await TailscaleHelper.EnsureTailscaleConnected();
+
+                    connectModel.InfoText = "Atualizando configurações de rede (Fika)...";
+                    LogManager.Instance.Info("[Connect] Configurando IP do Fika...");
+                    await TailscaleHelper.ConfigureFikaAsync(LauncherSettingsProvider.Instance.GamePath);
+                }
+
+                if (!LauncherSettingsProvider.Instance.IsDevMode)
+                {
+                    connectModel.InfoText = "Obtendo URL do servidor...";
+                    try
+                    {
+                        using var client = new System.Net.Http.HttpClient();
+                        client.Timeout = TimeSpan.FromSeconds(10);
+                        string pastebinUrl = await client.GetStringAsync("https://pastebin.com/raw/SHmXENmb");
+                        if (!string.IsNullOrWhiteSpace(pastebinUrl))
+                        {
+                            LauncherSettingsProvider.Instance.Server.Url = pastebinUrl.Trim();
+                            LogManager.Instance.Info($"[Connect] URL obtida do Pastebin: {LauncherSettingsProvider.Instance.Server.Url}");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogManager.Instance.Warning($"[Connect] Falha ao obter URL do Pastebin, usando cache/fallback: {ex.Message}");
+                    }
+                }
+                else
+                {
+                    LogManager.Instance.Info($"[Connect] Dev Mode Ativo: Ignorando Pastebin e usando URL atual: {LauncherSettingsProvider.Instance.Server.Url}");
+                }
+
+                if (!LauncherSettingsProvider.Instance.DisableUpdates)
+                {
+                    connectModel.InfoText = "Verificando atualizações do launcher...";
+                    LogManager.Instance.Info("[Connect] Verificando versão do launcher no servidor...");
+                    
+                    var progress = new Progress<int>(percent => 
+                    {
+                        connectModel.IsDownloading = true;
+                        connectModel.DownloadProgress = percent;
+                        connectModel.InfoText = $"Baixando atualização do launcher... {percent}%";
+                    });
+
+                    bool isUpdating = await LauncherUpdateHelper.CheckAndUpdateAsync(LauncherSettingsProvider.Instance.Server.Url, progress);
+                    if (isUpdating)
+                    {
+                        connectModel.InfoText = "Atualizando o launcher! Reiniciando...";
+                        return;
+                    }
+                }
+                else
+                {
+                    LogManager.Instance.Info("[Connect] Verificação de atualização bloqueada pelas configurações (Desativada).");
+                }
+
+                connectModel.InfoText = LocalizationProvider.Instance.server_connecting;
+                
+                LogManager.Instance.Info($"[Connect] Carregando servidor: {LauncherSettingsProvider.Instance.Server.Url}");
+                bool serverLoaded = await ServerManager.LoadDefaultServerAsync(LauncherSettingsProvider.Instance.Server.Url);
+                
+                // Retry automático — rede pode estar estabilizando após Tailscale reconnect
+                if (!serverLoaded)
+                {
+                    LogManager.Instance.Warning("[Connect] Primeira tentativa falhou. Aguardando 2s e tentando novamente...");
+                    connectModel.InfoText = "Reconectando ao servidor...";
+                    await Task.Delay(2000);
+                    serverLoaded = await ServerManager.LoadDefaultServerAsync(LauncherSettingsProvider.Instance.Server.Url);
+                }
+
+                if (!serverLoaded)
+                {
+                    LogManager.Instance.Error("[Connect] Falha ao carregar servidor após 2 tentativas.");
+                    connectModel.ConnectionFailed = true;
+                    connectModel.InfoText = string.Format(LocalizationProvider.Instance.server_unavailable_format_1,
+                        LauncherSettingsProvider.Instance.Server.Name);
+                    
+                    LauncherSettingsProvider.Instance.AllowSettings = true;
+                    return;
+                }
+                
+                LogManager.Instance.Info("[Connect] Servidor carregado com sucesso.");
+                LogManager.Instance.Info("[Connect] Ping ao servidor...");
+                bool connected = ServerManager.PingServer();
+                LogManager.Instance.Info($"[Connect] Ping resultado: {(connected ? "OK" : "FALHOU")}");
+
+                connectModel.ConnectionFailed = !connected;
+
+                connectModel.InfoText = connected ? LocalizationProvider.Instance.ok : string.Format(LocalizationProvider.Instance.server_unavailable_format_1, LauncherSettingsProvider.Instance.Server.Name);
+
+                if (connected)
+                {
+                    SPTVersion version = Locator.Current.GetService<SPTVersion>("sptversion");
+
+                    version.ParseVersionInfo(ServerManager.GetVersion());
+                    
+                    LogManager.Instance.Info($"Connected to server: {ServerManager.SelectedServer.backendUrl} - SPT MatchingVersion: {version}");
+
+
+
+                    LogManager.Instance.Info($"[Connect] Chamando NavigateTo LoginView...");
+                    NavigateTo(new LoginViewModel(HostScreen, noAutoLogin));
+                    LogManager.Instance.Info($"[Connect] Navegação disparada para LoginView.");
+                }
+                
+                LauncherSettingsProvider.Instance.AllowSettings = true;
+            }
+            catch (Exception ex)
+            {
+                LogManager.Instance.Error($"[FATAL ERROR IN CONNECT SERVER]: {ex.Message}\n{ex.StackTrace}");
+                connectModel.InfoText = "Erro Fatal Crítico: " + ex.Message;
+                connectModel.ConnectionFailed = true;
+            }
+        }
+
+        public void RetryCommand()
+        {
+            connectModel.InfoText = LocalizationProvider.Instance.server_connecting;
+
+            connectModel.ConnectionFailed = false;
+
+            Task.Run(async () =>
+            {
+                await ConnectServer();
+            });
+        }
+    }
+}

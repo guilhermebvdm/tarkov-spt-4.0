@@ -1,0 +1,51 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:SPT.Launcher.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:cc="using:SPT.Launcher.CustomControls"
+        xmlns:rxui="using:Avalonia.ReactiveUI"
+        xmlns:cvt="using:SPT.Launcher.Converters"
+        xmlns:dialogHost="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
+        mc:Ignorable="d" d:DesignWidth="750" d:DesignHeight="450"
+        x:Class="SPT.Launcher.Views.MainWindow"
+        Icon="/Assets/spt-logo.ico"
+        Title="{Binding WindowTitle}"
+        MinHeight="640" MinWidth="1104"
+        Height="660" Width="1140"
+        CanResize="False"
+        WindowStartupLocation="CenterScreen"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaTitleBarHeightHint="-1"
+        Background="{DynamicResource AltBackgroundBrush}">
+
+	<Window.Resources>
+		<cvt:ImageSourceConverter x:Key="imageSourceCvt"/>
+	</Window.Resources>
+
+	<Window.Styles>
+		<StyleInclude Source="/Assets/Styles.axaml"/>
+	</Window.Styles>
+
+	<Grid>
+		<cc:TitleBar Title=""
+				     XButtonCommand="{Binding CloseCommand}"
+					 MinButtonCommand="{Binding MinimizeCommand}"
+					 SettingsButtonCommand="{Binding GoToSettingsCommand}"
+					 Classes.versiontag="False"
+                     Background="Transparent"
+                     VerticalAlignment="Top"
+					 ZIndex="10"
+				     />
+
+		<dialogHost:DialogHost Identifier="mainHost"
+							   CornerRadius="0"
+							   DialogMargin="0"
+							   OverlayBackground="Gray"
+							   ZIndex="5">
+			<rxui:RoutedViewHost Router="{Binding Router}" />
+		</dialogHost:DialogHost>
+	</Grid>
+
+</Window>

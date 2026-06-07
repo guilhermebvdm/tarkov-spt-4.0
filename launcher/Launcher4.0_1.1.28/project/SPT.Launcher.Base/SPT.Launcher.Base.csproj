@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <RootNamespace>SPT.Launcher</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Reference Include="zlib.net, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\SPT.Launcher\References\zlib.net.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+      <PackageReference Include="SharpHDiffPatch.Core" Version="2.3.0" />
+      <PackageReference Include="System.Management" Version="10.0.5" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\SPT.ByteBanger\SPT.ByteBanger.csproj" />
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,260 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:cc="using:SPT.Launcher.CustomControls"
+             xmlns:helpers="using:SPT.Launcher.Helpers"
+             xmlns:cvt="using:SPT.Launcher.Converters"
+             mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="720"
+             x:Class="SPT.Launcher.Views.ProfileView">
+
+    <UserControl.Resources>
+        <cvt:ImageSourceConverter x:Key="imageSourceCvt"/>
+    </UserControl.Resources>
+
+    <!-- Estilos específicos do ProfileView para replicar o mockup -->
+    <UserControl.Styles>
+        <Style Selector="Button.SidebarMenu">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="20,15"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="BorderThickness" Value="0,0,3,0"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+        </Style>
+        <Style Selector="Button.SidebarMenu:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#1A1A1A"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0,0,3,0"/>
+        </Style>
+        <Style Selector="Button.SidebarMenu.Active">
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="Background" Value="#1A1A1A"/>
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+        </Style>
+        <Style Selector="Button.SidebarMenu Path">
+            <Setter Property="Fill" Value="{Binding $parent[Button].Foreground}"/>
+        </Style>
+        <Style Selector="Button.SidebarMenu.Active:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="Background" Value="#222222"/>
+        </Style>
+        <Style Selector="Border.PanelCard">
+            <Setter Property="Background" Value="#F2111111"/> <!-- 95% transparente -->
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#333333"/>
+            <Setter Property="CornerRadius" Value="0"/>
+        </Style>
+        
+        <!-- ActionButton e seu Disabled State -->
+        <Style Selector="Button.ActionButton">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush2}"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style Selector="Button.ActionButton:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style Selector="Button.ActionButton:disabled /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#222222"/>
+            <Setter Property="BorderBrush" Value="#444444"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Opacity" Value="0.5"/>
+        </Style>
+        <Style Selector="Button.ActionButton:disabled > StackPanel > Path">
+             <Setter Property="Fill" Value="#888888"/>
+        </Style>
+
+        <Style Selector="Button.AltButton:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#333333"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <!-- Fix hover jitter para botões Conta -->
+        <Style Selector="Button.PanelButton">
+            <Setter Property="Background" Value="#333"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="Button.PanelButton:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#444"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid ColumnDefinitions="250, *">
+
+        <!-- 1. BARRA LATERAL ESQUERDA (SIDEBAR) -->
+        <Border Grid.Column="0" Background="#111111" BorderThickness="0,0,1,0" BorderBrush="#222">
+            <Grid RowDefinitions="120, *, AUTO">
+                
+                <!-- Logo Topo -->
+                <Image Grid.Row="0" Margin="15" Source="/Assets/logo-redline.png" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+                <!-- Menu Central -->
+                <StackPanel Grid.Row="1" Spacing="5" Margin="0,20,0,0">
+                    <Button Classes="SidebarMenu Active" Cursor="Hand" Command="{Binding OpenSettingsCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Path Data="M12 5.69l5 4.5V18h-2v-6H9v6H7v-7.81l5-4.5M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z" VerticalAlignment="Center"/>
+                            <TextBlock Text="LAUNCHER" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="SidebarMenu" Cursor="Hand" Command="{Binding OpenSettingsCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Path Data="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.68 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z" VerticalAlignment="Center"/>
+                            <TextBlock Text="CONFIGURAÇÕES" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="SidebarMenu" Cursor="Hand" Command="{Binding OpenTargramCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Path Data="M16.36,14C16.44,13.34 16.5,12.68 16.5,12C16.5,11.32 16.44,10.66 16.36,10H19.74C19.9,10.64 20,11.31 20,12C20,12.69 19.9,13.36 19.74,14M14.59,19.56C15.19,18.45 15.65,17.25 15.97,16H18.92C17.96,17.65 16.43,18.93 14.59,19.56M14.34,14H9.66C9.56,13.34 9.5,12.68 9.5,12C9.5,11.32 9.56,10.66 9.66,10H14.34C14.44,10.66 14.5,11.32 14.5,12C14.5,12.68 14.44,13.34 14.34,14M12,19.96C11.16,18.76 10.5,17.43 10.09,16H13.91C13.5,17.43 12.84,18.76 12,19.96M8.03,16C8.35,17.25 8.81,18.45 9.41,19.56C7.57,18.93 6.04,17.65 5.08,16M4.26,14C4.1,13.36 4,12.69 4,12C4,11.31 4.1,10.64 4.26,10H7.64C7.56,10.66 7.5,11.32 7.5,12C7.5,12.68 7.56,13.34 7.64,14M5.08,8H8.03C8.35,6.75 8.81,5.55 9.41,4.44C7.57,5.07 6.04,6.35 5.08,8M12,4.04C12.84,5.24 13.5,6.57 13.91,8H10.09C10.5,6.57 11.16,5.24 12,4.04M14.59,4.44C13.99,5.55 13.53,6.75 13.21,8H16.16C17.12,6.35 18.65,5.07 14.59,4.44M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z" VerticalAlignment="Center"/>
+                            <TextBlock Text="TARGRAM" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="SidebarMenu" Cursor="Hand" Command="{Binding OpenKofiCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Path Data="M2,21H20V19H2M20,8H18V5H20M20,3H4V13A4,4 0 0,0 8,17H14A4,4 0 0,0 18,13V10H20A2,2 0 0,0 22,8V5C22,3.89 21.1,3 20,3M16,5V13A2,2 0 0,1 14,15H8A2,2 0 0,1 6,13V5H16Z" VerticalAlignment="Center"/>
+                            <TextBlock Text="APOIE UM CAFEZINHO" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="SidebarMenu" Cursor="Hand" ToolTip.Tip="Em construção" IsEnabled="False" Opacity="0.5">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Path Data="M12.87,15.07L8.33,12.46V7.22L12.87,9.84V15.07M22.67,10L17.43,13.06L12.5,10.22L17.73,7.17L22.67,10M21.5,11.3V15.33C21.5,15.33 21.08,16.5 19.33,16.5C17.58,16.5 17.17,15.33 17.17,15.33V11.3L15.33,12.37V16.5C15.33,16.5 15.33,19.25 19.33,19.25C23.33,19.25 23.33,16.5 23.33,16.5V11.3L21.5,11.3M8.33,13.62L3.8,16.24V11L8.33,8.38V13.62M12.5,22.25L3.8,17.22V6.15L12.5,1.11L21.2,6.15L21.2,9.3L19.33,10.37L12.5,6.43L2,12.5L12.5,18.57L15.33,16.94V19.11L12.5,20.73" VerticalAlignment="Center"/>
+                            <TextBlock Text="LISTA DE MODS" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <!-- Sair / Logout -->
+                <Button Grid.Row="2" Classes="ActionButton" Cursor="Hand" Margin="20" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" FontWeight="Bold" Padding="10" Command="{Binding LogoutCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <Path Data="M16,17V14H9V10H16V7L21,12L16,17M14,2A2,2 0 0,1 16,4V6H14V4H5V20H14V18H16V20A2,2 0 0,1 14,22H5A2,2 0 0,1 3,20V4A2,2 0 0,1 5,2H14Z" Fill="White" VerticalAlignment="Center"/>
+                        <TextBlock Text="Sair" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- 2. ÁREA CENTRAL (CARROSSEL E JOGO) -->
+        <Grid Grid.Column="1">
+            
+            <!-- Imagem de Fundo Estática (Futuro: Carrossel) -->
+            <Image Source="{Binding Background.Path, Converter={StaticResource imageSourceCvt}}" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+
+            <!-- Layout Sobreposto da Tela Principal -->
+            <Grid RowDefinitions="*, AUTO, AUTO">
+
+                <!-- CONTEÚDO TOP/RIGHT -->
+                <StackPanel Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="20,50,20,0" Width="250" Spacing="6">
+                    
+                    <!-- Box: VERSÃO -->
+                    <Border Classes="PanelCard" Padding="10">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Versão" Foreground="White" FontWeight="Bold" FontSize="14" Margin="0,0,0,4"/>
+                            
+                            <!-- Servidor -->
+                            <Border Background="#222" CornerRadius="3" Padding="8,4">
+                                <TextBlock Text="{Binding ServerVersion, StringFormat='Servidor: {0}'}" Foreground="LightGray" FontWeight="SemiBold" FontSize="12"/>
+                            </Border>
+
+                            <!-- Launcher -->
+                            <Border Background="#222" CornerRadius="3" Padding="8,4">
+                                <TextBlock Text="{Binding Source={x:Static helpers:LauncherUpdateHelper.CurrentVersion}, StringFormat='Launcher: {0}'}" Foreground="LightGray" FontWeight="SemiBold" FontSize="12"/>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Box: MODS OPCIONAIS -->
+                    <Border Classes="PanelCard" Padding="10">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Mods Opcionais" Foreground="White" FontWeight="Bold" FontSize="14" Margin="0,0,0,4"/>
+                            
+                            <ItemsControl ItemsSource="{Binding OptionalMods}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <CheckBox Content="{Binding Name}" 
+                                                  Cursor="Hand" 
+                                                  IsChecked="{Binding IsEnabled}" 
+                                                  Foreground="LightGray"
+                                                  ToolTip.Tip="{Binding Description}"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Box: CONTA -->
+                    <Border Classes="PanelCard" Padding="10">
+                        <StackPanel Spacing="5">
+                            <TextBlock Text="Conta" Foreground="White" FontWeight="Bold" FontSize="14" Margin="0,0,0,2"/>
+
+                            <Button Classes="PanelButton" Cursor="Hand" Command="{Binding WipeConfirmCommand}">
+                                <TextBlock Text="⚠ Resetar conta (Wipe)" />
+                            </Button>
+
+                            <Button Classes="PanelButton" Cursor="Hand" Command="{Binding ChangeEditionCommand}">
+                                <TextBlock Text="✏ Mudar edição do perfil" />
+                            </Button>
+                        </StackPanel>
+                    </Border>
+
+                </StackPanel>
+
+                <!-- BARRA DE PROGRESSO / UPDATE -->
+                <StackPanel Grid.Row="1" Margin="20,0,20,5" IsVisible="{Binding IsUpdateVisible}" Spacing="5" VerticalAlignment="Bottom">
+                    <TextBlock Text="{Binding UpdateStatusText}" Foreground="LightGray" FontSize="11" />
+                    <ProgressBar Minimum="0" Maximum="{Binding UpdateMaxProgress}" Value="{Binding UpdateProgress}"
+                                 Height="5" Foreground="{DynamicResource AccentBrush}" Background="#333" BorderThickness="0"/>
+                </StackPanel>
+
+                <!-- STATUS BAR INFERIOR (PERFIL E AÇÕES) -->
+                <Border Grid.Row="2" Background="#111111" BorderBrush="#222" BorderThickness="0,1,0,0" CornerRadius="0" Margin="0" Padding="15,10">
+                    <Grid ColumnDefinitions="AUTO, *, AUTO">
+                        
+                        <!-- Perfil (Esquerda) -->
+                        <Image Grid.Column="0" Source="{Binding SideImage.Path, Converter={StaticResource imageSourceCvt}}" Width="60" Height="60" Margin="0,0,15,0"/>
+                        
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="{Binding ProfileInfo.Level, StringFormat='Nível: {0}'}" Foreground="{DynamicResource AccentBrush}" FontWeight="Bold" FontSize="14"/>
+                                <!-- XP barra expandida -->
+                                <ProgressBar Value="{Binding ProfileInfo.XPLevelProgress}" Maximum="100" Height="4" Foreground="{DynamicResource AccentBrush}" Background="#333" VerticalAlignment="Center" HorizontalAlignment="Stretch" MinWidth="150"/>
+                                <TextBlock Text="{Binding ProfileInfo.RemainingExp, StringFormat='Faltam: {0} xp'}" Foreground="LightGray" FontSize="12" VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <TextBlock Text="{Binding ProfileInfo.Nickname, StringFormat='Operador: {0}'}" Foreground="White" FontWeight="Bold" FontSize="14"/>
+                            <TextBlock Text="{Binding CurrentId, StringFormat='Id: {0}'}" Foreground="#888" FontSize="12" Cursor="Hand"
+                                       ToolTip.Tip="Clique para copiar"
+                                       PointerPressed="CopyIdToClipboard"
+                                       TextDecorations="Underline"/>
+                            <TextBlock Text="{Binding ProfileInfo.Side, StringFormat='Facção: {0}'}" Foreground="{DynamicResource AccentBrush}" FontSize="12"/>
+                        </StackPanel>
+
+                        <!-- Ações (Direita) -->
+                        <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="10" Width="180">
+                            <!-- Verificar Arquivos -->
+                            <Button Classes="AltButton" Cursor="Hand" Content="Verificar arquivos" Command="{Binding VerifyFilesCommand}" IsEnabled="{Binding CanStartGame}"
+                                    Background="#222" Foreground="White" BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1"
+                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="5" FontWeight="SemiBold"/>
+                            
+                            <!-- JOGAR -->
+                            <Button Classes="ActionButton" Cursor="Hand" Content="▶ JOGAR" Command="{Binding StartGameCommand}" IsEnabled="{Binding CanStartGame}"
+                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="15,10" FontWeight="Black" FontSize="18"/>
+                        </StackPanel>
+
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>
