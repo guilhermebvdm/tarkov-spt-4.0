@@ -59,6 +59,62 @@ function readJsonc(p) {
   return JSON.parse(stripped);
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// DEFERRED (pré-pronto): live-server item source for code-injecting mods.
+//
+// Mod items are discovered below (§4c) by scanning user/mods/<mod>/db/CustomItems/
+// *.json(c). That covers EVERY mod in this install — WTT-Artem, WTT-PackNStrap,
+// HackerServer, LoadAmmoAnimServer, TEP300Backport — because they all DECLARE
+// items as JSON. A mod that instead builds items purely in code (pushing into
+// tables.templates.items at postDBLoad with no JSON file) would NOT be seen by the
+// file scan. None installed today → not wired in. Enable this when one appears.
+//
+// The running SPT server holds the MERGED item DB (every item, however injected):
+//   POST http://<http.ip>:<http.port>/client/items        (default 127.0.0.1:6969)
+//   headers { requestcompressed:'0', responsecompressed:'0' }   // plain in, plain out
+//   body    '{}'
+//   → { err, errmsg, data:{ <tpl>: <ItemTemplate>, … } }         // GetUnclearedBody wrapper
+// Transport derived from references SptHttpListener.cs (req/resp compression flags)
+// + DataCallbacks.cs:46 (GetTemplateItems → databaseService.GetItems()).
+// NOTE: not yet exercised against a live server (was down at authoring time) —
+// validate the wrapper shape + that no session cookie is required before relying on it.
+//
+// Wiring plan when enabling (set env SPT_LIVE_ITEMS=1; the §4c block must become async):
+//   1. const live = await fetchLiveServerItems();   // null if server down → fall back to file scan
+//   2. const liveModTpls = Object.keys(live.data).filter(t => !pricesDisk[t] && !items[t] && !handbookSet.has(t));
+//      // better vanilla test: tpl absent from the on-disk vanilla templates/items.json
+//   3. ATTRIBUTION — the live DB is FLAT (no "which mod added this"). Match each
+//      liveModTpl against files under each user/mods/<mod>/ (search the 24-hex id) →
+//      modSource = that folder. Tpls in no folder → modSource = '(unknown mod)'.
+//   4. Build the same record shape as §4c and run the same flea math (mhb/mflea/mBonus/mEff).
+async function fetchLiveServerItems(sptDataDir) {
+  let ip = '127.0.0.1', port = 6969;
+  try {
+    const http = readJson(path.join(sptDataDir, 'configs', 'http.json'));
+    ip = http.ip || ip; port = http.port || port;
+  } catch (_) { /* use defaults */ }
+  return new Promise((resolve) => {
+    const httpMod = require('http');
+    const req = httpMod.request({
+      host: ip, port, path: '/client/items', method: 'POST',
+      headers: { requestcompressed: '0', responsecompressed: '0', 'Content-Type': 'application/json', 'Content-Length': 2 },
+    }, (res) => {
+      const chunks = [];
+      res.on('data', c => chunks.push(c));
+      res.on('end', () => {
+        try {
+          const j = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+          resolve(j && j.data ? j.data : j);   // unwrap { err, errmsg, data }
+        } catch (e) { console.error(`  live /client/items: bad response (${e.message})`); resolve(null); }
+      });
+    });
+    req.on('error', (e) => { console.error(`  live /client/items unreachable (${e.code || e.message}) — falling back to file scan`); resolve(null); });
+    req.setTimeout(15000, () => req.destroy(new Error('timeout')));
+    req.end('{}');
+  });
+}
+void fetchLiveServerItems;  // referenced to keep linters quiet until §4c wires it in
+
 function resolveSptDataDir(sptPath) {
   const candidates = [
     path.join(sptPath, 'SPT_Data'),
@@ -192,6 +248,13 @@ function main() {
   const dyn = ragfair.dynamic || {};
   const fleaOverridesMap = dyn.itemPriceOverrideRouble || {};
   console.error(`  ${Object.keys(fleaOverridesMap).length} flea overrides active in ragfair.json`);
+  // itemPriceMultiplier: an OFFER-TIME factor applied in RagfairPriceService
+  // .GetDynamicOfferPriceForOffer (price *= multiplier) AFTER GetFleaPriceForItem
+  // and AFTER any mod's CustomItemService re-write. It is therefore the only lever
+  // that works for MOD items (overrides are wiped for those). Also affects vanilla
+  // items (SPT ships 2 defaults). Applied to effectiveFleaPrice below.
+  const fleaMultiplierMap = dyn.itemPriceMultiplier || {};
+  console.error(`  ${Object.keys(fleaMultiplierMap).length} flea offer-multipliers active in ragfair.json`);
 
   const gbfp = dyn.generateBaseFleaPrices || {};
   const FLEA_BASE_MULTIPLIER     = gbfp.priceMultiplier ?? 1.5;
@@ -295,15 +358,20 @@ function main() {
     const ov = fleaOverridesMap[e.Id];
     items[e.Id].fleaOverride = ov != null ? ov : null;
     if (ov != null) overridesApplied++;
+    const offerMult = fleaMultiplierMap[e.Id];
+    items[e.Id].fleaOfferMultiplier = offerMult != null ? offerMult : null;
     if (bonus != null) {
       const dynBase = (ov != null ? ov : (pricesDisk[e.Id] ?? 0)) + bonus;
+      items[e.Id].fleaBaseRaw = dynBase;   // = GetFleaPriceForItem (what itemPriceMultiplier scales)
       let eff = Math.max(dynBase, floor);
+      if (offerMult != null) eff = Math.round(eff * offerMult);  // itemPriceMultiplier (offer-time)
       if (ceiling != null && eff > ceiling) { eff = ceiling; cappedCount++; }
       else if (eff > dynBase) flooredCount++;
       items[e.Id].effectiveFleaPrice = eff;
       priceCount++;
       if (isCraft) craftItemsWithPrice++;
     } else {
+      items[e.Id].fleaBaseRaw = null;
       items[e.Id].effectiveFleaPrice = null;
     }
     baseCount++;
@@ -317,6 +385,8 @@ function main() {
     if (items[id].fleaMultiplier     === undefined) items[id].fleaMultiplier     = null;
     if (items[id].isHideoutCraftItem === undefined) items[id].isHideoutCraftItem = false;
     if (items[id].fleaOverride       === undefined) items[id].fleaOverride       = null;
+    if (items[id].fleaOfferMultiplier === undefined) items[id].fleaOfferMultiplier = null;
+    if (items[id].fleaBaseRaw        === undefined) items[id].fleaBaseRaw        = null;
     if (items[id].effectiveFleaPrice === undefined) items[id].effectiveFleaPrice = items[id].fleaPrice;
   }
   console.error(`  basePrice on ${baseCount}, fleaPrice on ${priceCount} (${craftItemsWithPrice} craft), overrides: ${overridesApplied}, trader-floored: ${flooredCount}, ceiling-capped: ${cappedCount}, K_trader=${K_trader}`);
@@ -363,6 +433,8 @@ function main() {
   // 4c. Mod-added items from user/mods/*/db/CustomItems/*.json(c)
   // Mod items define name, price and traders inline — no assort.json involvement.
   // Loaded after handbook (need currency rates) and ragfair blacklist (need customBanned).
+  // For mods that inject items purely in code (no CustomItems JSON), see the DEFERRED
+  // fetchLiveServerItems() helper above — wire it in here when such a mod is installed.
   const modsDir = path.join(SPT_PATH, 'user', 'mods');
   const MOD_CURRENCY_TPL = {
     MONEY_ROUBLES: CURRENCY_RUB,
@@ -458,9 +530,15 @@ function main() {
           const mBonus   = (mhb != null && mMult != null) ? Math.round(mhb * mMult) : null;
           const mFloor   = (mhb != null && USE_TRADER_FLOOR) ? Math.round(mhb * K_trader) : 0;
           const mCeiling = fleaCeilingFor(tpl, mhb);
+          // Offer-time multiplier (itemPriceMultiplier) — the lever the viewer uses
+          // to edit MOD-item prices (overrides don't work here, the mod re-sets the
+          // price). Applied to the raw base, before the ceiling, matching SPT.
+          const mOfferMult = fleaMultiplierMap[tpl];
+          const mBaseRaw   = (mBonus != null) ? ((mflea ?? 0) + mBonus) : null;  // = GetFleaPriceForItem
           let mEff = null;
-          if (mBonus != null) {
-            mEff = Math.max((mflea ?? 0) + mBonus, mFloor);
+          if (mBaseRaw != null) {
+            mEff = Math.max(mBaseRaw, mFloor);
+            if (mOfferMult != null) mEff = Math.round(mEff * mOfferMult);
             if (mCeiling != null && mEff > mCeiling) mEff = mCeiling;
           }
 
@@ -485,7 +563,9 @@ function main() {
             fleaMultiplier:     mMult,
             isHideoutCraftItem: mIsCraft,
             fleaOverride:       null,          // override has no effect on mod items (mod re-sets the price)
-            effectiveFleaPrice: mEff,          // = fleaPriceRoubles + basePrice×M (clamped)
+            fleaOfferMultiplier: mOfferMult != null ? mOfferMult : null,  // itemPriceMultiplier[tpl] — the working lever for mod items
+            fleaBaseRaw:        mBaseRaw,      // = fleaPriceRoubles + basePrice×M (what the multiplier scales)
+            effectiveFleaPrice: mEff,          // = clamp(fleaBaseRaw × offerMult, floor, ceiling)
             fleaBanned:        fleaBanReasons.length > 0,
             fleaBanReasons,
             traders: modTraders,

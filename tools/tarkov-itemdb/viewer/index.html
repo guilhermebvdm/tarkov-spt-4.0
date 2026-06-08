@@ -36,6 +36,7 @@
   </div>
 
   <div class="bulk-refresh">
+    <button type="button" class="bulk-btn" id="rescan-mods" data-tip="Reler a base local do SPT (pega itens de mods recém-adicionados). Não busca tarkov.dev/market." data-tip-pos="bottom">⟳ rescan</button>
     <button type="button" class="bulk-btn" id="refresh-all-dev" data-tip="Atualizar TODOS os preços via tarkov.dev" data-tip-pos="bottom">↻ dev</button>
     <button type="button" class="bulk-btn" id="refresh-all-market" data-tip="Atualizar TODOS os preços via tarkov-market" data-tip-pos="bottom">↻ market</button>
   </div>
@@ -527,14 +528,16 @@ function buildBanFilter() {
 }
 
 function buildOverrideFilter() {
-  // Count items by override state (fleaOverride != null = price pinned via ragfair.json).
-  let overrideCount = 0, vanillaCount = 0;
+  // Count items by "edited" state: price pinned via ragfair.json — either an
+  // additive override (vanilla items) or an offer-multiplier (mod items).
+  let editedCount = 0, vanillaCount = 0;
   for (const it of ITEM_LIST) {
-    if (it.spt && it.spt.fleaOverride != null) overrideCount++; else vanillaCount++;
+    const s = it.spt;
+    if (s && (s.fleaOverride != null || s.fleaOfferMultiplier != null)) editedCount++; else vanillaCount++;
   }
   const options = [
-    { value: 'override', label: 'Com override', iconHtml: '<span class="badge badge--override">OVR</span>', count: overrideCount },
-    { value: 'vanilla',  label: 'Sem override', count: vanillaCount },
+    { value: 'override', label: 'Editado', iconHtml: '<span class="badge badge--override">OVR</span>', count: editedCount },
+    { value: 'vanilla',  label: 'Não editado', count: vanillaCount },
   ];
 
   try {
@@ -824,8 +827,10 @@ function bindControls() {
   fleaWidget.addEventListener('click', () => openFleaMinLevelEditor(fleaWidget));
 
   // Bulk "update all" buttons (topbar)
+  const rescanBtn = document.getElementById('rescan-mods');
   const devAllBtn = document.getElementById('refresh-all-dev');
   const mktAllBtn = document.getElementById('refresh-all-market');
+  if (rescanBtn) rescanBtn.addEventListener('click', () => rescanMods());
   if (devAllBtn) devAllBtn.addEventListener('click', () => refreshAll('dev'));
   if (mktAllBtn) mktAllBtn.addEventListener('click', () => refreshAll('market'));
 
@@ -892,10 +897,11 @@ function filterItems() {
       if (!match) continue;
     }
     if (selectedOverrides.size > 0) {
-      const hasOverride = !!(it.spt && it.spt.fleaOverride != null);
+      const s = it.spt;
+      const edited = !!(s && (s.fleaOverride != null || s.fleaOfferMultiplier != null));
       let match = false;
-      if (selectedOverrides.has('override') && hasOverride)  match = true;
-      if (selectedOverrides.has('vanilla')  && !hasOverride) match = true;
+      if (selectedOverrides.has('override') && edited)  match = true;
+      if (selectedOverrides.has('vanilla')  && !edited) match = true;
       if (!match) continue;
     }
     if (selectedMods.size > 0) {
@@ -1148,16 +1154,23 @@ function renderRow(it) {
     ? `<small><span class="badge badge--src-${c.priceFleaSource.replace(/\./g,'-')}">${c.priceFleaSource}</span></small>`
     : '';
 
-  const hasOverride = it.spt && it.spt.fleaOverride != null;
-  const overrideTip = hasOverride
-    ? `Override ativo em ragfair.json — flea fixado em ${c.priceFleaSpt != null ? c.priceFleaSpt.toLocaleString('en-US') + ' ₽' : '?'} (override=${it.spt.fleaOverride.toLocaleString('en-US')}). Click na célula para editar / restaurar.`
-    : '';
-  const overrideBadge = hasOverride
-    ? ` <small><span class="badge badge--override" data-tip="${escapeAttr(overrideTip)}">OVR</span></small>`
-    : '';
+  // "Edited" badge: vanilla items via additive override (OVR), mod items via
+  // offer-multiplier (×N — the override doesn't work for them).
+  const sptBlk = it.spt || {};
+  const hasOverride = sptBlk.fleaOverride != null;
+  const hasMult     = sptBlk.fleaOfferMultiplier != null;
+  let editBadge = '';
+  if (hasOverride) {
+    const overrideTip = `Override ativo em ragfair.json — flea fixado em ${c.priceFleaSpt != null ? c.priceFleaSpt.toLocaleString('en-US') + ' ₽' : '?'} (override=${sptBlk.fleaOverride.toLocaleString('en-US')}). Click na célula para editar / restaurar.`;
+    editBadge = ` <small><span class="badge badge--override" data-tip="${escapeAttr(overrideTip)}">OVR</span></small>`;
+  } else if (hasMult) {
+    const multStr = (+sptBlk.fleaOfferMultiplier.toFixed(4)).toString();
+    const multTip = `Item do mod ${it.modSource || '?'} — preço ajustado via ragfair.json:itemPriceMultiplier (×${multStr}). Flea ≈ ${c.priceFleaSpt != null ? c.priceFleaSpt.toLocaleString('en-US') + ' ₽' : '?'}. O override não funciona em item de mod; o multiplicador sim. Click na célula para editar / restaurar.`;
+    editBadge = ` <small><span class="badge badge--mult" data-tip="${escapeAttr(multTip)}">×${escapeHtml(multStr)}</span></small>`;
+  }
   const fleaSptCell = (banned
     ? `<span class="price is-banned">${banIcon}${c.priceFleaSpt != null ? fmtRub(c.priceFleaSpt) : '—'}</span>`
-    : fmtRub(c.priceFleaSpt)) + overrideBadge;
+    : fmtRub(c.priceFleaSpt)) + editBadge;
 
   return `<tr data-id="${it.id}" class="${banned?'is-banned':''}">
     <td class="col-img">${img}</td>
@@ -1405,7 +1418,7 @@ function openCellActions(cell) {
   const banLabel = isBanned ? 'Unban item' : 'Ban item';
   const banIcon  = isBanned ? ICON_OK : ICON_BANNED;
   const banClass = isBanned ? 'is-unban' : 'is-ban';
-  const hasOverride = !!(item.spt && item.spt.fleaOverride != null);
+  const hasEdit = !!(item.spt && (item.spt.fleaOverride != null || item.spt.fleaOfferMultiplier != null));
 
   cell.classList.add('has-actions');
   const menu = document.createElement('div');
@@ -1414,7 +1427,7 @@ function openCellActions(cell) {
     `<button class="cell-actions__item" data-action="edit" type="button">` +
       `<span class="ico">${ICON_EDIT}</span><span>Edit price</span>` +
     `</button>` +
-    (hasOverride ? `<button class="cell-actions__item is-restore" data-action="restore" type="button">` +
+    (hasEdit ? `<button class="cell-actions__item is-restore" data-action="restore" type="button">` +
       `<span class="ico">${ICON_REFRESH}</span><span>Restaurar default</span>` +
     `</button>` : '') +
     `<button class="cell-actions__item ${banClass}" data-action="ban" type="button">` +
@@ -1473,7 +1486,7 @@ async function restoreOverride(cell) {
   });
   const data = await r.json();
   if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
-  if (item.spt) { item.spt.fleaOverride = null; item.spt.effectiveFleaPrice = data.effectiveFleaPrice; }
+  if (item.spt) { item.spt.fleaOverride = null; item.spt.fleaOfferMultiplier = null; item.spt.effectiveFleaPrice = data.effectiveFleaPrice; }
   item.consolidated = data.consolidated;
   const row = cell.closest('tr[data-id]');
   if (row) {
@@ -1481,7 +1494,8 @@ async function restoreOverride(cell) {
     tmp.innerHTML = renderRow(item);
     row.replaceWith(tmp.firstElementChild);
   }
-  toast(`${item.shortName || tpl}: override removido → vanilla ${data.effectiveFleaPrice != null ? data.effectiveFleaPrice.toLocaleString('pt-BR') : '—'} ₽`, 'ok');
+  const what = data.mode === 'multiplier' ? 'multiplicador removido' : 'override removido';
+  toast(`${item.shortName || tpl}: ${what} → default ${data.effectiveFleaPrice != null ? data.effectiveFleaPrice.toLocaleString('pt-BR') : '—'} ₽`, 'ok');
 }
 
 function confirmBanAction(cell, menu, banning) {
@@ -1534,13 +1548,15 @@ function openInlineEdit(cell) {
   if (!item) return;
   if (cell.querySelector('.edit-form')) return; // already editing
   const spt = item.spt || {};
-  // Show the EFFECTIVE flea price (override or vanilla, floored) — that's what
-  // the cell displays and what the user is adjusting.
+  const isMod = !!item.modSource;
+  // Show the EFFECTIVE flea price (override/multiplier or default, floored) —
+  // that's what the cell displays and what the user is adjusting.
   const current = spt.effectiveFleaPrice != null ? spt.effectiveFleaPrice : '';
-  const bonus = spt.fleaPrice;          // additive term (handbook × M); override = X − bonus
+  const bonus = spt.fleaPrice;          // additive term (handbook × M); override = X − bonus (vanilla)
+  const base  = spt.fleaBaseRaw != null ? spt.fleaBaseRaw : (spt.effectiveFleaPrice != null ? spt.effectiveFleaPrice : null);  // multiplier base (mod) = X / base
   const floor = spt.fleaFloor || 0;     // flea can't go below this
   const ceiling = spt.fleaCeiling != null ? spt.fleaCeiling : null;  // flea can't go above this (mods/electronics)
-  const hasOverride = spt.fleaOverride != null;
+  const hasEdit = spt.fleaOverride != null || spt.fleaOfferMultiplier != null;
 
   // Append the form as an absolute overlay so the cell keeps its original
   // dimensions and surrounding rows don't reflow when we enter edit mode.
@@ -1548,17 +1564,21 @@ function openInlineEdit(cell) {
   const form = document.createElement('form');
   form.className = 'edit-form';
   form.onsubmit = (e) => { e.preventDefault(); return false; };
-  const inputTip = `Preço flea desejado. Grava override = preço − ${bonus != null ? bonus.toLocaleString('en-US') : '?'} em ragfair.json:itemPriceOverrideRouble. ` +
-                   (floor > 0 ? `Mín ${floor.toLocaleString('en-US')} ₽ (piso = handbook × trader). ` : '') +
-                   (ceiling != null ? `Máx ${ceiling.toLocaleString('en-US')} ₽ (teto Electronics/Weapon Mod = handbook × multiplicador).` : '');
+  const inputTip = isMod
+    ? `Preço flea desejado. Item do mod ${item.modSource} — grava itemPriceMultiplier = preço / ${base != null ? base.toLocaleString('en-US') : '?'} em ragfair.json (o override não funciona em item de mod, o multiplicador sim). ` +
+      (ceiling != null ? `Máx ${ceiling.toLocaleString('en-US')} ₽ (teto unreasonableModPrices).` : '')
+    : `Preço flea desejado. Grava override = preço − ${bonus != null ? bonus.toLocaleString('en-US') : '?'} em ragfair.json:itemPriceOverrideRouble. ` +
+      (floor > 0 ? `Mín ${floor.toLocaleString('en-US')} ₽ (piso = handbook × trader). ` : '') +
+      (ceiling != null ? `Máx ${ceiling.toLocaleString('en-US')} ₽ (teto Electronics/Weapon Mod = handbook × multiplicador).` : '');
   const hintParts = [];
+  if (isMod && base != null) hintParts.push(`base ${base.toLocaleString('en-US')}`);
   if (floor > 0)      hintParts.push(`mín ${floor.toLocaleString('en-US')}`);
   if (ceiling != null) hintParts.push(`máx ${ceiling.toLocaleString('en-US')}`);
   form.innerHTML =
     `<input type="number" min="${floor || 0}"${ceiling != null ? ` max="${ceiling}"` : ''} step="1" value="${current}" autofocus data-tip="${escapeAttr(inputTip)}">` +
     `<div class="edit-form__actions">` +
       `<button class="save" type="button" title="Salvar (Enter)">Salvar</button>` +
-      (hasOverride ? `<button class="restore" type="button" title="Restaurar preço vanilla (remove o override)">↺</button>` : '') +
+      (hasEdit ? `<button class="restore" type="button" title="Restaurar preço default (remove a edição)">↺</button>` : '') +
       `<button class="cancel" type="button" title="Cancelar (Esc)">×</button>` +
     `</div>` +
     (hintParts.length ? `<div class="edit-form__hint">${hintParts.join(' · ')}</div>` : '');
@@ -1617,8 +1637,13 @@ function openInlineEdit(cell) {
       if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP '+r.status));
 
       const prevEff = item.spt && item.spt.effectiveFleaPrice != null ? item.spt.effectiveFleaPrice : null;
-      if (!item.spt) item.spt = { basePrice: null, fleaPrice: null, fleaFloor: 0, fleaOverride: null, effectiveFleaPrice: null, fleaBanned: false, fleaBanReasons: [], traders: [] };
-      item.spt.fleaOverride = data.override;
+      if (!item.spt) item.spt = { basePrice: null, fleaPrice: null, fleaFloor: 0, fleaOverride: null, fleaOfferMultiplier: null, fleaBaseRaw: null, effectiveFleaPrice: null, fleaBanned: false, fleaBanReasons: [], traders: [] };
+      if (data.mode === 'multiplier') {
+        item.spt.fleaOfferMultiplier = data.multiplier;
+        if (data.base != null) item.spt.fleaBaseRaw = data.base;
+      } else {
+        item.spt.fleaOverride = data.override;
+      }
       item.spt.effectiveFleaPrice = data.effectiveFleaPrice;
       item.consolidated = data.consolidated;
       closeForm();   // remove the form + its capture-phase doc listener before the row is replaced
@@ -1681,11 +1706,30 @@ function confirmDialog({ title, body, confirmText = 'Confirmar', cancelText = 'C
 }
 
 function setBulkBusy(busy) {
-  for (const id of ['refresh-all-dev', 'refresh-all-market']) {
+  for (const id of ['rescan-mods', 'refresh-all-dev', 'refresh-all-market']) {
     const b = document.getElementById(id);
     if (b) { b.disabled = busy; b.classList.toggle('is-busy', busy); }
   }
   document.body.classList.toggle('is-bulk-busy', busy);
+}
+
+// Rescan the local SPT DB (load-spt + normalize, no external fetch) → reload.
+// Picks up mod items added/removed since the last run. Fast; no confirm needed.
+async function rescanMods() {
+  setBulkBusy(true);
+  toast('Relendo a base do SPT (mods + preços)…', 'ok');
+  try {
+    const r = await fetch('/api/rescan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    const data = await r.json();
+    if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+    const secs = data.durationMs != null ? ` em ${(data.durationMs / 1000).toFixed(1)}s` : '';
+    const mods = data.modCount != null ? ` (${data.modCount} de mods)` : '';
+    toast(`${(data.itemCount || 0).toLocaleString('pt-BR')} itens${mods}${secs} — recarregando…`, 'ok');
+    setTimeout(() => location.reload(), 800);
+  } catch (err) {
+    setBulkBusy(false);
+    toast(`Falha no rescan: ${err.message}`, 'err');
+  }
 }
 
 // Bulk update all items from one source (dev | market): confirm → busy → POST

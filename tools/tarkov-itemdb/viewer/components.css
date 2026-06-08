@@ -1035,6 +1035,13 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
   font-size: 9px; letter-spacing: .4px; height: 14px; padding: 0 4px;
 }
 
+/* Mod-item price edit uses ragfair itemPriceMultiplier (×N), not an additive
+ * override — distinct hue so the two edit mechanisms read apart at a glance. */
+.badge--mult {
+  background: #6f5bd0; color: #fff;
+  font-size: 9px; letter-spacing: .3px; height: 14px; padding: 0 4px;
+}
+
 /* ── Source-coded column headers — match the colored borders used in the
  * detail source-cards so the eye links column ↔ section. */
 .tbl thead th.col-flea-spt    { color: var(--accent); }

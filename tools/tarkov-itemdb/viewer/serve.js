@@ -418,6 +418,33 @@ function handleRefreshAll(req, res) {
   });
 }
 
+// POST /api/rescan — re-read the LOCAL SPT database (incl. mod items added under
+// user/mods/*/db/CustomItems since the last run) and re-merge, WITHOUT hitting
+// tarkov.dev/market. Fast (load-spt reads from disk — the SPT server need not be
+// running). Use after installing/removing a mod to pick up its items + prices.
+// Body: none.
+function handleRescan(req, res) {
+  let body = '';
+  req.on('data', c => { body += c; if (body.length > 1e6) req.destroy(); });
+  req.on('end', () => {
+    const t0 = Date.now();
+    withWriteLock(async () => {
+      await runScript('load-spt.js', []);   // re-read SPT DB + user/mods + ragfair (overrides + multipliers)
+      await runScript('normalize.js', []);  // re-merge caches → items.json
+      let itemCount = null, modCount = null;
+      try {
+        const items = readJsonFile(ITEMS_JSON);
+        itemCount = Object.keys(items).length;
+        modCount = Object.values(items).filter(i => i && i.modSource).length;
+      } catch (_) {}
+      return sendJson(res, 200, { ok: true, itemCount, modCount, durationMs: Date.now() - t0 });
+    }).catch(e => {
+      console.error('rescan failed:', e);
+      if (!res.headersSent) return sendJson(res, 502, { error: e.message });
+    });
+  });
+}
+
 // Recompute the `consolidated` view from the raw source blocks (spt / tarkovDev /
 // tarkovMarket). Mirrors normalize.js:deriveConsolidated exactly so a live edit
 // or a per-item refresh produces the same result as a full pipeline run. Must
@@ -499,8 +526,56 @@ function handlePatchPrice(req, res) {
         return sendJson(res, 404, { error: 'tpl not in data/items.json — run normalize.js first' });
       }
       if (item.modSource) {
-        return sendJson(res, 422, {
-          error: `"${item.shortName || tpl}" é item do mod ${item.modSource} — não dá pra editar via override. O CustomItemService do mod re-define o preço (Prices[tpl] = fleaPriceRoubles) DEPOIS do override, apagando-o (validado in-game). Pra mudar, edite o fleaPriceRoubles no db/CustomItems do mod.`,
+        // Mod items: the additive override is WIPED by the mod's CustomItemService
+        // (it re-sets Prices[tpl] = fleaPriceRoubles AFTER ApplyFleaPriceOverrides).
+        // The working lever is ragfair.dynamic.itemPriceMultiplier[tpl] — an
+        // offer-time factor (RagfairPriceService.cs:341) applied AFTER the mod's
+        // write. To land on X we write multiplier = X / base, base = fleaBaseRaw
+        // (= fleaPriceRoubles + handbook×M = GetFleaPriceForItem). The multiplier
+        // is applied BEFORE the ceiling, so X is still capped by fleaCeiling.
+        const sptB    = item.spt || {};
+        const base    = sptB.fleaBaseRaw ?? sptB.effectiveFleaPrice ?? null;  // fallback if items.json predates fleaBaseRaw
+        const floor   = sptB.fleaFloor || 0;
+        const ceiling = sptB.fleaCeiling ?? null;
+        if (!base || base <= 0) {
+          return sendJson(res, 422, { error: `sem base de flea para "${item.shortName || tpl}" — multiplicador indefinido (rode rescan/normalize)` });
+        }
+        if (ceiling != null && price > ceiling) {
+          return sendJson(res, 422, {
+            error: `price ${price} acima do teto ${ceiling} (unreasonableModPrices: Weapon Mod ×6 / Electronics ×11). O multiplicador é aplicado antes do teto, então o flea não passa disso.`,
+            ceiling,
+          });
+        }
+        const multiplier = Math.round((price / base) * 1e6) / 1e6;  // 6-decimal precision
+        const ragfair = readJsonFile(RAGFAIR_JSON);
+        if (!ragfair.dynamic) return sendJson(res, 500, { error: 'ragfair.json missing .dynamic' });
+        ragfair.dynamic.itemPriceMultiplier = ragfair.dynamic.itemPriceMultiplier || {};
+        const previousMultiplier = ragfair.dynamic.itemPriceMultiplier[tpl] ?? null;
+        ragfair.dynamic.itemPriceMultiplier[tpl] = multiplier;
+        writeJsonPreservingStyle(RAGFAIR_JSON, ragfair);
+        const checksResult = updateSptChecks({ 'configs/ragfair.json': RAGFAIR_JSON });
+
+        // Sync items.json: effective = clamp(base × multiplier, floor, ceiling) ≈ X.
+        let eff = Math.round(base * multiplier);
+        if (eff < floor) eff = floor;
+        if (ceiling != null && eff > ceiling) eff = ceiling;
+        item.spt.fleaBaseRaw = base;
+        item.spt.fleaOfferMultiplier = multiplier;
+        item.spt.effectiveFleaPrice = eff;
+        recomputeConsolidated(item);
+        fs.writeFileSync(ITEMS_JSON, serializeItems(items), 'utf8');
+
+        appendEditLog({
+          at: new Date().toISOString(), action: 'set-multiplier', tpl,
+          name: item.name || null, shortName: item.shortName || null, modSource: item.modSource,
+          desiredFlea: price, base, multiplier, previousMultiplier,
+          ip: req.socket.remoteAddress || null,
+        });
+
+        return sendJson(res, 200, {
+          ok: true, tpl, mode: 'multiplier', multiplier, previousMultiplier,
+          base, effectiveFleaPrice: eff, ceiling,
+          consolidated: item.consolidated, checks: checksResult,
         });
       }
       const bonus = item.spt ? item.spt.fleaPrice : null;          // handbook × M
@@ -587,6 +662,48 @@ function handleDeletePrice(req, res) {
       if (!item) return sendJson(res, 404, { error: 'tpl not in data/items.json' });
 
       const ragfair = readJsonFile(RAGFAIR_JSON);
+
+      // Mod items are edited via itemPriceMultiplier — restoring default means
+      // removing THAT entry, not the (always-empty) override entry.
+      if (item.modSource) {
+        const mmap = (ragfair.dynamic && ragfair.dynamic.itemPriceMultiplier) || {};
+        const previousMultiplier = mmap[tpl] ?? null;
+        if (previousMultiplier == null) {
+          return sendJson(res, 200, { ok: true, tpl, noop: true, message: 'no multiplier to remove' });
+        }
+        delete mmap[tpl];
+        writeJsonPreservingStyle(RAGFAIR_JSON, ragfair);
+        const checksResult = updateSptChecks({ 'configs/ragfair.json': RAGFAIR_JSON });
+
+        // Restore default mod-item effective price = clamp(base, floor, ceiling).
+        const sptB    = item.spt || {};
+        const base    = sptB.fleaBaseRaw ?? null;
+        const floor   = sptB.fleaFloor || 0;
+        const ceiling = sptB.fleaCeiling ?? null;
+        let eff = base != null ? base : (sptB.effectiveFleaPrice ?? null);
+        if (eff != null) {
+          if (eff < floor) eff = floor;
+          if (ceiling != null && eff > ceiling) eff = ceiling;
+        }
+        if (item.spt) {
+          item.spt.fleaOfferMultiplier = null;
+          item.spt.effectiveFleaPrice = eff;
+          recomputeConsolidated(item);
+        }
+        fs.writeFileSync(ITEMS_JSON, serializeItems(items), 'utf8');
+
+        appendEditLog({
+          at: new Date().toISOString(), action: 'delete-multiplier', tpl,
+          name: item.name || null, shortName: item.shortName || null, modSource: item.modSource,
+          previousMultiplier, effectiveFleaPrice: eff, ip: req.socket.remoteAddress || null,
+        });
+
+        return sendJson(res, 200, {
+          ok: true, tpl, removed: true, mode: 'multiplier', previousMultiplier,
+          effectiveFleaPrice: eff, consolidated: item.consolidated, checks: checksResult,
+        });
+      }
+
       const map = (ragfair.dynamic && ragfair.dynamic.itemPriceOverrideRouble) || {};
       const previousOverride = map[tpl] ?? null;
       if (previousOverride == null) {
@@ -789,6 +906,7 @@ http.createServer((req, res) => {
   if (req.method === 'POST' && req.url === '/api/refresh-dev')    return handleRefreshDev(req, res);
   if (req.method === 'POST' && req.url === '/api/refresh-market') return handleRefreshMarket(req, res);
   if (req.method === 'POST' && req.url === '/api/refresh-all')    return handleRefreshAll(req, res);
+  if (req.method === 'POST' && req.url === '/api/rescan')         return handleRescan(req, res);
   if (req.method === 'POST' && req.url === '/api/flea-min-level') return handleFleaMinLevel(req, res);
 
   let urlPath = decodeURIComponent(req.url.split('?')[0]);

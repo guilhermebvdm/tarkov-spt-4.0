@@ -353,7 +353,9 @@ function main() {
       fleaMultiplier:     s.fleaMultiplier ?? null,       // M: 1.5/2.3 std/craft, or 1.8/2.5 tpl/type overrides
       isHideoutCraftItem: s.isHideoutCraftItem === true,
       fleaOverride:       s.fleaOverride ?? null,         // ragfair.json:itemPriceOverrideRouble[tpl], or null
-      effectiveFleaPrice: s.effectiveFleaPrice ?? null,   // max((override ?? pricesDisk ?? 0) + bonus, floor)
+      fleaOfferMultiplier: s.fleaOfferMultiplier ?? null, // ragfair.json:itemPriceMultiplier[tpl] — offer-time factor (lever for mod items), or null
+      fleaBaseRaw:        s.fleaBaseRaw ?? null,          // = GetFleaPriceForItem (raw base the offer-multiplier scales)
+      effectiveFleaPrice: s.effectiveFleaPrice ?? null,   // clamp((override ?? pricesDisk ?? 0 + bonus) × offerMult, floor, ceiling)
       fleaBanned:         s.fleaBanned === true,
       fleaBanReasons:     s.fleaBanReasons || [],
       traders:            s.traders || [],
