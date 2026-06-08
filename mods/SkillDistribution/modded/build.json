@@ -1,0 +1,19 @@
+{
+	"info":{
+		"name": "skilldistribution",
+		"version": "1.2.2",
+		"spt": "4.0"
+	},
+	"dest": {
+		"client": "BepInEx/plugins/",
+		"server": "SPT/user/mods/SkillDistribution/"
+	},
+	"files": {
+		"SkillDistributionServer/bin/Release/net9.0/SkillDistribution-Server.dll": "server",
+		"SkillDistributionServer/config": "server",
+		"SkillDistributionClient/bin/Release/netstandard2.1/SkillDistribution-Client.dll": "client"
+	},
+	"ignore": [
+		"**/*.md"
+	]
+}

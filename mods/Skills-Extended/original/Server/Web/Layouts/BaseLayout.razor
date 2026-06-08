@@ -1,0 +1,83 @@
+﻿@inherits LayoutComponentBase
+
+@inject ISnackbar Snackbar
+@inject ConfigController ConfigController
+@inject UpdateChecker UpdateChecker
+
+<HeadContent>
+    <link href="@Assets["_content/MudBlazor/MudBlazor.min.css"]" rel="stylesheet" />
+    <meta name="robots" content="noindex, nofollow">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&amp;family=Roboto:ital,wght@0,100..900;1,100..900&amp;display=swap" rel="stylesheet">
+</HeadContent>
+
+<MudThemeProvider IsDarkMode="true"/>
+<MudPopoverProvider/>
+<MudSnackbarProvider/>
+<MudDialogProvider/>
+
+<main>
+    <script src="@Assets["_content/MudBlazor/MudBlazor.min.js"]"></script>
+    <MudLayout>
+        <MudAppBar Color="Color.Dark"
+                   Fixed="true"
+                   Elevation="4">
+
+            <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Style="width: 100%;">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Style="width: 100%;">
+                    <!-- Left side -->
+                    <MudIconButton Icon="@Icons.Custom.Brands.GitHub"
+                                   Color="Color.Inherit"
+                                   Href="@SeModMetadata.Instance.Url"/>
+
+                    <MudText Style="font-size: 12px">
+                        Version: @SeModMetadata.Instance.Version.ToString() for SPT: @SeModMetadata.Instance.SptVersion.ToString()
+                    </MudText>
+                    
+                    @if (ConfigController.ServerConfig.CheckForUpdates && UpdateChecker.UpdateAvailable)
+                    {
+                        <MudText Style="font-size: 12px">
+                            Version: @UpdateChecker.ReleaseInformation!.Version Available
+                        </MudText>
+                    }
+                    
+                    <MudSwitch @bind-Value="@ConfigController.ServerConfig.CheckForUpdates" 
+                               Label="Check For Updates" 
+                               Color="Color.Info" 
+                    />
+                </MudStack>
+            
+                <MudButton Color="Color.Success"
+                           Style="font-size: 12px;"
+                           OnClick="SaveConfig"
+                           Variant="Variant.Outlined">
+                    Save Config
+                </MudButton>  
+            
+            </MudStack>
+        </MudAppBar>
+        
+        <MudDrawer Width="250px" 
+                   Open="true" 
+                   ClipMode="DrawerClipMode.Always" 
+                   Elevation="5" 
+                   Variant="@DrawerVariant.Mini" 
+                   OpenMiniOnHover="true" 
+                   Breakpoint="Breakpoint.None">
+            <NavMenu/>
+        </MudDrawer>
+        
+        <MudMainContent>
+            @Body
+        </MudMainContent>
+    </MudLayout>
+</main>
+
+@code {
+    private async Task SaveConfig()
+    {
+        await ConfigController.SaveSkillsConfig();
+        await ConfigController.SaveServerConfig();
+        
+        Snackbar.Add("Config Saved.", Severity.Success);
+    }
+}

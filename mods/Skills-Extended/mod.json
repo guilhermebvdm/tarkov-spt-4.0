@@ -1,0 +1,11 @@
+{
+  "name": "Skills-Extended",
+  "upstream_url": "https://github.com/CJ-SPT/Skills-Extended",
+  "upstream_sha": "d7afed666f884a4816e933d09089540569203727",
+  "upstream_branch": "master",
+  "forge_url": "",
+  "license": "CC-BY-NC-ND-4.0",
+  "version_base": "2.2.2",
+  "spt_version": "4.0.2",
+  "created_at": "2026-06-07T02:17:29Z"
+}

@@ -12,6 +12,10 @@ mods/**/builds/*
 # Engine/reference DLLs copied from the SPT/EFT install — not source, large and licensed.
 mods/**/References/*.dll
 
+# Heavy mod assets — Unity bundles and showcase images (re-fetchable from upstream).
+mods/**/*.bundle
+mods/**/*.webp
+
 # Node / TypeScript
 node_modules/
 *.log

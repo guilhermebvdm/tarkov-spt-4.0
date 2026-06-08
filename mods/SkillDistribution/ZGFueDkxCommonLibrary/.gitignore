@@ -1,0 +1,10 @@
+/node_modules/
+/package.json
+/package-lock.json
+/dist/
+
+**/.vs/
+**/bin/
+**/obj/
+
+TODO.md

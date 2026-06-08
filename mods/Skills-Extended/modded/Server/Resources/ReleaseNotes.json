@@ -1,0 +1,150 @@
+[
+  {
+    "Version": "2.2.1",
+    "ReleaseDate": "December 17, 2025",
+    "IsLatest": true,
+    "Features": [],
+    "Improvements": [],
+    "BugFixes": [
+      "Fixes incompatibility with medical attention (Infinite hideout loading)",
+      "Fixes bots being stuck on doors when hosting a raid using the Fika headless"
+    ]
+  },
+  {
+    "Version": "2.2.0",
+    "ReleaseDate": "December 11, 2025",
+    "IsLatest": false,
+    "Features": [
+      "Automatic Fika detection -- This will allow for features to be disabled by me to ensure fika compatibility",
+      "Automatic Fika detection -- Lockpicking will be automatically disabled if fika is present. Lock-picks will be left in-game as to not corrupt profiles",
+      "Automatic Update Checker -- There will be a notification in the config page when an update is available",
+      "All skill buffs in the Physical category are now configurable",
+      "New Always level endurance option",
+      "New Always level strength option"
+    ],
+    "Improvements": [
+      "New common dll for this mod to share between the client and server, this is distributed with the mod. This is required so I can easily share common interfaces.",
+      "Internal code change: Each Physical skill is now its own class so their functionality can be expanded in the future"
+    ],
+    "BugFixes": [
+      "Fixes 2 missing door entries on streets",
+      "Fixes a missing door entry on customs",
+      "Fixes \"Object Reference not set to an instance of an object\" on raid start on the fika headless"
+    ]
+  },
+  {
+    "Version": "2.1.1",
+    "ReleaseDate": "November 9, 2025",
+    "IsLatest": false,
+    "Features": [
+      "Adds a skill level changer to the config web page -- You do not need to save any changes it is applied automatically",
+      "Shadow connections now provides a chance for your scav to be generated as a cultist at a rate of 0.5% per level"
+    ],
+    "Improvements": [
+      "All config value percentages are now real numbers. Meaning if you want 1.5% per level, the value is 1.5%, not 0.015",
+      "Clamps the max discount accrued to 90% for trading discounts -- This ensures that the price is never zero and bugs out",
+      "Update Russian locale for 2.1.0 locales"
+    ],
+    "BugFixes": [
+      "Fixes a bug where the original stored value before modification for Light bleeds and Heavy bleeds was set to the fracture cost",
+      "Fixes a bug where a benign error message stating could not find skill X in profile would appear in the server",
+      "Fixes a bug where the your scav would be ready as soon as you would leave raid",
+      "Fixes a bug where 0 use lock-picks could be picked up again and used below the threshold"
+    ]
+  },
+  {
+    "Version": "2.1.0",
+    "ReleaseDate": "October 30, 2025",
+    "IsLatest": false,
+    "Features": [
+      "New Skill `Shadow Connections`",
+      "New Skill `Bear Raw Power`",
+      "New Skill `Usec Negotiations`",
+      "New config editor pages for the above skills"
+    ],
+    "Improvements": [
+      "Labyrinth doors are now able to be lock picked",
+      "Added `Attempts per door before lock breaks` to the config web page",
+      "All locales are set to english across all languages, then that languages locale file is loaded on-top of it to prevent missing locales. English is better than none",
+      "There is as now an error box that pops up when launching the game if the SkillsExtended.dll is not found in the plugins folder but the patcher exists",
+      "Door lock sweet spot ranges are now static for the duration of the raid, previously they would be randomized on every attempt leading to confusion",
+      "Field Medicine no longer increases the delay of stimulator effects, this often times increased the delay of positive effects",
+      "Updated Russian locales",
+      "Updated Korean locales",
+      "Updated Spanish locales",
+      "General code quality improvements"
+    ],
+    "BugFixes": [
+      "Fixes \"The given key `Labyrinth` was not present in the dictionary\"",
+      "Fixes a BSG bug where the `Military Checkpoint` key could not be used on customs",
+      "Fixes Strength speed buff for bushes and swamps",
+      "Fixes Strength elite buff for jumping and sprinting in bushes and swamps",
+      "Fixes Silent Ops buff scaling not behaving as intended",
+      "Fixes Field medicine skill cap buff (NOTE: Not all buffs can take advantage of this, I will work on that later)",
+      "Fixes Field medicine increasing the chance of negative stimulator effects",
+      "Fixes various typo's in english locales",
+      "Fixes locale related exceptions for all locales",
+      "Fixes missing crafts for all locales",
+      "Fixes a bug where changing lockpicking max attempts did nothing",
+      "Fixes an exploit where backing out of the lockpicking game did not remove a use from the lock-pick set",
+      "Fixes a bug where pressing the interact key while already in the lock-picking game reset the locks position and incremented the counter for tries on that door"
+    ]
+  },
+  {
+    "Version": "2.0.3",
+    "ReleaseDate": "October 23, 2025",
+    "IsLatest": false,
+    "Features": [],
+    "Improvements": [
+      "Massively simplified the config system, values should now all make sense and reflect correctly in-game",
+      "Rebalance of many config values, these are subject to change and feedback",
+      "Added better tooltips for some config editor fields",
+      "Updated RU locale to be inline with the EN locale",
+      "Base pick time before it breaks is now 1.50 seconds up from 1.25 seconds",
+      "Pick sweet spot range is now 3.75 degrees up from 3.50 degrees",
+      "Added AK-50 to the NATO weapons list"
+    ],
+    "BugFixes": [
+      "Crafts should now exist for RU locales"
+    ]
+  },
+  {
+    "Version": "2.0.2",
+    "ReleaseDate": "October 22, 2025",
+    "IsLatest": false,
+    "Features": [
+      "Reintroduces custom achievements"
+    ],
+    "Improvements": [],
+    "BugFixes": [
+      "Fixed skill buffs zeroing out after a scav raid",
+      "Fixed missing `Old House` door on woods",
+      "Fixed missing `Knossos LLC facility` door on shoreline (Labyrinth still WIP)",
+      "Fixed linux path bug"
+    ]
+  },
+  {
+    "Version": "2.0.1",
+    "ReleaseDate": "October 20, 2025",
+    "IsLatest": false,
+    "Features": [
+      "Config Editor"
+    ],
+    "Improvements": [
+      "Removed a bunch of debug logging from release builds"
+    ],
+    "BugFixes": [
+      "Fixed excessive skill share ratio being applied to the Eastern Weapons skill when using NATO weapons"
+    ]
+  },
+  {
+    "Version": "2.0.0",
+    "ReleaseDate": "October 19, 2025",
+    "IsLatest": false,
+    "Features": [
+      "The Resurrection of the mod from its eternal bit nap in the cloud."
+    ],
+    "Improvements": [],
+    "BugFixes": []
+  }
+]
