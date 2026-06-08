@@ -9,6 +9,8 @@ Target framework: .NET (Unity Mono runtime ≥ 6.0 for client mods; matching SPT
 
 This skill covers the **C# / runtime** concerns. Lifecycle, raid hooks and SPT-specific rules are in `spt-mod-best-practices`.
 
+> **📦 Itens/inventário/equipamento/hideout:** ao mexer com essas estruturas (árvore `_id`/`_tpl`/`parentId`/`slotId`, `location {x,y,r}`, presets, munição, hideout), consulte `docs/technical/inventario-itens-spt4.md` — fonte de verdade canônica.
+
 ## 1. Memory ownership
 
 ### Disposal

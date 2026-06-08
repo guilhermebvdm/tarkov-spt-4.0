@@ -7,7 +7,10 @@ description: Technical best practices for SPT 4.0 / EFT 0.16.x client and server
 
 Apply this skill whenever the task touches code in `mods/<mod>/modded/` or its specs/reviews. Pair with `csharp-mod-best-practices` for language-level rules.
 
+> **📦 Itens / inventário / equipamento / contêineres / armas compostas / presets / munição / hideout:** antes de escrever ou revisar **qualquer** código que toque essas estruturas, **leia `docs/technical/inventario-itens-spt4.md`** — fonte de verdade canônica para `_id`/`_tpl`/`parentId`/`slotId`, `location {x,y,r}` em grades, slots de equipamento, carregador/câmara, presets, re-id ao clonar árvores, e hideout (`Areas`/`HideoutAreas`). Não montar árvore de item "de cabeça" — confira lá.
+
 Authoritative references (in this repo) — full evidence hierarchy in `.agents/resources.md` → "Hierarquia de evidência":
+- **Itens/inventário/hideout:** `docs/technical/inventario-itens-spt4.md` (estrutura de árvore de item, `location`, presets, hideout)
 - Decompiled client assembly: `references/eft-decompiled/Assembly-CSharp/`
 - SPT server source: `references/spt-source/` (server-side logic; gitignored — see `references/README.md`)
 - FIKA (coop): `references/fika-server/`, `references/fika-plugin/` (`Fika.Core`), `references/fika-headless/`
