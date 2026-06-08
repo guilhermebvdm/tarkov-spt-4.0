@@ -20,7 +20,24 @@ public class ModUpdaterController : ControllerBase
 
     private static string GetUpdaterBasePath()
     {
-        return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Launcher-Updater");
+        string currentDir = AppDomain.CurrentDomain.BaseDirectory;
+        
+        // Procurar a pasta Launcher-Updater subindo até 4 níveis
+        for (int i = 0; i < 4; i++)
+        {
+            string testPath = Path.Combine(currentDir, "Launcher-Updater");
+            if (Directory.Exists(testPath))
+            {
+                return Path.GetFullPath(testPath);
+            }
+            
+            string parent = Path.GetDirectoryName(currentDir);
+            if (string.IsNullOrEmpty(parent) || parent == currentDir) break;
+            currentDir = parent;
+        }
+
+        // Fallback (o que estava antes) caso não exista ainda
+        return Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "Launcher-Updater"));
     }
 
     private static string GetModsRepoPath() => Path.Combine(GetUpdaterBasePath(), "mods_repo");
@@ -183,15 +200,54 @@ public class ModUpdaterController : ControllerBase
                 _fileMapCache[relPath] = file;
             }
 
+            string[] managedPaths = Array.Empty<string>();
+            string[] deleteFiles = Array.Empty<string>();
+            string[] ignoredFiles = Array.Empty<string>();
+            object optionalGroupsArray = Array.Empty<object>();
+
+            string configPath = Path.Combine(GetUpdaterBasePath(), "config.json");
+            if (!System.IO.File.Exists(configPath))
+            {
+                var defaultConfig = new
+                {
+                    managedPaths = new[] { "BepInEx/plugins", "user/mods" },
+                    deleteFiles = Array.Empty<string>(),
+                    ignoredFiles = new[] { "BepInEx/plugins/spt", "user/mods/spt" },
+                    optionalGroups = Array.Empty<object>()
+                };
+                System.IO.File.WriteAllText(configPath, JsonSerializer.Serialize(defaultConfig, new JsonSerializerOptions { WriteIndented = true }));
+            }
+
+            try
+            {
+                var configContent = System.IO.File.ReadAllText(configPath);
+                var doc = JsonDocument.Parse(configContent);
+                var root = doc.RootElement;
+
+                if (root.TryGetProperty("managedPaths", out var mpProp) && mpProp.ValueKind == JsonValueKind.Array)
+                    managedPaths = mpProp.EnumerateArray().Select(x => x.GetString()).Where(x => x != null).Cast<string>().ToArray();
+                if (root.TryGetProperty("deleteFiles", out var dfProp) && dfProp.ValueKind == JsonValueKind.Array)
+                    deleteFiles = dfProp.EnumerateArray().Select(x => x.GetString()).Where(x => x != null).Cast<string>().ToArray();
+                if (root.TryGetProperty("ignoredFiles", out var ifProp) && ifProp.ValueKind == JsonValueKind.Array)
+                    ignoredFiles = ifProp.EnumerateArray().Select(x => x.GetString()).Where(x => x != null).Cast<string>().ToArray();
+                if (root.TryGetProperty("optionalGroups", out var ogProp) && ogProp.ValueKind == JsonValueKind.Array)
+                    optionalGroupsArray = JsonSerializer.Deserialize<object[]>(ogProp.GetRawText()) ?? Array.Empty<object>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ModUpdater] Erro ao ler config.json: {ex.Message}");
+            }
+
             var manifestObj = new
             {
-                serverVersion = "1.4.0",
+                serverVersion = "1.4.1",
+                launcherVersion = "1.4.1",
                 generatedAt = DateTime.UtcNow.ToString("O"),
                 totalFiles = files.Count,
-                managedPaths = Array.Empty<string>(),
-                deleteFiles = Array.Empty<string>(),
-                ignoredFiles = Array.Empty<string>(),
-                optionalGroups = Array.Empty<object>(),
+                managedPaths = managedPaths,
+                deleteFiles = deleteFiles,
+                ignoredFiles = ignoredFiles,
+                optionalGroups = optionalGroupsArray,
                 files = files
             };
 
@@ -203,8 +259,10 @@ public class ModUpdaterController : ControllerBase
             _manifestHash = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
             _manifestCache = manifestObj;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Console.WriteLine($"[ModUpdater] Critical error generating manifest: {ex.Message}");
+            Console.WriteLine(ex.StackTrace);
         }
         finally
         {

@@ -9,18 +9,21 @@ namespace SPT.Launcher.Helpers
 {
     public static class LauncherUpdateHelper
     {
-        public const string CurrentVersion = "1.1.36"; // Versão corrente do launcher que será compilado agora.
+        public const string CurrentVersion = "1.4.3"; // Versão corrente do launcher que será compilado agora.
 
         public static async Task<bool> CheckAndUpdateAsync(string serverUrl, IProgress<int> progress = null)
         {
             try
             {
-                using var client = new HttpClient();
+                var handler = new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
+                };
+                using var client = new HttpClient(handler);
                 client.Timeout = TimeSpan.FromSeconds(10);
                 
-                // O mod.js roda um servidor HTTP puro na porta 7075
-                var uri = new Uri(serverUrl);
-                string updateServerUrl = $"http://{uri.Host}";
+                // O mod roda dentro do SPT Server, então usa a mesma URL e Porta
+                string updateServerUrl = serverUrl.TrimEnd('/');
                 
                 string versionUrl = $"{updateServerUrl}/redline/launcher/version";
                 var response = await client.GetAsync(versionUrl);
@@ -41,6 +44,7 @@ namespace SPT.Launcher.Helpers
             }
             catch (Exception ex)
             {
+                global::SPT.Launcher.Controllers.LogManager.Instance.Error($"[AutoUpdate] Erro ao buscar atualização do launcher: {ex.ToString()}");
                 Debug.WriteLine($"[AutoUpdate] Erro ao buscar atualização do launcher: {ex.Message}");
             }
             
@@ -61,10 +65,15 @@ namespace SPT.Launcher.Helpers
             string currentExe = Process.GetCurrentProcess().MainModule?.FileName;
             if (string.IsNullOrEmpty(currentExe)) return;
 
-            string updateExe = Path.Combine(Environment.CurrentDirectory, "SPT.Launcher_Update.exe");
-            string batFile = Path.Combine(Environment.CurrentDirectory, "update_launcher.bat");
+            string currentDir = Path.GetDirectoryName(currentExe);
+            string updateExe = Path.Combine(currentDir, "SPT.Launcher_Update.exe");
+            string batFile = Path.Combine(currentDir, "update_launcher.bat");
 
-            using var client = new HttpClient();
+            var handler = new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
+            };
+            using var client = new HttpClient(handler);
             using var response = await client.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
 
@@ -124,6 +133,7 @@ del ""%~f0""
             var startInfo = new ProcessStartInfo
             {
                 FileName = batFile,
+                WorkingDirectory = currentDir,
                 UseShellExecute = true,
                 CreateNoWindow = true,
                 WindowStyle = ProcessWindowStyle.Hidden

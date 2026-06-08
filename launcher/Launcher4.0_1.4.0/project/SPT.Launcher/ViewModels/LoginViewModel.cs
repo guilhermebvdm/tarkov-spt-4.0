@@ -114,6 +114,11 @@ namespace SPT.Launcher.ViewModels
                             if (LauncherSettingsProvider.Instance.RememberUsername)
                             {
                                 LauncherSettingsProvider.Instance.LastUsername = Login.Username;
+                                LauncherSettingsProvider.Instance.LastPassword = Login.Password;
+                            }
+                            else
+                            {
+                                LauncherSettingsProvider.Instance.LastPassword = "";
                             }
 
                             LauncherSettingsProvider.Instance.SaveSettings();
@@ -186,7 +191,18 @@ namespace SPT.Launcher.ViewModels
                         }
                     case AccountStatus.NoConnection:
                         {
-                            NavigateTo(new ConnectServerViewModel(HostScreen));
+                            // Se estiver em auto-login e der falha de conexão,
+                            // quebra o loop para não ficar voltando infinitamente para o ConnectServerViewModel.
+                            if (LauncherSettingsProvider.Instance.UseAutoLogin)
+                            {
+                                LauncherSettingsProvider.Instance.UseAutoLogin = false;
+                                LauncherSettingsProvider.Instance.SaveSettings();
+                                SendNotification("", "Erro de conexão ao tentar fazer o Auto-Login. Auto-Login desativado.", NotificationType.Error);
+                            }
+                            else
+                            {
+                                NavigateTo(new ConnectServerViewModel(HostScreen));
+                            }
                             break;
                         }
                 }
@@ -286,6 +302,7 @@ namespace SPT.Launcher.ViewModels
                 && !string.IsNullOrEmpty(LauncherSettingsProvider.Instance.LastUsername))
             {
                 Login.Username = LauncherSettingsProvider.Instance.LastUsername;
+                Login.Password = LauncherSettingsProvider.Instance.LastPassword;
             }
 
             // Salvar settings quando checkboxes de login mudam

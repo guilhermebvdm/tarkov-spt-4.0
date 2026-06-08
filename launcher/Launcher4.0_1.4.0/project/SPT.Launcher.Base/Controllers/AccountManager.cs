@@ -68,8 +68,13 @@ namespace SPT.Launcher
 
                 json = RequestHandler.RequestAccount(data);
             }
-            catch
+            catch (Exception ex)
             {
+                LogManager.Instance.Error($"[Login] Exception in RequestLogin/RequestAccount: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    LogManager.Instance.Error($"[Login] InnerException: {ex.InnerException.Message}");
+                }
                 return AccountStatus.NoConnection;
             }
 
@@ -127,7 +132,7 @@ namespace SPT.Launcher
             {
                 registerStatus = RequestHandler.RequestRegister(data);
 
-                if (registerStatus != STATUS_OK)
+                if (registerStatus == STATUS_FAILED || string.IsNullOrEmpty(registerStatus))
                 {
                     return AccountStatus.RegisterFailed;
                 }

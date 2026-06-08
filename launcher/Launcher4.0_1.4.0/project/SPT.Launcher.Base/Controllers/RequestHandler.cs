@@ -50,7 +50,7 @@ namespace SPT.Launcher
 
         public static string RequestAccount(LoginRequestData data)
         {
-            return request.PostJson("/launcher/profile/get", Json.Serialize(data));
+            return request.PostJson("/redline/profile/get", Json.Serialize(data), compress: false, decompressResponse: false);
         }
 
         public static string RequestProfileInfo(LoginRequestData data)
@@ -70,7 +70,7 @@ namespace SPT.Launcher
 
         public static string RequestChangePassword(ChangeRequestData data)
         {
-            return request.PostJson("/launcher/profile/change/password", Json.Serialize(data));
+            return request.PostJson("/redline/password/change", Json.Serialize(data), compress: false, decompressResponse: false);
         }
 
         public static string RequestWipe(RegisterRequestData data)
@@ -167,8 +167,7 @@ namespace SPT.Launcher
         {
             try
             {
-                var backendUri = new Uri(request.RemoteEndPoint);
-                string url = $"http://{backendUri.Host}/launcher/mods/download?file={Uri.EscapeDataString(filePath)}";
+                string url = $"{request.RemoteEndPoint}/launcher/mods/download?file={Uri.EscapeDataString(filePath)}";
 
                 var httpRequest = WebRequest.Create(new Uri(url));
                 httpRequest.Method = "GET";
@@ -196,9 +195,7 @@ namespace SPT.Launcher
         {
             try
             {
-                // Extrair host do endpoint principal (ex: https://127.0.0.1:6969 -> 127.0.0.1)
-                var backendUri = new Uri(request.RemoteEndPoint);
-                string hwidUrl = $"http://{backendUri.Host}{path}";
+                string hwidUrl = $"{request.RemoteEndPoint}{path}";
 
                 var httpRequest = WebRequest.Create(new Uri(hwidUrl));
                 httpRequest.Method = "POST";
@@ -244,8 +241,7 @@ namespace SPT.Launcher
         {
             try
             {
-                var backendUri = new Uri(request.RemoteEndPoint);
-                string hwidUrl = $"http://{backendUri.Host}{path}";
+                string hwidUrl = $"{request.RemoteEndPoint}{path}";
 
                 var httpRequest = WebRequest.Create(new Uri(hwidUrl));
                 httpRequest.Method = "GET";

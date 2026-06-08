@@ -298,7 +298,7 @@ namespace SPT.Launcher.ViewModels
         /// </summary>
         private async Task ForceCheckForUpdates()
         {
-            string gamePath = Path.Combine(AppContext.BaseDirectory, "SPT");
+            string gamePath = LauncherSettingsProvider.Instance.GamePath;
             string hashFilePath = Path.Combine(gamePath, "user", "launcher", "manifest_hash.txt");
 
             // Deletar hash local para forçar scan completo
@@ -317,8 +317,8 @@ namespace SPT.Launcher.ViewModels
         /// </summary>
         private async Task CheckForUpdates()
         {
-            // Sempre usa a pasta onde o launcher está (raiz do jogo)
-            string gamePath = Path.Combine(AppContext.BaseDirectory, "SPT");
+            // Sempre usa a pasta onde o jogo está configurado
+            string gamePath = LauncherSettingsProvider.Instance.GamePath;
 
             bool manifestFailed = false;
 
@@ -361,7 +361,7 @@ namespace SPT.Launcher.ViewModels
                     localManifestHash = File.ReadAllText(hashFilePath).Trim();
                 }
 
-                bool skipFileScan = (!string.IsNullOrEmpty(serverManifestHash) && serverManifestHash == localManifestHash);
+                bool skipFileScan = false; // Desabilitado a pedido: força o launcher a sempre verificar integridade local
 
                 if (skipFileScan)
                 {
@@ -599,7 +599,7 @@ namespace SPT.Launcher.ViewModels
             if (_filesToUpdate.Count == 0 && _filesToDelete.Count == 0) return;
 
             LogManager.Instance.Info($"[Profile] Iniciando atualização: {_filesToUpdate.Count} arquivos para baixar, {_filesToDelete.Count} para deletar");
-            string gamePath = Path.Combine(AppContext.BaseDirectory, "SPT");
+            string gamePath = LauncherSettingsProvider.Instance.GamePath;
             CanUpdate = false;
             LauncherSettingsProvider.Instance.IsUpdating = true;
             int totalActions = _filesToUpdate.Count + _filesToDelete.Count;

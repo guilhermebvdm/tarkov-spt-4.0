@@ -9,13 +9,13 @@
     <NoWin32Manifest>true</NoWin32Manifest>
     <AssemblyName>Tarkov Red Line</AssemblyName>
     <Product>Tarkov Red Line</Product>
-    <Version>1.1.36</Version>
-    <AssemblyVersion>1.1.36.0</AssemblyVersion>
-    <FileVersion>1.1.36.0</FileVersion>
+    <Version>1.4.3</Version>
+    <AssemblyVersion>1.4.3.0</AssemblyVersion>
+    <FileVersion>1.4.3.0</FileVersion>
   </PropertyGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\wireguard-amd64-1.0.1.msi">
-      <LogicalName>WireGuardInstaller</LogicalName>
+    <EmbeddedResource Include="Resources\tailscale-setup-1.98.4-amd64.msi">
+      <LogicalName>TailscaleInstaller</LogicalName>
     </EmbeddedResource>
     <AvaloniaResource Include="Assets\**" />
     <AvaloniaXaml Remove="Properties\**" />

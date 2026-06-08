@@ -297,12 +297,20 @@ namespace SPT.Launcher
         {
             var rootdir = new DirectoryInfo(Path.Combine(gamePath, "SPT", "user", "sptappdata"));
 
-            if (!rootdir.Exists)
+            bool success = true;
+            if (rootdir.Exists)
             {
-                return true;
+                success = RemoveFilesRecurse(rootdir);
             }
 
-            return RemoveFilesRecurse(rootdir);
+            // Also clear the launcher manifest hash to force a full update check on next login
+            string hashFile = Path.Combine(gamePath, "SPT", "user", "launcher", "manifest_hash.txt");
+            if (File.Exists(hashFile))
+            {
+                try { File.Delete(hashFile); } catch { }
+            }
+
+            return success;
         }
 
         bool RemoveFilesRecurse(DirectoryInfo basedir)
