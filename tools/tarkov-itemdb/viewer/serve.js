@@ -210,10 +210,11 @@ function fetchTarkovMarketItem(name, tpl) {
         try {
           const data = JSON.parse(Buffer.concat(chunks).toString('utf8'));
           const arr = Array.isArray(data) ? data : (data ? [data] : []);
-          // Prefer the exact bsgId match; fall back to the sole result if the
-          // name query returned exactly one item.
-          const match = arr.find(x => x && x.bsgId === tpl) || (arr.length === 1 ? arr[0] : null);
-          if (!match) return reject(new Error(`item not found on tarkov-market (q="${name}", ${arr.length} results)`));
+          // Require an EXACT bsgId match — never accept a sole fuzzy result, which
+          // for an item tarkov-market doesn't list would store the wrong item's
+          // price (the q= name search is fuzzy). Better no data than wrong data.
+          const match = arr.find(x => x && x.bsgId === tpl);
+          if (!match) return reject(new Error(`item not on tarkov-market (q="${name}", ${arr.length} results, none with bsgId ${tpl})`));
           resolve(match);
         } catch (e) { reject(e); }
       });

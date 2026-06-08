@@ -570,6 +570,7 @@ function main() {
             fleaBanReasons,
             traders: modTraders,
             modSource: modName,
+            cloneTpl: def.itemTplToClone || null,  // mod items clone a vanilla base; used as image proxy in normalize
           };
           modFilesCount++;
           modItemCount++;

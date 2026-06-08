@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-08T01:20:36.585Z",
+  "generatedAt": "2026-06-08T01:58:21.381Z",
   "sources": {
     "tarkovDev": {
       "fetchedAt": "2026-06-07T19:25:09.806Z",
@@ -12,7 +12,7 @@
       "count": 4279
     },
     "spt": {
-      "loadedAt": "2026-06-08T01:20:36.228Z",
+      "loadedAt": "2026-06-08T01:58:20.974Z",
       "fleaPricesMtime": "2026-06-07T05:35:40.763Z",
       "fleaPricesSource": "handbook",
       "fleaMinUserLevel": 1,
@@ -35,6 +35,6 @@
     "withTarkovDevOnly": 817,
     "withTarkovMarketOnly": 21,
     "tradeable": 5099,
-    "onlySptNoImage": 842
+    "onlySptNoImage": 663
   }
 }

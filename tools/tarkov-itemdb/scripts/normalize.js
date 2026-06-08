@@ -22,7 +22,7 @@ const DATA_DIR  = path.join(__dirname, '..', 'data');
 
 const ITEM_KEYS = [
   'id', 'name', 'shortName', 'normalizedName', 'wikiLink',
-  'image', 'category', 'types', 'dims', 'grids',
+  'image', 'imageFromClone', 'category', 'types', 'dims', 'grids',
   'modSource',
   'spt', 'tarkovDev', 'tarkovMarket', 'consolidated',
 ];
@@ -275,12 +275,24 @@ function main() {
     const shortName      = (d && d.shortName)       || (s && s.shortName) || null;
     const normalizedName = (d && d.normalizedName)  || null;
     const wikiLink       = (d && d.wikiLink)        || null;
-    const image = d ? {
+    let image = d ? {
       icon:  d.iconLink       || null,
       grid:  d.gridImageLink  || null,
       large: d.image512pxLink || null,
     } : null;
-    if (!d && s) onlySptNoImage++;
+    let imageFromClone = false;
+    // Mod items aren't on tarkov.dev (no image). They clone a vanilla base
+    // (itemTplToClone) whose real custom icon only exists as an in-game-rendered
+    // bundle prefab — no static PNG ships. Use the cloned vanilla item's tarkov.dev
+    // icon as a representative proxy (100% coverage for the installed WTT mods).
+    if (!image && s && s.cloneTpl) {
+      const cd = devPveById.get(s.cloneTpl);
+      if (cd && (cd.iconLink || cd.gridImageLink || cd.image512pxLink)) {
+        image = { icon: cd.iconLink || null, grid: cd.gridImageLink || null, large: cd.image512pxLink || null };
+        imageFromClone = true;
+      }
+    }
+    if (!image && s) onlySptNoImage++;
 
     const dims = d ? {
       weight: d.weight ?? null,
@@ -406,7 +418,7 @@ function main() {
     const item = {
       id: tpl,
       name, shortName, normalizedName, wikiLink,
-      image,
+      image, imageFromClone,
       category,
       types,
       dims,

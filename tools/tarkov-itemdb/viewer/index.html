@@ -340,6 +340,21 @@ function pctVsSpt(value, sptValue) {
   return `<span class="pct ${cls}">${arrow} ${sign}${pct.toFixed(1)}%</span>`;
 }
 
+// External (dev/market) prices for cheap/niche mods are frequently polluted by
+// troll listings (e.g. a Glock rear sight at 2,000,000 on tarkov.dev and 99,656
+// on tarkov-market — both real API values, both garbage). These columns are
+// reference-only and never drive the SPT flea, so we don't alter the value — we
+// just flag one that towers over the SPT flea so it isn't trusted at face value.
+// Mirrors SPT's own unreasonableModPrices spirit (×6).
+const TROLL_FACTOR = 6;
+const TROLL_MIN_ABS = 50000;
+function trollFlag(value, sptValue) {
+  if (value == null || sptValue == null || sptValue <= 0) return '';
+  if (value < TROLL_MIN_ABS || value <= sptValue * TROLL_FACTOR) return '';
+  const x = Math.round(value / sptValue);
+  return ` <span class="troll-flag" data-tip="Provável troll listing: ${value.toLocaleString('en-US')} ₽ é ~${x}× o flea SPT (${sptValue.toLocaleString('en-US')} ₽). Valor real da fonte externa, mas não confiável como referência.">⚠</span>`;
+}
+
 // ── Load ────────────────────────────────────────────────────────────────────
 // Render skeleton rows synchronously, before kicking off fetch — first paint
 // shows shimmer placeholders instead of blank/text.
@@ -1103,7 +1118,10 @@ function thWithDelta(valueKey, deltaKey, label, klass) {
 function renderRow(it) {
   const c = it.consolidated;
   const img = (it.image && it.image.icon)
-    ? `<img src="${escapeAttr(it.image.icon)}" alt="" loading="lazy">`
+    ? `<div class="img-wrap">` +
+        `<img src="${escapeAttr(it.image.icon)}" alt="" loading="lazy"${it.imageFromClone ? ' class="is-proxy"' : ''}>` +
+        (it.imageFromClone ? `<span class="img-proxy-mark" data-tip="Imagem do item vanilla clonado (proxy) — o ícone custom do mod só existe renderizado in-game">≈</span>` : '') +
+      `</div>`
     : '<div class="no-img">—</div>';
   const cond = c.conditionType || 'unknown';
   const condBadge = `<span class="badge badge--${cond}">${cond}</span>`;
@@ -1180,8 +1198,8 @@ function renderRow(it) {
     <td class="col-reward">${rewardCell}</td>
     <td class="num">${trader}</td>
     <td class="num cell-edit ${c.priceFleaSpt==null && !banned?'price is-null':'price'}" data-edit-tpl="${it.id}" data-tip="Click for actions (edit price / ban)" data-tip-pos="bottom"><div class="cell-num"><div class="cell-num__value">${fleaSptCell}</div></div><span class="cell-edit__icon" aria-hidden="true">${ICON_EDIT}</span></td>
-    <td class="num cell-refresh ${c.priceFleaDevAvg24h==null?'price is-null':'price'}" data-refresh-tpl="${it.id}" data-tip="Click to update price on tarkov.dev" data-tip-pos="bottom"><div class="cell-num"><div class="cell-num__value">${fmtRub(c.priceFleaDevAvg24h)}</div>${pctVsSpt(c.priceFleaDevAvg24h, c.priceFleaSpt)}</div><span class="cell-refresh__icon" aria-hidden="true">${ICON_REFRESH}</span><span class="cell-refresh__spinner" aria-hidden="true"></span></td>
-    <td class="num cell-refresh cell-refresh-market ${c.priceFleaMarketAvg24h==null?'price is-null':'price'}" data-refresh-tpl="${it.id}" data-tip="Click para atualizar via tarkov-market" data-tip-pos="bottom"><div class="cell-num"><div class="cell-num__value">${fmtRub(c.priceFleaMarketAvg24h)}</div>${pctVsSpt(c.priceFleaMarketAvg24h, c.priceFleaSpt)}</div><span class="cell-refresh__icon" aria-hidden="true">${ICON_REFRESH}</span><span class="cell-refresh__spinner" aria-hidden="true"></span></td>
+    <td class="num cell-refresh ${c.priceFleaDevAvg24h==null?'price is-null':'price'}" data-refresh-tpl="${it.id}" data-tip="Click to update price on tarkov.dev" data-tip-pos="bottom"><div class="cell-num"><div class="cell-num__value">${fmtRub(c.priceFleaDevAvg24h)}${trollFlag(c.priceFleaDevAvg24h, c.priceFleaSpt)}</div>${pctVsSpt(c.priceFleaDevAvg24h, c.priceFleaSpt)}</div><span class="cell-refresh__icon" aria-hidden="true">${ICON_REFRESH}</span><span class="cell-refresh__spinner" aria-hidden="true"></span></td>
+    <td class="num cell-refresh cell-refresh-market ${c.priceFleaMarketAvg24h==null?'price is-null':'price'}" data-refresh-tpl="${it.id}" data-tip="Click para atualizar via tarkov-market" data-tip-pos="bottom"><div class="cell-num"><div class="cell-num__value">${fmtRub(c.priceFleaMarketAvg24h)}${trollFlag(c.priceFleaMarketAvg24h, c.priceFleaSpt)}</div>${pctVsSpt(c.priceFleaMarketAvg24h, c.priceFleaSpt)}</div><span class="cell-refresh__icon" aria-hidden="true">${ICON_REFRESH}</span><span class="cell-refresh__spinner" aria-hidden="true"></span></td>
   </tr>`;
 }
 

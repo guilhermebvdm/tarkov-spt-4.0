@@ -1042,6 +1042,26 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
   font-size: 9px; letter-spacing: .3px; height: 14px; padding: 0 4px;
 }
 
+/* Troll-listing flag on a dev/market reference price that towers over the SPT
+ * flea (probable parked listing). Informational only — the value is unchanged. */
+.troll-flag {
+  color: #e0a93a; font-size: 11px; margin-left: 3px; cursor: help;
+}
+
+/* Mod-item images are a proxy: the cloned vanilla item's icon (the real custom
+ * icon only exists as an in-game-rendered bundle). Mark it so it isn't mistaken
+ * for the exact skin. */
+.img-wrap { position: relative; display: inline-block; line-height: 0; }
+.img-wrap img.is-proxy { opacity: .9; }
+/* Selector carries .img-wrap so it outranks the tooltip system's
+ * `[data-tip]{position:relative}` (equal specificity, defined later). */
+.img-wrap .img-proxy-mark {
+  position: absolute; top: 1px; right: 1px;
+  font-size: 9px; line-height: 1; color: #d8cda0;
+  background: rgba(0,0,0,.6); border-radius: 3px; padding: 1px 3px;
+  cursor: help;
+}
+
 /* ── Source-coded column headers — match the colored borders used in the
  * detail source-cards so the eye links column ↔ section. */
 .tbl thead th.col-flea-spt    { color: var(--accent); }
