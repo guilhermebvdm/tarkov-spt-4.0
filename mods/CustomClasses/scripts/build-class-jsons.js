@@ -17,15 +17,15 @@
  *
  * Ammo: dentro de `primary`, ammo[0] = arma primária, ammo[1] = pistola (ordem das recipes do RZ).
  *
- * Fontes: anchor-items.json (id→bsgId) e items.json (categoria) do RZ/tarkov-itemdb.
+ * Fontes: scripts/anchor-items.json (id→bsgId, cópia própria) e tools/tarkov-itemdb/data/items.json (categoria).
  */
 'use strict';
 const fs = require('fs');
 const path = require('path');
 
 const REPO = path.resolve(__dirname, '../../..');
-const RZ = path.join(REPO, 'mods/RZCustomProfiles');
-const ANCHOR = JSON.parse(fs.readFileSync(path.join(RZ, 'backlog/anchor-items.json'), 'utf8'));
+// item 007: anchor próprio (cópia local) — sem dependência de mods/RZCustomProfiles (aposentado).
+const ANCHOR = JSON.parse(fs.readFileSync(path.join(__dirname, 'anchor-items.json'), 'utf8'));
 const DB = JSON.parse(fs.readFileSync(path.join(REPO, 'tools/tarkov-itemdb/data/items.json'), 'utf8'));
 const OUT_DIR = path.join(__dirname, '../modded/Server/config/classes');
 
