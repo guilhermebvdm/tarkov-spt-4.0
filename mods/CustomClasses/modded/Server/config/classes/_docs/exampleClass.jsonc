@@ -1,0 +1,39 @@
+{
+  // "name" (REQUIRED): launcher edition label + unique key.
+  "name": "Example Class",
+
+  // "enabled" (optional, default true): set false to disable this class without deleting the file.
+  "enabled": true,
+
+  // "baseEdition" (optional, default "SPT Zero to hero"): a VANILLA edition cloned as the base
+  // (e.g. "SPT Zero to hero", "Standard"). "SPT Zero to hero" starts with an EMPTY stash so the
+  // class fully controls its own items. Do NOT point this at another custom class (load-order dependent).
+  "baseEdition": "SPT Zero to hero",
+
+  // "description" (optional): text shown in the launcher. Item 008 (i18n): accepts a plain STRING
+  // (legacy = English/fallback) OR an OBJECT per language. The launcher shows it in the SERVER's
+  // language (locale "pt*" -> pt, otherwise en; empty -> the class name).
+  //   "description": "English only fallback"
+  //   "description": { "en": "Combat medic...", "pt": "Médico de combate..." }
+  "description": { "en": "Example class demonstrating the CustomClasses JSON format.", "pt": "Classe de exemplo demonstrando o formato JSON do CustomClasses." },
+
+  // "skills" (optional): skill name -> starting level (0..51). Unknown names are ignored with a warning.
+  "skills": {
+    "Endurance": 5,
+    "Strength": 3
+  },
+
+  // "skillMultipliers" (optional, item 005/010): skill name -> XP gain factor.
+  // 1.0 = vanilla; 2.0 = +100% (buff, green arrow/border); 0.5 = -50% (debuff, red arrow/border).
+  // Unknown skills are ignored with a warning. Shown on the Skills screen (border + arrow + tooltip).
+  //
+  // Skills-Extended (item 006): these 4 skills are revived by the SE mod (com.cj.SkillsExtended).
+  // A multiplier for them only takes effect with the SE installed; without it, the server logs a
+  // warning and the multiplier is inert (the skill never gains XP):
+  //   FirstAid, FieldMedicine, BearRawpower, UsecNegotiations
+  "skillMultipliers": {
+    "Endurance": 1.5,
+    "CovertMovement": 0.7,
+    "FirstAid": 1.5
+  }
+}

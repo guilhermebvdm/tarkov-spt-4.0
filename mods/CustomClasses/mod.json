@@ -1,0 +1,11 @@
+{
+  "name": "CustomClasses",
+  "upstream_url": "",
+  "upstream_sha": "",
+  "upstream_branch": "",
+  "forge_url": "",
+  "license": "MIT",
+  "version_base": "0.1.0",
+  "spt_version": "4.0.13",
+  "created_at": "2026-06-07"
+}

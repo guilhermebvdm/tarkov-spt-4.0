@@ -1,0 +1,173 @@
+{
+  "name": "Caçador",
+  "baseEdition": "SPT Zero to hero",
+  "description": {
+    "en": "Sniper. Patient and precise. Owns elevated positions, minimises movement and eliminates before being spotted.",
+    "pt": "Sniper. Paciente e preciso. Domina posições elevadas, minimiza movimento e elimina antes de ser detectado."
+  },
+  "skills": {
+    "Sniper": 8,
+    "Endurance": 5,
+    "Perception": 6,
+    "Attention": 4,
+    "CovertMovement": 5
+  },
+  "skillMultipliers": {
+    "Sniper": 2,
+    "Perception": 1.5,
+    "CovertMovement": 1.5,
+    "Attention": 1.3,
+    "Assault": 0.7
+  },
+  "hideout": {
+    "Heating": 1
+  },
+  "outfit": {
+    "usec": {
+      "upper": "64ef3fa81a5f313cb144bf89",
+      "lower": "5e9dccd686f774343b592592"
+    },
+    "bear": {
+      "upper": "64ef3fa81a5f313cb144bf89",
+      "lower": "5d1f647186f7744bce0ef70c"
+    }
+  },
+  "loadout": {
+    "equipped": {
+      "FirstPrimaryWeapon": {
+        "preset": "55801eed4bdc2d89578b4588",
+        "premium": true,
+        "loadedMag": true,
+        "chambered": true,
+        "ammo": "5887431f2459777e1612938f"
+      },
+      "Holster": {
+        "preset": "5448bd6b4bdc2dfc2f8b4569",
+        "loadedMag": true,
+        "ammo": "5737201124597760fc4431f1"
+      },
+      "ArmorVest": {
+        "tpl": "5df8a2ca86f7740bfe6df777"
+      },
+      "Headwear": {
+        "tpl": "5b432d215acfc4771e1c6624"
+      },
+      "TacticalVest": {
+        "tpl": "5c0e746986f7741453628fe5"
+      },
+      "Backpack": {
+        "tpl": "59e763f286f7742ee57895da"
+      }
+    },
+    "stash": [
+      {
+        "tpl": "5449016a4bdc2d6f028b456f",
+        "count": 100000
+      },
+      {
+        "tpl": "544fb45d4bdc2dee738b4568",
+        "count": 2
+      },
+      {
+        "tpl": "5751a25924597722c463c472",
+        "count": 6
+      },
+      {
+        "tpl": "5af0454c86f7746bf20992e8",
+        "count": 1
+      },
+      {
+        "tpl": "544fb37f4bdc2dee738b4567",
+        "count": 2
+      },
+      {
+        "tpl": "590c5f0d86f77413997acfab",
+        "count": 2
+      },
+      {
+        "tpl": "5448ff904bdc2d6f028b456e",
+        "count": 1
+      },
+      {
+        "tpl": "5c0fa877d174af02a012e1cf",
+        "count": 2
+      },
+      {
+        "tpl": "5bffdc370db834001d23eca8",
+        "count": 1
+      },
+      {
+        "tpl": "5f4f9eb969cdc30ff33f09db",
+        "count": 1
+      },
+      {
+        "tpl": "5755383e24597772cb798966",
+        "count": 1
+      },
+      {
+        "tpl": "57347da92459774491567cf5",
+        "count": 3
+      },
+      {
+        "tpl": "590c695186f7741e566b64a2",
+        "count": 3
+      },
+      {
+        "tpl": "559ba5b34bdc2d1f1a8b4582",
+        "count": 4
+      },
+      {
+        "tpl": "5887431f2459777e1612938f",
+        "count": 200
+      },
+      {
+        "tpl": "5c82342f2e221644f31c060e",
+        "count": 1
+      },
+      {
+        "tpl": "671126a210d67adb5b08e925",
+        "count": 1
+      },
+      {
+        "tpl": "5448bd6b4bdc2dfc2f8b4569",
+        "count": 2
+      },
+      {
+        "tpl": "5448c12b4bdc2d02308b456f",
+        "count": 6
+      },
+      {
+        "tpl": "5737201124597760fc4431f1",
+        "count": 60
+      },
+      {
+        "tpl": "590c678286f77426c9660122",
+        "count": 3
+      },
+      {
+        "tpl": "5ae08f0a5acfc408fb1398a1",
+        "count": 2
+      },
+      {
+        "tpl": "5648a7494bdc2d9d488b4583",
+        "count": 2
+      },
+      {
+        "tpl": "5c06c6a80db834001b735491",
+        "count": 2
+      },
+      {
+        "tpl": "5648a69d4bdc2ded0b8b457b",
+        "count": 2
+      },
+      {
+        "tpl": "56e335e4d2720b6c058b456d",
+        "count": 2
+      },
+      {
+        "tpl": "57513f07245977207e26a311",
+        "count": 2
+      }
+    ]
+  }
+}

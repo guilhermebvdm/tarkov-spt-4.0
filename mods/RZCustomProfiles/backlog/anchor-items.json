@@ -682,6 +682,17 @@
     "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Mosin_7.62x54R_bolt-action_rifle_(Infantry)",
     "updated": "2026-05-04T01:14:11.000Z"
   },
+  "MOSIN_SNIPER": {
+    "id": "MOSIN_SNIPER",
+    "query": "Mosin 7.62x54R bolt-action rifle (Sniper)",
+    "name": "Mosin 7.62x54R bolt-action rifle (Sniper)",
+    "shortName": "Mosin Sniper",
+    "bsgId": "5ae08f0a5acfc408fb1398a1",
+    "tags": [
+      "Weapon",
+      "Bolt_action_rifles"
+    ]
+  },
   "SV98": {
     "id": "SV98",
     "query": "SV-98 7.62x54R bolt-action sniper rifle",
