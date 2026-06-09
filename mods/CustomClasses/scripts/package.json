@@ -1,0 +1,11 @@
+{
+  "name": "customclasses-icon-tools",
+  "private": true,
+  "description": "Authoring-time only: rasterizes vendored game-icons.net SVGs into white PNG class icons (tinted at runtime by the client). Not part of the mod runtime (which is C#).",
+  "scripts": {
+    "build:icons": "node build-icons.mjs"
+  },
+  "devDependencies": {
+    "sharp": "^0.33.5"
+  }
+}

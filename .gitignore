@@ -16,6 +16,9 @@ mods/**/References/*.dll
 mods/**/*.bundle
 mods/**/*.webp
 
+# Generated icon-review contact sheet — reproducible via scripts/preview-icons.mjs.
+mods/**/scripts/preview/
+
 # Node / TypeScript
 node_modules/
 *.log
