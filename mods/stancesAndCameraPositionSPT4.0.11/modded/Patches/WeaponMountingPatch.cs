@@ -127,6 +127,15 @@ namespace CameraRotationMod.Patches
             _collisionRot = Vector3.zero;
         }
 
+        // Reset de início de raid: zera offsets E o cache do TurnAway (force re-cache dos defaults do
+        // effector na próxima ativação — evita cachear um valor já-zerado de um boot/raid anterior).
+        public static void ResetForRaid()
+        {
+            _collisionPos = Vector3.zero;
+            _collisionRot = Vector3.zero;
+            _turnAwayCached = false;
+        }
+
         protected override MethodBase GetTargetMethod()
         {
             _fcField = AccessTools.Field(typeof(ProceduralWeaponAnimation), "_firearmController");

@@ -47,6 +47,13 @@ A implementação era uma **port direta do RealismMod 1.6.4 (SPT 3.11)** sem ada
 3. **`JustSpawned`** distingue spawn de equip mid-raid; é consumido no primeiro equip pós-`OnGameStarted`.
 4. **Maior incerteza do lote.** Risco de softlock se os targets `GClass2055/2016`/`method_18` divergirem do esperado em 0.16. Mitigação: o master toggle restaura o vanilla; os logs `[ManualChamber]` revelam qual gatilho dispara.
 
+### Code-review (2ª rodada) — aplicado e remanescente
+
+- **F2 (🔴) aplicado:** o guard do `ChamberUnload` recuperou `!CanLoadChamber` (paridade Realism `KeyInputPatch1`) — evita rechamber/consumo de munição espúrio.
+- **F1 (🟡) aplicado:** equip com câmara **cheia** agora seta `CanLoadChamber=true; BlockChambering=false` (antes ficava preso em `false` → `SetAmmoCompatiblePatch` forçava `compatible=false` até o próximo reload).
+- **F3 (🟡) NÃO aplicado (aceito):** `JustSpawned` é consumido pelo primeiro equip do player local; se a primeira arma não for de câmara única, o flag é gasto sem decisão e a próxima arma vazia vira "cenário 2 (mid-raid)". Imprecisão documentada.
+- **F8 (🟢) NÃO aplicado:** `SetAmmoCompatiblePatch`/`SetAmmoOnMagPatch` não têm o guard `Stationary` que o Realism tem — pode afetar arma estacionária (metralhadora montada). Fora do escopo do fix; improvável em arma normal.
+
 ## Histórico
 
 | Data | Autor | Alteração |

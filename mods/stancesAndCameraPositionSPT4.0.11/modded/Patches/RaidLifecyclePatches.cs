@@ -28,6 +28,11 @@ namespace CameraRotationMod.Patches
                 ManualChamberingState.Reset();
                 ManualChamberingState.JustSpawned = true;
 
+                // Item 004: garante estado de mount limpo no início (defensivo — cobre reload do BepInEx
+                // ou OnDestroy que não rodou). Re-cacheia os defaults do TurnAwayEffector.
+                MountingManager.ForceNone();
+                MountingCollisionPatch.ResetForRaid();
+
                 // backlog 002 F5 + 06-fix-01 — iniciar em Stance 2 - Low Ready quando habilitado.
                 // Após swap (06-fix-01), Stance 2 passou a ser Low Ready (era Stance 3).
                 // A aplicação efetiva acontece no primeiro Update em que PWA.HandsContainer estiver pronto.

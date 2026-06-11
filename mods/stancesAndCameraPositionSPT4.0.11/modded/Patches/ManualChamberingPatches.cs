@@ -104,6 +104,14 @@ namespace CameraRotationMod.Patches
                     Plugin.Logger.LogDebug("[ManualChamber] Equip vazio: spawn com OnRaidStart=off -> auto-chamber vanilla");
                 }
             }
+            else
+            {
+                // F1: câmara já cheia (ou arma sem chambers) — nada a bloquear. Sem isto, CanLoadChamber
+                // ficava preso em `false` e o SetAmmoCompatiblePatch forçaria compatible=false até o
+                // próximo reload resetar.
+                ManualChamberingState.CanLoadChamber = true;
+                ManualChamberingState.BlockChambering = false;
+            }
 
             __instance.Action_0 = onWeaponAppear;
             __instance.Start();
@@ -335,7 +343,9 @@ namespace CameraRotationMod.Patches
                 var fc = player.HandsController as Player.FirearmController;
                 if (fc == null || fc.Weapon == null) return true;
 
-                if (fc.Weapon.HasChambers && fc.Weapon.Chambers.Length == 1 && fc.Weapon.ChamberAmmoCount == 0)
+                // F2: inclui `!CanLoadChamber` (paridade com Realism KeyInputPatch1) — se a câmara já
+                // pode ser carregada, não faz rechamber manual (evita double-load / consumo espúrio).
+                if (!ManualChamberingState.CanLoadChamber && fc.Weapon.HasChambers && fc.Weapon.Chambers.Length == 1 && fc.Weapon.ChamberAmmoCount == 0)
                 {
                     var mag = fc.Weapon.GetCurrentMagazine();
                     if (mag != null && mag.Count > 0)

@@ -279,7 +279,10 @@ public class Plugin : BaseUnityPlugin
         new Patches.ActionStanceExamineWeaponPatch().Enable();
         new Patches.ActionStanceReloadPatch().Enable();
         new Patches.ActionStanceUnloadMagPatch().Enable();
-        new Patches.ActionStanceUnloadChamberPatch().Enable();   // 008 06-fix-01: esvaziar câmara
+        // 008 06-fix-01: GClass2046 (esvaziar câmara) é volátil entre builds 0.16 — se não resolver,
+        // desabilita só esta feature em vez de lançar e derrubar todos os patches do mod.
+        try { new Patches.ActionStanceUnloadChamberPatch().Enable(); }
+        catch (Exception ex) { Logger.LogWarning($"[008] ActionStanceUnloadChamberPatch não habilitado (GClass2046?): {ex.Message}"); }
         new Patches.ActionStanceOnIdlePatch().Enable();
         new Patches.ActionStanceCheckFireModePatch().Enable();
 

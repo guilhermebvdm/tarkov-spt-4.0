@@ -34,6 +34,9 @@ O item original cobria recarga, checar munição/câmara, examinar arma e checar
 
 1. **`GClass2046` dispara com câmara CHEIA** (esvaziar). O guard `ChamberAmmoCount > 0` mantém o item disjunto do **010** (manual chambering age em câmara VAZIA via `ECommand.ChamberUnload` antes da operação). O log `[ActionStance] UnloadChamber (ChamberAmmoCount=…)` confirma isso na 1ª execução; se também disparar com câmara vazia, o guard já evita o swap espúrio.
 2. **Patchar a base `GClass2046` inclui `FixMalfunctionOperationClass`** (corrigir malfunção também levanta a arma) — aceito como desejável. Para separar, patchar só `GClass2047`/`GClass2049`.
+3. **(code-review F5)** O fim da stance depende do `method_45` (OnIdle) disparar ao término do unload-chamber. Como `GClass2046.Start()` é parameterless (sem `Callback`), não há como envolver um callback de fim como no `ActionStanceUnloadMagPatch`. Se a operação não retornar ao idle, a arma pode ficar "levantada" até o jogador correr/montar (`EndActionStance(forceCancel)` no `Update` mitiga — sem softlock permanente). **Validar in-game.**
+4. **(code-review F7)** O fallback ao `MainPlayer` (quando `FirearmController_0` não resolve) pode disparar o swap por uma operação de peer remoto em Fika/coop. Em SP puro, sem efeito.
+5. **(code-review)** `.Enable()` do patch envolto em try/catch — se `GClass2046` não resolver em algum build 0.16, só esta feature é desabilitada (log `[008]`), o resto do mod carrega.
 
 ## Histórico
 
