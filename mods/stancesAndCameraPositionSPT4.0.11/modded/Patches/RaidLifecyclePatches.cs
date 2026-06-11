@@ -50,7 +50,7 @@ namespace CameraRotationMod.Patches
         [PatchPostfix]
         private static void Postfix()
         {
-            try { StanceManager.OnRaidEnd(); ManualChamberingState.Reset(); }
+            try { StanceManager.OnRaidEnd(); ManualChamberingState.Reset(); MountingManager.ForceNone(); }
             catch (Exception ex) { Plugin.Logger.LogError($"[GameWorldOnDestroyPatch] {ex}"); }
         }
     }

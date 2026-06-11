@@ -140,6 +140,7 @@ namespace CameraRotationMod.Patches
         private static void Postfix(ProceduralWeaponAnimation __instance)
         {
             if (!Plugin._EnableWeaponMounting.Value) { RestoreTurnAway(__instance); return; }
+            if (_fcField == null) return; // reflection não resolveu — degrada sem crashar
 
             Player.FirearmController fc = (Player.FirearmController)_fcField.GetValue(__instance);
             if (fc == null || fc.Weapon == null) return;
@@ -217,9 +218,12 @@ namespace CameraRotationMod.Patches
             }
         }
 
+        private static bool TurnAwayFieldsOk =>
+            _blendField != null && _smoothInField != null && _smoothOutField != null;
+
         private static void DisableTurnAway(ProceduralWeaponAnimation pwa)
         {
-            if (pwa.TurnAway == null) return;
+            if (pwa.TurnAway == null || !TurnAwayFieldsOk) return;
             if (!_turnAwayCached)
             {
                 _origBlend = (float)_blendField.GetValue(pwa.TurnAway);
@@ -234,7 +238,7 @@ namespace CameraRotationMod.Patches
 
         private static void RestoreTurnAway(ProceduralWeaponAnimation pwa)
         {
-            if (pwa.TurnAway == null || !_turnAwayCached) return;
+            if (pwa.TurnAway == null || !_turnAwayCached || !TurnAwayFieldsOk) return;
             _blendField.SetValue(pwa.TurnAway, _origBlend);
             _smoothInField.SetValue(pwa.TurnAway, _origInSmooth);
             _smoothOutField.SetValue(pwa.TurnAway, _origOutSmooth);
