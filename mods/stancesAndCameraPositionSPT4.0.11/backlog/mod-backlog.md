@@ -13,6 +13,7 @@
 | 007 | Inércia e velocidade máxima | Ajusta peso (inércia/turn penalty) e diminui velocidade máxima de caminhada/corrida com sliders no F12. | [007-inercia-velocidade-maxima/](./007-inercia-velocidade-maxima/) | 🟢 |
 | 008 | Stance para Recarga e Checagem | Altera automaticamente para a Stance "Pronto Alto" ao recarregar/checar arma e retorna à stance original após o término. | [008-stance-recarga-checagem/](./008-stance-recarga-checagem/) | 🟢 |
 | 009 | Animação Orgânica (Wiggle) | Adiciona a animação de "jogar" a arma para frente/trás (Wiggle Effect) ao trocar de postura, fugindo do movimento 100% linear. | [009-animacao-transicao-stances/](./009-animacao-transicao-stances/) | 🟢 |
+| 010 | Manual Chambering | Impede o auto-chamber da primeira bala (no spawn, equip e reload com câmara vazia) — o jogador puxa o ferrolho manualmente. Toggles separados por cenário no F12. | [010-manual-chambering/](./010-manual-chambering/) | 🟡 |
 
 ## Legenda
 

@@ -18,7 +18,26 @@ namespace CameraRotationMod.Patches
     public static class ManualChamberingState
     {
         public static bool BlockChambering = false;
-        public static bool CanLoadChamber = true;
+
+        // Default FALSE — alinhado ao RealismMod (Plugin.cs:49). Com `true`, o StartEquipWeapPatch
+        // carregava a primeira bala automaticamente no equip/spawn (sintoma "ainda chambera sozinho").
+        // Vira `true` apenas via RechamberRound (puxar ferrolho manual) ou quando a feature/cenário
+        // está desligado (comportamento vanilla).
+        public static bool CanLoadChamber = false;
+
+        // Flag de "raid recém-iniciada" — setada no GameWorldOnGameStartedPatch e consumida pelo
+        // StartEquipWeapPatch para distinguir o spawn (cenário 1) de uma troca de arma mid-raid (cenário 2),
+        // já que ambos passam pela mesma operação de equip (GClass2055).
+        public static bool JustSpawned = false;
+
+        // Reset completo de estado — chamado em OnRaidStart e OnRaidEnd (anti-resíduo entre raids,
+        // troca de arma, morte, extração).
+        public static void Reset()
+        {
+            BlockChambering = false;
+            CanLoadChamber = false;
+            JustSpawned = false;
+        }
     }
 
     public class ManualChamberingComponent : MonoBehaviour
@@ -66,10 +85,24 @@ namespace CameraRotationMod.Patches
             if (player == null || !player.IsYourPlayer || player.MovementContext == null || player.MovementContext.CurrentState == null || player.MovementContext.CurrentState.Name == EPlayerState.Stationary) return true;
 
             int chamberAmmoCount = __instance.Weapon_0.ChamberAmmoCount;
+            bool isSpawnEquip = ManualChamberingState.JustSpawned;
+            ManualChamberingState.JustSpawned = false; // consome no primeiro equip pós-spawn
+
             if (__instance.Weapon_0.HasChambers && chamberAmmoCount == 0)
             {
-                ManualChamberingState.CanLoadChamber = false;
-                ManualChamberingState.BlockChambering = true;
+                // Cenário 1 (spawn) respeita _ManualChamberingOnRaidStart; cenário 2 (equip mid-raid) usa o master.
+                bool blockThisEquip = isSpawnEquip ? Plugin._ManualChamberingOnRaidStart.Value : true;
+                if (blockThisEquip)
+                {
+                    ManualChamberingState.CanLoadChamber = false;
+                    ManualChamberingState.BlockChambering = true;
+                    Plugin.Logger.LogDebug($"[ManualChamber] Equip vazio: auto-chamber BLOQUEADO (spawn={isSpawnEquip})");
+                }
+                else
+                {
+                    ManualChamberingState.CanLoadChamber = true; // spawn + OnRaidStart=off -> vanilla
+                    Plugin.Logger.LogDebug("[ManualChamber] Equip vazio: spawn com OnRaidStart=off -> auto-chamber vanilla");
+                }
             }
 
             __instance.Action_0 = onWeaponAppear;
@@ -146,7 +179,10 @@ namespace CameraRotationMod.Patches
         }
     }
 
-    public class StartReloadMagBlockPatch : ModulePatch
+    // Reset de flags no INÍCIO do reload — espelha RealismMod.StartReloadPatch (que a port não tinha).
+    // Sem este reset, estado residual de um equip/chamber anterior pode travar o reload (softlock).
+    // O bloqueio do auto-chamber pós-reload, quando aplicável, é feito pelo PreChamberLoadPatch (method_18).
+    public class StartReloadResetPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
@@ -167,11 +203,9 @@ namespace CameraRotationMod.Patches
             var player = Traverse.Create(fc).Field<Player>("_player").Value;
             if (player == null || !player.IsYourPlayer) return;
 
-            if (fc.Weapon.HasChambers && fc.Weapon.ChamberAmmoCount == 0)
-            {
-                ManualChamberingState.CanLoadChamber = false;
-                ManualChamberingState.BlockChambering = true;
-            }
+            ManualChamberingState.CanLoadChamber = true;
+            ManualChamberingState.BlockChambering = false;
+            Plugin.Logger.LogDebug("[ManualChamber] Reload start: flags resetadas (CanLoad=true, Block=false)");
         }
     }
 
@@ -232,14 +266,19 @@ namespace CameraRotationMod.Patches
         private static void Prefix(Player.FirearmController __instance)
         {
             if (!Plugin._EnableManualChambering.Value) return;
+            // method_18 é o auto-chamber genérico (predominante após reload com câmara vazia).
+            // _ManualChamberingOnReload é a aproximação de cenário 3; sem ponto-só-reload limpo em 0.16.
+            if (!Plugin._ManualChamberingOnReload.Value) return;
 
             var player = Traverse.Create(__instance).Field<Player>("_player").Value;
             if (player == null || !player.IsYourPlayer) return;
 
             if (__instance.Weapon != null && __instance.Weapon.HasChambers && __instance.Weapon.Chambers.Length == 1 && __instance.Weapon.ChamberAmmoCount == 0 && !__instance.IsStationaryWeapon)
             {
-                ManualChamberingState.CanLoadChamber = false;
+                // Só BlockChambering (como RealismMod.PreChamberLoadPatch) — NÃO mutar CanLoadChamber aqui
+                // (a port fazia, criando estado residual entre operações).
                 ManualChamberingState.BlockChambering = true;
+                Plugin.Logger.LogDebug("[ManualChamber] method_18 (auto-chamber): BlockChambering=true");
             }
         }
     }

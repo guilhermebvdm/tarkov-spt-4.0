@@ -222,6 +222,8 @@ public class Plugin : BaseUnityPlugin
 
     // Manual Chambering (Item 010)
     public static ConfigEntry<bool> _EnableManualChambering;
+    public static ConfigEntry<bool> _ManualChamberingOnRaidStart;
+    public static ConfigEntry<bool> _ManualChamberingOnReload;
 
     public void Awake()
     {
@@ -281,7 +283,7 @@ public class Plugin : BaseUnityPlugin
 
         // Item 010: Manual Chambering
         new Patches.StartEquipWeapPatch().Enable();
-        new Patches.StartReloadMagBlockPatch().Enable();
+        new Patches.StartReloadResetPatch().Enable();
         new Patches.SetAmmoCompatiblePatch().Enable();
         new Patches.SetAmmoOnMagPatch().Enable();
         new Patches.PreChamberLoadPatch().Enable();
@@ -347,9 +349,27 @@ public class Plugin : BaseUnityPlugin
             "Manual Chambering Settings (Item 010)",
             "Enable Manual Chambering",
             true,
-            new ConfigDescription("Quando ativado, armas não carregarão automaticamente a primeira bala na câmara ao iniciar a raid ou recarregar do zero. Você deve puxar o ferrolho manualmente.",
+            new ConfigDescription("Master toggle do Manual Chambering. Desligado = comportamento vanilla em TODOS os cenários (kill-switch seguro). Puxe o ferrolho com a tecla nativa 'Chamber/Unload' (ECommand.ChamberUnload) quando a câmara estiver vazia e houver munição no carregador.",
             null,
             new ConfigurationManagerAttributes { Order = 70 }));
+
+        _ManualChamberingOnRaidStart = Config.Bind(
+            "Manual Chambering Settings (Item 010)",
+            "Manual Chambering On Raid Start",
+            true,
+            new ConfigDescription(
+                "Quando ativado, a arma que inicia a raid com a câmara vazia NÃO carrega a primeira bala automaticamente no spawn — puxe o ferrolho manualmente. Desligado = vanilla no início da raid. Efetivo na PRÓXIMA RAID.",
+                null,
+                new ConfigurationManagerAttributes { Order = 69 }));
+
+        _ManualChamberingOnReload = Config.Bind(
+            "Manual Chambering Settings (Item 010)",
+            "Manual Chambering On Reload",
+            true,
+            new ConfigDescription(
+                "Quando ativado, recarregar com a câmara vazia NÃO carrega automaticamente a primeira bala após inserir o carregador — puxe o ferrolho manualmente. Desligado = vanilla no reload. Tempo real.",
+                null,
+                new ConfigurationManagerAttributes { Order = 68 }));
 
 
         // ========================================

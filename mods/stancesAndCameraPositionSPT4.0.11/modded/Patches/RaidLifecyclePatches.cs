@@ -24,6 +24,10 @@ namespace CameraRotationMod.Patches
                 Plugin.ApplyMovementSpeeds();
                 StanceManager.OnRaidStart();
 
+                // Item 010: estado limpo a cada raid + marcar que o próximo equip é o spawn (cenário 1).
+                ManualChamberingState.Reset();
+                ManualChamberingState.JustSpawned = true;
+
                 // backlog 002 F5 + 06-fix-01 — iniciar em Stance 2 - Low Ready quando habilitado.
                 // Após swap (06-fix-01), Stance 2 passou a ser Low Ready (era Stance 3).
                 // A aplicação efetiva acontece no primeiro Update em que PWA.HandsContainer estiver pronto.
@@ -46,7 +50,7 @@ namespace CameraRotationMod.Patches
         [PatchPostfix]
         private static void Postfix()
         {
-            try { StanceManager.OnRaidEnd(); }
+            try { StanceManager.OnRaidEnd(); ManualChamberingState.Reset(); }
             catch (Exception ex) { Plugin.Logger.LogError($"[GameWorldOnDestroyPatch] {ex}"); }
         }
     }
