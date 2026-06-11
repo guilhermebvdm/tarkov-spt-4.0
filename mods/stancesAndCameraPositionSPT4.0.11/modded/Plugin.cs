@@ -278,7 +278,7 @@ public class Plugin : BaseUnityPlugin
         new Patches.ActionStanceExamineWeaponPatch().Enable();
         new Patches.ActionStanceReloadPatch().Enable();
         new Patches.ActionStanceUnloadMagPatch().Enable();
-        new Patches.ActionStanceUnloadChamberPatch().Enable();   // 008 06-fix-02: esvaziar câmara
+        new Patches.ActionStanceUnloadChamberPatch().Enable();   // 008 06-fix-01: esvaziar câmara
         new Patches.ActionStanceOnIdlePatch().Enable();
         new Patches.ActionStanceCheckFireModePatch().Enable();
 

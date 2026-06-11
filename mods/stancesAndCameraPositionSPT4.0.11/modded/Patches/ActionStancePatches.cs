@@ -180,7 +180,7 @@ namespace CameraRotationMod.Patches
         }
     }
 
-    // Item 008 (06-fix-02): "Esvaziar câmara" (unload chamber). GClass2046 é a operação de unload-chamber
+    // Item 008 (06-fix-01): "Esvaziar câmara" (unload chamber). GClass2046 é a operação de unload-chamber
     // (deriva de GClass2013; Start() sem parâmetros + RemoveAmmoFromChamber()). Patchar a base cobre os
     // derivados (inclui FixMalfunctionOperationClass — corrigir malfunção também levanta a arma; aceito).
     // Fim da ação: reusa ActionStanceOnIdlePatch (method_45). Conflito com o item 010 evitado por estado
