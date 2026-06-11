@@ -1,0 +1,14 @@
+# Local SPT/EFT install path — per-machine, gitignored as `.spt-path`.
+#
+# Setup: copy this file to `.spt-path` (same folder) and set the path to YOUR install.
+#   cp .spt-path.example .spt-path
+#
+# Used by .agents/scripts/compile-mod.sh to resolve the client reference DLLs
+# (BepInEx, Assembly-CSharp, Unity modules, SPT.Reflection, Fika.Core, ...) into each
+# mod's modded/.../References/ folder before building.
+#
+# Rules:
+#   - Value must be UNQUOTED.
+#   - Use forward slashes, even on Windows (e.g. D:/SPT, not D:\SPT).
+#   - Precedence: env $SPT_PATH / --spt-path flag > this file > default D:/SPT.
+SPT_PATH=D:/SPT

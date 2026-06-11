@@ -6,7 +6,7 @@ Repositório de mods para SPT 4.0 (Single Player Tarkov). Lido por qualquer assi
 
 - **SPT Version:** 4.0.x — Tarkov [PREENCHER versão]
 - **Game Version:** Escape From Tarkov 0.16.9
-- **Game install path:** [PREENCHER]
+- **Game install path:** por máquina, em `.spt-path` na raiz (gitignored; copie de `.spt-path.example`). Lido pelo `compile-mod.sh`. Default `D:/SPT`.
 - **Mod types:** Client e Server
 - **Compatibilidade:** SPT 3.x e 4.0 são arquiteturalmente incompatíveis — nunca misturar padrões
 
@@ -38,6 +38,7 @@ git clone https://github.com/guilhermebvdm/tarkov-spt-4.0.git
 cd tarkov-spt-4.0
 bash .agents/hooks/install-hooks.sh    # Instala git pre-commit hook
 node scripts/setup-references.js       # Clona as referências vendorizadas (spt-source, FIKA)
+cp .spt-path.example .spt-path         # Define o path local do SPT/EFT (ajuste se != D:/SPT)
 ```
 
 Dependência opcional (recomendada): `jq` para o hook do Claude Code funcionar.

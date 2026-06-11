@@ -43,6 +43,9 @@ desktop.ini
 .env.local
 .env.*.local
 
+# Per-machine SPT/EFT install path (compile-mod.sh reads it). Versioned: .spt-path.example
+/.spt-path
+
 # Claude Code (gitignored — preferências pessoais)
 .claude/settings.local.json
 .tmp-research.md

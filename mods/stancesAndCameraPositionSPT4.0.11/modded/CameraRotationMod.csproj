@@ -8,86 +8,92 @@
     <RootNamespace>CameraRotationMod</RootNamespace>
   </PropertyGroup>
 
+  <!--
+    HintPaths são RELATIVOS a References\ — o compile-mod.sh (resolve_references) popula
+    essa pasta a partir do SPT install ($SPT_PATH, configurável via .spt-path na raiz do repo).
+    References\*.dll é gitignored. NÃO trocar por paths absolutos da máquina (quebra o build
+    em outros PCs / sync). Ver Fase 0 do plano de ajustes.
+  -->
   <ItemGroup>
     <!-- BepInEx -->
     <Reference Include="BepInEx">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\BepInEx\core\BepInEx.dll</HintPath>
+      <HintPath>References\BepInEx.dll</HintPath>
       <Private>False</Private>
     </Reference>
 
     <!-- EFT Assemblies -->
     <Reference Include="Assembly-CSharp">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>References\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
 
     <!-- Unity -->
     <Reference Include="UnityEngine">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>References\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>References\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+      <HintPath>References\UnityEngine.InputLegacyModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>References\UnityEngine.IMGUIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <HintPath>References\UnityEngine.TextRenderingModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+      <HintPath>References\UnityEngine.PhysicsModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <HintPath>References\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.ImageConversionModule">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
+      <HintPath>References\UnityEngine.ImageConversionModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
 
     <!-- Comfort -->
     <Reference Include="Comfort">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\Comfort.dll</HintPath>
+      <HintPath>References\Comfort.dll</HintPath>
       <Private>False</Private>
     </Reference>
 
     <!-- SPT -->
     <Reference Include="SPT.Reflection">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\BepInEx\plugins\spt\spt-reflection.dll</HintPath>
+      <HintPath>References\SPT.Reflection.dll</HintPath>
       <Private>False</Private>
     </Reference>
 
     <!-- Harmony -->
     <Reference Include="0Harmony">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\BepInEx\core\0Harmony.dll</HintPath>
+      <HintPath>References\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
 
     <!-- Sirenix -->
     <Reference Include="Sirenix.Serialization">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\Sirenix.Serialization.dll</HintPath>
+      <HintPath>References\Sirenix.Serialization.dll</HintPath>
       <Private>False</Private>
     </Reference>
 
     <!-- Animation System -->
     <Reference Include="AnimationSystem.Types">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\AnimationSystem.Types.dll</HintPath>
+      <HintPath>References\AnimationSystem.Types.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    
+
     <!-- Fika Soft Dependency -->
     <Reference Include="Fika.Core">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\BepInEx\plugins\Fika\Fika.Core.dll</HintPath>
+      <HintPath>References\Fika.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
