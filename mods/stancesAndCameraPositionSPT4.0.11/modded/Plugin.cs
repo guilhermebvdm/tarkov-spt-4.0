@@ -261,10 +261,11 @@ public class Plugin : BaseUnityPlugin
             Logger.LogWarning("[F4] SnapFireTriggerPatch NOT enabled — Player.FirearmController.SetTriggerPressed " +
                               "não foi resolvida. F1/F2/F3/F5 funcionam normalmente; snap-on-fire desabilitado este boot.");
 
-        // Item 004: Mounting Patches e GameObject
-        new WeaponMountingPatch().Enable();
-        // new MountingInputPatch().Enable(); // Desabilitado para permitir o input nativo de mount do Tarkov
-        new Patches.MountingCollisionPatch().Enable();
+        // Item 004 (06-fix-01): Mount próprio unificado (passivo SEM grude / ativo COM grude).
+        new Patches.FirearmCollisionDetectPatch().Enable(); // detecção de superfície (passivo+ativo) via method_11
+        new WeaponMountingPatch().Enable();                 // sway
+        new Patches.MountingInputPatch().Enable();          // mount ativo via cmd 140 (suprime nativo, exceto bipé)
+        new Patches.MountingCollisionPatch().Enable();      // "grude" — só no ativo
         
         // Item 007: Movement & Inertia
         new Patches.MovementContextSpeedPatch().Enable();

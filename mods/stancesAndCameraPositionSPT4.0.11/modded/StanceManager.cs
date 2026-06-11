@@ -1298,6 +1298,11 @@ namespace CameraRotationMod
                 // Em ADS o vanilla do EFT toma conta — nosso tick faz no-op.
                 if (player.ProceduralWeaponAnimation?.IsAiming == true) return;
 
+                // Item 004 (06-fix-01): apoiar a arma (mount passivo ou ativo) não drena estamina de
+                // braço — suspende o nosso tick; o vanilla (regen em hipfire) assume. Sem isso, o mount
+                // força Stance 0 (drain 0.5) e drenaria, contrariando o spec do 004.
+                if (MountingManager.MountState != EMountState.None) return;
+
                 var hands = player.Physical?.HandsStamina;
                 if (hands == null) return;
 
