@@ -55,16 +55,22 @@ namespace CameraRotationMod
 
             if (old == newState) return; // só a direção mudou — sem efeitos de transição
 
-            var gw = StanceManager.GetCachedGameWorld();
-            var mp = gw?.MainPlayer;
-            if (mp != null)
+            // SetMounted/Fika só importam para o estado ATIVO (passivo é benefício local) — evita
+            // spam de pacotes de rede a cada None<->Passive ao encostar/desencostar na superfície.
+            bool activeChanged = (newState == EMountState.Active) || (old == EMountState.Active);
+            if (activeChanged)
             {
-                var fc = mp.HandsController as Player.FirearmController;
-                if (fc != null && fc.FirearmsAnimator != null)
-                    fc.FirearmsAnimator.SetMounted(newState == EMountState.Active);
+                var gw = StanceManager.GetCachedGameWorld();
+                var mp = gw?.MainPlayer;
+                if (mp != null)
+                {
+                    var fc = mp.HandsController as Player.FirearmController;
+                    if (fc != null && fc.FirearmsAnimator != null)
+                        fc.FirearmsAnimator.SetMounted(newState == EMountState.Active);
 
-                // 006 (Fika): remotos veem o mount ativo via sync de stance.
-                FikaSync.FikaNetworkSync.SendStanceUpdate(mp.ProfileId, StanceManager.CurrentStance, newState == EMountState.Active);
+                    // 006 (Fika): remotos veem o mount ativo via sync de stance.
+                    FikaSync.FikaNetworkSync.SendStanceUpdate(mp.ProfileId, StanceManager.CurrentStance, newState == EMountState.Active);
+                }
             }
 
             // ENTRAR no ativo: força Stance 0 (vanilla) — base limpa para o grude.
