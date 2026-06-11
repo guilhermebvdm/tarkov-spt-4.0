@@ -257,6 +257,7 @@ Sistemas do jogo afetados (1–2 valores separados por `·`; se 3+ usar **🧩 F
 | 150 | AutoGymRAT | 🖥️ Client | 🏚️ Hideout | 🛋️ QoL | 🏚️ Hideout | [2720](https://forge.sp-tarkov.com/mod/2720/autogymrat) | — | [Sweetloldude/AutoGym](https://github.com/Sweetloldude/AutoGym) | ✅ | Completa automaticamente o QTE do círculo do treino na academia do hideout — SPT 4.0.13 | 🟢 Instalar | 🔍 | New | — |
 | 151 | More Energy Drinks | 🌐 Server | 🌐 Geral | ➕ Conteúdo | 📊 Progressão · 💰 Mercado | [1688](https://forge.sp-tarkov.com/mod/1688/more-energy-drinks) | — | [Hood26/HoodsEnergyDrinks-CSharp](https://github.com/Hood26/HoodsEnergyDrinks-CSharp) | ✅ | Adiciona 38 energéticos com efeitos (regen de stamina, buffs de skill e drawbacks) — SPT 4.0.13 | 🟢 Instalar | 🔍 | New | — |
 | 152 | Raid Review | 🔀 Misto | ⚔️ Raid | 🛋️ QoL | 🗺️ Mapas · 🖼️ UI | [1479](https://forge.sp-tarkov.com/mod/1479/raid-review) | — | [Chazut/SPT-RaidReview](https://github.com/Chazut/SPT-RaidReview) | ✅ | Sistema web de replay de raids com heatmap, kills, loots e dados posicionais — SPT 4.0.13 | 🟢 Instalar | 🔍 | New | — |
+| 153 | Franchi SPAS-12 | 🌐 Server | 🌐 Geral | ➕ Conteúdo | 🔫 Armas | [2721](https://forge.sp-tarkov.com/mod/2721/franchi-spas-12) | — | [Eco9341/Franchi-SPAS-12](https://github.com/Eco9341/Franchi-SPAS-12) | ✅ | Adiciona a escopeta Franchi SPAS-12 (requer WTT-CommonLib v2.0.20+) — SPT 4.0.13. Autor: Eco | 🟢 Instalar | 🔍 | New | — |
 
 ## Próximos passos
 
@@ -364,3 +365,5 @@ Sistemas do jogo afetados (1–2 valores separados por `·`; se 3+ usar **🧩 F
 | 2026-06-06 | sync-script | docs(migration): sync mods-inventory.html from markdown |
 | 2026-06-06 | Guilherme | docs: add Discord dev-channel analysis for Realism Mod |
 | 2026-06-07 | sync-script | docs(migration): sync mods-inventory.html from markdown |
+| 2026-06-11 | sync-script | docs(migration): sync mods-inventory.html from markdown |
+| 2026-06-10 | Guilherme | feat(AutoGym): vendor mod + workout body skin swap (item 001) |
