@@ -67,7 +67,7 @@ public class Plugin : BaseUnityPlugin
     private const string TacSprintSettings = "Tac Sprint Settings (Advanced)";
     private const string FOVSettings = "Field of View";
     private const string DebugSettings = "Debug (Advanced)";
-    private const string MountingSettings = "Mounting Settings";
+    private const string MountingSettings = "Weapon Mounting";
     private const string AnimationSettings = "Animations & Transitions (Item 005)";
 
     // Positions
@@ -309,40 +309,9 @@ public class Plugin : BaseUnityPlugin
         mountingObj.AddComponent<MountingManager>();
         DontDestroyOnLoad(mountingObj);
 
-        // ========================================
-        // MOUNTING SETTINGS
-        // ========================================
-        _EnableWeaponMounting = Config.Bind(
-            "Mounting Settings (Item 004)",
-            "Enable Weapon Mounting",
-            true,
-            new ConfigDescription("Enable or disable weapon mounting and bracing mechanics.",
-            null,
-            new ConfigurationManagerAttributes { Order = 80 }));
-
-        _MountingHotkey = Config.Bind(
-            "Mounting Settings (Item 004)",
-            "Mounting Hotkey",
-            KeyCode.V,
-            new ConfigDescription("Hotkey to trigger mounting manually (in addition to native binding).",
-            null,
-            new ConfigurationManagerAttributes { Order = 79 }));
-
-        _MountingRecoilMultiplier = Config.Bind(
-            "Mounting Settings (Item 004)",
-            "Mounting Recoil Multiplier",
-            0.5f,
-            new ConfigDescription("Recoil multiplier when weapon is mounted/braced. Lower is better recoil reduction.",
-            new AcceptableValueRange<float>(0.1f, 1.0f),
-            new ConfigurationManagerAttributes { Order = 78 }));
-
-        _MountingSwayMultiplier = Config.Bind(
-            "Mounting Settings (Item 004)",
-            "Mounting Sway Multiplier",
-            0.3f,
-            new ConfigDescription("Sway (breath) multiplier when weapon is mounted/braced. Lower is better sway reduction.",
-            new AcceptableValueRange<float>(0.1f, 1.0f),
-            new ConfigurationManagerAttributes { Order = 77 }));
+        // Item 004 (06-fix-01): as 4 props de Weapon Mounting são bindadas UMA vez na seção
+        // "Weapon Mounting" (mais abaixo). O bloco duplicado "Mounting Settings (Item 004)" foi
+        // removido — o 2º bind vencia e o 1º criava entries órfãs no .cfg.
 
         // ========================================
         // MANUAL CHAMBERING
@@ -974,8 +943,8 @@ public class Plugin : BaseUnityPlugin
         _MountingSwayMultiplier = Config.Bind(
             MountingSettings,
             "Mounting Sway Multiplier",
-            0.1f,
-            new ConfigDescription("Multiplier for weapon sway when mounted. 0.1 means 90% less sway.",
+            0.2f,
+            new ConfigDescription("Multiplier for weapon sway (breath) when mounted. 0.2 = 80% less sway. Tempo real.",
             new AcceptableValueRange<float>(0.0f, 1f),
             new ConfigurationManagerAttributes { Order = 7 }));
 
@@ -990,7 +959,7 @@ public class Plugin : BaseUnityPlugin
             new AcceptableValueRange<float>(1f, 5f),
             new ConfigurationManagerAttributes { Order = 2 }));
 
-        const string MovementSection = "4. Movement & Inertia";
+        const string MovementSection = "Movement & Inertia";
         _InertiaMultiplier = Config.Bind(
             MovementSection,
             "Inertia Multiplier",
@@ -1015,16 +984,16 @@ public class Plugin : BaseUnityPlugin
             new AcceptableValueRange<float>(0.1f, 2.0f),
             new ConfigurationManagerAttributes { Order = 1 }));
 
-        const string ActionStanceSection = "8. Action Stances";
+        const string ActionStanceSection = "Action Stances";
         _EnableActionStanceSwap = Config.Bind(
             ActionStanceSection,
             "Enable Action Stance Swap",
             true,
-            new ConfigDescription("Automatically raises the weapon to High Ready stance when reloading or checking the weapon.",
+            new ConfigDescription("Levanta a arma para a Stance 0 (Pronto) automaticamente ao recarregar, checar munição/câmara, examinar a arma, checar modo de fogo e ESVAZIAR A CÂMARA — e retorna à postura anterior ao fim. Tempo real.",
             null,
             new ConfigurationManagerAttributes { Order = 1 }));
 
-        const string StanceWiggleSection = "9. Stance Animations";
+        const string StanceWiggleSection = "Stance Animations";
         _EnableStanceWiggle = Config.Bind(
             StanceWiggleSection,
             "Enable Stance Wiggle",
