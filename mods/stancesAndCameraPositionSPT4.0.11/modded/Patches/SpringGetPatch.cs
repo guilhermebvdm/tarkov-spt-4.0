@@ -49,7 +49,14 @@ namespace CameraRotationMod.Patches
         private static bool _isInStanceShoulderingPhase = false;
         private static float _stanceShoulderingStartTime = 0f;
         private static Stance _previousStance = Stance.Default;
-        
+
+        // Item 009: wiggle por troca INTENCIONAL de stance (request consumível do StanceManager),
+        // consumido 1x por frame (o postfix roda para a spring de rotação E de posição no mesmo frame).
+        private static int _wiggleFrame = -1;
+        private static bool _wiggleThisFrame;
+        private static Stance _wiggleFrom = Stance.Default;
+        private static Stance _wiggleTo = Stance.Default;
+
         // Smooth interpolation for transitions using SmoothDamp
         private static Vector3 _currentRotation = Vector3.zero;
         private static Vector3 _targetRotation = Vector3.zero;
@@ -213,15 +220,23 @@ namespace CameraRotationMod.Patches
             bool isAiming = pwa.IsAiming;
             bool isHoldingFirearm = StanceManager.IsHoldingFirearm();
             Stance currentStance = StanceManager.CurrentStance;
-            
+
+            // Item 009: consumir o pedido de wiggle 1x por frame (postfix roda p/ rot e pos no mesmo frame).
+            if (UnityEngine.Time.frameCount != _wiggleFrame)
+            {
+                _wiggleThisFrame = StanceManager.ConsumeWiggleRequest(out _wiggleFrom, out _wiggleTo);
+                _wiggleFrame = UnityEngine.Time.frameCount;
+            }
+
             // FAST PATH: If we're stable (at target with no active transitions) and no state changed,
             // we can skip all the expensive calculations and just apply cached values directly
             // Use firearm-aware isInStance to match the actual transition logic below
             bool isInStanceFull = isHoldingFirearm && StanceManager.IsInStance;
-            bool stateChanged = (isAiming != _wasAiming) || 
-                               (isInStanceFull != _wasInStance) || 
+            bool stateChanged = (isAiming != _wasAiming) ||
+                               (isInStanceFull != _wasInStance) ||
                                (currentStance != _previousStance) ||
-                               (isHoldingFirearm != _wasHoldingFirearm);
+                               (isHoldingFirearm != _wasHoldingFirearm) ||
+                               _wiggleThisFrame;
             
             if (_isStable && _isInitialized && !stateChanged)
             {
@@ -237,6 +252,43 @@ namespace CameraRotationMod.Patches
                 return;
             }
             
+            // --- Item 009: Stance Wiggle Procedural (gatilho = troca INTENCIONAL de stance) ---
+            // Fora do bloco `if (stateChanged)`: na passada de rotação o _previousStance é atualizado,
+            // o que zeraria o stateChanged na passada de posição. Guardado por _wiggleThisFrame (consumido
+            // 1x/frame). NÃO dispara em mount/colisão/prone/sprint — essas trocas não chamam RequestWiggle.
+            if (_wiggleThisFrame && Plugin._EnableStanceWiggle?.Value == true)
+            {
+                float weaponWeight = 3.0f;
+                if (gameWorld.MainPlayer != null && gameWorld.MainPlayer.HandsController is Player.FirearmController fcWiggle && fcWiggle.Item != null)
+                    weaponWeight = fcWiggle.Item.Weight;
+
+                float weightFactor = Mathf.Clamp(weaponWeight / 4.0f, 0.5f, 3.0f);
+                float multiplier = Plugin._StanceWiggleMultiplier?.Value ?? 1.0f;
+
+                // Direção pela transição: baixar p/ Stance 0 (to==Default) acomoda a coronha p/ trás;
+                // subir p/ uma stance ativa empurra a arma p/ frente antes de assentar.
+                float dirSign = (_wiggleTo == Stance.Default) ? 1f : -1f;
+
+                if (isRotationSpring)
+                {
+                    Vector3 wiggle = new Vector3(
+                        dirSign * UnityEngine.Random.Range(0.5f, 1.5f),
+                        UnityEngine.Random.Range(-1.0f, 1.0f),
+                        UnityEngine.Random.Range(-0.5f, 0.5f)
+                    ) * weightFactor * multiplier;
+                    _currentRotation += wiggle;
+                }
+                if (isPositionSpring)
+                {
+                    Vector3 wigglePos = new Vector3(
+                        0f,
+                        UnityEngine.Random.Range(-0.01f, 0.01f),
+                        dirSign * UnityEngine.Random.Range(0.02f, 0.05f)
+                    ) * weightFactor * multiplier;
+                    _currentPosition += wigglePos;
+                }
+            }
+
             // Check if any features are actually enabled
             bool resetOnADSEnabled = Plugin._ResetOnADS?.Value ?? false;
             bool defaultPositionEnabled = Plugin._DefaultHandsPositionEnabled?.Value ?? false;
@@ -258,46 +310,9 @@ namespace CameraRotationMod.Patches
             {
                 _isStable = false;
                 
-                // --- Item 009: Stance Wiggle Procedural ---
-                // Se estamos mudando de Stance (que não seja de/para ADS) e o wiggle estiver habilitado
-                if (currentStance != _previousStance && Plugin._EnableStanceWiggle?.Value == true)
-                {
-                    float weaponWeight = 3.0f; // Default weight fallback
-                    if (gameWorld.MainPlayer.HandsController is Player.FirearmController fc && fc.Item != null)
-                    {
-                        weaponWeight = fc.Item.Weight;
-                    }
+                // Item 009: o wiggle foi MOVIDO para fora deste bloco (ver após o fast-path) — agora
+                // dispara por troca intencional de stance (request) em vez de comparação de _previousStance.
 
-                    // A curva de peso mapeia de armas leves (~2kg) até pesadas (~12kg)
-                    // Armas pesadas geram um tranco mais agressivo
-                    float weightFactor = Mathf.Clamp(weaponWeight / 4.0f, 0.5f, 3.0f);
-                    
-                    float multiplier = Plugin._StanceWiggleMultiplier?.Value ?? 1.0f;
-                    
-                    // Injeta um impulso angular no estado atual da rotação.
-                    // O SmoothDamp vai se encarregar de absorver esse tranco e puxar a arma de volta para o target.
-                    if (isRotationSpring)
-                    {
-                        Vector3 wiggle = new Vector3(
-                            UnityEngine.Random.Range(-0.5f, -1.5f), // Pitch
-                            UnityEngine.Random.Range(-1.0f, 1.0f),  // Yaw
-                            UnityEngine.Random.Range(-0.5f, 0.5f)   // Roll
-                        ) * weightFactor * multiplier;
-                        
-                        _currentRotation += wiggle;
-                    }
-                    if (isPositionSpring)
-                    {
-                        Vector3 wigglePos = new Vector3(
-                            0f,
-                            UnityEngine.Random.Range(-0.01f, 0.01f),
-                            UnityEngine.Random.Range(-0.02f, -0.05f) // Tranco para trás (simulando inércia de puxar)
-                        ) * weightFactor * multiplier;
-                        
-                        _currentPosition += wigglePos;
-                    }
-                }
-                
                 _wasAiming = isAiming;
                 _wasInStance = isInStanceFull;
                 _wasHoldingFirearm = isHoldingFirearm;
