@@ -21,6 +21,7 @@ namespace CameraRotationMod.Patches
         {
             try
             {
+                Plugin.ApplyMovementSpeeds();
                 StanceManager.OnRaidStart();
 
                 // backlog 002 F5 + 06-fix-01 — iniciar em Stance 2 - Low Ready quando habilitado.

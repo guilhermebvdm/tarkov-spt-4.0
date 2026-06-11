@@ -33,6 +33,9 @@ public class Plugin : BaseUnityPlugin
     // Indexado pelo enum Stance (Default/Stance1/Stance2/Stance3) — não usar int paralelo.
     public static readonly Dictionary<Stance, StanceConfig> _stanceConfigs = new(4);
 
+    public static readonly Dictionary<string, Sprite> LoadedSprites = new();
+    public static GameObject MountingUIGameObject { get; private set; }
+
     // StaminaMultiplier: <1.0 = drain, 1.0 = vanilla, >1.0 = recovery. ref: fix-01.
     // SnapOnFire (backlog 002 F4): defaults divergem por stance. Stance 0 = false (sentinel).
     private static readonly (Stance Stance, string Section, float StaminaMultiplier, bool ModSpeed, int Multiplier, bool ApplyProne, bool SnapOnFire)[]
@@ -64,6 +67,8 @@ public class Plugin : BaseUnityPlugin
     private const string TacSprintSettings = "Tac Sprint Settings (Advanced)";
     private const string FOVSettings = "Field of View";
     private const string DebugSettings = "Debug (Advanced)";
+    private const string MountingSettings = "Mounting Settings";
+    private const string AnimationSettings = "Animations & Transitions (Item 005)";
 
     // Positions
     public static ConfigEntry<bool> _PositionEnabled;
@@ -193,9 +198,35 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<int> _FOVMinRange;
     public static ConfigEntry<int> _FOVMaxRange;
 
+    // Mounting Settings (Item 004)
+    public static ConfigEntry<bool> _EnableWeaponMounting;
+    public static ConfigEntry<KeyCode> _MountingHotkey;
+    public static ConfigEntry<float> _MountingRecoilMultiplier;
+    public static ConfigEntry<float> _MountingSwayMultiplier;
+
+    // Animation Settings (Item 005)
+    public static ConfigEntry<float> _CrouchSpeedMultiplier;
+    public static ConfigEntry<float> _LeanSpeedMultiplier;
+
+    // Movement & Inertia Settings (Item 007)
+    public static ConfigEntry<float> _InertiaMultiplier;
+    public static ConfigEntry<float> _WalkSpeedMultiplier;
+    public static ConfigEntry<float> _SprintSpeedMultiplier;
+
+    // Action Stance Settings (Item 008)
+    public static ConfigEntry<bool> _EnableActionStanceSwap;
+
+    // Stance Wiggle Settings (Item 009)
+    public static ConfigEntry<bool> _EnableStanceWiggle;
+    public static ConfigEntry<float> _StanceWiggleMultiplier;
+
+    // Manual Chambering (Item 010)
+    public static ConfigEntry<bool> _EnableManualChambering;
+
     public void Awake()
     {
         Logger = base.Logger;
+        FikaSync.FikaNetworkSync.Init();
         Logger.LogInfo($"Camera Rotation Mod has loaded!");
 
         // backlog 002 F2 — cachear API do ConfigurationManager para refresh de visibilidade em runtime.
@@ -210,10 +241,11 @@ public class Plugin : BaseUnityPlugin
         new PlayerSpringPatch().Enable(); // Handles camera position
         new SpringGetPatch().Enable(); // Handles stance rotation/position transitions
         new FOVSliderPatch().Enable(); // Extends FOV slider range in settings
-        new FOVClampPatch().Enable(); // Allows FOV values outside default 50-75 range
 
         // Stamina/velocidade por stance (backlog 001)
         new StanceStaminaRecoveryPatch().Enable();
+        new Patches.HandsStaminaConsumePatch().Enable();
+        new Patches.HandsStaminaProcessPatch().Enable();
         new GameWorldOnGameStartedPatch().Enable();
         new GameWorldOnDestroyPatch().Enable();
         // BaseLocalGame.Stop não é patchável diretamente (open generic) — OnDestroy cobre os 3 paths
@@ -226,6 +258,99 @@ public class Plugin : BaseUnityPlugin
         else
             Logger.LogWarning("[F4] SnapFireTriggerPatch NOT enabled — Player.FirearmController.SetTriggerPressed " +
                               "não foi resolvida. F1/F2/F3/F5 funcionam normalmente; snap-on-fire desabilitado este boot.");
+
+        // Item 004: Mounting Patches e GameObject
+        new WeaponMountingPatch().Enable();
+        // new MountingInputPatch().Enable(); // Desabilitado para permitir o input nativo de mount do Tarkov
+        new Patches.MountingCollisionPatch().Enable();
+        
+        // Item 007: Movement & Inertia
+        new Patches.MovementContextSpeedPatch().Enable();
+        new Patches.MovementContextSprintSpeedPatch().Enable();
+        new Patches.PlayerChangeSpeedPatch().Enable();
+        new Patches.PhysicalInertiaPatch().Enable();
+
+        // Item 008: Action Stance Swap (Reload, Check Ammo, etc)
+        new Patches.ActionStancePatch().Enable();
+        new Patches.ActionStanceCheckChamberPatch().Enable();
+        new Patches.ActionStanceExamineWeaponPatch().Enable();
+        new Patches.ActionStanceReloadPatch().Enable();
+        new Patches.ActionStanceUnloadMagPatch().Enable();
+        new Patches.ActionStanceOnIdlePatch().Enable();
+        new Patches.ActionStanceCheckFireModePatch().Enable();
+
+        // Item 010: Manual Chambering
+        new Patches.StartEquipWeapPatch().Enable();
+        new Patches.StartReloadMagBlockPatch().Enable();
+        new Patches.SetAmmoCompatiblePatch().Enable();
+        new Patches.SetAmmoOnMagPatch().Enable();
+        new Patches.PreChamberLoadPatch().Enable();
+        new Patches.ManualChamberingInputPatch().Enable();
+
+        // Mounting & Recoil
+        new Patches.AddRecoilForceMountPatch().Enable();
+
+        // Carrega sprites embutidos
+        LoadedSprites["mounting.png"] = LoadEmbeddedSprite("mounting.png");
+        LoadedSprites["mountingleft.png"] = LoadEmbeddedSprite("mountingleft.png");
+        LoadedSprites["mountingright.png"] = LoadEmbeddedSprite("mountingright.png");
+
+        // Inicializa o MountingUI GameObject e patch da UI
+        MountingUIGameObject = new GameObject("MountingUIGameObject");
+        MountingUIGameObject.AddComponent<MountingUI>();
+        DontDestroyOnLoad(MountingUIGameObject);
+        new BattleUIScreenPatch().Enable();
+
+        var mountingObj = new GameObject("MountingManager");
+        mountingObj.AddComponent<MountingManager>();
+        DontDestroyOnLoad(mountingObj);
+
+        // ========================================
+        // MOUNTING SETTINGS
+        // ========================================
+        _EnableWeaponMounting = Config.Bind(
+            "Mounting Settings (Item 004)",
+            "Enable Weapon Mounting",
+            true,
+            new ConfigDescription("Enable or disable weapon mounting and bracing mechanics.",
+            null,
+            new ConfigurationManagerAttributes { Order = 80 }));
+
+        _MountingHotkey = Config.Bind(
+            "Mounting Settings (Item 004)",
+            "Mounting Hotkey",
+            KeyCode.V,
+            new ConfigDescription("Hotkey to trigger mounting manually (in addition to native binding).",
+            null,
+            new ConfigurationManagerAttributes { Order = 79 }));
+
+        _MountingRecoilMultiplier = Config.Bind(
+            "Mounting Settings (Item 004)",
+            "Mounting Recoil Multiplier",
+            0.5f,
+            new ConfigDescription("Recoil multiplier when weapon is mounted/braced. Lower is better recoil reduction.",
+            new AcceptableValueRange<float>(0.1f, 1.0f),
+            new ConfigurationManagerAttributes { Order = 78 }));
+
+        _MountingSwayMultiplier = Config.Bind(
+            "Mounting Settings (Item 004)",
+            "Mounting Sway Multiplier",
+            0.3f,
+            new ConfigDescription("Sway (breath) multiplier when weapon is mounted/braced. Lower is better sway reduction.",
+            new AcceptableValueRange<float>(0.1f, 1.0f),
+            new ConfigurationManagerAttributes { Order = 77 }));
+
+        // ========================================
+        // MANUAL CHAMBERING
+        // ========================================
+        _EnableManualChambering = Config.Bind(
+            "Manual Chambering Settings (Item 010)",
+            "Enable Manual Chambering",
+            true,
+            new ConfigDescription("Quando ativado, armas não carregarão automaticamente a primeira bala na câmara ao iniciar a raid ou recarregar do zero. Você deve puxar o ferrolho manualmente.",
+            null,
+            new ConfigurationManagerAttributes { Order = 70 }));
+
 
         // ========================================
         // POSITIONS (Order 68-65)
@@ -425,12 +550,12 @@ public class Plugin : BaseUnityPlugin
         _SnapFireThreshold = Config.Bind(
             Settings,
             "Snap Fire Threshold (ms)",
-            200,
+            600,
             new ConfigDescription(
                 "Maximum press-to-release time (in milliseconds) classified as a single click. " +
                 "Single click = snap to Stance 0 without firing. " +
                 "Held longer = snap + 1 natural shot (semi-auto/burst) or short fullauto burst (~1 shot at 600 RPM).",
-                new AcceptableValueRange<int>(50, 500),
+                new AcceptableValueRange<int>(50, 1000),
                 new ConfigurationManagerAttributes { IsAdvanced = true, Order = 49 }));
 
         // ref: CR-01-06 — timeout do stale guard do snap (s). Advanced — só para troubleshooting.
@@ -797,6 +922,111 @@ public class Plugin : BaseUnityPlugin
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { Order = 16 }));
 
+        // ========================================
+        // MOUNTING SETTINGS (Item 004)
+        // ========================================
+        _EnableWeaponMounting = Config.Bind(
+            MountingSettings,
+            "Enable Weapon Mounting",
+            true,
+            new ConfigDescription("Enable the ability to mount your weapon on nearby surfaces for stability.",
+            null,
+            new ConfigurationManagerAttributes { Order = 10 }));
+
+        _MountingHotkey = Config.Bind(
+            MountingSettings,
+            "Weapon Mounting Hotkey",
+            KeyCode.Mouse3,
+            new ConfigDescription("Key used to mount/unmount the weapon when near a surface.",
+            null,
+            new ConfigurationManagerAttributes { Order = 9 }));
+
+        _MountingRecoilMultiplier = Config.Bind(
+            MountingSettings,
+            "Mounting Recoil Multiplier",
+            0.5f,
+            new ConfigDescription("Multiplier for weapon recoil when mounted. 0.5 means 50% less recoil.",
+            new AcceptableValueRange<float>(0.1f, 1f),
+            new ConfigurationManagerAttributes { Order = 8 }));
+
+        _MountingSwayMultiplier = Config.Bind(
+            MountingSettings,
+            "Mounting Sway Multiplier",
+            0.1f,
+            new ConfigDescription("Multiplier for weapon sway when mounted. 0.1 means 90% less sway.",
+            new AcceptableValueRange<float>(0.0f, 1f),
+            new ConfigurationManagerAttributes { Order = 7 }));
+
+        // ========================================
+        // ANIMATION SETTINGS (Item 005)
+// ========================================
+        _CrouchSpeedMultiplier = Config.Bind(
+            AnimationSettings,
+            "Crouch Speed Multiplier",
+            1.5f,
+            new ConfigDescription("Multiplier for crouch and prone animation speeds.",
+            new AcceptableValueRange<float>(1f, 5f),
+            new ConfigurationManagerAttributes { Order = 2 }));
+
+        const string MovementSection = "4. Movement & Inertia";
+        _InertiaMultiplier = Config.Bind(
+            MovementSection,
+            "Inertia Multiplier",
+            1.2f,
+            new ConfigDescription("Global multiplier for character inertia (weight feeling). 1.0 is default.",
+            new AcceptableValueRange<float>(0.1f, 3.0f),
+            new ConfigurationManagerAttributes { Order = 3 }));
+
+        _WalkSpeedMultiplier = Config.Bind(
+            MovementSection,
+            "Walk Speed Multiplier",
+            0.85f,
+            new ConfigDescription("Multiplier for maximum walking speed. 1.0 is default.",
+            new AcceptableValueRange<float>(0.1f, 2.0f),
+            new ConfigurationManagerAttributes { Order = 2 }));
+
+        _SprintSpeedMultiplier = Config.Bind(
+            MovementSection,
+            "Sprint Speed Multiplier",
+            0.9f,
+            new ConfigDescription("Multiplier for maximum sprinting speed. 1.0 is default.",
+            new AcceptableValueRange<float>(0.1f, 2.0f),
+            new ConfigurationManagerAttributes { Order = 1 }));
+
+        const string ActionStanceSection = "8. Action Stances";
+        _EnableActionStanceSwap = Config.Bind(
+            ActionStanceSection,
+            "Enable Action Stance Swap",
+            true,
+            new ConfigDescription("Automatically raises the weapon to High Ready stance when reloading or checking the weapon.",
+            null,
+            new ConfigurationManagerAttributes { Order = 1 }));
+
+        const string StanceWiggleSection = "9. Stance Animations";
+        _EnableStanceWiggle = Config.Bind(
+            StanceWiggleSection,
+            "Enable Stance Wiggle",
+            true,
+            new ConfigDescription("Adds an organic wiggle effect when changing stances.",
+            null,
+            new ConfigurationManagerAttributes { Order = 2 }));
+            
+        _StanceWiggleMultiplier = Config.Bind(
+            StanceWiggleSection,
+            "Stance Wiggle Multiplier",
+            1.0f,
+            new ConfigDescription("Intensity of the stance wiggle effect.",
+            new AcceptableValueRange<float>(0.0f, 5.0f),
+            new ConfigurationManagerAttributes { Order = 1 }));
+
+        _LeanSpeedMultiplier = Config.Bind(
+            AnimationSettings,
+            "Lean Speed Multiplier",
+            1.5f,
+            new ConfigDescription("Multiplier for leaning (Q/E) speeds.",
+            new AcceptableValueRange<float>(1f, 5f),
+            new ConfigurationManagerAttributes { Order = 1 }));
+
         _Stance2HandsSidewaysOffset = Config.Bind(
             Stance2Section,
             "Stance 2 Hands Sideways Offset",
@@ -1024,6 +1254,12 @@ public class Plugin : BaseUnityPlugin
         _Stance2SprintAnimationEnabled.SettingChanged += (_, __) => StanceManager.MarkSprintEnabledDirty();
         _Stance3SprintAnimationEnabled.SettingChanged += (_, __) => StanceManager.MarkSprintEnabledDirty();
 
+        _CrouchSpeedMultiplier.SettingChanged += (_, __) => ApplyMovementSpeeds();
+        _LeanSpeedMultiplier.SettingChanged += (_, __) => ApplyMovementSpeeds();
+
+        // Initialize FOV bounds
+
+
         // Note: RotationEvents and SetItemInHandsPatch are deprecated now
         // All logic is handled by StanceManager + SpringGetPatch
 
@@ -1124,10 +1360,25 @@ public class Plugin : BaseUnityPlugin
     /// <summary>
     /// PA-03-04: unsubscribe explícito dos handlers de SettingChanged em hot-reload.
     /// </summary>
+    public static void ApplyMovementSpeeds()
+    {
+        if (EFTHardSettings.Instance != null)
+        {
+            // O padrão do Tarkov é 3f para POSE e 10f para TILT
+            EFTHardSettings.Instance.POSE_CHANGING_SPEED = 3f * _CrouchSpeedMultiplier.Value;
+            EFTHardSettings.Instance.TILT_CHANGING_SPEED = 10f * _LeanSpeedMultiplier.Value;
+        }
+    }
+
     private void OnDestroy()
     {
         if (_MouseWheelScrollMode != null)  _MouseWheelScrollMode.SettingChanged  -= OnScrollModeSettingChanged;
         if (_EnableMouseWheelCycle != null) _EnableMouseWheelCycle.SettingChanged -= OnScrollModeSettingChanged;
+    }
+
+    private void FixedUpdate()
+    {
+
     }
 
     // Cached camera offset state to avoid setting every frame
@@ -1241,5 +1492,31 @@ public class Plugin : BaseUnityPlugin
         }
         
         _cameraOffsetDirty = false;
+    }
+
+    public static Sprite LoadEmbeddedSprite(string resourceName)
+    {
+        try
+        {
+            var assemblyDir = System.IO.Path.GetDirectoryName(typeof(Plugin).Assembly.Location);
+            string fullPath = System.IO.Path.Combine(assemblyDir, resourceName);
+            if (!System.IO.File.Exists(fullPath))
+            {
+                Logger.LogError($"[ResourceLoader] File '{fullPath}' not found!");
+                return null;
+            }
+            byte[] data = System.IO.File.ReadAllBytes(fullPath);
+            
+            Texture2D texture = new Texture2D(2, 2);
+            if (texture.LoadImage(data))
+            {
+                return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError($"[ResourceLoader] Error loading file '{resourceName}': {ex}");
+        }
+        return null;
     }
 }

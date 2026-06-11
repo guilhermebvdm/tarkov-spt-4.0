@@ -1,66 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <LangVersion>latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <AssemblyName>shwngFpsCameraStances4</AssemblyName>
+    <RootNamespace>CameraRotationMod</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
     <!-- BepInEx -->
     <Reference Include="BepInEx">
-      <HintPath>References\BepInEx.dll</HintPath>
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\BepInEx\core\BepInEx.dll</HintPath>
       <Private>False</Private>
     </Reference>
 
     <!-- EFT Assemblies -->
     <Reference Include="Assembly-CSharp">
-      <HintPath>References\Assembly-CSharp.dll</HintPath>
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
 
     <!-- Unity -->
     <Reference Include="UnityEngine">
-      <HintPath>References\UnityEngine.dll</HintPath>
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>References\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>References\UnityEngine.InputLegacyModule.dll</HintPath>
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
 
     <!-- Comfort -->
     <Reference Include="Comfort">
-      <HintPath>References\Comfort.dll</HintPath>
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\Comfort.dll</HintPath>
       <Private>False</Private>
     </Reference>
 
     <!-- SPT -->
     <Reference Include="SPT.Reflection">
-      <HintPath>References\spt-reflection.dll</HintPath>
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\BepInEx\plugins\spt\spt-reflection.dll</HintPath>
       <Private>False</Private>
     </Reference>
 
     <!-- Harmony -->
     <Reference Include="0Harmony">
-      <HintPath>References\0Harmony.dll</HintPath>
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\BepInEx\core\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
 
     <!-- Sirenix -->
     <Reference Include="Sirenix.Serialization">
-      <HintPath>References\Sirenix.Serialization.dll</HintPath>
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\Sirenix.Serialization.dll</HintPath>
       <Private>False</Private>
     </Reference>
 
     <!-- Animation System -->
     <Reference Include="AnimationSystem.Types">
-      <HintPath>References\AnimationSystem.Types.dll</HintPath>
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\AnimationSystem.Types.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    
+    <!-- Fika Soft Dependency -->
+    <Reference Include="Fika.Core">
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\BepInEx\plugins\Fika\Fika.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>

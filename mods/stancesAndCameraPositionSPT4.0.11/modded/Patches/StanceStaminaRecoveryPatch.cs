@@ -41,6 +41,12 @@ namespace CameraRotationMod.Patches
                 float mult = StanceStaminaState.Multiplier;
                 if (System.Math.Abs(mult - 1.0f) <= 1e-5f) return; // vanilla — não interferir
 
+                if (MountingManager.IsMounting || gw.MainPlayer.ProceduralWeaponAnimation?.IsMountedState == true)
+                {
+                    __result = 5f; // Recupera 5 de estamina do braço por segundo quando montado
+                    return;
+                }
+
                 if (!StanceStaminaState.IsSuspendedByProne &&
                     gw.MainPlayer.ProceduralWeaponAnimation?.IsAiming != true)
                     __result = 0f;
@@ -48,6 +54,79 @@ namespace CameraRotationMod.Patches
             catch (Exception ex)
             {
                 Plugin.Logger.LogError($"[StanceStaminaRecoveryPatch] {ex}");
+            }
+        }
+    }
+
+    public class HandsStaminaConsumePatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(GClass774), nameof(GClass774.Consume));
+        }
+
+        [PatchPrefix]
+        private static bool Prefix(GClass774 __instance, ref float __result)
+        {
+            try
+            {
+                var gw = Singleton<GameWorld>.Instance;
+                if (gw?.MainPlayer?.Physical?.HandsStamina == __instance)
+                {
+                    if (gw.MainPlayer.IsInPronePose)
+                    {
+                        __result = 0f;
+                        return false; // Ignora o método original
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.Logger.LogError($"[HandsStaminaConsumePatch] {ex}");
+            }
+            return true;
+        }
+    }
+
+    public class HandsStaminaProcessPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(GClass774), nameof(GClass774.Process));
+        }
+
+        [PatchPrefix]
+        private static void Prefix(GClass774 __instance, ref bool __state)
+        {
+            try
+            {
+                var gw = Singleton<GameWorld>.Instance;
+                if (gw?.MainPlayer?.Physical?.HandsStamina == __instance && gw.MainPlayer.IsInPronePose)
+                {
+                    __state = __instance.ForceMode;
+                    __instance.ForceMode = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.Logger.LogError($"[HandsStaminaProcessPatch Prefix] {ex}");
+            }
+        }
+
+        [PatchPostfix]
+        private static void Postfix(GClass774 __instance, bool __state)
+        {
+            try
+            {
+                var gw = Singleton<GameWorld>.Instance;
+                if (gw?.MainPlayer?.Physical?.HandsStamina == __instance && gw.MainPlayer.IsInPronePose)
+                {
+                    __instance.ForceMode = __state;
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.Logger.LogError($"[HandsStaminaProcessPatch Postfix] {ex}");
             }
         }
     }
