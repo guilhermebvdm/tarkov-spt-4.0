@@ -21,7 +21,7 @@ namespace SPT.Launcher.Helpers
 {
     public static class LauncherSettingsProvider
     {
-        public static string DefaultSettingsFileLocation = Path.Join(Environment.CurrentDirectory, "user", "launcher", "config.json");
+        public static string DefaultSettingsFileLocation = Path.Join(SPT.Launcher.Base.Helpers.SptPathHelper.SptRootPath, "user", "launcher", "config.json");
         
         private static Settings LoadSettings()
         {
@@ -35,7 +35,7 @@ namespace SPT.Launcher.Helpers
             // Se o launcher está na mesma pasta que EscapeFromTarkov.exe, auto-corrigir GamePath
             try
             {
-                string detectedPath = AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                string detectedPath = AppContext.BaseDirectory;
                 string exePath = Path.Combine(detectedPath, "EscapeFromTarkov.exe");
 
                 if (File.Exists(exePath) && !string.Equals(settings.GamePath, detectedPath, StringComparison.OrdinalIgnoreCase))
@@ -102,7 +102,7 @@ namespace SPT.Launcher.Helpers
         public void ResetDefaults()
         {
             string defaultUrl = "https://147.15.29.24:7073";
-            string defaultPath = Environment.CurrentDirectory;
+            string defaultPath = AppContext.BaseDirectory;
             
             // don't reset if running in dev mode
             if (IsDevMode)
@@ -295,6 +295,13 @@ namespace SPT.Launcher.Helpers
             set => SetProperty(ref _lastUsername, value);
         }
 
+        private string _lastPassword = "";
+        public string LastPassword
+        {
+            get => _lastPassword;
+            set => SetProperty(ref _lastPassword, value);
+        }
+
         private bool _useAutoLogin;
         public bool UseAutoLogin
         {
@@ -341,7 +348,7 @@ namespace SPT.Launcher.Helpers
                 LogManager.Instance.Info($"Creating launcher config: {LauncherSettingsProvider.DefaultSettingsFileLocation}");
                 LauncherStartGameAction = LauncherAction.MinimizeAction;
                 UseAutoLogin = true;
-                GamePath = Environment.CurrentDirectory;
+                GamePath = AppContext.BaseDirectory;
                 IsDevMode = true;
 
                 Server = new ServerSetting

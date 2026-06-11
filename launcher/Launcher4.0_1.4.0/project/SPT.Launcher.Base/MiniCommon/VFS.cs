@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -12,7 +12,7 @@ namespace SPT.Launcher.MiniCommon
 
         static VFS()
         {
-            Cwd = Environment.CurrentDirectory;
+            Cwd = SPT.Launcher.Base.Helpers.SptPathHelper.SptRootPath;
             mutex = new object();
         }
 

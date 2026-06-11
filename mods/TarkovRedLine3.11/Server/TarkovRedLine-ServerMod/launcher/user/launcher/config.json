@@ -1,0 +1,18 @@
+{
+    "FirstRun": true,
+    "DefaultLocale": "Portuguese",
+    "LauncherStartGameAction": 0,
+    "RememberUsername": false,
+    "LastUsername": "",
+    "UseAutoLogin": true,
+    "IsDevMode": true,
+    "GamePath": "D:\\Projetos\\TRABALHO ATUAL\\TarkovRedLine\\Server\\TarkovRedLine-ServerMod\\launcher",
+    "ExcludeFromCleanup": [],
+    "EnableGore": false,
+    "RemoveGrass": false,
+    "Server": {
+        "AutoLoginCreds": null,
+        "Name": "SPT",
+        "Url": "https://100.72.21.25:7073"
+    }
+}

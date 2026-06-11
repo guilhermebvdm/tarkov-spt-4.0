@@ -23,7 +23,7 @@ namespace SPT.Launcher.Helpers
 {
     public static class LocalizationProvider
     {
-        public static string DefaultLocaleFolderPath = Path.Join(Environment.CurrentDirectory, "SPT_Data", "Launcher", "Locales");
+        public static string DefaultLocaleFolderPath = Path.Join(SPT.Launcher.Base.Helpers.SptPathHelper.SptRootPath, "SPT_Data", "Launcher", "Locales");
 
         public static Dictionary<string, string> LocaleNameDictionary = GetLocaleDictionary("native_name");
 
@@ -78,159 +78,158 @@ namespace SPT.Launcher.Helpers
             
             if (String.IsNullOrEmpty(localeRomanName))
             {
-                localeRomanName = "English";
+                localeRomanName = "Portuguese";
             }
             
             LoadLocaleFromFile(localeRomanName);
         }
 
-        public static LocaleData GenerateEnglishLocale()
+        public static LocaleData GenerateDefaultLocale()
         {
-            //Create default english locale data and save if the default locale data file dosen't exist.
-            //This is to (hopefully) prevent the launcher from becoming 100% broken if no locale files exist or the locale files are outdated (missing data).
-            LocaleData englishLocale = new LocaleData();
+            //Create default locale data and save if the default locale data file dosen't exist.
+            LocaleData locale = new LocaleData();
 
-            #region Set All English Defaults
-            englishLocale.ietf_tag = "en";
-            englishLocale.native_name = "English";
-            englishLocale.retry = "Retry";
-            englishLocale.server_connecting = "Connecting";
-            englishLocale.server_unavailable_format_1 = "No server available at: '{0}' to connect to\nEnsure you have run 'SPT.Server.exe' first.";
-            englishLocale.no_servers_available = "No SPT Servers found. Ensure your SPT sever is running and check the server URL is correct in the settings page.";
-            englishLocale.settings_menu = "Settings";
-            englishLocale.back = "Back";
-            englishLocale.wipe_profile = "Wipe Profile";
-            englishLocale.username = "Username";
-            englishLocale.password = "Password";
-            englishLocale.update = "Update";
-            englishLocale.edit_account_update_error = "An issue occurred while updating your profile.";
-            englishLocale.register = "Register";
-            englishLocale.go_to_register = "Go to Register";
-            englishLocale.registration_failed = "Registration Failed.";
-            englishLocale.registration_question_format_1 = "Profile '{0}' does not exist.\n\nWould you like to create it?";
-            englishLocale.login_or_register = "Login / Register";
-            englishLocale.go_to_login = "Go to Login";
-            englishLocale.login_automatically = "Login Automatically";
-            englishLocale.incorrect_login = "Username or password is incorrect";
-            englishLocale.login_failed = "Login Failed";
-            englishLocale.edition = "Edition";
-            englishLocale.id = "ID";
-            englishLocale.logout = "Logout";
-            englishLocale.account = "Account";
-            englishLocale.edit_account = "Edit Account";
-            englishLocale.start_game = "Start Game";
-            englishLocale.installed_in_live_game_warning = "SPT shouldn't be installed into the live game directory. Please install SPT into a copy of the game directory elsewhere on your computer.";
-            englishLocale.no_official_game_warning = "Escape From Tarkov isn't installed on your computer. Ensure your BSG launcher can start EFT before starting SPT.";
-            englishLocale.eft_exe_not_found_warning = "EscapeFromTarkov.exe not found at game path. Ensure the folder you installed SPT into has this file.";
-            englishLocale.account_exist = "Account already exists";
-            englishLocale.url = "URL";
-            englishLocale.default_language = "Default Language";
-            englishLocale.game_path = "Game Path";
-            englishLocale.clear_game_settings = "Clear Game Settings";
-            englishLocale.clear_game_settings_succeeded = "Game settings cleared.";
-            englishLocale.clear_game_settings_failed = "An issue occurred while clearing game settings.";
-            englishLocale.load_live_settings = "Load Live Settings";
-            englishLocale.load_live_settings_succeeded = "Game settings copied from live";
-            englishLocale.load_live_settings_failed = "Failed to copy live settings";
-            englishLocale.remove_registry_keys = "Remove Registry Keys";
-            englishLocale.remove_registry_keys_succeeded = "Registry keys removed.";
-            englishLocale.remove_registry_keys_failed = "An issue occurred while removing registry keys.";
-            englishLocale.clean_temp_files = "Clean Temp Files";
-            englishLocale.clean_temp_files_succeeded = "Temp files cleaned";
-            englishLocale.clean_temp_files_failed = "Some issues occurred while cleaning temp files";
-            englishLocale.select_folder = "Select Folder";
-            englishLocale.minimize_action = "Minimize";
-            englishLocale.do_nothing_action = "Do nothing";
-            englishLocale.exit_action = "Close Launcher";
-            englishLocale.on_game_start = "On Game Start";
-            englishLocale.game = "Game";
-            englishLocale.new_password = "New Password";
-            englishLocale.wipe_warning = "Changing your account edition requires a profile wipe. This will reset your game prgrogess.";
-            englishLocale.cancel = "Cancel";
-            englishLocale.need_an_account = "Don't have an account yet?";
-            englishLocale.have_an_account = "Already have an account?";
-            englishLocale.reapply_patch = "Reapply Patch";
-            englishLocale.failed_to_receive_patches = "Failed to receive patches";
-            englishLocale.failed_core_patch = "Core patch failed";
-            englishLocale.failed_mod_patch = "Mod patch failed";
-            englishLocale.ok = "OK";
-            englishLocale.account_page_denied = "Account page denied. Either you are not logged in or the game is running.";
-            englishLocale.account_updated = "Your account has been updated";
-            englishLocale.nickname = "Nickname";
-            englishLocale.side = "Side";
-            englishLocale.level = "Level";
-            englishLocale.game_path = "Game Path";
-            englishLocale.patching = "Patching";
-            englishLocale.file_mismatch_dialog_message = "We noticed your EFT files do not match what we expected to see for SPT: {0}" +
-                "\nPlease check you have the latest version of live EFT installed" +
-                "\nIf not, delete SPT, update live EFT and run the Installer in an empty folder again" +
-                "\n\nAre you sure you want to proceed?";
-            englishLocale.yes = "Yes";
-            englishLocale.no = "No";
-            englishLocale.open_folder = "Open Folder";
-            englishLocale.select_edition = "Select Edition";
-            englishLocale.profile_created = "Profile Created";
-            englishLocale.next_level_in = "Next level in";
-            englishLocale.copied = "Copied";
-            englishLocale.no_profile_data = "No profile data";
-            englishLocale.profile_version_mismath = "Your profile was made using a different version of SPT and may have issues";
-            englishLocale.profile_removed = "Profile removed";
-            englishLocale.profile_removal_failed = "Failed to remove profile";
-            englishLocale.profile_remove_question_format_1 = "Permanently remove profile '{0}'?";
-            englishLocale.i_understand = "I Understand";
-            englishLocale.game_version_mismatch_format_2 = "SPT is unable to run, this is because SPT expected to find EFT version '{1}',\nbut instead found version '{0}'\n\nEnsure you've downgraded your EFT as described in the install guide\non the page you downloaded SPT from";
-            englishLocale.description = "Description";
-            englishLocale.author = "Author";
-            englishLocale.wipe_on_start = "Wipe profile on game start";
-            englishLocale.copy_live_settings_question = "Would you like to copy your live game settings to spt";
-            englishLocale.mod_not_in_server_warning = "This mod was found in your profile, but is not loaded on the server";
-            englishLocale.active_server_mods = "Active Server Mods";
-            englishLocale.active_server_mods_info_text = "These mods are currently running on the server";
-            englishLocale.inactive_server_mods = "Inactive Server Mods";
-            englishLocale.inactive_server_mods_info_text =
-                "These mods have not been loaded by the server, but your profile has used them in the past";
-            englishLocale.open_link_question_format_1 = "Are you sure you want to open the following link: \n{0}";
-            englishLocale.open_link = "Open Link";
-            englishLocale.dev_mode = "Developer Mode";
-            englishLocale.failed_to_save_settings = "Failed to save settings";
-            englishLocale.register_failed_name_limit = "name cannot exceed 15 characters";
-            englishLocale.copy_failed = "Failed to copy data to clipboard";
-            englishLocale.copy_logs_to_clipboard = "Copy logs to clipboard";
-            englishLocale.create_password_title = "Create Password";
-            englishLocale.create_password_message = "Your account does not have a password. Please create one to secure your profile.";
-            englishLocale.create_password_confirm = "Create Password";
-            englishLocale.create_password_success = "Password created successfully";
-            englishLocale.reset_password = "Reset Password";
-            englishLocale.reset_password_success = "Password has been reset. You can now log in without a password.";
-            englishLocale.reset_password_failed = "Failed to reset password. Make sure you entered the correct username.";
-            englishLocale.reset_password_hwid_mismatch = "This computer is not authorized to reset the password for this account. Contact the server administrator.";
-            englishLocale.repeat_password = "Repeat Password";
-            englishLocale.reset_password_no_hwid = "No HWID registered for this account. Log in first to register your HWID.";
-            englishLocale.server_version = "Version: ";
-            englishLocale.check_updates = "Check for Updates";
-            englishLocale.update_checking = "Checking for updates...";
-            englishLocale.update_checking_file = "Checking files... ({0}/{1})";
-            englishLocale.update_available = "{0} file(s) need updating";
-            englishLocale.update_up_to_date = "All files are up to date! ✅";
-            englishLocale.update_button = "Update";
-            englishLocale.update_downloading = "Downloading: {0} ({1}/{2})";
-            englishLocale.update_completed = "Update complete! {0} file(s) updated. ✅";
-            englishLocale.update_completed_with_errors = "Update finished: {0} updated, {1} error(s)";
-            englishLocale.update_error = "Update check failed: {0}";
-            englishLocale.update_files_to_delete = "{0} file(s) to remove";
-            englishLocale.update_deleting = "Removing: {0} ({1}/{2})";
+            #region Set All Defaults
+            locale.ietf_tag = "pt";
+            locale.native_name = "Portuguese";
+            locale.retry = "Tentar Novamente";
+            locale.server_connecting = "Conectando";
+            locale.server_unavailable_format_1 = "Nenhum servidor disponível em: '{0}' para conectar\nCertifique-se de iniciar o Servidor primeiro.";
+            locale.no_servers_available = "Nenhum Servidor SPT encontrado. Verifique a URL do servidor nas configurações.";
+            locale.settings_menu = "Configurações";
+            locale.back = "Voltar";
+            locale.wipe_profile = "Limpar Perfil (Wipe)";
+            locale.username = "Usuário";
+            locale.password = "Senha";
+            locale.update = "Atualizar";
+            locale.edit_account_update_error = "Ocorreu um problema ao atualizar o seu perfil.";
+            locale.register = "Registrar";
+            locale.go_to_register = "Criar Conta";
+            locale.registration_failed = "Falha no Registro.";
+            locale.registration_question_format_1 = "O perfil '{0}' não existe.\n\nGostaria de criá-lo?";
+            locale.login_or_register = "Login / Registro";
+            locale.go_to_login = "Fazer Login";
+            locale.login_automatically = "Login Automático";
+            locale.incorrect_login = "Usuário ou senha incorretos";
+            locale.login_failed = "Falha no Login";
+            locale.edition = "Edição";
+            locale.id = "ID";
+            locale.logout = "Sair";
+            locale.account = "Conta";
+            locale.edit_account = "Editar Conta";
+            locale.start_game = "JOGAR";
+            locale.installed_in_live_game_warning = "O Tarkov Red Line não deve ser instalado na pasta do jogo original. Instale em uma cópia separada.";
+            locale.no_official_game_warning = "Escape From Tarkov não está instalado no seu computador. Verifique pelo launcher da BSG.";
+            locale.eft_exe_not_found_warning = "EscapeFromTarkov.exe não encontrado. Verifique a pasta do jogo.";
+            locale.account_exist = "A conta já existe";
+            locale.url = "URL";
+            locale.default_language = "Idioma Padrão";
+            locale.game_path = "Caminho do Jogo";
+            locale.clear_game_settings = "Limpar Configurações do Jogo";
+            locale.clear_game_settings_succeeded = "Configurações do jogo limpas.";
+            locale.clear_game_settings_failed = "Erro ao limpar configurações do jogo.";
+            locale.load_live_settings = "Copiar Configurações do Live";
+            locale.load_live_settings_succeeded = "Configurações copiadas do jogo original.";
+            locale.load_live_settings_failed = "Falha ao copiar configurações do jogo original.";
+            locale.remove_registry_keys = "Remover Chaves do Registro";
+            locale.remove_registry_keys_succeeded = "Chaves do registro removidas.";
+            locale.remove_registry_keys_failed = "Erro ao remover chaves do registro.";
+            locale.clean_temp_files = "Limpar Arquivos Temporários";
+            locale.clean_temp_files_succeeded = "Arquivos temporários limpos.";
+            locale.clean_temp_files_failed = "Erro ao limpar arquivos temporários.";
+            locale.select_folder = "Selecionar Pasta";
+            locale.minimize_action = "Minimizar";
+            locale.do_nothing_action = "Não fazer nada";
+            locale.exit_action = "Fechar Launcher";
+            locale.on_game_start = "Ao Iniciar o Jogo";
+            locale.game = "Jogo";
+            locale.new_password = "Nova Senha";
+            locale.wipe_warning = "Alterar a edição da conta exige o Wipe do perfil. O progresso será resetado.";
+            locale.cancel = "Cancelar";
+            locale.need_an_account = "Ainda não tem uma conta?";
+            locale.have_an_account = "Já possui uma conta?";
+            locale.reapply_patch = "Reaplicar Patch";
+            locale.failed_to_receive_patches = "Falha ao receber patches";
+            locale.failed_core_patch = "Falha no patch Core";
+            locale.failed_mod_patch = "Falha no patch Mod";
+            locale.ok = "OK";
+            locale.account_page_denied = "Página da conta recusada. O jogo está aberto ou não há login.";
+            locale.account_updated = "Sua conta foi atualizada";
+            locale.nickname = "Apelido";
+            locale.side = "Facção";
+            locale.level = "Nível";
+            locale.patching = "Aplicando Patch";
+            locale.file_mismatch_dialog_message = "Arquivos do jogo incompatíveis com a versão esperada: {0}";
+            locale.yes = "Sim";
+            locale.no = "Não";
+            locale.open_folder = "Abrir Pasta";
+            locale.select_edition = "Selecionar Edição";
+            locale.profile_created = "Perfil Criado";
+            locale.next_level_in = "Próximo nível em";
+            locale.copied = "Copiado";
+            locale.no_profile_data = "Sem dados de perfil";
+            locale.profile_version_mismath = "O perfil foi criado em uma versão diferente.";
+            locale.profile_removed = "Perfil removido";
+            locale.profile_removal_failed = "Falha ao remover perfil";
+            locale.profile_remove_question_format_1 = "Remover perfil '{0}' permanentemente?";
+            locale.i_understand = "Eu Entendo";
+            locale.game_version_mismatch_format_2 = "Versão do Tarkov incorreta. Encontrado: '{0}', Esperado: '{1}'";
+            locale.description = "Descrição";
+            locale.author = "Autor";
+            locale.wipe_on_start = "Dar Wipe ao iniciar o jogo";
+            locale.copy_live_settings_question = "Gostaria de copiar as configurações do jogo original?";
+            locale.mod_not_in_server_warning = "Este mod está no perfil mas não foi carregado no servidor.";
+            locale.active_server_mods = "Mods Ativos no Servidor";
+            locale.active_server_mods_info_text = "Mods rodando no momento no servidor.";
+            locale.inactive_server_mods = "Mods Inativos no Servidor";
+            locale.inactive_server_mods_info_text = "Mods não carregados, mas que já foram usados no seu perfil.";
+            locale.open_link_question_format_1 = "Abrir o link: \n{0} ?";
+            locale.open_link = "Abrir Link";
+            locale.dev_mode = "Modo Desenvolvedor";
+            locale.failed_to_save_settings = "Falha ao salvar configurações";
+            locale.register_failed_name_limit = "O nome não pode exceder 15 caracteres";
+            locale.copy_failed = "Falha ao copiar para a área de transferência";
+            locale.copy_logs_to_clipboard = "Copiar logs";
+            locale.create_password_title = "Criar Senha";
+            locale.create_password_message = "Sua conta não tem senha. Crie uma para garantir a segurança.";
+            locale.create_password_confirm = "Criar Senha";
+            locale.create_password_success = "Senha criada com sucesso!";
+            locale.reset_password = "Redefinir Senha";
+            locale.reset_password_success = "Senha redefinida.";
+            locale.reset_password_failed = "Falha ao redefinir a senha. Nome de usuário incorreto?";
+            locale.reset_password_hwid_mismatch = "Computador não autorizado a redefinir a senha. Contate a administração.";
+            locale.repeat_password = "Repetir Senha";
+            locale.reset_password_no_hwid = "Nenhum HWID registrado para esta conta. Faça login primeiro.";
+            locale.server_version = "Versão: ";
+            locale.check_updates = "Verificar Atualizações";
+            locale.update_checking = "Procurando atualizações...";
+            locale.update_checking_file = "Verificando arquivos... ({0}/{1})";
+            locale.update_available = "{0} arquivo(s) precisam ser atualizados";
+            locale.update_up_to_date = "Tudo atualizado! ✅";
+            locale.update_button = "Atualizar Launcher";
+            locale.update_downloading = "Baixando: {0} ({1}/{2})";
+            locale.update_completed = "Atualização concluída! {0} arquivo(s) atualizados. ✅";
+            locale.update_completed_with_errors = "Atualização finalizada: {0} atualizados, {1} erro(s)";
+            locale.update_error = "Falha ao atualizar: {0}";
+            locale.update_files_to_delete = "{0} arquivo(s) para remover";
+            locale.update_deleting = "Removendo: {0} ({1}/{2})";
             #endregion
 
             Directory.CreateDirectory(LocalizationProvider.DefaultLocaleFolderPath);
-            LauncherSettingsProvider.Instance.DefaultLocale = "English";
+            LauncherSettingsProvider.Instance.DefaultLocale = "Portuguese";
             LauncherSettingsProvider.Instance.SaveSettings();
-            Json.SaveWithFormatting(Path.Join(LocalizationProvider.DefaultLocaleFolderPath, "English.json"), englishLocale, Newtonsoft.Json.Formatting.Indented);
+            Json.SaveWithFormatting(Path.Join(LocalizationProvider.DefaultLocaleFolderPath, "Portuguese.json"), locale, Newtonsoft.Json.Formatting.Indented);
 
-            return englishLocale;
+            return locale;
         }
 
         public static Dictionary<string, string> GetLocaleDictionary(string property)
         {
+            if (!Directory.Exists(DefaultLocaleFolderPath))
+            {
+                Directory.CreateDirectory(DefaultLocaleFolderPath);
+            }
+            
             List<FileInfo> localeFiles = new List<FileInfo>(Directory.GetFiles(DefaultLocaleFolderPath).Select(x => new FileInfo(x)).ToList());
             Dictionary<string, string> localeDictionary = new Dictionary<string, string>();
 
@@ -246,7 +245,7 @@ namespace SPT.Launcher.Helpers
             return new ObservableCollection<string>(LocaleNameDictionary.Values);
         }
 
-        public static LocaleData Instance { get; private set; } = Json.LoadClassWithoutSaving<LocaleData>(Path.Join(DefaultLocaleFolderPath, $"{LauncherSettingsProvider.Instance.DefaultLocale}.json")) ?? GenerateEnglishLocale();
+        public static LocaleData Instance { get; private set; } = Json.LoadClassWithoutSaving<LocaleData>(Path.Join(DefaultLocaleFolderPath, $"{LauncherSettingsProvider.Instance.DefaultLocale}.json")) ?? GenerateDefaultLocale();
     }
 
     public class LocaleData : NotifyPropertyChangedBase

@@ -1,0 +1,59 @@
+{
+    "serverVersion": "1.5.7",
+    "launcherVersion": "1.1.36",
+    "modsRepoPath": "./mods_repo",
+    "opcionaisPath": "./Opcionais",
+    "managedPaths": [
+        "BepInEx/plugins",
+        "user/cache"
+    ],
+    "deleteFiles": [
+        "SPT.Launcher.exe",
+        "SPT.Server.exe",
+        "SKIDROWRELOADED.COM.txt",
+        "SIT License.txt",
+        "Register.bat",
+        "Fika License.txt",
+        "LICENSE-BEPINEX.txt",
+        "LICENSE-ConfigurationManager.txt",
+        "LICENSE-Launcher.txt",
+        "LICENSE-Modules.txt",
+        "LICENSE-Server.txt",
+        "LiteNetLib License.txt",
+        "Open.NAT License.txt",
+        "BepInEx/plugins/Tyfon.WeaponCustomizer.pdb"
+    ],
+    "optionalGroups": [
+        {
+            "id": "gore",
+            "name": "Visceral (gore) -FPS",
+            "description": "Efeitos visuais de desmembramento corporal",
+            "folders": [
+                "Visceral Combat GORE - (OPCIONAL)"
+            ],
+            "targetSubDir": ""
+        },
+        {
+            "id": "grass",
+            "name": "Remove grama +FPS",
+            "description": "Remove vegetação rasteira para melhor performance",
+            "folders": [
+                "Remover grama +FPS (OPCIONAL)"
+            ],
+            "offFolders": [
+                "Remover grama Off"
+            ],
+            "targetSubDir": ""
+        },
+        {
+            "id": "hollywood",
+            "name": "Efeitos visuais -FPS",
+            "description": "Efeitos de explosão, impacto e iluminação melhorados",
+            "folders": [
+                "HollywoodFX",
+                "HollywoodGraphics"
+            ],
+            "targetSubDir": "BepInEx/plugins"
+        }
+    ]
+}

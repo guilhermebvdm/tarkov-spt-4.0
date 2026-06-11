@@ -158,7 +158,7 @@ namespace SPT.Launcher.Helpers
                 var requestData = new { publicKey = publicKey, username = playerName };
 
                 string serverUrl = LauncherSettingsProvider.Instance.Server.Url.TrimEnd('/');
-                string registerApiUrl = serverUrl.Replace("https://", "http://").Replace(":7073", ":7075") + "/api/vpn/register";
+                string registerApiUrl = serverUrl.Replace("https://", "http://").Replace(":7073", "") + "/api/vpn/register";
 
                 LogManager.Instance.Info($"[Connect] Enviando chave pública para {registerApiUrl}...");
                 var response = await httpClient.PostAsJsonAsync(registerApiUrl, requestData);

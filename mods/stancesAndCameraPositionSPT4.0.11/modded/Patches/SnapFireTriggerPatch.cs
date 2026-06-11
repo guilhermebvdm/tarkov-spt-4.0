@@ -68,6 +68,8 @@ namespace CameraRotationMod.Patches
         [PatchPrefix]
         private static bool Prefix(Player.FirearmController __instance, bool pressed)
         {
+            Plugin.Logger.LogDebug($"[F4] SnapFireTriggerPatch.Prefix disparado! pressed={pressed}");
+
             // PA-02-01: bypass durante a ressurreição — deixa o trigger sintético passar.
             if (_inSyntheticCall) return true;
 
@@ -76,16 +78,31 @@ namespace CameraRotationMod.Patches
                 // ref: CR-01-01 — filtrar para apenas MainPlayer (em multiplayer Fika, o patch
                 // dispara para FirearmControllers de outros players; snap só faz sentido no local).
                 var mainPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
-                if (mainPlayer == null || __instance != mainPlayer.HandsController) return true;
+                if (mainPlayer == null)
+                {
+                    Plugin.Logger.LogDebug($"[F4] SnapFireTriggerPatch.Prefix: IGNORADO (mainPlayer == null)");
+                    return true;
+                }
+                if (__instance != mainPlayer.HandsController)
+                {
+                    Plugin.Logger.LogDebug($"[F4] SnapFireTriggerPatch.Prefix: IGNORADO (__instance != mainPlayer.HandsController)");
+                    return true;
+                }
 
                 if (pressed)
                 {
+                    Plugin.Logger.LogDebug($"[F4] SnapFireTriggerPatch.Prefix: clicou DOWN");
                     if (StanceManager.TryInterceptTriggerDown(__instance))
+                    {
+                        Plugin.Logger.LogDebug($"[F4] SnapFireTriggerPatch.Prefix: Interceptado. Tiro BLOQUEADO.");
                         return false;     // skip original: tiro NÃO sai
+                    }
+                    Plugin.Logger.LogDebug($"[F4] SnapFireTriggerPatch.Prefix: Não interceptado. Deixando tiro sair.");
                     return true;           // caminho normal — sem snap
                 }
                 else
                 {
+                    Plugin.Logger.LogDebug($"[F4] SnapFireTriggerPatch.Prefix: clicou UP");
                     // PA-02-03 + PA-03-01: agenda ressurreição (synthetic true) e reset (synthetic false)
                     // para os frames seguintes. Sem closure no Prefix (PA-02-04).
                     StanceManager.OnTriggerUpAfterIntercept(__instance, _originalSetTrigger);

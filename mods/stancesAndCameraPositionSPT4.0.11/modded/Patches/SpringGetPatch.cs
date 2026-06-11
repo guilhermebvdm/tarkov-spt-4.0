@@ -1,7 +1,7 @@
 using SPT.Reflection.Patching;
-using EFT.Animations;
 using System.Reflection;
 using UnityEngine;
+using EFT.Animations;
 using HarmonyLib;
 using Comfort.Common;
 using EFT;
@@ -11,16 +11,36 @@ namespace CameraRotationMod.Patches
     /// <summary>
     /// Patch Spring.Get() to add our custom offset to the return value with smooth transitions
     /// Handles both ADS transitions and Stance toggling with framerate-independent interpolation
-    /// Uses Unity's SmoothDamp for guaranteed stability at any frame rate
+    /// Uses Unity's SmoothDamp    /// Permite adicionar offsets dinâmicos gerados pela transição das Stances para todos os jogadores.
     /// </summary>
     public class SpringGetPatch : ModulePatch
     {
-        // Track transition states
-        private static bool _wasAiming = false;
-        private static bool _wasInStance = false;
-        private static bool _wasHoldingFirearm = false;
-        private static bool _isInitialized = false;
-        
+        // Cache dictionary para mapear Springs -> Controladores dos jogadores (para Bots e Fika)
+        private static readonly System.Collections.Generic.Dictionary<Spring, PlayerStanceController> _playerSprings = 
+            new System.Collections.Generic.Dictionary<Spring, PlayerStanceController>();
+
+        // Fallback for MainPlayer
+        private static Spring _cachedHandsRotation;
+        private static Spring _cachedHandsPosition;
+
+        public static void RegisterPlayerSprings(EFT.Player player, Spring rot, Spring pos, PlayerStanceController controller)
+        {
+            if (rot != null) _playerSprings[rot] = controller;
+            if (pos != null) _playerSprings[pos] = controller;
+        }
+
+        public static void UnregisterPlayerSprings(Spring rot, Spring pos)
+        {
+            if (rot != null) _playerSprings.Remove(rot);
+            if (pos != null) _playerSprings.Remove(pos);
+        }
+
+        public static void ClearCache()
+        {
+            _cachedHandsRotation = null;
+            _cachedHandsPosition = null;
+            _playerSprings.Clear();
+        }
         // Advanced ADS Transition (Shouldering) state
         private static bool _isInShoulderingPhase = false;
         private static float _shoulderingStartTime = 0f;
@@ -48,9 +68,11 @@ namespace CameraRotationMod.Patches
         private static bool _isStable = false;
         private static bool _wasStable = false;
         
-        // Cached spring references to avoid property lookups on every Spring.Get() call
-        private static Spring _cachedHandsRotation = null;
-        private static Spring _cachedHandsPosition = null;
+        private static bool _wasAiming = false;
+        private static bool _wasInStance = false;
+        private static bool _wasHoldingFirearm = false;
+        private static bool _isInitialized = false;
+
         
         /// <summary>
         /// Reset all state - called when entering new raid or GameWorld changes
@@ -138,8 +160,29 @@ namespace CameraRotationMod.Patches
         [PatchPostfix]
         private static void PatchPostfix(Spring __instance, ref Vector3 __result)
         {
-            // FAST early exit: if we have cached spring refs, reject non-hands springs immediately
-            // This avoids GameWorld lookups for the majority of Spring.Get() calls
+            // Tenta pegar o controlador a partir do dicionário (multiplayer/bots)
+            if (_playerSprings.TryGetValue(__instance, out var controller))
+            {
+                if (controller != null)
+                {
+                    // Determinar se é posição ou rotação checando a velocidade da spring.
+                    // Isso é uma aproximação segura para os controladores extras,
+                    // já que registramos pos e rot em PlayerStanceController.
+                    bool isControllerRot = controller.IsRotationSpring(__instance);
+                    
+                    if (isControllerRot)
+                    {
+                        __result = controller.GetRotationOffset() + __instance.Current;
+                    }
+                    else
+                    {
+                        __result = controller.GetPositionOffset() + __instance.Current;
+                    }
+                    return; // Retorno antecipado para não processar a lógica do MainPlayer
+                }
+            }
+
+            // FAST early exit: se não estiver no dicionário e nem no cache do MainPlayer
             if (_cachedHandsRotation != null && __instance != _cachedHandsRotation && __instance != _cachedHandsPosition)
                 return;
             
@@ -157,12 +200,15 @@ namespace CameraRotationMod.Patches
                 _cachedHandsPosition = pwa.HandsContainer.HandsPosition;
             }
 
-            // Early exit if this spring is not one we care about (hands only, camera handled in PlayerSpringPatch)
-            if (__instance != _cachedHandsRotation && __instance != _cachedHandsPosition)
+            bool isMainPlayerRot = (__instance == _cachedHandsRotation);
+            bool isMainPlayerPos = (__instance == _cachedHandsPosition);
+
+            if (!isMainPlayerRot && !isMainPlayerPos)
                 return;
 
-            bool isRotationSpring = __instance == _cachedHandsRotation;
-            bool isPositionSpring = __instance == _cachedHandsPosition;
+            bool isRotationSpring = isMainPlayerRot;
+            bool isPositionSpring = isMainPlayerPos;
+
             
             bool isAiming = pwa.IsAiming;
             bool isHoldingFirearm = StanceManager.IsHoldingFirearm();
@@ -206,6 +252,57 @@ namespace CameraRotationMod.Patches
                 return;
             if (isPositionSpring && !anyPositionFeatureEnabled)
                 return;
+                
+            // Update target values when state changes
+            if (stateChanged)
+            {
+                _isStable = false;
+                
+                // --- Item 009: Stance Wiggle Procedural ---
+                // Se estamos mudando de Stance (que não seja de/para ADS) e o wiggle estiver habilitado
+                if (currentStance != _previousStance && Plugin._EnableStanceWiggle?.Value == true)
+                {
+                    float weaponWeight = 3.0f; // Default weight fallback
+                    if (gameWorld.MainPlayer.HandsController is Player.FirearmController fc && fc.Item != null)
+                    {
+                        weaponWeight = fc.Item.Weight;
+                    }
+
+                    // A curva de peso mapeia de armas leves (~2kg) até pesadas (~12kg)
+                    // Armas pesadas geram um tranco mais agressivo
+                    float weightFactor = Mathf.Clamp(weaponWeight / 4.0f, 0.5f, 3.0f);
+                    
+                    float multiplier = Plugin._StanceWiggleMultiplier?.Value ?? 1.0f;
+                    
+                    // Injeta um impulso angular no estado atual da rotação.
+                    // O SmoothDamp vai se encarregar de absorver esse tranco e puxar a arma de volta para o target.
+                    if (isRotationSpring)
+                    {
+                        Vector3 wiggle = new Vector3(
+                            UnityEngine.Random.Range(-0.5f, -1.5f), // Pitch
+                            UnityEngine.Random.Range(-1.0f, 1.0f),  // Yaw
+                            UnityEngine.Random.Range(-0.5f, 0.5f)   // Roll
+                        ) * weightFactor * multiplier;
+                        
+                        _currentRotation += wiggle;
+                    }
+                    if (isPositionSpring)
+                    {
+                        Vector3 wigglePos = new Vector3(
+                            0f,
+                            UnityEngine.Random.Range(-0.01f, 0.01f),
+                            UnityEngine.Random.Range(-0.02f, -0.05f) // Tranco para trás (simulando inércia de puxar)
+                        ) * weightFactor * multiplier;
+                        
+                        _currentPosition += wigglePos;
+                    }
+                }
+                
+                _wasAiming = isAiming;
+                _wasInStance = isInStanceFull;
+                _wasHoldingFirearm = isHoldingFirearm;
+                _previousStance = currentStance;
+            }
 
             // Check if player is holding a firearm - if not, force Default stance
             bool isInStance = isHoldingFirearm && StanceManager.IsInStance;

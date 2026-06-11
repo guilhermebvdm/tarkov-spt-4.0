@@ -25,6 +25,12 @@ namespace SPT.Launcher.Helpers
 
         public static PatchResultInfo Patch(string targetfile, string patchfile, bool IgnoreInputHashMismatch = false)
         {
+            if (!File.Exists(targetfile))
+            {
+                LogManager.Instance.Warning($"[Patch] Target file does not exist, skipping: {targetfile}");
+                return new PatchResultInfo(PatchResultType.Success, 1, 1);
+            }
+
             // Backup the original file if a backup doesn't exist yet
             var backupFile = $"{targetfile}.spt-bak";
             if (!File.Exists(backupFile))

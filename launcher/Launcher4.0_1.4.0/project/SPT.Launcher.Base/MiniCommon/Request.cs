@@ -70,9 +70,18 @@ namespace SPT.Launcher.MiniCommon
                 var response = request.GetResponse();
                 return response.GetResponseStream();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Not sure why this was a unityengine debug logger. Possilby used by another module?
+                SPT.Launcher.Controllers.LogManager.Instance.Error($"[Request] Network Error connecting to {url}: {ex.Message}");
+                if (ex is WebException webEx && webEx.Response is HttpWebResponse webResp)
+                {
+                    SPT.Launcher.Controllers.LogManager.Instance.Error($"[Request] HTTP Status: {webResp.StatusCode}");
+                    try {
+                        using var reader = new StreamReader(webResp.GetResponseStream());
+                        string errorBody = reader.ReadToEnd();
+                        SPT.Launcher.Controllers.LogManager.Instance.Error($"[Request] HTTP Body: {errorBody}");
+                    } catch {}
+                }
             }
 
             return null;
@@ -90,14 +99,21 @@ namespace SPT.Launcher.MiniCommon
             }
         }
 
-        public string PostJson(string url, string data, bool compress = true)
+        public string PostJson(string url, string data, bool compress = true, bool decompressResponse = true)
         {
             using (var stream = Send(url, "POST", data, compress))
             {
                 using (var ms = new MemoryStream())
                 {
                     stream.CopyTo(ms);
-                    return SimpleZlib.Decompress(ms.ToArray(), null);
+                    if (decompressResponse)
+                    {
+                        return SimpleZlib.Decompress(ms.ToArray(), null);
+                    }
+                    else
+                    {
+                        return Encoding.UTF8.GetString(ms.ToArray());
+                    }
                 }
             }
         }

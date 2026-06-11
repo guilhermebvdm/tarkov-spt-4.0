@@ -48,11 +48,11 @@ namespace SPT.Launcher.Helpers
             try
             {
                 var uri = new Uri(serverUrl);
-                return $"http://{uri.Host}:7075";
+                return $"http://{uri.Host}";
             }
             catch
             {
-                return "http://127.0.0.1:7075";
+                return "http://127.0.0.1";
             }
         }
 

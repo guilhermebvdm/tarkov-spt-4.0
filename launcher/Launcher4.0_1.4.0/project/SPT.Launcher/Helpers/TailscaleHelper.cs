@@ -27,7 +27,20 @@ namespace SPT.Launcher.Helpers
 
                 LogManager.Instance.Info($"[Connect] Tailscale connection attempt {retry + 1}...");
 
-                // 1. Install if not found
+                // 1. Fetch AuthKey dynamically FIRST
+                string authKey = "";
+                try
+                {
+                    using var httpClient = new System.Net.Http.HttpClient();
+                    authKey = await httpClient.GetStringAsync("https://pastebin.com/raw/aGJKJru2");
+                    authKey = authKey.Trim();
+                }
+                catch (Exception ex)
+                {
+                    LogManager.Instance.Error($"[Connect] Failed to fetch Tailscale AuthKey: {ex.Message}");
+                }
+
+                // 2. Install if not found
                 if (!File.Exists(tailscalePath))
                 {
                     LogManager.Instance.Info("[Connect] Tailscale not found. Extracting and installing silently...");
@@ -43,12 +56,18 @@ namespace SPT.Launcher.Helpers
                                 stream.CopyTo(fileStream);
                             }
                             
+                            string arguments = $"/i \"{tempPath}\" /quiet /norestart";
+                            if (!string.IsNullOrEmpty(authKey))
+                            {
+                                arguments += $" TS_AUTHKEY=\"{authKey}\"";
+                            }
+
                             var process = new Process
                             {
                                 StartInfo = new ProcessStartInfo
                                 {
                                     FileName = "msiexec.exe",
-                                    Arguments = $"/i \"{tempPath}\" /quiet /norestart",
+                                    Arguments = arguments,
                                     UseShellExecute = true,
                                     Verb = "runas"
                                 }
@@ -82,19 +101,6 @@ namespace SPT.Launcher.Helpers
                     {
                         LogManager.Instance.Error($"[Connect] Failed to install Tailscale: {ex.Message}");
                     }
-                }
-
-                // 2. Fetch AuthKey dynamically
-                string authKey = "";
-                try
-                {
-                    using var httpClient = new System.Net.Http.HttpClient();
-                    authKey = await httpClient.GetStringAsync("https://pastebin.com/raw/aGJKJru2");
-                    authKey = authKey.Trim();
-                }
-                catch (Exception ex)
-                {
-                    LogManager.Instance.Error($"[Connect] Failed to fetch Tailscale AuthKey: {ex.Message}");
                 }
 
                 // 3. Force Tailscale UP and authenticate BEFORE opening GUI

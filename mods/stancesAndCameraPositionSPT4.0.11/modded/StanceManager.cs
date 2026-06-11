@@ -37,6 +37,12 @@ namespace CameraRotationMod
                 OnStanceChanged(prev, value);
             }
         }
+
+        public static void SetStance(Stance newStance)
+        {
+            CurrentStance = newStance;
+        }
+
         public static bool IsInStance => CurrentStance != Stance.Default;
         
         private static ConfigEntry<KeyCode> _stanceToggleKeyConfig;
@@ -59,6 +65,12 @@ namespace CameraRotationMod
         // Cached GameWorld reference for this frame (avoids multiple Singleton lookups)
         private static GameWorld _cachedGameWorld = null;
         private static int _cachedGameWorldFrame = -1;
+
+        // Item 008: Action Stance variables
+        private static bool _isActionStanceActive = false;
+        private static Stance _preActionStance = Stance.Default;
+        private static float _actionStanceStartTime = 0f;
+        private static ConfigEntry<bool> _enableActionStanceSwapConfig;
         
         // Cached weapon properties - rebuilt when weapon changes
         private static Player.FirearmController _lastFirearmController = null;
@@ -96,6 +108,7 @@ namespace CameraRotationMod
             _stanceToggleKeyConfig = stanceToggleKeyConfig;
             _enableMouseWheelCycleConfig = Plugin._EnableMouseWheelCycle;
             _mouseWheelModifierKeyConfig = Plugin._MouseWheelModifierKey;
+            _enableActionStanceSwapConfig = Plugin._EnableActionStanceSwap;
         }
 
         public static void Update()
@@ -109,46 +122,78 @@ namespace CameraRotationMod
 
             // backlog 002 F4 — guard de stale para weapon swap durante hold (sem button-up).
             EvaluateSnapStaleTimeout();
-
-            // Block stance switching while sprinting
+            
+            // Block stance switching while sprinting, aiming, mounting (vanilla or custom), or prone
             var gameWorld = GetCachedGameWorld();
-            if (gameWorld?.MainPlayer?.IsSprintEnabled == true)
-                return;
-
-            // backlog 002 F3 (PA-04-02): hotkeys F3 PRIMEIRO — se uma matcha, return early.
-            // Garante prioridade de hotkey sobre tecla V quando coincidem.
-            if (HandleStanceHotkeys()) return;
-
-            // GetKeyDown already returns true for only one frame, no manual edge-detect needed
-            if (UnityEngine.Input.GetKeyDown(_stanceToggleKeyConfig.Value))
+            bool isNativeMounting = false;
+            bool isAiming = false;
+            bool isInProne = false;
+            
+            if (gameWorld?.MainPlayer != null)
             {
-                CurrentStance = GetNextStance(CurrentStance);
+                var pwa = gameWorld.MainPlayer.ProceduralWeaponAnimation;
+                if (pwa != null)
+                {
+                    isNativeMounting = pwa.IsMountedState || pwa.IsBipodUsed;
+                    isAiming = pwa.IsAiming;
+                }
+                isInProne = gameWorld.MainPlayer.IsInPronePose;
             }
 
-            // Mouse wheel cycling
-            if (_enableMouseWheelCycleConfig?.Value == true)
+            if (gameWorld?.MainPlayer?.IsSprintEnabled == true || MountingManager.IsMounting || isNativeMounting || isInProne)
             {
-                // Check if modifier key is held
-                if (UnityEngine.Input.GetKey(_mouseWheelModifierKeyConfig.Value))
+                // Se começou a correr, deitou ou está apoiado, quebra a Action Stance e trava controles
+                if (_isActionStanceActive) EndActionStance(forceCancel: true);
+                
+                // Forçar para Default caso seja montagem ou deitado (evita bugar se estivesse numa stance e montou/deitou do nada)
+                if ((MountingManager.IsMounting || isNativeMounting || isInProne) && CurrentStance != Stance.Default)
                 {
-                    float scrollDelta = UnityEngine.Input.GetAxis("Mouse ScrollWheel");
+                    SetStance(Stance.Default);
+                }
+                return;
+            }
 
-                    // Check cooldown to prevent rapid cycling
-                    if (scrollDelta != 0 && Time.time - _lastScrollTime > ScrollCooldown)
+            // Action Stance: o término é detectado via ActionStanceOnIdlePatch (OnIdleStartEvent).
+            // Sem polling aqui — o evento nativo é preciso e sem gaps.
+
+            // Se estiver mirando (ADS), não processamos as hotkeys ou a roda do mouse,
+            // mas ainda queremos rodar a ActionStance e UpdateTacSprint, então apenas pulamos a entrada.
+            if (!isAiming)
+            {
+                // Process hotkeys first (returns true if handled)
+                if (HandleStanceHotkeys()) return;
+
+                // Toggle logic
+                if (UnityEngine.Input.GetKeyDown(_stanceToggleKeyConfig.Value))
+                {
+                    CurrentStance = GetNextStance(CurrentStance);
+                }
+
+                // Mouse wheel cycling
+                if (_enableMouseWheelCycleConfig?.Value == true)
+                {
+                    // Check if modifier key is held
+                    if (UnityEngine.Input.GetKey(_mouseWheelModifierKeyConfig.Value))
                     {
-                        // backlog 002 F2 — branch por modo de scroll.
-                        switch (Plugin._MouseWheelScrollMode?.Value ?? ScrollMode.Linear)
+                        float scrollDelta = UnityEngine.Input.GetAxis("Mouse ScrollWheel");
+
+                        // Check cooldown to prevent rapid cycling
+                        if (scrollDelta != 0 && Time.time - _lastScrollTime > ScrollCooldown)
                         {
-                            case ScrollMode.Cycle:
-                                CurrentStance = scrollDelta > 0
-                                    ? GetNextStance(CurrentStance)
-                                    : GetPreviousStance(CurrentStance);
-                                break;
-                            case ScrollMode.Linear:
-                                HandleLinearScroll(scrollDelta);
-                                break;
+                            // backlog 002 F2 — branch por modo de scroll.
+                            switch (Plugin._MouseWheelScrollMode?.Value ?? ScrollMode.Linear)
+                            {
+                                case ScrollMode.Cycle:
+                                    CurrentStance = scrollDelta > 0
+                                        ? GetNextStance(CurrentStance)
+                                        : GetPreviousStance(CurrentStance);
+                                    break;
+                                case ScrollMode.Linear:
+                                    HandleLinearScroll(scrollDelta);
+                                    break;
+                            }
+                            _lastScrollTime = Time.time;
                         }
-                        _lastScrollTime = Time.time;
                     }
                 }
             }
@@ -206,6 +251,7 @@ namespace CameraRotationMod
             if (gw?.MainPlayer == null) return false;
             if (gw.MainPlayer.IsSprintEnabled) return false;                                  // bloqueio sprint
             if (gw.MainPlayer.ProceduralWeaponAnimation?.IsAiming == true) return false;      // ignora em ADS
+            if (gw.MainPlayer.IsInPronePose) return false;                                    // bloqueio prone
 
             if (TryHotkey(Plugin._Stance0Hotkey, Stance.Default)) return true;
             if (TryHotkey(Plugin._Stance1Hotkey, Stance.Stance1)) return true;
@@ -249,6 +295,57 @@ namespace CameraRotationMod
         // 06-fix-01: trocado de `object operationInstance` para `Player.FirearmController` (patch target mudou).
         private static Player.FirearmController _interceptFc;
 
+        // ==========================================================================
+        // Item 008: Action Stance (Reload / Check)
+        // ==========================================================================
+
+        public static void StartActionStance()
+        {
+            if (_enableActionStanceSwapConfig?.Value != true) return;
+            if (_isActionStanceActive) return;
+
+            var gw = GetCachedGameWorld();
+            if (gw?.MainPlayer?.IsSprintEnabled == true) return;
+            if (MountingManager.IsMounting) return; // Não levanta a arma se estiver apoiado na parede
+
+            if (CurrentStance != Stance.Default)
+            {
+                _preActionStance = CurrentStance;
+                SetStance(Stance.Default); // Força para Default (Vanilla) durante a recarga
+            }
+            else
+            {
+                // Já estava em Default, só marca que está ativo para não quebrar
+                _preActionStance = Stance.Default;
+            }
+            
+            _isActionStanceActive = true;
+            _actionStanceStartTime = Time.time;
+        }
+
+        public static void EndActionStance(bool forceCancel = false)
+        {
+            if (!_isActionStanceActive) return;
+
+            // Debounce: ignorar OnIdleStartEvent disparados nos primeiros 0.3s (podem ser idle
+            // events do próprio início da operação antes da animação realmente começar).
+            if (!forceCancel && (Time.time - _actionStanceStartTime < 0.3f)) return;
+
+            _isActionStanceActive = false;
+
+            // Reseta o estado do manual chambering para que o próximo tiro/operação de engatilhamento manual funcione normalmente
+            Patches.ManualChamberingState.CanLoadChamber = true;
+            Patches.ManualChamberingState.BlockChambering = false;
+
+            // Se forceCancel for true (ex: começou a correr no meio do reload),
+            // a própria lógica de sprint ou outras resetam a stance, então não voltamos para previousStance forçadamente
+            // Se for falso, restauramos a stance original se estivermos em Default
+            if (!forceCancel && CurrentStance == Stance.Default)
+            {
+                SetStance(_preActionStance);
+            }
+        }
+
         // PA-02-03: deferred resurrection (frame N+1: synthetic true).
         private static Player.FirearmController _pendingResurrectFc;
         private static MethodBase                _pendingResurrectMethod;
@@ -275,13 +372,31 @@ namespace CameraRotationMod
         {
             var gw = GetCachedGameWorld();
             if (gw?.MainPlayer == null) return false;
-            if (gw.MainPlayer.ProceduralWeaponAnimation?.IsAiming == true) return false; // sem snap em ADS
-            if (CurrentStance == Stance.Default) return false;                            // sem snap em Stance 0
-            if (!Plugin._stanceConfigs.TryGetValue(CurrentStance, out var cfg)) return false;
-            if (cfg.SnapToStance0OnFire == null) return false;                            // sentinel (Stance 0)
-            if (!cfg.SnapToStance0OnFire.Value) return false;                             // toggle off
+            
+            if (gw.MainPlayer.ProceduralWeaponAnimation?.IsAiming == true)
+            {
+                Plugin.Logger.LogDebug("[F4] TryInterceptTriggerDown: IGNORADO (está mirando/ADS)");
+                return false; 
+            }
+            if (CurrentStance == Stance.Default)
+            {
+                return false;
+            }
+            if (!Plugin._stanceConfigs.TryGetValue(CurrentStance, out var cfg))
+            {
+                return false;
+            }
+            if (cfg.SnapToStance0OnFire == null)
+            {
+                return false;
+            }
+            if (!cfg.SnapToStance0OnFire.Value)
+            {
+                Plugin.Logger.LogDebug($"[F4] TryInterceptTriggerDown: IGNORADO (SnapToStance0OnFire desligado na Stance {CurrentStance})");
+                return false;                             
+            }
 
-            // Snap imediato — comportamento desejado em todos os caminhos.
+            Plugin.Logger.LogDebug($"[F4] TryInterceptTriggerDown: INTERCEPTADO na Stance {CurrentStance}! Forçando Snap para Default (Vanilla)");
             CurrentStance = Stance.Default;
 
             // Marcar intercept ativo: timer começa, próximo button-up decide se ressuscita.
@@ -1113,6 +1228,14 @@ namespace CameraRotationMod
         {
             try
             {
+                var gw = GetCachedGameWorld();
+                if (gw?.MainPlayer != null)
+                {
+                    // Usa singleton estático em vez de FindObjectOfType (evita hitch de FPS).
+                    bool isMounting = MountingManager.IsMounting;
+                    FikaSync.FikaNetworkSync.SendStanceUpdate(gw.MainPlayer.ProfileId, newStance, isMounting);
+                }
+
                 _activeStaminaStance = newStance;
                 ApplyStaminaStance(newStance);
             }
