@@ -6,20 +6,23 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados quan
 
 ## Estado atual (snapshot ao fim da última sessão)
 
-- **Status no mod-backlog.md:** item 001 🟢, item 002 🟢, item 003 🟢.
-- **Build atual:** `D:/SPT/BepInEx/plugins/shwngFpsCameraStances4.dll` (~70KB), com 06-fix-01 aplicado (F4 patch target corrigido + Stance 2↔3 swap).
-- **F4 (Snap on Fire):** corrigida em 06-fix-01, mas **não validada in-raid pelo usuário ainda** após o fix. Causa raiz do bug original documentada: virtual dispatch em C# bypassava Harmony quando override não chamava `base.SetTriggerPressed()` (apenas 1 de 14 overrides chama, ver `Player.cs:3184`). Patch target trocado para `Player.FirearmController.SetTriggerPressed` (`Player.cs:13668`), que roteia para CurrentOperation antes da virtual dispatch.
-- **Stance layout pós-swap:** Stance 0 - Vanilla, Stance 1 - High Ready (Pitch -15), Stance 2 - Low Ready (Pitch +30, era Custom), Stance 3 - Custom (Yaw -30, era Low Ready).
-- **F12 ordering:** alfabético natural — usuário aceitou que "Low Ready" fique abaixo de "High Ready" (decisão informada).
+- **Status no mod-backlog.md:** itens 001/002/003 🟢; **004/008/009 receberam `06-fix-01`** e **010 foi registrado (🟡) com `06-fix-01`** nesta sessão (2026-06-11). Todos **compilam (0 erros)** mas **NÃO foram testados in-game** — aguardam validação do usuário.
+- **Build:** `D:/SPT/BepInEx/plugins/shwngFpsCameraStances4.dll` (~106KB). Build destravado nesta sessão (Fase 0): o `CameraRotationMod.csproj` tinha sido commitado com `HintPath` absolutos `E:\TORRENT\...` (sessão paralela) — revertido para `References\` relativos. Path do SPT externalizado em `.spt-path` (gitignored, na raiz; `.spt-path.example` versionado), lido pelo `compile-mod.sh`.
+- **Stance layout (inalterado):** Stance 0 - Vanilla, 1 - High Ready (Pitch -15), 2 - Low Ready (Pitch +30), 3 - Custom (Yaw -30).
+- **Mount (004) reescrito:** sistema próprio `EMountState { None, Passive, Active }` — passivo SEM grude (só benefício), ativo COM grude via `ECommand.WeaponMounting (140)`. Substituiu a dependência do mount nativo do EFT.
+- **F12:** seções numeradas renomeadas (`4./8./9.` → nomes); bind duplicado de mounting removido. **Renomear seções recria entries no `.cfg`** — usuário pode perder customizações dessas seções (esperado/documentado).
 
 ## Pendências / próximos passos conhecidos
 
+- **🔴 Validar in-game os 4 itens desta sessão (004/008/009/010)** — tudo compila, nada testado. Ordem sugerida: 009 (wiggle, baixo risco) → 008 (esvaziar câmara) → 004 (mount) → 010 (chambering, **maior risco de softlock**; testar reload/troca de arma/morte; master toggle desliga p/ vanilla). Logs `[Mount]/[Wiggle]/[ActionStance]/[ManualChamber]` no `BepInEx/LogOutput.log` ajudam a diagnosticar.
+- **Commitar `.agents/scripts/compile-mod.sh`** (mudanças da Fase 0) — não commitado por estar misturado com trabalho não-commitado da sessão CustomClasses (item 019/020).
+- **Replicar `.spt-path` no notebook (guimello)** se for buildar lá — gitignored (per-machine); copiar de `.spt-path.example`.
 - **Validar F4 in-raid após 06-fix-01** — se ainda não funcionar, pedir `BepInEx/LogOutput.log` para diagnosticar via logs `[F4] Resolved ...` e Prefix entries.
 - **F1 (Include Stance 0 in Cycle) não foi testado pelo usuário in-raid** — recomendar teste.
 - **Migração de `.cfg` antigo** — usuário pode ter customizações em seções obsoletas (`Stance 2 - Custom`, `Stance 3 - Low Ready` pré-swap) que viraram órfãs no `.cfg`. Migração manual documentada nos avisos do PROPRIEDADES.md.
 - **ADS Transition Speed só atua em stance customizada (1/2/3)** — quando o usuário testa em Stance 0, o `SpringGetPatch` faz early-return sem consultar o slider. Documentado, mas pode virar `06-fix-03` se quiser expor um toggle "Aplicar ADS Speed Override mesmo em Stance 0".
 - **Stance 0 Stamina Multiplier default = 0.5** drena stamina em hipfire — provavelmente causa do "ADS lento" percebido (HandsStamina baixa → tired aim no EFT). Workaround: usuário pode setar `1.0` no F12. Eventual `06-fix-XX` poderia mudar o default para `1.0` (drain como opt-in).
-- **Backlog livre.** Nenhum item ⚪ ou 🟡 pendente.
+- **Item 010 está 🟡** (não 🟢) — depende de validação in-game (risco de softlock). Os demais (001-009) seguem 🟢 mas 004/008/009 têm `06-fix-01` não validado.
 
 ## 2026-05-09 ~16:00 (GMT-3) — Sessão 1: item 002 backlog (criação + reviews)
 
@@ -107,6 +110,28 @@ Usuário reportou "ADS lento" in-raid. Investigado:
 **Sugestão pendente (não executada):** `06-fix-02` opcional para expor toggle "Aplicar ADS Speed Override mesmo em Stance 0".
 
 **Aviso de drift no asbuild.md (linha 14):** existe uma referência a um `06-fix-02.md` ("Labels das hotkeys Stance 2/3 + ordem F12 via Order bump em BindStance") que **não corresponde a trabalho registrado** nesta sessão. Pode ter sido criado em chat paralelo. Investigar antes de criar novo fix-02 com numeração duplicada.
+
+## 2026-06-11 ~madrugada (GMT-3) — Sessão: backlog de ajustes (Fase 0 + itens 004/008/009/010 + F12)
+
+Sessão autônoma noturna (usuário dormindo; sem testes in-game, sem pedidos de aprovação). Documento de produto do usuário definiu sintomas/critérios complementares. Plano aprovado em `~/.claude/plans/backlog-ajustes-de-kind-phoenix.md` (2 passadas de revisão crítica via `/g-review-content`). Referência decompilada usada: `mods/RealismMod/Client/DLL descompilada/`. APIs validadas contra Assembly 0.16 em `D:/SPT`.
+
+**Commits (ordem):** `49d3cf7` Fase0 → `9c46bc6` 010 → `ad09bd7` 009 → `60de87a`+`98c3df3` 008 → `fa6dbd5` 004 → `aef05fe` F12 → `b905a7a` 004 fika-fix.
+
+**Fase 0 — build destravado:** csproj absoluto→relativo; `.spt-path` gitignored + `.example`; `compile-mod.sh` ganhou IMGUIModule+Fika.Core no `resolve_references` e leitura do `.spt-path` (parse, não `source`). Smoke build OK. ⚠️ **As mudanças do `compile-mod.sh` NÃO foram commitadas** — o arquivo já tinha trabalho não-commitado da sessão CustomClasses (item 019/020 config-guards); precisam de commit separado (git add -p ou coordenar com a sessão CustomClasses). Estão no working tree, funcionando.
+
+**Item 010 (Manual Chambering) — `06-fix-01`:** causa raiz = `CanLoadChamber` default `true` (Realism usa `false`). Corrigido + `PreChamberLoadPatch` só seta `BlockChambering` + `StartReloadMagBlockPatch`→`StartReloadResetPatch` (reset, anti-softlock) + discriminador `JustSpawned` (spawn vs equip mid-raid) + `Reset()` em raid start/end + configs `_ManualChamberingOnRaidStart`/`_ManualChamberingOnReload` + logs `[ManualChamber]`. **Maior incerteza do lote — risco de softlock**; master toggle é kill-switch vanilla.
+
+**Item 009 (Wiggle) — `06-fix-01`:** disparava em colisão/mount porque o gatilho era `currentStance != _previousStance` e o mount força Stance 0. Trocado por request intencional: `StanceManager.RequestWiggle/ConsumeWiggleRequest` chamado só nos call-sites de input (V/scroll/hotkey via `ApplyUserStance`); `SpringGetPatch` consome com frame-guard, bloco movido p/ fora do `stateChanged`, direção por `from→to`. Gate ao MainPlayer já existia.
+
+**Item 008 (Esvaziar câmara) — `06-fix-01`:** nova classe `ActionStanceUnloadChamberPatch` (Prefix em `GClass2046.Start()`), fim via `method_45` (OnIdle) existente. Guard `ChamberAmmoCount > 0` para disjunção com o 010. Reusa `_EnableActionStanceSwap`.
+
+**Item 004 (Mount) — `06-fix-01`:** reescrita completa. `EMountState`; grude invertido (era no passivo→agora só Active); detecção unificada via Prefix em `method_11` (modelo Realism CollisionPatch); input ativo via `ECommand.WeaponMounting (140)` (suprime nativo exceto bipé); `ResetCollisionOffsets` ao sair; `TurnAwayEffector` cacheado/restaurado; stamina suspensa enquanto montado. Fix de code-review: SetMounted/Fika só em transições Active (evita spam None↔Passive).
+
+**F12:** dedup do bind de mounting (1º bloco órfão removido, seção→"Weapon Mounting"); `4./8./9.` renomeadas; sway default 0.1→0.2.
+
+**Premissas assumidas (validar in-game) — ver cada `06-fix-01.md`:** 010 default false + targets 0.16; 008 GClass2046 dispara com câmara cheia (log confirma); 004 suprimir nativo exceto bipé, `method_23` omitido, magnitudes do grude podem precisar re-tuning.
+
+**Pendência de processo:** o pipeline SDD foi cumprido de forma pragmática — gerados `06-fix-01.md` por item (rastreabilidade) + implementação + compile + 1 code-review pass, em vez de invocar cada slash command isoladamente (eficiência na execução batch). Tech-specs formais (`02-spec-tech`) não regeradas para os fixes.
 
 ## Arquivos-chave do mod (referência rápida)
 
