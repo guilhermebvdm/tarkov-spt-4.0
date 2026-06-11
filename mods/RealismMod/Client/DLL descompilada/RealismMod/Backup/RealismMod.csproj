@@ -1,0 +1,350 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!--Project was exported from assembly: D:\Drive\Google Drive\Users\Erick Saraiva\Downloads\Realism-Mod-1.6.4-SPT-3.11.0 (1)\BepInEx\plugins\RealismMod.dll-->
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{9C95C529-EAFA-4307-A54D-BD35C6AF2CDF}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AssemblyName>RealismMod</AssemblyName>
+    <ApplicationVersion>0.14.8.0</ApplicationVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="0Harmony" />
+    <Reference Include="netstandard" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ConfigurationManagerAttributes.cs" />
+    <Compile Include="FogScript.cs" />
+    <Compile Include="Bomb.cs" />
+    <Compile Include="ShockWave.cs" />
+    <Compile Include="System\Runtime\CompilerServices\RefSafetyRulesAttribute.cs" />
+    <Compile Include="RealismMod\EBodyHitZone.cs" />
+    <Compile Include="RealismMod\EHitOrientation.cs" />
+    <Compile Include="RealismMod\BallisticsController.cs" />
+    <Compile Include="RealismMod\HitZones.cs" />
+    <Compile Include="RealismMod\InitiateShotPatch.cs" />
+    <Compile Include="RealismMod\SetSkinPatch.cs" />
+    <Compile Include="RealismMod\VelocityPatch.cs" />
+    <Compile Include="RealismMod\IsPenetratedPatch.cs" />
+    <Compile Include="RealismMod\IsShotDeflectedByHeavyArmorPatch.cs" />
+    <Compile Include="RealismMod\DamageInfoPatch.cs" />
+    <Compile Include="RealismMod\ApplyDamageInfoPatch.cs" />
+    <Compile Include="RealismMod\AfterPenPlatePatch.cs" />
+    <Compile Include="RealismMod\SetPenetrationStatusPatch.cs" />
+    <Compile Include="RealismMod\ApplyArmorDamagePatch.cs" />
+    <Compile Include="RealismMod\CreateShotPatch.cs" />
+    <Compile Include="RealismMod\ApplyCorpseImpulsePatch.cs" />
+    <Compile Include="RealismMod\KeyInputPatch1.cs" />
+    <Compile Include="RealismMod\KeyInputPatch2.cs" />
+    <Compile Include="RealismMod\Birb.cs" />
+    <Compile Include="RealismMod\GameWorldController.cs" />
+    <Compile Include="RealismMod\GamePlayerPatch.cs" />
+    <Compile Include="RealismMod\ExfilInitPatch.cs" />
+    <Compile Include="RealismMod\RigidLootSpawnPatch.cs" />
+    <Compile Include="RealismMod\StaticLootSpawnPatch.cs" />
+    <Compile Include="RealismMod\DayTimeAmbientPatch.cs" />
+    <Compile Include="RealismMod\AmbientSoundPlayerGroupPatch.cs" />
+    <Compile Include="RealismMod\LampPatch.cs" />
+    <Compile Include="RealismMod\SpawnUpdatePatch.cs" />
+    <Compile Include="RealismMod\BossSpawnPatch.cs" />
+    <Compile Include="RealismMod\GetAvailableActionsPatch.cs" />
+    <Compile Include="RealismMod\DropItemPatch.cs" />
+    <Compile Include="RealismMod\DayTimeSpawnPatch.cs" />
+    <Compile Include="RealismMod\QuestCompletePatch.cs" />
+    <Compile Include="RealismMod\BirdPatch.cs" />
+    <Compile Include="RealismMod\OnGameStartPatch.cs" />
+    <Compile Include="RealismMod\OnGameEndPatch.cs" />
+    <Compile Include="RealismMod\HazardPlayerSpawnManager.cs" />
+    <Compile Include="RealismMod\PlayerZoneBridge.cs" />
+    <Compile Include="RealismMod\RealismWeatherController.cs" />
+    <Compile Include="RealismMod\EZoneType.cs" />
+    <Compile Include="RealismMod\EIneractableType.cs" />
+    <Compile Include="RealismMod\EIneractableAction.cs" />
+    <Compile Include="RealismMod\EInteractableState.cs" />
+    <Compile Include="RealismMod\Assets.cs" />
+    <Compile Include="RealismMod\SafeSpawns.cs" />
+    <Compile Include="RealismMod\DynamicRadZoneLoot.cs" />
+    <Compile Include="RealismMod\ZoneCollection.cs" />
+    <Compile Include="RealismMod\HazardGroup.cs" />
+    <Compile Include="RealismMod\Zone.cs" />
+    <Compile Include="RealismMod\Asset.cs" />
+    <Compile Include="RealismMod\Loot.cs" />
+    <Compile Include="RealismMod\Analysable.cs" />
+    <Compile Include="RealismMod\InteractableGroup.cs" />
+    <Compile Include="RealismMod\InteractableSubZone.cs" />
+    <Compile Include="RealismMod\Position.cs" />
+    <Compile Include="RealismMod\Rotation.cs" />
+    <Compile Include="RealismMod\Size.cs" />
+    <Compile Include="RealismMod\UserZones.cs" />
+    <Compile Include="RealismMod\SafeZones.cs" />
+    <Compile Include="RealismMod\RadAssetZones.cs" />
+    <Compile Include="RealismMod\RadZones.cs" />
+    <Compile Include="RealismMod\GasAssetZones.cs" />
+    <Compile Include="RealismMod\GasZones.cs" />
+    <Compile Include="RealismMod\QuestZones.cs" />
+    <Compile Include="RealismMod\InteractionZones.cs" />
+    <Compile Include="RealismMod\ZoneData.cs" />
+    <Compile Include="RealismMod\ZoneConstants.cs" />
+    <Compile Include="RealismMod\IZone.cs" />
+    <Compile Include="RealismMod\InteractableGroupComponent.cs" />
+    <Compile Include="RealismMod\InteractionZone.cs" />
+    <Compile Include="RealismMod\QuestZone.cs" />
+    <Compile Include="RealismMod\GasZone.cs" />
+    <Compile Include="RealismMod\RadiationZone.cs" />
+    <Compile Include="RealismMod\LabsSafeZone.cs" />
+    <Compile Include="RealismMod\ZoneSpawner.cs" />
+    <Compile Include="RealismMod\TransmitterHalloweenEvent.cs" />
+    <Compile Include="RealismMod\Transmitter.cs" />
+    <Compile Include="RealismMod\HazardAnalyser.cs" />
+    <Compile Include="RealismMod\GearController.cs" />
+    <Compile Include="RealismMod\FaceshieldMaskPatch.cs" />
+    <Compile Include="RealismMod\EquipmentPenaltyComponentPatch.cs" />
+    <Compile Include="RealismMod\RigConstructorPatch.cs" />
+    <Compile Include="RealismMod\HeadsetConstructorPatch.cs" />
+    <Compile Include="RealismMod\BodyPartStateWrapper.cs" />
+    <Compile Include="RealismMod\DamageTracker.cs" />
+    <Compile Include="RealismMod\HazardRecord.cs" />
+    <Compile Include="RealismMod\HazardTracker.cs" />
+    <Compile Include="RealismMod\MedProperties.cs" />
+    <Compile Include="RealismMod\EStimType.cs" />
+    <Compile Include="RealismMod\EHealBlockType.cs" />
+    <Compile Include="RealismMod\RealismHealthController.cs" />
+    <Compile Include="RealismMod\EHealthEffectType.cs" />
+    <Compile Include="RealismMod\ICustomHealthEffect.cs" />
+    <Compile Include="RealismMod\TourniquetEffect.cs" />
+    <Compile Include="RealismMod\SurgeryEffect.cs" />
+    <Compile Include="RealismMod\PassiveHealthRegenEffect.cs" />
+    <Compile Include="RealismMod\HealthRegenEffect.cs" />
+    <Compile Include="RealismMod\ResourceRateEffect.cs" />
+    <Compile Include="RealismMod\PainKillerEffect.cs" />
+    <Compile Include="RealismMod\FoodPoisoningEffect.cs" />
+    <Compile Include="RealismMod\AdrenalineEffect.cs" />
+    <Compile Include="RealismMod\ToxicityEffect.cs" />
+    <Compile Include="RealismMod\RadiationEffect.cs" />
+    <Compile Include="RealismMod\RadationTreatmentEffect.cs" />
+    <Compile Include="RealismMod\DetoxificationEffect.cs" />
+    <Compile Include="RealismMod\StimEffectShell.cs" />
+    <Compile Include="RealismMod\HealthDrain.cs" />
+    <Compile Include="RealismMod\HealthChange.cs" />
+    <Compile Include="RealismMod\RadiationDamage.cs" />
+    <Compile Include="RealismMod\ToxicityDamage.cs" />
+    <Compile Include="RealismMod\ResourceRateDrain.cs" />
+    <Compile Include="RealismMod\HealthPanelPatch.cs" />
+    <Compile Include="RealismMod\HealCostDisplayShortPatch.cs" />
+    <Compile Include="RealismMod\HealCostDisplayFullPatch.cs" />
+    <Compile Include="RealismMod\HealthEffectsConstructorPatch.cs" />
+    <Compile Include="RealismMod\StimStackPatch1.cs" />
+    <Compile Include="RealismMod\StimStackPatch2.cs" />
+    <Compile Include="RealismMod\BreathIsAudiblePatch.cs" />
+    <Compile Include="RealismMod\MedsController2Patch.cs" />
+    <Compile Include="RealismMod\MedKitHpRatePatch.cs" />
+    <Compile Include="RealismMod\HealthControllerTryGetBodyPartToApplyPatch.cs" />
+    <Compile Include="RealismMod\TryGetPartsToApplyPatch.cs" />
+    <Compile Include="RealismMod\HealthHasPartsToApplyBasePatch.cs" />
+    <Compile Include="RealismMod\Method8Patch.cs" />
+    <Compile Include="RealismMod\HealthCanApplyItemBasePatch.cs" />
+    <Compile Include="RealismMod\MedEffectStartedPatch.cs" />
+    <Compile Include="RealismMod\ApplyItemStashPatch.cs" />
+    <Compile Include="RealismMod\ApplyItemPatch.cs" />
+    <Compile Include="RealismMod\SetQuickSlotPatch.cs" />
+    <Compile Include="RealismMod\RestoreBodyPartPatch.cs" />
+    <Compile Include="RealismMod\RemoveEffectPatch.cs" />
+    <Compile Include="RealismMod\HCApplyDamagePatch.cs" />
+    <Compile Include="RealismMod\SetMedsInHandsPatch.cs" />
+    <Compile Include="RealismMod\ProceedMedsPatch.cs" />
+    <Compile Include="RealismMod\HeadsetGainController.cs" />
+    <Compile Include="RealismMod\DeafenController.cs" />
+    <Compile Include="RealismMod\MovementSpeedController.cs" />
+    <Compile Include="RealismMod\StaminaRegenRatePatch.cs" />
+    <Compile Include="RealismMod\ClampSpeedPatch.cs" />
+    <Compile Include="RealismMod\CalculateSurfacePatch.cs" />
+    <Compile Include="RealismMod\SprintAccelerationPatch.cs" />
+    <Compile Include="RealismMod\EnduranceSprintActionPatch.cs" />
+    <Compile Include="RealismMod\EnduranceMovementActionPatch.cs" />
+    <Compile Include="RealismMod\EndurancePatchHelper.cs" />
+    <Compile Include="RealismMod\InventoryOpenPatch.cs" />
+    <Compile Include="RealismMod\DoorAnimationOverride.cs" />
+    <Compile Include="RealismMod\FlyingBulletPatch.cs" />
+    <Compile Include="RealismMod\SyncWithCharacterSkillsPatch.cs" />
+    <Compile Include="RealismMod\TotalWeightPatch.cs" />
+    <Compile Include="RealismMod\PlayerInitPatch.cs" />
+    <Compile Include="RealismMod\OnItemAddedOrRemovedPatch.cs" />
+    <Compile Include="RealismMod\PlayerUpdatePatch.cs" />
+    <Compile Include="RealismMod\PlayerState.cs" />
+    <Compile Include="RealismMod\ProfileData.cs" />
+    <Compile Include="RealismMod\EBracingDirection.cs" />
+    <Compile Include="RealismMod\EStance.cs" />
+    <Compile Include="RealismMod\StanceController.cs" />
+    <Compile Include="RealismMod\SprintPatch.cs" />
+    <Compile Include="RealismMod\DisableAimOnReloadPatch.cs" />
+    <Compile Include="RealismMod\ChangeScopePatch.cs" />
+    <Compile Include="RealismMod\MountingAndCollisionPatch.cs" />
+    <Compile Include="RealismMod\OnWeaponDrawPatch.cs" />
+    <Compile Include="RealismMod\SetFireModePatch.cs" />
+    <Compile Include="RealismMod\OperateStationaryWeaponPatch.cs" />
+    <Compile Include="RealismMod\CollisionPatch.cs" />
+    <Compile Include="RealismMod\WeaponOverlapViewPatch.cs" />
+    <Compile Include="RealismMod\WeaponLengthPatch.cs" />
+    <Compile Include="RealismMod\WeaponOverlappingPatch.cs" />
+    <Compile Include="RealismMod\ShouldMoveWeapCloserPatch.cs" />
+    <Compile Include="RealismMod\InitTransformsPatch.cs" />
+    <Compile Include="RealismMod\ZeroAdjustmentsPatch.cs" />
+    <Compile Include="RealismMod\ChangePosePatch.cs" />
+    <Compile Include="RealismMod\SetTiltPatch.cs" />
+    <Compile Include="RealismMod\ApplySimpleRotationPatch.cs" />
+    <Compile Include="RealismMod\ApplyComplexRotationPatch.cs" />
+    <Compile Include="RealismMod\IRealismInfo.cs" />
+    <Compile Include="RealismMod\RealismConfig.cs" />
+    <Compile Include="RealismMod\RealismEventInfo.cs" />
+    <Compile Include="RealismMod\EUpdateType.cs" />
+    <Compile Include="RealismMod\Plugin.cs" />
+    <Compile Include="RealismMod\PluginConfig.cs" />
+    <Compile Include="RealismMod\MountingUI.cs" />
+    <Compile Include="RealismMod\BattleUIScreenPatch.cs" />
+    <Compile Include="RealismMod\GetAttributeIconPatches.cs" />
+    <Compile Include="RealismMod\Attributes.cs" />
+    <Compile Include="RealismMod\StatCalc.cs" />
+    <Compile Include="RealismMod\SingleFireRatePatch.cs" />
+    <Compile Include="RealismMod\AutoFireRatePatch.cs" />
+    <Compile Include="RealismMod\PlayerErgoPatch.cs" />
+    <Compile Include="RealismMod\ErgoDeltaPatch.cs" />
+    <Compile Include="RealismMod\COIDeltaPatch.cs" />
+    <Compile Include="RealismMod\GetTotalCenterOfImpactPatch.cs" />
+    <Compile Include="RealismMod\TotalShotgunDispersionPatch.cs" />
+    <Compile Include="RealismMod\ErgoWeightPatch.cs" />
+    <Compile Include="RealismMod\EConsumableType.cs" />
+    <Compile Include="RealismMod\EHeavyBleedHealType.cs" />
+    <Compile Include="RealismMod\RealismItem.cs" />
+    <Compile Include="RealismMod\Ammo.cs" />
+    <Compile Include="RealismMod\Gun.cs" />
+    <Compile Include="RealismMod\WeaponMod.cs" />
+    <Compile Include="RealismMod\Gear.cs" />
+    <Compile Include="RealismMod\Consumable.cs" />
+    <Compile Include="RealismMod\TemplateStats.cs" />
+    <Compile Include="RealismMod\ArmorClassStringPatch.cs" />
+    <Compile Include="RealismMod\ArmorLevelDisplayPatch.cs" />
+    <Compile Include="RealismMod\ArmorLevelUIPatch.cs" />
+    <Compile Include="RealismMod\PenetrationUIPatch.cs" />
+    <Compile Include="RealismMod\GetCachedReadonlyQualitiesPatch.cs" />
+    <Compile Include="RealismMod\MagazineMalfChanceDisplayPatch.cs" />
+    <Compile Include="RealismMod\ModVRecoilStatDisplayPatchFloat.cs" />
+    <Compile Include="RealismMod\ModVRecoilStatDisplayPatchString.cs" />
+    <Compile Include="RealismMod\ModErgoStatDisplayPatch.cs" />
+    <Compile Include="RealismMod\AmmoCaliberPatch.cs" />
+    <Compile Include="RealismMod\BarrelModClassPatch.cs" />
+    <Compile Include="RealismMod\ModConstructorPatch.cs" />
+    <Compile Include="RealismMod\CenterOfImpactMOAPatch.cs" />
+    <Compile Include="RealismMod\WeaponConstructorPatch.cs" />
+    <Compile Include="RealismMod\HRecoilDisplayDeltaPatch.cs" />
+    <Compile Include="RealismMod\HRecoilDisplayStringValuePatch.cs" />
+    <Compile Include="RealismMod\VRecoilDisplayDeltaPatch.cs" />
+    <Compile Include="RealismMod\VRecoilDisplayStringValuePatch.cs" />
+    <Compile Include="RealismMod\COIDisplayDeltaPatch.cs" />
+    <Compile Include="RealismMod\COIDisplayStringValuePatch.cs" />
+    <Compile Include="RealismMod\FireRateDisplayStringValuePatch.cs" />
+    <Compile Include="RealismMod\ErgoDisplayDeltaPatch.cs" />
+    <Compile Include="RealismMod\ErgoDisplayStringValuePatch.cs" />
+    <Compile Include="RealismMod\StatDeltaDisplay.cs" />
+    <Compile Include="RealismMod\DebugGizmos.cs" />
+    <Compile Include="RealismMod\TaskExtensions.cs" />
+    <Compile Include="RealismMod\Utils.cs" />
+    <Compile Include="RealismMod\MoveDaCube.cs" />
+    <Compile Include="RealismMod\DebugComponent.cs" />
+    <Compile Include="RealismMod\AimController.cs" />
+    <Compile Include="RealismMod\ToggleHeadDevicePatch.cs" />
+    <Compile Include="RealismMod\SetAimingSlowdownPatch.cs" />
+    <Compile Include="RealismMod\ToggleAimPatch.cs" />
+    <Compile Include="RealismMod\GetMalfunctionStatePatch.cs" />
+    <Compile Include="RealismMod\GetDurabilityLossOnShotPatch.cs" />
+    <Compile Include="RealismMod\GetTotalMalfunctionChancePatch.cs" />
+    <Compile Include="RealismMod\IsKnownMalfTypePatch.cs" />
+    <Compile Include="RealismMod\RemoveSillyBossForcedMalf.cs" />
+    <Compile Include="RealismMod\MuzzleEffectsPatch.cs" />
+    <Compile Include="RealismMod\AimPunchPatch.cs" />
+    <Compile Include="RealismMod\CamRecoilPatch.cs" />
+    <Compile Include="RealismMod\UpdateWeaponVariablesPatch.cs" />
+    <Compile Include="RealismMod\PwaWeaponParamsPatch.cs" />
+    <Compile Include="RealismMod\UpdateSwayFactorsPatch.cs" />
+    <Compile Include="RealismMod\BreathProcessPatch.cs" />
+    <Compile Include="RealismMod\SetOverweightPatch.cs" />
+    <Compile Include="RealismMod\GetOverweightPatch.cs" />
+    <Compile Include="RealismMod\CalibrationLookAt.cs" />
+    <Compile Include="RealismMod\CalibrationLookAtScope.cs" />
+    <Compile Include="RealismMod\VisualRecoilPatch.cs" />
+    <Compile Include="RealismMod\UpdateHipInaccuracyPatch.cs" />
+    <Compile Include="RealismMod\RotatePatch.cs" />
+    <Compile Include="RealismMod\RecoilAnglesPatch.cs" />
+    <Compile Include="RealismMod\RecalcWeaponParametersPatch.cs" />
+    <Compile Include="RealismMod\AddRecoilForcePatch.cs" />
+    <Compile Include="RealismMod\ShootPatch.cs" />
+    <Compile Include="RealismMod\TacticalReloadPatch.cs" />
+    <Compile Include="RealismMod\PreChamberLoadPatch.cs" />
+    <Compile Include="RealismMod\StartEquipWeapPatch.cs" />
+    <Compile Include="RealismMod\StartReloadPatch.cs" />
+    <Compile Include="RealismMod\SetAmmoOnMagPatch.cs" />
+    <Compile Include="RealismMod\SetAmmoCompatiblePatch.cs" />
+    <Compile Include="RealismMod\ChamberCheckUIPatch.cs" />
+    <Compile Include="RealismMod\SetSpeedParametersPatch.cs" />
+    <Compile Include="RealismMod\SetAnimatorAndProceduralValuesPatch.cs" />
+    <Compile Include="RealismMod\SetWeaponLevelPatch.cs" />
+    <Compile Include="RealismMod\CheckAmmoPatch.cs" />
+    <Compile Include="RealismMod\CheckChamberPatch.cs" />
+    <Compile Include="RealismMod\BoltActionReloadPatch.cs" />
+    <Compile Include="RealismMod\SetMalfRepairSpeedPatch.cs" />
+    <Compile Include="RealismMod\RechamberPatch.cs" />
+    <Compile Include="RealismMod\CanStartReloadPatch.cs" />
+    <Compile Include="RealismMod\ReloadMagPatch.cs" />
+    <Compile Include="RealismMod\QuickReloadMagPatch.cs" />
+    <Compile Include="RealismMod\ReloadCylinderMagazinePatch.cs" />
+    <Compile Include="RealismMod\ReloadWithAmmoPatch.cs" />
+    <Compile Include="RealismMod\ReloadBarrelsPatch.cs" />
+    <Compile Include="RealismMod\SetMagTypeNewPatch.cs" />
+    <Compile Include="RealismMod\SetMagTypeCurrentPatch.cs" />
+    <Compile Include="RealismMod\SetMagInWeaponPatch.cs" />
+    <Compile Include="RealismMod\OnMagInsertedPatch.cs" />
+    <Compile Include="RealismMod\ShootController.cs" />
+    <Compile Include="RealismMod\UIWeaponStats.cs" />
+    <Compile Include="RealismMod\WeaponStats.cs" />
+    <Compile Include="RealismMod\PluginInfo.cs" />
+    <Compile Include="RealismMod\Weapons\ReloadController.cs" />
+    <Compile Include="RealismMod\VisualEffects\PrismEffectsEnablePatch.cs" />
+    <Compile Include="RealismMod\VisualEffects\PrismEffectsDisablePatch.cs" />
+    <Compile Include="RealismMod\Health\ScreenEffectsController.cs" />
+    <Compile Include="RealismMod\Audio\AmbientAudioInitializer.cs" />
+    <Compile Include="RealismMod\Audio\AmbientAudioComponent.cs" />
+    <Compile Include="RealismMod\Audio\RealismAudioController.cs" />
+    <Compile Include="RealismMod\Audio\GunshotVolumePatch.cs" />
+    <Compile Include="RealismMod\Audio\FireratePitchPatch.cs" />
+    <Compile Include="RealismMod\Audio\PlayPhrasePatch.cs" />
+    <Compile Include="RealismMod\Audio\ADSAudioPatch.cs" />
+    <Compile Include="RealismMod\Audio\CovertEquipmentVolumePatch.cs" />
+    <Compile Include="RealismMod\Audio\CovertMovementVolumeBySpeedPatch.cs" />
+    <Compile Include="RealismMod\Audio\CovertMovementVolumePatch.cs" />
+    <Compile Include="RealismMod\Audio\UpdatePhonesPatch.cs" />
+    <Compile Include="RealismMod\Audio\RegisterShotPatch.cs" />
+    <Compile Include="RealismMod\Audio\ExplosionPatch.cs" />
+    <Compile Include="RealismMod\Audio\GrenadeClassContusionPatch.cs" />
+    <Compile Include="AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+</Project>

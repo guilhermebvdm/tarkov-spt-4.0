@@ -1,0 +1,41 @@
+﻿// Decompiled with JetBrains decompiler
+// Type: RealismMod.GetOverweightPatch
+// Assembly: RealismMod, Version=0.14.8.0, Culture=neutral, PublicKeyToken=null
+// MVID: 543CE9EB-B42D-4C5F-BBD9-23AF6383D504
+// Assembly location: D:\Drive\Google Drive\Users\Erick Saraiva\Downloads\Realism-Mod-1.6.4-SPT-3.11.0 (1)\BepInEx\plugins\RealismMod.dll
+
+using EFT;
+using EFT.Animations;
+using HarmonyLib;
+using SPT.Reflection.Patching;
+using System.Reflection;
+using UnityEngine;
+
+#nullable disable
+namespace RealismMod;
+
+public class GetOverweightPatch : ModulePatch
+{
+  private static FieldInfo playerField;
+  private static FieldInfo fcField;
+
+  protected virtual MethodBase GetTargetMethod()
+  {
+    GetOverweightPatch.playerField = AccessTools.Field(typeof (Player.FirearmController), "_player");
+    GetOverweightPatch.fcField = AccessTools.Field(typeof (ProceduralWeaponAnimation), "_firearmController");
+    return (MethodBase) typeof (ProceduralWeaponAnimation).GetMethod("get_Overweight", BindingFlags.Instance | BindingFlags.Public);
+  }
+
+  [PatchPrefix]
+  private static bool Prefix(ProceduralWeaponAnimation __instance, ref float __result)
+  {
+    Player.FirearmController firearmController = (Player.FirearmController) GetOverweightPatch.fcField.GetValue((object) __instance);
+    if (Object.op_Equality((Object) firearmController, (Object) null))
+      return false;
+    Player player = (Player) GetOverweightPatch.playerField.GetValue((object) firearmController);
+    if (!Object.op_Inequality((Object) player, (Object) null) || !player.IsYourPlayer || player.MovementContext.CurrentState.Name == 21)
+      return true;
+    __result = 0.0f;
+    return false;
+  }
+}

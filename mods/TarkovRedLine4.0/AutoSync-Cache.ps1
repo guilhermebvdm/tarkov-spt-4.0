@@ -11,7 +11,7 @@ $ServerExePath = Join-Path $ServerPath "SPT.Server.exe"
 $ServerCachePath = Join-Path $ServerPath "user\cache"
 
 $HeadlessExePath = Join-Path $PSScriptRoot "FikaHeadlessManager.exe"
-$UpdaterCachePath = Join-Path $PSScriptRoot "Launcher-Updater\mods_repo\user\cache"
+$UpdaterCachePath = Join-Path $PSScriptRoot "Launcher-Updater\mods_repo\SPT\user\cache"
 # --------------------------------
 
 Write-Host "--- GERENCIADOR DE CACHE 3D E SERVIDOR SPT ---" -ForegroundColor Cyan
@@ -92,7 +92,8 @@ if ($currentHash -ne $savedHash -or $savedHash -eq "") {
     
     if (Test-Path $HeadlessExePath) {
         $headlessProcess = Start-Process -FilePath $HeadlessExePath -WorkingDirectory $PSScriptRoot -PassThru
-    } else {
+    }
+    else {
         Write-Host "FikaHeadlessManager.exe nao encontrado. Abra o jogo manualmente!" -ForegroundColor Yellow
     }
     
@@ -131,7 +132,8 @@ if ($currentHash -ne $savedHash -or $savedHash -eq "") {
     
     # Atualiza a memoria do script com o novo hash para nao repetir esse processo na proxima vez
     $currentHash | Out-File -FilePath $HashFilePath -Encoding UTF8
-} else {
+}
+else {
     Write-Host "Nenhuma alteracao nos mods detectada. Pulando carregamento de bundles no jogo." -ForegroundColor Green
 }
 
@@ -156,7 +158,8 @@ $roboExit = $LASTEXITCODE
 # Robocopy sai com 1, 2 ou 3 quando faz sucesso com cópias. Acima de 8 é erro.
 if ($roboExit -ge 8) {
     Write-Host "ALERTA: Ocorreram erros durante a sincronizacao pelo Robocopy!" -ForegroundColor Red
-} else {
+}
+else {
     Write-Host "Sincronizacao do cache concluida com sucesso!" -ForegroundColor Green
 }
 Write-Host "---------------------------------------"
