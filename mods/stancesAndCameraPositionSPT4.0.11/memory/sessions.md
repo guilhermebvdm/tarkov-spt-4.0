@@ -6,7 +6,7 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados quan
 
 ## Estado atual (snapshot ao fim da última sessão)
 
-- **Status no mod-backlog.md:** itens 001/002/003 🟢; **004/008/009 receberam `06-fix-01`** e **010 foi registrado (🟡) com `06-fix-01`** nesta sessão (2026-06-11). Todos **compilam (0 erros)** mas **NÃO foram testados in-game** — aguardam validação do usuário.
+- **Status no mod-backlog.md:** itens 001/002/003 🟢; **004/008/009 receberam `06-fix-01`** e **010 foi registrado (🟡) com `06-fix-01`** em 2026-06-11. Todos **compilam (0 erros)**, passaram por **2 rodadas de code-review adversarial** (8 fixes de corretude aplicados) e foram **pushados para origin/main** (HEAD `57e54c4`), mas **NÃO foram testados in-game** — aguardam validação do usuário.
 - **Build:** `D:/SPT/BepInEx/plugins/shwngFpsCameraStances4.dll` (~106KB). Build destravado nesta sessão (Fase 0): o `CameraRotationMod.csproj` tinha sido commitado com `HintPath` absolutos `E:\TORRENT\...` (sessão paralela) — revertido para `References\` relativos. Path do SPT externalizado em `.spt-path` (gitignored, na raiz; `.spt-path.example` versionado), lido pelo `compile-mod.sh`.
 - **Stance layout (inalterado):** Stance 0 - Vanilla, 1 - High Ready (Pitch -15), 2 - Low Ready (Pitch +30), 3 - Custom (Yaw -30).
 - **Mount (004) reescrito:** sistema próprio `EMountState { None, Passive, Active }` — passivo SEM grude (só benefício), ativo COM grude via `ECommand.WeaponMounting (140)`. Substituiu a dependência do mount nativo do EFT.
@@ -132,6 +132,30 @@ Sessão autônoma noturna (usuário dormindo; sem testes in-game, sem pedidos de
 **Premissas assumidas (validar in-game) — ver cada `06-fix-01.md`:** 010 default false + targets 0.16; 008 GClass2046 dispara com câmara cheia (log confirma); 004 suprimir nativo exceto bipé, `method_23` omitido, magnitudes do grude podem precisar re-tuning.
 
 **Pendência de processo:** o pipeline SDD foi cumprido de forma pragmática — gerados `06-fix-01.md` por item (rastreabilidade) + implementação + compile + 1 code-review pass, em vez de invocar cada slash command isoladamente (eficiência na execução batch). Tech-specs formais (`02-spec-tech`) não regeradas para os fixes.
+
+## 2026-06-11 21:52 (GMT-3) — Sessão 4b: code-review adversarial (2 rodadas) + push
+
+Continuação direta da entrada de madrugada deste dia (Sessão 4a). Delta registrado após a gravação anterior do `sessions.md` (commit `6676a12`), que não incluía o code-review nem o push.
+
+**Tema central:** endurecer (corretude) os 4 itens recém-implementados via code-review adversarial, já que nada foi testado in-game.
+
+**Decisões-chave:**
+- **2 rodadas de code-review por subagentes adversariais** (a 1ª caiu por API 529; re-rodada com 2 subagentes em paralelo: um em 004/009+infra, outro em 010/008). **8 findings de corretude aplicados.**
+- **010 F2 (🔴):** guard do `ECommand.ChamberUnload` recuperou `!CanLoadChamber` (paridade com RealismMod `KeyInputPatch1`) — evita rechamber/consumo de munição espúrio. Ref: `ManualChamberingPatches.cs` (commit `57e54c4`).
+- **010 F1 (🟡):** equip com câmara **cheia** agora libera `CanLoadChamber`/`BlockChambering` (antes ficava preso `false` → `SetAmmoCompatiblePatch` forçava `compatible=false` até o reload).
+- **008/010 resiliência:** `.Enable()` do `ActionStanceUnloadChamberPatch` (GClass2046, volátil em 0.16) envolto em try/catch — degrada só a feature em vez de derrubar o mod inteiro.
+- **004 hardening:** guards null nos `FieldInfo` do `TurnAwayEffector` e em `_firearmController`; `ForceNone` no `OnDestroy` + `ResetForRaid` no `OnGameStarted` (anti-resíduo de mount entre raids); `SetMounted`/Fika só em transições Active (evita spam None↔Passive).
+- **Findings NÃO aplicados (documentados como validar-in-game):** F3 (`JustSpawned`), F5 (fim do unload-chamber depende de `method_45`), F7 (fallback Fika), F8 (guard `Stationary` nos animator-patches). Ref: `06-fix-01.md` de 008/010.
+
+**Atividade cronológica:**
+1. 1ª tentativa de subagente de review → API 529 (overload). 2 fixes já identificados manualmente aplicados (TurnAway guards, `_fcField`).
+2. 2 subagentes adversariais em paralelo → relatórios consolidados; 4 findings novos aplicados (F1, F2, Enable try/catch, ResetForRaid). Build verde a cada passo.
+3. Docs `06-fix-01.md` de 008/010 atualizados com findings remanescentes.
+4. **Push** `584ca1b..57e54c4` para `origin/main` (aprovado pelo usuário).
+
+**Cross-refs:**
+- Complementa a Sessão 4a (madrugada) deste dia — implementação + Fase 0 + F12.
+- Findings detalhados nos `backlog/{004,008,010}-…/…-06-fix-01.md`.
 
 ## Arquivos-chave do mod (referência rápida)
 
