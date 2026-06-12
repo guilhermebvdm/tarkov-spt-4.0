@@ -1,5 +1,7 @@
 @inherits LayoutComponentBase
 @inject IDialogService DialogService
+@inject IJSRuntime JS
+@using CustomClasses.Web
 
 @* Base layout for all CustomClasses editor pages (item 020).
    Structure mirrors Skills-Extended Web/Layouts/BaseLayout.razor (dark MudBlazor
@@ -19,6 +21,9 @@
     <link href="@Assets["_content/MudBlazor/MudBlazor.min.css"]" rel="stylesheet" />
     @* Item 033: mod density sheet — static link, served by the wwwroot mount under /CustomClasses-Server/ (not an RCL asset). *@
     <link href="/CustomClasses-Server/css/customclasses.css" rel="stylesheet" />
+    @* Item 035: localStorage prefs + Ctrl+S shortcut — plain <script src> served by the same wwwroot
+       mount (PA-035-01). Exposes window.ccPrefs; consumed only post-circuit (PA-035-02). *@
+    <script src="/CustomClasses-Server/js/customclasses.js"></script>
     <meta name="robots" content="noindex, nofollow">
 </HeadContent>
 
@@ -49,6 +54,11 @@
                        Fixed="true"
                        Elevation="4">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Style="width: 100%;">
+                    @* Item 035: drawer pin — toggles Mini↔Persistent (PA-R1-01) and persists the choice. *@
+                    <MudIconButton Icon="@(_drawerPinned ? Icons.Material.Filled.PushPin : Icons.Material.Outlined.PushPin)"
+                                   Color="Color.Inherit" Size="Size.Small"
+                                   title="@(_drawerPinned ? "Unpin sidebar (auto-collapse)" : "Pin sidebar open")"
+                                   OnClick="ToggleDrawerPin"/>
                     <MudText Typo="Typo.h6">CustomClasses — Class Editor</MudText>
                     <MudText Style="font-size: 12px" Class="ml-2">
                         v@(new CustomClassesMetadata().Version.ToString())
@@ -56,12 +66,16 @@
                 </MudStack>
             </MudAppBar>
 
+            @* PA-R1-01: do NOT bind Open — the Mini + OpenMiniOnHover drawer has no stable Open state.
+               The persisted PIN flips Variant Mini↔Persistent instead (Open stays literal "true": the
+               mini rail is always mounted). _drawerPinned defaults to false = Mini = today's behavior;
+               reconciled from localStorage in OnAfterRenderAsync(firstRender). *@
             <MudDrawer Width="250px"
                        Open="true"
                        ClipMode="DrawerClipMode.Always"
                        Elevation="5"
-                       Variant="@DrawerVariant.Mini"
-                       OpenMiniOnHover="true"
+                       Variant="@(_drawerPinned ? DrawerVariant.Persistent : DrawerVariant.Mini)"
+                       OpenMiniOnHover="@(!_drawerPinned)"
                        Breakpoint="Breakpoint.None">
                 <NavMenu/>
             </MudDrawer>
@@ -105,6 +119,36 @@
     }
 
     private readonly EditGuardState _guard = new();
+
+    // ── Item 035: drawer pin (Mini↔Persistent), persisted in localStorage ────────
+    private bool _drawerPinned;   // default false = Mini = today's behavior (auto-collapse)
+
+    /// <summary>
+    ///     Reconciles the persisted drawer pin once the interactive circuit is up (PA-035-02: no JS at
+    ///     prerender). The drawer mounts as Mini and flips to Persistent here if the saved pin says so —
+    ///     a one-frame "flash" from default to saved value is accepted (PA-035-03, single-user local).
+    /// </summary>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        var pinned = await UiPrefs.GetBoolAsync(JS, UiPrefs.DrawerPinned, _drawerPinned);
+        if (pinned != _drawerPinned)
+        {
+            _drawerPinned = pinned;
+            StateHasChanged();
+        }
+    }
+
+    /// <summary>AppBar pin button: toggles the drawer pin and persists it (fire-and-forget — PA-035-03).</summary>
+    private void ToggleDrawerPin()
+    {
+        _drawerPinned = !_drawerPinned;
+        _ = UiPrefs.SetAsync(JS, UiPrefs.DrawerPinned, _drawerPinned ? "1" : "0");
+    }
 
     /// <summary>
     ///     Intercepts internal navigation (incl. the sidebar's 1-click class switch) while an edit form is

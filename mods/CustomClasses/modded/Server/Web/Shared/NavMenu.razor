@@ -16,9 +16,11 @@
    LoadRows() — never per item inside a render loop. *@
 
 @using System.Globalization
+@using CustomClasses.Web
 @inject ClassEditorService EditorService
 @inject CostService CostService
 @inject NavigationManager Nav
+@inject IJSRuntime JS
 
 <MudNavMenu>
 
@@ -41,7 +43,7 @@
     @* Filter (item 030): the editor-created class list will grow — filter by name / en display name.
        Immediate=true so the list narrows per keystroke; the drawer stays open on focus. *@
     <div class="px-3 py-2">
-        <MudTextField @bind-Value="_filter" @bind-Value:after="StateHasChanged"
+        <MudTextField @bind-Value="_filter" @bind-Value:after="OnFilterChanged"
                       Immediate="true" DebounceInterval="120"
                       Placeholder="Filter classes…" Variant="Variant.Outlined"
                       Margin="Margin.Dense" Adornment="Adornment.Start"
@@ -80,6 +82,16 @@
                     @if (row.SkillCostTotal > 0)
                     {
                         <span class="cc-sidebar-cost">@row.SkillCostTotal.ToString("0", CultureInfo.InvariantCulture)</span>
+                    }
+                    @* Item 035: 1-click Edit (hover-revealed via .cc-sidebar-edit; disabled for an
+                       unparseable class — no edit form). stopPropagation so it doesn't trigger the
+                       row's view-preserving navigation. *@
+                    @if (row.HasDefinition)
+                    {
+                        <span class="cc-sidebar-edit" title="Edit this class"
+                              @onclick:stopPropagation="true" @onclick="@(() => EditClass(row))">
+                            <MudIcon Icon="@Icons.Material.Filled.Edit" Size="Size.Small"/>
+                        </span>
                     }
                 </div>
             </MudTooltip>
@@ -146,6 +158,23 @@
         opacity: .65;
         font-variant-numeric: tabular-nums;
     }
+    /* Item 035: hover-revealed Edit action — hidden until the row is hovered (keeps the rail clean,
+       still discoverable). The mini drawer hides the whole row body anyway, so this only shows when
+       the drawer is expanded/pinned. */
+    .cc-sidebar-edit {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        opacity: 0;
+        transition: opacity .12s ease;
+        cursor: pointer;
+    }
+    .cc-sidebar-item:hover .cc-sidebar-edit {
+        opacity: .8;
+    }
+    .cc-sidebar-edit:hover {
+        opacity: 1;
+    }
 </style>
 
 @code {
@@ -171,6 +200,12 @@
     private string? _filter;
     private string? _activeBare;
 
+    // Item 035 (PA-035-04): the active edit tab, cached from localStorage after the circuit connects so
+    // an edit→edit switch can travel it SYNCHRONOUSLY as ?tab=N (the query is the reliable in-session
+    // source; localStorage is the cross-session fallback ClassEdit reads on a no-query first mount).
+    private int _editTab;
+    private bool _prefsLoaded;
+
     protected override void OnInitialized()
     {
         Nav.LocationChanged += OnLocationChanged;
@@ -180,6 +215,48 @@
 
     public void Dispose() => Nav.LocationChanged -= OnLocationChanged;
 
+    /// <summary>Item 035: load persisted prefs (sidebar filter + last edit tab) once, post-circuit (PA-035-02).</summary>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _prefsLoaded)
+        {
+            return;
+        }
+
+        _prefsLoaded = true;
+        _editTab = await UiPrefs.GetIntAsync(JS, UiPrefs.EditTab, _editTab);
+
+        var savedFilter = await UiPrefs.GetAsync(JS, UiPrefs.SidebarFilter);
+        if (!string.IsNullOrEmpty(savedFilter))
+        {
+            _filter = savedFilter;
+            StateHasChanged();
+        }
+    }
+
+    /// <summary>Item 035: re-reads the persisted edit tab into the cache (called after each navigation).</summary>
+    private async Task RefreshEditTabAsync() => _editTab = await UiPrefs.GetIntAsync(JS, UiPrefs.EditTab, _editTab);
+
+    /// <summary>Item 035: filter changed — re-render the list and persist the text (fire-and-forget).</summary>
+    private void OnFilterChanged()
+    {
+        _ = UiPrefs.SetAsync(JS, UiPrefs.SidebarFilter, _filter ?? string.Empty);
+        StateHasChanged();
+    }
+
+    /// <summary>Item 035: 1-click Edit from the sidebar item (always lands on the edit form).</summary>
+    private void EditClass(SidebarRow row)
+    {
+        var bare = Uri.EscapeDataString(row.BareName);
+        var target = $"/customclasses/classes/{bare}/edit";
+        if (_editTab > 0)
+        {
+            target += $"?tab={_editTab}";   // preserve the active tab when coming from another edit
+        }
+
+        Nav.NavigateTo(target);
+    }
+
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         // A Save/Delete/Create lands on a NEW location; the 037 cache already reflects the change
@@ -188,6 +265,15 @@
         LoadRows();
         UpdateActive();
         StateHasChanged();
+
+        // Item 035 (PA-035-04): refresh the cached edit tab after every navigation so the NEXT
+        // edit→edit switch carries the tab the user last selected (ClassEdit persists it on change).
+        // Async + fire-and-forget: the field updates a render later, which is fine (the query is only
+        // read when the user actually clicks another class).
+        if (_prefsLoaded)
+        {
+            _ = RefreshEditTabAsync();
+        }
     }
 
     /// <summary>
@@ -282,9 +368,22 @@
     {
         var bare = Uri.EscapeDataString(row.BareName);
         var view = DetectView(out _);
-        var target = (view == CurrentView.Edit && row.HasDefinition)
-            ? $"/customclasses/classes/{bare}/edit"
-            : $"/customclasses/classes/{bare}";
+        string target;
+        if (view == CurrentView.Edit && row.HasDefinition)
+        {
+            // Item 035 (PA-035-04): preserve the active tab across an edit→edit switch — carried as a
+            // synchronous query so it can't lose the race with the new ClassEdit's OnParametersSet.
+            target = $"/customclasses/classes/{bare}/edit";
+            if (_editTab > 0)
+            {
+                target += $"?tab={_editTab}";
+            }
+        }
+        else
+        {
+            target = $"/customclasses/classes/{bare}";
+        }
+
         Nav.NavigateTo(target);
     }
 

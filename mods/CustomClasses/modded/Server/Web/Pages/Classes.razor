@@ -15,6 +15,8 @@
 @inject NavigationManager Nav
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
+@inject IJSRuntime JS
+@using CustomClasses.Web
 
 <PageTitle>CustomClasses — Classes</PageTitle>
 
@@ -40,18 +42,34 @@
         }
         else
         {
+            @* Item 035: sortable Class / Skill cost / Loadout columns (null/no-definition sorts LAST in
+               both directions). @ref on each label so the persisted sort can be re-applied after the
+               circuit connects; SortDirectionChanged persists the user's choice. *@
             <MudTable T="Row" Items="@_rows" Dense="true" Hover="true"
                       OnRowClick="@OnRowClick" RowClass="cursor-pointer">
                 <HeaderContent>
                     <MudTh Style="width:48px"></MudTh>
-                    <MudTh>Class</MudTh>
+                    <MudTh>
+                        <MudTableSortLabel T="Row" SortLabel="name" @ref="_sortName"
+                                           SortBy="@(r => r.Name)"
+                                           SortDirectionChanged="@(d => OnSortChanged("name", d))">Class</MudTableSortLabel>
+                    </MudTh>
                     <MudTh>Display name (en)</MudTh>
                     <MudTh>Status</MudTh>
                     <MudTh Style="text-align:right">Skills</MudTh>
-                    <MudTh Style="text-align:right">Skill cost</MudTh>
-                    <MudTh Style="text-align:right">Loadout</MudTh>
+                    <MudTh Style="text-align:right">
+                        <MudTableSortLabel T="Row" SortLabel="skillCost" @ref="_sortSkillCost"
+                                           SortBy="@(r => r.SkillCost?.Total ?? double.MaxValue)"
+                                           SortDirectionChanged="@(d => OnSortChanged("skillCost", d))">Skill cost</MudTableSortLabel>
+                    </MudTh>
+                    <MudTh Style="text-align:right">
+                        @* PA-R1-07: sort by the semantic HasError signal, not the SkillCost-is-null proxy. *@
+                        <MudTableSortLabel T="Row" SortLabel="loadout" @ref="_sortLoadout"
+                                           SortBy="@(r => r.HasError ? double.MaxValue : r.LoadoutTotal)"
+                                           SortDirectionChanged="@(d => OnSortChanged("loadout", d))">Loadout</MudTableSortLabel>
+                    </MudTh>
                     <MudTh>File</MudTh>
-                    <MudTh Style="width:96px">Actions</MudTh>
+                    <MudTh Style="width:136px">Actions</MudTh>
                 </HeaderContent>
                 <RowTemplate>
                     <MudTd DataLabel="">
@@ -79,6 +97,11 @@
                     <MudTd DataLabel="Actions">
                         @* Plain div with stopPropagation: the row itself navigates on click (item 024). *@
                         <div @onclick:stopPropagation="true" style="display:flex;gap:4px;">
+                            @* Item 035: 1-click Edit (disabled when the file has no parseable definition). *@
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small"
+                                           title="Edit this class"
+                                           Disabled="@(context.Entry.Definition is null)"
+                                           OnClick="@(() => EditClass(context))"/>
                             <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Size="Size.Small"
                                            title="Duplicate (the official rename path)"
                                            Disabled="@(context.Entry.Definition is null)"
@@ -109,6 +132,14 @@
 
     private List<Row> _rows = [];
 
+    // Item 035: @ref to each sort label so the persisted sort can be re-applied once the interactive
+    // circuit is up (the SortBy lambdas own the actual comparison). MudTable has no public SetSortLabel
+    // in 8.x; ToggleSortDirection() is the public method that actually re-sorts the table.
+    private MudTableSortLabel<Row>? _sortName;
+    private MudTableSortLabel<Row>? _sortSkillCost;
+    private MudTableSortLabel<Row>? _sortLoadout;
+    private bool _sortRestored;
+
     private static readonly DialogOptions LifecycleDialogOptions = new()
     {
         MaxWidth = MaxWidth.Small,
@@ -117,6 +148,72 @@
     };
 
     protected override void OnInitialized() => LoadRows();
+
+    /// <summary>
+    ///     Item 035: restore the persisted list sort (column + direction) once, after the circuit
+    ///     connects (PA-035-02: no JS at prerender). MudTable 8.x has no public SetSortLabel — restore by
+    ///     toggling the target label into place (None→Ascending→Descending; AllowUnsorted is false so the
+    ///     cycle is Asc↔Desc, and the labels start unsorted). Wrapped in try/catch so any MudBlazor drift
+    ///     degrades to the unsorted file order instead of breaking the page. OnSortChanged persists.
+    /// </summary>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _sortRestored)
+        {
+            return;
+        }
+
+        _sortRestored = true;
+        var saved = await UiPrefs.GetAsync(JS, UiPrefs.ListSort);
+        if (saved is null)
+        {
+            return;
+        }
+
+        var parts = saved.Split('|');
+        if (parts.Length != 2)
+        {
+            return;
+        }
+
+        MudTableSortLabel<Row>? label = parts[0] switch
+        {
+            "name" => _sortName,
+            "skillCost" => _sortSkillCost,
+            "loadout" => _sortLoadout,
+            _ => null,
+        };
+        if (label is null)
+        {
+            return;
+        }
+
+        try
+        {
+            // From the unsorted start: 1 toggle → Ascending, a 2nd → Descending. The toggles re-fire
+            // SortDirectionChanged → OnSortChanged re-persists the same value (idempotent).
+            await label.ToggleSortDirection();
+            if (parts[1] == "desc")
+            {
+                await label.ToggleSortDirection();
+            }
+        }
+        catch
+        {
+            // MudBlazor API drift — degrade to unsorted (file order). Never throw.
+        }
+    }
+
+    /// <summary>Item 035: persist the chosen column + direction (fire-and-forget — PA-035-03).</summary>
+    private void OnSortChanged(string label, SortDirection direction) =>
+        _ = UiPrefs.SetAsync(JS, UiPrefs.ListSort, $"{label}|{(direction == SortDirection.Descending ? "desc" : "asc")}");
+
+    /// <summary>Item 035: 1-click Edit from the list row — extension-less bare name in the route (item 024).</summary>
+    private void EditClass(Row row)
+    {
+        var bare = Path.GetFileNameWithoutExtension(row.Entry.FileName);
+        Nav.NavigateTo($"/customclasses/classes/{Uri.EscapeDataString(bare)}/edit");
+    }
 
     private void LoadRows()
     {

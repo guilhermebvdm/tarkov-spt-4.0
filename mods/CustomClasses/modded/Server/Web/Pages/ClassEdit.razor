@@ -31,6 +31,7 @@
 @inject ModHelper ModHelper
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
+@inject IJSRuntime JS
 @inject SPTarkov.Server.Core.Models.Utils.ISptLogger<ClassEditorService> Logger
 
 <PageTitle>CustomClasses — Edit @(_model?.Name ?? FileName)</PageTitle>
@@ -126,7 +127,8 @@
             <MudForm @ref="_form">
             @* Item 037: track the Stash tab so the stash subtotal + capacity dry-run only run while
                that tab is open (the hot Equipped-typing path is then 1 ComputeLoadoutCost call). *@
-            <MudTabs Elevation="0" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-4"
+            @* Item 035 (a): tighter panel padding (pa-2, was pa-4) — denser edit surface. *@
+            <MudTabs Elevation="0" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-2"
                      @bind-ActivePanelIndex="ActivePanelIndex">
 
                 @* ════ General (b) ════════════════════════════════════════════ *@
@@ -505,6 +507,19 @@
     /// <summary>Route value: file name WITHOUT extension (preferred) or exact file name.</summary>
     [Parameter] public string? FileName { get; set; }
 
+    /// <summary>
+    ///     Item 035 (PA-035-04): the active tab carried by the sidebar/matrix on a class switch. The
+    ///     query is the SYNCHRONOUS primary source within a session; localStorage (cc.ui.editTab) is the
+    ///     first-mount / cross-session fallback applied in OnAfterRenderAsync.
+    /// </summary>
+    [Parameter, SupplyParameterFromQuery(Name = "tab")] public int? Tab { get; set; }
+
+    // Item 035: Ctrl+S shortcut wiring + tab-reconcile guards.
+    private DotNetObjectReference<ClassEdit>? _dotNetRef;
+    private bool _tabReconciled;        // applied the localStorage tab once (no-query first mount)
+    private bool _tabFromQueryApplied;  // PA-R1-03: applied ?tab ONCE — don't clobber later tab clicks
+    private bool _pendingTabPersist;    // persist a query-applied tab once the circuit is up (PA-035-02)
+
     private static readonly Regex HexColor = new("^#[0-9a-fA-F]{6}$", RegexOptions.Compiled);
 
     private MudForm? _form;                       // UI-01: field-level validation gate for Save
@@ -528,7 +543,10 @@
     private string _newEquipSlot = string.Empty;
 
     // ── Item 037: recompute debounce + Stash-tab gating ───────────────────────
-    private const int StashTabIndex = 6;   // General=0, Skills=1, Multipliers=2, Hideout=3, Outfit=4, Equipped=5, Stash=6
+    // General=0, Skills=1, Multipliers=2, Hideout=3, Outfit=4, Equipped=5, Stash=6.
+    // Item 035: SkillsMatrix.SkillsTabIndex (=1) MIRRORS this map — reordering the MudTabPanel set
+    // requires updating both StashTabIndex/ClampTab here AND SkillsMatrix.SkillsTabIndex.
+    private const int StashTabIndex = 6;
     private int _activePanelIndex;
     private bool _stashTabVisible => _activePanelIndex == StashTabIndex;
 
@@ -542,13 +560,24 @@
         set
         {
             var enteringStash = value == StashTabIndex && _activePanelIndex != StashTabIndex;
+            var changed = _activePanelIndex != value;
             _activePanelIndex = value;
             if (enteringStash)
             {
                 RecomputeLoadoutCost();   // _stashTabVisible is now true → stash subtotal + capacity run
             }
+
+            // Item 035: persist the active tab so the sidebar/matrix can preserve it and a reload
+            // restores it (fire-and-forget — PA-035-03). Only when it actually changed.
+            if (changed)
+            {
+                _ = UiPrefs.SetAsync(JS, UiPrefs.EditTab, value.ToString());
+            }
         }
     }
+
+    /// <summary>Item 035: clamp a (possibly hand-crafted) tab index to a real panel — else General (0).</summary>
+    private static int ClampTab(int t) => t is >= 0 and <= StashTabIndex ? t : 0;
     private System.Threading.CancellationTokenSource? _recomputeCts;
     private bool _disposed;
 
@@ -561,7 +590,75 @@
         _seInstalled = Registrar.SkillsExtendedInstalled;
         LoadCatalogs();
         LoadFromDisk();
+
+        // Item 035 (PA-035-04 / PA-R1-03): ?tab is the synchronous primary source on a class switch.
+        // OnParametersSet re-runs on every re-render, but the route only changes ClassEdit (one instance
+        // per {FileName}) — so apply the query ONCE per instance, else the tab would "stick" to the query
+        // and the user couldn't switch tabs. The guards reset when the route re-instantiates the page.
+        if (Tab is { } t && !_tabFromQueryApplied)
+        {
+            _tabFromQueryApplied = true;
+            _activePanelIndex = ClampTab(t);   // direct field set (no setter re-entrancy during params)
+            _pendingTabPersist = true;         // persist it post-circuit so the sidebar carries it next
+        }
     }
+
+    /// <summary>
+    ///     Item 035: post-circuit wiring (PA-035-02 — no JS at prerender). Registers the Ctrl+S handler
+    ///     ONCE and, when the route carried no ?tab, reconciles the active tab from localStorage once.
+    /// </summary>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        _dotNetRef = DotNetObjectReference.Create(this);
+        try
+        {
+            await JS.InvokeVoidAsync("ccPrefs.registerSaveShortcut", _dotNetRef);
+        }
+        catch (JSException) { }
+        catch (InvalidOperationException) { }
+
+        // A ?tab arrived (matrix/sidebar): persist it now (interop is unavailable at prerender) so the
+        // sidebar's next edit→edit switch carries this tab too.
+        if (_pendingTabPersist)
+        {
+            _pendingTabPersist = false;
+            await UiPrefs.SetAsync(JS, UiPrefs.EditTab, _activePanelIndex.ToString());
+        }
+
+        // No inbound ?tab → fall back to the persisted tab exactly once.
+        if (Tab is null && !_tabReconciled)
+        {
+            _tabReconciled = true;
+            var saved = ClampTab(await UiPrefs.GetIntAsync(JS, UiPrefs.EditTab, _activePanelIndex));
+            if (saved != _activePanelIndex)
+            {
+                _activePanelIndex = saved;
+                StateHasChanged();
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Item 035: Ctrl/Cmd+S → Save. [JSInvokable] runs OUTSIDE the render context, so the save
+    ///     (which mutates _saving / diagnostics for the live feedback) is marshalled via InvokeAsync —
+    ///     identical to the Save button path (PA-R1-06). No-op while a save is already running.
+    /// </summary>
+    [JSInvokable]
+    public async Task OnSaveShortcut() =>
+        await InvokeAsync(async () =>
+        {
+            if (_saving)
+            {
+                return;
+            }
+
+            await SaveAsync();   // reuses the button path → form validation + Error gate
+        });
 
     // ── Load / discard ───────────────────────────────────────────────────────
 
@@ -869,6 +966,17 @@
         _disposed = true;
         _recomputeCts?.Cancel();
         _recomputeCts?.Dispose();
+
+        // Item 035: unregister the global Ctrl+S listener and dispose the .NET ref — MANDATORY, else
+        // the leaked handler keeps firing OnSaveShortcut on a disposed component (the JS pathname guard
+        // is only a backstop). InvokeVoidAsync may be unawaitable mid-teardown — swallow any throw.
+        try
+        {
+            _ = JS.InvokeVoidAsync("ccPrefs.unregisterSaveShortcut");
+        }
+        catch { /* circuit already gone */ }
+
+        _dotNetRef?.Dispose();
     }
 
     /// <summary>EquipmentSlots enum names (enum order — mirrors the character layout) minus the used ones.</summary>

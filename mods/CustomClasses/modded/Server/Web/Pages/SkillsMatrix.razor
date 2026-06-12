@@ -21,6 +21,7 @@
 @inject ClassEditorService EditorService
 @inject CostService CostService
 @inject NavigationManager Nav
+@inject IJSRuntime JS
 
 <PageTitle>CustomClasses — Skills matrix</PageTitle>
 
@@ -31,8 +32,10 @@
 </MudText>
 
 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="4" Class="mb-3">
-    <MudSwitch T="bool" @bind-Value="_showDisabled" Color="Color.Default" Label="Mostrar desabilitadas"/>
-    <MudSwitch T="bool" @bind-Value="_showMultipliers" Color="Color.Primary" Label="Multiplicadores XP"/>
+    <MudSwitch T="bool" @bind-Value="_showDisabled" @bind-Value:after="PersistToggles"
+               Color="Color.Default" Label="Mostrar desabilitadas"/>
+    <MudSwitch T="bool" @bind-Value="_showMultipliers" @bind-Value:after="PersistToggles"
+               Color="Color.Primary" Label="Multiplicadores XP"/>
 </MudStack>
 
 @if (_columns.Count == 0)
@@ -243,10 +246,44 @@ else
     private List<string> _overflowSkills = [];           // skills defined by some class, outside SkillMaster
     private bool _showDisabled = true;                   // toggle (default on)
     private bool _showMultipliers = false;               // toggle (default off)
+    private bool _togglesRestored;
+
+    // Item 035: MUST mirror ClassEdit's tab order (General=0, Skills=1, …, Stash=6). Reordering the
+    // MudTabPanel set requires updating BOTH this and ClassEdit.StashTabIndex/ClampTab.
+    private const int SkillsTabIndex = 1;
 
     // D4 — destination page: no LocationChanged subscription. Re-mount re-runs OnInitialized with the
     // 037 cache already fresh (Save/Delete invalidate the touched entry). No IDisposable needed.
     protected override void OnInitialized() => LoadColumns();
+
+    /// <summary>
+    ///     Item 035: restore the persisted toggles once, post-circuit (PA-035-02). Format
+    ///     "&lt;showDisabled&gt;|&lt;showMultipliers&gt;" e.g. "1|0". Missing/corrupt → keep defaults.
+    /// </summary>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _togglesRestored)
+        {
+            return;
+        }
+
+        _togglesRestored = true;
+        if (await UiPrefs.GetAsync(JS, UiPrefs.MatrixToggles) is { } s && s.Split('|') is { Length: 2 } parts)
+        {
+            var showDisabled = parts[0] == "1";
+            var showMultipliers = parts[1] == "1";
+            if (showDisabled != _showDisabled || showMultipliers != _showMultipliers)
+            {
+                _showDisabled = showDisabled;
+                _showMultipliers = showMultipliers;
+                StateHasChanged();
+            }
+        }
+    }
+
+    /// <summary>Item 035: persist both toggles (fire-and-forget — PA-035-03).</summary>
+    private void PersistToggles() =>
+        _ = UiPrefs.SetAsync(JS, UiPrefs.MatrixToggles, $"{(_showDisabled ? "1" : "0")}|{(_showMultipliers ? "1" : "0")}");
 
     /// <summary>
     ///     Projects one ClassColumn per 037 cache entry. ONE GetCachedEntries() and ONE ComputeSkillCost
@@ -448,8 +485,18 @@ else
     private static double? MultiplierOf(ClassColumn col, string skillName) =>
         col.Multipliers.TryGetValue(skillName, out var f) ? f : null;
 
-    private void NavigateTo(ClassColumn col) =>
-        Nav.NavigateTo($"/customclasses/classes/{Uri.EscapeDataString(col.BareName)}");   // P7, detail
+    /// <summary>
+    ///     Item 035: a cell/header click opens the class' EDIT form on the Skills tab (the matrix is a
+    ///     skills comparison — landing on Skills is the 1-click intent). An invalid/unparseable class has
+    ///     no edit form, so it falls back to the read-only detail.
+    /// </summary>
+    private void NavigateTo(ClassColumn col)
+    {
+        var bare = Uri.EscapeDataString(col.BareName);
+        Nav.NavigateTo(col.HasDefinition
+            ? $"/customclasses/classes/{bare}/edit?tab={SkillsTabIndex}"
+            : $"/customclasses/classes/{bare}");
+    }
 
     private static string? NameStyle(ClassColumn col) =>
         string.IsNullOrWhiteSpace(col.NameColor) ? null : $"color:{col.NameColor};";       // NavMenu:287
