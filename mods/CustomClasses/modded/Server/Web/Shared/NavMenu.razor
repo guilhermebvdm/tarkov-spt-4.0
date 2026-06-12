@@ -1,6 +1,24 @@
-@* Side navigation (item 020). Route convention: every CustomClasses page lives
-   under /customclasses/... — Blazor @page routes are global on the SPT server,
-   so the prefix avoids collisions with other web mods (e.g. /skills-extended). *@
+@implements IDisposable
+
+@* Item 030: the drawer is now a PERSISTENT class sidebar. It lists EVERY class file
+   (tinted icon + name in nameColor + compact skill cost + status dot), with a name
+   filter and 1-click switching that PRESERVES the current view (detail->detail,
+   edit->edit; an invalid class falls back to the detail). Home/Classes stay on top
+   as utility links.
+
+   Route convention (item 020): every CustomClasses page lives under /customclasses/...
+   — Blazor @page routes are global on the SPT server, so the prefix avoids collisions
+   with other web mods (e.g. /skills-extended).
+
+   Data source (CONTRATO 037->030): EditorService.GetCachedEntries() — the lightweight
+   037 entry-cache view, NEVER a per-render dry-run. Cost/status are derived on the UI
+   side (spec §1a decision B) via CostService.ComputeSkillCost, ONCE per navigation in
+   LoadRows() — never per item inside a render loop. *@
+
+@using System.Globalization
+@inject ClassEditorService EditorService
+@inject CostService CostService
+@inject NavigationManager Nav
 
 <MudNavMenu>
 
@@ -13,4 +31,286 @@
         Classes
     </MudNavLink>
 
+    <MudDivider Class="my-1"/>
+
+    @* Filter (item 030): the editor-created class list will grow — filter by name / en display name.
+       Immediate=true so the list narrows per keystroke; the drawer stays open on focus. *@
+    <div class="px-3 py-2">
+        <MudTextField @bind-Value="_filter" @bind-Value:after="StateHasChanged"
+                      Immediate="true" DebounceInterval="120"
+                      Placeholder="Filter classes…" Variant="Variant.Outlined"
+                      Margin="Margin.Dense" Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search" Clearable="true"/>
+    </div>
+
+    @{
+        var visible = FilteredRows();
+    }
+    @if (_rows.Count == 0)
+    {
+        <MudText Typo="Typo.body2" Class="px-4 py-2" Style="opacity:.6">No class files found.</MudText>
+    }
+    else if (visible.Count == 0)
+    {
+        <MudText Typo="Typo.body2" Class="px-4 py-2" Style="opacity:.6">No classes match.</MudText>
+    }
+    else
+    {
+        @foreach (var row in visible)
+        {
+            var active = string.Equals(row.BareName, _activeBare, StringComparison.OrdinalIgnoreCase);
+            <MudTooltip Text="@TooltipFor(row)" Placement="Placement.Right">
+                <div class="cc-sidebar-item @(active ? "cc-sidebar-item--active" : null)"
+                     @onclick="@(() => NavigateToClass(row))">
+                    <span class="cc-sidebar-dot" style="@DotStyle(row.Status)"></span>
+                    @if (row.IconUrl is not null)
+                    {
+                        <img class="cc-sidebar-icon" src="@row.IconUrl" alt=""/>
+                    }
+                    else
+                    {
+                        <span class="cc-sidebar-icon cc-sidebar-icon--fallback">@FallbackGlyph(row)</span>
+                    }
+                    <span class="cc-sidebar-name" style="@NameStyle(row)">@row.Name</span>
+                    @if (row.SkillCostTotal > 0)
+                    {
+                        <span class="cc-sidebar-cost">@row.SkillCostTotal.ToString("0", CultureInfo.InvariantCulture)</span>
+                    }
+                </div>
+            </MudTooltip>
+        }
+    }
+
 </MudNavMenu>
+
+@* Scoped styles for the sidebar items: the active strip + dark-theme hover mirror the old
+   profile viewer (profiles.css:21-60). Mini-drawer state hides everything but the dot+icon;
+   the MudTooltip then carries name + status (spec §6). *@
+<style>
+    .cc-sidebar-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 16px;
+        cursor: pointer;
+        border-left: 3px solid transparent;
+        white-space: nowrap;
+        overflow: hidden;
+        user-select: none;
+    }
+    .cc-sidebar-item:hover {
+        background: rgba(255, 255, 255, 0.06);
+    }
+    .cc-sidebar-item--active {
+        background: rgba(255, 255, 255, 0.10);
+        border-left-color: var(--mud-palette-primary);
+    }
+    .cc-sidebar-dot {
+        flex: 0 0 auto;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: transparent;
+    }
+    .cc-sidebar-icon {
+        flex: 0 0 auto;
+        width: 28px;
+        height: 28px;
+        object-fit: contain;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .cc-sidebar-icon--fallback {
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.10);
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        opacity: .8;
+    }
+    .cc-sidebar-name {
+        flex: 1 1 auto;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 14px;
+    }
+    .cc-sidebar-cost {
+        flex: 0 0 auto;
+        font-size: 11px;
+        opacity: .65;
+        font-variant-numeric: tabular-nums;
+    }
+</style>
+
+@code {
+    // ── View model ────────────────────────────────────────────────────────────
+    // SidebarStatus drives the dot color; computed ONCE per navigation (spec §3).
+    private enum SidebarStatus { Healthy, Invalid, Disabled, OverBudget }
+
+    /// <summary>One sidebar row — projected from a 037 cache entry + a single cost compute.</summary>
+    private sealed record SidebarRow(
+        string FileName,
+        string BareName,
+        string Name,
+        string? DisplayNameEn,
+        string? NameColor,
+        string? IconUrl,
+        bool Enabled,
+        bool HasError,
+        bool HasDefinition,
+        double SkillCostTotal,
+        SidebarStatus Status);
+
+    private List<SidebarRow> _rows = [];
+    private string? _filter;
+    private string? _activeBare;
+
+    protected override void OnInitialized()
+    {
+        Nav.LocationChanged += OnLocationChanged;
+        LoadRows();
+        UpdateActive();
+    }
+
+    public void Dispose() => Nav.LocationChanged -= OnLocationChanged;
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        // A Save/Delete/Create lands on a NEW location; the 037 cache already reflects the change
+        // (Save/Delete invalidate the touched entry), so re-projecting here keeps cost/status fresh
+        // AND re-highlights the active item. Cheap: GetCachedEntries() is a hot dir-scan, no dry-run.
+        LoadRows();
+        UpdateActive();
+        StateHasChanged();
+    }
+
+    /// <summary>
+    ///     Builds the sidebar rows ONCE (OnInitialized + each LocationChanged) from the 037 entry cache.
+    ///     GetCachedEntries() = the lightweight cache view (no per-render dry-run, spec §1). Skill cost +
+    ///     status come from CostService.ComputeSkillCost — one cheap call per class (no loadout rebuild,
+    ///     no dry-run), mirroring Classes.razor:121-146.
+    /// </summary>
+    private void LoadRows()
+    {
+        var rows = new List<SidebarRow>();
+        foreach (var entry in EditorService.GetCachedEntries())
+        {
+            var def = entry.Definition;
+            var hasError = def is null || entry.Diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error);
+
+            // Cheap skill cost (no dry-run / no loadout rebuild). 0 / no-def => neutral (not OverBudget).
+            var skillCost = def is null ? null : CostService.ComputeSkillCost(def);
+            var total = skillCost?.Total ?? 0;
+            var overBudget = skillCost is not null && total > 0 && !skillCost.WithinBudget;
+
+            // Status decision tree mirrors Classes.razor:217-238 / ClassDetail status, plus OverBudget.
+            var status =
+                hasError    ? SidebarStatus.Invalid    :
+                !entry.Enabled ? SidebarStatus.Disabled :
+                overBudget  ? SidebarStatus.OverBudget :
+                              SidebarStatus.Healthy;
+
+            rows.Add(new SidebarRow(
+                entry.FileName,
+                System.IO.Path.GetFileNameWithoutExtension(entry.FileName),
+                def?.Name ?? entry.FileName,
+                def?.DisplayName?.En,
+                def?.NameColor,
+                def?.IconFile is { Length: > 0 } icon ? $"/CustomClasses-Server/icons/{icon}" : null,
+                entry.Enabled,
+                hasError,
+                def is not null,
+                total,
+                status));
+        }
+
+        // Deterministic order: same as the list (ListClassFiles orders by file name); keep it stable.
+        _rows = rows;
+    }
+
+    private List<SidebarRow> FilteredRows()
+    {
+        var f = _filter?.Trim();
+        if (string.IsNullOrEmpty(f))
+        {
+            return _rows;
+        }
+
+        return _rows.Where(r =>
+            r.Name.Contains(f, StringComparison.OrdinalIgnoreCase)
+            || (r.DisplayNameEn?.Contains(f, StringComparison.OrdinalIgnoreCase) ?? false)).ToList();
+    }
+
+    // ── Current view / active item (spec §4) ────────────────────────────────────
+    private enum CurrentView { Other, Detail, Edit }
+
+    /// <summary>
+    ///     Derives the current view + the active class' bare name from Nav.Uri. Routes:
+    ///     detail  = /customclasses/classes/{bare}      (ClassDetail.razor)
+    ///     edit    = /customclasses/classes/{bare}/edit (ClassEdit.razor)
+    ///     The route segment is the EXTENSION-LESS file name (item 024 decision).
+    /// </summary>
+    private CurrentView DetectView(out string? activeBare)
+    {
+        activeBare = null;
+        var rel = Nav.ToBaseRelativePath(Nav.Uri).Split('?', '#')[0].Trim('/');
+        var parts = rel.Split('/');
+        if (parts.Length >= 3 && parts[0] == "customclasses" && parts[1] == "classes")
+        {
+            activeBare = Uri.UnescapeDataString(parts[2]);
+            return parts.Length >= 4 && parts[3] == "edit" ? CurrentView.Edit : CurrentView.Detail;
+        }
+
+        return CurrentView.Other;
+    }
+
+    private void UpdateActive() => DetectView(out _activeBare);
+
+    /// <summary>
+    ///     1-click switch preserving the current view. edit->edit only when the target class has a
+    ///     parseable definition; an invalid class falls back to the detail (kickoff fallback). The
+    ///     unsaved-changes guard (BaseLayout NavigationLock) intercepts the actual navigation when the
+    ///     current edit form is dirty — this method just computes + issues the target URL.
+    /// </summary>
+    private void NavigateToClass(SidebarRow row)
+    {
+        var bare = Uri.EscapeDataString(row.BareName);
+        var view = DetectView(out _);
+        var target = (view == CurrentView.Edit && row.HasDefinition)
+            ? $"/customclasses/classes/{bare}/edit"
+            : $"/customclasses/classes/{bare}";
+        Nav.NavigateTo(target);
+    }
+
+    // ── Presentation helpers ────────────────────────────────────────────────────
+    private static string? NameStyle(SidebarRow row) =>
+        string.IsNullOrWhiteSpace(row.NameColor) ? null : $"color:{row.NameColor};";
+
+    /// <summary>Status dot color (spec §3): red=Invalid, grey=Disabled, orange=OverBudget, none=Healthy.</summary>
+    private static string DotStyle(SidebarStatus status) => status switch
+    {
+        SidebarStatus.Invalid    => "background:var(--mud-palette-error);",
+        SidebarStatus.Disabled   => "background:var(--mud-palette-text-disabled);",
+        SidebarStatus.OverBudget => "background:var(--mud-palette-warning);",
+        _                        => "background:transparent;",
+    };
+
+    private static string FallbackGlyph(SidebarRow row) =>
+        string.IsNullOrEmpty(row.Name) ? "?" : row.Name.Substring(0, 1);
+
+    private static string TooltipFor(SidebarRow row)
+    {
+        var status = row.Status switch
+        {
+            SidebarStatus.Invalid    => "invalid",
+            SidebarStatus.Disabled   => "disabled",
+            SidebarStatus.OverBudget => "over budget",
+            _                        => "ok",
+        };
+        var cost = row.SkillCostTotal > 0
+            ? $" — {row.SkillCostTotal.ToString("0", CultureInfo.InvariantCulture)} skill cost"
+            : string.Empty;
+        return $"{row.Name} ({status}){cost}";
+    }
+}
