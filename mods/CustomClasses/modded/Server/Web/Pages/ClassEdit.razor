@@ -19,6 +19,7 @@
 @using System.Globalization
 @using System.Text.RegularExpressions
 @using SPTarkov.Server.Core.Helpers
+@using SPTarkov.Server.Core.Models.Common
 @using SPTarkov.Server.Core.Models.Enums
 @using SPTarkov.Server.Core.Models.Enums.Hideout
 @using CustomClasses.Web
@@ -447,25 +448,45 @@
                     {
                         <MudText Typo="Typo.body2" Class="mb-3">No stash items.</MudText>
                     }
-
-                    @for (var i = 0; i < _model.Stash.Count; i++)
+                    else
                     {
-                        var line = _model.Stash[i];
-                        var lineNumber = i + 1;
-                        <MudPaper Elevation="1" Class="pa-3 mb-3" @key="line">
-                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-2">
-                                <MudIcon Icon="@Icons.Material.Filled.Inventory2" Size="Size.Small"/>
-                                <MudText Typo="Typo.subtitle2"><b>#@lineNumber</b></MudText>
-                                <MudSpacer/>
-                                <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Size="Size.Small"
-                                               title="Duplicate this stash line"
-                                               OnClick="@(() => DuplicateStashLine(line))"/>
-                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
-                                               Color="Color.Error" title="Remove this stash line"
-                                               OnClick="@(() => RemoveStashLineAsync(line))"/>
-                            </MudStack>
-                            <ItemSpecEditor Spec="@line" AllowCount="true" OnChanged="ScheduleRecompute"/>
-                        </MudPaper>
+                        @* Item 034: name filter + category grouping (display only — _model.Stash order is
+                           preserved; typing here does NOT recompute, just re-buckets the existing cards). *@
+                        @* ref: CR-01-02 — removed illegal Dense attr (MUD0002); Margin.Dense is the valid density knob. *@
+                        <MudTextField @bind-Value="_stashFilter" @bind-Value:after="StashFilterChanged"
+                                      Label="Filter by name / short name / tpl" Variant="Variant.Outlined"
+                                      Margin="Margin.Dense" Clearable="true"
+                                      Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
+                                      Class="mb-3" Style="max-width:420px"/>
+
+                        @foreach (var group in BuildStashGroups())
+                        {
+                            <div class="cc-stash-group">
+                                <div class="cc-stash-group__title">
+                                    <span>@group.Name</span>
+                                    <span class="cc-stash-group__subtotal">@group.Lines.Count line(s)</span>
+                                </div>
+                                @foreach (var entry in group.Lines)
+                                {
+                                    var line = entry.Line;
+                                    var lineNumber = entry.Number;
+                                    <MudPaper Elevation="1" Class="pa-3 mb-3" @key="line">
+                                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-2">
+                                            <MudIcon Icon="@Icons.Material.Filled.Inventory2" Size="Size.Small"/>
+                                            <MudText Typo="Typo.subtitle2"><b>#@lineNumber</b></MudText>
+                                            <MudSpacer/>
+                                            <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Size="Size.Small"
+                                                           title="Duplicate this stash line"
+                                                           OnClick="@(() => DuplicateStashLine(line))"/>
+                                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
+                                                           Color="Color.Error" title="Remove this stash line"
+                                                           OnClick="@(() => RemoveStashLineAsync(line))"/>
+                                        </MudStack>
+                                        <ItemSpecEditor Spec="@line" AllowCount="true" OnChanged="ScheduleRecompute"/>
+                                    </MudPaper>
+                                }
+                            </div>
+                        }
                     }
 
                     <MudButton Variant="Variant.Outlined" Color="Color.Primary"
@@ -891,6 +912,74 @@
 
     /// <summary>Sum of root counts (count ≥ 1) — stacks/contents expansion is the dry-run's job.</summary>
     private int StashUnitTotal() => _model!.Stash.Sum(l => Math.Max(1, l.Count));
+
+    // ── Item 034: Stash tab name filter + category grouping (display only) ─────
+    private string _stashFilter = string.Empty;
+
+    private sealed record StashGroupEntry(ItemSpecModel Line, int Number, string Name);
+    private sealed record StashEditGroup(string Name, List<StashGroupEntry> Lines);
+
+    private const string StashOtherGroup = "Other";
+
+    /// <summary>
+    ///     Item 034: filter changed. Display-only re-bucketing — never calls ScheduleRecompute/RecomputeLoadoutCost
+    ///     (PA-037-04: the stash cost/capacity dry-run is unrelated to which cards are shown).
+    /// </summary>
+    private void StashFilterChanged() => StateHasChanged();
+
+    /// <summary>
+    ///     Buckets <c>_model.Stash</c> by handbook category for display, preserving the underlying list order
+    ///     (the #N badge is the original 1-based index, stable regardless of filter/group). Resolves each line's
+    ///     root tpl (preset > tpl) once to derive name/short name/category. The filter matches name, short name
+    ///     or tpl (case-insensitive). Groups are sorted by name; "Other" collects lines with no handbook category.
+    /// </summary>
+    private List<StashEditGroup> BuildStashGroups()
+    {
+        var filter = _stashFilter?.Trim() ?? string.Empty;
+        var groups = new Dictionary<string, List<StashGroupEntry>>(StringComparer.Ordinal);
+
+        for (var i = 0; i < _model!.Stash.Count; i++)
+        {
+            var line = _model.Stash[i];
+            var rootTpl = StashRootTpl(line);
+            var name = rootTpl is not null ? Catalog.GetItemName(new MongoId(rootTpl)) : (line.Preset ?? line.Tpl ?? "(no tpl)");
+
+            if (filter.Length > 0)
+            {
+                var raw = $"{name} {rootTpl} {line.Tpl} {line.Preset}";
+                if (!raw.Contains(filter, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+            }
+
+            var groupName = (rootTpl is not null ? Catalog.GetCategoryName(rootTpl) : null) ?? StashOtherGroup;
+            if (!groups.TryGetValue(groupName, out var list))
+            {
+                groups[groupName] = list = [];
+            }
+
+            list.Add(new StashGroupEntry(line, i + 1, name));
+        }
+
+        return groups
+            .Select(kv => new StashEditGroup(kv.Key, kv.Value))
+            .OrderBy(g => g.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    /// <summary>Root item tpl for a stash line (preset > tpl), null when unresolved. Mirrors ClassViewItemSpec.</summary>
+    private string? StashRootTpl(ItemSpecModel line)
+    {
+        if (!string.IsNullOrWhiteSpace(line.Preset) && MongoId.IsValidMongoId(line.Preset))
+        {
+            var key = new MongoId(line.Preset);
+            var preset = line.Premium ? Catalog.ResolvePremiumPreset(key) : Catalog.ResolveDefaultPreset(key);
+            return preset?.Items?.FirstOrDefault()?.Template.ToString();
+        }
+
+        return !string.IsNullOrWhiteSpace(line.Tpl) && MongoId.IsValidMongoId(line.Tpl) ? line.Tpl : null;
+    }
 
     /// <summary>New stash line via ItemPicker (unfiltered — the stash accepts any item template).</summary>
     private async Task AddStashLineAsync()

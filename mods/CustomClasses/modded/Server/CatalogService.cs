@@ -395,6 +395,52 @@ public class CatalogService
         return categories;
     }
 
+    // ── Dimensions / category resolution (item 034 — gear/stash visual cells) ──
+
+    /// <summary>
+    ///     Item dimensions in inventory cells (<c>_props.Width × _props.Height</c>). Unknown/malformed tpl
+    ///     or missing props default to 1×1 (corner case 034 — never zero, never throws). Read-only over the
+    ///     live DB via the same <see cref="GetTemplate"/> path as the rest of the service.
+    /// </summary>
+    public (int Width, int Height) GetItemDimensions(string tpl)
+    {
+        var id = TryParseMongoId(tpl);
+        var props = id is null ? null : GetTemplate(id.Value)?.Properties;
+        var w = props?.Width ?? 1;
+        var h = props?.Height ?? 1;
+        return (w > 0 ? w : 1, h > 0 ? h : 1);
+    }
+
+    /// <summary>
+    ///     tpl → handbook category id (null when the tpl is absent from the handbook). Cheap O(1) over the
+    ///     lazy <see cref="_handbookIndex"/> (item 037) — the StashPanel resolves N lines with this + a
+    ///     local id→name map (see CR-034-03), avoiding the per-line GetCategories rebuild.
+    /// </summary>
+    public string? GetCategoryId(string tpl)
+    {
+        var id = TryParseMongoId(tpl);
+        return id is not null && _handbookIndex.Value.TryGetValue(id.Value, out var catId) ? catId : null;
+    }
+
+    /// <summary>
+    ///     Localized handbook category NAME for a tpl, or null when the tpl is not in the handbook
+    ///     (corner case 034 — caller falls back to an "Other" group). Reuses <see cref="GetCategoryId"/>
+    ///     (tpl → category id) + <see cref="GetCategories"/> (id → localized name). lang: "en" | "pt".
+    ///     Single-tpl convenience for GearPanel/ItemTooltip (few calls). The StashPanel does NOT use this
+    ///     per-line — it builds an id→name map once from GetCategories (CR-034-03).
+    /// </summary>
+    public string? GetCategoryName(string tpl, string lang = "en")
+    {
+        var catId = GetCategoryId(tpl);
+        if (catId is null)
+        {
+            return null;
+        }
+
+        var cats = GetCategories(lang);
+        return cats.FirstOrDefault(c => string.Equals(c.Id, catId, StringComparison.Ordinal))?.Name;
+    }
+
     // ── Presets ──────────────────────────────────────────────────────────────
 
     /// <summary>

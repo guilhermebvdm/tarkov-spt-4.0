@@ -1,0 +1,112 @@
+@* Item 034: visual equipped panel (Tarkov-style slots) for the ClassDetail right column.
+   Renders only the slots present in Equipped (PA-034-01 — no fixed empty grid in v1). Per slot:
+   the slot label, a cell whose pixel size follows the item's real _props.Width/Height (via
+   CatalogService.GetItemDimensions), the tarkov.dev icon (onerror-hidden → degrades to the label
+   text offline), the short item name as an always-visible label under the cell (CR-034-05), and a
+   hover ItemTooltip (name/category/size/price). Root tpl resolution mirrors ClassViewItemSpec:
+   preset (default/premium) > tpl. No network call on the server; the icon is a client-side <img>. *@
+
+@using SPTarkov.Server.Core.Models.Common
+@inject CatalogService Catalog
+
+@if (_cells.Count == 0)
+{
+    <MudText Typo="Typo.caption">No equipped items.</MudText>
+}
+else
+{
+    <div class="cc-gear-slots">
+        @foreach (var cell in _cells)
+        {
+            <div class="cc-gear-slot">
+                <div class="cc-gear-slot__label">@cell.Slot</div>
+                <ItemTooltip Name="@cell.Name" Category="@cell.Category"
+                             Width="@cell.Width" Height="@cell.Height"
+                             Price="@cell.Price" PriceSource="@cell.PriceSource"
+                             MissingPrice="@cell.MissingPrice">
+                    <div class="cc-item-cell"
+                         style="@($"width:calc(var(--cc-cell-unit) * {cell.Width});height:calc(var(--cc-cell-unit) * {cell.Height});")">
+                        @if (cell.RootTpl is not null)
+                        {
+                            <img src="@($"https://assets.tarkov.dev/{cell.RootTpl}-icon.webp")"
+                                 loading="lazy" alt="" onerror="this.style.display='none'"/>
+                        }
+                    </div>
+                </ItemTooltip>
+                <div class="cc-item-cell__name" title="@cell.Name">@cell.Name</div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    /// <summary>slot → spec. Data contract frozen by ClassDetail (033). Null/empty → "No equipped items."</summary>
+    [Parameter] public Dictionary<string, ItemSpec>? Equipped { get; set; }
+
+    private sealed record GearCell(
+        string Slot, string? RootTpl, string Name, string? Category,
+        int Width, int Height, double Price, string? PriceSource, bool MissingPrice);
+
+    private List<GearCell> _cells = [];
+
+    protected override void OnParametersSet()
+    {
+        _cells = [];
+        if (Equipped is not { Count: > 0 })
+        {
+            return;
+        }
+
+        foreach (var (slot, spec) in Equipped)
+        {
+            _cells.Add(BuildCell(slot, spec));
+        }
+    }
+
+    private GearCell BuildCell(string slot, ItemSpec spec)
+    {
+        var rootTpl = ResolveRootTpl(spec);
+        if (rootTpl is null)
+        {
+            // Unresolved tpl/preset — show the slot with the raw reference as the name, no icon.
+            var raw = spec.Preset ?? spec.Tpl ?? "(no tpl)";
+            return new GearCell(slot, null, raw, null, 1, 1, 0, null, true);
+        }
+
+        var (w, h) = Catalog.GetItemDimensions(rootTpl);
+        var id = new MongoId(rootTpl);
+        var name = Catalog.GetItemName(id);
+        var category = Catalog.GetCategoryName(rootTpl);
+        var (price, source) = Catalog.GetPrice(id);
+        return new GearCell(slot, rootTpl, name, category, w, h, price, source,
+            string.Equals(source, "missing", StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    ///     Root item tpl following the same order as ClassViewItemSpec (preset > tpl). Presets resolve
+    ///     via the internal Catalog.ResolveDefaultPreset/ResolvePremiumPreset (same assembly) →
+    ///     preset.Items.First().Template. Returns null when nothing resolves (caller degrades to text).
+    /// </summary>
+    private string? ResolveRootTpl(ItemSpec spec)
+    {
+        if (!string.IsNullOrWhiteSpace(spec.Preset))
+        {
+            var key = TryMongoId(spec.Preset!);
+            var preset = key is null
+                ? null
+                : spec.Premium ? Catalog.ResolvePremiumPreset(key.Value) : Catalog.ResolveDefaultPreset(key.Value);
+            return preset?.Items?.FirstOrDefault()?.Template.ToString();
+        }
+
+        if (!string.IsNullOrWhiteSpace(spec.Tpl) && TryMongoId(spec.Tpl!) is not null)
+        {
+            return spec.Tpl;
+        }
+
+        return null;
+    }
+
+    // ref: CR-01-01 — cast the null arm to MongoId? so the ternary infers the nullable value type (CS8625).
+    private static MongoId? TryMongoId(string raw) =>
+        MongoId.IsValidMongoId(raw) ? new MongoId(raw) : (MongoId?)null;
+}

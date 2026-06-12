@@ -1,0 +1,55 @@
+@* Item 034: reusable hover tooltip for a gear/stash item cell. Wraps the cell (ChildContent)
+   in a MudTooltip whose TooltipContent is a formatted block: bold name, category, W×H size,
+   flea price + source (or a "no price" warning), and quantity when >1. No click, hover only.
+   All fields are resolved server-side by the caller (GearPanel/StashPanel) via CatalogService —
+   the cell itself degrades to text when the tarkov.dev icon fails (offline). *@
+
+@using System.Globalization
+
+<MudTooltip Placement="Placement.Top" Arrow="true">
+    <ChildContent>
+        @ChildContent
+    </ChildContent>
+    <TooltipContent>
+        <div class="cc-item-tip">
+            <div class="cc-item-tip__name">@Name</div>
+            @if (!string.IsNullOrWhiteSpace(Category))
+            {
+                <div class="cc-item-tip__cat">@Category</div>
+            }
+            <div class="cc-item-tip__row">@Width×@Height cells</div>
+            <div class="cc-item-tip__row">
+                @if (MissingPrice)
+                {
+                    <span class="cc-item-tip__warn">⚠ no price</span>
+                }
+                else
+                {
+                    <span>@Price.ToString("N0", CultureInfo.InvariantCulture) ₽</span>
+                    @if (!string.IsNullOrWhiteSpace(PriceSource))
+                    {
+                        <span class="cc-item-tip__src"> · @PriceSource</span>
+                    }
+                }
+            </div>
+            @if (Qty is > 1)
+            {
+                <div class="cc-item-tip__row">qty: @Qty.Value.ToString("N0", CultureInfo.InvariantCulture)</div>
+            }
+        </div>
+    </TooltipContent>
+</MudTooltip>
+
+@code {
+    /// <summary>The cell rendered as the hover target (the dimensioned icon + label).</summary>
+    [Parameter, EditorRequired] public RenderFragment ChildContent { get; set; } = default!;
+
+    [Parameter] public string Name { get; set; } = "";
+    [Parameter] public string? Category { get; set; }
+    [Parameter] public int Width { get; set; } = 1;
+    [Parameter] public int Height { get; set; } = 1;
+    [Parameter] public double Price { get; set; }
+    [Parameter] public string? PriceSource { get; set; }
+    [Parameter] public double? Qty { get; set; }
+    [Parameter] public bool MissingPrice { get; set; }
+}

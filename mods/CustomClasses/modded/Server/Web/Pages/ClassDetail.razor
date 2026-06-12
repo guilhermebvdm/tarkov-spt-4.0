@@ -215,28 +215,16 @@
 
                     @* ░░ RIGHT COLUMN: equipped + stash (TEXTUAL — contract 033→034) ░░ *@
                     <div class="cc-dash__right">
-                        @* ░░ EXTENSION POINT 034 ░░ replace this "Equipped" content with <GearPanel Equipped="@def.Loadout?.Equipped"/>.
-                           Data contract: def.Loadout?.Equipped (IReadOnlyDictionary<string, ItemSpec>, slot → spec) — unchanged. *@
+                        @* ░░ Item 034 ░░ visual gear slots (replaces the textual ClassViewItemSpec list).
+                           Data contract unchanged: def.Loadout?.Equipped (Dictionary<string, ItemSpec>, slot → spec). *@
                         <div class="cc-section" id="cc-equipped">
                             <div class="cc-section__title">Equipped (@(def.Loadout?.Equipped?.Count ?? 0) slots)</div>
-                            @if (def.Loadout?.Equipped is { Count: > 0 } equipped)
-                            {
-                                @foreach (var (slot, spec) in equipped)
-                                {
-                                    <div class="cc-equip-slot">
-                                        <div class="cc-equip-slot__label">@slot</div>
-                                        <ClassViewItemSpec Spec="@spec"/>
-                                    </div>
-                                }
-                            }
-                            else
-                            {
-                                <MudText Typo="Typo.caption">No equipped items.</MudText>
-                            }
+                            <GearPanel Equipped="@def.Loadout?.Equipped"/>
                         </div>
 
-                        @* ░░ EXTENSION POINT 034 ░░ replace this "Stash" content with <StashPanel Lines="@_stashLines"/>.
-                           Data contract: _stashLines (List<LoadoutCostEntry>, already filtered Context=="stash" in Reload) — unchanged. *@
+                        @* ░░ Item 034 ░░ visual stash grid (replaces the textual MudTable). The cost warnings
+                           and the "no priced line" notice stay HERE — they depend on _loadoutCost/def which
+                           StashPanel never receives; the panel only renders the priced _stashLines. *@
                         <div class="cc-section" id="cc-stash">
                             <div class="cc-section__title">Stash (@(def.Loadout?.Stash?.Count ?? 0) lines)</div>
                             @foreach (var w in _loadoutCost?.Warnings ?? [])
@@ -256,24 +244,7 @@
                             else
                             {
                                 @* context=="stash" only — container contents/ammo roll up into the loadout total badge. *@
-                                <MudTable Items="@_stashLines" Dense="true" Hover="true">
-                                    <HeaderContent>
-                                        <MudTh>Item</MudTh>
-                                        <MudTh>Tpl</MudTh>
-                                        <MudTh Style="text-align:right">Qty</MudTh>
-                                        <MudTh Style="text-align:right">Unit ₽</MudTh>
-                                        <MudTh>Price source</MudTh>
-                                        <MudTh Style="text-align:right">Subtotal ₽</MudTh>
-                                    </HeaderContent>
-                                    <RowTemplate>
-                                        <MudTd DataLabel="Item">@context.Name @MissingPriceBadge(context)</MudTd>
-                                        <MudTd DataLabel="Tpl"><code style="font-size:11px">@context.Tpl</code></MudTd>
-                                        <MudTd DataLabel="Qty" Style="text-align:right">@context.Qty.ToString("N0", CultureInfo.InvariantCulture)</MudTd>
-                                        <MudTd DataLabel="Unit ₽" Style="text-align:right">@context.UnitPrice.ToString("N0", CultureInfo.InvariantCulture)</MudTd>
-                                        <MudTd DataLabel="Price source">@context.PriceSource</MudTd>
-                                        <MudTd DataLabel="Subtotal ₽" Style="text-align:right">@context.Subtotal.ToString("N0", CultureInfo.InvariantCulture)</MudTd>
-                                    </RowTemplate>
-                                </MudTable>
+                                <StashPanel Lines="@_stashLines"/>
                             }
                         </div>
                     </div>
