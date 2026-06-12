@@ -211,65 +211,16 @@
 
                 @* ════ Skills (c) ═════════════════════════════════════════════ *@
                 <MudTabPanel Text="@($"Skills ({_model.Skills.Count})")">
-                    @if (_model.Skills.Count == 0)
-                    {
-                        <MudText Typo="Typo.body2" Class="mb-2">No starting skills.</MudText>
-                    }
-                    else
-                    {
-                        <MudSimpleTable Dense="true" Class="mb-3">
-                            <thead>
-                            <tr>
-                                <th style="text-align:left">Skill</th>
-                                <th style="text-align:right;width:140px">Level (0–51)</th>
-                                <th style="text-align:right;width:100px">Weight</th>
-                                <th style="text-align:left;width:160px">Origin</th>
-                                <th style="text-align:right;width:100px">Cost</th>
-                                <th style="width:56px"></th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            @foreach (var row in _model.Skills)
-                            {
-                                var entry = SkillCostEntryFor(row.Skill);
-                                <tr @key="row">
-                                    <td>@row.Skill</td>
-                                    <td style="text-align:right">
-                                        <MudNumericField T="int" @bind-Value="row.Level" @bind-Value:after="RecomputeSkillCost"
-                                                         Min="0" Max="51" Margin="Margin.Dense"
-                                                         Variant="Variant.Outlined" Style="max-width:120px;margin-left:auto;"/>
-                                    </td>
-                                    <td style="text-align:right">@(entry?.Weight.ToString("0.00", CultureInfo.InvariantCulture) ?? "—")</td>
-                                    <td>@(entry?.Origin ?? "—")</td>
-                                    <td style="text-align:right">@(entry?.Cost.ToString("0.00", CultureInfo.InvariantCulture) ?? "—")</td>
-                                    <td>
-                                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
-                                                       Color="Color.Error" title="Remove skill"
-                                                       OnClick="@(() => RemoveSkill(row))"/>
-                                    </td>
-                                </tr>
-                            }
-                            </tbody>
-                        </MudSimpleTable>
-                    }
+                    @* Item 031: canonical list — every skill always in the same position, level
+                       inline per row (replaces the old "Add skill" dropdown). Pre-existing zeros are
+                       preserved; a new zero is never created. *@
+                    <SkillCanonicalList Editable="true"
+                                        EditRows="@_model.Skills"
+                                        Cost="@_skillCost"
+                                        Multipliers="@MultiplierLookup()"
+                                        OnLevelChanged="RecomputeSkillCost"/>
 
-                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-3">
-                        <MudSelect T="string" @bind-Value="_newSkill" Label="Add skill"
-                                   Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true"
-                                   Style="min-width:280px">
-                            @foreach (var name in AvailableSkills(_model.Skills.Select(r => r.Skill)))
-                            {
-                                <MudSelectItem T="string" Value="@name">@name</MudSelectItem>
-                            }
-                        </MudSelect>
-                        <MudButton Variant="Variant.Outlined" Color="Color.Primary"
-                                   StartIcon="@Icons.Material.Filled.Add"
-                                   Disabled="@string.IsNullOrEmpty(_newSkill)" OnClick="AddSkill">
-                            Add
-                        </MudButton>
-                    </MudStack>
-
-                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-1">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-1 mt-3">
                         <MudText Typo="Typo.body1"><b>Total weighted cost:</b></MudText>
                         <MudText Typo="Typo.body1">@(_skillCost?.Total.ToString("0.00", CultureInfo.InvariantCulture) ?? "—")</MudText>
                         @SkillTotalChip()
@@ -551,7 +502,6 @@
     private bool _saving;
     private bool _savedOnce;
 
-    private string _newSkill = string.Empty;
     private string _newMultiplierSkill = string.Empty;
     private string _newStation = string.Empty;
     private string _newEquipSlot = string.Empty;
@@ -752,8 +702,24 @@
         }
     }
 
-    private SkillCostEntry? SkillCostEntryFor(string skill) =>
-        _skillCost?.Skills.FirstOrDefault(e => string.Equals(e.Skill, skill, StringComparison.Ordinal));
+    /// <summary>
+    ///     Item 031: skill name → XP factor for the canonical list's ±% chip. Tolerant aggregation
+    ///     (B1 — a hand-written file may repeat a skill; ToDictionary would throw): first occurrence
+    ///     wins, mirroring ClassEditModel.ToDict.
+    /// </summary>
+    private Dictionary<string, double> MultiplierLookup()
+    {
+        var d = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
+        foreach (var m in _model!.Multipliers)
+        {
+            if (!string.IsNullOrWhiteSpace(m.Skill))
+            {
+                d.TryAdd(m.Skill, m.Factor);
+            }
+        }
+
+        return d;
+    }
 
     /// <summary>All SkillTypes enum names minus the ones already used, alphabetical (no extra filtering — full enum offered).</summary>
     private static IEnumerable<string> AvailableSkills(IEnumerable<string> used)
@@ -770,22 +736,6 @@
         return Enum.GetNames<HideoutAreas>()
             .Where(n => !string.Equals(n, nameof(HideoutAreas.NotSet), StringComparison.Ordinal) && !taken.Contains(n))
             .OrderBy(n => n, StringComparer.OrdinalIgnoreCase);
-    }
-
-    private void AddSkill()
-    {
-        if (!string.IsNullOrEmpty(_newSkill))
-        {
-            _model!.Skills.Add(new SkillLevelRow { Skill = _newSkill, Level = 0 });
-            _newSkill = string.Empty;
-            RecomputeSkillCost();
-        }
-    }
-
-    private void RemoveSkill(SkillLevelRow row)
-    {
-        _model!.Skills.Remove(row);
-        RecomputeSkillCost();
     }
 
     private void AddMultiplier()

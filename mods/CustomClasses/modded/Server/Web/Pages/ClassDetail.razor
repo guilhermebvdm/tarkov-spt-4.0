@@ -149,28 +149,13 @@
 
                     @* ── Skills (levels + weighted cost, item 022) ─────────────── *@
                     <MudExpansionPanel Text="@($"Skills ({def.Skills?.Count ?? 0})")" Expanded="true">
-                        @if (_skillCost is null || _skillCost.Skills.Count == 0)
+                        @* Item 031: every canonical skill, fixed order, zeros dimmed (shared component). *@
+                        <SkillCanonicalList Levels="@def.Skills"
+                                            Cost="@_skillCost"
+                                            Multipliers="@def.SkillMultipliers"
+                                            Editable="false"/>
+                        @if (_skillCost is not null && _skillCost.Skills.Count > 0)
                         {
-                            <MudText Typo="Typo.body2">No starting skills.</MudText>
-                        }
-                        else
-                        {
-                            <MudTable Items="@_skillCost.Skills" Dense="true" Hover="true">
-                                <HeaderContent>
-                                    <MudTh>Skill</MudTh>
-                                    <MudTh Style="text-align:right">Level</MudTh>
-                                    <MudTh Style="text-align:right">Weight</MudTh>
-                                    <MudTh>Weight origin</MudTh>
-                                    <MudTh Style="text-align:right">Cost</MudTh>
-                                </HeaderContent>
-                                <RowTemplate>
-                                    <MudTd DataLabel="Skill">@context.Skill</MudTd>
-                                    <MudTd DataLabel="Level" Style="text-align:right">@context.Level</MudTd>
-                                    <MudTd DataLabel="Weight" Style="text-align:right">@context.Weight.ToString("0.00", CultureInfo.InvariantCulture)</MudTd>
-                                    <MudTd DataLabel="Weight origin">@context.Origin</MudTd>
-                                    <MudTd DataLabel="Cost" Style="text-align:right">@context.Cost.ToString("0.00", CultureInfo.InvariantCulture)</MudTd>
-                                </RowTemplate>
-                            </MudTable>
                             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mt-3">
                                 <MudText Typo="Typo.body1"><b>Total weighted cost:</b></MudText>
                                 @SkillTotalChip()

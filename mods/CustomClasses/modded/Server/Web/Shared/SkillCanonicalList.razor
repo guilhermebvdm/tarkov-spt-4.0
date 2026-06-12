@@ -1,0 +1,415 @@
+@* Item 031: canonical skill list — every live skill ALWAYS in the same fixed position
+   (Ph→M→C→P, then Special Elite), level 0 dimmed, category-colored progress bar, inline
+   weighted cost, and a ±% XP-multiplier chip. Order/list come from SkillMaster (derived from
+   SkillWeights + SkillsExtendedCompat — no magic numbers).
+
+   ── THREE MODES (CONTRATO 031→033/036) ─────────────────────────────────────────────────────
+   The parameters are designed so this one component serves all three callers without a rewrite:
+
+   1. READ-ONLY (033 dashboard, ClassDetail)  — Editable=false, Levels set.
+        Renders the level (or "—"), bar, inline cost and ±% chip per skill.
+   2. EDIT INLINE (031, ClassEdit)             — Editable=true, EditRows set.
+        Each row gets a MudNumericField bound to a computed get/set over EditRows; changing a
+        level fires OnLevelChanged. A pre-existing zero is preserved; a NEW zero is never created
+        (round-trip rule — acceptance 5). The legacy "Add skill" dropdown is replaced by this.
+   3. COMPARE A×B (036)                        — Compare set (over read-only).
+        Each row gains a delta column ▲/▼ = (B.level − A.level), B being the Compare class.
+
+   All level lookups go through a single case-insensitive dictionary built once per render (B2),
+   so "endurance" matches "Endurance" and a missing key degrades to 0 (never KeyNotFoundException). *@
+
+@using System.Globalization
+@using SPTarkov.Server.Core.Models.Enums
+@using CustomClasses.Web
+
+@{
+    var levels = BuildLevelLookup();
+    var compareLevels = BuildCompareLookup();
+    var overflow = BuildOverflowEntries(levels);
+}
+
+<MudSimpleTable Dense="true" Hover="true" Class="skill-canonical">
+    <tbody>
+    @{
+        SkillCategory? lastCategory = null;
+    }
+    @foreach (var entry in SkillMaster.Entries)
+    {
+        if (lastCategory != entry.Category)
+        {
+            lastCategory = entry.Category;
+            @CategoryHeader(entry.Category)
+        }
+
+        var level = levels.TryGetValue(entry.Name, out var lvl) ? lvl : 0;
+        @SkillRow(entry, level, compareLevels)
+    }
+
+    @if (overflow.Count > 0 || (Editable && !string.IsNullOrEmpty(_outsideToAdd)))
+    {
+        @OverflowHeader()
+        @foreach (var name in overflow)
+        {
+            var level = levels.TryGetValue(name, out var lvl) ? lvl : 0;
+            @OverflowRow(name, level, compareLevels)
+        }
+    }
+    </tbody>
+</MudSimpleTable>
+
+@if (Editable)
+{
+    @* B3 — parity with the removed "Add skill": let the author add a skill that is NOT in the
+       canonical master (dead enum members like SMG/Sniping). It lands in the overflow section. *@
+    var addable = OutsideCanonicalNames().ToList();
+    if (addable.Count > 0)
+    {
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mt-3">
+            <MudSelect T="string" @bind-Value="_outsideToAdd" Label="Add skill outside canonical"
+                       Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true"
+                       Style="min-width:280px">
+                @foreach (var name in addable)
+                {
+                    <MudSelectItem T="string" Value="@name">@name</MudSelectItem>
+                }
+            </MudSelect>
+            <MudButton Variant="Variant.Outlined" Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       Disabled="@string.IsNullOrEmpty(_outsideToAdd)"
+                       OnClick="AddOutsideAsync">
+                Add
+            </MudButton>
+        </MudStack>
+    }
+}
+
+@code {
+    /// <summary>Edit mode: a numeric field per row (031/ClassEdit). false = read-only (033/ClassDetail).</summary>
+    [Parameter] public bool Editable { get; set; }
+
+    /// <summary>Current levels by skill name (key = SkillTypes.ToString()). Class A.
+    /// In edit mode the source is the mutable <see cref="EditRows"/>; this dict is the read-only snapshot.</summary>
+    [Parameter] public IReadOnlyDictionary<string, int>? Levels { get; set; }
+
+    /// <summary>Edit: mutable rows (ClassEdit binds its model list directly). When set, takes precedence
+    /// over <see cref="Levels"/> and enables the inline field.</summary>
+    [Parameter] public IList<SkillLevelRow>? EditRows { get; set; }
+
+    /// <summary>Per-skill computed cost (item 022). Key = name. Null = no inline cost/weight shown.</summary>
+    [Parameter] public SkillCostBreakdown? Cost { get; set; }
+
+    /// <summary>XP multipliers per skill (name → factor). Drives the ±% chip (factor 1 = no chip).</summary>
+    [Parameter] public IReadOnlyDictionary<string, double>? Multipliers { get; set; }
+
+    /// <summary>COMPARE MODE (036): optional class B. When != null each row gets a delta column
+    /// ▲/▼ = (B.level − A.level) per skill. Read-only by nature.</summary>
+    [Parameter] public ClassDefinition? Compare { get; set; }
+
+    /// <summary>Raised when a level changes in edit mode (ClassEdit recomputes the cost).</summary>
+    [Parameter] public EventCallback OnLevelChanged { get; set; }
+
+    private string _outsideToAdd = string.Empty;
+
+    // ── Level resolution (precedence: EditRows → Levels), case-insensitive (B2) ──────────────
+
+    /// <summary>One case-insensitive lookup built per render: EditRows first, else Levels.</summary>
+    private Dictionary<string, int> BuildLevelLookup()
+    {
+        var lookup = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        if (EditRows is not null)
+        {
+            foreach (var row in EditRows)
+            {
+                if (!string.IsNullOrWhiteSpace(row.Skill))
+                {
+                    lookup[row.Skill] = row.Level;   // last wins — UI prevents duplicate skills
+                }
+            }
+        }
+        else if (Levels is not null)
+        {
+            foreach (var (name, level) in Levels)
+            {
+                if (!string.IsNullOrWhiteSpace(name))
+                {
+                    lookup[name] = level;
+                }
+            }
+        }
+
+        return lookup;
+    }
+
+    /// <summary>Compare class B levels (036) — case-insensitive; empty when no Compare set.</summary>
+    private Dictionary<string, int> BuildCompareLookup()
+    {
+        var lookup = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        foreach (var (name, level) in Compare?.Skills ?? new Dictionary<string, int>())
+        {
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                lookup[name] = level;
+            }
+        }
+
+        return lookup;
+    }
+
+    /// <summary>
+    ///     Skills present in the data but NOT in the canonical master (unknown / dead enum members).
+    ///     They have no canonical position — listed in an overflow section instead of being dropped.
+    ///     In compare mode, also surfaces skills only B has, so a B-only skill is not invisible.
+    /// </summary>
+    private List<string> BuildOverflowEntries(IReadOnlyDictionary<string, int> levels)
+    {
+        var canonical = new HashSet<string>(
+            SkillMaster.Entries.Select(e => e.Name), StringComparer.OrdinalIgnoreCase);
+
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var overflow = new List<string>();
+
+        foreach (var name in levels.Keys)
+        {
+            if (!canonical.Contains(name) && seen.Add(name))
+            {
+                overflow.Add(name);
+            }
+        }
+
+        if (Compare is not null)
+        {
+            foreach (var name in BuildCompareLookup().Keys)
+            {
+                if (!canonical.Contains(name) && seen.Add(name))
+                {
+                    overflow.Add(name);
+                }
+            }
+        }
+
+        return overflow;
+    }
+
+    /// <summary>Enum names that are NOT canonical and not already in EditRows — offered by the "Add" affordance (B3).</summary>
+    private IEnumerable<string> OutsideCanonicalNames()
+    {
+        var canonical = new HashSet<string>(
+            SkillMaster.Entries.Select(e => e.Name), StringComparer.OrdinalIgnoreCase);
+        var used = new HashSet<string>(
+            EditRows?.Select(r => r.Skill) ?? [], StringComparer.OrdinalIgnoreCase);
+
+        return Enum.GetNames<SkillTypes>()
+            .Where(n => !canonical.Contains(n) && !used.Contains(n))
+            .OrderBy(n => n, StringComparer.OrdinalIgnoreCase);
+    }
+
+    // ── Level get/set per row (edit mode) ───────────────────────────────────────────────────
+    // ref: CR-01-03 — removed unused LevelOf(name) (no callers; rows read the per-render `levels`
+    // lookup built in the @{} block directly, and it rebuilt the dictionary on every call).
+
+    /// <summary>
+    ///     Edit-mode set (B4): find the row by name (OrdinalIgnoreCase). Existing → assign. Missing AND
+    ///     value &gt; 0 → create a row (so the skill becomes defined). Missing AND value == 0 → DO NOT
+    ///     create (no new zero — acceptance 5). Then notify the parent to recompute.
+    /// </summary>
+    private async Task SetLevelAsync(string name, int value)
+    {
+        if (EditRows is null)
+        {
+            return;
+        }
+
+        var row = EditRows.FirstOrDefault(r => string.Equals(r.Skill, name, StringComparison.OrdinalIgnoreCase));
+        if (row is not null)
+        {
+            row.Level = value;
+        }
+        else if (value > 0)
+        {
+            EditRows.Add(new SkillLevelRow { Skill = name, Level = value });
+        }
+        // value == 0 with no row → intentionally nothing (round-trip: no new zero).
+
+        await OnLevelChanged.InvokeAsync();
+        StateHasChanged();
+    }
+
+    private async Task AddOutsideAsync()
+    {
+        if (EditRows is null || string.IsNullOrEmpty(_outsideToAdd))
+        {
+            return;
+        }
+
+        // Add with a level so it actually persists (a 0 would be dropped by ToDefinition on a fresh row);
+        // the author then edits it inline like any other row.
+        EditRows.Add(new SkillLevelRow { Skill = _outsideToAdd, Level = 1 });
+        _outsideToAdd = string.Empty;
+        await OnLevelChanged.InvokeAsync();
+        StateHasChanged();
+    }
+
+    // ── Cost / multiplier lookups (case-insensitive, never index directly — B2) ──────────────
+
+    private SkillCostEntry? CostOf(string name) =>
+        Cost?.Skills.FirstOrDefault(e => string.Equals(e.Skill, name, StringComparison.OrdinalIgnoreCase));
+
+    private double? MultiplierOf(string name)
+    {
+        if (Multipliers is null)
+        {
+            return null;
+        }
+
+        foreach (var (key, factor) in Multipliers)
+        {
+            if (string.Equals(key, name, StringComparison.OrdinalIgnoreCase))
+            {
+                return factor;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>Bar fill % — saturates at level 10 (porta profiles.js:154; corner case 2: &gt;10 clamps to 100).</summary>
+    private static double BarPercent(int level) =>
+        level <= 0 ? 0 : Math.Min(1.0, level / 10.0) * 100;
+
+    // ── Render fragments ─────────────────────────────────────────────────────────────────────
+
+    private RenderFragment CategoryHeader(SkillCategory category) => __builder =>
+    {
+        <tr class="skill-cat-sep">
+            <td colspan="@(ColumnCount)" style="border-bottom:2px solid @SkillMaster.ColorOf(category);padding-top:10px;">
+                <MudText Typo="Typo.subtitle2" Style="@($"color:{SkillMaster.ColorOf(category)};font-weight:600;")">
+                    @SkillMaster.LabelOf(category)
+                </MudText>
+            </td>
+        </tr>
+    };
+
+    private RenderFragment OverflowHeader() => __builder =>
+    {
+        <tr class="skill-cat-sep">
+            <td colspan="@(ColumnCount)" style="border-bottom:2px solid #888;padding-top:10px;opacity:.6;">
+                <MudText Typo="Typo.subtitle2" Style="font-weight:600;">
+                    Outside canonical (loader ignores / unmapped)
+                </MudText>
+            </td>
+        </tr>
+    };
+
+    /// <summary>name / bar / [level or field] / cost / chip / [delta]. Used by canonical rows.</summary>
+    private RenderFragment SkillRow(SkillMasterEntry entry, int level, Dictionary<string, int> compareLevels) =>
+        BuildRow(entry.Name, entry.Category, level, compareLevels);
+
+    /// <summary>Overflow rows reuse the same layout, colored neutral.</summary>
+    private RenderFragment OverflowRow(string name, int level, Dictionary<string, int> compareLevels) =>
+        BuildRow(name, null, level, compareLevels);
+
+    private RenderFragment BuildRow(string name, SkillCategory? category, int level,
+        Dictionary<string, int> compareLevels) => __builder =>
+    {
+        var color = category is { } c ? SkillMaster.ColorOf(c) : "#888";
+        var dim = level <= 0;
+        var costEntry = CostOf(name);
+        var factor = MultiplierOf(name);
+
+        <tr style="@(dim ? "opacity:.3;" : null)">
+            @* Name *@
+            <td style="width:200px">@name</td>
+
+            @* Progress bar *@
+            <td style="min-width:120px">
+                <div style="background:#3a3a3a;border-radius:3px;height:8px;overflow:hidden;">
+                    <div style="@($"width:{BarPercent(level).ToString("0.#", CultureInfo.InvariantCulture)}%;background:{color};height:100%;")"></div>
+                </div>
+            </td>
+
+            @* Level — editable field or static value *@
+            <td style="text-align:right;width:120px">
+                @if (Editable && EditRows is not null)
+                {
+                    <MudNumericField T="int" Value="@level" ValueChanged="@(v => SetLevelAsync(name, v))"
+                                     Min="0" Max="51" Margin="Margin.Dense"
+                                     Variant="Variant.Outlined" Style="max-width:96px;margin-left:auto;"/>
+                }
+                else
+                {
+                    <span>@(level > 0 ? level.ToString(CultureInfo.InvariantCulture) : "—")</span>
+                }
+            </td>
+
+            @* Inline weighted cost (when a breakdown is supplied) *@
+            @if (Cost is not null)
+            {
+                <td style="text-align:right;width:90px">
+                    @if (costEntry is { } ce)
+                    {
+                        <MudText Typo="Typo.caption">@ce.Cost.ToString("0.00", CultureInfo.InvariantCulture)</MudText>
+                    }
+                    else
+                    {
+                        <span>—</span>
+                    }
+                </td>
+            }
+
+            @* XP-multiplier chip *@
+            @if (Multipliers is not null)
+            {
+                <td style="width:84px">@MultiplierChip(factor)</td>
+            }
+
+            @* Compare delta (036) *@
+            @if (Compare is not null)
+            {
+                var bLevel = compareLevels.TryGetValue(name, out var bl) ? bl : 0;
+                <td style="text-align:right;width:80px">@DeltaCell(level, bLevel)</td>
+            }
+        </tr>
+    };
+
+    private RenderFragment MultiplierChip(double? factor) => __builder =>
+    {
+        if (factor is not { } f || Math.Abs(f - 1.0) < 0.0001)
+        {
+            return;
+        }
+
+        if (f > 1)
+        {
+            <MudChip T="string" Size="Size.Small" Color="Color.Success">
+                +@(((f - 1) * 100).ToString("0", CultureInfo.InvariantCulture))%
+            </MudChip>
+        }
+        else
+        {
+            <MudChip T="string" Size="Size.Small" Color="Color.Error">
+                −@(((1 - f) * 100).ToString("0", CultureInfo.InvariantCulture))%
+            </MudChip>
+        }
+    };
+
+    private RenderFragment DeltaCell(int aLevel, int bLevel) => __builder =>
+    {
+        var delta = bLevel - aLevel;
+        if (delta > 0)
+        {
+            <MudText Typo="Typo.caption" Color="Color.Success">▲ +@delta</MudText>
+        }
+        else if (delta < 0)
+        {
+            <MudText Typo="Typo.caption" Color="Color.Error">▼ @delta</MudText>
+        }
+        else
+        {
+            <MudText Typo="Typo.caption" Color="Color.Default">=</MudText>
+        }
+    };
+
+    /// <summary>Visible column count (name + bar + level, plus optional cost/chip/delta) for colspan.</summary>
+    private int ColumnCount =>
+        3 + (Cost is not null ? 1 : 0) + (Multipliers is not null ? 1 : 0) + (Compare is not null ? 1 : 0);
+}
