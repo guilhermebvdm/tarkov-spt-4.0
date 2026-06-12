@@ -239,63 +239,61 @@ public class Plugin : BaseUnityPlugin
         // bypassa Harmony quando override não chama base — só 1 de 14 overrides chama).
         ResolveFirearmControllerSetTrigger();
 
-        // Enable patches
-        new PlayerSpringPatch().Enable(); // Handles camera position
-        new SpringGetPatch().Enable(); // Handles stance rotation/position transitions
-        new FOVSliderPatch().Enable(); // Extends FOV slider range in settings
+        // Enable patches — CADA UM isolado em try/catch (SafeEnable). Se um target Harmony não resolver
+        // em algum build 0.16 (GClass volátil, method_NN renomeado), ele falha SOZINHO com log
+        // `[enable] FAIL <nome>` em vez de derrubar todos os patches seguintes do Awake.
+        SafeEnable("PlayerSpringPatch", () => new PlayerSpringPatch());        // camera position
+        SafeEnable("SpringGetPatch", () => new SpringGetPatch());              // stance + wiggle (009)
+        SafeEnable("FOVSliderPatch", () => new FOVSliderPatch());
 
         // Stamina/velocidade por stance (backlog 001)
-        new StanceStaminaRecoveryPatch().Enable();
-        new Patches.HandsStaminaConsumePatch().Enable();
-        new Patches.HandsStaminaProcessPatch().Enable();
-        new GameWorldOnGameStartedPatch().Enable();
-        new GameWorldOnDestroyPatch().Enable();
-        // BaseLocalGame.Stop não é patchável diretamente (open generic) — OnDestroy cobre os 3 paths
+        SafeEnable("StanceStaminaRecoveryPatch", () => new StanceStaminaRecoveryPatch());
+        SafeEnable("HandsStaminaConsumePatch", () => new Patches.HandsStaminaConsumePatch());
+        SafeEnable("HandsStaminaProcessPatch", () => new Patches.HandsStaminaProcessPatch());
+        SafeEnable("GameWorldOnGameStartedPatch", () => new GameWorldOnGameStartedPatch());
+        SafeEnable("GameWorldOnDestroyPatch", () => new GameWorldOnDestroyPatch());
 
-        // backlog 002 F4 — registro condicional do snap fire patch (PA-02-05).
-        // ModulePatch.Enable() chama Harmony.Patch que lança NRE com MethodBase null —
-        // não confiar em "skip silencioso". Awake checa antes.
+        // backlog 002 F4 — registro condicional do snap fire patch.
         if (FirearmControllerSetTrigger != null)
-            new SnapFireTriggerPatch().Enable();
+            SafeEnable("SnapFireTriggerPatch", () => new SnapFireTriggerPatch());
         else
             Logger.LogWarning("[F4] SnapFireTriggerPatch NOT enabled — Player.FirearmController.SetTriggerPressed " +
                               "não foi resolvida. F1/F2/F3/F5 funcionam normalmente; snap-on-fire desabilitado este boot.");
 
         // Item 004 (06-fix-01): Mount próprio unificado (passivo SEM grude / ativo COM grude).
-        new Patches.FirearmCollisionDetectPatch().Enable(); // detecção de superfície (passivo+ativo) via method_11
-        new WeaponMountingPatch().Enable();                 // sway
-        new Patches.MountingInputPatch().Enable();          // mount ativo via cmd 140 (suprime nativo, exceto bipé)
-        new Patches.MountingCollisionPatch().Enable();      // "grude" — só no ativo
-        
+        // A detecção de superfície roda no Update do MountingManager (não depende deste patch); o
+        // FirearmCollisionDetectPatch é só reforço (mais responsivo) e pode falhar sem quebrar o mount.
+        SafeEnable("FirearmCollisionDetectPatch", () => new Patches.FirearmCollisionDetectPatch());
+        SafeEnable("WeaponMountingPatch", () => new WeaponMountingPatch());          // sway
+        SafeEnable("MountingInputPatch", () => new Patches.MountingInputPatch());    // mount ativo (cmd 140)
+        SafeEnable("MountingCollisionPatch", () => new Patches.MountingCollisionPatch()); // grude (só ativo)
+
         // Item 007: Movement & Inertia
-        new Patches.MovementContextSpeedPatch().Enable();
-        new Patches.MovementContextSprintSpeedPatch().Enable();
-        new Patches.PlayerChangeSpeedPatch().Enable();
-        new Patches.PhysicalInertiaPatch().Enable();
+        SafeEnable("MovementContextSpeedPatch", () => new Patches.MovementContextSpeedPatch());
+        SafeEnable("MovementContextSprintSpeedPatch", () => new Patches.MovementContextSprintSpeedPatch());
+        SafeEnable("PlayerChangeSpeedPatch", () => new Patches.PlayerChangeSpeedPatch());
+        SafeEnable("PhysicalInertiaPatch", () => new Patches.PhysicalInertiaPatch());
 
         // Item 008: Action Stance Swap (Reload, Check Ammo, etc)
-        new Patches.ActionStancePatch().Enable();
-        new Patches.ActionStanceCheckChamberPatch().Enable();
-        new Patches.ActionStanceExamineWeaponPatch().Enable();
-        new Patches.ActionStanceReloadPatch().Enable();
-        new Patches.ActionStanceUnloadMagPatch().Enable();
-        // 008 06-fix-01: GClass2046 (esvaziar câmara) é volátil entre builds 0.16 — se não resolver,
-        // desabilita só esta feature em vez de lançar e derrubar todos os patches do mod.
-        try { new Patches.ActionStanceUnloadChamberPatch().Enable(); }
-        catch (Exception ex) { Logger.LogWarning($"[008] ActionStanceUnloadChamberPatch não habilitado (GClass2046?): {ex.Message}"); }
-        new Patches.ActionStanceOnIdlePatch().Enable();
-        new Patches.ActionStanceCheckFireModePatch().Enable();
+        SafeEnable("ActionStancePatch", () => new Patches.ActionStancePatch());
+        SafeEnable("ActionStanceCheckChamberPatch", () => new Patches.ActionStanceCheckChamberPatch());
+        SafeEnable("ActionStanceExamineWeaponPatch", () => new Patches.ActionStanceExamineWeaponPatch());
+        SafeEnable("ActionStanceReloadPatch", () => new Patches.ActionStanceReloadPatch());
+        SafeEnable("ActionStanceUnloadMagPatch", () => new Patches.ActionStanceUnloadMagPatch());
+        SafeEnable("ActionStanceUnloadChamberPatch", () => new Patches.ActionStanceUnloadChamberPatch()); // GClass2046 (esvaziar câmara)
+        SafeEnable("ActionStanceOnIdlePatch", () => new Patches.ActionStanceOnIdlePatch());
+        SafeEnable("ActionStanceCheckFireModePatch", () => new Patches.ActionStanceCheckFireModePatch());
 
         // Item 010: Manual Chambering
-        new Patches.StartEquipWeapPatch().Enable();
-        new Patches.StartReloadResetPatch().Enable();
-        new Patches.SetAmmoCompatiblePatch().Enable();
-        new Patches.SetAmmoOnMagPatch().Enable();
-        new Patches.PreChamberLoadPatch().Enable();
-        new Patches.ManualChamberingInputPatch().Enable();
+        SafeEnable("StartEquipWeapPatch", () => new Patches.StartEquipWeapPatch());
+        SafeEnable("StartReloadResetPatch", () => new Patches.StartReloadResetPatch());
+        SafeEnable("SetAmmoCompatiblePatch", () => new Patches.SetAmmoCompatiblePatch());
+        SafeEnable("SetAmmoOnMagPatch", () => new Patches.SetAmmoOnMagPatch());
+        SafeEnable("PreChamberLoadPatch", () => new Patches.PreChamberLoadPatch());
+        SafeEnable("ManualChamberingInputPatch", () => new Patches.ManualChamberingInputPatch());
 
         // Mounting & Recoil
-        new Patches.AddRecoilForceMountPatch().Enable();
+        SafeEnable("AddRecoilForceMountPatch", () => new Patches.AddRecoilForceMountPatch());
 
         // Carrega sprites embutidos
         LoadedSprites["mounting.png"] = LoadEmbeddedSprite("mounting.png");
@@ -1349,6 +1347,17 @@ public class Plugin : BaseUnityPlugin
             Logger.LogWarning("[F4] Player.FirearmController.SetTriggerPressed não resolvida — F4 desabilitado.");
         else
             Logger.LogInfo($"[F4] Resolved {FirearmControllerSetTrigger.DeclaringType?.FullName}.SetTriggerPressed");
+    }
+
+    /// <summary>
+    /// Habilita um ModulePatch de forma isolada: se o target Harmony não resolver (GClass volátil,
+    /// method_NN renomeado em 0.16), loga `[enable] FAIL <label>` e segue — em vez de lançar e abortar
+    /// o Awake, o que derrubaria todos os patches registrados depois.
+    /// </summary>
+    private static void SafeEnable(string label, Func<SPT.Reflection.Patching.ModulePatch> factory)
+    {
+        try { factory().Enable(); Logger.LogInfo($"[enable] OK   {label}"); }
+        catch (Exception ex) { Logger.LogWarning($"[enable] FAIL {label} -> {ex.GetType().Name}: {ex.Message}"); }
     }
 
     /// <summary>

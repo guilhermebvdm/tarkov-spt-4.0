@@ -131,8 +131,15 @@ namespace CameraRotationMod
             if (MountState != EMountState.None && _player.IsSprintEnabled)
                 ForceNone();
 
-            // A detecção de superfície (passivo) roda no Prefix de FirearmController.method_11
-            // (DetectBracing) — respeita o pipeline de animação e o comprimento real da arma (ln).
+            // Detecção de superfície (passivo) — feita AQUI no Update para NÃO depender só do
+            // FirearmCollisionDetectPatch (method_11, que pode não resolver em alguns builds 0.16).
+            // O cooldown interno de DetectBracing evita dupla execução se ambos rodarem.
+            var fc = _player.HandsController as Player.FirearmController;
+            if (fc != null && fc.Weapon != null)
+            {
+                float ln = fc.Weapon.CalculateCellSize().X * 0.1f + 0.15f;
+                DetectBracing(fc, _player, ln);
+            }
         }
 
         // ==========================================================================
