@@ -39,6 +39,12 @@
 - **Arquivos tocados:** `mods/AutoGym/modded/WorkoutBodySkinSwap.cs`.
 - **Recompilado:** 0 warnings / 0 erros; reinstalado em `D:/SPT/BepInEx/plugins/AutoGym/`.
 
+### 2026-06-11 — Code review 02 (`/apply-code-review`)
+
+- **Aplicados (3):** CR-02-01 (`Restore()` sem parâmetro `owner` — premissa single-player documentada; call-site do Finalizer atualizado), CR-02-02 (`.Trim()` no id do config antes do ctor `MongoID`), CR-02-03 (`LogDebug` de sucesso no swap e no restore, para a validação in-game).
+- **Arquivos tocados:** `mods/AutoGym/modded/WorkoutBodySkinSwap.cs`, `mods/AutoGym/modded/Plugin.cs`.
+- **Recompilado:** 0 warnings / 0 erros; reinstalado em `D:/SPT/BepInEx/plugins/AutoGym/`.
+
 ## Histórico
 
 | Data | Evento |
@@ -46,3 +52,4 @@
 | 2026-06-10 | Build concluído via `/code-mod` |
 | 2026-06-10 | `/compile-mod` OK (0 warnings, 0 erros); instalado em `D:/SPT/BepInEx/plugins/AutoGym/` |
 | 2026-06-10 | Aplicação de 4 achados de code-review 01 via `/apply-code-review` — IDs: CR-01-01, CR-01-02, CR-01-03, CR-01-04; recompilado e reinstalado |
+| 2026-06-11 | Aplicação de 3 achados de code-review 02 via `/apply-code-review` — IDs: CR-02-01, CR-02-02, CR-02-03; recompilado e reinstalado |

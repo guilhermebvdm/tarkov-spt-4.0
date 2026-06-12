@@ -52,7 +52,7 @@ internal static class WorkoutBodySkinSwap
             try
             {
                 // ref: Assembly-CSharp/EFT/MongoID.cs:59 (string ctor)
-                skinId = new MongoID(Plugin.WorkoutBodySkinId.Value);
+                skinId = new MongoID(Plugin.WorkoutBodySkinId.Value.Trim()); // ref: CR-02-02
             }
             catch (Exception)
             {
@@ -105,6 +105,7 @@ internal static class WorkoutBodySkinSwap
                 playerBody.HasIntergratedArmor = solver.HasIntegratedArmor(skinId);
                 _retainedBundles = handle;
                 _swappedBody = playerBody;
+                Plugin.Log?.LogDebug($"AutoGym: workout body skin applied ({skinId})."); // ref: CR-02-03
             }
             catch
             {
@@ -118,7 +119,9 @@ internal static class WorkoutBodySkinSwap
         }
     }
 
-    internal static void Restore(HideoutPlayerOwner owner)
+    // ref: CR-02-01 — no owner parameter: the hideout has a single local player,
+    // so the restore target is the globally tracked _swappedBody
+    internal static void Restore()
     {
         _generation++; // invalidate any in-flight ApplyAsync
         PlayerBody? playerBody = _swappedBody;
@@ -138,6 +141,7 @@ internal static class WorkoutBodySkinSwap
                         playerBody.SkeletonRootJoint);
                     // ref: PA-01-04
                     playerBody.HasIntergratedArmor = solver.HasIntegratedArmor(originalId);
+                    Plugin.Log?.LogDebug("AutoGym: body skin restored."); // ref: CR-02-03
                 }
             }
         }

@@ -68,7 +68,7 @@ internal static class HideoutPlayerOwnerStopWorkoutPatch
     private static void Finalizer(HideoutPlayerOwner __instance)
     {
         WorkoutGearVisibility.Restore(__instance);
-        WorkoutBodySkinSwap.Restore(__instance);
+        WorkoutBodySkinSwap.Restore(); // ref: CR-02-01
     }
 }
 
