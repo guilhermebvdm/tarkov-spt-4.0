@@ -136,3 +136,11 @@
 .cc-item-tip__row       { font-size: 11px; }
 .cc-item-tip__src       { opacity: .7; }
 .cc-item-tip__warn      { color: var(--mud-palette-warning, #ffb300); font-weight: 600; }
+
+/* ── 036 — comparação A×B (header badges + 2 colunas hideout/outfit) ─────────── */
+/* Additive only — does NOT redefine any 033/034 class. Delta arrow color stays owned
+   by the MudChip Color (Success/Error) and the SkillCanonicalList DeltaCell (031). */
+.cc-cmp-b         { margin-left: 6px; opacity: .75; font-weight: 600; font-variant-numeric: tabular-nums; }
+.cc-cmp-2col      { display: flex; gap: 16px; align-items: flex-start; }
+.cc-cmp-2col > *  { flex: 1; min-width: 0; }
+.cc-cmp-col__head { font-size: 10px; text-transform: uppercase; letter-spacing: .5px; opacity: .6; margin-bottom: 2px; }

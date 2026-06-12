@@ -37,6 +37,32 @@
                 @StatusChip(_entry)
             }
             <MudSpacer/>
+            @* ── Item 036: Compare with… picker (read-only, ephemeral; ?compare=<bare> deep-link) ── *@
+            @if (_entry?.Definition is not null)
+            {
+                <MudMenu Label="@(IsComparing ? $"Comparing: {_compareDef!.Name}" : "Compare with…")"
+                         StartIcon="@Icons.Material.Filled.Compare" Variant="Variant.Outlined" Size="Size.Small"
+                         title="Compare this class with another (read-only)">
+                    @foreach (var c in _compareCandidates)
+                    {
+                        <MudMenuItem OnClick="@(() => SetCompare(c.FileName))">
+                            @if (c.Definition!.IconFile is { Length: > 0 } ic)
+                            {
+                                <img src="@($"/CustomClasses-Server/icons/{ic}")" alt="" width="18" height="18"
+                                     style="object-fit:contain;margin-right:6px;vertical-align:middle;"/>
+                            }
+                            <span style="@(string.IsNullOrWhiteSpace(c.Definition.NameColor) ? null : $"color:{c.Definition.NameColor};")">
+                                @(c.Definition.Name ?? Path.GetFileNameWithoutExtension(c.FileName))
+                            </span>
+                        </MudMenuItem>
+                    }
+                </MudMenu>
+                @if (IsComparing)
+                {
+                    <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small"
+                                   OnClick="ClearCompare" title="Clear comparison"/>
+                }
+            }
             @if (_entry?.Definition is not null)
             {
                 @* Item 025: edit page (simple fields + outfit; equipped/stash arrive in 026/028). *@
@@ -93,16 +119,39 @@
                 @* ── Header badges (costs / status) — item 033 ─────────────────────── *@
                 <div class="cc-badges mb-2">
                     <div class="cc-badge">
-                        <span class="cc-badge__label">Skill cost</span>
+                        <span class="cc-badge__label">Skill cost@(IsComparing ? " (A vs B)" : null)</span>
                         <span class="cc-badge__value">
                             @(_skillCost?.Total.ToString("0.00", CultureInfo.InvariantCulture) ?? "—")
                             @SkillTotalChip()
+                            @if (IsComparing)
+                            {
+                                <span class="cc-cmp-b">vs @(_compareSkillCost?.Total.ToString("0.00", CultureInfo.InvariantCulture) ?? "—")</span>
+                                @DeltaChip(_skillCost?.Total, _compareSkillCost?.Total, "0.00")
+                            }
                         </span>
                     </div>
                     <div class="cc-badge">
-                        <span class="cc-badge__label">Loadout ₽</span>
-                        <span class="cc-badge__value">@(_loadoutCost is null ? "—" : FormatRub(_loadoutCost.TotalRub))</span>
+                        <span class="cc-badge__label">Loadout ₽@(IsComparing ? " (A vs B)" : null)</span>
+                        <span class="cc-badge__value">
+                            @(_loadoutCost is null ? "—" : FormatRub(_loadoutCost.TotalRub))
+                            @if (IsComparing)
+                            {
+                                <span class="cc-cmp-b">vs @(_compareLoadoutCost is null ? "—" : FormatRub(_compareLoadoutCost.TotalRub))</span>
+                                @DeltaChip(_loadoutCost?.TotalRub, _compareLoadoutCost?.TotalRub, "N0")
+                            }
+                        </span>
                     </div>
+                    @if (IsComparing)
+                    {
+                        <div class="cc-badge">
+                            <span class="cc-badge__label">Skills # (A vs B)</span>
+                            <span class="cc-badge__value">
+                                @CountSkills(def.Skills)
+                                <span class="cc-cmp-b">vs @CountSkills(_compareDef!.Skills)</span>
+                                @DeltaChip(CountSkills(def.Skills), CountSkills(_compareDef!.Skills), "0")
+                            </span>
+                        </div>
+                    }
                     <div class="cc-badge">
                         <span class="cc-badge__label">Base edition</span>
                         <span class="cc-badge__value" style="font-size:12px;">
@@ -146,7 +195,11 @@
                             <SkillCanonicalList Levels="@def.Skills"
                                                 Cost="@_skillCost"
                                                 Multipliers="@def.SkillMultipliers"
+                                                Compare="@_compareDef"
                                                 Editable="false"/>
+                            @* 036: Compare=null outside compare mode ⇒ identical to 033 (no delta column).
+                               The delta column convention is B−A (031 DeltaCell): ▲ green = B > A.
+                               Summary chips below use the A-centric DeltaChip (A−B). *@
                             @if (_skillCost is { Skills.Count: > 0 })
                             {
                                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mt-1">
@@ -169,46 +222,46 @@
 
                         <div class="cc-section">
                             <div class="cc-section__title">Hideout (@(def.Hideout?.Count ?? 0))</div>
-                            @if (def.Hideout is { Count: > 0 } hideout)
+                            @* 036: side-by-side A/B when comparing; identical to 033 otherwise. *@
+                            @if (IsComparing)
                             {
-                                <div class="cc-hideout-grid">
-                                    @foreach (var (station, lvl) in hideout)
-                                    {
-                                        <MudChip T="string" Size="Size.Small" Color="Color.Default">@station L@lvl</MudChip>
-                                    }
+                                <div class="cc-cmp-2col">
+                                    <div>
+                                        <div class="cc-cmp-col__head">A — @(def.Name ?? Path.GetFileNameWithoutExtension(_entry!.FileName))</div>
+                                        @HideoutBlock(def.Hideout)
+                                    </div>
+                                    <div>
+                                        <div class="cc-cmp-col__head">B — @_compareDef!.Name</div>
+                                        @HideoutBlock(_compareDef.Hideout)
+                                    </div>
                                 </div>
                             }
                             else
                             {
-                                <MudText Typo="Typo.caption">No hideout station overrides.</MudText>
+                                @HideoutBlock(def.Hideout)
                             }
                         </div>
 
                         <div class="cc-section">
                             <div class="cc-section__title">Outfit</div>
-                            @if (def.Outfit is null)
+                            @* 036: side-by-side A/B when comparing; identical to 033 otherwise.
+                               B clothing ids fall back to the raw id (no dedicated catalog — PA). *@
+                            @if (IsComparing)
                             {
-                                <MudText Typo="Typo.caption">No outfit configured (template defaults apply).</MudText>
+                                <div class="cc-cmp-2col">
+                                    <div>
+                                        <div class="cc-cmp-col__head">A — @(def.Name ?? Path.GetFileNameWithoutExtension(_entry!.FileName))</div>
+                                        @OutfitBlock(def.Outfit)
+                                    </div>
+                                    <div>
+                                        <div class="cc-cmp-col__head">B — @_compareDef!.Name</div>
+                                        @OutfitBlock(_compareDef.Outfit)
+                                    </div>
+                                </div>
                             }
                             else
                             {
-                                <MudSimpleTable Dense="true">
-                                    <thead>
-                                    <tr><th style="text-align:left;width:60px">Side</th><th style="text-align:left">Upper</th><th style="text-align:left">Lower</th></tr>
-                                    </thead>
-                                    <tbody>
-                                    <tr>
-                                        <td>USEC</td>
-                                        <td>@ClothingLabel(def.Outfit.Usec?.Upper)</td>
-                                        <td>@ClothingLabel(def.Outfit.Usec?.Lower)</td>
-                                    </tr>
-                                    <tr>
-                                        <td>BEAR</td>
-                                        <td>@ClothingLabel(def.Outfit.Bear?.Upper)</td>
-                                        <td>@ClothingLabel(def.Outfit.Bear?.Lower)</td>
-                                    </tr>
-                                    </tbody>
-                                </MudSimpleTable>
+                                @OutfitBlock(def.Outfit)
                             }
                         </div>
                     </div>
@@ -272,6 +325,18 @@
     private Dictionary<string, string> _clothingNames = new(StringComparer.Ordinal);
     private bool _seInstalled;
 
+    // ── Compare mode (036) — B is read-only & ephemeral (URL only; no persistence — PA-036-02) ──
+    /// <summary>Deep-link: ?compare=<fileName-sem-extensão>. Null/empty/igual a A/inválida ⇒ single.</summary>
+    [Parameter, SupplyParameterFromQuery(Name = "compare")] public string? CompareParam { get; set; }
+
+    private ClassFileEntry? _compareEntry;                 // B resolvida (ou null = single)
+    private ClassDefinition? _compareDef;                  // _compareEntry?.Definition — passado ao SkillCanonicalList
+    private SkillCostBreakdown? _compareSkillCost;         // ComputeSkillCost(B) — uma vez
+    private LoadoutCostBreakdown? _compareLoadoutCost;     // ComputeLoadoutCost(B)
+    private List<ClassFileEntry> _compareCandidates = [];  // classes válidas ≠ A para o picker
+
+    private bool IsComparing => _compareDef is not null;
+
     protected override void OnParametersSet() => Reload();
 
     /// <summary>Full reload from disk — also called after a lifecycle action (item 027: disable).</summary>
@@ -283,6 +348,11 @@
         _stashLines = [];
         _clothingNames = new Dictionary<string, string>(StringComparer.Ordinal);
         _seInstalled = Registrar.SkillsExtendedInstalled;
+        _compareEntry = null;
+        _compareDef = null;
+        _compareSkillCost = null;
+        _compareLoadoutCost = null;
+        _compareCandidates = [];
 
         if (string.IsNullOrWhiteSpace(FileName))
         {
@@ -323,7 +393,58 @@
                 }
             }
         }
+
+        // 036: resolve compare class B from ?compare= (reuses the list already loaded above).
+        ResolveCompare(entries);
     }
+
+    /// <summary>
+    ///     Resolve compare class B (036) from <see cref="CompareParam"/>. Candidates = parseable
+    ///     classes ≠ A (PA-036-05); reuses the list already loaded by A in <see cref="Reload"/>
+    ///     (no second ListClassFiles call). Null/empty/unknown/invalid/=A ⇒ single (no compare).
+    ///     Cost/loadout breakdowns for B are computed ONCE here, never per-render.
+    /// </summary>
+    private void ResolveCompare(IReadOnlyList<ClassFileEntry> entries)
+    {
+        var aBare = Path.GetFileNameWithoutExtension(_entry!.FileName);
+        _compareCandidates = entries
+            .Where(e => e.Definition is not null
+                     && !string.Equals(Path.GetFileNameWithoutExtension(e.FileName), aBare, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        if (string.IsNullOrWhiteSpace(CompareParam))
+        {
+            return; // single
+        }
+
+        var b = _compareCandidates.FirstOrDefault(e =>
+            string.Equals(e.FileName, CompareParam, StringComparison.OrdinalIgnoreCase)
+         || string.Equals(Path.GetFileNameWithoutExtension(e.FileName), CompareParam, StringComparison.OrdinalIgnoreCase));
+        if (b?.Definition is null)
+        {
+            return; // inexistente / inválida / = A ⇒ ignora (corner cases 1, 2)
+        }
+
+        _compareEntry = b;
+        _compareDef = b.Definition;
+        _compareSkillCost = CostService.ComputeSkillCost(b.Definition);
+        _compareLoadoutCost = CostService.ComputeLoadoutCost(b.Definition);
+    }
+
+    // ── Compare navigation (036) — writes ?compare= via the injected NavigationManager ──────────
+
+    private void SetCompare(string fileName)
+    {
+        var bare = Path.GetFileNameWithoutExtension(fileName);
+        Nav.NavigateTo(Nav.GetUriWithQueryParameter("compare", bare)); // → OnParametersSet → Reload → ResolveCompare
+    }
+
+    private void ClearCompare() =>
+        Nav.NavigateTo(Nav.GetUriWithQueryParameter("compare", (string?)null)); // remove a query → volta a single
+
+    /// <summary>Count of skills with a level > 0 (used by the "Skills #" compare badge).</summary>
+    private static int CountSkills(IReadOnlyDictionary<string, int>? skills) =>
+        skills?.Count(kv => kv.Value > 0) ?? 0;
 
     // ── Lifecycle actions (item 027) — same dialogs as the list page ─────────
 
@@ -412,6 +533,83 @@
 
     private static string FormatRub(double value) =>
         value.ToString("N0", CultureInfo.InvariantCulture) + " ₽";
+
+    /// <summary>
+    ///     Summary delta chip Δ = (A − B) from A's point of view: A higher ⇒ ▲ green, A lower ⇒ ▼ red,
+    ///     equal ⇒ "=". NOTE: this is the OPPOSITE polarity of the per-skill DeltaCell in
+    ///     SkillCanonicalList (031), which paints B − A (green = B has more). The two are intentionally
+    ///     different and labelled: the per-skill column reads "does B have more?"; the summary chips read
+    ///     "is A's number bigger?". v1 keeps green = "A's number is larger" for all three metrics (skill
+    ///     cost / loadout ₽ / skill count) — purely comparative, NOT a balancing verdict (see 🔴-R1/R2).
+    /// </summary>
+    private RenderFragment DeltaChip(double? a, double? b, string fmt) => __builder =>
+    {
+        if (a is not { } av || b is not { } bv)
+        {
+            return;
+        }
+
+        var d = av - bv;
+        if (Math.Abs(d) < 0.005)
+        {
+            <MudChip T="string" Size="Size.Small" Color="Color.Default">=</MudChip>
+        }
+        else
+        {
+            var arrow = d > 0 ? "▲" : "▼";
+            var color = d > 0 ? Color.Success : Color.Error;
+            <MudChip T="string" Size="Size.Small" Color="@color">
+                @arrow @((d > 0 ? "+" : "") + d.ToString(fmt, CultureInfo.InvariantCulture))
+            </MudChip>
+        }
+    };
+
+    /// <summary>Hideout station chips for one class (033 markup, reused per side in compare mode).</summary>
+    private RenderFragment HideoutBlock(IReadOnlyDictionary<string, int>? hideout) => __builder =>
+    {
+        if (hideout is { Count: > 0 })
+        {
+            <div class="cc-hideout-grid">
+                @foreach (var (station, lvl) in hideout)
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Default">@station L@lvl</MudChip>
+                }
+            </div>
+        }
+        else
+        {
+            <MudText Typo="Typo.caption">No hideout station overrides.</MudText>
+        }
+    };
+
+    /// <summary>Outfit table for one class (033 markup, reused per side in compare mode).</summary>
+    private RenderFragment OutfitBlock(Outfit? outfit) => __builder =>
+    {
+        if (outfit is null)
+        {
+            <MudText Typo="Typo.caption">No outfit configured (template defaults apply).</MudText>
+        }
+        else
+        {
+            <MudSimpleTable Dense="true">
+                <thead>
+                <tr><th style="text-align:left;width:60px">Side</th><th style="text-align:left">Upper</th><th style="text-align:left">Lower</th></tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>USEC</td>
+                    <td>@ClothingLabel(outfit.Usec?.Upper)</td>
+                    <td>@ClothingLabel(outfit.Usec?.Lower)</td>
+                </tr>
+                <tr>
+                    <td>BEAR</td>
+                    <td>@ClothingLabel(outfit.Bear?.Upper)</td>
+                    <td>@ClothingLabel(outfit.Bear?.Lower)</td>
+                </tr>
+                </tbody>
+            </MudSimpleTable>
+        }
+    };
 
     private RenderFragment StatusChip(ClassFileEntry entry) => __builder =>
     {
