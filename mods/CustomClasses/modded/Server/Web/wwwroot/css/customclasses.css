@@ -1,0 +1,47 @@
+/* CustomClasses — dashboard density sheet (item 033).
+   Served at /CustomClasses-Server/css/customclasses.css by the same wwwroot mount that
+   serves the class icons (CustomClassesMetadata implements IModWebMetadata → SPTWeb mounts
+   wwwroot/ under /CustomClasses-Server/). Ported tokens from the old viewer
+   (tools/tarkov-itemdb/viewer/profiles.css:72-86,152-214).
+
+   Class names are STABLE and REUSED by item 034 (gear/stash visual panels) — see the
+   033→034 contract: 034 only ADDS icon-grid rules, it does not rewrite the density/layout
+   classes below. */
+
+/* ── Dashboard 2-column layout (port of profiles.css:72-86) ─────────────────── */
+.cc-dash            { display: flex; gap: 16px; align-items: flex-start; }
+.cc-dash__left      { flex: 0 0 320px; display: flex; flex-direction: column; gap: 12px; }
+.cc-dash__right     { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+
+@media (max-width: 960px) {
+    /* Narrow viewports: stack the columns instead of squeezing them. */
+    .cc-dash        { flex-direction: column; }
+    .cc-dash__left  { flex: 1 1 auto; }
+}
+
+/* ── Typographic density — 12-14px, line-height 1.3, paddings 3-6px ─────────── */
+.cc-dense           { font-size: 13px; line-height: 1.3; }
+.cc-dense td,
+.cc-dense th        { padding: 3px 6px !important; }   /* beats MudBlazor's dense padding (see PT-2) */
+
+.cc-section         { margin: 0; }
+.cc-section__title  { font-size: 11px; font-weight: 600; text-transform: uppercase;
+                      letter-spacing: .5px; opacity: .7; margin: 0 0 4px; }
+
+/* ── Header badges (costs / status) — port of .meta-badge profiles.css:133-150 ── */
+.cc-badges          { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; }
+.cc-badge           { display: flex; flex-direction: column; gap: 1px; }
+.cc-badge__label    { font-size: 10px; text-transform: uppercase; letter-spacing: .5px; opacity: .6; }
+.cc-badge__value    { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums;
+                      display: flex; align-items: center; gap: 6px; }
+
+/* One-line description with ellipsis (full text in the tooltip). */
+.cc-desc            { max-width: 640px; overflow: hidden; text-overflow: ellipsis;
+                      white-space: nowrap; opacity: .8; font-size: 12px; }
+
+/* ── Compact hideout chips ──────────────────────────────────────────────────── */
+.cc-hideout-grid    { display: flex; flex-wrap: wrap; gap: 4px; }
+
+/* ── Equipped slot (right column, textual — item 034 extension point) ───────── */
+.cc-equip-slot          { margin-top: 6px; }
+.cc-equip-slot__label   { font-size: 11px; opacity: .7; text-transform: uppercase; letter-spacing: .4px; }

@@ -19,7 +19,7 @@
 
 <PageTitle>CustomClasses — @(_entry?.Definition?.Name ?? FileName)</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+<MudContainer MaxWidth="MaxWidth.False" Class="mt-4">
     <MudPaper Elevation="0" Class="pa-6">
         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-4">
             <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Href="/customclasses/classes"
@@ -90,270 +90,201 @@
             {
                 var def = _entry.Definition;
 
-                <MudExpansionPanels MultiExpansion="true" Class="mt-4">
+                @* ── Header badges (costs / status) — item 033 ─────────────────────── *@
+                <div class="cc-badges mb-2">
+                    <div class="cc-badge">
+                        <span class="cc-badge__label">Skill cost</span>
+                        <span class="cc-badge__value">
+                            @(_skillCost?.Total.ToString("0.00", CultureInfo.InvariantCulture) ?? "—")
+                            @SkillTotalChip()
+                        </span>
+                    </div>
+                    <div class="cc-badge">
+                        <span class="cc-badge__label">Loadout ₽</span>
+                        <span class="cc-badge__value">@(_loadoutCost is null ? "—" : FormatRub(_loadoutCost.TotalRub))</span>
+                    </div>
+                    <div class="cc-badge">
+                        <span class="cc-badge__label">Base edition</span>
+                        <span class="cc-badge__value" style="font-size:12px;">
+                            @(string.IsNullOrWhiteSpace(def.BaseEdition) ? "Zero to hero" : def.BaseEdition)
+                        </span>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(def.IconFile))
+                    {
+                        <div class="cc-badge">
+                            <span class="cc-badge__label">Icon</span>
+                            <span class="cc-badge__value" style="font-size:12px;"><code>@def.IconFile</code></span>
+                        </div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(def.NameColor))
+                    {
+                        <div class="cc-badge">
+                            <span class="cc-badge__label">Name color</span>
+                            <span class="cc-badge__value" style="font-size:12px;">
+                                <span style="display:inline-block;width:14px;height:14px;border-radius:3px;border:1px solid #666;background:@def.NameColor"></span>
+                                <code>@def.NameColor</code>
+                            </span>
+                        </div>
+                    }
+                </div>
 
-                    @* ── General ───────────────────────────────────────────────── *@
-                    <MudExpansionPanel Text="General" Expanded="true">
-                        <MudSimpleTable Dense="true">
-                            <tbody>
-                            <tr><td style="width:220px">name (edition key)</td><td><b>@def.Name</b></td></tr>
-                            <tr><td>displayName (en)</td><td>@(def.DisplayName?.En ?? "—")</td></tr>
-                            <tr><td>displayName (pt)</td><td>@(def.DisplayName?.Pt ?? "—")</td></tr>
-                            <tr><td>description (en)</td><td>@(def.Description?.En ?? "—")</td></tr>
-                            <tr><td>description (pt)</td><td>@(def.Description?.Pt ?? "—")</td></tr>
-                            <tr>
-                                <td>baseEdition</td>
-                                <td>@(string.IsNullOrWhiteSpace(def.BaseEdition) ? "SPT Zero to hero (default)" : def.BaseEdition)</td>
-                            </tr>
-                            <tr>
-                                <td>enabled</td>
-                                <td>
-                                    <MudChip T="string" Size="Size.Small"
-                                             Color="@(def.Enabled ? Color.Success : Color.Default)">
-                                        @(def.Enabled ? "true" : "false")
-                                    </MudChip>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>nameColor</td>
-                                <td>
-                                    @if (string.IsNullOrWhiteSpace(def.NameColor))
-                                    {
-                                        <span>—</span>
-                                    }
-                                    else
-                                    {
-                                        <span style="display:inline-block;width:16px;height:16px;border-radius:3px;vertical-align:middle;border:1px solid #666;background:@def.NameColor"></span>
-                                        <code class="ml-2">@def.NameColor</code>
-                                    }
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>iconFile</td>
-                                <td>
-                                    @if (string.IsNullOrWhiteSpace(def.IconFile))
-                                    {
-                                        <span>— (name-only fallback in the launcher/UI)</span>
-                                    }
-                                    else
-                                    {
-                                        <img src="@($"/CustomClasses-Server/icons/{def.IconFile}")" alt="@def.IconFile"
-                                             width="64" height="64" style="object-fit:contain;vertical-align:middle;"/>
-                                        <code class="ml-2">@def.IconFile</code>
-                                    }
-                                </td>
-                            </tr>
-                            </tbody>
-                        </MudSimpleTable>
-                    </MudExpansionPanel>
+                @if (!string.IsNullOrWhiteSpace(def.Description?.En))
+                {
+                    <MudTooltip Text="@def.Description!.En">
+                        <div class="cc-desc mb-2">@def.Description!.En</div>
+                    </MudTooltip>
+                }
 
-                    @* ── Skills (levels + weighted cost, item 022) ─────────────── *@
-                    <MudExpansionPanel Text="@($"Skills ({def.Skills?.Count ?? 0})")" Expanded="true">
-                        @* Item 031: every canonical skill, fixed order, zeros dimmed (shared component). *@
-                        <SkillCanonicalList Levels="@def.Skills"
-                                            Cost="@_skillCost"
-                                            Multipliers="@def.SkillMultipliers"
-                                            Editable="false"/>
-                        @if (_skillCost is not null && _skillCost.Skills.Count > 0)
-                        {
-                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mt-3">
-                                <MudText Typo="Typo.body1"><b>Total weighted cost:</b></MudText>
-                                @SkillTotalChip()
-                                <MudText Typo="Typo.caption">budget [@SkillWeights.BudgetMin.ToString("0"), @SkillWeights.BudgetMax.ToString("0")]</MudText>
-                            </MudStack>
-                            @foreach (var w in _skillCost.Warnings)
+                @* ── Dashboard: 2 columns, zero expansions (item 033) ──────────────── *@
+                <div class="cc-dash cc-dense mt-2">
+
+                    @* ░░ LEFT COLUMN: skills + multipliers + hideout + outfit ░░ *@
+                    <div class="cc-dash__left">
+                        <div class="cc-section">
+                            <div class="cc-section__title">Skills (@(def.Skills?.Count ?? 0))</div>
+                            @* Item 031: shared canonical list, read-only. DO NOT reimplement. *@
+                            <SkillCanonicalList Levels="@def.Skills"
+                                                Cost="@_skillCost"
+                                                Multipliers="@def.SkillMultipliers"
+                                                Editable="false"/>
+                            @if (_skillCost is { Skills.Count: > 0 })
                             {
-                                <MudAlert Severity="Severity.Warning" Dense="true" Class="mt-1">@w</MudAlert>
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mt-1">
+                                    <MudText Typo="Typo.caption"><b>Weighted:</b> @_skillCost.Total.ToString("0.00", CultureInfo.InvariantCulture)</MudText>
+                                    @SkillTotalChip()
+                                    <MudText Typo="Typo.caption">budget [@SkillWeights.BudgetMin.ToString("0"), @SkillWeights.BudgetMax.ToString("0")]</MudText>
+                                </MudStack>
+                                @foreach (var w in _skillCost.Warnings)
+                                {
+                                    <MudAlert Severity="Severity.Warning" Dense="true" Class="mt-1">@w</MudAlert>
+                                }
                             }
-                        }
-                    </MudExpansionPanel>
-
-                    @* ── XP multipliers (display only — never part of the cost) ── *@
-                    <MudExpansionPanel Text="@($"XP multipliers ({def.SkillMultipliers?.Count ?? 0})")">
-                        @if (def.SkillMultipliers is not { Count: > 0 } multipliers)
-                        {
-                            <MudText Typo="Typo.body2">No skill XP multipliers.</MudText>
-                        }
-                        else
-                        {
-                            @if (!_seInstalled && multipliers.Keys.Any(IsSeSkill))
+                            @if (!_seInstalled && def.SkillMultipliers?.Keys.Any(IsSeSkill) == true)
                             {
-                                <MudAlert Severity="Severity.Warning" Dense="true" Class="mb-2">
-                                    Skills-Extended is NOT installed — multipliers on its skills are registered but inert.
+                                <MudText Typo="Typo.caption" Color="Color.Warning" Class="mt-1">
+                                    Skills-Extended is not installed — its multipliers are registered but inert.
+                                </MudText>
+                            }
+                        </div>
+
+                        <div class="cc-section">
+                            <div class="cc-section__title">Hideout (@(def.Hideout?.Count ?? 0))</div>
+                            @if (def.Hideout is { Count: > 0 } hideout)
+                            {
+                                <div class="cc-hideout-grid">
+                                    @foreach (var (station, lvl) in hideout)
+                                    {
+                                        <MudChip T="string" Size="Size.Small" Color="Color.Default">@station L@lvl</MudChip>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <MudText Typo="Typo.caption">No hideout station overrides.</MudText>
+                            }
+                        </div>
+
+                        <div class="cc-section">
+                            <div class="cc-section__title">Outfit</div>
+                            @if (def.Outfit is null)
+                            {
+                                <MudText Typo="Typo.caption">No outfit configured (template defaults apply).</MudText>
+                            }
+                            else
+                            {
+                                <MudSimpleTable Dense="true">
+                                    <thead>
+                                    <tr><th style="text-align:left;width:60px">Side</th><th style="text-align:left">Upper</th><th style="text-align:left">Lower</th></tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+                                        <td>USEC</td>
+                                        <td>@ClothingLabel(def.Outfit.Usec?.Upper)</td>
+                                        <td>@ClothingLabel(def.Outfit.Usec?.Lower)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>BEAR</td>
+                                        <td>@ClothingLabel(def.Outfit.Bear?.Upper)</td>
+                                        <td>@ClothingLabel(def.Outfit.Bear?.Lower)</td>
+                                    </tr>
+                                    </tbody>
+                                </MudSimpleTable>
+                            }
+                        </div>
+                    </div>
+
+                    @* ░░ RIGHT COLUMN: equipped + stash (TEXTUAL — contract 033→034) ░░ *@
+                    <div class="cc-dash__right">
+                        @* ░░ EXTENSION POINT 034 ░░ replace this "Equipped" content with <GearPanel Equipped="@def.Loadout?.Equipped"/>.
+                           Data contract: def.Loadout?.Equipped (IReadOnlyDictionary<string, ItemSpec>, slot → spec) — unchanged. *@
+                        <div class="cc-section" id="cc-equipped">
+                            <div class="cc-section__title">Equipped (@(def.Loadout?.Equipped?.Count ?? 0) slots)</div>
+                            @if (def.Loadout?.Equipped is { Count: > 0 } equipped)
+                            {
+                                @foreach (var (slot, spec) in equipped)
+                                {
+                                    <div class="cc-equip-slot">
+                                        <div class="cc-equip-slot__label">@slot</div>
+                                        <ClassViewItemSpec Spec="@spec"/>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <MudText Typo="Typo.caption">No equipped items.</MudText>
+                            }
+                        </div>
+
+                        @* ░░ EXTENSION POINT 034 ░░ replace this "Stash" content with <StashPanel Lines="@_stashLines"/>.
+                           Data contract: _stashLines (List<LoadoutCostEntry>, already filtered Context=="stash" in Reload) — unchanged. *@
+                        <div class="cc-section" id="cc-stash">
+                            <div class="cc-section__title">Stash (@(def.Loadout?.Stash?.Count ?? 0) lines)</div>
+                            @foreach (var w in _loadoutCost?.Warnings ?? [])
+                            {
+                                <MudAlert Severity="Severity.Warning" Dense="true" Class="mb-1">@w</MudAlert>
+                            }
+                            @if (def.Loadout?.Stash is not { Count: > 0 })
+                            {
+                                <MudText Typo="Typo.caption">No loose stash items.</MudText>
+                            }
+                            else if (_stashLines.Count == 0)
+                            {
+                                <MudAlert Severity="Severity.Warning" Dense="true">
+                                    Stash entries exist but none produced a priced line — see the warnings above.
                                 </MudAlert>
                             }
-                            <MudTable Items="@multipliers.ToList()" Dense="true" Hover="true">
-                                <HeaderContent>
-                                    <MudTh>Skill</MudTh>
-                                    <MudTh Style="text-align:right">Factor</MudTh>
-                                </HeaderContent>
-                                <RowTemplate>
-                                    <MudTd DataLabel="Skill">
-                                        @context.Key
-                                        @if (IsSeSkill(context.Key))
-                                        {
-                                            <MudChip T="string" Size="Size.Small" Color="Color.Info" Class="ml-2">Skills-Extended</MudChip>
-                                        }
-                                    </MudTd>
-                                    <MudTd DataLabel="Factor" Style="text-align:right">
-                                        <MudText Typo="Typo.body2" Color="@FactorColor(context.Value)">
-                                            ×@context.Value.ToString("0.##", CultureInfo.InvariantCulture)
-                                        </MudText>
-                                    </MudTd>
-                                </RowTemplate>
-                            </MudTable>
-                        }
-                    </MudExpansionPanel>
-
-                    @* ── Hideout ───────────────────────────────────────────────── *@
-                    <MudExpansionPanel Text="@($"Hideout ({def.Hideout?.Count ?? 0})")">
-                        @if (def.Hideout is not { Count: > 0 } hideout)
-                        {
-                            <MudText Typo="Typo.body2">No hideout station overrides.</MudText>
-                        }
-                        else
-                        {
-                            <MudTable Items="@hideout.ToList()" Dense="true" Hover="true">
-                                <HeaderContent>
-                                    <MudTh>Station</MudTh>
-                                    <MudTh Style="text-align:right">Starting level</MudTh>
-                                </HeaderContent>
-                                <RowTemplate>
-                                    <MudTd DataLabel="Station">@context.Key</MudTd>
-                                    <MudTd DataLabel="Starting level" Style="text-align:right">@context.Value</MudTd>
-                                </RowTemplate>
-                            </MudTable>
-                        }
-                    </MudExpansionPanel>
-
-                    @* ── Outfit ────────────────────────────────────────────────── *@
-                    <MudExpansionPanel Text="Outfit">
-                        @if (def.Outfit is null)
-                        {
-                            <MudText Typo="Typo.body2">No outfit configured (template defaults apply).</MudText>
-                        }
-                        else
-                        {
-                            <MudSimpleTable Dense="true">
-                                <thead>
-                                <tr><th style="text-align:left;width:120px">Side</th><th style="text-align:left">Upper</th><th style="text-align:left">Lower</th></tr>
-                                </thead>
-                                <tbody>
-                                <tr>
-                                    <td>USEC</td>
-                                    <td>@ClothingLabel(def.Outfit.Usec?.Upper)</td>
-                                    <td>@ClothingLabel(def.Outfit.Usec?.Lower)</td>
-                                </tr>
-                                <tr>
-                                    <td>BEAR</td>
-                                    <td>@ClothingLabel(def.Outfit.Bear?.Upper)</td>
-                                    <td>@ClothingLabel(def.Outfit.Bear?.Lower)</td>
-                                </tr>
-                                </tbody>
-                            </MudSimpleTable>
-                        }
-                    </MudExpansionPanel>
-
-                    @* ── Equipped (recursive ItemSpec trees) ───────────────────── *@
-                    <MudExpansionPanel Text="@($"Equipped ({def.Loadout?.Equipped?.Count ?? 0} slots)")" Expanded="true">
-                        @if (def.Loadout?.Equipped is not { Count: > 0 } equipped)
-                        {
-                            <MudText Typo="Typo.body2">No equipped items.</MudText>
-                        }
-                        else
-                        {
-                            @foreach (var (slot, spec) in equipped)
+                            else
                             {
-                                <MudText Typo="Typo.subtitle2" Class="mt-3" Style="opacity:.75">@slot</MudText>
-                                <ClassViewItemSpec Spec="@spec"/>
+                                @* context=="stash" only — container contents/ammo roll up into the loadout total badge. *@
+                                <MudTable Items="@_stashLines" Dense="true" Hover="true">
+                                    <HeaderContent>
+                                        <MudTh>Item</MudTh>
+                                        <MudTh>Tpl</MudTh>
+                                        <MudTh Style="text-align:right">Qty</MudTh>
+                                        <MudTh Style="text-align:right">Unit ₽</MudTh>
+                                        <MudTh>Price source</MudTh>
+                                        <MudTh Style="text-align:right">Subtotal ₽</MudTh>
+                                    </HeaderContent>
+                                    <RowTemplate>
+                                        <MudTd DataLabel="Item">@context.Name @MissingPriceBadge(context)</MudTd>
+                                        <MudTd DataLabel="Tpl"><code style="font-size:11px">@context.Tpl</code></MudTd>
+                                        <MudTd DataLabel="Qty" Style="text-align:right">@context.Qty.ToString("N0", CultureInfo.InvariantCulture)</MudTd>
+                                        <MudTd DataLabel="Unit ₽" Style="text-align:right">@context.UnitPrice.ToString("N0", CultureInfo.InvariantCulture)</MudTd>
+                                        <MudTd DataLabel="Price source">@context.PriceSource</MudTd>
+                                        <MudTd DataLabel="Subtotal ₽" Style="text-align:right">@context.Subtotal.ToString("N0", CultureInfo.InvariantCulture)</MudTd>
+                                    </RowTemplate>
+                                </MudTable>
                             }
-                        }
-                    </MudExpansionPanel>
+                        </div>
+                    </div>
+                </div>
 
-                    @* ── Stash (priced lines from the 022 breakdown) ───────────── *@
-                    <MudExpansionPanel Text="@($"Stash ({def.Loadout?.Stash?.Count ?? 0} lines)")">
-                        @if (def.Loadout?.Stash is not { Count: > 0 })
-                        {
-                            <MudText Typo="Typo.body2">No loose stash items.</MudText>
-                        }
-                        else if (_stashLines.Count == 0)
-                        {
-                            <MudAlert Severity="Severity.Warning" Dense="true">
-                                Stash entries exist but none produced a priced line — see the Cost summary warnings.
-                            </MudAlert>
-                        }
-                        else
-                        {
-                            @* context=="stash" only — container contents/ammo show in the full breakdown (Cost panel). *@
-                            <MudTable Items="@_stashLines" Dense="true" Hover="true">
-                                <HeaderContent>
-                                    <MudTh>Item</MudTh>
-                                    <MudTh>Tpl</MudTh>
-                                    <MudTh Style="text-align:right">Qty</MudTh>
-                                    <MudTh Style="text-align:right">Unit ₽</MudTh>
-                                    <MudTh>Price source</MudTh>
-                                    <MudTh Style="text-align:right">Subtotal ₽</MudTh>
-                                </HeaderContent>
-                                <RowTemplate>
-                                    <MudTd DataLabel="Item">@context.Name @MissingPriceBadge(context)</MudTd>
-                                    <MudTd DataLabel="Tpl"><code style="font-size:11px">@context.Tpl</code></MudTd>
-                                    <MudTd DataLabel="Qty" Style="text-align:right">@context.Qty.ToString("N0", CultureInfo.InvariantCulture)</MudTd>
-                                    <MudTd DataLabel="Unit ₽" Style="text-align:right">@context.UnitPrice.ToString("N0", CultureInfo.InvariantCulture)</MudTd>
-                                    <MudTd DataLabel="Price source">@context.PriceSource</MudTd>
-                                    <MudTd DataLabel="Subtotal ₽" Style="text-align:right">@context.Subtotal.ToString("N0", CultureInfo.InvariantCulture)</MudTd>
-                                </RowTemplate>
-                            </MudTable>
-                        }
-                    </MudExpansionPanel>
-
-                    @* ── Cost summary (both totals + full breakdown) ───────────── *@
-                    <MudExpansionPanel Text="Cost summary" Expanded="true">
-                        <MudStack Row="true" Spacing="6" Class="mb-3" Wrap="Wrap.Wrap">
-                            <MudStack Spacing="0">
-                                <MudText Typo="Typo.caption">Weighted skill cost</MudText>
-                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                                    <MudText Typo="Typo.h5">@(_skillCost?.Total.ToString("0.00", CultureInfo.InvariantCulture) ?? "—")</MudText>
-                                    @SkillTotalChip()
-                                </MudStack>
-                                <MudText Typo="Typo.caption">budget [@SkillWeights.BudgetMin.ToString("0"), @SkillWeights.BudgetMax.ToString("0")]</MudText>
-                            </MudStack>
-                            <MudStack Spacing="0">
-                                <MudText Typo="Typo.caption">Loadout total</MudText>
-                                <MudText Typo="Typo.h5">@(_loadoutCost is null ? "—" : FormatRub(_loadoutCost.TotalRub))</MudText>
-                                <MudText Typo="Typo.caption">@(_loadoutCost?.Items.Count ?? 0) priced line(s)</MudText>
-                            </MudStack>
-                        </MudStack>
-
-                        @foreach (var w in _loadoutCost?.Warnings ?? [])
-                        {
-                            <MudAlert Severity="Severity.Warning" Dense="true" Class="mb-1">@w</MudAlert>
-                        }
-
-                        @if (_loadoutCost is { Items.Count: > 0 })
-                        {
-                            <MudText Typo="Typo.subtitle2" Class="mt-3 mb-1">Full price breakdown (equipped + stash + ammo + contents)</MudText>
-                            <MudTable Items="@_loadoutCost.Items" Dense="true" Hover="true">
-                                <HeaderContent>
-                                    <MudTh>Context</MudTh>
-                                    <MudTh>Item</MudTh>
-                                    <MudTh Style="text-align:right">Qty</MudTh>
-                                    <MudTh Style="text-align:right">Unit ₽</MudTh>
-                                    <MudTh>Price source</MudTh>
-                                    <MudTh Style="text-align:right">Subtotal ₽</MudTh>
-                                </HeaderContent>
-                                <RowTemplate>
-                                    <MudTd DataLabel="Context"><code style="font-size:11px">@context.Context</code></MudTd>
-                                    <MudTd DataLabel="Item">@context.Name @MissingPriceBadge(context)</MudTd>
-                                    <MudTd DataLabel="Qty" Style="text-align:right">@context.Qty.ToString("N0", CultureInfo.InvariantCulture)</MudTd>
-                                    <MudTd DataLabel="Unit ₽" Style="text-align:right">@context.UnitPrice.ToString("N0", CultureInfo.InvariantCulture)</MudTd>
-                                    <MudTd DataLabel="Price source">@context.PriceSource</MudTd>
-                                    <MudTd DataLabel="Subtotal ₽" Style="text-align:right">@context.Subtotal.ToString("N0", CultureInfo.InvariantCulture)</MudTd>
-                                </RowTemplate>
-                            </MudTable>
-                        }
-                    </MudExpansionPanel>
-
-                </MudExpansionPanels>
+                @* Item 033: the old MudExpansionPanels block (General / XP multipliers / Cost summary /
+                   per-section panels) was removed. Where its content went:
+                     • General       → header badges (icon / name color / baseEdition) + colored title
+                     • XP multipliers → inline ±% chips in SkillCanonicalList (031) + the SE-missing note
+                     • Cost summary   → the two header badges (skill cost + loadout ₽); loadout warnings
+                                        now render above the stash table *@
             }
         }
     </MudPaper>
@@ -496,9 +427,6 @@
     };
 
     private static bool IsSeSkill(string skillName) => SkillsExtendedCompat.Skills.Contains(skillName);
-
-    private static Color FactorColor(double factor) =>
-        factor > 1 ? Color.Success : factor < 1 ? Color.Error : Color.Default;
 
     /// <summary>"Name (id)" via the catalog clothing list; unknown id degrades to the raw id.</summary>
     private string ClothingLabel(string? id)
