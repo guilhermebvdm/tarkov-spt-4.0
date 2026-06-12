@@ -67,3 +67,4 @@ references/fika-plugin/
 references/fika-headless/
 *.exe
 .handoffs/
+*.Backup.tmp
