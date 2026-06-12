@@ -6,7 +6,7 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 
 ## Estado atual (snapshot ao fim da última sessão)
 
-**Mod híbrido completo e maduro.** Itens **001–029 entregues** (🟢): 11 classes + identidade visual + **editor web Blazor completo** (018–029: 2 rodadas de code-review consolidado + bateria de UI no Chrome MCP, save/hot-apply validados no server real). **Épico UX (030–037) planejado e revisado** (UX + desempenho), kickoffs prontos + handoff para execução em sessão dedicada. Working tree gigante, **nada commitado**.
+**Mod híbrido completo e maduro.** Itens **001–037 entregues** (🟢): 11 classes + identidade visual + **editor web Blazor completo** (018–029) + **épico UX (030–037) EXECUTADO** (autônomo via Workflow, 2026-06-11→12). Tudo **commitado** (15 commits do épico sobre baseline `3634548`); working tree limpo exceto frentes paralelas (`docs/migration/*`, `.claude/skills/*`, `.agents/resources.md`, `docs/technical/spt-antipatterns.md`, `mods/SPT-Menu-Overhaul/memory/`). **Branch ahead 22, SEM push** — aguarda revisão do usuário. Relatório: `.handoffs/handoff-2026-06-12-overnight-ux-030-037.md`.
 
 - **Identidade:** `CustomClasses`, GUID `customclasses.mdj` (server) + `customclasses.mdj.client` (client BepInEx). SPT 4.0.13. Mod irmão `mods/CustomizationPersistenceFix` (corrige reset de customização do SPT core via Harmony).
 - **Classes:** 10 reais + Peladão/**NAKED** (016, skin placeholder havaiana). Gerador `scripts/build-class-jsons.js` congelado como bootstrap (`--force`); **fonte de verdade = `.jsonc` do install** (volta via `/sync-classes`; compile-mod tem guard anti-clobber `--force-config`).
@@ -14,13 +14,16 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 - **Identidade visual (item 015):** gradiente sutil (0.15) nos nomes E ícones (`ClassIconGradient`); ícones proporcionais à fonte (`ClassIconRatio` 1.35, `IconSizeFor`); deploy `DeployNameScale` 3.0. Integra com Menu-Overhaul (AccentColor + reposicionamento de botões). Configs F12 em `PROPRIEDADES.md`.
 - **Multiplicadores de skill:** buff/debuff client-side (escala XP); rota `/customclasses/skill-multipliers` (server). Notificação de level-up `EASILY`/`FINALLY` (014).
 - **Editor web (018–029 🟢):** Blazor Server servido pelo próprio server SPT (`https://<ip do fika>:6969/customclasses`) — lista, detalhe, edição (7 abas), criar/duplicar/deletar com **hot-apply** (perfil novo sem restart); custo RZ vivo (`CostService`/`SkillWeights`); validação = mesmo pipeline do boot (`ClassRegistrar` dry-run). Docs: [docs/class-editor.md](../docs/class-editor.md) + [docs/class-schema.md](../docs/class-schema.md).
-- **Épico UX (030–037 ⚪):** waves UX-W0..W4 — **performance primeiro** (037: navegação atual dispara 22 dry-runs — 11 classes × prerender duplo). Plano: seção "Épico: UX do editor" do [mod-backlog.md](../backlog/mod-backlog.md) + kickoffs `0NN-*-00-kickoff.md`. **Handoff:** `.handoffs/handoff-2026-06-10-epico-ux-editor-030-037.md`.
-- **Coordenação multi-chat:** identidade visual/client correu em sessões paralelas (entradas 2026-06-09 e 2026-06-11 21:45); o épico UX deve ser retomado **pelo handoff** em sessão dedicada.
+- **Épico UX (030–037 🟢):** TODOS entregues. 037 cache+índices+throttle; 030 sidebar persistente; 031 SkillCanonicalList+SkillMaster (ordem canônica, 3 modos: read-only/edit/compare); 032 matriz heatmap (`/customclasses/skills`); 033 dashboard single-screen (2-col, sem expansion panels, `customclasses.css`); 034 GearPanel/StashPanel/ItemTooltip; 036 comparação A×B (?compare=); 035 densidade global + Ctrl+S + prefs localStorage (`customclasses.js`). Validado: build 0/0, boot `Loaded 11 class(es)`, editor smoke no Chrome MCP. **Pendente:** medição quantitativa 037 (logs `[perf]` são LogDebug; precisa server em nível Debug + baseline) + QA visual.
+- **Coordenação multi-chat:** identidade visual/client correu em sessões paralelas (2026-06-09, 2026-06-11 21:45); o épico UX foi executado autônomo nesta sessão (Workflow por wave) — frentes paralelas (skills SKILL.md, mods-inventory, SPT-Menu-Overhaul) ficaram unstaged, intactas.
 
 ## Pendências / próximos passos conhecidos
 
-- 🔴 [P-7.1] **Executar o épico UX 030–037** (começar por `/create-spec 037` — performance) — retomar pelo handoff `.handoffs/handoff-2026-06-10-epico-ux-editor-030-037.md`.
-- 🔴 [P-7.2] **Commit do working tree** (018–029 + fixes + planejamento UX + bloco 010–017 das sessões paralelas) — decisão de agrupamento é do usuário.
+- ✅ [P-7.1] **Épico UX 030–037 EXECUTADO** (2026-06-11→12, autônomo via Workflow) — 8/8 itens 🟢 commitados. Ver entrada 2026-06-12.
+- ✅ [P-7.2] **Working tree commitado** — agrupado: identidade+editor (010–029), mods novos (CustomizationPersistenceFix, SPT-Menu-Overhaul), plano UX, + 1 commit por item do épico. **Branch ahead 22, sem push** (aguarda revisão).
+- 🔴 [P-7.9] **PUSH dos 15 commits do épico** + QA visual no viewer (build-gate ≠ correção: matriz em células estreitas 032, dashboard em viewport estreito 033, comparação A×B 036).
+- 🟡 [P-7.10] **Medição quantitativa do 037** (before/after) — fechar o DoD: subir server com log Debug (`[perf]` é LogDebug) + baseline pré-`d180195`.
+- 🟡 [P-7.11] **Achados de review adiados** (no relatório 2026-06-12, por wave) — decidir follow-ups: 036 multiplicadores de B lado a lado (toca componente 031), 037 dispose de `_recomputeCts`, 034 msg "filtro sem resultados" na aba Stash.
 - 🟡 [P-7.3] **Validação in-game pós-CR-EP-01**: stash agora spawna `preset`/`mods`/`ammo`/`contents` montados (antes só tpl+count) — criar perfil novo e conferir o nascimento (regra `feedback_spt_validation`).
 - 🟡 [P-7.4] **Validações in-game da sessão paralela de 2026-06-11** (013 botão SKILLS×MO, 015 polish, 017 CustomizationPersistenceFix) — ver entrada 2026-06-11 21:45.
 - 🟡 [P-7.5] **Housekeeping deferido do editor**: CR-EP-10 (ícones client×server sem validação cruzada), CR2-EP-05 (óptica mínima não precificada), página `/customclasses/picker-test` (rota dev sem link).
@@ -132,6 +135,32 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 **Cross-refs:**
 - Trabalho paralelo no mesmo dia: ver Sessão de 2026-06-11 21:45 (polish 015 + fixes 013/017).
 - O plano do épico UX em si foi gravado nas entradas de 2026-06-10 (não duplicado aqui).
+
+### 2026-06-12 — Épico UX 030–037 executado autônomo (Workflow por wave)
+
+**Tema central:** executar o épico UX de ponta a ponta sem supervisão (usuário dormindo), pelo fluxo do repo, orquestrado por **Workflows** (1 por wave) com gates determinísticos.
+
+**Setup:**
+- Commit do working tree pré-existente em grupos (identidade+editor 010–029; mods novos CustomizationPersistenceFix e SPT-Menu-Overhaul; plano UX 030–037; `.handoffs/` gitignorado; `*.Backup.tmp` gitignorado; `LocalPlayer.cs` decompilado movido p/ `references/eft-decompiled/`).
+- Verificação de settings: `bypassPermissions` já ativo nos dois `settings.json` → nenhuma mudança de permissão necessária p/ rodar autônomo.
+- Política autônoma aprovada: auto-aplicar achados de review SEGUROS / adiar design; build hard-gate por wave; pular item em falha; **1 commit por item, pathspec explícito, SEM push**.
+
+**Execução (waves):**
+- **W0 [037]** — Workflow estourou **limite de sessão** após o code-mod (spec/tech-spec/review rodaram); loop principal **salvou** (build 0/0 + commit `d180195`). Reset de quota → retomada de manhã.
+- **W1 [030+031]** paralelo → 🟢 `73228e9`/`1db0dad` (build teve 2 erros no SkillCanonicalList auto-corrigidos em 2 tentativas).
+- **W2 [032+033]** paralelo → 🟢 `2e3ea9c`/`d52211f`.
+- **W3 [034→036]** **sequencial** (compartilham `ClassDetail.razor`/`customclasses.css` — evitar clobber) → 🟢 `72866cc`/`b4dc2cf`.
+- **W4 [035]** solo → 🟢 `fdc9439`.
+- 037 code-review (lacuna da W0) fechado depois: `8e38bde`+`515ab1c` (0 fixes, código correto).
+
+**Validação:** build integrado 0/0; `compile-mod` instalou (config sem divergência); boot `Loaded 11 class(es)` sem exceção; smoke Chrome MCP confirmou sidebar/matriz/skills canônicas/abas/prefs. Medição quantitativa 037 ficou pendente (logs `[perf]` são LogDebug).
+
+**Lições:**
+- **Custo real por wave ~370–630k tokens** → o épico inteiro estoura o limite de sessão em uma janela; a W0 morreu no meio. Mitigação que funcionou: **salvamento pelo loop principal** (build+commit do que estava pronto) + retomada pós-reset; pipeline comprimido (menos agentes/item) nas waves seguintes.
+- **Itens que compartilham arquivo** (034/036 em ClassDetail) **não podem rodar em paralelo** — quebra o commit por-item com pathspec. Rodar sequencial.
+- here-string PowerShell `@'...'@` na Bash tool insere `@` literal no commit subject → usar `git commit -F <arquivo>`.
+
+**Cross-refs:** relatório completo (achados adiados por wave, premissas, hashes) em `.handoffs/handoff-2026-06-12-overnight-ux-030-037.md`. Plano de execução em `~/.claude/plans/`.
 
 ## Arquivo — blocos de topo pré-curadoria (2026-06-07 → 2026-06-10)
 
