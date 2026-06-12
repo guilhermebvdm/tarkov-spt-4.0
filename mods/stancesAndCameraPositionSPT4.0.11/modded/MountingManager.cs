@@ -89,6 +89,17 @@ namespace CameraRotationMod
             if (MountState != EMountState.None) SetMountState(EMountState.None, EBracingDirection.None);
         }
 
+        // Toggle do mount ativo, compartilhado entre a tecla NATIVA de mount do EFT (MountingInputPatch,
+        // cmd 140) e a hotkey do F12 (`_MountingHotkey`, lida no Update). Active -> None; senão, se há
+        // superfície detectada (Passive) -> Active. Sem superfície: no-op.
+        public static void ToggleActiveMount()
+        {
+            if (MountState == EMountState.Active)
+                SetMountState(EMountState.None, EBracingDirection.None);
+            else if (MountState == EMountState.Passive)
+                SetMountState(EMountState.Active, BracingDirection);
+        }
+
         private void Update()
         {
             var gameWorld = StanceManager.GetCachedGameWorld();
@@ -104,6 +115,16 @@ namespace CameraRotationMod
             {
                 ForceNone();
                 return;
+            }
+
+            // Fallback de input (item 004): a hotkey do F12 (_MountingHotkey) também alterna o mount
+            // ativo, além da tecla nativa de mount do EFT (MountingInputPatch). Com bipé, deixa o nativo.
+            var hotkey = Plugin._MountingHotkey?.Value ?? KeyCode.None;
+            if (hotkey != KeyCode.None && UnityEngine.Input.GetKeyDown(hotkey))
+            {
+                var pwa = _player.ProceduralWeaponAnimation;
+                if (pwa == null || !pwa.IsBipodUsed)
+                    ToggleActiveMount();
             }
 
             // Cancelar mount (ativo ou passivo) ao correr.

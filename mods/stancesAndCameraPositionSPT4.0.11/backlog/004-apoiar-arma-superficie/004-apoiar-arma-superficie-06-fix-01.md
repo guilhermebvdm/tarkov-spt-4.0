@@ -49,7 +49,7 @@ Mantido **`WeaponRootAnim`** (ponta da arma) — ponto canônico de colisão de 
 2. **`method_23` (reset de pose) OMITIDO** — risco de conflito com o controle de springs do stance (revisão #8). Confia-se em `ResetCollisionOffsets` + force Stance 0. Se houver resíduo visual, reavaliar.
 3. **Magnitudes do grude** mantidas (alvo de Stance 0); podem precisar de re-tuning agora que só atuam no ativo (antes "vazavam" no passivo).
 4. **Cache do `TurnAwayEffector`** lê os defaults no 1º mount ativo do boot — assume que o effector é recriado com defaults a cada boot/raid.
-5. **Fallback de tecla** (Input.GetKeyDown `_MountingHotkey`) NÃO implementado — o cmd 140 resolveu em compilação. Adicionar se a tecla nativa não funcionar in-game.
+5. **Fallback de tecla implementado:** a `Weapon Mounting Hotkey` (F12, default `Mouse3`) alterna o mount ativo no `Update` via `MountingManager.ToggleActiveMount()`, além da tecla nativa do EFT (cmd 140). Com bipé, deixa o nativo. (Antes a config estava órfã — não-lida.)
 
 ## Histórico
 

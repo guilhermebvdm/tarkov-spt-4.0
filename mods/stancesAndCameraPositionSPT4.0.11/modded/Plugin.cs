@@ -931,7 +931,7 @@ public class Plugin : BaseUnityPlugin
             MountingSettings,
             "Weapon Mounting Hotkey",
             KeyCode.Mouse3,
-            new ConfigDescription("Key used to mount/unmount the weapon when near a surface.",
+            new ConfigDescription("Tecla (F12) para apoiar/soltar a arma quando perto de uma superfície — ALÉM da tecla nativa de mount do EFT (configurável nas opções de controle do jogo). Tempo real.",
             null,
             new ConfigurationManagerAttributes { Order = 9 }));
 

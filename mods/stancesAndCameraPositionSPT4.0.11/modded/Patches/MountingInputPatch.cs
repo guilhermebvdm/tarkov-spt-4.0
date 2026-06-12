@@ -30,12 +30,9 @@ namespace CameraRotationMod.Patches
             var pwa = player.ProceduralWeaponAnimation;
             if (pwa != null && pwa.IsBipodUsed) return true;
 
-            if (MountingManager.IsMounting)
-                MountingManager.SetMountState(EMountState.None, EBracingDirection.None);
-            else if (MountingManager.IsBracing)
-                MountingManager.SetMountState(EMountState.Active, MountingManager.BracingDirection);
-            // sem superfície detectada: engole o comando (no-op) — evita o mount nativo em superfície
-            // que o nosso raycast não validou (mantém critério unificado).
+            MountingManager.ToggleActiveMount();
+            // Sem superfície detectada, ToggleActiveMount é no-op — mas ainda suprimimos o comando nativo
+            // para evitar o mount do EFT numa superfície que o nosso raycast não validou (critério unificado).
 
             return false; // suprime o mount nativo
         }
