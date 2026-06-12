@@ -1,3 +1,4 @@
+using System.Diagnostics;                            // item 037: Stopwatch (perf instrumentation)
 using System.Text.Json.Serialization;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;                  // ItemHelper
@@ -6,6 +7,7 @@ using SPTarkov.Server.Core.Models.Common;            // MongoId
 using SPTarkov.Server.Core.Models.Enums;             // BaseClasses
 using SPTarkov.Server.Core.Models.Eft.Common;        // Preset
 using SPTarkov.Server.Core.Models.Eft.Common.Tables; // TemplateItem, CustomizationItem
+using SPTarkov.Server.Core.Models.Utils;             // ISptLogger (item 037)
 
 namespace CustomClasses;
 
@@ -82,15 +84,57 @@ public sealed record CatalogClothing
 ///     Currency is face value (rouble handbook = 1 ₽). No price at all → 0 + "missing" source (never silent).
 /// </summary>
 [Injectable(InjectionType.Singleton)]
-public class CatalogService(
-    DatabaseService databaseService,
-    ItemHelper itemHelper,
-    LocaleService localeService)
+public class CatalogService
 {
     private const string SourceFlea = "flea";
     private const string SourceHandbook = "handbook";
     private const string SourceCurrency = "currency";
     private const string SourceMissing = "missing";
+
+    private readonly DatabaseService databaseService;
+    private readonly ItemHelper itemHelper;
+    private readonly LocaleService localeService;
+    private readonly ISptLogger<CatalogService> logger;   // item 037 (PA-R1-08): perf instrumentation
+
+    // ── Item 037: lazy read-only indexes over the LIVE DB ──────────────────────
+    // Premise PA-037-06: GetItems/GetHandbook/GetCustomization/locales are immutable AFTER boot. These
+    // Lazy<T> are built on FIRST ACCESS (never eager in the ctor — see §7), i.e. after every mod's
+    // PostDBModLoader has run, then read-only. Lazy<T> default mode (ExecutionAndPublication) is
+    // thread-safe — fine for indexes built once and only read afterwards (PA-037-03). A mod mutating
+    // the DB at runtime (unsupported) would see a stale index — accepted risk.
+    private readonly Lazy<List<SearchIndexRow>> _searchIndex;
+    private readonly Lazy<Dictionary<MongoId, string>> _handbookIndex;       // tpl → handbook category id
+    private readonly Lazy<Dictionary<string, List<string>>> _childrenByParent; // category id → direct children
+    private readonly Lazy<Dictionary<string, List<CatalogClothing>>> _clothingBySide; // "Usec"/"Bear" → pieces
+
+    public CatalogService(
+        DatabaseService databaseService,
+        ItemHelper itemHelper,
+        LocaleService localeService,
+        ISptLogger<CatalogService> logger)
+    {
+        this.databaseService = databaseService;
+        this.itemHelper = itemHelper;
+        this.localeService = localeService;
+        this.logger = logger;
+
+        // Index factories — invoked on first .Value access (post-boot), never here in the ctor.
+        _handbookIndex = new Lazy<Dictionary<MongoId, string>>(BuildHandbookIndex);
+        _searchIndex = new Lazy<List<SearchIndexRow>>(BuildSearchIndex);
+        _childrenByParent = new Lazy<Dictionary<string, List<string>>>(BuildChildrenByParent);
+        _clothingBySide = new Lazy<Dictionary<string, List<CatalogClothing>>>(BuildClothingBySide);
+    }
+
+    /// <summary>Pre-computed search-index row (DB immutable post-boot — PA-037-06).</summary>
+    private sealed record SearchIndexRow(
+        string Tpl,
+        string? EnNameLower,
+        string? PtNameLower,
+        string? ShortNameLower,
+        string? TemplateNameLower,   // PA-R1-01: template.Name internal IS a match source in the current Search
+        string EnNameDisplay,
+        string? ShortNameDisplay,
+        string? CategoryId);
 
     // ── Prices ───────────────────────────────────────────────────────────────
 
@@ -166,54 +210,50 @@ public class CatalogService(
             return results;
         }
 
+        // Item 037 instrumentation: differentiate the cold build (first access) from the hot scan.
+        var cold = !_searchIndex.IsValueCreated;
+        var sw = Stopwatch.StartNew();
+
         var q = query.Trim();
-        var en = GetLocale("en");
-        var pt = GetLocale("pt");
-        var handbookIndex = BuildHandbookIndex();
-        var categoryScope = parentCategoryId is null ? null : CollectCategoryWithDescendants(parentCategoryId);
+        var qLower = q.ToLowerInvariant();
+        var scope = parentCategoryId is null ? null : CollectCategoryWithDescendants(parentCategoryId);
 
-        foreach (var (tpl, template) in databaseService.GetItems())   // ref: DatabaseService.cs:129
+        // Order is IDENTICAL to the pre-037 Search (PA-R1-06): category → match(5 sources) →
+        // filter(tpl) → GetPrice → add → cap@limit. GetPrice is computed only for the ≤limit matches
+        // (PA-037-08: price is NOT frozen in the index — flea overrides at runtime — but it is cheap).
+        foreach (var row in _searchIndex.Value)   // HOT: scan a compact in-memory list
         {
-            if (!string.Equals(template.Type, "Item", StringComparison.Ordinal))
-            {
-                continue;   // skip "Node" type rows (category nodes inside items.json)
-            }
-
-            handbookIndex.TryGetValue(tpl, out var categoryId);
-            if (categoryScope is not null && (categoryId is null || !categoryScope.Contains(categoryId)))
+            if (scope is not null && (row.CategoryId is null || !scope.Contains(row.CategoryId)))
             {
                 continue;
             }
 
-            var key = tpl.ToString();
-            en.TryGetValue($"{key} Name", out var enName);
-            en.TryGetValue($"{key} ShortName", out var shortName);
-            pt.TryGetValue($"{key} Name", out var ptName);
-
-            var match = string.Equals(key, q, StringComparison.OrdinalIgnoreCase)
-                || Contains(enName, q)
-                || Contains(ptName, q)
-                || Contains(shortName, q)
-                || Contains(template.Name, q);
+            // PA-R1-01: the same 5 match sources as the original Search (tpl exact, en, pt, short,
+            // internal template.Name) — TemplateNameLower preserves the internal-name match.
+            var match = string.Equals(row.Tpl, q, StringComparison.OrdinalIgnoreCase)
+                || (row.EnNameLower?.Contains(qLower, StringComparison.Ordinal) ?? false)
+                || (row.PtNameLower?.Contains(qLower, StringComparison.Ordinal) ?? false)
+                || (row.ShortNameLower?.Contains(qLower, StringComparison.Ordinal) ?? false)
+                || (row.TemplateNameLower?.Contains(qLower, StringComparison.Ordinal) ?? false);
             if (!match)
             {
                 continue;
             }
 
-            if (filter is not null && !filter(key))
+            if (filter is not null && !filter(row.Tpl))
             {
                 continue;   // CR-EP-07: incompatible hit must not consume the result cap
             }
 
-            var (price, source) = GetPrice(tpl);
+            var (price, source) = GetPrice(new MongoId(row.Tpl));
             results.Add(new CatalogItem
             {
-                Tpl = key,
-                Name = !string.IsNullOrWhiteSpace(enName) ? enName! : template.Name ?? key,
-                ShortName = shortName,
+                Tpl = row.Tpl,
+                Name = row.EnNameDisplay,
+                ShortName = row.ShortNameDisplay,
                 Price = price,
                 PriceSource = source,
-                CategoryId = categoryId,
+                CategoryId = row.CategoryId,
             });
 
             if (results.Count >= limit)
@@ -222,13 +262,55 @@ public class CatalogService(
             }
         }
 
+        logger.Debug($"[CustomClasses] [perf] Search '{q}': {results.Count} hit(s) over {_searchIndex.Value.Count} rows "
+            + $"({(cold ? "cold/index-built" : "hot")}) in {sw.ElapsedMilliseconds} ms");
         return results;
     }
 
-    private static bool Contains(string? haystack, string needle) =>
-        haystack is not null && haystack.Contains(needle, StringComparison.OrdinalIgnoreCase);
+    /// <summary>
+    ///     Item 037: pre-computed search index over item templates (<c>_type == "Item"</c>). Resolves
+    ///     en/pt/short locale + handbook category ONCE; the hot <see cref="Search"/> scans this compact
+    ///     list (the expensive part the index eliminates is per-item locale resolution over the whole DB).
+    /// </summary>
+    private List<SearchIndexRow> BuildSearchIndex()
+    {
+        var sw = Stopwatch.StartNew();
+        var en = GetLocale("en");
+        var pt = GetLocale("pt");
+        var handbook = _handbookIndex.Value;
+        var rows = new List<SearchIndexRow>();
 
-    /// <summary>tpl → handbook category id (handbook.Items[].ParentId). Built per call — DB is live (mods).</summary>
+        foreach (var (tpl, template) in databaseService.GetItems())   // ref: DatabaseService.cs:129
+        {
+            if (!string.Equals(template.Type, "Item", StringComparison.Ordinal))
+            {
+                continue;   // skip "Node" type rows (category nodes inside items.json)
+            }
+
+            var key = tpl.ToString();
+            en.TryGetValue($"{key} Name", out var enName);
+            en.TryGetValue($"{key} ShortName", out var shortName);
+            pt.TryGetValue($"{key} Name", out var ptName);
+            handbook.TryGetValue(tpl, out var categoryId);
+
+            // PA-037-07: nothing drops from search for lack of locale — the display name falls back to
+            // template.Name/tpl and template.Name stays a match source.
+            rows.Add(new SearchIndexRow(
+                key,
+                enName?.ToLowerInvariant(),
+                ptName?.ToLowerInvariant(),
+                shortName?.ToLowerInvariant(),
+                template.Name?.ToLowerInvariant(),
+                !string.IsNullOrWhiteSpace(enName) ? enName! : template.Name ?? key,
+                shortName,
+                categoryId));
+        }
+
+        logger.Debug($"[CustomClasses] [perf] BuildSearchIndex: {rows.Count} rows in {sw.ElapsedMilliseconds} ms");
+        return rows;
+    }
+
+    /// <summary>tpl → handbook category id (handbook.Items[].ParentId). Item 037: built once (lazy).</summary>
     private Dictionary<MongoId, string> BuildHandbookIndex()
     {
         var index = new Dictionary<MongoId, string>();
@@ -240,8 +322,12 @@ public class CatalogService(
         return index;
     }
 
-    /// <summary>Set with a category id + all its descendants (handbook.Categories tree by ParentId).</summary>
-    private HashSet<string> CollectCategoryWithDescendants(string rootId)
+    /// <summary>
+    ///     category id → direct children (handbook.Categories tree by ParentId). Item 037 (PA-R1-04):
+    ///     the EXPENSIVE part (building this parent→children map) is cached once; the per-root BFS in
+    ///     <see cref="CollectCategoryWithDescendants"/> is cheap and stays per-call over this read-only map.
+    /// </summary>
+    private Dictionary<string, List<string>> BuildChildrenByParent()
     {
         var children = new Dictionary<string, List<string>>(StringComparer.Ordinal);
         foreach (var cat in databaseService.GetHandbook().Categories)
@@ -260,6 +346,13 @@ public class CatalogService(
             list.Add(cat.Id.ToString());
         }
 
+        return children;
+    }
+
+    /// <summary>Set with a category id + all its descendants (BFS over the cached parent→children map).</summary>
+    private HashSet<string> CollectCategoryWithDescendants(string rootId)
+    {
+        var children = _childrenByParent.Value;   // item 037: cached tree (built once)
         var result = new HashSet<string>(StringComparer.Ordinal) { rootId };
         var queue = new Queue<string>();
         queue.Enqueue(rootId);
@@ -514,20 +607,34 @@ public class CatalogService(
     /// </summary>
     public List<CatalogClothing> GetClothing(string sideName)
     {
+        // Item 037: clothing per side is pre-computed once (lazy). Returns the cached list for the side
+        // ("Usec"/"Bear"); unknown side → empty. The list is treated as read-only by callers.
+        return _clothingBySide.Value.TryGetValue(sideName, out var pieces) ? pieces : [];
+    }
+
+    /// <summary>
+    ///     Item 037: pre-computes the outfit-eligible clothing pieces for "Usec" and "Bear" in ONE pass
+    ///     over the customization table (was one full scan per GetClothing call, twice per editor load).
+    ///     Same OutfitBuilder acceptance rules and locale-first naming as before — a piece with an empty
+    ///     Side list is usable by both factions (lenient, PA-01-03), so it lands in both lists.
+    /// </summary>
+    private Dictionary<string, List<CatalogClothing>> BuildClothingBySide()
+    {
+        var sw = Stopwatch.StartNew();
         var en = GetLocale("en");
         var pt = GetLocale("pt");
-        var pieces = new List<CatalogClothing>();
+        var bySide = new Dictionary<string, List<CatalogClothing>>(StringComparer.Ordinal)
+        {
+            ["Usec"] = [],
+            ["Bear"] = [],
+        };
+
         foreach (var (id, item) in databaseService.GetCustomization())   // ref: DatabaseService.cs:117
         {
             var props = item.Properties;
             if (props is null || !string.Equals(item.Type, "Item", StringComparison.Ordinal))
             {
                 continue;   // skip "Node" rows and malformed mod data
-            }
-
-            if (props.Side is { Count: > 0 } sides && !sides.Contains(sideName))
-            {
-                continue;
             }
 
             var isUpper = props.Body is not null
@@ -544,15 +651,22 @@ public class CatalogService(
                 : pt.TryGetValue($"{key} Name", out var ptName) && !string.IsNullOrWhiteSpace(ptName) ? ptName
                 : props.Name ?? item.Name;
 
-            pieces.Add(new CatalogClothing
+            var piece = new CatalogClothing { Id = key, Name = name, Slot = isUpper ? "upper" : "lower" };
+
+            // Empty Side list = both factions; otherwise only the listed sides.
+            var sides = props.Side is { Count: > 0 } declared ? declared : (IEnumerable<string>)["Usec", "Bear"];
+            foreach (var side in sides)
             {
-                Id = key,
-                Name = name,
-                Slot = isUpper ? "upper" : "lower",
-            });
+                if (bySide.TryGetValue(side, out var list))
+                {
+                    list.Add(piece);
+                }
+            }
         }
 
-        return pieces;
+        logger.Debug($"[CustomClasses] [perf] BuildClothingBySide: "
+            + $"{bySide["Usec"].Count} Usec / {bySide["Bear"].Count} Bear in {sw.ElapsedMilliseconds} ms");
+        return bySide;
     }
 
     // ── Slots (item 026) ─────────────────────────────────────────────────────

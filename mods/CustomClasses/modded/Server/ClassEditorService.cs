@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;                    // item 037: ConcurrentDictionary entry cache
+using System.Diagnostics;                               // item 037: Stopwatch (perf instrumentation)
 using System.Globalization;
 using System.Reflection;
 using System.Text;
@@ -74,6 +76,23 @@ public class ClassEditorService(
 
     private string? _classesPath;
 
+    // ── Item 037: per-file validation cache ───────────────────────────────────
+    // The heavy work in ListClassFiles is the per-file dry-run (ClassRegistrar.ValidateAndBuild →
+    // deep clone + InventoryBuilder). We cache one entry per file keyed by (mtime-ticks, length): the
+    // dry-run only re-runs when a file's stamp changes. A HOT ListClassFiles is a directory scan
+    // (cheap) + dictionary reads — ZERO dry-run. Invalidated explicitly on Save/Delete/Create/Duplicate
+    // (covers two writes inside the same FS-mtime tick); mtime revalidation covers external edits
+    // (/sync-classes, hand edits). See spec 037-performance-cache-02 §1/§5(a) (PA-037-01..03).
+
+    /// <summary>Cache-validity key for one entry — invalidates on a change of mtime OR length.</summary>
+    private readonly record struct FileStamp(long MTimeTicks, long Length);
+
+    private sealed record CachedEntry(FileStamp Stamp, ClassFileEntry Entry);
+
+    // Keyed by bare file name. ConcurrentDictionary: Blazor Server may serve concurrent circuits
+    // (PA-037-03). Entries are immutable once cached (the CR-EP-06 collision pass never mutates them).
+    private readonly ConcurrentDictionary<string, CachedEntry> _entryCache = new(StringComparer.OrdinalIgnoreCase);
+
     /// <summary>config/classes/ inside the installed mod folder (same resolution as CustomClassesMod.OnLoad).</summary>
     private string ClassesPath => _classesPath ??= System.IO.Path.Combine(   // System.IO.Path: evita ambiguidade com ...Tables.Path
         modHelper.GetAbsolutePathToModFolder(Assembly.GetExecutingAssembly()),   // ref: ModHelper.cs:10
@@ -84,9 +103,19 @@ public class ClassEditorService(
     ///     entry per file with parse + dry-run diagnostics. The dry-run uses allowReplace=true so a class
     ///     that is already registered (by its own file) does not produce a false collision Error.
     ///     Note: the dry-run logs the same warnings boot would (registrar + builders log directly).
+    ///     <para>
+    ///     Item 037: the heavy dry-run is cached per file by (mtime, length) — a HOT call (no file
+    ///     changed) is a directory scan + dictionary reads, zero dry-run. The cross-file collision pass
+    ///     (CR-EP-06) runs EVERY call over the (cached or fresh) entries, producing fresh entries for
+    ///     the collided files only (the cache keeps the clean entry — see <see cref="ApplyCrossFileCollisions"/>).
+    ///     </para>
     /// </summary>
     public List<ClassFileEntry> ListClassFiles()
     {
+        var sw = Stopwatch.StartNew();
+        var hits = 0;
+        var misses = 0;
+
         var entries = new List<ClassFileEntry>();
         if (!fileUtil.DirectoryExists(ClassesPath))   // ref: FileUtil.cs:48
         {
@@ -99,46 +128,137 @@ public class ClassEditorService(
             .OrderBy(f => f, StringComparer.OrdinalIgnoreCase)   // deterministic UI order
             .ToList();
 
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var templates = databaseService.GetProfileTemplates();   // ref: DatabaseService.cs:141
+        bool IsRegistered(string editionName) => templates.ContainsKey(editionName);
 
         foreach (var file in files)
         {
             var fileName = fileUtil.GetFileNameAndExtension(file);   // ref: FileUtil.cs:33
-            var diagnostics = new List<ClassDiagnostic>();
-            var def = ParseFile(file, fileName, diagnostics);
+            seen.Add(fileName);
+            var stamp = StampOf(file);
 
-            var registered = false;
-            if (def is not null)
+            if (_entryCache.TryGetValue(fileName, out var cached) && cached.Stamp == stamp)
             {
-                registered = !string.IsNullOrWhiteSpace(def.Name) && templates.ContainsKey(def.Name!.Trim());
-                _ = classRegistrar.ValidateAndBuild(def, fileName, allowReplace: true, out var dryRun);
-                diagnostics.AddRange(dryRun);
+                entries.Add(cached.Entry);   // HOT: zero dry-run
+                hits++;
+                continue;
             }
 
-            entries.Add(new ClassFileEntry(fileName, def, def?.Enabled ?? false, registered, diagnostics));
+            var entry = BuildEntry(file, fileName, IsRegistered);   // COLD: parse + ValidateAndBuild
+            _entryCache[fileName] = new CachedEntry(stamp, entry);
+            entries.Add(entry);
+            misses++;
         }
 
-        // CR-EP-06: two files claiming the same `name` — the per-file dry-run (allowReplace=true) cannot
-        // see the sibling file, so it passes clean while boot registers only the FIRST (alphabetical) and
-        // skips the rest with EditionCollision. Surface the collision as an Error on EVERY involved file.
+        // Corner case §50: drop orphan cache entries (file removed from disk by an external delete).
+        foreach (var stale in _entryCache.Keys.Where(k => !seen.Contains(k)).ToList())
+        {
+            _entryCache.TryRemove(stale, out _);
+        }
+
+        // CR-EP-06: the AGGREGATE name-collision pass runs ALWAYS (cheap; over the entries). It NEVER
+        // mutates the cached entries — see ApplyCrossFileCollisions (PA-R1-02).
+        entries = ApplyCrossFileCollisions(entries);
+
+        logger.Debug($"[CustomClasses] [perf] ListClassFiles: {hits} hot / {misses} cold in {sw.ElapsedMilliseconds} ms");
+        return entries;
+    }
+
+    /// <summary>
+    ///     CONTRATO 037→030: leve view sobre a cache — entries já validadas, sem disparar o dry-run pesado.
+    ///     O futuro <c>ListClassSummaries()</c> (item 030) deve projetar a partir DESTA lista
+    ///     (FileName, Enabled, Registered, Definition?.Name/DisplayName, contagem de Error/Warning em
+    ///     Diagnostics), NUNCA re-rodar <see cref="ClassRegistrar.ValidateAndBuild"/>. Isso garante um
+    ///     source-of-truth único entre a lista (030) e o detalhe/edição.
+    ///     <para>
+    ///     CUSTO (PA-R1-05, não é custo-zero): evita o dry-run (o ganho real), mas ainda faz a varredura
+    ///     de diretório (<c>fileUtil.GetFiles</c>) + um <c>FileInfo</c> por arquivo (<see cref="StampOf"/>)
+    ///     + a passada CR-EP-06 a cada chamada — barato, mas não free. O 030 deve chamar este método UMA
+    ///     vez por navegação/render (cachear o resultado no componente), nunca por item de lista num loop
+    ///     de render. // 030: ListClassSummaries() => GetCachedEntries().Select(e => new ClassSummary(...)).
+    ///     </para>
+    /// </summary>
+    public IReadOnlyList<ClassFileEntry> GetCachedEntries() => ListClassFiles();
+
+    /// <summary>(mtime-ticks, length) of one file — the entry-cache validity key (item 037).</summary>
+    private static FileStamp StampOf(string fullPath)
+    {
+        var info = new FileInfo(fullPath);
+        return new FileStamp(info.LastWriteTimeUtc.Ticks, info.Length);
+    }
+
+    /// <summary>Parse + per-file dry-run for ONE file (the cold path of <see cref="ListClassFiles"/>).</summary>
+    private ClassFileEntry BuildEntry(string fullPath, string fileName, Func<string, bool> isRegistered)
+    {
+        var diagnostics = new List<ClassDiagnostic>();
+        var def = ParseFile(fullPath, fileName, diagnostics);
+
+        var registered = false;
+        if (def is not null)
+        {
+            registered = !string.IsNullOrWhiteSpace(def.Name) && isRegistered(def.Name!.Trim());
+            _ = classRegistrar.ValidateAndBuild(def, fileName, allowReplace: true, out var dryRun);
+            diagnostics.AddRange(dryRun);
+        }
+
+        return new ClassFileEntry(fileName, def, def?.Enabled ?? false, registered, diagnostics);
+    }
+
+    /// <summary>
+    ///     CR-EP-06: two files claiming the same <c>name</c> — the per-file dry-run (allowReplace=true)
+    ///     cannot see the sibling file, so it passes clean while boot registers only the FIRST
+    ///     (alphabetical) and skips the rest with EditionCollision. Surface the collision as an Error on
+    ///     EVERY involved file.
+    ///     <para>
+    ///     PA-R1-02 (item 037): this pass NEVER mutates the cached entry's <c>List&lt;ClassDiagnostic&gt;</c>.
+    ///     <c>ClassFileEntry.Diagnostics</c> is a MUTABLE list and <c>entry with { ... }</c> is a SHALLOW
+    ///     copy — the new record would SHARE the same list reference. So we copy the LIST itself
+    ///     (<c>[.. entry.Diagnostics, diag]</c>). The cache (written in <see cref="BuildEntry"/>, BEFORE
+    ///     this pass) keeps the entry with the CLEAN list; this pass produces fresh entries with fresh
+    ///     lists only for the return value. Without this the collision would stick in the cache and
+    ///     re-accumulate on every ListClassFiles. Entries not involved in a collision are returned by
+    ///     reference (no copy).
+    ///     </para>
+    /// </summary>
+    private List<ClassFileEntry> ApplyCrossFileCollisions(List<ClassFileEntry> entries)
+    {
         var collisions = entries
             .Where(e => !string.IsNullOrWhiteSpace(e.Definition?.Name))
             .GroupBy(e => e.Definition!.Name!.Trim(), StringComparer.OrdinalIgnoreCase)
-            .Where(g => g.Count() > 1);
+            .Where(g => g.Count() > 1)
+            .ToList();
+        if (collisions.Count == 0)
+        {
+            return entries;
+        }
+
+        var rebuilt = new Dictionary<string, ClassFileEntry>(StringComparer.OrdinalIgnoreCase);
         foreach (var group in collisions)
         {
             var involved = string.Join(", ", group.Select(e => e.FileName));
             foreach (var entry in group)
             {
-                entry.Diagnostics.Add(new ClassDiagnostic(DiagnosticSeverity.Error, DiagnosticCodes.DuplicateClassName,
+                var diag = new ClassDiagnostic(DiagnosticSeverity.Error, DiagnosticCodes.DuplicateClassName,
                     $"'{entry.FileName}': class name '{group.Key}' is declared by {group.Count()} files ({involved}) — "
                     + "at boot only the first (alphabetical) registers; the others are skipped (EditionCollision). "
-                    + "Rename or delete the duplicates."));
+                    + "Rename or delete the duplicates.");
+                // Fresh LIST — the cache keeps the original entry (clean list).
+                rebuilt[entry.FileName] = entry with { Diagnostics = [.. entry.Diagnostics, diag] };
             }
         }
 
-        return entries;
+        return entries.Select(e => rebuilt.TryGetValue(e.FileName, out var r) ? r : e).ToList();
     }
+
+    /// <summary>
+    ///     Item 037: drops one file from the validation cache so the next <see cref="ListClassFiles"/>
+    ///     re-runs its dry-run. Called after every successful Save/Delete (Create/Duplicate go through
+    ///     Save). Covers the "two writes in the same FS-mtime tick" corner case (§45) independently of
+    ///     mtime; only the touched entry leaves the cache (the rest stay hot — acceptance "revalidates
+    ///     exactly 1 entry").
+    /// </summary>
+    private void Invalidate(string fileName) => _entryCache.TryRemove(fileName, out _);
 
     /// <summary>
     ///     Loads and parses one class file. Returns null (with diagnostics) on bad file name, missing file
@@ -210,6 +330,7 @@ public class ClassEditorService(
             }
         }
 
+        Invalidate(fileName);   // item 037: next ListClassFiles re-validates exactly this entry
         Audit(fileName, "save", $"name='{plan.Name}', enabled={def.Enabled}, hotApply={hotApply}");
         return new SaveResult(true, diagnostics);
     }
@@ -247,6 +368,7 @@ public class ClassEditorService(
             editionRemoved = classRegistrar.Remove(name!);
         }
 
+        Invalidate(fileName);   // item 037: drop the deleted file's cached entry (orphan-cleanup also covers it)
         Audit(fileName, "delete", $"name='{name ?? "?"}', hotRemove={hotRemove}, editionRemoved={editionRemoved}");
         return true;
     }

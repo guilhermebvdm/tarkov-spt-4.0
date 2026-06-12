@@ -1,5 +1,6 @@
 @page "/customclasses/classes/{FileName}/edit"
 @layout BaseLayout
+@implements IDisposable
 
 @* Item 025: first persisted edit — simple fields + skills + multipliers + hideout + outfit.
    Item 026: Equipped tab — EquipmentSlots → ItemSpecEditor (slot filters from the live DB
@@ -14,6 +15,7 @@
    → rotating .bak → write → hot-apply (Commit / Remove when disabled). An Error blocks the
    write entirely — the diagnostics surface here untouched. *@
 
+@using System.Diagnostics
 @using System.Globalization
 @using System.Text.RegularExpressions
 @using SPTarkov.Server.Core.Helpers
@@ -28,6 +30,7 @@
 @inject ModHelper ModHelper
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
+@inject SPTarkov.Server.Core.Models.Utils.ISptLogger<ClassEditorService> Logger
 
 <PageTitle>CustomClasses — Edit @(_model?.Name ?? FileName)</PageTitle>
 
@@ -120,7 +123,10 @@
                text) so SaveAsync can refuse to save while any visible field is invalid — a rejected
                bind leaves the MODEL with the old (valid) value, so model-only checks would pass. *@
             <MudForm @ref="_form">
-            <MudTabs Elevation="0" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-4">
+            @* Item 037: track the Stash tab so the stash subtotal + capacity dry-run only run while
+               that tab is open (the hot Equipped-typing path is then 1 ComputeLoadoutCost call). *@
+            <MudTabs Elevation="0" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-4"
+                     @bind-ActivePanelIndex="ActivePanelIndex">
 
                 @* ════ General (b) ════════════════════════════════════════════ *@
                 <MudTabPanel Text="General">
@@ -449,7 +455,7 @@
                             </MudStack>
                             <ItemSpecEditor Spec="@row.Item"
                                             TplFilter="@(t => Catalog.IsAllowedInEquipmentSlot(row.Slot, t))"
-                                            OnChanged="RecomputeLoadoutCost"/>
+                                            OnChanged="ScheduleRecompute"/>
                         </MudPaper>
                     }
 
@@ -507,7 +513,7 @@
                                                Color="Color.Error" title="Remove this stash line"
                                                OnClick="@(() => RemoveStashLineAsync(line))"/>
                             </MudStack>
-                            <ItemSpecEditor Spec="@line" AllowCount="true" OnChanged="RecomputeLoadoutCost"/>
+                            <ItemSpecEditor Spec="@line" AllowCount="true" OnChanged="ScheduleRecompute"/>
                         </MudPaper>
                     }
 
@@ -550,6 +556,31 @@
     private string _newStation = string.Empty;
     private string _newEquipSlot = string.Empty;
 
+    // ── Item 037: recompute debounce + Stash-tab gating ───────────────────────
+    private const int StashTabIndex = 6;   // General=0, Skills=1, Multipliers=2, Hideout=3, Outfit=4, Equipped=5, Stash=6
+    private int _activePanelIndex;
+    private bool _stashTabVisible => _activePanelIndex == StashTabIndex;
+
+    /// <summary>
+    ///     Item 037: tab binding. Entering the Stash tab recomputes once so the stash subtotal/capacity
+    ///     (skipped on the hot Equipped path) are fresh before they are first displayed.
+    /// </summary>
+    private int ActivePanelIndex
+    {
+        get => _activePanelIndex;
+        set
+        {
+            var enteringStash = value == StashTabIndex && _activePanelIndex != StashTabIndex;
+            _activePanelIndex = value;
+            if (enteringStash)
+            {
+                RecomputeLoadoutCost();   // _stashTabVisible is now true → stash subtotal + capacity run
+            }
+        }
+    }
+    private System.Threading.CancellationTokenSource? _recomputeCts;
+    private bool _disposed;
+
     private string BareName => System.IO.Path.GetFileNameWithoutExtension(_resolvedFileName ?? FileName ?? string.Empty);
 
     protected override void OnParametersSet()
@@ -566,6 +597,7 @@
     /// <summary>Resolves the route name to a real file (same logic as ClassDetail) and (re)builds the model.</summary>
     private void LoadFromDisk()
     {
+        var sw = Stopwatch.StartNew();
         _model = null;
         _resolvedFileName = null;
         _loadDiagnostics = [];
@@ -602,6 +634,9 @@
         {
             _editions.Add(current);
         }
+
+        // Item 037: navigation timing — hot ListClassFiles + model build (vs cold first navigation).
+        Logger.Debug($"[CustomClasses] [perf] ClassEdit.LoadFromDisk '{_resolvedFileName}' in {sw.ElapsedMilliseconds} ms");
     }
 
     private void Discard()
@@ -653,6 +688,10 @@
         {
             return;
         }
+
+        // Item 037 (corner case §49/§53): a Save can land inside the 250 ms debounce window — flush any
+        // pending recompute and force the capacity dry-run before snapshotting the definition to persist.
+        FlushPendingRecompute();
 
         // UI-01: the on-screen fields are authoritative — invalid text (e.g. nameColor "laranja")
         // can be rejected by the bind, leaving the model with the stale valid value. Never show
@@ -770,8 +809,10 @@
     // ── Equipped (item 026) ──────────────────────────────────────────────────
 
     /// <summary>
-    ///     Live loadout total + stash subtotal + stash capacity dry-run, all from the same definition
-    ///     snapshot — called on load and on every equipped/stash mutation (026/028).
+    ///     Item 037: live loadout total from one definition snapshot. On the HOT typing path (Equipped
+    ///     tab) this is a SINGLE ComputeLoadoutCost call — the stash subtotal + capacity dry-run only run
+    ///     while the Stash tab is visible (PA-037-04), since they are only displayed there. Called on load
+    ///     and (via ScheduleRecompute) on every equipped/stash mutation (026/028).
     /// </summary>
     private void RecomputeLoadoutCost()
     {
@@ -781,14 +822,82 @@
         }
 
         var def = _model.ToDefinition();
+        _loadoutCost = CostService.ComputeLoadoutCost(def);   // 1 call (loadout total)
+
+        // (c) Stash subtotal + capacity only when the Stash tab is visible — both are stash-only UI.
+        if (_stashTabVisible)
+        {
+            // stash-only subtotal: a definition holding just the stash keeps contents/ammo lines in
+            // (filtering _loadoutCost by context would miss them — equipped contents share "contents").
+            _stashCost = CostService.ComputeLoadoutCost(new ClassDefinition
+            {
+                Loadout = new Loadout { Stash = def.Loadout?.Stash },
+            });
+            _stashCapacity = CostService.CheckStashCapacity(def);
+        }
+    }
+
+    /// <summary>
+    ///     Item 037: debounce ~250 ms — groups count/level keystrokes so a fast typist triggers ONE
+    ///     recompute per pause (corner case "the field stalls"). Add/remove of a whole line is a discrete
+    ///     event and recomputes immediately (calls RecomputeLoadoutCost directly).
+    /// </summary>
+    private void ScheduleRecompute()
+    {
+        _recomputeCts?.Cancel();
+        var cts = _recomputeCts = new System.Threading.CancellationTokenSource();
+        _ = InvokeAsync(async () =>
+        {
+            try
+            {
+                await Task.Delay(250, cts.Token);
+            }
+            catch (TaskCanceledException)
+            {
+                return;   // superseded by a newer keystroke
+            }
+
+            RecomputeLoadoutCost();
+            // PA-R1-07: the circuit may be gone after the delay — swallow the dispose race.
+            if (!_disposed)
+            {
+                try
+                {
+                    StateHasChanged();
+                }
+                catch (ObjectDisposedException) { /* circuit disposed mid-debounce */ }
+            }
+        });
+    }
+
+    /// <summary>
+    ///     Item 037: forces any pending debounced recompute to run NOW and guarantees the stash capacity
+    ///     is computed before persisting (corner cases §49/§53: a Save during the 250 ms window must not
+    ///     write with a stale cost, and capacity can never be "never computed"). Runs the full recompute
+    ///     unconditionally (capacity included) regardless of the active tab.
+    /// </summary>
+    private void FlushPendingRecompute()
+    {
+        _recomputeCts?.Cancel();
+        if (_model is null)
+        {
+            return;
+        }
+
+        var def = _model.ToDefinition();
         _loadoutCost = CostService.ComputeLoadoutCost(def);
-        // stash-only subtotal: a definition holding just the stash keeps contents/ammo lines in
-        // (filtering _loadoutCost by context would miss them — equipped contents share "contents")
         _stashCost = CostService.ComputeLoadoutCost(new ClassDefinition
         {
             Loadout = new Loadout { Stash = def.Loadout?.Stash },
         });
-        _stashCapacity = CostService.CheckStashCapacity(def);
+        _stashCapacity = CostService.CheckStashCapacity(def);   // §53: never leave capacity uncomputed
+    }
+
+    public void Dispose()
+    {
+        _disposed = true;
+        _recomputeCts?.Cancel();
+        _recomputeCts?.Dispose();
     }
 
     /// <summary>EquipmentSlots enum names (enum order — mirrors the character layout) minus the used ones.</summary>
