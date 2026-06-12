@@ -35,7 +35,9 @@ internal class SkillIconBorderPatch : ModulePatch
         try
         {
             SkillMultipliers.EnsureLoaded();
-            var has = SkillMultipliers.TryGet(skill.Id, out var f) && MultiplierFormat.IsActive(f);
+            // Pula skills bloqueadas/"beta" (Locked = sem buffs) — não colore borda de skill que não dá p/ usar.
+            var got = SkillMultipliers.TryGet(skill.Id, out var f);
+            var has = got && !skill.Locked && MultiplierFormat.IsActive(f);
 
             if (has && !skill.IsEliteLevel)
             {

@@ -23,6 +23,11 @@
 const fs = require('fs');
 const path = require('path');
 
+// item 019 (config guard rails): this generator is frozen as BOOTSTRAP-only.
+// Existing .jsonc files that diverge from what would be generated are NOT
+// overwritten (they may carry editor/manual edits); pass --force to overwrite.
+const FORCE = process.argv.includes('--force');
+
 const REPO = path.resolve(__dirname, '../../..');
 // item 007: anchor próprio (cópia local) — sem dependência de mods/RZCustomProfiles (aposentado).
 const ANCHOR = JSON.parse(fs.readFileSync(path.join(__dirname, 'anchor-items.json'), 'utf8'));
@@ -76,13 +81,50 @@ const SKILL_MULTIPLIERS = {
   gerenteDeOperacoes: { Crafting: 2.0, HideoutManagement: 2.0, Intellect: 1.5, Memory: 1.5, Charisma: 1.5, Strength: 0.7 },
 };
 
+// Item 011: identidade visual por classe (ícone PNG + cor do nome em hex). iconFile = arquivo em
+// BepInEx/plugins/CustomClasses/icons/ (placeholders agora; trocar a arte depois sem recompilar).
+const CLASS_VISUAL = {
+  // Paleta Tarkov-dark: tons dessaturados/militares (bronze, ferrugem, oliva, cáqui, âmbar) +
+  // frios apagados (azul-aço, ardósia, gunmetal) p/ recon/furtivo. Inspirada nos selos de edição
+  // do EFT (Unheard/EOD, âmbar-dourado). O ícone (silhueta branca) é tingido com esta cor em runtime.
+  medicoDeCombate:    { iconFile: 'medicoDeCombate.png',    nameColor: '#6f9455' },
+  cacador:            { iconFile: 'cacador.png',            nameColor: '#c2973f' },
+  fuzileiro:          { iconFile: 'fuzileiro.png',          nameColor: '#b0573a' },
+  batedor:            { iconFile: 'batedor.png',            nameColor: '#5f7f93' },
+  operadorFurtivo:    { iconFile: 'operadorFurtivo.png',    nameColor: '#7d7392' },
+  armeiro:            { iconFile: 'armeiro.png',            nameColor: '#a8824e' },
+  operadorTatico:     { iconFile: 'operadorTatico.png',     nameColor: '#7a818c' },
+  sobrevivencialista: { iconFile: 'sobrevivencialista.png', nameColor: '#97934e' },
+  saqueador:          { iconFile: 'saqueador.png',          nameColor: '#c4ad45' },
+  gerenteDeOperacoes: { iconFile: 'gerenteDeOperacoes.png', nameColor: '#4f8a80' },
+  // item 016 (Peladão): identidade visual adiantada — só vira JSON quando o profile existir em class-recipes.js.
+  peladao:            { iconFile: 'peladao.png',            nameColor: '#c28a60' },
+};
+
+// Item 008 (i18n): nome da classe em INGLÊS. O `name` (PT) continua sendo a CHAVE da edition no launcher;
+// este nome aparece in-game (menu/tooltip) quando o EFT está em inglês. Em "po" (português) mostra o `name`.
+const DISPLAY_NAME_EN = {
+  medicoDeCombate:    'Combat Medic',
+  cacador:            'Hunter',
+  fuzileiro:          'Rifleman',
+  batedor:            'Scout',
+  operadorFurtivo:    'Stealth Operator',
+  armeiro:            'Armorer',
+  operadorTatico:     'Tactical Operator',
+  sobrevivencialista: 'Survivalist',
+  saqueador:          'Scavenger',
+  gerenteDeOperacoes: 'Operations Manager',
+  peladao:            'NAKED',
+};
+
 const PROFILES = require('./class-recipes.js')(BASELINE, backupKit);
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 function aggregate(p) {
   const t = new Map();
   const add = (arr, m = 1) => { for (const it of arr) t.set(it.id, (t.get(it.id) || 0) + it.qty * m); };
-  add(BASELINE); add(p.tema); add(p.primary); add(p.backup, p.backupCount);
+  if (!p.noBaseline) { add(BASELINE); }   // item 016: Peladão nasce 100% sem itens (sem o kit comum)
+  add(p.tema); add(p.primary); add(p.backup, p.backupCount);
   return t;
 }
 
@@ -136,14 +178,21 @@ function buildLoadout(p) {
 }
 
 // ── emit ─────────────────────────────────────────────────────────────────────
+// item 019: normalize EOL + trailing whitespace before comparing, so EOL-only
+// differences (CRLF checkout, editor rewrite) never count as a real divergence.
+const normalizeText = s => s.replace(/\r\n/g, '\n').replace(/[ \t]+$/gm, '');
+
 if (!fs.existsSync(OUT_DIR)) fs.mkdirSync(OUT_DIR, { recursive: true });
 const report = [];
+let written = 0, frozenCount = 0, unchanged = 0;
 for (const p of PROFILES) {
   const loadout = buildLoadout(p);
   const json = {
     name: p.name,
+    displayName: { en: DISPLAY_NAME_EN[p.fileName] || p.name, pt: p.name },   // item 008 (i18n)
     baseEdition: 'SPT Zero to hero',
     description: p.description,
+    ...(CLASS_VISUAL[p.fileName] ? CLASS_VISUAL[p.fileName] : {}),   // item 011: iconFile + nameColor
     skills: p.skillOverrides,
     ...(SKILL_MULTIPLIERS[p.fileName] ? { skillMultipliers: SKILL_MULTIPLIERS[p.fileName] } : {}),
     hideout: p.hideout,
@@ -151,10 +200,30 @@ for (const p of PROFILES) {
     loadout,
   };
   const file = path.join(OUT_DIR, `${p.fileName}.jsonc`);
-  fs.writeFileSync(file, JSON.stringify(json, null, 2) + '\n', { encoding: 'utf8' });
-  report.push({ name: p.name, equipped: Object.keys(loadout.equipped).length, stash: loadout.stash.length });
+  const next = JSON.stringify(json, null, 2) + '\n';
+
+  // item 019: freeze guard — never overwrite a diverging existing file without --force.
+  let status = 'written';
+  if (fs.existsSync(file)) {
+    const current = fs.readFileSync(file, 'utf8');
+    if (normalizeText(current) === normalizeText(next)) {
+      status = 'unchanged';
+      unchanged++;
+    } else if (!FORCE) {
+      status = 'frozen';
+      frozenCount++;
+      console.warn(`  ! ${p.fileName}.jsonc frozen — editor/manual edits detected; use --force to overwrite`);
+    }
+  }
+  if (status === 'written') {
+    fs.writeFileSync(file, next, { encoding: 'utf8' });
+    written++;
+  }
+  report.push({ name: p.name, status, equipped: Object.keys(loadout.equipped).length, stash: loadout.stash.length });
 }
 
-console.log('\n=== 10 classes geradas em modded/Server/config/classes/ ===');
-for (const r of report) console.log(`  ${r.name.padEnd(26)} equipado=${r.equipped}  stash=${r.stash}`);
-console.log('\n✓ OK. Rode /compile-mod CustomClasses para shippar os JSONs ao servidor.');
+console.log(`\n=== ${PROFILES.length} classes processadas em modded/Server/config/classes/ ===`);
+for (const r of report) console.log(`  ${r.name.padEnd(26)} [${r.status}] equipado=${r.equipped}  stash=${r.stash}`);
+console.log(`\nSummary: ${written} written, ${frozenCount} skipped (frozen), ${unchanged} unchanged.`);
+if (frozenCount > 0) console.log('Frozen files diverge from the generator output (bootstrap-only). Re-run with --force to overwrite.');
+if (written > 0) console.log('✓ Rode /compile-mod CustomClasses para shippar os JSONs ao servidor.');

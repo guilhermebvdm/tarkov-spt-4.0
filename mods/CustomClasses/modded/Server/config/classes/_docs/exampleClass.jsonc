@@ -10,12 +10,25 @@
   // class fully controls its own items. Do NOT point this at another custom class (load-order dependent).
   "baseEdition": "SPT Zero to hero",
 
+  // "displayName" (optional, item 011/015): localized class name shown IN-GAME (menu, Skills screen,
+  // player-name identity), resolved by the EFT CLIENT's language. Accepts a plain STRING (legacy =
+  // English/fallback) OR an object per language. Does NOT change the edition key (always "name").
+  "displayName": { "en": "Example Class", "pt": "Classe de Exemplo" },
+
   // "description" (optional): text shown in the launcher. Item 008 (i18n): accepts a plain STRING
   // (legacy = English/fallback) OR an OBJECT per language. The launcher shows it in the SERVER's
   // language (locale "pt*" -> pt, otherwise en; empty -> the class name).
   //   "description": "English only fallback"
   //   "description": { "en": "Combat medic...", "pt": "Médico de combate..." }
   "description": { "en": "Example class demonstrating the CustomClasses JSON format.", "pt": "Classe de exemplo demonstrando o formato JSON do CustomClasses." },
+
+  // "iconFile" (optional, item 011): PNG file name in BepInEx/plugins/CustomClasses/icons/ used as the
+  // class "badge" (icon next to the class name in the menu and Skills screen). Optional: if absent or the
+  // file is missing, only the (colored) name shows. Just a file name (no path); swap the PNG without recompiling.
+  "iconFile": "exampleClass.png",
+
+  // "nameColor" (optional, item 011): hex color "#RRGGBB" of the class name in the UI. Absent/invalid -> default.
+  "nameColor": "#9ad27a",
 
   // "skills" (optional): skill name -> starting level (0..51). Unknown names are ignored with a warning.
   "skills": {

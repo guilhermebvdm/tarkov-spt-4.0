@@ -1,0 +1,109 @@
+@* Item 027: "New class" dialog. Live name validation against a snapshot of every existing
+   edition/class name (ExistingEditionNames, taken once at open — cheap per-keystroke checks);
+   Create() re-validates authoritatively before writing. On success the dialog closes with
+   DialogResult.Ok(fileName) and the caller navigates to the 025 edit form.
+   Always opened via IDialogService (dialog-only component, unlike the dual-mode 023 pickers). *@
+
+@inject ClassEditorService EditorService
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">New class</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudStack Spacing="3">
+            <MudTextField T="string"
+                          Value="@_name"
+                          ValueChanged="OnNameChanged"
+                          Immediate="true"
+                          Label="Class name (edition key)"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Error="@(_error is not null && _touched)"
+                          ErrorText="@_error"
+                          HelperText="Shown in the launcher and in-game. Accents are fine — the file name is slugged automatically."
+                          autofocus/>
+
+            <MudAlert Severity="Severity.Info" Dense="true">
+                A new class is born <b>without an icon</b> — the launcher/UI degrade to colored text only.
+                Set <code>iconFile</code> later in the edit form (PNG goes to the client's
+                <code>BepInEx/plugins/CustomClasses/icons/</code>).
+            </MudAlert>
+
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                The class is created from the minimal template (base edition
+                "@ClassRegistrar.DefaultBaseEdition", no skills/items) and hot-applied — it appears
+                in the launcher immediately. You land on the edit form next.
+            </MudText>
+
+            @foreach (var d in _diagnostics)
+            {
+                <MudAlert Severity="@(d.Severity == DiagnosticSeverity.Error ? Severity.Error : Severity.Warning)" Dense="true">
+                    [@d.Code] @d.Message
+                </MudAlert>
+            }
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => Dialog?.Cancel())">Cancel</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                   Disabled="@(!CanSubmit)" OnClick="CreateAsync">
+            Create
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance? Dialog { get; set; }
+
+    private string _name = string.Empty;
+    private string? _error = "Name is required.";
+    private bool _touched;
+    private bool _busy;
+    private HashSet<string> _existing = new(StringComparer.OrdinalIgnoreCase);
+    private List<ClassDiagnostic> _diagnostics = [];
+
+    private bool CanSubmit => _error is null && !_busy;
+
+    protected override void OnInitialized()
+    {
+        // Snapshot once: profile-template keys + names parsed from every class file (item 027).
+        _existing = EditorService.ExistingEditionNames();
+    }
+
+    private void OnNameChanged(string value)
+    {
+        _name = value;
+        _touched = true;
+        _error = EditorService.ValidateNewClassName(value, _existing);
+    }
+
+    private async Task CreateAsync()
+    {
+        if (!CanSubmit)
+        {
+            return;
+        }
+
+        _busy = true;
+        CreateResult result;
+        try
+        {
+            // Off the circuit thread: Create runs the full boot-equivalent dry-run (clone + builders).
+            result = await Task.Run(() => EditorService.Create(_name));
+        }
+        finally
+        {
+            _busy = false;   // CR2-EP-10: an IO exception must never leave the dialog stuck on busy
+        }
+
+        if (result.Success)
+        {
+            Dialog?.Close(DialogResult.Ok(result.FileName!));
+        }
+        else
+        {
+            _diagnostics = result.Diagnostics;
+        }
+    }
+}

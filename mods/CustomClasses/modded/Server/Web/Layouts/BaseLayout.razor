@@ -1,0 +1,51 @@
+@inherits LayoutComponentBase
+
+@* Base layout for all CustomClasses editor pages (item 020).
+   Structure mirrors Skills-Extended Web/Layouts/BaseLayout.razor (dark MudBlazor
+   theme + fixed AppBar + mini drawer with NavMenu), minus SE's config/update bits. *@
+
+<HeadContent>
+    <link href="@Assets["_content/MudBlazor/MudBlazor.min.css"]" rel="stylesheet" />
+    <meta name="robots" content="noindex, nofollow">
+</HeadContent>
+
+<MudThemeProvider IsDarkMode="true"/>
+<MudPopoverProvider/>
+<MudSnackbarProvider/>
+<MudDialogProvider/>
+
+<main>
+    @* UI-03 (accepted): the layout renders twice per page load (static prerender + interactive
+       circuit attach), so MudBlazor.min.js is evaluated twice and the SECOND evaluation throws a
+       benign "Identifier 'MudPointerEventsNone' has already been declared" in the console. This is
+       the upstream pattern — Skills-Extended and the host's own BaseMudBlazorLayout ship the exact
+       same plain <script src> and show the same cosmetic error. An inline guarded loader is NOT an
+       option: Blazor cannot render <script> elements with a body (appendChild "Invalid token"). *@
+    <script src="@Assets["_content/MudBlazor/MudBlazor.min.js"]"></script>
+    <MudLayout>
+        <MudAppBar Color="Color.Dark"
+                   Fixed="true"
+                   Elevation="4">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Style="width: 100%;">
+                <MudText Typo="Typo.h6">CustomClasses — Class Editor</MudText>
+                <MudText Style="font-size: 12px" Class="ml-2">
+                    v@(new CustomClassesMetadata().Version.ToString())
+                </MudText>
+            </MudStack>
+        </MudAppBar>
+
+        <MudDrawer Width="250px"
+                   Open="true"
+                   ClipMode="DrawerClipMode.Always"
+                   Elevation="5"
+                   Variant="@DrawerVariant.Mini"
+                   OpenMiniOnHover="true"
+                   Breakpoint="Breakpoint.None">
+            <NavMenu/>
+        </MudDrawer>
+
+        <MudMainContent>
+            @Body
+        </MudMainContent>
+    </MudLayout>
+</main>

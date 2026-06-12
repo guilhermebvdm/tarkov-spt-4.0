@@ -1,0 +1,86 @@
+@* Item 023: outfit clothing picker — CatalogService.GetClothing(side) filtered to the
+   requested slot (Upper/Lower). Same acceptance rules as OutfitBuilder, so anything listed
+   here is applicable as a class outfit. Text filter + virtualized list (a few hundred rows
+   with AllTheClothes-style mods). Click fires OnClothingSelected with the customization id. *@
+
+@inject CatalogService Catalog
+
+<MudStack Spacing="2">
+    <MudTextField T="string"
+                  @bind-Value="_filter"
+                  Label="Filter by name"
+                  Variant="Variant.Outlined"
+                  Margin="Margin.Dense"
+                  Immediate="true"
+                  DebounceInterval="200"
+                  OnDebounceIntervalElapsed="ApplyFilter"
+                  Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Filled.FilterAlt"/>
+
+    <MudText Typo="Typo.caption" Class="mud-text-secondary">
+        @Side · @SlotKind — @_filtered.Count of @_all.Count pieces
+    </MudText>
+
+    <div style="height: 300px; overflow-y: auto;">
+        @if (_filtered.Count == 0)
+        {
+            <MudText Typo="Typo.body2" Class="mud-text-secondary pa-2">No clothing found.</MudText>
+        }
+        else
+        {
+            <MudVirtualize Items="_filtered" ItemSize="40f" Context="piece" OverscanCount="6">
+                <div class="d-flex align-center gap-3 pa-1"
+                     style="height: 40px; cursor: pointer; border-bottom: 1px solid var(--mud-palette-lines-default);"
+                     @onclick="@(() => SelectAsync(piece))">
+                    <MudText Typo="Typo.body2" Class="flex-grow-1"
+                             Style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        @(piece.Name ?? piece.Id)
+                    </MudText>
+                    <MudText Typo="Typo.caption" Class="mud-text-secondary">@piece.Id</MudText>
+                </div>
+            </MudVirtualize>
+        }
+    </div>
+</MudStack>
+
+@code {
+    /// <summary>Faction: "Usec" or "Bear" (DB side names).</summary>
+    [Parameter] public string Side { get; set; } = "Usec";
+
+    /// <summary>"Upper" (body) or "Lower" (feet).</summary>
+    [Parameter] public string SlotKind { get; set; } = "Upper";
+
+    /// <summary>Fired with the selected customization id.</summary>
+    [Parameter] public EventCallback<string> OnClothingSelected { get; set; }
+
+    private string _filter = string.Empty;
+    private List<CatalogClothing> _all = [];
+    private List<CatalogClothing> _filtered = [];
+    private string? _loadedKey;
+
+    protected override void OnParametersSet()
+    {
+        var key = $"{Side}|{SlotKind}";
+        if (string.Equals(key, _loadedKey, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        _loadedKey = key;
+        var slot = SlotKind.Equals("Lower", StringComparison.OrdinalIgnoreCase) ? "lower" : "upper";
+        _all = Catalog.GetClothing(Side)
+            .Where(c => string.Equals(c.Slot, slot, StringComparison.Ordinal))
+            .OrderBy(c => c.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        ApplyFilter();
+    }
+
+    private void ApplyFilter()
+    {
+        _filtered = string.IsNullOrWhiteSpace(_filter)
+            ? _all
+            : _all.Where(c => (c.Name ?? c.Id).Contains(_filter.Trim(), StringComparison.OrdinalIgnoreCase)).ToList();
+    }
+
+    private Task SelectAsync(CatalogClothing piece) => OnClothingSelected.InvokeAsync(piece.Id);
+}

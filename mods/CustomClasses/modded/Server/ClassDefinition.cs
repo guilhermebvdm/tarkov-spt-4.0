@@ -9,9 +9,16 @@ namespace CustomClasses;
 /// </summary>
 public sealed record ClassDefinition
 {
-    /// <summary>Required. Becomes the launcher edition key + display label.</summary>
+    /// <summary>Required. Becomes the launcher edition key + display label (PT identifier).</summary>
     [JsonPropertyName("name")]
     public string? Name { get; init; }
+
+    /// <summary>
+    ///     Optional. Item 008 (i18n): localized class name shown in-game (menu/tooltip). Object { en, pt }.
+    ///     Falls back to <see cref="Name"/> when absent. The launcher edition key stays <see cref="Name"/> (PT).
+    /// </summary>
+    [JsonPropertyName("displayName")]
+    public LocalizedText? DisplayName { get; init; }
 
     /// <summary>Optional (default true). When false the class is not registered.</summary>
     [JsonPropertyName("enabled")]
@@ -24,6 +31,14 @@ public sealed record ClassDefinition
     /// <summary>Optional. Launcher description. Item 008: aceita string (legado=en) ou objeto { en, pt }.</summary>
     [JsonPropertyName("description")]
     public LocalizedText? Description { get; init; }
+
+    /// <summary>Optional. Item 011: nome do PNG do ícone da classe (ex.: "cacador.png"), em BepInEx/plugins/CustomClasses/icons/.</summary>
+    [JsonPropertyName("iconFile")]
+    public string? IconFile { get; init; }
+
+    /// <summary>Optional. Item 011: cor do nome da classe na UI, hex "#RRGGBB".</summary>
+    [JsonPropertyName("nameColor")]
+    public string? NameColor { get; init; }
 
     /// <summary>Optional. Skill name → starting level (0..51). Unknown names are ignored with a warning.</summary>
     [JsonPropertyName("skills")]

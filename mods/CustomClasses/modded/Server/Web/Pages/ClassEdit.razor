@@ -1,0 +1,1016 @@
+@page "/customclasses/classes/{FileName}/edit"
+@layout BaseLayout
+
+@* Item 025: first persisted edit — simple fields + skills + multipliers + hideout + outfit.
+   Item 026: Equipped tab — EquipmentSlots → ItemSpecEditor (slot filters from the live DB
+   Default Inventory template); loadout cost recomputes on every change.
+   Item 028: Stash tab — flat ItemSpec list (ItemSpecEditor with AllowCount=true) + GridPacker
+   capacity dry-run against the base edition's stash grid (warning only — the loader skips
+   overflow items itself).
+   Route carries the file name WITHOUT extension (same resolution as ClassDetail.razor).
+   ClassDefinition is an immutable record, so the form binds to the mutable ClassEditModel
+   (Web/ClassEditModel.cs) and rebuilds the definition on save/cost-recompute.
+   Save = ClassEditorService.Save(file, def, hotApply:true): validate (boot pipeline, dry-run)
+   → rotating .bak → write → hot-apply (Commit / Remove when disabled). An Error blocks the
+   write entirely — the diagnostics surface here untouched. *@
+
+@using System.Globalization
+@using System.Text.RegularExpressions
+@using SPTarkov.Server.Core.Helpers
+@using SPTarkov.Server.Core.Models.Enums
+@using SPTarkov.Server.Core.Models.Enums.Hideout
+@using CustomClasses.Web
+@inject ClassEditorService EditorService
+@inject CostService CostService
+@inject CatalogService Catalog
+@inject ClassRegistrar Registrar
+@inject ClassVisualRegistry VisualRegistry
+@inject ModHelper ModHelper
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+<PageTitle>CustomClasses — Edit @(_model?.Name ?? FileName)</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudPaper Elevation="0" Class="pa-6">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-2">
+            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"
+                           Href="@($"/customclasses/classes/{Uri.EscapeDataString(BareName)}")"
+                           Size="Size.Small" title="Back to the class detail"/>
+            @if (_model?.IconFile is { Length: > 0 } icon)
+            {
+                <img src="@($"/CustomClasses-Server/icons/{icon}")" alt="" width="40" height="40"
+                     style="object-fit:contain;"/>
+            }
+            <MudText Typo="Typo.h4" Style="@NameStyle()">Edit — @(_model?.Name ?? FileName)</MudText>
+            @if (_resolvedFileName is not null)
+            {
+                <code style="opacity:.6">@_resolvedFileName</code>
+            }
+        </MudStack>
+
+        @if (_loadDiagnostics.Count > 0)
+        {
+            @foreach (var d in _loadDiagnostics)
+            {
+                <MudAlert Severity="@MapSeverity(d.Severity)" Dense="true" Class="mb-1">
+                    [@d.Code] @d.Message
+                </MudAlert>
+            }
+        }
+
+        @if (_model is null)
+        {
+            <MudAlert Severity="Severity.Error" Dense="true" Class="mt-2">
+                No editable class file matching "@FileName" was found in config/classes/ (or it could
+                not be parsed — fix it on disk and reload).
+            </MudAlert>
+        }
+        else
+        {
+            @* ── Sticky toolbar: save/discard + live cost (h, g) ────────────── *@
+            <MudPaper Elevation="3" Class="pa-3 mb-4"
+                      Style="position:sticky; top:72px; z-index:10;">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3" Wrap="Wrap.Wrap">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Save"
+                               Disabled="@_saving" OnClick="SaveAsync">
+                        @(_saving ? "Saving…" : "Save")
+                    </MudButton>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Default"
+                               StartIcon="@Icons.Material.Filled.Restore"
+                               Disabled="@_saving" OnClick="Discard">
+                        Discard
+                    </MudButton>
+                    <MudSpacer/>
+                    <MudStack Spacing="0">
+                        <MudText Typo="Typo.caption">Weighted skill cost</MudText>
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                            <MudText Typo="Typo.h6">@(_skillCost?.Total.ToString("0.00", CultureInfo.InvariantCulture) ?? "—")</MudText>
+                            @SkillTotalChip()
+                        </MudStack>
+                    </MudStack>
+                    <MudStack Spacing="0">
+                        <MudText Typo="Typo.caption">Loadout total</MudText>
+                        <MudText Typo="Typo.h6">@(_loadoutCost is null ? "—" : FormatRub(_loadoutCost.TotalRub))</MudText>
+                    </MudStack>
+                </MudStack>
+            </MudPaper>
+
+            @* ── Save outcome (g) ───────────────────────────────────────────── *@
+            @if (_saveDiagnostics.Count > 0)
+            {
+                @foreach (var d in _saveDiagnostics)
+                {
+                    <MudAlert Severity="@MapSeverity(d.Severity)" Dense="true" Class="mb-1">
+                        [@d.Code] @d.Message
+                    </MudAlert>
+                }
+            }
+            @if (_savedOnce)
+            {
+                <MudAlert Severity="Severity.Info" Dense="true" Class="mb-3">
+                    Saved with hot-apply. Limits: applies to <b>new profiles</b> created in the launcher
+                    immediately (no server restart); a game client that is already open will NOT see new
+                    identity/multipliers (cached once per session); <b>existing profiles do not change</b>.
+                </MudAlert>
+            }
+
+            @* UI-01: MudForm collects the field-level validation state (e.g. nameColor with non-hex
+               text) so SaveAsync can refuse to save while any visible field is invalid — a rejected
+               bind leaves the MODEL with the old (valid) value, so model-only checks would pass. *@
+            <MudForm @ref="_form">
+            <MudTabs Elevation="0" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-4">
+
+                @* ════ General (b) ════════════════════════════════════════════ *@
+                <MudTabPanel Text="General">
+                    <MudGrid Spacing="3">
+                        <MudItem xs="12" md="6">
+                            <MudTooltip Text="Renaming would orphan existing profiles (ProfileInfo.Edition is the key) — duplicate the class instead (item 027, soon).">
+                                <MudTextField T="string" Value="@_model.Name" Label="name (edition key)"
+                                              Variant="Variant.Outlined" Margin="Margin.Dense"
+                                              Disabled="true" FullWidth="true"/>
+                            </MudTooltip>
+                        </MudItem>
+                        <MudItem xs="12" md="6">
+                            <MudSwitch T="bool" @bind-Value="_model.Enabled" Color="Color.Success"
+                                       Label="@(_model.Enabled ? "enabled (registers on boot / hot-apply)" : "disabled (saving hot-removes the edition)")"/>
+                        </MudItem>
+
+                        <MudItem xs="12" md="6">
+                            <MudTextField T="string" @bind-Value="_model.DisplayNameEn" Label="displayName (en)"
+                                          Variant="Variant.Outlined" Margin="Margin.Dense"/>
+                        </MudItem>
+                        <MudItem xs="12" md="6">
+                            <MudTextField T="string" @bind-Value="_model.DisplayNamePt" Label="displayName (pt)"
+                                          Variant="Variant.Outlined" Margin="Margin.Dense"/>
+                        </MudItem>
+
+                        <MudItem xs="12" md="6">
+                            <MudTextField T="string" @bind-Value="_model.DescriptionEn" Label="description (en)"
+                                          Variant="Variant.Outlined" Margin="Margin.Dense" Lines="4"/>
+                        </MudItem>
+                        <MudItem xs="12" md="6">
+                            <MudTextField T="string" @bind-Value="_model.DescriptionPt" Label="description (pt)"
+                                          Variant="Variant.Outlined" Margin="Margin.Dense" Lines="4"/>
+                        </MudItem>
+
+                        <MudItem xs="12" md="6">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                <span style="display:inline-block;width:24px;height:24px;border-radius:4px;border:1px solid #666;background:@SwatchColor()"></span>
+                                <MudTextField T="string" @bind-Value="_model.NameColor"
+                                              Label="nameColor (hex #RRGGBB)" Placeholder="#RRGGBB"
+                                              Variant="Variant.Outlined" Margin="Margin.Dense"
+                                              Immediate="true"
+                                              Validation="@((string? v) => ValidateColor(v))"/>
+                            </MudStack>
+                        </MudItem>
+                        <MudItem xs="12" md="6">
+                            <MudSelect T="string" @bind-Value="BaseEditionSelect" Label="baseEdition"
+                                       Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true">
+                                <MudSelectItem T="string" Value="@string.Empty">(default — SPT Zero to hero)</MudSelectItem>
+                                @foreach (var edition in _editions)
+                                {
+                                    <MudSelectItem T="string" Value="@edition">@edition</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+
+                        <MudItem xs="12" md="6">
+                            <MudSelect T="string" @bind-Value="IconSelect" Label="iconFile"
+                                       Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true">
+                                <MudSelectItem T="string" Value="@string.Empty">(none)</MudSelectItem>
+                                @foreach (var file in _iconFiles)
+                                {
+                                    <MudSelectItem T="string" Value="@file">@file</MudSelectItem>
+                                }
+                            </MudSelect>
+                            @if (_model.IconFile is { Length: > 0 } selectedIcon)
+                            {
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mt-2">
+                                    <img src="@($"/CustomClasses-Server/icons/{selectedIcon}")" alt="@selectedIcon"
+                                         width="64" height="64" style="object-fit:contain;"/>
+                                    <code>@selectedIcon</code>
+                                </MudStack>
+                            }
+                            else
+                            {
+                                <MudAlert Severity="Severity.Info" Dense="true" Class="mt-2">
+                                    No icon: the in-game skill panel / launcher degrade to a text-only label.
+                                </MudAlert>
+                            }
+                        </MudItem>
+                    </MudGrid>
+                </MudTabPanel>
+
+                @* ════ Skills (c) ═════════════════════════════════════════════ *@
+                <MudTabPanel Text="@($"Skills ({_model.Skills.Count})")">
+                    @if (_model.Skills.Count == 0)
+                    {
+                        <MudText Typo="Typo.body2" Class="mb-2">No starting skills.</MudText>
+                    }
+                    else
+                    {
+                        <MudSimpleTable Dense="true" Class="mb-3">
+                            <thead>
+                            <tr>
+                                <th style="text-align:left">Skill</th>
+                                <th style="text-align:right;width:140px">Level (0–51)</th>
+                                <th style="text-align:right;width:100px">Weight</th>
+                                <th style="text-align:left;width:160px">Origin</th>
+                                <th style="text-align:right;width:100px">Cost</th>
+                                <th style="width:56px"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var row in _model.Skills)
+                            {
+                                var entry = SkillCostEntryFor(row.Skill);
+                                <tr @key="row">
+                                    <td>@row.Skill</td>
+                                    <td style="text-align:right">
+                                        <MudNumericField T="int" @bind-Value="row.Level" @bind-Value:after="RecomputeSkillCost"
+                                                         Min="0" Max="51" Margin="Margin.Dense"
+                                                         Variant="Variant.Outlined" Style="max-width:120px;margin-left:auto;"/>
+                                    </td>
+                                    <td style="text-align:right">@(entry?.Weight.ToString("0.00", CultureInfo.InvariantCulture) ?? "—")</td>
+                                    <td>@(entry?.Origin ?? "—")</td>
+                                    <td style="text-align:right">@(entry?.Cost.ToString("0.00", CultureInfo.InvariantCulture) ?? "—")</td>
+                                    <td>
+                                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
+                                                       Color="Color.Error" title="Remove skill"
+                                                       OnClick="@(() => RemoveSkill(row))"/>
+                                    </td>
+                                </tr>
+                            }
+                            </tbody>
+                        </MudSimpleTable>
+                    }
+
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-3">
+                        <MudSelect T="string" @bind-Value="_newSkill" Label="Add skill"
+                                   Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true"
+                                   Style="min-width:280px">
+                            @foreach (var name in AvailableSkills(_model.Skills.Select(r => r.Skill)))
+                            {
+                                <MudSelectItem T="string" Value="@name">@name</MudSelectItem>
+                            }
+                        </MudSelect>
+                        <MudButton Variant="Variant.Outlined" Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.Add"
+                                   Disabled="@string.IsNullOrEmpty(_newSkill)" OnClick="AddSkill">
+                            Add
+                        </MudButton>
+                    </MudStack>
+
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-1">
+                        <MudText Typo="Typo.body1"><b>Total weighted cost:</b></MudText>
+                        <MudText Typo="Typo.body1">@(_skillCost?.Total.ToString("0.00", CultureInfo.InvariantCulture) ?? "—")</MudText>
+                        @SkillTotalChip()
+                        <MudText Typo="Typo.caption">budget [@SkillWeights.BudgetMin.ToString("0"), @SkillWeights.BudgetMax.ToString("0")]</MudText>
+                    </MudStack>
+                    @foreach (var w in _skillCost?.Warnings ?? [])
+                    {
+                        <MudAlert Severity="Severity.Warning" Dense="true" Class="mt-1">@w</MudAlert>
+                    }
+                </MudTabPanel>
+
+                @* ════ Multipliers (d) ════════════════════════════════════════ *@
+                <MudTabPanel Text="@($"Multipliers ({_model.Multipliers.Count})")">
+                    @if (!_seInstalled)
+                    {
+                        <MudAlert Severity="Severity.Warning" Dense="true" Class="mb-3">
+                            Skills-Extended is NOT installed — multipliers on its skills
+                            (@string.Join(", ", SkillsExtendedCompat.Skills)) are registered but inert.
+                        </MudAlert>
+                    }
+                    <MudText Typo="Typo.caption" Class="mb-2 d-block">
+                        XP-gain factor per skill: 1 = vanilla, 1.5 = +50%, 0.5 = −50%. Display only in the
+                        cost model (multipliers never count toward the skill budget).
+                    </MudText>
+
+                    @if (_model.Multipliers.Count == 0)
+                    {
+                        <MudText Typo="Typo.body2" Class="mb-2">No skill XP multipliers.</MudText>
+                    }
+                    else
+                    {
+                        <MudSimpleTable Dense="true" Class="mb-3">
+                            <thead>
+                            <tr>
+                                <th style="text-align:left">Skill</th>
+                                <th style="text-align:right;width:180px">Factor (≥ 0)</th>
+                                <th style="text-align:right;width:100px"></th>
+                                <th style="width:56px"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var row in _model.Multipliers)
+                            {
+                                <tr @key="row">
+                                    <td>
+                                        @row.Skill
+                                        @if (IsSeSkill(row.Skill))
+                                        {
+                                            <MudChip T="string" Size="Size.Small" Color="Color.Info" Class="ml-2">Skills-Extended</MudChip>
+                                        }
+                                    </td>
+                                    <td style="text-align:right">
+                                        <MudNumericField T="double" @bind-Value="row.Factor"
+                                                         Min="0" Step="0.1" Format="0.##" Margin="Margin.Dense"
+                                                         Variant="Variant.Outlined" Style="max-width:140px;margin-left:auto;"/>
+                                    </td>
+                                    <td style="text-align:right">
+                                        <MudText Typo="Typo.body2" Color="@FactorColor(row.Factor)">
+                                            ×@row.Factor.ToString("0.##", CultureInfo.InvariantCulture)
+                                        </MudText>
+                                    </td>
+                                    <td>
+                                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
+                                                       Color="Color.Error" title="Remove multiplier"
+                                                       OnClick="@(() => _model.Multipliers.Remove(row))"/>
+                                    </td>
+                                </tr>
+                            }
+                            </tbody>
+                        </MudSimpleTable>
+                    }
+
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                        <MudSelect T="string" @bind-Value="_newMultiplierSkill" Label="Add multiplier"
+                                   Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true"
+                                   Style="min-width:280px">
+                            @foreach (var name in AvailableSkills(_model.Multipliers.Select(r => r.Skill)))
+                            {
+                                <MudSelectItem T="string" Value="@name">
+                                    @name@(IsSeSkill(name) ? " (Skills-Extended)" : "")
+                                </MudSelectItem>
+                            }
+                        </MudSelect>
+                        <MudButton Variant="Variant.Outlined" Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.Add"
+                                   Disabled="@string.IsNullOrEmpty(_newMultiplierSkill)" OnClick="AddMultiplier">
+                            Add
+                        </MudButton>
+                    </MudStack>
+                </MudTabPanel>
+
+                @* ════ Hideout (e) ════════════════════════════════════════════ *@
+                <MudTabPanel Text="@($"Hideout ({_model.Hideout.Count})")">
+                    @if (_model.Hideout.Count == 0)
+                    {
+                        <MudText Typo="Typo.body2" Class="mb-2">No hideout station overrides.</MudText>
+                    }
+                    else
+                    {
+                        <MudSimpleTable Dense="true" Class="mb-3">
+                            <thead>
+                            <tr>
+                                <th style="text-align:left">Station (HideoutAreas)</th>
+                                <th style="text-align:right;width:160px">Starting level (≥ 1)</th>
+                                <th style="width:56px"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var row in _model.Hideout)
+                            {
+                                <tr @key="row">
+                                    <td>@row.Station</td>
+                                    <td style="text-align:right">
+                                        <MudNumericField T="int" @bind-Value="row.Level"
+                                                         Min="1" Margin="Margin.Dense"
+                                                         Variant="Variant.Outlined" Style="max-width:120px;margin-left:auto;"/>
+                                    </td>
+                                    <td>
+                                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
+                                                       Color="Color.Error" title="Remove station"
+                                                       OnClick="@(() => _model.Hideout.Remove(row))"/>
+                                    </td>
+                                </tr>
+                            }
+                            </tbody>
+                        </MudSimpleTable>
+                    }
+
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                        <MudSelect T="string" @bind-Value="_newStation" Label="Add station"
+                                   Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true"
+                                   Style="min-width:280px">
+                            @foreach (var name in AvailableStations())
+                            {
+                                <MudSelectItem T="string" Value="@name">@name</MudSelectItem>
+                            }
+                        </MudSelect>
+                        <MudButton Variant="Variant.Outlined" Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.Add"
+                                   Disabled="@string.IsNullOrEmpty(_newStation)" OnClick="AddStation">
+                            Add
+                        </MudButton>
+                    </MudStack>
+                </MudTabPanel>
+
+                @* ════ Outfit (f) ═════════════════════════════════════════════ *@
+                <MudTabPanel Text="Outfit">
+                    <MudGrid Spacing="3">
+                        @OutfitSlot("USEC · Upper", "Usec", "Upper",
+                            () => _model.UsecUpper, v => _model.UsecUpper = v)
+                        @OutfitSlot("USEC · Lower", "Usec", "Lower",
+                            () => _model.UsecLower, v => _model.UsecLower = v)
+                        @OutfitSlot("BEAR · Upper", "Bear", "Upper",
+                            () => _model.BearUpper, v => _model.BearUpper = v)
+                        @OutfitSlot("BEAR · Lower", "Bear", "Lower",
+                            () => _model.BearLower, v => _model.BearLower = v)
+                    </MudGrid>
+                </MudTabPanel>
+
+                @* ════ Equipped (item 026) ═══════════════════════════════════ *@
+                <MudTabPanel Text="@($"Equipped ({_model.Equipped.Count})")">
+                    <MudText Typo="Typo.caption" Class="mb-3 d-block">
+                        One item per character slot. <code>count</code> is ignored on equipped slots
+                        (stash/contents only). Slot compatibility comes from the live DB filters and is a
+                        <b>warning only</b> — the Save dry-run decides what blocks.
+                    </MudText>
+
+                    @if (_model.Equipped.Count == 0)
+                    {
+                        <MudText Typo="Typo.body2" Class="mb-3">No equipped slots.</MudText>
+                    }
+
+                    @foreach (var row in _model.Equipped)
+                    {
+                        <MudPaper Elevation="1" Class="pa-3 mb-3" @key="row">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-2">
+                                <MudIcon Icon="@Icons.Material.Filled.Accessibility" Size="Size.Small"/>
+                                <MudText Typo="Typo.subtitle1"><b>@row.Slot</b></MudText>
+                                <MudSpacer/>
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
+                                               Color="Color.Error" title="Remove this equipped slot"
+                                               OnClick="@(() => RemoveEquipSlotAsync(row))"/>
+                            </MudStack>
+                            <ItemSpecEditor Spec="@row.Item"
+                                            TplFilter="@(t => Catalog.IsAllowedInEquipmentSlot(row.Slot, t))"
+                                            OnChanged="RecomputeLoadoutCost"/>
+                        </MudPaper>
+                    }
+
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                        <MudSelect T="string" @bind-Value="_newEquipSlot" Label="Add slot"
+                                   Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true"
+                                   Style="min-width:280px">
+                            @foreach (var name in AvailableEquipmentSlots())
+                            {
+                                <MudSelectItem T="string" Value="@name">@name</MudSelectItem>
+                            }
+                        </MudSelect>
+                        <MudButton Variant="Variant.Outlined" Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.Add"
+                                   Disabled="@string.IsNullOrEmpty(_newEquipSlot)" OnClick="AddEquipSlot">
+                            Add
+                        </MudButton>
+                    </MudStack>
+                </MudTabPanel>
+
+                @* ════ Stash (item 028) ══════════════════════════════════════ *@
+                <MudTabPanel Text="@($"Stash ({_model.Stash.Count})")">
+                    <MudText Typo="Typo.caption" Class="mb-3 d-block">
+                        Flat list — the server packs these into the base edition's stash grid at
+                        registration time (first-fit + rotation, <code>GridPacker</code>). The capacity
+                        check below is a <b>warning only</b>: items that don't fit are skipped by the
+                        server with a log line, never blocking the save.
+                    </MudText>
+
+                    @StashCapacityAlert()
+
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3" Class="mb-3" Wrap="Wrap.Wrap">
+                        <MudText Typo="Typo.body2"><b>@_model.Stash.Count</b> line(s) · <b>@StashUnitTotal()</b> unit(s)</MudText>
+                        <MudText Typo="Typo.body2">Stash value: <b>@(_stashCost is null ? "—" : FormatRub(_stashCost.TotalRub))</b></MudText>
+                    </MudStack>
+
+                    @if (_model.Stash.Count == 0)
+                    {
+                        <MudText Typo="Typo.body2" Class="mb-3">No stash items.</MudText>
+                    }
+
+                    @for (var i = 0; i < _model.Stash.Count; i++)
+                    {
+                        var line = _model.Stash[i];
+                        var lineNumber = i + 1;
+                        <MudPaper Elevation="1" Class="pa-3 mb-3" @key="line">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-2">
+                                <MudIcon Icon="@Icons.Material.Filled.Inventory2" Size="Size.Small"/>
+                                <MudText Typo="Typo.subtitle2"><b>#@lineNumber</b></MudText>
+                                <MudSpacer/>
+                                <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Size="Size.Small"
+                                               title="Duplicate this stash line"
+                                               OnClick="@(() => DuplicateStashLine(line))"/>
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
+                                               Color="Color.Error" title="Remove this stash line"
+                                               OnClick="@(() => RemoveStashLineAsync(line))"/>
+                            </MudStack>
+                            <ItemSpecEditor Spec="@line" AllowCount="true" OnChanged="RecomputeLoadoutCost"/>
+                        </MudPaper>
+                    }
+
+                    <MudButton Variant="Variant.Outlined" Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Add" OnClick="AddStashLineAsync">
+                        Add item
+                    </MudButton>
+                </MudTabPanel>
+
+            </MudTabs>
+            </MudForm>
+        }
+    </MudPaper>
+</MudContainer>
+
+@code {
+    /// <summary>Route value: file name WITHOUT extension (preferred) or exact file name.</summary>
+    [Parameter] public string? FileName { get; set; }
+
+    private static readonly Regex HexColor = new("^#[0-9a-fA-F]{6}$", RegexOptions.Compiled);
+
+    private MudForm? _form;                       // UI-01: field-level validation gate for Save
+    private ClassEditModel? _model;
+    private string? _resolvedFileName;            // real file name WITH extension — Save target
+    private List<ClassDiagnostic> _loadDiagnostics = [];
+    private List<ClassDiagnostic> _saveDiagnostics = [];
+    private SkillCostBreakdown? _skillCost;
+    private LoadoutCostBreakdown? _loadoutCost;   // recomputed on every equipped/stash change (026/028)
+    private LoadoutCostBreakdown? _stashCost;     // stash-only subtotal shown in the Stash tab (item 028)
+    private StashCapacityResult? _stashCapacity;  // GridPacker dry-run — warning only (item 028)
+    private Dictionary<string, string> _clothingNames = new(StringComparer.Ordinal);
+    private List<string> _editions = [];
+    private List<string> _iconFiles = [];
+    private bool _seInstalled;
+    private bool _saving;
+    private bool _savedOnce;
+
+    private string _newSkill = string.Empty;
+    private string _newMultiplierSkill = string.Empty;
+    private string _newStation = string.Empty;
+    private string _newEquipSlot = string.Empty;
+
+    private string BareName => System.IO.Path.GetFileNameWithoutExtension(_resolvedFileName ?? FileName ?? string.Empty);
+
+    protected override void OnParametersSet()
+    {
+        _savedOnce = false;
+        _saveDiagnostics = [];
+        _seInstalled = Registrar.SkillsExtendedInstalled;
+        LoadCatalogs();
+        LoadFromDisk();
+    }
+
+    // ── Load / discard ───────────────────────────────────────────────────────
+
+    /// <summary>Resolves the route name to a real file (same logic as ClassDetail) and (re)builds the model.</summary>
+    private void LoadFromDisk()
+    {
+        _model = null;
+        _resolvedFileName = null;
+        _loadDiagnostics = [];
+        _skillCost = null;
+        _loadoutCost = null;
+
+        if (string.IsNullOrWhiteSpace(FileName))
+        {
+            return;
+        }
+
+        var entries = EditorService.ListClassFiles();
+        var entry = entries.FirstOrDefault(e => string.Equals(e.FileName, FileName, StringComparison.OrdinalIgnoreCase))
+                    ?? entries.FirstOrDefault(e => string.Equals(
+                        System.IO.Path.GetFileNameWithoutExtension(e.FileName), FileName, StringComparison.OrdinalIgnoreCase));
+        if (entry is null)
+        {
+            return;
+        }
+
+        _resolvedFileName = entry.FileName;
+        _loadDiagnostics = entry.Diagnostics;
+        if (entry.Definition is not { } def)
+        {
+            return;   // parse error — diagnostics already shown, no form
+        }
+
+        _model = ClassEditModel.FromDefinition(def);
+        RecomputeLoadoutCost();
+        RecomputeSkillCost();
+
+        // Current baseEdition referencing a non-vanilla edition (edge): keep it selectable.
+        if (_model.BaseEdition is { Length: > 0 } current && !_editions.Contains(current, StringComparer.Ordinal))
+        {
+            _editions.Add(current);
+        }
+    }
+
+    private void Discard()
+    {
+        _savedOnce = false;
+        _saveDiagnostics = [];
+        LoadFromDisk();
+        Snackbar.Add("Changes discarded — reloaded from file.", Severity.Info);
+    }
+
+    /// <summary>Editions (vanilla only — mod classes excluded via ClassVisualRegistry), icons, clothing names.</summary>
+    private void LoadCatalogs()
+    {
+        _editions = Catalog.GetEditionKeys()
+            .Where(k => !VisualRegistry.Contains(k))
+            .OrderBy(k => k, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        // Icons live in the INSTALLED mod folder (wwwroot/icons, served at /CustomClasses-Server/icons/) —
+        // enumerate via ModHelper, the same path resolution ClassEditorService uses for config/classes/.
+        var iconsDir = System.IO.Path.Combine(
+            ModHelper.GetAbsolutePathToModFolder(typeof(ClassEditorService).Assembly), "wwwroot", "icons");
+        _iconFiles = Directory.Exists(iconsDir)
+            ? Directory.GetFiles(iconsDir, "*.png")
+                .Select(f => System.IO.Path.GetFileName(f)!)
+                .OrderBy(f => f, StringComparer.OrdinalIgnoreCase)
+                .ToList()
+            : [];
+
+        // id → name for outfit labels (same source as ClassDetail — OutfitBuilder acceptance rules).
+        _clothingNames = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var side in new[] { "Usec", "Bear" })
+        {
+            foreach (var piece in Catalog.GetClothing(side))
+            {
+                if (!string.IsNullOrWhiteSpace(piece.Name))
+                {
+                    _clothingNames[piece.Id] = piece.Name!;
+                }
+            }
+        }
+    }
+
+    // ── Save (g) ─────────────────────────────────────────────────────────────
+
+    private async Task SaveAsync()
+    {
+        if (_model is null || _resolvedFileName is null)
+        {
+            return;
+        }
+
+        // UI-01: the on-screen fields are authoritative — invalid text (e.g. nameColor "laranja")
+        // can be rejected by the bind, leaving the model with the stale valid value. Never show
+        // "Saved" while a visible field is invalid: validate the form first and abort loudly.
+        if (_form is not null)
+        {
+            await _form.Validate();
+            if (!_form.IsValid)
+            {
+                _savedOnce = false;
+                Snackbar.Add("Save blocked — fix the invalid fields first.", Severity.Error);
+                return;
+            }
+        }
+
+        if (ValidateColor(_model.NameColor) is { } colorError)
+        {
+            _savedOnce = false;
+            Snackbar.Add($"nameColor: {colorError}", Severity.Error);
+            return;
+        }
+
+        _saving = true;
+        try
+        {
+            // CR2-EP-09: snapshot the definition ON the circuit thread — the form stays editable
+            // during the save, and ToDefinition enumerating live lists from a pool thread would be
+            // a torn read (or "Collection was modified" crashing the circuit).
+            var def = _model.ToDefinition();
+
+            // Save runs the boot validation pipeline (dry-run first) — an Error aborts before any write.
+            var result = await Task.Run(() => EditorService.Save(_resolvedFileName, def, hotApply: true));
+            _saveDiagnostics = result.Diagnostics;
+            if (result.Success)
+            {
+                _savedOnce = true;
+                Snackbar.Add("Class saved and hot-applied.", Severity.Success);
+            }
+            else
+            {
+                _savedOnce = false;
+                Snackbar.Add("Save blocked by validation — nothing was written.", Severity.Error);
+            }
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    // ── Skills / multipliers / hideout rows ─────────────────────────────────
+
+    private void RecomputeSkillCost()
+    {
+        if (_model is not null)
+        {
+            _skillCost = CostService.ComputeSkillCost(_model.ToDefinition());
+        }
+    }
+
+    private SkillCostEntry? SkillCostEntryFor(string skill) =>
+        _skillCost?.Skills.FirstOrDefault(e => string.Equals(e.Skill, skill, StringComparison.Ordinal));
+
+    /// <summary>All SkillTypes enum names minus the ones already used, alphabetical (no extra filtering — full enum offered).</summary>
+    private static IEnumerable<string> AvailableSkills(IEnumerable<string> used)
+    {
+        var taken = new HashSet<string>(used, StringComparer.OrdinalIgnoreCase);
+        return Enum.GetNames<SkillTypes>()
+            .Where(n => !taken.Contains(n))
+            .OrderBy(n => n, StringComparer.OrdinalIgnoreCase);
+    }
+
+    private IEnumerable<string> AvailableStations()
+    {
+        var taken = new HashSet<string>(_model!.Hideout.Select(r => r.Station), StringComparer.OrdinalIgnoreCase);
+        return Enum.GetNames<HideoutAreas>()
+            .Where(n => !string.Equals(n, nameof(HideoutAreas.NotSet), StringComparison.Ordinal) && !taken.Contains(n))
+            .OrderBy(n => n, StringComparer.OrdinalIgnoreCase);
+    }
+
+    private void AddSkill()
+    {
+        if (!string.IsNullOrEmpty(_newSkill))
+        {
+            _model!.Skills.Add(new SkillLevelRow { Skill = _newSkill, Level = 0 });
+            _newSkill = string.Empty;
+            RecomputeSkillCost();
+        }
+    }
+
+    private void RemoveSkill(SkillLevelRow row)
+    {
+        _model!.Skills.Remove(row);
+        RecomputeSkillCost();
+    }
+
+    private void AddMultiplier()
+    {
+        if (!string.IsNullOrEmpty(_newMultiplierSkill))
+        {
+            _model!.Multipliers.Add(new SkillFactorRow { Skill = _newMultiplierSkill, Factor = 1.0 });
+            _newMultiplierSkill = string.Empty;
+        }
+    }
+
+    private void AddStation()
+    {
+        if (!string.IsNullOrEmpty(_newStation))
+        {
+            _model!.Hideout.Add(new HideoutRow { Station = _newStation, Level = 1 });
+            _newStation = string.Empty;
+        }
+    }
+
+    // ── Equipped (item 026) ──────────────────────────────────────────────────
+
+    /// <summary>
+    ///     Live loadout total + stash subtotal + stash capacity dry-run, all from the same definition
+    ///     snapshot — called on load and on every equipped/stash mutation (026/028).
+    /// </summary>
+    private void RecomputeLoadoutCost()
+    {
+        if (_model is null)
+        {
+            return;
+        }
+
+        var def = _model.ToDefinition();
+        _loadoutCost = CostService.ComputeLoadoutCost(def);
+        // stash-only subtotal: a definition holding just the stash keeps contents/ammo lines in
+        // (filtering _loadoutCost by context would miss them — equipped contents share "contents")
+        _stashCost = CostService.ComputeLoadoutCost(new ClassDefinition
+        {
+            Loadout = new Loadout { Stash = def.Loadout?.Stash },
+        });
+        _stashCapacity = CostService.CheckStashCapacity(def);
+    }
+
+    /// <summary>EquipmentSlots enum names (enum order — mirrors the character layout) minus the used ones.</summary>
+    private IEnumerable<string> AvailableEquipmentSlots()
+    {
+        var taken = new HashSet<string>(_model!.Equipped.Select(r => r.Slot), StringComparer.OrdinalIgnoreCase);
+        return Enum.GetNames<EquipmentSlots>().Where(n => !taken.Contains(n));
+    }
+
+    private void AddEquipSlot()
+    {
+        if (!string.IsNullOrEmpty(_newEquipSlot))
+        {
+            _model!.Equipped.Add(new EquippedSlotRow { Slot = _newEquipSlot });
+            _newEquipSlot = string.Empty;
+            RecomputeLoadoutCost();
+        }
+    }
+
+    private async Task RemoveEquipSlotAsync(EquippedSlotRow row)
+    {
+        var confirmed = await DialogService.ShowMessageBox(
+            "Remove equipped slot",
+            $"Remove '{row.Slot}' and its configured item from the loadout?",
+            yesText: "Remove", cancelText: "Cancel");
+        if (confirmed == true)
+        {
+            _model!.Equipped.Remove(row);
+            RecomputeLoadoutCost();
+        }
+    }
+
+    // ── Stash (item 028) ─────────────────────────────────────────────────────
+
+    private static readonly DialogOptions StashPickerOptions = new()
+    {
+        MaxWidth = MaxWidth.Medium,
+        FullWidth = true,
+        CloseButton = true,
+    };
+
+    /// <summary>Sum of root counts (count ≥ 1) — stacks/contents expansion is the dry-run's job.</summary>
+    private int StashUnitTotal() => _model!.Stash.Sum(l => Math.Max(1, l.Count));
+
+    /// <summary>New stash line via ItemPicker (unfiltered — the stash accepts any item template).</summary>
+    private async Task AddStashLineAsync()
+    {
+        var parameters = new DialogParameters<ItemPicker> { { x => x.Title, "Add stash item" } };
+        var dialog = await DialogService.ShowAsync<ItemPicker>("Add stash item", parameters, StashPickerOptions);
+        var result = await dialog.Result;
+        if (result is { Canceled: false, Data: string tpl })
+        {
+            _model!.Stash.Add(new ItemSpecModel { Tpl = tpl });
+            RecomputeLoadoutCost();
+        }
+    }
+
+    /// <summary>Deep copy via the spec round-trip (ToSpec → FromSpec), inserted right below the original.</summary>
+    private void DuplicateStashLine(ItemSpecModel line)
+    {
+        var clone = ItemSpecModel.FromSpec(line.ToSpec());
+        _model!.Stash.Insert(_model.Stash.IndexOf(line) + 1, clone);
+        RecomputeLoadoutCost();
+    }
+
+    private async Task RemoveStashLineAsync(ItemSpecModel line)
+    {
+        var confirmed = await DialogService.ShowMessageBox(
+            "Remove stash line",
+            "Remove this item line (and everything nested in it) from the stash?",
+            yesText: "Remove", cancelText: "Cancel");
+        if (confirmed == true)
+        {
+            _model!.Stash.Remove(line);
+            RecomputeLoadoutCost();
+        }
+    }
+
+    /// <summary>
+    ///     Capacity verdict (item 028): green = everything fits; orange = overflow lines listed (the
+    ///     server skips them with a warning); info = grid unresolved. Extra dry-run notes (pre-existing
+    ///     base stash items, malformed lines) render as separate info alerts.
+    /// </summary>
+    private RenderFragment StashCapacityAlert() => __builder =>
+    {
+        if (_stashCapacity is not { } cap)
+        {
+            return;
+        }
+
+        if (!cap.GridResolved)
+        {
+            <MudAlert Severity="Severity.Info" Dense="true" Class="mb-2">
+                Stash capacity not checked — @(cap.Warnings.Count > 0 ? string.Join(" ", cap.Warnings) : "stash grid unresolved.")
+            </MudAlert>
+        }
+        else
+        {
+            var grid = $"{string.Join(" + ", cap.GridSizes)} of base '{cap.BaseEdition}'";
+            if (cap.Unplaced.Count == 0)
+            {
+                <MudAlert Severity="Severity.Success" Dense="true" Class="mb-2">
+                    Fits — @cap.OccupancyPercent.ToString("0.#", CultureInfo.InvariantCulture)% occupied
+                    (@cap.UsedCells/@cap.TotalCells cells, stash @grid).
+                </MudAlert>
+            }
+            else
+            {
+                <MudAlert Severity="Severity.Warning" Dense="true" Class="mb-2">
+                    @cap.Unplaced.Count item line(s) won't fit: @string.Join(", ", cap.Unplaced) —
+                    the server will skip them with a warning
+                    (@cap.OccupancyPercent.ToString("0.#", CultureInfo.InvariantCulture)% occupied, stash @grid).
+                </MudAlert>
+            }
+
+            @foreach (var warning in cap.Warnings)
+            {
+                <MudAlert Severity="Severity.Info" Dense="true" Class="mb-2">@warning</MudAlert>
+            }
+        }
+    };
+
+    // ── Select adapters ("" sentinel — MudSelect needs a concrete value) ─────
+
+    private string BaseEditionSelect
+    {
+        get => _model?.BaseEdition ?? string.Empty;
+        set
+        {
+            if (_model is not null)
+            {
+                _model.BaseEdition = string.IsNullOrEmpty(value) ? null : value;
+                RecomputeLoadoutCost();   // stash capacity is sized by the base edition's stash (item 028)
+            }
+        }
+    }
+
+    private string IconSelect
+    {
+        get => _model?.IconFile ?? string.Empty;
+        set
+        {
+            if (_model is not null)
+            {
+                _model.IconFile = string.IsNullOrEmpty(value) ? null : value;
+            }
+        }
+    }
+
+    // ── Outfit (f) ───────────────────────────────────────────────────────────
+
+    private RenderFragment OutfitSlot(string title, string side, string slotKind,
+        Func<string?> get, Action<string?> set) => __builder =>
+    {
+        <MudItem xs="12" md="6">
+            <MudPaper Elevation="1" Class="pa-3">
+                <MudText Typo="Typo.subtitle1" Class="mb-1"><b>@title</b></MudText>
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-2">
+                    <MudText Typo="Typo.body2" Class="flex-grow-1">
+                        @(get() is { Length: > 0 } id ? ClothingLabel(id) : "— (template default)")
+                    </MudText>
+                    <MudIconButton Icon="@Icons.Material.Filled.Clear" Size="Size.Small"
+                                   title="Clear (use template default)"
+                                   Disabled="@(get() is null)"
+                                   OnClick="@(() => set(null))"/>
+                </MudStack>
+                <CustomizationPicker Side="@side" SlotKind="@slotKind"
+                                     OnClothingSelected="@(id => set(id))"/>
+            </MudPaper>
+        </MudItem>
+    };
+
+    /// <summary>"Name (id)" via the catalog clothing list; unknown id degrades to the raw id.</summary>
+    private string ClothingLabel(string id) =>
+        _clothingNames.TryGetValue(id, out var name) ? $"{name} ({id})" : id;
+
+    // ── Presentation helpers ─────────────────────────────────────────────────
+
+    private string? NameStyle() =>
+        _model?.NameColor is { Length: > 0 } c && HexColor.IsMatch(c) ? $"color:{c};" : null;
+
+    private string SwatchColor() =>
+        _model?.NameColor is { Length: > 0 } c && HexColor.IsMatch(c) ? c : "transparent";
+
+    /// <summary>null = valid (empty allowed — color is optional).</summary>
+    private static string? ValidateColor(string? value) =>
+        string.IsNullOrWhiteSpace(value) || HexColor.IsMatch(value!.Trim())
+            ? null
+            : "Expected hex #RRGGBB (e.g. #C8A35A).";
+
+    private static Severity MapSeverity(DiagnosticSeverity severity) => severity switch
+    {
+        DiagnosticSeverity.Error => Severity.Error,
+        DiagnosticSeverity.Warning => Severity.Warning,
+        _ => Severity.Info,
+    };
+
+    private static bool IsSeSkill(string skillName) => SkillsExtendedCompat.Skills.Contains(skillName);
+
+    private static Color FactorColor(double factor) =>
+        factor > 1 ? Color.Success : factor < 1 ? Color.Error : Color.Default;
+
+    private static string FormatRub(double value) =>
+        value.ToString("N0", CultureInfo.InvariantCulture) + " ₽";
+
+    private RenderFragment SkillTotalChip() => __builder =>
+    {
+        if (_skillCost is null)
+        {
+            return;
+        }
+
+        if (_skillCost.Total == 0)
+        {
+            <MudChip T="string" Size="Size.Small" Color="Color.Default">no skills</MudChip>
+        }
+        else
+        {
+            <MudChip T="string" Size="Size.Small"
+                     Color="@(_skillCost.WithinBudget ? Color.Success : Color.Warning)">
+                @(_skillCost.WithinBudget ? "within budget" : "outside budget")
+            </MudChip>
+        }
+    };
+}

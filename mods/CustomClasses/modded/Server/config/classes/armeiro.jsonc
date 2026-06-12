@@ -1,10 +1,16 @@
 {
   "name": "Armeiro",
+  "displayName": {
+    "en": "Armorer",
+    "pt": "Armeiro"
+  },
   "baseEdition": "SPT Zero to hero",
   "description": {
     "en": "Field Armorer. Keeps weapons running longer, clears jams and modifies gear in the field.",
     "pt": "Armeiro de campo. Mantém armas funcionando por mais tempo, corrige encravamentos e modifica equipamento em campo."
   },
+  "iconFile": "armeiro.png",
+  "nameColor": "#a8824e",
   "skills": {
     "Assault": 4,
     "Strength": 3,

@@ -1,10 +1,16 @@
 {
   "name": "Médico de Combate",
+  "displayName": {
+    "en": "Combat Medic",
+    "pt": "Médico de Combate"
+  },
   "baseEdition": "SPT Zero to hero",
   "description": {
     "en": "Combat Medic. Survives wounds that would kill others. Treats severe damage fast and stays operational after taking hits.",
     "pt": "Médico de combate. Sobrevive a ferimentos que matariam outros. Trata dano severo rápido e continua operacional após levar dano."
   },
+  "iconFile": "medicoDeCombate.png",
+  "nameColor": "#6f9455",
   "skills": {
     "Assault": 5,
     "Vitality": 5,

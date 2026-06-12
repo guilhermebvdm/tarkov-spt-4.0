@@ -14,7 +14,9 @@ namespace CustomClasses;
 ///     Builds a class's starting inventory onto a character. Item 003.
 ///     Fatia 1: equipado-simples (1 tpl/slot) + slot-occupancy/subtree-removal (PA-02-01/02).
 ///     Fatia 2: <b>preset</b> (re-id da árvore, PA-01-02/04) e <b>árvore manual</b> (mods por slot).
-///     Deferido: contents em grade (fatia 4) e carregador/câmara (fatia 3) — logados como "deferido".
+///     Fatia 3: carregador/câmara (`ammo`). Fatia 4: contents em grade (GridPacker).
+///     CR-EP-01: linhas de stash/contents honram a MESMA semântica dos slots equipados —
+///     `preset` explícito/`mods`/`ammo`/`contents` recursivo (antes só `tpl`+`count`).
 ///     Estrutura de item: ver docs/technical/inventario-itens-spt4.md.
 /// </summary>
 [Injectable]
@@ -58,6 +60,13 @@ public class InventoryBuilder(DatabaseService databaseService, ItemHelper itemHe
                 {
                     logger.Debug($"[CustomClasses] '{className}': count>1 ignorado no slot equipado '{slotName}' (PA-02-05).");
                 }
+                // Fatia 3: carregador carregado + bala na câmara (`ammo` obrigatório).
+                // CR2-EP-04: BEFORE packing contents — a content line may be an assembled weapon with
+                // its own mod_magazine, and the whole-tree scan in LoadAmmo must never fill a magazine
+                // that belongs to an item nested inside this container (cartridges don't change the
+                // container footprint, so running first is safe — same rationale as PlaceSpecTrees).
+                LoadAmmo(tree, spec, tree.FirstOrDefault(i => i.SlotId == slotId), slotId, className);
+
                 // Fatia 4: conteúdo do contêiner (rig/mochila) empacotado nas grades dele.
                 if (spec.Contents is { Count: > 0 })
                 {
@@ -67,9 +76,6 @@ public class InventoryBuilder(DatabaseService databaseService, ItemHelper itemHe
                         PackSpecsIntoGrids(tree, containerRoot.Id.ToString(), GetGrids(containerRoot.Template), spec.Contents, className);
                     }
                 }
-
-                // Fatia 3: carregador carregado + bala na câmara (`ammo` obrigatório).
-                LoadAmmo(tree, spec, slotId, className);
 
                 // CR-02: arma equipada sem óptica (preset base, ex.: AKMS) → garante mira mínima (red dot).
                 var equippedRoot = tree.FirstOrDefault(i => i.SlotId == slotId);
@@ -458,8 +464,9 @@ public class InventoryBuilder(DatabaseService databaseService, ItemHelper itemHe
     /// <summary>
     ///     Fatia 3: carrega o carregador (filhos `cartridges`) e a câmara (`patron_in_weapon`) com `ammo`.
     ///     Reusa `ItemHelper.FillMagazineWithCartridge` (capacidade via `_props.Cartridges._max_count`).
+    ///     CR-EP-01: `root` (a arma) vem do caller — slot equipado OU linha de stash/contents.
     /// </summary>
-    private void LoadAmmo(List<Item> tree, ItemSpec spec, string slotId, string className)
+    private void LoadAmmo(List<Item> tree, ItemSpec spec, Item? root, string context, string className)
     {
         if (!spec.LoadedMag && !spec.Chambered)
         {
@@ -468,23 +475,22 @@ public class InventoryBuilder(DatabaseService databaseService, ItemHelper itemHe
 
         if (string.IsNullOrWhiteSpace(spec.Ammo))
         {
-            logger.Warning($"[CustomClasses] '{className}': slot '{slotId}' loadedMag/chambered sem 'ammo' — ignorado (PA-01-03).");
+            logger.Warning($"[CustomClasses] '{className}': '{context}' loadedMag/chambered sem 'ammo' — ignorado (PA-01-03).");
             return;
         }
 
         var ammo = new MongoId(spec.Ammo);
-        var root = tree.FirstOrDefault(i => i.SlotId == slotId);   // raiz equipada (a arma)
 
         if (spec.LoadedMag)
         {
             var mag = tree.FirstOrDefault(i => i.SlotId == "mod_magazine");
             if (mag is null)
             {
-                logger.Warning($"[CustomClasses] '{className}': slot '{slotId}' sem 'mod_magazine' — carregador não carregado.");
+                logger.Warning($"[CustomClasses] '{className}': '{context}' sem 'mod_magazine' — carregador não carregado.");
             }
             else if (tree.Any(i => i.ParentId == mag.Id.ToString() && i.SlotId == "cartridges"))
             {
-                logger.Debug($"[CustomClasses] '{className}': '{slotId}' carregador do preset já tem cartuchos — fill pulado (CR-01-03).");
+                logger.Debug($"[CustomClasses] '{className}': '{context}' carregador do preset já tem cartuchos — fill pulado (CR-01-03).");
             }
             else
             {
@@ -509,7 +515,7 @@ public class InventoryBuilder(DatabaseService databaseService, ItemHelper itemHe
 
             if (string.IsNullOrEmpty(chamberSlot))   // CR-01-02: só chambrear se a arma tem câmara
             {
-                logger.Warning($"[CustomClasses] '{className}': '{slotId}' arma sem slot de câmara — câmara ignorada.");
+                logger.Warning($"[CustomClasses] '{className}': '{context}' arma sem slot de câmara — câmara ignorada.");
             }
             else
             {
@@ -526,9 +532,12 @@ public class InventoryBuilder(DatabaseService databaseService, ItemHelper itemHe
     }
 
     /// <summary>
-    ///     Empacota itens nas grades de um contêiner (stash/rig/mochila). Itens com preset default
-    ///     (arma/armadura/...) entram MONTADOS (árvore completa), posicionados pela dimensão real do item
-    ///     montado (com mods — InventoryHelper.GetItemSize). Itens sem preset: simples, stack-aware.
+    ///     Empacota itens nas grades de um contêiner (stash/rig/mochila). CR-EP-01: linhas honram a MESMA
+    ///     semântica dos slots equipados — `preset` explícito (premium opcional), árvore manual (`mods`),
+    ///     `ammo` (loadedMag/chambered) e `contents` recursivo nas grades do item colocado. Sem
+    ///     preset/mods: `tpl` auto-completa com o stash-preset (arma/armadura/...) ou vira item simples,
+    ///     stack-aware (caminho tpl+count puro inalterado). Posição pela dimensão real do item montado
+    ///     (com mods — InventoryHelper.GetItemSize); count&gt;1 composto = N árvores.
     /// </summary>
     private int PackSpecsIntoGrids(List<Item> items, string parentId, List<Grid> grids, List<ItemSpec> specs, string className)
     {
@@ -547,6 +556,40 @@ public class InventoryBuilder(DatabaseService databaseService, ItemHelper itemHe
         {
             try
             {
+                var count = Math.Max(1, spec.Count);
+
+                // CR-EP-01 (1): `preset` explícito — mesma resolução do slot equipado (premium opcional).
+                if (!string.IsNullOrWhiteSpace(spec.Preset))
+                {
+                    var preset = spec.Premium ? ResolvePremiumPreset(new MongoId(spec.Preset)) : ResolvePreset(new MongoId(spec.Preset));
+                    if (preset?.Items is null || !preset.Items.Any())
+                    {
+                        logger.Warning($"[CustomClasses] '{className}': preset/arma '{spec.Preset}' não encontrado — item de contêiner pulado.");
+                        continue;
+                    }
+
+                    added += PlaceSpecTrees(packers, items, parentId, spec, count, () => ClonePresetTree(preset), className);
+                    continue;
+                }
+
+                // CR-EP-01 (2): árvore manual (`mods`) — mesmo builder do slot equipado.
+                if (spec.Mods is not null)
+                {
+                    if (string.IsNullOrWhiteSpace(spec.Tpl))
+                    {
+                        logger.Warning($"[CustomClasses] '{className}': item de contêiner tem 'mods' mas não tem 'tpl' raiz — pulado.");
+                        continue;
+                    }
+
+                    added += PlaceSpecTrees(packers, items, parentId, spec, count, () =>
+                    {
+                        // parentId/slotId da raiz são re-escritos pelo PlaceTree na colocação.
+                        var tree = BuildManualTree(spec.Tpl!, spec.Mods!, parentId, "main");
+                        return (tree, tree[0]);
+                    }, className);
+                    continue;
+                }
+
                 if (string.IsNullOrWhiteSpace(spec.Tpl))
                 {
                     logger.Warning($"[CustomClasses] '{className}': item de contêiner sem tpl — pulado.");
@@ -554,36 +597,16 @@ public class InventoryBuilder(DatabaseService databaseService, ItemHelper itemHe
                 }
 
                 var tpl = new MongoId(spec.Tpl);
-                var count = Math.Max(1, spec.Count);
-                var preset = ResolveStashPreset(tpl);   // etapa 2: prefere preset com óptica p/ armas
+                var autoPreset = ResolveStashPreset(tpl);   // etapa 2: prefere preset com óptica p/ armas
 
                 // Composto (arma/armadura/...): uma árvore montada por unidade.
-                if (preset?.Items is not null && preset.Items.Any())
+                if (autoPreset?.Items is not null && autoPreset.Items.Any())
                 {
-                    for (var i = 0; i < count; i++)
-                    {
-                        var (tree, root) = ClonePresetTree(preset);
-                        // etapa 2: garantir mira mínima em armas do stash sem óptica (snipers etc.).
-                        if (itemHelper.IsOfBaseclass(root.Template, BaseClasses.WEAPON))
-                        {
-                            EnsureMinimumOptic(tree, className);
-                        }
-
-                        if (PlaceTree(packers, items, parentId, tree, root))
-                        {
-                            added++;
-                        }
-                        else
-                        {
-                            logger.Warning($"[CustomClasses] '{className}': sem espaço p/ '{spec.Tpl}' (montado) em '{parentId}' — {count - i} unidade(s) pulada(s).");
-                            break;
-                        }
-                    }
-
+                    added += PlaceSpecTrees(packers, items, parentId, spec, count, () => ClonePresetTree(autoPreset), className);
                     continue;
                 }
 
-                // Simples, stack-aware.
+                // Simples, stack-aware (caminho tpl+count puro — inalterado; CR-EP-01 só recursa contents).
                 var ci = itemHelper.GetItem(tpl);   // ref: ItemHelper.cs:494
                 var stackMax = (ci is { Key: true, Value: not null } ? ci.Value.Properties?.StackMaxSize : null) ?? 1;
                 var remaining = count;
@@ -600,6 +623,11 @@ public class InventoryBuilder(DatabaseService databaseService, ItemHelper itemHe
                     {
                         added++;
                         remaining -= thisStack;
+                        // CR-EP-01 (5): contents também em contêiner simples (ex.: mochila sem preset).
+                        if (spec.Contents is { Count: > 0 })
+                        {
+                            PackSpecsIntoGrids(items, item.Id.ToString(), GetGrids(item.Template), spec.Contents, className);
+                        }
                     }
                     else
                     {
@@ -610,11 +638,51 @@ public class InventoryBuilder(DatabaseService databaseService, ItemHelper itemHe
             }
             catch (Exception ex)
             {
-                logger.Warning($"[CustomClasses] '{className}': item de contêiner '{spec.Tpl}' falhou ({ex.Message}) — pulado.");
+                logger.Warning($"[CustomClasses] '{className}': item de contêiner '{spec.Tpl ?? spec.Preset}' falhou ({ex.Message}) — pulado.");
             }
         }
 
         return added;
+    }
+
+    /// <summary>
+    ///     CR-EP-01: coloca <paramref name="count"/> unidades de uma árvore composta (preset explícito,
+    ///     manual ou auto-preset) nas grades, espelhando o slot equipado: mira mínima p/ armas
+    ///     (EnsureMinimumOptic), `ammo` (LoadAmmo) e recursão de `contents` nas grades do item colocado.
+    ///     Specs tpl+count puros passam ilesos (LoadAmmo/contents são no-op sem os campos).
+    /// </summary>
+    private int PlaceSpecTrees(List<(Grid Grid, GridPacker Packer)> packers, List<Item> items, string parentId,
+        ItemSpec spec, int count, Func<(List<Item> Tree, Item Root)> buildUnit, string className)
+    {
+        var label = spec.Tpl ?? spec.Preset ?? "?";
+        var placed = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var (tree, root) = buildUnit();
+            // etapa 2: garantir mira mínima em armas do stash sem óptica (snipers etc.).
+            if (itemHelper.IsOfBaseclass(root.Template, BaseClasses.WEAPON))
+            {
+                EnsureMinimumOptic(tree, className);
+            }
+
+            // CR-EP-01 (4): carregador/câmara em linha de stash/contents (cartuchos não mudam o footprint).
+            LoadAmmo(tree, spec, root, $"stash:{label}", className);
+
+            if (!PlaceTree(packers, items, parentId, tree, root))
+            {
+                logger.Warning($"[CustomClasses] '{className}': sem espaço p/ '{label}' (montado) em '{parentId}' — {count - i} unidade(s) pulada(s).");
+                break;
+            }
+
+            placed++;
+            // CR-EP-01 (5): contents recursivo — mesmo caminho que o slot equipado usa (Apply).
+            if (spec.Contents is { Count: > 0 })
+            {
+                PackSpecsIntoGrids(items, root.Id.ToString(), GetGrids(root.Template), spec.Contents, className);
+            }
+        }
+
+        return placed;
     }
 
     /// <summary>

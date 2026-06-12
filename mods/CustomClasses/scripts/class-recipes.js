@@ -204,4 +204,19 @@ module.exports = (BASELINE, backupKit) => [
     ],
     tema: [{ id: 'TOOLSET', qty: 2 }, { id: 'CPU_FAN', qty: 4 }, { id: 'WIRES', qty: 4 }, { id: 'DUCT_TAPE', qty: 3 }, { id: 'BOLTS', qty: 1 }, { id: 'SCREWS', qty: 1 }, { id: 'ROUBLES', qty: 300000 }],
   },
+  // item 016 — Peladão (PLACEHOLDER: skin/itens/descrição a revisar). Base SPT Zero to Hero; sem skills nem multiplicadores.
+  {
+    fileName: 'peladao', name: 'Peladão',
+    description: {
+      en: 'The Streaker. Who needs armor when you have confidence? Showed up to the raid the way he came into the world. (placeholder — review skin/items)',
+      pt: 'O Peladão. Quem precisa de armadura quando se tem confiança? Apareceu na raid do jeitinho que veio ao mundo. (placeholder — revisar skin/itens)',
+    },
+    skillOverrides: {}, hideout: {}, backupCount: 0, noBaseline: true,   // 100% pelado: sem skills e sem itens
+    // skin "leve" placeholder (camisa havaiana) — revisar depois.
+    outfit: {
+      usec: { upper: '6847e663f43abfdda205835a', lower: '66589cceb00aec5c0278573c' }, // Blue Hawaii shirt / Outdoor Tactical
+      bear: { upper: '6847e76f3f4cd20a97097a93', lower: '6658a1d54de4820934746dd4' }, // Green Hawaii shirt / BEAR Centurion
+    },
+    primary: [], backup: [], tema: [],
+  },
 ];

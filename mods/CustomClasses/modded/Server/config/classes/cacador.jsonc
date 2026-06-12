@@ -1,10 +1,16 @@
 {
   "name": "Caçador",
+  "displayName": {
+    "en": "Hunter",
+    "pt": "Caçador"
+  },
   "baseEdition": "SPT Zero to hero",
   "description": {
     "en": "Sniper. Patient and precise. Owns elevated positions, minimises movement and eliminates before being spotted.",
     "pt": "Sniper. Paciente e preciso. Domina posições elevadas, minimiza movimento e elimina antes de ser detectado."
   },
+  "iconFile": "cacador.png",
+  "nameColor": "#c2973f",
   "skills": {
     "Sniper": 8,
     "Endurance": 5,

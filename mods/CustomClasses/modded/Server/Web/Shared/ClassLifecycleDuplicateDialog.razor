@@ -1,0 +1,108 @@
+@* Item 027: "Duplicate class" dialog — the official RENAME path (renaming in place would orphan
+   profiles created from the old edition; see 025: name is read-only there). Copies the source
+   file's full content (skills/multipliers/loadout/outfit/hideout/iconFile/nameColor) under a new
+   name; displayName en/pt becomes the new name. Closes with DialogResult.Ok(newFileName). *@
+
+@inject ClassEditorService EditorService
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">Duplicate "@(SourceClassName ?? SourceFileName)"</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudStack Spacing="3">
+            <MudText Typo="Typo.body2">
+                Creates an independent copy of <code>@SourceFileName</code> with the same content
+                (skills, multipliers, loadout, outfit, hideout, icon, color). Duplicating is the
+                official way to <b>rename</b> a class — existing profiles keep pointing at the old
+                edition, untouched.
+            </MudText>
+
+            <MudTextField T="string"
+                          Value="@_name"
+                          ValueChanged="OnNameChanged"
+                          Immediate="true"
+                          Label="New class name (edition key)"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Error="@(_error is not null && _touched)"
+                          ErrorText="@_error"
+                          HelperText="displayName (en/pt) is set to this name; everything else is copied verbatim."
+                          autofocus/>
+
+            @foreach (var d in _diagnostics)
+            {
+                <MudAlert Severity="@(d.Severity == DiagnosticSeverity.Error ? Severity.Error : Severity.Warning)" Dense="true">
+                    [@d.Code] @d.Message
+                </MudAlert>
+            }
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => Dialog?.Cancel())">Cancel</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                   Disabled="@(!CanSubmit)" OnClick="DuplicateAsync">
+            Duplicate
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance? Dialog { get; set; }
+
+    /// <summary>Bare file name of the class being copied (e.g. "cacador.jsonc").</summary>
+    [Parameter, EditorRequired] public string SourceFileName { get; set; } = string.Empty;
+
+    /// <summary>Edition key of the source class — title only (null for a fallback to the file name).</summary>
+    [Parameter] public string? SourceClassName { get; set; }
+
+    private string _name = string.Empty;
+    private string? _error = "Name is required.";
+    private bool _touched;
+    private bool _busy;
+    private HashSet<string> _existing = new(StringComparer.OrdinalIgnoreCase);
+    private List<ClassDiagnostic> _diagnostics = [];
+
+    private bool CanSubmit => _error is null && !_busy;
+
+    protected override void OnInitialized()
+    {
+        _existing = EditorService.ExistingEditionNames();
+    }
+
+    private void OnNameChanged(string value)
+    {
+        _name = value;
+        _touched = true;
+        _error = EditorService.ValidateNewClassName(value, _existing);
+    }
+
+    private async Task DuplicateAsync()
+    {
+        if (!CanSubmit)
+        {
+            return;
+        }
+
+        _busy = true;
+        CreateResult result;
+        try
+        {
+            // Off the circuit thread: Duplicate re-runs the full dry-run pipeline before writing.
+            result = await Task.Run(() => EditorService.Duplicate(SourceFileName, _name));
+        }
+        finally
+        {
+            _busy = false;   // CR2-EP-10: an IO exception must never leave the dialog stuck on busy
+        }
+
+        if (result.Success)
+        {
+            Dialog?.Close(DialogResult.Ok(result.FileName!));
+        }
+        else
+        {
+            _diagnostics = result.Diagnostics;
+        }
+    }
+}

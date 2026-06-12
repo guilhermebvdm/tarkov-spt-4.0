@@ -1,0 +1,16 @@
+@* Side navigation (item 020). Route convention: every CustomClasses page lives
+   under /customclasses/... — Blazor @page routes are global on the SPT server,
+   so the prefix avoids collisions with other web mods (e.g. /skills-extended). *@
+
+<MudNavMenu>
+
+    <MudNavLink Href="/customclasses" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">
+        Home
+    </MudNavLink>
+
+    @* Item 024: class list (+ per-class read-only detail under /customclasses/classes/{file}). *@
+    <MudNavLink Href="/customclasses/classes" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Groups">
+        Classes
+    </MudNavLink>
+
+</MudNavMenu>

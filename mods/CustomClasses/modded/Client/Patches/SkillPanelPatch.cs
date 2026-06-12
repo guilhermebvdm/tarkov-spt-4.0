@@ -18,6 +18,7 @@ namespace CustomClasses.Client;
 internal class SkillPanelPatch : ModulePatch
 {
     private const string MarkerName = "CC_MultMarker";
+    private const float MarkerGap = 20f;   // px após o fim do texto do nome (não sobrepor)
 
     protected override MethodBase GetTargetMethod()
     {
@@ -35,7 +36,10 @@ internal class SkillPanelPatch : ModulePatch
         try
         {
             SkillMultipliers.EnsureLoaded();   // perfil novo (sem XP) → garante cache+ClassName ao abrir a tela
-            var has = SkillMultipliers.TryGet(___skillClass.Id, out var f) && MultiplierFormat.IsActive(f);
+            // Pula skills bloqueadas/"beta" (Locked = sem buffs; ex.: FirstAid/FieldMedicine sem o Skills-Extended):
+            // não faz sentido marcar +X% numa skill que o jogador não pode usar. (got: TryGet sempre roda → f atribuído.)
+            var got = SkillMultipliers.TryGet(___skillClass.Id, out var f);
+            var has = got && !___skillClass.Locked && MultiplierFormat.IsActive(f);
 
             // Marcador reusável (a lista recicla SkillPanel ao rolar) — sempre reescrito/escondido.
             var marker = GetOrCreateMarker(____name);
@@ -51,6 +55,9 @@ internal class SkillPanelPatch : ModulePatch
             }
 
             tmp.text = MultiplierFormat.Marker(f);
+            // Ponto 2: posiciona o marcador logo APÓS o fim do texto do nome (não sobre ele).
+            // Usa a largura preferida do TMP do nome — robusto a nomes curtos/longos e ao layout do painel.
+            ((RectTransform)marker.transform).anchoredPosition = new Vector2(____name.preferredWidth + MarkerGap, 0f);
             // ref: CR-01-03 — o SimpleTooltip é resolvido 1x na criação (GetOrCreateMarker);
             // aqui só atualiza o texto (rawText:true preserva <color>/<b>).
             marker.GetComponent<HoverTooltipArea>()
@@ -65,7 +72,8 @@ internal class SkillPanelPatch : ModulePatch
 
     /// <summary>
     ///     Acha (ou cria 1x) o marcador como filho do _name, herdando fonte/material do nome.
-    ///     PA-01-04: ancorado esticado sobre a área do nome, texto alinhado à direita.
+    ///     Ponto 2: ancorado à ESQUERDA do _name (pivot 0, cresce p/ direita); a posição X final é
+    ///     definida no Postfix via _name.preferredWidth (logo após o fim do texto, sem sobrepor).
     /// </summary>
     private static GameObject GetOrCreateMarker(TextMeshProUGUI name)
     {
@@ -79,16 +87,16 @@ internal class SkillPanelPatch : ModulePatch
         go.transform.SetParent(name.transform, false);
 
         var rt = (RectTransform)go.transform;
-        rt.anchorMin = new Vector2(0f, 0f);
-        rt.anchorMax = new Vector2(1f, 1f);
-        rt.offsetMin = Vector2.zero;
-        rt.offsetMax = Vector2.zero;
+        rt.anchorMin = new Vector2(0f, 0.5f);
+        rt.anchorMax = new Vector2(0f, 0.5f);
+        rt.pivot = new Vector2(0f, 0.5f);
+        rt.sizeDelta = new Vector2(200f, 32f);
 
         var tmp = go.AddComponent<TextMeshProUGUI>();
         tmp.font = name.font;
         tmp.fontSharedMaterial = name.fontSharedMaterial;
         tmp.fontSize = name.fontSize;
-        tmp.alignment = TextAlignmentOptions.MidlineRight;   // marcador na direita da coluna do nome
+        tmp.alignment = TextAlignmentOptions.MidlineLeft;   // texto cresce do anchor (após o nome) p/ a direita
         tmp.enableWordWrapping = false;
         tmp.raycastTarget = true;                            // necessário p/ HoverTooltipArea receber o ponteiro
 

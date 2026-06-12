@@ -1,0 +1,81 @@
+@using SPTarkov.Server.Core.Models.Common
+
+@* Item 023: lists cartridges compatible with a weapon (matched by caliber, see
+   CatalogService.GetAmmoForWeapon — weapon `_props.ammoCaliber` vs ammo `_props.Caliber`).
+   Either WeaponTpl or Caliber must be set; Caliber wins when both are present.
+   Rows show name, damage/pen (straight from _props) and price; click fires
+   OnAmmoSelected with the cartridge tpl. *@
+
+@inject CatalogService Catalog
+
+<MudStack Spacing="1">
+    @if (_caliber is null)
+    {
+        <MudText Typo="Typo.body2" Class="mud-text-secondary">
+            No caliber resolved — set Caliber or a valid weapon tpl.
+        </MudText>
+    }
+    else
+    {
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+            <MudChip T="string" Size="Size.Small" Color="Color.Default">@_caliber</MudChip>
+            <MudText Typo="Typo.caption" Class="mud-text-secondary">@_ammo.Count cartridges</MudText>
+        </MudStack>
+
+        <MudTable Items="_ammo" Dense="true" Hover="true"
+                  T="CatalogAmmo"
+                  OnRowClick="@(args => SelectAsync(args.Item))"
+                  RowStyle="cursor: pointer;"
+                  FixedHeader="true" Height="320px">
+            <HeaderContent>
+                <MudTh>Cartridge</MudTh>
+                <MudTh Style="text-align: right;">Dmg</MudTh>
+                <MudTh Style="text-align: right;">Pen</MudTh>
+                <MudTh Style="text-align: right;">Price</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Cartridge">
+                    <MudText Typo="Typo.body2">@context.Name</MudText>
+                    <MudText Typo="Typo.caption" Class="mud-text-secondary">@context.Tpl</MudText>
+                </MudTd>
+                <MudTd DataLabel="Dmg" Style="text-align: right;">@(context.Damage?.ToString("0") ?? "—")</MudTd>
+                <MudTd DataLabel="Pen" Style="text-align: right;">@(context.Penetration?.ToString() ?? "—")</MudTd>
+                <MudTd DataLabel="Price" Style="text-align: right;">@context.Price.ToString("N0") ₽</MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+</MudStack>
+
+@code {
+    /// <summary>Weapon tpl — its caliber (_props.ammoCaliber) selects the compatible cartridges.</summary>
+    [Parameter] public string? WeaponTpl { get; set; }
+
+    /// <summary>Explicit caliber (e.g. "Caliber556x45NATO"); takes precedence over WeaponTpl.</summary>
+    [Parameter] public string? Caliber { get; set; }
+
+    /// <summary>Fired with the selected cartridge tpl.</summary>
+    [Parameter] public EventCallback<string> OnAmmoSelected { get; set; }
+
+    private List<CatalogAmmo> _ammo = [];
+    private string? _caliber;
+    private string? _loadedKey;
+
+    protected override void OnParametersSet()
+    {
+        var key = Caliber ?? WeaponTpl;
+        if (string.Equals(key, _loadedKey, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        _loadedKey = key;
+        _caliber = Caliber
+            ?? (WeaponTpl is not null && MongoId.IsValidMongoId(WeaponTpl)
+                ? Catalog.GetCaliber(new MongoId(WeaponTpl))
+                : null);
+        _ammo = _caliber is null ? [] : Catalog.GetAmmoByCaliber(_caliber);
+    }
+
+    private Task SelectAsync(CatalogAmmo? ammo) =>
+        ammo is null ? Task.CompletedTask : OnAmmoSelected.InvokeAsync(ammo.Tpl);
+}

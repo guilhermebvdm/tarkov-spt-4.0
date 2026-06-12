@@ -1,10 +1,16 @@
 {
   "name": "Gerente de Operações",
+  "displayName": {
+    "en": "Operations Manager",
+    "pt": "Gerente de Operações"
+  },
   "baseEdition": "SPT Zero to hero",
   "description": {
     "en": "Operations Manager. Maximises hideout output and levels skills faster. A cumulative edge, not an in-raid one.",
     "pt": "Gerente de operações. Maximiza o rendimento do hideout e progride skills mais rápido. Vantagem cumulativa, não imediata em raid."
   },
+  "iconFile": "gerenteDeOperacoes.png",
+  "nameColor": "#4f8a80",
   "skills": {
     "Shotgun": 2,
     "Strength": 4,

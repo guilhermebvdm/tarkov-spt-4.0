@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -9,13 +9,18 @@
     <Authors>mdj</Authors>
     <Version>0.1.0</Version>
     <LangVersion>latest</LangVersion>
+    <!-- Sdk.Web defaults to Exe; this is a mod assembly loaded by the SPT server host (item 020, same as Skills-Extended). -->
+    <OutputType>Library</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Pinned to 4.0.0 (same as SkillDistribution server). Bump to 4.0.2 if restore/load fails against the installed SPT 4.0.13. -->
-    <PackageReference Include="SPTarkov.Server.Core" Version="4.0.0" />
-    <PackageReference Include="SPTarkov.DI" Version="4.0.0" />
-    <PackageReference Include="SPTarkov.Common" Version="4.0.0" />
+    <!-- Item 020: bumped 4.0.0 -> 4.0.2 to match SPTarkov.Server.Web 4.0.2 (same versions Skills-Extended uses).
+         Previous pin at 4.0.0 mirrored the SkillDistribution reference mod; the installed SPT 4.0.13 server
+         ships Web support, so the web stack requires the 4.0.2 package line. -->
+    <PackageReference Include="SPTarkov.Server.Core" Version="4.0.2" />
+    <PackageReference Include="SPTarkov.Server.Web" Version="4.0.2" />
+    <PackageReference Include="SPTarkov.DI" Version="4.0.2" />
+    <PackageReference Include="SPTarkov.Common" Version="4.0.2" />
   </ItemGroup>
 
 </Project>

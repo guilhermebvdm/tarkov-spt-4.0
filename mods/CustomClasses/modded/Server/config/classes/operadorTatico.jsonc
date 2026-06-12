@@ -1,10 +1,16 @@
 {
   "name": "Operador Tático",
+  "displayName": {
+    "en": "Tactical Operator",
+    "pt": "Operador Tático"
+  },
   "baseEdition": "SPT Zero to hero",
   "description": {
     "en": "Special Forces. Elite all-rounder with no obvious weaknesses. Superior fitness, fast aim and adapts to any fight.",
     "pt": "Forças especiais. Generalista de elite, sem fraquezas evidentes. Físico superior, mira rápida e adaptação a qualquer combate."
   },
+  "iconFile": "operadorTatico.png",
+  "nameColor": "#7a818c",
   "skills": {
     "Assault": 5,
     "AimDrills": 5,

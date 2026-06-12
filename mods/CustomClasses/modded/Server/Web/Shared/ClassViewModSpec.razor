@@ -1,0 +1,56 @@
+@* Item 024: recursive read-only renderer for a manual mod tree (ModSpec list).
+   Each nesting level renders inside its parent's wrapper div, so the fixed
+   24px margin compounds naturally per level. Depth only caps runaway recursion. *@
+
+@using SPTarkov.Server.Core.Models.Common
+@inject CatalogService Catalog
+
+<div style="margin-left:24px;">
+    @if (Depth > MaxDepth)
+    {
+        <MudText Typo="Typo.caption" Color="Color.Warning">… mod tree deeper than @MaxDepth levels — truncated.</MudText>
+    }
+    else
+    {
+        @foreach (var mod in Mods)
+        {
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Class="my-1">
+                <MudIcon Icon="@Icons.Material.Filled.SubdirectoryArrowRight" Size="Size.Small" Color="Color.Default"/>
+                <MudText Typo="Typo.body2">
+                    <span style="opacity:.65">@(mod.SlotId ?? "?"):</span> @ResolveName(mod.Tpl)
+                </MudText>
+            </MudStack>
+            @if (mod.Mods is { Count: > 0 })
+            {
+                <ClassViewModSpec Mods="@mod.Mods" Depth="@(Depth + 1)"/>
+            }
+        }
+    }
+</div>
+
+@code {
+    private const int MaxDepth = 12;
+
+    [Parameter, EditorRequired] public List<ModSpec> Mods { get; set; } = [];
+
+    /// <summary>Recursion guard only — visual indent comes from DOM nesting.</summary>
+    [Parameter] public int Depth { get; set; }
+
+    /// <summary>Item name via catalog; malformed/missing tpl degrades to the raw string (never throws).</summary>
+    private string ResolveName(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return "(mod without tpl)";
+        }
+
+        try
+        {
+            return Catalog.GetItemName(new MongoId(raw));
+        }
+        catch
+        {
+            return raw; // malformed id — show as-is, CostService already reports it as a warning
+        }
+    }
+}

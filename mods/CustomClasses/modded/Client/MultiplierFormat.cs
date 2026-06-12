@@ -38,7 +38,7 @@ internal static class MultiplierFormat
 
     /// <summary>
     ///     Frase do tooltip (rawText — preserva as tags): nome da classe em negrito + "+X% buff/debuff"
-    ///     colorido. Idioma escolhido pelo seletor do F12 (item 008); fallback de nome quando ausente.
+    ///     colorido. Idioma segue o EFT (item 008); fallback de nome quando ausente.
     /// </summary>
     public static string TooltipText(float factor, string? className)
     {
@@ -48,7 +48,7 @@ internal static class MultiplierFormat
         var word = up ? "buff" : "debuff";
         var sign = pct >= 0 ? "+" : string.Empty;
 
-        if (Plugin.Lang == Plugin.Language.Portugues)
+        if (GameLocale.IsPortuguese)   // item 008: segue o idioma do EFT
         {
             var amountPt = $"<color={hex}>{sign}{pct}% de {word}</color>";
             var clsPt = string.IsNullOrWhiteSpace(className) ? "sua Classe" : $"Classe <b>{className}</b>";

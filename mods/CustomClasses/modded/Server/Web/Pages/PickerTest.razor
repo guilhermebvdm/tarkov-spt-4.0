@@ -1,0 +1,135 @@
+@page "/customclasses/picker-test"
+@layout BaseLayout
+
+@* Item 023: temporary harness exercising the four pickers in isolation.
+   Not linked in the NavMenu on purpose — reach it by URL. Removal/keep is a 029 call. *@
+
+@inject IDialogService DialogService
+
+<PageTitle>CustomClasses — Picker test</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4 mb-8">
+    <MudText Typo="Typo.h4" Class="mb-4">Picker test harness (item 023)</MudText>
+
+    <MudGrid Spacing="3">
+
+        @* ── ItemPicker — inline ── *@
+        <MudItem xs="12" md="6">
+            <MudPaper Elevation="1" Class="pa-4" Style="height: 100%;">
+                <MudText Typo="Typo.h6" Class="mb-2">ItemPicker — inline</MudText>
+                <ItemPicker OnItemSelected="@(tpl => _inlineItem = tpl)"/>
+                <MudText Typo="Typo.body2" Class="mt-2">Selected: <b>@(_inlineItem ?? "—")</b></MudText>
+            </MudPaper>
+        </MudItem>
+
+        @* ── ItemPicker — dialog + FilterTpls demo ── *@
+        <MudItem xs="12" md="6">
+            <MudPaper Elevation="1" Class="pa-4" Style="height: 100%;">
+                <MudText Typo="Typo.h6" Class="mb-2">ItemPicker — dialog mode</MudText>
+                <MudStack Row="true" Spacing="2" Class="mb-2">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenItemDialogAsync">
+                        Open picker dialog
+                    </MudButton>
+                    <MudButton Variant="Variant.Outlined" OnClick="OpenFilteredDialogAsync">
+                        Dialog with FilterTpls (tpl starts with "5a")
+                    </MudButton>
+                </MudStack>
+                <MudText Typo="Typo.body2">Selected: <b>@(_dialogItem ?? "—")</b></MudText>
+
+                <MudDivider Class="my-4"/>
+
+                <MudText Typo="Typo.h6" Class="mb-2">Weapon tpl (feeds Preset + Ammo pickers)</MudText>
+                <MudTextField T="string" @bind-Value="_weaponTpl"
+                              Label="Weapon tpl" Variant="Variant.Outlined" Margin="Margin.Dense"
+                              HelperText="Default: M4A1 (5447a9cd4bdc2dbd208b4567)"/>
+            </MudPaper>
+        </MudItem>
+
+        @* ── PresetPicker ── *@
+        <MudItem xs="12" md="6">
+            <MudPaper Elevation="1" Class="pa-4" Style="height: 100%;">
+                <MudText Typo="Typo.h6" Class="mb-2">PresetPicker</MudText>
+                <PresetPicker WeaponTpl="@_weaponTpl"
+                              OnPresetSelected="@(id => _preset = id)"/>
+                <MudText Typo="Typo.body2" Class="mt-2">Selected preset: <b>@(_preset ?? "—")</b></MudText>
+            </MudPaper>
+        </MudItem>
+
+        @* ── AmmoPicker ── *@
+        <MudItem xs="12" md="6">
+            <MudPaper Elevation="1" Class="pa-4" Style="height: 100%;">
+                <MudText Typo="Typo.h6" Class="mb-2">AmmoPicker</MudText>
+                <AmmoPicker WeaponTpl="@_weaponTpl"
+                            OnAmmoSelected="@(tpl => _ammo = tpl)"/>
+                <MudText Typo="Typo.body2" Class="mt-2">Selected ammo: <b>@(_ammo ?? "—")</b></MudText>
+            </MudPaper>
+        </MudItem>
+
+        @* ── CustomizationPicker ── *@
+        <MudItem xs="12">
+            <MudPaper Elevation="1" Class="pa-4">
+                <MudText Typo="Typo.h6" Class="mb-2">CustomizationPicker</MudText>
+                <MudStack Row="true" Spacing="2" Class="mb-2">
+                    <MudSelect T="string" @bind-Value="_side" Label="Side"
+                               Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true">
+                        <MudSelectItem T="string" Value="@("Usec")">Usec</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("Bear")">Bear</MudSelectItem>
+                    </MudSelect>
+                    <MudSelect T="string" @bind-Value="_slotKind" Label="Slot"
+                               Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true">
+                        <MudSelectItem T="string" Value="@("Upper")">Upper</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("Lower")">Lower</MudSelectItem>
+                    </MudSelect>
+                </MudStack>
+                <CustomizationPicker Side="@_side" SlotKind="@_slotKind"
+                                     OnClothingSelected="@(id => _clothing = id)"/>
+                <MudText Typo="Typo.body2" Class="mt-2">Selected clothing: <b>@(_clothing ?? "—")</b></MudText>
+            </MudPaper>
+        </MudItem>
+
+    </MudGrid>
+</MudContainer>
+
+@code {
+    private string? _inlineItem;
+    private string? _dialogItem;
+    private string? _preset;
+    private string? _ammo;
+    private string? _clothing;
+    private string _weaponTpl = "5447a9cd4bdc2dbd208b4567";   // M4A1
+    private string _side = "Usec";
+    private string _slotKind = "Upper";
+
+    private static readonly DialogOptions PickerDialogOptions = new()
+    {
+        MaxWidth = MaxWidth.Medium,
+        FullWidth = true,
+        CloseButton = true,
+    };
+
+    private async Task OpenItemDialogAsync()
+    {
+        var dialog = await DialogService.ShowAsync<ItemPicker>("Select item", PickerDialogOptions);
+        var result = await dialog.Result;
+        if (result is { Canceled: false, Data: string tpl })
+        {
+            _dialogItem = tpl;
+        }
+    }
+
+    private async Task OpenFilteredDialogAsync()
+    {
+        // Arbitrary predicate just to exercise FilterTpls end-to-end (026 will pass slot filters).
+        var parameters = new DialogParameters<ItemPicker>
+        {
+            { x => x.FilterTpls, tpl => tpl.StartsWith("5a", StringComparison.Ordinal) },
+            { x => x.Title, "Select item (tpl starts with 5a)" },
+        };
+        var dialog = await DialogService.ShowAsync<ItemPicker>("Select item", parameters, PickerDialogOptions);
+        var result = await dialog.Result;
+        if (result is { Canceled: false, Data: string tpl })
+        {
+            _dialogItem = tpl;
+        }
+    }
+}

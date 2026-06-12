@@ -1,0 +1,76 @@
+@using SPTarkov.Server.Core.Models.Common
+
+@* Item 023: lists the presets available for a weapon/armor tpl (CatalogService.GetPresetsFor)
+   with Default/Premium chips matching what InventoryBuilder resolves for `preset: <tpl>` and
+   `premium: true`. Row click fires OnPresetSelected with the preset id. *@
+
+@inject CatalogService Catalog
+
+<MudStack Spacing="1">
+    @if (string.IsNullOrWhiteSpace(WeaponTpl))
+    {
+        <MudText Typo="Typo.body2" Class="mud-text-secondary">No weapon tpl set.</MudText>
+    }
+    else if (_presets.Count == 0)
+    {
+        <MudText Typo="Typo.body2" Class="mud-text-secondary">No presets found for @WeaponTpl.</MudText>
+    }
+    else
+    {
+        <MudTable Items="_presets" Dense="true" Hover="true"
+                  T="CatalogPreset"
+                  OnRowClick="@(args => SelectAsync(args.Item))"
+                  RowStyle="cursor: pointer;">
+            <HeaderContent>
+                <MudTh>Preset</MudTh>
+                <MudTh>Items</MudTh>
+                <MudTh>Flags</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Preset">
+                    <MudText Typo="Typo.body2">@(context.Name ?? context.Id)</MudText>
+                    <MudText Typo="Typo.caption" Class="mud-text-secondary">@context.Id</MudText>
+                </MudTd>
+                <MudTd DataLabel="Items">@context.ItemCount</MudTd>
+                <MudTd DataLabel="Flags">
+                    @if (context.IsDefault)
+                    {
+                        <MudChip T="string" Size="Size.Small" Color="Color.Info">Default</MudChip>
+                    }
+                    @if (context.IsPremium)
+                    {
+                        <MudChip T="string" Size="Size.Small" Color="Color.Warning">Premium</MudChip>
+                    }
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+</MudStack>
+
+@code {
+    /// <summary>Root weapon/armor tpl whose presets are listed.</summary>
+    [Parameter] public string? WeaponTpl { get; set; }
+
+    /// <summary>Fired with the selected preset id.</summary>
+    [Parameter] public EventCallback<string> OnPresetSelected { get; set; }
+
+    private List<CatalogPreset> _presets = [];
+    private string? _loadedTpl;
+
+    protected override void OnParametersSet()
+    {
+        if (string.Equals(WeaponTpl, _loadedTpl, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        _loadedTpl = WeaponTpl;
+        // MongoId(string) throws on malformed ids — guard so a half-typed tpl can't kill the circuit.
+        _presets = WeaponTpl is not null && MongoId.IsValidMongoId(WeaponTpl)
+            ? Catalog.GetPresetsFor(new MongoId(WeaponTpl))
+            : [];
+    }
+
+    private Task SelectAsync(CatalogPreset? preset) =>
+        preset is null ? Task.CompletedTask : OnPresetSelected.InvokeAsync(preset.Id);
+}

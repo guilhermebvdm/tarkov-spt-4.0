@@ -1,0 +1,581 @@
+@page "/customclasses/classes/{FileName}"
+@layout BaseLayout
+
+@* Item 024: read-only detail of one class FILE. The route carries the file name WITHOUT
+   extension ("cacador", not "cacador.jsonc") — a dot in the last URL segment can be picked
+   up as a static-file request; resolution back to the real file happens in OnParametersSet
+   (exact match first, then extension-less match). Data: ClassEditorService (parse + dry-run
+   diagnostics), CostService (skill/loadout breakdowns), CatalogService (names). *@
+
+@using System.Globalization
+@using SPTarkov.Server.Core.Models.Common
+@inject ClassEditorService EditorService
+@inject CostService CostService
+@inject CatalogService Catalog
+@inject ClassRegistrar Registrar
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+
+<PageTitle>CustomClasses — @(_entry?.Definition?.Name ?? FileName)</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudPaper Elevation="0" Class="pa-6">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-4">
+            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Href="/customclasses/classes"
+                           Size="Size.Small" title="Back to the class list"/>
+            @if (_entry?.Definition?.IconFile is { Length: > 0 } icon)
+            {
+                <img src="@($"/CustomClasses-Server/icons/{icon}")" alt="" width="48" height="48"
+                     style="object-fit:contain;"/>
+            }
+            <MudText Typo="Typo.h4" Style="@NameStyle()">
+                @(_entry?.Definition?.Name ?? FileName)
+            </MudText>
+            @if (_entry is not null)
+            {
+                @StatusChip(_entry)
+            }
+            <MudSpacer/>
+            @if (_entry?.Definition is not null)
+            {
+                @* Item 025: edit page (simple fields + outfit; equipped/stash arrive in 026/028). *@
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                           StartIcon="@Icons.Material.Filled.Edit"
+                           Href="@($"/customclasses/classes/{Uri.EscapeDataString(Path.GetFileNameWithoutExtension(_entry.FileName))}/edit")">
+                    Edit
+                </MudButton>
+                @* Item 027: duplicate = official rename path (same dialog as the list). *@
+                <MudButton Variant="Variant.Outlined" Size="Size.Small"
+                           StartIcon="@Icons.Material.Filled.ContentCopy"
+                           OnClick="OpenDuplicateDialogAsync">
+                    Duplicate
+                </MudButton>
+            }
+            @if (_entry is not null)
+            {
+                @* Item 027: delete works even for unparseable files (file-only removal). *@
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" Size="Size.Small"
+                           StartIcon="@Icons.Material.Filled.Delete"
+                           OnClick="OpenDeleteDialogAsync">
+                    Delete
+                </MudButton>
+            }
+        </MudStack>
+
+        @if (_entry is null)
+        {
+            <MudAlert Severity="Severity.Error" Dense="true">
+                No class file matching "@FileName" was found in config/classes/.
+            </MudAlert>
+        }
+        else
+        {
+            @* ── Diagnostics (parse + boot-equivalent dry-run) ─────────────────── *@
+            @foreach (var d in _entry.Diagnostics)
+            {
+                <MudAlert Severity="@MapSeverity(d.Severity)" Dense="true" Class="mb-1">
+                    [@d.Code] @d.Message
+                </MudAlert>
+            }
+
+            @if (_entry.Definition is null)
+            {
+                <MudText Typo="Typo.body2" Class="mt-4">
+                    The file could not be parsed — fix it on disk (a <code>.bak1</code> backup
+                    exists if the editor ever wrote it) and reload this page.
+                </MudText>
+            }
+            else
+            {
+                var def = _entry.Definition;
+
+                <MudExpansionPanels MultiExpansion="true" Class="mt-4">
+
+                    @* ── General ───────────────────────────────────────────────── *@
+                    <MudExpansionPanel Text="General" Expanded="true">
+                        <MudSimpleTable Dense="true">
+                            <tbody>
+                            <tr><td style="width:220px">name (edition key)</td><td><b>@def.Name</b></td></tr>
+                            <tr><td>displayName (en)</td><td>@(def.DisplayName?.En ?? "—")</td></tr>
+                            <tr><td>displayName (pt)</td><td>@(def.DisplayName?.Pt ?? "—")</td></tr>
+                            <tr><td>description (en)</td><td>@(def.Description?.En ?? "—")</td></tr>
+                            <tr><td>description (pt)</td><td>@(def.Description?.Pt ?? "—")</td></tr>
+                            <tr>
+                                <td>baseEdition</td>
+                                <td>@(string.IsNullOrWhiteSpace(def.BaseEdition) ? "SPT Zero to hero (default)" : def.BaseEdition)</td>
+                            </tr>
+                            <tr>
+                                <td>enabled</td>
+                                <td>
+                                    <MudChip T="string" Size="Size.Small"
+                                             Color="@(def.Enabled ? Color.Success : Color.Default)">
+                                        @(def.Enabled ? "true" : "false")
+                                    </MudChip>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>nameColor</td>
+                                <td>
+                                    @if (string.IsNullOrWhiteSpace(def.NameColor))
+                                    {
+                                        <span>—</span>
+                                    }
+                                    else
+                                    {
+                                        <span style="display:inline-block;width:16px;height:16px;border-radius:3px;vertical-align:middle;border:1px solid #666;background:@def.NameColor"></span>
+                                        <code class="ml-2">@def.NameColor</code>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>iconFile</td>
+                                <td>
+                                    @if (string.IsNullOrWhiteSpace(def.IconFile))
+                                    {
+                                        <span>— (name-only fallback in the launcher/UI)</span>
+                                    }
+                                    else
+                                    {
+                                        <img src="@($"/CustomClasses-Server/icons/{def.IconFile}")" alt="@def.IconFile"
+                                             width="64" height="64" style="object-fit:contain;vertical-align:middle;"/>
+                                        <code class="ml-2">@def.IconFile</code>
+                                    }
+                                </td>
+                            </tr>
+                            </tbody>
+                        </MudSimpleTable>
+                    </MudExpansionPanel>
+
+                    @* ── Skills (levels + weighted cost, item 022) ─────────────── *@
+                    <MudExpansionPanel Text="@($"Skills ({def.Skills?.Count ?? 0})")" Expanded="true">
+                        @if (_skillCost is null || _skillCost.Skills.Count == 0)
+                        {
+                            <MudText Typo="Typo.body2">No starting skills.</MudText>
+                        }
+                        else
+                        {
+                            <MudTable Items="@_skillCost.Skills" Dense="true" Hover="true">
+                                <HeaderContent>
+                                    <MudTh>Skill</MudTh>
+                                    <MudTh Style="text-align:right">Level</MudTh>
+                                    <MudTh Style="text-align:right">Weight</MudTh>
+                                    <MudTh>Weight origin</MudTh>
+                                    <MudTh Style="text-align:right">Cost</MudTh>
+                                </HeaderContent>
+                                <RowTemplate>
+                                    <MudTd DataLabel="Skill">@context.Skill</MudTd>
+                                    <MudTd DataLabel="Level" Style="text-align:right">@context.Level</MudTd>
+                                    <MudTd DataLabel="Weight" Style="text-align:right">@context.Weight.ToString("0.00", CultureInfo.InvariantCulture)</MudTd>
+                                    <MudTd DataLabel="Weight origin">@context.Origin</MudTd>
+                                    <MudTd DataLabel="Cost" Style="text-align:right">@context.Cost.ToString("0.00", CultureInfo.InvariantCulture)</MudTd>
+                                </RowTemplate>
+                            </MudTable>
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mt-3">
+                                <MudText Typo="Typo.body1"><b>Total weighted cost:</b></MudText>
+                                @SkillTotalChip()
+                                <MudText Typo="Typo.caption">budget [@SkillWeights.BudgetMin.ToString("0"), @SkillWeights.BudgetMax.ToString("0")]</MudText>
+                            </MudStack>
+                            @foreach (var w in _skillCost.Warnings)
+                            {
+                                <MudAlert Severity="Severity.Warning" Dense="true" Class="mt-1">@w</MudAlert>
+                            }
+                        }
+                    </MudExpansionPanel>
+
+                    @* ── XP multipliers (display only — never part of the cost) ── *@
+                    <MudExpansionPanel Text="@($"XP multipliers ({def.SkillMultipliers?.Count ?? 0})")">
+                        @if (def.SkillMultipliers is not { Count: > 0 } multipliers)
+                        {
+                            <MudText Typo="Typo.body2">No skill XP multipliers.</MudText>
+                        }
+                        else
+                        {
+                            @if (!_seInstalled && multipliers.Keys.Any(IsSeSkill))
+                            {
+                                <MudAlert Severity="Severity.Warning" Dense="true" Class="mb-2">
+                                    Skills-Extended is NOT installed — multipliers on its skills are registered but inert.
+                                </MudAlert>
+                            }
+                            <MudTable Items="@multipliers.ToList()" Dense="true" Hover="true">
+                                <HeaderContent>
+                                    <MudTh>Skill</MudTh>
+                                    <MudTh Style="text-align:right">Factor</MudTh>
+                                </HeaderContent>
+                                <RowTemplate>
+                                    <MudTd DataLabel="Skill">
+                                        @context.Key
+                                        @if (IsSeSkill(context.Key))
+                                        {
+                                            <MudChip T="string" Size="Size.Small" Color="Color.Info" Class="ml-2">Skills-Extended</MudChip>
+                                        }
+                                    </MudTd>
+                                    <MudTd DataLabel="Factor" Style="text-align:right">
+                                        <MudText Typo="Typo.body2" Color="@FactorColor(context.Value)">
+                                            ×@context.Value.ToString("0.##", CultureInfo.InvariantCulture)
+                                        </MudText>
+                                    </MudTd>
+                                </RowTemplate>
+                            </MudTable>
+                        }
+                    </MudExpansionPanel>
+
+                    @* ── Hideout ───────────────────────────────────────────────── *@
+                    <MudExpansionPanel Text="@($"Hideout ({def.Hideout?.Count ?? 0})")">
+                        @if (def.Hideout is not { Count: > 0 } hideout)
+                        {
+                            <MudText Typo="Typo.body2">No hideout station overrides.</MudText>
+                        }
+                        else
+                        {
+                            <MudTable Items="@hideout.ToList()" Dense="true" Hover="true">
+                                <HeaderContent>
+                                    <MudTh>Station</MudTh>
+                                    <MudTh Style="text-align:right">Starting level</MudTh>
+                                </HeaderContent>
+                                <RowTemplate>
+                                    <MudTd DataLabel="Station">@context.Key</MudTd>
+                                    <MudTd DataLabel="Starting level" Style="text-align:right">@context.Value</MudTd>
+                                </RowTemplate>
+                            </MudTable>
+                        }
+                    </MudExpansionPanel>
+
+                    @* ── Outfit ────────────────────────────────────────────────── *@
+                    <MudExpansionPanel Text="Outfit">
+                        @if (def.Outfit is null)
+                        {
+                            <MudText Typo="Typo.body2">No outfit configured (template defaults apply).</MudText>
+                        }
+                        else
+                        {
+                            <MudSimpleTable Dense="true">
+                                <thead>
+                                <tr><th style="text-align:left;width:120px">Side</th><th style="text-align:left">Upper</th><th style="text-align:left">Lower</th></tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>USEC</td>
+                                    <td>@ClothingLabel(def.Outfit.Usec?.Upper)</td>
+                                    <td>@ClothingLabel(def.Outfit.Usec?.Lower)</td>
+                                </tr>
+                                <tr>
+                                    <td>BEAR</td>
+                                    <td>@ClothingLabel(def.Outfit.Bear?.Upper)</td>
+                                    <td>@ClothingLabel(def.Outfit.Bear?.Lower)</td>
+                                </tr>
+                                </tbody>
+                            </MudSimpleTable>
+                        }
+                    </MudExpansionPanel>
+
+                    @* ── Equipped (recursive ItemSpec trees) ───────────────────── *@
+                    <MudExpansionPanel Text="@($"Equipped ({def.Loadout?.Equipped?.Count ?? 0} slots)")" Expanded="true">
+                        @if (def.Loadout?.Equipped is not { Count: > 0 } equipped)
+                        {
+                            <MudText Typo="Typo.body2">No equipped items.</MudText>
+                        }
+                        else
+                        {
+                            @foreach (var (slot, spec) in equipped)
+                            {
+                                <MudText Typo="Typo.subtitle2" Class="mt-3" Style="opacity:.75">@slot</MudText>
+                                <ClassViewItemSpec Spec="@spec"/>
+                            }
+                        }
+                    </MudExpansionPanel>
+
+                    @* ── Stash (priced lines from the 022 breakdown) ───────────── *@
+                    <MudExpansionPanel Text="@($"Stash ({def.Loadout?.Stash?.Count ?? 0} lines)")">
+                        @if (def.Loadout?.Stash is not { Count: > 0 })
+                        {
+                            <MudText Typo="Typo.body2">No loose stash items.</MudText>
+                        }
+                        else if (_stashLines.Count == 0)
+                        {
+                            <MudAlert Severity="Severity.Warning" Dense="true">
+                                Stash entries exist but none produced a priced line — see the Cost summary warnings.
+                            </MudAlert>
+                        }
+                        else
+                        {
+                            @* context=="stash" only — container contents/ammo show in the full breakdown (Cost panel). *@
+                            <MudTable Items="@_stashLines" Dense="true" Hover="true">
+                                <HeaderContent>
+                                    <MudTh>Item</MudTh>
+                                    <MudTh>Tpl</MudTh>
+                                    <MudTh Style="text-align:right">Qty</MudTh>
+                                    <MudTh Style="text-align:right">Unit ₽</MudTh>
+                                    <MudTh>Price source</MudTh>
+                                    <MudTh Style="text-align:right">Subtotal ₽</MudTh>
+                                </HeaderContent>
+                                <RowTemplate>
+                                    <MudTd DataLabel="Item">@context.Name @MissingPriceBadge(context)</MudTd>
+                                    <MudTd DataLabel="Tpl"><code style="font-size:11px">@context.Tpl</code></MudTd>
+                                    <MudTd DataLabel="Qty" Style="text-align:right">@context.Qty.ToString("N0", CultureInfo.InvariantCulture)</MudTd>
+                                    <MudTd DataLabel="Unit ₽" Style="text-align:right">@context.UnitPrice.ToString("N0", CultureInfo.InvariantCulture)</MudTd>
+                                    <MudTd DataLabel="Price source">@context.PriceSource</MudTd>
+                                    <MudTd DataLabel="Subtotal ₽" Style="text-align:right">@context.Subtotal.ToString("N0", CultureInfo.InvariantCulture)</MudTd>
+                                </RowTemplate>
+                            </MudTable>
+                        }
+                    </MudExpansionPanel>
+
+                    @* ── Cost summary (both totals + full breakdown) ───────────── *@
+                    <MudExpansionPanel Text="Cost summary" Expanded="true">
+                        <MudStack Row="true" Spacing="6" Class="mb-3" Wrap="Wrap.Wrap">
+                            <MudStack Spacing="0">
+                                <MudText Typo="Typo.caption">Weighted skill cost</MudText>
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                    <MudText Typo="Typo.h5">@(_skillCost?.Total.ToString("0.00", CultureInfo.InvariantCulture) ?? "—")</MudText>
+                                    @SkillTotalChip()
+                                </MudStack>
+                                <MudText Typo="Typo.caption">budget [@SkillWeights.BudgetMin.ToString("0"), @SkillWeights.BudgetMax.ToString("0")]</MudText>
+                            </MudStack>
+                            <MudStack Spacing="0">
+                                <MudText Typo="Typo.caption">Loadout total</MudText>
+                                <MudText Typo="Typo.h5">@(_loadoutCost is null ? "—" : FormatRub(_loadoutCost.TotalRub))</MudText>
+                                <MudText Typo="Typo.caption">@(_loadoutCost?.Items.Count ?? 0) priced line(s)</MudText>
+                            </MudStack>
+                        </MudStack>
+
+                        @foreach (var w in _loadoutCost?.Warnings ?? [])
+                        {
+                            <MudAlert Severity="Severity.Warning" Dense="true" Class="mb-1">@w</MudAlert>
+                        }
+
+                        @if (_loadoutCost is { Items.Count: > 0 })
+                        {
+                            <MudText Typo="Typo.subtitle2" Class="mt-3 mb-1">Full price breakdown (equipped + stash + ammo + contents)</MudText>
+                            <MudTable Items="@_loadoutCost.Items" Dense="true" Hover="true">
+                                <HeaderContent>
+                                    <MudTh>Context</MudTh>
+                                    <MudTh>Item</MudTh>
+                                    <MudTh Style="text-align:right">Qty</MudTh>
+                                    <MudTh Style="text-align:right">Unit ₽</MudTh>
+                                    <MudTh>Price source</MudTh>
+                                    <MudTh Style="text-align:right">Subtotal ₽</MudTh>
+                                </HeaderContent>
+                                <RowTemplate>
+                                    <MudTd DataLabel="Context"><code style="font-size:11px">@context.Context</code></MudTd>
+                                    <MudTd DataLabel="Item">@context.Name @MissingPriceBadge(context)</MudTd>
+                                    <MudTd DataLabel="Qty" Style="text-align:right">@context.Qty.ToString("N0", CultureInfo.InvariantCulture)</MudTd>
+                                    <MudTd DataLabel="Unit ₽" Style="text-align:right">@context.UnitPrice.ToString("N0", CultureInfo.InvariantCulture)</MudTd>
+                                    <MudTd DataLabel="Price source">@context.PriceSource</MudTd>
+                                    <MudTd DataLabel="Subtotal ₽" Style="text-align:right">@context.Subtotal.ToString("N0", CultureInfo.InvariantCulture)</MudTd>
+                                </RowTemplate>
+                            </MudTable>
+                        }
+                    </MudExpansionPanel>
+
+                </MudExpansionPanels>
+            }
+        }
+    </MudPaper>
+</MudContainer>
+
+@code {
+    /// <summary>Route value: file name WITHOUT extension (preferred) or exact file name.</summary>
+    [Parameter] public string? FileName { get; set; }
+
+    private ClassFileEntry? _entry;
+    private SkillCostBreakdown? _skillCost;
+    private LoadoutCostBreakdown? _loadoutCost;
+    private List<LoadoutCostEntry> _stashLines = [];
+    private Dictionary<string, string> _clothingNames = new(StringComparer.Ordinal);
+    private bool _seInstalled;
+
+    protected override void OnParametersSet() => Reload();
+
+    /// <summary>Full reload from disk — also called after a lifecycle action (item 027: disable).</summary>
+    private void Reload()
+    {
+        _entry = null;
+        _skillCost = null;
+        _loadoutCost = null;
+        _stashLines = [];
+        _clothingNames = new Dictionary<string, string>(StringComparer.Ordinal);
+        _seInstalled = Registrar.SkillsExtendedInstalled;
+
+        if (string.IsNullOrWhiteSpace(FileName))
+        {
+            return;
+        }
+
+        // ListClassFiles (not Load) so this page shows the SAME dry-run diagnostics + Registered
+        // flag as the list. ~12 files → one extra dry-run pass per visit is fine (kickoff).
+        var entries = EditorService.ListClassFiles();
+        _entry = entries.FirstOrDefault(e => string.Equals(e.FileName, FileName, StringComparison.OrdinalIgnoreCase))
+                 ?? entries.FirstOrDefault(e => string.Equals(
+                     Path.GetFileNameWithoutExtension(e.FileName), FileName, StringComparison.OrdinalIgnoreCase));
+
+        if (_entry?.Definition is not { } def)
+        {
+            return;
+        }
+
+        _skillCost = CostService.ComputeSkillCost(def);
+        _loadoutCost = CostService.ComputeLoadoutCost(def);
+        _stashLines = _loadoutCost.Items
+            .Where(i => string.Equals(i.Context, "stash", StringComparison.Ordinal))
+            .ToList();
+
+        if (def.Outfit is not null)
+        {
+            // id → name for both factions; locale-based GetItemName does not cover customization
+            // templates reliably (its template fallback only reads items.json), so the clothing
+            // list from CatalogService (OutfitBuilder acceptance rules) is the name source.
+            foreach (var side in new[] { "Usec", "Bear" })
+            {
+                foreach (var piece in Catalog.GetClothing(side))
+                {
+                    if (!string.IsNullOrWhiteSpace(piece.Name))
+                    {
+                        _clothingNames[piece.Id] = piece.Name!;
+                    }
+                }
+            }
+        }
+    }
+
+    // ── Lifecycle actions (item 027) — same dialogs as the list page ─────────
+
+    private static readonly DialogOptions LifecycleDialogOptions = new()
+    {
+        MaxWidth = MaxWidth.Small,
+        FullWidth = true,
+        CloseButton = true,
+    };
+
+    private async Task OpenDuplicateDialogAsync()
+    {
+        if (_entry?.Definition is null)
+        {
+            return;
+        }
+
+        var parameters = new DialogParameters<ClassLifecycleDuplicateDialog>
+        {
+            { x => x.SourceFileName, _entry.FileName },
+            { x => x.SourceClassName, _entry.Definition.Name },
+        };
+        var dialog = await DialogService.ShowAsync<ClassLifecycleDuplicateDialog>("Duplicate class", parameters, LifecycleDialogOptions);
+        var result = await dialog.Result;
+        if (result is { Canceled: false, Data: string fileName })
+        {
+            Snackbar.Add($"Class duplicated to '{fileName}' and hot-applied.", Severity.Success);
+            var bare = Path.GetFileNameWithoutExtension(fileName);
+            Nav.NavigateTo($"/customclasses/classes/{Uri.EscapeDataString(bare)}");
+        }
+    }
+
+    private async Task OpenDeleteDialogAsync()
+    {
+        if (_entry is null)
+        {
+            return;
+        }
+
+        var parameters = new DialogParameters<ClassLifecycleDeleteDialog>
+        {
+            { x => x.FileName, _entry.FileName },
+            { x => x.ClassName, _entry.Definition?.Name },
+            { x => x.CanDisable, _entry.Definition is not null && _entry.Enabled },
+        };
+        var dialog = await DialogService.ShowAsync<ClassLifecycleDeleteDialog>("Delete class", parameters, LifecycleDialogOptions);
+        var result = await dialog.Result;
+        if (result is { Canceled: false, Data: string action })
+        {
+            if (action == "deleted")
+            {
+                Snackbar.Add($"'{_entry.FileName}' deleted (edition hot-removed; .bak1 keeps the last content).", Severity.Success);
+                Nav.NavigateTo("/customclasses/classes");
+            }
+            else
+            {
+                Snackbar.Add($"'{_entry.FileName}' disabled (edition hot-removed; file kept).", Severity.Success);
+                Reload();
+                StateHasChanged();
+            }
+        }
+    }
+
+    private string? NameStyle() =>
+        _entry?.Definition?.NameColor is { Length: > 0 } c ? $"color:{c};" : null;
+
+    private static Severity MapSeverity(DiagnosticSeverity severity) => severity switch
+    {
+        DiagnosticSeverity.Error => Severity.Error,
+        DiagnosticSeverity.Warning => Severity.Warning,
+        _ => Severity.Info,
+    };
+
+    private static bool IsSeSkill(string skillName) => SkillsExtendedCompat.Skills.Contains(skillName);
+
+    private static Color FactorColor(double factor) =>
+        factor > 1 ? Color.Success : factor < 1 ? Color.Error : Color.Default;
+
+    /// <summary>"Name (id)" via the catalog clothing list; unknown id degrades to the raw id.</summary>
+    private string ClothingLabel(string? id)
+    {
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            return "—";
+        }
+
+        return _clothingNames.TryGetValue(id!, out var name) ? $"{name} ({id})" : id!;
+    }
+
+    private static string FormatRub(double value) =>
+        value.ToString("N0", CultureInfo.InvariantCulture) + " ₽";
+
+    private RenderFragment StatusChip(ClassFileEntry entry) => __builder =>
+    {
+        if (entry.Definition is null || entry.Diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
+        {
+            <MudChip T="string" Size="Size.Small" Color="Color.Error">Invalid</MudChip>
+        }
+        else if (!entry.Enabled)
+        {
+            <MudChip T="string" Size="Size.Small" Color="Color.Default">Disabled</MudChip>
+        }
+        else if (entry.Registered)
+        {
+            <MudChip T="string" Size="Size.Small" Color="Color.Success">Registered</MudChip>
+        }
+        else
+        {
+            <MudChip T="string" Size="Size.Small" Color="Color.Warning">Not registered</MudChip>
+        }
+    };
+
+    private RenderFragment SkillTotalChip() => __builder =>
+    {
+        if (_skillCost is null)
+        {
+            return;
+        }
+
+        if (_skillCost.Total == 0)
+        {
+            <MudChip T="string" Size="Size.Small" Color="Color.Default">no skills</MudChip>
+        }
+        else
+        {
+            <MudChip T="string" Size="Size.Small"
+                     Color="@(_skillCost.WithinBudget ? Color.Success : Color.Warning)">
+                @(_skillCost.WithinBudget ? "within budget" : "outside budget")
+            </MudChip>
+        }
+    };
+
+    private RenderFragment MissingPriceBadge(LoadoutCostEntry entry) => __builder =>
+    {
+        if (entry.MissingPrice)
+        {
+            <MudTooltip Text="No flea or handbook price found — counted as 0 ₽">
+                <MudChip T="string" Size="Size.Small" Color="Color.Warning" Class="ml-1">⚠ no price</MudChip>
+            </MudTooltip>
+        }
+    };
+}

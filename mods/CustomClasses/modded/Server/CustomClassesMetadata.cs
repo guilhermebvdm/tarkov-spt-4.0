@@ -1,12 +1,16 @@
 using SPTarkov.Server.Core.Models.Spt.Mod;   // ref: SkillDistributionMetadata.cs:1
+using SPTarkov.Server.Web;                    // IModWebMetadata — ref: spt-source SPTarkov.Server.Web/IModBlazorMetadata.cs
 
 namespace CustomClasses;
 
 /// <summary>
 ///     Mod metadata discovered by the SPT server. Mirrors the shape of the reference mod
 ///     SkillDistributionMetadata (same SPT 4.0 server contract).
+///     Item 020: also implements <see cref="IModWebMetadata"/> (empty marker) so the host
+///     registers this assembly's Blazor pages and mounts wwwroot/ at /CustomClasses-Server/
+///     (ref: SPTWeb.cs InitializeSptBlazor/UseSptBlazor).
 /// </summary>
-public record CustomClassesMetadata : AbstractModMetadata
+public record CustomClassesMetadata : AbstractModMetadata, IModWebMetadata
 {
     public override string ModGuid { get; init; } = "customclasses.mdj";
     public override string Name { get; init; } = "CustomClasses";
