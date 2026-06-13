@@ -1,0 +1,183 @@
+@* Item 027: delete-confirmation dialog. On open it scans user/profiles/*.json (off the circuit
+   thread — profiles are MB-sized) for profiles created from this edition and, when any exist,
+   shows a strong warning: those profiles lose identity/multipliers but keep working (edition key
+   simply stops resolving). Three outcomes:
+   - "Delete file"      → ClassEditorService.Delete(hotRemove:true)  → closes Ok("deleted")
+   - "Disable instead"  → Save(enabled:false, hotApply:true)         → closes Ok("disabled")
+     (Save itself hot-applies enabled:false as ClassRegistrar.Remove — no extra Remove call needed,
+      see ClassEditorService.Save docs)
+   - "Cancel"           → Dialog.Cancel()
+   The .bak1 rotating backup keeps the last file content recoverable after a delete. *@
+
+@inject ClassEditorService EditorService
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">Delete "@(ClassName ?? FileName)"</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudStack Spacing="3">
+            <MudText Typo="Typo.body2">
+                Deletes <code>@FileName</code> from <code>config/classes/</code> and hot-removes the
+                edition — it disappears from the launcher immediately (no restart). The last content
+                stays recoverable as <code>@($"{FileName}.bak1")</code>.
+            </MudText>
+
+            @if (!_profilesLoaded)
+            {
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                    <MudProgressCircular Indeterminate="true" Size="Size.Small"/>
+                    <MudText Typo="Typo.body2">Scanning user profiles…</MudText>
+                </MudStack>
+            }
+            else if (_profiles.Count > 0)
+            {
+                <MudAlert Severity="Severity.Error" Dense="true">
+                    <b>@_profiles.Count profile(s) were created from this class.</b> They will keep
+                    working, but will be left <b>without class identity and without skill XP
+                    multipliers</b> (icon, colored name and bonuses all stop resolving):
+                </MudAlert>
+                <MudPaper Elevation="0" Class="pa-2" Style="max-height:160px;overflow-y:auto;">
+                    @foreach (var profile in _profiles)
+                    {
+                        <MudText Typo="Typo.body2">• @profile</MudText>
+                    }
+                </MudPaper>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                    Prefer <b>Disable instead</b> to hide the class from the launcher while keeping
+                    identity/multipliers for these profiles.
+                </MudText>
+            }
+            else if (ClassName is not null)
+            {
+                <MudAlert Severity="Severity.Info" Dense="true">
+                    No user profile uses this class — safe to delete.
+                </MudAlert>
+            }
+            else
+            {
+                <MudAlert Severity="Severity.Warning" Dense="true">
+                    The file could not be parsed, so profile usage cannot be checked. Deleting removes
+                    the file only (nothing to hot-remove).
+                </MudAlert>
+            }
+
+            @foreach (var d in _diagnostics)
+            {
+                <MudAlert Severity="@(d.Severity == DiagnosticSeverity.Error ? Severity.Error : Severity.Warning)" Dense="true">
+                    [@d.Code] @d.Message
+                </MudAlert>
+            }
+            @if (_actionError is not null)
+            {
+                <MudAlert Severity="Severity.Error" Dense="true">@_actionError</MudAlert>
+            }
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => Dialog?.Cancel())">Cancel</MudButton>
+        @if (CanDisable)
+        {
+            <MudButton Variant="Variant.Outlined" Color="Color.Warning"
+                       Disabled="@_busy" OnClick="DisableAsync">
+                Disable instead
+            </MudButton>
+        }
+        <MudButton Variant="Variant.Filled" Color="Color.Error"
+                   Disabled="@_busy" OnClick="DeleteAsync">
+            Delete file
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance? Dialog { get; set; }
+
+    /// <summary>Bare file name of the class file to delete (e.g. "cacador.jsonc").</summary>
+    [Parameter, EditorRequired] public string FileName { get; set; } = string.Empty;
+
+    /// <summary>Edition key (def.name). Null when the file is unparseable — profile scan is skipped.</summary>
+    [Parameter] public string? ClassName { get; set; }
+
+    /// <summary>False hides "Disable instead" (already-disabled or unparseable class).</summary>
+    [Parameter] public bool CanDisable { get; set; } = true;
+
+    private List<string> _profiles = [];
+    private bool _profilesLoaded;
+    private bool _busy;
+    private string? _actionError;
+    private List<ClassDiagnostic> _diagnostics = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(ClassName))
+        {
+            // Off the circuit thread: JsonDocument scan over every profile file (MB-sized JSONs).
+            var edition = ClassName!;
+            _profiles = await Task.Run(() => EditorService.ProfilesUsingEdition(edition));
+        }
+
+        _profilesLoaded = true;
+    }
+
+    private async Task DeleteAsync()
+    {
+        _busy = true;
+        _actionError = null;
+        bool deleted;
+        try
+        {
+            deleted = await Task.Run(() => EditorService.Delete(FileName, hotRemove: true));
+        }
+        finally
+        {
+            _busy = false;   // CR2-EP-10: an IO exception must never leave the dialog stuck on busy
+        }
+
+        if (deleted)
+        {
+            Dialog?.Close(DialogResult.Ok("deleted"));
+        }
+        else
+        {
+            _actionError = $"Delete failed — '{FileName}' was not found (already deleted?). Reload the list.";
+        }
+    }
+
+    private async Task DisableAsync()
+    {
+        _busy = true;
+        _actionError = null;
+        _diagnostics = [];
+
+        SaveResult result;
+        try
+        {
+            // Load fresh from disk, flip enabled, save with hot-apply (= ClassRegistrar.Remove for disabled).
+            result = await Task.Run(() =>
+            {
+                var def = EditorService.Load(FileName, out var loadDiagnostics);
+                if (def is null)
+                {
+                    return new SaveResult(false, loadDiagnostics);
+                }
+
+                return EditorService.Save(FileName, def with { Enabled = false }, hotApply: true);
+            });
+        }
+        finally
+        {
+            _busy = false;   // CR2-EP-10: an IO exception must never leave the dialog stuck on busy
+        }
+
+        if (result.Success)
+        {
+            Dialog?.Close(DialogResult.Ok("disabled"));
+        }
+        else
+        {
+            _diagnostics = result.Diagnostics;
+            _actionError = "Disable failed — the file could not be re-saved (see diagnostics). You can still delete it.";
+        }
+    }
+}

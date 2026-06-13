@@ -8,15 +8,16 @@ Trabalho específico de cada mod fica em `mods/<mod>/memory/sessions.md`. Este a
 
 ## Estado atual (snapshot ao fim da última sessão)
 
-- **Workflow de backlog:** `/add-backlog-item` → `/create-spec` → `/review-spec` (inline edits) → `/create-technical-spec` → `/review-technical-spec` (NN incremental) → `/code-mod` (gera `05-asbuild.md`) → `/code-review` (NN incremental) → `/apply-code-review` → `/compile-mod`.
-- **Convenção de naming canônica:** `NNN-<slug>-MM-tipo[-NN].md` onde `MM` é a posição no ciclo: `01-spec`, `02-spec-tech`, `03-spec-tech-review-NN`, `04-code-review-NN`, `05-asbuild`, `06-fix-NN`.
-- **Skills ativas:**
-  - `spt-mod-best-practices` — lifecycle SPT 4.0 / EFT 0.16.x, raid hooks, leaks, Harmony.
-  - `csharp-mod-best-practices` — C# / runtime para BepInEx.
-  - `repo-workflow-best-practices` — convenção de naming, rastreabilidade PA-NN-MM/CR-NN-MM, sandbox `modded/` vs `original/`.
-  - `memory-curation` — regras de redação para `sessions.md` / `repo-sessions.md`.
-- **Commands custom:** `/add-backlog-item`, `/create-spec`, `/review-spec`, `/create-technical-spec`, `/review-technical-spec`, `/code-mod`, `/code-review`, `/apply-code-review`, `/compile-mod`, `/add-mod-repo-for-modding`, `/update-mods-inventory`, `/add-mod-inventory-list`, `/serve-inventory`, `/update-memory`.
-- **Mods no repo (5):** `stancesAndCameraPositionSPT4.0.11` (ativo), `SPT-Realism-Mod-Client` (vendor pinned), `SPT-DynamicMaps` (vendor pinned), `RZCustomProfiles` (vendor pinned), `RZ-SPTMods` (vendor pinned).
+- **Workflow de backlog (canônico em [WORKFLOW.md](../WORKFLOW.md)):** `/add-backlog-item` → `/create-spec` → `/review-spec` → `/create-technical-spec` (conformidade §9) → `/review-technical-spec` (NN) → `/code-mod` → `/code-review` (NN) → `/apply-code-review` → `/compile-mod` → validação in-game → `06-fix-NN` (via `fix.md.tmpl`) → `/update-memory` → `/update-mod-graph`.
+- **Convenção de naming canônica:** `NNN-<slug>-MM-tipo[-NN].md` (`01-spec`, `02-spec-tech`, `03-spec-tech-review-NN`, `04-code-review-NN`, `05-asbuild`, `06-fix-NN`).
+- **Skills ativas (6):** `spt-mod-best-practices` (+§8 API canônica), `csharp-mod-best-practices` (+virtual dispatch), `repo-workflow-best-practices`, `memory-curation` (escrita §1-13 + consumo §14 + promoção §15), `graph-code-navigation` (grafos graphify).
+- **Memória é CONSUMIDA pelos commands de desenvolvimento** (passo "Contexto de memória", skill §14): pendência 🔴 do item/mod → alerta antes de prosseguir; todo command emite a linha greppável `Memória consultada:` no relatório (prova de consumo, obj2 observável).
+- **Antipatterns:** `docs/technical/spt-antipatterns.md` (AP-01..**08**, erros reais do stances) — checados na §9 da spec técnica (8 checks), critérios padrão da spec funcional (Fika + estado entre raids, N/A frágil em patch player-reactive = gap) e checklist do fix.
+- **Enforcement (não mais só prosa):** 3 gates no pre-commit — `check-delivered-validation.sh` (HARD: item 🟢 com caixa in-raid desmarcada bloqueia, AP-06; lê staged blob), `check-graph-freshness.sh` (WARN: código de mod mudou sem regenerar grafo), `check-memory-ids.sh` (WARN: pendência do topo sem `[P-N.M]`). **Validados executando** (não só write+hash) — o fix-review da Sessão 5b achou os 3 quebrados e corrigiu.
+- **IDs de pendência:** esquema único `P-<N>.<M>` (N=sessão), data inline `(aberta YYYY-MM-DD)` pra GC ser diff literal; stances e CustomClasses migrados.
+- **Grafos de código (graphify):** versionados em `references/graphs/` (todos os mods + eft-decompiled 58k nós + fika-* + spt-source); regeneração via `scripts/update-graphs.sh` / `/update-mod-graph`; **MCP só `graphify-eft`** (grafos de mod via CLI `--graph`); `graph.html` >1.5MB não versiona; `.graphifyignore` na raiz destrava as references gitignored.
+- **Commands custom (16):** ciclo de backlog + `/add-mod-repo-for-modding` (gera grafo), `/update-memory` (lições obrigatórias, GC >30d, promoções, gancho `/update-mod-graph`), `/update-mod-graph`, inventário (`/update-mods-inventory`, `/add-mod-inventory-list`, `/serve-inventory`).
+- **Mods no repo:** 10 com `modded/` (stances e CustomClasses ativos; demais vendor pinned/pontuais).
 - **Tools cross-cutting:** `tools/tarkov-itemdb/` — DB unificada (SPT + tarkov.dev + tarkov-market) com viewer HTML pra calibração manual do flea. Edit pelo viewer atualiza `prices.json` + `checks.dat` (MD5) + audit log. Env: `SPT_PATH`, `TARKOV_MARKET_API_KEY`. Detalhes em [tools/tarkov-itemdb/README.md](../tools/tarkov-itemdb/README.md) + [tools/tarkov-itemdb/docs/spt-internals.md](../tools/tarkov-itemdb/docs/spt-internals.md).
 - **LiveFleaPrices mod:** **desativado** (renomeado `<SPT>/user/mods/DrakiaXYZ-LiveFleaPrices.disabled/`) — substituído por calibração manual via viewer. `prices.json` hoje é autoral.
 - **Memory system:** ativo. 5 pastas `mods/*/memory/` + 1 top-level. Sessions com timestamps GMT-3 HH:MM (relógio do sistema via `Bash date '+%Y-%m-%d %H:%M'`).
@@ -24,9 +25,12 @@ Trabalho específico de cada mod fica em `mods/<mod>/memory/sessions.md`. Este a
 
 ## Pendências / próximos passos conhecidos
 
-- **Item 002 do stances mod aguarda validação in-raid de F4** após 06-fix-01 (ver `mods/stancesAndCameraPositionSPT4.0.11/memory/sessions.md`).
-- **Drift potencial no asbuild do stances mod** (referência a `06-fix-02` não rastreável nesta sessão) — investigar antes de gerar fix-02 novo com numeração duplicada.
-- **Ramificar features novas a partir de `main`** — `flea-price-formula-fix` virou ancestral da `main` via PR#2 (trabalho de tarkov-itemdb/RZCustomProfiles/docs flea agora está na main por carona do branch base).
+- [P-2.1] (aberta 2026-06-03) 🟢 **Ramificar features novas a partir de `main`** — lição da Sessão 2 (PR#2 levou carona do branch base). Candidata a promoção para `.agents/conventions.md`.
+- [P-4.1] (aberta 2026-06-12) 🟡 **Wiki no graphify — decisão pendente do usuário:** pipeline de markdown usa LLM (requer API key, ex. `GEMINI_API_KEY`) e a wiki é CC BY-NC-ND (derivado versionado só se o repo for privado). Amostra + custo antes de extração integral. Ver `references/graphs/README.md` § Notas.
+- [P-4.2] (aberta 2026-06-12) 🟢 **Replicar instalação do graphify no notebook (`guimello`):** `python -m pip install --user uv && python -m uv tool install graphifyy && python -m uv tool update-shell` + aprovar o server do `.mcp.json` no primeiro uso.
+- [P-5.1] (aberta 2026-06-13) 🟡 **Validação fim-a-fim dos fluxos no primeiro uso real** — os gates e a observabilidade obj2 foram testados isoladamente; o ciclo completo (spec→code→fix→memory→graph com os hooks ativos) ainda não rodou num item de backlog real.
+
+> GC 2026-06-12 (Sessão 4): pendências antigas "validação in-raid F4 (item 002)" e "drift asbuild 06-fix-02" descartadas DESTE arquivo — são escopo do mod e já rastreadas em `mods/stancesAndCameraPositionSPT4.0.11/memory/sessions.md` (dedup, skill §9).
 
 ## 2026-05-11 02:00 (GMT-3) — Sessão 1b: validação end-to-end do memory system
 
@@ -243,3 +247,99 @@ offerBase = clamp( (override ?? prices.json ?? 0) + bonus , floor , ceiling )
 - Fórmula/override/internals: `tools/tarkov-itemdb/docs/{flea-override-plan,flea-formula-validation,spt-internals}.md`.
 - Harness do smoke test: `tools/tarkov-itemdb/scripts/smoke-matrix.js`.
 - Memória pessoal (não versionada, não vai pro outro PC): `project_flea_price_formula.md`.
+
+## 2026-06-13 13:03 (GMT-3) — Sessão 5b: fix-review dos próprios fixes da 5a (os 3 hooks estavam quebrados)
+
+**Tema central:** revisar adversarialmente as correções da Sessão 5 (o agente revisando o próprio trabalho) e aplicar tudo confirmado sem aprovação — Workflow `review-the-fixes` (5 dimensões × verificação, 10/11 achados confirmados).
+
+**Decisões-chave:**
+- **Aplicar todos os 10 achados direto** (pedido do usuário, sem aprovação por achado), agrupados em 3 commits: hooks (`98ce849`), refinamento do hook (`ae07d28`), consistência (`9c5fb15`). Ref: `wf_e3b2ed9c-d88`.
+
+**Lições / hipóteses descartadas:**
+- **Os 3 gates de enforcement da Sessão 5 estavam todos quebrados — e o `check-memory-ids.sh` estava 100% MORTO.** A regex awk `/[Pp]end.ncias/` usava um `.` único para casar o `ê` de "Pendências", mas o `ê` são 2 bytes UTF-8 (0xC3 0xAA) e o GNU awk do git-bash roda em locale de byte único — o heading NUNCA casava, o gate nunca varria nada. O commit `411f00a` até afirmava "o hook rodou neste commit": rodou, mas não podia casar nada. **Isto reencena exatamente a lição `feedback_spt_validation`** — write+hash não prova nada; só rodar prova. Por isso o fix-review EXECUTOU os hooks contra estado real, não só leu o diff. Fix: `.` → `.*`.
+- **Hook que ficou vivo gerou falso positivo** — ao casar o heading, ele varria TODO bloco "Pendências" incluindo o "(ARQUIVADO)" e menções históricas dentro de entradas de sessão. Refinado para varrer só o PRIMEIRO bloco (snapshot do topo) e parar no próximo heading de qualquer nível. Lição: testar hook contra um arquivo REAL grande (com seções arquivadas), não só um caso mínimo.
+- **TOCTOU em gate de pre-commit:** `check-delivered-validation.sh` lia o working tree enquanto o trigger lia o staged — marcar a caixa só no working tree enganava o gate HARD. Gate de commit tem que ler o staged blob (`git show :path`). Testado: bloqueia mesmo com `[x]` só no working tree.
+- **Sweep incompleto deixa resíduo:** adicionar AP-07/AP-08 deixou 4 ponteiros vivos ainda dizendo `AP-01..AP-06`; o backfill de IDs do stances apontou para um header sem número; 3 pendências do CustomClasses ficaram com data 06-11 para trabalho de 06-12 (uma se autocontradizia). Lição: ao expandir uma série (APs) ou migrar IDs, grep por TODAS as referências vivas, separando das históricas/changelog.
+
+**Atividade cronológica:**
+1. Workflow `review-the-fixes` (6 dimensões → 5 efetivas, verificação adversarial) — 11 levantados, 10 confirmados (HOOK-1/2/3, NUM-01, IDM-01/02/03/04, D2W-01, NB-01; IDM-03+NB-01 dedup de HOOK-1).
+2. Commit `98ce849`: HOOK-1 (awk `.*`), HOOK-2 (trigger aceita slug), HOOK-3 (lê staged blob). Testados executando: memory-ids vivo, delivered-validation bloqueia/libera com staged.
+3. Commit `ae07d28`: refinamento do HOOK-1 (só o bloco do topo; ignora ARQUIVADO). Disparou no commit da consistência e foi corrigido aqui.
+4. Commit `9c5fb15`: NUM-01 (4 ponteiros → AP-01..AP-08, changelog preservado), IDM-01 (stances "Sessão 4a"), IDM-02 (P-7.9/10/11 → 06-12), IDM-04 (cross-ref "Sessão 6"), D2W-01 (§14 colapsado p/ casar os 7 commands).
+
+**Pendências abertas nesta sessão:** nenhuma nova — todas as 10 confirmadas foram aplicadas e verificadas.
+
+**Cross-refs:**
+- Fecha o loop find→fix→review-the-fix da Sessão 5a (mesma infra).
+- Resolve a fragilidade que [P-5.1] aponta parcialmente: os hooks agora foram validados executando; falta só o ciclo fim-a-fim num item real.
+- ~20 commits do harness (Sessões 4/5/5b) seguem LOCAIS — push aguarda decisão do usuário.
+
+## 2026-06-13 04:29 (GMT-3) — Sessão 5: revisão de valor adversarial do harness + correção dos 35 achados (prosa → enforcement)
+
+**Tema central:** validar se o overhaul da Sessão 4 estava "bem-cercado" nos 4 objetivos e fechar os gaps — revisão multi-agente (Workflow, 6 dimensões × verificação adversarial, 35/39 achados confirmados) seguida da execução de todas as correções em 8 fases.
+
+**Decisões-chave:**
+- **Veredito da revisão: "bem-concebido, mal-cercado"** — 3 de 4 objetivos + cross-cutting falhavam no teste "não pode ser pulado sem ninguém notar", porque tudo era prosa que o agente escolhe seguir (1 hook só). Decisão: converter os invariantes de maior valor em **gates de pre-commit**. Ref: revisão em `wf_1d6ed3e5-3de`.
+- **Só 1 gate é HARD (`check-delivered-validation.sh`)** — bloquear item 🟢 com validação in-game pendente (AP-06) não tem bypass legítimo. Os outros 2 (graph-freshness, memory-ids) são WARN para não brigar com fluxos legítimos ("commit código, depois grafo"; migração de memória incremental). Ref: `.agents/hooks/`.
+- **MCP reduzido a só `graphify-eft`** — o server por-mod era pin fixo no stances (query do mod errado) e git-tracked (churn entre os 2 PCs). Grafos de mod via CLI. Ref: `.mcp.json`, commit `17b2bd4`.
+- **`graph.html` >1.5MB não versiona** — 3 htmls grandes (fika-server 2.6MB, Skills-Extended 2.3MB, SPT-Realism 1.8MB) saíram do git; graph.json+REPORT cobrem a navegação.
+
+**Lições / hipóteses descartadas:**
+- **O stamp "Built from commit" do graphify NÃO é sinal de staleness confiável** — ele só atualiza quando há mudança de topologia (`graphify update` imprime "No topology changes" e deixa o output intacto). 13 dos 14 grafos têm stamp `c3e8df24` porque o código deles não mudou — o conteúdo está correto. O sinal real de staleness é "código de mod mudou sem regenerar o grafo" (o que o `check-graph-freshness.sh` compara), não o stamp. Forçar refresh de stamp seria churn de grafos idênticos.
+- **Finders adversariais inflam métricas** — ex.: D5-04 dizia "18 bullets / passou do STOP de 15" no stances; o real era 9+5 e nenhum bloco passou de 15. O gap de fundo (0 P-IDs) era real, mas a métrica era fabricada. A camada de verificação adversarial pegou (35/39), validando o padrão find→verify.
+- **Trigger de hook precisa casar o nome real do artefato** — o teste do gate AP-06 com `06-fix-99-TESTE.md` não disparou porque o trigger exige `-06-fix-NN.md$` (sem sufixo). Renomeado para `-06-fix-99.md` → bloqueou corretamente. Lição: testar hook com nome de arquivo idêntico ao padrão de produção.
+
+**Atividade cronológica:**
+1. Revisão multi-agente (Workflow `harness-value-review`) — 6 dimensões, verificação adversarial, síntese de cobertura. Veredito + 9 achados críticos verificados por mim independentemente (grafos stale, stances sem P-IDs, bug de nome `technical-review`, checklist `AbstractGame.Stop`).
+2. Fase 1: bugs de nome (`review-technical-spec:3,26`, `SKILL spt:137`) — commit Fase 1.
+3. Fase 2: AP-07 (reentrância) + AP-08 (estado stale) + §9 checks 7-8 + N/A player-reactive = gap — commit `06ea2b8`.
+4. Fase 3: esquema de ID único `P-<N>.<M>` + datas inline + GC com `date`; backfill stances [P-4.1..9]; migração CustomClasses (P-0611.x→P-6.x, Sessão 6, P-7.x com datas) — commit `477879f`.
+5. Fase 4: linha greppável `Memória consultada:` nos 7 commands; tiers documentados; memory-curation no blockquote do review-spec — commit `35b98b6`.
+6. Fase 5: MCP só eft, mods via CLI — commit `17b2bd4`.
+7. Fase 6: 3 hooks de enforcement + wire no pre-commit; testados (hard bloqueia, warns disparam) — commit `22669f4`.
+8. Fase 7-8: limpeza advisory (`c057dcc`) + regen de grafos + remoção de htmls grandes (`3235379`); teste end-to-end do gate AP-06 (bloqueia/libera).
+
+**Pendências abertas nesta sessão:**
+- [P-5.1] (aberta 2026-06-13) Validação fim-a-fim no primeiro uso real (ver topo). Categoria: 🟡 débito.
+
+**Cross-refs:**
+- Continua o overhaul da Sessão 4 (mesma infra). A revisão de valor é o "completeness critic" da Sessão 4.
+- Migração de memória tocou `mods/stancesAndCameraPositionSPT4.0.11/memory/sessions.md` e `mods/CustomClasses/memory/sessions.md` (fatos inalterados, só notação de ID).
+
+## 2026-06-12 22:06 (GMT-3) — Sessão 4: overhaul do harness — memória nos commands, antipatterns, checklists e grafos de código (graphify)
+
+**Tema central:** verificação completa do harness (retroalimentação de memória, erros recorrentes, mapeamento de código) e implementação das melhorias em 7 fases — plano com 2 rodadas de /g-review-content (15 + 12 itens endereçados).
+
+**Decisões-chave:**
+
+- **Memória passa a ser CONSUMIDA, não só escrita** — todo command de desenvolvimento ganhou passo "Contexto de memória" (1º bullet da leitura) + skill `memory-curation` §14. Justificativa: diagnóstico mostrou que NENHUM command lia `sessions.md`; pendências 🔴 (ex.: "4 itens não validados in-game" do stances) passavam despercebidas. Ref: commit `c3e8df2`.
+- **Antipatterns como doc separado** (`docs/technical/spt-antipatterns.md`, AP-01..06) e não dentro das skills — skills são prescritivas/curtas; a taxonomia com exemplos reais (links aos PA/CR/fix do stances) cresce via promoção de lições (§15). Ref: commit `9d649b2`.
+- **Graphify adotado para mapeamento de código** (decisão do usuário; grafos VERSIONADOS, todas as fontes): extração AST `graphify update <path>` é **sem LLM** e barata (eft-decompiled inteiro: 68s, 58k nós, graph.json 46MB); working outputs (`<escopo>/graphify-out/`) gitignored e artefatos publicados em `references/graphs/` pelo `scripts/update-graphs.sh` (escopos auto-descobertos por glob). Ref: commit `b2e8fb8`.
+- **`.graphifyignore` na raiz** para destravar `spt-source`/`fika-*`: graphify respeita o `.gitignore` do repo (confirmado empiricamente — spt-source retornava "No code files found") e o `.graphifyignore` o substitui por diretório. Ref: `.graphifyignore`.
+- **MCP com política de servers**: permanentes só eft-decompiled + mod ativo (`.mcp.json`, binário `graphify-mcp <graph.json>`); demais escopos sob demanda via CLI (`graphify query/path/explain/affected --graph ...`).
+
+**Lições / hipóteses descartadas:**
+
+- **README upstream do graphify ≠ CLI real** — o plano original assumia `python -m graphify.serve` e `graphify <path> --mcp` (do README); a CLI real tem binário `graphify-mcp` dedicado, `graphify update` (code-only, sem LLM) e `extract --out` (com etapa LLM). Lição: mapear `--help` ANTES de desenhar integração (virou passo 0 da fase).
+- **`fika-*` extraía e `spt-source` não** — hipótese inicial era limitação da ferramenta; causa raiz: fika-plugin tem `.git` próprio (boundary de repo, gitignore do pai não se aplica) e spt-source não (gitignore do repo raiz o anulava). Diagnóstico via `git check-ignore -v`.
+- **Negação de .gitignore sob diretório excluído não funciona** (`references/graphs/` + `!README.md`) — git não re-inclui sob pai excluído; padrão correto é excluir o conteúdo (`dir/*`) ou, como adotado, publicar os grafos FORA dos diretórios ignorados.
+- **Validação contra bug real como teste de aceitação:** o grafo do EFT lista exatamente 15 nós `.SetTriggerPressed()` = base + 14 overrides — reproduz a auditoria manual do `002-...-06-fix-01` (bug do F4) em 1 query de ~1s. É a classe de erro AP-03 que o grafo torna barata de prevenir.
+
+**Atividade cronológica:**
+
+1. Diagnóstico (3 agentes Explore) — gaps: memória não consumida, lições inconsistentes, skills aplicadas reativamente, zero índice de código.
+2. F1: `spt-antipatterns.md` + §8/checklists nas skills SPT e C# + pointers no `resources.md` (commit `9d649b2`).
+3. F2-F4: §14/§15 + lições/IDs/GC na `memory-curation` e no `/update-memory`; bullets de memória em 7 commands; §9 conformidade no template de spec técnica; critérios padrão Fika/estado-entre-raids na spec funcional; `fix.md.tmpl` com checklist de validação (commit `c3e8df2`).
+4. F5: instalação (`uv tool install graphifyy`), mapeamento da CLI real, extração de TODAS as fontes de código, `scripts/update-graphs.sh`, validação de assertividade (commit `b2e8fb8`).
+5. F6: skill `graph-code-navigation`, command `/update-mod-graph`, bullets de grafo em 4 commands + `add-mod-repo-for-modding` + gancho no `/update-memory`, `.mcp.json` (commit `84938db`).
+6. F7: `WORKFLOW.md` na raiz + link no template de README de mod + backfill nos 10 mods + pointer no AGENTS.md (commit `3aba46a`); verificação fim-a-fim (hook de docs ✅, commands citados existem ✅, idempotência do script ✅).
+
+**Pendências abertas nesta sessão:**
+
+- [P-4.1] Wiki no graphify — decisão do usuário (custo de API + licença ND). Categoria: 🟡 débito.
+- [P-4.2] Replicar instalação do graphify no notebook `guimello`. Categoria: 🟢 ideia.
+
+**Cross-refs:**
+
+- Diagnóstico baseado nos erros reais de `mods/stancesAndCameraPositionSPT4.0.11` (reviews dos itens 001/002/004) — ver memória do mod.
+- Promoções desta sessão: a taxonomia inteira do `spt-antipatterns.md` É a primeira promoção em massa de lições da memória do stances para conhecimento institucional.

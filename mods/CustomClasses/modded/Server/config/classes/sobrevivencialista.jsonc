@@ -1,10 +1,16 @@
 {
   "name": "Sobrevivencialista",
+  "displayName": {
+    "en": "Survivalist",
+    "pt": "Sobrevivencialista"
+  },
   "baseEdition": "SPT Zero to hero",
   "description": {
     "en": "Survivalist. Stays in raid longer than anyone else. Drains resources slowly and resists negative effects.",
     "pt": "Sobrevivencialista. Fica em raid por mais tempo que qualquer outro. Drena recursos devagar e resiste a efeitos negativos."
   },
+  "iconFile": "sobrevivencialista.png",
+  "nameColor": "#97934e",
   "skills": {
     "Shotgun": 3,
     "Metabolism": 10,

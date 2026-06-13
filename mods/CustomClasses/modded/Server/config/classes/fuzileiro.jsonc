@@ -1,10 +1,16 @@
 {
   "name": "Fuzileiro",
+  "displayName": {
+    "en": "Rifleman",
+    "pt": "Fuzileiro"
+  },
   "baseEdition": "SPT Zero to hero",
   "description": {
     "en": "Assault Rifleman. Aggressive. Closes the distance, sustains fire and pushes positions with fast reloads and recoil control.",
     "pt": "Fuzileiro de assalto. Agressivo. Entra em contato, sustenta fogo e empurra posições com recargas rápidas e controle de recuo."
   },
+  "iconFile": "fuzileiro.png",
+  "nameColor": "#b0573a",
   "skills": {
     "Assault": 10,
     "RecoilControl": 4,

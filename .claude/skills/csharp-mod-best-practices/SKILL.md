@@ -11,6 +11,8 @@ This skill covers the **C# / runtime** concerns. Lifecycle, raid hooks and SPT-s
 
 > **📦 Itens/inventário/equipamento/hideout:** ao mexer com essas estruturas (árvore `_id`/`_tpl`/`parentId`/`slotId`, `location {x,y,r}`, presets, munição, hideout), consulte `docs/technical/inventario-itens-spt4.md` — fonte de verdade canônica.
 
+> **⚠️ Erros recorrentes já cometidos neste repo:** `docs/technical/spt-antipatterns.md` (AP-01..AP-08) — ler antes de escrever ou revisar spec técnica.
+
 ## 1. Memory ownership
 
 ### Disposal
@@ -55,6 +57,7 @@ This skill covers the **C# / runtime** concerns. Lifecycle, raid hooks and SPT-s
 - Never throw out of a Harmony prefix/postfix unless you intend to skip the original. Wrap the body in `try/catch (Exception ex) { Log.LogError(ex); }`. An unhandled prefix exception cancels the original call.
 - Prefer `__instance`, `__result`, `__args`, `___privateField` injection over manual reflection inside the patch.
 - Do not call back into the patched method from the patch (infinite recursion). Use `[HarmonyReversePatch]` or hold a delegate to the original.
+- **Virtual dispatch trap:** patching a `virtual`/`abstract` method only intercepts call paths whose IL actually runs — an override that does **not** call `base.X()` bypasses your patch entirely. Before patching a virtual target, enumerate ALL overrides (`GetBaseDefinition()` + scan derived types) and check which ones call base; prefer patching a routing point that covers every path. Real case: 13 of 14 `SetTriggerPressed` overrides skip base — see `docs/technical/spt-antipatterns.md` AP-03.
 
 ## 4. Nullability and defensive code
 
@@ -109,5 +112,8 @@ This skill covers the **C# / runtime** concerns. Lifecycle, raid hooks and SPT-s
 8. **Naming/visibility:** internals are `internal`/`private`? Public surface matches what the mod actually exposes?
 9. **Strings/IDs:** ordinal comparisons? IDs treated as opaque?
 10. **Logging:** levels appropriate? No per-frame `LogInfo`?
+11. **Virtual dispatch:** patches on virtual/abstract targets audited against ALL overrides (which call base, which don't)? (AP-03)
+12. **Stale state across context switches:** flags/caches that survive a weapon swap, operation change or screen transition are re-validated against the current context (e.g. cache the operation instance and compare before acting)? Real case: snap intercept firing on the NEW weapon after swap — stances 002, CR-01-02 (AP-08).
+13. **Self-reentry:** any path that re-invokes the patched target (`MethodInfo.Invoke`, operation resurrection, forwarding) guarded against re-entering the patch (`[ThreadStatic]` reentry flag or `[HarmonyReversePatch]`)? Real case: trigger-operation resurrection recursing the Prefix → stack overflow — stances 002, PA-02-01 (AP-07).
 
 If any item fails, flag in the review or stop the build and request a `/review-technical-spec` pass.

@@ -1,0 +1,575 @@
+@* Item 026: recursive editor for ONE loadout ItemSpec — used by the Equipped tab and reused
+   by item 028 for stash lines (AllowCount=true there). Edits the mutable ItemSpecModel in
+   place (the ItemSpec record is init-only) and bubbles every mutation through OnChanged so
+   the page can recompute the loadout cost live.
+
+   Root modes mirror the builder precedence (preset > mods > tpl, docs/class-schema.md §3.1):
+   - "Item": bare tpl via ItemPicker dialog (TplFilter restricts to the slot's filter) +
+     optional manual mod tree — slots come from the template's _props.Slots, each filtered by
+     its own slot filter (CatalogService.GetSlotsOf / IsAllowedInSlot), recursive into sub-mods;
+   - "Preset": weapon via ItemPicker (weapons only) → premium switch (`premium: true`, most-
+     kitted build) or an explicit preset id via PresetPicker. Switching modes clears the
+     fields of the abandoned mode (the builder would silently ignore them otherwise).
+
+   Weapons (either mode) get the ammo section: AmmoPicker by caliber; loadedMag/chambered
+   REQUIRE ammo (PA-01-03) — the switches stay disabled until a cartridge is picked, and
+   clearing the ammo resets them. Containers (template with _props.Grids) get the Contents
+   section: nested ItemSpecEditor list with AllowCount=true. Depth caps both recursions
+   (MaxDepth) — the builder has no cap, the editor does (sanity).
+
+   Compatibility is WARNING-grade by design (kickoff): an incompatible root shows an inline
+   chip and never blocks — the Save dry-run (ValidateAndBuild) has the final word. *@
+
+@using SPTarkov.Server.Core.Models.Common
+@using CustomClasses.Web
+@inject CatalogService Catalog
+@inject IDialogService DialogService
+
+<MudStack Spacing="2">
+
+    @* ── Root: mode toggle + current item + pick ─────────────────────────── *@
+    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Wrap="Wrap.Wrap">
+        <MudButtonGroup Variant="Variant.Outlined" Size="Size.Small">
+            <MudButton Color="@(!_presetMode ? Color.Primary : Color.Default)"
+                       Variant="@(!_presetMode ? Variant.Filled : Variant.Outlined)"
+                       OnClick="@(() => SwitchModeAsync(false))">Item</MudButton>
+            <MudButton Color="@(_presetMode ? Color.Primary : Color.Default)"
+                       Variant="@(_presetMode ? Variant.Filled : Variant.Outlined)"
+                       OnClick="@(() => SwitchModeAsync(true))">Preset</MudButton>
+        </MudButtonGroup>
+
+        @if (_effectiveRootTpl is { Length: > 0 } rootTpl && _rootExists)
+        {
+            <img src="https://assets.tarkov.dev/@(rootTpl)-icon.webp" width="28" height="28"
+                 loading="lazy" alt="" onerror="this.style.display='none'"/>
+        }
+        <MudText Typo="Typo.body1"><b>@RootLabel()</b></MudText>
+        @if (_effectiveRootTpl is { Length: > 0 })
+        {
+            <code style="opacity:.55;font-size:.75rem">@_effectiveRootTpl</code>
+        }
+
+        <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Search" OnClick="PickRootAsync">
+            @(_presetMode ? "Pick weapon" : "Pick item")
+        </MudButton>
+
+        @if (AllowCount)
+        {
+            <MudNumericField T="int" @bind-Value="Spec.Count" @bind-Value:after="NotifyChangedAsync"
+                             Min="1" Label="count" Margin="Margin.Dense"
+                             Variant="Variant.Outlined" Style="max-width:110px"/>
+        }
+        @if (_presetMode)
+        {
+            <MudSwitch T="bool" @bind-Value="Spec.Premium" @bind-Value:after="NotifyChangedAsync"
+                       Color="Color.Warning" Label="premium (most-kitted build)" Size="Size.Small"/>
+        }
+
+        @if (_effectiveRootTpl is { Length: > 0 } && !_rootExists)
+        {
+            <MudTooltip Text="tpl/preset not found in the live DB — the builder would skip this entry">
+                <MudChip T="string" Size="Size.Small" Color="Color.Error">unresolved</MudChip>
+            </MudTooltip>
+        }
+        else if (!_slotAllowed)
+        {
+            <MudTooltip Text="Not in this slot's filter (live DB) — the game may reject it. Warning only; the Save dry-run decides.">
+                <MudChip T="string" Size="Size.Small" Color="Color.Warning">not allowed in slot</MudChip>
+            </MudTooltip>
+        }
+    </MudStack>
+
+    @* ── Preset selection (preset mode, weapon resolved) ─────────────────── *@
+    @if (_presetMode && _presets.Count > 0)
+    {
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Wrap="Wrap.Wrap">
+            <MudText Typo="Typo.body2">Preset:</MudText>
+            @if (_explicitPreset is not null)
+            {
+                <MudChip T="string" Size="Size.Small" Color="Color.Info">
+                    @(_explicitPreset.Name ?? _explicitPreset.Id) (@_explicitPreset.ItemCount parts)
+                </MudChip>
+                <MudButton Variant="Variant.Text" Size="Size.Small"
+                           OnClick="ResetToWeaponDefaultAsync">
+                    Use @(Spec.Premium ? "premium" : "default") instead
+                </MudButton>
+            }
+            else
+            {
+                <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined">
+                    @(Spec.Premium ? "premium (most-kitted)" : "default (encyclopedia)")
+                </MudChip>
+            }
+            <MudButton Variant="Variant.Outlined" Size="Size.Small"
+                       OnClick="@(() => _presetOpen = !_presetOpen)">
+                @(_presetOpen ? "Hide presets" : "Choose explicit preset")
+            </MudButton>
+        </MudStack>
+        <MudCollapse Expanded="_presetOpen">
+            <PresetPicker WeaponTpl="@_effectiveRootTpl" OnPresetSelected="OnPresetPickedAsync"/>
+        </MudCollapse>
+    }
+
+    @* ── Ammo (weapons only): ammo required for loadedMag/chambered ─────── *@
+    @if (_isWeapon)
+    {
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Wrap="Wrap.Wrap">
+            <MudText Typo="Typo.body2">Ammo:</MudText>
+            @if (Spec.Ammo is { Length: > 0 } ammoTpl)
+            {
+                <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined">@ItemName(ammoTpl)</MudChip>
+                <MudIconButton Icon="@Icons.Material.Filled.Clear" Size="Size.Small"
+                               title="Clear ammo (also resets loadedMag/chambered)"
+                               OnClick="ClearAmmoAsync"/>
+            }
+            else
+            {
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">—</MudText>
+            }
+            <MudButton Variant="Variant.Outlined" Size="Size.Small"
+                       OnClick="@(() => _ammoOpen = !_ammoOpen)">
+                @(_ammoOpen ? "Hide cartridges" : "Pick ammo")
+            </MudButton>
+            <MudSwitch T="bool" @bind-Value="Spec.LoadedMag" @bind-Value:after="NotifyChangedAsync"
+                       Disabled="@(Spec.Ammo is null)" Color="Color.Success"
+                       Label="loadedMag" Size="Size.Small"/>
+            <MudSwitch T="bool" @bind-Value="Spec.Chambered" @bind-Value:after="NotifyChangedAsync"
+                       Disabled="@(Spec.Ammo is null)" Color="Color.Success"
+                       Label="chambered" Size="Size.Small"/>
+        </MudStack>
+        @if (Spec.Ammo is null)
+        {
+            <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                Pick a cartridge first — <code>ammo</code> is required for loadedMag/chambered (PA-01-03).
+            </MudText>
+        }
+        <MudCollapse Expanded="_ammoOpen">
+            <AmmoPicker WeaponTpl="@_effectiveRootTpl" OnAmmoSelected="OnAmmoPickedAsync"/>
+        </MudCollapse>
+    }
+
+    @* ── Mods (item mode only — `mods` requires a root tpl; ignored with preset) ── *@
+    @if (!_presetMode && _rootSlots.Count > 0)
+    {
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+            <MudButton Variant="Variant.Text" Size="Size.Small"
+                       StartIcon="@(_modsOpen ? Icons.Material.Filled.ExpandLess : Icons.Material.Filled.ExpandMore)"
+                       OnClick="@(() => _modsOpen = !_modsOpen)">
+                Mods (@CountMods(Spec.Mods)) — @_rootSlots.Count slot(s)
+            </MudButton>
+            @if (Spec.Mods.Count == 0)
+            {
+                <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                    empty = default preset auto-completes on build (weapons/armor)
+                </MudText>
+            }
+        </MudStack>
+        <MudCollapse Expanded="_modsOpen">
+            <div class="pl-2" style="border-left:2px solid var(--mud-palette-lines-default);">
+                @ModSlotRows(Spec.Tpl!, Spec.Mods, 0)
+            </div>
+        </MudCollapse>
+    }
+
+    @* ── Contents (containers — rig/backpack/case) ───────────────────────── *@
+    @if (_hasGrids || Spec.Contents.Count > 0)
+    {
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+            <MudText Typo="Typo.body2"><b>Contents</b> (@Spec.Contents.Count)</MudText>
+            @if (Depth + 1 < MaxDepth)
+            {
+                <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Add" OnClick="AddContentAsync">
+                    Add item
+                </MudButton>
+            }
+            @if (!_hasGrids && Spec.Contents.Count > 0)
+            {
+                <MudTooltip Text="The current root template declares no grids — contents would be skipped by the builder.">
+                    <MudChip T="string" Size="Size.Small" Color="Color.Warning">no grids</MudChip>
+                </MudTooltip>
+            }
+        </MudStack>
+        @if (Depth + 1 >= MaxDepth && Spec.Contents.Count > 0)
+        {
+            <MudText Typo="Typo.caption" Color="Color.Warning">
+                … nested deeper than @MaxDepth levels — not editable here (kept on save).
+            </MudText>
+        }
+        else
+        {
+            @foreach (var content in Spec.Contents)
+            {
+                <div @key="content" class="pl-3 py-2"
+                     style="border-left:2px solid var(--mud-palette-lines-default); margin-left:8px;">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Class="mb-1">
+                        <MudIcon Icon="@Icons.Material.Filled.SubdirectoryArrowRight" Size="Size.Small"/>
+                        <MudSpacer/>
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                                       title="Remove content item"
+                                       OnClick="@(() => RemoveContentAsync(content))"/>
+                    </MudStack>
+                    <ItemSpecEditor Spec="@content" AllowCount="true" Depth="@(Depth + 1)"
+                                    OnChanged="NotifyChangedAsync"/>
+                </div>
+            }
+        }
+    }
+</MudStack>
+
+@code {
+    /// <summary>Recursion cap for contents nesting AND mod-tree depth (the builder has no cap).</summary>
+    private const int MaxDepth = 6;
+
+    /// <summary>Mutable model edited in place (page rebuilds the ItemSpec record on save).</summary>
+    [Parameter, EditorRequired] public ItemSpecModel Spec { get; set; } = default!;
+
+    /// <summary>Slot restriction for the ROOT item (equipment slot filter) — null = unrestricted.</summary>
+    [Parameter] public Func<string, bool>? TplFilter { get; set; }
+
+    /// <summary>Show the count field — stash/contents only (equipped ignores count, PA-02-05).</summary>
+    [Parameter] public bool AllowCount { get; set; }
+
+    /// <summary>0 at the root; contents children get Depth+1 (recursion cap + indentation).</summary>
+    [Parameter] public int Depth { get; set; }
+
+    /// <summary>Bubbles every mutation (own or nested) — the page recomputes the loadout cost.</summary>
+    [Parameter] public EventCallback OnChanged { get; set; }
+
+    private static readonly DialogOptions PickerDialogOptions = new()
+    {
+        MaxWidth = MaxWidth.Medium,
+        FullWidth = true,
+        CloseButton = true,
+    };
+
+    private bool _presetMode;
+    private bool _presetOpen;
+    private bool _ammoOpen;
+    private bool _modsOpen;
+
+    // Cached per render-cycle (recomputed in Refresh — Spec is mutated in place, so
+    // OnParametersSet alone would miss our own event-handler mutations).
+    private string? _effectiveRootTpl;
+    private bool _rootExists;
+    private bool _isWeapon;
+    private bool _hasGrids;
+    private bool _slotAllowed = true;
+    private List<CatalogSlotInfo> _rootSlots = [];
+    private List<CatalogPreset> _presets = [];
+    private CatalogPreset? _explicitPreset;
+
+    protected override void OnInitialized()
+    {
+        _presetMode = !string.IsNullOrWhiteSpace(Spec.Preset);
+        _modsOpen = Spec.Mods.Count > 0;
+    }
+
+    protected override void OnParametersSet() => Refresh();
+
+    /// <summary>Re-derives everything the markup needs from the current Spec state.</summary>
+    private void Refresh()
+    {
+        _effectiveRootTpl = ComputeEffectiveRootTpl();
+        _rootExists = _effectiveRootTpl is { Length: > 0 } && Catalog.TemplateExists(_effectiveRootTpl);
+        _isWeapon = _rootExists && Catalog.IsWeapon(_effectiveRootTpl!);
+        _hasGrids = _rootExists && Catalog.HasGrids(_effectiveRootTpl!);
+        _rootSlots = !_presetMode && Spec.Tpl is { Length: > 0 } ? Catalog.GetSlotsOf(Spec.Tpl) : [];
+        _presets = _presetMode && _rootExists ? Catalog.GetPresetsFor(new MongoId(_effectiveRootTpl!)) : [];
+        _explicitPreset = _presets.FirstOrDefault(p => string.Equals(p.Id, Spec.Preset, StringComparison.Ordinal));
+        _slotAllowed = TplFilter is null
+            || _effectiveRootTpl is not { Length: > 0 }
+            || !_rootExists
+            || TplFilter(_effectiveRootTpl!);
+    }
+
+    /// <summary>
+    ///     Template the rest of the editor reasons about: the bare tpl in item mode; in preset mode the
+    ///     preset's root item (Preset may be a preset id OR a weapon tpl — ResolveDefaultPreset handles
+    ///     both, same resolution InventoryBuilder uses).
+    /// </summary>
+    private string? ComputeEffectiveRootTpl()
+    {
+        if (!_presetMode)
+        {
+            return Spec.Tpl;
+        }
+
+        if (Spec.Preset is not { Length: > 0 } raw || !MongoId.IsValidMongoId(raw))
+        {
+            return Spec.Preset;   // null/malformed — surfaces as "unresolved"
+        }
+
+        var preset = Catalog.ResolveDefaultPreset(new MongoId(raw));
+        return preset?.Items?.FirstOrDefault()?.Template.ToString() ?? raw;
+    }
+
+    private string RootLabel()
+    {
+        if (_effectiveRootTpl is not { Length: > 0 })
+        {
+            return _presetMode ? "(no weapon selected)" : "(no item selected)";
+        }
+
+        return _rootExists ? ItemName(_effectiveRootTpl) : _effectiveRootTpl;
+    }
+
+    private string ItemName(string tpl) =>
+        MongoId.IsValidMongoId(tpl) ? Catalog.GetItemName(new MongoId(tpl)) : tpl;
+
+    private async Task NotifyChangedAsync()
+    {
+        Refresh();
+        await OnChanged.InvokeAsync();
+    }
+
+    // ── Mode / root selection ────────────────────────────────────────────────
+
+    /// <summary>Switching modes clears the abandoned mode's fields — the builder would ignore them anyway.</summary>
+    private async Task SwitchModeAsync(bool presetMode)
+    {
+        if (_presetMode == presetMode)
+        {
+            return;
+        }
+
+        _presetMode = presetMode;
+        if (presetMode)
+        {
+            Spec.Tpl = null;
+            Spec.Mods.Clear();
+        }
+        else
+        {
+            Spec.Preset = null;
+            Spec.Premium = false;
+        }
+
+        await NotifyChangedAsync();
+    }
+
+    private async Task PickRootAsync()
+    {
+        var parameters = new DialogParameters<ItemPicker>();
+        if (_presetMode)
+        {
+            parameters.Add(x => x.FilterTpls, (Func<string, bool>)Catalog.IsWeapon);
+            parameters.Add(x => x.Title, "Select weapon (preset root)");
+            parameters.Add(x => x.ShowCategoryFilter, false);
+        }
+        else
+        {
+            if (TplFilter is not null)
+            {
+                parameters.Add(x => x.FilterTpls, TplFilter);
+            }
+
+            parameters.Add(x => x.Title, "Select item");
+        }
+
+        var dialog = await DialogService.ShowAsync<ItemPicker>("Select item", parameters, PickerDialogOptions);
+        var result = await dialog.Result;
+        if (result is not { Canceled: false, Data: string tpl })
+        {
+            return;
+        }
+
+        if (_presetMode)
+        {
+            Spec.Preset = tpl;   // weapon tpl → default (or premium) preset semantics
+        }
+        else
+        {
+            Spec.Tpl = tpl;
+            Spec.Mods.Clear();   // mod tree belongs to the previous root template
+        }
+
+        // Different root → previous caliber may not match; ammo rule stays consistent.
+        Spec.Ammo = null;
+        Spec.LoadedMag = false;
+        Spec.Chambered = false;
+        _presetOpen = false;
+        _ammoOpen = false;
+        await NotifyChangedAsync();
+    }
+
+    private async Task OnPresetPickedAsync(string presetId)
+    {
+        Spec.Preset = presetId;
+        _presetOpen = false;
+        await NotifyChangedAsync();
+    }
+
+    /// <summary>Back from an explicit preset id to weapon-tpl semantics (default/premium resolution).</summary>
+    private async Task ResetToWeaponDefaultAsync()
+    {
+        if (_effectiveRootTpl is { Length: > 0 })
+        {
+            Spec.Preset = _effectiveRootTpl;
+            await NotifyChangedAsync();
+        }
+    }
+
+    // ── Ammo ─────────────────────────────────────────────────────────────────
+
+    private async Task OnAmmoPickedAsync(string ammoTpl)
+    {
+        Spec.Ammo = ammoTpl;
+        _ammoOpen = false;
+        await NotifyChangedAsync();
+    }
+
+    private async Task ClearAmmoAsync()
+    {
+        Spec.Ammo = null;
+        Spec.LoadedMag = false;   // PA-01-03: no ammo → no loadedMag/chambered
+        Spec.Chambered = false;
+        await NotifyChangedAsync();
+    }
+
+    // ── Mods (recursive slot tree) ───────────────────────────────────────────
+
+    private static int CountMods(List<ModSpecModel> mods)
+    {
+        var n = 0;
+        foreach (var m in mods)
+        {
+            n += 1 + CountMods(m.Mods);
+        }
+
+        return n;
+    }
+
+    /// <summary>
+    ///     One row per slot of <paramref name="parentTpl"/> (live DB _props.Slots) with the mod currently
+    ///     filling it, plus orphan entries whose slotId no longer matches any slot. Recurses into each
+    ///     mod's own slots up to MaxDepth.
+    /// </summary>
+    private RenderFragment ModSlotRows(string parentTpl, List<ModSpecModel> mods, int depth) => __builder =>
+    {
+        if (depth >= MaxDepth)
+        {
+            <MudText Typo="Typo.caption" Color="Color.Warning">
+                … mod tree deeper than @MaxDepth levels — not editable here (kept on save).
+            </MudText>
+            return;
+        }
+
+        var slots = Catalog.GetSlotsOf(parentTpl);
+        foreach (var slot in slots)
+        {
+            var mod = mods.FirstOrDefault(m => string.Equals(m.SlotId, slot.Id, StringComparison.OrdinalIgnoreCase));
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Class="my-1"
+                      Style="@($"margin-left:{depth * 20}px;")">
+                <MudIcon Icon="@Icons.Material.Filled.SubdirectoryArrowRight" Size="Size.Small" Color="Color.Default"/>
+                <code style="font-size:.8rem">@slot.Id</code>
+                @if (slot.Required)
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Error" Variant="Variant.Outlined">required</MudChip>
+                }
+                @if (mod?.Tpl is { Length: > 0 } modTpl)
+                {
+                    <MudText Typo="Typo.body2"><b>@ItemName(modTpl)</b></MudText>
+                    @if (!Catalog.TemplateExists(modTpl))
+                    {
+                        <MudChip T="string" Size="Size.Small" Color="Color.Error">unresolved</MudChip>
+                    }
+                    else if (!Catalog.IsAllowedInSlot(parentTpl, slot.Id, modTpl))
+                    {
+                        <MudTooltip Text="Not in this slot's filter — the game may reject it (warning only).">
+                            <MudChip T="string" Size="Size.Small" Color="Color.Warning">not allowed</MudChip>
+                        </MudTooltip>
+                    }
+                    <MudIconButton Icon="@Icons.Material.Filled.Search" Size="Size.Small"
+                                   title="Replace mod"
+                                   OnClick="@(() => PickModAsync(parentTpl, slot.Id, mods))"/>
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                                   title="Remove mod (and its sub-mods)"
+                                   OnClick="@(() => RemoveModAsync(mods, mod))"/>
+                }
+                else
+                {
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary">—</MudText>
+                    <MudButton Variant="Variant.Text" Size="Size.Small" Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Add"
+                               OnClick="@(() => PickModAsync(parentTpl, slot.Id, mods))">
+                        Set
+                    </MudButton>
+                }
+            </MudStack>
+            if (mod?.Tpl is { Length: > 0 } subTpl && Catalog.TemplateExists(subTpl))
+            {
+                <text>@ModSlotRows(subTpl, mod.Mods, depth + 1)</text>
+            }
+        }
+
+        // Orphans: mod entries whose slotId is not declared by the (current) parent template.
+        foreach (var orphan in mods.Where(m => !slots.Any(s =>
+            string.Equals(s.Id, m.SlotId, StringComparison.OrdinalIgnoreCase))).ToList())
+        {
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Class="my-1"
+                      Style="@($"margin-left:{depth * 20}px;")">
+                <MudIcon Icon="@Icons.Material.Filled.Warning" Size="Size.Small" Color="Color.Warning"/>
+                <code style="font-size:.8rem">@orphan.SlotId</code>
+                <MudText Typo="Typo.body2">@(orphan.Tpl is { Length: > 0 } t ? ItemName(t) : "(no tpl)")</MudText>
+                <MudTooltip Text="This slotId does not exist on the parent template — the game would not mount it.">
+                    <MudChip T="string" Size="Size.Small" Color="Color.Warning">unknown slot</MudChip>
+                </MudTooltip>
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                               title="Remove entry"
+                               OnClick="@(() => RemoveModAsync(mods, orphan))"/>
+            </MudStack>
+        }
+    };
+
+    /// <summary>Opens the ItemPicker filtered by the slot's own filter; replaces or adds the mod entry.</summary>
+    private async Task PickModAsync(string parentTpl, string slotId, List<ModSpecModel> siblings)
+    {
+        var parameters = new DialogParameters<ItemPicker>
+        {
+            { x => x.FilterTpls, (Func<string, bool>)(t => Catalog.IsAllowedInSlot(parentTpl, slotId, t)) },
+            { x => x.Title, $"Select mod for {slotId}" },
+            { x => x.ShowCategoryFilter, false },
+        };
+        var dialog = await DialogService.ShowAsync<ItemPicker>("Select mod", parameters, PickerDialogOptions);
+        var result = await dialog.Result;
+        if (result is not { Canceled: false, Data: string tpl })
+        {
+            return;
+        }
+
+        var existing = siblings.FirstOrDefault(m => string.Equals(m.SlotId, slotId, StringComparison.OrdinalIgnoreCase));
+        if (existing is not null)
+        {
+            existing.Tpl = tpl;
+            existing.Mods.Clear();   // sub-mods belonged to the previous mod template
+        }
+        else
+        {
+            siblings.Add(new ModSpecModel { SlotId = slotId, Tpl = tpl });
+        }
+
+        await NotifyChangedAsync();
+    }
+
+    private async Task RemoveModAsync(List<ModSpecModel> siblings, ModSpecModel mod)
+    {
+        siblings.Remove(mod);
+        await NotifyChangedAsync();
+    }
+
+    // ── Contents ─────────────────────────────────────────────────────────────
+
+    private async Task AddContentAsync()
+    {
+        Spec.Contents.Add(new ItemSpecModel());
+        await NotifyChangedAsync();
+    }
+
+    private async Task RemoveContentAsync(ItemSpecModel content)
+    {
+        Spec.Contents.Remove(content);
+        await NotifyChangedAsync();
+    }
+}

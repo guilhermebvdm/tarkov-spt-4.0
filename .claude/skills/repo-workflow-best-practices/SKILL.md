@@ -30,7 +30,7 @@ Todo artefato de um item de backlog vive em `mods/<mod>/backlog/NNN-<slug>/` e u
 | 03 | `-03-spec-tech-review-NN.md` | Review da spec técnica | sim (NN) | `/review-technical-spec` |
 | 04 | `-04-code-review-NN.md` | Review do código | sim (NN) | `/code-review` |
 | 05 | `-05-asbuild.md` | Documentação pós-build | não | `/code-mod` cria; `/apply-code-review` atualiza |
-| 06 | `-06-fix-NN.md` | Correção pontual posterior | sim (NN) | manual |
+| 06 | `-06-fix-NN.md` | Correção pontual posterior | sim (NN) | manual, a partir de `.agents/templates/fix.md.tmpl` (checklist de validação obrigatório antes de marcar entregue) |
 
 - **Ordem visual = ordem do ciclo.** Listar a pasta mostra o histórico do item.
 - **`/review-spec` não recebe número** — edita inline a spec funcional, sem gerar novo arquivo.
@@ -126,5 +126,6 @@ A **ordem da tabela representa a ordem de execução desejada**, não a ordem cr
 6. **Status:** o `mod-backlog.md` reflete a etapa atual do item?
 7. **PROPRIEDADES.md:** novas `ConfigEntry` foram documentadas?
 8. **Section renames em `Config.Bind`:** breaking change foi sinalizado no changelog?
+9. **Fix 06-NN:** nasceu de `.agents/templates/fix.md.tmpl` e o checklist de validação (compila, in-raid, Fika, raid1→raid2, alt-F4, memória) foi preenchido antes de marcar entregue?
 
 Se algum item falha, parar e corrigir antes de avançar para a próxima etapa do fluxo.

@@ -34,6 +34,7 @@ Aplica em `modded/` os achados de um `04-code-review-NN.md` marcados como **Acei
 4. **Ler:**
    - O `<NNN>-<slug>-04-code-review-NN.md` alvo.
    - Spec funcional, spec técnica, asbuild — para contexto.
+   - **Memória do mod (leve)** — topo de `mods/<mod>/memory/sessions.md` (snapshot + pendências): fixes podem colidir com pendências abertas (ex.: "não validado in-game"). Pendência 🔴 do item/mod → alertar antes de prosseguir (`memory-curation` §14).
    - Arquivos de `mods/<mod>/modded/` que serão tocados (por CR-NN-MM).
 
 5. **Iterar achados em ordem (por NN do CR-NN-MM):**
@@ -85,6 +86,7 @@ Aplica em `modded/` os achados de um `04-code-review-NN.md` marcados como **Acei
 
     ```text
     ✓ Apply code-review concluído — <NNN> <Título> (rodada NN)
+    Memória consultada: snapshot de YYYY-MM-DD (Sessão N) · pendências que afetam: [P-N.M ...] / nenhuma
     Achados aplicados: N (IDs: CR-NN-01, CR-NN-03, CR-NN-05)
     Achados rejeitados: M (IDs: CR-NN-04)
     Achados pulados (clarificar): K (IDs: CR-NN-07)
@@ -97,6 +99,8 @@ Aplica em `modded/` os achados de um `04-code-review-NN.md` marcados como **Acei
     Próximo:
       /compile-mod <mod>
       Opcional: nova rodada /code-review para validar correções.
+      Achado deferido/regressão que virar fix pós-validação → usar .agents/templates/fix.md.tmpl (06-fix-NN).
+      Mudança de código substancial → /update-mod-graph <mod> (regenera o grafo; commit junto).
     ```
 
 ## Regras

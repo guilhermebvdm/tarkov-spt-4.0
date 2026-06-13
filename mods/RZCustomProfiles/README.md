@@ -123,3 +123,7 @@ Todas as skills aceitam valores de **0 a 51** (máximo do jogo).
 | `HideoutManagement` | Produção do hideout mais eficiente |
 | `Barter` | Melhores condições de troca |
 | `Taskperformance` | Melhores recompensas de quests |
+
+---
+
+**Workflow de desenvolvimento:** ver [WORKFLOW.md](../../WORKFLOW.md).

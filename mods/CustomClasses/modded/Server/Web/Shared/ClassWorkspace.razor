@@ -1,0 +1,841 @@
+@* Fase F1/F2 (rascunho): workspace unificado de 3 painéis, estilo inventário EFT. Recebe a
+   ClassDefinition já carregada (parse+diagnostics ficam no ClassDetail) + os custos já computados.
+     • header slim: badges (skill cost / loadout ₽) + botão EDIT (read) / SAVE+DISCARD (edit);
+     • ESQUERDA: skills (SkillCanonicalList) + multipliers + hideout + outfit simbólico;
+     • CENTRO: CharacterDoll (paper doll dos equipados);
+     • DIREITA: StashGrid (grade 2D do stash).
+   Cada painel rola só internamente (single-screen). O polimento visual fica pro orquestrador.
+
+   ── F2a: EDIÇÃO IN-PLACE ────────────────────────────────────────────────────────────────────
+   Em vez de linkar pra /edit, o botão EDIT liga _editMode=true E navega pra .../edit (replace:true)
+   só pra a URL acompanhar (refresh preserva: a rota /edit monta o workspace com InitialEdit=true).
+   A LÓGICA migra inteira do antigo ClassEdit.razor:
+     • _model = ClassEditModel.FromDefinition(def) ao entrar em editMode;
+     • Save = FlushPendingRecompute + ToDefinition + EditorService.Save(hotApply:true) + sai do edit + recarrega;
+     • Discard = descarta _model + sai do edit;
+     • EditGuardState (CascadingParameter) p/ guard de unsaved; Ctrl+S (window.ccPrefs.registerSaveShortcut);
+     • recompute debounced (037) → custo ao vivo no header slim.
+   O painel esquerdo vira editável (SkillCanonicalList Editable, multipliers add/remove, hideout add/remove)
+   e o outfit-preview vira clicável → SkinPickerDialog. StashGrid/CharacterDoll recebem Editable (no-op
+   visual por enquanto — F2c do orquestrador: DnD do stash + clicar-slot-equipado). *@
+
+@using System.Globalization
+@using SPTarkov.Server.Core.Models.Enums
+@using SPTarkov.Server.Core.Models.Enums.Hideout
+@using SPTarkov.Server.Core.Models.Common
+@using CustomClasses.Web
+@implements IDisposable
+@inject CatalogService Catalog
+@inject ClassEditorService EditorService
+@inject CostService CostService
+@inject NavigationManager Nav
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject IJSRuntime JS
+
+@if (Definition is null)
+{
+    <MudText Typo="Typo.body2">No parsed class to display.</MudText>
+}
+else
+{
+    var def = Definition;
+
+    <div class="cc-ws @(_editMode ? "cc-ws--edit" : null)">
+        @* ── Slim metrics bar + ações (Edit / Save+Discard) ── *@
+        <div class="cc-ws__header">
+            <div class="cc-ws__badges">
+                <span class="cc-ws__badge">
+                    <span class="cc-ws__badge-label">Skill cost</span>
+                    <span class="cc-ws__badge-val">@(LiveSkillCost?.Total.ToString("0.00", CultureInfo.InvariantCulture) ?? "—")</span>
+                </span>
+                <span class="cc-ws__badge">
+                    <span class="cc-ws__badge-label">Loadout</span>
+                    <span class="cc-ws__badge-val">@(LiveLoadoutCost is null ? "—" : FormatRub(LiveLoadoutCost.TotalRub))</span>
+                </span>
+            </div>
+
+            <div class="cc-ws__actions">
+                @if (!_editMode)
+                {
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                               StartIcon="@Icons.Material.Filled.Edit" OnClick="EnterEdit">
+                        Edit
+                    </MudButton>
+                }
+                else
+                {
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                               StartIcon="@Icons.Material.Filled.Save"
+                               Disabled="@_saving" OnClick="@(async () => await SaveAsync())">
+                        @(_saving ? "Saving…" : "Save")
+                    </MudButton>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Default" Size="Size.Small"
+                               StartIcon="@Icons.Material.Filled.Restore"
+                               Disabled="@_saving" OnClick="DiscardEdit">
+                        Discard
+                    </MudButton>
+                }
+            </div>
+        </div>
+
+        @* ── Save outcome (edit mode) ── *@
+        @if (_editMode && _saveDiagnostics.Count > 0)
+        {
+            @foreach (var d in _saveDiagnostics)
+            {
+                <MudAlert Severity="@MapSeverity(d.Severity)" Dense="true" Class="mb-1">
+                    [@d.Code] @d.Message
+                </MudAlert>
+            }
+        }
+
+        @* ── 3 colunas ──────────────────────────────────────────────────────── *@
+        <div class="cc-ws__grid">
+
+            @* ░ ESQUERDA ░ *@
+            <div class="cc-ws__panel cc-ws__panel--left">
+
+                @* ── Skills ── *@
+                <div class="cc-section">
+                    <div class="cc-section__title">Skills (@SkillsCount)</div>
+                    @if (_editMode && _model is not null)
+                    {
+                        <SkillCanonicalList Editable="true"
+                                            EditRows="@_model.Skills"
+                                            Cost="@LiveSkillCost"
+                                            Multipliers="@MultiplierLookup()"
+                                            OnLevelChanged="RecomputeSkillCost"/>
+                    }
+                    else
+                    {
+                        <SkillCanonicalList Levels="@def.Skills"
+                                            Cost="@SkillCost"
+                                            Multipliers="@def.SkillMultipliers"
+                                            Editable="false"/>
+                    }
+                </div>
+
+                @* ── XP multipliers ── *@
+                @if (_editMode && _model is not null)
+                {
+                    <div class="cc-section">
+                        <div class="cc-section__title">XP multipliers (@_model.Multipliers.Count)</div>
+                        @if (_model.Multipliers.Count > 0)
+                        {
+                            <div class="cc-ws__mults">
+                                @foreach (var row in _model.Multipliers)
+                                {
+                                    <div class="cc-ws__mult" @key="row">
+                                        <span class="cc-ws__mult-name">@row.Skill</span>
+                                        <MudNumericField T="double" @bind-Value="row.Factor"
+                                                         @bind-Value:after="RecomputeSkillCost"
+                                                         Min="0" Step="0.1" Format="0.##" Margin="Margin.Dense"
+                                                         Variant="Variant.Outlined" Style="max-width:96px;"/>
+                                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
+                                                       Color="Color.Error" title="Remove multiplier"
+                                                       OnClick="@(() => RemoveMultiplier(row))"/>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mt-2">
+                            <MudSelect T="string" @bind-Value="_newMultiplierSkill" Label="Add multiplier"
+                                       Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true"
+                                       Style="min-width:200px">
+                                @foreach (var name in AvailableSkills(_model.Multipliers.Select(r => r.Skill)))
+                                {
+                                    <MudSelectItem T="string" Value="@name">@name</MudSelectItem>
+                                }
+                            </MudSelect>
+                            <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary"
+                                           Disabled="@string.IsNullOrEmpty(_newMultiplierSkill)" OnClick="AddMultiplier"
+                                           title="Add multiplier"/>
+                        </MudStack>
+                    </div>
+                }
+                else if (def.SkillMultipliers is { Count: > 0 })
+                {
+                    <div class="cc-section">
+                        <div class="cc-section__title">XP multipliers (@def.SkillMultipliers.Count)</div>
+                        <div class="cc-ws__mults">
+                            @foreach (var (skill, factor) in def.SkillMultipliers)
+                            {
+                                <div class="cc-ws__mult">
+                                    <span class="cc-ws__mult-name">@skill</span>
+                                    <span class="cc-ws__mult-val">@MultiplierLabel(factor)</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                @* ── Hideout ── *@
+                <div class="cc-section">
+                    <div class="cc-section__title">Hideout (@HideoutCount)</div>
+                    @if (_editMode && _model is not null)
+                    {
+                        @if (_model.Hideout.Count > 0)
+                        {
+                            <div class="cc-ws__mults">
+                                @foreach (var row in _model.Hideout)
+                                {
+                                    <div class="cc-ws__mult" @key="row">
+                                        <span class="cc-ws__mult-name">@row.Station</span>
+                                        <MudNumericField T="int" @bind-Value="row.Level"
+                                                         Min="1" Margin="Margin.Dense"
+                                                         Variant="Variant.Outlined" Style="max-width:80px;"/>
+                                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
+                                                       Color="Color.Error" title="Remove station"
+                                                       OnClick="@(() => RemoveStation(row))"/>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mt-2">
+                            <MudSelect T="string" @bind-Value="_newStation" Label="Add station"
+                                       Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true"
+                                       Style="min-width:200px">
+                                @foreach (var name in AvailableStations())
+                                {
+                                    <MudSelectItem T="string" Value="@name">@name</MudSelectItem>
+                                }
+                            </MudSelect>
+                            <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary"
+                                           Disabled="@string.IsNullOrEmpty(_newStation)" OnClick="AddStation"
+                                           title="Add station"/>
+                        </MudStack>
+                    }
+                    else if (def.Hideout is { Count: > 0 })
+                    {
+                        <div class="cc-hideout-grid">
+                            @foreach (var (station, lvl) in def.Hideout)
+                            {
+                                <MudChip T="string" Size="Size.Small" Color="Color.Default">@station L@lvl</MudChip>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.caption">No hideout station overrides.</MudText>
+                    }
+                </div>
+
+                @* ── Outfit ── *@
+                <div class="cc-section">
+                    <div class="cc-section__title">Outfit</div>
+                    <div class="cc-ws__outfit">
+                        @if (_editMode && _model is not null)
+                        {
+                            @EditOutfitCard("USEC", "Upper", "Usec", () => _model.UsecUpper, v => _model.UsecUpper = v)
+                            @EditOutfitCard("USEC", "Lower", "Usec", () => _model.UsecLower, v => _model.UsecLower = v)
+                            @EditOutfitCard("BEAR", "Upper", "Bear", () => _model.BearUpper, v => _model.BearUpper = v)
+                            @EditOutfitCard("BEAR", "Lower", "Bear", () => _model.BearLower, v => _model.BearLower = v)
+                        }
+                        else
+                        {
+                            @OutfitCard("USEC", "Upper", def.Outfit?.Usec?.Upper)
+                            @OutfitCard("USEC", "Lower", def.Outfit?.Usec?.Lower)
+                            @OutfitCard("BEAR", "Upper", def.Outfit?.Bear?.Upper)
+                            @OutfitCard("BEAR", "Lower", def.Outfit?.Bear?.Lower)
+                        }
+                    </div>
+                </div>
+            </div>
+
+            @* ░ CENTRO ░ *@
+            <div class="cc-ws__panel cc-ws__panel--center">
+                <div class="cc-section__title">Equipped (@EquippedCount slots)</div>
+                <CharacterDoll Equipped="@EquippedForView" Editable="@_editMode" OnSlotClick="EditSlotAsync"/>
+            </div>
+
+            @* ░ DIREITA ░ *@
+            <div class="cc-ws__panel cc-ws__panel--right">
+                <div class="cc-section__title">Stash (@StashCount lines)</div>
+                <StashGrid Stash="@StashForView" BaseEdition="@def.BaseEdition" Editable="@_editMode"
+                           EditItems="@(_editMode ? _model?.Stash : null)"
+                           OnChanged="RecomputeLoadoutCost"/>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    /// <summary>Classe já parseada (parse/diagnostics ficam no ClassDetail). Null → nada a mostrar.</summary>
+    [Parameter] public ClassDefinition? Definition { get; set; }
+
+    /// <summary>Nome do arquivo SEM extensão (para o link de EDIT e fallback de título).</summary>
+    [Parameter] public string FileNameBare { get; set; } = "";
+
+    /// <summary>Custo de skills já computado (CostService.ComputeSkillCost) — modo read.</summary>
+    [Parameter] public SkillCostBreakdown? SkillCost { get; set; }
+
+    /// <summary>Custo de loadout já computado (CostService.ComputeLoadoutCost) — modo read.</summary>
+    [Parameter] public LoadoutCostBreakdown? LoadoutCost { get; set; }
+
+    /// <summary>Status do arquivo (Registered/Disabled/Invalid/Not registered) — passado pelo ClassDetail.</summary>
+    [Parameter] public ClassFileEntry? Entry { get; set; }
+
+    /// <summary>F2a: a rota /edit monta o workspace JÁ em edição (refresh preserva). false = começa em read.</summary>
+    [Parameter] public bool InitialEdit { get; set; }
+
+    /// <summary>F2a: callback opcional p/ a página recarregar a definição do disco após um Save bem-sucedido.</summary>
+    [Parameter] public EventCallback OnSaved { get; set; }
+
+    /// <summary>Item 030: guard de unsaved (per-circuit POCO via CascadingValue no BaseLayout).</summary>
+    [CascadingParameter] private BaseLayout.EditGuardState? Guard { get; set; }
+
+    // ── Estado de edição (F2a) ────────────────────────────────────────────────
+    private bool _editMode;
+    private ClassEditModel? _model;
+    private string? _resolvedFileName;            // nome real do arquivo (alvo do Save)
+    private List<ClassDiagnostic> _saveDiagnostics = [];
+    private SkillCostBreakdown? _editSkillCost;
+    private LoadoutCostBreakdown? _editLoadoutCost;
+    private bool _saving;
+
+    private string _newMultiplierSkill = string.Empty;
+    private string _newStation = string.Empty;
+
+    // Ctrl+S (item 035)
+    private DotNetObjectReference<ClassWorkspace>? _dotNetRef;
+    private bool _shortcutRegistered;
+
+    // recompute debounce (item 037)
+    private System.Threading.CancellationTokenSource? _recomputeCts;
+    private bool _disposed;
+
+    // outfit id → nome (ambas as facções) — read mode
+    private Dictionary<string, string> _clothingNames = new(StringComparer.Ordinal);
+
+    // ── Views: edit usa o _model; read usa a Definition ────────────────────────
+    private SkillCostBreakdown? LiveSkillCost => _editMode ? _editSkillCost : SkillCost;
+    private LoadoutCostBreakdown? LiveLoadoutCost => _editMode ? _editLoadoutCost : LoadoutCost;
+
+    private int SkillsCount => _editMode && _model is not null ? _model.Skills.Count : Definition?.Skills?.Count ?? 0;
+    private int HideoutCount => _editMode && _model is not null ? _model.Hideout.Count : Definition?.Hideout?.Count ?? 0;
+    private int EquippedCount => _editMode && _model is not null ? _model.Equipped.Count : Definition?.Loadout?.Equipped?.Count ?? 0;
+    private int StashCount => _editMode && _model is not null ? _model.Stash.Count : Definition?.Loadout?.Stash?.Count ?? 0;
+
+    /// <summary>Equipados desenhados na doll: snapshot do _model em edição, senão a Definition.</summary>
+    private Dictionary<string, ItemSpec>? EquippedForView =>
+        _editMode && _model is not null ? _model.ToDefinition().Loadout?.Equipped : Definition?.Loadout?.Equipped;
+
+    /// <summary>Stash desenhado na grade: snapshot do _model em edição, senão a Definition.</summary>
+    private List<ItemSpec>? StashForView =>
+        _editMode && _model is not null ? _model.ToDefinition().Loadout?.Stash : Definition?.Loadout?.Stash;
+
+    protected override void OnParametersSet()
+    {
+        // id → nome p/ os labels do outfit read-only (mesma fonte do ClassDetail).
+        _clothingNames = new Dictionary<string, string>(StringComparer.Ordinal);
+        if (Definition?.Outfit is not null || InitialEdit)
+        {
+            foreach (var side in new[] { "Usec", "Bear" })
+            {
+                foreach (var piece in Catalog.GetClothing(side))
+                {
+                    if (!string.IsNullOrWhiteSpace(piece.Name))
+                    {
+                        _clothingNames[piece.Id] = piece.Name!;
+                    }
+                }
+            }
+        }
+
+        // F2a: a rota /edit monta o workspace já em edição — UMA VEZ por instância. Sem o flag, o
+        // re-render do reload pós-save (OnSaved, ainda na rota /edit com _editMode já false) re-entraria
+        // em edição e re-armaria o guard, disparando um diálogo de "unsaved" espúrio no NavigateToDetail.
+        if (InitialEdit && !_editMode && !_initialEditHandled)
+        {
+            _initialEditHandled = true;
+            EnterEdit();
+        }
+    }
+
+    private bool _initialEditHandled;
+
+    // ── Entrar / sair do modo edição (F2a) ─────────────────────────────────────
+
+    /// <summary>
+    ///     Entra em edição IN-PLACE: resolve o arquivo real, monta o ClassEditModel, computa os custos
+    ///     ao vivo, arma o guard de unsaved + Ctrl+S e leva a URL pra .../edit (replace — refresh preserva).
+    /// </summary>
+    private void EnterEdit()
+    {
+        if (Definition is null)
+        {
+            return;
+        }
+
+        _resolvedFileName = ResolveFileName();
+        if (_resolvedFileName is null)
+        {
+            Snackbar.Add("Could not resolve the class file on disk — edit unavailable.", Severity.Error);
+            return;
+        }
+
+        var onEditRoute = Nav.Uri.Contains("/edit", StringComparison.Ordinal);
+
+        // Se ainda NÃO estamos na rota /edit (Edit clicado no detalhe), só navegamos pra .../edit:
+        // a página ClassEdit remonta o workspace com InitialEdit=true e ESSA instância entra em edição
+        // (arma o guard etc.). Armar o guard aqui ANTES de navegar dispararia o diálogo de unsaved na
+        // própria navegação que abre a edição.
+        if (!onEditRoute)
+        {
+            if (FileNameBare is { Length: > 0 })
+            {
+                Nav.NavigateTo($"/customclasses/classes/{Uri.EscapeDataString(FileNameBare)}/edit");
+            }
+
+            return;
+        }
+
+        _model = ClassEditModel.FromDefinition(Definition);
+        _saveDiagnostics = [];
+        _editMode = true;
+        RecomputeSkillCost();
+        RecomputeLoadoutCost();
+        ArmGuard();
+    }
+
+    /// <summary>Discard: descarta o _model e volta pro read in-place (URL volta pro detalhe).</summary>
+    private void DiscardEdit()
+    {
+        _model = null;
+        _editMode = false;
+        _saveDiagnostics = [];
+        _editSkillCost = null;
+        _editLoadoutCost = null;
+        _newMultiplierSkill = string.Empty;
+        _newStation = string.Empty;
+        DisarmGuard();
+        Snackbar.Add("Changes discarded.", Severity.Info);
+        NavigateToDetail();
+    }
+
+    /// <summary>Resolve route name (bare ou exato) → nome real do arquivo (mesma lógica do ClassDetail/ClassEdit).</summary>
+    private string? ResolveFileName()
+    {
+        if (Entry?.FileName is { Length: > 0 } fn)
+        {
+            return fn;
+        }
+
+        if (string.IsNullOrWhiteSpace(FileNameBare))
+        {
+            return null;
+        }
+
+        var entries = EditorService.ListClassFiles();
+        var entry = entries.FirstOrDefault(e => string.Equals(e.FileName, FileNameBare, StringComparison.OrdinalIgnoreCase))
+                    ?? entries.FirstOrDefault(e => string.Equals(
+                        System.IO.Path.GetFileNameWithoutExtension(e.FileName), FileNameBare, StringComparison.OrdinalIgnoreCase));
+        return entry?.FileName;
+    }
+
+    private void NavigateToDetail()
+    {
+        if (FileNameBare is { Length: > 0 })
+        {
+            Nav.NavigateTo($"/customclasses/classes/{Uri.EscapeDataString(FileNameBare)}", replace: true);
+        }
+    }
+
+    // ── Save (migrado do ClassEdit) ─────────────────────────────────────────────
+
+    private async Task<bool> SaveAsync()
+    {
+        if (_model is null || _resolvedFileName is null)
+        {
+            return false;
+        }
+
+        // Item 037: um Save pode cair dentro da janela de debounce — força o recompute pendente
+        // (capacity incluída) antes de tirar o snapshot da definição a persistir.
+        FlushPendingRecompute();
+
+        _saving = true;
+        try
+        {
+            // CR2-EP-09: snapshot da definição NA thread do circuito (a UI fica editável durante o save).
+            var def = _model.ToDefinition();
+            var result = await Task.Run(() => EditorService.Save(_resolvedFileName, def, hotApply: true));
+            _saveDiagnostics = result.Diagnostics;
+            if (result.Success)
+            {
+                Snackbar.Add("Class saved and hot-applied.", Severity.Success);
+                _editMode = false;
+                _model = null;
+                _editSkillCost = null;
+                _editLoadoutCost = null;
+                DisarmGuard();
+                // a página recarrega a Definition do disco; volta a URL pro detalhe.
+                if (OnSaved.HasDelegate)
+                {
+                    await OnSaved.InvokeAsync();
+                }
+
+                NavigateToDetail();
+                return true;
+            }
+
+            Snackbar.Add("Save blocked by validation — nothing was written.", Severity.Error);
+            return false;
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    // ── Guard de unsaved (item 030) + Ctrl+S (item 035) ─────────────────────────
+
+    private void ArmGuard()
+    {
+        if (Guard is not null)
+        {
+            Guard.IsDirty = true;
+            Guard.SaveAsync = SaveAsync;
+            Guard.Discard = () =>
+            {
+                _model = null;
+                _editMode = false;
+            };
+        }
+    }
+
+    private void DisarmGuard() => Guard?.Reset();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_shortcutRegistered)
+        {
+            _shortcutRegistered = true;
+            _dotNetRef = DotNetObjectReference.Create(this);
+            try
+            {
+                await JS.InvokeVoidAsync("ccPrefs.registerSaveShortcut", _dotNetRef);
+            }
+            catch (JSException) { }
+            catch (InvalidOperationException) { }
+        }
+    }
+
+    /// <summary>Ctrl/Cmd+S → Save. Roda FORA do render context → marshalled via InvokeAsync (igual ao botão).</summary>
+    [JSInvokable]
+    public async Task OnSaveShortcut() =>
+        await InvokeAsync(async () =>
+        {
+            if (_saving || !_editMode)
+            {
+                return;
+            }
+
+            await SaveAsync();
+        });
+
+    // ── Recompute (item 037) ────────────────────────────────────────────────────
+
+    private void RecomputeSkillCost()
+    {
+        if (_model is not null)
+        {
+            _editSkillCost = CostService.ComputeSkillCost(_model.ToDefinition());
+        }
+    }
+
+    private void RecomputeLoadoutCost()
+    {
+        if (_model is not null)
+        {
+            _editLoadoutCost = CostService.ComputeLoadoutCost(_model.ToDefinition());
+        }
+    }
+
+    /// <summary>Debounce ~250 ms — agrupa keystrokes (factor/level). Add/remove de linha é discreto (chama direto).</summary>
+    private void ScheduleRecompute()
+    {
+        _recomputeCts?.Cancel();
+        var cts = _recomputeCts = new System.Threading.CancellationTokenSource();
+        _ = InvokeAsync(async () =>
+        {
+            try
+            {
+                await Task.Delay(250, cts.Token);
+            }
+            catch (TaskCanceledException)
+            {
+                return;
+            }
+
+            RecomputeLoadoutCost();
+            if (!_disposed)
+            {
+                try
+                {
+                    StateHasChanged();
+                }
+                catch (ObjectDisposedException) { }
+            }
+        });
+    }
+
+    private void FlushPendingRecompute()
+    {
+        _recomputeCts?.Cancel();
+        RecomputeSkillCost();
+        RecomputeLoadoutCost();
+    }
+
+    public void Dispose()
+    {
+        _disposed = true;
+        _recomputeCts?.Cancel();
+        _recomputeCts?.Dispose();
+
+        if (_shortcutRegistered)
+        {
+            try
+            {
+                _ = JS.InvokeVoidAsync("ccPrefs.unregisterSaveShortcut");
+            }
+            catch { }
+        }
+
+        _dotNetRef?.Dispose();
+        // Não chamamos Guard.Reset() aqui: o BaseLayout pode dispor antes do save concluir.
+    }
+
+    // ── Multipliers / hideout (add/remove) — migrado do ClassEdit ───────────────
+
+    private Dictionary<string, double> MultiplierLookup()
+    {
+        var d = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
+        foreach (var m in _model!.Multipliers)
+        {
+            if (!string.IsNullOrWhiteSpace(m.Skill))
+            {
+                d.TryAdd(m.Skill, m.Factor);
+            }
+        }
+
+        return d;
+    }
+
+    private static IEnumerable<string> AvailableSkills(IEnumerable<string> used)
+    {
+        var taken = new HashSet<string>(used, StringComparer.OrdinalIgnoreCase);
+        return Enum.GetNames<SkillTypes>()
+            .Where(n => !taken.Contains(n))
+            .OrderBy(n => n, StringComparer.OrdinalIgnoreCase);
+    }
+
+    private IEnumerable<string> AvailableStations()
+    {
+        var taken = new HashSet<string>(_model!.Hideout.Select(r => r.Station), StringComparer.OrdinalIgnoreCase);
+        return Enum.GetNames<HideoutAreas>()
+            .Where(n => !string.Equals(n, nameof(HideoutAreas.NotSet), StringComparison.Ordinal) && !taken.Contains(n))
+            .OrderBy(n => n, StringComparer.OrdinalIgnoreCase);
+    }
+
+    private void AddMultiplier()
+    {
+        if (!string.IsNullOrEmpty(_newMultiplierSkill))
+        {
+            _model!.Multipliers.Add(new SkillFactorRow { Skill = _newMultiplierSkill, Factor = 1.0 });
+            _newMultiplierSkill = string.Empty;
+            RecomputeSkillCost();
+        }
+    }
+
+    private void RemoveMultiplier(SkillFactorRow row)
+    {
+        _model!.Multipliers.Remove(row);
+        RecomputeSkillCost();
+    }
+
+    private void AddStation()
+    {
+        if (!string.IsNullOrEmpty(_newStation))
+        {
+            _model!.Hideout.Add(new HideoutRow { Station = _newStation, Level = 1 });
+            _newStation = string.Empty;
+        }
+    }
+
+    private void RemoveStation(HideoutRow row) => _model!.Hideout.Remove(row);
+
+    // ── Outfit (read + edit via SkinPickerDialog) ───────────────────────────────
+
+    private static readonly DialogOptions SkinPickerOptions = new()
+    {
+        MaxWidth = MaxWidth.Medium,
+        FullWidth = true,
+        CloseButton = true,
+    };
+
+    /// <summary>
+    ///     F2b: abre a galeria de skins do slot; o resultado (id ou null) seta o _model.
+    ///     <paramref name="side"/> é a casing do catálogo ("Usec"/"Bear" — Catalog.GetClothing);
+    ///     <paramref name="faction"/> é só o rótulo de exibição ("USEC"/"BEAR").
+    /// </summary>
+    private async Task PickSkinAsync(string faction, string side, string slot, Func<string?> get, Action<string?> set)
+    {
+        var parameters = new DialogParameters<SkinPickerDialog>
+        {
+            { x => x.Side, side },
+            { x => x.SlotKind, slot },
+            { x => x.CurrentId, get() },
+            { x => x.Title, $"{faction} · {slot} skin" },
+        };
+        var dialog = await DialogService.ShowAsync<SkinPickerDialog>($"{faction} {slot} skin", parameters, SkinPickerOptions);
+        var result = await dialog.Result;
+        if (result is { Canceled: false })
+        {
+            // Data == null → "use template default" (limpa); string → id da skin.
+            set(result.Data as string);
+            StateHasChanged();
+        }
+    }
+
+    // ── Clicar-slot-edita o equipado (F2c) ──────────────────────────────────────
+
+    private static readonly DialogOptions SlotEditOptions = new()
+    {
+        MaxWidth = MaxWidth.Medium,
+        FullWidth = true,
+        CloseButton = true,
+    };
+
+    /// <summary>
+    ///     F2c: clicar num slot da silhueta (modo edição) abre o ItemSpecEditor desse slot num dialog.
+    ///     Slot vazio → linha efêmera; só entra no _model.Equipped se o usuário escolher um item.
+    ///     "Clear" remove o slot. O ItemSpecModel é mutado em lugar (o Discard global faz o rollback).
+    /// </summary>
+    private async Task EditSlotAsync(string slot)
+    {
+        if (_model is null)
+        {
+            return;
+        }
+
+        var row = _model.Equipped.FirstOrDefault(r => string.Equals(r.Slot, slot, StringComparison.OrdinalIgnoreCase));
+        var isNew = row is null;
+        row ??= new EquippedSlotRow { Slot = slot, Item = new ItemSpecModel() };
+
+        var parameters = new DialogParameters<SlotEditDialog>
+        {
+            { x => x.Item, row.Item },
+            { x => x.SlotName, slot },
+            { x => x.Filter, (Func<string, bool>)(t => Catalog.IsAllowedInEquipmentSlot(slot, t)) },
+            { x => x.OnChanged, EventCallback.Factory.Create(this, RecomputeLoadoutCost) },
+        };
+        var dialog = await DialogService.ShowAsync<SlotEditDialog>(slot, parameters, SlotEditOptions);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false, Data: "clear" })
+        {
+            if (!isNew)
+            {
+                _model.Equipped.Remove(row);
+            }
+        }
+        else if (isNew && (row.Item.Tpl is { Length: > 0 } || row.Item.Preset is { Length: > 0 }))
+        {
+            // slot novo que ganhou um item (Done ou Cancel após escolher) → entra no modelo.
+            _model.Equipped.Add(row);
+        }
+
+        RecomputeLoadoutCost();
+        StateHasChanged();
+    }
+
+    // ── Helpers de apresentação ─────────────────────────────────────────────────
+
+    private static string FormatRub(double value) =>
+        value.ToString("N0", CultureInfo.InvariantCulture) + " ₽";
+
+    private string ClothingLabel(string? id)
+    {
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            return "—";
+        }
+
+        return _clothingNames.TryGetValue(id!, out var name) ? name : id!;
+    }
+
+    private static string MultiplierLabel(double factor)
+    {
+        if (Math.Abs(factor - 1.0) < 0.0001)
+        {
+            return "×1";
+        }
+
+        var pct = (factor - 1) * 100;
+        var sign = pct > 0 ? "+" : "";
+        return $"{sign}{pct.ToString("0", CultureInfo.InvariantCulture)}%";
+    }
+
+    private static Severity MapSeverity(DiagnosticSeverity severity) => severity switch
+    {
+        DiagnosticSeverity.Error => Severity.Error,
+        DiagnosticSeverity.Warning => Severity.Warning,
+        _ => Severity.Info,
+    };
+
+    /// <summary>Card simbólico read-only de uma peça: glyph SVG (camisa Upper / calça Lower) + faction/slot + nome.</summary>
+    private RenderFragment OutfitCard(string faction, string slot, string? id) => __builder =>
+    {
+        <div class="cc-ws__outfit-card">
+            <div class="cc-ws__outfit-glyph">@OutfitGlyph(slot)</div>
+            <div class="cc-ws__outfit-meta">
+                <span class="cc-ws__outfit-slot">@faction · @slot</span>
+                <span class="cc-ws__outfit-name" title="@ClothingLabel(id)">@ClothingLabel(id)</span>
+            </div>
+        </div>
+    };
+
+    /// <summary>F2b: card de outfit EDITÁVEL — clica abre o SkinPickerDialog; lápis e limpar inline.</summary>
+    private RenderFragment EditOutfitCard(string faction, string slot, string side,
+        Func<string?> get, Action<string?> set) => __builder =>
+    {
+        <div class="cc-ws__outfit-card cc-ws__outfit-card--edit"
+             @onclick="@(() => PickSkinAsync(faction, side, slot, get, set))"
+             title="Click to choose a skin">
+            <div class="cc-ws__outfit-glyph">@OutfitGlyph(slot)</div>
+            <div class="cc-ws__outfit-meta">
+                <span class="cc-ws__outfit-slot">@faction · @slot</span>
+                <span class="cc-ws__outfit-name" title="@(get() is { Length: > 0 } id ? ClothingLabel(id) : "template default")">
+                    @(get() is { Length: > 0 } cur ? ClothingLabel(cur) : "— (template default)")
+                </span>
+            </div>
+            @if (get() is { Length: > 0 })
+            {
+                @* span com stopPropagation: o clique no "limpar" não deve abrir o picker do card. *@
+                <span @onclick="@(() => { set(null); StateHasChanged(); })" @onclick:stopPropagation="true">
+                    <MudIconButton Icon="@Icons.Material.Filled.Clear" Size="Size.Small"
+                                   title="Clear (use template default)"/>
+                </span>
+            }
+        </div>
+    };
+
+    private static RenderFragment OutfitGlyph(string slot) => __builder =>
+    {
+        var isUpper = string.Equals(slot, "Upper", StringComparison.Ordinal);
+        if (isUpper)
+        {
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M4 6l4-3 4 2 4-2 4 3-3 3v11H7V9z"/>
+            </svg>
+        }
+        else
+        {
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M6 3h12l-1 18h-4l-1-11-1 11H7z"/>
+            </svg>
+        }
+    };
+}

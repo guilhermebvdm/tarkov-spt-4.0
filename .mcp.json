@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "graphify-eft": {
+      "command": "graphify-mcp",
+      "args": ["references/graphs/eft-decompiled/graph.json"]
+    }
+  }
+}

@@ -1,10 +1,16 @@
 {
   "name": "Operador Furtivo",
+  "displayName": {
+    "en": "Stealth Operator",
+    "pt": "Operador Furtivo"
+  },
   "baseEdition": "SPT Zero to hero",
   "description": {
     "en": "Stealth Operator. Stealth specialist — silent on the move, sharp perception and efficient searching. Moves unheard.",
     "pt": "Operador furtivo. Especialista em furtividade — silêncio em movimento, percepção apurada e busca eficiente. Move-se sem ser ouvido."
   },
+  "iconFile": "operadorFurtivo.png",
+  "nameColor": "#7d7392",
   "skills": {
     "Assault": 5,
     "Endurance": 5,

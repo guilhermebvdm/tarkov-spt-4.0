@@ -1,10 +1,16 @@
 {
   "name": "Saqueador",
+  "displayName": {
+    "en": "Scavenger",
+    "pt": "Saqueador"
+  },
   "baseEdition": "SPT Zero to hero",
   "description": {
     "en": "Scavenger. Empties containers in seconds, detects loot at range and instantly identifies valuable items.",
     "pt": "Saqueador. Esvazia containers em segundos, detecta loot à distância e identifica itens valiosos instantaneamente."
   },
+  "iconFile": "saqueador.png",
+  "nameColor": "#c4ad45",
   "skills": {
     "Assault": 2,
     "Strength": 2,

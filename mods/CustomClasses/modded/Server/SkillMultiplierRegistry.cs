@@ -24,4 +24,13 @@ public class SkillMultiplierRegistry
     {
         return _byEdition.TryGetValue(edition, out var m) ? m : new Dictionary<string, double>();
     }
+
+    /// <summary>Item 021: remove os fatores da edition (hot-remove do editor). True se existia.</summary>
+    public bool Remove(string edition)
+    {
+        return _byEdition.Remove(edition);
+    }
+
+    /// <summary>Item 021: editions com fatores registrados (enumeração p/ o editor).</summary>
+    public IReadOnlyCollection<string> Editions => _byEdition.Keys;
 }

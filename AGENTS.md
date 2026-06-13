@@ -75,18 +75,9 @@ Para tarefas específicas, consulte `.agents/workflows/` (quando existirem).
 
 ## Fluxo de backlog (slash commands)
 
-Cada item de backlog vive em `mods/<mod>/backlog/NNN-<slug>/` (numeração local por mod, 3 dígitos). O índice é `mods/<mod>/backlog/mod-backlog.md`.
+> 📋 **Fonte de verdade do ciclo de desenvolvimento** (commands, artefatos, skills, memória, grafos de código): **[WORKFLOW.md](WORKFLOW.md)** — não duplicar a tabela aqui.
 
-| Comando | Ação | Output |
-|---|---|---|
-| [`/add-backlog-item`](.claude/commands/add-backlog-item.md) `<mod> <descrição>` | Cria entrada e pasta; invoca `/create-spec` | `mod-backlog.md` + pasta `NNN-<slug>/` |
-| [`/create-spec`](.claude/commands/create-spec.md) `<ref>` | Spec funcional (critérios + corner cases) | `NNN-<slug>-spec.md` |
-| [`/review-spec`](.claude/commands/review-spec.md) `<ref>` | Edita inline a spec — gaps/contradições | mesmo arquivo |
-| [`/create-technical-spec`](.claude/commands/create-technical-spec.md) `<ref>` | Pré-código com refs ao Assembly | `NNN-<slug>-technical-spec.md` |
-| [`/review-technical-spec`](.claude/commands/review-technical-spec.md) `<ref>` | Análise crítica incremental | `NNN-<slug>-technical-review-NN.md` (NN +1 a cada run) |
-| [`/code-mod`](.claude/commands/code-mod.md) `<ref>` | Implementa em `modded/` | mudanças em `mods/<mod>/modded/` |
-
-`<ref>` aceita: path da pasta, path de arquivo dentro da pasta, ou forma curta `<mod> <NNN>`.
+Resumo: cada item vive em `mods/<mod>/backlog/NNN-<slug>/` (índice em `mod-backlog.md`); artefatos seguem `NNN-<slug>-MM-tipo[-NN].md`; o ciclo vai de `/add-backlog-item` a `/update-mod-graph`. `<ref>` aceita: path da pasta, path de arquivo dentro dela, ou forma curta `<mod> <NNN>`.
 
 ## Hierarquia de evidência (spec/review técnicas)
 

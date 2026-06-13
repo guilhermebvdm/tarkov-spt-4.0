@@ -1,0 +1,87 @@
+@page "/customclasses"
+@using SPTarkov.Server.Core.Services
+@layout BaseLayout
+
+@* Item 020 walking skeleton / smoke test: proves the Blazor page can reach the
+   server DI (DatabaseService) by listing the edition keys of profiles.json —
+   vanilla editions plus the class editions this mod registered.
+   The real class list UI is item 024. *@
+
+@inject DatabaseService DatabaseService
+
+<PageTitle>CustomClasses — Editions</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-4">
+    @* Item 024: main entry point — the class list replaces this page as the editor's landing content. *@
+    <MudPaper Elevation="0" Class="pa-6 mb-4">
+        <MudText Typo="Typo.h4" Class="mb-2">Class editor</MudText>
+        <MudText Typo="Typo.body2" Class="mb-4">
+            Browse every class file in <code>config/classes/</code> — status, diagnostics,
+            skills, multipliers, hideout, outfit, loadout and costs (read-only).
+        </MudText>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Groups"
+                   Href="/customclasses/classes">
+            Open class list
+        </MudButton>
+    </MudPaper>
+
+    <MudPaper Elevation="0" Class="pa-6">
+        <MudText Typo="Typo.h4" Class="mb-2">Profile editions</MudText>
+        <MudText Typo="Typo.body2" Class="mb-4">
+            Smoke test: edition keys from DatabaseService.GetProfileTemplates().
+            Non-vanilla entries are the classes registered by CustomClasses (or other mods).
+        </MudText>
+
+        <MudTable Items="@_editions" Dense="true" Hover="true">
+            <HeaderContent>
+                <MudTh>Edition</MudTh>
+                <MudTh>Origin</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Edition">@context.Key</MudTd>
+                <MudTd DataLabel="Origin">
+                    @if (context.IsVanilla)
+                    {
+                        <MudChip T="string" Size="Size.Small" Color="Color.Default">vanilla</MudChip>
+                    }
+                    else
+                    {
+                        <MudChip T="string" Size="Size.Small" Color="Color.Success">mod</MudChip>
+                    }
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    // Edition keys shipped by SPT 4.0 itself (SPT_Data/database/templates/profiles.json).
+    // Anything else in GetProfileTemplates() was injected by a mod at runtime.
+    private static readonly HashSet<string> VanillaEditions = new(StringComparer.Ordinal)
+    {
+        "Standard",
+        "Left Behind",
+        "Prepare To Escape",
+        "Edge Of Darkness",
+        "Unheard",
+        "Tournament",
+        "SPT Developer",
+        "SPT Easy start",
+        "SPT Zero to hero",
+    };
+
+    private sealed record EditionRow(string Key, bool IsVanilla);
+
+    private List<EditionRow> _editions = [];
+
+    protected override void OnInitialized()
+    {
+        _editions = DatabaseService
+            .GetProfileTemplates()                       // ref: DatabaseService.cs:141
+            .Keys
+            .OrderBy(k => k, StringComparer.Ordinal)
+            .Select(k => new EditionRow(k, VanillaEditions.Contains(k)))
+            .ToList();
+    }
+}

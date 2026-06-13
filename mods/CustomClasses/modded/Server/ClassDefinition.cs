@@ -9,9 +9,16 @@ namespace CustomClasses;
 /// </summary>
 public sealed record ClassDefinition
 {
-    /// <summary>Required. Becomes the launcher edition key + display label.</summary>
+    /// <summary>Required. Becomes the launcher edition key + display label (PT identifier).</summary>
     [JsonPropertyName("name")]
     public string? Name { get; init; }
+
+    /// <summary>
+    ///     Optional. Item 008 (i18n): localized class name shown in-game (menu/tooltip). Object { en, pt }.
+    ///     Falls back to <see cref="Name"/> when absent. The launcher edition key stays <see cref="Name"/> (PT).
+    /// </summary>
+    [JsonPropertyName("displayName")]
+    public LocalizedText? DisplayName { get; init; }
 
     /// <summary>Optional (default true). When false the class is not registered.</summary>
     [JsonPropertyName("enabled")]
@@ -24,6 +31,14 @@ public sealed record ClassDefinition
     /// <summary>Optional. Launcher description. Item 008: aceita string (legado=en) ou objeto { en, pt }.</summary>
     [JsonPropertyName("description")]
     public LocalizedText? Description { get; init; }
+
+    /// <summary>Optional. Item 011: nome do PNG do ícone da classe (ex.: "cacador.png"), em BepInEx/plugins/CustomClasses/icons/.</summary>
+    [JsonPropertyName("iconFile")]
+    public string? IconFile { get; init; }
+
+    /// <summary>Optional. Item 011: cor do nome da classe na UI, hex "#RRGGBB".</summary>
+    [JsonPropertyName("nameColor")]
+    public string? NameColor { get; init; }
 
     /// <summary>Optional. Skill name → starting level (0..51). Unknown names are ignored with a warning.</summary>
     [JsonPropertyName("skills")]
@@ -97,6 +112,16 @@ public sealed record ItemSpec
 
     /// <summary>Manual mod tree (alternative to preset).</summary>
     [JsonPropertyName("mods")] public List<ModSpec>? Mods { get; init; }
+
+    /// <summary>Stash grid column (0-based). Opt-in: when X+Y are set the builder places the item at that
+    /// cell instead of first-fit (falls back to auto-pack if it no longer fits). Stash-only (item 038).</summary>
+    [JsonPropertyName("x")] public int? X { get; init; }
+
+    /// <summary>Stash grid row (0-based). See <see cref="X"/>.</summary>
+    [JsonPropertyName("y")] public int? Y { get; init; }
+
+    /// <summary>Explicit rotation for the pinned cell — true → ItemRotation.Vertical (item 038).</summary>
+    [JsonPropertyName("rotated")] public bool? Rotated { get; init; }
 }
 
 /// <summary>A mod node in a manual item tree.</summary>

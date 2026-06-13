@@ -16,6 +16,7 @@ Authoritative references (in this repo) — full evidence hierarchy in `.agents/
 - FIKA (coop): `references/fika-server/`, `references/fika-plugin/` (`Fika.Core`), `references/fika-headless/`
 - Wiki snapshot: `wiki/spt/` (read-only)
 - Mod conventions: `AGENTS.md`, `.agents/conventions.md`
+- **Erros recorrentes já cometidos neste repo:** `docs/technical/spt-antipatterns.md` (AP-01..AP-08) — ler antes de escrever ou revisar spec técnica.
 
 ## 1. Plugin lifecycle
 
@@ -125,15 +126,23 @@ If the spec talks about a "raid mod" that should not run in hideout, this guard 
 - If you need an upstream type or helper, copy the minimum into `modded/` and document the source in a comment: `// ref: original/<file>:<line>`.
 - Cite Assembly evidence as `arquivo.cs:linha` (the convention in `AGENTS.md` §"Hierarquia de referências").
 
+## 8. Canonical API vs direct state mutation
+
+- When changing player/weapon/world state, prefer the EFT-canonical entry point (public controller method, `ECommand` via `TranslateCommand`, operation API) over writing internal fields directly. Canonical paths fire the side-effects the rest of the game expects: HUD updates, sounds, animation/state-machine transitions, network sync in Fika. Real cases: stamina drain must go through `Consume()`/`UpdateStamina()` — writing `HandsStamina.Current` directly skips HUD, low-stamina sounds and `HandsExhausted` (stances 001, PA-02-01); weapon mounting must go through `ECommand.WeaponMounting (140)` (stances 004, 06-fix-01).
+- Before mutating any field directly, grep the Assembly for the setter/command/operation the game itself uses for that transition and list its side-effects in the technical spec. If you still bypass it, document why and which side-effects you intentionally skip.
+- See `docs/technical/spt-antipatterns.md` AP-04 for the full case history.
+
 ## Review checklist (use during `/review-technical-spec` and `/code-mod`)
 
-1. **Lifecycle:** Is there a clear Awake / raid-start / raid-end story? Are stop hooks idempotent and covering both `GameWorld.OnDestroy` and `AbstractGame.Stop`?
+1. **Lifecycle:** Is there a clear Awake / raid-start / raid-end story? Are stop hooks idempotent and covering both `GameWorld.OnDestroy` and `BaseLocalGame.Stop` (patch `AbstractGame.Stop` only to cover all derived game types — rare)?
 2. **Leaks:** Every `+= handler`, `new GameObject`, `StartCoroutine`, `CancellationTokenSource`, static collection — is its release point identified?
 3. **Hot path:** Any allocations or LINQ in per-frame / per-bot-tick code? Reflection cached?
-4. **Context guards:** Does code that assumes a raid early-return in menu/hideout?
+4. **Context guards:** Does code that assumes a raid early-return in menu/hideout? **Multiplayer/Fika:** does every player-reactive patch distinguish the local player (`IsYourPlayer` / `__instance == MainPlayer.HandsController`) from bots and other Fika players? (AP-02)
 5. **Patches:** Targets resolved by signature, not `GClassNNNN`? Bodies wrapped in try/catch and logged?
 6. **Compatibility:** Assembly refs verified at `arquivo:linha`? No SPT-3.x patterns? No cross-side imports (server↔client)?
 7. **Config:** New entries documented in `PROPRIEDADES.md` with units and defaults?
 8. **Sandbox:** All changes in `modded/`? `original/` untouched?
+9. **Canonical API:** state changes go through the EFT command/API path (§8)? Side-effects of any bypass documented? (AP-04)
+10. **Virtual dispatch:** when patching a virtual/abstract method, were ALL overrides audited for base-call, and is the patch on a routing point that covers every path? (AP-03)
 
 If any item is unanswered, flag as 🔴 in the review or stop the build and request a `/review-technical-spec` pass.

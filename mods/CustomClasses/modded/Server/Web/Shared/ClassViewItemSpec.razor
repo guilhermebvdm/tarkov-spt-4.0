@@ -1,0 +1,151 @@
+@* Item 024: recursive read-only renderer for one loadout ItemSpec (equipped slot,
+   stash line or container content). Mirrors CostService/InventoryBuilder resolution:
+   preset id or weapon tpl → default/premium preset (name + part count), manual mod
+   trees via ClassViewModSpec, container contents via self-recursion.
+   Visual indent comes from DOM nesting (24px per level); Depth caps recursion. *@
+
+@using SPTarkov.Server.Core.Models.Common
+@using SPTarkov.Server.Core.Models.Eft.Common
+@inject CatalogService Catalog
+
+<div style="@(Depth > 0 ? "margin-left:24px;" : null)">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Wrap="Wrap.Wrap" Class="my-1">
+        @if (Depth > 0)
+        {
+            <MudIcon Icon="@Icons.Material.Filled.SubdirectoryArrowRight" Size="Size.Small" Color="Color.Default"/>
+        }
+        <MudText Typo="Typo.body2"><b>@_rootName</b></MudText>
+
+        @if (_presetName is not null)
+        {
+            <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Outlined">
+                preset: @_presetName (@_presetItemCount parts)
+            </MudChip>
+        }
+        @if (Spec.Premium)
+        {
+            <MudChip T="string" Size="Size.Small" Color="Color.Warning">premium</MudChip>
+        }
+        @if (Spec.Count > 1)
+        {
+            <MudChip T="string" Size="Size.Small" Color="Color.Default">×@Spec.Count.ToString("N0")</MudChip>
+        }
+        @if (Spec.LoadedMag)
+        {
+            <MudTooltip Text="Magazine loaded to capacity">
+                <MudIcon Icon="@Icons.Material.Filled.BatteryChargingFull" Size="Size.Small" Color="Color.Success"/>
+            </MudTooltip>
+        }
+        @if (Spec.Chambered)
+        {
+            <MudTooltip Text="Round chambered">
+                <MudIcon Icon="@Icons.Material.Filled.Adjust" Size="Size.Small" Color="Color.Success"/>
+            </MudTooltip>
+        }
+        @if (!string.IsNullOrWhiteSpace(Spec.Ammo))
+        {
+            <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined">ammo: @ResolveName(Spec.Ammo)</MudChip>
+        }
+        @if (_unresolved)
+        {
+            <MudTooltip Text="tpl/preset could not be resolved against the live DB — the builder would skip this line too">
+                <MudChip T="string" Size="Size.Small" Color="Color.Error">unresolved</MudChip>
+            </MudTooltip>
+        }
+    </MudStack>
+
+    @if (Depth >= MaxDepth)
+    {
+        @if (Spec.Mods is { Count: > 0 } || Spec.Contents is { Count: > 0 })
+        {
+            <MudText Typo="Typo.caption" Color="Color.Warning">… nested deeper than @MaxDepth levels — truncated.</MudText>
+        }
+    }
+    else
+    {
+        @if (Spec.Mods is { Count: > 0 })
+        {
+            <ClassViewModSpec Mods="@Spec.Mods" Depth="@(Depth + 1)"/>
+        }
+        @foreach (var content in Spec.Contents ?? [])
+        {
+            <ClassViewItemSpec Spec="@content" Depth="@(Depth + 1)"/>
+        }
+    }
+</div>
+
+@code {
+    private const int MaxDepth = 12;
+
+    [Parameter, EditorRequired] public ItemSpec Spec { get; set; } = default!;
+
+    /// <summary>0 at the root (slot/stash line); children get Depth+1. Guards recursion + hides the root arrow.</summary>
+    [Parameter] public int Depth { get; set; }
+
+    private string _rootName = string.Empty;
+    private string? _presetName;
+    private int _presetItemCount;
+    private bool _unresolved;
+
+    protected override void OnParametersSet()
+    {
+        _rootName = string.Empty;
+        _presetName = null;
+        _presetItemCount = 0;
+        _unresolved = false;
+
+        // Resolution order mirrors CostService.AddSpec: preset > tpl.
+        if (!string.IsNullOrWhiteSpace(Spec.Preset))
+        {
+            var key = TryMongoId(Spec.Preset!);
+            var preset = key is null
+                ? null
+                : Spec.Premium ? Catalog.ResolvePremiumPreset(key.Value) : Catalog.ResolveDefaultPreset(key.Value);
+
+            if (preset?.Items?.FirstOrDefault() is { } root)
+            {
+                _rootName = Catalog.GetItemName(root.Template);   // preset root item (ref: PresetController.cs:32)
+                _presetName = string.IsNullOrWhiteSpace(preset.Name) ? Spec.Preset : preset.Name;
+                _presetItemCount = preset.Items!.Count();
+            }
+            else
+            {
+                _rootName = Spec.Preset!;
+                _unresolved = true;
+            }
+        }
+        else if (!string.IsNullOrWhiteSpace(Spec.Tpl))
+        {
+            _rootName = ResolveName(Spec.Tpl);
+        }
+        else
+        {
+            _rootName = "(item without tpl/preset)";
+            _unresolved = true;
+        }
+    }
+
+    /// <summary>Item name via catalog; malformed id degrades to the raw string (never throws).</summary>
+    private string ResolveName(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return "(missing tpl)";
+        }
+
+        var id = TryMongoId(raw!);
+        return id is null ? raw! : Catalog.GetItemName(id.Value);
+    }
+
+    private static MongoId? TryMongoId(string raw)
+    {
+        try
+        {
+            return new MongoId(raw);
+        }
+        catch
+        {
+            return null; // malformed id — CostService surfaces it as a warning already
+        }
+    }
+}

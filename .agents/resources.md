@@ -25,6 +25,10 @@ Ordem ao **responder dúvidas** sobre SPT/EFT:
 
 > Distinta da **Hierarquia de consulta (geral)** acima: aquela é pra responder dúvidas; esta é pra **citar evidência** em specs/reviews.
 
+> ⚠️ **Erros recorrentes já cometidos neste repo:** [docs/technical/spt-antipatterns.md](../docs/technical/spt-antipatterns.md) (AP-01..AP-08) — leitura obrigatória antes de escrever ou revisar spec técnica.
+
+> 🧭 **Navegação estrutural:** os grafos de código do graphify ([references/graphs/](../references/graphs/), skill `graph-code-navigation`) aceleram achar callers, overrides e cadeias input→efeito — mas **NÃO são fonte de evidência**: todo achado do grafo é confirmado lendo o `arquivo.cs:linha`.
+
 ## Mapa rápido por tipo de dúvida
 
 | Tipo de informação | Onde buscar primeiro | Fallback externo |
@@ -47,6 +51,8 @@ Ordem ao **responder dúvidas** sobre SPT/EFT:
 | **Preços / economia / flea (EFT live)** | _(wiki não cobre)_ | **tarkov-market.com/dev/api** (PVP/PVE) · api.tarkov.dev |
 | **Mecânicas EFT vivas (loot, hideout, weapon mods)** | _(wiki não cobre)_ | **tarkov.dev · Tarkynator** |
 | **Código-fonte do servidor SPT** | **[references/spt-source/](../references/spt-source/)** (vendorizado, read-only) | deepwiki.com/sp-tarkov/server-csharp |
+| **Erros recorrentes deste repo (antipatterns)** | **[docs/technical/spt-antipatterns.md](../docs/technical/spt-antipatterns.md)** | — |
+| **Quem chama X / overrides de Y / cadeia A→B** | **MCP graphify + [references/graphs/](../references/graphs/)** (skill `graph-code-navigation`) | Grep manual com a mesma disciplina |
 | **Mods publicados / instalador** | — | **forge.sp-tarkov.com** |
 
 ## Fontes externas — quando usar cada uma

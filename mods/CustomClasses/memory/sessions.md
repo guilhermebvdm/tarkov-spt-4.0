@@ -6,15 +6,183 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 
 ## Estado atual (snapshot ao fim da última sessão)
 
-**Mod recém-criado (scaffold).** Plano aprovado e estrutura inicial montada. Ainda **sem código** (server/client/common não existem). Próximo passo: item 001 (walking skeleton) via o fluxo de backlog.
+**Mod híbrido completo e maduro.** Itens **001–037 entregues** (🟢): 11 classes + identidade visual + **editor web Blazor completo** (018–029) + **épico UX (030–037) EXECUTADO** (autônomo via Workflow, 2026-06-11→12). Tudo **commitado** (15 commits do épico sobre baseline `3634548`); working tree limpo exceto frentes paralelas (`docs/migration/*`, `.claude/skills/*`, `.agents/resources.md`, `docs/technical/spt-antipatterns.md`, `mods/SPT-Menu-Overhaul/memory/`). **Branch ahead 22, SEM push** — aguarda revisão do usuário. Relatório: `.handoffs/handoff-2026-06-12-overnight-ux-030-037.md`.
 
-- **Identidade:** `CustomClasses`, GUID `customclasses.mdj` (client + server), autor mdj, SPT 4.0.13, licença MIT (placeholder — confirmar).
-- **Arquitetura travada:** standalone, **híbrido** (server C# injeta editions de perfil; client BepInEx escala XP de skill + seletor de língua F12). Seleção de classe = editions no launcher.
-- **Mecanismo central:** registrar classe = injetar chave em `databaseService.GetProfileTemplates()` no `PostDBModLoader`. `Character.Inventory.Items` (ParentId/SlotId) cobre equipado/composto nativamente; `Suits` cobre outfits.
-- **Multiplicadores:** só multiplicadores por skill (buff/debuff), **sem** distribuição dinâmica. SkillDistribution é referência conceitual (reimplementar, não copiar → sem GPL).
-- **i18n:** descrições de edition seguem a língua do launcher (en+pt, fallback en); seletor pt-BR/en só no F12 (default english). Código/comentários em inglês.
+**Em andamento (item 038 — redesign workspace 3 painéis estilo EFT):** F0 ✅ (`82bc4a5`, grade 2D X/Y/R no schema+builder) e F1 ✅ (`2cc4274`, workspace read-only: silhueta + grade 2D). Faltam **F2** (edição in-place + skins dialog + DnD HTML5 `.mjs` + migrar `@code` do ClassEdit + refino da silhueta) e **F3** (polimento/docs/smoke in-game). Plano: `~/.claude/plans/monte-um-plano-para-goofy-otter.md`. Silhueta ainda rascunho. Sem push.
+
+- **Identidade:** `CustomClasses`, GUID `customclasses.mdj` (server) + `customclasses.mdj.client` (client BepInEx). SPT 4.0.13. Mod irmão `mods/CustomizationPersistenceFix` (corrige reset de customização do SPT core via Harmony).
+- **Classes:** 10 reais + Peladão/**NAKED** (016, skin placeholder havaiana). Gerador `scripts/build-class-jsons.js` congelado como bootstrap (`--force`); **fonte de verdade = `.jsonc` do install** (volta via `/sync-classes`; compile-mod tem guard anti-clobber `--force-config`).
+- **i18n:** nome da classe (`displayName {en,pt}`) segue o **idioma do EFT** (`LocaleManagerClass.String_0`; "po"=pt); seletor F12 `Language` removido. Descrição da edition = locale do **servidor** (limitação).
+- **Identidade visual (item 015):** gradiente sutil (0.15) nos nomes E ícones (`ClassIconGradient`); ícones proporcionais à fonte (`ClassIconRatio` 1.35, `IconSizeFor`); deploy `DeployNameScale` 3.0. Integra com Menu-Overhaul (AccentColor + reposicionamento de botões). Configs F12 em `PROPRIEDADES.md`.
+- **Multiplicadores de skill:** buff/debuff client-side (escala XP); rota `/customclasses/skill-multipliers` (server). Notificação de level-up `EASILY`/`FINALLY` (014).
+- **Editor web (018–029 🟢):** Blazor Server servido pelo próprio server SPT (`https://<ip do fika>:6969/customclasses`) — lista, detalhe, edição (7 abas), criar/duplicar/deletar com **hot-apply** (perfil novo sem restart); custo RZ vivo (`CostService`/`SkillWeights`); validação = mesmo pipeline do boot (`ClassRegistrar` dry-run). Docs: [docs/class-editor.md](../docs/class-editor.md) + [docs/class-schema.md](../docs/class-schema.md).
+- **Épico UX (030–037 🟢):** TODOS entregues. 037 cache+índices+throttle; 030 sidebar persistente; 031 SkillCanonicalList+SkillMaster (ordem canônica, 3 modos: read-only/edit/compare); 032 matriz heatmap (`/customclasses/skills`); 033 dashboard single-screen (2-col, sem expansion panels, `customclasses.css`); 034 GearPanel/StashPanel/ItemTooltip; 036 comparação A×B (?compare=); 035 densidade global + Ctrl+S + prefs localStorage (`customclasses.js`). Validado: build 0/0, boot `Loaded 11 class(es)`, editor smoke no Chrome MCP. **Pendente:** medição quantitativa 037 (logs `[perf]` são LogDebug; precisa server em nível Debug + baseline) + QA visual.
+- **Coordenação multi-chat:** identidade visual/client correu em sessões paralelas (2026-06-09, 2026-06-11 21:45); o épico UX foi executado autônomo nesta sessão (Workflow por wave) — frentes paralelas (skills SKILL.md, mods-inventory, SPT-Menu-Overhaul) ficaram unstaged, intactas.
 
 ## Pendências / próximos passos conhecidos
+
+- 🔴 [P-7.9] (aberta 2026-06-12) **PUSH dos 15 commits do épico** + QA visual no viewer (build-gate ≠ correção: matriz em células estreitas 032, dashboard em viewport estreito 033, comparação A×B 036).
+- 🟡 [P-7.10] (aberta 2026-06-12) **Medição quantitativa do 037** (before/after) — fechar o DoD: subir server com log Debug (`[perf]` é LogDebug) + baseline pré-`d180195`.
+- 🟡 [P-7.11] (aberta 2026-06-12) **Achados de review adiados** (no relatório 2026-06-12, por wave) — decidir follow-ups: 036 multiplicadores de B lado a lado (toca componente 031), 037 dispose de `_recomputeCts`, 034 msg "filtro sem resultados" na aba Stash.
+- 🟡 [P-7.3] (aberta 2026-06-11) **Validação in-game pós-CR-EP-01**: stash agora spawna `preset`/`mods`/`ammo`/`contents` montados (antes só tpl+count) — criar perfil novo e conferir o nascimento (regra `feedback_spt_validation`).
+- 🟡 [P-7.4] (aberta 2026-06-11) **Validações in-game da sessão paralela de 2026-06-11** (013 botão SKILLS×MO, 015 polish, 017 CustomizationPersistenceFix) — ver entrada Sessão 6 (2026-06-11 21:45).
+- 🟡 [P-7.5] (aberta 2026-06-11) **Housekeeping deferido do editor**: CR-EP-10 (ícones client×server sem validação cruzada), CR2-EP-05 (óptica mínima não precificada), página `/customclasses/picker-test` (rota dev sem link).
+- 🟢 [P-7.6] (aberta 2026-06-11) Conteúdo definitivo do **Peladão** (skin/descrição/cor — placeholder do 016).
+- 🟢 [P-7.7] (aberta 2026-06-11) **Outfits definitivos das 10 classes** (aguardando escolhas skin↔classe; `scripts/suits-catalog.json` pronto — item 004/D1).
+- 🟢 [P-7.8] (aberta 2026-06-07) **Importar loadout de profile real** (decisão de 2026-06-07, nunca executada) — superseded pelo editor de equipado/stash (026/028); vira candidata a feature futura do editor ("import from profile").
+
+## Sessões
+
+### 2026-06-07 — Planejamento + scaffold
+
+- Adicionados ao repo (sessões anteriores deste chat) os mods de referência `SkillDistribution` (+ lib `ZGFueDkxCommonLibrary`) e `Skills-Extended` via `/add-mod-repo-for-modding`.
+- Exploração profunda de RZCustomProfiles (limitações), SkillDistribution (padrão de multiplicadores), Skills-Extended (soft-detect) e do server source SPT (`references/spt-source/`: `CreateProfileService`, `ProfileHelper`, `LauncherController`, modelos `ProfileSides`/`TemplateSide`/`Customization`).
+- Plano escrito, revisado 2× com `/g-review-content` e aprovado pelo usuário. Decisões travadas registradas no snapshot acima.
+- Scaffold criado: `mod.json`, `README.md`, `backlog/mod-backlog.md` (roadmap 001-008), este `sessions.md`. Sem código de mod ainda.
+- **Item 000 (infra) concluído:** `.agents/scripts/compile-mod.sh` reescrito para suportar C# multi-projeto/híbrido (server-csharp antes dava erro). Detecta N csproj, classifica client/server/lib, builda os entry projects e instala só as DLLs próprias (filtro por AssemblyName) em `BepInEx/plugins/<mod>/` (client) e `SPT/user/mods/<mod>/` (server). Caminhos client-csharp single e server-typescript preservados. Verificado: `bash -n` + classificação contra SkillDistribution/Skills-Extended.
+- **Item 001 — fluxo de backlog completo até `/code-mod`:** spec funcional (01) + review inline + spec técnica (02, ancorada no `spt-source`) + review técnica (03, 6 pontos, 0 bloqueadores, todos resolvidos) + implementação (`/code-mod`) + asbuild (05). Código em `modded/Server/`: `CustomClasses.Server.csproj`, `CustomClassesMetadata.cs`, `CustomClassesMod.cs` (`[Injectable] IOnLoad` em `PostDBModLoader+1` injeta a edition "Test Class" clonando "Standard" e setando skills Endurance 5 / Strength 3). Evidências-chave: `GetProfileTemplates()` (DatabaseService.cs:141), Progress=nível*100 (ProfileHelper.cs:460), descrição via texto literal (ServerLocalisationService.cs:163 fallback). **Não compilado/validado ainda.**
+
+### 2026-06-09 — Ícones de classe (estilo ChatSpecialIcon) + paleta Tarkov-dark
+
+> ⚠️ **Sessão paralela.** Esta sessão mexeu **só na arte/identidade visual**. Os itens 010–016 (infra de identidade, patches de menu/skills/deploy, ClassIconCache, ClassVisualRegistry, classe Peladão) foram feitos por **outra(s) sessão(ões)** e **ainda não estão registrados aqui nem commitados** — todo o working tree de identidade visual está untracked/`M`.
+
+- **Objetivo:** dar a cada classe um ícone próprio no estilo dos **selos de edição do EFT** (Unheard/EOD), consumido pelo `ChatSpecialIcon` (nome do jogador) já existente (item 015).
+- **Assets (11 ícones = 10 classes + Peladão):** símbolos do **game-icons.net** (CC BY 3.0), **silhueta branca + alpha** (máscara), **tingida com a `nameColor` da classe em runtime** (igual ao tingimento de edição do EFT). Mapeamento e créditos em `modded/Client/icons/ATTRIBUTION.md`. Caçador = `skoll/bullseye` (trocado de `crosshair` → traços finos sumiam em ~40px); Op. Tático = `star-medal`; demais: anvil, binoculars, ak47, gears, health-normal, hooded-figure, swap-bag, campfire, underwear.
+- **Pipeline (authoring-time, fora do runtime):** SVGs vendored em `scripts/icon-sources/<classe>.svg` → `scripts/build-icons.mjs` (dep **sharp**, isolada em `scripts/package.json`) rasteriza p/ **256² branco+alpha** em `modded/Client/icons/`. `scripts/preview-icons.mjs` gera folha de contato **tingida** em `scripts/preview/` (gitignored) p/ revisão. Trocar arte = trocar SVG/`CLASS_VISUAL` + `npm run build:icons` + compile-mod + **restart do cliente** (PNG cacheado; **não** recompila DLL).
+- **Tingimento (C#, 2 linhas):** `ChatSpecialIconPatch` seta `____icon.color = color` (+ reset p/ `Color.white` no branch não-local → não vaza cor em célula reciclada de lista/chat); `ClassIdentityView.BuildOrRefresh` seta `img.color = color` no selo de menu/Skills. *(Esses 2 .cs também receberam, em paralelo, `BuildColoredName`/CAPSLOCK do item 015 — não é desta sessão.)*
+- **Paleta Tarkov-dark (nova):** cores antigas eram vivas/saturadas demais. Refeitas p/ tons dessaturados/militares (bronze/ferrugem/oliva/cáqui/âmbar + frios apagados). Fonte = `CLASS_VISUAL` em `scripts/build-class-jsons.js`; aplicada cirurgicamente nos 10 `.jsonc` (só a linha `nameColor`). Hex: armeiro `#a8824e`, batedor `#5f7f93`, cacador `#c2973f`, fuzileiro `#b0573a`, gerenteDeOperacoes `#4f8a80`, medicoDeCombate `#6f9455`, operadorFurtivo `#7d7392`, operadorTatico `#7a818c`, saqueador `#c4ad45`, sobrevivencialista `#97934e`, peladao `#c28a60`.
+- **Peladão (016):** entrada visual (`iconFile`+`nameColor`) **adiantada** em `CLASS_VISUAL`; inerte até o profile `peladao` existir em `class-recipes.js`. PNG já gerado.
+- **Deploy:** `compile-mod CustomClasses` feito → DLL (com tingimento) + 11 PNGs + config instalados em `D:/SPT`. Compila 0 warn/err. **Validação in-game pendente** (usuário): perfil precisa ser classe do mod + `ShowClassOnPlayerName` (F12) on; olhar deploy/character/lista online.
+- **Pendências:** validar in-game; afinar Op. Tático (`star-medal` é o tom/símbolo mais "neutro"); decisão de **commit** do bloco de identidade visual (010–016 + arte) — está tudo no working tree.
+
+### 2026-06-09 — Plano do épico "editor web de classes" (itens 018–029)
+
+> ⚠️ **Sessão paralela** (mesmo dia da sessão de ícones e da que criou o bug 017). Esta sessão só **planejou e materializou backlog** — zero código.
+
+- **O que é:** editor web completo de classes **dentro do próprio mod** — visualizar/editar/criar classes (campos simples, skills, mults, hideout, outfit, equipado composto, stash) com **custo automático**. Plano aprovado pelo usuário (`~/.claude/plans/`, sessão 2026-06-09) após 2 rodadas de revisão de gaps (+ `/g-review-content`, 9 correções aplicadas).
+- **Arquitetura travada:** Blazor Server **padrão Skills-Extended** — `IModWebMetadata` + `SPTarkov.Server.Web` 4.0.2 (MudBlazor transitivo); páginas `.razor` compiladas na DLL, rotas `@page "/customclasses/..."` na raiz (`https://localhost:6969/customclasses`); estáticos em `/{AssemblyName}/` = `/CustomClasses-Server/`. Catálogo de itens do **DB vivo** (`DatabaseService`) — decisão: **NÃO** integra com `tools/tarkov-itemdb`.
+- **Fonte de verdade:** editor lê/escreve `.jsonc` no **install** (D:/SPT); volta pro repo via novo `/sync-classes`; `compile-mod.sh` e gerador ganham **anti-clobber** (gerador congelado como bootstrap). Decisão do usuário.
+- **Custo:** fórmula RZ pura (SKILL_MULTS/BASELINE 15/clamp 0.25–5.00/budget 28–32 + loadoutTotalRub); XP-mults FORA do custo. Skills sem peso (4 do SE + futuras): peso derivado da **mecânica de upagem** (evento de XP/frequência/velocidade, analisando source do SE) + fallback por categoria — pedido explícito do usuário.
+- **Fatos-chave descobertos:** hot-apply é viável (`CreateProfileService` lê o dict de templates a CADA criação de perfil; registries singleton mutáveis — mas **sem Remove/enumeração**, precisa adicionar); rename de classe órfã perfis existentes (`ProfileInfo.Edition` é string) → rename **bloqueado**, caminho = duplicar; round-trip do editor **perde comentários** dos `.jsonc` (aceito, `.bak`); lista de classes deve vir dos **arquivos** (disabled não está em registry); `compile-mod.sh` não copia `wwwroot/` e clobbera `config/`.
+- **Backlog materializado:** itens **018–029** no `mod-backlog.md` + 12 pastas com `*-00-kickoff.md` (brief → insumo do `/create-spec`). **Renumerado +1 na hora de gravar**: sessão paralela criou o 017 (bug skin não persiste) — colisão detectada via re-read do backlog. Waves: W0 [018 doc schema] → W1 [019 guard-rails PRIMEIRO → 020 infra-web · 021 registrar/editor-service · 022 catalog-custo] → W2 [023 pickers · 024 viewer] → W3 [025 edit-simples, **fecha MVP**] → W4 [026 equipado · 027 criar/duplicar/deletar] → W5 [028 stash · 029 docs]. Sub-agents paralelos por wave (worktree quando tocam `Web/`).
+- **Pendências:** executar as waves pelo workflow (`/create-spec 018` em diante); nenhuma implementação iniciada.
+
+### 2026-06-10 — Épico do editor web IMPLEMENTADO (018–029) + 2 rodadas de review + teste de UI no Chrome
+
+> Mesma sessão (continuação) da que planejou o épico em 2026-06-09. Execução completa por waves com sub-agents paralelos.
+
+- **Itens 018–029 TODOS entregues (🟢 no backlog)** pelo fluxo spec→tech→code→asbuild por item, em 6 waves (W1 com 3-4 agentes paralelos em territórios de arquivo disjuntos; build integrado pelo orquestrador entre waves). Builds sempre 0 warn/0 err; **validação real**: server bootado em background (`DISABLE_VIRTUAL_TERMINAL=1 ./SPT.Server.exe`; bind no IP do **fika-server** `26.207.194.149:6969`, NÃO no http.json) + curl + **Chrome DevTools MCP**.
+- **O que existe agora:** editor Blazor Server dentro do mod (`Web/` + `wwwroot/`, MudBlazor 8.13 transitivo de `SPTarkov.Server.Web` 4.0.2, Sdk.Web, `IModWebMetadata`): lista (`/customclasses/classes`, lê ARQUIVOS via `ClassEditorService`), detalhe read-only, edição com 7 abas (Geral/Skills/Mults/Hideout/Outfit/Equipado/Stash), criar/duplicar/deletar com hot-apply/hot-remove (sem restart p/ perfil novo), custo RZ ao vivo (`CostService`/`SkillWeights` — paridade validada com `scripts/check-skill-costs.mjs`), pickers (item/preset/ammo por calibre/customization), dry-run de capacidade do stash (GridPacker 10×30 do Zero to hero). Guard rails: anti-clobber no compile-mod (`--force-config`), `/sync-classes` (install→repo, propaga deleção SÓ no 1º nível de `classes/`), gerador congelado (`--force`).
+- **2 rodadas de code-review consolidado** (`backlog/029-docs-e-fechamento/epico-editor-04-code-review-0{1,2}.md`): R1 = 0 bloq/2 maiores/9 menores → todos aplicados ou aceitos (CR-EP-01: stash agora honra preset/mods/ammo/contents como o equipado — `InventoryBuilder.PackSpecsIntoGrids` estendido; CR-EP-02: deleção via editor não ressuscita no compile-mod). R2 = 0 bloq/2 maiores/9 menores → aplicados (CR2-EP-01 contents×count no custo; CR2-EP-09 `ToDefinition()` fora do `Task.Run`; CR2-EP-02 propagação restrita ao 1º nível). Dívidas aceitas documentadas: CR-EP-03 (race de insert, uso local), CR-EP-10 (ícones client×server), CR2-EP-05 (óptica mínima não precificada).
+- **Teste de UI completo no Chrome MCP** (fluxo E2E real): criar "Teste UI" (validação de colisão OK) → editar todas as abas → SV-98 preset premium + ammo LPS + loadedMag/chambered → Salewa no stash (capacidade 2/300 ✓) → **save + hot-apply confirmado no log do server** (`Registered ... skills=1 items=1 mults=1`) → duplicar → deletar com aviso de perfis (lista TestePerfil1 ao tentar deletar Armeiro; CANCEL) → cleanup. **3 achados corrigidos:** UI-01 save com campo inválido mostrava "Saved" (agora MudForm gate: "Save blocked — fix the invalid fields first", validado); UI-02 picker de outfit mostrava chaves cruas — nomes agora via locale **`"{id} Name"`** (filtro "P" → 74/268 validado); UI-03 erro de console `MudPointerEventsNone` = **cosmético do padrão upstream** (SE e host idem; tentativa de loader inline revertida — Blazor não renderiza `<script>` com corpo).
+- **Lições:** (1) MudTable `OnRowClick`/MudTextField debounce NÃO respondem a eventos JS sintéticos — testar com `fill`/`press_key` do MCP (teclado real); (2) sub-agents paralelos no mesmo working tree funcionam com territórios de arquivo explícitos + exclusividade de `dotnet build` p/ UM agente; (3) `_props.Name` de customization é chave interna — nome humano só no locale `"{id} Name"`.
+- **Pendências:** validação in-game (perfil novo nascendo com loadout editado — memória `feedback_spt_validation`); decisão de commit do épico inteiro (working tree gigante: 018–029 + fixes, nada commitado; inclui também o bloco 010–017 de sessões anteriores); housekeeping deferido (CR-EP-10 ícones, page `/customclasses/picker-test` mantida como rota de dev).
+
+### 2026-06-10 — Comparação de UX (editor × viewer de perfis RZ) + épico UX materializado (030–035)
+
+- **Análise comparativa** com `tools/tarkov-itemdb/viewer/profiles.html`/`profiles-skills.html`: o viewer antigo ganha em (1) tudo numa tela (header badges + skills à esquerda + loadout visual à direita, denso 12-14px), (2) skills SEMPRE na ordem canônica Ph→M→C→P (`SKILL_MASTER` em `profiles.js:10-45`, zeros esmaecidos) → comparação imediata entre classes, (3) sidebar persistente de perfis (1 clique, sem perder contexto), (4) matriz classes×skills com heatmap (`profiles-skills.html`), (5) tooltips no hover (item: nome/tamanho/preço). O editor atual perde nesses pontos (lista→linha→detail com expansion panels→edit com 7 abas; skills só as definidas na ordem do JSON; zero visão comparativa) mas ganha em edição/hot-apply/custos vivos/diagnostics.
+- **Épico UX materializado no backlog: itens 030–035** (kickoffs em `backlog/0NN-*/`): 030 sidebar de classes (1 clique, preserva vista; `ListClassSummaries` leve — dry-run do ListClassFiles é pesado p/ sidebar), 031 skills canônicas (componente compartilhado, modo read-only+edit inline — mata o "Add skill" por dropdown), 032 matriz heatmap (`/customclasses/skills` + custo no rodapé + célula clicável), 033 detalhe single-screen (dashboard 2 colunas, sem expansion panels, CSS denso local), 034 loadout visual (gear slots estilo Tarkov + stash em grid de ícones por categoria + tooltip hover; ícones tarkov.dev), 035 densidade global + cliques (Dense, aba preservada ao trocar classe, Ctrl+S, regressão Chrome MCP). Waves: UX-W1 [030‖031] → UX-W2 [032‖033] → UX-W3 [034] → UX-W4 [035 solo].
+- **Pendência:** executar as waves do épico UX pelo workflow (aguardando OK do usuário pra rodar; itens ⚪).
+
+### 2026-06-11 21:45 (GMT-3) — Sessão 6: Polish de identidade (015) + i18n do nome + fixes 013/017 + mod CustomizationPersistenceFix
+
+> Nota de migração (2026-06-13): esta entrada estava sem número de sessão e usava IDs derivados de data (`P-0611.x`), violando o esquema `P-<N>.<M>` (`memory-curation` §7). Numerada retroativamente como **Sessão 6** e os IDs convertidos para `P-6.x` (fatos inalterados — só a notação). Cf. revisão de valor D1-02.
+
+> ⚠️ **Sessão paralela (client UI / polish).** O épico do editor (018–035) roda em paralelo no server — ver entradas 2026-06-10 e a memória global `project_customclasses_session_split`. O trabalho desta sessão cruzou 06-09/10/11 (conversa longa, compactada); timestamp = momento da gravação.
+
+**Tema central:** acabamento da identidade visual + i18n do nome da classe, fechar os bugs 013/017, e extrair o fix do bug de skin do SPT para um mod dedicado.
+
+**Decisões-chave:**
+- **i18n do nome segue o IDIOMA DO EFT** (não mais o seletor F12): `displayName {en,pt}` no JSON → exposto na rota (`classNameEn/Pt`); client resolve via `LocaleManagerClass.String_0` (novo `UI/GameLocale.cs`). Seletor `Language` (F12) **removido** (redundante). Descoberta: **"po" = Português** no SPT (`locales/global/po.json`). Descrição da edition no launcher segue o **locale do servidor** (server-side — `LauncherController:63`; limitação documentada). Nomes EN em `build-class-jsons.js` `DISPLAY_NAME_EN`.
+- **Ícones proporcionais à fonte** (não px absoluto): `ClassIconSize`→`ClassIconRatio` (1.35) + `ClassIdentityView.IconSizeFor` = `fontSize × ratio` por tela — resolve a inconsistência de tamanho entre menu/OVERALL/deploy/confirmation.
+- **017 = bug do SPT CORE** (não do mod): `ProfileFixerService.CheckForAndFixPmcProfileIssues` reseta Body/Hands/Feet **válidos** p/ default no `/client/game/start` (lógica invertida — falta o `!`; só o Head está correto). Confirmado pelo usuário (afeta qualquer skin, pré-existe ao mod). **Fix = mod server dedicado `mods/CustomizationPersistenceFix`** (Harmony Prefix/Postfix preserva válidos). Ref: `017-customizacao-nao-persiste-00-bug.md`, memória global `reference_spt_customization_reset_bug`.
+- **013 = clone órfão pelo Menu-Overhaul**: o MO reposiciona botões por nome via `anchoredPosition` (`ButtonHelpers`, y=-index*60); o clone com `SetSiblingIndex` ficava invisível. Fix: coroutine pós-MO posiciona o SKILLS abaixo do Character + empurra Trade/Hideout/Exit (posições absolutas). Ref: `SkillsNavButtonPatch.cs`, `013-...-06-fix-01`.
+- **Gradiente sutil (escolha do usuário):** clareamento dos nomes 0.4→**0.15** (destoava do glow/EXP **sólidos** do MO — `LayoutHelpers.UpdateTopGlowColor` usa AccentColor.rgb + alpha; `PlayerProfileFeaturesPatch:617/690`) + **gradiente também nos ÍCONES** (novo `UI/ClassIconGradient.cs` `BaseMeshEffect` — silhueta branca × degradê vertical = look Unheard/EOD). Ref: `ClassIdentityView.cs`.
+- **NAKED** = nome EN do Peladão (era Streaker). **014 aprovado** in-game.
+
+**Atividade cronológica:**
+1. i18n do nome (server `ClassDefinition`/`ClassVisualRegistry`/`Response`/`Router` + client `SkillMultipliers`/`GameLocale` + scripts) — nome resolve EN/PT pelo EFT; seletor `Language` removido; os 3 usos migraram p/ `GameLocale.IsPortuguese`.
+2. Calibragem proporcional dos ícones + deploy `DeployNameScale` 1.2→2.2→**3.0** (escala o ChatSpecialIcon = ícone+nome juntos). **Lição:** BepInEx persiste o valor no `.cfg` — mudar só o default no código NÃO atualiza instalação existente; editar o `.cfg` junto.
+3. 014 testado/aprovado (Endurance gigante temporário em `operadorTatico`=100 → revertido p/ 1.5).
+4. 017 investigado (template tem a skin, perfil salvo tem default → reset pós-criação) → causa-raiz = bug do SPT core → criado `mods/CustomizationPersistenceFix` (Harmony 2.15.0; ref local `0Harmony.dll` Private=false). Skin havaiana re-gravada no perfil Peladon (workaround manual do save).
+5. 013 fix (posicionamento relativo ao MO via coroutine).
+6. Gradiente sutil + gradiente nos ícones (todas as telas via `ApplyClassIcon` central; `RevertIconGradient` no ramo não-local p/ não vazar).
+7. NAKED (gerador + JSON + install).
+
+**Pendências abertas nesta sessão:**
+- [P-6.1] 🔴 Validação in-game: 013 (botão SKILLS no menu), 017 (skin persiste após fechar/reabrir), 015 polish (NAKED, ícones proporcionais, deploy 3.0, gradiente nome+ícones, nome×glow alinhados).
+- [P-6.2] 🟢 016 — definir a skin definitiva do Peladão (placeholder havaiano).
+- [P-6.3] 🟢 Melhorias sugeridas ao usuário: skins reais por classe + ícones coesos; validação coop/compat (FIKA + AllTheClothes/WTT mexem em customization); playtest do balanço dos multiplicadores; reportar o bug do `ProfileFixerService` upstream ao SPT.
+
+**Cross-refs:**
+- **Trabalho paralelo no MESMO mod** (server/editor): itens 018–035 — ver entradas 2026-06-10. Esta sessão = client UI/polish; só o i18n do server (displayName no `ClassVisualRegistry`) tocou área comum, integrado ao refactor do item 021 (`ClassRegistrar`).
+- Mod separado **`mods/CustomizationPersistenceFix`** (sem `sessions.md` próprio ainda).
+- Memória global: `reference_spt_customization_reset_bug`, `project_customclasses_session_split`.
+- **Review do épico UX aplicado (12 achados):** contagem de skills sem números mágicos (fonte = `SkillWeights.cs`; "31" era falso, enumeração soma 32+4 SE); DoD do 033 realinhado (single-screen completo fecha no 034); **guard de unsaved changes no 030** (1 clique do sidebar não pode descartar edição — dialog Save/Discard/Cancel); fallback edit→detail p/ classe inválida; zeros explícitos no JSON preservados no round-trip do 031; disabled na matriz (toggle); **+item 036 — comparação A×B no dashboard** (deltas por skill ▲▼ + custo, B fixa enquanto A navega; UX-W3 ‖ 034); sidebar com filtro+status dots (030); lista ordenável + preferências em localStorage (035); stash do edit agrupado/filtrável (034). Métrica corrigida: detail atual tem 4 painéis fechados por default (Stash/Mults/Hideout/Outfit — verificado no código). Épico agora 030–036.
+- **Revisão de DESEMPENHO do épico UX (lentidão reportada pelo usuário) — diagnóstico confirmado no código:** (1) `ClassEditorService.ListClassFiles()` roda `ValidateAndBuild` (deep clone do template base + InventoryBuilder + outfit) p/ CADA arquivo e é chamado por TODAS as páginas (`Classes.razor:126`, `ClassDetail.razor:407`, `ClassEdit.razor:580`) — navegação = 11 dry-runs; (2) prerender duplo do Blazor dobra → **22 dry-runs por navegação** (a lentidão dominante); (3) `CatalogService` sem índices (Search varre GetItems+locale por busca; GetClothing varre customization por render da aba Outfit ×4 pickers); (4) `ClassEdit` recalcula custo 2× + CheckStashCapacity (GridPacker) a cada keystroke. **Item 037 criado** (cache de `ClassFileEntry` por mtime invalidado no Save/Delete/Create; índices lazy no Catalog; recompute com throttle + 1 chamada; avaliar prerender:false; medição antes/depois obrigatória) — vira **UX-W0, PRIMEIRO**; 030 (`ListClassSummaries` = view do cache) e 032 (matriz não pode disparar dry-run) atualizados pra consumir. Épico agora 030–037.
+
+### 2026-06-11 22:49 (GMT-3) — Sessão 7: Handoff do épico UX + curadoria da memória
+
+**Tema central:** fechar a sessão do épico UX com um handoff executável em outra sessão e curar o topo desta memória (defasado desde a era 001–005).
+
+**Decisões-chave:**
+- Handoff como artefato de retomada: **`.handoffs/handoff-2026-06-10-epico-ux-editor-030-037.md`** — próxima ação no topo (`/create-spec 037`), links pro plano/kickoffs (sem duplicar), modelo de execução por waves com sub-agents (territórios + build exclusivo), receita do ambiente (boot do server com `DISABLE_VIRTUAL_TERMINAL=1`, URL do bind fika, bypass de cert, Chrome MCP × MudBlazor). `.handoffs/` adicionado ao `.gitignore` (scratch de sessão, não artefato).
+- Curadoria do topo (skill `memory-curation` §6): snapshot "Estado atual" e "Pendências" reescritos como **delta** (≤10 bullets, só abertas, com IDs P-7.x); os blocos antigos ("Pendências" acumuladas da era 001–005, "Mudança de fluxo dos ITENS (003)" e "Riscos abertos") foram **movidos verbatim** para a seção "Arquivo" no fim deste arquivo — preservação sem revisionismo (§8).
+- [P-7.8] registra que a decisão de 2026-06-07 ("itens virão de profiles reais montados in-game") foi **superseded** pelo editor de equipado/stash (026/028) sem nunca ter sido executada.
+
+**Atividade cronológica:**
+1. Handoff escrito + `.gitignore` atualizado.
+2. Curadoria: topo reescrito, blocos antigos arquivados (esta entrada).
+
+**Cross-refs:**
+- Trabalho paralelo no mesmo dia: ver Sessão 6 (2026-06-11 21:45) (polish 015 + fixes 013/017).
+- O plano do épico UX em si foi gravado nas entradas de 2026-06-10 (não duplicado aqui).
+
+### 2026-06-12 — Épico UX 030–037 executado autônomo (Workflow por wave)
+
+**Tema central:** executar o épico UX de ponta a ponta sem supervisão (usuário dormindo), pelo fluxo do repo, orquestrado por **Workflows** (1 por wave) com gates determinísticos.
+
+**Setup:**
+- Commit do working tree pré-existente em grupos (identidade+editor 010–029; mods novos CustomizationPersistenceFix e SPT-Menu-Overhaul; plano UX 030–037; `.handoffs/` gitignorado; `*.Backup.tmp` gitignorado; `LocalPlayer.cs` decompilado movido p/ `references/eft-decompiled/`).
+- Verificação de settings: `bypassPermissions` já ativo nos dois `settings.json` → nenhuma mudança de permissão necessária p/ rodar autônomo.
+- Política autônoma aprovada: auto-aplicar achados de review SEGUROS / adiar design; build hard-gate por wave; pular item em falha; **1 commit por item, pathspec explícito, SEM push**.
+
+**Execução (waves):**
+- **W0 [037]** — Workflow estourou **limite de sessão** após o code-mod (spec/tech-spec/review rodaram); loop principal **salvou** (build 0/0 + commit `d180195`). Reset de quota → retomada de manhã.
+- **W1 [030+031]** paralelo → 🟢 `73228e9`/`1db0dad` (build teve 2 erros no SkillCanonicalList auto-corrigidos em 2 tentativas).
+- **W2 [032+033]** paralelo → 🟢 `2e3ea9c`/`d52211f`.
+- **W3 [034→036]** **sequencial** (compartilham `ClassDetail.razor`/`customclasses.css` — evitar clobber) → 🟢 `72866cc`/`b4dc2cf`.
+- **W4 [035]** solo → 🟢 `fdc9439`.
+- 037 code-review (lacuna da W0) fechado depois: `8e38bde`+`515ab1c` (0 fixes, código correto).
+
+**Validação:** build integrado 0/0; `compile-mod` instalou (config sem divergência); boot `Loaded 11 class(es)` sem exceção; smoke Chrome MCP confirmou sidebar/matriz/skills canônicas/abas/prefs. Medição quantitativa 037 ficou pendente (logs `[perf]` são LogDebug).
+
+**Lições:**
+- **Custo real por wave ~370–630k tokens** → o épico inteiro estoura o limite de sessão em uma janela; a W0 morreu no meio. Mitigação que funcionou: **salvamento pelo loop principal** (build+commit do que estava pronto) + retomada pós-reset; pipeline comprimido (menos agentes/item) nas waves seguintes.
+- **Itens que compartilham arquivo** (034/036 em ClassDetail) **não podem rodar em paralelo** — quebra o commit por-item com pathspec. Rodar sequencial.
+- here-string PowerShell `@'...'@` na Bash tool insere `@` literal no commit subject → usar `git commit -F <arquivo>`.
+
+**Cross-refs:** relatório completo (achados adiados por wave, premissas, hashes) em `.handoffs/handoff-2026-06-12-overnight-ux-030-037.md`. Plano de execução em `~/.claude/plans/`.
+
+### 2026-06-12→13 — QA do editor + início do redesign workspace 3 painéis (item 038)
+
+**QA visual (Chrome MCP) do épico 030–037 + correções:**
+- **Bug de raiz:** `css/js` do editor estavam em `Server/Web/wwwroot/` (NÃO servido); o SPT serve `Server/wwwroot/`. Davam 404 → dashboard sem CSS (1 coluna), Ctrl+S/prefs mortos. Movidos pra `Server/wwwroot/`. **E**: shipar `.js` faz o SPT rejeitar o mod (`ModValidator.cs:316` varre `*.js`/`*.ts` → "pre-4.0.0 JS mod") — renomeado pra `customclasses.mjs` (módulo, `type=module`). Commit `e1360ae`.
+- **Sidebar 3 estados** (open 250 / mini 64 / closed 0) ciclando no botão, **conteúdo sincronizado** via classe no `MudLayout` (`cc-sb-*`) controlando largura do drawer E margem do `mud-main-content` na mesma regra (mecânica nativa do MudBlazor dessincronizava; `display:none` no closed). Ícones centralizados no mini (tooltip wrapper inline-block encolhia). Commits `3ecd023`, `3079782`.
+- **Skills matrix:** faltava `MudContainer`+`MudPaper` (sem topo/padding) — padronizado. Commit `5849e0d`.
+
+**Redesign workspace (item 038) — plano aprovado, multi-sessão:** 3 painéis estilo EFT (esquerda skills/mults/hideout/outfit · centro silhueta CSS + 14 slots · direita grade 2D do stash X/Y/R + DnD), view/edit unificado (Editar destrava in-place), + seletor de skins com preview simbólico (sem imagem 2D nativa). Plano em `~/.claude/plans/`, revisado 3× com `/g-review-content`. **Decisões:** grade 2D honrada in-game (coords **opt-in**, não reescreve `.jsonc`); **tamanho-com-mods** (não base); DnD = **HTML5 + `.mjs`** (MudBlazor não faz 2D); página única + `_editMode` toggle.
+- **F0 ✅ (`82bc4a5`):** X/Y/Rotated em `ItemSpec`/`ItemSpecModel`; `GridPacker.TryPlaceAt`; `InventoryBuilder.PlaceTree` honra coords (tamanho real) + fallback first-fit (coord-bearing primeiro); `CostService.GetStashGridSize`. Gate: boot dry-run das 11 (regressão auto-pack idêntica) + classe hand-crafted x/y registra limpo. Coords opt-in → classes coordless byte-idênticas.
+- **F1 ✅ (`2cc4274`):** `ClassWorkspace.razor` + `CharacterDoll.razor` (silhueta+slots) + `StashGrid.razor` (grade 2D 10×30, 23 itens posicionados/dimensionados/ícones). ClassDetail single-class monta o workspace; compare (036) mantém dashboard antigo. Fix-chave: `--cc-cell-unit` içado pro `.cc-ws` (estava só em `.cc-item-cell` → `repeat(W,var())` inválido → grade colapsava em 1 col). Header dedup (página mantém nome/ações; workspace = barra slim de custo). **Silhueta = qualidade rascunho** (posições aproximadas, refino em F2/F3).
+- **Pendente:** F2 (edição in-place + skins dialog + DnD `.mjs` + migrar `@code` do ClassEdit 1272L + refino silhueta) · F3 (polimento, retrocompat, docs, smoke in-game pelo usuário). **Sem push.**
+- **Lição:** UI visual (silhueta/grade) feita por agente headless sai estruturalmente OK mas precisa de iteração visual no Chrome MCP (loop principal) — não dá pra fan-out cego.
+
+## Arquivo — blocos de topo pré-curadoria (2026-06-07 → 2026-06-10)
+
+> Movidos verbatim do topo em 2026-06-11 22:49 (Sessão 7) ao aplicar a regra de snapshot-delta (`memory-curation` §6/§8). Conteúdo histórico — o estado vigente está no topo do arquivo.
+
+## Pendências / próximos passos conhecidos (ARQUIVADO)
+
 
 - **(Infra) ✅ feito** — `compile-mod.sh` estendido para C# multi-projeto/híbrido (classifica client/server/lib, builda entry projects, instala só DLLs próprias nos 2 destinos). Verificado syntax + classificação; build dotnet end-to-end só quando existirem projetos.
 - **Item 001 — ENTREGUE (🟢)** via fluxo completo (spec → review-spec → spec-tech → review-tech → code-mod → compile-mod → playtest → code-review → apply-code-review). 3 arquivos em `modded/Server/`. Validado em isolamento (sem RZ): edition "Test Class" no launcher + personagem nasce **stash vazio + Endurance 5 / Strength 3**. **Base = `"SPT Zero to hero"`** (stash vazio — a classe controla os itens). Code-review 01: CR-01-02 (warn + contagem aplicada) e CR-01-03 (comentário deep clone) aplicados; CR-01-01/04 deferidos ao 002, CR-01-05 ao 007.
@@ -50,26 +218,3 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 - Mapeamento pt-BR → `pt` + inclusão em `ServerSupportedLocales`.
 - Capacidade do stash (lição de overflow do RZ).
 
-## Sessões
-
-### 2026-06-07 — Planejamento + scaffold
-
-- Adicionados ao repo (sessões anteriores deste chat) os mods de referência `SkillDistribution` (+ lib `ZGFueDkxCommonLibrary`) e `Skills-Extended` via `/add-mod-repo-for-modding`.
-- Exploração profunda de RZCustomProfiles (limitações), SkillDistribution (padrão de multiplicadores), Skills-Extended (soft-detect) e do server source SPT (`references/spt-source/`: `CreateProfileService`, `ProfileHelper`, `LauncherController`, modelos `ProfileSides`/`TemplateSide`/`Customization`).
-- Plano escrito, revisado 2× com `/g-review-content` e aprovado pelo usuário. Decisões travadas registradas no snapshot acima.
-- Scaffold criado: `mod.json`, `README.md`, `backlog/mod-backlog.md` (roadmap 001-008), este `sessions.md`. Sem código de mod ainda.
-- **Item 000 (infra) concluído:** `.agents/scripts/compile-mod.sh` reescrito para suportar C# multi-projeto/híbrido (server-csharp antes dava erro). Detecta N csproj, classifica client/server/lib, builda os entry projects e instala só as DLLs próprias (filtro por AssemblyName) em `BepInEx/plugins/<mod>/` (client) e `SPT/user/mods/<mod>/` (server). Caminhos client-csharp single e server-typescript preservados. Verificado: `bash -n` + classificação contra SkillDistribution/Skills-Extended.
-- **Item 001 — fluxo de backlog completo até `/code-mod`:** spec funcional (01) + review inline + spec técnica (02, ancorada no `spt-source`) + review técnica (03, 6 pontos, 0 bloqueadores, todos resolvidos) + implementação (`/code-mod`) + asbuild (05). Código em `modded/Server/`: `CustomClasses.Server.csproj`, `CustomClassesMetadata.cs`, `CustomClassesMod.cs` (`[Injectable] IOnLoad` em `PostDBModLoader+1` injeta a edition "Test Class" clonando "Standard" e setando skills Endurance 5 / Strength 3). Evidências-chave: `GetProfileTemplates()` (DatabaseService.cs:141), Progress=nível*100 (ProfileHelper.cs:460), descrição via texto literal (ServerLocalisationService.cs:163 fallback). **Não compilado/validado ainda.**
-
-### 2026-06-09 — Ícones de classe (estilo ChatSpecialIcon) + paleta Tarkov-dark
-
-> ⚠️ **Sessão paralela.** Esta sessão mexeu **só na arte/identidade visual**. Os itens 010–016 (infra de identidade, patches de menu/skills/deploy, ClassIconCache, ClassVisualRegistry, classe Peladão) foram feitos por **outra(s) sessão(ões)** e **ainda não estão registrados aqui nem commitados** — todo o working tree de identidade visual está untracked/`M`.
-
-- **Objetivo:** dar a cada classe um ícone próprio no estilo dos **selos de edição do EFT** (Unheard/EOD), consumido pelo `ChatSpecialIcon` (nome do jogador) já existente (item 015).
-- **Assets (11 ícones = 10 classes + Peladão):** símbolos do **game-icons.net** (CC BY 3.0), **silhueta branca + alpha** (máscara), **tingida com a `nameColor` da classe em runtime** (igual ao tingimento de edição do EFT). Mapeamento e créditos em `modded/Client/icons/ATTRIBUTION.md`. Caçador = `skoll/bullseye` (trocado de `crosshair` → traços finos sumiam em ~40px); Op. Tático = `star-medal`; demais: anvil, binoculars, ak47, gears, health-normal, hooded-figure, swap-bag, campfire, underwear.
-- **Pipeline (authoring-time, fora do runtime):** SVGs vendored em `scripts/icon-sources/<classe>.svg` → `scripts/build-icons.mjs` (dep **sharp**, isolada em `scripts/package.json`) rasteriza p/ **256² branco+alpha** em `modded/Client/icons/`. `scripts/preview-icons.mjs` gera folha de contato **tingida** em `scripts/preview/` (gitignored) p/ revisão. Trocar arte = trocar SVG/`CLASS_VISUAL` + `npm run build:icons` + compile-mod + **restart do cliente** (PNG cacheado; **não** recompila DLL).
-- **Tingimento (C#, 2 linhas):** `ChatSpecialIconPatch` seta `____icon.color = color` (+ reset p/ `Color.white` no branch não-local → não vaza cor em célula reciclada de lista/chat); `ClassIdentityView.BuildOrRefresh` seta `img.color = color` no selo de menu/Skills. *(Esses 2 .cs também receberam, em paralelo, `BuildColoredName`/CAPSLOCK do item 015 — não é desta sessão.)*
-- **Paleta Tarkov-dark (nova):** cores antigas eram vivas/saturadas demais. Refeitas p/ tons dessaturados/militares (bronze/ferrugem/oliva/cáqui/âmbar + frios apagados). Fonte = `CLASS_VISUAL` em `scripts/build-class-jsons.js`; aplicada cirurgicamente nos 10 `.jsonc` (só a linha `nameColor`). Hex: armeiro `#a8824e`, batedor `#5f7f93`, cacador `#c2973f`, fuzileiro `#b0573a`, gerenteDeOperacoes `#4f8a80`, medicoDeCombate `#6f9455`, operadorFurtivo `#7d7392`, operadorTatico `#7a818c`, saqueador `#c4ad45`, sobrevivencialista `#97934e`, peladao `#c28a60`.
-- **Peladão (016):** entrada visual (`iconFile`+`nameColor`) **adiantada** em `CLASS_VISUAL`; inerte até o profile `peladao` existir em `class-recipes.js`. PNG já gerado.
-- **Deploy:** `compile-mod CustomClasses` feito → DLL (com tingimento) + 11 PNGs + config instalados em `D:/SPT`. Compila 0 warn/err. **Validação in-game pendente** (usuário): perfil precisa ser classe do mod + `ShowClassOnPlayerName` (F12) on; olhar deploy/character/lista online.
-- **Pendências:** validar in-game; afinar Op. Tático (`star-medal` é o tom/símbolo mais "neutro"); decisão de **commit** do bloco de identidade visual (010–016 + arte) — está tudo no working tree.

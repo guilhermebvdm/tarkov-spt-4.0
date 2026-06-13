@@ -66,3 +66,9 @@ references/fika-server/
 references/fika-plugin/
 references/fika-headless/
 *.exe
+.handoffs/
+*.Backup.tmp
+
+# Graphify working outputs — per-scope scratch; the VERSIONED graphs live in
+# references/graphs/ (published by scripts/update-graphs.sh)
+graphify-out/

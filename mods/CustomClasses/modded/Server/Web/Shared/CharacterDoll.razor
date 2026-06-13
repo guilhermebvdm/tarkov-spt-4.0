@@ -1,0 +1,156 @@
+@* Fase F1 (rascunho): "paper doll" estilo inventário EFT — uma silhueta simples (CSS) com os 14
+   EquipmentSlots posicionados em volta por CSS absoluto. READ-ONLY. Cada slot mostra um label curto
+   e uma célula com o ícone do item equipado (padrão GearPanel: tarkov.dev icon, onerror-hidden,
+   dimensão real via Catalog.GetItemDimensions, hover ItemTooltip). Slots sem item ficam esmaecidos.
+   O polimento visual (posições exatas, proporções) fica pro orquestrador. *@
+
+@using SPTarkov.Server.Core.Models.Common
+@inject CatalogService Catalog
+
+<div class="cc-doll">
+    @* Silhueta central (cabeça + torso + pernas), puramente decorativa. *@
+    <div class="cc-doll__body" aria-hidden="true">
+        <div class="cc-doll__head"></div>
+        <div class="cc-doll__torso"></div>
+        <div class="cc-doll__legs"></div>
+    </div>
+
+    @foreach (var slot in SlotOrder)
+    {
+        var cell = _cells.TryGetValue(slot, out var c) ? c : null;
+        var clickable = Editable && OnSlotClick.HasDelegate;
+        <div class="cc-doll-slot @($"cc-doll-slot--{slot.ToLowerInvariant()}") @(clickable ? "cc-doll-slot--edit" : null)"
+             @onclick="@(clickable ? (() => OnSlotClick.InvokeAsync(slot)) : null)"
+             title="@(clickable ? "Click to edit this slot" : null)">
+            <div class="cc-doll-slot__label">@ShortLabel(slot)</div>
+            @if (cell is { } gc)
+            {
+                <ItemTooltip Name="@gc.Name" Category="@gc.Category"
+                             Width="@gc.Width" Height="@gc.Height"
+                             Price="@gc.Price" PriceSource="@gc.PriceSource"
+                             MissingPrice="@gc.MissingPrice">
+                    @* Slot de equipamento = caixa de TAMANHO FIXO (estilo EFT): o ícone é contido
+                       (object-fit) — NÃO dimensionamos pelo W×H real do item, senão armas (5×2) e
+                       mochilas (4×4) estouram a silhueta e se sobrepõem. O W×H real importa só no stash. *@
+                    <div class="cc-item-cell cc-doll-slot__cell">
+                        @if (gc.RootTpl is not null)
+                        {
+                            <img src="@($"https://assets.tarkov.dev/{gc.RootTpl}-icon.webp")"
+                                 loading="lazy" alt="" onerror="this.style.display='none'"/>
+                        }
+                        else
+                        {
+                            <span class="cc-item-cell__txt">@gc.Name</span>
+                        }
+                    </div>
+                </ItemTooltip>
+            }
+            else
+            {
+                <div class="cc-item-cell cc-doll-slot__cell cc-doll-slot__cell--empty"></div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>slot → spec (mesmo contrato do GearPanel). Null/vazio → todos os slots aparecem vazios.</summary>
+    [Parameter] public Dictionary<string, ItemSpec>? Equipped { get; set; }
+
+    /// <summary>F2c: habilita clicar-slot-edita (vide OnSlotClick). Sem callback → cliques inertes.</summary>
+    [Parameter] public bool Editable { get; set; }
+
+    /// <summary>F2c: clicar num slot (em modo editável) emite o nome do EquipmentSlot p/ o workspace abrir o editor.</summary>
+    [Parameter] public EventCallback<string> OnSlotClick { get; set; }
+
+    /// <summary>Ordem/conjunto fixo dos 14 EquipmentSlots desenhados em volta da silhueta (estilo EFT).</summary>
+    private static readonly string[] SlotOrder =
+    [
+        "Headwear", "Earpiece", "FaceCover", "Eyewear",
+        "ArmorVest", "TacticalVest", "ArmBand", "Backpack",
+        "FirstPrimaryWeapon", "SecondPrimaryWeapon", "Holster", "Scabbard",
+        "Pockets", "SecuredContainer", "Dogtag",
+    ];
+
+    private sealed record GearCell(
+        string? RootTpl, string Name, string? Category,
+        int Width, int Height, double Price, string? PriceSource, bool MissingPrice);
+
+    private Dictionary<string, GearCell> _cells = new(StringComparer.OrdinalIgnoreCase);
+
+    protected override void OnParametersSet()
+    {
+        _cells = new Dictionary<string, GearCell>(StringComparer.OrdinalIgnoreCase);
+        if (Equipped is not { Count: > 0 })
+        {
+            return;
+        }
+
+        foreach (var (slot, spec) in Equipped)
+        {
+            _cells[slot] = BuildCell(spec);
+        }
+    }
+
+    private GearCell BuildCell(ItemSpec spec)
+    {
+        var rootTpl = ResolveRootTpl(spec);
+        if (rootTpl is null)
+        {
+            var raw = spec.Preset ?? spec.Tpl ?? "(no tpl)";
+            return new GearCell(null, raw, null, 1, 1, 0, null, true);
+        }
+
+        var (w, h) = Catalog.GetItemDimensions(rootTpl);
+        var id = new MongoId(rootTpl);
+        var name = Catalog.GetItemName(id);
+        var category = Catalog.GetCategoryName(rootTpl);
+        var (price, source) = Catalog.GetPrice(id);
+        return new GearCell(rootTpl, name, category, w, h, price, source,
+            string.Equals(source, "missing", StringComparison.Ordinal));
+    }
+
+    /// <summary>preset > tpl (mesma ordem do GearPanel/ClassViewItemSpec). null = nada resolve.</summary>
+    private string? ResolveRootTpl(ItemSpec spec)
+    {
+        if (!string.IsNullOrWhiteSpace(spec.Preset))
+        {
+            var key = TryMongoId(spec.Preset!);
+            var preset = key is null
+                ? null
+                : spec.Premium ? Catalog.ResolvePremiumPreset(key.Value) : Catalog.ResolveDefaultPreset(key.Value);
+            return preset?.Items?.FirstOrDefault()?.Template.ToString();
+        }
+
+        if (!string.IsNullOrWhiteSpace(spec.Tpl) && TryMongoId(spec.Tpl!) is not null)
+        {
+            return spec.Tpl;
+        }
+
+        return null;
+    }
+
+    private static MongoId? TryMongoId(string raw) =>
+        MongoId.IsValidMongoId(raw) ? new MongoId(raw) : (MongoId?)null;
+
+    /// <summary>Label curto por slot (cabe na célula). Fallback: o próprio nome do slot.</summary>
+    private static string ShortLabel(string slot) => slot switch
+    {
+        "Headwear" => "Head",
+        "Earpiece" => "Ears",
+        "FaceCover" => "Face",
+        "Eyewear" => "Eyes",
+        "ArmorVest" => "Armor",
+        "TacticalVest" => "Rig",
+        "ArmBand" => "Band",
+        "Backpack" => "Bag",
+        "FirstPrimaryWeapon" => "Primary",
+        "SecondPrimaryWeapon" => "Primary 2",
+        "Holster" => "Holster",
+        "Scabbard" => "Melee",
+        "Pockets" => "Pockets",
+        "SecuredContainer" => "Secure",
+        "Dogtag" => "Dogtag",
+        _ => slot,
+    };
+}

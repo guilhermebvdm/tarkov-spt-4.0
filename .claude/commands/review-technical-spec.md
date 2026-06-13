@@ -1,8 +1,8 @@
 # /review-technical-spec
 
-Análise crítica da spec técnica. **Cria** um arquivo novo `NNN-<slug>-technical-review-NN.md` a cada execução (NN incremental). Resolver até zerar bloqueadores antes de `/code-mod`.
+Análise crítica da spec técnica. **Cria** um arquivo novo `NNN-<slug>-03-spec-tech-review-NN.md` a cada execução (NN incremental). Resolver até zerar bloqueadores antes de `/code-mod`.
 
-> **Skills obrigatórias:** carregar `spt-mod-best-practices`, `csharp-mod-best-practices` e `repo-workflow-best-practices` antes de revisar. Use os checklists ao fim de cada skill como base mínima da revisão.
+> **Skills obrigatórias:** carregar `spt-mod-best-practices`, `csharp-mod-best-practices` e `repo-workflow-best-practices` antes de revisar. Use os checklists ao fim de cada skill como base mínima da revisão. Consultar `memory-curation` § "Consumo de memória por commands" (§14) para o passo de contexto de memória.
 
 ## Uso
 
@@ -21,10 +21,13 @@ Análise crítica da spec técnica. **Cria** um arquivo novo `NNN-<slug>-technic
 3. **Calcular `NN` da review.** Listar arquivos `<NNN>-<slug>-03-spec-tech-review-*.md` na pasta. Próximo NN = maior + 1, padded a 2 dígitos. Primeira review = `01`.
 
 4. **Ler:**
+   - **Memória do mod** — topo de `mods/<mod>/memory/sessions.md` (snapshot + pendências) + entradas que citam o item `<NNN>`. Aplicar `memory-curation` § "Consumo de memória por commands" (§14): reportar pendências que afetam esta tarefa; pendência 🔴 do item/mod → alertar antes de prosseguir. Pendências 🟡 relacionadas que a spec técnica não endereça são candidatas a ponto Categoria A (Gap). Se o arquivo não existir, registrar "sem memória prévia".
    - A spec técnica completa.
-   - A spec funcional (`<NNN>-<slug>-spec.md`) — para conferir se a spec técnica responde aos critérios de aceite.
+   - A spec funcional (`<NNN>-<slug>-01-spec.md`) — para conferir se a spec técnica responde aos critérios de aceite.
    - Reviews anteriores `<NNN>-<slug>-03-spec-tech-review-*.md` — pontos já resolvidos não devem ser refeitos; pontos pendentes podem ser revalidados.
    - Os arquivos do Assembly citados na spec técnica — confirmar que as linhas batem com o que a spec afirma.
+   - A seção **9. Conformidade com skills** da spec técnica — conferir cada evidência citada. Check marcado ✅ sem evidência verificável = ponto **Categoria C — 🔴 Bloqueador**; check N/A com razão frágil = ponto Categoria A. **Em especial:** um `N/A` no check 2 (MainPlayer/Fika) quando há patch que reage a ação de player, ou no check 5 (estado entre raids) quando há estado estático/raid-scoped, é Categoria A — confrontar o `N/A` contra os alvos de patch reais da §2, não aceitar de cara.
+   - **Grafo de código** (skill `graph-code-navigation`): `get_neighbors` no alvo de patch para verificar se a spec auditou todos os overrides/callers (evidência negativa barata — auditoria ausente em alvo virtual = ponto Categoria C, AP-03).
    - `mods/<mod>/modded/` — checar conflitos com patches existentes.
 
 5. **Análise crítica em 3 categorias × 3 impactos:**
@@ -66,6 +69,7 @@ Análise crítica da spec técnica. **Cria** um arquivo novo `NNN-<slug>-technic
 9. **Reportar:**
    ```
    ✓ Review NN criada: <path>
+     Memória consultada: snapshot de YYYY-MM-DD (Sessão N) · pendências que afetam: [P-N.M ...] / nenhuma
      🔴 Bloqueadores: N · 🟡 Importantes: N · 🟢 Menores: N
    Status:
      [se houver 🔴]: NÃO está pronto pra build — resolver bloqueadores primeiro.

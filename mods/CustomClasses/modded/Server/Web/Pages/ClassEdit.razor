@@ -1,0 +1,118 @@
+@page "/customclasses/classes/{FileName}/edit"
+@layout BaseLayout
+
+@* Fase F2a: a tela de edição agora é o ClassWorkspace montado JÁ em editMode (InitialEdit=true).
+   A antiga UI de abas (ClassEditModel/_model, Save com hot-apply, guard de unsaved, Ctrl+S, recompute
+   debounced, validação) MIGROU INTEIRA para Web/Shared/ClassWorkspace.razor — esta página só resolve a
+   classe do disco (parse + dry-run diagnostics + custos) e a entrega ao workspace. Um refresh nesta rota
+   recria a página → InitialEdit volta true → o workspace reentra em edição com o estado fresco do disco.
+
+   A rota carrega o nome do arquivo SEM extensão (mesma resolução do ClassDetail). *@
+
+@using System.Globalization
+@using SPTarkov.Server.Core.Models.Common
+@inject ClassEditorService EditorService
+@inject CostService CostService
+@inject NavigationManager Nav
+
+<PageTitle>CustomClasses — Edit @(_entry?.Definition?.Name ?? FileName)</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.False" Class="mt-4">
+    <MudPaper Elevation="0" Class="pa-6">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-4">
+            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"
+                           Href="@($"/customclasses/classes/{Uri.EscapeDataString(BareName)}")"
+                           Size="Size.Small" title="Back to the class detail"/>
+            @if (_entry?.Definition?.IconFile is { Length: > 0 } icon)
+            {
+                <img src="@($"/CustomClasses-Server/icons/{icon}")" alt="" width="40" height="40"
+                     style="object-fit:contain;"/>
+            }
+            <MudText Typo="Typo.h4" Style="@NameStyle()">Edit — @(_entry?.Definition?.Name ?? FileName)</MudText>
+        </MudStack>
+
+        @if (_entry is not null)
+        {
+            @foreach (var d in _entry.Diagnostics)
+            {
+                <MudAlert Severity="@MapSeverity(d.Severity)" Dense="true" Class="mb-1">
+                    [@d.Code] @d.Message
+                </MudAlert>
+            }
+        }
+
+        @if (_entry?.Definition is not { } def)
+        {
+            <MudAlert Severity="Severity.Error" Dense="true" Class="mt-2">
+                No editable class file matching "@FileName" was found in config/classes/ (or it could
+                not be parsed — fix it on disk and reload).
+            </MudAlert>
+        }
+        else
+        {
+            <ClassWorkspace Definition="@def"
+                            FileNameBare="@System.IO.Path.GetFileNameWithoutExtension(_entry.FileName)"
+                            SkillCost="@_skillCost"
+                            LoadoutCost="@_loadoutCost"
+                            Entry="@_entry"
+                            InitialEdit="true"
+                            OnSaved="ReloadAndRefresh"/>
+        }
+    </MudPaper>
+</MudContainer>
+
+@code {
+    /// <summary>Route value: file name WITHOUT extension (preferred) or exact file name.</summary>
+    [Parameter] public string? FileName { get; set; }
+
+    private ClassFileEntry? _entry;
+    private SkillCostBreakdown? _skillCost;
+    private LoadoutCostBreakdown? _loadoutCost;
+
+    private string BareName =>
+        System.IO.Path.GetFileNameWithoutExtension(_entry?.FileName ?? FileName ?? string.Empty);
+
+    protected override void OnParametersSet() => Reload();
+
+    /// <summary>F2a: re-resolve from disk (e.g. after a Save) and re-render.</summary>
+    private void ReloadAndRefresh()
+    {
+        Reload();
+        StateHasChanged();
+    }
+
+    private void Reload()
+    {
+        _entry = null;
+        _skillCost = null;
+        _loadoutCost = null;
+
+        if (string.IsNullOrWhiteSpace(FileName))
+        {
+            return;
+        }
+
+        var entries = EditorService.ListClassFiles();
+        _entry = entries.FirstOrDefault(e => string.Equals(e.FileName, FileName, StringComparison.OrdinalIgnoreCase))
+                 ?? entries.FirstOrDefault(e => string.Equals(
+                     System.IO.Path.GetFileNameWithoutExtension(e.FileName), FileName, StringComparison.OrdinalIgnoreCase));
+
+        if (_entry?.Definition is not { } def)
+        {
+            return;
+        }
+
+        _skillCost = CostService.ComputeSkillCost(def);
+        _loadoutCost = CostService.ComputeLoadoutCost(def);
+    }
+
+    private string? NameStyle() =>
+        _entry?.Definition?.NameColor is { Length: > 0 } c ? $"color:{c};" : null;
+
+    private static Severity MapSeverity(DiagnosticSeverity severity) => severity switch
+    {
+        DiagnosticSeverity.Error => Severity.Error,
+        DiagnosticSeverity.Warning => Severity.Warning,
+        _ => Severity.Info,
+    };
+}

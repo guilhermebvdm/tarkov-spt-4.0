@@ -1,0 +1,11 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.idea/.idea.SPT-MenuOverhaul/.idea
+/.vs
+/bin/
+/obj/
+/Properties
+/Build/
+/docs/

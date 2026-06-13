@@ -14,15 +14,15 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados quan
 
 ## Pendências / próximos passos conhecidos
 
-- **🔴 Validar in-game os 4 itens desta sessão (004/008/009/010)** — tudo compila, nada testado. Ordem sugerida: 009 (wiggle, baixo risco) → 008 (esvaziar câmara) → 004 (mount) → 010 (chambering, **maior risco de softlock**; testar reload/troca de arma/morte; master toggle desliga p/ vanilla). Logs `[Mount]/[Wiggle]/[ActionStance]/[ManualChamber]` no `BepInEx/LogOutput.log` ajudam a diagnosticar.
-- **Commitar `.agents/scripts/compile-mod.sh`** (mudanças da Fase 0) — não commitado por estar misturado com trabalho não-commitado da sessão CustomClasses (item 019/020).
-- **Replicar `.spt-path` no notebook (guimello)** se for buildar lá — gitignored (per-machine); copiar de `.spt-path.example`.
-- **Validar F4 in-raid após 06-fix-01** — se ainda não funcionar, pedir `BepInEx/LogOutput.log` para diagnosticar via logs `[F4] Resolved ...` e Prefix entries.
-- **F1 (Include Stance 0 in Cycle) não foi testado pelo usuário in-raid** — recomendar teste.
-- **Migração de `.cfg` antigo** — usuário pode ter customizações em seções obsoletas (`Stance 2 - Custom`, `Stance 3 - Low Ready` pré-swap) que viraram órfãs no `.cfg`. Migração manual documentada nos avisos do PROPRIEDADES.md.
-- **ADS Transition Speed só atua em stance customizada (1/2/3)** — quando o usuário testa em Stance 0, o `SpringGetPatch` faz early-return sem consultar o slider. Documentado, mas pode virar `06-fix-03` se quiser expor um toggle "Aplicar ADS Speed Override mesmo em Stance 0".
-- **Stance 0 Stamina Multiplier default = 0.5** drena stamina em hipfire — provavelmente causa do "ADS lento" percebido (HandsStamina baixa → tired aim no EFT). Workaround: usuário pode setar `1.0` no F12. Eventual `06-fix-XX` poderia mudar o default para `1.0` (drain como opt-in).
-- **Item 010 está 🟡** (não 🟢) — depende de validação in-game (risco de softlock). Os demais (001-009) seguem 🟢 mas 004/008/009 têm `06-fix-01` não validado.
+- **[P-4.1] (aberta 2026-06-11) 🔴 Validar in-game os 4 itens desta sessão (004/008/009/010)** — tudo compila, nada testado. Ordem sugerida: 009 (wiggle, baixo risco) → 008 (esvaziar câmara) → 004 (mount) → 010 (chambering, **maior risco de softlock**; testar reload/troca de arma/morte; master toggle desliga p/ vanilla). Logs `[Mount]/[Wiggle]/[ActionStance]/[ManualChamber]` no `BepInEx/LogOutput.log` ajudam a diagnosticar.
+- **[P-4.2] (aberta 2026-06-11) Commitar `.agents/scripts/compile-mod.sh`** (mudanças da Fase 0) — não commitado por estar misturado com trabalho não-commitado da sessão CustomClasses (item 019/020).
+- **[P-4.3] (aberta 2026-06-11) Replicar `.spt-path` no notebook (guimello)** se for buildar lá — gitignored (per-machine); copiar de `.spt-path.example`.
+- **[P-4.4] (aberta 2026-06-11) Validar F4 in-raid após 06-fix-01** — se ainda não funcionar, pedir `BepInEx/LogOutput.log` para diagnosticar via logs `[F4] Resolved ...` e Prefix entries.
+- **[P-4.5] (aberta 2026-06-11) F1 (Include Stance 0 in Cycle) não foi testado pelo usuário in-raid** — recomendar teste.
+- **[P-4.6] (aberta 2026-06-11) Migração de `.cfg` antigo** — usuário pode ter customizações em seções obsoletas (`Stance 2 - Custom`, `Stance 3 - Low Ready` pré-swap) que viraram órfãs no `.cfg`. Migração manual documentada nos avisos do PROPRIEDADES.md.
+- **[P-4.7] (aberta 2026-06-11) ADS Transition Speed só atua em stance customizada (1/2/3)** — quando o usuário testa em Stance 0, o `SpringGetPatch` faz early-return sem consultar o slider. Documentado, mas pode virar `06-fix-03` se quiser expor um toggle "Aplicar ADS Speed Override mesmo em Stance 0".
+- **[P-4.8] (aberta 2026-06-11) Stance 0 Stamina Multiplier default = 0.5** drena stamina em hipfire — provavelmente causa do "ADS lento" percebido (HandsStamina baixa → tired aim no EFT). Workaround: usuário pode setar `1.0` no F12. Eventual `06-fix-XX` poderia mudar o default para `1.0` (drain como opt-in).
+- **[P-4.9] (aberta 2026-06-11) Item 010 está 🟡** (não 🟢) — depende de validação in-game (risco de softlock). Os demais (001-009) seguem 🟢 mas 004/008/009 têm `06-fix-01` não validado.
 
 ## 2026-05-09 ~16:00 (GMT-3) — Sessão 1: item 002 backlog (criação + reviews)
 
@@ -111,7 +111,7 @@ Usuário reportou "ADS lento" in-raid. Investigado:
 
 **Aviso de drift no asbuild.md (linha 14):** existe uma referência a um `06-fix-02.md` ("Labels das hotkeys Stance 2/3 + ordem F12 via Order bump em BindStance") que **não corresponde a trabalho registrado** nesta sessão. Pode ter sido criado em chat paralelo. Investigar antes de criar novo fix-02 com numeração duplicada.
 
-## 2026-06-11 ~madrugada (GMT-3) — Sessão: backlog de ajustes (Fase 0 + itens 004/008/009/010 + F12)
+## 2026-06-11 ~madrugada (GMT-3) — Sessão 4a: backlog de ajustes (Fase 0 + itens 004/008/009/010 + F12)
 
 Sessão autônoma noturna (usuário dormindo; sem testes in-game, sem pedidos de aprovação). Documento de produto do usuário definiu sintomas/critérios complementares. Plano aprovado em `~/.claude/plans/backlog-ajustes-de-kind-phoenix.md` (2 passadas de revisão crítica via `/g-review-content`). Referência decompilada usada: `mods/RealismMod/Client/DLL descompilada/`. APIs validadas contra Assembly 0.16 em `D:/SPT`.
 

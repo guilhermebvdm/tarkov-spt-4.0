@@ -89,6 +89,9 @@ Seguir o template da skill §5:
 **Decisões-chave:**
 - [Decisão 1]: <o quê> — <por quê>. Ref: <file:linha ou artefato>.
 
+**Lições / hipóteses descartadas:**
+- <hipótese/abordagem testada> — falhou/foi descartada porque <causa raiz>. Ref: <artefato/file:linha>.
+
 **Atividade cronológica:**
 1. <ação> — <resultado>.
 
@@ -101,14 +104,17 @@ Seguir o template da skill §5:
 - Infra repo-wide: ver `memory/repo-sessions.md` Sessão K.
 ```
 
-### 5. Atualizar "Estado atual" e "Pendências" no topo
+**A seção "Lições / hipóteses descartadas" é obrigatória** (skill §5). Antes de gravar, varrer a conversa por: bugs diagnosticados (com causa raiz), abordagens revertidas, premissas refutadas ("tentamos X, falhou porque Y"). Se nada qualifica, registrar a justificativa explícita: `Nenhuma lição nova — sessão de <tipo>.` Sessão que tocou código sem decisão "— porquê" nem lição é red flag — voltar à conversa e extrair o raciocínio.
+
+### 6. Atualizar "Estado atual" e "Pendências" no topo
 
 Aplicar regra de **delta, não acumulação** (skill §6):
 
 - Reescrever os bullets do snapshot para refletir o **estado AO FIM** da sessão atual.
 - Não acumular bullets antigos. Substituir os que mudaram, manter os que ainda são verdade.
 - Pendências resolvidas: removidas do topo, marcadas com `✅ Resolvido em YYYY-MM-DD` na entrada que resolveu (com link bidirecional).
-- Limite suave: ≤ 10 bullets em cada bloco. Se está estourando, é sinal de que alguma pendência deveria virar item de backlog.
+- **IDs obrigatórios:** todo bullet de pendência no topo carrega `[P-N.M]` (skill §7). Ao reescrever o topo, preservar IDs existentes; bullets legados sem ID recebem ID retroativo derivado da sessão de origem.
+- **Alertas de tamanho:** snapshot ou pendências com >10 bullets → avisar na confirmação e propor consolidação/promoção a backlog; **>15 bullets → parar** e pedir decisão do usuário antes de gravar.
 
 Para sessões longas, opcional incluir antes da reescrita uma seção curta:
 
@@ -119,7 +125,7 @@ Para sessões longas, opcional incluir antes da reescrita uma seção curta:
 - MUDOU: <field> de X para Y
 ```
 
-### 6. Idempotência — verificar duplicidade antes de gravar
+### 7. Idempotência — verificar duplicidade antes de gravar
 
 Antes de inserir uma nova entrada:
 
@@ -132,7 +138,32 @@ Antes de inserir uma nova entrada:
   ```
 - Se há **delta novo** (ações depois da última gravação): criar uma NOVA sub-letra (Sessão Nb), só com o delta.
 
-### 7. Confirmar e gravar
+### 8. Garbage collection de pendências (>30 dias)
+
+A cada rodada (skill §7): **rodar `date '+%Y-%m-%d'`** e, para cada bullet `[P-N.M] (aberta YYYY-MM-DD)` do topo, subtrair a data inline da data atual (diff literal — não resolver ID→sessão). Para cada pendência **>30 dias sem progresso**, incluir no plano de atualização uma proposta com 3 opções:
+
+```text
+🗑️ GC: [P-2.1] "<descrição>" está aberta há 34 dias (Sessão 2, 2026-05-09).
+   ( ) Promover a item de backlog (/add-backlog-item)
+   ( ) Descartar — com nota "descartada por <razão>"
+   ( ) Manter — justificar: ___
+```
+
+A decisão do usuário é registrada na entrada da sessão atual (não na entrada original — append-only).
+
+### 9. Promoção de lições recorrentes
+
+Aplicar skill §15: se a mesma classe de erro/lição aparece em **≥2 sessões** (deste mod ou de outros), incluir no relatório final:
+
+```text
+💡 Candidata a promoção: <lição> — vista em <Sessão X, Sessão Y>.
+   Destino sugerido: docs/technical/spt-antipatterns.md §AP-NN / skill <nome>.
+   Aprovar?
+```
+
+A edição do doc/skill só acontece com aprovação do usuário e é registrada como trabalho repo-wide em `memory/repo-sessions.md`. A memória do mod ganha link para o destino promovido — não duplica.
+
+### 10. Confirmar e gravar
 
 Após confirmação do usuário (ou com `--all` que skipa):
 
@@ -148,7 +179,15 @@ Após confirmação do usuário (ou com `--all` que skipa):
        → 1 pendência resolvida: P-3.2 ✅ (criada em 2026-05-09 Sessão 3)
      - memory/repo-sessions.md
        → Adicionada Sessão 2 ao final (sem conflito de timestamp)
+   Lições registradas: N (ou "ausência justificada")
+   GC: K pendências >30d decididas
+   Promoções propostas: M
    ```
+3. **Gancho do grafo de código:** se a classificação do passo 1 detectou mudança de **código** em algum mod (não só docs/spec/memória), perguntar:
+   ```text
+   Houve mudança de código em <mod> nesta sessão — rodar /update-mod-graph <mod> agora? [y/N]
+   ```
+   Sessões só de docs/spec/memória não disparam a pergunta.
 
 ## Regras
 

@@ -1,0 +1,92 @@
+@* Item 034: visual stash panel for the ClassDetail right column. Groups the priced stash lines
+   (LoadoutCostEntry, Context=="stash", resolved by CostService) by handbook category, renders each
+   group as a header (category name + ₽ subtotal) over a grid of dimensioned icon cells with a qty
+   badge (>1), a ⚠ badge for missing prices, and a hover ItemTooltip. Performance (037-aware,
+   CR-034-03): GetCategories() is called ONCE in OnParametersSet to build an id→name map; per-line
+   grouping uses GetCategoryId (O(1) over the lazy handbook index). Cost warnings and the "no priced
+   line" notice stay in ClassDetail (they depend on _loadoutCost/def the panel never receives). *@
+
+@using System.Globalization
+@using SPTarkov.Server.Core.Models.Common
+@inject CatalogService Catalog
+
+@foreach (var group in _groups)
+{
+    <div class="cc-stash-group">
+        <div class="cc-stash-group__title">
+            <span>@group.Name</span>
+            <span class="cc-stash-group__subtotal">@group.Subtotal.ToString("N0", CultureInfo.InvariantCulture) ₽</span>
+        </div>
+        <div class="cc-stash-grid">
+            @foreach (var cell in group.Cells)
+            {
+                <ItemTooltip Name="@cell.Name" Category="@group.Name"
+                             Width="@cell.Width" Height="@cell.Height"
+                             Price="@cell.UnitPrice" PriceSource="@cell.PriceSource"
+                             Qty="@cell.Qty" MissingPrice="@cell.MissingPrice">
+                    <div class="cc-item-cell"
+                         style="@($"width:calc(var(--cc-cell-unit) * {cell.Width});height:calc(var(--cc-cell-unit) * {cell.Height});")">
+                        @* text first so a loaded icon (later in DOM, same stacking context) paints over it;
+                           when the icon fails (offline) the text remains visible. *@
+                        <span class="cc-item-cell__txt">@cell.Name</span>
+                        <img src="@($"https://assets.tarkov.dev/{cell.Tpl}-icon.webp")"
+                             loading="lazy" alt="" onerror="this.style.display='none'"/>
+                        @if (cell.Qty > 1)
+                        {
+                            <span class="cc-item-cell__qty">@cell.Qty.ToString("N0", CultureInfo.InvariantCulture)</span>
+                        }
+                        @if (cell.MissingPrice)
+                        {
+                            <span class="cc-item-cell__warn" title="No flea or handbook price found">⚠</span>
+                        }
+                    </div>
+                </ItemTooltip>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    /// <summary>Priced stash lines (Context=="stash"), already resolved by CostService. Frozen contract (033).</summary>
+    [Parameter, EditorRequired] public List<LoadoutCostEntry> Lines { get; set; } = [];
+
+    private sealed record StashCell(
+        string Tpl, string Name, double Qty, double UnitPrice, string? PriceSource,
+        double Subtotal, bool MissingPrice, int Width, int Height);
+
+    private sealed record StashGroup(string Name, double Subtotal, List<StashCell> Cells);
+
+    private const string OtherGroup = "Other";
+
+    private List<StashGroup> _groups = [];
+
+    protected override void OnParametersSet()
+    {
+        // id → localized name, built ONCE (CR-034-03 — never per line).
+        var catNames = Catalog.GetCategories()
+            .GroupBy(c => c.Id, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.First().Name, StringComparer.Ordinal);
+
+        var byGroup = new Dictionary<string, List<StashCell>>(StringComparer.Ordinal);
+        foreach (var line in Lines)
+        {
+            var catId = Catalog.GetCategoryId(line.Tpl);
+            var groupName = catId is not null && catNames.TryGetValue(catId, out var n) ? n : OtherGroup;
+            var (w, h) = Catalog.GetItemDimensions(line.Tpl);
+            var cell = new StashCell(line.Tpl, line.Name, line.Qty, line.UnitPrice, line.PriceSource,
+                line.Subtotal, line.MissingPrice, w, h);
+
+            if (!byGroup.TryGetValue(groupName, out var cells))
+            {
+                byGroup[groupName] = cells = [];
+            }
+
+            cells.Add(cell);
+        }
+
+        _groups = byGroup
+            .Select(kv => new StashGroup(kv.Key, kv.Value.Sum(c => c.Subtotal), kv.Value))
+            .OrderBy(g => g.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+}

@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>CustomizationPersistenceFix</RootNamespace>
+    <AssemblyName>CustomizationPersistenceFix</AssemblyName>
+    <Authors>mdj</Authors>
+    <Version>1.0.0</Version>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Mesma linha do CustomClasses.Server. -->
+    <PackageReference Include="SPTarkov.Server.Core" Version="4.0.0" />
+    <PackageReference Include="SPTarkov.DI" Version="4.0.0" />
+    <PackageReference Include="SPTarkov.Common" Version="4.0.0" />
+    <!-- Harmony: compila contra o 0Harmony (2.15.0) do servidor SPT; Private=false → usa o do servidor em runtime, não redistribui. -->
+    <Reference Include="0Harmony">
+      <HintPath>References\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>

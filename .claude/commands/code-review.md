@@ -2,7 +2,7 @@
 
 Análise crítica do **código implementado** por `/code-mod`. Cria um arquivo novo `NNN-<slug>-04-code-review-NN.md` a cada execução (NN incremental). Achados priorizados em 6 categorias × 4 impactos. Resolver bloqueadores via `/apply-code-review` antes de fechar o item.
 
-> **Skills obrigatórias:** carregar `spt-mod-best-practices`, `csharp-mod-best-practices` e `repo-workflow-best-practices` antes de revisar. Use os checklists ao fim de cada skill como base mínima da análise.
+> **Skills obrigatórias:** carregar `spt-mod-best-practices`, `csharp-mod-best-practices` e `repo-workflow-best-practices` antes de revisar. Use os checklists ao fim de cada skill como base mínima da análise. Consultar `memory-curation` § "Consumo de memória por commands" (§14) para o passo de contexto de memória.
 
 ## Uso
 
@@ -31,11 +31,13 @@ Se alguma pré-condição falhar, parar com mensagem clara.
 3. **Calcular `NN` da review.** Listar `<NNN>-<slug>-04-code-review-*.md` na pasta. Próximo NN = maior + 1, padded a 2 dígitos. Primeira review = `01`.
 
 4. **Ler:**
+   - **Memória do mod** — topo de `mods/<mod>/memory/sessions.md` (snapshot + pendências) + entradas que citam o item `<NNN>`. Aplicar `memory-curation` § "Consumo de memória por commands" (§14): reportar pendências que afetam esta tarefa; pendência 🔴 do item/mod → alertar antes de prosseguir. Bug/lição registrada na memória que reaparece no código = achado com ref à sessão. Se o arquivo não existir, registrar "sem memória prévia".
    - Spec funcional, spec técnica, **todos** os reviews técnicos (para conhecer pontos `🟡`/`🟢` aceitos como ressalvas e quais PA-NN-MM foram aplicados no build).
    - Reviews de code-review anteriores (`04-code-review-*.md`) — pontos já `✅ Resolvido` ou `✅ Aplicado` **não voltam**; pontos pendentes podem ser revalidados.
    - `05-asbuild.md` (se existir) — para a lista canônica de arquivos tocados.
    - Os arquivos de `mods/<mod>/modded/` modificados/criados pelo item. Resolver via `05-asbuild.md` quando disponível; caso contrário, via §4 da spec técnica.
    - O Assembly nas linhas citadas pelos stubs da spec técnica — confirmar que o código implementado bate com as refs.
+   - **Grafo do mod** (skill `graph-code-navigation`): `graphify affected "<classe/método tocado>"` para mapear callers afetados pelo diff — impacto além dos arquivos tocados.
 
 5. **Análise crítica em 6 categorias × 4 impactos:**
 
@@ -89,6 +91,7 @@ Se alguma pré-condição falhar, parar com mensagem clara.
 
    ```text
    ✓ Code review NN criada: <path>
+     Memória consultada: snapshot de YYYY-MM-DD (Sessão N) · pendências que afetam: [P-N.M ...] / nenhuma
      🔴 Bloqueadores: N · 🟠 Fortes: N · 🟡 Médios: N · 🟢 Menores: N
    Status:
      [se houver 🔴]: item NÃO está pronto pra fechar — rode /apply-code-review primeiro.
@@ -96,6 +99,7 @@ Se alguma pré-condição falhar, parar com mensagem clara.
    Próximo passo:
      Marque "Aceitar sugestão" (ou Aceitar com modificação) para cada achado a corrigir.
      Rode /apply-code-review <ref> para aplicar — o command lê o último 04-code-review-NN.md.
+     Achado deferido/regressão que virar fix pós-validação → usar .agents/templates/fix.md.tmpl (06-fix-NN).
    ```
 
 ## Regras

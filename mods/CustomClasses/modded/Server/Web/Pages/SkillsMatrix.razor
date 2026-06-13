@@ -1,0 +1,511 @@
+@page "/customclasses/skills"
+@layout BaseLayout
+
+@* Item 032: skills × classes comparison MATRIX (heatmap). Port of the RZ viewer's
+   profiles-skills.html (tools/tarkov-itemdb/viewer/profiles-skills.js:20-93,
+   profiles-skills.css:25-127): ROWS = skills in canonical order (reuse SkillMaster from
+   031 — NEVER redefine the order here), COLUMNS = every class file (vertical header in the
+   class' nameColor + icon), CELLS = skill level as a tiered heatmap (1-3 low / 4-6 mid /
+   7-10 high), empty = level 0. A footer row shows the weighted skill cost per class.
+
+   Two toggles (Blazor-local, NO recompute): "Mostrar desabilitadas" (default on — a
+   comparison must not be blind to what's off the air) and "Multiplicadores XP" (each cell
+   gains a ±% chip). Clicking any cell / header navigates to the class detail (1-click act).
+
+   Data source (CONTRATO 037→032): EditorService.GetCachedEntries() — the lightweight 037
+   entry-cache view, NEVER a per-render dry-run. Cost comes from CostService.ComputeSkillCost,
+   ONCE per class in OnInitialized (mirror of NavMenu.LoadRows). Toggles re-render only. *@
+
+@using System.Globalization
+@using CustomClasses.Web
+@inject ClassEditorService EditorService
+@inject CostService CostService
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<PageTitle>CustomClasses — Skills matrix</PageTitle>
+
+@* QA 2026-06-12: wrapped in the standard MudContainer(False)+MudPaper(pa-6) shell like the other
+   pages (Classes/ClassDetail/Home) so the page has the same top margin and padding, and the matrix
+   no longer hugs the top-left edge. *@
+<MudContainer MaxWidth="MaxWidth.False" Class="mt-4">
+<MudPaper Elevation="0" Class="pa-6">
+
+<MudText Typo="Typo.h4" Class="mb-1">Skills matrix</MudText>
+<MudText Typo="Typo.body2" Class="mb-3" Style="opacity:.7">
+    Compare every class side by side — rows are skills in canonical order, columns are classes.
+    Click any cell to open the class.
+</MudText>
+
+<MudStack Row="true" AlignItems="AlignItems.Center" Spacing="4" Class="mb-3">
+    <MudSwitch T="bool" @bind-Value="_showDisabled" @bind-Value:after="PersistToggles"
+               Color="Color.Default" Label="Mostrar desabilitadas"/>
+    <MudSwitch T="bool" @bind-Value="_showMultipliers" @bind-Value:after="PersistToggles"
+               Color="Color.Primary" Label="Multiplicadores XP"/>
+</MudStack>
+
+@if (_columns.Count == 0)
+{
+    <MudAlert Severity="Severity.Info" Dense="true">No class files found in config/classes/.</MudAlert>
+}
+else
+{
+    var visible = VisibleColumns();
+    <div class="cc-matrix-wrap">
+        <table class="cc-skill-matrix">
+            <thead>
+                <tr>
+                    <th class="cc-skill-name-header"></th>
+                    @foreach (var col in visible)
+                    {
+                        <th class="cc-skill-col-header @(col.Enabled ? null : "cc-cell--disabled")"
+                            title="@HeaderTitle(col)" @onclick="@(() => NavigateTo(col))">
+                            @if (col.IconUrl is not null)
+                            {
+                                <div class="cc-col-icon"><img src="@col.IconUrl" alt=""/></div>
+                            }
+                            <div class="cc-skill-col-header__name" style="@NameStyle(col)">@col.DisplayName</div>
+                        </th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    SkillCategory? lastCategory = null;
+                }
+                @foreach (var entry in SkillMaster.Entries)
+                {
+                    if (lastCategory != entry.Category)
+                    {
+                        lastCategory = entry.Category;
+                        @CategoryHeader(entry.Category)
+                    }
+                    @SkillRow(entry.Name, visible)
+                }
+
+                @if (_overflowSkills.Count > 0)
+                {
+                    @OverflowHeader()
+                    @foreach (var name in _overflowSkills)
+                    {
+                        @SkillRow(name, visible)
+                    }
+                }
+            </tbody>
+            <tfoot>
+                <tr class="cc-skill-cost-row">
+                    <td class="cc-skill-name cc-skill-cost-label">Skill cost</td>
+                    @foreach (var col in visible)
+                    {
+                        @CostFooterCell(col)
+                    }
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+}
+
+</MudPaper>
+</MudContainer>
+
+@* Scoped styles ported from profiles-skills.css:25-127. Viewer tokens (--accent-bright,
+   --fg-dim, --border-subtle, --bg-hover) do NOT exist in the editor — substituted by MudBlazor
+   --mud-palette-* or literal rgba. Category colors come from SkillMaster.ColorOf (set inline per
+   header), not from cat-header-row--Ph classes. R2: the icon sits OUTSIDE the rotated name block
+   (its own horizontal-tb div) so it is not laid on its side. R3: the disabled fade is applied
+   PER CELL via cc-cell--disabled (from col.Enabled), never via an nth-child column selector that
+   would break when the toggle filters columns. *@
+<style>
+    .cc-matrix-wrap {
+        overflow-x: auto;
+    }
+    .cc-skill-matrix {
+        border-collapse: collapse;
+        width: max-content;
+    }
+
+    /* Column headers (rotated class names) */
+    .cc-skill-col-header {
+        vertical-align: bottom;
+        padding: 0 2px 6px;
+        min-width: 52px;
+        width: 52px;
+        cursor: pointer;
+    }
+    .cc-skill-col-header:hover {
+        background: rgba(255, 255, 255, 0.06);
+    }
+    .cc-col-icon {
+        writing-mode: horizontal-tb;
+        display: flex;
+        justify-content: center;
+        margin-bottom: 4px;
+    }
+    .cc-col-icon img {
+        width: 26px;
+        height: 26px;
+        object-fit: contain;
+    }
+    .cc-skill-col-header__name {
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+        white-space: nowrap;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: .4px;
+        height: 120px;
+        display: flex;
+        align-items: center;
+        margin: 0 auto;
+    }
+    .cc-skill-name-header {
+        min-width: 150px;
+        width: 150px;
+    }
+
+    /* Category / overflow separator rows */
+    .cc-skill-cat-sep td {
+        padding: 12px 0 6px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .8px;
+    }
+
+    /* Skill rows */
+    .cc-skill-row:hover .cc-skill-cell {
+        background: rgba(255, 255, 255, 0.06);
+    }
+    .cc-skill-row:hover .cc-skill-name {
+        color: var(--mud-palette-text-primary);
+    }
+    .cc-skill-name {
+        font-size: 12px;
+        color: var(--mud-palette-text-secondary);
+        padding: 3px 16px 3px 0;
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+
+    /* Skill cells (heatmap by tier) */
+    .cc-skill-cell {
+        text-align: center;
+        vertical-align: middle;
+        padding: 2px;
+        border-left: 1px solid rgba(255, 255, 255, 0.08);
+        cursor: pointer;
+        transition: background .12s ease;
+    }
+    .cc-skill-cell--empty { background: transparent; }
+    .cc-skill-cell--low   { background: rgba(166, 124, 0, 0.12); }
+    .cc-skill-cell--mid   { background: rgba(166, 124, 0, 0.28); }
+    .cc-skill-cell--high  { background: rgba(200, 160, 0, 0.45); }
+    .cc-skill-cell__val {
+        display: inline-block;
+        min-width: 24px;
+        height: 24px;
+        line-height: 24px;
+        border-radius: 3px;
+        font-size: 12px;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+    }
+    .cc-skill-cell--low  .cc-skill-cell__val { color: var(--mud-palette-text-secondary); }
+    .cc-skill-cell--mid  .cc-skill-cell__val { color: var(--mud-palette-text-primary); }
+    .cc-skill-cell--high .cc-skill-cell__val { color: #e7c46a; }
+
+    /* Footer (weighted skill cost per class) */
+    .cc-skill-cost-row td {
+        border-top: 2px solid rgba(255, 255, 255, 0.12);
+        padding: 6px 4px;
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+        font-weight: 600;
+    }
+    .cc-skill-cost-label {
+        text-align: right;
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: .6px;
+    }
+    .cc-cost--ok   { color: var(--mud-palette-success); }
+    .cc-cost--over { color: var(--mud-palette-warning); }
+
+    /* R3 — per-cell disabled fade (header + cells), robust to column filtering */
+    .cc-cell--disabled { opacity: .4; }
+</style>
+
+@code {
+    /// <summary>One column = one class file, projected ONCE per navigation from a 037 cache entry
+    /// + a single ComputeSkillCost (mirror of NavMenu.SidebarRow).</summary>
+    private sealed record ClassColumn(
+        string BareName,                                 // route target (extension-less file name)
+        string DisplayName,                              // def?.Name ?? entry.FileName
+        string? NameColor,                               // def?.NameColor
+        string? IconUrl,                                 // /CustomClasses-Server/icons/{icon}
+        bool Enabled,
+        bool HasDefinition,
+        IReadOnlyDictionary<string, int> Levels,         // case-insensitive
+        IReadOnlyDictionary<string, double> Multipliers, // case-insensitive
+        double SkillCostTotal,
+        bool WithinBudget,
+        bool HasCost);                                   // def != null && total > 0
+
+    private List<ClassColumn> _columns = [];
+    private List<string> _overflowSkills = [];           // skills defined by some class, outside SkillMaster
+    private bool _showDisabled = true;                   // toggle (default on)
+    private bool _showMultipliers = false;               // toggle (default off)
+    private bool _togglesRestored;
+
+    // D4 — destination page: no LocationChanged subscription. Re-mount re-runs OnInitialized with the
+    // 037 cache already fresh (Save/Delete invalidate the touched entry). No IDisposable needed.
+    protected override void OnInitialized() => LoadColumns();
+
+    /// <summary>
+    ///     Item 035: restore the persisted toggles once, post-circuit (PA-035-02). Format
+    ///     "&lt;showDisabled&gt;|&lt;showMultipliers&gt;" e.g. "1|0". Missing/corrupt → keep defaults.
+    /// </summary>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _togglesRestored)
+        {
+            return;
+        }
+
+        _togglesRestored = true;
+        if (await UiPrefs.GetAsync(JS, UiPrefs.MatrixToggles) is { } s && s.Split('|') is { Length: 2 } parts)
+        {
+            var showDisabled = parts[0] == "1";
+            var showMultipliers = parts[1] == "1";
+            if (showDisabled != _showDisabled || showMultipliers != _showMultipliers)
+            {
+                _showDisabled = showDisabled;
+                _showMultipliers = showMultipliers;
+                StateHasChanged();
+            }
+        }
+    }
+
+    /// <summary>Item 035: persist both toggles (fire-and-forget — PA-035-03).</summary>
+    private void PersistToggles() =>
+        _ = UiPrefs.SetAsync(JS, UiPrefs.MatrixToggles, $"{(_showDisabled ? "1" : "0")}|{(_showMultipliers ? "1" : "0")}");
+
+    /// <summary>
+    ///     Projects one ClassColumn per 037 cache entry. ONE GetCachedEntries() and ONE ComputeSkillCost
+    ///     per class (D3 / CA7) — never per render or per cell. Level / multiplier dicts are built
+    ///     case-insensitive (B2, same as SkillCanonicalList:116-141): "endurance" matches "Endurance",
+    ///     a missing key degrades to 0, never KeyNotFoundException.
+    /// </summary>
+    private void LoadColumns()
+    {
+        var columns = new List<ClassColumn>();
+        foreach (var entry in EditorService.GetCachedEntries())
+        {
+            var def = entry.Definition;
+
+            var levels = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            foreach (var (name, level) in def?.Skills ?? new Dictionary<string, int>())
+            {
+                if (!string.IsNullOrWhiteSpace(name))
+                {
+                    levels[name] = level;
+                }
+            }
+
+            var multipliers = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
+            foreach (var (name, factor) in def?.SkillMultipliers ?? new Dictionary<string, double>())
+            {
+                if (!string.IsNullOrWhiteSpace(name))
+                {
+                    multipliers[name] = factor;
+                }
+            }
+
+            // Cheap skill cost (no dry-run / no loadout rebuild). 0 / no-def => neutral. (NavMenu:203-205)
+            var cost = def is null ? null : CostService.ComputeSkillCost(def);
+            var total = cost?.Total ?? 0;
+            var within = cost?.WithinBudget ?? false;
+            var hasCost = cost is not null && total > 0;
+
+            columns.Add(new ClassColumn(
+                System.IO.Path.GetFileNameWithoutExtension(entry.FileName),
+                def?.Name ?? entry.FileName,
+                def?.NameColor,
+                def?.IconFile is { Length: > 0 } icon ? $"/CustomClasses-Server/icons/{icon}" : null,
+                entry.Enabled,
+                def is not null,
+                levels,
+                multipliers,
+                total,
+                within,
+                hasCost));
+        }
+
+        _columns = columns;
+        _overflowSkills = BuildOverflowSkills(columns);
+    }
+
+    /// <summary>
+    ///     Skills defined by ANY class but NOT in SkillMaster.Entries (unknown / dead enum members) —
+    ///     listed in an overflow section instead of being dropped (mirror of
+    ///     SkillCanonicalList.BuildOverflowEntries:163-191). Order = first appearance, case-insensitive.
+    /// </summary>
+    private static List<string> BuildOverflowSkills(List<ClassColumn> columns)
+    {
+        var canonical = new HashSet<string>(
+            SkillMaster.Entries.Select(e => e.Name), StringComparer.OrdinalIgnoreCase);
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var overflow = new List<string>();
+
+        foreach (var col in columns)
+        {
+            foreach (var name in col.Levels.Keys)
+            {
+                if (!canonical.Contains(name) && seen.Add(name))
+                {
+                    overflow.Add(name);
+                }
+            }
+        }
+
+        return overflow;
+    }
+
+    /// <summary>Columns shown this render. Toggle reads state at render time — no recompute (CA7).
+    /// Order preserved (P5).</summary>
+    private List<ClassColumn> VisibleColumns() =>
+        _showDisabled ? _columns : _columns.Where(c => c.Enabled).ToList();
+
+    /// <summary>R1 — dynamic colspan: names column + visible columns, recomputed per render so the
+    /// category/overflow separators stay aligned when the "show disabled" toggle changes column count.</summary>
+    private int ColumnSpan => 1 + VisibleColumns().Count;
+
+    // ── Render fragments ─────────────────────────────────────────────────────────────────────
+
+    private RenderFragment CategoryHeader(SkillCategory category) => __builder =>
+    {
+        <tr class="cc-skill-cat-sep">
+            <td colspan="@ColumnSpan"
+                style="@($"border-bottom:2px solid {SkillMaster.ColorOf(category)};color:{SkillMaster.ColorOf(category)};")">
+                @SkillMaster.LabelOf(category)
+            </td>
+        </tr>
+    };
+
+    private RenderFragment OverflowHeader() => __builder =>
+    {
+        <tr class="cc-skill-cat-sep">
+            <td colspan="@ColumnSpan" style="border-bottom:2px solid #888;color:#888;opacity:.7;">
+                Outside canonical (loader ignores / unmapped)
+            </td>
+        </tr>
+    };
+
+    /// <summary>One skill row: name + a heatmap cell per visible column.</summary>
+    private RenderFragment SkillRow(string skillName, List<ClassColumn> visible) => __builder =>
+    {
+        <tr class="cc-skill-row">
+            <td class="cc-skill-name">@skillName</td>
+            @foreach (var col in visible)
+            {
+                @Cell(col, skillName)
+            }
+        </tr>
+    };
+
+    /// <summary>Heatmap cell (port of profiles-skills.js:60-68). Clickable even when empty (navigates to
+    /// the class). With the multipliers toggle on, a ±% chip is appended.</summary>
+    private RenderFragment Cell(ClassColumn col, string skillName) => __builder =>
+    {
+        var level = col.Levels.TryGetValue(skillName, out var l) ? l : 0;
+        var disabledClass = col.Enabled ? null : "cc-cell--disabled";
+
+        if (level <= 0)
+        {
+            <td class="cc-skill-cell cc-skill-cell--empty @disabledClass"
+                @onclick="@(() => NavigateTo(col))">
+                @if (_showMultipliers)
+                {
+                    @MultiplierChip(MultiplierOf(col, skillName))
+                }
+            </td>
+        }
+        else
+        {
+            <td class="cc-skill-cell cc-skill-cell--@(TierOf(level)) @disabledClass"
+                title="@($"{col.DisplayName}: {skillName} {level}")"
+                @onclick="@(() => NavigateTo(col))">
+                <span class="cc-skill-cell__val">@level</span>
+                @if (_showMultipliers)
+                {
+                    @MultiplierChip(MultiplierOf(col, skillName))
+                }
+            </td>
+        }
+    };
+
+    private RenderFragment CostFooterCell(ClassColumn col) => __builder =>
+    {
+        var disabledClass = col.Enabled ? null : "cc-cell--disabled";
+        if (!col.HasCost)
+        {
+            <td class="@disabledClass">—</td>
+        }
+        else
+        {
+            <td class="@(col.WithinBudget ? "cc-cost--ok" : "cc-cost--over") @disabledClass"
+                title="@($"{col.DisplayName}: {col.SkillCostTotal.ToString("0.##", CultureInfo.InvariantCulture)} weighted skill cost")">
+                @col.SkillCostTotal.ToString("0", CultureInfo.InvariantCulture)
+            </td>
+        }
+    };
+
+    /// <summary>±% chip — copy of SkillCanonicalList.MultiplierChip:374-393 (factor 1 / null = no chip).</summary>
+    private RenderFragment MultiplierChip(double? factor) => __builder =>
+    {
+        if (factor is not { } f || Math.Abs(f - 1.0) < 0.0001)
+        {
+            return;
+        }
+
+        if (f > 1)
+        {
+            <MudChip T="string" Size="Size.Small" Color="Color.Success">
+                +@(((f - 1) * 100).ToString("0", CultureInfo.InvariantCulture))%
+            </MudChip>
+        }
+        else
+        {
+            <MudChip T="string" Size="Size.Small" Color="Color.Error">
+                −@(((1 - f) * 100).ToString("0", CultureInfo.InvariantCulture))%
+            </MudChip>
+        }
+    };
+
+    // ── Helpers ──────────────────────────────────────────────────────────────────────────────
+
+    private static string TierOf(int level) => level <= 3 ? "low" : level <= 6 ? "mid" : "high"; // js:64
+
+    /// <summary>Multiplier lookup — case-insensitive, never index directly (B2 / SkillCanonicalList:257-273).</summary>
+    private static double? MultiplierOf(ClassColumn col, string skillName) =>
+        col.Multipliers.TryGetValue(skillName, out var f) ? f : null;
+
+    /// <summary>
+    ///     Item 035: a cell/header click opens the class' EDIT workspace (skills live in the left panel —
+    ///     the workspace has no tabs since the F2 redesign, so the old ?tab deep-link is dropped). An
+    ///     invalid/unparseable class has no edit form, so it falls back to the read-only detail.
+    /// </summary>
+    private void NavigateTo(ClassColumn col)
+    {
+        var bare = Uri.EscapeDataString(col.BareName);
+        Nav.NavigateTo(col.HasDefinition
+            ? $"/customclasses/classes/{bare}/edit"
+            : $"/customclasses/classes/{bare}");
+    }
+
+    private static string? NameStyle(ClassColumn col) =>
+        string.IsNullOrWhiteSpace(col.NameColor) ? null : $"color:{col.NameColor};";       // NavMenu:287
+
+    private static string HeaderTitle(ClassColumn col) =>
+        col.Enabled ? col.DisplayName : $"{col.DisplayName} (disabled)";
+}

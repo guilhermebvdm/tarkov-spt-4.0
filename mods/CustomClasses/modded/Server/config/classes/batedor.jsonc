@@ -1,10 +1,16 @@
 {
   "name": "Batedor",
+  "displayName": {
+    "en": "Scout",
+    "pt": "Batedor"
+  },
   "baseEdition": "SPT Zero to hero",
   "description": {
     "en": "Scout / Recon. Moves in fast, gathers intel and leaves before being detected. Moves silently and spots enemies at range.",
     "pt": "Batedor / Recon. Entra rápido, coleta informação e sai antes de ser detectado. Move-se em silêncio e identifica inimigos à distância."
   },
+  "iconFile": "batedor.png",
+  "nameColor": "#5f7f93",
   "skills": {
     "Assault": 4,
     "Endurance": 5,

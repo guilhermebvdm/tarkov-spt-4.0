@@ -1,0 +1,249 @@
+@using SPTarkov.Server.Core.Models.Common
+
+@* Item 023: reusable item search picker over CatalogService.Search.
+   Works in two modes:
+   - inline: drop <ItemPicker OnItemSelected="..."/> anywhere;
+   - dialog: open via IDialogService.ShowAsync<ItemPicker>(...) — the cascading
+     IMudDialogInstance is non-null then, the body is wrapped in a MudDialog and
+     selection closes it with DialogResult.Ok(tpl).
+   Search is debounced (300ms) and runs off the circuit thread (Task.Run) so the
+   full-catalog scan never blocks the Blazor Server circuit. Results are capped by
+   Limit and rendered with MudVirtualize inside a fixed-height scroll container.
+   Item thumbs come from tarkov.dev (decision in 023-...-02-spec-tech.md): broken
+   image (offline / mod-added tpl) hides itself via onerror — text row remains. *@
+
+@inject CatalogService Catalog
+
+@{
+    RenderFragment pickerBody =
+        @<MudStack Spacing="2">
+            <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                <MudTextField T="string"
+                              @bind-Value="_query"
+                              Label="Search item (name, shortname or tpl)"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Immediate="true"
+                              DebounceInterval="300"
+                              OnDebounceIntervalElapsed="RunSearchAsync"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              Style="flex: 2;"/>
+                @if (ShowCategoryFilter)
+                {
+                    <MudSelect T="string"
+                               Value="_categoryId"
+                               ValueChanged="OnCategoryChangedAsync"
+                               Label="Category"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               Clearable="true"
+                               Dense="true"
+                               Style="flex: 1;">
+                        @foreach (var cat in _categoryOptions)
+                        {
+                            <MudSelectItem T="string" Value="@cat.Id">@cat.Label</MudSelectItem>
+                        }
+                    </MudSelect>
+                }
+            </MudStack>
+
+            @if (_searching)
+            {
+                <MudProgressLinear Indeterminate="true" Color="Color.Primary"/>
+            }
+
+            <div style="height: 360px; overflow-y: auto;">
+                @if (_results.Count == 0)
+                {
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary pa-2">
+                        @(_searched ? "No items found." : "Type to search the catalog.")
+                    </MudText>
+                }
+                else
+                {
+                    <MudVirtualize Items="_results" ItemSize="48f" Context="item" OverscanCount="6">
+                        <div class="d-flex align-center gap-3 pa-1 mud-ripple"
+                             style="height: 48px; cursor: pointer; border-bottom: 1px solid var(--mud-palette-lines-default);"
+                             @onclick="@(() => SelectAsync(item))">
+                            <img src="https://assets.tarkov.dev/@(item.Tpl)-icon.webp"
+                                 width="32" height="32" loading="lazy" alt=""
+                                 onerror="this.style.display='none'"
+                                 style="flex-shrink: 0;"/>
+                            <div class="flex-grow-1" style="min-width: 0;">
+                                <MudText Typo="Typo.body2" Style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    @item.Name
+                                </MudText>
+                                <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                                    @(item.ShortName ?? "—") · @item.Tpl
+                                </MudText>
+                            </div>
+                            <MudText Typo="Typo.caption" Class="mud-text-secondary" Style="white-space: nowrap;">
+                                @CategoryName(item.CategoryId)
+                            </MudText>
+                            <MudText Typo="Typo.body2" Style="white-space: nowrap; min-width: 90px; text-align: right;">
+                                @item.Price.ToString("N0") ₽
+                            </MudText>
+                        </div>
+                    </MudVirtualize>
+                }
+            </div>
+        </MudStack>;
+}
+
+@if (Dialog is not null)
+{
+    <MudDialog>
+        <TitleContent>
+            <MudText Typo="Typo.h6">@Title</MudText>
+        </TitleContent>
+        <DialogContent>
+            @pickerBody
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="@(() => Dialog.Cancel())">Cancel</MudButton>
+        </DialogActions>
+    </MudDialog>
+}
+else
+{
+    @pickerBody
+}
+
+@code {
+    /// <summary>Non-null only when the component was opened through IDialogService.</summary>
+    [CascadingParameter] private IMudDialogInstance? Dialog { get; set; }
+
+    /// <summary>Fired with the selected tpl (both modes; in dialog mode the dialog also closes with the tpl).</summary>
+    [Parameter] public EventCallback<string> OnItemSelected { get; set; }
+
+    /// <summary>Dialog title (dialog mode only).</summary>
+    [Parameter] public string Title { get; set; } = "Select item";
+
+    /// <summary>Show the handbook category dropdown.</summary>
+    [Parameter] public bool ShowCategoryFilter { get; set; } = true;
+
+    /// <summary>Pre-applied handbook category filter (id); user can still change/clear it when the dropdown is shown.</summary>
+    [Parameter] public string? CategoryId { get; set; }
+
+    /// <summary>
+    ///     Extra tpl predicate forwarded into CatalogService.Search (applied BEFORE the result cap —
+    ///     CR-EP-07) — item 026 uses it to restrict results to templates compatible with a slot.
+    /// </summary>
+    [Parameter] public Func<string, bool>? FilterTpls { get; set; }
+
+    /// <summary>Max results shown (server-side Search cap).</summary>
+    [Parameter] public int Limit { get; set; } = 100;
+
+    private sealed record CategoryOption(string Id, string Label);
+
+    private string _query = string.Empty;
+    private string? _categoryId;
+    private bool _searching;
+    private bool _searched;
+    private List<CatalogItem> _results = [];
+    private List<CategoryOption> _categoryOptions = [];
+    private Dictionary<string, string> _categoryNames = new(StringComparer.Ordinal);
+    private int _searchVersion;
+
+    protected override void OnInitialized()
+    {
+        _categoryId = CategoryId;
+        var categories = Catalog.GetCategories();
+        _categoryNames = categories.ToDictionary(c => c.Id, c => c.Name, StringComparer.Ordinal);
+        _categoryOptions = FlattenCategoryTree(categories);
+    }
+
+    private async Task OnCategoryChangedAsync(string? value)
+    {
+        _categoryId = value;
+        await RunSearchAsync();
+    }
+
+    private async Task RunSearchAsync()
+    {
+        // CR2-EP-08: EVERY path invalidates in-flight searches — clearing the query must not let
+        // a slow full-catalog scan repopulate the list after the clear.
+        var version = ++_searchVersion;
+
+        if (string.IsNullOrWhiteSpace(_query))
+        {
+            _results = [];
+            _searched = false;
+            _searching = false;   // the superseded search no longer clears it (version mismatch)
+            return;
+        }
+
+        _searching = true;
+        var query = _query;
+        var categoryId = _categoryId;
+        var filter = FilterTpls;
+
+        try
+        {
+            // Off the circuit thread: Search walks every item template + locale lookups.
+            // CR-EP-07: FilterTpls runs INSIDE Search, before the cap — compatible items can
+            // never be pushed out of the result window by incompatible ones.
+            var hits = await Task.Run(() => Catalog.Search(query, categoryId, Limit, filter));
+            if (version != _searchVersion)
+            {
+                return;   // a newer search superseded this one
+            }
+
+            _results = hits;
+            _searched = true;
+        }
+        finally
+        {
+            // CR2-EP-10: a Search exception must never leave the progress bar stuck. Superseded
+            // searches leave the flag to the newer one (which owns the current version).
+            if (version == _searchVersion)
+            {
+                _searching = false;
+            }
+        }
+    }
+
+    private async Task SelectAsync(CatalogItem item)
+    {
+        await OnItemSelected.InvokeAsync(item.Tpl);
+        Dialog?.Close(DialogResult.Ok(item.Tpl));
+    }
+
+    private string CategoryName(string? categoryId) =>
+        categoryId is not null && _categoryNames.TryGetValue(categoryId, out var name) ? name : "—";
+
+    /// <summary>Depth-first flatten of the handbook category tree, indenting children for the dropdown.</summary>
+    private static List<CategoryOption> FlattenCategoryTree(List<CatalogCategory> categories)
+    {
+        var byParent = categories
+            .Where(c => c.ParentId is not null)
+            .GroupBy(c => c.ParentId!)
+            .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.Ordinal);
+        var ids = categories.Select(c => c.Id).ToHashSet(StringComparer.Ordinal);
+        var roots = categories.Where(c => c.ParentId is null || !ids.Contains(c.ParentId)).ToList();
+
+        var options = new List<CategoryOption>(categories.Count);
+        var stack = new Stack<(CatalogCategory Cat, int Depth)>();
+        for (var i = roots.Count - 1; i >= 0; i--)
+        {
+            stack.Push((roots[i], 0));
+        }
+
+        while (stack.Count > 0)
+        {
+            var (cat, depth) = stack.Pop();
+            var indent = string.Concat(Enumerable.Repeat("   ", depth));
+            options.Add(new CategoryOption(cat.Id, indent + cat.Name));
+            if (byParent.TryGetValue(cat.Id, out var kids))
+            {
+                for (var i = kids.Count - 1; i >= 0; i--)
+                {
+                    stack.Push((kids[i], depth + 1));
+                }
+            }
+        }
+
+        return options;
+    }
+}

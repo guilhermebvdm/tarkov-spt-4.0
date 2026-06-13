@@ -2,7 +2,7 @@
 
 Implementa um item do backlog em `mods/<mod>/modded/`, seguindo a spec técnica e o checklist.
 
-> **Skills obrigatórias:** carregar `spt-mod-best-practices`, `csharp-mod-best-practices` e `repo-workflow-best-practices` antes de codar. Validar cada arquivo escrito contra os checklists ao fim de cada skill antes de marcar `[x]`.
+> **Skills obrigatórias:** carregar `spt-mod-best-practices`, `csharp-mod-best-practices` e `repo-workflow-best-practices` antes de codar. Validar cada arquivo escrito contra os checklists ao fim de cada skill antes de marcar `[x]`. Consultar `memory-curation` § "Consumo de memória por commands" (§14) para o passo de contexto de memória.
 
 ## Uso
 
@@ -25,10 +25,11 @@ Implementa um item do backlog em `mods/<mod>/modded/`, seguindo a spec técnica 
 2. **Validar pré-condições.** Se faltar arquivo ou houver `🔴 [ ]` na última review, parar com mensagem clara.
 
 3. **Ler:**
+   - **Memória do mod** — topo de `mods/<mod>/memory/sessions.md` (snapshot + pendências) + entradas que citam o item `<NNN>`. Aplicar `memory-curation` § "Consumo de memória por commands" (§14): reportar pendências que afetam esta tarefa; pendência 🔴 do item/mod → alertar antes de prosseguir. Se o arquivo não existir, registrar "sem memória prévia".
    - Spec técnica completa.
    - Última review (e quaisquer pontos `🟡`/`🟢` ainda pendentes — registrar para resolver durante).
    - Os arquivos do Assembly citados na spec, **conferindo `arquivo:linha`** antes de escrever código que dependa deles.
-   - Estado atual de `mods/<mod>/modded/` para entender onde encaixar.
+   - Estado atual de `mods/<mod>/modded/` para entender onde encaixar. **Grafo do mod** (`references/graphs/mods/<mod>/`, skill `graph-code-navigation`): `query_graph` pelos conceitos da feature para localizar utilities/patterns existentes — reuso > invenção.
 
 4. **Implementar seguindo o checklist da spec técnica**, em ordem:
    - **Apenas em `mods/<mod>/modded/`.** Nunca tocar em `original/`.
@@ -58,6 +59,7 @@ Implementa um item do backlog em `mods/<mod>/modded/`, seguindo a spec técnica 
 
    ```text
    ✓ Build concluído — <NNN> <Título>
+   Memória consultada: snapshot de YYYY-MM-DD (Sessão N) · pendências que afetam: [P-N.M ...] / nenhuma
    Arquivos alterados:
      - mods/<mod>/modded/Plugin.cs (modificado)
      - mods/<mod>/modded/Patches/<X>.cs (criado)
@@ -67,6 +69,7 @@ Implementa um item do backlog em `mods/<mod>/modded/`, seguindo a spec técnica 
    Próximo:
      - Build do .dll: /compile-mod <mod>
      - /code-review <ref> para análise crítica do código implementado
+     - Entrega substancial → /update-mod-graph <mod> (regenera o grafo do mod)
    ```
 
 ## Regras

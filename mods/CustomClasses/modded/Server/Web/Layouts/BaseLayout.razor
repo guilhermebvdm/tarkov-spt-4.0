@@ -1,0 +1,232 @@
+@inherits LayoutComponentBase
+@inject IDialogService DialogService
+@inject IJSRuntime JS
+@using CustomClasses.Web
+
+@* Base layout for all CustomClasses editor pages (item 020).
+   Structure mirrors Skills-Extended Web/Layouts/BaseLayout.razor (dark MudBlazor
+   theme + fixed AppBar + mini drawer with NavMenu), minus SE's config/update bits.
+
+   Item 030: hosts the unsaved-changes GUARD. The host (SPTWeb.InitializeSptBlazor)
+   owns Blazor service registration and the mod cannot register a circuit-scoped
+   service; a singleton [Injectable] would leak the "dirty" flag across circuits.
+   So the guard state is a plain POCO (EditGuardState) instantiated ONCE per layout
+   instance (= one per circuit) and provided via CascadingValue to <NavMenu/> and
+   @Body. The edit page (ClassEdit.razor — item 025/026 territory, NOT touched here)
+   must consume [CascadingParameter] EditGuardState and set IsDirty / SaveAsync /
+   Discard for the guard to have a signal. Until it does, IsDirty stays false and the
+   NavigationLock is a no-op (navigation never blocked) — safe default. *@
+
+<HeadContent>
+    <link href="@Assets["_content/MudBlazor/MudBlazor.min.css"]" rel="stylesheet" />
+    @* Item 033: mod density sheet — static link, served by the wwwroot mount under /CustomClasses-Server/ (not an RCL asset). *@
+    <link href="/CustomClasses-Server/css/customclasses.css" rel="stylesheet" />
+    @* Item 035: localStorage prefs + Ctrl+S shortcut. Served by the wwwroot mount (PA-035-01); exposes
+       window.ccPrefs, consumed only post-circuit (PA-035-02). QA 2026-06-12: shipped as .mjs (module),
+       NOT .js — SPT's ModValidator rejects any mod whose install dir contains a *.js/*.ts file
+       (modloader-is-old-js-mod). The script still assigns window.ccPrefs so the global API is unchanged. *@
+    <script type="module" src="/CustomClasses-Server/js/customclasses.mjs"></script>
+    <meta name="robots" content="noindex, nofollow">
+</HeadContent>
+
+<MudThemeProvider IsDarkMode="true"/>
+<MudPopoverProvider/>
+<MudSnackbarProvider/>
+<MudDialogProvider/>
+
+<main>
+    @* UI-03 (accepted): the layout renders twice per page load (static prerender + interactive
+       circuit attach), so MudBlazor.min.js is evaluated twice and the SECOND evaluation throws a
+       benign "Identifier 'MudPointerEventsNone' has already been declared" in the console. This is
+       the upstream pattern — Skills-Extended and the host's own BaseMudBlazorLayout ship the exact
+       same plain <script src> and show the same cosmetic error. An inline guarded loader is NOT an
+       option: Blazor cannot render <script> elements with a body (appendChild "Invalid token"). *@
+    <script src="@Assets["_content/MudBlazor/MudBlazor.min.js"]"></script>
+    @* Item 030: one guard state per circuit, shared with NavMenu (issues navigations) and the edit
+       form (sets the dirty flag + Save/Discard handlers). IsFixed: the reference never changes. *@
+    <CascadingValue Value="_guard" IsFixed="true">
+        @* NavigationLock (Microsoft.AspNetCore.Components, .NET 7+; host is net9.0 interactive server —
+           020-infra-web-blazor-02:30). OnBeforeInternalNavigation intercepts links / Nav.NavigateTo
+           (the sidebar's 1-click switch); ConfirmExternalNavigation arms the browser's native prompt for
+           refresh/close-tab while dirty. Premise PA-030-01: NavigationLock is available in the SPT host. *@
+        <NavigationLock OnBeforeInternalNavigation="OnBeforeNavAsync"
+                        ConfirmExternalNavigation="@_guard.IsDirty"/>
+        <MudLayout Class="@LayoutStateClass">
+            <MudAppBar Color="Color.Dark"
+                       Fixed="true"
+                       Elevation="4">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Style="width: 100%;">
+                    @* Item 035 / QA 2026-06-12: cycles the sidebar Open → Mini → Closed on each click. *@
+                    <MudIconButton Icon="@DrawerIcon"
+                                   Color="Color.Inherit" Size="Size.Small"
+                                   title="@DrawerTooltip"
+                                   OnClick="CycleDrawer"/>
+                    <MudText Typo="Typo.h6">CustomClasses — Class Editor</MudText>
+                    <MudText Style="font-size: 12px" Class="ml-2">
+                        v@(new CustomClassesMetadata().Version.ToString())
+                    </MudText>
+                </MudStack>
+            </MudAppBar>
+
+            @* QA 2026-06-12: three-state sidebar cycled by the AppBar button — Open (250px) → Mini
+               (64px, icons only) → Closed (hidden). The drawer stays permanently Open (Persistent);
+               MudBlazor's own open/close + drawer-width var did NOT keep the content margin in sync,
+               so the state class (cc-sb-open/mini/closed on MudLayout) drives BOTH the drawer width
+               AND the MudMainContent left margin from customclasses.css — guaranteed in sync. *@
+            <MudDrawer Open="true"
+                       Width="250px"
+                       ClipMode="DrawerClipMode.Always"
+                       Elevation="5"
+                       Variant="DrawerVariant.Persistent"
+                       Breakpoint="Breakpoint.None">
+                <NavMenu/>
+            </MudDrawer>
+
+            <MudMainContent>
+                @Body
+            </MudMainContent>
+        </MudLayout>
+    </CascadingValue>
+</main>
+
+@code {
+    // ── Item 030: unsaved-changes guard ─────────────────────────────────────────
+
+    /// <summary>
+    ///     Per-circuit guard state (NOT a DI singleton — that would leak the dirty flag across circuits;
+    ///     the host owns service registration and the mod cannot register a scoped service). The layout is
+    ///     instantiated once per circuit, so this field is too. The edit page (ClassEdit.razor, item
+    ///     025/026 territory) consumes it as a [CascadingParameter] and:
+    ///       • sets IsDirty=true on any unsaved model mutation, false after a successful Save / Discard;
+    ///       • assigns SaveAsync (returns true when the save succeeded — no blocking Error) + Discard;
+    ///       • calls Reset() in Dispose so leaving the edit clears the state for the next view.
+    ///     Detail/list pages have no form, so they never set IsDirty → the guard never fires there.
+    /// </summary>
+    public sealed class EditGuardState
+    {
+        public bool IsDirty { get; set; }
+
+        /// <summary>Set by the edit page so the guard can offer "Save" (true on a successful save).</summary>
+        public Func<Task<bool>>? SaveAsync { get; set; }
+
+        /// <summary>Set by the edit page so the guard can offer "Discard" (reverts the form in place).</summary>
+        public Action? Discard { get; set; }
+
+        public void Reset()
+        {
+            IsDirty = false;
+            SaveAsync = null;
+            Discard = null;
+        }
+    }
+
+    private readonly EditGuardState _guard = new();
+
+    // ── Item 035 / QA: three-state sidebar (Open → Mini → Closed), persisted in localStorage ──
+    private const int DrawerClosed = 0;   // hidden, content full-width
+    private const int DrawerMini = 1;     // icon-only rail (64px)
+    private const int DrawerOpen = 2;     // full sidebar (250px)
+
+    private int _drawerState = DrawerOpen;   // default open
+
+    // The drawer stays permanently Open; this class on MudLayout drives the drawer width AND the
+    // MudMainContent margin together (customclasses.css) so the right content stays in sync.
+    private string LayoutStateClass => _drawerState switch
+    {
+        DrawerMini => "cc-sb-mini",
+        DrawerClosed => "cc-sb-closed",
+        _ => "cc-sb-open",
+    };
+
+    private string DrawerIcon => _drawerState switch
+    {
+        DrawerOpen => Icons.Material.Filled.MenuOpen,
+        DrawerMini => Icons.Material.Filled.ViewSidebar,
+        _ => Icons.Material.Filled.Menu,
+    };
+
+    private string DrawerTooltip => _drawerState switch
+    {
+        DrawerOpen => "Sidebar: open — click for icons only",
+        DrawerMini => "Sidebar: icons only — click to hide",
+        _ => "Sidebar: hidden — click to open",
+    };
+
+    /// <summary>
+    ///     Reconciles the persisted drawer state once the interactive circuit is up (PA-035-02: no JS at
+    ///     prerender). Mounts Open and only changes here if the saved pref differs — a one-frame "flash"
+    ///     from default to saved value is accepted (PA-035-03, single-user local).
+    /// </summary>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        var saved = await UiPrefs.GetIntAsync(JS, UiPrefs.DrawerPinned, _drawerState);
+        if (saved is DrawerClosed or DrawerMini or DrawerOpen && saved != _drawerState)
+        {
+            _drawerState = saved;
+            StateHasChanged();
+        }
+    }
+
+    /// <summary>AppBar button: cycles Open → Mini → Closed → Open and persists it (fire-and-forget).</summary>
+    private void CycleDrawer()
+    {
+        _drawerState = _drawerState switch
+        {
+            DrawerOpen => DrawerMini,
+            DrawerMini => DrawerClosed,
+            _ => DrawerOpen,
+        };
+        _ = UiPrefs.SetAsync(JS, UiPrefs.DrawerPinned, _drawerState.ToString());
+    }
+
+    /// <summary>
+    ///     Intercepts internal navigation (incl. the sidebar's 1-click class switch) while an edit form is
+    ///     dirty. Clean → let it go. Dirty → ask Save / Discard / Cancel; NEVER discards silently.
+    /// </summary>
+    private async Task OnBeforeNavAsync(LocationChangingContext ctx)
+    {
+        if (!_guard.IsDirty)
+        {
+            return;   // nothing pending — navigate freely
+        }
+
+        var result = await DialogService.ShowMessageBox(
+            "Unsaved changes",
+            "You have unsaved changes to this class.",
+            yesText: "Save",
+            noText: "Discard",
+            cancelText: "Cancel");
+
+        // Cancel (or dialog dismissed): stay on the edit, changes intact.
+        if (result is not bool choice)
+        {
+            ctx.PreventNavigation();
+            return;
+        }
+
+        if (choice)
+        {
+            // Save: navigate only if the save actually succeeded (no blocking validation Error).
+            var saved = _guard.SaveAsync is null || await _guard.SaveAsync.Invoke();
+            if (saved)
+            {
+                _guard.Reset();   // navigation proceeds
+            }
+            else
+            {
+                ctx.PreventNavigation();   // save blocked — keep the user on the form (snackbar from the page)
+            }
+        }
+        else
+        {
+            // Discard: drop the changes and let the navigation proceed.
+            _guard.Discard?.Invoke();
+            _guard.Reset();
+        }
+    }
+}

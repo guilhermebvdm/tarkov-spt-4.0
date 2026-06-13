@@ -1,0 +1,361 @@
+@page "/customclasses/classes"
+@layout BaseLayout
+
+@* Item 024: class list — one row per FILE in config/classes/ (ClassEditorService.ListClassFiles),
+   never from the registries: a disabled or invalid class only exists on disk. Costs come from
+   CostService (item 022). Rows navigate to the read-only detail page (extension-less file name
+   in the route — see ClassDetail.razor).
+   Item 027: lifecycle actions — "New class" in the toolbar, Duplicate/Delete per row (dialogs in
+   Web/Shared/ClassLifecycle*.razor). Create navigates to the 025 edit form; duplicate to the new
+   detail page; delete/disable reloads the list (everything hot-applies — no restart). *@
+
+@using System.Globalization
+@inject ClassEditorService EditorService
+@inject CostService CostService
+@inject NavigationManager Nav
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject IJSRuntime JS
+@using CustomClasses.Web
+
+<PageTitle>CustomClasses — Classes</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudPaper Elevation="0" Class="pa-6">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-2">
+            <MudText Typo="Typo.h4">Classes</MudText>
+            <MudSpacer/>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                       StartIcon="@Icons.Material.Filled.Add" OnClick="OpenCreateDialogAsync">
+                New class
+            </MudButton>
+        </MudStack>
+        <MudText Typo="Typo.body2" Class="mb-4">
+            Every class file in <code>config/classes/</code> (including disabled and invalid ones),
+            with the boot-equivalent dry-run diagnostics and the item-022 cost model.
+            Click a row for the read-only detail.
+        </MudText>
+
+        @if (_rows.Count == 0)
+        {
+            <MudAlert Severity="Severity.Info" Dense="true">No class files found in config/classes/.</MudAlert>
+        }
+        else
+        {
+            @* Item 035: sortable Class / Skill cost / Loadout columns (null/no-definition sorts LAST in
+               both directions). @ref on each label so the persisted sort can be re-applied after the
+               circuit connects; SortDirectionChanged persists the user's choice. *@
+            <MudTable T="Row" Items="@_rows" Dense="true" Hover="true"
+                      OnRowClick="@OnRowClick" RowClass="cursor-pointer">
+                <HeaderContent>
+                    <MudTh Style="width:48px"></MudTh>
+                    <MudTh>
+                        <MudTableSortLabel T="Row" SortLabel="name" @ref="_sortName"
+                                           SortBy="@(r => r.Name)"
+                                           SortDirectionChanged="@(d => OnSortChanged("name", d))">Class</MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>Display name (en)</MudTh>
+                    <MudTh>Status</MudTh>
+                    <MudTh Style="text-align:right">Skills</MudTh>
+                    <MudTh Style="text-align:right">
+                        <MudTableSortLabel T="Row" SortLabel="skillCost" @ref="_sortSkillCost"
+                                           SortBy="@(r => r.SkillCost?.Total ?? double.MaxValue)"
+                                           SortDirectionChanged="@(d => OnSortChanged("skillCost", d))">Skill cost</MudTableSortLabel>
+                    </MudTh>
+                    <MudTh Style="text-align:right">
+                        @* PA-R1-07: sort by the semantic HasError signal, not the SkillCost-is-null proxy. *@
+                        <MudTableSortLabel T="Row" SortLabel="loadout" @ref="_sortLoadout"
+                                           SortBy="@(r => r.HasError ? double.MaxValue : r.LoadoutTotal)"
+                                           SortDirectionChanged="@(d => OnSortChanged("loadout", d))">Loadout</MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>File</MudTh>
+                    <MudTh Style="width:136px">Actions</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="">
+                        @if (context.IconUrl is not null)
+                        {
+                            <img src="@context.IconUrl" alt="" width="32" height="32"
+                                 style="object-fit:contain;vertical-align:middle;"/>
+                        }
+                    </MudTd>
+                    <MudTd DataLabel="Class">
+                        <MudText Typo="Typo.body1" Style="@NameStyle(context)"><b>@context.Name</b></MudText>
+                    </MudTd>
+                    <MudTd DataLabel="Display name (en)">@context.DisplayNameEn</MudTd>
+                    <MudTd DataLabel="Status">
+                        @StatusChip(context)
+                    </MudTd>
+                    <MudTd DataLabel="Skills" Style="text-align:right">@context.SkillCount</MudTd>
+                    <MudTd DataLabel="Skill cost" Style="text-align:right">
+                        @SkillCostChip(context)
+                    </MudTd>
+                    <MudTd DataLabel="Loadout" Style="text-align:right">
+                        @(context.SkillCost is null ? "—" : FormatRub(context.LoadoutTotal))
+                    </MudTd>
+                    <MudTd DataLabel="File"><code>@context.Entry.FileName</code></MudTd>
+                    <MudTd DataLabel="Actions">
+                        @* Plain div with stopPropagation: the row itself navigates on click (item 024). *@
+                        <div @onclick:stopPropagation="true" style="display:flex;gap:4px;">
+                            @* Item 035: 1-click Edit (disabled when the file has no parseable definition). *@
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small"
+                                           title="Edit this class"
+                                           Disabled="@(context.Entry.Definition is null)"
+                                           OnClick="@(() => EditClass(context))"/>
+                            <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Size="Size.Small"
+                                           title="Duplicate (the official rename path)"
+                                           Disabled="@(context.Entry.Definition is null)"
+                                           OnClick="@(() => OpenDuplicateDialogAsync(context))"/>
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
+                                           Color="Color.Error" title="Delete / disable"
+                                           OnClick="@(() => OpenDeleteDialogAsync(context))"/>
+                        </div>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+    </MudPaper>
+</MudContainer>
+
+@code {
+    /// <summary>One list row: file entry + precomputed costs (computed once in OnInitialized).</summary>
+    private sealed record Row(
+        ClassFileEntry Entry,
+        string? IconUrl,
+        string Name,
+        string? NameColor,
+        string DisplayNameEn,
+        int SkillCount,
+        SkillCostBreakdown? SkillCost,
+        double LoadoutTotal,
+        bool HasError);
+
+    private List<Row> _rows = [];
+
+    // Item 035: @ref to each sort label so the persisted sort can be re-applied once the interactive
+    // circuit is up (the SortBy lambdas own the actual comparison). MudTable has no public SetSortLabel
+    // in 8.x; ToggleSortDirection() is the public method that actually re-sorts the table.
+    private MudTableSortLabel<Row>? _sortName;
+    private MudTableSortLabel<Row>? _sortSkillCost;
+    private MudTableSortLabel<Row>? _sortLoadout;
+    private bool _sortRestored;
+
+    private static readonly DialogOptions LifecycleDialogOptions = new()
+    {
+        MaxWidth = MaxWidth.Small,
+        FullWidth = true,
+        CloseButton = true,
+    };
+
+    protected override void OnInitialized() => LoadRows();
+
+    /// <summary>
+    ///     Item 035: restore the persisted list sort (column + direction) once, after the circuit
+    ///     connects (PA-035-02: no JS at prerender). MudTable 8.x has no public SetSortLabel — restore by
+    ///     toggling the target label into place (None→Ascending→Descending; AllowUnsorted is false so the
+    ///     cycle is Asc↔Desc, and the labels start unsorted). Wrapped in try/catch so any MudBlazor drift
+    ///     degrades to the unsorted file order instead of breaking the page. OnSortChanged persists.
+    /// </summary>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _sortRestored)
+        {
+            return;
+        }
+
+        _sortRestored = true;
+        var saved = await UiPrefs.GetAsync(JS, UiPrefs.ListSort);
+        if (saved is null)
+        {
+            return;
+        }
+
+        var parts = saved.Split('|');
+        if (parts.Length != 2)
+        {
+            return;
+        }
+
+        MudTableSortLabel<Row>? label = parts[0] switch
+        {
+            "name" => _sortName,
+            "skillCost" => _sortSkillCost,
+            "loadout" => _sortLoadout,
+            _ => null,
+        };
+        if (label is null)
+        {
+            return;
+        }
+
+        try
+        {
+            // From the unsorted start: 1 toggle → Ascending, a 2nd → Descending. The toggles re-fire
+            // SortDirectionChanged → OnSortChanged re-persists the same value (idempotent).
+            await label.ToggleSortDirection();
+            if (parts[1] == "desc")
+            {
+                await label.ToggleSortDirection();
+            }
+        }
+        catch
+        {
+            // MudBlazor API drift — degrade to unsorted (file order). Never throw.
+        }
+    }
+
+    /// <summary>Item 035: persist the chosen column + direction (fire-and-forget — PA-035-03).</summary>
+    private void OnSortChanged(string label, SortDirection direction) =>
+        _ = UiPrefs.SetAsync(JS, UiPrefs.ListSort, $"{label}|{(direction == SortDirection.Descending ? "desc" : "asc")}");
+
+    /// <summary>Item 035: 1-click Edit from the list row — extension-less bare name in the route (item 024).</summary>
+    private void EditClass(Row row)
+    {
+        var bare = Path.GetFileNameWithoutExtension(row.Entry.FileName);
+        Nav.NavigateTo($"/customclasses/classes/{Uri.EscapeDataString(bare)}/edit");
+    }
+
+    private void LoadRows()
+    {
+        _rows = [];
+
+        // ListClassFiles runs one parse + dry-run per file — fine for ~12 classes, loaded once per visit.
+        foreach (var entry in EditorService.ListClassFiles())
+        {
+            var def = entry.Definition;
+            var hasError = def is null || entry.Diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error);
+
+            // Definition == null (parse error): the row still renders, with the error chip + tooltip.
+            var skillCost = def is null ? null : CostService.ComputeSkillCost(def);
+            var loadoutTotal = def is null ? 0 : CostService.ComputeLoadoutCost(def).TotalRub;
+
+            _rows.Add(new Row(
+                entry,
+                def?.IconFile is { Length: > 0 } icon ? $"/CustomClasses-Server/icons/{icon}" : null,   // wwwroot statics (item 020)
+                def?.Name ?? entry.FileName,
+                def?.NameColor,
+                def?.DisplayName?.En ?? "—",
+                def?.Skills?.Count ?? 0,
+                skillCost,
+                loadoutTotal,
+                hasError));
+        }
+    }
+
+    private void OnRowClick(TableRowClickEventArgs<Row> args)
+    {
+        if (args.Item is null)
+        {
+            return;
+        }
+
+        // Extension-less name in the route: ".jsonc" in the last URL segment can be hijacked by
+        // static-file handling — the detail page resolves it back (see ClassDetail.razor).
+        var bare = Path.GetFileNameWithoutExtension(args.Item.Entry.FileName);
+        Nav.NavigateTo($"/customclasses/classes/{Uri.EscapeDataString(bare)}");
+    }
+
+    // ── Lifecycle actions (item 027) ─────────────────────────────────────────
+
+    private async Task OpenCreateDialogAsync()
+    {
+        var dialog = await DialogService.ShowAsync<ClassLifecycleCreateDialog>("New class", LifecycleDialogOptions);
+        var result = await dialog.Result;
+        if (result is { Canceled: false, Data: string fileName })
+        {
+            // Kickoff: a freshly created class opens straight in the 025 edit form.
+            var bare = Path.GetFileNameWithoutExtension(fileName);
+            Nav.NavigateTo($"/customclasses/classes/{Uri.EscapeDataString(bare)}/edit");
+        }
+    }
+
+    private async Task OpenDuplicateDialogAsync(Row row)
+    {
+        var parameters = new DialogParameters<ClassLifecycleDuplicateDialog>
+        {
+            { x => x.SourceFileName, row.Entry.FileName },
+            { x => x.SourceClassName, row.Entry.Definition?.Name },
+        };
+        var dialog = await DialogService.ShowAsync<ClassLifecycleDuplicateDialog>("Duplicate class", parameters, LifecycleDialogOptions);
+        var result = await dialog.Result;
+        if (result is { Canceled: false, Data: string fileName })
+        {
+            Snackbar.Add($"Class duplicated to '{fileName}' and hot-applied.", Severity.Success);
+            var bare = Path.GetFileNameWithoutExtension(fileName);
+            Nav.NavigateTo($"/customclasses/classes/{Uri.EscapeDataString(bare)}");
+        }
+    }
+
+    private async Task OpenDeleteDialogAsync(Row row)
+    {
+        var parameters = new DialogParameters<ClassLifecycleDeleteDialog>
+        {
+            { x => x.FileName, row.Entry.FileName },
+            { x => x.ClassName, row.Entry.Definition?.Name },
+            // "Disable instead" needs a parseable, currently-enabled definition to re-save.
+            { x => x.CanDisable, row.Entry.Definition is not null && row.Entry.Enabled },
+        };
+        var dialog = await DialogService.ShowAsync<ClassLifecycleDeleteDialog>("Delete class", parameters, LifecycleDialogOptions);
+        var result = await dialog.Result;
+        if (result is { Canceled: false, Data: string action })
+        {
+            Snackbar.Add(action == "deleted"
+                ? $"'{row.Entry.FileName}' deleted (edition hot-removed; .bak1 keeps the last content)."
+                : $"'{row.Entry.FileName}' disabled (edition hot-removed; file kept).",
+                Severity.Success);
+            LoadRows();
+            StateHasChanged();
+        }
+    }
+
+    private static string? NameStyle(Row row) =>
+        string.IsNullOrWhiteSpace(row.NameColor) ? null : $"color:{row.NameColor};";
+
+    private RenderFragment StatusChip(Row row) => __builder =>
+    {
+        if (row.HasError)
+        {
+            var tooltip = string.Join(" • ", row.Entry.Diagnostics.Select(d => $"[{d.Code}] {d.Message}"));
+            <MudTooltip Text="@tooltip">
+                <MudChip T="string" Size="Size.Small" Color="Color.Error">Invalid</MudChip>
+            </MudTooltip>
+        }
+        else if (!row.Entry.Enabled)
+        {
+            <MudChip T="string" Size="Size.Small" Color="Color.Default">Disabled</MudChip>
+        }
+        else if (row.Entry.Registered)
+        {
+            <MudChip T="string" Size="Size.Small" Color="Color.Success">Registered</MudChip>
+        }
+        else
+        {
+            <MudChip T="string" Size="Size.Small" Color="Color.Warning">Not registered</MudChip>
+        }
+    };
+
+    private RenderFragment SkillCostChip(Row row) => __builder =>
+    {
+        if (row.SkillCost is null)
+        {
+            <MudText Typo="Typo.body2">—</MudText>
+        }
+        else if (row.SkillCost.Total == 0)
+        {
+            // intentionally empty class (e.g. Peladão) — neutral, not "over/under budget"
+            <MudChip T="string" Size="Size.Small" Color="Color.Default">0</MudChip>
+        }
+        else
+        {
+            <MudTooltip Text="@($"Weighted skill cost — budget [{SkillWeights.BudgetMin:0}, {SkillWeights.BudgetMax:0}]")">
+                <MudChip T="string" Size="Size.Small"
+                         Color="@(row.SkillCost.WithinBudget ? Color.Success : Color.Warning)">
+                    @row.SkillCost.Total.ToString("0.00", CultureInfo.InvariantCulture)
+                </MudChip>
+            </MudTooltip>
+        }
+    };
+
+    private static string FormatRub(double value) =>
+        value.ToString("N0", CultureInfo.InvariantCulture) + " ₽";
+}

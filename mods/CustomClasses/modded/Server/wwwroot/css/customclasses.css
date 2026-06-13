@@ -1,0 +1,375 @@
+/* CustomClasses — dashboard density sheet (item 033).
+   Served at /CustomClasses-Server/css/customclasses.css by the same wwwroot mount that
+   serves the class icons (CustomClassesMetadata implements IModWebMetadata → SPTWeb mounts
+   wwwroot/ under /CustomClasses-Server/). Ported tokens from the old viewer
+   (tools/tarkov-itemdb/viewer/profiles.css:72-86,152-214).
+
+   Class names are STABLE and REUSED by item 034 (gear/stash visual panels) — see the
+   033→034 contract: 034 only ADDS icon-grid rules, it does not rewrite the density/layout
+   classes below. */
+
+/* ── Dashboard 2-column layout (port of profiles.css:72-86) ─────────────────── */
+.cc-dash            { display: flex; gap: 16px; align-items: flex-start; }
+.cc-dash__left      { flex: 0 0 320px; display: flex; flex-direction: column; gap: 12px; }
+.cc-dash__right     { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+
+@media (max-width: 960px) {
+    /* Narrow viewports: stack the columns instead of squeezing them. */
+    .cc-dash        { flex-direction: column; }
+    .cc-dash__left  { flex: 1 1 auto; }
+}
+
+/* ── Typographic density — 12-14px, line-height 1.3, paddings 3-6px ─────────── */
+.cc-dense           { font-size: 13px; line-height: 1.3; }
+.cc-dense td,
+.cc-dense th        { padding: 3px 6px !important; }   /* beats MudBlazor's dense padding (see PT-2) */
+
+.cc-section         { margin: 0; }
+.cc-section__title  { font-size: 11px; font-weight: 600; text-transform: uppercase;
+                      letter-spacing: .5px; opacity: .7; margin: 0 0 4px; }
+
+/* ── Header badges (costs / status) — port of .meta-badge profiles.css:133-150 ── */
+.cc-badges          { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; }
+.cc-badge           { display: flex; flex-direction: column; gap: 1px; }
+.cc-badge__label    { font-size: 10px; text-transform: uppercase; letter-spacing: .5px; opacity: .6; }
+.cc-badge__value    { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums;
+                      display: flex; align-items: center; gap: 6px; }
+
+/* One-line description with ellipsis (full text in the tooltip). */
+.cc-desc            { max-width: 640px; overflow: hidden; text-overflow: ellipsis;
+                      white-space: nowrap; opacity: .8; font-size: 12px; }
+
+/* ── Compact hideout chips ──────────────────────────────────────────────────── */
+.cc-hideout-grid    { display: flex; flex-wrap: wrap; gap: 4px; }
+
+/* ── Equipped slot (right column, textual — kept for any remaining textual use) ── */
+.cc-equip-slot          { margin-top: 6px; }
+.cc-equip-slot__label   { font-size: 11px; opacity: .7; text-transform: uppercase; letter-spacing: .4px; }
+
+/* ── Item 034: gear/stash visual cells ───────────────────────────────────────
+   Pixel size of a cell follows the item's real _props.Width/Height: each cell is
+   (W × --cc-cell-unit) by (H × --cc-cell-unit) via an inline style on .cc-item-cell.
+   Offline (tarkov.dev unreachable) the <img> hides itself (onerror) and the in-cell
+   text (.cc-item-cell__txt) / under-cell label (.cc-item-cell__name) stay legible. */
+.cc-item-cell {
+    --cc-cell-unit: 36px;
+    position: relative;
+    box-sizing: border-box;
+    border: 1px solid var(--mud-palette-lines-default, #555);
+    border-radius: 3px;
+    background: var(--mud-palette-background-grey, rgba(255, 255, 255, .04));
+    overflow: hidden;
+    min-width: var(--cc-cell-unit);
+    min-height: var(--cc-cell-unit);
+}
+.cc-item-cell img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+/* In-cell fallback text (stash): centered, sits BEHIND the icon — visible only when the
+   icon fails to load (onerror hides the <img>, revealing this). */
+.cc-item-cell__txt {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    font-size: 9px;
+    line-height: 1.1;
+    text-align: center;
+    overflow: hidden;
+    opacity: .85;
+}
+.cc-item-cell__qty {
+    position: absolute;
+    right: 1px;
+    bottom: 0;
+    padding: 0 3px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #fff;
+    background: rgba(0, 0, 0, .65);
+    border-radius: 2px;
+    font-variant-numeric: tabular-nums;
+}
+.cc-item-cell__warn {
+    position: absolute;
+    left: 1px;
+    top: 0;
+    font-size: 11px;
+    line-height: 1;
+    color: var(--mud-palette-warning, #ffb300);
+}
+
+/* Always-visible short name under a gear cell (ellipsis; the only label offline). */
+.cc-item-cell__name {
+    max-width: calc(var(--cc-cell-unit) * 3);
+    font-size: 9px;
+    line-height: 1.2;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    opacity: .8;
+}
+
+.cc-gear-slots       { display: flex; flex-wrap: wrap; gap: 12px; }
+.cc-gear-slot        { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.cc-gear-slot__label { font-size: 9px; text-transform: uppercase; letter-spacing: .4px; opacity: .7; }
+.cc-gear-slot--empty { opacity: .35; }   /* reserved for a future fixed grid (PA-034-01) — unused in v1 */
+
+.cc-stash-group           { margin-bottom: 12px; }
+.cc-stash-group__title    { display: flex; align-items: baseline; gap: 8px;
+                            font-size: 11px; font-weight: 600; text-transform: uppercase;
+                            letter-spacing: .5px; opacity: .7; margin: 0 0 4px; }
+.cc-stash-group__subtotal { margin-left: auto; font-variant-numeric: tabular-nums; opacity: .9; }
+.cc-stash-grid            { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Hover tooltip body (ItemTooltip). */
+.cc-item-tip            { max-width: 240px; }
+.cc-item-tip__name      { font-weight: 700; }
+.cc-item-tip__cat       { font-size: 11px; opacity: .8; }
+.cc-item-tip__row       { font-size: 11px; }
+.cc-item-tip__src       { opacity: .7; }
+.cc-item-tip__warn      { color: var(--mud-palette-warning, #ffb300); font-weight: 600; }
+
+/* ── 036 — comparação A×B (header badges + 2 colunas hideout/outfit) ─────────── */
+/* Additive only — does NOT redefine any 033/034 class. Delta arrow color stays owned
+   by the MudChip Color (Success/Error) and the SkillCanonicalList DeltaCell (031). */
+.cc-cmp-b         { margin-left: 6px; opacity: .75; font-weight: 600; font-variant-numeric: tabular-nums; }
+.cc-cmp-2col      { display: flex; gap: 16px; align-items: flex-start; }
+.cc-cmp-2col > *  { flex: 1; min-width: 0; }
+.cc-cmp-col__head { font-size: 10px; text-transform: uppercase; letter-spacing: .5px; opacity: .6; margin-bottom: 2px; }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   Fase F1 (rascunho) — workspace unificado de 3 painéis (estilo inventário EFT).
+   ADITIVO: não redefine nenhuma classe 033/034/036 acima. Reusa --cc-cell-unit e
+   .cc-item-cell (definidos no bloco 034). O polimento visual fica pro orquestrador.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Container + header ─────────────────────────────────────────────────────── */
+/* --cc-cell-unit é definido em .cc-item-cell (folha) e NÃO é herdado por .cc-grid2d /
+   .cc-doll (que o usam em var()). Içamos aqui no root do workspace para todos herdarem. */
+.cc-ws                { --cc-cell-unit: 36px; display: flex; flex-direction: column; gap: 12px;
+                        height: calc(100vh - 120px); min-height: 480px; }
+
+.cc-ws__header        { display: flex; align-items: center; gap: 12px; flex: 0 0 auto;
+                        padding-bottom: 8px; border-bottom: 1px solid var(--mud-palette-lines-default, #555); }
+.cc-ws__icon          { width: 40px; height: 40px; object-fit: contain; flex: 0 0 auto; }
+.cc-ws__title         { font-size: 22px; font-weight: 700; line-height: 1.1; }
+.cc-ws__badges        { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-left: 8px; }
+.cc-ws__badge         { display: flex; flex-direction: column; gap: 1px; }
+.cc-ws__badge-label   { font-size: 10px; text-transform: uppercase; letter-spacing: .5px; opacity: .6; }
+.cc-ws__badge-val     { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* ── 3-column grid; cada painel rola só internamente (single-screen) ─────────────
+   Esquerda alargada (skills cabem); centro = MAIOR (equipped estilo Gear do EFT);
+   direita justa à grade do stash (10×36px≈360 + padding) — sem o espaço livre antigo. */
+.cc-ws__grid          { display: grid; grid-template-columns: 420px 1fr 390px; gap: 14px;
+                        flex: 1 1 auto; min-height: 0; }
+.cc-ws__panel         { overflow-y: auto; overflow-x: hidden; min-height: 0;
+                        border: 1px solid var(--mud-palette-lines-default, #444);
+                        border-radius: 6px; padding: 10px; display: flex;
+                        flex-direction: column; gap: 12px; }
+.cc-ws__panel--center { align-items: center; }
+
+@media (max-width: 1100px) {
+    /* Viewport estreito: empilha (perde o single-screen, mas não esmaga). */
+    .cc-ws            { height: auto; }
+    .cc-ws__grid      { grid-template-columns: 1fr; }
+    .cc-ws__panel     { overflow: visible; max-height: none; }
+}
+
+/* ── XP multipliers (lista compacta) ───────────────────────────────────────────── */
+.cc-ws__mults         { display: flex; flex-direction: column; gap: 2px; }
+.cc-ws__mult          { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; }
+.cc-ws__mult-name     { opacity: .85; }
+.cc-ws__mult-val      { font-variant-numeric: tabular-nums; font-weight: 600; }
+
+/* ── Outfit: 4 cards simbólicos (glyph SVG + nome) ─────────────────────────────── */
+.cc-ws__outfit        { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cc-ws__outfit-card   { display: flex; align-items: center; gap: 8px; padding: 6px 8px;
+                        border: 1px solid var(--mud-palette-lines-default, #444); border-radius: 4px;
+                        background: var(--mud-palette-background-grey, rgba(255,255,255,.03)); }
+.cc-ws__outfit-glyph  { flex: 0 0 auto; opacity: .7; display: flex; }
+.cc-ws__outfit-meta   { display: flex; flex-direction: column; min-width: 0; }
+.cc-ws__outfit-slot   { font-size: 9px; text-transform: uppercase; letter-spacing: .4px; opacity: .6; }
+.cc-ws__outfit-name   { font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── CharacterDoll: layout fiel à tela GEAR do EFT ──────────────────────────────────
+   Mockup = a própria tela Gear do jogo (4 "colunas" de slots ao redor do boneco):
+     col A (esq): Earpiece · Armband · Dogtag · ON SLING (arma1) · ON BACK (arma2)
+     col B:       Headwear · Body armor               (silhueta atrás desta coluna)
+     col C:       Face cover · Eyewear · Holster · Sheath
+     col D (centro-dir): Tactical rig (grande) · Pockets · Secured · Backpack
+   Cada slot tem TAMANHO FIXO POR TIPO (como o slot do jogo); o ícone é contido. */
+.cc-doll              { --cc-doll-unit: 26px; position: relative; width: 100%; max-width: 780px;
+                        aspect-ratio: 1.42 / 1; min-height: 420px; margin: 4px auto; }
+/* silhueta decorativa atrás da coluna B (Headwear/Body armor), como o modelo 3D do EFT. */
+.cc-doll__body        { position: absolute; top: 6%; bottom: 6%; left: 18%; width: 22%;
+                        display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+                        opacity: .12; pointer-events: none; }
+.cc-doll__head        { width: 40%; aspect-ratio: 1; border-radius: 50%; margin-top: 4%;
+                        background: var(--mud-palette-text-secondary, #999); }
+.cc-doll__torso       { width: 80%; height: 34%; margin-top: 3%;
+                        border-radius: 18% 18% 8% 8%; background: var(--mud-palette-text-secondary, #999); }
+.cc-doll__legs        { width: 64%; height: 32%; margin-top: 2%;
+                        border-radius: 8% 8% 18% 18%; background: var(--mud-palette-text-secondary, #999); }
+
+.cc-doll-slot         { position: absolute; display: flex; flex-direction: column;
+                        align-items: center; gap: 2px; transform: translate(-50%, -50%); }
+.cc-doll-slot__label  { font-size: 8px; text-transform: uppercase; letter-spacing: .3px; opacity: .65;
+                        white-space: nowrap; }
+/* Caixa de slot de TAMANHO FIXO POR TIPO (espelha o tamanho do slot no EFT); ícone contido. */
+.cc-doll-slot__cell        { width: calc(var(--cc-doll-unit) * 2); height: calc(var(--cc-doll-unit) * 2); }
+.cc-doll-slot__cell--empty { opacity: .3; }
+/* F2c: slot clicável (modo edição) — cursor + realce no hover. */
+.cc-doll-slot--edit            { cursor: pointer; }
+.cc-doll-slot--edit:hover .cc-doll-slot__cell {
+    outline: 2px solid var(--mud-palette-primary, #7e6fff);
+    outline-offset: 1px; opacity: 1; }
+.cc-doll-slot--edit:hover .cc-doll-slot__label { opacity: 1; color: var(--mud-palette-primary, #7e6fff); }
+
+/* Tamanhos por tipo (w×h em doll-units), espelhando os slots do EFT. */
+.cc-doll-slot--eyewear  .cc-doll-slot__cell,
+.cc-doll-slot--armband  .cc-doll-slot__cell,
+.cc-doll-slot--dogtag   .cc-doll-slot__cell   { height: var(--cc-doll-unit); }            /* 2×1 */
+.cc-doll-slot--armorvest .cc-doll-slot__cell  { height: calc(var(--cc-doll-unit) * 3); }  /* 2×3 (alto) */
+.cc-doll-slot--tacticalvest .cc-doll-slot__cell { width: calc(var(--cc-doll-unit) * 4);
+                                                  height: calc(var(--cc-doll-unit) * 3); } /* 4×3 (grande) */
+.cc-doll-slot--backpack .cc-doll-slot__cell   { width: calc(var(--cc-doll-unit) * 3); }    /* 3×2 */
+.cc-doll-slot--pockets  .cc-doll-slot__cell   { width: calc(var(--cc-doll-unit) * 4);
+                                                height: var(--cc-doll-unit); }             /* 4×1 (bolsos) */
+.cc-doll-slot--firstprimaryweapon  .cc-doll-slot__cell,
+.cc-doll-slot--secondprimaryweapon .cc-doll-slot__cell { width: calc(var(--cc-doll-unit) * 4); } /* 4×2 (arma) */
+.cc-doll-slot--scabbard .cc-doll-slot__cell   { width: calc(var(--cc-doll-unit) * 3);
+                                                height: var(--cc-doll-unit); }             /* 3×1 (faca) */
+
+/* Posições (top/left em % do .cc-doll, centradas via translate(-50%,-50%)) — espelham a tela Gear. */
+.cc-doll-slot--earpiece            { top: 12%; left: 11%; }
+.cc-doll-slot--headwear            { top: 13%; left: 29%; }
+.cc-doll-slot--facecover           { top: 13%; left: 47%; }
+.cc-doll-slot--armband             { top: 30%; left: 11%; }
+.cc-doll-slot--eyewear             { top: 30%; left: 47%; }
+.cc-doll-slot--dogtag              { top: 43%; left: 11%; }
+.cc-doll-slot--armorvest           { top: 45%; left: 29%; }
+.cc-doll-slot--firstprimaryweapon  { top: 65%; left: 19%; }
+.cc-doll-slot--holster             { top: 63%; left: 47%; }
+.cc-doll-slot--secondprimaryweapon { top: 86%; left: 19%; }
+.cc-doll-slot--scabbard            { top: 84%; left: 47%; }
+.cc-doll-slot--tacticalvest        { top: 21%; left: 71%; }
+.cc-doll-slot--pockets             { top: 60%; left: 64%; }
+.cc-doll-slot--securedcontainer    { top: 60%; left: 88%; }
+.cc-doll-slot--backpack            { top: 86%; left: 68%; }
+
+/* ── StashGrid: grade 2D real (W colunas × H linhas) ───────────────────────────── */
+.cc-grid2d-wrap       { display: flex; flex-direction: column; gap: 6px; }
+.cc-grid2d-meta       { font-size: 10px; opacity: .6; text-transform: uppercase; letter-spacing: .5px; }
+/* A grade (linhas) é desenhada por background-gradient (1px a cada cell-unit) — NÃO por divs
+   de fundo: divs auto-fluídas competiam com os itens posicionados no auto-placement do CSS Grid
+   e empurravam os itens p/ linhas implícitas no fim. Sem gap: os itens encostam nas linhas. */
+.cc-grid2d            { display: grid; position: relative; width: max-content;
+                        border: 1px solid var(--mud-palette-lines-default, #333);
+                        background-color: var(--mud-palette-background, rgba(255,255,255,.02));
+                        background-image:
+                            linear-gradient(to right, var(--mud-palette-lines-default, #333) 1px, transparent 1px),
+                            linear-gradient(to bottom, var(--mud-palette-lines-default, #333) 1px, transparent 1px);
+                        background-size: var(--cc-cell-unit) var(--cc-cell-unit); }
+/* itens posicionados via grid-column/grid-row inline; vão por cima do fundo */
+.cc-grid2d__item      { position: relative; z-index: 1; width: auto !important; height: auto !important;
+                        border: 1px solid var(--mud-palette-lines-default, #444);
+                        background: var(--mud-palette-background-grey, rgba(40,40,44,.92)); }
+.cc-grid2d-overflow   { font-size: 11px; color: var(--mud-palette-warning, #ffb300); }
+/* ── F2c: drag-and-drop do stash ───────────────────────────────────────────────── */
+.cc-grid2d-hint       { font-size: 10px; opacity: .55; }
+.cc-grid2d__item--edit { cursor: grab; user-select: none; }
+.cc-grid2d__item--edit:hover { outline: 1px solid var(--mud-palette-primary, #7e6fff); z-index: 2; }
+/* o ícone NUNCA é a fonte do drag — o drag é sempre do .cc-grid2d__item (div pai). */
+.cc-grid2d__item--edit img { -webkit-user-drag: none; user-select: none; pointer-events: none; }
+/* Durante o drag, os itens não capturam pointer-events → o drop SEMPRE cai na grade (offset
+   relativo a ela), mesmo soltando sobre outro item. */
+.cc-grid2d--dragging .cc-grid2d__item { pointer-events: none; }
+/* Botão ⟳ (rotacionar) no canto do item — só aparece no hover p/ não poluir. */
+.cc-grid2d__rotate    { position: absolute; top: 0; left: 0; z-index: 3; width: 16px; height: 16px;
+                        padding: 0; line-height: 14px; font-size: 11px; cursor: pointer;
+                        border: none; border-radius: 0 0 3px 0; opacity: 0;
+                        color: #fff; background: rgba(0,0,0,.7); }
+.cc-grid2d__item--edit:hover .cc-grid2d__rotate { opacity: 1; }
+
+/* ── Three-state sidebar (QA 2026-06-12) — Open 250px / Mini 64px / Closed 0 ─────
+   The drawer stays permanently Open; the state class on MudLayout (cc-sb-open/mini/closed)
+   drives the drawer WIDTH and the MudMainContent LEFT MARGIN from the SAME rule, so the
+   right-hand content is always in sync. Smooth width/margin transition for the toggle. */
+.cc-sb-open   .mud-drawer,
+.cc-sb-mini   .mud-drawer,
+.cc-sb-closed .mud-drawer        { transition: width .2s ease; overflow-x: hidden; }
+.cc-sb-open   .mud-main-content,
+.cc-sb-mini   .mud-main-content,
+.cc-sb-closed .mud-main-content  { transition: margin-left .2s ease; }
+
+.cc-sb-open   .mud-drawer        { width: 250px !important; }
+.cc-sb-open   .mud-main-content  { margin-left: 250px !important; }
+
+.cc-sb-mini   .mud-drawer        { width: 64px !important; }
+.cc-sb-mini   .mud-main-content  { margin-left: 64px !important; }
+
+.cc-sb-closed .mud-drawer        { display: none !important; }
+.cc-sb-closed .mud-main-content  { margin-left: 0 !important; }
+
+/* Mini: hide every text bit so only the tinted icons remain. */
+.cc-sb-mini .cc-sidebar-filter   { display: none; }
+.cc-sb-mini .cc-sidebar-name,
+.cc-sb-mini .cc-sidebar-cost     { display: none; }
+.cc-sb-mini .cc-sidebar-edit     { display: none; }   /* hover edit pencil — would offset the icon */
+/* Each class row is wrapped in a MudTooltip (.mud-tooltip-inline = inline-block → shrinks to the icon
+   and hugs the left). Force it full-width so the item's justify-center actually centers the icon. */
+.cc-sb-mini .mud-navmenu .mud-tooltip-root { display: block; width: 100%; }
+.cc-sb-mini .cc-sidebar-item     { justify-content: center; gap: 0; padding-left: 0; padding-right: 0; }
+.cc-sb-mini .cc-sidebar-dot      { display: none; }   /* no room beside a centered icon */
+.cc-sb-mini .mud-nav-link-text   { display: none; }
+.cc-sb-mini .mud-nav-link        { justify-content: center; padding-left: 0; padding-right: 0; }
+.cc-sb-mini .mud-nav-link .mud-nav-link-icon-default { margin: 0; }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   Fase F2 (rascunho) — edição in-place no workspace + galeria de skins (SkinPickerDialog).
+   ADITIVO: não redefine nenhuma classe F1/033/034/036 acima. O polimento visual fica
+   pro orquestrador.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Header slim: ações Edit / Save+Discard à direita das badges ─────────────── */
+.cc-ws__actions       { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+
+/* ── Outfit card EDITÁVEL: clicável (hover destaca) + botão limpar inline ─────── */
+.cc-ws__outfit-card--edit          { cursor: pointer; transition: border-color .12s ease, background .12s ease; }
+.cc-ws__outfit-card--edit:hover    { border-color: var(--mud-palette-primary, #8b6fc4);
+                                     background: var(--mud-palette-action-default-hover, rgba(255,255,255,.06)); }
+
+/* ── SkinPickerDialog: galeria virtualizada de cards ───────────────────────────
+   Cada card 84px de altura (ItemSize do MudVirtualize). Art = glyph simbólico
+   SEMPRE presente; a <img> tarkov.dev (se carregar) cobre por cima (onerror esconde). */
+.cc-skinpick-gallery       { height: 60vh; max-height: 560px; overflow-y: auto;
+                             border: 1px solid var(--mud-palette-lines-default, #444); border-radius: 6px; }
+
+.cc-skinpick-card          { display: flex; align-items: center; gap: 12px; height: 84px;
+                             padding: 8px 12px; cursor: pointer; box-sizing: border-box;
+                             border-bottom: 1px solid var(--mud-palette-lines-default, #3a3a3a);
+                             transition: background .1s ease; }
+.cc-skinpick-card:hover    { background: var(--mud-palette-action-default-hover, rgba(255,255,255,.06)); }
+.cc-skinpick-card--sel     { background: var(--mud-palette-primary-hover, rgba(139,111,196,.18));
+                             border-left: 3px solid var(--mud-palette-primary, #8b6fc4); }
+
+.cc-skinpick-card__art     { position: relative; flex: 0 0 auto; width: 56px; height: 56px;
+                             display: flex; align-items: center; justify-content: center;
+                             border: 1px solid var(--mud-palette-lines-default, #444); border-radius: 4px;
+                             background: var(--mud-palette-background-grey, rgba(255,255,255,.03)); overflow: hidden; }
+.cc-skinpick-card__glyph   { opacity: .55; display: flex; }
+.cc-skinpick-card__img     { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+
+.cc-skinpick-card__meta    { display: flex; flex-direction: column; min-width: 0; gap: 2px; }
+.cc-skinpick-card__name    { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cc-skinpick-card__id      { font-size: 10px; opacity: .55; font-family: monospace;
+                             overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

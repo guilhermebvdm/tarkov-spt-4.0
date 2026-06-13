@@ -78,6 +78,21 @@ public class <Novo>Patch : ModulePatch
 - [ ] [Tarefa atômica 2]
 - [ ] [Tarefa atômica 3]
 
+## 9. Conformidade com skills (auto-checklist)
+
+> Preenchido pelo `/create-technical-spec` ANTES de salvar. Cada linha: ✅ com evidência (seção desta spec ou `arquivo:linha`), ou **N/A + razão**. Linha ❌ → a spec não está pronta. Validado pelo `/review-technical-spec`. Taxonomia: [docs/technical/spt-antipatterns.md](../../../../docs/technical/spt-antipatterns.md).
+
+| # | Check | Status | Evidência / razão |
+|---|---|---|---|
+| 1 | Lifecycle de raid: start hook + stop hooks idempotentes (`GameWorld.OnDestroy` + `BaseLocalGame.Stop`) — AP-01 | | |
+| 2 | Filtro MainPlayer/Fika em todo patch que reage a ação de player — AP-02 | | |
+| 3 | Alvos ofuscados/virtuais resolvidos por assinatura; TODOS os overrides auditados — AP-03 | | |
+| 4 | Mudança de estado via API canônica do EFT; side-effects mapeados — AP-04 | | |
+| 5 | Estado entre raids: raid1→exit→raid2 e alt-F4/morte/MIA cobertos | | |
+| 6 | Semântica/defaults/faixas de cada ConfigEntry sem ambiguidade (incl. estado neutro) — AP-05 | | |
+| 7 | Re-invocação de método patcheado tem reentry-guard/`ReversePatch` (sem recursão infinita) — AP-07 | | |
+| 8 | Flags/caches de intercept validados contra o contexto atual após troca (arma/operação/tela) — AP-08 | | |
+
 ## Histórico
 
 | Data | Evento |
