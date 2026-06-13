@@ -169,7 +169,11 @@
 .cc-sb-mini .cc-sidebar-filter   { display: none; }
 .cc-sb-mini .cc-sidebar-name,
 .cc-sb-mini .cc-sidebar-cost     { display: none; }
-.cc-sb-mini .cc-sidebar-item     { justify-content: center; padding-left: 0; padding-right: 0; }
+.cc-sb-mini .cc-sidebar-edit     { display: none; }   /* hover edit pencil — would offset the icon */
+/* Each class row is wrapped in a MudTooltip (.mud-tooltip-inline = inline-block → shrinks to the icon
+   and hugs the left). Force it full-width so the item's justify-center actually centers the icon. */
+.cc-sb-mini .mud-navmenu .mud-tooltip-root { display: block; width: 100%; }
+.cc-sb-mini .cc-sidebar-item     { justify-content: center; gap: 0; padding-left: 0; padding-right: 0; }
 .cc-sb-mini .cc-sidebar-dot      { display: none; }   /* no room beside a centered icon */
 .cc-sb-mini .mud-nav-link-text   { display: none; }
 .cc-sb-mini .mud-nav-link        { justify-content: center; padding-left: 0; padding-right: 0; }
