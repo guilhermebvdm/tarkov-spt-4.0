@@ -51,16 +51,16 @@
            refresh/close-tab while dirty. Premise PA-030-01: NavigationLock is available in the SPT host. *@
         <NavigationLock OnBeforeInternalNavigation="OnBeforeNavAsync"
                         ConfirmExternalNavigation="@_guard.IsDirty"/>
-        <MudLayout>
+        <MudLayout Class="@LayoutStateClass">
             <MudAppBar Color="Color.Dark"
                        Fixed="true"
                        Elevation="4">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Style="width: 100%;">
-                    @* Item 035: sidebar show/hide — toggles the persistent drawer Open state and persists it. *@
-                    <MudIconButton Icon="@(_drawerOpen ? Icons.Material.Filled.MenuOpen : Icons.Material.Filled.Menu)"
+                    @* Item 035 / QA 2026-06-12: cycles the sidebar Open → Mini → Closed on each click. *@
+                    <MudIconButton Icon="@DrawerIcon"
                                    Color="Color.Inherit" Size="Size.Small"
-                                   title="@(_drawerOpen ? "Collapse sidebar" : "Expand sidebar")"
-                                   OnClick="ToggleDrawer"/>
+                                   title="@DrawerTooltip"
+                                   OnClick="CycleDrawer"/>
                     <MudText Typo="Typo.h6">CustomClasses — Class Editor</MudText>
                     <MudText Style="font-size: 12px" Class="ml-2">
                         v@(new CustomClassesMetadata().Version.ToString())
@@ -68,12 +68,12 @@
                 </MudStack>
             </MudAppBar>
 
-            @* QA 2026-06-12: a persistent drawer with @bind-Open. The previous design (PA-R1-01: keep
-               Open literal "true" and flip Variant Mini↔Persistent) was broken — switching to Persistent
-               left the drawer in mud-drawer--closed (off-screen at left:-250), so "expand" hid the whole
-               sidebar. Open-by-default shows the full sidebar (names + costs + filter + status dots); the
-               AppBar button shows/hides it. State persisted in localStorage (reconciled post-circuit). *@
-            <MudDrawer @bind-Open="_drawerOpen"
+            @* QA 2026-06-12: three-state sidebar cycled by the AppBar button — Open (250px) → Mini
+               (64px, icons only) → Closed (hidden). The drawer stays permanently Open (Persistent);
+               MudBlazor's own open/close + drawer-width var did NOT keep the content margin in sync,
+               so the state class (cc-sb-open/mini/closed on MudLayout) drives BOTH the drawer width
+               AND the MudMainContent left margin from customclasses.css — guaranteed in sync. *@
+            <MudDrawer Open="true"
                        Width="250px"
                        ClipMode="DrawerClipMode.Always"
                        Elevation="5"
@@ -122,13 +122,40 @@
 
     private readonly EditGuardState _guard = new();
 
-    // ── Item 035: drawer open/closed, persisted in localStorage ──────────────────
-    private bool _drawerOpen = true;   // default open = full sidebar visible (names + costs + filter)
+    // ── Item 035 / QA: three-state sidebar (Open → Mini → Closed), persisted in localStorage ──
+    private const int DrawerClosed = 0;   // hidden, content full-width
+    private const int DrawerMini = 1;     // icon-only rail (64px)
+    private const int DrawerOpen = 2;     // full sidebar (250px)
+
+    private int _drawerState = DrawerOpen;   // default open
+
+    // The drawer stays permanently Open; this class on MudLayout drives the drawer width AND the
+    // MudMainContent margin together (customclasses.css) so the right content stays in sync.
+    private string LayoutStateClass => _drawerState switch
+    {
+        DrawerMini => "cc-sb-mini",
+        DrawerClosed => "cc-sb-closed",
+        _ => "cc-sb-open",
+    };
+
+    private string DrawerIcon => _drawerState switch
+    {
+        DrawerOpen => Icons.Material.Filled.MenuOpen,
+        DrawerMini => Icons.Material.Filled.ViewSidebar,
+        _ => Icons.Material.Filled.Menu,
+    };
+
+    private string DrawerTooltip => _drawerState switch
+    {
+        DrawerOpen => "Sidebar: open — click for icons only",
+        DrawerMini => "Sidebar: icons only — click to hide",
+        _ => "Sidebar: hidden — click to open",
+    };
 
     /// <summary>
-    ///     Reconciles the persisted drawer open state once the interactive circuit is up (PA-035-02: no JS
-    ///     at prerender). The drawer mounts open and only collapses here if the saved pref says so — a
-    ///     one-frame "flash" from default to saved value is accepted (PA-035-03, single-user local).
+    ///     Reconciles the persisted drawer state once the interactive circuit is up (PA-035-02: no JS at
+    ///     prerender). Mounts Open and only changes here if the saved pref differs — a one-frame "flash"
+    ///     from default to saved value is accepted (PA-035-03, single-user local).
     /// </summary>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -137,19 +164,24 @@
             return;
         }
 
-        var open = await UiPrefs.GetBoolAsync(JS, UiPrefs.DrawerPinned, _drawerOpen);
-        if (open != _drawerOpen)
+        var saved = await UiPrefs.GetIntAsync(JS, UiPrefs.DrawerPinned, _drawerState);
+        if (saved is DrawerClosed or DrawerMini or DrawerOpen && saved != _drawerState)
         {
-            _drawerOpen = open;
+            _drawerState = saved;
             StateHasChanged();
         }
     }
 
-    /// <summary>AppBar button: shows/hides the sidebar and persists it (fire-and-forget — PA-035-03).</summary>
-    private void ToggleDrawer()
+    /// <summary>AppBar button: cycles Open → Mini → Closed → Open and persists it (fire-and-forget).</summary>
+    private void CycleDrawer()
     {
-        _drawerOpen = !_drawerOpen;
-        _ = UiPrefs.SetAsync(JS, UiPrefs.DrawerPinned, _drawerOpen ? "1" : "0");
+        _drawerState = _drawerState switch
+        {
+            DrawerOpen => DrawerMini,
+            DrawerMini => DrawerClosed,
+            _ => DrawerOpen,
+        };
+        _ = UiPrefs.SetAsync(JS, UiPrefs.DrawerPinned, _drawerState.ToString());
     }
 
     /// <summary>

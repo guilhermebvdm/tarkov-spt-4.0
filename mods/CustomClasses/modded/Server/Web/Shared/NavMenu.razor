@@ -42,7 +42,7 @@
 
     @* Filter (item 030): the editor-created class list will grow — filter by name / en display name.
        Immediate=true so the list narrows per keystroke; the drawer stays open on focus. *@
-    <div class="px-3 py-2">
+    <div class="px-3 py-2 cc-sidebar-filter">
         <MudTextField @bind-Value="_filter" @bind-Value:after="OnFilterChanged"
                       Immediate="true" DebounceInterval="120"
                       Placeholder="Filter classes…" Variant="Variant.Outlined"

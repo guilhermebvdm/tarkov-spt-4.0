@@ -144,3 +144,33 @@
 .cc-cmp-2col      { display: flex; gap: 16px; align-items: flex-start; }
 .cc-cmp-2col > *  { flex: 1; min-width: 0; }
 .cc-cmp-col__head { font-size: 10px; text-transform: uppercase; letter-spacing: .5px; opacity: .6; margin-bottom: 2px; }
+
+/* ── Three-state sidebar (QA 2026-06-12) — Open 250px / Mini 64px / Closed 0 ─────
+   The drawer stays permanently Open; the state class on MudLayout (cc-sb-open/mini/closed)
+   drives the drawer WIDTH and the MudMainContent LEFT MARGIN from the SAME rule, so the
+   right-hand content is always in sync. Smooth width/margin transition for the toggle. */
+.cc-sb-open   .mud-drawer,
+.cc-sb-mini   .mud-drawer,
+.cc-sb-closed .mud-drawer        { transition: width .2s ease; overflow-x: hidden; }
+.cc-sb-open   .mud-main-content,
+.cc-sb-mini   .mud-main-content,
+.cc-sb-closed .mud-main-content  { transition: margin-left .2s ease; }
+
+.cc-sb-open   .mud-drawer        { width: 250px !important; }
+.cc-sb-open   .mud-main-content  { margin-left: 250px !important; }
+
+.cc-sb-mini   .mud-drawer        { width: 64px !important; }
+.cc-sb-mini   .mud-main-content  { margin-left: 64px !important; }
+
+.cc-sb-closed .mud-drawer        { display: none !important; }
+.cc-sb-closed .mud-main-content  { margin-left: 0 !important; }
+
+/* Mini: hide every text bit so only the tinted icons remain. */
+.cc-sb-mini .cc-sidebar-filter   { display: none; }
+.cc-sb-mini .cc-sidebar-name,
+.cc-sb-mini .cc-sidebar-cost     { display: none; }
+.cc-sb-mini .cc-sidebar-item     { justify-content: center; padding-left: 0; padding-right: 0; }
+.cc-sb-mini .cc-sidebar-dot      { display: none; }   /* no room beside a centered icon */
+.cc-sb-mini .mud-nav-link-text   { display: none; }
+.cc-sb-mini .mud-nav-link        { justify-content: center; padding-left: 0; padding-right: 0; }
+.cc-sb-mini .mud-nav-link .mud-nav-link-icon-default { margin: 0; }
