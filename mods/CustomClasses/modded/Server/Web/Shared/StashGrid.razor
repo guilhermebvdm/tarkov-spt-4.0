@@ -1,0 +1,194 @@
+@* Fase F1 (rascunho): grade 2D do stash estilo inventário EFT. Dimensiona a grade pela baseEdition
+   (CostService.GetStashGridSize; fallback 10×40) e posiciona cada item loose:
+     • com X/Y → célula fixa (GridPacker.TryPlaceAt, rotação por Rotated);
+     • sem coord → first-fit sequencial (GridPacker.Place) nas células livres.
+   Cada item: ícone (padrão GearPanel: tarkov.dev, onerror-hidden), badge de qty (>1), hover ItemTooltip.
+   READ-ONLY. NOTA: usa Catalog.GetItemDimensions (tamanho BASE do item) — TODO tamanho-com-mods (presets
+   montados podem ter ExtraSize; o CostService.CheckStashCapacity usa InventoryHelper.GetItemSize p/ isso). *@
+
+@using System.Globalization
+@using SPTarkov.Server.Core.Models.Common
+@inject CatalogService Catalog
+@inject CostService CostService
+
+<div class="cc-grid2d-wrap">
+    <div class="cc-grid2d-meta">@_w × @_h cells</div>
+    <div class="cc-grid2d"
+         style="@($"grid-template-columns:repeat({_w}, var(--cc-cell-unit));grid-template-rows:repeat({_h}, var(--cc-cell-unit));")">
+        @* células de fundo (linhas da grade) *@
+        @for (var i = 0; i < _w * _h; i++)
+        {
+            <div class="cc-grid2d__bg"></div>
+        }
+
+        @foreach (var cell in _cells)
+        {
+            <ItemTooltip Name="@cell.Name" Category="@cell.Category"
+                         Width="@cell.Width" Height="@cell.Height"
+                         Price="@cell.Price" PriceSource="@cell.PriceSource"
+                         Qty="@cell.Qty" MissingPrice="@cell.MissingPrice">
+                <div class="cc-item-cell cc-grid2d__item"
+                     style="@CellStyle(cell)">
+                    <span class="cc-item-cell__txt">@cell.Name</span>
+                    @if (cell.RootTpl is not null)
+                    {
+                        <img src="@($"https://assets.tarkov.dev/{cell.RootTpl}-icon.webp")"
+                             loading="lazy" alt="" onerror="this.style.display='none'"/>
+                    }
+                    @if (cell.Qty > 1)
+                    {
+                        <span class="cc-item-cell__qty">@cell.Qty.ToString("N0", CultureInfo.InvariantCulture)</span>
+                    }
+                    @if (cell.MissingPrice)
+                    {
+                        <span class="cc-item-cell__warn" title="No flea or handbook price found">⚠</span>
+                    }
+                </div>
+            </ItemTooltip>
+        }
+    </div>
+    @if (_overflow > 0)
+    {
+        <div class="cc-grid2d-overflow">@_overflow item(s) did not fit the grid (not shown).</div>
+    }
+</div>
+
+@code {
+    /// <summary>Itens loose do stash (Loadout.Stash). Null/vazio → grade vazia.</summary>
+    [Parameter] public List<ItemSpec>? Stash { get; set; }
+
+    /// <summary>baseEdition da classe (dimensiona a grade). Vazio → default (Zero to hero).</summary>
+    [Parameter] public string? BaseEdition { get; set; }
+
+    private const int FallbackW = 10;
+    private const int FallbackH = 40;
+
+    private int _w = FallbackW;
+    private int _h = FallbackH;
+    private int _overflow;
+    private List<PlacedCell> _cells = [];
+
+    private sealed record PlacedCell(
+        int X, int Y, int W, int H, string? RootTpl, string Name, string? Category,
+        double Qty, double Price, string? PriceSource, bool MissingPrice, int Width, int Height);
+
+    protected override void OnParametersSet()
+    {
+        var baseKey = string.IsNullOrWhiteSpace(BaseEdition) ? ClassRegistrar.DefaultBaseEdition : BaseEdition!;
+        var size = CostService.GetStashGridSize(baseKey);
+        (_w, _h) = size ?? (FallbackW, FallbackH);
+
+        _cells = [];
+        _overflow = 0;
+        if (Stash is not { Count: > 0 })
+        {
+            return;
+        }
+
+        var packer = new GridPacker(_w, _h);
+
+        // Dois passos: primeiro itens com coordenada fixa (X/Y), depois auto-posiciona o resto
+        // (mesma prioridade do InventoryBuilder/PackSpecsIntoGrids — pinned antes do first-fit).
+        var pinned = Stash.Where(s => s.X is not null && s.Y is not null).ToList();
+        var loose = Stash.Where(s => s.X is null || s.Y is null).ToList();
+
+        foreach (var spec in pinned)
+        {
+            var data = Resolve(spec);
+            if (data is null)
+            {
+                continue;
+            }
+
+            var (rootTpl, name, category, w, h, qty, price, source, missing) = data.Value;
+            var rotated = spec.Rotated ?? false;
+            if (packer.TryPlaceAt(spec.X!.Value, spec.Y!.Value, w, h, rotated))
+            {
+                var (dw, dh) = rotated ? (h, w) : (w, h);
+                _cells.Add(new PlacedCell(spec.X.Value, spec.Y.Value, dw, dh, rootTpl, name, category,
+                    qty, price, source, missing, w, h));
+            }
+            else if (packer.Place(w, h) is { } pos)
+            {
+                // a célula pedida colidiu/saiu da grade → cai no first-fit (mirror do builder).
+                var (dw, dh) = pos.Rotated ? (h, w) : (w, h);
+                _cells.Add(new PlacedCell(pos.X, pos.Y, dw, dh, rootTpl, name, category,
+                    qty, price, source, missing, w, h));
+            }
+            else
+            {
+                _overflow++;
+            }
+        }
+
+        foreach (var spec in loose)
+        {
+            var data = Resolve(spec);
+            if (data is null)
+            {
+                continue;
+            }
+
+            var (rootTpl, name, category, w, h, qty, price, source, missing) = data.Value;
+            if (packer.Place(w, h) is { } pos)
+            {
+                var (dw, dh) = pos.Rotated ? (h, w) : (w, h);
+                _cells.Add(new PlacedCell(pos.X, pos.Y, dw, dh, rootTpl, name, category,
+                    qty, price, source, missing, w, h));
+            }
+            else
+            {
+                _overflow++;
+            }
+        }
+    }
+
+    /// <summary>1-based grid-column/row + span (grid começa em 1; X/Y são 0-based).</summary>
+    private static string CellStyle(PlacedCell c) =>
+        $"grid-column:{c.X + 1} / span {c.W};grid-row:{c.Y + 1} / span {c.H};";
+
+    private (string? RootTpl, string Name, string? Category, int W, int H, double Qty,
+        double Price, string? PriceSource, bool Missing)? Resolve(ItemSpec spec)
+    {
+        var rootTpl = ResolveRootTpl(spec);
+        var qty = Math.Max(1, spec.Count);
+        if (rootTpl is null)
+        {
+            var raw = spec.Preset ?? spec.Tpl ?? "(no tpl)";
+            return (null, raw, null, 1, 1, qty, 0, null, true);
+        }
+
+        // TODO tamanho-com-mods: GetItemDimensions é o tamanho BASE; presets/mods com ExtraSize não
+        // são considerados aqui (o builder usa InventoryHelper.GetItemSize sobre a árvore montada).
+        var (w, h) = Catalog.GetItemDimensions(rootTpl);
+        var id = new MongoId(rootTpl);
+        var name = Catalog.GetItemName(id);
+        var category = Catalog.GetCategoryName(rootTpl);
+        var (price, source) = Catalog.GetPrice(id);
+        return (rootTpl, name, category, w, h, qty, price, source,
+            string.Equals(source, "missing", StringComparison.Ordinal));
+    }
+
+    /// <summary>preset > tpl (mesma ordem do GearPanel). null = nada resolve.</summary>
+    private string? ResolveRootTpl(ItemSpec spec)
+    {
+        if (!string.IsNullOrWhiteSpace(spec.Preset))
+        {
+            var key = TryMongoId(spec.Preset!);
+            var preset = key is null
+                ? null
+                : spec.Premium ? Catalog.ResolvePremiumPreset(key.Value) : Catalog.ResolveDefaultPreset(key.Value);
+            return preset?.Items?.FirstOrDefault()?.Template.ToString();
+        }
+
+        if (!string.IsNullOrWhiteSpace(spec.Tpl) && TryMongoId(spec.Tpl!) is not null)
+        {
+            return spec.Tpl;
+        }
+
+        return null;
+    }
+
+    private static MongoId? TryMongoId(string raw) =>
+        MongoId.IsValidMongoId(raw) ? new MongoId(raw) : (MongoId?)null;
+}

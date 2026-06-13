@@ -1,0 +1,237 @@
+@* Fase F1 (rascunho): workspace unificado READ-ONLY de 3 painéis, estilo inventário EFT. Recebe a
+   ClassDefinition já carregada (parse+diagnostics ficam no ClassDetail) + os custos já computados, e
+   monta:
+     • header: ícone tingido + nome na cor + badges (skill cost / ₽ / status) + botão EDIT;
+     • ESQUERDA: skills (SkillCanonicalList read-only) + multipliers + hideout + outfit simbólico;
+     • CENTRO: CharacterDoll (paper doll dos equipados);
+     • DIREITA: StashGrid (grade 2D do stash).
+   Cada painel rola só internamente (single-screen). O polimento visual fica pro orquestrador. *@
+
+@using System.Globalization
+@using SPTarkov.Server.Core.Models.Common
+@inject CatalogService Catalog
+
+@if (Definition is null)
+{
+    <MudText Typo="Typo.body2">No parsed class to display.</MudText>
+}
+else
+{
+    var def = Definition;
+
+    <div class="cc-ws">
+        @* ── Slim metrics bar (nome/status/ações/Edit já vivem no header da página) ── *@
+        <div class="cc-ws__header">
+            <div class="cc-ws__badges">
+                <span class="cc-ws__badge">
+                    <span class="cc-ws__badge-label">Skill cost</span>
+                    <span class="cc-ws__badge-val">@(SkillCost?.Total.ToString("0.00", CultureInfo.InvariantCulture) ?? "—")</span>
+                </span>
+                <span class="cc-ws__badge">
+                    <span class="cc-ws__badge-label">Loadout</span>
+                    <span class="cc-ws__badge-val">@(LoadoutCost is null ? "—" : FormatRub(LoadoutCost.TotalRub))</span>
+                </span>
+            </div>
+        </div>
+
+        @* ── 3 colunas ──────────────────────────────────────────────────────── *@
+        <div class="cc-ws__grid">
+
+            @* ░ ESQUERDA ░ *@
+            <div class="cc-ws__panel cc-ws__panel--left">
+                <div class="cc-section">
+                    <div class="cc-section__title">Skills (@(def.Skills?.Count ?? 0))</div>
+                    <SkillCanonicalList Levels="@def.Skills"
+                                        Cost="@SkillCost"
+                                        Multipliers="@def.SkillMultipliers"
+                                        Editable="false"/>
+                </div>
+
+                @if (def.SkillMultipliers is { Count: > 0 })
+                {
+                    <div class="cc-section">
+                        <div class="cc-section__title">XP multipliers (@def.SkillMultipliers.Count)</div>
+                        <div class="cc-ws__mults">
+                            @foreach (var (skill, factor) in def.SkillMultipliers)
+                            {
+                                <div class="cc-ws__mult">
+                                    <span class="cc-ws__mult-name">@skill</span>
+                                    <span class="cc-ws__mult-val">@MultiplierLabel(factor)</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <div class="cc-section">
+                    <div class="cc-section__title">Hideout (@(def.Hideout?.Count ?? 0))</div>
+                    @if (def.Hideout is { Count: > 0 })
+                    {
+                        <div class="cc-hideout-grid">
+                            @foreach (var (station, lvl) in def.Hideout)
+                            {
+                                <MudChip T="string" Size="Size.Small" Color="Color.Default">@station L@lvl</MudChip>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.caption">No hideout station overrides.</MudText>
+                    }
+                </div>
+
+                <div class="cc-section">
+                    <div class="cc-section__title">Outfit</div>
+                    @* Preview simbólico (decisão F1): 4 cards (USEC/BEAR × Upper/Lower) com glyph SVG e o
+                       nome da skin (Catalog.GetClothing) ou "—". SEM imagem da peça. *@
+                    <div class="cc-ws__outfit">
+                        @OutfitCard("USEC", "Upper", def.Outfit?.Usec?.Upper)
+                        @OutfitCard("USEC", "Lower", def.Outfit?.Usec?.Lower)
+                        @OutfitCard("BEAR", "Upper", def.Outfit?.Bear?.Upper)
+                        @OutfitCard("BEAR", "Lower", def.Outfit?.Bear?.Lower)
+                    </div>
+                </div>
+            </div>
+
+            @* ░ CENTRO ░ *@
+            <div class="cc-ws__panel cc-ws__panel--center">
+                <div class="cc-section__title">Equipped (@(def.Loadout?.Equipped?.Count ?? 0) slots)</div>
+                <CharacterDoll Equipped="@def.Loadout?.Equipped"/>
+            </div>
+
+            @* ░ DIREITA ░ *@
+            <div class="cc-ws__panel cc-ws__panel--right">
+                <div class="cc-section__title">Stash (@(def.Loadout?.Stash?.Count ?? 0) lines)</div>
+                <StashGrid Stash="@def.Loadout?.Stash" BaseEdition="@def.BaseEdition"/>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    /// <summary>Classe já parseada (parse/diagnostics ficam no ClassDetail). Null → nada a mostrar.</summary>
+    [Parameter] public ClassDefinition? Definition { get; set; }
+
+    /// <summary>Nome do arquivo SEM extensão (para o link de EDIT e fallback de título).</summary>
+    [Parameter] public string FileNameBare { get; set; } = "";
+
+    /// <summary>Custo de skills já computado (CostService.ComputeSkillCost).</summary>
+    [Parameter] public SkillCostBreakdown? SkillCost { get; set; }
+
+    /// <summary>Custo de loadout já computado (CostService.ComputeLoadoutCost).</summary>
+    [Parameter] public LoadoutCostBreakdown? LoadoutCost { get; set; }
+
+    /// <summary>Status do arquivo (Registered/Disabled/Invalid/Not registered) — passado pelo ClassDetail.</summary>
+    [Parameter] public ClassFileEntry? Entry { get; set; }
+
+    // ── Outfit: id → nome (ambas as facções), construído uma vez por render dos params ──
+    private Dictionary<string, string> _clothingNames = new(StringComparer.Ordinal);
+
+    protected override void OnParametersSet()
+    {
+        _clothingNames = new Dictionary<string, string>(StringComparer.Ordinal);
+        if (Definition?.Outfit is null)
+        {
+            return;
+        }
+
+        foreach (var side in new[] { "Usec", "Bear" })
+        {
+            foreach (var piece in Catalog.GetClothing(side))
+            {
+                if (!string.IsNullOrWhiteSpace(piece.Name))
+                {
+                    _clothingNames[piece.Id] = piece.Name!;
+                }
+            }
+        }
+    }
+
+    private string? NameStyle() =>
+        Definition?.NameColor is { Length: > 0 } c ? $"color:{c};" : null;
+
+    /* Tinge o ícone (PNG branco/máscara) com a cor do nome quando houver — simples drop-shadow box. */
+    private string? IconTintStyle() => null;
+
+    private static string FormatRub(double value) =>
+        value.ToString("N0", CultureInfo.InvariantCulture) + " ₽";
+
+    private string ClothingLabel(string? id)
+    {
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            return "—";
+        }
+
+        return _clothingNames.TryGetValue(id!, out var name) ? name : id!;
+    }
+
+    private static string MultiplierLabel(double factor)
+    {
+        if (Math.Abs(factor - 1.0) < 0.0001)
+        {
+            return "×1";
+        }
+
+        var pct = (factor - 1) * 100;
+        var sign = pct > 0 ? "+" : "";
+        return $"{sign}{pct.ToString("0", CultureInfo.InvariantCulture)}%";
+    }
+
+    private RenderFragment StatusBadge() => __builder =>
+    {
+        var (text, color) = StatusOf();
+        <span class="cc-ws__badge">
+            <span class="cc-ws__badge-label">Status</span>
+            <MudChip T="string" Size="Size.Small" Color="@color">@text</MudChip>
+        </span>
+    };
+
+    private (string Text, Color Color) StatusOf()
+    {
+        if (Entry is null)
+        {
+            return ("—", Color.Default);
+        }
+
+        if (Entry.Definition is null || Entry.Diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
+        {
+            return ("Invalid", Color.Error);
+        }
+
+        if (!Entry.Enabled)
+        {
+            return ("Disabled", Color.Default);
+        }
+
+        return Entry.Registered ? ("Registered", Color.Success) : ("Not registered", Color.Warning);
+    }
+
+    /// <summary>Card simbólico de uma peça: glyph SVG (camisa p/ Upper, calça p/ Lower) + faction/slot + nome.</summary>
+    private RenderFragment OutfitCard(string faction, string slot, string? id) => __builder =>
+    {
+        var isUpper = string.Equals(slot, "Upper", StringComparison.Ordinal);
+        <div class="cc-ws__outfit-card">
+            <div class="cc-ws__outfit-glyph">
+                @if (isUpper)
+                {
+                    @* camisa *@
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M4 6l4-3 4 2 4-2 4 3-3 3v11H7V9z"/>
+                    </svg>
+                }
+                else
+                {
+                    @* calça *@
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M6 3h12l-1 18h-4l-1-11-1 11H7z"/>
+                    </svg>
+                }
+            </div>
+            <div class="cc-ws__outfit-meta">
+                <span class="cc-ws__outfit-slot">@faction · @slot</span>
+                <span class="cc-ws__outfit-name" title="@ClothingLabel(id)">@ClothingLabel(id)</span>
+            </div>
+        </div>
+    };
+}

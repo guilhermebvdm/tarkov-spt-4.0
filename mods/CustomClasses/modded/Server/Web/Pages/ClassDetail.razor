@@ -116,6 +116,19 @@
             {
                 var def = _entry.Definition;
 
+                @* ── Fase F1: workspace unificado read-only (single-class). O modo COMPARE (036)
+                   continua usando o dashboard 033/034 abaixo — o workspace é a visão padrão. ── *@
+                if (!IsComparing)
+                {
+                    <ClassWorkspace Definition="@def"
+                                    FileNameBare="@Path.GetFileNameWithoutExtension(_entry.FileName)"
+                                    SkillCost="@_skillCost"
+                                    LoadoutCost="@_loadoutCost"
+                                    Entry="@_entry"/>
+                }
+                else
+                {
+
                 @* ── Header badges (costs / status) — item 033 ─────────────────────── *@
                 <div class="cc-badges mb-2">
                     <div class="cc-badge">
@@ -309,6 +322,7 @@
                      • XP multipliers → inline ±% chips in SkillCanonicalList (031) + the SE-missing note
                      • Cost summary   → the two header badges (skill cost + loadout ₽); loadout warnings
                                         now render above the stash table *@
+                }
             }
         }
     </MudPaper>
