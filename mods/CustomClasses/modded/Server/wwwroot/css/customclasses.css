@@ -250,7 +250,12 @@
      col C:       Face cover · Eyewear · Holster · Sheath
      col D (centro-dir): Tactical rig (grande) · Pockets · Secured · Backpack
    Cada slot tem TAMANHO FIXO POR TIPO (como o slot do jogo); o ícone é contido. */
-.cc-doll              { --cc-doll-unit: 44px; position: relative; width: 100%; max-width: 660px;
+/* container-type: a unidade do slot é em cqw (% da largura do PRÓPRIO doll), então os slots ESCALAM
+   junto com o doll. Antes era px fixo + posições em %: ao expandir a sidebar o doll encolhia e os
+   slots (px) estouravam/desalinhavam. Com cqw, arma em left:18% alinha a borda esquerda com a coluna
+   EARS/BAND/DOGTAG (ambas com borda esquerda ≈ 0.5cqw). */
+.cc-doll              { container-type: inline-size; --cc-doll-unit: 7cqw;
+                        position: relative; width: 100%; max-width: 660px;
                         aspect-ratio: 1.33 / 1; min-height: 420px; margin: 4px auto; }
 /* silhueta decorativa atrás da coluna B (Headwear/Body armor), como o modelo 3D do EFT. */
 .cc-doll__body        { position: absolute; top: 6%; bottom: 6%; left: 18%; width: 22%;
