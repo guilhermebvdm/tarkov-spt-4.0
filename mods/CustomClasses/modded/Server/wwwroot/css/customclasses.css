@@ -169,7 +169,8 @@
 /* ── 3-column grid; cada painel rola só internamente (single-screen) ─────────────
    Esquerda alargada (skills cabem); centro = MAIOR (equipped estilo Gear do EFT);
    direita justa à grade do stash (10×36px≈360 + padding) — sem o espaço livre antigo. */
-.cc-ws__grid          { display: grid; grid-template-columns: 480px 1fr 390px; gap: 14px;
+/* SKILLS e EQUIPPED com a MESMA largura (1fr cada); STASH fixo à grade (10 col ≈ 360 + padding). */
+.cc-ws__grid          { display: grid; grid-template-columns: 1fr 1fr 390px; gap: 14px;
                         flex: 1 1 auto; min-height: 0; }
 .cc-ws__panel         { overflow-y: auto; overflow-x: hidden; min-height: 0;
                         border: 1px solid var(--mud-palette-lines-default, #444);
@@ -222,8 +223,8 @@
      col C:       Face cover · Eyewear · Holster · Sheath
      col D (centro-dir): Tactical rig (grande) · Pockets · Secured · Backpack
    Cada slot tem TAMANHO FIXO POR TIPO (como o slot do jogo); o ícone é contido. */
-.cc-doll              { --cc-doll-unit: 26px; position: relative; width: 100%; max-width: 780px;
-                        aspect-ratio: 1.42 / 1; min-height: 420px; margin: 4px auto; }
+.cc-doll              { --cc-doll-unit: 26px; position: relative; width: 100%; max-width: 640px;
+                        aspect-ratio: 1.12 / 1; min-height: 480px; margin: 4px auto; }
 /* silhueta decorativa atrás da coluna B (Headwear/Body armor), como o modelo 3D do EFT. */
 .cc-doll__body        { position: absolute; top: 6%; bottom: 6%; left: 18%; width: 22%;
                         display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
@@ -249,37 +250,39 @@
     outline-offset: 1px; opacity: 1; }
 .cc-doll-slot--edit:hover .cc-doll-slot__label { opacity: 1; color: var(--mud-palette-primary, #7e6fff); }
 
-/* Tamanhos por tipo (w×h em doll-units), espelhando os slots do EFT. */
+/* Tamanhos por tipo (w×h em doll-units) — os GRANDES (arma/rig/armadura/mochila) bem maiores, como no jogo. */
 .cc-doll-slot--eyewear  .cc-doll-slot__cell,
 .cc-doll-slot--armband  .cc-doll-slot__cell,
 .cc-doll-slot--dogtag   .cc-doll-slot__cell   { height: var(--cc-doll-unit); }            /* 2×1 */
-.cc-doll-slot--armorvest .cc-doll-slot__cell  { height: calc(var(--cc-doll-unit) * 3); }  /* 2×3 (alto) */
-.cc-doll-slot--tacticalvest .cc-doll-slot__cell { width: calc(var(--cc-doll-unit) * 4);
-                                                  height: calc(var(--cc-doll-unit) * 3); } /* 4×3 (grande) */
-.cc-doll-slot--backpack .cc-doll-slot__cell   { width: calc(var(--cc-doll-unit) * 3); }    /* 3×2 */
+.cc-doll-slot--armorvest .cc-doll-slot__cell  { width: calc(var(--cc-doll-unit) * 3);
+                                                height: calc(var(--cc-doll-unit) * 4); }   /* 3×4 (armadura grande) */
+.cc-doll-slot--tacticalvest .cc-doll-slot__cell { width: calc(var(--cc-doll-unit) * 5);
+                                                  height: calc(var(--cc-doll-unit) * 4); } /* 5×4 (rig grande) */
+.cc-doll-slot--backpack .cc-doll-slot__cell   { width: calc(var(--cc-doll-unit) * 4);
+                                                height: calc(var(--cc-doll-unit) * 4); }   /* 4×4 (mochila grande) */
 .cc-doll-slot--pockets  .cc-doll-slot__cell   { width: calc(var(--cc-doll-unit) * 4);
                                                 height: var(--cc-doll-unit); }             /* 4×1 (bolsos) */
 .cc-doll-slot--firstprimaryweapon  .cc-doll-slot__cell,
-.cc-doll-slot--secondprimaryweapon .cc-doll-slot__cell { width: calc(var(--cc-doll-unit) * 4); } /* 4×2 (arma) */
+.cc-doll-slot--secondprimaryweapon .cc-doll-slot__cell { width: calc(var(--cc-doll-unit) * 5); } /* 5×2 (arma larga) */
 .cc-doll-slot--scabbard .cc-doll-slot__cell   { width: calc(var(--cc-doll-unit) * 3);
                                                 height: var(--cc-doll-unit); }             /* 3×1 (faca) */
 
 /* Posições (top/left em % do .cc-doll, centradas via translate(-50%,-50%)) — espelham a tela Gear. */
-.cc-doll-slot--earpiece            { top: 12%; left: 11%; }
-.cc-doll-slot--headwear            { top: 13%; left: 29%; }
-.cc-doll-slot--facecover           { top: 13%; left: 47%; }
-.cc-doll-slot--armband             { top: 30%; left: 11%; }
-.cc-doll-slot--eyewear             { top: 30%; left: 47%; }
-.cc-doll-slot--dogtag              { top: 43%; left: 11%; }
-.cc-doll-slot--armorvest           { top: 45%; left: 29%; }
-.cc-doll-slot--firstprimaryweapon  { top: 65%; left: 19%; }
-.cc-doll-slot--holster             { top: 63%; left: 47%; }
-.cc-doll-slot--secondprimaryweapon { top: 86%; left: 19%; }
-.cc-doll-slot--scabbard            { top: 84%; left: 47%; }
-.cc-doll-slot--tacticalvest        { top: 21%; left: 71%; }
-.cc-doll-slot--pockets             { top: 60%; left: 64%; }
-.cc-doll-slot--securedcontainer    { top: 60%; left: 88%; }
-.cc-doll-slot--backpack            { top: 86%; left: 68%; }
+.cc-doll-slot--earpiece            { top: 11%; left: 11%; }
+.cc-doll-slot--headwear            { top: 11%; left: 30%; }
+.cc-doll-slot--facecover           { top: 11%; left: 47%; }   /* EARS/HEAD/FACE na MESMA altura */
+.cc-doll-slot--armband             { top: 27%; left: 11%; }
+.cc-doll-slot--eyewear             { top: 27%; left: 47%; }
+.cc-doll-slot--dogtag              { top: 39%; left: 11%; }
+.cc-doll-slot--armorvest           { top: 52%; left: 30%; }
+.cc-doll-slot--holster             { top: 40%; left: 47%; }
+.cc-doll-slot--scabbard            { top: 54%; left: 47%; }
+.cc-doll-slot--firstprimaryweapon  { top: 70%; left: 24%; }
+.cc-doll-slot--secondprimaryweapon { top: 88%; left: 24%; }
+.cc-doll-slot--tacticalvest        { top: 26%; left: 72%; }
+.cc-doll-slot--pockets             { top: 52%; left: 70%; }
+.cc-doll-slot--backpack            { top: 72%; left: 72%; }
+.cc-doll-slot--securedcontainer    { top: 92%; left: 72%; }   /* SECURE abaixo da BAG */
 
 /* ── StashGrid: grade 2D real (W colunas × H linhas) ───────────────────────────── */
 .cc-grid2d-wrap       { display: flex; flex-direction: column; gap: 6px; }
