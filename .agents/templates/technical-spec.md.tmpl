@@ -90,6 +90,8 @@ public class <Novo>Patch : ModulePatch
 | 4 | Mudança de estado via API canônica do EFT; side-effects mapeados — AP-04 | | |
 | 5 | Estado entre raids: raid1→exit→raid2 e alt-F4/morte/MIA cobertos | | |
 | 6 | Semântica/defaults/faixas de cada ConfigEntry sem ambiguidade (incl. estado neutro) — AP-05 | | |
+| 7 | Re-invocação de método patcheado tem reentry-guard/`ReversePatch` (sem recursão infinita) — AP-07 | | |
+| 8 | Flags/caches de intercept validados contra o contexto atual após troca (arma/operação/tela) — AP-08 | | |
 
 ## Histórico
 

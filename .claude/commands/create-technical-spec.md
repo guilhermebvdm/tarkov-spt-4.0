@@ -67,7 +67,7 @@ Fonte de verdade desta ordem: [.agents/resources.md](../../.agents/resources.md)
    Refs ao Assembly: N (verificadas)
    Stubs C# compiláveis: N
    Memória: N pendências relevantes citadas
-   Conformidade: 6/6 checks ✅ ou N/A justificado
+   Conformidade: 8/8 checks ✅ ou N/A justificado
    Próximo: rode /review-technical-spec <ref> para análise crítica
    ```
 

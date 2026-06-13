@@ -26,7 +26,7 @@ Análise crítica da spec técnica. **Cria** um arquivo novo `NNN-<slug>-03-spec
    - A spec funcional (`<NNN>-<slug>-01-spec.md`) — para conferir se a spec técnica responde aos critérios de aceite.
    - Reviews anteriores `<NNN>-<slug>-03-spec-tech-review-*.md` — pontos já resolvidos não devem ser refeitos; pontos pendentes podem ser revalidados.
    - Os arquivos do Assembly citados na spec técnica — confirmar que as linhas batem com o que a spec afirma.
-   - A seção **9. Conformidade com skills** da spec técnica — conferir cada evidência citada. Check marcado ✅ sem evidência verificável = ponto **Categoria C — 🔴 Bloqueador**; check N/A com razão frágil = ponto Categoria A.
+   - A seção **9. Conformidade com skills** da spec técnica — conferir cada evidência citada. Check marcado ✅ sem evidência verificável = ponto **Categoria C — 🔴 Bloqueador**; check N/A com razão frágil = ponto Categoria A. **Em especial:** um `N/A` no check 2 (MainPlayer/Fika) quando há patch que reage a ação de player, ou no check 5 (estado entre raids) quando há estado estático/raid-scoped, é Categoria A — confrontar o `N/A` contra os alvos de patch reais da §2, não aceitar de cara.
    - **Grafo de código** (skill `graph-code-navigation`): `get_neighbors` no alvo de patch para verificar se a spec auditou todos os overrides/callers (evidência negativa barata — auditoria ausente em alvo virtual = ponto Categoria C, AP-03).
    - `mods/<mod>/modded/` — checar conflitos com patches existentes.
 

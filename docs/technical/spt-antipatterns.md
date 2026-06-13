@@ -63,7 +63,23 @@ Catálogo dos erros que **já cometemos neste repo**, com o caso real, a causa r
 - **Causa raiz:** `06-fix-NN` não tinha checklist de validação — "compila" era tratado como "funciona".
 - **Exemplo real:** pendência 🔴 atual do stances — 4 itens (004/008/009/010) compilados e nenhum validado in-game (`mods/stancesAndCameraPositionSPT4.0.11/memory/sessions.md`, snapshot).
 - **Prevenção:** todo fix nasce de `.agents/templates/fix.md.tmpl` e só é marcado entregue com o checklist preenchido: compila, in-raid, Fika (ou N/A), raid1→exit→raid2, alt-F4/morte/MIA, memória atualizada com a lição.
-- **Onde é checado:** template `fix.md.tmpl`; skill `repo-workflow-best-practices` (artefato 06); output do `/apply-code-review`.
+- **Onde é checado:** template `fix.md.tmpl`; skill `repo-workflow-best-practices` (artefato 06); output do `/apply-code-review`; **gate de pre-commit** `check-delivered-validation.sh` (item 🟢 com caixa in-raid desmarcada bloqueia o commit).
+
+## AP-07 — Self-reentry: re-invocar o próprio método patcheado
+
+- **Sintoma:** recursão infinita → stack overflow / crash-to-desktop na primeira vez que o caminho dispara (não no boot — só quando a ação acontece).
+- **Causa raiz:** chamar de volta o método patcheado (via `MethodInfo.Invoke`, ressurreição de operação, ou forwarding) re-entra o próprio Prefix/Postfix do Harmony, que chama de novo, sem fundo de pilha.
+- **Exemplo real:** [PA-02-01 do item 002](../../mods/stancesAndCameraPositionSPT4.0.11/backlog/002-ciclo-linear-hotkeys-snap-fogo/002-ciclo-linear-hotkeys-snap-fogo-03-spec-tech-review-02.md) — ressuscitar a operação de trigger via `MethodInfo.Invoke` re-entrava o Prefix → stack overflow no primeiro hold ≥ threshold. Fix: guard `[ThreadStatic] bool _inSyntheticCall` que faz o Prefix retornar cedo durante a chamada sintética.
+- **Prevenção:** ao re-invocar/forward um alvo patcheado, ou usar `[HarmonyReversePatch]`/delegate para a original, ou um reentry-guard `[ThreadStatic]` que o Prefix checa antes de agir. Nunca chamar o método patcheado diretamente de dentro do patch.
+- **Onde é checado:** check 7 da "Conformidade com skills"; checklist item 13 da skill C# (reentrância); skill `csharp-mod-best-practices` §3.
+
+## AP-08 — Estado stale através de troca de contexto
+
+- **Sintoma:** efeito/intercept dispara no alvo errado depois de uma troca (arma, operação, tela) — ex.: um tiro espúrio na arma NOVA.
+- **Causa raiz:** flag/cache de estado sobrevive a uma mudança de operação/contexto e é lido como se ainda fosse válido para o contexto antigo.
+- **Exemplo real:** [CR-01-02 do item 002](../../mods/stancesAndCameraPositionSPT4.0.11/backlog/002-ciclo-linear-hotkeys-snap-fogo/002-ciclo-linear-hotkeys-snap-fogo-04-code-review-01.md) — `_snapInterceptActive` sobrevivia à troca de arma e disparava snap na arma nova. Fix: cachear a identidade da operação (`_interceptOperationInstance`) no início e comparar antes de agir.
+- **Prevenção:** cachear a identidade do contexto (operação/controller/arma) no início do intercept e comparar antes de cada ação; limpar flags de estado no teardown de cada operação.
+- **Onde é checado:** check 8 da "Conformidade com skills"; checklist item 12 da skill C# (estado stale em troca de contexto); skill `csharp-mod-best-practices` §3.
 
 ---
 
@@ -76,7 +92,9 @@ Catálogo dos erros que **já cometemos neste repo**, com o caso real, a causa r
 | AP-03 | — | check 3 | `/review-technical-spec` Cat. C | SPT checklist 10; C# (virtual dispatch) | grafo de código (overrides) |
 | AP-04 | — | check 4 | `/review-technical-spec` Cat. C | SPT §8, checklist 9 | — |
 | AP-05 | critérios verificáveis | check 6 | `/review-spec`; `/review-technical-spec` Cat. A | — | — |
-| AP-06 | — | — | `/apply-code-review` (output) | repo-workflow (artefato 06) | `fix.md.tmpl` |
+| AP-06 | — | — | `/apply-code-review` (output) | repo-workflow (artefato 06) | `fix.md.tmpl`; gate `check-delivered-validation.sh` |
+| AP-07 | — | check 7 | `/review-technical-spec` Cat. C | C# checklist 13 (reentrância) | — |
+| AP-08 | — | check 8 | `/code-review` Cat. B | C# checklist 12 (estado stale) | grafo de código (`affected`) |
 
 ## Histórico de Alterações
 
@@ -85,3 +103,5 @@ Catálogo dos erros que **já cometemos neste repo**, com o caso real, a causa r
 | 2026-06-11 | Guilherme | Criação — AP-01..AP-06 a partir da taxonomia de erros reais do mod stances (reviews/fixes dos itens 001, 002, 004) |
 | 2026-06-12 | Guilherme | docs(CustomClasses): session memory — UX epic 030-037 executed |
 | 2026-06-12 | Guilherme | docs(harness): add SPT antipatterns taxonomy (AP-01..06) wired into skills |
+| 2026-06-13 | Guilherme | Adicionados AP-07 (self-reentry/ThreadStatic, PA-02-01) e AP-08 (estado stale em troca de contexto, CR-01-02); fechando gaps D4-01/D4-02 da revisão de valor |
+| 2026-06-13 | Guilherme | fix(harness): correct artifact-name and hook-target naming bugs |

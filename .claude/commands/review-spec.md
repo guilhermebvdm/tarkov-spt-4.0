@@ -24,7 +24,7 @@ Revisão crítica e **edição inline** da spec funcional. Não cria arquivo nov
    - **Contradições internas** — comportamento desejado bate com critérios de aceite? Corner case bate com fora de escopo?
    - **Critérios vagos / não-verificáveis** — "deve funcionar bem", "ser intuitivo" → pedir versão mensurável.
    - **Corner cases óbvios faltando** — usar checklist mental: estado nulo/vazio, race condition, troca rápida de modo, fim de raid, interação com mod do mesmo escopo.
-   - **Critérios padrão ausentes** — os critérios **Fika/multiplayer** e **estado entre raids** precisam existir (preenchidos com comportamento verificável ou `N/A: <razão>`). Ausência = gap a corrigir.
+   - **Critérios padrão ausentes ou N/A-ados indevidamente** — os critérios **Fika/multiplayer** e **estado entre raids** precisam existir (preenchidos com comportamento verificável ou `N/A: <razão>`). Ausência = gap. **`N/A` não é aceito de graça:** se o "Comportamento desejado" descreve algo que reage a ação de player (tiro, recarga, postura, movimento) ou que mantém estado estático/raid-scoped, um `N/A` no critério Fika ou estado-entre-raids é ele mesmo um gap 🟡 — exigir justificativa concreta de por que a feature é imune (AP-02/AP-01). Marcar com `<!-- review: N/A frágil em <critério> — justificar -->`.
 
 4. **Aplicar correções inline** no arquivo:
    - Reescrever critérios vagos.

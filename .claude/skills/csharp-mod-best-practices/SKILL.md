@@ -113,6 +113,7 @@ This skill covers the **C# / runtime** concerns. Lifecycle, raid hooks and SPT-s
 9. **Strings/IDs:** ordinal comparisons? IDs treated as opaque?
 10. **Logging:** levels appropriate? No per-frame `LogInfo`?
 11. **Virtual dispatch:** patches on virtual/abstract targets audited against ALL overrides (which call base, which don't)? (AP-03)
-12. **Stale state across context switches:** flags/caches that survive a weapon swap, operation change or screen transition are re-validated against the current context (e.g. cache the operation instance and compare before acting)? Real case: snap intercept firing on the NEW weapon after swap — stances 002, CR-01-02.
+12. **Stale state across context switches:** flags/caches that survive a weapon swap, operation change or screen transition are re-validated against the current context (e.g. cache the operation instance and compare before acting)? Real case: snap intercept firing on the NEW weapon after swap — stances 002, CR-01-02 (AP-08).
+13. **Self-reentry:** any path that re-invokes the patched target (`MethodInfo.Invoke`, operation resurrection, forwarding) guarded against re-entering the patch (`[ThreadStatic]` reentry flag or `[HarmonyReversePatch]`)? Real case: trigger-operation resurrection recursing the Prefix → stack overflow — stances 002, PA-02-01 (AP-07).
 
 If any item fails, flag in the review or stop the build and request a `/review-technical-spec` pass.
