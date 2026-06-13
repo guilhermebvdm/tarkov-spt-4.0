@@ -3,10 +3,6 @@
     "graphify-eft": {
       "command": "graphify-mcp",
       "args": ["references/graphs/eft-decompiled/graph.json"]
-    },
-    "graphify-mod-stances": {
-      "command": "graphify-mcp",
-      "args": ["references/graphs/mods/stancesAndCameraPositionSPT4.0.11/graph.json"]
     }
   }
 }

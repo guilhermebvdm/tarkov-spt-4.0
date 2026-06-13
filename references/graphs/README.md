@@ -41,10 +41,10 @@ bash scripts/update-graphs.sh eft-decompiled        # uma reference
 
 ## MCP (consulta estrutural nas sessões)
 
-`.mcp.json` na raiz registra servers stdio (`graphify-mcp <graph.json>`): permanentes só para os escopos de consulta frequente — `graphify-eft` e o mod ativo em desenvolvimento. Tools: `query_graph`, `get_node`, `get_neighbors`, `get_community`, `shortest_path`, `god_nodes`, `graph_stats`.
+`.mcp.json` na raiz registra **um único** server stdio (`graphify-mcp <graph.json>`): `graphify-eft` (o grafo do EFT decompilado, estável e o mais consultado). Tools: `query_graph`, `get_node`, `get_neighbors`, `get_community`, `shortest_path`, `god_nodes`, `graph_stats`. **Grafos de mod não têm server MCP** — são consultados via CLI `graphify query/path/explain/affected --graph references/graphs/mods/<mod>/graph.json` (um pin fixo por mod apontava pro mod errado quando se trocava de mod e churnava commits entre os 2 PCs).
 
-- **Primeiro uso em cada PC:** o Claude Code pede aprovação interativa dos servers do `.mcp.json` — aprovar uma vez; não é "MCP quebrado".
-- **Mod ativo mudou?** Trocar o server `graphify-mod-*` no `.mcp.json` para apontar ao `graph.json` do novo mod (1 linha).
+- **Primeiro uso em cada PC:** o Claude Code pede aprovação interativa do server do `.mcp.json` — aprovar uma vez; não é "MCP quebrado".
+- **Trabalhando um mod específico?** Não há server MCP por mod — use o CLI `--graph references/graphs/mods/<mod>/graph.json` (a skill `graph-code-navigation` §3 documenta as queries).
 - **Demais escopos** (fika, spt-source, outros mods): consultar sob demanda via CLI — `graphify query "<pergunta>" --graph references/graphs/<id>/graph.json` (também `path`, `explain`, `affected`) — ou ler o `GRAPH_REPORT.md`.
 - **Cadeias entre escopos** (ex.: patch do mod → método do EFT): consultar cada grafo separadamente, ou gerar um grafo combinado com `graphify merge-graphs`.
 

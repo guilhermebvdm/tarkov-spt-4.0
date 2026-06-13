@@ -25,9 +25,9 @@ Os grafos de código (graphify, AST/tree-sitter) vivem em `references/graphs/<es
 
 ## 3. Como consultar
 
-**Via MCP** (escopos registrados em `.mcp.json` — eft-decompiled + mod ativo): tools `query_graph`, `get_node`, `get_neighbors`, `get_community`, `shortest_path`, `god_nodes`, `graph_stats`.
+**Via MCP** (só `graphify-eft` em `.mcp.json` — o grafo do EFT decompilado, estável e o mais consultado): tools `query_graph`, `get_node`, `get_neighbors`, `get_community`, `shortest_path`, `god_nodes`, `graph_stats`. **Grafos de mod NÃO têm server MCP** (eram um pin fixo que apontava pro mod errado e gerava churn entre os 2 PCs) — consultá-los sempre via CLI abaixo.
 
-**Via CLI** (qualquer escopo, sem server):
+**Via CLI** (qualquer escopo, sem server — caminho padrão para mods):
 
 ```bash
 graphify query "<pergunta>"        --graph references/graphs/<id>/graph.json --budget 2000

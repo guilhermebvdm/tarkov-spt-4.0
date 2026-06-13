@@ -73,7 +73,7 @@ Convenção de artefatos: `NNN-<slug>-MM-tipo[-NN].md` — ordem visual = ordem 
 
 ### Grafos de código
 
-Grafos AST (graphify) de todas as fontes em [references/graphs/](references/graphs/) — versionados; MCP para eft-decompiled + mod ativo; regeneração via `scripts/update-graphs.sh`. Regra: **grafo aponta, leitura do `arquivo.cs:linha` prova**. Ver [references/graphs/README.md](references/graphs/README.md).
+Grafos AST (graphify) de todas as fontes em [references/graphs/](references/graphs/) — versionados; MCP só para eft-decompiled (grafos de mod via CLI `--graph`); regeneração via `scripts/update-graphs.sh`. Regra: **grafo aponta, leitura do `arquivo.cs:linha` prova**. Ver [references/graphs/README.md](references/graphs/README.md).
 
 ### Hierarquia de fontes e antipatterns
 
