@@ -150,7 +150,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "modulepatch",
-      "community": 53,
+      "community": 40,
       "norm_label": "modulepatch"
     },
     {
@@ -8644,10 +8644,20 @@
       "norm_label": "mudbutton"
     },
     {
+      "label": "MudChip",
+      "file_type": "code",
+      "source_file": "Server/Web/Shared/ClassWorkspace.razor",
+      "source_location": "L73",
+      "_origin": "ast",
+      "id": "server_web_shared_classworkspace_razor_mudchip",
+      "community": 66,
+      "norm_label": "mudchip"
+    },
+    {
       "label": "MudAlert",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L87",
+      "source_location": "L83",
       "_origin": "ast",
       "id": "server_web_shared_classworkspace_razor_mudalert",
       "community": 66,
@@ -8657,7 +8667,7 @@
       "label": "SkillCanonicalList",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L104",
+      "source_location": "L100",
       "_origin": "ast",
       "id": "server_web_shared_classworkspace_razor_skillcanonicallist",
       "community": 66,
@@ -8667,7 +8677,7 @@
       "label": "MudNumericField",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L131",
+      "source_location": "L127",
       "_origin": "ast",
       "id": "server_web_shared_classworkspace_razor_mudnumericfield",
       "community": 66,
@@ -8677,7 +8687,7 @@
       "label": "MudIconButton",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L135",
+      "source_location": "L131",
       "_origin": "ast",
       "id": "server_web_shared_classworkspace_razor_mudiconbutton",
       "community": 66,
@@ -8687,7 +8697,7 @@
       "label": "MudStack",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L142",
+      "source_location": "L138",
       "_origin": "ast",
       "id": "server_web_shared_classworkspace_razor_mudstack",
       "community": 66,
@@ -8697,7 +8707,7 @@
       "label": "MudSelect",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L143",
+      "source_location": "L139",
       "_origin": "ast",
       "id": "server_web_shared_classworkspace_razor_mudselect",
       "community": 66,
@@ -8707,27 +8717,17 @@
       "label": "MudSelectItem",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L148",
+      "source_location": "L144",
       "_origin": "ast",
       "id": "server_web_shared_classworkspace_razor_mudselectitem",
       "community": 66,
       "norm_label": "mudselectitem"
     },
     {
-      "label": "MudChip",
-      "file_type": "code",
-      "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L214",
-      "_origin": "ast",
-      "id": "server_web_shared_classworkspace_razor_mudchip",
-      "community": 66,
-      "norm_label": "mudchip"
-    },
-    {
       "label": "CharacterDoll",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L249",
+      "source_location": "L246",
       "_origin": "ast",
       "id": "characterdoll",
       "community": 66,
@@ -8737,7 +8737,7 @@
       "label": "StashGrid",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L255",
+      "source_location": "L252",
       "_origin": "ast",
       "id": "stashgrid",
       "community": 66,
@@ -8747,7 +8747,7 @@
       "label": "ClassDiagnostic",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L292",
+      "source_location": "L289",
       "_origin": "ast",
       "id": "server_web_shared_classworkspace_razor_classdiagnostic",
       "community": 66,
@@ -8757,7 +8757,7 @@
       "label": "ClassWorkspace",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L301",
+      "source_location": "L298",
       "_origin": "ast",
       "id": "server_web_shared_classworkspace_razor_classworkspace",
       "community": 66,
@@ -8767,7 +8767,7 @@
       "label": "ItemSpec",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L325",
+      "source_location": "L322",
       "_origin": "ast",
       "id": "server_web_shared_classworkspace_razor_itemspec",
       "community": 66,
@@ -8777,7 +8777,7 @@
       "label": "SkillTypes",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L629",
+      "source_location": "L640",
       "_origin": "ast",
       "id": "server_web_shared_classworkspace_razor_skilltypes",
       "community": 66,
@@ -8787,7 +8787,7 @@
       "label": "HideoutAreas",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L637",
+      "source_location": "L648",
       "_origin": "ast",
       "id": "hideoutareas",
       "community": 0,
@@ -8797,7 +8797,7 @@
       "label": "SkinPickerDialog",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L685",
+      "source_location": "L701",
       "_origin": "ast",
       "id": "skinpickerdialog",
       "community": 66,
@@ -8807,7 +8807,7 @@
       "label": "SlotEditDialog",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L727",
+      "source_location": "L744",
       "_origin": "ast",
       "id": "sloteditdialog",
       "community": 66,
@@ -8817,77 +8817,97 @@
       "label": "OnParametersSet",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L328",
+      "source_location": "L325",
       "_origin": "ast",
       "id": "shared_classworkspace_onparametersset",
       "community": 66,
       "norm_label": "onparametersset"
     },
     {
-      "label": "EnterEdit",
+      "label": "LoadClothingNames",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L364",
+      "source_location": "L341",
       "_origin": "ast",
-      "id": "shared_classworkspace_enteredit",
+      "id": "shared_classworkspace_loadclothingnames",
       "community": 66,
-      "norm_label": "enteredit"
+      "norm_label": "loadclothingnames"
+    },
+    {
+      "label": "EnterEditFor",
+      "file_type": "code",
+      "source_file": "Server/Web/Shared/ClassWorkspace.razor",
+      "source_location": "L363",
+      "_origin": "ast",
+      "id": "shared_classworkspace_entereditfor",
+      "community": 66,
+      "norm_label": "entereditfor"
     },
     {
       "label": "DiscardEdit",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L403",
+      "source_location": "L379",
       "_origin": "ast",
       "id": "shared_classworkspace_discardedit",
       "community": 66,
       "norm_label": "discardedit"
     },
     {
-      "label": "NavigateToDetail",
-      "file_type": "code",
-      "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L437",
-      "_origin": "ast",
-      "id": "shared_classworkspace_navigatetodetail",
-      "community": 66,
-      "norm_label": "navigatetodetail"
-    },
-    {
       "label": "SaveAsync",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L447",
+      "source_location": "L421",
       "_origin": "ast",
       "id": "shared_classworkspace_saveasync",
       "community": 66,
       "norm_label": "saveasync"
     },
     {
-      "label": "ArmGuard",
+      "label": "RegisterGuardHandlers",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L494",
+      "source_location": "L476",
       "_origin": "ast",
-      "id": "shared_classworkspace_armguard",
+      "id": "shared_classworkspace_registerguardhandlers",
       "community": 66,
-      "norm_label": "armguard"
+      "norm_label": "registerguardhandlers"
     },
     {
-      "label": "DisarmGuard",
+      "label": "MarkDirty",
+      "file_type": "code",
+      "source_file": "Server/Web/Shared/ClassWorkspace.razor",
+      "source_location": "L499",
+      "_origin": "ast",
+      "id": "shared_classworkspace_markdirty",
+      "community": 66,
+      "norm_label": "markdirty"
+    },
+    {
+      "label": "OnSkillsEdited",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "source_location": "L508",
       "_origin": "ast",
-      "id": "shared_classworkspace_disarmguard",
+      "id": "shared_classworkspace_onskillsedited",
       "community": 66,
-      "norm_label": "disarmguard"
+      "norm_label": "onskillsedited"
+    },
+    {
+      "label": "OnLoadoutEdited",
+      "file_type": "code",
+      "source_file": "Server/Web/Shared/ClassWorkspace.razor",
+      "source_location": "L515",
+      "_origin": "ast",
+      "id": "shared_classworkspace_onloadoutedited",
+      "community": 66,
+      "norm_label": "onloadoutedited"
     },
     {
       "label": "OnAfterRenderAsync",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L510",
+      "source_location": "L521",
       "_origin": "ast",
       "id": "shared_classworkspace_onafterrenderasync",
       "community": 66,
@@ -8897,7 +8917,7 @@
       "label": "OnSaveShortcut",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L527",
+      "source_location": "L538",
       "_origin": "ast",
       "id": "shared_classworkspace_onsaveshortcut",
       "community": 66,
@@ -8907,7 +8927,7 @@
       "label": "RecomputeSkillCost",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L540",
+      "source_location": "L551",
       "_origin": "ast",
       "id": "shared_classworkspace_recomputeskillcost",
       "community": 66,
@@ -8917,7 +8937,7 @@
       "label": "RecomputeLoadoutCost",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L548",
+      "source_location": "L559",
       "_origin": "ast",
       "id": "shared_classworkspace_recomputeloadoutcost",
       "community": 66,
@@ -8927,7 +8947,7 @@
       "label": "ScheduleRecompute",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L557",
+      "source_location": "L568",
       "_origin": "ast",
       "id": "shared_classworkspace_schedulerecompute",
       "community": 66,
@@ -8937,7 +8957,7 @@
       "label": "FlushPendingRecompute",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L584",
+      "source_location": "L595",
       "_origin": "ast",
       "id": "shared_classworkspace_flushpendingrecompute",
       "community": 66,
@@ -8947,7 +8967,7 @@
       "label": "Dispose",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L591",
+      "source_location": "L602",
       "_origin": "ast",
       "id": "shared_classworkspace_dispose",
       "community": 66,
@@ -8957,7 +8977,7 @@
       "label": "MultiplierLookup",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L612",
+      "source_location": "L623",
       "_origin": "ast",
       "id": "shared_classworkspace_multiplierlookup",
       "community": 66,
@@ -8967,7 +8987,7 @@
       "label": "AvailableSkills",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L626",
+      "source_location": "L637",
       "_origin": "ast",
       "id": "shared_classworkspace_availableskills",
       "community": 66,
@@ -8977,7 +8997,7 @@
       "label": "AvailableStations",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L634",
+      "source_location": "L645",
       "_origin": "ast",
       "id": "shared_classworkspace_availablestations",
       "community": 66,
@@ -8987,7 +9007,7 @@
       "label": "AddMultiplier",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L642",
+      "source_location": "L653",
       "_origin": "ast",
       "id": "shared_classworkspace_addmultiplier",
       "community": 66,
@@ -8997,7 +9017,7 @@
       "label": "RemoveMultiplier",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L652",
+      "source_location": "L663",
       "_origin": "ast",
       "id": "shared_classworkspace_removemultiplier",
       "community": 66,
@@ -9007,7 +9027,7 @@
       "label": "AddStation",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L658",
+      "source_location": "L669",
       "_origin": "ast",
       "id": "shared_classworkspace_addstation",
       "community": 66,
@@ -9017,7 +9037,7 @@
       "label": "RemoveStation",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L667",
+      "source_location": "L679",
       "_origin": "ast",
       "id": "shared_classworkspace_removestation",
       "community": 66,
@@ -9027,7 +9047,7 @@
       "label": "PickSkinAsync",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L683",
+      "source_location": "L699",
       "_origin": "ast",
       "id": "shared_classworkspace_pickskinasync",
       "community": 66,
@@ -9037,7 +9057,7 @@
       "label": "EditSlotAsync",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L716",
+      "source_location": "L733",
       "_origin": "ast",
       "id": "shared_classworkspace_editslotasync",
       "community": 66,
@@ -9047,7 +9067,7 @@
       "label": "FormatRub",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L756",
+      "source_location": "L775",
       "_origin": "ast",
       "id": "shared_classworkspace_formatrub",
       "community": 66,
@@ -9057,7 +9077,7 @@
       "label": "ClothingLabel",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L759",
+      "source_location": "L778",
       "_origin": "ast",
       "id": "shared_classworkspace_clothinglabel",
       "community": 66,
@@ -9067,7 +9087,7 @@
       "label": "MultiplierLabel",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L769",
+      "source_location": "L788",
       "_origin": "ast",
       "id": "shared_classworkspace_multiplierlabel",
       "community": 66,
@@ -9077,7 +9097,7 @@
       "label": "MapSeverity",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L781",
+      "source_location": "L800",
       "_origin": "ast",
       "id": "shared_classworkspace_mapseverity",
       "community": 66,
@@ -9087,7 +9107,7 @@
       "label": "OutfitCard",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L789",
+      "source_location": "L808",
       "_origin": "ast",
       "id": "shared_classworkspace_outfitcard",
       "community": 66,
@@ -9097,7 +9117,7 @@
       "label": "EditOutfitCard",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L801",
+      "source_location": "L820",
       "_origin": "ast",
       "id": "shared_classworkspace_editoutfitcard",
       "community": 66,
@@ -9107,7 +9127,7 @@
       "label": "OutfitGlyph",
       "file_type": "code",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "source_location": "L825",
+      "source_location": "L844",
       "_origin": "ast",
       "id": "shared_classworkspace_outfitglyph",
       "community": 66,
@@ -11267,7 +11287,7 @@
       "label": "CellStyle",
       "file_type": "code",
       "source_file": "Server/Web/Shared/StashGrid.razor",
-      "source_location": "L308",
+      "source_location": "L310",
       "_origin": "ast",
       "id": "shared_stashgrid_cellstyle",
       "community": 67,
@@ -13487,9 +13507,9 @@
       "source_file": "Client/UI/ClassIconCache.cs",
       "source_location": "L156",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ui_classiconcache_classiconcache",
-      "target": "ui_classiconcache_classiconcache_destroysprite",
-      "confidence_score": 1.0
+      "target": "ui_classiconcache_classiconcache_destroysprite"
     },
     {
       "relation": "method",
@@ -13517,9 +13537,9 @@
       "source_file": "Client/UI/ClassIconCache.cs",
       "source_location": "L74",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ui_classiconcache_classiconcache",
-      "target": "ui_classiconcache_classiconcache_gettinted",
-      "confidence_score": 1.0
+      "target": "ui_classiconcache_classiconcache_gettinted"
     },
     {
       "relation": "references",
@@ -13539,9 +13559,9 @@
       "source_location": "L156",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "ui_classiconcache_classiconcache_destroysprite",
-      "target": "sprite",
-      "confidence_score": 1.0
+      "target": "sprite"
     },
     {
       "relation": "references",
@@ -13550,9 +13570,9 @@
       "source_location": "L74",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "ui_classiconcache_classiconcache_gettinted",
-      "target": "sprite",
-      "confidence_score": 1.0
+      "target": "sprite"
     },
     {
       "relation": "references",
@@ -13561,9 +13581,9 @@
       "source_location": "L74",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "ui_classiconcache_classiconcache_gettinted",
-      "target": "client_ui_classiconcache_cs_color",
-      "confidence_score": 1.0
+      "target": "client_ui_classiconcache_cs_color"
     },
     {
       "relation": "calls",
@@ -13572,9 +13592,9 @@
       "source_file": "Client/UI/ClassIconCache.cs",
       "source_location": "L144",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ui_classiconcache_classiconcache_dispose",
-      "target": "ui_classiconcache_classiconcache_destroysprite",
-      "confidence_score": 1.0
+      "target": "ui_classiconcache_classiconcache_destroysprite"
     },
     {
       "relation": "contains",
@@ -13727,9 +13747,9 @@
       "source_file": "Client/UI/ClassIdentityView.cs",
       "source_location": "L53",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ui_classidentityview_classidentityview",
-      "target": "ui_classidentityview_classidentityview_icongradient",
-      "confidence_score": 1.0
+      "target": "ui_classidentityview_classidentityview_icongradient"
     },
     {
       "relation": "method",
@@ -13845,9 +13865,9 @@
       "source_location": "L53",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "ui_classidentityview_classidentityview_icongradient",
-      "target": "client_ui_classidentityview_cs_color",
-      "confidence_score": 1.0
+      "target": "client_ui_classidentityview_cs_color"
     },
     {
       "relation": "references",
@@ -13878,9 +13898,9 @@
       "source_file": "Client/UI/ClassIdentityView.cs",
       "source_location": "L89",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ui_classidentityview_classidentityview_applyclassicon",
-      "target": "ui_classidentityview_classidentityview_icongradient",
-      "confidence_score": 1.0
+      "target": "ui_classidentityview_classidentityview_icongradient"
     },
     {
       "relation": "calls",
@@ -13889,9 +13909,9 @@
       "source_file": "Client/UI/ClassIdentityView.cs",
       "source_location": "L173",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ui_classidentityview_classidentityview_buildorrefresh",
-      "target": "ui_classidentityview_classidentityview_icongradient",
-      "confidence_score": 1.0
+      "target": "ui_classidentityview_classidentityview_icongradient"
     },
     {
       "relation": "references",
@@ -13900,9 +13920,9 @@
       "source_location": "L53",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "ui_classidentityview_classidentityview_icongradient",
-      "target": "bottom",
-      "confidence_score": 1.0
+      "target": "bottom"
     },
     {
       "relation": "references",
@@ -13911,9 +13931,9 @@
       "source_location": "L53",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "ui_classidentityview_classidentityview_icongradient",
-      "target": "top",
-      "confidence_score": 1.0
+      "target": "top"
     },
     {
       "relation": "references",
@@ -19805,9 +19825,9 @@
       "source_location": "L24",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "server_skillmultipliersrouter_skillmultipliersrouter_getroutes",
-      "target": "classvisualregistry",
-      "confidence_score": 1.0
+      "target": "classvisualregistry"
     },
     {
       "relation": "references",
@@ -20811,9 +20831,9 @@
       "source_file": "Server/Web/Pages/ClassDetail.razor",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "pages_classdetail",
-      "target": "classregistrar",
-      "confidence_score": 1.0
+      "target": "classregistrar"
     },
     {
       "relation": "calls",
@@ -20976,9 +20996,9 @@
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Pages/ClassDetail.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "pages_classdetail",
-      "target": "pages_classdetail_reloadandrefresh",
-      "confidence_score": 1.0
+      "target": "pages_classdetail_reloadandrefresh"
     },
     {
       "relation": "contains",
@@ -21081,9 +21101,9 @@
       "source_file": "Server/Web/Pages/ClassDetail.razor",
       "source_location": "L119",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "pages_classdetail",
-      "target": "server_web_pages_classdetail_razor_classworkspace",
-      "confidence_score": 1.0
+      "target": "server_web_pages_classdetail_razor_classworkspace"
     },
     {
       "relation": "imports",
@@ -21328,18 +21348,18 @@
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Pages/ClassEdit.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "pages_classedit",
-      "target": "pages_classedit_reload",
-      "confidence_score": 1.0
+      "target": "pages_classedit_reload"
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Pages/ClassEdit.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "pages_classedit",
-      "target": "pages_classedit_reloadandrefresh",
-      "confidence_score": 1.0
+      "target": "pages_classedit_reloadandrefresh"
     },
     {
       "relation": "references",
@@ -21366,9 +21386,9 @@
       "source_file": "Server/Web/Pages/ClassEdit.razor",
       "source_location": "L53",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "pages_classedit",
-      "target": "server_web_pages_classedit_razor_classworkspace",
-      "confidence_score": 1.0
+      "target": "server_web_pages_classedit_razor_classworkspace"
     },
     {
       "relation": "imports",
@@ -21446,9 +21466,9 @@
       "source_file": "Server/Web/Pages/ClassEdit.razor",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "pages_classedit",
-      "target": "server_web_pages_classedit_razor_navigationmanager",
-      "confidence_score": 1.0
+      "target": "server_web_pages_classedit_razor_navigationmanager"
     },
     {
       "relation": "calls",
@@ -22079,9 +22099,9 @@
       "source_file": "Server/Web/Pages/PickerTest.razor",
       "source_location": "L84",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "pages_pickertest",
-      "target": "customizationpicker",
-      "confidence_score": 1.0
+      "target": "customizationpicker"
     },
     {
       "relation": "calls",
@@ -22089,9 +22109,9 @@
       "source_file": "Server/Web/Pages/PickerTest.razor",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "pages_pickertest",
-      "target": "mudgrid",
-      "confidence_score": 1.0
+      "target": "mudgrid"
     },
     {
       "relation": "calls",
@@ -22099,9 +22119,9 @@
       "source_file": "Server/Web/Pages/PickerTest.razor",
       "source_location": "L69",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "pages_pickertest",
-      "target": "muditem",
-      "confidence_score": 1.0
+      "target": "muditem"
     },
     {
       "relation": "contains",
@@ -23401,9 +23421,9 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "source_location": "L637",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "hideoutareas",
-      "confidence_score": 1.0
+      "target": "hideoutareas"
     },
     {
       "relation": "imports",
@@ -23421,9 +23441,9 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "source_location": "L292",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "server_web_shared_classworkspace_razor_classdiagnostic",
-      "confidence_score": 1.0
+      "target": "server_web_shared_classworkspace_razor_classdiagnostic"
     },
     {
       "relation": "imports",
@@ -23431,9 +23451,9 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "server_web_shared_classworkspace_razor_classeditorservice",
-      "confidence_score": 1.0
+      "target": "server_web_shared_classworkspace_razor_classeditorservice"
     },
     {
       "relation": "calls",
@@ -23441,9 +23461,9 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "source_location": "L301",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "server_web_shared_classworkspace_razor_classworkspace",
-      "confidence_score": 1.0
+      "target": "server_web_shared_classworkspace_razor_classworkspace"
     },
     {
       "relation": "imports",
@@ -23451,9 +23471,9 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "server_web_shared_classworkspace_razor_costservice",
-      "confidence_score": 1.0
+      "target": "server_web_shared_classworkspace_razor_costservice"
     },
     {
       "relation": "imports",
@@ -23461,9 +23481,9 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "server_web_shared_classworkspace_razor_customclasses_web",
-      "confidence_score": 1.0
+      "target": "server_web_shared_classworkspace_razor_customclasses_web"
     },
     {
       "relation": "imports",
@@ -23471,9 +23491,9 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "source_location": "L33",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "server_web_shared_classworkspace_razor_idialogservice",
-      "confidence_score": 1.0
+      "target": "server_web_shared_classworkspace_razor_idialogservice"
     },
     {
       "relation": "imports",
@@ -23481,9 +23501,9 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "source_location": "L34",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "server_web_shared_classworkspace_razor_ijsruntime",
-      "confidence_score": 1.0
+      "target": "server_web_shared_classworkspace_razor_ijsruntime"
     },
     {
       "relation": "imports",
@@ -23491,9 +23511,9 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "source_location": "L32",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "server_web_shared_classworkspace_razor_isnackbar",
-      "confidence_score": 1.0
+      "target": "server_web_shared_classworkspace_razor_isnackbar"
     },
     {
       "relation": "calls",
@@ -23501,9 +23521,9 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "source_location": "L325",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "server_web_shared_classworkspace_razor_itemspec",
-      "confidence_score": 1.0
+      "target": "server_web_shared_classworkspace_razor_itemspec"
     },
     {
       "relation": "calls",
@@ -23511,9 +23531,9 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "source_location": "L87",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "server_web_shared_classworkspace_razor_mudalert",
-      "confidence_score": 1.0
+      "target": "server_web_shared_classworkspace_razor_mudalert"
     },
     {
       "relation": "calls",
@@ -23521,9 +23541,9 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "source_location": "L73",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "server_web_shared_classworkspace_razor_mudbutton",
-      "confidence_score": 1.0
+      "target": "server_web_shared_classworkspace_razor_mudbutton"
     },
     {
       "relation": "calls",
@@ -23541,9 +23561,9 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "source_location": "L818",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "server_web_shared_classworkspace_razor_mudiconbutton",
-      "confidence_score": 1.0
+      "target": "server_web_shared_classworkspace_razor_mudiconbutton"
     },
     {
       "relation": "calls",
@@ -23551,9 +23571,9 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "source_location": "L185",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "server_web_shared_classworkspace_razor_mudnumericfield",
-      "confidence_score": 1.0
+      "target": "server_web_shared_classworkspace_razor_mudnumericfield"
     },
     {
       "relation": "calls",
@@ -23561,9 +23581,9 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "source_location": "L196",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "server_web_shared_classworkspace_razor_mudselect",
-      "confidence_score": 1.0
+      "target": "server_web_shared_classworkspace_razor_mudselect"
     },
     {
       "relation": "calls",
@@ -23571,9 +23591,9 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "source_location": "L201",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "server_web_shared_classworkspace_razor_mudselectitem",
-      "confidence_score": 1.0
+      "target": "server_web_shared_classworkspace_razor_mudselectitem"
     },
     {
       "relation": "calls",
@@ -23581,9 +23601,9 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "source_location": "L195",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "server_web_shared_classworkspace_razor_mudstack",
-      "confidence_score": 1.0
+      "target": "server_web_shared_classworkspace_razor_mudstack"
     },
     {
       "relation": "calls",
@@ -23601,9 +23621,9 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "source_location": "L31",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "server_web_shared_classworkspace_razor_navigationmanager",
-      "confidence_score": 1.0
+      "target": "server_web_shared_classworkspace_razor_navigationmanager"
     },
     {
       "relation": "calls",
@@ -23621,9 +23641,9 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "source_location": "L629",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "server_web_shared_classworkspace_razor_skilltypes",
-      "confidence_score": 1.0
+      "target": "server_web_shared_classworkspace_razor_skilltypes"
     },
     {
       "relation": "imports",
@@ -23641,9 +23661,9 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "server_web_shared_classworkspace_razor_sptarkov_server_core_models_enums",
-      "confidence_score": 1.0
+      "target": "server_web_shared_classworkspace_razor_sptarkov_server_core_models_enums"
     },
     {
       "relation": "imports",
@@ -23660,45 +23680,36 @@
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "shared_classworkspace_addmultiplier",
-      "confidence_score": 1.0
+      "target": "shared_classworkspace_addmultiplier"
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "shared_classworkspace_addstation",
-      "confidence_score": 1.0
+      "target": "shared_classworkspace_addstation"
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "shared_classworkspace_armguard",
-      "confidence_score": 1.0
+      "target": "shared_classworkspace_availableskills"
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "shared_classworkspace_availableskills",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "weight": 1.0,
-      "source": "shared_classworkspace",
-      "target": "shared_classworkspace_availablestations",
-      "confidence_score": 1.0
+      "target": "shared_classworkspace_availablestations"
     },
     {
       "relation": "contains",
@@ -23714,9 +23725,36 @@
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "shared_classworkspace_disarmguard",
-      "confidence_score": 1.0
+      "target": "shared_classworkspace_discardedit"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/Web/Shared/ClassWorkspace.razor",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "shared_classworkspace",
+      "target": "shared_classworkspace_dispose"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/Web/Shared/ClassWorkspace.razor",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "shared_classworkspace",
+      "target": "shared_classworkspace_editoutfitcard"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/Web/Shared/ClassWorkspace.razor",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "shared_classworkspace",
+      "target": "shared_classworkspace_editslotasync"
     },
     {
       "relation": "contains",
@@ -23724,7 +23762,7 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "weight": 1.0,
       "source": "shared_classworkspace",
-      "target": "shared_classworkspace_discardedit",
+      "target": "shared_classworkspace_entereditfor",
       "confidence_score": 1.0
     },
     {
@@ -23732,45 +23770,9 @@
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "shared_classworkspace_dispose",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "weight": 1.0,
-      "source": "shared_classworkspace",
-      "target": "shared_classworkspace_editoutfitcard",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "weight": 1.0,
-      "source": "shared_classworkspace",
-      "target": "shared_classworkspace_editslotasync",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "weight": 1.0,
-      "source": "shared_classworkspace",
-      "target": "shared_classworkspace_enteredit",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "weight": 1.0,
-      "source": "shared_classworkspace",
-      "target": "shared_classworkspace_flushpendingrecompute",
-      "confidence_score": 1.0
+      "target": "shared_classworkspace_flushpendingrecompute"
     },
     {
       "relation": "contains",
@@ -23787,7 +23789,25 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "weight": 1.0,
       "source": "shared_classworkspace",
-      "target": "shared_classworkspace_mapseverity",
+      "target": "shared_classworkspace_loadclothingnames",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/Web/Shared/ClassWorkspace.razor",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "shared_classworkspace",
+      "target": "shared_classworkspace_mapseverity"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/Web/Shared/ClassWorkspace.razor",
+      "weight": 1.0,
+      "source": "shared_classworkspace",
+      "target": "shared_classworkspace_markdirty",
       "confidence_score": 1.0
     },
     {
@@ -23804,9 +23824,18 @@
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "shared_classworkspace_multiplierlookup",
-      "confidence_score": 1.0
+      "target": "shared_classworkspace_multiplierlookup"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/Web/Shared/ClassWorkspace.razor",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "shared_classworkspace",
+      "target": "shared_classworkspace_onafterrenderasync"
     },
     {
       "relation": "contains",
@@ -23814,16 +23843,7 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "weight": 1.0,
       "source": "shared_classworkspace",
-      "target": "shared_classworkspace_navigatetodetail",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "weight": 1.0,
-      "source": "shared_classworkspace",
-      "target": "shared_classworkspace_onafterrenderasync",
+      "target": "shared_classworkspace_onloadoutedited",
       "confidence_score": 1.0
     },
     {
@@ -23840,8 +23860,17 @@
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "shared_classworkspace_onsaveshortcut",
+      "target": "shared_classworkspace_onsaveshortcut"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/Web/Shared/ClassWorkspace.razor",
+      "weight": 1.0,
+      "source": "shared_classworkspace",
+      "target": "shared_classworkspace_onskillsedited",
       "confidence_score": 1.0
     },
     {
@@ -23858,9 +23887,36 @@
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "shared_classworkspace_outfitglyph",
-      "confidence_score": 1.0
+      "target": "shared_classworkspace_outfitglyph"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/Web/Shared/ClassWorkspace.razor",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "shared_classworkspace",
+      "target": "shared_classworkspace_pickskinasync"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/Web/Shared/ClassWorkspace.razor",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "shared_classworkspace",
+      "target": "shared_classworkspace_recomputeloadoutcost"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/Web/Shared/ClassWorkspace.razor",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "shared_classworkspace",
+      "target": "shared_classworkspace_recomputeskillcost"
     },
     {
       "relation": "contains",
@@ -23868,7 +23924,7 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "weight": 1.0,
       "source": "shared_classworkspace",
-      "target": "shared_classworkspace_pickskinasync",
+      "target": "shared_classworkspace_registerguardhandlers",
       "confidence_score": 1.0
     },
     {
@@ -23876,54 +23932,36 @@
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "shared_classworkspace_recomputeloadoutcost",
-      "confidence_score": 1.0
+      "target": "shared_classworkspace_removemultiplier"
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "shared_classworkspace_recomputeskillcost",
-      "confidence_score": 1.0
+      "target": "shared_classworkspace_removestation"
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "shared_classworkspace_removemultiplier",
-      "confidence_score": 1.0
+      "target": "shared_classworkspace_saveasync"
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "shared_classworkspace_removestation",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "weight": 1.0,
-      "source": "shared_classworkspace",
-      "target": "shared_classworkspace_saveasync",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "Server/Web/Shared/ClassWorkspace.razor",
-      "weight": 1.0,
-      "source": "shared_classworkspace",
-      "target": "shared_classworkspace_schedulerecompute",
-      "confidence_score": 1.0
+      "target": "shared_classworkspace_schedulerecompute"
     },
     {
       "relation": "calls",
@@ -23931,9 +23969,9 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "source_location": "L692",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "skinpickerdialog",
-      "confidence_score": 1.0
+      "target": "skinpickerdialog"
     },
     {
       "relation": "calls",
@@ -23941,9 +23979,9 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "source_location": "L734",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "sloteditdialog",
-      "confidence_score": 1.0
+      "target": "sloteditdialog"
     },
     {
       "relation": "imports",
@@ -23951,9 +23989,9 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "sptarkov_server_core_models_enums_hideout",
-      "confidence_score": 1.0
+      "target": "sptarkov_server_core_models_enums_hideout"
     },
     {
       "relation": "calls",
@@ -25642,9 +25680,9 @@
       "source_file": "Server/Web/Shared/SlotEditDialog.razor",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_sloteditdialog",
-      "target": "server_web_shared_sloteditdialog_razor_customclasses_web",
-      "confidence_score": 1.0
+      "target": "server_web_shared_sloteditdialog_razor_customclasses_web"
     },
     {
       "relation": "calls",
@@ -25652,9 +25690,9 @@
       "source_file": "Server/Web/Shared/SlotEditDialog.razor",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_sloteditdialog",
-      "target": "server_web_shared_sloteditdialog_razor_dialogactions",
-      "confidence_score": 1.0
+      "target": "server_web_shared_sloteditdialog_razor_dialogactions"
     },
     {
       "relation": "calls",
@@ -25662,9 +25700,9 @@
       "source_file": "Server/Web/Shared/SlotEditDialog.razor",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_sloteditdialog",
-      "target": "server_web_shared_sloteditdialog_razor_dialogcontent",
-      "confidence_score": 1.0
+      "target": "server_web_shared_sloteditdialog_razor_dialogcontent"
     },
     {
       "relation": "calls",
@@ -25672,9 +25710,9 @@
       "source_file": "Server/Web/Shared/SlotEditDialog.razor",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_sloteditdialog",
-      "target": "server_web_shared_sloteditdialog_razor_itemspeceditor",
-      "confidence_score": 1.0
+      "target": "server_web_shared_sloteditdialog_razor_itemspeceditor"
     },
     {
       "relation": "calls",
@@ -25682,9 +25720,9 @@
       "source_file": "Server/Web/Shared/SlotEditDialog.razor",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_sloteditdialog",
-      "target": "server_web_shared_sloteditdialog_razor_mudbutton",
-      "confidence_score": 1.0
+      "target": "server_web_shared_sloteditdialog_razor_mudbutton"
     },
     {
       "relation": "calls",
@@ -25692,9 +25730,9 @@
       "source_file": "Server/Web/Shared/SlotEditDialog.razor",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_sloteditdialog",
-      "target": "server_web_shared_sloteditdialog_razor_muddialog",
-      "confidence_score": 1.0
+      "target": "server_web_shared_sloteditdialog_razor_muddialog"
     },
     {
       "relation": "calls",
@@ -25702,9 +25740,9 @@
       "source_file": "Server/Web/Shared/SlotEditDialog.razor",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_sloteditdialog",
-      "target": "server_web_shared_sloteditdialog_razor_mudtext",
-      "confidence_score": 1.0
+      "target": "server_web_shared_sloteditdialog_razor_mudtext"
     },
     {
       "relation": "calls",
@@ -25712,18 +25750,18 @@
       "source_file": "Server/Web/Shared/SlotEditDialog.razor",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_sloteditdialog",
-      "target": "server_web_shared_sloteditdialog_razor_titlecontent",
-      "confidence_score": 1.0
+      "target": "server_web_shared_sloteditdialog_razor_titlecontent"
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Shared/SlotEditDialog.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_sloteditdialog",
-      "target": "shared_sloteditdialog_oneditorchanged",
-      "confidence_score": 1.0
+      "target": "shared_sloteditdialog_oneditorchanged"
     },
     {
       "relation": "calls",
@@ -25731,9 +25769,9 @@
       "source_file": "Server/Web/Shared/StashGrid.razor",
       "source_location": "L81",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_stashgrid",
-      "target": "itemspecmodel",
-      "confidence_score": 1.0
+      "target": "itemspecmodel"
     },
     {
       "relation": "calls",
@@ -25771,9 +25809,9 @@
       "source_file": "Server/Web/Shared/StashGrid.razor",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_stashgrid",
-      "target": "server_web_shared_stashgrid_razor_customclasses_web",
-      "confidence_score": 1.0
+      "target": "server_web_shared_stashgrid_razor_customclasses_web"
     },
     {
       "relation": "calls",
@@ -25801,9 +25839,9 @@
       "source_file": "Server/Web/Shared/StashGrid.razor",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_stashgrid",
-      "target": "server_web_shared_stashgrid_razor_microsoft_aspnetcore_components_web",
-      "confidence_score": 1.0
+      "target": "server_web_shared_stashgrid_razor_microsoft_aspnetcore_components_web"
     },
     {
       "relation": "imports",
@@ -25830,27 +25868,27 @@
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Shared/StashGrid.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_stashgrid",
-      "target": "shared_stashgrid_addcell",
-      "confidence_score": 1.0
+      "target": "shared_stashgrid_addcell"
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Shared/StashGrid.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_stashgrid",
-      "target": "shared_stashgrid_build",
-      "confidence_score": 1.0
+      "target": "shared_stashgrid_build"
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Shared/StashGrid.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_stashgrid",
-      "target": "shared_stashgrid_canplace",
-      "confidence_score": 1.0
+      "target": "shared_stashgrid_canplace"
     },
     {
       "relation": "contains",
@@ -25866,18 +25904,18 @@
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Shared/StashGrid.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_stashgrid",
-      "target": "shared_stashgrid_iteminner",
-      "confidence_score": 1.0
+      "target": "shared_stashgrid_iteminner"
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Shared/StashGrid.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_stashgrid",
-      "target": "shared_stashgrid_ondrop",
-      "confidence_score": 1.0
+      "target": "shared_stashgrid_ondrop"
     },
     {
       "relation": "contains",
@@ -25902,27 +25940,27 @@
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Shared/StashGrid.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_stashgrid",
-      "target": "shared_stashgrid_rotateasync",
-      "confidence_score": 1.0
+      "target": "shared_stashgrid_rotateasync"
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Shared/StashGrid.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_stashgrid",
-      "target": "shared_stashgrid_sourceitems",
-      "confidence_score": 1.0
+      "target": "shared_stashgrid_sourceitems"
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Shared/StashGrid.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_stashgrid",
-      "target": "shared_stashgrid_srcitem",
-      "confidence_score": 1.0
+      "target": "shared_stashgrid_srcitem"
     },
     {
       "relation": "calls",
@@ -25930,9 +25968,9 @@
       "source_file": "Server/Web/Shared/StashGrid.razor",
       "source_location": "L185",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_stashgrid",
-      "target": "srcitem",
-      "confidence_score": 1.0
+      "target": "srcitem"
     },
     {
       "relation": "imports",
@@ -26288,9 +26326,9 @@
       "source_file": "Server/Web/_imports.razor",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "web_imports",
-      "target": "server_web_imports_razor_microsoft_aspnetcore_components_web",
-      "confidence_score": 1.0
+      "target": "server_web_imports_razor_microsoft_aspnetcore_components_web"
     },
     {
       "relation": "imports",
@@ -26365,5 +26403,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "ff971888b21d7e292df1aaef04c38f09ba4660fc"
+  "built_at_commit": "428257cf04d0cf1e159a488cf6b12a7b7387ed68"
 }
