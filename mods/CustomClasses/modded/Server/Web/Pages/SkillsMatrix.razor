@@ -25,7 +25,13 @@
 
 <PageTitle>CustomClasses — Skills matrix</PageTitle>
 
-<MudText Typo="Typo.h5" Class="mb-1">Skills matrix</MudText>
+@* QA 2026-06-12: wrapped in the standard MudContainer(False)+MudPaper(pa-6) shell like the other
+   pages (Classes/ClassDetail/Home) so the page has the same top margin and padding, and the matrix
+   no longer hugs the top-left edge. *@
+<MudContainer MaxWidth="MaxWidth.False" Class="mt-4">
+<MudPaper Elevation="0" Class="pa-6">
+
+<MudText Typo="Typo.h4" Class="mb-1">Skills matrix</MudText>
 <MudText Typo="Typo.body2" Class="mb-3" Style="opacity:.7">
     Compare every class side by side — rows are skills in canonical order, columns are classes.
     Click any cell to open the class.
@@ -98,6 +104,9 @@ else
         </table>
     </div>
 }
+
+</MudPaper>
+</MudContainer>
 
 @* Scoped styles ported from profiles-skills.css:25-127. Viewer tokens (--accent-bright,
    --fg-dim, --border-subtle, --bg-hover) do NOT exist in the editor — substituted by MudBlazor
