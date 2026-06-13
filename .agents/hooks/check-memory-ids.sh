@@ -19,12 +19,16 @@ while IFS= read -r FILE; do
   [ -f "$FILE" ] || continue
   # Extract the lines between the "Pendências" heading and the next "## " heading,
   # then flag top-level bullets that have no [P- id.
+  # Varre SÓ o primeiro bloco "Pendências" (snapshot do topo) e para no próximo
+  # heading de qualquer nível — assim blocos "(ARQUIVADO)" e menções históricas
+  # dentro de entradas de sessão não geram falso positivo.
   # NB: git-bash GNU awk roda em locale de byte único — o 'ê' de "Pendências" são 2
   # bytes (0xC3 0xAA), então um '.' não casa. Usar .* entre 'end' e 'ncias'.
   BAD=$(awk '
-    /^## .*[Pp]end.*ncias/ { inblk=1; next }
-    inblk && /^## / { inblk=0 }
+    done { next }
+    inblk && /^#/ { done=1; next }
     inblk && /^- / && $0 !~ /\[P-[0-9]/ { print }
+    !inblk && /^## .*[Pp]end.*ncias/ { inblk=1 }
   ' "$FILE" || true)
   if [ -n "$BAD" ]; then
     echo "⚠ $FILE — bullet(s) de pendência sem [P-N.M] (memory-curation §7):" >&2
