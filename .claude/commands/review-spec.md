@@ -2,7 +2,7 @@
 
 Revisão crítica e **edição inline** da spec funcional. Não cria arquivo novo — corrige o existente.
 
-> **Skills obrigatórias:** carregar `spt-mod-best-practices` e `csharp-mod-best-practices` para identificar lacunas técnicas (lifecycle de raid, leaks, patches, threading) que a spec funcional precise mencionar como restrições/critérios.
+> **Skills obrigatórias:** carregar `spt-mod-best-practices`, `csharp-mod-best-practices` e `memory-curation` (§14 — passo de contexto de memória) para identificar lacunas técnicas (lifecycle de raid, leaks, patches, threading) e lições prévias que a spec funcional precise mencionar como restrições/critérios.
 
 ## Uso
 
@@ -40,6 +40,7 @@ Revisão crítica e **edição inline** da spec funcional. Não cria arquivo nov
 6. **Reportar ao usuário** um diff resumido:
    ```
    ✓ Spec revisada: <path>
+   Memória consultada: snapshot de YYYY-MM-DD (Sessão N) [ou "sem memória prévia"] · pendências que afetam: [P-N.M ...] / nenhuma
    Mudanças:
      - Critério "X" reescrito para verificabilidade
      - Adicionados N corner cases (lista)

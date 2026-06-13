@@ -281,18 +281,22 @@ A memória só paga seu custo se for LIDA. Os commands de desenvolvimento (`/cre
 3. Se nada casa (item novo): ler apenas a última entrada de sessão.
 4. Se `sessions.md` não existe: seguir normalmente e registrar "sem memória prévia" no relatório.
 
+**Tiers de leitura (intencional):** `/code-mod`, `/code-review`, `/create-technical-spec`, `/review-technical-spec` fazem a leitura **completa** (snapshot + grep do item `<NNN>`), pois operam sobre um item já especificado. `/create-spec` e `/review-spec` fazem leitura **leve** (só snapshot + pendências), porque o item é novo/funcional e ainda não tem entradas próprias — as lições do snapshot viram corner cases. `/apply-code-review` lê leve mas mantém o alerta de 🔴 do item/mod. Em todos, o alerta de 🔴 e a linha de provenance abaixo são obrigatórios.
+
 **O que fazer com pendências:**
 
 - 🔴 **do item em questão** (ou que bloqueia o mod inteiro — ex.: build quebrado, validação in-game pendente do mesmo código que será tocado): **alertar o usuário antes de prosseguir** e perguntar se continua. Não é bloqueio automático — é decisão humana informada.
 - 🟡 **relacionadas ao mesmo sistema/arquivo:** citar como risco no artefato (spec técnica §7 "Riscos e dependências"; review como evidência de ponto).
 - 🟢: mencionar só se diretamente relacionada à tarefa.
 
-**Output obrigatório do passo** — 2-5 linhas no início do trabalho do command:
+**Output obrigatório do passo — linha de provenance greppável.** No INÍCIO do trabalho, emitir literalmente (começando com o token `Memória consultada:`), e repetir no bloco de confirmação/relatório final do command:
 
 ```text
-Memória consultada: snapshot de YYYY-MM-DD (Sessão N).
+Memória consultada: snapshot de YYYY-MM-DD (Sessão N)   [ou: "sem memória prévia" / "item novo, última entrada Sessão N"]
 Pendências que afetam esta tarefa: [P-N.M <resumo>] / nenhuma.
 ```
+
+O token `Memória consultada:` é a única prova de que a leitura aconteceu — sem ele, um leitor/revisor não distingue "li e não havia nada" de "não li". Por isso é obrigatório mesmo no caso vazio.
 
 **Regra de evidência:** memória aponta, artefato confirma — nenhum claim técnico vindo da memória entra num artefato sem reconferir o `arquivo:linha` atual (o código pode ter mudado desde a gravação).
 

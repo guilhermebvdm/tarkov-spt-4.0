@@ -86,6 +86,7 @@ Aplica em `modded/` os achados de um `04-code-review-NN.md` marcados como **Acei
 
     ```text
     ✓ Apply code-review concluído — <NNN> <Título> (rodada NN)
+    Memória consultada: snapshot de YYYY-MM-DD (Sessão N) · pendências que afetam: [P-N.M ...] / nenhuma
     Achados aplicados: N (IDs: CR-NN-01, CR-NN-03, CR-NN-05)
     Achados rejeitados: M (IDs: CR-NN-04)
     Achados pulados (clarificar): K (IDs: CR-NN-07)

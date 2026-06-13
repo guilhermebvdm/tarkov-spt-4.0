@@ -51,6 +51,7 @@ Cria a **spec funcional** de um item do backlog (sem código — foca em intenç
 7. **Confirmar:**
    ```
    ✓ Spec funcional criada: mods/<mod>/backlog/<NNN>-<slug>/<NNN>-<slug>-01-spec.md
+   Memória consultada: snapshot de YYYY-MM-DD (Sessão N) [ou "sem memória prévia"] · pendências que afetam: [P-N.M ...] / nenhuma
    Próximo: revise o conteúdo e rode /review-spec <ref>
    ```
 

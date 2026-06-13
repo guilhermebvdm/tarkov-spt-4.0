@@ -59,6 +59,7 @@ Implementa um item do backlog em `mods/<mod>/modded/`, seguindo a spec técnica 
 
    ```text
    ✓ Build concluído — <NNN> <Título>
+   Memória consultada: snapshot de YYYY-MM-DD (Sessão N) · pendências que afetam: [P-N.M ...] / nenhuma
    Arquivos alterados:
      - mods/<mod>/modded/Plugin.cs (modificado)
      - mods/<mod>/modded/Patches/<X>.cs (criado)

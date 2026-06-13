@@ -91,6 +91,7 @@ Se alguma pré-condição falhar, parar com mensagem clara.
 
    ```text
    ✓ Code review NN criada: <path>
+     Memória consultada: snapshot de YYYY-MM-DD (Sessão N) · pendências que afetam: [P-N.M ...] / nenhuma
      🔴 Bloqueadores: N · 🟠 Fortes: N · 🟡 Médios: N · 🟢 Menores: N
    Status:
      [se houver 🔴]: item NÃO está pronto pra fechar — rode /apply-code-review primeiro.

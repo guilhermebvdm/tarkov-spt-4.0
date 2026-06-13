@@ -66,7 +66,7 @@ Fonte de verdade desta ordem: [.agents/resources.md](../../.agents/resources.md)
    ✓ Spec técnica criada: <path>
    Refs ao Assembly: N (verificadas)
    Stubs C# compiláveis: N
-   Memória: N pendências relevantes citadas
+   Memória consultada: snapshot de YYYY-MM-DD (Sessão N) · pendências que afetam: [P-N.M ...] / nenhuma
    Conformidade: 8/8 checks ✅ ou N/A justificado
    Próximo: rode /review-technical-spec <ref> para análise crítica
    ```

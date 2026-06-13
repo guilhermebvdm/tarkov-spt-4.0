@@ -69,6 +69,7 @@ Análise crítica da spec técnica. **Cria** um arquivo novo `NNN-<slug>-03-spec
 9. **Reportar:**
    ```
    ✓ Review NN criada: <path>
+     Memória consultada: snapshot de YYYY-MM-DD (Sessão N) · pendências que afetam: [P-N.M ...] / nenhuma
      🔴 Bloqueadores: N · 🟡 Importantes: N · 🟢 Menores: N
    Status:
      [se houver 🔴]: NÃO está pronto pra build — resolver bloqueadores primeiro.
