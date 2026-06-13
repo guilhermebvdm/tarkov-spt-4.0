@@ -29,7 +29,7 @@ Implementa um item do backlog em `mods/<mod>/modded/`, seguindo a spec técnica 
    - Spec técnica completa.
    - Última review (e quaisquer pontos `🟡`/`🟢` ainda pendentes — registrar para resolver durante).
    - Os arquivos do Assembly citados na spec, **conferindo `arquivo:linha`** antes de escrever código que dependa deles.
-   - Estado atual de `mods/<mod>/modded/` para entender onde encaixar.
+   - Estado atual de `mods/<mod>/modded/` para entender onde encaixar. **Grafo do mod** (`references/graphs/mods/<mod>/`, skill `graph-code-navigation`): `query_graph` pelos conceitos da feature para localizar utilities/patterns existentes — reuso > invenção.
 
 4. **Implementar seguindo o checklist da spec técnica**, em ordem:
    - **Apenas em `mods/<mod>/modded/`.** Nunca tocar em `original/`.
@@ -68,6 +68,7 @@ Implementa um item do backlog em `mods/<mod>/modded/`, seguindo a spec técnica 
    Próximo:
      - Build do .dll: /compile-mod <mod>
      - /code-review <ref> para análise crítica do código implementado
+     - Entrega substancial → /update-mod-graph <mod> (regenera o grafo do mod)
    ```
 
 ## Regras

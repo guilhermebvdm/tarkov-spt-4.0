@@ -22,10 +22,13 @@ Adiciona um novo mod ao repositório clonando da URL fornecida e criando a estru
    - Para cada propriedade, registre em uma linha de tabela: nome em inglês, tradução pt-BR, tipo (`bool`/`float`/`int`/`KeyCode`/etc.), valor padrão, faixa (`AcceptableValueRange`, se houver), e a coluna **Tooltip (pt-BR)** com a tradução fiel do `ConfigDescription` (texto do tooltip que aparece ao passar o mouse).
    - Marque com **(Avançado)** as entradas que tenham `IsAdvanced = true` em `ConfigurationManagerAttributes` — adicione coluna "Avançado" na tabela ou anote no cabeçalho da seção quando todas forem avançadas.
    - Inclua no topo: nome do plugin (`BepInPlugin`), versão, link `[original/Plugin.cs](original/Plugin.cs)` (ou arquivo equivalente), e nota de que itens **(Avançado)** só aparecem com "Advanced settings" ligado no F12.
-4. Em sucesso, confirme ao usuário:
+4. **Gerar o grafo inicial do mod** — rodar `/update-mod-graph <Nome>` (o escopo `mods/<Nome>/modded` é auto-descoberto pelo glob do `scripts/update-graphs.sh` — sem registro manual). Adicionar ao `README.md` do mod uma seção curta "Mapa de código" apontando para `references/graphs/mods/<Nome>/GRAPH_REPORT.md` e o comando de regeneração. Se o graphify não estiver instalado, **pular com aviso** (instruções em `references/graphs/README.md`).
+
+5. Em sucesso, confirme ao usuário:
    - nome do mod e pasta criada
    - SHA do upstream capturado
    - se `PROPRIEDADES.md` foi gerado (ou que foi pulado por não ser BepInEx)
+   - se o grafo de código foi gerado (ou pulado por graphify ausente)
    - lembrete: editar `mod.json` (preencher `spt_version`) e `README.md`
 
 ## O que o script faz

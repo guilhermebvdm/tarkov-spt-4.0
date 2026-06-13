@@ -27,6 +27,7 @@ Análise crítica da spec técnica. **Cria** um arquivo novo `NNN-<slug>-technic
    - Reviews anteriores `<NNN>-<slug>-03-spec-tech-review-*.md` — pontos já resolvidos não devem ser refeitos; pontos pendentes podem ser revalidados.
    - Os arquivos do Assembly citados na spec técnica — confirmar que as linhas batem com o que a spec afirma.
    - A seção **9. Conformidade com skills** da spec técnica — conferir cada evidência citada. Check marcado ✅ sem evidência verificável = ponto **Categoria C — 🔴 Bloqueador**; check N/A com razão frágil = ponto Categoria A.
+   - **Grafo de código** (skill `graph-code-navigation`): `get_neighbors` no alvo de patch para verificar se a spec auditou todos os overrides/callers (evidência negativa barata — auditoria ausente em alvo virtual = ponto Categoria C, AP-03).
    - `mods/<mod>/modded/` — checar conflitos com patches existentes.
 
 5. **Análise crítica em 3 categorias × 3 impactos:**

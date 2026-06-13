@@ -183,6 +183,11 @@ Após confirmação do usuário (ou com `--all` que skipa):
    GC: K pendências >30d decididas
    Promoções propostas: M
    ```
+3. **Gancho do grafo de código:** se a classificação do passo 1 detectou mudança de **código** em algum mod (não só docs/spec/memória), perguntar:
+   ```text
+   Houve mudança de código em <mod> nesta sessão — rodar /update-mod-graph <mod> agora? [y/N]
+   ```
+   Sessões só de docs/spec/memória não disparam a pergunta.
 
 ## Regras
 

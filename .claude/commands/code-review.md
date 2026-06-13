@@ -37,6 +37,7 @@ Se alguma pré-condição falhar, parar com mensagem clara.
    - `05-asbuild.md` (se existir) — para a lista canônica de arquivos tocados.
    - Os arquivos de `mods/<mod>/modded/` modificados/criados pelo item. Resolver via `05-asbuild.md` quando disponível; caso contrário, via §4 da spec técnica.
    - O Assembly nas linhas citadas pelos stubs da spec técnica — confirmar que o código implementado bate com as refs.
+   - **Grafo do mod** (skill `graph-code-navigation`): `graphify affected "<classe/método tocado>"` para mapear callers afetados pelo diff — impacto além dos arquivos tocados.
 
 5. **Análise crítica em 6 categorias × 4 impactos:**
 

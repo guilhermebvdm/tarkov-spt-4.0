@@ -2,7 +2,7 @@
 
 Cria a **spec técnica** (pré-código) de um item do backlog, usando o Assembly descompilado como fonte primária.
 
-> **Skills obrigatórias:** carregar `spt-mod-best-practices`, `csharp-mod-best-practices` e `repo-workflow-best-practices` antes de redigir. Toda decisão técnica (lifecycle, leaks, hot paths, patches, threading) deve ser ancorada nelas. Consultar `memory-curation` § "Consumo de memória por commands" (§14) para o passo de contexto de memória.
+> **Skills obrigatórias:** carregar `spt-mod-best-practices`, `csharp-mod-best-practices`, `repo-workflow-best-practices` e `graph-code-navigation` antes de redigir. Toda decisão técnica (lifecycle, leaks, hot paths, patches, threading) deve ser ancorada nelas. Consultar `memory-curation` § "Consumo de memória por commands" (§14) para o passo de contexto de memória.
 
 ## Uso
 
@@ -38,7 +38,8 @@ Fonte de verdade desta ordem: [.agents/resources.md](../../.agents/resources.md)
    - `mods/<mod>/PROPRIEDADES.md` se existir.
 
 5. **Pesquisar no Assembly.** Para cada comportamento da spec funcional:
-   - Identificar a classe e método mais provável (Grep por palavras-chave).
+   - **Grafo primeiro** (skill `graph-code-navigation`): `query_graph`/`get_neighbors` para localizar classes, callers/callees e **TODOS os overrides de alvos virtuais (AP-03)** antes do Grep manual; `shortest_path` para a cadeia input→efeito do fluxo de dados (§6). O grafo aponta, a leitura prova.
+   - Identificar a classe e método mais provável (Grep por palavras-chave quando a busca for textual: strings, configs, logs).
    - Ler o trecho relevante e capturar `arquivo:linha` exatos.
    - Anotar fórmula, constantes, dependências.
    - Investigar callers e callees até ter um fluxo de dados completo.
