@@ -45,7 +45,7 @@
         @SkillRow(entry, level, compareLevels)
     }
 
-    @if (overflow.Count > 0 || (Editable && !string.IsNullOrEmpty(_outsideToAdd)))
+    @if (overflow.Count > 0)
     {
         @OverflowHeader()
         @foreach (var name in overflow)
@@ -56,32 +56,6 @@
     }
     </tbody>
 </MudSimpleTable>
-
-@if (Editable)
-{
-    @* B3 — parity with the removed "Add skill": let the author add a skill that is NOT in the
-       canonical master (dead enum members like SMG/Sniping). It lands in the overflow section. *@
-    var addable = OutsideCanonicalNames().ToList();
-    if (addable.Count > 0)
-    {
-        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mt-3">
-            <MudSelect T="string" @bind-Value="_outsideToAdd" Label="Add skill outside canonical"
-                       Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true"
-                       Style="min-width:280px">
-                @foreach (var name in addable)
-                {
-                    <MudSelectItem T="string" Value="@name">@name</MudSelectItem>
-                }
-            </MudSelect>
-            <MudButton Variant="Variant.Outlined" Color="Color.Primary"
-                       StartIcon="@Icons.Material.Filled.Add"
-                       Disabled="@string.IsNullOrEmpty(_outsideToAdd)"
-                       OnClick="AddOutsideAsync">
-                Add
-            </MudButton>
-        </MudStack>
-    }
-}
 
 @code {
     /// <summary>Edit mode: a numeric field per row (031/ClassEdit). false = read-only (033/ClassDetail).</summary>
@@ -115,7 +89,6 @@
     /// <summary>Raised quando um multiplicador muda no editor in-row (recompute do custo + dirty).</summary>
     [Parameter] public EventCallback OnMultipliersChanged { get; set; }
 
-    private string _outsideToAdd = string.Empty;
 
     // ── Level resolution (precedence: EditRows → Levels), case-insensitive (B2) ──────────────
 
@@ -194,20 +167,21 @@
             }
         }
 
+        // EDIT: lista TODAS as skills não-canônicas do enum (mesmo sem valor) para serem editáveis
+        // direto na tabela — substitui o antigo dropdown "Add skill outside canonical".
+        if (EditRows is not null)
+        {
+            foreach (var name in Enum.GetNames<SkillTypes>())
+            {
+                if (!canonical.Contains(name) && seen.Add(name))
+                {
+                    overflow.Add(name);
+                }
+            }
+        }
+
+        overflow.Sort(StringComparer.OrdinalIgnoreCase);
         return overflow;
-    }
-
-    /// <summary>Enum names that are NOT canonical and not already in EditRows — offered by the "Add" affordance (B3).</summary>
-    private IEnumerable<string> OutsideCanonicalNames()
-    {
-        var canonical = new HashSet<string>(
-            SkillMaster.Entries.Select(e => e.Name), StringComparer.OrdinalIgnoreCase);
-        var used = new HashSet<string>(
-            EditRows?.Select(r => r.Skill) ?? [], StringComparer.OrdinalIgnoreCase);
-
-        return Enum.GetNames<SkillTypes>()
-            .Where(n => !canonical.Contains(n) && !used.Contains(n))
-            .OrderBy(n => n, StringComparer.OrdinalIgnoreCase);
     }
 
     // ── Level get/set per row (edit mode) ───────────────────────────────────────────────────
@@ -237,21 +211,6 @@
         }
         // value == 0 with no row → intentionally nothing (round-trip: no new zero).
 
-        await OnLevelChanged.InvokeAsync();
-        StateHasChanged();
-    }
-
-    private async Task AddOutsideAsync()
-    {
-        if (EditRows is null || string.IsNullOrEmpty(_outsideToAdd))
-        {
-            return;
-        }
-
-        // Add with a level so it actually persists (a 0 would be dropped by ToDefinition on a fresh row);
-        // the author then edits it inline like any other row.
-        EditRows.Add(new SkillLevelRow { Skill = _outsideToAdd, Level = 1 });
-        _outsideToAdd = string.Empty;
         await OnLevelChanged.InvokeAsync();
         StateHasChanged();
     }
@@ -380,8 +339,24 @@
         var factor = EditMultipliers is not null ? EditFactorOf(name) : MultiplierOf(name);
 
         <tr style="@(dim ? "opacity:.3;" : null)">
-            @* Name *@
-            <td style="width:200px">@name</td>
+            @* Name (+ tooltip detalhado do que a skill faz — negrito nas palavras-chave) *@
+            <td style="width:200px">
+                @if (SkillInfo.Of(name) is { } desc)
+                {
+                    <MudTooltip Placement="Placement.Right" Arrow="true" Delay="200">
+                        <ChildContent>
+                            <span class="cc-skill-name">@name</span>
+                        </ChildContent>
+                        <TooltipContent>
+                            <div class="cc-skill-tip">@((MarkupString)desc)</div>
+                        </TooltipContent>
+                    </MudTooltip>
+                }
+                else
+                {
+                    @name
+                }
+            </td>
 
             @* Barra (read) / slider arrastável 0–51 (edit) — controla o nível, 1 em 1, sem spinner.
                A bolha de valor do MudSlider (ValueLabel) é o "zoom" pedido: mostra o número ao arrastar. *@

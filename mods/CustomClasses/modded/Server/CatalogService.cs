@@ -268,6 +268,52 @@ public class CatalogService
     }
 
     /// <summary>
+    ///     Item #6: lista os itens que passam num <paramref name="filter"/> (sem texto de busca) — usado
+    ///     pra PRÉ-LISTAR os itens compatíveis com um slot ao abrir o picker. Mesma fonte/forma do
+    ///     <see cref="Search"/>; só troca a condição de match (filtro do slot) pela busca textual.
+    /// </summary>
+    public List<CatalogItem> ListByFilter(Func<string, bool> filter, int limit = 100, string? parentCategoryId = null)
+    {
+        var results = new List<CatalogItem>();
+        if (filter is null || limit <= 0)
+        {
+            return results;
+        }
+
+        var scope = parentCategoryId is null ? null : CollectCategoryWithDescendants(parentCategoryId);
+        foreach (var row in _searchIndex.Value)
+        {
+            if (scope is not null && (row.CategoryId is null || !scope.Contains(row.CategoryId)))
+            {
+                continue;
+            }
+
+            if (!filter(row.Tpl))
+            {
+                continue;
+            }
+
+            var (price, source) = GetPrice(new MongoId(row.Tpl));
+            results.Add(new CatalogItem
+            {
+                Tpl = row.Tpl,
+                Name = row.EnNameDisplay,
+                ShortName = row.ShortNameDisplay,
+                Price = price,
+                PriceSource = source,
+                CategoryId = row.CategoryId,
+            });
+
+            if (results.Count >= limit)
+            {
+                break;
+            }
+        }
+
+        return results;
+    }
+
+    /// <summary>
     ///     Item 037: pre-computed search index over item templates (<c>_type == "Item"</c>). Resolves
     ///     en/pt/short locale + handbook category ONCE; the hot <see cref="Search"/> scans this compact
     ///     list (the expensive part the index eliminates is per-item locale resolution over the whole DB).

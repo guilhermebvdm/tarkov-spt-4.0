@@ -135,6 +135,10 @@ else
     /// <summary>Max results shown (server-side Search cap).</summary>
     [Parameter] public int Limit { get; set; } = 100;
 
+    /// <summary>Item #6: com query vazia, JÁ lista os itens que passam no <see cref="FilterTpls"/>
+    /// (compatíveis com o slot) — sem precisar digitar. Requer FilterTpls.</summary>
+    [Parameter] public bool AutoList { get; set; }
+
     private sealed record CategoryOption(string Id, string Label);
 
     private string _query = string.Empty;
@@ -146,12 +150,18 @@ else
     private Dictionary<string, string> _categoryNames = new(StringComparer.Ordinal);
     private int _searchVersion;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         _categoryId = CategoryId;
         var categories = Catalog.GetCategories();
         _categoryNames = categories.ToDictionary(c => c.Id, c => c.Name, StringComparer.Ordinal);
         _categoryOptions = FlattenCategoryTree(categories);
+
+        // #6: pré-lista os itens compatíveis (filtro do slot) já na abertura, sem digitar.
+        if (AutoList && FilterTpls is not null)
+        {
+            await RunSearchAsync();
+        }
     }
 
     private async Task OnCategoryChangedAsync(string? value)
@@ -168,6 +178,32 @@ else
 
         if (string.IsNullOrWhiteSpace(_query))
         {
+            // #6: query vazia + AutoList → lista os compatíveis pelo filtro do slot (sem texto).
+            if (AutoList && FilterTpls is not null)
+            {
+                var f = FilterTpls;
+                var cat = _categoryId;
+                _searching = true;
+                try
+                {
+                    var hits = await Task.Run(() => Catalog.ListByFilter(f, Limit, cat));
+                    if (version == _searchVersion)
+                    {
+                        _results = hits;
+                        _searched = true;
+                    }
+                }
+                finally
+                {
+                    if (version == _searchVersion)
+                    {
+                        _searching = false;
+                    }
+                }
+
+                return;
+            }
+
             _results = [];
             _searched = false;
             _searching = false;   // the superseded search no longer clears it (version mismatch)

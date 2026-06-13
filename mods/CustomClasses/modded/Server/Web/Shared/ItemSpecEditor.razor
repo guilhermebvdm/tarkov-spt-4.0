@@ -357,12 +357,14 @@
             parameters.Add(x => x.FilterTpls, (Func<string, bool>)Catalog.IsWeapon);
             parameters.Add(x => x.Title, "Select weapon (preset root)");
             parameters.Add(x => x.ShowCategoryFilter, false);
+            parameters.Add(x => x.AutoList, true);   // #6: já lista as armas compatíveis ao abrir
         }
         else
         {
             if (TplFilter is not null)
             {
                 parameters.Add(x => x.FilterTpls, TplFilter);
+                parameters.Add(x => x.AutoList, true);   // #6: já lista os itens compatíveis com o slot
             }
 
             parameters.Add(x => x.Title, "Select item");
@@ -531,6 +533,7 @@
             { x => x.FilterTpls, (Func<string, bool>)(t => Catalog.IsAllowedInSlot(parentTpl, slotId, t)) },
             { x => x.Title, $"Select mod for {slotId}" },
             { x => x.ShowCategoryFilter, false },
+            { x => x.AutoList, true },   // #6: já lista os mods compatíveis com o slot ao abrir
         };
         var dialog = await DialogService.ShowAsync<ItemPicker>("Select mod", parameters, PickerDialogOptions);
         var result = await dialog.Result;
