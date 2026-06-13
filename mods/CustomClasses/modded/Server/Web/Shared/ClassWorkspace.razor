@@ -246,7 +246,7 @@ else
             @* ░ CENTRO ░ *@
             <div class="cc-ws__panel cc-ws__panel--center">
                 <div class="cc-section__title">Equipped (@EquippedCount slots)</div>
-                <CharacterDoll Equipped="@EquippedForView" Editable="@_editMode"/>
+                <CharacterDoll Equipped="@EquippedForView" Editable="@_editMode" OnSlotClick="EditSlotAsync"/>
             </div>
 
             @* ░ DIREITA ░ *@
@@ -695,6 +695,58 @@ else
             set(result.Data as string);
             StateHasChanged();
         }
+    }
+
+    // ── Clicar-slot-edita o equipado (F2c) ──────────────────────────────────────
+
+    private static readonly DialogOptions SlotEditOptions = new()
+    {
+        MaxWidth = MaxWidth.Medium,
+        FullWidth = true,
+        CloseButton = true,
+    };
+
+    /// <summary>
+    ///     F2c: clicar num slot da silhueta (modo edição) abre o ItemSpecEditor desse slot num dialog.
+    ///     Slot vazio → linha efêmera; só entra no _model.Equipped se o usuário escolher um item.
+    ///     "Clear" remove o slot. O ItemSpecModel é mutado em lugar (o Discard global faz o rollback).
+    /// </summary>
+    private async Task EditSlotAsync(string slot)
+    {
+        if (_model is null)
+        {
+            return;
+        }
+
+        var row = _model.Equipped.FirstOrDefault(r => string.Equals(r.Slot, slot, StringComparison.OrdinalIgnoreCase));
+        var isNew = row is null;
+        row ??= new EquippedSlotRow { Slot = slot, Item = new ItemSpecModel() };
+
+        var parameters = new DialogParameters<SlotEditDialog>
+        {
+            { x => x.Item, row.Item },
+            { x => x.SlotName, slot },
+            { x => x.Filter, (Func<string, bool>)(t => Catalog.IsAllowedInEquipmentSlot(slot, t)) },
+            { x => x.OnChanged, EventCallback.Factory.Create(this, RecomputeLoadoutCost) },
+        };
+        var dialog = await DialogService.ShowAsync<SlotEditDialog>(slot, parameters, SlotEditOptions);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false, Data: "clear" })
+        {
+            if (!isNew)
+            {
+                _model.Equipped.Remove(row);
+            }
+        }
+        else if (isNew && (row.Item.Tpl is { Length: > 0 } || row.Item.Preset is { Length: > 0 }))
+        {
+            // slot novo que ganhou um item (Done ou Cancel após escolher) → entra no modelo.
+            _model.Equipped.Add(row);
+        }
+
+        RecomputeLoadoutCost();
+        StateHasChanged();
     }
 
     // ── Helpers de apresentação ─────────────────────────────────────────────────

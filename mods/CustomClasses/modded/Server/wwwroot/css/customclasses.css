@@ -217,6 +217,12 @@
    Slots de arma são mais largos (3×2). Nada é dimensionado pelo W×H real do item (vide CharacterDoll). */
 .cc-doll-slot__cell        { width: calc(var(--cc-cell-unit) * 2); height: calc(var(--cc-cell-unit) * 2); }
 .cc-doll-slot__cell--empty { opacity: .3; }
+/* F2c: slot clicável (modo edição) — cursor + realce no hover. */
+.cc-doll-slot--edit            { cursor: pointer; }
+.cc-doll-slot--edit:hover .cc-doll-slot__cell {
+    outline: 2px solid var(--mud-palette-primary, #7e6fff);
+    outline-offset: 1px; opacity: 1; }
+.cc-doll-slot--edit:hover .cc-doll-slot__label { opacity: 1; color: var(--mud-palette-primary, #7e6fff); }
 .cc-doll-slot--firstprimaryweapon  .cc-doll-slot__cell,
 .cc-doll-slot--secondprimaryweapon .cc-doll-slot__cell,
 .cc-doll-slot--holster             .cc-doll-slot__cell,

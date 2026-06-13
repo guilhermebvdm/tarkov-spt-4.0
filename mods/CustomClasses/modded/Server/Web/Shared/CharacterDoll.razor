@@ -18,7 +18,10 @@
     @foreach (var slot in SlotOrder)
     {
         var cell = _cells.TryGetValue(slot, out var c) ? c : null;
-        <div class="cc-doll-slot @($"cc-doll-slot--{slot.ToLowerInvariant()}")">
+        var clickable = Editable && OnSlotClick.HasDelegate;
+        <div class="cc-doll-slot @($"cc-doll-slot--{slot.ToLowerInvariant()}") @(clickable ? "cc-doll-slot--edit" : null)"
+             @onclick="@(clickable ? (() => OnSlotClick.InvokeAsync(slot)) : null)"
+             title="@(clickable ? "Click to edit this slot" : null)">
             <div class="cc-doll-slot__label">@ShortLabel(slot)</div>
             @if (cell is { } gc)
             {
@@ -54,8 +57,11 @@
     /// <summary>slot → spec (mesmo contrato do GearPanel). Null/vazio → todos os slots aparecem vazios.</summary>
     [Parameter] public Dictionary<string, ItemSpec>? Equipped { get; set; }
 
-    /// <summary>F2a: preparado p/ o orquestrador (F2c: clicar-slot-equipado). No-op visual por enquanto.</summary>
+    /// <summary>F2c: habilita clicar-slot-edita (vide OnSlotClick). Sem callback → cliques inertes.</summary>
     [Parameter] public bool Editable { get; set; }
+
+    /// <summary>F2c: clicar num slot (em modo editável) emite o nome do EquipmentSlot p/ o workspace abrir o editor.</summary>
+    [Parameter] public EventCallback<string> OnSlotClick { get; set; }
 
     /// <summary>Ordem/conjunto fixo dos 14 EquipmentSlots desenhados em volta da silhueta (estilo EFT).</summary>
     private static readonly string[] SlotOrder =
