@@ -42,6 +42,12 @@
                Color="Color.Default" Label="Mostrar desabilitadas"/>
     <MudSwitch T="bool" @bind-Value="_showMultipliers" @bind-Value:after="PersistToggles"
                Color="Color.Primary" Label="Multiplicadores XP"/>
+    <MudSpacer/>
+    <MudButton Variant="Variant.Outlined" Size="Size.Small"
+               StartIcon="@(_fullscreen ? Icons.Material.Filled.FullscreenExit : Icons.Material.Filled.Fullscreen)"
+               OnClick="@(() => _fullscreen = !_fullscreen)">
+        @(_fullscreen ? "Sair" : "Tela cheia")
+    </MudButton>
 </MudStack>
 
 @if (_columns.Count == 0)
@@ -51,7 +57,13 @@
 else
 {
     var visible = VisibleColumns();
-    <div class="cc-matrix-wrap">
+    <div class="cc-matrix-wrap @(_fullscreen ? "cc-matrix-wrap--fullscreen" : null)">
+        @if (_fullscreen)
+        {
+            <MudIconButton Icon="@Icons.Material.Filled.FullscreenExit" Class="cc-matrix-exit"
+                           Color="Color.Inherit" title="Sair da tela cheia"
+                           OnClick="@(() => _fullscreen = false)"/>
+        }
         <table class="cc-skill-matrix">
             <thead>
                 <tr>
@@ -165,8 +177,8 @@ else
 
     /* Category / overflow separator rows */
     .cc-skill-cat-sep td {
-        padding: 12px 0 6px;
-        font-size: 12px;
+        padding: 7px 0 3px;
+        font-size: 11px;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: .8px;
@@ -180,18 +192,18 @@ else
         color: var(--mud-palette-text-primary);
     }
     .cc-skill-name {
-        font-size: 12px;
+        font-size: 11px;
         color: var(--mud-palette-text-secondary);
-        padding: 3px 16px 3px 0;
+        padding: 0 12px 0 0;
         white-space: nowrap;
         vertical-align: middle;
     }
 
-    /* Skill cells (heatmap by tier) */
+    /* Skill cells (heatmap by tier) — linhas compactas */
     .cc-skill-cell {
         text-align: center;
         vertical-align: middle;
-        padding: 2px;
+        padding: 1px 3px;
         border-left: 1px solid rgba(255, 255, 255, 0.08);
         cursor: pointer;
         transition: background .12s ease;
@@ -200,16 +212,25 @@ else
     .cc-skill-cell--low   { background: rgba(166, 124, 0, 0.12); }
     .cc-skill-cell--mid   { background: rgba(166, 124, 0, 0.28); }
     .cc-skill-cell--high  { background: rgba(200, 160, 0, 0.45); }
+    /* valor + multiplicador lado a lado (mult à direita) — não empilha mais */
+    .cc-mx-cell {
+        display: flex; align-items: center; justify-content: center; gap: 3px; min-height: 20px;
+    }
     .cc-skill-cell__val {
         display: inline-block;
-        min-width: 24px;
-        height: 24px;
-        line-height: 24px;
+        min-width: 18px;
+        height: 20px;
+        line-height: 20px;
         border-radius: 3px;
         font-size: 12px;
         font-weight: 700;
         font-variant-numeric: tabular-nums;
     }
+    /* badge ±% compacto inline (substitui o MudChip que engordava a linha) */
+    .cc-mx-mult { font-size: 9px; font-weight: 700; line-height: 14px; padding: 0 4px; border-radius: 7px;
+                  font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .cc-mx-mult--up   { color: #81c784; background: rgba(76, 175, 80, 0.18); }
+    .cc-mx-mult--down { color: #e57373; background: rgba(244, 67, 54, 0.18); }
     .cc-skill-cell--low  .cc-skill-cell__val { color: var(--mud-palette-text-secondary); }
     .cc-skill-cell--mid  .cc-skill-cell__val { color: var(--mud-palette-text-primary); }
     .cc-skill-cell--high .cc-skill-cell__val { color: #e7c46a; }
@@ -233,6 +254,24 @@ else
 
     /* R3 — per-cell disabled fade (header + cells), robust to column filtering */
     .cc-cell--disabled { opacity: .4; }
+
+    /* ── Sticky: cabeçalho de classes (topo) + coluna de skills (esquerda) ficam fixos ao rolar ── */
+    .cc-skill-matrix thead th { position: sticky; top: 0; z-index: 2;
+        background: var(--mud-palette-surface, #1e1e1e); }
+    .cc-skill-name, .cc-skill-name-header, .cc-skill-cost-label {
+        position: sticky; left: 0; z-index: 1; background: var(--mud-palette-surface, #1e1e1e); }
+    .cc-skill-name-header { z-index: 3; }   /* canto: fica acima de ambos */
+
+    /* ── Tela cheia: a matriz vira um overlay que cobre tudo e rola interna (vê Skills + Mult) ── */
+    .cc-matrix-wrap--fullscreen {
+        position: fixed; inset: 0; z-index: 1300;
+        background: var(--mud-palette-background, #161616);
+        overflow: auto; padding: 16px 16px 24px;
+    }
+    .cc-matrix-exit {
+        position: fixed; top: 10px; right: 14px; z-index: 1310;
+        background: rgba(0, 0, 0, 0.5);
+    }
 </style>
 
 @code {
@@ -255,6 +294,7 @@ else
     private List<string> _overflowSkills = [];           // skills defined by some class, outside SkillMaster
     private bool _showDisabled = true;                   // toggle (default on)
     private bool _showMultipliers = false;               // toggle (default off)
+    private bool _fullscreen;                            // matriz em overlay de tela cheia
     private bool _togglesRestored;
 
     // D4 — destination page: no LocationChanged subscription. Re-mount re-runs OnInitialized with the
@@ -420,28 +460,20 @@ else
         var level = col.Levels.TryGetValue(skillName, out var l) ? l : 0;
         var disabledClass = col.Enabled ? null : "cc-cell--disabled";
 
-        if (level <= 0)
-        {
-            <td class="cc-skill-cell cc-skill-cell--empty @disabledClass"
-                @onclick="@(() => NavigateTo(col))">
+        <td class="cc-skill-cell @(level <= 0 ? "cc-skill-cell--empty" : $"cc-skill-cell--{TierOf(level)}") @disabledClass"
+            title="@(level <= 0 ? col.DisplayName : $"{col.DisplayName}: {skillName} {level}")"
+            @onclick="@(() => NavigateTo(col))">
+            <div class="cc-mx-cell">
+                @if (level > 0)
+                {
+                    <span class="cc-skill-cell__val">@level</span>
+                }
                 @if (_showMultipliers)
                 {
-                    @MultiplierChip(MultiplierOf(col, skillName))
+                    @MultiplierBadge(MultiplierOf(col, skillName))
                 }
-            </td>
-        }
-        else
-        {
-            <td class="cc-skill-cell cc-skill-cell--@(TierOf(level)) @disabledClass"
-                title="@($"{col.DisplayName}: {skillName} {level}")"
-                @onclick="@(() => NavigateTo(col))">
-                <span class="cc-skill-cell__val">@level</span>
-                @if (_showMultipliers)
-                {
-                    @MultiplierChip(MultiplierOf(col, skillName))
-                }
-            </td>
-        }
+            </div>
+        </td>
     };
 
     private RenderFragment CostFooterCell(ClassColumn col) => __builder =>
@@ -460,26 +492,19 @@ else
         }
     };
 
-    /// <summary>±% chip — copy of SkillCanonicalList.MultiplierChip:374-393 (factor 1 / null = no chip).</summary>
-    private RenderFragment MultiplierChip(double? factor) => __builder =>
+    /// <summary>±% badge compacto inline (à direita do valor) — sem MudChip (que empurrava p/ baixo e
+    /// engordava a linha). factor 1 / null = nada.</summary>
+    private RenderFragment MultiplierBadge(double? factor) => __builder =>
     {
         if (factor is not { } f || Math.Abs(f - 1.0) < 0.0001)
         {
             return;
         }
 
-        if (f > 1)
-        {
-            <MudChip T="string" Size="Size.Small" Color="Color.Success">
-                +@(((f - 1) * 100).ToString("0", CultureInfo.InvariantCulture))%
-            </MudChip>
-        }
-        else
-        {
-            <MudChip T="string" Size="Size.Small" Color="Color.Error">
-                −@(((1 - f) * 100).ToString("0", CultureInfo.InvariantCulture))%
-            </MudChip>
-        }
+        var pct = (int)Math.Round((f - 1) * 100);
+        var cls = pct > 0 ? "cc-mx-mult cc-mx-mult--up" : "cc-mx-mult cc-mx-mult--down";
+        var label = pct > 0 ? $"+{pct}%" : $"−{-pct}%";
+        <span class="@cls">@label</span>
     };
 
     // ── Helpers ──────────────────────────────────────────────────────────────────────────────
