@@ -1,0 +1,42 @@
+# Ignore rules for graphify code-graph extraction (overrides .gitignore at repo root).
+# Why this file exists: graphify prefers .graphifyignore over .gitignore per directory.
+# The repo .gitignore excludes references/spt-source/ and references/fika-* (vendored,
+# heavy) — but those MUST be extracted into code graphs. This file replicates the
+# build/IDE noise excludes WITHOUT the references/* lines.
+# Regenerate graphs via scripts/update-graphs.sh.
+
+# .NET / C# build noise
+bin/
+obj/
+.vs/
+
+# Mod build output and binary assets
+mods/**/builds/
+mods/**/References/*.dll
+mods/**/*.bundle
+mods/**/*.webp
+
+# Node / TypeScript
+node_modules/
+
+# IDE / OS
+.idea/
+.vscode/
+.fleet/
+.DS_Store
+Thumbs.db
+
+# Graphify's own outputs (never re-ingest a graph as data)
+graphify-out/
+
+# Non-code content — graphs are code-only by decision (docs/wiki pipelines use LLM)
+wiki/
+docs/
+*.md
+*.log
+*.exe
+.qa-shots/
+.handoffs/
+
+# Upstream snapshots inside mods — graphs are built from modded/ only
+mods/*/original/
