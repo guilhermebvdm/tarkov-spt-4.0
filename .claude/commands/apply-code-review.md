@@ -100,6 +100,7 @@ Aplica em `modded/` os achados de um `04-code-review-NN.md` marcados como **Acei
       /compile-mod <mod>
       Opcional: nova rodada /code-review para validar correções.
       Achado deferido/regressão que virar fix pós-validação → usar .agents/templates/fix.md.tmpl (06-fix-NN).
+      Mudança de código substancial → /update-mod-graph <mod> (regenera o grafo; commit junto).
     ```
 
 ## Regras

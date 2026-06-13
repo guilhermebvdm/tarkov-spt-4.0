@@ -310,7 +310,7 @@ Memória é tracking efêmero; regra recorrente vira conhecimento institucional.
 - Pitfall de **linguagem C#/Unity** → skill `csharp-mod-best-practices`.
 - A memória mantém o narrativo e ganha link para o destino promovido — **não duplica** o conteúdo.
 
-Fluxo: o `/update-memory` **PROPÕE** a promoção (bloco `💡 Candidata a promoção` no relatório); o usuário aprova; a edição do doc/skill é trabalho repo-wide (registrar em `memory/repo-sessions.md`).
+Fluxo: o `/update-memory` **PROPÕE** a promoção (bloco `💡 Candidata a promoção` no relatório); o usuário aprova; a edição do doc/skill é trabalho repo-wide. **Loop fechado (confirmar os 3 após aprovação):** (a) seção `AP-NN` editada/criada em `spt-antipatterns.md` (sem prefixo `§` — os headers são `## AP-NN`); (b) entrada repo-wide em `memory/repo-sessions.md`; (c) bullet de origem na memória do mod substituído por link para `AP-NN` (não duplica o conteúdo).
 
 ## Checklist final (usar antes de commit)
 
@@ -330,5 +330,6 @@ Ao escrever/atualizar uma entrada de memória:
 12. **IDs de pendência:** todo bullet de pendência (no topo e nas entradas) com `[P-N.M]`; legados receberam ID retroativo (§7).
 13. **Tamanho do snapshot:** ≤10 bullets por bloco (alerta); >15 → parar e consolidar/promover antes de gravar (§6).
 14. **GC:** nenhuma pendência >30 dias sem decisão explícita (promover/descartar/manter justificado) (§7).
+15. **Promoção (se houve):** loop fechado — `AP-NN` editado, entrada em `repo-sessions.md`, bullet do mod vira link para o destino (§15).
 
 Se algum item falha, parar e corrigir antes de marcar a entrada como concluída.

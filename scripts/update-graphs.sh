@@ -69,7 +69,17 @@ scope() {
   mkdir -p "$GRAPHS_DIR/$id"
   cp "$out/graph.json" "$GRAPHS_DIR/$id/graph.json"
   [ -f "$out/GRAPH_REPORT.md" ] && cp "$out/GRAPH_REPORT.md" "$GRAPHS_DIR/$id/GRAPH_REPORT.md"
-  [ -f "$out/graph.html" ] && cp "$out/graph.html" "$GRAPHS_DIR/$id/graph.html"
+  # graph.html é só para grafos pequenos (visualização); acima de ~1.5MB não versiona
+  # (cresce o tree sem ganho — o GRAPH_REPORT.md + graph.json cobrem a navegação).
+  if [ -f "$out/graph.html" ]; then
+    HTML_KB=$(du -k "$out/graph.html" | cut -f1)
+    if [ "${HTML_KB:-0}" -le 1536 ]; then
+      cp "$out/graph.html" "$GRAPHS_DIR/$id/graph.html"
+    else
+      rm -f "$GRAPHS_DIR/$id/graph.html"
+      echo "  (graph.html ${HTML_KB}KB > 1.5MB — não versionado; gere local se precisar)"
+    fi
+  fi
   echo "  ✓ publicado em $GRAPHS_DIR/$id/"
 }
 
