@@ -75,6 +75,8 @@ Para tarefas específicas, consulte `.agents/workflows/` (quando existirem).
 
 ## Fluxo de backlog (slash commands)
 
+> 📋 **Visão completa do ciclo de desenvolvimento** (commands + skills + memória + grafos de código): [WORKFLOW.md](WORKFLOW.md).
+
 Cada item de backlog vive em `mods/<mod>/backlog/NNN-<slug>/` (numeração local por mod, 3 dígitos). O índice é `mods/<mod>/backlog/mod-backlog.md`.
 
 | Comando | Ação | Output |

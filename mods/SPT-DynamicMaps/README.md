@@ -45,3 +45,7 @@ Após atualizar, o diff acima mostrará suas modificações + drift do upstream.
 ---
 
 _Adicionado em 2026-05-10T01:13:35Z_
+
+---
+
+**Workflow de desenvolvimento:** ver [WORKFLOW.md](../../WORKFLOW.md).

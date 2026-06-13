@@ -58,3 +58,7 @@ Itens, status e o épico do editor web (018–029) em [backlog/mod-backlog.md](b
 ---
 
 _Criado em 2026-06-07._
+
+---
+
+**Workflow de desenvolvimento:** ver [WORKFLOW.md](../../WORKFLOW.md).
