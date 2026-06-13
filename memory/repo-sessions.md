@@ -13,7 +13,7 @@ Trabalho específico de cada mod fica em `mods/<mod>/memory/sessions.md`. Este a
 - **Skills ativas (6):** `spt-mod-best-practices` (+§8 API canônica), `csharp-mod-best-practices` (+virtual dispatch), `repo-workflow-best-practices`, `memory-curation` (escrita §1-13 + consumo §14 + promoção §15), `graph-code-navigation` (grafos graphify).
 - **Memória é CONSUMIDA pelos commands de desenvolvimento** (passo "Contexto de memória", skill §14): pendência 🔴 do item/mod → alerta antes de prosseguir; todo command emite a linha greppável `Memória consultada:` no relatório (prova de consumo, obj2 observável).
 - **Antipatterns:** `docs/technical/spt-antipatterns.md` (AP-01..**08**, erros reais do stances) — checados na §9 da spec técnica (8 checks), critérios padrão da spec funcional (Fika + estado entre raids, N/A frágil em patch player-reactive = gap) e checklist do fix.
-- **Enforcement (não mais só prosa):** 3 gates no pre-commit — `check-delivered-validation.sh` (HARD: item 🟢 com caixa in-raid desmarcada bloqueia, AP-06), `check-graph-freshness.sh` (WARN: código de mod mudou sem regenerar grafo), `check-memory-ids.sh` (WARN: pendência sem `[P-N.M]`).
+- **Enforcement (não mais só prosa):** 3 gates no pre-commit — `check-delivered-validation.sh` (HARD: item 🟢 com caixa in-raid desmarcada bloqueia, AP-06; lê staged blob), `check-graph-freshness.sh` (WARN: código de mod mudou sem regenerar grafo), `check-memory-ids.sh` (WARN: pendência do topo sem `[P-N.M]`). **Validados executando** (não só write+hash) — o fix-review da Sessão 5b achou os 3 quebrados e corrigiu.
 - **IDs de pendência:** esquema único `P-<N>.<M>` (N=sessão), data inline `(aberta YYYY-MM-DD)` pra GC ser diff literal; stances e CustomClasses migrados.
 - **Grafos de código (graphify):** versionados em `references/graphs/` (todos os mods + eft-decompiled 58k nós + fika-* + spt-source); regeneração via `scripts/update-graphs.sh` / `/update-mod-graph`; **MCP só `graphify-eft`** (grafos de mod via CLI `--graph`); `graph.html` >1.5MB não versiona; `.graphifyignore` na raiz destrava as references gitignored.
 - **Commands custom (16):** ciclo de backlog + `/add-mod-repo-for-modding` (gera grafo), `/update-memory` (lições obrigatórias, GC >30d, promoções, gancho `/update-mod-graph`), `/update-mod-graph`, inventário (`/update-mods-inventory`, `/add-mod-inventory-list`, `/serve-inventory`).
@@ -247,6 +247,32 @@ offerBase = clamp( (override ?? prices.json ?? 0) + bonus , floor , ceiling )
 - Fórmula/override/internals: `tools/tarkov-itemdb/docs/{flea-override-plan,flea-formula-validation,spt-internals}.md`.
 - Harness do smoke test: `tools/tarkov-itemdb/scripts/smoke-matrix.js`.
 - Memória pessoal (não versionada, não vai pro outro PC): `project_flea_price_formula.md`.
+
+## 2026-06-13 13:03 (GMT-3) — Sessão 5b: fix-review dos próprios fixes da 5a (os 3 hooks estavam quebrados)
+
+**Tema central:** revisar adversarialmente as correções da Sessão 5 (o agente revisando o próprio trabalho) e aplicar tudo confirmado sem aprovação — Workflow `review-the-fixes` (5 dimensões × verificação, 10/11 achados confirmados).
+
+**Decisões-chave:**
+- **Aplicar todos os 10 achados direto** (pedido do usuário, sem aprovação por achado), agrupados em 3 commits: hooks (`98ce849`), refinamento do hook (`ae07d28`), consistência (`9c5fb15`). Ref: `wf_e3b2ed9c-d88`.
+
+**Lições / hipóteses descartadas:**
+- **Os 3 gates de enforcement da Sessão 5 estavam todos quebrados — e o `check-memory-ids.sh` estava 100% MORTO.** A regex awk `/[Pp]end.ncias/` usava um `.` único para casar o `ê` de "Pendências", mas o `ê` são 2 bytes UTF-8 (0xC3 0xAA) e o GNU awk do git-bash roda em locale de byte único — o heading NUNCA casava, o gate nunca varria nada. O commit `411f00a` até afirmava "o hook rodou neste commit": rodou, mas não podia casar nada. **Isto reencena exatamente a lição `feedback_spt_validation`** — write+hash não prova nada; só rodar prova. Por isso o fix-review EXECUTOU os hooks contra estado real, não só leu o diff. Fix: `.` → `.*`.
+- **Hook que ficou vivo gerou falso positivo** — ao casar o heading, ele varria TODO bloco "Pendências" incluindo o "(ARQUIVADO)" e menções históricas dentro de entradas de sessão. Refinado para varrer só o PRIMEIRO bloco (snapshot do topo) e parar no próximo heading de qualquer nível. Lição: testar hook contra um arquivo REAL grande (com seções arquivadas), não só um caso mínimo.
+- **TOCTOU em gate de pre-commit:** `check-delivered-validation.sh` lia o working tree enquanto o trigger lia o staged — marcar a caixa só no working tree enganava o gate HARD. Gate de commit tem que ler o staged blob (`git show :path`). Testado: bloqueia mesmo com `[x]` só no working tree.
+- **Sweep incompleto deixa resíduo:** adicionar AP-07/AP-08 deixou 4 ponteiros vivos ainda dizendo `AP-01..AP-06`; o backfill de IDs do stances apontou para um header sem número; 3 pendências do CustomClasses ficaram com data 06-11 para trabalho de 06-12 (uma se autocontradizia). Lição: ao expandir uma série (APs) ou migrar IDs, grep por TODAS as referências vivas, separando das históricas/changelog.
+
+**Atividade cronológica:**
+1. Workflow `review-the-fixes` (6 dimensões → 5 efetivas, verificação adversarial) — 11 levantados, 10 confirmados (HOOK-1/2/3, NUM-01, IDM-01/02/03/04, D2W-01, NB-01; IDM-03+NB-01 dedup de HOOK-1).
+2. Commit `98ce849`: HOOK-1 (awk `.*`), HOOK-2 (trigger aceita slug), HOOK-3 (lê staged blob). Testados executando: memory-ids vivo, delivered-validation bloqueia/libera com staged.
+3. Commit `ae07d28`: refinamento do HOOK-1 (só o bloco do topo; ignora ARQUIVADO). Disparou no commit da consistência e foi corrigido aqui.
+4. Commit `9c5fb15`: NUM-01 (4 ponteiros → AP-01..AP-08, changelog preservado), IDM-01 (stances "Sessão 4a"), IDM-02 (P-7.9/10/11 → 06-12), IDM-04 (cross-ref "Sessão 6"), D2W-01 (§14 colapsado p/ casar os 7 commands).
+
+**Pendências abertas nesta sessão:** nenhuma nova — todas as 10 confirmadas foram aplicadas e verificadas.
+
+**Cross-refs:**
+- Fecha o loop find→fix→review-the-fix da Sessão 5a (mesma infra).
+- Resolve a fragilidade que [P-5.1] aponta parcialmente: os hooks agora foram validados executando; falta só o ciclo fim-a-fim num item real.
+- ~20 commits do harness (Sessões 4/5/5b) seguem LOCAIS — push aguarda decisão do usuário.
 
 ## 2026-06-13 04:29 (GMT-3) — Sessão 5: revisão de valor adversarial do harness + correção dos 35 achados (prosa → enforcement)
 
