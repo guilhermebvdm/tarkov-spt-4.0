@@ -21,9 +21,11 @@
     <link href="@Assets["_content/MudBlazor/MudBlazor.min.css"]" rel="stylesheet" />
     @* Item 033: mod density sheet — static link, served by the wwwroot mount under /CustomClasses-Server/ (not an RCL asset). *@
     <link href="/CustomClasses-Server/css/customclasses.css" rel="stylesheet" />
-    @* Item 035: localStorage prefs + Ctrl+S shortcut — plain <script src> served by the same wwwroot
-       mount (PA-035-01). Exposes window.ccPrefs; consumed only post-circuit (PA-035-02). *@
-    <script src="/CustomClasses-Server/js/customclasses.js"></script>
+    @* Item 035: localStorage prefs + Ctrl+S shortcut. Served by the wwwroot mount (PA-035-01); exposes
+       window.ccPrefs, consumed only post-circuit (PA-035-02). QA 2026-06-12: shipped as .mjs (module),
+       NOT .js — SPT's ModValidator rejects any mod whose install dir contains a *.js/*.ts file
+       (modloader-is-old-js-mod). The script still assigns window.ccPrefs so the global API is unchanged. *@
+    <script type="module" src="/CustomClasses-Server/js/customclasses.mjs"></script>
     <meta name="robots" content="noindex, nofollow">
 </HeadContent>
 
@@ -54,10 +56,10 @@
                        Fixed="true"
                        Elevation="4">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Style="width: 100%;">
-                    @* Item 035: drawer pin — toggles Mini↔Persistent (PA-R1-01) and persists the choice. *@
-                    <MudIconButton Icon="@(_drawerPinned ? Icons.Material.Filled.PushPin : Icons.Material.Outlined.PushPin)"
+                    @* Item 035: sidebar expand/collapse — toggles Mini↔Persistent (PA-R1-01) and persists the choice. *@
+                    <MudIconButton Icon="@(_drawerPinned ? Icons.Material.Filled.MenuOpen : Icons.Material.Filled.Menu)"
                                    Color="Color.Inherit" Size="Size.Small"
-                                   title="@(_drawerPinned ? "Unpin sidebar (auto-collapse)" : "Pin sidebar open")"
+                                   title="@(_drawerPinned ? "Collapse sidebar (auto-collapse on leave)" : "Expand sidebar")"
                                    OnClick="ToggleDrawerPin"/>
                     <MudText Typo="Typo.h6">CustomClasses — Class Editor</MudText>
                     <MudText Style="font-size: 12px" Class="ml-2">
