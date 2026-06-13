@@ -182,16 +182,20 @@
    fixed + larguras relativas comprimem as colunas pra caber (batem os width:Npx inline do componente
    com !important), e o container do MudSimpleTable tem overflow-x escondido. */
 .cc-ws__panel--left .skill-canonical        { width: 100%; table-layout: fixed; }
-.cc-ws__panel--left .skill-canonical td     { min-width: 0 !important; padding-left: 4px !important;
-                                              padding-right: 4px !important; }
-.cc-ws__panel--left .skill-canonical td:nth-child(1) { width: 40% !important; white-space: nowrap;
+/* Linhas COMPACTAS (mais skills por tela): pouca altura/padding, fonte menor. */
+.cc-ws__panel--left .skill-canonical td     { min-width: 0 !important; padding: 1px 4px !important;
+                                              height: 26px; font-size: 12px; vertical-align: middle; }
+.cc-ws__panel--left .skill-canonical td:nth-child(1) { width: 30% !important; white-space: nowrap;
                                               overflow: hidden; text-overflow: ellipsis; }
-.cc-ws__panel--left .skill-canonical td:nth-child(2) { width: 22% !important; }
-.cc-ws__panel--left .skill-canonical td:nth-child(3) { width: 20% !important; }
-.cc-ws__panel--left .skill-canonical td:nth-child(4) { width: 10% !important; text-align: right; }
-.cc-ws__panel--left .skill-canonical td:nth-child(5) { width:  8% !important; }
+.cc-ws__panel--left .skill-canonical td:nth-child(2) { width: 38% !important; }   /* barra/slider */
+.cc-ws__panel--left .skill-canonical td:nth-child(3) { width:  8% !important; text-align: right; }  /* nível */
+.cc-ws__panel--left .skill-canonical td:nth-child(4) { width: 10% !important; text-align: right; }  /* custo */
+.cc-ws__panel--left .skill-canonical td:nth-child(5) { width: 14% !important; }   /* multiplicador */
 .cc-ws__panel--left .mud-table-container,
 .cc-ws__panel--left .mud-simple-table       { overflow-x: hidden !important; }
+/* slider do nível compacto dentro da linha (a bolha de valor ainda aparece ao arrastar). */
+.cc-ws__panel--left .skill-canonical .mud-slider { margin: 0 !important; min-height: 0; padding: 4px 0; }
+.cc-skill-lvlnum__on { font-weight: 600; }
 
 @media (max-width: 1100px) {
     /* Viewport estreito: empilha (perde o single-screen, mas não esmaga). */

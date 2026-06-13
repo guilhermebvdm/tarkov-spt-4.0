@@ -276,6 +276,17 @@
     private static double BarPercent(int level) =>
         level <= 0 ? 0 : Math.Min(1.0, level / 10.0) * 100;
 
+    /// <summary>Cor do slider por categoria (aproxima as cores das abas do EFT, sem CSS hack).</summary>
+    private static Color CategoryColor(SkillCategory? category) => category switch
+    {
+        SkillCategory.Physical => Color.Warning,
+        SkillCategory.Mental => Color.Info,
+        SkillCategory.Combat => Color.Error,
+        SkillCategory.Practical => Color.Secondary,
+        SkillCategory.SpecialElite => Color.Tertiary,
+        _ => Color.Primary,
+    };
+
     // ── Render fragments ─────────────────────────────────────────────────────────────────────
 
     private RenderFragment CategoryHeader(SkillCategory category) => __builder =>
@@ -320,25 +331,26 @@
             @* Name *@
             <td style="width:200px">@name</td>
 
-            @* Progress bar *@
-            <td style="min-width:120px">
-                <div style="background:#3a3a3a;border-radius:3px;height:8px;overflow:hidden;">
-                    <div style="@($"width:{BarPercent(level).ToString("0.#", CultureInfo.InvariantCulture)}%;background:{color};height:100%;")"></div>
-                </div>
-            </td>
-
-            @* Level — editable field or static value *@
-            <td style="text-align:right;width:120px">
+            @* Barra (read) / slider arrastável 0–51 (edit) — controla o nível, 1 em 1, sem spinner.
+               A bolha de valor do MudSlider (ValueLabel) é o "zoom" pedido: mostra o número ao arrastar. *@
+            <td class="cc-skill-bar">
                 @if (Editable && EditRows is not null)
                 {
-                    <MudNumericField T="int" Value="@level" ValueChanged="@(v => SetLevelAsync(name, v))"
-                                     Min="0" Max="51" Margin="Margin.Dense"
-                                     Variant="Variant.Outlined" Style="max-width:96px;margin-left:auto;"/>
+                    <MudSlider T="int" Value="@level" ValueChanged="@(v => SetLevelAsync(name, v))"
+                               Min="0" Max="51" Step="1" Size="Size.Small" ValueLabel="true"
+                               Color="@CategoryColor(category)"/>
                 }
                 else
                 {
-                    <span>@(level > 0 ? level.ToString(CultureInfo.InvariantCulture) : "—")</span>
+                    <div style="background:#3a3a3a;border-radius:3px;height:8px;overflow:hidden;">
+                        <div style="@($"width:{BarPercent(level).ToString("0.#", CultureInfo.InvariantCulture)}%;background:{color};height:100%;")"></div>
+                    </div>
                 }
+            </td>
+
+            @* Nível (número) — antes era o campo com setinhas; agora só o valor (o slider edita). *@
+            <td class="cc-skill-lvlnum" style="text-align:right;">
+                <span class="@(level > 0 ? "cc-skill-lvlnum__on" : null)">@(level > 0 ? level.ToString(CultureInfo.InvariantCulture) : "—")</span>
             </td>
 
             @* Inline weighted cost (when a breakdown is supplied) *@
