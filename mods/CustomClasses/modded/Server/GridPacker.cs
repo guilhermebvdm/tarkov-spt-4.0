@@ -44,6 +44,29 @@ internal sealed class GridPacker(int width, int height)
         return null;
     }
 
+    /// <summary>
+    ///     Tenta posicionar um item w×h numa célula EXPLÍCITA (x,y) com a rotação dada (item 038).
+    ///     Valida limites + ausência de sobreposição; em sucesso marca as células e retorna true.
+    ///     Não tenta a outra rotação (a posição é a pedida pelo autor).
+    /// </summary>
+    public bool TryPlaceAt(int x, int y, int w, int h, bool rotated)
+    {
+        if (w <= 0 || h <= 0)
+        {
+            return false;
+        }
+
+        var iw = rotated ? h : w;
+        var ih = rotated ? w : h;
+        if (x < 0 || y < 0 || x + iw > Width || y + ih > Height || !Fits(x, y, iw, ih))
+        {
+            return false;
+        }
+
+        Mark(x, y, iw, ih);
+        return true;
+    }
+
     private bool Fits(int x, int y, int w, int h)
     {
         for (var j = y; j < y + h; j++)

@@ -770,6 +770,25 @@ public class CostService(
         return stashGrids;
     }
 
+    /// <summary>
+    ///     Item 038: dimensões (colunas × linhas) da grade-raiz do stash da baseEdition, para o editor
+    ///     desenhar a grade 2D. Premissa: o stash do player é single-grid — usamos a 1ª grade. Retorna
+    ///     null se a base/stash/grade não resolver (o editor cai num default e mostra aviso).
+    /// </summary>
+    public (int Width, int Height)? GetStashGridSize(string baseKey)
+    {
+        var grids = ResolveBaseStashGrids(baseKey, []);
+        var props = grids.FirstOrDefault()?.Properties;
+        if (props is null)
+        {
+            return null;
+        }
+
+        var w = props.CellsH ?? 0;
+        var h = props.CellsV ?? 0;
+        return w > 0 && h > 0 ? (w, h) : null;
+    }
+
     /// <summary>Malformed ids throw in <c>new MongoId</c> — degrade to a warning, never break the breakdown.</summary>
     private static MongoId? TryMongoId(string raw, string context, List<string> warnings)
     {

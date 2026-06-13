@@ -112,6 +112,16 @@ public sealed record ItemSpec
 
     /// <summary>Manual mod tree (alternative to preset).</summary>
     [JsonPropertyName("mods")] public List<ModSpec>? Mods { get; init; }
+
+    /// <summary>Stash grid column (0-based). Opt-in: when X+Y are set the builder places the item at that
+    /// cell instead of first-fit (falls back to auto-pack if it no longer fits). Stash-only (item 038).</summary>
+    [JsonPropertyName("x")] public int? X { get; init; }
+
+    /// <summary>Stash grid row (0-based). See <see cref="X"/>.</summary>
+    [JsonPropertyName("y")] public int? Y { get; init; }
+
+    /// <summary>Explicit rotation for the pinned cell — true → ItemRotation.Vertical (item 038).</summary>
+    [JsonPropertyName("rotated")] public bool? Rotated { get; init; }
 }
 
 /// <summary>A mod node in a manual item tree.</summary>

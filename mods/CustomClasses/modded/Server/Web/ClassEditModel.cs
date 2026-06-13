@@ -51,6 +51,11 @@ public sealed class ItemSpecModel
     public bool LoadedMag { get; set; }
     public bool Chambered { get; set; }
 
+    /// <summary>Stash grid cell (opt-in, item 038) — null = auto-pack. Stash-only.</summary>
+    public int? X { get; set; }
+    public int? Y { get; set; }
+    public bool? Rotated { get; set; }
+
     public List<ItemSpecModel> Contents { get; } = [];
     public List<ModSpecModel> Mods { get; } = [];
 
@@ -65,6 +70,9 @@ public sealed class ItemSpecModel
             Ammo = NullIfBlank(spec.Ammo),
             LoadedMag = spec.LoadedMag,
             Chambered = spec.Chambered,
+            X = spec.X,
+            Y = spec.Y,
+            Rotated = spec.Rotated,
         };
 
         foreach (var content in spec.Contents ?? [])
@@ -90,6 +98,9 @@ public sealed class ItemSpecModel
         Ammo = NullIfBlank(Ammo),
         LoadedMag = LoadedMag,
         Chambered = Chambered,
+        X = X,
+        Y = Y,
+        Rotated = Rotated,
         Contents = Contents.Count > 0 ? Contents.Select(c => c.ToSpec()).ToList() : null,
         Mods = Mods.Count > 0 ? Mods.Select(m => m.ToSpec()).ToList() : null,
     };

@@ -552,7 +552,10 @@ public class InventoryBuilder(DatabaseService databaseService, ItemHelper itemHe
             .ToList();
         var added = 0;
 
-        foreach (var spec in specs)
+        // item 038: itens com posição explícita primeiro — reservam a célula antes do auto-pack preencher
+        // o resto (OrderBy estável preserva a ordem relativa original dentro de cada grupo).
+        var ordered = specs.OrderByDescending(s => s.X.HasValue && s.Y.HasValue).ToList();
+        foreach (var spec in ordered)
         {
             try
             {
@@ -610,6 +613,7 @@ public class InventoryBuilder(DatabaseService databaseService, ItemHelper itemHe
                 var ci = itemHelper.GetItem(tpl);   // ref: ItemHelper.cs:494
                 var stackMax = (ci is { Key: true, Value: not null } ? ci.Value.Properties?.StackMaxSize : null) ?? 1;
                 var remaining = count;
+                var firstUnit = true;
                 while (remaining > 0)
                 {
                     var thisStack = stackMax > 1 ? Math.Min(remaining, stackMax) : 1;
@@ -619,7 +623,12 @@ public class InventoryBuilder(DatabaseService databaseService, ItemHelper itemHe
                         item.Upd = new Upd { StackObjectsCount = thisStack };
                     }
 
-                    if (PlaceTree(packers, items, parentId, [item], item))
+                    // item 038: só a 1ª unidade honra a coord explícita; as demais cópias auto-empacotam.
+                    var placed = firstUnit
+                        ? PlaceTree(packers, items, parentId, [item], item, spec.X, spec.Y, spec.Rotated ?? false)
+                        : PlaceTree(packers, items, parentId, [item], item);
+                    firstUnit = false;
+                    if (placed)
                     {
                         added++;
                         remaining -= thisStack;
@@ -668,7 +677,11 @@ public class InventoryBuilder(DatabaseService databaseService, ItemHelper itemHe
             // CR-EP-01 (4): carregador/câmara em linha de stash/contents (cartuchos não mudam o footprint).
             LoadAmmo(tree, spec, root, $"stash:{label}", className);
 
-            if (!PlaceTree(packers, items, parentId, tree, root))
+            // item 038: 1ª unidade honra a coord explícita (opt-in); cópias seguintes auto-empacotam.
+            var placedOk = i == 0
+                ? PlaceTree(packers, items, parentId, tree, root, spec.X, spec.Y, spec.Rotated ?? false)
+                : PlaceTree(packers, items, parentId, tree, root);
+            if (!placedOk)
             {
                 logger.Warning($"[CustomClasses] '{className}': sem espaço p/ '{label}' (montado) em '{parentId}' — {count - i} unidade(s) pulada(s).");
                 break;
@@ -690,9 +703,33 @@ public class InventoryBuilder(DatabaseService databaseService, ItemHelper itemHe
     ///     REAL do item montado (InventoryHelper.GetItemSize considera ExtraSize dos mods). Em sucesso,
     ///     seta parentId/slotId/location da raiz e adiciona a árvore inteira a `dest`.
     /// </summary>
-    private bool PlaceTree(List<(Grid Grid, GridPacker Packer)> packers, List<Item> dest, string parentId, List<Item> tree, Item root)
+    private bool PlaceTree(List<(Grid Grid, GridPacker Packer)> packers, List<Item> dest, string parentId, List<Item> tree, Item root,
+        int? wantX = null, int? wantY = null, bool wantRotated = false)
     {
         var (w, h) = inventoryHelper.GetItemSize(root.Template, root.Id, tree);   // ref: InventoryHelper.cs:609
+
+        // item 038: posição explícita (opt-in). Coloca na célula pedida com a dimensão REAL (mods incl.);
+        // se não couber mais (mod mudou o footprint, colisão), cai no auto-pack abaixo — nunca dropa o item.
+        if (wantX is int wx && wantY is int wy)
+        {
+            foreach (var p in packers)
+            {
+                if (p.Packer.TryPlaceAt(wx, wy, w, h, wantRotated))
+                {
+                    root.ParentId = parentId;
+                    root.SlotId = p.Grid.Name ?? "main";
+                    root.Location = new ItemLocation
+                    {
+                        X = wx,
+                        Y = wy,
+                        R = wantRotated ? ItemRotation.Vertical : ItemRotation.Horizontal,
+                    };
+                    dest.AddRange(tree);
+                    return true;
+                }
+            }
+        }
+
         foreach (var p in packers)
         {
             var pos = p.Packer.Place(w, h);
