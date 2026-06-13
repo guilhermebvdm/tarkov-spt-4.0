@@ -199,7 +199,7 @@
 .cc-ws__outfit-name   { font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ── CharacterDoll: silhueta + 14 slots absolutos (estilo EFT) ─────────────────── */
-.cc-doll              { position: relative; width: 100%; max-width: 460px; aspect-ratio: 3 / 4;
+.cc-doll              { position: relative; width: 100%; max-width: 520px; aspect-ratio: 3 / 4;
                         margin: 8px auto; }
 .cc-doll__body        { position: absolute; inset: 0; display: flex; flex-direction: column;
                         align-items: center; justify-content: center; opacity: .18; pointer-events: none; }
@@ -213,36 +213,51 @@
 .cc-doll-slot         { position: absolute; display: flex; flex-direction: column;
                         align-items: center; gap: 2px; transform: translate(-50%, -50%); }
 .cc-doll-slot__label  { font-size: 8px; text-transform: uppercase; letter-spacing: .3px; opacity: .65; }
-.cc-doll-slot__cell--empty { opacity: .3; width: var(--cc-cell-unit); height: var(--cc-cell-unit); }
+/* Caixa de slot de TAMANHO FIXO (2×2 cells) — o ícone é contido (object-fit no .cc-item-cell img).
+   Slots de arma são mais largos (3×2). Nada é dimensionado pelo W×H real do item (vide CharacterDoll). */
+.cc-doll-slot__cell        { width: calc(var(--cc-cell-unit) * 2); height: calc(var(--cc-cell-unit) * 2); }
+.cc-doll-slot__cell--empty { opacity: .3; }
+.cc-doll-slot--firstprimaryweapon  .cc-doll-slot__cell,
+.cc-doll-slot--secondprimaryweapon .cc-doll-slot__cell,
+.cc-doll-slot--holster             .cc-doll-slot__cell,
+.cc-doll-slot--scabbard            .cc-doll-slot__cell { width: calc(var(--cc-cell-unit) * 3); }
 
-/* Posições aproximadas (rascunho — o orquestrador refina). top/left em % do .cc-doll. */
-.cc-doll-slot--headwear            { top: 8%;  left: 50%; }
-.cc-doll-slot--earpiece            { top: 12%; left: 28%; }
-.cc-doll-slot--facecover           { top: 20%; left: 72%; }
-.cc-doll-slot--eyewear             { top: 12%; left: 72%; }
-.cc-doll-slot--armorvest           { top: 40%; left: 30%; }
-.cc-doll-slot--tacticalvest        { top: 40%; left: 50%; }
-.cc-doll-slot--armband             { top: 40%; left: 70%; }
-.cc-doll-slot--backpack            { top: 58%; left: 12%; }
-.cc-doll-slot--firstprimaryweapon  { top: 60%; left: 88%; }
-.cc-doll-slot--secondprimaryweapon { top: 78%; left: 88%; }
-.cc-doll-slot--holster             { top: 62%; left: 35%; }
-.cc-doll-slot--scabbard            { top: 62%; left: 65%; }
-.cc-doll-slot--pockets             { top: 80%; left: 50%; }
-.cc-doll-slot--securedcontainer    { top: 80%; left: 22%; }
-.cc-doll-slot--dogtag              { top: 22%; left: 50%; }
+/* Posições (top/left em % do .cc-doll, centradas via translate(-50%,-50%)). Layout esquemático
+   sem sobreposição: cabeça/acessórios no topo, armadura/rig no meio, contêineres embaixo e os
+   slots de arma numa "trilha" à direita (caixas 3-wide). Refinado visualmente no browser. */
+.cc-doll-slot--headwear            { top: 6%;  left: 42%; }
+.cc-doll-slot--dogtag              { top: 6%;  left: 64%; }
+.cc-doll-slot--earpiece            { top: 16%; left: 22%; }
+.cc-doll-slot--eyewear             { top: 18%; left: 62%; }
+.cc-doll-slot--facecover           { top: 30%; left: 22%; }
+.cc-doll-slot--armband             { top: 30%; left: 62%; }
+.cc-doll-slot--armorvest           { top: 44%; left: 30%; }
+.cc-doll-slot--tacticalvest        { top: 44%; left: 54%; }
+.cc-doll-slot--backpack            { top: 60%; left: 16%; }
+.cc-doll-slot--pockets             { top: 60%; left: 44%; }
+.cc-doll-slot--securedcontainer    { top: 78%; left: 16%; }
+.cc-doll-slot--holster             { top: 76%; left: 44%; }
+.cc-doll-slot--firstprimaryweapon  { top: 30%; left: 86%; }
+.cc-doll-slot--secondprimaryweapon { top: 52%; left: 86%; }
+.cc-doll-slot--scabbard            { top: 74%; left: 86%; }
 
 /* ── StashGrid: grade 2D real (W colunas × H linhas) ───────────────────────────── */
 .cc-grid2d-wrap       { display: flex; flex-direction: column; gap: 6px; }
 .cc-grid2d-meta       { font-size: 10px; opacity: .6; text-transform: uppercase; letter-spacing: .5px; }
+/* A grade (linhas) é desenhada por background-gradient (1px a cada cell-unit) — NÃO por divs
+   de fundo: divs auto-fluídas competiam com os itens posicionados no auto-placement do CSS Grid
+   e empurravam os itens p/ linhas implícitas no fim. Sem gap: os itens encostam nas linhas. */
 .cc-grid2d            { display: grid; position: relative; width: max-content;
-                        background: var(--mud-palette-lines-default, #333); gap: 1px; }
-/* células de fundo (linhas da grade) */
-.cc-grid2d__bg        { width: var(--cc-cell-unit); height: var(--cc-cell-unit);
-                        background: var(--mud-palette-background, rgba(255,255,255,.02)); }
+                        border: 1px solid var(--mud-palette-lines-default, #333);
+                        background-color: var(--mud-palette-background, rgba(255,255,255,.02));
+                        background-image:
+                            linear-gradient(to right, var(--mud-palette-lines-default, #333) 1px, transparent 1px),
+                            linear-gradient(to bottom, var(--mud-palette-lines-default, #333) 1px, transparent 1px);
+                        background-size: var(--cc-cell-unit) var(--cc-cell-unit); }
 /* itens posicionados via grid-column/grid-row inline; vão por cima do fundo */
 .cc-grid2d__item      { position: relative; z-index: 1; width: auto !important; height: auto !important;
-                        background: var(--mud-palette-background-grey, rgba(255,255,255,.06)); }
+                        border: 1px solid var(--mud-palette-lines-default, #444);
+                        background: var(--mud-palette-background-grey, rgba(40,40,44,.92)); }
 .cc-grid2d-overflow   { font-size: 11px; color: var(--mud-palette-warning, #ffb300); }
 
 /* ── Three-state sidebar (QA 2026-06-12) — Open 250px / Mini 64px / Closed 0 ─────

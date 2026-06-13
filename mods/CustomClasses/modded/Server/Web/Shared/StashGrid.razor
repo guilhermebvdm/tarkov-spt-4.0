@@ -13,14 +13,11 @@
 
 <div class="cc-grid2d-wrap">
     <div class="cc-grid2d-meta">@_w × @_h cells</div>
+    @* A grade (linhas) é pintada via background-gradient no .cc-grid2d (CSS) — sem células de
+       fundo: divs auto-fluídas conflitavam com os itens posicionados (empurravam-nos p/ linhas
+       implícitas no fim do grid). Só os itens reais entram como filhos posicionados. *@
     <div class="cc-grid2d"
          style="@($"grid-template-columns:repeat({_w}, var(--cc-cell-unit));grid-template-rows:repeat({_h}, var(--cc-cell-unit));")">
-        @* células de fundo (linhas da grade) *@
-        @for (var i = 0; i < _w * _h; i++)
-        {
-            <div class="cc-grid2d__bg"></div>
-        }
-
         @foreach (var cell in _cells)
         {
             <ItemTooltip Name="@cell.Name" Category="@cell.Category"

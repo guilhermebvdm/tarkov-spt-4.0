@@ -65,12 +65,8 @@
             }
             @if (_entry?.Definition is not null)
             {
-                @* Item 025: edit page (simple fields + outfit; equipped/stash arrive in 026/028). *@
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
-                           StartIcon="@Icons.Material.Filled.Edit"
-                           Href="@($"/customclasses/classes/{Uri.EscapeDataString(Path.GetFileNameWithoutExtension(_entry.FileName))}/edit")">
-                    Edit
-                </MudButton>
+                @* F2c: o botão EDIT canônico vive no header slim do ClassWorkspace (edição IN-PLACE).
+                   O Edit antigo daqui foi removido para não duplicar (vide ClassWorkspace.EnterEdit). *@
                 @* Item 027: duplicate = official rename path (same dialog as the list). *@
                 <MudButton Variant="Variant.Outlined" Size="Size.Small"
                            StartIcon="@Icons.Material.Filled.ContentCopy"
