@@ -195,17 +195,17 @@ namespace CameraRotationMod
 
         private static bool CheckCover(EBracingDirection dir, Vector3 start, Vector3 lineEnd, Vector3 spherePos, float radius)
         {
-            int layerMask = LayerMaskClass.HighPolyWithTerrainMask;
+            int layerMask = EFTHardSettings.Instance.WEAPON_OCCLUSION_LAYERS;
             int playerLayer = LayerMask.NameToLayer("Player");
 
-            if (Physics.Linecast(start, lineEnd, out RaycastHit hit, layerMask) &&
+            if (Physics.Linecast(start, lineEnd, out RaycastHit hit, layerMask, QueryTriggerInteraction.Ignore) &&
                 hit.collider.gameObject.layer != playerLayer)
             {
                 SetPassive(dir);
                 return true;
             }
 
-            foreach (var c in Physics.OverlapSphere(spherePos, radius, layerMask))
+            foreach (var c in Physics.OverlapSphere(spherePos, radius, layerMask, QueryTriggerInteraction.Ignore))
             {
                 if (c.gameObject.layer != playerLayer)
                 {
