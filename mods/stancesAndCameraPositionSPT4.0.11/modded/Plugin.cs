@@ -21,6 +21,8 @@ public enum ScrollMode
 [BepInPlugin("shwng.camerarotation", "shwng.FpsCameraStances", "1.1.0")]
 public class Plugin : BaseUnityPlugin
 {
+    public static Plugin Instance;
+
     // ⚠️ MANTER o `public static new` — shadow estático do BaseUnityPlugin.Logger.
     // Sem o `new`, vira shadowing implícito (CS0108) e os helpers static deste mod quebram.
     public static new ManualLogSource Logger;
@@ -218,7 +220,20 @@ public class Plugin : BaseUnityPlugin
 
     // Stance Wiggle Settings (Item 009)
     public static ConfigEntry<bool> _EnableStanceWiggle;
-    public static ConfigEntry<float> _StanceWiggleMultiplier;
+    public static ConfigEntry<float> _StanceWiggleX;
+    public static ConfigEntry<float> _StanceWiggleY;
+    public static ConfigEntry<float> _StanceWiggleZ;
+    public static ConfigEntry<bool> _EnableDoubleWiggle;
+    public static ConfigEntry<bool> _EnableADSWiggle;
+    public static ConfigEntry<float> _WiggleSpeedHipfire;
+    public static ConfigEntry<float> _WiggleSpeedADS;
+    public static ConfigEntry<float> _WiggleDurationHipfire;
+    public static ConfigEntry<float> _WiggleDurationADS;
+    public static ConfigEntry<float> _CameraBobbingMultiplier;
+    public static ConfigEntry<float> _StanceOvershootDamping;
+    public static ConfigEntry<float> _StanceTransitionDamping;
+
+    public static ConfigEntry<float> _MaxLeanLimit;
 
     // Manual Chambering (Item 010)
     public static ConfigEntry<bool> _EnableManualChambering;
@@ -227,6 +242,7 @@ public class Plugin : BaseUnityPlugin
 
     public void Awake()
     {
+        Instance = this;
         Logger = base.Logger;
         FikaSync.FikaNetworkSync.Init();
         Logger.LogInfo($"Camera Rotation Mod has loaded!");
@@ -244,6 +260,7 @@ public class Plugin : BaseUnityPlugin
         // `[enable] FAIL <nome>` em vez de derrubar todos os patches seguintes do Awake.
         SafeEnable("PlayerSpringPatch", () => new PlayerSpringPatch());        // camera position
         SafeEnable("SpringGetPatch", () => new SpringGetPatch());              // stance + wiggle (009)
+        SafeEnable("LerpCameraPatch", () => new LerpCameraPatch());
         SafeEnable("FOVSliderPatch", () => new FOVSliderPatch());
 
         // Stamina/velocidade por stance (backlog 001)
@@ -275,6 +292,7 @@ public class Plugin : BaseUnityPlugin
         SafeEnable("PhysicalInertiaPatch", () => new Patches.PhysicalInertiaPatch());
 
         // Item 008: Action Stance Swap (Reload, Check Ammo, etc)
+        SafeEnable("LocaleClassReloadPatch", () => new Patches.LocaleClassReloadPatch());
         SafeEnable("ActionStancePatch", () => new Patches.ActionStancePatch());
         SafeEnable("ActionStanceCheckChamberPatch", () => new Patches.ActionStanceCheckChamberPatch());
         SafeEnable("ActionStanceExamineWeaponPatch", () => new Patches.ActionStanceExamineWeaponPatch());
@@ -999,17 +1017,113 @@ public class Plugin : BaseUnityPlugin
             StanceWiggleSection,
             "Enable Stance Wiggle",
             true,
-            new ConfigDescription("Adds an organic wiggle effect when changing stances.",
+            new ConfigDescription("Adds an organic wiggle effect when changing stances. / Adiciona um solavanco orgânico ao trocar de stance.",
             null,
-            new ConfigurationManagerAttributes { Order = 2 }));
+            new ConfigurationManagerAttributes { Order = 4 }));
             
-        _StanceWiggleMultiplier = Config.Bind(
+        _StanceWiggleX = Config.Bind(
             StanceWiggleSection,
-            "Stance Wiggle Multiplier",
+            "Wiggle X-Axis (Eixo X)",
             1.0f,
-            new ConfigDescription("Intensity of the stance wiggle effect.",
-            new AcceptableValueRange<float>(0.0f, 5.0f),
+            new ConfigDescription("Intensity of the wiggle on X-axis (Pitch/Right). / Intensidade do wiggle no Eixo X (Pitch rot / Direita-Esquerda pos).",
+            new AcceptableValueRange<float>(-5.0f, 5.0f),
+            new ConfigurationManagerAttributes { Order = 3 }));
+
+        _StanceWiggleY = Config.Bind(
+            StanceWiggleSection,
+            "Wiggle Y-Axis (Eixo Y)",
+            1.0f,
+            new ConfigDescription("Intensity of the wiggle on Y-axis (Yaw/Up). / Intensidade do wiggle no Eixo Y (Yaw rot / Cima-Baixo pos).",
+            new AcceptableValueRange<float>(-5.0f, 5.0f),
+            new ConfigurationManagerAttributes { Order = 2 }));
+
+        _StanceWiggleZ = Config.Bind(
+            StanceWiggleSection,
+            "Wiggle Z-Axis (Eixo Z)",
+            1.0f,
+            new ConfigDescription("Intensity of the wiggle on Z-axis (Roll/Forward). / Intensidade do wiggle no Eixo Z (Roll rot / Frente-Trás pos).",
+            new AcceptableValueRange<float>(-5.0f, 5.0f),
             new ConfigurationManagerAttributes { Order = 1 }));
+
+        _EnableDoubleWiggle = Config.Bind(
+            StanceWiggleSection,
+            "Enable Double Wiggle (Habilitar Wiggle Duplo)",
+            true,
+            new ConfigDescription("Adds a secondary inverse bounce to simulate weapon settling. / Adiciona uma quicada inversa para simular o assentamento da arma.",
+            null,
+            new ConfigurationManagerAttributes { Order = 0 }));
+
+        _EnableADSWiggle = Config.Bind(
+            StanceWiggleSection,
+            "Enable ADS Wiggle (Habilitar Wiggle ao Mirar)",
+            false,
+            new ConfigDescription("Triggers the wiggle physics when pulling the weapon to ADS. / Dispara a inércia do wiggle ao puxar a arma para mirar.",
+            null,
+            new ConfigurationManagerAttributes { Order = -1 }));
+
+        _WiggleSpeedHipfire = Config.Bind(
+            StanceWiggleSection,
+            "Wiggle Speed - Hipfire (Velocidade s/ Mirar)",
+            15.0f,
+            new ConfigDescription("Speed of the wiggle bounce when NOT aiming. / Velocidade do solavanco quando NÃO estiver mirando.",
+            new AcceptableValueRange<float>(1.0f, 50.0f),
+            new ConfigurationManagerAttributes { Order = -2 }));
+
+        _WiggleSpeedADS = Config.Bind(
+            StanceWiggleSection,
+            "Wiggle Speed - ADS (Velocidade Mirando)",
+            15.0f,
+            new ConfigDescription("Speed of the wiggle bounce when aiming. / Velocidade do solavanco ao mirar.",
+            new AcceptableValueRange<float>(1.0f, 50.0f),
+            new ConfigurationManagerAttributes { Order = -3 }));
+
+        _WiggleDurationHipfire = Config.Bind(
+            StanceWiggleSection,
+            "Wiggle Duration - Hipfire (Tempo s/ Mirar)",
+            0.15f,
+            new ConfigDescription("How long the wiggle takes to settle when NOT aiming (seconds). / Tempo (em segundos) de assentamento sem mirar.",
+            new AcceptableValueRange<float>(0.05f, 1.0f),
+            new ConfigurationManagerAttributes { Order = -4 }));
+
+        _WiggleDurationADS = Config.Bind(
+            StanceWiggleSection,
+            "Wiggle Duration - ADS (Tempo Mirando)",
+            0.15f,
+            new ConfigDescription("How long the wiggle takes to settle when aiming (seconds). / Tempo (em segundos) de assentamento mirando.",
+            new AcceptableValueRange<float>(0.05f, 1.0f),
+            new ConfigurationManagerAttributes { Order = -5 }));
+
+        _LeanSpeedMultiplier = Config.Bind(
+            "2. Configurações de Stance",
+            "Multiplicador de Velocidade do Lean",
+            1f,
+            new ConfigDescription("Multiplica a velocidade com que o personagem inclina (Lean). 1 = Original do jogo.", new AcceptableValueRange<float>(0.1f, 10f)));
+
+        _StanceOvershootDamping = Config.Bind(
+            "2. Configurações de Stance",
+            "Overshoot/Settle Damping (Retorno Stance 0)",
+            0.55f,
+            new ConfigDescription("Controla o 'quique' quando a arma volta para a stance 0. 1.0 = Sem quique. 0.4 = Muito quique.", new AcceptableValueRange<float>(0.2f, 1.0f)));
+
+        _StanceTransitionDamping = Config.Bind(
+            "2. Configurações de Stance",
+            "Frenagem da Transição (Easing Out)",
+            1.0f,
+            new ConfigDescription("Controla o quão suavemente a arma freia ao trocar de stance. 1.0 = Original. Valores < 1.0 = Movimento mais rápido/seco. Valores > 1.0 = Movimento arrastado/lento.", new AcceptableValueRange<float>(0.2f, 2.0f)));
+
+        _MaxLeanLimit = Config.Bind(
+            "2. Configurações de Stance",
+            "Limite Máximo de Lean",
+            5f,
+            new ConfigDescription("O limite máximo de inclinação do Lean. 5 = Original do jogo. (Aviso: Valores altos podem não ter animação no jogo).", new AcceptableValueRange<float>(1f, 15f)));
+
+        _CameraBobbingMultiplier = Config.Bind(
+            StanceWiggleSection,
+            "Camera Bobbing Multiplier",
+            1.0f,
+            new ConfigDescription("Multiplies the camera shake effect caused by wiggle. Follows the native Head Bobbing option setting. / Multiplicador de intensidade do balanço da câmera.",
+            new AcceptableValueRange<float>(0f, 5.0f),
+            new ConfigurationManagerAttributes { Order = -6 }));
 
         _LeanSpeedMultiplier = Config.Bind(
             AnimationSettings,

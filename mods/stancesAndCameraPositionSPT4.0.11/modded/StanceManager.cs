@@ -40,6 +40,11 @@ namespace CameraRotationMod
 
         public static void SetStance(Stance newStance)
         {
+            if (CurrentStance != newStance)
+            {
+                Plugin.Logger.LogInfo($"[Spy] SetStance called: {CurrentStance} -> {newStance}");
+                RequestWiggle(CurrentStance, newStance);
+            }
             CurrentStance = newStance;
         }
 
@@ -92,6 +97,16 @@ namespace CameraRotationMod
         // Tac Sprint reset delay variables
         private static bool _isWaitingToResetTacSprint = false;
         private static float _tacSprintResetTimer = 0f;
+        
+        // Sprint Stance Tracking
+        private static bool _wasSprinting = false;
+        private static Stance _preSprintStance = Stance.Default;
+        
+        // ADS Tracking for Wiggle
+        private static bool _wasAimingGlobal = false;
+        
+        // Track Sprint fallback
+        private static bool _wasSprintingForceZero = false;
         
         // Track GameWorld to detect raid changes and reset state
         private static GameWorld _lastGameWorld = null;
@@ -174,17 +189,59 @@ namespace CameraRotationMod
                 isInProne = gameWorld.MainPlayer.IsInPronePose;
             }
 
-            if (gameWorld?.MainPlayer?.IsSprintEnabled == true || MountingManager.IsMounting || isNativeMounting || isInProne)
+            // --- ADS Wiggle Logic ---
+            if (isAiming != _wasAimingGlobal && Plugin._EnableADSWiggle?.Value == true)
             {
-                // Se começou a correr, deitou ou está apoiado, quebra a Action Stance e trava controles
+                RequestWiggle(CurrentStance, CurrentStance);
+            }
+            _wasAimingGlobal = isAiming;
+
+            bool isSprinting = gameWorld?.MainPlayer?.IsSprintEnabled == true;
+
+            if (MountingManager.IsMounting || isNativeMounting || isInProne)
+            {
+                // Se deitou ou está apoiado, quebra a Action Stance e trava controles
                 if (_isActionStanceActive) EndActionStance(forceCancel: true);
                 
                 // Forçar para Default caso seja montagem ou deitado (evita bugar se estivesse numa stance e montou/deitou do nada)
-                if ((MountingManager.IsMounting || isNativeMounting || isInProne) && CurrentStance != Stance.Default)
+                if (CurrentStance != Stance.Default)
                 {
                     SetStance(Stance.Default);
                 }
                 return;
+            }
+
+            if (isSprinting)
+            {
+                if (_isActionStanceActive) EndActionStance(forceCancel: true);
+
+                // Se estiver sprintando e NÃO for ativar o TacSprint, força a stance 0 e guarda a antiga
+                if (!_isTacSprintActive && !CanDoTacSprint(gameWorld.MainPlayer))
+                {
+                    if (!_wasSprintingForceZero)
+                    {
+                        _wasSprintingForceZero = true;
+                        if (CurrentStance != Stance.Default)
+                        {
+                            _preSprintStance = CurrentStance;
+                            SetStance(Stance.Default);
+                        }
+                        else
+                        {
+                            _preSprintStance = Stance.Default;
+                        }
+                    }
+                }
+                return; // Trava as hotkeys normais durante o sprint
+            }
+            else if (_wasSprintingForceZero)
+            {
+                // Parou de sprintar, restaura a stance se estiver na 0
+                _wasSprintingForceZero = false;
+                if (CurrentStance == Stance.Default)
+                {
+                    SetStance(_preSprintStance);
+                }
             }
 
             // Action Stance: o término é detectado via ActionStanceOnIdlePatch (OnIdleStartEvent).
@@ -341,7 +398,8 @@ namespace CameraRotationMod
             var gw = GetCachedGameWorld();
             if (gw?.MainPlayer?.IsSprintEnabled == true) return;
             if (MountingManager.IsMounting) return; // Não levanta a arma se estiver apoiado na parede
-
+            
+            Plugin.Logger.LogInfo($"[Spy] StartActionStance called. CurrentStance: {CurrentStance}");
             if (CurrentStance != Stance.Default)
             {
                 _preActionStance = CurrentStance;
@@ -361,6 +419,7 @@ namespace CameraRotationMod
         {
             if (!_isActionStanceActive) return;
 
+            Plugin.Logger.LogInfo($"[Spy] EndActionStance called. forceCancel={forceCancel}, Time delta={Time.time - _actionStanceStartTime}");
             // Debounce: ignorar OnIdleStartEvent disparados nos primeiros 0.3s (podem ser idle
             // events do próprio início da operação antes da animação realmente começar).
             if (!forceCancel && (Time.time - _actionStanceStartTime < 0.3f)) return;
@@ -431,7 +490,7 @@ namespace CameraRotationMod
             }
 
             Plugin.Logger.LogDebug($"[F4] TryInterceptTriggerDown: INTERCEPTADO na Stance {CurrentStance}! Forçando Snap para Default (Vanilla)");
-            CurrentStance = Stance.Default;
+            ApplyUserStance(Stance.Default);
 
             // Marcar intercept ativo: timer começa, próximo button-up decide se ressuscita.
             _triggerDownTimeUnscaled = Time.unscaledTime;
