@@ -11,7 +11,7 @@ This skill covers the **C# / runtime** concerns. Lifecycle, raid hooks and SPT-s
 
 > **📦 Itens/inventário/equipamento/hideout:** ao mexer com essas estruturas (árvore `_id`/`_tpl`/`parentId`/`slotId`, `location {x,y,r}`, presets, munição, hideout), consulte `docs/technical/inventario-itens-spt4.md` — fonte de verdade canônica.
 
-> **⚠️ Erros recorrentes já cometidos neste repo:** `docs/technical/spt-antipatterns.md` (AP-01..AP-06) — ler antes de escrever ou revisar spec técnica.
+> **⚠️ Erros recorrentes já cometidos neste repo:** `docs/technical/spt-antipatterns.md` (AP-01..AP-08) — ler antes de escrever ou revisar spec técnica.
 
 ## 1. Memory ownership
 

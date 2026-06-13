@@ -21,9 +21,9 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 
 ## Pendências / próximos passos conhecidos
 
-- 🔴 [P-7.9] (aberta 2026-06-11) **PUSH dos 15 commits do épico** + QA visual no viewer (build-gate ≠ correção: matriz em células estreitas 032, dashboard em viewport estreito 033, comparação A×B 036).
-- 🟡 [P-7.10] (aberta 2026-06-11) **Medição quantitativa do 037** (before/after) — fechar o DoD: subir server com log Debug (`[perf]` é LogDebug) + baseline pré-`d180195`.
-- 🟡 [P-7.11] (aberta 2026-06-11) **Achados de review adiados** (no relatório 2026-06-12, por wave) — decidir follow-ups: 036 multiplicadores de B lado a lado (toca componente 031), 037 dispose de `_recomputeCts`, 034 msg "filtro sem resultados" na aba Stash.
+- 🔴 [P-7.9] (aberta 2026-06-12) **PUSH dos 15 commits do épico** + QA visual no viewer (build-gate ≠ correção: matriz em células estreitas 032, dashboard em viewport estreito 033, comparação A×B 036).
+- 🟡 [P-7.10] (aberta 2026-06-12) **Medição quantitativa do 037** (before/after) — fechar o DoD: subir server com log Debug (`[perf]` é LogDebug) + baseline pré-`d180195`.
+- 🟡 [P-7.11] (aberta 2026-06-12) **Achados de review adiados** (no relatório 2026-06-12, por wave) — decidir follow-ups: 036 multiplicadores de B lado a lado (toca componente 031), 037 dispose de `_recomputeCts`, 034 msg "filtro sem resultados" na aba Stash.
 - 🟡 [P-7.3] (aberta 2026-06-11) **Validação in-game pós-CR-EP-01**: stash agora spawna `preset`/`mods`/`ammo`/`contents` montados (antes só tpl+count) — criar perfil novo e conferir o nascimento (regra `feedback_spt_validation`).
 - 🟡 [P-7.4] (aberta 2026-06-11) **Validações in-game da sessão paralela de 2026-06-11** (013 botão SKILLS×MO, 015 polish, 017 CustomizationPersistenceFix) — ver entrada Sessão 6 (2026-06-11 21:45).
 - 🟡 [P-7.5] (aberta 2026-06-11) **Housekeeping deferido do editor**: CR-EP-10 (ícones client×server sem validação cruzada), CR2-EP-05 (óptica mínima não precificada), página `/customclasses/picker-test` (rota dev sem link).
@@ -135,7 +135,7 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 2. Curadoria: topo reescrito, blocos antigos arquivados (esta entrada).
 
 **Cross-refs:**
-- Trabalho paralelo no mesmo dia: ver Sessão de 2026-06-11 21:45 (polish 015 + fixes 013/017).
+- Trabalho paralelo no mesmo dia: ver Sessão 6 (2026-06-11 21:45) (polish 015 + fixes 013/017).
 - O plano do épico UX em si foi gravado nas entradas de 2026-06-10 (não duplicado aqui).
 
 ### 2026-06-12 — Épico UX 030–037 executado autônomo (Workflow por wave)

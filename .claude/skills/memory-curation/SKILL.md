@@ -292,8 +292,7 @@ A memória só paga seu custo se for LIDA. Os commands de desenvolvimento (`/cre
 **Output obrigatório do passo — linha de provenance greppável.** No INÍCIO do trabalho, emitir literalmente (começando com o token `Memória consultada:`), e repetir no bloco de confirmação/relatório final do command:
 
 ```text
-Memória consultada: snapshot de YYYY-MM-DD (Sessão N)   [ou: "sem memória prévia" / "item novo, última entrada Sessão N"]
-Pendências que afetam esta tarefa: [P-N.M <resumo>] / nenhuma.
+Memória consultada: snapshot de YYYY-MM-DD (Sessão N)   [ou: "sem memória prévia" / "item novo, última entrada Sessão N"] · pendências que afetam: [P-N.M <resumo>] / nenhuma
 ```
 
 O token `Memória consultada:` é a única prova de que a leitura aconteceu — sem ele, um leitor/revisor não distingue "li e não havia nada" de "não li". Por isso é obrigatório mesmo no caso vazio.

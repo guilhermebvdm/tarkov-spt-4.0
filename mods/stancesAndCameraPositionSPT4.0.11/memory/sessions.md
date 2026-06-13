@@ -111,7 +111,7 @@ Usuário reportou "ADS lento" in-raid. Investigado:
 
 **Aviso de drift no asbuild.md (linha 14):** existe uma referência a um `06-fix-02.md` ("Labels das hotkeys Stance 2/3 + ordem F12 via Order bump em BindStance") que **não corresponde a trabalho registrado** nesta sessão. Pode ter sido criado em chat paralelo. Investigar antes de criar novo fix-02 com numeração duplicada.
 
-## 2026-06-11 ~madrugada (GMT-3) — Sessão: backlog de ajustes (Fase 0 + itens 004/008/009/010 + F12)
+## 2026-06-11 ~madrugada (GMT-3) — Sessão 4a: backlog de ajustes (Fase 0 + itens 004/008/009/010 + F12)
 
 Sessão autônoma noturna (usuário dormindo; sem testes in-game, sem pedidos de aprovação). Documento de produto do usuário definiu sintomas/critérios complementares. Plano aprovado em `~/.claude/plans/backlog-ajustes-de-kind-phoenix.md` (2 passadas de revisão crítica via `/g-review-content`). Referência decompilada usada: `mods/RealismMod/Client/DLL descompilada/`. APIs validadas contra Assembly 0.16 em `D:/SPT`.
 

@@ -25,7 +25,7 @@ Ordem ao **responder dúvidas** sobre SPT/EFT:
 
 > Distinta da **Hierarquia de consulta (geral)** acima: aquela é pra responder dúvidas; esta é pra **citar evidência** em specs/reviews.
 
-> ⚠️ **Erros recorrentes já cometidos neste repo:** [docs/technical/spt-antipatterns.md](../docs/technical/spt-antipatterns.md) (AP-01..AP-06) — leitura obrigatória antes de escrever ou revisar spec técnica.
+> ⚠️ **Erros recorrentes já cometidos neste repo:** [docs/technical/spt-antipatterns.md](../docs/technical/spt-antipatterns.md) (AP-01..AP-08) — leitura obrigatória antes de escrever ou revisar spec técnica.
 
 > 🧭 **Navegação estrutural:** os grafos de código do graphify ([references/graphs/](../references/graphs/), skill `graph-code-navigation`) aceleram achar callers, overrides e cadeias input→efeito — mas **NÃO são fonte de evidência**: todo achado do grafo é confirmado lendo o `arquivo.cs:linha`.
 
