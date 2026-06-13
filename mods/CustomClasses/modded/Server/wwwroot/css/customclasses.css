@@ -185,12 +185,16 @@
 /* Linhas COMPACTAS (mais skills por tela): pouca altura/padding, fonte menor. */
 .cc-ws__panel--left .skill-canonical td     { min-width: 0 !important; padding: 1px 4px !important;
                                               height: 26px; font-size: 12px; vertical-align: middle; }
-.cc-ws__panel--left .skill-canonical td:nth-child(1) { width: 30% !important; white-space: nowrap;
+.cc-ws__panel--left .skill-canonical td:nth-child(1) { width: 26% !important; white-space: nowrap;
                                               overflow: hidden; text-overflow: ellipsis; }
-.cc-ws__panel--left .skill-canonical td:nth-child(2) { width: 38% !important; }   /* barra/slider */
-.cc-ws__panel--left .skill-canonical td:nth-child(3) { width:  8% !important; text-align: right; }  /* nível */
+.cc-ws__panel--left .skill-canonical td:nth-child(2) { width: 34% !important; }   /* barra/slider */
+.cc-ws__panel--left .skill-canonical td:nth-child(3) { width:  7% !important; text-align: right; }  /* nível */
 .cc-ws__panel--left .skill-canonical td:nth-child(4) { width: 10% !important; text-align: right; }  /* custo */
-.cc-ws__panel--left .skill-canonical td:nth-child(5) { width: 14% !important; }   /* multiplicador */
+.cc-ws__panel--left .skill-canonical td:nth-child(5) { width: 15% !important; }   /* multiplicador */
+.cc-ws__panel--left .skill-canonical td:nth-child(6) { width:  8% !important; text-align: center; }  /* reload default */
+/* botão "Reload default": discreto, realça no hover da linha. */
+.cc-skill-reset .mud-icon-button { padding: 2px; opacity: .55; }
+.cc-skill-reset .mud-icon-button:hover { opacity: 1; }
 .cc-ws__panel--left .mud-table-container,
 .cc-ws__panel--left .mud-simple-table       { overflow-x: hidden !important; }
 /* slider do nível compacto dentro da linha (a bolha de valor ainda aparece ao arrastar). */

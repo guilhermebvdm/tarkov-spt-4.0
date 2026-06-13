@@ -102,6 +102,8 @@ else
                                             Cost="@LiveSkillCost"
                                             Multipliers="@MultiplierLookup()"
                                             EditMultipliers="@_model.Multipliers"
+                                            BaselineLevels="@def.Skills"
+                                            BaselineMultipliers="@def.SkillMultipliers"
                                             OnLevelChanged="OnSkillsEdited"
                                             OnMultipliersChanged="OnSkillsEdited"/>
                     }

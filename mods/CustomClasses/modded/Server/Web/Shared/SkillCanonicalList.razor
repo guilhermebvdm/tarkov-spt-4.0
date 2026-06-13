@@ -89,6 +89,12 @@
     /// <summary>Raised quando um multiplicador muda no editor in-row (recompute do custo + dirty).</summary>
     [Parameter] public EventCallback OnMultipliersChanged { get; set; }
 
+    /// <summary>EDIT: níveis "default" (estado salvo no disco) p/ o botão "Reload default" por linha.</summary>
+    [Parameter] public IReadOnlyDictionary<string, int>? BaselineLevels { get; set; }
+
+    /// <summary>EDIT: multiplicadores "default" (estado salvo no disco) p/ o botão "Reload default".</summary>
+    [Parameter] public IReadOnlyDictionary<string, double>? BaselineMultipliers { get; set; }
+
 
     // ── Level resolution (precedence: EditRows → Levels), case-insensitive (B2) ──────────────
 
@@ -283,6 +289,55 @@
         StateHasChanged();
     }
 
+    // ── "Reload default" por linha (reverte nível + multiplicador ao estado salvo) ────────────
+
+    private int BaselineLevelOf(string name)
+    {
+        if (BaselineLevels is not null)
+        {
+            foreach (var (k, v) in BaselineLevels)
+            {
+                if (string.Equals(k, name, StringComparison.OrdinalIgnoreCase))
+                {
+                    return v;
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    private double BaselineFactorOf(string name)
+    {
+        if (BaselineMultipliers is not null)
+        {
+            foreach (var (k, v) in BaselineMultipliers)
+            {
+                if (string.Equals(k, name, StringComparison.OrdinalIgnoreCase))
+                {
+                    return v;
+                }
+            }
+        }
+
+        return 1.0;
+    }
+
+    /// <summary>A linha está diferente do default (nível OU multiplicador)? → mostra o botão de reset.</summary>
+    private bool RowDiffersFromBaseline(string name, int level) =>
+        EditRows is not null
+        && (level != BaselineLevelOf(name) || Math.Abs(EditFactorOf(name) - BaselineFactorOf(name)) > 0.0001);
+
+    /// <summary>Reverte a skill (nível + multiplicador) ao valor "default" (estado salvo no disco).</summary>
+    private async Task ResetRowAsync(string name)
+    {
+        await SetLevelAsync(name, BaselineLevelOf(name));
+        if (EditMultipliers is not null)
+        {
+            await SetFactorAsync(name, BaselineFactorOf(name));
+        }
+    }
+
     /// <summary>Bar fill % — saturates at level 10 (porta profiles.js:154; corner case 2: &gt;10 clamps to 100).</summary>
     private static double BarPercent(int level) =>
         level <= 0 ? 0 : Math.Min(1.0, level / 10.0) * 100;
@@ -416,6 +471,19 @@
                 var bLevel = compareLevels.TryGetValue(name, out var bl) ? bl : 0;
                 <td style="text-align:right;width:80px">@DeltaCell(level, bLevel)</td>
             }
+
+            @* "Reload default": reverte nível + multiplicador ao estado salvo (só quando difere). *@
+            @if (EditRows is not null)
+            {
+                <td class="cc-skill-reset">
+                    @if (RowDiffersFromBaseline(name, level))
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.Restore" Size="Size.Small"
+                                       title="Reload default (revert this skill to the saved value)"
+                                       OnClick="@(() => ResetRowAsync(name))"/>
+                    }
+                </td>
+            }
         </tr>
     };
 
@@ -497,5 +565,6 @@
     private int ColumnCount =>
         3 + (Cost is not null ? 1 : 0)
           + (Multipliers is not null || EditMultipliers is not null ? 1 : 0)
-          + (Compare is not null ? 1 : 0);
+          + (Compare is not null ? 1 : 0)
+          + (EditRows is not null ? 1 : 0);   // coluna do "Reload default"
 }
