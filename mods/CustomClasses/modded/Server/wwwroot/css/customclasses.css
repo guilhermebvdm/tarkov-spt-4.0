@@ -265,6 +265,19 @@
                         border: 1px solid var(--mud-palette-lines-default, #444);
                         background: var(--mud-palette-background-grey, rgba(40,40,44,.92)); }
 .cc-grid2d-overflow   { font-size: 11px; color: var(--mud-palette-warning, #ffb300); }
+/* ── F2c: drag-and-drop do stash ───────────────────────────────────────────────── */
+.cc-grid2d-hint       { font-size: 10px; opacity: .55; }
+.cc-grid2d__item--edit { cursor: grab; }
+.cc-grid2d__item--edit:hover { outline: 1px solid var(--mud-palette-primary, #7e6fff); z-index: 2; }
+/* Durante o drag, os itens não capturam pointer-events → o drop SEMPRE cai na grade (offset
+   relativo a ela), mesmo soltando sobre outro item. */
+.cc-grid2d--dragging .cc-grid2d__item { pointer-events: none; }
+/* Botão ⟳ (rotacionar) no canto do item — só aparece no hover p/ não poluir. */
+.cc-grid2d__rotate    { position: absolute; top: 0; left: 0; z-index: 3; width: 16px; height: 16px;
+                        padding: 0; line-height: 14px; font-size: 11px; cursor: pointer;
+                        border: none; border-radius: 0 0 3px 0; opacity: 0;
+                        color: #fff; background: rgba(0,0,0,.7); }
+.cc-grid2d__item--edit:hover .cc-grid2d__rotate { opacity: 1; }
 
 /* ── Three-state sidebar (QA 2026-06-12) — Open 250px / Mini 64px / Closed 0 ─────
    The drawer stays permanently Open; the state class on MudLayout (cc-sb-open/mini/closed)

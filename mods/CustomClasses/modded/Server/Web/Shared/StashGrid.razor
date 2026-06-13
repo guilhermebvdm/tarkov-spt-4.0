@@ -1,78 +1,114 @@
-@* Fase F1 (rascunho): grade 2D do stash estilo inventário EFT. Dimensiona a grade pela baseEdition
+@* Fase F1/F2c: grade 2D do stash estilo inventário EFT. Dimensiona a grade pela baseEdition
    (CostService.GetStashGridSize; fallback 10×40) e posiciona cada item loose:
      • com X/Y → célula fixa (GridPacker.TryPlaceAt, rotação por Rotated);
      • sem coord → first-fit sequencial (GridPacker.Place) nas células livres.
    Cada item: ícone (padrão GearPanel: tarkov.dev, onerror-hidden), badge de qty (>1), hover ItemTooltip.
-   READ-ONLY. NOTA: usa Catalog.GetItemDimensions (tamanho BASE do item) — TODO tamanho-com-mods (presets
-   montados podem ter ExtraSize; o CostService.CheckStashCapacity usa InventoryHelper.GetItemSize p/ isso). *@
+
+   ── F2c: DRAG-AND-DROP (modo edição) ────────────────────────────────────────────────────────
+   Quando Editable E EditItems (a List<ItemSpecModel> VIVA do _model.Stash) é fornecida, os itens
+   ficam draggable e a grade vira drop-zone única. O cálculo da célula é Blazor-nativo (SEM JS):
+     • drop na .cc-grid2d → OffsetX/Y do DragEventArgs / CellPx = célula alvo;
+     • durante o drag, .cc-grid2d--dragging zera pointer-events dos itens, então o drop SEMPRE cai
+       na grade (offset relativo a ela) mesmo soltando sobre outro item.
+   Soltar valida bounds + colisão (CanPlace, excluindo o próprio item); válido → seta X/Y no modelo
+   e fixa (pin). Botão ⟳ rotaciona (re-valida na posição atual). Em edição NÃO embrulhamos no
+   ItemTooltip (o wrapper do MudTooltip interferiria no grid-item/drag). READ-ONLY mantém o tooltip.
+   NOTA: usa Catalog.GetItemDimensions (tamanho BASE) — TODO tamanho-com-mods (presets montados). *@
 
 @using System.Globalization
+@using Microsoft.AspNetCore.Components.Web
 @using SPTarkov.Server.Core.Models.Common
+@using CustomClasses.Web
 @inject CatalogService Catalog
 @inject CostService CostService
 
 <div class="cc-grid2d-wrap">
     <div class="cc-grid2d-meta">@_w × @_h cells</div>
-    @* A grade (linhas) é pintada via background-gradient no .cc-grid2d (CSS) — sem células de
-       fundo: divs auto-fluídas conflitavam com os itens posicionados (empurravam-nos p/ linhas
-       implícitas no fim do grid). Só os itens reais entram como filhos posicionados. *@
-    <div class="cc-grid2d"
-         style="@($"grid-template-columns:repeat({_w}, var(--cc-cell-unit));grid-template-rows:repeat({_h}, var(--cc-cell-unit));")">
+    @* A grade (linhas) é pintada via background-gradient no .cc-grid2d (CSS) — só os itens reais
+       entram como filhos posicionados. Em edição a própria grade é a drop-zone. *@
+    <div class="cc-grid2d @(_dragging is not null ? "cc-grid2d--dragging" : null)"
+         style="@($"grid-template-columns:repeat({_w}, var(--cc-cell-unit));grid-template-rows:repeat({_h}, var(--cc-cell-unit));")"
+         @ondragover:preventDefault="true"
+         @ondrop="OnDrop">
         @foreach (var cell in _cells)
         {
-            <ItemTooltip Name="@cell.Name" Category="@cell.Category"
-                         Width="@cell.Width" Height="@cell.Height"
-                         Price="@cell.Price" PriceSource="@cell.PriceSource"
-                         Qty="@cell.Qty" MissingPrice="@cell.MissingPrice">
-                <div class="cc-item-cell cc-grid2d__item"
-                     style="@CellStyle(cell)">
-                    <span class="cc-item-cell__txt">@cell.Name</span>
-                    @if (cell.RootTpl is not null)
-                    {
-                        <img src="@($"https://assets.tarkov.dev/{cell.RootTpl}-icon.webp")"
-                             loading="lazy" alt="" onerror="this.style.display='none'"/>
-                    }
-                    @if (cell.Qty > 1)
-                    {
-                        <span class="cc-item-cell__qty">@cell.Qty.ToString("N0", CultureInfo.InvariantCulture)</span>
-                    }
-                    @if (cell.MissingPrice)
-                    {
-                        <span class="cc-item-cell__warn" title="No flea or handbook price found">⚠</span>
-                    }
+            if (_editable)
+            {
+                <div class="cc-item-cell cc-grid2d__item cc-grid2d__item--edit"
+                     style="@CellStyle(cell)" draggable="true"
+                     @ondragstart="@(() => _dragging = cell)"
+                     @ondragend="@(() => _dragging = null)">
+                    @ItemInner(cell)
+                    <button class="cc-grid2d__rotate" type="button" title="Rotate"
+                            @onclick="@(() => RotateAsync(cell))" @onclick:stopPropagation="true"
+                            @ondragstart:stopPropagation="true">⟳</button>
                 </div>
-            </ItemTooltip>
+            }
+            else
+            {
+                <ItemTooltip Name="@cell.Name" Category="@cell.Category"
+                             Width="@cell.Width" Height="@cell.Height"
+                             Price="@cell.Price" PriceSource="@cell.PriceSource"
+                             Qty="@cell.Qty" MissingPrice="@cell.MissingPrice">
+                    <div class="cc-item-cell cc-grid2d__item" style="@CellStyle(cell)">
+                        @ItemInner(cell)
+                    </div>
+                </ItemTooltip>
+            }
         }
     </div>
     @if (_overflow > 0)
     {
         <div class="cc-grid2d-overflow">@_overflow item(s) did not fit the grid (not shown).</div>
     }
+    @if (_editable)
+    {
+        <div class="cc-grid2d-hint">Drag to move · ⟳ to rotate · drop on a free area</div>
+    }
 </div>
 
 @code {
-    /// <summary>Itens loose do stash (Loadout.Stash). Null/vazio → grade vazia.</summary>
+    /// <summary>Itens loose do stash (Loadout.Stash) — modo READ-ONLY. Null/vazio → grade vazia.</summary>
     [Parameter] public List<ItemSpec>? Stash { get; set; }
 
     /// <summary>baseEdition da classe (dimensiona a grade). Vazio → default (Zero to hero).</summary>
     [Parameter] public string? BaseEdition { get; set; }
 
-    /// <summary>F2a: preparado p/ o orquestrador (F2c: drag-and-drop do stash). No-op visual por enquanto.</summary>
+    /// <summary>F2c: habilita drag-and-drop (requer EditItems). Sem EditItems → render read-only.</summary>
     [Parameter] public bool Editable { get; set; }
+
+    /// <summary>F2c: lista VIVA do _model.Stash (mutada em lugar pelo DnD). Null → read-only.</summary>
+    [Parameter] public List<ItemSpecModel>? EditItems { get; set; }
+
+    /// <summary>F2c: bubble após mover/rotacionar → o workspace recomputa o custo.</summary>
+    [Parameter] public EventCallback OnChanged { get; set; }
 
     private const int FallbackW = 10;
     private const int FallbackH = 40;
+
+    /// <summary>Pixel de uma célula — DEVE casar com --cc-cell-unit no CSS (.cc-ws { 36px }).</summary>
+    private const double CellPx = 36;
 
     private int _w = FallbackW;
     private int _h = FallbackH;
     private int _overflow;
     private List<PlacedCell> _cells = [];
+    private PlacedCell? _dragging;
+
+    private bool _editable => Editable && EditItems is not null;
 
     private sealed record PlacedCell(
-        int X, int Y, int W, int H, string? RootTpl, string Name, string? Category,
-        double Qty, double Price, string? PriceSource, bool MissingPrice, int Width, int Height);
+        int X, int Y, int W, int H, int W0, int H0, string? RootTpl, string Name, string? Category,
+        double Qty, double Price, string? PriceSource, bool MissingPrice, int Width, int Height,
+        ItemSpecModel? Model);
 
-    protected override void OnParametersSet()
+    /// <summary>Campos normalizados de um item de origem (ItemSpec read-only OU ItemSpecModel editável).</summary>
+    private readonly record struct SrcItem(
+        string? Preset, string? Tpl, bool Premium, double Count, int? X, int? Y, bool Rotated, ItemSpecModel? Model);
+
+    protected override void OnParametersSet() => Build();
+
+    private void Build()
     {
         var baseKey = string.IsNullOrWhiteSpace(BaseEdition) ? ClassRegistrar.DefaultBaseEdition : BaseEdition!;
         var size = CostService.GetStashGridSize(baseKey);
@@ -80,7 +116,9 @@
 
         _cells = [];
         _overflow = 0;
-        if (Stash is not { Count: > 0 })
+
+        var src = SourceItems();
+        if (src.Count == 0)
         {
             return;
         }
@@ -89,31 +127,26 @@
 
         // Dois passos: primeiro itens com coordenada fixa (X/Y), depois auto-posiciona o resto
         // (mesma prioridade do InventoryBuilder/PackSpecsIntoGrids — pinned antes do first-fit).
-        var pinned = Stash.Where(s => s.X is not null && s.Y is not null).ToList();
-        var loose = Stash.Where(s => s.X is null || s.Y is null).ToList();
+        var pinned = src.Where(s => s.X is not null && s.Y is not null).ToList();
+        var loose = src.Where(s => s.X is null || s.Y is null).ToList();
 
-        foreach (var spec in pinned)
+        foreach (var item in pinned)
         {
-            var data = Resolve(spec);
+            var data = Resolve(item);
             if (data is null)
             {
                 continue;
             }
 
             var (rootTpl, name, category, w, h, qty, price, source, missing) = data.Value;
-            var rotated = spec.Rotated ?? false;
-            if (packer.TryPlaceAt(spec.X!.Value, spec.Y!.Value, w, h, rotated))
+            var rotated = item.Rotated;
+            if (packer.TryPlaceAt(item.X!.Value, item.Y!.Value, w, h, rotated))
             {
-                var (dw, dh) = rotated ? (h, w) : (w, h);
-                _cells.Add(new PlacedCell(spec.X.Value, spec.Y.Value, dw, dh, rootTpl, name, category,
-                    qty, price, source, missing, w, h));
+                AddCell(item, rootTpl, name, category, w, h, qty, price, source, missing, item.X.Value, item.Y.Value, rotated);
             }
             else if (packer.Place(w, h) is { } pos)
             {
-                // a célula pedida colidiu/saiu da grade → cai no first-fit (mirror do builder).
-                var (dw, dh) = pos.Rotated ? (h, w) : (w, h);
-                _cells.Add(new PlacedCell(pos.X, pos.Y, dw, dh, rootTpl, name, category,
-                    qty, price, source, missing, w, h));
+                AddCell(item, rootTpl, name, category, w, h, qty, price, source, missing, pos.X, pos.Y, pos.Rotated);
             }
             else
             {
@@ -121,9 +154,9 @@
             }
         }
 
-        foreach (var spec in loose)
+        foreach (var item in loose)
         {
-            var data = Resolve(spec);
+            var data = Resolve(item);
             if (data is null)
             {
                 continue;
@@ -132,9 +165,7 @@
             var (rootTpl, name, category, w, h, qty, price, source, missing) = data.Value;
             if (packer.Place(w, h) is { } pos)
             {
-                var (dw, dh) = pos.Rotated ? (h, w) : (w, h);
-                _cells.Add(new PlacedCell(pos.X, pos.Y, dw, dh, rootTpl, name, category,
-                    qty, price, source, missing, w, h));
+                AddCell(item, rootTpl, name, category, w, h, qty, price, source, missing, pos.X, pos.Y, pos.Rotated);
             }
             else
             {
@@ -143,18 +174,148 @@
         }
     }
 
+    private void AddCell(SrcItem item, string? rootTpl, string name, string? category, int w0, int h0,
+        double qty, double price, string? source, bool missing, int x, int y, bool rotated)
+    {
+        var (dw, dh) = rotated ? (h0, w0) : (w0, h0);
+        _cells.Add(new PlacedCell(x, y, dw, dh, w0, h0, rootTpl, name, category,
+            qty, price, source, missing, w0, h0, item.Model));
+    }
+
+    private List<SrcItem> SourceItems()
+    {
+        if (_editable)
+        {
+            return EditItems!.Select(m => new SrcItem(
+                m.Preset, m.Tpl, m.Premium, Math.Max(1, m.Count), m.X, m.Y, m.Rotated ?? false, m)).ToList();
+        }
+
+        return (Stash ?? [])
+            .Select(s => new SrcItem(s.Preset, s.Tpl, s.Premium, Math.Max(1, s.Count), s.X, s.Y, s.Rotated ?? false, null))
+            .ToList();
+    }
+
+    // ── DnD (modo edição) ───────────────────────────────────────────────────────
+
+    /// <summary>Solta na grade: célula = OffsetX/Y / CellPx (offset relativo à grade — itens com
+    /// pointer-events:none durante o drag). Valida bounds+colisão, fixa X/Y no modelo, recomputa.</summary>
+    private async Task OnDrop(DragEventArgs e)
+    {
+        var dragged = _dragging;
+        _dragging = null;
+        if (!_editable || dragged?.Model is null)
+        {
+            return;
+        }
+
+        var x = (int)Math.Floor(e.OffsetX / CellPx);
+        var y = (int)Math.Floor(e.OffsetY / CellPx);
+        var rotated = dragged.Model.Rotated ?? false;
+        var (w, h) = rotated ? (dragged.H0, dragged.W0) : (dragged.W0, dragged.H0);
+
+        if (CanPlace(x, y, w, h, dragged.Model))
+        {
+            dragged.Model.X = x;
+            dragged.Model.Y = y;
+            Build();
+            await OnChanged.InvokeAsync();
+        }
+    }
+
+    /// <summary>⟳: alterna Rotated na posição atual (fixando se era loose). Reverte se não couber.</summary>
+    private async Task RotateAsync(PlacedCell cell)
+    {
+        if (!_editable || cell.Model is null)
+        {
+            return;
+        }
+
+        var rot = !(cell.Model.Rotated ?? false);
+        var (w, h) = rot ? (cell.H0, cell.W0) : (cell.W0, cell.H0);
+        var x = cell.Model.X ?? cell.X;
+        var y = cell.Model.Y ?? cell.Y;
+
+        if (CanPlace(x, y, w, h, cell.Model))
+        {
+            cell.Model.Rotated = rot;
+            cell.Model.X = x;   // rotacionar fixa a posição (era loose → vira pinned)
+            cell.Model.Y = y;
+            Build();
+            await OnChanged.InvokeAsync();
+        }
+    }
+
+    /// <summary>Cabe em (x,y) o retângulo w×h sem sair da grade nem colidir (exclui o item arrastado).</summary>
+    private bool CanPlace(int x, int y, int w, int h, ItemSpecModel? exclude)
+    {
+        if (x < 0 || y < 0 || x + w > _w || y + h > _h)
+        {
+            return false;
+        }
+
+        var occ = new bool[_w, _h];
+        foreach (var c in _cells)
+        {
+            if (exclude is not null && ReferenceEquals(c.Model, exclude))
+            {
+                continue;
+            }
+
+            for (var yy = c.Y; yy < c.Y + c.H && yy < _h; yy++)
+            {
+                for (var xx = c.X; xx < c.X + c.W && xx < _w; xx++)
+                {
+                    occ[xx, yy] = true;
+                }
+            }
+        }
+
+        for (var yy = y; yy < y + h; yy++)
+        {
+            for (var xx = x; xx < x + w; xx++)
+            {
+                if (occ[xx, yy])
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    // ── Render compartilhado da célula ────────────────────────────────────────────
+
+    private RenderFragment ItemInner(PlacedCell cell) => __builder =>
+    {
+        <span class="cc-item-cell__txt">@cell.Name</span>
+        @if (cell.RootTpl is not null)
+        {
+            <img src="@($"https://assets.tarkov.dev/{cell.RootTpl}-icon.webp")"
+                 loading="lazy" alt="" onerror="this.style.display='none'"/>
+        }
+        @if (cell.Qty > 1)
+        {
+            <span class="cc-item-cell__qty">@cell.Qty.ToString("N0", CultureInfo.InvariantCulture)</span>
+        }
+        @if (cell.MissingPrice)
+        {
+            <span class="cc-item-cell__warn" title="No flea or handbook price found">⚠</span>
+        }
+    };
+
     /// <summary>1-based grid-column/row + span (grid começa em 1; X/Y são 0-based).</summary>
     private static string CellStyle(PlacedCell c) =>
         $"grid-column:{c.X + 1} / span {c.W};grid-row:{c.Y + 1} / span {c.H};";
 
     private (string? RootTpl, string Name, string? Category, int W, int H, double Qty,
-        double Price, string? PriceSource, bool Missing)? Resolve(ItemSpec spec)
+        double Price, string? PriceSource, bool Missing)? Resolve(SrcItem item)
     {
-        var rootTpl = ResolveRootTpl(spec);
-        var qty = Math.Max(1, spec.Count);
+        var rootTpl = ResolveRootTpl(item);
+        var qty = Math.Max(1, item.Count);
         if (rootTpl is null)
         {
-            var raw = spec.Preset ?? spec.Tpl ?? "(no tpl)";
+            var raw = item.Preset ?? item.Tpl ?? "(no tpl)";
             return (null, raw, null, 1, 1, qty, 0, null, true);
         }
 
@@ -170,20 +331,20 @@
     }
 
     /// <summary>preset > tpl (mesma ordem do GearPanel). null = nada resolve.</summary>
-    private string? ResolveRootTpl(ItemSpec spec)
+    private string? ResolveRootTpl(SrcItem item)
     {
-        if (!string.IsNullOrWhiteSpace(spec.Preset))
+        if (!string.IsNullOrWhiteSpace(item.Preset))
         {
-            var key = TryMongoId(spec.Preset!);
+            var key = TryMongoId(item.Preset!);
             var preset = key is null
                 ? null
-                : spec.Premium ? Catalog.ResolvePremiumPreset(key.Value) : Catalog.ResolveDefaultPreset(key.Value);
+                : item.Premium ? Catalog.ResolvePremiumPreset(key.Value) : Catalog.ResolveDefaultPreset(key.Value);
             return preset?.Items?.FirstOrDefault()?.Template.ToString();
         }
 
-        if (!string.IsNullOrWhiteSpace(spec.Tpl) && TryMongoId(spec.Tpl!) is not null)
+        if (!string.IsNullOrWhiteSpace(item.Tpl) && TryMongoId(item.Tpl!) is not null)
         {
-            return spec.Tpl;
+            return item.Tpl;
         }
 
         return null;

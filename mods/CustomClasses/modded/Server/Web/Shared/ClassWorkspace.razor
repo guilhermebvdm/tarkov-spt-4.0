@@ -252,7 +252,9 @@ else
             @* ░ DIREITA ░ *@
             <div class="cc-ws__panel cc-ws__panel--right">
                 <div class="cc-section__title">Stash (@StashCount lines)</div>
-                <StashGrid Stash="@StashForView" BaseEdition="@def.BaseEdition" Editable="@_editMode"/>
+                <StashGrid Stash="@StashForView" BaseEdition="@def.BaseEdition" Editable="@_editMode"
+                           EditItems="@(_editMode ? _model?.Stash : null)"
+                           OnChanged="RecomputeLoadoutCost"/>
             </div>
         </div>
     </div>
