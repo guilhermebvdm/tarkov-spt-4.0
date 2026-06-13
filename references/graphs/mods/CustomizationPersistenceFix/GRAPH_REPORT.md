@@ -1,16 +1,16 @@
-# Graph Report - mods\CustomizationPersistenceFix\modded  (2026-06-12)
+# Graph Report - mods\CustomizationPersistenceFix\modded  (2026-06-13)
 
 ## Corpus Check
-- 4 files · ~592 words
+- 4 files · ~1,057 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 22 nodes · 20 edges · 4 communities
+- 29 nodes · 28 edges · 6 communities (5 shown, 1 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `c3e8df24`
+- Built from commit: `5849e0df`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -18,10 +18,12 @@
 - [[_COMMUNITY_Community 0|Community 0]]
 - [[_COMMUNITY_Community 1|Community 1]]
 - [[_COMMUNITY_Community 2|Community 2]]
+- [[_COMMUNITY_Community 4|Community 4]]
+- [[_COMMUNITY_Community 5|Community 5]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `CustomizationPersistenceFixMod` - 5 edges
-2. `ProfileFixerCustomizationPatch` - 3 edges
+1. `CustomizationPersistenceFixMod` - 6 edges
+2. `ProfileFixerCustomizationPatch` - 5 edges
 3. `PmcData` - 2 edges
 4. `Snapshot` - 2 edges
 5. `net9.0` - 1 edges
@@ -37,26 +39,33 @@
 ## Import Cycles
 - None detected.
 
-## Communities (4 total, 0 thin omitted)
+## Communities (6 total, 1 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.32
-Nodes (5): HarmonyPostfix, HarmonyPrefix, PmcData, ProfileFixerCustomizationPatch, Snapshot
+Cohesion: 0.33
+Nodes (5): HarmonyPostfix, HarmonyPrefix, HarmonyPriority, PmcData, Snapshot
 
 ### Community 1 - "Community 1"
-Cohesion: 0.29
-Nodes (5): bool, DatabaseService, IOnLoad, CustomizationPersistenceFixMod, Task
+Cohesion: 0.25
+Nodes (6): bool, DatabaseService, IOnLoad, ISptLogger, CustomizationPersistenceFixMod, Task
 
 ### Community 2 - "Community 2"
 Cohesion: 0.33
 Nodes (5): net9.0, SPTarkov.Common (4.0.0), SPTarkov.DI (4.0.0), SPTarkov.Server.Core (4.0.0), Microsoft.NET.Sdk
 
+### Community 4 - "Community 4"
+Cohesion: 0.50
+Nodes (3): CustomizationItem, Dictionary, MongoId
+
 ## Knowledge Gaps
-- **10 isolated node(s):** `net9.0`, `SPTarkov.Server.Core (4.0.0)`, `SPTarkov.DI (4.0.0)`, `SPTarkov.Common (4.0.0)`, `Microsoft.NET.Sdk` (+5 more)
+- **16 isolated node(s):** `net9.0`, `SPTarkov.Server.Core (4.0.0)`, `SPTarkov.DI (4.0.0)`, `SPTarkov.Common (4.0.0)`, `Microsoft.NET.Sdk` (+11 more)
   These have ≤1 connection - possible missing edges or undocumented components.
+- **1 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
+- **Why does `ProfileFixerCustomizationPatch` connect `Community 5` to `Community 0`, `Community 4`?**
+  _High betweenness centrality (0.087) - this node is a cross-community bridge._
 - **What connects `net9.0`, `SPTarkov.Server.Core (4.0.0)`, `SPTarkov.DI (4.0.0)` to the rest of the system?**
-  _10 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _16 weakly-connected nodes found - possible documentation gaps or missing edges._
