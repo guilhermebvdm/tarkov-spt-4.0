@@ -291,8 +291,10 @@
         <span class="cc-item-cell__txt">@cell.Name</span>
         @if (cell.RootTpl is not null)
         {
+            @* draggable="false": a <img> é arrastável por padrão e capturaria o drag NATIVO da
+               imagem em vez do nosso @ondragstart no div pai (era o "mistério" do DnD travado). *@
             <img src="@($"https://assets.tarkov.dev/{cell.RootTpl}-icon.webp")"
-                 loading="lazy" alt="" onerror="this.style.display='none'"/>
+                 loading="lazy" alt="" draggable="false" onerror="this.style.display='none'"/>
         }
         @if (cell.Qty > 1)
         {

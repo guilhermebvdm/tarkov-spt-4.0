@@ -166,8 +166,10 @@
 .cc-ws__badge-label   { font-size: 10px; text-transform: uppercase; letter-spacing: .5px; opacity: .6; }
 .cc-ws__badge-val     { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
 
-/* ── 3-column grid; cada painel rola só internamente (single-screen) ───────────── */
-.cc-ws__grid          { display: grid; grid-template-columns: 340px 1fr 1fr; gap: 14px;
+/* ── 3-column grid; cada painel rola só internamente (single-screen) ─────────────
+   Esquerda alargada (skills cabem); centro = MAIOR (equipped estilo Gear do EFT);
+   direita justa à grade do stash (10×36px≈360 + padding) — sem o espaço livre antigo. */
+.cc-ws__grid          { display: grid; grid-template-columns: 420px 1fr 390px; gap: 14px;
                         flex: 1 1 auto; min-height: 0; }
 .cc-ws__panel         { overflow-y: auto; overflow-x: hidden; min-height: 0;
                         border: 1px solid var(--mud-palette-lines-default, #444);
@@ -198,24 +200,32 @@
 .cc-ws__outfit-slot   { font-size: 9px; text-transform: uppercase; letter-spacing: .4px; opacity: .6; }
 .cc-ws__outfit-name   { font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* ── CharacterDoll: silhueta + 14 slots absolutos (estilo EFT) ─────────────────── */
-.cc-doll              { position: relative; width: 100%; max-width: 520px; aspect-ratio: 3 / 4;
-                        margin: 8px auto; }
-.cc-doll__body        { position: absolute; inset: 0; display: flex; flex-direction: column;
-                        align-items: center; justify-content: center; opacity: .18; pointer-events: none; }
-.cc-doll__head        { width: 14%; aspect-ratio: 1; border-radius: 50%;
+/* ── CharacterDoll: layout fiel à tela GEAR do EFT ──────────────────────────────────
+   Mockup = a própria tela Gear do jogo (4 "colunas" de slots ao redor do boneco):
+     col A (esq): Earpiece · Armband · Dogtag · ON SLING (arma1) · ON BACK (arma2)
+     col B:       Headwear · Body armor               (silhueta atrás desta coluna)
+     col C:       Face cover · Eyewear · Holster · Sheath
+     col D (centro-dir): Tactical rig (grande) · Pockets · Secured · Backpack
+   Cada slot tem TAMANHO FIXO POR TIPO (como o slot do jogo); o ícone é contido. */
+.cc-doll              { --cc-doll-unit: 26px; position: relative; width: 100%; max-width: 780px;
+                        aspect-ratio: 1.42 / 1; min-height: 420px; margin: 4px auto; }
+/* silhueta decorativa atrás da coluna B (Headwear/Body armor), como o modelo 3D do EFT. */
+.cc-doll__body        { position: absolute; top: 6%; bottom: 6%; left: 18%; width: 22%;
+                        display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+                        opacity: .12; pointer-events: none; }
+.cc-doll__head        { width: 40%; aspect-ratio: 1; border-radius: 50%; margin-top: 4%;
                         background: var(--mud-palette-text-secondary, #999); }
-.cc-doll__torso       { width: 26%; height: 30%; margin-top: 2%;
+.cc-doll__torso       { width: 80%; height: 34%; margin-top: 3%;
                         border-radius: 18% 18% 8% 8%; background: var(--mud-palette-text-secondary, #999); }
-.cc-doll__legs        { width: 22%; height: 28%; margin-top: 1%;
+.cc-doll__legs        { width: 64%; height: 32%; margin-top: 2%;
                         border-radius: 8% 8% 18% 18%; background: var(--mud-palette-text-secondary, #999); }
 
 .cc-doll-slot         { position: absolute; display: flex; flex-direction: column;
                         align-items: center; gap: 2px; transform: translate(-50%, -50%); }
-.cc-doll-slot__label  { font-size: 8px; text-transform: uppercase; letter-spacing: .3px; opacity: .65; }
-/* Caixa de slot de TAMANHO FIXO (2×2 cells) — o ícone é contido (object-fit no .cc-item-cell img).
-   Slots de arma são mais largos (3×2). Nada é dimensionado pelo W×H real do item (vide CharacterDoll). */
-.cc-doll-slot__cell        { width: calc(var(--cc-cell-unit) * 2); height: calc(var(--cc-cell-unit) * 2); }
+.cc-doll-slot__label  { font-size: 8px; text-transform: uppercase; letter-spacing: .3px; opacity: .65;
+                        white-space: nowrap; }
+/* Caixa de slot de TAMANHO FIXO POR TIPO (espelha o tamanho do slot no EFT); ícone contido. */
+.cc-doll-slot__cell        { width: calc(var(--cc-doll-unit) * 2); height: calc(var(--cc-doll-unit) * 2); }
 .cc-doll-slot__cell--empty { opacity: .3; }
 /* F2c: slot clicável (modo edição) — cursor + realce no hover. */
 .cc-doll-slot--edit            { cursor: pointer; }
@@ -223,29 +233,38 @@
     outline: 2px solid var(--mud-palette-primary, #7e6fff);
     outline-offset: 1px; opacity: 1; }
 .cc-doll-slot--edit:hover .cc-doll-slot__label { opacity: 1; color: var(--mud-palette-primary, #7e6fff); }
-.cc-doll-slot--firstprimaryweapon  .cc-doll-slot__cell,
-.cc-doll-slot--secondprimaryweapon .cc-doll-slot__cell,
-.cc-doll-slot--holster             .cc-doll-slot__cell,
-.cc-doll-slot--scabbard            .cc-doll-slot__cell { width: calc(var(--cc-cell-unit) * 3); }
 
-/* Posições (top/left em % do .cc-doll, centradas via translate(-50%,-50%)). Layout esquemático
-   sem sobreposição: cabeça/acessórios no topo, armadura/rig no meio, contêineres embaixo e os
-   slots de arma numa "trilha" à direita (caixas 3-wide). Refinado visualmente no browser. */
-.cc-doll-slot--headwear            { top: 6%;  left: 42%; }
-.cc-doll-slot--dogtag              { top: 6%;  left: 64%; }
-.cc-doll-slot--earpiece            { top: 16%; left: 22%; }
-.cc-doll-slot--eyewear             { top: 18%; left: 62%; }
-.cc-doll-slot--facecover           { top: 30%; left: 22%; }
-.cc-doll-slot--armband             { top: 30%; left: 62%; }
-.cc-doll-slot--armorvest           { top: 44%; left: 30%; }
-.cc-doll-slot--tacticalvest        { top: 44%; left: 54%; }
-.cc-doll-slot--backpack            { top: 60%; left: 16%; }
-.cc-doll-slot--pockets             { top: 60%; left: 44%; }
-.cc-doll-slot--securedcontainer    { top: 78%; left: 16%; }
-.cc-doll-slot--holster             { top: 76%; left: 44%; }
-.cc-doll-slot--firstprimaryweapon  { top: 30%; left: 86%; }
-.cc-doll-slot--secondprimaryweapon { top: 52%; left: 86%; }
-.cc-doll-slot--scabbard            { top: 74%; left: 86%; }
+/* Tamanhos por tipo (w×h em doll-units), espelhando os slots do EFT. */
+.cc-doll-slot--eyewear  .cc-doll-slot__cell,
+.cc-doll-slot--armband  .cc-doll-slot__cell,
+.cc-doll-slot--dogtag   .cc-doll-slot__cell   { height: var(--cc-doll-unit); }            /* 2×1 */
+.cc-doll-slot--armorvest .cc-doll-slot__cell  { height: calc(var(--cc-doll-unit) * 3); }  /* 2×3 (alto) */
+.cc-doll-slot--tacticalvest .cc-doll-slot__cell { width: calc(var(--cc-doll-unit) * 4);
+                                                  height: calc(var(--cc-doll-unit) * 3); } /* 4×3 (grande) */
+.cc-doll-slot--backpack .cc-doll-slot__cell   { width: calc(var(--cc-doll-unit) * 3); }    /* 3×2 */
+.cc-doll-slot--pockets  .cc-doll-slot__cell   { width: calc(var(--cc-doll-unit) * 4);
+                                                height: var(--cc-doll-unit); }             /* 4×1 (bolsos) */
+.cc-doll-slot--firstprimaryweapon  .cc-doll-slot__cell,
+.cc-doll-slot--secondprimaryweapon .cc-doll-slot__cell { width: calc(var(--cc-doll-unit) * 4); } /* 4×2 (arma) */
+.cc-doll-slot--scabbard .cc-doll-slot__cell   { width: calc(var(--cc-doll-unit) * 3);
+                                                height: var(--cc-doll-unit); }             /* 3×1 (faca) */
+
+/* Posições (top/left em % do .cc-doll, centradas via translate(-50%,-50%)) — espelham a tela Gear. */
+.cc-doll-slot--earpiece            { top: 12%; left: 11%; }
+.cc-doll-slot--headwear            { top: 13%; left: 29%; }
+.cc-doll-slot--facecover           { top: 13%; left: 47%; }
+.cc-doll-slot--armband             { top: 30%; left: 11%; }
+.cc-doll-slot--eyewear             { top: 30%; left: 47%; }
+.cc-doll-slot--dogtag              { top: 43%; left: 11%; }
+.cc-doll-slot--armorvest           { top: 45%; left: 29%; }
+.cc-doll-slot--firstprimaryweapon  { top: 65%; left: 19%; }
+.cc-doll-slot--holster             { top: 63%; left: 47%; }
+.cc-doll-slot--secondprimaryweapon { top: 86%; left: 19%; }
+.cc-doll-slot--scabbard            { top: 84%; left: 47%; }
+.cc-doll-slot--tacticalvest        { top: 21%; left: 71%; }
+.cc-doll-slot--pockets             { top: 60%; left: 64%; }
+.cc-doll-slot--securedcontainer    { top: 60%; left: 88%; }
+.cc-doll-slot--backpack            { top: 86%; left: 68%; }
 
 /* ── StashGrid: grade 2D real (W colunas × H linhas) ───────────────────────────── */
 .cc-grid2d-wrap       { display: flex; flex-direction: column; gap: 6px; }
@@ -267,8 +286,10 @@
 .cc-grid2d-overflow   { font-size: 11px; color: var(--mud-palette-warning, #ffb300); }
 /* ── F2c: drag-and-drop do stash ───────────────────────────────────────────────── */
 .cc-grid2d-hint       { font-size: 10px; opacity: .55; }
-.cc-grid2d__item--edit { cursor: grab; }
+.cc-grid2d__item--edit { cursor: grab; user-select: none; }
 .cc-grid2d__item--edit:hover { outline: 1px solid var(--mud-palette-primary, #7e6fff); z-index: 2; }
+/* o ícone NUNCA é a fonte do drag — o drag é sempre do .cc-grid2d__item (div pai). */
+.cc-grid2d__item--edit img { -webkit-user-drag: none; user-select: none; pointer-events: none; }
 /* Durante o drag, os itens não capturam pointer-events → o drop SEMPRE cai na grade (offset
    relativo a ela), mesmo soltando sobre outro item. */
 .cc-grid2d--dragging .cc-grid2d__item { pointer-events: none; }
