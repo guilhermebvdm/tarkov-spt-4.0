@@ -56,11 +56,11 @@
                        Fixed="true"
                        Elevation="4">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Style="width: 100%;">
-                    @* Item 035: sidebar expand/collapse — toggles Mini↔Persistent (PA-R1-01) and persists the choice. *@
-                    <MudIconButton Icon="@(_drawerPinned ? Icons.Material.Filled.MenuOpen : Icons.Material.Filled.Menu)"
+                    @* Item 035: sidebar show/hide — toggles the persistent drawer Open state and persists it. *@
+                    <MudIconButton Icon="@(_drawerOpen ? Icons.Material.Filled.MenuOpen : Icons.Material.Filled.Menu)"
                                    Color="Color.Inherit" Size="Size.Small"
-                                   title="@(_drawerPinned ? "Collapse sidebar (auto-collapse on leave)" : "Expand sidebar")"
-                                   OnClick="ToggleDrawerPin"/>
+                                   title="@(_drawerOpen ? "Collapse sidebar" : "Expand sidebar")"
+                                   OnClick="ToggleDrawer"/>
                     <MudText Typo="Typo.h6">CustomClasses — Class Editor</MudText>
                     <MudText Style="font-size: 12px" Class="ml-2">
                         v@(new CustomClassesMetadata().Version.ToString())
@@ -68,16 +68,16 @@
                 </MudStack>
             </MudAppBar>
 
-            @* PA-R1-01: do NOT bind Open — the Mini + OpenMiniOnHover drawer has no stable Open state.
-               The persisted PIN flips Variant Mini↔Persistent instead (Open stays literal "true": the
-               mini rail is always mounted). _drawerPinned defaults to false = Mini = today's behavior;
-               reconciled from localStorage in OnAfterRenderAsync(firstRender). *@
-            <MudDrawer Width="250px"
-                       Open="true"
+            @* QA 2026-06-12: a persistent drawer with @bind-Open. The previous design (PA-R1-01: keep
+               Open literal "true" and flip Variant Mini↔Persistent) was broken — switching to Persistent
+               left the drawer in mud-drawer--closed (off-screen at left:-250), so "expand" hid the whole
+               sidebar. Open-by-default shows the full sidebar (names + costs + filter + status dots); the
+               AppBar button shows/hides it. State persisted in localStorage (reconciled post-circuit). *@
+            <MudDrawer @bind-Open="_drawerOpen"
+                       Width="250px"
                        ClipMode="DrawerClipMode.Always"
                        Elevation="5"
-                       Variant="@(_drawerPinned ? DrawerVariant.Persistent : DrawerVariant.Mini)"
-                       OpenMiniOnHover="@(!_drawerPinned)"
+                       Variant="DrawerVariant.Persistent"
                        Breakpoint="Breakpoint.None">
                 <NavMenu/>
             </MudDrawer>
@@ -122,13 +122,13 @@
 
     private readonly EditGuardState _guard = new();
 
-    // ── Item 035: drawer pin (Mini↔Persistent), persisted in localStorage ────────
-    private bool _drawerPinned;   // default false = Mini = today's behavior (auto-collapse)
+    // ── Item 035: drawer open/closed, persisted in localStorage ──────────────────
+    private bool _drawerOpen = true;   // default open = full sidebar visible (names + costs + filter)
 
     /// <summary>
-    ///     Reconciles the persisted drawer pin once the interactive circuit is up (PA-035-02: no JS at
-    ///     prerender). The drawer mounts as Mini and flips to Persistent here if the saved pin says so —
-    ///     a one-frame "flash" from default to saved value is accepted (PA-035-03, single-user local).
+    ///     Reconciles the persisted drawer open state once the interactive circuit is up (PA-035-02: no JS
+    ///     at prerender). The drawer mounts open and only collapses here if the saved pref says so — a
+    ///     one-frame "flash" from default to saved value is accepted (PA-035-03, single-user local).
     /// </summary>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -137,19 +137,19 @@
             return;
         }
 
-        var pinned = await UiPrefs.GetBoolAsync(JS, UiPrefs.DrawerPinned, _drawerPinned);
-        if (pinned != _drawerPinned)
+        var open = await UiPrefs.GetBoolAsync(JS, UiPrefs.DrawerPinned, _drawerOpen);
+        if (open != _drawerOpen)
         {
-            _drawerPinned = pinned;
+            _drawerOpen = open;
             StateHasChanged();
         }
     }
 
-    /// <summary>AppBar pin button: toggles the drawer pin and persists it (fire-and-forget — PA-035-03).</summary>
-    private void ToggleDrawerPin()
+    /// <summary>AppBar button: shows/hides the sidebar and persists it (fire-and-forget — PA-035-03).</summary>
+    private void ToggleDrawer()
     {
-        _drawerPinned = !_drawerPinned;
-        _ = UiPrefs.SetAsync(JS, UiPrefs.DrawerPinned, _drawerPinned ? "1" : "0");
+        _drawerOpen = !_drawerOpen;
+        _ = UiPrefs.SetAsync(JS, UiPrefs.DrawerPinned, _drawerOpen ? "1" : "0");
     }
 
     /// <summary>
