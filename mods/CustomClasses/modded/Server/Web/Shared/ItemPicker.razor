@@ -15,6 +15,43 @@
 @inject CatalogService Catalog
 
 @{
+    RenderFragment resultsList =
+        @<div class="cc-picker-list" style="height: 56vh; min-height: 320px; overflow-y: auto;">
+            @if (_results.Count == 0)
+            {
+                <MudText Typo="Typo.body2" Class="mud-text-secondary pa-2">
+                    @(_searched ? "No items found." : (Wide ? "Pick a category or type to search." : "Type to search the catalog."))
+                </MudText>
+            }
+            else
+            {
+                <MudVirtualize Items="_results" ItemSize="64f" Context="item" OverscanCount="6">
+                    <div class="d-flex align-center gap-3 pa-1 mud-ripple"
+                         style="height: 64px; cursor: pointer; border-bottom: 1px solid var(--mud-palette-lines-default);"
+                         @onclick="@(() => SelectAsync(item))">
+                        <img src="https://assets.tarkov.dev/@(item.Tpl)-icon.webp"
+                             width="52" height="52" loading="lazy" alt=""
+                             onerror="this.style.display='none'"
+                             style="flex-shrink: 0; object-fit: contain;"/>
+                        <div class="flex-grow-1" style="min-width: 0;">
+                            <MudText Typo="Typo.body2" Style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                @item.Name
+                            </MudText>
+                            <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                                @(item.ShortName ?? "—") · @item.Tpl
+                            </MudText>
+                        </div>
+                        <MudText Typo="Typo.caption" Class="mud-text-secondary" Style="white-space: nowrap;">
+                            @CategoryName(item.CategoryId)
+                        </MudText>
+                        <MudText Typo="Typo.body2" Style="white-space: nowrap; min-width: 90px; text-align: right;">
+                            @item.Price.ToString("N0") ₽
+                        </MudText>
+                    </div>
+                </MudVirtualize>
+            }
+        </div>;
+
     RenderFragment pickerBody =
         @<MudStack Spacing="2">
             <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
@@ -29,7 +66,8 @@
                               Adornment="Adornment.Start"
                               AdornmentIcon="@Icons.Material.Filled.Search"
                               Style="flex: 2;"/>
-                @if (ShowCategoryFilter)
+                @* fora do modo largo: dropdown plano (compacto). No modo largo: árvore à esquerda. *@
+                @if (ShowCategoryFilter && !Wide)
                 {
                     <MudSelect T="string"
                                Value="_categoryId"
@@ -53,41 +91,28 @@
                 <MudProgressLinear Indeterminate="true" Color="Color.Primary"/>
             }
 
-            <div class="cc-picker-list" style="height: 56vh; min-height: 320px; overflow-y: auto;">
-                @if (_results.Count == 0)
-                {
-                    <MudText Typo="Typo.body2" Class="mud-text-secondary pa-2">
-                        @(_searched ? "No items found." : "Type to search the catalog.")
-                    </MudText>
-                }
-                else
-                {
-                    <MudVirtualize Items="_results" ItemSize="64f" Context="item" OverscanCount="6">
-                        <div class="d-flex align-center gap-3 pa-1 mud-ripple"
-                             style="height: 64px; cursor: pointer; border-bottom: 1px solid var(--mud-palette-lines-default);"
-                             @onclick="@(() => SelectAsync(item))">
-                            <img src="https://assets.tarkov.dev/@(item.Tpl)-icon.webp"
-                                 width="52" height="52" loading="lazy" alt=""
-                                 onerror="this.style.display='none'"
-                                 style="flex-shrink: 0; object-fit: contain;"/>
-                            <div class="flex-grow-1" style="min-width: 0;">
-                                <MudText Typo="Typo.body2" Style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                    @item.Name
-                                </MudText>
-                                <MudText Typo="Typo.caption" Class="mud-text-secondary">
-                                    @(item.ShortName ?? "—") · @item.Tpl
-                                </MudText>
-                            </div>
-                            <MudText Typo="Typo.caption" Class="mud-text-secondary" Style="white-space: nowrap;">
-                                @CategoryName(item.CategoryId)
-                            </MudText>
-                            <MudText Typo="Typo.body2" Style="white-space: nowrap; min-width: 90px; text-align: right;">
-                                @item.Price.ToString("N0") ₽
-                            </MudText>
+            @if (Wide)
+            {
+                @* 2 painéis estilo items viewer: árvore de categorias (com ícones do handbook) + lista. *@
+                <div class="cc-picker-2pane">
+                    <div class="cc-picker-tree">
+                        <div class="cc-cat-node @(_categoryId is null ? "cc-cat-node--sel" : null)"
+                             @onclick="@(() => OnCategoryChangedAsync(null))">
+                            <span class="cc-cat-node__tog"></span>
+                            <span class="cc-cat-node__lbl">Todas as categorias</span>
                         </div>
-                    </MudVirtualize>
-                }
-            </div>
+                        @foreach (var root in _rootCats)
+                        {
+                            @CatNode(root, 0)
+                        }
+                    </div>
+                    @resultsList
+                </div>
+            }
+            else
+            {
+                @resultsList
+            }
         </MudStack>;
 }
 
@@ -144,6 +169,15 @@ else
 
     private sealed record CategoryOption(string Id, string Label);
 
+    /// <summary>Nó da árvore de categorias (modo largo) — espelha a árvore do items viewer.</summary>
+    private sealed class CatNodeData
+    {
+        public required string Id { get; init; }
+        public required string Name { get; init; }
+        public string? Icon { get; init; }
+        public List<CatNodeData> Children { get; } = [];
+    }
+
     private string _query = string.Empty;
     private string? _categoryId;
     private bool _searching;
@@ -151,6 +185,8 @@ else
     private List<CatalogItem> _results = [];
     private List<CategoryOption> _categoryOptions = [];
     private Dictionary<string, string> _categoryNames = new(StringComparer.Ordinal);
+    private List<CatNodeData> _rootCats = [];
+    private readonly HashSet<string> _expanded = new(StringComparer.Ordinal);
     private int _searchVersion;
 
     protected override async Task OnInitializedAsync()
@@ -159,6 +195,7 @@ else
         var categories = Catalog.GetCategories();
         _categoryNames = categories.ToDictionary(c => c.Id, c => c.Name, StringComparer.Ordinal);
         _categoryOptions = FlattenCategoryTree(categories);
+        _rootCats = BuildCategoryTree(categories);
 
         // #6: pré-lista os itens compatíveis (filtro do slot) já na abertura, sem digitar.
         if (AutoList && FilterTpls is not null)
@@ -166,6 +203,85 @@ else
             await RunSearchAsync();
         }
     }
+
+    /// <summary>Monta a árvore de categorias (id→nó, ligando por ParentId), ordenada por nome.</summary>
+    private static List<CatNodeData> BuildCategoryTree(List<CatalogCategory> categories)
+    {
+        var byId = categories.ToDictionary(
+            c => c.Id,
+            c => new CatNodeData { Id = c.Id, Name = c.Name, Icon = c.Icon },
+            StringComparer.Ordinal);
+        var ids = new HashSet<string>(categories.Select(c => c.Id), StringComparer.Ordinal);
+        var roots = new List<CatNodeData>();
+        foreach (var c in categories)
+        {
+            var node = byId[c.Id];
+            if (c.ParentId is { } p && ids.Contains(p) && byId.TryGetValue(p, out var parent))
+            {
+                parent.Children.Add(node);
+            }
+            else
+            {
+                roots.Add(node);
+            }
+        }
+
+        void Sort(List<CatNodeData> list)
+        {
+            list.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
+            foreach (var n in list)
+            {
+                Sort(n.Children);
+            }
+        }
+
+        Sort(roots);
+        return roots;
+    }
+
+    private void Toggle(string id)
+    {
+        if (!_expanded.Add(id))
+        {
+            _expanded.Remove(id);
+        }
+    }
+
+    /// <summary>Linha da árvore: indent + toggle (se tem filhos) + ícone do handbook + nome. Recursivo.</summary>
+    private RenderFragment CatNode(CatNodeData node, int depth) => __builder =>
+    {
+        var hasKids = node.Children.Count > 0;
+        var expanded = _expanded.Contains(node.Id);
+        var selected = string.Equals(_categoryId, node.Id, StringComparison.Ordinal);
+
+        <div class="cc-cat-node @(selected ? "cc-cat-node--sel" : null)"
+             style="@($"padding-left:{6 + depth * 14}px;")"
+             @onclick="@(() => OnCategoryChangedAsync(node.Id))">
+            @if (hasKids)
+            {
+                <span class="cc-cat-node__tog" @onclick="@(() => Toggle(node.Id))" @onclick:stopPropagation="true">
+                    @(expanded ? "▾" : "▸")
+                </span>
+            }
+            else
+            {
+                <span class="cc-cat-node__tog"></span>
+            }
+            @if (node.Icon is { Length: > 0 } ic)
+            {
+                <img class="cc-cat-node__icon" src="@ic" alt="" loading="lazy"
+                     onerror="this.style.visibility='hidden'"/>
+            }
+            <span class="cc-cat-node__lbl">@node.Name</span>
+        </div>
+        @if (hasKids && expanded)
+        {
+            foreach (var child in node.Children)
+            {
+                @CatNode(child, depth + 1)
+            }
+        }
+    };
 
     private async Task OnCategoryChangedAsync(string? value)
     {
@@ -190,6 +306,30 @@ else
                 try
                 {
                     var hits = await Task.Run(() => Catalog.ListByFilter(f, Limit, cat));
+                    if (version == _searchVersion)
+                    {
+                        _results = hits;
+                        _searched = true;
+                    }
+                }
+                finally
+                {
+                    if (version == _searchVersion)
+                    {
+                        _searching = false;
+                    }
+                }
+
+                return;
+            }
+
+            // Modo largo (árvore): clicar numa categoria lista os itens dela mesmo sem texto.
+            if (Wide && _categoryId is { } catId)
+            {
+                _searching = true;
+                try
+                {
+                    var hits = await Task.Run(() => Catalog.ListByFilter(_ => true, Limit, catId));
                     if (version == _searchVersion)
                     {
                         _results = hits;
