@@ -169,13 +169,28 @@
 /* ── 3-column grid; cada painel rola só internamente (single-screen) ─────────────
    Esquerda alargada (skills cabem); centro = MAIOR (equipped estilo Gear do EFT);
    direita justa à grade do stash (10×36px≈360 + padding) — sem o espaço livre antigo. */
-.cc-ws__grid          { display: grid; grid-template-columns: 420px 1fr 390px; gap: 14px;
+.cc-ws__grid          { display: grid; grid-template-columns: 480px 1fr 390px; gap: 14px;
                         flex: 1 1 auto; min-height: 0; }
 .cc-ws__panel         { overflow-y: auto; overflow-x: hidden; min-height: 0;
                         border: 1px solid var(--mud-palette-lines-default, #444);
                         border-radius: 6px; padding: 10px; display: flex;
                         flex-direction: column; gap: 12px; }
 .cc-ws__panel--center { align-items: center; }
+
+/* A tabela de skills (SkillCanonicalList) NUNCA rola na horizontal dentro do painel: table-layout
+   fixed + larguras relativas comprimem as colunas pra caber (batem os width:Npx inline do componente
+   com !important), e o container do MudSimpleTable tem overflow-x escondido. */
+.cc-ws__panel--left .skill-canonical        { width: 100%; table-layout: fixed; }
+.cc-ws__panel--left .skill-canonical td     { min-width: 0 !important; padding-left: 4px !important;
+                                              padding-right: 4px !important; }
+.cc-ws__panel--left .skill-canonical td:nth-child(1) { width: 40% !important; white-space: nowrap;
+                                              overflow: hidden; text-overflow: ellipsis; }
+.cc-ws__panel--left .skill-canonical td:nth-child(2) { width: 22% !important; }
+.cc-ws__panel--left .skill-canonical td:nth-child(3) { width: 20% !important; }
+.cc-ws__panel--left .skill-canonical td:nth-child(4) { width: 10% !important; text-align: right; }
+.cc-ws__panel--left .skill-canonical td:nth-child(5) { width:  8% !important; }
+.cc-ws__panel--left .mud-table-container,
+.cc-ws__panel--left .mud-simple-table       { overflow-x: hidden !important; }
 
 @media (max-width: 1100px) {
     /* Viewport estreito: empilha (perde o single-screen, mas não esmaga). */
