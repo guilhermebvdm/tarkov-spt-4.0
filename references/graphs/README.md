@@ -44,6 +44,7 @@ bash scripts/update-graphs.sh eft-decompiled        # uma reference
 `.mcp.json` na raiz registra servers stdio (`graphify-mcp <graph.json>`): permanentes só para os escopos de consulta frequente — `graphify-eft` e o mod ativo em desenvolvimento. Tools: `query_graph`, `get_node`, `get_neighbors`, `get_community`, `shortest_path`, `god_nodes`, `graph_stats`.
 
 - **Primeiro uso em cada PC:** o Claude Code pede aprovação interativa dos servers do `.mcp.json` — aprovar uma vez; não é "MCP quebrado".
+- **Mod ativo mudou?** Trocar o server `graphify-mod-*` no `.mcp.json` para apontar ao `graph.json` do novo mod (1 linha).
 - **Demais escopos** (fika, spt-source, outros mods): consultar sob demanda via CLI — `graphify query "<pergunta>" --graph references/graphs/<id>/graph.json` (também `path`, `explain`, `affected`) — ou ler o `GRAPH_REPORT.md`.
 - **Cadeias entre escopos** (ex.: patch do mod → método do EFT): consultar cada grafo separadamente, ou gerar um grafo combinado com `graphify merge-graphs`.
 
@@ -51,4 +52,5 @@ bash scripts/update-graphs.sh eft-decompiled        # uma reference
 
 - Grafos de `spt-source`/`fika-*` referenciam fontes **gitignored** — num clone fresco, rode `node scripts/setup-references.js` antes de confiar nos paths apontados.
 - `graph.json` do eft-decompiled tem ~46MB (<100MB do GitHub). Se algum grafo estourar 100MB, migrar para git LFS ou reduzir escopo.
-- **Wiki:** fora dos grafos por ora — o pipeline de markdown do graphify usa LLM (requer API key, ex. `GEMINI_API_KEY`) e a wiki é CC BY-NC-ND (derivado versionado só se o repo for privado). Decisão pendente registrada na memória repo-wide.
+- **Wiki:** fora dos grafos por ora — o pipeline de markdown do graphify usa LLM (requer API key, ex. `GEMINI_API_KEY`) e a wiki é CC BY-NC-ND (derivado versionado só se o repo for privado). Decisão pendente registrada na memória repo-wide. ⚠️ Ao rodar a amostra, lembrar que o `.graphifyignore` da raiz exclui `wiki/` e `*.md` — será preciso override pontual.
+- **Mods sem código-fonte** (só DLL/configs em `modded/`, ex. RZCustomProfiles) não geram grafo — o `update-graphs.sh` pula a publicação quando a extração retorna 0 nós.

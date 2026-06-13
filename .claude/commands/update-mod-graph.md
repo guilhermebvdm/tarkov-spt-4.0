@@ -23,7 +23,7 @@ Regenera o grafo de código de um mod (graphify) e publica em `references/graphs
    Ver references/graphs/README.md.
    ```
 
-3. **Capturar contagem anterior** (se existir): nós/arestas do `references/graphs/mods/<mod>/GRAPH_REPORT.md` ou via `graphify query` stats.
+3. **Capturar contagem anterior** (se existir): nós/arestas do `references/graphs/mods/<mod>/GRAPH_REPORT.md`.
 
 4. **Rodar a regeneração** (extração incremental, sem LLM):
    ```bash

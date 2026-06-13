@@ -44,10 +44,26 @@ scope() {
     return 0
   fi
   echo "▶ $id ($path)"
-  graphify update "$path" 2>&1 | grep -E "Rebuilt|No code" || true
+  local result
+  result="$(graphify update "$path" 2>&1 | grep -E "Rebuilt|No code" || true)"
+  echo "$result"
+  if echo "$result" | grep -qE "Rebuilt: 0 nodes|No code files found"; then
+    echo "⏭️  $id — sem código-fonte (mod binário/configs?), pulando publicação."
+    rm -rf "$GRAPHS_DIR/$id"  # remove publicação antiga se existir (grafo vazio é ruído)
+    return 0
+  fi
   local out="$path/graphify-out"
   if [ ! -f "$out/graph.json" ]; then
     echo "⚠️  $id — extração não produziu graph.json, pulando publicação."
+    return 0
+  fi
+  # Grafo vazio (mod binário/só configs) = ruído — não publicar (checa o conteúdo, não o log,
+  # porque o caminho incremental imprime "No topology changes" mesmo para grafos vazios)
+  local nodes
+  nodes="$(python -c "import json,sys;g=json.load(open(sys.argv[1],encoding='utf-8'));print(len(g.get('nodes') or []))" "$out/graph.json" 2>/dev/null || echo -1)"
+  if [ "$nodes" = "0" ]; then
+    echo "⏭️  $id — grafo com 0 nós (sem código-fonte), pulando publicação."
+    rm -rf "$GRAPHS_DIR/$id"
     return 0
   fi
   mkdir -p "$GRAPHS_DIR/$id"

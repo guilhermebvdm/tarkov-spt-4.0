@@ -285,16 +285,16 @@ if [[ "$MOD_TYPE" == "server-typescript" ]]; then
   fi
 
   rm -rf "$BUILDS"; mkdir -p "$BUILDS"
-  rsync -a --exclude='node_modules' --exclude='.git' --exclude='*.log' \
-        "$MODDED/" "$BUILDS/" 2>/dev/null || cp -r "$MODDED/." "$BUILDS/"
+  rsync -a --exclude='node_modules' --exclude='.git' --exclude='*.log' --exclude='graphify-out' \
+        "$MODDED/" "$BUILDS/" 2>/dev/null || { cp -r "$MODDED/." "$BUILDS/"; rm -rf "$BUILDS/graphify-out"; }
 
   echo "✓ Build OK: $BUILDS"
 
   if [[ -d "$SPT_PATH" ]]; then
     DEST_DIR="$SPT_PATH/SPT/user/mods/$MOD"
     mkdir -p "$DEST_DIR"
-    rsync -a --delete --exclude='node_modules' "$BUILDS/" "$DEST_DIR/" 2>/dev/null \
-      || cp -r "$BUILDS/." "$DEST_DIR/"
+    rsync -a --delete --exclude='node_modules' --exclude='graphify-out' "$BUILDS/" "$DEST_DIR/" 2>/dev/null \
+      || { cp -r "$BUILDS/." "$DEST_DIR/"; rm -rf "$DEST_DIR/graphify-out"; }
     echo "✓ Instalado: $DEST_DIR"
   fi
 
