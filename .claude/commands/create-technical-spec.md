@@ -2,7 +2,7 @@
 
 Cria a **spec técnica** (pré-código) de um item do backlog, usando o Assembly descompilado como fonte primária.
 
-> **Skills obrigatórias:** carregar `spt-mod-best-practices`, `csharp-mod-best-practices` e `repo-workflow-best-practices` antes de redigir. Toda decisão técnica (lifecycle, leaks, hot paths, patches, threading) deve ser ancorada nelas.
+> **Skills obrigatórias:** carregar `spt-mod-best-practices`, `csharp-mod-best-practices` e `repo-workflow-best-practices` antes de redigir. Toda decisão técnica (lifecycle, leaks, hot paths, patches, threading) deve ser ancorada nelas. Consultar `memory-curation` § "Consumo de memória por commands" (§14) para o passo de contexto de memória.
 
 ## Uso
 
@@ -32,6 +32,7 @@ Fonte de verdade desta ordem: [.agents/resources.md](../../.agents/resources.md)
 3. **Verificar duplicata.** Se `<NNN>-<slug>-02-spec-tech.md` já existe, perguntar se o usuário quer **sobrescrever** ou **abortar**.
 
 4. **Ler contexto:**
+   - **Memória do mod** — topo de `mods/<mod>/memory/sessions.md` (snapshot + pendências) + entradas que citam o item `<NNN>`. Aplicar `memory-curation` § "Consumo de memória por commands" (§14): reportar pendências que afetam esta tarefa; pendência 🔴 do item/mod → alertar antes de prosseguir. Se o arquivo não existir, registrar "sem memória prévia".
    - A spec funcional inteira (critérios de aceite e corner cases pautam a busca).
    - `mods/<mod>/modded/Plugin.cs` e `mods/<mod>/modded/Patches/` — entender padrões já usados pelo mod.
    - `mods/<mod>/PROPRIEDADES.md` se existir.
@@ -55,6 +56,7 @@ Fonte de verdade desta ordem: [.agents/resources.md](../../.agents/resources.md)
    6. **Fluxo de dados** — diagrama A→B→C com linhas de ref do Assembly e do mod.
    7. **Riscos e dependências** — patches existentes em `modded/`, mods externos relacionados, ordem de inicialização.
    8. **Checklist de implementação** — tarefas atômicas em ordem (cada uma rodável e verificável).
+   9. **Conformidade com skills (auto-checklist)** — preencher a tabela ANTES de salvar. Cada check: ✅ com evidência (seção da spec ou `arquivo:linha`) ou N/A + razão. **Check sem evidência não vale ✅.** Qualquer ❌ → resolver na própria spec antes de prosseguir. Taxonomia de referência: `docs/technical/spt-antipatterns.md`.
 
 8. **Salvar** como `<path-pasta>/<NNN>-<slug>-02-spec-tech.md`.
 
@@ -63,6 +65,8 @@ Fonte de verdade desta ordem: [.agents/resources.md](../../.agents/resources.md)
    ✓ Spec técnica criada: <path>
    Refs ao Assembly: N (verificadas)
    Stubs C# compiláveis: N
+   Memória: N pendências relevantes citadas
+   Conformidade: 6/6 checks ✅ ou N/A justificado
    Próximo: rode /review-technical-spec <ref> para análise crítica
    ```
 

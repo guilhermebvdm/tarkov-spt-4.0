@@ -16,7 +16,7 @@ Revisão crítica e **edição inline** da spec funcional. Não cria arquivo nov
 
 1. **Resolver `<ref>`** → `<path-pasta>` e localizar `<NNN>-<slug>-01-spec.md`. Se não existir, parar.
 
-2. **Ler todo o conteúdo** da spec.
+2. **Ler todo o conteúdo** da spec. Ler também o topo de `mods/<mod>/memory/sessions.md` (snapshot + pendências, `memory-curation` §14) — lições registradas (ex.: bugs Fika, estado entre raids) que a spec ignora são gaps a corrigir.
 
 3. **Analisar criticamente** procurando:
    - **Gaps** — informação ausente que ambigua o que precisa ser feito.
@@ -24,6 +24,7 @@ Revisão crítica e **edição inline** da spec funcional. Não cria arquivo nov
    - **Contradições internas** — comportamento desejado bate com critérios de aceite? Corner case bate com fora de escopo?
    - **Critérios vagos / não-verificáveis** — "deve funcionar bem", "ser intuitivo" → pedir versão mensurável.
    - **Corner cases óbvios faltando** — usar checklist mental: estado nulo/vazio, race condition, troca rápida de modo, fim de raid, interação com mod do mesmo escopo.
+   - **Critérios padrão ausentes** — os critérios **Fika/multiplayer** e **estado entre raids** precisam existir (preenchidos com comportamento verificável ou `N/A: <razão>`). Ausência = gap a corrigir.
 
 4. **Aplicar correções inline** no arquivo:
    - Reescrever critérios vagos.

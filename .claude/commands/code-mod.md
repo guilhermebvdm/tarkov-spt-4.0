@@ -2,7 +2,7 @@
 
 Implementa um item do backlog em `mods/<mod>/modded/`, seguindo a spec técnica e o checklist.
 
-> **Skills obrigatórias:** carregar `spt-mod-best-practices`, `csharp-mod-best-practices` e `repo-workflow-best-practices` antes de codar. Validar cada arquivo escrito contra os checklists ao fim de cada skill antes de marcar `[x]`.
+> **Skills obrigatórias:** carregar `spt-mod-best-practices`, `csharp-mod-best-practices` e `repo-workflow-best-practices` antes de codar. Validar cada arquivo escrito contra os checklists ao fim de cada skill antes de marcar `[x]`. Consultar `memory-curation` § "Consumo de memória por commands" (§14) para o passo de contexto de memória.
 
 ## Uso
 
@@ -25,6 +25,7 @@ Implementa um item do backlog em `mods/<mod>/modded/`, seguindo a spec técnica 
 2. **Validar pré-condições.** Se faltar arquivo ou houver `🔴 [ ]` na última review, parar com mensagem clara.
 
 3. **Ler:**
+   - **Memória do mod** — topo de `mods/<mod>/memory/sessions.md` (snapshot + pendências) + entradas que citam o item `<NNN>`. Aplicar `memory-curation` § "Consumo de memória por commands" (§14): reportar pendências que afetam esta tarefa; pendência 🔴 do item/mod → alertar antes de prosseguir. Se o arquivo não existir, registrar "sem memória prévia".
    - Spec técnica completa.
    - Última review (e quaisquer pontos `🟡`/`🟢` ainda pendentes — registrar para resolver durante).
    - Os arquivos do Assembly citados na spec, **conferindo `arquivo:linha`** antes de escrever código que dependa deles.

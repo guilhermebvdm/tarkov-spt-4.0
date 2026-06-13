@@ -1,6 +1,6 @@
 ---
 name: memory-curation
-description: Como manter memória cronológica de sessões de chat em `mods/<mod>/memory/sessions.md` e `memory/repo-sessions.md`. Aplicar durante `/update-memory` (e qualquer fluxo manual equivalente) para garantir que futuras sessões em chats paralelos consigam carregar contexto sem releitura completa. Cobre: granularidade de timestamps GMT-3, detecção automática de pertinência por mod, regras de imutabilidade, snapshot "Estado atual" como delta (não acumulação), pendências classificadas, cross-references entre mods, e o que NÃO memorizar.
+description: Como manter memória cronológica de sessões de chat em `mods/<mod>/memory/sessions.md` e `memory/repo-sessions.md`. Aplicar durante `/update-memory` (escrita) E durante os commands de desenvolvimento (/create-spec, /review-spec, /create-technical-spec, /review-technical-spec, /code-mod, /code-review, /apply-code-review) no passo "Contexto de memória" (consumo — ver §14). Cobre: granularidade de timestamps GMT-3, detecção automática de pertinência por mod, regras de imutabilidade, snapshot "Estado atual" como delta (não acumulação), pendências classificadas com IDs P-N.M, lições/hipóteses descartadas, promoção de lições recorrentes, cross-references entre mods, e o que NÃO memorizar.
 ---
 
 # Memory Curation
@@ -83,13 +83,17 @@ Regra prática: se a entrada não ajuda a próxima sessão a **tomar uma decisã
 Template:
 
 ```markdown
-## YYYY-MM-DD (GMT-3) — Sessão N: <título resumido>
+## YYYY-MM-DD HH:MM (GMT-3) — Sessão N[<letra>]: <título resumido>
 
 **Tema central:** [1 linha — qual era a meta principal]
 
 **Decisões-chave:**
 - [Decisão 1]: <o quê> — <por quê>. Ref: <artefato/file:linha>.
 - [Decisão 2]: ...
+
+**Lições / hipóteses descartadas:**
+- <hipótese ou abordagem testada> — falhou/foi descartada porque <causa raiz>. Ref: <artefato/file:linha>.
+- (Se a sessão não gerou lição: escrever `Nenhuma lição nova — sessão de <tipo>.` — ausência silenciosa não é permitida.)
 
 **Atividade cronológica:**
 1. <ação> — <resultado>.
@@ -105,6 +109,8 @@ Template:
 ```
 
 **Decisões-chave vem antes da cronologia.** O futuro leitor quer saber "o que mudou e por quê", não "em que ordem isso aconteceu". Cronologia é apoio.
+
+**A seção "Lições / hipóteses descartadas" é obrigatória.** É a diferença entre memória ("por que NÃO fazer X") e diário ("fizemos X"). Red flag: sessão que tocou código sem nenhuma decisão com "— porquê" e sem lição registrada — voltar à conversa e extrair o raciocínio antes de gravar.
 
 ## 6. Snapshot "Estado atual" — delta, não acumulação
 
@@ -131,7 +137,13 @@ Regras:
 
 ## 7. Pendências — classificação tri-camada + garbage collection
 
-Toda pendência ganha **ID local** `P-<NNNN>.<MM>` (NNNN = sessão, MM = ordem) e **categoria**:
+Toda pendência ganha **ID local** `P-<NNNN>.<MM>` (NNNN = sessão, MM = ordem) e **categoria**.
+
+**Enforcement de IDs (sem exceção):**
+
+- Todo bullet do bloco "Pendências" no **topo** carrega o ID `[P-N.M]` herdado da sessão que o criou. Ao reescrever o topo (delta, §6), **preservar os IDs existentes**.
+- Bullets legados sem ID: atribuir ID retroativo `[P-N.M]` na próxima gravação, usando a sessão de origem (rastreável pelo conteúdo). Isso NÃO viola a imutabilidade do §8 — o topo é mutável por definição (§6); só as entradas de sessão são append-only.
+- Sem ID não há cross-ref estável ("resolve P-3.2") — bullet sem ID é red flag no checklist final.
 
 | Categoria | Significado | Vida útil |
 | --- | --- | --- |
@@ -145,7 +157,7 @@ Quando uma pendência é resolvida:
 2. Mover para o final do `Histórico` da sessão que resolveu.
 3. Remover do bloco "Pendências" no topo.
 
-Se uma pendência fica >30 dias sem progresso: revisão obrigatória — promover a item de backlog OU descartar (com nota explícita "descartada por X").
+**Garbage collection (executado pelo `/update-memory` a cada rodada):** pendência >30 dias sem progresso entra em revisão obrigatória — o command propõe ao usuário: **promover** a item de backlog (`/add-backlog-item`), **descartar** (com nota explícita "descartada por X") ou **manter** (com justificativa registrada). Nenhuma pendência fica >30 dias sem decisão explícita.
 
 ## 8. Imutabilidade + apêndice
 
@@ -257,6 +269,44 @@ Adições que valem como prática:
 
 12. **Dry-run flag.** `/update-memory --dry` mostra o que seria escrito sem efetivar. Espelha `migrate-backlog-naming.sh --dry`. Permite revisar antes.
 
+## 14. Consumo de memória por commands
+
+A memória só paga seu custo se for LIDA. Os commands de desenvolvimento (`/create-spec`, `/review-spec`, `/create-technical-spec`, `/review-technical-spec`, `/code-mod`, `/code-review`, `/apply-code-review`) executam um passo **"Contexto de memória"** no início. Regras:
+
+**O que ler (nesta ordem — sem reler o arquivo inteiro):**
+
+1. Topo de `mods/<mod>/memory/sessions.md` — blocos "Estado atual" e "Pendências / próximos passos conhecidos" (≈ primeiras 30-40 linhas).
+2. Entradas que mencionam o item: Grep por `<NNN>-`, pelo slug e por nomes de feature do item. Ler só as entradas que casam.
+3. Se nada casa (item novo): ler apenas a última entrada de sessão.
+4. Se `sessions.md` não existe: seguir normalmente e registrar "sem memória prévia" no relatório.
+
+**O que fazer com pendências:**
+
+- 🔴 **do item em questão** (ou que bloqueia o mod inteiro — ex.: build quebrado, validação in-game pendente do mesmo código que será tocado): **alertar o usuário antes de prosseguir** e perguntar se continua. Não é bloqueio automático — é decisão humana informada.
+- 🟡 **relacionadas ao mesmo sistema/arquivo:** citar como risco no artefato (spec técnica §7 "Riscos e dependências"; review como evidência de ponto).
+- 🟢: mencionar só se diretamente relacionada à tarefa.
+
+**Output obrigatório do passo** — 2-5 linhas no início do trabalho do command:
+
+```text
+Memória consultada: snapshot de YYYY-MM-DD (Sessão N).
+Pendências que afetam esta tarefa: [P-N.M <resumo>] / nenhuma.
+```
+
+**Regra de evidência:** memória aponta, artefato confirma — nenhum claim técnico vindo da memória entra num artefato sem reconferir o `arquivo:linha` atual (o código pode ter mudado desde a gravação).
+
+## 15. Promoção de lições para skills/antipatterns
+
+Memória é tracking efêmero; regra recorrente vira conhecimento institucional. Critérios:
+
+- Mesma classe de erro/lição aparece em **≥2 sessões** (mesmo mod ou mods diferentes) → candidata a promoção.
+- Classe já existe em `docs/technical/spt-antipatterns.md` → adicionar o exemplo/ref novo lá (na seção AP-NN correspondente).
+- Classe nova de **domínio SPT/EFT** → nova seção AP-NN no `spt-antipatterns.md` + avaliar regra na skill `spt-mod-best-practices`.
+- Pitfall de **linguagem C#/Unity** → skill `csharp-mod-best-practices`.
+- A memória mantém o narrativo e ganha link para o destino promovido — **não duplica** o conteúdo.
+
+Fluxo: o `/update-memory` **PROPÕE** a promoção (bloco `💡 Candidata a promoção` no relatório); o usuário aprova; a edição do doc/skill é trabalho repo-wide (registrar em `memory/repo-sessions.md`).
+
 ## Checklist final (usar antes de commit)
 
 Ao escrever/atualizar uma entrada de memória:
@@ -271,5 +321,9 @@ Ao escrever/atualizar uma entrada de memória:
 8. **Pendências resolvidas:** removidas do topo, marcadas ✅ na sessão que resolveu.
 9. **Sem revisionismo:** entradas antigas não editadas. Refutações em sessão atual.
 10. **Sem duplicação:** conteúdo de spec/asbuild/review não copiado — só linkado.
+11. **Lições:** seção "Lições / hipóteses descartadas" presente — com conteúdo real ou justificativa explícita de ausência (§5).
+12. **IDs de pendência:** todo bullet de pendência (no topo e nas entradas) com `[P-N.M]`; legados receberam ID retroativo (§7).
+13. **Tamanho do snapshot:** ≤10 bullets por bloco (alerta); >15 → parar e consolidar/promover antes de gravar (§6).
+14. **GC:** nenhuma pendência >30 dias sem decisão explícita (promover/descartar/manter justificado) (§7).
 
 Se algum item falha, parar e corrigir antes de marcar a entrada como concluída.

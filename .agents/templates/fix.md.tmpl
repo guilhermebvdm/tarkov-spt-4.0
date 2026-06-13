@@ -1,0 +1,36 @@
+# {{NUM}} — Fix {{FIX_NN}} · {{TITLE}}
+
+**Mod:** {{MOD}}
+**Item raiz:** [{{NUM}}-{{SLUG}}-01-spec.md]({{NUM}}-{{SLUG}}-01-spec.md)
+**Asbuild:** [{{NUM}}-{{SLUG}}-05-asbuild.md]({{NUM}}-{{SLUG}}-05-asbuild.md)
+**Criado:** {{CREATED_AT}}
+**Disparado por:** [feedback in-raid / achado de code-review deferido / regressão]
+
+## Contexto
+
+[O que foi observado — sintoma, cenário, quem reportou. Com refs.]
+
+## Causa raiz
+
+[Diagnóstico com `arquivo.cs:linha` (Assembly e/ou modded). Se refuta premissa de artefato anterior (spec, review), **citar o artefato — não editá-lo** (append-only, ver `repo-workflow-best-practices` §5).]
+
+## Mudanças aplicadas
+
+| Arquivo | Mudança |
+|---|---|
+| `modded/<arquivo>.cs` | [resumo de 1 linha] |
+
+## Checklist de validação (obrigatório antes de marcar o fix como entregue)
+
+- [ ] Compila via `/compile-mod` sem erros
+- [ ] **In-raid:** comportamento corrigido observado em raid real
+- [ ] **Fika/multiplayer:** sem regressão com outros players — ou `N/A: <razão>`
+- [ ] **raid1 → exit → raid2:** sem estado vazado entre raids
+- [ ] **alt-F4 / morte / MIA:** teardown idempotente, sem exceção no LogOutput.log
+- [ ] Memória do mod atualizada (`/update-memory`) com a lição do fix
+
+## Histórico
+
+| Data | Evento |
+|---|---|
+| {{CREATED_AT}} | Fix criado |

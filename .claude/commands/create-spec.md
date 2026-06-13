@@ -30,6 +30,7 @@ Cria a **spec funcional** de um item do backlog (sem código — foca em intenç
    - `mods/<mod>/backlog/mod-backlog.md` — pegar resumo e título do item.
    - `mods/<mod>/README.md` (se existir) — entender o mod.
    - `mods/<mod>/PROPRIEDADES.md` (se existir) — propriedades atuais do F12.
+   - **Memória do mod (leve)** — topo de `mods/<mod>/memory/sessions.md` (snapshot + pendências): lições registradas (ex.: bugs Fika, estado entre raids) viram corner cases da spec. Pendência 🔴 do mod → alertar antes de prosseguir (`memory-curation` §14). Se o arquivo não existir, registrar "sem memória prévia".
 
 4. **Renderizar `.agents/templates/spec.md.tmpl`** preenchendo:
    - `{{NUM}}` = `NNN`
@@ -41,7 +42,7 @@ Cria a **spec funcional** de um item do backlog (sem código — foca em intenç
 5. **Preencher seções** com conteúdo real, não placeholders genéricos:
    - **Comportamento atual:** baseado no que foi observado em `original/` ou no que o usuário descreveu.
    - **Comportamento desejado:** o que muda após implementar.
-   - **Critérios de aceite:** 3–6 itens **verificáveis** (cada um deve ser testável manualmente in-game ou via assert no código).
+   - **Critérios de aceite:** 3–6 itens **verificáveis** (cada um deve ser testável manualmente in-game ou via assert no código). Os dois critérios padrão do template — **Fika/multiplayer** e **estado entre raids** — são **obrigatórios**: preencher com comportamento verificável ou `N/A: <razão>`. Nunca deletar a linha.
    - **Corner cases:** pelo menos 3, pensando em estados-limite (nulo/vazio, race condition, interação com outros sistemas do EFT, troca rápida de estado, sair de raid).
    - **Fora de escopo:** deixar `[ ] A definir` se não for óbvio. **Nunca inferir.**
 
