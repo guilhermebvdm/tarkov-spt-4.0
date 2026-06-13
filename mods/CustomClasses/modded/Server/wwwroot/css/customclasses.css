@@ -238,6 +238,10 @@
 .cc-ws__outfit-meta   { display: flex; flex-direction: column; min-width: 0; }
 .cc-ws__outfit-slot   { font-size: 9px; text-transform: uppercase; letter-spacing: .4px; opacity: .6; }
 .cc-ws__outfit-name   { font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Outfit movido pro painel EQUIPPED (abaixo do doll): largura do doll, 2×2, acento de cor por facção. */
+.cc-ws__outfit-section { width: 100%; max-width: 660px; margin-top: 6px; }
+.cc-ws__outfit-card--usec { border-left: 3px solid #5b7fae; }   /* USEC */
+.cc-ws__outfit-card--bear { border-left: 3px solid #ae5b5b; }   /* BEAR */
 
 /* ── CharacterDoll: layout fiel à tela GEAR do EFT ──────────────────────────────────
    Mockup = a própria tela Gear do jogo (4 "colunas" de slots ao redor do boneco):

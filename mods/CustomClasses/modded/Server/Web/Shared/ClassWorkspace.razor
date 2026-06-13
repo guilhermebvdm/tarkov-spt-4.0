@@ -171,8 +171,15 @@ else
                     }
                 </div>
 
-                @* ── Outfit ── *@
-                <div class="cc-section">
+            </div>
+
+            @* ░ CENTRO ░ *@
+            <div class="cc-ws__panel cc-ws__panel--center">
+                <div class="cc-section__title">Equipped (@EquippedCount slots)</div>
+                <CharacterDoll Equipped="@EquippedForView" Editable="@_editMode" OnSlotClick="EditSlotAsync"/>
+
+                @* ── Outfit (movido pro painel EQUIPPED — é a aparência do personagem) ── *@
+                <div class="cc-section cc-ws__outfit-section">
                     <div class="cc-section__title">Outfit</div>
                     <div class="cc-ws__outfit">
                         @if (_editMode && _model is not null)
@@ -191,12 +198,6 @@ else
                         }
                     </div>
                 </div>
-            </div>
-
-            @* ░ CENTRO ░ *@
-            <div class="cc-ws__panel cc-ws__panel--center">
-                <div class="cc-section__title">Equipped (@EquippedCount slots)</div>
-                <CharacterDoll Equipped="@EquippedForView" Editable="@_editMode" OnSlotClick="EditSlotAsync"/>
             </div>
 
             @* ░ DIREITA ░ *@
@@ -748,7 +749,7 @@ else
     /// <summary>Card simbólico read-only de uma peça: glyph SVG (camisa Upper / calça Lower) + faction/slot + nome.</summary>
     private RenderFragment OutfitCard(string faction, string slot, string? id) => __builder =>
     {
-        <div class="cc-ws__outfit-card">
+        <div class="cc-ws__outfit-card cc-ws__outfit-card--@(faction.ToLowerInvariant())">
             <div class="cc-ws__outfit-glyph">@OutfitGlyph(slot)</div>
             <div class="cc-ws__outfit-meta">
                 <span class="cc-ws__outfit-slot">@faction · @slot</span>
@@ -761,7 +762,7 @@ else
     private RenderFragment EditOutfitCard(string faction, string slot, string side,
         Func<string?> get, Action<string?> set) => __builder =>
     {
-        <div class="cc-ws__outfit-card cc-ws__outfit-card--edit"
+        <div class="cc-ws__outfit-card cc-ws__outfit-card--edit cc-ws__outfit-card--@(faction.ToLowerInvariant())"
              @onclick="@(() => PickSkinAsync(faction, side, slot, get, set))"
              title="Click to choose a skin">
             <div class="cc-ws__outfit-glyph">@OutfitGlyph(slot)</div>
