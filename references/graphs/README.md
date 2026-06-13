@@ -13,7 +13,7 @@ Grafos de conhecimento extraídos por [graphify](https://github.com/safishamsi/g
 | `fika-plugin/`, `fika-server/`, `fika-headless/` | `references/fika-*/` | grafos do FIKA |
 | `spt-source/` | `references/spt-source/` | grafo do servidor SPT |
 
-Cada pasta tem `graph.json` (dados, consumido pelo MCP e pela CLI), `GRAPH_REPORT.md` (resumo legível: comunidades, hubs) e `graph.html` (visualização — só para grafos pequenos).
+Cada pasta tem `graph.json` (dados, consumido pelo MCP e pela CLI), `GRAPH_REPORT.md` (resumo legível: comunidades, hubs) e — só para grafos pequenos — `graph.html` (visualização). O `update-graphs.sh` **não versiona `graph.html` acima de 1.5MB** (gere local com `graphify` se precisar da visualização de um grafo grande).
 
 ## Instalação (uma vez por PC — desktop `guime` e notebook `guimello`)
 
