@@ -289,11 +289,11 @@
 .cc-doll-slot--armband             { top: 27%; left: 11%; }
 .cc-doll-slot--eyewear             { top: 27%; left: 47%; }
 .cc-doll-slot--dogtag              { top: 39%; left: 11%; }
-.cc-doll-slot--armorvest           { top: 52%; left: 30%; }
+.cc-doll-slot--armorvest           { top: 42%; left: 30%; }
 .cc-doll-slot--holster             { top: 40%; left: 47%; }
 .cc-doll-slot--scabbard            { top: 54%; left: 47%; }
-.cc-doll-slot--firstprimaryweapon  { top: 70%; left: 24%; }
-.cc-doll-slot--secondprimaryweapon { top: 88%; left: 24%; }
+.cc-doll-slot--firstprimaryweapon  { top: 62%; left: 24%; }
+.cc-doll-slot--secondprimaryweapon { top: 80%; left: 24%; }
 .cc-doll-slot--tacticalvest        { top: 26%; left: 72%; }
 .cc-doll-slot--pockets             { top: 52%; left: 70%; }
 .cc-doll-slot--backpack            { top: 72%; left: 72%; }

@@ -33,10 +33,13 @@
                        (object-fit) — NÃO dimensionamos pelo W×H real do item, senão armas (5×2) e
                        mochilas (4×4) estouram a silhueta e se sobrepõem. O W×H real importa só no stash. *@
                     <div class="cc-item-cell cc-doll-slot__cell">
-                        @if (gc.RootTpl is not null)
+                        @if (gc.IconId is not null)
                         {
-                            <img src="@($"https://assets.tarkov.dev/{gc.RootTpl}-icon.webp")"
-                                 loading="lazy" alt="" onerror="this.style.display='none'"/>
+                            @* #3: ícone do PRESET montado; no erro cai pro tpl base; no 2º erro esconde. *@
+                            <img src="@($"https://assets.tarkov.dev/{gc.IconId}-icon.webp")"
+                                 loading="lazy" alt="" draggable="false"
+                                 data-fb="@(gc.IconId != gc.RootTpl ? gc.RootTpl : null)"
+                                 onerror="if(this.dataset.fb){this.src='https://assets.tarkov.dev/'+this.dataset.fb+'-icon.webp';this.dataset.fb='';}else{this.style.display='none';}"/>
                         }
                         else
                         {
@@ -73,13 +76,27 @@
     ];
 
     private sealed record GearCell(
-        string? RootTpl, string Name, string? Category,
+        string? RootTpl, string? IconId, string Name, string? Category,
         int Width, int Height, double Price, string? PriceSource, bool MissingPrice);
 
     private Dictionary<string, GearCell> _cells = new(StringComparer.OrdinalIgnoreCase);
 
+    private Dictionary<string, ItemSpec>? _lastEquipped;
+    private bool _built;
+
     protected override void OnParametersSet()
     {
+        // PERF: o Blazor chama OnParametersSet a cada render do pai; só reconstrua se o dict de
+        // equipados realmente mudou de referência (o workspace cacheia o snapshot). Sem isso, mexer
+        // num slider de SKILL reconstruía a doll inteira (resolução de preset/catálogo) a cada step.
+        if (_built && ReferenceEquals(Equipped, _lastEquipped))
+        {
+            return;
+        }
+
+        _built = true;
+        _lastEquipped = Equipped;
+
         _cells = new Dictionary<string, GearCell>(StringComparer.OrdinalIgnoreCase);
         if (Equipped is not { Count: > 0 })
         {
@@ -98,7 +115,7 @@
         if (rootTpl is null)
         {
             var raw = spec.Preset ?? spec.Tpl ?? "(no tpl)";
-            return new GearCell(null, raw, null, 1, 1, 0, null, true);
+            return new GearCell(null, null, raw, null, 1, 1, 0, null, true);
         }
 
         var (w, h) = Catalog.GetItemDimensions(rootTpl);
@@ -106,8 +123,22 @@
         var name = Catalog.GetItemName(id);
         var category = Catalog.GetCategoryName(rootTpl);
         var (price, source) = Catalog.GetPrice(id);
-        return new GearCell(rootTpl, name, category, w, h, price, source,
+        // #3: ícone do PRESET montado quando aplicável (fallback pro tpl base no onerror).
+        var iconId = ResolvePresetIconId(spec) ?? rootTpl;
+        return new GearCell(rootTpl, iconId, name, category, w, h, price, source,
             string.Equals(source, "missing", StringComparison.Ordinal));
+    }
+
+    /// <summary>Id do preset (default/premium) p/ a imagem do tarkov.dev — null se o item não é preset.</summary>
+    private string? ResolvePresetIconId(ItemSpec spec)
+    {
+        if (string.IsNullOrWhiteSpace(spec.Preset) || TryMongoId(spec.Preset!) is not { } key)
+        {
+            return null;
+        }
+
+        var preset = spec.Premium ? Catalog.ResolvePremiumPreset(key) : Catalog.ResolveDefaultPreset(key);
+        return preset?.Id.ToString();
     }
 
     /// <summary>preset > tpl (mesma ordem do GearPanel/ClassViewItemSpec). null = nada resolve.</summary>

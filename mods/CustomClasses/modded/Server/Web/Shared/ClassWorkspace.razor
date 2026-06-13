@@ -264,13 +264,35 @@ else
     private int EquippedCount => _editMode && _model is not null ? _model.Equipped.Count : Definition?.Loadout?.Equipped?.Count ?? 0;
     private int StashCount => _editMode && _model is not null ? _model.Stash.Count : Definition?.Loadout?.Stash?.Count ?? 0;
 
-    /// <summary>Equipados desenhados na doll: snapshot do _model em edição, senão a Definition.</summary>
-    private Dictionary<string, ItemSpec>? EquippedForView =>
-        _editMode && _model is not null ? _model.ToDefinition().Loadout?.Equipped : Definition?.Loadout?.Equipped;
+    // PERF: os snapshots da doll/stash são CACHEADOS (rebuild só quando o loadout muda — RebuildLoadoutViews),
+    // NÃO recomputados a cada render. Antes, EquippedForView/StashForView chamavam _model.ToDefinition()
+    // (rebuild completo) 2× por render; cada step do slider de skill disparava isso + re-pack do stash →
+    // lag. Agora mudança de skill não toca esses caches (referência estável → os filhos pulam o rebuild).
+    private Dictionary<string, ItemSpec>? _equippedView;
+    private List<ItemSpec>? _stashView;
 
-    /// <summary>Stash desenhado na grade: snapshot do _model em edição, senão a Definition.</summary>
+    /// <summary>Recomputa os snapshots da doll/stash a partir do _model — chamado só ao montar e ao editar o loadout.</summary>
+    private void RebuildLoadoutViews()
+    {
+        if (_model is null)
+        {
+            _equippedView = null;
+            _stashView = null;
+            return;
+        }
+
+        var def = _model.ToDefinition();
+        _equippedView = def.Loadout?.Equipped;
+        _stashView = def.Loadout?.Stash;
+    }
+
+    /// <summary>Equipados desenhados na doll: snapshot cacheado em edição, senão a Definition.</summary>
+    private Dictionary<string, ItemSpec>? EquippedForView =>
+        _editMode && _model is not null ? _equippedView : Definition?.Loadout?.Equipped;
+
+    /// <summary>Stash desenhado na grade: snapshot cacheado em edição, senão a Definition.</summary>
     private List<ItemSpec>? StashForView =>
-        _editMode && _model is not null ? _model.ToDefinition().Loadout?.Stash : Definition?.Loadout?.Stash;
+        _editMode && _model is not null ? _stashView : Definition?.Loadout?.Stash;
 
     protected override void OnParametersSet()
     {
@@ -318,6 +340,7 @@ else
         _saveDiagnostics = [];
         RecomputeSkillCost();
         RecomputeLoadoutCost();
+        RebuildLoadoutViews();
         RegisterGuardHandlers();
         if (Guard is not null)
         {
@@ -337,6 +360,7 @@ else
         _newStation = string.Empty;
         RecomputeSkillCost();
         RecomputeLoadoutCost();
+        RebuildLoadoutViews();
         if (Guard is not null)
         {
             Guard.IsDirty = false;
@@ -460,11 +484,12 @@ else
         RecomputeSkillCost();
     }
 
-    /// <summary>MarkDirty + recompute do custo de loadout (handler das mutações de equipado/stash).</summary>
+    /// <summary>MarkDirty + recompute do custo de loadout + rebuild dos snapshots da doll/stash.</summary>
     private void OnLoadoutEdited()
     {
         MarkDirty();
         RecomputeLoadoutCost();
+        RebuildLoadoutViews();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

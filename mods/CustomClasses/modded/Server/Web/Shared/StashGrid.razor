@@ -98,7 +98,7 @@
     private bool _editable => Editable && EditItems is not null;
 
     private sealed record PlacedCell(
-        int X, int Y, int W, int H, int W0, int H0, string? RootTpl, string Name, string? Category,
+        int X, int Y, int W, int H, int W0, int H0, string? RootTpl, string? IconId, string Name, string? Category,
         double Qty, double Price, string? PriceSource, bool MissingPrice, int Width, int Height,
         ItemSpecModel? Model);
 
@@ -106,7 +106,27 @@
     private readonly record struct SrcItem(
         string? Preset, string? Tpl, bool Premium, double Count, int? X, int? Y, bool Rotated, ItemSpecModel? Model);
 
-    protected override void OnParametersSet() => Build();
+    private object? _lastSource;
+    private string? _lastBase;
+    private bool _built;
+
+    protected override void OnParametersSet()
+    {
+        // PERF: só reconstrua (pack do GridPacker) quando a fonte/baseEdition mudar de referência. O
+        // Blazor chama OnParametersSet a cada render do pai; sem o guard, mexer num slider de SKILL
+        // re-empacotava o stash inteiro a cada step. O DnD chama Build() direto, então move/rotate
+        // continua refletindo na hora.
+        object? source = _editable ? EditItems : Stash;
+        if (_built && ReferenceEquals(source, _lastSource) && string.Equals(_lastBase, BaseEdition, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        _built = true;
+        _lastSource = source;
+        _lastBase = BaseEdition;
+        Build();
+    }
 
     private void Build()
     {
@@ -178,8 +198,23 @@
         double qty, double price, string? source, bool missing, int x, int y, bool rotated)
     {
         var (dw, dh) = rotated ? (h0, w0) : (w0, h0);
-        _cells.Add(new PlacedCell(x, y, dw, dh, w0, h0, rootTpl, name, category,
+        // #3: ícone do PRESET montado (tarkov.dev hospeda o render do preset) quando o item é um preset;
+        // o tpl base fica como fallback no onerror (vide ItemInner). Sem preset → ícone = tpl base.
+        var iconId = ResolvePresetIconId(item) ?? rootTpl;
+        _cells.Add(new PlacedCell(x, y, dw, dh, w0, h0, rootTpl, iconId, name, category,
             qty, price, source, missing, w0, h0, item.Model));
+    }
+
+    /// <summary>Id do preset (default/premium) p/ a imagem do tarkov.dev — null se o item não é preset.</summary>
+    private string? ResolvePresetIconId(SrcItem item)
+    {
+        if (string.IsNullOrWhiteSpace(item.Preset) || TryMongoId(item.Preset!) is not { } key)
+        {
+            return null;
+        }
+
+        var preset = item.Premium ? Catalog.ResolvePremiumPreset(key) : Catalog.ResolveDefaultPreset(key);
+        return preset?.Id.ToString();
     }
 
     private List<SrcItem> SourceItems()
@@ -289,12 +324,15 @@
     private RenderFragment ItemInner(PlacedCell cell) => __builder =>
     {
         <span class="cc-item-cell__txt">@cell.Name</span>
-        @if (cell.RootTpl is not null)
+        @if (cell.IconId is not null)
         {
-            @* draggable="false": a <img> é arrastável por padrão e capturaria o drag NATIVO da
+            @* #3: tenta o ícone do PRESET montado; no erro cai pro tpl base; no 2º erro esconde.
+               draggable="false": a <img> é arrastável por padrão e capturaria o drag NATIVO da
                imagem em vez do nosso @ondragstart no div pai (era o "mistério" do DnD travado). *@
-            <img src="@($"https://assets.tarkov.dev/{cell.RootTpl}-icon.webp")"
-                 loading="lazy" alt="" draggable="false" onerror="this.style.display='none'"/>
+            <img src="@($"https://assets.tarkov.dev/{cell.IconId}-icon.webp")"
+                 loading="lazy" alt="" draggable="false"
+                 data-fb="@(cell.IconId != cell.RootTpl ? cell.RootTpl : null)"
+                 onerror="if(this.dataset.fb){this.src='https://assets.tarkov.dev/'+this.dataset.fb+'-icon.webp';this.dataset.fb='';}else{this.style.display='none';}"/>
         }
         @if (cell.Qty > 1)
         {
