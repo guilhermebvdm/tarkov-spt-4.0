@@ -8,6 +8,8 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 
 **Mod híbrido completo e maduro.** Itens **001–037 entregues** (🟢): 11 classes + identidade visual + **editor web Blazor completo** (018–029) + **épico UX (030–037) EXECUTADO** (autônomo via Workflow, 2026-06-11→12). Tudo **commitado** (15 commits do épico sobre baseline `3634548`); working tree limpo exceto frentes paralelas (`docs/migration/*`, `.claude/skills/*`, `.agents/resources.md`, `docs/technical/spt-antipatterns.md`, `mods/SPT-Menu-Overhaul/memory/`). **Branch ahead 22, SEM push** — aguarda revisão do usuário. Relatório: `.handoffs/handoff-2026-06-12-overnight-ux-030-037.md`.
 
+**Em andamento (item 038 — redesign workspace 3 painéis estilo EFT):** F0 ✅ (`82bc4a5`, grade 2D X/Y/R no schema+builder) e F1 ✅ (`2cc4274`, workspace read-only: silhueta + grade 2D). Faltam **F2** (edição in-place + skins dialog + DnD HTML5 `.mjs` + migrar `@code` do ClassEdit + refino da silhueta) e **F3** (polimento/docs/smoke in-game). Plano: `~/.claude/plans/monte-um-plano-para-goofy-otter.md`. Silhueta ainda rascunho. Sem push.
+
 - **Identidade:** `CustomClasses`, GUID `customclasses.mdj` (server) + `customclasses.mdj.client` (client BepInEx). SPT 4.0.13. Mod irmão `mods/CustomizationPersistenceFix` (corrige reset de customização do SPT core via Harmony).
 - **Classes:** 10 reais + Peladão/**NAKED** (016, skin placeholder havaiana). Gerador `scripts/build-class-jsons.js` congelado como bootstrap (`--force`); **fonte de verdade = `.jsonc` do install** (volta via `/sync-classes`; compile-mod tem guard anti-clobber `--force-config`).
 - **i18n:** nome da classe (`displayName {en,pt}`) segue o **idioma do EFT** (`LocaleManagerClass.String_0`; "po"=pt); seletor F12 `Language` removido. Descrição da edition = locale do **servidor** (limitação).
@@ -161,6 +163,19 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 - here-string PowerShell `@'...'@` na Bash tool insere `@` literal no commit subject → usar `git commit -F <arquivo>`.
 
 **Cross-refs:** relatório completo (achados adiados por wave, premissas, hashes) em `.handoffs/handoff-2026-06-12-overnight-ux-030-037.md`. Plano de execução em `~/.claude/plans/`.
+
+### 2026-06-12→13 — QA do editor + início do redesign workspace 3 painéis (item 038)
+
+**QA visual (Chrome MCP) do épico 030–037 + correções:**
+- **Bug de raiz:** `css/js` do editor estavam em `Server/Web/wwwroot/` (NÃO servido); o SPT serve `Server/wwwroot/`. Davam 404 → dashboard sem CSS (1 coluna), Ctrl+S/prefs mortos. Movidos pra `Server/wwwroot/`. **E**: shipar `.js` faz o SPT rejeitar o mod (`ModValidator.cs:316` varre `*.js`/`*.ts` → "pre-4.0.0 JS mod") — renomeado pra `customclasses.mjs` (módulo, `type=module`). Commit `e1360ae`.
+- **Sidebar 3 estados** (open 250 / mini 64 / closed 0) ciclando no botão, **conteúdo sincronizado** via classe no `MudLayout` (`cc-sb-*`) controlando largura do drawer E margem do `mud-main-content` na mesma regra (mecânica nativa do MudBlazor dessincronizava; `display:none` no closed). Ícones centralizados no mini (tooltip wrapper inline-block encolhia). Commits `3ecd023`, `3079782`.
+- **Skills matrix:** faltava `MudContainer`+`MudPaper` (sem topo/padding) — padronizado. Commit `5849e0d`.
+
+**Redesign workspace (item 038) — plano aprovado, multi-sessão:** 3 painéis estilo EFT (esquerda skills/mults/hideout/outfit · centro silhueta CSS + 14 slots · direita grade 2D do stash X/Y/R + DnD), view/edit unificado (Editar destrava in-place), + seletor de skins com preview simbólico (sem imagem 2D nativa). Plano em `~/.claude/plans/`, revisado 3× com `/g-review-content`. **Decisões:** grade 2D honrada in-game (coords **opt-in**, não reescreve `.jsonc`); **tamanho-com-mods** (não base); DnD = **HTML5 + `.mjs`** (MudBlazor não faz 2D); página única + `_editMode` toggle.
+- **F0 ✅ (`82bc4a5`):** X/Y/Rotated em `ItemSpec`/`ItemSpecModel`; `GridPacker.TryPlaceAt`; `InventoryBuilder.PlaceTree` honra coords (tamanho real) + fallback first-fit (coord-bearing primeiro); `CostService.GetStashGridSize`. Gate: boot dry-run das 11 (regressão auto-pack idêntica) + classe hand-crafted x/y registra limpo. Coords opt-in → classes coordless byte-idênticas.
+- **F1 ✅ (`2cc4274`):** `ClassWorkspace.razor` + `CharacterDoll.razor` (silhueta+slots) + `StashGrid.razor` (grade 2D 10×30, 23 itens posicionados/dimensionados/ícones). ClassDetail single-class monta o workspace; compare (036) mantém dashboard antigo. Fix-chave: `--cc-cell-unit` içado pro `.cc-ws` (estava só em `.cc-item-cell` → `repeat(W,var())` inválido → grade colapsava em 1 col). Header dedup (página mantém nome/ações; workspace = barra slim de custo). **Silhueta = qualidade rascunho** (posições aproximadas, refino em F2/F3).
+- **Pendente:** F2 (edição in-place + skins dialog + DnD `.mjs` + migrar `@code` do ClassEdit 1272L + refino silhueta) · F3 (polimento, retrocompat, docs, smoke in-game pelo usuário). **Sem push.**
+- **Lição:** UI visual (silhueta/grade) feita por agente headless sai estruturalmente OK mas precisa de iteração visual no Chrome MCP (loop principal) — não dá pra fan-out cego.
 
 ## Arquivo — blocos de topo pré-curadoria (2026-06-07 → 2026-06-10)
 
