@@ -101,7 +101,9 @@ else
                                             EditRows="@_model.Skills"
                                             Cost="@LiveSkillCost"
                                             Multipliers="@MultiplierLookup()"
-                                            OnLevelChanged="OnSkillsEdited"/>
+                                            EditMultipliers="@_model.Multipliers"
+                                            OnLevelChanged="OnSkillsEdited"
+                                            OnMultipliersChanged="OnSkillsEdited"/>
                     }
                     else
                     {
@@ -112,59 +114,8 @@ else
                     }
                 </div>
 
-                @* ── XP multipliers ── *@
-                @if (_editMode && _model is not null)
-                {
-                    <div class="cc-section">
-                        <div class="cc-section__title">XP multipliers (@_model.Multipliers.Count)</div>
-                        @if (_model.Multipliers.Count > 0)
-                        {
-                            <div class="cc-ws__mults">
-                                @foreach (var row in _model.Multipliers)
-                                {
-                                    <div class="cc-ws__mult" @key="row">
-                                        <span class="cc-ws__mult-name">@row.Skill</span>
-                                        <MudNumericField T="double" @bind-Value="row.Factor"
-                                                         @bind-Value:after="OnSkillsEdited"
-                                                         Min="0" Step="0.1" Format="0.##" Margin="Margin.Dense"
-                                                         Variant="Variant.Outlined" Style="max-width:96px;"/>
-                                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
-                                                       Color="Color.Error" title="Remove multiplier"
-                                                       OnClick="@(() => RemoveMultiplier(row))"/>
-                                    </div>
-                                }
-                            </div>
-                        }
-                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mt-2">
-                            <MudSelect T="string" @bind-Value="_newMultiplierSkill" Label="Add multiplier"
-                                       Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true"
-                                       Style="min-width:200px">
-                                @foreach (var name in AvailableSkills(_model.Multipliers.Select(r => r.Skill)))
-                                {
-                                    <MudSelectItem T="string" Value="@name">@name</MudSelectItem>
-                                }
-                            </MudSelect>
-                            <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary"
-                                           Disabled="@string.IsNullOrEmpty(_newMultiplierSkill)" OnClick="AddMultiplier"
-                                           title="Add multiplier"/>
-                        </MudStack>
-                    </div>
-                }
-                else if (def.SkillMultipliers is { Count: > 0 })
-                {
-                    <div class="cc-section">
-                        <div class="cc-section__title">XP multipliers (@def.SkillMultipliers.Count)</div>
-                        <div class="cc-ws__mults">
-                            @foreach (var (skill, factor) in def.SkillMultipliers)
-                            {
-                                <div class="cc-ws__mult">
-                                    <span class="cc-ws__mult-name">@skill</span>
-                                    <span class="cc-ws__mult-val">@MultiplierLabel(factor)</span>
-                                </div>
-                            }
-                        </div>
-                    </div>
-                }
+                @* XP multipliers: editados IN-ROW na própria SkillCanonicalList (clique no chip de % →
+                   popup com slider de 5%). A seção separada foi removida. *@
 
                 @* ── Hideout ── *@
                 <div class="cc-section">
@@ -291,7 +242,6 @@ else
     private LoadoutCostBreakdown? _editLoadoutCost;
     private bool _saving;
 
-    private string _newMultiplierSkill = string.Empty;
     private string _newStation = string.Empty;
 
     // Ctrl+S (item 035)
@@ -384,7 +334,6 @@ else
         }
 
         _saveDiagnostics = [];
-        _newMultiplierSkill = string.Empty;
         _newStation = string.Empty;
         RecomputeSkillCost();
         RecomputeLoadoutCost();
@@ -634,14 +583,6 @@ else
         return d;
     }
 
-    private static IEnumerable<string> AvailableSkills(IEnumerable<string> used)
-    {
-        var taken = new HashSet<string>(used, StringComparer.OrdinalIgnoreCase);
-        return Enum.GetNames<SkillTypes>()
-            .Where(n => !taken.Contains(n))
-            .OrderBy(n => n, StringComparer.OrdinalIgnoreCase);
-    }
-
     private IEnumerable<string> AvailableStations()
     {
         var taken = new HashSet<string>(_model!.Hideout.Select(r => r.Station), StringComparer.OrdinalIgnoreCase);
@@ -650,21 +591,6 @@ else
             .OrderBy(n => n, StringComparer.OrdinalIgnoreCase);
     }
 
-    private void AddMultiplier()
-    {
-        if (!string.IsNullOrEmpty(_newMultiplierSkill))
-        {
-            _model!.Multipliers.Add(new SkillFactorRow { Skill = _newMultiplierSkill, Factor = 1.0 });
-            _newMultiplierSkill = string.Empty;
-            OnSkillsEdited();
-        }
-    }
-
-    private void RemoveMultiplier(SkillFactorRow row)
-    {
-        _model!.Multipliers.Remove(row);
-        OnSkillsEdited();
-    }
 
     private void AddStation()
     {
@@ -783,18 +709,6 @@ else
         }
 
         return _clothingNames.TryGetValue(id!, out var name) ? name : id!;
-    }
-
-    private static string MultiplierLabel(double factor)
-    {
-        if (Math.Abs(factor - 1.0) < 0.0001)
-        {
-            return "×1";
-        }
-
-        var pct = (factor - 1) * 100;
-        var sign = pct > 0 ? "+" : "";
-        return $"{sign}{pct.ToString("0", CultureInfo.InvariantCulture)}%";
     }
 
     private static Severity MapSeverity(DiagnosticSeverity severity) => severity switch

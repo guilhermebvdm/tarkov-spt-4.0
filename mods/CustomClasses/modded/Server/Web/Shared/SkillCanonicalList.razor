@@ -108,6 +108,13 @@
     /// <summary>Raised when a level changes in edit mode (ClassEdit recomputes the cost).</summary>
     [Parameter] public EventCallback OnLevelChanged { get; set; }
 
+    /// <summary>EDIT: lista mutável de multiplicadores (o workspace passa _model.Multipliers). Quando
+    /// setada, a célula do multiplicador vira editável in-row (popup com slider de 5%).</summary>
+    [Parameter] public IList<SkillFactorRow>? EditMultipliers { get; set; }
+
+    /// <summary>Raised quando um multiplicador muda no editor in-row (recompute do custo + dirty).</summary>
+    [Parameter] public EventCallback OnMultipliersChanged { get; set; }
+
     private string _outsideToAdd = string.Empty;
 
     // ── Level resolution (precedence: EditRows → Levels), case-insensitive (B2) ──────────────
@@ -272,6 +279,51 @@
         return null;
     }
 
+    // ── Edição in-row do multiplicador (popup com slider de 5%) ──────────────────────────────
+
+    /// <summary>Fator vivo do multiplicador da skill (do EditMultipliers); 1.0 = sem bônus.</summary>
+    private double EditFactorOf(string name)
+    {
+        var row = EditMultipliers?.FirstOrDefault(r => string.Equals(r.Skill, name, StringComparison.OrdinalIgnoreCase));
+        return row?.Factor ?? 1.0;
+    }
+
+    /// <summary>Fator → percentual (slider trabalha em %): factor 1.5 → +50; 0.7 → −30.</summary>
+    private int PercentOf(string name) => (int)Math.Round((EditFactorOf(name) - 1.0) * 100);
+
+    /// <summary>
+    ///     Seta o fator do multiplicador da skill. 100% (factor 1) → remove a linha (sem bônus = limpo);
+    ///     senão atualiza/insere. Notifica o pai (recompute + dirty). Step de 5% vem do slider.
+    /// </summary>
+    private async Task SetFactorAsync(string name, double factor)
+    {
+        if (EditMultipliers is null)
+        {
+            return;
+        }
+
+        factor = Math.Max(0, Math.Round(factor, 2));
+        var row = EditMultipliers.FirstOrDefault(r => string.Equals(r.Skill, name, StringComparison.OrdinalIgnoreCase));
+        if (Math.Abs(factor - 1.0) < 0.0001)
+        {
+            if (row is not null)
+            {
+                EditMultipliers.Remove(row);
+            }
+        }
+        else if (row is not null)
+        {
+            row.Factor = factor;
+        }
+        else
+        {
+            EditMultipliers.Add(new SkillFactorRow { Skill = name, Factor = factor });
+        }
+
+        await OnMultipliersChanged.InvokeAsync();
+        StateHasChanged();
+    }
+
     /// <summary>Bar fill % — saturates at level 10 (porta profiles.js:154; corner case 2: &gt;10 clamps to 100).</summary>
     private static double BarPercent(int level) =>
         level <= 0 ? 0 : Math.Min(1.0, level / 10.0) * 100;
@@ -325,7 +377,7 @@
         var color = category is { } c ? SkillMaster.ColorOf(c) : "#888";
         var dim = level <= 0;
         var costEntry = CostOf(name);
-        var factor = MultiplierOf(name);
+        var factor = EditMultipliers is not null ? EditFactorOf(name) : MultiplierOf(name);
 
         <tr style="@(dim ? "opacity:.3;" : null)">
             @* Name *@
@@ -368,10 +420,19 @@
                 </td>
             }
 
-            @* XP-multiplier chip *@
-            @if (Multipliers is not null)
+            @* XP-multiplier — editor in-row (popup slider) em edição; chip read-only fora. *@
+            @if (Multipliers is not null || EditMultipliers is not null)
             {
-                <td style="width:84px">@MultiplierChip(factor)</td>
+                <td class="cc-skill-mult">
+                    @if (EditMultipliers is not null)
+                    {
+                        @MultiplierEditor(name)
+                    }
+                    else
+                    {
+                        @MultiplierChip(factor)
+                    }
+                </td>
             }
 
             @* Compare delta (036) *@
@@ -404,6 +465,42 @@
         }
     };
 
+    /// <summary>
+    ///     EDIT in-row: clicar o chip abre um MudMenu (popup) com um slider de % que começa no valor
+    ///     atual e anda de 5 em 5% (−90…+200). "Clear" zera (= ×1, sem bônus). Sem bônus → chip "+%"
+    ///     discreto convidando ao clique.
+    /// </summary>
+    private RenderFragment MultiplierEditor(string name) => __builder =>
+    {
+        var pct = PercentOf(name);
+        var has = pct != 0;
+        var cls = has ? (pct > 0 ? "cc-mult-chip cc-mult-chip--up" : "cc-mult-chip cc-mult-chip--down")
+                      : "cc-mult-chip cc-mult-chip--none";
+        var label = has ? (pct > 0 ? $"+{pct}%" : $"−{-pct}%") : "+%";
+
+        <MudMenu Dense="true" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+            <ActivatorContent>
+                <span class="@cls" title="Set XP multiplier">@label</span>
+            </ActivatorContent>
+            <ChildContent>
+                <div class="cc-mult-pop" @onclick:stopPropagation="true">
+                    <div class="cc-mult-pop__hd">XP multiplier · @name</div>
+                    <div class="cc-mult-pop__val">@(pct == 0 ? "×1 (no bonus)" : (pct > 0 ? $"+{pct}%" : $"−{-pct}%"))</div>
+                    <MudSlider T="int" Value="@pct" ValueChanged="@(p => SetFactorAsync(name, 1 + p / 100.0))"
+                               Min="-90" Max="200" Step="5" ValueLabel="true"
+                               Color="@(pct < 0 ? Color.Error : Color.Success)" Class="cc-mult-slider"/>
+                    <div class="cc-mult-pop__ft">
+                        <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Default"
+                                   StartIcon="@Icons.Material.Filled.Clear"
+                                   OnClick="@(() => SetFactorAsync(name, 1.0))">
+                            Clear
+                        </MudButton>
+                    </div>
+                </div>
+            </ChildContent>
+        </MudMenu>
+    };
+
     private RenderFragment DeltaCell(int aLevel, int bLevel) => __builder =>
     {
         var delta = bLevel - aLevel;
@@ -423,5 +520,7 @@
 
     /// <summary>Visible column count (name + bar + level, plus optional cost/chip/delta) for colspan.</summary>
     private int ColumnCount =>
-        3 + (Cost is not null ? 1 : 0) + (Multipliers is not null ? 1 : 0) + (Compare is not null ? 1 : 0);
+        3 + (Cost is not null ? 1 : 0)
+          + (Multipliers is not null || EditMultipliers is not null ? 1 : 0)
+          + (Compare is not null ? 1 : 0);
 }

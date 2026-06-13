@@ -196,6 +196,17 @@
 /* slider do nível compacto dentro da linha (a bolha de valor ainda aparece ao arrastar). */
 .cc-ws__panel--left .skill-canonical .mud-slider { margin: 0 !important; min-height: 0; padding: 4px 0; }
 .cc-skill-lvlnum__on { font-weight: 600; }
+/* Multiplicador editável in-row: chip clicável + popup com slider de 5%. */
+.cc-mult-chip       { display: inline-block; min-width: 34px; text-align: center; padding: 0 6px;
+                      border-radius: 10px; font-size: 11px; font-weight: 600; cursor: pointer; line-height: 18px; }
+.cc-mult-chip--up   { background: rgba(76,175,80,.22);  color: #81c784; }
+.cc-mult-chip--down { background: rgba(244,67,54,.22);  color: #e57373; }
+.cc-mult-chip--none { background: rgba(255,255,255,.06); color: rgba(255,255,255,.4); }
+.cc-mult-pop        { padding: 10px 12px; width: 240px; }
+.cc-mult-pop__hd    { font-size: 10px; opacity: .6; text-transform: uppercase; letter-spacing: .4px; }
+.cc-mult-pop__val   { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; margin: 2px 0 8px; }
+.cc-mult-pop__ft    { display: flex; justify-content: flex-end; margin-top: 4px; }
+.cc-mult-slider     { margin: 0 !important; }
 
 @media (max-width: 1100px) {
     /* Viewport estreito: empilha (perde o single-screen, mas não esmaga). */
