@@ -20,7 +20,7 @@
         var cell = _cells.TryGetValue(slot, out var c) ? c : null;
         var clickable = Editable && OnSlotClick.HasDelegate;
         <div class="cc-doll-slot @($"cc-doll-slot--{slot.ToLowerInvariant()}") @(clickable ? "cc-doll-slot--edit" : null)"
-             @onclick="@(clickable ? (() => OnSlotClick.InvokeAsync(slot)) : null)"
+             @onclick="@(() => { if (clickable) return OnSlotClick.InvokeAsync(slot); return Task.CompletedTask; })"
              title="@(clickable ? "Click to edit this slot" : null)">
             <div class="cc-doll-slot__label">@ShortLabel(slot)</div>
             @if (cell is { } gc)

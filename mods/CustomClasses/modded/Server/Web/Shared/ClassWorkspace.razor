@@ -56,25 +56,21 @@ else
             </div>
 
             <div class="cc-ws__actions">
-                @if (!_editMode)
+                @* Sempre em edição (item: removido o modo view). O guard de unsaved + Discard são o
+                   "fallback" — Save grava, Discard reverte ao disco; ambos mantêm a tela em edição. *@
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                           StartIcon="@Icons.Material.Filled.Save"
+                           Disabled="@(_saving || !IsDirty)" OnClick="@(async () => await SaveAsync())">
+                    @(_saving ? "Saving…" : "Save")
+                </MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Default" Size="Size.Small"
+                           StartIcon="@Icons.Material.Filled.Restore"
+                           Disabled="@(_saving || !IsDirty)" OnClick="DiscardEdit">
+                    Discard
+                </MudButton>
+                @if (IsDirty)
                 {
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
-                               StartIcon="@Icons.Material.Filled.Edit" OnClick="EnterEdit">
-                        Edit
-                    </MudButton>
-                }
-                else
-                {
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
-                               StartIcon="@Icons.Material.Filled.Save"
-                               Disabled="@_saving" OnClick="@(async () => await SaveAsync())">
-                        @(_saving ? "Saving…" : "Save")
-                    </MudButton>
-                    <MudButton Variant="Variant.Outlined" Color="Color.Default" Size="Size.Small"
-                               StartIcon="@Icons.Material.Filled.Restore"
-                               Disabled="@_saving" OnClick="DiscardEdit">
-                        Discard
-                    </MudButton>
+                    <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Text">unsaved</MudChip>
                 }
             </div>
         </div>
@@ -105,7 +101,7 @@ else
                                             EditRows="@_model.Skills"
                                             Cost="@LiveSkillCost"
                                             Multipliers="@MultiplierLookup()"
-                                            OnLevelChanged="RecomputeSkillCost"/>
+                                            OnLevelChanged="OnSkillsEdited"/>
                     }
                     else
                     {
@@ -129,7 +125,7 @@ else
                                     <div class="cc-ws__mult" @key="row">
                                         <span class="cc-ws__mult-name">@row.Skill</span>
                                         <MudNumericField T="double" @bind-Value="row.Factor"
-                                                         @bind-Value:after="RecomputeSkillCost"
+                                                         @bind-Value:after="OnSkillsEdited"
                                                          Min="0" Step="0.1" Format="0.##" Margin="Margin.Dense"
                                                          Variant="Variant.Outlined" Style="max-width:96px;"/>
                                         <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
@@ -183,6 +179,7 @@ else
                                     <div class="cc-ws__mult" @key="row">
                                         <span class="cc-ws__mult-name">@row.Station</span>
                                         <MudNumericField T="int" @bind-Value="row.Level"
+                                                         @bind-Value:after="MarkDirty"
                                                          Min="1" Margin="Margin.Dense"
                                                          Variant="Variant.Outlined" Style="max-width:80px;"/>
                                         <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
@@ -254,7 +251,7 @@ else
                 <div class="cc-section__title">Stash (@StashCount lines)</div>
                 <StashGrid Stash="@StashForView" BaseEdition="@def.BaseEdition" Editable="@_editMode"
                            EditItems="@(_editMode ? _model?.Stash : null)"
-                           OnChanged="RecomputeLoadoutCost"/>
+                           OnChanged="OnLoadoutEdited"/>
             </div>
         </div>
     </div>
@@ -327,91 +324,76 @@ else
 
     protected override void OnParametersSet()
     {
-        // id → nome p/ os labels do outfit read-only (mesma fonte do ClassDetail).
-        _clothingNames = new Dictionary<string, string>(StringComparer.Ordinal);
-        if (Definition?.Outfit is not null || InitialEdit)
+        // Sempre-edição: (re)monta o modelo sempre que a Definition muda — nova classe (troca pela
+        // sidebar) ou recarga pós-save. A MESMA instância do workspace é reusada entre navegações,
+        // por isso comparamos a referência da Definition (e não rebuildamos a cada render).
+        if (Definition is not null && !ReferenceEquals(Definition, _modelSource))
         {
-            foreach (var side in new[] { "Usec", "Bear" })
+            _modelSource = Definition;
+            LoadClothingNames();
+            EnterEditFor(Definition);
+        }
+    }
+
+    private ClassDefinition? _modelSource;
+
+    /// <summary>id → nome p/ os labels do outfit (ambas as facções) — recarregado por classe.</summary>
+    private void LoadClothingNames()
+    {
+        _clothingNames = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var side in new[] { "Usec", "Bear" })
+        {
+            foreach (var piece in Catalog.GetClothing(side))
             {
-                foreach (var piece in Catalog.GetClothing(side))
+                if (!string.IsNullOrWhiteSpace(piece.Name))
                 {
-                    if (!string.IsNullOrWhiteSpace(piece.Name))
-                    {
-                        _clothingNames[piece.Id] = piece.Name!;
-                    }
+                    _clothingNames[piece.Id] = piece.Name!;
                 }
             }
         }
-
-        // F2a: a rota /edit monta o workspace já em edição — UMA VEZ por instância. Sem o flag, o
-        // re-render do reload pós-save (OnSaved, ainda na rota /edit com _editMode já false) re-entraria
-        // em edição e re-armaria o guard, disparando um diálogo de "unsaved" espúrio no NavigateToDetail.
-        if (InitialEdit && !_editMode && !_initialEditHandled)
-        {
-            _initialEditHandled = true;
-            EnterEdit();
-        }
     }
 
-    private bool _initialEditHandled;
-
-    // ── Entrar / sair do modo edição (F2a) ─────────────────────────────────────
+    // ── Sempre em edição: monta o modelo, registra os handlers do guard (sem marcar dirty) ──────
 
     /// <summary>
-    ///     Entra em edição IN-PLACE: resolve o arquivo real, monta o ClassEditModel, computa os custos
-    ///     ao vivo, arma o guard de unsaved + Ctrl+S e leva a URL pra .../edit (replace — refresh preserva).
+    ///     Monta o ClassEditModel da classe atual, computa os custos ao vivo e registra Save/Discard no
+    ///     guard. NÃO marca dirty — a classe recém-carregada está limpa; o dirty só liga na 1ª mudança
+    ///     real (MarkDirty), pra que trocar de classe sem editar NÃO dispare o diálogo de unsaved.
     /// </summary>
-    private void EnterEdit()
+    private void EnterEditFor(ClassDefinition def)
     {
-        if (Definition is null)
-        {
-            return;
-        }
-
         _resolvedFileName = ResolveFileName();
-        if (_resolvedFileName is null)
-        {
-            Snackbar.Add("Could not resolve the class file on disk — edit unavailable.", Severity.Error);
-            return;
-        }
-
-        var onEditRoute = Nav.Uri.Contains("/edit", StringComparison.Ordinal);
-
-        // Se ainda NÃO estamos na rota /edit (Edit clicado no detalhe), só navegamos pra .../edit:
-        // a página ClassEdit remonta o workspace com InitialEdit=true e ESSA instância entra em edição
-        // (arma o guard etc.). Armar o guard aqui ANTES de navegar dispararia o diálogo de unsaved na
-        // própria navegação que abre a edição.
-        if (!onEditRoute)
-        {
-            if (FileNameBare is { Length: > 0 })
-            {
-                Nav.NavigateTo($"/customclasses/classes/{Uri.EscapeDataString(FileNameBare)}/edit");
-            }
-
-            return;
-        }
-
-        _model = ClassEditModel.FromDefinition(Definition);
-        _saveDiagnostics = [];
+        _model = ClassEditModel.FromDefinition(def);
         _editMode = true;
+        _saveDiagnostics = [];
         RecomputeSkillCost();
         RecomputeLoadoutCost();
-        ArmGuard();
+        RegisterGuardHandlers();
+        if (Guard is not null)
+        {
+            Guard.IsDirty = false;
+        }
     }
 
-    /// <summary>Discard: descarta o _model e volta pro read in-place (URL volta pro detalhe).</summary>
+    /// <summary>Discard: reverte o modelo ao estado do disco (Definition atual) e limpa o dirty — sem sair da edição.</summary>
     private void DiscardEdit()
     {
-        _model = null;
-        _editMode = false;
+        if (Definition is not null)
+        {
+            _model = ClassEditModel.FromDefinition(Definition);
+        }
+
         _saveDiagnostics = [];
-        _editSkillCost = null;
-        _editLoadoutCost = null;
         _newMultiplierSkill = string.Empty;
         _newStation = string.Empty;
-        DisarmGuard();
+        RecomputeSkillCost();
+        RecomputeLoadoutCost();
+        if (Guard is not null)
+        {
+            Guard.IsDirty = false;
+        }
+
         Snackbar.Add("Changes discarded.", Severity.Info);
-        NavigateToDetail();
     }
 
     /// <summary>Resolve route name (bare ou exato) → nome real do arquivo (mesma lógica do ClassDetail/ClassEdit).</summary>
@@ -432,14 +414,6 @@ else
                     ?? entries.FirstOrDefault(e => string.Equals(
                         System.IO.Path.GetFileNameWithoutExtension(e.FileName), FileNameBare, StringComparison.OrdinalIgnoreCase));
         return entry?.FileName;
-    }
-
-    private void NavigateToDetail()
-    {
-        if (FileNameBare is { Length: > 0 })
-        {
-            Nav.NavigateTo($"/customclasses/classes/{Uri.EscapeDataString(FileNameBare)}", replace: true);
-        }
     }
 
     // ── Save (migrado do ClassEdit) ─────────────────────────────────────────────
@@ -465,18 +439,18 @@ else
             if (result.Success)
             {
                 Snackbar.Add("Class saved and hot-applied.", Severity.Success);
-                _editMode = false;
-                _model = null;
-                _editSkillCost = null;
-                _editLoadoutCost = null;
-                DisarmGuard();
-                // a página recarrega a Definition do disco; volta a URL pro detalhe.
+                if (Guard is not null)
+                {
+                    Guard.IsDirty = false;   // limpo de novo; permanece em edição
+                }
+
+                // A página recarrega a Definition do disco (nova instância) → OnParametersSet
+                // remonta o _model. Continuamos NA edição (sem navegar) — o modo view foi removido.
                 if (OnSaved.HasDelegate)
                 {
                     await OnSaved.InvokeAsync();
                 }
 
-                NavigateToDetail();
                 return true;
             }
 
@@ -491,21 +465,58 @@ else
 
     // ── Guard de unsaved (item 030) + Ctrl+S (item 035) ─────────────────────────
 
-    private void ArmGuard()
+    /// <summary>Há mudanças não salvas? (espelha o guard do circuito.)</summary>
+    private bool IsDirty => Guard?.IsDirty ?? false;
+
+    /// <summary>
+    ///     Registra Save/Discard no guard SEM marcar dirty. O guard só dispara o diálogo quando IsDirty
+    ///     liga (1ª mudança real via MarkDirty) — assim, abrir/trocar de classe sem editar NÃO pergunta.
+    ///     O Discard do guard (saída com mudanças → "Discard") reverte o modelo ao disco e limpa o dirty.
+    /// </summary>
+    private void RegisterGuardHandlers()
     {
-        if (Guard is not null)
+        if (Guard is null)
+        {
+            return;
+        }
+
+        Guard.SaveAsync = SaveAsync;
+        Guard.Discard = () =>
+        {
+            if (Definition is not null)
+            {
+                _model = ClassEditModel.FromDefinition(Definition);
+            }
+
+            if (Guard is not null)
+            {
+                Guard.IsDirty = false;
+            }
+        };
+    }
+
+    /// <summary>Liga o dirty na 1ª mudança real (qualquer mutação do modelo chama isto).</summary>
+    private void MarkDirty()
+    {
+        if (Guard is not null && !Guard.IsDirty)
         {
             Guard.IsDirty = true;
-            Guard.SaveAsync = SaveAsync;
-            Guard.Discard = () =>
-            {
-                _model = null;
-                _editMode = false;
-            };
         }
     }
 
-    private void DisarmGuard() => Guard?.Reset();
+    /// <summary>MarkDirty + recompute do custo de skills (handler das mutações de skills/multipliers).</summary>
+    private void OnSkillsEdited()
+    {
+        MarkDirty();
+        RecomputeSkillCost();
+    }
+
+    /// <summary>MarkDirty + recompute do custo de loadout (handler das mutações de equipado/stash).</summary>
+    private void OnLoadoutEdited()
+    {
+        MarkDirty();
+        RecomputeLoadoutCost();
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -645,14 +656,14 @@ else
         {
             _model!.Multipliers.Add(new SkillFactorRow { Skill = _newMultiplierSkill, Factor = 1.0 });
             _newMultiplierSkill = string.Empty;
-            RecomputeSkillCost();
+            OnSkillsEdited();
         }
     }
 
     private void RemoveMultiplier(SkillFactorRow row)
     {
         _model!.Multipliers.Remove(row);
-        RecomputeSkillCost();
+        OnSkillsEdited();
     }
 
     private void AddStation()
@@ -661,10 +672,15 @@ else
         {
             _model!.Hideout.Add(new HideoutRow { Station = _newStation, Level = 1 });
             _newStation = string.Empty;
+            MarkDirty();
         }
     }
 
-    private void RemoveStation(HideoutRow row) => _model!.Hideout.Remove(row);
+    private void RemoveStation(HideoutRow row)
+    {
+        _model!.Hideout.Remove(row);
+        MarkDirty();
+    }
 
     // ── Outfit (read + edit via SkinPickerDialog) ───────────────────────────────
 
@@ -695,6 +711,7 @@ else
         {
             // Data == null → "use template default" (limpa); string → id da skin.
             set(result.Data as string);
+            MarkDirty();
             StateHasChanged();
         }
     }
@@ -729,7 +746,7 @@ else
             { x => x.Item, row.Item },
             { x => x.SlotName, slot },
             { x => x.Filter, (Func<string, bool>)(t => Catalog.IsAllowedInEquipmentSlot(slot, t)) },
-            { x => x.OnChanged, EventCallback.Factory.Create(this, RecomputeLoadoutCost) },
+            { x => x.OnChanged, EventCallback.Factory.Create(this, OnLoadoutEdited) },
         };
         var dialog = await DialogService.ShowAsync<SlotEditDialog>(slot, parameters, SlotEditOptions);
         var result = await dialog.Result;
@@ -739,12 +756,14 @@ else
             if (!isNew)
             {
                 _model.Equipped.Remove(row);
+                MarkDirty();
             }
         }
         else if (isNew && (row.Item.Tpl is { Length: > 0 } || row.Item.Preset is { Length: > 0 }))
         {
             // slot novo que ganhou um item (Done ou Cancel após escolher) → entra no modelo.
             _model.Equipped.Add(row);
+            MarkDirty();
         }
 
         RecomputeLoadoutCost();
@@ -814,7 +833,7 @@ else
             @if (get() is { Length: > 0 })
             {
                 @* span com stopPropagation: o clique no "limpar" não deve abrir o picker do card. *@
-                <span @onclick="@(() => { set(null); StateHasChanged(); })" @onclick:stopPropagation="true">
+                <span @onclick="@(() => { set(null); MarkDirty(); StateHasChanged(); })" @onclick:stopPropagation="true">
                     <MudIconButton Icon="@Icons.Material.Filled.Clear" Size="Size.Small"
                                    title="Clear (use template default)"/>
                 </span>
