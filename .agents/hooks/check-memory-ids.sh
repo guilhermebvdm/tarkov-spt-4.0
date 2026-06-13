@@ -19,8 +19,10 @@ while IFS= read -r FILE; do
   [ -f "$FILE" ] || continue
   # Extract the lines between the "Pendências" heading and the next "## " heading,
   # then flag top-level bullets that have no [P- id.
+  # NB: git-bash GNU awk roda em locale de byte único — o 'ê' de "Pendências" são 2
+  # bytes (0xC3 0xAA), então um '.' não casa. Usar .* entre 'end' e 'ncias'.
   BAD=$(awk '
-    /^## .*[Pp]end.ncias/ { inblk=1; next }
+    /^## .*[Pp]end.*ncias/ { inblk=1; next }
     inblk && /^## / { inblk=0 }
     inblk && /^- / && $0 !~ /\[P-[0-9]/ { print }
   ' "$FILE" || true)
