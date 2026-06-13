@@ -1,16 +1,16 @@
 # Graph Report - mods\CustomClasses\modded  (2026-06-13)
 
 ## Corpus Check
-- 77 files · ~60,867 words
+- 78 files · ~62,706 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1166 nodes · 1437 edges · 75 communities (69 shown, 6 thin omitted)
+- 1173 nodes · 1448 edges · 76 communities (69 shown, 7 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 1 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `428257cf`
+- Built from commit: `bd37a6d4`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -86,9 +86,10 @@
 - [[_COMMUNITY_Community 68|Community 68]]
 - [[_COMMUNITY_Community 73|Community 73]]
 - [[_COMMUNITY_Community 74|Community 74]]
+- [[_COMMUNITY_Community 75|Community 75]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `CatalogService` - 45 edges
+1. `CatalogService` - 46 edges
 2. `ClassEditorService` - 24 edges
 3. `InventoryBuilder` - 23 edges
 4. `CostService` - 17 edges
@@ -100,21 +101,21 @@
 10. `Plugin` - 10 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `ChatSpecialIconPatch` --inherits--> `ModulePatch`  [EXTRACTED]
+  Client/Patches/ChatSpecialIconPatch.cs →   _Bridges community 40 → community 50_
 - `MenuClassIdentityPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/MenuClassIdentityPatch.cs →   _Bridges community 40 → community 20_
+  Client/Patches/MenuClassIdentityPatch.cs →   _Bridges community 50 → community 20_
 - `OnTriggerPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/OnTriggerPatch.cs →   _Bridges community 40 → community 53_
+  Client/Patches/OnTriggerPatch.cs →   _Bridges community 50 → community 53_
 - `PlayerModelWithStatsIdentityPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/PlayerModelWithStatsIdentityPatch.cs →   _Bridges community 40 → community 47_
+  Client/Patches/PlayerModelWithStatsIdentityPatch.cs →   _Bridges community 50 → community 47_
 - `PlayerNamePanelPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/PlayerNamePanelPatch.cs →   _Bridges community 40 → community 48_
-- `RaidReadyPlayerPanelPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/RaidReadyPlayerPanelPatch.cs →   _Bridges community 40 → community 49_
+  Client/Patches/PlayerNamePanelPatch.cs →   _Bridges community 50 → community 48_
 
 ## Import Cycles
 - None detected.
 
-## Communities (75 total, 6 thin omitted)
+## Communities (76 total, 7 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.10
@@ -126,7 +127,7 @@ Nodes (25): ISptLogger, ItemHelper, Lazy, LocaleService, Price, SearchIndexRow, 
 
 ### Community 2 - "Community 2"
 Cohesion: 0.04
-Nodes (51): ClassRegistrar, GearPanel, MudMenu, MudMenuItem, ClearCompare, ClothingLabel, CountSkills, DeltaChip (+43 more)
+Nodes (51): ClassRegistrar, GearPanel, MudMenuItem, ClearCompare, ClothingLabel, CountSkills, DeltaChip, FormatRub (+43 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.05
@@ -161,8 +162,8 @@ Cohesion: 0.14
 Nodes (16): LoadoutCostBreakdown, CostService, ClassDefinition, Grid, GridPacker, Height, Item, ItemSpec (+8 more)
 
 ### Community 11 - "Community 11"
-Cohesion: 0.07
-Nodes (27): CustomClasses.Web, MudButton, MudChip, MudNumericField, MudSelect, MudSelectItem, MudSimpleTable, MudStack (+19 more)
+Cohesion: 0.06
+Nodes (33): ActivatorContent, MudSlider, ChildContent, CustomClasses.Web, MudButton, MudChip, MudMenu, MudSimpleTable (+25 more)
 
 ### Community 12 - "Community 12"
 Cohesion: 0.08
@@ -277,8 +278,8 @@ Cohesion: 0.28
 Nodes (5): BaseUnityPlugin, bool, Plugin, ConfigEntry, ManualLogSource
 
 ### Community 40 - "Community 40"
-Cohesion: 0.22
-Nodes (6): Image, MethodBase, PatchPostfix, TextMeshProUGUI, ModulePatch, ChatSpecialIconPatch
+Cohesion: 0.25
+Nodes (5): Image, MethodBase, PatchPostfix, TextMeshProUGUI, ChatSpecialIconPatch
 
 ### Community 41 - "Community 41"
 Cohesion: 0.22
@@ -317,8 +318,8 @@ Cohesion: 0.25
 Nodes (5): FieldInfo, MethodBase, PatchPostfix, RaidReadyPlayerPanelPatch, RaidReadyPlayerPanel
 
 ### Community 50 - "Community 50"
-Cohesion: 0.25
-Nodes (5): Image, MethodBase, PatchPostfix, SkillClass, SkillIconBorderPatch
+Cohesion: 0.22
+Nodes (6): Image, MethodBase, PatchPostfix, SkillClass, ModulePatch, SkillIconBorderPatch
 
 ### Community 51 - "Community 51"
 Cohesion: 0.25
@@ -362,7 +363,7 @@ Nodes (3): Dictionary, PmcData, HideoutBuilder
 
 ### Community 66 - "Community 66"
 Cohesion: 0.03
-Nodes (61): CharacterDoll, CatalogService, ClassDiagnostic, ClassEditorService, ClassWorkspace, CostService, CustomClasses.Web, IDialogService (+53 more)
+Nodes (57): CharacterDoll, CatalogService, ClassDiagnostic, ClassEditorService, ClassWorkspace, CostService, CustomClasses.Web, IDialogService (+49 more)
 
 ### Community 67 - "Community 67"
 Cohesion: 0.09
@@ -377,24 +378,24 @@ Cohesion: 0.20
 Nodes (9): CustomClasses.Web, DialogActions, DialogContent, ItemSpecEditor, MudButton, MudDialog, MudText, TitleContent (+1 more)
 
 ## Knowledge Gaps
-- **762 isolated node(s):** `netstandard2.1`, `Microsoft.NET.Sdk`, `string`, `MethodBase`, `TextMeshProUGUI` (+757 more)
+- **763 isolated node(s):** `netstandard2.1`, `Microsoft.NET.Sdk`, `string`, `MethodBase`, `TextMeshProUGUI` (+758 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **6 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **7 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `SkillPanelPatch` connect `Community 27` to `Community 40`?**
+- **Why does `SkillPanelPatch` connect `Community 27` to `Community 50`?**
   _High betweenness centrality (0.004) - this node is a cross-community bridge._
-- **Why does `RaidReadyPlayerPanelPatch` connect `Community 49` to `Community 40`?**
+- **Why does `RaidReadyPlayerPanelPatch` connect `Community 49` to `Community 50`?**
   _High betweenness centrality (0.003) - this node is a cross-community bridge._
-- **Why does `SkillsNavButtonPatch` connect `Community 17` to `Community 40`?**
+- **Why does `SkillsNavButtonPatch` connect `Community 17` to `Community 50`?**
   _High betweenness centrality (0.002) - this node is a cross-community bridge._
 - **What connects `netstandard2.1`, `Microsoft.NET.Sdk`, `string` to the rest of the system?**
-  _762 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _763 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.09523809523809523 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.07219662058371736 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07291666666666667 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.038461538461538464 - nodes in this community are weakly interconnected._
