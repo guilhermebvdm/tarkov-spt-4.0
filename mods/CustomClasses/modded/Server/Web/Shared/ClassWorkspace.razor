@@ -689,6 +689,15 @@ else
         CloseButton = true,
     };
 
+    /// <summary>Picker grande (~80% da tela) — usado no "Add item" do stash (miniaturas maiores).
+    /// A largura 80vw vem da classe cc-picker-lg aplicada no MudDialog (ItemPicker Wide=true).</summary>
+    private static readonly DialogOptions BigPickerOptions = new()
+    {
+        MaxWidth = MaxWidth.False,
+        FullWidth = true,
+        CloseButton = true,
+    };
+
     /// <summary>
     ///     F2c: clicar num slot da silhueta (modo edição) abre o ItemSpecEditor desse slot num dialog.
     ///     Slot vazio → linha efêmera; só entra no _model.Equipped se o usuário escolher um item.
@@ -745,8 +754,12 @@ else
             return;
         }
 
-        var parameters = new DialogParameters<ItemPicker> { { x => x.Title, "Add item to stash" } };
-        var dialog = await DialogService.ShowAsync<ItemPicker>("Add item to stash", parameters, SlotEditOptions);
+        var parameters = new DialogParameters<ItemPicker>
+        {
+            { x => x.Title, "Add item to stash" },
+            { x => x.Wide, true },
+        };
+        var dialog = await DialogService.ShowAsync<ItemPicker>("Add item to stash", parameters, BigPickerOptions);
         var result = await dialog.Result;
         if (result is { Canceled: false, Data: string tpl })
         {

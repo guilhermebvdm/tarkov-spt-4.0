@@ -28,6 +28,8 @@ public sealed record CatalogCategory
     [JsonPropertyName("id")] public required string Id { get; init; }
     [JsonPropertyName("parentId")] public string? ParentId { get; init; }
     [JsonPropertyName("name")] public required string Name { get; init; }
+    /// <summary>Ícone do handbook (ex.: <c>/files/handbook/icon_weapons.png</c>) — servido pelo próprio SPT.</summary>
+    [JsonPropertyName("icon")] public string? Icon { get; init; }
 }
 
 /// <summary>One weapon/armor preset available for a tpl.</summary>
@@ -435,7 +437,7 @@ public class CatalogService
             var name = locale.TryGetValue(id, out var localized) && !string.IsNullOrWhiteSpace(localized)
                 ? localized
                 : en.TryGetValue(id, out var enName) ? enName : id;
-            categories.Add(new CatalogCategory { Id = id, ParentId = cat.ParentId?.ToString(), Name = name });
+            categories.Add(new CatalogCategory { Id = id, ParentId = cat.ParentId?.ToString(), Name = name, Icon = cat.Icon });
         }
 
         return categories;

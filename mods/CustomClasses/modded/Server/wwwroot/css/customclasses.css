@@ -179,6 +179,8 @@
 .cc-ws__panel--center { align-items: center; }
 /* cabeçalho de painel: título + ação (ex.: "Add item" no stash). */
 .cc-ws__panel-head    { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+/* "Add item" do stash: modal grande (~80% da tela) com miniaturas maiores. */
+.mud-dialog.cc-picker-lg { width: 80vw !important; max-width: 80vw !important; }
 
 /* A tabela de skills (SkillCanonicalList) NUNCA rola na horizontal dentro do painel: table-layout
    fixed + larguras relativas comprimem as colunas pra caber (batem os width:Npx inline do componente
