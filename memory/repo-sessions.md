@@ -8,15 +8,14 @@ Trabalho específico de cada mod fica em `mods/<mod>/memory/sessions.md`. Este a
 
 ## Estado atual (snapshot ao fim da última sessão)
 
-- **Workflow de backlog:** `/add-backlog-item` → `/create-spec` → `/review-spec` (inline edits) → `/create-technical-spec` → `/review-technical-spec` (NN incremental) → `/code-mod` (gera `05-asbuild.md`) → `/code-review` (NN incremental) → `/apply-code-review` → `/compile-mod`.
-- **Convenção de naming canônica:** `NNN-<slug>-MM-tipo[-NN].md` onde `MM` é a posição no ciclo: `01-spec`, `02-spec-tech`, `03-spec-tech-review-NN`, `04-code-review-NN`, `05-asbuild`, `06-fix-NN`.
-- **Skills ativas:**
-  - `spt-mod-best-practices` — lifecycle SPT 4.0 / EFT 0.16.x, raid hooks, leaks, Harmony.
-  - `csharp-mod-best-practices` — C# / runtime para BepInEx.
-  - `repo-workflow-best-practices` — convenção de naming, rastreabilidade PA-NN-MM/CR-NN-MM, sandbox `modded/` vs `original/`.
-  - `memory-curation` — regras de redação para `sessions.md` / `repo-sessions.md`.
-- **Commands custom:** `/add-backlog-item`, `/create-spec`, `/review-spec`, `/create-technical-spec`, `/review-technical-spec`, `/code-mod`, `/code-review`, `/apply-code-review`, `/compile-mod`, `/add-mod-repo-for-modding`, `/update-mods-inventory`, `/add-mod-inventory-list`, `/serve-inventory`, `/update-memory`.
-- **Mods no repo (5):** `stancesAndCameraPositionSPT4.0.11` (ativo), `SPT-Realism-Mod-Client` (vendor pinned), `SPT-DynamicMaps` (vendor pinned), `RZCustomProfiles` (vendor pinned), `RZ-SPTMods` (vendor pinned).
+- **Workflow de backlog (canônico em [WORKFLOW.md](../WORKFLOW.md)):** `/add-backlog-item` → `/create-spec` → `/review-spec` → `/create-technical-spec` (conformidade §9) → `/review-technical-spec` (NN) → `/code-mod` → `/code-review` (NN) → `/apply-code-review` → `/compile-mod` → validação in-game → `06-fix-NN` (via `fix.md.tmpl`) → `/update-memory` → `/update-mod-graph`.
+- **Convenção de naming canônica:** `NNN-<slug>-MM-tipo[-NN].md` (`01-spec`, `02-spec-tech`, `03-spec-tech-review-NN`, `04-code-review-NN`, `05-asbuild`, `06-fix-NN`).
+- **Skills ativas (6):** `spt-mod-best-practices` (+§8 API canônica), `csharp-mod-best-practices` (+virtual dispatch), `repo-workflow-best-practices`, `memory-curation` (escrita §1-13 + consumo §14 + promoção §15), `graph-code-navigation` (grafos graphify).
+- **Memória é CONSUMIDA pelos commands de desenvolvimento** (passo "Contexto de memória", skill §14): pendência 🔴 do item/mod → alerta antes de prosseguir.
+- **Antipatterns:** `docs/technical/spt-antipatterns.md` (AP-01..06, erros reais do stances) — checados na §9 da spec técnica, critérios padrão da spec funcional (Fika + estado entre raids) e checklist do fix.
+- **Grafos de código (graphify):** versionados em `references/graphs/` (todos os mods + eft-decompiled 58k nós + fika-* + spt-source); regeneração via `scripts/update-graphs.sh` / `/update-mod-graph`; MCP em `.mcp.json` (eft + mod ativo); `.graphifyignore` na raiz destrava as references gitignored.
+- **Commands custom (16):** ciclo de backlog + `/add-mod-repo-for-modding` (gera grafo), `/update-memory` (lições obrigatórias, GC >30d, promoções, gancho `/update-mod-graph`), `/update-mod-graph`, inventário (`/update-mods-inventory`, `/add-mod-inventory-list`, `/serve-inventory`).
+- **Mods no repo:** 10 com `modded/` (stances e CustomClasses ativos; demais vendor pinned/pontuais).
 - **Tools cross-cutting:** `tools/tarkov-itemdb/` — DB unificada (SPT + tarkov.dev + tarkov-market) com viewer HTML pra calibração manual do flea. Edit pelo viewer atualiza `prices.json` + `checks.dat` (MD5) + audit log. Env: `SPT_PATH`, `TARKOV_MARKET_API_KEY`. Detalhes em [tools/tarkov-itemdb/README.md](../tools/tarkov-itemdb/README.md) + [tools/tarkov-itemdb/docs/spt-internals.md](../tools/tarkov-itemdb/docs/spt-internals.md).
 - **LiveFleaPrices mod:** **desativado** (renomeado `<SPT>/user/mods/DrakiaXYZ-LiveFleaPrices.disabled/`) — substituído por calibração manual via viewer. `prices.json` hoje é autoral.
 - **Memory system:** ativo. 5 pastas `mods/*/memory/` + 1 top-level. Sessions com timestamps GMT-3 HH:MM (relógio do sistema via `Bash date '+%Y-%m-%d %H:%M'`).
@@ -24,9 +23,11 @@ Trabalho específico de cada mod fica em `mods/<mod>/memory/sessions.md`. Este a
 
 ## Pendências / próximos passos conhecidos
 
-- **Item 002 do stances mod aguarda validação in-raid de F4** após 06-fix-01 (ver `mods/stancesAndCameraPositionSPT4.0.11/memory/sessions.md`).
-- **Drift potencial no asbuild do stances mod** (referência a `06-fix-02` não rastreável nesta sessão) — investigar antes de gerar fix-02 novo com numeração duplicada.
-- **Ramificar features novas a partir de `main`** — `flea-price-formula-fix` virou ancestral da `main` via PR#2 (trabalho de tarkov-itemdb/RZCustomProfiles/docs flea agora está na main por carona do branch base).
+- [P-2.1] 🟢 **Ramificar features novas a partir de `main`** — lição da Sessão 2 (PR#2 levou carona do branch base). GC 2026-06-12: mantida — regra de processo; candidata a promoção para `.agents/conventions.md`.
+- [P-4.1] 🟡 **Wiki no graphify — decisão pendente do usuário:** pipeline de markdown usa LLM (requer API key, ex. `GEMINI_API_KEY`) e a wiki é CC BY-NC-ND (derivado versionado só se o repo for privado). Amostra + custo antes de extração integral. Ver `references/graphs/README.md` § Notas.
+- [P-4.2] 🟢 **Replicar instalação do graphify no notebook (`guimello`):** `python -m pip install --user uv && python -m uv tool install graphifyy && python -m uv tool update-shell` + aprovar os servers do `.mcp.json` no primeiro uso.
+
+> GC 2026-06-12 (Sessão 4): pendências antigas "validação in-raid F4 (item 002)" e "drift asbuild 06-fix-02" descartadas DESTE arquivo — são escopo do mod e já rastreadas em `mods/stancesAndCameraPositionSPT4.0.11/memory/sessions.md` (dedup, skill §9).
 
 ## 2026-05-11 02:00 (GMT-3) — Sessão 1b: validação end-to-end do memory system
 
@@ -243,3 +244,41 @@ offerBase = clamp( (override ?? prices.json ?? 0) + bonus , floor , ceiling )
 - Fórmula/override/internals: `tools/tarkov-itemdb/docs/{flea-override-plan,flea-formula-validation,spt-internals}.md`.
 - Harness do smoke test: `tools/tarkov-itemdb/scripts/smoke-matrix.js`.
 - Memória pessoal (não versionada, não vai pro outro PC): `project_flea_price_formula.md`.
+
+## 2026-06-12 22:06 (GMT-3) — Sessão 4: overhaul do harness — memória nos commands, antipatterns, checklists e grafos de código (graphify)
+
+**Tema central:** verificação completa do harness (retroalimentação de memória, erros recorrentes, mapeamento de código) e implementação das melhorias em 7 fases — plano com 2 rodadas de /g-review-content (15 + 12 itens endereçados).
+
+**Decisões-chave:**
+
+- **Memória passa a ser CONSUMIDA, não só escrita** — todo command de desenvolvimento ganhou passo "Contexto de memória" (1º bullet da leitura) + skill `memory-curation` §14. Justificativa: diagnóstico mostrou que NENHUM command lia `sessions.md`; pendências 🔴 (ex.: "4 itens não validados in-game" do stances) passavam despercebidas. Ref: commit `c3e8df2`.
+- **Antipatterns como doc separado** (`docs/technical/spt-antipatterns.md`, AP-01..06) e não dentro das skills — skills são prescritivas/curtas; a taxonomia com exemplos reais (links aos PA/CR/fix do stances) cresce via promoção de lições (§15). Ref: commit `9d649b2`.
+- **Graphify adotado para mapeamento de código** (decisão do usuário; grafos VERSIONADOS, todas as fontes): extração AST `graphify update <path>` é **sem LLM** e barata (eft-decompiled inteiro: 68s, 58k nós, graph.json 46MB); working outputs (`<escopo>/graphify-out/`) gitignored e artefatos publicados em `references/graphs/` pelo `scripts/update-graphs.sh` (escopos auto-descobertos por glob). Ref: commit `b2e8fb8`.
+- **`.graphifyignore` na raiz** para destravar `spt-source`/`fika-*`: graphify respeita o `.gitignore` do repo (confirmado empiricamente — spt-source retornava "No code files found") e o `.graphifyignore` o substitui por diretório. Ref: `.graphifyignore`.
+- **MCP com política de servers**: permanentes só eft-decompiled + mod ativo (`.mcp.json`, binário `graphify-mcp <graph.json>`); demais escopos sob demanda via CLI (`graphify query/path/explain/affected --graph ...`).
+
+**Lições / hipóteses descartadas:**
+
+- **README upstream do graphify ≠ CLI real** — o plano original assumia `python -m graphify.serve` e `graphify <path> --mcp` (do README); a CLI real tem binário `graphify-mcp` dedicado, `graphify update` (code-only, sem LLM) e `extract --out` (com etapa LLM). Lição: mapear `--help` ANTES de desenhar integração (virou passo 0 da fase).
+- **`fika-*` extraía e `spt-source` não** — hipótese inicial era limitação da ferramenta; causa raiz: fika-plugin tem `.git` próprio (boundary de repo, gitignore do pai não se aplica) e spt-source não (gitignore do repo raiz o anulava). Diagnóstico via `git check-ignore -v`.
+- **Negação de .gitignore sob diretório excluído não funciona** (`references/graphs/` + `!README.md`) — git não re-inclui sob pai excluído; padrão correto é excluir o conteúdo (`dir/*`) ou, como adotado, publicar os grafos FORA dos diretórios ignorados.
+- **Validação contra bug real como teste de aceitação:** o grafo do EFT lista exatamente 15 nós `.SetTriggerPressed()` = base + 14 overrides — reproduz a auditoria manual do `002-...-06-fix-01` (bug do F4) em 1 query de ~1s. É a classe de erro AP-03 que o grafo torna barata de prevenir.
+
+**Atividade cronológica:**
+
+1. Diagnóstico (3 agentes Explore) — gaps: memória não consumida, lições inconsistentes, skills aplicadas reativamente, zero índice de código.
+2. F1: `spt-antipatterns.md` + §8/checklists nas skills SPT e C# + pointers no `resources.md` (commit `9d649b2`).
+3. F2-F4: §14/§15 + lições/IDs/GC na `memory-curation` e no `/update-memory`; bullets de memória em 7 commands; §9 conformidade no template de spec técnica; critérios padrão Fika/estado-entre-raids na spec funcional; `fix.md.tmpl` com checklist de validação (commit `c3e8df2`).
+4. F5: instalação (`uv tool install graphifyy`), mapeamento da CLI real, extração de TODAS as fontes de código, `scripts/update-graphs.sh`, validação de assertividade (commit `b2e8fb8`).
+5. F6: skill `graph-code-navigation`, command `/update-mod-graph`, bullets de grafo em 4 commands + `add-mod-repo-for-modding` + gancho no `/update-memory`, `.mcp.json` (commit `84938db`).
+6. F7: `WORKFLOW.md` na raiz + link no template de README de mod + backfill nos 10 mods + pointer no AGENTS.md (commit `3aba46a`); verificação fim-a-fim (hook de docs ✅, commands citados existem ✅, idempotência do script ✅).
+
+**Pendências abertas nesta sessão:**
+
+- [P-4.1] Wiki no graphify — decisão do usuário (custo de API + licença ND). Categoria: 🟡 débito.
+- [P-4.2] Replicar instalação do graphify no notebook `guimello`. Categoria: 🟢 ideia.
+
+**Cross-refs:**
+
+- Diagnóstico baseado nos erros reais de `mods/stancesAndCameraPositionSPT4.0.11` (reviews dos itens 001/002/004) — ver memória do mod.
+- Promoções desta sessão: a taxonomia inteira do `spt-antipatterns.md` É a primeira promoção em massa de lições da memória do stances para conhecimento institucional.
