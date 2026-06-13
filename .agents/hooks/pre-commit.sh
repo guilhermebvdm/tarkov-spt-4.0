@@ -8,6 +8,16 @@ if [ "${GIT_AMEND:-}" = "1" ]; then
   exit 0
 fi
 
+# Gates do harness (revisão de valor — converte invariantes de prosa em enforcement).
+# Resolve o diretório deste script para chamar os gates vizinhos.
+HOOK_DIR="$(cd "$(dirname "$0")" && pwd)"
+# HARD: bloqueia item 🟢 com validação in-game pendente (AP-06).
+bash "$HOOK_DIR/check-delivered-validation.sh" || exit 1
+# WARN: grafo de mod defasado vs código mudado.
+bash "$HOOK_DIR/check-graph-freshness.sh" || true
+# WARN: pendência de memória sem [P-N.M].
+bash "$HOOK_DIR/check-memory-ids.sh" || true
+
 # Valida o manifesto de referencias quando ele estiver staged (abortar commit se invalido)
 MANIFEST_STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep -E '^references/manifest\.json$' || true)
 if [ -n "$MANIFEST_STAGED" ]; then
