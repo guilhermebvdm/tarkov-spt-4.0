@@ -19,17 +19,15 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 
 ## Pendências / próximos passos conhecidos
 
-- ✅ [P-7.1] **Épico UX 030–037 EXECUTADO** (2026-06-11→12, autônomo via Workflow) — 8/8 itens 🟢 commitados. Ver entrada 2026-06-12.
-- ✅ [P-7.2] **Working tree commitado** — agrupado: identidade+editor (010–029), mods novos (CustomizationPersistenceFix, SPT-Menu-Overhaul), plano UX, + 1 commit por item do épico. **Branch ahead 22, sem push** (aguarda revisão).
-- 🔴 [P-7.9] **PUSH dos 15 commits do épico** + QA visual no viewer (build-gate ≠ correção: matriz em células estreitas 032, dashboard em viewport estreito 033, comparação A×B 036).
-- 🟡 [P-7.10] **Medição quantitativa do 037** (before/after) — fechar o DoD: subir server com log Debug (`[perf]` é LogDebug) + baseline pré-`d180195`.
-- 🟡 [P-7.11] **Achados de review adiados** (no relatório 2026-06-12, por wave) — decidir follow-ups: 036 multiplicadores de B lado a lado (toca componente 031), 037 dispose de `_recomputeCts`, 034 msg "filtro sem resultados" na aba Stash.
-- 🟡 [P-7.3] **Validação in-game pós-CR-EP-01**: stash agora spawna `preset`/`mods`/`ammo`/`contents` montados (antes só tpl+count) — criar perfil novo e conferir o nascimento (regra `feedback_spt_validation`).
-- 🟡 [P-7.4] **Validações in-game da sessão paralela de 2026-06-11** (013 botão SKILLS×MO, 015 polish, 017 CustomizationPersistenceFix) — ver entrada 2026-06-11 21:45.
-- 🟡 [P-7.5] **Housekeeping deferido do editor**: CR-EP-10 (ícones client×server sem validação cruzada), CR2-EP-05 (óptica mínima não precificada), página `/customclasses/picker-test` (rota dev sem link).
-- 🟢 [P-7.6] Conteúdo definitivo do **Peladão** (skin/descrição/cor — placeholder do 016).
-- 🟢 [P-7.7] **Outfits definitivos das 10 classes** (aguardando escolhas skin↔classe; `scripts/suits-catalog.json` pronto — item 004/D1).
-- 🟢 [P-7.8] **Importar loadout de profile real** (decisão de 2026-06-07, nunca executada) — superseded pelo editor de equipado/stash (026/028); vira candidata a feature futura do editor ("import from profile").
+- 🔴 [P-7.9] (aberta 2026-06-11) **PUSH dos 15 commits do épico** + QA visual no viewer (build-gate ≠ correção: matriz em células estreitas 032, dashboard em viewport estreito 033, comparação A×B 036).
+- 🟡 [P-7.10] (aberta 2026-06-11) **Medição quantitativa do 037** (before/after) — fechar o DoD: subir server com log Debug (`[perf]` é LogDebug) + baseline pré-`d180195`.
+- 🟡 [P-7.11] (aberta 2026-06-11) **Achados de review adiados** (no relatório 2026-06-12, por wave) — decidir follow-ups: 036 multiplicadores de B lado a lado (toca componente 031), 037 dispose de `_recomputeCts`, 034 msg "filtro sem resultados" na aba Stash.
+- 🟡 [P-7.3] (aberta 2026-06-11) **Validação in-game pós-CR-EP-01**: stash agora spawna `preset`/`mods`/`ammo`/`contents` montados (antes só tpl+count) — criar perfil novo e conferir o nascimento (regra `feedback_spt_validation`).
+- 🟡 [P-7.4] (aberta 2026-06-11) **Validações in-game da sessão paralela de 2026-06-11** (013 botão SKILLS×MO, 015 polish, 017 CustomizationPersistenceFix) — ver entrada Sessão 6 (2026-06-11 21:45).
+- 🟡 [P-7.5] (aberta 2026-06-11) **Housekeeping deferido do editor**: CR-EP-10 (ícones client×server sem validação cruzada), CR2-EP-05 (óptica mínima não precificada), página `/customclasses/picker-test` (rota dev sem link).
+- 🟢 [P-7.6] (aberta 2026-06-11) Conteúdo definitivo do **Peladão** (skin/descrição/cor — placeholder do 016).
+- 🟢 [P-7.7] (aberta 2026-06-11) **Outfits definitivos das 10 classes** (aguardando escolhas skin↔classe; `scripts/suits-catalog.json` pronto — item 004/D1).
+- 🟢 [P-7.8] (aberta 2026-06-07) **Importar loadout de profile real** (decisão de 2026-06-07, nunca executada) — superseded pelo editor de equipado/stash (026/028); vira candidata a feature futura do editor ("import from profile").
 
 ## Sessões
 
@@ -84,7 +82,9 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 - **Épico UX materializado no backlog: itens 030–035** (kickoffs em `backlog/0NN-*/`): 030 sidebar de classes (1 clique, preserva vista; `ListClassSummaries` leve — dry-run do ListClassFiles é pesado p/ sidebar), 031 skills canônicas (componente compartilhado, modo read-only+edit inline — mata o "Add skill" por dropdown), 032 matriz heatmap (`/customclasses/skills` + custo no rodapé + célula clicável), 033 detalhe single-screen (dashboard 2 colunas, sem expansion panels, CSS denso local), 034 loadout visual (gear slots estilo Tarkov + stash em grid de ícones por categoria + tooltip hover; ícones tarkov.dev), 035 densidade global + cliques (Dense, aba preservada ao trocar classe, Ctrl+S, regressão Chrome MCP). Waves: UX-W1 [030‖031] → UX-W2 [032‖033] → UX-W3 [034] → UX-W4 [035 solo].
 - **Pendência:** executar as waves do épico UX pelo workflow (aguardando OK do usuário pra rodar; itens ⚪).
 
-### 2026-06-11 21:45 (GMT-3) — Polish de identidade (015) + i18n do nome + fixes 013/017 + mod CustomizationPersistenceFix
+### 2026-06-11 21:45 (GMT-3) — Sessão 6: Polish de identidade (015) + i18n do nome + fixes 013/017 + mod CustomizationPersistenceFix
+
+> Nota de migração (2026-06-13): esta entrada estava sem número de sessão e usava IDs derivados de data (`P-0611.x`), violando o esquema `P-<N>.<M>` (`memory-curation` §7). Numerada retroativamente como **Sessão 6** e os IDs convertidos para `P-6.x` (fatos inalterados — só a notação). Cf. revisão de valor D1-02.
 
 > ⚠️ **Sessão paralela (client UI / polish).** O épico do editor (018–035) roda em paralelo no server — ver entradas 2026-06-10 e a memória global `project_customclasses_session_split`. O trabalho desta sessão cruzou 06-09/10/11 (conversa longa, compactada); timestamp = momento da gravação.
 
@@ -108,9 +108,9 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 7. NAKED (gerador + JSON + install).
 
 **Pendências abertas nesta sessão:**
-- [P-0611.1] 🔴 Validação in-game: 013 (botão SKILLS no menu), 017 (skin persiste após fechar/reabrir), 015 polish (NAKED, ícones proporcionais, deploy 3.0, gradiente nome+ícones, nome×glow alinhados).
-- [P-0611.2] 🟢 016 — definir a skin definitiva do Peladão (placeholder havaiano).
-- [P-0611.3] 🟢 Melhorias sugeridas ao usuário: skins reais por classe + ícones coesos; validação coop/compat (FIKA + AllTheClothes/WTT mexem em customization); playtest do balanço dos multiplicadores; reportar o bug do `ProfileFixerService` upstream ao SPT.
+- [P-6.1] 🔴 Validação in-game: 013 (botão SKILLS no menu), 017 (skin persiste após fechar/reabrir), 015 polish (NAKED, ícones proporcionais, deploy 3.0, gradiente nome+ícones, nome×glow alinhados).
+- [P-6.2] 🟢 016 — definir a skin definitiva do Peladão (placeholder havaiano).
+- [P-6.3] 🟢 Melhorias sugeridas ao usuário: skins reais por classe + ícones coesos; validação coop/compat (FIKA + AllTheClothes/WTT mexem em customization); playtest do balanço dos multiplicadores; reportar o bug do `ProfileFixerService` upstream ao SPT.
 
 **Cross-refs:**
 - **Trabalho paralelo no MESMO mod** (server/editor): itens 018–035 — ver entradas 2026-06-10. Esta sessão = client UI/polish; só o i18n do server (displayName no `ClassVisualRegistry`) tocou área comum, integrado ao refactor do item 021 (`ClassRegistrar`).

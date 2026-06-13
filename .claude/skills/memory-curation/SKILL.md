@@ -101,7 +101,7 @@ Template:
 3. ...
 
 **Pendências abertas nesta sessão** (se houver):
-- [P-N.M] <descrição>. Categoria: <bloqueador / débito / ideia>. (Ver §7)
+- [P-N.M] (aberta YYYY-MM-DD) <descrição>. Categoria: <bloqueador / débito / ideia>. (Ver §7 — N = nº desta sessão, data inline para a GC)
 
 **Cross-refs:**
 - Resolve pendências [P-X.Y] da sessão `<data>` (se aplicável).
@@ -133,17 +133,18 @@ Regras:
 
 - **Snapshot reflete o ESTADO ATUAL, não a história.** Substituir os bullets a cada atualização. Não acumular.
 - **Pendências:** listar apenas as ainda abertas. Resolvidas vão pra Histórico da sessão que resolveu (com ✅).
-- **Manter ≤ 10 bullets em cada bloco.** Se está crescendo, é sinal de que algo precisa virar artefato (06-fix, item de backlog) em vez de pendência permanente.
+- **Contar os bullets de cada bloco explicitamente.** ≤10 = ok; **>10 = avisar** e propor consolidação/promoção a backlog; **>15 = parar** e pedir decisão antes de gravar. Reportar a contagem no output do `/update-memory`. Se está crescendo, é sinal de que algo precisa virar artefato (06-fix, item de backlog) em vez de pendência permanente.
 
 ## 7. Pendências — classificação tri-camada + garbage collection
 
-Toda pendência ganha **ID local** `P-<NNNN>.<MM>` (NNNN = sessão, MM = ordem) e **categoria**.
+Toda pendência ganha **ID local** `P-<N>.<M>` e **categoria**, onde **`N` = número da sessão** (inteiro, sem zero-padding) e **`M` = ordem da pendência naquela sessão**. Ex.: `P-7.1` = sessão 7, pendência 1. **Proibido derivar o ID da data** (`P-0611.x` é inválido) — o ID precisa resolver para uma `Sessão N`, então toda entrada que cria pendência DEVE ter `Sessão N` no header.
 
 **Enforcement de IDs (sem exceção):**
 
-- Todo bullet do bloco "Pendências" no **topo** carrega o ID `[P-N.M]` herdado da sessão que o criou. Ao reescrever o topo (delta, §6), **preservar os IDs existentes**.
-- Bullets legados sem ID: atribuir ID retroativo `[P-N.M]` na próxima gravação, usando a sessão de origem (rastreável pelo conteúdo). Isso NÃO viola a imutabilidade do §8 — o topo é mutável por definição (§6); só as entradas de sessão são append-only.
-- Sem ID não há cross-ref estável ("resolve P-3.2") — bullet sem ID é red flag no checklist final.
+- Todo bullet do bloco "Pendências" no **topo** carrega o ID `[P-N.M]` herdado da sessão que o criou **e a data de abertura** entre parênteses: `[P-7.3] (aberta 2026-06-11) <descrição>`. A data inline torna a GC (§7) um diff de datas literal, não uma resolução mental ID→sessão→header.
+- Ao reescrever o topo (delta, §6), **preservar os IDs e as datas existentes**.
+- Bullets legados sem ID: atribuir ID retroativo `[P-N.M]` + data de abertura na próxima gravação, usando a sessão de origem (rastreável pelo conteúdo). Isso NÃO viola a imutabilidade do §8 — o topo é mutável por definição (§6); só as entradas de sessão são append-only.
+- Sem ID não há cross-ref estável ("resolve P-3.2") — bullet sem ID é red flag no checklist final, e o hook `check-memory-ids.sh` avisa no pre-commit.
 
 | Categoria | Significado | Vida útil |
 | --- | --- | --- |
@@ -157,7 +158,7 @@ Quando uma pendência é resolvida:
 2. Mover para o final do `Histórico` da sessão que resolveu.
 3. Remover do bloco "Pendências" no topo.
 
-**Garbage collection (executado pelo `/update-memory` a cada rodada):** pendência >30 dias sem progresso entra em revisão obrigatória — o command propõe ao usuário: **promover** a item de backlog (`/add-backlog-item`), **descartar** (com nota explícita "descartada por X") ou **manter** (com justificativa registrada). Nenhuma pendência fica >30 dias sem decisão explícita.
+**Garbage collection (executado pelo `/update-memory` a cada rodada):** rodar `date '+%Y-%m-%d'` e, para cada bullet do topo, subtrair a `(aberta YYYY-MM-DD)` inline da data atual. Pendência >30 dias sem progresso entra em revisão obrigatória — o command propõe ao usuário: **promover** a item de backlog (`/add-backlog-item`), **descartar** (com nota explícita "descartada por X") ou **manter** (com justificativa registrada). Nenhuma pendência fica >30 dias sem decisão explícita. Como a data está no bullet, a GC é um diff literal — não depende de resolver o ID para a sessão.
 
 ## 8. Imutabilidade + apêndice
 

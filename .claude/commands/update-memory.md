@@ -140,7 +140,7 @@ Antes de inserir uma nova entrada:
 
 ### 8. Garbage collection de pendências (>30 dias)
 
-A cada rodada (skill §7), comparar a data da sessão de origem de cada `[P-N.M]` do topo com a data atual. Para cada pendência **>30 dias sem progresso**, incluir no plano de atualização uma proposta com 3 opções:
+A cada rodada (skill §7): **rodar `date '+%Y-%m-%d'`** e, para cada bullet `[P-N.M] (aberta YYYY-MM-DD)` do topo, subtrair a data inline da data atual (diff literal — não resolver ID→sessão). Para cada pendência **>30 dias sem progresso**, incluir no plano de atualização uma proposta com 3 opções:
 
 ```text
 🗑️ GC: [P-2.1] "<descrição>" está aberta há 34 dias (Sessão 2, 2026-05-09).
