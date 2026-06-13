@@ -21,11 +21,12 @@
     "HideoutManagement": 10
   },
   "skillMultipliers": {
-    "Crafting": 2,
-    "HideoutManagement": 2,
-    "Intellect": 1.5,
-    "Memory": 1.5,
-    "Charisma": 1.5,
+    "Crafting": 3,
+    "HideoutManagement": 3,
+    "Intellect": 2,
+    "Charisma": 2,
+    "Attention": 2,
+    "Shotgun": 1.5,
     "Strength": 0.7
   },
   "hideout": {

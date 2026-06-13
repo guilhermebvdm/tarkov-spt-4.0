@@ -20,10 +20,11 @@
     "Search": 8
   },
   "skillMultipliers": {
-    "CovertMovement": 2,
-    "Search": 1.5,
-    "Perception": 1.5,
-    "Endurance": 1.3,
+    "Perception": 3,
+    "Endurance": 3,
+    "Attention": 2.5,
+    "CovertMovement": 1.5,
+    "Search": 2,
     "RecoilControl": 0.8
   },
   "hideout": {

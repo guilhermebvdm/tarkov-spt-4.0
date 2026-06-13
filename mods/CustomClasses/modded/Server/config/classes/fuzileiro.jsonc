@@ -21,9 +21,11 @@
   },
   "skillMultipliers": {
     "Assault": 2,
-    "RecoilControl": 1.5,
-    "AimDrills": 1.5,
-    "MagDrills": 1.5,
+    "AimDrills": 2,
+    "RecoilControl": 2,
+    "MagDrills": 2,
+    "Endurance": 2,
+    "Throwing": 2,
     "CovertMovement": 0.7
   },
   "hideout": {

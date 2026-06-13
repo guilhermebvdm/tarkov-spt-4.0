@@ -20,12 +20,14 @@
     "MagDrills": 4
   },
   "skillMultipliers": {
-    "Strength": 1.5,
-    "Endurance": 1.5,
+    "Endurance": 2,
+    "Strength": 2,
+    "StressResistance": 2,
+    "MagDrills": 2,
+    "Throwing": 2,
     "AimDrills": 1.5,
-    "Assault": 1.3,
-    "MagDrills": 1.3,
-    "CovertMovement": 0.7
+    "Assault": 1.5,
+    "Attention": 1.5
   },
   "hideout": {
     "RestSpace": 1

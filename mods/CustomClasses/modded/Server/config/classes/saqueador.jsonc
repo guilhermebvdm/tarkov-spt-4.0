@@ -21,11 +21,12 @@
     "Search": 10
   },
   "skillMultipliers": {
+    "Attention": 3,
+    "Perception": 3,
+    "Intellect": 2,
+    "Endurance": 2,
     "Search": 2,
-    "Attention": 1.5,
-    "Perception": 1.5,
-    "Intellect": 1.5,
-    "Memory": 1.3,
+    "Strength": 2,
     "RecoilControl": 0.7
   },
   "hideout": {

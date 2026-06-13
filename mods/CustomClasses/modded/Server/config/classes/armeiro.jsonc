@@ -20,9 +20,11 @@
   },
   "skillMultipliers": {
     "WeaponTreatment": 2,
-    "TroubleShooting": 1.5,
-    "Intellect": 1.5,
-    "Strength": 1.3,
+    "TroubleShooting": 2,
+    "Intellect": 2,
+    "Crafting": 2,
+    "Strength": 2,
+    "Assault": 1.3,
     "Endurance": 0.8
   },
   "hideout": {

@@ -41,6 +41,13 @@
 | 035 | Densidade global + redução de cliques | `Dense=true` em tudo, Edit direto da lista/sidebar, **colunas ordenáveis** na lista, aba ativa preservada ao trocar de classe, `Ctrl+S`, célula da matriz → edit, **preferências persistidas** (localStorage: drawer/vista/aba/ordenação/toggles), passada de regressão visual Chrome MCP (incl. re-medição dos tempos do 037) + docs/memória. *(UX — Wave UX-W4, solo; deps: 030–034, 036, 037)* | [035-densidade-cliques/](./035-densidade-cliques/) | 🟢 |
 | 036 | Modo comparação A×B no dashboard | Picker "Compare with…" no detail: `SkillCanonicalList` ganha coluna fantasma com deltas por skill (▲ verde/▼ vermelho), deltas de custo ponderado e ₽ no header, mults lado a lado; B fixa enquanto A navega pelo sidebar; deep-link `?compare=`. Complemento profundo da matriz (032). *(UX — Wave UX-W3; deps: 031, 033)* | [036-comparacao-classes/](./036-comparacao-classes/) | 🟢 |
 | 037 | Performance: cache de validação + índices | **Causa da lentidão atual:** toda navegação roda `ValidateAndBuild` (deep clone + InventoryBuilder) p/ as 11 classes ×2 (prerender) — `ListClassFiles` é chamado por lista/detail/edit. Fix: cache de `ClassFileEntry` por arquivo (mtime; invalidação no Save/Delete/Create), índices lazy no `CatalogService` (busca/clothing/categorias), recompute do edit com throttle + 1 chamada de custo, avaliar `prerender:false`. Medição antes/depois obrigatória. *(UX — Wave UX-W0, PRIMEIRO)* | [037-performance-cache/](./037-performance-cache/) | 🟢 |
+| 039 | Fundação do balanceamento (modelo + arquétipos + snapshot) | Modelo de 2 orçamentos ancorados no peso (custo 28–32 + **netMult** = Σ(fator−1)×peso; **meta ~+6, Médico = padrão**; regra anti-furo + ressalva de viabilidade peso-baixo), arquétipos das 11 classes (conjunto plausível por classe) e o snapshot de baseline. Entregue: [docs/balance-model.md](../docs/balance-model.md) + [docs/class-archetypes.md](../docs/class-archetypes.md) + `scripts/{skill-weights,class-balance-snapshot}.mjs`. Baseline 2026-06-13: Médico +6.17 (padrão), demais +1.36→+3.43 (subir). *(Balance — Fase 0)* | [039-balance-fundacao/](./039-balance-fundacao/) | 🟢 |
+| 040 | Rodada de balance: Suporte/Sobrevivência | Sobrevivencialista subido a **+5.94** (Médico = padrão intacto). Assinatura Immunity ×2.0; Endurance/StressResistance ativadas; Search removida. Diferenciado do Médico (resiliência passiva vs. cura ativa). [Registro](./040-balance-suporte/040-balance-suporte-round.md). Validação in-game pendente. *(Balance — Rodada **1ª**)* | [040-balance-suporte/](./040-balance-suporte/) | 🟢 |
+| 041 | Rodada de balance: Recon/Stealth | Batedor **+5.36** (assinatura Perception/Endurance ×3) + Furtivo **+5.33** (CovertMovement/MagDrills ×3) — hierarquia Perception↔CovertMovement invertida (anti-clone). Peso baixo → teto de buff ×3.0 na assinatura. [Registro](./041-balance-recon-stealth/041-round.md). *(Balance — Rodada)* | [041-balance-recon-stealth/](./041-balance-recon-stealth/) | 🟢 |
+| 042 | Rodada de balance: Combate | Fuzileiro **+5.64** (balística: Assault/AimDrills/RecoilControl/MagDrills ×2) + Op. Tático **+5.50** (físico/versátil, **sem debuff** = "sem fraqueza"). Anti-clone por magnitude (Assault pico só no Fuzileiro). [Registro](./042-balance-combate/042-round.md). *(Balance — Rodada)* | [042-balance-combate/](./042-balance-combate/) | 🟢 |
+| 043 | Rodada de balance: Utilitário/Hideout | Armeiro **+5.33** (WeaponTreatment/TroubleShooting/Crafting ×2 — TroubleShooting peso 2.5 = alavanca) + Gerente **+4.23** (hideout XP ×3 + Shotgun ×1.5 autodefesa; **piso temático** por decisão do usuário — classe fora-de-raid; Memory removida). [Registro](./043-balance-utilitario/043-round.md). *(Balance — Rodada)* | [043-balance-utilitario/](./043-balance-utilitario/) | 🟢 |
+| 044 | Rodada de balance: Caçador (sniper) | Caçador **+5.47** (Sniper/AimDrills/Endurance/CovertMovement/Perception ×2). **Correção da pesquisa:** Sniper = bolt-action ≠ DMR; Caçador é bolt-action puro → DMR **não** ativada (não é intercambiável). [Registro](./044-balance-cacador/044-round.md). *(Balance — Rodada)* | [044-balance-cacador/](./044-balance-cacador/) | 🟢 |
+| 045 | Rodada de balance: Saqueador (loot) | Saqueador **+5.24** (assinatura Attention/Perception ×3 — velocidade real de loot; +Strength/Endurance ×2 carga). Memory removida (skill morta no EFT 0.14.5). [Registro](./045-balance-saqueador/045-round.md). *(Balance — Rodada)* | [045-balance-saqueador/](./045-balance-saqueador/) | 🟢 |
 
 > **Pré-requisito de infra (000 — fora do sandbox do mod):** ✅ **feito em 2026-06-07.** [.agents/scripts/compile-mod.sh](../../../.agents/scripts/compile-mod.sh) agora detecta vários `.csproj`, classifica cada um (client/server/lib), builda os entry projects e instala **só as DLLs próprias** do mod (filtra SPTarkov/Unity/BepInEx/NuGet) nos 2 destinos (server → `SPT/user/mods/`, client → `BepInEx/plugins/`). Verificado: syntax + classificação contra SkillDistribution/Skills-Extended. Build dotnet end-to-end pendente até existirem projetos (item 001).
 
@@ -72,6 +79,22 @@ UX-W4: [035]         ← solo: densidade global + cliques + preferências + regr
 ```
 
 Tarefas-alvo (cliques): ver skills de outra classe **1** (hoje 2+ com perda de contexto); comparar todas as classes **0** depois de abrir a matriz (hoje impossível); comparar 2 classes em profundidade **2** (036; hoje só com 2 abas do browser); ver custo/equipado/stash de uma classe **0** no dashboard (hoje até 4 expansões — Stash/Mults/Hideout/Outfit nascem fechados — + scroll). Desempenho-alvo (037): navegação entre vistas **sem nenhum dry-run** com cache quente (hoje 11 dry-runs ×2 por navegação), medido antes/depois.
+
+## Épico: balanceamento das classes (039–045)
+
+> Plano aprovado em 2026-06-13 (`~/.claude/plans/`). Processo rigoroso e reutilizável de rebalance, ancorado no **peso de skill** (`SkillWeights.cs`). Dois orçamentos: **custo** (skills iniciais, 28–32) e **multiplicador** (`netMult` = Σ(fator−1)×peso). **Meta (decisão do usuário): netMult ~+6 para todas, com o Médico de Combate como padrão intacto** — elevar todas ao nível do Médico, diferenciando por *quais* skills cada uma acelera (não pelo tamanho do net). Fundação completa no 039 ([balance-model.md](../docs/balance-model.md) + [class-archetypes.md](../docs/class-archetypes.md) + scripts). Peladão **isento** (`noBaseline`).
+
+```
+039: fundação (modelo + arquétipos + snapshot/baseline)   ← FEITO
+040: Suporte/Sobrevivência (Sobreviv.; Médico = padrão)    ← 1ª rodada
+041: Recon/Stealth (Batedor + Furtivo)        ⚠ peso baixo
+042: Combate (Fuzileiro + Op. Tático)
+043: Utilitário/Hideout (Armeiro + Gerente)   ⚠ Gerente peso baixo
+044: Caçador (sniper) — solo, ativar DMR
+045: Saqueador (loot) — solo                  ⚠ peso baixo
+```
+
+Cada rodada (040–045) = `/deep-research` do papel → proposta (`skills` + `skillMultipliers` mirando ~+6, anti-furo, anti-clones) → coordenar fonte de verdade com a sessão do editor → aplicar via `build-class-jsons.js --force` + `/sync-classes` → validar (`class-balance-snapshot.mjs` + `check-skill-costs.mjs` + matriz/A×B + smoke in-game). **⚠ Peso baixo:** Gerente/Saqueador/Recon não chegam a +6 com teto ×2.0 → sub-decisão por rodada (teto de buff maior / piso documentado / skill temática de peso maior), levada ao usuário.
 
 ## Legenda
 
