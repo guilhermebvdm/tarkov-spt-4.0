@@ -11,9 +11,11 @@ Trabalho específico de cada mod fica em `mods/<mod>/memory/sessions.md`. Este a
 - **Workflow de backlog (canônico em [WORKFLOW.md](../WORKFLOW.md)):** `/add-backlog-item` → `/create-spec` → `/review-spec` → `/create-technical-spec` (conformidade §9) → `/review-technical-spec` (NN) → `/code-mod` → `/code-review` (NN) → `/apply-code-review` → `/compile-mod` → validação in-game → `06-fix-NN` (via `fix.md.tmpl`) → `/update-memory` → `/update-mod-graph`.
 - **Convenção de naming canônica:** `NNN-<slug>-MM-tipo[-NN].md` (`01-spec`, `02-spec-tech`, `03-spec-tech-review-NN`, `04-code-review-NN`, `05-asbuild`, `06-fix-NN`).
 - **Skills ativas (6):** `spt-mod-best-practices` (+§8 API canônica), `csharp-mod-best-practices` (+virtual dispatch), `repo-workflow-best-practices`, `memory-curation` (escrita §1-13 + consumo §14 + promoção §15), `graph-code-navigation` (grafos graphify).
-- **Memória é CONSUMIDA pelos commands de desenvolvimento** (passo "Contexto de memória", skill §14): pendência 🔴 do item/mod → alerta antes de prosseguir.
-- **Antipatterns:** `docs/technical/spt-antipatterns.md` (AP-01..06, erros reais do stances) — checados na §9 da spec técnica, critérios padrão da spec funcional (Fika + estado entre raids) e checklist do fix.
-- **Grafos de código (graphify):** versionados em `references/graphs/` (todos os mods + eft-decompiled 58k nós + fika-* + spt-source); regeneração via `scripts/update-graphs.sh` / `/update-mod-graph`; MCP em `.mcp.json` (eft + mod ativo); `.graphifyignore` na raiz destrava as references gitignored.
+- **Memória é CONSUMIDA pelos commands de desenvolvimento** (passo "Contexto de memória", skill §14): pendência 🔴 do item/mod → alerta antes de prosseguir; todo command emite a linha greppável `Memória consultada:` no relatório (prova de consumo, obj2 observável).
+- **Antipatterns:** `docs/technical/spt-antipatterns.md` (AP-01..**08**, erros reais do stances) — checados na §9 da spec técnica (8 checks), critérios padrão da spec funcional (Fika + estado entre raids, N/A frágil em patch player-reactive = gap) e checklist do fix.
+- **Enforcement (não mais só prosa):** 3 gates no pre-commit — `check-delivered-validation.sh` (HARD: item 🟢 com caixa in-raid desmarcada bloqueia, AP-06), `check-graph-freshness.sh` (WARN: código de mod mudou sem regenerar grafo), `check-memory-ids.sh` (WARN: pendência sem `[P-N.M]`).
+- **IDs de pendência:** esquema único `P-<N>.<M>` (N=sessão), data inline `(aberta YYYY-MM-DD)` pra GC ser diff literal; stances e CustomClasses migrados.
+- **Grafos de código (graphify):** versionados em `references/graphs/` (todos os mods + eft-decompiled 58k nós + fika-* + spt-source); regeneração via `scripts/update-graphs.sh` / `/update-mod-graph`; **MCP só `graphify-eft`** (grafos de mod via CLI `--graph`); `graph.html` >1.5MB não versiona; `.graphifyignore` na raiz destrava as references gitignored.
 - **Commands custom (16):** ciclo de backlog + `/add-mod-repo-for-modding` (gera grafo), `/update-memory` (lições obrigatórias, GC >30d, promoções, gancho `/update-mod-graph`), `/update-mod-graph`, inventário (`/update-mods-inventory`, `/add-mod-inventory-list`, `/serve-inventory`).
 - **Mods no repo:** 10 com `modded/` (stances e CustomClasses ativos; demais vendor pinned/pontuais).
 - **Tools cross-cutting:** `tools/tarkov-itemdb/` — DB unificada (SPT + tarkov.dev + tarkov-market) com viewer HTML pra calibração manual do flea. Edit pelo viewer atualiza `prices.json` + `checks.dat` (MD5) + audit log. Env: `SPT_PATH`, `TARKOV_MARKET_API_KEY`. Detalhes em [tools/tarkov-itemdb/README.md](../tools/tarkov-itemdb/README.md) + [tools/tarkov-itemdb/docs/spt-internals.md](../tools/tarkov-itemdb/docs/spt-internals.md).
@@ -23,9 +25,10 @@ Trabalho específico de cada mod fica em `mods/<mod>/memory/sessions.md`. Este a
 
 ## Pendências / próximos passos conhecidos
 
-- [P-2.1] 🟢 **Ramificar features novas a partir de `main`** — lição da Sessão 2 (PR#2 levou carona do branch base). GC 2026-06-12: mantida — regra de processo; candidata a promoção para `.agents/conventions.md`.
-- [P-4.1] 🟡 **Wiki no graphify — decisão pendente do usuário:** pipeline de markdown usa LLM (requer API key, ex. `GEMINI_API_KEY`) e a wiki é CC BY-NC-ND (derivado versionado só se o repo for privado). Amostra + custo antes de extração integral. Ver `references/graphs/README.md` § Notas.
-- [P-4.2] 🟢 **Replicar instalação do graphify no notebook (`guimello`):** `python -m pip install --user uv && python -m uv tool install graphifyy && python -m uv tool update-shell` + aprovar os servers do `.mcp.json` no primeiro uso.
+- [P-2.1] (aberta 2026-06-03) 🟢 **Ramificar features novas a partir de `main`** — lição da Sessão 2 (PR#2 levou carona do branch base). Candidata a promoção para `.agents/conventions.md`.
+- [P-4.1] (aberta 2026-06-12) 🟡 **Wiki no graphify — decisão pendente do usuário:** pipeline de markdown usa LLM (requer API key, ex. `GEMINI_API_KEY`) e a wiki é CC BY-NC-ND (derivado versionado só se o repo for privado). Amostra + custo antes de extração integral. Ver `references/graphs/README.md` § Notas.
+- [P-4.2] (aberta 2026-06-12) 🟢 **Replicar instalação do graphify no notebook (`guimello`):** `python -m pip install --user uv && python -m uv tool install graphifyy && python -m uv tool update-shell` + aprovar o server do `.mcp.json` no primeiro uso.
+- [P-5.1] (aberta 2026-06-13) 🟡 **Validação fim-a-fim dos fluxos no primeiro uso real** — os gates e a observabilidade obj2 foram testados isoladamente; o ciclo completo (spec→code→fix→memory→graph com os hooks ativos) ainda não rodou num item de backlog real.
 
 > GC 2026-06-12 (Sessão 4): pendências antigas "validação in-raid F4 (item 002)" e "drift asbuild 06-fix-02" descartadas DESTE arquivo — são escopo do mod e já rastreadas em `mods/stancesAndCameraPositionSPT4.0.11/memory/sessions.md` (dedup, skill §9).
 
@@ -244,6 +247,38 @@ offerBase = clamp( (override ?? prices.json ?? 0) + bonus , floor , ceiling )
 - Fórmula/override/internals: `tools/tarkov-itemdb/docs/{flea-override-plan,flea-formula-validation,spt-internals}.md`.
 - Harness do smoke test: `tools/tarkov-itemdb/scripts/smoke-matrix.js`.
 - Memória pessoal (não versionada, não vai pro outro PC): `project_flea_price_formula.md`.
+
+## 2026-06-13 04:29 (GMT-3) — Sessão 5: revisão de valor adversarial do harness + correção dos 35 achados (prosa → enforcement)
+
+**Tema central:** validar se o overhaul da Sessão 4 estava "bem-cercado" nos 4 objetivos e fechar os gaps — revisão multi-agente (Workflow, 6 dimensões × verificação adversarial, 35/39 achados confirmados) seguida da execução de todas as correções em 8 fases.
+
+**Decisões-chave:**
+- **Veredito da revisão: "bem-concebido, mal-cercado"** — 3 de 4 objetivos + cross-cutting falhavam no teste "não pode ser pulado sem ninguém notar", porque tudo era prosa que o agente escolhe seguir (1 hook só). Decisão: converter os invariantes de maior valor em **gates de pre-commit**. Ref: revisão em `wf_1d6ed3e5-3de`.
+- **Só 1 gate é HARD (`check-delivered-validation.sh`)** — bloquear item 🟢 com validação in-game pendente (AP-06) não tem bypass legítimo. Os outros 2 (graph-freshness, memory-ids) são WARN para não brigar com fluxos legítimos ("commit código, depois grafo"; migração de memória incremental). Ref: `.agents/hooks/`.
+- **MCP reduzido a só `graphify-eft`** — o server por-mod era pin fixo no stances (query do mod errado) e git-tracked (churn entre os 2 PCs). Grafos de mod via CLI. Ref: `.mcp.json`, commit `17b2bd4`.
+- **`graph.html` >1.5MB não versiona** — 3 htmls grandes (fika-server 2.6MB, Skills-Extended 2.3MB, SPT-Realism 1.8MB) saíram do git; graph.json+REPORT cobrem a navegação.
+
+**Lições / hipóteses descartadas:**
+- **O stamp "Built from commit" do graphify NÃO é sinal de staleness confiável** — ele só atualiza quando há mudança de topologia (`graphify update` imprime "No topology changes" e deixa o output intacto). 13 dos 14 grafos têm stamp `c3e8df24` porque o código deles não mudou — o conteúdo está correto. O sinal real de staleness é "código de mod mudou sem regenerar o grafo" (o que o `check-graph-freshness.sh` compara), não o stamp. Forçar refresh de stamp seria churn de grafos idênticos.
+- **Finders adversariais inflam métricas** — ex.: D5-04 dizia "18 bullets / passou do STOP de 15" no stances; o real era 9+5 e nenhum bloco passou de 15. O gap de fundo (0 P-IDs) era real, mas a métrica era fabricada. A camada de verificação adversarial pegou (35/39), validando o padrão find→verify.
+- **Trigger de hook precisa casar o nome real do artefato** — o teste do gate AP-06 com `06-fix-99-TESTE.md` não disparou porque o trigger exige `-06-fix-NN.md$` (sem sufixo). Renomeado para `-06-fix-99.md` → bloqueou corretamente. Lição: testar hook com nome de arquivo idêntico ao padrão de produção.
+
+**Atividade cronológica:**
+1. Revisão multi-agente (Workflow `harness-value-review`) — 6 dimensões, verificação adversarial, síntese de cobertura. Veredito + 9 achados críticos verificados por mim independentemente (grafos stale, stances sem P-IDs, bug de nome `technical-review`, checklist `AbstractGame.Stop`).
+2. Fase 1: bugs de nome (`review-technical-spec:3,26`, `SKILL spt:137`) — commit Fase 1.
+3. Fase 2: AP-07 (reentrância) + AP-08 (estado stale) + §9 checks 7-8 + N/A player-reactive = gap — commit `06ea2b8`.
+4. Fase 3: esquema de ID único `P-<N>.<M>` + datas inline + GC com `date`; backfill stances [P-4.1..9]; migração CustomClasses (P-0611.x→P-6.x, Sessão 6, P-7.x com datas) — commit `477879f`.
+5. Fase 4: linha greppável `Memória consultada:` nos 7 commands; tiers documentados; memory-curation no blockquote do review-spec — commit `35b98b6`.
+6. Fase 5: MCP só eft, mods via CLI — commit `17b2bd4`.
+7. Fase 6: 3 hooks de enforcement + wire no pre-commit; testados (hard bloqueia, warns disparam) — commit `22669f4`.
+8. Fase 7-8: limpeza advisory (`c057dcc`) + regen de grafos + remoção de htmls grandes (`3235379`); teste end-to-end do gate AP-06 (bloqueia/libera).
+
+**Pendências abertas nesta sessão:**
+- [P-5.1] (aberta 2026-06-13) Validação fim-a-fim no primeiro uso real (ver topo). Categoria: 🟡 débito.
+
+**Cross-refs:**
+- Continua o overhaul da Sessão 4 (mesma infra). A revisão de valor é o "completeness critic" da Sessão 4.
+- Migração de memória tocou `mods/stancesAndCameraPositionSPT4.0.11/memory/sessions.md` e `mods/CustomClasses/memory/sessions.md` (fatos inalterados, só notação de ID).
 
 ## 2026-06-12 22:06 (GMT-3) — Sessão 4: overhaul do harness — memória nos commands, antipatterns, checklists e grafos de código (graphify)
 
