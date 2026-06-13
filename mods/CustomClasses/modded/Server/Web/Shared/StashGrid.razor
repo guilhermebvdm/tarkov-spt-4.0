@@ -35,9 +35,10 @@
             if (_editable)
             {
                 <div class="cc-item-cell cc-grid2d__item cc-grid2d__item--edit"
-                     style="@CellStyle(cell)" draggable="true"
+                     style="@CellStyle(cell)" draggable="true" title="Click to edit · drag to move · ⟳ to rotate"
                      @ondragstart="@(() => _dragging = cell)"
-                     @ondragend="@(() => _dragging = null)">
+                     @ondragend="@(() => _dragging = null)"
+                     @onclick="@(() => OnItemClick.InvokeAsync(cell.Model))">
                     @ItemInner(cell)
                     <button class="cc-grid2d__rotate" type="button" title="Rotate"
                             @onclick="@(() => RotateAsync(cell))" @onclick:stopPropagation="true"
@@ -82,6 +83,9 @@
 
     /// <summary>F2c: bubble após mover/rotacionar → o workspace recomputa o custo.</summary>
     [Parameter] public EventCallback OnChanged { get; set; }
+
+    /// <summary>Clicar num item (modo edição) → o workspace abre o editor daquele item (count/preset/remover).</summary>
+    [Parameter] public EventCallback<ItemSpecModel?> OnItemClick { get; set; }
 
     private const int FallbackW = 10;
     private const int FallbackH = 40;

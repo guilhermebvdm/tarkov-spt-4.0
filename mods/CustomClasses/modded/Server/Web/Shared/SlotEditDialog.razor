@@ -13,12 +13,12 @@
         <MudText Typo="Typo.h6">@SlotName</MudText>
     </TitleContent>
     <DialogContent>
-        <ItemSpecEditor Spec="@Item" TplFilter="@Filter" OnChanged="OnEditorChanged"/>
+        <ItemSpecEditor Spec="@Item" TplFilter="@Filter" AllowCount="@AllowCount" OnChanged="OnEditorChanged"/>
     </DialogContent>
     <DialogActions>
         <MudButton StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error"
                    OnClick="@(() => Dialog?.Close(DialogResult.Ok("clear")))">
-            Clear slot
+            @ClearLabel
         </MudButton>
         <MudButton OnClick="@(() => Dialog?.Cancel())">Cancel</MudButton>
         <MudButton Variant="Variant.Filled" Color="Color.Primary"
@@ -39,6 +39,12 @@
 
     /// <summary>Filtro do slot (Catalog.IsAllowedInEquipmentSlot) — restringe o ItemPicker do editor.</summary>
     [Parameter] public Func<string, bool>? Filter { get; set; }
+
+    /// <summary>Mostra o campo "count" (stash/contents — equipado ignora). Default false.</summary>
+    [Parameter] public bool AllowCount { get; set; }
+
+    /// <summary>Rótulo do botão de remover (default "Clear slot"; stash usa "Remove item").</summary>
+    [Parameter] public string ClearLabel { get; set; } = "Clear slot";
 
     /// <summary>Bubble opcional p/ o workspace recomputar o custo ao vivo enquanto edita.</summary>
     [Parameter] public EventCallback OnChanged { get; set; }

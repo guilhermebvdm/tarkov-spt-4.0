@@ -202,10 +202,20 @@ else
 
             @* ░ DIREITA ░ *@
             <div class="cc-ws__panel cc-ws__panel--right">
-                <div class="cc-section__title">Stash (@StashCount lines)</div>
+                <div class="cc-ws__panel-head">
+                    <div class="cc-section__title">Stash (@StashCount lines)</div>
+                    @if (_editMode && _model is not null)
+                    {
+                        <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small"
+                                   StartIcon="@Icons.Material.Filled.Add" OnClick="AddStashItemAsync">
+                            Add item
+                        </MudButton>
+                    }
+                </div>
                 <StashGrid Stash="@StashForView" BaseEdition="@def.BaseEdition" Editable="@_editMode"
                            EditItems="@(_editMode ? _model?.Stash : null)"
-                           OnChanged="OnLoadoutEdited"/>
+                           OnChanged="OnLoadoutEdited"
+                           OnItemClick="EditStashItemAsync"/>
             </div>
         </div>
     </div>
@@ -720,6 +730,59 @@ else
             MarkDirty();
         }
 
+        RebuildLoadoutViews();
+        RecomputeLoadoutCost();
+        StateHasChanged();
+    }
+
+    // ── Stash: adicionar / editar / remover item (não havia como adicionar antes) ──────────────
+
+    /// <summary>Botão "Add item": abre o ItemPicker (busca livre) e anexa o item escolhido ao stash (count 1).</summary>
+    private async Task AddStashItemAsync()
+    {
+        if (_model is null)
+        {
+            return;
+        }
+
+        var parameters = new DialogParameters<ItemPicker> { { x => x.Title, "Add item to stash" } };
+        var dialog = await DialogService.ShowAsync<ItemPicker>("Add item to stash", parameters, SlotEditOptions);
+        var result = await dialog.Result;
+        if (result is { Canceled: false, Data: string tpl })
+        {
+            _model.Stash.Add(new ItemSpecModel { Tpl = tpl, Count = 1 });
+            MarkDirty();
+            RebuildLoadoutViews();
+            RecomputeLoadoutCost();
+            StateHasChanged();
+        }
+    }
+
+    /// <summary>Clicar num item do stash: abre o editor (count/preset/mods) com "Remove item" pra excluir.</summary>
+    private async Task EditStashItemAsync(ItemSpecModel? item)
+    {
+        if (_model is null || item is null)
+        {
+            return;
+        }
+
+        var parameters = new DialogParameters<SlotEditDialog>
+        {
+            { x => x.Item, item },
+            { x => x.SlotName, "Stash item" },
+            { x => x.AllowCount, true },
+            { x => x.ClearLabel, "Remove item" },
+            { x => x.OnChanged, EventCallback.Factory.Create(this, OnLoadoutEdited) },
+        };
+        var dialog = await DialogService.ShowAsync<SlotEditDialog>("Stash item", parameters, SlotEditOptions);
+        var result = await dialog.Result;
+        if (result is { Canceled: false, Data: "clear" })
+        {
+            _model.Stash.Remove(item);
+            MarkDirty();
+        }
+
+        RebuildLoadoutViews();
         RecomputeLoadoutCost();
         StateHasChanged();
     }
