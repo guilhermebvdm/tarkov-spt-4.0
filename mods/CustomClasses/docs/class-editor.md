@@ -22,9 +22,9 @@ Guia do **editor web de classes** entregue no épico 018–028 (Blazor Server + 
 |---|---|
 | `/customclasses` | Home (card "Class editor" + smoke test de editions) |
 | `/customclasses/classes` | **Lista de classes** — ícone, nome colorido, status (Registered/Disabled/Invalid/Not registered + diagnostics em tooltip), nº de skills, custo de skills vs. budget, loadout ₽, arquivo. Toolbar "New class" + ações **Edit/Duplicate/Delete** por linha. Colunas **Class / Skill cost / Loadout** são ordenáveis (clique no header; ordenação persistida — ver §7). |
-| `/customclasses/classes/{arquivo}` | **Detalhe read-only** — diagnostics, dashboard de 2 colunas (item 033), painéis General/Skills/XP multipliers/Hideout/Outfit + **gear/stash visual** (item 034) + breakdown de custo. Botões Edit/Duplicate/Delete e **"Compare with…"** (comparação A×B read-only, item 036; deep-link `?compare=<arquivo>`). |
-| `/customclasses/classes/{arquivo}/edit` | **Edição** — abas **General / Skills / Multipliers / Hideout / Outfit / Equipped / Stash**, toolbar sticky com Save/Discard + custo ao vivo. Aba inicial via `?tab=N` (sidebar/matriz pré-selecionam). **`Ctrl+S` salva** (item 035). |
-| `/customclasses/skills` | **Matriz de skills** (item 032) — skills (linhas, ordem canônica) × classes (colunas), heatmap por tier; toggles "Mostrar desabilitadas" / "Multiplicadores XP" (persistidos). Clicar numa célula abre o **edit da classe na aba Skills** (item 035). |
+| `/customclasses/classes/{arquivo}` | **Workspace read-only** (redesign F1/F2) — 3 painéis: **esquerda** skills + XP multipliers + hideout + outfit; **centro** silhueta do personagem (paper doll) com os 14 slots de equipamento; **direita** grade 2D do stash (itens no tamanho W×H). Header slim com custo de skills / loadout ₽ + botão **Edit** (edição in-place). Modo **"Compare with…"** (A×B read-only, item 036; deep-link `?compare=<arquivo>`) ainda usa o dashboard 2-col antigo. Duplicate/Delete no header da página. |
+| `/customclasses/classes/{arquivo}/edit` | **Mesmo workspace, em modo edição IN-PLACE** — os campos destravam no lugar (sem abas, sem navegar): skills/multipliers/hideout editáveis, outfit abre o **seletor visual de skins** (dialog), clicar num slot da silhueta abre o **editor daquele item** (dialog), o stash vira **drag-and-drop 2D** (arrastar move, ⟳ rotaciona). Toolbar Save/Discard + custo ao vivo + guard de não-salvo. **`Ctrl+S` salva** (item 035). |
+| `/customclasses/skills` | **Matriz de skills** (item 032) — skills (linhas, ordem canônica) × classes (colunas), heatmap por tier; toggles "Mostrar desabilitadas" / "Multiplicadores XP" (persistidos). Clicar numa célula abre o **workspace de edição** da classe (item 035; sem abas desde o redesign F2). |
 | `/customclasses/picker-test` | Harness de dev dos pickers (item 023) — sem link no menu, só URL direta. |
 
 ### Sidebar de classes (drawer)
@@ -35,13 +35,15 @@ Desde o item 030 o drawer esquerdo é uma **sidebar persistente** de classes: li
 
 ### O que dá pra editar
 
-- **General:** displayName/description (en/pt), cor do nome, `enabled`, `baseEdition` (só editions vanilla), `iconFile` (enumerado do install, com preview). `name` é **read-only** — é a chave da edition (ver limite 4).
-- **Skills:** níveis 0–51 com peso/custo por linha e total vs. budget ao vivo.
-- **Multipliers:** fatores de XP por skill (≥ 0; verde = buff, vermelho = debuff; badge p/ skills do Skills-Extended).
-- **Hideout:** nível inicial por estação.
-- **Outfit:** upper/lower por facção via picker de customization.
-- **Equipped:** 1 `ItemSpec` por slot do personagem — modos item/preset, premium, ammo (loadedMag/chambered), árvore de mods recursiva filtrada pelos slots do template, contents de contêiner.
-- **Stash:** lista plana de `ItemSpec` (item 028).
+Desde o redesign F2 a edição é **in-place no workspace** — não há mais abas; clicar **Edit** destrava os campos na mesma tela.
+
+- **Skills** (painel esquerdo): níveis 0–51 com peso/custo por linha e total vs. budget ao vivo.
+- **Multipliers** (painel esquerdo): fatores de XP por skill (≥ 0; verde = buff, vermelho = debuff; badge p/ skills do Skills-Extended).
+- **Hideout** (painel esquerdo): nível inicial por estação.
+- **Outfit** (painel esquerdo): clicar num dos 4 cards (USEC/BEAR × upper/lower) abre o **seletor visual de skins** (galeria com thumbnail/glyph + nome, todas as skins vanilla + mods); "Use template default" limpa.
+- **Equipped** (centro, silhueta): clicar num dos 14 slots abre o **editor daquele item** (modos item/preset, premium, ammo loadedMag/chambered, árvore de mods recursiva, contents de contêiner) num dialog; "Clear slot" remove.
+- **Stash** (direita, grade 2D): **arrastar** um item reposiciona (célula calculada pelo cursor; colisão bloqueada), botão **⟳** rotaciona. Posições (`x`/`y`/`rotated`) são **opt-in** — só itens efetivamente movidos/rotacionados ganham coordenadas; o resto continua auto-empacotado. Honradas in-game pelo builder.
+- **General** (campos simples — displayName/description en/pt, cor do nome, `enabled`, `baseEdition`, `iconFile`): hoje editados via os fluxos de lifecycle/lista; `name` é **read-only** (chave da edition — ver limite 4).
 - **Lifecycle:** criar (template mínimo → abre na edição), duplicar (cópia verbatim com nome novo — **é o caminho oficial de rename**) e deletar/desabilitar (com varredura de perfis existentes que usam a edition + confirmação).
 
 ### Save = hot-apply
@@ -92,10 +94,10 @@ Roteiro de verificação do ciclo completo (usado no fechamento do épico):
 
 1. **Suba o server SPT** e abra `https://<ip>:6969/customclasses/classes` — a lista deve mostrar as 12 classes registradas com custos dentro do budget.
 2. **Crie uma classe**: "New class" → nome (ex.: `Teste Smoke`) → o diálogo avisa que nasce sem ícone → abre direto na edição.
-3. **Edite campos simples**: displayName en/pt, descrição, cor do nome; na aba Skills adicione 2–3 skills com níveis.
+3. **Entre em edição** (botão Edit) e ajuste no painel esquerdo: adicione 2–3 skills com níveis, um multiplicador, uma estação de hideout.
 4. **Confira o custo** na toolbar: total de skills vs. budget 28–32 (warning se fora — informativo).
-5. **Adicione equipado**: aba Equipped → "Add slot" → FirstPrimaryWeapon com um preset de arma (premium opcional) + ammo com loadedMag; veja o "Loadout total" recalcular.
-6. **Save**: snackbar "saved and hot-applied" + banner com os limites; confira no install o `.jsonc` novo, o `.bak1` e a linha no `_audit.log`.
+5. **Adicione equipado**: clique o slot **Primary** da silhueta → modo preset → escolha uma arma (premium opcional) + ammo com loadedMag → Done; veja o "Loadout" recalcular. No painel do stash, **arraste** um item e **⟳** rotacione-o.
+6. **Save**: snackbar "saved and hot-applied"; confira no install o `.jsonc` novo (com `x`/`y`/`rotated` só nos itens movidos), o `.bak1` e a linha no `_audit.log`.
 7. **Launcher sem restart do server**: abra o launcher → a edition nova aparece na criação de perfil.
 8. **Crie um perfil** com a classe e entre no jogo: skills nos níveis configurados, arma equipada montada (com mira mínima), stash conforme.
 9. **`/sync-classes`** (ou `scripts/sync-classes.sh`): diff preview mostra o arquivo novo → confirme → repo == install.
@@ -104,10 +106,10 @@ Roteiro de verificação do ciclo completo (usado no fechamento do épico):
 ## 7. Atalhos, densidade e preferências (item 035)
 
 - **Densidade:** lista, abas de edição, pickers e diálogos usam densidade compacta — mais linhas/campos por tela.
-- **`Ctrl+S` (e `Cmd+S`)** na página de edição salva (mesma validação do botão Save; bloqueio por Error continua valendo) e impede o "salvar página" nativo do browser. Só atua na página de edit.
-- **Edit em 1 clique:** ação Edit por linha na lista e por item na sidebar; clicar numa célula da matriz abre o edit já na aba Skills.
-- **Aba preservada:** trocar de classe pela sidebar mantém a aba ativa do edit.
-- **Preferências persistidas** (no `localStorage` do browser, escopo local single-user): pin do drawer (Mini↔Persistent), aba ativa do edit, ordenação da lista (coluna + direção), toggles da matriz e filtro da sidebar. Na primeira visita (sem chave salva) tudo abre nos defaults de hoje. As preferências são aplicadas **após** a página conectar o circuito interativo — pode haver um leve "flash" do default para o valor salvo no reload (esperado).
+- **`Ctrl+S` (e `Cmd+S`)** na edição salva (mesma validação do botão Save; bloqueio por Error continua valendo) e impede o "salvar página" nativo do browser. Só atua em modo edição.
+- **Edit em 1 clique:** ação Edit por linha na lista e por item na sidebar; clicar numa célula da matriz abre o workspace de edição.
+- **Sem abas (redesign F2):** o edit é in-place no workspace de 3 painéis; o antigo deep-link `?tab=N` e a "aba preservada" entre classes deixaram de existir (skills/equipado/stash convivem na mesma tela). O `?tab` ainda é aceito mas ignorado.
+- **Preferências persistidas** (no `localStorage` do browser, escopo local single-user): estado da sidebar (aberta/ícones/fechada), ordenação da lista (coluna + direção), toggles da matriz e filtro da sidebar. Na primeira visita (sem chave salva) tudo abre nos defaults de hoje. As preferências são aplicadas **após** a página conectar o circuito interativo — pode haver um leve "flash" do default para o valor salvo no reload (esperado).
 
 ## Histórico de Alterações
 
@@ -116,3 +118,4 @@ Roteiro de verificação do ciclo completo (usado no fechamento do épico):
 | 2026-06-10 | Guilherme | Criação (item 029) — acesso, fluxo install↔repo, os 4 limites, custo, ícones, smoke test. |
 | 2026-06-12 | Guilherme | Atualização waves 030–036 (sidebar persistente, matriz de skills, dashboard 033, gear/stash visual 034, comparação A×B 036) + §7 (atalhos Ctrl+S, Edit 1-clique, aba preservada, densidade e preferências em localStorage do item 035). |
 | 2026-06-12 | Claude | Item 035 implementado (densidade global, colunas ordenáveis + Edit na lista, Edit na sidebar, aba preservada via `?tab=`, Ctrl+S, matriz→edit na aba Skills, preferências em `localStorage` via `window.ccPrefs`/`UiPrefs`). |
+| 2026-06-13 | Claude | Redesign F1/F2 (itens 038+): workspace unificado de 3 painéis (skills/mults/hideout/outfit · silhueta com 14 slots · grade 2D do stash), edição IN-PLACE (sem abas), seletor visual de skins, clicar-slot-edita-equipado, e drag-and-drop do stash (mover + ⟳ rotacionar, coords `x`/`y`/`rotated` opt-in honradas in-game). Sidebar 3-estados (aberta/ícones/fechada). `?tab` deep-link aposentado (ignorado). |

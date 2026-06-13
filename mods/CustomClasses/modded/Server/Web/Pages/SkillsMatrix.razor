@@ -257,10 +257,6 @@ else
     private bool _showMultipliers = false;               // toggle (default off)
     private bool _togglesRestored;
 
-    // Item 035: MUST mirror ClassEdit's tab order (General=0, Skills=1, …, Stash=6). Reordering the
-    // MudTabPanel set requires updating BOTH this and ClassEdit.StashTabIndex/ClampTab.
-    private const int SkillsTabIndex = 1;
-
     // D4 — destination page: no LocationChanged subscription. Re-mount re-runs OnInitialized with the
     // 037 cache already fresh (Save/Delete invalidate the touched entry). No IDisposable needed.
     protected override void OnInitialized() => LoadColumns();
@@ -495,15 +491,15 @@ else
         col.Multipliers.TryGetValue(skillName, out var f) ? f : null;
 
     /// <summary>
-    ///     Item 035: a cell/header click opens the class' EDIT form on the Skills tab (the matrix is a
-    ///     skills comparison — landing on Skills is the 1-click intent). An invalid/unparseable class has
-    ///     no edit form, so it falls back to the read-only detail.
+    ///     Item 035: a cell/header click opens the class' EDIT workspace (skills live in the left panel —
+    ///     the workspace has no tabs since the F2 redesign, so the old ?tab deep-link is dropped). An
+    ///     invalid/unparseable class has no edit form, so it falls back to the read-only detail.
     /// </summary>
     private void NavigateTo(ClassColumn col)
     {
         var bare = Uri.EscapeDataString(col.BareName);
         Nav.NavigateTo(col.HasDefinition
-            ? $"/customclasses/classes/{bare}/edit?tab={SkillsTabIndex}"
+            ? $"/customclasses/classes/{bare}/edit"
             : $"/customclasses/classes/{bare}");
     }
 

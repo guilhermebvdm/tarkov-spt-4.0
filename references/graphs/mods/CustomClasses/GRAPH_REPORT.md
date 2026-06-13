@@ -1,16 +1,16 @@
-# Graph Report - mods\CustomClasses\modded  (2026-06-12)
+# Graph Report - mods\CustomClasses\modded  (2026-06-13)
 
 ## Corpus Check
-- 72 files · ~57,718 words
+- 77 files · ~60,709 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1099 nodes · 1366 edges · 70 communities (64 shown, 6 thin omitted)
+- 1164 nodes · 1435 edges · 75 communities (69 shown, 6 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 1 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `c3e8df24`
+- Built from commit: `ff971888`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -73,6 +73,7 @@
 - [[_COMMUNITY_Community 55|Community 55]]
 - [[_COMMUNITY_Community 56|Community 56]]
 - [[_COMMUNITY_Community 57|Community 57]]
+- [[_COMMUNITY_Community 58|Community 58]]
 - [[_COMMUNITY_Community 59|Community 59]]
 - [[_COMMUNITY_Community 60|Community 60]]
 - [[_COMMUNITY_Community 61|Community 61]]
@@ -80,48 +81,52 @@
 - [[_COMMUNITY_Community 63|Community 63]]
 - [[_COMMUNITY_Community 64|Community 64]]
 - [[_COMMUNITY_Community 65|Community 65]]
+- [[_COMMUNITY_Community 66|Community 66]]
+- [[_COMMUNITY_Community 67|Community 67]]
 - [[_COMMUNITY_Community 68|Community 68]]
+- [[_COMMUNITY_Community 73|Community 73]]
+- [[_COMMUNITY_Community 74|Community 74]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `CatalogService` - 45 edges
 2. `ClassEditorService` - 24 edges
 3. `InventoryBuilder` - 23 edges
-4. `MongoId` - 16 edges
-5. `CostService` - 16 edges
+4. `CostService` - 17 edges
+5. `MongoId` - 16 edges
 6. `ClassIdentityView` - 12 edges
 7. `Item` - 12 edges
-8. `SkillsNavButtonPatch` - 10 edges
-9. `Plugin` - 10 edges
-10. `MongoId` - 10 edges
+8. `MenuOverhaulBridge` - 11 edges
+9. `SkillsNavButtonPatch` - 10 edges
+10. `Plugin` - 10 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `ChatSpecialIconPatch` --inherits--> `ModulePatch`  [EXTRACTED]
+  Client/Patches/ChatSpecialIconPatch.cs →   _Bridges community 40 → community 53_
 - `MenuClassIdentityPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/MenuClassIdentityPatch.cs →   _Bridges community 40 → community 20_
-- `OnTriggerPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/OnTriggerPatch.cs →   _Bridges community 40 → community 53_
+  Client/Patches/MenuClassIdentityPatch.cs →   _Bridges community 53 → community 20_
 - `PlayerModelWithStatsIdentityPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/PlayerModelWithStatsIdentityPatch.cs →   _Bridges community 40 → community 47_
+  Client/Patches/PlayerModelWithStatsIdentityPatch.cs →   _Bridges community 53 → community 47_
 - `PlayerNamePanelPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/PlayerNamePanelPatch.cs →   _Bridges community 40 → community 48_
+  Client/Patches/PlayerNamePanelPatch.cs →   _Bridges community 53 → community 48_
 - `RaidReadyPlayerPanelPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/RaidReadyPlayerPanelPatch.cs →   _Bridges community 40 → community 49_
+  Client/Patches/RaidReadyPlayerPanelPatch.cs →   _Bridges community 53 → community 49_
 
 ## Import Cycles
 - None detected.
 
-## Communities (70 total, 6 thin omitted)
+## Communities (75 total, 6 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.02
-Nodes (91): ClassEdit, EquipmentSlots, HideoutAreas, ModHelper, MudForm, MudTabPanel, MudTabs, AddEquipSlot (+83 more)
+Cohesion: 0.10
+Nodes (20): HideoutAreas, MapSeverity, OnParametersSet, Reload, ReloadAndRefresh, route:/customclasses/classes/{FileName}/edit, ClassEditorService, ClassWorkspace (+12 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.07
-Nodes (25): Height, ISptLogger, ItemHelper, Lazy, LocaleService, Price, SearchIndexRow, CatalogService (+17 more)
+Nodes (25): ISptLogger, ItemHelper, Lazy, LocaleService, Price, SearchIndexRow, CatalogService, CatalogAmmo (+17 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.04
-Nodes (49): GearPanel, MudMenu, MudMenuItem, ClearCompare, ClothingLabel, CountSkills, DeltaChip, FormatRub (+41 more)
+Nodes (51): ClassRegistrar, GearPanel, MudMenu, MudMenuItem, ClearCompare, ClothingLabel, CountSkills, DeltaChip (+43 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.05
@@ -145,15 +150,15 @@ Nodes (19): LocalizedText, Outfit, ClassDefinition, Dictionary, Func, ItemSpec, 
 
 ### Community 8 - "Community 8"
 Cohesion: 0.06
-Nodes (30): ClassColumn, BuildOverflowSkills, CategoryHeader, Cell, ClassColumn, CostFooterCell, HeaderTitle, LoadColumns (+22 more)
+Nodes (32): ClassColumn, BuildOverflowSkills, CategoryHeader, Cell, ClassColumn, CostFooterCell, HeaderTitle, LoadColumns (+24 more)
 
 ### Community 9 - "Community 9"
 Cohesion: 0.06
 Nodes (30): MudNavLink, MudNavMenu, ClassEditorService, CostService, CustomClasses.Web, IJSRuntime, MudDivider, MudIcon (+22 more)
 
 ### Community 10 - "Community 10"
-Cohesion: 0.17
-Nodes (14): LoadoutCostBreakdown, CostService, ClassDefinition, Grid, GridPacker, Item, ItemSpec, List (+6 more)
+Cohesion: 0.14
+Nodes (16): LoadoutCostBreakdown, CostService, ClassDefinition, Grid, GridPacker, Height, Item, ItemSpec (+8 more)
 
 ### Community 11 - "Community 11"
 Cohesion: 0.07
@@ -165,15 +170,15 @@ Nodes (25): CategoryOption, MudProgressLinear, CatalogCategory, CatalogItem, Cat
 
 ### Community 13 - "Community 13"
 Cohesion: 0.08
-Nodes (23): CascadingValue, HeadContent, LayoutComponentBase, OnAfterRenderAsync, OnBeforeNavAsync, Reset, ToggleDrawerPin, MudAppBar (+15 more)
+Nodes (23): CascadingValue, HeadContent, LayoutComponentBase, CycleDrawer, OnAfterRenderAsync, OnBeforeNavAsync, Reset, MudAppBar (+15 more)
 
 ### Community 14 - "Community 14"
 Cohesion: 0.10
-Nodes (20): OpenFilteredDialogAsync, OpenItemDialogAsync, route:/customclasses/picker-test, AmmoPicker, CustomizationPicker, IDialogService, ItemPicker, MudButton (+12 more)
+Nodes (20): CustomizationPicker, MudGrid, MudItem, OpenFilteredDialogAsync, OpenItemDialogAsync, route:/customclasses/picker-test, AmmoPicker, IDialogService (+12 more)
 
 ### Community 15 - "Community 15"
-Cohesion: 0.18
-Nodes (10): ChatSpecialIcon, Color, FieldInfo, float, GameObject, Image, TextMeshProUGUI, Transform (+2 more)
+Cohesion: 0.15
+Nodes (12): bottom, ChatSpecialIcon, Color, FieldInfo, float, GameObject, Image, TextMeshProUGUI (+4 more)
 
 ### Community 16 - "Community 16"
 Cohesion: 0.11
@@ -192,8 +197,8 @@ Cohesion: 0.12
 Nodes (15): MudProgressCircular, ClassDiagnostic, ClassEditorService, DialogActions, DialogContent, MudAlert, MudButton, MudDialog (+7 more)
 
 ### Community 20 - "Community 20"
-Cohesion: 0.18
-Nodes (9): IEnumerator, Image, MenuScreen, MethodBase, PatchPostfix, string, TextMeshProUGUI, Transform (+1 more)
+Cohesion: 0.16
+Nodes (10): Color, IEnumerator, Image, MenuScreen, MethodBase, PatchPostfix, string, TextMeshProUGUI (+2 more)
 
 ### Community 21 - "Community 21"
 Cohesion: 0.13
@@ -233,7 +238,7 @@ Nodes (7): Dictionary, ESkillId, MethodBase, PatchPostfix, PatchPrefix, WorkoutB
 
 ### Community 30 - "Community 30"
 Cohesion: 0.18
-Nodes (10): CustomClasses, CustomClasses.Web.Layouts, CustomClasses.Web.Shared, Microsoft.AspNetCore.Components.Forms, Microsoft.AspNetCore.Components.Routing, Microsoft.AspNetCore.Components.Web, Microsoft.AspNetCore.Components.Web.Virtualization, Microsoft.JSInterop (+2 more)
+Nodes (10): CustomClasses, CustomClasses.Web.Layouts, CustomClasses.Web.Shared, Microsoft.AspNetCore.Components.Forms, Microsoft.AspNetCore.Components.Routing, Microsoft.AspNetCore.Components.Web.Virtualization, Microsoft.JSInterop, MudBlazor (+2 more)
 
 ### Community 31 - "Community 31"
 Cohesion: 0.25
@@ -252,8 +257,8 @@ Cohesion: 0.20
 Nodes (6): bool, Dictionary, ESkillId, string, Payload, SkillMultipliers
 
 ### Community 35 - "Community 35"
-Cohesion: 0.22
-Nodes (6): bool, Color, string, object, PropertyInfo, MenuOverhaulBridge
+Cohesion: 0.20
+Nodes (7): bool, Color, string, MethodInfo, object, PropertyInfo, MenuOverhaulBridge
 
 ### Community 36 - "Community 36"
 Cohesion: 0.24
@@ -261,7 +266,7 @@ Nodes (7): Customization, CustomizationItem, IReadOnlyDictionary, MongoId, Outfi
 
 ### Community 37 - "Community 37"
 Cohesion: 0.20
-Nodes (8): JsonUtil, RouteAction, SaveServer, ClassVisualRegistry, List, SkillMultipliersRouter, SkillMultiplierRegistry, StaticRouter
+Nodes (8): ClassVisualRegistry, JsonUtil, RouteAction, SaveServer, List, SkillMultipliersRouter, SkillMultiplierRegistry, StaticRouter
 
 ### Community 38 - "Community 38"
 Cohesion: 0.20
@@ -272,8 +277,8 @@ Cohesion: 0.28
 Nodes (5): BaseUnityPlugin, bool, Plugin, ConfigEntry, ManualLogSource
 
 ### Community 40 - "Community 40"
-Cohesion: 0.22
-Nodes (6): Image, MethodBase, PatchPostfix, TextMeshProUGUI, ModulePatch, ChatSpecialIconPatch
+Cohesion: 0.25
+Nodes (5): Image, MethodBase, PatchPostfix, TextMeshProUGUI, ChatSpecialIconPatch
 
 ### Community 41 - "Community 41"
 Cohesion: 0.22
@@ -288,7 +293,7 @@ Cohesion: 0.22
 Nodes (5): IOnLoad, Task, CustomClassesMod, Task, HiddenEditionsLoader
 
 ### Community 44 - "Community 44"
-Cohesion: 0.28
+Cohesion: 0.29
 Nodes (5): Rotated, bool, GridPacker, X, Y
 
 ### Community 45 - "Community 45"
@@ -324,12 +329,12 @@ Cohesion: 0.25
 Nodes (3): ClassVisualRegistry, Dictionary, Visual
 
 ### Community 53 - "Community 53"
-Cohesion: 0.29
-Nodes (4): AbstractSkillClass, MethodBase, PatchPrefix, OnTriggerPatch
+Cohesion: 0.25
+Nodes (5): AbstractSkillClass, MethodBase, PatchPrefix, ModulePatch, OnTriggerPatch
 
 ### Community 54 - "Community 54"
-Cohesion: 0.29
-Nodes (4): Dictionary, string, Sprite, ClassIconCache
+Cohesion: 0.27
+Nodes (5): Color, Dictionary, string, Sprite, ClassIconCache
 
 ### Community 55 - "Community 55"
 Cohesion: 0.33
@@ -343,6 +348,10 @@ Nodes (6): net9.0, SPTarkov.Common (4.0.2), SPTarkov.DI (4.0.2), SPTarkov.Server
 Cohesion: 0.29
 Nodes (5): HashSet, IReadOnlyList, string, SkillsExtendedCompat, SptMod
 
+### Community 58 - "Community 58"
+Cohesion: 0.11
+Nodes (17): CatalogClothing, CatalogService, DialogActions, DialogContent, MudButton, MudDialog, MudStack, MudText (+9 more)
+
 ### Community 61 - "Community 61"
 Cohesion: 0.40
 Nodes (4): ChildContent, MudTooltip, System.Globalization, TooltipContent
@@ -351,25 +360,41 @@ Nodes (4): ChildContent, MudTooltip, System.Globalization, TooltipContent
 Cohesion: 0.40
 Nodes (3): Dictionary, PmcData, HideoutBuilder
 
+### Community 66 - "Community 66"
+Cohesion: 0.03
+Nodes (59): CharacterDoll, CatalogService, ClassDiagnostic, ClassEditorService, ClassWorkspace, CostService, CustomClasses.Web, IDialogService (+51 more)
+
+### Community 67 - "Community 67"
+Cohesion: 0.09
+Nodes (22): ItemSpecModel, PlacedCell, CatalogService, CostService, CustomClasses.Web, ItemSpec, ItemTooltip, Microsoft.AspNetCore.Components.Web (+14 more)
+
+### Community 73 - "Community 73"
+Cohesion: 0.25
+Nodes (7): CatalogService, ItemTooltip, SPTarkov.Server.Core.Models.Common, BuildCell, GearCell, OnParametersSet, ShortLabel
+
+### Community 74 - "Community 74"
+Cohesion: 0.20
+Nodes (9): CustomClasses.Web, DialogActions, DialogContent, ItemSpecEditor, MudButton, MudDialog, MudText, TitleContent (+1 more)
+
 ## Knowledge Gaps
-- **709 isolated node(s):** `netstandard2.1`, `Microsoft.NET.Sdk`, `string`, `MethodBase`, `TextMeshProUGUI` (+704 more)
+- **760 isolated node(s):** `netstandard2.1`, `Microsoft.NET.Sdk`, `string`, `MethodBase`, `TextMeshProUGUI` (+755 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **6 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `SkillPanelPatch` connect `Community 27` to `Community 40`?**
+- **Why does `SkillPanelPatch` connect `Community 27` to `Community 53`?**
+  _High betweenness centrality (0.004) - this node is a cross-community bridge._
+- **Why does `RaidReadyPlayerPanelPatch` connect `Community 49` to `Community 53`?**
   _High betweenness centrality (0.003) - this node is a cross-community bridge._
-- **Why does `PlayerNamePanelPatch` connect `Community 48` to `Community 40`?**
-  _High betweenness centrality (0.003) - this node is a cross-community bridge._
-- **Why does `RaidReadyPlayerPanelPatch` connect `Community 49` to `Community 40`?**
-  _High betweenness centrality (0.003) - this node is a cross-community bridge._
+- **Why does `SkillsNavButtonPatch` connect `Community 17` to `Community 53`?**
+  _High betweenness centrality (0.002) - this node is a cross-community bridge._
 - **What connects `netstandard2.1`, `Microsoft.NET.Sdk`, `string` to the rest of the system?**
-  _709 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _760 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.021739130434782608 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09523809523809523 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.07219662058371736 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.04 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.038461538461538464 - nodes in this community are weakly interconnected._
