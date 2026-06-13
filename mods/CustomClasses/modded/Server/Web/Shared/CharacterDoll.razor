@@ -52,6 +52,9 @@
     /// <summary>slot → spec (mesmo contrato do GearPanel). Null/vazio → todos os slots aparecem vazios.</summary>
     [Parameter] public Dictionary<string, ItemSpec>? Equipped { get; set; }
 
+    /// <summary>F2a: preparado p/ o orquestrador (F2c: clicar-slot-equipado). No-op visual por enquanto.</summary>
+    [Parameter] public bool Editable { get; set; }
+
     /// <summary>Ordem/conjunto fixo dos 14 EquipmentSlots desenhados em volta da silhueta (estilo EFT).</summary>
     private static readonly string[] SlotOrder =
     [

@@ -278,3 +278,43 @@
 .cc-sb-mini .mud-nav-link-text   { display: none; }
 .cc-sb-mini .mud-nav-link        { justify-content: center; padding-left: 0; padding-right: 0; }
 .cc-sb-mini .mud-nav-link .mud-nav-link-icon-default { margin: 0; }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   Fase F2 (rascunho) — edição in-place no workspace + galeria de skins (SkinPickerDialog).
+   ADITIVO: não redefine nenhuma classe F1/033/034/036 acima. O polimento visual fica
+   pro orquestrador.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Header slim: ações Edit / Save+Discard à direita das badges ─────────────── */
+.cc-ws__actions       { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+
+/* ── Outfit card EDITÁVEL: clicável (hover destaca) + botão limpar inline ─────── */
+.cc-ws__outfit-card--edit          { cursor: pointer; transition: border-color .12s ease, background .12s ease; }
+.cc-ws__outfit-card--edit:hover    { border-color: var(--mud-palette-primary, #8b6fc4);
+                                     background: var(--mud-palette-action-default-hover, rgba(255,255,255,.06)); }
+
+/* ── SkinPickerDialog: galeria virtualizada de cards ───────────────────────────
+   Cada card 84px de altura (ItemSize do MudVirtualize). Art = glyph simbólico
+   SEMPRE presente; a <img> tarkov.dev (se carregar) cobre por cima (onerror esconde). */
+.cc-skinpick-gallery       { height: 60vh; max-height: 560px; overflow-y: auto;
+                             border: 1px solid var(--mud-palette-lines-default, #444); border-radius: 6px; }
+
+.cc-skinpick-card          { display: flex; align-items: center; gap: 12px; height: 84px;
+                             padding: 8px 12px; cursor: pointer; box-sizing: border-box;
+                             border-bottom: 1px solid var(--mud-palette-lines-default, #3a3a3a);
+                             transition: background .1s ease; }
+.cc-skinpick-card:hover    { background: var(--mud-palette-action-default-hover, rgba(255,255,255,.06)); }
+.cc-skinpick-card--sel     { background: var(--mud-palette-primary-hover, rgba(139,111,196,.18));
+                             border-left: 3px solid var(--mud-palette-primary, #8b6fc4); }
+
+.cc-skinpick-card__art     { position: relative; flex: 0 0 auto; width: 56px; height: 56px;
+                             display: flex; align-items: center; justify-content: center;
+                             border: 1px solid var(--mud-palette-lines-default, #444); border-radius: 4px;
+                             background: var(--mud-palette-background-grey, rgba(255,255,255,.03)); overflow: hidden; }
+.cc-skinpick-card__glyph   { opacity: .55; display: flex; }
+.cc-skinpick-card__img     { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+
+.cc-skinpick-card__meta    { display: flex; flex-direction: column; min-width: 0; gap: 2px; }
+.cc-skinpick-card__name    { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cc-skinpick-card__id      { font-size: 10px; opacity: .55; font-family: monospace;
+                             overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

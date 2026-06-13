@@ -60,6 +60,9 @@
     /// <summary>baseEdition da classe (dimensiona a grade). Vazio → default (Zero to hero).</summary>
     [Parameter] public string? BaseEdition { get; set; }
 
+    /// <summary>F2a: preparado p/ o orquestrador (F2c: drag-and-drop do stash). No-op visual por enquanto.</summary>
+    [Parameter] public bool Editable { get; set; }
+
     private const int FallbackW = 10;
     private const int FallbackH = 40;
 

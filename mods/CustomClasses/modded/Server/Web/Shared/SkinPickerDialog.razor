@@ -1,0 +1,123 @@
+@* Fase F2b (rascunho): galeria VISUAL de skins por slot (faction × upper/lower). Abre como dialog
+   (IDialogService) a partir do outfit-preview editável do ClassWorkspace. Lista virtualizada
+   (MudVirtualize) de Catalog.GetClothing(side) filtrada pelo slot upper/lower; filtro por nome no topo.
+   Cada card: <img tarkov.dev (onerror-hidden) ANTES do glyph SVG simbólico (camisa upper / calça lower)>
+   + nome + id. Selecionar → fecha o dialog com DialogResult.Ok(id) (string). Botão "Use template
+   default" → fecha com DialogResult.Ok((string?)null) p/ limpar o slot.
+
+   Decisão (F1/F2): preview SIMBÓLICO — não depende de imagem. A <img> é barata e oportunista: se a
+   tarkov.dev tiver o ícone (~200) ele aparece por cima do glyph; senão o onerror esconde e fica o glyph. *@
+
+@inject CatalogService Catalog
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">@Title</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudStack Spacing="2">
+            <MudTextField T="string" @bind-Value="_filter"
+                          Label="Filter by name" Variant="Variant.Outlined" Margin="Margin.Dense"
+                          Immediate="true" DebounceInterval="200" OnDebounceIntervalElapsed="ApplyFilter"
+                          Clearable="true"
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.FilterAlt"/>
+
+            <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                @Side · @SlotKind — @_filtered.Count of @_all.Count pieces
+            </MudText>
+
+            <div class="cc-skinpick-gallery">
+                @if (_filtered.Count == 0)
+                {
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary pa-2">No clothing found.</MudText>
+                }
+                else
+                {
+                    <MudVirtualize Items="_filtered" ItemSize="84f" Context="piece" OverscanCount="6">
+                        <div class="cc-skinpick-card @(IsSelected(piece) ? "cc-skinpick-card--sel" : null)"
+                             @onclick="@(() => Select(piece.Id))" title="@(piece.Name ?? piece.Id)">
+                            <div class="cc-skinpick-card__art">
+                                @* glyph simbólico SEMPRE presente; a img (se carregar) cobre por cima *@
+                                <span class="cc-skinpick-card__glyph">@Glyph()</span>
+                                <img class="cc-skinpick-card__img"
+                                     src="@($"https://assets.tarkov.dev/{piece.Id}-icon.webp")"
+                                     loading="lazy" alt="" onerror="this.style.display='none'"/>
+                            </div>
+                            <div class="cc-skinpick-card__meta">
+                                <span class="cc-skinpick-card__name">@(piece.Name ?? piece.Id)</span>
+                                <span class="cc-skinpick-card__id">@piece.Id</span>
+                            </div>
+                        </div>
+                    </MudVirtualize>
+                }
+            </div>
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton StartIcon="@Icons.Material.Filled.Clear" OnClick="ClearSlot">Use template default</MudButton>
+        <MudButton OnClick="@(() => Dialog?.Cancel())">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance? Dialog { get; set; }
+
+    /// <summary>Faction: "Usec" or "Bear" (DB side names).</summary>
+    [Parameter] public string Side { get; set; } = "Usec";
+
+    /// <summary>"Upper" (body) or "Lower" (feet).</summary>
+    [Parameter] public string SlotKind { get; set; } = "Upper";
+
+    /// <summary>Currently selected id (highlights its card; null = none).</summary>
+    [Parameter] public string? CurrentId { get; set; }
+
+    /// <summary>Dialog title.</summary>
+    [Parameter] public string Title { get; set; } = "Select skin";
+
+    private string _filter = string.Empty;
+    private List<CatalogClothing> _all = [];
+    private List<CatalogClothing> _filtered = [];
+
+    protected override void OnParametersSet()
+    {
+        var slot = SlotKind.Equals("Lower", StringComparison.OrdinalIgnoreCase) ? "lower" : "upper";
+        _all = Catalog.GetClothing(Side)
+            .Where(c => string.Equals(c.Slot, slot, StringComparison.Ordinal))
+            .OrderBy(c => c.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        ApplyFilter();
+    }
+
+    private void ApplyFilter()
+    {
+        _filtered = string.IsNullOrWhiteSpace(_filter)
+            ? _all
+            : _all.Where(c => (c.Name ?? c.Id).Contains(_filter.Trim(), StringComparison.OrdinalIgnoreCase)).ToList();
+    }
+
+    private bool IsSelected(CatalogClothing piece) =>
+        CurrentId is { Length: > 0 } && string.Equals(piece.Id, CurrentId, StringComparison.Ordinal);
+
+    private void Select(string id) => Dialog?.Close(DialogResult.Ok<string?>(id));
+
+    /// <summary>Clear → return null so the caller drops the override (template default).</summary>
+    private void ClearSlot() => Dialog?.Close(DialogResult.Ok<string?>(null));
+
+    /// <summary>Symbolic glyph: shirt for Upper, trousers for Lower (mirrors ClassWorkspace.OutfitCard).</summary>
+    private RenderFragment Glyph() => __builder =>
+    {
+        var isUpper = string.Equals(SlotKind, "Upper", StringComparison.OrdinalIgnoreCase);
+        if (isUpper)
+        {
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M4 6l4-3 4 2 4-2 4 3-3 3v11H7V9z"/>
+            </svg>
+        }
+        else
+        {
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M6 3h12l-1 18h-4l-1-11-1 11H7z"/>
+            </svg>
+        }
+    };
+}

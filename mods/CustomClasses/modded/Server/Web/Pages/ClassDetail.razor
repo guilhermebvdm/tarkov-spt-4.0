@@ -124,7 +124,8 @@
                                     FileNameBare="@Path.GetFileNameWithoutExtension(_entry.FileName)"
                                     SkillCost="@_skillCost"
                                     LoadoutCost="@_loadoutCost"
-                                    Entry="@_entry"/>
+                                    Entry="@_entry"
+                                    OnSaved="ReloadAndRefresh"/>
                 }
                 else
                 {
@@ -352,6 +353,13 @@
     private bool IsComparing => _compareDef is not null;
 
     protected override void OnParametersSet() => Reload();
+
+    /// <summary>F2a: chamado pelo ClassWorkspace após um Save bem-sucedido — relê do disco e re-renderiza.</summary>
+    private void ReloadAndRefresh()
+    {
+        Reload();
+        StateHasChanged();
+    }
 
     /// <summary>Full reload from disk — also called after a lifecycle action (item 027: disable).</summary>
     private void Reload()
