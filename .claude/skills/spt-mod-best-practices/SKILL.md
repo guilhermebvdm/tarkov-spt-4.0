@@ -134,7 +134,7 @@ If the spec talks about a "raid mod" that should not run in hideout, this guard 
 
 ## Review checklist (use during `/review-technical-spec` and `/code-mod`)
 
-1. **Lifecycle:** Is there a clear Awake / raid-start / raid-end story? Are stop hooks idempotent and covering both `GameWorld.OnDestroy` and `AbstractGame.Stop`?
+1. **Lifecycle:** Is there a clear Awake / raid-start / raid-end story? Are stop hooks idempotent and covering both `GameWorld.OnDestroy` and `BaseLocalGame.Stop` (patch `AbstractGame.Stop` only to cover all derived game types — rare)?
 2. **Leaks:** Every `+= handler`, `new GameObject`, `StartCoroutine`, `CancellationTokenSource`, static collection — is its release point identified?
 3. **Hot path:** Any allocations or LINQ in per-frame / per-bot-tick code? Reflection cached?
 4. **Context guards:** Does code that assumes a raid early-return in menu/hideout? **Multiplayer/Fika:** does every player-reactive patch distinguish the local player (`IsYourPlayer` / `__instance == MainPlayer.HandsController`) from bots and other Fika players? (AP-02)
