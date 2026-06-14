@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;                 // locale cache
 using System.Diagnostics;                            // item 037: Stopwatch (perf instrumentation)
 using System.Text.Json.Serialization;
 using SPTarkov.DI.Annotations;
@@ -108,6 +109,7 @@ public class CatalogService
     private readonly Lazy<Dictionary<MongoId, string>> _handbookIndex;       // tpl → handbook category id
     private readonly Lazy<Dictionary<string, List<string>>> _childrenByParent; // category id → direct children
     private readonly Lazy<Dictionary<string, List<CatalogClothing>>> _clothingBySide; // "Usec"/"Bear" → pieces
+    private readonly Lazy<Dictionary<MongoId, List<Preset>>> _presetsByRoot;  // root tpl → presets rooted at it
 
     public CatalogService(
         DatabaseService databaseService,
@@ -125,6 +127,7 @@ public class CatalogService
         _searchIndex = new Lazy<List<SearchIndexRow>>(BuildSearchIndex);
         _childrenByParent = new Lazy<Dictionary<string, List<string>>>(BuildChildrenByParent);
         _clothingBySide = new Lazy<Dictionary<string, List<CatalogClothing>>>(BuildClothingBySide);
+        _presetsByRoot = new Lazy<Dictionary<MongoId, List<Preset>>>(BuildPresetsByRoot);
     }
 
     /// <summary>Pre-computed search-index row (DB immutable post-boot — PA-037-06).</summary>
@@ -188,11 +191,19 @@ public class CatalogService
         return GetTemplate(tpl)?.Name ?? tpl.ToString();
     }
 
-    /// <summary>EFT locale dict for a language ("pt" → EFT code "po"); LocaleService falls back to en.</summary>
+    // localeService.GetLocaleDb re-materializes the whole locale dict on every call (the core Locales.Global
+    // is a LazyLoad whose transformers — e.g. Fika's — re-run per .Value access; ~5ms, thousands of keys).
+    // The cost walker resolves a name per loadout line and called GetLocale TWICE per item, so this scan
+    // dominated ComputeLoadoutCost (~900ms/heavy class → GetItemName). Cache the dict per code (immutable
+    // post-boot — PA-037-06, same premise as the lazy indexes above).
+    private readonly ConcurrentDictionary<string, Dictionary<string, string>> _localeCache =
+        new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>EFT locale dict for a language ("pt" → EFT code "po"); LocaleService falls back to en. Cached.</summary>
     private Dictionary<string, string> GetLocale(string lang)
     {
         var code = string.Equals(lang, "pt", StringComparison.OrdinalIgnoreCase) ? "po" : lang;
-        return localeService.GetLocaleDb(code);   // ref: LocaleService.cs:20 (en fallback built in)
+        return _localeCache.GetOrAdd(code, c => localeService.GetLocaleDb(c));   // ref: LocaleService.cs:20 (en fallback built in)
     }
 
     // ── Search ───────────────────────────────────────────────────────────────
@@ -515,13 +526,41 @@ public class CatalogService
         return results;
     }
 
-    /// <summary>All presets rooted at a tpl (root = first item — ref: PresetController.cs:32).</summary>
-    private List<Preset> PresetsFor(MongoId tpl)
+    /// <summary>
+    ///     All presets rooted at a tpl (root = first item — ref: PresetController.cs:32). O(1) lookup over
+    ///     the <see cref="_presetsByRoot"/> index: the cost walker resolves a preset for almost every
+    ///     equipped/stash line, and the old per-call linear scan over the thousands-strong
+    ///     globals.ItemPresets dominated ComputeLoadoutCost (~1s/heavy class). Returns the shared cached
+    ///     list — callers only read it (FirstOrDefault/Where/OrderBy/indexing), never mutate.
+    /// </summary>
+    private List<Preset> PresetsFor(MongoId tpl) =>
+        _presetsByRoot.Value.TryGetValue(tpl, out var list) ? list : [];
+
+    /// <summary>
+    ///     Indexes every <c>globals.ItemPresets</c> entry by its root tpl (first item's Template) so
+    ///     <see cref="PresetsFor"/> is a dictionary read instead of a full scan. Built once on first access
+    ///     (post-boot, DB immutable — PA-037-06), same premise/lifecycle as the other lazy indexes.
+    /// </summary>
+    private Dictionary<MongoId, List<Preset>> BuildPresetsByRoot()
     {
-        var itemPresets = databaseService.GetGlobals().ItemPresets;   // ref: Globals.cs:23
-        return itemPresets.Values
-            .Where(p => p.Items?.FirstOrDefault()?.Template == tpl)
-            .ToList();
+        var index = new Dictionary<MongoId, List<Preset>>();
+        foreach (var preset in databaseService.GetGlobals().ItemPresets.Values)   // ref: Globals.cs:23
+        {
+            if (preset.Items?.FirstOrDefault()?.Template is not { } root)
+            {
+                continue;
+            }
+
+            if (!index.TryGetValue(root, out var list))
+            {
+                list = [];
+                index[root] = list;
+            }
+
+            list.Add(preset);
+        }
+
+        return index;
     }
 
     /// <summary>
