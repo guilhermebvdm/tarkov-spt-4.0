@@ -176,6 +176,23 @@ public class CatalogService
         return (0, SourceMissing);
     }
 
+    /// <summary>
+    ///     Trader/handbook base price (static, per unit) — the "grounded" value, contrast to the speculative
+    ///     flea (<see cref="GetPrice"/>). For money it is the face value (rouble = 1, USD/EUR = conversion).
+    ///     Returns 0 when the item has no handbook entry (so the UI can hide the trader column for it).
+    /// </summary>
+    public double GetHandbookPrice(MongoId tpl)
+    {
+        if (itemHelper.IsOfBaseclass(tpl, BaseClasses.MONEY))
+        {
+            var face = itemHelper.GetStaticItemPrice(tpl);
+            return face >= 1 ? face : 1;
+        }
+
+        var handbook = itemHelper.GetStaticItemPrice(tpl);
+        return handbook >= 1 ? handbook : 0;
+    }
+
     // ── Names / locales ──────────────────────────────────────────────────────
 
     /// <summary>

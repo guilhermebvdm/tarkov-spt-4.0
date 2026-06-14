@@ -142,6 +142,8 @@
 .cc-item-cell__contents-ico { font-size: 9px; opacity: .9; }
 /* Somatório ₽ no cabeçalho dos painéis (Equipped/Stash). */
 .cc-section__sum { font-weight: 600; color: var(--mud-palette-primary, #7e6fff); font-size: .82em; margin-left: 4px; }
+/* Parte "trader" do somatório do painel — esmaecida, contraste do flea (em primary acima). */
+.cc-section__sum-trader { font-weight: 500; color: var(--mud-palette-text-secondary, #b0b0b8); opacity: .85; }
 
 /* Always-visible short name under a gear cell (ellipsis; the only label offline). */
 .cc-item-cell__name {
@@ -181,6 +183,8 @@
 .cc-item-tip__price     { font-size: .82rem; margin-top: 4px; }
 .cc-item-tip__build     { font-size: .82rem; margin-top: 2px; color: var(--mud-palette-primary, #7e6fff); }
 .cc-item-tip__src       { opacity: .7; font-size: 11px; }
+/* Valor de trader/handbook (base aterrada) ao lado do flea — tom esmaecido p/ distinguir do flea. */
+.cc-item-tip__trader    { opacity: .8; font-size: 11px; color: var(--mud-palette-text-secondary, #b0b0b8); }
 .cc-item-tip__warn      { color: var(--mud-palette-warning, #ffb300); font-weight: 600; }
 .cc-item-tip__row       { font-size: 11px; }
 
@@ -220,6 +224,8 @@
 .cc-ws__badge         { display: flex; flex-direction: column; gap: 1px; }
 .cc-ws__badge-label   { font-size: 10px; text-transform: uppercase; letter-spacing: .5px; opacity: .6; }
 .cc-ws__badge-val     { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+/* Parte "trader" do badge Loadout — menor e esmaecida, ao lado do flea. */
+.cc-ws__badge-sub     { font-size: 12px; font-weight: 500; opacity: .65; }
 
 /* ── 3-column grid; cada painel rola só internamente (single-screen) ─────────────
    Esquerda alargada (skills cabem); centro = MAIOR (equipped estilo Gear do EFT);

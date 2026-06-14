@@ -42,9 +42,11 @@
                 else
                 {
                     <span class="mud-text-secondary">base </span><b>@Price.ToString("N0", CultureInfo.InvariantCulture) ₽</b>
-                    @if (!string.IsNullOrWhiteSpace(PriceSource))
+                    <span class="cc-item-tip__src"> flea</span>
+                    @* Valor de trader/handbook (base "aterrada") lado a lado com o flea especulativo. *@
+                    @if (HandbookPrice > 0)
                     {
-                        <span class="cc-item-tip__src"> · @PriceSource</span>
+                        <span class="cc-item-tip__trader"> · @HandbookPrice.ToString("N0", CultureInfo.InvariantCulture) ₽ trader</span>
                     }
                 }
             </div>
@@ -52,7 +54,13 @@
                um item "pesa" mais que o tpl base no somatório do painel. Só quando difere do base. *@
             @if (BuildValue > Price + 1)
             {
-                <div class="cc-item-tip__build">assembled <b>@BuildValue.ToString("N0", CultureInfo.InvariantCulture) ₽</b></div>
+                <div class="cc-item-tip__build">
+                    assembled <b>@BuildValue.ToString("N0", CultureInfo.InvariantCulture) ₽</b><span class="cc-item-tip__src"> flea</span>
+                    @if (HandbookBuildValue > 0)
+                    {
+                        <span class="cc-item-tip__trader"> · @HandbookBuildValue.ToString("N0", CultureInfo.InvariantCulture) ₽ trader</span>
+                    }
+                </div>
             }
         </div>
     </TooltipContent>
@@ -81,4 +89,10 @@
 
     /// <summary>Total value of the assembled build (root + parts + ammo + contents). Shown when &gt; base price.</summary>
     [Parameter] public double BuildValue { get; set; }
+
+    /// <summary>Trader/handbook base price (per unit) shown next to the flea base. 0 hides the trader column.</summary>
+    [Parameter] public double HandbookPrice { get; set; }
+
+    /// <summary>Trader/handbook value of the assembled build, shown next to the flea assembled value. 0 hides it.</summary>
+    [Parameter] public double HandbookBuildValue { get; set; }
 }

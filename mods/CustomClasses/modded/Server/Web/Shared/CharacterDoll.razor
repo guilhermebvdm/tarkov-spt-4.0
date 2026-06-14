@@ -35,7 +35,8 @@
                              Price="@gc.Price" PriceSource="@gc.PriceSource"
                              MissingPrice="@gc.MissingPrice"
                              IconId="@gc.IconId" RootTpl="@gc.RootTpl" CategoryIcon="@gc.CategoryIcon"
-                             Contents="@gc.Contents" BuildValue="@gc.BuildValue">
+                             Contents="@gc.Contents" BuildValue="@gc.BuildValue"
+                             HandbookPrice="@gc.HandbookPrice" HandbookBuildValue="@gc.HandbookBuildValue">
                     @* Slot de equipamento = caixa de TAMANHO FIXO (estilo EFT): o ícone é contido
                        (object-fit) — NÃO dimensionamos pelo W×H real do item, senão armas (5×2) e
                        mochilas (4×4) estouram a silhueta e se sobrepõem. O W×H real importa só no stash. *@
@@ -92,7 +93,7 @@
     private sealed record GearCell(
         string? RootTpl, string? IconId, string Name, string? Category,
         int Width, int Height, double Price, string? PriceSource, bool MissingPrice, bool MissingRequired,
-        string? CategoryIcon, int Contents, double BuildValue);
+        string? CategoryIcon, int Contents, double BuildValue, double HandbookPrice, double HandbookBuildValue);
 
     private Dictionary<string, GearCell> _cells = new(StringComparer.OrdinalIgnoreCase);
 
@@ -132,7 +133,7 @@
         if (rootTpl is null)
         {
             var raw = spec.Preset ?? spec.Tpl ?? "(no tpl)";
-            return new GearCell(null, null, raw, null, 1, 1, 0, null, true, missingRequired, null, contents, 0);
+            return new GearCell(null, null, raw, null, 1, 1, 0, null, true, missingRequired, null, contents, 0, 0, 0);
         }
 
         var (w, h) = Catalog.GetItemDimensions(rootTpl);
@@ -140,11 +141,13 @@
         var name = Catalog.GetItemName(id);
         var category = Catalog.GetCategoryName(rootTpl);
         var (price, source) = Catalog.GetPrice(id);
+        var handbook = Catalog.GetHandbookPrice(id);
+        var (buildFlea, buildHb) = CostService.ItemBuildValueDual(spec, true);
         // #3: ícone do PRESET montado quando aplicável (fallback pro tpl base no onerror).
         var iconId = ResolvePresetIconId(spec) ?? rootTpl;
         return new GearCell(rootTpl, iconId, name, category, w, h, price, source,
             string.Equals(source, "missing", StringComparison.Ordinal), missingRequired,
-            Catalog.GetCategoryIcon(rootTpl), contents, CostService.ItemBuildValue(spec, true));
+            Catalog.GetCategoryIcon(rootTpl), contents, buildFlea, handbook, buildHb);
     }
 
     /// <summary>Id do preset (default/premium) p/ a imagem do tarkov.dev — null se o item não é preset.</summary>

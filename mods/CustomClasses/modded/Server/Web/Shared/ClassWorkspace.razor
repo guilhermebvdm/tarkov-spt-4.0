@@ -44,6 +44,7 @@ else
     // o Blazor recria o elemento e o .cc-pulse roda 1× (auto-reset). Sem custo extra.
     var skillCostStr = LiveSkillCost?.Total.ToString("0.00", CultureInfo.InvariantCulture) ?? "—";
     var loadoutStr = LiveLoadoutCost is null ? "—" : FormatRub(LiveLoadoutCost.TotalRub);
+    var loadoutTraderStr = LiveLoadoutCost is null ? null : FormatRub(LiveLoadoutCost.TotalHandbook);
 
     <div class="cc-ws @(_editMode ? "cc-ws--edit" : null)">
         @* Camada 3 (fluidez): overlay + spinner sobre o workspace durante o Save (hot-apply off-circuit). *@
@@ -58,8 +59,8 @@ else
                     <span @key="skillCostStr" class="cc-ws__badge-val cc-pulse">@skillCostStr</span>
                 </span>
                 <span class="cc-ws__badge">
-                    <span class="cc-ws__badge-label">Loadout</span>
-                    <span @key="loadoutStr" class="cc-ws__badge-val cc-pulse">@loadoutStr</span>
+                    <span class="cc-ws__badge-label">Loadout (flea · trader)</span>
+                    <span @key="loadoutStr" class="cc-ws__badge-val cc-pulse">@loadoutStr@if (loadoutTraderStr is not null){<span class="cc-ws__badge-sub"> · @loadoutTraderStr</span>}</span>
                 </span>
             </div>
 
@@ -190,7 +191,7 @@ else
 
             @* ░ CENTRO ░ *@
             <div class="cc-ws__panel cc-ws__panel--center">
-                <div class="cc-section__title">Equipped (@EquippedCount slots) <span class="cc-section__sum">@FormatRub(EquippedRub)</span></div>
+                <div class="cc-section__title">Equipped (@EquippedCount slots) <span class="cc-section__sum">@FormatRub(EquippedRub) <span class="cc-section__sum-trader">flea · @FormatRub(EquippedHb) trader</span></span></div>
                 <CharacterDoll Equipped="@EquippedForView" Editable="@_editMode" OnSlotClick="EditSlotAsync"/>
 
                 @* ── Outfit (movido pro painel EQUIPPED — é a aparência do personagem) ── *@
@@ -218,7 +219,7 @@ else
             @* ░ DIREITA ░ *@
             <div class="cc-ws__panel cc-ws__panel--right">
                 <div class="cc-ws__panel-head">
-                    <div class="cc-section__title">Stash (@StashCount lines) <span class="cc-section__sum">@FormatRub(StashRub)</span></div>
+                    <div class="cc-section__title">Stash (@StashCount lines) <span class="cc-section__sum">@FormatRub(StashRub) <span class="cc-section__sum-trader">flea · @FormatRub(StashHb) trader</span></span></div>
                     @if (_editMode && _model is not null)
                     {
                         <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small"
@@ -297,13 +298,20 @@ else
     // contents, com count) — bate com o que cada tooltip mostra e cobre ammo/contents (antes ficavam de
     // fora). Em edição é cacheado no RecomputeLoadoutCost (não recomputa a cada slider); em read deriva
     // da Definition (renderiza poucas vezes).
-    private double _equippedRub, _stashRub;
+    private double _equippedRub, _stashRub, _equippedHb, _stashHb;
     private double EquippedRub => _editMode && _model is not null
         ? _equippedRub
         : Definition?.Loadout?.Equipped?.Values.Sum(s => CostService.ItemBuildValue(s, true)) ?? 0;
     private double StashRub => _editMode && _model is not null
         ? _stashRub
         : Definition?.Loadout?.Stash?.Sum(s => CostService.ItemBuildValue(s, false)) ?? 0;
+    // Valor de trader/handbook (base aterrada) por painel — contraste do flea especulativo (item 037 UX).
+    private double EquippedHb => _editMode && _model is not null
+        ? _equippedHb
+        : Definition?.Loadout?.Equipped?.Values.Sum(s => CostService.ItemBuildValueDual(s, true).Handbook) ?? 0;
+    private double StashHb => _editMode && _model is not null
+        ? _stashHb
+        : Definition?.Loadout?.Stash?.Sum(s => CostService.ItemBuildValueDual(s, false).Handbook) ?? 0;
 
     // PERF: os snapshots da doll/stash são CACHEADOS (rebuild só quando o loadout muda — RebuildLoadoutViews),
     // NÃO recomputados a cada render. Antes, EquippedForView/StashForView chamavam _model.ToDefinition()
@@ -585,8 +593,12 @@ else
         {
             var def = _model.ToDefinition();
             _editLoadoutCost = CostService.ComputeLoadoutCost(def);
-            _equippedRub = def.Loadout?.Equipped?.Values.Sum(s => CostService.ItemBuildValue(s, true)) ?? 0;
-            _stashRub = def.Loadout?.Stash?.Sum(s => CostService.ItemBuildValue(s, false)) ?? 0;
+            var eq = def.Loadout?.Equipped?.Values.Select(s => CostService.ItemBuildValueDual(s, true)).ToList() ?? [];
+            var st = def.Loadout?.Stash?.Select(s => CostService.ItemBuildValueDual(s, false)).ToList() ?? [];
+            _equippedRub = eq.Sum(v => v.Flea);
+            _stashRub = st.Sum(v => v.Flea);
+            _equippedHb = eq.Sum(v => v.Handbook);
+            _stashHb = st.Sum(v => v.Handbook);
         }
     }
 

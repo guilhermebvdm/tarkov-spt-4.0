@@ -46,7 +46,8 @@
                      @onclick="@(() => OnItemClick.InvokeAsync(cell.Model))">
                     <ItemTooltip Name="@cell.Name" Category="@cell.Category" Width="@cell.Width" Height="@cell.Height"
                                  Price="@cell.Price" PriceSource="@cell.PriceSource" Qty="@cell.Qty" MissingPrice="@cell.MissingPrice"
-                                 IconId="@cell.IconId" RootTpl="@cell.RootTpl" CategoryIcon="@cell.CategoryIcon" Contents="@cell.Contents" BuildValue="@cell.BuildValue">
+                                 IconId="@cell.IconId" RootTpl="@cell.RootTpl" CategoryIcon="@cell.CategoryIcon" Contents="@cell.Contents" BuildValue="@cell.BuildValue"
+                                 HandbookPrice="@cell.HandbookPrice" HandbookBuildValue="@cell.HandbookBuildValue">
                         <ChildContent>@ItemInner(cell)</ChildContent>
                     </ItemTooltip>
                     <button class="cc-grid2d__rotate" type="button" title="Rotate"
@@ -61,7 +62,8 @@
                      style="@CellStyle(cell)">
                     <ItemTooltip Name="@cell.Name" Category="@cell.Category" Width="@cell.Width" Height="@cell.Height"
                                  Price="@cell.Price" PriceSource="@cell.PriceSource" Qty="@cell.Qty" MissingPrice="@cell.MissingPrice"
-                                 IconId="@cell.IconId" RootTpl="@cell.RootTpl" CategoryIcon="@cell.CategoryIcon" Contents="@cell.Contents" BuildValue="@cell.BuildValue">
+                                 IconId="@cell.IconId" RootTpl="@cell.RootTpl" CategoryIcon="@cell.CategoryIcon" Contents="@cell.Contents" BuildValue="@cell.BuildValue"
+                                 HandbookPrice="@cell.HandbookPrice" HandbookBuildValue="@cell.HandbookBuildValue">
                         <ChildContent>@ItemInner(cell)</ChildContent>
                     </ItemTooltip>
                 </div>
@@ -122,12 +124,13 @@
     private sealed record PlacedCell(
         int X, int Y, int W, int H, int W0, int H0, string? RootTpl, string? IconId, string Name, string? Category,
         double Qty, double Price, string? PriceSource, bool MissingPrice, int Width, int Height,
-        ItemSpecModel? Model, bool Rotated, string? CategoryIcon, int Contents, double BuildValue);
+        ItemSpecModel? Model, bool Rotated, string? CategoryIcon, int Contents, double BuildValue,
+        double HandbookPrice, double HandbookBuildValue);
 
     /// <summary>Campos normalizados de um item de origem (ItemSpec read-only OU ItemSpecModel editável).</summary>
     private readonly record struct SrcItem(
         string? Preset, string? Tpl, bool Premium, double Count, int? X, int? Y, bool Rotated, ItemSpecModel? Model,
-        int Contents, double BuildValue);
+        int Contents, double BuildValue, double HandbookBuildValue);
 
     private object? _lastSource;
     private string? _lastBase;
@@ -232,8 +235,11 @@
         var iconId = ResolvePresetIconId(item) ?? rootTpl;
         // Fallback de imagem: ícone da categoria do handbook (servido pelo SPT) quando o ícone do item falha.
         var catIcon = Catalog.GetCategoryIcon(rootTpl);
+        // Valor de trader/handbook (base aterrada) ao lado do flea — unit via tpl-raiz; build via item.
+        var handbookUnit = rootTpl is not null && TryMongoId(rootTpl) is { } hbId ? Catalog.GetHandbookPrice(hbId) : 0;
         _cells.Add(new PlacedCell(x, y, dw, dh, w0, h0, rootTpl, iconId, name, category,
-            qty, price, source, missing, w0, h0, item.Model, rotated && w0 != h0, catIcon, item.Contents, item.BuildValue));
+            qty, price, source, missing, w0, h0, item.Model, rotated && w0 != h0, catIcon, item.Contents, item.BuildValue,
+            handbookUnit, item.HandbookBuildValue));
     }
 
     /// <summary>Id do preset (default/premium) p/ a imagem do tarkov.dev — null se o item não é preset.</summary>
@@ -252,14 +258,22 @@
     {
         if (_editable)
         {
-            return EditItems!.Select(m => new SrcItem(
-                m.Preset, m.Tpl, m.Premium, Math.Max(1, m.Count), m.X, m.Y, m.Rotated ?? false, m,
-                m.Contents.Count, CostService.ItemBuildValue(m.ToSpec(), false))).ToList();
+            return EditItems!.Select(m =>
+            {
+                var (flea, hb) = CostService.ItemBuildValueDual(m.ToSpec(), false);
+                return new SrcItem(
+                    m.Preset, m.Tpl, m.Premium, Math.Max(1, m.Count), m.X, m.Y, m.Rotated ?? false, m,
+                    m.Contents.Count, flea, hb);
+            }).ToList();
         }
 
         return (Stash ?? [])
-            .Select(s => new SrcItem(s.Preset, s.Tpl, s.Premium, Math.Max(1, s.Count), s.X, s.Y, s.Rotated ?? false, null,
-                s.Contents?.Count ?? 0, CostService.ItemBuildValue(s, false)))
+            .Select(s =>
+            {
+                var (flea, hb) = CostService.ItemBuildValueDual(s, false);
+                return new SrcItem(s.Preset, s.Tpl, s.Premium, Math.Max(1, s.Count), s.X, s.Y, s.Rotated ?? false, null,
+                    s.Contents?.Count ?? 0, flea, hb);
+            })
             .ToList();
     }
 

@@ -23,7 +23,7 @@ else
                 <ItemTooltip Name="@cell.Name" Category="@cell.Category"
                              Width="@cell.Width" Height="@cell.Height"
                              Price="@cell.Price" PriceSource="@cell.PriceSource"
-                             MissingPrice="@cell.MissingPrice">
+                             MissingPrice="@cell.MissingPrice" HandbookPrice="@cell.HandbookPrice">
                     <div class="cc-item-cell"
                          style="@($"width:calc(var(--cc-cell-unit) * {cell.Width});height:calc(var(--cc-cell-unit) * {cell.Height});")">
                         @if (cell.RootTpl is not null)
@@ -45,7 +45,7 @@ else
 
     private sealed record GearCell(
         string Slot, string? RootTpl, string Name, string? Category,
-        int Width, int Height, double Price, string? PriceSource, bool MissingPrice);
+        int Width, int Height, double Price, string? PriceSource, bool MissingPrice, double HandbookPrice);
 
     private List<GearCell> _cells = [];
 
@@ -70,7 +70,7 @@ else
         {
             // Unresolved tpl/preset — show the slot with the raw reference as the name, no icon.
             var raw = spec.Preset ?? spec.Tpl ?? "(no tpl)";
-            return new GearCell(slot, null, raw, null, 1, 1, 0, null, true);
+            return new GearCell(slot, null, raw, null, 1, 1, 0, null, true, 0);
         }
 
         var (w, h) = Catalog.GetItemDimensions(rootTpl);
@@ -79,7 +79,7 @@ else
         var category = Catalog.GetCategoryName(rootTpl);
         var (price, source) = Catalog.GetPrice(id);
         return new GearCell(slot, rootTpl, name, category, w, h, price, source,
-            string.Equals(source, "missing", StringComparison.Ordinal));
+            string.Equals(source, "missing", StringComparison.Ordinal), Catalog.GetHandbookPrice(id));
     }
 
     /// <summary>

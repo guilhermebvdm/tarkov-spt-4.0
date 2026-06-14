@@ -42,6 +42,8 @@ public sealed record LoadoutCostEntry
     /// <summary>"flea" | "handbook" | "currency" | "missing" (see CatalogService.GetPrice).</summary>
     [JsonPropertyName("priceSource")] public required string PriceSource { get; init; }
     [JsonPropertyName("subtotal")] public double Subtotal { get; init; }
+    /// <summary>Trader/handbook subtotal (static base price × qty) — the grounded value next to the flea subtotal.</summary>
+    [JsonPropertyName("handbookSubtotal")] public double HandbookSubtotal { get; init; }
     /// <summary>True when no price was found — subtotal 0, surfaced as a badge in the UI (never silent).</summary>
     [JsonPropertyName("missingPrice")] public bool MissingPrice { get; init; }
 }
@@ -51,6 +53,8 @@ public sealed record LoadoutCostBreakdown
 {
     [JsonPropertyName("items")] public required List<LoadoutCostEntry> Items { get; init; }
     [JsonPropertyName("totalRub")] public double TotalRub { get; init; }
+    /// <summary>Same walk priced at trader/handbook base value — the grounded contrast to the flea total.</summary>
+    [JsonPropertyName("totalHandbook")] public double TotalHandbook { get; init; }
     [JsonPropertyName("warnings")] public required List<string> Warnings { get; init; }
 }
 
@@ -249,6 +253,7 @@ public class CostService(
         {
             Items = items,
             TotalRub = Math.Round(items.Sum(i => i.Subtotal)),
+            TotalHandbook = Math.Round(items.Sum(i => i.HandbookSubtotal)),
             Warnings = warnings,
         };
     }
@@ -259,11 +264,18 @@ public class CostService(
     ///     cref="AddSpec"/>, então espelha exatamente o que o builder spawna e o que entra no somatório do
     ///     painel. Usado no tooltip pra revelar por que uma arma montada "pesa" (ex.: AKM + thermal).
     /// </summary>
-    public double ItemBuildValue(ItemSpec spec, bool equipped)
+    public double ItemBuildValue(ItemSpec spec, bool equipped) => ItemBuildValueDual(spec, equipped).Flea;
+
+    /// <summary>
+    ///     Like <see cref="ItemBuildValue"/> but returns BOTH valuations of the assembled item: the flea total
+    ///     and the trader/handbook total (item 037 UX — the editor shows "flea X · trader Y" so the speculative
+    ///     market value and the grounded base value sit side by side).
+    /// </summary>
+    public (double Flea, double Handbook) ItemBuildValueDual(ItemSpec spec, bool equipped)
     {
         var items = new List<LoadoutCostEntry>();
         AddSpec(spec, equipped, equipped ? "equipped" : "stash", items, []);
-        return Math.Round(items.Sum(i => i.Subtotal));
+        return (Math.Round(items.Sum(i => i.Subtotal)), Math.Round(items.Sum(i => i.HandbookSubtotal)));
     }
 
     /// <param name="multiplier">
@@ -553,6 +565,7 @@ public class CostService(
     private void AddLine(MongoId tpl, double qty, string context, List<LoadoutCostEntry> items)
     {
         var (unitPrice, source) = catalog.GetPrice(tpl);
+        var handbookUnit = catalog.GetHandbookPrice(tpl);
         items.Add(new LoadoutCostEntry
         {
             Tpl = tpl.ToString(),
@@ -562,6 +575,7 @@ public class CostService(
             UnitPrice = unitPrice,
             PriceSource = source,
             Subtotal = Math.Round(unitPrice * qty),
+            HandbookSubtotal = Math.Round(handbookUnit * qty),
             MissingPrice = string.Equals(source, "missing", StringComparison.Ordinal),
         });
     }
