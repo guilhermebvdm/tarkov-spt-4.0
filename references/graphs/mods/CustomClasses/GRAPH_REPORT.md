@@ -1,16 +1,16 @@
-# Graph Report - mods\CustomClasses\modded  (2026-06-13)
+# Graph Report - mods\CustomClasses\modded  (2026-06-14)
 
 ## Corpus Check
-- 78 files · ~64,092 words
+- 81 files · ~64,861 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1187 nodes · 1462 edges · 76 communities (69 shown, 7 thin omitted)
+- 1203 nodes · 1475 edges · 79 communities (72 shown, 7 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 1 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `5fe45638`
+- Built from commit: `ebb28270`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -115,11 +115,11 @@
 ## Import Cycles
 - None detected.
 
-## Communities (76 total, 7 thin omitted)
+## Communities (79 total, 7 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.10
-Nodes (20): HideoutAreas, MapSeverity, OnParametersSet, Reload, ReloadAndRefresh, route:/customclasses/classes/{FileName}/edit, ClassEditorService, ClassWorkspace (+12 more)
+Cohesion: 0.09
+Nodes (21): HideoutAreas, MapSeverity, OnParametersSetAsync, Reload, ReloadAndRefresh, route:/customclasses/classes/{FileName}/edit, ClassEditorService, ClassWorkspace (+13 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.07
@@ -127,11 +127,11 @@ Nodes (25): ISptLogger, ItemHelper, Lazy, LocaleService, Price, SearchIndexRow, 
 
 ### Community 2 - "Community 2"
 Cohesion: 0.04
-Nodes (51): ClassRegistrar, GearPanel, MudMenuItem, ClearCompare, ClothingLabel, CountSkills, DeltaChip, FormatRub (+43 more)
+Nodes (52): ClassRegistrar, GearPanel, MudMenuItem, ClearCompare, ClothingLabel, CountSkills, DeltaChip, FormatRub (+44 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.05
-Nodes (43): ClassLifecycleCreateDialog, MudTableSortLabel, EditClass, FormatRub, LoadRows, OnAfterRenderAsync, OnInitialized, OnRowClick (+35 more)
+Cohesion: 0.04
+Nodes (44): ClassLifecycleCreateDialog, MudTableSortLabel, EditClass, FormatRub, LoadRows, OnAfterRenderAsync, OnInitializedAsync, OnRowClick (+36 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.05
@@ -151,11 +151,11 @@ Nodes (19): LocalizedText, Outfit, ClassDefinition, Dictionary, Func, ItemSpec, 
 
 ### Community 8 - "Community 8"
 Cohesion: 0.06
-Nodes (34): ClassColumn, BuildOverflowSkills, CategoryHeader, Cell, ClassColumn, CostFooterCell, HeaderTitle, LoadColumns (+26 more)
+Nodes (35): ClassColumn, MatrixSkeleton, BuildOverflowSkills, CategoryHeader, Cell, ClassColumn, CostFooterCell, HeaderTitle (+27 more)
 
 ### Community 9 - "Community 9"
 Cohesion: 0.06
-Nodes (30): MudNavLink, MudNavMenu, ClassEditorService, CostService, CustomClasses.Web, IJSRuntime, MudDivider, MudIcon (+22 more)
+Nodes (31): MudNavLink, MudNavMenu, ClassEditorService, CostService, CustomClasses.Web, IJSRuntime, ListRowsSkeleton, MudDivider (+23 more)
 
 ### Community 10 - "Community 10"
 Cohesion: 0.14
@@ -170,8 +170,8 @@ Cohesion: 0.07
 Nodes (29): CategoryOption, CatNodeData, MudProgressLinear, CatalogCategory, CatalogItem, CatalogService, DialogActions, DialogContent (+21 more)
 
 ### Community 13 - "Community 13"
-Cohesion: 0.08
-Nodes (23): CascadingValue, HeadContent, LayoutComponentBase, CycleDrawer, OnAfterRenderAsync, OnBeforeNavAsync, Reset, MudAppBar (+15 more)
+Cohesion: 0.07
+Nodes (27): CascadingValue, HeadContent, LayoutComponentBase, CycleDrawer, Dispose, OnAfterRenderAsync, OnBeforeNavAsync, OnInitialized (+19 more)
 
 ### Community 14 - "Community 14"
 Cohesion: 0.10
@@ -195,19 +195,19 @@ Nodes (8): BaseMeshEffect, Color, string, MultiplierFormat, Color, List, ClassIc
 
 ### Community 19 - "Community 19"
 Cohesion: 0.12
-Nodes (15): MudProgressCircular, ClassDiagnostic, ClassEditorService, DialogActions, DialogContent, MudAlert, MudButton, MudDialog (+7 more)
+Nodes (15): ClassDiagnostic, ClassEditorService, DialogActions, DialogContent, MudAlert, MudButton, MudDialog, MudPaper (+7 more)
 
 ### Community 20 - "Community 20"
 Cohesion: 0.16
 Nodes (10): Color, IEnumerator, Image, MenuScreen, MethodBase, PatchPostfix, string, TextMeshProUGUI (+2 more)
 
 ### Community 21 - "Community 21"
-Cohesion: 0.13
-Nodes (14): ClassDiagnostic, ClassEditorService, DialogActions, DialogContent, MudAlert, MudButton, MudDialog, MudStack (+6 more)
+Cohesion: 0.12
+Nodes (15): ClassDiagnostic, ClassEditorService, DialogActions, DialogContent, MudAlert, MudButton, MudDialog, MudProgressCircular (+7 more)
 
 ### Community 22 - "Community 22"
-Cohesion: 0.13
-Nodes (14): ClassDiagnostic, ClassEditorService, DialogActions, DialogContent, MudAlert, MudButton, MudDialog, MudStack (+6 more)
+Cohesion: 0.12
+Nodes (15): ClassDiagnostic, ClassEditorService, DialogActions, DialogContent, MudAlert, MudButton, MudDialog, MudProgressCircular (+7 more)
 
 ### Community 23 - "Community 23"
 Cohesion: 0.14
@@ -363,7 +363,7 @@ Nodes (3): Dictionary, PmcData, HideoutBuilder
 
 ### Community 66 - "Community 66"
 Cohesion: 0.03
-Nodes (60): CharacterDoll, CatalogService, ClassDiagnostic, ClassEditorService, ClassWorkspace, CostService, CustomClasses.Web, IDialogService (+52 more)
+Nodes (62): CharacterDoll, MudOverlay, CatalogService, ClassDiagnostic, ClassEditorService, ClassWorkspace, CostService, CustomClasses.Web (+54 more)
 
 ### Community 67 - "Community 67"
 Cohesion: 0.09
@@ -378,7 +378,7 @@ Cohesion: 0.20
 Nodes (9): CustomClasses.Web, DialogActions, DialogContent, ItemSpecEditor, MudButton, MudDialog, MudText, TitleContent (+1 more)
 
 ## Knowledge Gaps
-- **777 isolated node(s):** `netstandard2.1`, `Microsoft.NET.Sdk`, `string`, `MethodBase`, `TextMeshProUGUI` (+772 more)
+- **790 isolated node(s):** `netstandard2.1`, `Microsoft.NET.Sdk`, `string`, `MethodBase`, `TextMeshProUGUI` (+785 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **7 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -386,16 +386,16 @@ Nodes (9): CustomClasses.Web, DialogActions, DialogContent, ItemSpecEditor, MudB
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `SkillPanelPatch` connect `Community 27` to `Community 40`?**
-  _High betweenness centrality (0.004) - this node is a cross-community bridge._
+  _High betweenness centrality (0.003) - this node is a cross-community bridge._
 - **Why does `RaidReadyPlayerPanelPatch` connect `Community 49` to `Community 40`?**
   _High betweenness centrality (0.002) - this node is a cross-community bridge._
 - **Why does `SkillsNavButtonPatch` connect `Community 17` to `Community 40`?**
   _High betweenness centrality (0.002) - this node is a cross-community bridge._
 - **What connects `netstandard2.1`, `Microsoft.NET.Sdk`, `string` to the rest of the system?**
-  _777 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _790 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.09523809523809523 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09090909090909091 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.07291666666666667 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.038461538461538464 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.03773584905660377 - nodes in this community are weakly interconnected._
