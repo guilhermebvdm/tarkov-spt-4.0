@@ -15,6 +15,10 @@ const path   = require('path');
 const crypto = require('crypto');
 
 const PORT     = parseInt(process.argv[2] || '8080', 10);
+// Bind localhost by default — the viewer mutates live SPT config and has no auth,
+// so it must not be reachable off-box. Set ITEMDB_HOST=0.0.0.0 to expose on the
+// LAN (only behind your own auth/network controls — there is none built in).
+const HOST     = process.env.ITEMDB_HOST || '127.0.0.1';
 const ROOT     = path.resolve(__dirname, '..');
 const SPT_PATH = process.env.SPT_PATH || 'D:/SPT/SPT';
 const SPT_DATA = path.join(SPT_PATH, 'SPT_Data');
@@ -937,8 +941,8 @@ http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': MIME[path.extname(filePath)] || 'application/octet-stream' });
     fs.createReadStream(filePath).pipe(res);
   });
-}).listen(PORT, () => {
-  console.error(`Serving ${ROOT} at http://localhost:${PORT}/viewer/`);
+}).listen(PORT, HOST, () => {
+  console.error(`Serving ${ROOT} at http://${HOST}:${PORT}/viewer/`);
   console.error(`POST/DELETE /api/price → writes override in ${RAGFAIR_JSON}`);
 
   // On startup: refresh hashes for tracked SPT files that may be divergent.
