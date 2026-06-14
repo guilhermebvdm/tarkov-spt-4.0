@@ -37,12 +37,18 @@
         {
             if (_editable)
             {
+                @* O ItemTooltip envolve o CONTEÚDO (não a célula) — a célula segue sendo o grid-child com
+                   CellStyle/data-* (o DnD usa closest('.cc-grid2d__item')); o wrapper preenche a célula via CSS. *@
                 <div class="cc-item-cell cc-grid2d__item cc-grid2d__item--edit @(cell.Rotated ? "cc-grid2d__item--rot" : null)"
-                     style="@CellStyle(cell)" title="Click to edit · drag to move · ⟳ rotate · ✕ remove"
+                     style="@CellStyle(cell)"
                      data-index="@(EditItems!.IndexOf(cell.Model!))"
                      data-x="@cell.X" data-y="@cell.Y" data-w="@cell.W" data-h="@cell.H"
                      @onclick="@(() => OnItemClick.InvokeAsync(cell.Model))">
-                    @ItemInner(cell)
+                    <ItemTooltip Name="@cell.Name" Category="@cell.Category" Width="@cell.Width" Height="@cell.Height"
+                                 Price="@cell.Price" PriceSource="@cell.PriceSource" Qty="@cell.Qty" MissingPrice="@cell.MissingPrice"
+                                 IconId="@cell.IconId" RootTpl="@cell.RootTpl" CategoryIcon="@cell.CategoryIcon" Contents="@cell.Contents">
+                        <ChildContent>@ItemInner(cell)</ChildContent>
+                    </ItemTooltip>
                     <button class="cc-grid2d__rotate" type="button" title="Rotate"
                             @onclick="@(() => RotateAsync(cell))" @onclick:stopPropagation="true">⟳</button>
                     <button class="cc-grid2d__remove" type="button" title="Remove item"
@@ -51,15 +57,14 @@
             }
             else
             {
-                <ItemTooltip Name="@cell.Name" Category="@cell.Category"
-                             Width="@cell.Width" Height="@cell.Height"
-                             Price="@cell.Price" PriceSource="@cell.PriceSource"
-                             Qty="@cell.Qty" MissingPrice="@cell.MissingPrice">
-                    <div class="cc-item-cell cc-grid2d__item @(cell.Rotated ? "cc-grid2d__item--rot" : null)"
-                         style="@CellStyle(cell)">
-                        @ItemInner(cell)
-                    </div>
-                </ItemTooltip>
+                <div class="cc-item-cell cc-grid2d__item @(cell.Rotated ? "cc-grid2d__item--rot" : null)"
+                     style="@CellStyle(cell)">
+                    <ItemTooltip Name="@cell.Name" Category="@cell.Category" Width="@cell.Width" Height="@cell.Height"
+                                 Price="@cell.Price" PriceSource="@cell.PriceSource" Qty="@cell.Qty" MissingPrice="@cell.MissingPrice"
+                                 IconId="@cell.IconId" RootTpl="@cell.RootTpl" CategoryIcon="@cell.CategoryIcon" Contents="@cell.Contents">
+                        <ChildContent>@ItemInner(cell)</ChildContent>
+                    </ItemTooltip>
+                </div>
             }
         }
     </div>

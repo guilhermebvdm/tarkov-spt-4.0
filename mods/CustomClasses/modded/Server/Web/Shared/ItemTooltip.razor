@@ -1,41 +1,53 @@
 @* Item 034: reusable hover tooltip for a gear/stash item cell. Wraps the cell (ChildContent)
-   in a MudTooltip whose TooltipContent is a formatted block: bold name, category, W×H size,
-   flea price + source (or a "no price" warning), and quantity when >1. No click, hover only.
-   All fields are resolved server-side by the caller (GearPanel/StashPanel) via CatalogService —
-   the cell itself degrades to text when the tarkov.dev icon fails (offline). *@
+   in a MudTooltip whose TooltipContent is a premium card: item image (with category fallback),
+   bold name, category, W×H size, qty, flea price + source (or a "no price" warning). Hover only.
+   Fields resolved server-side by the caller (GearPanel / CharacterDoll / StashGrid) via CatalogService. *@
 
 @using System.Globalization
 
-<MudTooltip Placement="Placement.Top" Arrow="true">
+<MudTooltip Placement="Placement.Top" Arrow="true" Class="cc-item-tip-wrap">
     <ChildContent>
         @ChildContent
     </ChildContent>
     <TooltipContent>
         <div class="cc-item-tip">
+            @if (IconId is { Length: > 0 })
+            {
+                <img class="cc-item-tip__img" src="@($"https://assets.tarkov.dev/{IconId}-icon.webp")"
+                     alt="" draggable="false"
+                     data-fb="@(IconId != RootTpl ? RootTpl : null)" data-cat="@CategoryIcon"
+                     onerror="if(this.dataset.fb){this.src='https://assets.tarkov.dev/'+this.dataset.fb+'-icon.webp';this.dataset.fb='';}else if(this.dataset.cat){this.src=this.dataset.cat;this.dataset.cat='';this.classList.add('cc-item-tip__img--cat');}else{this.style.display='none';}"/>
+            }
             <div class="cc-item-tip__name">@Name</div>
             @if (!string.IsNullOrWhiteSpace(Category))
             {
                 <div class="cc-item-tip__cat">@Category</div>
             }
-            <div class="cc-item-tip__row">@Width×@Height cells</div>
-            <div class="cc-item-tip__row">
+            <div class="cc-item-tip__meta">
+                <span>@Width×@Height</span>
+                @if (Qty is > 1)
+                {
+                    <span>· qty @Qty.Value.ToString("N0", CultureInfo.InvariantCulture)</span>
+                }
+                @if (Contents > 0)
+                {
+                    <span>· @Contents inside</span>
+                }
+            </div>
+            <div class="cc-item-tip__price">
                 @if (MissingPrice)
                 {
-                    <span class="cc-item-tip__warn">⚠ no price</span>
+                    <span class="cc-item-tip__warn">⚠ no flea/handbook price</span>
                 }
                 else
                 {
-                    <span>@Price.ToString("N0", CultureInfo.InvariantCulture) ₽</span>
+                    <b>@Price.ToString("N0", CultureInfo.InvariantCulture) ₽</b>
                     @if (!string.IsNullOrWhiteSpace(PriceSource))
                     {
                         <span class="cc-item-tip__src"> · @PriceSource</span>
                     }
                 }
             </div>
-            @if (Qty is > 1)
-            {
-                <div class="cc-item-tip__row">qty: @Qty.Value.ToString("N0", CultureInfo.InvariantCulture)</div>
-            }
         </div>
     </TooltipContent>
 </MudTooltip>
@@ -52,4 +64,12 @@
     [Parameter] public string? PriceSource { get; set; }
     [Parameter] public double? Qty { get; set; }
     [Parameter] public bool MissingPrice { get; set; }
+
+    /// <summary>tarkov.dev icon id (preset or tpl) shown big in the tooltip; falls back to RootTpl/category.</summary>
+    [Parameter] public string? IconId { get; set; }
+    [Parameter] public string? RootTpl { get; set; }
+    [Parameter] public string? CategoryIcon { get; set; }
+
+    /// <summary>Items inside this container (rig/backpack) — shown as "N inside".</summary>
+    [Parameter] public int Contents { get; set; }
 }

@@ -32,7 +32,9 @@
                 <ItemTooltip Name="@gc.Name" Category="@gc.Category"
                              Width="@gc.Width" Height="@gc.Height"
                              Price="@gc.Price" PriceSource="@gc.PriceSource"
-                             MissingPrice="@gc.MissingPrice">
+                             MissingPrice="@gc.MissingPrice"
+                             IconId="@gc.IconId" RootTpl="@gc.RootTpl" CategoryIcon="@gc.CategoryIcon"
+                             Contents="@gc.Contents">
                     @* Slot de equipamento = caixa de TAMANHO FIXO (estilo EFT): o ícone é contido
                        (object-fit) — NÃO dimensionamos pelo W×H real do item, senão armas (5×2) e
                        mochilas (4×4) estouram a silhueta e se sobrepõem. O W×H real importa só no stash. *@
