@@ -71,7 +71,8 @@ window.ccGridDnd = (function () {
 
     function onDown(e) {
         if (e.button !== 0) { return; }                       // left button only
-        if (e.target.closest('.cc-grid2d__rotate')) { return; } // the ⟳ button is not a drag handle
+        // os botões ⟳/✕ não são alça de arraste (têm seus próprios cliques).
+        if (e.target.closest('.cc-grid2d__rotate') || e.target.closest('.cc-grid2d__remove')) { return; }
         const item = e.target.closest('.cc-grid2d__item');
         const grid = e.currentTarget;
         if (!item || !grid.__ccDnd) { return; }
@@ -79,14 +80,35 @@ window.ccGridDnd = (function () {
         if (Number.isNaN(index)) { return; }
 
         const rect = item.getBoundingClientRect();
+        // Ocupação das OUTRAS células + dims do item arrastado: o preview valida colisão no cliente
+        // (sem round-trip), e o C# revalida no drop (MoveItemTo).
+        const occ = [];
+        let dragW = 1, dragH = 1, origX = 0, origY = 0;
+        for (const it of grid.querySelectorAll('.cc-grid2d__item[data-index]')) {
+            const ix = +it.dataset.x, iy = +it.dataset.y, iw = +it.dataset.w, ih = +it.dataset.h;
+            if (+it.dataset.index === index) { dragW = iw; dragH = ih; origX = ix; origY = iy; continue; }
+            occ.push({ x: ix, y: iy, w: iw, h: ih });
+        }
+
         active = {
             grid, item, index, ref: grid.__ccDnd.ref,
             startX: e.clientX, startY: e.clientY,
             grabDX: e.clientX - rect.left, grabDY: e.clientY - rect.top,
-            w: rect.width, h: rect.height, moved: false, ghost: null,
+            w: rect.width, h: rect.height, moved: false, ghost: null, hint: null,
+            occ, dragW, dragH, origX, origY,
+            cols: +grid.dataset.cols || 0, rows: +grid.dataset.rows || 0,
+            lastCx: origX, lastCy: origY,
         };
         window.addEventListener('pointermove', onMove);
         window.addEventListener('pointerup', onUp);
+    }
+
+    function fitsAt(a, cx, cy) {
+        if (cx < 0 || cy < 0 || cx + a.dragW > a.cols || cy + a.dragH > a.rows) { return false; }
+        for (const o of a.occ) {
+            if (cx < o.x + o.w && cx + a.dragW > o.x && cy < o.y + o.h && cy + a.dragH > o.y) { return false; }
+        }
+        return true;
     }
 
     function onMove(e) {
@@ -105,9 +127,29 @@ window.ccGridDnd = (function () {
             active.ghost = g;
             active.item.classList.add('cc-grid2d__item--dragging');
             active.grid.classList.add('cc-grid2d--dragging');
+            // preview da célula-alvo (verde/vermelho), filho posicionado da grade (position:relative).
+            const hint = document.createElement('div');
+            hint.className = 'cc-grid2d__drop-hint';
+            active.grid.appendChild(hint);
+            active.hint = hint;
         }
         active.ghost.style.left = (e.clientX - active.grabDX) + 'px';
         active.ghost.style.top = (e.clientY - active.grabDY) + 'px';
+
+        const cellPx = cellPxOf(active.grid);
+        const gridRect = active.grid.getBoundingClientRect();
+        const cx = Math.round((e.clientX - active.grabDX - gridRect.left) / cellPx);
+        const cy = Math.round((e.clientY - active.grabDY - gridRect.top) / cellPx);
+        active.lastCx = cx;
+        active.lastCy = cy;
+        const fits = fitsAt(active, cx, cy);
+        const h = active.hint;
+        h.classList.toggle('cc-grid2d__drop-hint--ok', fits);
+        h.classList.toggle('cc-grid2d__drop-hint--bad', !fits);
+        h.style.left = (cx * cellPx) + 'px';
+        h.style.top = (cy * cellPx) + 'px';
+        h.style.width = (active.dragW * cellPx) + 'px';
+        h.style.height = (active.dragH * cellPx) + 'px';
     }
 
     function onUp(e) {
@@ -117,6 +159,7 @@ window.ccGridDnd = (function () {
         window.removeEventListener('pointermove', onMove);
         window.removeEventListener('pointerup', onUp);
         if (a.ghost) { a.ghost.remove(); }
+        if (a.hint) { a.hint.remove(); }
         a.item.classList.remove('cc-grid2d__item--dragging');
         a.grid.classList.remove('cc-grid2d--dragging');
         if (!a.moved) { return; }                              // it was a click — let @onclick handle it
@@ -126,12 +169,10 @@ window.ccGridDnd = (function () {
         a.item.addEventListener('click', swallow, { capture: true, once: true });
         setTimeout(() => a.item.removeEventListener('click', swallow, true), 300);
 
-        // target cell = item's top-left (cursor − grab offset) relative to the grid, snapped to the cell.
-        const cellPx = cellPxOf(a.grid);
-        const gridRect = a.grid.getBoundingClientRect();
-        const cx = Math.round((e.clientX - a.grabDX - gridRect.left) / cellPx);
-        const cy = Math.round((e.clientY - a.grabDY - gridRect.top) / cellPx);
-        a.ref.invokeMethodAsync('MoveItemTo', a.index, cx, cy);
+        // soltou na mesma célula → nada a fazer (não marca dirty à toa).
+        if (a.lastCx === a.origX && a.lastCy === a.origY) { return; }
+        // C# revalida (MoveItemTo) — fonte da verdade; o preview foi só dica visual.
+        a.ref.invokeMethodAsync('MoveItemTo', a.index, a.lastCx, a.lastCy);
     }
 
     return { init, dispose };

@@ -370,12 +370,26 @@
 /* (legado) Durante o drag, os itens não capturam pointer-events → o drop SEMPRE cai na grade (offset
    relativo a ela), mesmo soltando sobre outro item. */
 .cc-grid2d--dragging .cc-grid2d__item { pointer-events: none; }
-/* Botão ⟳ (rotacionar) no canto do item — só aparece no hover p/ não poluir. */
-.cc-grid2d__rotate    { position: absolute; top: 0; left: 0; z-index: 3; width: 16px; height: 16px;
+/* Botões ⟳ (rotacionar) / ✕ (remover) nos cantos do item — só aparecem no hover p/ não poluir. */
+.cc-grid2d__rotate, .cc-grid2d__remove {
+                        position: absolute; top: 0; z-index: 3; width: 16px; height: 16px;
                         padding: 0; line-height: 14px; font-size: 11px; cursor: pointer;
-                        border: none; border-radius: 0 0 3px 0; opacity: 0;
-                        color: #fff; background: rgba(0,0,0,.7); }
-.cc-grid2d__item--edit:hover .cc-grid2d__rotate { opacity: 1; }
+                        border: none; opacity: 0; color: #fff;
+                        background: rgba(0,0,0,.7); transition: opacity .12s ease, background .12s ease; }
+.cc-grid2d__rotate    { left: 0; border-radius: 0 0 3px 0; }
+.cc-grid2d__remove    { right: 0; border-radius: 0 0 0 3px; }
+.cc-grid2d__remove:hover { background: var(--mud-palette-error, #f44336); }
+.cc-grid2d__item--edit:hover .cc-grid2d__rotate,
+.cc-grid2d__item--edit:hover .cc-grid2d__remove { opacity: 1; }
+
+/* Preview da célula-alvo durante o arraste — verde (cabe) / vermelho (não cabe). A transição em
+   left/top faz o preview "deslizar" pela grade acompanhando o cursor (fluidez). */
+.cc-grid2d__drop-hint {
+    position: absolute; z-index: 5; pointer-events: none; border-radius: 3px;
+    transition: left .07s linear, top .07s linear, width .07s linear, height .07s linear, background .1s ease;
+}
+.cc-grid2d__drop-hint--ok  { background: rgba(102, 187, 106, .28); outline: 1px solid var(--mud-palette-success, #66bb6a); }
+.cc-grid2d__drop-hint--bad { background: rgba(244, 67, 54, .26); outline: 1px solid var(--mud-palette-error, #f44336); }
 
 /* ── Three-state sidebar (QA 2026-06-12) — Open 250px / Mini 64px / Closed 0 ─────
    The drawer stays permanently Open; the state class on MudLayout (cc-sb-open/mini/closed)
@@ -484,7 +498,7 @@
 .cc-sidebar-item       { transition: background .12s ease, border-left-color .12s ease; }
 .cc-ws__panel--left .skill-canonical tbody tr { transition: background .12s ease; }
 .cc-skill-cell, .cc-skill-col-header { transition: background .12s ease; }
-.cc-grid2d__item--edit { transition: outline-color .12s ease, box-shadow .12s ease; }
+.cc-grid2d__item--edit { transition: outline-color .12s ease, box-shadow .12s ease, opacity .12s ease; }
 .cc-doll-slot--edit .cc-doll-slot__cell { transition: outline-color .12s ease, opacity .12s ease; }
 .cc-ws__badge-val, .cc-badge__value, .cc-mult-chip, .cc-cat-node { transition: background .12s ease, color .12s ease; }
 

@@ -31,18 +31,22 @@
     @* A grade (linhas) é pintada via background-gradient no .cc-grid2d (CSS) — só os itens reais
        entram como filhos posicionados. Em edição a própria grade é a drop-zone. *@
     <div class="cc-grid2d" @ref="_gridEl" data-cell="@CellPx.ToString(CultureInfo.InvariantCulture)"
+         data-cols="@_w" data-rows="@_h"
          style="@($"grid-template-columns:repeat({_w}, var(--cc-cell-unit));grid-template-rows:repeat({_h}, var(--cc-cell-unit));")">
         @foreach (var cell in _cells)
         {
             if (_editable)
             {
                 <div class="cc-item-cell cc-grid2d__item cc-grid2d__item--edit"
-                     style="@CellStyle(cell)" title="Click to edit · drag to move · ⟳ to rotate"
+                     style="@CellStyle(cell)" title="Click to edit · drag to move · ⟳ rotate · ✕ remove"
                      data-index="@(EditItems!.IndexOf(cell.Model!))"
+                     data-x="@cell.X" data-y="@cell.Y" data-w="@cell.W" data-h="@cell.H"
                      @onclick="@(() => OnItemClick.InvokeAsync(cell.Model))">
                     @ItemInner(cell)
                     <button class="cc-grid2d__rotate" type="button" title="Rotate"
                             @onclick="@(() => RotateAsync(cell))" @onclick:stopPropagation="true">⟳</button>
+                    <button class="cc-grid2d__remove" type="button" title="Remove item"
+                            @onclick="@(() => RemoveAsync(cell))" @onclick:stopPropagation="true">✕</button>
                 </div>
             }
             else
@@ -341,6 +345,20 @@
         {
             Snackbar.Add("Can't rotate here — no room. Move it to a free area first.", Severity.Info);
         }
+    }
+
+    /// <summary>✕: remove o item direto da lista viva do stash (atalho do "Remove item" do diálogo).</summary>
+    private async Task RemoveAsync(PlacedCell cell)
+    {
+        if (!_editable || cell.Model is null)
+        {
+            return;
+        }
+
+        EditItems!.Remove(cell.Model);
+        Build();
+        StateHasChanged();
+        await OnChanged.InvokeAsync();
     }
 
     /// <summary>Cabe em (x,y) o retângulo w×h sem sair da grade nem colidir (exclui o item arrastado).</summary>
