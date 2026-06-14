@@ -31,32 +31,40 @@
             <MudText Typo="Typo.h4" Style="@NameStyle()">Edit — @(_entry?.Definition?.Name ?? FileName)</MudText>
         </MudStack>
 
-        @if (_entry is not null)
+        @if (_loading)
         {
-            @foreach (var d in _entry.Diagnostics)
-            {
-                <MudAlert Severity="@MapSeverity(d.Severity)" Dense="true" Class="mb-1">
-                    [@d.Code] @d.Message
-                </MudAlert>
-            }
-        }
-
-        @if (_entry?.Definition is not { } def)
-        {
-            <MudAlert Severity="Severity.Error" Dense="true" Class="mt-2">
-                No editable class file matching "@FileName" was found in config/classes/ (or it could
-                not be parsed — fix it on disk and reload).
-            </MudAlert>
+            @* Camada 2 (fluidez): skeleton enquanto recarrega do disco. *@
+            <WorkspaceSkeleton/>
         }
         else
         {
-            <ClassWorkspace Definition="@def"
-                            FileNameBare="@System.IO.Path.GetFileNameWithoutExtension(_entry.FileName)"
-                            SkillCost="@_skillCost"
-                            LoadoutCost="@_loadoutCost"
-                            Entry="@_entry"
-                            InitialEdit="true"
-                            OnSaved="ReloadAndRefresh"/>
+            @if (_entry is not null)
+            {
+                @foreach (var d in _entry.Diagnostics)
+                {
+                    <MudAlert Severity="@MapSeverity(d.Severity)" Dense="true" Class="mb-1">
+                        [@d.Code] @d.Message
+                    </MudAlert>
+                }
+            }
+
+            @if (_entry?.Definition is not { } def)
+            {
+                <MudAlert Severity="Severity.Error" Dense="true" Class="mt-2">
+                    No editable class file matching "@FileName" was found in config/classes/ (or it could
+                    not be parsed — fix it on disk and reload).
+                </MudAlert>
+            }
+            else
+            {
+                <ClassWorkspace Definition="@def"
+                                FileNameBare="@System.IO.Path.GetFileNameWithoutExtension(_entry.FileName)"
+                                SkillCost="@_skillCost"
+                                LoadoutCost="@_loadoutCost"
+                                Entry="@_entry"
+                                InitialEdit="true"
+                                OnSaved="ReloadAndRefresh"/>
+            }
         }
     </MudPaper>
 </MudContainer>
@@ -72,7 +80,29 @@
     private string BareName =>
         System.IO.Path.GetFileNameWithoutExtension(_entry?.FileName ?? FileName ?? string.Empty);
 
-    protected override void OnParametersSet() => Reload();
+    // Camada 2 (fluidez): skeleton durante o reload + _loadVersion (barra load duplo em troca rápida).
+    private bool _loading = true;
+    private int _loadVersion;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var v = ++_loadVersion;
+        _loading = true;
+        StateHasChanged();
+        await Task.Yield();
+        if (v != _loadVersion)
+        {
+            return;
+        }
+
+        Reload();
+        if (v != _loadVersion)
+        {
+            return;
+        }
+
+        _loading = false;
+    }
 
     /// <summary>F2a: re-resolve from disk (e.g. after a Save) and re-render.</summary>
     private void ReloadAndRefresh()

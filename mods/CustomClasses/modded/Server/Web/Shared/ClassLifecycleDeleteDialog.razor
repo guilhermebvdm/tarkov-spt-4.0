@@ -85,6 +85,10 @@
         }
         <MudButton Variant="Variant.Filled" Color="Color.Error"
                    Disabled="@_busy" OnClick="DeleteAsync">
+            @if (_busy)
+            {
+                <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2"/>
+            }
             Delete file
         </MudButton>
     </DialogActions>

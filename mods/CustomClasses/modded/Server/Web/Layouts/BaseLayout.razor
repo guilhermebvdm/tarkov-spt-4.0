@@ -1,6 +1,8 @@
 @inherits LayoutComponentBase
+@implements IDisposable
 @inject IDialogService DialogService
 @inject IJSRuntime JS
+@inject NavigationManager Nav
 @using CustomClasses.Web
 
 @* Base layout for all CustomClasses editor pages (item 020).
@@ -83,7 +85,11 @@
             </MudDrawer>
 
             <MudMainContent>
-                @Body
+                @* Camada 5 (fluidez): fade-in sutil do conteúdo a cada navegação. O @key pela rota faz
+                   o Blazor recriar o container → a animação .cc-enter (opacity) roda de novo. *@
+                <div class="cc-enter" @key="_routeKey">
+                    @Body
+                </div>
             </MudMainContent>
         </MudLayout>
     </CascadingValue>
@@ -121,6 +127,23 @@
     }
 
     private readonly EditGuardState _guard = new();
+
+    // ── Camada 5 (fluidez): chave de rota → re-cria o container do @Body p/ replay do fade-in ──
+    private string _routeKey = "";
+
+    protected override void OnInitialized()
+    {
+        _routeKey = Nav.Uri;
+        Nav.LocationChanged += OnRouteChanged;
+    }
+
+    private void OnRouteChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        _routeKey = e.Location;
+        StateHasChanged();
+    }
+
+    public void Dispose() => Nav.LocationChanged -= OnRouteChanged;
 
     // ── Item 035 / QA: three-state sidebar (Open → Mini → Closed), persisted in localStorage ──
     private const int DrawerClosed = 0;   // hidden, content full-width

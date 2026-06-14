@@ -85,7 +85,12 @@
             }
         </MudStack>
 
-        @if (_entry is null)
+        @if (_loading)
+        {
+            @* Camada 2 (fluidez): skeleton enquanto recarrega do disco (troca de classe / ?compare=). *@
+            <WorkspaceSkeleton/>
+        }
+        else if (_entry is null)
         {
             <MudAlert Severity="Severity.Error" Dense="true">
                 No class file matching "@FileName" was found in config/classes/.
@@ -348,7 +353,30 @@
 
     private bool IsComparing => _compareDef is not null;
 
-    protected override void OnParametersSet() => Reload();
+    // Camada 2 (fluidez): skeleton durante o reload. _loadVersion barra load duplo em troca rápida de
+    // classe pela sidebar (mesma técnica do ItemPicker._searchVersion): um reload superado não escreve.
+    private bool _loading = true;
+    private int _loadVersion;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var v = ++_loadVersion;
+        _loading = true;
+        StateHasChanged();
+        await Task.Yield();            // deixa o skeleton pintar antes do trabalho pesado
+        if (v != _loadVersion)
+        {
+            return;                    // uma navegação mais nova já tomou a frente
+        }
+
+        Reload();                      // síncrono (parse + dry-run + custos)
+        if (v != _loadVersion)
+        {
+            return;
+        }
+
+        _loading = false;
+    }
 
     /// <summary>F2a: chamado pelo ClassWorkspace após um Save bem-sucedido — relê do disco e re-renderiza.</summary>
     private void ReloadAndRefresh()

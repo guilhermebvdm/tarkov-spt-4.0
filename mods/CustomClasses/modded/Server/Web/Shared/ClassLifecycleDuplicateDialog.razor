@@ -42,6 +42,10 @@
         <MudButton OnClick="@(() => Dialog?.Cancel())">Cancel</MudButton>
         <MudButton Variant="Variant.Filled" Color="Color.Primary"
                    Disabled="@(!CanSubmit)" OnClick="DuplicateAsync">
+            @if (_busy)
+            {
+                <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2"/>
+            }
             Duplicate
         </MudButton>
     </DialogActions>
