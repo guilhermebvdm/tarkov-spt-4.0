@@ -1,14 +1,14 @@
 using SPTarkov.Server.Core.Models.Spt.Mod;   // AbstractModMetadata
 
-namespace CustomizationPersistenceFix;
+namespace OutfitPersistenceFix;
 
 /// <summary>
 ///     Mod metadata discovered by the SPT server (same contract as CustomClasses / SkillDistribution).
 /// </summary>
-public record CustomizationPersistenceFixMetadata : AbstractModMetadata
+public record OutfitPersistenceFixMetadata : AbstractModMetadata
 {
-    public override string ModGuid { get; init; } = "customizationpersistencefix.mdj";
-    public override string Name { get; init; } = "CustomizationPersistenceFix";
+    public override string ModGuid { get; init; } = "outfitpersistencefix.mdj";
+    public override string Name { get; init; } = "OutfitPersistenceFix";
     public override string Author { get; init; } = "mdj";
     public override List<string>? Contributors { get; init; }
     public override SemanticVersioning.Version Version { get; init; } = new("1.0.0");

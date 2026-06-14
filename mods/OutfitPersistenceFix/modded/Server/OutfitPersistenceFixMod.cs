@@ -4,7 +4,7 @@ using SPTarkov.Server.Core.DI;                 // IOnLoad, OnLoadOrder
 using SPTarkov.Server.Core.Models.Utils;       // ISptLogger
 using SPTarkov.Server.Core.Services;           // DatabaseService
 
-namespace CustomizationPersistenceFix;
+namespace OutfitPersistenceFix;
 
 /// <summary>
 ///     Corrige um bug do SPT 4.0.x: <c>ProfileFixerService.FixProfileBreakingInventoryItemIssues</c>
@@ -18,16 +18,16 @@ namespace CustomizationPersistenceFix;
 ///          <c>if (customizationDb.ContainsKey(...))</c> em vez de <c>if (!customizationDb.ContainsKey(...))</c>.
 /// </summary>
 [Injectable(TypePriority = OnLoadOrder.PostDBModLoader)]
-public class CustomizationPersistenceFixMod(
+public class OutfitPersistenceFixMod(
     DatabaseService databaseService,
-    ISptLogger<CustomizationPersistenceFixMod> logger
+    ISptLogger<OutfitPersistenceFixMod> logger
 ) : IOnLoad
 {
     /// <summary>Referência ao DatabaseService p/ o patch estático validar as peças contra a DB de customização.</summary>
     internal static DatabaseService? Db;
 
     /// <summary>Logger exposto ao patch estático p/ confirmar que ele dispara (a 1ª versão era um no-op silencioso).</summary>
-    internal static ISptLogger<CustomizationPersistenceFixMod>? Log;
+    internal static ISptLogger<OutfitPersistenceFixMod>? Log;
 
     private static bool _patched;
 
@@ -40,13 +40,13 @@ public class CustomizationPersistenceFixMod(
         {
             try
             {
-                new Harmony("customizationpersistencefix.mdj").PatchAll(typeof(CustomizationPersistenceFixMod).Assembly);
+                new Harmony("outfitpersistencefix.mdj").PatchAll(typeof(OutfitPersistenceFixMod).Assembly);
                 _patched = true;
-                logger.Info("[CustomizationPersistenceFix] Patch aplicado — Body/Hands/Feet preservados no load (corrige reset de skin do SPT).");
+                logger.Info("[OutfitPersistenceFix] Patch aplicado — Body/Hands/Feet preservados no load (corrige reset de skin do SPT).");
             }
             catch (Exception ex)
             {
-                logger.Error($"[CustomizationPersistenceFix] Falha ao aplicar o patch Harmony: {ex.Message}");
+                logger.Error($"[OutfitPersistenceFix] Falha ao aplicar o patch Harmony: {ex.Message}");
             }
         }
 

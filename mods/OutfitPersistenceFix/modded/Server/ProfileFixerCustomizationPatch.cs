@@ -4,7 +4,7 @@ using SPTarkov.Server.Core.Models.Eft.Common;        // PmcData
 using SPTarkov.Server.Core.Models.Eft.Common.Tables; // CustomizationItem
 using SPTarkov.Server.Core.Services;                 // ProfileFixerService
 
-namespace CustomizationPersistenceFix;
+namespace OutfitPersistenceFix;
 
 /// <summary>
 ///     Patch de <c>ProfileFixerService.FixProfileBreakingInventoryItemIssues(PmcData)</c> — o método que
@@ -59,7 +59,7 @@ internal static class ProfileFixerCustomizationPatch
     private static void Postfix(PmcData pmcProfile, Snapshot __state)
     {
         var c = pmcProfile?.Customization;
-        var db = CustomizationPersistenceFixMod.Db?.GetTemplates()?.Customization;
+        var db = OutfitPersistenceFixMod.Db?.GetTemplates()?.Customization;
         if (pmcProfile is null || c is null || db is null)
         {
             return;
@@ -78,8 +78,8 @@ internal static class ProfileFixerCustomizationPatch
         // versão deste mod era um no-op silencioso por patchar o método errado).
         if (preserved > 0)
         {
-            CustomizationPersistenceFixMod.Log?.Debug(
-                $"[CustomizationPersistenceFix] {preserved} peça(s) de roupa preservada(s) no game/start (Body={c.Body}, Hands={c.Hands}, Feet={c.Feet})."
+            OutfitPersistenceFixMod.Log?.Debug(
+                $"[OutfitPersistenceFix] {preserved} peça(s) de roupa preservada(s) no game/start (Body={c.Body}, Hands={c.Hands}, Feet={c.Feet})."
             );
         }
     }

@@ -1,14 +1,16 @@
-# Memória de sessões — CustomizationPersistenceFix
+# Memória de sessões — OutfitPersistenceFix
+
+> **Renomeado em 2026-06-13:** `CustomizationPersistenceFix` → **`OutfitPersistenceFix`** (grafia correta "Persistence", a pedido do usuário). Namespace, classes, GUID (`outfitpersistencefix.mdj`), csproj/assembly, README e pasta instalada migrados. A Sessão 1 abaixo é registro histórico — referências a `CustomizationPersistenceFix*` ali eram os nomes vigentes naquele momento.
 
 ## Estado atual (snapshot ao fim da última sessão)
 
-- Mod server-side (SPT 4.0.13 / EFT 0.16.9) que corrige o reset de roupa do PMC (`Body/Hands/Feet`) a cada `game/start`.
+- Mod server-side (SPT 4.0.13 / EFT 0.16.9) que corrige o reset de roupa do PMC (`Body/Hands/Feet`) a cada `game/start`. Nome atual: **OutfitPersistenceFix**.
 - Patch Harmony aplicado em **`FixProfileBreakingInventoryItemIssues`** (método correto), não mais em `CheckForAndFixPmcProfileIssues` (era no-op).
 - Lógica completa: peça válida → preserva; peça inválida/ausente → default da facção. `Head/DogTag/Voice` intocados.
 - Melhorias de code-review aplicadas: `[HarmonyPriority(Priority.Last)]` no Postfix + logging Debug de peças preservadas.
-- Compila 0 warn / 0 err; DLL instalada em `D:/SPT/SPT/user/mods/CustomizationPersistenceFix`. Carrega sem erro no log do servidor.
+- Compila 0 warn / 0 err; DLL instalada em `D:/SPT/SPT/user/mods/OutfitPersistenceFix` (pasta antiga `CustomizationPersistenceFix` removida). Carrega sem erro no log do servidor.
 - Validação in-game preliminar: **aparentemente persiste** ("deu sim"); usuário fará mais testes.
-- Nada commitado ainda no momento da gravação (commit/push planejados em seguida).
+- Correção do método + melhorias commitadas em `f4b3296` (sob o nome antigo); rename commitado em seguida.
 
 ## Pendências / próximos passos conhecidos
 

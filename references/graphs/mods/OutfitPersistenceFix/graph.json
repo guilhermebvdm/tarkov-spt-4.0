@@ -4,19 +4,19 @@
   "graph": {},
   "nodes": [
     {
-      "label": "CustomizationPersistenceFix.csproj",
+      "label": "OutfitPersistenceFix.csproj",
       "file_type": "code",
-      "source_file": "Server/CustomizationPersistenceFix.csproj",
+      "source_file": "Server/OutfitPersistenceFix.csproj",
       "source_location": null,
       "_origin": "ast",
-      "id": "server_customizationpersistencefix",
+      "id": "server_outfitpersistencefix",
       "community": 2,
-      "norm_label": "customizationpersistencefix.csproj"
+      "norm_label": "outfitpersistencefix.csproj"
     },
     {
       "label": "net9.0",
       "file_type": "concept",
-      "source_file": "Server/CustomizationPersistenceFix.csproj",
+      "source_file": "Server/OutfitPersistenceFix.csproj",
       "source_location": null,
       "_origin": "ast",
       "id": "framework_net9_0",
@@ -26,7 +26,7 @@
     {
       "label": "SPTarkov.Server.Core (4.0.0)",
       "file_type": "code",
-      "source_file": "Server/CustomizationPersistenceFix.csproj",
+      "source_file": "Server/OutfitPersistenceFix.csproj",
       "source_location": null,
       "_origin": "ast",
       "id": "nuget_sptarkov_server_core",
@@ -36,7 +36,7 @@
     {
       "label": "SPTarkov.DI (4.0.0)",
       "file_type": "code",
-      "source_file": "Server/CustomizationPersistenceFix.csproj",
+      "source_file": "Server/OutfitPersistenceFix.csproj",
       "source_location": null,
       "_origin": "ast",
       "id": "nuget_sptarkov_di",
@@ -46,7 +46,7 @@
     {
       "label": "SPTarkov.Common (4.0.0)",
       "file_type": "code",
-      "source_file": "Server/CustomizationPersistenceFix.csproj",
+      "source_file": "Server/OutfitPersistenceFix.csproj",
       "source_location": null,
       "_origin": "ast",
       "id": "nuget_sptarkov_common",
@@ -56,7 +56,7 @@
     {
       "label": "Microsoft.NET.Sdk",
       "file_type": "concept",
-      "source_file": "Server/CustomizationPersistenceFix.csproj",
+      "source_file": "Server/OutfitPersistenceFix.csproj",
       "source_location": null,
       "_origin": "ast",
       "id": "sdk_microsoft_net_sdk",
@@ -64,34 +64,34 @@
       "norm_label": "microsoft.net.sdk"
     },
     {
-      "label": "CustomizationPersistenceFixMetadata.cs",
+      "label": "OutfitPersistenceFixMetadata.cs",
       "file_type": "code",
-      "source_file": "Server/CustomizationPersistenceFixMetadata.cs",
+      "source_file": "Server/OutfitPersistenceFixMetadata.cs",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "server_customizationpersistencefixmetadata",
-      "community": 3,
-      "norm_label": "customizationpersistencefixmetadata.cs"
+      "id": "server_outfitpersistencefixmetadata",
+      "community": 5,
+      "norm_label": "outfitpersistencefixmetadata.cs"
     },
     {
-      "label": "CustomizationPersistenceFixMod.cs",
+      "label": "OutfitPersistenceFixMod.cs",
       "file_type": "code",
-      "source_file": "Server/CustomizationPersistenceFixMod.cs",
+      "source_file": "Server/OutfitPersistenceFixMod.cs",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "server_customizationpersistencefixmod",
-      "community": 1,
-      "norm_label": "customizationpersistencefixmod.cs"
+      "id": "server_outfitpersistencefixmod",
+      "community": 0,
+      "norm_label": "outfitpersistencefixmod.cs"
     },
     {
-      "label": "CustomizationPersistenceFixMod",
+      "label": "OutfitPersistenceFixMod",
       "file_type": "code",
-      "source_file": "Server/CustomizationPersistenceFixMod.cs",
+      "source_file": "Server/OutfitPersistenceFixMod.cs",
       "source_location": "L20",
       "_origin": "ast",
-      "id": "server_customizationpersistencefixmod_customizationpersistencefixmod",
-      "community": 1,
-      "norm_label": "customizationpersistencefixmod"
+      "id": "server_outfitpersistencefixmod_outfitpersistencefixmod",
+      "community": 0,
+      "norm_label": "outfitpersistencefixmod"
     },
     {
       "label": "IOnLoad",
@@ -100,57 +100,57 @@
       "source_location": "",
       "_origin": "ast",
       "id": "ionload",
-      "community": 1,
+      "community": 0,
       "norm_label": "ionload"
     },
     {
       "label": "DatabaseService",
       "file_type": "code",
-      "source_file": "Server/CustomizationPersistenceFixMod.cs",
+      "source_file": "Server/OutfitPersistenceFixMod.cs",
       "source_location": "L27",
       "_origin": "ast",
       "id": "databaseservice",
-      "community": 1,
+      "community": 0,
       "norm_label": "databaseservice"
     },
     {
       "label": "ISptLogger",
       "file_type": "code",
-      "source_file": "Server/CustomizationPersistenceFixMod.cs",
+      "source_file": "Server/OutfitPersistenceFixMod.cs",
       "source_location": "L30",
       "_origin": "ast",
       "id": "isptlogger",
-      "community": 1,
+      "community": 0,
       "norm_label": "isptlogger"
     },
     {
       "label": "bool",
       "file_type": "code",
-      "source_file": "Server/CustomizationPersistenceFixMod.cs",
+      "source_file": "Server/OutfitPersistenceFixMod.cs",
       "source_location": "L32",
       "_origin": "ast",
       "id": "bool",
-      "community": 1,
+      "community": 0,
       "norm_label": "bool"
     },
     {
       "label": ".OnLoad()",
       "file_type": "code",
-      "source_file": "Server/CustomizationPersistenceFixMod.cs",
+      "source_file": "Server/OutfitPersistenceFixMod.cs",
       "source_location": "L34",
       "_origin": "ast",
-      "id": "server_customizationpersistencefixmod_customizationpersistencefixmod_onload",
-      "community": 1,
+      "id": "server_outfitpersistencefixmod_outfitpersistencefixmod_onload",
+      "community": 0,
       "norm_label": ".onload()"
     },
     {
       "label": "Task",
       "file_type": "code",
-      "source_file": "Server/CustomizationPersistenceFixMod.cs",
+      "source_file": "Server/OutfitPersistenceFixMod.cs",
       "source_location": "L34",
       "_origin": "ast",
       "id": "task",
-      "community": 1,
+      "community": 0,
       "norm_label": "task"
     },
     {
@@ -160,7 +160,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "server_profilefixercustomizationpatch",
-      "community": 5,
+      "community": 4,
       "norm_label": "profilefixercustomizationpatch.cs"
     },
     {
@@ -170,7 +170,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "server_profilefixercustomizationpatch_profilefixercustomizationpatch",
-      "community": 5,
+      "community": 4,
       "norm_label": "profilefixercustomizationpatch"
     },
     {
@@ -180,7 +180,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "string",
-      "community": 5,
+      "community": 4,
       "norm_label": "string"
     },
     {
@@ -190,7 +190,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "server_profilefixercustomizationpatch_profilefixercustomizationpatch_prefix",
-      "community": 0,
+      "community": 1,
       "norm_label": ".prefix()"
     },
     {
@@ -200,7 +200,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "pmcdata",
-      "community": 0,
+      "community": 1,
       "norm_label": "pmcdata"
     },
     {
@@ -210,7 +210,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "snapshot",
-      "community": 0,
+      "community": 1,
       "norm_label": "snapshot"
     },
     {
@@ -220,7 +220,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "harmonyprefix",
-      "community": 0,
+      "community": 1,
       "norm_label": "harmonyprefix"
     },
     {
@@ -230,7 +230,7 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "server_profilefixercustomizationpatch_profilefixercustomizationpatch_postfix",
-      "community": 0,
+      "community": 1,
       "norm_label": ".postfix()"
     },
     {
@@ -240,7 +240,7 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "harmonypostfix",
-      "community": 0,
+      "community": 1,
       "norm_label": "harmonypostfix"
     },
     {
@@ -250,7 +250,7 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "harmonypriority",
-      "community": 0,
+      "community": 1,
       "norm_label": "harmonypriority"
     },
     {
@@ -260,7 +260,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "server_profilefixercustomizationpatch_profilefixercustomizationpatch_resolvepiece",
-      "community": 4,
+      "community": 3,
       "norm_label": ".resolvepiece()"
     },
     {
@@ -270,7 +270,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "mongoid",
-      "community": 4,
+      "community": 3,
       "norm_label": "mongoid"
     },
     {
@@ -280,7 +280,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "dictionary",
-      "community": 4,
+      "community": 3,
       "norm_label": "dictionary"
     },
     {
@@ -290,7 +290,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "customizationitem",
-      "community": 4,
+      "community": 3,
       "norm_label": "customizationitem"
     }
   ],
@@ -298,151 +298,151 @@
     {
       "relation": "references",
       "confidence": "EXTRACTED",
-      "source_file": "Server/CustomizationPersistenceFix.csproj",
+      "source_file": "Server/OutfitPersistenceFix.csproj",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "server_customizationpersistencefix",
-      "target": "framework_net9_0"
+      "source": "server_outfitpersistencefix",
+      "target": "framework_net9_0",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
       "confidence": "EXTRACTED",
-      "source_file": "Server/CustomizationPersistenceFix.csproj",
+      "source_file": "Server/OutfitPersistenceFix.csproj",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "server_customizationpersistencefix",
-      "target": "nuget_sptarkov_common"
+      "source": "server_outfitpersistencefix",
+      "target": "nuget_sptarkov_common",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
       "confidence": "EXTRACTED",
-      "source_file": "Server/CustomizationPersistenceFix.csproj",
+      "source_file": "Server/OutfitPersistenceFix.csproj",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "server_customizationpersistencefix",
-      "target": "nuget_sptarkov_di"
+      "source": "server_outfitpersistencefix",
+      "target": "nuget_sptarkov_di",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
       "confidence": "EXTRACTED",
-      "source_file": "Server/CustomizationPersistenceFix.csproj",
+      "source_file": "Server/OutfitPersistenceFix.csproj",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "server_customizationpersistencefix",
-      "target": "nuget_sptarkov_server_core"
+      "source": "server_outfitpersistencefix",
+      "target": "nuget_sptarkov_server_core",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
-      "source_file": "Server/CustomizationPersistenceFix.csproj",
+      "source_file": "Server/OutfitPersistenceFix.csproj",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "server_customizationpersistencefix",
-      "target": "sdk_microsoft_net_sdk"
+      "source": "server_outfitpersistencefix",
+      "target": "sdk_microsoft_net_sdk",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "Server/CustomizationPersistenceFixMod.cs",
-      "source_location": "L18",
+      "source_file": "Server/OutfitPersistenceFixMod.cs",
+      "source_location": "L20",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "server_customizationpersistencefixmod",
-      "target": "server_customizationpersistencefixmod_customizationpersistencefixmod"
+      "source": "server_outfitpersistencefixmod",
+      "target": "server_outfitpersistencefixmod_outfitpersistencefixmod",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
-      "source_file": "Server/CustomizationPersistenceFixMod.cs",
+      "source_file": "Server/OutfitPersistenceFixMod.cs",
+      "source_location": "L32",
+      "weight": 1.0,
+      "context": "field",
+      "source": "server_outfitpersistencefixmod_outfitpersistencefixmod",
+      "target": "bool",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/OutfitPersistenceFixMod.cs",
       "source_location": "L27",
       "weight": 1.0,
       "context": "field",
-      "confidence_score": 1.0,
-      "source": "server_customizationpersistencefixmod_customizationpersistencefixmod",
-      "target": "bool"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "Server/CustomizationPersistenceFixMod.cs",
-      "source_location": "L25",
-      "weight": 1.0,
-      "context": "field",
-      "confidence_score": 1.0,
-      "source": "server_customizationpersistencefixmod_customizationpersistencefixmod",
-      "target": "databaseservice"
+      "source": "server_outfitpersistencefixmod_outfitpersistencefixmod",
+      "target": "databaseservice",
+      "confidence_score": 1.0
     },
     {
       "relation": "implements",
       "confidence": "EXTRACTED",
-      "source_file": "Server/CustomizationPersistenceFixMod.cs",
-      "source_location": "L18",
+      "source_file": "Server/OutfitPersistenceFixMod.cs",
+      "source_location": "L20",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "server_customizationpersistencefixmod_customizationpersistencefixmod",
-      "target": "ionload"
+      "source": "server_outfitpersistencefixmod_outfitpersistencefixmod",
+      "target": "ionload",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
-      "source_file": "Server/CustomizationPersistenceFixMod.cs",
+      "source_file": "Server/OutfitPersistenceFixMod.cs",
       "source_location": "L30",
       "weight": 1.0,
       "context": "field",
-      "source": "server_customizationpersistencefixmod_customizationpersistencefixmod",
+      "source": "server_outfitpersistencefixmod_outfitpersistencefixmod",
       "target": "isptlogger",
       "confidence_score": 1.0
     },
     {
       "relation": "method",
       "confidence": "EXTRACTED",
-      "source_file": "Server/CustomizationPersistenceFixMod.cs",
-      "source_location": "L29",
+      "source_file": "Server/OutfitPersistenceFixMod.cs",
+      "source_location": "L34",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "server_customizationpersistencefixmod_customizationpersistencefixmod",
-      "target": "server_customizationpersistencefixmod_customizationpersistencefixmod_onload"
+      "source": "server_outfitpersistencefixmod_outfitpersistencefixmod",
+      "target": "server_outfitpersistencefixmod_outfitpersistencefixmod_onload",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
-      "source_file": "Server/CustomizationPersistenceFixMod.cs",
-      "source_location": "L29",
+      "source_file": "Server/OutfitPersistenceFixMod.cs",
+      "source_location": "L34",
       "weight": 1.0,
       "context": "return_type",
-      "confidence_score": 1.0,
-      "source": "server_customizationpersistencefixmod_customizationpersistencefixmod_onload",
-      "target": "task"
+      "source": "server_outfitpersistencefixmod_outfitpersistencefixmod_onload",
+      "target": "task",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "Server/ProfileFixerCustomizationPatch.cs",
-      "source_location": "L14",
+      "source_location": "L27",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "server_profilefixercustomizationpatch",
-      "target": "server_profilefixercustomizationpatch_profilefixercustomizationpatch"
+      "target": "server_profilefixercustomizationpatch_profilefixercustomizationpatch",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Server/ProfileFixerCustomizationPatch.cs",
-      "source_location": "L31",
+      "source_location": "L57",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "server_profilefixercustomizationpatch_profilefixercustomizationpatch",
-      "target": "server_profilefixercustomizationpatch_profilefixercustomizationpatch_postfix"
+      "target": "server_profilefixercustomizationpatch_profilefixercustomizationpatch_postfix",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Server/ProfileFixerCustomizationPatch.cs",
-      "source_location": "L24",
+      "source_location": "L47",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "server_profilefixercustomizationpatch_profilefixercustomizationpatch",
-      "target": "server_profilefixercustomizationpatch_profilefixercustomizationpatch_prefix"
+      "target": "server_profilefixercustomizationpatch_profilefixercustomizationpatch_prefix",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -469,67 +469,67 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Server/ProfileFixerCustomizationPatch.cs",
-      "source_location": "L24",
+      "source_location": "L47",
       "weight": 1.0,
       "context": "attribute",
-      "confidence_score": 1.0,
       "source": "server_profilefixercustomizationpatch_profilefixercustomizationpatch_prefix",
-      "target": "harmonyprefix"
+      "target": "harmonyprefix",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Server/ProfileFixerCustomizationPatch.cs",
-      "source_location": "L24",
+      "source_location": "L47",
       "weight": 1.0,
       "context": "parameter_type",
-      "confidence_score": 1.0,
       "source": "server_profilefixercustomizationpatch_profilefixercustomizationpatch_prefix",
-      "target": "pmcdata"
+      "target": "pmcdata",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Server/ProfileFixerCustomizationPatch.cs",
-      "source_location": "L24",
+      "source_location": "L47",
       "weight": 1.0,
       "context": "parameter_type",
-      "confidence_score": 1.0,
       "source": "server_profilefixercustomizationpatch_profilefixercustomizationpatch_prefix",
-      "target": "snapshot"
+      "target": "snapshot",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Server/ProfileFixerCustomizationPatch.cs",
-      "source_location": "L31",
+      "source_location": "L57",
       "weight": 1.0,
       "context": "parameter_type",
-      "confidence_score": 1.0,
       "source": "server_profilefixercustomizationpatch_profilefixercustomizationpatch_postfix",
-      "target": "pmcdata"
+      "target": "pmcdata",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Server/ProfileFixerCustomizationPatch.cs",
-      "source_location": "L31",
+      "source_location": "L57",
       "weight": 1.0,
       "context": "parameter_type",
-      "confidence_score": 1.0,
       "source": "server_profilefixercustomizationpatch_profilefixercustomizationpatch_postfix",
-      "target": "snapshot"
+      "target": "snapshot",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Server/ProfileFixerCustomizationPatch.cs",
-      "source_location": "L31",
+      "source_location": "L57",
       "weight": 1.0,
       "context": "attribute",
-      "confidence_score": 1.0,
       "source": "server_profilefixercustomizationpatch_profilefixercustomizationpatch_postfix",
-      "target": "harmonypostfix"
+      "target": "harmonypostfix",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -588,5 +588,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "5849e0df927be17779654af6b41103c8daed4120"
+  "built_at_commit": "2968ee9cc2abc20627f2c09eb236feec2de3eaf6"
 }

@@ -1,4 +1,4 @@
-# CustomizationPersistenceFix
+# OutfitPersistenceFix
 
 Mod **server-side** (SPT 4.0) que corrige um **bug do SPT core**: roupas/skins (aparência do PMC) **não persistem** entre sessões — ao recarregar o jogo o personagem volta sempre para o uniforme **default** da facção.
 
@@ -22,12 +22,12 @@ Ou seja, qualquer roupa **válida** equipada é trocada pelo default a cada load
 
 Patch Harmony em `FixProfileBreakingInventoryItemIssues`: o Prefix captura `Body/Hands/Feet` antes do método rodar; o Postfix reescreve cada peça com a lógica **correta** — peça válida → preservada (desfaz o reset indevido); peça inválida/ausente → default da facção (o que o SPT pretendia). Os demais reparos do método (dupes, tags, `StackObjectsCount`) são preservados. `Head` não é tocado (já está correto no SPT).
 
-- `CustomizationPersistenceFixMod.cs` — entry `IOnLoad`: aplica o `Harmony.PatchAll` no boot e guarda o `DatabaseService`.
+- `OutfitPersistenceFixMod.cs` — entry `IOnLoad`: aplica o `Harmony.PatchAll` no boot e guarda o `DatabaseService`.
 - `ProfileFixerCustomizationPatch.cs` — o patch Prefix/Postfix.
 
 ## Build
 
-`/compile-mod CustomizationPersistenceFix` → instala em `D:/SPT/SPT/user/mods/CustomizationPersistenceFix/`. Requer **reiniciar o servidor**.
+`/compile-mod OutfitPersistenceFix` → instala em `D:/SPT/SPT/user/mods/OutfitPersistenceFix/`. Requer **reiniciar o servidor**.
 
 > Bug do SPT 4.0.13 (`compatibleTarkovVersion 0.16.9`). Candidato a report upstream — se uma versão futura do SPT corrigir a lógica, este mod pode ser removido.
 
