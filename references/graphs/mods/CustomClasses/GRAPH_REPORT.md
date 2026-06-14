@@ -1,16 +1,16 @@
 # Graph Report - mods\CustomClasses\modded  (2026-06-14)
 
 ## Corpus Check
-- 81 files · ~64,904 words
+- 81 files · ~69,727 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1203 nodes · 1475 edges · 79 communities (72 shown, 7 thin omitted)
+- 1238 nodes · 1537 edges · 79 communities (73 shown, 6 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 1 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `85a2def4`
+- Built from commit: `5f15e899`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -89,11 +89,11 @@
 - [[_COMMUNITY_Community 75|Community 75]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `CatalogService` - 46 edges
+1. `CatalogService` - 54 edges
 2. `ClassEditorService` - 24 edges
 3. `InventoryBuilder` - 23 edges
-4. `CostService` - 17 edges
-5. `MongoId` - 16 edges
+4. `CostService` - 19 edges
+5. `MongoId` - 17 edges
 6. `ClassIdentityView` - 12 edges
 7. `Item` - 12 edges
 8. `MenuOverhaulBridge` - 11 edges
@@ -115,15 +115,15 @@
 ## Import Cycles
 - None detected.
 
-## Communities (79 total, 7 thin omitted)
+## Communities (79 total, 6 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.09
 Nodes (21): HideoutAreas, MapSeverity, OnParametersSetAsync, Reload, ReloadAndRefresh, route:/customclasses/classes/{FileName}/edit, ClassEditorService, ClassWorkspace (+13 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.07
-Nodes (25): ISptLogger, ItemHelper, Lazy, LocaleService, Price, SearchIndexRow, CatalogService, CatalogAmmo (+17 more)
+Cohesion: 0.06
+Nodes (29): ISptLogger, ItemHelper, Lazy, LocaleService, Price, SearchIndexRow, CatalogService, CatalogAmmo (+21 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.04
@@ -134,8 +134,8 @@ Cohesion: 0.04
 Nodes (44): ClassLifecycleCreateDialog, MudTableSortLabel, EditClass, FormatRub, LoadRows, OnAfterRenderAsync, OnInitializedAsync, OnRowClick (+36 more)
 
 ### Community 4 - "Community 4"
-Cohesion: 0.05
-Nodes (41): ModSpecModel, MudButtonGroup, MudCollapse, AmmoPicker, CatalogPreset, CatalogService, CatalogSlotInfo, CustomClasses.Web (+33 more)
+Cohesion: 0.04
+Nodes (46): ModSpecModel, MudButtonGroup, MudCollapse, AmmoPicker, CatalogPreset, CatalogService, CatalogSlotInfo, CustomClasses.Web (+38 more)
 
 ### Community 5 - "Community 5"
 Cohesion: 0.16
@@ -143,7 +143,7 @@ Nodes (17): IEnumerable, Packer, Root, Func, Grid, GridPacker, Item, ItemSpec (+
 
 ### Community 6 - "Community 6"
 Cohesion: 0.12
-Nodes (15): ConcurrentDictionary, CreateResult, FileStamp, IReadOnlySet, SaveResult, ClassEditorService, ClassDefinition, ClassDiagnostic (+7 more)
+Nodes (15): CreateResult, FileStamp, IReadOnlySet, SaveResult, ClassEditorService, ClassDefinition, ClassDiagnostic, ClassFileEntry (+7 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.09
@@ -214,8 +214,8 @@ Cohesion: 0.14
 Nodes (13): CatalogAmmo, CatalogService, HeaderContent, MudChip, MudStack, MudTable, MudTd, MudText (+5 more)
 
 ### Community 24 - "Community 24"
-Cohesion: 0.14
-Nodes (13): CatalogPreset, CatalogService, HeaderContent, MudChip, MudStack, MudTable, MudTd, MudText (+5 more)
+Cohesion: 0.18
+Nodes (10): CatalogPreset, CatalogPresetPart, CatalogService, MudChip, MudIcon, MudStack, MudText, SPTarkov.Server.Core.Models.Common (+2 more)
 
 ### Community 25 - "Community 25"
 Cohesion: 0.15
@@ -239,7 +239,7 @@ Nodes (7): Dictionary, ESkillId, MethodBase, PatchPostfix, PatchPrefix, WorkoutB
 
 ### Community 30 - "Community 30"
 Cohesion: 0.18
-Nodes (10): CustomClasses, CustomClasses.Web.Layouts, CustomClasses.Web.Shared, Microsoft.AspNetCore.Components.Forms, Microsoft.AspNetCore.Components.Routing, Microsoft.AspNetCore.Components.Web.Virtualization, Microsoft.JSInterop, MudBlazor (+2 more)
+Nodes (10): CustomClasses, CustomClasses.Web.Layouts, CustomClasses.Web.Shared, Microsoft.AspNetCore.Components.Forms, Microsoft.AspNetCore.Components.Routing, Microsoft.AspNetCore.Components.Web.Virtualization, MudBlazor, Microsoft.AspNetCore.Components.Web (+2 more)
 
 ### Community 31 - "Community 31"
 Cohesion: 0.25
@@ -353,6 +353,10 @@ Nodes (5): HashSet, IReadOnlyList, string, SkillsExtendedCompat, SptMod
 Cohesion: 0.11
 Nodes (17): CatalogClothing, CatalogService, DialogActions, DialogContent, MudButton, MudDialog, MudStack, MudText (+9 more)
 
+### Community 59 - "Community 59"
+Cohesion: 0.20
+Nodes (11): cellPxOf(), dispose(), fitsAt(), init(), onCancel(), onMove(), onUp(), registerSaveShortcut() (+3 more)
+
 ### Community 61 - "Community 61"
 Cohesion: 0.40
 Nodes (4): ChildContent, MudTooltip, System.Globalization, TooltipContent
@@ -363,39 +367,39 @@ Nodes (3): Dictionary, PmcData, HideoutBuilder
 
 ### Community 66 - "Community 66"
 Cohesion: 0.03
-Nodes (62): CharacterDoll, MudOverlay, CatalogService, ClassDiagnostic, ClassEditorService, ClassWorkspace, CostService, CustomClasses.Web (+54 more)
+Nodes (65): CharacterDoll, MudOverlay, CatalogService, ClassDiagnostic, ClassEditorService, ClassWorkspace, CostService, CustomClasses.Web (+57 more)
 
 ### Community 67 - "Community 67"
-Cohesion: 0.09
-Nodes (22): ItemSpecModel, PlacedCell, CatalogService, CostService, CustomClasses.Web, ItemSpec, ItemTooltip, Microsoft.AspNetCore.Components.Web (+14 more)
+Cohesion: 0.06
+Nodes (30): ItemSpecModel, PlacedCell, CatalogService, ChildContent, CostService, CustomClasses.Web, IJSRuntime, ISnackbar (+22 more)
 
 ### Community 73 - "Community 73"
-Cohesion: 0.25
-Nodes (7): CatalogService, ItemTooltip, SPTarkov.Server.Core.Models.Common, BuildCell, GearCell, OnParametersSet, ShortLabel
+Cohesion: 0.22
+Nodes (8): CatalogService, CostService, ItemTooltip, SPTarkov.Server.Core.Models.Common, BuildCell, GearCell, OnParametersSet, ShortLabel
 
 ### Community 74 - "Community 74"
 Cohesion: 0.20
 Nodes (9): CustomClasses.Web, DialogActions, DialogContent, ItemSpecEditor, MudButton, MudDialog, MudText, TitleContent (+1 more)
 
 ## Knowledge Gaps
-- **790 isolated node(s):** `netstandard2.1`, `Microsoft.NET.Sdk`, `string`, `MethodBase`, `TextMeshProUGUI` (+785 more)
+- **808 isolated node(s):** `netstandard2.1`, `Microsoft.NET.Sdk`, `string`, `MethodBase`, `TextMeshProUGUI` (+803 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **7 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **6 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `SkillPanelPatch` connect `Community 27` to `Community 40`?**
-  _High betweenness centrality (0.003) - this node is a cross-community bridge._
+  _High betweenness centrality (0.002) - this node is a cross-community bridge._
 - **Why does `RaidReadyPlayerPanelPatch` connect `Community 49` to `Community 40`?**
   _High betweenness centrality (0.002) - this node is a cross-community bridge._
-- **Why does `SkillsNavButtonPatch` connect `Community 17` to `Community 40`?**
-  _High betweenness centrality (0.002) - this node is a cross-community bridge._
 - **What connects `netstandard2.1`, `Microsoft.NET.Sdk`, `string` to the rest of the system?**
-  _790 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _808 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.09090909090909091 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.07291666666666667 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06342342342342343 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.03773584905660377 - nodes in this community are weakly interconnected._
+- **Should `Community 3` be split into smaller, more focused modules?**
+  _Cohesion score 0.044444444444444446 - nodes in this community are weakly interconnected._
