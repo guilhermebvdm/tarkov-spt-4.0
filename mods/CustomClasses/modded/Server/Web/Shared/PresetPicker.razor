@@ -2,9 +2,12 @@
 
 @* Item 023: lista os presets de uma arma/armadura (CatalogService.GetPresetsFor) com chips
    Standard/Premium iguais ao que o InventoryBuilder resolve para `preset: <tpl>` + `premium: true`.
-   Clique numa linha dispara OnPresetSelected com o id do preset. Hover numa linha → popover grande
-   (MudTooltip) com a imagem maior + a lista de peças do preset (GetPresetParts) — pra entender a
-   diferença entre presets sem precisar selecionar. O id mongo fica só no title da linha. *@
+   Clique numa linha dispara OnPresetSelected com o id do preset.
+
+   Layout mestre-detalhe: lista à esquerda; passar o mouse (ou selecionar) uma linha atualiza o painel
+   de DETALHE à direita (imagem grande do build + lista de peças via GetPresetParts). Substituiu o
+   MudTooltip de hover, que não abria de forma confiável dentro do diálogo (delay + aninhamento). O
+   painel fica sempre visível, sem delay. *@
 
 @inject CatalogService Catalog
 
@@ -19,63 +22,67 @@
     }
     else
     {
-        <div class="cc-preset-list">
-            @foreach (var p in _presets)
-            {
-                var selected = string.Equals(p.Id, SelectedPresetId, StringComparison.Ordinal);
-                var parts = _parts.TryGetValue(p.Id, out var pp) ? pp : [];
-                <MudTooltip Placement="Placement.Right" Delay="350" Class="cc-preset-tip-root">
-                    <TooltipContent>
-                        <div class="cc-preset-pop">
-                            <img class="cc-preset-pop__img" src="https://assets.tarkov.dev/@(p.Id)-icon.webp"
-                                 alt="" draggable="false" data-fb="@WeaponTpl"
-                                 onerror="if(this.dataset.fb){this.src='https://assets.tarkov.dev/'+this.dataset.fb+'-icon.webp';this.dataset.fb='';}else{this.style.visibility='hidden';}"/>
-                            <div class="cc-preset-pop__name">@(p.Name ?? "Unnamed preset")</div>
-                            <div class="cc-preset-pop__sub">
-                                @p.ItemCount parts@(p.IsDefault ? " · Standard" : "")@(p.IsPremium ? " · Premium" : "")
-                            </div>
-                            @if (parts.Count == 0)
-                            {
-                                <div class="cc-preset-pop__empty">Bare weapon — no extra mods.</div>
-                            }
-                            else
-                            {
-                                <ul class="cc-preset-pop__list">
-                                    @foreach (var part in parts)
-                                    {
-                                        <li>@part.Name@(part.Count > 1 ? $" ×{part.Count}" : "")</li>
-                                    }
-                                </ul>
-                            }
+        var detail = _presets.FirstOrDefault(p => string.Equals(p.Id, _detailId, StringComparison.Ordinal))
+                     ?? _presets.FirstOrDefault(p => string.Equals(p.Id, SelectedPresetId, StringComparison.Ordinal))
+                     ?? _presets[0];
+        var detailParts = _parts.TryGetValue(detail.Id, out var dp) ? dp : [];
+
+        <div class="cc-preset-2col">
+            <div class="cc-preset-list">
+                @foreach (var p in _presets)
+                {
+                    var selected = string.Equals(p.Id, SelectedPresetId, StringComparison.Ordinal);
+                    var focused = string.Equals(p.Id, detail.Id, StringComparison.Ordinal);
+                    <div class="cc-preset-row @(selected ? "cc-preset-row--sel" : null) @(focused ? "cc-preset-row--focus" : null)"
+                         title="@p.Id"
+                         @onmouseenter="@(() => _detailId = p.Id)"
+                         @onclick="@(() => SelectAsync(p))">
+                        <img class="cc-preset-row__icon" src="https://assets.tarkov.dev/@(p.Id)-icon.webp"
+                             loading="lazy" alt="" draggable="false" data-fb="@WeaponTpl"
+                             onerror="if(this.dataset.fb){this.src='https://assets.tarkov.dev/'+this.dataset.fb+'-icon.webp';this.dataset.fb='';}else{this.style.visibility='hidden';}"/>
+                        <div class="cc-preset-row__main">
+                            <span class="cc-preset-row__name">@(p.Name ?? "Unnamed preset")</span>
+                            <span class="cc-preset-row__sub">@p.ItemCount parts</span>
                         </div>
-                    </TooltipContent>
-                    <ChildContent>
-                        <div class="cc-preset-row @(selected ? "cc-preset-row--sel" : null)"
-                             title="@p.Id" @onclick="@(() => SelectAsync(p))">
-                            @* Ícone do preset montado (mostra como vem kitado); cai pra arma base no erro. *@
-                            <img class="cc-preset-row__icon" src="https://assets.tarkov.dev/@(p.Id)-icon.webp"
-                                 loading="lazy" alt="" draggable="false" data-fb="@WeaponTpl"
-                                 onerror="if(this.dataset.fb){this.src='https://assets.tarkov.dev/'+this.dataset.fb+'-icon.webp';this.dataset.fb='';}else{this.style.visibility='hidden';}"/>
-                            <div class="cc-preset-row__main">
-                                <span class="cc-preset-row__name">@(p.Name ?? "Unnamed preset")</span>
-                                <span class="cc-preset-row__sub">@p.ItemCount parts</span>
-                            </div>
-                            @if (p.IsDefault)
-                            {
-                                <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Outlined">Standard</MudChip>
-                            }
-                            @if (p.IsPremium)
-                            {
-                                <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Outlined">Premium</MudChip>
-                            }
-                            @if (selected)
-                            {
-                                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Small"/>
-                            }
-                        </div>
-                    </ChildContent>
-                </MudTooltip>
-            }
+                        @if (p.IsDefault)
+                        {
+                            <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Outlined">Standard</MudChip>
+                        }
+                        @if (p.IsPremium)
+                        {
+                            <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Outlined">Premium</MudChip>
+                        }
+                        @if (selected)
+                        {
+                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Small"/>
+                        }
+                    </div>
+                }
+            </div>
+
+            @* ── Detalhe do preset em foco (hover/seleção) ── *@
+            <div class="cc-preset-detail">
+                <img class="cc-preset-pop__img" src="https://assets.tarkov.dev/@(detail.Id)-icon.webp"
+                     alt="" draggable="false" data-fb="@WeaponTpl"
+                     onerror="if(this.dataset.fb){this.src='https://assets.tarkov.dev/'+this.dataset.fb+'-icon.webp';this.dataset.fb='';}else{this.style.visibility='hidden';}"/>
+                <div class="cc-preset-pop__name">@(detail.Name ?? "Unnamed preset")</div>
+                <div class="cc-preset-pop__sub">
+                    @detail.ItemCount parts@(detail.IsDefault ? " · Standard" : "")@(detail.IsPremium ? " · Premium" : "")
+                </div>
+                @if (detailParts.Count == 0)
+                {
+                    <div class="cc-preset-pop__empty">Bare weapon — no extra mods.</div>
+                }
+                else
+                {
+                    <ul class="cc-preset-pop__list">
+                        @foreach (var part in detailParts)
+                        {
+                            <li>@part.Name@(part.Count > 1 ? $" ×{part.Count}" : "")</li>
+                        }
+                    </ul>
+                }
+            </div>
         </div>
     }
 </MudStack>
@@ -92,6 +99,7 @@
 
     private List<CatalogPreset> _presets = [];
     private Dictionary<string, List<CatalogPresetPart>> _parts = new(StringComparer.Ordinal);
+    private string? _detailId;   // preset em foco no painel de detalhe (hover/seleção)
     private string? _loadedTpl;
 
     protected override void OnParametersSet()
@@ -107,12 +115,15 @@
             ? Catalog.GetPresetsFor(new MongoId(WeaponTpl))
             : [];
 
-        // Pré-computa as peças de cada preset (popover de hover). Barato: locale cacheado + poucos presets.
+        // Pré-computa as peças de cada preset (painel de detalhe). Barato: locale cacheado + poucos presets.
         _parts = new Dictionary<string, List<CatalogPresetPart>>(StringComparer.Ordinal);
         foreach (var p in _presets)
         {
             _parts[p.Id] = Catalog.GetPresetParts(p.Id);
         }
+
+        // foco inicial = o selecionado (ou o primeiro), resolvido no markup.
+        _detailId = SelectedPresetId;
     }
 
     private Task SelectAsync(CatalogPreset? preset) =>
