@@ -483,6 +483,27 @@
     padding: 2px 4px;
 }
 
+/* Seletor de Build (Standard/Premium/Specific/Custom) — substitui o toggle Item/Preset. */
+.cc-build { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* Lista de presets (PresetPicker): linhas clicáveis, selecionado destacado. */
+.cc-preset-list { display: flex; flex-direction: column; gap: 2px; max-height: 240px; overflow-y: auto; }
+.cc-preset-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background .12s ease, border-color .12s ease;
+}
+.cc-preset-row:hover { background: rgba(255, 255, 255, .05); }
+.cc-preset-row--sel { border-color: var(--mud-palette-success, #66bb6a); background: rgba(102, 187, 106, .08); }
+.cc-preset-row__main { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; }
+.cc-preset-row__name { font-size: .85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cc-preset-row__sub { font-size: .72rem; opacity: .6; }
+
 /* prefers-reduced-motion: desliga TODA a animação/transição do editor (skeleton fica estático). */
 @media (prefers-reduced-motion: reduce) {
     .cc-fade-in, .cc-enter, .cc-pulse, .cc-skeleton { animation: none !important; }
