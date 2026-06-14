@@ -549,6 +549,20 @@
 .cc-content-item { position: relative; padding-right: 40px; }
 .cc-content-item__del { position: absolute; top: 6px; right: 6px; z-index: 2; }
 
+/* Hideout premium: cada estação numa linha com ícone representativo + nome legível. */
+.cc-hideout-list { display: flex; flex-direction: column; gap: 4px; }
+.cc-hideout-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 3px 8px; border-radius: 4px;
+    background: rgba(255, 255, 255, .03);
+    border-left: 2px solid var(--mud-palette-primary, #7e6fff);
+    transition: background .12s ease;
+}
+.cc-hideout-row:hover { background: rgba(255, 255, 255, .06); }
+.cc-hideout-row__icon { color: var(--mud-palette-primary, #7e6fff); flex: 0 0 auto; }
+.cc-hideout-row__name { flex: 1 1 auto; font-size: .85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cc-hideout-opt { display: flex; align-items: center; gap: 8px; }
+
 /* Lista de presets (PresetPicker): linhas clicáveis, selecionado destacado. */
 .cc-preset-list { display: flex; flex-direction: column; gap: 2px; max-height: 300px; overflow-y: auto; }
 .cc-preset-row__icon { width: 46px; height: 32px; object-fit: contain; flex-shrink: 0; }

@@ -714,6 +714,7 @@
     private async Task RemoveContentAsync(ItemSpecModel content)
     {
         Spec.Contents.Remove(content);
+        Snackbar.Add("Content item removed.", Severity.Info);
         await NotifyChangedAsync();
     }
 }

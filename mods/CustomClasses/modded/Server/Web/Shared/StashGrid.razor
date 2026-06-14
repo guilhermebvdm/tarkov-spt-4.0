@@ -359,6 +359,7 @@
         EditItems!.Remove(cell.Model);
         Build();
         StateHasChanged();
+        Snackbar.Add($"'{cell.Name}' removed from the stash.", Severity.Info);
         await OnChanged.InvokeAsync();
     }
 

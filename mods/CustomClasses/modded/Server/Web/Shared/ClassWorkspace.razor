@@ -134,15 +134,16 @@ else
                     {
                         @if (_model.Hideout.Count > 0)
                         {
-                            <div class="cc-ws__mults">
+                            <div class="cc-hideout-list">
                                 @foreach (var row in _model.Hideout)
                                 {
-                                    <div class="cc-ws__mult" @key="row">
-                                        <span class="cc-ws__mult-name">@row.Station</span>
+                                    <div class="cc-hideout-row" @key="row">
+                                        <MudIcon Icon="@StationIcon(row.Station)" Size="Size.Small" Class="cc-hideout-row__icon"/>
+                                        <span class="cc-hideout-row__name">@StationLabel(row.Station)</span>
                                         <MudNumericField T="int" @bind-Value="row.Level"
                                                          @bind-Value:after="MarkDirty"
-                                                         Min="1" Margin="Margin.Dense"
-                                                         Variant="Variant.Outlined" Style="max-width:80px;"/>
+                                                         Min="1" Margin="Margin.Dense" Label="level"
+                                                         Variant="Variant.Outlined" Style="max-width:78px;"/>
                                         <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
                                                        Color="Color.Error" title="Remove station"
                                                        OnClick="@(() => RemoveStation(row))"/>
@@ -153,13 +154,18 @@ else
                         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mt-2">
                             <MudSelect T="string" @bind-Value="_newStation" Label="Add station"
                                        Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true"
-                                       Style="min-width:200px">
+                                       Style="min-width:220px">
                                 @foreach (var name in AvailableStations())
                                 {
-                                    <MudSelectItem T="string" Value="@name">@name</MudSelectItem>
+                                    <MudSelectItem T="string" Value="@name">
+                                        <div class="cc-hideout-opt">
+                                            <MudIcon Icon="@StationIcon(name)" Size="Size.Small"/>
+                                            <span>@StationLabel(name)</span>
+                                        </div>
+                                    </MudSelectItem>
                                 }
                             </MudSelect>
-                            <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary"
+                            <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary"
                                            Disabled="@string.IsNullOrEmpty(_newStation)" OnClick="AddStation"
                                            title="Add station"/>
                         </MudStack>
@@ -169,7 +175,8 @@ else
                         <div class="cc-hideout-grid">
                             @foreach (var (station, lvl) in def.Hideout)
                             {
-                                <MudChip T="string" Size="Size.Small" Color="Color.Default">@station L@lvl</MudChip>
+                                <MudChip T="string" Size="Size.Small" Color="Color.Default"
+                                         Icon="@StationIcon(station)">@StationLabel(station) · L@lvl</MudChip>
                             }
                         </div>
                     }
@@ -649,9 +656,11 @@ else
     {
         if (!string.IsNullOrEmpty(_newStation))
         {
-            _model!.Hideout.Add(new HideoutRow { Station = _newStation, Level = 1 });
+            var name = _newStation;
+            _model!.Hideout.Add(new HideoutRow { Station = name, Level = 1 });
             _newStation = string.Empty;
             MarkDirty();
+            Snackbar.Add($"Hideout station '{StationLabel(name)}' added (level 1).", Severity.Success);
         }
     }
 
@@ -659,7 +668,46 @@ else
     {
         _model!.Hideout.Remove(row);
         MarkDirty();
+        Snackbar.Add($"Hideout station '{StationLabel(row.Station)}' removed.", Severity.Info);
     }
+
+    /// <summary>Nome legível da estação: insere espaço antes de cada maiúscula ("ShootingRange" → "Shooting Range").</summary>
+    private static string StationLabel(string station) =>
+        string.IsNullOrEmpty(station)
+            ? station
+            : System.Text.RegularExpressions.Regex.Replace(station, "(?<=[a-z0-9])(?=[A-Z])", " ");
+
+    /// <summary>Ícone Material que representa cada estação do hideout (default genérico p/ as não mapeadas).</summary>
+    private static string StationIcon(string station) => station?.ToLowerInvariant() switch
+    {
+        "stash" => Icons.Material.Filled.Inventory2,
+        "generator" => Icons.Material.Filled.Bolt,
+        "heating" => Icons.Material.Filled.Thermostat,
+        "watercollector" => Icons.Material.Filled.WaterDrop,
+        "medstation" => Icons.Material.Filled.MedicalServices,
+        "nutritionunit" => Icons.Material.Filled.Restaurant,
+        "restspace" => Icons.Material.Filled.KingBed,
+        "workbench" => Icons.Material.Filled.Build,
+        "intelligencecenter" => Icons.Material.Filled.Lightbulb,
+        "shootingrange" => Icons.Material.Filled.GpsFixed,
+        "lavatory" => Icons.Material.Filled.Wc,
+        "vents" => Icons.Material.Filled.Air,
+        "security" => Icons.Material.Filled.Security,
+        "bitcoinfarm" => Icons.Material.Filled.CurrencyBitcoin,
+        "boozegenerator" => Icons.Material.Filled.LocalBar,
+        "solarpower" => Icons.Material.Filled.SolarPower,
+        "library" => Icons.Material.Filled.MenuBook,
+        "scavcase" => Icons.Material.Filled.Casino,
+        "illumination" => Icons.Material.Filled.Highlight,
+        "placeoffame" or "walloffame" => Icons.Material.Filled.EmojiEvents,
+        "airfilteringunit" => Icons.Material.Filled.FilterAlt,
+        "circleofcultists" => Icons.Material.Filled.Groups,
+        "gym" => Icons.Material.Filled.FitnessCenter,
+        "weaponstand" or "weaponrack" => Icons.Material.Filled.Hardware,
+        "equipmentpresetsstand" => Icons.Material.Filled.Checkroom,
+        "cultistcircle" => Icons.Material.Filled.Groups,
+        _ => Icons.Material.Filled.HomeRepairService,
+    };
 
     // ── Outfit (read + edit via SkinPickerDialog) ───────────────────────────────
 
@@ -689,9 +737,11 @@ else
         if (result is { Canceled: false })
         {
             // Data == null → "use template default" (limpa); string → id da skin.
-            set(result.Data as string);
+            var id = result.Data as string;
+            set(id);
             MarkDirty();
             StateHasChanged();
+            Snackbar.Add(id is null ? $"{faction} {slot} reset to template default." : $"{faction} {slot} skin set.", Severity.Success);
         }
     }
 
@@ -765,6 +815,7 @@ else
             {
                 _model.Equipped.Remove(row);
                 MarkDirty();
+                Snackbar.Add($"{slot} slot cleared.", Severity.Info);
             }
         }
         else if (isNew && (row.Item.Tpl is { Length: > 0 } || row.Item.Preset is { Length: > 0 }))
@@ -772,6 +823,7 @@ else
             // slot novo que ganhou um item (Done ou Cancel após escolher) → entra no modelo.
             _model.Equipped.Add(row);
             MarkDirty();
+            Snackbar.Add($"Item equipped in {slot}.", Severity.Success);
         }
 
         RebuildLoadoutViews();
@@ -803,6 +855,7 @@ else
             RebuildLoadoutViews();
             RecomputeLoadoutCost();
             StateHasChanged();
+            Snackbar.Add("Item added to the stash.", Severity.Success);
         }
     }
 
@@ -828,6 +881,7 @@ else
         {
             _model.Stash.Remove(item);
             MarkDirty();
+            Snackbar.Add("Item removed from the stash.", Severity.Info);
         }
 
         RebuildLoadoutViews();
