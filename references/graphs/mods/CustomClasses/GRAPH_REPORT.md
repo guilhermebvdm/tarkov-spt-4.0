@@ -1,16 +1,16 @@
 # Graph Report - mods\CustomClasses\modded  (2026-06-14)
 
 ## Corpus Check
-- 81 files · ~69,727 words
+- 81 files · ~70,232 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1238 nodes · 1537 edges · 79 communities (73 shown, 6 thin omitted)
+- 1242 nodes · 1545 edges · 79 communities (73 shown, 6 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 1 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `5f15e899`
+- Built from commit: `5b675abf`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -89,11 +89,11 @@
 - [[_COMMUNITY_Community 75|Community 75]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `CatalogService` - 54 edges
+1. `CatalogService` - 55 edges
 2. `ClassEditorService` - 24 edges
 3. `InventoryBuilder` - 23 edges
-4. `CostService` - 19 edges
-5. `MongoId` - 17 edges
+4. `CostService` - 20 edges
+5. `MongoId` - 18 edges
 6. `ClassIdentityView` - 12 edges
 7. `Item` - 12 edges
 8. `MenuOverhaulBridge` - 11 edges
@@ -158,8 +158,8 @@ Cohesion: 0.06
 Nodes (31): MudNavLink, MudNavMenu, ClassEditorService, CostService, CustomClasses.Web, IJSRuntime, ListRowsSkeleton, MudDivider (+23 more)
 
 ### Community 10 - "Community 10"
-Cohesion: 0.14
-Nodes (16): LoadoutCostBreakdown, CostService, ClassDefinition, Grid, GridPacker, Height, Item, ItemSpec (+8 more)
+Cohesion: 0.13
+Nodes (18): Flea, Handbook, LoadoutCostBreakdown, CostService, ClassDefinition, Grid, GridPacker, Height (+10 more)
 
 ### Community 11 - "Community 11"
 Cohesion: 0.05
@@ -382,7 +382,7 @@ Cohesion: 0.20
 Nodes (9): CustomClasses.Web, DialogActions, DialogContent, ItemSpecEditor, MudButton, MudDialog, MudText, TitleContent (+1 more)
 
 ## Knowledge Gaps
-- **808 isolated node(s):** `netstandard2.1`, `Microsoft.NET.Sdk`, `string`, `MethodBase`, `TextMeshProUGUI` (+803 more)
+- **810 isolated node(s):** `netstandard2.1`, `Microsoft.NET.Sdk`, `string`, `MethodBase`, `TextMeshProUGUI` (+805 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **6 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -394,11 +394,11 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `RaidReadyPlayerPanelPatch` connect `Community 49` to `Community 40`?**
   _High betweenness centrality (0.002) - this node is a cross-community bridge._
 - **What connects `netstandard2.1`, `Microsoft.NET.Sdk`, `string` to the rest of the system?**
-  _808 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _810 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.09090909090909091 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.06342342342342343 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.062456140350877196 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.03773584905660377 - nodes in this community are weakly interconnected._
 - **Should `Community 3` be split into smaller, more focused modules?**
