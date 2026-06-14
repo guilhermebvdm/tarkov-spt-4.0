@@ -117,11 +117,12 @@
     private sealed record PlacedCell(
         int X, int Y, int W, int H, int W0, int H0, string? RootTpl, string? IconId, string Name, string? Category,
         double Qty, double Price, string? PriceSource, bool MissingPrice, int Width, int Height,
-        ItemSpecModel? Model, bool Rotated);
+        ItemSpecModel? Model, bool Rotated, string? CategoryIcon, int Contents);
 
     /// <summary>Campos normalizados de um item de origem (ItemSpec read-only OU ItemSpecModel editável).</summary>
     private readonly record struct SrcItem(
-        string? Preset, string? Tpl, bool Premium, double Count, int? X, int? Y, bool Rotated, ItemSpecModel? Model);
+        string? Preset, string? Tpl, bool Premium, double Count, int? X, int? Y, bool Rotated, ItemSpecModel? Model,
+        int Contents);
 
     private object? _lastSource;
     private string? _lastBase;
@@ -224,8 +225,10 @@
         // #3: ícone do PRESET montado (tarkov.dev hospeda o render do preset) quando o item é um preset;
         // o tpl base fica como fallback no onerror (vide ItemInner). Sem preset → ícone = tpl base.
         var iconId = ResolvePresetIconId(item) ?? rootTpl;
+        // Fallback de imagem: ícone da categoria do handbook (servido pelo SPT) quando o ícone do item falha.
+        var catIcon = Catalog.GetCategoryIcon(rootTpl);
         _cells.Add(new PlacedCell(x, y, dw, dh, w0, h0, rootTpl, iconId, name, category,
-            qty, price, source, missing, w0, h0, item.Model, rotated && w0 != h0));
+            qty, price, source, missing, w0, h0, item.Model, rotated && w0 != h0, catIcon, item.Contents));
     }
 
     /// <summary>Id do preset (default/premium) p/ a imagem do tarkov.dev — null se o item não é preset.</summary>
@@ -245,11 +248,11 @@
         if (_editable)
         {
             return EditItems!.Select(m => new SrcItem(
-                m.Preset, m.Tpl, m.Premium, Math.Max(1, m.Count), m.X, m.Y, m.Rotated ?? false, m)).ToList();
+                m.Preset, m.Tpl, m.Premium, Math.Max(1, m.Count), m.X, m.Y, m.Rotated ?? false, m, m.Contents.Count)).ToList();
         }
 
         return (Stash ?? [])
-            .Select(s => new SrcItem(s.Preset, s.Tpl, s.Premium, Math.Max(1, s.Count), s.X, s.Y, s.Rotated ?? false, null))
+            .Select(s => new SrcItem(s.Preset, s.Tpl, s.Premium, Math.Max(1, s.Count), s.X, s.Y, s.Rotated ?? false, null, s.Contents?.Count ?? 0))
             .ToList();
     }
 
@@ -412,14 +415,23 @@
             @* #3: tenta o ícone do PRESET montado; no erro cai pro tpl base; no 2º erro esconde.
                draggable="false": a <img> é arrastável por padrão e capturaria o drag NATIVO da
                imagem em vez do nosso @ondragstart no div pai (era o "mistério" do DnD travado). *@
+            @* Cadeia de fallback: preset montado → tpl base → ÍCONE DA CATEGORIA (handbook, servido pelo
+               SPT) → esconde. O ícone de categoria garante que a célula nunca fica vazia/sem indício. *@
             <img src="@($"https://assets.tarkov.dev/{cell.IconId}-icon.webp")"
                  loading="lazy" alt="" draggable="false"
                  data-fb="@(cell.IconId != cell.RootTpl ? cell.RootTpl : null)"
-                 onerror="if(this.dataset.fb){this.src='https://assets.tarkov.dev/'+this.dataset.fb+'-icon.webp';this.dataset.fb='';}else{this.style.display='none';}"/>
+                 data-cat="@cell.CategoryIcon"
+                 onerror="if(this.dataset.fb){this.src='https://assets.tarkov.dev/'+this.dataset.fb+'-icon.webp';this.dataset.fb='';}else if(this.dataset.cat){this.src=this.dataset.cat;this.dataset.cat='';this.classList.add('cc-item-cell__catimg');}else{this.style.display='none';}"/>
         }
         @if (cell.Qty > 1)
         {
             <span class="cc-item-cell__qty">@cell.Qty.ToString("N0", CultureInfo.InvariantCulture)</span>
+        }
+        @if (cell.Contents > 0)
+        {
+            <span class="cc-item-cell__contents" title="@(cell.Contents) item(s) inside this container">
+                <span class="cc-item-cell__contents-ico">▤</span>@cell.Contents
+            </span>
         }
         @if (cell.MissingPrice)
         {

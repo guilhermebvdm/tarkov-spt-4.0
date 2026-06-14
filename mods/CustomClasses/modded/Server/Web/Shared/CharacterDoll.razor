@@ -39,15 +39,22 @@
                     <div class="cc-item-cell cc-doll-slot__cell">
                         @if (gc.IconId is not null)
                         {
-                            @* #3: ícone do PRESET montado; no erro cai pro tpl base; no 2º erro esconde. *@
+                            @* Fallback: preset montado → tpl base → ÍCONE DA CATEGORIA (handbook/SPT) → esconde. *@
                             <img src="@($"https://assets.tarkov.dev/{gc.IconId}-icon.webp")"
                                  loading="lazy" alt="" draggable="false"
                                  data-fb="@(gc.IconId != gc.RootTpl ? gc.RootTpl : null)"
-                                 onerror="if(this.dataset.fb){this.src='https://assets.tarkov.dev/'+this.dataset.fb+'-icon.webp';this.dataset.fb='';}else{this.style.display='none';}"/>
+                                 data-cat="@gc.CategoryIcon"
+                                 onerror="if(this.dataset.fb){this.src='https://assets.tarkov.dev/'+this.dataset.fb+'-icon.webp';this.dataset.fb='';}else if(this.dataset.cat){this.src=this.dataset.cat;this.dataset.cat='';this.classList.add('cc-item-cell__catimg');}else{this.style.display='none';}"/>
                         }
                         else
                         {
                             <span class="cc-item-cell__txt">@gc.Name</span>
+                        }
+                        @if (gc.Contents > 0)
+                        {
+                            <span class="cc-item-cell__contents" title="@(gc.Contents) item(s) inside this container">
+                                <span class="cc-item-cell__contents-ico">▤</span>@gc.Contents
+                            </span>
                         }
                     </div>
                 </ItemTooltip>
@@ -81,7 +88,8 @@
 
     private sealed record GearCell(
         string? RootTpl, string? IconId, string Name, string? Category,
-        int Width, int Height, double Price, string? PriceSource, bool MissingPrice, bool MissingRequired);
+        int Width, int Height, double Price, string? PriceSource, bool MissingPrice, bool MissingRequired,
+        string? CategoryIcon, int Contents);
 
     private Dictionary<string, GearCell> _cells = new(StringComparer.OrdinalIgnoreCase);
 
@@ -116,11 +124,12 @@
     private GearCell BuildCell(ItemSpec spec)
     {
         var missingRequired = Catalog.HasMissingRequiredMods(spec);
+        var contents = spec.Contents?.Count ?? 0;
         var rootTpl = ResolveRootTpl(spec);
         if (rootTpl is null)
         {
             var raw = spec.Preset ?? spec.Tpl ?? "(no tpl)";
-            return new GearCell(null, null, raw, null, 1, 1, 0, null, true, missingRequired);
+            return new GearCell(null, null, raw, null, 1, 1, 0, null, true, missingRequired, null, contents);
         }
 
         var (w, h) = Catalog.GetItemDimensions(rootTpl);
@@ -131,7 +140,8 @@
         // #3: ícone do PRESET montado quando aplicável (fallback pro tpl base no onerror).
         var iconId = ResolvePresetIconId(spec) ?? rootTpl;
         return new GearCell(rootTpl, iconId, name, category, w, h, price, source,
-            string.Equals(source, "missing", StringComparison.Ordinal), missingRequired);
+            string.Equals(source, "missing", StringComparison.Ordinal), missingRequired,
+            Catalog.GetCategoryIcon(rootTpl), contents);
     }
 
     /// <summary>Id do preset (default/premium) p/ a imagem do tarkov.dev — null se o item não é preset.</summary>

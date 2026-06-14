@@ -508,6 +508,28 @@ public class CatalogService
         return cats.FirstOrDefault(c => string.Equals(c.Id, catId, StringComparison.Ordinal))?.Name;
     }
 
+    /// <summary>
+    ///     Handbook-category ICON path (served by SPT, e.g. "/files/handbook/icon_Weapons.png") for a tpl —
+    ///     used as a FALLBACK when the item's tarkov.dev icon fails, so a cell still shows a meaningful
+    ///     placeholder ("there's a &lt;weapon/med/…&gt; here") instead of going blank. Null when the tpl is
+    ///     not in the handbook or its category has no icon.
+    /// </summary>
+    public string? GetCategoryIcon(string? tpl)
+    {
+        if (string.IsNullOrWhiteSpace(tpl))
+        {
+            return null;
+        }
+
+        var catId = GetCategoryId(tpl);
+        if (catId is null)
+        {
+            return null;
+        }
+
+        return GetCategories().FirstOrDefault(c => string.Equals(c.Id, catId, StringComparison.Ordinal))?.Icon;
+    }
+
     // ── Presets ──────────────────────────────────────────────────────────────
 
     /// <summary>

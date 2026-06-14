@@ -190,7 +190,7 @@ else
 
             @* ░ CENTRO ░ *@
             <div class="cc-ws__panel cc-ws__panel--center">
-                <div class="cc-section__title">Equipped (@EquippedCount slots)</div>
+                <div class="cc-section__title">Equipped (@EquippedCount slots) <span class="cc-section__sum">@FormatRub(EquippedRub)</span></div>
                 <CharacterDoll Equipped="@EquippedForView" Editable="@_editMode" OnSlotClick="EditSlotAsync"/>
 
                 @* ── Outfit (movido pro painel EQUIPPED — é a aparência do personagem) ── *@
@@ -218,7 +218,7 @@ else
             @* ░ DIREITA ░ *@
             <div class="cc-ws__panel cc-ws__panel--right">
                 <div class="cc-ws__panel-head">
-                    <div class="cc-section__title">Stash (@StashCount lines)</div>
+                    <div class="cc-section__title">Stash (@StashCount lines) <span class="cc-section__sum">@FormatRub(StashRub)</span></div>
                     @if (_editMode && _model is not null)
                     {
                         <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small"
@@ -292,6 +292,13 @@ else
     private int HideoutCount => _editMode && _model is not null ? _model.Hideout.Count : Definition?.Hideout?.Count ?? 0;
     private int EquippedCount => _editMode && _model is not null ? _model.Equipped.Count : Definition?.Loadout?.Equipped?.Count ?? 0;
     private int StashCount => _editMode && _model is not null ? _model.Stash.Count : Definition?.Loadout?.Stash?.Count ?? 0;
+
+    // Somatório ₽ por painel (cabeçalho). Equipped inclui as peças dos presets equipados; o stash, as suas.
+    // Ammo/contents ficam fora desta separação (entram no total geral do header) — aproximação intencional.
+    private double EquippedRub => LiveLoadoutCost?.Items
+        .Where(i => i.Context.StartsWith("equipped", StringComparison.Ordinal)).Sum(i => i.Subtotal) ?? 0;
+    private double StashRub => LiveLoadoutCost?.Items
+        .Where(i => string.Equals(i.Context, "stash", StringComparison.Ordinal)).Sum(i => i.Subtotal) ?? 0;
 
     // PERF: os snapshots da doll/stash são CACHEADOS (rebuild só quando o loadout muda — RebuildLoadoutViews),
     // NÃO recomputados a cada render. Antes, EquippedForView/StashForView chamavam _model.ToDefinition()
