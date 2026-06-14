@@ -483,6 +483,23 @@
     padding: 2px 4px;
 }
 
+/* Pendência de required (build manual): marca o slot da silhueta sem precisar abrir o item. */
+.cc-doll-slot--pending .cc-doll-slot__cell {
+    outline: 2px solid var(--mud-palette-error, #f44336);
+    outline-offset: -1px;
+}
+.cc-doll-slot__warn {
+    position: absolute;
+    top: 0;
+    right: 2px;
+    z-index: 3;
+    font-size: 13px;
+    line-height: 1;
+    color: var(--mud-palette-error, #f44336);
+    text-shadow: 0 0 2px #000, 0 0 2px #000;
+    pointer-events: none;
+}
+
 /* Seletor de Build (Standard/Premium/Specific/Custom) — substitui o toggle Item/Preset. */
 .cc-build { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 

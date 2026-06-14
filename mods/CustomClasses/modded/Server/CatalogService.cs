@@ -912,6 +912,52 @@ public class CatalogService
         return template is not null && string.Equals(template.Type, "Item", StringComparison.Ordinal) ? only : null;
     }
 
+    /// <summary>
+    ///     True when an item is built MANUALLY (explicit <c>mods</c>, no <c>preset</c>) and at least one
+    ///     REQUIRED slot in its tree is empty — i.e. the builder will NOT auto-complete the default preset,
+    ///     so the mandatory part genuinely is missing. Mirrors the editor's required-slot validation; lets
+    ///     the silhouette / stash flag a pending item WITHOUT opening it. Preset / auto (empty mods) items
+    ///     never report a pending required (the preset fills them at build).
+    /// </summary>
+    public bool HasMissingRequiredMods(ItemSpec? spec)
+    {
+        if (spec is null
+            || !string.IsNullOrWhiteSpace(spec.Preset)   // preset mode — builder completes the tree
+            || spec.Mods is not { Count: > 0 }            // empty mods — default preset auto-completes
+            || string.IsNullOrWhiteSpace(spec.Tpl))
+        {
+            return false;
+        }
+
+        return CountMissingRequiredInTree(spec.Tpl!, spec.Mods, 0) > 0;
+    }
+
+    /// <summary>Recursive count of empty REQUIRED slots in a manual mod tree (depth-capped like the editor).</summary>
+    private int CountMissingRequiredInTree(string parentTpl, List<ModSpec>? mods, int depth)
+    {
+        if (depth >= 6)
+        {
+            return 0;
+        }
+
+        var missing = 0;
+        foreach (var slot in GetSlotsOf(parentTpl))
+        {
+            var mod = mods?.FirstOrDefault(m => string.Equals(m.SlotId, slot.Id, StringComparison.OrdinalIgnoreCase));
+            if (slot.Required && string.IsNullOrWhiteSpace(mod?.Tpl))
+            {
+                missing++;
+            }
+
+            if (mod?.Tpl is { Length: > 0 } subTpl && TemplateExists(subTpl))
+            {
+                missing += CountMissingRequiredInTree(subTpl, mod.Mods, depth + 1);
+            }
+        }
+
+        return missing;
+    }
+
     /// <summary>True when the tpl resolves to a live item template (mods included — live DB).</summary>
     public bool TemplateExists(string tpl)
     {

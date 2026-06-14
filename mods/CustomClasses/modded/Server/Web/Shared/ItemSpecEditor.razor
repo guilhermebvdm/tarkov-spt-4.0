@@ -515,6 +515,9 @@
                 }
                 @if (mod?.Tpl is { Length: > 0 } modTpl)
                 {
+                    <img src="https://assets.tarkov.dev/@(modTpl)-icon.webp" width="22" height="22"
+                         loading="lazy" alt="" onerror="this.style.display='none'"
+                         style="object-fit:contain;flex-shrink:0;"/>
                     <MudText Typo="Typo.body2"><b>@ItemName(modTpl)</b></MudText>
                     @if (!Catalog.TemplateExists(modTpl))
                     {

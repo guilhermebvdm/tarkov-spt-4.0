@@ -19,10 +19,14 @@
     {
         var cell = _cells.TryGetValue(slot, out var c) ? c : null;
         var clickable = Editable && OnSlotClick.HasDelegate;
-        <div class="cc-doll-slot @($"cc-doll-slot--{slot.ToLowerInvariant()}") @(clickable ? "cc-doll-slot--edit" : null)"
+        <div class="cc-doll-slot @($"cc-doll-slot--{slot.ToLowerInvariant()}") @(clickable ? "cc-doll-slot--edit" : null) @(cell?.MissingRequired == true ? "cc-doll-slot--pending" : null)"
              @onclick="@(() => { if (clickable) return OnSlotClick.InvokeAsync(slot); return Task.CompletedTask; })"
-             title="@(clickable ? "Click to edit this slot" : null)">
+             title="@(cell?.MissingRequired == true ? "Required slot(s) empty in this item's manual build — click to fix" : (clickable ? "Click to edit this slot" : null))">
             <div class="cc-doll-slot__label">@ShortLabel(slot)</div>
+            @if (cell?.MissingRequired == true)
+            {
+                <span class="cc-doll-slot__warn" title="Required slot(s) empty — the game may reject this item">⚠</span>
+            }
             @if (cell is { } gc)
             {
                 <ItemTooltip Name="@gc.Name" Category="@gc.Category"
@@ -77,7 +81,7 @@
 
     private sealed record GearCell(
         string? RootTpl, string? IconId, string Name, string? Category,
-        int Width, int Height, double Price, string? PriceSource, bool MissingPrice);
+        int Width, int Height, double Price, string? PriceSource, bool MissingPrice, bool MissingRequired);
 
     private Dictionary<string, GearCell> _cells = new(StringComparer.OrdinalIgnoreCase);
 
@@ -111,11 +115,12 @@
 
     private GearCell BuildCell(ItemSpec spec)
     {
+        var missingRequired = Catalog.HasMissingRequiredMods(spec);
         var rootTpl = ResolveRootTpl(spec);
         if (rootTpl is null)
         {
             var raw = spec.Preset ?? spec.Tpl ?? "(no tpl)";
-            return new GearCell(null, null, raw, null, 1, 1, 0, null, true);
+            return new GearCell(null, null, raw, null, 1, 1, 0, null, true, missingRequired);
         }
 
         var (w, h) = Catalog.GetItemDimensions(rootTpl);
@@ -126,7 +131,7 @@
         // #3: ícone do PRESET montado quando aplicável (fallback pro tpl base no onerror).
         var iconId = ResolvePresetIconId(spec) ?? rootTpl;
         return new GearCell(rootTpl, iconId, name, category, w, h, price, source,
-            string.Equals(source, "missing", StringComparison.Ordinal));
+            string.Equals(source, "missing", StringComparison.Ordinal), missingRequired);
     }
 
     /// <summary>Id do preset (default/premium) p/ a imagem do tarkov.dev — null se o item não é preset.</summary>
