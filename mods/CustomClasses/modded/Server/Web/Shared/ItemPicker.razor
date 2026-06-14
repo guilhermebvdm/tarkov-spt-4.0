@@ -43,6 +43,11 @@
                             <MudText Typo="Typo.caption" Class="mud-text-secondary">
                                 @(item.ShortName ?? "—") · @item.Tpl
                             </MudText>
+                            @{ var cap = Catalog.GridSummary(item.Tpl); }
+                            @if (cap is not null)
+                            {
+                                <MudText Typo="Typo.caption" Style="color: var(--mud-palette-primary);">▦ @cap</MudText>
+                            }
                         </div>
                         <MudText Typo="Typo.caption" Class="mud-text-secondary" Style="white-space: nowrap;">
                             @CategoryName(item.CategoryId)

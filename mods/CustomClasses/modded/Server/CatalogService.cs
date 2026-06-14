@@ -530,6 +530,37 @@ public class CatalogService
         return GetCategories().FirstOrDefault(c => string.Equals(c.Id, catId, StringComparison.Ordinal))?.Icon;
     }
 
+    /// <summary>
+    ///     Short human description of an item's internal capacity: its grids (each pocket/compartment as
+    ///     W×H, grouped) plus any special slots. Used to explain what each pocket/rig/backpack offers in the
+    ///     picker. Null when the item has no grids nor special slots (e.g. a plain consumable).
+    /// </summary>
+    public string? GridSummary(string tpl)
+    {
+        var id = TryParseMongoId(tpl);
+        var props = id is null ? null : GetTemplate(id.Value)?.Properties;
+        if (props is null)
+        {
+            return null;
+        }
+
+        var parts = new List<string>();
+        if (props.Grids is { } grids && grids.Any())
+        {
+            var sizes = grids
+                .GroupBy(g => $"{g.Properties?.CellsH ?? 0}×{g.Properties?.CellsV ?? 0}")
+                .Select(gr => gr.Count() > 1 ? $"{gr.Count()}× {gr.Key}" : gr.Key);
+            parts.Add(string.Join(" · ", sizes));
+        }
+
+        if (props.Slots is { } slots && slots.Any())
+        {
+            parts.Add($"{slots.Count()} special slot(s)");
+        }
+
+        return parts.Count > 0 ? string.Join(" · ", parts) : null;
+    }
+
     // ── Presets ──────────────────────────────────────────────────────────────
 
     /// <summary>
