@@ -37,7 +37,7 @@
         {
             if (_editable)
             {
-                <div class="cc-item-cell cc-grid2d__item cc-grid2d__item--edit"
+                <div class="cc-item-cell cc-grid2d__item cc-grid2d__item--edit @(cell.Rotated ? "cc-grid2d__item--rot" : null)"
                      style="@CellStyle(cell)" title="Click to edit · drag to move · ⟳ rotate · ✕ remove"
                      data-index="@(EditItems!.IndexOf(cell.Model!))"
                      data-x="@cell.X" data-y="@cell.Y" data-w="@cell.W" data-h="@cell.H"
@@ -55,7 +55,8 @@
                              Width="@cell.Width" Height="@cell.Height"
                              Price="@cell.Price" PriceSource="@cell.PriceSource"
                              Qty="@cell.Qty" MissingPrice="@cell.MissingPrice">
-                    <div class="cc-item-cell cc-grid2d__item" style="@CellStyle(cell)">
+                    <div class="cc-item-cell cc-grid2d__item @(cell.Rotated ? "cc-grid2d__item--rot" : null)"
+                         style="@CellStyle(cell)">
                         @ItemInner(cell)
                     </div>
                 </ItemTooltip>
@@ -116,7 +117,7 @@
     private sealed record PlacedCell(
         int X, int Y, int W, int H, int W0, int H0, string? RootTpl, string? IconId, string Name, string? Category,
         double Qty, double Price, string? PriceSource, bool MissingPrice, int Width, int Height,
-        ItemSpecModel? Model);
+        ItemSpecModel? Model, bool Rotated);
 
     /// <summary>Campos normalizados de um item de origem (ItemSpec read-only OU ItemSpecModel editável).</summary>
     private readonly record struct SrcItem(
@@ -224,7 +225,7 @@
         // o tpl base fica como fallback no onerror (vide ItemInner). Sem preset → ícone = tpl base.
         var iconId = ResolvePresetIconId(item) ?? rootTpl;
         _cells.Add(new PlacedCell(x, y, dw, dh, w0, h0, rootTpl, iconId, name, category,
-            qty, price, source, missing, w0, h0, item.Model));
+            qty, price, source, missing, w0, h0, item.Model, rotated && w0 != h0));
     }
 
     /// <summary>Id do preset (default/premium) p/ a imagem do tarkov.dev — null se o item não é preset.</summary>
@@ -426,8 +427,10 @@
     };
 
     /// <summary>1-based grid-column/row + span (grid começa em 1; X/Y são 0-based).</summary>
+    // --cw0/--ch0 = dimensões BASE (não rotacionadas) em células: o CSS .cc-grid2d__item--rot usa-as
+    // pra dimensionar o ícone no tamanho natural e girá-lo 90° (preenchendo a célula já invertida).
     private static string CellStyle(PlacedCell c) =>
-        $"grid-column:{c.X + 1} / span {c.W};grid-row:{c.Y + 1} / span {c.H};";
+        $"grid-column:{c.X + 1} / span {c.W};grid-row:{c.Y + 1} / span {c.H};--cw0:{c.W0};--ch0:{c.H0};";
 
     private (string? RootTpl, string Name, string? Category, int W, int H, double Qty,
         double Price, string? PriceSource, bool Missing)? Resolve(SrcItem item)
