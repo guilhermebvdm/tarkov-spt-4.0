@@ -504,7 +504,8 @@
 .cc-build { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
 /* Lista de presets (PresetPicker): linhas clicáveis, selecionado destacado. */
-.cc-preset-list { display: flex; flex-direction: column; gap: 2px; max-height: 240px; overflow-y: auto; }
+.cc-preset-list { display: flex; flex-direction: column; gap: 2px; max-height: 300px; overflow-y: auto; }
+.cc-preset-row__icon { width: 46px; height: 32px; object-fit: contain; flex-shrink: 0; }
 .cc-preset-row {
     display: flex;
     align-items: center;

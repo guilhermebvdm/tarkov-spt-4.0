@@ -28,12 +28,15 @@
 
 <MudStack Spacing="2">
 
-    @* ── Root: mode toggle + current item + pick ─────────────────────────── *@
+    @* ── Root: item atual + trocar ───────────────────────────────────────── *@
     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Wrap="Wrap.Wrap">
-        @if (_effectiveRootTpl is { Length: > 0 } rootTpl && _rootExists)
+        @if (_effectiveRootTpl is { Length: > 0 } && _rootExists)
         {
-            <img src="https://assets.tarkov.dev/@(rootTpl)-icon.webp" width="32" height="32"
-                 loading="lazy" alt="" onerror="this.style.display='none'"/>
+            @* Ícone reflete o PRESET montado (cai pro tpl base no erro, depois esconde). *@
+            <img src="https://assets.tarkov.dev/@(_iconId)-icon.webp" width="36" height="36"
+                 loading="lazy" alt="" draggable="false" style="object-fit:contain;"
+                 data-fb="@(_iconId != _effectiveRootTpl ? _effectiveRootTpl : null)"
+                 onerror="if(this.dataset.fb){this.src='https://assets.tarkov.dev/'+this.dataset.fb+'-icon.webp';this.dataset.fb='';}else{this.style.display='none';}"/>
         }
         <MudText Typo="Typo.body1"><b>@RootLabel()</b></MudText>
         @if (_effectiveRootTpl is { Length: > 0 })
@@ -67,22 +70,17 @@
         }
     </MudStack>
 
-    @* ── Build: substitui o antigo toggle Item/Preset. Só aparece p/ itens COM presets (armas);
-       capacetes/armaduras/itens simples não têm essa seção (vão direto pra Mods/Contents). ── *@
+    @* ── Build: só p/ itens COM presets (armas). Dois modos: usar um PRESET (escolhido na lista) ou
+       montar peça a peça (Custom). "Standard/Premium" do EFT são apenas presets → viram rótulos
+       na lista, não modos separados. Capacetes/itens simples não têm esta seção. ── *@
     @if (_hasPresets)
     {
         <div class="cc-build">
             <MudText Typo="Typo.body2"><b>Build:</b></MudText>
             <MudButtonGroup Variant="Variant.Outlined" Size="Size.Small">
-                <MudButton Color="@(_buildMode == BuildKind.Default ? Color.Primary : Color.Default)"
-                           Variant="@(_buildMode == BuildKind.Default ? Variant.Filled : Variant.Outlined)"
-                           OnClick="@(() => SetBuildAsync(BuildKind.Default))">Standard</MudButton>
-                <MudButton Color="@(_buildMode == BuildKind.Premium ? Color.Primary : Color.Default)"
-                           Variant="@(_buildMode == BuildKind.Premium ? Variant.Filled : Variant.Outlined)"
-                           OnClick="@(() => SetBuildAsync(BuildKind.Premium))">Premium</MudButton>
-                <MudButton Color="@(_buildMode == BuildKind.Specific ? Color.Primary : Color.Default)"
-                           Variant="@(_buildMode == BuildKind.Specific ? Variant.Filled : Variant.Outlined)"
-                           OnClick="@(() => _specificOpen = !_specificOpen)">Specific preset…</MudButton>
+                <MudButton Color="@(_buildMode == BuildKind.Preset ? Color.Primary : Color.Default)"
+                           Variant="@(_buildMode == BuildKind.Preset ? Variant.Filled : Variant.Outlined)"
+                           OnClick="@(() => SetBuildAsync(BuildKind.Preset))">Preset</MudButton>
                 <MudButton Color="@(_buildMode == BuildKind.Custom ? Color.Primary : Color.Default)"
                            Variant="@(_buildMode == BuildKind.Custom ? Variant.Filled : Variant.Outlined)"
                            OnClick="@(() => SetBuildAsync(BuildKind.Custom))">Custom (by part)</MudButton>
@@ -90,16 +88,11 @@
         </div>
         <MudText Typo="Typo.caption" Class="mud-text-secondary">@BuildHint()</MudText>
 
-        @if (_buildMode == BuildKind.Specific && _explicitPreset is not null)
+        @if (_buildMode == BuildKind.Preset)
         {
-            <MudText Typo="Typo.body2">
-                Selected: <b>@(_explicitPreset.Name ?? _explicitPreset.Id)</b> (@_explicitPreset.ItemCount parts)
-            </MudText>
-        }
-        <MudCollapse Expanded="@(_specificOpen || _buildMode == BuildKind.Specific)">
-            <PresetPicker WeaponTpl="@_effectiveRootTpl" SelectedPresetId="@_explicitPreset?.Id"
+            <PresetPicker WeaponTpl="@_effectiveRootTpl" SelectedPresetId="@_selectedPresetId"
                           OnPresetSelected="OnPresetPickedAsync"/>
-        </MudCollapse>
+        }
     }
 
     @* ── Ammo (weapons only): ammo required for loadedMag/chambered ─────── *@
@@ -255,13 +248,14 @@
         CloseButton = true,
     };
 
-    private bool _specificOpen;
     private bool _ammoOpen;
     private bool _modsOpen;
 
     // Cached per render-cycle (recomputed in Refresh — Spec is mutated in place, so
     // OnParametersSet alone would miss our own event-handler mutations).
     private string? _effectiveRootTpl;
+    private string? _iconId;            // ícone exibido: o preset montado (preset mode) ou o tpl base
+    private string? _selectedPresetId;  // preset destacado na lista (null fora do modo Preset)
     private bool _rootExists;
     private bool _isWeapon;
     private bool _hasGrids;
@@ -270,10 +264,9 @@
     private BuildKind _buildMode;
     private List<CatalogSlotInfo> _rootSlots = [];
     private List<CatalogPreset> _presets = [];
-    private CatalogPreset? _explicitPreset;
 
-    /// <summary>How a weapon (item with presets) is assembled — replaces the old Item/Preset toggle.</summary>
-    private enum BuildKind { Default, Premium, Specific, Custom }
+    /// <summary>How an item with presets is built: a PRESET chosen from the list, or a manual mod tree.</summary>
+    private enum BuildKind { Preset, Custom }
 
     // A árvore de mods abre por padrão: a seção só aparece com um tpl montável e o usuário está editando-o.
     protected override void OnInitialized() => _modsOpen = true;
@@ -291,28 +284,29 @@
         _rootSlots = Spec.Tpl is { Length: > 0 } ? Catalog.GetSlotsOf(Spec.Tpl) : [];
         _presets = _rootExists ? Catalog.GetPresetsFor(new MongoId(_effectiveRootTpl!)) : [];
         _hasPresets = _presets.Count > 0;
-        _explicitPreset = _presets.FirstOrDefault(p => string.Equals(p.Id, Spec.Preset, StringComparison.Ordinal));
-        _buildMode = ComputeBuildMode();
+        _buildMode = Spec.Preset is { Length: > 0 } ? BuildKind.Preset : BuildKind.Custom;
+        // Preset efetivo (id) — resolve tanto Spec.Preset == preset id quanto == weapon tpl (default).
+        var effectivePresetId = ResolveEffectivePresetId();
+        _selectedPresetId = _buildMode == BuildKind.Preset ? effectivePresetId : null;
+        _iconId = effectivePresetId ?? _effectiveRootTpl;
         _slotAllowed = TplFilter is null
             || _effectiveRootTpl is not { Length: > 0 }
             || !_rootExists
             || TplFilter(_effectiveRootTpl!);
     }
 
-    /// <summary>Build mode derived from the Spec: preset id ⇒ Specific; preset==tpl ⇒ Default/Premium; only Tpl ⇒ Custom.</summary>
-    private BuildKind ComputeBuildMode()
+    /// <summary>Effective preset id of the Spec (resolves preset-by-tpl → default); null when not in preset mode.</summary>
+    private string? ResolveEffectivePresetId()
     {
-        if (Spec.Preset is not { Length: > 0 })
+        if (Spec.Preset is not { Length: > 0 } raw || !MongoId.IsValidMongoId(raw))
         {
-            return BuildKind.Custom;   // bare tpl (or nothing) — manual tree / simple item
+            return null;
         }
 
-        if (_explicitPreset is not null)
-        {
-            return BuildKind.Specific;
-        }
-
-        return Spec.Premium ? BuildKind.Premium : BuildKind.Default;
+        var preset = Spec.Premium
+            ? Catalog.ResolvePremiumPreset(new MongoId(raw))
+            : Catalog.ResolveDefaultPreset(new MongoId(raw));
+        return preset?.Id.ToString();
     }
 
     /// <summary>
@@ -344,16 +338,12 @@
     private string ItemName(string tpl) =>
         MongoId.IsValidMongoId(tpl) ? Catalog.GetItemName(new MongoId(tpl)) : tpl;
 
-    /// <summary>Short plain-language hint for the current build mode (replaces the old "encyclopedia/most-kitted" jargon).</summary>
-    private string BuildHint() => _buildMode switch
-    {
-        BuildKind.Default => "Standard factory build — assembled automatically (default preset).",
-        BuildKind.Premium => "Most-kitted build available (prefers no thermal/NV optic when possible).",
-        BuildKind.Specific => "A specific saved preset, picked from the list below.",
-        _ => Spec.Mods.Count == 0
+    /// <summary>Short plain-language hint for the current build mode.</summary>
+    private string BuildHint() => _buildMode == BuildKind.Preset
+        ? "Pick a ready-made build below — each row is a preset (its icon shows how it's kitted). The tags mark the game's default (Standard) and the most-kitted one (Premium)."
+        : Spec.Mods.Count == 0
             ? "Custom: no mods yet, so the default preset still applies. Add a mod (Set) to take manual control."
-            : "Custom: manual build — the automatic preset is OFF; fill the required slots yourself.",
-    };
+            : "Custom: manual build — the automatic preset is OFF; fill the required slots yourself.";
 
     private async Task NotifyChangedAsync()
     {
@@ -364,10 +354,9 @@
     // ── Build mode / root selection ──────────────────────────────────────────
 
     /// <summary>
-    ///     Switches the build mode of a weapon (item with presets). Standard/Premium use the weapon tpl as
-    ///     <c>preset</c> (default/premium resolution); Custom keeps the bare tpl + manual mod tree. Specific
-    ///     is set by choosing in the preset list (OnPresetPickedAsync). Each switch clears the fields the
-    ///     abandoned mode would leave dangling (the builder ignores them anyway).
+    ///     Switches between PRESET (a ready-made build — starts on the default preset id, then changed via
+    ///     the list) and CUSTOM (bare tpl + manual mod tree). Each switch clears the fields the abandoned
+    ///     mode would leave dangling (the builder ignores them anyway).
     /// </summary>
     private async Task SetBuildAsync(BuildKind mode)
     {
@@ -376,22 +365,24 @@
             return;
         }
 
-        switch (mode)
+        if (mode == BuildKind.Preset)
         {
-            case BuildKind.Default:
-                Spec.Preset = baseTpl; Spec.Premium = false; Spec.Tpl = null; Spec.Mods.Clear();
-                break;
-            case BuildKind.Premium:
-                Spec.Preset = baseTpl; Spec.Premium = true; Spec.Tpl = null; Spec.Mods.Clear();
-                break;
-            case BuildKind.Custom:
-                Spec.Tpl = baseTpl; Spec.Preset = null; Spec.Premium = false; _modsOpen = true;
-                // Ponto de partida: preenche os required de opção única (se houver) ao assumir o manual.
-                AutoFillRequiredSingleOptions(baseTpl, Spec.Mods, 0);
-                break;
+            // Começa no preset padrão (id resolvido pra destacar na lista); o usuário troca pela lista.
+            Spec.Preset = Catalog.ResolveDefaultPreset(new MongoId(baseTpl))?.Id.ToString() ?? baseTpl;
+            Spec.Premium = false;
+            Spec.Tpl = null;
+            Spec.Mods.Clear();
+        }
+        else
+        {
+            Spec.Tpl = baseTpl;
+            Spec.Preset = null;
+            Spec.Premium = false;
+            _modsOpen = true;
+            // Ponto de partida: preenche os required de opção única (se houver) ao assumir o manual.
+            AutoFillRequiredSingleOptions(baseTpl, Spec.Mods, 0);
         }
 
-        _specificOpen = false;
         await NotifyChangedAsync();
     }
 
@@ -412,11 +403,13 @@
             return;
         }
 
-        // Item COM presets (arma) nasce em "Standard" (preset por tpl); sem presets, vira tpl montável.
-        var hasPresets = MongoId.IsValidMongoId(tpl) && Catalog.GetPresetsFor(new MongoId(tpl)).Count > 0;
-        if (hasPresets)
+        // Item COM presets (arma) nasce no preset PADRÃO (id resolvido); sem presets, vira tpl montável.
+        var defaultPresetId = MongoId.IsValidMongoId(tpl)
+            ? Catalog.ResolveDefaultPreset(new MongoId(tpl))?.Id.ToString()
+            : null;
+        if (defaultPresetId is not null)
         {
-            Spec.Preset = tpl;
+            Spec.Preset = defaultPresetId;
             Spec.Tpl = null;
             Spec.Premium = false;
         }
@@ -431,19 +424,17 @@
         Spec.Ammo = null;
         Spec.LoadedMag = false;
         Spec.Chambered = false;
-        _specificOpen = false;
         _ammoOpen = false;
         await NotifyChangedAsync();
     }
 
-    /// <summary>Specific preset chosen from the list → preset id (clears the bare-tpl/manual-tree mode).</summary>
+    /// <summary>Preset chosen from the list → its id (clears the manual-tree fields).</summary>
     private async Task OnPresetPickedAsync(string presetId)
     {
         Spec.Preset = presetId;
         Spec.Tpl = null;
         Spec.Premium = false;
         Spec.Mods.Clear();
-        _specificOpen = false;
         await NotifyChangedAsync();
     }
 

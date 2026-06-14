@@ -24,6 +24,10 @@
                 var selected = string.Equals(p.Id, SelectedPresetId, StringComparison.Ordinal);
                 <div class="cc-preset-row @(selected ? "cc-preset-row--sel" : null)"
                      title="@p.Id" @onclick="@(() => SelectAsync(p))">
+                    @* Ícone do preset montado (mostra como vem kitado); cai pra arma base no erro. *@
+                    <img class="cc-preset-row__icon" src="https://assets.tarkov.dev/@(p.Id)-icon.webp"
+                         loading="lazy" alt="" draggable="false" data-fb="@WeaponTpl"
+                         onerror="if(this.dataset.fb){this.src='https://assets.tarkov.dev/'+this.dataset.fb+'-icon.webp';this.dataset.fb='';}else{this.style.visibility='hidden';}"/>
                     <div class="cc-preset-row__main">
                         <span class="cc-preset-row__name">@(p.Name ?? "Unnamed preset")</span>
                         <span class="cc-preset-row__sub">@p.ItemCount parts</span>
