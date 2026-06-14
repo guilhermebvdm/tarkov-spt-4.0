@@ -10407,7 +10407,7 @@
       "label": "SidebarRow",
       "file_type": "code",
       "source_file": "Server/Web/Shared/NavMenu.razor",
-      "source_location": "L204",
+      "source_location": "L210",
       "_origin": "ast",
       "id": "sidebarrow",
       "community": 9,
@@ -10417,7 +10417,7 @@
       "label": "SidebarRow",
       "file_type": "code",
       "source_file": "Server/Web/Shared/NavMenu.razor",
-      "source_location": "L191",
+      "source_location": "L197",
       "_origin": "ast",
       "id": "shared_navmenu_sidebarrow",
       "community": 9,
@@ -10427,7 +10427,7 @@
       "label": "OnInitializedAsync",
       "file_type": "code",
       "source_file": "Server/Web/Shared/NavMenu.razor",
-      "source_location": "L215",
+      "source_location": "L221",
       "_origin": "ast",
       "id": "shared_navmenu_oninitializedasync",
       "community": 9,
@@ -10437,7 +10437,7 @@
       "label": "Dispose",
       "file_type": "code",
       "source_file": "Server/Web/Shared/NavMenu.razor",
-      "source_location": "L230",
+      "source_location": "L236",
       "_origin": "ast",
       "id": "shared_navmenu_dispose",
       "community": 9,
@@ -10447,7 +10447,7 @@
       "label": "OnAfterRenderAsync",
       "file_type": "code",
       "source_file": "Server/Web/Shared/NavMenu.razor",
-      "source_location": "L233",
+      "source_location": "L239",
       "_origin": "ast",
       "id": "shared_navmenu_onafterrenderasync",
       "community": 9,
@@ -10457,7 +10457,7 @@
       "label": "RefreshEditTabAsync",
       "file_type": "code",
       "source_file": "Server/Web/Shared/NavMenu.razor",
-      "source_location": "L252",
+      "source_location": "L258",
       "_origin": "ast",
       "id": "shared_navmenu_refreshedittabasync",
       "community": 9,
@@ -10467,7 +10467,7 @@
       "label": "OnFilterChanged",
       "file_type": "code",
       "source_file": "Server/Web/Shared/NavMenu.razor",
-      "source_location": "L255",
+      "source_location": "L261",
       "_origin": "ast",
       "id": "shared_navmenu_onfilterchanged",
       "community": 9,
@@ -10477,7 +10477,7 @@
       "label": "EditClass",
       "file_type": "code",
       "source_file": "Server/Web/Shared/NavMenu.razor",
-      "source_location": "L262",
+      "source_location": "L268",
       "_origin": "ast",
       "id": "shared_navmenu_editclass",
       "community": 9,
@@ -10487,7 +10487,7 @@
       "label": "OnLocationChanged",
       "file_type": "code",
       "source_file": "Server/Web/Shared/NavMenu.razor",
-      "source_location": "L274",
+      "source_location": "L280",
       "_origin": "ast",
       "id": "shared_navmenu_onlocationchanged",
       "community": 9,
@@ -10497,7 +10497,7 @@
       "label": "LoadRows",
       "file_type": "code",
       "source_file": "Server/Web/Shared/NavMenu.razor",
-      "source_location": "L299",
+      "source_location": "L305",
       "_origin": "ast",
       "id": "shared_navmenu_loadrows",
       "community": 9,
@@ -10507,7 +10507,7 @@
       "label": "FilteredRows",
       "file_type": "code",
       "source_file": "Server/Web/Shared/NavMenu.razor",
-      "source_location": "L337",
+      "source_location": "L343",
       "_origin": "ast",
       "id": "shared_navmenu_filteredrows",
       "community": 9,
@@ -10517,7 +10517,7 @@
       "label": "DetectView",
       "file_type": "code",
       "source_file": "Server/Web/Shared/NavMenu.razor",
-      "source_location": "L359",
+      "source_location": "L365",
       "_origin": "ast",
       "id": "shared_navmenu_detectview",
       "community": 9,
@@ -10527,7 +10527,7 @@
       "label": "UpdateActive",
       "file_type": "code",
       "source_file": "Server/Web/Shared/NavMenu.razor",
-      "source_location": "L373",
+      "source_location": "L379",
       "_origin": "ast",
       "id": "shared_navmenu_updateactive",
       "community": 9,
@@ -10537,7 +10537,7 @@
       "label": "NavigateToClass",
       "file_type": "code",
       "source_file": "Server/Web/Shared/NavMenu.razor",
-      "source_location": "L381",
+      "source_location": "L387",
       "_origin": "ast",
       "id": "shared_navmenu_navigatetoclass",
       "community": 9,
@@ -10547,7 +10547,7 @@
       "label": "DotStyle",
       "file_type": "code",
       "source_file": "Server/Web/Shared/NavMenu.razor",
-      "source_location": "L409",
+      "source_location": "L415",
       "_origin": "ast",
       "id": "shared_navmenu_dotstyle",
       "community": 9,
@@ -10557,7 +10557,7 @@
       "label": "FallbackGlyph",
       "file_type": "code",
       "source_file": "Server/Web/Shared/NavMenu.razor",
-      "source_location": "L417",
+      "source_location": "L423",
       "_origin": "ast",
       "id": "shared_navmenu_fallbackglyph",
       "community": 9,
@@ -10567,7 +10567,7 @@
       "label": "TooltipFor",
       "file_type": "code",
       "source_file": "Server/Web/Shared/NavMenu.razor",
-      "source_location": "L420",
+      "source_location": "L426",
       "_origin": "ast",
       "id": "shared_navmenu_tooltipfor",
       "community": 9,
@@ -21078,9 +21078,9 @@
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Layouts/BaseLayout.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "layouts_baselayout",
-      "target": "layouts_baselayout_dispose",
-      "confidence_score": 1.0
+      "target": "layouts_baselayout_dispose"
     },
     {
       "relation": "contains",
@@ -21105,18 +21105,18 @@
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Layouts/BaseLayout.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "layouts_baselayout",
-      "target": "layouts_baselayout_oninitialized",
-      "confidence_score": 1.0
+      "target": "layouts_baselayout_oninitialized"
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Layouts/BaseLayout.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "layouts_baselayout",
-      "target": "layouts_baselayout_onroutechanged",
-      "confidence_score": 1.0
+      "target": "layouts_baselayout_onroutechanged"
     },
     {
       "relation": "contains",
@@ -21293,9 +21293,9 @@
       "source_file": "Server/Web/Layouts/BaseLayout.razor",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "layouts_baselayout",
-      "target": "server_web_layouts_baselayout_razor_navigationmanager",
-      "confidence_score": 1.0
+      "target": "server_web_layouts_baselayout_razor_navigationmanager"
     },
     {
       "relation": "imports",
@@ -21413,9 +21413,9 @@
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Pages/ClassDetail.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "pages_classdetail",
-      "target": "pages_classdetail_onparameterssetasync",
-      "confidence_score": 1.0
+      "target": "pages_classdetail_onparameterssetasync"
     },
     {
       "relation": "contains",
@@ -21783,9 +21783,9 @@
       "source_file": "Server/Web/Pages/ClassDetail.razor",
       "source_location": "L91",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "pages_classdetail",
-      "target": "server_web_pages_classdetail_razor_workspaceskeleton",
-      "confidence_score": 1.0
+      "target": "server_web_pages_classdetail_razor_workspaceskeleton"
     },
     {
       "relation": "calls",
@@ -21821,9 +21821,9 @@
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Pages/ClassEdit.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "pages_classedit",
-      "target": "pages_classedit_onparameterssetasync",
-      "confidence_score": 1.0
+      "target": "pages_classedit_onparameterssetasync"
     },
     {
       "relation": "contains",
@@ -21988,9 +21988,9 @@
       "source_file": "Server/Web/Pages/ClassEdit.razor",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "pages_classedit",
-      "target": "server_web_pages_classedit_razor_workspaceskeleton",
-      "confidence_score": 1.0
+      "target": "server_web_pages_classedit_razor_workspaceskeleton"
     },
     {
       "relation": "imports",
@@ -22063,9 +22063,9 @@
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Pages/Classes.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "pages_classes",
-      "target": "pages_classes_oninitializedasync",
-      "confidence_score": 1.0
+      "target": "pages_classes_oninitializedasync"
     },
     {
       "relation": "contains",
@@ -22254,9 +22254,9 @@
       "source_file": "Server/Web/Pages/Classes.razor",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "pages_classes",
-      "target": "server_web_pages_classes_razor_listrowsskeleton",
-      "confidence_score": 1.0
+      "target": "server_web_pages_classes_razor_listrowsskeleton"
     },
     {
       "relation": "calls",
@@ -22808,9 +22808,9 @@
       "source_file": "Server/Web/Pages/SkillsMatrix.razor",
       "source_location": "L55",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "pages_skillsmatrix",
-      "target": "matrixskeleton",
-      "confidence_score": 1.0
+      "target": "matrixskeleton"
     },
     {
       "relation": "contains",
@@ -22907,9 +22907,9 @@
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Pages/SkillsMatrix.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "pages_skillsmatrix",
-      "target": "pages_skillsmatrix_oninitializedasync",
-      "confidence_score": 1.0
+      "target": "pages_skillsmatrix_oninitializedasync"
     },
     {
       "relation": "contains",
@@ -23395,9 +23395,9 @@
       "source_file": "Server/Web/Shared/ClassLifecycleCreateDialog.razor",
       "source_location": "L54",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classlifecyclecreatedialog",
-      "target": "server_web_shared_classlifecyclecreatedialog_razor_mudprogresscircular",
-      "confidence_score": 1.0
+      "target": "server_web_shared_classlifecyclecreatedialog_razor_mudprogresscircular"
     },
     {
       "relation": "calls",
@@ -23552,9 +23552,9 @@
       "source_file": "Server/Web/Shared/ClassLifecycleDeleteDialog.razor",
       "source_location": "L90",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classlifecycledeletedialog",
-      "target": "server_web_shared_classlifecycledeletedialog_razor_mudprogresscircular",
-      "confidence_score": 1.0
+      "target": "server_web_shared_classlifecycledeletedialog_razor_mudprogresscircular"
     },
     {
       "relation": "calls",
@@ -23689,9 +23689,9 @@
       "source_file": "Server/Web/Shared/ClassLifecycleDuplicateDialog.razor",
       "source_location": "L47",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classlifecycleduplicatedialog",
-      "target": "server_web_shared_classlifecycleduplicatedialog_razor_mudprogresscircular",
-      "confidence_score": 1.0
+      "target": "server_web_shared_classlifecycleduplicatedialog_razor_mudprogresscircular"
     },
     {
       "relation": "calls",
@@ -23983,9 +23983,9 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "source_location": "L50",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "mudoverlay",
-      "confidence_score": 1.0
+      "target": "mudoverlay"
     },
     {
       "relation": "imports",
@@ -24153,9 +24153,9 @@
       "source_file": "Server/Web/Shared/ClassWorkspace.razor",
       "source_location": "L51",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_classworkspace",
-      "target": "server_web_shared_classworkspace_razor_mudprogresscircular",
-      "confidence_score": 1.0
+      "target": "server_web_shared_classworkspace_razor_mudprogresscircular"
     },
     {
       "relation": "calls",
@@ -25508,9 +25508,9 @@
       "source_file": "Server/Web/Shared/NavMenu.razor",
       "source_location": "L55",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_navmenu",
-      "target": "server_web_shared_navmenu_razor_listrowsskeleton",
-      "confidence_score": 1.0
+      "target": "server_web_shared_navmenu_razor_listrowsskeleton"
     },
     {
       "relation": "calls",
@@ -25677,9 +25677,9 @@
       "confidence": "EXTRACTED",
       "source_file": "Server/Web/Shared/NavMenu.razor",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_navmenu",
-      "target": "shared_navmenu_oninitializedasync",
-      "confidence_score": 1.0
+      "target": "shared_navmenu_oninitializedasync"
     },
     {
       "relation": "contains",
@@ -27147,5 +27147,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "ebb28270401616a94e91305c5e6fa78417c72584"
+  "built_at_commit": "85a2def4b552f0d47b10d82c060a86c50973eb7d"
 }

@@ -1,7 +1,7 @@
 # Graph Report - mods\CustomClasses\modded  (2026-06-14)
 
 ## Corpus Check
-- 81 files · ~64,861 words
+- 81 files · ~64,904 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `ebb28270`
+- Built from commit: `85a2def4`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
