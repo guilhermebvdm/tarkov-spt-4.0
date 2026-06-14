@@ -885,6 +885,33 @@ public class CatalogService
     public bool IsAllowedInEquipmentSlot(string slotName, string candidateTpl) =>
         IsAllowedInSlot(DefaultInventoryTpl, slotName, candidateTpl);
 
+    /// <summary>
+    ///     The slot's SINGLE concrete option, when there is exactly one — the editor auto-selects it instead
+    ///     of opening a picker with one choice. Returns the tpl only when the slot filter
+    ///     (<see cref="GetSlotFilter"/>) has exactly ONE entry AND that entry is a concrete item
+    ///     (<c>_type == "Item"</c>); null otherwise: zero options, several, or the lone entry is a
+    ///     baseclass/Node (which would expand into many items — NOT expanded here, that would scan the
+    ///     catalog). Conservative on purpose: a null just means "let the user pick", never a wrong auto-fill.
+    /// </summary>
+    public string? SingleSlotOption(string parentTpl, string slotId)
+    {
+        var filter = GetSlotFilter(parentTpl, slotId);
+        if (filter.Count != 1)
+        {
+            return null;
+        }
+
+        var only = filter[0];
+        var id = TryParseMongoId(only);
+        if (id is null)
+        {
+            return null;
+        }
+
+        var template = GetTemplate(id.Value);
+        return template is not null && string.Equals(template.Type, "Item", StringComparison.Ordinal) ? only : null;
+    }
+
     /// <summary>True when the tpl resolves to a live item template (mods included — live DB).</summary>
     public bool TemplateExists(string tpl)
     {

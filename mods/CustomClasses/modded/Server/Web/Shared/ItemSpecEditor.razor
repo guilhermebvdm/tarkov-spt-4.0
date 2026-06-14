@@ -24,6 +24,7 @@
 @using CustomClasses.Web
 @inject CatalogService Catalog
 @inject IDialogService DialogService
+@inject ISnackbar Snackbar
 
 <MudStack Spacing="2">
 
@@ -164,10 +165,29 @@
                     empty = default preset auto-completes on build (weapons/armor)
                 </MudText>
             }
+            else
+            {
+                <MudButton Variant="Variant.Text" Size="Size.Small" Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.AutoFixHigh"
+                           OnClick="AutoFillRequiredAsync">
+                    Auto-fill required (1 option)
+                </MudButton>
+            }
         </MudStack>
+        @if (ManualMode)
+        {
+            var missingRequired = CountMissingRequired(Spec.Tpl!, Spec.Mods, 0);
+            @if (missingRequired > 0)
+            {
+                <MudAlert Severity="Severity.Warning" Dense="true" Class="my-1">
+                    @missingRequired required slot(s) empty — a manual mod tree skips the default preset, so
+                    the game may reject this item on spawn. Fill them (single-option slots auto-fill).
+                </MudAlert>
+            }
+        }
         <MudCollapse Expanded="_modsOpen">
             <div class="pl-2" style="border-left:2px solid var(--mud-palette-lines-default);">
-                @ModSlotRows(Spec.Tpl!, Spec.Mods, 0)
+                @ModSlotRows(Spec.Tpl!, Spec.Mods, 0, ManualMode)
             </div>
         </MudCollapse>
     }
@@ -448,7 +468,7 @@
     ///     filling it, plus orphan entries whose slotId no longer matches any slot. Recurses into each
     ///     mod's own slots up to MaxDepth.
     /// </summary>
-    private RenderFragment ModSlotRows(string parentTpl, List<ModSpecModel> mods, int depth) => __builder =>
+    private RenderFragment ModSlotRows(string parentTpl, List<ModSpecModel> mods, int depth, bool manual) => __builder =>
     {
         if (depth >= MaxDepth)
         {
@@ -462,13 +482,22 @@
         foreach (var slot in slots)
         {
             var mod = mods.FirstOrDefault(m => string.Equals(m.SlotId, slot.Id, StringComparison.OrdinalIgnoreCase));
-            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Class="my-1"
+            var slotEmpty = mod?.Tpl is not { Length: > 0 };
+            // Required vazio só é um erro real em modo manual: aí o build NÃO auto-completa o preset.
+            var requiredMissing = slot.Required && slotEmpty && manual;
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1"
+                      Class="@("my-1" + (requiredMissing ? " cc-slot-row--missing" : ""))"
                       Style="@($"margin-left:{depth * 20}px;")">
                 <MudIcon Icon="@Icons.Material.Filled.SubdirectoryArrowRight" Size="Size.Small" Color="Color.Default"/>
                 <code style="font-size:.8rem">@slot.Id</code>
                 @if (slot.Required)
                 {
-                    <MudChip T="string" Size="Size.Small" Color="Color.Error" Variant="Variant.Outlined">required</MudChip>
+                    <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined"
+                             Color="@(manual ? Color.Error : Color.Default)">required</MudChip>
+                    @if (!manual && slotEmpty)
+                    {
+                        <MudText Typo="Typo.caption" Class="mud-text-secondary">auto via preset</MudText>
+                    }
                 }
                 @if (mod?.Tpl is { Length: > 0 } modTpl)
                 {
@@ -502,7 +531,7 @@
             </MudStack>
             if (mod?.Tpl is { Length: > 0 } subTpl && Catalog.TemplateExists(subTpl))
             {
-                <text>@ModSlotRows(subTpl, mod.Mods, depth + 1)</text>
+                <text>@ModSlotRows(subTpl, mod.Mods, depth + 1, manual)</text>
             }
         }
 
@@ -525,9 +554,22 @@
         }
     };
 
-    /// <summary>Opens the ItemPicker filtered by the slot's own filter; replaces or adds the mod entry.</summary>
+    /// <summary>
+    ///     Fills a slot. A slot with a SINGLE concrete option is selected straight away (no picker — there is
+    ///     nothing to choose); otherwise the ItemPicker opens, filtered by the slot's own filter. Either way
+    ///     the mod entry is replaced/added and the single-option required auto-fill cascades.
+    /// </summary>
     private async Task PickModAsync(string parentTpl, string slotId, List<ModSpecModel> siblings)
     {
+        if (Catalog.SingleSlotOption(parentTpl, slotId) is { } only)
+        {
+            SetMod(siblings, slotId, only);
+            Snackbar.Add($"'{slotId}': single option selected automatically.", Severity.Info);
+            AutoFillRequiredSingleOptions(Spec.Tpl!, Spec.Mods, 0);
+            await NotifyChangedAsync();
+            return;
+        }
+
         var parameters = new DialogParameters<ItemPicker>
         {
             { x => x.FilterTpls, (Func<string, bool>)(t => Catalog.IsAllowedInSlot(parentTpl, slotId, t)) },
@@ -542,6 +584,15 @@
             return;
         }
 
+        SetMod(siblings, slotId, tpl);
+        // Virou/segue modo manual → preenche os required de 1 opção que ficaram pendentes (cascata).
+        AutoFillRequiredSingleOptions(Spec.Tpl!, Spec.Mods, 0);
+        await NotifyChangedAsync();
+    }
+
+    /// <summary>Sets (replaces or adds) the mod for a slot; clears sub-mods that belonged to the old tpl.</summary>
+    private static void SetMod(List<ModSpecModel> siblings, string slotId, string tpl)
+    {
         var existing = siblings.FirstOrDefault(m => string.Equals(m.SlotId, slotId, StringComparison.OrdinalIgnoreCase));
         if (existing is not null)
         {
@@ -552,8 +603,92 @@
         {
             siblings.Add(new ModSpecModel { SlotId = slotId, Tpl = tpl });
         }
+    }
 
-        await NotifyChangedAsync();
+    /// <summary>
+    ///     Manual mode = item mode with at least one explicit mod. The builder then assembles EXACTLY this
+    ///     tree (no default-preset auto-completion — see CostService.AddSpec), so an empty required slot is a
+    ///     real problem here (and only here). In preset/auto mode (no mods) the preset fills required slots.
+    /// </summary>
+    private bool ManualMode => !_presetMode && Spec.Mods.Count > 0;
+
+    /// <summary>
+    ///     Fills empty REQUIRED slots that have a single concrete option (<see cref="CatalogService.SingleSlotOption"/>)
+    ///     — there is nothing to choose. Recurses into filled mods (cascading newly-resolved trees), capped by
+    ///     MaxDepth. Leaves non-required and multi-option slots untouched. Returns how many slots it filled.
+    /// </summary>
+    private int AutoFillRequiredSingleOptions(string parentTpl, List<ModSpecModel> mods, int depth)
+    {
+        if (depth >= MaxDepth)
+        {
+            return 0;
+        }
+
+        var filled = 0;
+        foreach (var slot in Catalog.GetSlotsOf(parentTpl))
+        {
+            var mod = mods.FirstOrDefault(m => string.Equals(m.SlotId, slot.Id, StringComparison.OrdinalIgnoreCase));
+            if (slot.Required && mod?.Tpl is not { Length: > 0 }
+                && Catalog.SingleSlotOption(parentTpl, slot.Id) is { } only)
+            {
+                SetMod(mods, slot.Id, only);
+                mod = mods.First(m => string.Equals(m.SlotId, slot.Id, StringComparison.OrdinalIgnoreCase));
+                filled++;
+            }
+
+            if (mod?.Tpl is { Length: > 0 } subTpl && Catalog.TemplateExists(subTpl))
+            {
+                filled += AutoFillRequiredSingleOptions(subTpl, mod.Mods, depth + 1);
+            }
+        }
+
+        return filled;
+    }
+
+    /// <summary>Manual "Auto-fill required (1 option)" button — fills what it can and reports the count.</summary>
+    private async Task AutoFillRequiredAsync()
+    {
+        if (Spec.Tpl is not { Length: > 0 })
+        {
+            return;
+        }
+
+        var filled = AutoFillRequiredSingleOptions(Spec.Tpl, Spec.Mods, 0);
+        Snackbar.Add(
+            filled > 0
+                ? $"Auto-filled {filled} single-option required slot(s)."
+                : "No single-option required slot left to fill (remaining ones have multiple options).",
+            filled > 0 ? Severity.Success : Severity.Info);
+        if (filled > 0)
+        {
+            await NotifyChangedAsync();
+        }
+    }
+
+    /// <summary>Counts empty REQUIRED slots across the manual mod tree (the warning surfaced above).</summary>
+    private int CountMissingRequired(string parentTpl, List<ModSpecModel> mods, int depth)
+    {
+        if (depth >= MaxDepth)
+        {
+            return 0;
+        }
+
+        var missing = 0;
+        foreach (var slot in Catalog.GetSlotsOf(parentTpl))
+        {
+            var mod = mods.FirstOrDefault(m => string.Equals(m.SlotId, slot.Id, StringComparison.OrdinalIgnoreCase));
+            if (slot.Required && mod?.Tpl is not { Length: > 0 })
+            {
+                missing++;
+            }
+
+            if (mod?.Tpl is { Length: > 0 } subTpl && Catalog.TemplateExists(subTpl))
+            {
+                missing += CountMissingRequired(subTpl, mod.Mods, depth + 1);
+            }
+        }
+
+        return missing;
     }
 
     private async Task RemoveModAsync(List<ModSpecModel> siblings, ModSpecModel mod)

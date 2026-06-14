@@ -474,6 +474,15 @@
 .cc-doll-slot--edit .cc-doll-slot__cell { transition: outline-color .12s ease, opacity .12s ease; }
 .cc-ws__badge-val, .cc-badge__value, .cc-mult-chip, .cc-cat-node { transition: background .12s ease, color .12s ease; }
 
+/* Slot required vazio (modo manual): destaque vermelho na linha — o builder não auto-completa
+   o preset numa árvore manual, então a peça obrigatória precisa ser escolhida (warning-grade). */
+.cc-slot-row--missing {
+    border-left: 2px solid var(--mud-palette-error, #f44336);
+    background: rgba(244, 67, 54, .07);
+    border-radius: 3px;
+    padding: 2px 4px;
+}
+
 /* prefers-reduced-motion: desliga TODA a animação/transição do editor (skeleton fica estático). */
 @media (prefers-reduced-motion: reduce) {
     .cc-fade-in, .cc-enter, .cc-pulse, .cc-skeleton { animation: none !important; }
