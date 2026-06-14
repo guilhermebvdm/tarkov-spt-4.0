@@ -155,7 +155,10 @@
 /* --cc-cell-unit é definido em .cc-item-cell (folha) e NÃO é herdado por .cc-grid2d /
    .cc-doll (que o usam em var()). Içamos aqui no root do workspace para todos herdarem. */
 .cc-ws                { --cc-cell-unit: 36px; display: flex; flex-direction: column; gap: 12px;
-                        height: calc(100vh - 120px); min-height: 480px; }
+                        height: calc(100vh - 120px); min-height: 480px; position: relative; }
+/* Camada 3: overlay do Save (cobre o workspace; fundo translúcido leve). */
+.cc-ws__overlay .mud-overlay-content { backdrop-filter: blur(1px); }
+.cc-ws__overlay.mud-overlay-absolute { background: rgba(0,0,0,.18); }
 
 .cc-ws__header        { display: flex; align-items: center; gap: 12px; flex: 0 0 auto;
                         padding-bottom: 8px; border-bottom: 1px solid var(--mud-palette-lines-default, #555); }
@@ -433,3 +436,47 @@
 .cc-skinpick-card__name    { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cc-skinpick-card__id      { font-size: 10px; opacity: .55; font-family: monospace;
                              overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   Motion kit — fluidez sutil/profissional (skeleton, fade de entrada, pulse de
+   valor, transições nos elementos interativos). TUDO desligado por
+   prefers-reduced-motion no fim desta seção. Durações curtas (120–250ms).
+   ════════════════════════════════════════════════════════════════════════════ */
+@keyframes cc-shimmer  { 0% { background-position: -150% 0; } 100% { background-position: 250% 0; } }
+@keyframes cc-fade-in  { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@keyframes cc-fade-in-soft { from { opacity: 0; } to { opacity: 1; } }
+@keyframes cc-pulse    { 0% { background-color: rgba(126,111,255,.30); }
+                         100% { background-color: transparent; } }
+
+/* Entrada de conteúdo/listas/painéis (~180ms). .cc-enter = mesma coisa, p/ containers @key-ados. */
+.cc-fade-in            { animation: cc-fade-in .18s ease both; }
+.cc-enter              { animation: cc-fade-in-soft .16s ease both; }
+
+/* Pulse de feedback de valor (1×, auto-reset por re-@key do elemento). */
+.cc-pulse              { animation: cc-pulse .6s ease-out 1; border-radius: 4px; }
+
+/* Skeleton shimmer (não depende da marcação interna do MudSkeleton). */
+.cc-skeleton           { position: relative; overflow: hidden; border-radius: 4px;
+                         background: var(--mud-palette-background-grey, rgba(255,255,255,.05));
+                         background-image: linear-gradient(90deg,
+                            transparent 0%, rgba(255,255,255,.07) 50%, transparent 100%);
+                         background-size: 200% 100%; background-repeat: no-repeat;
+                         animation: cc-shimmer 1.4s ease-in-out infinite; }
+.cc-skeleton--text     { height: 12px; margin: 4px 0; }
+.cc-skeleton--row      { height: 36px; margin: 4px 0; }
+.cc-skeleton--cell     { width: 100%; height: 100%; }
+
+/* Transições nos elementos interativos (estende as 5 já existentes; não substitui). */
+.cc-sidebar-item       { transition: background .12s ease, border-left-color .12s ease; }
+.cc-ws__panel--left .skill-canonical tbody tr { transition: background .12s ease; }
+.cc-skill-cell, .cc-skill-col-header { transition: background .12s ease; }
+.cc-grid2d__item--edit { transition: outline-color .12s ease, box-shadow .12s ease; }
+.cc-doll-slot--edit .cc-doll-slot__cell { transition: outline-color .12s ease, opacity .12s ease; }
+.cc-ws__badge-val, .cc-badge__value, .cc-mult-chip, .cc-cat-node { transition: background .12s ease, color .12s ease; }
+
+/* prefers-reduced-motion: desliga TODA a animação/transição do editor (skeleton fica estático). */
+@media (prefers-reduced-motion: reduce) {
+    .cc-fade-in, .cc-enter, .cc-pulse, .cc-skeleton { animation: none !important; }
+    .cc-skeleton { background-image: none; }
+    [class*="cc-"] { transition: none !important; }
+}

@@ -36,7 +36,11 @@
             Click a row for the read-only detail.
         </MudText>
 
-        @if (_rows.Count == 0)
+        @if (_loading)
+        {
+            <ListRowsSkeleton Rows="10"/>
+        }
+        else if (_rows.Count == 0)
         {
             <MudAlert Severity="Severity.Info" Dense="true">No class files found in config/classes/.</MudAlert>
         }
@@ -132,6 +136,8 @@
 
     private List<Row> _rows = [];
 
+    private bool _loading = true;
+
     // Item 035: @ref to each sort label so the persisted sort can be re-applied once the interactive
     // circuit is up (the SortBy lambdas own the actual comparison). MudTable has no public SetSortLabel
     // in 8.x; ToggleSortDirection() is the public method that actually re-sorts the table.
@@ -147,7 +153,17 @@
         CloseButton = true,
     };
 
-    protected override void OnInitialized() => LoadRows();
+    protected override async Task OnInitializedAsync()
+    {
+        // Skeleton-first: paint the loading placeholder before the heavy synchronous LoadRows()
+        // (ListClassFiles + per-class cost compute). await Task.Yield() releases the render thread so
+        // the skeleton is shown; no Task.Run — LoadRows mutates fields directly and must stay on-context.
+        _loading = true;
+        StateHasChanged();
+        await Task.Yield();
+        LoadRows();
+        _loading = false;
+    }
 
     /// <summary>
     ///     Item 035: restore the persisted list sort (column + direction) once, after the circuit

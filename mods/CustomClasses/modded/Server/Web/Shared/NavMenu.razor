@@ -50,11 +50,15 @@
                       AdornmentIcon="@Icons.Material.Filled.Search" Clearable="true"/>
     </div>
 
-    @{
-        var visible = FilteredRows();
-    }
-    @if (_rows.Count == 0)
+    @if (_firstLoading)
     {
+        <ListRowsSkeleton Rows="6" RowWidth="92%"/>
+    }
+    else
+    {
+        var visible = FilteredRows();
+        @if (_rows.Count == 0)
+        {
         <MudText Typo="Typo.body2" Class="px-4 py-2" Style="opacity:.6">No class files found.</MudText>
     }
     else if (visible.Count == 0)
@@ -95,6 +99,7 @@
                     }
                 </div>
             </MudTooltip>
+        }
         }
     }
 
@@ -199,6 +204,7 @@
     private List<SidebarRow> _rows = [];
     private string? _filter;
     private string? _activeBare;
+    private bool _firstLoading = true;
 
     // Item 035 (PA-035-04): the active edit tab, cached from localStorage after the circuit connects so
     // an edit→edit switch can travel it SYNCHRONOUSLY as ?tab=N (the query is the reliable in-session
@@ -206,10 +212,18 @@
     private int _editTab;
     private bool _prefsLoaded;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         Nav.LocationChanged += OnLocationChanged;
+
+        // Skeletonize the class list on the FIRST render only: paint the rail (top links + filter +
+        // skeleton) immediately, then yield so the row scan/cost compute doesn't block the first frame.
+        _firstLoading = true;
+        StateHasChanged();
+        await Task.Yield();
+
         LoadRows();
+        _firstLoading = false;
         UpdateActive();
     }
 

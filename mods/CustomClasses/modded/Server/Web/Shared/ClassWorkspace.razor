@@ -40,18 +40,26 @@
 else
 {
     var def = Definition;
+    // Camada 4 (fluidez): re-@key o span pelo valor exibido → quando o recompute muda o número,
+    // o Blazor recria o elemento e o .cc-pulse roda 1× (auto-reset). Sem custo extra.
+    var skillCostStr = LiveSkillCost?.Total.ToString("0.00", CultureInfo.InvariantCulture) ?? "—";
+    var loadoutStr = LiveLoadoutCost is null ? "—" : FormatRub(LiveLoadoutCost.TotalRub);
 
     <div class="cc-ws @(_editMode ? "cc-ws--edit" : null)">
+        @* Camada 3 (fluidez): overlay + spinner sobre o workspace durante o Save (hot-apply off-circuit). *@
+        <MudOverlay Visible="@_saving" Absolute="true" DarkBackground="false" Class="cc-ws__overlay">
+            <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Large"/>
+        </MudOverlay>
         @* ── Slim metrics bar + ações (Edit / Save+Discard) ── *@
         <div class="cc-ws__header">
             <div class="cc-ws__badges">
                 <span class="cc-ws__badge">
                     <span class="cc-ws__badge-label">Skill cost</span>
-                    <span class="cc-ws__badge-val">@(LiveSkillCost?.Total.ToString("0.00", CultureInfo.InvariantCulture) ?? "—")</span>
+                    <span @key="skillCostStr" class="cc-ws__badge-val cc-pulse">@skillCostStr</span>
                 </span>
                 <span class="cc-ws__badge">
                     <span class="cc-ws__badge-label">Loadout</span>
-                    <span class="cc-ws__badge-val">@(LiveLoadoutCost is null ? "—" : FormatRub(LiveLoadoutCost.TotalRub))</span>
+                    <span @key="loadoutStr" class="cc-ws__badge-val cc-pulse">@loadoutStr</span>
                 </span>
             </div>
 

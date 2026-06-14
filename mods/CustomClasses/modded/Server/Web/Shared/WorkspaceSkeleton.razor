@@ -1,0 +1,26 @@
+@* Skeleton de carregamento do workspace de 3 paineis (esquerda/centro/direita). Reusa as classes de layout .cc-ws para casar com o ClassWorkspace real. *@
+<div class="cc-ws cc-fade-in">
+  <div class="cc-ws__grid">
+    <div class="cc-ws__panel">
+      <div class="cc-skeleton cc-skeleton--row"></div>
+      <div class="cc-skeleton cc-skeleton--row"></div>
+      <div class="cc-skeleton cc-skeleton--row"></div>
+      <div class="cc-skeleton cc-skeleton--row"></div>
+      <div class="cc-skeleton cc-skeleton--row"></div>
+      <div class="cc-skeleton cc-skeleton--row"></div>
+      <div class="cc-skeleton cc-skeleton--row"></div>
+      <div class="cc-skeleton cc-skeleton--row"></div>
+      <div class="cc-skeleton cc-skeleton--row"></div>
+      <div class="cc-skeleton cc-skeleton--row"></div>
+    </div>
+    <div class="cc-ws__panel cc-ws__panel--center">
+      <div class="cc-skeleton" style="width:90%;height:60%;min-height:300px;margin:12px auto;"></div>
+    </div>
+    <div class="cc-ws__panel">
+      @for (var i = 0; i < 24; i++)
+      {
+        <div class="cc-skeleton" style="width:34px;height:34px;display:inline-block;margin:2px;"></div>
+      }
+    </div>
+  </div>
+</div>

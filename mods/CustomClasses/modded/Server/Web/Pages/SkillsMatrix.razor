@@ -50,7 +50,11 @@
     </MudButton>
 </MudStack>
 
-@if (_columns.Count == 0)
+@if (_loading)
+{
+    <MatrixSkeleton/>
+}
+else if (_columns.Count == 0)
 {
     <MudAlert Severity="Severity.Info" Dense="true">No class files found in config/classes/.</MudAlert>
 }
@@ -296,10 +300,18 @@ else
     private bool _showMultipliers = false;               // toggle (default off)
     private bool _fullscreen;                            // matriz em overlay de tela cheia
     private bool _togglesRestored;
+    private bool _loading = true;                        // skeleton enquanto LoadColumns roda
 
     // D4 — destination page: no LocationChanged subscription. Re-mount re-runs OnInitialized with the
     // 037 cache already fresh (Save/Delete invalidate the touched entry). No IDisposable needed.
-    protected override void OnInitialized() => LoadColumns();
+    protected override async Task OnInitializedAsync()
+    {
+        _loading = true;
+        StateHasChanged();
+        await Task.Yield();
+        LoadColumns();
+        _loading = false;
+    }
 
     /// <summary>
     ///     Item 035: restore the persisted toggles once, post-circuit (PA-035-02). Format

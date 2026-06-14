@@ -1,0 +1,12 @@
+@* Skeleton de loading para listas/sidebar: renderiza N linhas com efeito shimmer enquanto os dados carregam. *@
+<div class="cc-fade-in">
+    @for (var i = 0; i < Rows; i++)
+    {
+        <div class="cc-skeleton cc-skeleton--row" style="width:@RowWidth"></div>
+    }
+</div>
+
+@code {
+    [Parameter] public int Rows { get; set; } = 8;
+    [Parameter] public string RowWidth { get; set; } = "100%";
+}

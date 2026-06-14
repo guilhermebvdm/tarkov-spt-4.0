@@ -1,0 +1,18 @@
+@* Skeleton da matriz de skills: grade de blocos shimmer enquanto carrega *@
+<div class="cc-fade-in">
+    @for (var r = 0; r < Rows; r++)
+    {
+        <div style="display:flex;gap:6px;margin:4px 0;">
+            <div class="cc-skeleton cc-skeleton--row" style="width:150px"></div>
+            @for (var c = 0; c < Cols; c++)
+            {
+                <div class="cc-skeleton cc-skeleton--row" style="width:48px"></div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int Rows { get; set; } = 10;
+    [Parameter] public int Cols { get; set; } = 8;
+}
