@@ -100,6 +100,13 @@ public class CostService(
     InventoryHelper inventoryHelper,
     DatabaseService databaseService)
 {
+    // Itens "vestíveis" cujo flea já embute os inserts/placas default → NÃO expandir o preset (evita
+    // dupla contagem dos inserts; ver AddSpec). Cobre body armor, capacete e equipamento armado.
+    private static readonly MongoId[] ArmorBaseclasses =
+    [
+        BaseClasses.ARMOR, BaseClasses.HEADWEAR, BaseClasses.ARMORED_EQUIPMENT,
+    ];
+
     // ── Skills ───────────────────────────────────────────────────────────────
 
     /// <summary>Weighted skill cost of a class (RZ weightedCost + validateProfile rules as warnings).</summary>
@@ -301,9 +308,26 @@ public class CostService(
                 return;
             }
 
-            hasManualTree = true;
-            AddSimple(spec.Tpl!, count, context, items, warnings);
-            AddModTree(spec.Mods, count, context, items, warnings);
+            var rootTpl = TryMongoId(spec.Tpl!, context, warnings);
+            if (rootTpl is null)
+            {
+                return;
+            }
+
+            // Armadura/capacete/equipamento armado: o flea do tpl-raiz JÁ embute os inserts/placas
+            // default. Mesmo quando o editor expõe os inserts como 'mods' manuais, contá-los somaria
+            // de novo o que o flea da carcaça já inclui (ex.: 6B2 ~27k virava ~51k). Precifica só a
+            // carcaça montada. Armas/rigs seguem expandindo a árvore (cada peça tem flea próprio).
+            if (itemHelper.IsOfBaseclasses(rootTpl.Value, ArmorBaseclasses))
+            {
+                AddSimple(spec.Tpl!, count, context, items, warnings);
+            }
+            else
+            {
+                hasManualTree = true;
+                AddSimple(spec.Tpl!, count, context, items, warnings);
+                AddModTree(spec.Mods, count, context, items, warnings);
+            }
         }
         else if (!string.IsNullOrWhiteSpace(spec.Tpl))
         {
@@ -313,13 +337,23 @@ public class CostService(
                 return;
             }
 
-            // auto-completion parity with InventoryBuilder: equipped bare tpl resolves the default
-            // preset (BuildItemTree); stash/contents resolve the stash preset (PackSpecsIntoGrids)
-            preset = equipped ? catalog.ResolveDefaultPreset(tpl.Value) : catalog.ResolveStashPreset(tpl.Value);
-            if (preset?.Items is null || !preset.Items.Any())
+            // Armadura/capacete/equipamento armado: o flea do tpl JÁ inclui os inserts/placas default —
+            // expandir o preset contaria os inserts DE NOVO (dupla contagem; ex.: PACA ~35k virava ~70k).
+            // Precifica o item montado direto. Armas seguem expandindo (cada peça tem flea próprio).
+            if (itemHelper.IsOfBaseclasses(tpl.Value, ArmorBaseclasses))
             {
-                preset = null;
                 AddSimple(spec.Tpl!, count, context, items, warnings);
+            }
+            else
+            {
+                // auto-completion parity with InventoryBuilder: equipped bare tpl resolves the default
+                // preset (BuildItemTree); stash/contents resolve the stash preset (PackSpecsIntoGrids)
+                preset = equipped ? catalog.ResolveDefaultPreset(tpl.Value) : catalog.ResolveStashPreset(tpl.Value);
+                if (preset?.Items is null || !preset.Items.Any())
+                {
+                    preset = null;
+                    AddSimple(spec.Tpl!, count, context, items, warnings);
+                }
             }
         }
         else
