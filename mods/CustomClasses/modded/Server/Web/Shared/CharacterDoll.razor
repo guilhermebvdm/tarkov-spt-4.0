@@ -6,6 +6,7 @@
 
 @using SPTarkov.Server.Core.Models.Common
 @inject CatalogService Catalog
+@inject CostService CostService
 
 <div class="cc-doll">
     @* Silhueta central (cabeça + torso + pernas), puramente decorativa. *@
@@ -34,7 +35,7 @@
                              Price="@gc.Price" PriceSource="@gc.PriceSource"
                              MissingPrice="@gc.MissingPrice"
                              IconId="@gc.IconId" RootTpl="@gc.RootTpl" CategoryIcon="@gc.CategoryIcon"
-                             Contents="@gc.Contents">
+                             Contents="@gc.Contents" BuildValue="@gc.BuildValue">
                     @* Slot de equipamento = caixa de TAMANHO FIXO (estilo EFT): o ícone é contido
                        (object-fit) — NÃO dimensionamos pelo W×H real do item, senão armas (5×2) e
                        mochilas (4×4) estouram a silhueta e se sobrepõem. O W×H real importa só no stash. *@
@@ -91,7 +92,7 @@
     private sealed record GearCell(
         string? RootTpl, string? IconId, string Name, string? Category,
         int Width, int Height, double Price, string? PriceSource, bool MissingPrice, bool MissingRequired,
-        string? CategoryIcon, int Contents);
+        string? CategoryIcon, int Contents, double BuildValue);
 
     private Dictionary<string, GearCell> _cells = new(StringComparer.OrdinalIgnoreCase);
 
@@ -131,7 +132,7 @@
         if (rootTpl is null)
         {
             var raw = spec.Preset ?? spec.Tpl ?? "(no tpl)";
-            return new GearCell(null, null, raw, null, 1, 1, 0, null, true, missingRequired, null, contents);
+            return new GearCell(null, null, raw, null, 1, 1, 0, null, true, missingRequired, null, contents, 0);
         }
 
         var (w, h) = Catalog.GetItemDimensions(rootTpl);
@@ -143,7 +144,7 @@
         var iconId = ResolvePresetIconId(spec) ?? rootTpl;
         return new GearCell(rootTpl, iconId, name, category, w, h, price, source,
             string.Equals(source, "missing", StringComparison.Ordinal), missingRequired,
-            Catalog.GetCategoryIcon(rootTpl), contents);
+            Catalog.GetCategoryIcon(rootTpl), contents, CostService.ItemBuildValue(spec, true));
     }
 
     /// <summary>Id do preset (default/premium) p/ a imagem do tarkov.dev — null se o item não é preset.</summary>

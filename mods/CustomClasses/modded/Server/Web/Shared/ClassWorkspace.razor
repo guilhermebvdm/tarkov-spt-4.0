@@ -293,12 +293,17 @@ else
     private int EquippedCount => _editMode && _model is not null ? _model.Equipped.Count : Definition?.Loadout?.Equipped?.Count ?? 0;
     private int StashCount => _editMode && _model is not null ? _model.Stash.Count : Definition?.Loadout?.Stash?.Count ?? 0;
 
-    // Somatório ₽ por painel (cabeçalho). Equipped inclui as peças dos presets equipados; o stash, as suas.
-    // Ammo/contents ficam fora desta separação (entram no total geral do header) — aproximação intencional.
-    private double EquippedRub => LiveLoadoutCost?.Items
-        .Where(i => i.Context.StartsWith("equipped", StringComparison.Ordinal)).Sum(i => i.Subtotal) ?? 0;
-    private double StashRub => LiveLoadoutCost?.Items
-        .Where(i => string.Equals(i.Context, "stash", StringComparison.Ordinal)).Sum(i => i.Subtotal) ?? 0;
+    // Somatório ₽ por painel (cabeçalho) = soma do VALOR DE BUILD de cada item (root + peças + ammo +
+    // contents, com count) — bate com o que cada tooltip mostra e cobre ammo/contents (antes ficavam de
+    // fora). Em edição é cacheado no RecomputeLoadoutCost (não recomputa a cada slider); em read deriva
+    // da Definition (renderiza poucas vezes).
+    private double _equippedRub, _stashRub;
+    private double EquippedRub => _editMode && _model is not null
+        ? _equippedRub
+        : Definition?.Loadout?.Equipped?.Values.Sum(s => CostService.ItemBuildValue(s, true)) ?? 0;
+    private double StashRub => _editMode && _model is not null
+        ? _stashRub
+        : Definition?.Loadout?.Stash?.Sum(s => CostService.ItemBuildValue(s, false)) ?? 0;
 
     // PERF: os snapshots da doll/stash são CACHEADOS (rebuild só quando o loadout muda — RebuildLoadoutViews),
     // NÃO recomputados a cada render. Antes, EquippedForView/StashForView chamavam _model.ToDefinition()
@@ -578,7 +583,10 @@ else
     {
         if (_model is not null)
         {
-            _editLoadoutCost = CostService.ComputeLoadoutCost(_model.ToDefinition());
+            var def = _model.ToDefinition();
+            _editLoadoutCost = CostService.ComputeLoadoutCost(def);
+            _equippedRub = def.Loadout?.Equipped?.Values.Sum(s => CostService.ItemBuildValue(s, true)) ?? 0;
+            _stashRub = def.Loadout?.Stash?.Sum(s => CostService.ItemBuildValue(s, false)) ?? 0;
         }
     }
 

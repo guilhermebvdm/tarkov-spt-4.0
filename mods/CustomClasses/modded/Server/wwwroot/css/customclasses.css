@@ -179,6 +179,7 @@
 .cc-item-tip__cat       { font-size: 11px; opacity: .75; margin-top: 1px; }
 .cc-item-tip__meta      { font-size: 11px; opacity: .7; margin-top: 4px; }
 .cc-item-tip__price     { font-size: .82rem; margin-top: 4px; }
+.cc-item-tip__build     { font-size: .82rem; margin-top: 2px; color: var(--mud-palette-primary, #7e6fff); }
 .cc-item-tip__src       { opacity: .7; font-size: 11px; }
 .cc-item-tip__warn      { color: var(--mud-palette-warning, #ffb300); font-weight: 600; }
 .cc-item-tip__row       { font-size: 11px; }

@@ -246,6 +246,19 @@ public class CostService(
         };
     }
 
+    /// <summary>
+    ///     Total ₽ de UM item montado (a build): root + peças do preset/árvore de mods + ammo + contents,
+    ///     com o count honrado — i.e. o valor real que o item carrega, não só o tpl base. Reusa <see
+    ///     cref="AddSpec"/>, então espelha exatamente o que o builder spawna e o que entra no somatório do
+    ///     painel. Usado no tooltip pra revelar por que uma arma montada "pesa" (ex.: AKM + thermal).
+    /// </summary>
+    public double ItemBuildValue(ItemSpec spec, bool equipped)
+    {
+        var items = new List<LoadoutCostEntry>();
+        AddSpec(spec, equipped, equipped ? "equipped" : "stash", items, []);
+        return Math.Round(items.Sum(i => i.Subtotal));
+    }
+
     /// <param name="multiplier">
     ///     CR2-EP-01: contents are packed into EVERY placed unit of the parent line (builder's
     ///     PlaceSpecTrees/PackSpecsIntoGrids recurse per unit/stack) — the parent's count multiplies

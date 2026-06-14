@@ -5,7 +5,7 @@
 
 @using System.Globalization
 
-<MudTooltip Placement="Placement.Top" Arrow="true" Class="cc-item-tip-wrap">
+<MudTooltip Placement="Placement.Top" Arrow="true">
     <ChildContent>
         @ChildContent
     </ChildContent>
@@ -41,13 +41,19 @@
                 }
                 else
                 {
-                    <b>@Price.ToString("N0", CultureInfo.InvariantCulture) ₽</b>
+                    <span class="mud-text-secondary">base </span><b>@Price.ToString("N0", CultureInfo.InvariantCulture) ₽</b>
                     @if (!string.IsNullOrWhiteSpace(PriceSource))
                     {
                         <span class="cc-item-tip__src"> · @PriceSource</span>
                     }
                 }
             </div>
+            @* Valor da build montada (peças do preset/mods + ammo + contents, com count) — explica por que
+               um item "pesa" mais que o tpl base no somatório do painel. Só quando difere do base. *@
+            @if (BuildValue > Price + 1)
+            {
+                <div class="cc-item-tip__build">assembled <b>@BuildValue.ToString("N0", CultureInfo.InvariantCulture) ₽</b></div>
+            }
         </div>
     </TooltipContent>
 </MudTooltip>
@@ -72,4 +78,7 @@
 
     /// <summary>Items inside this container (rig/backpack) — shown as "N inside".</summary>
     [Parameter] public int Contents { get; set; }
+
+    /// <summary>Total value of the assembled build (root + parts + ammo + contents). Shown when &gt; base price.</summary>
+    [Parameter] public double BuildValue { get; set; }
 }
