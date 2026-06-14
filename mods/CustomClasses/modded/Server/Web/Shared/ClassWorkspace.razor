@@ -437,6 +437,8 @@ else
     {
         if (_model is null || _resolvedFileName is null)
         {
+            // review #3: não falhar em silêncio — Save/Ctrl+S precisa avisar quando não há alvo resolvido.
+            Snackbar.Add("Could not resolve the class file to save — reload the class and try again.", Severity.Error);
             return false;
         }
 
@@ -745,6 +747,11 @@ else
         {
             // Data == null → "use template default" (limpa); string → id da skin.
             var id = result.Data as string;
+            if (string.Equals(get(), id, StringComparison.Ordinal))
+            {
+                return;   // review: re-selecionar a MESMA skin não deve sujar nem notificar
+            }
+
             set(id);
             MarkDirty();
             StateHasChanged();
