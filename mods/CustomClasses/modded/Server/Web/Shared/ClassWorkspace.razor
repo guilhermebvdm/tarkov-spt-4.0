@@ -722,6 +722,26 @@ else
         var isNew = row is null;
         row ??= new EquippedSlotRow { Slot = slot, Item = new ItemSpecModel() };
 
+        // Slot vazio → vai DIRETO pra seleção de item (filtrada pelo slot, já listada). Cancelar não cria
+        // o slot; escolher preenche o tpl e segue pro editor (mods/preset/ammo) pra refinar.
+        if (isNew)
+        {
+            var pickerParams = new DialogParameters<ItemPicker>
+            {
+                { x => x.FilterTpls, (Func<string, bool>)(t => Catalog.IsAllowedInEquipmentSlot(slot, t)) },
+                { x => x.Title, $"Select item for {slot}" },
+                { x => x.ShowCategoryFilter, false },
+                { x => x.AutoList, true },
+            };
+            var picked = await DialogService.ShowAsync<ItemPicker>($"Select item for {slot}", pickerParams, SlotEditOptions);
+            if (await picked.Result is not { Canceled: false, Data: string chosenTpl })
+            {
+                return;   // cancelou a seleção — não cria o slot
+            }
+
+            row.Item.Tpl = chosenTpl;
+        }
+
         var parameters = new DialogParameters<SlotEditDialog>
         {
             { x => x.Item, row.Item },
