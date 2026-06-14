@@ -222,6 +222,7 @@ else
                 </div>
                 <StashGrid Stash="@StashForView" BaseEdition="@def.BaseEdition" Editable="@_editMode"
                            EditItems="@(_editMode ? _model?.Stash : null)"
+                           Revision="@_loadoutRevision"
                            OnChanged="OnLoadoutEdited"
                            OnItemClick="EditStashItemAsync"/>
             </div>
@@ -293,8 +294,14 @@ else
     private List<ItemSpec>? _stashView;
 
     /// <summary>Recomputa os snapshots da doll/stash a partir do _model — chamado só ao montar e ao editar o loadout.</summary>
+    // Token incrementado a cada (re)build do loadout. O StashGrid edita a lista VIVA (_model.Stash), cuja
+    // REFERÊNCIA não muda ao adicionar/remover/editar item — então o grid precisa de um sinal explícito
+    // pra reconstruir. Só muda em edições de loadout (skill slider não chama isto → sem rebuild à toa).
+    private int _loadoutRevision;
+
     private void RebuildLoadoutViews()
     {
+        _loadoutRevision++;
         if (_model is null)
         {
             _equippedView = null;

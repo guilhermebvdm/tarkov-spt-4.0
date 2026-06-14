@@ -84,6 +84,9 @@
     /// <summary>F2c: bubble após mover/rotacionar → o workspace recomputa o custo.</summary>
     [Parameter] public EventCallback OnChanged { get; set; }
 
+    /// <summary>Token que muda a cada edição de loadout — força rebuild mesmo com a lista VIVA (ref estável).</summary>
+    [Parameter] public int Revision { get; set; }
+
     /// <summary>Clicar num item (modo edição) → o workspace abre o editor daquele item (count/preset/remover).</summary>
     [Parameter] public EventCallback<ItemSpecModel?> OnItemClick { get; set; }
 
@@ -112,16 +115,21 @@
 
     private object? _lastSource;
     private string? _lastBase;
+    private int _lastRevision = -1;
     private bool _built;
 
     protected override void OnParametersSet()
     {
-        // PERF: só reconstrua (pack do GridPacker) quando a fonte/baseEdition mudar de referência. O
-        // Blazor chama OnParametersSet a cada render do pai; sem o guard, mexer num slider de SKILL
-        // re-empacotava o stash inteiro a cada step. O DnD chama Build() direto, então move/rotate
-        // continua refletindo na hora.
+        // PERF: só reconstrua (pack do GridPacker) quando a fonte/baseEdition/Revision mudar. O Blazor
+        // chama OnParametersSet a cada render do pai; sem o guard, mexer num slider de SKILL re-empacotava
+        // o stash inteiro a cada step. O DnD chama Build() direto, então move/rotate reflete na hora.
+        // Revision: a lista editável (_model.Stash) é mutada EM LUGAR (add/remove/edit) sem trocar a
+        // referência — o token do workspace é o sinal de "o conteúdo mudou, reconstrua".
         object? source = _editable ? EditItems : Stash;
-        if (_built && ReferenceEquals(source, _lastSource) && string.Equals(_lastBase, BaseEdition, StringComparison.Ordinal))
+        if (_built
+            && ReferenceEquals(source, _lastSource)
+            && string.Equals(_lastBase, BaseEdition, StringComparison.Ordinal)
+            && Revision == _lastRevision)
         {
             return;
         }
@@ -129,6 +137,7 @@
         _built = true;
         _lastSource = source;
         _lastBase = BaseEdition;
+        _lastRevision = Revision;
         Build();
     }
 
