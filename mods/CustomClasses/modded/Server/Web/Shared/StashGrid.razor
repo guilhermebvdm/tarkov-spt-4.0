@@ -17,32 +17,31 @@
 
 @using System.Globalization
 @using Microsoft.AspNetCore.Components.Web
+@using Microsoft.JSInterop
 @using SPTarkov.Server.Core.Models.Common
 @using CustomClasses.Web
+@implements IAsyncDisposable
 @inject CatalogService Catalog
 @inject CostService CostService
+@inject IJSRuntime JS
 
 <div class="cc-grid2d-wrap">
     <div class="cc-grid2d-meta">@_w × @_h cells</div>
     @* A grade (linhas) é pintada via background-gradient no .cc-grid2d (CSS) — só os itens reais
        entram como filhos posicionados. Em edição a própria grade é a drop-zone. *@
-    <div class="cc-grid2d @(_dragging is not null ? "cc-grid2d--dragging" : null)"
-         style="@($"grid-template-columns:repeat({_w}, var(--cc-cell-unit));grid-template-rows:repeat({_h}, var(--cc-cell-unit));")"
-         @ondragover:preventDefault="true"
-         @ondrop="OnDrop">
+    <div class="cc-grid2d" @ref="_gridEl" data-cell="@CellPx.ToString(CultureInfo.InvariantCulture)"
+         style="@($"grid-template-columns:repeat({_w}, var(--cc-cell-unit));grid-template-rows:repeat({_h}, var(--cc-cell-unit));")">
         @foreach (var cell in _cells)
         {
             if (_editable)
             {
                 <div class="cc-item-cell cc-grid2d__item cc-grid2d__item--edit"
-                     style="@CellStyle(cell)" draggable="true" title="Click to edit · drag to move · ⟳ to rotate"
-                     @ondragstart="@(() => _dragging = cell)"
-                     @ondragend="@(() => _dragging = null)"
+                     style="@CellStyle(cell)" title="Click to edit · drag to move · ⟳ to rotate"
+                     data-index="@(EditItems!.IndexOf(cell.Model!))"
                      @onclick="@(() => OnItemClick.InvokeAsync(cell.Model))">
                     @ItemInner(cell)
                     <button class="cc-grid2d__rotate" type="button" title="Rotate"
-                            @onclick="@(() => RotateAsync(cell))" @onclick:stopPropagation="true"
-                            @ondragstart:stopPropagation="true">⟳</button>
+                            @onclick="@(() => RotateAsync(cell))" @onclick:stopPropagation="true">⟳</button>
                 </div>
             }
             else
@@ -100,9 +99,14 @@
     private int _h = FallbackH;
     private int _overflow;
     private List<PlacedCell> _cells = [];
-    private PlacedCell? _dragging;
 
     private bool _editable => Editable && EditItems is not null;
+
+    // Pointer-drag interop (customclasses.mjs / window.ccGridDnd): a grade é a drop-zone; o JS calcula a
+    // célula pelo rect da grade e chama MoveItemTo. Um init por elemento de grade (delegado no pointerdown).
+    private ElementReference _gridEl;
+    private DotNetObjectReference<StashGrid>? _dotNetRef;
+    private bool _dndInit;
 
     private sealed record PlacedCell(
         int X, int Y, int W, int H, int W0, int H0, string? RootTpl, string? IconId, string Name, string? Category,
@@ -243,31 +247,70 @@
             .ToList();
     }
 
-    // ── DnD (modo edição) ───────────────────────────────────────────────────────
+    // ── DnD (modo edição) — pointer-based via window.ccGridDnd ────────────────────
 
-    /// <summary>Solta na grade: célula = OffsetX/Y / CellPx (offset relativo à grade — itens com
-    /// pointer-events:none durante o drag). Valida bounds+colisão, fixa X/Y no modelo, recomputa.</summary>
-    private async Task OnDrop(DragEventArgs e)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var dragged = _dragging;
-        _dragging = null;
-        if (!_editable || dragged?.Model is null)
+        // Liga o drag uma vez, quando a grade editável existe. O listener é delegado no elemento da
+        // grade (estável), então um init basta; o JS resolve o item alvo pelo data-index a cada drag.
+        if (_editable && !_dndInit)
+        {
+            _dndInit = true;
+            _dotNetRef ??= DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("ccGridDnd.init", _gridEl, _dotNetRef);
+        }
+    }
+
+    /// <summary>
+    ///     Chamado pelo JS no fim do drag: tenta posicionar o item <paramref name="index"/> (na lista
+    ///     EditItems) na célula (x,y). Valida bounds+colisão (CanPlace); válido → fixa X/Y, re-empacota e
+    ///     recomputa o custo. Inválido → ignora (o item volta pra onde estava). StateHasChanged porque a
+    ///     chamada vem de fora do ciclo de render do Blazor.
+    /// </summary>
+    [JSInvokable]
+    public async Task MoveItemTo(int index, int x, int y)
+    {
+        if (!_editable || EditItems is null || index < 0 || index >= EditItems.Count)
         {
             return;
         }
 
-        var x = (int)Math.Floor(e.OffsetX / CellPx);
-        var y = (int)Math.Floor(e.OffsetY / CellPx);
-        var rotated = dragged.Model.Rotated ?? false;
-        var (w, h) = rotated ? (dragged.H0, dragged.W0) : (dragged.W0, dragged.H0);
-
-        if (CanPlace(x, y, w, h, dragged.Model))
+        var model = EditItems[index];
+        var cell = _cells.FirstOrDefault(c => ReferenceEquals(c.Model, model));
+        if (cell is null)
         {
-            dragged.Model.X = x;
-            dragged.Model.Y = y;
-            Build();
-            await OnChanged.InvokeAsync();
+            return;
         }
+
+        var rotated = model.Rotated ?? false;
+        var (w, h) = rotated ? (cell.H0, cell.W0) : (cell.W0, cell.H0);
+        if (!CanPlace(x, y, w, h, model))
+        {
+            return;
+        }
+
+        model.X = x;
+        model.Y = y;
+        Build();
+        StateHasChanged();
+        await OnChanged.InvokeAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_dndInit)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("ccGridDnd.dispose", _gridEl);
+            }
+            catch (JSDisconnectedException)
+            {
+                // circuito já caiu (navegação/refresh) — nada a limpar no cliente.
+            }
+        }
+
+        _dotNetRef?.Dispose();
     }
 
     /// <summary>⟳: alterna Rotated na posição atual (fixando se era loose). Reverte se não couber.</summary>

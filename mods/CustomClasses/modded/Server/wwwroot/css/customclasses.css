@@ -351,9 +351,21 @@
 .cc-grid2d-hint       { font-size: 10px; opacity: .55; }
 .cc-grid2d__item--edit { cursor: grab; user-select: none; }
 .cc-grid2d__item--edit:hover { outline: 1px solid var(--mud-palette-primary, #7e6fff); z-index: 2; }
-/* o ícone NUNCA é a fonte do drag — o drag é sempre do .cc-grid2d__item (div pai). */
+/* o ícone NUNCA é a fonte do drag — o drag é do pointer no .cc-grid2d__item (JS ccGridDnd). */
 .cc-grid2d__item--edit img { -webkit-user-drag: none; user-select: none; pointer-events: none; }
-/* Durante o drag, os itens não capturam pointer-events → o drop SEMPRE cai na grade (offset
+/* Drag por pointer: o item de origem esmaece e um "ghost" (clone) segue o cursor (position:fixed). */
+.cc-grid2d__item--dragging { opacity: .3; }
+.cc-grid2d__ghost {
+    position: fixed !important;
+    z-index: 9999;
+    margin: 0 !important;
+    pointer-events: none;
+    opacity: .9;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .55);
+    outline: 2px solid var(--mud-palette-primary, #7e6fff);
+    border-radius: 3px;
+}
+/* (legado) Durante o drag, os itens não capturam pointer-events → o drop SEMPRE cai na grade (offset
    relativo a ela), mesmo soltando sobre outro item. */
 .cc-grid2d--dragging .cc-grid2d__item { pointer-events: none; }
 /* Botão ⟳ (rotacionar) no canto do item — só aparece no hover p/ não poluir. */
