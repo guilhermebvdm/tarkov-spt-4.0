@@ -29,9 +29,12 @@
                     <div class="d-flex align-center gap-3 pa-1 mud-ripple"
                          style="height: 64px; cursor: pointer; border-bottom: 1px solid var(--mud-palette-lines-default);"
                          @onclick="@(() => SelectAsync(item))">
+                        @* onload reexibe: o MudVirtualize recicla os <img>; um nó que errou (404 de outro
+                           item) ficava display:none e não voltava ao receber um src válido. *@
                         <img src="https://assets.tarkov.dev/@(item.Tpl)-icon.webp"
                              width="52" height="52" loading="lazy" alt=""
-                             onerror="this.style.display='none'"
+                             onerror="this.style.visibility='hidden'"
+                             onload="this.style.visibility='visible'"
                              style="flex-shrink: 0; object-fit: contain;"/>
                         <div class="flex-grow-1" style="min-width: 0;">
                             <MudText Typo="Typo.body2" Style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
