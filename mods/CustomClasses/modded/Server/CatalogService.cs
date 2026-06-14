@@ -45,6 +45,14 @@ public sealed record CatalogPreset
     [JsonPropertyName("isPremium")] public bool IsPremium { get; init; }
 }
 
+/// <summary>One part (mod) that composes a preset — for the preset hover popover.</summary>
+public sealed record CatalogPresetPart
+{
+    [JsonPropertyName("tpl")] public required string Tpl { get; init; }
+    [JsonPropertyName("name")] public required string Name { get; init; }
+    [JsonPropertyName("count")] public int Count { get; init; }
+}
+
 /// <summary>One ammo cartridge compatible with a weapon's caliber (item 023 — AmmoPicker).</summary>
 public sealed record CatalogAmmo
 {
@@ -524,6 +532,33 @@ public class CatalogService
         }
 
         return results;
+    }
+
+    /// <summary>
+    ///     The mods that compose a preset (for the hover popover): every item below the root, grouped by
+    ///     tpl (qty summed — e.g. loaded cartridges), named and sorted. The root (the weapon itself) is
+    ///     skipped — ref: PresetController.cs:32, first item is the root. Unknown/missing id → empty.
+    /// </summary>
+    public List<CatalogPresetPart> GetPresetParts(string presetId)
+    {
+        if (TryParseMongoId(presetId) is not { } id
+            || !databaseService.GetGlobals().ItemPresets.TryGetValue(id, out var preset)
+            || preset.Items is not { Count: > 0 } items)
+        {
+            return [];
+        }
+
+        var byTpl = new Dictionary<MongoId, int>();
+        foreach (var it in items.Skip(1))   // skip the root weapon/armor
+        {
+            var qty = (int)Math.Max(1, it.Upd?.StackObjectsCount ?? 1);
+            byTpl[it.Template] = byTpl.GetValueOrDefault(it.Template) + qty;
+        }
+
+        return byTpl
+            .Select(kv => new CatalogPresetPart { Tpl = kv.Key.ToString(), Name = GetItemName(kv.Key), Count = kv.Value })
+            .OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
     }
 
     /// <summary>

@@ -205,15 +205,13 @@
         {
             @foreach (var content in Spec.Contents)
             {
-                <div @key="content" class="pl-3 py-2"
+                <div @key="content" class="pl-3 py-2 cc-content-item"
                      style="border-left:2px solid var(--mud-palette-lines-default); margin-left:8px;">
-                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Class="mb-1">
-                        <MudIcon Icon="@Icons.Material.Filled.SubdirectoryArrowRight" Size="Size.Small"/>
-                        <MudSpacer/>
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
-                                       title="Remove content item"
-                                       OnClick="@(() => RemoveContentAsync(content))"/>
-                    </MudStack>
+                    @* Lixeira ancorada no canto sup-direito do bloco (antes flutuava isolada numa linha
+                       própria, desalinhada do item). O padding-right do bloco evita sobreposição. *@
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                                   title="Remove content item" Class="cc-content-item__del"
+                                   OnClick="@(() => RemoveContentAsync(content))"/>
                     <ItemSpecEditor Spec="@content" AllowCount="true" Depth="@(Depth + 1)"
                                     OnChanged="NotifyChangedAsync"/>
                 </div>
