@@ -109,6 +109,12 @@
    profile viewer (profiles.css:21-60). Mini-drawer state hides everything but the dot+icon;
    the MudTooltip then carries name + status (spec §6). *@
 <style>
+    /* O MudTooltip embrulha cada linha num root inline-block → o flex item encolhe ao conteúdo e o
+       hover/active só cobria a largura do nome. Forçar o wrapper a ocupar a largura toda da sidebar. */
+    .mud-tooltip-root:has(.cc-sidebar-item) {
+        display: block;
+        width: 100%;
+    }
     .cc-sidebar-item {
         display: flex;
         align-items: center;
