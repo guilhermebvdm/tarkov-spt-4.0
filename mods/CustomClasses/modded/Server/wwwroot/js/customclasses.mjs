@@ -71,6 +71,7 @@ window.ccGridDnd = (function () {
 
     function onDown(e) {
         if (e.button !== 0) { return; }                       // left button only
+        if (active) { return; }                               // já arrastando (2º dedo/clique) — ignora
         // os botões ⟳/✕ não são alça de arraste (têm seus próprios cliques).
         if (e.target.closest('.cc-grid2d__rotate') || e.target.closest('.cc-grid2d__remove')) { return; }
         const item = e.target.closest('.cc-grid2d__item');
@@ -101,6 +102,27 @@ window.ccGridDnd = (function () {
         };
         window.addEventListener('pointermove', onMove);
         window.addEventListener('pointerup', onUp);
+        // pointercancel (touch interrompido pelo SO / scroll-cancel) → limpa sem aplicar, senão o item
+        // ficaria preso em --dragging com ghost/hint órfãos e os listeners de window vazando.
+        window.addEventListener('pointercancel', onCancel);
+    }
+
+    // Desfaz o estado visual do drag e solta os listeners de window. Usado por onUp e onCancel.
+    function teardown(a) {
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        window.removeEventListener('pointercancel', onCancel);
+        if (a.ghost) { a.ghost.remove(); }
+        if (a.hint) { a.hint.remove(); }
+        a.item.classList.remove('cc-grid2d__item--dragging');
+        a.grid.classList.remove('cc-grid2d--dragging');
+    }
+
+    function onCancel() {
+        if (!active) { return; }
+        const a = active;
+        active = null;
+        teardown(a);
     }
 
     function fitsAt(a, cx, cy) {
@@ -156,12 +178,7 @@ window.ccGridDnd = (function () {
         if (!active) { return; }
         const a = active;
         active = null;
-        window.removeEventListener('pointermove', onMove);
-        window.removeEventListener('pointerup', onUp);
-        if (a.ghost) { a.ghost.remove(); }
-        if (a.hint) { a.hint.remove(); }
-        a.item.classList.remove('cc-grid2d__item--dragging');
-        a.grid.classList.remove('cc-grid2d--dragging');
+        teardown(a);
         if (!a.moved) { return; }                              // it was a click — let @onclick handle it
 
         // a drag happened → swallow the click that the browser fires next so we don't open the editor.

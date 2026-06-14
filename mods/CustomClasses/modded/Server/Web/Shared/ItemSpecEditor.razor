@@ -365,7 +365,14 @@
 
         if (mode == BuildKind.Preset)
         {
-            // Começa no preset padrão (id resolvido pra destacar na lista); o usuário troca pela lista.
+            // Já em modo preset → mantém a seleção atual (NÃO reseta pro default: preservaria um preset
+            // específico ou um build premium legado — antes isso apagava o premium silenciosamente).
+            if (Spec.Preset is { Length: > 0 })
+            {
+                return;
+            }
+
+            // Vindo de Custom: começa no preset padrão (id resolvido pra destacar na lista).
             Spec.Preset = Catalog.ResolveDefaultPreset(new MongoId(baseTpl))?.Id.ToString() ?? baseTpl;
             Spec.Premium = false;
             Spec.Tpl = null;
