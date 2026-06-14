@@ -24,6 +24,7 @@
 @inject CatalogService Catalog
 @inject CostService CostService
 @inject IJSRuntime JS
+@inject ISnackbar Snackbar
 
 <div class="cc-grid2d-wrap">
     <div class="cc-grid2d-meta">@_w × @_h cells</div>
@@ -286,6 +287,8 @@
         var (w, h) = rotated ? (cell.H0, cell.W0) : (cell.W0, cell.H0);
         if (!CanPlace(x, y, w, h, model))
         {
+            Snackbar.Add("Doesn't fit there — it overlaps another item or the grid edge.", Severity.Info);
+            StateHasChanged();   // re-render põe o item de volta na origem (o ghost já sumiu no cliente)
             return;
         }
 
@@ -333,6 +336,10 @@
             cell.Model.Y = y;
             Build();
             await OnChanged.InvokeAsync();
+        }
+        else
+        {
+            Snackbar.Add("Can't rotate here — no room. Move it to a free area first.", Severity.Info);
         }
     }
 

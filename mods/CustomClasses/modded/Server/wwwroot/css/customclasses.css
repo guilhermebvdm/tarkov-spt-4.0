@@ -365,6 +365,8 @@
     outline: 2px solid var(--mud-palette-primary, #7e6fff);
     border-radius: 3px;
 }
+/* Durante o arraste, realça a grade como a área-alvo do drop. */
+.cc-grid2d--dragging { outline: 1px dashed var(--mud-palette-primary, #7e6fff); outline-offset: 2px; }
 /* (legado) Durante o drag, os itens não capturam pointer-events → o drop SEMPRE cai na grade (offset
    relativo a ela), mesmo soltando sobre outro item. */
 .cc-grid2d--dragging .cc-grid2d__item { pointer-events: none; }
