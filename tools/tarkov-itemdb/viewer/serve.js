@@ -13,6 +13,7 @@ const https  = require('https');
 const fs     = require('fs');
 const path   = require('path');
 const crypto = require('crypto');
+const zlib   = require('zlib');
 
 const PORT     = parseInt(process.argv[2] || '8080', 10);
 // Bind localhost by default — the viewer mutates live SPT config and has no auth,
@@ -44,6 +45,25 @@ const MIME = {
   '.png':  'image/png',
   '.webp': 'image/webp',
 };
+
+// Text types worth gzipping. Binary (.png/.webp) is already compressed — skip.
+const GZIP_TYPES = new Set(['.json', '.js', '.css', '.html', '.svg']);
+// Cache of gzipped buffers, keyed by absolute path, invalidated by mtime+size.
+// items.json (~17MB) is rewritten on every edit/refresh/rescan, so re-gzip only
+// when it actually changes — never per request.
+const _gzipCache = new Map();  // path -> { mtimeMs, size, buf }
+function getGzipped(filePath, mtimeMs, size, cb) {
+  const hit = _gzipCache.get(filePath);
+  if (hit && hit.mtimeMs === mtimeMs && hit.size === size) return cb(null, hit.buf);
+  fs.readFile(filePath, (err, raw) => {
+    if (err) return cb(err);
+    zlib.gzip(raw, (gerr, buf) => {
+      if (gerr) return cb(gerr);
+      _gzipCache.set(filePath, { mtimeMs, size, buf });
+      cb(null, buf);
+    });
+  });
+}
 
 function readJsonFile(p) {
   return JSON.parse(fs.readFileSync(p, 'utf8').replace(/^﻿/, ''));
@@ -938,7 +958,39 @@ http.createServer((req, res) => {
   if (!filePath.startsWith(ROOT)) { res.writeHead(403); res.end('forbidden'); return; }
   fs.stat(filePath, (err, st) => {
     if (err || !st.isFile()) { res.writeHead(404); res.end('not found: ' + urlPath); return; }
-    res.writeHead(200, { 'Content-Type': MIME[path.extname(filePath)] || 'application/octet-stream' });
+    const ext  = path.extname(filePath);
+    const type = MIME[ext] || 'application/octet-stream';
+    // Data files mutate (items.json rewritten on every edit/refresh/rescan): no-cache
+    // + ETag revalidation (304 when unchanged). Static assets cache 1h.
+    const isData = urlPath.startsWith('/data/');
+    const cacheControl = isData ? 'no-cache' : 'public, max-age=3600';
+    // gzip text types when the client accepts it (items.json ~17MB → ~2-3MB on the wire).
+    const useGzip = GZIP_TYPES.has(ext) && /\bgzip\b/.test(req.headers['accept-encoding'] || '');
+    const etag = `"${st.size.toString(16)}-${Math.round(st.mtimeMs).toString(16)}${useGzip ? '-gz' : ''}"`;
+
+    if (req.headers['if-none-match'] === etag) {
+      res.writeHead(304, { 'ETag': etag, 'Cache-Control': cacheControl, 'Vary': 'Accept-Encoding' });
+      return res.end();
+    }
+
+    if (useGzip) {
+      // Serve a cached gzip buffer keyed by mtime+size (re-gzips only when the
+      // file changes) — never gzip 17MB on every request.
+      getGzipped(filePath, st.mtimeMs, st.size, (gerr, buf) => {
+        if (gerr) { res.writeHead(500); res.end('gzip error: ' + gerr.message); return; }
+        res.writeHead(200, {
+          'Content-Type': type, 'Content-Encoding': 'gzip', 'Content-Length': buf.length,
+          'ETag': etag, 'Cache-Control': cacheControl, 'Vary': 'Accept-Encoding',
+        });
+        res.end(buf);
+      });
+      return;
+    }
+
+    res.writeHead(200, {
+      'Content-Type': type, 'Content-Length': st.size,
+      'ETag': etag, 'Cache-Control': cacheControl, 'Vary': 'Accept-Encoding',
+    });
     fs.createReadStream(filePath).pipe(res);
   });
 }).listen(PORT, HOST, () => {

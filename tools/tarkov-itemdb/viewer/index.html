@@ -244,7 +244,11 @@ function saveSortPref() {
 const _initSort = loadSortPref() || { key: 'priceTraderSell', dir: -1 };
 let sortKey = _initSort.key;
 let sortDir = _initSort.dir; // -1 desc, 1 asc
-const RENDER_LIMIT = 1500;
+const RENDER_LIMIT = 1500;   // hard cap on rows ever rendered for one view
+const RENDER_BATCH = 200;    // rows per incremental window batch (rest load on scroll)
+// Windowing state (see renderNow / appendWindowBatch): keeps the live DOM to a few
+// hundred rows instead of up to 1500, without changing the table layout/visuals.
+let _winRows = [], _winCursor = 0, _winObserver = null;
 
 // Handbook tree (used now) has no synthetic intermediates, so the skip set is empty.
 // Kept as an empty Set so existing code paths remain valid.
@@ -885,7 +889,26 @@ function collectAncestors(node, target, path) {
   return new Set();
 }
 
+// Filter-result memoization: a pure sort change (same filters) reuses the last
+// filtered set instead of re-scanning all 5907 items. `_dataVersion` is bumped by
+// every single-row mutation (edit/ban/restore/refresh) so a data change forces a
+// recompute even when the filter inputs are unchanged.
+let _filterKey = null, _filterCache = null, _dataVersion = 0;
+function filterStateKey() {
+  return [
+    document.getElementById('q').value.trim().toLowerCase(),
+    [...selectedConditions].sort().join(','),
+    [...selectedGroups].sort().join(','),
+    [...selectedBans].sort().join(','),
+    [...selectedOverrides].sort().join(','),
+    [...selectedMods].sort().join(','),
+    deltaMin, deltaMax, deltaSource, activeCategoryId, _dataVersion,
+  ].join('|');
+}
+
 function filterItems() {
+  const cacheKey = filterStateKey();
+  if (cacheKey === _filterKey && _filterCache) return _filterCache;
   const q = document.getElementById('q').value.trim().toLowerCase();
 
   const out = [];
@@ -934,21 +957,27 @@ function filterItems() {
     if (activeCategoryId && !isInCategorySubtree(it, activeCategoryId)) continue;
     out.push(it);
   }
+  _filterKey = cacheKey; _filterCache = out;
   return out;
 }
 
 function sortItems(list) {
   const dir = sortDir;
   const key = sortKey;
-  list.sort((a, b) => {
-    const va = getSortValue(a, key);
-    const vb = getSortValue(b, key);
+  // Schwartzian transform: compute each sort value ONCE (decorate), sort on the
+  // precomputed value, then write back in place. Avoids 2× getSortValue per
+  // comparison (O(n log n) calls → O(n)), incl. repeated toLowerCase/computeDelta.
+  // Mutates `list` in place so the filter cache keeps the same array reference.
+  const dec = list.map(it => ({ it, v: getSortValue(it, key) }));
+  dec.sort((a, b) => {
+    const va = a.v, vb = b.v;
     if (va == null && vb == null) return 0;
     if (va == null) return 1;  // nulls last
     if (vb == null) return -1;
     if (typeof va === 'string') return dir * va.localeCompare(vb);
     return dir * (va - vb);
   });
+  for (let i = 0; i < dec.length; i++) list[i] = dec[i].it;
   return list;
 }
 
@@ -978,7 +1007,17 @@ function computeDelta(it, valueKey) {
 }
 
 // ── Render ──────────────────────────────────────────────────────────────────
+// Public render() coalesces bursts (a "Limpar"/"Todos" filter action, or several
+// state changes in one tick) into a single rebuild per animation frame. Heavy
+// work lives in renderNow(). One-frame defer is imperceptible (skeleton/old rows
+// stay until the frame) and no caller reads the table DOM synchronously after render().
+let _renderScheduled = false;
 function render() {
+  if (_renderScheduled) return;
+  _renderScheduled = true;
+  requestAnimationFrame(() => { _renderScheduled = false; renderNow(); });
+}
+function renderNow() {
   const filtered = sortItems(filterItems());
   const total = ITEM_LIST.length;
   const shown = Math.min(filtered.length, RENDER_LIMIT);
@@ -992,7 +1031,13 @@ function render() {
     return;
   }
 
-  const rows = filtered.slice(0, RENDER_LIMIT);
+  // Windowed render: build the shell + first batch, then append more batches as a
+  // sentinel scrolls near the viewport. Keeps the live DOM to a few hundred rows
+  // (was up to 1500) without touching layout/visuals.
+  if (_winObserver) { _winObserver.disconnect(); _winObserver = null; }
+  _winRows = filtered.slice(0, RENDER_LIMIT);
+  _winCursor = 0;
+
   const html = ['<table class="tbl"><thead><tr>',
     '<th></th>',
     th('name', 'Item'),
@@ -1004,15 +1049,14 @@ function render() {
     thWithDelta('priceFleaDevAvg24h',    'deltaFleaDev',    'Flea tarkov.dev',    'num col-flea-dev'),
     thWithDelta('priceFleaMarketAvg24h', 'deltaFleaMarket', 'Flea tarkov-market', 'num col-flea-market'),
     // canonical column hidden — still computed/exposed in row detail
-    // th('priceFleaCanonical', 'Canonical', 'num'),
-    '</tr></thead><tbody>'];
-
-  for (const it of rows) html.push(renderRow(it));
-  html.push('</tbody></table>');
+    '</tr></thead><tbody></tbody></table>'];
   main.innerHTML = html.join('');
 
+  const tbl   = main.querySelector('table');
+  const tbody = tbl.querySelector('tbody');
+  appendWindowBatch(tbody);   // first batch (adds a scroll sentinel if more remain)
+
   // Click handlers (delegated)
-  const tbl = main.querySelector('table');
   tbl.addEventListener('click', onTableClick);
   bindRewardHover(tbl);
   main.querySelectorAll('th').forEach(th => {
@@ -1028,6 +1072,34 @@ function render() {
       render();
     });
   });
+
+  // Incremental loading: append the next batch as the sentinel nears the viewport.
+  const sentinel = document.getElementById('win-sentinel');
+  if (sentinel) {
+    _winObserver = new IntersectionObserver((entries) => {
+      if (entries.some(e => e.isIntersecting)) appendWindowBatch(tbody);
+    }, { root: main, rootMargin: '800px 0px' });
+    _winObserver.observe(sentinel);
+  }
+}
+
+// Append the next RENDER_BATCH rows into <tbody>, moving the scroll sentinel.
+// Keeps the live DOM small; called first by renderNow and then by the observer.
+function appendWindowBatch(tbody) {
+  const end = Math.min(_winCursor + RENDER_BATCH, _winRows.length);
+  let html = '';
+  for (let i = _winCursor; i < end; i++) html += renderRow(_winRows[i]);
+  _winCursor = end;
+  const oldSentinel = document.getElementById('win-sentinel');
+  if (oldSentinel) oldSentinel.remove();
+  tbody.insertAdjacentHTML('beforeend', html);
+  if (_winCursor < _winRows.length) {
+    tbody.insertAdjacentHTML('beforeend',
+      '<tr id="win-sentinel" class="win-sentinel" aria-hidden="true"><td colspan="9"></td></tr>');
+    if (_winObserver) { _winObserver.disconnect(); _winObserver.observe(document.getElementById('win-sentinel')); }
+  } else if (_winObserver) {
+    _winObserver.disconnect();
+  }
 }
 
 function openFleaMinLevelEditor(trigger) {
@@ -1372,6 +1444,7 @@ async function refreshDevCell(cell) {
     // Update in-memory item and re-render the row
     item.tarkovDev = data.tarkovDev;
     item.consolidated = data.consolidated;
+    _dataVersion++;  // data changed → invalidate filter-cache
     const row = cell.closest('tr[data-id]');
     if (row) {
       const tmp = document.createElement('tbody');
@@ -1406,6 +1479,7 @@ async function refreshMarketCell(cell) {
 
     item.tarkovMarket = data.tarkovMarket;
     item.consolidated = data.consolidated;
+    _dataVersion++;  // data changed → invalidate filter-cache
     const row = cell.closest('tr[data-id]');
     if (row) {
       const tmp = document.createElement('tbody');
@@ -1506,6 +1580,7 @@ async function restoreOverride(cell) {
   if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
   if (item.spt) { item.spt.fleaOverride = null; item.spt.fleaOfferMultiplier = null; item.spt.effectiveFleaPrice = data.effectiveFleaPrice; }
   item.consolidated = data.consolidated;
+  _dataVersion++;  // data changed → invalidate filter-cache
   const row = cell.closest('tr[data-id]');
   if (row) {
     const tmp = document.createElement('tbody');
@@ -1545,6 +1620,7 @@ function confirmBanAction(cell, menu, banning) {
       if (!item.spt) item.spt = { basePrice: null, fleaPrice: null, fleaBanned: false, fleaBanReasons: [], traders: [] };
       item.spt.fleaBanned = data.fleaBanned;
       item.spt.fleaBanReasons = data.fleaBanReasons;
+      _dataVersion++;  // data changed → invalidate filter-cache
       // Re-render this row
       const row = cell.closest('tr[data-id]');
       if (row) {
@@ -1664,6 +1740,7 @@ function openInlineEdit(cell) {
       }
       item.spt.effectiveFleaPrice = data.effectiveFleaPrice;
       item.consolidated = data.consolidated;
+      _dataVersion++;  // data changed → invalidate filter-cache
       closeForm();   // remove the form + its capture-phase doc listener before the row is replaced
       rerenderRow();
       const fromStr = (prevEff != null && prevEff !== data.effectiveFleaPrice) ? `${prevEff.toLocaleString('pt-BR')} → ` : '';

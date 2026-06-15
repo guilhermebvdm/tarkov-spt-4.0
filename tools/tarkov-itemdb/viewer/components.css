@@ -22,13 +22,18 @@ html, body {
  * solid UI colors. A dark overlay tames the image so foreground stays readable. */
 body {
   background-color: var(--bg-app);
-  background-image:
+}
+/* Fixed decorative background layer (was `background-attachment: fixed` on body).
+ * A fixed-position layer is composited once; scrolling `.main` no longer forces a
+ * full-viewport background repaint every frame. Visual is identical. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
     linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.65)),
-    url("bg.png");
-  background-size: cover;
-  background-position: center center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
+    url("bg.png") center center / cover no-repeat;
 }
 
 /* ── Layout shell ──────────────────────────────────────────────────────────── */
@@ -500,9 +505,9 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
 .tbl thead { position: sticky; top: 0; z-index: var(--z-sticky); }
 .tbl thead th {
   position: sticky; top: 0;
-  background: rgba(10, 10, 10, 0.96);   /* opaque enough to hide rows scrolling underneath */
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
+  /* Fully opaque (was rgba .96 + blur(6px)). The blur forced a GPU recomposite of
+   * the sticky header on every scroll frame; opaque fill hides rows just as well. */
+  background: rgb(10, 10, 10);
 }
 .tbl th {
   text-align: left;
@@ -541,7 +546,8 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
   background: var(--bg-row);
   cursor: pointer;
   position: relative;
-  transition: background var(--transition-fast);
+  /* No background transition: hover swaps instantly (imperceptible vs the 100ms
+   * fade) and avoids an animated paint primed on every one of ~1500 rows. */
 }
 .tbl tbody tr:nth-child(even) { background: var(--bg-row-alt); }
 .tbl tbody tr:hover { background: var(--bg-hover); }
@@ -565,6 +571,11 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
  * (the 48px item image + its padding). */
 .tbl tbody tr td { vertical-align: middle; padding: var(--space-3) var(--space-5); }
 .tbl tbody tr { height: 60px; }
+
+/* Invisible IntersectionObserver target for incremental window loading — must not
+ * inherit the 60px row height or it leaves a gap at the bottom while loading. */
+.tbl tbody tr.win-sentinel { height: 0; background: none; cursor: default; border: 0; }
+.tbl tbody tr.win-sentinel td { padding: 0; border: 0; height: 0; }
 
 /* Image cell — slightly larger, with subtle inset grid background mimicking
  * the in-game inventory slot. The grid is purely decorative (linear-gradients). */
