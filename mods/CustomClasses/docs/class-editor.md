@@ -13,7 +13,7 @@ Guia do **editor web de classes** entregue no épico 018–028 (Blazor Server + 
 
 1. Suba o servidor SPT normalmente (`SPT.Server.exe`).
 2. Abra no browser: `https://<ip>:6969/customclasses`.
-   - O `<ip>` é o `ip` de `SPT_Data/configs/http.json` (default `127.0.0.1`), **mas mods podem sobrescrever o bind**. No install atual o **fika-server** força o IP do Radmin (`server.ip` em `user/mods/fika-server/assets/configs/fika.jsonc`, ex.: `26.207.194.149`) — o editor responde **só nesse IP** (`https://26.207.194.149:6969/customclasses`); `127.0.0.1` não responde.
+   - O `<ip>` é o `ip` de `SPT_Data/configs/http.json` (atual `127.0.0.1`), **mas mods podem sobrescrever o bind**: o **fika-server** dita o IP efetivo via `server.ip` em `user/mods/fika-server/assets/configs/fika.jsonc`. **Os dois precisam bater** — no install atual ambos estão em `127.0.0.1`, então o editor responde em `https://127.0.0.1:6969/customclasses`. (Para expor na LAN/Radmin, troque `server.ip` do fika **e** o `ip` do http.json para o mesmo IP, ex.: `26.207.194.149`.)
 3. O certificado é **self-signed** → o browser bloqueia na primeira visita. Aceite a exceção ("Avançado → Continuar"); no Chrome sem botão, digite `thisisunsafe` na página de aviso.
 
 ### Rotas
