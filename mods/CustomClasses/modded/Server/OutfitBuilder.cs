@@ -99,12 +99,14 @@ public class OutfitBuilder(DatabaseService databaseService, ISptLogger<OutfitBui
             return 0;
         }
 
-        // Restrição de facção (ref: CustomizationItem.cs:66 — valores "Usec"/"Bear"/"Savage").
-        // Side nulo/vazio = sem restrição (aplica em ambos os lados) — comportamento lenient (PA-01-03).
+        // Restrição de facção RELAXADA (decisão do usuário 2026-06-15): aplica a roupa MESMO de facção
+        // diferente (Savage/AllTheClothes incluídas) — o autor da classe escolhe o outfit deliberadamente,
+        // e o mod AllTheClothes torna qualquer roupa válida para PMC. Antes pulava (return 0) quando
+        // props.Side não continha o lado; agora só registra e segue. Sem AllTheClothes, uma malha
+        // scav-only pode renderizar estranho — responsabilidade do autor. (ref: CustomizationItem.cs:66)
         if (props.Side is { Count: > 0 } sides && !sides.Contains(sideName))
         {
-            logger.Warning($"[CustomClasses] '{className}' ({sideName}): roupa '{pieceId}' é de [{string.Join(",", sides)}] — pulada.");
-            return 0;
+            logger.Info($"[CustomClasses] '{className}' ({sideName}): roupa '{pieceId}' é de [{string.Join(",", sides)}] — aplicada mesmo assim (guard de Side relaxado).");
         }
 
         if (isUpper)

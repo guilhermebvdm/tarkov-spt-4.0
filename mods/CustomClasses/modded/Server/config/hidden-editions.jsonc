@@ -1,6 +1,7 @@
 {
   // Edições (pelo nome exato/Key) ocultadas na criação de perfil do launcher.
-  // Mantidos automaticamente: SPT Developer, SPT Zero to hero, e todas as classes do mod.
+  // Mantidos: SPT Developer + todas as classes do mod. (SPT Zero to hero foi ocultado a pedido — é só a
+  // base das classes, não precisa aparecer como opção.)
   // Limitação: vale para o launcher v1 (atual). O launcher v2 (/launcher/v2/types) não filtra por esta lista.
   "hide": [
     "Standard",
@@ -9,6 +10,7 @@
     "Edge Of Darkness",
     "Unheard",
     "Tournament",
-    "SPT Easy start"
+    "SPT Easy start",
+    "SPT Zero to hero"
   ]
 }

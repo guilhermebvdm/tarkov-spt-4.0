@@ -1,0 +1,14 @@
+{
+  // Opções globais do CustomClasses (separadas dos arquivos de classe em classes/).
+  //
+  // language — língua dos NOMES de classe mostrados no LAUNCHER (a chave da edition).
+  //   O launcher exibe a chave da edition (= o campo "name" da classe); não há locale para o nome.
+  //   "pt"   → registra cada edition usando displayName.pt (ex.: Caçador, Fuzileiro, Médico de Combate)
+  //   "en"   → usa displayName.en (ex.: Hunter, Rifleman, Combat Medic)
+  //   "name" → usa o campo "name" cru do .jsonc (sem tradução)
+  //
+  //   ⚠ Trocar este valor RE-CHAVEIA as editions: perfis já criados com a chave antiga deixam de casar
+  //     com a edition (precisariam ser recriados). Reinicie o server após mudar.
+  //   (O texto in-game — selo/menu — segue localizado pelo displayName independentemente desta opção.)
+  "language": "pt"
+}
