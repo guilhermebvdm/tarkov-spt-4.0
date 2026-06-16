@@ -55,6 +55,17 @@ O `install-service.ps1` faz isso automaticamente (se ainda não existir). Manual
 `*.bak`: `SPT_Data\configs\ragfair.json`, `SPT_Data\database\globals.json`,
 `SPT_Data\database\templates\items.json`, `SPT_Data\checks.dat`.
 
+> 🔑 **API key do tarkov-market — a forma mais simples (recomendada):** crie um arquivo **`.env`**
+> na raiz do tool (`E:\tools\tarkov-itemdb\.env`) com uma linha:
+> ```
+> TARKOV_MARKET_API_KEY=sua-key-aqui
+> ```
+> O `load-env.js` carrega automático em **qualquer** start (build, serviço, per-item, bulk) — sem
+> env var do sistema nem do parâmetro `-MarketKey`. O `.env` é **gitignored** (não vai no pacote/git),
+> então você cria um novo no server. É **opcional**: só afeta a coluna do tarkov-market — editar preço,
+> ban, flea-level e tarkov.dev funcionam sem ela. *(Alternativas: `-MarketKey` no install-service.ps1,
+> ou env var do sistema.)*
+
 ### 4. Regerar `data/items.json` pro install oficial (obrigatório)
 ```powershell
 $env:SPT_PATH = "E:\SPT\SPT"                 # a RAIZ que contém SPT_Data

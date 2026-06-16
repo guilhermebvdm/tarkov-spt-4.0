@@ -1,5 +1,6 @@
 cache/
 logs/
+.env
 probe-schema.js
 .serve.log
 assets/snapshot-*.png

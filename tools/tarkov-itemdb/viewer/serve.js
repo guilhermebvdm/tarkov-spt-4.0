@@ -14,6 +14,7 @@ const fs     = require('fs');
 const path   = require('path');
 const crypto = require('crypto');
 const zlib   = require('zlib');
+require('../scripts/load-env.js');  // populate process.env from tool-root/.env (TARKOV_MARKET_API_KEY)
 
 const PORT     = parseInt(process.argv[2] || '8080', 10);
 // Bind localhost by default — the viewer mutates live SPT config and has no auth,

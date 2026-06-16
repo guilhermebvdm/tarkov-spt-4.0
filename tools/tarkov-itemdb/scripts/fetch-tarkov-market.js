@@ -12,6 +12,7 @@
 const fs    = require('fs');
 const path  = require('path');
 const https = require('https');
+require('./load-env.js');  // populate process.env from tool-root/.env before reading the key
 
 const API_KEY = process.env.TARKOV_MARKET_API_KEY;
 const API_URL = 'https://api.tarkov-market.app/api/v1/pve/items/all';
