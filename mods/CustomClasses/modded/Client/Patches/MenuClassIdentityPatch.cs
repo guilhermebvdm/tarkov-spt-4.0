@@ -81,10 +81,10 @@ internal class MenuClassIdentityPatch : ModulePatch
             yield break;   // sem Menu-Overhaul / fechou / sem nickname → no-op
         }
 
+        var baseColor = ClassIdentityView.ResolveColor(SkillMultipliers.NameColor, Color.white);
+
         try
         {
-            var baseColor = ClassIdentityView.ResolveColor(SkillMultipliers.NameColor, Color.white);
-
             // EXP, top glow, botões e luzes do menu seguem a cor da classe (AccentColor do Menu-Overhaul).
             MenuOverhaulBridge.SetAccent(baseColor);
 
@@ -101,10 +101,53 @@ internal class MenuClassIdentityPatch : ModulePatch
             classLine.text = SkillMultipliers.ClassName!.ToUpperInvariant();
             ClassIdentityView.ApplyGradient(classLine, baseColor);
             classLine.transform.SetSiblingIndex(nick.transform.GetSiblingIndex() + 1);
+
+            // Glow/luzes/logo: força o MO a reaplicar a cor agora — o ambiente já existe (o nick apareceu) e o
+            // AccentColor já é a cor da classe. Vence a corrida em que o SettingChanged disparou cedo demais.
+            MenuOverhaulBridge.ReapplyLayout();
         }
         catch (Exception ex)
         {
             Plugin.Log?.LogError($"[CustomClasses] menu layout falhou: {ex.Message}");
+        }
+
+        // Espera o EFT/MO assentarem (o glow do PvE é (re)montado de forma assíncrona) e corrige o glow.
+        for (var i = 0; i < 90; i++)
+        {
+            yield return null;
+        }
+
+        FixTopGlow(baseColor);
+    }
+
+    /// <summary>
+    ///     (06-fix-02) Corrige o glow do topo no modo PvE. O <c>TopGlowPve</c> usa um SPRITE azul/ciano
+    ///     (tema PvE); como o Unity UI renderiza <c>sprite × color</c>, o nosso tint laranja vira VERDE.
+    ///     Por multiplicação não dá p/ "laranjar" um sprite azul → trocamos o sprite do PvE pelo do
+    ///     <c>TopGlowRegular</c> (glow neutro do modo normal) e reaplicamos o tint da classe.
+    /// </summary>
+    private static void FixTopGlow(Color baseColor)
+    {
+        try
+        {
+            var glow = GameObject.Find("Environment UI")?.transform.Find("Common/Glow Canvas");
+            var pve = glow?.Find("TopGlowPve")?.GetComponent<Image>();
+            if (pve == null)
+            {
+                return;
+            }
+
+            var regular = glow!.Find("TopGlowRegular")?.GetComponent<Image>();
+            if (regular != null && regular.sprite != null)
+            {
+                pve.sprite = regular.sprite;   // sprite neutro → tint laranja × neutro = laranja
+            }
+
+            pve.color = new Color(baseColor.r, baseColor.g, baseColor.b, pve.color.a);   // preserva o alpha do glow
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log?.LogError($"[CustomClasses] glowfix falhou: {ex.Message}");
         }
     }
 

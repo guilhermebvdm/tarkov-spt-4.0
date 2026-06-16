@@ -44,20 +44,14 @@ internal static class ClassIdentityView
         }
     }
 
-    /// <summary>
-    ///     (06-fix-02) Aplica o MESMO gradiente dos nomes ao ÍCONE (silhueta branca × degradê), via o
-    ///     componente <see cref="ClassIconGradient"/> — topo clareado, base = cor da classe. Aspecto premium
-    ///     dos ícones de edição do EFT. Seta a cor da Image p/ branco (a cor vem do gradiente dos vértices).
-    /// </summary>
-    public static void ApplyIconGradient(Image icon, Color baseColor)
-    {
-        var grad = icon.GetComponent<ClassIconGradient>() ?? icon.gameObject.AddComponent<ClassIconGradient>();
-        grad.TopColor = Color.Lerp(baseColor, Color.white, GradientLighten);
-        grad.BottomColor = baseColor;
-        grad.enabled = true;
-        icon.color = Color.white;   // neutro — a cor vem do gradiente dos vértices (ClassIconGradient)
-        icon.SetVerticesDirty();    // força o rebuild do mesh com o novo gradiente
-    }
+    // (06-fix-02) Clareamento do topo do gradiente do ÍCONE. Mais forte que o dos nomes (0.15) porque o
+    // ícone é pequeno — um degradê sutil seria imperceptível. O gradiente é EMBUTIDO na textura
+    // (ClassIconCache.GetTinted), não via BaseMeshEffect (que falha em Image criada em runtime, ex.: menu).
+    private const float IconGradientLighten = 0.35f;
+
+    /// <summary>(06-fix-02) Par (topo clareado, base) do gradiente do ícone para a cor da classe.</summary>
+    private static (Color top, Color bottom) IconGradient(Color baseColor)
+        => (Color.Lerp(baseColor, Color.white, IconGradientLighten), baseColor);
 
     /// <summary>(06-fix-02) Remove o gradiente do ícone (célula reciclada / outro jogador) — volta ao vanilla.</summary>
     public static void RevertIconGradient(Image? icon)
@@ -90,7 +84,10 @@ internal static class ClassIdentityView
             return;
         }
 
-        var sprite = ClassIconCache.Get(iconFile);
+        // (06-fix-02) sprite com gradiente EMBUTIDO na textura (silhueta branca × degradê vertical) — robusto
+        // onde o BaseMeshEffect falha (ícone do menu). icon.color = white pois a cor já está na textura.
+        var (top, bottom) = IconGradient(ResolveColor(nameColor, Color.white));
+        var sprite = ClassIconCache.GetTinted(iconFile, top, bottom);
         if (sprite == null)
         {
             return;   // sem ícone → mantém o vanilla
@@ -98,11 +95,18 @@ internal static class ClassIdentityView
 
         icon.sprite = sprite;
         icon.preserveAspect = true;
-        ApplyIconGradient(icon, ResolveColor(nameColor, Color.white));   // (06-fix-02) gradiente premium (silhueta branca × degradê)
+        icon.color = Color.white;
         icon.enabled = true;
         if (!icon.gameObject.activeSelf)
         {
             icon.gameObject.SetActive(true);   // fix do return-cedo no Default
+        }
+
+        // desabilita um gradiente de mesh antigo (build anterior) que possa ter ficado no mesmo GameObject.
+        var oldGrad = icon.GetComponent<ClassIconGradient>();
+        if (oldGrad != null)
+        {
+            oldGrad.enabled = false;
         }
 
         // tamanho ABSOLUTO consistente entre telas (sizeDelta + LayoutElement; reset da escala relativa).
@@ -166,13 +170,14 @@ internal static class ClassIdentityView
             : CreateContainer(parent, goName, iconSize);
 
         var img = go.transform.Find("Icon").GetComponent<Image>();
-        var sprite = ClassIconCache.Get(iconFile);
+        var (top, bottom) = IconGradient(color);
+        var sprite = ClassIconCache.GetTinted(iconFile, top, bottom);   // (06-fix-02) gradiente embutido na textura
         img.gameObject.SetActive(sprite != null);
         if (sprite != null)
         {
             img.sprite = sprite;
             img.preserveAspect = true;   // não distorce PNG não-quadrado
-            ApplyIconGradient(img, color);   // (06-fix-02) gradiente premium (igual aos nomes/demais ícones)
+            img.color = Color.white;     // a cor/gradiente está na textura
         }
 
         var tmp = go.transform.Find("Label").GetComponent<TextMeshProUGUI>();

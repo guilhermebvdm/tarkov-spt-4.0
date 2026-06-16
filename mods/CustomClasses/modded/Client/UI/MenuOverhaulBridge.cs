@@ -17,10 +17,12 @@ internal static class MenuOverhaulBridge
 {
     private const string MoGuid = "com.moxopixel.menuoverhaul";
     private const string SettingsTypeName = "MoxoPixel.MenuOverhaul.Utils.Settings";
+    private const string MenuPatchTypeName = "MoxoPixel.MenuOverhaul.Patches.MenuOverhaulPatch";
 
     private static bool _resolved;
     private static object? _accentEntry;          // ConfigEntry<Color>
     private static PropertyInfo? _valueProp;       // ConfigEntry<Color>.Value
+    private static MethodInfo? _updateLayout;      // MenuOverhaulPatch.UpdateLayoutElements() (public static)
     private static Color _original;
     private static bool _hasOriginal;
 
@@ -39,10 +41,17 @@ internal static class MenuOverhaulBridge
                 return;   // Menu-Overhaul ausente
             }
 
-            var settingsType = info.Instance.GetType().Assembly.GetType(SettingsTypeName);
+            var asm = info.Instance.GetType().Assembly;
+            var settingsType = asm.GetType(SettingsTypeName);
             var field = settingsType?.GetField("AccentColor", BindingFlags.Static | BindingFlags.Public);
             _accentEntry = field?.GetValue(null);   // ConfigEntry<Color>
             _valueProp = _accentEntry?.GetType().GetProperty("Value");
+
+            // MenuOverhaulPatch.UpdateLayoutElements() — público estático; recolore glow/luzes/logo com a
+            // AccentColor.Value atual. Chamamos após SetAccent p/ vencer a corrida de timing (o MO só recolore
+            // no SettingChanged se o ambiente já existir; o nosso SetAccent às vezes dispara antes disso).
+            _updateLayout = asm.GetType(MenuPatchTypeName)
+                ?.GetMethod("UpdateLayoutElements", BindingFlags.Static | BindingFlags.Public);
         }
         catch (Exception ex)
         {
@@ -109,6 +118,29 @@ internal static class MenuOverhaulBridge
         catch (Exception ex)
         {
             Plugin.Log?.LogError($"[CustomClasses] MO RestoreAccent falhou: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    ///     Força o Menu-Overhaul a reaplicar a cor do glow/luzes/logo a partir do AccentColor atual,
+    ///     chamando <c>MenuOverhaulPatch.UpdateLayoutElements()</c>. Chamar DEPOIS de <see cref="SetAccent"/>
+    ///     e do ambiente do menu existir — vence a corrida em que o glow não acompanha a cor da classe.
+    /// </summary>
+    internal static void ReapplyLayout()
+    {
+        Resolve();
+        if (_updateLayout == null)
+        {
+            return;
+        }
+
+        try
+        {
+            _updateLayout.Invoke(null, null);
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log?.LogError($"[CustomClasses] MO ReapplyLayout falhou: {ex.Message}");
         }
     }
 }
