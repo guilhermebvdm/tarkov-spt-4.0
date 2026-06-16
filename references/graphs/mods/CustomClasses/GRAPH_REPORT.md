@@ -1,16 +1,16 @@
-# Graph Report - mods\CustomClasses\modded  (2026-06-14)
+# Graph Report - mods\CustomClasses\modded  (2026-06-15)
 
 ## Corpus Check
-- 81 files · ~70,232 words
+- 81 files · ~70,552 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1242 nodes · 1545 edges · 79 communities (73 shown, 6 thin omitted)
+- 1245 nodes · 1550 edges · 79 communities (73 shown, 6 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 1 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `5b675abf`
+- Built from commit: `f235348c`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -290,8 +290,8 @@ Cohesion: 0.22
 Nodes (8): GearCell, CatalogService, ItemTooltip, MudText, SPTarkov.Server.Core.Models.Common, BuildCell, GearCell, OnParametersSet
 
 ### Community 43 - "Community 43"
-Cohesion: 0.22
-Nodes (5): IOnLoad, Task, CustomClassesMod, Task, HiddenEditionsLoader
+Cohesion: 0.20
+Nodes (6): IOnLoad, ClassDefinition, Task, CustomClassesMod, Task, HiddenEditionsLoader
 
 ### Community 44 - "Community 44"
 Cohesion: 0.29
@@ -382,7 +382,7 @@ Cohesion: 0.20
 Nodes (9): CustomClasses.Web, DialogActions, DialogContent, ItemSpecEditor, MudButton, MudDialog, MudText, TitleContent (+1 more)
 
 ## Knowledge Gaps
-- **810 isolated node(s):** `netstandard2.1`, `Microsoft.NET.Sdk`, `string`, `MethodBase`, `TextMeshProUGUI` (+805 more)
+- **811 isolated node(s):** `netstandard2.1`, `Microsoft.NET.Sdk`, `string`, `MethodBase`, `TextMeshProUGUI` (+806 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **6 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -394,7 +394,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `RaidReadyPlayerPanelPatch` connect `Community 49` to `Community 40`?**
   _High betweenness centrality (0.002) - this node is a cross-community bridge._
 - **What connects `netstandard2.1`, `Microsoft.NET.Sdk`, `string` to the rest of the system?**
-  _810 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _811 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.09090909090909091 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**

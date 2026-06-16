@@ -4017,7 +4017,7 @@
       "label": "CustomClassesMod",
       "file_type": "code",
       "source_file": "Server/CustomClassesMod.cs",
-      "source_location": "L18",
+      "source_location": "L19",
       "_origin": "ast",
       "id": "server_customclassesmod_customclassesmod",
       "community": 43,
@@ -4037,7 +4037,7 @@
       "label": ".OnLoad()",
       "file_type": "code",
       "source_file": "Server/CustomClassesMod.cs",
-      "source_location": "L27",
+      "source_location": "L28",
       "_origin": "ast",
       "id": "server_customclassesmod_customclassesmod_onload",
       "community": 43,
@@ -4047,11 +4047,41 @@
       "label": "Task",
       "file_type": "code",
       "source_file": "Server/CustomClassesMod.cs",
-      "source_location": "L27",
+      "source_location": "L28",
       "_origin": "ast",
       "id": "server_customclassesmod_cs_task",
       "community": 43,
       "norm_label": "task"
+    },
+    {
+      "label": ".LoadLauncherLanguage()",
+      "file_type": "code",
+      "source_file": "Server/CustomClassesMod.cs",
+      "source_location": "L104",
+      "_origin": "ast",
+      "id": "server_customclassesmod_customclassesmod_loadlauncherlanguage",
+      "community": 43,
+      "norm_label": ".loadlauncherlanguage()"
+    },
+    {
+      "label": ".ApplyLauncherLanguage()",
+      "file_type": "code",
+      "source_file": "Server/CustomClassesMod.cs",
+      "source_location": "L129",
+      "_origin": "ast",
+      "id": "server_customclassesmod_customclassesmod_applylauncherlanguage",
+      "community": 43,
+      "norm_label": ".applylauncherlanguage()"
+    },
+    {
+      "label": "ClassDefinition",
+      "file_type": "code",
+      "source_file": "Server/CustomClassesMod.cs",
+      "source_location": "L129",
+      "_origin": "ast",
+      "id": "server_customclassesmod_cs_classdefinition",
+      "community": 43,
+      "norm_label": "classdefinition"
     },
     {
       "label": "GridPacker.cs",
@@ -15298,9 +15328,9 @@
       "source_file": "Server/CatalogService.cs",
       "source_location": "L184",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_catalogservice_catalogservice",
-      "target": "server_catalogservice_catalogservice_gethandbookprice",
-      "confidence_score": 1.0
+      "target": "server_catalogservice_catalogservice_gethandbookprice"
     },
     {
       "relation": "method",
@@ -15743,9 +15773,9 @@
       "source_location": "L184",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "server_catalogservice_catalogservice_gethandbookprice",
-      "target": "server_catalogservice_cs_mongoid",
-      "confidence_score": 1.0
+      "target": "server_catalogservice_cs_mongoid"
     },
     {
       "relation": "references",
@@ -18225,9 +18255,9 @@
       "source_file": "Server/CostService.cs",
       "source_location": "L274",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_costservice_costservice",
-      "target": "server_costservice_costservice_itembuildvaluedual",
-      "confidence_score": 1.0
+      "target": "server_costservice_costservice_itembuildvaluedual"
     },
     {
       "relation": "method",
@@ -18376,9 +18406,9 @@
       "source_file": "Server/CostService.cs",
       "source_location": "L267",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_costservice_costservice_itembuildvalue",
-      "target": "server_costservice_costservice_itembuildvaluedual",
-      "confidence_score": 1.0
+      "target": "server_costservice_costservice_itembuildvaluedual"
     },
     {
       "relation": "references",
@@ -18420,9 +18450,9 @@
       "source_location": "L274",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "server_costservice_costservice_itembuildvaluedual",
-      "target": "server_costservice_cs_itemspec",
-      "confidence_score": 1.0
+      "target": "server_costservice_cs_itemspec"
     },
     {
       "relation": "references",
@@ -18431,9 +18461,9 @@
       "source_location": "L274",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "server_costservice_costservice_itembuildvaluedual",
-      "target": "flea",
-      "confidence_score": 1.0
+      "target": "flea"
     },
     {
       "relation": "references",
@@ -18442,9 +18472,9 @@
       "source_location": "L274",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "server_costservice_costservice_itembuildvaluedual",
-      "target": "handbook",
-      "confidence_score": 1.0
+      "target": "handbook"
     },
     {
       "relation": "calls",
@@ -18453,9 +18483,9 @@
       "source_file": "Server/CostService.cs",
       "source_location": "L277",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_costservice_costservice_itembuildvaluedual",
-      "target": "server_costservice_costservice_addspec",
-      "confidence_score": 1.0
+      "target": "server_costservice_costservice_addspec"
     },
     {
       "relation": "calls",
@@ -19074,6 +19104,26 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Server/CustomClassesMod.cs",
+      "source_location": "L129",
+      "weight": 1.0,
+      "source": "server_customclassesmod_customclassesmod",
+      "target": "server_customclassesmod_customclassesmod_applylauncherlanguage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/CustomClassesMod.cs",
+      "source_location": "L104",
+      "weight": 1.0,
+      "source": "server_customclassesmod_customclassesmod",
+      "target": "server_customclassesmod_customclassesmod_loadlauncherlanguage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/CustomClassesMod.cs",
       "source_location": "L27",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -19100,6 +19150,39 @@
       "confidence_score": 1.0,
       "source": "server_customclassesmod_customclassesmod_onload",
       "target": "server_customclassesmod_cs_task"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/CustomClassesMod.cs",
+      "source_location": "L77",
+      "weight": 1.0,
+      "source": "server_customclassesmod_customclassesmod_onload",
+      "target": "server_customclassesmod_customclassesmod_applylauncherlanguage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/CustomClassesMod.cs",
+      "source_location": "L46",
+      "weight": 1.0,
+      "source": "server_customclassesmod_customclassesmod_onload",
+      "target": "server_customclassesmod_customclassesmod_loadlauncherlanguage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/CustomClassesMod.cs",
+      "source_location": "L129",
+      "weight": 1.0,
+      "context": "return_type",
+      "source": "server_customclassesmod_customclassesmod_applylauncherlanguage",
+      "target": "server_customclassesmod_cs_classdefinition",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -28265,5 +28348,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "5b675abf71908366944be510ceb702e58c237c8e"
+  "built_at_commit": "f235348c078ddb0cf9809c3470f1a4bf85a859a4"
 }
