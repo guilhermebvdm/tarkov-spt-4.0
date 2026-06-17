@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>shwngFpsCameraStances4</AssemblyName>
+    <RootNamespace>CameraRotationMod</RootNamespace>
+  </PropertyGroup>
+
+  <!--
+    HintPaths são RELATIVOS a References\ — o compile-mod.sh (resolve_references) popula
+    essa pasta a partir do SPT install ($SPT_PATH, configurável via .spt-path na raiz do repo).
+    References\*.dll é gitignored. NÃO trocar por paths absolutos da máquina (quebra o build
+    em outros PCs / sync). Ver Fase 0 do plano de ajustes.
+  -->
+  <ItemGroup>
+    <!-- BepInEx -->
+    <Reference Include="BepInEx">
+      <HintPath>References\BepInEx.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <!-- EFT Assemblies -->
+    <Reference Include="Assembly-CSharp">
+      <HintPath>References\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <!-- Unity -->
+    <Reference Include="UnityEngine">
+      <HintPath>References\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>References\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>References\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>References\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>References\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>References\UnityEngine.PhysicsModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>References\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <HintPath>References\UnityEngine.ImageConversionModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <!-- Comfort -->
+    <Reference Include="Comfort">
+      <HintPath>References\Comfort.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <!-- SPT -->
+    <Reference Include="SPT.Reflection">
+      <HintPath>References\SPT.Reflection.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <!-- Harmony -->
+    <Reference Include="0Harmony">
+      <HintPath>References\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <!-- Sirenix -->
+    <Reference Include="Sirenix.Serialization">
+      <HintPath>References\Sirenix.Serialization.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <!-- Animation System -->
+    <Reference Include="AnimationSystem.Types">
+      <HintPath>References\AnimationSystem.Types.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <!-- Fika Soft Dependency -->
+    <Reference Include="Fika.Core">
+      <HintPath>References\Fika.Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+</Project>
