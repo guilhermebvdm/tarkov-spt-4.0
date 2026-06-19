@@ -46,15 +46,7 @@ namespace CameraRotationMod
 
             var pwa = _player.ProceduralWeaponAnimation;
             
-            // Registra as springs no dicionário global para interceptação
-            if (_handsRotationSpring == null)
-            {
-                _handsRotationSpring = pwa.HandsContainer.HandsRotation;
-                _handsPositionSpring = pwa.HandsContainer.HandsPosition;
-
-                SpringGetPatch.RegisterPlayerSprings(_player, _handsRotationSpring, _handsPositionSpring, this);
-            }
-
+            // Removed SpringGetPatch references
             // Calcula os offsets alvo baseados na stance atual
             Vector3 targetRot = Vector3.zero;
             Vector3 targetPos = Vector3.zero;
@@ -97,10 +89,6 @@ namespace CameraRotationMod
 
         private void OnDestroy()
         {
-            if (_handsRotationSpring != null)
-            {
-                SpringGetPatch.UnregisterPlayerSprings(_handsRotationSpring, _handsPositionSpring);
-            }
         }
 
         public Vector3 GetRotationOffset() => _currentRotOffset;

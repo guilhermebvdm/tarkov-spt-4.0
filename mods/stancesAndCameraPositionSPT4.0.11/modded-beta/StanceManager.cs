@@ -51,7 +51,11 @@ namespace CameraRotationMod
 
         private static void ApplyUserStance(Stance to)
         {
-            if (CurrentStance != to) CameraRotationMod.Patches.SpringGetPatch.TriggerTransitionCurve();
+            if (CurrentStance != to)
+            {
+                Plugin.Logger.LogInfo($"[Stances] User changed stance from {CurrentStance} to {to}");
+                CameraRotationMod.Patches.ApplyComplexRotationPatch.LogNextFrame = true;
+            }
             CurrentStance = to;
         }
 
@@ -627,9 +631,6 @@ namespace CameraRotationMod
             _pendingInitialStance = null;
 
             // Set imediato — bypass spring lerp.
-            // PA-04-04: ResetState pode interromper transição em vôo, mas só relevante em hot-reload
-            // de dev (raid start normal não tem transição em vôo). Aceitável.
-            SpringGetPatch.ResetState();
             CurrentStance = target;
         }
 
@@ -760,8 +761,8 @@ namespace CameraRotationMod
             
             _cachedADSPosition = new Vector3(
                 Plugin._ADSHandsSidewaysOffset?.Value ?? 0f,        // X (Sideways)
-                Plugin._ADSHandsForwardBackwardOffset?.Value ?? 0f, // Y (Forward/Backward)
-                Plugin._ADSHandsUpDownOffset?.Value ?? 0f           // Z (Up/Down)
+                Plugin._ADSHandsForwardBackwardOffset?.Value ?? 0f, // Y (Local Y = Forward/Backward in Tarkov)
+                Plugin._ADSHandsUpDownOffset?.Value ?? 0f           // Z (Local Z = Up/Down in Tarkov)
             );
             
             _cachedStance1Rotation = new Vector3(
@@ -772,8 +773,8 @@ namespace CameraRotationMod
             
             _cachedStance1Position = new Vector3(
                 Plugin._Stance1HandsSidewaysOffset?.Value ?? 0f,        // X (Sideways)
-                Plugin._Stance1HandsForwardBackwardOffset?.Value ?? 0f, // Y (Forward/Backward)
-                Plugin._Stance1HandsUpDownOffset?.Value ?? 0f           // Z (Up/Down)
+                Plugin._Stance1HandsForwardBackwardOffset?.Value ?? 0f, // Y (Local Y = Forward/Backward in Tarkov)
+                Plugin._Stance1HandsUpDownOffset?.Value ?? 0f           // Z (Local Z = Up/Down in Tarkov)
             );
             
             _cachedStance2Rotation = new Vector3(
@@ -784,8 +785,8 @@ namespace CameraRotationMod
             
             _cachedStance2Position = new Vector3(
                 Plugin._Stance2HandsSidewaysOffset?.Value ?? 0f,        // X (Sideways)
-                Plugin._Stance2HandsForwardBackwardOffset?.Value ?? 0f, // Y (Forward/Backward)
-                Plugin._Stance2HandsUpDownOffset?.Value ?? 0f           // Z (Up/Down)
+                Plugin._Stance2HandsForwardBackwardOffset?.Value ?? 0f, // Y (Local Y = Forward/Backward in Tarkov)
+                Plugin._Stance2HandsUpDownOffset?.Value ?? 0f           // Z (Local Z = Up/Down in Tarkov)
             );
             
             _cachedStance3Rotation = new Vector3(
@@ -796,15 +797,15 @@ namespace CameraRotationMod
             
             _cachedStance3Position = new Vector3(
                 Plugin._Stance3HandsSidewaysOffset?.Value ?? 0f,        // X (Sideways)
-                Plugin._Stance3HandsForwardBackwardOffset?.Value ?? 0f, // Y (Forward/Backward)
-                Plugin._Stance3HandsUpDownOffset?.Value ?? 0f           // Z (Up/Down)
+                Plugin._Stance3HandsForwardBackwardOffset?.Value ?? 0f, // Y (Local Y = Forward/Backward in Tarkov)
+                Plugin._Stance3HandsUpDownOffset?.Value ?? 0f           // Z (Local Z = Up/Down in Tarkov)
             );
             
             _cachedDefaultPosition = (Plugin._DefaultHandsPositionEnabled?.Value ?? false)
                 ? new Vector3(
                     Plugin._DefaultHandsSidewaysOffset?.Value ?? 0f,        // X (Sideways)
-                    Plugin._DefaultHandsForwardBackwardOffset?.Value ?? 0f, // Y (Forward/Backward)
-                    Plugin._DefaultHandsUpDownOffset?.Value ?? 0f           // Z (Up/Down)
+                    Plugin._DefaultHandsForwardBackwardOffset?.Value ?? 0f, // Y (Local Y = Forward/Backward in Tarkov)
+                    Plugin._DefaultHandsUpDownOffset?.Value ?? 0f           // Z (Local Z = Up/Down in Tarkov)
                 )
                 : Vector3.zero;
             
