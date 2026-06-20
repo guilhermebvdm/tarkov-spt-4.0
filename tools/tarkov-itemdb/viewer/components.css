@@ -159,7 +159,7 @@ body::before {
 .search input::-webkit-search-decoration { -webkit-appearance: none; appearance: none; }
 .search::before {
   content: "⌕";
-  position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+  position: absolute; left: 11px; top: 50%; transform: translateY(calc(-50% - 2px));
   color: var(--fg-dim); font-size: 16px; line-height: 1; pointer-events: none;
 }
 

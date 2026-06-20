@@ -72,8 +72,8 @@ function readJsonFile(p) {
 
 // SPT 4.0 validates each templates/*.json against an MD5 manifest stored in
 // checks.dat (base64-encoded JSON array of {Path, Hash}). When we modify a
-// tracked file we must update its hash here, otherwise SPT logs "validação de
-// arquivo falhou" on boot. Paths use forward slashes relative to SPT_Data.
+// tracked file we must update its hash here, otherwise SPT logs a file-validation
+// failure on boot. Paths use forward slashes relative to SPT_Data.
 function updateSptChecks(updates /* { 'database/templates/prices.json': '<absPath>' } */) {
   if (!fs.existsSync(CHECKS_DAT)) return { ok: false, error: 'checks.dat not found' };
   const raw = fs.readFileSync(CHECKS_DAT, 'utf8');
@@ -564,11 +564,11 @@ function handlePatchPrice(req, res) {
         const floor   = sptB.fleaFloor || 0;
         const ceiling = sptB.fleaCeiling ?? null;
         if (!base || base <= 0) {
-          return sendJson(res, 422, { error: `sem base de flea para "${item.shortName || tpl}" — multiplicador indefinido (rode rescan/normalize)` });
+          return sendJson(res, 422, { error: `no flea base for "${item.shortName || tpl}" — multiplier undefined (run rescan/normalize)` });
         }
         if (ceiling != null && price > ceiling) {
           return sendJson(res, 422, {
-            error: `price ${price} acima do teto ${ceiling} (unreasonableModPrices: Weapon Mod ×6 / Electronics ×11). O multiplicador é aplicado antes do teto, então o flea não passa disso.`,
+            error: `price ${price} is above the ceiling ${ceiling} (unreasonableModPrices: Weapon Mod ×6 / Electronics ×11). The multiplier is applied before the ceiling, so the flea cannot exceed this.`,
             ceiling,
           });
         }

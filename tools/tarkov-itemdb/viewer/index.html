@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,12 +15,12 @@
 <div class="app">
 
 <header class="topbar">
-  <span class="brand">TRL Items Management</span><span class="app-version" title="Versão">v1.0.0</span>
+  <span class="brand">TRL Items Management</span><span class="app-version" title="Version">v1.0.0</span>
 
   <div class="topbar-controls">
     <div class="search">
-      <input type="search" id="q" placeholder="Buscar por nome ou short name..." autocomplete="off" autofocus>
-      <button type="button" id="q-clear" class="search__clear" data-tip="Limpar busca (Esc)" tabindex="-1" aria-label="Limpar busca">
+      <input type="search" id="q" placeholder="Search by name or id" autocomplete="off" autofocus>
+      <button type="button" id="q-clear" class="search__clear" data-tip="Clear search (Esc)" tabindex="-1" aria-label="Clear search">
         <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
           <path d="M1.5 1.5 L8.5 8.5 M8.5 1.5 L1.5 8.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
         </svg>
@@ -36,23 +36,23 @@
   </div>
 
   <div class="bulk-refresh">
-    <button type="button" class="bulk-btn" id="rescan-mods" data-tip="Reler a base local do SPT (pega itens de mods recém-adicionados). Não busca tarkov.dev/market." data-tip-pos="bottom">⟳ rescan</button>
-    <button type="button" class="bulk-btn" id="refresh-all-dev" data-tip="Atualizar TODOS os preços via tarkov.dev" data-tip-pos="bottom">↻ dev</button>
-    <button type="button" class="bulk-btn" id="refresh-all-market" data-tip="Atualizar TODOS os preços via tarkov-market" data-tip-pos="bottom">↻ market</button>
+    <button type="button" class="bulk-btn" id="rescan-mods" data-tip="Re-read the local SPT database (picks up items from newly-added mods). Does not fetch tarkov.dev/market." data-tip-pos="bottom">⟳ rescan</button>
+    <button type="button" class="bulk-btn" id="refresh-all-dev" data-tip="Update ALL prices via tarkov.dev" data-tip-pos="bottom">↻ dev</button>
+    <button type="button" class="bulk-btn" id="refresh-all-market" data-tip="Update ALL prices via tarkov-market" data-tip-pos="bottom">↻ market</button>
   </div>
 
-  <button type="button" class="flea-level-widget" id="flea-level-widget" title="Editar nível mínimo do flea (globals.json)">
+  <button type="button" class="flea-level-widget" id="flea-level-widget" title="Edit minimum flea level (globals.json)">
     Flea Lvl <span id="flea-level-num">15</span>+
   </button>
 
-  <span class="stats" id="stats">carregando…</span>
+  <span class="stats" id="stats">loading…</span>
 </header>
 
 <aside class="sidebar" id="sidebar"></aside>
 
 <main class="main" id="main">
   <div class="loading" id="loading">
-    <div class="loading__hint">Carregando data/items.json (14 MB)…</div>
+    <div class="loading__hint">Loading data/items.json (14 MB)…</div>
     <div class="loading__rows" id="skel"></div>
   </div>
 </main>
@@ -106,7 +106,7 @@ function createDropdown({ placeholder, options, multi = false, searchable = fals
     searchInput = document.createElement('input');
     searchInput.type = 'text';
     searchInput.className = 'dropdown__search';
-    searchInput.placeholder = 'Filtrar…';
+    searchInput.placeholder = 'Filter…';
     panel.appendChild(searchInput);
   }
 
@@ -115,10 +115,10 @@ function createDropdown({ placeholder, options, multi = false, searchable = fals
     const actions = document.createElement('div');
     actions.className = 'dropdown__actions';
     const clearBtn = document.createElement('button');
-    clearBtn.type = 'button'; clearBtn.className = 'dropdown__action'; clearBtn.textContent = 'Limpar';
+    clearBtn.type = 'button'; clearBtn.className = 'dropdown__action'; clearBtn.textContent = 'Clear';
     clearBtn.onclick = (e) => { e.stopPropagation(); selected.clear(); refresh(); emit(); };
     const selectAllBtn = document.createElement('button');
-    selectAllBtn.type = 'button'; selectAllBtn.className = 'dropdown__action'; selectAllBtn.textContent = 'Todos';
+    selectAllBtn.type = 'button'; selectAllBtn.className = 'dropdown__action'; selectAllBtn.textContent = 'All';
     selectAllBtn.onclick = (e) => { e.stopPropagation(); options.forEach(o => selected.add(o.value)); refresh(); emit(); };
     actions.appendChild(clearBtn);
     actions.appendChild(selectAllBtn);
@@ -134,7 +134,7 @@ function createDropdown({ placeholder, options, multi = false, searchable = fals
     if (!options.length) {
       const empty = document.createElement('div');
       empty.className = 'dropdown__empty';
-      empty.textContent = 'Sem opções';
+      empty.textContent = 'No options';
       optionsList.appendChild(empty);
       return;
     }
@@ -293,7 +293,7 @@ const ICON_BANNED = '<svg class="icon-banned" width="14" height="14" viewBox="0 
   + '<line x1="2.75" y1="2.75" x2="11.25" y2="11.25" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>'
   + '</svg>';
 
-// Green check SVG for "permitido" state in the Banidos filter.
+// Green check SVG for the "allowed" state in the Banned filter.
 const ICON_OK = '<svg class="icon-ok" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">'
   + '<path d="M2 7.5 L5.5 11 L12 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>'
   + '</svg>';
@@ -325,11 +325,11 @@ function fmtRelTime(iso) {
   const h = Math.round(abs / 3600000);
   const d = Math.round(abs / 86400000);
   let label;
-  if (abs < 60000) label = 'agora';
-  else if (m < 60) label = `há ${m} min`;
-  else if (h < 24) label = `há ${h}h`;
-  else if (d < 30) label = `há ${d}d`;
-  else label = new Date(iso).toLocaleDateString('pt-BR');
+  if (abs < 60000) label = 'now';
+  else if (m < 60) label = `${m} min ago`;
+  else if (h < 24) label = `${h}h ago`;
+  else if (d < 30) label = `${d}d ago`;
+  else label = new Date(iso).toLocaleDateString('en-US');
   return `<span title="${escapeAttr(iso)}">${label}</span>`;
 }
 
@@ -356,7 +356,7 @@ function trollFlag(value, sptValue) {
   if (value == null || sptValue == null || sptValue <= 0) return '';
   if (value < TROLL_MIN_ABS || value <= sptValue * TROLL_FACTOR) return '';
   const x = Math.round(value / sptValue);
-  return ` <span class="troll-flag" data-tip="Provável troll listing: ${value.toLocaleString('en-US')} ₽ é ~${x}× o flea SPT (${sptValue.toLocaleString('en-US')} ₽). Valor real da fonte externa, mas não confiável como referência.">⚠</span>`;
+  return ` <span class="troll-flag" data-tip="Probable troll listing: ${value.toLocaleString('en-US')} ₽ is ~${x}× the SPT flea (${sptValue.toLocaleString('en-US')} ₽). Real value from the external source, but not reliable as a reference.">⚠</span>`;
 }
 
 // ── Load ────────────────────────────────────────────────────────────────────
@@ -416,9 +416,10 @@ async function load() {
     buildDeltaFilter();
     bindControls();
     render();
+    document.getElementById('q').focus();
   } catch (e) {
     document.getElementById('main').innerHTML =
-      '<div class="empty">Falha ao carregar JSONs.<br>Use <code>node viewer/serve.js</code> e abra http://localhost:8080/viewer/<br><br>' + e.message + '</div>';
+      '<div class="empty">Failed to load JSONs.<br>Use <code>node viewer/serve.js</code> and open http://localhost:8080/viewer/<br><br>' + e.message + '</div>';
   }
 }
 
@@ -453,13 +454,13 @@ function buildDeltaFilter() {
 
   root.innerHTML =
     '<span class="delta-filter__label">Δ%</span>' +
-    '<button type="button" class="delta-filter__src" data-src="dev"  title="Comparar vs tarkov.dev avg24h">Dev</button>' +
-    '<button type="button" class="delta-filter__src" data-src="market" title="Comparar vs tarkov-market avg24h">Market</button>' +
+    '<button type="button" class="delta-filter__src" data-src="dev"  title="Compare vs tarkov.dev avg24h">Dev</button>' +
+    '<button type="button" class="delta-filter__src" data-src="market" title="Compare vs tarkov-market avg24h">Market</button>' +
     '<span class="delta-filter__sep">·</span>' +
-    '<input class="delta-filter__input" id="delta-min" type="number" placeholder="min%" step="1" title="Delta mínimo (ex: -50)">' +
+    '<input class="delta-filter__input" id="delta-min" type="number" placeholder="min%" step="1" title="Min delta (e.g. -50)">' +
     '<span class="delta-filter__range-sep">…</span>' +
-    '<input class="delta-filter__input" id="delta-max" type="number" placeholder="max%" step="1" title="Delta máximo (ex: +200)">' +
-    '<button type="button" class="delta-filter__clear" id="delta-clear" title="Limpar filtro de delta">×</button>';
+    '<input class="delta-filter__input" id="delta-max" type="number" placeholder="max%" step="1" title="Max delta (e.g. +200)">' +
+    '<button type="button" class="delta-filter__clear" id="delta-clear" title="Clear delta filter">×</button>';
 
   const btnDev    = root.querySelector('[data-src="dev"]');
   const btnMarket = root.querySelector('[data-src="market"]');
@@ -521,9 +522,9 @@ function buildBanFilter() {
     if (reasons.includes('custom')) customCount++;
   }
   const options = [
-    { value: 'ok',     label: 'Permitido',     iconHtml: '<span class="ban-ico ban-ico--ok">'+ICON_OK+'</span>',         count: okCount },
-    { value: 'bsg',    label: 'Banido (BSG)',  iconHtml: '<span class="ban-ico ban-ico--banned">'+ICON_BANNED+'</span>', count: bsgCount },
-    { value: 'custom', label: 'Banido (custom)', iconHtml: '<span class="ban-ico ban-ico--banned">'+ICON_BANNED+'</span>', count: customCount },
+    { value: 'ok',     label: 'Allowed',     iconHtml: '<span class="ban-ico ban-ico--ok">'+ICON_OK+'</span>',         count: okCount },
+    { value: 'bsg',    label: 'Banned (BSG)',  iconHtml: '<span class="ban-ico ban-ico--banned">'+ICON_BANNED+'</span>', count: bsgCount },
+    { value: 'custom', label: 'Banned (custom)', iconHtml: '<span class="ban-ico ban-ico--banned">'+ICON_BANNED+'</span>', count: customCount },
   ];
 
   try {
@@ -532,7 +533,7 @@ function buildBanFilter() {
   } catch (e) {}
 
   banDropdown = createDropdown({
-    placeholder: 'Banidos',
+    placeholder: 'Banned',
     options,
     multi: true,
     onChange: (vals) => {
@@ -555,8 +556,8 @@ function buildOverrideFilter() {
     if (s && (s.fleaOverride != null || s.fleaOfferMultiplier != null)) editedCount++; else vanillaCount++;
   }
   const options = [
-    { value: 'override', label: 'Editado', iconHtml: '<span class="badge badge--override">OVR</span>', count: editedCount },
-    { value: 'vanilla',  label: 'Não editado', count: vanillaCount },
+    { value: 'override', label: 'Edited', iconHtml: '<span class="badge badge--override">OVR</span>', count: editedCount },
+    { value: 'vanilla',  label: 'Not edited', count: vanillaCount },
   ];
 
   try {
@@ -726,7 +727,7 @@ function renderSidebar() {
   sb.innerHTML = '';
   const all = document.createElement('div');
   all.className = 'tree-node tree-all' + (activeCategoryId === null ? ' is-active' : '');
-  all.innerHTML = '<span class="label">Todos os itens</span><span class="count">' + ITEM_LIST.length + '</span>';
+  all.innerHTML = '<span class="label">All items</span><span class="count">' + ITEM_LIST.length + '</span>';
   all.onclick = () => { activeCategoryId = null; render(); refreshActiveCat(); };
   sb.appendChild(all);
 
@@ -1007,7 +1008,7 @@ function computeDelta(it, valueKey) {
 }
 
 // ── Render ──────────────────────────────────────────────────────────────────
-// Public render() coalesces bursts (a "Limpar"/"Todos" filter action, or several
+// Public render() coalesces bursts (a "Clear"/"All" filter action, or several
 // state changes in one tick) into a single rebuild per animation frame. Heavy
 // work lives in renderNow(). One-frame defer is imperceptible (skeleton/old rows
 // stay until the frame) and no caller reads the table DOM synchronously after render().
@@ -1021,8 +1022,8 @@ function renderNow() {
   const filtered = sortItems(filterItems());
   const total = ITEM_LIST.length;
   document.getElementById('stats').textContent =
-    `${filtered.length.toLocaleString('pt-BR')} / ${total.toLocaleString('pt-BR')} itens` +
-    (filtered.length > RENDER_LIMIT ? ` (mostrando ${RENDER_LIMIT})` : '');
+    `${filtered.length.toLocaleString('pt-BR')} / ${total.toLocaleString('pt-BR')} items` +
+    (filtered.length > RENDER_LIMIT ? ` (showing ${RENDER_LIMIT})` : '');
 
   // Tear down any previous window observer up-front so both the empty and the
   // table path leave no orphan observer on a detached sentinel.
@@ -1030,7 +1031,7 @@ function renderNow() {
 
   const main = document.getElementById('main');
   if (filtered.length === 0) {
-    main.innerHTML = '<div class="empty">Nenhum item corresponde aos filtros.</div>';
+    main.innerHTML = '<div class="empty">No items match the filters.</div>';
     return;
   }
 
@@ -1111,8 +1112,8 @@ function openFleaMinLevelEditor(trigger) {
   trigger.classList.add('is-editing');
   trigger.innerHTML =
     `Flea Lvl <input class="flea-level-widget__input" type="number" min="1" max="99" value="${current}">+` +
-    `<button class="flea-level-widget__btn is-save"   type="button" title="Salvar">${ICON_OK}</button>` +
-    `<button class="flea-level-widget__btn is-cancel" type="button" title="Cancelar">×</button>`;
+    `<button class="flea-level-widget__btn is-save"   type="button" title="Save">${ICON_OK}</button>` +
+    `<button class="flea-level-widget__btn is-cancel" type="button" title="Cancel">×</button>`;
   const input = trigger.querySelector('input');
   input.focus(); input.select();
 
@@ -1123,7 +1124,7 @@ function openFleaMinLevelEditor(trigger) {
   const save = async () => {
     const val = parseInt(input.value, 10);
     if (!Number.isInteger(val) || val < 1 || val > 99) {
-      toast('Level inválido (1..99)', 'err');
+      toast('Invalid level (1..99)', 'err');
       return;
     }
     if (val === current) { cancel(); return; }
@@ -1140,7 +1141,7 @@ function openFleaMinLevelEditor(trigger) {
       trigger.innerHTML = `Flea Lvl <span id="flea-level-num">${val}</span>+`;
       toast(`Flea unlock level: ${current} → ${val}`, 'ok');
     } catch (err) {
-      toast('Falha: ' + err.message, 'err');
+      toast('Failed: ' + err.message, 'err');
       cancel();
     }
   };
@@ -1173,8 +1174,8 @@ function th(key, label, klass) {
   return `<th data-sort="${key}"${classes ? ' class="'+classes+'"' : ''}>${label}${sortMark}</th>`;
 }
 
-// Header com duas opções de ordenação: por valor e por Δ% vs SPT Flea.
-// Ambos clicáveis independentemente; a seta segue o sort key ativo.
+// Header with two sort options: by value and by Δ% vs SPT Flea.
+// Both independently clickable; the arrow follows the active sort key.
 function thWithDelta(valueKey, deltaKey, label, klass) {
   const isValueSorted = sortKey === valueKey;
   const isDeltaSorted = sortKey === deltaKey;
@@ -1184,8 +1185,8 @@ function thWithDelta(valueKey, deltaKey, label, klass) {
   const deltaMark = isDeltaSorted ? ` <span class="sort">${arrow}</span>` : '';
   const classes = [klass, isSorted ? 'is-sorted' : ''].filter(Boolean).join(' ');
   return `<th${classes ? ' class="'+classes+'"' : ''}>` +
-    `<span class="th-sort-key${isValueSorted?' is-active':''}" data-sort="${valueKey}" title="Ordenar pelo valor">${label}${valueMark}</span>` +
-    `<span class="th-sort-key th-sort-key--delta${isDeltaSorted?' is-active':''}" data-sort="${deltaKey}" title="Ordenar pela variação % vs SPT Flea">Δ%${deltaMark}</span>` +
+    `<span class="th-sort-key${isValueSorted?' is-active':''}" data-sort="${valueKey}" title="Sort by value">${label}${valueMark}</span>` +
+    `<span class="th-sort-key th-sort-key--delta${isDeltaSorted?' is-active':''}" data-sort="${deltaKey}" title="Sort by % change vs SPT Flea">Δ%${deltaMark}</span>` +
   `</th>`;
 }
 
@@ -1194,7 +1195,7 @@ function renderRow(it) {
   const img = (it.image && it.image.icon)
     ? `<div class="img-wrap">` +
         `<img src="${escapeAttr(it.image.icon)}" alt="" loading="lazy"${it.imageFromClone ? ' class="is-proxy"' : ''}>` +
-        (it.imageFromClone ? `<span class="img-proxy-mark" data-tip="Imagem do item vanilla clonado (proxy) — o ícone custom do mod só existe renderizado in-game">≈</span>` : '') +
+        (it.imageFromClone ? `<span class="img-proxy-mark" data-tip="Image of the cloned vanilla item (proxy) — the mod's custom icon only exists rendered in-game">≈</span>` : '') +
       `</div>`
     : '<div class="no-img">—</div>';
   const cond = c.conditionType || 'unknown';
@@ -1202,7 +1203,7 @@ function renderRow(it) {
   const banned = it.spt && it.spt.fleaBanned;
   const banReasons = (it.spt && it.spt.fleaBanReasons) || [];
   const banIcon = banned
-    ? `<span class="banned-icon" data-tip="Banido do flea: ${banReasons.join(', ')}" tabindex="0">${ICON_BANNED}</span> `
+    ? `<span class="banned-icon" data-tip="Banned from flea: ${banReasons.join(', ')}" tabindex="0">${ICON_BANNED}</span> `
     : '';
   // Trader cell — stacked SELL (player→trader, tarkov.dev) and BUY (trader→player, SPT assort)
   const traderSellValue = c.priceTraderSell ? c.priceTraderSell.value : null;
@@ -1253,11 +1254,11 @@ function renderRow(it) {
   const hasMult     = sptBlk.fleaOfferMultiplier != null;
   let editBadge = '';
   if (hasOverride) {
-    const overrideTip = `Override ativo em ragfair.json — flea fixado em ${c.priceFleaSpt != null ? c.priceFleaSpt.toLocaleString('en-US') + ' ₽' : '?'} (override=${sptBlk.fleaOverride.toLocaleString('en-US')}). Click na célula para editar / restaurar.`;
+    const overrideTip = `Override active in ragfair.json — flea pinned at ${c.priceFleaSpt != null ? c.priceFleaSpt.toLocaleString('en-US') + ' ₽' : '?'} (override=${sptBlk.fleaOverride.toLocaleString('en-US')}). Click the cell to edit / restore.`;
     editBadge = ` <small><span class="badge badge--override" data-tip="${escapeAttr(overrideTip)}">OVR</span></small>`;
   } else if (hasMult) {
     const multStr = (+sptBlk.fleaOfferMultiplier.toFixed(4)).toString();
-    const multTip = `Item do mod ${it.modSource || '?'} — preço ajustado via ragfair.json:itemPriceMultiplier (×${multStr}). Flea ≈ ${c.priceFleaSpt != null ? c.priceFleaSpt.toLocaleString('en-US') + ' ₽' : '?'}. O override não funciona em item de mod; o multiplicador sim. Click na célula para editar / restaurar.`;
+    const multTip = `Mod item ${it.modSource || '?'} — price adjusted via ragfair.json:itemPriceMultiplier (×${multStr}). Flea ≈ ${c.priceFleaSpt != null ? c.priceFleaSpt.toLocaleString('en-US') + ' ₽' : '?'}. The override does not work on a mod item; the multiplier does. Click the cell to edit / restore.`;
     editBadge = ` <small><span class="badge badge--mult" data-tip="${escapeAttr(multTip)}">×${escapeHtml(multStr)}</span></small>`;
   }
   const fleaSptCell = (banned
@@ -1273,7 +1274,7 @@ function renderRow(it) {
     <td class="num">${trader}</td>
     <td class="num cell-edit ${c.priceFleaSpt==null && !banned?'price is-null':'price'}" data-edit-tpl="${it.id}" data-tip="Click for actions (edit price / ban)" data-tip-pos="bottom"><div class="cell-num"><div class="cell-num__value">${fleaSptCell}</div></div><span class="cell-edit__icon" aria-hidden="true">${ICON_EDIT}</span></td>
     <td class="num cell-refresh ${c.priceFleaDevAvg24h==null?'price is-null':'price'}" data-refresh-tpl="${it.id}" data-tip="Click to update price on tarkov.dev" data-tip-pos="bottom"><div class="cell-num"><div class="cell-num__value">${fmtRub(c.priceFleaDevAvg24h)}${trollFlag(c.priceFleaDevAvg24h, c.priceFleaSpt)}</div>${pctVsSpt(c.priceFleaDevAvg24h, c.priceFleaSpt)}</div><span class="cell-refresh__icon" aria-hidden="true">${ICON_REFRESH}</span><span class="cell-refresh__spinner" aria-hidden="true"></span></td>
-    <td class="num cell-refresh cell-refresh-market ${c.priceFleaMarketAvg24h==null?'price is-null':'price'}" data-refresh-tpl="${it.id}" data-tip="Click para atualizar via tarkov-market" data-tip-pos="bottom"><div class="cell-num"><div class="cell-num__value">${fmtRub(c.priceFleaMarketAvg24h)}${trollFlag(c.priceFleaMarketAvg24h, c.priceFleaSpt)}</div>${pctVsSpt(c.priceFleaMarketAvg24h, c.priceFleaSpt)}</div><span class="cell-refresh__icon" aria-hidden="true">${ICON_REFRESH}</span><span class="cell-refresh__spinner" aria-hidden="true"></span></td>
+    <td class="num cell-refresh cell-refresh-market ${c.priceFleaMarketAvg24h==null?'price is-null':'price'}" data-refresh-tpl="${it.id}" data-tip="Click to update via tarkov-market" data-tip-pos="bottom"><div class="cell-num"><div class="cell-num__value">${fmtRub(c.priceFleaMarketAvg24h)}${trollFlag(c.priceFleaMarketAvg24h, c.priceFleaSpt)}</div>${pctVsSpt(c.priceFleaMarketAvg24h, c.priceFleaSpt)}</div><span class="cell-refresh__icon" aria-hidden="true">${ICON_REFRESH}</span><span class="cell-refresh__spinner" aria-hidden="true"></span></td>
   </tr>`;
 }
 
@@ -1305,7 +1306,7 @@ function openRewardPopover(badge, rewards) {
     </li>`;
   }).join('');
   pop.innerHTML =
-    `<div class="reward-popover__header">🎁 ${rewards.length} missão${rewards.length > 1 ? 'ões' : ''}</div>` +
+    `<div class="reward-popover__header">🎁 ${rewards.length} mission${rewards.length > 1 ? 's' : ''}</div>` +
     `<ul class="reward-popover__list">${rows}</ul>`;
   document.body.appendChild(pop);
 
@@ -1456,12 +1457,12 @@ async function refreshDevCell(cell) {
     const prev = data.previous && data.previous.avg24h;
     const curr = data.tarkovDev && data.tarkovDev.pve && data.tarkovDev.pve.avg24h;
     const deltaTxt = (prev != null && curr != null && prev !== curr)
-      ? ` (era ${prev.toLocaleString('pt-BR')} ₽ → ${curr.toLocaleString('pt-BR')} ₽)`
+      ? ` (was ${prev.toLocaleString('pt-BR')} ₽ → ${curr.toLocaleString('pt-BR')} ₽)`
       : '';
-    toast(`${item.shortName || tpl}: preços atualizados via tarkov.dev${deltaTxt}`, 'ok');
+    toast(`${item.shortName || tpl}: prices updated via tarkov.dev${deltaTxt}`, 'ok');
   } catch (err) {
     cell.classList.remove('is-loading');
-    toast('Falha ao atualizar via tarkov.dev: ' + err.message, 'err');
+    toast('Failed to update via tarkov.dev: ' + err.message, 'err');
   }
 }
 
@@ -1491,12 +1492,12 @@ async function refreshMarketCell(cell) {
     const prev = data.previous && data.previous.avg24h;
     const curr = data.tarkovMarket && data.tarkovMarket.pve && data.tarkovMarket.pve.avg24h;
     const deltaTxt = (prev != null && curr != null && prev !== curr)
-      ? ` (era ${prev.toLocaleString('pt-BR')} ₽ → ${curr.toLocaleString('pt-BR')} ₽)`
+      ? ` (was ${prev.toLocaleString('pt-BR')} ₽ → ${curr.toLocaleString('pt-BR')} ₽)`
       : '';
-    toast(`${item.shortName || tpl}: preços atualizados via tarkov-market${deltaTxt}`, 'ok');
+    toast(`${item.shortName || tpl}: prices updated via tarkov-market${deltaTxt}`, 'ok');
   } catch (err) {
     cell.classList.remove('is-loading');
-    toast('Falha ao atualizar via tarkov-market: ' + err.message, 'err');
+    toast('Failed to update via tarkov-market: ' + err.message, 'err');
   }
 }
 
@@ -1522,7 +1523,7 @@ function openCellActions(cell) {
       `<span class="ico">${ICON_EDIT}</span><span>Edit price</span>` +
     `</button>` +
     (hasEdit ? `<button class="cell-actions__item is-restore" data-action="restore" type="button">` +
-      `<span class="ico">${ICON_REFRESH}</span><span>Restaurar default</span>` +
+      `<span class="ico">${ICON_REFRESH}</span><span>Restore default</span>` +
     `</button>` : '') +
     `<button class="cell-actions__item ${banClass}" data-action="ban" type="button">` +
       `<span class="ico">${banIcon}</span><span>${banLabel}</span>` +
@@ -1552,7 +1553,7 @@ function openCellActions(cell) {
     try {
       await restoreOverride(cell);   // re-renders the row
     } catch (err) {
-      toast('Falha ao restaurar: ' + err.message, 'err');
+      toast('Failed to restore: ' + err.message, 'err');
     }
   };
   menu.querySelector('[data-action="ban"]').onclick = (ev) => {
@@ -1589,7 +1590,7 @@ async function restoreOverride(cell) {
     tmp.innerHTML = renderRow(item);
     row.replaceWith(tmp.firstElementChild);
   }
-  const what = data.mode === 'multiplier' ? 'multiplicador removido' : 'override removido';
+  const what = data.mode === 'multiplier' ? 'multiplier removed' : 'override removed';
   toast(`${item.shortName || tpl}: ${what} → default ${data.effectiveFleaPrice != null ? data.effectiveFleaPrice.toLocaleString('pt-BR') : '—'} ₽`, 'ok');
 }
 
@@ -1597,12 +1598,12 @@ function confirmBanAction(cell, menu, banning) {
   const tpl = cell.dataset.editTpl;
   const item = ITEMS[tpl];
   if (!item) return;
-  const verb = banning ? 'Banir' : 'Desbanir';
+  const verb = banning ? 'Ban' : 'Unban';
   menu.classList.add('is-confirming');
   menu.innerHTML =
     `<div class="cell-actions__prompt">${escapeHtml(verb)} <b>${escapeHtml(item.shortName || item.name || tpl)}</b>?</div>` +
     `<div class="cell-actions__confirm">` +
-      `<button class="cell-actions__btn cancel" type="button" title="Cancelar">×</button>` +
+      `<button class="cell-actions__btn cancel" type="button" title="Cancel">×</button>` +
       `<button class="cell-actions__btn confirm ${banning?'is-danger':'is-success'}" type="button">${verb}</button>` +
     `</div>`;
   menu.querySelector('.cancel').onclick = (ev) => { ev.stopPropagation(); closeCellActions(cell); };
@@ -1630,9 +1631,9 @@ function confirmBanAction(cell, menu, banning) {
         tmp.innerHTML = renderRow(item);
         row.replaceWith(tmp.firstElementChild);
       }
-      toast(`${item.shortName || tpl}: ${banning ? 'banido' : 'desbanido'}`, 'ok');
+      toast(`${item.shortName || tpl}: ${banning ? 'banned' : 'unbanned'}`, 'ok');
     } catch (err) {
-      toast('Falha: ' + err.message, 'err');
+      toast('Failed: ' + err.message, 'err');
       closeCellActions(cell);
     }
   };
@@ -1661,21 +1662,21 @@ function openInlineEdit(cell) {
   form.className = 'edit-form';
   form.onsubmit = (e) => { e.preventDefault(); return false; };
   const inputTip = isMod
-    ? `Preço flea desejado. Item do mod ${item.modSource} — grava itemPriceMultiplier = preço / ${base != null ? base.toLocaleString('en-US') : '?'} em ragfair.json (o override não funciona em item de mod, o multiplicador sim). ` +
-      (ceiling != null ? `Máx ${ceiling.toLocaleString('en-US')} ₽ (teto unreasonableModPrices).` : '')
-    : `Preço flea desejado. Grava override = preço − ${bonus != null ? bonus.toLocaleString('en-US') : '?'} em ragfair.json:itemPriceOverrideRouble. ` +
-      (floor > 0 ? `Mín ${floor.toLocaleString('en-US')} ₽ (piso = handbook × trader). ` : '') +
-      (ceiling != null ? `Máx ${ceiling.toLocaleString('en-US')} ₽ (teto Electronics/Weapon Mod = handbook × multiplicador).` : '');
+    ? `Desired flea price. Mod item ${item.modSource} — writes itemPriceMultiplier = price / ${base != null ? base.toLocaleString('en-US') : '?'} in ragfair.json (the override does not work on a mod item, the multiplier does). ` +
+      (ceiling != null ? `Max ${ceiling.toLocaleString('en-US')} ₽ (unreasonableModPrices ceiling).` : '')
+    : `Desired flea price. Writes override = price − ${bonus != null ? bonus.toLocaleString('en-US') : '?'} in ragfair.json:itemPriceOverrideRouble. ` +
+      (floor > 0 ? `Min ${floor.toLocaleString('en-US')} ₽ (floor = handbook × trader). ` : '') +
+      (ceiling != null ? `Max ${ceiling.toLocaleString('en-US')} ₽ (Electronics/Weapon Mod ceiling = handbook × multiplier).` : '');
   const hintParts = [];
   if (isMod && base != null) hintParts.push(`base ${base.toLocaleString('en-US')}`);
-  if (floor > 0)      hintParts.push(`mín ${floor.toLocaleString('en-US')}`);
-  if (ceiling != null) hintParts.push(`máx ${ceiling.toLocaleString('en-US')}`);
+  if (floor > 0)      hintParts.push(`min ${floor.toLocaleString('en-US')}`);
+  if (ceiling != null) hintParts.push(`max ${ceiling.toLocaleString('en-US')}`);
   form.innerHTML =
     `<input type="number" min="${floor || 0}"${ceiling != null ? ` max="${ceiling}"` : ''} step="1" value="${current}" autofocus data-tip="${escapeAttr(inputTip)}">` +
     `<div class="edit-form__actions">` +
-      `<button class="save" type="button" title="Salvar (Enter)">Salvar</button>` +
-      (hasEdit ? `<button class="restore" type="button" title="Restaurar preço default (remove a edição)">↺</button>` : '') +
-      `<button class="cancel" type="button" title="Cancelar (Esc)">×</button>` +
+      `<button class="save" type="button" title="Save (Enter)">Save</button>` +
+      (hasEdit ? `<button class="restore" type="button" title="Restore default price (undo edit)">↺</button>` : '') +
+      `<button class="cancel" type="button" title="Cancel (Esc)">×</button>` +
     `</div>` +
     (hintParts.length ? `<div class="edit-form__hint">${hintParts.join(' · ')}</div>` : '');
   cell.appendChild(form);
@@ -1718,7 +1719,7 @@ function openInlineEdit(cell) {
   save.onclick = async () => {
     const price = parseInt(input.value, 10);
     if (!Number.isFinite(price) || price <= 0) {
-      toast('Valor inválido', 'err');
+      toast('Invalid value', 'err');
       input.focus();
       return;
     }
@@ -1748,7 +1749,7 @@ function openInlineEdit(cell) {
       const fromStr = (prevEff != null && prevEff !== data.effectiveFleaPrice) ? `${prevEff.toLocaleString('pt-BR')} → ` : '';
       toast(`${item.shortName || tpl}: flea ${fromStr}${data.effectiveFleaPrice.toLocaleString('pt-BR')} ₽`, 'ok');
     } catch (err) {
-      toast('Falha ao salvar: ' + err.message, 'err');
+      toast('Failed to save: ' + err.message, 'err');
       save.disabled = false; cancel.disabled = false; if (restore) restore.disabled = false;
     }
   };
@@ -1758,7 +1759,7 @@ function openInlineEdit(cell) {
     try {
       await restoreOverride(cell);   // re-renders the row
     } catch (err) {
-      toast('Falha ao restaurar: ' + err.message, 'err');
+      toast('Failed to restore: ' + err.message, 'err');
     }
   };
 }
@@ -1777,7 +1778,7 @@ function toast(msg, kind) {
 }
 
 // Promise-based confirmation modal. Resolves true (confirm) / false (cancel/Esc).
-function confirmDialog({ title, body, confirmText = 'Confirmar', cancelText = 'Cancelar' }) {
+function confirmDialog({ title, body, confirmText = 'Confirm', cancelText = 'Cancel' }) {
   return new Promise((resolve) => {
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay';
@@ -1814,18 +1815,18 @@ function setBulkBusy(busy) {
 // Picks up mod items added/removed since the last run. Fast; no confirm needed.
 async function rescanMods() {
   setBulkBusy(true);
-  toast('Relendo a base do SPT (mods + preços)…', 'ok');
+  toast('Re-reading the SPT database (mods + prices)…', 'ok');
   try {
     const r = await fetch('/api/rescan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
     const data = await r.json();
     if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
-    const secs = data.durationMs != null ? ` em ${(data.durationMs / 1000).toFixed(1)}s` : '';
-    const mods = data.modCount != null ? ` (${data.modCount} de mods)` : '';
-    toast(`${(data.itemCount || 0).toLocaleString('pt-BR')} itens${mods}${secs} — recarregando…`, 'ok');
+    const secs = data.durationMs != null ? ` in ${(data.durationMs / 1000).toFixed(1)}s` : '';
+    const mods = data.modCount != null ? ` (${data.modCount} from mods)` : '';
+    toast(`${(data.itemCount || 0).toLocaleString('pt-BR')} items${mods}${secs} — reloading…`, 'ok');
     setTimeout(() => location.reload(), 800);
   } catch (err) {
     setBulkBusy(false);
-    toast(`Falha no rescan: ${err.message}`, 'err');
+    toast(`Rescan failed: ${err.message}`, 'err');
   }
 }
 
@@ -1835,13 +1836,13 @@ async function refreshAll(source) {
   const label = source === 'market' ? 'tarkov-market' : 'tarkov.dev';
   const count = (typeof ITEM_LIST !== 'undefined' && ITEM_LIST) ? ITEM_LIST.length : 0;
   const ok = await confirmDialog({
-    title: `Atualizar TODOS os preços via ${label}?`,
-    body: `Re-baixa os ~${count.toLocaleString('pt-BR')} itens de uma vez (geralmente alguns segundos, ~5–15s). A edição de preços fica bloqueada enquanto roda; a página recarrega ao terminar.`,
-    confirmText: 'Atualizar todos',
+    title: `Update ALL prices via ${label}?`,
+    body: `Re-downloads ~${count.toLocaleString('pt-BR')} items at once (usually a few seconds, ~5–15s). Price editing is locked while it runs; the page reloads when done.`,
+    confirmText: 'Update all',
   });
   if (!ok) return;
   setBulkBusy(true);
-  toast(`Atualizando todos via ${label}… (alguns segundos)`, 'ok');
+  toast(`Updating all via ${label}… (a few seconds)`, 'ok');
   try {
     const r = await fetch('/api/refresh-all', {
       method: 'POST',
@@ -1850,12 +1851,12 @@ async function refreshAll(source) {
     });
     const data = await r.json();
     if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
-    const secs = data.durationMs != null ? ` em ${(data.durationMs / 1000).toFixed(1)}s` : '';
-    toast(`${(data.itemCount || count).toLocaleString('pt-BR')} itens atualizados via ${label}${secs} — recarregando…`, 'ok');
+    const secs = data.durationMs != null ? ` in ${(data.durationMs / 1000).toFixed(1)}s` : '';
+    toast(`${(data.itemCount || count).toLocaleString('pt-BR')} items updated via ${label}${secs} — reloading…`, 'ok');
     setTimeout(() => location.reload(), 1000);
   } catch (err) {
     setBulkBusy(false);
-    toast(`Falha ao atualizar todos via ${label}: ${err.message}`, 'err');
+    toast(`Failed to update all via ${label}: ${err.message}`, 'err');
   }
 }
 
@@ -1875,7 +1876,7 @@ function renderDetail(it) {
 
   return `<div class="detail-grid">
     <div class="detail-img">
-      ${it.image && it.image.large ? `<img src="${escapeAttr(it.image.large)}" alt="">` : '<div class="no-img" style="width:200px;height:200px">sem imagem</div>'}
+      ${it.image && it.image.large ? `<img src="${escapeAttr(it.image.large)}" alt="">` : '<div class="no-img" style="width:200px;height:200px">no image</div>'}
       <div class="meta-line">
         <b>${escapeHtml(it.name || '')}</b><br>
         <span class="types">${(it.types||[]).join(', ')}</span><br>
@@ -1900,7 +1901,7 @@ function renderDetail(it) {
           <tr><td class="k">condition</td><td class="v">${c.conditionType}</td></tr>
           <tr><td class="k">group</td><td class="v">${escapeHtml(c.group||'—')}</td></tr>
           <tr><td class="k">path</td><td class="v">${(it.category && it.category.path || []).join(' › ')}</td></tr>
-          <tr><td class="k">flea ban</td><td class="v">${spt && spt.fleaBanned ? '<span class="banned-icon">'+ICON_BANNED+'</span> banido ('+spt.fleaBanReasons.join(', ')+')' : '✓ permitido'}</td></tr>
+          <tr><td class="k">flea ban</td><td class="v">${spt && spt.fleaBanned ? '<span class="banned-icon">'+ICON_BANNED+'</span> banned ('+spt.fleaBanReasons.join(', ')+')' : '✓ allowed'}</td></tr>
         </table>
       </div>
 
@@ -1908,7 +1909,7 @@ function renderDetail(it) {
         <h3>SPT <small class="source-card__when">${fmtRelTime(META && META.sources && META.sources.spt && META.sources.spt.fleaPricesMtime)}</small></h3>
         <table>
           <tr><td class="k">fleaPrice</td><td class="v">${fmt(c.priceFleaSpt)} ₽</td></tr>
-          <tr><td class="k">fonte</td><td class="v">${META && META.sources && META.sources.spt && escapeHtml(META.sources.spt.fleaPricesSource || '—')}</td></tr>
+          <tr><td class="k">source</td><td class="v">${META && META.sources && META.sources.spt && escapeHtml(META.sources.spt.fleaPricesSource || '—')}</td></tr>
         </table>
       </div>
 
