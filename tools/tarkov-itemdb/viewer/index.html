@@ -1020,10 +1020,13 @@ function render() {
 function renderNow() {
   const filtered = sortItems(filterItems());
   const total = ITEM_LIST.length;
-  const shown = Math.min(filtered.length, RENDER_LIMIT);
   document.getElementById('stats').textContent =
     `${filtered.length.toLocaleString('pt-BR')} / ${total.toLocaleString('pt-BR')} itens` +
     (filtered.length > RENDER_LIMIT ? ` (mostrando ${RENDER_LIMIT})` : '');
+
+  // Tear down any previous window observer up-front so both the empty and the
+  // table path leave no orphan observer on a detached sentinel.
+  if (_winObserver) { _winObserver.disconnect(); _winObserver = null; }
 
   const main = document.getElementById('main');
   if (filtered.length === 0) {
@@ -1034,7 +1037,6 @@ function renderNow() {
   // Windowed render: build the shell + first batch, then append more batches as a
   // sentinel scrolls near the viewport. Keeps the live DOM to a few hundred rows
   // (was up to 1500) without touching layout/visuals.
-  if (_winObserver) { _winObserver.disconnect(); _winObserver = null; }
   _winRows = filtered.slice(0, RENDER_LIMIT);
   _winCursor = 0;
 
