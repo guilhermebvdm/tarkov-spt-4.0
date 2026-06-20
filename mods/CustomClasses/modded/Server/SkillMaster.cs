@@ -17,7 +17,7 @@ public sealed record SkillMasterEntry(SkillTypes Skill, string Name, SkillCatego
 
 /// <summary>
 ///     Item 031: canonical skill order for the editor UI (port of the RZ viewer's SKILL_MASTER,
-///     tools/tarkov-itemdb/viewer/profiles.js:10-45). Every live skill always renders in the SAME
+///     tools/trl-items-management/viewer/profiles.js:10-45). Every live skill always renders in the SAME
 ///     fixed position — Physical → Mental → Combat → Practical, then a final "Special Elite" section
 ///     for the four Skills-Extended skills — so switching classes keeps each skill visually pinned.
 ///

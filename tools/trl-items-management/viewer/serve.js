@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Tiny static server for the viewer. Serves files from tools/tarkov-itemdb/
+ * Tiny static server for the viewer. Serves files from tools/trl-items-management/
  * so the viewer can fetch ../data/items.json without CORS / file:// issues.
  *
  * Usage:  node viewer/serve.js [port]

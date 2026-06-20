@@ -2,7 +2,7 @@
    Served at /CustomClasses-Server/css/customclasses.css by the same wwwroot mount that
    serves the class icons (CustomClassesMetadata implements IModWebMetadata → SPTWeb mounts
    wwwroot/ under /CustomClasses-Server/). Ported tokens from the old viewer
-   (tools/tarkov-itemdb/viewer/profiles.css:72-86,152-214).
+   (tools/trl-items-management/viewer/profiles.css:72-86,152-214).
 
    Class names are STABLE and REUSED by item 034 (gear/stash visual panels) — see the
    033→034 contract: 034 only ADDS icon-grid rules, it does not rewrite the density/layout

@@ -115,7 +115,7 @@ Validar manualmente que `itemPriceOverrideRouble` funciona em SPT 4.0.13. Fecha 
 ### Procedimento
 
 ```bash
-node tools/tarkov-itemdb/scripts/action0-override-smoke-test.js prep
+node tools/trl-items-management/scripts/action0-override-smoke-test.js prep
 ```
 
 O script faz backup de `ragfair.json`, injeta 2 overrides (Bolts `57347c5b245977448d35f6e1` → `123456`; GPU `57347ca924597744596b4e71` → `654321`), refresca `checks.dat`.
@@ -287,8 +287,8 @@ Lock simples em-process para evitar race em `PATCH` simultâneos (leem-modificam
 ### Pipeline
 
 ```bash
-node tools/tarkov-itemdb/scripts/load-spt.js
-node tools/tarkov-itemdb/scripts/normalize.js
+node tools/trl-items-management/scripts/load-spt.js
+node tools/trl-items-management/scripts/normalize.js
 ```
 
 `data/items.json`: campos novos presentes; 12 tpls com `isHideoutCraftItem` correto; `data/hideout-crafts.json` coerente.
@@ -296,7 +296,7 @@ node tools/tarkov-itemdb/scripts/normalize.js
 ### Viewer back-end
 
 ```bash
-node tools/tarkov-itemdb/viewer/serve.js
+node tools/trl-items-management/viewer/serve.js
 ```
 
 - `PATCH /api/price {tpl:"57347c5b245977448d35f6e1",price:100000}` → `ragfair.json` override = 100000, `checks.dat` atualizado, `items.json` viewer-side com `fleaOverride:100000`
@@ -329,25 +329,25 @@ Editar 3 items (craft handbook baixo, craft handbook alto, non-craft com prices.
 
 ### Código a modificar
 
-- `tools/tarkov-itemdb/scripts/load-spt.js` ✅ feito
-- `tools/tarkov-itemdb/scripts/normalize.js` ❌ Ação 2
-- `tools/tarkov-itemdb/viewer/serve.js` ❌ Ação 3
-- `tools/tarkov-itemdb/viewer/index.html` ❌ Ação 4
+- `tools/trl-items-management/scripts/load-spt.js` ✅ feito
+- `tools/trl-items-management/scripts/normalize.js` ❌ Ação 2
+- `tools/trl-items-management/viewer/serve.js` ❌ Ação 3
+- `tools/trl-items-management/viewer/index.html` ❌ Ação 4
 
 ### Docs
 
-- `tools/tarkov-itemdb/docs/spt-internals.md` ✅
-- `tools/tarkov-itemdb/docs/flea-formula-validation.md` 🟡 (falta conclusão)
-- `tools/tarkov-itemdb/docs/flea-override-validation.md` 🟡 (falta resultado Ação 0)
-- `tools/tarkov-itemdb/docs/flea-override-plan.md` — **este arquivo**
-- `tools/tarkov-itemdb/README.md` ✅
+- `tools/trl-items-management/docs/spt-internals.md` ✅
+- `tools/trl-items-management/docs/flea-formula-validation.md` 🟡 (falta conclusão)
+- `tools/trl-items-management/docs/flea-override-validation.md` 🟡 (falta resultado Ação 0)
+- `tools/trl-items-management/docs/flea-override-plan.md` — **este arquivo**
+- `tools/trl-items-management/README.md` ✅
 
 ### Estado de teste (versionado)
 
-- `tools/tarkov-itemdb/.revert-state.json` — valores originais dos 12 tpls
-- `tools/tarkov-itemdb/.test-validation-state.json` — backups detalhados por teste
-- `tools/tarkov-itemdb/data/hideout-crafts.json` — Set de craft items gerado pela Ação 1
-- `tools/tarkov-itemdb/scripts/action0-override-smoke-test.js` — script da Ação 0
+- `tools/trl-items-management/.revert-state.json` — valores originais dos 12 tpls
+- `tools/trl-items-management/.test-validation-state.json` — backups detalhados por teste
+- `tools/trl-items-management/data/hideout-crafts.json` — Set de craft items gerado pela Ação 1
+- `tools/trl-items-management/scripts/action0-override-smoke-test.js` — script da Ação 0
 
 ### Referências (só leitura) — código-fonte SPT vendorizado
 

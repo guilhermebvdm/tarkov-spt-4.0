@@ -1,4 +1,4 @@
-# tarkov-itemdb
+# trl-items-management
 
 > **Para detalhes do SPT internals** (checks.dat, handbook/prices semântica, assort gotchas, categorias, flea blacklist) ver [docs/spt-internals.md](docs/spt-internals.md).
 
@@ -18,7 +18,7 @@ Inclui viewer com edição de preços ao vivo (override aditivo p/ itens vanilla
 
 1. **`SPT_PATH`** (env var) — raiz do SPT install (a pasta que contém `SPT_Data/`). Default: `D:/SPT/SPT`. O script aceita tanto a raiz quanto a subpasta `SPT_Data/`.
 2. **`TARKOV_MARKET_API_KEY`** (env var) — chave de [tarkov-market.com](https://tarkov-market.com) (requer Patreon Tier 1+). Sem ela `fetch-tarkov-market.js` aborta com erro claro.
-3. **Rodar pipeline**: `cd tools/tarkov-itemdb && node scripts/build.js` (~6s no primeiro run, rápido em re-runs com cache fresco).
+3. **Rodar pipeline**: `cd tools/trl-items-management && node scripts/build.js` (~6s no primeiro run, rápido em re-runs com cache fresco).
 4. **Abrir viewer**: `node viewer/serve.js [porta]` → `http://localhost:8080/TRLItemsManagement/`.
 
 ---
@@ -55,7 +55,7 @@ node scripts/normalize.js                       # → data/{items,categories,met
 ## Estrutura de arquivos
 
 ```text
-tools/tarkov-itemdb/
+tools/trl-items-management/
 ├── scripts/
 │   ├── build.js                  orquestrador: chama os 4 em sequência
 │   ├── fetch-tarkov-dev.js       GraphQL tarkov.dev → cache/

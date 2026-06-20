@@ -11,7 +11,7 @@
  * Resolução do path base do SPT (em ordem):
  *   1. --target <abs-path>          → caminho absoluto direto para a pasta profiles/
  *   2. --spt-path <abs-path>        → raiz do SPT (substitui SPT_PATH)
- *   3. env var SPT_PATH             → mesma convenção do tools/tarkov-itemdb
+ *   3. env var SPT_PATH             → mesma convenção do tools/trl-items-management
  *   4. default 'D:/SPT/SPT'
  *
  * Uso:

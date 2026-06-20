@@ -1,6 +1,6 @@
-# SPT 4.0 — Internals relevantes ao tarkov-itemdb
+# SPT 4.0 — Internals relevantes ao trl-items-management
 
-Notas técnicas dos pontos do SPT que o `tarkov-itemdb` lê/escreve. Validadas empiricamente em SPT 4.0.13.
+Notas técnicas dos pontos do SPT que o `trl-items-management` lê/escreve. Validadas empiricamente em SPT 4.0.13.
 
 ## `SPT_Data/checks.dat` — manifest de integridade
 

@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  Instala o tarkov-itemdb viewer como serviço Windows (via NSSM), bind localhost.
+  Instala o trl-items-management viewer como serviço Windows (via NSSM), bind localhost.
 
 .DESCRIPTION
   Roda no SERVIDOR SPT. Valida pré-condições, faz backup único da config do SPT antes de
@@ -10,7 +10,7 @@
 
 .EXAMPLE
   .\install-service.ps1 -NodeExe "C:\Program Files\nodejs\node.exe" `
-    -ToolDir "E:\tools\tarkov-itemdb" -SptPath "E:\SPT\SPT" -Port 8080 -MarketKey "<key>"
+    -ToolDir "E:\tools\trl-items-management" -SptPath "E:\SPT\SPT" -Port 8080 -MarketKey "<key>"
 #>
 [CmdletBinding()]
 param(

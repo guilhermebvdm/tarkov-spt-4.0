@@ -38,7 +38,7 @@ oferta    = offerBase × variância(0.8..1.2, clamp rígido)
 ## Procedimento
 
 ```bash
-node tools/tarkov-itemdb/scripts/action0-override-smoke-test.js prep
+node tools/trl-items-management/scripts/action0-override-smoke-test.js prep
 ```
 
 Esse script:
@@ -96,7 +96,7 @@ Resultado observado: _preencher após testar_.
 ## Reversão
 
 ```bash
-node tools/tarkov-itemdb/scripts/action0-override-smoke-test.js revert
+node tools/trl-items-management/scripts/action0-override-smoke-test.js revert
 ```
 
 Restaura `ragfair.json` do backup e refrescha `checks.dat`. Backup é removido após sucesso.

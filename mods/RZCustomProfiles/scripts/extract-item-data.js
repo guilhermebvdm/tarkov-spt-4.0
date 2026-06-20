@@ -2,14 +2,14 @@
 /**
  * extract-item-data.js
  *
- * Lê dados do tarkov-itemdb (que tem partes gitignored em cache/) e emite
+ * Lê dados do trl-items-management (que tem partes gitignored em cache/) e emite
  * scripts/item-data.json (versionado) com apenas o subset que build-profile-jsons
  * precisa: stackMax + width + height + name por TPL referenciado nas recipes.
  *
- * Roda quando o tarkov-itemdb é regenerado (raro — só quando EFT atualiza).
+ * Roda quando o trl-items-management é regenerado (raro — só quando EFT atualiza).
  *
- * Fonte: tools/tarkov-itemdb/cache/spt-raw.json (stackMaxSize, dims) +
- *        tools/tarkov-itemdb/data/items.json (fallback/dims se necessário).
+ * Fonte: tools/trl-items-management/cache/spt-raw.json (stackMaxSize, dims) +
+ *        tools/trl-items-management/data/items.json (fallback/dims se necessário).
  *
  * Saída: scripts/item-data.json (~5-10 KB, só os TPLs usados em recipes).
  */
@@ -21,11 +21,11 @@ const path = require('path');
 const MOD_ROOT  = path.resolve(__dirname, '..');
 const REPO_ROOT = path.resolve(MOD_ROOT, '../..');
 
-const SPT_RAW_PATH = path.join(REPO_ROOT, 'tools/tarkov-itemdb/cache/spt-raw.json');
+const SPT_RAW_PATH = path.join(REPO_ROOT, 'tools/trl-items-management/cache/spt-raw.json');
 const ANCHOR_PATH  = path.join(MOD_ROOT, 'backlog/anchor-items.json');
 
 if (!fs.existsSync(SPT_RAW_PATH)) {
-  console.error(`ERRO: ${SPT_RAW_PATH} não existe. Rode tools/tarkov-itemdb/scripts/load-spt.js antes.`);
+  console.error(`ERRO: ${SPT_RAW_PATH} não existe. Rode tools/trl-items-management/scripts/load-spt.js antes.`);
   process.exit(1);
 }
 

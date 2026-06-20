@@ -15,7 +15,7 @@ O metadado canônico (upstream, commit pinado, LFS, licença) vive no `manifest.
 
 ## `spt-source/` — código-fonte do servidor SPT (C#)
 
-**Gitignored** (~856 MB). Necessário para investigar a lógica interna do SPT 4.0 — usado, por exemplo, na descoberta da fórmula de preço do flea (ver [tools/tarkov-itemdb/docs/flea-override-plan.md](../tools/tarkov-itemdb/docs/flea-override-plan.md)). Metadado (commit pinado, versão SPT, LFS): [manifest.json](./manifest.json) → `id: spt-source`.
+**Gitignored** (~856 MB). Necessário para investigar a lógica interna do SPT 4.0 — usado, por exemplo, na descoberta da fórmula de preço do flea (ver [tools/trl-items-management/docs/flea-override-plan.md](../tools/trl-items-management/docs/flea-override-plan.md)). Metadado (commit pinado, versão SPT, LFS): [manifest.json](./manifest.json) → `id: spt-source`.
 
 O commit pinado corresponde ao SPT 4.0.13 instalado em `D:/SPT/SPT/`. Se atualizar o SPT, atualizar o `pin` no `manifest.json` e re-rodar o setup — senão a lógica diverge do runtime testado.
 

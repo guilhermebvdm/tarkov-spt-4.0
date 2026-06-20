@@ -39,9 +39,9 @@ Confirme também que **`SPT_Data/checks.dat` existe** (todo install real tem).
 ### 2. Copiar o tool pro server
 Empacote só os arquivos versionados (a partir do repo, na máquina de dev):
 ```bash
-git archive --format=zip -o trl-items-management.zip HEAD:tools/tarkov-itemdb
+git archive --format=zip -o trl-items-management.zip HEAD:tools/trl-items-management
 ```
-(A pasta interna do archive sai como `tarkov-itemdb` — o nome do repo; renomeie pra
+(A pasta interna do archive sai como `trl-items-management` — o nome do repo; renomeie pra
 `trl-items-management` ao extrair, ou use o zip pronto entregue, que já extrai assim.)
 Copie o zip pro server e extraia, ex.: `E:\tools\trl-items-management`. **Remova** do pacote:
 - `data/items.json` (placeholder do dev box — será regerado no passo 4; sem ele o viewer fica vazio

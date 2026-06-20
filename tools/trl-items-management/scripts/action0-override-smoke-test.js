@@ -21,9 +21,9 @@
  *   - LiveFleaPrices DESATIVADO
  *
  * Uso:
- *   node tools/tarkov-itemdb/scripts/action0-override-smoke-test.js prep
- *   node tools/tarkov-itemdb/scripts/action0-override-smoke-test.js status
- *   node tools/tarkov-itemdb/scripts/action0-override-smoke-test.js revert
+ *   node tools/trl-items-management/scripts/action0-override-smoke-test.js prep
+ *   node tools/trl-items-management/scripts/action0-override-smoke-test.js status
+ *   node tools/trl-items-management/scripts/action0-override-smoke-test.js revert
  */
 'use strict';
 
@@ -125,7 +125,7 @@ function cmdPrep() {
   console.log('             (se vier ~11.5M, override foi ignorado pela fórmula vanilla)');
   console.log('   - GPU:    ofertas esperadas em 654321 × 0.8..1.2 ≈ 523K..785K');
   console.log('             (se vier ~7.5M, override foi ignorado)');
-  console.log('4. Anote observações em tools/tarkov-itemdb/docs/flea-override-validation.md');
+  console.log('4. Anote observações em tools/trl-items-management/docs/flea-override-validation.md');
   console.log('5. Quando terminar: `node action0-override-smoke-test.js revert`');
 }
 

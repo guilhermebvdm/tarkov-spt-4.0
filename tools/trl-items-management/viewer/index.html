@@ -77,7 +77,7 @@ const selectedConditions = new Set();  // conditionType values selected
 const selectedBans       = new Set();  // ban filter values: 'ok' | 'bsg' | 'custom'
 const selectedOverrides  = new Set();  // override filter values: 'override' | 'vanilla'
 const selectedMods       = new Set();  // modSource names selected (custom items from mods)
-const DELTA_STORAGE_KEY  = 'tarkov-itemdb.delta';
+const DELTA_STORAGE_KEY  = 'trl-items-management.delta';
 let deltaSource = 'dev';   // 'dev' | 'market'
 let deltaMin    = null;    // number or null
 let deltaMax    = null;    // number or null
@@ -227,7 +227,7 @@ function createDropdown({ placeholder, options, multi = false, searchable = fals
 }
 
 // Persisted sort (defaults: Trader sell descending). Restored on load.
-const SORT_STORAGE_KEY = 'tarkov-itemdb.sort';
+const SORT_STORAGE_KEY = 'trl-items-management.sort';
 function loadSortPref() {
   try {
     const raw = localStorage.getItem(SORT_STORAGE_KEY);
@@ -423,11 +423,11 @@ async function load() {
   }
 }
 
-const GROUP_STORAGE_KEY     = 'tarkov-itemdb.groups';
-const CONDITION_STORAGE_KEY = 'tarkov-itemdb.conditions';
-const BAN_STORAGE_KEY       = 'tarkov-itemdb.bans';
-const OVERRIDE_STORAGE_KEY  = 'tarkov-itemdb.overrides';
-const MOD_STORAGE_KEY       = 'tarkov-itemdb.mods';
+const GROUP_STORAGE_KEY     = 'trl-items-management.groups';
+const CONDITION_STORAGE_KEY = 'trl-items-management.conditions';
+const BAN_STORAGE_KEY       = 'trl-items-management.bans';
+const OVERRIDE_STORAGE_KEY  = 'trl-items-management.overrides';
+const MOD_STORAGE_KEY       = 'trl-items-management.mods';
 let groupDropdown = null;
 let conditionDropdown = null;
 let banDropdown = null;

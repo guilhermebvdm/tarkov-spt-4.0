@@ -71,7 +71,7 @@ function resolvePath(categoryMap, leafId) {
 
 // Per-category icon overrides — used when the SPT-shipped PNG is too low-res
 // for crisp display (some are 11x11 originals). Lanczos-upscaled versions
-// live under `tools/tarkov-itemdb/viewer/icons/` and are served by serve.js
+// live under `tools/trl-items-management/viewer/icons/` and are served by serve.js
 // at /viewer/icons/<filename>.
 const ICON_OVERRIDES = {
   '5b5f749986f774094242f199': '/viewer/icons/icon_mod_sight_hd.png', // Special purpose sights

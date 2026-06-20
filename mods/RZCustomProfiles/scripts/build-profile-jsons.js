@@ -7,7 +7,7 @@
  *
  * Fontes:
  *   - anchor-items.json (id simbólico → bsgId do EFT)
- *   - tools/tarkov-itemdb/cache/spt-raw.json (TPL → stackMaxSize)
+ *   - tools/trl-items-management/cache/spt-raw.json (TPL → stackMaxSize)
  *   - planejamento §Inventário inicial / §Modelo de balanceamento / §Hideout inicial
  *
  * Regra de stack (PA-01-03 da review 01):
@@ -27,8 +27,8 @@ const ANCHOR = JSON.parse(fs.readFileSync(
   path.join(MOD_ROOT, 'backlog/anchor-items.json'), 'utf8'
 ));
 
-// Versionado (extraído via extract-item-data.js a partir do tarkov-itemdb).
-// Não depende de tools/tarkov-itemdb/cache/* (gitignored) em runtime.
+// Versionado (extraído via extract-item-data.js a partir do trl-items-management).
+// Não depende de tools/trl-items-management/cache/* (gitignored) em runtime.
 const ITEM_DATA_PATH = path.join(__dirname, 'item-data.json');
 if (!fs.existsSync(ITEM_DATA_PATH)) {
   console.error(`ERRO: ${ITEM_DATA_PATH} não encontrado. Rode 'node mods/RZCustomProfiles/scripts/extract-item-data.js' antes.`);
@@ -834,7 +834,7 @@ console.log('\n✓ Validação OK — todas as 10 classes dentro dos limites de 
 // ── Emit profiles-meta.json (viewer HTML) ────────────────────────────────────
 
 function emitProfilesMeta() {
-  const ITEMS_DB_PATH = path.join(MOD_ROOT, '../../tools/tarkov-itemdb/data/items.json');
+  const ITEMS_DB_PATH = path.join(MOD_ROOT, '../../tools/trl-items-management/data/items.json');
   if (!fs.existsSync(ITEMS_DB_PATH)) {
     console.error(`\nAVISO: ${ITEMS_DB_PATH} não encontrado — profiles-meta.json não emitido.`);
     return;
@@ -904,7 +904,7 @@ function emitProfilesMeta() {
     };
   }
 
-  const outPath = path.join(MOD_ROOT, '../../tools/tarkov-itemdb/data/profiles-meta.json');
+  const outPath = path.join(MOD_ROOT, '../../tools/trl-items-management/data/profiles-meta.json');
   fs.writeFileSync(outPath, JSON.stringify(out, null, 2) + '\n', { encoding: 'utf8' });
   console.log(`\n✓ profiles-meta.json emitido: ${outPath}`);
 }

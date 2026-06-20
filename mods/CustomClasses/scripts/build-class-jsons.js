@@ -6,7 +6,7 @@
  * (modded/Server/config/classes/<fileName>.jsonc), MAS com itens equipados/compostos
  * (o RZ só fazia "tudo no stash").
  *
- * Mapeamento de placement (auto via categoria do tarkov-itemdb):
+ * Mapeamento de placement (auto via categoria do trl-items-management):
  *   - 1ª arma não-pistola  → FirstPrimaryWeapon  (preset + loadedMag + chambered + ammo)
  *   - 1ª pistola           → Holster             (preset + loadedMag + ammo)
  *   - 1ª Body armor        → ArmorVest
@@ -17,7 +17,7 @@
  *
  * Ammo: dentro de `primary`, ammo[0] = arma primária, ammo[1] = pistola (ordem das recipes do RZ).
  *
- * Fontes: scripts/anchor-items.json (id→bsgId, cópia própria) e tools/tarkov-itemdb/data/items.json (categoria).
+ * Fontes: scripts/anchor-items.json (id→bsgId, cópia própria) e tools/trl-items-management/data/items.json (categoria).
  */
 'use strict';
 const fs = require('fs');
@@ -31,7 +31,7 @@ const FORCE = process.argv.includes('--force');
 const REPO = path.resolve(__dirname, '../../..');
 // item 007: anchor próprio (cópia local) — sem dependência de mods/RZCustomProfiles (aposentado).
 const ANCHOR = JSON.parse(fs.readFileSync(path.join(__dirname, 'anchor-items.json'), 'utf8'));
-const DB = JSON.parse(fs.readFileSync(path.join(REPO, 'tools/tarkov-itemdb/data/items.json'), 'utf8'));
+const DB = JSON.parse(fs.readFileSync(path.join(REPO, 'tools/trl-items-management/data/items.json'), 'utf8'));
 const OUT_DIR = path.join(__dirname, '../modded/Server/config/classes');
 
 const bsg = id => { const a = ANCHOR[id]; if (!a || !a.bsgId) throw new Error(`anchor sem bsgId: ${id}`); return a.bsgId; };
