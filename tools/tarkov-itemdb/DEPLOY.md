@@ -91,7 +91,7 @@ O script faz o backup (passo 3) se faltar, instala o serviço **TRLItemsManageme
 restart-on-crash, logs em `logs\service-*.log`, bind em `127.0.0.1`) e inicia.
 
 ### 6. Acessar
-No desktop do server (AnyDesk), abra o navegador → `http://127.0.0.1:8080/viewer/`.
+No desktop do server (AnyDesk), abra o navegador → `http://127.0.0.1:8080/TRLItemsManagement/`.
 Confirme que a lista carrega e que uma edição de preço + **Restore** funcionam.
 
 ---

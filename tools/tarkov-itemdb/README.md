@@ -10,7 +10,7 @@ Base de dados unificada de itens do Tarkov, combinando 3 fontes:
 
 Saída: `data/items.json` normalizado por BSG Tpl, com bloco `consolidated` que serve como view direta para a tabela (Item | Group | Trader | Flea SPT | Flea Dev | Flea Market).
 
-Inclui viewer com edição de preços ao vivo, ban/unban de itens no flea, e integração com o pipeline de perfis (`mods/RZCustomProfiles`).
+Inclui viewer com edição de preços ao vivo (override aditivo p/ itens vanilla, multiplicador p/ itens de mod) e ban/unban de itens no flea.
 
 ---
 
@@ -19,7 +19,7 @@ Inclui viewer com edição de preços ao vivo, ban/unban de itens no flea, e int
 1. **`SPT_PATH`** (env var) — raiz do SPT install (a pasta que contém `SPT_Data/`). Default: `D:/SPT/SPT`. O script aceita tanto a raiz quanto a subpasta `SPT_Data/`.
 2. **`TARKOV_MARKET_API_KEY`** (env var) — chave de [tarkov-market.com](https://tarkov-market.com) (requer Patreon Tier 1+). Sem ela `fetch-tarkov-market.js` aborta com erro claro.
 3. **Rodar pipeline**: `cd tools/tarkov-itemdb && node scripts/build.js` (~6s no primeiro run, rápido em re-runs com cache fresco).
-4. **Abrir viewer**: `node viewer/serve.js [porta]` → `http://localhost:8080/viewer/`.
+4. **Abrir viewer**: `node viewer/serve.js [porta]` → `http://localhost:8080/TRLItemsManagement/`.
 
 ---
 
@@ -243,7 +243,7 @@ Mod items têm campo `modSource` com o nome da pasta do mod.
 
 ```bash
 node viewer/serve.js [port]   # default 8080
-# Abrir: http://localhost:8080/viewer/
+# Abrir: http://localhost:8080/TRLItemsManagement/
 ```
 
 | Feature | Como funciona |

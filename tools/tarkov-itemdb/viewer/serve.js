@@ -954,6 +954,11 @@ http.createServer((req, res) => {
     return;
   }
 
+  // Brand URL: /TRLItemsManagement[/...] serves the viewer/ folder. (Old /viewer/
+  // paths still work.) The UI uses relative asset URLs, so an asset requested as
+  // /TRLItemsManagement/components.css is rewritten to /viewer/components.css.
+  if (urlPath === '/TRLItemsManagement' || urlPath === '/TRLItemsManagement/') urlPath = '/viewer/index.html';
+  else if (urlPath.startsWith('/TRLItemsManagement/')) urlPath = '/viewer/' + urlPath.slice('/TRLItemsManagement/'.length);
   if (urlPath === '/' || urlPath === '/viewer' || urlPath === '/viewer/') urlPath = '/viewer/index.html';
   const filePath = path.join(ROOT, urlPath);
   if (!filePath.startsWith(ROOT)) { res.writeHead(403); res.end('forbidden'); return; }
@@ -995,7 +1000,7 @@ http.createServer((req, res) => {
     fs.createReadStream(filePath).pipe(res);
   });
 }).listen(PORT, HOST, () => {
-  console.error(`Serving ${ROOT} at http://${HOST}:${PORT}/viewer/`);
+  console.error(`Serving ${ROOT} at http://${HOST}:${PORT}/TRLItemsManagement/`);
   console.error(`POST/DELETE /api/price → writes override in ${RAGFAIR_JSON}`);
 
   // On startup: refresh hashes for tracked SPT files that may be divergent.
