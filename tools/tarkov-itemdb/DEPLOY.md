@@ -1,4 +1,4 @@
-# DEPLOY — tarkov-itemdb no servidor SPT oficial (Windows, serviço, localhost)
+# DEPLOY — TRL Items Management no servidor SPT oficial (Windows, serviço, localhost)
 
 Guia pra rodar o **item viewer / editor de preço de flea** no servidor SPT oficial: outra máquina
 Windows, SPT em outro disco, acessado pelo navegador **da própria máquina do server** (via AnyDesk),
@@ -39,16 +39,16 @@ Confirme também que **`SPT_Data/checks.dat` existe** (todo install real tem).
 ### 2. Copiar o tool pro server
 Empacote só os arquivos versionados (a partir do repo, na máquina de dev):
 ```bash
-git archive --format=zip -o tarkov-itemdb.zip HEAD:tools/tarkov-itemdb
+git archive --format=zip -o trl-items-management.zip HEAD:tools/tarkov-itemdb
 ```
-Copie o zip pro server e extraia, ex.: `E:\tools\tarkov-itemdb`. **Remova** do pacote:
+(A pasta interna do archive sai como `tarkov-itemdb` — o nome do repo; renomeie pra
+`trl-items-management` ao extrair, ou use o zip pronto entregue, que já extrai assim.)
+Copie o zip pro server e extraia, ex.: `E:\tools\trl-items-management`. **Remova** do pacote:
 - `data/items.json` (placeholder do dev box — será regerado no passo 4; sem ele o viewer fica vazio
   até o build rodar);
-- `viewer/profiles*.{html,js,css}` e `data/profiles-meta.json` (Profile Viewer — depende do mod
-  RZCustomProfiles, fora do escopo de preço; a rota `/viewer/profiles*` só fica 404, inofensivo);
 - scripts de teste `scripts/*smoke*.js`, `scripts/action0-*.js` (não-runtime).
 
-Crie a pasta de logs: `New-Item -ItemType Directory -Force E:\tools\tarkov-itemdb\logs`.
+Crie a pasta de logs: `New-Item -ItemType Directory -Force E:\tools\trl-items-management\logs`.
 
 ### 3. Backup da config do SPT (antes de qualquer edição!)
 O `install-service.ps1` faz isso automaticamente (se ainda não existir). Manual seria copiar pra
@@ -56,7 +56,7 @@ O `install-service.ps1` faz isso automaticamente (se ainda não existir). Manual
 `SPT_Data\database\templates\items.json`, `SPT_Data\checks.dat`.
 
 > 🔑 **API key do tarkov-market — a forma mais simples (recomendada):** crie um arquivo **`.env`**
-> na raiz do tool (`E:\tools\tarkov-itemdb\.env`) com uma linha:
+> na raiz do tool (`E:\tools\trl-items-management\.env`) com uma linha:
 > ```
 > TARKOV_MARKET_API_KEY=sua-key-aqui
 > ```
@@ -82,7 +82,7 @@ colunas de display dev/market — não a edição nem o que é escrito no SPT).
 ```powershell
 .\scripts\install-service.ps1 `
   -NodeExe "C:\Program Files\nodejs\node.exe" `
-  -ToolDir "E:\tools\tarkov-itemdb" `
+  -ToolDir "E:\tools\trl-items-management" `
   -SptPath "E:\SPT\SPT" `
   -Port 8080 `
   -MarketKey "<sua-key>"     # opcional
@@ -120,7 +120,7 @@ Confirme que a lista carrega e que uma edição de preço + **Restore** funciona
 ## Alternativa sem NSSM (Task Scheduler)
 
 ```powershell
-$node = "C:\Program Files\nodejs\node.exe"; $tool = "E:\tools\tarkov-itemdb"
+$node = "C:\Program Files\nodejs\node.exe"; $tool = "E:\tools\trl-items-management"
 [Environment]::SetEnvironmentVariable('SPT_PATH','E:\SPT\SPT','Machine')
 [Environment]::SetEnvironmentVariable('ITEMDB_HOST','127.0.0.1','Machine')
 # [Environment]::SetEnvironmentVariable('TARKOV_MARKET_API_KEY','<key>','Machine')  # opcional
