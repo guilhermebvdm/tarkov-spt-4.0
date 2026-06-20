@@ -69,7 +69,10 @@ namespace CameraRotationMod
                         fc.FirearmsAnimator.SetMounted(newState == EMountState.Active);
 
                     // 006 (Fika): remotos veem o mount ativo via sync de stance.
-                    FikaSync.FikaNetworkSync.SendStanceUpdate(mp.ProfileId, StanceManager.CurrentStance, newState == EMountState.Active);
+                    bool isAiming = false;
+                    if (mp.HandsController is Player.FirearmController fc2)
+                        isAiming = fc2.IsAiming;
+                    CameraRotationMod.Networking.FikaSyncManager.SendStance((int)StanceManager.CurrentStance, isAiming);
                 }
             }
 

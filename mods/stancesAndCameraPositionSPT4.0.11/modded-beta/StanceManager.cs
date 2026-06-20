@@ -1295,8 +1295,11 @@ namespace CameraRotationMod
                 if (gw?.MainPlayer != null)
                 {
                     // Usa singleton estático em vez de FindObjectOfType (evita hitch de FPS).
-                    bool isMounting = MountingManager.IsMounting;
-                    FikaSync.FikaNetworkSync.SendStanceUpdate(gw.MainPlayer.ProfileId, newStance, isMounting);
+                    bool isAiming = false;
+                    if (gw.MainPlayer.HandsController is Player.FirearmController fc)
+                        isAiming = fc.IsAiming;
+                    
+                    CameraRotationMod.Networking.FikaSyncManager.SendStance((int)newStance, isAiming);
                 }
 
                 _activeStaminaStance = newStance;

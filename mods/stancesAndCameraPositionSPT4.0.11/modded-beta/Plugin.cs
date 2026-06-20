@@ -8,6 +8,8 @@ using CameraRotationMod.Patches;
 using EFT;
 using HarmonyLib;
 using UnityEngine;
+using BepInEx.Bootstrap;
+using System.Runtime.CompilerServices;
 
 namespace CameraRotationMod;
 
@@ -18,10 +20,10 @@ public enum ScrollMode
     Linear,
 }
 
-[BepInPlugin("shwng.camerarotation", "shwng.FpsCameraStances", "1.1.0")]
+[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "1.3.1")]
 public class Plugin : BaseUnityPlugin
 {
-    public static Plugin Instance;
+    public static Plugin Instance { get; private set; }
 
     // ⚠️ MANTER o `public static new` — shadow estático do BaseUnityPlugin.Logger.
     // Sem o `new`, vira shadowing implícito (CS0108) e os helpers static deste mod quebram.
@@ -90,6 +92,21 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<float> _ADSKickDelay;
     public static ConfigEntry<float> _StanceOvershootDamping;
     public static ConfigEntry<float> _ADSTransitionSpeed;
+
+    // Hold Breath
+    public static ConfigEntry<float> _HoldBreathArmStaminaDrain;
+    public static ConfigEntry<float> _HoldBreathOxygenDrain;
+    public static ConfigEntry<bool> _EnableCustomBreathAudio;
+    public static ConfigEntry<float> _BreathInVolume;
+    public static ConfigEntry<float> _BreathOutVolume;
+    public static ConfigEntry<float> _HeartbeatVolume;
+
+    // Oxygen UI
+    public static ConfigEntry<bool> _EnableOxygenUI;
+    public static ConfigEntry<float> _OxygenUIPosX;
+    public static ConfigEntry<float> _OxygenUIPosY;
+    public static ConfigEntry<float> _OxygenUIWidth;
+    public static ConfigEntry<float> _OxygenUIHeight;
 
     // backlog 002 F1 — substitui `Use Only Stances` (lógica invertida). True = Stance 0 entra no ciclo.
     public static ConfigEntry<bool> _IncludeStance0InCycle;
@@ -254,7 +271,7 @@ public class Plugin : BaseUnityPlugin
     {
         Instance = this;
         Logger = base.Logger;
-        FikaSync.FikaNetworkSync.Init();
+        Logger.LogInfo("Plugin shwngFpsCameraStances4 is loaded!");
         Logger.LogInfo($"Camera Rotation Mod has loaded!");
 
         // backlog 002 F2 — cachear API do ConfigurationManager para refresh de visibilidade em runtime.
@@ -270,8 +287,30 @@ public class Plugin : BaseUnityPlugin
         // `[enable] FAIL <nome>` em vez de derrubar todos os patches seguintes do Awake.
         SafeEnable("PlayerSpringPatch", () => new PlayerSpringPatch());        // camera position
         SafeEnable("ApplySimpleRotationPatch", () => new ApplySimpleRotationPatch());  // stance interpolation
-        SafeEnable("ApplyComplexRotationPatch", () => new ApplyComplexRotationPatch()); // stance interpolation
+        new CameraRotationMod.Patches.ApplyComplexRotationPatch().Enable();
+        new CameraRotationMod.Patches.HoldBreathPatch().Enable();
+        CameraRotationMod.Patches.HoldBreathPatch.LoadAudioClips();
         SafeEnable("FOVSliderPatch", () => new FOVSliderPatch());
+
+        // Fika Multiplayer Sync Integration (Soft Dependency)
+        if (Chainloader.PluginInfos.ContainsKey("com.fika.core"))
+        {
+            try
+            {
+                InitFikaSync();
+            }
+            catch (System.Exception ex)
+            {
+                Logger.LogError($"[CameraRotationMod] Erro ao tentar inicializar integração com Fika: {ex.Message}");
+            }
+        }
+        else
+        {
+            Logger.LogInfo("[CameraRotationMod] Fika multiplayer not found. Running in offline/standard mode.");
+        }
+
+        // UI
+        gameObject.AddComponent<UI.OxygenUI>();
 
         // Stamina/velocidade por stance (backlog 001)
         SafeEnable("StanceStaminaRecoveryPatch", () => new StanceStaminaRecoveryPatch());
@@ -891,6 +930,104 @@ public class Plugin : BaseUnityPlugin
             new AcceptableValueRange<float>(0.0f, 1f),
             new ConfigurationManagerAttributes { Order = 7 }));
 
+        const string HoldBreathSection = "9. Respiração (Hold Breath)";
+
+        // ========================================
+        // HOLD BREATH SETTINGS (Order -10)
+        // ========================================
+        _HoldBreathArmStaminaDrain = Config.Bind(
+            HoldBreathSection,
+            "Arm Stamina Drain / sec",
+            2.0f,
+            new ConfigDescription("How much extra Arm Stamina (HandsStamina) is drained per second while holding breath.",
+            new AcceptableValueRange<float>(0f, 20f),
+            new ConfigurationManagerAttributes { Order = -10 }));
+
+        _HoldBreathOxygenDrain = Config.Bind(
+            HoldBreathSection,
+            "Oxygen Drain / sec",
+            5.0f,
+            new ConfigDescription("How much extra Oxygen is drained per second while holding breath.",
+            new AcceptableValueRange<float>(0f, 50f),
+            new ConfigurationManagerAttributes { Order = -11 }));
+
+        _EnableCustomBreathAudio = Config.Bind(
+            HoldBreathSection,
+            "Enable Custom Breath Audio",
+            true,
+            new ConfigDescription("Plays custom breath_in.wav and breath_out.wav from the mod folder when holding breath.",
+            null,
+            new ConfigurationManagerAttributes { Order = -11 }));
+
+        _BreathInVolume = Config.Bind(
+            HoldBreathSection,
+            "Breath In Volume",
+            1.0f,
+            new ConfigDescription("Volume of the breath_in audio.",
+            new AcceptableValueRange<float>(0f, 2f),
+            new ConfigurationManagerAttributes { Order = -12 }));
+
+        _BreathOutVolume = Config.Bind(
+            HoldBreathSection,
+            "Breath Out Volume",
+            1.0f,
+            new ConfigDescription("Volume of the breath_out audio.",
+            new AcceptableValueRange<float>(0f, 2f),
+            new ConfigurationManagerAttributes { Order = -13 }));
+
+        _HeartbeatVolume = Config.Bind(
+            HoldBreathSection,
+            "Heartbeat Volume",
+            1.0f,
+            new ConfigDescription("Volume of the heartbeat loop audio.",
+            new AcceptableValueRange<float>(0f, 2f),
+            new ConfigurationManagerAttributes { Order = -14 }));
+
+        // ========================================
+        // OXYGEN UI SETTINGS (Order -13)
+        // ========================================
+        const string OxygenUISection = "10. Barra de Oxigênio (UI)";
+        
+        _EnableOxygenUI = Config.Bind(
+            OxygenUISection,
+            "Enable Oxygen UI Bar",
+            true,
+            new ConfigDescription("Displays a white bar above the hands stamina that drains while holding breath.",
+            null,
+            new ConfigurationManagerAttributes { Order = -1 }));
+
+        _OxygenUIPosX = Config.Bind(
+            OxygenUISection,
+            "UI X Position",
+            20f,
+            new ConfigDescription("Horizontal position of the oxygen bar (pixels from left).",
+            new AcceptableValueRange<float>(0f, 3000f),
+            new ConfigurationManagerAttributes { Order = -2 }));
+
+        _OxygenUIPosY = Config.Bind(
+            OxygenUISection,
+            "UI Y Position",
+            120f,
+            new ConfigDescription("Vertical position of the oxygen bar (pixels from BOTTOM).",
+            new AcceptableValueRange<float>(0f, 2000f),
+            new ConfigurationManagerAttributes { Order = -3 }));
+
+        _OxygenUIWidth = Config.Bind(
+            OxygenUISection,
+            "UI Width",
+            260f,
+            new ConfigDescription("Width of the oxygen bar.",
+            new AcceptableValueRange<float>(10f, 1000f),
+            new ConfigurationManagerAttributes { Order = -4 }));
+
+        _OxygenUIHeight = Config.Bind(
+            OxygenUISection,
+            "UI Height",
+            4f,
+            new ConfigDescription("Height (thickness) of the oxygen bar.",
+            new AcceptableValueRange<float>(1f, 20f),
+            new ConfigurationManagerAttributes { Order = -5 }));
+
         // ========================================
         // ANIMATION SETTINGS (Item 005)
         // ========================================
@@ -936,7 +1073,7 @@ public class Plugin : BaseUnityPlugin
             null,
             new ConfigurationManagerAttributes { Order = 1 }));
 
-        const string StanceWiggleSection = "Stance Animations (Cinematic Curves)";
+        const string StanceWiggleSection = "8. Wiggle (Q/E) Dynamics (Stance Based)";
         _CurveDuration = Config.Bind(
             StanceWiggleSection,
             "Animation Curve Duration",
@@ -1333,6 +1470,12 @@ public class Plugin : BaseUnityPlugin
         RefreshScrollModeVisibility();
     }
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private void InitFikaSync()
+    {
+        CameraRotationMod.Networking.FikaSyncManager.Initialize(Logger);
+    }
+
     // ==========================================================================
     // backlog 002 F2/F4 — helpers de Plugin
     // ==========================================================================
@@ -1531,6 +1674,12 @@ public class Plugin : BaseUnityPlugin
                         null,
                         new ConfigurationManagerAttributes { Order = 0 })),
         };
+    }
+
+    private void Start()
+    {
+        // Pre-load audio clips so they are ready on first use
+        CameraRotationMod.Patches.HoldBreathPatch.LoadAudioClips();
     }
 
     /// <summary>SettingChanged handler — marca config suja; tick re-aplica numa janela ≤ 1 frame.</summary>

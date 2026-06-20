@@ -93,10 +93,54 @@ namespace CameraRotationMod.Patches
             Quaternion weapRotation = (Quaternion)_weapTempRotationField.GetValue(__instance);
             bool isAiming = (bool)_isAimingField.GetValue(__instance);
 
+            // ==========================================
+            // [AUTO-SPY & SAFEGUARD]
+            // Previne a câmera de virar de ponta cabeça
+            // ==========================================
+            if (weapRotation.w == 0 && weapRotation.x == 0 && weapRotation.y == 0 && weapRotation.z == 0)
+            {
+                Plugin.Logger.LogError($"[SPY-CRASH-PREVENTED] ApplyComplex: weapRotation (Tarkov _temporaryRotation) is (0,0,0,0)! Skipped frame to save camera.");
+                return;
+            }
+            if (float.IsNaN(dt) || float.IsInfinity(dt) || dt <= 0f || dt > 1f)
+            {
+                Plugin.Logger.LogError($"[SPY-CRASH-PREVENTED] ApplyComplex: deltaTime is invalid ({dt})! Skipped frame.");
+                return;
+            }
+            if (float.IsNaN(scopeRotation.x) || float.IsNaN(scopeRotation.y) || float.IsNaN(scopeRotation.z) || float.IsNaN(scopeRotation.w))
+            {
+                Plugin.Logger.LogError($"[SPY-CRASH-PREVENTED] ApplyComplex: scopeRotation has NaN components! Skipped frame.");
+                return;
+            }
+            // ==========================================
+
             bool isInStance = StanceManager.IsInStance;
             Stance currentStance = StanceManager.CurrentStance;
             float kick = Plugin._StanceKickIntensity?.Value ?? -0.05f;
             float kickVelocity = kick * 30f; // Convert positional intensity to velocity impulse
+
+            // Hold Breath Arm Stamina & Oxygen Drain
+            if (player.Physical != null && player.Physical.HoldingBreath)
+            {
+                // Arm Stamina
+                float drainAmount = Plugin._HoldBreathArmStaminaDrain.Value * dt;
+                player.Physical.HandsStamina.Current -= drainAmount;
+                if (player.Physical.HandsStamina.Current < 0f) 
+                {
+                    player.Physical.HandsStamina.Current = 0f;
+                }
+
+                // Oxygen
+                if (player.Physical.Oxygen != null)
+                {
+                    float oxDrain = Plugin._HoldBreathOxygenDrain.Value * dt;
+                    player.Physical.Oxygen.Current -= oxDrain;
+                    if (player.Physical.Oxygen.Current < 0f)
+                    {
+                        player.Physical.Oxygen.Current = 0f;
+                    }
+                }
+            }
 
             // Do not apply kick if player is prone
             bool isProne = player.IsInPronePose;
@@ -154,8 +198,8 @@ namespace CameraRotationMod.Patches
                 _kickSustainTimer = 0f;
             }
 
-            // Targets
-            Vector3 targetEuler = isAiming && !isInStance ? scopeRotation.eulerAngles : isInStance ? StanceManager.GetTargetRotation(isAiming) : Vector3.zero;
+            // Targets (Nunca usar scopeRotation.eulerAngles diretamente, pois algumas miras possuem valores extremos fixup que viram a câmera)
+            Vector3 targetEuler = isInStance ? StanceManager.GetTargetRotation(isAiming) : Vector3.zero;
             Vector3 targetPosition = isAiming && !isInStance ? Vector3.zero : isInStance ? StanceManager.GetTargetPosition(isAiming) : Vector3.zero;
 
             // Spring Interpolation (Overshoot / Quicada)
@@ -167,6 +211,15 @@ namespace CameraRotationMod.Patches
             CurrentPosition = SpringLerp(CurrentPosition, targetPosition, ref _posVelocity, stiffness, damping, dt);
             
             CurrentRotation = Quaternion.Euler(CurrentEuler);
+
+            // [AUTO-SPY] Check if CurrentRotation got corrupted before applying
+            if (float.IsNaN(CurrentRotation.x) || float.IsNaN(CurrentRotation.y) || float.IsNaN(CurrentRotation.z) || float.IsNaN(CurrentRotation.w) || 
+               (CurrentRotation.x == 0 && CurrentRotation.y == 0 && CurrentRotation.z == 0 && CurrentRotation.w == 0))
+            {
+                Plugin.Logger.LogError($"[SPY-CRASH-PREVENTED] ApplyComplex: CurrentRotation generated an invalid Quaternion {CurrentRotation} from Euler {CurrentEuler}! Skipped apply.");
+                CurrentEuler = Vector3.zero; // Reset to safe state
+                return;
+            }
 
             // Apply directly to WeaponRootAnim, ensuring the position offset is oriented correctly in the weapon's local space
             Vector3 orientedPositionOffset = weapRotation * CurrentPosition;
@@ -181,8 +234,6 @@ namespace CameraRotationMod.Patches
                 LogNextFrame = false;
             }
 
-            if (_currentRotationField != null)
-                _currentRotationField.SetValue(__instance, CurrentRotation);
         }
     }
 }
