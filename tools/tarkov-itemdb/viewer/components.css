@@ -133,13 +133,14 @@ body::before {
 }
 
 .search {
-  flex: 0 1 280px;
-  min-width: 120px;
+  flex: 1 1 340px;             /* grows to fill leftover topbar space */
+  min-width: 200px;
+  max-width: 520px;
   position: relative;          /* anchors the absolute magnifier + clear button */
 }
 .search input {
   width: 100%;
-  padding: var(--space-3) 36px var(--space-3) var(--space-10);  /* right room for clear button */
+  padding: var(--space-3) 36px var(--space-3) 34px;  /* left: clear of the magnifier; right: clear button */
   background: var(--bg-input);
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-sm);
@@ -158,8 +159,8 @@ body::before {
 .search input::-webkit-search-decoration { -webkit-appearance: none; appearance: none; }
 .search::before {
   content: "⌕";
-  position: absolute; left: var(--space-3); top: 50%; transform: translateY(-50%);
-  color: var(--fg-dim); font-size: 18px; line-height: 1; pointer-events: none;
+  position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+  color: var(--fg-dim); font-size: 16px; line-height: 1; pointer-events: none;
 }
 
 /* Custom clear button — only visible when the input has content.
