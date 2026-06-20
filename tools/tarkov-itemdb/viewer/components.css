@@ -112,6 +112,18 @@ body::before {
 .topbar-nav--sep { margin-left: var(--space-6); }
 .brand--spaced { margin-left: var(--space-4); }
 
+/* App version, tucked next to the brand. */
+.app-version {
+  font-family: var(--font-display);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  letter-spacing: .5px;
+  color: var(--fg-faint);
+  align-self: center;
+  margin-left: calc(-1 * var(--space-3));
+  margin-right: var(--space-4);
+}
+
 .topbar-controls {
   flex: 1 1 0;
   min-width: 0;

@@ -87,7 +87,7 @@ colunas de display dev/market — não a edição nem o que é escrito no SPT).
   -Port 8080 `
   -MarketKey "<sua-key>"     # opcional
 ```
-O script faz o backup (passo 3) se faltar, instala o serviço **TarkovItemDB** (auto-start,
+O script faz o backup (passo 3) se faltar, instala o serviço **TRLItemsManagement** (auto-start,
 restart-on-crash, logs em `logs\service-*.log`, bind em `127.0.0.1`) e inicia.
 
 ### 6. Acessar
@@ -128,8 +128,8 @@ $action  = New-ScheduledTaskAction -Execute $node -Argument "`"$tool\viewer\serv
 $trigger = New-ScheduledTaskTrigger -AtStartup
 $principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
 $settings = New-ScheduledTaskSettingsSet -RestartCount 999 -RestartInterval (New-TimeSpan -Minutes 1) -ExecutionTimeLimit ([TimeSpan]::Zero)
-Register-ScheduledTask -TaskName "TarkovItemDB" -Action $action -Trigger $trigger -Principal $principal -Settings $settings
-Start-ScheduledTask -TaskName "TarkovItemDB"
+Register-ScheduledTask -TaskName "TRLItemsManagement" -Action $action -Trigger $trigger -Principal $principal -Settings $settings
+Start-ScheduledTask -TaskName "TRLItemsManagement"
 ```
 Limitações vs NSSM: sem captura de stdout/stderr embutida e restart mais grosseiro. Faça o backup
 do passo 3 manualmente. Lembre que o backup também é feito pelo `install-service.ps1` (rota NSSM).

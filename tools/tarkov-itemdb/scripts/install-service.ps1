@@ -19,7 +19,7 @@ param(
   [Parameter(Mandatory=$true)] [string] $SptPath,   # RAIZ do install (contém SPT_Data/)
   [int]    $Port        = 8080,
   [string] $MarketKey   = '',
-  [string] $ServiceName = 'TarkovItemDB',
+  [string] $ServiceName = 'TRLItemsManagement',
   [string] $BindHost    = '127.0.0.1'   # NÃO usar $Host (variável automática read-only do PowerShell)
 )
 
