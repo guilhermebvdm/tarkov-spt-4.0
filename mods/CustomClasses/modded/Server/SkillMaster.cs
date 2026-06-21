@@ -10,6 +10,7 @@ public enum SkillCategory
     Combat,
     Practical,
     SpecialElite,
+    Gems,
 }
 
 /// <summary>One skill in canonical position. Color/label derive from <see cref="Category"/>.</summary>
@@ -40,6 +41,7 @@ public static class SkillMaster
     private const string ColorCombat = "#c8a35a";
     private const string ColorPractical = "#6e9a3f";
     private const string ColorSpecialElite = "#9a6ec8";
+    private const string ColorGems = "#5aa0a0";
 
     /// <summary>
     ///     Fixed order of the four main categories. The per-category skill order is taken from the
@@ -59,6 +61,16 @@ public static class SkillMaster
         [SkillTypes.FirstAid, SkillTypes.FieldMedicine, SkillTypes.UsecNegotiations, SkillTypes.BearRawpower];
 
     /// <summary>
+    ///     Item 047: the six SE-reactivated "gem" skills the 6-class redesign actually uses
+    ///     (NATO/Eastern weapon systems, stealth, lockpicking, scav cooldown). They are functional
+    ///     but live outside the RZ explicit map — shown as their own canonical section instead of
+    ///     being dumped under "Outside canonical (loader ignores / unmapped)".
+    /// </summary>
+    private static readonly SkillTypes[] GemsOrder =
+        [SkillTypes.UsecArsystems, SkillTypes.BearAksystems, SkillTypes.SilentOps,
+         SkillTypes.ProneMovement, SkillTypes.Lockpicking, SkillTypes.Shadowconnections];
+
+    /// <summary>
     ///     All canonical skills in fixed order (Ph→M→C→P, then Special Elite). Count/list are derived
     ///     from <see cref="SkillWeights"/> + <see cref="SkillsExtendedCompat"/> — no magic numbers.
     /// </summary>
@@ -72,6 +84,7 @@ public static class SkillMaster
         SkillCategory.Combat => ColorCombat,
         SkillCategory.Practical => ColorPractical,
         SkillCategory.SpecialElite => ColorSpecialElite,
+        SkillCategory.Gems => ColorGems,
         _ => ColorCombat,
     };
 
@@ -83,6 +96,7 @@ public static class SkillMaster
         SkillCategory.Combat => "Combat (C)",
         SkillCategory.Practical => "Practical (P)",
         SkillCategory.SpecialElite => "Special Elite",
+        SkillCategory.Gems => "Gems (SE)",
         _ => category.ToString(),
     };
 
@@ -117,10 +131,16 @@ public static class SkillMaster
             }
         }
 
-        // Special Elite last, in the fixed declared order.
+        // Special Elite next, in the fixed declared order.
         foreach (var skill in specialElite)
         {
             entries.Add(new SkillMasterEntry(skill, skill.ToString(), SkillCategory.SpecialElite));
+        }
+
+        // Item 047: Gems (SE-reactivated, functional) last — promoted out of the "Outside canonical" dump.
+        foreach (var skill in GemsOrder)
+        {
+            entries.Add(new SkillMasterEntry(skill, skill.ToString(), SkillCategory.Gems));
         }
 
         return entries;

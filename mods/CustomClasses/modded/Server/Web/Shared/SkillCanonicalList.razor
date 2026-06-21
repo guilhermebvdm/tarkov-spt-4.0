@@ -173,18 +173,11 @@
             }
         }
 
-        // EDIT: lista TODAS as skills não-canônicas do enum (mesmo sem valor) para serem editáveis
-        // direto na tabela — substitui o antigo dropdown "Add skill outside canonical".
-        if (EditRows is not null)
-        {
-            foreach (var name in Enum.GetNames<SkillTypes>())
-            {
-                if (!canonical.Contains(name) && seen.Add(name))
-                {
-                    overflow.Add(name);
-                }
-            }
-        }
+        // Item 047: removido o dump edit-mode de TODAS as skills não-canônicas do enum. As funcionais
+        // (gems) viraram canônicas (SkillMaster "Gems (SE)"); as não-canônicas restantes são inertes
+        // ("fantasmas": SMG/HMG/Launcher/AttachedLauncher/Auctions/Bot*/etc.) e não devem ser editáveis.
+        // Skills custom novas (itens 048+) entram via SkillMaster, não por este dump. O overflow
+        // data-driven acima ainda exibe qualquer skill não-canônica que uma classe realmente tenha (safety).
 
         overflow.Sort(StringComparer.OrdinalIgnoreCase);
         return overflow;

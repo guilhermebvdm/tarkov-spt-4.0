@@ -41,7 +41,9 @@ O **`OrphanEditionSaveLoadRouter` NÃO foi construído** (e o config `orphanEdit
 
 ## Mudanças posteriores
 
-(vazio inicialmente — preenchido por `/apply-code-review`)
+| Data | Mudança | Arquivos |
+| --- | --- | --- |
+| 2026-06-21 | **Limpeza do viewer (a pedido do usuário):** removidas as skills inertes ("fantasmas") do editor. As 6 gems funcionais viraram a seção canônica **"Gems (SE)"** (`SkillMaster.cs`); removido o dump edit-mode de todas as skills não-canônicas do enum (`SkillCanonicalList.razor`) — o overflow data-driven (safety) ficou. Convenção registrada no épico: skills custom novas (048+) entram no `SkillMaster`. **Requer restart do server** p/ o editor refletir. | `SkillMaster.cs`, `Web/Shared/SkillCanonicalList.razor` |
 
 ## Histórico
 

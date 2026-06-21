@@ -120,6 +120,8 @@ R-W3: [052]            ← validação in-game (FIKA) — depende de todos
 
 Camadas: 🎯 skill (matriz) · 🧪 skill custom (padrão SE) · 🔧 patch per-player (keyed na classe) · 🎒 loadout (gear) · 🏠 hideout · 🌐 global. Pontas soltas vivas ([class-levers.md](../docs/class-levers.md) §7): sync do `SkillWeights.cs` (047), levers da zona stances (051), loot instantâneo (049), bug do Círculo de Cultistas (decisão no 047).
 
+> **Convenção de viewer (a partir do 047):** o editor mostra só skills **funcionais** — o dump de skills inertes ("fantasmas": SMG/HMG/Launcher/AttachedLauncher/Auctions/Bot*/etc.) foi removido do `SkillCanonicalList`, e as 6 gems funcionais viraram a seção canônica **"Gems (SE)"** no `SkillMaster.cs`. **Toda skill custom (🧪) nova dos itens 048–051 deve ser adicionada ao `SkillMaster`** (aparece no viewer) e documentada em [class-levers.md](../docs/class-levers.md). Patches (🔧) e habilidades não são skills → documentar em class-levers + expor no F12 (decisão #8); não entram no viewer de skills.
+
 ## Legenda
 
 - ⚪ Backlog · 🟡 Em progresso · 🟢 Entregue · 🔴 Cancelado
