@@ -6,6 +6,7 @@ using SPTarkov.Server.Core.Models.Enums;             // Money
 using SPTarkov.Server.Core.Models.Utils;             // ISptLogger
 using SPTarkov.Server.Core.Services;                 // DatabaseService
 using SPTarkov.Server.Core.Utils;                    // FileUtil, JsonUtil
+using System.Text.Json.Serialization;                // JsonPropertyName
 using Item = SPTarkov.Server.Core.Models.Eft.Common.Tables.Item;
 
 namespace TRLTraderPrices;
@@ -51,8 +52,11 @@ public class TRLTraderPricesMod(
     /// </summary>
     private sealed record TraderOverride
     {
-        public double Count { get; init; }
-        public string? Currency { get; init; }
+        // The overrides.json keys are lowercase ("count"/"currency"); SPT's JsonUtil binds
+        // case-sensitively, so without these attributes Count deserialized to 0 (free items!)
+        // and Currency to null. JsonPropertyName makes the lowercase JSON bind correctly.
+        [JsonPropertyName("count")]    public double Count { get; init; }
+        [JsonPropertyName("currency")] public string? Currency { get; init; }
     }
 
     /// <summary>Maps an override currency code to its Money tpl. Returns null for unknown/empty (match any money entry).</summary>
