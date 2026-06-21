@@ -2105,8 +2105,8 @@ function traderOverrideCount(traderId, tpl) {
   return (typeof ovr === 'object') ? ovr.count : ovr;
 }
 
-// PRIMARY native value markup: number + currency symbol/pill.
-//   RUB → "18.397 ₽" via fmtRub.  USD/EUR/GP → "417 $" as a colored pill.
+// PRIMARY native value markup — same pattern as RUB (fmtRub): plain number OUTSIDE the
+// badge, only the currency UNIT inside the tag. RUB → "18.397 ₽"; USD/EUR/GP → "417 $".
 function nativeValueMarkup(native, cur) {
   if (native == null) return `<span class="trader-price-val is-null">—</span>`;
   if (cur === 'RUB') return `<span class="trader-price-val">${fmtRub(native)}</span>`;
@@ -2114,10 +2114,9 @@ function nativeValueMarkup(native, cur) {
   const sym = CURRENCY_SYMBOL[cur] || cur;
   const rate = CURRENCY_RATES[cur];
   const tip = (rate && rate > 0)
-    ? escapeAttr('In-game native price (@ ' + rate.toLocaleString('en-US') + ' ₽/' + sym + ')')
-    : 'In-game native price';
-  return `<span class="trader-price-val"><span class="currency ${cls}" data-tip="${tip}">` +
-    `${native.toLocaleString('en-US')} ${escapeHtml(sym)}</span></span>`;
+    ? escapeAttr('In-game native currency (@ ' + rate.toLocaleString('en-US') + ' ₽/' + sym + ')')
+    : 'In-game native currency';
+  return `<span class="trader-price-val">${native.toLocaleString('pt-BR')} <span class="currency ${cls}" data-tip="${tip}">${escapeHtml(sym)}</span></span>`;
 }
 
 // Faint rouble-equivalent hint "≈ X ₽" for USD/EUR only. '' otherwise (incl. GP/RUB).

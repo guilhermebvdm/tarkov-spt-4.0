@@ -870,7 +870,8 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
 .tbl tbody td.num.price.is-canonical { color: var(--accent-bright); }
 
 /* Currency sigil — small inline pill that visually separates the number from
- * the unit. RUB uses the EFT khaki accent, USD green, EUR blue. */
+ * the unit. RUB uses the EFT khaki accent; USD/EUR use yellow so they don't read as
+ * the green "B" / red "S" trader tags ($ / € symbols tell them apart). */
 .currency {
   display: inline-block;
   margin-left: 3px;
@@ -882,8 +883,8 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
   vertical-align: 1px;
 }
 .currency--rub { background: var(--accent-deep); color: var(--accent-bright); }
-.currency--usd { background: #2c4a25; color: var(--color-currency-usd); }
-.currency--eur { background: #1f3c5e; color: var(--color-currency-eur); }
+.currency--usd { background: #3d3410; color: #ecc94b; }
+.currency--eur { background: #3d3410; color: #ecc94b; }
 .currency--gp  { background: #3a2f15; color: #c9a14a; }   /* GP: muted gold */
 .price.is-canonical .currency--rub { background: var(--accent-dim); color: var(--fg-on-accent); }
 .price.is-banned .currency--rub { opacity: .6; }
