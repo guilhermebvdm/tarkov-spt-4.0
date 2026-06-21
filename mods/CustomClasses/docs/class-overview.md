@@ -63,7 +63,7 @@ Visão **rápida e completa** das 6 classes: o que cada uma é, sua habilidade-a
 
 - **🟢 Sobe rápido** — **SilentOps** ×2.5 `Lv6` · **Pistol** ×1.8 `Lv2` *(silenciada)* · CovertMovement ×1.5 `Lv6` · Perception ×1.5 `Lv5` · Melee ×1.5 `Lv3` · LightVests ×1.3 · ProneMovement ×1.5 · Lockpicking ×1.3 `Lv3`
 - **🔴 Atrofia** — Assault ×0.6 · StressResistance ×0.7 · Shotgun ×0.7
-- **🔧 Extra** — **Passo Fantasma** (ruído de todas as ações até **−50%**, não silêncio total) · MaxSpeed **×1.1**
+- **🔧 Extra** — **Passo Fantasma** (ruído de todas as ações até **−50%**, não silêncio total). *(Execução agora dá +velocidade c/ a melee na mão; o MaxSpeed ×1.1 fixo foi removido.)*
 - **🏠 Hideout** Lavatory (inicial + −50%)
 
 ## 🎒 Saqueador — *Looter* · Pilhagem

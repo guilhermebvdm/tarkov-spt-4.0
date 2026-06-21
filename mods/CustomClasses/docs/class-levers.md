@@ -113,7 +113,7 @@ Cada classe é definida por camadas, marcadas por emoji ao longo do doc:
 - **🩺 Médico** — 🔧 cura de HP tempo ×0.3, +50% HP, sem lock de movimento/arma · 🔧 **cirurgia/restauração de membro destruído** (CMS/Surv12) ×0.5 tempo *(distinto da cura de HP acima — é a costura lenta de membro blackado; reforça a Surgery ×2 da matriz)* · 🏠 MedStation (inicial + −50%)
 - **🔫 Fuzileiro** — 🧪 **Adrenalina** (pós-abate: −recuo/−recarga/−ADS por `3s + 0.5s/nv`) · 🔧 resist. supressão (aim-punch ×0.5) · 🔧 antitravamento (malfunction ×0.5, fix ×2) · 🏠 Workbench (inicial + −50%)
 - **🎯 Caçador** — 🧪 **Fôlego de Aço** (`×(1+0.1·nv) ≤ ×3`, −sway) · 🔧 saque de pistola ×0.5 · 🔧 ADS por arma (sniper/DMR ×0.85, AR ×1.15) · ⚠️ 🔧 resist. de braço em ADS (zona stances, §6.2) · 🏠 Shooting Range (inicial) + Intelligence Center (−50%)
-- **👻 Fantasma** — 🔧 **Execução** (melee ×20) · 🔧 Passo Fantasma (ruído de todas as ações `×(1−0.5·nv/max)`, até −50%, **NÃO** silêncio total) · 🔧 MaxSpeed ×1.1 · 🏠 Lavatory (inicial + −50%)
+- **👻 Fantasma** — 🧪 **Execução** (melee ×20 + velocidade c/ melee na mão — §5.1) · 🧪 Passo Fantasma (ruído `×(1−0.5·nv/max)`, até −50%, **NÃO** silêncio total — §5.1) · 🏠 Lavatory (inicial + −50%)
 - **🎒 Saqueador** — 🧪 **Mãos Rápidas** (busca/loot mais rápido — 🟡 verificar se loot instantâneo já é vanilla, §7) · 🧪 **Pack Mule** (peso `×(1−[0.10→0.50])`) · 🔧 loot silencioso · 🌐 revelar valor ₽ (global, todos veem — não é lever de classe) · 🎒 contêiner seguro 6 slots (gear) · 🏠 Scav Case (inicial + −50%)
 - **🛡️ Tanque** — 🔧 **Couraça** (dano recebido `×(1−[0.05→0.25])`) · 🧪 **Pack Mule** (compartilhada c/ Saqueador) · 🔧 GL mastery via patch (o slot `AttachedLauncher` é inerte no globals — §7) · 🔧 GL sem penalidade de ergo · ⚠️ 🔧 stamina segurando arma pesada ×0 (zona stances, §6.2) · 🔧 velocidade ×0.9 (debuff) · 🔧 −comida/bebida ×0.7 (debuff imediato = patch, não skill) · 🎒 placas laterais (gear) · 🏠 Rest Station (inicial) + Kitchen (−50%)
 
@@ -139,7 +139,7 @@ As signatures que **escalam** viram **skills custom** (🧪) numa categoria nova
 *`XP/ev` = Current somado por evento — **tunável (F12)**, derivado do alvo ~40 raids; valores finais no playtest. **Nível inicial** por skill = tunável (0 = grind puro · >0 = boost · máx = traço "pronto").
 
 **Notas de implementação:**
-- **Execução, efeito (2):** patch em `MovementContext.MaxSpeed`/`SprintSpeed` (§6.1) condicionado a *Fantasma + arma ativa = melee + nível da Execução*; **compõe** com o stances (§6.2). ⚠️ **Sobrepõe o perk flat "MaxSpeed ×1.1"** do Fantasma (§5) → decidir: (a) fundir o ×1.1 na Execução (velocidade só com melee na mão) ou (b) manter o ×1.1 sempre + bônus da Execução por cima.
+- **Execução, efeito (2):** patch em `MovementContext.MaxSpeed`/`SprintSpeed` (§6.1) condicionado a *Fantasma + arma ativa = melee + nível da Execução*; **compõe** com o stances (§6.2). **Decisão (2026-06-21): FUNDIDO** — o perk flat "MaxSpeed ×1.1" do Fantasma foi **removido**; a velocidade vem **só da Execução** (escala com nv, **apenas com a melee na mão**). Com arma de fogo = velocidade normal.
 - **Eventos de movimento** (Mula, Passo Fantasma): disparam por tick (freq alta, XP/ev minúsculo, escala vanilla 0.005-0.025) → calibrar **relativo** ao Strength/CovertMovement, não por contagem absoluta.
 - **Adrenalina:** não há `SkillActionClass` de "kill" nativo → hook próprio no evento de abate.
 
@@ -189,7 +189,7 @@ Dois canais, **nenhum número hardcoded**:
 | 🎯 Caçador | Resist. braço ADS ⚠️ | 🔧 | `TBD` (zona stances, §6.2) | F12 |
 | 👻 Fantasma | Execução | 🔧 | melee ×20 | F12 |
 | 👻 Fantasma | Passo Fantasma | 🔧 | ruído `×(1−0.5·nv/max)`, piso −50% | F12 |
-| 👻 Fantasma | MaxSpeed | 🔧 | ×1.1 | F12 |
+| 👻 Fantasma | Execução: velocidade c/ melee | 🧪 | `×(1+0.02·nv)` (→+20%, só c/ melee na mão) | F12 |
 | 🎒 Saqueador | Mãos Rápidas | 🧪 | search/loot speed ×`TBD` | F12 |
 | 🎒🛡️ Saq+Tan | Pack Mule | 🧪 | peso `×(1−[0.10→0.50])` | F12 |
 | 🎒 Saqueador | Loot silencioso | 🔧 | volume ×`TBD` | F12 |
