@@ -31,6 +31,7 @@
     <div id="condition-filter"></div>
     <div id="ban-filter"></div>
     <div id="override-filter"></div>
+    <div id="trader-override-filter"></div>
     <div id="mod-filter"></div>
     <div id="delta-filter"></div>
   </div>
@@ -39,6 +40,8 @@
     <button type="button" class="bulk-btn" id="rescan-mods" data-tip="Re-read the local SPT database (picks up items from newly-added mods). Does not fetch tarkov.dev/market." data-tip-pos="bottom">⟳ rescan</button>
     <button type="button" class="bulk-btn" id="refresh-all-dev" data-tip="Update ALL prices via tarkov.dev" data-tip-pos="bottom">↻ dev</button>
     <button type="button" class="bulk-btn" id="refresh-all-market" data-tip="Update ALL prices via tarkov-market" data-tip-pos="bottom">↻ market</button>
+    <span class="trader-pending-pill" id="trader-pending-pill" hidden data-tip="Trader buy-price overrides written via TRLTraderPrices. Restart SPT to apply." data-tip-pos="bottom"></span>
+    <button type="button" class="bulk-btn bulk-btn--danger" id="clear-trader-overrides" hidden data-tip="Remove every trader buy-price override (TRLTraderPrices)." data-tip-pos="bottom">Clear trader overrides</button>
   </div>
 
   <button type="button" class="flea-level-widget" id="flea-level-widget" title="Edit minimum flea level (globals.json)">
@@ -70,7 +73,9 @@ let CATEGORIES = null;
 let CATEGORY_ICONS = {}; // category id → icon URL (also keyed by name as fallback)
 let TRADERS = {};       // nickname → { id, avatar }
 let TRADER_ID_TO_NAME = {}; // trader MongoId → nickname (built from TRADERS)
-let TRADER_OVERRIDES = {};  // traderId → { tpl → priceRUB } (from GET /api/trader-overrides)
+let TRADER_OVERRIDES = {};  // traderId → { tpl → { count, currency } } (NATIVE amount; from GET /api/trader-overrides)
+let TRADER_MOD_INSTALLED = true;  // companion mod TRLTraderPrices present? (from GET /api/trader-overrides)
+let CURRENCY_RATES = { RUB: 1 };  // { RUB:1, USD, EUR, GP } rubles-per-native-unit (from meta.json)
 const FENCE_ID = '579dc571d53a0658a154fbec'; // Fence — dynamic assort, not editable
 let META = null;
 let CAT_COUNTS = {};    // categoryId -> count of items
@@ -79,6 +84,7 @@ const selectedGroups     = new Set();  // names selected in Group multiselect
 const selectedConditions = new Set();  // conditionType values selected
 const selectedBans       = new Set();  // ban filter values: 'ok' | 'bsg' | 'custom'
 const selectedOverrides  = new Set();  // override filter values: 'override' | 'vanilla'
+const selectedTraderOverrides = new Set();  // trader-override filter: 'override' | 'vanilla'
 const selectedMods       = new Set();  // modSource names selected (custom items from mods)
 const DELTA_STORAGE_KEY  = 'trl-items-management.delta';
 let deltaSource = 'dev';   // 'dev' | 'market'
@@ -399,6 +405,15 @@ async function load() {
     CATEGORIES = cats;
     META = meta;
     TRADERS = traders || {};
+    // Currency conversion rates (rubles per unit) for the in-game native preview.
+    // RUB is implicit (=1). Missing currencies fall back to 1 (no conversion shown).
+    {
+      const rates = (META && META.sources && META.sources.spt && META.sources.spt.currencyRates) || {};
+      CURRENCY_RATES = { RUB: 1 };
+      for (const k of ['USD', 'EUR', 'GP']) {
+        if (rates[k] != null && rates[k] > 0) CURRENCY_RATES[k] = rates[k];
+      }
+    }
     // Build reverse lookup (id → nickname) so detail rows can resolve a trader's
     // display name / avatar from the traderId carried on each offer.
     TRADER_ID_TO_NAME = {};
@@ -410,7 +425,8 @@ async function load() {
     try {
       const tr = await fetch('/api/trader-overrides').then(r => r.json());
       TRADER_OVERRIDES = (tr && tr.ok && tr.overrides) ? tr.overrides : {};
-    } catch (_) { TRADER_OVERRIDES = {}; }
+      TRADER_MOD_INSTALLED = (tr && tr.ok) ? (tr.modInstalled !== false) : true;
+    } catch (_) { TRADER_OVERRIDES = {}; TRADER_MOD_INSTALLED = true; }
 
     // Walk category tree once and index icon URLs by both id and name so the
     // table's Group column can find the right icon for any item.
@@ -427,6 +443,7 @@ async function load() {
     buildConditionFilter();
     buildBanFilter();
     buildOverrideFilter();
+    buildTraderOverrideFilter();
     buildModFilter();
     buildDeltaFilter();
     bindControls();
@@ -442,11 +459,13 @@ const GROUP_STORAGE_KEY     = 'trl-items-management.groups';
 const CONDITION_STORAGE_KEY = 'trl-items-management.conditions';
 const BAN_STORAGE_KEY       = 'trl-items-management.bans';
 const OVERRIDE_STORAGE_KEY  = 'trl-items-management.overrides';
+const TRADER_OVERRIDE_STORAGE_KEY = 'trl-items-management.trader-overrides';
 const MOD_STORAGE_KEY       = 'trl-items-management.mods';
 let groupDropdown = null;
 let conditionDropdown = null;
 let banDropdown = null;
 let overrideDropdown = null;
+let traderOverrideDropdown = null;
 let modDropdown = null;
 
 function buildDeltaFilter() {
@@ -593,6 +612,61 @@ function buildOverrideFilter() {
   });
   overrideDropdown.setValue([...selectedOverrides]);
   document.getElementById('override-filter').appendChild(overrideDropdown.root);
+}
+
+// True if ANY editable money offer of this item has a trader-price override
+// pinned at its (traderId, tpl). Shared by the filter + its counts.
+function itemHasTraderOverride(it) {
+  const traders = it.spt && it.spt.traders ? it.spt.traders : [];
+  for (const t of traders) {
+    const traderId = t.traderId || (t.name ? (TRADERS[t.name] && TRADERS[t.name].id) : null);
+    if (!traderId || traderId === FENCE_ID) continue;
+    const editable = (t.editable === true) || (TRADER_MONEY_CURRENCIES.has(t.currency) && t.currency !== 'BARTER');
+    if (!editable) continue;
+    if (traderOverrideFor(traderId, it.id) != null) return true;
+  }
+  return false;
+}
+
+// Trader-override filter chip — mirrors buildOverrideFilter but keyed on
+// per-trader buy-price overrides (TRLTraderPrices) rather than flea overrides.
+function buildTraderOverrideFilter() {
+  let editedCount = 0, vanillaCount = 0;
+  for (const it of ITEM_LIST) {
+    if (itemHasTraderOverride(it)) editedCount++; else vanillaCount++;
+  }
+  const options = [
+    { value: 'override', label: 'Trader-edited', iconHtml: '<span class="badge badge--override">OVR</span>', count: editedCount },
+    { value: 'vanilla',  label: 'No trader edit', count: vanillaCount },
+  ];
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(TRADER_OVERRIDE_STORAGE_KEY) || '[]');
+    if (Array.isArray(saved)) saved.forEach(v => selectedTraderOverrides.add(v));
+  } catch (e) {}
+
+  traderOverrideDropdown = createDropdown({
+    placeholder: 'Trader',
+    options,
+    multi: true,
+    onChange: (vals) => {
+      selectedTraderOverrides.clear();
+      vals.forEach(v => selectedTraderOverrides.add(v));
+      try { localStorage.setItem(TRADER_OVERRIDE_STORAGE_KEY, JSON.stringify(vals)); } catch (e) {}
+      render();
+    },
+  });
+  traderOverrideDropdown.setValue([...selectedTraderOverrides]);
+  document.getElementById('trader-override-filter').appendChild(traderOverrideDropdown.root);
+}
+
+// Recompute trader-override filter counts in place (after a save/restore/clear).
+function refreshTraderOverrideFilter() {
+  if (!traderOverrideDropdown) return;
+  const host = document.getElementById('trader-override-filter');
+  if (host) host.innerHTML = '';
+  traderOverrideDropdown = null;
+  buildTraderOverrideFilter();
 }
 
 function buildModFilter() {
@@ -869,6 +943,11 @@ function bindControls() {
   if (devAllBtn) devAllBtn.addEventListener('click', () => refreshAll('dev'));
   if (mktAllBtn) mktAllBtn.addEventListener('click', () => refreshAll('market'));
 
+  // Clear ALL trader buy-price overrides (TRLTraderPrices).
+  const clearTraderBtn = document.getElementById('clear-trader-overrides');
+  if (clearTraderBtn) clearTraderBtn.addEventListener('click', () => clearAllTraderOverrides());
+  updateTraderTopbar();
+
   // Condition / Group / Ban are handled by multi-select dropdowns
   // (buildConditionFilter / buildGroupFilter / buildBanFilter).
 }
@@ -917,6 +996,7 @@ function filterStateKey() {
     [...selectedGroups].sort().join(','),
     [...selectedBans].sort().join(','),
     [...selectedOverrides].sort().join(','),
+    [...selectedTraderOverrides].sort().join(','),
     [...selectedMods].sort().join(','),
     deltaMin, deltaMax, deltaSource, activeCategoryId, _dataVersion,
   ].join('|');
@@ -956,6 +1036,13 @@ function filterItems() {
       let match = false;
       if (selectedOverrides.has('override') && edited)  match = true;
       if (selectedOverrides.has('vanilla')  && !edited) match = true;
+      if (!match) continue;
+    }
+    if (selectedTraderOverrides.size > 0) {
+      const edited = itemHasTraderOverride(it);
+      let match = false;
+      if (selectedTraderOverrides.has('override') && edited)  match = true;
+      if (selectedTraderOverrides.has('vanilla')  && !edited) match = true;
       if (!match) continue;
     }
     if (selectedMods.size > 0) {
@@ -1076,6 +1163,15 @@ function renderNow() {
 
   // Click handlers (delegated)
   tbl.addEventListener('click', onTableClick);
+  // T10: keyboard activation — Enter/Space on a focused trader cell opens edit.
+  tbl.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const cell = e.target.closest('td.trader-edit-cell');
+    if (!cell || cell.classList.contains('is-editing')) return;
+    e.preventDefault();
+    const row = cell.closest('tr.trader-row');
+    if (row) openTraderEdit(row);
+  });
   bindRewardHover(tbl);
   main.querySelectorAll('th').forEach(th => {
     th.addEventListener('click', (ev) => {
@@ -1377,17 +1473,25 @@ function bindRewardHover(tableEl) {
 }
 
 function onTableClick(e) {
-  // Click on a trader-row edit button (inside the item detail) → inline edit.
-  const traderEditBtn = e.target.closest('.trader-edit-btn');
-  if (traderEditBtn) {
+  // Inline restore ↺ on an overridden trader row → delete the override directly.
+  const traderRestoreBtn = e.target.closest('.trader-restore-btn');
+  if (traderRestoreBtn) {
     e.stopPropagation();
-    const row = traderEditBtn.closest('tr.trader-row');
-    if (row) openTraderEdit(row);
+    const row = traderRestoreBtn.closest('tr.trader-row');
+    if (row) restoreTraderOverride(row);
     return;
   }
   // Clicks inside an open trader-edit form: let the form's own handlers fire
   // (don't let the click bubble up to toggle/close the detail row).
   if (e.target.closest('.trader-edit-form')) { e.stopPropagation(); return; }
+  // Click anywhere on an editable trader cell (not just the pencil) → inline edit.
+  const traderCell = e.target.closest('td.trader-edit-cell');
+  if (traderCell) {
+    e.stopPropagation();
+    const row = traderCell.closest('tr.trader-row');
+    if (row) openTraderEdit(row);
+    return;
+  }
 
   // Click on reward badge → toggle reward popover
   const rewardBadge = e.target.closest('.reward-badge');
@@ -1794,14 +1898,15 @@ function openInlineEdit(cell) {
 function toast(msg, kind) {
   const c = document.getElementById('toasts');
   const t = document.createElement('div');
-  t.className = 'toast' + (kind === 'err' ? ' is-error' : '');
-  t.innerHTML = (kind === 'err' ? '⚠ ' : '✓ ') + escapeHtml(msg);
+  t.className = 'toast' + (kind === 'err' ? ' is-error' : kind === 'warn' ? ' is-warn' : '');
+  const sigil = kind === 'err' ? '⚠ ' : kind === 'warn' ? '⚠ ' : '✓ ';
+  t.innerHTML = sigil + escapeHtml(msg);
   c.appendChild(t);
   requestAnimationFrame(() => t.classList.add('is-show'));
   setTimeout(() => {
     t.classList.remove('is-show');
     setTimeout(() => t.remove(), 300);
-  }, kind === 'err' ? 5000 : 3000);
+  }, (kind === 'err' || kind === 'warn') ? 5000 : 3000);
 }
 
 // Promise-based confirmation modal. Resolves true (confirm) / false (cancel/Esc).
@@ -1890,13 +1995,118 @@ async function refreshAll(source) {
 // ── Per-trader price editing (companion mod TRLTraderPrices) ─────────────────
 const TRADER_MONEY_CURRENCIES = new Set(['RUB', 'USD', 'EUR', 'GP']);
 const CURRENCY_SYMBOL = { RUB: '₽', USD: '$', EUR: '€', GP: 'GP' };
+const CURRENCY_PILL_CLASS = { USD: 'currency--usd', EUR: 'currency--eur', GP: 'currency--gp' };
+// Currencies that get a faint rouble-equivalent hint next to their native value.
+// GP is intentionally excluded (no meaningful ₽ conversion shown to the player).
+const CURRENCY_RUB_HINT = new Set(['USD', 'EUR']);
 
-// Resolve the current override (priceRUB) for a (trader, tpl), or null.
+// Native amount (integer) → rouble-equivalent via CURRENCY_RATES. RUB is identity.
+function rubFromNative(native, cur) {
+  if (native == null) return null;
+  const rate = CURRENCY_RATES[cur];
+  if (!rate || rate <= 0) return null;
+  return Math.round(native * rate);
+}
+
+// Total override count + how many traders carry at least one.
+function traderOverrideTotals() {
+  let total = 0; let traders = 0;
+  for (const tpls of Object.values(TRADER_OVERRIDES)) {
+    const n = tpls ? Object.keys(tpls).length : 0;
+    if (n > 0) { total += n; traders++; }
+  }
+  return { total, traders };
+}
+
+// Show/hide the topbar "clear trader overrides" button + pending pill.
+function updateTraderTopbar() {
+  const { total, traders } = traderOverrideTotals();
+  const btn  = document.getElementById('clear-trader-overrides');
+  const pill = document.getElementById('trader-pending-pill');
+  if (btn)  btn.hidden  = total === 0;
+  if (pill) {
+    pill.hidden = total === 0;
+    pill.textContent = total > 0 ? `${total} trader edit${total === 1 ? '' : 's'} pending` : '';
+  }
+}
+
+// Reset ALL trader buy-price overrides (DELETE /api/trader-price/all).
+async function clearAllTraderOverrides() {
+  const { total, traders } = traderOverrideTotals();
+  if (total === 0) return;
+  const ok = await confirmDialog({
+    title: 'Reset ALL trader buy-price overrides?',
+    body: `Removes ${total} override${total === 1 ? '' : 's'} across ${traders} trader${traders === 1 ? '' : 's'}. Cannot be undone.`,
+    confirmText: 'Reset all',
+  });
+  if (!ok) return;
+  const btn = document.getElementById('clear-trader-overrides');
+  if (btn) { btn.disabled = true; btn.classList.add('is-busy'); }
+  try {
+    const r = await fetch('/api/trader-price/all', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    const data = await r.json();
+    if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+    TRADER_OVERRIDES = {};
+    // Re-render any open trader rows so OVR badges / struck-through bases clear.
+    document.querySelectorAll('tr.detail .trader-edit-table').forEach(rerenderTraderTable);
+    refreshTraderOverrideFilter();
+    updateTraderTopbar();
+    const n = data.removedCount != null ? data.removedCount : total;
+    toast(`${n} trader override${n === 1 ? '' : 's'} removed · restart SPT to apply${data.warning ? ` (${data.warning})` : ''}`, data.warning ? 'warn' : 'ok');
+  } catch (err) {
+    toast('Failed to reset trader overrides: ' + err.message, 'err');
+  } finally {
+    if (btn) { btn.disabled = false; btn.classList.remove('is-busy'); }
+  }
+}
+
+// Re-render every trader row in a given <table.trader-edit-table> from ITEMS.
+function rerenderTraderTable(table) {
+  const tpl = table.dataset.traderTpl;
+  const item = ITEMS[tpl];
+  if (!item) return;
+  const traders = item.spt && item.spt.traders ? item.spt.traders : [];
+  if (traders.length === 0) return;
+  table.innerHTML = traders.map(t => renderTraderRow(item, t)).join('');
+}
+
+// Resolve the current override for a (trader, tpl) as { count, currency }, or null.
+// `count` is the NATIVE amount the game charges (not rouble-equivalent).
 function traderOverrideFor(traderId, tpl) {
   if (!traderId) return null;
   const byTrader = TRADER_OVERRIDES[traderId];
   if (!byTrader || byTrader[tpl] == null) return null;
   return byTrader[tpl];
+}
+
+// Override's native count, or null. Tolerates a legacy plain-number override.
+function traderOverrideCount(traderId, tpl) {
+  const ovr = traderOverrideFor(traderId, tpl);
+  if (ovr == null) return null;
+  return (typeof ovr === 'object') ? ovr.count : ovr;
+}
+
+// PRIMARY native value markup: number + currency symbol/pill.
+//   RUB → "18.397 ₽" via fmtRub.  USD/EUR/GP → "417 $" as a colored pill.
+function nativeValueMarkup(native, cur) {
+  if (native == null) return `<span class="trader-price-val is-null">—</span>`;
+  if (cur === 'RUB') return `<span class="trader-price-val">${fmtRub(native)}</span>`;
+  const cls = CURRENCY_PILL_CLASS[cur] || 'currency--usd';
+  const sym = CURRENCY_SYMBOL[cur] || cur;
+  const rate = CURRENCY_RATES[cur];
+  const tip = (rate && rate > 0)
+    ? escapeAttr('In-game native price (@ ' + rate.toLocaleString('en-US') + ' ₽/' + sym + ')')
+    : 'In-game native price';
+  return `<span class="trader-price-val"><span class="currency ${cls}" data-tip="${tip}">` +
+    `${native.toLocaleString('en-US')} ${escapeHtml(sym)}</span></span>`;
+}
+
+// Faint rouble-equivalent hint "≈ X ₽" for USD/EUR only. '' otherwise (incl. GP/RUB).
+function rubHintMarkup(native, cur) {
+  if (!CURRENCY_RUB_HINT.has(cur)) return '';
+  const rub = rubFromNative(native, cur);
+  if (rub == null) return '';
+  return ` <span class="trader-rub-hint" data-tip="${escapeAttr('rouble-equivalent (@ ' + CURRENCY_RATES[cur].toLocaleString('en-US') + ' ₽/' + (CURRENCY_SYMBOL[cur] || cur) + ')')}">≈ ${rub.toLocaleString('en-US')} ₽</span>`;
 }
 
 // Render one offer row. Editable rows (money & not Fence) get an inline edit
@@ -1913,32 +2123,114 @@ function renderTraderRow(it, t) {
   const ovr = editable ? traderOverrideFor(traderId, tpl) : null;
   const hasOvr = ovr != null;
 
-  const meta = `<small class="vendor">${escapeHtml(t.currency || '?')} · L${t.loyaltyLevel}${t.questLocked?' · 🔒':''}${t.unlimited?' · ∞':''}</small>`;
+  // Quest-lock 🔒 gets its own tooltip so it isn't confused with Fence's marker.
+  const lockGlyph = t.questLocked ? ` · <span class="trader-lock" data-tip="Quest-locked offer">🔒</span>` : '';
+  const meta = `<small class="vendor">${escapeHtml(t.currency || '?')} · L${t.loyaltyLevel}${lockGlyph}${t.unlimited?' · ∞':''}</small>`;
   const nameCell = `<td class="k">${escapeHtml(t.name)} ${meta}</td>`;
+
+  // Muted em-dash for a missing effective price.
+  const nullCell = `<span class="trader-price-val is-null">—</span>`;
 
   if (isBarter) {
     return `<tr>${nameCell}<td class="v"><span class="vendor" data-tip="barter — not editable">barter</span></td></tr>`;
   }
   if (isFence) {
-    return `<tr>${nameCell}<td class="v">${fmt(t.priceRUB)} ₽ <span class="vendor" data-tip="Fence — dynamic, not supported">🔒</span></td></tr>`;
+    // Distinct Fence marker/label — not the quest-lock 🔒. Shows native value + ₽ hint.
+    const fencePrice = t.price != null
+      ? nativeValueMarkup(t.price, t.currency) + rubHintMarkup(t.price, t.currency)
+      : nullCell;
+    return `<tr>${nameCell}<td class="v">${fencePrice} <span class="vendor trader-fence-tag" data-tip="Fence — dynamic assort, not editable">Fence — not editable</span></td></tr>`;
   }
   if (!editable) {
-    return `<tr>${nameCell}<td class="v">${t.priceRUB!=null ? fmt(t.priceRUB)+' ₽':'—'}</td></tr>`;
+    const ro = t.price != null
+      ? nativeValueMarkup(t.price, t.currency) + rubHintMarkup(t.price, t.currency)
+      : nullCell;
+    return `<tr>${nameCell}<td class="v">${ro}</td></tr>`;
   }
 
-  // Editable: show effective (override or base) price + OVR badge + edit control.
-  const base = t.priceRUB;
-  const eff = hasOvr ? ovr : base;
+  // Editable: NATIVE model. base = game's native amount; override.count overrides it.
+  const base = t.price;
+  const ovrCount = hasOvr ? ((typeof ovr === 'object') ? ovr.count : ovr) : null;
+  const eff = hasOvr && ovrCount != null ? ovrCount : base;
+  const rubHint = eff != null ? rubHintMarkup(eff, t.currency) : '';
+  // OVR tooltip in NATIVE units; ₽ equivalent only appended for USD/EUR.
+  const effRub = CURRENCY_RUB_HINT.has(t.currency) ? rubFromNative(eff, t.currency) : null;
+  const effRubTxt = effRub != null ? ` ≈ ${effRub.toLocaleString('en-US')} ₽` : '';
   const badge = hasOvr
-    ? ` <span class="badge badge--override" data-tip="${escapeAttr('Override active — buy price pinned at ' + eff.toLocaleString('en-US') + ' ₽ (base ' + (base!=null?base.toLocaleString('en-US'):'?') + ' ' + sym + '). Edit / restore here.')}">OVR</span>`
+    ? ` <span class="badge badge--override" data-tip="${escapeAttr('Override active — buy price pinned at ' + (eff!=null?eff.toLocaleString('en-US'):'?') + ' ' + sym + ' (base ' + (base!=null?base.toLocaleString('en-US'):'?') + ' ' + sym + ')' + effRubTxt + '. Edit / restore here.')}">OVR</span>`
     : '';
-  return `<tr class="trader-row" data-trader-id="${escapeAttr(traderId||'')}" data-trader-tpl="${escapeAttr(tpl)}" data-trader-base="${base!=null?base:''}" data-trader-cur="${escapeAttr(t.currency||'')}">` +
+
+  // T6: when overridden, show the base struck-through then the override value (native).
+  let priceMarkup;
+  if (eff == null) {
+    priceMarkup = nullCell;
+  } else if (hasOvr) {
+    priceMarkup = (base != null ? `<s class="trader-price-base">${nativeValueMarkup(base, t.currency)}</s> → ` : '') +
+      `<span class="is-overridden">${nativeValueMarkup(eff, t.currency)}</span>${rubHint}`;
+  } else {
+    priceMarkup = `${nativeValueMarkup(eff, t.currency)}${rubHint}`;
+  }
+  // T7: inline restore ↺ for overridden rows (deletes without opening the editor).
+  const restoreBtn = hasOvr
+    ? `<button class="trader-restore-btn" type="button" data-tip="Restore default buy price" aria-label="Restore default buy price">↺</button>`
+    : '';
+  return `<tr class="trader-row is-editable${hasOvr?' is-overridden':''}" data-trader-id="${escapeAttr(traderId||'')}" data-trader-tpl="${escapeAttr(tpl)}" data-trader-base="${base!=null?base:''}" data-trader-cur="${escapeAttr(t.currency||'')}">` +
     nameCell +
-    `<td class="v trader-edit-cell">` +
-      `<span class="trader-price-val${hasOvr?' is-overridden':''}">${eff!=null?fmt(eff)+' ₽':'—'}</span>${badge}` +
-      `<button class="trader-edit-btn" type="button" title="Edit buy price">${ICON_EDIT}</button>` +
+    `<td class="v trader-edit-cell" data-tip="Click to edit buy price" tabindex="0" role="button" aria-label="Edit buy price">` +
+      priceMarkup + badge + restoreBtn +
+      `<button class="trader-edit-btn" type="button" title="Edit buy price" tabindex="-1">${ICON_EDIT}</button>` +
     `</td>` +
   `</tr>`;
+}
+
+// Re-render a single trader row from ITEMS, returning a fresh <tr>. Optionally
+// moves focus back to the row's edit cell (keyboard return after an action).
+function rerenderTraderRowEl(row, focusBack) {
+  const tpl = row.dataset.traderTpl;
+  const traderId = row.dataset.traderId;
+  const item = ITEMS[tpl];
+  if (!item) return null;
+  const t = (item.spt && item.spt.traders ? item.spt.traders : []).find(x =>
+    (x.traderId || (x.name && TRADERS[x.name] && TRADERS[x.name].id)) === traderId);
+  if (!t) return null;
+  const tmp = document.createElement('tbody');
+  tmp.innerHTML = renderTraderRow(item, t);
+  const fresh = tmp.firstElementChild;
+  row.replaceWith(fresh);
+  if (focusBack) {
+    const cell = fresh.querySelector('.trader-edit-cell');
+    if (cell) cell.focus();
+  }
+  return fresh;
+}
+
+// T7: inline restore (↺ on the row, no editor). DELETEs the override directly.
+async function restoreTraderOverride(row) {
+  const tpl = row.dataset.traderTpl;
+  const traderId = row.dataset.traderId;
+  const btn = row.querySelector('.trader-restore-btn');
+  if (btn) btn.disabled = true;
+  try {
+    const r = await fetch('/api/trader-price', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tpl, traderId }),
+    });
+    const data = await r.json();
+    if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+    if (TRADER_OVERRIDES[traderId]) {
+      delete TRADER_OVERRIDES[traderId][tpl];
+      if (Object.keys(TRADER_OVERRIDES[traderId]).length === 0) delete TRADER_OVERRIDES[traderId];
+    }
+    rerenderTraderRowEl(row, true);
+    refreshTraderOverrideFilter();
+    updateTraderTopbar();
+    const item = ITEMS[tpl];
+    toast(`${(item && (item.shortName || item.name)) || tpl}: trader override removed → default · restart SPT to apply${data.warning ? ` (${data.warning})` : ''}`, data.warning ? 'warn' : 'ok');
+  } catch (err) {
+    if (btn) btn.disabled = false;
+    toast('Failed to restore: ' + err.message, 'err');
+  }
 }
 
 // Open the inline editor on a trader row. Mirrors the flea inline edit.
@@ -1949,32 +2241,55 @@ function openTraderEdit(row) {
   const cur = row.dataset.traderCur;
   const sym = CURRENCY_SYMBOL[cur] || cur || '';
   const base = row.dataset.traderBase !== '' ? Number(row.dataset.traderBase) : null;
-  const ovr = traderOverrideFor(traderId, tpl);
-  const current = ovr != null ? ovr : (base != null ? base : '');
-  const hasOvr = ovr != null;
+  const ovrCount = traderOverrideCount(traderId, tpl);
+  // Input is the NATIVE amount; default to the current effective native value.
+  const current = ovrCount != null ? ovrCount : (base != null ? base : '');
+  const hasOvr = ovrCount != null;
+
+  const isRub = cur === 'RUB';
+  const rate = CURRENCY_RATES[cur];
+  const showRubPreview = CURRENCY_RUB_HINT.has(cur) && rate && rate > 0;
 
   const cell = row.querySelector('.trader-edit-cell');
   cell.classList.add('is-editing');
   const form = document.createElement('form');
   form.className = 'trader-edit-form';
   form.onsubmit = (e) => { e.preventDefault(); return false; };
-  const tip = `Buy price in RUB-equivalent. In-game shows native currency (${escapeAttr(cur)}). ` +
-    `Writes to TRLTraderPrices override; applies to all loyalty levels. Restart SPT to apply.`;
   form.innerHTML =
-    `<input type="number" min="1" step="1" value="${current}" autofocus data-tip="${tip}">` +
+    // NATIVE integer input — step 1, no rate snapping. No data-tip here: it would pop on
+    // autofocus and collide with the preview/hint below (which already explain the field).
+    `<input type="number" min="1" step="1" value="${current}" autofocus aria-label="Buy price in ${escapeAttr(cur)}">` +
+    `<div class="trader-edit-form__preview" aria-live="polite"></div>` +
     `<div class="trader-edit-form__actions">` +
       `<button class="save" type="button" title="Save (Enter)">Save</button>` +
       (hasOvr ? `<button class="restore" type="button" title="Restore default price (undo edit)">↺</button>` : '') +
       `<button class="cancel" type="button" title="Cancel (Esc)">×</button>` +
     `</div>` +
-    `<div class="trader-edit-form__hint">edit in RUB-equivalent · in-game shows ${escapeHtml(sym)} · all loyalty levels · restart SPT to apply</div>`;
+    `<div class="trader-edit-form__hint">edit in ${escapeHtml(cur)} · applies to all loyalty levels · restart SPT to apply</div>`;
   cell.appendChild(form);
 
   const input   = form.querySelector('input');
+  const preview = form.querySelector('.trader-edit-form__preview');
   const save    = form.querySelector('button.save');
   const cancel  = form.querySelector('button.cancel');
   const restore = form.querySelector('button.restore');
   input.focus(); input.select();
+
+  // Live preview. USD/EUR → rouble-equivalent; GP → "= N GP"; RUB → "= N ₽".
+  function updatePreview() {
+    const v = parseInt(input.value, 10);
+    if (!Number.isFinite(v) || v <= 0) { preview.textContent = ''; return; }
+    if (showRubPreview) {
+      const rub = Math.round(v * rate);
+      preview.textContent = `≈ ${rub.toLocaleString('en-US')} ₽ (@ ${rate.toLocaleString('en-US')} ₽/${sym})`;
+    } else if (isRub) {
+      preview.textContent = `= ${v.toLocaleString('en-US')} ₽`;
+    } else {
+      preview.textContent = `= ${v.toLocaleString('en-US')} ${sym}`;
+    }
+  }
+  input.addEventListener('input', updatePreview);
+  updatePreview();
 
   let docClickHandler = null;
   function closeForm() {
@@ -1982,18 +2297,9 @@ function openTraderEdit(row) {
     form.remove();
     if (docClickHandler) document.removeEventListener('mousedown', docClickHandler, true);
   }
-  function rerenderRow() {
-    const item = ITEMS[tpl];
-    if (!item) return;
-    const t = (item.spt && item.spt.traders ? item.spt.traders : []).find(x =>
-      (x.traderId || (x.name && TRADERS[x.name] && TRADERS[x.name].id)) === traderId);
-    if (!t) return;
-    const tmp = document.createElement('tbody');
-    tmp.innerHTML = renderTraderRow(item, t);
-    row.replaceWith(tmp.firstElementChild);
-  }
+  function rerenderRow() { return rerenderTraderRowEl(row, true); }
 
-  cancel.onclick = closeForm;
+  cancel.onclick = () => { closeForm(); const cell2 = row.querySelector('.trader-edit-cell'); if (cell2) cell2.focus(); };
   input.onkeydown = (ev) => {
     if (ev.key === 'Escape') closeForm();
     if (ev.key === 'Enter')  { ev.preventDefault(); save.click(); }
@@ -2002,27 +2308,31 @@ function openTraderEdit(row) {
   setTimeout(() => document.addEventListener('mousedown', docClickHandler, true), 0);
 
   save.onclick = async () => {
-    const price = parseInt(input.value, 10);
-    if (!Number.isFinite(price) || price <= 0) { toast('Invalid value', 'err'); input.focus(); return; }
+    const count = parseInt(input.value, 10);
+    if (!Number.isFinite(count) || count <= 0) { toast('Invalid value', 'err'); input.focus(); return; }
     save.disabled = true; cancel.disabled = true; if (restore) restore.disabled = true;
     try {
       const r = await fetch('/api/trader-price', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tpl, traderId, priceRUB: price }),
+        body: JSON.stringify({ tpl, traderId, count, currency: cur }),
       });
       const data = await r.json();
       if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
-      // Optimistically reflect the new override in the in-memory cache.
+      // Optimistically reflect the new override (NATIVE { count, currency }).
       if (!TRADER_OVERRIDES[traderId]) TRADER_OVERRIDES[traderId] = {};
-      TRADER_OVERRIDES[traderId][tpl] = price;
+      TRADER_OVERRIDES[traderId][tpl] = { count, currency: cur };
       closeForm();
       rerenderRow();
+      refreshTraderOverrideFilter();
+      updateTraderTopbar();
       const item = ITEMS[tpl];
-      const prev = data.previousPrice != null ? `${data.previousPrice.toLocaleString('pt-BR')} → ` : '';
-      let msg = `${(item && (item.shortName || item.name)) || tpl}: trader buy ${prev}${price.toLocaleString('pt-BR')} ₽`;
+      const prevCount = data.previousCount != null ? data.previousCount : data.previousPrice;
+      const prev = prevCount != null ? `${prevCount.toLocaleString('en-US')} → ` : '';
+      let msg = `${(item && (item.shortName || item.name)) || tpl}: trader buy ${prev}${count.toLocaleString('en-US')} ${sym} · restart SPT to apply`;
+      // B2: a successful save with a warning (e.g. mod not installed) is amber, not red.
       if (data.warning) msg += ` (${data.warning})`;
-      toast(msg, data.warning ? 'err' : 'ok');
+      toast(msg, data.warning ? 'warn' : 'ok');
     } catch (err) {
       toast('Failed to save: ' + err.message, 'err');
       save.disabled = false; cancel.disabled = false; if (restore) restore.disabled = false;
@@ -2045,8 +2355,10 @@ function openTraderEdit(row) {
       }
       closeForm();
       rerenderRow();
+      refreshTraderOverrideFilter();
+      updateTraderTopbar();
       const item = ITEMS[tpl];
-      toast(`${(item && (item.shortName || item.name)) || tpl}: trader override removed → default`, 'ok');
+      toast(`${(item && (item.shortName || item.name)) || tpl}: trader override removed → default · restart SPT to apply${data.warning ? ` (${data.warning})` : ''}`, data.warning ? 'warn' : 'ok');
     } catch (err) {
       toast('Failed to restore: ' + err.message, 'err');
       restore.disabled = false; save.disabled = false; cancel.disabled = false;
@@ -2136,13 +2448,15 @@ function renderDetail(it) {
         </table>
       </div>
 
-      <div class="detail-section">
-        <h3>Trader buy (SPT assort)</h3>
+      <div class="detail-section detail-section--full">
+        <h3>Trader buy (SPT assort)${TRADER_MOD_INSTALLED ? '' : ' <span class="trader-mod-warn" data-tip="Install TRLTraderPrices for edits to take effect in-game.">⚠ mod not installed</span>'}</h3>
         <table class="trader-edit-table" data-trader-tpl="${escapeAttr(it.id)}">
           ${sptTraders.length === 0 ? '<tr><td>—</td></tr>' :
             sptTraders.map(t => renderTraderRow(it, t)).join('')}
         </table>
-        <div class="trader-edit-note">Edit in RUB-equivalent; in-game shows native currency. Applies to all loyalty levels. Restart SPT to apply.</div>
+        <div class="trader-edit-note${TRADER_MOD_INSTALLED ? '' : ' is-warn'}">${TRADER_MOD_INSTALLED
+          ? 'Edit in the trader\'s native currency (the amount the game charges). Applies to all loyalty levels. Restart SPT to apply.'
+          : 'TRLTraderPrices not installed — edits are saved but inert. Install the mod, then restart SPT to apply.'}</div>
       </div>
 
     </div>

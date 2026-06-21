@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-21T02:34:35.725Z",
+  "generatedAt": "2026-06-21T04:24:55.253Z",
   "sources": {
     "tarkovDev": {
       "fetchedAt": "2026-06-20T20:29:17.065Z",
@@ -12,7 +12,7 @@
       "count": 4396
     },
     "spt": {
-      "loadedAt": "2026-06-21T02:33:53.487Z",
+      "loadedAt": "2026-06-21T04:24:54.853Z",
       "fleaPricesMtime": "2026-06-07T05:35:40.763Z",
       "fleaPricesSource": "handbook",
       "fleaMinUserLevel": 1,
@@ -22,9 +22,10 @@
       "traderCount": 13,
       "offerCount": 3134,
       "currencyRates": {
-        "source": "handbook",
-        "USD": 120,
-        "EUR": 133
+        "source": "trader-exchange",
+        "USD": 136,
+        "EUR": 158,
+        "GP": 7500
       }
     }
   },

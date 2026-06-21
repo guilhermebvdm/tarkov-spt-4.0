@@ -794,17 +794,32 @@ function handleGetOverrides(req, res) {
 // Unlike flea prices (written into SPT_Data/configs/ragfair.json), trader prices
 // are overridden by a separate server mod that reads its own config/overrides.json
 // at boot. The viewer just maintains that file. Shape:
-//   { "<traderId>": { "<tpl>": <priceRUB> } }
+//   { "<traderId>": { "<tpl>": { "count": <positive int>, "currency": "RUB"|"USD"|"EUR"|"GP" } } }
+// Prices are stored in the trader's NATIVE currency (count + currency); there is
+// NO rouble conversion anywhere.
 // All writes are atomic (tmp + fs.renameSync) and serialized through the same
 // in-process write lock as the flea APIs. NO checks.dat refresh — the file lives
 // outside SPT_Data and is not part of SPT's MD5 manifest.
 // ---------------------------------------------------------------------------
 
-// Read overrides.json at serve time, tolerating a missing file/dir.
+// Read overrides.json at serve time, tolerating a missing file/dir. A CORRUPT
+// file (unparseable JSON) is backed up to a stable .corrupt.bak sibling and
+// treated as {} so the next write self-heals the config.
 function readTraderOverrides() {
   if (!fs.existsSync(TRADER_OVERRIDES)) return {};
-  const obj = readJsonFile(TRADER_OVERRIDES);
-  return obj && typeof obj === 'object' ? obj : {};
+  try {
+    const obj = readJsonFile(TRADER_OVERRIDES);
+    return obj && typeof obj === 'object' ? obj : {};
+  } catch (e) {
+    const backup = TRADER_OVERRIDES + '.corrupt.bak';
+    try {
+      fs.renameSync(TRADER_OVERRIDES, backup);  // overwrite any prior backup
+      console.error(`trader overrides.json is corrupt (${e.message}); backed up to ${backup} and resetting to {}`);
+    } catch (renameErr) {
+      console.error(`trader overrides.json is corrupt (${e.message}); failed to back up: ${renameErr.message}`);
+    }
+    return {};
+  }
 }
 
 // Atomically write the overrides map. Creates config/ on demand. Uses 2-space
@@ -819,17 +834,24 @@ function writeTraderOverrides(obj) {
 }
 
 // GET /api/trader-overrides — current overrides.json map (read at serve time).
-// Returns {} when the mod / file is not present yet.
+// Values are { count, currency } objects (native trader currency, no rouble
+// conversion). Returns {} when the mod / file is not present yet.
 function handleGetTraderOverrides(req, res) {
   try {
-    return sendJson(res, 200, { ok: true, overrides: readTraderOverrides() });
+    return sendJson(res, 200, {
+      ok: true,
+      overrides: readTraderOverrides(),
+      modInstalled: fs.existsSync(TRL_MOD_DIR),
+    });
   } catch (e) {
     return sendJson(res, 500, { error: e.message });
   }
 }
 
-// PATCH /api/trader-price — set a trader-specific price for a tpl.
-// Body: { tpl, traderId, priceRUB }. Writes overrides[traderId][tpl] = priceRUB.
+// PATCH /api/trader-price — set a trader-specific price for a tpl, in the
+// trader's NATIVE currency (no rouble conversion). Body: { tpl, traderId, count,
+// currency }. Writes overrides[traderId][tpl] = { count, currency }.
+const TRADER_CURRENCIES = ['RUB', 'USD', 'EUR', 'GP'];
 function handlePatchTraderPrice(req, res) {
   let body = '';
   req.on('data', c => { body += c; if (body.length > 1e6) { req.destroy(); }});
@@ -840,27 +862,37 @@ function handlePatchTraderPrice(req, res) {
 
     const tpl      = payload.tpl;
     const traderId = payload.traderId;
-    const priceRUB = payload.priceRUB;
+    const count    = payload.count;
+    const currency = payload.currency;
     if (typeof tpl !== 'string' || !/^[a-f0-9]{24}$/i.test(tpl)) {
       return sendJson(res, 400, { error: 'invalid tpl (expected 24-char hex BSG id)' });
     }
     if (typeof traderId !== 'string' || !/^[a-f0-9]{24}$/i.test(traderId)) {
       return sendJson(res, 400, { error: 'invalid traderId (expected 24-char hex MongoId)' });
     }
-    if (!Number.isFinite(priceRUB) || priceRUB <= 0) {
-      return sendJson(res, 400, { error: 'invalid priceRUB (expected finite number > 0)' });
+    if (!Number.isInteger(count) || count <= 0) {
+      return sendJson(res, 400, { error: 'invalid count (expected positive integer)' });
+    }
+    if (typeof currency !== 'string' || !TRADER_CURRENCIES.includes(currency)) {
+      return sendJson(res, 400, { error: 'invalid currency' });
     }
 
     withWriteLock(() => {
       const overrides = readTraderOverrides();
       if (!overrides[traderId] || typeof overrides[traderId] !== 'object') overrides[traderId] = {};
-      const previousPrice = overrides[traderId][tpl] ?? null;
-      overrides[traderId][tpl] = priceRUB;
+      const prev = overrides[traderId][tpl];
+      const previousCount = (prev && typeof prev === 'object' && prev.count != null) ? prev.count : null;
+      overrides[traderId][tpl] = { count, currency };
       writeTraderOverrides(overrides);
+
+      appendEditLog({
+        at: new Date().toISOString(), action: 'set-trader-price', tpl, traderId,
+        count, currency, previousCount, ip: req.socket.remoteAddress || null,
+      });
 
       const modInstalled = fs.existsSync(TRL_MOD_DIR);
       const resp = {
-        ok: true, tpl, traderId, priceRUB, previousPrice,
+        ok: true, tpl, traderId, count, currency, previousPrice: previousCount,
       };
       if (!modInstalled) {
         resp.warning = 'mod not installed — saved but will not apply until TRLTraderPrices is installed';
@@ -895,14 +927,25 @@ function handleDeleteTraderPrice(req, res) {
     withWriteLock(() => {
       const overrides = readTraderOverrides();
       const traderMap = overrides[traderId];
-      const previousPrice = (traderMap && traderMap[tpl] != null) ? traderMap[tpl] : null;
-      if (previousPrice == null) {
+      const prev = (traderMap && traderMap[tpl] != null) ? traderMap[tpl] : null;
+      const previousCount = (prev && typeof prev === 'object' && prev.count != null) ? prev.count : null;
+      if (prev == null) {
         return sendJson(res, 200, { ok: true, tpl, traderId, noop: true, message: 'no override to remove' });
       }
       delete traderMap[tpl];
       if (Object.keys(traderMap).length === 0) delete overrides[traderId];  // prune empty trader
       writeTraderOverrides(overrides);
-      return sendJson(res, 200, { ok: true, tpl, traderId, removed: true, previousPrice });
+
+      appendEditLog({
+        at: new Date().toISOString(), action: 'delete-trader-price', tpl, traderId,
+        previousCount, ip: req.socket.remoteAddress || null,
+      });
+
+      const resp = { ok: true, tpl, traderId, removed: true, previousPrice: previousCount };
+      if (!fs.existsSync(TRL_MOD_DIR)) {
+        resp.warning = 'mod not installed — saved but will not apply until TRLTraderPrices is installed';
+      }
+      return sendJson(res, 200, resp);
     }).catch(e => {
       console.error('delete-trader-price failed:', e);
       if (!res.headersSent) return sendJson(res, 500, { error: e.message });
@@ -916,7 +959,17 @@ function handleDeleteAllTraderPrices(req, res) {
     const overrides = readTraderOverrides();
     const count = Object.values(overrides).reduce((n, m) => n + (m && typeof m === 'object' ? Object.keys(m).length : 0), 0);
     writeTraderOverrides({});
-    return sendJson(res, 200, { ok: true, reset: true, removedCount: count });
+
+    appendEditLog({
+      at: new Date().toISOString(), action: 'reset-trader-prices', removedCount: count,
+      ip: req.socket.remoteAddress || null,
+    });
+
+    const resp = { ok: true, reset: true, removedCount: count };
+    if (!fs.existsSync(TRL_MOD_DIR)) {
+      resp.warning = 'mod not installed — saved but will not apply until TRLTraderPrices is installed';
+    }
+    return sendJson(res, 200, resp);
   }).catch(e => {
     console.error('reset-trader-prices failed:', e);
     if (!res.headersSent) return sendJson(res, 500, { error: e.message });
@@ -1110,10 +1163,13 @@ http.createServer((req, res) => {
     if (err || !st.isFile()) { res.writeHead(404); res.end('not found: ' + urlPath); return; }
     const ext  = path.extname(filePath);
     const type = MIME[ext] || 'application/octet-stream';
-    // Data files mutate (items.json rewritten on every edit/refresh/rescan): no-cache
-    // + ETag revalidation (304 when unchanged). Static assets cache 1h.
-    const isData = urlPath.startsWith('/data/');
-    const cacheControl = isData ? 'no-cache' : 'public, max-age=3600';
+    // App shell (html/css/js) + data files mutate during edits/updates → no-cache with
+    // ETag revalidation (304 when unchanged, fresh when changed) so tool updates show
+    // immediately instead of serving a stale cached UI. Only immutable binary assets
+    // (images/fonts) keep the 1h cache.
+    const longCache = ['.png', '.webp', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf']
+      .includes(ext.toLowerCase());
+    const cacheControl = longCache ? 'public, max-age=3600' : 'no-cache';
     // gzip text types when the client accepts it (items.json ~17MB → ~2-3MB on the wire).
     const useGzip = GZIP_TYPES.has(ext) && /\bgzip\b/.test(req.headers['accept-encoding'] || '');
     const etag = `"${st.size.toString(16)}-${Math.round(st.mtimeMs).toString(16)}${useGzip ? '-gz' : ''}"`;

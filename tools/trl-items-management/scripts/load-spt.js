@@ -11,7 +11,8 @@
  *     isHideoutCraftItem, fleaOverride, effectiveFleaPrice,
  *     weight, width, height, stackMaxSize, conditionType,
  *     handbookCategoryId, parentClassId,
- *     traders: [{ name, priceRUB, currency, loyaltyLevel, unlimited, stock, questLocked }] }
+ *     traders: [{ name, traderId, price, priceRUB, currency, loyaltyLevel, editable, unlimited, stock, questLocked }] }
+ *   (price = native currency amount, raw barter count pre-conversion; priceRUB = rouble-converted)
  *
  * Flea price math (SPT 4.0, validated vs source + 7 in-game scenarios; see
  * docs/flea-formula-validation.md + docs/flea-override-plan.md):
@@ -397,25 +398,53 @@ function main() {
   }
   console.error(`  basePrice on ${baseCount}, fleaPrice on ${priceCount} (${craftItemsWithPrice} craft), overrides: ${overridesApplied}, trader-floored: ${flooredCount}, ceiling-capped: ${cappedCount}, K_trader=${K_trader}`);
 
-  // Currency rates from handbook
+  // Currency rates. USD/EUR come from the ACTUAL trader currency-exchange — what
+  // Peacekeeper sells USD for / Skier sells EUR for, in RUB (lowest loyalty offer) —
+  // because that's the real RUB cost of acquiring the currency. The handbook "nominal
+  // value" (USD 120 / EUR 133) understates it (real exchange ≈ 136 / 158). GP has NO
+  // rouble exchange (you can't buy GP with roubles), so it keeps a handbook value for
+  // internal use only and is NEVER shown as a RUB hint in the viewer. Falls back to the
+  // handbook price if the exchange offer can't be found.
+  function deriveSellRate(traderId, coinTpl) {
+    try {
+      const ap = path.join(dataDir, 'database', 'traders', traderId, 'assort.json');
+      if (!fs.existsSync(ap)) return null;
+      const a = readJson(ap);
+      let best = null; // prefer the lowest-loyalty exchange offer
+      for (const it of a.items) {
+        if (it._tpl !== coinTpl || it.parentId !== 'hideout') continue;
+        const bs = a.barter_scheme[it._id];
+        if (!bs || !bs[0] || !bs[0][0] || bs[0][0]._tpl !== CURRENCY_RUB) continue;
+        const loy = a.loyal_level_items[it._id] ?? 1;
+        if (!best || loy < best.loy) best = { loy, rate: bs[0][0].count };
+      }
+      return best ? best.rate : null;
+    } catch { return null; }
+  }
+  const PEACEKEEPER_ID = '5935c25fb3acc3127c3d8cd9';
+  const SKIER_ID       = '58330581ace78e27b8b10cee';
+  const usdExchange = deriveSellRate(PEACEKEEPER_ID, CURRENCY_USD);
+  const eurExchange = deriveSellRate(SKIER_ID, CURRENCY_EUR);
+  const gpEntry  = handbook.Items.find(x => x.Id === CURRENCY_GP);
   const usdEntry = handbook.Items.find(x => x.Id === CURRENCY_USD);
   const eurEntry = handbook.Items.find(x => x.Id === CURRENCY_EUR);
-  const gpEntry  = handbook.Items.find(x => x.Id === CURRENCY_GP);
-  const usdRate = usdEntry ? usdEntry.Price : FALLBACK_USD_RATE;
-  const eurRate = eurEntry ? eurEntry.Price : FALLBACK_EUR_RATE;
+  const usdRate = usdExchange != null ? usdExchange : (usdEntry ? usdEntry.Price : FALLBACK_USD_RATE);
+  const eurRate = eurExchange != null ? eurExchange : (eurEntry ? eurEntry.Price : FALLBACK_EUR_RATE);
   const gpRate  = gpEntry  ? gpEntry.Price  : FALLBACK_GP_RATE;
-  const rateSource = (usdEntry && eurEntry && gpEntry) ? 'handbook' : 'fallback';
-  console.error(`  currency rates (${rateSource}): USD=${usdRate}, EUR=${eurRate}, GP=${gpRate}`);
+  const rateSource = (usdExchange != null && eurExchange != null) ? 'trader-exchange' : 'handbook-fallback';
+  console.error(`  currency rates (${rateSource}): USD=${usdRate} (PK sell), EUR=${eurRate} (Skier sell), GP=${gpRate} (handbook, no RUB hint)`);
 
-  // Resolve a single barter_scheme requirement to { currency, priceRUB }.
+  // Resolve a single barter_scheme requirement to { currency, price, priceRUB }.
   // currency: 'RUB'|'USD'|'EUR'|'GP' for money tpls, 'BARTER' otherwise.
+  // price is the NATIVE currency amount (raw requirement count, pre-conversion),
+  // rounded to an integer (null for barter — same as priceRUB).
   // priceRUB is the requirement converted to roubles via handbook rate (null for barter).
   function resolveCurrency(reqTpl, count) {
-    if (reqTpl === CURRENCY_RUB) return { currency: 'RUB', priceRUB: count };
-    if (reqTpl === CURRENCY_USD) return { currency: 'USD', priceRUB: Math.round(count * usdRate) };
-    if (reqTpl === CURRENCY_EUR) return { currency: 'EUR', priceRUB: Math.round(count * eurRate) };
-    if (reqTpl === CURRENCY_GP)  return { currency: 'GP',  priceRUB: Math.round(count * gpRate) };
-    return { currency: 'BARTER', priceRUB: null };
+    if (reqTpl === CURRENCY_RUB) return { currency: 'RUB', price: Math.round(count), priceRUB: count };
+    if (reqTpl === CURRENCY_USD) return { currency: 'USD', price: Math.round(count), priceRUB: Math.round(count * usdRate) };
+    if (reqTpl === CURRENCY_EUR) return { currency: 'EUR', price: Math.round(count), priceRUB: Math.round(count * eurRate) };
+    if (reqTpl === CURRENCY_GP)  return { currency: 'GP',  price: Math.round(count), priceRUB: Math.round(count * gpRate) };
+    return { currency: 'BARTER', price: null, priceRUB: null };
   }
   const MONEY_CURRENCIES = new Set(['RUB', 'USD', 'EUR', 'GP']);
 
@@ -485,6 +514,16 @@ function main() {
   // mod-shipped { id, nickname, base, assort } to parse in §5 like vanilla.
   const traderAvatarsDir = path.join(dataDir, 'images', 'trader', 'avatar');
   const avatarFiles = fs.existsSync(traderAvatarsDir) ? new Set(fs.readdirSync(traderAvatarsDir)) : new Set();
+  // resolveAvatar only scans <SPT_Data>/images/trader/avatar (the vanilla dir
+  // serve.js exposes under /spt-images/). VANILLA traders resolve here.
+  // MOD traders (e.g. WTT-Artem) ship their avatar at <modDir>/res/<id>.<ext>;
+  // their base.json avatar field points at /files/trader/avatar/<id>.jpg, which
+  // SPT remaps to that res/ dir at runtime. That path is OUTSIDE SPT_Data/images,
+  // so serve.js's /spt-images/ proxy (confined to SPT_Data/images by its
+  // traversal guard) cannot reach it. Mod avatars are therefore left null on
+  // purpose: serving them would need a new serve.js route + relaxed guard. If you
+  // want them later, add a /mod-images/<mod>/res/<file> route in serve.js and
+  // emit that URL from the mod-trader registration below.
   function resolveAvatar(avatarField) {
     if (!avatarField) return null;
     const filename = path.basename(avatarField);
@@ -525,6 +564,9 @@ function main() {
   const modTraderSources = []; // { modName, id, nickname, baseDir }
   function tryRegisterModTrader(modName, base, baseDir) {
     if (!base || !base.nickname || !base._id || !base.sell_category) return false;
+    // resolveAvatar returns null for mod traders (their avatar lives in
+    // <modDir>/res/<id>.<ext>, outside the served SPT_Data/images dir — see the
+    // resolveAvatar comment above). Left intentionally unresolved.
     registerTrader(base.nickname, base._id, resolveAvatar(base.avatar));
     modTraderSources.push({ modName, id: base._id, nickname: base.nickname, baseDir });
     return true;
@@ -603,17 +645,25 @@ function main() {
             for (const [nameUpper, offers] of Object.entries(def.traders)) {
               const nick     = normTraderName(nameUpper);
               const traderId = nameToId[nick] || nameToId[nameUpper] || null;
+              // normTraderName only handles single-word names; multi-word or
+              // Cyrillic mod trader names miss the registry → traderId null. The
+              // offer is still emitted (priceRUB/currency intact) but won't link
+              // to a trader. Surface it so new mod edge-cases aren't silent.
+              if (traderId === null) {
+                console.error(`  WARNING: ${modName}/${file}: item ${tpl} offer references unknown trader "${nameUpper}" (normTraderName="${nick}") — traderId left null`);
+              }
               for (const offer of Object.values(offers)) {
                 const bs      = offer.barterSettings || {};
                 const barters = offer.barters || [];
                 if (barters.length !== 1) continue; // skip multi-req barters
                 const req = barters[0];
                 const currTpl = MOD_CURRENCY_TPL[req._tpl] || req._tpl;
-                const { currency, priceRUB } = resolveCurrency(currTpl, req.count);
+                const { currency, price, priceRUB } = resolveCurrency(currTpl, req.count);
                 const loyaltyLevel = bs.loyalLevel ?? 1;
                 modTraders.push({
                   name: nick,
                   traderId,
+                  price,
                   priceRUB,
                   currency,
                   loyaltyLevel,
@@ -761,11 +811,12 @@ function main() {
 
       // Resolve price/currency (RUB/USD/EUR/GP money, else BARTER)
       const scheme = barterScheme[offer._id];
+      let price = null;
       let priceRUB = null;
       let currency = 'BARTER';
       if (Array.isArray(scheme) && Array.isArray(scheme[0]) && scheme[0].length === 1) {
         const req = scheme[0][0];
-        ({ currency, priceRUB } = resolveCurrency(req._tpl, req.count));
+        ({ currency, price, priceRUB } = resolveCurrency(req._tpl, req.count));
       }
       if (currency === 'BARTER') barterOffers++;
 
@@ -777,6 +828,7 @@ function main() {
       items[tpl].traders.push({
         name: nickname,
         traderId,
+        price,
         priceRUB,
         currency,
         loyaltyLevel,
@@ -793,10 +845,14 @@ function main() {
   }
 
   // Dedup intra-trader: keep ONE offer per (trader, tpl). Preference order:
-  //   1. an editable (money) offer beats a barter offer (so the editor has a price)
+  //   1. a money offer beats a barter offer (so the editor has a price)
   //   2. then lowest loyalty level
   //   3. then lowest priceRUB
-  // Retained offer always carries traderId + currency.
+  // Retained offer always carries price (native) + currency + priceRUB + traderId
+  // (the whole offer object is kept, so every field rides along).
+  // The money test uses the currency set (NOT `editable`): editable is forced
+  // false for Fence, so keying off it would let a Fence barter offer beat a
+  // Fence money offer. (Latent today — Fence ships 0 static offers — but fixed.)
   let dedupRemoved = 0;
   for (const tpl of Object.keys(items)) {
     const offers = items[tpl].traders;
@@ -806,20 +862,24 @@ function main() {
       const key = o.traderId || o.name; // group by trader id (fallback name)
       const prev = byTrader[key];
       if (!prev) { byTrader[key] = o; continue; }
-      const oMoney    = o.editable === true;
-      const prevMoney = prev.editable === true;
+      const oMoney    = MONEY_CURRENCIES.has(o.currency);
+      const prevMoney = MONEY_CURRENCIES.has(prev.currency);
       let replace;
       if (oMoney !== prevMoney) {
-        replace = oMoney; // prefer the money/editable offer
+        replace = oMoney; // prefer the money offer
       } else {
         replace =
           (o.loyaltyLevel < prev.loyaltyLevel) ||
           (o.loyaltyLevel === prev.loyaltyLevel && (o.priceRUB ?? Infinity) < (prev.priceRUB ?? Infinity));
       }
       if (replace) byTrader[key] = o;
-      dedupRemoved++;
     }
-    items[tpl].traders = Object.values(byTrader);
+    const kept = Object.values(byTrader);
+    // ACTUAL removals = offers in minus offers kept (a log-only counter). The old
+    // `dedupRemoved++` per comparison overcounted: 3+ offers for one (trader,tpl)
+    // produce N-1 comparisons but each comparison isn't necessarily a 1:1 removal.
+    dedupRemoved += offers.length - kept.length;
+    items[tpl].traders = kept;
   }
 
   console.error(`Trader offers: ${totalOffers} total, ${barterOffers} barter, ${questLockedOffers} quest-locked, ${dedupRemoved} dedup-removed`);
@@ -862,7 +922,11 @@ function main() {
   const out = {
     loadedAt: new Date().toISOString(),
     sptDataPath: dataDir,
-    currencyRates: { source: rateSource, USD: usdRate, EUR: eurRate },
+    // rub-per-unit rates from the SPT handbook (currency tpl Price). USD/EUR/GP
+    // let the viewer render native-currency previews for trader offers. `source`
+    // is 'handbook' (live install) or 'fallback' (hardcoded). Verified install
+    // values: USD=120, EUR=133, GP=7500.
+    currencyRates: { source: rateSource, USD: usdRate, EUR: eurRate, GP: gpRate },
     fleaPricesSource: 'handbook',
     // mtime of handbook.json — answers "when were base prices last edited?"
     fleaPricesMtime: fs.statSync(handbookPath).mtime.toISOString(),
