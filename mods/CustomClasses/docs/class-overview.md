@@ -1,0 +1,92 @@
+# Resumo das classes — visão de uma página
+
+> **Data:** 2026-06-20<br>
+> **Status:** 🟢 Vivo<br>
+> **Responsáveis:** Guilherme<br>
+> **Referências:** [class-levers.md](./class-levers.md)<br>
+
+---
+
+Visão **rápida e completa** das 6 classes: o que cada uma é, sua habilidade-assinatura e tudo que será implementado por camada. Para os números e a engenharia, ver [class-levers.md](./class-levers.md) (matriz, decisões, patches) e [`class-matrix.mjs`](../scripts/class-matrix.mjs) (reproduzível).
+
+**Como ler os cards:** `×` = multiplicador de XP da skill (`>1` sobe mais rápido 🟢, `<1` atrofia 🔴) · `Lv` = nível inicial · ⚠️ = depende de coordenar com o stances mod.
+**Camadas:** 🎯 skill · 🧪 skill custom · 🔧 patch · 🎒 item/estação inicial · 🏠 hideout −50% · 🌐 global.
+
+---
+
+## Comparação rápida
+
+| Classe | Pilar | ⭐ Signature | Faz melhor | Balance |
+|---|---|---|---|---|
+| 🩺 **Médico** | Suporte | 🔧 cura quase instantânea, sobrevive a tudo | cura/cirurgia · vitalidade | **topo** · net +6.12 |
+| 🔫 **Fuzileiro** | Combate | 🧪 Adrenalina pós-abate | rifle · recarga · recuo | **topo** · net +6.27 |
+| 🎯 **Caçador** | Precisão | 🧪 Fôlego de Aço (respiração ×3) | sniper/DMR · furtividade | **topo** · net +5.84 |
+| 👻 **Fantasma** | Furtividade | 🔧 Execução (melee ×20) | silêncio · SMG · melee | **topo** · net +6.16 |
+| 🎒 **Saqueador** | Pilhagem | 🧪 Mãos Rápidas + Pack Mule | lockpick · loot · carga | **base** · net +4.06 |
+| 🛡️ **Tanque** | Resistência | 🔧 Couraça + Pack Mule | armadura · HP · lança-granadas | **base** · net +4.22 |
+
+> **Topo ~+6 · base ~+4** — Saqueador e Tanque têm netMult menor de propósito; são compensados pelas signatures 🔧/🧪 (que ficam fora do netMult).
+
+---
+
+## 🩺 Médico — *Medic* · Suporte
+
+> ⭐ **Médico de Combate** 🔧 — cura quase instantânea (tempo **×0.3**), **+50% HP**, cura **andando e atirando** (sem lock de movimento/arma).
+
+- **🟢 Sobe rápido** — **FirstAid** ×2.5 `Lv6` · **FieldMedicine** ×2 `Lv5` · **Surgery** ×2 `Lv4` · **Vitality** ×2 `Lv4` · HideoutManagement ×1.5 `Lv6` · Crafting ×1.5 · Immunity ×1.2 `Lv1`
+- **🔴 Atrofia** — Assault ×0.6 · AimDrills ×0.7 · CovertMovement ×0.7 · Perception ×0.8
+- **🔧 Extra** — membro quebrado cura em **×0.5** do tempo
+- **🎒 Começa com** MedStation  ·  **🏠 Hideout** MedStation −50%
+
+## 🔫 Fuzileiro — *Rifleman* · Combate
+
+> ⭐ **Adrenalina** 🧪 — após um abate: **−recuo / −recarga / −ADS** por `3s + 0.5s/nível`.
+
+- **🟢 Sobe rápido** — **Assault** ×2.5 `Lv7` · **UsecArsystems** (NATO) ×2.5 `Lv4` · **BearAksystems** (Leste) ×2.5 `Lv4` · AimDrills ×1.5 `Lv5` · MagDrills ×1.5 `Lv4` · Endurance ×1.5 `Lv5` · StressResistance ×1.3 · Pistol ×1.2
+- **🔴 Atrofia** — CovertMovement ×0.6 · Attention ×0.7 · Search ×0.8
+- **🔧 Extra** — resistência a supressão (aim-punch **×0.5**) · antitravamento (malfunction **×0.5**, conserto **×2**)
+- **🎒🏠** Workbench −50%
+
+## 🎯 Caçador — *Hunter* · Precisão
+
+> ⭐ **Fôlego de Aço** 🧪 — prende a respiração `×(1+0.1·nível) ≤ ×3`, com **−sway**.
+
+- **🟢 Sobe rápido** — **Sniper** ×2.5 `Lv7` · **DMR** ×1.5 `Lv2` · AimDrills ×1.5 · ProneMovement ×1.5 `Lv3` · Pistol ×1.3 `Lv2` · Perception ×1.3 `Lv3` · Metabolism ×1.3 · CovertMovement ×1.2 `Lv3`
+- **🔴 Atrofia** — Assault ×0.6 · SMG ×0.6
+- **🔧 Extra** — saque de pistola **×0.5** · ADS por arma (sniper/DMR ×0.85, AR ×1.15) · ⚠️ resistência de braço em ADS
+- **🎒🏠** Shooting Range + Intelligence Center −50%
+
+## 👻 Fantasma — *Ghost* · Furtividade
+
+> ⭐ **Execução** 🔧 — dano de **melee ×20**.
+
+- **🟢 Sobe rápido** — **SilentOps** ×2.5 `Lv6` · **SMG** ×1.8 `Lv4` · CovertMovement ×1.5 `Lv6` · Perception ×1.5 `Lv5` · Pistol ×1.5 · Melee ×1.5 `Lv3` · LightVests ×1.3 · ProneMovement ×1.5 · LockPicking ×1.3 `Lv3`
+- **🔴 Atrofia** — Assault ×0.6 · StressResistance ×0.7 · Shotgun ×0.7
+- **🔧 Extra** — **Passo Fantasma** (ruído de todas as ações até **−50%**, não silêncio total) · MaxSpeed **×1.1**
+- **🎒🏠** Lavatory −50%
+
+## 🎒 Saqueador — *Looter* · Pilhagem
+
+> ⭐ **Mãos Rápidas** 🧪 (busca/loot mais rápido) + **Pack Mule** 🧪 (peso `×(1−[0.10→0.50])`).
+
+- **🟢 Sobe rápido** — **LockPicking** ×3 `Lv8` · **ShadowConnections** ×2.5 `Lv6` · **Strength** ×2.5 `Lv6` · Attention ×1.3 `Lv8` · Perception ×1.3 `Lv5` · Search ×1.3 `Lv6` · HideoutManagement ×1.2 · Intellect ×1.2 · Charisma ×1.2
+- **🔴 Atrofia** — Assault ×0.6 · AimDrills ×0.7 · StressResistance ×0.7
+- **🔧 Extra** — loot silencioso · **🌐 revelar valor ₽** (global — todos veem)
+- **🎒 Começa com** contêiner seguro de 6 slots + Scav Case  ·  **🏠 Hideout** Scav Case −50%
+
+## 🛡️ Tanque — *Tank* · Resistência
+
+> ⭐ **Couraça** 🔧 (dano recebido `×(1−[0.05→0.25])`) + **Pack Mule** 🧪 (compartilhada com o Saqueador).
+
+- **🟢 Sobe rápido** — **StressResistance** ×2 · **HeavyVests** ×1.5 `Lv3` · Health ×1.5 `Lv4` · Vitality ×1.5 `Lv4` · Strength ×1.5 `Lv5` · Shotgun ×1.5 `Lv1` · Throwing ×1.5 `Lv1` · AttachedLauncher ×1.5 · Melee ×1.2
+- **🔴 Atrofia** — Pistol ×0.7 · DMR ×0.7 · AimDrills ×0.7 · CovertMovement ×0.5 · Metabolism ×0.5
+- **🔧 Extra** — maestria de lança-granadas (sem penalidade de ergo) · ⚠️ stamina segurando arma pesada **×0** · velocidade **×0.9** · −fome/sede **×0.7**
+- **🎒🏠** Rest Station + Kitchen + placas laterais · Kitchen −50%
+
+---
+
+## Histórico de Alterações
+
+| Data | Autor | Alteração |
+|---|---|---|
+| 2026-06-20 | Guilherme | Criação. One-pager de resumo das 6 classes (tabela de comparação + card por classe com todas as camadas), derivado de [class-levers.md](./class-levers.md). |
