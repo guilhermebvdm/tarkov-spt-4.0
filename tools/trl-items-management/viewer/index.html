@@ -40,8 +40,8 @@
     <button type="button" class="bulk-btn" id="rescan-mods" data-tip="Re-read the local SPT database (picks up items from newly-added mods). Does not fetch tarkov.dev/market." data-tip-pos="bottom">⟳ rescan</button>
     <button type="button" class="bulk-btn" id="refresh-all-dev" data-tip="Update ALL prices via tarkov.dev" data-tip-pos="bottom">↻ dev</button>
     <button type="button" class="bulk-btn" id="refresh-all-market" data-tip="Update ALL prices via tarkov-market" data-tip-pos="bottom">↻ market</button>
-    <span class="trader-pending-pill" id="trader-pending-pill" hidden data-tip="Trader buy-price overrides written via TRLTraderPrices. Restart SPT to apply." data-tip-pos="bottom"></span>
-    <button type="button" class="bulk-btn bulk-btn--danger" id="clear-trader-overrides" hidden data-tip="Remove every trader buy-price override (TRLTraderPrices)." data-tip-pos="bottom">Clear trader overrides</button>
+    <span class="trader-pending-pill" id="trader-pending-pill" hidden data-tip="Trader sell-price overrides written via TRLTraderPrices. Restart SPT to apply." data-tip-pos="bottom"></span>
+    <button type="button" class="bulk-btn bulk-btn--danger" id="clear-trader-overrides" hidden data-tip="Remove every trader sell-price override (TRLTraderPrices)." data-tip-pos="bottom">Clear trader overrides</button>
   </div>
 
   <button type="button" class="flea-level-widget" id="flea-level-widget" title="Edit minimum flea level (globals.json)">
@@ -629,7 +629,7 @@ function itemHasTraderOverride(it) {
 }
 
 // Trader-override filter chip — mirrors buildOverrideFilter but keyed on
-// per-trader buy-price overrides (TRLTraderPrices) rather than flea overrides.
+// per-trader sell-price overrides (TRLTraderPrices) rather than flea overrides.
 function buildTraderOverrideFilter() {
   let editedCount = 0, vanillaCount = 0;
   for (const it of ITEM_LIST) {
@@ -646,7 +646,7 @@ function buildTraderOverrideFilter() {
   } catch (e) {}
 
   traderOverrideDropdown = createDropdown({
-    placeholder: 'Trader',
+    placeholder: 'Trader edit',
     options,
     multi: true,
     onChange: (vals) => {
@@ -943,7 +943,7 @@ function bindControls() {
   if (devAllBtn) devAllBtn.addEventListener('click', () => refreshAll('dev'));
   if (mktAllBtn) mktAllBtn.addEventListener('click', () => refreshAll('market'));
 
-  // Clear ALL trader buy-price overrides (TRLTraderPrices).
+  // Clear ALL trader sell-price overrides (TRLTraderPrices).
   const clearTraderBtn = document.getElementById('clear-trader-overrides');
   if (clearTraderBtn) clearTraderBtn.addEventListener('click', () => clearAllTraderOverrides());
   updateTraderTopbar();
@@ -1319,12 +1319,23 @@ function renderRow(it) {
   // Trader cell — stacked SELL (player→trader, tarkov.dev) and BUY (trader→player, SPT assort)
   const traderSellValue = c.priceTraderSell ? c.priceTraderSell.value : null;
   const traderSellName  = c.priceTraderSell ? c.priceTraderSell.vendor : null;
-  // Best buy = cheapest non-BARTER trader offer in spt.traders[], with its loyaltyLevel
+  // Best buy = cheapest non-BARTER trader offer in spt.traders[], with its loyaltyLevel.
+  // Trader OVERRIDES are applied here (effective price = override count × currency rate) so
+  // an edited trader price shows in the item row, not only in the detail panel.
   let traderBuy = null;
   if (it.spt && Array.isArray(it.spt.traders) && it.spt.traders.length) {
-    const candidates = it.spt.traders.filter(t => t.currency !== 'BARTER' && t.priceRUB != null);
+    const candidates = it.spt.traders
+      .filter(t => t.currency !== 'BARTER' && t.priceRUB != null)
+      .map(t => {
+        const tid = t.traderId || (t.name && TRADERS[t.name] ? TRADERS[t.name].id : null);
+        const ov  = tid ? traderOverrideFor(tid, it.id) : null;
+        const ovCount = ov != null ? ((typeof ov === 'object') ? ov.count : ov) : null;
+        const rate = CURRENCY_RATES[t.currency] != null ? CURRENCY_RATES[t.currency] : 1;
+        const effPriceRUB = ovCount != null ? Math.round(ovCount * rate) : t.priceRUB;
+        return Object.assign({}, t, { effPriceRUB, overridden: ovCount != null });
+      });
     if (candidates.length) {
-      candidates.sort((a, b) => a.priceRUB - b.priceRUB);
+      candidates.sort((a, b) => a.effPriceRUB - b.effPriceRUB);
       traderBuy = candidates[0];
     }
   }
@@ -1334,13 +1345,17 @@ function renderRow(it) {
     if (name) return `<span class="trader-avatar trader-avatar--xs trader-avatar--placeholder" title="${escapeAttr(name)}">${escapeHtml(name.charAt(0))}</span>`;
     return '';
   }
+  // Reference = the TRADER (consistent with the expanded detail). Colored/labeled by
+  // SEMANTIC (not row position), so a sell-only mod item never mislabels:
+  //   S (red)  = trader SELLS this to you  → the SPT assort (the editable price you pay)
+  //   B (green)= trader BUYS this from you → tarkov.dev buyback (what the trader pays you)
   const trader = (traderSellValue != null || traderBuy)
     ? `<div class="cell-trader cell-trader--stacked">` +
-        (traderSellValue != null
-          ? `<div class="cell-trader__line"><span class="cell-trader__dir" title="Player sells to trader">↓</span>${avatarFor(traderSellName)}<span class="cell-trader__num">${fmtRub(traderSellValue)}</span></div>`
-          : '') +
         (traderBuy
-          ? `<div class="cell-trader__line"><span class="cell-trader__dir" title="Player buys from trader">↑</span>${avatarFor(traderBuy.name)}<span class="cell-trader__num">${fmtRub(traderBuy.priceRUB)}</span><small class="cell-trader__ll">LL${traderBuy.loyaltyLevel}${traderBuy.questLocked?' 🔒':''}</small></div>`
+          ? `<div class="cell-trader__line cell-trader__line--sell" data-tip="S = trader SELLS this to you — the assort price you pay (SPT)"><span class="cell-trader__tag cell-trader__tag--sell" aria-label="Trader sells to you">S</span>${avatarFor(traderBuy.name)}<span class="cell-trader__num${traderBuy.overridden?' is-overridden':''}">${fmtRub(traderBuy.effPriceRUB)}</span>${traderBuy.overridden?` <span class="badge badge--override cell-trader__ovr" data-tip="Trader sell-price override — restart SPT to apply">OVR</span>`:''}<small class="cell-trader__ll">LL${traderBuy.loyaltyLevel}${traderBuy.questLocked?' 🔒':''}</small></div>`
+          : '') +
+        (traderSellValue != null
+          ? `<div class="cell-trader__line cell-trader__line--buy" data-tip="B = trader BUYS this from you — buyback (tarkov.dev)"><span class="cell-trader__tag cell-trader__tag--buy" aria-label="Trader buys from you">B</span>${avatarFor(traderSellName)}<span class="cell-trader__num">${fmtRub(traderSellValue)}</span></div>`
           : '') +
       `</div>`
     : '<span class="price is-null">—</span>';
@@ -2030,12 +2045,12 @@ function updateTraderTopbar() {
   }
 }
 
-// Reset ALL trader buy-price overrides (DELETE /api/trader-price/all).
+// Reset ALL trader sell-price overrides (DELETE /api/trader-price/all).
 async function clearAllTraderOverrides() {
   const { total, traders } = traderOverrideTotals();
   if (total === 0) return;
   const ok = await confirmDialog({
-    title: 'Reset ALL trader buy-price overrides?',
+    title: 'Reset ALL trader sell-price overrides?',
     body: `Removes ${total} override${total === 1 ? '' : 's'} across ${traders} trader${traders === 1 ? '' : 's'}. Cannot be undone.`,
     confirmText: 'Reset all',
   });
@@ -2049,6 +2064,10 @@ async function clearAllTraderOverrides() {
     TRADER_OVERRIDES = {};
     // Re-render any open trader rows so OVR badges / struck-through bases clear.
     document.querySelectorAll('tr.detail .trader-edit-table').forEach(rerenderTraderTable);
+    // Clear OVR markers from visible item rows in the main table too.
+    document.querySelectorAll('tr[data-id]').forEach(r => {
+      if (r.querySelector('.cell-trader__ovr')) rerenderMainRow(r.getAttribute('data-id'));
+    });
     refreshTraderOverrideFilter();
     updateTraderTopbar();
     const n = data.removedCount != null ? data.removedCount : total;
@@ -2157,7 +2176,7 @@ function renderTraderRow(it, t) {
   const effRub = CURRENCY_RUB_HINT.has(t.currency) ? rubFromNative(eff, t.currency) : null;
   const effRubTxt = effRub != null ? ` ≈ ${effRub.toLocaleString('en-US')} ₽` : '';
   const badge = hasOvr
-    ? ` <span class="badge badge--override" data-tip="${escapeAttr('Override active — buy price pinned at ' + (eff!=null?eff.toLocaleString('en-US'):'?') + ' ' + sym + ' (base ' + (base!=null?base.toLocaleString('en-US'):'?') + ' ' + sym + ')' + effRubTxt + '. Edit / restore here.')}">OVR</span>`
+    ? ` <span class="badge badge--override" data-tip="${escapeAttr('Override active — trader sell price pinned at ' + (eff!=null?eff.toLocaleString('en-US'):'?') + ' ' + sym + ' (base ' + (base!=null?base.toLocaleString('en-US'):'?') + ' ' + sym + ')' + effRubTxt + '. Edit / restore here.')}">OVR</span>`
     : '';
 
   // T6: when overridden, show the base struck-through then the override value (native).
@@ -2172,13 +2191,13 @@ function renderTraderRow(it, t) {
   }
   // T7: inline restore ↺ for overridden rows (deletes without opening the editor).
   const restoreBtn = hasOvr
-    ? `<button class="trader-restore-btn" type="button" data-tip="Restore default buy price" aria-label="Restore default buy price">↺</button>`
+    ? `<button class="trader-restore-btn" type="button" data-tip="Restore default sell price" aria-label="Restore default sell price">↺</button>`
     : '';
   return `<tr class="trader-row is-editable${hasOvr?' is-overridden':''}" data-trader-id="${escapeAttr(traderId||'')}" data-trader-tpl="${escapeAttr(tpl)}" data-trader-base="${base!=null?base:''}" data-trader-cur="${escapeAttr(t.currency||'')}">` +
     nameCell +
-    `<td class="v trader-edit-cell" data-tip="Click to edit buy price" tabindex="0" role="button" aria-label="Edit buy price">` +
+    `<td class="v trader-edit-cell" data-tip="Click to edit the trader's sell price" tabindex="0" role="button" aria-label="Edit trader sell price">` +
       priceMarkup + badge + restoreBtn +
-      `<button class="trader-edit-btn" type="button" title="Edit buy price" tabindex="-1">${ICON_EDIT}</button>` +
+      `<button class="trader-edit-btn" type="button" title="Edit trader sell price" tabindex="-1">${ICON_EDIT}</button>` +
     `</td>` +
   `</tr>`;
 }
@@ -2204,6 +2223,23 @@ function rerenderTraderRowEl(row, focusBack) {
   return fresh;
 }
 
+// Re-render the MAIN table row for a tpl (preserving its expanded state + open detail
+// sibling) so a trader-override edit reflects in the item row's TRADER column, not just
+// the detail panel. No-op if the row is currently windowed out (correct on next render).
+function rerenderMainRow(tpl) {
+  const item = ITEMS[tpl];
+  if (!item) return;
+  const sel = (window.CSS && CSS.escape) ? CSS.escape(tpl) : tpl;
+  const mainRow = document.querySelector('tr[data-id="' + sel + '"]');
+  if (!mainRow) return;
+  const wasExpanded = mainRow.classList.contains('is-expanded');
+  const tmp = document.createElement('tbody');
+  tmp.innerHTML = renderRow(item);
+  const fresh = tmp.firstElementChild;
+  if (wasExpanded && fresh) fresh.classList.add('is-expanded');
+  mainRow.replaceWith(fresh);
+}
+
 // T7: inline restore (↺ on the row, no editor). DELETEs the override directly.
 async function restoreTraderOverride(row) {
   const tpl = row.dataset.traderTpl;
@@ -2223,6 +2259,7 @@ async function restoreTraderOverride(row) {
       if (Object.keys(TRADER_OVERRIDES[traderId]).length === 0) delete TRADER_OVERRIDES[traderId];
     }
     rerenderTraderRowEl(row, true);
+    rerenderMainRow(tpl);
     refreshTraderOverrideFilter();
     updateTraderTopbar();
     const item = ITEMS[tpl];
@@ -2258,7 +2295,7 @@ function openTraderEdit(row) {
   form.innerHTML =
     // NATIVE integer input — step 1, no rate snapping. No data-tip here: it would pop on
     // autofocus and collide with the preview/hint below (which already explain the field).
-    `<input type="number" min="1" step="1" value="${current}" autofocus aria-label="Buy price in ${escapeAttr(cur)}">` +
+    `<input type="number" min="1" step="1" value="${current}" autofocus aria-label="Trader sell price in ${escapeAttr(cur)}">` +
     `<div class="trader-edit-form__preview" aria-live="polite"></div>` +
     `<div class="trader-edit-form__actions">` +
       `<button class="save" type="button" title="Save (Enter)">Save</button>` +
@@ -2324,12 +2361,13 @@ function openTraderEdit(row) {
       TRADER_OVERRIDES[traderId][tpl] = { count, currency: cur };
       closeForm();
       rerenderRow();
+      rerenderMainRow(tpl);
       refreshTraderOverrideFilter();
       updateTraderTopbar();
       const item = ITEMS[tpl];
       const prevCount = data.previousCount != null ? data.previousCount : data.previousPrice;
       const prev = prevCount != null ? `${prevCount.toLocaleString('en-US')} → ` : '';
-      let msg = `${(item && (item.shortName || item.name)) || tpl}: trader buy ${prev}${count.toLocaleString('en-US')} ${sym} · restart SPT to apply`;
+      let msg = `${(item && (item.shortName || item.name)) || tpl}: trader sell ${prev}${count.toLocaleString('en-US')} ${sym} · restart SPT to apply`;
       // B2: a successful save with a warning (e.g. mod not installed) is amber, not red.
       if (data.warning) msg += ` (${data.warning})`;
       toast(msg, data.warning ? 'warn' : 'ok');
@@ -2355,6 +2393,7 @@ function openTraderEdit(row) {
       }
       closeForm();
       rerenderRow();
+      rerenderMainRow(tpl);
       refreshTraderOverrideFilter();
       updateTraderTopbar();
       const item = ITEMS[tpl];
@@ -2441,7 +2480,7 @@ function renderDetail(it) {
       </div>
 
       <div class="detail-section">
-        <h3>Trader sell (tarkov.dev) — best: <span class="price is-canonical">${c.priceTraderSell ? fmt(c.priceTraderSell.value)+' ₽ ('+escapeHtml(c.priceTraderSell.vendor)+')' : '—'}</span></h3>
+        <h3>Trader buy (tarkov.dev) — best: <span class="price is-canonical" data-tip="What the trader pays you (buyback)">${c.priceTraderSell ? fmt(c.priceTraderSell.value)+' ₽ ('+escapeHtml(c.priceTraderSell.vendor)+')' : '—'}</span></h3>
         <table>
           ${traderSell.length === 0 ? '<tr><td>—</td></tr>' :
             traderSell.map(s => `<tr><td class="k">${escapeHtml(s.vendor.name)}</td><td class="v">${fmt(s.priceRUB)} ₽ ${s.currency!=='RUB' ? '<small class="vendor">('+s.price+' '+s.currency+')</small>' : ''}</td></tr>`).join('')}
@@ -2449,7 +2488,7 @@ function renderDetail(it) {
       </div>
 
       <div class="detail-section detail-section--full">
-        <h3>Trader buy (SPT assort)${TRADER_MOD_INSTALLED ? '' : ' <span class="trader-mod-warn" data-tip="Install TRLTraderPrices for edits to take effect in-game.">⚠ mod not installed</span>'}</h3>
+        <h3>Trader sell (SPT assort) <span class="vendor" style="text-transform:none;font-weight:400" data-tip="The price the trader sells this for — what you pay. This is the editable price.">— what you pay</span>${TRADER_MOD_INSTALLED ? '' : ' <span class="trader-mod-warn" data-tip="Install TRLTraderPrices for edits to take effect in-game.">⚠ mod not installed</span>'}</h3>
         <table class="trader-edit-table" data-trader-tpl="${escapeAttr(it.id)}">
           ${sptTraders.length === 0 ? '<tr><td>—</td></tr>' :
             sptTraders.map(t => renderTraderRow(it, t)).join('')}

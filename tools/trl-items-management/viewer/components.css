@@ -725,8 +725,16 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
   font-size: 10px; font-weight: 700;
   color: var(--fg-dim);
 }
-.cell-trader__line:nth-child(1) .cell-trader__dir { color: var(--color-down); } /* sell to trader: ↓ red */
-.cell-trader__line:nth-child(2) .cell-trader__dir { color: var(--color-up); }   /* buy from trader: ↑ green */
+/* B/S letter tags — clearer than arrows; colored by SEMANTIC (not row position) so a
+ * buy-only item never shows a red "buy". S = you sell to trader (red); B = you buy from
+ * trader (green). */
+.cell-trader__tag {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 14px; height: 14px; border-radius: 3px;
+  font-size: 9px; font-weight: 800; line-height: 1; flex: 0 0 auto;
+}
+.cell-trader__tag--sell { color: var(--color-down); background: color-mix(in srgb, var(--color-down) 16%, transparent); }
+.cell-trader__tag--buy  { color: var(--color-up);   background: color-mix(in srgb, var(--color-up) 16%, transparent); }
 .cell-trader--stacked .cell-trader__num { font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
 .cell-trader__ll {
   background: var(--bg-input);
@@ -737,6 +745,9 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
   font-weight: 700;
   letter-spacing: .3px;
 }
+/* Trader buy override in the item row: accent the value + a compact OVR badge. */
+.cell-trader__num.is-overridden { color: var(--accent-bright); font-weight: 600; }
+.badge.cell-trader__ovr { font-size: 8px; padding: 0 3px; line-height: 1.4; }
 
 /* ── Reward popover ────────────────────────────────────────────────────────── */
 .reward-popover {
