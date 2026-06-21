@@ -12,21 +12,25 @@
   "iconFile": "fuzileiro.png",
   "nameColor": "#b0573a",
   "skills": {
-    "Assault": 10,
-    "RecoilControl": 4,
-    "AimDrills": 4,
-    "Endurance": 3,
-    "Attention": 3,
-    "MagDrills": 6
+    "Assault": 7,
+    "UsecArsystems": 3,
+    "BearAksystems": 3,
+    "AimDrills": 5,
+    "MagDrills": 4,
+    "Endurance": 5
   },
   "skillMultipliers": {
-    "Assault": 2,
-    "AimDrills": 2,
-    "RecoilControl": 2,
-    "MagDrills": 2,
-    "Endurance": 2,
-    "Throwing": 2,
-    "CovertMovement": 0.7
+    "Assault": 2.5,
+    "UsecArsystems": 2,
+    "BearAksystems": 2,
+    "AimDrills": 1.5,
+    "MagDrills": 1.5,
+    "Endurance": 1.5,
+    "StressResistance": 1.3,
+    "Pistol": 1.2,
+    "CovertMovement": 0.6,
+    "Attention": 0.7,
+    "Search": 0.8
   },
   "hideout": {
     "Workbench": 1

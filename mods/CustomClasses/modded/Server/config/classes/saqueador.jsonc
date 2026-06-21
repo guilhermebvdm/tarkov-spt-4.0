@@ -12,25 +12,29 @@
   "iconFile": "saqueador.png",
   "nameColor": "#c4ad45",
   "skills": {
-    "Assault": 2,
-    "Strength": 2,
-    "Attention": 10,
-    "Perception": 10,
-    "Intellect": 8,
-    "Memory": 5,
-    "Search": 10
+    "Lockpicking": 8,
+    "Strength": 7,
+    "ShadowConnections": 6,
+    "Attention": 8,
+    "Perception": 5,
+    "Search": 6
   },
   "skillMultipliers": {
-    "Attention": 3,
-    "Perception": 3,
-    "Intellect": 2,
-    "Endurance": 2,
-    "Search": 2,
-    "Strength": 2,
-    "RecoilControl": 0.7
+    "Lockpicking": 3,
+    "Strength": 3,
+    "ShadowConnections": 2.5,
+    "Attention": 1.3,
+    "Perception": 1.3,
+    "Search": 1.3,
+    "HideoutManagement": 1.2,
+    "Intellect": 1.2,
+    "Charisma": 1.2,
+    "Assault": 0.6,
+    "AimDrills": 0.7,
+    "StressResistance": 0.7
   },
   "hideout": {
-    "Security": 1
+    "ScavCase": 1
   },
   "outfit": {
     "usec": {

@@ -12,22 +12,25 @@
   "iconFile": "medicoDeCombate.png",
   "nameColor": "#6f9455",
   "skills": {
-    "Assault": 5,
-    "Vitality": 5,
-    "Health": 3,
-    "StressResistance": 4,
-    "Attention": 2,
-    "Surgery": 7
+    "FirstAid": 5,
+    "FieldMedicine": 5,
+    "Surgery": 4,
+    "Vitality": 4,
+    "HideoutManagement": 6,
+    "Immunity": 1
   },
   "skillMultipliers": {
+    "FirstAid": 2.5,
+    "FieldMedicine": 2,
     "Surgery": 2,
-    "Vitality": 1.5,
-    "Health": 1.5,
-    "Immunity": 1.5,
-    "StressResistance": 1.3,
-    "RecoilControl": 0.7,
-    "FirstAid": 1.5,
-    "FieldMedicine": 1.5
+    "Vitality": 2,
+    "HideoutManagement": 1.5,
+    "Crafting": 1.5,
+    "Immunity": 1.2,
+    "Assault": 0.6,
+    "AimDrills": 0.7,
+    "CovertMovement": 0.7,
+    "Perception": 0.8
   },
   "hideout": {
     "MedStation": 1

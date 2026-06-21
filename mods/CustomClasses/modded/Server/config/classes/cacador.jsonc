@@ -13,23 +13,25 @@
   "iconFile": "cacador.png",
   "nameColor": "#c2973f",
   "skills": {
-    "Sniper": 8,
-    "Endurance": 5,
-    "Perception": 6,
-    "Attention": 4,
-    "CovertMovement": 5
+    "Sniper": 7,
+    "DMR": 2,
+    "ProneMovement": 3,
+    "Pistol": 2,
+    "Perception": 2,
+    "CovertMovement": 3
   },
   "skillMultipliers": {
-    "Sniper": 2,
-    "AimDrills": 2,
-    "Endurance": 2,
-    "CovertMovement": 2,
-    "Perception": 2,
-    "Attention": 1.5,
-    "Assault": 0.7
+    "Sniper": 2.5,
+    "DMR": 1.5,
+    "AimDrills": 1.5,
+    "ProneMovement": 1.5,
+    "Pistol": 1.3,
+    "Perception": 1.3,
+    "Metabolism": 1.3,
+    "CovertMovement": 1.2,
+    "Assault": 0.6
   },
   "hideout": {
-    "Heating": 1,
     "ShootingRange": 1
   },
   "loadout": {

@@ -135,6 +135,8 @@ public static class SkillWeights
         { SkillTypes.AimDrills, "C" }, { SkillTypes.TroubleShooting, "C" },
         { SkillTypes.SMG, "C" }, { SkillTypes.LMG, "C" }, { SkillTypes.HMG, "C" },
         { SkillTypes.Launcher, "C" }, { SkillTypes.AttachedLauncher, "C" },
+        // Item 047: weapon-system gems (NATO/Eastern) — Combat. Mirror em scripts/skill-weights.mjs.
+        { SkillTypes.UsecArsystems, "C" }, { SkillTypes.BearAksystems, "C" },
         // P — Practical (RZ map + dead practical skills from the RZ doc; FirstAid/FieldMedicine revived by SE)
         { SkillTypes.Surgery, "P" }, { SkillTypes.CovertMovement, "P" }, { SkillTypes.Search, "P" },
         { SkillTypes.MagDrills, "P" }, { SkillTypes.LightVests, "P" }, { SkillTypes.HeavyVests, "P" },
@@ -143,6 +145,8 @@ public static class SkillWeights
         { SkillTypes.Sniping, "P" }, { SkillTypes.ProneMovement, "P" }, { SkillTypes.WeaponModding, "P" },
         { SkillTypes.AdvancedModding, "P" }, { SkillTypes.NightOps, "P" }, { SkillTypes.SilentOps, "P" },
         { SkillTypes.Lockpicking, "P" },
+        // Item 047: ShadowConnections gem (scav cooldown / cultists) — Practical. Note: enum é "Shadowconnections" (c minúsculo).
+        { SkillTypes.Shadowconnections, "P" },
         // S — faction/special (SE faction passives; not part of the Ph/M/C/P coverage rule)
         { SkillTypes.UsecNegotiations, "S" }, { SkillTypes.BearRawpower, "S" },
     };

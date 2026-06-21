@@ -203,13 +203,13 @@ public class OrphanEditionSaveLoadRouter(
 
 ## 8. Checklist de implementação
 
-- [ ] Escrever os 6 `.jsonc` (4 modificar + 2 criar) com a matriz de `class-matrix.mjs` (IDs no schema; estações §5: Caçador SR+IC, Tanque Rest+Kitchen).
-- [ ] Gerar gear de fantasma/tanque via `extract-from-profile.mjs` a partir do profile-fonte escolhido.
-- [ ] Deletar os 6 `.jsonc` aposentados (repo + install).
-- [ ] Adicionar as 3 entradas em `SkillWeights.cs` `Categories` (caixa `Shadowconnections`).
-- [ ] Criar `OrphanEditionSaveLoadRouter.cs` (lista das 6 aposentadas pt+en; ler `orphanEditionFallback` de `settings.jsonc`; defesa se fallback ausente).
-- [ ] `node class-matrix.mjs` + `check-skill-costs.mjs` sem flag de custo; `class-balance-snapshot.mjs` ok.
-- [ ] Validar: criar perfil de cada classe (skills/mults/loadout/hideout) + carregar um perfil de classe deletada (não crasha; vira "Standard").
+- [x] Escrever os 6 `.jsonc` (4 modificar + 2 criar) com a matriz de `class-matrix.mjs` (hideout: Médico=MedStation, Fuzileiro=Workbench, Caçador=ShootingRange, Fantasma=WaterCloset, Saqueador=ScavCase, Tanque=RestSpace).
+- [x] Gear de fantasma/tanque por **clone direto** do operadorFurtivo/operadorTatico (placeholder, antes de deletar).
+- [x] Deletar os 6 `.jsonc` aposentados (repo). *(install: no `/compile-mod`)*
+- [x] Adicionar as 3 entradas em `SkillWeights.cs` `Categories` (`UsecArsystems`/`BearAksystems`→C, `Shadowconnections`→P).
+- [~] ~~Criar `OrphanEditionSaveLoadRouter.cs`~~ — **DESCOPADO** (decisão do usuário: sem perfis ao vivo; ver asbuild).
+- [x] `check-skill-costs.mjs` — 6 em [28,32], custos batem com `class-matrix.mjs`.
+- [ ] Validar in-game (item 052) — criar perfil de cada classe (skills/mults/loadout/hideout).
 
 ## 9. Conformidade com skills (auto-checklist)
 
@@ -230,3 +230,4 @@ public class OrphanEditionSaveLoadRouter(
 |---|---|
 | 2026-06-21 | Spec técnica criada via `/create-technical-spec` |
 | 2026-06-21 | Review 01 endereçada (6 pontos aceitos): remap escopado às 6 aposentadas pt+en (PA-01-01), `orphanEditionFallback` cabeado (PA-01-02), defesa de fallback ausente (PA-01-03), gear placeholder via clone (PA-01-04), âncora ProfileHelper 808-811 (PA-01-05), dict compartilhado Commit↔router confirmado (PA-01-06). |
+| 2026-06-21 | `/code-mod`: **router DESCOPADO** (decisão do usuário — sem perfis ao vivo); PA-01-01/02/03 viram moot. Implementado config-only + sync do `SkillWeights.cs`. Ver `05-asbuild.md`. |
