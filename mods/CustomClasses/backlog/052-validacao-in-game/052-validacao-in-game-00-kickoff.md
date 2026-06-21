@@ -28,3 +28,4 @@ Validar o redesign completo **in-game** (não só write+hash — memória `feedb
 
 - As 6 classes jogáveis com identidade observável; achados registrados na memória do mod (`memory/sessions.md`).
 - **F12 validado:** ajustar um parâmetro de cada camada (🔧 e 🧪) e ver o efeito mudar (runtime ou após restart, conforme o caso) — decisão #8.
+- **Fika (2+ players):** a classe/mults de um player **não** afetam as skills/XP do outro (valida o N/A de Fika do 047) · **perfil órfão:** um perfil de classe removida ainda carrega (fallback), não crasha (requisito do 047).

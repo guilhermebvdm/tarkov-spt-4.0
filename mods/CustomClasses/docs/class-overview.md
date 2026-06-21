@@ -55,7 +55,7 @@ Visão **rápida e completa** das 6 classes: o que cada uma é, sua habilidade-a
 - **🟢 Sobe rápido** — **Sniper** ×2.5 `Lv7` · **DMR** ×1.5 `Lv2` · AimDrills ×1.5 · ProneMovement ×1.5 `Lv3` · Pistol ×1.3 `Lv2` · Perception ×1.3 `Lv2` · Metabolism ×1.3 · CovertMovement ×1.2 `Lv3`
 - **🔴 Atrofia** — Assault ×0.6
 - **🔧 Extra** — saque de pistola **×0.5** · ADS por arma (sniper/DMR ×0.85, AR ×1.15) · ⚠️ resistência de braço em ADS
-- **🏠 Hideout** Shooting Range + Intelligence Center (inicial + −50%)
+- **🏠 Hideout** Shooting Range (inicial) + Intelligence Center (−50%)
 
 ## 👻 Fantasma — *Ghost* · Furtividade
 
@@ -82,7 +82,7 @@ Visão **rápida e completa** das 6 classes: o que cada uma é, sua habilidade-a
 - **🟢 Sobe rápido** — **StressResistance** ×2 · **HeavyVests** ×1.5 `Lv3` · Health ×1.5 `Lv4` · Vitality ×1.5 `Lv4` · Strength ×1.5 `Lv5` · Shotgun ×1.5 `Lv1` · Throwing ×1.5 `Lv1` · Melee ×1.5
 - **🔴 Atrofia** — Pistol ×0.7 · DMR ×0.7 · AimDrills ×0.7 · CovertMovement ×0.5 · Metabolism ×0.5
 - **🔧 Extra** — maestria de lança-granadas (sem penalidade de ergo) · ⚠️ stamina segurando arma pesada **×0** · velocidade **×0.9** · −fome/sede **×0.7**
-- **🎒 Loadout** placas laterais  ·  **🏠 Hideout** Rest Station + Kitchen (inicial + −50%)
+- **🎒 Loadout** placas laterais  ·  **🏠 Hideout** Rest Station (inicial) + Kitchen (−50%)
 
 ---
 
