@@ -7,6 +7,8 @@
 
 ---
 
+> ⚠️ **Superseded para o roster (2026-06-20):** o redesign 11→6 ([class-levers.md](./class-levers.md)) substituiu o roster de 11 classes e **revisou a meta para topo ~+6 / base ~+4** (base compensada por signatures 🔧/🧪 fora do netMult) — a meta "~+6 para todas" do §2 abaixo vale só para o histórico das rodadas 040–045. A **fórmula e o método** (custo/netMult ponderados por peso) seguem válidos e são usados pelo [`class-matrix.mjs`](../scripts/class-matrix.mjs).
+
 Como balancear as classes do CustomClasses de forma sistemática e reutilizável (rodadas iterativas). Dois orçamentos por classe, **ambos ancorados no peso de skill** (`modded/Server/SkillWeights.cs`, espelhado em `scripts/skill-weights.mjs`).
 
 > **Limitação assumida:** o peso mede **raridade de aquisição** (BASELINE/nível-esperado), **não poder de combate/utilidade**. Os orçamentos equilibram **investimento**, não poder real (Immunity 10 × Charisma 10 custam parecido, valem diferente em jogo). O ajuste fino de *poder percebido* é do **playtest**, não da fórmula. **Escopo:** só `skills` + `skillMultipliers`; loadout fica de fora (o ₽ é contexto).
@@ -88,3 +90,4 @@ Leitura: o Médico (+6.17) é o **padrão alcançado**; **todas as outras estão
 |---|---|---|
 | 2026-06-13 | mdj | Criação. Modelo de 2 orçamentos (custo + multiplicador ponderado por peso); meta de netMult +2.0 ±0.5 calibrada pela baseline; regra anti-furo. |
 | 2026-06-13 | mdj | **Meta revista (decisão do usuário): netMult ~+6 para todas, Médico de Combate como padrão intacto** — elevar todas ao nível do Médico, diferenciando por *quais* skills (não por tamanho do net). Adicionada ressalva de viabilidade (peso baixo não chega a +6 com teto ×2.0 → sub-decisão por rodada). Reenquadrados §3 (gap até +6) e §4 (subir, não cortar). |
+| 2026-06-20 | Guilherme | Nota de superseded no topo: redesign 11→6 mudou o roster e revisou a meta para topo ~+6 / base ~+4 (ver class-levers.md). Fórmula/método mantidos (usados pelo class-matrix.mjs). |

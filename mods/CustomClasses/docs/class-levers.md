@@ -20,8 +20,8 @@ Cada classe é definida por camadas, marcadas por emoji ao longo do doc:
 | 🎯 | **skill** | `skills` (nível inicial) + `skillMultipliers` (XP-mult). É a **matriz**. Zero patch. |
 | 🧪 | **skill custom** | revive um slot `ESkillId` morto como skill nova (padrão Skills-Extended), efeito lido de `mgr.<skill>.Level` num patch. Aparece no menu de Skills, sobe com XP, é gatilhável por `skillMultipliers`. |
 | 🔧 | **patch per-player** | Harmony keyed na classe (`Info.GameVersion`), para o que skill não cobre (velocidade, ADS, cura instantânea, dano recebido). Flat **ou** escalando com uma skill existente lida no patch. |
-| 🎒 | **loadout** | item/estação inicial no inventário. |
-| 🏠 | **hideout** | estação com `−50%` de tempo. |
+| 🎒 | **loadout** | gear inicial: `loadout.equipped` (arma/armadura/colete) + `loadout.stash`. |
+| 🏠 | **hideout** | estações de `hideout`: 1 pré-construída (inicial) + 1 com `−50%` de tempo. |
 | 🌐 | **global** | afeta **todos** os players (ex.: revelar valor ₽). **NÃO** é lever de classe. |
 
 ---
@@ -35,6 +35,7 @@ Cada classe é definida por camadas, marcadas por emoji ao longo do doc:
 5. **REVIVE morreu** — FIKA 2.2.6 e EFT 0.16.x **não têm sistema de "downed"/revive** (`FikaPlayer.cs:971`: morte é terminal). **NÃO construir do zero.** Por isso o Médico virou **Médico de Combate** (cura quase instantânea), não reanimador.
 6. **Stances mod compõe** (multiplica) em velocidade/inércia/stamina-de-perna; **conflita em stamina de braço** (stances seta `GetHandsRestorationFunc`→0 para o MainPlayer, `Priority.Low`). 2 levers nossos caem nessa zona ⚠️ (ver §6).
 7. **netMult ≠ poder real** — peso baixo + impacto alto (Strength 0.47) é subestimado; peso alto (Immunity/Vests/DMR 3.75) domina o número. netMult é **guia**; cruzar com velocidade de skill (§3) + impacto real ([class-skill-catalog.md](./class-skill-catalog.md)).
+8. **Tudo configurável (F12 + server)** — nenhum número hardcoded sem exposição. Levers de **client** (🔧 patches + efeito das 🧪) → `ConfigEntry` no **F12** (BepInEx Config Manager), runtime quando o patch relê o valor, reinício quando lido só no load. Levers de **server** (🎯 matriz `skills`/`skillMultipliers` — já no editor web; params server de skill custom) → config com **nota de "restart para aplicar 100%"**. Exposição fina avaliada no desenvolvimento (Fase 5). Tabela em §6.4.
 
 ---
 
@@ -97,6 +98,7 @@ Cada classe é definida por camadas, marcadas por emoji ao longo do doc:
 ### 🎒 Saqueador — netMult +4.09 · custo 28.23
 - 🟢 Lockpicking 🐌×3 Lv8 · Strength 🐌×3 Lv7 · ShadowConnections 🐌×2.5 Lv6 · Attention 🐇×1.3 Lv8 · Perception 🐇×1.3 Lv5 · Search 🐇×1.3 Lv6 · HideoutManagement 🐌×1.2 · Intellect 🐇×1.2 · Charisma 🐇×1.2
 - 🔴 Assault 🚶×0.6 · AimDrills 🚶×0.7 · StressResistance 🚶×0.7
+- *Lockpicking/Strength ×3 ficam acima do teto de buff ×2.0 — permitido pela **ressalva de viabilidade peso-baixo** do [balance-model.md](./balance-model.md) §2 (classe de loot tem skills temáticas de peso baixo).*
 
 ### 🛡️ Tanque — netMult +4.28 · custo 30.29
 - 🟢 StressResistance 🚶×2 · HeavyVests 🐌×1.5 Lv3 · Health 🐌×1.5 Lv4 · Vitality 🐌×1.5 Lv4 · Strength 🐌×1.5 Lv5 · Shotgun 🚶×1.5 Lv1 · Throwing 🐌×1.5 Lv1 · Melee 🐌×1.5 *(GL/AttachedLauncher saiu da matriz, era inerte → vira 🔧 signature)*
@@ -106,14 +108,14 @@ Cada classe é definida por camadas, marcadas por emoji ao longo do doc:
 
 ## 5. Camadas além do 🎯 skill (signatures 🔧/🧪 + 🎒 loadout + 🏠 hideout)
 
-> Padrão hideout: cada classe = **1 estação inicial 🎒 + 1 estação −50% tempo 🏠**.
+> **Hideout 🏠:** cada classe = 1 estação **inicial** (pré-construída) + 1 estação **−50% tempo**. **Loadout 🎒:** gear inicial (`equipped` + `stash`) por classe — autorado à parte (ferramenta [`extract-from-profile.mjs`](../scripts/extract-from-profile.mjs), item 046); **as 2 classes novas (Fantasma/Tanque) ainda não têm gear definido** (escopo do 047).
 
-- **🩺 Médico** — 🔧 cura tempo ×0.3, +50% HP, sem lock de movimento/arma · 🔧 membro quebrado cura ×0.5 tempo · 🏠 MedStation −50% · 🎒 início MedStation
-- **🔫 Fuzileiro** — 🧪 **Adrenalina** (pós-abate: −recuo/−recarga/−ADS por `3s + 0.5s/nv`) · 🔧 resist. supressão (aim-punch ×0.5) · 🔧 antitravamento (malfunction ×0.5, fix ×2) · 🎒🏠 Workbench −50%
-- **🎯 Caçador** — 🧪 **Fôlego de Aço** (`×(1+0.1·nv) ≤ ×3`, −sway) · 🔧 saque de pistola ×0.5 · 🔧 ADS por arma (sniper/DMR ×0.85, AR ×1.15) · ⚠️ 🔧 resist. de braço em ADS (zona stances, §6) · 🎒🏠 Shooting Range + Intelligence Center −50%
-- **👻 Fantasma** — 🔧 **Execução** (melee ×20) · 🔧 Passo Fantasma (ruído de todas as ações `×(1−0.5·nv/max)`, até −50%, **NÃO** silêncio total) · 🔧 MaxSpeed ×1.1 · 🎒🏠 Lavatory −50%
-- **🎒 Saqueador** — 🧪 **Mãos Rápidas** (busca/loot mais rápido — 🟡 verificar se loot instantâneo já é vanilla, §7) · 🧪 **Pack Mule** (peso `×(1−[0.10→0.50])`) · 🔧 loot silencioso · 🎒 contêiner seguro 6 slots + Scav Case · 🏠 Scav Case −50% · 🌐 revelar valor ₽ (global, todos veem — não é lever de classe)
-- **🛡️ Tanque** — 🔧 **Couraça** (dano recebido `×(1−[0.05→0.25])`) · 🧪 **Pack Mule** (compartilhada c/ Saqueador) · 🔧 GL mastery via patch (o slot `AttachedLauncher` é inerte no globals — §7) · 🔧 GL sem penalidade de ergo · ⚠️ 🔧 stamina segurando arma pesada ×0 (zona stances, §6) · 🔧 velocidade ×0.9 (debuff) · 🔧 −comida/bebida ×0.7 (debuff imediato = patch, não skill) · 🎒🏠 Rest Station + Kitchen + placas laterais · Kitchen −50%
+- **🩺 Médico** — 🔧 cura de HP tempo ×0.3, +50% HP, sem lock de movimento/arma · 🔧 **cirurgia/restauração de membro destruído** (CMS/Surv12) ×0.5 tempo *(distinto da cura de HP acima — é a costura lenta de membro blackado; reforça a Surgery ×2 da matriz)* · 🏠 MedStation (inicial + −50%)
+- **🔫 Fuzileiro** — 🧪 **Adrenalina** (pós-abate: −recuo/−recarga/−ADS por `3s + 0.5s/nv`) · 🔧 resist. supressão (aim-punch ×0.5) · 🔧 antitravamento (malfunction ×0.5, fix ×2) · 🏠 Workbench (inicial + −50%)
+- **🎯 Caçador** — 🧪 **Fôlego de Aço** (`×(1+0.1·nv) ≤ ×3`, −sway) · 🔧 saque de pistola ×0.5 · 🔧 ADS por arma (sniper/DMR ×0.85, AR ×1.15) · ⚠️ 🔧 resist. de braço em ADS (zona stances, §6.2) · 🏠 Shooting Range + Intelligence Center (inicial + −50%)
+- **👻 Fantasma** — 🔧 **Execução** (melee ×20) · 🔧 Passo Fantasma (ruído de todas as ações `×(1−0.5·nv/max)`, até −50%, **NÃO** silêncio total) · 🔧 MaxSpeed ×1.1 · 🏠 Lavatory (inicial + −50%)
+- **🎒 Saqueador** — 🧪 **Mãos Rápidas** (busca/loot mais rápido — 🟡 verificar se loot instantâneo já é vanilla, §7) · 🧪 **Pack Mule** (peso `×(1−[0.10→0.50])`) · 🔧 loot silencioso · 🌐 revelar valor ₽ (global, todos veem — não é lever de classe) · 🎒 contêiner seguro 6 slots (gear) · 🏠 Scav Case (inicial + −50%)
+- **🛡️ Tanque** — 🔧 **Couraça** (dano recebido `×(1−[0.05→0.25])`) · 🧪 **Pack Mule** (compartilhada c/ Saqueador) · 🔧 GL mastery via patch (o slot `AttachedLauncher` é inerte no globals — §7) · 🔧 GL sem penalidade de ergo · ⚠️ 🔧 stamina segurando arma pesada ×0 (zona stances, §6.2) · 🔧 velocidade ×0.9 (debuff) · 🔧 −comida/bebida ×0.7 (debuff imediato = patch, não skill) · 🎒 placas laterais (gear) · 🏠 Rest Station + Kitchen (inicial + −50%)
 
 ---
 
@@ -137,6 +139,43 @@ Per-player, ideais para `×fator` por classe (lendo a classe via `Info.GameVersi
 ### 6.3 `globals.json` ⚪
 Muda o **baseline** — afeta bots. **Nunca** vira lever por-classe (só via patch per-player ou skill).
 
+### 6.4 Configurabilidade dos levers (F12 + server) — decisão #8
+
+Dois canais, **nenhum número hardcoded**:
+
+- **Client (🔧 patches + efeito das 🧪):** `ConfigEntry` no **F12** (BepInEx Configuration Manager). Aplica em runtime quando o patch relê o valor a cada uso; quando lido só no load → muda no F12 + **reinício**.
+- **Server (🎯 matriz + params server de skill custom):** `skills`/`skillMultipliers` por classe já editáveis no **editor web** (`.jsonc`) — aplicam em **perfil novo** (hot-apply) ou com restart. Params server de skill custom no config do mod com **nota de "restart para aplicar 100%"**.
+
+> A exposição fina (nomes/seções no F12, runtime vs restart por parâmetro) é avaliada no desenvolvimento (Fase 5, itens 048–051). Valores `TBD` são fixados no playtest.
+
+**Parâmetros tunáveis** (além da matriz 🎯, que vive no editor web):
+
+| Classe | Lever | Camada | Parâmetro(s) · default | Canal |
+|---|---|---|---|---|
+| 🩺 Médico | Médico de Combate | 🔧 | cura HP ×0.3 · max HP +50% · cura em movimento/tiro (bool) | F12 |
+| 🩺 Médico | Cirurgia de membro | 🔧 | surgery/restauração ×0.5 | F12 |
+| 🔫 Fuzileiro | Adrenalina | 🧪 | duração `3s + 0.5s/nv` · recuo/recarga/ADS ×`TBD` | F12 |
+| 🔫 Fuzileiro | Resist. supressão | 🔧 | aim-punch ×0.5 | F12 |
+| 🔫 Fuzileiro | Antitravamento | 🔧 | malfunction ×0.5 · fix ×2 | F12 |
+| 🎯 Caçador | Fôlego de Aço | 🧪 | breath `×(1+0.1·nv)≤×3` · sway ×`TBD` | F12 |
+| 🎯 Caçador | Saque de pistola | 🔧 | ×0.5 | F12 |
+| 🎯 Caçador | ADS por arma | 🔧 | sniper/DMR ×0.85 · AR ×1.15 | F12 |
+| 🎯 Caçador | Resist. braço ADS ⚠️ | 🔧 | `TBD` (zona stances, §6.2) | F12 |
+| 👻 Fantasma | Execução | 🔧 | melee ×20 | F12 |
+| 👻 Fantasma | Passo Fantasma | 🔧 | ruído `×(1−0.5·nv/max)`, piso −50% | F12 |
+| 👻 Fantasma | MaxSpeed | 🔧 | ×1.1 | F12 |
+| 🎒 Saqueador | Mãos Rápidas | 🧪 | search/loot speed ×`TBD` | F12 |
+| 🎒🛡️ Saq+Tan | Pack Mule | 🧪 | peso `×(1−[0.10→0.50])` | F12 |
+| 🎒 Saqueador | Loot silencioso | 🔧 | volume ×`TBD` | F12 |
+| 🎒 Saqueador | Revelar ₽ | 🌐 | toggle on/off (**global**) | F12 |
+| 🛡️ Tanque | Couraça | 🔧 | dano recebido `×(1−[0.05→0.25])` | F12 |
+| 🛡️ Tanque | GL mastery | 🔧 | ergo/penalidade ×`TBD` | F12 |
+| 🛡️ Tanque | Stamina arma pesada ⚠️ | 🔧 | ×0 (zona stances, §6.2) | F12 |
+| 🛡️ Tanque | Velocidade | 🔧 | ×0.9 | F12 |
+| 🛡️ Tanque | Fome/sede | 🔧 | ×0.7 | F12 |
+
+> A matriz 🎯 (skills iniciais + skillMultipliers das 6 classes) é **server-side** — editável no editor web, **restart/perfil novo** para aplicar. Ver [class-overview.md](./class-overview.md) para a lista por classe.
+
 ---
 
 ## 7. Pontas soltas
@@ -151,7 +190,7 @@ Muda o **baseline** — afeta bots. **Nunca** vira lever por-classe (só via pat
 5. **Sincronizar `SkillWeights.cs`** — o `.mjs` ganhou 3 categorias de gem (ShadowConnections→P, UsecArsystems→C, BearAksystems→C) que **faltam no `.cs`** (caem em `UnmappedFallback` lá). Replicar numa mudança **coordenada** de `modded/Server/` (sessão paralela do editor).
 6. **2 levers ⚠️ na zona stances** (§6.2): Caçador (resist. braço-ADS) e Tanque (stamina arma pesada). Decidir: coordenar (mesmo repo) ou trocar o lever.
 7. **Loot instantâneo** — verificar no Assembly se já é vanilla (se for, Mãos Rápidas do Saqueador vira só velocidade de busca). Não bloqueia a matriz.
-8. **Bug do Círculo de Cultistas** (ShadowConnections, [class-skill-catalog.md](./class-skill-catalog.md) §5.1) — o servidor não chama `NormalizeToPercentage()` → efeito instantâneo desde o nível 1. Afeta o Saqueador: o cooldown de scav funciona (−50% no L50), mas o círculo está bugado. Contar com isso ou corrigir antes.
+8. **Bug do Círculo de Cultistas** (ShadowConnections, [class-skill-catalog.md](./class-skill-catalog.md) §5.1) — o servidor não chama `NormalizeToPercentage()` → efeito instantâneo desde o nível 1. Afeta o Saqueador: o cooldown de scav funciona (−50% no L50), mas o círculo está bugado. **Decisão (aceitar vs corrigir): no item 047** (onde ShadowConnections entra na matriz do Saqueador).
 9. **Review pendente do `class-levers.md` (9 itens)** — a maioria virou *moot* com "tudo-é-skill-real" (§1); itens vivos absorvidos. Re-revisar via `g-review-content` quando fechar.
 
 ---
@@ -178,3 +217,4 @@ Muda o **baseline** — afeta bots. **Nunca** vira lever por-classe (só via pat
 | 2026-06-16 | mdj | Criação. Catálogo de levers (BuffType + patch per-player + skills/gems SE), régua de impacto, coordenação com o stances mod, rascunho dos 5-6 conjuntos. |
 | 2026-06-20 | Guilherme | **Reescrita (Fase 3 do redesign 11→6).** Consolidado: arquitetura "tudo-é-skill-real" (7 decisões), roster 6 classes, tiers de velocidade, **matriz calibrada aprovada** (cards + tabela), camadas 🔧/🧪/🎒/🏠 por classe, mecanismos de patch, pontas soltas. Matriz materializada e validada em `scripts/class-matrix.mjs` (cross-check dos netMult ✅). |
 | 2026-06-20 | Guilherme | **Net-check final (Fase 4).** Pesos das gems derivados por categoria (`skill-weights.mjs`); confirmado no `globals.json` que SMG/AttachedLauncher são inertes (`[]`) → removidos da matriz (Fantasma→Pistol ×1.8, Caçador dropa SMG, Tanque GL vira 🔧, Melee ×1.5). Custos aparados p/ [28,32]. Matriz recalibrada: topo +6.12/+6.27/+6.21/+6.12 · base +4.09/+4.28 (cross-check ✅, sem flags). Delta do `SkillWeights.cs` flagado p/ coordenação. |
+| 2026-06-20 | Guilherme | **Revisão pós-Fase 4 (g-review-content).** Decisão #8 (tudo configurável: F12 client + server c/ nota de restart) + §6.4 tabela de parâmetros tunáveis. Glossário 🎒/🏠 corrigido (gear vs estação de hideout). Médico: "membro quebrado" esclarecido → cirurgia/restauração de membro destruído ×0.5 (distinto da cura de HP ×0.3). Gear das classes novas (Fantasma/Tanque) marcado pendente do 047. Ressalva peso-baixo citada no Saqueador; dono do bug do Círculo de Cultistas → 047. |

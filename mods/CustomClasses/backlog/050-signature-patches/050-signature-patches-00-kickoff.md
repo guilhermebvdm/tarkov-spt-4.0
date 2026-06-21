@@ -9,7 +9,7 @@
 
 Patches Harmony **per-player keyed na classe** (`Info.GameVersion`) para o que skill não cobre:
 
-- **Médico de Combate** — cura `×0.3` tempo, +50% HP, sem lock de movimento/arma; membro quebrado `×0.5` tempo.
+- **Médico de Combate** — cura de HP `×0.3` tempo, +50% HP, sem lock de movimento/arma; **cirurgia/restauração de membro destruído** (CMS/Surv12) `×0.5` tempo (distinto da cura de HP).
 - **Fantasma** — Execução (melee `×20`), Passo Fantasma (ruído de todas as ações até −50%), MaxSpeed `×1.1`.
 - **Tanque** — Couraça (dano recebido `×(1−[0.05→0.25])`), velocidade `×0.9`, −comida/bebida `×0.7`, GL mastery **via patch** + GL sem penalidade de ergo (o slot `AttachedLauncher` é inerte).
 - **Caçador** — saque de pistola `×0.5`, ADS por arma (sniper/DMR `×0.85`, AR `×1.15`).
@@ -30,3 +30,4 @@ Patches Harmony **per-player keyed na classe** (`Info.GameVersion`) para o que s
 ## DoD (resumo)
 
 - Cada signature 🔧 observável in-game na classe certa; **sem efeito nas outras** (gating por `GameVersion` validado).
+- Toda constante exposta no **F12** (`ConfigEntry`), runtime quando possível, senão nota de restart — decisão #8 ([tabela §6.4](../../docs/class-levers.md)).

@@ -29,3 +29,4 @@ Implementar as signatures/levers **🧪** sobre a infra do 048 — cada uma = sl
 ## DoD (resumo)
 
 - 4 skills funcionais in-game, escalando com o nível e gated por classe (Pack Mule em 2). Aparecem no menu de Skills.
+- Parâmetros de cada efeito expostos no **F12** (defaults da [tabela §6.4](../../docs/class-levers.md); valores `TBD` fixados no playtest) — decisão #8.

@@ -7,6 +7,8 @@
 
 ---
 
+> ⚠️ **Superseded para o roster (2026-06-20):** o redesign consolidou as 11 classes em **6** (Médico/Fuzileiro/Caçador/Fantasma/Saqueador/Tanque + Peladão isenta) — ver [class-levers.md](./class-levers.md). Os 11 arquétipos abaixo são **histórico do método** (fantasia/eixos/conjunto plausível); Fantasma e Tanque não estão descritos aqui.
+
 Catálogo de arquétipos das 11 classes do CustomClasses. Para cada uma: **fantasia/conceito**, **eixos de força**, **skills-assinatura** e o **conjunto plausível** — as skills que a classe "treina de verdade" (categorias do arquétipo + skills exercitadas pelo loadout/playstyle). O conjunto plausível é o que a **regra anti-furo** do [balance-model.md](./balance-model.md) usa: um debuff só financia um buff se cair numa skill plausível; debuff fora dele é "grátis".
 
 > **Como evolui:** este doc nasce dos arquétipos do RZCustomProfiles + estado atual das classes. Cada rodada de `/deep-research` (por grupo) **refina** o conjunto plausível e as skills-assinatura da(s) classe(s) daquele grupo, e registra a fonte. Não é congelado — é a fonte de verdade do *design de papel*, separada do *design de números* (que vive nos `.jsonc`).
@@ -149,3 +151,4 @@ Os arquétipos se agrupam por skills compartilhadas — a pesquisa externa rende
 |---|---|---|
 | 2026-06-13 | mdj | Criação. 11 arquétipos (fantasia, eixos, skills-assinatura, conjunto plausível, debuff temático) + grupos de rodada. Base: estado atual dos `.jsonc` + arquétipos RZ. A refinar por `/deep-research` em cada rodada. |
 | 2026-06-13 | mdj | Meta revista (Médico = padrão ~+6 intacto): notas por classe reenquadradas de "acima/abaixo de +2.0" para "gap até +6"; ressalva de viabilidade (peso baixo) marcada em Gerente/Saqueador/Batedor/Furtivo. |
+| 2026-06-20 | Guilherme | Nota de superseded no topo: redesign consolidou 11→6 classes (ver class-levers.md). Doc mantido como histórico do método/arquétipos. |

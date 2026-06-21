@@ -31,3 +31,4 @@ Base reutilizável para as **skills custom** (🧪): reviver um slot `ESkillId` 
 ## DoD (resumo)
 
 - 1 skill custom de prova aparece no menu, sobe XP, **congela** com mult 0, e tem o nível lido num patch. Persistente no perfil.
+- Padrão de `ConfigEntry` (F12) estabelecido para os parâmetros de efeito — base da configurabilidade das 🧪/🔧 (decisão #8, [class-levers.md §6.4](../../docs/class-levers.md)); server-side com nota de "restart para aplicar 100%".

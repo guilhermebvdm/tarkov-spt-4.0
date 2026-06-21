@@ -27,3 +27,4 @@ Validar o redesign completo **in-game** (não só write+hash — memória `feedb
 ## DoD (resumo)
 
 - As 6 classes jogáveis com identidade observável; achados registrados na memória do mod (`memory/sessions.md`).
+- **F12 validado:** ajustar um parâmetro de cada camada (🔧 e 🧪) e ver o efeito mudar (runtime ou após restart, conforme o caso) — decisão #8.

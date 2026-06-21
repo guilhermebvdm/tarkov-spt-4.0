@@ -11,28 +11,37 @@ Substituir as 11 classes antigas pelas **6 do redesign** (Médico/Fuzileiro/Caç
 
 ## Escopo
 
+**(a) Matriz 🎯 (server-side; editável no editor web, aplica em perfil novo/restart):**
 - **Rewrite (4):** `medicoDeCombate.jsonc`, `fuzileiro.jsonc`, `cacador.jsonc`, `saqueador.jsonc` com a matriz nova.
 - **Criar (2):** `fantasma.jsonc`, `tanque.jsonc`.
 - **Remover (6 aposentadas):** armeiro, batedor, gerenteDeOperacoes, operadorFurtivo, operadorTatico, sobrevivencialista. **Manter** peladao (`noBaseline`).
-- skills + skillMultipliers **exatamente** como em [`scripts/class-matrix.mjs`](../../scripts/class-matrix.mjs) (cross-check ✅).
-- loadout 🎒 (1 estação inicial) + hideout 🏠 (1 estação −50%) por classe ([class-levers.md](../../docs/class-levers.md) §5).
-- **Sincronizar `SkillWeights.cs`** (ponta solta #5): adicionar Categories `ShadowConnections→P`, `UsecArsystems→C`, `BearAksystems→C` (já no `skill-weights.mjs`, faltam no `.cs`).
-- IDs = enum `SkillTypes`: `Lockpicking`, `UsecArsystems`, `BearAksystems`, `ShadowConnections`, `SilentOps`, `ProneMovement` (**não** "LockPicking").
+- skills + skillMultipliers **exatamente** como em [`scripts/class-matrix.mjs`](../../scripts/class-matrix.mjs) (cross-check ✅). IDs = enum `SkillTypes` (`Lockpicking`/`UsecArsystems`/`BearAksystems`/`ShadowConnections`/`SilentOps`/`ProneMovement` — **não** "LockPicking").
+- Saqueador usa Lockpicking/Strength ×3 (acima do teto ×2.0) — **intencional** (ressalva de viabilidade peso-baixo, balance-model §2); não "corrigir".
+
+**(b) Loadout 🎒 (gear) + hideout 🏠 por classe** ([class-levers.md](../../docs/class-levers.md) §5):
+- hideout: 1 estação inicial + 1 estação −50%.
+- gear (`equipped` + `stash`): as 4 mantidas já têm; **as 2 novas (fantasma/tanque) precisam de gear autorado** — usar `extract-from-profile.mjs` (item 046) a partir de um profile de referência, com merge cirúrgico (preserva skills/mults).
+
+**(c) Sub-tarefa — sync `SkillWeights.cs`** (ponta solta #5; mudança C# **separada** da matriz, só afeta o warning de custo do editor): adicionar Categories `ShadowConnections→P`, `UsecArsystems→C`, `BearAksystems→C` (já no `skill-weights.mjs`).
+
+**(d) Decisão — bug do Círculo de Cultistas** (ShadowConnections do Saqueador, [class-skill-catalog.md](../../docs/class-skill-catalog.md) §5.1): aceitar o efeito instantâneo **ou** corrigir o `NormalizeToPercentage()` no server antes de ativar.
 
 ## Riscos / atenção
 
 - **Coordenar com a sessão do editor web** — fonte de verdade = `.jsonc` do install. Aplicar via `build-class-jsons.js --force` + `/sync-classes`; **não clobberar** edições (memória `feedback_serve_inventory_clobber`).
 - SMG e AttachedLauncher foram **removidos** (inertes no globals) — não reintroduzir.
-- Após aplicar: `class-matrix.mjs` + `check-skill-costs.mjs` sem flags (custo [28,32]).
+- `check-skill-costs.mjs` vai avisar **"categories without coverage"** (vários cards têm skills *iniciais* só em 2 categorias — ex.: Médico P/Ph). É warning **não-bloqueante**; documentar quais são aceitos.
+- Após aplicar: `class-matrix.mjs` + `check-skill-costs.mjs` sem flags de **custo** (todas em [28,32]).
 
 ## Refs
 
-- [../../docs/class-levers.md](../../docs/class-levers.md) §4/§5 · [../../docs/class-overview.md](../../docs/class-overview.md)
-- [../../scripts/class-matrix.mjs](../../scripts/class-matrix.mjs) — matriz fonte
+- [../../docs/class-levers.md](../../docs/class-levers.md) §4/§5/§6.4 · [../../docs/class-overview.md](../../docs/class-overview.md) · [../../docs/class-skill-catalog.md](../../docs/class-skill-catalog.md) §5.1
+- [../../scripts/class-matrix.mjs](../../scripts/class-matrix.mjs) — matriz fonte · [../../scripts/extract-from-profile.mjs](../../scripts/extract-from-profile.mjs) — gear (item 046)
 - [../../modded/Server/config/classes/](../../modded/Server/config/classes/) — destino · [../../scripts/build-class-jsons.js](../../scripts/build-class-jsons.js) + skill `/sync-classes`
 
 ## DoD (resumo)
 
 - 6 classes (+Peladão) no editor e no launcher com a matriz recalibrada; 6 antigas removidas.
-- `class-matrix.mjs` e `check-skill-costs.mjs` sem flags; `SkillWeights.cs` sincronizado.
+- gear das 2 novas (fantasma/tanque) presente; `class-matrix.mjs` e `check-skill-costs.mjs` sem flag de custo.
+- `SkillWeights.cs` sincronizado (sub-tarefa c); decisão do bug do Círculo registrada (sub-tarefa d).
 - Smoke: criar perfil de cada classe; skills/mults corretos na tela de Skills.
