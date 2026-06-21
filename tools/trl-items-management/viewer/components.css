@@ -132,6 +132,30 @@ body::before {
   gap: var(--space-3);
 }
 
+/* Grouped filter zone — the cluster of dropdowns between the dividers. */
+.filter-zone {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Right-side cluster: flea-level widget + pending pill + clear-overrides. */
+.trader-cluster {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+/* Thin vertical divider between topbar zones. */
+.topbar-sep {
+  flex-shrink: 0;
+  width: 1px;
+  height: 22px;
+  background: linear-gradient(180deg, transparent, var(--border-strong) 20%, var(--border-strong) 80%, transparent);
+  opacity: .7;
+}
+
 .search {
   flex: 1 1 340px;             /* grows to fill leftover topbar space */
   min-width: 200px;
@@ -1696,8 +1720,7 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
   border-color: var(--accent-dim);
 }
 
-/* ── Bulk "update all" buttons (topbar) ─────────────────────────────────────── */
-.bulk-refresh { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
+/* ── Bulk-action buttons (topbar: Update menu trigger + clear-overrides) ─────── */
 .bulk-btn {
   height: 24px; padding: 0 8px;
   background: var(--bg-input);
@@ -1722,6 +1745,95 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
   font-size: var(--fs-xs); font-weight: 600; white-space: nowrap; cursor: help;
 }
 .trader-pending-pill[hidden] { display: none; }
+
+/* ── "⟳ Update" menu (collapsed rescan / update-all buttons) ─────────────────── */
+.update-menu { position: relative; display: inline-block; flex-shrink: 0; }
+.update-menu__trigger {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+}
+.update-menu.is-open .update-menu__trigger {
+  color: var(--accent-bright); border-color: var(--accent-dim);
+}
+/* Small chevron shared by the Update + Δ% triggers (mirrors .dropdown chev). */
+.update-menu__trigger .chev,
+.delta-pop__trigger .chev {
+  width: 6px; height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  margin-left: 1px;
+  transition: transform 150ms cubic-bezier(.4, 0, .2, 1);
+}
+.update-menu.is-open .update-menu__trigger .chev,
+.delta-pop.is-open .delta-pop__trigger .chev { transform: rotate(-135deg); margin-top: 3px; }
+
+.update-menu__panel {
+  position: absolute;
+  top: calc(100% + 4px); right: 0;
+  min-width: 240px;
+  display: flex; flex-direction: column;
+  background: rgba(20, 20, 20, 0.97);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-overlay);
+  padding: var(--space-2) 0;
+}
+.update-menu__item {
+  display: flex; flex-direction: column; gap: 2px;
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: transparent; border: 0;
+  text-align: left;
+  color: var(--fg-primary);
+  font: inherit; font-size: var(--fs-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+.update-menu__item:hover { background: var(--bg-hover); }
+.update-menu__item:disabled { opacity: .5; cursor: wait; }
+.update-menu__label { font-weight: 600; }
+.update-menu__sub {
+  color: var(--fg-dim);
+  font-size: var(--fs-xs);
+  line-height: 1.3;
+  white-space: normal;
+}
+
+/* ── Δ% popover (collapsed delta filter) ────────────────────────────────────── */
+.delta-pop { position: relative; display: inline-block; flex-shrink: 0; }
+.delta-pop__trigger {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+}
+.delta-pop.is-open .delta-pop__trigger { color: var(--accent-bright); border-color: var(--accent-dim); }
+/* Active state: a delta bound is set. */
+.delta-pop__trigger.is-active {
+  color: var(--accent-bright);
+  border-color: var(--accent-dim);
+  background: rgba(139,109,56,.14);
+}
+.delta-pop__badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 14px; padding: 0 4px;
+  background: var(--accent-dim); color: var(--fg-on-accent);
+  border-radius: var(--radius-sm);
+  font-size: 9px; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.delta-pop__badge[hidden] { display: none; }
+/* The delta UI panel: hidden until open, anchored under the trigger. */
+.delta-pop__panel {
+  position: absolute;
+  top: calc(100% + 4px); right: 0;
+  z-index: var(--z-overlay);
+  box-shadow: var(--shadow-lg);
+  opacity: 0; visibility: hidden;
+  transform: translateY(-4px);
+  transition: opacity 120ms ease, transform 120ms ease, visibility 120ms;
+}
+.delta-pop.is-open .delta-pop__panel {
+  opacity: 1; visibility: visible; transform: translateY(0);
+}
 
 /* ── Confirmation modal ─────────────────────────────────────────────────────── */
 .modal-overlay {
