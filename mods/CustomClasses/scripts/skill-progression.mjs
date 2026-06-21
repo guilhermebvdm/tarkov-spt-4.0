@@ -8,61 +8,51 @@
  *
  * Fadiga (globals.json SkillsSettings): SkillFreshEffectiveness 1.3 · SkillFreshPoints 1 ·
  *   SkillPointsBeforeFatigue 1 · SkillFatiguePerPoint 0.6 · SkillMinEffectiveness 0.0001 ·
- *   SkillFatigueReset 200s. → ganhar XP rápido satura a effectiveness; espaçar (>200s) recupera.
- *
- * MODELO (previsível): nossas skills custom dão XP via SetCurrent direto (bypass da fadiga),
- *   então a progressão é exata e tunável:
+ *   SkillFatigueReset 200s. → MODELO previsível assume XP via SetCurrent direto (bypass da fadiga).
  *     raids p/ nível L = (100·L) / (eventos_por_raid × XP_por_evento)
- *   Deriva-se XP_por_evento a partir de um ALVO de "raids até o máximo" no jogo NORMAL:
- *     XP_por_evento = (100·MAX) / (TARGET × eventos_normal)
- *   (Alternativa honrando a fadiga = anti-grind porém imprevisível — não modelada aqui.)
+ *     XP_por_evento = (100·MAX) / (TARGET × eventos_normal)   (deriva do alvo de raids→máx no jogo normal)
+ *
+ * FREQUÊNCIA POR RAID (`freq`): a base de cada estimativa está em `basis`.
+ *   Anchors pesquisados (jun/2026): raid ≈ 30–40 min; sobrevivência ≈ 20–40% (mesmo bons players).
+ *   BSG NÃO publica abates/loot por raid → esses são [reasoned] (raciocinados do tempo de raid + playstyle),
+ *   a validar com o próprio jogo. [grounded] = ancorado em dado público.
  *
  * Uso: node skill-progression.mjs [MAX=10] [TARGET_RAIDS_ATE_MAX=40]
  */
 'use strict';
 
 const PER_LEVEL = 100;
-const MAX = Number(process.argv[2]) || 10;                // nível máximo das custom (proposto: 10)
-const TARGET = Number(process.argv[3]) || 40;             // alvo: atingir o máx em ~N raids (jogo normal)
+const MAX = Number(process.argv[2]) || 10;
+const TARGET = Number(process.argv[3]) || 40;
 
-// Estimativas de eventos/raid por playstyle (light=casual, normal=médio, heavy=agressivo/grinder).
+// freq = eventos/raid {light=casual, normal=médio, heavy=agressivo/grinder}.
 const SKILLS = [
-  { name: 'Adrenalina',        cls: 'Fuzileiro', ev: 'abate (PMC/Scav)',                  freq: { light: 1,   normal: 4,  heavy: 10 } },
-  { name: 'Fôlego de Aço',     cls: 'Caçador',   ev: 'tiro c/ respiração presa / abate à distância', freq: { light: 2, normal: 6, heavy: 15 } },
-  { name: 'Mula de Carga',     cls: 'Saq/Tan',   ev: 'extrair carregando peso',           freq: { light: 0.6, normal: 1,  heavy: 1.5 } },
-  { name: 'Mãos Rápidas',      cls: 'Saqueador', ev: 'container revistado',               freq: { light: 10,  normal: 30, heavy: 60 } },
-  { name: 'Passo Fantasma',    cls: 'Fantasma',  ev: 'trecho furtivo / abate não-detectado', freq: { light: 1, normal: 3, heavy: 6 } },
-  { name: 'Couraça',           cls: 'Tanque',    ev: 'hit absorvido (sobrevivido)',       freq: { light: 2,   normal: 8,  heavy: 20 } },
-  { name: 'Médico de Combate', cls: 'Médico',    ev: 'cura realizada',                    freq: { light: 1,   normal: 3,  heavy: 6 } },
-  { name: 'Execução',          cls: 'Fantasma',  ev: 'abate com melee',                   freq: { light: 0.3, normal: 1,  heavy: 3 } },
+  { name: 'Adrenalina',        cls: 'Fuzileiro', ev: 'abate (PMC/Scav)',                 freq: { light: 1,   normal: 4,  heavy: 10 }, basis: 'reasoned — PMC ~1-2/raid (raro), scav comum' },
+  { name: 'Fôlego de Aço',     cls: 'Caçador',   ev: 'tiro mirado c/ respiração presa',  freq: { light: 3,   normal: 8,  heavy: 20 }, basis: 'reasoned — vários tiros mirados/raid de sniper' },
+  { name: 'Mula de Carga',     cls: 'Saq/Tan',   ev: 'extrair carregando peso',          freq: { light: 0.2, normal: 0.3, heavy: 0.4 }, basis: 'grounded — só na extração; sobrevivência ~20-40%' },
+  { name: 'Mãos Rápidas',      cls: 'Saqueador', ev: 'container revistado',              freq: { light: 10,  normal: 30, heavy: 60 }, basis: 'reasoned — looter revista muito em ~30min' },
+  { name: 'Passo Fantasma',    cls: 'Fantasma',  ev: 'trecho furtivo / abate stealth',  freq: { light: 1,   normal: 3,  heavy: 6 },  basis: 'reasoned — fuzzy (difícil contar)' },
+  { name: 'Couraça',           cls: 'Tanque',    ev: 'hit absorvido (sobrevivido)',     freq: { light: 2,   normal: 8,  heavy: 20 }, basis: 'reasoned — hits levados em combate' },
+  { name: 'Médico de Combate', cls: 'Médico',    ev: 'cura realizada',                  freq: { light: 1,   normal: 3,  heavy: 6 },  basis: 'reasoned — curas/raid (depende de combate)' },
+  { name: 'Execução',          cls: 'Fantasma',  ev: 'abate com melee',                 freq: { light: 0.1, normal: 0.5, heavy: 2 }, basis: 'reasoned — abate melee é raro' },
 ];
 
 const currentMax = PER_LEVEL * MAX;
-const raidsToLevel = (L, freq, xp) => (freq <= 0 ? Infinity : (PER_LEVEL * L) / (freq * xp));
+const raidsTo = (L, f, xp) => (f <= 0 ? Infinity : (PER_LEVEL * L) / (f * xp));
 const fmt = n => (n === Infinity ? '∞' : n < 10 ? n.toFixed(1) : Math.round(n).toString());
 
-console.log(`\nMODELO DE PROGRESSÃO — máx nível = ${MAX} (Current ${currentMax}) · alvo = máx em ~${TARGET} raids (jogo normal)\n`);
-console.log(`${'Skill'.padEnd(18)} ${'evento'.padEnd(34)} ${'XP/ev'.padStart(6)} ${'→lvl1'.padStart(6)} ${'→lvl' + Math.ceil(MAX / 2)}`.padEnd(0) + `   raids→máx (light/normal/heavy)`);
-console.log('─'.repeat(110));
+console.log(`\nPROGRESSÃO — máx=${MAX} (Current ${currentMax}) · alvo: máx em ~${TARGET} raids (jogo normal)`);
+console.log(`Anchors: raid ~30-40min · sobrevivência ~20-40%. [grounded]=dado público · [reasoned]=estimado (validar in-game)\n`);
 
+const head = `${'Skill'.padEnd(17)} ${'evento'.padEnd(30)} ${'freq L/N/H'.padStart(13)} ${'XP/ev'.padStart(6)} ${'→nv1'.padStart(5)} ${'→máx L/N/H'.padStart(14)}`;
+console.log(head);
+console.log('─'.repeat(head.length));
 for (const s of SKILLS) {
-  // XP/evento p/ bater o máx em TARGET raids no jogo normal.
   const xp = currentMax / (TARGET * s.freq.normal);
-  const mid = Math.ceil(MAX / 2);
-  const r1 = raidsToLevel(1, s.freq.normal, xp);
-  const rMid = raidsToLevel(mid, s.freq.normal, xp);
-  const rMaxL = raidsToLevel(MAX, s.freq.light, xp);
-  const rMaxN = raidsToLevel(MAX, s.freq.normal, xp);
-  const rMaxH = raidsToLevel(MAX, s.freq.heavy, xp);
-  console.log(
-    `${s.name.padEnd(18)} ${s.ev.padEnd(34)} ${xp.toFixed(1).padStart(6)} ${fmt(r1).padStart(6)} ${fmt(rMid).padStart(6).padEnd(6)}` +
-    `      ${fmt(rMaxL)} / ${fmt(rMaxN)} / ${fmt(rMaxH)}`
-  );
+  const freqStr = `${s.freq.light}/${s.freq.normal}/${s.freq.heavy}`;
+  const maxStr = `${fmt(raidsTo(MAX, s.freq.light, xp))}/${fmt(raidsTo(MAX, s.freq.normal, xp))}/${fmt(raidsTo(MAX, s.freq.heavy, xp))}`;
+  console.log(`${s.name.padEnd(17)} ${s.ev.padEnd(30)} ${freqStr.padStart(13)} ${xp.toFixed(1).padStart(6)} ${fmt(raidsTo(1, s.freq.normal, xp)).padStart(5)} ${maxStr.padStart(14)}`);
 }
-
-console.log('\nLeitura:');
-console.log(`  • XP/ev = quanto somar ao Current por evento (botão de tuning). 100·MAX=${currentMax} é o total p/ o máx.`);
-console.log(`  • →lvl1 / →lvl${Math.ceil(MAX / 2)} = raids p/ o 1º nível e o meio (jogo normal) — sente cedo?`);
-console.log(`  • raids→máx light/normal/heavy = sensibilidade ao playstyle (heavy chega bem antes).`);
-console.log(`  • Nível inicial (matriz/boost) reduz tudo proporcionalmente. Fadiga do EFT NÃO aplicada (modelo previsível).`);
-console.log(`  • Trocar cenário: node skill-progression.mjs <MAX> <TARGET>  (ex.: 20 60)\n`);
+console.log('\nbasis das frequências:');
+for (const s of SKILLS) console.log(`  • ${s.name.padEnd(17)} freq=${s.freq.light}/${s.freq.normal}/${s.freq.heavy}  — ${s.basis}`);
+console.log(`\n(XP/ev = Current somado por evento. →nv1/→máx em raids. Nível inicial reduz proporcional. Trocar: node skill-progression.mjs <MAX> <TARGET>)\n`);
