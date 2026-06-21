@@ -7,7 +7,7 @@
 
 ## Objetivo
 
-Implementar as signatures/levers **🧪** sobre a infra do 048 — cada uma = slot `ESkillId` revivido + efeito lido do nível:
+Implementar as signatures **🧪** sobre a infra do 048 — cada uma = slot `ESkillId` revivido + efeito lido do nível. **Lista autoritativa (8 skills) + eventos de XP + fórmulas + máx (10) na [class-levers.md §5.1](../../docs/class-levers.md)** (escopo cresceu de 4 → 8 pela decisão "sempre skill"; Médico/Execução/Passo Fantasma/Couraça migraram de 🔧 flat p/ skill). Categoria **"Ability"** nova no `SkillMaster`, **1ª na tela**. Núcleo das 4 originais:
 
 - **Pack Mule** (Saqueador + Tanque) — peso `×(1−[0.10→0.50])` por nível.
 - **Adrenalina** (Fuzileiro) — pós-abate: −recuo/−recarga/−ADS por `3s + 0.5s/nv`.

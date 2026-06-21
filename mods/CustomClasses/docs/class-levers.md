@@ -119,6 +119,32 @@ Cada classe é definida por camadas, marcadas por emoji ao longo do doc:
 
 ---
 
+## 5.1 Skills custom (categoria "Ability") — progressão e efeitos
+
+As signatures que **escalam** viram **skills custom** (🧪) numa categoria nova **"Ability"** (em inglês), **posicionada PRIMEIRO** na tela de Skills (antes de Physical): o `SkillMaster` ganha `SkillCategory.Ability` no topo de `MainCategoryOrder`; as entradas entram quando os slots `ESkillId` mortos forem atribuídos (item 049). Ordem final da tela: **Ability → Physical → Mental → Combat → Practical → Special Elite → Gems (SE)**.
+
+**Matemática (decompile 0.16.x):** `Level = floor(Current/100)`, **100 de Current por nível**; **máximo das custom = 10** (Current 1000). XP por evento somado direto (bypass da fadiga → previsível e tunável). Eventos ancorados nos `SkillActionClass` compartilhados do vanilla (`SkillManager.cs:1455-1485`). Modelo reproduzível: [`scripts/skill-progression.mjs`](../scripts/skill-progression.mjs) (alvo ~40 raids no jogo normal; nv1 em ~4; heavy ~15-20).
+
+| Skill | Classe | Evento de XP (vanilla) | Efeito (escala com `nv`, máx 10) | XP/ev* |
+|---|---|---|---|---|
+| Adrenalina | Fuzileiro | abate (hook de kill) | pós-abate −recuo/−recarga/−ADS por `3 + 0.5·nv` s | ~6 |
+| Fôlego de Aço | Caçador | `WeaponAimAction`/`HoldBreathAction` | respiração `×(1 + 0.2·nv)` (→×3), −sway | ~1.7 |
+| Mula de Carga | Saq+Tan | mover/correr **overweight** (`Movement`/`SprintAction`, =Strength) | peso `×(1 − 0.05·nv)` (→−50%) | ~0.04 |
+| Mãos Rápidas | Saqueador | `SearchAction` (=Search, 0.33/container) | tempo de busca `×(1 − 0.05·nv)` (→−50%) | ~0.8 |
+| Passo Fantasma | Fantasma | mover **silencioso** (`MovementAction`, =CovertMovement) | ruído `×(1 − 0.05·nv)` (→−50%) | ~0.05 |
+| Couraça | Tanque | dano recebido (=Vitality) | dano recebido `×(1 − 0.025·nv)` (→−25%) | ~2.5 |
+| Médico de Combate | Médico | cura (`HealAction`) | tempo de cura `×(1 − 0.07·nv)` (→×0.3) | ~8 |
+| **Execução** | Fantasma | golpe de melee (`FistfightAction`) | **(1)** dano melee `×(1 + 1.9·nv)` (→×20) · **(2)** +velocidade andando/correndo `×(1 + 0.02·nv)` (→+20%) **com a melee na mão** | ~5 |
+
+*`XP/ev` = Current somado por evento — **tunável (F12)**, derivado do alvo ~40 raids; valores finais no playtest. **Nível inicial** por skill = tunável (0 = grind puro · >0 = boost · máx = traço "pronto").
+
+**Notas de implementação:**
+- **Execução, efeito (2):** patch em `MovementContext.MaxSpeed`/`SprintSpeed` (§6.1) condicionado a *Fantasma + arma ativa = melee + nível da Execução*; **compõe** com o stances (§6.2). ⚠️ **Sobrepõe o perk flat "MaxSpeed ×1.1"** do Fantasma (§5) → decidir: (a) fundir o ×1.1 na Execução (velocidade só com melee na mão) ou (b) manter o ×1.1 sempre + bônus da Execução por cima.
+- **Eventos de movimento** (Mula, Passo Fantasma): disparam por tick (freq alta, XP/ev minúsculo, escala vanilla 0.005-0.025) → calibrar **relativo** ao Strength/CovertMovement, não por contagem absoluta.
+- **Adrenalina:** não há `SkillActionClass` de "kill" nativo → hook próprio no evento de abate.
+
+---
+
 ## 6. Mecanismos de implementação
 
 ### 6.1 Pontos de patch per-player (🔧) confirmados
@@ -218,3 +244,4 @@ Dois canais, **nenhum número hardcoded**:
 | 2026-06-20 | Guilherme | **Reescrita (Fase 3 do redesign 11→6).** Consolidado: arquitetura "tudo-é-skill-real" (7 decisões), roster 6 classes, tiers de velocidade, **matriz calibrada aprovada** (cards + tabela), camadas 🔧/🧪/🎒/🏠 por classe, mecanismos de patch, pontas soltas. Matriz materializada e validada em `scripts/class-matrix.mjs` (cross-check dos netMult ✅). |
 | 2026-06-20 | Guilherme | **Net-check final (Fase 4).** Pesos das gems derivados por categoria (`skill-weights.mjs`); confirmado no `globals.json` que SMG/AttachedLauncher são inertes (`[]`) → removidos da matriz (Fantasma→Pistol ×1.8, Caçador dropa SMG, Tanque GL vira 🔧, Melee ×1.5). Custos aparados p/ [28,32]. Matriz recalibrada: topo +6.12/+6.27/+6.21/+6.12 · base +4.09/+4.28 (cross-check ✅, sem flags). Delta do `SkillWeights.cs` flagado p/ coordenação. |
 | 2026-06-20 | Guilherme | **Revisão pós-Fase 4 (g-review-content).** Decisão #8 (tudo configurável: F12 client + server c/ nota de restart) + §6.4 tabela de parâmetros tunáveis. Glossário 🎒/🏠 corrigido (gear vs estação de hideout). Médico: "membro quebrado" esclarecido → cirurgia/restauração de membro destruído ×0.5 (distinto da cura de HP ×0.3). Gear das classes novas (Fantasma/Tanque) marcado pendente do 047. Ressalva peso-baixo citada no Saqueador; dono do bug do Círculo de Cultistas → 047. |
+| 2026-06-21 | Guilherme | **§5.1 nova — skills custom (categoria "Ability", 1ª na tela).** Tabela de progressão ancorada no decompile 0.16.x (`Level=Current/100`, máx **10**) + eventos nos `SkillActionClass` do vanilla (Mula=overweight movement/Strength, Mãos Rápidas=Search, Passo Fantasma=CovertMovement, Execução=FistfightAction). Modelo `scripts/skill-progression.mjs`. Decisão "sempre skill" → 8 custom skills (Médico/Execução/Passo Fantasma/Couraça migram de 🔧 flat → skill). Execução ganha 2º efeito: +velocidade andando/correndo com a melee na mão. |
