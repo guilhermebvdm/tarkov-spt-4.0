@@ -26,19 +26,21 @@ Substituir o roster antigo (10 classes balanceadas + Peladão) pelas **6 classes
 - [ ] Criar um perfil novo oferece **exatamente 7** opções de classe do mod (6 redesenhadas + Peladão); nenhuma das 6 aposentadas aparece.
 - [ ] Cada uma das 6 classes, ao criar perfil, concede as **skills iniciais e níveis** idênticos aos de `class-matrix.mjs` (conferível na tela de Skills).
 - [ ] Os **multiplicadores de XP** de cada classe batem com a matriz em sinal e valor (conferível na UI/tooltip de skill — buff `>1`, debuff `<1`).
-- [ ] Cada classe nasce com o **loadout** e a **estação de hideout inicial** definidos, e com **1 estação a −50%** de tempo de construção.
+- [ ] Cada classe nasce com **algum loadout** (gear) e com as **estações de hideout** definidas por classe — pelo menos 1 pré-construída e pelo menos 1 com **−50%** de tempo de construção. <!-- review: pinar, por classe, qual estação é inicial e qual é −50% — class-levers §5 lista 2 estações p/ Caçador (Shooting Range + Intelligence Center) e Tanque (Rest Station + Kitchen) sem marcar qual é qual -->
 - [ ] O editor web lista as 6 + Peladão **sem diagnostics de erro**; o **custo** de cada uma das 6 fica em **[28, 32]** (Peladão isento).
-- [ ] **Fika/multiplayer:** `N/A` — escolha de classe na criação de perfil e multiplicadores de XP são **por-jogador/local**; não há efeito sobre outros players no raid.
+- [ ] **Fika/multiplayer:** `N/A` justificado — o mecanismo de multiplicador de XP (item 005, já em produção) aplica o fator **só aos eventos de XP do jogador local**, lendo a classe do **próprio perfil**; a classe de um player remoto não altera as skills/XP do local. O 047 só troca os **valores** desse mecanismo, sem mudar o escopo per-jogador. <!-- review: confirmar que o item 005 foi validado em Fika (a memória do mod não registra validação multiplayer explícita do multiplicador) -->
 - [ ] **Estado entre raids:** skills e multiplicadores persistem no perfil entre raids (são do perfil, não da raid). A matriz nova vale **apenas para perfis criados após a troca**; perfis pré-existentes não são reescritos.
 
 ## Corner cases
 
-- [ ] **Perfil já criado com uma classe que será removida** (ex.: alguém tem um perfil "Armeiro"): ao remover a classe, esse perfil deixa de ter uma classe correspondente registrada. Definir o comportamento aceito (carregar com fallback neutro vs. bloquear) e documentar — **não** deixar o perfil quebrar silenciosamente.
+- [ ] **Perfil já criado com uma classe que será removida** (ex.: alguém tem um perfil "Armeiro"): a classe do perfil é guardada como **texto**; ao remover a classe, esse perfil deixa de ter uma classe correspondente registrada. <!-- review: DECISÃO HUMANA — (a) remover de fato as 6 classes (perfis existentes ficam órfãos) ou (b) apenas DESABILITAR (escondidas da criação de perfil, mas ainda registradas p/ perfis existentes resolverem)? A opção (b) satisfaz "não aparecem na criação" sem orfanar. Definir também o comportamento aceito p/ perfil órfão (fallback neutro vs. bloquear) — não deixar quebrar em silêncio. -->
 - [ ] **Perfil já criado com uma classe mantida** (ex.: "Caçador" com a matriz antiga): a matriz nova **não** reescreve skills já concedidas — só vale para perfis novos. Confirmar que aplicar o redesign **não corrompe** nem altera retroativamente esse perfil.
 - [ ] **Saqueador com multiplicadores acima do teto** (Lockpicking/Strength ×3 > ×2.0): é **intencional** (ressalva de viabilidade peso-baixo) — o editor/checker pode avisar, mas **não** pode tratar como erro bloqueante.
 - [ ] **Cobertura de categorias incompleta** (ex.: Médico sem skills iniciais em todas as 4 categorias): gera **aviso não-bloqueante**, não impede registrar a classe.
 - [ ] **Saqueador + Círculo de Cultistas** (skill ShadowConnections): o efeito do Círculo é instantâneo desde o nível 1 (bug conhecido no servidor). Decidir **aceitar** o comportamento ou **corrigir** antes de ativar a classe (registrar a decisão).
 - [ ] **Edição concorrente com o editor web**: o install é a fonte de verdade e há uma sessão paralela editando classes. Aplicar a matriz pelo repo **não pode clobberar** edições não sincronizadas — exige sincronização/guard antes de gravar.
+- [ ] **Peladão permanece isento** (`noBaseline`, sem skills/multiplicadores): continua aparecendo na criação de perfil e o editor/checker **não** o trata como erro nem o inclui na verificação de custo [28, 32].
+- [ ] **Stash com itens compostos** (preset/mods/munição/conteúdo): ao autorar o gear das classes (sobretudo as novas), os itens compostos do stash devem **nascer montados** no perfil novo (não só tpl+count) — ver pendência de validação **P-7.3** da memória do mod (`feedback_spt_validation`: validar in-game, não só write+hash).
 
 ## Fora de escopo
 
@@ -58,3 +60,4 @@ Substituir o roster antigo (10 classes balanceadas + Peladão) pelas **6 classes
 | Data | Evento |
 |---|---|
 | 2026-06-21 | Item criado via `/create-spec` |
+| 2026-06-21 | Revisão `/review-spec` — 3 gaps + 2 corner cases corrigidos; 3 trechos marcados `<!-- review -->` (decisão deletar-vs-desabilitar, atribuição de estações por classe, validação Fika do item 005) |
