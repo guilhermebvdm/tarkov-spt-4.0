@@ -8,6 +8,8 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 
 **Mod híbrido completo e maduro.** Itens **001–037 entregues** (🟢): 11 classes + identidade visual + **editor web Blazor completo** (018–029) + **épico UX (030–037) EXECUTADO** (autônomo via Workflow, 2026-06-11→12). Tudo **commitado** (15 commits do épico sobre baseline `3634548`); working tree limpo exceto frentes paralelas (`docs/migration/*`, `.claude/skills/*`, `.agents/resources.md`, `docs/technical/spt-antipatterns.md`, `mods/SPT-Menu-Overhaul/memory/`). **Branch ahead 22, SEM push** — aguarda revisão do usuário. Relatório: `.handoffs/handoff-2026-06-12-overnight-ux-030-037.md`.
 
+**Redesign de classes 11→6 (épico 047–052) — EM ANDAMENTO (Sessão 8).** O roster mudou de 11 para **6 balanceadas + Peladão** (Médico/Fuzileiro/Caçador/Fantasma/Saqueador/Tanque), arquitetura **"tudo-é-skill-real"**. **Item 047 (aplicar matriz) ENTREGUE** (🟡 falta validação de raid): 6 `.jsonc` com a matriz recalibrada + `SkillWeights.cs` (+3 gems) + **viewer do editor limpo** (seção "Gems (SE)", skills fantasmas removidas) — compilado/instalado/validado (launcher + editor MCP). netMult **topo ~+6 / base ~+4**. Design: `docs/class-levers.md` (+`class-overview.md` resumo, +`class-skill-catalog.md` fórmulas); matriz reproduzível em `scripts/class-matrix.mjs` (cross-check ✅). **048–052 pendentes** (skill custom 🧪, patches 🔧, levers zona stances, validação). Precede: épico balance 039–045 + 046 (tooling `extract-from-profile.mjs`) — outras sessões, não em memória. ⚠️ **Sessão paralela do editor: roster agora é 6 — recarregar/reiniciar antes de salvar** (senão re-clobra). Detalhe em [class-levers.md](../docs/class-levers.md) + backlog 047–052.
+
 **Em andamento (item 038 — redesign workspace 3 painéis estilo EFT):** F0 ✅ (`82bc4a5`, grade 2D X/Y/R no schema+builder) e F1 ✅ (`2cc4274`, workspace read-only: silhueta + grade 2D). Faltam **F2** (edição in-place + skins dialog + DnD HTML5 `.mjs` + migrar `@code` do ClassEdit + refino da silhueta) e **F3** (polimento/docs/smoke in-game). Plano: `~/.claude/plans/monte-um-plano-para-goofy-otter.md`. Silhueta ainda rascunho. Sem push.
 
 - **Identidade:** `CustomClasses`, GUID `customclasses.mdj` (server) + `customclasses.mdj.client` (client BepInEx). SPT 4.0.13. Mod irmão `mods/CustomizationPersistenceFix` (corrige reset de customização do SPT core via Harmony).
@@ -21,6 +23,10 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 
 ## Pendências / próximos passos conhecidos
 
+- 🟡 [P-8.1] (aberta 2026-06-21) **Validação in-game (raid) do 047** — criar perfil de cada uma das 6 classes e conferir skills/mults/loadout/hideout aplicando (item 052 parcial). Regra `feedback_spt_validation`.
+- 🟡 [P-8.2] (aberta 2026-06-21) **Itens 048–052** do épico do redesign: infra de skill custom 🧪 (048) → skills 🧪 (049) + patches signature 🔧 (050) → levers zona stances ⚠️ (051) → validação (052). Specs por wave; kickoffs prontos.
+- 🟢 [P-8.3] (aberta 2026-06-21) **Badge "Not registered" no editor** — server registra a edition por `displayName.pt` ("Fantasma") mas o editor chaveia por `name` en ("Ghost"). Cosmético, pré-redesign; corrigir se incomodar.
+- 🟡 [P-8.4] (aberta 2026-06-21) **Gear + identidade visual de fantasma/tanque são placeholder** (loadout clonado do furtivo/tático; `iconFile` reusa PNG do furtivo/tático) — curar (ícones próprios, gear definitivo).
 - 🔴 [P-7.9] (aberta 2026-06-12) **PUSH dos 15 commits do épico** + QA visual no viewer (build-gate ≠ correção: matriz em células estreitas 032, dashboard em viewport estreito 033, comparação A×B 036).
 - 🟡 [P-7.10] (aberta 2026-06-12) **Medição quantitativa do 037** (before/after) — fechar o DoD: subir server com log Debug (`[perf]` é LogDebug) + baseline pré-`d180195`.
 - 🟡 [P-7.11] (aberta 2026-06-12) **Achados de review adiados** (no relatório 2026-06-12, por wave) — decidir follow-ups: 036 multiplicadores de B lado a lado (toca componente 031), 037 dispose de `_recomputeCts`, 034 msg "filtro sem resultados" na aba Stash.
@@ -176,6 +182,41 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 - **F1 ✅ (`2cc4274`):** `ClassWorkspace.razor` + `CharacterDoll.razor` (silhueta+slots) + `StashGrid.razor` (grade 2D 10×30, 23 itens posicionados/dimensionados/ícones). ClassDetail single-class monta o workspace; compare (036) mantém dashboard antigo. Fix-chave: `--cc-cell-unit` içado pro `.cc-ws` (estava só em `.cc-item-cell` → `repeat(W,var())` inválido → grade colapsava em 1 col). Header dedup (página mantém nome/ações; workspace = barra slim de custo). **Silhueta = qualidade rascunho** (posições aproximadas, refino em F2/F3).
 - **Pendente:** F2 (edição in-place + skins dialog + DnD `.mjs` + migrar `@code` do ClassEdit 1272L + refino silhueta) · F3 (polimento, retrocompat, docs, smoke in-game pelo usuário). **Sem push.**
 - **Lição:** UI visual (silhueta/grade) feita por agente headless sai estruturalmente OK mas precisa de iteração visual no Chrome MCP (loop principal) — não dá pra fan-out cego.
+
+### 2026-06-21 02:21 (GMT-3) — Sessão 8: Redesign 11→6 (Fase 3–5) + item 047 implementado + viewer limpo
+
+**Tema central:** Continuação do redesign de classes (handoff 2026-06-20): consolidar o design, recalibrar a matriz, materializar o épico 047–052 e **implementar/validar o 047** (aplicar a matriz do novo roster de 6 classes).
+
+**Decisões-chave:**
+- **Roster 11→6 + Peladão** + arquitetura **"tudo-é-skill-real"** (skills + skillMultipliers + skills custom padrão SE). Design consolidado em `docs/class-levers.md` (+overview, +class-skill-catalog) e `scripts/class-matrix.mjs` (reproduzível, cross-check ✅).
+- **netMult topo ~+6 / base ~+4** (Saq/Tan compensados por signatures, fora do net). **Pesos das gems por categoria** (`skill-weights.mjs`+`SkillWeights.cs`: Usec/Bear→C, demais gems→P).
+- **SMG e AttachedLauncher removidos da matriz** — inertes no `globals.json` (`[]`). Fantasma trocou SMG→Pistol ×1.8; Tanque GL vira 🔧 patch (não skill 🎯).
+- **Decisão #8 (tudo configurável):** levers 🔧/🧪 no F12; matriz no editor web; server com nota de restart. Tabela em class-levers §6.4.
+- **Órfão descopado:** **deletar** as 6 aposentadas (não desabilitar) e **sem** router de remap — decisão do usuário (server não roda oficialmente; perfis perdidos OK).
+- **Viewer só com skills funcionais:** 6 gems promovidas à seção **"Gems (SE)"** no `SkillMaster`; removido o dump de skills inertes no `SkillCanonicalList`. Convenção: skills custom novas (048+) entram no `SkillMaster`.
+
+**Lições / hipóteses descartadas:**
+- **Masteries SMG/HMG/LMG/Launcher/AttachedLauncher são inertes** nesta build (`globals.json` `[]`, sem XP/efeito) → buffar/setar não faz nada. Ref: globals.json:35559/35261; class-skill-catalog §6.
+- **Deletar uma classe quebra perfis existentes dela:** `GetProfileTemplateForSide` retorna null (ProfileHelper.cs:808-811) → `TraderHelper.ResetTrader` NRE em `.Trader` (TraderHelper.cs:150). Router de remap especificado e depois **descopado** (sem perfis ao vivo).
+- **Launcher mostrava roster antigo** não por cache — estava no **IP do server oficial (remoto)**, não o local. Red herring.
+- **Enum é `Shadowconnections`** (c minúsculo); `.jsonc` tolera via `Enum.TryParse ignoreCase` (ClassRegistrar.cs:220/329), mas `SkillWeights.cs` exige a caixa exata. `WaterCloset` = Lavatory (HideoutAreas.cs:8).
+- **Badge "Not registered" no editor** = server chaveia edition por `displayName.pt`, editor por `name` en. Cosmético.
+- **Dados do Caçador (extract 046, profile modado)**: braçadeira inexistente no DB (`6761b213…`) + 10 armas stash `loadedMag` sem mag → erros não-fatais; limpos (categoria P-7.3).
+
+**Atividade cronológica** (resumida; detalhe nos commits `cb22668`→`d00d072`):
+1. Fase 3: `class-levers.md` reescrito + `class-matrix.mjs` + `class-overview.md`.
+2. Fase 4: net-check (gems por categoria, inertes fora, custos aparados) + épico 047–052 (kickoffs) + 2× `/g-review-content` (correções) + decisão #8/§6.4.
+3. 047: spec → review-spec (3 decisões) → spec-tech (achado do crash de órfão) → review-tech (6 pontos resolvidos) → `/code-mod` (matriz nos 6 `.jsonc`, SkillWeights +3 gems, router descopado) → `/compile-mod` (build+install, `--force-config` + remoção das 6 órfãs do install).
+4. Validação: server log "Loaded 7", launcher (após corrigir IP), editor (MCP) funcional.
+5. Viewer limpo (Gems SE + sem fantasmas) + provisão no plano (048+). Fix de dados do Caçador (braçadeira vanilla + strip de bare-mags).
+
+**Pendências abertas nesta sessão:** [P-8.1] validação raid · [P-8.2] itens 048–052 · [P-8.3] badge "Not registered" · [P-8.4] gear/visual placeholder de fantasma/tanque (ver topo).
+
+**Cross-refs:**
+- Base: handoff `.handoffs/handoff-2026-06-20-customclasses-class-redesign.md` (gitignored).
+- Resolve a ponta solta de sync `SkillWeights.cs`↔`skill-weights.mjs` (3 categorias de gem agora em ambos).
+- Memória global `project_customclasses_session_split` (sessão paralela do editor — agora roster 6).
+- `/update-mod-graph CustomClasses` pendente (hook; mudança de estrutura no SkillMaster).
 
 ## Arquivo — blocos de topo pré-curadoria (2026-06-07 → 2026-06-10)
 
