@@ -181,14 +181,8 @@ namespace CameraRotationMod.Patches
             // Hold Breath Arm Stamina & Oxygen Drain
             if (player.Physical != null && player.Physical.HoldingBreath)
             {
-                // Arm Stamina — só drena no modo HoldBreath (cede a mount/prone — fix-06-01)
-                if (ArmStamina.Resolve(player) == ArmStaminaMode.HoldBreath)
-                {
-                    float drainAmount = Plugin._HoldBreathArmStaminaDrain.Value * dt;
-                    player.Physical.HandsStamina.Current -= drainAmount;
-                    if (player.Physical.HandsStamina.Current < 0f)
-                        player.Physical.HandsStamina.Current = 0f;
-                }
+                // Item 012: o drain de braço do hold-breath virou o multiplicador "Hold Breath" no StaminaController.
+                // Aqui sobra apenas o dreno de oxigênio.
 
                 // Oxygen
                 if (player.Physical.Oxygen != null)

@@ -1149,6 +1149,7 @@ namespace CameraRotationMod
         private static bool _staminaConfigDirty = true;
         private static float _lastAppliedSpeedLimit = -1f;   // -1 = nada aplicado; força re-apply
         private static float _cachedAimDrainRate = 3f;        // cacheado em OnRaidStart — fallback ao default vanilla
+        public static float CachedAimDrainRate => _cachedAimDrainRate;   // item 012: base rate do StaminaController
 
         public static Stance GetActiveStaminaStance() => _activeStaminaStance;
 
@@ -1271,8 +1272,7 @@ namespace CameraRotationMod
             mc.RemoveStateSpeedLimit(Plugin.StanceSpeedLimitCause);
             _lastAppliedSpeedLimit = -1f;
 
-            StanceStaminaState.Multiplier = cfg.StaminaMultiplier.Value;
-
+            // item 012: o multiplicador de stamina migrou para o StaminaController; aqui sobra só o speed-limit.
             bool inProne = Singleton<GameWorld>.Instance.MainPlayer.IsInPronePose;
             StanceStaminaState.IsSuspendedByProne = inProne && !cfg.ApplyWhenProne.Value;
 
@@ -1316,42 +1316,11 @@ namespace CameraRotationMod
         /// </summary>
         public static void TickStanceStamina()
         {
+            // item 012: o delta de stamina de braço migrou para StaminaController.Tick (autoridade única).
+            // Aqui sobra apenas a re-aplicação do speed-limit quando a config de stance muda (dirty).
             try
             {
-                // Re-aplicar config se foi marcada suja por SettingChanged
                 if (_staminaConfigDirty) ApplyStaminaStance(_activeStaminaStance);
-
-                if (!IsActiveContext()) return;
-                if (!StanceStaminaState.ShouldApplyStamina) return;
-
-                var player = Singleton<GameWorld>.Instance.MainPlayer;
-
-                // Coordenador (fix-06-01): o tick só age no modo StanceDrain. Cede a mount ativo/passivo,
-                // hold-breath, ADS e prone — elimina o cabo-de-guerra na stamina de braço.
-                if (ArmStamina.Resolve(player) != ArmStaminaMode.StanceDrain) return;
-
-                var hands = player.Physical?.HandsStamina;
-                if (hands == null) return;
-
-                if (hands.Multiplier <= 0f) return;
-                // Honra ForceMode do GClass774 — Consume() vanilla pula quando ForceMode = true
-                if (hands.ForceMode) return;
-
-                // delta: negativo = drain, positivo = recovery
-                // _cachedAimDrainRate populado em OnRaidStart (constante imutável)
-                float mult = StanceStaminaState.Multiplier;
-                float delta = _cachedAimDrainRate * (mult - 1.0f) * hands.Multiplier * Time.deltaTime;
-                if (float.IsNaN(delta) || float.IsInfinity(delta) || Mathf.Abs(delta) < 0.0001f) return;
-
-                float prev = hands.Current;
-                float target = Mathf.Clamp(prev + delta, 0f, (float)hands.TotalCapacity);
-                if (Mathf.Abs(target - prev) < 0.0001f) return;
-                hands.Current = target;
-                NotifyHandsStaminaChanged(hands, prev);
-
-                // Replica HandleExpiration vanilla para disparar OnExpired event ao atingir 0
-                if (delta < 0 && target <= 0f && prev > 0f)
-                    hands.HandleExpiration();
             }
             catch (Exception ex) { Plugin.Logger.LogError($"[StanceManager.TickStanceStamina] {ex}"); }
         }

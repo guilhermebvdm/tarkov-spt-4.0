@@ -72,6 +72,13 @@ namespace CameraRotationMod.Patches
                     return;
                 }
 
+                // Item 012: o passivo só vale em Stance 0 ou em ADS (corner case da spec).
+                if (StanceManager.CurrentStance != Stance.Default && !pwa.IsAiming)
+                {
+                    PassiveMountState.ClearBracing();
+                    return;
+                }
+
                 Transform w = pwa.HandsContainer.WeaponRootAnim;
                 Vector3 up = weaponUp ?? w.TransformDirection(Vector3.up);
                 float len = ln * 1.25f;

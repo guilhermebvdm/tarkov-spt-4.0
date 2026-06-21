@@ -24,6 +24,7 @@ namespace CameraRotationMod.Patches
                 Plugin.ApplyMovementSpeeds();
                 StanceManager.OnRaidStart();
                 HoldBreathPatch.OnRaidStart();   // carrega o áudio no contexto da cena + reseta estado do hold
+                StaminaController.Reset();       // CR-01-02: estado limpo de stamina a cada raid
 
                 // Item 010: estado limpo a cada raid + marcar que o próximo equip é o spawn (cenário 1).
                 ManualChamberingState.Reset();
@@ -51,7 +52,7 @@ namespace CameraRotationMod.Patches
         [PatchPostfix]
         private static void Postfix()
         {
-            try { StanceManager.OnRaidEnd(); HoldBreathPatch.OnRaidEnd(); ManualChamberingState.Reset(); PassiveMountState.Reset(); }
+            try { StanceManager.OnRaidEnd(); HoldBreathPatch.OnRaidEnd(); ManualChamberingState.Reset(); PassiveMountState.Reset(); StaminaController.Reset(); }
             catch (Exception ex) { Plugin.Logger.LogError($"[GameWorldOnDestroyPatch] {ex}"); }
         }
     }

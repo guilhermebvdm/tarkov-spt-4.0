@@ -93,7 +93,6 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<float> _ADSTransitionSpeed;
 
     // Hold Breath
-    public static ConfigEntry<float> _HoldBreathArmStaminaDrain;
     public static ConfigEntry<float> _HoldBreathOxygenDrain;
     public static ConfigEntry<bool> _EnableCustomBreathAudio;
     public static ConfigEntry<float> _BreathInVolume;
@@ -211,8 +210,7 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<float> _PassiveRecoilMultiplier;
     public static ConfigEntry<float> _PassiveSwayMultiplier;
     public static ConfigEntry<bool> _PassiveStaminaSave;
-    public static ConfigEntry<float> _ActiveMountStaminaRegen;
-    public static ConfigEntry<float> _PassiveMountStaminaRegen;
+    public static ConfigEntry<bool> _DebugStaminaState;   // item 012 — toggle do overlay/log de estado de stamina
     public static ConfigEntry<bool> _ShowMountIcon;
 
     // Animation Settings (Item 005)
@@ -315,10 +313,9 @@ public class Plugin : BaseUnityPlugin
         // UI
         gameObject.AddComponent<UI.OxygenUI>();
 
-        // Stamina/velocidade por stance (backlog 001)
-        SafeEnable("StanceStaminaRecoveryPatch", () => new StanceStaminaRecoveryPatch());
-        SafeEnable("HandsStaminaConsumePatch", () => new Patches.HandsStaminaConsumePatch());
-        SafeEnable("HandsStaminaProcessPatch", () => new Patches.HandsStaminaProcessPatch());
+        // Stamina de braço — item 012: StaminaController (Plugin.Update) + neutralização do vanilla
+        SafeEnable("HandsStaminaNeutralizePatch", () => new Patches.HandsStaminaNeutralizePatch());
+        SafeEnable("HandsConsumeNeutralizePatch", () => new Patches.HandsConsumeNeutralizePatch());
         SafeEnable("GameWorldOnGameStartedPatch", () => new GameWorldOnGameStartedPatch());
         SafeEnable("GameWorldOnDestroyPatch", () => new GameWorldOnDestroyPatch());
 
@@ -367,6 +364,9 @@ public class Plugin : BaseUnityPlugin
 
         // Item 011: UI do mount passivo no GameObject PERSISTENTE do plugin (mesmo padrão do OxygenUI).
         gameObject.AddComponent<PassiveMountUI>();
+
+        // Item 012: overlay de debug do cenário de stamina (toggle no F12).
+        gameObject.AddComponent<StaminaDebugUI>();
 
         // ========================================
         // MANUAL CHAMBERING
@@ -917,21 +917,7 @@ public class Plugin : BaseUnityPlugin
             null,
             new ConfigurationManagerAttributes { Order = 7 }));
 
-        _ActiveMountStaminaRegen = Config.Bind(
-            PassiveMountSettings,
-            "Active Mount Stamina Regen",
-            5f,
-            new ConfigDescription("Taxa de recuperação de stamina de braço no mount ATIVO (vanilla), em hipfire. Em ADS usa a taxa do passivo (recupera leve). 0 = não recupera.",
-            new AcceptableValueRange<float>(0f, 20f),
-            new ConfigurationManagerAttributes { Order = 6 }));
-
-        _PassiveMountStaminaRegen = Config.Bind(
-            PassiveMountSettings,
-            "Passive Mount Stamina Regen",
-            2.5f,
-            new ConfigDescription("Taxa de recuperação no mount PASSIVO em hipfire (e no ativo em ADS). No passivo + ADS a stamina fica parada (segura, sem recuperar). Deve ser MENOR que a do ativo.",
-            new AcceptableValueRange<float>(0f, 20f),
-            new ConfigurationManagerAttributes { Order = 5 }));
+        // Active/Passive Mount Stamina Regen removidos no item 012 (substituídos pelos multiplicadores do grupo "Stamina Management").
 
         _ShowMountIcon = Config.Bind(
             PassiveMountSettings,
@@ -941,18 +927,16 @@ public class Plugin : BaseUnityPlugin
             null,
             new ConfigurationManagerAttributes { Order = 6 }));
 
+        // Item 012: grupo "Stamina Management" — primeira Bind ANTES da seção Hold Breath (aposta na ordem
+        // de descoberta; se no F12 não ficar acima de "9. Respiração", prefixar o nome — ver 02-spec-tech §7).
+        BindStaminaManagement();
+
         const string HoldBreathSection = "9. Respiração (Hold Breath)";
 
         // ========================================
         // HOLD BREATH SETTINGS (Order -10)
         // ========================================
-        _HoldBreathArmStaminaDrain = Config.Bind(
-            HoldBreathSection,
-            "Arm Stamina Drain / sec",
-            2.0f,
-            new ConfigDescription("How much extra Arm Stamina (HandsStamina) is drained per second while holding breath.",
-            new AcceptableValueRange<float>(0f, 20f),
-            new ConfigurationManagerAttributes { Order = -10 }));
+        // _HoldBreathArmStaminaDrain removido no item 012 (o drain do braço virou o multiplicador "Hold Breath").
 
         _HoldBreathOxygenDrain = Config.Bind(
             HoldBreathSection,
@@ -1406,7 +1390,6 @@ public class Plugin : BaseUnityPlugin
 
         foreach (var cfg in _stanceConfigs.Values)
         {
-            cfg.StaminaMultiplier.SettingChanged       += OnStanceConfigChanged;
             cfg.ModifiesMovementSpeed.SettingChanged   += OnStanceConfigChanged;
             cfg.MovementSpeedMultiplier.SettingChanged += OnStanceConfigChanged;
             cfg.ApplyWhenProne.SettingChanged          += OnStanceConfigChanged;
@@ -1629,7 +1612,8 @@ public class Plugin : BaseUnityPlugin
         
         StanceManager.Update();
         StanceManager.UpdateTacSprint();
-        StanceManager.TickStanceStamina();              // backlog 001: delta stamina (drain/recovery) em hipfire
+        StaminaController.Tick();                       // item 012: stamina de braço (autoridade única)
+        StanceManager.TickStanceStamina();              // item 012: agora só re-aplica o speed-limit quando a config muda
         StanceManager.EvaluateProneSuspensionTick();    // backlog 001: prone toggle + refresh defensivo de speed limit
         UpdateCameraOffset();
     }
@@ -1649,14 +1633,7 @@ public class Plugin : BaseUnityPlugin
 
         return new StanceConfig
         {
-            StaminaMultiplier = Config.Bind(d.Section, $"Stance {n} Stamina Multiplier", d.StaminaMultiplier,
-                new ConfigDescription(
-                    "Controls stamina behavior for this stance. " +
-                    "< 1.0 = drain (e.g. 0.5 drains at half ADS rate). " +
-                    "1.0 = vanilla, no effect. " +
-                    "> 1.0 = accelerated recovery (e.g. 2.0 recovers at full ADS drain rate).",
-                    new AcceptableValueRange<float>(0f, 10f),
-                    new ConfigurationManagerAttributes { Order = orderBase })),
+            // StaminaMultiplier migrou para o grupo "Stamina Management" (item 012, BindStaminaManagement).
             ModifiesMovementSpeed = Config.Bind(d.Section, $"Stance {n} Modifies Movement Speed", d.ModSpeed,
                 new ConfigDescription(
                     "When enabled, this stance applies a movement speed cap.",
@@ -1685,6 +1662,44 @@ public class Plugin : BaseUnityPlugin
                         null,
                         new ConfigurationManagerAttributes { Order = 0 })),
         };
+    }
+
+    // Item 012: cria os 15 multiplicadores do grupo "Stamina Management" + o toggle de debug, e popula
+    // StaminaController.Multipliers (indexado por StaminaScenario). Chamado ANTES de HoldBreathSection.
+    private void BindStaminaManagement()
+    {
+        const string SEC = "Stamina Management";
+        var M = StaminaController.Multipliers;
+        int o = 80;
+        M[(int)StaminaScenario.StandStance0]      = BindMult(SEC, "Stance 0 Stamina Multiplier", _stanceDefaults[0].StaminaMultiplier, "Stand up sem mount, Stance 0 (hipfire).", ref o);
+        M[(int)StaminaScenario.StandStance1]      = BindMult(SEC, "Stance 1 Stamina Multiplier", _stanceDefaults[1].StaminaMultiplier, "Stand up sem mount, Stance 1.", ref o);
+        M[(int)StaminaScenario.StandStance2]      = BindMult(SEC, "Stance 2 Stamina Multiplier", _stanceDefaults[2].StaminaMultiplier, "Stand up sem mount, Stance 2.", ref o);
+        M[(int)StaminaScenario.StandStance3]      = BindMult(SEC, "Stance 3 Stamina Multiplier", _stanceDefaults[3].StaminaMultiplier, "Stand up sem mount, Stance 3.", ref o);
+        M[(int)StaminaScenario.StandAds]          = BindMult(SEC, "ADS - Stand up Multiplier", 0.7f, "Stand up sem mount, mirando (ADS).", ref o);
+        M[(int)StaminaScenario.StandHoldBreath]   = BindMult(SEC, "Hold Breath - Stand up Multiplier", 0.5f, "Stand up sem mount, segurando a respiração.", ref o);
+        M[(int)StaminaScenario.ProneHip]          = BindMult(SEC, "Prone Stamina Multiplier", 1.5f, "Deitado (prone) sem mount, hipfire.", ref o);
+        M[(int)StaminaScenario.ProneAds]          = BindMult(SEC, "ADS - Prone Multiplier", 0.9f, "Deitado, mirando.", ref o);
+        M[(int)StaminaScenario.ProneHoldBreath]   = BindMult(SEC, "Hold Breath - Prone Multiplier", 0.7f, "Deitado, segurando a respiração.", ref o);
+        M[(int)StaminaScenario.PassiveStance0]    = BindMult(SEC, "Passive Mount Multiplier", 1.5f, "Apoio passivo (encostado), Stance 0.", ref o);
+        M[(int)StaminaScenario.PassiveAds]        = BindMult(SEC, "ADS - Passive Mount Multiplier", 1.0f, "Apoio passivo, mirando (segura, não recupera).", ref o);
+        M[(int)StaminaScenario.PassiveHoldBreath] = BindMult(SEC, "Hold Breath - Passive Mount Multiplier", 0.9f, "Apoio passivo, segurando a respiração.", ref o);
+        M[(int)StaminaScenario.ActiveStance0]     = BindMult(SEC, "Active Mount Multiplier", 3.0f, "Mount nativo (montado), Stance 0.", ref o);
+        M[(int)StaminaScenario.ActiveAds]         = BindMult(SEC, "ADS - Active Mount Multiplier", 1.5f, "Mount nativo, mirando.", ref o);
+        M[(int)StaminaScenario.ActiveHoldBreath]  = BindMult(SEC, "Hold Breath - Active Mount Multiplier", 1.0f, "Mount nativo, segurando a respiração.", ref o);
+
+        _DebugStaminaState = Config.Bind(SEC, "Debug Stamina State", false,
+            new ConfigDescription("Mostra na tela + loga o cenário de stamina ativo (STAMINA STATE: ...).",
+                null, new ConfigurationManagerAttributes { Order = 1 }));
+    }
+
+    private ConfigEntry<float> BindMult(string sec, string key, float def, string tip, ref int order)
+    {
+        var e = Config.Bind(sec, key, def, new ConfigDescription(
+            tip + " <1 drena, 1 mantém, >1 recupera.",
+            new AcceptableValueRange<float>(0f, 10f),
+            new ConfigurationManagerAttributes { Order = order }));
+        order--;
+        return e;
     }
 
     private void Start()

@@ -91,7 +91,6 @@ Fonte: [modded/Plugin.cs](modded/Plugin.cs) (63 originais + 16 do backlog `001-s
 
 | Propriedade (EN) | Tradução | Tipo | Padrão | Faixa | Tooltip (pt-BR) |
 |---|---|---|---|---|---|
-| Stance 0 Stamina Multiplier | Multiplicador de Stamina — Postura 0 | float | `0.5` | 0.0 a 10.0 | Controla o comportamento da stamina. < 1.0 = drain (ex: 0.5 = drena na metade da taxa de mira). 1.0 = vanilla, sem efeito. > 1.0 = recovery acelerado (ex: 2.0 = recupera na taxa de drain de mira). |
 | Stance 0 Modifies Movement Speed | Modifica Velocidade — Postura 0 | bool | `true` | — | Quando habilitado, esta stance aplica um redutor à velocidade de movimentação. |
 | Stance 0 Movement Speed Multiplier | Multiplicador de Velocidade — Postura 0 | int (%) | `90` | 50 a 100 (Avançado) | Redutor de velocidade em %. 50 = metade da velocidade · 75 = um pouco mais lento · 100 = sem redução. Apenas redução (limitação do sistema de speed limits do EFT). |
 | Stance 0 Apply When Prone | Aplicar em Prone — Postura 0 | bool | `false` | — (Avançado) | Aplicar esta stance (offsets, drain/recovery e redutor de velocidade) também quando o personagem está deitado. Desligado por padrão porque pode conflitar com as animações nativas de prone. |
@@ -107,7 +106,6 @@ Fonte: [modded/Plugin.cs](modded/Plugin.cs) (63 originais + 16 do backlog `001-s
 | Stance 1 Hands Forward/Backward Offset | Offset Frente/Trás — Postura 1 | float | `-0.15` | -0.5 a 0.5 | Posição de mãos/arma da Postura 1 para frente/trás (positivo = frente) |
 | Stance 1 Hands Up/Down Offset | Offset Cima/Baixo — Postura 1 | float | `0` | -0.5 a 0.5 | Posição de mãos/arma da Postura 1 para cima/baixo (positivo = cima) |
 | Stance 1 Hands Sideways Offset | Offset Lateral — Postura 1 | float | `0` | -0.5 a 0.5 | Posição de mãos/arma da Postura 1 para esquerda/direita (positivo = direita) |
-| Stance 1 Stamina Multiplier | Multiplicador de Stamina — Postura 1 | float | `1.5` | 0.0 a 10.0 | Controla o comportamento da stamina. < 1.0 = drain. 1.0 = vanilla, sem efeito. > 1.0 = recovery acelerado (ex: 1.5 = recupera na metade da taxa de drain de mira). |
 | Stance 1 Modifies Movement Speed | Modifica Velocidade — Postura 1 | bool | `true` | — | Quando habilitado, aplica um redutor à velocidade de movimentação. |
 | Stance 1 Movement Speed Multiplier | Multiplicador de Velocidade — Postura 1 | int (%) | `95` | 50 a 100 (Avançado) | Redutor de velocidade em %. 100 = sem redução. |
 | Stance 1 Apply When Prone | Aplicar em Prone — Postura 1 | bool | `false` | — (Avançado) | Aplicar esta stance também quando o personagem está deitado. Desligado por padrão. |
@@ -126,7 +124,6 @@ Fonte: [modded/Plugin.cs](modded/Plugin.cs) (63 originais + 16 do backlog `001-s
 | Stance 2 Hands Forward/Backward Offset | Offset Frente/Trás — Postura 2 | float | `0.03` | -0.5 a 0.5 | Posição de mãos/arma da Postura 2 para frente/trás (positivo = frente). Low Ready: leve push forward. |
 | Stance 2 Hands Up/Down Offset | Offset Cima/Baixo — Postura 2 | float | `0` | -0.5 a 0.5 | Posição de mãos/arma da Postura 2 para cima/baixo (positivo = cima) |
 | Stance 2 Hands Sideways Offset | Offset Lateral — Postura 2 | float | `0` | -0.5 a 0.5 | Posição de mãos/arma da Postura 2 para esquerda/direita (positivo = direita) |
-| Stance 2 Stamina Multiplier | Multiplicador de Stamina — Postura 2 | float | `1.0` | 0.0 a 10.0 | Controla o comportamento da stamina. Low Ready: padrão vanilla (1.0 = sem efeito; ajuste para drain ou recovery). |
 | Stance 2 Modifies Movement Speed | Modifica Velocidade — Postura 2 | bool | `true` | — | Quando habilitado, aplica um redutor à velocidade de movimentação. |
 | Stance 2 Movement Speed Multiplier | Multiplicador de Velocidade — Postura 2 | int (%) | `90` | 50 a 100 (Avançado) | Redutor de velocidade em %. 90 = leve redução (Low Ready). |
 | Stance 2 Apply When Prone | Aplicar em Prone — Postura 2 | bool | `false` | — (Avançado) | Aplicar esta stance também quando o personagem está deitado. Desligado por padrão. |
@@ -145,7 +142,6 @@ Fonte: [modded/Plugin.cs](modded/Plugin.cs) (63 originais + 16 do backlog `001-s
 | Stance 3 Hands Forward/Backward Offset | Offset Frente/Trás — Postura 3 | float | `0` | -0.5 a 0.5 | Posição de mãos/arma da Postura 3 para frente/trás (positivo = frente). Custom: padrão sem deslocamento. |
 | Stance 3 Hands Up/Down Offset | Offset Cima/Baixo — Postura 3 | float | `0` | -0.5 a 0.5 | Posição de mãos/arma da Postura 3 para cima/baixo (positivo = cima) |
 | Stance 3 Hands Sideways Offset | Offset Lateral — Postura 3 | float | `0` | -0.5 a 0.5 | Posição de mãos/arma da Postura 3 para esquerda/direita (positivo = direita) |
-| Stance 3 Stamina Multiplier | Multiplicador de Stamina — Postura 3 | float | `2.0` | 0.0 a 10.0 | Controla o comportamento da stamina. Custom: padrão `2.0` (recovery acelerado — taxa de drain de mira). |
 | Stance 3 Modifies Movement Speed | Modifica Velocidade — Postura 3 | bool | `true` | — | Quando habilitado, aplica um redutor à velocidade de movimentação. |
 | Stance 3 Movement Speed Multiplier | Multiplicador de Velocidade — Postura 3 | int (%) | `100` | 50 a 100 (Avançado) | Redutor de velocidade em %. 100 = sem redução (Custom: sem cap). |
 | Stance 3 Apply When Prone | Aplicar em Prone — Postura 3 | bool | `false` | — (Avançado) | Aplicar esta stance também quando o personagem está deitado. Desligado por padrão. |
@@ -169,6 +165,29 @@ Fonte: [modded/Plugin.cs](modded/Plugin.cs) (63 originais + 16 do backlog `001-s
 | Minimum FOV | FOV Mínimo | int | `20` | 1 a 50 | Valor mínimo de FOV. O mínimo padrão do jogo é 50 |
 | Maximum FOV | FOV Máximo | int | `150` | 75 a 170 | Valor máximo de FOV. O máximo padrão do jogo é 75 |
 
+## Stamina Management (`Stamina Management`) — Item 012
+
+> Controlador central de stamina de braço. Cada cenário (estado principal × modificador) tem um multiplicador: **< 1.0 drena · 1.0 mantém · > 1.0 recupera**. Substitui os `Stance X Stamina Multiplier` (migrados das seções de Stance), os `*Mount Stamina Regen` (06-fix-01) e o `Arm Stamina Drain` do hold-breath. **Stims/skills de stamina de braço não se somam** (o controlador é a régua). Posição no F12: acima de "9. Respiração (Hold Breath)" — _validar in-game (ver 02-spec-tech §7)_.
+
+| Propriedade (EN) | Tradução | Tipo | Padrão | Faixa | Tooltip (pt-BR) |
+|---|---|---|---|---|---|
+| Stance 0 Stamina Multiplier | Estamina — Stand, Stance 0 | float | `0.5` | 0 a 10 | Stand up sem mount, Stance 0 (hipfire). |
+| Stance 1 Stamina Multiplier | Estamina — Stand, Stance 1 | float | `1.5` | 0 a 10 | Stand up sem mount, Stance 1. |
+| Stance 2 Stamina Multiplier | Estamina — Stand, Stance 2 | float | `1.0` | 0 a 10 | Stand up sem mount, Stance 2. |
+| Stance 3 Stamina Multiplier | Estamina — Stand, Stance 3 | float | `2.0` | 0 a 10 | Stand up sem mount, Stance 3. |
+| ADS - Stand up Multiplier | Estamina — Stand, ADS | float | `0.7` | 0 a 10 | Stand up sem mount, mirando. |
+| Hold Breath - Stand up Multiplier | Estamina — Stand, Hold Breath | float | `0.5` | 0 a 10 | Stand up sem mount, segurando a respiração. |
+| Prone Stamina Multiplier | Estamina — Prone, Hipfire | float | `1.5` | 0 a 10 | Deitado sem mount, hipfire. |
+| ADS - Prone Multiplier | Estamina — Prone, ADS | float | `0.9` | 0 a 10 | Deitado, mirando. |
+| Hold Breath - Prone Multiplier | Estamina — Prone, Hold Breath | float | `0.7` | 0 a 10 | Deitado, segurando a respiração. |
+| Passive Mount Multiplier | Estamina — Passivo, Stance 0 | float | `1.5` | 0 a 10 | Apoio passivo (encostado), Stance 0. |
+| ADS - Passive Mount Multiplier | Estamina — Passivo, ADS | float | `1.0` | 0 a 10 | Apoio passivo, mirando (segura, não recupera). |
+| Hold Breath - Passive Mount Multiplier | Estamina — Passivo, Hold Breath | float | `0.9` | 0 a 10 | Apoio passivo, segurando a respiração. |
+| Active Mount Multiplier | Estamina — Ativo, Stance 0 | float | `3.0` | 0 a 10 | Mount nativo (montado), Stance 0. |
+| ADS - Active Mount Multiplier | Estamina — Ativo, ADS | float | `1.5` | 0 a 10 | Mount nativo, mirando. |
+| Hold Breath - Active Mount Multiplier | Estamina — Ativo, Hold Breath | float | `1.0` | 0 a 10 | Mount nativo, segurando a respiração. |
+| Debug Stamina State | Debug do Estado de Stamina | bool | `false` | — | Mostra na tela + loga o cenário de stamina ativo (STAMINA STATE: ...). |
+
 ## Apoio Passivo de Arma (`Weapon Mount (Passive)`) — Item 011
 
 | Propriedade (EN) | Tradução | Tipo | Padrão | Faixa | Tooltip (pt-BR) |
@@ -176,7 +195,5 @@ Fonte: [modded/Plugin.cs](modded/Plugin.cs) (63 originais + 16 do backlog `001-s
 | Enable Passive Mount | Habilitar Apoio Passivo | bool | `true` | — | Liga o apoio passivo: ao encostar a arma numa superfície (sem a tecla de mount) você ganha um benefício leve de estabilidade. Desligado = só o mount nativo do jogo. |
 | Passive Recoil Multiplier | Multiplicador de Recuo (Passivo) | float | `0.7` | 0.1 a 1.0 | Multiplicador de recuo enquanto apoiado (passivo). 0.7 = 30% menos recuo. Deve ser MAIOR que o do mount ativo (vanilla) — o passivo é mais fraco. |
 | Passive Sway Multiplier | Multiplicador de Sway (Passivo) | float | `0.65` | 0.0 a 1.0 | Multiplicador de sway (respiração) enquanto apoiado. 0.65 = 35% menos sway. |
-| Passive Stamina Save | Economia de Estamina (Passivo) | bool | `true` | — | Enquanto apoiado, pausa/reduz o drain de stamina de braço (mais fraco que o mount nativo). |
-| Active Mount Stamina Regen | Recuperação de Estamina (Ativo) | float | `5.0` | 0 a 20 | Taxa de recuperação de stamina de braço no mount ATIVO (vanilla), em hipfire. Em ADS usa a taxa do passivo (recupera leve). 0 = não recupera. |
-| Passive Mount Stamina Regen | Recuperação de Estamina (Passivo) | float | `2.5` | 0 a 20 | Taxa de recuperação no mount PASSIVO em hipfire (e no ativo em ADS). No passivo + ADS a stamina fica parada (segura, sem recuperar). Deve ser MENOR que a do ativo. |
+| Passive Stamina Save | Controle de Estamina (Passivo) | bool | `true` | — | Liga o controle de stamina do apoio passivo. Desligado = o passivo dá recoil/sway mas NÃO mexe na stamina (ela segue o cenário sem-mount). A magnitude vem do grupo "Stamina Management" (item 012). |
 | Show Mount Icon | Mostrar Ícone de Apoio | bool | `true` | — | Mostra o ícone direcional (esquerda/direita/baixo) no canto inferior direito quando o apoio passivo está ativo. |
