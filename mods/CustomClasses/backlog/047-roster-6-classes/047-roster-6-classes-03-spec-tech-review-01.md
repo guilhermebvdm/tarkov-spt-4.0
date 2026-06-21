@@ -8,7 +8,9 @@
 
 ## Resumo
 
-> 🔴 Bloqueadores: 0 · 🟡 Importantes: 3 · 🟢 Menores: 3 · ✅ Resolvidos: 0 · Total: 6
+> 🔴 Bloqueadores: 0 · 🟡 Importantes: 3 · 🟢 Menores: 3 · ✅ Resolvidos: **6** · Total: 6
+>
+> **Todos os 6 pontos aceitos e aplicados na spec técnica (2026-06-21)** — ver §Resolução no fim.
 
 Âncoras conferidas no SPT source: `ProfileHelper.GetProfileTemplateForSide`→`return null` ✅, `TraderHelper.cs:150` `matchingSide.Trader` (NRE p/ órfão) ✅, `SaveServer` itera **todos** os `SaveLoadRouter` no load ✅ (com guard `IsProfileInvalidOrUnloadable` antes — SaveServer.cs:260), `SaveLoadRouter`/`HandledRoute` shape ✅, `SkillTypes.Shadowconnections` (c minúsculo) ✅, `HiddenEditionsLoader` só mexe na blacklist de criação (não no dict de templates) ✅ → fallback "Standard" é válido. Sem bloqueador.
 
@@ -18,12 +20,12 @@
 
 | ID | Categoria | Impacto | Título | Status |
 |---|---|---|---|---|
-| PA-01-01 | B — Edge Case | 🟡 | Remap amplo nuka perfis de classe mantida em troca de idioma | Pendente |
-| PA-01-02 | A — Gap | 🟡 | Config `orphanEditionFallback` não está cabeada no stub | Pendente |
-| PA-01-03 | A — Gap | 🟡 | Fallback sem defesa se "Standard" não existir nos templates | Pendente |
-| PA-01-04 | A — Gap | 🟢 | Profile-fonte do gear de fantasma/tanque não definido | Pendente |
-| PA-01-05 | C — Lógica | 🟢 | Drift de linha em ProfileHelper (809-812 → ~808-811) | Pendente |
-| PA-01-06 | A — Gap | 🟢 | Assumir que editions CustomClasses entram no GetProfileTemplates() | Pendente |
+| PA-01-01 | B — Edge Case | 🟡 | Remap amplo nuka perfis de classe mantida em troca de idioma | ✅ Resolvido |
+| PA-01-02 | A — Gap | 🟡 | Config `orphanEditionFallback` não está cabeada no stub | ✅ Resolvido |
+| PA-01-03 | A — Gap | 🟡 | Fallback sem defesa se "Standard" não existir nos templates | ✅ Resolvido |
+| PA-01-04 | A — Gap | 🟢 | Profile-fonte do gear de fantasma/tanque não definido | ✅ Resolvido |
+| PA-01-05 | C — Lógica | 🟢 | Drift de linha em ProfileHelper (809-812 → ~808-811) | ✅ Resolvido |
+| PA-01-06 | A — Gap | 🟢 | Assumir que editions CustomClasses entram no GetProfileTemplates() | ✅ Resolvido |
 
 ## Categorias
 
@@ -124,5 +126,20 @@
 
 **Decisão:**
 - `[ ]` Pendente
-- `[ ]` Aceitar sugestão
+- `[x]` Aceitar sugestão
 - `[ ]` Caminho alternativo: _________________
+
+---
+
+## Resolução (2026-06-21)
+
+Todos os 6 pontos **aceitos** e aplicados na [spec técnica](047-roster-6-classes-02-spec-tech.md):
+
+- **PA-01-01** ✅ — router escopado a uma `HashSet` das 6 aposentadas (name/en + pt: Armorer/Armeiro, Scout/Batedor, Operations Manager/Gerente de Operações, Stealth Operator/Operador Furtivo, Tactical Operator/Operador Tático, Survivalist/Sobrevivencialista); só remapeia essas → re-chave por idioma de classe mantida não é tocado.
+- **PA-01-02** ✅ — `LoadFallbackEdition()` lê `orphanEditionFallback` de `settings.jsonc` (padrão do `LoadLauncherLanguage`), default `"Standard"`; nota p/ unificar com `LauncherSettings`.
+- **PA-01-03** ✅ — guarda `if (!templates.ContainsKey(fallback)) fallback = templates.Keys.FirstOrDefault()`; `Error` se não houver template.
+- **PA-01-04** ✅ — gear placeholder por clone (fantasma ← operadorFurtivo; tanque ← operadorTatico/sobrevivencialista) **antes** de deletar; curado depois. §4/§8 atualizados.
+- **PA-01-05** ✅ — âncora corrigida p/ `ProfileHelper.cs:808-811`.
+- **PA-01-06** ✅ — confirmado: `Commit` escreve `GetProfileTemplates()[plan.Name]` (ClassRegistrar.cs:282) = mesmo dict que o router lê; linha citada na §2.
+
+**Status:** 0 pendentes. Spec técnica pronta para `/code-mod`.

@@ -12,7 +12,7 @@
 
 1. **Aplicar a matriz** — reescrever 4 `.jsonc`, criar 2, deletar 6, em `modded/Server/config/classes/`. O loader já existe: `CustomClassesMod.OnLoad` (`[Injectable] PostDBModLoader+1`, ref: CustomClassesMod.cs:19) lê cada `.jsonc`, pula `Enabled:false` (CustomClassesMod.cs:70) e registra via `ClassRegistrar.ValidateAndBuild`+`Commit`. **Deletar o arquivo = classe não registrada** no boot. Zero código novo aqui.
 2. **Sync `SkillWeights.cs`** — adicionar 3 categorias de gem ao dict `Categories` (afeta só o *warning de custo* do editor; não é runtime de jogo).
-3. **Rede de segurança contra perfil órfão** (requisito da spec funcional) — um `SaveLoadRouter` novo que, no load de cada perfil, remapeia uma `Edition` que não existe mais nos templates para uma edição neutra. **Necessário** (não opcional): a investigação confirmou que deletar uma classe faz um perfil dela **crashar** (ver §2).
+3. **Rede de segurança contra perfil órfão** (requisito da spec funcional) — um `SaveLoadRouter` novo que, no load, remapeia perfis cuja `Edition` é de uma das **6 classes aposentadas** (lista pt+en) que sumiu dos templates → edição neutra (`orphanEditionFallback`, default `"Standard"`). **Escopado às deletadas** (não "qualquer edition ausente") p/ não pegar re-chave por idioma de classe mantida (PA-01-01). **Necessário** (não opcional): a investigação confirmou que deletar uma classe faz um perfil dela **crashar** (ver §2).
 
 Alternativas descartadas: (a) *não deletar, só esconder da criação* (HiddenEditions/blacklist) — evitaria o órfão sem o router, mas deixa as 6 registradas (editor mostra 13, contradiz o roster limpo); decisão do usuário foi **deletar** (spec §corner case). (b) *Harmony em `TraderHelper`* — desnecessário; o `SaveLoadRouter` é o ponto de extensão canônico do SPT.
 
@@ -22,7 +22,8 @@ Alternativas descartadas: (a) *não deletar, só esconder da criação* (HiddenE
 |---|---|---|
 | [`SptProfile.cs:100`](../../../../references/spt-source/Libraries/SPTarkov.Server.Core/Models/Eft/Profile/SptProfile.cs#L100) | campo | `ProfileInfo.Edition` é `string?` nua (sem enum/validação) — `SptProfile.ProfileInfo` (SptProfile.cs:15) |
 | `ProfileHelper.cs:806` | lookup | `databaseService.GetProfileTemplates()` → `Dictionary<string, ProfileSides>` |
-| `ProfileHelper.cs:809-812` | órfão (1/2) | `GetProfileTemplateForSide`: `TryGetValue(edition)` falha → **retorna `null`** (loga erro) |
+| `ProfileHelper.cs:808-811` | órfão (1/2) | `GetProfileTemplateForSide`: `TryGetValue(edition)` falha → **retorna `null`** (loga erro) |
+| `ClassRegistrar.cs:282` | dict | `Commit` escreve `GetProfileTemplates()[plan.Name] = Sides` — **mesmo dict** que o router lê (PA-01-06) |
 | `TraderHelper.cs:147-150` | **crash** | `ResetTrader` passa `ProfileInfo.Edition` e acessa `.Trader` no resultado `null` → **NullReferenceException** p/ perfil órfão |
 | `Router.cs:167-177` | **hook** | `abstract SaveLoadRouter` · `HandleLoadInternal(SptProfile)` — ponto de extensão do load |
 | `SaveServer.cs:268` | invocação | `callback.HandleLoad(GetProfile(sessionID))` roda **todos** os `SaveLoadRouter` em cada load de perfil (sem validar edition) |
@@ -49,8 +50,8 @@ Alternativas descartadas: (a) *não deletar, só esconder da criação* (HiddenE
 | `config/classes/fuzileiro.jsonc` | MODIFICAR | idem |
 | `config/classes/cacador.jsonc` | MODIFICAR | idem |
 | `config/classes/saqueador.jsonc` | MODIFICAR | idem (Lockpicking/Strength ×3 — ressalva peso-baixo, **não** é erro) |
-| `config/classes/fantasma.jsonc` | CRIAR | nova classe + gear via `extract-from-profile.mjs` (046) |
-| `config/classes/tanque.jsonc` | CRIAR | idem |
+| `config/classes/fantasma.jsonc` | CRIAR | nova classe + gear **placeholder**: clonar o loadout do `operadorFurtivo` (furtivo) **antes** de deletá-lo; curado depois (PA-01-04) |
+| `config/classes/tanque.jsonc` | CRIAR | nova classe + gear **placeholder**: clonar o loadout do `operadorTatico`/`sobrevivencialista` (pesado) antes de deletar; curado depois (PA-01-04) |
 | `config/classes/{armeiro,batedor,gerenteDeOperacoes,operadorFurtivo,operadorTatico,sobrevivencialista}.jsonc` | DELETAR | 6 aposentadas (repo + install) |
 | `modded/Server/SkillWeights.cs` | MODIFICAR | +3 entradas em `Categories` (sub-tarefa c) |
 | `modded/Server/OrphanEditionSaveLoadRouter.cs` | CRIAR | remap de edition órfã no load (rede de segurança) |
@@ -61,47 +62,104 @@ Alternativas descartadas: (a) *não deletar, só esconder da criação* (HiddenE
 
 ```csharp
 // modded/Server/OrphanEditionSaveLoadRouter.cs
+using System.Reflection;
+using System.Text.Json.Serialization;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;                       // SaveLoadRouter, HandledRoute (ref: Router.cs:167,180)
+using SPTarkov.Server.Core.Helpers;                  // ModHelper
 using SPTarkov.Server.Core.Models.Eft.Profile;       // SptProfile (ref: SptProfile.cs:15,100)
 using SPTarkov.Server.Core.Services;                 // DatabaseService
+using SPTarkov.Server.Core.Utils;                    // FileUtil, JsonUtil
 using SPTarkov.Server.Core.Models.Utils;             // ISptLogger
 
 namespace CustomClasses;
 
 /// <summary>
-///   Item 047 — rede de segurança: ao carregar um perfil cuja Edition não existe mais nos
-///   profile-templates (classe aposentada deletada), remapeia para uma edição neutra. Sem isso,
-///   TraderHelper.ResetTrader dá NRE no template null (ref: ProfileHelper.cs:809-812 → TraderHelper.cs:150).
+///   Item 047 — rede de segurança: ao carregar um perfil cuja Edition é de uma classe APOSENTADA
+///   deletada (e some dos templates), remapeia para uma edição neutra. Sem isso, TraderHelper.ResetTrader
+///   dá NRE no template null (ref: ProfileHelper.cs:808-811 → TraderHelper.cs:150).
+///   PA-01-01: escopado à lista das 6 deletadas (pt+en), NÃO "qualquer edition ausente" — assim não
+///   pega re-chaveamento por idioma de classe mantida (edition key = displayName[lang], CustomClassesMod.cs:77).
 /// </summary>
 [Injectable]
 public class OrphanEditionSaveLoadRouter(
+    ModHelper modHelper,
+    FileUtil fileUtil,
+    JsonUtil jsonUtil,
     DatabaseService databaseService,
     ISptLogger<OrphanEditionSaveLoadRouter> logger
 ) : SaveLoadRouter                                    // ref: Router.cs:167
 {
-    // O HandleLoad roda p/ todo perfil no load (SaveServer.cs:268); a rota é só identificador.
+    // name(==en) + pt das 6 deletadas no 047 (edition key = displayName[lang] ou name — CustomClassesMod.cs:77).
+    private static readonly HashSet<string> RetiredEditions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Armorer", "Armeiro", "Scout", "Batedor",
+        "Operations Manager", "Gerente de Operações",
+        "Stealth Operator", "Operador Furtivo",
+        "Tactical Operator", "Operador Tático",
+        "Survivalist", "Sobrevivencialista",
+    };
+
+    // HandleLoad roda p/ todo perfil no load (SaveServer.cs:268); a rota é só identificador.
     protected override List<HandledRoute> GetHandledRoutes() =>
         [new HandledRoute("customclasses-orphan-edition", false)];   // ref: ProfileSaveLoadRouter.cs:13
 
     protected override SptProfile HandleLoadInternal(SptProfile profile)   // ref: Router.cs:177
     {
         var edition = profile.ProfileInfo?.Edition;                       // ref: SptProfile.cs:100
-        if (string.IsNullOrEmpty(edition))
+        if (string.IsNullOrEmpty(edition) || !RetiredEditions.Contains(edition))
         {
-            return profile;
+            return profile;   // PA-01-01: só age em edition aposentada conhecida
         }
 
-        var templates = databaseService.GetProfileTemplates();           // ref: ProfileHelper.cs:806
+        // mesmo dict que o Commit escreve (ClassRegistrar.cs:282) e que GetProfileTemplateForSide lê (ProfileHelper.cs:806 / DatabaseService.cs:141)
+        var templates = databaseService.GetProfileTemplates();
         if (templates.ContainsKey(edition))
         {
-            return profile;                                              // edition válida — nada a fazer
+            return profile;   // ainda registrada (não deletada de fato) — nada a fazer
         }
 
-        const string fallback = "Standard";                              // TODO confirm: ler de settings.jsonc (orphanEditionFallback)
-        logger.Warning($"[CustomClasses] Edition '{edition}' não existe nos templates — remapeando perfil para '{fallback}'.");
+        var fallback = LoadFallbackEdition();
+        if (!templates.ContainsKey(fallback))                            // PA-01-03: defesa se o fallback não existir
+        {
+            var first = templates.Keys.FirstOrDefault();
+            if (first is null)
+            {
+                logger.Error("[CustomClasses] Sem profile-templates — não foi possível remapear edition órfã.");
+                return profile;
+            }
+            fallback = first;
+        }
+
+        logger.Warning($"[CustomClasses] Edition aposentada '{edition}' — remapeando perfil para '{fallback}'.");
         profile.ProfileInfo!.Edition = fallback;
         return profile;
+    }
+
+    /// <summary>Lê config/settings.jsonc → orphanEditionFallback (default "Standard"). PA-01-02.</summary>
+    private string LoadFallbackEdition()
+    {
+        try
+        {
+            var configPath = System.IO.Path.Combine(
+                modHelper.GetAbsolutePathToModFolder(Assembly.GetExecutingAssembly()), "config");   // ref: ModHelper.cs:10
+            var file = System.IO.Path.Combine(configPath, "settings.jsonc");
+            if (!System.IO.File.Exists(file)) return "Standard";
+            var s = jsonUtil.Deserialize<OrphanSettings>(fileUtil.ReadFile(file));
+            var v = s?.OrphanEditionFallback?.Trim();
+            return string.IsNullOrEmpty(v) ? "Standard" : v;
+        }
+        catch (Exception ex)
+        {
+            logger.Warning($"[CustomClasses] settings.jsonc inválido p/ orphanEditionFallback — usando 'Standard'. {ex.Message}");
+            return "Standard";
+        }
+    }
+
+    // PA-01-02: idealmente unificar com o LauncherSettings de CustomClassesMod.cs:143 num record compartilhado.
+    private sealed record OrphanSettings
+    {
+        [JsonPropertyName("orphanEditionFallback")] public string? OrphanEditionFallback { get; init; }
     }
 }
 ```
@@ -131,7 +189,7 @@ public class OrphanEditionSaveLoadRouter(
 [load de perfil EXISTENTE] SaveServer.LoadProfileAsync (SaveServer.cs:249,268)
    → para cada SaveLoadRouter: HandleLoad(profile)
    → OrphanEditionSaveLoadRouter.HandleLoadInternal (Router.cs:177)
-       → edition ∉ GetProfileTemplates()? → remap p/ "Standard"   ← evita o NRE de TraderHelper.cs:150
+       → edition ∈ {6 aposentadas pt+en} e ∉ GetProfileTemplates()? → remap p/ orphanEditionFallback ("Standard")   ← evita o NRE de TraderHelper.cs:150
 ```
 
 ## 7. Riscos e dependências
@@ -149,7 +207,7 @@ public class OrphanEditionSaveLoadRouter(
 - [ ] Gerar gear de fantasma/tanque via `extract-from-profile.mjs` a partir do profile-fonte escolhido.
 - [ ] Deletar os 6 `.jsonc` aposentados (repo + install).
 - [ ] Adicionar as 3 entradas em `SkillWeights.cs` `Categories` (caixa `Shadowconnections`).
-- [ ] Criar `OrphanEditionSaveLoadRouter.cs` + ler `orphanEditionFallback` de `settings.jsonc`.
+- [ ] Criar `OrphanEditionSaveLoadRouter.cs` (lista das 6 aposentadas pt+en; ler `orphanEditionFallback` de `settings.jsonc`; defesa se fallback ausente).
 - [ ] `node class-matrix.mjs` + `check-skill-costs.mjs` sem flag de custo; `class-balance-snapshot.mjs` ok.
 - [ ] Validar: criar perfil de cada classe (skills/mults/loadout/hideout) + carregar um perfil de classe deletada (não crasha; vira "Standard").
 
@@ -171,3 +229,4 @@ public class OrphanEditionSaveLoadRouter(
 | Data | Evento |
 |---|---|
 | 2026-06-21 | Spec técnica criada via `/create-technical-spec` |
+| 2026-06-21 | Review 01 endereçada (6 pontos aceitos): remap escopado às 6 aposentadas pt+en (PA-01-01), `orphanEditionFallback` cabeado (PA-01-02), defesa de fallback ausente (PA-01-03), gear placeholder via clone (PA-01-04), âncora ProfileHelper 808-811 (PA-01-05), dict compartilhado Commit↔router confirmado (PA-01-06). |
