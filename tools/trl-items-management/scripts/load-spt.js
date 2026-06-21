@@ -784,18 +784,32 @@ function main() {
     }
     if (!Array.isArray(assort.items)) continue;
 
-    // Quest-locked assortIds
+    // Quest-locked assortIds. Standard layout is baseDir/questassort.json. Mods may
+    // ALSO ship a quest-assort in a non-standard spot — WTT-Artem puts it at
+    // baseDir/CustomQuests/<traderId>/QuestAssort/*.json (same { started, success,
+    // fail } shape). Quest-locked items live in trader.QuestAssort, NOT the base
+    // trader.Assort, until the quest completes — so the TRLTraderPrices mod (which
+    // iterates the base assort) can only apply an override to them AFTER unlock.
+    // Marking them lets the viewer flag "applies after unlocking the quest".
     const questLockedIds = new Set();
-    if (fs.existsSync(questAP)) {
-      try {
-        const qa = readJson(questAP);
-        for (const bucket of ['success', 'started', 'fail']) {
-          if (qa[bucket] && typeof qa[bucket] === 'object') {
-            for (const aid of Object.keys(qa[bucket])) questLockedIds.add(aid);
-          }
+    const addQuestBuckets = (qa) => {
+      for (const bucket of ['success', 'started', 'fail']) {
+        if (qa && qa[bucket] && typeof qa[bucket] === 'object') {
+          for (const aid of Object.keys(qa[bucket])) questLockedIds.add(aid);
         }
-      } catch (e) {
-        console.error(`  ${nickname}: questassort.json parse failed (${e.message})`);
+      }
+    };
+    if (fs.existsSync(questAP)) {
+      try { addQuestBuckets(readJson(questAP)); }
+      catch (e) { console.error(`  ${nickname}: questassort.json parse failed (${e.message})`); }
+    }
+    const customQuestDir = path.join(baseDir, 'CustomQuests', traderId, 'QuestAssort');
+    if (fs.existsSync(customQuestDir)) {
+      for (const f of fs.readdirSync(customQuestDir)) {
+        if (!/\.jsonc?$/i.test(f)) continue;
+        // Mod files may carry comments — readJsonc tolerates them (readJson does not).
+        try { addQuestBuckets(readJsonc(path.join(customQuestDir, f))); }
+        catch (e) { console.error(`  ${nickname}: CustomQuests/${traderId}/QuestAssort/${f} parse failed (${e.message})`); }
       }
     }
 

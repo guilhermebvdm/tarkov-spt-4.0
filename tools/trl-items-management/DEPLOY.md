@@ -45,7 +45,8 @@ git archive --format=zip -o trl-items-management.zip HEAD:tools/trl-items-manage
 Copie o zip pro server e extraia, ex.: `E:\tools\trl-items-management`. **Remova** do pacote:
 - `data/items.json` (placeholder do dev box — será regerado no passo 4; sem ele o viewer fica vazio
   até o build rodar);
-- scripts de teste `scripts/*smoke*.js`, `scripts/action0-*.js` (não-runtime).
+- scripts de teste/diagnóstico `scripts/*smoke*.js`, `scripts/action0-*.js`,
+  `scripts/verify-trader-*.js` (não-runtime).
 
 Crie a pasta de logs: `New-Item -ItemType Directory -Force E:\tools\trl-items-management\logs`.
 
@@ -92,6 +93,35 @@ restart-on-crash, logs em `logs\service-*.log`, bind em `127.0.0.1`) e inicia.
 ### 6. Acessar
 No desktop do server (AnyDesk), abra o navegador → `http://127.0.0.1:8080/TRLItemsManagement/`.
 Confirme que a lista carrega e que uma edição de preço + **Restore** funcionam.
+
+### 7. Mod de preços de trader (`TRLTraderPrices`) — necessário pra editar preço de trader
+
+A edição de **preço de flea** (passos acima) escreve direto na config do SPT e não precisa de mod. Já a
+edição de **preço de venda de trader** (a coluna do trader no viewer) é aplicada por um **companion server
+mod** em C#: o viewer grava `user/mods/TRLTraderPrices/config/overrides.json` e o mod reescreve a assort do
+trader no boot. **Sem o mod instalado, o viewer salva o override mas avisa "mod not installed" e nada aplica
+no jogo.**
+
+1. **Copiar o pacote do mod pro server.** Na máquina de dev, o pacote pronto fica em
+   `mods/TRLTraderPrices/builds/TRLTraderPrices-vm-deploy.zip` (só a DLL + .pdb; ~20 KB). Copie pro server.
+   *(Regerar o pacote, se faltar: `bash .agents/scripts/compile-mod.sh TRLTraderPrices` e zipe
+   `mods/TRLTraderPrices/builds/server/TRLTraderPrices.dll` dentro de uma pasta `TRLTraderPrices/`.)*
+2. **Extrair em `user/mods/`.** O zip já tem a estrutura `TRLTraderPrices/` — extraia direto na pasta
+   `user/mods/` do install (ex.: `E:\SPT\SPT\user\mods\`), resultando em
+   `E:\SPT\SPT\user\mods\TRLTraderPrices\TRLTraderPrices.dll`.
+3. **NÃO copie `config/overrides.json`.** É user-data: o viewer cria a pasta `config/` e o arquivo na
+   primeira edição de trader. (Por isso o pacote não traz config — shipar um default `{}` já fez o deploy
+   sobrescrever os overrides ao vivo no passado.)
+4. **Reiniciar o SPT.** O mod aplica os overrides no boot, ANTES do flea gerar as ofertas, então a compra
+   direta no trader E o preço dele no flea refletem o override. O log mostra
+   `[TRLTraderPrices] applied N entries (...)` no boot.
+
+> O `SPT_PATH` do viewer (passo 5) já aponta pra raiz do install, então ele acha
+> `user/mods/TRLTraderPrices/config/` automaticamente — nada extra a configurar.
+
+> **Limitação conhecida:** ofertas de trader **quest-locked** (marcadas com 🔒 no viewer) só aplicam o
+> override **depois** que a quest correspondente é concluída (até lá o item fica no quest-assort, fora da
+> assort viva que o mod edita). O mod ignora com segurança o que não está na assort viva (log `tplNotSold`).
 
 ---
 

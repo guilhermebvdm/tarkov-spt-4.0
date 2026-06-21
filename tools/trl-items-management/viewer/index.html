@@ -1369,7 +1369,7 @@ function renderRow(it) {
   const trader = (traderSellValue != null || traderBuy)
     ? `<div class="cell-trader cell-trader--stacked">` +
         (traderBuy
-          ? `<div class="cell-trader__line cell-trader__line--sell" data-tip="S = trader SELLS this to you — the assort price you pay (SPT)"><span class="cell-trader__tag cell-trader__tag--sell" aria-label="Trader sells to you">S</span>${avatarFor(traderBuy.name)}<span class="cell-trader__num${traderBuy.overridden?' is-overridden':''}">${fmtRub(traderBuy.effPriceRUB)}</span>${traderBuy.overridden?` <span class="badge badge--override cell-trader__ovr" data-tip="Trader sell-price override — restart SPT to apply">OVR</span>`:''}<small class="cell-trader__ll">LL${traderBuy.loyaltyLevel}${traderBuy.questLocked?' 🔒':''}</small></div>`
+          ? `<div class="cell-trader__line cell-trader__line--sell" data-tip="S = trader SELLS this to you — the assort price you pay (SPT)"><span class="cell-trader__tag cell-trader__tag--sell" aria-label="Trader sells to you">S</span>${avatarFor(traderBuy.name)}<span class="cell-trader__num${traderBuy.overridden?' is-overridden':''}">${fmtRub(traderBuy.effPriceRUB)}</span>${traderBuy.overridden?` <span class="badge badge--override cell-trader__ovr" data-tip="Trader sell-price override — restart SPT to apply">OVR</span>`:''}<small class="cell-trader__ll">LL${traderBuy.loyaltyLevel}${traderBuy.questLocked?` <span class="trader-lock" data-tip="Quest-locked — an override applies only after you unlock the quest">🔒</span>`:''}</small></div>`
           : '') +
         (traderSellValue != null
           ? `<div class="cell-trader__line cell-trader__line--buy" data-tip="B = trader BUYS this from you — buyback (tarkov.dev)"><span class="cell-trader__tag cell-trader__tag--buy" aria-label="Trader buys from you">B</span>${avatarFor(traderSellName)}<span class="cell-trader__num">${fmtRub(traderSellValue)}</span></div>`
@@ -2226,7 +2226,7 @@ function renderTraderRow(it, t) {
   const hasOvr = ovr != null;
 
   // Quest-lock 🔒 gets its own tooltip so it isn't confused with Fence's marker.
-  const lockGlyph = t.questLocked ? ` · <span class="trader-lock" data-tip="Quest-locked offer">🔒</span>` : '';
+  const lockGlyph = t.questLocked ? ` · <span class="trader-lock" data-tip="Quest-locked — an override here applies only after you unlock the quest (until then the item sits in the trader's quest assort, not the live one)">🔒</span>` : '';
   const meta = `<small class="vendor">${escapeHtml(t.currency || '?')} · L${t.loyaltyLevel}${lockGlyph}${t.unlimited?' · ∞':''}</small>`;
   const nameCell = `<td class="k">${escapeHtml(t.name)} ${meta}</td>`;
 
