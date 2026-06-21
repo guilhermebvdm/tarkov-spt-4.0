@@ -36,30 +36,89 @@ namespace CameraRotationMod.Patches
         private static Vector3 _rotVelocity;
         private static Vector3 _posVelocity;
 
+        // Limites de sanidade da interpolação por mola. O alvo legítimo nunca passa de ±45° (range de
+        // config); a mola Euler explícita, porém, DIVERGE com frame time ruim (dt grande / FPS baixo /
+        // stutter) e o Euler resultante cruza o gimbal (~90-180°), virando a câmera de cabeça pra baixo
+        // — comportamento dependente de hardware, por isso só alguns players são afetados com o mesmo
+        // build/config. Sub-stepping torna a integração estável independente de FPS; o batente angular
+        // impede o gimbal-flip preservando a "quicada" (overshoot até o limite).
+        private const float SpringMaxStep = 1f / 60f;
+        private const int SpringMaxSubSteps = 8;
+        private const float MaxStanceAngleDeg = 60f;   // ±45° é o alvo máx; 60° dá margem de quicada sem flipar
+        private const float MaxAngularVelDeg = 1080f;  // graus/s — teto da velocidade angular da mola
+        private const float MaxStancePosOffset = 0.5f; // metros — teto do offset de posição
+        private const float MaxLinearVel = 10f;        // m/s — teto da velocidade linear da mola
+        private static int _clampLogBudget = 12;       // loga as primeiras N vezes que o batente dispara
+
+        private static Vector3 ClampAngles(Vector3 e, ref Vector3 vel, float max)
+        {
+            bool hit = false;
+            if (e.x > max) { e.x = max; if (vel.x > 0f) vel.x = 0f; hit = true; }
+            else if (e.x < -max) { e.x = -max; if (vel.x < 0f) vel.x = 0f; hit = true; }
+            if (e.y > max) { e.y = max; if (vel.y > 0f) vel.y = 0f; hit = true; }
+            else if (e.y < -max) { e.y = -max; if (vel.y < 0f) vel.y = 0f; hit = true; }
+            if (e.z > max) { e.z = max; if (vel.z > 0f) vel.z = 0f; hit = true; }
+            else if (e.z < -max) { e.z = -max; if (vel.z < 0f) vel.z = 0f; hit = true; }
+            if (hit && _clampLogBudget > 0)
+            {
+                _clampLogBudget--;
+                Plugin.Logger.LogWarning($"[STANCE-CLAMP] ApplyComplex: spring overshoot batido no limite seguro ({max}°) — divergência da mola contida (causa do flip de câmera). euler={e}");
+            }
+            return e;
+        }
+
         private static Vector3 SpringLerpAngle(Vector3 current, Vector3 target, ref Vector3 velocity, float stiffness, float damping, float dt)
         {
-            if (float.IsNaN(target.x) || float.IsNaN(target.y) || float.IsNaN(target.z) || float.IsNaN(current.x)) return Vector3.zero;
-            Vector3 diff = new Vector3(
-                Mathf.DeltaAngle(current.x, target.x),
-                Mathf.DeltaAngle(current.y, target.y),
-                Mathf.DeltaAngle(current.z, target.z)
-            );
-            Vector3 force = diff * stiffness;
-            velocity += force * dt;
-            velocity *= Mathf.Clamp01(1f - damping * dt);
-            Vector3 result = current + velocity * dt;
-            if (float.IsNaN(result.x)) return Vector3.zero;
+            if (float.IsNaN(target.x) || float.IsNaN(target.y) || float.IsNaN(target.z) ||
+                float.IsNaN(current.x) || float.IsNaN(current.y) || float.IsNaN(current.z)) return Vector3.zero;
+
+            // Sub-step: integra em passos de no máx SpringMaxStep para manter a mola estável
+            // independente do dt do frame (frame spikes não fazem mais a integração explodir).
+            int steps = Mathf.Clamp(Mathf.CeilToInt(dt / SpringMaxStep), 1, SpringMaxSubSteps);
+            float sdt = dt / steps;
+
+            Vector3 result = current;
+            for (int i = 0; i < steps; i++)
+            {
+                Vector3 diff = new Vector3(
+                    Mathf.DeltaAngle(result.x, target.x),
+                    Mathf.DeltaAngle(result.y, target.y),
+                    Mathf.DeltaAngle(result.z, target.z)
+                );
+                velocity += diff * stiffness * sdt;
+                velocity *= Mathf.Clamp01(1f - damping * sdt);
+                velocity = Vector3.ClampMagnitude(velocity, MaxAngularVelDeg);
+                result += velocity * sdt;
+            }
+
+            // Batente final: impede o gimbal-flip mesmo se algo ainda escapar.
+            result = ClampAngles(result, ref velocity, MaxStanceAngleDeg);
+
+            if (float.IsNaN(result.x) || float.IsNaN(result.y) || float.IsNaN(result.z)) return Vector3.zero;
             return result;
         }
 
         private static Vector3 SpringLerp(Vector3 current, Vector3 target, ref Vector3 velocity, float stiffness, float damping, float dt)
         {
-            if (float.IsNaN(target.x) || float.IsNaN(target.y) || float.IsNaN(target.z) || float.IsNaN(current.x)) return Vector3.zero;
-            Vector3 force = (target - current) * stiffness;
-            velocity += force * dt;
-            velocity *= Mathf.Clamp01(1f - damping * dt);
-            Vector3 result = current + velocity * dt;
-            if (float.IsNaN(result.x)) return Vector3.zero;
+            if (float.IsNaN(target.x) || float.IsNaN(target.y) || float.IsNaN(target.z) ||
+                float.IsNaN(current.x) || float.IsNaN(current.y) || float.IsNaN(current.z)) return Vector3.zero;
+
+            int steps = Mathf.Clamp(Mathf.CeilToInt(dt / SpringMaxStep), 1, SpringMaxSubSteps);
+            float sdt = dt / steps;
+
+            Vector3 result = current;
+            for (int i = 0; i < steps; i++)
+            {
+                Vector3 force = (target - result) * stiffness;
+                velocity += force * sdt;
+                velocity *= Mathf.Clamp01(1f - damping * sdt);
+                velocity = Vector3.ClampMagnitude(velocity, MaxLinearVel);
+                result += velocity * sdt;
+            }
+
+            result = Vector3.ClampMagnitude(result, MaxStancePosOffset);
+
+            if (float.IsNaN(result.x) || float.IsNaN(result.y) || float.IsNaN(result.z)) return Vector3.zero;
             return result;
         }
 
