@@ -59,7 +59,7 @@ Cada classe é definida por camadas, marcadas por emoji ao longo do doc:
 
 - 🐇 **Sobe-fácil:** Perception, Metabolism, Attention, Search, Charisma, Intellect
 - 🚶 **Média:** Assault, Pistol, SMG, Shotgun, DMR, AimDrills, MagDrills, StressResistance, **Endurance**, **CovertMovement** *(Endurance/CovertMovement não são fast: Endurance 0.04/ação, CovertMovement 0.025/passo)*
-- 🐌 **Grind:** Strength, Sniper, Vitality, Health, Immunity, Melee, Throwing, Surgery, FirstAid, FieldMedicine, Light/HeavyVests, TroubleShooting, HideoutManagement, Crafting + gems (LockPicking, SilentOps, ProneMovement, ShadowConnections, UsecArsystems, BearAksystems, AttachedLauncher)
+- 🐌 **Grind:** Strength, Sniper, Vitality, Health, Immunity, Melee, Throwing, Surgery, FirstAid, FieldMedicine, Light/HeavyVests, TroubleShooting, HideoutManagement, Crafting + gems (Lockpicking, SilentOps, ProneMovement, ShadowConnections, UsecArsystems, BearAksystems)
 
 ---
 
@@ -67,39 +67,39 @@ Cada classe é definida por camadas, marcadas por emoji ao longo do doc:
 
 > `×` = multiplicador de XP · `Lv` = nível inicial (ausente = só multiplicador, sem pontos) · 🟢 buff 🔴 debuff. **Balance: topo (Méd/Fuz/Caç/Fan) ~+6 · base (Saq/Tan) ~+4** (Saq/Tan compensados pelas signatures 🔧🧪, fora do netMult). Reproduzível em [`scripts/class-matrix.mjs`](../scripts/class-matrix.mjs).
 
-| Classe | custo | netMult | aprovado |
+> **Recalibrada na Fase 4** (cross-check do `class-matrix.mjs` ✅, sem flags): (a) pesos das gems derivados por categoria — Lockpicking/SilentOps/ProneMovement/ShadowConnections → P (0.94), UsecArsystems/BearAksystems → C (1.50); (b) **SMG e AttachedLauncher removidos** (inertes no `globals` — ver §7); (c) custos aparados para caber em 28–32.
+
+| Classe | custo | netMult | faixa |
 |---|---|---|---|
-| 🩺 Médico | 32.8 ⚠️ | +6.12 | topo |
-| 🔫 Fuzileiro | 29.5 | +6.27 | topo |
-| 🎯 Caçador | 32.5 ⚠️ | +5.84 | topo |
-| 👻 Fantasma | 28.7 | +6.16 | topo |
-| 🎒 Saqueador | 28.6 | +4.06 | base |
-| 🛡️ Tanque | 30.3 | +4.22 | base |
+| 🩺 Médico | 31.87 | +6.12 | topo |
+| 🔫 Fuzileiro | 30.51 | +6.27 | topo |
+| 🎯 Caçador | 31.40 | +6.21 | topo |
+| 👻 Fantasma | 30.14 | +6.12 | topo |
+| 🎒 Saqueador | 28.23 | +4.09 | base |
+| 🛡️ Tanque | 30.29 | +4.28 | base |
 
-⚠️ = custo acima do teto 32 (ponta solta #1, §7). `class-matrix.mjs` reproduz os 6 netMult exatamente (cross-check ✅).
-
-### 🩺 Médico — netMult +6.12 · custo 32.8
-- 🟢 FirstAid 🐌×2.5 Lv6 · FieldMedicine 🐌×2 Lv5 · Surgery 🐌×2 Lv4 · Vitality 🐌×2 Lv4 · HideoutManagement 🐌×1.5 Lv6 · Crafting 🐌×1.5 · Immunity 🐌×1.2 Lv1
+### 🩺 Médico — netMult +6.12 · custo 31.87
+- 🟢 FirstAid 🐌×2.5 Lv5 · FieldMedicine 🐌×2 Lv5 · Surgery 🐌×2 Lv4 · Vitality 🐌×2 Lv4 · HideoutManagement 🐌×1.5 Lv6 · Crafting 🐌×1.5 · Immunity 🐌×1.2 Lv1
 - 🔴 Assault 🚶×0.6 · AimDrills 🚶×0.7 · CovertMovement 🚶×0.7 · Perception 🐇×0.8
 
-### 🔫 Fuzileiro — netMult +6.27 · custo 29.5
-- 🟢 Assault 🚶×2.5 Lv7 · UsecArsystems 🐌×2.5 Lv4 · BearAksystems 🐌×2.5 Lv4 · AimDrills 🚶×1.5 Lv5 · MagDrills 🚶×1.5 Lv4 · Endurance 🚶×1.5 Lv5 · StressResistance 🚶×1.3 · Pistol 🚶×1.2
+### 🔫 Fuzileiro — netMult +6.27 · custo 30.51
+- 🟢 Assault 🚶×2.5 Lv7 · UsecArsystems 🐌×2 Lv3 · BearAksystems 🐌×2 Lv3 · AimDrills 🚶×1.5 Lv5 · MagDrills 🚶×1.5 Lv4 · Endurance 🚶×1.5 Lv5 · StressResistance 🚶×1.3 · Pistol 🚶×1.2
 - 🔴 CovertMovement 🚶×0.6 · Attention 🐇×0.7 · Search 🐇×0.8
 
-### 🎯 Caçador — netMult +5.84 · custo 32.5
-- 🟢 Sniper 🐌×2.5 Lv7 · DMR 🚶×1.5 Lv2 · AimDrills 🚶×1.5 · ProneMovement 🐌×1.5 Lv3 · Pistol 🚶×1.3 Lv2 · Perception 🐇×1.3 Lv3 · Metabolism 🐇×1.3 · CovertMovement 🚶×1.2 Lv3
-- 🔴 Assault 🚶×0.6 · SMG 🚶×0.6
+### 🎯 Caçador — netMult +6.21 · custo 31.40
+- 🟢 Sniper 🐌×2.5 Lv7 · DMR 🚶×1.5 Lv2 · AimDrills 🚶×1.5 · ProneMovement 🐌×1.5 Lv3 · Pistol 🚶×1.3 Lv2 · Perception 🐇×1.3 Lv2 · Metabolism 🐇×1.3 · CovertMovement 🚶×1.2 Lv3
+- 🔴 Assault 🚶×0.6
 
-### 👻 Fantasma — netMult +6.16 · custo 28.7
-- 🟢 SilentOps 🐌×2.5 Lv6 · SMG 🚶×1.8 Lv4 · CovertMovement 🚶×1.5 Lv6 · Perception 🐇×1.5 Lv5 *(exceção aceita: sentido-assinatura)* · Pistol 🚶×1.5 · Melee 🐌×1.5 Lv3 · LightVests 🐌×1.3 · ProneMovement 🐌×1.5 · LockPicking 🐌×1.3 Lv3
+### 👻 Fantasma — netMult +6.12 · custo 30.14
+- 🟢 SilentOps 🐌×2.5 Lv6 · Pistol 🚶×1.8 Lv2 *(pistola silenciada — arma do Fantasma; SMG saiu, era inerte)* · CovertMovement 🚶×1.5 Lv6 · Perception 🐇×1.5 Lv5 *(exceção aceita: sentido-assinatura)* · Melee 🐌×1.5 Lv3 · LightVests 🐌×1.3 · ProneMovement 🐌×1.5 · Lockpicking 🐌×1.3 Lv3
 - 🔴 Assault 🚶×0.6 · StressResistance 🚶×0.7 · Shotgun 🚶×0.7
 
-### 🎒 Saqueador — netMult +4.06 · custo 28.6
-- 🟢 LockPicking 🐌×3 Lv8 · ShadowConnections 🐌×2.5 Lv6 · Strength 🐌×2.5 Lv6 · Attention 🐇×1.3 Lv8 · Perception 🐇×1.3 Lv5 · Search 🐇×1.3 Lv6 · HideoutManagement 🐌×1.2 · Intellect 🐇×1.2 · Charisma 🐇×1.2
+### 🎒 Saqueador — netMult +4.09 · custo 28.23
+- 🟢 Lockpicking 🐌×3 Lv8 · Strength 🐌×3 Lv7 · ShadowConnections 🐌×2.5 Lv6 · Attention 🐇×1.3 Lv8 · Perception 🐇×1.3 Lv5 · Search 🐇×1.3 Lv6 · HideoutManagement 🐌×1.2 · Intellect 🐇×1.2 · Charisma 🐇×1.2
 - 🔴 Assault 🚶×0.6 · AimDrills 🚶×0.7 · StressResistance 🚶×0.7
 
-### 🛡️ Tanque — netMult +4.22 · custo 30.3
-- 🟢 StressResistance 🚶×2 · HeavyVests 🐌×1.5 Lv3 · Health 🐌×1.5 Lv4 · Vitality 🐌×1.5 Lv4 · Strength 🐌×1.5 Lv5 · Shotgun 🚶×1.5 Lv1 · Throwing 🐌×1.5 Lv1 · AttachedLauncher 🐌×1.5 · Melee 🐌×1.2
+### 🛡️ Tanque — netMult +4.28 · custo 30.29
+- 🟢 StressResistance 🚶×2 · HeavyVests 🐌×1.5 Lv3 · Health 🐌×1.5 Lv4 · Vitality 🐌×1.5 Lv4 · Strength 🐌×1.5 Lv5 · Shotgun 🚶×1.5 Lv1 · Throwing 🐌×1.5 Lv1 · Melee 🐌×1.5 *(GL/AttachedLauncher saiu da matriz, era inerte → vira 🔧 signature)*
 - 🔴 Metabolism 🐇×0.5 · CovertMovement 🚶×0.5 · AimDrills 🚶×0.7 · Pistol 🚶×0.7 · DMR 🚶×0.7
 
 ---
@@ -113,7 +113,7 @@ Cada classe é definida por camadas, marcadas por emoji ao longo do doc:
 - **🎯 Caçador** — 🧪 **Fôlego de Aço** (`×(1+0.1·nv) ≤ ×3`, −sway) · 🔧 saque de pistola ×0.5 · 🔧 ADS por arma (sniper/DMR ×0.85, AR ×1.15) · ⚠️ 🔧 resist. de braço em ADS (zona stances, §6) · 🎒🏠 Shooting Range + Intelligence Center −50%
 - **👻 Fantasma** — 🔧 **Execução** (melee ×20) · 🔧 Passo Fantasma (ruído de todas as ações `×(1−0.5·nv/max)`, até −50%, **NÃO** silêncio total) · 🔧 MaxSpeed ×1.1 · 🎒🏠 Lavatory −50%
 - **🎒 Saqueador** — 🧪 **Mãos Rápidas** (busca/loot mais rápido — 🟡 verificar se loot instantâneo já é vanilla, §7) · 🧪 **Pack Mule** (peso `×(1−[0.10→0.50])`) · 🔧 loot silencioso · 🎒 contêiner seguro 6 slots + Scav Case · 🏠 Scav Case −50% · 🌐 revelar valor ₽ (global, todos veem — não é lever de classe)
-- **🛡️ Tanque** — 🔧 **Couraça** (dano recebido `×(1−[0.05→0.25])`) · 🧪 **Pack Mule** (compartilhada c/ Saqueador) · 🧪/🔧 GL mastery (slot `AttachedLauncher`) · 🔧 GL sem penalidade de ergo · ⚠️ 🔧 stamina segurando arma pesada ×0 (zona stances, §6) · 🔧 velocidade ×0.9 (debuff) · 🔧 −comida/bebida ×0.7 (debuff imediato = patch, não skill) · 🎒🏠 Rest Station + Kitchen + placas laterais · Kitchen −50%
+- **🛡️ Tanque** — 🔧 **Couraça** (dano recebido `×(1−[0.05→0.25])`) · 🧪 **Pack Mule** (compartilhada c/ Saqueador) · 🔧 GL mastery via patch (o slot `AttachedLauncher` é inerte no globals — §7) · 🔧 GL sem penalidade de ergo · ⚠️ 🔧 stamina segurando arma pesada ×0 (zona stances, §6) · 🔧 velocidade ×0.9 (debuff) · 🔧 −comida/bebida ×0.7 (debuff imediato = patch, não skill) · 🎒🏠 Rest Station + Kitchen + placas laterais · Kitchen −50%
 
 ---
 
@@ -139,15 +139,20 @@ Muda o **baseline** — afeta bots. **Nunca** vira lever por-classe (só via pat
 
 ---
 
-## 7. Pontas soltas (resolver na Fase 3/4)
+## 7. Pontas soltas
 
-1. **Custo Médico (32.8) e Caçador (32.5) ~0.5 acima do teto 32** → aparar 1 nível inicial (trivial). **Não aplicado** (preserva a matriz aprovada); `class-matrix.mjs` sinaliza com FLAG. Decidir qual nível raspar.
-2. **Pesos reais das gems** — UsecArsystems/BearAksystems/LockPicking/SilentOps/ProneMovement/ShadowConnections/AttachedLauncher (+ SMG) caem em `UnmappedFallback = 1.00` no `skill-weights.mjs`. Os netMult acima foram calibrados **com** esse 1.00; ao definir pesos reais, **re-rodar `class-matrix.mjs`** e recalibrar topo/base.
-3. **2 levers ⚠️ na zona stances** (§6.2): Caçador (resist. braço-ADS) e Tanque (stamina arma pesada). Decidir: coordenar (mesmo repo) ou trocar o lever.
-4. **SMG mastery pode ser inerte** — [class-skill-catalog.md](./class-skill-catalog.md) §6: `SMG/LMG/HMG = []` (sem XP/efeito nesta build). Se confirmado, **Fantasma SMG ×1.8 e Caçador SMG ×0.6 são teatro**. Validar no Assembly; se inerte, trocar pela skill de arma do Fantasma que de fato progride.
-5. **Loot instantâneo / `AttachedLauncher`** — verificar no Assembly se loot instantâneo já é vanilla (se for, Mãos Rápidas vira só velocidade de busca) e se `AttachedLauncher` é setável/funcional (Tanque GL).
-6. **Bug do Círculo de Cultistas** (ShadowConnections, [class-skill-catalog.md](./class-skill-catalog.md) §5.1) — o servidor não chama `NormalizeToPercentage()` → efeito instantâneo desde o nível 1. Afeta o Saqueador (ShadowConnections ×2.5): o cooldown de scav funciona (−50% no L50), mas o círculo está bugado. Contar com isso ou corrigir antes.
-7. **Review pendente do `class-levers.md` (9 itens)** — a maioria virou *moot* com a arquitetura "tudo-é-skill-real" (§1). Os itens vivos foram absorvidos nesta reescrita; o que sobrar é re-revisar via `g-review-content`.
+### ✅ Resolvidas na Fase 4
+1. **Custo > 32 (Médico/Caçador)** — aparado: Médico FirstAid Lv6→5 (31.87), Caçador Perception Lv3→2 (31.40). As 6 classes ficam em [28,32].
+2. **Pesos das gems** — derivados por categoria no `skill-weights.mjs`: Lockpicking/SilentOps/ProneMovement/ShadowConnections → P (0.94); UsecArsystems/BearAksystems → C (1.50). Matriz recalibrada e re-validada (`class-matrix.mjs` cross-check ✅).
+3. **SMG mastery inerte** — confirmado no `globals.json` (`"SMG": []`, idem HMG/LMG). Fantasma trocou SMG ×1.8 por **Pistol ×1.8** (pistola silenciada, mastery funcional); Caçador removeu o debuff SMG (era teatro).
+4. **AttachedLauncher inerte** — confirmado (`"AttachedLauncher": []` no globals, ausente do SE). Removido da matriz do Tanque; a identidade de lança-granadas vira **🔧 signature** (patch), não lever 🎯.
+
+### ⏳ Em aberto
+5. **Sincronizar `SkillWeights.cs`** — o `.mjs` ganhou 3 categorias de gem (ShadowConnections→P, UsecArsystems→C, BearAksystems→C) que **faltam no `.cs`** (caem em `UnmappedFallback` lá). Replicar numa mudança **coordenada** de `modded/Server/` (sessão paralela do editor).
+6. **2 levers ⚠️ na zona stances** (§6.2): Caçador (resist. braço-ADS) e Tanque (stamina arma pesada). Decidir: coordenar (mesmo repo) ou trocar o lever.
+7. **Loot instantâneo** — verificar no Assembly se já é vanilla (se for, Mãos Rápidas do Saqueador vira só velocidade de busca). Não bloqueia a matriz.
+8. **Bug do Círculo de Cultistas** (ShadowConnections, [class-skill-catalog.md](./class-skill-catalog.md) §5.1) — o servidor não chama `NormalizeToPercentage()` → efeito instantâneo desde o nível 1. Afeta o Saqueador: o cooldown de scav funciona (−50% no L50), mas o círculo está bugado. Contar com isso ou corrigir antes.
+9. **Review pendente do `class-levers.md` (9 itens)** — a maioria virou *moot* com "tudo-é-skill-real" (§1); itens vivos absorvidos. Re-revisar via `g-review-content` quando fechar.
 
 ---
 
@@ -159,7 +164,8 @@ Muda o **baseline** — afeta bots. **Nunca** vira lever por-classe (só via pat
 | 1 | Travar roster (6 classes) | ✅ |
 | 2 | Assinatura por classe + matriz skill calibrada | ✅ aprovado |
 | 3 | Consolidar neste doc + `class-matrix.mjs` | ✅ **(este doc)** |
-| 4 | Épico no backlog (itens 047+) + net-check final (pesos das gems) | ⏳ |
+| 4 | Net-check final (pesos das gems por categoria + recalibração dos inertes) | ✅ |
+| 4b | Épico no backlog (itens 047+) | ⏳ **PRÓXIMA** |
 | 5 | Build das skills custom (padrão SE, sem prepatcher) | ⏳ |
 | 6 | Aplicar nos `.jsonc` + validar (editor web + in-game) | ⏳ |
 
@@ -171,3 +177,4 @@ Muda o **baseline** — afeta bots. **Nunca** vira lever por-classe (só via pat
 |---|---|---|
 | 2026-06-16 | mdj | Criação. Catálogo de levers (BuffType + patch per-player + skills/gems SE), régua de impacto, coordenação com o stances mod, rascunho dos 5-6 conjuntos. |
 | 2026-06-20 | Guilherme | **Reescrita (Fase 3 do redesign 11→6).** Consolidado: arquitetura "tudo-é-skill-real" (7 decisões), roster 6 classes, tiers de velocidade, **matriz calibrada aprovada** (cards + tabela), camadas 🔧/🧪/🎒/🏠 por classe, mecanismos de patch, pontas soltas. Matriz materializada e validada em `scripts/class-matrix.mjs` (cross-check dos netMult ✅). |
+| 2026-06-20 | Guilherme | **Net-check final (Fase 4).** Pesos das gems derivados por categoria (`skill-weights.mjs`); confirmado no `globals.json` que SMG/AttachedLauncher são inertes (`[]`) → removidos da matriz (Fantasma→Pistol ×1.8, Caçador dropa SMG, Tanque GL vira 🔧, Melee ×1.5). Custos aparados p/ [28,32]. Matriz recalibrada: topo +6.12/+6.27/+6.21/+6.12 · base +4.09/+4.28 (cross-check ✅, sem flags). Delta do `SkillWeights.cs` flagado p/ coordenação. |

@@ -16,10 +16,11 @@
  * Saída: por classe (custo, netMult, breakdown) + resumo + cross-check contra os valores APROVADOS
  * embutidos abaixo (APPROVED). Divergência custo>32 ou net≠aprovado = FLAG (pontas soltas Fase 3/4).
  *
- * ⚠️ Pesos das gems (LockPicking/SilentOps/ProneMovement/ShadowConnections/UsecArsystems/
- * BearAksystems/AttachedLauncher) e SMG caem em UnmappedFallback=1.00 hoje (ponta solta #2). Os nets
- * abaixo foram calibrados COM esse 1.00; ao definir pesos reais em skill-weights.mjs, re-rodar e
- * recalibrar topo/base. As linhas afetadas saem marcadas "(unmapped w=1.00)".
+ * Pesos das gems: derivados por CATEGORIA na Fase 4 (skill-weights.mjs) — Lockpicking/SilentOps/
+ * ProneMovement/ShadowConnections → P (0.94); UsecArsystems/BearAksystems → C (1.50). SMG e
+ * AttachedLauncher são INERTES no globals ("[]" → sem XP/efeito) e foram REMOVIDOS da matriz.
+ * Delta a replicar no SkillWeights.cs: categorizar ShadowConnections/UsecArsystems/BearAksystems
+ * (faltam lá) — mudança coordenada de modded/Server (sessão paralela).
  */
 'use strict';
 import { resolveWeight, BUDGET_MIN, BUDGET_MAX, MAX_SKILLS_WITH_POINTS } from './skill-weights.mjs';
@@ -38,9 +39,12 @@ export const SPEED = {
   Strength: '🐌', Sniper: '🐌', Vitality: '🐌', Health: '🐌', Immunity: '🐌', Melee: '🐌', Throwing: '🐌',
   Surgery: '🐌', FirstAid: '🐌', FieldMedicine: '🐌', LightVests: '🐌', HeavyVests: '🐌',
   TroubleShooting: '🐌', HideoutManagement: '🐌', Crafting: '🐌',
-  LockPicking: '🐌', SilentOps: '🐌', ProneMovement: '🐌', ShadowConnections: '🐌',
+  Lockpicking: '🐌', SilentOps: '🐌', ProneMovement: '🐌', ShadowConnections: '🐌',
   UsecArsystems: '🐌', BearAksystems: '🐌', AttachedLauncher: '🐌',
 };
+
+// Nota de grafia: os IDs seguem o enum SkillTypes (server) — Lockpicking (não "LockPicking"),
+// UsecArsystems, BearAksystems, ShadowConnections, SilentOps, ProneMovement, AttachedLauncher, SMG.
 
 // ── MATRIZ FINAL CALIBRADA (aprovada Fase 2) ───────────────────────────────────
 // s=ESkillId, m=XP-mult, l=nível inicial (ausente = só multiplicador, sem pontos iniciais).
@@ -48,7 +52,7 @@ export const MATRIX = {
   medico: {
     emoji: '🩺', pt: 'Médico', en: 'Medic', file: 'medicoDeCombate.jsonc',
     entries: [
-      { s: 'FirstAid', m: 2.5, l: 6 }, { s: 'FieldMedicine', m: 2, l: 5 }, { s: 'Surgery', m: 2, l: 4 },
+      { s: 'FirstAid', m: 2.5, l: 5 }, { s: 'FieldMedicine', m: 2, l: 5 }, { s: 'Surgery', m: 2, l: 4 },
       { s: 'Vitality', m: 2, l: 4 }, { s: 'HideoutManagement', m: 1.5, l: 6 }, { s: 'Crafting', m: 1.5 },
       { s: 'Immunity', m: 1.2, l: 1 },
       { s: 'Assault', m: 0.6 }, { s: 'AimDrills', m: 0.7 }, { s: 'CovertMovement', m: 0.7 }, { s: 'Perception', m: 0.8 },
@@ -57,7 +61,7 @@ export const MATRIX = {
   fuzileiro: {
     emoji: '🔫', pt: 'Fuzileiro', en: 'Rifleman', file: 'fuzileiro.jsonc',
     entries: [
-      { s: 'Assault', m: 2.5, l: 7 }, { s: 'UsecArsystems', m: 2.5, l: 4 }, { s: 'BearAksystems', m: 2.5, l: 4 },
+      { s: 'Assault', m: 2.5, l: 7 }, { s: 'UsecArsystems', m: 2, l: 3 }, { s: 'BearAksystems', m: 2, l: 3 },
       { s: 'AimDrills', m: 1.5, l: 5 }, { s: 'MagDrills', m: 1.5, l: 4 }, { s: 'Endurance', m: 1.5, l: 5 },
       { s: 'StressResistance', m: 1.3 }, { s: 'Pistol', m: 1.2 },
       { s: 'CovertMovement', m: 0.6 }, { s: 'Attention', m: 0.7 }, { s: 'Search', m: 0.8 },
@@ -67,24 +71,24 @@ export const MATRIX = {
     emoji: '🎯', pt: 'Caçador', en: 'Hunter', file: 'cacador.jsonc',
     entries: [
       { s: 'Sniper', m: 2.5, l: 7 }, { s: 'DMR', m: 1.5, l: 2 }, { s: 'AimDrills', m: 1.5 },
-      { s: 'ProneMovement', m: 1.5, l: 3 }, { s: 'Pistol', m: 1.3, l: 2 }, { s: 'Perception', m: 1.3, l: 3 },
+      { s: 'ProneMovement', m: 1.5, l: 3 }, { s: 'Pistol', m: 1.3, l: 2 }, { s: 'Perception', m: 1.3, l: 2 },
       { s: 'Metabolism', m: 1.3 }, { s: 'CovertMovement', m: 1.2, l: 3 },
-      { s: 'Assault', m: 0.6 }, { s: 'SMG', m: 0.6 },
+      { s: 'Assault', m: 0.6 },
     ],
   },
   fantasma: {
     emoji: '👻', pt: 'Fantasma', en: 'Ghost', file: 'fantasma.jsonc',
     entries: [
-      { s: 'SilentOps', m: 2.5, l: 6 }, { s: 'SMG', m: 1.8, l: 4 }, { s: 'CovertMovement', m: 1.5, l: 6 },
-      { s: 'Perception', m: 1.5, l: 5 }, { s: 'Pistol', m: 1.5 }, { s: 'Melee', m: 1.5, l: 3 },
-      { s: 'LightVests', m: 1.3 }, { s: 'ProneMovement', m: 1.5 }, { s: 'LockPicking', m: 1.3, l: 3 },
+      { s: 'SilentOps', m: 2.5, l: 6 }, { s: 'CovertMovement', m: 1.5, l: 6 },
+      { s: 'Perception', m: 1.5, l: 5 }, { s: 'Pistol', m: 1.8, l: 2 }, { s: 'Melee', m: 1.5, l: 3 },
+      { s: 'LightVests', m: 1.3 }, { s: 'ProneMovement', m: 1.5 }, { s: 'Lockpicking', m: 1.3, l: 3 },
       { s: 'Assault', m: 0.6 }, { s: 'StressResistance', m: 0.7 }, { s: 'Shotgun', m: 0.7 },
     ],
   },
   saqueador: {
     emoji: '🎒', pt: 'Saqueador', en: 'Looter', file: 'saqueador.jsonc',
     entries: [
-      { s: 'LockPicking', m: 3, l: 8 }, { s: 'ShadowConnections', m: 2.5, l: 6 }, { s: 'Strength', m: 2.5, l: 6 },
+      { s: 'Lockpicking', m: 3, l: 8 }, { s: 'ShadowConnections', m: 2.5, l: 6 }, { s: 'Strength', m: 3, l: 7 },
       { s: 'Attention', m: 1.3, l: 8 }, { s: 'Perception', m: 1.3, l: 5 }, { s: 'Search', m: 1.3, l: 6 },
       { s: 'HideoutManagement', m: 1.2 }, { s: 'Intellect', m: 1.2 }, { s: 'Charisma', m: 1.2 },
       { s: 'Assault', m: 0.6 }, { s: 'AimDrills', m: 0.7 }, { s: 'StressResistance', m: 0.7 },
@@ -95,17 +99,18 @@ export const MATRIX = {
     entries: [
       { s: 'StressResistance', m: 2 }, { s: 'HeavyVests', m: 1.5, l: 3 }, { s: 'Health', m: 1.5, l: 4 },
       { s: 'Vitality', m: 1.5, l: 4 }, { s: 'Strength', m: 1.5, l: 5 }, { s: 'Shotgun', m: 1.5, l: 1 },
-      { s: 'Throwing', m: 1.5, l: 1 }, { s: 'AttachedLauncher', m: 1.5 }, { s: 'Melee', m: 1.2 },
+      { s: 'Throwing', m: 1.5, l: 1 }, { s: 'Melee', m: 1.5 },
       { s: 'Metabolism', m: 0.5 }, { s: 'CovertMovement', m: 0.5 }, { s: 'AimDrills', m: 0.7 },
       { s: 'Pistol', m: 0.7 }, { s: 'DMR', m: 0.7 },
     ],
   },
 };
 
-// Valores APROVADOS no handoff (cross-check da transcrição). custo arredondado a 1 casa lá.
+// Alvos APROVADOS + recalibrados na Fase 4 (pesos de gem por categoria + remoção dos levers inertes
+// SMG/AttachedLauncher). Cross-check da transcrição contra estes valores.
 const APPROVED = {
-  medico: { cost: 32.8, net: 6.12 }, fuzileiro: { cost: 29.5, net: 6.27 }, cacador: { cost: 32.5, net: 5.84 },
-  fantasma: { cost: 28.7, net: 6.16 }, saqueador: { cost: 28.6, net: 4.06 }, tanque: { cost: 30.3, net: 4.22 },
+  medico: { cost: 31.87, net: 6.12 }, fuzileiro: { cost: 30.51, net: 6.27 }, cacador: { cost: 31.4, net: 6.21 },
+  fantasma: { cost: 30.14, net: 6.12 }, saqueador: { cost: 28.23, net: 4.09 }, tanque: { cost: 30.29, net: 4.28 },
 };
 
 // ── Cálculo ────────────────────────────────────────────────────────────────────

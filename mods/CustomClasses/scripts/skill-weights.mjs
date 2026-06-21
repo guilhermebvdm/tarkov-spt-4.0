@@ -41,17 +41,29 @@ export const DERIVED = {
   BearRawpower: 2.50,
 };
 
-// Category per skill — mirror of SkillWeights.Categories for the live skills (coverage rule)
+// Category per skill — mirror of SkillWeights.Categories (coverage rule). Skills sem peso explícito
+// resolvem para a MEDIANA da categoria (Ph=1.00, M=0.60, C=1.50, P=0.94). 'S' não tem mediana
+// (sem skill explícita) → UsecNegotiations/BearRawpower resolvem via DERIVED.
+//
+// ⚠️ DELTA vs SkillWeights.cs: as 3 gems funcionais marcadas (★) NÃO existem no Categories do .cs
+// ainda (caem em UnmappedFallback 1.00 lá). Adicionadas aqui na Fase 4 (derivar-por-categoria das
+// gems). Replicar no SkillWeights.cs numa mudança coordenada de modded/Server (sessão paralela).
 export const CATEGORIES = {
   Endurance: 'Ph', Strength: 'Ph', Vitality: 'Ph', Health: 'Ph',
   StressResistance: 'Ph', Metabolism: 'Ph', Immunity: 'Ph',
   Perception: 'M', Intellect: 'M', Attention: 'M', Charisma: 'M', Memory: 'M',
   Pistol: 'C', Revolver: 'C', Assault: 'C', Shotgun: 'C', Sniper: 'C',
   DMR: 'C', Throwing: 'C', Melee: 'C', RecoilControl: 'C', AimDrills: 'C', TroubleShooting: 'C',
+  SMG: 'C', LMG: 'C', HMG: 'C', Launcher: 'C', AttachedLauncher: 'C',
   Surgery: 'P', CovertMovement: 'P', Search: 'P', MagDrills: 'P',
   LightVests: 'P', HeavyVests: 'P', WeaponTreatment: 'P',
   Crafting: 'P', HideoutManagement: 'P',
-  FirstAid: 'P', FieldMedicine: 'P', UsecNegotiations: 'S', BearRawpower: 'S',
+  FirstAid: 'P', FieldMedicine: 'P',
+  Sniping: 'P', ProneMovement: 'P', WeaponModding: 'P', AdvancedModding: 'P', NightOps: 'P',
+  SilentOps: 'P', Lockpicking: 'P',
+  UsecNegotiations: 'S', BearRawpower: 'S',
+  // ★ gems funcionais derivadas por categoria na Fase 4 (delta vs .cs — replicar lá):
+  ShadowConnections: 'P', UsecArsystems: 'C', BearAksystems: 'C',
 };
 
 // Category medians of EXPLICIT weights — fallback for categorized skills without a weight
