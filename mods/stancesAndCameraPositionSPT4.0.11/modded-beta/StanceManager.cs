@@ -170,7 +170,7 @@ namespace CameraRotationMod
 
             bool isSprinting = gameWorld?.MainPlayer?.IsSprintEnabled == true;
 
-            if (MountingManager.IsMounting || isNativeMounting || isInProne)
+            if (isNativeMounting || isInProne)
             {
                 // Se deitou ou está apoiado, quebra a Action Stance e trava controles
                 if (_isActionStanceActive) EndActionStance(forceCancel: true);
@@ -369,7 +369,7 @@ namespace CameraRotationMod
 
             var gw = GetCachedGameWorld();
             if (gw?.MainPlayer?.IsSprintEnabled == true) return;
-            if (MountingManager.IsMounting) return; // Não levanta a arma se estiver apoiado na parede
+            if (gw?.MainPlayer?.ProceduralWeaponAnimation?.IsMountedState == true) return; // Não levanta a arma se montado (vanilla)
             
             Plugin.Logger.LogInfo($"[Spy] StartActionStance called. CurrentStance: {CurrentStance}");
             if (CurrentStance != Stance.Default)
@@ -1329,10 +1329,9 @@ namespace CameraRotationMod
                 // Em ADS o vanilla do EFT toma conta — nosso tick faz no-op.
                 if (player.ProceduralWeaponAnimation?.IsAiming == true) return;
 
-                // Item 004 (06-fix-01): apoiar a arma (mount passivo ou ativo) não drena estamina de
-                // braço — suspende o nosso tick; o vanilla (regen em hipfire) assume. Sem isso, o mount
-                // força Stance 0 (drain 0.5) e drenaria, contrariando o spec do 004.
-                if (MountingManager.MountState != EMountState.None) return;
+                // Montado no vanilla: não drena estamina de braço — suspende o nosso tick e deixa o
+                // vanilla (regen em hipfire) assumir. (O mount passivo do novo item reavaliará isto.)
+                if (player.ProceduralWeaponAnimation?.IsMountedState == true) return;
 
                 var hands = player.Physical?.HandsStamina;
                 if (hands == null) return;

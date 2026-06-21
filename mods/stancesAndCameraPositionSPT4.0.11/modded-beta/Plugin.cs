@@ -38,7 +38,6 @@ public class Plugin : BaseUnityPlugin
     public static readonly Dictionary<Stance, StanceConfig> _stanceConfigs = new(4);
 
     public static readonly Dictionary<string, Sprite> LoadedSprites = new();
-    public static GameObject MountingUIGameObject { get; private set; }
 
     // StaminaMultiplier: <1.0 = drain, 1.0 = vanilla, >1.0 = recovery. ref: fix-01.
     // SnapOnFire (backlog 002 F4): defaults divergem por stance. Stance 0 = false (sentinel).
@@ -71,7 +70,6 @@ public class Plugin : BaseUnityPlugin
     private const string TacSprintSettings = "Tac Sprint Settings (Advanced)";
     private const string FOVSettings = "Field of View";
     private const string DebugSettings = "Debug (Advanced)";
-    private const string MountingSettings = "Weapon Mounting";
     private const string AnimationSettings = "Animations & Transitions (Item 005)";
 
     // Positions
@@ -207,12 +205,6 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<int> _FOVMinRange;
     public static ConfigEntry<int> _FOVMaxRange;
 
-    // Mounting Settings (Item 004)
-    public static ConfigEntry<bool> _EnableWeaponMounting;
-    public static ConfigEntry<KeyCode> _MountingHotkey;
-    public static ConfigEntry<float> _MountingRecoilMultiplier;
-    public static ConfigEntry<float> _MountingSwayMultiplier;
-
     // Animation Settings (Item 005)
     public static ConfigEntry<float> _CrouchSpeedMultiplier;
     public static ConfigEntry<float> _LeanSpeedMultiplier;
@@ -289,7 +281,8 @@ public class Plugin : BaseUnityPlugin
         SafeEnable("ApplySimpleRotationPatch", () => new ApplySimpleRotationPatch());  // stance interpolation
         new CameraRotationMod.Patches.ApplyComplexRotationPatch().Enable();
         new CameraRotationMod.Patches.HoldBreathPatch().Enable();
-        CameraRotationMod.Patches.HoldBreathPatch.LoadAudioClips();
+        // Áudio NÃO é carregado aqui (cena de menu): a transição p/ o jogo descarrega os clips
+        // (length vira 0). Carregamento é disparado em GameWorld.OnGameStarted via HoldBreathPatch.OnRaidStart().
         SafeEnable("FOVSliderPatch", () => new FOVSliderPatch());
 
         // Fika Multiplayer Sync Integration (Soft Dependency)
@@ -326,14 +319,6 @@ public class Plugin : BaseUnityPlugin
             Logger.LogWarning("[F4] SnapFireTriggerPatch NOT enabled — Player.FirearmController.SetTriggerPressed " +
                               "não foi resolvida. F1/F2/F3/F5 funcionam normalmente; snap-on-fire desabilitado este boot.");
 
-        // Item 004 (06-fix-01): Mount próprio unificado (passivo SEM grude / ativo COM grude).
-        // A detecção de superfície roda no Update do MountingManager (não depende deste patch); o
-        // FirearmCollisionDetectPatch é só reforço (mais responsivo) e pode falhar sem quebrar o mount.
-        SafeEnable("FirearmCollisionDetectPatch", () => new Patches.FirearmCollisionDetectPatch());
-        SafeEnable("WeaponMountingPatch", () => new WeaponMountingPatch());          // sway
-        SafeEnable("MountingInputPatch", () => new Patches.MountingInputPatch());    // mount ativo (cmd 140)
-        SafeEnable("MountingCollisionPatch", () => new Patches.MountingCollisionPatch()); // grude (só ativo)
-
         // Item 007: Movement & Inertia
         SafeEnable("MovementContextSpeedPatch", () => new Patches.MovementContextSpeedPatch());
         SafeEnable("MovementContextSprintSpeedPatch", () => new Patches.MovementContextSprintSpeedPatch());
@@ -359,27 +344,13 @@ public class Plugin : BaseUnityPlugin
         SafeEnable("PreChamberLoadPatch", () => new Patches.PreChamberLoadPatch());
         SafeEnable("ManualChamberingInputPatch", () => new Patches.ManualChamberingInputPatch());
 
-        // Mounting & Recoil
-        SafeEnable("AddRecoilForceMountPatch", () => new Patches.AddRecoilForceMountPatch());
-
-        // Carrega sprites embutidos
+        // Carrega sprites do ícone de mount (reusados pelo novo item de mount; carregamento mantido).
         LoadedSprites["mounting.png"] = LoadEmbeddedSprite("mounting.png");
         LoadedSprites["mountingleft.png"] = LoadEmbeddedSprite("mountingleft.png");
         LoadedSprites["mountingright.png"] = LoadEmbeddedSprite("mountingright.png");
 
-        // Inicializa o MountingUI GameObject e patch da UI
-        MountingUIGameObject = new GameObject("MountingUIGameObject");
-        MountingUIGameObject.AddComponent<MountingUI>();
-        DontDestroyOnLoad(MountingUIGameObject);
-        new BattleUIScreenPatch().Enable();
-
-        var mountingObj = new GameObject("MountingManager");
-        mountingObj.AddComponent<MountingManager>();
-        DontDestroyOnLoad(mountingObj);
-
-        // Item 004 (06-fix-01): as 4 props de Weapon Mounting são bindadas UMA vez na seção
-        // "Weapon Mounting" (mais abaixo). O bloco duplicado "Mounting Settings (Item 004)" foi
-        // removido — o 2º bind vencia e o 1º criava entries órfãs no .cfg.
+        // [mount removido] O sistema de mount (item 004) foi descartado — será reconstruído sobre o
+        // mount vanilla num novo item de backlog (ativo = vanilla; passivo = camada própria).
 
         // ========================================
         // MANUAL CHAMBERING
@@ -895,40 +866,8 @@ public class Plugin : BaseUnityPlugin
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { Order = 16 }));
 
-        // ========================================
-        // MOUNTING SETTINGS (Item 004)
-        // ========================================
-        _EnableWeaponMounting = Config.Bind(
-            MountingSettings,
-            "Enable Weapon Mounting",
-            true,
-            new ConfigDescription("Enable the ability to mount your weapon on nearby surfaces for stability.",
-            null,
-            new ConfigurationManagerAttributes { Order = 10 }));
-
-        _MountingHotkey = Config.Bind(
-            MountingSettings,
-            "Weapon Mounting Hotkey",
-            KeyCode.Mouse3,
-            new ConfigDescription("Tecla (F12) para apoiar/soltar a arma quando perto de uma superfície — ALÉM da tecla nativa de mount do EFT (configurável nas opções de controle do jogo). Tempo real.",
-            null,
-            new ConfigurationManagerAttributes { Order = 9 }));
-
-        _MountingRecoilMultiplier = Config.Bind(
-            MountingSettings,
-            "Mounting Recoil Multiplier",
-            0.5f,
-            new ConfigDescription("Multiplier for weapon recoil when mounted. 0.5 means 50% less recoil.",
-            new AcceptableValueRange<float>(0.1f, 1f),
-            new ConfigurationManagerAttributes { Order = 8 }));
-
-        _MountingSwayMultiplier = Config.Bind(
-            MountingSettings,
-            "Mounting Sway Multiplier",
-            0.2f,
-            new ConfigDescription("Multiplier for weapon sway (breath) when mounted. 0.2 = 80% less sway. Tempo real.",
-            new AcceptableValueRange<float>(0.0f, 1f),
-            new ConfigurationManagerAttributes { Order = 7 }));
+        // [mount removido] As ConfigEntries de "Weapon Mounting" (item 004) foram descartadas.
+        // O novo item de mount (passivo sobre o vanilla) definirá suas próprias configs.
 
         const string HoldBreathSection = "9. Respiração (Hold Breath)";
 
@@ -1678,8 +1617,8 @@ public class Plugin : BaseUnityPlugin
 
     private void Start()
     {
-        // Pre-load audio clips so they are ready on first use
-        CameraRotationMod.Patches.HoldBreathPatch.LoadAudioClips();
+        // Áudio do hold-breath é carregado em GameWorld.OnGameStarted (HoldBreathPatch.OnRaidStart),
+        // não aqui — carregar na cena de menu faz os clips serem descarregados na transição p/ o jogo.
     }
 
     /// <summary>SettingChanged handler — marca config suja; tick re-aplica numa janela ≤ 1 frame.</summary>

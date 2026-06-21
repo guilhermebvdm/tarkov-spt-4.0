@@ -41,7 +41,7 @@ namespace CameraRotationMod.Patches
                 float mult = StanceStaminaState.Multiplier;
                 if (System.Math.Abs(mult - 1.0f) <= 1e-5f) return; // vanilla — não interferir
 
-                if (MountingManager.IsMounting || gw.MainPlayer.ProceduralWeaponAnimation?.IsMountedState == true)
+                if (gw.MainPlayer.ProceduralWeaponAnimation?.IsMountedState == true)
                 {
                     __result = 5f; // Recupera 5 de estamina do braço por segundo quando montado
                     return;

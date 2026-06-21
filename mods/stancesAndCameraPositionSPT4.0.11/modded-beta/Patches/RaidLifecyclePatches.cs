@@ -23,15 +23,11 @@ namespace CameraRotationMod.Patches
             {
                 Plugin.ApplyMovementSpeeds();
                 StanceManager.OnRaidStart();
+                HoldBreathPatch.OnRaidStart();   // carrega o áudio no contexto da cena + reseta estado do hold
 
                 // Item 010: estado limpo a cada raid + marcar que o próximo equip é o spawn (cenário 1).
                 ManualChamberingState.Reset();
                 ManualChamberingState.JustSpawned = true;
-
-                // Item 004: garante estado de mount limpo no início (defensivo — cobre reload do BepInEx
-                // ou OnDestroy que não rodou). Re-cacheia os defaults do TurnAwayEffector.
-                MountingManager.ForceNone();
-                MountingCollisionPatch.ResetForRaid();
 
                 // backlog 002 F5 + 06-fix-01 — iniciar em Stance 2 - Low Ready quando habilitado.
                 // Após swap (06-fix-01), Stance 2 passou a ser Low Ready (era Stance 3).
@@ -55,7 +51,7 @@ namespace CameraRotationMod.Patches
         [PatchPostfix]
         private static void Postfix()
         {
-            try { StanceManager.OnRaidEnd(); ManualChamberingState.Reset(); MountingManager.ForceNone(); }
+            try { StanceManager.OnRaidEnd(); HoldBreathPatch.OnRaidEnd(); ManualChamberingState.Reset(); }
             catch (Exception ex) { Plugin.Logger.LogError($"[GameWorldOnDestroyPatch] {ex}"); }
         }
     }

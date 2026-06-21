@@ -50,11 +50,15 @@ namespace CameraRotationMod.Patches
 
         private static void PlayBreathAudio(bool breathIn)
         {
-            if (!_audioLoaded)
+            // Os clips podem ter sido descarregados numa transição de cena (menu -> hideout -> raid),
+            // ficando com length 0 mesmo com a referência viva. Se inválidos, recarrega no contexto
+            // atual e ignora este disparo (o próximo já toca).
+            if (!_audioLoaded || !ClipsValid())
             {
                 if (!_isRoutineRunning)
                 {
-                    // Fallback to loading it if it hasn't loaded yet
+                    Plugin.Logger.LogWarning("[HoldBreath] Clips ausentes/descarregados — recarregando no contexto atual.");
+                    _audioLoaded = false;
                     LoadAudioClips();
                 }
                 return;
@@ -105,107 +109,118 @@ namespace CameraRotationMod.Patches
             }
         }
 
+        // Carregamento via decodificador NATIVO do Unity (UnityWebRequestMultimedia). Suporta
+        // OGG/WAV/PCM/float sem parser manual. Substituiu o antigo WavUtility, que só lia PCM 16-bit
+        // e produzia ruído saturado nos arquivos float32 (ver diagnóstico de áudio). Os assets foram
+        // convertidos para OGG Vorbis mono (heartbeat: 23 MB -> ~460 KB). Roda como coroutine no
+        // Plugin (MonoBehaviour) porque o request é assíncrono.
         public static void LoadAudioClips()
         {
-            if (_audioLoaded) return;
-            
-            // Load audio synchronously bypassing UnityWebRequest
-            LoadAudioSynchronous();
+            if (_audioLoaded || _isRoutineRunning) return;
+            if (Plugin.Instance == null)
+            {
+                Plugin.Logger.LogWarning("[HoldBreath] Plugin.Instance ainda null — carregamento de áudio adiado.");
+                return;
+            }
+            _isRoutineRunning = true;
+            Plugin.Instance.StartCoroutine(LoadAudioRoutine());
         }
 
-        private static UnityWebRequest _wwwIn;
-        private static UnityWebRequest _wwwOut;
-        private static UnityWebRequest _wwwHeart;
-
-        private static void LoadAudioSynchronous()
+        private static IEnumerator LoadAudioRoutine()
         {
             string pluginPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            string breathInWav = Path.Combine(pluginPath, "breath_in.wav");
-            string breathOutWav = Path.Combine(pluginPath, "breath_out.wav");
-            string heartbeatWav = Path.Combine(pluginPath, "heartbeat.wav");
 
-            if (File.Exists(breathInWav))
-            {
-                Plugin.Logger.LogInfo($"[HoldBreath] Native loading WAV: {breathInWav}");
-                _breathInClip = WavUtility.ToAudioClip(breathInWav, "breath_in");
-                if (_breathInClip != null)
-                {
-                    _breathInClip.hideFlags = HideFlags.HideAndDontSave;
-                    Plugin.Logger.LogInfo($"[HoldBreath] Success breath_in (Length: {_breathInClip.length})");
-                }
-            }
-            
-            if (File.Exists(breathOutWav))
-            {
-                Plugin.Logger.LogInfo($"[HoldBreath] Native loading WAV: {breathOutWav}");
-                _breathOutClip = WavUtility.ToAudioClip(breathOutWav, "breath_out");
-                if (_breathOutClip != null)
-                {
-                    _breathOutClip.hideFlags = HideFlags.HideAndDontSave;
-                    Plugin.Logger.LogInfo($"[HoldBreath] Success breath_out (Length: {_breathOutClip.length})");
-                }
-            }
-
-            if (File.Exists(heartbeatWav))
-            {
-                Plugin.Logger.LogInfo($"[HoldBreath] Native loading WAV: {heartbeatWav}");
-                _heartbeatClip = WavUtility.ToAudioClip(heartbeatWav, "heartbeat");
-                if (_heartbeatClip != null)
-                {
-                    _heartbeatClip.hideFlags = HideFlags.HideAndDontSave;
-                    Plugin.Logger.LogInfo($"[HoldBreath] Success heartbeat (Length: {_heartbeatClip.length})");
-                }
-            }
+            yield return LoadClip(Path.Combine(pluginPath, "breath_in.ogg"),  "breath_in",  c => _breathInClip = c);
+            yield return LoadClip(Path.Combine(pluginPath, "breath_out.ogg"), "breath_out", c => _breathOutClip = c);
+            yield return LoadClip(Path.Combine(pluginPath, "heartbeat.ogg"),  "heartbeat",  c => _heartbeatClip = c);
 
             _audioLoaded = true;
+            _isRoutineRunning = false;
+            Plugin.Logger.LogInfo("[HoldBreath] Audio load routine finished.");
         }
 
-        public static class WavUtility
+        private static IEnumerator LoadClip(string path, string clipName, Action<AudioClip> assign)
         {
-            public static AudioClip ToAudioClip(string filePath, string clipName)
+            if (!File.Exists(path))
             {
-                try
-                {
-                    byte[] fileData = File.ReadAllBytes(filePath);
-
-                    int channels = fileData[22];
-                    int sampleRate = BitConverter.ToInt32(fileData, 24);
-
-                    int pos = 12;
-                    // Search for "data" chunk
-                    while (!(fileData[pos] == 100 && fileData[pos + 1] == 97 && fileData[pos + 2] == 116 && fileData[pos + 3] == 97))
-                    {
-                        pos += 4;
-                        int chunkSize = BitConverter.ToInt32(fileData, pos);
-                        pos += 4 + chunkSize;
-                        if (pos >= fileData.Length - 8)
-                        {
-                            Plugin.Logger.LogError($"[HoldBreath] Invalid WAV format or missing data chunk: {clipName}");
-                            return null;
-                        }
-                    }
-                    pos += 4;
-                    int subchunk2Size = BitConverter.ToInt32(fileData, pos);
-                    pos += 4;
-
-                    float[] samples = new float[subchunk2Size / 2];
-                    for (int i = 0; i < samples.Length; i++)
-                    {
-                        short s = BitConverter.ToInt16(fileData, pos);
-                        samples[i] = s / 32768f;
-                        pos += 2;
-                    }
-
-                    AudioClip clip = AudioClip.Create(clipName, samples.Length / channels, channels, sampleRate, false);
-                    clip.SetData(samples, 0);
-                    return clip;
-                }
-                catch (Exception e)
-                {
-                    Plugin.Logger.LogError($"[HoldBreath] Error loading WAV manually: {e.Message}");
-                    return null;
-                }
+                Plugin.Logger.LogWarning($"[HoldBreath] Audio file not found: {path}");
+                yield break;
             }
+
+            // "file://" + forward slashes — exigido pelo UnityWebRequest para caminhos locais no Windows.
+            string uri = "file://" + path.Replace("\\", "/");
+            using (UnityWebRequest uwr = UnityWebRequestMultimedia.GetAudioClip(uri, AudioType.OGGVORBIS))
+            {
+                // streamAudio=false força o áudio a ser TOTALMENTE decodificado em memória. Sem isto,
+                // o AudioClip fica em modo streaming e depende do DownloadHandler vivo; ao sair do
+                // using (Dispose), o clip perde os dados — length vira 0 e PlayOneShot não toca nada.
+                ((DownloadHandlerAudioClip)uwr.downloadHandler).streamAudio = false;
+
+                yield return uwr.SendWebRequest();
+
+                // uwr.error é estável entre versões do Unity (evita isNetworkError/isHttpError/result,
+                // que mudam de assinatura/disponibilidade entre 2019/2020/2022).
+                if (!string.IsNullOrEmpty(uwr.error))
+                {
+                    Plugin.Logger.LogError($"[HoldBreath] Failed to load {clipName}: {uwr.error}");
+                    yield break;
+                }
+
+                AudioClip src = DownloadHandlerAudioClip.GetContent(uwr);
+                if (src == null || src.samples == 0)
+                {
+                    Plugin.Logger.LogError($"[HoldBreath] Decoded clip inválido para {clipName} (src null ou 0 samples).");
+                    yield break;
+                }
+
+                // Cópia STANDALONE: extrai o PCM decodificado e cria um AudioClip próprio, 100% em
+                // memória. Imune ao Dispose do UnityWebRequest e ao modo streaming — que zerava
+                // clip.length no momento do play (clip lia do download handler já descartado).
+                float[] data = new float[src.samples * src.channels];
+                src.GetData(data, 0);
+                AudioClip clip = AudioClip.Create(clipName, src.samples, src.channels, src.frequency, false);
+                clip.SetData(data, 0);
+                clip.hideFlags = HideFlags.HideAndDontSave;
+                assign(clip);
+                Plugin.Logger.LogInfo($"[HoldBreath] Loaded {clipName} v3-raidload (length {clip.length:F2}s, samples {clip.samples}, ch {clip.channels}, freq {clip.frequency})");
+            }
+        }
+
+        /// <summary>Todos os clips presentes e com dados válidos (length &gt; 0).</summary>
+        private static bool ClipsValid()
+        {
+            return _breathInClip != null && _breathInClip.length > 0f
+                && _breathOutClip != null && _breathOutClip.length > 0f
+                && _heartbeatClip != null && _heartbeatClip.length > 0f;
+        }
+
+        private static void StopHeartbeat()
+        {
+            if (_heartbeatSource != null && _heartbeatSource.isPlaying)
+                _heartbeatSource.Stop();
+        }
+
+        /// <summary>
+        /// Início de raid/hideout (GameWorld.OnGameStarted). Carrega o áudio DENTRO do contexto da
+        /// cena de jogo — evita os clips descarregados pela transição menu -> jogo (causa do length 0).
+        /// Também zera o estado do hold (anti-heartbeat-órfão entre raids).
+        /// </summary>
+        public static void OnRaidStart()
+        {
+            IsHoldingBreath = false;
+            StopHeartbeat();
+            if (!_audioLoaded || !ClipsValid())
+            {
+                _audioLoaded = false;
+                LoadAudioClips();
+            }
+        }
+
+        /// <summary>Fim de raid/hideout — para o heartbeat e zera o estado (idempotente).</summary>
+        public static void OnRaidEnd()
+        {
+            IsHoldingBreath = false;
+            StopHeartbeat();
         }
 
     }
