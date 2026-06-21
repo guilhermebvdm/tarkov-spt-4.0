@@ -69,6 +69,9 @@ let ITEM_LIST = [];     // array form
 let CATEGORIES = null;
 let CATEGORY_ICONS = {}; // category id → icon URL (also keyed by name as fallback)
 let TRADERS = {};       // nickname → { id, avatar }
+let TRADER_ID_TO_NAME = {}; // trader MongoId → nickname (built from TRADERS)
+let TRADER_OVERRIDES = {};  // traderId → { tpl → priceRUB } (from GET /api/trader-overrides)
+const FENCE_ID = '579dc571d53a0658a154fbec'; // Fence — dynamic assort, not editable
 let META = null;
 let CAT_COUNTS = {};    // categoryId -> count of items
 let activeCategoryId = null;
@@ -396,6 +399,18 @@ async function load() {
     CATEGORIES = cats;
     META = meta;
     TRADERS = traders || {};
+    // Build reverse lookup (id → nickname) so detail rows can resolve a trader's
+    // display name / avatar from the traderId carried on each offer.
+    TRADER_ID_TO_NAME = {};
+    for (const [name, meta_] of Object.entries(TRADERS)) {
+      if (meta_ && meta_.id) TRADER_ID_TO_NAME[meta_.id] = name;
+    }
+    // Trader-price overrides (companion mod TRLTraderPrices). Tolerate failure —
+    // the section still renders base prices without override badges.
+    try {
+      const tr = await fetch('/api/trader-overrides').then(r => r.json());
+      TRADER_OVERRIDES = (tr && tr.ok && tr.overrides) ? tr.overrides : {};
+    } catch (_) { TRADER_OVERRIDES = {}; }
 
     // Walk category tree once and index icon URLs by both id and name so the
     // table's Group column can find the right icon for any item.
@@ -1362,6 +1377,18 @@ function bindRewardHover(tableEl) {
 }
 
 function onTableClick(e) {
+  // Click on a trader-row edit button (inside the item detail) → inline edit.
+  const traderEditBtn = e.target.closest('.trader-edit-btn');
+  if (traderEditBtn) {
+    e.stopPropagation();
+    const row = traderEditBtn.closest('tr.trader-row');
+    if (row) openTraderEdit(row);
+    return;
+  }
+  // Clicks inside an open trader-edit form: let the form's own handlers fire
+  // (don't let the click bubble up to toggle/close the detail row).
+  if (e.target.closest('.trader-edit-form')) { e.stopPropagation(); return; }
+
   // Click on reward badge → toggle reward popover
   const rewardBadge = e.target.closest('.reward-badge');
   if (rewardBadge) {
@@ -1860,6 +1887,173 @@ async function refreshAll(source) {
   }
 }
 
+// ── Per-trader price editing (companion mod TRLTraderPrices) ─────────────────
+const TRADER_MONEY_CURRENCIES = new Set(['RUB', 'USD', 'EUR', 'GP']);
+const CURRENCY_SYMBOL = { RUB: '₽', USD: '$', EUR: '€', GP: 'GP' };
+
+// Resolve the current override (priceRUB) for a (trader, tpl), or null.
+function traderOverrideFor(traderId, tpl) {
+  if (!traderId) return null;
+  const byTrader = TRADER_OVERRIDES[traderId];
+  if (!byTrader || byTrader[tpl] == null) return null;
+  return byTrader[tpl];
+}
+
+// Render one offer row. Editable rows (money & not Fence) get an inline edit
+// affordance + OVR badge when overridden; barter / Fence rows are read-only.
+function renderTraderRow(it, t) {
+  const tpl = it.id;
+  const traderId = t.traderId || (t.name ? (TRADERS[t.name] && TRADERS[t.name].id) : null);
+  const isFence = traderId === FENCE_ID;
+  const isBarter = t.currency === 'BARTER';
+  const isMoney = TRADER_MONEY_CURRENCIES.has(t.currency);
+  // `editable` is precomputed upstream (money && not Fence); fall back defensively.
+  const editable = (t.editable === true) || (isMoney && !isFence && !isBarter && !!traderId);
+  const sym = CURRENCY_SYMBOL[t.currency] || t.currency || '';
+  const ovr = editable ? traderOverrideFor(traderId, tpl) : null;
+  const hasOvr = ovr != null;
+
+  const meta = `<small class="vendor">${escapeHtml(t.currency || '?')} · L${t.loyaltyLevel}${t.questLocked?' · 🔒':''}${t.unlimited?' · ∞':''}</small>`;
+  const nameCell = `<td class="k">${escapeHtml(t.name)} ${meta}</td>`;
+
+  if (isBarter) {
+    return `<tr>${nameCell}<td class="v"><span class="vendor" data-tip="barter — not editable">barter</span></td></tr>`;
+  }
+  if (isFence) {
+    return `<tr>${nameCell}<td class="v">${fmt(t.priceRUB)} ₽ <span class="vendor" data-tip="Fence — dynamic, not supported">🔒</span></td></tr>`;
+  }
+  if (!editable) {
+    return `<tr>${nameCell}<td class="v">${t.priceRUB!=null ? fmt(t.priceRUB)+' ₽':'—'}</td></tr>`;
+  }
+
+  // Editable: show effective (override or base) price + OVR badge + edit control.
+  const base = t.priceRUB;
+  const eff = hasOvr ? ovr : base;
+  const badge = hasOvr
+    ? ` <span class="badge badge--override" data-tip="${escapeAttr('Override active — buy price pinned at ' + eff.toLocaleString('en-US') + ' ₽ (base ' + (base!=null?base.toLocaleString('en-US'):'?') + ' ' + sym + '). Edit / restore here.')}">OVR</span>`
+    : '';
+  return `<tr class="trader-row" data-trader-id="${escapeAttr(traderId||'')}" data-trader-tpl="${escapeAttr(tpl)}" data-trader-base="${base!=null?base:''}" data-trader-cur="${escapeAttr(t.currency||'')}">` +
+    nameCell +
+    `<td class="v trader-edit-cell">` +
+      `<span class="trader-price-val${hasOvr?' is-overridden':''}">${eff!=null?fmt(eff)+' ₽':'—'}</span>${badge}` +
+      `<button class="trader-edit-btn" type="button" title="Edit buy price">${ICON_EDIT}</button>` +
+    `</td>` +
+  `</tr>`;
+}
+
+// Open the inline editor on a trader row. Mirrors the flea inline edit.
+function openTraderEdit(row) {
+  if (row.querySelector('.trader-edit-form')) return; // already editing
+  const tpl = row.dataset.traderTpl;
+  const traderId = row.dataset.traderId;
+  const cur = row.dataset.traderCur;
+  const sym = CURRENCY_SYMBOL[cur] || cur || '';
+  const base = row.dataset.traderBase !== '' ? Number(row.dataset.traderBase) : null;
+  const ovr = traderOverrideFor(traderId, tpl);
+  const current = ovr != null ? ovr : (base != null ? base : '');
+  const hasOvr = ovr != null;
+
+  const cell = row.querySelector('.trader-edit-cell');
+  cell.classList.add('is-editing');
+  const form = document.createElement('form');
+  form.className = 'trader-edit-form';
+  form.onsubmit = (e) => { e.preventDefault(); return false; };
+  const tip = `Buy price in RUB-equivalent. In-game shows native currency (${escapeAttr(cur)}). ` +
+    `Writes to TRLTraderPrices override; applies to all loyalty levels. Restart SPT to apply.`;
+  form.innerHTML =
+    `<input type="number" min="1" step="1" value="${current}" autofocus data-tip="${tip}">` +
+    `<div class="trader-edit-form__actions">` +
+      `<button class="save" type="button" title="Save (Enter)">Save</button>` +
+      (hasOvr ? `<button class="restore" type="button" title="Restore default price (undo edit)">↺</button>` : '') +
+      `<button class="cancel" type="button" title="Cancel (Esc)">×</button>` +
+    `</div>` +
+    `<div class="trader-edit-form__hint">edit in RUB-equivalent · in-game shows ${escapeHtml(sym)} · all loyalty levels · restart SPT to apply</div>`;
+  cell.appendChild(form);
+
+  const input   = form.querySelector('input');
+  const save    = form.querySelector('button.save');
+  const cancel  = form.querySelector('button.cancel');
+  const restore = form.querySelector('button.restore');
+  input.focus(); input.select();
+
+  let docClickHandler = null;
+  function closeForm() {
+    cell.classList.remove('is-editing');
+    form.remove();
+    if (docClickHandler) document.removeEventListener('mousedown', docClickHandler, true);
+  }
+  function rerenderRow() {
+    const item = ITEMS[tpl];
+    if (!item) return;
+    const t = (item.spt && item.spt.traders ? item.spt.traders : []).find(x =>
+      (x.traderId || (x.name && TRADERS[x.name] && TRADERS[x.name].id)) === traderId);
+    if (!t) return;
+    const tmp = document.createElement('tbody');
+    tmp.innerHTML = renderTraderRow(item, t);
+    row.replaceWith(tmp.firstElementChild);
+  }
+
+  cancel.onclick = closeForm;
+  input.onkeydown = (ev) => {
+    if (ev.key === 'Escape') closeForm();
+    if (ev.key === 'Enter')  { ev.preventDefault(); save.click(); }
+  };
+  docClickHandler = (ev) => { if (!row.contains(ev.target)) closeForm(); };
+  setTimeout(() => document.addEventListener('mousedown', docClickHandler, true), 0);
+
+  save.onclick = async () => {
+    const price = parseInt(input.value, 10);
+    if (!Number.isFinite(price) || price <= 0) { toast('Invalid value', 'err'); input.focus(); return; }
+    save.disabled = true; cancel.disabled = true; if (restore) restore.disabled = true;
+    try {
+      const r = await fetch('/api/trader-price', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tpl, traderId, priceRUB: price }),
+      });
+      const data = await r.json();
+      if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+      // Optimistically reflect the new override in the in-memory cache.
+      if (!TRADER_OVERRIDES[traderId]) TRADER_OVERRIDES[traderId] = {};
+      TRADER_OVERRIDES[traderId][tpl] = price;
+      closeForm();
+      rerenderRow();
+      const item = ITEMS[tpl];
+      const prev = data.previousPrice != null ? `${data.previousPrice.toLocaleString('pt-BR')} → ` : '';
+      let msg = `${(item && (item.shortName || item.name)) || tpl}: trader buy ${prev}${price.toLocaleString('pt-BR')} ₽`;
+      if (data.warning) msg += ` (${data.warning})`;
+      toast(msg, data.warning ? 'err' : 'ok');
+    } catch (err) {
+      toast('Failed to save: ' + err.message, 'err');
+      save.disabled = false; cancel.disabled = false; if (restore) restore.disabled = false;
+    }
+  };
+
+  if (restore) restore.onclick = async () => {
+    restore.disabled = true; save.disabled = true; cancel.disabled = true;
+    try {
+      const r = await fetch('/api/trader-price', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tpl, traderId }),
+      });
+      const data = await r.json();
+      if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+      if (TRADER_OVERRIDES[traderId]) {
+        delete TRADER_OVERRIDES[traderId][tpl];
+        if (Object.keys(TRADER_OVERRIDES[traderId]).length === 0) delete TRADER_OVERRIDES[traderId];
+      }
+      closeForm();
+      rerenderRow();
+      const item = ITEMS[tpl];
+      toast(`${(item && (item.shortName || item.name)) || tpl}: trader override removed → default`, 'ok');
+    } catch (err) {
+      toast('Failed to restore: ' + err.message, 'err');
+      restore.disabled = false; save.disabled = false; cancel.disabled = false;
+    }
+  };
+}
+
 function renderDetail(it) {
   const c = it.consolidated;
   const dev = it.tarkovDev && it.tarkovDev.pve;
@@ -1944,10 +2138,11 @@ function renderDetail(it) {
 
       <div class="detail-section">
         <h3>Trader buy (SPT assort)</h3>
-        <table>
+        <table class="trader-edit-table" data-trader-tpl="${escapeAttr(it.id)}">
           ${sptTraders.length === 0 ? '<tr><td>—</td></tr>' :
-            sptTraders.map(t => `<tr><td class="k">${escapeHtml(t.name)} <small class="vendor">L${t.loyaltyLevel}${t.questLocked?' · 🔒':''}${t.unlimited?' · ∞':''}</small></td><td class="v">${t.currency==='BARTER' ? '<span class="vendor">barter</span>' : fmt(t.priceRUB)+' ₽'}</td></tr>`).join('')}
+            sptTraders.map(t => renderTraderRow(it, t)).join('')}
         </table>
+        <div class="trader-edit-note">Edit in RUB-equivalent; in-game shows native currency. Applies to all loyalty levels. Restart SPT to apply.</div>
       </div>
 
     </div>

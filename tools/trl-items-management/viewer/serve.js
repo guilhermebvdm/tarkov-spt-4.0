@@ -32,6 +32,11 @@ const PRICES_JSON    = path.join(SPT_DATA, 'database', 'templates', 'prices.json
 const META_JSON      = path.resolve(__dirname, '..', 'data', 'meta.json');
 const ITEMS_JSON   = path.join(ROOT, 'data', 'items.json');
 const CHECKS_DAT   = path.join(SPT_DATA, 'checks.dat');
+// Trader-price overrides live in a companion server mod (TRLTraderPrices), not in
+// SPT_Data — the mod applies overrides.json at boot. Resolve both the mod dir
+// (presence check) and the config file (read/written at serve time).
+const TRL_MOD_DIR        = path.join(SPT_PATH, 'user', 'mods', 'TRLTraderPrices');
+const TRADER_OVERRIDES   = path.join(TRL_MOD_DIR, 'config', 'overrides.json');
 const LOG_FILE              = path.join(ROOT, 'logs', 'price-edits.jsonl');
 const BAN_LOG_FILE          = path.join(ROOT, 'logs', 'ban-edits.jsonl');
 const HISTORY_LOG_FILE      = path.join(ROOT, 'logs', 'price-history.jsonl');
@@ -783,6 +788,141 @@ function handleGetOverrides(req, res) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Trader-price overrides (companion mod TRLTraderPrices)
+//
+// Unlike flea prices (written into SPT_Data/configs/ragfair.json), trader prices
+// are overridden by a separate server mod that reads its own config/overrides.json
+// at boot. The viewer just maintains that file. Shape:
+//   { "<traderId>": { "<tpl>": <priceRUB> } }
+// All writes are atomic (tmp + fs.renameSync) and serialized through the same
+// in-process write lock as the flea APIs. NO checks.dat refresh — the file lives
+// outside SPT_Data and is not part of SPT's MD5 manifest.
+// ---------------------------------------------------------------------------
+
+// Read overrides.json at serve time, tolerating a missing file/dir.
+function readTraderOverrides() {
+  if (!fs.existsSync(TRADER_OVERRIDES)) return {};
+  const obj = readJsonFile(TRADER_OVERRIDES);
+  return obj && typeof obj === 'object' ? obj : {};
+}
+
+// Atomically write the overrides map. Creates config/ on demand. Uses 2-space
+// indent + trailing newline (the mod owns this file; vanilla-style preservation
+// via writeJsonPreservingStyle is not applicable when the file may not exist).
+function writeTraderOverrides(obj) {
+  fs.mkdirSync(path.dirname(TRADER_OVERRIDES), { recursive: true });
+  const serialized = JSON.stringify(obj, null, 2) + '\n';
+  const tmp = TRADER_OVERRIDES + '.tmp';
+  fs.writeFileSync(tmp, serialized, 'utf8');
+  fs.renameSync(tmp, TRADER_OVERRIDES);
+}
+
+// GET /api/trader-overrides — current overrides.json map (read at serve time).
+// Returns {} when the mod / file is not present yet.
+function handleGetTraderOverrides(req, res) {
+  try {
+    return sendJson(res, 200, { ok: true, overrides: readTraderOverrides() });
+  } catch (e) {
+    return sendJson(res, 500, { error: e.message });
+  }
+}
+
+// PATCH /api/trader-price — set a trader-specific price for a tpl.
+// Body: { tpl, traderId, priceRUB }. Writes overrides[traderId][tpl] = priceRUB.
+function handlePatchTraderPrice(req, res) {
+  let body = '';
+  req.on('data', c => { body += c; if (body.length > 1e6) { req.destroy(); }});
+  req.on('end', () => {
+    let payload;
+    try { payload = JSON.parse(body); }
+    catch (e) { return sendJson(res, 400, { error: 'invalid JSON' }); }
+
+    const tpl      = payload.tpl;
+    const traderId = payload.traderId;
+    const priceRUB = payload.priceRUB;
+    if (typeof tpl !== 'string' || !/^[a-f0-9]{24}$/i.test(tpl)) {
+      return sendJson(res, 400, { error: 'invalid tpl (expected 24-char hex BSG id)' });
+    }
+    if (typeof traderId !== 'string' || !/^[a-f0-9]{24}$/i.test(traderId)) {
+      return sendJson(res, 400, { error: 'invalid traderId (expected 24-char hex MongoId)' });
+    }
+    if (!Number.isFinite(priceRUB) || priceRUB <= 0) {
+      return sendJson(res, 400, { error: 'invalid priceRUB (expected finite number > 0)' });
+    }
+
+    withWriteLock(() => {
+      const overrides = readTraderOverrides();
+      if (!overrides[traderId] || typeof overrides[traderId] !== 'object') overrides[traderId] = {};
+      const previousPrice = overrides[traderId][tpl] ?? null;
+      overrides[traderId][tpl] = priceRUB;
+      writeTraderOverrides(overrides);
+
+      const modInstalled = fs.existsSync(TRL_MOD_DIR);
+      const resp = {
+        ok: true, tpl, traderId, priceRUB, previousPrice,
+      };
+      if (!modInstalled) {
+        resp.warning = 'mod not installed — saved but will not apply until TRLTraderPrices is installed';
+      }
+      return sendJson(res, 200, resp);
+    }).catch(e => {
+      console.error('set-trader-price failed:', e);
+      if (!res.headersSent) return sendJson(res, 500, { error: e.message });
+    });
+  });
+}
+
+// DELETE /api/trader-price — remove a single trader override for a tpl.
+// Body: { tpl, traderId }. Prunes the trader object when it becomes empty.
+function handleDeleteTraderPrice(req, res) {
+  let body = '';
+  req.on('data', c => { body += c; if (body.length > 1e6) { req.destroy(); }});
+  req.on('end', () => {
+    let payload;
+    try { payload = JSON.parse(body || '{}'); }
+    catch (e) { return sendJson(res, 400, { error: 'invalid JSON' }); }
+
+    const tpl      = payload.tpl;
+    const traderId = payload.traderId;
+    if (typeof tpl !== 'string' || !/^[a-f0-9]{24}$/i.test(tpl)) {
+      return sendJson(res, 400, { error: 'invalid tpl (expected 24-char hex BSG id)' });
+    }
+    if (typeof traderId !== 'string' || !/^[a-f0-9]{24}$/i.test(traderId)) {
+      return sendJson(res, 400, { error: 'invalid traderId (expected 24-char hex MongoId)' });
+    }
+
+    withWriteLock(() => {
+      const overrides = readTraderOverrides();
+      const traderMap = overrides[traderId];
+      const previousPrice = (traderMap && traderMap[tpl] != null) ? traderMap[tpl] : null;
+      if (previousPrice == null) {
+        return sendJson(res, 200, { ok: true, tpl, traderId, noop: true, message: 'no override to remove' });
+      }
+      delete traderMap[tpl];
+      if (Object.keys(traderMap).length === 0) delete overrides[traderId];  // prune empty trader
+      writeTraderOverrides(overrides);
+      return sendJson(res, 200, { ok: true, tpl, traderId, removed: true, previousPrice });
+    }).catch(e => {
+      console.error('delete-trader-price failed:', e);
+      if (!res.headersSent) return sendJson(res, 500, { error: e.message });
+    });
+  });
+}
+
+// DELETE /api/trader-price/all — reset all trader overrides to {} (atomic).
+function handleDeleteAllTraderPrices(req, res) {
+  withWriteLock(() => {
+    const overrides = readTraderOverrides();
+    const count = Object.values(overrides).reduce((n, m) => n + (m && typeof m === 'object' ? Object.keys(m).length : 0), 0);
+    writeTraderOverrides({});
+    return sendJson(res, 200, { ok: true, reset: true, removedCount: count });
+  }).catch(e => {
+    console.error('reset-trader-prices failed:', e);
+    if (!res.headersSent) return sendJson(res, 500, { error: e.message });
+  });
+}
+
 // POST /api/ban — toggles _props.CanSellOnRagfair in SPT's items.json.
 // Body: { tpl: "<bsgTpl>", banned: true|false }.
 //
@@ -928,6 +1068,10 @@ http.createServer((req, res) => {
   if (req.method === 'POST'   && req.url === '/api/price')        return handlePatchPrice(req, res);
   if (req.method === 'DELETE' && req.url === '/api/price')        return handleDeletePrice(req, res);
   if (req.method === 'GET'    && req.url === '/api/overrides')    return handleGetOverrides(req, res);
+  if (req.method === 'GET'    && req.url === '/api/trader-overrides') return handleGetTraderOverrides(req, res);
+  if (req.method === 'PATCH'  && req.url === '/api/trader-price') return handlePatchTraderPrice(req, res);
+  if (req.method === 'DELETE' && req.url === '/api/trader-price/all') return handleDeleteAllTraderPrices(req, res);
+  if (req.method === 'DELETE' && req.url === '/api/trader-price') return handleDeleteTraderPrice(req, res);
   if (req.method === 'POST' && req.url === '/api/ban')            return handleBanToggle(req, res);
   if (req.method === 'POST' && req.url === '/api/refresh-dev')    return handleRefreshDev(req, res);
   if (req.method === 'POST' && req.url === '/api/refresh-market') return handleRefreshMarket(req, res);

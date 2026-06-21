@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>TRLTraderPrices</RootNamespace>
+    <AssemblyName>TRLTraderPrices</AssemblyName>
+    <Authors>trl</Authors>
+    <Version>1.0.0</Version>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Mesma linha do CustomClasses.Server / OutfitPersistenceFix. Sem 0Harmony: este mod só muta a DB. -->
+    <PackageReference Include="SPTarkov.Server.Core" Version="4.0.0" />
+    <PackageReference Include="SPTarkov.DI" Version="4.0.0" />
+    <PackageReference Include="SPTarkov.Common" Version="4.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="config\overrides.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

@@ -42,8 +42,14 @@ const CACHE    = path.join(__dirname, '..', 'cache', 'spt-raw.json');
 const CURRENCY_RUB = '5449016a4bdc2d6f028b456f';
 const CURRENCY_USD = '5696686a4bdc2da3298b456a';
 const CURRENCY_EUR = '569668774bdc2da2298b4568';
-const FALLBACK_USD_RATE = 120; // RUB per USD; verified from handbook
-const FALLBACK_EUR_RATE = 133; // RUB per EUR; verified from handbook
+const CURRENCY_GP  = '5d235b4d86f7742e017bc88a'; // GP coin — used by some traders (handbook price ≈ 7500 RUB)
+const FALLBACK_USD_RATE = 120;  // RUB per USD; verified from handbook
+const FALLBACK_EUR_RATE = 133;  // RUB per EUR; verified from handbook
+const FALLBACK_GP_RATE  = 7500; // RUB per GP coin; verified from handbook
+
+// Fence never sells money-priced editable assort (its stock is recycled player
+// flea/insurance items). Offers from Fence are flagged non-editable regardless.
+const FENCE_ID = '579dc571d53a0658a154fbec';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -394,10 +400,24 @@ function main() {
   // Currency rates from handbook
   const usdEntry = handbook.Items.find(x => x.Id === CURRENCY_USD);
   const eurEntry = handbook.Items.find(x => x.Id === CURRENCY_EUR);
+  const gpEntry  = handbook.Items.find(x => x.Id === CURRENCY_GP);
   const usdRate = usdEntry ? usdEntry.Price : FALLBACK_USD_RATE;
   const eurRate = eurEntry ? eurEntry.Price : FALLBACK_EUR_RATE;
-  const rateSource = (usdEntry && eurEntry) ? 'handbook' : 'fallback';
-  console.error(`  currency rates (${rateSource}): USD=${usdRate}, EUR=${eurRate}`);
+  const gpRate  = gpEntry  ? gpEntry.Price  : FALLBACK_GP_RATE;
+  const rateSource = (usdEntry && eurEntry && gpEntry) ? 'handbook' : 'fallback';
+  console.error(`  currency rates (${rateSource}): USD=${usdRate}, EUR=${eurRate}, GP=${gpRate}`);
+
+  // Resolve a single barter_scheme requirement to { currency, priceRUB }.
+  // currency: 'RUB'|'USD'|'EUR'|'GP' for money tpls, 'BARTER' otherwise.
+  // priceRUB is the requirement converted to roubles via handbook rate (null for barter).
+  function resolveCurrency(reqTpl, count) {
+    if (reqTpl === CURRENCY_RUB) return { currency: 'RUB', priceRUB: count };
+    if (reqTpl === CURRENCY_USD) return { currency: 'USD', priceRUB: Math.round(count * usdRate) };
+    if (reqTpl === CURRENCY_EUR) return { currency: 'EUR', priceRUB: Math.round(count * eurRate) };
+    if (reqTpl === CURRENCY_GP)  return { currency: 'GP',  priceRUB: Math.round(count * gpRate) };
+    return { currency: 'BARTER', priceRUB: null };
+  }
+  const MONEY_CURRENCIES = new Set(['RUB', 'USD', 'EUR', 'GP']);
 
   // 4a. Global flea config (player level gate)
   let fleaMinUserLevel = null;
@@ -446,6 +466,102 @@ function main() {
     return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
   }
 
+  // Mod-enabled test. SPT C# server mods (DLL) and JS mods can be disabled
+  // without removing the folder via a `.disabled` marker or a package.json with
+  // "isEnabled": false. Skip those — their data must not leak into the cache.
+  function isModEnabled(modDir) {
+    if (fs.existsSync(path.join(modDir, '.disabled'))) return false;
+    const pkgP = path.join(modDir, 'package.json');
+    if (fs.existsSync(pkgP)) {
+      try { const pkg = readJson(pkgP); if (pkg.isEnabled === false) return false; } catch (_) { /* ignore */ }
+    }
+    return true;
+  }
+
+  // ── Trader registry (vanilla + mod), built BEFORE the mod-item loop ─────────
+  // Maps trader nickname → { id, avatar }. Built here (ahead of §4c and §5) so
+  // mod-item offers (§4c) and assort offers (§5) can resolve traderId. Also
+  // returns nameToId for name→id lookups and modTraderSources: the list of
+  // mod-shipped { id, nickname, base, assort } to parse in §5 like vanilla.
+  const traderAvatarsDir = path.join(dataDir, 'images', 'trader', 'avatar');
+  const avatarFiles = fs.existsSync(traderAvatarsDir) ? new Set(fs.readdirSync(traderAvatarsDir)) : new Set();
+  function resolveAvatar(avatarField) {
+    if (!avatarField) return null;
+    const filename = path.basename(avatarField);
+    const stem = filename.replace(/\.[^.]+$/, '');
+    const match = avatarFiles.has(filename) ? filename
+                : [...avatarFiles].find(f => f.startsWith(stem + '.'));
+    return match ? '/spt-images/trader/avatar/' + match : null;
+  }
+
+  const traders = {};            // nickname -> { id, avatar }  (→ data/traders.json)
+  const nameToId = {};           // nickname -> traderId  (for §4c mod-offer resolution)
+  const idToNick = {};           // traderId -> nickname
+  function registerTrader(nickname, id, avatar) {
+    if (!nickname || !id) return;
+    if (!traders[nickname]) traders[nickname] = { id, avatar: avatar ?? null };
+    nameToId[nickname] = id;
+    idToNick[id] = nickname;
+  }
+
+  // Vanilla traders from <SPT_Data>/database/traders/<id>/base.json
+  const vanillaTradersDir = path.join(dataDir, 'database', 'traders');
+  const vanillaTraderIds = fs.existsSync(vanillaTradersDir)
+    ? fs.readdirSync(vanillaTradersDir).filter(d => fs.statSync(path.join(vanillaTradersDir, d)).isDirectory())
+    : [];
+  for (const traderId of vanillaTraderIds) {
+    const baseP = path.join(vanillaTradersDir, traderId, 'base.json');
+    if (!fs.existsSync(baseP)) continue;
+    let base; try { base = readJson(baseP); } catch (_) { continue; }
+    registerTrader(base.nickname || traderId, traderId, resolveAvatar(base.avatar));
+  }
+
+  // Mod traders. Two layouts:
+  //   (a) WTT-Artem pattern: <mod>/db/base.json + <mod>/db/assort.json
+  //   (b) alt pattern:       <mod>/db/traders/<id>/base.json + assort.json
+  // A db/base.json is only treated as a trader if it has nickname + _id +
+  // sell_category (the field BSG uses to mark a sellable trader). Disabled mods
+  // are skipped. Each accepted trader contributes its assort to §5.
+  const modTraderSources = []; // { modName, id, nickname, baseDir }
+  function tryRegisterModTrader(modName, base, baseDir) {
+    if (!base || !base.nickname || !base._id || !base.sell_category) return false;
+    registerTrader(base.nickname, base._id, resolveAvatar(base.avatar));
+    modTraderSources.push({ modName, id: base._id, nickname: base.nickname, baseDir });
+    return true;
+  }
+  if (fs.existsSync(modsDir)) {
+    for (const modName of fs.readdirSync(modsDir)) {
+      const modDir = path.join(modsDir, modName);
+      let st; try { st = fs.statSync(modDir); } catch (_) { continue; }
+      if (!st.isDirectory() || !isModEnabled(modDir)) continue;
+
+      // (a) <mod>/db/base.json
+      const baseP = path.join(modDir, 'db', 'base.json');
+      if (fs.existsSync(baseP)) {
+        let base; try { base = readJson(baseP); } catch (_) { base = null; }
+        if (base && tryRegisterModTrader(modName, base, path.join(modDir, 'db'))) {
+          console.error(`  mod trader: ${base.nickname} (${modName})`);
+        }
+      }
+      // (b) <mod>/db/traders/<id>/base.json
+      const modTradersDir = path.join(modDir, 'db', 'traders');
+      if (fs.existsSync(modTradersDir)) {
+        for (const tid of fs.readdirSync(modTradersDir)) {
+          const tDir = path.join(modTradersDir, tid);
+          let tst; try { tst = fs.statSync(tDir); } catch (_) { continue; }
+          if (!tst.isDirectory()) continue;
+          const bP = path.join(tDir, 'base.json');
+          if (!fs.existsSync(bP)) continue;
+          let base; try { base = readJson(bP); } catch (_) { base = null; }
+          if (base && tryRegisterModTrader(modName, base, tDir)) {
+            console.error(`  mod trader: ${base.nickname} (${modName}/db/traders/${tid})`);
+          }
+        }
+      }
+    }
+  }
+  console.error(`Trader registry: ${Object.keys(traders).length} traders (${vanillaTraderIds.length} vanilla, ${modTraderSources.length} mod)`);
+
   let modItemCount = 0;
   if (fs.existsSync(modsDir)) {
     for (const modName of fs.readdirSync(modsDir)) {
@@ -481,28 +597,30 @@ function main() {
           }
 
           // Trader offers from mod JSON: { TRADERNAME: { assortId: { barterSettings, barters } } }
+          // traderId resolved from the registry built above (vanilla + mod).
           const modTraders = [];
           if (def.addtoTraders && def.traders) {
             for (const [nameUpper, offers] of Object.entries(def.traders)) {
+              const nick     = normTraderName(nameUpper);
+              const traderId = nameToId[nick] || nameToId[nameUpper] || null;
               for (const offer of Object.values(offers)) {
                 const bs      = offer.barterSettings || {};
                 const barters = offer.barters || [];
                 if (barters.length !== 1) continue; // skip multi-req barters
                 const req = barters[0];
                 const currTpl = MOD_CURRENCY_TPL[req._tpl] || req._tpl;
-                let priceRUB = null;
-                let currency = 'BARTER';
-                if      (currTpl === CURRENCY_RUB) { priceRUB = req.count;                          currency = 'RUB'; }
-                else if (currTpl === CURRENCY_USD) { priceRUB = Math.round(req.count * usdRate);   currency = 'USD'; }
-                else if (currTpl === CURRENCY_EUR) { priceRUB = Math.round(req.count * eurRate);   currency = 'EUR'; }
+                const { currency, priceRUB } = resolveCurrency(currTpl, req.count);
+                const loyaltyLevel = bs.loyalLevel ?? 1;
                 modTraders.push({
-                  name: normTraderName(nameUpper),
+                  name: nick,
+                  traderId,
                   priceRUB,
                   currency,
-                  loyaltyLevel: bs.loyalLevel ?? 1,
+                  loyaltyLevel,
                   unlimited: !!bs.unlimitedCount,
                   stock: bs.unlimitedCount ? null : (bs.stackObjectsCount ?? 0),
                   questLocked: false,
+                  editable: MONEY_CURRENCIES.has(currency) && traderId !== FENCE_ID,
                 });
               }
             }
@@ -583,53 +701,38 @@ function main() {
   }
   console.error(`Mod items total: ${modItemCount}`);
 
-  // 5. Traders
-  const tradersDir = path.join(dataDir, 'database', 'traders');
-  const traderIds = fs.readdirSync(tradersDir).filter(d =>
-    fs.statSync(path.join(tradersDir, d)).isDirectory()
-  );
-  console.error(`Reading ${traderIds.length} traders...`);
-  for (const id of Object.keys(items)) items[id].traders = [];
+  // 5. Trader assorts (vanilla + mod). The registry (nickname/id/avatar) was
+  // already built above (§4c preamble); here we parse each trader's assort —
+  // top offers (parentId==='hideout'), barter_scheme, loyal_level_items — the
+  // same shape for vanilla and mod traders (WTT-Artem pattern + db/traders/<id>).
+  // NOTE: do NOT zero items[].traders — mod items carry inline offers from §4c.
+  for (const id of Object.keys(items)) { if (!Array.isArray(items[id].traders)) items[id].traders = []; }
 
   let totalOffers = 0;
   let barterOffers = 0;
   let questLockedOffers = 0;
 
-  // Trader metadata: nickname → { id, avatar URL served by serve.js /spt-images/ }.
-  // Files live in SPT_Data/images/trader/avatar/. base.json `avatar` field uses
-  // /files/ prefix (legacy) and may say .jpg even though the file is .png — we
-  // resolve by reading the actual directory.
-  const traderAvatarsDir = path.join(dataDir, 'images', 'trader', 'avatar');
-  const avatarFiles = fs.existsSync(traderAvatarsDir) ? new Set(fs.readdirSync(traderAvatarsDir)) : new Set();
-  const traders = {};
+  // Unified source list: { nickname, id, baseDir } for vanilla and mod traders.
+  const assortSources = [];
+  for (const traderId of vanillaTraderIds) {
+    const nick = idToNick[traderId] || traderId;
+    assortSources.push({ nickname: nick, id: traderId, baseDir: path.join(vanillaTradersDir, traderId) });
+  }
+  for (const src of modTraderSources) {
+    assortSources.push({ nickname: src.nickname, id: src.id, baseDir: src.baseDir });
+  }
 
-  for (const traderId of traderIds) {
-    const baseP   = path.join(tradersDir, traderId, 'base.json');
-    const assortP = path.join(tradersDir, traderId, 'assort.json');
-    const questAP = path.join(tradersDir, traderId, 'questassort.json');
-    if (!fs.existsSync(baseP) || !fs.existsSync(assortP)) {
-      console.error(`  ${traderId}: missing base or assort, skipping`);
+  for (const { nickname, id: traderId, baseDir } of assortSources) {
+    const assortP = path.join(baseDir, 'assort.json');
+    const questAP = path.join(baseDir, 'questassort.json');
+    if (!fs.existsSync(assortP)) {
+      console.error(`  ${nickname}: missing assort.json, skipping offers`);
       continue;
     }
-    const base   = readJson(baseP);
-    const assort = readJson(assortP);
-    const nickname = base.nickname || traderId;
-
-    // Resolve avatar: base.json says /files/trader/avatar/<id>.jpg but real file may be .png
-    let avatarUrl = null;
-    if (base.avatar) {
-      const filename = path.basename(base.avatar);
-      const stem = filename.replace(/\.[^.]+$/, '');
-      // Try exact match first, then any extension
-      const match = avatarFiles.has(filename) ? filename
-                  : [...avatarFiles].find(f => f.startsWith(stem + '.'));
-      if (match) avatarUrl = '/spt-images/trader/avatar/' + match;
+    let assort; try { assort = readJson(assortP); } catch (e) {
+      console.error(`  ${nickname}: assort.json parse failed (${e.message})`); continue;
     }
-    traders[nickname] = { id: traderId, avatar: avatarUrl };
-
-    // assortId -> tpl map
-    const idToTpl = {};
-    for (const it of assort.items) idToTpl[it._id] = it._tpl;
+    if (!Array.isArray(assort.items)) continue;
 
     // Quest-locked assortIds
     const questLockedIds = new Set();
@@ -646,6 +749,9 @@ function main() {
       }
     }
 
+    const barterScheme = assort.barter_scheme || {};
+    const loyalItems   = assort.loyal_level_items || {};
+
     // Iterate top-level offers
     const topItems = assort.items.filter(x => x.parentId === 'hideout');
     let traderOffers = 0;
@@ -653,37 +759,32 @@ function main() {
       const tpl = offer._tpl;
       if (!items[tpl]) continue; // not in base items or known mods
 
-      // Resolve price
-      const scheme = assort.barter_scheme[offer._id];
+      // Resolve price/currency (RUB/USD/EUR/GP money, else BARTER)
+      const scheme = barterScheme[offer._id];
       let priceRUB = null;
       let currency = 'BARTER';
       if (Array.isArray(scheme) && Array.isArray(scheme[0]) && scheme[0].length === 1) {
         const req = scheme[0][0];
-        if (req._tpl === CURRENCY_RUB) {
-          priceRUB = req.count;
-          currency = 'RUB';
-        } else if (req._tpl === CURRENCY_USD) {
-          priceRUB = Math.round(req.count * usdRate);
-          currency = 'USD';
-        } else if (req._tpl === CURRENCY_EUR) {
-          priceRUB = Math.round(req.count * eurRate);
-          currency = 'EUR';
-        }
+        ({ currency, priceRUB } = resolveCurrency(req._tpl, req.count));
       }
       if (currency === 'BARTER') barterOffers++;
 
       const upd = offer.upd || {};
       const questLocked = questLockedIds.has(offer._id);
       if (questLocked) questLockedOffers++;
+      const loyaltyLevel = loyalItems[offer._id] ?? 1;
 
       items[tpl].traders.push({
         name: nickname,
+        traderId,
         priceRUB,
         currency,
-        loyaltyLevel: assort.loyal_level_items[offer._id] ?? 1,
+        loyaltyLevel,
         unlimited: !!upd.UnlimitedCount,
         stock: upd.UnlimitedCount ? null : (upd.StackObjectsCount ?? 0),
         questLocked,
+        // Editable only for money offers from a non-Fence trader.
+        editable: MONEY_CURRENCIES.has(currency) && traderId !== FENCE_ID,
       });
       traderOffers++;
     }
@@ -691,20 +792,31 @@ function main() {
     console.error(`  ${nickname.padEnd(15)} ${traderOffers} offers`);
   }
 
-  // Dedup intra-trader: same tpl appearing multiple times → keep lowest loyalty, then lowest price
+  // Dedup intra-trader: keep ONE offer per (trader, tpl). Preference order:
+  //   1. an editable (money) offer beats a barter offer (so the editor has a price)
+  //   2. then lowest loyalty level
+  //   3. then lowest priceRUB
+  // Retained offer always carries traderId + currency.
   let dedupRemoved = 0;
   for (const tpl of Object.keys(items)) {
     const offers = items[tpl].traders;
     if (offers.length < 2) continue;
     const byTrader = {};
     for (const o of offers) {
-      const key = o.name;
+      const key = o.traderId || o.name; // group by trader id (fallback name)
       const prev = byTrader[key];
       if (!prev) { byTrader[key] = o; continue; }
-      const prevWorse =
-        (o.loyaltyLevel < prev.loyaltyLevel) ||
-        (o.loyaltyLevel === prev.loyaltyLevel && (o.priceRUB ?? Infinity) < (prev.priceRUB ?? Infinity));
-      if (prevWorse) byTrader[key] = o;
+      const oMoney    = o.editable === true;
+      const prevMoney = prev.editable === true;
+      let replace;
+      if (oMoney !== prevMoney) {
+        replace = oMoney; // prefer the money/editable offer
+      } else {
+        replace =
+          (o.loyaltyLevel < prev.loyaltyLevel) ||
+          (o.loyaltyLevel === prev.loyaltyLevel && (o.priceRUB ?? Infinity) < (prev.priceRUB ?? Infinity));
+      }
+      if (replace) byTrader[key] = o;
       dedupRemoved++;
     }
     items[tpl].traders = Object.values(byTrader);
@@ -767,7 +879,7 @@ function main() {
       modItems: modItemCount,
       withFleaPrice: priceCount,
       withBasePrice: baseCount,
-      traders: traderIds.length,
+      traders: Object.keys(traders).length,
       offers: totalOffers,
       barterOffers,
       questLockedOffers,
