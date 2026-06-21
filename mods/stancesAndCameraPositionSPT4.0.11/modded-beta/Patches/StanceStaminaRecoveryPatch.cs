@@ -41,24 +41,31 @@ namespace CameraRotationMod.Patches
                 // Mount ativo (vanilla) ou passivo (item 011): poupar stamina de braço — INDEPENDENTE do
                 // stance multiplier. Ativo poupa mais; passivo, ~metade (PA-01-04). Passivo cede ao ativo
                 // (IsBracing é limpo quando IsMountedState).
-                var pwaSt = gw.MainPlayer.ProceduralWeaponAnimation;
-                if (pwaSt?.IsMountedState == true)
-                {
-                    __result = 5f; // montado (vanilla): regen forte
-                    return;
-                }
-                if (PassiveMountState.IsBracing && Plugin._PassiveStaminaSave.Value)
-                {
-                    __result = 2.5f; // passivo: regen ~metade do ativo
-                    return;
-                }
+                var player = gw.MainPlayer;
+                bool ads = player.ProceduralWeaponAnimation?.IsAiming == true;
 
-                float mult = StanceStaminaState.Multiplier;
-                if (System.Math.Abs(mult - 1.0f) <= 1e-5f) return; // vanilla — não interferir
-
-                if (!StanceStaminaState.IsSuspendedByProne &&
-                    pwaSt?.IsAiming != true)
-                    __result = 0f;
+                // Coordenador (fix-06-01): UMA fonte controla a stamina de braço por frame — Perfil B.
+                // O consumo de aim-drain é zerado nos modos de mount (HandsStaminaConsumePatch), então o
+                // resultado é determinístico: só a restauração abaixo decide drena/parado/recupera.
+                switch (ArmStamina.Resolve(player))
+                {
+                    case ArmStaminaMode.MountActive:
+                        // hipfire = recupera forte; ADS = recupera leve
+                        __result = ads ? Plugin._PassiveMountStaminaRegen.Value
+                                       : Plugin._ActiveMountStaminaRegen.Value;
+                        return;
+                    case ArmStaminaMode.MountPassive:
+                        // hipfire = recupera leve; ADS = parado (segura, sem regen)
+                        __result = ads ? 0f : Plugin._PassiveMountStaminaRegen.Value;
+                        return;
+                    case ArmStaminaMode.HoldBreath:
+                        __result = 0f; // drain via ApplyComplexRotationPatch; sem regen contrariando
+                        return;
+                    case ArmStaminaMode.StanceDrain:
+                        __result = 0f; // o tick do StanceManager aplica o delta
+                        return;
+                    // Prone, Vanilla → não interferir (EFT controla)
+                }
             }
             catch (Exception ex)
             {
@@ -80,9 +87,16 @@ namespace CameraRotationMod.Patches
             try
             {
                 var gw = Singleton<GameWorld>.Instance;
-                if (gw?.MainPlayer?.Physical?.HandsStamina == __instance)
+                var mp = gw?.MainPlayer;
+                if (mp?.Physical?.HandsStamina == __instance)
                 {
-                    if (gw.MainPlayer.IsInPronePose)
+                    // Prone (vanilla congela) e os modos de mount (controle via restauração) zeram o
+                    // consumo de braço — torna o Perfil B determinístico (sem depender do regen vencer o
+                    // aim-drain). fix-06-01.
+                    var mode = ArmStamina.Resolve(mp);
+                    if (mp.IsInPronePose
+                        || mode == ArmStaminaMode.MountActive
+                        || mode == ArmStaminaMode.MountPassive)
                     {
                         __result = 0f;
                         return false; // Ignora o método original

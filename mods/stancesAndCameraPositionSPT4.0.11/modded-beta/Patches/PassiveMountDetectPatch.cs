@@ -36,7 +36,7 @@ namespace CameraRotationMod.Patches
         {
             try
             {
-                if (!Plugin._EnablePassiveMount.Value) return;
+                if (!Plugin._EnablePassiveMount.Value) { PassiveMountState.ClearBracing(); return; }
 
                 var player = (Player)_playerField.GetValue(__instance);
                 if (player == null || !player.IsYourPlayer) return; // AP-02: só o jogador local
@@ -54,6 +54,19 @@ namespace CameraRotationMod.Patches
 
                 // Cede ao vanilla: montado / bipé / deitado / correndo => sem passivo.
                 if (pwa.IsMountedState || pwa.IsBipodUsed || player.IsInPronePose || player.IsSprintEnabled)
+                {
+                    PassiveMountState.ClearBracing();
+                    return;
+                }
+
+                // Espelha os guards do TryMountWeapon (Player.cs:26220): o passivo só ativa onde o vanilla
+                // permitiria mount — cobre reload/interação/spawn/remove/blindfire/no-ar/metralhadora-fixa/
+                // arma-não-montável de uma vez (fix-06-01).
+                var mc = player.MovementContext;
+                if (__instance.Weapon == null || !__instance.Weapon.IsMountable
+                    || mc.IsStationaryWeaponInHands || !mc.IsGrounded || mc.BlindFire != 0
+                    || __instance.IsInReloadOperation() || __instance.IsInSpawnOperation()
+                    || __instance.IsInRemoveOperation() || __instance.IsInInteraction())
                 {
                     PassiveMountState.ClearBracing();
                     return;

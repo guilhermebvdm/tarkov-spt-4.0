@@ -211,6 +211,8 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<float> _PassiveRecoilMultiplier;
     public static ConfigEntry<float> _PassiveSwayMultiplier;
     public static ConfigEntry<bool> _PassiveStaminaSave;
+    public static ConfigEntry<float> _ActiveMountStaminaRegen;
+    public static ConfigEntry<float> _PassiveMountStaminaRegen;
     public static ConfigEntry<bool> _ShowMountIcon;
 
     // Animation Settings (Item 005)
@@ -914,6 +916,22 @@ public class Plugin : BaseUnityPlugin
             new ConfigDescription("Enquanto apoiado, pausa/reduz o drain de stamina de braço (mais fraco que o mount nativo).",
             null,
             new ConfigurationManagerAttributes { Order = 7 }));
+
+        _ActiveMountStaminaRegen = Config.Bind(
+            PassiveMountSettings,
+            "Active Mount Stamina Regen",
+            5f,
+            new ConfigDescription("Taxa de recuperação de stamina de braço no mount ATIVO (vanilla), em hipfire. Em ADS usa a taxa do passivo (recupera leve). 0 = não recupera.",
+            new AcceptableValueRange<float>(0f, 20f),
+            new ConfigurationManagerAttributes { Order = 6 }));
+
+        _PassiveMountStaminaRegen = Config.Bind(
+            PassiveMountSettings,
+            "Passive Mount Stamina Regen",
+            2.5f,
+            new ConfigDescription("Taxa de recuperação no mount PASSIVO em hipfire (e no ativo em ADS). No passivo + ADS a stamina fica parada (segura, sem recuperar). Deve ser MENOR que a do ativo.",
+            new AcceptableValueRange<float>(0f, 20f),
+            new ConfigurationManagerAttributes { Order = 5 }));
 
         _ShowMountIcon = Config.Bind(
             PassiveMountSettings,

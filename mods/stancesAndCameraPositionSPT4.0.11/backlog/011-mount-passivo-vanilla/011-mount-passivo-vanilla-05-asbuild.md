@@ -41,3 +41,4 @@
 |---|---|
 | 2026-06-21 | Build concluído via `/code-mod` — compila 0 erros; status 🟡 (aguarda validação in-game) |
 | 2026-06-21 | Code review 01 + aplicação: gate MainPlayer (AP-02) no `PassiveSwayPatch` + `try/catch` nos buffs. Recompila 0 erros. |
+| 2026-06-21 | Validado in-game (passivo ativa). Feedback: conflito de stamina → [06-fix-01](011-mount-passivo-vanilla-06-fix-01.md) (coordenador único + Perfil B + guards `TryMountWeapon`). |

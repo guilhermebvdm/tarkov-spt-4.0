@@ -1326,12 +1326,9 @@ namespace CameraRotationMod
 
                 var player = Singleton<GameWorld>.Instance.MainPlayer;
 
-                // Em ADS o vanilla do EFT toma conta — nosso tick faz no-op.
-                if (player.ProceduralWeaponAnimation?.IsAiming == true) return;
-
-                // Montado no vanilla: não drena estamina de braço — suspende o nosso tick e deixa o
-                // vanilla (regen em hipfire) assumir. (O mount passivo do novo item reavaliará isto.)
-                if (player.ProceduralWeaponAnimation?.IsMountedState == true) return;
+                // Coordenador (fix-06-01): o tick só age no modo StanceDrain. Cede a mount ativo/passivo,
+                // hold-breath, ADS e prone — elimina o cabo-de-guerra na stamina de braço.
+                if (ArmStamina.Resolve(player) != ArmStaminaMode.StanceDrain) return;
 
                 var hands = player.Physical?.HandsStamina;
                 if (hands == null) return;

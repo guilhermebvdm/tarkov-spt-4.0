@@ -177,4 +177,6 @@ Fonte: [modded/Plugin.cs](modded/Plugin.cs) (63 originais + 16 do backlog `001-s
 | Passive Recoil Multiplier | Multiplicador de Recuo (Passivo) | float | `0.7` | 0.1 a 1.0 | Multiplicador de recuo enquanto apoiado (passivo). 0.7 = 30% menos recuo. Deve ser MAIOR que o do mount ativo (vanilla) — o passivo é mais fraco. |
 | Passive Sway Multiplier | Multiplicador de Sway (Passivo) | float | `0.65` | 0.0 a 1.0 | Multiplicador de sway (respiração) enquanto apoiado. 0.65 = 35% menos sway. |
 | Passive Stamina Save | Economia de Estamina (Passivo) | bool | `true` | — | Enquanto apoiado, pausa/reduz o drain de stamina de braço (mais fraco que o mount nativo). |
+| Active Mount Stamina Regen | Recuperação de Estamina (Ativo) | float | `5.0` | 0 a 20 | Taxa de recuperação de stamina de braço no mount ATIVO (vanilla), em hipfire. Em ADS usa a taxa do passivo (recupera leve). 0 = não recupera. |
+| Passive Mount Stamina Regen | Recuperação de Estamina (Passivo) | float | `2.5` | 0 a 20 | Taxa de recuperação no mount PASSIVO em hipfire (e no ativo em ADS). No passivo + ADS a stamina fica parada (segura, sem recuperar). Deve ser MENOR que a do ativo. |
 | Show Mount Icon | Mostrar Ícone de Apoio | bool | `true` | — | Mostra o ícone direcional (esquerda/direita/baixo) no canto inferior direito quando o apoio passivo está ativo. |
