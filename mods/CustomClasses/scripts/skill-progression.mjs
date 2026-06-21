@@ -26,15 +26,17 @@ const MAX = Number(process.argv[2]) || 10;
 const TARGET = Number(process.argv[3]) || 40;
 
 // freq = eventos/raid {light=casual, normal=médio, heavy=agressivo/grinder}.
+// Eventos ancorados nos SkillActionClass compartilhados do vanilla (SkillManager.cs:1455-1485).
+// "tick" = disparo contínuo (movimento/mira) — freq alta, XP/ev minúsculo, igual às skills de movimento do EFT.
 const SKILLS = [
-  { name: 'Adrenalina',        cls: 'Fuzileiro', ev: 'abate (PMC/Scav)',                 freq: { light: 1,   normal: 4,  heavy: 10 }, basis: 'reasoned — PMC ~1-2/raid (raro), scav comum' },
-  { name: 'Fôlego de Aço',     cls: 'Caçador',   ev: 'tiro mirado c/ respiração presa',  freq: { light: 3,   normal: 8,  heavy: 20 }, basis: 'reasoned — vários tiros mirados/raid de sniper' },
-  { name: 'Mula de Carga',     cls: 'Saq/Tan',   ev: 'extrair carregando peso',          freq: { light: 0.2, normal: 0.3, heavy: 0.4 }, basis: 'grounded — só na extração; sobrevivência ~20-40%' },
-  { name: 'Mãos Rápidas',      cls: 'Saqueador', ev: 'container revistado',              freq: { light: 10,  normal: 30, heavy: 60 }, basis: 'reasoned — looter revista muito em ~30min' },
-  { name: 'Passo Fantasma',    cls: 'Fantasma',  ev: 'trecho furtivo / abate stealth',  freq: { light: 1,   normal: 3,  heavy: 6 },  basis: 'reasoned — fuzzy (difícil contar)' },
-  { name: 'Couraça',           cls: 'Tanque',    ev: 'hit absorvido (sobrevivido)',     freq: { light: 2,   normal: 8,  heavy: 20 }, basis: 'reasoned — hits levados em combate' },
-  { name: 'Médico de Combate', cls: 'Médico',    ev: 'cura realizada',                  freq: { light: 1,   normal: 3,  heavy: 6 },  basis: 'reasoned — curas/raid (depende de combate)' },
-  { name: 'Execução',          cls: 'Fantasma',  ev: 'abate com melee',                 freq: { light: 0.1, normal: 0.5, heavy: 2 }, basis: 'reasoned — abate melee é raro' },
+  { name: 'Adrenalina',        cls: 'Fuzileiro', ev: 'abate (hook de kill)',                    freq: { light: 1,   normal: 4,   heavy: 10 },  basis: 'reasoned — sem SkillAction de kill nativo; hook próprio' },
+  { name: 'Fôlego de Aço',     cls: 'Caçador',   ev: 'mira/respiração (WeaponAim/HoldBreath)',  freq: { light: 5,   normal: 15,  heavy: 40 },  basis: 'reasoned — sniper mira muito/raid' },
+  { name: 'Mula de Carga',     cls: 'Saq/Tan',   ev: 'mover/correr OVERWEIGHT (=Strength)',     freq: { light: 300, normal: 700, heavy: 1500 }, basis: 'grounded — Movement/SprintAction overweight (0.005-0.12/tick), contínuo' },
+  { name: 'Mãos Rápidas',      cls: 'Saqueador', ev: 'container (SearchAction, =Search)',       freq: { light: 10,  normal: 30,  heavy: 60 },  basis: 'grounded — SearchAction 0.33/container' },
+  { name: 'Passo Fantasma',    cls: 'Fantasma',  ev: 'mover SILENCIOSO (=CovertMovement)',      freq: { light: 200, normal: 500, heavy: 1000 }, basis: 'grounded — MovementAction com Noise<1 (0.025/tick), contínuo' },
+  { name: 'Couraça',           cls: 'Tanque',    ev: 'dano recebido (=Vitality)',              freq: { light: 3,   normal: 10,  heavy: 25 },  basis: 'reasoned — hit recebido e sobrevivido' },
+  { name: 'Médico de Combate', cls: 'Médico',    ev: 'cura realizada (HealAction)',            freq: { light: 1,   normal: 3,   heavy: 6 },   basis: 'reasoned — curas/raid' },
+  { name: 'Execução',          cls: 'Fantasma',  ev: 'golpe de melee (FistfightAction)',       freq: { light: 1,   normal: 5,   heavy: 15 },  basis: 'grounded — melee HIT (não kill) → frequente' },
 ];
 
 const currentMax = PER_LEVEL * MAX;
