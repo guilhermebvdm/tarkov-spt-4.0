@@ -49,6 +49,12 @@
 | 044 | Rodada de balance: Caçador (sniper) | Caçador **+5.47** (Sniper/AimDrills/Endurance/CovertMovement/Perception ×2). **Correção da pesquisa:** Sniper = bolt-action ≠ DMR; Caçador é bolt-action puro → DMR **não** ativada (não é intercambiável). [Registro](./044-balance-cacador/044-round.md). *(Balance — Rodada)* | [044-balance-cacador/](./044-balance-cacador/) | 🟢 |
 | 046 | Automação profile→classe (outfit/equipados/stash/dinheiro) | `scripts/extract-from-profile.mjs`: lê um profile SPT e preenche outfit + loadout.equipped + stash + dinheiro (capado) numa classe, com **merge cirúrgico** (preserva skills/skillMultipliers/balance). Cópia fiel da árvore de mods (não casa preset); munição derivada; grava repo+install (+.bak). Exemplo aplicado: profile `6a25db…85ea` → Caçador. *(Tooling)* | [scripts/extract-from-profile.mjs](../scripts/extract-from-profile.mjs) | 🟢 |
 | 045 | Rodada de balance: Saqueador (loot) | Saqueador **+5.24** (assinatura Attention/Perception ×3 — velocidade real de loot; +Strength/Endurance ×2 carga). Memory removida (skill morta no EFT 0.14.5). [Registro](./045-balance-saqueador/045-round.md). *(Balance — Rodada)* | [045-balance-saqueador/](./045-balance-saqueador/) | 🟢 |
+| 047 | Roster 11→6 (aplicar matriz) | Trocar os 11 `.jsonc` pelos 6 do redesign (Médico/Fuzileiro/Caçador/Fantasma/Saqueador/Tanque) com a matriz recalibrada (skills + skillMultipliers + loadout 🎒 + hideout 🏠). Remove as 6 aposentadas; cria fantasma/tanque; mantém Peladão. Sincroniza `SkillWeights.cs` (3 gems). Só camada 🎯. Coordena c/ editor. *(Redesign — R-W0)* | [047-roster-6-classes/](./047-roster-6-classes/) | ⚪ |
+| 048 | Infra de skill custom (padrão SE) | Base p/ as skills 🧪: revive slot `ESkillId` morto + patch lê `mgr.<skill>.Level` (sem prepatcher); gating por `skillMultipliers` + por classe (`Info.GameVersion`). *(Redesign — R-W1)* | [048-skill-custom-infra/](./048-skill-custom-infra/) | ⚪ |
+| 049 | Skills custom de classe (🧪) | Pack Mule (Saq+Tan), Adrenalina (Fuz), Fôlego de Aço (Caç), Mãos Rápidas (Saq) sobre a 048. *(Redesign — R-W2; deps: 048)* | [049-class-custom-skills/](./049-class-custom-skills/) | ⚪ |
+| 050 | Patches de signature (🔧) | Médico de Combate, Execução+Passo Fantasma, Couraça+debuffs do Tanque, patches Caçador/Fuzileiro, loot silencioso + 🌐 revelar ₽. Per-player keyed por classe. *(Redesign — R-W1; deps: 047 soft)* | [050-signature-patches/](./050-signature-patches/) | ⚪ |
+| 051 | Levers da zona stances (🔧⚠️) | Caçador (resist. braço-ADS) + Tanque (stamina arma pesada) — território do stances mod. Coordenar ou trocar o lever. *(Redesign — R-W2; deps: 050)* | [051-stances-zone-levers/](./051-stances-zone-levers/) | ⚪ |
+| 052 | Validação in-game das 6 classes | Editor web + launcher + raid (FIKA): matriz/custos, signatures 🔧/🧪 observáveis, debuffs mordem. *(Redesign — R-W3; deps: 047–051)* | [052-validacao-in-game/](./052-validacao-in-game/) | ⚪ |
 
 > **Pré-requisito de infra (000 — fora do sandbox do mod):** ✅ **feito em 2026-06-07.** [.agents/scripts/compile-mod.sh](../../../.agents/scripts/compile-mod.sh) agora detecta vários `.csproj`, classifica cada um (client/server/lib), builda os entry projects e instala **só as DLLs próprias** do mod (filtra SPTarkov/Unity/BepInEx/NuGet) nos 2 destinos (server → `SPT/user/mods/`, client → `BepInEx/plugins/`). Verificado: syntax + classificação contra SkillDistribution/Skills-Extended. Build dotnet end-to-end pendente até existirem projetos (item 001).
 
@@ -96,6 +102,19 @@ Tarefas-alvo (cliques): ver skills de outra classe **1** (hoje 2+ com perda de c
 ```
 
 Cada rodada (040–045) = `/deep-research` do papel → proposta (`skills` + `skillMultipliers` mirando ~+6, anti-furo, anti-clones) → coordenar fonte de verdade com a sessão do editor → aplicar via `build-class-jsons.js --force` + `/sync-classes` → validar (`class-balance-snapshot.mjs` + `check-skill-costs.mjs` + matriz/A×B + smoke in-game). **⚠ Peso baixo:** Gerente/Saqueador/Recon não chegam a +6 com teto ×2.0 → sub-decisão por rodada (teto de buff maior / piso documentado / skill temática de peso maior), levada ao usuário.
+
+## Épico: redesign das classes 11→6 (047–052)
+
+> Aprovado em 2026-06-20 (handoff `customclasses-class-redesign`). Reduz o roster de 11 para **6 classes de identidade forte** (Médico/Fuzileiro/Caçador/Fantasma/Saqueador/Tanque + Peladão isenta), sob a arquitetura **"tudo-é-skill-real"** (skills + skillMultipliers + skills custom no padrão SE; sem spawn-buffs efêmeros). Design consolidado em [docs/class-levers.md](../docs/class-levers.md) (+ [class-overview.md](../docs/class-overview.md) resumo, [class-skill-catalog.md](../docs/class-skill-catalog.md) fórmulas); matriz reproduzível em [scripts/class-matrix.mjs](../scripts/class-matrix.mjs) (cross-check ✅; topo ~+6 / base ~+4). **Supersede** o épico de balance 11-classes (039–045).
+
+```
+R-W0: [047]            ← config: roster 6 + matriz + SkillWeights.cs (coordenar editor). A camada 🎯 já funciona sozinha → valida cedo.
+R-W1: [048] [050]      ← infra skill custom (SE) × patches de signature 🔧 — disjuntos (050 não depende de 048)
+R-W2: [049] [051]      ← skills custom 🧪 (sobre 048) × levers zona stances (sobre 050; coordenar stances)
+R-W3: [052]            ← validação in-game (FIKA) — depende de todos
+```
+
+Camadas: 🎯 skill (matriz) · 🧪 skill custom (padrão SE) · 🔧 patch per-player (keyed na classe) · 🎒 loadout · 🏠 hideout · 🌐 global. Pontas soltas vivas ([class-levers.md](../docs/class-levers.md) §7): sync do `SkillWeights.cs` (047), levers da zona stances (051), loot instantâneo (049), bug do Círculo de Cultistas (Saqueador).
 
 ## Legenda
 
