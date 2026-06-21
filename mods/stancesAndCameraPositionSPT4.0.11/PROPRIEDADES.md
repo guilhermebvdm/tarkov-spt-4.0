@@ -168,3 +168,13 @@ Fonte: [modded/Plugin.cs](modded/Plugin.cs) (63 originais + 16 do backlog `001-s
 | Enable Expanded FOV Range | Habilitar FOV Estendido | bool | `false` | — | Permite estender o slider de FOV além da faixa padrão de 50-75 |
 | Minimum FOV | FOV Mínimo | int | `20` | 1 a 50 | Valor mínimo de FOV. O mínimo padrão do jogo é 50 |
 | Maximum FOV | FOV Máximo | int | `150` | 75 a 170 | Valor máximo de FOV. O máximo padrão do jogo é 75 |
+
+## Apoio Passivo de Arma (`Weapon Mount (Passive)`) — Item 011
+
+| Propriedade (EN) | Tradução | Tipo | Padrão | Faixa | Tooltip (pt-BR) |
+|---|---|---|---|---|---|
+| Enable Passive Mount | Habilitar Apoio Passivo | bool | `true` | — | Liga o apoio passivo: ao encostar a arma numa superfície (sem a tecla de mount) você ganha um benefício leve de estabilidade. Desligado = só o mount nativo do jogo. |
+| Passive Recoil Multiplier | Multiplicador de Recuo (Passivo) | float | `0.7` | 0.1 a 1.0 | Multiplicador de recuo enquanto apoiado (passivo). 0.7 = 30% menos recuo. Deve ser MAIOR que o do mount ativo (vanilla) — o passivo é mais fraco. |
+| Passive Sway Multiplier | Multiplicador de Sway (Passivo) | float | `0.65` | 0.0 a 1.0 | Multiplicador de sway (respiração) enquanto apoiado. 0.65 = 35% menos sway. |
+| Passive Stamina Save | Economia de Estamina (Passivo) | bool | `true` | — | Enquanto apoiado, pausa/reduz o drain de stamina de braço (mais fraco que o mount nativo). |
+| Show Mount Icon | Mostrar Ícone de Apoio | bool | `true` | — | Mostra o ícone direcional (esquerda/direita/baixo) no canto inferior direito quando o apoio passivo está ativo. |

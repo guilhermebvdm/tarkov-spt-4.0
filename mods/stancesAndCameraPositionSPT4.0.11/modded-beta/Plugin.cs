@@ -70,6 +70,7 @@ public class Plugin : BaseUnityPlugin
     private const string TacSprintSettings = "Tac Sprint Settings (Advanced)";
     private const string FOVSettings = "Field of View";
     private const string DebugSettings = "Debug (Advanced)";
+    private const string PassiveMountSettings = "Weapon Mount (Passive)";
     private const string AnimationSettings = "Animations & Transitions (Item 005)";
 
     // Positions
@@ -205,6 +206,13 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<int> _FOVMinRange;
     public static ConfigEntry<int> _FOVMaxRange;
 
+    // Weapon Mount (Passive) — Item 011
+    public static ConfigEntry<bool> _EnablePassiveMount;
+    public static ConfigEntry<float> _PassiveRecoilMultiplier;
+    public static ConfigEntry<float> _PassiveSwayMultiplier;
+    public static ConfigEntry<bool> _PassiveStaminaSave;
+    public static ConfigEntry<bool> _ShowMountIcon;
+
     // Animation Settings (Item 005)
     public static ConfigEntry<float> _CrouchSpeedMultiplier;
     public static ConfigEntry<float> _LeanSpeedMultiplier;
@@ -319,6 +327,12 @@ public class Plugin : BaseUnityPlugin
             Logger.LogWarning("[F4] SnapFireTriggerPatch NOT enabled — Player.FirearmController.SetTriggerPressed " +
                               "não foi resolvida. F1/F2/F3/F5 funcionam normalmente; snap-on-fire desabilitado este boot.");
 
+        // Item 011: Mount passivo sobre o vanilla (detecção + buffs + UI). Ativo = 100% vanilla.
+        SafeEnable("PassiveMountDetectPatch", () => new Patches.PassiveMountDetectPatch());
+        SafeEnable("PassiveRecoilPatch", () => new Patches.PassiveRecoilPatch());
+        SafeEnable("PassiveSwayPatch", () => new Patches.PassiveSwayPatch());
+        SafeEnable("BattleUIScreenPatch", () => new BattleUIScreenPatch());
+
         // Item 007: Movement & Inertia
         SafeEnable("MovementContextSpeedPatch", () => new Patches.MovementContextSpeedPatch());
         SafeEnable("MovementContextSprintSpeedPatch", () => new Patches.MovementContextSprintSpeedPatch());
@@ -349,8 +363,8 @@ public class Plugin : BaseUnityPlugin
         LoadedSprites["mountingleft.png"] = LoadEmbeddedSprite("mountingleft.png");
         LoadedSprites["mountingright.png"] = LoadEmbeddedSprite("mountingright.png");
 
-        // [mount removido] O sistema de mount (item 004) foi descartado — será reconstruído sobre o
-        // mount vanilla num novo item de backlog (ativo = vanilla; passivo = camada própria).
+        // Item 011: UI do mount passivo no GameObject PERSISTENTE do plugin (mesmo padrão do OxygenUI).
+        gameObject.AddComponent<PassiveMountUI>();
 
         // ========================================
         // MANUAL CHAMBERING
@@ -866,8 +880,48 @@ public class Plugin : BaseUnityPlugin
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { Order = 16 }));
 
-        // [mount removido] As ConfigEntries de "Weapon Mounting" (item 004) foram descartadas.
-        // O novo item de mount (passivo sobre o vanilla) definirá suas próprias configs.
+        // ========================================
+        // WEAPON MOUNT (PASSIVE) — Item 011
+        // ========================================
+        _EnablePassiveMount = Config.Bind(
+            PassiveMountSettings,
+            "Enable Passive Mount",
+            true,
+            new ConfigDescription("Liga o apoio passivo: ao encostar a arma numa superfície (sem a tecla de mount) você ganha um benefício leve de estabilidade. Desligado = só o mount nativo do jogo.",
+            null,
+            new ConfigurationManagerAttributes { Order = 10 }));
+
+        _PassiveRecoilMultiplier = Config.Bind(
+            PassiveMountSettings,
+            "Passive Recoil Multiplier",
+            0.7f,
+            new ConfigDescription("Multiplicador de recuo enquanto apoiado (passivo). 0.7 = 30% menos recuo. Deve ser MAIOR que o do mount ativo (vanilla) — o passivo é mais fraco.",
+            new AcceptableValueRange<float>(0.1f, 1f),
+            new ConfigurationManagerAttributes { Order = 9 }));
+
+        _PassiveSwayMultiplier = Config.Bind(
+            PassiveMountSettings,
+            "Passive Sway Multiplier",
+            0.65f,
+            new ConfigDescription("Multiplicador de sway (respiração) enquanto apoiado. 0.65 = 35% menos sway.",
+            new AcceptableValueRange<float>(0f, 1f),
+            new ConfigurationManagerAttributes { Order = 8 }));
+
+        _PassiveStaminaSave = Config.Bind(
+            PassiveMountSettings,
+            "Passive Stamina Save",
+            true,
+            new ConfigDescription("Enquanto apoiado, pausa/reduz o drain de stamina de braço (mais fraco que o mount nativo).",
+            null,
+            new ConfigurationManagerAttributes { Order = 7 }));
+
+        _ShowMountIcon = Config.Bind(
+            PassiveMountSettings,
+            "Show Mount Icon",
+            true,
+            new ConfigDescription("Mostra o ícone direcional (esquerda/direita/baixo) no canto inferior direito quando o apoio passivo está ativo.",
+            null,
+            new ConfigurationManagerAttributes { Order = 6 }));
 
         const string HoldBreathSection = "9. Respiração (Hold Breath)";
 

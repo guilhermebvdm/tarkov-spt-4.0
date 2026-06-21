@@ -38,17 +38,26 @@ namespace CameraRotationMod.Patches
                 // Zeramos o vanilla aqui para evitar que ele interfira (soma indesejada).
                 // Em ADS e prone-suspenso preservamos o comportamento vanilla do EFT.
                 // ref: fix-01 — StaminaMode+Intensity unificados em StaminaMultiplier.
-                float mult = StanceStaminaState.Multiplier;
-                if (System.Math.Abs(mult - 1.0f) <= 1e-5f) return; // vanilla — não interferir
-
-                if (gw.MainPlayer.ProceduralWeaponAnimation?.IsMountedState == true)
+                // Mount ativo (vanilla) ou passivo (item 011): poupar stamina de braço — INDEPENDENTE do
+                // stance multiplier. Ativo poupa mais; passivo, ~metade (PA-01-04). Passivo cede ao ativo
+                // (IsBracing é limpo quando IsMountedState).
+                var pwaSt = gw.MainPlayer.ProceduralWeaponAnimation;
+                if (pwaSt?.IsMountedState == true)
                 {
-                    __result = 5f; // Recupera 5 de estamina do braço por segundo quando montado
+                    __result = 5f; // montado (vanilla): regen forte
+                    return;
+                }
+                if (PassiveMountState.IsBracing && Plugin._PassiveStaminaSave.Value)
+                {
+                    __result = 2.5f; // passivo: regen ~metade do ativo
                     return;
                 }
 
+                float mult = StanceStaminaState.Multiplier;
+                if (System.Math.Abs(mult - 1.0f) <= 1e-5f) return; // vanilla — não interferir
+
                 if (!StanceStaminaState.IsSuspendedByProne &&
-                    gw.MainPlayer.ProceduralWeaponAnimation?.IsAiming != true)
+                    pwaSt?.IsAiming != true)
                     __result = 0f;
             }
             catch (Exception ex)
