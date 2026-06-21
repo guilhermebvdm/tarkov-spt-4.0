@@ -11,7 +11,7 @@ Visão **rápida e completa** das 6 classes: o que cada uma é, sua habilidade-a
 
 **Como ler os cards:** `×` = multiplicador de XP da skill (`>1` sobe mais rápido 🟢, `<1` atrofia 🔴) · `Lv` = nível inicial · ⚠️ = depende de coordenar com o stances mod.
 **Camadas:** 🎯 skill · 🧪 skill custom · 🔧 patch · 🎒 loadout (gear) · 🏠 hideout (inicial + −50%) · 🌐 global.
-**Configurável:** todo lever 🔧/🧪 será exposto no **F12** (ajuste em runtime/restart); a matriz 🎯 (skills/mults) no editor web (restart). Tabela de parâmetros em [class-levers.md §6.4](./class-levers.md).
+**Configurável:** todo lever 🔧/🧪 será exposto no **F12** (ajuste em runtime/restart); a matriz 🎯 (skills/mults) no editor web (perfil novo/restart). Tabela de parâmetros em [class-levers.md §6.4](./class-levers.md).
 
 ---
 

@@ -20,7 +20,7 @@ Substituir as 11 classes antigas pelas **6 do redesign** (Médico/Fuzileiro/Caç
 
 **(b) Loadout 🎒 (gear) + hideout 🏠 por classe** ([class-levers.md](../../docs/class-levers.md) §5):
 - hideout: 1 estação inicial + 1 estação −50%.
-- gear (`equipped` + `stash`): as 4 mantidas já têm; **as 2 novas (fantasma/tanque) precisam de gear autorado** — usar `extract-from-profile.mjs` (item 046) a partir de um profile de referência, com merge cirúrgico (preserva skills/mults).
+- gear (`equipped` + `stash`): as 4 mantidas já têm; **as 2 novas (fantasma/tanque) precisam de gear autorado** — usar `extract-from-profile.mjs` (item 046) a partir de um profile de referência, com merge cirúrgico (preserva skills/mults). **O `/create-spec 047` escolhe/nomeia o profile-fonte de cada classe nova** (ou decide autorar o gear à mão).
 
 **(c) Sub-tarefa — sync `SkillWeights.cs`** (ponta solta #5; mudança C# **separada** da matriz, só afeta o warning de custo do editor): adicionar Categories `ShadowConnections→P`, `UsecArsystems→C`, `BearAksystems→C` (já no `skill-weights.mjs`).
 

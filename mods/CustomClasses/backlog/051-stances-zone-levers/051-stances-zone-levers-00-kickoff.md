@@ -16,6 +16,7 @@ Os 2 levers que tocam **stamina de braço/mãos** — território do stances mod
 
 - Multiplicar nessa zona seria **zerado** pelo stances. Decidir entre: **(a)** coordenar via estado compartilhado (mesmo repo — `mods/stancesAndCameraPositionSPT4.0.11`) ou **(b)** trocar o lever por equivalente fora da zona (ex.: BuffType `HandsTremor` / stamina de perna).
 - **Levar a decisão ao usuário antes de codar** (é escolha de design + coordenação entre mods).
+- ⚠️ **Se a tendência for (b)**, antecipar a decisão para **antes de specar o 050** — um lever fora da zona vira patch comum, que pertence ao 050 (R-W1); decidir tarde gera retrabalho de mover o lever entre itens.
 
 ## Refs
 

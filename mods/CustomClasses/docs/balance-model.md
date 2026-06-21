@@ -32,7 +32,7 @@ valor(skill)   = (fator − 1) × peso_da_skill      # buff > 0, debuff < 0
 netMult(classe) = Σ valor                          # poder líquido de progressão
 ```
 
-**Meta (decisão do usuário, 2026-06-13):** `netMult ≈ +6` para **todas** as classes — o **Médico de Combate (+6.17) é o padrão**, construído corretamente e **intacto**. Todas as classes são "edições especiais" igualmente **fortes**; a diferença entre elas vem de **QUAIS skills cada uma acelera** (a identidade do arquétipo), **não** do tamanho do net. Faixa de trabalho **~+5 a +6.5**. *(Substitui a meta anterior de +2.0 ±0.5 / net≈0 — o objetivo deixou de ser achatar e passou a ser **elevar todas ao nível do Médico** mantendo identidades distintas.)*
+**Meta (decisão do usuário, 2026-06-13):** ⚠️ *revisado no redesign 11→6 — ver nota do topo: topo ~+6 / base ~+4. O texto abaixo é o da fase 11-classes.* `netMult ≈ +6` para **todas** as classes — o **Médico de Combate (+6.17) é o padrão**, construído corretamente e **intacto**. Todas as classes são "edições especiais" igualmente **fortes**; a diferença entre elas vem de **QUAIS skills cada uma acelera** (a identidade do arquétipo), **não** do tamanho do net. Faixa de trabalho **~+5 a +6.5**. *(Substitui a meta anterior de +2.0 ±0.5 / net≈0 — o objetivo deixou de ser achatar e passou a ser **elevar todas ao nível do Médico** mantendo identidades distintas.)*
 
 Regras de composição:
 - **Skill-assinatura:** 1–2 skills no foco da classe, fator alto.
