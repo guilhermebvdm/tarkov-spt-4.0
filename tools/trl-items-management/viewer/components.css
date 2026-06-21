@@ -1353,9 +1353,12 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
 /* Full-width section: flow the trader rows into responsive columns so they fill the
  * band instead of leaving a big empty area, and each row is a snug "name … value" pair
  * (no oversized empty edit cells). break-inside keeps a row within one column. */
-.detail-section--full .trader-edit-table { max-width: none; display: block; column-width: 400px; column-gap: var(--space-10); }
-.detail-section--full .trader-edit-table tbody { display: block; }
-.detail-section--full .trader-edit-table tr { display: flex; align-items: center; gap: var(--space-4); break-inside: avoid; padding: 3px 0; }
+/* Real CSS grid (NOT multicolumn — multicol breaks absolute-positioned popovers and
+ * balances columns unevenly, which looked off). tbody display:contents promotes the
+ * <tr> rows to grid items; each row is a flex name/value pair. */
+.detail-section--full .trader-edit-table { max-width: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(390px, 1fr)); column-gap: var(--space-10); row-gap: 1px; }
+.detail-section--full .trader-edit-table tbody { display: contents; }
+.detail-section--full .trader-edit-table tr { display: flex; align-items: center; gap: var(--space-4); padding: 4px 0; min-width: 0; }
 .detail-section--full .trader-edit-table td.k { flex: 0 0 auto; width: auto; }
 .detail-section--full .trader-edit-table td.v.trader-edit-cell { flex: 1 1 auto; min-width: 0; justify-content: flex-end; }
 .trader-edit-table td.v.trader-edit-cell {
@@ -1420,7 +1423,7 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
 .trader-edit-cell.is-editing > * { visibility: hidden; }
 .trader-edit-cell.is-editing > .trader-edit-form { visibility: visible; }
 .trader-edit-form {
-  position: absolute; top: -2px; left: 0; z-index: 2;
+  position: absolute; top: -2px; right: 0; z-index: 3;
   display: flex; flex-direction: column; align-items: stretch; gap: 3px;
   width: 200px; height: auto;
   background: var(--bg-input); padding: 3px;
