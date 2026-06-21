@@ -53,7 +53,7 @@
         "mods": []
       },
       "ArmBand": {
-        "tpl": "6761b213607f9a6f79017af3",
+        "tpl": "5b3f15d486f77432d0509248",
         "mods": []
       },
       "FaceCover": {
@@ -382,21 +382,15 @@
       },
       {
         "tpl": "5bfea7ad0db834001c38f1ee",
-        "mods": [],
-        "loadedMag": true,
-        "ammo": "5e023e6e34d52a55c3304f71"
+        "mods": []
       },
       {
         "tpl": "5bfea7ad0db834001c38f1ee",
-        "mods": [],
-        "loadedMag": true,
-        "ammo": "5e023e6e34d52a55c3304f71"
+        "mods": []
       },
       {
         "tpl": "5bfea7ad0db834001c38f1ee",
-        "mods": [],
-        "loadedMag": true,
-        "ammo": "5e023e6e34d52a55c3304f71"
+        "mods": []
       },
       {
         "tpl": "5e023e6e34d52a55c3304f71",
@@ -445,9 +439,7 @@
       },
       {
         "tpl": "5de653abf76fdc1ce94a5a2a",
-        "mods": [],
-        "loadedMag": true,
-        "ammo": "59e6658b86f77411d949b250"
+        "mods": []
       },
       {
         "tpl": "59e6658b86f77411d949b250",
@@ -496,9 +488,7 @@
       },
       {
         "tpl": "5de653abf76fdc1ce94a5a2a",
-        "mods": [],
-        "loadedMag": true,
-        "ammo": "59e6658b86f77411d949b250"
+        "mods": []
       },
       {
         "tpl": "5de652c31b7e3716273428be",
@@ -543,9 +533,7 @@
       },
       {
         "tpl": "5de653abf76fdc1ce94a5a2a",
-        "mods": [],
-        "loadedMag": true,
-        "ammo": "59e6658b86f77411d949b250"
+        "mods": []
       },
       {
         "tpl": "5448bd6b4bdc2dfc2f8b4569",
@@ -624,21 +612,15 @@
       },
       {
         "tpl": "5448c12b4bdc2d02308b456f",
-        "mods": [],
-        "loadedMag": true,
-        "ammo": "57371b192459775a9f58a5e0"
+        "mods": []
       },
       {
         "tpl": "5448c12b4bdc2d02308b456f",
-        "mods": [],
-        "loadedMag": true,
-        "ammo": "57371b192459775a9f58a5e0"
+        "mods": []
       },
       {
         "tpl": "5448c12b4bdc2d02308b456f",
-        "mods": [],
-        "loadedMag": true,
-        "ammo": "57371b192459775a9f58a5e0"
+        "mods": []
       },
       {
         "tpl": "57371b192459775a9f58a5e0",
@@ -646,9 +628,7 @@
       },
       {
         "tpl": "5cadc2e0ae9215051e1c21e7",
-        "mods": [],
-        "loadedMag": true,
-        "ammo": "56d59d3ad2720bdb418b4577"
+        "mods": []
       },
       {
         "tpl": "56d59d3ad2720bdb418b4577",
