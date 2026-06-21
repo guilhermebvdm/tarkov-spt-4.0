@@ -17,15 +17,20 @@ namespace TRLTraderPrices;
 ///     NATIVE currency and applied DIRECTLY (no RUB conversion). The currency field identifies which money
 ///     tpl the count is denominated in, so a mismatched-currency assort entry is skipped instead of corrupted.
 ///
-///     Runs LAST (after RagfairCallbacks / PostSptModLoader) so it mutates the live
-///     <see cref="DatabaseService.GetTraders"/> dictionary after every other loader. The served assort is
-///     cloned from this live object per request (TraderAssortHelper), so the change is visible to clients
-///     with no pristine snapshot fighting it.
+///     Timing: runs at RagfairCallbacks - 1, i.e. AFTER trader-assort injection (mods @ PostDBModLoader
+///     400000, custom traders @ TraderRegistration 500000) and AFTER TraderController.Load @ TraderCallbacks
+///     800000 (so the global traderPriceMultiplier is applied before our override) — but BEFORE
+///     RagfairCallbacks 1000000. This is critical: RagfairOfferGenerator.GenerateFleaOffersForTrader clones
+///     the LIVE trader.Assort at generation time (RagfairOfferGenerator.cs:532), so the flea-market trader
+///     offers only reflect our override if we mutate the assort BEFORE ragfair generates them. (Running at
+///     PostSptModLoader+1 = 1100001, after ragfair, left the flea showing base prices while the direct
+///     trader buy showed the override — the bug this fixes.) The served assort is the live
+///     <see cref="DatabaseService.GetTraders"/> object, cloned per request, so direct buy reflects it too.
 ///
 ///     Skips: Fence (dynamic assort), barter (non-money first tier) offers, unknown traders/tpls, mixed-
 ///     requirement first tiers, and entries whose currency does not match the override's currency.
 /// </summary>
-[Injectable(TypePriority = OnLoadOrder.PostSptModLoader + 1)]
+[Injectable(TypePriority = OnLoadOrder.RagfairCallbacks - 1)]
 public class TRLTraderPricesMod(
     DatabaseService databaseService,
     PaymentHelper paymentHelper,
