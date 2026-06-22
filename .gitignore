@@ -49,6 +49,7 @@ desktop.ini
 # Claude Code (gitignored — preferências pessoais)
 .claude/settings.local.json
 .tmp-research.md
+.qa-shots
 
 # Local API caches (third-party data, refetchable)
 mods/RZCustomProfiles/scripts/cache/
