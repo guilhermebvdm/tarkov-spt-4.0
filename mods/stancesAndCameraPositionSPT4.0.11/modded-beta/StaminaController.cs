@@ -52,9 +52,11 @@ namespace CameraRotationMod
 
                 Player p = Singleton<GameWorld>.Instance?.MainPlayer;
                 if (p == null) { SetScenario(StaminaScenario.Inactive); ControllingHands = false; return; }   // CR-01-01
+                // Arma montada do cenário (stationary) também é controlada (item 013).
+                bool stationary = p.MovementContext != null && p.MovementContext.IsStationaryWeaponInHands;   // ref: MovementContext.cs:1446
                 GClass774 hands = p.Physical?.HandsStamina;   // ref: BasePhysicalClass.cs:355
-                // Sem arma de fogo em mãos → cede ao vanilla (spec 01: corner case mãos vazias).
-                if (hands == null || !(p.HandsController is Player.FirearmController))
+                // Sem arma de fogo em mãos (e fora de stationary) → cede ao vanilla (spec 01: corner case mãos vazias).
+                if (hands == null || (!stationary && !(p.HandsController is Player.FirearmController)))
                 {
                     SetScenario(StaminaScenario.Inactive);
                     ControllingHands = false;
@@ -92,6 +94,9 @@ namespace CameraRotationMod
         private static StaminaScenario Resolve(Player p)
         {
             if (p == null) return StaminaScenario.Inactive;   // CR-01-01: defesa em camadas
+            // Arma montada do cenário (stationary) = Mount Active (item 013). Sem ADS/stance reais (bloqueio nativo).
+            if (p.MovementContext != null && p.MovementContext.IsStationaryWeaponInHands)
+                return StaminaScenario.ActiveStance0;
             EFT.Animations.ProceduralWeaponAnimation pwa = p.ProceduralWeaponAnimation;
             bool ads = pwa != null && pwa.IsAiming;
             bool hb = p.Physical != null && p.Physical.HoldingBreath;   // ref: PlayerPhysicalClass.HoldingBreath

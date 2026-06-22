@@ -154,7 +154,8 @@ namespace CameraRotationMod
             bool isNativeMounting = false;
             bool isAiming = false;
             bool isInProne = false;
-            
+            bool isStationary = false;
+
             if (gameWorld?.MainPlayer != null)
             {
                 var pwa = gameWorld.MainPlayer.ProceduralWeaponAnimation;
@@ -164,18 +165,20 @@ namespace CameraRotationMod
                     isAiming = pwa.IsAiming;
                 }
                 isInProne = gameWorld.MainPlayer.IsInPronePose;
+                var mc = gameWorld.MainPlayer.MovementContext;
+                isStationary = mc != null && mc.IsStationaryWeaponInHands;   // item 013: arma montada do cenário
             }
 
             _wasAimingGlobal = isAiming;
 
             bool isSprinting = gameWorld?.MainPlayer?.IsSprintEnabled == true;
 
-            if (isNativeMounting || isInProne)
+            if (isNativeMounting || isInProne || isStationary)
             {
-                // Se deitou ou está apoiado, quebra a Action Stance e trava controles
+                // Se deitou, apoiou (bipé) ou entrou em arma montada, quebra a Action Stance e trava controles
                 if (_isActionStanceActive) EndActionStance(forceCancel: true);
-                
-                // Forçar para Default caso seja montagem ou deitado (evita bugar se estivesse numa stance e montou/deitou do nada)
+
+                // Forçar Stance 0 (item 013: inclui arma montada do cenário — evita desalinhamento visual)
                 if (CurrentStance != Stance.Default)
                 {
                     SetStance(Stance.Default);
@@ -197,6 +200,7 @@ namespace CameraRotationMod
                         {
                             _preSprintStance = CurrentStance;
                             SetStance(Stance.Default);
+                            Patches.ApplyComplexRotationPatch.SnapToNeutral();   // item 013: pula o spring 1→0 (sem flash da Stance 0)
                         }
                         else
                         {
