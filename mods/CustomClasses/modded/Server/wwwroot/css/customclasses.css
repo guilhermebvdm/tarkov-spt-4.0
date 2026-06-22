@@ -281,6 +281,11 @@
 .cc-skill-name { cursor: help; border-bottom: 1px dotted rgba(255,255,255,.3); }
 .cc-skill-tip  { max-width: 300px; font-size: 12px; line-height: 1.45; text-align: left; }
 .cc-skill-tip b { color: #fff; font-weight: 700; }
+/* Linha de números reais (efeito no L50/elite) — separada da descrição qualitativa. */
+.cc-skill-tip__fx   { display: block; margin-top: 5px; padding-top: 4px;
+                      border-top: 1px solid rgba(255,255,255,.12);
+                      color: rgba(255,255,255,.6); font-size: 11px; line-height: 1.4; }
+.cc-skill-tip__fx b { color: #9ecbff; font-weight: 700; }
 /* Multiplicador editável in-row: chip clicável + popup com slider de 5%. */
 .cc-mult-chip       { display: inline-block; min-width: 34px; text-align: center; padding: 0 6px;
                       border-radius: 10px; font-size: 11px; font-weight: 600; cursor: pointer; line-height: 18px; }

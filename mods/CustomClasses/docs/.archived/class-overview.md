@@ -1,11 +1,13 @@
 # Resumo das classes — visão de uma página
 
 > **Data:** 2026-06-20<br>
-> **Status:** 🟢 Vivo<br>
+> **Status:** ⚫ Arquivado<br>
 > **Responsáveis:** Guilherme<br>
-> **Referências:** [class-levers.md](./class-levers.md)<br>
+> **Referências:** [class-design.md](../class-design.md)<br>
 
 ---
+
+> ⚫ **Arquivado (2026-06-21).** Superado pelo redesign "tudo é perk" + consolidação num doc único. Conteúdo vivo (perks/drawbacks + matriz + loadout/hideout) em **[class-design.md](../class-design.md)**. Mantido como histórico (estrutura antiga: 8 skills 🧪, nomes PT).
 
 Visão **rápida e completa** das 6 classes: o que cada uma é, sua habilidade-assinatura e tudo que será implementado por camada. Para os números e a engenharia, ver [class-levers.md](./class-levers.md) (matriz, decisões, patches) e [`class-matrix.mjs`](../scripts/class-matrix.mjs) (reproduzível).
 
@@ -72,7 +74,7 @@ Visão **rápida e completa** das 6 classes: o que cada uma é, sua habilidade-a
 
 - **🟢 Sobe rápido** — **Lockpicking** ×3 `Lv8` · **Strength** ×3 `Lv7` · **ShadowConnections** ×2.5 `Lv6` · Attention ×1.3 `Lv8` · Perception ×1.3 `Lv5` · Search ×1.3 `Lv6` · HideoutManagement ×1.2 · Intellect ×1.2 · Charisma ×1.2
 - **🔴 Atrofia** — Assault ×0.6 · AimDrills ×0.7 · StressResistance ×0.7
-- **🔧 Extra** — loot silencioso · **🌐 revelar valor ₽** (global — todos veem)
+- **🔧 Extra** — loot silencioso
 - **🎒 Loadout** contêiner seguro de 6 slots  ·  **🏠 Hideout** Scav Case (inicial + −50%)
 
 ## 🛡️ Tanque — *Tank* · Resistência
@@ -93,3 +95,4 @@ Visão **rápida e completa** das 6 classes: o que cada uma é, sua habilidade-a
 | 2026-06-20 | Guilherme | Criação. One-pager de resumo das 6 classes (tabela de comparação + card por classe com todas as camadas), derivado de [class-levers.md](./class-levers.md). |
 | 2026-06-20 | Guilherme | Sincronizado com a recalibração da Fase 4 (gems por categoria, SMG/AttachedLauncher inertes removidos, custos aparados). Nets: topo +6.12–6.27 · base +4.09–4.28. |
 | 2026-06-20 | Guilherme | Revisão pós-Fase 4: glossário 🎒/🏠 (gear vs hideout), nota de configurabilidade (F12 + editor web), Médico esclarecido (cirurgia/restauração de membro destruído ×0.5). |
+| 2026-06-21 | Guilherme | ⚫ Arquivado. Superado pelo redesign "tudo é perk" e pela consolidação num doc único. Substituído por [class-design.md](../class-design.md). |

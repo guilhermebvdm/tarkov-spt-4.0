@@ -1,5 +1,7 @@
 # 049 — Skills custom de classe (🧪) · Kickoff
 
+> ⚫ **FUNDIDO no 050 em 2026-06-21.** Decisão: todas as signatures viram **perks flat** (Adrenaline, Iron Lungs, Bulwark, Execution + os head-start) — ver [class-custom-perks.md](../../docs/class-custom-perks.md). Não há mais skill custom que escala. Conteúdo abaixo mantido como histórico.
+
 **Mod:** CustomClasses · **Data:** 2026-06-20 · **Origem:** redesign 11→6, Fase 5 ([class-levers.md](../../docs/class-levers.md) §5)
 **Wave:** R-W2 · **Deps:** 048
 

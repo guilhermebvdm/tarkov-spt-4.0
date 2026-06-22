@@ -1,16 +1,16 @@
 {
-  // Item 047 — Fantasma (Ghost). Matriz: class-matrix.mjs / class-levers.md §4.
+  // Item 047/054 — Furtivo (Stealth). Matriz: class-matrix.mjs / class-design.md.
   // Gear/outfit = PLACEHOLDER clonado do antigo operadorFurtivo (PA-01-04); curar depois.
   // iconFile reusa o PNG do furtivo (placeholder de identidade visual — fora do escopo do 047).
-  "name": "Ghost",
+  "name": "Stealth",
   "displayName": {
-    "en": "Ghost",
-    "pt": "Fantasma"
+    "en": "Stealth",
+    "pt": "Furtivo"
   },
   "baseEdition": "SPT Zero to hero",
   "description": {
-    "en": "Ghost. Furtive killer — moves unheard, strikes from the dark. Devastating melee execution and a suppressed sidearm.",
-    "pt": "Fantasma. Assassino furtivo — move-se sem ser ouvido e ataca do escuro. Execução melee devastadora e pistola silenciada."
+    "en": "Stealth. Furtive killer — moves unheard, strikes from the dark. Devastating melee execution and a suppressed sidearm.",
+    "pt": "Furtivo. Assassino furtivo — move-se sem ser ouvido e ataca do escuro. Execução melee devastadora e pistola silenciada."
   },
   "iconFile": "operadorFurtivo.png",
   "nameColor": "#8b8fa3",

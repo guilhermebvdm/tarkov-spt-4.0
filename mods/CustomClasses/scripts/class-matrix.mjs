@@ -76,8 +76,8 @@ export const MATRIX = {
       { s: 'Assault', m: 0.6 },
     ],
   },
-  fantasma: {
-    emoji: '👻', pt: 'Fantasma', en: 'Ghost', file: 'fantasma.jsonc',
+  furtivo: {
+    emoji: '👻', pt: 'Furtivo', en: 'Stealth', file: 'furtivo.jsonc',
     entries: [
       { s: 'SilentOps', m: 2.5, l: 6 }, { s: 'CovertMovement', m: 1.5, l: 6 },
       { s: 'Perception', m: 1.5, l: 5 }, { s: 'Pistol', m: 1.8, l: 2 }, { s: 'Melee', m: 1.5, l: 3 },
@@ -86,7 +86,7 @@ export const MATRIX = {
     ],
   },
   saqueador: {
-    emoji: '🎒', pt: 'Saqueador', en: 'Looter', file: 'saqueador.jsonc',
+    emoji: '🎒', pt: 'Saqueador', en: 'Scavenger', file: 'saqueador.jsonc',
     entries: [
       { s: 'Lockpicking', m: 3, l: 8 }, { s: 'ShadowConnections', m: 2.5, l: 6 }, { s: 'Strength', m: 3, l: 7 },
       { s: 'Attention', m: 1.3, l: 8 }, { s: 'Perception', m: 1.3, l: 5 }, { s: 'Search', m: 1.3, l: 6 },
@@ -110,7 +110,7 @@ export const MATRIX = {
 // SMG/AttachedLauncher). Cross-check da transcrição contra estes valores.
 const APPROVED = {
   medico: { cost: 31.87, net: 6.12 }, fuzileiro: { cost: 30.51, net: 6.27 }, cacador: { cost: 31.4, net: 6.21 },
-  fantasma: { cost: 30.14, net: 6.12 }, saqueador: { cost: 28.23, net: 4.09 }, tanque: { cost: 30.29, net: 4.28 },
+  furtivo: { cost: 30.14, net: 6.12 }, saqueador: { cost: 28.23, net: 4.09 }, tanque: { cost: 30.29, net: 4.28 },
 };
 
 // ── Cálculo ────────────────────────────────────────────────────────────────────

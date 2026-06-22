@@ -1,11 +1,13 @@
 # Design das classes — redesign 6 classes (skills + signatures)
 
 > **Data:** 2026-06-20<br>
-> **Status:** 🟢 Vivo<br>
+> **Status:** ⚫ Arquivado<br>
 > **Responsáveis:** mdj, Guilherme<br>
-> **Referências:** [class-skill-catalog.md](./class-skill-catalog.md), [balance-model.md](./balance-model.md), [class-archetypes.md](./class-archetypes.md)<br>
+> **Referências:** [class-design.md](../class-design.md)<br>
 
 ---
+
+> ⚫ **Arquivado (2026-06-21).** Superado pelo redesign "tudo é perk" + consolidação num doc único. O **load-bearing** foi migrado para **[class-design.md](../class-design.md)**: matriz 🎯 (§4 → também em [`class-matrix.mjs`](../../scripts/class-matrix.mjs)), loadout 🎒 / hideout 🏠 (§5), pontas soltas (§7). As camadas 🧪 "skill custom" e a §5.1 estão **obsoletas** (viraram perks flat). Mantido como histórico do raciocínio.
 
 Documento **consolidado** do redesign de **11→6 classes**. É a fonte de verdade do *design de papel + números* das classes: roster, arquitetura, a **matriz calibrada** (aprovada) e as **camadas** (skills, skills custom, patches, loadout, hideout) de cada classe.
 
@@ -22,7 +24,7 @@ Cada classe é definida por camadas, marcadas por emoji ao longo do doc:
 | 🔧 | **patch per-player** | Harmony keyed na classe (`Info.GameVersion`), para o que skill não cobre (velocidade, ADS, cura instantânea, dano recebido). Flat **ou** escalando com uma skill existente lida no patch. |
 | 🎒 | **loadout** | gear inicial: `loadout.equipped` (arma/armadura/colete) + `loadout.stash`. |
 | 🏠 | **hideout** | estações de `hideout`: 1 pré-construída (inicial) + 1 com `−50%` de tempo. |
-| 🌐 | **global** | afeta **todos** os players (ex.: revelar valor ₽). **NÃO** é lever de classe. |
+| 🌐 | **global** | afeta **todos** os players. **NÃO** é lever de classe. *(nenhum em uso no roster atual.)* |
 
 ---
 
@@ -114,7 +116,7 @@ Cada classe é definida por camadas, marcadas por emoji ao longo do doc:
 - **🔫 Fuzileiro** — 🧪 **Adrenalina** (pós-abate: −recuo/−recarga/−ADS por `3s + 0.5s/nv`) · 🔧 resist. supressão (aim-punch ×0.5) · 🔧 antitravamento (malfunction ×0.5, fix ×2) · 🏠 Workbench (inicial + −50%)
 - **🎯 Caçador** — 🧪 **Fôlego de Aço** (`×(1+0.1·nv) ≤ ×3`, −sway) · 🔧 saque de pistola ×0.5 · 🔧 ADS por arma (sniper/DMR ×0.85, AR ×1.15) · ⚠️ 🔧 resist. de braço em ADS (zona stances, §6.2) · 🏠 Shooting Range (inicial) + Intelligence Center (−50%)
 - **👻 Fantasma** — 🧪 **Execução** (melee ×20 + velocidade c/ melee na mão — §5.1) · 🧪 Passo Fantasma (ruído `×(1−0.5·nv/max)`, até −50%, **NÃO** silêncio total — §5.1) · 🏠 Lavatory (inicial + −50%)
-- **🎒 Saqueador** — 🧪 **Mãos Rápidas** (busca/loot mais rápido — 🟡 verificar se loot instantâneo já é vanilla, §7) · 🧪 **Pack Mule** (peso `×(1−[0.10→0.50])`) · 🔧 loot silencioso · 🌐 revelar valor ₽ (global, todos veem — não é lever de classe) · 🎒 contêiner seguro 6 slots (gear) · 🏠 Scav Case (inicial + −50%)
+- **🎒 Saqueador** — 🧪 **Mãos Rápidas** (busca/loot mais rápido — 🟡 verificar se loot instantâneo já é vanilla, §7) · 🧪 **Pack Mule** (peso `×(1−[0.10→0.50])`) · 🔧 loot silencioso · 🎒 contêiner seguro 6 slots (gear) · 🏠 Scav Case (inicial + −50%)
 - **🛡️ Tanque** — 🔧 **Couraça** (dano recebido `×(1−[0.05→0.25])`) · 🧪 **Pack Mule** (compartilhada c/ Saqueador) · 🔧 GL mastery via patch (o slot `AttachedLauncher` é inerte no globals — §7) · 🔧 GL sem penalidade de ergo · ⚠️ 🔧 stamina segurando arma pesada ×0 (zona stances, §6.2) · 🔧 velocidade ×0.9 (debuff) · 🔧 −comida/bebida ×0.7 (debuff imediato = patch, não skill) · 🎒 placas laterais (gear) · 🏠 Rest Station (inicial) + Kitchen (−50%)
 
 ---
@@ -193,7 +195,6 @@ Dois canais, **nenhum número hardcoded**:
 | 🎒 Saqueador | Mãos Rápidas | 🧪 | search/loot speed ×`TBD` | F12 |
 | 🎒🛡️ Saq+Tan | Pack Mule | 🧪 | peso `×(1−[0.10→0.50])` | F12 |
 | 🎒 Saqueador | Loot silencioso | 🔧 | volume ×`TBD` | F12 |
-| 🎒 Saqueador | Revelar ₽ | 🌐 | toggle on/off (**global**) | F12 |
 | 🛡️ Tanque | Couraça | 🔧 | dano recebido `×(1−[0.05→0.25])` | F12 |
 | 🛡️ Tanque | GL mastery | 🔧 | ergo/penalidade ×`TBD` | F12 |
 | 🛡️ Tanque | Stamina arma pesada ⚠️ | 🔧 | ×0 (zona stances, §6.2) | F12 |
@@ -245,3 +246,4 @@ Dois canais, **nenhum número hardcoded**:
 | 2026-06-20 | Guilherme | **Net-check final (Fase 4).** Pesos das gems derivados por categoria (`skill-weights.mjs`); confirmado no `globals.json` que SMG/AttachedLauncher são inertes (`[]`) → removidos da matriz (Fantasma→Pistol ×1.8, Caçador dropa SMG, Tanque GL vira 🔧, Melee ×1.5). Custos aparados p/ [28,32]. Matriz recalibrada: topo +6.12/+6.27/+6.21/+6.12 · base +4.09/+4.28 (cross-check ✅, sem flags). Delta do `SkillWeights.cs` flagado p/ coordenação. |
 | 2026-06-20 | Guilherme | **Revisão pós-Fase 4 (g-review-content).** Decisão #8 (tudo configurável: F12 client + server c/ nota de restart) + §6.4 tabela de parâmetros tunáveis. Glossário 🎒/🏠 corrigido (gear vs estação de hideout). Médico: "membro quebrado" esclarecido → cirurgia/restauração de membro destruído ×0.5 (distinto da cura de HP ×0.3). Gear das classes novas (Fantasma/Tanque) marcado pendente do 047. Ressalva peso-baixo citada no Saqueador; dono do bug do Círculo de Cultistas → 047. |
 | 2026-06-21 | Guilherme | **§5.1 nova — skills custom (categoria "Ability", 1ª na tela).** Tabela de progressão ancorada no decompile 0.16.x (`Level=Current/100`, máx **10**) + eventos nos `SkillActionClass` do vanilla (Mula=overweight movement/Strength, Mãos Rápidas=Search, Passo Fantasma=CovertMovement, Execução=FistfightAction). Modelo `scripts/skill-progression.mjs`. Decisão "sempre skill" → 8 custom skills (Médico/Execução/Passo Fantasma/Couraça migram de 🔧 flat → skill). Execução ganha 2º efeito: +velocidade andando/correndo com a melee na mão. |
+| 2026-06-21 | Guilherme | ⚫ Arquivado. Redesign "tudo é perk" tornou a §5.1 obsoleta; consolidação num doc único. Load-bearing (matriz/loadout/hideout/pontas soltas) migrado. Substituído por [class-design.md](../class-design.md). |
