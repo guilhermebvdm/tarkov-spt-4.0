@@ -126,6 +126,37 @@ no jogo.**
 
 ---
 
+## Atualizar pra uma nova versão (1 comando)
+
+A partir da **v1.1.0** o release é **um bundle único** (`trl-release-vX.Y.Z.zip`) que junta viewer + DLL do
+mod + um updater. Atualizar a VM = *copiar 1 arquivo → rodar 1 comando*.
+
+**No dev box** — gerar o bundle (a versão é lida do `<Version>` do csproj do mod):
+```bash
+bash tools/trl-items-management/scripts/package-release.sh D:/SPT/_vm-deploy
+# → D:/SPT/_vm-deploy/trl-release-v<versão>.zip  (viewer SEM items.json + DLL + update-vm.ps1)
+```
+
+**Na VM** — copie o zip (AnyDesk), extraia e rode o updater de dentro da pasta extraída:
+```powershell
+Expand-Archive "D:\_deploy\trl-release-v1.1.0.zip" "D:\_deploy" -Force
+cd "D:\_deploy\trl-release-v1.1.0"
+powershell -ExecutionPolicy Bypass -File .\update-vm.ps1
+```
+O `update-vm.ps1` faz tudo, **idempotente e sem rede**: para SPT+viewer → atualiza o viewer (preserva
+`.env`, `logs\`) → instala a DLL (preserva `config\overrides.json`) → regenera o `items.json` (via
+`load-spt`+`normalize`, usando o cache de preços) → sobe viewer+SPT → imprime as versões aplicadas.
+- Caminhos diferentes? passe `-SptPath`, `-ToolDir`, `-NodeExe`, `-Port`. Ver `Get-Help .\update-vm.ps1 -Full` (cabeçalho do arquivo).
+- 1ª vez sem cache de preços (ou pra repuxar tarkov.dev/market): adicione **`-Fetch`** (precisa internet + `.env`).
+- Só atualizar sem subir o jogo: **`-NoStartGame`**.
+
+> **Dica (auto-start):** como o viewer roda manual hoje, ele não volta sozinho após reboot da VM. Pra isso,
+> registre-o uma vez como tarefa agendada (snippet em "Alternativa sem NSSM" abaixo) com o nome
+> **`TRLItemsManagement`** — o `update-vm.ps1` detecta a tarefa e usa `Stop/Start-ScheduledTask` no lugar de
+> matar/subir o node na mão.
+
+---
+
 ## Workflow operacional
 
 - **Começa do zero:** o ragfair do server oficial tem só o que ele já tinha; edições feitas em outra

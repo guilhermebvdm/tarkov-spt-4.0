@@ -72,3 +72,7 @@ references/fika-headless/
 # Graphify working outputs — per-scope scratch; the VERSIONED graphs live in
 # references/graphs/ (published by scripts/update-graphs.sh)
 graphify-out/
+
+# Release bundles produced by tools/trl-items-management/scripts/package-release.sh
+# (default OUTDIR). Build artifacts — never committed.
+/dist/
