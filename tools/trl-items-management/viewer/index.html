@@ -15,7 +15,7 @@
 <div class="app">
 
 <header class="topbar">
-  <span class="brand">TRL Items Management</span><span class="app-version" title="Version">v1.0.0</span>
+  <span class="brand">TRL Items Management</span><span class="app-version" title="Version">v1.1.0</span>
 
   <div class="topbar-controls">
     <div class="search">
@@ -27,26 +27,35 @@
       </button>
     </div>
 
-    <div id="group-filter"></div>
-    <div id="condition-filter"></div>
-    <div id="ban-filter"></div>
-    <div id="override-filter"></div>
-    <div id="trader-override-filter"></div>
-    <div id="mod-filter"></div>
-    <div id="delta-filter"></div>
+    <span class="topbar-sep" aria-hidden="true"></span>
+
+    <div class="filter-zone">
+      <div id="group-filter"></div>
+      <div id="condition-filter"></div>
+      <div id="ban-filter"></div>
+      <div id="mod-filter"></div>
+      <div id="edited-filter"></div>
+      <div id="delta-filter"></div>
+    </div>
+
+    <span class="topbar-sep" aria-hidden="true"></span>
+
+    <div class="update-menu" id="update-menu">
+      <button type="button" class="bulk-btn update-menu__trigger" id="update-menu-trigger" data-tip="Rescan mods / bulk-update all prices" data-tip-pos="bottom" aria-haspopup="true" aria-expanded="false">⟳ Update <span class="chev"></span></button>
+    </div>
   </div>
 
-  <div class="bulk-refresh">
-    <button type="button" class="bulk-btn" id="rescan-mods" data-tip="Re-read the local SPT database (picks up items from newly-added mods). Does not fetch tarkov.dev/market." data-tip-pos="bottom">⟳ rescan</button>
-    <button type="button" class="bulk-btn" id="refresh-all-dev" data-tip="Update ALL prices via tarkov.dev" data-tip-pos="bottom">↻ dev</button>
-    <button type="button" class="bulk-btn" id="refresh-all-market" data-tip="Update ALL prices via tarkov-market" data-tip-pos="bottom">↻ market</button>
+  <span class="topbar-sep" aria-hidden="true"></span>
+
+  <div class="trader-cluster">
+    <button type="button" class="flea-level-widget" id="flea-level-widget" title="Edit minimum flea level (globals.json)">
+      Flea Lvl <span id="flea-level-num">15</span>+
+    </button>
     <span class="trader-pending-pill" id="trader-pending-pill" hidden data-tip="Trader sell-price overrides written via TRLTraderPrices. Restart SPT to apply." data-tip-pos="bottom"></span>
     <button type="button" class="bulk-btn bulk-btn--danger" id="clear-trader-overrides" hidden data-tip="Remove every trader sell-price override (TRLTraderPrices)." data-tip-pos="bottom">Clear trader overrides</button>
   </div>
 
-  <button type="button" class="flea-level-widget" id="flea-level-widget" title="Edit minimum flea level (globals.json)">
-    Flea Lvl <span id="flea-level-num">15</span>+
-  </button>
+  <span class="topbar-sep" aria-hidden="true"></span>
 
   <span class="stats" id="stats">loading…</span>
 </header>
@@ -83,8 +92,7 @@ let activeCategoryId = null;
 const selectedGroups     = new Set();  // names selected in Group multiselect
 const selectedConditions = new Set();  // conditionType values selected
 const selectedBans       = new Set();  // ban filter values: 'ok' | 'bsg' | 'custom'
-const selectedOverrides  = new Set();  // override filter values: 'override' | 'vanilla'
-const selectedTraderOverrides = new Set();  // trader-override filter: 'override' | 'vanilla'
+const selectedEdited     = new Set();  // edited filter values: 'flea' | 'trader' | 'none'
 const selectedMods       = new Set();  // modSource names selected (custom items from mods)
 const DELTA_STORAGE_KEY  = 'trl-items-management.delta';
 let deltaSource = 'dev';   // 'dev' | 'market'
@@ -442,9 +450,8 @@ async function load() {
     buildGroupFilter();
     buildConditionFilter();
     buildBanFilter();
-    buildOverrideFilter();
-    buildTraderOverrideFilter();
     buildModFilter();
+    buildEditedFilter();
     buildDeltaFilter();
     bindControls();
     render();
@@ -458,14 +465,12 @@ async function load() {
 const GROUP_STORAGE_KEY     = 'trl-items-management.groups';
 const CONDITION_STORAGE_KEY = 'trl-items-management.conditions';
 const BAN_STORAGE_KEY       = 'trl-items-management.bans';
-const OVERRIDE_STORAGE_KEY  = 'trl-items-management.overrides';
-const TRADER_OVERRIDE_STORAGE_KEY = 'trl-items-management.trader-overrides';
+const EDITED_STORAGE_KEY    = 'trl.editedFilter';
 const MOD_STORAGE_KEY       = 'trl-items-management.mods';
 let groupDropdown = null;
 let conditionDropdown = null;
 let banDropdown = null;
-let overrideDropdown = null;
-let traderOverrideDropdown = null;
+let editedDropdown = null;
 let modDropdown = null;
 
 function buildDeltaFilter() {
@@ -483,8 +488,23 @@ function buildDeltaFilter() {
     try { localStorage.setItem(DELTA_STORAGE_KEY, JSON.stringify({ source: deltaSource, min: deltaMin, max: deltaMax })); } catch (e) {}
   }
 
+  // Compact host: a toggle button + a popover holding the (unchanged) delta UI.
+  const host = document.createElement('div');
+  host.className = 'delta-pop';
+
+  const trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'bulk-btn delta-pop__trigger';
+  trigger.setAttribute('aria-haspopup', 'true');
+  trigger.setAttribute('aria-expanded', 'false');
+  trigger.setAttribute('data-tip', 'Filter by % delta of an external price vs the SPT flea');
+  trigger.setAttribute('data-tip-pos', 'bottom');
+  trigger.innerHTML = 'Δ% <span class="delta-pop__badge" hidden></span><span class="chev"></span>';
+  host.appendChild(trigger);
+
+  // The original delta UI, verbatim — only relocated inside the popover.
   const root = document.createElement('div');
-  root.className = 'delta-filter';
+  root.className = 'delta-filter delta-pop__panel';
 
   root.innerHTML =
     '<span class="delta-filter__label">Δ%</span>' +
@@ -495,6 +515,7 @@ function buildDeltaFilter() {
     '<span class="delta-filter__range-sep">…</span>' +
     '<input class="delta-filter__input" id="delta-max" type="number" placeholder="max%" step="1" title="Max delta (e.g. +200)">' +
     '<button type="button" class="delta-filter__clear" id="delta-clear" title="Clear delta filter">×</button>';
+  host.appendChild(root);
 
   const btnDev    = root.querySelector('[data-src="dev"]');
   const btnMarket = root.querySelector('[data-src="market"]');
@@ -509,12 +530,26 @@ function buildDeltaFilter() {
   function updateClearVisibility() {
     btnClear.style.display = (deltaMin !== null || deltaMax !== null) ? '' : 'none';
   }
+  // Active state on the compact trigger when a min/max bound is set.
+  function updateTriggerState() {
+    const active = (deltaMin !== null || deltaMax !== null);
+    trigger.classList.toggle('is-active', active);
+    const badge = trigger.querySelector('.delta-pop__badge');
+    if (badge) {
+      const lo = deltaMin !== null ? deltaMin + '%' : '';
+      const hi = deltaMax !== null ? deltaMax + '%' : '';
+      const txt = active ? (lo && hi ? `${lo}…${hi}` : (lo ? `≥${lo}` : `≤${hi}`)) : '';
+      badge.textContent = txt;
+      badge.hidden = !active;
+    }
+  }
 
   // Restore inputs
   if (deltaMin !== null) inputMin.value = deltaMin;
   if (deltaMax !== null) inputMax.value = deltaMax;
   updateSrcButtons();
   updateClearVisibility();
+  updateTriggerState();
 
   btnDev.addEventListener('click', () => {
     deltaSource = 'dev'; updateSrcButtons(); saveDelta(); render();
@@ -528,6 +563,7 @@ function buildDeltaFilter() {
     setter(raw === '' ? null : parseFloat(raw));
     saveDelta();
     updateClearVisibility();
+    updateTriggerState();
     render();
   }
 
@@ -539,10 +575,20 @@ function buildDeltaFilter() {
   btnClear.addEventListener('click', () => {
     deltaMin = null; deltaMax = null;
     inputMin.value = ''; inputMax.value = '';
-    saveDelta(); updateClearVisibility(); render();
+    saveDelta(); updateClearVisibility(); updateTriggerState(); render();
   });
 
-  document.getElementById('delta-filter').appendChild(root);
+  // Popover open/close (outside-click / Esc), matching the .dropdown behavior.
+  function open()  { host.classList.add('is-open'); trigger.setAttribute('aria-expanded', 'true'); }
+  function close() { host.classList.remove('is-open'); trigger.setAttribute('aria-expanded', 'false'); }
+  trigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    host.classList.contains('is-open') ? close() : open();
+  });
+  document.addEventListener('click', (e) => { if (!host.contains(e.target)) close(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+
+  document.getElementById('delta-filter').appendChild(host);
 }
 
 function buildBanFilter() {
@@ -581,37 +627,11 @@ function buildBanFilter() {
   document.getElementById('ban-filter').appendChild(banDropdown.root);
 }
 
-function buildOverrideFilter() {
-  // Count items by "edited" state: price pinned via ragfair.json — either an
-  // additive override (vanilla items) or an offer-multiplier (mod items).
-  let editedCount = 0, vanillaCount = 0;
-  for (const it of ITEM_LIST) {
-    const s = it.spt;
-    if (s && (s.fleaOverride != null || s.fleaOfferMultiplier != null)) editedCount++; else vanillaCount++;
-  }
-  const options = [
-    { value: 'override', label: 'Edited', iconHtml: '<span class="badge badge--override">OVR</span>', count: editedCount },
-    { value: 'vanilla',  label: 'Not edited', count: vanillaCount },
-  ];
-
-  try {
-    const saved = JSON.parse(localStorage.getItem(OVERRIDE_STORAGE_KEY) || '[]');
-    if (Array.isArray(saved)) saved.forEach(v => selectedOverrides.add(v));
-  } catch (e) {}
-
-  overrideDropdown = createDropdown({
-    placeholder: 'Override',
-    options,
-    multi: true,
-    onChange: (vals) => {
-      selectedOverrides.clear();
-      vals.forEach(v => selectedOverrides.add(v));
-      try { localStorage.setItem(OVERRIDE_STORAGE_KEY, JSON.stringify(vals)); } catch (e) {}
-      render();
-    },
-  });
-  overrideDropdown.setValue([...selectedOverrides]);
-  document.getElementById('override-filter').appendChild(overrideDropdown.root);
+// True if a vanilla/mod item has its flea price pinned via ragfair.json — either
+// an additive override (vanilla items) or an offer-multiplier (mod items).
+function itemIsFleaEdited(it) {
+  const s = it.spt;
+  return !!(s && (s.fleaOverride != null || s.fleaOfferMultiplier != null));
 }
 
 // True if ANY editable money offer of this item has a trader-price override
@@ -628,46 +648,55 @@ function itemHasTraderOverride(it) {
   return false;
 }
 
-// Trader-override filter chip — mirrors buildOverrideFilter but keyed on
-// per-trader sell-price overrides (TRLTraderPrices) rather than flea overrides.
-function buildTraderOverrideFilter() {
-  let editedCount = 0, vanillaCount = 0;
+// Merged "Edited" filter — one multi-select replacing the old Override +
+// Trader-edit chips. Conditions: flea-edited (ragfair override/multiplier),
+// trader-edited (TRLTraderPrices override), or not edited at all.
+function buildEditedFilter() {
+  let fleaCount = 0, traderCount = 0, noneCount = 0;
   for (const it of ITEM_LIST) {
-    if (itemHasTraderOverride(it)) editedCount++; else vanillaCount++;
+    const flea   = itemIsFleaEdited(it);
+    const trader = itemHasTraderOverride(it);
+    if (flea)   fleaCount++;
+    if (trader) traderCount++;
+    if (!flea && !trader) noneCount++;
   }
   const options = [
-    { value: 'override', label: 'Trader-edited', iconHtml: '<span class="badge badge--override">OVR</span>', count: editedCount },
-    { value: 'vanilla',  label: 'No trader edit', count: vanillaCount },
+    { value: 'flea',   label: 'Flea-edited',   iconHtml: '<span class="badge badge--override">OVR</span>', count: fleaCount },
+    { value: 'trader', label: 'Trader-edited', iconHtml: '<span class="badge badge--override">OVR</span>', count: traderCount },
+    { value: 'none',   label: 'Not edited', count: noneCount },
   ];
 
   try {
-    const saved = JSON.parse(localStorage.getItem(TRADER_OVERRIDE_STORAGE_KEY) || '[]');
-    if (Array.isArray(saved)) saved.forEach(v => selectedTraderOverrides.add(v));
+    const saved = JSON.parse(localStorage.getItem(EDITED_STORAGE_KEY) || '[]');
+    if (Array.isArray(saved)) saved.forEach(v => selectedEdited.add(v));
   } catch (e) {}
 
-  traderOverrideDropdown = createDropdown({
-    placeholder: 'Trader edit',
+  editedDropdown = createDropdown({
+    placeholder: 'Edited',
     options,
     multi: true,
     onChange: (vals) => {
-      selectedTraderOverrides.clear();
-      vals.forEach(v => selectedTraderOverrides.add(v));
-      try { localStorage.setItem(TRADER_OVERRIDE_STORAGE_KEY, JSON.stringify(vals)); } catch (e) {}
+      selectedEdited.clear();
+      vals.forEach(v => selectedEdited.add(v));
+      try { localStorage.setItem(EDITED_STORAGE_KEY, JSON.stringify(vals)); } catch (e) {}
       render();
     },
   });
-  traderOverrideDropdown.setValue([...selectedTraderOverrides]);
-  document.getElementById('trader-override-filter').appendChild(traderOverrideDropdown.root);
+  editedDropdown.setValue([...selectedEdited]);
+  document.getElementById('edited-filter').appendChild(editedDropdown.root);
 }
 
-// Recompute trader-override filter counts in place (after a save/restore/clear).
-function refreshTraderOverrideFilter() {
-  if (!traderOverrideDropdown) return;
-  const host = document.getElementById('trader-override-filter');
+// Recompute Edited-filter counts in place (after a flea/trader edit/restore/clear).
+// Preserves the current selection (selectedEdited keeps its values).
+function refreshEditedFilter() {
+  const host = document.getElementById('edited-filter');
   if (host) host.innerHTML = '';
-  traderOverrideDropdown = null;
-  buildTraderOverrideFilter();
+  editedDropdown = null;
+  buildEditedFilter();
 }
+
+// Back-compat alias: trader save/restore/clear paths call this name.
+function refreshTraderOverrideFilter() { refreshEditedFilter(); }
 
 function buildModFilter() {
   // Custom items added by server mods (modSource set in load-spt from
@@ -935,13 +964,8 @@ function bindControls() {
   }
   fleaWidget.addEventListener('click', () => openFleaMinLevelEditor(fleaWidget));
 
-  // Bulk "update all" buttons (topbar)
-  const rescanBtn = document.getElementById('rescan-mods');
-  const devAllBtn = document.getElementById('refresh-all-dev');
-  const mktAllBtn = document.getElementById('refresh-all-market');
-  if (rescanBtn) rescanBtn.addEventListener('click', () => rescanMods());
-  if (devAllBtn) devAllBtn.addEventListener('click', () => refreshAll('dev'));
-  if (mktAllBtn) mktAllBtn.addEventListener('click', () => refreshAll('market'));
+  // Bulk "⟳ Update" menu (rescan / update-all-dev / update-all-market).
+  bindUpdateMenu();
 
   // Clear ALL trader sell-price overrides (TRLTraderPrices).
   const clearTraderBtn = document.getElementById('clear-trader-overrides');
@@ -995,8 +1019,7 @@ function filterStateKey() {
     [...selectedConditions].sort().join(','),
     [...selectedGroups].sort().join(','),
     [...selectedBans].sort().join(','),
-    [...selectedOverrides].sort().join(','),
-    [...selectedTraderOverrides].sort().join(','),
+    [...selectedEdited].sort().join(','),
     [...selectedMods].sort().join(','),
     deltaMin, deltaMax, deltaSource, activeCategoryId, _dataVersion,
   ].join('|');
@@ -1030,19 +1053,13 @@ function filterItems() {
       if (selectedBans.has('custom') && reasons.includes('custom')) match = true;
       if (!match) continue;
     }
-    if (selectedOverrides.size > 0) {
-      const s = it.spt;
-      const edited = !!(s && (s.fleaOverride != null || s.fleaOfferMultiplier != null));
+    if (selectedEdited.size > 0) {
+      const fleaEdited   = itemIsFleaEdited(it);
+      const traderEdited = itemHasTraderOverride(it);
       let match = false;
-      if (selectedOverrides.has('override') && edited)  match = true;
-      if (selectedOverrides.has('vanilla')  && !edited) match = true;
-      if (!match) continue;
-    }
-    if (selectedTraderOverrides.size > 0) {
-      const edited = itemHasTraderOverride(it);
-      let match = false;
-      if (selectedTraderOverrides.has('override') && edited)  match = true;
-      if (selectedTraderOverrides.has('vanilla')  && !edited) match = true;
+      if (selectedEdited.has('flea')   && fleaEdited)                  match = true;
+      if (selectedEdited.has('trader') && traderEdited)               match = true;
+      if (selectedEdited.has('none')   && !fleaEdited && !traderEdited) match = true;
       if (!match) continue;
     }
     if (selectedMods.size > 0) {
@@ -1352,7 +1369,7 @@ function renderRow(it) {
   const trader = (traderSellValue != null || traderBuy)
     ? `<div class="cell-trader cell-trader--stacked">` +
         (traderBuy
-          ? `<div class="cell-trader__line cell-trader__line--sell" data-tip="S = trader SELLS this to you — the assort price you pay (SPT)"><span class="cell-trader__tag cell-trader__tag--sell" aria-label="Trader sells to you">S</span>${avatarFor(traderBuy.name)}<span class="cell-trader__num${traderBuy.overridden?' is-overridden':''}">${fmtRub(traderBuy.effPriceRUB)}</span>${traderBuy.overridden?` <span class="badge badge--override cell-trader__ovr" data-tip="Trader sell-price override — restart SPT to apply">OVR</span>`:''}<small class="cell-trader__ll">LL${traderBuy.loyaltyLevel}${traderBuy.questLocked?' 🔒':''}</small></div>`
+          ? `<div class="cell-trader__line cell-trader__line--sell" data-tip="S = trader SELLS this to you — the assort price you pay (SPT)"><span class="cell-trader__tag cell-trader__tag--sell" aria-label="Trader sells to you">S</span>${avatarFor(traderBuy.name)}<span class="cell-trader__num${traderBuy.overridden?' is-overridden':''}">${fmtRub(traderBuy.effPriceRUB)}</span>${traderBuy.overridden?` <span class="badge badge--override cell-trader__ovr" data-tip="Trader sell-price override — restart SPT to apply">OVR</span>`:''}<small class="cell-trader__ll">LL${traderBuy.loyaltyLevel}${traderBuy.questLocked?` <span class="trader-lock" data-tip="Quest-locked — an override applies only after you unlock the quest">🔒</span>`:''}</small></div>`
           : '') +
         (traderSellValue != null
           ? `<div class="cell-trader__line cell-trader__line--buy" data-tip="B = trader BUYS this from you — buyback (tarkov.dev)"><span class="cell-trader__tag cell-trader__tag--buy" aria-label="Trader buys from you">B</span>${avatarFor(traderSellName)}<span class="cell-trader__num">${fmtRub(traderSellValue)}</span></div>`
@@ -1736,6 +1753,7 @@ async function restoreOverride(cell) {
     tmp.innerHTML = renderRow(item);
     row.replaceWith(tmp.firstElementChild);
   }
+  refreshEditedFilter();  // flea-edited state changed → refresh Edited filter counts
   const what = data.mode === 'multiplier' ? 'multiplier removed' : 'override removed';
   toast(`${item.shortName || tpl}: ${what} → default ${data.effectiveFleaPrice != null ? data.effectiveFleaPrice.toLocaleString('pt-BR') : '—'} ₽`, 'ok');
 }
@@ -1892,6 +1910,7 @@ function openInlineEdit(cell) {
       _dataVersion++;  // data changed → invalidate filter-cache
       closeForm();   // remove the form + its capture-phase doc listener before the row is replaced
       rerenderRow();
+      refreshEditedFilter();  // flea-edited state changed → refresh Edited filter counts
       const fromStr = (prevEff != null && prevEff !== data.effectiveFleaPrice) ? `${prevEff.toLocaleString('pt-BR')} → ` : '';
       toast(`${item.shortName || tpl}: flea ${fromStr}${data.effectiveFleaPrice.toLocaleString('pt-BR')} ₽`, 'ok');
     } catch (err) {
@@ -1951,11 +1970,76 @@ function confirmDialog({ title, body, confirmText = 'Confirm', cancelText = 'Can
 }
 
 function setBulkBusy(busy) {
-  for (const id of ['rescan-mods', 'refresh-all-dev', 'refresh-all-market']) {
-    const b = document.getElementById(id);
-    if (b) { b.disabled = busy; b.classList.toggle('is-busy', busy); }
-  }
+  const trigger = document.getElementById('update-menu-trigger');
+  if (trigger) { trigger.disabled = busy; trigger.classList.toggle('is-busy', busy); }
   document.body.classList.toggle('is-bulk-busy', busy);
+}
+
+// ── "⟳ Update" menu (rescan / update-all dev / update-all market) ────────────
+// Popdown matching the .dropdown visual style. Reuses the existing handlers
+// (rescanMods / refreshAll) — no logic duplicated. Closes on outside-click/Esc/
+// item click.
+let _updateMenuCleanup = null;
+function bindUpdateMenu() {
+  const trigger = document.getElementById('update-menu-trigger');
+  if (trigger) trigger.addEventListener('click', (e) => { e.stopPropagation(); toggleUpdateMenu(); });
+}
+
+function toggleUpdateMenu() {
+  const host = document.getElementById('update-menu');
+  if (!host) return;
+  if (host.querySelector('.update-menu__panel')) closeUpdateMenu();
+  else openUpdateMenu();
+}
+
+function openUpdateMenu() {
+  const host = document.getElementById('update-menu');
+  const trigger = document.getElementById('update-menu-trigger');
+  if (!host || host.querySelector('.update-menu__panel')) return;
+
+  const items = [
+    { label: 'Rescan mods',                tip: 'Re-read the local SPT database (picks up items from newly-added mods). Does not fetch tarkov.dev/market.', run: () => rescanMods() },
+    { label: 'Update all · tarkov.dev',    tip: 'Update ALL prices via tarkov.dev',    run: () => refreshAll('dev') },
+    { label: 'Update all · tarkov-market', tip: 'Update ALL prices via tarkov-market', run: () => refreshAll('market') },
+  ];
+
+  const panel = document.createElement('div');
+  panel.className = 'update-menu__panel';
+  panel.setAttribute('role', 'menu');
+  for (const it of items) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'update-menu__item';
+    btn.setAttribute('role', 'menuitem');
+    btn.innerHTML = `<span class="update-menu__label">${escapeHtml(it.label)}</span>` +
+                    `<span class="update-menu__sub">${escapeHtml(it.tip)}</span>`;
+    btn.onclick = (e) => { e.stopPropagation(); closeUpdateMenu(); it.run(); };
+    panel.appendChild(btn);
+  }
+  host.appendChild(panel);
+  host.classList.add('is-open');
+  if (trigger) trigger.setAttribute('aria-expanded', 'true');
+
+  const onDocClick = (e) => { if (!host.contains(e.target)) closeUpdateMenu(); };
+  const onKey = (e) => { if (e.key === 'Escape') closeUpdateMenu(); };
+  setTimeout(() => document.addEventListener('click', onDocClick), 0);
+  document.addEventListener('keydown', onKey);
+  _updateMenuCleanup = () => {
+    document.removeEventListener('click', onDocClick);
+    document.removeEventListener('keydown', onKey);
+  };
+}
+
+function closeUpdateMenu() {
+  const host = document.getElementById('update-menu');
+  const trigger = document.getElementById('update-menu-trigger');
+  if (host) {
+    const panel = host.querySelector('.update-menu__panel');
+    if (panel) panel.remove();
+    host.classList.remove('is-open');
+  }
+  if (trigger) trigger.setAttribute('aria-expanded', 'false');
+  if (_updateMenuCleanup) { _updateMenuCleanup(); _updateMenuCleanup = null; }
 }
 
 // Rescan the local SPT DB (load-spt + normalize, no external fetch) → reload.
@@ -2142,7 +2226,7 @@ function renderTraderRow(it, t) {
   const hasOvr = ovr != null;
 
   // Quest-lock 🔒 gets its own tooltip so it isn't confused with Fence's marker.
-  const lockGlyph = t.questLocked ? ` · <span class="trader-lock" data-tip="Quest-locked offer">🔒</span>` : '';
+  const lockGlyph = t.questLocked ? ` · <span class="trader-lock" data-tip="Quest-locked — an override here applies only after you unlock the quest (until then the item sits in the trader's quest assort, not the live one)">🔒</span>` : '';
   const meta = `<small class="vendor">${escapeHtml(t.currency || '?')} · L${t.loyaltyLevel}${lockGlyph}${t.unlimited?' · ∞':''}</small>`;
   const nameCell = `<td class="k">${escapeHtml(t.name)} ${meta}</td>`;
 

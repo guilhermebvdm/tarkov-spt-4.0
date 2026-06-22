@@ -1,33 +1,38 @@
-# 050 — Patches de signature (🔧) · Kickoff
+# 050 — Perks + drawbacks de signature (🔧🔻) · Kickoff
 
-**Mod:** CustomClasses · **Data:** 2026-06-20 · **Origem:** redesign 11→6, Fase 5 ([class-levers.md](../../docs/class-levers.md) §5/§6)
-**Wave:** R-W1 · **Deps:** 047 (soft) — independente do 048
+**Mod:** CustomClasses · **Data:** 2026-06-21 · **Origem:** redesign 11→6 → "tudo é perk flat" ([class-design.md](../../docs/class-design.md))
+**Wave:** R-W1 · **Deps:** **054 (rename Furtivo) é pré-requisito do 050.0** · 047 (soft)
 
-> Brief de kickoff — insumo para `/create-spec 050`. Não é a spec.
+> Brief de kickoff — insumo para `/create-spec 050`. Não é a spec. **Fonte autoritativa: [class-design.md](../../docs/class-design.md)** (perks/drawbacks por classe + Contrato de gating + patch-points + fatiamento).
 
 ## Objetivo
 
-Patches Harmony **per-player keyed na classe** (`Info.GameVersion`) para o que skill não cobre:
+Patches Harmony **per-player keyed na classe** (gating pela **chave estável `name`**, ver Contrato de gating no doc), **client-side**, **F12-live** (ler `ConfigEntry` no apply-time). **Todas as signatures são flat** — não há skill custom que escala. Estende a infra client que **já existe** (`modded/Client/Plugin.cs` + ConfigEntry + Harmony).
 
-- **Médico de Combate** — cura de HP `×0.3` tempo, +50% HP, sem lock de movimento/arma; **cirurgia/restauração de membro destruído** (CMS/Surv12) `×0.5` tempo (distinto da cura de HP).
-- **Fantasma** — Execução (melee `×20`), Passo Fantasma (ruído de todas as ações até −50%), MaxSpeed `×1.1`.
-- **Tanque** — Couraça (dano recebido `×(1−[0.05→0.25])`), velocidade `×0.9`, −comida/bebida `×0.7`, GL mastery **via patch** + GL sem penalidade de ergo (o slot `AttachedLauncher` é inerte).
-- **Caçador** — saque de pistola `×0.5`, ADS por arma (sniper/DMR `×0.85`, AR `×1.15`).
-- **Fuzileiro** — resist. supressão (aim-punch `×0.5`), antitravamento (malfunction `×0.5`, fix `×2`).
-- **Saqueador** — loot silencioso; **🌐 revelar valor ₽** (GLOBAL — todos veem; separar do gating de classe).
+**12 perks 🔧 + 6 drawbacks 🔻** (1 drawback/classe): Combat Medic · Cool Under Fire + Adrenaline · Sharpshooter + Iron Lungs · Ghost Step + Execution · Quick Hands + Silent Looter + Pack Mule · Bulwark + Bunker; drawbacks Shaky Hands · Loud Operator · Rooted · Rattled · Overladen · Heavy Frame.
 
-## Riscos / atenção
+## Fatiamento (cada fatia = 1 ciclo SDD; ver doc §Implementação)
 
-- Velocidade/inércia **compõem** com o stances (multiplicar) ✅. Os levers da **ZONA STANCES** (arm-ADS Caçador, heavy-weapon stamina Tanque) vão para o item **051**, não aqui.
-- AttachedLauncher inerte → GL mastery do Tanque é patch puro, não skill 🎯.
-- Revelar ₽ é global (não keyed por classe) — não confundir com lever de classe.
+- **050.0 — Infra + 2 provas** *(✅)*: gating per-classe (`name`) + framework F12-live + **Bulwark** (dano) + **Pack Mule** (carga, piso). Valida ponta-a-ponta in-game.
+- **050.1 — Movimento/inércia** *(✅)*: Execution vel · Rooted · Heavy Frame vel · Overladen.
+- **050.2 — Recuo/aim-punch** *(✅/🟡)*: Shaky Hands · Adrenaline recuo · Cool Under Fire supressão · Rattled.
+- **050.3 — Combate/saúde** *(🟡)*: Execution melee · Heavy Frame fome/sede · Combat Medic · malfunction · máquina-de-estado da Adrenaline.
+- **050.4 — Som/arma/inventário** *(🟡+✅)*: Ghost Step/Loud/Silent · Sharpshooter · Bunker GL · Quick Hands · Iron Lungs respiração/sway.
+
+## Escopo / Riscos
+
+- **Gating:** `Info.GameVersion` = `displayName[lang]` (muda com idioma) → **gatear pela chave estável `name`** (mapear via `classVisualRegistry`), **não** hardcodar idioma. Furtivo = `Ghost` no runtime até o **054**.
+- **Confiança dos patch-points = estimativa do recon** (nomes `GClass*`/método são version-specific) → **re-confirmar o alvo no assembly carregado just-in-time** em cada fatia (decompilar de `D:/SPT` se preciso). 9 ✅ · ~7 🟡 · 2 ⚠️.
+- **Em aberto (resolver na spec da fatia):** som "todos os sons" = **multi-hook** (não 1 knob); aim-punch **hit vs supressão**; Energy/Hydration **client vs server** (se server, Heavy Frame vira restart); melee-dano/GL-ergo/uso-de-medkit/lock-de-cirurgia + gatilho "causar dano" da Adrenaline = métodos a confirmar.
+- **ZONA STANCES (vai pro 051, não aqui):** Iron Lungs braço-ADS + Bunker arma-pesada → compor via `StaminaController.Multipliers`/`ArmStaminaCoordinator`; **NÃO patchar `GClass774`** (o stances neutraliza).
+- Velocidade/inércia **compõem** com o stances (postfix-mult) ✅.
 
 ## Refs
 
-- [../../docs/class-levers.md](../../docs/class-levers.md) §5/§6 · [../../docs/class-skill-catalog.md](../../docs/class-skill-catalog.md)
+- **[../../docs/class-design.md](../../docs/class-design.md)** (autoridade) · [../../scripts/class-matrix.mjs](../../scripts/class-matrix.mjs) (matriz)
 - Skills `spt-mod-best-practices`, `csharp-mod-best-practices`, `graph-code-navigation`
 
 ## DoD (resumo)
 
-- Cada signature 🔧 observável in-game na classe certa; **sem efeito nas outras** (gating por `GameVersion` validado).
-- Toda constante exposta no **F12** (`ConfigEntry`), runtime quando possível, senão nota de restart — decisão #8 ([tabela §6.4](../../docs/class-levers.md)).
+- **Aceite por EFEITO** (não por perk — perks divididos só ficam 100% após a última fatia): cada efeito observável in-game na classe certa, **sem efeito nas outras** (gating validado). Ex.: Bulwark → hit conhecido perde −15% HP; Pack Mule → +30% no limite de peso.
+- Toda constante exposta no **F12** (`ConfigEntry`), **lida no apply-time** (muda durante a raid) — exceto o que a spec marcar como restart.

@@ -70,6 +70,7 @@ public class Plugin : BaseUnityPlugin
     private const string TacSprintSettings = "Tac Sprint Settings (Advanced)";
     private const string FOVSettings = "Field of View";
     private const string DebugSettings = "Debug (Advanced)";
+    private const string PassiveMountSettings = "Weapon Mount (Passive)";
     private const string AnimationSettings = "Animations & Transitions (Item 005)";
 
     // Positions
@@ -92,7 +93,6 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<float> _ADSTransitionSpeed;
 
     // Hold Breath
-    public static ConfigEntry<float> _HoldBreathArmStaminaDrain;
     public static ConfigEntry<float> _HoldBreathOxygenDrain;
     public static ConfigEntry<bool> _EnableCustomBreathAudio;
     public static ConfigEntry<float> _BreathInVolume;
@@ -205,6 +205,14 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<int> _FOVMinRange;
     public static ConfigEntry<int> _FOVMaxRange;
 
+    // Weapon Mount (Passive) — Item 011
+    public static ConfigEntry<bool> _EnablePassiveMount;
+    public static ConfigEntry<float> _PassiveRecoilMultiplier;
+    public static ConfigEntry<float> _PassiveSwayMultiplier;
+    public static ConfigEntry<bool> _PassiveStaminaSave;
+    public static ConfigEntry<bool> _DebugStaminaState;   // item 012 — toggle do overlay/log de estado de stamina
+    public static ConfigEntry<bool> _ShowMountIcon;
+
     // Animation Settings (Item 005)
     public static ConfigEntry<float> _CrouchSpeedMultiplier;
     public static ConfigEntry<float> _LeanSpeedMultiplier;
@@ -305,10 +313,9 @@ public class Plugin : BaseUnityPlugin
         // UI
         gameObject.AddComponent<UI.OxygenUI>();
 
-        // Stamina/velocidade por stance (backlog 001)
-        SafeEnable("StanceStaminaRecoveryPatch", () => new StanceStaminaRecoveryPatch());
-        SafeEnable("HandsStaminaConsumePatch", () => new Patches.HandsStaminaConsumePatch());
-        SafeEnable("HandsStaminaProcessPatch", () => new Patches.HandsStaminaProcessPatch());
+        // Stamina de braço — item 012: StaminaController (Plugin.Update) + neutralização do vanilla
+        SafeEnable("HandsStaminaNeutralizePatch", () => new Patches.HandsStaminaNeutralizePatch());
+        SafeEnable("HandsConsumeNeutralizePatch", () => new Patches.HandsConsumeNeutralizePatch());
         SafeEnable("GameWorldOnGameStartedPatch", () => new GameWorldOnGameStartedPatch());
         SafeEnable("GameWorldOnDestroyPatch", () => new GameWorldOnDestroyPatch());
 
@@ -318,6 +325,12 @@ public class Plugin : BaseUnityPlugin
         else
             Logger.LogWarning("[F4] SnapFireTriggerPatch NOT enabled — Player.FirearmController.SetTriggerPressed " +
                               "não foi resolvida. F1/F2/F3/F5 funcionam normalmente; snap-on-fire desabilitado este boot.");
+
+        // Item 011: Mount passivo sobre o vanilla (detecção + buffs + UI). Ativo = 100% vanilla.
+        SafeEnable("PassiveMountDetectPatch", () => new Patches.PassiveMountDetectPatch());
+        SafeEnable("PassiveRecoilPatch", () => new Patches.PassiveRecoilPatch());
+        SafeEnable("PassiveSwayPatch", () => new Patches.PassiveSwayPatch());
+        SafeEnable("BattleUIScreenPatch", () => new BattleUIScreenPatch());
 
         // Item 007: Movement & Inertia
         SafeEnable("MovementContextSpeedPatch", () => new Patches.MovementContextSpeedPatch());
@@ -349,8 +362,11 @@ public class Plugin : BaseUnityPlugin
         LoadedSprites["mountingleft.png"] = LoadEmbeddedSprite("mountingleft.png");
         LoadedSprites["mountingright.png"] = LoadEmbeddedSprite("mountingright.png");
 
-        // [mount removido] O sistema de mount (item 004) foi descartado — será reconstruído sobre o
-        // mount vanilla num novo item de backlog (ativo = vanilla; passivo = camada própria).
+        // Item 011: UI do mount passivo no GameObject PERSISTENTE do plugin (mesmo padrão do OxygenUI).
+        gameObject.AddComponent<PassiveMountUI>();
+
+        // Item 012: overlay de debug do cenário de stamina (toggle no F12).
+        gameObject.AddComponent<StaminaDebugUI>();
 
         // ========================================
         // MANUAL CHAMBERING
@@ -866,21 +882,61 @@ public class Plugin : BaseUnityPlugin
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { Order = 16 }));
 
-        // [mount removido] As ConfigEntries de "Weapon Mounting" (item 004) foram descartadas.
-        // O novo item de mount (passivo sobre o vanilla) definirá suas próprias configs.
+        // ========================================
+        // WEAPON MOUNT (PASSIVE) — Item 011
+        // ========================================
+        _EnablePassiveMount = Config.Bind(
+            PassiveMountSettings,
+            "Enable Passive Mount",
+            true,
+            new ConfigDescription("Liga o apoio passivo: ao encostar a arma numa superfície (sem a tecla de mount) você ganha um benefício leve de estabilidade. Desligado = só o mount nativo do jogo.",
+            null,
+            new ConfigurationManagerAttributes { Order = 10 }));
+
+        _PassiveRecoilMultiplier = Config.Bind(
+            PassiveMountSettings,
+            "Passive Recoil Multiplier",
+            0.7f,
+            new ConfigDescription("Multiplicador de recuo enquanto apoiado (passivo). 0.7 = 30% menos recuo. Deve ser MAIOR que o do mount ativo (vanilla) — o passivo é mais fraco.",
+            new AcceptableValueRange<float>(0.1f, 1f),
+            new ConfigurationManagerAttributes { Order = 9 }));
+
+        _PassiveSwayMultiplier = Config.Bind(
+            PassiveMountSettings,
+            "Passive Sway Multiplier",
+            0.65f,
+            new ConfigDescription("Multiplicador de sway (respiração) enquanto apoiado. 0.65 = 35% menos sway.",
+            new AcceptableValueRange<float>(0f, 1f),
+            new ConfigurationManagerAttributes { Order = 8 }));
+
+        _PassiveStaminaSave = Config.Bind(
+            PassiveMountSettings,
+            "Passive Stamina Save",
+            true,
+            new ConfigDescription("Enquanto apoiado, pausa/reduz o drain de stamina de braço (mais fraco que o mount nativo).",
+            null,
+            new ConfigurationManagerAttributes { Order = 7 }));
+
+        // Active/Passive Mount Stamina Regen removidos no item 012 (substituídos pelos multiplicadores do grupo "Stamina Management").
+
+        _ShowMountIcon = Config.Bind(
+            PassiveMountSettings,
+            "Show Mount Icon",
+            true,
+            new ConfigDescription("Mostra o ícone direcional (esquerda/direita/baixo) no canto inferior direito quando o apoio passivo está ativo.",
+            null,
+            new ConfigurationManagerAttributes { Order = 6 }));
+
+        // Item 012: grupo "Stamina Management" — primeira Bind ANTES da seção Hold Breath (aposta na ordem
+        // de descoberta; se no F12 não ficar acima de "9. Respiração", prefixar o nome — ver 02-spec-tech §7).
+        BindStaminaManagement();
 
         const string HoldBreathSection = "9. Respiração (Hold Breath)";
 
         // ========================================
         // HOLD BREATH SETTINGS (Order -10)
         // ========================================
-        _HoldBreathArmStaminaDrain = Config.Bind(
-            HoldBreathSection,
-            "Arm Stamina Drain / sec",
-            2.0f,
-            new ConfigDescription("How much extra Arm Stamina (HandsStamina) is drained per second while holding breath.",
-            new AcceptableValueRange<float>(0f, 20f),
-            new ConfigurationManagerAttributes { Order = -10 }));
+        // _HoldBreathArmStaminaDrain removido no item 012 (o drain do braço virou o multiplicador "Hold Breath").
 
         _HoldBreathOxygenDrain = Config.Bind(
             HoldBreathSection,
@@ -1334,7 +1390,6 @@ public class Plugin : BaseUnityPlugin
 
         foreach (var cfg in _stanceConfigs.Values)
         {
-            cfg.StaminaMultiplier.SettingChanged       += OnStanceConfigChanged;
             cfg.ModifiesMovementSpeed.SettingChanged   += OnStanceConfigChanged;
             cfg.MovementSpeedMultiplier.SettingChanged += OnStanceConfigChanged;
             cfg.ApplyWhenProne.SettingChanged          += OnStanceConfigChanged;
@@ -1557,7 +1612,8 @@ public class Plugin : BaseUnityPlugin
         
         StanceManager.Update();
         StanceManager.UpdateTacSprint();
-        StanceManager.TickStanceStamina();              // backlog 001: delta stamina (drain/recovery) em hipfire
+        StaminaController.Tick();                       // item 012: stamina de braço (autoridade única)
+        StanceManager.TickStanceStamina();              // item 012: agora só re-aplica o speed-limit quando a config muda
         StanceManager.EvaluateProneSuspensionTick();    // backlog 001: prone toggle + refresh defensivo de speed limit
         UpdateCameraOffset();
     }
@@ -1577,14 +1633,7 @@ public class Plugin : BaseUnityPlugin
 
         return new StanceConfig
         {
-            StaminaMultiplier = Config.Bind(d.Section, $"Stance {n} Stamina Multiplier", d.StaminaMultiplier,
-                new ConfigDescription(
-                    "Controls stamina behavior for this stance. " +
-                    "< 1.0 = drain (e.g. 0.5 drains at half ADS rate). " +
-                    "1.0 = vanilla, no effect. " +
-                    "> 1.0 = accelerated recovery (e.g. 2.0 recovers at full ADS drain rate).",
-                    new AcceptableValueRange<float>(0f, 10f),
-                    new ConfigurationManagerAttributes { Order = orderBase })),
+            // StaminaMultiplier migrou para o grupo "Stamina Management" (item 012, BindStaminaManagement).
             ModifiesMovementSpeed = Config.Bind(d.Section, $"Stance {n} Modifies Movement Speed", d.ModSpeed,
                 new ConfigDescription(
                     "When enabled, this stance applies a movement speed cap.",
@@ -1613,6 +1662,44 @@ public class Plugin : BaseUnityPlugin
                         null,
                         new ConfigurationManagerAttributes { Order = 0 })),
         };
+    }
+
+    // Item 012: cria os 15 multiplicadores do grupo "Stamina Management" + o toggle de debug, e popula
+    // StaminaController.Multipliers (indexado por StaminaScenario). Chamado ANTES de HoldBreathSection.
+    private void BindStaminaManagement()
+    {
+        const string SEC = "Stamina Management";
+        var M = StaminaController.Multipliers;
+        int o = 80;
+        M[(int)StaminaScenario.StandStance0]      = BindMult(SEC, "Stance 0 Stamina Multiplier", _stanceDefaults[0].StaminaMultiplier, "Stand up sem mount, Stance 0 (hipfire).", ref o);
+        M[(int)StaminaScenario.StandStance1]      = BindMult(SEC, "Stance 1 Stamina Multiplier", _stanceDefaults[1].StaminaMultiplier, "Stand up sem mount, Stance 1.", ref o);
+        M[(int)StaminaScenario.StandStance2]      = BindMult(SEC, "Stance 2 Stamina Multiplier", _stanceDefaults[2].StaminaMultiplier, "Stand up sem mount, Stance 2.", ref o);
+        M[(int)StaminaScenario.StandStance3]      = BindMult(SEC, "Stance 3 Stamina Multiplier", _stanceDefaults[3].StaminaMultiplier, "Stand up sem mount, Stance 3.", ref o);
+        M[(int)StaminaScenario.StandAds]          = BindMult(SEC, "ADS - Stand up Multiplier", 0.7f, "Stand up sem mount, mirando (ADS).", ref o);
+        M[(int)StaminaScenario.StandHoldBreath]   = BindMult(SEC, "Hold Breath - Stand up Multiplier", 0.5f, "Stand up sem mount, segurando a respiração.", ref o);
+        M[(int)StaminaScenario.ProneHip]          = BindMult(SEC, "Prone Stamina Multiplier", 1.5f, "Deitado (prone) sem mount, hipfire.", ref o);
+        M[(int)StaminaScenario.ProneAds]          = BindMult(SEC, "ADS - Prone Multiplier", 0.9f, "Deitado, mirando.", ref o);
+        M[(int)StaminaScenario.ProneHoldBreath]   = BindMult(SEC, "Hold Breath - Prone Multiplier", 0.7f, "Deitado, segurando a respiração.", ref o);
+        M[(int)StaminaScenario.PassiveStance0]    = BindMult(SEC, "Passive Mount Multiplier", 1.5f, "Apoio passivo (encostado), Stance 0.", ref o);
+        M[(int)StaminaScenario.PassiveAds]        = BindMult(SEC, "ADS - Passive Mount Multiplier", 1.0f, "Apoio passivo, mirando (segura, não recupera).", ref o);
+        M[(int)StaminaScenario.PassiveHoldBreath] = BindMult(SEC, "Hold Breath - Passive Mount Multiplier", 0.9f, "Apoio passivo, segurando a respiração.", ref o);
+        M[(int)StaminaScenario.ActiveStance0]     = BindMult(SEC, "Active Mount Multiplier", 3.0f, "Mount nativo (montado), Stance 0.", ref o);
+        M[(int)StaminaScenario.ActiveAds]         = BindMult(SEC, "ADS - Active Mount Multiplier", 1.5f, "Mount nativo, mirando.", ref o);
+        M[(int)StaminaScenario.ActiveHoldBreath]  = BindMult(SEC, "Hold Breath - Active Mount Multiplier", 1.0f, "Mount nativo, segurando a respiração.", ref o);
+
+        _DebugStaminaState = Config.Bind(SEC, "Debug Stamina State", false,
+            new ConfigDescription("Mostra na tela + loga o cenário de stamina ativo (STAMINA STATE: ...).",
+                null, new ConfigurationManagerAttributes { Order = 1 }));
+    }
+
+    private ConfigEntry<float> BindMult(string sec, string key, float def, string tip, ref int order)
+    {
+        var e = Config.Bind(sec, key, def, new ConfigDescription(
+            tip + " <1 drena, 1 mantém, >1 recupera.",
+            new AcceptableValueRange<float>(0f, 10f),
+            new ConfigurationManagerAttributes { Order = order }));
+        order--;
+        return e;
     }
 
     private void Start()

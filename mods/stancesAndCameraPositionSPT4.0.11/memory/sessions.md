@@ -6,23 +6,23 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados quan
 
 ## Estado atual (snapshot ao fim da última sessão)
 
-- **Status no mod-backlog.md:** itens 001/002/003 🟢; **004/008/009 receberam `06-fix-01`** e **010 foi registrado (🟡) com `06-fix-01`** em 2026-06-11. Todos **compilam (0 erros)**, passaram por **2 rodadas de code-review adversarial** (8 fixes de corretude aplicados) e foram **pushados para origin/main** (HEAD `57e54c4`), mas **NÃO foram testados in-game** — aguardam validação do usuário.
-- **Build:** `D:/SPT/BepInEx/plugins/shwngFpsCameraStances4.dll` (~106KB). Build destravado nesta sessão (Fase 0): o `CameraRotationMod.csproj` tinha sido commitado com `HintPath` absolutos `E:\TORRENT\...` (sessão paralela) — revertido para `References\` relativos. Path do SPT externalizado em `.spt-path` (gitignored, na raiz; `.spt-path.example` versionado), lido pelo `compile-mod.sh`.
-- **Stance layout (inalterado):** Stance 0 - Vanilla, 1 - High Ready (Pitch -15), 2 - Low Ready (Pitch +30), 3 - Custom (Yaw -30).
-- **Mount (004) reescrito:** sistema próprio `EMountState { None, Passive, Active }` — passivo SEM grude (só benefício), ativo COM grude via `ECommand.WeaponMounting (140)`. Substituiu a dependência do mount nativo do EFT.
-- **F12:** seções numeradas renomeadas (`4./8./9.` → nomes); bind duplicado de mounting removido. **Renomear seções recria entries no `.cfg`** — usuário pode perder customizações dessas seções (esperado/documentado).
+- **Linha ativa = fork `modded-beta`** (do dev rocket, trazido no pull `e8f706b`): refactor das animações de stance (Realism como ref) + features novas (hold-breath/oxigênio, FIKA stance sync, FOV). Buildado via **`dotnet build` direto** no `CameraRotationMod.csproj` — o `compile-mod.sh` só conhece `modded/` (ver P-5.4).
+- **Bugs do refactor corrigidos e validados in-game (2026-06-20):** câmera invertida (gimbal flip nos patches de rotação) e som de hold-breath (não tocava). Ver Sessão 5.
+- **DLL instalada em `D:/SPT/BepInEx/plugins/RealisticMobility/`** (subfolder, ~139 KB) — não mais flat. Assets de áudio agora são `.ogg` (mono) na raiz dessa pasta.
+- **Itens antigos (`modded/`):** 001/002/003 🟢; 004/008/009 com `06-fix-01`; 010 🟡 — pushados (HEAD `57e54c4`), mas **004/008/009/010 ainda não validados in-game** (ver P-4.1).
+- **Stance layout:** Stance 0 - Vanilla, 1 - High Ready (Pitch -15), 2 - Low Ready (Pitch +30), 3 - Custom (Yaw -30). Mount (004) = sistema próprio `EMountState {None,Passive,Active}`.
 
 ## Pendências / próximos passos conhecidos
 
-- **[P-4.1] (aberta 2026-06-11) 🔴 Validar in-game os 4 itens desta sessão (004/008/009/010)** — tudo compila, nada testado. Ordem sugerida: 009 (wiggle, baixo risco) → 008 (esvaziar câmara) → 004 (mount) → 010 (chambering, **maior risco de softlock**; testar reload/troca de arma/morte; master toggle desliga p/ vanilla). Logs `[Mount]/[Wiggle]/[ActionStance]/[ManualChamber]` no `BepInEx/LogOutput.log` ajudam a diagnosticar.
-- **[P-4.2] (aberta 2026-06-11) Commitar `.agents/scripts/compile-mod.sh`** (mudanças da Fase 0) — não commitado por estar misturado com trabalho não-commitado da sessão CustomClasses (item 019/020).
-- **[P-4.3] (aberta 2026-06-11) Replicar `.spt-path` no notebook (guimello)** se for buildar lá — gitignored (per-machine); copiar de `.spt-path.example`.
-- **[P-4.4] (aberta 2026-06-11) Validar F4 in-raid após 06-fix-01** — se ainda não funcionar, pedir `BepInEx/LogOutput.log` para diagnosticar via logs `[F4] Resolved ...` e Prefix entries.
-- **[P-4.5] (aberta 2026-06-11) F1 (Include Stance 0 in Cycle) não foi testado pelo usuário in-raid** — recomendar teste.
-- **[P-4.6] (aberta 2026-06-11) Migração de `.cfg` antigo** — usuário pode ter customizações em seções obsoletas (`Stance 2 - Custom`, `Stance 3 - Low Ready` pré-swap) que viraram órfãs no `.cfg`. Migração manual documentada nos avisos do PROPRIEDADES.md.
-- **[P-4.7] (aberta 2026-06-11) ADS Transition Speed só atua em stance customizada (1/2/3)** — quando o usuário testa em Stance 0, o `SpringGetPatch` faz early-return sem consultar o slider. Documentado, mas pode virar `06-fix-03` se quiser expor um toggle "Aplicar ADS Speed Override mesmo em Stance 0".
-- **[P-4.8] (aberta 2026-06-11) Stance 0 Stamina Multiplier default = 0.5** drena stamina em hipfire — provavelmente causa do "ADS lento" percebido (HandsStamina baixa → tired aim no EFT). Workaround: usuário pode setar `1.0` no F12. Eventual `06-fix-XX` poderia mudar o default para `1.0` (drain como opt-in).
-- **[P-4.9] (aberta 2026-06-11) Item 010 está 🟡** (não 🟢) — depende de validação in-game (risco de softlock). Os demais (001-009) seguem 🟢 mas 004/008/009 têm `06-fix-01` não validado.
+- **[P-4.1 / P-4.9] (aberta 2026-06-11) 🔴 Validar in-game itens antigos 004/008/009/010** (`modded/`) — nada testado; 010 segue 🟡 (risco de softlock; testar reload/troca de arma/morte). Logs `[Mount]/[Wiggle]/[ActionStance]/[ManualChamber]` ajudam.
+- **[P-4.4 / P-4.5] (aberta 2026-06-11) 🟡 Validar in-game F4 (snap-on-fire) e F1 (Stance 0 no ciclo)** do item 002 — se F4 falhar, diagnosticar via logs `[F4] Resolved ...`.
+- **[P-4.2 / P-4.3] (aberta 2026-06-11) 🟡 Infra de build (`modded/`):** commitar Fase 0 do `compile-mod.sh` (misturada com CustomClasses); replicar `.spt-path` no notebook (guimello) se for buildar lá.
+- **[P-4.6] (aberta 2026-06-11) 🟡 Migração de `.cfg` antigo** — seções órfãs pós-swap (`Stance 2 - Custom`, `Stance 3 - Low Ready`); migração manual documentada no PROPRIEDADES.md.
+- **[P-5.1] (aberta 2026-06-21) 🟡 Commit pendente:** fix câmera (`ApplyComplex/SimpleRotationPatch` + `code-review-camera-flip-fix-01.md`) e fix áudio (`HoldBreathPatch`, `RaidLifecyclePatches`, `Plugin.cs`, 3 `.ogg`, remoção dos 3 `.wav`, DLL versionada). PNGs `mountingleft/right` (swap do usuário) ficam de fora.
+- **[P-5.2] (aberta 2026-06-21) 🔴 Item 2 — mount automático + ícones nunca funcionou** (passivo/ativo em superfícies). Próximo alvo via `/g-diagnose`; checar `[enable] FAIL` no log (suspeita: patch `method_11` não resolve em 0.16).
+- **[P-5.3] (aberta 2026-06-21) 🟡 Refatoração pós-features:** unificar interpolação em `SpringMath.SpringDamp` (CR-01-02), matar reflection por frame nos patches de rotação, reset de estado estático, `try/catch` nos Postfix, audit F12 × PROPRIEDADES.md. Ver `code-review-camera-flip-fix-01.md`.
+- **[P-5.4] (aberta 2026-06-21) 🟡 Build do `modded-beta` fora do pipeline:** `compile-mod.sh` hardcoded em `modded/`; `csproj` com HintPaths de Fika a 2 níveis (contornado via `mods/references` temporário); decidir destino do fork (promover p/ `modded/` ou ensinar o script). (CR-01-06)
+- **[P-5.5] (aberta 2026-06-21) 🟢 Logs de diagnóstico temporários** (`v3-raidload`, `[STANCE-CLAMP]`) — limpar na refatoração (P-5.3).
 
 ## 2026-05-09 ~16:00 (GMT-3) — Sessão 1: item 002 backlog (criação + reviews)
 
@@ -156,6 +156,38 @@ Continuação direta da entrada de madrugada deste dia (Sessão 4a). Delta regis
 **Cross-refs:**
 - Complementa a Sessão 4a (madrugada) deste dia — implementação + Fase 0 + F12.
 - Findings detalhados nos `backlog/{004,008,010}-…/…-06-fix-01.md`.
+
+## 2026-06-21 00:08 (GMT-3) — Sessão 5: fix câmera (gimbal flip) + fix áudio hold-breath (fork modded-beta)
+
+**Tema central:** corrigir dois bugs críticos do refactor do dev rocket (pull `e8f706b`) na linha `modded-beta`: câmera invertida ao aplicar stance e som de hold-breath que não tocava. + `/code-review` do fix de câmera.
+
+**Decisões-chave:**
+- **Câmera (gimbal flip):** `ApplyComplexRotationPatch`/`ApplySimpleRotationPatch` trocaram o `Quaternion.Slerp` do RealismMod por uma **mola Euler inline** que diverge/overshoota conforme o frame-timing e, operando em ângulos de Euler, cruza o gimbal (~180°) → câmera de cabeça pra baixo, só em alguns players (mesma DLL/config). Fix: **sub-stepping** (integração estável independente do `dt`) + **batente angular ±60°** (alvo legítimo é ±45°) + clamp de velocidade, idêntico nos dois patches. Preserva a "quicada". Validado in-game. Ref: `modded-beta/Patches/ApplyComplexRotationPatch.cs`, `ApplySimpleRotationPatch.cs`.
+- **Áudio hold-breath — dois bugs independentes:** (A) `.wav` em IEEE float 32-bit lidos pelo `WavUtility` como PCM 16-bit → ruído saturado; (B) `AudioClip` carregados no boot (cena de menu) e **descarregados na transição p/ o jogo** → `length 0` no play. Fix: assets p/ **OGG Vorbis mono** (heartbeat 23 MB→467 KB) + **decodificador nativo** `UnityWebRequestMultimedia`+`DownloadHandlerAudioClip` (`streamAudio=false` + cópia standalone) + **carregar em `GameWorld.OnGameStarted`** (não no boot). Validado in-game. Ref: `modded-beta/Patches/HoldBreathPatch.cs`, `RaidLifecyclePatches.cs`, `Plugin.cs`.
+- **Heartbeat órfão:** `HoldBreathPatch.OnRaidEnd()` para o loop e zera `IsHoldingBreath` — evita o batimento tocando no menu após morte/extração segurando a respiração.
+- **Sequenciamento acordado:** corrigir features quebradas (som → mount) **antes** da refatoração grande. "Refatore código que funciona, não quebrado."
+
+**Lições / hipóteses descartadas:**
+- Câmera: a hipótese "mola diverge por config" foi enfraquecida pela análise de estabilidade — com `damping=12` (default) a mola é estável; o **batente ±60°** é a real garantia, não o sub-stepping. Causa determinística = frame-timing, não config.
+- Áudio: gastei dois ciclos com `streamAudio=false` + cópia standalone achando que o `length 0` era o `Dispose` do `UnityWebRequest`; o sintoma persistia. Causa real = **descarregamento na troca de cena** (carregar no menu). Pista decisiva no log: "carrega 1.14s no boot, 0 no hideout, mesma DLL/objeto" → culpado é a transição.
+- Launcher: o sync (Dev Mod off) revertia a DLL local pela do servidor a cada "Start" → testávamos a build antiga sem saber. **Confirmar a build via marcador de versão no log** antes de concluir que um fix "não funcionou". Ref: memória `feedback_server_launcher_sync_builds`.
+
+**Atividade cronológica:**
+1. `git pull` (`e8f706b`) — refactor de animação + hold-breath/oxigênio/FIKA sync do rocket.
+2. Diagnóstico câmera — comparação com RealismMod (Slerp vs mola Euler) e decompilado (`GClass909-912`; `ProceduralWeaponAnimation.SetStrategy(pointOfView)`: 1ª/3ª pessoa = mesma PWA trocando estratégia).
+3. Fix câmera (sub-step + clamp); `dotnet build`; instalado em `RealisticMobility/`; validado in-game.
+4. `/code-review` do fix → `modded-beta/code-review-camera-flip-fix-01.md` (8 achados CR-01-01..08, 0 🔴; hotfix fora do pipeline SDD).
+5. `/g-diagnose` áudio — causa de formato provada offline (differential loop PCM16 vs float32).
+6. Conversão OGG (ffmpeg) + reescrita do loader; vários ciclos até achar a 2ª causa (carregar no game start).
+7. Fix final áudio + heartbeat órfão; validado in-game.
+8. Memória `reference_spt_mod_audio_loading` criada.
+
+**Pendências abertas nesta sessão:** P-5.1..P-5.5 (ver topo).
+
+**Cross-refs:**
+- Code-review: `modded-beta/code-review-camera-flip-fix-01.md`.
+- Memória: `reference_spt_mod_audio_loading` (pipeline de áudio), `feedback_server_launcher_sync_builds` (reversão de build pelo launcher).
+- **Revisão de fato anterior:** as Sessões 1–4 tratavam o trabalho em `modded/`; a linha ativa agora é o fork `modded-beta` (do rocket), buildado fora do `compile-mod.sh`. Histórico preservado.
 
 ## Arquivos-chave do mod (referência rápida)
 

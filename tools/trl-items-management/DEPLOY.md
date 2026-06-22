@@ -45,7 +45,8 @@ git archive --format=zip -o trl-items-management.zip HEAD:tools/trl-items-manage
 Copie o zip pro server e extraia, ex.: `E:\tools\trl-items-management`. **Remova** do pacote:
 - `data/items.json` (placeholder do dev box — será regerado no passo 4; sem ele o viewer fica vazio
   até o build rodar);
-- scripts de teste `scripts/*smoke*.js`, `scripts/action0-*.js` (não-runtime).
+- scripts de teste/diagnóstico `scripts/*smoke*.js`, `scripts/action0-*.js`,
+  `scripts/verify-trader-*.js` (não-runtime).
 
 Crie a pasta de logs: `New-Item -ItemType Directory -Force E:\tools\trl-items-management\logs`.
 
@@ -92,6 +93,67 @@ restart-on-crash, logs em `logs\service-*.log`, bind em `127.0.0.1`) e inicia.
 ### 6. Acessar
 No desktop do server (AnyDesk), abra o navegador → `http://127.0.0.1:8080/TRLItemsManagement/`.
 Confirme que a lista carrega e que uma edição de preço + **Restore** funcionam.
+
+### 7. Mod de preços de trader (`TRLTraderPrices`) — necessário pra editar preço de trader
+
+A edição de **preço de flea** (passos acima) escreve direto na config do SPT e não precisa de mod. Já a
+edição de **preço de venda de trader** (a coluna do trader no viewer) é aplicada por um **companion server
+mod** em C#: o viewer grava `user/mods/TRLTraderPrices/config/overrides.json` e o mod reescreve a assort do
+trader no boot. **Sem o mod instalado, o viewer salva o override mas avisa "mod not installed" e nada aplica
+no jogo.**
+
+1. **Copiar o pacote do mod pro server.** Na máquina de dev, o pacote pronto fica em
+   `mods/TRLTraderPrices/builds/TRLTraderPrices-mod-v<versão>.zip` (só a DLL + .pdb; ~20 KB) — versão
+   atual **v1.1.0**. Copie pro server. *(Regerar o pacote, se faltar:
+   `bash .agents/scripts/compile-mod.sh TRLTraderPrices` e zipe
+   `mods/TRLTraderPrices/builds/server/TRLTraderPrices.dll` dentro de uma pasta `TRLTraderPrices/`.)*
+2. **Extrair em `user/mods/`.** O zip já tem a estrutura `TRLTraderPrices/` — extraia direto na pasta
+   `user/mods/` do install (ex.: `E:\SPT\SPT\user\mods\`), resultando em
+   `E:\SPT\SPT\user\mods\TRLTraderPrices\TRLTraderPrices.dll`.
+3. **NÃO copie `config/overrides.json`.** É user-data: o viewer cria a pasta `config/` e o arquivo na
+   primeira edição de trader. (Por isso o pacote não traz config — shipar um default `{}` já fez o deploy
+   sobrescrever os overrides ao vivo no passado.)
+4. **Reiniciar o SPT.** O mod aplica os overrides no boot, ANTES do flea gerar as ofertas, então a compra
+   direta no trader E o preço dele no flea refletem o override. O log mostra
+   `[TRLTraderPrices] applied N entries (...)` no boot.
+
+> O `SPT_PATH` do viewer (passo 5) já aponta pra raiz do install, então ele acha
+> `user/mods/TRLTraderPrices/config/` automaticamente — nada extra a configurar.
+
+> **Limitação conhecida:** ofertas de trader **quest-locked** (marcadas com 🔒 no viewer) só aplicam o
+> override **depois** que a quest correspondente é concluída (até lá o item fica no quest-assort, fora da
+> assort viva que o mod edita). O mod ignora com segurança o que não está na assort viva (log `tplNotSold`).
+
+---
+
+## Atualizar pra uma nova versão (1 comando)
+
+A partir da **v1.1.0** o release é **um bundle único** (`trl-release-vX.Y.Z.zip`) que junta viewer + DLL do
+mod + um updater. Atualizar a VM = *copiar 1 arquivo → rodar 1 comando*.
+
+**No dev box** — gerar o bundle (a versão é lida do `<Version>` do csproj do mod):
+```bash
+bash tools/trl-items-management/scripts/package-release.sh D:/SPT/_vm-deploy
+# → D:/SPT/_vm-deploy/trl-release-v<versão>.zip  (viewer SEM items.json + DLL + update-vm.ps1)
+```
+
+**Na VM** — copie o zip (AnyDesk), extraia e rode o updater de dentro da pasta extraída:
+```powershell
+Expand-Archive "D:\_deploy\trl-release-v1.1.0.zip" "D:\_deploy" -Force
+cd "D:\_deploy\trl-release-v1.1.0"
+powershell -ExecutionPolicy Bypass -File .\update-vm.ps1
+```
+O `update-vm.ps1` faz tudo, **idempotente e sem rede**: para SPT+viewer → atualiza o viewer (preserva
+`.env`, `logs\`) → instala a DLL (preserva `config\overrides.json`) → regenera o `items.json` (via
+`load-spt`+`normalize`, usando o cache de preços) → sobe viewer+SPT → imprime as versões aplicadas.
+- Caminhos diferentes? passe `-SptPath`, `-ToolDir`, `-NodeExe`, `-Port`. Ver `Get-Help .\update-vm.ps1 -Full` (cabeçalho do arquivo).
+- 1ª vez sem cache de preços (ou pra repuxar tarkov.dev/market): adicione **`-Fetch`** (precisa internet + `.env`).
+- Só atualizar sem subir o jogo: **`-NoStartGame`**.
+
+> **Dica (auto-start):** como o viewer roda manual hoje, ele não volta sozinho após reboot da VM. Pra isso,
+> registre-o uma vez como tarefa agendada (snippet em "Alternativa sem NSSM" abaixo) com o nome
+> **`TRLItemsManagement`** — o `update-vm.ps1` detecta a tarefa e usa `Stop/Start-ScheduledTask` no lugar de
+> matar/subir o node na mão.
 
 ---
 

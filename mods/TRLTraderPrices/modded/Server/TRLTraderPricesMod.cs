@@ -6,6 +6,7 @@ using SPTarkov.Server.Core.Models.Enums;             // Money
 using SPTarkov.Server.Core.Models.Utils;             // ISptLogger
 using SPTarkov.Server.Core.Services;                 // DatabaseService
 using SPTarkov.Server.Core.Utils;                    // FileUtil, JsonUtil
+using System.Text.Json.Serialization;                // JsonPropertyName
 using Item = SPTarkov.Server.Core.Models.Eft.Common.Tables.Item;
 
 namespace TRLTraderPrices;
@@ -17,15 +18,20 @@ namespace TRLTraderPrices;
 ///     NATIVE currency and applied DIRECTLY (no RUB conversion). The currency field identifies which money
 ///     tpl the count is denominated in, so a mismatched-currency assort entry is skipped instead of corrupted.
 ///
-///     Runs LAST (after RagfairCallbacks / PostSptModLoader) so it mutates the live
-///     <see cref="DatabaseService.GetTraders"/> dictionary after every other loader. The served assort is
-///     cloned from this live object per request (TraderAssortHelper), so the change is visible to clients
-///     with no pristine snapshot fighting it.
+///     Timing: runs at RagfairCallbacks - 1, i.e. AFTER trader-assort injection (mods @ PostDBModLoader
+///     400000, custom traders @ TraderRegistration 500000) and AFTER TraderController.Load @ TraderCallbacks
+///     800000 (so the global traderPriceMultiplier is applied before our override) — but BEFORE
+///     RagfairCallbacks 1000000. This is critical: RagfairOfferGenerator.GenerateFleaOffersForTrader clones
+///     the LIVE trader.Assort at generation time (RagfairOfferGenerator.cs:532), so the flea-market trader
+///     offers only reflect our override if we mutate the assort BEFORE ragfair generates them. (Running at
+///     PostSptModLoader+1 = 1100001, after ragfair, left the flea showing base prices while the direct
+///     trader buy showed the override — the bug this fixes.) The served assort is the live
+///     <see cref="DatabaseService.GetTraders"/> object, cloned per request, so direct buy reflects it too.
 ///
 ///     Skips: Fence (dynamic assort), barter (non-money first tier) offers, unknown traders/tpls, mixed-
 ///     requirement first tiers, and entries whose currency does not match the override's currency.
 /// </summary>
-[Injectable(TypePriority = OnLoadOrder.PostSptModLoader + 1)]
+[Injectable(TypePriority = OnLoadOrder.RagfairCallbacks - 1)]
 public class TRLTraderPricesMod(
     DatabaseService databaseService,
     PaymentHelper paymentHelper,
@@ -46,8 +52,11 @@ public class TRLTraderPricesMod(
     /// </summary>
     private sealed record TraderOverride
     {
-        public double Count { get; init; }
-        public string? Currency { get; init; }
+        // The overrides.json keys are lowercase ("count"/"currency"); SPT's JsonUtil binds
+        // case-sensitively, so without these attributes Count deserialized to 0 (free items!)
+        // and Currency to null. JsonPropertyName makes the lowercase JSON bind correctly.
+        [JsonPropertyName("count")]    public double Count { get; init; }
+        [JsonPropertyName("currency")] public string? Currency { get; init; }
     }
 
     /// <summary>Maps an override currency code to its Money tpl. Returns null for unknown/empty (match any money entry).</summary>

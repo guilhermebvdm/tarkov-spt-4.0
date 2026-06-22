@@ -1,5 +1,7 @@
 # 048 — Infra de skill custom (padrão SE, sem prepatcher) · Kickoff
 
+> ⚫ **DESCOPADO em 2026-06-21.** Decisão: não haverá skill custom que escala — todas as signatures viram **perks flat** (ver [class-custom-perks.md](../../docs/class-custom-perks.md)). A infra de reviver `ESkillId`/injetar no `DisplayList` não é mais necessária. Conteúdo abaixo mantido como histórico.
+
 **Mod:** CustomClasses · **Data:** 2026-06-20 · **Origem:** redesign 11→6, Fase 5 (decisão de arquitetura #2 — [class-levers.md](../../docs/class-levers.md) §1)
 **Wave:** R-W1 · **Deps:** 047 (soft)
 

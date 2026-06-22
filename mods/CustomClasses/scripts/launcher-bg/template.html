@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<title>CustomClasses — Painel da classe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Saira+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #d4262a;
+    --red-glow: rgba(212, 38, 42, 0.6);
+    --ink: #efece2;
+    --ink-dim: #a39c8d;
+    --buff: #8ec56b;
+    --buff-glow: rgba(142, 197, 107, 0.30);
+    --accent: #c2973f; /* cor da classe — sobrescrita por classe */
+    --font-display: "Oswald", "Bahnschrift Condensed", "Bahnschrift SemiBold", "Bahnschrift", sans-serif;
+    --font-body: "Saira Condensed", "Bahnschrift Condensed", "Bahnschrift", "Segoe UI", sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #000; }
+
+  .stage {
+    position: relative; width: 1040px; height: 915px; overflow: hidden;
+    font-family: var(--font-body); color: var(--ink);
+    background: #0a0806;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  /* ===== Cena ambiente: céu de entardecer + floresta ===== */
+  .sky {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(80% 60% at 64% 84%, rgba(214, 120, 54, 0.55) 0%, rgba(120, 60, 30, 0.18) 34%, rgba(10, 8, 6, 0) 64%),
+      linear-gradient(180deg, #20211c 0%, #1a1712 34%, #120f0b 64%, #0a0806 100%);
+  }
+  .treeline { position: absolute; left: -3%; right: -3%; bottom: 0; width: 106%; height: 360px; filter: blur(1.4px); opacity: 0.9; }
+  .scene-dim {
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(90deg, rgba(6,6,5,0.55) 0%, rgba(6,6,5,0.30) 40%, rgba(6,6,5,0.62) 100%),
+      linear-gradient(180deg, rgba(6,6,5,0.35) 0%, rgba(6,6,5,0.10) 30%, rgba(6,6,5,0.55) 100%);
+  }
+  .grain {
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-size: 300px 300px; mix-blend-mode: overlay; opacity: 0.13;
+  }
+  .vignette { position: absolute; inset: 0; box-shadow: inset 0 0 240px 80px rgba(0,0,0,0.78); pointer-events: none; }
+
+  /* faixa de marca (vermelho calibrado) */
+  .topbar { position: absolute; left: 0; right: 0; top: 0; height: 4px; background: linear-gradient(90deg, var(--red), #ff5a44 50%, var(--red)); box-shadow: 0 0 18px 2px var(--red-glow); }
+  .redline-bg {
+    position: absolute; left: -12%; right: -12%; top: 17%; height: 4px;
+    background: linear-gradient(90deg, transparent, var(--red) 28%, #ff6a52 50%, var(--red) 72%, transparent);
+    transform: rotate(-3deg); box-shadow: 0 0 20px 3px var(--red-glow); opacity: 0.4;
+  }
+
+  /* ===== Header ===== */
+  .kicker { position: absolute; left: 42px; top: 30px; font-family: var(--font-display); font-size: 16px; letter-spacing: 6px; color: var(--red); text-transform: uppercase; font-weight: 600; }
+  .kicker b { color: var(--ink-dim); font-weight: 400; }
+  .head { position: absolute; left: 40px; top: 56px; right: 40px; display: flex; align-items: center; gap: 18px; }
+  .badge-seal {
+    width: 82px; height: 82px; flex: 0 0 auto; position: relative; display: flex; align-items: center; justify-content: center;
+    border: 2px solid rgba(212,38,42,0.6); box-shadow: 0 0 18px var(--red-glow), inset 0 0 20px rgba(0,0,0,0.65); background: rgba(0,0,0,0.4);
+  }
+  .badge-seal::before, .badge-seal::after { content: ""; position: absolute; width: 12px; height: 12px; border: 2px solid var(--red); }
+  .badge-seal::before { left: -2px; top: -2px; border-right: none; border-bottom: none; }
+  .badge-seal::after { right: -2px; bottom: -2px; border-left: none; border-top: none; }
+  .badge { width: 56px; height: 56px; background: var(--accent); -webkit-mask: var(--badge) center / contain no-repeat; mask: var(--badge) center / contain no-repeat; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.8)); }
+  .titles { display: flex; flex-direction: column; gap: 8px; }
+  .name { font-family: var(--font-display); font-size: 66px; line-height: 0.82; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 3px 20px rgba(0,0,0,0.9); }
+  .underrow { display: flex; align-items: center; gap: 14px; }
+  .underline { width: 76px; height: 4px; background: linear-gradient(90deg, var(--red), #ff6a52); box-shadow: 0 0 14px var(--red-glow); flex: 0 0 auto; }
+  .arch { font-family: var(--font-display); font-size: 19px; letter-spacing: 3px; color: var(--ink-dim); text-transform: uppercase; white-space: nowrap; font-weight: 500; }
+
+  /* ===== Card do personagem ===== */
+  .card {
+    position: absolute; left: 40px; top: 168px; width: 372px; bottom: 52px;
+    background: linear-gradient(180deg, rgba(22,20,15,0.35), rgba(5,5,4,0.78));
+    border: 1px solid rgba(255,255,255,0.09); overflow: hidden;
+  }
+  .card .render { position: absolute; inset: 0; background-position: center bottom; background-repeat: no-repeat; background-size: contain; }
+  .card .grad { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 52%, rgba(0,0,0,0.6)); }
+  .card-watermark {
+    position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%);
+    width: 290px; height: 290px; background: var(--accent);
+    -webkit-mask: var(--badge) center / contain no-repeat; mask: var(--badge) center / contain no-repeat; opacity: 0.07;
+  }
+  .char-ph { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 240px; height: 480px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; color: rgba(255,255,255,0.22); }
+  .char-ph svg { width: 140px; opacity: .5; }
+  .char-ph .lbl { font-family: var(--font-display); font-size: 15px; letter-spacing: 4px; text-align: center; line-height: 1.6; }
+  .card .corner { position: absolute; width: 24px; height: 24px; border: 2px solid var(--red); box-shadow: 0 0 10px var(--red-glow); z-index: 2; }
+  .card .tl { left: 10px; top: 10px; border-right: none; border-bottom: none; }
+  .card .tr { right: 10px; top: 10px; border-left: none; border-bottom: none; }
+  .card .bl { left: 10px; bottom: 10px; border-right: none; border-top: none; }
+  .card .br { right: 10px; bottom: 10px; border-left: none; border-top: none; }
+
+  /* ===== Coluna direita ===== */
+  .info { position: absolute; left: 448px; top: 172px; right: 40px; bottom: 40px; display: flex; flex-direction: column; gap: 22px; }
+  .sec-title { font-family: var(--font-display); font-size: 17px; letter-spacing: 4px; text-transform: uppercase; color: var(--ink); margin-bottom: 13px; display: flex; align-items: center; gap: 11px; font-weight: 600; }
+  .sec-title::before { content: ""; width: 8px; height: 16px; background: var(--red); box-shadow: 0 0 10px var(--red-glow); flex: 0 0 auto; }
+
+  .desc { font-size: 22px; line-height: 1.4; color: var(--ink); opacity: .95; font-weight: 400; }
+
+  /* skills — barras segmentadas (HUD) */
+  .skill { margin-bottom: 13px; }
+  .skill .row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+  .skill .nm { font-size: 20px; letter-spacing: .3px; font-weight: 500; }
+  .skill .lv { font-family: var(--font-display); font-size: 19px; color: var(--ink-dim); font-weight: 600; letter-spacing: 1px; }
+  .skill .lv b { font-size: 23px; color: var(--ink); }
+  .skill.sig .nm, .skill.sig .lv, .skill.sig .lv b { color: var(--accent); }
+  .segbar { display: flex; gap: 3px; height: 11px; }
+  .seg { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.05); transform: skewX(-14deg); }
+  .seg.on { background: linear-gradient(180deg, #b6b6a6, #76766a); border-color: rgba(255,255,255,0.12); }
+  .skill.sig .seg.on { background: linear-gradient(180deg, #ffe2a0, var(--accent)); box-shadow: 0 0 9px rgba(255, 210, 120, 0.5); border-color: rgba(255,220,150,0.4); }
+
+  /* multiplicadores */
+  .mods-group + .mods-group { margin-top: 13px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 9px; }
+  .chip { display: inline-flex; align-items: baseline; gap: 8px; padding: 7px 13px; font-size: 19px; letter-spacing: .2px; border: 1px solid; background: rgba(0,0,0,0.32); font-weight: 500; }
+  .chip .pct { font-family: var(--font-display); font-weight: 700; font-size: 20px; }
+  .chip.buff { border-color: rgba(142,197,107,0.5); color: #d8efc6; box-shadow: inset 0 0 18px var(--buff-glow); }
+  .chip.buff .pct { color: var(--buff); }
+  .chip.debuff { border-color: rgba(212,38,42,0.65); color: #f3cdc6; box-shadow: inset 0 0 18px var(--red-glow); }
+  .chip.debuff .pct { color: #ff6a52; }
+  .empty-note { font-size: 18px; color: var(--ink-dim); opacity: .7; }
+</style>
+</head>
+<body>
+  <div class="stage" id="stage">
+    <div class="sky"></div>
+    <svg class="treeline" id="treeline" viewBox="0 0 1040 360" preserveAspectRatio="none"></svg>
+    <div class="scene-dim"></div>
+    <div class="grain"></div>
+    <div class="vignette"></div>
+    <div class="topbar"></div>
+    <div class="redline-bg"></div>
+
+    <div class="kicker">// CLASSE <b id="archInline"></b></div>
+    <div class="head">
+      <div class="badge-seal"><div class="badge" id="badge"></div></div>
+      <div class="titles">
+        <div class="name" id="name">Caçador</div>
+        <div class="underrow"><div class="underline"></div><div class="arch" id="arch">Sniper</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-watermark" id="watermark"></div>
+      <div class="render" id="render"></div>
+      <div class="char-ph" id="charph">
+        <svg viewBox="0 0 120 220" fill="currentColor"><circle cx="60" cy="28" r="22"/><path d="M30 70 q30 -16 60 0 l10 78 -22 6 -4 58 -28 0 -4 -58 -22 -6 z"/></svg>
+        <div class="lbl">RENDER DA CLASSE<br/>(exportar PNG)</div>
+      </div>
+      <div class="grad"></div>
+      <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+    </div>
+
+    <div class="info">
+      <div>
+        <div class="sec-title">Descrição</div>
+        <div class="desc" id="desc"></div>
+      </div>
+      <div>
+        <div class="sec-title">Skills iniciais</div>
+        <div id="skills"></div>
+      </div>
+      <div>
+        <div class="sec-title">Ganho de XP</div>
+        <div class="mods-group"><div class="chips" id="buffs"></div></div>
+        <div class="mods-group"><div class="chips" id="debuffs"></div></div>
+      </div>
+    </div>
+  </div>
+
+<script src="icons-data.js"></script>
+<script>
+  const CLASS = {
+    name: "Caçador",
+    archetype: "Sniper — Longa distância",
+    description: "Sniper. Paciente e preciso. Domina posições elevadas, minimiza movimento e elimina antes de ser detectado.",
+    accent: "#c2973f",
+    iconKey: "cacador",
+    renderUrl: "",
+    skills: { Sniper: 8, Perception: 6, Endurance: 5, CovertMovement: 5, Attention: 4 },
+    multipliers: { Sniper: 2, AimDrills: 2, Endurance: 2, CovertMovement: 2, Perception: 2, Attention: 1.5, Assault: 0.7 }
+  };
+
+  const SKILL_PT = {
+    Sniper: "Sniper", AimDrills: "Mira", Endurance: "Resistência", CovertMovement: "Mov. furtivo",
+    Perception: "Percepção", Attention: "Atenção", Assault: "Assalto", Strength: "Força",
+    Search: "Busca", Surgery: "Cirurgia", Vitality: "Vitalidade", Health: "Saúde",
+    Immunity: "Imunidade", Metabolism: "Metabolismo", WeaponTreatment: "Manut. de arma",
+    TroubleShooting: "Diagnóstico", Intellect: "Intelecto", Crafting: "Produção",
+    HideoutManagement: "Gestão do esconderijo", Memory: "Memória", Charisma: "Carisma",
+    RecoilControl: "Controle de recuo", MagDrills: "Recarga", DMR: "DMR",
+    StressResistance: "Resist. ao estresse", Throwing: "Arremesso", Shotgun: "Espingarda"
+  };
+  const lbl = k => SKILL_PT[k] || k;
+
+  // floresta (silhueta de pinheiros)
+  (function drawTrees() {
+    const heights = [120,178,96,210,140,168,108,196,128,160,90,184,118,150,102,172,134,200,112,156,98,182];
+    const svg = document.getElementById("treeline");
+    const W = 1040, base = 360, step = W / (heights.length - 1);
+    let d = "";
+    heights.forEach((h, i) => {
+      const x = i * step, half = 26 + (h * 0.16);
+      // pinheiro em 3 camadas
+      const top = base - h;
+      d += `M${x-half} ${base} L${x} ${top} L${x+half} ${base} Z`;
+      d += `M${x-half*0.78} ${base-h*0.42} L${x} ${top+h*0.12} L${x+half*0.78} ${base-h*0.42} Z`;
+    });
+    svg.innerHTML = `<path d="${d}" fill="#05060a"/>`;
+  })();
+
+  const stage = document.getElementById("stage");
+  stage.style.setProperty("--accent", CLASS.accent);
+  const iconData = (window.ICON_DATA && window.ICON_DATA[CLASS.iconKey]) || "";
+  stage.style.setProperty("--badge", `url("${iconData}")`);
+
+  document.getElementById("name").textContent = CLASS.name;
+  document.getElementById("arch").textContent = CLASS.archetype;
+  document.getElementById("archInline").textContent = "· " + CLASS.archetype;
+  document.getElementById("desc").textContent = CLASS.description;
+
+  if (CLASS.renderUrl) {
+    document.getElementById("render").style.backgroundImage = `url("${CLASS.renderUrl}")`;
+    document.getElementById("charph").style.display = "none";
+    document.getElementById("watermark").style.opacity = ".11";
+  }
+
+  // skills com barras segmentadas (0..10)
+  const SEGS = 10;
+  const skEl = document.getElementById("skills");
+  Object.entries(CLASS.skills).sort((a, b) => b[1] - a[1]).forEach(([k, v], i) => {
+    const on = Math.max(0, Math.min(SEGS, v));
+    let segs = "";
+    for (let s = 0; s < SEGS; s++) segs += `<div class="seg ${s < on ? "on" : ""}"></div>`;
+    const d = document.createElement("div");
+    d.className = "skill" + (i === 0 ? " sig" : "");
+    d.innerHTML = `<div class="row"><span class="nm">${lbl(k)}</span><span class="lv">NV <b>${v}</b></span></div><div class="segbar">${segs}</div>`;
+    skEl.appendChild(d);
+  });
+
+  const fmtPct = f => { const p = Math.round((f - 1) * 100); return (p > 0 ? "+" : "−") + Math.abs(p) + "%"; };
+  const buffs = [], debuffs = [];
+  Object.entries(CLASS.multipliers).forEach(([k, f]) => { if (f > 1) buffs.push([k, f]); else if (f < 1) debuffs.push([k, f]); });
+  buffs.sort((a, b) => b[1] - a[1]); debuffs.sort((a, b) => a[1] - b[1]);
+  const chip = (k, f, kind) => `<span class="chip ${kind}"><span class="nm">${lbl(k)}</span><span class="pct">${fmtPct(f)}</span></span>`;
+  document.getElementById("buffs").innerHTML = buffs.map(([k, f]) => chip(k, f, "buff")).join("");
+  document.getElementById("debuffs").innerHTML = debuffs.length ? debuffs.map(([k, f]) => chip(k, f, "debuff")).join("") : `<span class="empty-note">— sem penalidades —</span>`;
+</script>
+</body>
+</html>

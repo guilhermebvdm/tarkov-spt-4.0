@@ -154,7 +154,8 @@ namespace CameraRotationMod
             bool isNativeMounting = false;
             bool isAiming = false;
             bool isInProne = false;
-            
+            bool isStationary = false;
+
             if (gameWorld?.MainPlayer != null)
             {
                 var pwa = gameWorld.MainPlayer.ProceduralWeaponAnimation;
@@ -164,18 +165,20 @@ namespace CameraRotationMod
                     isAiming = pwa.IsAiming;
                 }
                 isInProne = gameWorld.MainPlayer.IsInPronePose;
+                var mc = gameWorld.MainPlayer.MovementContext;
+                isStationary = mc != null && mc.IsStationaryWeaponInHands;   // item 013: arma montada do cenário
             }
 
             _wasAimingGlobal = isAiming;
 
             bool isSprinting = gameWorld?.MainPlayer?.IsSprintEnabled == true;
 
-            if (isNativeMounting || isInProne)
+            if (isNativeMounting || isInProne || isStationary)
             {
-                // Se deitou ou está apoiado, quebra a Action Stance e trava controles
+                // Se deitou, apoiou (bipé) ou entrou em arma montada, quebra a Action Stance e trava controles
                 if (_isActionStanceActive) EndActionStance(forceCancel: true);
-                
-                // Forçar para Default caso seja montagem ou deitado (evita bugar se estivesse numa stance e montou/deitou do nada)
+
+                // Forçar Stance 0 (item 013: inclui arma montada do cenário — evita desalinhamento visual)
                 if (CurrentStance != Stance.Default)
                 {
                     SetStance(Stance.Default);
@@ -197,6 +200,7 @@ namespace CameraRotationMod
                         {
                             _preSprintStance = CurrentStance;
                             SetStance(Stance.Default);
+                            Patches.ApplyComplexRotationPatch.SnapToNeutral();   // item 013: pula o spring 1→0 (sem flash da Stance 0)
                         }
                         else
                         {
@@ -1149,6 +1153,7 @@ namespace CameraRotationMod
         private static bool _staminaConfigDirty = true;
         private static float _lastAppliedSpeedLimit = -1f;   // -1 = nada aplicado; força re-apply
         private static float _cachedAimDrainRate = 3f;        // cacheado em OnRaidStart — fallback ao default vanilla
+        public static float CachedAimDrainRate => _cachedAimDrainRate;   // item 012: base rate do StaminaController
 
         public static Stance GetActiveStaminaStance() => _activeStaminaStance;
 
@@ -1271,8 +1276,7 @@ namespace CameraRotationMod
             mc.RemoveStateSpeedLimit(Plugin.StanceSpeedLimitCause);
             _lastAppliedSpeedLimit = -1f;
 
-            StanceStaminaState.Multiplier = cfg.StaminaMultiplier.Value;
-
+            // item 012: o multiplicador de stamina migrou para o StaminaController; aqui sobra só o speed-limit.
             bool inProne = Singleton<GameWorld>.Instance.MainPlayer.IsInPronePose;
             StanceStaminaState.IsSuspendedByProne = inProne && !cfg.ApplyWhenProne.Value;
 
@@ -1316,45 +1320,11 @@ namespace CameraRotationMod
         /// </summary>
         public static void TickStanceStamina()
         {
+            // item 012: o delta de stamina de braço migrou para StaminaController.Tick (autoridade única).
+            // Aqui sobra apenas a re-aplicação do speed-limit quando a config de stance muda (dirty).
             try
             {
-                // Re-aplicar config se foi marcada suja por SettingChanged
                 if (_staminaConfigDirty) ApplyStaminaStance(_activeStaminaStance);
-
-                if (!IsActiveContext()) return;
-                if (!StanceStaminaState.ShouldApplyStamina) return;
-
-                var player = Singleton<GameWorld>.Instance.MainPlayer;
-
-                // Em ADS o vanilla do EFT toma conta — nosso tick faz no-op.
-                if (player.ProceduralWeaponAnimation?.IsAiming == true) return;
-
-                // Montado no vanilla: não drena estamina de braço — suspende o nosso tick e deixa o
-                // vanilla (regen em hipfire) assumir. (O mount passivo do novo item reavaliará isto.)
-                if (player.ProceduralWeaponAnimation?.IsMountedState == true) return;
-
-                var hands = player.Physical?.HandsStamina;
-                if (hands == null) return;
-
-                if (hands.Multiplier <= 0f) return;
-                // Honra ForceMode do GClass774 — Consume() vanilla pula quando ForceMode = true
-                if (hands.ForceMode) return;
-
-                // delta: negativo = drain, positivo = recovery
-                // _cachedAimDrainRate populado em OnRaidStart (constante imutável)
-                float mult = StanceStaminaState.Multiplier;
-                float delta = _cachedAimDrainRate * (mult - 1.0f) * hands.Multiplier * Time.deltaTime;
-                if (float.IsNaN(delta) || float.IsInfinity(delta) || Mathf.Abs(delta) < 0.0001f) return;
-
-                float prev = hands.Current;
-                float target = Mathf.Clamp(prev + delta, 0f, (float)hands.TotalCapacity);
-                if (Mathf.Abs(target - prev) < 0.0001f) return;
-                hands.Current = target;
-                NotifyHandsStaminaChanged(hands, prev);
-
-                // Replica HandleExpiration vanilla para disparar OnExpired event ao atingir 0
-                if (delta < 0 && target <= 0f && prev > 0f)
-                    hands.HandleExpiration();
             }
             catch (Exception ex) { Plugin.Logger.LogError($"[StanceManager.TickStanceStamina] {ex}"); }
         }
