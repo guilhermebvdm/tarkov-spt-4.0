@@ -36,17 +36,6 @@ namespace CameraRotationMod.Patches
         private static Vector3 _rotVelocity;
         private static Vector3 _posVelocity;
 
-        // Item 013: snap instantâneo dos offsets para neutro (sem animar o spring). Usado ao forçar Stance 0
-        // no início do sprint — elimina o "flash" da arma passando pela Stance 0 antes da corrida.
-        public static void SnapToNeutral()
-        {
-            CurrentEuler = Vector3.zero;
-            CurrentPosition = Vector3.zero;
-            _rotVelocity = Vector3.zero;
-            _posVelocity = Vector3.zero;
-            CurrentRotation = Quaternion.identity;
-        }
-
         // Limites de sanidade da interpolação por mola. O alvo legítimo nunca passa de ±45° (range de
         // config); a mola Euler explícita, porém, DIVERGE com frame time ruim (dt grande / FPS baixo /
         // stutter) e o Euler resultante cruza o gimbal (~90-180°), virando a câmera de cabeça pra baixo

@@ -75,16 +75,9 @@ namespace CameraRotationMod
         private static bool _isWaitingToResetTacSprint = false;
         private static float _tacSprintResetTimer = 0f;
         
-        // Sprint Stance Tracking
-
-        private static Stance _preSprintStance = Stance.Default;
-        
         // ADS Tracking for Wiggle
         private static bool _wasAimingGlobal = false;
-        
-        // Track Sprint fallback
-        private static bool _wasSprintingForceZero = false;
-        
+
         // Track GameWorld to detect raid changes and reset state
         private static GameWorld _lastGameWorld = null;
         
@@ -189,35 +182,9 @@ namespace CameraRotationMod
             if (isSprinting)
             {
                 if (_isActionStanceActive) EndActionStance(forceCancel: true);
-
-                // Se estiver sprintando e NÃO for ativar o TacSprint, força a stance 0 e guarda a antiga
-                if (!_isTacSprintActive && !CanDoTacSprint(gameWorld.MainPlayer))
-                {
-                    if (!_wasSprintingForceZero)
-                    {
-                        _wasSprintingForceZero = true;
-                        if (CurrentStance != Stance.Default)
-                        {
-                            _preSprintStance = CurrentStance;
-                            SetStance(Stance.Default);
-                            Patches.ApplyComplexRotationPatch.SnapToNeutral();   // item 013: pula o spring 1→0 (sem flash da Stance 0)
-                        }
-                        else
-                        {
-                            _preSprintStance = Stance.Default;
-                        }
-                    }
-                }
+                // item 013 (fix-01): NÃO forçar Stance 0 ao correr. A corrida acontece inteiramente na
+                // stance atual (0/1/2/3), sem qualquer transição ou "flash" pela Stance 0. TacSprint normal.
                 return; // Trava as hotkeys normais durante o sprint
-            }
-            else if (_wasSprintingForceZero)
-            {
-                // Parou de sprintar, restaura a stance se estiver na 0
-                _wasSprintingForceZero = false;
-                if (CurrentStance == Stance.Default)
-                {
-                    SetStance(_preSprintStance);
-                }
             }
 
             // Action Stance: o término é detectado via ActionStanceOnIdlePatch (OnIdleStartEvent).
