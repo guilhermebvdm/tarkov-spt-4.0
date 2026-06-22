@@ -103,8 +103,9 @@ trader no boot. **Sem o mod instalado, o viewer salva o override mas avisa "mod 
 no jogo.**
 
 1. **Copiar o pacote do mod pro server.** Na máquina de dev, o pacote pronto fica em
-   `mods/TRLTraderPrices/builds/TRLTraderPrices-vm-deploy.zip` (só a DLL + .pdb; ~20 KB). Copie pro server.
-   *(Regerar o pacote, se faltar: `bash .agents/scripts/compile-mod.sh TRLTraderPrices` e zipe
+   `mods/TRLTraderPrices/builds/TRLTraderPrices-mod-v<versão>.zip` (só a DLL + .pdb; ~20 KB) — versão
+   atual **v1.1.0**. Copie pro server. *(Regerar o pacote, se faltar:
+   `bash .agents/scripts/compile-mod.sh TRLTraderPrices` e zipe
    `mods/TRLTraderPrices/builds/server/TRLTraderPrices.dll` dentro de uma pasta `TRLTraderPrices/`.)*
 2. **Extrair em `user/mods/`.** O zip já tem a estrutura `TRLTraderPrices/` — extraia direto na pasta
    `user/mods/` do install (ex.: `E:\SPT\SPT\user\mods\`), resultando em
