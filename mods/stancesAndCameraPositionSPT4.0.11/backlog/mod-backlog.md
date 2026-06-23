@@ -16,7 +16,8 @@
 | 010 | Manual Chambering | Impede o auto-chamber da primeira bala (no spawn, equip e reload com câmara vazia) — o jogador puxa o ferrolho manualmente. Toggles separados por cenário no F12. | [010-manual-chambering/](./010-manual-chambering/) | 🟡 |
 | 011 | Mount passivo sobre o vanilla | Reconstrói o mount sobre o nativo do EFT: ativo = mount vanilla; passivo = buffs leves de stamina/recoil/sway + ícones direcionais (left/right/down) ao encostar, sem tecla. Substitui o 004. | [011-mount-passivo-vanilla/](./011-mount-passivo-vanilla/) | 🟡 |
 | 012 | Controlador central de stamina de braço | Controlador único que escreve a HandsStamina (neutraliza o vanilla), com multiplicador por cenário (Stand/Prone/Passive/Active × Stance/ADS/Hold Breath) num grupo F12 "Stamina Management" + debug de estado. Evolui o coordenador do 06-fix-01. | [012-controlador-central-stamina/](./012-controlador-central-stamina/) | 🟢 |
-| 013 | Refinamentos de transição de stance | Arma montada (stationary) reconhecida como Mount Active + força Stance 0 ao entrar; corrida a partir de Stance 1/2/3 não "pisca" pela Stance 0. | [013-refino-transicao-stance/](./013-refino-transicao-stance/) | ⚪ |
+| 013 | Refinamentos de transição de stance | Arma montada (stationary) reconhecida como Mount Active + força Stance 0 ao entrar; corrida a partir de Stance 1/2/3 não "pisca" pela Stance 0. | [013-refino-transicao-stance/](./013-refino-transicao-stance/) | 🟡 |
+| 014 | Corrigir sync visual de stances no Fika | Aplicação remota mexia no Spine3 (só torso) → arma ficava imóvel. Corrige para aplicar o offset no WeaponRootAnim (braço+arma juntos), de forma aditiva, coexistindo com lean/troca de ombro. Substitui a implementação do 006. | [014-sync-stances-fika/](./014-sync-stances-fika/) | 🟡 |
 
 ## Legenda
 

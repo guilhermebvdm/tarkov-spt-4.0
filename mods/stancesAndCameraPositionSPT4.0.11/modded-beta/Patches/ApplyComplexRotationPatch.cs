@@ -36,17 +36,6 @@ namespace CameraRotationMod.Patches
         private static Vector3 _rotVelocity;
         private static Vector3 _posVelocity;
 
-        // Item 013: snap instantâneo dos offsets para neutro (sem animar o spring). Usado ao forçar Stance 0
-        // no início do sprint — elimina o "flash" da arma passando pela Stance 0 antes da corrida.
-        public static void SnapToNeutral()
-        {
-            CurrentEuler = Vector3.zero;
-            CurrentPosition = Vector3.zero;
-            _rotVelocity = Vector3.zero;
-            _posVelocity = Vector3.zero;
-            CurrentRotation = Quaternion.identity;
-        }
-
         // Limites de sanidade da interpolação por mola. O alvo legítimo nunca passa de ±45° (range de
         // config); a mola Euler explícita, porém, DIVERGE com frame time ruim (dt grande / FPS baixo /
         // stutter) e o Euler resultante cruza o gimbal (~90-180°), virando a câmera de cabeça pra baixo
@@ -78,7 +67,7 @@ namespace CameraRotationMod.Patches
             return e;
         }
 
-        private static Vector3 SpringLerpAngle(Vector3 current, Vector3 target, ref Vector3 velocity, float stiffness, float damping, float dt)
+        public static Vector3 SpringLerpAngle(Vector3 current, Vector3 target, ref Vector3 velocity, float stiffness, float damping, float dt)
         {
             if (float.IsNaN(target.x) || float.IsNaN(target.y) || float.IsNaN(target.z) ||
                 float.IsNaN(current.x) || float.IsNaN(current.y) || float.IsNaN(current.z)) return Vector3.zero;
@@ -109,7 +98,7 @@ namespace CameraRotationMod.Patches
             return result;
         }
 
-        private static Vector3 SpringLerp(Vector3 current, Vector3 target, ref Vector3 velocity, float stiffness, float damping, float dt)
+        public static Vector3 SpringLerp(Vector3 current, Vector3 target, ref Vector3 velocity, float stiffness, float damping, float dt)
         {
             if (float.IsNaN(target.x) || float.IsNaN(target.y) || float.IsNaN(target.z) ||
                 float.IsNaN(current.x) || float.IsNaN(current.y) || float.IsNaN(current.z)) return Vector3.zero;
@@ -156,7 +145,7 @@ namespace CameraRotationMod.Patches
 
             Player player = Traverse.Create(firearmController).Field<Player>("_player").Value;
             if (player == null || !player.IsYourPlayer)
-                return;
+                return;   // observado é tratado no ObservedStanceProcessPatch (Postfix de ProcessEffectors)
 
             Quaternion scopeRotation = (Quaternion)_scopeRotationField.GetValue(__instance);
             Vector3 weaponPosition = (Vector3)_weapTempPositionField.GetValue(__instance);

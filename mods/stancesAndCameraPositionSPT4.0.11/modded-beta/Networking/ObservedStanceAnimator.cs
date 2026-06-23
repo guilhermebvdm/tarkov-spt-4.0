@@ -1,90 +1,60 @@
-using System;
 using EFT;
 using Fika.Core.Main.Players;
 using UnityEngine;
+using CameraRotationMod.Patches;
 
 namespace CameraRotationMod.Networking
 {
+    /// <summary>
+    /// Item 014: state-holder por jogador OBSERVADO (Fika). Guarda o stance sincronizado + o spring state e
+    /// aplica o offset de stance ADITIVO em PlayerBones.DeltaRotation/Offset (via ObservedStanceShiftPatch,
+    /// Prefix de ShiftWeaponRoot). O ObservedPlayer reseta Offset/DeltaRotation com a pose nativa a cada frame
+    /// ANTES do ShiftWeaponRoot (ObservedPlayer.cs:1852-1853), então aqui apenas SOMAMOS o stance — coexiste
+    /// com lean/ombro/mira. O ShiftWeaponRoot usa Weapon_Root_Third.rotation * DeltaRotation → a arma de 3a
+    /// pessoa reflete o stance; as mãos/braço seguem a arma por IK.
+    /// </summary>
     public class ObservedStanceAnimator : MonoBehaviour
     {
         private ObservedPlayer _observedPlayer;
-        private int _currentStance = 0;
-        private bool _isAiming = false;
+        private int _stance;
+        private bool _isAiming;
+        private Vector3 _euler, _pos, _rotVel, _posVel;
+        private static bool _loggedApply;
 
-        private Vector3 _currentEuler = Vector3.zero;
-        private Vector3 _rotVelocity = Vector3.zero;
-
-        public void Init(ObservedPlayer player)
-        {
-            _observedPlayer = player;
-        }
+        public void Init(ObservedPlayer p) => _observedPlayer = p;
 
         public void SetStance(int stance, bool isAiming)
         {
-            _currentStance = stance;
+            // CR-01-01: sanear o dado de rede — stance fora de 0..3 (cliente bugado/versão divergente) → 0.
+            _stance = (stance < 0 || stance > 3) ? 0 : stance;
             _isAiming = isAiming;
         }
 
-        private void LateUpdate()
+        public void ApplyToWeaponRoot(PlayerBones bones)
         {
-            if (_observedPlayer == null || _observedPlayer.PlayerBones == null)
-                return;
+            Transform wra = bones == null ? null : bones.Weapon_Root_Anim;
+            if (wra == null) return;
 
-            if (_observedPlayer.PlayerBones.Spine3 == null || _observedPlayer.PlayerBones.Spine3.Original == null)
-                return;
+            bool inStance = _stance > 0 && !(_observedPlayer != null && _observedPlayer.IsInPronePose);
+            Vector3 targetEuler = inStance ? StanceManager.GetTargetRotation((Stance)_stance, _isAiming) : Vector3.zero;
+            Vector3 targetPos = inStance ? StanceManager.GetTargetPosition((Stance)_stance, _isAiming) : Vector3.zero;
 
-            // Não aplica stance se o jogador observado estiver deitado
-            if (_observedPlayer.IsInPronePose)
-                return;
-
-            // Encontra a rotação alvo (mesmos graus do StanceManager)
-            Vector3 targetEuler = Vector3.zero;
-            bool isInStance = _currentStance > 0;
-            
-            if (isInStance)
-            {
-                targetEuler = GetTargetRotationForStance(_currentStance, _isAiming);
-            }
-
-            // Suaviza a rotação (Mathf.SmoothDampAngle)
             float dt = Time.deltaTime;
-            _currentEuler.x = Mathf.SmoothDampAngle(_currentEuler.x, targetEuler.x, ref _rotVelocity.x, 0.1f, float.PositiveInfinity, dt);
-            _currentEuler.y = Mathf.SmoothDampAngle(_currentEuler.y, targetEuler.y, ref _rotVelocity.y, 0.1f, float.PositiveInfinity, dt);
-            _currentEuler.z = Mathf.SmoothDampAngle(_currentEuler.z, targetEuler.z, ref _rotVelocity.z, 0.1f, float.PositiveInfinity, dt);
+            float speedMult = Plugin._StanceTransitionSpeed?.Value ?? 1f;
+            float stiffness = 150f * speedMult;
+            float damping = Plugin._StanceOvershootDamping?.Value ?? 12f;
+            _euler = ApplyComplexRotationPatch.SpringLerpAngle(_euler, targetEuler, ref _rotVel, stiffness, damping, dt);
+            _pos = ApplyComplexRotationPatch.SpringLerp(_pos, targetPos, ref _posVel, stiffness, damping, dt);
 
-            // Aplica a rotação adicional no Spine3 (Torso superior)
-            // Isso vai inclinar o braço inteiro dele e a arma
-            _observedPlayer.PlayerBones.Spine3.Original.localRotation *= Quaternion.Euler(_currentEuler);
-        }
+            // Transform FINAL da arma de 3a pessoa, após ShiftWeaponRoot + Kinematics + IK (nada sobrescreve depois).
+            wra.localRotation = wra.localRotation * Quaternion.Euler(_euler);
+            wra.localPosition = wra.localPosition + _pos;
 
-        private Vector3 GetTargetRotationForStance(int stance, bool isAiming)
-        {
-            if (stance == 1) // LowReady (Stance1)
+            if (!_loggedApply && _stance > 0)
             {
-                return new Vector3(
-                    Plugin._Stance1HandsPitchRotation?.Value ?? 0f,
-                    Plugin._Stance1HandsYawRotation?.Value ?? 0f,
-                    Plugin._Stance1HandsRollRotation?.Value ?? 0f
-                );
+                _loggedApply = true;
+                Plugin.Logger.LogInfo($"[StanceSync-014] aplicando stance={_stance} euler={targetEuler} no Weapon_Root_Anim do observado.");
             }
-            if (stance == 2) // HighReady (Stance2)
-            {
-                return new Vector3(
-                    Plugin._Stance2HandsPitchRotation?.Value ?? 0f,
-                    Plugin._Stance2HandsYawRotation?.Value ?? 0f,
-                    Plugin._Stance2HandsRollRotation?.Value ?? 0f
-                );
-            }
-            if (stance == 3) // Patrol (Stance3)
-            {
-                return new Vector3(
-                    Plugin._Stance3HandsPitchRotation?.Value ?? 0f,
-                    Plugin._Stance3HandsYawRotation?.Value ?? 0f,
-                    Plugin._Stance3HandsRollRotation?.Value ?? 0f
-                );
-            }
-            
-            return Vector3.zero;
         }
     }
 }

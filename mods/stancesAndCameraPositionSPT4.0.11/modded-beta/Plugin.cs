@@ -330,6 +330,7 @@ public class Plugin : BaseUnityPlugin
         SafeEnable("PassiveMountDetectPatch", () => new Patches.PassiveMountDetectPatch());
         SafeEnable("PassiveRecoilPatch", () => new Patches.PassiveRecoilPatch());
         SafeEnable("PassiveSwayPatch", () => new Patches.PassiveSwayPatch());
+        SafeEnable("ObservedStanceVisualPatch", () => new Patches.ObservedStanceVisualPatch());   // item 014 fix-03
         SafeEnable("BattleUIScreenPatch", () => new BattleUIScreenPatch());
 
         // Item 007: Movement & Inertia
@@ -882,6 +883,17 @@ public class Plugin : BaseUnityPlugin
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { Order = 16 }));
 
+        // 013 fix-02: descoberta antecipada da Stance 3 (1ª Bind da seção) para "Stance 3 - Custom" aparecer
+        // logo após "Stance 2 - Low Ready" no F12 (ordem das seções = ordem de descoberta). O resto do bloco
+        // da Stance 3 (hand rotations) continua mais abaixo, já anexando à seção descoberta aqui.
+        _Stance3SprintAnimationEnabled = Config.Bind(
+            Stance3Section,
+            "Enable Stance 3 Sprint Animation",
+            false,
+            new ConfigDescription("When enabled, uses a compact sprint animation when sprinting in Stance 3 (tac sprint style)",
+            null,
+            new ConfigurationManagerAttributes { Order = 14 }));
+
         // ========================================
         // WEAPON MOUNT (PASSIVE) — Item 011
         // ========================================
@@ -1236,14 +1248,8 @@ public class Plugin : BaseUnityPlugin
         // ========================================
         // STANCE 3 (Order 14-8)
         // ========================================
-        _Stance3SprintAnimationEnabled = Config.Bind(
-            Stance3Section,
-            "Enable Stance 3 Sprint Animation",
-            false,
-            new ConfigDescription("When enabled, uses a compact sprint animation when sprinting in Stance 3 (tac sprint style)",
-            null,
-            new ConfigurationManagerAttributes { Order = 14 }));
-
+        // 013 fix-02: _Stance3SprintAnimationEnabled (1ª Bind da seção) foi movido para logo após o bloco
+        // da Stance 2, para a seção ser DESCOBERTA cedo e aparecer na ordem 0→1→2→3 no F12.
         // 06-fix-01: Stance 3 é agora Custom — Pitch 0, Yaw -30° (lateral).
         _Stance3HandsPitchRotation = Config.Bind(
             Stance3Section,
