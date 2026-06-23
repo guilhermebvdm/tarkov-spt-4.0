@@ -1,0 +1,219 @@
+v0.9.6
+- Changes:
+	- Reworked injury effects on Efficiency system:
+		- While you have Realism's Adrenaline buff, you will not suffer negative debuffs from heavy and light bleeds, and bone breaks.
+		- Heavy and light bleeds, and bone breaks no longer have immediate effects on the player's Efficiency: the effects now increase over time until a maximum level is reached.
+- Fixes:
+	- Added smoothing layer to footstep visual effect. Hopefully this helps people running sub-50 fps to not experience the weird stuttering.
+
+
+v0.9.1
+- Made lagging sway a function of efficiency, increased prominence of the effect in general.
+- Decreased efficiency of Active Aim stance, but also decreased misalignment.
+
+v0.9 -- Small polishes. I had been waiting for the 3.11 Realism update to hit the round version number, but whatever. 
+
+- Increased base hold-breath speed from 25% to 40% of normal breathing speed;
+- Increased default arm shake effect value;
+- Slightly increased default mis-alignment value; BUT; if player is under adrenaline effect (either from combat or from stims), old-breath speed is reduced to 20% of base;
+- Reduced weapon transition buff for folded stocks to +50% (down from +100%);
+- Reduced weapon transition penalty when prone from 33% to 50% base speed modifier;
+
+Version 0.8.9 --
+- I've done a moderate pass on the sway model: hopefully the sway feels more weighty and authentic, and less 'floaty' than it was before. I'm very happy with it now and considering it done.
+- When trasitioning between sling and shoulder, if the transitioning weapon has a retracted stock, that weapon's transition speed is buffed 100%.
+
+-- Version 0.8.4 --
+
+- Added Realism's adrenaline effect from 1.5 for 3.9.8 version (with permission).
+
+-- Version 0.8.3 --
+
+- Backported latest to version 3.9.8! Lol.
+
+-- Version 0.8.2 --
+
+- Polish pass on weapon sway, tried to reduce wobblyness a little and tighten up the effect in general.
+- Refined reloads speeds, made them generally a bit slower and added min/max final values.
+- Increased arm shake with broken hand(s), +100% shake for each break.
+- Increased animation length when changing vertical pose with broken hand(s). -25% speed for each break.
+
+-- Version 0.8.1 --
+
+- Updated for Realism 1.5.3.
+- Added toggles for Augmented Reload and Custom Weapon Transitions features.
+- Added toggle to Augmented Reload behavior active by default (you don't have to press the reload key again).
+- Added additional layer of lagging sway to existing model; delay time depends on weapon weight (max 10kg).
+- Reworked reload speeds to rely less on Realism's native speeds, which aren't set to consider WHM's own reload system. Essentially reloads generally run faster except for the slower portion I add in the middle of the cycle. Tied to player efficiency.
+- Some rework of sway and misalignment values.
+- Reduced default deadzone value.
+- Fixed a bug where weapon transitions fail to go at intended speeds.
+
+
+-- Version 0.8 --
+
+Even though this version has few new features, it's an important update. I've fixed a couple of big bugs that were plaguing the mod, and integrated a major performance upgrade (previously when the game stuttered or lagged, as she is wont to do in spt 3.10, the player's weapon movements became extremely erratic).
+
+New:
+- Updated for Realism 1.5.1 release.
+- Did an overhaul on the to- and from-crouch animations and logic. Adds a sense of real weight to (un-)crouching and integrates weapon weight/ergo and efficiency into the action.
+- Removed a lot of junk from the config.
+- Small tweaks to misalignment and sway values.
+
+Fixes:
+- MAJOR performance improvement: Integrated a protective check for lag spikes over most of the mod's core logic.
+- Fixed some cases where selecting/changing equiped weapons caused player to bug out. (PSA - just in case someone manages to find this bug again, the hands-are-not-busy mod fixes it too).
+- Fixed folding stock not detecting reliably (thanks Fontaine's API).
+
+
+-- Version 0.7.5 --
+
+- Updated for SPT 3.10.x + Realism 1.5
+- Added smoothing layer to Misalignment effect to reduce volatility when injured
+- Fixed bug of reloads not being slower when sprinting
+- Removed throwing animation feature temporarily for 3.10 compat
+- Fixed some cases where weapon sway profile changed between stocked / stock retracted incorrectly
+- Fixed toxication not being detected by Efficiency system
+- Fixed bug where weapon stats were not being tracked correctly (thanks Berial for bug report)
+- Removed Directional Sway from non-shouldered weapons
+- Added different Deadzone profiles for all the different Realism stances
+- Various tweaks to sway, misalignment, deadzone in general
+
+-- Version 0.7.4.2 --
+
+- Fixed reload bugs for real this time.
+- Fixed bug where folded stock was not detecting correctly.
+
+-- Version 0.7.4.1 --
+
+- Attempted fix to problems with my reload system not engaging sometimes. In my limited testing it's fixed. I was not intending to update again for the 3.9.x branch but ... well my personal playthrough is on 3.9 :p
+
+-- Version 0.7.4 -- (0.7.3 was just a hotfix)
+
+Small polish pass, the final update of 3.9.x. Some things I wanted to solidify before moving to 3.10 development. As I have repeatedly said, the mod has reached a very evolved state and I am unlikely to add (m)any more new features. From now on I will concentrate on updates, polish, documentation and cleanup up the config; working toward 1.0.
+
+- Added Realism's balance stat to my Emulated Gravity mechanic: Front-heavy weapons will drop faster and take longer to raise, essentially they are harder to handle in the vertical plane.
+- Some more polish on quickdraw speeds/effects, looks smoother.
+- Camera tracking speed for Deadzone increased 50% when in high ready; high ready feels more 'ready' this way, ready to break out into the ADS (especially since you go into the ADS with an efficiency buff).
+- Lowered default mis-alignment value (after adding Realism's balance state to that calculation, it is generally higher now).
+- Lowered default directional sway value.
+
+-- Version 0.7.2 --
+
+Important polish pass on previous features. At this point I estimate the WHM's feature set is complete, and my goal now is refining and maintenance.
+
+- Slower reloads: Reload speeds in Tarkov conspicuously lack the gap in time wherein your character replaces an old magazine and retrieves a new one from his vest. Even if you watched the most juiced guntubers, they spend much more time replacing a mag in the vest than operating the weapon. I have fixed this: there is not a noticeable time gap after your character removes the mag, making standard reloads significantly slower. Notably, this feature does not apply to emergency reloads, which is another great reason to use them when it's really necessary. Obviously, the slower reloads feature dovetails with the augmented reloads feature, which allows you to reload faster at a cost of reduced situational awareness.
+- Rewrote and improved the weapon transition feature; it was janky before and didn't work well. I've improve the feature's visual cohesion, made it more reliable so that it actually works, and added more transition cases;
+	- In particular, the pistol transitions have specific dynamics: your quickdraw transition from sling to pistol is very fast, and the re-transition back to sling is faster than vanilla; however, your shoulder weapon to pistol transitions -- even the quickdraw -- is quick slow. This is again in line with T-REX Arms' evaluation of weapon transitions in Tarkov, all my inspiration is from their feedback.
+- Added Realism's weapon balance stat as a function of my weapon handling: more front-heavy weapons will have more aiming mis-alignment.
+- Reworked pistol mis-alignment: pistols have increased mis-alignment sensitivity, but an overall lower max mis-alignment; this is to a) reflect reality, b) reflect pistols' function as emergency and limited-case weapons. Put more simply, they are harder to aim very accurately but easier to aim generally with respect to the previous patch.
+- Removed pistol directional sway. This should help if you're very injured and going to the sidearm as a last resort.
+- Small edits to sway effect, I think it's better.
+
+
+-- Version 0.7.1 --
+This version is mostly a polish pass on the new Deadzone from 0.7.
+
+Updates and Fixes:
+- Fixed bug where efficiency was not being calculated correctly vis-a-vis injuries, reworked some values.
+- Increased effect of weight on efficiency.
+- Increased effect of overall health (not specific injuries) on efficiency.
+- Added debug option to show efficiency stat in console.
+- Added more sliders for Deadzone values: separate values for ADS, when in Active Aim, Shortstock, and the vanilla BSG pose (which in my playstyle takes stam).
+- Added efficiency weight to camera rotation speed (optional).
+- Added multiplier slider for camera rotation speed.
+- Added option to factor in player Efficiency to Deadzone camera rotation recenter speed.
+- Removed some accidental debug console spam.
+- Increased default reload speed penalty while sprinting.
+
+-- Version 0.7 --
+
+New Features:
+- Complete rewrite of the Deadzone. The new deadzone is in the style of Bodycam, its intensity depends on your weapon's size and ergo. Smaller weapons with better ergo get a smaller deadzone.- Added new Augmented Hold Breath mechanism. Now when holding your breath, the exhaling portion of my custom breathing animation will slow down to 25% speed; in addition, the arm shake effect intensity is reduce by 50% while within the exhaling window. To balance these buffs, you will lose stamina regen entirely during that window.
+	- When ADSed with a stocked weapon, the deadzone is reduced by 80%.
+	- When in Active Aim mode (Realism), the deadzone is reduced by half.
+- Added significant amount of complexity to weapon transition system:
+	- Each half of weapon transition animation independently affected by weapon weight characteristics, lighter + better ergo weapons go faster.
+	- Weapon transition time affected by player efficiency.
+	- Weapon transition while prone takes a 66% speed debuff.
+	- Added a smoothing layer to weapon transition animations.
+	- Reworked the transition animations, they are better (??).
+- Added Realism's adrenaline to player efficiency calculation; efficiency gets 50% buff if adrenaline is pumping. This is a big change and will add a lot of complexity to how you behave when getting shot / shot at; it will definitely help with noodle arms.
+
+Updates and Fixes:
+- Fixed bug where you can get some 'orphaned' transitions, especially when trying to select a slot that is empty!
+- Generally added more cases to transition controller so that you get fewer 'vanilla' transitions. Ideally it would be zero but ain't nobody got time for that.
+- Added hard clamps to how much weapon sway and parallax is possible. These will stop the effect from increasing in intensity regardless of your situation, for those frustrated with the noodle arms.
+- Fixed bug (feature?) where weapon would drop a lot during a sidestep-peek; weapon now drops a very tiny bit, but you take a 20% efficiency debuff during the sidestop.
+- Changed logic of weapon pulling in while rotating (because angular momentum), it's not smooth per rotation instead of binary.
+- Increased time to reduce parallax during ADS, depending on efficiency and weapon.
+
+-- Version 0.6.8.1 --
+
+I wouldn't even call this a hotfix, really just a small pass on the config. I had a little time today to play with the config values. Nothing you couldn't have done yourself, so if you're happy with things then I would say don't upgrade. The only code changes are that I put a couple of the config values into the Main Feature Values config tab, at the top, because they are important.
+
+- Slightly changed the shoulder-to-sling animation timing to be a bit longer.
+- Slightly reduced the default efficiency penalty of negative effects (like damage). Altered the parallax to be a bit less intense.
+- Slightly reduced the default Directional Sway value.
+
+Honestly I would suggest just deleting your old config values, it's tedious to result all the defaults as you might miss an important one.
+
+-- Version 0.6.8 --
+
+New Features:
+
+- Reworked weapon transitions, based on T-REX Arms criticism:
+	- Sling to shoulder weapon transition time significantly increased, and has enhanced custom animations.
+	- Quickdraw to pistol time significantly reduced if drawing from slinged weapon, includes enhanced animaton.
+	- Pistol to shoulder transitions also take longer than usual.
+- Further integration with Realism: I've added some more buffs and debuffs based on Realism stances, which I now have access to. They now play a part in my own Efficiency calculation:
+	- Being in High Ready stance gives 15% efficiency buff, so when you come out of it to aim you'll be more efficient for a moment while the calculation adjusts.
+	- Low Ready takes a 10% debuff.
+	- Shortstock stance gives 30% buff, and you can fire(!) from that position in Realism. Game changer.
+	- Being mounted gives a 50% efficiency buff.
+	- Using left shoulder swap takes a 10% debuff.
+	- Being in Active Aim takes a tiny 5% debuff.
+- Added slight head rotation when ADSing with a stocked weapon; this rotation also reverses polarity when ADSing on the left shoulder.
+
+Updates and Fixes:
+
+- Reworked the parallax feature again, it's more responsive and agile now. When you move your mouse less, you actually get a bit more parallax; this was to emulate fine aiming through sights. The effect is now both more active/interesting and yet much more forgiving, I'm very happy with where it is now. Of course, you can turn it off.
+- Slight reduction in footstep visual effect intensity.
+
+
+- Version 0.6.7 -
+Updates and Fixes:
+- This is basically a hotfix of a hotfix. I rewrote the augmented reload code to be much more reliable leveraging Realism's API. Everything is working well now -- I swear ...
+
+New Features:
+- Added reload speed debuff while sprinting, which is also in turn buffed by Augmented Reload. There is a slider for this if you don't want it.
+- Slightly reduced intensity of 'Hyper-Vertical' feature. I should rename that to just ... Emulated Gravity Effect. Yes.
+
+--- Version 0.6.6 ---
+Updates and Fixes:
+- As of 0.6.6, Realism mod is a REQUIREMENT. I have long anticipated this necessity, and the day has finally come. It was necessary to fix the bugs in my new reload system, and I imagine this change will bear much fruit.
+- Fixed bugs related to the new Augmented Reload system.
+- Added slider for Augmented Reload speed.
+- Lowered the effect of overall health on efficiency by 40%.
+- Lowered the effect of heavy bleeds on efficiency by 33%.
+
+--- Version 0.6.5 ---
+New Features:
+- Added new Directional Sway feature for movement in different directions, your weapon has more complex movement when moving in all directions.
+- Added new Augmented Reloads feature: when reloading or checking mag, if you press again your reload button, your character will look down at what he's doing and the animation speed will be increased by 30%.
+
+Updates and Fixes:
+- Huge repass on config entry names, things should be easier to read now.
+- Fixed MP5k thinking he has a stock.
+- Fixed extra freelook range to work even if not using the Deadzone feature.
+- Default weapon cant value reduced to zero in recognition that Realism's new canting feature is better - and this mod is always meant to be played, let's say it together, with Realism maxed out very good.
+
+--- Version 0.6.1 ---
+- Fixed version number not being correct
+- Lowered default sway value
+- Restored parallax feature and fixed default values
+
+--- Version 0.6 ---
+- Added new weapon sway model
+- Added new footstep visual effects
+- Added new lean visual effects and mechanics

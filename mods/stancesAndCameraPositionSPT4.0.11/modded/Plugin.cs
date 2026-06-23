@@ -218,17 +218,12 @@ public class Plugin : BaseUnityPlugin
     // Action Stance Settings (Item 008)
     public static ConfigEntry<bool> _EnableActionStanceSwap;
 
-    // Stance Wiggle Settings (Item 009)
-    public static ConfigEntry<bool> _EnableStanceWiggle;
-    public static ConfigEntry<float> _StanceWiggleX;
-    public static ConfigEntry<float> _StanceWiggleY;
-    public static ConfigEntry<float> _StanceWiggleZ;
-    public static ConfigEntry<bool> _EnableDoubleWiggle;
-    public static ConfigEntry<bool> _EnableADSWiggle;
-    public static ConfigEntry<float> _WiggleSpeedHipfire;
-    public static ConfigEntry<float> _WiggleSpeedADS;
-    public static ConfigEntry<float> _WiggleDurationHipfire;
-    public static ConfigEntry<float> _WiggleDurationADS;
+    // Stance Cinematic Curves Settings (Item 009)
+    public static ConfigEntry<float> _CurveDuration;
+    public static ConfigEntry<float> _CurvePitchMultiplier;
+    public static ConfigEntry<float> _CurveYawMultiplier;
+    public static ConfigEntry<float> _CurveRollMultiplier;
+    public static ConfigEntry<float> _CurvePositionMultiplier;
     public static ConfigEntry<float> _CameraBobbingMultiplier;
     public static ConfigEntry<float> _StanceOvershootDamping;
     public static ConfigEntry<float> _StanceTransitionDamping;
@@ -1012,86 +1007,46 @@ public class Plugin : BaseUnityPlugin
             null,
             new ConfigurationManagerAttributes { Order = 1 }));
 
-        const string StanceWiggleSection = "Stance Animations";
-        _EnableStanceWiggle = Config.Bind(
+        const string StanceWiggleSection = "Stance Animations (Cinematic Curves)";
+        _CurveDuration = Config.Bind(
             StanceWiggleSection,
-            "Enable Stance Wiggle",
-            true,
-            new ConfigDescription("Adds an organic wiggle effect when changing stances. / Adiciona um solavanco orgânico ao trocar de stance.",
-            null,
+            "Animation Curve Duration",
+            0.35f,
+            new ConfigDescription("How long the cinematic stance transition takes to complete (seconds).",
+            new AcceptableValueRange<float>(0.1f, 1.0f),
             new ConfigurationManagerAttributes { Order = 4 }));
             
-        _StanceWiggleX = Config.Bind(
+        _CurvePitchMultiplier = Config.Bind(
             StanceWiggleSection,
-            "Wiggle X-Axis (Eixo X)",
+            "Pitch Multiplier (Cano sobe/desce)",
             1.0f,
-            new ConfigDescription("Intensity of the wiggle on X-axis (Pitch/Right). / Intensidade do wiggle no Eixo X (Pitch rot / Direita-Esquerda pos).",
-            new AcceptableValueRange<float>(-5.0f, 5.0f),
+            new ConfigDescription("Multiplier for the X-axis (Pitch) sway curve.",
+            new AcceptableValueRange<float>(0.0f, 5.0f),
             new ConfigurationManagerAttributes { Order = 3 }));
 
-        _StanceWiggleY = Config.Bind(
+        _CurveYawMultiplier = Config.Bind(
             StanceWiggleSection,
-            "Wiggle Y-Axis (Eixo Y)",
+            "Yaw Multiplier (Luneta tomba)",
             1.0f,
-            new ConfigDescription("Intensity of the wiggle on Y-axis (Yaw/Up). / Intensidade do wiggle no Eixo Y (Yaw rot / Cima-Baixo pos).",
-            new AcceptableValueRange<float>(-5.0f, 5.0f),
+            new ConfigDescription("Multiplier for the Y-axis (Yaw) sway curve.",
+            new AcceptableValueRange<float>(0.0f, 5.0f),
             new ConfigurationManagerAttributes { Order = 2 }));
 
-        _StanceWiggleZ = Config.Bind(
+        _CurveRollMultiplier = Config.Bind(
             StanceWiggleSection,
-            "Wiggle Z-Axis (Eixo Z)",
+            "Roll Multiplier (Apontar Esq/Dir)",
             1.0f,
-            new ConfigDescription("Intensity of the wiggle on Z-axis (Roll/Forward). / Intensidade do wiggle no Eixo Z (Roll rot / Frente-Trás pos).",
-            new AcceptableValueRange<float>(-5.0f, 5.0f),
+            new ConfigDescription("Multiplier for the Z-axis (Roll) sway curve.",
+            new AcceptableValueRange<float>(0.0f, 5.0f),
             new ConfigurationManagerAttributes { Order = 1 }));
 
-        _EnableDoubleWiggle = Config.Bind(
+        _CurvePositionMultiplier = Config.Bind(
             StanceWiggleSection,
-            "Enable Double Wiggle (Habilitar Wiggle Duplo)",
-            true,
-            new ConfigDescription("Adds a secondary inverse bounce to simulate weapon settling. / Adiciona uma quicada inversa para simular o assentamento da arma.",
-            null,
+            "Position Multiplier (Coronha no peito)",
+            1.0f,
+            new ConfigDescription("Multiplier for the positional sway curves (Quick/Impact).",
+            new AcceptableValueRange<float>(0.0f, 5.0f),
             new ConfigurationManagerAttributes { Order = 0 }));
-
-        _EnableADSWiggle = Config.Bind(
-            StanceWiggleSection,
-            "Enable ADS Wiggle (Habilitar Wiggle ao Mirar)",
-            false,
-            new ConfigDescription("Triggers the wiggle physics when pulling the weapon to ADS. / Dispara a inércia do wiggle ao puxar a arma para mirar.",
-            null,
-            new ConfigurationManagerAttributes { Order = -1 }));
-
-        _WiggleSpeedHipfire = Config.Bind(
-            StanceWiggleSection,
-            "Wiggle Speed - Hipfire (Velocidade s/ Mirar)",
-            15.0f,
-            new ConfigDescription("Speed of the wiggle bounce when NOT aiming. / Velocidade do solavanco quando NÃO estiver mirando.",
-            new AcceptableValueRange<float>(1.0f, 50.0f),
-            new ConfigurationManagerAttributes { Order = -2 }));
-
-        _WiggleSpeedADS = Config.Bind(
-            StanceWiggleSection,
-            "Wiggle Speed - ADS (Velocidade Mirando)",
-            15.0f,
-            new ConfigDescription("Speed of the wiggle bounce when aiming. / Velocidade do solavanco ao mirar.",
-            new AcceptableValueRange<float>(1.0f, 50.0f),
-            new ConfigurationManagerAttributes { Order = -3 }));
-
-        _WiggleDurationHipfire = Config.Bind(
-            StanceWiggleSection,
-            "Wiggle Duration - Hipfire (Tempo s/ Mirar)",
-            0.15f,
-            new ConfigDescription("How long the wiggle takes to settle when NOT aiming (seconds). / Tempo (em segundos) de assentamento sem mirar.",
-            new AcceptableValueRange<float>(0.05f, 1.0f),
-            new ConfigurationManagerAttributes { Order = -4 }));
-
-        _WiggleDurationADS = Config.Bind(
-            StanceWiggleSection,
-            "Wiggle Duration - ADS (Tempo Mirando)",
-            0.15f,
-            new ConfigDescription("How long the wiggle takes to settle when aiming (seconds). / Tempo (em segundos) de assentamento mirando.",
-            new AcceptableValueRange<float>(0.05f, 1.0f),
-            new ConfigurationManagerAttributes { Order = -5 }));
 
         _LeanSpeedMultiplier = Config.Bind(
             "2. Configurações de Stance",

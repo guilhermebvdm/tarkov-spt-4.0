@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <Nullable>enable</Nullable>
+    <ApplicationIcon>Assets\spt-logo.ico</ApplicationIcon>
+    <NoWin32Manifest>true</NoWin32Manifest>
+    <AssemblyName>Tarkov Red Line</AssemblyName>
+    <Product>Tarkov Red Line</Product>
+    <Version>1.4.7</Version>
+    <AssemblyVersion>1.4.7.0</AssemblyVersion>
+    <FileVersion>1.4.7.0</FileVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\tailscale-setup-1.98.4-amd64.msi">
+      <LogicalName>TailscaleInstaller</LogicalName>
+    </EmbeddedResource>
+    <AvaloniaResource Include="Assets\**" />
+    <AvaloniaXaml Remove="Properties\**" />
+    <Compile Remove="Properties\**" />
+    <EmbeddedResource Remove="Properties\**" />
+    <None Remove="Properties\**" />
+    <AvaloniaResource Remove="Assets\Styles.axaml" />
+    <None Remove=".gitignore" />
+    <None Remove="Assets\SPT-logo.png" />
+    <None Remove="Assets\icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Assets\icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.1.1" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.1.1" />
+    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="0.10.12" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="11.1.1" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.1.1" />
+    <PackageReference Include="DialogHost.Avalonia" Version="0.8.0-avalonia11dot1-3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SPT.ByteBanger\SPT.ByteBanger.csproj" />
+    <ProjectReference Include="..\SPT.Launcher.Base\SPT.Launcher.Base.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="zlib.net">
+      <HintPath>References\zlib.net.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <AvaloniaXaml Update="Assets\Styles.axaml">
+      <SubType>Designer</SubType>
+    </AvaloniaXaml>
+  </ItemGroup>
+</Project>

@@ -23,7 +23,7 @@ namespace CameraRotationMod
             float bobbingMult = Plugin._CameraBobbingMultiplier?.Value ?? 1f;
             if (bobbingMult <= 0.01f) return;
 
-            Vector3 cameraWiggle = SpringGetPatch._currentWiggleRotation * bobbingMult;
+            Vector3 cameraWiggle = SpringGetPatch.CurrentCurveRotation * bobbingMult;
             if (cameraWiggle == Vector3.zero) return;
 
             Camera.main.transform.localRotation *= Quaternion.Euler(cameraWiggle);

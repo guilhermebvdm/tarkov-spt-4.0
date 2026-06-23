@@ -43,42 +43,15 @@ namespace CameraRotationMod
             if (CurrentStance != newStance)
             {
                 Plugin.Logger.LogInfo($"[Spy] SetStance called: {CurrentStance} -> {newStance}");
-                RequestWiggle(CurrentStance, newStance);
             }
             CurrentStance = newStance;
         }
 
-        // ==========================================================================
-        // Item 009 — Wiggle por troca INTENCIONAL de stance
-        // ==========================================================================
-        // O wiggle (impulso procedural) deve disparar apenas quando o JOGADOR troca de stance
-        // (tecla V, scroll, hotkey dedicada), não quando o mod força Stance 0 por mount/colisão/
-        // prone/sprint ou ao restaurar a stance pós-ação. RequestWiggle é chamado só nos call-sites
-        // de input; o SpringGetPatch consome o pedido (1x por frame, gate ao MainPlayer já existente).
-        private static bool _wiggleRequested;
-        private static Stance _wiggleFrom = Stance.Default;
-        private static Stance _wiggleTo = Stance.Default;
 
-        public static void RequestWiggle(Stance from, Stance to)
-        {
-            _wiggleRequested = true;
-            _wiggleFrom = from;
-            _wiggleTo = to;
-        }
 
-        public static bool ConsumeWiggleRequest(out Stance from, out Stance to)
-        {
-            from = _wiggleFrom;
-            to = _wiggleTo;
-            bool r = _wiggleRequested;
-            _wiggleRequested = false;
-            return r;
-        }
-
-        /// <summary>Troca de stance INICIADA PELO JOGADOR — dispara o wiggle (item 009).</summary>
         private static void ApplyUserStance(Stance to)
         {
-            if (to != CurrentStance) RequestWiggle(CurrentStance, to);
+            if (CurrentStance != to) CameraRotationMod.Patches.SpringGetPatch.TriggerTransitionCurve();
             CurrentStance = to;
         }
 
@@ -99,7 +72,7 @@ namespace CameraRotationMod
         private static float _tacSprintResetTimer = 0f;
         
         // Sprint Stance Tracking
-        private static bool _wasSprinting = false;
+
         private static Stance _preSprintStance = Stance.Default;
         
         // ADS Tracking for Wiggle
@@ -189,11 +162,6 @@ namespace CameraRotationMod
                 isInProne = gameWorld.MainPlayer.IsInPronePose;
             }
 
-            // --- ADS Wiggle Logic ---
-            if (isAiming != _wasAimingGlobal && Plugin._EnableADSWiggle?.Value == true)
-            {
-                RequestWiggle(CurrentStance, CurrentStance);
-            }
             _wasAimingGlobal = isAiming;
 
             bool isSprinting = gameWorld?.MainPlayer?.IsSprintEnabled == true;
@@ -897,7 +865,7 @@ namespace CameraRotationMod
         public static void ResetState()
         {
             CurrentStance = Stance.Default;
-            _wiggleRequested = false;
+
             _isTacSprintActive = false;
             _wasAiming = false;
             _isWaitingToResetTacSprint = false;

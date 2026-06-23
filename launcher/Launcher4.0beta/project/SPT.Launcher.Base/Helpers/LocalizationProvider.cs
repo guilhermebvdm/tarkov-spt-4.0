@@ -1,0 +1,1323 @@
+/* LocalizationProvider.cs
+ * License: NCSA Open Source License
+ * 
+ * Copyright: SPT
+ * AUTHORS:
+ * waffle.lord
+ */
+
+
+using SPT.Launcher.Extensions;
+using SPT.Launcher.MiniCommon;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using SPT.Launcher.Utilities;
+using SPT.Launcher.Controllers;
+
+namespace SPT.Launcher.Helpers
+{
+    public static class LocalizationProvider
+    {
+        public static string DefaultLocaleFolderPath = Path.Join(SPT.Launcher.Base.Helpers.SptPathHelper.SptRootPath, "SPT_Data", "Launcher", "Locales");
+
+        public static Dictionary<string, string> LocaleNameDictionary = GetLocaleDictionary("native_name");
+
+        public static event EventHandler LocaleChanged = delegate { };
+
+        public static void LoadLocalByName(string localeName)
+        {
+            string localeRomanName = LocaleNameDictionary.GetKeyByValue(localeName);
+
+            if (String.IsNullOrEmpty(localeRomanName))
+            {
+                localeRomanName = localeName;
+            }
+            
+            LoadLocaleFromFile(localeRomanName);
+        }
+
+        public static void LoadLocaleFromFile(string localeRomanName)
+        {
+            var localePath = Path.Join(DefaultLocaleFolderPath, $"{localeRomanName}.json");
+            LocaleData newLocale = Json.LoadClassWithoutSaving<LocaleData>(localePath);
+
+            if (newLocale != null)
+            {
+                foreach (var prop in Instance.GetType().GetProperties())
+                {
+                    prop.SetValue(Instance, newLocale.GetType().GetProperty(prop.Name).GetValue(newLocale));
+                }
+
+                LauncherSettingsProvider.Instance.DefaultLocale = localeRomanName;
+                LauncherSettingsProvider.Instance.SaveSettings();
+
+                LocaleChanged(null, EventArgs.Empty);
+
+                return;
+            }
+
+            LogManager.Instance.Error($"Could not load locale: {localePath}");
+        }
+
+        public static void TryAutoSetLocale()
+        {
+            // get local dictionary based on ietf_tag property in locale files. like: ("English", "en")
+            // "English" being the file name
+            var localeTagDictionary = GetLocaleDictionary("ietf_tag");
+
+            // get system locale. Like: "en-US"
+            var tag = CultureInfo.CurrentUICulture.IetfLanguageTag;
+
+            // get the locale file name from the dictionary based on the input tag. If it matches, or starts with the value
+            var localeRomanName = localeTagDictionary.GetKeyByInput(tag);
+            
+            if (String.IsNullOrEmpty(localeRomanName))
+            {
+                localeRomanName = "Portuguese";
+            }
+            
+            LoadLocaleFromFile(localeRomanName);
+        }
+
+        public static LocaleData GenerateDefaultLocale()
+        {
+            //Create default locale data and save if the default locale data file dosen't exist.
+            LocaleData locale = new LocaleData();
+
+            #region Set All Defaults
+            locale.ietf_tag = "pt";
+            locale.native_name = "Portuguese";
+            locale.retry = "Tentar Novamente";
+            locale.server_connecting = "Conectando";
+            locale.server_unavailable_format_1 = "Nenhum servidor disponível em: '{0}' para conectar\nCertifique-se de iniciar o Servidor primeiro.";
+            locale.no_servers_available = "Nenhum Servidor SPT encontrado. Verifique a URL do servidor nas configurações.";
+            locale.settings_menu = "Configurações";
+            locale.back = "Voltar";
+            locale.wipe_profile = "Limpar Perfil (Wipe)";
+            locale.username = "Usuário";
+            locale.password = "Senha";
+            locale.update = "Atualizar";
+            locale.edit_account_update_error = "Ocorreu um problema ao atualizar o seu perfil.";
+            locale.register = "Registrar";
+            locale.go_to_register = "Criar Conta";
+            locale.registration_failed = "Falha no Registro.";
+            locale.registration_question_format_1 = "O perfil '{0}' não existe.\n\nGostaria de criá-lo?";
+            locale.login_or_register = "Login / Registro";
+            locale.go_to_login = "Fazer Login";
+            locale.login_automatically = "Login Automático";
+            locale.incorrect_login = "Usuário ou senha incorretos";
+            locale.login_failed = "Falha no Login";
+            locale.edition = "Edição";
+            locale.id = "ID";
+            locale.logout = "Sair";
+            locale.account = "Conta";
+            locale.edit_account = "Editar Conta";
+            locale.start_game = "JOGAR";
+            locale.installed_in_live_game_warning = "O Tarkov Red Line não deve ser instalado na pasta do jogo original. Instale em uma cópia separada.";
+            locale.no_official_game_warning = "Escape From Tarkov não está instalado no seu computador. Verifique pelo launcher da BSG.";
+            locale.eft_exe_not_found_warning = "EscapeFromTarkov.exe não encontrado. Verifique a pasta do jogo.";
+            locale.account_exist = "A conta já existe";
+            locale.url = "URL";
+            locale.default_language = "Idioma Padrão";
+            locale.game_path = "Caminho do Jogo";
+            locale.clear_game_settings = "Limpar Configurações do Jogo";
+            locale.clear_game_settings_succeeded = "Configurações do jogo limpas.";
+            locale.clear_game_settings_failed = "Erro ao limpar configurações do jogo.";
+            locale.load_live_settings = "Copiar Configurações do Live";
+            locale.load_live_settings_succeeded = "Configurações copiadas do jogo original.";
+            locale.load_live_settings_failed = "Falha ao copiar configurações do jogo original.";
+            locale.remove_registry_keys = "Remover Chaves do Registro";
+            locale.remove_registry_keys_succeeded = "Chaves do registro removidas.";
+            locale.remove_registry_keys_failed = "Erro ao remover chaves do registro.";
+            locale.clean_temp_files = "Limpar Arquivos Temporários";
+            locale.clean_temp_files_succeeded = "Arquivos temporários limpos.";
+            locale.clean_temp_files_failed = "Erro ao limpar arquivos temporários.";
+            locale.select_folder = "Selecionar Pasta";
+            locale.minimize_action = "Minimizar";
+            locale.do_nothing_action = "Não fazer nada";
+            locale.exit_action = "Fechar Launcher";
+            locale.on_game_start = "Ao Iniciar o Jogo";
+            locale.game = "Jogo";
+            locale.new_password = "Nova Senha";
+            locale.wipe_warning = "Alterar a edição da conta exige o Wipe do perfil. O progresso será resetado.";
+            locale.cancel = "Cancelar";
+            locale.need_an_account = "Ainda não tem uma conta?";
+            locale.have_an_account = "Já possui uma conta?";
+            locale.reapply_patch = "Reaplicar Patch";
+            locale.failed_to_receive_patches = "Falha ao receber patches";
+            locale.failed_core_patch = "Falha no patch Core";
+            locale.failed_mod_patch = "Falha no patch Mod";
+            locale.ok = "OK";
+            locale.account_page_denied = "Página da conta recusada. O jogo está aberto ou não há login.";
+            locale.account_updated = "Sua conta foi atualizada";
+            locale.nickname = "Apelido";
+            locale.side = "Facção";
+            locale.level = "Nível";
+            locale.patching = "Aplicando Patch";
+            locale.file_mismatch_dialog_message = "Arquivos do jogo incompatíveis com a versão esperada: {0}";
+            locale.yes = "Sim";
+            locale.no = "Não";
+            locale.open_folder = "Abrir Pasta";
+            locale.select_edition = "Selecionar Edição";
+            locale.profile_created = "Perfil Criado";
+            locale.next_level_in = "Próximo nível em";
+            locale.copied = "Copiado";
+            locale.no_profile_data = "Sem dados de perfil";
+            locale.profile_version_mismath = "O perfil foi criado em uma versão diferente.";
+            locale.profile_removed = "Perfil removido";
+            locale.profile_removal_failed = "Falha ao remover perfil";
+            locale.profile_remove_question_format_1 = "Remover perfil '{0}' permanentemente?";
+            locale.i_understand = "Eu Entendo";
+            locale.game_version_mismatch_format_2 = "Versão do Tarkov incorreta. Encontrado: '{0}', Esperado: '{1}'";
+            locale.description = "Descrição";
+            locale.author = "Autor";
+            locale.wipe_on_start = "Dar Wipe ao iniciar o jogo";
+            locale.copy_live_settings_question = "Gostaria de copiar as configurações do jogo original?";
+            locale.mod_not_in_server_warning = "Este mod está no perfil mas não foi carregado no servidor.";
+            locale.active_server_mods = "Mods Ativos no Servidor";
+            locale.active_server_mods_info_text = "Mods rodando no momento no servidor.";
+            locale.inactive_server_mods = "Mods Inativos no Servidor";
+            locale.inactive_server_mods_info_text = "Mods não carregados, mas que já foram usados no seu perfil.";
+            locale.open_link_question_format_1 = "Abrir o link: \n{0} ?";
+            locale.open_link = "Abrir Link";
+            locale.dev_mode = "Modo Desenvolvedor";
+            locale.failed_to_save_settings = "Falha ao salvar configurações";
+            locale.register_failed_name_limit = "O nome não pode exceder 15 caracteres";
+            locale.copy_failed = "Falha ao copiar para a área de transferência";
+            locale.copy_logs_to_clipboard = "Copiar logs";
+            locale.create_password_title = "Criar Senha";
+            locale.create_password_message = "Sua conta não tem senha. Crie uma para garantir a segurança.";
+            locale.create_password_confirm = "Criar Senha";
+            locale.create_password_success = "Senha criada com sucesso!";
+            locale.reset_password = "Redefinir Senha";
+            locale.reset_password_success = "Senha redefinida.";
+            locale.reset_password_failed = "Falha ao redefinir a senha. Nome de usuário incorreto?";
+            locale.reset_password_hwid_mismatch = "Computador não autorizado a redefinir a senha. Contate a administração.";
+            locale.repeat_password = "Repetir Senha";
+            locale.reset_password_no_hwid = "Nenhum HWID registrado para esta conta. Faça login primeiro.";
+            locale.server_version = "Versão: ";
+            locale.check_updates = "Verificar Atualizações";
+            locale.update_checking = "Procurando atualizações...";
+            locale.update_checking_file = "Verificando arquivos... ({0}/{1})";
+            locale.update_available = "{0} arquivo(s) precisam ser atualizados";
+            locale.update_up_to_date = "Tudo atualizado! ✅";
+            locale.update_button = "Atualizar Launcher";
+            locale.update_downloading = "Baixando: {0} ({1}/{2})";
+            locale.update_completed = "Atualização concluída! {0} arquivo(s) atualizados. ✅";
+            locale.update_completed_with_errors = "Atualização finalizada: {0} atualizados, {1} erro(s)";
+            locale.update_error = "Falha ao atualizar: {0}";
+            locale.update_files_to_delete = "{0} arquivo(s) para remover";
+            locale.update_deleting = "Removendo: {0} ({1}/{2})";
+            #endregion
+
+            Directory.CreateDirectory(LocalizationProvider.DefaultLocaleFolderPath);
+            LauncherSettingsProvider.Instance.DefaultLocale = "Portuguese";
+            LauncherSettingsProvider.Instance.SaveSettings();
+            Json.SaveWithFormatting(Path.Join(LocalizationProvider.DefaultLocaleFolderPath, "Portuguese.json"), locale, Newtonsoft.Json.Formatting.Indented);
+
+            return locale;
+        }
+
+        public static Dictionary<string, string> GetLocaleDictionary(string property)
+        {
+            if (!Directory.Exists(DefaultLocaleFolderPath))
+            {
+                Directory.CreateDirectory(DefaultLocaleFolderPath);
+            }
+            
+            List<FileInfo> localeFiles = new List<FileInfo>(Directory.GetFiles(DefaultLocaleFolderPath).Select(x => new FileInfo(x)).ToList());
+            Dictionary<string, string> localeDictionary = new Dictionary<string, string>();
+
+            foreach (FileInfo file in localeFiles)
+            {
+                localeDictionary.Add(file.Name.Replace(".json", ""), Json.GetPropertyByName<string>(file.FullName, property));
+            }
+
+            return localeDictionary;
+        }
+        public static ObservableCollection<string> GetAvailableLocales()
+        {
+            return new ObservableCollection<string>(LocaleNameDictionary.Values);
+        }
+
+        public static LocaleData Instance { get; private set; } = Json.LoadClassWithoutSaving<LocaleData>(Path.Join(DefaultLocaleFolderPath, $"{LauncherSettingsProvider.Instance.DefaultLocale}.json")) ?? GenerateDefaultLocale();
+    }
+
+    public class LocaleData : NotifyPropertyChangedBase
+    {
+        //this is going to be some pretty long boiler plate code. So I'm putting everything into regions.
+
+        #region All Properties
+        
+        #region
+        private string _copy_logs_to_clipboard;
+        public string copy_logs_to_clipboard
+        {
+            get => _copy_logs_to_clipboard;
+            set => SetProperty(ref _copy_logs_to_clipboard, value);
+        }
+        
+        #endregion
+        
+        #region copy_failed
+        private string _copy_failed;
+        public string copy_failed
+        {
+            get => _copy_failed;
+            set => SetProperty(ref _copy_failed, value);
+        }
+        #endregion
+        
+        #region register_failed_name_limit
+
+        private string _register_failed_name_limit;
+
+        public string register_failed_name_limit
+        {
+            get => _register_failed_name_limit;
+            set => SetProperty(ref _register_failed_name_limit, value);
+        }
+        #endregion
+        
+        #region failed_to_save_settings
+
+        private string _failed_to_save_settings;
+
+        public string failed_to_save_settings
+        {
+            get => _failed_to_save_settings;
+            set => SetProperty(ref _failed_to_save_settings, value);
+        }
+        #endregion
+        
+        #region dev_mode
+        private string _dev_mode;
+        public string dev_mode
+        {
+            get => _dev_mode;
+            set => SetProperty(ref _dev_mode, value);
+        }
+        #endregion
+
+        #region ietf_tag
+
+        private string _ietf_tag;
+
+        public string ietf_tag
+        {
+            get => _ietf_tag;
+            set => SetProperty(ref _ietf_tag, value);
+        }
+        #endregion
+        
+        #region native_name
+        private string _native_name;
+        public string native_name
+        {
+            get => _native_name;
+            set => SetProperty(ref _native_name, value);
+        }
+        #endregion
+
+        #region retry
+        private string _retry;
+        public string retry
+        {
+            get => _retry;
+            set => SetProperty(ref _retry, value);
+        }
+        #endregion
+
+        #region server_connecting
+        private string _server_connecting;
+        public string server_connecting
+        {
+            get => _server_connecting;
+            set => SetProperty(ref _server_connecting, value);
+        }
+        #endregion
+
+        #region server_unavailable_format_1
+        private string _server_unavailable_format_1;
+        public string server_unavailable_format_1
+        {
+            get => _server_unavailable_format_1;
+            set => SetProperty(ref _server_unavailable_format_1, value);
+        }
+        #endregion
+
+        #region no_servers_available
+        private string _no_servers_available;
+        public string no_servers_available
+        {
+            get => _no_servers_available;
+            set => SetProperty(ref _no_servers_available, value);
+        }
+        #endregion
+
+        #region settings_menu
+        private string _settings_menu;
+        public string settings_menu
+        {
+            get => _settings_menu;
+            set => SetProperty(ref _settings_menu, value);
+        }
+        #endregion
+
+        #region back
+        private string _back;
+        public string back
+        {
+            get => _back;
+            set => SetProperty(ref _back, value);
+        }
+        #endregion
+
+        #region wipe_profile
+        private string _wipe_profile;
+        public string wipe_profile
+        {
+            get => _wipe_profile;
+            set => SetProperty(ref _wipe_profile, value);
+        }
+        #endregion
+
+        #region username
+        private string _username;
+        public string username
+        {
+            get => _username;
+            set => SetProperty(ref _username, value);
+        }
+        #endregion
+
+        #region password
+        private string _password;
+        public string password
+        {
+            get => _password;
+            set => SetProperty(ref _password, value);
+        }
+        #endregion
+
+        #region update
+        private string _update;
+        public string update
+        {
+            get => _update;
+            set => SetProperty(ref _update, value);
+        }
+        #endregion
+
+        #region edit_account_update_error
+        private string _edit_account_update_error;
+        public string edit_account_update_error
+        {
+            get => _edit_account_update_error;
+            set => SetProperty(ref _edit_account_update_error, value);
+        }
+        #endregion
+
+        #region register
+        private string _register;
+        public string register
+        {
+            get => _register;
+            set => SetProperty(ref _register, value);
+        }
+        #endregion
+
+        #region go_to_register
+        private string _go_to_register;
+        public string go_to_register
+        {
+            get => _go_to_register;
+            set => SetProperty(ref _go_to_register, value);
+        }
+        #endregion
+
+        #region login_or_register
+        private string _login_or_register;
+        public string login_or_register
+        {
+            get => _login_or_register;
+            set => SetProperty(ref _login_or_register, value);
+        }
+        #endregion
+
+        #region go_to_login
+        private string _go_to_login;
+        public string go_to_login
+        {
+            get => _go_to_login;
+            set => SetProperty(ref _go_to_login, value);
+        }
+        #endregion
+
+        #region login_automatically
+        private string _login_automatically;
+        public string login_automatically
+        {
+            get => _login_automatically;
+            set => SetProperty(ref _login_automatically, value);
+        }
+        #endregion
+
+        #region incorrect_login
+        private string _incorrect_login;
+        public string incorrect_login
+        {
+            get => _incorrect_login;
+            set => SetProperty(ref _incorrect_login, value);
+        }
+        #endregion
+
+        #region login_failed
+        private string _login_failed;
+        public string login_failed
+        {
+            get => _login_failed;
+            set => SetProperty(ref _login_failed, value);
+        }
+        #endregion
+
+        #region edition
+        private string _edition;
+        public string edition
+        {
+            get => _edition;
+            set => SetProperty(ref _edition, value);
+        }
+        #endregion
+
+        #region id
+        private string _id;
+        public string id
+        {
+            get => _id;
+            set => SetProperty(ref _id, value);
+        }
+        #endregion
+
+        #region logout
+        private string _logout;
+        public string logout
+        {
+            get => _logout;
+            set => SetProperty(ref _logout, value);
+        }
+        #endregion
+
+        #region account
+        private string _account;
+        public string account
+        {
+            get => _account;
+            set => SetProperty(ref _account, value);
+        }
+        #endregion
+
+        #region edit_account
+        private string _edit_account;
+        public string edit_account
+        {
+            get => _edit_account;
+            set => SetProperty(ref _edit_account, value);
+        }
+        #endregion
+
+        #region start_game
+        private string _start_game;
+        public string start_game
+        {
+            get => _start_game;
+            set => SetProperty(ref _start_game, value);
+        }
+        #endregion
+
+        #region installed_in_live_game_warning
+        private string _installed_in_live_game_warning;
+        public string installed_in_live_game_warning
+        {
+            get => _installed_in_live_game_warning;
+            set => SetProperty(ref _installed_in_live_game_warning, value);
+        }
+        #endregion
+
+        #region no_official_game_warning
+        private string _no_official_game_warning;
+        public string no_official_game_warning
+        {
+            get => _no_official_game_warning;
+            set => SetProperty(ref _no_official_game_warning, value);
+        }
+        #endregion
+
+        #region eft_exe_not_found_warning
+        private string _eft_exe_not_found_warning;
+        public string eft_exe_not_found_warning
+        {
+            get => _eft_exe_not_found_warning;
+            set => SetProperty(ref _eft_exe_not_found_warning, value);
+        }
+        #endregion
+
+        #region account_exist
+        private string _account_exist;
+        public string account_exist
+        {
+            get => _account_exist;
+            set => SetProperty(ref _account_exist, value);
+        }
+        #endregion
+
+        #region url
+        private string _url;
+        public string url
+        {
+            get => _url;
+            set => SetProperty(ref _url, value);
+        }
+        #endregion
+
+        #region default_language
+        private string _default_language;
+        public string default_language
+        {
+            get => _default_language;
+            set => SetProperty(ref _default_language, value);
+        }
+        #endregion
+
+        #region game_path
+        private string _game_path;
+        public string game_path
+        {
+            get => _game_path;
+            set => SetProperty(ref _game_path, value);
+        }
+        #endregion
+
+        #region clear_game_settings
+        private string _clear_game_settings;
+        public string clear_game_settings
+        {
+            get => _clear_game_settings;
+            set => SetProperty(ref _clear_game_settings, value);
+        }
+        #endregion
+
+        #region clear_game_settings_succeeded
+        private string _clear_game_settings_succeeded;
+        public string clear_game_settings_succeeded
+        {
+            get => _clear_game_settings_succeeded;
+            set => SetProperty(ref _clear_game_settings_succeeded, value);
+        }
+        #endregion
+
+        #region clear_game_settings_failed
+        private string _clear_game_settings_failed;
+        public string clear_game_settings_failed
+        {
+            get => _clear_game_settings_failed;
+            set => SetProperty(ref _clear_game_settings_failed, value);
+        }
+        #endregion
+
+        #region load_live_settings
+        private string _load_live_settings;
+        public string load_live_settings
+        {
+            get => _load_live_settings;
+            set => SetProperty(ref _load_live_settings, value);
+        }
+        #endregion
+
+        #region load_live_settings_failed
+        private string _load_live_settings_failed;
+        public string load_live_settings_failed
+        {
+            get => _load_live_settings_failed;
+            set => SetProperty(ref _load_live_settings_failed, value);
+        }
+        #endregion
+
+        #region load_live_settings_succeeded
+        private string _load_live_settings_succeeded;
+        public string load_live_settings_succeeded
+        {
+            get => _load_live_settings_succeeded;
+            set => SetProperty(ref _load_live_settings_succeeded, value);
+        }
+        #endregion
+
+        #region remove_registry_keys
+        private string _remove_registry_keys;
+        public string remove_registry_keys
+        {
+            get => _remove_registry_keys;
+            set => SetProperty(ref _remove_registry_keys, value);
+        }
+        #endregion
+
+        #region remove_registry_keys_succeeded
+        private string _remove_registry_keys_succeeded;
+        public string remove_registry_keys_succeeded
+        {
+            get => _remove_registry_keys_succeeded;
+            set => SetProperty(ref _remove_registry_keys_succeeded, value);
+        }
+        #endregion
+
+        #region remove_registry_keys_failed
+        private string _remove_registry_keys_failed;
+        public string remove_registry_keys_failed
+        {
+            get => _remove_registry_keys_failed;
+            set => SetProperty(ref _remove_registry_keys_failed, value);
+        }
+        #endregion
+
+        #region clean_temp_files
+        private string _clean_temp_files;
+        public string clean_temp_files
+        {
+            get => _clean_temp_files;
+            set => SetProperty(ref _clean_temp_files, value);
+        }
+        #endregion
+
+        #region clean_temp_files_succeeded
+        private string _clean_temp_files_succeeded;
+        public string clean_temp_files_succeeded
+        {
+            get => _clean_temp_files_succeeded;
+            set => SetProperty(ref _clean_temp_files_succeeded, value);
+        }
+        #endregion
+
+        #region clean_temp_files_failed
+        private string _clean_temp_files_failed;
+        public string clean_temp_files_failed
+        {
+            get => _clean_temp_files_failed;
+            set => SetProperty(ref _clean_temp_files_failed, value);
+        }
+        #endregion
+
+        #region select_folder
+        private string _select_folder;
+        public string select_folder
+        {
+            get => _select_folder;
+            set => SetProperty(ref _select_folder, value);
+        }
+        #endregion
+
+        #region registration_failed
+        private string _registration_failed;
+        public string registration_failed
+        {
+            get => _registration_failed;
+            set => SetProperty(ref _registration_failed, value);
+        }
+        #endregion
+
+        #region registration_question_format_1
+        private string _registration_question_format_1;
+        public string registration_question_format_1
+        {
+            get => _registration_question_format_1;
+            set => SetProperty(ref _registration_question_format_1, value);
+        }
+        #endregion
+
+        #region minimize_action
+        private string _minimize_action;
+        public string minimize_action
+        {
+            get => _minimize_action;
+            set => SetProperty(ref _minimize_action, value);
+        }
+        #endregion
+
+        #region do_nothing_action
+        private string _do_nothing_action;
+        public string do_nothing_action
+        {
+            get => _do_nothing_action;
+            set => SetProperty(ref _do_nothing_action, value);
+        }
+        #endregion
+
+        #region exit_action
+        private string _exit_action;
+        public string exit_action
+        {
+            get => _exit_action;
+            set => SetProperty(ref _exit_action, value);
+        }
+        #endregion
+
+        #region on_game_start
+        private string _on_game_start;
+        public string on_game_start
+        {
+            get => _on_game_start;
+            set => SetProperty(ref _on_game_start, value);
+        }
+        #endregion
+
+        #region game
+        private string _game;
+        public string game
+        {
+            get => _game;
+            set => SetProperty(ref _game, value);
+        }
+        #endregion
+
+        #region new_password
+        private string _new_password;
+        public string new_password
+        {
+            get => _new_password;
+            set => SetProperty(ref _new_password, value);
+        }
+        #endregion
+
+        #region wipe_warning
+        private string _wipe_warning;
+        public string wipe_warning
+        {
+            get => _wipe_warning;
+            set => SetProperty(ref _wipe_warning, value);
+        }
+        #endregion
+
+        #region cancel
+        private string _cancel;
+        public string cancel
+        {
+            get => _cancel;
+            set => SetProperty(ref _cancel, value);
+        }
+        #endregion
+
+        #region need_an_account
+        private string _need_an_account;
+        public string need_an_account
+        {
+            get => _need_an_account;
+            set => SetProperty(ref _need_an_account, value);
+        }
+        #endregion
+
+        #region have_an_account
+        private string _have_an_account;
+        public string have_an_account
+        {
+            get => _have_an_account;
+            set => SetProperty(ref _have_an_account, value);
+        }
+        #endregion
+
+        #region reapply_patch
+        private string _reapply_patch;
+        public string reapply_patch
+        {
+            get => _reapply_patch;
+            set => SetProperty(ref _reapply_patch, value);
+        }
+        #endregion
+
+        #region failed_to_receive_patches
+        private string _failed_to_receive_patches;
+        public string failed_to_receive_patches
+        {
+            get => _failed_to_receive_patches;
+            set => SetProperty(ref _failed_to_receive_patches, value);
+        }
+        #endregion
+
+        #region failed_core_patch
+        private string _failed_core_patch;
+        public string failed_core_patch
+        {
+            get => _failed_core_patch;
+            set => SetProperty(ref _failed_core_patch, value);
+        }
+        #endregion
+
+        #region failed_mod_patch
+        private string _failed_mod_patch;
+        public string failed_mod_patch
+        {
+            get => _failed_mod_patch;
+            set => SetProperty(ref _failed_mod_patch, value);
+        }
+        #endregion
+
+        #region OK
+        private string _ok;
+        public string ok
+        {
+            get => _ok;
+            set => SetProperty(ref _ok, value);
+        }
+        #endregion
+
+        #region account_page_denied
+        private string _account_page_denied;
+        public string account_page_denied
+        {
+            get => _account_page_denied;
+            set => SetProperty(ref _account_page_denied, value);
+        }
+        #endregion
+
+        #region account_updated
+        private string _account_updated;
+        public string account_updated
+        {
+            get => _account_updated;
+            set => SetProperty(ref _account_updated, value);
+        }
+        #endregion
+
+        #region nickname
+        private string _nickname;
+        public string nickname
+        {
+            get => _nickname;
+            set => SetProperty(ref _nickname, value);
+        }
+        #endregion
+
+        #region side
+        private string _side;
+        public string side
+        {
+            get => _side;
+            set => SetProperty(ref _side, value);
+        }
+        #endregion
+
+        #region level
+        private string _level;
+        public string level
+        {
+            get => _level;
+            set => SetProperty(ref _level, value);
+        }
+        #endregion
+
+        #region patching
+        private string _patching;
+        public string patching
+        {
+            get => _patching;
+            set => SetProperty(ref _patching, value);
+        }
+        #endregion
+
+        #region file_mismatch_dialog_message
+        private string _file_mismatch_dialog_message;
+        public string file_mismatch_dialog_message
+        {
+            get => _file_mismatch_dialog_message;
+            set => SetProperty(ref _file_mismatch_dialog_message, value);
+        }
+        #endregion
+
+        #region yes
+        private string _yes;
+        public string yes
+        {
+            get => _yes;
+            set => SetProperty(ref _yes, value);
+        }
+        #endregion
+
+        #region no
+        private string _no;
+        public string no
+        {
+            get => _no;
+            set => SetProperty(ref _no, value);
+        }
+        #endregion
+
+        #region profile_created
+        private string _profile_created;
+        public string profile_created
+        {
+            get => _profile_created;
+            set => SetProperty(ref _profile_created, value);
+        }
+        #endregion
+
+        #region open_folder
+        private string _open_folder;
+        public string open_folder
+        {
+            get => _open_folder;
+            set => SetProperty(ref _open_folder, value);
+        }
+        #endregion
+
+        #region select_edition
+        private string _select_edition;
+        public string select_edition
+        {
+            get => _select_edition;
+            set => SetProperty(ref _select_edition, value);
+        }
+        #endregion
+
+        #region copied
+        private string _copied;
+        public string copied
+        {
+            get => _copied;
+            set => SetProperty(ref _copied, value);
+        }
+        #endregion
+
+        #region next_level_in
+        private string _next_level_in;
+        public string next_level_in
+        {
+            get => _next_level_in;
+            set => SetProperty(ref _next_level_in, value);
+        }
+        #endregion
+
+        #region no_profile_data
+        private string _no_profile_data;
+        public string no_profile_data
+        {
+            get => _no_profile_data;
+            set => SetProperty(ref _no_profile_data, value);
+        }
+        #endregion
+
+        #region profile_version_mismatch
+        private string _profile_version_mismath;
+        public string profile_version_mismath
+        {
+            get => _profile_version_mismath;
+            set => SetProperty(ref _profile_version_mismath, value);
+        }
+        #endregion
+
+        #region profile_removed
+        private string _profile_removed;
+        public string profile_removed
+        {
+            get => _profile_removed;
+            set => SetProperty(ref _profile_removed, value);
+        }
+        #endregion
+
+        #region profile_removal_failed
+        private string _profile_removal_failed;
+        public string profile_removal_failed
+        {
+            get => _profile_removal_failed;
+            set => SetProperty(ref _profile_removal_failed, value);
+        }
+        #endregion
+
+        #region profile_remove_question_format_1
+        private string _profile_remove_question_format_1;
+        public string profile_remove_question_format_1
+        {
+            get => _profile_remove_question_format_1;
+            set => SetProperty(ref _profile_remove_question_format_1, value);
+        }
+        #endregion
+
+        #region i_understand
+        private string _i_understand;
+        public string i_understand
+        {
+            get => _i_understand;
+            set => SetProperty(ref _i_understand, value);
+        }
+        #endregion
+
+        #region game_version_mismatch_format_2
+        private string _game_version_mismatch_format_2;
+        public string game_version_mismatch_format_2
+        {
+            get => _game_version_mismatch_format_2;
+            set => SetProperty(ref _game_version_mismatch_format_2, value);
+        }
+        #endregion
+
+        #region description
+        private string _description;
+        public string description
+        {
+            get => _description;
+            set => SetProperty(ref _description, value);
+        }
+        #endregion
+
+        #region author
+        private string _author;
+        public string author
+        {
+            get => _author;
+            set => SetProperty(ref _author, value);
+        }
+
+        #endregion
+
+        #region wipe_on_start
+        private string _wipe_on_start;
+        public string wipe_on_start
+        {
+            get => _wipe_on_start;
+            set => SetProperty(ref _wipe_on_start, value);
+        }
+        #endregion
+
+        #region copy_live_settings_question
+        private string _copy_live_settings_question;
+        public string copy_live_settings_question
+        {
+            get => _copy_live_settings_question;
+            set => SetProperty(ref _copy_live_settings_question, value);
+        }
+        #endregion
+        
+        #region mod_not_in_server_warning
+        private string _mod_not_in_server_warning;
+        public string mod_not_in_server_warning
+        {
+            get => _mod_not_in_server_warning;
+            set => SetProperty(ref _mod_not_in_server_warning, value);
+        }
+        #endregion
+        
+        #region active_server_mods
+        private string _active_server_mods;
+        public string active_server_mods
+        {
+            get => _active_server_mods;
+            set => SetProperty(ref _active_server_mods, value);
+        }
+        #endregion
+        
+        #region active_server_mods_info_text
+
+        private string _active_server_mods_info_text;
+
+        public string active_server_mods_info_text
+        {
+            get => _active_server_mods_info_text;
+            set => SetProperty(ref _active_server_mods_info_text, value);
+        }
+        #endregion
+        
+        #region inactive_server_mods
+        private string _inactive_server_mods;
+        public string inactive_server_mods
+        {
+            get => _inactive_server_mods;
+            set => SetProperty(ref _inactive_server_mods, value);
+        }
+        #endregion
+        
+        #region inactive_server_mods_info_text
+
+        private string _inactive_server_mods_info_text;
+
+        public string inactive_server_mods_info_text
+        {
+            get => _inactive_server_mods_info_text;
+            set => SetProperty(ref _inactive_server_mods_info_text, value);
+        }
+        #endregion
+        
+        #region open_link_question_format_1
+
+        private string _open_link_question_format_1;
+
+        public string open_link_question_format_1
+        {
+            get => _open_link_question_format_1;
+            set => SetProperty(ref _open_link_question_format_1, value);
+        }
+        #endregion
+        
+        #region open_link
+
+        private string _open_link;
+
+        public string open_link
+        {
+            get => _open_link;
+            set => SetProperty(ref _open_link, value);
+        }
+        #endregion
+
+        #region core_dll_file_version_mismatch
+        private string _core_dll_file_version_mismatch;
+
+        public string core_dll_file_version_mismatch
+        {
+            get => _core_dll_file_version_mismatch;
+            set => SetProperty(ref _core_dll_file_version_mismatch, value);
+        }
+
+        #endregion
+
+        #region create_password_title
+        private string _create_password_title;
+        public string create_password_title
+        {
+            get => _create_password_title;
+            set => SetProperty(ref _create_password_title, value);
+        }
+        #endregion
+
+        #region create_password_message
+        private string _create_password_message;
+        public string create_password_message
+        {
+            get => _create_password_message;
+            set => SetProperty(ref _create_password_message, value);
+        }
+        #endregion
+
+        #region create_password_confirm
+        private string _create_password_confirm;
+        public string create_password_confirm
+        {
+            get => _create_password_confirm;
+            set => SetProperty(ref _create_password_confirm, value);
+        }
+        #endregion
+
+        #region create_password_success
+        private string _create_password_success;
+        public string create_password_success
+        {
+            get => _create_password_success;
+            set => SetProperty(ref _create_password_success, value);
+        }
+        #endregion
+
+        #region reset_password
+        private string _reset_password;
+        public string reset_password
+        {
+            get => _reset_password;
+            set => SetProperty(ref _reset_password, value);
+        }
+        #endregion
+
+        #region reset_password_success
+        private string _reset_password_success;
+        public string reset_password_success
+        {
+            get => _reset_password_success;
+            set => SetProperty(ref _reset_password_success, value);
+        }
+        #endregion
+
+        #region reset_password_failed
+        private string _reset_password_failed;
+        public string reset_password_failed
+        {
+            get => _reset_password_failed;
+            set => SetProperty(ref _reset_password_failed, value);
+        }
+        #endregion
+
+        #region reset_password_hwid_mismatch
+        private string _reset_password_hwid_mismatch;
+        public string reset_password_hwid_mismatch
+        {
+            get => _reset_password_hwid_mismatch;
+            set => SetProperty(ref _reset_password_hwid_mismatch, value);
+        }
+        #endregion
+
+        #region repeat_password
+        private string _repeat_password;
+        public string repeat_password
+        {
+            get => _repeat_password;
+            set => SetProperty(ref _repeat_password, value);
+        }
+        #endregion
+
+        #region reset_password_no_hwid
+        private string _reset_password_no_hwid;
+        public string reset_password_no_hwid
+        {
+            get => _reset_password_no_hwid;
+            set => SetProperty(ref _reset_password_no_hwid, value);
+        }
+        #endregion
+
+        #region server_version
+        private string _server_version;
+        public string server_version
+        {
+            get => _server_version;
+            set => SetProperty(ref _server_version, value);
+        }
+        #endregion
+
+        #region update_strings
+        private string _check_updates;
+        public string check_updates { get => _check_updates; set => SetProperty(ref _check_updates, value); }
+
+        private string _update_checking;
+        public string update_checking { get => _update_checking; set => SetProperty(ref _update_checking, value); }
+
+        private string _update_checking_file;
+        public string update_checking_file { get => _update_checking_file; set => SetProperty(ref _update_checking_file, value); }
+
+        private string _update_available;
+        public string update_available { get => _update_available; set => SetProperty(ref _update_available, value); }
+
+        private string _update_up_to_date;
+        public string update_up_to_date { get => _update_up_to_date; set => SetProperty(ref _update_up_to_date, value); }
+
+        private string _update_button;
+        public string update_button { get => _update_button; set => SetProperty(ref _update_button, value); }
+
+        private string _update_downloading;
+        public string update_downloading { get => _update_downloading; set => SetProperty(ref _update_downloading, value); }
+
+        private string _update_completed;
+        public string update_completed { get => _update_completed; set => SetProperty(ref _update_completed, value); }
+
+        private string _update_completed_with_errors;
+        public string update_completed_with_errors { get => _update_completed_with_errors; set => SetProperty(ref _update_completed_with_errors, value); }
+
+        private string _update_error;
+        public string update_error { get => _update_error; set => SetProperty(ref _update_error, value); }
+
+        private string _update_files_to_delete;
+        public string update_files_to_delete { get => _update_files_to_delete; set => SetProperty(ref _update_files_to_delete, value); }
+
+        private string _update_deleting;
+        public string update_deleting { get => _update_deleting; set => SetProperty(ref _update_deleting, value); }
+        #endregion
+
+        #endregion
+    }
+}
