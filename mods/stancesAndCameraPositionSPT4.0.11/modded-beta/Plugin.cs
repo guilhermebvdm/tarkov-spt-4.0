@@ -330,7 +330,7 @@ public class Plugin : BaseUnityPlugin
         SafeEnable("PassiveMountDetectPatch", () => new Patches.PassiveMountDetectPatch());
         SafeEnable("PassiveRecoilPatch", () => new Patches.PassiveRecoilPatch());
         SafeEnable("PassiveSwayPatch", () => new Patches.PassiveSwayPatch());
-        SafeEnable("ObservedStanceProcessPatch", () => new Patches.ObservedStanceProcessPatch());   // item 014 fix-01
+        SafeEnable("ObservedStanceVisualPatch", () => new Patches.ObservedStanceVisualPatch());   // item 014 fix-03
         SafeEnable("BattleUIScreenPatch", () => new BattleUIScreenPatch());
 
         // Item 007: Movement & Inertia
