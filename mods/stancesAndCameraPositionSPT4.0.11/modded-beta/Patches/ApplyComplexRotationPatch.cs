@@ -67,7 +67,7 @@ namespace CameraRotationMod.Patches
             return e;
         }
 
-        private static Vector3 SpringLerpAngle(Vector3 current, Vector3 target, ref Vector3 velocity, float stiffness, float damping, float dt)
+        public static Vector3 SpringLerpAngle(Vector3 current, Vector3 target, ref Vector3 velocity, float stiffness, float damping, float dt)
         {
             if (float.IsNaN(target.x) || float.IsNaN(target.y) || float.IsNaN(target.z) ||
                 float.IsNaN(current.x) || float.IsNaN(current.y) || float.IsNaN(current.z)) return Vector3.zero;
@@ -98,7 +98,7 @@ namespace CameraRotationMod.Patches
             return result;
         }
 
-        private static Vector3 SpringLerp(Vector3 current, Vector3 target, ref Vector3 velocity, float stiffness, float damping, float dt)
+        public static Vector3 SpringLerp(Vector3 current, Vector3 target, ref Vector3 velocity, float stiffness, float damping, float dt)
         {
             if (float.IsNaN(target.x) || float.IsNaN(target.y) || float.IsNaN(target.z) ||
                 float.IsNaN(current.x) || float.IsNaN(current.y) || float.IsNaN(current.z)) return Vector3.zero;
@@ -144,13 +144,24 @@ namespace CameraRotationMod.Patches
             }
 
             Player player = Traverse.Create(firearmController).Field<Player>("_player").Value;
-            if (player == null || !player.IsYourPlayer)
+            if (player == null)
                 return;
 
             Quaternion scopeRotation = (Quaternion)_scopeRotationField.GetValue(__instance);
             Vector3 weaponPosition = (Vector3)_weapTempPositionField.GetValue(__instance);
             Quaternion weapRotation = (Quaternion)_weapTempRotationField.GetValue(__instance);
             bool isAiming = (bool)_isAimingField.GetValue(__instance);
+
+            // Item 014: jogador OBSERVADO (Fika) — aplica o stance SINCRONIZADO no WeaponRootAnim (mesma forma
+            // do local), sem rodar kick/hold-breath (que são só do MainPlayer). Coexiste com lean/ombro/mira
+            // porque o offset é aditivo sobre weapRotation (pose nativa). O bloco MainPlayer abaixo fica intacto.
+            if (!player.IsYourPlayer)
+            {
+                if (weapRotation.w == 0 && weapRotation.x == 0 && weapRotation.y == 0 && weapRotation.z == 0) return;
+                if (float.IsNaN(dt) || float.IsInfinity(dt) || dt <= 0f || dt > 1f) return;
+                player.gameObject.GetComponent<Networking.ObservedStanceAnimator>()?.ApplyTo(__instance, weaponPosition, weapRotation, dt);
+                return;
+            }
 
             // ==========================================
             // [AUTO-SPY & SAFEGUARD]

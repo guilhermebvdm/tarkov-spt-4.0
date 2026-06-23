@@ -786,19 +786,22 @@ namespace CameraRotationMod
         /// <summary>
         /// Get the current target rotation based on stance state and ADS state
         /// </summary>
-        public static Vector3 GetTargetRotation(bool isAiming)
+        public static Vector3 GetTargetRotation(bool isAiming) => GetTargetRotation(CurrentStance, isAiming);
+
+        // Item 014: overload parametrizado — usado pelo sync remoto para o stance sincronizado de cada player.
+        public static Vector3 GetTargetRotation(Stance stance, bool isAiming)
         {
             // Ensure cached values are up to date
             RebuildCachedStanceValues();
-            
+
             // If ADS and reset rotation is enabled, return ADS rotation
             if (isAiming && (Plugin._ResetOnADS?.Value ?? false))
             {
                 return _cachedADSRotation;
             }
 
-            // Return cached rotation based on current stance
-            return CurrentStance switch
+            // Return cached rotation based on the given stance
+            return stance switch
             {
                 Stance.Stance1 => _cachedStance1Rotation,
                 Stance.Stance2 => _cachedStance2Rotation,
@@ -810,19 +813,22 @@ namespace CameraRotationMod
         /// <summary>
         /// Get the current target position based on stance state and ADS state
         /// </summary>
-        public static Vector3 GetTargetPosition(bool isAiming)
+        public static Vector3 GetTargetPosition(bool isAiming) => GetTargetPosition(CurrentStance, isAiming);
+
+        // Item 014: overload parametrizado — sync remoto.
+        public static Vector3 GetTargetPosition(Stance stance, bool isAiming)
         {
             // Ensure cached values are up to date
             RebuildCachedStanceValues();
-            
+
             // If ADS and reset is enabled, return ADS position
             if (isAiming && (Plugin._ResetOnADS?.Value ?? false))
             {
                 return _cachedADSPosition;
             }
 
-            // Return cached position based on current stance
-            return CurrentStance switch
+            // Return cached position based on the given stance
+            return stance switch
             {
                 Stance.Stance1 => _cachedStance1Position,
                 Stance.Stance2 => _cachedStance2Position,
