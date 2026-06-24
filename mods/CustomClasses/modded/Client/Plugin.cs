@@ -81,6 +81,8 @@ public class Plugin : BaseUnityPlugin
         SkillsClassPosX.SettingChanged += (_, _) => RepositionSeals();
         SkillsClassPosY.SettingChanged += (_, _) => RepositionSeals();
 
+        PerksConfig.Bind(Config);   // item 050: F12 dos perks/drawbacks (fatia 050.0: Bulwark + Pack Mule)
+
         new OnTriggerPatch().Enable();
         new WorkoutBehaviourPatch().Enable();   // (a) gym
         new SkillPanelPatch().Enable();         // (010) UI — marcador ±X% + tooltip dedicado da classe
@@ -92,6 +94,54 @@ public class Plugin : BaseUnityPlugin
         new PlayerNamePanelPatch().Enable();                // (015) identidade no nome — confirmation (PlayerNamePanel)
         new RaidReadyPlayerPanelPatch().Enable();           // (015) aumenta ícone+nome na tela de deploy
         new SkillsNavButtonPatch().Enable();                // (013) botão SKILLS no menu → abre a aba Skills
+        new BulwarkPatch().Enable();                        // (050.0) 🛡️ Tanque — dano recebido ×0.85
+        new PackMulePatch().Enable();                       // (050.0) 🎒🛡️ Pack Mule — +30% limite de carga (piso, stash+raid)
+        new RaidPerksNotificationPatch().Enable();          // (050) notificação de perks/drawbacks no início da raid
+        new MaxSpeedPatch().Enable();                       // (050.1) vel. de movimento por classe (Heavy Frame…)
+        new SprintSpeedPatch().Enable();                    // (050.1) idem no sprint
+        new OverladenInertiaPatch().Enable();               // (050.1) 🔻 Saqueador — inércia ∝ peso
+        new ShootRecoilPatch().Enable();                    // (050.2) 🔻 Médico — recuo ×1.25 (Shaky Hands) + Adrenaline ×0.7
+        new AimPunchPatch().Enable();                       // (050.2) 🔻 Furtivo — aim-punch ×1.5 (Rattled)
+        try
+        {
+            new AdrenalineTriggerPatch().Enable();          // (050.2) 🔧 Fuzileiro — gatilho da Adrenaline (dano dado/recebido)
+            new ReloadSpeedPatch().Enable();                // (050.2) 🔧 Adrenaline — recarga mais rápida na janela
+            new AdsSpeedPatch().Enable();                   // (050.2) 🔧 Adrenaline — ADS mais rápido (injeção de campo _aimingSpeed)
+        }
+        catch (System.Exception ex)
+        {
+            Log.LogError($"[CustomClasses] (050.2) Adrenaline patches falharam ao aplicar: {ex.Message}");
+        }
+        new ExecutionMeleePatch().Enable();                 // (050.3) 🔧 Furtivo — dano de melee ×5
+        new MalfunctionChancePatch().Enable();              // (050.3) 🔧 Fuzileiro — anti-jam ×0.5 (Cool Under Fire)
+        new InteractionSoundPatch().Enable();               // (050.4) 🔧 Saqueador — loot mais silencioso (Silent Looter)
+        try
+        {
+            new SoundRadiusPatch().Enable();                // (050.4) 🔧🔻 Ghost Step / Loud Operator — raio de som (method_67 obfuscado)
+        }
+        catch (System.Exception ex)
+        {
+            Log.LogError($"[CustomClasses] (050.4) SoundRadiusPatch falhou ao aplicar: {ex.Message}");
+        }
+        // 050.4b — Bunker recuo (branch no ShootRecoilPatch já ligado) + Sharpshooter ADS (branch no AdsSpeedPatch já ligado)
+        try
+        {
+            new HeavyWeaponErgoPatch().Enable();            // (050.4b) 🔧 Tanque — +ergo arma pesada (Bunker)
+            new IronLungsPatch().Enable();                  // (050.4b) 🔧 Caçador — segura respiração + tempo (método obfuscado)
+        }
+        catch (System.Exception ex)
+        {
+            Log.LogError($"[CustomClasses] (050.4b) Bunker ergo / Iron Lungs falharam ao aplicar: {ex.Message}");
+        }
+        try
+        {
+            new ChangeEnergyPatch().Enable();               // (050.3) 🔻 Tanque — fome drena ×1.3 (Heavy Frame)
+            new ChangeHydrationPatch().Enable();            // (050.3) 🔻 Tanque — sede drena ×1.3 (Heavy Frame)
+        }
+        catch (System.Exception ex)
+        {
+            Log.LogError($"[CustomClasses] (050.3) Heavy Frame metabolism patches falharam ao aplicar: {ex.Message}");
+        }
         if (SkillLevelUpNotificationPatch.CanEnable)        // (014) notificação de level-up (EASILY/FINALLY)
         {
             new SkillLevelUpNotificationPatch().Enable();

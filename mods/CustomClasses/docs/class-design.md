@@ -39,7 +39,7 @@
 
 | Perk / Drawback | Tipo | Efeito | Obs / knob |
 |---|---|---|---|
-| **Cool Under Fire** | 🔧 passivo | • **supressão** (tranco na mira ao ser alvejado de perto/ferido): intensidade `×0.5` → **metade do tranco**<br>• **travamento da arma** (jam/misfire): chance `×0.5` → **metade da chance**<br>• **conserto do travamento**: tempo `×0.5` → **2× mais rápido** | |
+| **Cool Under Fire** | 🔧 passivo | • **flinch ao levar dano** (tranco na mira ao ser **atingido**): intensidade `×0.5` → **metade do tranco** *(re-escopo 2026-06-23: o EFT 0.16.9 não tem efeito de supressão/near-miss no cliente; o perk atenua o flinch de hit)*<br>• **travamento da arma** (jam/misfire): chance `×0.5`<br>• **conserto do travamento**: tempo `×0.5` → **2× mais rápido** | flinch = `ForceEffector.AddForce` ✅ (050.2) · jam/conserto = 050.3 |
 | **Adrenaline** | 🔧 condicional | • Ao **causar ou receber dano** em combate, liga uma janela de **25s** com:<br>  – recuo `×0.7` → **−30%**<br>  – tempo de recarga `×0.8` → **20% mais rápido**<br>  – tempo de ADS `×0.8` → **20% mais rápido**<br>• **renova** a cada novo evento · **cooldown 2 min** após expirar | duração/magnitudes tunáveis (F12) |
 | **Loud Operator** | 🔻 drawback | • **volume de TODOS os sons do player `×1.3`** → **+30% mais alto** *(o assalto é barulhento; é ouvido chegando)* | `SoundVolume` (client) |
 
@@ -82,30 +82,25 @@
 |---|---|---|---|
 | **Pack Mule** | 🔧 head-start *(compartilhada c/ Saqueador)* | • **+30% no limite de peso** que carrega antes de ficar *overweight* (aguenta mais; **não** deixa os itens mais leves) | = bônus máximo da Strength vanilla (`StrengthBuffLiftWeightInc.Max(0.3)`) |
 | **Bulwark** | 🔧 passivo | • **dano recebido na vida** (após a armadura) `×0.85` → **−15%** | (era skill 0→−25%; flat −15%) |
-| **Bunker** | 🔧 passivo | • **lança-granadas acoplado** (GP-25/M203): montar **não reduz a ergonomia** da arma<br>• ⚠️ **dreno de stamina do braço por segurar arma pesada** `×0` (braço não cansa) | ⚠️ = zona stances (item 051) |
+| **Bunker** | 🔧 passivo | • **armas pesadas na mão** (LMG/HMG/lança-granadas/underbarrel): **recuo `×0.85`** + **ergonomia `×1.15`** *(as skills de maestria dessas armas são **inertes** no jogo `[]` — o bônus vem por patch, não por skill)*<br>• **lança-granadas acoplado** (GP-25/M203): montar **não reduz a ergonomia** da arma<br>• ⚠️ **dreno de stamina do braço por segurar arma pesada** `×0` (braço não cansa) | ⚠️ = zona stances (item 051) |
 | **Heavy Frame** | 🔻 drawback | • **velocidade de movimento `×0.9`** → **−10%**<br>• **fome/sede `×1.3`** → consome **30% mais rápido** *(o brutamontes gasta mais energia/hidratação)* | `Energy`/`Hydration` drain (client) |
 
 ---
 
 ## Matriz 🎯 (skills vanilla por classe)
 
-> **Conferida 1:1 com os `.jsonc` atuais em 2026-06-21** (`skillMultipliers` + níveis iniciais batem com o que está no editor). Camada **server-side** (aplicada na criação do profile → restart/perfil novo). **Fonte de verdade reproduzível:** [`class-matrix.mjs`](../scripts/class-matrix.mjs) (`node mods/CustomClasses/scripts/class-matrix.mjs` recalcula custo/netMult e faz cross-check); implementação nos `.jsonc`. `×` = multiplicador de XP (>1 sobe mais rápido 🟢 · <1 atrofia 🔴) · `Lv` = nível inicial · **balance: topo (Méd/Fuz/Caç/Furtivo) ~+6 · base (Saq/Tan) ~+4** (base compensada pelos perks).
+> **Baseline = editor web (2026-06-22)** — re-sincronizado dos `.jsonc` (decisão do usuário: edições do editor = nova baseline; substitui a calibração da Fase 2). Camada **server-side** (criação de profile → restart/perfil novo). **Matriz completa por classe (~20–30 skills cada) vive em [`class-matrix.mjs`](../scripts/class-matrix.mjs)** (`node …/class-matrix.mjs` recalcula) + nos `.jsonc` — não duplicada aqui. Resumo:
 
-| Classe | custo | netMult | faixa |
+| Classe | custo | netMult | flag |
 |---|---|---|---|
-| 🩺 Médico | 31.87 | +6.12 | topo |
-| 🔫 Fuzileiro | 30.51 | +6.27 | topo |
-| 🎯 Caçador | 31.40 | +6.21 | topo |
-| 👻 Furtivo | 30.14 | +6.12 | topo |
-| 🎒 Saqueador | 28.23 | +4.09 | base |
-| 🛡️ Tanque | 30.29 | +4.28 | base |
+| 🩺 Médico | 30.95 | +11.31 | 7 skills c/ nível (>6) |
+| 🔫 Fuzileiro | 30.51 | +18.28 | — |
+| 🎯 Caçador | 31.40 | +14.45 | ok |
+| 👻 Furtivo | 29.74 | +12.43 | 8 skills c/ nível (>6) |
+| 🎒 Saqueador | 30.45 | +11.65 | 8 skills c/ nível (>6) |
+| 🛡️ Tanque | 35.28 | +18.89 | **custo >32** |
 
-- **🩺 Médico** — 🟢 FirstAid ×2.5 Lv5 · FieldMedicine ×2 Lv5 · Surgery ×2 Lv4 · Vitality ×2 Lv4 · HideoutManagement ×1.5 Lv6 · Crafting ×1.5 · Immunity ×1.2 Lv1 · 🔴 Assault ×0.6 · AimDrills ×0.7 · CovertMovement ×0.7 · Perception ×0.8
-- **🔫 Fuzileiro** — 🟢 Assault ×2.5 Lv7 · UsecArsystems ×2 Lv3 · BearAksystems ×2 Lv3 · AimDrills ×1.5 Lv5 · MagDrills ×1.5 Lv4 · Endurance ×1.5 Lv5 · StressResistance ×1.3 · Pistol ×1.2 · 🔴 CovertMovement ×0.6 · Attention ×0.7 · Search ×0.8
-- **🎯 Caçador** — 🟢 Sniper ×2.5 Lv7 · DMR ×1.5 Lv2 · AimDrills ×1.5 · ProneMovement ×1.5 Lv3 · Pistol ×1.3 Lv2 · Perception ×1.3 Lv2 · Metabolism ×1.3 · CovertMovement ×1.2 Lv3 · 🔴 Assault ×0.6
-- **👻 Furtivo** — 🟢 SilentOps ×2.5 Lv6 · CovertMovement ×1.5 Lv6 · Perception ×1.5 Lv5 · Pistol ×1.8 Lv2 *(pistola silenciada)* · Melee ×1.5 Lv3 · LightVests ×1.3 · ProneMovement ×1.5 · Lockpicking ×1.3 Lv3 · 🔴 Assault ×0.6 · StressResistance ×0.7 · Shotgun ×0.7
-- **🎒 Saqueador** — 🟢 Lockpicking ×3 Lv8 · Strength ×3 Lv7 · ShadowConnections ×2.5 Lv6 · Attention ×1.3 Lv8 · Perception ×1.3 Lv5 · Search ×1.3 Lv6 · HideoutManagement ×1.2 · Intellect ×1.2 · Charisma ×1.2 · 🔴 Assault ×0.6 · AimDrills ×0.7 · StressResistance ×0.7 · *(Lockpicking/Strength ×3 acima do teto ×2 — ressalva peso-baixo do [balance-model.md](./balance-model.md))*
-- **🛡️ Tanque** — 🟢 StressResistance ×2 · HeavyVests ×1.5 Lv3 · Health ×1.5 Lv4 · Vitality ×1.5 Lv4 · Strength ×1.5 Lv5 · Shotgun ×1.5 Lv1 · Throwing ×1.5 Lv1 · Melee ×1.5 · 🔴 Metabolism ×0.5 · CovertMovement ×0.5 · AimDrills ×0.7 · Pistol ×0.7 · DMR ×0.7
+> ✅ **Balance aceito como está (decisão do usuário, 2026-06-22):** o netMult mais alto (≈+11 a +19) e os budgets estourados (Tanque custo 35.28>32; >6 skills de nível em alguns) são **intencionais** — o baseline do editor é o final. Os "flags" do `class-matrix.mjs` são informativos, não bloqueiam. *(`Shadowconnections` sem peso → custo/net preliminares, mas sem impacto na decisão.)*
 
 ## Loadout 🎒 e Hideout 🏠
 
@@ -182,7 +177,7 @@
 | **Cool Under Fire** travamento/conserto | `config.Malfunction` / roll | client | 🟡 |
 | **Sharpshooter** ADS-por-arma / saque | `_props.Ergonomics`×`config.Aiming` / draw | client | 🟡 |
 | **Ghost Step / Loud Operator / Silent Looter** som | passo (`MovementContext`) **+** sons de ação | client | 🟡 |
-| **Bunker** GL sem penalidade ergo | ergo c/ lançador acoplado | client | 🟡 |
+| **Bunker** GL + armas pesadas (LMG/HMG/GL/underbarrel) | ergo (`_props.Ergonomics`) + recuo (`WeaponRecoil`) condicionados ao `weapClass` da arma na mão + classe Tank. *(Maestrias LMG/HMG/Launcher/AttachedLauncher são inertes `[]` → bônus por patch.)* | client | 🟡 |
 
 > **9 ✅ · ~7 🟡 · 2 ⚠️.** Quase tudo **client-side** → o **F12-live é viável** (ver seção F12).
 >
@@ -281,6 +276,8 @@ Cada perk/drawback tem um **toggle `Enabled`** + os valores tunáveis. Layout pr
   Bunker — Enabled                bool   true
   Bunker — GL no ergo penalty     bool   true
   Bunker — Heavy wpn arm stamina  float  0.00    # ×dreno do braço c/ arma pesada
+  Bunker — Heavy wpn recoil       float  0.85    # ×recuo c/ LMG/HMG/GL/underbarrel (maestrias inertes → patch)
+  Bunker — Heavy wpn ergo         float  1.15    # ×ergonomia c/ armas pesadas
   🔻 Heavy Frame — Enabled        bool   true
   🔻 Heavy Frame — Move speed     float  0.90    # ×velocidade (−10%)
   🔻 Heavy Frame — Hunger/thirst  float  1.30    # ×taxa de fome/sede (+30%)
@@ -315,3 +312,4 @@ Adicionar uma **aba nova "Perks/Drawback"** na tela de **SKILLS** (ao lado das c
 | 2026-06-21 | Guilherme | **Review 1 endereçado (g-review-content):** seção **Implementação — patch-points + fatiamento** (mapa do recon: 9✅/7🟡/2⚠️ + 050.0–050.4); contradições "tela de Skills" reescritas; `[Fantasma]`→`[Furtivo]` no F12; Saqueador "contêiner 6 slots" corrigido (todas usam mesma `baseEdition`); **K resolvido** (Pack Mule = piso, sem somar c/ Strength); Quick Hands (`SearchDouble`) reescrito. |
 | 2026-06-21 | Guilherme | **Review 2 endereçado:** Adrenaline confiança split (gatilho "causar dano" 🟡); ressalva F12 (Heavy Frame fome/sede client a confirmar); caveat de confiança do recon (re-confirmar alvo por fatia); **DoD por efeito** + aceite por efeito no fatiamento; 053 ganha pendência do dicionário de strings EN/pt-br. |
 | 2026-06-21 | Guilherme | **Review 3 endereçado:** **Contrato de gating** pinado (`GameVersion`=`displayName[lang]`; chave estável=`name`; tabela por classe) + **Furtivo=`Ghost` no runtime** → rename de implementação vira **pré-requisito do 050.0**. Doc fechado pra `/g-autodev`. |
+| 2026-06-22 | Guilherme | **Matriz re-sincronizada ao editor (novo baseline).** `sync-classes` (install→repo) + rename 054 re-aplicado (`furtivo.jsonc`) + `class-matrix.mjs` reescrito aos valores do editor. netMult subiu p/ ~+11–19 (vs +6/+4) e budgets estouraram (Tanque custo 35.28>32; Médico/Furtivo/Saqueador >6 skills c/ nível) → **pendência de balance**. `Shadowconnections` sem peso (preliminar). 050.0 (Bulwark/Pack Mule) compila ✅, pendente in-game. |

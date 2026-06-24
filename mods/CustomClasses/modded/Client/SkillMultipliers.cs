@@ -29,6 +29,16 @@ internal static class SkillMultipliers
             ? null
             : (GameLocale.IsPortuguese ? (_classNamePt ?? _classNameEn) : (_classNameEn ?? _classNamePt));
 
+    /// <summary>Item 050: nome EN estável da classe (= campo `name` do config) — chave de gating idioma-independente. Null se vanilla.</summary>
+    public static string? ClassNameEn => _classNameEn;
+
+    /// <summary>Item 050: true se a classe do perfil local é <paramref name="nameEn"/> (compara o nome EN estável, case-insensitive).</summary>
+    public static bool IsLocalClass(string nameEn)
+    {
+        EnsureLoaded();
+        return _classNameEn != null && string.Equals(_classNameEn, nameEn, StringComparison.OrdinalIgnoreCase);
+    }
+
     /// <summary>Item 015: nickname do perfil local (p/ casar o ChatSpecialIcon do jogador local).</summary>
     public static string? Nickname { get; private set; }
 

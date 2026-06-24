@@ -1,16 +1,16 @@
-# Graph Report - mods\CustomClasses\modded  (2026-06-15)
+# Graph Report - mods\CustomClasses\modded  (2026-06-23)
 
 ## Corpus Check
-- 81 files · ~70,552 words
+- 92 files · ~77,230 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1245 nodes · 1550 edges · 79 communities (73 shown, 6 thin omitted)
+- 1375 nodes · 1727 edges · 92 communities (84 shown, 8 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 1 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f235348c`
+- Built from commit: `afffc770`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -87,6 +87,19 @@
 - [[_COMMUNITY_Community 73|Community 73]]
 - [[_COMMUNITY_Community 74|Community 74]]
 - [[_COMMUNITY_Community 75|Community 75]]
+- [[_COMMUNITY_Community 79|Community 79]]
+- [[_COMMUNITY_Community 80|Community 80]]
+- [[_COMMUNITY_Community 81|Community 81]]
+- [[_COMMUNITY_Community 82|Community 82]]
+- [[_COMMUNITY_Community 83|Community 83]]
+- [[_COMMUNITY_Community 84|Community 84]]
+- [[_COMMUNITY_Community 85|Community 85]]
+- [[_COMMUNITY_Community 86|Community 86]]
+- [[_COMMUNITY_Community 87|Community 87]]
+- [[_COMMUNITY_Community 88|Community 88]]
+- [[_COMMUNITY_Community 89|Community 89]]
+- [[_COMMUNITY_Community 90|Community 90]]
+- [[_COMMUNITY_Community 91|Community 91]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `CatalogService` - 55 edges
@@ -101,21 +114,21 @@
 10. `Plugin` - 10 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `MenuClassIdentityPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/MenuClassIdentityPatch.cs →   _Bridges community 40 → community 20_
-- `OnTriggerPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/OnTriggerPatch.cs →   _Bridges community 40 → community 53_
-- `PlayerModelWithStatsIdentityPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/PlayerModelWithStatsIdentityPatch.cs →   _Bridges community 40 → community 47_
-- `PlayerNamePanelPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/PlayerNamePanelPatch.cs →   _Bridges community 40 → community 48_
-- `RaidReadyPlayerPanelPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/RaidReadyPlayerPanelPatch.cs →   _Bridges community 40 → community 49_
+- `BulwarkPatch` --inherits--> `ModulePatch`  [EXTRACTED]
+  Client/Patches/BulwarkPatch.cs →   _Bridges community 80 → community 86_
+- `ChatSpecialIconPatch` --inherits--> `ModulePatch`  [EXTRACTED]
+  Client/Patches/ChatSpecialIconPatch.cs →   _Bridges community 80 → community 40_
+- `ChangeEnergyPatch` --inherits--> `ModulePatch`  [EXTRACTED]
+  Client/Patches/ClassCombatHealthPatches.cs →   _Bridges community 80 → community 79_
+- `MaxSpeedPatch` --inherits--> `ModulePatch`  [EXTRACTED]
+  Client/Patches/ClassMovementPatches.cs →   _Bridges community 80 → community 81_
+- `InteractionSoundPatch` --inherits--> `ModulePatch`  [EXTRACTED]
+  Client/Patches/ClassSoundPatches.cs →   _Bridges community 80 → community 82_
 
 ## Import Cycles
 - None detected.
 
-## Communities (79 total, 6 thin omitted)
+## Communities (92 total, 8 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.09
@@ -163,7 +176,7 @@ Nodes (18): Flea, Handbook, LoadoutCostBreakdown, CostService, ClassDefinition, 
 
 ### Community 11 - "Community 11"
 Cohesion: 0.05
-Nodes (38): ActivatorContent, MudSlider, ChildContent, CustomClasses.Web, MudButton, MudChip, MudIconButton, MudMenu (+30 more)
+Nodes (37): ActivatorContent, MudSlider, ChildContent, CustomClasses.Web, MudButton, MudChip, MudIconButton, MudMenu (+29 more)
 
 ### Community 12 - "Community 12"
 Cohesion: 0.07
@@ -275,11 +288,11 @@ Nodes (9): CatalogClothing, CatalogService, MudStack, MudText, MudTextField, Mud
 
 ### Community 39 - "Community 39"
 Cohesion: 0.28
-Nodes (5): BaseUnityPlugin, bool, Plugin, ConfigEntry, ManualLogSource
+Nodes (5): BaseUnityPlugin, bool, ConfigEntry, Plugin, ManualLogSource
 
 ### Community 40 - "Community 40"
-Cohesion: 0.22
-Nodes (6): Image, MethodBase, PatchPostfix, TextMeshProUGUI, ModulePatch, ChatSpecialIconPatch
+Cohesion: 0.25
+Nodes (5): Image, MethodBase, PatchPostfix, TextMeshProUGUI, ChatSpecialIconPatch
 
 ### Community 41 - "Community 41"
 Cohesion: 0.22
@@ -381,25 +394,69 @@ Nodes (8): CatalogService, CostService, ItemTooltip, SPTarkov.Server.Core.Models
 Cohesion: 0.20
 Nodes (9): CustomClasses.Web, DialogActions, DialogContent, ItemSpecEditor, MudButton, MudDialog, MudText, TitleContent (+1 more)
 
+### Community 79 - "Community 79"
+Cohesion: 0.12
+Nodes (13): ActiveHealthController, DamageInfoStruct, FirearmController, MethodBase, PatchPostfix, PatchPrefix, ChangeEnergyPatch, ChangeHydrationPatch (+5 more)
+
+### Community 80 - "Community 80"
+Cohesion: 0.16
+Nodes (9): MethodBase, MethodBase, ModulePatch, AdrenalineTriggerPatch, AdsSpeedPatch, AimPunchPatch, HeavyWeaponErgoPatch, ReloadSpeedPatch (+1 more)
+
+### Community 81 - "Community 81"
+Cohesion: 0.19
+Nodes (8): BasePhysicalClass, MethodBase, PatchPostfix, MovementContext, ClassMoveSpeed, MaxSpeedPatch, OverladenInertiaPatch, SprintSpeedPatch
+
+### Community 82 - "Community 82"
+Cohesion: 0.22
+Nodes (6): MethodBase, PatchPostfix, PatchPrefix, Player, InteractionSoundPatch, SoundRadiusPatch
+
+### Community 83 - "Community 83"
+Cohesion: 0.22
+Nodes (6): PatchPrefix, Player, ForceEffector, HeavyWeapon, ProceduralWeaponAnimation, Weapon
+
+### Community 84 - "Community 84"
+Cohesion: 0.29
+Nodes (5): bool, Dictionary, string, Entry, PerksCatalog
+
+### Community 85 - "Community 85"
+Cohesion: 0.25
+Nodes (5): IEnumerator, MethodBase, PatchPostfix, GameWorld, RaidPerksNotificationPatch
+
+### Community 86 - "Community 86"
+Cohesion: 0.25
+Nodes (5): DamageInfoStruct, MethodBase, PatchPrefix, Player, BulwarkPatch
+
+### Community 87 - "Community 87"
+Cohesion: 0.29
+Nodes (4): MethodBase, PatchPostfix, PackMulePatch, SkillManager
+
+### Community 88 - "Community 88"
+Cohesion: 0.40
+Nodes (3): ConfigEntry, PerksConfig, ConfigFile
+
+### Community 90 - "Community 90"
+Cohesion: 0.50
+Nodes (3): DamageInfoStruct, PatchPostfix, Player
+
 ## Knowledge Gaps
-- **811 isolated node(s):** `netstandard2.1`, `Microsoft.NET.Sdk`, `string`, `MethodBase`, `TextMeshProUGUI` (+806 more)
+- **840 isolated node(s):** `float`, `netstandard2.1`, `Microsoft.NET.Sdk`, `string`, `MethodBase` (+835 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **6 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **8 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `SkillPanelPatch` connect `Community 27` to `Community 40`?**
-  _High betweenness centrality (0.002) - this node is a cross-community bridge._
-- **Why does `RaidReadyPlayerPanelPatch` connect `Community 49` to `Community 40`?**
-  _High betweenness centrality (0.002) - this node is a cross-community bridge._
-- **What connects `netstandard2.1`, `Microsoft.NET.Sdk`, `string` to the rest of the system?**
-  _811 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Why does `SkillPanelPatch` connect `Community 27` to `Community 80`?**
+  _High betweenness centrality (0.005) - this node is a cross-community bridge._
+- **Why does `PlayerNamePanelPatch` connect `Community 48` to `Community 80`?**
+  _High betweenness centrality (0.004) - this node is a cross-community bridge._
+- **Why does `SkillIconBorderPatch` connect `Community 50` to `Community 80`?**
+  _High betweenness centrality (0.004) - this node is a cross-community bridge._
+- **What connects `float`, `netstandard2.1`, `Microsoft.NET.Sdk` to the rest of the system?**
+  _840 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.09090909090909091 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.062456140350877196 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.03773584905660377 - nodes in this community are weakly interconnected._
-- **Should `Community 3` be split into smaller, more focused modules?**
-  _Cohesion score 0.044444444444444446 - nodes in this community are weakly interconnected._

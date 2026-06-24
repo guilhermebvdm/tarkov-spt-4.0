@@ -8,7 +8,7 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 
 **Mod híbrido completo e maduro.** Itens **001–037 entregues** (🟢): 11 classes + identidade visual + **editor web Blazor completo** (018–029) + **épico UX (030–037) EXECUTADO** (autônomo via Workflow, 2026-06-11→12). Tudo **commitado** (15 commits do épico sobre baseline `3634548`); working tree limpo exceto frentes paralelas (`docs/migration/*`, `.claude/skills/*`, `.agents/resources.md`, `docs/technical/spt-antipatterns.md`, `mods/SPT-Menu-Overhaul/memory/`). **Branch ahead 22, SEM push** — aguarda revisão do usuário. Relatório: `.handoffs/handoff-2026-06-12-overnight-ux-030-037.md`.
 
-**Redesign de classes 11→6 (épico 047–052) — EM ANDAMENTO (Sessão 8).** O roster mudou de 11 para **6 balanceadas + Peladão** (Médico/Fuzileiro/Caçador/Fantasma/Saqueador/Tanque), arquitetura **"tudo-é-skill-real"**. **Item 047 (aplicar matriz) ENTREGUE** (🟡 falta validação de raid): 6 `.jsonc` com a matriz recalibrada + `SkillWeights.cs` (+3 gems) + **viewer do editor limpo** (seção "Gems (SE)", skills fantasmas removidas) — compilado/instalado/validado (launcher + editor MCP). netMult **topo ~+6 / base ~+4**. Design: `docs/class-levers.md` (+`class-overview.md` resumo, +`class-skill-catalog.md` fórmulas); matriz reproduzível em `scripts/class-matrix.mjs` (cross-check ✅). **048–052 pendentes** (skill custom 🧪, patches 🔧, levers zona stances, validação). Precede: épico balance 039–045 + 046 (tooling `extract-from-profile.mjs`) — outras sessões, não em memória. ⚠️ **Sessão paralela do editor: roster agora é 6 — recarregar/reiniciar antes de salvar** (senão re-clobra). Detalhe em [class-levers.md](../docs/class-levers.md) + backlog 047–052.
+**Redesign 11→6 — épico 050 (perks/drawbacks) IMPLEMENTADO (Sessão 10, 2026-06-23).** Roster: **6 + Peladão** (Médico/Fuzileiro/Caçador/**Furtivo**/Saqueador/Tanque); arquitetura **"tudo-é-perk-flat"** (signatures = perks **flat client-side no F12**, não skills custom — pivot do antigo "tudo-é-skill-real"). **050.0–050.4 compilam** (~21 efeitos: Bulwark, Pack Mule, Heavy Frame, Overladen, Rooted, Execution, Shaky Hands, Rattled, **Adrenaline** state-machine, Cool Under Fire, Ghost Step, Loud Operator, Silent Looter, **Bunker** armas pesadas, Sharpshooter, Iron Lungs…) — **NADA validado in-game** (🔴 P-10.1; vários gates de runtime). Item 047 (matriz) entregue. Design vivo: [class-design.md](../docs/class-design.md) (overview+levers ⚫ arquivados); matriz `scripts/class-matrix.mjs`. **Restante no backlog:** 051 (zona stances), 052 (validação), 053/055/056 (UI), 054 (propagar rename Furtivo `--force-config`), 057 (identidade coop). **Deferidos:** Combat Medic (transpiler), Quick Hands (server-side), Iron Lungs sway. ⚠️ **Sessão paralela do editor** commitando — coordenar antes de salvar `modded/Server/` (este chat não commitou).
 
 **Em andamento (item 038 — redesign workspace 3 painéis estilo EFT):** F0 ✅ (`82bc4a5`, grade 2D X/Y/R no schema+builder) e F1 ✅ (`2cc4274`, workspace read-only: silhueta + grade 2D). Faltam **F2** (edição in-place + skins dialog + DnD HTML5 `.mjs` + migrar `@code` do ClassEdit + refino da silhueta) e **F3** (polimento/docs/smoke in-game). Plano: `~/.claude/plans/monte-um-plano-para-goofy-otter.md`. Silhueta ainda rascunho. Sem push.
 
@@ -23,10 +23,11 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 
 ## Pendências / próximos passos conhecidos
 
-- 🟡 [P-8.1] (aberta 2026-06-21) **Validação in-game (raid) do 047** — criar perfil de cada uma das 6 classes e conferir skills/mults/loadout/hideout aplicando (item 052 parcial). Regra `feedback_spt_validation`.
-- 🟡 [P-8.2] (aberta 2026-06-21) **Itens 048–052** do épico do redesign: infra de skill custom 🧪 (048) → skills 🧪 (049) + patches signature 🔧 (050) → levers zona stances ⚠️ (051) → validação (052). Specs por wave; kickoffs prontos.
-- 🟢 [P-8.3] (aberta 2026-06-21) **Badge "Not registered" no editor** — server registra a edition por `displayName.pt` ("Fantasma") mas o editor chaveia por `name` en ("Ghost"). Cosmético, pré-redesign; corrigir se incomodar.
-- 🟡 [P-8.4] (aberta 2026-06-21) **Gear + identidade visual de fantasma/tanque são placeholder** (loadout clonado do furtivo/tático; `iconFile` reusa PNG do furtivo/tático) — curar (ícones próprios, gear definitivo).
+- 🔴 [P-10.1] (aberta 2026-06-23) **Validação in-game 050.0–050.4** (~21 efeitos) + 047 — vários **gates de runtime** que o compile não pega (`method_67` som, `method_12` fôlego, injeção `_aimingSpeed`, getter `TotalErgonomics`, `IPlayerOwner.iPlayer`, weapClass vs DB). Regra `feedback_spt_validation`. (Supersede P-8.1.)
+- 🟡 [P-10.2] (aberta 2026-06-23) **Deferrals do 050:** Combat Medic (transpiler em `DoMedEffect` + lock de cirurgia runtime), Quick Hands (buff `SearchDouble` server-side), Iron Lungs sway (`BreathEffector`). Detalhe em 050…-05-asbuild.
+- 🟡 [P-10.3] (aberta 2026-06-23) **Redesign restante (backlog):** 051 (zona stances — coordenar stances mod), 057 (identidade coop — toca `modded/Server`), 053/055/056 (UI), 054 (propagar rename `--force-config`), 052 (validação final). (Supersede P-8.2.)
+- 🟢 [P-8.3] (aberta 2026-06-21) **Badge "Not registered" no editor** — server registra a edition por `displayName.pt` mas o editor chaveia por `name` en. Cosmético; corrigir se incomodar.
+- 🟡 [P-8.4] (aberta 2026-06-21) **Gear + identidade visual de furtivo/tanque são placeholder** (loadout/`iconFile` clonados do furtivo/tático) — curar (ícones próprios, gear definitivo).
 - 🔴 [P-7.9] (aberta 2026-06-12) **PUSH dos 15 commits do épico** + QA visual no viewer (build-gate ≠ correção: matriz em células estreitas 032, dashboard em viewport estreito 033, comparação A×B 036).
 - 🟡 [P-7.10] (aberta 2026-06-12) **Medição quantitativa do 037** (before/after) — fechar o DoD: subir server com log Debug (`[perf]` é LogDebug) + baseline pré-`d180195`.
 - 🟡 [P-7.11] (aberta 2026-06-12) **Achados de review adiados** (no relatório 2026-06-12, por wave) — decidir follow-ups: 036 multiplicadores de B lado a lado (toca componente 031), 037 dispose de `_recomputeCts`, 034 msg "filtro sem resultados" na aba Stash.
@@ -183,6 +184,34 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 - **Pendente:** F2 (edição in-place + skins dialog + DnD `.mjs` + migrar `@code` do ClassEdit 1272L + refino silhueta) · F3 (polimento, retrocompat, docs, smoke in-game pelo usuário). **Sem push.**
 - **Lição:** UI visual (silhueta/grade) feita por agente headless sai estruturalmente OK mas precisa de iteração visual no Chrome MCP (loop principal) — não dá pra fan-out cego.
 
+### 2026-06-20 20:50 (GMT-3) — Sessão 9: Catálogo quantitativo de skills (class-skill-catalog)
+
+> ⚠️ **Sessão paralela, gravada fora de ordem.** Trabalho de 2026-06-20 (anterior à Sessão 8 de 06-21), mas o `/update-memory` rodou depois da Sessão 8 já existir → recebeu o próximo ID de gravação (**9**) e foi posicionada por timestamp **antes** da Sessão 8 (`memory-curation` §10: ID = ordem de gravação, posição = timestamp). A Sessão 8 já **consumiu** o doc criado aqui (cita `class-skill-catalog §6` para masteries inertes).
+
+**Tema central:** transformar o catálogo qualitativo de levers ([class-levers.md](../docs/class-levers.md)) em **fórmulas reais por skill**, para escolher fatores por classe com base quantitativa.
+
+**Decisões-chave:**
+- **Doc novo [docs/class-skill-catalog.md](../docs/class-skill-catalog.md)** (🟢 Vivo) — detalhamento quantitativo, cruzando 3 fontes: `SkillsConfig.json` do Skills-Extended, EFT decompilado (`references/eft-decompiled/Assembly-CSharp/`) e `globals.json` (`SkillsSettings`, linha ~35250). Por quê: definir levers exige a fórmula real, não só o rótulo qualitativo.
+- **Fonte de verdade do EFEITO das skills = Skills-Extended** (físicas/médicas FirstAid/FieldMedicine + 6 gems); nativas (mastering de arma, AimDrills, vests, Surgery) seguem o EFT base. Regra-mestra de leitura dos valores do config no doc §1 (config = pontos %, `PerLevel(p)`→`p%·nível`, `Max(m)`=L50, `Elite(e)`=plano no L51).
+
+**Lições / hipóteses descartadas:**
+- **Bug no SE (Círculo de Cultistas):** `Server/Patches/CultistProductionPatch.cs:69` aplica `CultistCircleReturnTimeReduction=1` **sem** `NormalizeToPercentage()` (≠ `ScavCooldownTimerPatch.cs:52` ao lado) → tempo do círculo **zerado já no nível 1**, não −1%/nível.
+- **Copy/paste em `SkillClasses/Physical/EnduranceSkill.cs:26`:** usa `BuffBreathTimeIncMax`(100) onde devia ser `BuffEnduranceIncMax`(50). Validar in-game.
+- **Hipótese "RecoilControl removida em 0.14.5" — REFUTADA:** continua viva, −0,3%/nível (−15% no L50). Ref: `globals.json:35549`.
+- **Multiplicadores por nível das nativas** (AimDrills, MagDrills, masteries de arma, Search, Attention) são getters compilados de `SkillManager` **não extraíveis** do dump → marcados `[inf]` no doc. `modpage.md` do SE tem números **desatualizados** (config antiga).
+
+**Atividade cronológica:**
+1. Mapeamento das fontes (globals `SkillsSettings`, SE `SkillsConfig.json` + plugin C#, EFT decompilado) — 6 gems confirmadas `[]` (mortas) no SPT base, reativadas pelo SE.
+2. Investigação cruzada por **2 sub-agents paralelos** (semântica do config no código do SE; nativas no decompilado) com `arquivo:linha`.
+3. Criação do doc (regra-mestra, físicas/médicas/gems, combate/movimento/armadura nativas, mortas/meta, achados). Refino posterior do doc (Surgery §4.1, marcação `[mec]`) por outra sessão.
+
+**Pendências abertas nesta sessão:**
+- [P-9.1] (aberta 2026-06-20) Achados do Skills-Extended a tratar caso alguma gem vire lever: (a) bug do Círculo de Cultistas não-normalizado; (b) copy/paste do Endurance; (c) confirmar os `[inf]` (mults nativos) via tooltip in-game ou dnSpy, se precisão exata for exigida. Categoria: 🟢 investigação. (**Não promovida ao topo** — o snapshot reflete a Sessão 8, posterior.)
+
+**Cross-refs:**
+- Detalha [docs/class-levers.md](../docs/class-levers.md) (consumido depois pela Sessão 8 do redesign 11→6).
+- Sessão só de docs/referência — **sem mudança de código, sem `/update-mod-graph`**.
+
 ### 2026-06-21 02:21 (GMT-3) — Sessão 8: Redesign 11→6 (Fase 3–5) + item 047 implementado + viewer limpo
 
 **Tema central:** Continuação do redesign de classes (handoff 2026-06-20): consolidar o design, recalibrar a matriz, materializar o épico 047–052 e **implementar/validar o 047** (aplicar a matriz do novo roster de 6 classes).
@@ -217,6 +246,50 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 - Resolve a ponta solta de sync `SkillWeights.cs`↔`skill-weights.mjs` (3 categorias de gem agora em ambos).
 - Memória global `project_customclasses_session_split` (sessão paralela do editor — agora roster 6).
 - `/update-mod-graph CustomClasses` pendente (hook; mudança de estrutura no SkillMaster).
+
+### 2026-06-23 22:46 (GMT-3) — Sessão 10: Redesign 11→6 — épico 050 (perks/drawbacks) implementado de ponta a ponta
+
+> Conversa longa (compactada), cruzou 2026-06-21→23. Continuação direta da Sessão 8 (item 047 = matriz). Sessão paralela do editor seguiu commitando — **nada commitado por este chat** (evitar corrida).
+
+**Tema central:** Refinar o design do redesign 11→6 e implementar o épico **050** (todos os perks/drawbacks de signature) client-side, fatia a fatia (050.0→050.4), autônomo até o compile (`/g-autodev`).
+
+**Decisões-chave:**
+- **Pivot arquitetural "tudo-é-skill-real" → "tudo-é-perk-flat"** — signatures viraram **perks flat** (sem leveling custom; valores medianos desde o início). 4 skills eram redundantes com vanilla (Mãos Rápidas=Search, Passo Fantasma=CovertMovement, Mula=Strength, Médico de Combate=FieldMedicine). Ref: [class-design.md](../docs/class-design.md).
+- **Consolidação de docs:** `class-overview.md` + `class-levers.md` → **`class-design.md`** único/vivo; os 2 arquivados (⚫ `docs/.archived/`). 3× `/g-review-content`. Max skill corrigido 10→**51 (elite)**.
+- **Rename Fantasma → Furtivo (Stealth)** (item 054): `git mv fantasma→furtivo.jsonc`, `name`="Stealth". ⚠️ **não propagado ao install** (precisa `--force-config`).
+- **Gating pela chave estável `name` (EN)** via `SkillMultipliers.IsLocalClass(nameEn)` — `Info.GameVersion`=`displayName[idioma]` varia; `name` EN é idioma-independente. Ref: SkillMultipliers.cs.
+- **Masteries inertes** (LMG/HMG/Launcher/AttachedLauncher = globals `[]`) **fora da matriz** → viram o perk **Bunker** (recuo ×0.85 + ergo ×1.15 por patch; weapClass machinegun/grenadeLauncher). Ref: class-design.md. → regra geral promovida a [AP-10](../../../docs/technical/spt-antipatterns.md) (lista versionada fica em class-skill-catalog §6).
+- **Cool Under Fire re-escopado** (decisão do usuário): supressão/near-miss **não existe no cliente EFT 0.16.9** → vira **−50% flinch ao levar dano** (mesmo `ForceEffector.AddForce`, oposto ao Rattled).
+- **Recon delegado a 3 subagentes** (decompile do `D:/SPT` via ilspycmd: armas, combate/saúde, som) devolvendo só os pontos. Padrão eficiente p/ membros obfuscados fora do decompile curado.
+
+**Lições / hipóteses descartadas:**
+- **Confiança de recon = candidato, não pinado.** O 1º recon citou `WeaponRecoil.CalculateRecoil` (✅) que **não existe** no curado (alucinado); o ponto real é `ProceduralWeaponAnimation.Shoot(str)`. Reconfirmar no assembly antes de codar. → promovido a [AP-09](../../../docs/technical/spt-antipatterns.md).
+- **`damageInfo.Player` é `IPlayerOwner` (wrapper), não `Player`** — comparar por referência com `MainPlayer` **nunca casa**; usar `damageInfo.Player.iPlayer.ProfileId`. Bug: gatilho "causar dano" da Adrenaline compilava mas nunca disparava. Ref: AdrenalineTriggerPatch.cs · Player.cs:30410.
+- **Obfuscados (`method_67` som, `method_12` fôlego) + injeção de campo (`_aimingSpeed`) + getter aninhado (`TotalErgonomics`)** = riscos de **runtime** que o compile não pega → try/catch no `.Enable()` + gate in-game.
+- **Quick Hands (Search Double) é server-side** (buff `SearchDouble`); o lever client `CanStartNewSearchOperation` pode ser re-validado pelo server → melhor via server mod.
+- **`Weapon.IsUnderbarrelWeapon` não existe** (recon supôs) → underbarrel acoplado vira follow-up; `weapClass` cobre LMG/HMG/GL standalone.
+- **Combat Medic não-trivial:** med/cirurgia rápido está em var local de `DoMedEffect` (precisa transpiler); "cirurgia sem lock" não é localizável no estático (animação full-body) → investigação runtime.
+
+**Atividade cronológica** (resumida; detalhe nos as-builts 050…-05 + 054):
+1. Design: pivot perk-flat + `class-design.md` + 1 drawback/classe + nomes EN + árvore F12 + 3× review.
+2. Backlog: 050 fatiado (050.0–050.4), 054 rename, +053/055/056/057.
+3. **050.0:** Bulwark (dano ×0.85) + Pack Mule (+30% carga, piso; reflete no stash) + notificação de raid + rename Furtivo.
+4. **050.1:** Heavy Frame (−10% vel), Overladen (inércia ∝ peso), Rooted (−15% vel ADS), Execution (+vel c/ faca).
+5. **050.2:** Shaky Hands (recuo ×1.25), Rattled (aim-punch ×1.5), Adrenaline (state-machine 25s/cd120s), Cool Under Fire (flinch ×0.5).
+6. **050.3:** Execution melee ×5, Heavy Frame fome/sede ×1.3, anti-jam ×0.5. (Combat Medic deferido.)
+7. **050.4:** Ghost Step (som ×0.4), Loud Operator (som ×1.3), Silent Looter (loot ×0.4), Bunker (recuo+ergo), Sharpshooter (ADS ×0.85), Iron Lungs (fôlego ~2×). (Quick Hands server + Iron Lungs sway deferidos.)
+8. Overweight do Tanque relatado mas **não reproduziu** → deprioritizado.
+
+**Pendências abertas nesta sessão:**
+- 🔴 [P-10.1] (aberta 2026-06-23) **Validação in-game 050.0–050.4** (~21 efeitos) + 047 — vários **gates de runtime** que o compile não pega (`method_67`, `method_12`, injeção `_aimingSpeed`, `TotalErgonomics`, `IPlayerOwner.iPlayer`, weapClass vs DB). Regra `feedback_spt_validation`.
+- 🟡 [P-10.2] (aberta 2026-06-23) **Deferrals do 050:** Combat Medic (transpiler `DoMedEffect` + lock cirurgia runtime), Quick Hands (buff server-side), Iron Lungs sway (`BreathEffector`). Detalhe em 050…-05-asbuild.
+- 🟡 [P-10.3] (aberta 2026-06-23) **Redesign restante (backlog):** 051 (zona stances — coordenar stances mod), 057 (identidade coop — toca `modded/Server`), 053/055/056 (UI), 054 (propagar rename `--force-config`), 052 (validação final).
+
+**Cross-refs:**
+- Continua a Sessão 8 (2026-06-21); **supersede [P-8.2]** (048–052: 048/049 descopados, 050 implementado).
+- As-builts: [050…-05-asbuild.md](../backlog/050-signature-patches/050-signature-patches-05-asbuild.md).
+- Sessão paralela do editor commitando — memória global `project_customclasses_session_split`.
+- `/update-mod-graph CustomClasses` rodado ao fim desta sessão (5 arquivos de patches novos).
 
 ## Arquivo — blocos de topo pré-curadoria (2026-06-07 → 2026-06-10)
 
