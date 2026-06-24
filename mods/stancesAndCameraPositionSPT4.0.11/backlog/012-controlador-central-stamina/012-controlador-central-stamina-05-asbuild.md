@@ -12,17 +12,17 @@
 
 | Ação | Arquivo | Resumo |
 |---|---|---|
-| CRIADO | `modded-beta/StaminaController.cs` | Enum `StaminaScenario` (15+Inactive), `Resolve`/`Tick` (escrita direta + eventos via reflection), `CurrentLabel`, `ControllingHands`, `Reset`. |
-| CRIADO | `modded-beta/StaminaDebugUI.cs` | Overlay `OnGUI` (`STAMINA STATE` + `Current`) no GameObject do plugin, gated por toggle. |
-| REMOVIDO | `modded-beta/ArmStaminaCoordinator.cs` | Absorvido pelo `StaminaController`. |
-| MODIFICADO | `modded-beta/Patches/StanceStaminaRecoveryPatch.cs` | Os 3 patches do 06-fix-01 → `HandsStaminaNeutralizePatch` (Process) + `HandsConsumeNeutralizePatch` (Consume), gate `__instance == MainPlayer.HandsStamina`. |
-| MODIFICADO | `modded-beta/Plugin.cs` | `Update`→`StaminaController.Tick`; `BindStaminaManagement()` (15 mults + toggle) antes de `HoldBreathSection`; removidas `*_Regen`/`_HoldBreathArmStaminaDrain`; `AddComponent<StaminaDebugUI>`; enables dos 2 patches. |
-| MODIFICADO | `modded-beta/StanceManager.cs` | `CachedAimDrainRate` exposto; `TickStanceStamina` reduzido ao re-apply do speed-limit; `ApplyStaminaStance` sem `StaminaMultiplier`. |
-| MODIFICADO | `modded-beta/StanceConfig.cs` | Campo `StaminaMultiplier` removido (migrou). |
-| MODIFICADO | `modded-beta/StanceStaminaState.cs` | `Multiplier`/`ShouldApplyStamina` aposentados; sobra `IsSuspendedByProne`. |
-| MODIFICADO | `modded-beta/Patches/PassiveMountDetectPatch.cs` | Corner case: passivo só em Stance 0 ou ADS. |
-| MODIFICADO | `modded-beta/Patches/ApplyComplexRotationPatch.cs` | Removido o arm-drain do hold-breath (virou multiplicador); oxigênio mantido. |
-| MODIFICADO | `modded-beta/Patches/RaidLifecyclePatches.cs` | `StaminaController.Reset()` no OnRaidEnd. |
+| CRIADO | `modded/StaminaController.cs` | Enum `StaminaScenario` (15+Inactive), `Resolve`/`Tick` (escrita direta + eventos via reflection), `CurrentLabel`, `ControllingHands`, `Reset`. |
+| CRIADO | `modded/StaminaDebugUI.cs` | Overlay `OnGUI` (`STAMINA STATE` + `Current`) no GameObject do plugin, gated por toggle. |
+| REMOVIDO | `modded/ArmStaminaCoordinator.cs` | Absorvido pelo `StaminaController`. |
+| MODIFICADO | `modded/Patches/StanceStaminaRecoveryPatch.cs` | Os 3 patches do 06-fix-01 → `HandsStaminaNeutralizePatch` (Process) + `HandsConsumeNeutralizePatch` (Consume), gate `__instance == MainPlayer.HandsStamina`. |
+| MODIFICADO | `modded/Plugin.cs` | `Update`→`StaminaController.Tick`; `BindStaminaManagement()` (15 mults + toggle) antes de `HoldBreathSection`; removidas `*_Regen`/`_HoldBreathArmStaminaDrain`; `AddComponent<StaminaDebugUI>`; enables dos 2 patches. |
+| MODIFICADO | `modded/StanceManager.cs` | `CachedAimDrainRate` exposto; `TickStanceStamina` reduzido ao re-apply do speed-limit; `ApplyStaminaStance` sem `StaminaMultiplier`. |
+| MODIFICADO | `modded/StanceConfig.cs` | Campo `StaminaMultiplier` removido (migrou). |
+| MODIFICADO | `modded/StanceStaminaState.cs` | `Multiplier`/`ShouldApplyStamina` aposentados; sobra `IsSuspendedByProne`. |
+| MODIFICADO | `modded/Patches/PassiveMountDetectPatch.cs` | Corner case: passivo só em Stance 0 ou ADS. |
+| MODIFICADO | `modded/Patches/ApplyComplexRotationPatch.cs` | Removido o arm-drain do hold-breath (virou multiplicador); oxigênio mantido. |
+| MODIFICADO | `modded/Patches/RaidLifecyclePatches.cs` | `StaminaController.Reset()` no OnRaidEnd. |
 | MODIFICADO | `PROPRIEDADES.md` | Seção `Stamina Management` (15 props); migração dos `Stance X Stamina Multiplier`; remoções. |
 
 ## Pontos da review tratados no build

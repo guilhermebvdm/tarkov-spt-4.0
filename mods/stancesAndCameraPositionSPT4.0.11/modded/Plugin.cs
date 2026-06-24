@@ -8,6 +8,8 @@ using CameraRotationMod.Patches;
 using EFT;
 using HarmonyLib;
 using UnityEngine;
+using BepInEx.Bootstrap;
+using System.Runtime.CompilerServices;
 
 namespace CameraRotationMod;
 
@@ -18,10 +20,10 @@ public enum ScrollMode
     Linear,
 }
 
-[BepInPlugin("shwng.camerarotation", "shwng.FpsCameraStances", "1.1.0")]
+[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "1.3.1")]
 public class Plugin : BaseUnityPlugin
 {
-    public static Plugin Instance;
+    public static Plugin Instance { get; private set; }
 
     // ⚠️ MANTER o `public static new` — shadow estático do BaseUnityPlugin.Logger.
     // Sem o `new`, vira shadowing implícito (CS0108) e os helpers static deste mod quebram.
@@ -36,7 +38,6 @@ public class Plugin : BaseUnityPlugin
     public static readonly Dictionary<Stance, StanceConfig> _stanceConfigs = new(4);
 
     public static readonly Dictionary<string, Sprite> LoadedSprites = new();
-    public static GameObject MountingUIGameObject { get; private set; }
 
     // StaminaMultiplier: <1.0 = drain, 1.0 = vanilla, >1.0 = recovery. ref: fix-01.
     // SnapOnFire (backlog 002 F4): defaults divergem por stance. Stance 0 = false (sentinel).
@@ -69,7 +70,7 @@ public class Plugin : BaseUnityPlugin
     private const string TacSprintSettings = "Tac Sprint Settings (Advanced)";
     private const string FOVSettings = "Field of View";
     private const string DebugSettings = "Debug (Advanced)";
-    private const string MountingSettings = "Weapon Mounting";
+    private const string PassiveMountSettings = "Weapon Mount (Passive)";
     private const string AnimationSettings = "Animations & Transitions (Item 005)";
 
     // Positions
@@ -86,7 +87,24 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<bool> _EnableMouseWheelCycle;
     public static ConfigEntry<KeyCode> _MouseWheelModifierKey;
     public static ConfigEntry<float> _StanceTransitionSpeed;
+    public static ConfigEntry<float> _StanceKickIntensity;
+    public static ConfigEntry<float> _ADSKickDelay;
+    public static ConfigEntry<float> _StanceOvershootDamping;
     public static ConfigEntry<float> _ADSTransitionSpeed;
+
+    // Hold Breath
+    public static ConfigEntry<float> _HoldBreathOxygenDrain;
+    public static ConfigEntry<bool> _EnableCustomBreathAudio;
+    public static ConfigEntry<float> _BreathInVolume;
+    public static ConfigEntry<float> _BreathOutVolume;
+    public static ConfigEntry<float> _HeartbeatVolume;
+
+    // Oxygen UI
+    public static ConfigEntry<bool> _EnableOxygenUI;
+    public static ConfigEntry<float> _OxygenUIPosX;
+    public static ConfigEntry<float> _OxygenUIPosY;
+    public static ConfigEntry<float> _OxygenUIWidth;
+    public static ConfigEntry<float> _OxygenUIHeight;
 
     // backlog 002 F1 — substitui `Use Only Stances` (lógica invertida). True = Stance 0 entra no ciclo.
     public static ConfigEntry<bool> _IncludeStance0InCycle;
@@ -129,19 +147,6 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<bool> _EnableAdvancedADSTransitions;
     public static ConfigEntry<bool> _AffectStanceTransitionToo;
     public static ConfigEntry<float> _StanceChangeSoundVolume;
-    public static ConfigEntry<float> _ADSShoulderThrowIntensity;
-    public static ConfigEntry<float> _StanceShoulderThrowIntensity;
-    public static ConfigEntry<bool> _ScaleByWeaponStats;
-    public static ConfigEntry<float> _WeaponStatsScaleIntensity;
-    public static ConfigEntry<float> _AdvancedStanceTransitionIntensity;
-    public static ConfigEntry<float> _ADSShoulderThrowForward;
-    public static ConfigEntry<float> _ADSShoulderThrowUp;
-    public static ConfigEntry<float> _ADSShoulderThrowYaw;
-    public static ConfigEntry<float> _ADSShoulderThrowPitch;
-    public static ConfigEntry<float> _ADSShoulderThrowRoll;
-    public static ConfigEntry<float> _ADSShoulderThrowSpeed;
-    public static ConfigEntry<float> _ADSShoulderSettleSpeed;
-    public static ConfigEntry<float> _ADSShoulderThrowDuration;
 
     // ADS Default Values
     public static ConfigEntry<bool> _ResetOnADS;
@@ -200,11 +205,13 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<int> _FOVMinRange;
     public static ConfigEntry<int> _FOVMaxRange;
 
-    // Mounting Settings (Item 004)
-    public static ConfigEntry<bool> _EnableWeaponMounting;
-    public static ConfigEntry<KeyCode> _MountingHotkey;
-    public static ConfigEntry<float> _MountingRecoilMultiplier;
-    public static ConfigEntry<float> _MountingSwayMultiplier;
+    // Weapon Mount (Passive) — Item 011
+    public static ConfigEntry<bool> _EnablePassiveMount;
+    public static ConfigEntry<float> _PassiveRecoilMultiplier;
+    public static ConfigEntry<float> _PassiveSwayMultiplier;
+    public static ConfigEntry<bool> _PassiveStaminaSave;
+    public static ConfigEntry<bool> _DebugStaminaState;   // item 012 — toggle do overlay/log de estado de stamina
+    public static ConfigEntry<bool> _ShowMountIcon;
 
     // Animation Settings (Item 005)
     public static ConfigEntry<float> _CrouchSpeedMultiplier;
@@ -220,12 +227,37 @@ public class Plugin : BaseUnityPlugin
 
     // Stance Cinematic Curves Settings (Item 009)
     public static ConfigEntry<float> _CurveDuration;
-    public static ConfigEntry<float> _CurvePitchMultiplier;
-    public static ConfigEntry<float> _CurveYawMultiplier;
-    public static ConfigEntry<float> _CurveRollMultiplier;
-    public static ConfigEntry<float> _CurvePositionMultiplier;
+    public static ConfigEntry<float> _StanceCurvePitchMultiplier;
+    public static ConfigEntry<float> _StanceCurveYawMultiplier;
+    public static ConfigEntry<float> _StanceCurveRollMultiplier;
+    public static ConfigEntry<float> _StanceCurvePositionMultiplier;
+    // Stance 0 (Vanilla) ADS Multipliers
+    public static ConfigEntry<float> _Stance0ADSPitchMultiplier;
+    public static ConfigEntry<float> _Stance0ADSYawMultiplier;
+    public static ConfigEntry<float> _Stance0ADSRollMultiplier;
+    public static ConfigEntry<float> _Stance0ADSPosYMultiplier;
+    public static ConfigEntry<float> _Stance0ADSPosZMultiplier;
+    public static ConfigEntry<float> _Stance0ADSOvershootDamping;
+
+    // Stance 1 ADS Multipliers
+    public static ConfigEntry<float> _Stance1ADSPitchMultiplier;
+    public static ConfigEntry<float> _Stance1ADSYawMultiplier;
+    public static ConfigEntry<float> _Stance1ADSRollMultiplier;
+    public static ConfigEntry<float> _Stance1ADSPosYMultiplier;
+    public static ConfigEntry<float> _Stance1ADSPosZMultiplier;
+    public static ConfigEntry<float> _Stance1ADSOvershootDamping;
+
+    // Stance 2 ADS Multipliers
+    public static ConfigEntry<float> _Stance2ADSPitchMultiplier;
+    public static ConfigEntry<float> _Stance2ADSYawMultiplier;
+    public static ConfigEntry<float> _Stance2ADSRollMultiplier;
+    public static ConfigEntry<float> _Stance2ADSPosYMultiplier;
+    public static ConfigEntry<float> _Stance2ADSPosZMultiplier;
+    public static ConfigEntry<float> _Stance2ADSOvershootDamping;
+
+    public static ConfigEntry<float> _OvershootAmplitude;
+    public static ConfigEntry<float> _OvershootFrequency;
     public static ConfigEntry<float> _CameraBobbingMultiplier;
-    public static ConfigEntry<float> _StanceOvershootDamping;
     public static ConfigEntry<float> _StanceTransitionDamping;
 
     public static ConfigEntry<float> _MaxLeanLimit;
@@ -239,7 +271,7 @@ public class Plugin : BaseUnityPlugin
     {
         Instance = this;
         Logger = base.Logger;
-        FikaSync.FikaNetworkSync.Init();
+        Logger.LogInfo("Plugin shwngFpsCameraStances4 is loaded!");
         Logger.LogInfo($"Camera Rotation Mod has loaded!");
 
         // backlog 002 F2 — cachear API do ConfigurationManager para refresh de visibilidade em runtime.
@@ -254,14 +286,36 @@ public class Plugin : BaseUnityPlugin
         // em algum build 0.16 (GClass volátil, method_NN renomeado), ele falha SOZINHO com log
         // `[enable] FAIL <nome>` em vez de derrubar todos os patches seguintes do Awake.
         SafeEnable("PlayerSpringPatch", () => new PlayerSpringPatch());        // camera position
-        SafeEnable("SpringGetPatch", () => new SpringGetPatch());              // stance + wiggle (009)
-        SafeEnable("LerpCameraPatch", () => new LerpCameraPatch());
+        SafeEnable("ApplySimpleRotationPatch", () => new ApplySimpleRotationPatch());  // stance interpolation
+        new CameraRotationMod.Patches.ApplyComplexRotationPatch().Enable();
+        new CameraRotationMod.Patches.HoldBreathPatch().Enable();
+        // Áudio NÃO é carregado aqui (cena de menu): a transição p/ o jogo descarrega os clips
+        // (length vira 0). Carregamento é disparado em GameWorld.OnGameStarted via HoldBreathPatch.OnRaidStart().
         SafeEnable("FOVSliderPatch", () => new FOVSliderPatch());
 
-        // Stamina/velocidade por stance (backlog 001)
-        SafeEnable("StanceStaminaRecoveryPatch", () => new StanceStaminaRecoveryPatch());
-        SafeEnable("HandsStaminaConsumePatch", () => new Patches.HandsStaminaConsumePatch());
-        SafeEnable("HandsStaminaProcessPatch", () => new Patches.HandsStaminaProcessPatch());
+        // Fika Multiplayer Sync Integration (Soft Dependency)
+        if (Chainloader.PluginInfos.ContainsKey("com.fika.core"))
+        {
+            try
+            {
+                InitFikaSync();
+            }
+            catch (System.Exception ex)
+            {
+                Logger.LogError($"[CameraRotationMod] Erro ao tentar inicializar integração com Fika: {ex.Message}");
+            }
+        }
+        else
+        {
+            Logger.LogInfo("[CameraRotationMod] Fika multiplayer not found. Running in offline/standard mode.");
+        }
+
+        // UI
+        gameObject.AddComponent<UI.OxygenUI>();
+
+        // Stamina de braço — item 012: StaminaController (Plugin.Update) + neutralização do vanilla
+        SafeEnable("HandsStaminaNeutralizePatch", () => new Patches.HandsStaminaNeutralizePatch());
+        SafeEnable("HandsConsumeNeutralizePatch", () => new Patches.HandsConsumeNeutralizePatch());
         SafeEnable("GameWorldOnGameStartedPatch", () => new GameWorldOnGameStartedPatch());
         SafeEnable("GameWorldOnDestroyPatch", () => new GameWorldOnDestroyPatch());
 
@@ -272,13 +326,12 @@ public class Plugin : BaseUnityPlugin
             Logger.LogWarning("[F4] SnapFireTriggerPatch NOT enabled — Player.FirearmController.SetTriggerPressed " +
                               "não foi resolvida. F1/F2/F3/F5 funcionam normalmente; snap-on-fire desabilitado este boot.");
 
-        // Item 004 (06-fix-01): Mount próprio unificado (passivo SEM grude / ativo COM grude).
-        // A detecção de superfície roda no Update do MountingManager (não depende deste patch); o
-        // FirearmCollisionDetectPatch é só reforço (mais responsivo) e pode falhar sem quebrar o mount.
-        SafeEnable("FirearmCollisionDetectPatch", () => new Patches.FirearmCollisionDetectPatch());
-        SafeEnable("WeaponMountingPatch", () => new WeaponMountingPatch());          // sway
-        SafeEnable("MountingInputPatch", () => new Patches.MountingInputPatch());    // mount ativo (cmd 140)
-        SafeEnable("MountingCollisionPatch", () => new Patches.MountingCollisionPatch()); // grude (só ativo)
+        // Item 011: Mount passivo sobre o vanilla (detecção + buffs + UI). Ativo = 100% vanilla.
+        SafeEnable("PassiveMountDetectPatch", () => new Patches.PassiveMountDetectPatch());
+        SafeEnable("PassiveRecoilPatch", () => new Patches.PassiveRecoilPatch());
+        SafeEnable("PassiveSwayPatch", () => new Patches.PassiveSwayPatch());
+        SafeEnable("ObservedStanceVisualPatch", () => new Patches.ObservedStanceVisualPatch());   // item 014 fix-03
+        SafeEnable("BattleUIScreenPatch", () => new BattleUIScreenPatch());
 
         // Item 007: Movement & Inertia
         SafeEnable("MovementContextSpeedPatch", () => new Patches.MovementContextSpeedPatch());
@@ -305,27 +358,16 @@ public class Plugin : BaseUnityPlugin
         SafeEnable("PreChamberLoadPatch", () => new Patches.PreChamberLoadPatch());
         SafeEnable("ManualChamberingInputPatch", () => new Patches.ManualChamberingInputPatch());
 
-        // Mounting & Recoil
-        SafeEnable("AddRecoilForceMountPatch", () => new Patches.AddRecoilForceMountPatch());
-
-        // Carrega sprites embutidos
+        // Carrega sprites do ícone de mount (reusados pelo novo item de mount; carregamento mantido).
         LoadedSprites["mounting.png"] = LoadEmbeddedSprite("mounting.png");
         LoadedSprites["mountingleft.png"] = LoadEmbeddedSprite("mountingleft.png");
         LoadedSprites["mountingright.png"] = LoadEmbeddedSprite("mountingright.png");
 
-        // Inicializa o MountingUI GameObject e patch da UI
-        MountingUIGameObject = new GameObject("MountingUIGameObject");
-        MountingUIGameObject.AddComponent<MountingUI>();
-        DontDestroyOnLoad(MountingUIGameObject);
-        new BattleUIScreenPatch().Enable();
+        // Item 011: UI do mount passivo no GameObject PERSISTENTE do plugin (mesmo padrão do OxygenUI).
+        gameObject.AddComponent<PassiveMountUI>();
 
-        var mountingObj = new GameObject("MountingManager");
-        mountingObj.AddComponent<MountingManager>();
-        DontDestroyOnLoad(mountingObj);
-
-        // Item 004 (06-fix-01): as 4 props de Weapon Mounting são bindadas UMA vez na seção
-        // "Weapon Mounting" (mais abaixo). O bloco duplicado "Mounting Settings (Item 004)" foi
-        // removido — o 2º bind vencia e o 1º criava entries órfãs no .cfg.
+        // Item 012: overlay de debug do cenário de stamina (toggle no F12).
+        gameObject.AddComponent<StaminaDebugUI>();
 
         // ========================================
         // MANUAL CHAMBERING
@@ -395,6 +437,7 @@ public class Plugin : BaseUnityPlugin
         // ========================================
         // SETTINGS (Order 65 → 48)
         // ========================================
+        const string GeneralSection = "General";
 
         // backlog 002 F1 — substitui `Use Only Stances` (lógica invertida).
         _attrIncludeStance0 = new ConfigurationManagerAttributes { Order = 65 };
@@ -478,12 +521,36 @@ public class Plugin : BaseUnityPlugin
         _EnableMouseWheelCycle.SettingChanged += OnScrollModeSettingChanged;
 
         _StanceTransitionSpeed = Config.Bind(
-            Settings,
+            GeneralSection,
             "Stance Transition Speed",
-            1f,
-            new ConfigDescription("How quickly hands transition between Default and Stance. Higher = faster/snappier, Lower = slower/smoother. Recommended: 3-10",
-            new AcceptableValueRange<float>(0.5f, 20f),
-            new ConfigurationManagerAttributes { Order = 57 }));
+            1.0f,
+            new ConfigDescription("Speed multiplier for transitioning between stances and default view",
+            new AcceptableValueRange<float>(0.1f, 5.0f),
+            new ConfigurationManagerAttributes { Order = 98 }));
+
+        _StanceKickIntensity = Config.Bind(
+            GeneralSection,
+            "Stance Kick Intensity (Contra o Peito)",
+            -0.05f,
+            new ConfigDescription("How much the weapon kicks towards your chest when changing stances or ADS. Negative values pull it towards you.",
+            new AcceptableValueRange<float>(-0.3f, 0.3f),
+            new ConfigurationManagerAttributes { Order = 97 }));
+
+        _ADSKickDelay = Config.Bind(
+            GeneralSection,
+            "ADS Kick Delay (In)",
+            0.15f,
+            new ConfigDescription("Delay in seconds before the kick is applied when entering ADS. Use this to sync the kick with the end of the ADS animation.",
+            new AcceptableValueRange<float>(0f, 1f),
+            new ConfigurationManagerAttributes { Order = 96 }));
+
+        _StanceOvershootDamping = Config.Bind(
+            GeneralSection,
+            "Stance Overshoot Damping (Menos gera Mais Quicada)",
+            12.0f,
+            new ConfigDescription("Damping for the spring physics. Lower values mean more overshoot/bounce. Default is 12.",
+            new AcceptableValueRange<float>(1f, 30.0f),
+            new ConfigurationManagerAttributes { Order = 95 }));
 
         _ADSTransitionSpeed = Config.Bind(
             Settings,
@@ -596,117 +663,7 @@ public class Plugin : BaseUnityPlugin
             null,
             new ConfigurationManagerAttributes { Order = 55 }));
 
-        _AffectStanceTransitionToo = Config.Bind(
-            AdvancedADSSettings,
-            "Affect Stance Transition Too",
-            true,
-            new ConfigDescription("When enabled (requires 'Advanced ADS Transitions'), applies the same shouldering effect when switching between stances",
-            null,
-            new ConfigurationManagerAttributes { IsAdvanced = true, Order = 54 }));
 
-        _ADSShoulderThrowIntensity = Config.Bind(
-            AdvancedADSSettings,
-            "ADS Shoulder Throw Intensity",
-            1f,
-            new ConfigDescription("Overall intensity of ADS throw effect. Multiplies Forward, Up, Yaw, Pitch, Roll amounts. 0 = no throw, 1 = use config values, 2 = double effect.",
-            new AcceptableValueRange<float>(0f, 2f),
-            new ConfigurationManagerAttributes { IsAdvanced = true, Order = 52 }));
-
-        _StanceShoulderThrowIntensity = Config.Bind(
-            AdvancedADSSettings,
-            "Stance Shoulder Throw Intensity",
-            0.75f,
-            new ConfigDescription("Overall intensity of stance switch throw effect. Multiplies Forward, Up, Yaw, Pitch, Roll amounts. 0 = no throw, 1 = use config values, 2 = double effect.",
-            new AcceptableValueRange<float>(0f, 2f),
-            new ConfigurationManagerAttributes { IsAdvanced = true, Order = 51 }));
-
-        _ScaleByWeaponStats = Config.Bind(
-            AdvancedADSSettings,
-            "Scale by Weapon Stats",
-            true,
-            new ConfigDescription("When enabled, shouldering speed/duration/amount scales with weapon weight and ergonomics (uses EFT's AimingSpeed calculation). Heavy/low-ergo = slower, dramatic. Light/high-ergo = fast, subtle.",
-            null,
-            new ConfigurationManagerAttributes { IsAdvanced = true, Order = 50 }));
-
-        _WeaponStatsScaleIntensity = Config.Bind(
-            AdvancedADSSettings,
-            "Advanced ADS Transition Stat Intensity",
-            1f,
-            new ConfigDescription("How strongly weapon stats affect ADS shouldering. 0 = no scaling (all weapons same), 1 = normal, 2 = exaggerated difference between light/heavy weapons.",
-            new AcceptableValueRange<float>(0f, 2f),
-            new ConfigurationManagerAttributes { IsAdvanced = true, Order = 49 }));
-
-        _AdvancedStanceTransitionIntensity = Config.Bind(
-            AdvancedADSSettings,
-            "Advanced Stance Transition Stat Intensity",
-            1f,
-            new ConfigDescription("How strongly weapon weight/ergonomics affects stance transition speed and shouldering. 0.01 = minimal effect, 1 = normal, 2 = exaggerated. Works when 'Affect Stance Transition Too' is enabled.",
-            new AcceptableValueRange<float>(0.01f, 2f),
-            new ConfigurationManagerAttributes { IsAdvanced = true, Order = 48 }));
-
-        _ADSShoulderThrowForward = Config.Bind(
-            AdvancedADSSettings,
-            "Shoulder Throw Forward Amount",
-            0.02f,
-            new ConfigDescription("Base forward throw distance. With 'Scale by Weapon Stats' enabled, this is multiplied by inverse AimingSpeed (heavy weapons throw more).",
-            new AcceptableValueRange<float>(0f, 0.3f),
-            new ConfigurationManagerAttributes { IsAdvanced = true, Order = 47 }));
-
-        _ADSShoulderThrowUp = Config.Bind(
-            AdvancedADSSettings,
-            "Shoulder Throw Up Amount",
-            -0.015f,
-            new ConfigDescription("Base vertical offset during throw. Negative = down. With 'Scale by Weapon Stats', scales with inverse AimingSpeed.",
-            new AcceptableValueRange<float>(-0.15f, 0.15f),
-            new ConfigurationManagerAttributes { IsAdvanced = true, Order = 46 }));
-
-        _ADSShoulderThrowYaw = Config.Bind(
-            AdvancedADSSettings,
-            "Shoulder Throw Yaw",
-            6f,
-            new ConfigDescription("Yaw rotation during throw phase (degrees). Positive = rotate right. Applied to both ADS and stance transitions.",
-            new AcceptableValueRange<float>(-15f, 15f),
-            new ConfigurationManagerAttributes { IsAdvanced = true, Order = 45 }));
-
-        _ADSShoulderThrowPitch = Config.Bind(
-            AdvancedADSSettings,
-            "Shoulder Throw Pitch",
-            -3f,
-            new ConfigDescription("Pitch rotation during throw phase (degrees). Positive = rotate up. Applied to both ADS and stance transitions.",
-            new AcceptableValueRange<float>(-15f, 15f),
-            new ConfigurationManagerAttributes { IsAdvanced = true, Order = 44 }));
-
-        _ADSShoulderThrowRoll = Config.Bind(
-            AdvancedADSSettings,
-            "Shoulder Throw Roll",
-            -1.5f,
-            new ConfigDescription("Roll rotation during throw phase (degrees). Positive = tilt right. Applied to both ADS and stance transitions.",
-            new AcceptableValueRange<float>(-15f, 15f),
-            new ConfigurationManagerAttributes { IsAdvanced = true, Order = 43 }));
-
-        _ADSShoulderThrowSpeed = Config.Bind(
-            AdvancedADSSettings,
-            "Shoulder Throw Speed",
-            2f,
-            new ConfigDescription("Base speed of throw motion. With 'Scale by Weapon Stats', multiplied by AimingSpeed (light weapons = faster).",
-            new AcceptableValueRange<float>(0.5f, 5f),
-            new ConfigurationManagerAttributes { IsAdvanced = true, Order = 42 }));
-
-        _ADSShoulderSettleSpeed = Config.Bind(
-            AdvancedADSSettings,
-            "Shoulder Settle Speed",
-            1.5f,
-            new ConfigDescription("Base speed of settling to ADS. With 'Scale by Weapon Stats', multiplied by AimingSpeed.",
-            new AcceptableValueRange<float>(0.5f, 5f),
-            new ConfigurationManagerAttributes { IsAdvanced = true, Order = 41 }));
-
-        _ADSShoulderThrowDuration = Config.Bind(
-            AdvancedADSSettings,
-            "Shoulder Throw Duration",
-            0.15f,
-            new ConfigDescription("Base throw phase duration (seconds). With 'Scale by Weapon Stats', heavy weapons have longer duration.",
-            new AcceptableValueRange<float>(0.01f, 0.5f),
-            new ConfigurationManagerAttributes { IsAdvanced = true, Order = 40 }));
 
         // ========================================
         // ADS DEFAULT VALUES (Order 39-33)
@@ -721,7 +678,7 @@ public class Plugin : BaseUnityPlugin
 
         _ADSHandsPitchRotation = Config.Bind(
             ADSDefaults,
-            "ADS Hands Pitch Rotation",
+            "ADS Pitch (Cano Sobe/Desce)",
             0f,
             new ConfigDescription("Hands pitch rotation (X-axis) when ADS with 'Reset On ADS' enabled. 0 = default game position",
             new AcceptableValueRange<float>(-45f, 45f),
@@ -729,7 +686,7 @@ public class Plugin : BaseUnityPlugin
 
         _ADSHandsYawRotation = Config.Bind(
             ADSDefaults,
-            "ADS Hands Yaw Rotation",
+            "ADS Roll (Tombar Arma)",
             0f,
             new ConfigDescription("Hands yaw rotation (Y-axis) when ADS with 'Reset On ADS' enabled. 0 = default game position",
             new AcceptableValueRange<float>(-45f, 45f),
@@ -737,7 +694,7 @@ public class Plugin : BaseUnityPlugin
 
         _ADSHandsRollRotation = Config.Bind(
             ADSDefaults,
-            "ADS Hands Roll Rotation",
+            "ADS Yaw (Apontar Esq/Dir)",
             0f,
             new ConfigDescription("Hands roll rotation (Z-axis) when ADS with 'Reset On ADS' enabled. 0 = default game position",
             new AcceptableValueRange<float>(-45f, 45f),
@@ -745,7 +702,7 @@ public class Plugin : BaseUnityPlugin
 
         _ADSHandsForwardBackwardOffset = Config.Bind(
             ADSDefaults,
-            "ADS Hands Forward/Backward Offset",
+            "ADS Forward/Backward (Frente/Trás)",
             0f,
             new ConfigDescription("Hands position forward/backward (Z-axis) when ADS. Default is 0.04",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
@@ -753,7 +710,7 @@ public class Plugin : BaseUnityPlugin
 
         _ADSHandsUpDownOffset = Config.Bind(
             ADSDefaults,
-            "ADS Hands Up/Down Offset",
+            "ADS Up/Down (Coronha Sobe/Desce)",
             0f,
             new ConfigDescription("Hands position up/down (Y-axis) when ADS. Default is 0.04",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
@@ -761,7 +718,7 @@ public class Plugin : BaseUnityPlugin
 
         _ADSHandsSidewaysOffset = Config.Bind(
             ADSDefaults,
-            "ADS Hands Sideways Offset",
+            "ADS Sideways (Coronha Esq/Dir)",
             0f,
             new ConfigDescription("Hands position left/right (X-axis) when ADS. Default is 0.04",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
@@ -780,7 +737,7 @@ public class Plugin : BaseUnityPlugin
 
         _DefaultHandsForwardBackwardOffset = Config.Bind(
             DefaultHandsPositions,
-            "Default Hands Forward/Backward Offset",
+            "Default Forward/Backward (Frente/Trás)",
             0f,
             new ConfigDescription("Default hands/weapon position forward/backward (positive = forward). This is your normal hip-fire position.",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
@@ -788,7 +745,7 @@ public class Plugin : BaseUnityPlugin
 
         _DefaultHandsUpDownOffset = Config.Bind(
             DefaultHandsPositions,
-            "Default Hands Up/Down Offset",
+            "Default Up/Down (Coronha Sobe/Desce)",
             0f,
             new ConfigDescription("Default hands/weapon position up/down (positive = up). This is your normal hip-fire position.",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
@@ -796,7 +753,7 @@ public class Plugin : BaseUnityPlugin
 
         _DefaultHandsSidewaysOffset = Config.Bind(
             DefaultHandsPositions,
-            "Default Hands Sideways Offset",
+            "Default Sideways (Coronha Esq/Dir)",
             0f,
             new ConfigDescription("Default hands/weapon position left/right (positive = right). This is your normal hip-fire position.",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
@@ -828,48 +785,48 @@ public class Plugin : BaseUnityPlugin
 
         _Stance1HandsPitchRotation = Config.Bind(
             Stance1Section,
-            "Stance 1 Hands Pitch (X-Axis)",
-            -15f,
+            "Stance 1 Pitch (Cano Sobe/Desce)",
+            -34.0f,
             new ConfigDescription("Stance 1 hands/arms pitch rotation in degrees (up/down tilt)",
             new AcceptableValueRange<float>(-45f, 45f),
             new ConfigurationManagerAttributes { Order = 27 }));
 
         _Stance1HandsYawRotation = Config.Bind(
             Stance1Section,
-            "Stance 1 Hands Yaw (Y-Axis)",
-            -15f,
+            "Stance 1 Roll (Tombar Arma)",
+            0.0f,
             new ConfigDescription("Stance 1 hands/arms yaw rotation in degrees (left/right turn)",
             new AcceptableValueRange<float>(-45f, 45f),
             new ConfigurationManagerAttributes { Order = 26 }));
 
         _Stance1HandsRollRotation = Config.Bind(
             Stance1Section,
-            "Stance 1 Hands Roll (Z-Axis)",
-            0f,
+            "Stance 1 Yaw (Apontar Esq/Dir)",
+            0.0f,
             new ConfigDescription("Stance 1 hands/arms roll rotation in degrees (weapon cant)",
             new AcceptableValueRange<float>(-45f, 45f),
             new ConfigurationManagerAttributes { Order = 25 }));
 
         _Stance1HandsForwardBackwardOffset = Config.Bind(
             Stance1Section,
-            "Stance 1 Hands Forward/Backward Offset",
-            -0.15f,
+            "Stance 1 Forward/Backward (Frente/Trás)",
+            0.02f,
             new ConfigDescription("Stance 1 hands/weapon position forward/backward (positive = forward)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { Order = 24 }));
 
         _Stance1HandsUpDownOffset = Config.Bind(
             Stance1Section,
-            "Stance 1 Hands Up/Down Offset",
-            0f,
+            "Stance 1 Up/Down (Coronha Sobe/Desce)",
+            -0.01f,
             new ConfigDescription("Stance 1 hands/weapon position up/down (positive = up)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { Order = 23 }));
 
         _Stance1HandsSidewaysOffset = Config.Bind(
             Stance1Section,
-            "Stance 1 Hands Sideways Offset",
-            0f,
+            "Stance 1 Sideways (Coronha Esq/Dir)",
+            0.02f,
             new ConfigDescription("Stance 1 hands/weapon position left/right (positive = right)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { Order = 22 }));
@@ -888,83 +845,199 @@ public class Plugin : BaseUnityPlugin
         // 06-fix-01: Stance 2 é agora Low Ready — Pitch +30° (cano desce), Yaw 0.
         _Stance2HandsPitchRotation = Config.Bind(
             Stance2Section,
-            "Stance 2 Hands Pitch (X-Axis)",
-            30f,
+            "Stance 2 Pitch (Cano Sobe/Desce)",
+            25.0f,
             new ConfigDescription("Stance 2 hands/arms pitch rotation in degrees (up/down tilt)",
             new AcceptableValueRange<float>(-45f, 45f),
             new ConfigurationManagerAttributes { Order = 20 }));
 
         _Stance2HandsYawRotation = Config.Bind(
             Stance2Section,
-            "Stance 2 Hands Yaw (Y-Axis)",
-            0f,
+            "Stance 2 Roll (Tombar Arma)",
+            0.0f,
             new ConfigDescription("Stance 2 hands/arms yaw rotation in degrees (left/right turn)",
             new AcceptableValueRange<float>(-45f, 45f),
             new ConfigurationManagerAttributes { Order = 19 }));
 
         _Stance2HandsRollRotation = Config.Bind(
             Stance2Section,
-            "Stance 2 Hands Roll (Z-Axis)",
-            0f,
+            "Stance 2 Yaw (Apontar Esq/Dir)",
+            0.0f,
             new ConfigDescription("Stance 2 hands/arms roll rotation in degrees (weapon cant)",
             new AcceptableValueRange<float>(-45f, 45f),
             new ConfigurationManagerAttributes { Order = 18 }));
 
-        // 06-fix-01: Low Ready inclui leve push forward.
         _Stance2HandsForwardBackwardOffset = Config.Bind(
             Stance2Section,
-            "Stance 2 Hands Forward/Backward Offset",
-            0.03f,
+            "Stance 2 Forward/Backward (Frente/Trás)",
+            0.015f,
             new ConfigDescription("Stance 2 hands/weapon position forward/backward (positive = forward)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { Order = 17 }));
 
         _Stance2HandsUpDownOffset = Config.Bind(
             Stance2Section,
-            "Stance 2 Hands Up/Down Offset",
-            0f,
+            "Stance 2 Up/Down (Coronha Sobe/Desce)",
+            -0.02f,
             new ConfigDescription("Stance 2 hands/weapon position up/down (positive = up)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { Order = 16 }));
 
+        // 013 fix-02: descoberta antecipada da Stance 3 (1ª Bind da seção) para "Stance 3 - Custom" aparecer
+        // logo após "Stance 2 - Low Ready" no F12 (ordem das seções = ordem de descoberta). O resto do bloco
+        // da Stance 3 (hand rotations) continua mais abaixo, já anexando à seção descoberta aqui.
+        _Stance3SprintAnimationEnabled = Config.Bind(
+            Stance3Section,
+            "Enable Stance 3 Sprint Animation",
+            false,
+            new ConfigDescription("When enabled, uses a compact sprint animation when sprinting in Stance 3 (tac sprint style)",
+            null,
+            new ConfigurationManagerAttributes { Order = 14 }));
+
         // ========================================
-        // MOUNTING SETTINGS (Item 004)
+        // WEAPON MOUNT (PASSIVE) — Item 011
         // ========================================
-        _EnableWeaponMounting = Config.Bind(
-            MountingSettings,
-            "Enable Weapon Mounting",
+        _EnablePassiveMount = Config.Bind(
+            PassiveMountSettings,
+            "Enable Passive Mount",
             true,
-            new ConfigDescription("Enable the ability to mount your weapon on nearby surfaces for stability.",
+            new ConfigDescription("Liga o apoio passivo: ao encostar a arma numa superfície (sem a tecla de mount) você ganha um benefício leve de estabilidade. Desligado = só o mount nativo do jogo.",
             null,
             new ConfigurationManagerAttributes { Order = 10 }));
 
-        _MountingHotkey = Config.Bind(
-            MountingSettings,
-            "Weapon Mounting Hotkey",
-            KeyCode.Mouse3,
-            new ConfigDescription("Tecla (F12) para apoiar/soltar a arma quando perto de uma superfície — ALÉM da tecla nativa de mount do EFT (configurável nas opções de controle do jogo). Tempo real.",
-            null,
+        _PassiveRecoilMultiplier = Config.Bind(
+            PassiveMountSettings,
+            "Passive Recoil Multiplier",
+            0.7f,
+            new ConfigDescription("Multiplicador de recuo enquanto apoiado (passivo). 0.7 = 30% menos recuo. Deve ser MAIOR que o do mount ativo (vanilla) — o passivo é mais fraco.",
+            new AcceptableValueRange<float>(0.1f, 1f),
             new ConfigurationManagerAttributes { Order = 9 }));
 
-        _MountingRecoilMultiplier = Config.Bind(
-            MountingSettings,
-            "Mounting Recoil Multiplier",
-            0.5f,
-            new ConfigDescription("Multiplier for weapon recoil when mounted. 0.5 means 50% less recoil.",
-            new AcceptableValueRange<float>(0.1f, 1f),
+        _PassiveSwayMultiplier = Config.Bind(
+            PassiveMountSettings,
+            "Passive Sway Multiplier",
+            0.65f,
+            new ConfigDescription("Multiplicador de sway (respiração) enquanto apoiado. 0.65 = 35% menos sway.",
+            new AcceptableValueRange<float>(0f, 1f),
             new ConfigurationManagerAttributes { Order = 8 }));
 
-        _MountingSwayMultiplier = Config.Bind(
-            MountingSettings,
-            "Mounting Sway Multiplier",
-            0.2f,
-            new ConfigDescription("Multiplier for weapon sway (breath) when mounted. 0.2 = 80% less sway. Tempo real.",
-            new AcceptableValueRange<float>(0.0f, 1f),
+        _PassiveStaminaSave = Config.Bind(
+            PassiveMountSettings,
+            "Passive Stamina Save",
+            true,
+            new ConfigDescription("Enquanto apoiado, pausa/reduz o drain de stamina de braço (mais fraco que o mount nativo).",
+            null,
             new ConfigurationManagerAttributes { Order = 7 }));
+
+        // Active/Passive Mount Stamina Regen removidos no item 012 (substituídos pelos multiplicadores do grupo "Stamina Management").
+
+        _ShowMountIcon = Config.Bind(
+            PassiveMountSettings,
+            "Show Mount Icon",
+            true,
+            new ConfigDescription("Mostra o ícone direcional (esquerda/direita/baixo) no canto inferior direito quando o apoio passivo está ativo.",
+            null,
+            new ConfigurationManagerAttributes { Order = 6 }));
+
+        // Item 012: grupo "Stamina Management" — primeira Bind ANTES da seção Hold Breath (aposta na ordem
+        // de descoberta; se no F12 não ficar acima de "9. Respiração", prefixar o nome — ver 02-spec-tech §7).
+        BindStaminaManagement();
+
+        const string HoldBreathSection = "9. Respiração (Hold Breath)";
+
+        // ========================================
+        // HOLD BREATH SETTINGS (Order -10)
+        // ========================================
+        // _HoldBreathArmStaminaDrain removido no item 012 (o drain do braço virou o multiplicador "Hold Breath").
+
+        _HoldBreathOxygenDrain = Config.Bind(
+            HoldBreathSection,
+            "Oxygen Drain / sec",
+            5.0f,
+            new ConfigDescription("How much extra Oxygen is drained per second while holding breath.",
+            new AcceptableValueRange<float>(0f, 50f),
+            new ConfigurationManagerAttributes { Order = -11 }));
+
+        _EnableCustomBreathAudio = Config.Bind(
+            HoldBreathSection,
+            "Enable Custom Breath Audio",
+            true,
+            new ConfigDescription("Plays custom breath_in.wav and breath_out.wav from the mod folder when holding breath.",
+            null,
+            new ConfigurationManagerAttributes { Order = -11 }));
+
+        _BreathInVolume = Config.Bind(
+            HoldBreathSection,
+            "Breath In Volume",
+            1.0f,
+            new ConfigDescription("Volume of the breath_in audio.",
+            new AcceptableValueRange<float>(0f, 2f),
+            new ConfigurationManagerAttributes { Order = -12 }));
+
+        _BreathOutVolume = Config.Bind(
+            HoldBreathSection,
+            "Breath Out Volume",
+            1.0f,
+            new ConfigDescription("Volume of the breath_out audio.",
+            new AcceptableValueRange<float>(0f, 2f),
+            new ConfigurationManagerAttributes { Order = -13 }));
+
+        _HeartbeatVolume = Config.Bind(
+            HoldBreathSection,
+            "Heartbeat Volume",
+            1.0f,
+            new ConfigDescription("Volume of the heartbeat loop audio.",
+            new AcceptableValueRange<float>(0f, 2f),
+            new ConfigurationManagerAttributes { Order = -14 }));
+
+        // ========================================
+        // OXYGEN UI SETTINGS (Order -13)
+        // ========================================
+        const string OxygenUISection = "10. Barra de Oxigênio (UI)";
+        
+        _EnableOxygenUI = Config.Bind(
+            OxygenUISection,
+            "Enable Oxygen UI Bar",
+            true,
+            new ConfigDescription("Displays a white bar above the hands stamina that drains while holding breath.",
+            null,
+            new ConfigurationManagerAttributes { Order = -1 }));
+
+        _OxygenUIPosX = Config.Bind(
+            OxygenUISection,
+            "UI X Position",
+            20f,
+            new ConfigDescription("Horizontal position of the oxygen bar (pixels from left).",
+            new AcceptableValueRange<float>(0f, 3000f),
+            new ConfigurationManagerAttributes { Order = -2 }));
+
+        _OxygenUIPosY = Config.Bind(
+            OxygenUISection,
+            "UI Y Position",
+            120f,
+            new ConfigDescription("Vertical position of the oxygen bar (pixels from BOTTOM).",
+            new AcceptableValueRange<float>(0f, 2000f),
+            new ConfigurationManagerAttributes { Order = -3 }));
+
+        _OxygenUIWidth = Config.Bind(
+            OxygenUISection,
+            "UI Width",
+            260f,
+            new ConfigDescription("Width of the oxygen bar.",
+            new AcceptableValueRange<float>(10f, 1000f),
+            new ConfigurationManagerAttributes { Order = -4 }));
+
+        _OxygenUIHeight = Config.Bind(
+            OxygenUISection,
+            "UI Height",
+            4f,
+            new ConfigDescription("Height (thickness) of the oxygen bar.",
+            new AcceptableValueRange<float>(1f, 20f),
+            new ConfigurationManagerAttributes { Order = -5 }));
 
         // ========================================
         // ANIMATION SETTINGS (Item 005)
-// ========================================
+        // ========================================
         _CrouchSpeedMultiplier = Config.Bind(
             AnimationSettings,
             "Crouch Speed Multiplier",
@@ -1007,78 +1080,154 @@ public class Plugin : BaseUnityPlugin
             null,
             new ConfigurationManagerAttributes { Order = 1 }));
 
-        const string StanceWiggleSection = "Stance Animations (Cinematic Curves)";
+        const string StanceWiggleSection = "8. Wiggle (Q/E) Dynamics (Stance Based)";
         _CurveDuration = Config.Bind(
             StanceWiggleSection,
             "Animation Curve Duration",
             0.35f,
             new ConfigDescription("How long the cinematic stance transition takes to complete (seconds).",
-            new AcceptableValueRange<float>(0.1f, 1.0f),
+            new AcceptableValueRange<float>(0.1f, 10.0f),
             new ConfigurationManagerAttributes { Order = 4 }));
             
-        _CurvePitchMultiplier = Config.Bind(
+        _StanceCurvePitchMultiplier = Config.Bind(
             StanceWiggleSection,
-            "Pitch Multiplier (Cano sobe/desce)",
+            "Stance Pitch Multiplier (Cano sobe/desce)",
             1.0f,
-            new ConfigDescription("Multiplier for the X-axis (Pitch) sway curve.",
+            new ConfigDescription("Multiplier for the X-axis (Pitch) sway curve during STANCE transitions.",
             new AcceptableValueRange<float>(0.0f, 5.0f),
             new ConfigurationManagerAttributes { Order = 3 }));
 
-        _CurveYawMultiplier = Config.Bind(
+        _StanceCurveYawMultiplier = Config.Bind(
             StanceWiggleSection,
-            "Yaw Multiplier (Luneta tomba)",
+            "Stance Yaw Multiplier (Apontar Esq/Dir)",
             1.0f,
-            new ConfigDescription("Multiplier for the Y-axis (Yaw) sway curve.",
+            new ConfigDescription("Multiplier for the Yaw sway curve during STANCE transitions.",
             new AcceptableValueRange<float>(0.0f, 5.0f),
             new ConfigurationManagerAttributes { Order = 2 }));
 
-        _CurveRollMultiplier = Config.Bind(
+        _StanceCurveRollMultiplier = Config.Bind(
             StanceWiggleSection,
-            "Roll Multiplier (Apontar Esq/Dir)",
+            "Stance Roll Multiplier (Tombar Arma)",
             1.0f,
-            new ConfigDescription("Multiplier for the Z-axis (Roll) sway curve.",
+            new ConfigDescription("Multiplier for the Roll sway curve during STANCE transitions.",
             new AcceptableValueRange<float>(0.0f, 5.0f),
             new ConfigurationManagerAttributes { Order = 1 }));
 
-        _CurvePositionMultiplier = Config.Bind(
+        _StanceCurvePositionMultiplier = Config.Bind(
             StanceWiggleSection,
-            "Position Multiplier (Coronha no peito)",
+            "Stance Position Multiplier (Coronha no peito)",
             1.0f,
-            new ConfigDescription("Multiplier for the positional sway curves (Quick/Impact).",
+            new ConfigDescription("Multiplier for the positional sway curves during STANCE transitions.",
             new AcceptableValueRange<float>(0.0f, 5.0f),
             new ConfigurationManagerAttributes { Order = 0 }));
 
-        _LeanSpeedMultiplier = Config.Bind(
-            "2. Configurações de Stance",
-            "Multiplicador de Velocidade do Lean",
-            1f,
-            new ConfigDescription("Multiplica a velocidade com que o personagem inclina (Lean). 1 = Original do jogo.", new AcceptableValueRange<float>(0.1f, 10f)));
-
-        _StanceOvershootDamping = Config.Bind(
-            "2. Configurações de Stance",
-            "Overshoot/Settle Damping (Retorno Stance 0)",
-            0.55f,
-            new ConfigDescription("Controla o 'quique' quando a arma volta para a stance 0. 1.0 = Sem quique. 0.4 = Muito quique.", new AcceptableValueRange<float>(0.2f, 1.0f)));
-
-        _StanceTransitionDamping = Config.Bind(
-            "2. Configurações de Stance",
-            "Frenagem da Transição (Easing Out)",
+        // --- Stance 0 (Vanilla) ADS Multipliers ---
+        _Stance0ADSPitchMultiplier = Config.Bind(
+            "Stance 0 - Vanilla",
+            "ADS Pitch Multiplier",
             1.0f,
-            new ConfigDescription("Controla o quão suavemente a arma freia ao trocar de stance. 1.0 = Original. Valores < 1.0 = Movimento mais rápido/seco. Valores > 1.0 = Movimento arrastado/lento.", new AcceptableValueRange<float>(0.2f, 2.0f)));
+            new ConfigDescription("Multiplier for the Pitch sway curve during ADS from Stance 0.",
+            new AcceptableValueRange<float>(0.0f, 5.0f)));
 
-        _MaxLeanLimit = Config.Bind(
-            "2. Configurações de Stance",
-            "Limite Máximo de Lean",
-            5f,
-            new ConfigDescription("O limite máximo de inclinação do Lean. 5 = Original do jogo. (Aviso: Valores altos podem não ter animação no jogo).", new AcceptableValueRange<float>(1f, 15f)));
-
-        _CameraBobbingMultiplier = Config.Bind(
-            StanceWiggleSection,
-            "Camera Bobbing Multiplier",
+        _Stance0ADSYawMultiplier = Config.Bind(
+            "Stance 0 - Vanilla",
+            "ADS Yaw Multiplier",
             1.0f,
-            new ConfigDescription("Multiplies the camera shake effect caused by wiggle. Follows the native Head Bobbing option setting. / Multiplicador de intensidade do balanço da câmera.",
-            new AcceptableValueRange<float>(0f, 5.0f),
-            new ConfigurationManagerAttributes { Order = -6 }));
+            new ConfigDescription("Multiplier for the Yaw sway curve during ADS from Stance 0.",
+            new AcceptableValueRange<float>(0.0f, 5.0f)));
+
+        _Stance0ADSRollMultiplier = Config.Bind(
+            "Stance 0 - Vanilla",
+            "ADS Roll Multiplier",
+            1.0f,
+            new ConfigDescription("Multiplier for the Roll sway curve during ADS from Stance 0.",
+            new AcceptableValueRange<float>(0.0f, 5.0f)));
+
+        _Stance0ADSPosYMultiplier = Config.Bind(
+            "Stance 0 - Vanilla",
+            "ADS Pos Y Multiplier (Forward/Back)",
+            1.0f,
+            new ConfigDescription("Multiplier for the positional sway (Y axis) during ADS from Stance 0.",
+            new AcceptableValueRange<float>(-5.0f, 5.0f)));
+
+        _Stance0ADSPosZMultiplier = Config.Bind(
+            "Stance 0 - Vanilla",
+            "ADS Pos Z Multiplier (Up/Down)",
+            1.0f,
+            new ConfigDescription("Multiplier for the positional sway (Z axis) during ADS from Stance 0.",
+            new AcceptableValueRange<float>(-5.0f, 5.0f)));
+
+        // --- Stance 1 ADS Multipliers ---
+        _Stance1ADSPitchMultiplier = Config.Bind(
+            Stance1Section,
+            "ADS Pitch Multiplier",
+            1.0f,
+            new ConfigDescription("Multiplier for the Pitch sway curve during ADS from Stance 1.",
+            new AcceptableValueRange<float>(0.0f, 5.0f)));
+
+        _Stance1ADSYawMultiplier = Config.Bind(
+            Stance1Section,
+            "ADS Yaw Multiplier",
+            1.0f,
+            new ConfigDescription("Multiplier for the Yaw sway curve during ADS from Stance 1.",
+            new AcceptableValueRange<float>(0.0f, 5.0f)));
+
+        _Stance1ADSRollMultiplier = Config.Bind(
+            Stance1Section,
+            "ADS Roll Multiplier",
+            1.0f,
+            new ConfigDescription("Multiplier for the Roll sway curve during ADS from Stance 1.",
+            new AcceptableValueRange<float>(0.0f, 5.0f)));
+
+        _Stance1ADSPosYMultiplier = Config.Bind(
+            Stance1Section,
+            "ADS Pos Y Multiplier (Forward/Back)",
+            1.0f,
+            new ConfigDescription("Multiplier for the positional sway (Y axis) during ADS from Stance 1.",
+            new AcceptableValueRange<float>(-5.0f, 5.0f)));
+
+        _Stance1ADSPosZMultiplier = Config.Bind(
+            Stance1Section,
+            "ADS Pos Z Multiplier (Up/Down)",
+            1.0f,
+            new ConfigDescription("Multiplier for the positional sway (Z axis) during ADS from Stance 1.",
+            new AcceptableValueRange<float>(-5.0f, 5.0f)));
+
+        // --- Stance 2 ADS Multipliers ---
+        _Stance2ADSPitchMultiplier = Config.Bind(
+            Stance2Section,
+            "ADS Pitch Multiplier",
+            1.0f,
+            new ConfigDescription("Multiplier for the Pitch sway curve during ADS from Stance 2.",
+            new AcceptableValueRange<float>(0.0f, 5.0f)));
+
+        _Stance2ADSYawMultiplier = Config.Bind(
+            Stance2Section,
+            "ADS Yaw Multiplier",
+            1.0f,
+            new ConfigDescription("Multiplier for the Yaw sway curve during ADS from Stance 2.",
+            new AcceptableValueRange<float>(0.0f, 5.0f)));
+
+        _Stance2ADSRollMultiplier = Config.Bind(
+            Stance2Section,
+            "ADS Roll Multiplier",
+            1.0f,
+            new ConfigDescription("Multiplier for the Roll sway curve during ADS from Stance 2.",
+            new AcceptableValueRange<float>(0.0f, 5.0f)));
+
+        _Stance2ADSPosYMultiplier = Config.Bind(
+            Stance2Section,
+            "ADS Pos Y Multiplier (Forward/Back)",
+            1.0f,
+            new ConfigDescription("Multiplier for the positional sway (Y axis) during ADS from Stance 2.",
+            new AcceptableValueRange<float>(-5.0f, 5.0f)));
+
+        _Stance2ADSPosZMultiplier = Config.Bind(
+            Stance2Section,
+            "ADS Pos Z Multiplier (Up/Down)",
+            1.0f,
+            new ConfigDescription("Multiplier for the positional sway (Z axis) during ADS from Stance 2.",
+            new AcceptableValueRange<float>(-5.0f, 5.0f)));
 
         _LeanSpeedMultiplier = Config.Bind(
             AnimationSettings,
@@ -1090,8 +1239,8 @@ public class Plugin : BaseUnityPlugin
 
         _Stance2HandsSidewaysOffset = Config.Bind(
             Stance2Section,
-            "Stance 2 Hands Sideways Offset",
-            0f,
+            "Stance 2 Sideways (Coronha Esq/Dir)",
+            0.05f,
             new ConfigDescription("Stance 2 hands/weapon position left/right (positive = right)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { Order = 15 }));
@@ -1099,18 +1248,12 @@ public class Plugin : BaseUnityPlugin
         // ========================================
         // STANCE 3 (Order 14-8)
         // ========================================
-        _Stance3SprintAnimationEnabled = Config.Bind(
-            Stance3Section,
-            "Enable Stance 3 Sprint Animation",
-            false,
-            new ConfigDescription("When enabled, uses a compact sprint animation when sprinting in Stance 3 (tac sprint style)",
-            null,
-            new ConfigurationManagerAttributes { Order = 14 }));
-
+        // 013 fix-02: _Stance3SprintAnimationEnabled (1ª Bind da seção) foi movido para logo após o bloco
+        // da Stance 2, para a seção ser DESCOBERTA cedo e aparecer na ordem 0→1→2→3 no F12.
         // 06-fix-01: Stance 3 é agora Custom — Pitch 0, Yaw -30° (lateral).
         _Stance3HandsPitchRotation = Config.Bind(
             Stance3Section,
-            "Stance 3 Hands Pitch (X-Axis)",
+            "Stance 3 Pitch (Cano Sobe/Desce)",
             0f,
             new ConfigDescription("Stance 3 hands/arms pitch rotation in degrees (up/down tilt)",
             new AcceptableValueRange<float>(-45f, 45f),
@@ -1118,7 +1261,7 @@ public class Plugin : BaseUnityPlugin
 
         _Stance3HandsYawRotation = Config.Bind(
             Stance3Section,
-            "Stance 3 Hands Yaw (Y-Axis)",
+            "Stance 3 Roll (Tombar Arma)",
             -30f,
             new ConfigDescription("Stance 3 hands/arms yaw rotation in degrees (left/right turn)",
             new AcceptableValueRange<float>(-45f, 45f),
@@ -1126,7 +1269,7 @@ public class Plugin : BaseUnityPlugin
 
         _Stance3HandsRollRotation = Config.Bind(
             Stance3Section,
-            "Stance 3 Hands Roll (Z-Axis)",
+            "Stance 3 Yaw (Apontar Esq/Dir)",
             0f,
             new ConfigDescription("Stance 3 hands/arms roll rotation in degrees (weapon cant)",
             new AcceptableValueRange<float>(-45f, 45f),
@@ -1135,7 +1278,7 @@ public class Plugin : BaseUnityPlugin
         // 06-fix-01: Custom não tem push forward (lateral pura).
         _Stance3HandsForwardBackwardOffset = Config.Bind(
             Stance3Section,
-            "Stance 3 Hands Forward/Backward Offset",
+            "Stance 3 Forward/Backward (Frente/Trás)",
             0f,
             new ConfigDescription("Stance 3 hands/weapon position forward/backward (positive = forward)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
@@ -1143,7 +1286,7 @@ public class Plugin : BaseUnityPlugin
 
         _Stance3HandsUpDownOffset = Config.Bind(
             Stance3Section,
-            "Stance 3 Hands Up/Down Offset",
+            "Stance 3 Up/Down (Coronha Sobe/Desce)",
             0f,
             new ConfigDescription("Stance 3 hands/weapon position up/down (positive = up)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
@@ -1151,7 +1294,7 @@ public class Plugin : BaseUnityPlugin
 
         _Stance3HandsSidewaysOffset = Config.Bind(
             Stance3Section,
-            "Stance 3 Hands Sideways Offset",
+            "Stance 3 Sideways (Coronha Esq/Dir)",
             0f,
             new ConfigDescription("Stance 3 hands/weapon position left/right (positive = right)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
@@ -1253,7 +1396,6 @@ public class Plugin : BaseUnityPlugin
 
         foreach (var cfg in _stanceConfigs.Values)
         {
-            cfg.StaminaMultiplier.SettingChanged       += OnStanceConfigChanged;
             cfg.ModifiesMovementSpeed.SettingChanged   += OnStanceConfigChanged;
             cfg.MovementSpeedMultiplier.SettingChanged += OnStanceConfigChanged;
             cfg.ApplyWhenProne.SettingChanged          += OnStanceConfigChanged;
@@ -1326,6 +1468,12 @@ public class Plugin : BaseUnityPlugin
 
         // backlog 002 F2 — visibilidade inicial dos toggles de ciclo conforme ScrollMode atual.
         RefreshScrollModeVisibility();
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private void InitFikaSync()
+    {
+        CameraRotationMod.Networking.FikaSyncManager.Initialize(Logger);
     }
 
     // ==========================================================================
@@ -1466,13 +1614,13 @@ public class Plugin : BaseUnityPlugin
     // Update is called every frame by Unity
     public void Update()
     {
-        // Validate spring cache FIRST — detects stale references after transit/weapon swap
-        // so the fast-exit in SpringGetPatch.PatchPostfix doesn't reject new Spring instances
-        SpringGetPatch.ValidateSpringCache();
+        // Validação antiga de cache removida
         
         StanceManager.Update();
         StanceManager.UpdateTacSprint();
-        StanceManager.TickStanceStamina();              // backlog 001: delta stamina (drain/recovery) em hipfire
+        StanceManager.TickAdsNetworkSync();             // CR-02-02: reenvia stance ao mirar/desmirar (Fika)
+        StaminaController.Tick();                       // item 012: stamina de braço (autoridade única)
+        StanceManager.TickStanceStamina();              // item 012: agora só re-aplica o speed-limit quando a config muda
         StanceManager.EvaluateProneSuspensionTick();    // backlog 001: prone toggle + refresh defensivo de speed limit
         UpdateCameraOffset();
     }
@@ -1492,14 +1640,7 @@ public class Plugin : BaseUnityPlugin
 
         return new StanceConfig
         {
-            StaminaMultiplier = Config.Bind(d.Section, $"Stance {n} Stamina Multiplier", d.StaminaMultiplier,
-                new ConfigDescription(
-                    "Controls stamina behavior for this stance. " +
-                    "< 1.0 = drain (e.g. 0.5 drains at half ADS rate). " +
-                    "1.0 = vanilla, no effect. " +
-                    "> 1.0 = accelerated recovery (e.g. 2.0 recovers at full ADS drain rate).",
-                    new AcceptableValueRange<float>(0f, 10f),
-                    new ConfigurationManagerAttributes { Order = orderBase })),
+            // StaminaMultiplier migrou para o grupo "Stamina Management" (item 012, BindStaminaManagement).
             ModifiesMovementSpeed = Config.Bind(d.Section, $"Stance {n} Modifies Movement Speed", d.ModSpeed,
                 new ConfigDescription(
                     "When enabled, this stance applies a movement speed cap.",
@@ -1528,6 +1669,50 @@ public class Plugin : BaseUnityPlugin
                         null,
                         new ConfigurationManagerAttributes { Order = 0 })),
         };
+    }
+
+    // Item 012: cria os 15 multiplicadores do grupo "Stamina Management" + o toggle de debug, e popula
+    // StaminaController.Multipliers (indexado por StaminaScenario). Chamado ANTES de HoldBreathSection.
+    private void BindStaminaManagement()
+    {
+        const string SEC = "Stamina Management";
+        var M = StaminaController.Multipliers;
+        int o = 80;
+        M[(int)StaminaScenario.StandStance0]      = BindMult(SEC, "Stance 0 Stamina Multiplier", _stanceDefaults[0].StaminaMultiplier, "Stand up sem mount, Stance 0 (hipfire).", ref o);
+        M[(int)StaminaScenario.StandStance1]      = BindMult(SEC, "Stance 1 Stamina Multiplier", _stanceDefaults[1].StaminaMultiplier, "Stand up sem mount, Stance 1.", ref o);
+        M[(int)StaminaScenario.StandStance2]      = BindMult(SEC, "Stance 2 Stamina Multiplier", _stanceDefaults[2].StaminaMultiplier, "Stand up sem mount, Stance 2.", ref o);
+        M[(int)StaminaScenario.StandStance3]      = BindMult(SEC, "Stance 3 Stamina Multiplier", _stanceDefaults[3].StaminaMultiplier, "Stand up sem mount, Stance 3.", ref o);
+        M[(int)StaminaScenario.StandAds]          = BindMult(SEC, "ADS - Stand up Multiplier", 0.7f, "Stand up sem mount, mirando (ADS).", ref o);
+        M[(int)StaminaScenario.StandHoldBreath]   = BindMult(SEC, "Hold Breath - Stand up Multiplier", 0.5f, "Stand up sem mount, segurando a respiração.", ref o);
+        M[(int)StaminaScenario.ProneHip]          = BindMult(SEC, "Prone Stamina Multiplier", 1.5f, "Deitado (prone) sem mount, hipfire.", ref o);
+        M[(int)StaminaScenario.ProneAds]          = BindMult(SEC, "ADS - Prone Multiplier", 0.9f, "Deitado, mirando.", ref o);
+        M[(int)StaminaScenario.ProneHoldBreath]   = BindMult(SEC, "Hold Breath - Prone Multiplier", 0.7f, "Deitado, segurando a respiração.", ref o);
+        M[(int)StaminaScenario.PassiveStance0]    = BindMult(SEC, "Passive Mount Multiplier", 1.5f, "Apoio passivo (encostado), Stance 0.", ref o);
+        M[(int)StaminaScenario.PassiveAds]        = BindMult(SEC, "ADS - Passive Mount Multiplier", 1.0f, "Apoio passivo, mirando (segura, não recupera).", ref o);
+        M[(int)StaminaScenario.PassiveHoldBreath] = BindMult(SEC, "Hold Breath - Passive Mount Multiplier", 0.9f, "Apoio passivo, segurando a respiração.", ref o);
+        M[(int)StaminaScenario.ActiveStance0]     = BindMult(SEC, "Active Mount Multiplier", 3.0f, "Mount nativo (montado), Stance 0.", ref o);
+        M[(int)StaminaScenario.ActiveAds]         = BindMult(SEC, "ADS - Active Mount Multiplier", 1.5f, "Mount nativo, mirando.", ref o);
+        M[(int)StaminaScenario.ActiveHoldBreath]  = BindMult(SEC, "Hold Breath - Active Mount Multiplier", 1.0f, "Mount nativo, segurando a respiração.", ref o);
+
+        _DebugStaminaState = Config.Bind(SEC, "Debug Stamina State", false,
+            new ConfigDescription("Mostra na tela + loga o cenário de stamina ativo (STAMINA STATE: ...).",
+                null, new ConfigurationManagerAttributes { Order = 1 }));
+    }
+
+    private ConfigEntry<float> BindMult(string sec, string key, float def, string tip, ref int order)
+    {
+        var e = Config.Bind(sec, key, def, new ConfigDescription(
+            tip + " <1 drena, 1 mantém, >1 recupera.",
+            new AcceptableValueRange<float>(0f, 10f),
+            new ConfigurationManagerAttributes { Order = order }));
+        order--;
+        return e;
+    }
+
+    private void Start()
+    {
+        // Áudio do hold-breath é carregado em GameWorld.OnGameStarted (HoldBreathPatch.OnRaidStart),
+        // não aqui — carregar na cena de menu faz os clips serem descarregados na transição p/ o jogo.
     }
 
     /// <summary>SettingChanged handler — marca config suja; tick re-aplica numa janela ≤ 1 frame.</summary>

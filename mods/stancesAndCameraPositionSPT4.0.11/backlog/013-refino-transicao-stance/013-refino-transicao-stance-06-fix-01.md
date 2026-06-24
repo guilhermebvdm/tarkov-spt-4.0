@@ -14,7 +14,7 @@ Requisito real esclarecido: ao iniciar o sprint estando em **qualquer** stance (
 
 ## Causa raiz
 
-O bloco de sprint em [`StanceManager.cs`](../../modded-beta/StanceManager.cs) ainda chamava `SetStance(Stance.Default)` (force-zero) ao sprintar sem TacSprint — o `SnapToNeutral` só pulava a animação, não eliminava a mudança de stance. O comportamento correto é **não tocar na stance** durante o sprint.
+O bloco de sprint em [`StanceManager.cs`](../../modded/StanceManager.cs) ainda chamava `SetStance(Stance.Default)` (force-zero) ao sprintar sem TacSprint — o `SnapToNeutral` só pulava a animação, não eliminava a mudança de stance. O comportamento correto é **não tocar na stance** durante o sprint.
 
 ## Solução
 
@@ -28,8 +28,8 @@ Remoção completa do mecanismo de force-zero do sprint:
 
 | Arquivo | Mudança |
 |---|---|
-| `modded-beta/StanceManager.cs` | Removido o force-zero/restore do sprint; sprint mantém a stance atual. Removidas 2 vars órfãs. |
-| `modded-beta/Patches/ApplyComplexRotationPatch.cs` | Removido o método `SnapToNeutral` (sem uso). |
+| `modded/StanceManager.cs` | Removido o force-zero/restore do sprint; sprint mantém a stance atual. Removidas 2 vars órfãs. |
+| `modded/Patches/ApplyComplexRotationPatch.cs` | Removido o método `SnapToNeutral` (sem uso). |
 
 ## Checklist de validação (obrigatório antes de marcar entregue)
 

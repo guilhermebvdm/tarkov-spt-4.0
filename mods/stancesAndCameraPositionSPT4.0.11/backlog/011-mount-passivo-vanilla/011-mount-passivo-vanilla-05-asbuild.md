@@ -12,13 +12,13 @@
 
 | Ação | Arquivo | Resumo |
 |---|---|---|
-| CRIADO | `modded-beta/PassiveMountState.cs` | Estado estático do passivo: `IsBracing`, `Direction`, `LastDetectTick`, `SetBracing/ClearBracing/Reset`. |
-| CRIADO | `modded-beta/Patches/PassiveMountDetectPatch.cs` | Postfix em `Player.FirearmController.method_11` (por assinatura) + 3 raycasts (Top/Left/Right) com `origin`/`ln`/`weaponUp` reais; gate `IsYourPlayer`; cede a montado/bipé/prone/sprint. |
-| CRIADO | `modded-beta/Patches/PassiveMountBuffPatches.cs` | `PassiveRecoilPatch` (`NewRecoilShotEffect.AddRecoilForce`) + `PassiveSwayPatch` (`ProceduralWeaponAnimation.ProcessEffectors` → `Breath.Intensity`); só quando `IsBracing`. |
-| CRIADO | `modded-beta/PassiveMountUI.cs` | Ícone direcional (canto inf. direito) no GameObject do plugin + `BattleUIScreenPatch` (`EftBattleUIScreen.Show`); reset por timeout. |
-| MODIFICADO | `modded-beta/Patches/StanceStaminaRecoveryPatch.cs` | Passivo poupa stamina (regen `2.5` vs `5` do ativo), atrás de `Passive Stamina Save`; mount ativo/passivo movidos para antes do guard de multiplier. |
-| MODIFICADO | `modded-beta/Plugin.cs` | 5 `ConfigEntry` novas (seção `Weapon Mount (Passive)`); `SafeEnable` dos 4 patches; `AddComponent<PassiveMountUI>()`. |
-| MODIFICADO | `modded-beta/Patches/RaidLifecyclePatches.cs` | `PassiveMountState.Reset()` no `GameWorld.OnDestroy`. |
+| CRIADO | `modded/PassiveMountState.cs` | Estado estático do passivo: `IsBracing`, `Direction`, `LastDetectTick`, `SetBracing/ClearBracing/Reset`. |
+| CRIADO | `modded/Patches/PassiveMountDetectPatch.cs` | Postfix em `Player.FirearmController.method_11` (por assinatura) + 3 raycasts (Top/Left/Right) com `origin`/`ln`/`weaponUp` reais; gate `IsYourPlayer`; cede a montado/bipé/prone/sprint. |
+| CRIADO | `modded/Patches/PassiveMountBuffPatches.cs` | `PassiveRecoilPatch` (`NewRecoilShotEffect.AddRecoilForce`) + `PassiveSwayPatch` (`ProceduralWeaponAnimation.ProcessEffectors` → `Breath.Intensity`); só quando `IsBracing`. |
+| CRIADO | `modded/PassiveMountUI.cs` | Ícone direcional (canto inf. direito) no GameObject do plugin + `BattleUIScreenPatch` (`EftBattleUIScreen.Show`); reset por timeout. |
+| MODIFICADO | `modded/Patches/StanceStaminaRecoveryPatch.cs` | Passivo poupa stamina (regen `2.5` vs `5` do ativo), atrás de `Passive Stamina Save`; mount ativo/passivo movidos para antes do guard de multiplier. |
+| MODIFICADO | `modded/Plugin.cs` | 5 `ConfigEntry` novas (seção `Weapon Mount (Passive)`); `SafeEnable` dos 4 patches; `AddComponent<PassiveMountUI>()`. |
+| MODIFICADO | `modded/Patches/RaidLifecyclePatches.cs` | `PassiveMountState.Reset()` no `GameWorld.OnDestroy`. |
 | MODIFICADO | `PROPRIEDADES.md` | Seção "Apoio Passivo de Arma" (5 props). |
 
 ## Pontos da review tratados no build

@@ -23,7 +23,7 @@ Alternativas descartadas: subordinar via `GetHandsRestorationFunc` (não funcion
 | [`GClass774.cs:47`](../../../../references/eft-decompiled/Assembly-CSharp/GClass774.cs#L47) `action_1` / [`:53`](../../../../references/eft-decompiled/Assembly-CSharp/GClass774.cs#L53) `action_3` | reflection (`AccessTools.Field`) | Re-disparar `OnThresholdPass`/`OnValueChanged` (tremor/barra) |
 | [`BasePhysicalClass.cs:353-355`](../../../../references/eft-decompiled/Assembly-CSharp/BasePhysicalClass.cs#L353) `Stamina`/`HandsStamina` (ambos `GClass774`) | leitura (gate) | Distinguir braço de perna no Prefix |
 
-Estado amostrado (leitura): `ProceduralWeaponAnimation.IsMountedState`/`IsAiming`, `Player.IsInPronePose`, `PlayerPhysicalClass.HoldingBreath`, `PassiveMountState.IsBracing` (mod), `StanceManager.CurrentStance` (mod). `BaseRate` = `StanceManager._cachedAimDrainRate` ([StanceManager.cs:1151](../../modded-beta/StanceManager.cs), populado de `backend.Stamina.AimDrainRate` em :1234).
+Estado amostrado (leitura): `ProceduralWeaponAnimation.IsMountedState`/`IsAiming`, `Player.IsInPronePose`, `PlayerPhysicalClass.HoldingBreath`, `PassiveMountState.IsBracing` (mod), `StanceManager.CurrentStance` (mod). `BaseRate` = `StanceManager._cachedAimDrainRate` ([StanceManager.cs:1151](../../modded/StanceManager.cs), populado de `backend.Stamina.AimDrainRate` em :1234).
 
 ## 3. Novas propriedades F12 (BepInEx)
 
@@ -54,22 +54,22 @@ Grupo único **`Stamina Management`** (15 multiplicadores) + 1 toggle de debug. 
 
 | Arquivo | Ação | Resumo |
 |---|---|---|
-| `modded-beta/StaminaController.cs` | CRIAR | Enum `StaminaScenario` (15+Inactive), `Resolve`, `Tick` (escrita+eventos), `CurrentLabel`, `ControllingHands`, `Reset`. Absorve `ArmStaminaCoordinator.cs`. |
-| `modded-beta/StaminaDebugUI.cs` | CRIAR | `MonoBehaviour` com `OnGUI` (texto `STAMINA STATE` + `Current`), gated por toggle. |
-| `modded-beta/ArmStaminaCoordinator.cs` | DELETAR | Absorvido pelo `StaminaController`. |
-| `modded-beta/Patches/StanceStaminaRecoveryPatch.cs` | MODIFICAR | Trocar os 3 patches por `HandsStaminaNeutralizePatch` (Process) + `HandsConsumeNeutralizePatch` (Consume), com gate de braço/MainPlayer. |
-| `modded-beta/Plugin.cs` | MODIFICAR | `Update` chama `StaminaController.Tick`; `BindStaminaManagement()` (15 entries + toggle) antes de `HoldBreathSection`; remove `*_Regen`/`_HoldBreathArmStaminaDrain`; `AddComponent<StaminaDebugUI>`; reordena descoberta Stance 2/3; enables dos 2 patches novos. |
-| `modded-beta/StanceManager.cs` | MODIFICAR | Esvaziar `TickStanceStamina`; expor `CachedAimDrainRate`; `ApplyStaminaStance` mantém só speed-limit; `BindStance` deixa de criar `StaminaMultiplier`. |
-| `modded-beta/StanceConfig.cs` | MODIFICAR | `StaminaMultiplier` passa a ser atribuído por `BindStaminaManagement`. |
-| `modded-beta/Patches/PassiveMountDetectPatch.cs` | MODIFICAR | Corner case: não `SetBracing` se `stance∈{1,2,3} && !ads`. |
-| `modded-beta/Patches/ApplyComplexRotationPatch.cs` | MODIFICAR | Remover o arm-stamina drain do hold-breath (vira multiplicador); manter o oxygen drain. |
-| `modded-beta/Patches/RaidLifecyclePatches.cs` | MODIFICAR | `StaminaController.Reset()` em OnRaidStart/OnRaidEnd. |
+| `modded/StaminaController.cs` | CRIAR | Enum `StaminaScenario` (15+Inactive), `Resolve`, `Tick` (escrita+eventos), `CurrentLabel`, `ControllingHands`, `Reset`. Absorve `ArmStaminaCoordinator.cs`. |
+| `modded/StaminaDebugUI.cs` | CRIAR | `MonoBehaviour` com `OnGUI` (texto `STAMINA STATE` + `Current`), gated por toggle. |
+| `modded/ArmStaminaCoordinator.cs` | DELETAR | Absorvido pelo `StaminaController`. |
+| `modded/Patches/StanceStaminaRecoveryPatch.cs` | MODIFICAR | Trocar os 3 patches por `HandsStaminaNeutralizePatch` (Process) + `HandsConsumeNeutralizePatch` (Consume), com gate de braço/MainPlayer. |
+| `modded/Plugin.cs` | MODIFICAR | `Update` chama `StaminaController.Tick`; `BindStaminaManagement()` (15 entries + toggle) antes de `HoldBreathSection`; remove `*_Regen`/`_HoldBreathArmStaminaDrain`; `AddComponent<StaminaDebugUI>`; reordena descoberta Stance 2/3; enables dos 2 patches novos. |
+| `modded/StanceManager.cs` | MODIFICAR | Esvaziar `TickStanceStamina`; expor `CachedAimDrainRate`; `ApplyStaminaStance` mantém só speed-limit; `BindStance` deixa de criar `StaminaMultiplier`. |
+| `modded/StanceConfig.cs` | MODIFICAR | `StaminaMultiplier` passa a ser atribuído por `BindStaminaManagement`. |
+| `modded/Patches/PassiveMountDetectPatch.cs` | MODIFICAR | Corner case: não `SetBracing` se `stance∈{1,2,3} && !ads`. |
+| `modded/Patches/ApplyComplexRotationPatch.cs` | MODIFICAR | Remover o arm-stamina drain do hold-breath (vira multiplicador); manter o oxygen drain. |
+| `modded/Patches/RaidLifecyclePatches.cs` | MODIFICAR | `StaminaController.Reset()` em OnRaidStart/OnRaidEnd. |
 | `PROPRIEDADES.md` | MODIFICAR | Documentar o grupo `Stamina Management`; remover as linhas órfãs. |
 
 ## 5. Stubs de código
 
 ```csharp
-// modded-beta/StaminaController.cs
+// modded/StaminaController.cs
 using System;
 using System.Reflection;
 using BepInEx.Configuration;
@@ -193,7 +193,7 @@ namespace CameraRotationMod
 ```
 
 ```csharp
-// modded-beta/Patches/StanceStaminaRecoveryPatch.cs  (substitui os 3 patches antigos)
+// modded/Patches/StanceStaminaRecoveryPatch.cs  (substitui os 3 patches antigos)
 using System;
 using Comfort.Common;
 using EFT;
@@ -245,7 +245,7 @@ namespace CameraRotationMod.Patches
 ```
 
 ```csharp
-// modded-beta/StaminaDebugUI.cs
+// modded/StaminaDebugUI.cs
 using Comfort.Common;
 using EFT;
 using UnityEngine;
@@ -269,7 +269,7 @@ namespace CameraRotationMod
 ```
 
 ```csharp
-// modded-beta/Plugin.cs  (trecho — chamado ANTES de HoldBreathSection; ver §7 risco de ordenação)
+// modded/Plugin.cs  (trecho — chamado ANTES de HoldBreathSection; ver §7 risco de ordenação)
 private void BindStaminaManagement()
 {
     const string SEC = "Stamina Management";

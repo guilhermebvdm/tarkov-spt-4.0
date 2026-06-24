@@ -26,7 +26,7 @@ Ambos os revisores convergiram nos mesmos 2 achados acionáveis (NRE + Reset). D
 
 **`StaminaController.Tick` acessa `p.HandsController` sem checar `p == null`**
 
-**Local:** [`StaminaController.cs:56-57`](../../modded-beta/StaminaController.cs)
+**Local:** [`StaminaController.cs:56-57`](../../modded/StaminaController.cs)
 
 **Problema:** `p?.Physical?.HandsStamina` é null-safe, mas a linha seguinte faz `p.HandsController` sem guard de `p`. Se `Singleton<GameWorld>.Instance.MainPlayer` for null (transição de cena/raid), lança `NRE`. Mitigado pelo `try/catch` do `Tick` (não crasha), **mas** o caminho de exceção **não** seta `ControllingHands = false` → o `Process` segue neutralizado e a stamina de braço congela por frames. `Resolve(p)` também assume `p != null`.
 
@@ -48,7 +48,7 @@ e adicionar `if (p == null) return StaminaScenario.Inactive;` no topo de `Resolv
 
 **`StaminaController.Reset()` chamado só no `OnRaidEnd`, não no `OnRaidStart`**
 
-**Local:** [`Patches/RaidLifecyclePatches.cs`](../../modded-beta/Patches/RaidLifecyclePatches.cs) (`GameWorldOnGameStartedPatch`)
+**Local:** [`Patches/RaidLifecyclePatches.cs`](../../modded/Patches/RaidLifecyclePatches.cs) (`GameWorldOnGameStartedPatch`)
 
 **Problema:** a spec técnica (§9 check 1) prevê reset em start **e** end. Só o `OnRaidEnd` tem `StaminaController.Reset()`. Entre raid1→raid2, `Current`/`_prev`/`CurrentLabel`/`ControllingHands` carregam estado da raid anterior — o `_prev` desatualizado pode suprimir o primeiro log de transição e o debug mostra cenário incoerente por 1 frame.
 
@@ -64,7 +64,7 @@ e adicionar `if (p == null) return StaminaScenario.Inactive;` no topo de `Resolv
 
 **O gate `_PassiveStaminaSave` no `Resolve` não está nas specs funcional/técnica**
 
-**Local:** [`StaminaController.cs:99`](../../modded-beta/StaminaController.cs)
+**Local:** [`StaminaController.cs:99`](../../modded/StaminaController.cs)
 
 **Problema:** `Resolve` só entra em cenário Passive se `_PassiveStaminaSave.Value` — toggle introduzido no code-mod (reaproveitado do 06-fix-01) para não deixar a config órfã. É uma feature válida (off = passivo não mexe na stamina), mas a spec assumia que o passivo sempre captura. Já documentado em PROPRIEDADES + asbuild, mas não nas specs.
 

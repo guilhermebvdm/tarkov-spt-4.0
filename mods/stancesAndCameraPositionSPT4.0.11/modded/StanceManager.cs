@@ -51,7 +51,11 @@ namespace CameraRotationMod
 
         private static void ApplyUserStance(Stance to)
         {
-            if (CurrentStance != to) CameraRotationMod.Patches.SpringGetPatch.TriggerTransitionCurve();
+            if (CurrentStance != to)
+            {
+                Plugin.Logger.LogInfo($"[Stances] User changed stance from {CurrentStance} to {to}");
+                CameraRotationMod.Patches.ApplyComplexRotationPatch.LogNextFrame = true;
+            }
             CurrentStance = to;
         }
 
@@ -71,16 +75,9 @@ namespace CameraRotationMod
         private static bool _isWaitingToResetTacSprint = false;
         private static float _tacSprintResetTimer = 0f;
         
-        // Sprint Stance Tracking
-
-        private static Stance _preSprintStance = Stance.Default;
-        
         // ADS Tracking for Wiggle
         private static bool _wasAimingGlobal = false;
-        
-        // Track Sprint fallback
-        private static bool _wasSprintingForceZero = false;
-        
+
         // Track GameWorld to detect raid changes and reset state
         private static GameWorld _lastGameWorld = null;
         
@@ -150,7 +147,8 @@ namespace CameraRotationMod
             bool isNativeMounting = false;
             bool isAiming = false;
             bool isInProne = false;
-            
+            bool isStationary = false;
+
             if (gameWorld?.MainPlayer != null)
             {
                 var pwa = gameWorld.MainPlayer.ProceduralWeaponAnimation;
@@ -160,18 +158,20 @@ namespace CameraRotationMod
                     isAiming = pwa.IsAiming;
                 }
                 isInProne = gameWorld.MainPlayer.IsInPronePose;
+                var mc = gameWorld.MainPlayer.MovementContext;
+                isStationary = mc != null && mc.IsStationaryWeaponInHands;   // item 013: arma montada do cenário
             }
 
             _wasAimingGlobal = isAiming;
 
             bool isSprinting = gameWorld?.MainPlayer?.IsSprintEnabled == true;
 
-            if (MountingManager.IsMounting || isNativeMounting || isInProne)
+            if (isNativeMounting || isInProne || isStationary)
             {
-                // Se deitou ou está apoiado, quebra a Action Stance e trava controles
+                // Se deitou, apoiou (bipé) ou entrou em arma montada, quebra a Action Stance e trava controles
                 if (_isActionStanceActive) EndActionStance(forceCancel: true);
-                
-                // Forçar para Default caso seja montagem ou deitado (evita bugar se estivesse numa stance e montou/deitou do nada)
+
+                // Forçar Stance 0 (item 013: inclui arma montada do cenário — evita desalinhamento visual)
                 if (CurrentStance != Stance.Default)
                 {
                     SetStance(Stance.Default);
@@ -182,34 +182,9 @@ namespace CameraRotationMod
             if (isSprinting)
             {
                 if (_isActionStanceActive) EndActionStance(forceCancel: true);
-
-                // Se estiver sprintando e NÃO for ativar o TacSprint, força a stance 0 e guarda a antiga
-                if (!_isTacSprintActive && !CanDoTacSprint(gameWorld.MainPlayer))
-                {
-                    if (!_wasSprintingForceZero)
-                    {
-                        _wasSprintingForceZero = true;
-                        if (CurrentStance != Stance.Default)
-                        {
-                            _preSprintStance = CurrentStance;
-                            SetStance(Stance.Default);
-                        }
-                        else
-                        {
-                            _preSprintStance = Stance.Default;
-                        }
-                    }
-                }
+                // item 013 (fix-01): NÃO forçar Stance 0 ao correr. A corrida acontece inteiramente na
+                // stance atual (0/1/2/3), sem qualquer transição ou "flash" pela Stance 0. TacSprint normal.
                 return; // Trava as hotkeys normais durante o sprint
-            }
-            else if (_wasSprintingForceZero)
-            {
-                // Parou de sprintar, restaura a stance se estiver na 0
-                _wasSprintingForceZero = false;
-                if (CurrentStance == Stance.Default)
-                {
-                    SetStance(_preSprintStance);
-                }
             }
 
             // Action Stance: o término é detectado via ActionStanceOnIdlePatch (OnIdleStartEvent).
@@ -365,7 +340,7 @@ namespace CameraRotationMod
 
             var gw = GetCachedGameWorld();
             if (gw?.MainPlayer?.IsSprintEnabled == true) return;
-            if (MountingManager.IsMounting) return; // Não levanta a arma se estiver apoiado na parede
+            if (gw?.MainPlayer?.ProceduralWeaponAnimation?.IsMountedState == true) return; // Não levanta a arma se montado (vanilla)
             
             Plugin.Logger.LogInfo($"[Spy] StartActionStance called. CurrentStance: {CurrentStance}");
             if (CurrentStance != Stance.Default)
@@ -627,9 +602,6 @@ namespace CameraRotationMod
             _pendingInitialStance = null;
 
             // Set imediato — bypass spring lerp.
-            // PA-04-04: ResetState pode interromper transição em vôo, mas só relevante em hot-reload
-            // de dev (raid start normal não tem transição em vôo). Aceitável.
-            SpringGetPatch.ResetState();
             CurrentStance = target;
         }
 
@@ -759,9 +731,9 @@ namespace CameraRotationMod
             );
             
             _cachedADSPosition = new Vector3(
-                Plugin._ADSHandsSidewaysOffset?.Value ?? 0f,
-                Plugin._ADSHandsUpDownOffset?.Value ?? 0f,
-                Plugin._ADSHandsForwardBackwardOffset?.Value ?? 0f
+                Plugin._ADSHandsSidewaysOffset?.Value ?? 0f,        // X (Sideways)
+                Plugin._ADSHandsForwardBackwardOffset?.Value ?? 0f, // Y (Local Y = Forward/Backward in Tarkov)
+                Plugin._ADSHandsUpDownOffset?.Value ?? 0f           // Z (Local Z = Up/Down in Tarkov)
             );
             
             _cachedStance1Rotation = new Vector3(
@@ -771,9 +743,9 @@ namespace CameraRotationMod
             );
             
             _cachedStance1Position = new Vector3(
-                Plugin._Stance1HandsSidewaysOffset?.Value ?? 0f,
-                Plugin._Stance1HandsUpDownOffset?.Value ?? 0f,
-                Plugin._Stance1HandsForwardBackwardOffset?.Value ?? 0f
+                Plugin._Stance1HandsSidewaysOffset?.Value ?? 0f,        // X (Sideways)
+                Plugin._Stance1HandsForwardBackwardOffset?.Value ?? 0f, // Y (Local Y = Forward/Backward in Tarkov)
+                Plugin._Stance1HandsUpDownOffset?.Value ?? 0f           // Z (Local Z = Up/Down in Tarkov)
             );
             
             _cachedStance2Rotation = new Vector3(
@@ -783,9 +755,9 @@ namespace CameraRotationMod
             );
             
             _cachedStance2Position = new Vector3(
-                Plugin._Stance2HandsSidewaysOffset?.Value ?? 0f,
-                Plugin._Stance2HandsUpDownOffset?.Value ?? 0f,
-                Plugin._Stance2HandsForwardBackwardOffset?.Value ?? 0f
+                Plugin._Stance2HandsSidewaysOffset?.Value ?? 0f,        // X (Sideways)
+                Plugin._Stance2HandsForwardBackwardOffset?.Value ?? 0f, // Y (Local Y = Forward/Backward in Tarkov)
+                Plugin._Stance2HandsUpDownOffset?.Value ?? 0f           // Z (Local Z = Up/Down in Tarkov)
             );
             
             _cachedStance3Rotation = new Vector3(
@@ -795,16 +767,16 @@ namespace CameraRotationMod
             );
             
             _cachedStance3Position = new Vector3(
-                Plugin._Stance3HandsSidewaysOffset?.Value ?? 0f,
-                Plugin._Stance3HandsUpDownOffset?.Value ?? 0f,
-                Plugin._Stance3HandsForwardBackwardOffset?.Value ?? 0f
+                Plugin._Stance3HandsSidewaysOffset?.Value ?? 0f,        // X (Sideways)
+                Plugin._Stance3HandsForwardBackwardOffset?.Value ?? 0f, // Y (Local Y = Forward/Backward in Tarkov)
+                Plugin._Stance3HandsUpDownOffset?.Value ?? 0f           // Z (Local Z = Up/Down in Tarkov)
             );
             
             _cachedDefaultPosition = (Plugin._DefaultHandsPositionEnabled?.Value ?? false)
                 ? new Vector3(
-                    Plugin._DefaultHandsSidewaysOffset?.Value ?? 0f,
-                    Plugin._DefaultHandsUpDownOffset?.Value ?? 0f,
-                    Plugin._DefaultHandsForwardBackwardOffset?.Value ?? 0f
+                    Plugin._DefaultHandsSidewaysOffset?.Value ?? 0f,        // X (Sideways)
+                    Plugin._DefaultHandsForwardBackwardOffset?.Value ?? 0f, // Y (Local Y = Forward/Backward in Tarkov)
+                    Plugin._DefaultHandsUpDownOffset?.Value ?? 0f           // Z (Local Z = Up/Down in Tarkov)
                 )
                 : Vector3.zero;
             
@@ -814,19 +786,22 @@ namespace CameraRotationMod
         /// <summary>
         /// Get the current target rotation based on stance state and ADS state
         /// </summary>
-        public static Vector3 GetTargetRotation(bool isAiming)
+        public static Vector3 GetTargetRotation(bool isAiming) => GetTargetRotation(CurrentStance, isAiming);
+
+        // Item 014: overload parametrizado — usado pelo sync remoto para o stance sincronizado de cada player.
+        public static Vector3 GetTargetRotation(Stance stance, bool isAiming)
         {
             // Ensure cached values are up to date
             RebuildCachedStanceValues();
-            
+
             // If ADS and reset rotation is enabled, return ADS rotation
             if (isAiming && (Plugin._ResetOnADS?.Value ?? false))
             {
                 return _cachedADSRotation;
             }
 
-            // Return cached rotation based on current stance
-            return CurrentStance switch
+            // Return cached rotation based on the given stance
+            return stance switch
             {
                 Stance.Stance1 => _cachedStance1Rotation,
                 Stance.Stance2 => _cachedStance2Rotation,
@@ -838,19 +813,22 @@ namespace CameraRotationMod
         /// <summary>
         /// Get the current target position based on stance state and ADS state
         /// </summary>
-        public static Vector3 GetTargetPosition(bool isAiming)
+        public static Vector3 GetTargetPosition(bool isAiming) => GetTargetPosition(CurrentStance, isAiming);
+
+        // Item 014: overload parametrizado — sync remoto.
+        public static Vector3 GetTargetPosition(Stance stance, bool isAiming)
         {
             // Ensure cached values are up to date
             RebuildCachedStanceValues();
-            
+
             // If ADS and reset is enabled, return ADS position
             if (isAiming && (Plugin._ResetOnADS?.Value ?? false))
             {
                 return _cachedADSPosition;
             }
 
-            // Return cached position based on current stance
-            return CurrentStance switch
+            // Return cached position based on the given stance
+            return stance switch
             {
                 Stance.Stance1 => _cachedStance1Position,
                 Stance.Stance2 => _cachedStance2Position,
@@ -1148,6 +1126,7 @@ namespace CameraRotationMod
         private static bool _staminaConfigDirty = true;
         private static float _lastAppliedSpeedLimit = -1f;   // -1 = nada aplicado; força re-apply
         private static float _cachedAimDrainRate = 3f;        // cacheado em OnRaidStart — fallback ao default vanilla
+        public static float CachedAimDrainRate => _cachedAimDrainRate;   // item 012: base rate do StaminaController
 
         public static Stance GetActiveStaminaStance() => _activeStaminaStance;
 
@@ -1270,8 +1249,7 @@ namespace CameraRotationMod
             mc.RemoveStateSpeedLimit(Plugin.StanceSpeedLimitCause);
             _lastAppliedSpeedLimit = -1f;
 
-            StanceStaminaState.Multiplier = cfg.StaminaMultiplier.Value;
-
+            // item 012: o multiplicador de stamina migrou para o StaminaController; aqui sobra só o speed-limit.
             bool inProne = Singleton<GameWorld>.Instance.MainPlayer.IsInPronePose;
             StanceStaminaState.IsSuspendedByProne = inProne && !cfg.ApplyWhenProne.Value;
 
@@ -1286,6 +1264,11 @@ namespace CameraRotationMod
             _staminaConfigDirty = false;
         }
 
+        // CR-02-02: último estado de ADS (mira) enviado pela rede. Permite reenviar o stance quando o jogador
+        // mira/desmira SEM trocar de stance — caso em que OnStanceChanged não dispara e o _isAiming do observado
+        // ficaria preso no valor de quando a stance mudou.
+        private static bool _lastSentAiming;
+
         private static void OnStanceChanged(Stance previousStance, Stance newStance)
         {
             try
@@ -1294,14 +1277,43 @@ namespace CameraRotationMod
                 if (gw?.MainPlayer != null)
                 {
                     // Usa singleton estático em vez de FindObjectOfType (evita hitch de FPS).
-                    bool isMounting = MountingManager.IsMounting;
-                    FikaSync.FikaNetworkSync.SendStanceUpdate(gw.MainPlayer.ProfileId, newStance, isMounting);
+                    bool isAiming = false;
+                    if (gw.MainPlayer.HandsController is Player.FirearmController fc)
+                        isAiming = fc.IsAiming;
+
+                    CameraRotationMod.Networking.FikaSyncManager.SendStance((int)newStance, isAiming);
+                    _lastSentAiming = isAiming;   // CR-02-02: baseline para o tick de ADS não reenviar redundante.
                 }
 
                 _activeStaminaStance = newStance;
                 ApplyStaminaStance(newStance);
             }
             catch (Exception ex) { Plugin.Logger.LogError($"[StanceManager.OnStanceChanged] {ex}"); }
+        }
+
+        /// <summary>
+        /// CR-02-02: detecta a transição de ADS (mira) mantendo a mesma stance ativa e reenvia o stance para os
+        /// peers Fika. Sem isto, o offset de ADS da pose remota fica preso no valor de quando a stance mudou.
+        /// Throttle natural: só envia na BORDA da mudança (compara com o último valor enviado). Chamado 1x/frame
+        /// no Plugin.Update.
+        /// </summary>
+        public static void TickAdsNetworkSync()
+        {
+            try
+            {
+                // Só importa com stance ativa — em Default o observado ignora o offset (inStance = false).
+                if (CurrentStance == Stance.Default) return;
+
+                var gw = GetCachedGameWorld();
+                if (gw?.MainPlayer == null) return;
+
+                bool isAiming = gw.MainPlayer.HandsController is Player.FirearmController fc && fc.IsAiming;
+                if (isAiming == _lastSentAiming) return;
+
+                _lastSentAiming = isAiming;
+                CameraRotationMod.Networking.FikaSyncManager.SendStance((int)CurrentStance, isAiming);
+            }
+            catch (Exception ex) { Plugin.Logger.LogError($"[StanceManager.TickAdsNetworkSync] {ex}"); }
         }
 
         /// <summary>
@@ -1312,46 +1324,11 @@ namespace CameraRotationMod
         /// </summary>
         public static void TickStanceStamina()
         {
+            // item 012: o delta de stamina de braço migrou para StaminaController.Tick (autoridade única).
+            // Aqui sobra apenas a re-aplicação do speed-limit quando a config de stance muda (dirty).
             try
             {
-                // Re-aplicar config se foi marcada suja por SettingChanged
                 if (_staminaConfigDirty) ApplyStaminaStance(_activeStaminaStance);
-
-                if (!IsActiveContext()) return;
-                if (!StanceStaminaState.ShouldApplyStamina) return;
-
-                var player = Singleton<GameWorld>.Instance.MainPlayer;
-
-                // Em ADS o vanilla do EFT toma conta — nosso tick faz no-op.
-                if (player.ProceduralWeaponAnimation?.IsAiming == true) return;
-
-                // Item 004 (06-fix-01): apoiar a arma (mount passivo ou ativo) não drena estamina de
-                // braço — suspende o nosso tick; o vanilla (regen em hipfire) assume. Sem isso, o mount
-                // força Stance 0 (drain 0.5) e drenaria, contrariando o spec do 004.
-                if (MountingManager.MountState != EMountState.None) return;
-
-                var hands = player.Physical?.HandsStamina;
-                if (hands == null) return;
-
-                if (hands.Multiplier <= 0f) return;
-                // Honra ForceMode do GClass774 — Consume() vanilla pula quando ForceMode = true
-                if (hands.ForceMode) return;
-
-                // delta: negativo = drain, positivo = recovery
-                // _cachedAimDrainRate populado em OnRaidStart (constante imutável)
-                float mult = StanceStaminaState.Multiplier;
-                float delta = _cachedAimDrainRate * (mult - 1.0f) * hands.Multiplier * Time.deltaTime;
-                if (float.IsNaN(delta) || float.IsInfinity(delta) || Mathf.Abs(delta) < 0.0001f) return;
-
-                float prev = hands.Current;
-                float target = Mathf.Clamp(prev + delta, 0f, (float)hands.TotalCapacity);
-                if (Mathf.Abs(target - prev) < 0.0001f) return;
-                hands.Current = target;
-                NotifyHandsStaminaChanged(hands, prev);
-
-                // Replica HandleExpiration vanilla para disparar OnExpired event ao atingir 0
-                if (delta < 0 && target <= 0f && prev > 0f)
-                    hands.HandleExpiration();
             }
             catch (Exception ex) { Plugin.Logger.LogError($"[StanceManager.TickStanceStamina] {ex}"); }
         }

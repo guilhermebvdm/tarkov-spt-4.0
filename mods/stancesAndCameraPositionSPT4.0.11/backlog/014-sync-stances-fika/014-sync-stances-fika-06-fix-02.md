@@ -34,9 +34,9 @@ Mapeada a sequência completa de render da arma do observado em `ObservedPlayer.
 
 | Arquivo | Mudança |
 |---|---|
-| `modded-beta/Patches/ObservedStanceVisualPatch.cs` | **CRIADO** — Postfix em `ObservedPlayer.ObservedVisualPass`; chama `ApplyToWeaponRoot`. (Substitui os patches ProcessEffectors/ShiftWeaponRoot das tentativas anteriores, removidos.) |
-| `modded-beta/Networking/ObservedStanceAnimator.cs` | `ApplyToWeaponRoot(bones)` aplica o offset em `bones.Weapon_Root_Anim.local*`. Logs `[StanceSync-014]`. |
-| `modded-beta/Plugin.cs` | `SafeEnable("ObservedStanceVisualPatch")`. |
+| `modded/Patches/ObservedStanceVisualPatch.cs` | **CRIADO** — Postfix em `ObservedPlayer.ObservedVisualPass`; chama `ApplyToWeaponRoot`. (Substitui os patches ProcessEffectors/ShiftWeaponRoot das tentativas anteriores, removidos.) |
+| `modded/Networking/ObservedStanceAnimator.cs` | `ApplyToWeaponRoot(bones)` aplica o offset em `bones.Weapon_Root_Anim.local*`. Logs `[StanceSync-014]`. |
+| `modded/Plugin.cs` | `SafeEnable("ObservedStanceVisualPatch")`. |
 
 ## Diagnóstico instrumentado (1 teste decisivo)
 

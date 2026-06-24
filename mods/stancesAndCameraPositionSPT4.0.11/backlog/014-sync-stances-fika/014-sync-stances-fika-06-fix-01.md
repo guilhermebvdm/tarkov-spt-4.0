@@ -30,10 +30,10 @@ Aplicar o offset num **Postfix de `ProceduralWeaponAnimation.ProcessEffectors`**
 
 | Arquivo | Mudança |
 |---|---|
-| `modded-beta/Patches/ObservedStanceProcessPatch.cs` | **CRIADO** — Postfix em `ProcessEffectors`; resolve o player da PWA; só observados → `ObservedStanceAnimator.ApplyToObserved`. |
-| `modded-beta/Networking/ObservedStanceAnimator.cs` | `ApplyToObserved(pwa)` aplica o offset **aditivo** em `WeaponRootAnim.localPosition/localRotation`. Log único `[ObservedStance] fix-01 ATIVO` para confirmar execução. |
-| `modded-beta/Patches/ApplyComplexRotationPatch.cs` | Revertido o desvio observed; gate `!IsYourPlayer return` restaurado (local-only). `SpringLerp*` seguem públicos. |
-| `modded-beta/Plugin.cs` | `SafeEnable("ObservedStanceProcessPatch")`. |
+| `modded/Patches/ObservedStanceProcessPatch.cs` | **CRIADO** — Postfix em `ProcessEffectors`; resolve o player da PWA; só observados → `ObservedStanceAnimator.ApplyToObserved`. |
+| `modded/Networking/ObservedStanceAnimator.cs` | `ApplyToObserved(pwa)` aplica o offset **aditivo** em `WeaponRootAnim.localPosition/localRotation`. Log único `[ObservedStance] fix-01 ATIVO` para confirmar execução. |
+| `modded/Patches/ApplyComplexRotationPatch.cs` | Revertido o desvio observed; gate `!IsYourPlayer return` restaurado (local-only). `SpringLerp*` seguem públicos. |
+| `modded/Plugin.cs` | `SafeEnable("ObservedStanceProcessPatch")`. |
 
 ## Checklist de validação (2 clientes Fika)
 

@@ -8,7 +8,7 @@ namespace CameraRotationMod
     /// </summary>
     public sealed class StanceConfig
     {
-        // StaminaMultiplier migrou para o grupo "Stamina Management" (item 012) — ver StaminaController.Multipliers.
+        public ConfigEntry<float> StaminaMultiplier;
         public ConfigEntry<bool> ModifiesMovementSpeed;
         public ConfigEntry<int> MovementSpeedMultiplier;
         public ConfigEntry<bool> ApplyWhenProne;

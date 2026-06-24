@@ -11,9 +11,9 @@
 Em raid, a stamina de braço na **stance 0** oscilava (subia/descia) e às vezes "não entendia que saiu" do mount; mexer no `Stamina Multiplier` no F12 "consertava" temporariamente. Sintoma de **cabo-de-guerra**: 5 fontes escreviam na `HandsStamina` sem coordenação, cada uma cedendo a um subconjunto diferente de estados.
 
 Fontes em conflito:
-- Tick por stance ([`StanceManager.TickStanceStamina`](../../modded-beta/StanceManager.cs)) — cedia a ADS/mount-ativo/prone, **mas não ao mount passivo**.
-- Restauração ([`StanceStaminaRecoveryPatch`](../../modded-beta/Patches/StanceStaminaRecoveryPatch.cs) → `GetHandsRestorationFunc`) — regen 5/2.5 fixos.
-- Hold-breath drain ([`ApplyComplexRotationPatch`](../../modded-beta/Patches/ApplyComplexRotationPatch.cs)) — **não cedia a nada**.
+- Tick por stance ([`StanceManager.TickStanceStamina`](../../modded/StanceManager.cs)) — cedia a ADS/mount-ativo/prone, **mas não ao mount passivo**.
+- Restauração ([`StanceStaminaRecoveryPatch`](../../modded/Patches/StanceStaminaRecoveryPatch.cs) → `GetHandsRestorationFunc`) — regen 5/2.5 fixos.
+- Hold-breath drain ([`ApplyComplexRotationPatch`](../../modded/Patches/ApplyComplexRotationPatch.cs)) — **não cedia a nada**.
 - Prone (`HandsStaminaConsume/Process`) — só prone.
 - Vanilla EFT — ADS/hipfire/prone.
 
@@ -23,7 +23,7 @@ No mount **passivo** a restauração regenerava (`2.5`) enquanto o tick **contin
 
 ## Solução: um único dono da stamina por frame
 
-Coordenador [`ArmStamina.Resolve`](../../modded-beta/ArmStaminaCoordinator.cs) resolve **um** modo por frame (prioridade: **Prone → MountActive → MountPassive → HoldBreath → ADS(vanilla) → StanceDrain → Vanilla**). Cada fonte consulta o coordenador e só age no seu modo. Nos modos de mount o **consumo de aim-drain é zerado** (como no prone) e tudo é controlado pela restauração → resultado determinístico.
+Coordenador [`ArmStamina.Resolve`](../../modded/ArmStaminaCoordinator.cs) resolve **um** modo por frame (prioridade: **Prone → MountActive → MountPassive → HoldBreath → ADS(vanilla) → StanceDrain → Vanilla**). Cada fonte consulta o coordenador e só age no seu modo. Nos modos de mount o **consumo de aim-drain é zerado** (como no prone) e tudo é controlado pela restauração → resultado determinístico.
 
 ### Perfil B (resultado por quadrante, stance 0)
 
@@ -41,12 +41,12 @@ O passivo só ativa onde o vanilla permite mount — `IsBracing` é limpo em: re
 
 | Arquivo | Mudança |
 |---|---|
-| `modded-beta/ArmStaminaCoordinator.cs` | **CRIADO** — enum `ArmStaminaMode` + `ArmStamina.Resolve` (autoridade única). |
-| `modded-beta/Patches/StanceStaminaRecoveryPatch.cs` | Restauração via coordenador (Perfil B, ADS-aware); `Consume` zera aim-drain nos modos de mount (não só prone). |
-| `modded-beta/Patches/PassiveMountDetectPatch.cs` | Guards do `TryMountWeapon`; `ClearBracing` no toggle OFF. |
-| `modded-beta/StanceManager.cs` | `TickStanceStamina` só age no modo `StanceDrain` (via coordenador). |
-| `modded-beta/Patches/ApplyComplexRotationPatch.cs` | Hold-breath drain só no modo `HoldBreath` (cede a mount/prone). |
-| `modded-beta/Plugin.cs` | 2 configs: `Active Mount Stamina Regen` (5), `Passive Mount Stamina Regen` (2.5). |
+| `modded/ArmStaminaCoordinator.cs` | **CRIADO** — enum `ArmStaminaMode` + `ArmStamina.Resolve` (autoridade única). |
+| `modded/Patches/StanceStaminaRecoveryPatch.cs` | Restauração via coordenador (Perfil B, ADS-aware); `Consume` zera aim-drain nos modos de mount (não só prone). |
+| `modded/Patches/PassiveMountDetectPatch.cs` | Guards do `TryMountWeapon`; `ClearBracing` no toggle OFF. |
+| `modded/StanceManager.cs` | `TickStanceStamina` só age no modo `StanceDrain` (via coordenador). |
+| `modded/Patches/ApplyComplexRotationPatch.cs` | Hold-breath drain só no modo `HoldBreath` (cede a mount/prone). |
+| `modded/Plugin.cs` | 2 configs: `Active Mount Stamina Regen` (5), `Passive Mount Stamina Regen` (2.5). |
 | `PROPRIEDADES.md` | Documenta as 2 configs novas. |
 
 ## Deferido para calibração in-game (pós-validação)

@@ -10,7 +10,7 @@ Reconstruir o sistema de apoio de arma (mount) sobre o **mount nativo do EFT**, 
 
 ## Comportamento atual
 
-O mount próprio (item 004) foi removido nesta linha (`modded-beta`). Hoje o mount é **100% vanilla** — o mod não interfere no apoio de arma: a tecla nativa monta/desmonta normalmente, com os bônus nativos do EFT (ergonomia, redução de aim-drain). **Não existe** modo passivo: encostar a arma sem montar não dá nenhum benefício nem feedback visual.
+O mount próprio (item 004) foi removido nesta linha (`modded`). Hoje o mount é **100% vanilla** — o mod não interfere no apoio de arma: a tecla nativa monta/desmonta normalmente, com os bônus nativos do EFT (ergonomia, redução de aim-drain). **Não existe** modo passivo: encostar a arma sem montar não dá nenhum benefício nem feedback visual.
 
 ## Comportamento desejado
 
@@ -56,7 +56,7 @@ O mount próprio (item 004) foi removido nesta linha (`modded-beta`). Hoje o mou
 
 ## Referências
 
-- `mods/stancesAndCameraPositionSPT4.0.11/modded-beta/mount-diagnosis-plan.md` — diagnóstico comparativo (vanilla / RealismMod / impl. antiga) e descobertas técnicas.
+- `mods/stancesAndCameraPositionSPT4.0.11/modded/mount-diagnosis-plan.md` — diagnóstico comparativo (vanilla / RealismMod / impl. antiga) e descobertas técnicas.
 - Item **004** (`004-apoiar-arma-superficie/`) — predecessor descartado (mount próprio que suprimia o vanilla).
 - Plano de reconstrução: `~/.claude/plans/magical-imagining-meadow.md`.
 

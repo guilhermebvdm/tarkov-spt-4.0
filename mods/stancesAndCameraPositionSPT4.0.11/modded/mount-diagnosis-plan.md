@@ -1,10 +1,10 @@
 # Mount — Diagnóstico Comparativo + Plano de Correção
 
-**Mod:** stancesAndCameraPositionSPT4.0.11 (`modded-beta`) · **Data:** 2026-06-21
+**Mod:** stancesAndCameraPositionSPT4.0.11 (`modded`) · **Data:** 2026-06-21
 **Sintoma:** mount não ativa ao aproximar/encostar a arma em superfícies do mapa; ícones não aparecem. Nunca funcionou nesta linha.
 **Objetivo:** mount deve funcionar nas mesmas superfícies do mount vanilla (pedra, árvore, parede). **Passivo** = buffs (stamina/recoil/sway) ao encostar; **Ativo** = "grude" (estilo vanilla), por tecla.
 
-> Fontes cruzadas: vanilla EFT 0.16 (`references/eft-decompiled/`), RealismMod 0.14.8 decompilado (`mods/RealismMod/Client/DLL descompilada/`), nossa impl (`modded-beta/`).
+> Fontes cruzadas: vanilla EFT 0.16 (`references/eft-decompiled/`), RealismMod 0.14.8 decompilado (`mods/RealismMod/Client/DLL descompilada/`), nossa impl (`modded/`).
 
 ## 1. Como funciona em cada sistema
 
@@ -18,7 +18,7 @@
 - **Detecção** ([CollisionPatch.cs:100](../../RealismMod/Client/DLL%20descompilada/RealismMod/RealismMod/CollisionPatch.cs#L100)): timer a cada 60 chamadas; origem = `WeaponRootAnim.position`; `up = WeaponRootAnim.TransformDirection(Vector3.up)`; 3 linecasts (Top/Left/Right) + OverlapSphere; offsets `_startDownDir(0,0,-0.19)`, `_startLeftDir(0.143,0,0)`, esferas raio 0.045/0.09; layer `WEAPON_OCCLUSION_LAYERS`.
 - **UI:** POSTFIX em `EftBattleUIScreen.Show` cria/anexa o ícone; `MountingUI.Update` escolhe sprite por direção e alpha por estado.
 
-### Nossa impl (`modded-beta`)
+### Nossa impl (`modded`)
 - **DOIS caminhos de detecção** (redundância): (a) PREFIX `FirearmCollisionDetectPatch` em `method_11` ([WeaponMountingPatch.cs:15](Patches/WeaponMountingPatch.cs#L15)); (b) `MountingManager.Update` ([MountingManager.cs:106](MountingManager.cs#L106)). Ambos chamam `MountingManager.DetectBracing` ([MountingManager.cs:152](MountingManager.cs#L152)) — **geometria copiada fielmente do Realism** (mesmos offsets/raios/layer).
 - **Estado próprio:** `EMountState {None,Passive,Active}`. Passivo = buffs (recoil/sway via `AddRecoilForceMountPatch`/`WeaponMountingPatch`); Ativo = grude (`MountingCollisionPatch` em `AvoidObstacles`).
 - **UI:** `BattleUIScreenPatch` POSTFIX em `EftBattleUIScreen.Show` ([MountingUI.cs:98](MountingUI.cs#L98)).

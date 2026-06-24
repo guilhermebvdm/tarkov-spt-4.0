@@ -9,12 +9,16 @@ namespace CameraRotationMod
     /// </summary>
     public static class StanceStaminaState
     {
-        // item 012: Multiplier/ShouldApplyStamina aposentados (o StaminaController lê os multiplicadores
-        // direto de StaminaController.Multipliers). Sobra IsSuspendedByProne para o speed-limit em prone.
+        public static float Multiplier = 1f;
         public static bool IsSuspendedByProne = false;
+
+        // 1.0 = vanilla (nenhuma intervenção do mod)
+        public static bool ShouldApplyStamina =>
+            System.Math.Abs(Multiplier - 1.0f) > 1e-5f && !IsSuspendedByProne;
 
         public static void Reset()
         {
+            Multiplier = 1f;
             IsSuspendedByProne = false;
         }
     }

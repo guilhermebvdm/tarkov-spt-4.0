@@ -60,18 +60,6 @@
       <HintPath>References\UnityEngine.ImageConversionModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.AudioModule">
-      <HintPath>References\UnityEngine.AudioModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.UnityWebRequestModule">
-      <HintPath>References\UnityEngine.UnityWebRequestModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.UnityWebRequestAudioModule">
-      <HintPath>References\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
 
     <!-- Comfort -->
     <Reference Include="Comfort">
@@ -104,12 +92,8 @@
     </Reference>
 
     <!-- Fika Soft Dependency -->
-    <Reference Include="Comfort">
-      <HintPath>..\..\references\eft-decompiled\Comfort.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Fika.Core">
-      <HintPath>..\..\references\fika-headless\References\Fika.Core.dll</HintPath>
+      <HintPath>References\Fika.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>

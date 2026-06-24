@@ -50,16 +50,29 @@ namespace CameraRotationMod.Patches
         private static float _stanceShoulderingStartTime = 0f;
         private static Stance _previousStance = Stance.Default;
 
+        // Item 009: wiggle por troca INTENCIONAL de stance (request consumível do StanceManager),
+        // consumido 1x por frame (o postfix roda para a spring de rotação E de posição no mesmo frame).
+        private static int _wiggleFrame = -1;
+        private static bool _wiggleThisFrame;
+        private static Stance _wiggleFrom = Stance.Default;
+        private static Stance _wiggleTo = Stance.Default;
+        
+        // Double Wiggle state
+        private static bool _waitingForDoubleWiggle = false;
+        private static float _doubleWiggleExecutionTime = 0f;
+
         private static bool _isPlayingTransitionCurve = false;
         private static float _transitionCurveTimer = 0f;
-        public static Vector3 CurrentCurveRotation = Vector3.zero;
-        public static Vector3 CurrentCurvePosition = Vector3.zero;
+        private static Vector3 _currentCurveRotation = Vector3.zero;
+        private static Vector3 _currentCurvePosition = Vector3.zero;
 
-        public static void TriggerTransitionCurve()
-        {
-            _isPlayingTransitionCurve = true;
-            _transitionCurveTimer = 0f;
-        }
+        private static float _lastWeaponWeightFactor = 1f;
+
+        // Independent Wiggle Spring
+        public static Vector3 _currentWiggleRotation = Vector3.zero;
+        private static Vector3 _wiggleRotationVelocity = Vector3.zero;
+        private static Vector3 _currentWigglePosition = Vector3.zero;
+        private static Vector3 _wigglePositionVelocity = Vector3.zero;
 
         // Smooth interpolation for transitions using SmoothDamp
         private static Vector3 _currentRotation = Vector3.zero;
@@ -225,9 +238,26 @@ namespace CameraRotationMod.Patches
             bool isHoldingFirearm = StanceManager.IsHoldingFirearm();
             Stance currentStance = StanceManager.CurrentStance;
 
+            // Item 009: consumir o pedido de wiggle 1x por frame (postfix roda p/ rot e pos no mesmo frame).
+            if (UnityEngine.Time.frameCount != _wiggleFrame)
+            {
+                _wiggleThisFrame = StanceManager.ConsumeWiggleRequest(out _wiggleFrom, out _wiggleTo);
+                _wiggleFrame = UnityEngine.Time.frameCount;
+            }
+
+            // Safe double wiggle check that works for both rot and pos without double-decreasing
+            bool executeDoubleWiggle = false;
+            if (_waitingForDoubleWiggle && UnityEngine.Time.time >= _doubleWiggleExecutionTime)
+            {
+                executeDoubleWiggle = true;
+            }
+
             // A transição natural do EFT para mira (ADS) e a nossa transição de Stance 
             // ocorrem ao longo de vários frames. Aplicamos a velocidade/offset de forma contínua.
-            bool isTransitioning = _isInStanceShoulderingPhase || _isInShoulderingPhase || _isPlayingTransitionCurve;
+            bool isTransitioning = _isInStanceShoulderingPhase || 
+                                   _isInShoulderingPhase || 
+                                   _wiggleThisFrame ||
+                                   executeDoubleWiggle;
 
             // FAST PATH: If we're stable (at target with no active transitions) and no state changed,
             // we can skip all the expensive calculations and just apply cached values directly
@@ -236,16 +266,19 @@ namespace CameraRotationMod.Patches
             bool stateChanged = (isAiming != _wasAiming) ||
                                (isInStanceFull != _wasInStance) ||
                                (currentStance != _previousStance) ||
-                               (isHoldingFirearm != _wasHoldingFirearm);
+                               (isHoldingFirearm != _wasHoldingFirearm) ||
+                               _wiggleThisFrame;
             
+            // Check if wiggle is active so we don't early exit
             const float epsilon = 1e-6f;
+            bool isWiggleActive = _currentWiggleRotation.sqrMagnitude > epsilon || _currentWigglePosition.sqrMagnitude > epsilon;
 
-            if (_isStable && _isInitialized && !stateChanged && !_isPlayingTransitionCurve)
+            if (_isStable && _isInitialized && !stateChanged && !executeDoubleWiggle && !isWiggleActive)
             {
                 // Apply cached values directly - skip all transition logic
                 if (isRotationSpring)
                 {
-                    __result = _currentRotation + _currentShoulderingRotation + __instance.Current;
+                    __result = _currentRotation + _currentShoulderingRotation + _currentWiggleRotation + __instance.Current;
                 }
                 else if (isPositionSpring)
                 {
@@ -254,7 +287,98 @@ namespace CameraRotationMod.Patches
                 return;
             }
             
+            // --- Item 009: Stance Wiggle Procedural ---
+            float speedMultiplier = isAiming ? (Plugin._WiggleSpeedADS?.Value ?? 15f) : (Plugin._WiggleSpeedHipfire?.Value ?? 15f);
+            
+            if (_wiggleThisFrame && Plugin._EnableStanceWiggle?.Value == true)
+            {
+                Plugin.Logger.LogInfo($"[Spy] Executing Wiggle! To={_wiggleTo}, IsRotationSpring={isRotationSpring}");
+                float weaponWeight = 3.0f;
+                if (gameWorld.MainPlayer != null && gameWorld.MainPlayer.HandsController is Player.FirearmController fcWiggle && fcWiggle.Item != null)
+                {
+                    weaponWeight = fcWiggle.Item.Weight;
+                }
 
+                float weightFactor = Mathf.Clamp(weaponWeight / 4.0f, 0.5f, 3.0f);
+                _lastWeaponWeightFactor = weightFactor; // Save for double wiggle
+
+                float dirSign = -1f;
+
+                if (isRotationSpring)
+                {
+                    float multX = Plugin._StanceWiggleX?.Value ?? 1f;
+                    float multY = Plugin._StanceWiggleY?.Value ?? 1f;
+                    float multZ = Plugin._StanceWiggleZ?.Value ?? 1f;
+
+                    Vector3 wiggle = new Vector3(
+                        dirSign * UnityEngine.Random.Range(0.2f, 0.5f) * multX, // X: Pitch
+                        UnityEngine.Random.Range(-0.3f, 0.3f) * multY,          // Y: Yaw
+                        UnityEngine.Random.Range(-0.1f, 0.1f) * multZ           // Z: Roll
+                    ) * weightFactor;
+                    _currentWiggleRotation += wiggle * 0.5f;
+                    _wiggleRotationVelocity += wiggle * speedMultiplier;
+                }
+                if (isPositionSpring)
+                {
+                    float multX = Plugin._StanceWiggleX?.Value ?? 1f;
+                    float multY = Plugin._StanceWiggleY?.Value ?? 1f;
+                    float multZ = Plugin._StanceWiggleZ?.Value ?? 1f;
+
+                    Vector3 wigglePos = new Vector3(
+                        UnityEngine.Random.Range(-0.01f, 0.01f) * multX,        // X: Esquerda/Direita
+                        dirSign * UnityEngine.Random.Range(0.01f, 0.03f) * multY, // Y: Cima/Baixo
+                        dirSign * UnityEngine.Random.Range(0.02f, 0.05f) * multZ  // Z: Frente/Trás
+                    ) * weightFactor;
+                    _currentWigglePosition += wigglePos * 1.0f;
+                    _wigglePositionVelocity += wigglePos * speedMultiplier;
+                    
+                    // Schedule double wiggle
+                    if (Plugin._EnableDoubleWiggle?.Value == true)
+                    {
+                        _waitingForDoubleWiggle = true;
+                        _doubleWiggleExecutionTime = UnityEngine.Time.time + 0.12f; // 120ms delay
+                    }
+                }
+            }
+            else if (executeDoubleWiggle && Plugin._EnableStanceWiggle?.Value == true)
+            {
+                // Double Wiggle (inverse direction, reduced strength)
+                float dirSign = 1f; // Inverted!
+                float doubleWiggleStrength = 0.35f; // 35% of original
+                
+                if (isRotationSpring)
+                {
+                    float multX = Plugin._StanceWiggleX?.Value ?? 1f;
+                    float multY = Plugin._StanceWiggleY?.Value ?? 1f;
+                    float multZ = Plugin._StanceWiggleZ?.Value ?? 1f;
+
+                    Vector3 wiggle = new Vector3(
+                        dirSign * 0.35f * multX, // Static pitch bounce
+                        0f,                      // No secondary yaw
+                        0f                       // No secondary roll
+                    ) * _lastWeaponWeightFactor * doubleWiggleStrength;
+                    
+                    _currentWiggleRotation += wiggle * 0.5f;
+                    _wiggleRotationVelocity += wiggle * speedMultiplier;
+                }
+                if (isPositionSpring)
+                {
+                    float multY = Plugin._StanceWiggleY?.Value ?? 1f;
+                    float multZ = Plugin._StanceWiggleZ?.Value ?? 1f;
+
+                    Vector3 wigglePos = new Vector3(
+                        0f,
+                        dirSign * 0.02f * multY, 
+                        dirSign * 0.035f * multZ  
+                    ) * _lastWeaponWeightFactor * doubleWiggleStrength;
+                    
+                    _currentWigglePosition += wigglePos * 1.0f;
+                    _wigglePositionVelocity += wigglePos * speedMultiplier;
+                    
+                    // Turn it off so it doesn't execute again
+                    _waitingForDoubleWiggle = false;
+                }
+            }
 
             // Check if any features are actually enabled
             bool resetOnADSEnabled = Plugin._ResetOnADS?.Value ?? false;
@@ -277,6 +401,8 @@ namespace CameraRotationMod.Patches
             {
                 _isStable = false;
                 
+                // Item 009: o wiggle foi MOVIDO para fora deste bloco (ver após o fast-path) — agora
+                // dispara por troca intencional de stance (request) em vez de comparação de _previousStance.
 
                 _wasAiming = isAiming;
                 _wasInStance = isInStanceFull;
@@ -526,19 +652,10 @@ namespace CameraRotationMod.Patches
             if (_isPlayingTransitionCurve)
             {
                 _transitionCurveTimer += deltaTime;
-                float duration = Plugin._CurveDuration?.Value ?? 0.35f;
-                float progress = Mathf.Clamp01(_transitionCurveTimer / duration);
+                float progress = Mathf.Clamp01(_transitionCurveTimer / 0.35f); // 0.35s fixo de acordo com o design
 
-                Vector3 baseRot = shwngFpsCameraStances.StanceTransitionCurves.EvaluateRotation(progress);
-                Vector3 basePos = shwngFpsCameraStances.StanceTransitionCurves.EvaluatePosition(progress);
-
-                float pitchMult = Plugin._CurvePitchMultiplier?.Value ?? 1.0f;
-                float yawMult = Plugin._CurveYawMultiplier?.Value ?? 1.0f;
-                float rollMult = Plugin._CurveRollMultiplier?.Value ?? 1.0f;
-                float posMult = Plugin._CurvePositionMultiplier?.Value ?? 1.0f;
-
-                CurrentCurveRotation = new Vector3(baseRot.x * pitchMult, baseRot.y * yawMult, baseRot.z * rollMult);
-                CurrentCurvePosition = basePos * posMult;
+                _currentCurveRotation = shwngFpsCameraStances.StanceTransitionCurves.EvaluateRotation(progress);
+                _currentCurvePosition = shwngFpsCameraStances.StanceTransitionCurves.EvaluatePosition(progress);
 
                 if (progress >= 1.0f)
                 {
@@ -547,30 +664,38 @@ namespace CameraRotationMod.Patches
             }
             else
             {
-                CurrentCurveRotation = Vector3.zero;
-                CurrentCurvePosition = Vector3.zero;
+                _currentCurveRotation = Vector3.zero;
+                _currentCurvePosition = Vector3.zero;
             }
+
+            float wiggleDuration = _wasAiming ? (Plugin._WiggleDurationADS?.Value ?? 0.15f) : (Plugin._WiggleDurationHipfire?.Value ?? 0.15f);
+            float wiggleFreq = SpringMath.SmoothTimeToAngularFrequency(wiggleDuration);
+            
+            _currentWiggleRotation = SpringMath.SpringDamp(_currentWiggleRotation, Vector3.zero, ref _wiggleRotationVelocity, 1.0f, wiggleFreq, deltaTime);
+            _currentWigglePosition = SpringMath.SpringDamp(_currentWigglePosition, Vector3.zero, ref _wigglePositionVelocity, 1.0f, wiggleFreq, deltaTime);
             
             // Track stability for potential early exit optimization in future frames
             // Use small epsilon for approximate comparison since SmoothDamp converges asymptotically
             bool atRotationTarget = (_currentRotation - _targetRotation).sqrMagnitude < epsilon;
             bool atPositionTarget = (_currentPosition - _targetPosition).sqrMagnitude < epsilon;
             bool atShoulderingTarget = (_currentShoulderingRotation - _targetShoulderingRotation).sqrMagnitude < epsilon;
+            bool atWiggleRotationTarget = _currentWiggleRotation.sqrMagnitude < epsilon;
+            bool atWigglePositionTarget = _currentWigglePosition.sqrMagnitude < epsilon;
             
             _wasStable = _isStable;
             _isStable = atRotationTarget && atPositionTarget && atShoulderingTarget && 
-                       !_isPlayingTransitionCurve &&
+                       atWiggleRotationTarget && atWigglePositionTarget &&
                        !_isInShoulderingPhase && !_isInStanceShoulderingPhase;
 
             // Apply the interpolated values based on which spring this is
             if (isRotationSpring)
             {
-                // Add the stance/ADS rotation, shouldering offset, and curve rotation
-                __result = _currentRotation + _currentShoulderingRotation + CurrentCurveRotation + __instance.Current;
+                // Add both the stance/ADS rotation AND the shouldering rotation offset AND the wiggle AND the curve
+                __result = _currentRotation + _currentShoulderingRotation + _currentWiggleRotation + _currentCurveRotation + __instance.Current;
             }
             else if (isPositionSpring)
             {
-                __result = _currentPosition + CurrentCurvePosition + __instance.Current;
+                __result = _currentPosition + _currentWigglePosition + _currentCurvePosition + __instance.Current;
             }
         }
         
