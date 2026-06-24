@@ -12,7 +12,7 @@ In-game, a seção **`Stance 3 - Custom`** aparecia **deslocada** no F12 — dep
 
 ## Causa raiz
 
-A ordem das seções no ConfigurationManager é a **ordem de descoberta** (primeira `Config.Bind` de cada seção). As seções de Stance eram descobertas em: Stance 0 ([Plugin.cs:772](../../modded-beta/Plugin.cs#L772)), Stance 1 (~778), Stance 2 (~837) — **mas o bloco da Stance 3 estava lá embaixo no `Awake`** ([Plugin.cs:~1239](../../modded-beta/Plugin.cs)), depois de Passive Mount / Stamina Management / Hold Breath / Wiggle. Logo, `Stance 3 - Custom` era descoberta por último e caía fora da sequência 0→1→2→3.
+A ordem das seções no ConfigurationManager é a **ordem de descoberta** (primeira `Config.Bind` de cada seção). As seções de Stance eram descobertas em: Stance 0 ([Plugin.cs:772](../../modded/Plugin.cs#L772)), Stance 1 (~778), Stance 2 (~837) — **mas o bloco da Stance 3 estava lá embaixo no `Awake`** ([Plugin.cs:~1239](../../modded/Plugin.cs)), depois de Passive Mount / Stamina Management / Hold Breath / Wiggle. Logo, `Stance 3 - Custom` era descoberta por último e caía fora da sequência 0→1→2→3.
 
 ## Solução
 
@@ -22,7 +22,7 @@ A ordem das seções no ConfigurationManager é a **ordem de descoberta** (prime
 
 | Arquivo | Mudança |
 |---|---|
-| `modded-beta/Plugin.cs` | `_Stance3SprintAnimationEnabled` (1ª Bind da `Stance3Section`) movido para logo após o bloco da Stance 2. Nenhuma config nova/removida. |
+| `modded/Plugin.cs` | `_Stance3SprintAnimationEnabled` (1ª Bind da `Stance3Section`) movido para logo após o bloco da Stance 2. Nenhuma config nova/removida. |
 
 ## Checklist de validação
 

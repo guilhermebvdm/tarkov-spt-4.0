@@ -19,6 +19,11 @@ namespace CameraRotationMod.Networking
         private int _stance;
         private bool _isAiming;
         private Vector3 _euler, _pos, _rotVel, _posVel;
+        // CR-02-01: guarda o último resultado escrito para detectar frames em que o vanilla NÃO re-setou
+        // o Weapon_Root_Anim (early-return de ObservedVisualPass) e evitar acúmulo do offset aditivo.
+        private Quaternion _lastWrittenRot;
+        private Vector3 _lastWrittenPos;
+        private bool _hasWritten;
         private static bool _loggedApply;
 
         public void Init(ObservedPlayer p) => _observedPlayer = p;
@@ -35,6 +40,15 @@ namespace CameraRotationMod.Networking
             Transform wra = bones == null ? null : bones.Weapon_Root_Anim;
             if (wra == null) return;
 
+            // CR-02-01: ObservedVisualPass tem early-return (ObservedPlayer.cs:1841: CustomAnimationsAreProcessing
+            // || !IsVisible || !IsAlive) que pula ShiftWeaponRoot/Kinematics. Nesses frames o Weapon_Root_Anim NÃO
+            // é re-setado para a pose base — e como somamos um offset ADITIVO, repeti-lo acumularia (arma girando).
+            // Detecção robusta (sem depender de acessores privados do Fika): se o transform atual é idêntico ao que
+            // NÓS escrevemos por último, o vanilla não o tocou neste frame → pulamos. Como offset != 0 garante
+            // base != base+offset, isto só pula de fato em frame "sujo" (não-resetado).
+            if (_hasWritten && wra.localRotation == _lastWrittenRot && wra.localPosition == _lastWrittenPos)
+                return;
+
             bool inStance = _stance > 0 && !(_observedPlayer != null && _observedPlayer.IsInPronePose);
             Vector3 targetEuler = inStance ? StanceManager.GetTargetRotation((Stance)_stance, _isAiming) : Vector3.zero;
             Vector3 targetPos = inStance ? StanceManager.GetTargetPosition((Stance)_stance, _isAiming) : Vector3.zero;
@@ -49,6 +63,11 @@ namespace CameraRotationMod.Networking
             // Transform FINAL da arma de 3a pessoa, após ShiftWeaponRoot + Kinematics + IK (nada sobrescreve depois).
             wra.localRotation = wra.localRotation * Quaternion.Euler(_euler);
             wra.localPosition = wra.localPosition + _pos;
+
+            // CR-02-01: registra o resultado para, no próximo frame, distinguir transform re-setado vs. congelado.
+            _lastWrittenRot = wra.localRotation;
+            _lastWrittenPos = wra.localPosition;
+            _hasWritten = true;
 
             if (!_loggedApply && _stance > 0)
             {

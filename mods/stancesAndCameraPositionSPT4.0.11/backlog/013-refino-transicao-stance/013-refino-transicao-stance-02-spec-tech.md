@@ -11,8 +11,8 @@
 Três ajustes pequenos, todos no jogador local, **sem novas configs F12**:
 
 1. **Stationary → Mount Active:** `StaminaController` detecta `MovementContext.IsStationaryWeaponInHands` e resolve `ActiveStance0` (reusa o multiplicador Active Mount). Detecção **contínua** (sem flag) — sai limpo ao largar a arma.
-2. **Forçar Stance 0 ao entrar:** o `StanceManager.Update` **já** força Stance 0 em `isNativeMounting || isInProne` ([StanceManager.cs:173-184](../../modded-beta/StanceManager.cs)); basta **incluir `isStationary`** na condição. O `SetStance(Default)` só dispara se `CurrentStance != Default` (evento único, no-op se já em 0).
-3. **Sprint sem flash da Stance 0:** o flash é o **spring** ([ApplyComplexRotationPatch.cs:264](../../modded-beta/Patches/ApplyComplexRotationPatch.cs)) animando os offsets `Stance1→0` quando o sprint força `SetStance(Default)` ([StanceManager.cs:199](../../modded-beta/StanceManager.cs)). Fix: ao forçar Default no sprint, **snap instantâneo** dos offsets para neutro (`SnapToNeutral()`), pulando a animação — a corrida assume a pose nativa sem "passar pela Stance 0". Ao sair do sprint, o restore atual (`SetStance(_preSprintStance)`) re-anima suave.
+2. **Forçar Stance 0 ao entrar:** o `StanceManager.Update` **já** força Stance 0 em `isNativeMounting || isInProne` ([StanceManager.cs:173-184](../../modded/StanceManager.cs)); basta **incluir `isStationary`** na condição. O `SetStance(Default)` só dispara se `CurrentStance != Default` (evento único, no-op se já em 0).
+3. **Sprint sem flash da Stance 0:** o flash é o **spring** ([ApplyComplexRotationPatch.cs:264](../../modded/Patches/ApplyComplexRotationPatch.cs)) animando os offsets `Stance1→0` quando o sprint força `SetStance(Default)` ([StanceManager.cs:199](../../modded/StanceManager.cs)). Fix: ao forçar Default no sprint, **snap instantâneo** dos offsets para neutro (`SnapToNeutral()`), pulando a animação — a corrida assume a pose nativa sem "passar pela Stance 0". Ao sair do sprint, o restore atual (`SetStance(_preSprintStance)`) re-anima suave.
 
 Não é preciso cercar stance/ADS/breath em stationary — o jogo bloqueia nativamente ([Player.cs:32113](../../../../references/eft-decompiled/Assembly-CSharp/EFT/Player.cs#L32113)).
 
@@ -21,10 +21,10 @@ Não é preciso cercar stance/ADS/breath em stationary — o jogo bloqueia nativ
 | Alvo | Arquivo:linha | Uso |
 |---|---|---|
 | `MovementContext.IsStationaryWeaponInHands` (bool) | [MovementContext.cs:1446](../../../../references/eft-decompiled/Assembly-CSharp/EFT/MovementContext.cs#L1446) | Detecção de arma montada (ajustes 1 e 2) |
-| `StanceManager.Update` força-Default | [StanceManager.cs:154-184](../../modded-beta/StanceManager.cs) | Incluir `isStationary` na condição (ajuste 2) |
-| `StanceManager` sprint force-zero | [StanceManager.cs:191-217](../../modded-beta/StanceManager.cs) | Snap ao forçar Default no sprint (ajuste 3) |
-| `ApplyComplexRotationPatch` spring + `CurrentEuler`/`CurrentPosition`/`_rotVelocity`/`_posVelocity` | [ApplyComplexRotationPatch.cs:259-267](../../modded-beta/Patches/ApplyComplexRotationPatch.cs) | Novo `SnapToNeutral()` (ajuste 3) |
-| `StaminaController.Resolve`/`Tick` | [StaminaController.cs](../../modded-beta/StaminaController.cs) | Mapear stationary → ActiveStance0 (ajuste 1) |
+| `StanceManager.Update` força-Default | [StanceManager.cs:154-184](../../modded/StanceManager.cs) | Incluir `isStationary` na condição (ajuste 2) |
+| `StanceManager` sprint force-zero | [StanceManager.cs:191-217](../../modded/StanceManager.cs) | Snap ao forçar Default no sprint (ajuste 3) |
+| `ApplyComplexRotationPatch` spring + `CurrentEuler`/`CurrentPosition`/`_rotVelocity`/`_posVelocity` | [ApplyComplexRotationPatch.cs:259-267](../../modded/Patches/ApplyComplexRotationPatch.cs) | Novo `SnapToNeutral()` (ajuste 3) |
+| `StaminaController.Resolve`/`Tick` | [StaminaController.cs](../../modded/StaminaController.cs) | Mapear stationary → ActiveStance0 (ajuste 1) |
 
 Nenhum **patch Harmony novo** — só edição de código do mod (a detecção de stationary é leitura de propriedade pública, não-virtual; sem AP-03).
 
@@ -36,9 +36,9 @@ Nenhuma.
 
 | Arquivo | Ação | Resumo |
 |---|---|---|
-| `modded-beta/StaminaController.cs` | MODIFICAR | `Tick` permite stationary no gate; `Resolve` → `ActiveStance0` quando `IsStationaryWeaponInHands`. |
-| `modded-beta/StanceManager.cs` | MODIFICAR | `Update`: `isStationary` na condição de força-Default (ajuste 2); `SnapToNeutral()` após o `SetStance(Default)` do sprint (ajuste 3). |
-| `modded-beta/Patches/ApplyComplexRotationPatch.cs` | MODIFICAR | Novo `public static void SnapToNeutral()` (zera offsets + velocidades do spring). |
+| `modded/StaminaController.cs` | MODIFICAR | `Tick` permite stationary no gate; `Resolve` → `ActiveStance0` quando `IsStationaryWeaponInHands`. |
+| `modded/StanceManager.cs` | MODIFICAR | `Update`: `isStationary` na condição de força-Default (ajuste 2); `SnapToNeutral()` após o `SetStance(Default)` do sprint (ajuste 3). |
+| `modded/Patches/ApplyComplexRotationPatch.cs` | MODIFICAR | Novo `public static void SnapToNeutral()` (zera offsets + velocidades do spring). |
 
 ## 5. Stubs de código
 

@@ -16,10 +16,10 @@ Por que coexiste com lean/shoulder de graça: o offset é multiplicado **por cim
 
 | Alvo | Arquivo | Papel |
 |---|---|---|
-| `ProceduralWeaponAnimation.ApplyComplexRotation(float)` | [ApplyComplexRotationPatch.cs:134](../../modded-beta/Patches/ApplyComplexRotationPatch.cs#L134) | Postfix; ponto de aplicação (local **e** observed) |
-| `HandsContainer.WeaponRootAnim.SetPositionAndRotation` | [ApplyComplexRotationPatch.cs:280](../../modded-beta/Patches/ApplyComplexRotationPatch.cs#L280) | Transform da arma+braço (local) — replicar no observed |
+| `ProceduralWeaponAnimation.ApplyComplexRotation(float)` | [ApplyComplexRotationPatch.cs:134](../../modded/Patches/ApplyComplexRotationPatch.cs#L134) | Postfix; ponto de aplicação (local **e** observed) |
+| `HandsContainer.WeaponRootAnim.SetPositionAndRotation` | [ApplyComplexRotationPatch.cs:280](../../modded/Patches/ApplyComplexRotationPatch.cs#L280) | Transform da arma+braço (local) — replicar no observed |
 | `ObservedPlayer` cópia `WeaponRootAnim`→`PlayerBones.Offset/DeltaRotation` → `ShiftWeaponRoot` | [ObservedPlayer.cs:1851-1853, 1876](../../../../references/fika-plugin/Fika.Core/Main/Players/ObservedPlayer.cs#L1851) | Confirma que o offset no `WeaponRootAnim` é renderizado no remoto |
-| `FikaSyncManager` / `StanceSyncPacket` | [Networking/](../../modded-beta/Networking/) | Já enviam `ProfileId`+`Stance`+`IsAiming` por player (mantidos) |
+| `FikaSyncManager` / `StanceSyncPacket` | [Networking/](../../modded/Networking/) | Já enviam `ProfileId`+`Stance`+`IsAiming` por player (mantidos) |
 
 ## 3. Novas propriedades F12
 
@@ -29,9 +29,9 @@ Nenhuma. (Reusa os `Stance X Hands Pitch/Yaw/Roll` e os offsets de posição já
 
 | Arquivo | Ação | Resumo |
 |---|---|---|
-| `modded-beta/Networking/ObservedStanceAnimator.cs` | MODIFICAR | Vira **state-holder por player**: guarda stance/isAiming + spring (euler/pos/velocities). Remove `LateUpdate`/Spine3. Novo `ApplyTo(pwa, weaponPosition, weapRotation, dt)` que avança o spring e escreve o `WeaponRootAnim`. |
-| `modded-beta/Patches/ApplyComplexRotationPatch.cs` | MODIFICAR | No gate, se `!IsYourPlayer`: buscar o `ObservedStanceAnimator` do player e chamar `ApplyTo(...)`, depois `return` (sem rodar kick/holdbreath). Expor `SpringLerpAngle`/`SpringLerp` (reuso). |
-| `modded-beta/StanceManager.cs` | MODIFICAR | Overloads `GetTargetRotation(Stance, bool)` e `GetTargetPosition(Stance, bool)` (recebem o stance por parâmetro; os atuais delegam com `CurrentStance`). |
+| `modded/Networking/ObservedStanceAnimator.cs` | MODIFICAR | Vira **state-holder por player**: guarda stance/isAiming + spring (euler/pos/velocities). Remove `LateUpdate`/Spine3. Novo `ApplyTo(pwa, weaponPosition, weapRotation, dt)` que avança o spring e escreve o `WeaponRootAnim`. |
+| `modded/Patches/ApplyComplexRotationPatch.cs` | MODIFICAR | No gate, se `!IsYourPlayer`: buscar o `ObservedStanceAnimator` do player e chamar `ApplyTo(...)`, depois `return` (sem rodar kick/holdbreath). Expor `SpringLerpAngle`/`SpringLerp` (reuso). |
+| `modded/StanceManager.cs` | MODIFICAR | Overloads `GetTargetRotation(Stance, bool)` e `GetTargetPosition(Stance, bool)` (recebem o stance por parâmetro; os atuais delegam com `CurrentStance`). |
 
 > _PA-01-03: a edição em `RaidLifecyclePatches` foi removida — o estado vive no component `ObservedStanceAnimator` (destruído no despawn), sem dict estático a limpar._
 

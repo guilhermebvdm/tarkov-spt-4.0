@@ -6,7 +6,7 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados quan
 
 ## Estado atual (snapshot ao fim da última sessão)
 
-- **Linha ativa = fork `modded-beta`** (do dev rocket, trazido no pull `e8f706b`): refactor das animações de stance (Realism como ref) + features novas (hold-breath/oxigênio, FIKA stance sync, FOV). Buildado via **`dotnet build` direto** no `CameraRotationMod.csproj` — o `compile-mod.sh` só conhece `modded/` (ver P-5.4).
+- **Linha ativa = fork `modded`** (do dev rocket, trazido no pull `e8f706b`): refactor das animações de stance (Realism como ref) + features novas (hold-breath/oxigênio, FIKA stance sync, FOV). Buildado via **`dotnet build` direto** no `CameraRotationMod.csproj` — o `compile-mod.sh` só conhece `modded/` (ver P-5.4).
 - **Bugs do refactor corrigidos e validados in-game (2026-06-20):** câmera invertida (gimbal flip nos patches de rotação) e som de hold-breath (não tocava). Ver Sessão 5.
 - **DLL instalada em `D:/SPT/BepInEx/plugins/RealisticMobility/`** (subfolder, ~139 KB) — não mais flat. Assets de áudio agora são `.ogg` (mono) na raiz dessa pasta.
 - **Itens antigos (`modded/`):** 001/002/003 🟢; 004/008/009 com `06-fix-01`; 010 🟡 — pushados (HEAD `57e54c4`), mas **004/008/009/010 ainda não validados in-game** (ver P-4.1).
@@ -21,7 +21,7 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados quan
 - **[P-5.1] (aberta 2026-06-21) 🟡 Commit pendente:** fix câmera (`ApplyComplex/SimpleRotationPatch` + `code-review-camera-flip-fix-01.md`) e fix áudio (`HoldBreathPatch`, `RaidLifecyclePatches`, `Plugin.cs`, 3 `.ogg`, remoção dos 3 `.wav`, DLL versionada). PNGs `mountingleft/right` (swap do usuário) ficam de fora.
 - **[P-5.2] (aberta 2026-06-21) 🔴 Item 2 — mount automático + ícones nunca funcionou** (passivo/ativo em superfícies). Próximo alvo via `/g-diagnose`; checar `[enable] FAIL` no log (suspeita: patch `method_11` não resolve em 0.16).
 - **[P-5.3] (aberta 2026-06-21) 🟡 Refatoração pós-features:** unificar interpolação em `SpringMath.SpringDamp` (CR-01-02), matar reflection por frame nos patches de rotação, reset de estado estático, `try/catch` nos Postfix, audit F12 × PROPRIEDADES.md. Ver `code-review-camera-flip-fix-01.md`.
-- **[P-5.4] (aberta 2026-06-21) 🟡 Build do `modded-beta` fora do pipeline:** `compile-mod.sh` hardcoded em `modded/`; `csproj` com HintPaths de Fika a 2 níveis (contornado via `mods/references` temporário); decidir destino do fork (promover p/ `modded/` ou ensinar o script). (CR-01-06)
+- **[P-5.4] (aberta 2026-06-21) 🟡 Build do `modded` fora do pipeline:** `compile-mod.sh` hardcoded em `modded/`; `csproj` com HintPaths de Fika a 2 níveis (contornado via `mods/references` temporário); decidir destino do fork (promover p/ `modded/` ou ensinar o script). (CR-01-06)
 - **[P-5.5] (aberta 2026-06-21) 🟢 Logs de diagnóstico temporários** (`v3-raidload`, `[STANCE-CLAMP]`) — limpar na refatoração (P-5.3).
 
 ## 2026-05-09 ~16:00 (GMT-3) — Sessão 1: item 002 backlog (criação + reviews)
@@ -157,13 +157,13 @@ Continuação direta da entrada de madrugada deste dia (Sessão 4a). Delta regis
 - Complementa a Sessão 4a (madrugada) deste dia — implementação + Fase 0 + F12.
 - Findings detalhados nos `backlog/{004,008,010}-…/…-06-fix-01.md`.
 
-## 2026-06-21 00:08 (GMT-3) — Sessão 5: fix câmera (gimbal flip) + fix áudio hold-breath (fork modded-beta)
+## 2026-06-21 00:08 (GMT-3) — Sessão 5: fix câmera (gimbal flip) + fix áudio hold-breath (fork modded)
 
-**Tema central:** corrigir dois bugs críticos do refactor do dev rocket (pull `e8f706b`) na linha `modded-beta`: câmera invertida ao aplicar stance e som de hold-breath que não tocava. + `/code-review` do fix de câmera.
+**Tema central:** corrigir dois bugs críticos do refactor do dev rocket (pull `e8f706b`) na linha `modded`: câmera invertida ao aplicar stance e som de hold-breath que não tocava. + `/code-review` do fix de câmera.
 
 **Decisões-chave:**
-- **Câmera (gimbal flip):** `ApplyComplexRotationPatch`/`ApplySimpleRotationPatch` trocaram o `Quaternion.Slerp` do RealismMod por uma **mola Euler inline** que diverge/overshoota conforme o frame-timing e, operando em ângulos de Euler, cruza o gimbal (~180°) → câmera de cabeça pra baixo, só em alguns players (mesma DLL/config). Fix: **sub-stepping** (integração estável independente do `dt`) + **batente angular ±60°** (alvo legítimo é ±45°) + clamp de velocidade, idêntico nos dois patches. Preserva a "quicada". Validado in-game. Ref: `modded-beta/Patches/ApplyComplexRotationPatch.cs`, `ApplySimpleRotationPatch.cs`.
-- **Áudio hold-breath — dois bugs independentes:** (A) `.wav` em IEEE float 32-bit lidos pelo `WavUtility` como PCM 16-bit → ruído saturado; (B) `AudioClip` carregados no boot (cena de menu) e **descarregados na transição p/ o jogo** → `length 0` no play. Fix: assets p/ **OGG Vorbis mono** (heartbeat 23 MB→467 KB) + **decodificador nativo** `UnityWebRequestMultimedia`+`DownloadHandlerAudioClip` (`streamAudio=false` + cópia standalone) + **carregar em `GameWorld.OnGameStarted`** (não no boot). Validado in-game. Ref: `modded-beta/Patches/HoldBreathPatch.cs`, `RaidLifecyclePatches.cs`, `Plugin.cs`.
+- **Câmera (gimbal flip):** `ApplyComplexRotationPatch`/`ApplySimpleRotationPatch` trocaram o `Quaternion.Slerp` do RealismMod por uma **mola Euler inline** que diverge/overshoota conforme o frame-timing e, operando em ângulos de Euler, cruza o gimbal (~180°) → câmera de cabeça pra baixo, só em alguns players (mesma DLL/config). Fix: **sub-stepping** (integração estável independente do `dt`) + **batente angular ±60°** (alvo legítimo é ±45°) + clamp de velocidade, idêntico nos dois patches. Preserva a "quicada". Validado in-game. Ref: `modded/Patches/ApplyComplexRotationPatch.cs`, `ApplySimpleRotationPatch.cs`.
+- **Áudio hold-breath — dois bugs independentes:** (A) `.wav` em IEEE float 32-bit lidos pelo `WavUtility` como PCM 16-bit → ruído saturado; (B) `AudioClip` carregados no boot (cena de menu) e **descarregados na transição p/ o jogo** → `length 0` no play. Fix: assets p/ **OGG Vorbis mono** (heartbeat 23 MB→467 KB) + **decodificador nativo** `UnityWebRequestMultimedia`+`DownloadHandlerAudioClip` (`streamAudio=false` + cópia standalone) + **carregar em `GameWorld.OnGameStarted`** (não no boot). Validado in-game. Ref: `modded/Patches/HoldBreathPatch.cs`, `RaidLifecyclePatches.cs`, `Plugin.cs`.
 - **Heartbeat órfão:** `HoldBreathPatch.OnRaidEnd()` para o loop e zera `IsHoldingBreath` — evita o batimento tocando no menu após morte/extração segurando a respiração.
 - **Sequenciamento acordado:** corrigir features quebradas (som → mount) **antes** da refatoração grande. "Refatore código que funciona, não quebrado."
 
@@ -176,7 +176,7 @@ Continuação direta da entrada de madrugada deste dia (Sessão 4a). Delta regis
 1. `git pull` (`e8f706b`) — refactor de animação + hold-breath/oxigênio/FIKA sync do rocket.
 2. Diagnóstico câmera — comparação com RealismMod (Slerp vs mola Euler) e decompilado (`GClass909-912`; `ProceduralWeaponAnimation.SetStrategy(pointOfView)`: 1ª/3ª pessoa = mesma PWA trocando estratégia).
 3. Fix câmera (sub-step + clamp); `dotnet build`; instalado em `RealisticMobility/`; validado in-game.
-4. `/code-review` do fix → `modded-beta/code-review-camera-flip-fix-01.md` (8 achados CR-01-01..08, 0 🔴; hotfix fora do pipeline SDD).
+4. `/code-review` do fix → `modded/code-review-camera-flip-fix-01.md` (8 achados CR-01-01..08, 0 🔴; hotfix fora do pipeline SDD).
 5. `/g-diagnose` áudio — causa de formato provada offline (differential loop PCM16 vs float32).
 6. Conversão OGG (ffmpeg) + reescrita do loader; vários ciclos até achar a 2ª causa (carregar no game start).
 7. Fix final áudio + heartbeat órfão; validado in-game.
@@ -185,9 +185,9 @@ Continuação direta da entrada de madrugada deste dia (Sessão 4a). Delta regis
 **Pendências abertas nesta sessão:** P-5.1..P-5.5 (ver topo).
 
 **Cross-refs:**
-- Code-review: `modded-beta/code-review-camera-flip-fix-01.md`.
+- Code-review: `modded/code-review-camera-flip-fix-01.md`.
 - Memória: `reference_spt_mod_audio_loading` (pipeline de áudio), `feedback_server_launcher_sync_builds` (reversão de build pelo launcher).
-- **Revisão de fato anterior:** as Sessões 1–4 tratavam o trabalho em `modded/`; a linha ativa agora é o fork `modded-beta` (do rocket), buildado fora do `compile-mod.sh`. Histórico preservado.
+- **Revisão de fato anterior:** as Sessões 1–4 tratavam o trabalho em `modded/`; a linha ativa agora é o fork `modded` (do rocket), buildado fora do `compile-mod.sh`. Histórico preservado.
 
 ## Arquivos-chave do mod (referência rápida)
 

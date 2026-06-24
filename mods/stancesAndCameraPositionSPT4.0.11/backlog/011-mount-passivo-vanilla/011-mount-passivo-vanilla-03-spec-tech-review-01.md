@@ -95,7 +95,7 @@ Sem bloqueadores — a spec é implementável. Os pontos são de **corretude/val
 
 **Por que importa:** o `/code-mod` precisa do detalhe para o ícone direcional + pulsar de alpha.
 
-**Sugestão:** recuperar a implementação do `MountingUI`/`BattleUIScreenPatch` removidos (em `git show ebc2312^:mods/.../modded-beta/MountingUI.cs`) como base, adaptando: anexar ao gameObject do plugin, ler `PassiveMountState.Direction`, e remover qualquer resíduo de mount ativo/`MountState`.
+**Sugestão:** recuperar a implementação do `MountingUI`/`BattleUIScreenPatch` removidos (em `git show ebc2312^:mods/.../modded/MountingUI.cs`) como base, adaptando: anexar ao gameObject do plugin, ler `PassiveMountState.Direction`, e remover qualquer resíduo de mount ativo/`MountState`.
 
 **Decisão:** `[x]` Aceitar sugestão (reusar MountingUI antigo do git como base)
 

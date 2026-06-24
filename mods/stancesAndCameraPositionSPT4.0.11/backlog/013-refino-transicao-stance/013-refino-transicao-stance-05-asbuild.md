@@ -12,9 +12,9 @@
 
 | Ação | Arquivo | Resumo |
 |---|---|---|
-| MODIFICADO | `modded-beta/StaminaController.cs` | `Tick` permite stationary no gate; `Resolve` → `ActiveStance0` quando `IsStationaryWeaponInHands` (arma montada = Mount Active). |
-| MODIFICADO | `modded-beta/StanceManager.cs` | `Update`: detecta `isStationary` e o inclui na condição que força Stance 0; bloco de sprint chama `SnapToNeutral()` após `SetStance(Default)`. |
-| MODIFICADO | `modded-beta/Patches/ApplyComplexRotationPatch.cs` | Novo `SnapToNeutral()` — zera offsets + velocidades do spring (snap instantâneo, sem animar pela Stance 0). |
+| MODIFICADO | `modded/StaminaController.cs` | `Tick` permite stationary no gate; `Resolve` → `ActiveStance0` quando `IsStationaryWeaponInHands` (arma montada = Mount Active). |
+| MODIFICADO | `modded/StanceManager.cs` | `Update`: detecta `isStationary` e o inclui na condição que força Stance 0; bloco de sprint chama `SnapToNeutral()` após `SetStance(Default)`. |
+| MODIFICADO | `modded/Patches/ApplyComplexRotationPatch.cs` | Novo `SnapToNeutral()` — zera offsets + velocidades do spring (snap instantâneo, sem animar pela Stance 0). |
 
 ## Ajustes entregues
 

@@ -26,7 +26,7 @@ Ambos confirmaram a implementação **correta e coerente com a spec**: gate `!Is
 
 **`_stance` recebido da rede não é validado antes de `(Stance)_stance`**
 
-**Local:** [`ObservedStanceAnimator.cs:23-26, 39`](../../modded-beta/Networking/ObservedStanceAnimator.cs)
+**Local:** [`ObservedStanceAnimator.cs:23-26, 39`](../../modded/Networking/ObservedStanceAnimator.cs)
 
 **Problema:** `SetStance(int stance, …)` grava `_stance` direto do `StanceSyncPacket.Stance` (dado de rede). O cast `(Stance)_stance` não valida bounds — um valor fora de `0..3` (cliente bugado/versão divergente) vira um enum inválido. O `switch` em `GetTargetRotation` tem `_ => Vector3.zero` (não crasha), mas `inStance = _stance > 0` ficaria `true` com offset zero (estado incoerente), e input de rede não-confiável deve ser saneado na borda.
 
@@ -49,7 +49,7 @@ public void SetStance(int stance, bool isAiming)
 
 **`player.gameObject.GetComponent<ObservedStanceAnimator>()` a cada frame por observed**
 
-**Local:** [`ApplyComplexRotationPatch.cs:162`](../../modded-beta/Patches/ApplyComplexRotationPatch.cs)
+**Local:** [`ApplyComplexRotationPatch.cs:162`](../../modded/Patches/ApplyComplexRotationPatch.cs)
 
 **Problema:** `GetComponent` por frame por observed player. Custo O(1) (cache interno do Unity), null-safe via `?.`. Trivial, mas poderia ser cacheado (dict por ProfileId no `FikaSyncManager`).
 
@@ -65,7 +65,7 @@ public void SetStance(int stance, bool isAiming)
 
 **`bool inStance = _stance > 0 && !(_observedPlayer != null && _observedPlayer.IsInPronePose)`**
 
-**Local:** [`ObservedStanceAnimator.cs:38`](../../modded-beta/Networking/ObservedStanceAnimator.cs)
+**Local:** [`ObservedStanceAnimator.cs:38`](../../modded/Networking/ObservedStanceAnimator.cs)
 
 **Problema:** a forma é **já null-safe** (short-circuit + o operador `!=` do Unity trata objeto destruído como null). Um revisor sugeriu a forma `_stance > 0 && (_observedPlayer == null || !_observedPlayer.IsInPronePose)` — **logicamente equivalente**, só mais legível.
 

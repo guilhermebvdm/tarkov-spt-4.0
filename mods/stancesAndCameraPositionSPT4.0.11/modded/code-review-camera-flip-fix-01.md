@@ -1,9 +1,9 @@
 # Camera Flip (gimbal) Fix — Code Review 01
 
-**Mod:** stancesAndCameraPositionSPT4.0.11 (`modded-beta`)
+**Mod:** stancesAndCameraPositionSPT4.0.11 (`modded`)
 **Escopo revisado:** fix do bug "câmera de cabeça pra baixo ao aplicar stance" em [ApplyComplexRotationPatch.cs](Patches/ApplyComplexRotationPatch.cs) e [ApplySimpleRotationPatch.cs](Patches/ApplySimpleRotationPatch.cs)
 **Data:** 2026-06-20
-**Natureza:** hotfix fora do pipeline SDD (não há `01-spec`/`02-spec-tech`/`05-asbuild`; critérios de aceite derivados do bug reportado pelo usuário). Sandbox real é `modded-beta/` (linha paralela do dev rocket), não `modded/`.
+**Natureza:** hotfix fora do pipeline SDD (não há `01-spec`/`02-spec-tech`/`05-asbuild`; critérios de aceite derivados do bug reportado pelo usuário). Sandbox real é `modded/` (linha paralela do dev rocket), não `modded/`.
 
 > Análise crítica usando `spt-mod-best-practices`, `csharp-mod-best-practices` e `repo-workflow-best-practices`. Cada achado tem ID `CR-01-MM` permanente.
 
@@ -32,7 +32,7 @@
 | CR-01-03 | D/B | 🟡 | Estado estático dos springs não reseta entre raids | Pendente |
 | CR-01-04 | C | 🟡 | Falta o guard `CurrentState.Name == 21` que o Realism tem | Pendente |
 | CR-01-05 | A/B | 🟡 | Postfix dos 2 patches sem `try/catch` (hot path) | Pendente |
-| CR-01-06 | D | 🟡 | Fix fora do pipeline (`modded-beta`) + DLL versionada divergente + build não-padrão | Pendente |
+| CR-01-06 | D | 🟡 | Fix fora do pipeline (`modded`) + DLL versionada divergente + build não-padrão | Pendente |
 | CR-01-07 | F | 🟢 | `ClampMagnitude` (sqrt) por sub-step no hot path | Pendente |
 | CR-01-08 | E | 🟢 | Três implementações de interpolação coexistem sem nota | Pendente |
 
@@ -142,15 +142,15 @@
 
 ### CR-01-06 · D — Sandbox / processo de build · 🟡 Médio
 
-**Fix fora do pipeline (`modded-beta`), DLL versionada estava divergente, build não-padrão**
+**Fix fora do pipeline (`modded`), DLL versionada estava divergente, build não-padrão**
 
-**Local:** `mods/stancesAndCameraPositionSPT4.0.11/modded-beta/` · `CameraRotationMod.csproj`
+**Local:** `mods/stancesAndCameraPositionSPT4.0.11/modded/` · `CameraRotationMod.csproj`
 
-**Problema:** (1) O trabalho vive em `modded-beta/`, que o pipeline SDD e o `compile-mod.sh` não reconhecem (o script é hardcoded em `modded/`). (2) A DLL versionada `shwngFpsCameraStances4.dll` estava em **47 KB** enquanto o código gera **136 KB** — o build commitado estava desatualizado vs. o fonte (sincronizado nesta sessão). (3) O `.csproj` referencia Fika por `..\..\references\...` (2 níveis → `mods/references/`, inexistente) e não declara LiteNetLib — só compilou após popular `References/` e criar `mods/references/` temporário.
+**Problema:** (1) O trabalho vive em `modded/`, que o pipeline SDD e o `compile-mod.sh` não reconhecem (o script é hardcoded em `modded/`). (2) A DLL versionada `shwngFpsCameraStances4.dll` estava em **47 KB** enquanto o código gera **136 KB** — o build commitado estava desatualizado vs. o fonte (sincronizado nesta sessão). (3) O `.csproj` referencia Fika por `..\..\references\...` (2 níveis → `mods/references/`, inexistente) e não declara LiteNetLib — só compilou após popular `References/` e criar `mods/references/` temporário.
 
 **Por que importa:** Drift entre o que está versionado e o que roda; outro dev que clonar não consegue buildar via fluxo do repo. Risco de "passa aqui, quebra lá" — exatamente o sintoma original do bug.
 
-**Sugestão:** Decidir o destino do `modded-beta` (promover p/ `modded/` ou ensinar o `compile-mod.sh` a aceitar `--sandbox modded-beta`). Corrigir os HintPaths do `.csproj` (3 níveis até `references/` da raiz) e padronizar Fika via `References\Fika.Core.dll` como o `.csproj` antigo. Confirmar se a DLL deve mesmo ser versionada (as outras DLLs são gitignored).
+**Sugestão:** Decidir o destino do `modded` (promover p/ `modded/` ou ensinar o `compile-mod.sh` a aceitar `--sandbox modded`). Corrigir os HintPaths do `.csproj` (3 níveis até `references/` da raiz) e padronizar Fika via `References\Fika.Core.dll` como o `.csproj` antigo. Confirmar se a DLL deve mesmo ser versionada (as outras DLLs são gitignored).
 
 **Decisão:**
 - `[ ]` Pendente

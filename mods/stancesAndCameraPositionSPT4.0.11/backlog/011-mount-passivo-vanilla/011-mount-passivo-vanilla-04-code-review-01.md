@@ -26,7 +26,7 @@ Memória: snapshot Sessão 5 · pendência P-5.2 (este item). Sem 🔴 — o ite
 
 **Buffs de recoil/sway aplicam a qualquer player; o guard `IsBracing` é global (do local)**
 
-**Local:** [`PassiveMountBuffPatches.cs`](../../modded-beta/Patches/PassiveMountBuffPatches.cs)
+**Local:** [`PassiveMountBuffPatches.cs`](../../modded/Patches/PassiveMountBuffPatches.cs)
 
 **Problema:** `PassiveSwayPatch` faz Postfix em `ProceduralWeaponAnimation.ProcessEffectors`, que roda para **todas** as PWA processadas (peers/bots inclusos). O único guard é `PassiveMountState.IsBracing` — estado **global** que reflete o jogador local. Logo, enquanto o local está apoiado, o `Breath.Intensity` de um **peer** sendo processado no mesmo frame também é multiplicado:
 ```csharp
@@ -54,7 +54,7 @@ e, no `PassiveRecoilPatch`, confirmar o escopo; se rodar para peers, derivar o p
 
 **`PassiveRecoilPatch`/`PassiveSwayPatch` sem `try/catch`**
 
-**Local:** [`PassiveMountBuffPatches.cs`](../../modded-beta/Patches/PassiveMountBuffPatches.cs)
+**Local:** [`PassiveMountBuffPatches.cs`](../../modded/Patches/PassiveMountBuffPatches.cs)
 
 **Problema:** os dois patches rodam no hot path de animação/recoil e não envolvem o corpo em `try/catch` (o `PassiveMountDetectPatch` envolve). Uma exceção inesperada (ex.: `Breath`/`MainPlayer` em estado atípico) propagaria do patch.
 
@@ -73,7 +73,7 @@ e, no `PassiveRecoilPatch`, confirmar o escopo; se rodar para peers, derivar o p
 
 **`_playerField.GetValue(__instance)` por frame na detecção**
 
-**Local:** [`PassiveMountDetectPatch.cs`](../../modded-beta/Patches/PassiveMountDetectPatch.cs)
+**Local:** [`PassiveMountDetectPatch.cs`](../../modded/Patches/PassiveMountDetectPatch.cs)
 
 **Problema:** o Postfix de `method_11` resolve o `_player` por `FieldInfo.GetValue` a cada chamada (com boxing). `FieldInfo` já é cacheado, mas a chamada roda por frame com a arma em mãos.
 
