@@ -12,7 +12,7 @@ namespace TarkovIRL;
 
 public class StaminaRegenRatePatch : ModulePatch
 {
-  protected virtual MethodBase GetTargetMethod()
+  protected override MethodBase GetTargetMethod()
   {
     return (MethodBase) typeof (PlayerPhysicalClass).GetMethod("method_21", BindingFlags.Instance | BindingFlags.Public);
   }

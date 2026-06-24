@@ -25,7 +25,7 @@ internal class HeadRotController
     Vector3 vector3 = headRotThisFrame;
     HeadRotController._headRotLerpTarget = !ThrowController.IsThrowing ? new Vector3(0.0f, 0.0f, PlayerMotionController.LeanNormal * PrimeMover.LeanCounterRotateMod.Value) : ThrowController.GetThrowOffset;
     Vector3 reloadHeadOffset = AugmentedReloadController.GetAugmentedReloadHeadOffset();
-    HeadRotController._headRotLerpTarget = Vector3.op_Addition(HeadRotController._headRotLerpTarget, reloadHeadOffset);
+    HeadRotController._headRotLerpTarget = (HeadRotController._headRotLerpTarget + reloadHeadOffset);
     if (PrimeMover.IsHeadTiltADS.Value)
     {
       float Y;
@@ -34,6 +34,6 @@ internal class HeadRotController
       HeadRotController._headRotLerpTarget.y += Y;
       HeadRotController._headRotLerpTarget.z += Z;
     }
-    return Vector3.op_Addition(vector3, HeadRotController._headRotLerp);
+    return (vector3 + HeadRotController._headRotLerp);
   }
 }

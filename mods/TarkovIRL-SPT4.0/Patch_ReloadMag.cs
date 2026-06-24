@@ -16,7 +16,7 @@ public class Patch_ReloadMag : ModulePatch
 {
   private static FieldInfo playerField;
 
-  protected virtual MethodBase GetTargetMethod()
+  protected override MethodBase GetTargetMethod()
   {
     Patch_ReloadMag.playerField = AccessTools.Field(typeof (Player.FirearmController), "_player");
     return (MethodBase) typeof (Player.FirearmController).GetMethod("ReloadMag", BindingFlags.Instance | BindingFlags.Public);

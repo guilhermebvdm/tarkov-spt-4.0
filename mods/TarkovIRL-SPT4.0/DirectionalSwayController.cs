@@ -88,9 +88,7 @@ internal class DirectionalSwayController
       position = Vector3.zero;
       position.x = DirectionalSwayController._lateralPosLerp;
       position.z = DirectionalSwayController._projectedPosLerp;
-      rotation = Quaternion.identity;
-      rotation.z = DirectionalSwayController._lateralRotLerp;
-      rotation.x = DirectionalSwayController._verticalRotLerp;
+      rotation = Quaternion.Euler(DirectionalSwayController._verticalRotLerp, 0f, DirectionalSwayController._lateralRotLerp);
     }
   }
 }

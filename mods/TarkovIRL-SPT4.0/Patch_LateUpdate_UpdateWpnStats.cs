@@ -16,7 +16,7 @@ public class Patch_LateUpdate_UpdateWpnStats : ModulePatch
 {
   private static int _weaponHashLastFrame;
 
-  protected virtual MethodBase GetTargetMethod()
+  protected override MethodBase GetTargetMethod()
   {
     return (MethodBase) typeof (Player).GetMethod("LateUpdate", BindingFlags.Instance | BindingFlags.Public);
   }
@@ -25,7 +25,7 @@ public class Patch_LateUpdate_UpdateWpnStats : ModulePatch
   private static void PatchPostfix(Player __instance)
   {
     Player.FirearmController handsController = __instance.HandsController as Player.FirearmController;
-    if (Object.op_Equality((Object) handsController, (Object) null) || !__instance.IsYourPlayer)
+    if (handsController == null || !__instance.IsYourPlayer)
       return;
     PlayerMotionController.UpdateMovementInformation(__instance);
     AnimStateController.SetCurrentWeaponAnimState(__instance.HandsAnimator.Animator.GetCurrentAnimatorStateInfo(1).nameHash);

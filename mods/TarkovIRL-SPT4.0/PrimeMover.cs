@@ -167,7 +167,7 @@ public class PrimeMover : BaseUnityPlugin
 
   private void Awake()
   {
-    if (Object.op_Equality((Object) PrimeMover.Instance, (Object) null))
+    if (PrimeMover.Instance == null)
       PrimeMover.Instance = this;
     this.Initialize();
     this.LoadConfigValues();
@@ -244,7 +244,7 @@ public class PrimeMover : BaseUnityPlugin
       new Keyframe(0.6299997f, -0.988526f),
       new Keyframe(0.6399997f, -0.9896744f),
       new Keyframe(0.6499997f, -0.9905687f),
-      new Keyframe(0.6599997f, -254f * (float) Math.PI / 805f),
+      new Keyframe(0.6599997f, -254f * (float) (float)Math.PI / 805f),
       new Keyframe(0.6699997f, -0.9918006f),
       new Keyframe(0.6799996f, -0.992241f),
       new Keyframe(0.6899996f, -0.9926327f),
@@ -1366,7 +1366,7 @@ public class PrimeMover : BaseUnityPlugin
       new Keyframe(0.4099999f, 0.099107f),
       new Keyframe(0.4199999f, 0.09855059f),
       new Keyframe(0.4299999f, 0.09769553f),
-      new Keyframe(0.4399998f, 28f * (float) Math.PI / 911f),
+      new Keyframe(0.4399998f, 28f * (float) (float)Math.PI / 911f),
       new Keyframe(0.4499998f, 0.09515533f),
       new Keyframe(0.4599998f, 0.0935031f),
       new Keyframe(0.4699998f, 0.09161809f),
@@ -2309,7 +2309,7 @@ public class PrimeMover : BaseUnityPlugin
       new Keyframe(8.800106f, 6.455522f),
       new Keyframe(8.810106f, 6.456147f),
       new Keyframe(8.820107f, 6.456765f),
-      new Keyframe(8.830107f, 7932f / (391f * Math.PI)),
+      new Keyframe(8.830107f, 7932f / (391f * (float)Math.PI)),
       new Keyframe(8.840107f, 6.457979f),
       new Keyframe(8.850107f, 6.458575f),
       new Keyframe(8.860107f, 6.459165f),
@@ -2579,7 +2579,7 @@ public class PrimeMover : BaseUnityPlugin
       new Keyframe(0.3599999f, 0.3046415f),
       new Keyframe(0.3699999f, 0.2765021f),
       new Keyframe(0.3799999f, 0.2515396f),
-      new Keyframe(0.3899999f, 67f * (float) Math.PI / 917f),
+      new Keyframe(0.3899999f, 67f * (float) (float)Math.PI / 917f),
       new Keyframe(0.3999999f, 0.2102829f),
       new Keyframe(0.4099999f, 0.1935575f),
       new Keyframe(0.4199999f, 0.1791467f),
@@ -3072,7 +3072,7 @@ public class PrimeMover : BaseUnityPlugin
 
   private void DriveLerps()
   {
-    if ((double) GameWorldController.TimeInRaid <= 0.0)
+    if (Comfort.Common.Singleton<EFT.GameWorld>.Instance == null)
       return;
     TIRLUtils.Update(this.DeltaTime);
     EfficiencyController.UpdateEfficiencyLerp(this.DeltaTime);
@@ -3081,7 +3081,7 @@ public class PrimeMover : BaseUnityPlugin
 
   private void FixedUpdate()
   {
-    if ((double) GameWorldController.TimeInRaid <= 0.0)
+    if (Comfort.Common.Singleton<EFT.GameWorld>.Instance == null)
       return;
     this.FixedDeltaTime += UnityEngine.Time.unscaledDeltaTime - this.FixedDeltaTime;
     if ((double) this.FixedDeltaTime > (double) this.FTDThresh)
@@ -3146,7 +3146,7 @@ public class PrimeMover : BaseUnityPlugin
 
   private void OnGUI()
   {
-    if ((double) GameWorldController.TimeInRaid <= 0.0 || !PrimeMover.IsEfficiencyIndicator.Value)
+    if (Comfort.Common.Singleton<EFT.GameWorld>.Instance == null || !PrimeMover.IsEfficiencyIndicator.Value)
       return;
     float num1 = 40f;
     this.efficiencyIndicatorStyle.normal.textColor = Color.grey;

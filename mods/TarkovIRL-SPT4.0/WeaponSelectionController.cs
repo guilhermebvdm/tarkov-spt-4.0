@@ -118,7 +118,7 @@ internal class WeaponSelectionController
 
   public static void Process(ECommand command, Player player)
   {
-    if (Object.op_Equality((Object) player, (Object) null))
+    if (player == null)
       return;
     WeaponSelectionController._player = player;
     if (AnimStateController.WeaponState == AnimStateController.EWeaponState.UNKNOWN_STATE)
@@ -135,13 +135,13 @@ internal class WeaponSelectionController
     }
     if (containedItem1 != null && weaponOrKnifeItem.Equals((object) containedItem1))
     {
-      if (command == 40)
+      if ((int)command == 40)
         return;
       WeaponSelectionController._lastSelectedWeapon = WeaponSelectionController.EWeaponSelection.SLING;
     }
     if (containedItem2 != null && weaponOrKnifeItem.Equals((object) containedItem2))
     {
-      if (command == 41)
+      if ((int)command == 41)
         return;
       WeaponSelectionController._lastSelectedWeapon = WeaponSelectionController.EWeaponSelection.SHOULDER;
     }
@@ -149,37 +149,37 @@ internal class WeaponSelectionController
     {
       if (weaponOrKnifeItem.Equals((object) containedItem3))
       {
-        if (command == 42)
+        if ((int)command == 42)
           return;
         WeaponSelectionController._lastSelectedWeapon = WeaponSelectionController.EWeaponSelection.PISTOL;
       }
       if (weaponOrKnifeItem.Equals((object) containedItem3))
       {
-        if (command == 43 && containedItem1 == null)
+        if ((int)command == 43 && containedItem1 == null)
           return;
         WeaponSelectionController._lastSelectedWeapon = WeaponSelectionController.EWeaponSelection.PISTOL;
       }
     }
-    if (command == 40 && containedItem1 == null || command == 41 && containedItem2 == null || command == 42 && containedItem3 == null)
+    if ((int)command == 40 && containedItem1 == null || (int)command == 41 && containedItem2 == null || (int)command == 42 && containedItem3 == null)
       return;
     WeaponSelectionController._transitionFirstFrame = true;
-    if (command == 40 && WeaponSelectionController._lastSelectedWeapon == WeaponSelectionController.EWeaponSelection.SHOULDER)
+    if ((int)command == 40 && WeaponSelectionController._lastSelectedWeapon == WeaponSelectionController.EWeaponSelection.SHOULDER)
       WeaponSelectionController.ProcessShoulderToSling();
-    if (command == 41 && WeaponSelectionController._lastSelectedWeapon == WeaponSelectionController.EWeaponSelection.SLING)
+    if ((int)command == 41 && WeaponSelectionController._lastSelectedWeapon == WeaponSelectionController.EWeaponSelection.SLING)
       WeaponSelectionController.ProcessSlingToShoulder();
-    if (command == 42 && WeaponSelectionController._lastSelectedWeapon == WeaponSelectionController.EWeaponSelection.SLING)
+    if ((int)command == 42 && WeaponSelectionController._lastSelectedWeapon == WeaponSelectionController.EWeaponSelection.SLING)
       WeaponSelectionController.ProcessSlingToPistol();
-    if (command == 43 && WeaponSelectionController._lastSelectedWeapon == WeaponSelectionController.EWeaponSelection.SLING)
+    if ((int)command == 43 && WeaponSelectionController._lastSelectedWeapon == WeaponSelectionController.EWeaponSelection.SLING)
       WeaponSelectionController.ProcessQuickSlingToPistol();
-    if (command == 42 && WeaponSelectionController._lastSelectedWeapon == WeaponSelectionController.EWeaponSelection.SHOULDER)
+    if ((int)command == 42 && WeaponSelectionController._lastSelectedWeapon == WeaponSelectionController.EWeaponSelection.SHOULDER)
       WeaponSelectionController.ProcessShoulderToPistol();
-    if (command == 43 && WeaponSelectionController._lastSelectedWeapon == WeaponSelectionController.EWeaponSelection.SHOULDER)
+    if ((int)command == 43 && WeaponSelectionController._lastSelectedWeapon == WeaponSelectionController.EWeaponSelection.SHOULDER)
       WeaponSelectionController.ProcessShoulderToPistol();
-    if (command == 41 && WeaponSelectionController._lastSelectedWeapon == WeaponSelectionController.EWeaponSelection.PISTOL)
+    if ((int)command == 41 && WeaponSelectionController._lastSelectedWeapon == WeaponSelectionController.EWeaponSelection.PISTOL)
       WeaponSelectionController.ProcessPistolToShoulder();
-    if (command == 40 && WeaponSelectionController._lastSelectedWeapon == WeaponSelectionController.EWeaponSelection.PISTOL)
+    if ((int)command == 40 && WeaponSelectionController._lastSelectedWeapon == WeaponSelectionController.EWeaponSelection.PISTOL)
       WeaponSelectionController.ProcessPistolToSling();
-    if (!(command == 133 & command == (int) sbyte.MaxValue & command == 128 /*0x80*/ & command == 129 & command == 130 & command == 131 & command == 132 & command == 52 & command == 46 & command == 47 & command == 48 /*0x30*/ & command == 49 & command == 50 & command == 51) || WeaponSelectionController._lastSelectedWeapon != WeaponSelectionController.EWeaponSelection.SHOULDER)
+    if (!((int)command == 133 & (int)command == (int) sbyte.MaxValue & (int)command == 128 /*0x80*/ & (int)command == 129 & (int)command == 130 & (int)command == 131 & (int)command == 132 & (int)command == 52 & (int)command == 46 & (int)command == 47 & (int)command == 48 /*0x30*/ & (int)command == 49 & (int)command == 50 & (int)command == 51) || WeaponSelectionController._lastSelectedWeapon != WeaponSelectionController.EWeaponSelection.SHOULDER)
       return;
     WeaponSelectionController.ProcessShoulderToSlot();
   }
@@ -298,7 +298,7 @@ internal class WeaponSelectionController
 
   private static void SetAnimSpeed(Player player, float speed)
   {
-    if (Object.op_Equality((Object) player, (Object) null))
+    if (player == null)
       return;
     player.HandsAnimator.SetAnimationSpeed(speed);
   }

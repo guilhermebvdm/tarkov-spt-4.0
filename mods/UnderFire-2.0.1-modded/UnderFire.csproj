@@ -36,46 +36,46 @@
   <ItemGroup>
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\SPT\EscapeFromTarkov_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\SPT\EscapeFromTarkov_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="bsg.console.core">
-      <HintPath>C:\SPT\EscapeFromTarkov_Data\Managed\bsg.console.core.dll</HintPath>
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\bsg.console.core.dll</HintPath>
     </Reference>
     <Reference Include="0Harmony, Version=2.9.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\SPT\BepInEx\core\0Harmony.dll</HintPath>
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\BepInEx\core\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\SPT\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="BepInEx, Version=5.4.21.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\SPT\BepInEx\core\BepInEx.dll</HintPath>
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\BepInEx\core\BepInEx.dll</HintPath>
     </Reference>
     <Reference Include="Comfort, Version=1.0.0.4, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\SPT\EscapeFromTarkov_Data\Managed\Comfort.dll</HintPath>
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\Comfort.dll</HintPath>
     </Reference>
     <Reference Include="Comfort.Unity, Version=1.0.0.4, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\SPT\EscapeFromTarkov_Data\Managed\Comfort.Unity.dll</HintPath>
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\Comfort.Unity.dll</HintPath>
     </Reference>
     <Reference Include="ConfigurationManager">
-      <HintPath>C:\SPT\BepInEx\plugins\ConfigurationManager.dll</HintPath>
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\BepInEx\plugins\ConfigurationManager.dll</HintPath>
     </Reference>
     <Reference Include="ConfigurationManager">
-      <HintPath>C:\SPT\BepInEx\plugins\spt\ConfigurationManager.dll</HintPath>
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\BepInEx\plugins\spt\ConfigurationManager.dll</HintPath>
     </Reference>
     <Reference Include="spt-common">
-      <HintPath>C:\SPT\BepInEx\plugins\spt\spt-common.dll</HintPath>
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\BepInEx\plugins\spt\spt-common.dll</HintPath>
     </Reference>
     <Reference Include="spt-reflection">
-      <HintPath>C:\SPT\BepInEx\plugins\spt\spt-reflection.dll</HintPath>
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\BepInEx\plugins\spt\spt-reflection.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

@@ -33,9 +33,9 @@ public static class ParallaxController
 
   public static void Update(float dt)
   {
-    if (Object.op_Equality((Object) ParallaxController._player, (Object) null))
+    if (ParallaxController._player == null)
       return;
-    Vector2 vector2 = Vector2.op_Multiply(Vector2.op_Subtraction(ParallaxController._playerRotationLastFrame, ParallaxController._player.Rotation), dt);
+    Vector2 vector2 = (ParallaxController._playerRotationLastFrame - ParallaxController._player.Rotation) * dt;
     ParallaxController._playerRotationLastFrame = ParallaxController._player.Rotation;
     float num1 = StanceController.CurrentStance == EStance.ShortStock ? 2f : 1f;
     float num2 = ParallaxController._ParallaxSetSizeFixed * PrimeMover.ParallaxSetSizeMulti.Value * RealismWrapper.WeaponBalanceMulti * num1;
@@ -76,9 +76,9 @@ public static class ParallaxController
     ref Vector3 position,
     ref Quaternion rotation)
   {
-    if (Object.op_Equality((Object) ParallaxController._player, (Object) null))
+    if (ParallaxController._player == null)
       ParallaxController._player = player;
-    if (Object.op_Equality((Object) ParallaxController._player, (Object) null))
+    if (ParallaxController._player == null)
       return;
     if (AnimStateController.IsBlindfire)
     {

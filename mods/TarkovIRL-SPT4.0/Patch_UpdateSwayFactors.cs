@@ -18,8 +18,9 @@ internal class Patch_UpdateSwayFactors : ModulePatch
 {
   private static FieldInfo playerField;
   private static FieldInfo fcField;
+  private static System.Runtime.CompilerServices.ConditionalWeakTable<ProceduralWeaponAnimation, Player> _playerCache = new System.Runtime.CompilerServices.ConditionalWeakTable<ProceduralWeaponAnimation, Player>();
 
-  protected virtual MethodBase GetTargetMethod()
+  protected override MethodBase GetTargetMethod()
   {
     Patch_UpdateSwayFactors.playerField = AccessTools.Field(typeof (Player.FirearmController), "_player");
     Patch_UpdateSwayFactors.fcField = AccessTools.Field(typeof (ProceduralWeaponAnimation), "_firearmController");
@@ -29,16 +30,24 @@ internal class Patch_UpdateSwayFactors : ModulePatch
   [PatchPostfix]
   private static void Postfix(ProceduralWeaponAnimation __instance)
   {
-    if (Object.op_Equality((Object) __instance, (Object) null) || !PrimeMover.IsWeaponSway.Value || SwayController.IsSwayUpdatedThisFrame)
+    if (__instance == null || !PrimeMover.IsWeaponSway.Value || SwayController.IsSwayUpdatedThisFrame)
       return;
-    Player.FirearmController firearmController = (Player.FirearmController) Patch_UpdateSwayFactors.fcField.GetValue((object) __instance);
-    if (Object.op_Equality((Object) firearmController, (Object) null))
-      return;
-    Player player = (Player) Patch_UpdateSwayFactors.playerField.GetValue((object) firearmController);
-    if (!Object.op_Inequality((Object) player, (Object) null) || !player.IsYourPlayer || player.MovementContext.CurrentState.Name == 21)
+    Player player;
+    if (!_playerCache.TryGetValue(__instance, out player))
+    {
+        Player.FirearmController firearmController = (Player.FirearmController) Patch_UpdateSwayFactors.fcField.GetValue((object) __instance);
+        if (firearmController != null)
+            player = (Player) Patch_UpdateSwayFactors.playerField.GetValue((object) firearmController);
+        
+        if (player != null)
+            _playerCache.Add(__instance, player);
+    }
+
+    if (player == null || !player.IsYourPlayer || (int)player.MovementContext.CurrentState.Name == 21)
       return;
     Vector3 newSway = SwayController.GetNewSway(__instance.MotionReact.SwayFactors, __instance.IsAiming);
     __instance.MotionReact.SwayFactors = newSway;
     SwayController.IsSwayUpdatedThisFrame = true;
   }
+
 }

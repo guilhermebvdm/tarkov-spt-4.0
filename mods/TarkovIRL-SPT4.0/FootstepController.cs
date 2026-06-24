@@ -75,10 +75,7 @@ label_5:
 
   public static Quaternion GetSideToSideRotation()
   {
-    Quaternion identity = Quaternion.identity;
-    identity.z = FootstepController._sideToSideRotationSmoothingLerp * PlayerMotionController.GetNormalSpeed();
-    identity.z *= PlayerMotionController.IsAiming ? 0.4f : 1f;
-    return identity;
+    return Quaternion.Euler(0f, 0f, FootstepController._sideToSideRotationSmoothingLerp * PlayerMotionController.GetNormalSpeed() * (PlayerMotionController.IsAiming ? 0.4f : 1f));
   }
 
   public static Vector3 GetSideToSidePosition()

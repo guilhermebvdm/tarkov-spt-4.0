@@ -14,7 +14,7 @@ namespace TarkovIRL;
 
 internal class Patch_Look : ModulePatch
 {
-  protected virtual MethodBase GetTargetMethod()
+  protected override MethodBase GetTargetMethod()
   {
     return (MethodBase) typeof (Player).GetMethod("Look", BindingFlags.Instance | BindingFlags.Public);
   }
@@ -22,7 +22,7 @@ internal class Patch_Look : ModulePatch
   [PatchPostfix]
   private static void Postfix(Player __instance)
   {
-    if (!Object.op_Inequality((Object) __instance, (Object) null) || !__instance.IsYourPlayer || __instance.MovementContext.CurrentState.Name == 21 || !PrimeMover.IsSmallMovementsEffect.Value)
+    if (__instance == null || !__instance.IsYourPlayer || (int)__instance.MovementContext.CurrentState.Name == 21 || !PrimeMover.IsSmallMovementsEffect.Value)
       return;
     Vector3 headRotThisFrame = HeadRotController.GetHeadRotThisFrame(__instance.HeadRotation);
     __instance.HeadRotation = headRotThisFrame;

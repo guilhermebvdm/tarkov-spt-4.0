@@ -12,7 +12,7 @@ namespace TarkovIRL;
 
 internal class Patch_SetSprint : ModulePatch
 {
-  protected virtual MethodBase GetTargetMethod()
+  protected override MethodBase GetTargetMethod()
   {
     return (MethodBase) typeof (FirearmsAnimator).GetMethod("SetSprint", BindingFlags.Instance | BindingFlags.Public);
   }

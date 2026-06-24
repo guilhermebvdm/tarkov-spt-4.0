@@ -1,4 +1,4 @@
-﻿// Decompiled with JetBrains decompiler
+// Decompiled with JetBrains decompiler
 // Type: TarkovIRL.Properties.Settings
 // Assembly: TarkovIRL, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
 // MVID: C42939BD-7BF0-4586-ABE5-9D2EFC361A0B

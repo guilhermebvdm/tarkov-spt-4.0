@@ -18,7 +18,7 @@ internal class Patch_ProcessUpperbodyRotation : ModulePatch
 {
   private static FieldInfo movementContextField;
 
-  protected virtual MethodBase GetTargetMethod()
+  protected override MethodBase GetTargetMethod()
   {
     Patch_ProcessUpperbodyRotation.movementContextField = AccessTools.Field(typeof (MovementState), "MovementContext");
     return (MethodBase) typeof (MovementState).GetMethod("ProcessUpperbodyRotation", BindingFlags.Instance | BindingFlags.Public);
@@ -29,7 +29,7 @@ internal class Patch_ProcessUpperbodyRotation : ModulePatch
   {
     MovementContext movementContext = (MovementContext) Patch_ProcessUpperbodyRotation.movementContextField.GetValue((object) __instance);
     float num = Mathf.DeltaAngle((float) Math.Sign(movementContext.HandsToBodyAngle) * movementContext.TrunkRotationLimit, movementContext.HandsToBodyAngle);
-    movementContext.ApplyRotation(Quaternion.Lerp(movementContext.TransformRotation, Quaternion.op_Multiply(movementContext.TransformRotation, Quaternion.Euler(0.0f, num, 0.0f)), 30f * PrimeMover.Instance.DeltaTime));
+    movementContext.ApplyRotation(Quaternion.Lerp(movementContext.TransformRotation, (movementContext.TransformRotation * Quaternion.Euler(0.0f, num, 0.0f)), 30f * PrimeMover.Instance.DeltaTime));
     return false;
   }
 }

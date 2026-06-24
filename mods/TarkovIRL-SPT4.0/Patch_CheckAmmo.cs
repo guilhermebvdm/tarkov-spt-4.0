@@ -16,7 +16,7 @@ internal class Patch_CheckAmmo : ModulePatch
 {
   private static FieldInfo playerField;
 
-  protected virtual MethodBase GetTargetMethod()
+  protected override MethodBase GetTargetMethod()
   {
     Patch_CheckAmmo.playerField = AccessTools.Field(typeof (Player.FirearmController), "_player");
     return (MethodBase) typeof (Player.FirearmController).GetMethod("CheckAmmo", BindingFlags.Instance | BindingFlags.Public);
@@ -31,3 +31,4 @@ internal class Patch_CheckAmmo : ModulePatch
     AugmentedReloadController.RefreshAnimator(player.HandsAnimator);
   }
 }
+

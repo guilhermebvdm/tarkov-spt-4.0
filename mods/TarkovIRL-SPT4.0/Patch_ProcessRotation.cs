@@ -17,7 +17,7 @@ public class Patch_ProcessRotation : ModulePatch
 {
   private static FieldInfo movementContextField;
 
-  protected virtual MethodBase GetTargetMethod()
+  protected override MethodBase GetTargetMethod()
   {
     Patch_ProcessRotation.movementContextField = AccessTools.Field(typeof (MovementState), "MovementContext");
     return (MethodBase) typeof (MovementState).GetMethod("ProcessRotation", BindingFlags.Instance | BindingFlags.Public);
@@ -29,7 +29,7 @@ public class Patch_ProcessRotation : ModulePatch
     MovementContext movementContext = (MovementContext) Patch_ProcessRotation.movementContextField.GetValue((object) __instance);
     TIRLUtils.LogError($"turn called, HandsToBodyAngle {movementContext.HandsToBodyAngle}, TrunkRotationLimit {movementContext.TrunkRotationLimit}");
     if ((double) Mathf.Abs(movementContext.HandsToBodyAngle) > (double) movementContext.TrunkRotationLimit * 0.20000000298023224)
-      __instance.ProcessUpperbodyRotation(deltaTime);
+      __instance.ProcessUpperbodyRotation(deltaTime, false);
     __instance.UpdateRotationSpeed(deltaTime);
     return false;
   }

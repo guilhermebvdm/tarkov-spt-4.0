@@ -26,7 +26,7 @@ public static class WeaponController
 
   public static void UpdateWpnStats(Player.FirearmController fc)
   {
-    if (Object.op_Inequality((Object) fc, (Object) null))
+    if (fc != null)
     {
       WeaponController.CurrentWeaponWeight = PrimeMover.Instance.WeightAttenuationCurve.Evaluate(((Item) fc.Weapon).TotalWeight);
       WeaponController.CurrentWeaponErgoNorm = PrimeMover.Instance.ErgoAttenuationCurve.Evaluate(fc.TotalErgonomics / 100f);

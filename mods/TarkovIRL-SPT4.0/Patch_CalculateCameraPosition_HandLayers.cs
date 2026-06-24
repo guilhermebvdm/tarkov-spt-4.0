@@ -18,8 +18,12 @@ internal class Patch_CalculateCameraPosition_HandLayers : ModulePatch
 {
   private static FieldInfo playerField;
   private static FieldInfo fcField;
+  private static System.Runtime.CompilerServices.ConditionalWeakTable<ProceduralWeaponAnimation, Player> _playerCache = new System.Runtime.CompilerServices.ConditionalWeakTable<ProceduralWeaponAnimation, Player>();
+  private static Transform _lastWeaponRoot = null;
+  private static Vector3 _lastTotalPosOffset = Vector3.zero;
+  private static Quaternion _lastTotalRotOffset = Quaternion.identity;
 
-  protected virtual MethodBase GetTargetMethod()
+  protected override MethodBase GetTargetMethod()
   {
     Patch_CalculateCameraPosition_HandLayers.playerField = AccessTools.Field(typeof (Player.FirearmController), "_player");
     Patch_CalculateCameraPosition_HandLayers.fcField = AccessTools.Field(typeof (ProceduralWeaponAnimation), "_firearmController");
@@ -29,17 +33,37 @@ internal class Patch_CalculateCameraPosition_HandLayers : ModulePatch
   [SPT.Reflection.Patching.PatchPostfix]
   private static void PatchPostfix(ProceduralWeaponAnimation __instance)
   {
-    if (Object.op_Equality((Object) __instance, (Object) null))
+    if (__instance == null)
       return;
-    Player.FirearmController firearmController = (Player.FirearmController) Patch_CalculateCameraPosition_HandLayers.fcField.GetValue((object) __instance);
-    if (Object.op_Equality((Object) firearmController, (Object) null))
-      return;
-    Player player = (Player) Patch_CalculateCameraPosition_HandLayers.playerField.GetValue((object) firearmController);
-    if (!Object.op_Inequality((Object) player, (Object) null) || !player.IsYourPlayer)
+    Player player;
+    if (!_playerCache.TryGetValue(__instance, out player))
+    {
+        Player.FirearmController firearmController = (Player.FirearmController) Patch_CalculateCameraPosition_HandLayers.fcField.GetValue((object) __instance);
+        if (firearmController != null)
+            player = (Player) Patch_CalculateCameraPosition_HandLayers.playerField.GetValue((object) firearmController);
+        
+        if (player != null)
+            _playerCache.Add(__instance, player);
+    }
+
+    if (player == null || !player.IsYourPlayer)
       return;
     WeaponController.IsUsingMounted = __instance.IsMountedState;
+
+    Transform currentWeaponRoot = __instance.HandsContainer.WeaponRoot;
+    if (Patch_CalculateCameraPosition_HandLayers._lastWeaponRoot == currentWeaponRoot)
+    {
+        currentWeaponRoot.localPosition -= Patch_CalculateCameraPosition_HandLayers._lastTotalPosOffset;
+        currentWeaponRoot.localRotation *= Quaternion.Inverse(Patch_CalculateCameraPosition_HandLayers._lastTotalRotOffset);
+    }
+    Patch_CalculateCameraPosition_HandLayers._lastWeaponRoot = currentWeaponRoot;
+
     if (AnimStateController.IsBlindfire || WeaponController.IsUsingMounted)
-      return;
+    {
+        Patch_CalculateCameraPosition_HandLayers._lastTotalPosOffset = Vector3.zero;
+        Patch_CalculateCameraPosition_HandLayers._lastTotalRotOffset = Quaternion.identity;
+        return;
+    }
     EfficiencyController.UpdateEfficiency(player);
     Vector3 handPosForBreath = HandBreathController.GetModifiedHandPosForBreath(player);
     Vector3 handsShakePosition = HandShakeController.GetHandsShakePosition(player);
@@ -64,71 +88,56 @@ internal class Patch_CalculateCameraPosition_HandLayers : ModulePatch
     bool flag6 = PrimeMover.IsFootstepEffect.Value;
     bool flag7 = PrimeMover.IsParallaxEffect.Value;
     bool flag8 = PrimeMover.IsWeaponSway.Value;
-    if (flag1)
-    {
-      Transform weaponRoot = __instance.HandsContainer.WeaponRoot;
-      weaponRoot.localPosition = Vector3.op_Addition(weaponRoot.localPosition, handPosForBreath);
-    }
-    if (flag2)
-    {
-      Transform weaponRoot = __instance.HandsContainer.WeaponRoot;
-      weaponRoot.localPosition = Vector3.op_Addition(weaponRoot.localPosition, modifiedHandPosWithPose);
-    }
+    Vector3 totalPosOffset = Vector3.zero;
+    Quaternion totalRotOffset = Quaternion.identity;
+
+    if (flag1) totalPosOffset += handPosForBreath;
+    if (flag2) totalPosOffset += modifiedHandPosWithPose;
     if (flag3)
     {
-      Transform weaponRoot1 = __instance.HandsContainer.WeaponRoot;
-      weaponRoot1.localPosition = Vector3.op_Addition(weaponRoot1.localPosition, posWithPoseChange);
-      Transform weaponRoot2 = __instance.HandsContainer.WeaponRoot;
-      weaponRoot2.localRotation = Quaternion.op_Multiply(weaponRoot2.localRotation, rotWithPoseChange);
+      totalPosOffset += posWithPoseChange;
+      totalRotOffset *= rotWithPoseChange;
     }
-    if (flag4)
-    {
-      Transform weaponRoot = __instance.HandsContainer.WeaponRoot;
-      weaponRoot.localPosition = Vector3.op_Addition(weaponRoot.localPosition, handsShakePosition);
-    }
+    if (flag4) totalPosOffset += handsShakePosition;
     if (flag5)
     {
-      Transform weaponRoot3 = __instance.HandsContainer.WeaponRoot;
-      weaponRoot3.localPosition = Vector3.op_Addition(weaponRoot3.localPosition, handPosZmovement);
-      Transform weaponRoot4 = __instance.HandsContainer.WeaponRoot;
-      weaponRoot4.localPosition = Vector3.op_Addition(weaponRoot4.localPosition, forLoweredWeapon);
+      totalPosOffset += handPosZmovement;
+      totalPosOffset += forLoweredWeapon;
     }
     if (flag7)
     {
-      Transform weaponRoot5 = __instance.HandsContainer.WeaponRoot;
-      weaponRoot5.localPosition = Vector3.op_Addition(weaponRoot5.localPosition, localPosition);
-      Transform weaponRoot6 = __instance.HandsContainer.WeaponRoot;
-      weaponRoot6.localRotation = Quaternion.op_Multiply(weaponRoot6.localRotation, localRotation);
+      totalPosOffset += localPosition;
+      totalRotOffset *= localRotation;
     }
     if (flag6)
     {
-      Transform weaponRoot7 = __instance.HandsContainer.WeaponRoot;
-      weaponRoot7.localPosition = Vector3.op_Addition(weaponRoot7.localPosition, modifiedHandPosFootstep);
-      Transform weaponRoot8 = __instance.HandsContainer.WeaponRoot;
-      weaponRoot8.localPosition = Vector3.op_Addition(weaponRoot8.localPosition, sideToSidePosition);
-      Transform weaponRoot9 = __instance.HandsContainer.WeaponRoot;
-      weaponRoot9.localRotation = Quaternion.op_Multiply(weaponRoot9.localRotation, sideToSideRotation);
+      totalPosOffset += modifiedHandPosFootstep;
+      totalPosOffset += sideToSidePosition;
+      totalRotOffset *= sideToSideRotation;
     }
     if (flag8)
     {
-      Transform weaponRoot10 = __instance.HandsContainer.WeaponRoot;
-      weaponRoot10.localPosition = Vector3.op_Addition(weaponRoot10.localPosition, newSwayPosition);
-      Transform weaponRoot11 = __instance.HandsContainer.WeaponRoot;
-      weaponRoot11.localRotation = Quaternion.op_Multiply(weaponRoot11.localRotation, newSwayRotation);
+      totalPosOffset += newSwayPosition;
+      totalRotOffset *= newSwayRotation;
     }
+
     Vector3 position;
     Quaternion rotation;
     DirectionalSwayController.GetDirectionalSway(out position, out rotation);
-    Transform weaponRoot12 = __instance.HandsContainer.WeaponRoot;
-    weaponRoot12.localPosition = Vector3.op_Addition(weaponRoot12.localPosition, position);
-    Transform weaponRoot13 = __instance.HandsContainer.WeaponRoot;
-    weaponRoot13.localRotation = Quaternion.op_Multiply(weaponRoot13.localRotation, rotation);
+    totalPosOffset += position;
+    totalRotOffset *= rotation;
+
     Vector3 pos;
     Quaternion rot;
     WeaponSelectionController.GetWeaponSelectionTransforms(out pos, out rot);
-    Transform weaponRoot14 = __instance.HandsContainer.WeaponRoot;
-    weaponRoot14.localPosition = Vector3.op_Addition(weaponRoot14.localPosition, pos);
-    Transform weaponRoot15 = __instance.HandsContainer.WeaponRoot;
-    weaponRoot15.localRotation = Quaternion.op_Multiply(weaponRoot15.localRotation, rot);
+    totalPosOffset += pos;
+    totalRotOffset *= rot;
+
+    currentWeaponRoot.localPosition += totalPosOffset;
+    currentWeaponRoot.localRotation *= totalRotOffset;
+
+    Patch_CalculateCameraPosition_HandLayers._lastTotalPosOffset = totalPosOffset;
+    Patch_CalculateCameraPosition_HandLayers._lastTotalRotOffset = totalRotOffset;
   }
 }
+

@@ -21,7 +21,7 @@ public class Patch_SetHeadRotation : ModulePatch
   private static Vector3 _dzLerp = Vector3.zero;
   private static Vector3 _dzLerpTarget = Vector3.zero;
 
-  protected virtual MethodBase GetTargetMethod()
+  protected override MethodBase GetTargetMethod()
   {
     Patch_SetHeadRotation._playerField = AccessTools.Field(typeof (Player.FirearmController), "_player");
     Patch_SetHeadRotation._fcField = AccessTools.Field(typeof (ProceduralWeaponAnimation), "_firearmController");
@@ -31,16 +31,16 @@ public class Patch_SetHeadRotation : ModulePatch
   [PatchPrefix]
   private static bool Prefix(ProceduralWeaponAnimation __instance, Vector3 headRot)
   {
-    if (Object.op_Equality((Object) __instance, (Object) null))
+    if (__instance == null)
       return true;
     Player.FirearmController firearmController = (Player.FirearmController) Patch_SetHeadRotation._fcField.GetValue((object) __instance);
-    if (Object.op_Equality((Object) firearmController, (Object) null))
+    if (firearmController == null)
     {
       Patch_SetHeadRotation._dzLerpTarget = headRot;
       return true;
     }
     Player player = (Player) Patch_SetHeadRotation._playerField.GetValue((object) firearmController);
-    if (!Object.op_Inequality((Object) player, (Object) null) || !player.IsYourPlayer || player.MovementContext.CurrentState.Name == 21)
+    if (player == null || !player.IsYourPlayer || (int)player.MovementContext.CurrentState.Name == 21)
       return true;
     Vector3 headRotInitial = headRot;
     if (PrimeMover.IsWeaponDeadzone.Value)

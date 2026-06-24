@@ -14,7 +14,7 @@ namespace TarkovIRL;
 
 public class Patch_OnShot : ModulePatch
 {
-  protected virtual MethodBase GetTargetMethod()
+  protected override MethodBase GetTargetMethod()
   {
     return (MethodBase) typeof (Player).GetMethod("OnMakingShot", BindingFlags.Instance | BindingFlags.Public);
   }
@@ -22,7 +22,7 @@ public class Patch_OnShot : ModulePatch
   [SPT.Reflection.Patching.PatchPostfix]
   private static void PatchPostfix(Player __instance)
   {
-    if (!Object.op_Inequality((Object) __instance, (Object) null) || !__instance.IsYourPlayer)
+    if (!__instance != null || !__instance.IsYourPlayer)
       return;
     Player.FirearmController handsController = __instance.HandsController as Player.FirearmController;
     WeaponController.UpdateWpnStats(handsController);

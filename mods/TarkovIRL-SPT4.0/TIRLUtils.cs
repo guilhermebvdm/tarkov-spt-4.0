@@ -70,11 +70,7 @@ public static class TIRLUtils
 
   public static Quaternion GetQuatFromV3(Vector3 v)
   {
-    Quaternion identity = Quaternion.identity;
-    identity.x = v.x;
-    identity.y = v.y;
-    identity.z = v.z;
-    return identity;
+    return Quaternion.Euler(v.x, v.y, v.z);
   }
 
   public enum E_DEBUG_PRIORITY

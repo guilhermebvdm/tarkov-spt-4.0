@@ -128,10 +128,10 @@ internal class NewSwayController
     NewSwayController._finalRotSmoothed = Vector3.Lerp(NewSwayController._finalRotSmoothed, NewSwayController._finalRot, PrimeMover.Instance.DeltaTime * PrimeMover.NewSwayFinalLerpSpeed.Value);
     if (!PrimeMover.IsWeaponSway.Value || AnimStateController.IsBlindfire)
       return Quaternion.identity;
-    Quaternion identity = Quaternion.identity;
-    identity.x = NewSwayController._finalRotSmoothed.x;
-    identity.y = NewSwayController._finalRotSmoothed.y;
-    identity.z = NewSwayController._finalRotSmoothed.z * PrimeMover.NewSwayRotationMulti.Value * WeaponController.GetWeaponMulti(false);
-    return identity;
+    return Quaternion.Euler(
+      NewSwayController._finalRotSmoothed.x,
+      NewSwayController._finalRotSmoothed.y,
+      NewSwayController._finalRotSmoothed.z * PrimeMover.NewSwayRotationMulti.Value * WeaponController.GetWeaponMulti(false)
+    );
   }
 }

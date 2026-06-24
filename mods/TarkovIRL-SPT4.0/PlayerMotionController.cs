@@ -50,7 +50,7 @@ internal class PlayerMotionController
     PlayerMotionController._playerSpeed = player.Speed;
     PlayerMotionController._leanNormalized = player.MovementContext.Tilt / 5f;
     PlayerMotionController._armStam = player.Physical.HandsStamina.NormalValue;
-    PlayerMotionController.UpdateMovementDirection(Vector2.op_Implicit(player.InputDirection));
+    PlayerMotionController.UpdateMovementDirection((Vector2)player.InputDirection);
   }
 
   private static void UpdateIsMovingBool(Vector3 position)

@@ -16,32 +16,14 @@ namespace TarkovIRL
 
     public static class StanceController
     {
-        private static PropertyInfo _currentStanceProperty;
-
         public static EStance CurrentStance
         {
             get
             {
-                if (_currentStanceProperty == null)
-                {
-                    var type = System.Type.GetType("CameraRotationMod.StanceManager, shwngFpsCameraStances4");
-                    if (type != null)
-                    {
-                        _currentStanceProperty = type.GetProperty("CurrentStance", BindingFlags.Public | BindingFlags.Static);
-                    }
-                }
-
-                if (_currentStanceProperty != null)
-                {
-                    var val = _currentStanceProperty.GetValue(null);
-                    // CameraRotationMod.Stance is an enum: Default, Stance1, Stance2, Stance3
-                    // We map Stance1 to HighReady, Stance2 to LowReady, Stance3 to ShortStock.
-                    string valString = val.ToString();
-                    if (valString == "Stance1") return EStance.HighReady;
-                    if (valString == "Stance2") return EStance.LowReady;
-                    if (valString == "Stance3") return EStance.ShortStock;
-                }
-                
+                var valString = CameraRotationMod.StanceManager.CurrentStance.ToString();
+                if (valString == "Stance1") return EStance.HighReady;
+                if (valString == "Stance2") return EStance.LowReady;
+                if (valString == "Stance3") return EStance.ShortStock;
                 return EStance.None;
             }
         }

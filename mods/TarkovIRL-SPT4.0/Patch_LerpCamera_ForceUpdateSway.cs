@@ -18,8 +18,9 @@ public class Patch_LerpCamera_ForceUpdateSway : ModulePatch
 {
   private static FieldInfo playerField;
   private static FieldInfo fcField;
+  private static System.Runtime.CompilerServices.ConditionalWeakTable<ProceduralWeaponAnimation, Player> _playerCache = new System.Runtime.CompilerServices.ConditionalWeakTable<ProceduralWeaponAnimation, Player>();
 
-  protected virtual MethodBase GetTargetMethod()
+  protected override MethodBase GetTargetMethod()
   {
     Patch_LerpCamera_ForceUpdateSway.playerField = AccessTools.Field(typeof (Player.FirearmController), "_player");
     Patch_LerpCamera_ForceUpdateSway.fcField = AccessTools.Field(typeof (ProceduralWeaponAnimation), "_firearmController");
@@ -29,16 +30,26 @@ public class Patch_LerpCamera_ForceUpdateSway : ModulePatch
   [SPT.Reflection.Patching.PatchPostfix]
   private static void PatchPostfix(ProceduralWeaponAnimation __instance, float dt)
   {
-    if (Object.op_Equality((Object) __instance, (Object) null))
+    if (__instance == null)
       return;
-    Player.FirearmController firearmController = (Player.FirearmController) Patch_LerpCamera_ForceUpdateSway.fcField.GetValue((object) __instance);
-    if (Object.op_Equality((Object) firearmController, (Object) null))
+    Player player;
+    if (!_playerCache.TryGetValue(__instance, out player))
+    {
+        Player.FirearmController firearmController = (Player.FirearmController) Patch_LerpCamera_ForceUpdateSway.fcField.GetValue((object) __instance);
+        if (firearmController != null)
+            player = (Player) Patch_LerpCamera_ForceUpdateSway.playerField.GetValue((object) firearmController);
+        
+        if (player != null)
+            _playerCache.Add(__instance, player);
+    }
+
+    if (player == null || !player.IsYourPlayer)
       return;
-    Player player = (Player) Patch_LerpCamera_ForceUpdateSway.playerField.GetValue((object) firearmController);
     AnimStateController.SetCurrentBodyAnimState(player.MovementContext.CurrentState.AnimatorStateHash);
     PlayerMotionController.UpdateMovementInformation(player);
     if (player.IsInventoryOpened)
       return;
     __instance.UpdateSwayFactors();
   }
+
 }
