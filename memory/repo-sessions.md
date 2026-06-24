@@ -12,7 +12,7 @@ Trabalho específico de cada mod fica em `mods/<mod>/memory/sessions.md`. Este a
 - **Convenção de naming canônica:** `NNN-<slug>-MM-tipo[-NN].md` (`01-spec`, `02-spec-tech`, `03-spec-tech-review-NN`, `04-code-review-NN`, `05-asbuild`, `06-fix-NN`).
 - **Skills ativas (6):** `spt-mod-best-practices` (+§8 API canônica), `csharp-mod-best-practices` (+virtual dispatch), `repo-workflow-best-practices`, `memory-curation` (escrita §1-13 + consumo §14 + promoção §15), `graph-code-navigation` (grafos graphify).
 - **Memória é CONSUMIDA pelos commands de desenvolvimento** (passo "Contexto de memória", skill §14): pendência 🔴 do item/mod → alerta antes de prosseguir; todo command emite a linha greppável `Memória consultada:` no relatório (prova de consumo, obj2 observável).
-- **Antipatterns:** `docs/technical/spt-antipatterns.md` (AP-01..**08**, erros reais do stances) — checados na §9 da spec técnica (8 checks), critérios padrão da spec funcional (Fika + estado entre raids, N/A frágil em patch player-reactive = gap) e checklist do fix.
+- **Antipatterns:** `docs/technical/spt-antipatterns.md` (AP-01..**10** — AP-09 recon/decompile parcial + AP-10 skill inerte promovidos do CustomClasses em 2026-06-23) — checados na §9 da spec técnica, critérios padrão da spec funcional (Fika + estado entre raids) e checklist do fix.
 - **Enforcement (não mais só prosa):** 3 gates no pre-commit — `check-delivered-validation.sh` (HARD: item 🟢 com caixa in-raid desmarcada bloqueia, AP-06; lê staged blob), `check-graph-freshness.sh` (WARN: código de mod mudou sem regenerar grafo), `check-memory-ids.sh` (WARN: pendência do topo sem `[P-N.M]`). **Validados executando** (não só write+hash) — o fix-review da Sessão 5b achou os 3 quebrados e corrigiu.
 - **IDs de pendência:** esquema único `P-<N>.<M>` (N=sessão), data inline `(aberta YYYY-MM-DD)` pra GC ser diff literal; stances e CustomClasses migrados.
 - **Grafos de código (graphify):** versionados em `references/graphs/` (todos os mods + eft-decompiled 58k nós + fika-* + spt-source); regeneração via `scripts/update-graphs.sh` / `/update-mod-graph`; **MCP só `graphify-eft`** (grafos de mod via CLI `--graph`); `graph.html` >1.5MB não versiona; `.graphifyignore` na raiz destrava as references gitignored.
@@ -247,6 +247,29 @@ offerBase = clamp( (override ?? prices.json ?? 0) + bonus , floor , ceiling )
 - Fórmula/override/internals: `tools/tarkov-itemdb/docs/{flea-override-plan,flea-formula-validation,spt-internals}.md`.
 - Harness do smoke test: `tools/tarkov-itemdb/scripts/smoke-matrix.js`.
 - Memória pessoal (não versionada, não vai pro outro PC): `project_flea_price_formula.md`.
+
+## 2026-06-23 22:46 (GMT-3) — Sessão 6: promoção de 2 lições recorrentes → AP-09/AP-10 no spt-antipatterns
+
+**Tema central:** promover 2 lições que reapareceram em ≥2 sessões (`memory-curation` §15) da memória do CustomClasses para conhecimento institucional (`docs/technical/spt-antipatterns.md`).
+
+**Decisões-chave:**
+
+- **AP-09 — "Recon/decompile curado tratado como verdade pinada"** (item 005 do stances S5/6 + CustomClasses S10). O decompile curado `references/eft-decompiled/` é PARCIAL (tipos quentes fora — `ProceduralWeaponAnimation`/`ActiveHealthController`/`BreathEffector`); "confiança" de recon é candidato, não fato (`WeaponRecoil.CalculateRecoil` alucinado → real `PWA.Shoot`). Prevenção: reconfirmar no `Assembly-CSharp.dll` (ilspycmd/dnSpy) ou pela compilação; obfuscados/injeção de campo = gate de runtime (try/catch). Ref: [spt-antipatterns.md AP-09](../docs/technical/spt-antipatterns.md).
+- **AP-10 — "Buffar/depender de skill EFT inerte"** (CustomClasses S8 + S10). Masteries com `SkillsSettings []` no `globals.json` não têm efeito → entregar por patch/perk, não pela skill. A LISTA versionada fica no `class-skill-catalog.md §6` do mod (a AP só aponta — evita stale). Ref: [AP-10](../docs/technical/spt-antipatterns.md).
+- **Não promovido:** a lista concreta de skills inertes (dado versionado do EFT) — fica no catálogo do mod, não na AP.
+
+**Lições / hipóteses descartadas:** Nenhuma lição nova — sessão de curadoria/promoção (consolida lições já existentes).
+
+**Atividade cronológica:**
+
+1. `/update-memory CustomClasses` → Sessão 10 gravada (épico 050) + snapshot/pendências consolidados; `/update-mod-graph` (1245→1375 nós).
+2. Promoção aprovada pelo usuário → AP-09 + AP-10 em `spt-antipatterns.md` (+2 linhas no mapa de checagem + histórico).
+3. Esta entrada repo-wide + bullets de origem na memória do CustomClasses (Sessão 10) ganham ponteiro `→ AP-09/AP-10`.
+
+**Cross-refs:**
+
+- Origem das lições: `mods/CustomClasses/memory/sessions.md` Sessões 8 e 10.
+- Loop fechado (§15): AP editado ✅ · entrada repo-wide ✅ · ponteiro no mod ✅. Não commitado (sessão paralela do editor ativa).
 
 ## 2026-06-13 13:03 (GMT-3) — Sessão 5b: fix-review dos próprios fixes da 5a (os 3 hooks estavam quebrados)
 

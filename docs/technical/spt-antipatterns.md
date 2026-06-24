@@ -81,6 +81,22 @@ Catálogo dos erros que **já cometemos neste repo**, com o caso real, a causa r
 - **Prevenção:** cachear a identidade do contexto (operação/controller/arma) no início do intercept e comparar antes de cada ação; limpar flags de estado no teardown de cada operação.
 - **Onde é checado:** check 8 da "Conformidade com skills"; checklist item 12 da skill C# (estado stale em troca de contexto); skill `csharp-mod-best-practices` §3.
 
+## AP-09 — Recon/decompile curado tratado como verdade pinada
+
+- **Sintoma:** patch-point "confirmado" no recon não existe no assembly (nome/assinatura diferente ou inventado) → tempo perdido codando contra um alvo fantasma; o patch não aplica (ou compila e falha em runtime).
+- **Causa raiz:** o decompile curado (`references/eft-decompiled/`) é **PARCIAL** — tipos quentes ficam de fora (ex.: `ProceduralWeaponAnimation`, `ActiveHealthController`, `BreathEffector` não estão lá). E "confiança" de recon (humano ou subagente) é um **candidato**, não um fato — pode citar um membro plausível porém inexistente. Agravante: membros ofuscados (`method_##`, `GClass####`) variam entre builds.
+- **Exemplos reais:** item 005 do stances (Sessão 5/6) — "dump `eft-decompiled` é PARCIAL → validar membros via compilação contra `Assembly-CSharp.dll`". [CustomClasses Sessão 10](../../mods/CustomClasses/memory/sessions.md) — recon citou `WeaponRecoil.CalculateRecoil` (marcado ✅) que **não existe**; o ponto real era `ProceduralWeaponAnimation.Shoot(str)`, achado via `ilspycmd` sobre `D:/SPT/.../Assembly-CSharp.dll`.
+- **Prevenção:** tratar todo ponto de recon como **candidato até reconfirmar no assembly real** (`ilspycmd`/`dnSpy` sobre `Assembly-CSharp.dll`) ou pela compilação. O compile pega tipo/membro inexistente; **runtime** pega injeção de campo (`___field`) e método ofuscado errado → envolver `Enable()` em try/catch + gate de validação in-game. Nunca pinar um ponto fora do curado sem reconfirmação.
+- **Onde é checado:** skill `graph-code-navigation` ("grafo aponta, leitura prova"); `/create-technical-spec` e `/code-mod` (reconfirmar patch-point antes de codar); skill `spt-mod-best-practices`.
+
+## AP-10 — Buffar/depender de skill EFT inerte
+
+- **Sintoma:** feature que escala/buffa uma skill "funciona" no código mas tem **zero efeito** in-game (XP não sobe, bônus não aplica).
+- **Causa raiz:** várias masteries do EFT têm `SkillsSettings` vazio (`[]`) no `globals.json` — sem ação de XP, sem efeito. Buffar/setar uma skill inerte é teatro.
+- **Exemplo real:** [CustomClasses](../../mods/CustomClasses/docs/class-skill-catalog.md) (Sessão 8 + 10) — SMG/LMG/HMG/Launcher/AttachedLauncher inertes; o redesign moveu a maestria de armas pesadas do Tanque de skill 🎯 para um **perk 🔧** (Bunker, patch direto em recoil/ergo). A lista concreta de inertes vive em `class-skill-catalog.md §6` — **dado versionado** (muda entre builds do EFT), por isso não é replicada aqui.
+- **Prevenção:** antes de escolher uma skill como lever, confirmar que ela **não é inerte** (`globals.json` `SkillsSettings` não-`[]`, ou efeito real no `SkillManager`); skill inerte → entregar o efeito por **patch direto (perk)**, não pela skill. Lista atual no catálogo do mod, não no antipattern (evita stale).
+- **Onde é checado:** `/create-technical-spec` (ao decidir lever skill vs patch); skill `spt-mod-best-practices`.
+
 ---
 
 ## Mapa: antipattern → onde o harness checa
@@ -95,6 +111,8 @@ Catálogo dos erros que **já cometemos neste repo**, com o caso real, a causa r
 | AP-06 | — | — | `/apply-code-review` (output) | repo-workflow (artefato 06) | `fix.md.tmpl`; gate `check-delivered-validation.sh` |
 | AP-07 | — | check 7 | `/review-technical-spec` Cat. C | C# checklist 13 (reentrância) | — |
 | AP-08 | — | check 8 | `/code-review` Cat. B | C# checklist 12 (estado stale) | grafo de código (`affected`) |
+| AP-09 | — | reconfirmar patch-point | `/create-technical-spec`; `/code-mod` | `graph-code-navigation`; SPT | `ilspycmd`/`dnSpy` vs `Assembly-CSharp.dll` |
+| AP-10 | — | lever skill vs patch | `/create-technical-spec` | SPT | catálogo de skills do mod (`globals.json` `SkillsSettings`) |
 
 ## Histórico de Alterações
 
@@ -105,3 +123,5 @@ Catálogo dos erros que **já cometemos neste repo**, com o caso real, a causa r
 | 2026-06-12 | Guilherme | docs(harness): add SPT antipatterns taxonomy (AP-01..06) wired into skills |
 | 2026-06-13 | Guilherme | Adicionados AP-07 (self-reentry/ThreadStatic, PA-02-01) e AP-08 (estado stale em troca de contexto, CR-01-02); fechando gaps D4-01/D4-02 da revisão de valor |
 | 2026-06-13 | Guilherme | fix(harness): correct artifact-name and hook-target naming bugs |
+| 2026-06-23 | Guilherme | Adicionados AP-09 (recon/decompile curado tratado como verdade — item 005 + CustomClasses S10) e AP-10 (buffar skill EFT inerte — CustomClasses S8/S10), promovidos da memória do CustomClasses (memory-curation §15) |
+| 2026-06-23 | Guilherme | feat(CustomClasses): implement 050 signature perks/drawbacks (client) |
