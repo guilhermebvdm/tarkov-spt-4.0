@@ -1,0 +1,317 @@
+﻿---- GClass2667 ----
+using System;
+using System.Runtime.CompilerServices;
+using EFT;
+using EFT.Animations;
+using EFT.Interactive;
+using EFT.MovingPlatforms;
+using EFT.WeaponMounting;
+using UnityEngine;
+
+public class GClass2667 : IWeaponMountingComponent, IDisposable
+{
+	[NonSerialized]
+	public const float Float_0 = 50f;
+
+	[NonSerialized]
+	public Vector3 Vector3_0 = new Vector3 (0.1849f, 0f, 0.074f);
+
+	[NonSerialized]
+	public Vector3 Vector3_1 = new Vector3 (0.1866f, 0f, 0.2853f);
+
+	[NonSerialized]
+	public Vector3 Vector3_2 = new Vector3 (-0.0198f, 0f, 0.1225f);
+
+	[NonSerialized]
+	public Vector3 Vector3_3 = new Vector3 (-0.05f, 0f, 0.263f);
+
+	[NonSerialized]
+	public WeaponMountingView WeaponMountingView_0;
+
+	[NonSerialized]
+	public MovementContext MovementContext_0;
+
+	[NonSerialized]
+	public ProceduralWeaponAnimation ProceduralWeaponAnimation_0;
+
+	[NonSerialized]
+	public PlayerSpring PlayerSpring_0;
+
+	[NonSerialized]
+	public GClass2666 Gclass2666_0;
+
+	[NonSerialized]
+	public Collider[] Collider_0 = new Collider[8];
+
+	[NonSerialized]
+	public RaycastHit[] RaycastHit_0 = new RaycastHit[1];
+
+	[NonSerialized]
+	public Player.FirearmController FirearmController_0;
+
+	[NonSerialized]
+	[CompilerGenerated]
+	public IMountingPointDetectionSettings ImountingPointDetectionSettings_0;
+
+	[NonSerialized]
+	[CompilerGenerated]
+	public IMountingMovementSettings ImountingMovementSettings_0;
+
+	[NonSerialized]
+	[CompilerGenerated]
+	public Action Action_0;
+
+	public IMountingPointDetectionSettings MountingPointDetectionSettings {
+		[CompilerGenerated]
+		get {
+			return ImountingPointDetectionSettings_0;
+		}
+	}
+
+	public IMountingMovementSettings MountingMovementSettings {
+		[CompilerGenerated]
+		get {
+			return ImountingMovementSettings_0;
+		}
+	}
+
+	public Action OnNothingFound {
+		[CompilerGenerated]
+		get {
+			return Action_0;
+		}
+		[CompilerGenerated]
+		set {
+			Action_0 = value;
+		}
+	}
+
+	public GClass2667 (WeaponMountingView view, MovementContext movementContext, ProceduralWeaponAnimation proceduralWeaponAnimation, IMountingPointDetectionSettings mountingPointDetectionSettings, IMountingMovementSettings mountingMovementSettings, PlayerSpring playerSpring)
+	{
+		WeaponMountingView_0 = view;
+		MovementContext_0 = movementContext;
+		ProceduralWeaponAnimation_0 = proceduralWeaponAnimation;
+		PlayerSpring_0 = playerSpring;
+		ImountingPointDetectionSettings_0 = mountingPointDetectionSettings;
+		ImountingMovementSettings_0 = mountingMovementSettings;
+		Gclass2666_0 = new GClass2666 (MountingPointDetectionSettings, WeaponMountingView_0);
+		GClass2666 gclass2666_ = Gclass2666_0;
+		gclass2666_.OnMountingPointFound = (Action<MountPointData>)Delegate.Combine (gclass2666_.OnMountingPointFound, new Action<MountPointData> (method_1));
+		GClass2666 gclass2666_2 = Gclass2666_0;
+		gclass2666_2.OnNoPointFound = (Action)Delegate.Combine (gclass2666_2.OnNoPointFound, new Action (method_0));
+	}
+
+	public void method_0 ()
+	{
+		OnNothingFound?.Invoke ();
+	}
+
+	public void TryMountWeapon (Player.FirearmController controller)
+	{
+		if (MovementContext_0.IsInMountedState) {
+			MovementContext_0.StartExitingMountedState ();
+			return;
+		}
+		FirearmController_0 = controller;
+		if (MovementContext_0.IsInPronePose) {
+			if (FirearmController_0.BipodState && MovementContext_0.Step == 0 && MovementContext_0.InputMotion.Equals (Vector3.zero)) {
+				Gclass2666_0.FindMountingPointProne (MovementContext_0.Yaw, Mathf.Abs (PlayerSpring_0.MountingRotationCenterBipods.y), Mathf.Abs (PlayerSpring_0.MountingRotationCenterBipods.z), MovementContext_0.SurfacePitch);
+			} else {
+				method_0 ();
+			}
+		} else {
+			Gclass2666_0.FindMountingPoint (MovementContext_0.Yaw, MovementContext_0.TransformPosition.y, FirearmController_0.BipodState ? PlayerSpring_0.MountingRotationCenterBipods.z : PlayerSpring_0.MountingRotationCenter.z, PlayerSpring_0.MountingRotationCenter.z, canMountVertically: true);
+		}
+	}
+
+	public void CancelFindingPoint ()
+	{
+		FirearmController_0 = null;
+		Gclass2666_0.CancelFindingPoint ();
+	}
+
+	public void method_1 (MountPointData mountPointData)
+	{
+		if (method_2 (mountPointData.MountPoint, out var movingPlatform)) {
+			MovementContext_0.PlayerMountingPointData.SetMovingPlatform (movingPlatform);
+		}
+		if (method_3 (mountPointData.MountPoint, out var interactive)) {
+			if (interactive.DoorState == EDoorState.Interacting) {
+				return;
+			}
+			MovementContext_0.PlayerMountingPointData.SetCurrentInteractive (interactive);
+		}
+		if (method_4 (mountPointData)) {
+			int aimIndex = ProceduralWeaponAnimation_0.AimIndex;
+			if (Mathf.Abs (ProceduralWeaponAnimation_0.ScopeAimTransforms [aimIndex].Rotation) >= EFTHardSettings.Instance.SCOPE_ROTATION_THRESHOLD) {
+				for (int i = 0; i < ProceduralWeaponAnimation_0.ScopeAimTransforms.Count; i++) {
+					if (Mathf.Abs (ProceduralWeaponAnimation_0.ScopeAimTransforms [i].Rotation) < EFTHardSettings.Instance.SCOPE_ROTATION_THRESHOLD) {
+						FirearmController_0.ChangeAimingMode (i);
+						break;
+					}
+				}
+			}
+			MovementContext_0.EnterMountedState ();
+		} else {
+			MovementContext_0.PlayerMountingPointData.ClearData ();
+			method_0 ();
+		}
+	}
+
+	public bool method_2 (Vector3 mountPoint, out MovingPlatform movingPlatform)
+	{
+		int num = Physics.OverlapSphereNonAlloc (mountPoint, MountingPointDetectionSettings.PointVerticalMountOffset * 2f, Collider_0, LayerMaskClass.TriggersMask);
+		movingPlatform = null;
+		if (num > 0) {
+			for (int i = 0; i < num; i++) {
+				if (Collider_0 [i].gameObject.TryGetComponent<MovingPlatform> (out var component)) {
+					movingPlatform = component;
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public bool method_3 (Vector3 mountPoint, out WorldInteractiveObject interactive)
+	{
+		int num = Physics.OverlapSphereNonAlloc (mountPoint, MountingPointDetectionSettings.PointVerticalMountOffset * 2f, Collider_0, LayerMaskClass.InteractiveMask);
+		interactive = null;
+		if (num > 0) {
+			for (int i = 0; i < num; i++) {
+				if (Collider_0 [i].gameObject.TryGetComponent<WorldInteractiveObject> (out var component)) {
+					interactive = component;
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public bool method_4 (MountPointData mountPointData)
+	{
+		Vector3 mountPoint = mountPointData.MountPoint;
+		mountPoint.y = 0f;
+		Vector3 vector = ((mountPointData.MountSideDirection != 0 || !FirearmController_0.BipodState) ? PlayerSpring_0.MountingRotationCenter : PlayerSpring_0.MountingRotationCenterBipods);
+		float num = Mathf.Abs (vector.y);
+		float num2 = 57.29578f * Mathf.Atan (MountingMovementSettings.TiltPositionOffset / num) - 1f;
+		int mountSideDirection = (int)mountPointData.MountSideDirection;
+		Vector2 vector2 = ((mountPointData.MountSideDirection != 0) ? MountingMovementSettings.PitchLimitVertical : (FirearmController_0.BipodState ? MountingMovementSettings.PitchLimitHorizontalBipod : MountingMovementSettings.PitchLimitHorizontal));
+		if (!(MovementContext_0.Pitch < vector2.x - MountingMovementSettings.MaxPitchLimitExcess) && MovementContext_0.Pitch <= vector2.y + MountingMovementSettings.MaxPitchLimitExcess) {
+			Vector2 yawLimit;
+			float num7;
+			Quaternion targetBodyRotation;
+			if (mountPointData.MountSideDirection != 0) {
+				Quaternion quaternion = Quaternion.LookRotation (mountPointData.MountDirection);
+				float x = Mathf.Min (quaternion.eulerAngles.y, quaternion.eulerAngles.y + (float)mountSideDirection * MountingMovementSettings.MaxVerticalMountAngle);
+				float y = Mathf.Max (quaternion.eulerAngles.y, quaternion.eulerAngles.y + (float)mountSideDirection * MountingMovementSettings.MaxVerticalMountAngle);
+				yawLimit = new Vector2 (x, y);
+				if (!(yawLimit.x > 360f) && yawLimit.y <= 360f) {
+					if (yawLimit.x < -360f || yawLimit.y < -360f) {
+						yawLimit = new Vector2 (yawLimit.x + 360f, yawLimit.y + 360f);
+					}
+				} else {
+					yawLimit = new Vector2 (yawLimit.x - 360f, yawLimit.y - 360f);
+				}
+				float y2 = Quaternion.LookRotation (Quaternion.Euler (0f, (mountPointData.MountSideDirection == EMountSideDirection.Right) ? 90 : (-90), 0f) * mountPointData.MountDirection).eulerAngles.y;
+				float num3 = Mathf.Abs (Mathf.DeltaAngle (y2, yawLimit.x));
+				float num4 = Mathf.Abs (Mathf.DeltaAngle (y2, yawLimit.y));
+				float num5 = MovementContext_0.Yaw;
+				if (num5 < -360f) {
+					num5 += 360f;
+				}
+				if (num5 > 360f) {
+					num5 -= 360f;
+				}
+				float num6 = ((num5 > 0f) ? (num5 - 360f) : (num5 + 360f));
+				if ((num5 < yawLimit.x - MountingMovementSettings.MaxYawLimitExcess || num5 > yawLimit.y + MountingMovementSettings.MaxYawLimitExcess) && (num6 < yawLimit.x - MountingMovementSettings.MaxYawLimitExcess || !(num6 <= yawLimit.y + MountingMovementSettings.MaxYawLimitExcess))) {
+					return false;
+				}
+				num7 = ((num3 < num4) ? yawLimit.x : yawLimit.y);
+				targetBodyRotation = quaternion;
+			} else {
+				targetBodyRotation = Quaternion.AngleAxis (MovementContext_0.Yaw, Vector3.up);
+				num7 = MovementContext_0.Yaw;
+				float x2 = num7 - num2;
+				float y3 = num7 + num2;
+				yawLimit = new Vector2 (x2, y3);
+				if (!(yawLimit.x > 360f) && yawLimit.y <= 360f) {
+					if (yawLimit.x < -360f || yawLimit.y < -360f) {
+						yawLimit = new Vector2 (yawLimit.x + 360f, yawLimit.y + 360f);
+					}
+				} else {
+					yawLimit = new Vector2 (yawLimit.x - 360f, yawLimit.y - 360f);
+				}
+			}
+			Vector3 transformPosition;
+			if (MovementContext_0.IsInPronePose) {
+				transformPosition = MovementContext_0.TransformPosition;
+				MovementContext_0.PlayerMountingPointData.SetData (mountPointData, transformPosition, MovementContext_0.PoseLevel, num7, MountingMovementSettings.MinApproachTime, targetBodyRotation, new Vector2 (0f, 0f), FirearmController_0.Bipod.PitchLimitProneBipod, new Vector2 (num7 + FirearmController_0.Bipod.YawLimitProneBipod.x, num7 + FirearmController_0.Bipod.YawLimitProneBipod.y));
+				return true;
+			}
+			Vector3 vector3 = Vector3.Lerp (Vector3_1, Vector3_0, MovementContext_0.PoseLevel);
+			Quaternion quaternion2 = Quaternion.Euler (0f, num7, 0f);
+			Vector3 vector4 = Vector3.forward * num + vector3;
+			vector4 = quaternion2 * vector4;
+			transformPosition = mountPoint - vector4;
+			transformPosition.y = mountPointData.MountPoint.y;
+			transformPosition.y = (Physics.Raycast (transformPosition, Vector3.down, out var hitInfo, 3f, LayerMaskClass.PlayerStaticCollisionsMask) ? hitInfo.point.y : MovementContext_0.TransformPosition.y);
+			if (!method_5 (transformPosition, targetBodyRotation)) {
+				return false;
+			}
+			float value = mountPointData.MountPoint.y - transformPosition.y - vector.z;
+			float num8 = Mathf.InverseLerp (MountingPointDetectionSettings.GridMinHeight, MountingPointDetectionSettings.GridMaxHeight, value);
+			float num9 = Mathf.Clamp (num8 - vector2.x / 50f, 0f, 1f);
+			float num10 = Mathf.Clamp (num8 - vector2.y / 50f, 0f, 1f);
+			Vector2 poseLimit = new Vector2 (num10, num9);
+			float x3 = (0f - (num8 - num10)) * 50f;
+			float y4 = (num9 - num8) * 50f;
+			vector2 = new Vector2 (x3, y4);
+			float t = Mathf.InverseLerp (vector2.x, vector2.y, MovementContext_0.Pitch);
+			num8 = Mathf.Lerp (poseLimit.x, poseLimit.y, t);
+			float t2 = Mathf.InverseLerp (0f, MountingPointDetectionSettings.EdgeDetectionDistance, (MovementContext_0.TransformPosition - transformPosition).magnitude);
+			float num11 = Mathf.Lerp (MountingMovementSettings.MinApproachTime, MountingMovementSettings.MaxApproachTime, t2);
+			if (MovementContext_0.Pitch < vector2.x || MovementContext_0.Pitch > vector2.y) {
+				float num12 = ((Mathf.Abs (MovementContext_0.Pitch - vector2.x) <= Mathf.Abs (MovementContext_0.Pitch - vector2.y)) ? vector2.x : vector2.y);
+				float num13 = ((mountPointData.MountSideDirection == EMountSideDirection.Forward) ? Mathf.Abs (MovementContext_0.Pitch) : Mathf.Abs (MovementContext_0.Pitch - num12));
+				float num14 = Mathf.Abs (MovementContext_0.Yaw - num7);
+				num11 *= 1f + (num13 + num14) * MountingMovementSettings.ApproachTimeDeltaAngleModifier;
+			}
+			num11 = Mathf.Clamp (num11, MountingMovementSettings.MinApproachTime, MountingMovementSettings.MaxApproachTime);
+			MovementContext_0.PlayerMountingPointData.SetData (mountPointData, transformPosition, num8, num7, num11, targetBodyRotation, poseLimit, vector2, yawLimit);
+			return true;
+		}
+		return false;
+	}
+
+	public bool method_5 (Vector3 targetPos, Quaternion targetBodyRotation)
+	{
+		if (!MovementContext_0.IsGrounded) {
+			return false;
+		}
+		float stepOffset = MovementContext_0.CharacterController.stepOffset;
+		float num = MovementContext_0.CharacterController.radius + MovementContext_0.CharacterController.skinWidth;
+		LayerMask playerStaticCollisionsMask = LayerMaskClass.PlayerStaticCollisionsMask;
+		ICharacterController characterController = MovementContext_0.CharacterController;
+		Vector3 vector = targetPos - MovementContext_0.TransformPosition;
+		float maxDistance = vector.magnitude + num / 4f;
+		Vector3 center = MovementContext_0.TransformPosition + Vector3.up * stepOffset + characterController.center;
+		float num2 = Mathf.Sqrt (num / 2f);
+		Vector3 halfExtents = new Vector3 (num2 / 2f, (characterController.height - stepOffset / 2f) / 2f, num2 / 2f);
+		return Physics.BoxCastNonAlloc (center, halfExtents, vector.normalized, RaycastHit_0, targetBodyRotation, maxDistance, playerStaticCollisionsMask) == 0;
+	}
+
+	public void Dispose ()
+	{
+		FirearmController_0 = null;
+		if (Gclass2666_0 != null) {
+			GClass2666 gclass2666_ = Gclass2666_0;
+			gclass2666_.OnNoPointFound = (Action)Delegate.Remove (gclass2666_.OnNoPointFound, new Action (method_0));
+			GClass2666 gclass2666_2 = Gclass2666_0;
+			gclass2666_2.OnMountingPointFound = (Action<MountPointData>)Delegate.Remove (gclass2666_2.OnMountingPointFound, new Action<MountPointData> (method_1));
+			Gclass2666_0.Dispose ();
+			Gclass2666_0 = null;
+		}
+	}
+}
+
