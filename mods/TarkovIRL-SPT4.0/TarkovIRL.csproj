@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!--Project was exported from assembly: D:\Drive\Google Drive\Users\Erick Saraiva\Downloads\TarkovIRL_WeaponsHandlingMod_1.0.0\BepInEx\plugins\TarkovIRL.dll-->
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{F79EEC73-5316-47A1-A95F-DFAFC243B1A5}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AssemblyName>TarkovIRL</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <LangVersion>latest</LangVersion>
+    <ApplicationVersion>0.0.0.0</ApplicationVersion>
+    <FileAlignment>512</FileAlignment>
+    <RootNamespace>TarkovIRL</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="UnityEngine">
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\BepInEx\core\0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx">
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\BepInEx\core\BepInEx.dll</HintPath>
+    </Reference>
+    <Reference Include="Comfort">
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\Comfort.dll</HintPath>
+    </Reference>
+    <Reference Include="spt-reflection">
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\BepInEx\plugins\spt\spt-reflection.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="0Harmony" />
+    <Reference Include="System" />
+    <Reference Include="UnderFire">
+      <HintPath>..\UnderFire-2.0.1-modded\UnderFire.dll</HintPath>
+    </Reference>
+    <Reference Include="shwngFpsCameraStances4">
+      <HintPath>..\stancesAndCameraPositionSPT4.0.11\shwngFpsCameraStances4.dll</HintPath>
+    </Reference>
+  <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+    </Reference>
+  <Reference Include="AnimationSystem.Types">
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\AnimationSystem.Types.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="StanceController.cs" />
+    <Compile Include="Patch_LateUpdate_UpdateWpnStats.cs" />
+    <Compile Include="AugmentedReloadController.cs" />
+    <Compile Include="DirectionalSwayController.cs" />
+    <Compile Include="EfficiencyController.cs" />
+    <Compile Include="FootstepController.cs" />
+    <Compile Include="HeadRotController.cs" />
+    <Compile Include="NewDeadzoneController.cs" />
+    <Compile Include="NewSwayController.cs" />
+    <Compile Include="ParallaxAdsController.cs" />
+    <Compile Include="DeadzoneController.cs" />
+    <Compile Include="HandPoseController.cs" />
+    <Compile Include="HandShakeController.cs" />
+    <Compile Include="HandBreathController.cs" />
+    <Compile Include="Patch_ProcessRotation.cs" />
+    <Compile Include="Patch_CalculateCameraPosition_HandLayers.cs" />
+    <Compile Include="HandMovWithRotController.cs" />
+    <Compile Include="Patch_Look.cs" />
+    <Compile Include="Patch_LerpCamera_ForceUpdateSway.cs" />
+    <Compile Include="AnimStateController.cs" />
+    <Compile Include="Patch_OnShot.cs" />
+    <Compile Include="ParallaxController.cs" />
+    <Compile Include="Patch_ProcessUpperbodyRotation.cs" />
+    <Compile Include="Patch_QuickReloadMag.cs" />
+    <Compile Include="Patch_ReloadMag.cs" />
+    <Compile Include="Patch_SetHeadRotation.cs" />
+    <Compile Include="Patch_CheckAmmo.cs" />
+    <Compile Include="Patch_SetSprint.cs" />
+    <Compile Include="StaminaRegenRatePatch.cs" />
+    <Compile Include="Patch_ThrowGrenade.cs" />
+    <Compile Include="Patch_TranslateCommand.cs" />
+    <Compile Include="PlayerMotionController.cs" />
+    <Compile Include="Patch_PlayStepSound.cs" />
+    <Compile Include="RaycastTester.cs" />
+    <Compile Include="RealismWrapper.cs" />
+    <Compile Include="RunningFadeController.cs" />
+    <Compile Include="Injury.cs" />
+    <Compile Include="SwayController.cs" />
+    <Compile Include="ThrowController.cs" />
+    <Compile Include="TIRLUtils.cs" />
+    <Compile Include="WeaponController.cs" />
+    <Compile Include="Patch_UpdateSwayFactors.cs" />
+    <Compile Include="PrimeMover.cs" />
+    <Compile Include="WeaponSelectionController.cs" />
+    <Compile Include="Properties\Settings.cs" />
+    <Compile Include="AssemblyInfo.cs" />
+  <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+    </Reference>
+  <Reference Include="AnimationSystem.Types">
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\AnimationSystem.Types.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

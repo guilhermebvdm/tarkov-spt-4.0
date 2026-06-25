@@ -68,7 +68,7 @@ namespace CameraRotationMod
         private const float ScrollCooldown = 0.15f; // Prevent scroll spam
 
         // Tac Sprint variables - track state to avoid setting animator every frame
-        private static bool _isTacSprintActive = false;
+        public static bool _isTacSprintActive = false;
         private static bool _wasAiming = false;
         
         // Tac Sprint reset delay variables
