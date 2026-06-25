@@ -29,130 +29,22 @@ namespace SPT.Launcher.ViewModels
 
         public ReactiveCommand<Unit, Unit> LoginCommand { get; set; }
         public ReactiveCommand<Unit, Unit> ResetPasswordCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> GoToRegisterCommand { get; set; }
 
         private bool _isLoggedIn;
         public bool IsLoggedIn
         {
             get => _isLoggedIn;
             set => this.RaiseAndSetIfChanged(ref _isLoggedIn, value);
-        private string _currentState = "Login";
-        public string CurrentState
-        {
-            get => _currentState;
-            set 
-            {
-                this.RaiseAndSetIfChanged(ref _currentState, value);
-                this.RaisePropertyChanged(nameof(IsLoginState));
-                this.RaisePropertyChanged(nameof(IsRegisterState));
-            }
         }
-
-        public bool IsLoginState => CurrentState == "Login";
-        public bool IsRegisterState => CurrentState == "Register";
-        public bool IsClassSelectionState => CurrentState == "ClassSelection";
-
-        private string _registerUsername;
-        public string RegisterUsername
-        {
-            get => _registerUsername;
-            set => this.RaiseAndSetIfChanged(ref _registerUsername, value);
-        }
-
-        private string _registerPassword;
-        public string RegisterPassword
-        {
-            get => _registerPassword;
-            set => this.RaiseAndSetIfChanged(ref _registerPassword, value);
-        }
-
-        private string _confirmPassword;
-        public string ConfirmPassword
-        {
-            get => _confirmPassword;
-            set => this.RaiseAndSetIfChanged(ref _confirmPassword, value);
-        }
-
-        private string _registerErrorMsg;
-        public string RegisterErrorMsg
-        {
-            get => _registerErrorMsg;
-            set => this.RaiseAndSetIfChanged(ref _registerErrorMsg, value);
-        }
-
-        public ReactiveCommand<Unit, Unit> GoToRegisterCommand { get; set; }
-        public ReactiveCommand<Unit, Unit> GoToLoginCommand { get; set; }
-        public ReactiveCommand<Unit, Unit> CreateAccountCommand { get; set; }
-        public ReactiveCommand<Unit, Unit> FinalizeAccountCommand { get; set; }
 
         public LoginViewModel(IScreen Host, bool NoAutoLogin = false) : base(Host)
         {
             GoToRegisterCommand = ReactiveCommand.Create(() => 
             {
-                CurrentState = "Register";
-                RegisterUsername = "";
-                RegisterPassword = "";
-                ConfirmPassword = "";
-                RegisterErrorMsg = "";
+                NavigateTo(new RegisterViewModel(HostScreen));
             });
 
-            GoToLoginCommand = ReactiveCommand.Create(() => 
-            {
-                CurrentState = "Login";
-                RegisterErrorMsg = "";
-            });
-
-            CreateAccountCommand = ReactiveCommand.Create(() => 
-            {
-                RegisterErrorMsg = "";
-                if (string.IsNullOrWhiteSpace(RegisterUsername) || RegisterUsername.Length > 15)
-                {
-                    RegisterErrorMsg = "Usuário inválido (vazio ou maior que 15 caracteres).";
-                    return;
-                }
-                if (string.IsNullOrWhiteSpace(RegisterPassword) || RegisterPassword != ConfirmPassword)
-                {
-                    RegisterErrorMsg = "Senhas não são idênticas!";
-                    return;
-                }
-
-                // Em vez de finalizar o registro, vamos para a tela 3 para visualização
-                CurrentState = "ClassSelection";
-            });
-
-            FinalizeAccountCommand = ReactiveCommand.CreateFromTask(async () => 
-            {
-                // Aqui usamos os dados que ficaram armazenados temporariamente na memória pela Tela 2
-                // e a edição (classe) selecionada na Tela 3.
-                string editionToUse = "Standard";
-                if (ServerManager.SelectedServer != null && ServerManager.SelectedServer.editions.Count > 0)
-                {
-                    editionToUse = ServerManager.SelectedServer.editions[0]; // TODO: Pegar da classe selecionada na UI
-                }
-
-                AccountStatus registerResult = await AccountManager.RegisterAsync(RegisterUsername, RegisterPassword, editionToUse);
-
-                if (registerResult == AccountStatus.OK)
-                {
-                    Login.Username = RegisterUsername;
-                    Login.Password = RegisterPassword;
-                    SendNotification(LocalizationProvider.Instance.profile_created, RegisterUsername, NotificationType.Success);
-                    CurrentState = "Login";
-                    
-                    // Força o login após o cadastro
-                    Dispatcher.UIThread.InvokeAsync(() =>
-                    {
-                        LoginCommand.Execute();
-                    });
-                }
-                else
-                {
-                    // Voltar para a tela de registro para mostrar o erro (ou mostrar na tela atual)
-                    CurrentState = "Register";
-                    RegisterErrorMsg = "Erro ao criar conta: " + registerResult.ToString();
-                }
-            });
-
-            //setup reactive commands
             LoginCommand = ReactiveCommand.CreateFromTask(async () =>
             {
                 LogManager.Instance.Info($"[Login] Tentando login: {Login.Username}");
@@ -165,7 +57,7 @@ namespace SPT.Launcher.ViewModels
                         {
                             string storedPassword = AccountManager.SelectedAccount?.password ?? "";
 
-                            // Client-side password validation (SPT server does NOT validate passwords)
+                            // Client-side password validation
                             if (!string.IsNullOrEmpty(storedPassword) && Login.Password != storedPassword)
                             {
                                 AccountManager.Logout();
@@ -197,13 +89,12 @@ namespace SPT.Launcher.ViewModels
                                 }
                                 else
                                 {
-                                    // User cancelled - logout
                                     AccountManager.Logout();
                                     return;
                                 }
                             }
 
-                            // Registrar HWID silenciosamente após login bem-sucedido
+                            // Registrar HWID silenciosamente
                             _ = Task.Run(() =>
                             {
                                 try
@@ -223,7 +114,6 @@ namespace SPT.Launcher.ViewModels
                                 LauncherSettingsProvider.Instance.Server.AutoLoginCreds = Login;
                             }
 
-                            // Salvar último username se "Lembrar Usuário" ativo
                             if (LauncherSettingsProvider.Instance.RememberUsername)
                             {
                                 LauncherSettingsProvider.Instance.LastUsername = Login.Username;
@@ -241,71 +131,12 @@ namespace SPT.Launcher.ViewModels
                         }
                     case AccountStatus.LoginFailed:
                         {
-                            // Create account if it doesn't exist
-                            if (!string.IsNullOrWhiteSpace(Login.Username))
-                            {
-                                if (Login.Username.Length > 15)
-                                {
-                                    SendNotification(LocalizationProvider.Instance.registration_failed, LocalizationProvider.Instance.register_failed_name_limit, NotificationType.Error);
-                                    return;
-                                }
-                                
-                                var result = await ShowDialog(new RegisterDialogViewModel(null, Login.Username));
-
-                                if (result != null && result is RegisterDialogViewModel regDialog)
-                                {
-                                    var edition = regDialog.Editions.SelectedEdition;
-                                    var registerPassword = regDialog.Password;
-
-                                    if (edition == null || string.IsNullOrWhiteSpace(registerPassword)) 
-                                        return;
-
-                                    AccountStatus registerResult = await AccountManager.RegisterAsync(Login.Username, registerPassword, edition.Name);
-                                    LogManager.Instance.Info($"[Login] Registro resultado: {registerResult}");
-
-                                    switch (registerResult)
-                                    {
-                                        case AccountStatus.OK:
-                                            {
-                                                if (LauncherSettingsProvider.Instance.UseAutoLogin && LauncherSettingsProvider.Instance.Server.AutoLoginCreds != Login)
-                                                {
-                                                    LauncherSettingsProvider.Instance.Server.AutoLoginCreds = Login;
-                                                }
-
-                                                LauncherSettingsProvider.Instance.SaveSettings();
-                                                SendNotification(LocalizationProvider.Instance.profile_created, Login.Username, NotificationType.Success);
-                                                NavigateTo(new ProfileViewModel(HostScreen));
-                                                break;
-                                            }
-                                        case AccountStatus.RegisterFailed:
-                                            {
-                                                SendNotification("", LocalizationProvider.Instance.registration_failed, NotificationType.Error);
-                                                break;
-                                            }
-                                        case AccountStatus.NoConnection:
-                                            {
-                                                NavigateTo(new ConnectServerViewModel(HostScreen));
-                                                break;
-                                            }
-                                        default:
-                                            {
-                                                SendNotification("", registerResult.ToString(), NotificationType.Error);
-                                                break;
-                                            }
-                                    }
-
-                                    return;
-                                }
-                            }
-
+                            // Se a conta não existe, alertamos ou forçamos ir pro registro
                             SendNotification("", LocalizationProvider.Instance.login_failed, NotificationType.Error);
-
                             break;
                         }
                     case AccountStatus.NoConnection:
                         {
-                            // Se estiver em auto-login e der falha de conexão,
-                            // quebra o loop para não ficar voltando infinitamente para o ConnectServerViewModel.
                             if (LauncherSettingsProvider.Instance.UseAutoLogin)
                             {
                                 LauncherSettingsProvider.Instance.UseAutoLogin = false;
@@ -332,7 +163,6 @@ namespace SPT.Launcher.ViewModels
 
                 try
                 {
-                    // Step 1: Verify HWID with the mod
                     string hwid = HwidHelper.GetHwid();
                     var resetData = new HwidResetPasswordRequestData(Login.Username, hwid);
                     string response = RequestHandler.RequestHwidResetPassword(resetData);
@@ -356,7 +186,6 @@ namespace SPT.Launcher.ViewModels
                         return;
                     }
 
-                    // Step 2: Login silently (SPT server doesn't validate passwords)
                     AccountStatus loginStatus = await AccountManager.LoginAsync(Login.Username, "");
                     if (loginStatus != AccountStatus.OK)
                     {
@@ -364,7 +193,6 @@ namespace SPT.Launcher.ViewModels
                         return;
                     }
 
-                    // Step 3: Clear password via SPT's official API (updates memory + disk)
                     AccountStatus changePwdStatus = await AccountManager.ChangePasswordAsync("");
                     AccountManager.Logout();
 
@@ -374,7 +202,6 @@ namespace SPT.Launcher.ViewModels
                         return;
                     }
 
-                    // Step 4: Re-login to trigger password creation dialog
                     Login.Password = "";
                     SendNotification("", LocalizationProvider.Instance.reset_password_success, NotificationType.Success);
                     await Task.Delay(500);
@@ -386,14 +213,10 @@ namespace SPT.Launcher.ViewModels
                 }
             });
 
-            //cache and touch background image
             var backgroundImage = Locator.Current.GetService<ImageHelper>("bgimage");
-
             ImageRequest.CacheBackgroundImage();
-
             backgroundImage.Touch();
 
-            //handle auto-login
             if (LauncherSettingsProvider.Instance.UseAutoLogin && LauncherSettingsProvider.Instance.Server.AutoLoginCreds != null && !NoAutoLogin)
             {
                 Login = LauncherSettingsProvider.Instance.Server.AutoLoginCreds;
@@ -410,7 +233,6 @@ namespace SPT.Launcher.ViewModels
                 GetExistingProfiles();
             });
 
-            // Preencher username salvo se "Lembrar Usuário" ativo (e não é auto-login)
             if (LauncherSettingsProvider.Instance.RememberUsername 
                 && !string.IsNullOrEmpty(LauncherSettingsProvider.Instance.LastUsername))
             {
@@ -418,7 +240,6 @@ namespace SPT.Launcher.ViewModels
                 Login.Password = LauncherSettingsProvider.Instance.LastPassword;
             }
 
-            // Salvar settings quando checkboxes de login mudam
             LauncherSettingsProvider.Instance.PropertyChanged += (s, e) =>
             {
                 if (e.PropertyName == "UseAutoLogin" || e.PropertyName == "RememberUsername")
@@ -455,7 +276,6 @@ namespace SPT.Launcher.ViewModels
                 foreach(ServerProfileInfo profile in existingProfiles)
                 {
                     ProfileInfo profileInfo = new ProfileInfo(profile);
-
                     ExistingProfiles.Add(profileInfo);
 
                     ImageRequest.CacheSideImage(profileInfo.Side);

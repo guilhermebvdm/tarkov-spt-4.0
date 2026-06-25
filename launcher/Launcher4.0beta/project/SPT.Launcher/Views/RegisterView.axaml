@@ -2,11 +2,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:launcher="using:SPT.Launcher.Models.Launcher"
              xmlns:cc="using:SPT.Launcher.CustomControls"
              xmlns:cvt="using:SPT.Launcher.Converters"
              mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="720"
-             x:Class="SPT.Launcher.Views.LoginView">
+             x:Class="SPT.Launcher.Views.RegisterView">
 
     <UserControl.Resources>
         <cvt:ImageSourceConverter x:Key="imageSourceCvt"/>
@@ -19,34 +18,34 @@
         <Grid ColumnDefinitions="*, 450">
             <!-- Coluna 0 vazia para mostrar a imagem -->
 
-            <!-- 2. ÁREA CENTRAL (LOGIN) -->
+            <!-- 2. ÁREA CENTRAL (REGISTRO) -->
             <Border Grid.Column="1" BorderBrush="#333" BorderThickness="1,0,0,0" Background="#B3000000">
                 <Grid RowDefinitions="120, *">
                 
                     <!-- Logo Topo -->
                     <Image Grid.Row="0" Margin="15" Source="/Assets/logo-redline.png" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
-                    <!-- Painel de Login -->
+                    <!-- Painel de Registro -->
                     <StackPanel Grid.Row="1" Spacing="15" Margin="40,20" VerticalAlignment="Center">
-                        <TextBlock Text="BEM-VINDO" Foreground="White" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+                        <TextBlock Text="CRIE SUA CONTA" Foreground="White" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,20"/>
                         
-                        <TextBlock Text="Usuário" Foreground="White" FontSize="14" Margin="0,0,0,-10"/>
-                        <TextBox Text="{Binding Login.Username, Mode=TwoWay}" Watermark="Insira seu usuário" Classes="dark"/>
+                        <TextBlock Text="Defina seu usuário" Foreground="White" FontSize="14" Margin="0,0,0,-10"/>
+                        <TextBox Text="{Binding RegisterUsername, Mode=TwoWay}" Watermark="Escolha um nome de usuário" Classes="dark"/>
                         
-                        <TextBlock Text="Senha" Foreground="White" FontSize="14" Margin="0,0,0,-10"/>
-                        <TextBox Text="{Binding Login.Password, Mode=TwoWay}" PasswordChar="●" Watermark="Insira sua senha" Classes="dark"/>
+                        <TextBlock Text="Crie uma senha" Foreground="White" FontSize="14" Margin="0,0,0,-10"/>
+                        <TextBox Text="{Binding RegisterPassword, Mode=TwoWay}" PasswordChar="●" Watermark="Digite sua senha" Classes="dark"/>
                         
-                        <StackPanel Orientation="Horizontal" Spacing="5" Margin="0,5,0,0">
-                            <TextBlock Text="Esqueceu a senha?" Foreground="White" FontSize="12"/>
-                            <Button Content="Redefinir" Command="{Binding ResetPasswordCommand}" Classes="transparent" Foreground="#CC1111" FontSize="12" Padding="0" Margin="0"/>
-                        </StackPanel>
+                        <TextBlock Text="Confirme a senha" Foreground="White" FontSize="14" Margin="0,0,0,-10"/>
+                        <TextBox Text="{Binding ConfirmPassword, Mode=TwoWay}" PasswordChar="●" Watermark="Repita a senha" Classes="dark"/>
 
-                        <Button Content="Entrar" Command="{Binding LoginCommand}" Background="#990000" Foreground="White" FontWeight="Bold" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="0,10,0,20"/>
+                        <TextBlock Text="{Binding RegisterErrorMsg}" Foreground="#CC1111" FontSize="12" FontWeight="Bold" IsVisible="{Binding RegisterErrorMsg, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+
+                        <Button Content="Criar conta" Command="{Binding GoToClassSelectionCommand}" Background="#990000" Foreground="White" FontWeight="Bold" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="0,10,0,20"/>
                         
                         <Separator Background="#333" Margin="0,10"/>
 
-                        <TextBlock Text="Ainda não possui uma conta?" Foreground="LightGray" FontSize="12" HorizontalAlignment="Center" Margin="0,10,0,0"/>
-                        <Button Content="Cadastrar" Command="{Binding GoToRegisterCommand}" Background="#990000" Foreground="White" FontWeight="Bold" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+                        <TextBlock Text="Já possui uma conta?" Foreground="LightGray" FontSize="12" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                        <Button Content="Voltar para Login" Command="{Binding GoToLoginCommand}" Background="#333333" Foreground="White" FontWeight="Bold" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
                     </StackPanel>
 
                     <!-- Footer (Versão) -->
