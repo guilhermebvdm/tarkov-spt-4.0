@@ -16,6 +16,10 @@ internal static class AdrenalineState
 
     internal static bool IsActive => Time.time < _windowEnd;
 
+    // Diagnóstico (overlay 052)
+    internal static float SecondsLeft => Mathf.Max(0f, _windowEnd - Time.time);
+    internal static bool OnCooldown => !IsActive && Time.time < _cooldownEnd;
+
     internal static void Trigger()
     {
         var now = Time.time;

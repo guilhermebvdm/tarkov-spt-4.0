@@ -33,6 +33,8 @@ internal class ShootRecoilPatch : ModulePatch
                 return;   // só a arma do player local
             }
 
+            var str0 = str;   // (052) baseline p/ o diagnóstico
+
             // 🔻 Shaky Hands (Médico): +25% de recuo (mãos trêmulas).
             if (PerksConfig.ShakyHandsEnabled?.Value == true && SkillMultipliers.IsLocalClass("Combat Medic"))
             {
@@ -51,6 +53,11 @@ internal class ShootRecoilPatch : ModulePatch
                 && HeavyWeapon.InHand(p))
             {
                 str *= PerksConfig.BunkerHeavyRecoil?.Value ?? 1f;
+            }
+
+            if (PerkDiag.Enabled)
+            {
+                PerkDiag.LastRecoil = str0 > 0f ? $"x{str / str0:F2}" : "-";
             }
         }
         catch (Exception ex)

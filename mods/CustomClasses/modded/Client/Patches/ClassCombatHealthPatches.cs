@@ -191,6 +191,11 @@ internal class MalfunctionChancePatch : ModulePatch
             {
                 __result *= PerksConfig.CoolUnderFireMalfChance?.Value ?? 1f;
             }
+
+            if (PerkDiag.Enabled)
+            {
+                PerkDiag.LastMalfunction = $"{__result * 100f:F2}%";
+            }
         }
         catch (Exception ex)
         {

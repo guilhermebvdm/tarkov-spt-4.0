@@ -122,6 +122,22 @@ O **funcional** (peso +30% no stash) **está feito**. Falta a **setinha verde pr
 - 🟡 **Iron Lungs sway DEFERIDO** (a duração foi feita; o sway é `BreathEffector.Process` — output reescrito todo frame + injeção de campo frágil).
 - ⚠️ **Gates de runtime:** `method_67` (raio de som realmente muda?), `method_12` (fôlego dobra?), `TotalErgonomics` postfix (ergo aplica?), weapClass "machinegun"/"grenadeLauncher" (bater com a DB do server).
 
+## Ferramenta 052 — Perk Diagnostics Overlay (2026-06-24)
+
+> "Super espião" pra validar os efeitos **sutis/obfuscados** solo, sem depender de "sentir".
+
+| Arquivo | Mudança |
+|---|---|
+| `PerkDiagnostics.cs` *(novo)* | `PerkDiagnostics.Draw()` — overlay `OnGUI` lendo ao vivo do MainPlayer: MaxSpeed/Sprint, Inertia, CarryMod, **TotalErgonomics+weapClass**, **AimingSpeed**, estado da Adrenaline. + `PerkDiag` (valores de evento: recuo/som/jam). |
+| `Plugin.cs` | `OnGUI()` → `PerkDiagnostics.Draw()`. |
+| `PerksConfig.cs` | + `DiagnosticsEnabled` (seção **Diagnostics**, F12, default OFF). |
+| `AdrenalineState.cs` | + `SecondsLeft`/`OnCooldown` (label do overlay). |
+| `ClassWeaponPatches.cs` · `ClassSoundPatches.cs` · `ClassCombatHealthPatches.cs` | capturam `PerkDiag.LastRecoil/LastSound/LastMalfunction` quando diag on. |
+| `.csproj` | + ref `UnityEngine.IMGUIModule` (GUIStyle/OnGUI). |
+
+- **Uso:** F12 → *Diagnostics* → **Perk Diagnostics overlay** ON → entra na raid → overlay no topo-esquerdo. Troca o toggle de um perk no F12 → **o número pula** (prova patch+gate+valor). Cobre justo os pontos de risco de runtime (`TotalErgonomics`, `AimingSpeed`, `method_67`, `GetTotalMalfunctionChance`).
+- Compila 0 erros, instalado.
+
 ## Checklist de validação in-game (050.0 + 054) — quando puder testar
 
 > Pré: rebuildar (`compile-mod CustomClasses`) e reiniciar server + cliente. Compilar ≠ funcionar (AP-06).

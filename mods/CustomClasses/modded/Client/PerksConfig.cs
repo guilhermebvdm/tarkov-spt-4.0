@@ -57,6 +57,9 @@ internal static class PerksConfig
     internal static ConfigEntry<bool>? IronLungsEnabled;
     internal static ConfigEntry<float>? IronLungsBreathDrain;
 
+    // 🔍 Diagnóstico (052) — overlay "super espião" das propriedades afetadas
+    internal static ConfigEntry<bool>? DiagnosticsEnabled;
+
     // 🔻 Overladen (Saqueador) — inércia por peso (050.1)
     internal static ConfigEntry<bool>? OverladenEnabled;
     internal static ConfigEntry<float>? OverladenInertia;
@@ -281,5 +284,9 @@ internal static class PerksConfig
             new ConfigDescription(
                 "Multiplicador do TEMPO de ADS na janela (0.80 = 20% mais rápido). / ADS time multiplier.",
                 new AcceptableValueRange<float>(0.3f, 1f)));
+
+        DiagnosticsEnabled = config.Bind(
+            "Diagnostics", "Perk Diagnostics overlay", false,
+            "Overlay ao vivo das propriedades afetadas pelos perks do seu player (validação). / Live overlay of perk-affected properties.");
     }
 }

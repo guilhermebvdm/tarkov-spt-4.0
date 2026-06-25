@@ -30,6 +30,8 @@ internal class SoundRadiusPatch : ModulePatch
                 return;
             }
 
+            var r0 = __result;   // (052) baseline p/ o diagnóstico
+
             // 🔧 Ghost Step (Furtivo): reduz o raio de audibilidade.
             if (PerksConfig.GhostStepEnabled?.Value == true && SkillMultipliers.IsLocalClass("Stealth"))
             {
@@ -40,6 +42,11 @@ internal class SoundRadiusPatch : ModulePatch
             if (PerksConfig.LoudOperatorEnabled?.Value == true && SkillMultipliers.IsLocalClass("Rifleman"))
             {
                 __result *= PerksConfig.LoudOperatorSoundRadius?.Value ?? 1f;
+            }
+
+            if (PerkDiag.Enabled)
+            {
+                PerkDiag.LastSound = $"{r0:F1}→{__result:F1}";
             }
         }
         catch (Exception ex)

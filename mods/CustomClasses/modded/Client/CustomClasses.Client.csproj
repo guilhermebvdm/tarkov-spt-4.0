@@ -44,6 +44,10 @@
       <HintPath>References/UnityEngine.CoreModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>References/UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="Comfort">
       <HintPath>References/Comfort.dll</HintPath>
       <Private>false</Private>

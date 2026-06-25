@@ -153,6 +153,11 @@ public class Plugin : BaseUnityPlugin
         Log.LogInfo("[CustomClasses] client carregado (multiplicadores de skill).");
     }
 
+    private void OnGUI()
+    {
+        PerkDiagnostics.Draw();   // (052) overlay "super espião" — só desenha se o toggle F12 estiver on
+    }
+
     private void OnDestroy()
     {
         ClassIconCache.Dispose();   // item 011: libera sprites/texturas dos ícones (evita leak de VRAM)
