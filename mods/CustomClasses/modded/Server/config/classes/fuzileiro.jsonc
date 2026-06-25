@@ -4,6 +4,7 @@
     "en": "Rifleman",
     "pt": "Fuzileiro"
   },
+  "enabled": true,
   "baseEdition": "SPT Zero to hero",
   "description": {
     "en": "Assault Rifleman. Aggressive. Closes the distance, sustains fire and pushes positions with fast reloads and recoil control.",
@@ -25,12 +26,36 @@
     "BearAksystems": 2,
     "AimDrills": 1.5,
     "MagDrills": 1.5,
-    "Endurance": 1.5,
-    "StressResistance": 1.3,
-    "Pistol": 1.2,
+    "Endurance": 1.75,
+    "StressResistance": 1.5,
+    "Pistol": 1.5,
     "CovertMovement": 0.6,
     "Attention": 0.7,
-    "Search": 0.8
+    "Search": 0.8,
+    "Strength": 1.75,
+    "Vitality": 1.75,
+    "Immunity": 1.5,
+    "Shotgun": 1.5,
+    "Sniper": 0.8,
+    "DMR": 0.8,
+    "RecoilControl": 1.5,
+    "TroubleShooting": 1.5,
+    "LightVests": 1.5,
+    "HeavyVests": 1.5,
+    "WeaponTreatment": 1.5,
+    "FirstAid": 1.5,
+    "UsecNegotiations": 1.5,
+    "BearRawpower": 1.5,
+    "SilentOps": 0.65,
+    "ProneMovement": 0.65,
+    "Lockpicking": 0.65,
+    "Shadowconnections": 0.65,
+    "FieldMedicine": 0.75,
+    "Crafting": 0.8,
+    "HideoutManagement": 0.8,
+    "Intellect": 0.8,
+    "Memory": 0.8,
+    "Charisma": 1.25
   },
   "hideout": {
     "Workbench": 1
@@ -40,128 +65,223 @@
       "FirstPrimaryWeapon": {
         "preset": "59d6088586f774275f37482f",
         "premium": true,
+        "count": 1,
+        "ammo": "59e0d99486f7744a32234762",
         "loadedMag": true,
-        "chambered": true,
-        "ammo": "59e0d99486f7744a32234762"
+        "chambered": true
       },
       "Holster": {
         "preset": "576a581d2459771e7b1bc4f1",
+        "premium": false,
+        "count": 1,
+        "ammo": "56d59d3ad2720bdb418b4577",
         "loadedMag": true,
-        "ammo": "56d59d3ad2720bdb418b4577"
+        "chambered": false
       },
       "ArmorVest": {
-        "tpl": "5c0e5bab86f77461f55ed1f3"
+        "tpl": "5c0e5bab86f77461f55ed1f3",
+        "premium": false,
+        "count": 1,
+        "loadedMag": false,
+        "chambered": false
       },
       "Headwear": {
-        "tpl": "5b432d215acfc4771e1c6624"
+        "tpl": "5b432d215acfc4771e1c6624",
+        "premium": false,
+        "count": 1,
+        "loadedMag": false,
+        "chambered": false
       },
       "TacticalVest": {
-        "tpl": "5648a69d4bdc2ded0b8b457b"
+        "tpl": "5648a69d4bdc2ded0b8b457b",
+        "premium": false,
+        "count": 1,
+        "loadedMag": false,
+        "chambered": false
       },
       "Backpack": {
-        "tpl": "545cdae64bdc2d39198b4568"
+        "tpl": "545cdae64bdc2d39198b4568",
+        "premium": false,
+        "count": 1,
+        "loadedMag": false,
+        "chambered": false
       }
     },
     "stash": [
       {
         "tpl": "5449016a4bdc2d6f028b456f",
-        "count": 100000
+        "premium": false,
+        "count": 100000,
+        "loadedMag": false,
+        "chambered": false
       },
       {
         "tpl": "544fb45d4bdc2dee738b4568",
-        "count": 2
+        "premium": false,
+        "count": 2,
+        "loadedMag": false,
+        "chambered": false
       },
       {
         "tpl": "5751a25924597722c463c472",
-        "count": 6
+        "premium": false,
+        "count": 6,
+        "loadedMag": false,
+        "chambered": false
       },
       {
         "tpl": "5af0454c86f7746bf20992e8",
-        "count": 1
+        "premium": false,
+        "count": 1,
+        "loadedMag": false,
+        "chambered": false
       },
       {
         "tpl": "544fb37f4bdc2dee738b4567",
-        "count": 2
+        "premium": false,
+        "count": 2,
+        "loadedMag": false,
+        "chambered": false
       },
       {
         "tpl": "590c5f0d86f77413997acfab",
-        "count": 2
+        "premium": false,
+        "count": 2,
+        "loadedMag": false,
+        "chambered": false
       },
       {
         "tpl": "5448ff904bdc2d6f028b456e",
-        "count": 1
+        "premium": false,
+        "count": 1,
+        "loadedMag": false,
+        "chambered": false
       },
       {
         "tpl": "5c0fa877d174af02a012e1cf",
-        "count": 2
+        "premium": false,
+        "count": 2,
+        "loadedMag": false,
+        "chambered": false
       },
       {
         "tpl": "5bffdc370db834001d23eca8",
-        "count": 1
+        "premium": false,
+        "count": 1,
+        "loadedMag": false,
+        "chambered": false
       },
       {
         "tpl": "59d625f086f774661516605d",
-        "count": 14
+        "premium": false,
+        "count": 14,
+        "loadedMag": false,
+        "chambered": false
       },
       {
         "tpl": "59d6088586f774275f37482f",
-        "count": 2
+        "premium": false,
+        "count": 2,
+        "loadedMag": false,
+        "chambered": false
       },
       {
         "tpl": "59e0d99486f7744a32234762",
-        "count": 180
+        "premium": false,
+        "count": 180,
+        "loadedMag": false,
+        "chambered": false
       },
       {
         "tpl": "570fd79bd2720bc7458b4583",
-        "count": 1
+        "premium": false,
+        "count": 1,
+        "loadedMag": false,
+        "chambered": false
       },
       {
         "tpl": "576a5ed62459771e9c2096cb",
-        "count": 2
+        "premium": false,
+        "count": 2,
+        "loadedMag": false,
+        "chambered": false
       },
       {
         "tpl": "56d59d3ad2720bdb418b4577",
-        "count": 60
+        "premium": false,
+        "count": 60,
+        "loadedMag": false,
+        "chambered": false
       },
       {
         "tpl": "5648a69d4bdc2ded0b8b457b",
-        "count": 2
+        "premium": false,
+        "count": 2,
+        "loadedMag": false,
+        "chambered": false
       },
       {
         "tpl": "590c678286f77426c9660122",
-        "count": 3
+        "premium": false,
+        "count": 3,
+        "loadedMag": false,
+        "chambered": false
       },
       {
         "tpl": "5656d7c34bdc2d9d198b4587",
-        "count": 240
+        "premium": false,
+        "count": 240,
+        "loadedMag": false,
+        "chambered": false
       },
       {
         "tpl": "5448bd6b4bdc2dfc2f8b4569",
-        "count": 2
+        "premium": false,
+        "count": 2,
+        "loadedMag": false,
+        "chambered": false
       },
       {
         "tpl": "5448c12b4bdc2d02308b456f",
-        "count": 4
+        "premium": false,
+        "count": 4,
+        "loadedMag": false,
+        "chambered": false
       },
       {
         "tpl": "5737201124597760fc4431f1",
-        "count": 120
+        "premium": false,
+        "count": 120,
+        "loadedMag": false,
+        "chambered": false
       },
       {
         "tpl": "5648a7494bdc2d9d488b4583",
-        "count": 2
+        "premium": false,
+        "count": 2,
+        "loadedMag": false,
+        "chambered": false
       },
       {
         "tpl": "5c06c6a80db834001b735491",
-        "count": 2
+        "premium": false,
+        "count": 2,
+        "loadedMag": false,
+        "chambered": false
       },
       {
         "tpl": "56e335e4d2720b6c058b456d",
-        "count": 2
+        "premium": false,
+        "count": 2,
+        "loadedMag": false,
+        "chambered": false
       },
       {
         "tpl": "57513f07245977207e26a311",
-        "count": 2
+        "premium": false,
+        "count": 2,
+        "loadedMag": false,
+        "chambered": false
       }
     ]
   }

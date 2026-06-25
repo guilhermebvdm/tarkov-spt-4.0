@@ -1,12 +1,10 @@
 {
-  // Item 047 — Tanque (Tank). Matriz: class-matrix.mjs / class-levers.md §4.
-  // Gear = PLACEHOLDER clonado do antigo operadorTatico (gear pesado, PA-01-04); curar depois.
-  // iconFile reusa o PNG do tático (placeholder de identidade visual — fora do escopo do 047).
   "name": "Tank",
   "displayName": {
     "en": "Tank",
     "pt": "Tanque"
   },
+  "enabled": true,
   "baseEdition": "SPT Zero to hero",
   "description": {
     "en": "Tank. Walking fortress — soaks damage that drops others, hauls heavy gear and keeps pushing. Trades speed for armor.",
@@ -16,26 +14,45 @@
   "nameColor": "#6b7280",
   "skills": {
     "HeavyVests": 3,
-    "Health": 4,
-    "Vitality": 4,
+    "Health": 0,
+    "Vitality": 5,
     "Strength": 5,
-    "Shotgun": 1,
+    "Shotgun": 5,
     "Throwing": 1
   },
   "skillMultipliers": {
     "StressResistance": 2,
-    "HeavyVests": 1.5,
-    "Health": 1.5,
-    "Vitality": 1.5,
-    "Strength": 1.5,
-    "Shotgun": 1.5,
-    "Throwing": 1.5,
-    "Melee": 1.5,
+    "HeavyVests": 2,
+    "Vitality": 2,
+    "Strength": 2.5,
+    "Shotgun": 3,
+    "Throwing": 2,
+    "Melee": 2,
     "Metabolism": 0.5,
     "CovertMovement": 0.5,
     "AimDrills": 0.7,
-    "Pistol": 0.7,
-    "DMR": 0.7
+    "DMR": 0.7,
+    "LightVests": 2,
+    "Immunity": 2,
+    "Endurance": 2,
+    "Perception": 0.7,
+    "Intellect": 0.7,
+    "Attention": 0.7,
+    "Charisma": 1.5,
+    "Memory": 0.8,
+    "Sniper": 0.7,
+    "TroubleShooting": 0.7,
+    "Search": 0.7,
+    "Crafting": 0.8,
+    "HideoutManagement": 0.8,
+    "FirstAid": 0.8,
+    "FieldMedicine": 0.8,
+    "SilentOps": 0.7,
+    "ProneMovement": 0.7,
+    "Lockpicking": 0.65,
+    "Shadowconnections": 0.7,
+    "BearRawpower": 1.75,
+    "Health": 0.8
   },
   "hideout": {
     "RestSpace": 1
@@ -45,56 +62,238 @@
       "FirstPrimaryWeapon": {
         "preset": "5447a9cd4bdc2dbd208b4567",
         "premium": true,
+        "count": 1,
+        "ammo": "54527a984bdc2d4e668b4567",
         "loadedMag": true,
-        "chambered": true,
-        "ammo": "54527a984bdc2d4e668b4567"
+        "chambered": true
       },
       "Holster": {
         "preset": "576a581d2459771e7b1bc4f1",
+        "premium": false,
+        "count": 1,
+        "ammo": "56d59d3ad2720bdb418b4577",
         "loadedMag": true,
-        "ammo": "56d59d3ad2720bdb418b4577"
+        "chambered": false
       },
       "ArmorVest": {
-        "tpl": "5c0e5bab86f77461f55ed1f3"
+        "tpl": "5c0e5bab86f77461f55ed1f3",
+        "premium": false,
+        "count": 1,
+        "loadedMag": false,
+        "chambered": false
       },
       "Headwear": {
-        "tpl": "5d5e7d28a4b936645d161203"
+        "tpl": "5d5e7d28a4b936645d161203",
+        "premium": false,
+        "count": 1,
+        "loadedMag": false,
+        "chambered": false
       },
       "TacticalVest": {
-        "tpl": "5648a69d4bdc2ded0b8b457b"
+        "tpl": "5648a69d4bdc2ded0b8b457b",
+        "premium": false,
+        "count": 1,
+        "loadedMag": false,
+        "chambered": false
       },
       "Backpack": {
-        "tpl": "545cdae64bdc2d39198b4568"
+        "tpl": "545cdae64bdc2d39198b4568",
+        "premium": false,
+        "count": 1,
+        "loadedMag": false,
+        "chambered": false
       }
     },
     "stash": [
-      { "tpl": "5449016a4bdc2d6f028b456f", "count": 100000 },
-      { "tpl": "544fb45d4bdc2dee738b4568", "count": 2 },
-      { "tpl": "5751a25924597722c463c472", "count": 6 },
-      { "tpl": "5af0454c86f7746bf20992e8", "count": 1 },
-      { "tpl": "544fb37f4bdc2dee738b4567", "count": 2 },
-      { "tpl": "590c5f0d86f77413997acfab", "count": 2 },
-      { "tpl": "5448ff904bdc2d6f028b456e", "count": 1 },
-      { "tpl": "5c0fa877d174af02a012e1cf", "count": 2 },
-      { "tpl": "5bffdc370db834001d23eca8", "count": 1 },
-      { "tpl": "5c0e534186f7747fa1419867", "count": 1 },
-      { "tpl": "5aaa5dfee5b5b000140293d3", "count": 4 },
-      { "tpl": "54527a984bdc2d4e668b4567", "count": 180 },
-      { "tpl": "570fd79bd2720bc7458b4583", "count": 1 },
-      { "tpl": "576a5ed62459771e9c2096cb", "count": 2 },
-      { "tpl": "56d59d3ad2720bdb418b4577", "count": 60 },
-      { "tpl": "5648a69d4bdc2ded0b8b457b", "count": 2 },
-      { "tpl": "590c678286f77426c9660122", "count": 3 },
-      { "tpl": "5644bd2b4bdc2d3b4c8b4572", "count": 2 },
-      { "tpl": "5bed61680db834001d2c45ab", "count": 8 },
-      { "tpl": "56dff3afd2720bba668b4567", "count": 180 },
-      { "tpl": "5448bd6b4bdc2dfc2f8b4569", "count": 2 },
-      { "tpl": "5448c12b4bdc2d02308b456f", "count": 4 },
-      { "tpl": "5737201124597760fc4431f1", "count": 120 },
-      { "tpl": "5648a7494bdc2d9d488b4583", "count": 2 },
-      { "tpl": "5c06c6a80db834001b735491", "count": 2 },
-      { "tpl": "56e335e4d2720b6c058b456d", "count": 2 },
-      { "tpl": "57513f07245977207e26a311", "count": 2 }
+      {
+        "tpl": "5449016a4bdc2d6f028b456f",
+        "premium": false,
+        "count": 100000,
+        "loadedMag": false,
+        "chambered": false
+      },
+      {
+        "tpl": "544fb45d4bdc2dee738b4568",
+        "premium": false,
+        "count": 2,
+        "loadedMag": false,
+        "chambered": false
+      },
+      {
+        "tpl": "5751a25924597722c463c472",
+        "premium": false,
+        "count": 6,
+        "loadedMag": false,
+        "chambered": false
+      },
+      {
+        "tpl": "5af0454c86f7746bf20992e8",
+        "premium": false,
+        "count": 1,
+        "loadedMag": false,
+        "chambered": false
+      },
+      {
+        "tpl": "544fb37f4bdc2dee738b4567",
+        "premium": false,
+        "count": 2,
+        "loadedMag": false,
+        "chambered": false
+      },
+      {
+        "tpl": "590c5f0d86f77413997acfab",
+        "premium": false,
+        "count": 2,
+        "loadedMag": false,
+        "chambered": false
+      },
+      {
+        "tpl": "5448ff904bdc2d6f028b456e",
+        "premium": false,
+        "count": 1,
+        "loadedMag": false,
+        "chambered": false
+      },
+      {
+        "tpl": "5c0fa877d174af02a012e1cf",
+        "premium": false,
+        "count": 2,
+        "loadedMag": false,
+        "chambered": false
+      },
+      {
+        "tpl": "5bffdc370db834001d23eca8",
+        "premium": false,
+        "count": 1,
+        "loadedMag": false,
+        "chambered": false
+      },
+      {
+        "tpl": "5c0e534186f7747fa1419867",
+        "premium": false,
+        "count": 1,
+        "loadedMag": false,
+        "chambered": false
+      },
+      {
+        "tpl": "5aaa5dfee5b5b000140293d3",
+        "premium": false,
+        "count": 4,
+        "loadedMag": false,
+        "chambered": false
+      },
+      {
+        "tpl": "54527a984bdc2d4e668b4567",
+        "premium": false,
+        "count": 180,
+        "loadedMag": false,
+        "chambered": false
+      },
+      {
+        "tpl": "570fd79bd2720bc7458b4583",
+        "premium": false,
+        "count": 1,
+        "loadedMag": false,
+        "chambered": false
+      },
+      {
+        "tpl": "576a5ed62459771e9c2096cb",
+        "premium": false,
+        "count": 2,
+        "loadedMag": false,
+        "chambered": false
+      },
+      {
+        "tpl": "56d59d3ad2720bdb418b4577",
+        "premium": false,
+        "count": 60,
+        "loadedMag": false,
+        "chambered": false
+      },
+      {
+        "tpl": "5648a69d4bdc2ded0b8b457b",
+        "premium": false,
+        "count": 2,
+        "loadedMag": false,
+        "chambered": false
+      },
+      {
+        "tpl": "590c678286f77426c9660122",
+        "premium": false,
+        "count": 3,
+        "loadedMag": false,
+        "chambered": false
+      },
+      {
+        "tpl": "5644bd2b4bdc2d3b4c8b4572",
+        "premium": false,
+        "count": 2,
+        "loadedMag": false,
+        "chambered": false
+      },
+      {
+        "tpl": "5bed61680db834001d2c45ab",
+        "premium": false,
+        "count": 8,
+        "loadedMag": false,
+        "chambered": false
+      },
+      {
+        "tpl": "56dff3afd2720bba668b4567",
+        "premium": false,
+        "count": 180,
+        "loadedMag": false,
+        "chambered": false
+      },
+      {
+        "tpl": "5448bd6b4bdc2dfc2f8b4569",
+        "premium": false,
+        "count": 2,
+        "loadedMag": false,
+        "chambered": false
+      },
+      {
+        "tpl": "5448c12b4bdc2d02308b456f",
+        "premium": false,
+        "count": 4,
+        "loadedMag": false,
+        "chambered": false
+      },
+      {
+        "tpl": "5737201124597760fc4431f1",
+        "premium": false,
+        "count": 120,
+        "loadedMag": false,
+        "chambered": false
+      },
+      {
+        "tpl": "5648a7494bdc2d9d488b4583",
+        "premium": false,
+        "count": 2,
+        "loadedMag": false,
+        "chambered": false
+      },
+      {
+        "tpl": "5c06c6a80db834001b735491",
+        "premium": false,
+        "count": 2,
+        "loadedMag": false,
+        "chambered": false
+      },
+      {
+        "tpl": "56e335e4d2720b6c058b456d",
+        "premium": false,
+        "count": 2,
+        "loadedMag": false,
+        "chambered": false
+      },
+      {
+        "tpl": "57513f07245977207e26a311",
+        "premium": false,
+        "count": 2,
+        "loadedMag": false,
+        "chambered": false
+      }
     ]
   }
 }
