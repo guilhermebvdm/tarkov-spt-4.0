@@ -1,0 +1,960 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "label": "Camera.cs",
+      "file_type": "code",
+      "source_file": "Camera.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "camera",
+      "community": 1,
+      "norm_label": "camera.cs"
+    },
+    {
+      "label": "hazelify.StanceSync",
+      "file_type": "code",
+      "source_file": "Camera.cs",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "camera_hazelify_stancesync",
+      "community": 1,
+      "norm_label": "hazelify.stancesync"
+    },
+    {
+      "label": "Camera",
+      "file_type": "code",
+      "source_file": "Camera.cs",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "camera_camera",
+      "community": 1,
+      "norm_label": "camera"
+    },
+    {
+      "label": "MonoBehaviour",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "monobehaviour",
+      "community": 1,
+      "norm_label": "monobehaviour"
+    },
+    {
+      "label": "Player",
+      "file_type": "code",
+      "source_file": "Camera.cs",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "camera_cs_player",
+      "community": 1,
+      "norm_label": "player"
+    },
+    {
+      "label": "SharedGameSettingsClass",
+      "file_type": "code",
+      "source_file": "Camera.cs",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "sharedgamesettingsclass",
+      "community": 1,
+      "norm_label": "sharedgamesettingsclass"
+    },
+    {
+      "label": "ItemHandsController",
+      "file_type": "code",
+      "source_file": "Camera.cs",
+      "source_location": "L11",
+      "_origin": "ast",
+      "id": "itemhandscontroller",
+      "community": 1,
+      "norm_label": "itemhandscontroller"
+    },
+    {
+      "label": "FirearmController",
+      "file_type": "code",
+      "source_file": "Camera.cs",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "firearmcontroller",
+      "community": 1,
+      "norm_label": "firearmcontroller"
+    },
+    {
+      "label": ".Awake()",
+      "file_type": "code",
+      "source_file": "Camera.cs",
+      "source_location": "L14",
+      "_origin": "ast",
+      "id": "camera_camera_awake",
+      "community": 1,
+      "norm_label": ".awake()"
+    },
+    {
+      "label": ".UpdateCamera()",
+      "file_type": "code",
+      "source_file": "Camera.cs",
+      "source_location": "L19",
+      "_origin": "ast",
+      "id": "camera_camera_updatecamera",
+      "community": 1,
+      "norm_label": ".updatecamera()"
+    },
+    {
+      "label": "ConfigurationManagerAttributes.cs",
+      "file_type": "code",
+      "source_file": "ConfigurationManagerAttributes.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "configurationmanagerattributes",
+      "community": 0,
+      "norm_label": "configurationmanagerattributes.cs"
+    },
+    {
+      "label": "ConfigurationManagerAttributes",
+      "file_type": "code",
+      "source_file": "ConfigurationManagerAttributes.cs",
+      "source_location": "L28",
+      "_origin": "ast",
+      "id": "configurationmanagerattributes_configurationmanagerattributes",
+      "community": 0,
+      "norm_label": "configurationmanagerattributes"
+    },
+    {
+      "label": "bool",
+      "file_type": "code",
+      "source_file": "ConfigurationManagerAttributes.cs",
+      "source_location": "L33",
+      "_origin": "ast",
+      "id": "bool",
+      "community": 0,
+      "norm_label": "bool"
+    },
+    {
+      "label": "ConfigEntryBase>",
+      "file_type": "code",
+      "source_file": "ConfigurationManagerAttributes.cs",
+      "source_location": "L39",
+      "_origin": "ast",
+      "id": "configentrybase",
+      "community": 0,
+      "norm_label": "configentrybase>"
+    },
+    {
+      "label": "CustomHotkeyDrawerFunc",
+      "file_type": "code",
+      "source_file": "ConfigurationManagerAttributes.cs",
+      "source_location": "L45",
+      "_origin": "ast",
+      "id": "customhotkeydrawerfunc",
+      "community": 0,
+      "norm_label": "customhotkeydrawerfunc"
+    },
+    {
+      "label": "string",
+      "file_type": "code",
+      "source_file": "ConfigurationManagerAttributes.cs",
+      "source_location": "L95",
+      "_origin": "ast",
+      "id": "string",
+      "community": 0,
+      "norm_label": "string"
+    },
+    {
+      "label": "object",
+      "file_type": "code",
+      "source_file": "ConfigurationManagerAttributes.cs",
+      "source_location": "L100",
+      "_origin": "ast",
+      "id": "object",
+      "community": 0,
+      "norm_label": "object"
+    },
+    {
+      "label": "int",
+      "file_type": "code",
+      "source_file": "ConfigurationManagerAttributes.cs",
+      "source_location": "L128",
+      "_origin": "ast",
+      "id": "int",
+      "community": 0,
+      "norm_label": "int"
+    },
+    {
+      "label": "Func<object, string>",
+      "file_type": "code",
+      "source_file": "ConfigurationManagerAttributes.cs",
+      "source_location": "L143",
+      "_origin": "ast",
+      "id": "func_object_string",
+      "community": 0,
+      "norm_label": "func<object, string>"
+    },
+    {
+      "label": "Func<string, object>",
+      "file_type": "code",
+      "source_file": "ConfigurationManagerAttributes.cs",
+      "source_location": "L148",
+      "_origin": "ast",
+      "id": "func_string_object",
+      "community": 0,
+      "norm_label": "func<string, object>"
+    },
+    {
+      "label": "OnLeanPatchPostfix.cs",
+      "file_type": "code",
+      "source_file": "Patches/OnLeanPatchPostfix.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "patches_onleanpatchpostfix",
+      "community": 3,
+      "norm_label": "onleanpatchpostfix.cs"
+    },
+    {
+      "label": "OnLeanPatchPostfix",
+      "file_type": "code",
+      "source_file": "Patches/OnLeanPatchPostfix.cs",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "patches_onleanpatchpostfix_onleanpatchpostfix",
+      "community": 3,
+      "norm_label": "onleanpatchpostfix"
+    },
+    {
+      "label": "ModulePatch",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "modulepatch",
+      "community": 3,
+      "norm_label": "modulepatch"
+    },
+    {
+      "label": ".GetTargetMethod()",
+      "file_type": "code",
+      "source_file": "Patches/OnLeanPatchPostfix.cs",
+      "source_location": "L11",
+      "_origin": "ast",
+      "id": "patches_onleanpatchpostfix_onleanpatchpostfix_gettargetmethod",
+      "community": 3,
+      "norm_label": ".gettargetmethod()"
+    },
+    {
+      "label": "MethodBase",
+      "file_type": "code",
+      "source_file": "Patches/OnLeanPatchPostfix.cs",
+      "source_location": "L11",
+      "_origin": "ast",
+      "id": "patches_onleanpatchpostfix_cs_methodbase",
+      "community": 3,
+      "norm_label": "methodbase"
+    },
+    {
+      "label": ".Postfix()",
+      "file_type": "code",
+      "source_file": "Patches/OnLeanPatchPostfix.cs",
+      "source_location": "L16",
+      "_origin": "ast",
+      "id": "patches_onleanpatchpostfix_onleanpatchpostfix_postfix",
+      "community": 3,
+      "norm_label": ".postfix()"
+    },
+    {
+      "label": "Player",
+      "file_type": "code",
+      "source_file": "Patches/OnLeanPatchPostfix.cs",
+      "source_location": "L16",
+      "_origin": "ast",
+      "id": "patches_onleanpatchpostfix_cs_player",
+      "community": 3,
+      "norm_label": "player"
+    },
+    {
+      "label": "PatchPostfix",
+      "file_type": "code",
+      "source_file": "Patches/OnLeanPatchPostfix.cs",
+      "source_location": "L16",
+      "_origin": "ast",
+      "id": "patchpostfix",
+      "community": 3,
+      "norm_label": "patchpostfix"
+    },
+    {
+      "label": "PlayerCameraControllerPatchPrefix.cs",
+      "file_type": "code",
+      "source_file": "Patches/PlayerCameraControllerPatchPrefix.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "patches_playercameracontrollerpatchprefix",
+      "community": 4,
+      "norm_label": "playercameracontrollerpatchprefix.cs"
+    },
+    {
+      "label": "hazelify.StanceSync.Patches",
+      "file_type": "code",
+      "source_file": "Patches/PlayerCameraControllerPatchPrefix.cs",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "patches_playercameracontrollerpatchprefix_hazelify_stancesync_patches",
+      "community": 4,
+      "norm_label": "hazelify.stancesync.patches"
+    },
+    {
+      "label": "PlayerCameraControllerPatchPrefix",
+      "file_type": "code",
+      "source_file": "Patches/PlayerCameraControllerPatchPrefix.cs",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "patches_playercameracontrollerpatchprefix_playercameracontrollerpatchprefix",
+      "community": 4,
+      "norm_label": "playercameracontrollerpatchprefix"
+    },
+    {
+      "label": ".GetTargetMethod()",
+      "file_type": "code",
+      "source_file": "Patches/PlayerCameraControllerPatchPrefix.cs",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "patches_playercameracontrollerpatchprefix_playercameracontrollerpatchprefix_gettargetmethod",
+      "community": 4,
+      "norm_label": ".gettargetmethod()"
+    },
+    {
+      "label": "MethodBase",
+      "file_type": "code",
+      "source_file": "Patches/PlayerCameraControllerPatchPrefix.cs",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "patches_playercameracontrollerpatchprefix_cs_methodbase",
+      "community": 4,
+      "norm_label": "methodbase"
+    },
+    {
+      "label": ".Prefix()",
+      "file_type": "code",
+      "source_file": "Patches/PlayerCameraControllerPatchPrefix.cs",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "patches_playercameracontrollerpatchprefix_playercameracontrollerpatchprefix_prefix",
+      "community": 4,
+      "norm_label": ".prefix()"
+    },
+    {
+      "label": "PlayerCameraController",
+      "file_type": "code",
+      "source_file": "Patches/PlayerCameraControllerPatchPrefix.cs",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "playercameracontroller",
+      "community": 4,
+      "norm_label": "playercameracontroller"
+    },
+    {
+      "label": "PatchPrefix",
+      "file_type": "code",
+      "source_file": "Patches/PlayerCameraControllerPatchPrefix.cs",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "patchprefix",
+      "community": 4,
+      "norm_label": "patchprefix"
+    },
+    {
+      "label": "Plugin.cs",
+      "file_type": "code",
+      "source_file": "Plugin.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "plugin",
+      "community": 2,
+      "norm_label": "plugin.cs"
+    },
+    {
+      "label": "hazelify.StanceSync",
+      "file_type": "code",
+      "source_file": "Plugin.cs",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "plugin_hazelify_stancesync",
+      "community": 2,
+      "norm_label": "hazelify.stancesync"
+    },
+    {
+      "label": "Plugin",
+      "file_type": "code",
+      "source_file": "Plugin.cs",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "plugin_plugin",
+      "community": 2,
+      "norm_label": "plugin"
+    },
+    {
+      "label": "BaseUnityPlugin",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "baseunityplugin",
+      "community": 2,
+      "norm_label": "baseunityplugin"
+    },
+    {
+      "label": "ManualLogSource",
+      "file_type": "code",
+      "source_file": "Plugin.cs",
+      "source_location": "L16",
+      "_origin": "ast",
+      "id": "manuallogsource",
+      "community": 2,
+      "norm_label": "manuallogsource"
+    },
+    {
+      "label": "ConfigEntry",
+      "file_type": "code",
+      "source_file": "Plugin.cs",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "configentry",
+      "community": 2,
+      "norm_label": "configentry"
+    },
+    {
+      "label": ".Awake()",
+      "file_type": "code",
+      "source_file": "Plugin.cs",
+      "source_location": "L23",
+      "_origin": "ast",
+      "id": "plugin_plugin_awake",
+      "community": 2,
+      "norm_label": ".awake()"
+    },
+    {
+      "label": ".initConfig()",
+      "file_type": "code",
+      "source_file": "Plugin.cs",
+      "source_location": "L36",
+      "_origin": "ast",
+      "id": "plugin_plugin_initconfig",
+      "community": 2,
+      "norm_label": ".initconfig()"
+    },
+    {
+      "label": "StanceSync",
+      "file_type": "code",
+      "source_file": "StanceSync.csproj",
+      "source_location": null,
+      "_origin": "ast",
+      "id": "stancesync_csproj_stancesync",
+      "community": 5,
+      "norm_label": "stancesync"
+    },
+    {
+      "label": "netstandard2.1",
+      "file_type": "concept",
+      "source_file": "StanceSync.csproj",
+      "source_location": null,
+      "_origin": "ast",
+      "id": "framework_netstandard2_1",
+      "community": 5,
+      "norm_label": "netstandard2.1"
+    },
+    {
+      "label": "Microsoft.NET.Sdk",
+      "file_type": "concept",
+      "source_file": "StanceSync.csproj",
+      "source_location": null,
+      "_origin": "ast",
+      "id": "sdk_microsoft_net_sdk",
+      "community": 5,
+      "norm_label": "microsoft.net.sdk"
+    },
+    {
+      "label": "StanceSync.sln",
+      "file_type": "code",
+      "source_file": "StanceSync.sln",
+      "source_location": null,
+      "_origin": "ast",
+      "id": "stancesync_sln_stancesync",
+      "community": 6,
+      "norm_label": "stancesync.sln"
+    }
+  ],
+  "links": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Camera.cs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "camera",
+      "target": "camera_camera",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Camera.cs",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "camera",
+      "target": "camera_hazelify_stancesync",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Camera.cs",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "camera_camera",
+      "target": "camera_camera_awake",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Camera.cs",
+      "source_location": "L19",
+      "weight": 1.0,
+      "source": "camera_camera",
+      "target": "camera_camera_updatecamera",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Camera.cs",
+      "source_location": "L9",
+      "weight": 1.0,
+      "context": "field",
+      "source": "camera_camera",
+      "target": "camera_cs_player",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Camera.cs",
+      "source_location": "L12",
+      "weight": 1.0,
+      "context": "field",
+      "source": "camera_camera",
+      "target": "firearmcontroller",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Camera.cs",
+      "source_location": "L11",
+      "weight": 1.0,
+      "context": "field",
+      "source": "camera_camera",
+      "target": "itemhandscontroller",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "Camera.cs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "camera_camera",
+      "target": "monobehaviour",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Camera.cs",
+      "source_location": "L10",
+      "weight": 1.0,
+      "context": "field",
+      "source": "camera_camera",
+      "target": "sharedgamesettingsclass",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "ConfigurationManagerAttributes.cs",
+      "source_location": "L28",
+      "weight": 1.0,
+      "source": "configurationmanagerattributes",
+      "target": "configurationmanagerattributes_configurationmanagerattributes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "ConfigurationManagerAttributes.cs",
+      "source_location": "L138",
+      "weight": 1.0,
+      "context": "field",
+      "source": "configurationmanagerattributes_configurationmanagerattributes",
+      "target": "bool",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "ConfigurationManagerAttributes.cs",
+      "source_location": "L39",
+      "weight": 1.0,
+      "context": "field",
+      "source": "configurationmanagerattributes_configurationmanagerattributes",
+      "target": "configentrybase",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "ConfigurationManagerAttributes.cs",
+      "source_location": "L45",
+      "weight": 1.0,
+      "context": "field",
+      "source": "configurationmanagerattributes_configurationmanagerattributes",
+      "target": "customhotkeydrawerfunc",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "ConfigurationManagerAttributes.cs",
+      "source_location": "L143",
+      "weight": 1.0,
+      "context": "field",
+      "source": "configurationmanagerattributes_configurationmanagerattributes",
+      "target": "func_object_string",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "ConfigurationManagerAttributes.cs",
+      "source_location": "L148",
+      "weight": 1.0,
+      "context": "field",
+      "source": "configurationmanagerattributes_configurationmanagerattributes",
+      "target": "func_string_object",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "ConfigurationManagerAttributes.cs",
+      "source_location": "L128",
+      "weight": 1.0,
+      "context": "field",
+      "source": "configurationmanagerattributes_configurationmanagerattributes",
+      "target": "int",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "ConfigurationManagerAttributes.cs",
+      "source_location": "L100",
+      "weight": 1.0,
+      "context": "field",
+      "source": "configurationmanagerattributes_configurationmanagerattributes",
+      "target": "object",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "ConfigurationManagerAttributes.cs",
+      "source_location": "L122",
+      "weight": 1.0,
+      "context": "field",
+      "source": "configurationmanagerattributes_configurationmanagerattributes",
+      "target": "string",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/OnLeanPatchPostfix.cs",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "patches_onleanpatchpostfix",
+      "target": "patches_onleanpatchpostfix_cs_player",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/OnLeanPatchPostfix.cs",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "patches_onleanpatchpostfix",
+      "target": "patches_onleanpatchpostfix_onleanpatchpostfix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/OnLeanPatchPostfix.cs",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "patches_onleanpatchpostfix_onleanpatchpostfix",
+      "target": "modulepatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/OnLeanPatchPostfix.cs",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "patches_onleanpatchpostfix_onleanpatchpostfix",
+      "target": "patches_onleanpatchpostfix_onleanpatchpostfix_gettargetmethod",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/OnLeanPatchPostfix.cs",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "patches_onleanpatchpostfix_onleanpatchpostfix",
+      "target": "patches_onleanpatchpostfix_onleanpatchpostfix_postfix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/PlayerCameraControllerPatchPrefix.cs",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "patches_playercameracontrollerpatchprefix_playercameracontrollerpatchprefix",
+      "target": "modulepatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/OnLeanPatchPostfix.cs",
+      "source_location": "L11",
+      "weight": 1.0,
+      "context": "return_type",
+      "source": "patches_onleanpatchpostfix_onleanpatchpostfix_gettargetmethod",
+      "target": "patches_onleanpatchpostfix_cs_methodbase",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/OnLeanPatchPostfix.cs",
+      "source_location": "L16",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "patches_onleanpatchpostfix_onleanpatchpostfix_postfix",
+      "target": "patches_onleanpatchpostfix_cs_player",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/OnLeanPatchPostfix.cs",
+      "source_location": "L16",
+      "weight": 1.0,
+      "context": "attribute",
+      "source": "patches_onleanpatchpostfix_onleanpatchpostfix_postfix",
+      "target": "patchpostfix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/PlayerCameraControllerPatchPrefix.cs",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "patches_playercameracontrollerpatchprefix",
+      "target": "patches_playercameracontrollerpatchprefix_hazelify_stancesync_patches",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/PlayerCameraControllerPatchPrefix.cs",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "patches_playercameracontrollerpatchprefix",
+      "target": "patches_playercameracontrollerpatchprefix_playercameracontrollerpatchprefix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/PlayerCameraControllerPatchPrefix.cs",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "patches_playercameracontrollerpatchprefix_playercameracontrollerpatchprefix",
+      "target": "patches_playercameracontrollerpatchprefix_playercameracontrollerpatchprefix_gettargetmethod",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/PlayerCameraControllerPatchPrefix.cs",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "patches_playercameracontrollerpatchprefix_playercameracontrollerpatchprefix",
+      "target": "patches_playercameracontrollerpatchprefix_playercameracontrollerpatchprefix_prefix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/PlayerCameraControllerPatchPrefix.cs",
+      "source_location": "L12",
+      "weight": 1.0,
+      "context": "return_type",
+      "source": "patches_playercameracontrollerpatchprefix_playercameracontrollerpatchprefix_gettargetmethod",
+      "target": "patches_playercameracontrollerpatchprefix_cs_methodbase",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/PlayerCameraControllerPatchPrefix.cs",
+      "source_location": "L17",
+      "weight": 1.0,
+      "context": "attribute",
+      "source": "patches_playercameracontrollerpatchprefix_playercameracontrollerpatchprefix_prefix",
+      "target": "patchprefix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/PlayerCameraControllerPatchPrefix.cs",
+      "source_location": "L17",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "patches_playercameracontrollerpatchprefix_playercameracontrollerpatchprefix_prefix",
+      "target": "playercameracontroller",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Plugin.cs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "plugin",
+      "target": "plugin_hazelify_stancesync",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Plugin.cs",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "plugin",
+      "target": "plugin_plugin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "Plugin.cs",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "plugin_plugin",
+      "target": "baseunityplugin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Plugin.cs",
+      "source_location": "L21",
+      "weight": 1.0,
+      "context": "field",
+      "source": "plugin_plugin",
+      "target": "configentry",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Plugin.cs",
+      "source_location": "L16",
+      "weight": 1.0,
+      "context": "field",
+      "source": "plugin_plugin",
+      "target": "manuallogsource",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Plugin.cs",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "plugin_plugin",
+      "target": "plugin_plugin_awake",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Plugin.cs",
+      "source_location": "L36",
+      "weight": 1.0,
+      "source": "plugin_plugin",
+      "target": "plugin_plugin_initconfig",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Plugin.cs",
+      "source_location": "L26",
+      "weight": 1.0,
+      "source": "plugin_plugin_awake",
+      "target": "plugin_plugin_initconfig",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "StanceSync.csproj",
+      "weight": 1.0,
+      "source": "stancesync_csproj_stancesync",
+      "target": "framework_netstandard2_1",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "StanceSync.csproj",
+      "weight": 1.0,
+      "source": "stancesync_csproj_stancesync",
+      "target": "sdk_microsoft_net_sdk",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "StanceSync.sln",
+      "weight": 1.0,
+      "source": "stancesync_sln_stancesync",
+      "target": "stancesync_sln_stancesync",
+      "confidence_score": 1.0
+    }
+  ],
+  "hyperedges": [],
+  "built_at_commit": "dd0c533f18c7703dc7da292311cfa3a17fcc0b88"
+}

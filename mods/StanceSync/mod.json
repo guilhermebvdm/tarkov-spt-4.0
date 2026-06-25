@@ -1,0 +1,11 @@
+{
+  "name": "StanceSync",
+  "upstream_url": "https://github.com/minihazel/StanceSync",
+  "upstream_sha": "f5a063f3e302f30580ced3a5875b2bc6188225c8",
+  "upstream_branch": "master",
+  "forge_url": "",
+  "license": "MIT",
+  "version_base": "$(AssemblyVersion)",
+  "spt_version": "",
+  "created_at": "2026-06-23T00:03:44Z"
+}
