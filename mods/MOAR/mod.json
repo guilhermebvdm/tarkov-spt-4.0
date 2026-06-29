@@ -1,0 +1,11 @@
+{
+  "name": "MOAR",
+  "upstream_url": "https://github.com/Andrewgdewar/MOAR",
+  "upstream_sha": "0d4becec33556316cd7a6cfceb276c75e489698c",
+  "upstream_branch": "main",
+  "forge_url": "",
+  "license": "MIT",
+  "version_base": "3.1.6",
+  "spt_version": "",
+  "created_at": "2026-06-29T03:42:00Z"
+}

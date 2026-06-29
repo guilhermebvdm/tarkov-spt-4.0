@@ -1,0 +1,107 @@
+{
+  "live-like": {},
+  "quiet-raids": {
+    "spawnSmoothing": false,
+    "randomSpawns": true,
+    "scavGroupChance": 0.1,
+    "scavMaxGroupSize": 2,
+    "pmcGroupChance": 0.1,
+    "pmcMaxGroupSize": 2,
+    "scavWaveQuantity": 0.7,
+    "pmcWaveQuantity": 0.5,
+    "mainBossChanceBuff": 0
+  },
+  "more-scavs": {
+    "scavGroupChance": 0.5,
+    "scavMaxGroupSize": 5,
+    "scavWaveQuantity": 1.5,
+    "pmcWaveQuantity": 0.7
+  },
+  "more-pmcs": {
+    "pmcGroupChance": 0.5,
+    "pmcWaveQuantity": 1.3,
+    "scavWaveQuantity": 0.7
+  },
+  "more-scavs-and-pmcs": {
+    "scavGroupChance": 0.3,
+    "scavMaxGroupSize": 5,
+    "pmcGroupChance": 0.3,
+    "pmcMaxGroupSize": 5,
+    "scavWaveQuantity": 1.4,
+    "pmcWaveQuantity": 1.2
+  },
+  "delayed-scavs": {
+    "scavWaveDistribution": 1.5
+  },
+  "delayed-pmcs": {
+    "pmcWaveDistribution": 1.2
+  },
+  "arrived-early": {
+    "spawnSmoothing": false,
+    "scavWaveDistribution": 1.2,
+    "pmcWaveDistribution": 1.2
+  },
+  "rogue-invasion": {
+    "randomRaiderGroup": true,
+    "randomRaiderGroupChance": 100
+  },
+  "raider-invasion": {
+    "randomRaiderGroup": true,
+    "randomRaiderGroupChance": 100
+  },
+  "insanity": {
+    "scavWaveQuantity": 1.3,
+    "pmcWaveQuantity": 1.3,
+    "scavGroupChance": 0.7,
+    "pmcGroupChance": 0.8,
+    "pmcMaxGroupSize": 6,
+    "scavMaxGroupSize": 6,
+    "sniperGroupChance": 0.5,
+    "bossOpenZones": true,
+    "randomRaiderGroup": true,
+    "randomRaiderGroupChance": 50,
+    "randomRogueGroup": true,
+    "randomRogueGroupChance": 50,
+    "mainBossChanceBuff": 50,
+    "bossInvasion": true,
+    "bossInvasionSpawnChance": 10
+  },
+  "minor-boss-invasion": {
+    "bossOpenZones": true,
+    "bossInvasion": true,
+    "bossInvasionSpawnChance": 10,
+    "mainBossChanceBuff": 25,
+    "gradualBossInvasion": true
+  },
+  "less-pmcs-less-scavs-boss-invasion": {
+    "maxBotCap": 20,
+    "scavWaveQuantity": 0.7,
+    "pmcWaveQuantity": 0.7,
+    "bossOpenZones": true,
+    "bossInvasion": true,
+    "bossInvasionSpawnChance": 25,
+    "mainBossChanceBuff": 35,
+    "gradualBossInvasion": true
+  },
+  "low-pmcs-low-scavs-major-boss-invasion": {
+    "maxBotCap": 12,
+    "scavWaveQuantity": 0.3,
+    "pmcWaveQuantity": 0.1,
+    "bossOpenZones": true,
+    "bossInvasion": true,
+    "bossInvasionSpawnChance": 90,
+    "mainBossChanceBuff": 80,
+    "gradualBossInvasion": true
+  },
+  "main-boss-guaranteed": {
+    "mainBossChanceBuff": 100
+  },
+  "main-boss-guaranteed-roaming": {
+    "bossOpenZones": true,
+    "mainBossChanceBuff": 100
+  },
+  "sniper-buddies": {
+    "sniperMaxGroupSize": 4,
+    "sniperGroupChance": 1
+  }
+}

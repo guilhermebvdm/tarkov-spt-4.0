@@ -1,0 +1,11 @@
+{
+  "name": "MOAR-Client",
+  "upstream_url": "https://github.com/Andrewgdewar/MOAR-Client",
+  "upstream_sha": "41f6ffb8f4c037f20fce7fdbde8e77310daf73e6",
+  "upstream_branch": "master",
+  "forge_url": "",
+  "license": "Unknown",
+  "version_base": "unknown",
+  "spt_version": "",
+  "created_at": "2026-06-29T03:39:37Z"
+}
