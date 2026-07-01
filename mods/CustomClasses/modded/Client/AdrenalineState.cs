@@ -36,4 +36,11 @@ internal static class AdrenalineState
         _windowEnd = now + dur;
         _cooldownEnd = _windowEnd + cd;
     }
+
+    /// <summary>Reseta janela+cooldown (chamado no início da raid — evita cooldown de raid anterior atravessar).</summary>
+    internal static void Reset()
+    {
+        _windowEnd = -9999f;
+        _cooldownEnd = -9999f;
+    }
 }

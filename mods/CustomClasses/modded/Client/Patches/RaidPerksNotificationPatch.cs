@@ -28,6 +28,10 @@ internal class RaidPerksNotificationPatch : ModulePatch
     {
         try
         {
+            // (review fix) reseta a Adrenaline no início da raid — o cooldown não deve atravessar de uma raid
+            // anterior (Time.time é monotônico no processo). Roda independente do toggle da notificação.
+            AdrenalineState.Reset();
+
             if (PerksConfig.ShowRaidPerksNotification?.Value != true)
             {
                 return;

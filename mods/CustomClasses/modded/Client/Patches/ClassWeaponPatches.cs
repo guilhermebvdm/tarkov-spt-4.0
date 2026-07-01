@@ -57,7 +57,8 @@ internal class ShootRecoilPatch : ModulePatch
 
             if (PerkDiag.Enabled)
             {
-                PerkDiag.LastRecoil = str0 > 0f ? $"x{str / str0:F2}" : "-";
+                PerkDiag.RecoilBefore = str0;
+                PerkDiag.RecoilAfter = str;
             }
         }
         catch (Exception ex)
@@ -247,6 +248,13 @@ internal class AimPunchPatch : ModulePatch
                 return;   // só o tranco do player local
             }
 
+            // (review fix 2026-06-24) só aplica se houve dano de COMBATE recente (ApplyDamageInfo). Dano de QUEDA
+            // não passa por ApplyDamageInfo → timestamp velho → não dispara. Janela curta = mesmo frame do hit.
+            if (UnityEngine.Time.time - LocalHitTypePatch.LastCombatHitTime > 0.15f)
+            {
+                return;
+            }
+
             // 🔻 Rattled (Furtivo): +50% no tranco de câmera ao levar dano.
             if (PerksConfig.RattledEnabled?.Value == true && SkillMultipliers.IsLocalClass("Stealth"))
             {
@@ -262,6 +270,33 @@ internal class AimPunchPatch : ModulePatch
         catch (Exception ex)
         {
             Plugin.Log?.LogError($"[CustomClasses] aim-punch falhou: {ex.Message}");
+        }
+    }
+}
+
+/// <summary>
+///     (review fix 2026-06-24) Captura o tipo do último dano recebido pelo player LOCAL, pra o
+///     <c>AimPunchPatch</c> (Rattled/Cool Under Fire) NÃO disparar em dano de QUEDA. Prefix em
+///     <c>Player.ApplyDamageInfo</c> — roda antes do <c>EffectsController</c>→<c>ForceEffector.AddForce</c>.
+/// </summary>
+internal class LocalHitTypePatch : ModulePatch
+{
+    // Marca o instante do último dano de COMBATE (que passa por Player.ApplyDamageInfo). Dano de QUEDA NÃO passa
+    // por aqui — vai por ActiveHealthController.ApplyDamage (review 2026-06-24) → o timestamp fica velho → o
+    // aim-punch de queda é barrado por RECÊNCIA no AimPunchPatch (o AddForce de combate é síncrono ao ApplyDamageInfo).
+    internal static float LastCombatHitTime = -999f;
+
+    protected override MethodBase GetTargetMethod()
+    {
+        return AccessTools.Method(typeof(Player), nameof(Player.ApplyDamageInfo));
+    }
+
+    [PatchPrefix]
+    private static void Prefix(Player __instance)
+    {
+        if (ReferenceEquals(__instance, Singleton<GameWorld>.Instance?.MainPlayer))
+        {
+            LastCombatHitTime = UnityEngine.Time.time;
         }
     }
 }

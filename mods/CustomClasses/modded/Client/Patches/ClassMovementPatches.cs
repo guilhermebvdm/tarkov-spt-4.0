@@ -111,12 +111,73 @@ internal class OverladenInertiaPatch : ModulePatch
                 return;
             }
 
-            // Inertia já escala com o peso no vanilla (OnWeightUpdated) — aqui multiplicamos por cima.
-            __instance.Inertia *= PerksConfig.OverladenInertia?.Value ?? 1f;
+            // Overladen (fix review 2026-06-24): OnWeightUpdated já DERIVOU os campos de inércia reais a partir de
+            // Inertia — multiplicar só o Inertia cru (pós-derivação) quase não muda o "clunky". Multiplicamos também
+            // os derivados que de fato movem (lateral/diagonal).
+            var m = PerksConfig.OverladenInertia?.Value ?? 1f;
+            __instance.Inertia *= m;
+            __instance.MoveSideInertia *= m;
+            __instance.MoveDiagonalInertia *= m;
         }
         catch (Exception ex)
         {
             Plugin.Log?.LogError($"[CustomClasses] overladen falhou: {ex.Message}");
+        }
+    }
+}
+
+/// <summary>
+///     Item 050.1 (fix 2026-06-24) — DRIVER REAL da velocidade de movimento.
+///     Os getters <c>MaxSpeed</c>/<c>SprintSpeed</c> (patches acima) são só TETO de clamp / denominador de razão —
+///     NÃO movem o boneco (a locomoção do EFT é root-motion + cap físico). O valor real passa por
+///     <c>MovementContext.SetCharacterMovementSpeed(speed)</c>. Aqui aplicamos os MESMOS multiplicadores de classe
+///     ao <c>speed</c> real (via <c>ClassMoveSpeed.Apply</c>); os getters acima ficam como TETO — necessário pro
+///     buff do Execution não ser clampado. <c>__0</c> = 1º parâmetro (o speed), robusto ao nome.
+///     ⚠️ Coop: só o player LOCAL; peers veem via MovementInfoPacket — gap de coop-sync a validar.
+/// </summary>
+internal class SetCharacterMovementSpeedPatch : ModulePatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return AccessTools.Method(typeof(MovementContext), "SetCharacterMovementSpeed");
+    }
+
+    [PatchPrefix]
+    private static void Prefix(MovementContext __instance, ref float __0)
+    {
+        ClassMoveSpeed.Apply(__instance, ref __0);
+    }
+}
+
+/// <summary>
+///     Item 050.1 (fix 2026-06-24) — velocidade de CORRIDA (sprint). Sprint é caminho separado do walk:
+///     o driver é <c>MovementContext.SprintAcceleration</c> → campo <c>SprintSpeed</c> (root-motion). Postfix
+///     reaplica os mesmos multiplicadores de classe ao <c>SprintSpeed</c> pós-clamp (Rooted é no-op — não se
+///     mira correndo). ⚠️ validar in-game: o buff (+10%) pode ser re-clampado no frame seguinte.
+/// </summary>
+internal class SprintAccelerationPatch : ModulePatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return AccessTools.Method(typeof(MovementContext), "SprintAcceleration");
+    }
+
+    [PatchPostfix]
+    private static void Postfix(MovementContext __instance)
+    {
+        try
+        {
+            var s = __instance.SprintSpeed;
+            var s0 = s;
+            ClassMoveSpeed.Apply(__instance, ref s);   // gateia internamente (só MainPlayer local + classe)
+            if (s != s0)
+            {
+                __instance.SprintSpeed = s;
+            }
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log?.LogError($"[CustomClasses] sprint falhou: {ex.Message}");
         }
     }
 }

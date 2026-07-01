@@ -97,11 +97,24 @@ public class Plugin : BaseUnityPlugin
         new BulwarkPatch().Enable();                        // (050.0) 🛡️ Tanque — dano recebido ×0.85
         new PackMulePatch().Enable();                       // (050.0) 🎒🛡️ Pack Mule — +30% limite de carga (piso, stash+raid)
         new RaidPerksNotificationPatch().Enable();          // (050) notificação de perks/drawbacks no início da raid
-        new MaxSpeedPatch().Enable();                       // (050.1) vel. de movimento por classe (Heavy Frame…)
-        new SprintSpeedPatch().Enable();                    // (050.1) idem no sprint
+        // (050.1 fix 2026-06-24) MaxSpeedPatch/SprintSpeedPatch (getters) REMOVIDOS:
+        //   - MaxSpeed é só TETO/denominador da razão RelativeSpeed = CharSpeed/MaxSpeed → aplicar no getter E no
+        //     SetCharacterMovementSpeed CANCELAVA o efeito na razão. Agora só o driver real é patchado (abaixo).
+        //   - SprintSpeed getter é DEAD (sprint usa StateSprintSpeedLimit/Physical.SprintSpeed, caminho separado).
         new OverladenInertiaPatch().Enable();               // (050.1) 🔻 Saqueador — inércia ∝ peso
+        try
+        {
+            new SetCharacterMovementSpeedPatch().Enable();  // (050.1 fix) driver REAL da velocidade de ANDAR
+            new SprintAccelerationPatch().Enable();         // (050.1 fix) driver da velocidade de CORRER (sprint)
+            new AiSoundPatch().Enable();                    // (050.4 fix) audibilidade PARA A IA (BotEventHandler.PlaySound)
+        }
+        catch (System.Exception ex)
+        {
+            Log.LogError($"[CustomClasses] (fix vel/som) patches falharam ao aplicar: {ex.Message}");
+        }
         new ShootRecoilPatch().Enable();                    // (050.2) 🔻 Médico — recuo ×1.25 (Shaky Hands) + Adrenaline ×0.7
         new AimPunchPatch().Enable();                       // (050.2) 🔻 Furtivo — aim-punch ×1.5 (Rattled)
+        new LocalHitTypePatch().Enable();                   // (review) captura tipo do dano local (barra aim-punch em queda)
         try
         {
             new AdrenalineTriggerPatch().Enable();          // (050.2) 🔧 Fuzileiro — gatilho da Adrenaline (dano dado/recebido)
@@ -127,7 +140,7 @@ public class Plugin : BaseUnityPlugin
         try
         {
             new HeavyWeaponErgoPatch().Enable();            // (050.4b) 🔧 Tanque — +ergo arma pesada (Bunker)
-            new IronLungsPatch().Enable();                  // (050.4b) 🔧 Caçador — segura respiração + tempo (método obfuscado)
+            new IronLungsPatch().Enable();                  // (050.4b, lever corrigido) 🔧 Caçador — fôlego +longo (BaseHoldBreathConsumption)
         }
         catch (System.Exception ex)
         {

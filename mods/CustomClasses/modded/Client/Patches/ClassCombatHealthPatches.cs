@@ -118,40 +118,45 @@ internal class ChangeHydrationPatch : ModulePatch
 }
 
 /// <summary>
-///     🔧 Iron Lungs (Caçador) — segura a respiração por mais tempo (menos dreno de oxigênio).
-///     Postfix em <c>PlayerPhysicalClass.method_12</c> (consumo de O₂ do hold-breath) → divide o consumo.
-///     Gate: o physical do MainPlayer + Hunter. (método obfuscado → wiring em try/catch.)
+///     🔧 Iron Lungs (Caçador) — segura a respiração por mais tempo (menos dreno de O₂).
+///     LEVER CORRETO (recon 2026-06-24): o dreno vivo é <c>Oxygen.Process</c> lendo o <c>Delta</c> do consumption
+///     HoldBreath = lambda <c>BaseHoldBreathConsumption × …</c> (sem cache → relido todo frame). Reduzimos o campo
+///     de instância <c>PlayerPhysicalClass.BaseHoldBreathConsumption</c>. Postfix em <c>HoldBreath(enable)</c>
+///     (dispara ao começar/parar de segurar). Gate: physical do MainPlayer + Hunter.
+///     ⚠️ Idempotência: campo persistente por-raid → cacheia o valor-base original (por instância) e SETA
+///     (<c>= base × fator</c>), nunca <c>×=</c> cru (empilharia). O physical é recriado a cada raid → re-captura.
 /// </summary>
 internal class IronLungsPatch : ModulePatch
 {
+    private static PlayerPhysicalClass? _lastPhysical;
+    private static float _originalBase;
+
     protected override MethodBase GetTargetMethod()
     {
-        return AccessTools.Method(typeof(PlayerPhysicalClass), "method_12");
+        return AccessTools.Method(typeof(PlayerPhysicalClass), nameof(PlayerPhysicalClass.HoldBreath));
     }
 
     [PatchPostfix]
-    private static void Postfix(PlayerPhysicalClass __instance, ref float __result)
+    private static void Postfix(PlayerPhysicalClass __instance)
     {
         try
         {
-            if (PerksConfig.IronLungsEnabled?.Value != true)
-            {
-                return;
-            }
-
-            if (!ReferenceEquals(__instance, Singleton<GameWorld>.Instance?.MainPlayer?.Physical))
+            var p = Singleton<GameWorld>.Instance?.MainPlayer;
+            if (p == null || !ReferenceEquals(__instance, p.Physical))
             {
                 return;   // só o player local
             }
 
-            if (SkillMultipliers.IsLocalClass("Hunter"))
+            // captura o valor-base 1× por instância de physical (nova raid = novo physical → re-captura).
+            if (!ReferenceEquals(_lastPhysical, __instance))
             {
-                var f = PerksConfig.IronLungsBreathDrain?.Value ?? 1f;
-                if (f > 0f && f < 1f)
-                {
-                    __result *= f;   // 0.5 = metade do consumo de O₂ → ~2× o tempo de fôlego
-                }
+                _lastPhysical = __instance;
+                _originalBase = __instance.BaseHoldBreathConsumption;
             }
+
+            var on = PerksConfig.IronLungsEnabled?.Value == true && SkillMultipliers.IsLocalClass("Hunter");
+            var f = on ? (PerksConfig.IronLungsBreathDrain?.Value ?? 1f) : 1f;
+            __instance.BaseHoldBreathConsumption = _originalBase * f;   // SETA (idempotente), não ×=
         }
         catch (Exception ex)
         {
@@ -194,7 +199,7 @@ internal class MalfunctionChancePatch : ModulePatch
 
             if (PerkDiag.Enabled)
             {
-                PerkDiag.LastMalfunction = $"{__result * 100f:F2}%";
+                PerkDiag.MalfChance = __result;
             }
         }
         catch (Exception ex)
