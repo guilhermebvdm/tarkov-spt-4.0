@@ -90,6 +90,7 @@ public class Plugin : BaseUnityPlugin
         new SkillIconBorderPatch().Enable();    // (010) UI — borda colorida no ícone
         new MenuClassIdentityPatch().Enable();              // (015) identidade no nome do jogador no menu (Menu-Overhaul)
         new SkillsScreenIdentityPatch().Enable();           // (012) selo da classe no topo da tela de Skills
+        new SkillsPerksPanelPatch().Enable();               // (053) painel de perks/drawbacks na tela de Skills
         new ChatSpecialIconPatch().Enable();                // (015) identidade no nome — deploy/chat/grupo (ChatSpecialIcon)
         new PlayerModelWithStatsIdentityPatch().Enable();   // (015) identidade no nome — tela de character (OVERALL)
         new PlayerNamePanelPatch().Enable();                // (015) identidade no nome — confirmation (PlayerNamePanel)

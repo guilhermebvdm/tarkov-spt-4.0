@@ -97,4 +97,34 @@ internal static class PerksCatalog
 
         return sb.ToString().TrimEnd('\n');
     }
+
+    /// <summary>
+    ///     Item 053 — texto rich-text do painel na tela de Skills: título (classe + "Perks & Drawbacks") +
+    ///     lista com marcador (+ verde perk / − vermelho drawback). Null se a classe não tem entradas.
+    /// </summary>
+    internal static string? BuildPanelText()
+    {
+        var entries = LocalEntries();
+        if (entries == null || entries.Length == 0)
+        {
+            return null;
+        }
+
+        var sb = new StringBuilder();
+        var header = SkillMultipliers.ClassName;
+        var title = GameLocale.IsPortuguese ? "Perks e Drawbacks" : "Perks & Drawbacks";
+        if (!string.IsNullOrEmpty(header))
+        {
+            sb.Append("<b>").Append(header).Append("</b>   <size=75%><i>").Append(title).Append("</i></size>\n\n");
+        }
+
+        foreach (var e in entries)
+        {
+            var hex = e.IsPerk ? MultiplierFormat.GreenHex : MultiplierFormat.RedHex;
+            var mark = e.IsPerk ? "+" : "−";
+            sb.Append("<color=").Append(hex).Append("><b>").Append(mark).Append("</b>  ").Append(e.Text).Append("</color>\n");
+        }
+
+        return sb.ToString().TrimEnd('\n');
+    }
 }

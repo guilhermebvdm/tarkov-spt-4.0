@@ -20,6 +20,9 @@ internal static class PerksConfig
     // UI — notificação de perks/drawbacks no início da raid
     internal static ConfigEntry<bool>? ShowRaidPerksNotification;
 
+    // UI (053) — painel de perks/drawbacks na tela de Skills
+    internal static ConfigEntry<bool>? PerksPanelEnabled;
+
     // 🔻 Heavy Frame (Tanque) — velocidade (050.1) + fome/sede (050.3)
     internal static ConfigEntry<bool>? HeavyFrameEnabled;
     internal static ConfigEntry<float>? HeavyFrameMoveSpeed;
@@ -115,6 +118,10 @@ internal static class PerksConfig
         ShowRaidPerksNotification = config.Bind(
             "Perks — UI", "Raid-start perks notification", true,
             "Notificação no início da raid listando os perks (verde) e drawbacks (vermelho) da classe. / Raid-start notification listing the class's perks/drawbacks.");
+
+        PerksPanelEnabled = config.Bind(
+            "Perks — UI", "Skills-screen perks panel", true,
+            "Painel de perks/drawbacks da classe na tela de Skills (canto superior-direito). / Perks/drawbacks panel on the Skills screen.");
 
         HeavyFrameEnabled = config.Bind(
             "Drawbacks — Tank", "Heavy Frame — Enabled", true,
