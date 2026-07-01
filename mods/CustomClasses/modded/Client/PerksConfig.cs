@@ -22,6 +22,8 @@ internal static class PerksConfig
 
     // UI (053) — painel de perks/drawbacks na tela de Skills
     internal static ConfigEntry<bool>? PerksPanelEnabled;
+    internal static ConfigEntry<float>? PerksPanelPosX;
+    internal static ConfigEntry<float>? PerksPanelPosY;
 
     // 🔻 Heavy Frame (Tanque) — velocidade (050.1) + fome/sede (050.3)
     internal static ConfigEntry<bool>? HeavyFrameEnabled;
@@ -121,7 +123,19 @@ internal static class PerksConfig
 
         PerksPanelEnabled = config.Bind(
             "Perks — UI", "Skills-screen perks panel", true,
-            "Painel de perks/drawbacks da classe na tela de Skills (canto superior-direito). / Perks/drawbacks panel on the Skills screen.");
+            "Painel de perks/drawbacks da classe na tela de Skills. / Perks/drawbacks panel on the Skills screen.");
+        PerksPanelPosX = config.Bind(
+            "Perks — UI", "Perks panel — X offset", -24f,
+            new ConfigDescription(
+                "Deslocamento X do painel a partir da borda direita (mais negativo = mais pra esquerda). / Panel X offset from the right edge.",
+                new AcceptableValueRange<float>(-1800f, 0f)));
+        PerksPanelPosY = config.Bind(
+            "Perks — UI", "Perks panel — Y offset", -90f,
+            new ConfigDescription(
+                "Deslocamento Y do painel a partir do topo (mais negativo = mais pra baixo). / Panel Y offset from the top.",
+                new AcceptableValueRange<float>(-1000f, 0f)));
+        PerksPanelPosX.SettingChanged += (_, _) => SkillsPerksPanelPatch.Reposition();
+        PerksPanelPosY.SettingChanged += (_, _) => SkillsPerksPanelPatch.Reposition();
 
         HeavyFrameEnabled = config.Bind(
             "Drawbacks — Tank", "Heavy Frame — Enabled", true,

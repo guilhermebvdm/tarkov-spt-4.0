@@ -60,6 +60,7 @@ internal class SkillsPerksPanelPatch : ModulePatch
                 ? existing.gameObject
                 : CreatePanel(__instance.transform, font);
             go.SetActive(true);
+            ((RectTransform)go.transform).anchoredPosition = ConfigPos();
 
             var tmp = go.transform.Find("Label").GetComponent<TextMeshProUGUI>();
             if (font != null)
@@ -119,7 +120,22 @@ internal class SkillsPerksPanelPatch : ModulePatch
         var rt = (RectTransform)go.transform;
         rt.anchorMin = rt.anchorMax = new Vector2(1f, 1f);
         rt.pivot = new Vector2(1f, 1f);
-        rt.anchoredPosition = new Vector2(-24f, -90f);
+        rt.anchoredPosition = ConfigPos();
         return go;
+    }
+
+    private static Vector2 ConfigPos()
+    {
+        return new Vector2(PerksConfig.PerksPanelPosX?.Value ?? -24f, PerksConfig.PerksPanelPosY?.Value ?? -90f);
+    }
+
+    /// <summary>Reposiciona o painel em tempo real quando o X/Y muda no F12 (só existe com a tela de Skills aberta).</summary>
+    internal static void Reposition()
+    {
+        var go = GameObject.Find(PanelName);
+        if (go != null)
+        {
+            ((RectTransform)go.transform).anchoredPosition = ConfigPos();
+        }
     }
 }
