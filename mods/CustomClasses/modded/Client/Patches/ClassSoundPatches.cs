@@ -1,4 +1,5 @@
 using System;
+using System.Linq.Expressions;
 using System.Reflection;
 using Comfort.Common;
 using EFT;
@@ -159,7 +160,7 @@ internal class AiSoundPatch : ModulePatch
 internal class SainSoundPatch : ModulePatch
 {
     private const int SainSoundTypeLooting = 5;
-    private static PropertyInfo? _profileIdProp;
+    private static Func<object, string>? _getProfileId;   // getter compilado 1× — tira o reflection do hot-path (review)
 
     protected override MethodBase? GetTargetMethod()
     {
@@ -169,7 +170,14 @@ internal class SainSoundPatch : ModulePatch
             return null;   // SAIN ausente (a habilitação no Plugin já checa antes)
         }
 
-        _profileIdProp = AccessTools.Property(t, "ProfileId");
+        var getter = AccessTools.Property(t, "ProfileId")?.GetGetMethod();
+        if (getter != null)
+        {
+            var pc = Expression.Parameter(typeof(object), "pc");
+            _getProfileId = Expression.Lambda<Func<object, string>>(
+                Expression.Call(Expression.Convert(pc, t), getter), pc).Compile();
+        }
+
         return AccessTools.Method(t, "PlayAISound");
     }
 
@@ -179,13 +187,13 @@ internal class SainSoundPatch : ModulePatch
         try
         {
             var mp = Singleton<GameWorld>.Instance?.MainPlayer;
-            if (mp == null || _profileIdProp == null)
+            if (mp == null || _getProfileId == null)
             {
                 return;
             }
 
-            // gate: só o player local (ProfileId) — não afeta peers coop nem bots.
-            if (_profileIdProp.GetValue(__instance) as string != mp.ProfileId)
+            // gate: só o player local (ProfileId) — não afeta peers coop nem bots. Getter compilado (sem reflection).
+            if (_getProfileId(__instance) != mp.ProfileId)
             {
                 return;
             }
