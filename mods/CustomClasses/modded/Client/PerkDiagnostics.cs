@@ -19,6 +19,7 @@ internal static class PerkDiag
     internal static float RecoilBefore = 1f, RecoilAfter = 1f;
     internal static float AudioBefore, AudioAfter;
     internal static float AiPowerBefore, AiPowerAfter;
+    internal static float SainBefore, SainAfter;
     internal static float MalfChance = -1f;
 }
 
@@ -81,7 +82,8 @@ internal static class PerkDiagnostics
         sb.AppendLine($"Adrenaline: <b>{AdrenalineLabel()}</b>");
         sb.AppendLine($"Recoil str (last shot): <b>{FmtBA(PerkDiag.RecoilBefore, PerkDiag.RecoilAfter, "F2")}</b>");
         sb.AppendLine($"Audio radius — you hear: <b>{FmtBA(PerkDiag.AudioBefore, PerkDiag.AudioAfter, "F1")}</b>");
-        sb.AppendLine($"AI hear power — bots: <b>{FmtBA(PerkDiag.AiPowerBefore, PerkDiag.AiPowerAfter, "F1")}</b>");
+        sb.AppendLine($"AI hear power — bots (base): <b>{FmtBA(PerkDiag.AiPowerBefore, PerkDiag.AiPowerAfter, "F1")}</b>");
+        sb.AppendLine($"SAIN hear range — bots: <b>{FmtBA(PerkDiag.SainBefore, PerkDiag.SainAfter, "F1")}</b>");
         sb.AppendLine($"Malfunction%: <b>{(PerkDiag.MalfChance < 0f ? "-" : (PerkDiag.MalfChance * 100f).ToString("F2") + "%")}</b>");
 
         AppendPerkList(sb);

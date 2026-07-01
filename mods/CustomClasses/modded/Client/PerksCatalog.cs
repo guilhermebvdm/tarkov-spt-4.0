@@ -50,7 +50,7 @@ internal static class PerksCatalog
         ["Scavenger"] = new[]
         {
             P("Quick Hands — search 2 items at once", "Mãos Rápidas — revista 2 itens de uma vez"),
-            P("Silent Looter — quieter loot sounds (to your ears)", "Saque Silencioso — sons de saque mais baixos (no seu fone)"),
+            P("Silent Looter — quieter looting (bots hear it less + your ears)", "Saque Silencioso — saque mais silencioso (bots ouvem menos + no seu fone)"),
             P("Pack Mule — +30% carry limit", "Mula de Carga — +30% de limite de carga"),
             D("Overladen — inertia scales with weight", "Sobrecarregado — inércia escala com o peso"),
         },

@@ -146,3 +146,78 @@ internal class AiSoundPatch : ModulePatch
         }
     }
 }
+
+/// <summary>
+///     Item 050.4 (SAIN 2026-06-24) — audibilidade do player local PARA A IA quando o SAIN está ativo.
+///     O SAIN tem um pipeline de percepção PRÓPRIO (não passa pelo `BotEventHandler` base) que registra passo
+///     + AÇÕES (recarregar, curar, comer, lootar, porta, gear…). Prefix em
+///     <c>PlayerComponent.PlayAISound(SAINSoundType, Vector3, InRange, InVolume, …)</c> multiplica o <c>InRange</c>
+///     (alcance que o bot ouve). Via REFLECTION (SAIN não é ref de compile-time → no-op se ausente).
+///     Ghost Step reduz TODOS os tipos · Loud Operator aumenta TODOS · Silent Looter reduz só Looting(=5).
+///     ⚠️ Coop: gate por ProfileId (só você); peer remoto emite o próprio som no host mas o gate barra (gap 057).
+/// </summary>
+internal class SainSoundPatch : ModulePatch
+{
+    private const int SainSoundTypeLooting = 5;
+    private static PropertyInfo? _profileIdProp;
+
+    protected override MethodBase? GetTargetMethod()
+    {
+        var t = AccessTools.TypeByName("SAIN.Components.PlayerComponentSpace.PlayerComponent");
+        if (t == null)
+        {
+            return null;   // SAIN ausente (a habilitação no Plugin já checa antes)
+        }
+
+        _profileIdProp = AccessTools.Property(t, "ProfileId");
+        return AccessTools.Method(t, "PlayAISound");
+    }
+
+    [PatchPrefix]
+    private static void Prefix(object __instance, object __0, ref float __2)
+    {
+        try
+        {
+            var mp = Singleton<GameWorld>.Instance?.MainPlayer;
+            if (mp == null || _profileIdProp == null)
+            {
+                return;
+            }
+
+            // gate: só o player local (ProfileId) — não afeta peers coop nem bots.
+            if (_profileIdProp.GetValue(__instance) as string != mp.ProfileId)
+            {
+                return;
+            }
+
+            var before = __2;
+            var soundType = Convert.ToInt32(__0);
+
+            if (PerksConfig.GhostStepEnabled?.Value == true && SkillMultipliers.IsLocalClass("Stealth"))
+            {
+                __2 *= PerksConfig.GhostStepSoundRadius?.Value ?? 1f;   // reduz TODOS
+            }
+
+            if (PerksConfig.LoudOperatorEnabled?.Value == true && SkillMultipliers.IsLocalClass("Rifleman"))
+            {
+                __2 *= PerksConfig.LoudOperatorSoundRadius?.Value ?? 1f;   // aumenta TODOS
+            }
+
+            if (soundType == SainSoundTypeLooting
+                && PerksConfig.SilentLooterEnabled?.Value == true && SkillMultipliers.IsLocalClass("Scavenger"))
+            {
+                __2 *= PerksConfig.SilentLooterVolume?.Value ?? 1f;   // anti-detecção: reduz só o Looting
+            }
+
+            if (PerkDiag.Enabled)
+            {
+                PerkDiag.SainBefore = before;
+                PerkDiag.SainAfter = __2;
+            }
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log?.LogError($"[CustomClasses] SAIN sound falhou: {ex.Message}");
+        }
+    }
+}

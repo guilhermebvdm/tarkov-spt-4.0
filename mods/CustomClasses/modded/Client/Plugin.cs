@@ -12,6 +12,7 @@ namespace CustomClasses.Client;
 /// </summary>
 [BepInPlugin("customclasses.mdj.client", "CustomClasses", "0.1.0")]
 [BepInDependency("com.SPT.core", "4.0.0")]
+[BepInDependency("me.sol.sain", BepInDependency.DependencyFlags.SoftDependency)]   // (050.4 SAIN) carrega após o SAIN se presente
 public class Plugin : BaseUnityPlugin
 {
     internal static Plugin? Instance;   // item 012: host de coroutine (BaseUnityPlugin é MonoBehaviour)
@@ -111,6 +112,19 @@ public class Plugin : BaseUnityPlugin
         catch (System.Exception ex)
         {
             Log.LogError($"[CustomClasses] (fix vel/som) patches falharam ao aplicar: {ex.Message}");
+        }
+        // (050.4 SAIN) Ghost Step/Loud Operator/Silent Looter pelo pipeline REAL que os bots ouvem — só se SAIN presente.
+        if (HarmonyLib.AccessTools.TypeByName("SAIN.Components.PlayerComponentSpace.PlayerComponent") != null)
+        {
+            try
+            {
+                new SainSoundPatch().Enable();
+                Log.LogInfo("[CustomClasses] SAIN detectado — sons de perk pelo pipeline do SAIN.");
+            }
+            catch (System.Exception ex)
+            {
+                Log.LogError($"[CustomClasses] (050.4 SAIN) SainSoundPatch falhou ao aplicar: {ex.Message}");
+            }
         }
         new ShootRecoilPatch().Enable();                    // (050.2) 🔻 Médico — recuo ×1.25 (Shaky Hands) + Adrenaline ×0.7
         new AimPunchPatch().Enable();                       // (050.2) 🔻 Furtivo — aim-punch ×1.5 (Rattled)
