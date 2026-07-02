@@ -23,6 +23,9 @@ internal static class PerksConfig
     // UI (059) — ajuste fino da posição X do botão da aba CLASS
     internal static ConfigEntry<float>? ClassTabOffsetX;
 
+    // UI (055) — detalhe da classe na tela de carregamento da raid (FIKA)
+    internal static ConfigEntry<bool>? ClassDetailOnLoading;
+
     // 🔻 Heavy Frame (Tanque) — velocidade (050.1) + fome/sede (050.3)
     internal static ConfigEntry<bool>? HeavyFrameEnabled;
     internal static ConfigEntry<float>? HeavyFrameMoveSpeed;
@@ -297,5 +300,9 @@ internal static class PerksConfig
             new ConfigDescription(
                 "Ajuste fino da posição horizontal do botão da aba CLASS (px). Só use se a aba não alinhar. / Fine-tune the CLASS tab button X position (px).",
                 new AcceptableValueRange<float>(-400f, 400f)));
+
+        ClassDetailOnLoading = config.Bind(
+            "Perks — UI", "Class Detail on Loading Screen", true,
+            "Mostra o detalhe da sua classe (perks/drawbacks) no seu nome na tela de carregamento da raid (FIKA). / Show your class detail on the FIKA raid loading screen.");
     }
 }
