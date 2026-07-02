@@ -22,6 +22,17 @@ internal static class MultiplierFormat
     public static Color BorderColor(float factor) => factor > 1f ? Green : Red;
 
     /// <summary>
+    ///     Item 059 — token de valor de uma propriedade atômica: Percent "+30%"/"−10%" (sinal do mult, magnitude
+    ///     |mult−1|·100), Multiplier "×0.85"/"×5", Flag "" (qualitativa). Cor/seção vêm do <c>PerkLine.IsPerk</c>.
+    /// </summary>
+    public static string ValueToken(PerksCatalog.PerkLine l) => l.Format switch
+    {
+        ValueFormat.Percent => (l.Multiplier > 1f ? "+" : "−") + Mathf.RoundToInt(Mathf.Abs(l.Multiplier - 1f) * 100f) + "%",
+        ValueFormat.Multiplier => "×" + l.Multiplier.ToString("0.##"),
+        _ => "",
+    };
+
+    /// <summary>
     ///     Marcador da linha: "▲ +50%" (verde) / "▼ -30%" (vermelho), rich text TMP.
     ///     PA-01-02: setas Unicode (U+25B2/U+25BC). Se a fonte TMP do EFT não tiver os glyphs
     ///     (aparecer "□"), trocar AQUI por só-texto (sem seta) ou ASCII — ponto único de mudança.

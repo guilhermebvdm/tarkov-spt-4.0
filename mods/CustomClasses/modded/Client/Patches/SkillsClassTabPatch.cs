@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using EFT.UI;   // SkillsAndMasteringScreen, UIElement, LocalizedText
 using HarmonyLib;
@@ -56,6 +55,7 @@ internal class SkillsClassTabPatch : ModulePatch
 {
     private const string TabName = "CC_ClassTab";
     private const string PanelName = "CC_ClassPanel";
+    private const string TabOverlayName = "CC_ClassTabLabel";   // 059: overlay [ícone][CLASS] próprio sobre a aba
 
     private static string? _lastPanelClass;   // CR-01-03: evita rebuild dos cards quando a classe não mudou.
     private static bool _loggedTabImages;      // req 1: loga os nomes dos Images da aba 1× (ajuste fino do ícone).
@@ -101,19 +101,17 @@ internal class SkillsClassTabPatch : ModulePatch
 
             var font = __instance.GetComponentInChildren<TextMeshProUGUI>(true)?.font ?? TMP_Settings.defaultFontAsset;
 
-            // label da aba = NOME DA CLASSE (ex.: TANK), não "CLASS" genérico — pedido do usuário.
+            // 059: rótulo GENÉRICO "CLASS"/"CLASSE" (não o nome da classe — o header do painel já mostra "TANK").
             SkillMultipliers.EnsureLoaded();
-            var tabLabel = string.IsNullOrWhiteSpace(SkillMultipliers.ClassName)
-                ? (GameLocale.IsPortuguese ? "CLASSE" : "CLASS")
-                : SkillMultipliers.ClassName!.ToUpperInvariant();
+            var tabLabel = GameLocale.IsPortuguese ? "CLASSE" : "CLASS";
 
             // (a) clona a aba MASTERING (estado NORMAL no Postfix → clone limpo, sem a prancha "selecionada" da SKILLS).
             var classTab = UnityEngine.Object.Instantiate(masteringTab.gameObject, masteringTab.transform.parent).GetComponent<Tab>();
             classTab.name = TabName;
             classTab.transform.SetSiblingIndex(0);
 
-            // label + ícone: LocalizedText sobrescreveria o texto → remove. Depois StyleClassTab aplica o label nas
-            // DUAS versões (normal/selected) + o ícone da classe. Reaplico em cada troca de seleção (o selected vinha vazio).
+            // 059: LocalizedText re-localizaria o texto nativo → remove. StyleClassTab esconde o conteúdo NATIVO
+            // (texto + ícone, preservando o fundo) e sobrepõe um label próprio [ícone][CLASS] sempre visível.
             foreach (var loc in classTab.GetComponentsInChildren<LocalizedText>(true))
             {
                 UnityEngine.Object.Destroy(loc);
@@ -121,7 +119,7 @@ internal class SkillsClassTabPatch : ModulePatch
 
             classTab.LocalizedText = null;
             StyleClassTab(classTab, tabLabel);
-            classTab.OnSelectionChanged += (tab, _) => StyleClassTab(tab, tabLabel);
+            classTab.OnSelectionChanged += (tab, _) => StyleClassTab(tab, tabLabel);   // reaplica na (de)seleção
 
             // painel: filho do content pai (comum a skills/mastering), preenche a área, começa escondido.
             var panel = BuildPanel(skillsScreen.transform.parent, font);
@@ -169,8 +167,12 @@ internal class SkillsClassTabPatch : ModulePatch
 
             if (barLg == null)
             {
-                var spacing = mRt.anchoredPosition.x - sRt.anchoredPosition.x;   // gap natural SKILLS→MASTERING
-                cRt.anchoredPosition = new Vector2(sRt.anchoredPosition.x - spacing, sRt.anchoredPosition.y);   // CLASS 1 slot à esquerda
+                // 059: CLASS ADJACENTE à esquerda da SKILLS (largura do clone + gap). cRt.rect.width pode ser 0
+                // pré-layout → proxy = largura da SKILLS (a aba clonada tem largura equivalente). +F12 offset opcional.
+                const float gap = 24f;
+                var classW = cRt.rect.width > 1f ? cRt.rect.width : sRt.rect.width;
+                var offsetX = PerksConfig.ClassTabOffsetX?.Value ?? 0f;
+                cRt.anchoredPosition = new Vector2(sRt.anchoredPosition.x - classW - gap + offsetX, sRt.anchoredPosition.y);
             }
 
             Plugin.Log?.LogInfo($"[CustomClasses][053-tabs] barLG={barLg?.GetType().Name ?? "none"} | CLASS={cRt.anchoredPosition} w={cRt.rect.width:F0} | SKILLS={sRt.anchoredPosition} | MASTER={mRt.anchoredPosition}");
@@ -190,17 +192,18 @@ internal class SkillsClassTabPatch : ModulePatch
             panel.GetComponent<FadeIn>()?.Restart();   // CR-03-03: re-dispara o fade a cada exibição da aba
             var headerTmp = panel.transform.Find("Header/HeaderText")?.GetComponent<TextMeshProUGUI>();
             var headerIcon = panel.transform.Find("Header/Icon")?.GetComponent<Image>();
-            var list = panel.transform.Find("List");
-            if (headerTmp == null || list == null)
+            var perksCol = panel.transform.Find("Columns/PerksCol");
+            var drawbacksCol = panel.transform.Find("Columns/DrawbacksCol");
+            if (headerTmp == null || perksCol == null || drawbacksCol == null)
             {
                 return;
             }
 
             var font = headerTmp.font;
 
-            // CR-01-03: só reconstrói header+cards quando a classe muda (evita flicker de Destroy-deferido e trabalho redundante).
+            // CR-01-03: só reconstrói quando a classe muda (evita flicker de Destroy-deferido e trabalho redundante).
             var cls = SkillMultipliers.ClassNameEn;
-            if (list.childCount > 0 && _lastPanelClass == cls)
+            if ((perksCol.childCount > 0 || drawbacksCol.childCount > 0) && _lastPanelClass == cls)
             {
                 return;
             }
@@ -230,39 +233,38 @@ internal class SkillsClassTabPatch : ModulePatch
                 ? sub
                 : $"<b><color={classHex}>{name.ToUpperInvariant()}</color></b>   <size=55%><color=#7a7a7a><i>{sub}</i></color></size>";
 
-            // limpa cards antigos e reconstrói.
-            for (var i = list.childCount - 1; i >= 0; i--)
-            {
-                UnityEngine.Object.Destroy(list.GetChild(i).gameObject);
-            }
+            // limpa as duas colunas e reconstrói.
+            ClearChildren(perksCol);
+            ClearChildren(drawbacksCol);
 
-            var entries = PerksCatalog.LocalEntries();
-            if (entries == null || entries.Length == 0)
+            var groups = PerksCatalog.LocalGroups();
+            if (groups == null || groups.Length == 0)
             {
-                BuildMessageCard(list, font, GameLocale.IsPortuguese
+                // vanilla (edge raro — classe não-mod): mensagem na coluna esquerda.
+                BuildMessageCard(perksCol, font, GameLocale.IsPortuguese
                     ? "Classe vanilla — sem perks/drawbacks."
                     : "Vanilla class — no perks/drawbacks.");
             }
             else
             {
-                // req 3: agrupado em seções PERKS / DRAWBACKS com cabeçalho.
-                var perks = entries.Where(e => e.IsPerk).ToArray();
-                var draws = entries.Where(e => !e.IsPerk).ToArray();
+                // 059: perks à ESQUERDA, drawbacks à DIREITA. Um card por grupo, efeitos em linhas.
+                var perks = groups.Where(g => g.IsPerk).ToArray();
+                var draws = groups.Where(g => !g.IsPerk).ToArray();
                 if (perks.Length > 0)
                 {
-                    BuildSectionHeader(list, font, "PERKS");
-                    foreach (var e in perks)
+                    BuildSectionHeader(perksCol, font, "PERKS");
+                    foreach (var g in perks)
                     {
-                        BuildCard(list, e, font);
+                        BuildGroupCard(perksCol, g, font);
                     }
                 }
 
                 if (draws.Length > 0)
                 {
-                    BuildSectionHeader(list, font, "DRAWBACKS");
-                    foreach (var e in draws)
+                    BuildSectionHeader(drawbacksCol, font, "DRAWBACKS");
+                    foreach (var g in draws)
                     {
-                        BuildCard(list, e, font);
+                        BuildGroupCard(drawbacksCol, g, font);
                     }
                 }
             }
@@ -350,57 +352,76 @@ internal class SkillsClassTabPatch : ModulePatch
         htmp.alignment = TextAlignmentOptions.Left;
         htmp.raycastTarget = false;
 
-        // List — seções + cards. childControlHeight=true lê o preferred-height do HLG de cada card.
-        var list = new GameObject("List", typeof(RectTransform), typeof(VerticalLayoutGroup));
-        list.transform.SetParent(go.transform, false);
-        var lvl = list.GetComponent<VerticalLayoutGroup>();
-        lvl.spacing = 6f;
-        lvl.childControlWidth = true;
-        lvl.childControlHeight = true;
-        lvl.childForceExpandWidth = true;
-        lvl.childForceExpandHeight = false;
-        lvl.childAlignment = TextAnchor.UpperLeft;
-        list.AddComponent<LayoutElement>().flexibleHeight = 1f;
+        // 059: Columns — 2 colunas lado a lado. PerksCol (esquerda) / DrawbacksCol (direita).
+        var columns = new GameObject("Columns", typeof(RectTransform), typeof(HorizontalLayoutGroup));
+        columns.transform.SetParent(go.transform, false);
+        columns.AddComponent<LayoutElement>().flexibleHeight = 1f;
+        var chl = columns.GetComponent<HorizontalLayoutGroup>();
+        chl.spacing = 24f;
+        chl.childControlWidth = true;
+        chl.childControlHeight = true;
+        chl.childForceExpandWidth = true;
+        chl.childForceExpandHeight = true;
+        chl.childAlignment = TextAnchor.UpperLeft;
+
+        BuildColumn(columns.transform, "PerksCol");
+        BuildColumn(columns.transform, "DrawbacksCol");
 
         go.SetActive(false);   // começa escondido (SKILLS é a aba inicial)
         return go;
     }
 
-    /// <summary>Card de 1 perk/drawback: acento vertical + ícone (sprite de skill) + nome (branco) + efeito (cinza).</summary>
-    private static void BuildCard(Transform parent, PerksCatalog.Entry entry, TMP_FontAsset? font)
+    /// <summary>Uma coluna do painel (VLG, ~50% largura): section header + group-cards.</summary>
+    private static void BuildColumn(Transform parent, string name)
     {
-        // CR-02-01/02: perk deferido (não implementado) → acento âmbar "em breve" (nem verde-ativo nem vermelho-drawback).
-        var pending = entry.Pending;
-        var accent = pending
+        var col = new GameObject(name, typeof(RectTransform), typeof(VerticalLayoutGroup));
+        col.transform.SetParent(parent, false);
+        col.AddComponent<LayoutElement>().flexibleWidth = 1f;
+        var vl = col.GetComponent<VerticalLayoutGroup>();
+        vl.spacing = 6f;
+        vl.childControlWidth = true;
+        vl.childControlHeight = true;
+        vl.childForceExpandWidth = true;
+        vl.childForceExpandHeight = false;
+        vl.childAlignment = TextAnchor.UpperLeft;
+    }
+
+    /// <summary>
+    ///     059 — card de um <see cref="PerksCatalog.PerkGroup"/>: acento + frame do ícone + [Nome do perk] e
+    ///     **uma linha por efeito atômico** (chip do ValueToken colorido por line.IsPerk + label). Linha/grupo
+    ///     deferido → "· em breve". A cor/seção do grupo saem de <c>group.IsPerk</c> (derivado).
+    /// </summary>
+    private static void BuildGroupCard(Transform parent, PerksCatalog.PerkGroup group, TMP_FontAsset? font)
+    {
+        var allPending = group.AllPending;
+        var accent = allPending
             ? new Color(0.80f, 0.62f, 0.28f, 1f)
-            : entry.IsPerk ? MultiplierFormat.Green : MultiplierFormat.Red;
+            : group.IsPerk ? MultiplierFormat.Green : MultiplierFormat.Red;
 
         var card = new GameObject("Card", typeof(RectTransform), typeof(Image), typeof(HorizontalLayoutGroup));
         card.transform.SetParent(parent, false);
         var cardImg = card.GetComponent<Image>();
-        var cardBg = pending
-            ? new Color(0.10f, 0.09f, 0.055f, 0.55f)   // âmbar escuro
-            : entry.IsPerk
+        var cardBg = allPending
+            ? new Color(0.10f, 0.09f, 0.055f, 0.55f)
+            : group.IsPerk
                 ? new Color(0.07f, 0.10f, 0.08f, 0.55f)
                 : new Color(0.11f, 0.075f, 0.075f, 0.55f);
         cardImg.color = cardBg;
 
-        // idéia 1: realce no hover (clareia o card, como as rows nativas).
-        var hover = card.AddComponent<CardHover>();
+        var hover = card.AddComponent<CardHover>();   // idéia 1: realce no hover
         hover.Target = cardImg;
         hover.Normal = cardBg;
         hover.Hover = new Color(cardBg.r + 0.06f, cardBg.g + 0.06f, cardBg.b + 0.06f, Mathf.Min(1f, cardBg.a + 0.22f));
         var hl = card.GetComponent<HorizontalLayoutGroup>();
-        hl.padding = new RectOffset(16, 16, 9, 9);
+        hl.padding = new RectOffset(16, 16, 10, 10);
         hl.spacing = 13f;
-        hl.childAlignment = TextAnchor.MiddleLeft;
+        hl.childAlignment = TextAnchor.UpperLeft;   // ícone no topo, nome + linhas fluindo (card multi-linha)
         hl.childControlWidth = true;
         hl.childControlHeight = true;
         hl.childForceExpandWidth = false;
         hl.childForceExpandHeight = false;
 
-        // acento vertical — FORA do layout (ignoreLayout) + ancorado à esquerda esticando na vertical. Assim NÃO
-        // propaga flexibleHeight pro card (era ISSO que fazia o List espalhar os cards com gaps enormes).
+        // acento vertical — FORA do layout (ignoreLayout) + âncoras: NÃO propaga flexibleHeight pro card.
         var accentGo = new GameObject("Accent", typeof(RectTransform), typeof(Image), typeof(LayoutElement));
         accentGo.transform.SetParent(card.transform, false);
         accentGo.GetComponent<LayoutElement>().ignoreLayout = true;
@@ -414,13 +435,13 @@ internal class SkillsClassTabPatch : ModulePatch
         accentImg.color = accent;
         accentImg.raycastTarget = false;
 
-        // idéia 4: frame "slot" premium — borda na cor do acento + inset escuro + ícone por cima.
-        var frame = new GameObject("IconFrame", typeof(RectTransform), typeof(Image));
+        // frame "slot" — borda na cor do acento + inset escuro + ícone por cima.
+        var frame = new GameObject("IconFrame", typeof(RectTransform), typeof(Image), typeof(LayoutElement));
         frame.transform.SetParent(card.transform, false);
         var frameImg = frame.GetComponent<Image>();
         frameImg.color = new Color(accent.r, accent.g, accent.b, 0.85f);
         frameImg.raycastTarget = false;
-        var fle = frame.AddComponent<LayoutElement>();
+        var fle = frame.GetComponent<LayoutElement>();
         fle.minWidth = 46f;
         fle.preferredWidth = 46f;
         fle.minHeight = 46f;
@@ -447,7 +468,7 @@ internal class SkillsClassTabPatch : ModulePatch
         var iimg = icon.GetComponent<Image>();
         iimg.preserveAspect = true;
         iimg.raycastTarget = false;
-        var sprite = PerksCatalog.IconSprite(entry);
+        var sprite = PerksCatalog.IconSprite(group);
         if (sprite != null)
         {
             iimg.sprite = sprite;
@@ -455,10 +476,10 @@ internal class SkillsClassTabPatch : ModulePatch
         }
         else
         {
-            iimg.enabled = false;   // sem sprite → só o inset
+            iimg.enabled = false;
         }
 
-        // coluna de texto (nome + efeito).
+        // coluna de texto: [Nome do perk] + uma linha por efeito.
         var col = new GameObject("Text", typeof(RectTransform), typeof(VerticalLayoutGroup));
         col.transform.SetParent(card.transform, false);
         var cvl = col.GetComponent<VerticalLayoutGroup>();
@@ -467,43 +488,48 @@ internal class SkillsClassTabPatch : ModulePatch
         cvl.childControlHeight = true;
         cvl.childForceExpandWidth = true;
         cvl.childForceExpandHeight = false;
-        cvl.childAlignment = TextAnchor.MiddleLeft;
+        cvl.childAlignment = TextAnchor.UpperLeft;
         col.AddComponent<LayoutElement>().flexibleWidth = 1f;
 
-        var titleGo = new GameObject("Title", typeof(RectTransform), typeof(TextMeshProUGUI));
-        titleGo.transform.SetParent(col.transform, false);
-        var ttmp = titleGo.GetComponent<TextMeshProUGUI>();
+        var nameGo = new GameObject("Name", typeof(RectTransform), typeof(TextMeshProUGUI));
+        nameGo.transform.SetParent(col.transform, false);
+        var ntmp = nameGo.GetComponent<TextMeshProUGUI>();
         if (font != null)
         {
-            ttmp.font = font;
+            ntmp.font = font;
         }
 
-        ttmp.text = pending
-            ? entry.Name + $"  <size=60%><color=#cc9a3e><i>{(GameLocale.IsPortuguese ? "· em breve" : "· soon")}</i></color></size>"
-            : entry.Name;
-        ttmp.fontSize = 21f;
-        ttmp.fontStyle = FontStyles.Bold;
-        ttmp.color = Color.white;
-        ttmp.raycastTarget = false;
-        ttmp.enableWordWrapping = false;
-        ttmp.overflowMode = TextOverflowModes.Overflow;
+        ntmp.text = allPending
+            ? group.Name + $"  <size=60%><color=#cc9a3e><i>{(GameLocale.IsPortuguese ? "· em breve" : "· soon")}</i></color></size>"
+            : group.Name;
+        ntmp.fontSize = 20f;
+        ntmp.fontStyle = FontStyles.Bold;
+        ntmp.color = Color.white;
+        ntmp.raycastTarget = false;
+        ntmp.enableWordWrapping = false;
+        ntmp.overflowMode = TextOverflowModes.Overflow;
 
-        if (!string.IsNullOrEmpty(entry.Effect))
+        foreach (var line in group.Lines)
         {
-            var effGo = new GameObject("Effect", typeof(RectTransform), typeof(TextMeshProUGUI));
-            effGo.transform.SetParent(col.transform, false);
-            var etmp = effGo.GetComponent<TextMeshProUGUI>();
+            var lineGo = new GameObject("Line", typeof(RectTransform), typeof(TextMeshProUGUI));
+            lineGo.transform.SetParent(col.transform, false);
+            var ltmp = lineGo.GetComponent<TextMeshProUGUI>();
             if (font != null)
             {
-                etmp.font = font;
+                ltmp.font = font;
             }
 
-            etmp.text = PillifyValues(entry.Effect);
-            etmp.fontSize = 15.5f;
-            etmp.color = new Color(0.66f, 0.66f, 0.66f, 1f);
-            etmp.raycastTarget = false;
-            etmp.enableWordWrapping = true;
-            etmp.richText = true;
+            var hex = line.Pending ? "#cc9a3e" : (line.IsPerk ? MultiplierFormat.GreenHex : MultiplierFormat.RedHex);
+            var chip = line.ValueToken.Length > 0 ? $"<b><color={hex}>{line.ValueToken}</color></b> " : "";
+            var soon = line.Pending && !allPending
+                ? $"  <size=80%><color=#cc9a3e><i>{(GameLocale.IsPortuguese ? "· em breve" : "· soon")}</i></color></size>"
+                : "";
+            ltmp.text = chip + $"<color=#a8a8a8>{line.Label}</color>" + soon;
+            ltmp.fontSize = 15f;
+            ltmp.color = Color.white;
+            ltmp.raycastTarget = false;
+            ltmp.enableWordWrapping = true;
+            ltmp.richText = true;
         }
     }
 
@@ -561,67 +587,127 @@ internal class SkillsClassTabPatch : ModulePatch
     }
 
     /// <summary>
-    ///     Req 1/2 — aplica o label da aba CLASS nas DUAS versões (normal/selected; o selected vinha sem texto) e
-    ///     troca o ícone (💡 da SKILLS → brasão da classe). Reaplicável (chamado também na troca de seleção).
-    ///     Só toca Images cujo GameObject se chama "*icon*" (não mexe no fundo/hover); loga os nomes p/ ajuste fino.
+    ///     059 — dá o rótulo "(ícone) CLASS" à aba CLASS de forma ROBUSTA: **esconde o conteúdo nativo** do Tab
+    ///     (texto + ícone, preservando o fundo/`_targetImage`) e **sobrepõe um label próprio** [ícone da classe][CLASS]
+    ///     como filho do root do Tab, sempre visível (independe do estado normal/selected — o selected nativo não
+    ///     renderizava o texto). Idempotente (cria o overlay 1×; só reaplica texto/ícone). Reaplicável na seleção.
     /// </summary>
     private static void StyleClassTab(Tab tab, string label)
     {
         try
         {
+            // overlay primeiro (idempotente) — pra excluir seus próprios filhos ao esconder o conteúdo nativo.
+            var overlayTf = tab.transform.Find(TabOverlayName);
+            if (overlayTf == null)
+            {
+                overlayTf = BuildTabOverlay(tab).transform;
+            }
+
+            overlayTf.SetAsLastSibling();   // por cima das versões normal/selected
+
+            var targetImage = AccessTools.Field(typeof(Tab), "_targetImage")?.GetValue(tab) as Image;   // ref: Tab.cs:26 (fundo — preservar)
+
+            // esconde o TEXTO nativo (fora do overlay).
             foreach (var tmp in tab.GetComponentsInChildren<TextMeshProUGUI>(true))
             {
-                tmp.text = label;
+                if (!tmp.transform.IsChildOf(overlayTf))
+                {
+                    tmp.text = "";
+                }
             }
 
-            var color = ClassIdentityView.ResolveColor(SkillMultipliers.NameColor, Color.white);
-            var sprite = ClassIconCache.GetTinted(SkillMultipliers.IconFile, color, color);
-            if (sprite == null)
-            {
-                return;
-            }
-
-            var targetImage = AccessTools.Field(typeof(Tab), "_targetImage")?.GetValue(tab) as Image;
+            // esconde os ÍCONES nativos (Images "*icon*"), preservando o fundo (`_targetImage`) e o overlay.
             var images = tab.GetComponentsInChildren<Image>(true);
-            var iconImgs = images
-                .Where(i => i != targetImage && i.gameObject.name.ToLowerInvariant().Contains("icon"))
-                .ToArray();
-
-            if (!_loggedTabImages)
+            foreach (var img in images)
             {
-                _loggedTabImages = true;
-                Plugin.Log?.LogInfo($"[CustomClasses][053-tabicon] images=[{string.Join(", ", images.Select(i => i.gameObject.name))}] | iconMatches={iconImgs.Length}");
-            }
-
-            // CR-03-04: o re-apply a cada seleção é intencional (o selected reseta o texto ao ativar); aqui só pulo
-            // o sprite já aplicado pra evitar trabalho redundante.
-            foreach (var img in iconImgs)
-            {
-                if (img.sprite == sprite)
+                if (img == targetImage || img.transform.IsChildOf(overlayTf))
                 {
                     continue;
                 }
 
-                img.sprite = sprite;
-                img.color = Color.white;
-                img.preserveAspect = true;
+                if (img.gameObject.name.ToLowerInvariant().Contains("icon"))
+                {
+                    img.gameObject.SetActive(false);
+                }
             }
+
+            if (!_loggedTabImages)
+            {
+                _loggedTabImages = true;
+                Plugin.Log?.LogInfo($"[CustomClasses][053-tabicon] images=[{string.Join(", ", images.Select(i => i.gameObject.name))}]");
+            }
+
+            // aplica o rótulo + o ícone da classe no MEU overlay.
+            var otmp = overlayTf.Find("Text")?.GetComponent<TextMeshProUGUI>();
+            if (otmp != null)
+            {
+                otmp.text = label;
+            }
+
+            var oicon = overlayTf.Find("Icon")?.GetComponent<Image>();
+            ClassIdentityView.ApplyClassIcon(oicon, SkillMultipliers.IconFile, SkillMultipliers.NameColor, 22f);
         }
         catch (Exception ex)
         {
-            Plugin.Log?.LogError($"[CustomClasses] (053) style tab: {ex.Message}");
+            Plugin.Log?.LogError($"[CustomClasses] (059) style tab: {ex.Message}");
         }
     }
 
-    private static readonly Regex ValueRegex = new(@"([+\-−]?\d+%|×\d+(?:[.,]\d+)?)", RegexOptions.Compiled);
-
-    /// <summary>
-    ///     idéia 5: envolve valores (±NN%, ×N.N) num "chip" (mark + cor clara) pra virar pílula.
-    ///     CR-03-06: padding com no-break space ( ) — não gera espaço-duplo com o texto ao redor nem quebra o chip.
-    /// </summary>
-    private static string PillifyValues(string effect)
+    /// <summary>Cria o overlay [ícone][CLASS] sobre a aba (idempotente). Fundo/hover nativos ficam por baixo.</summary>
+    private static GameObject BuildTabOverlay(Tab tab)
     {
-        return ValueRegex.Replace(effect, m => $"<mark=#ffffff14><b><color=#e6e6e6> {m.Value} </color></b></mark>");
+        var font = tab.GetComponentInChildren<TextMeshProUGUI>(true)?.font ?? TMP_Settings.defaultFontAsset;
+
+        var go = new GameObject(TabOverlayName, typeof(RectTransform), typeof(HorizontalLayoutGroup));
+        go.transform.SetParent(tab.transform, false);
+        var rt = (RectTransform)go.transform;
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;   // preenche a aba
+        rt.offsetMin = new Vector2(16f, 0f);
+        rt.offsetMax = new Vector2(-10f, 0f);
+
+        var hl = go.GetComponent<HorizontalLayoutGroup>();
+        hl.spacing = 8f;
+        hl.childAlignment = TextAnchor.MiddleLeft;
+        hl.childControlWidth = true;
+        hl.childControlHeight = true;
+        hl.childForceExpandWidth = false;
+        hl.childForceExpandHeight = false;
+
+        var icon = new GameObject("Icon", typeof(RectTransform), typeof(Image), typeof(LayoutElement));
+        icon.transform.SetParent(go.transform, false);
+        var iimg = icon.GetComponent<Image>();
+        iimg.raycastTarget = false;
+        iimg.preserveAspect = true;
+        icon.SetActive(false);   // ApplyClassIcon reativa quando há sprite
+
+        var txt = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+        txt.transform.SetParent(go.transform, false);
+        var tmp = txt.GetComponent<TextMeshProUGUI>();
+        if (font != null)
+        {
+            tmp.font = font;
+        }
+
+        tmp.fontSize = 20f;
+        tmp.fontStyle = FontStyles.Bold;
+        tmp.color = Color.white;
+        tmp.alignment = TextAlignmentOptions.Left;
+        tmp.raycastTarget = false;
+        tmp.enableWordWrapping = false;
+        tmp.overflowMode = TextOverflowModes.Overflow;
+
+        return go;
+    }
+
+
+    /// <summary>Destrói todos os filhos de um container (limpeza de coluna antes do rebuild).</summary>
+    private static void ClearChildren(Transform t)
+    {
+        for (var i = t.childCount - 1; i >= 0; i--)
+        {
+            UnityEngine.Object.Destroy(t.GetChild(i).gameObject);
+        }
     }
 }
 

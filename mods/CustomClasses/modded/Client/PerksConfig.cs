@@ -20,10 +20,8 @@ internal static class PerksConfig
     // UI — notificação de perks/drawbacks no início da raid
     internal static ConfigEntry<bool>? ShowRaidPerksNotification;
 
-    // UI (053) — painel de perks/drawbacks na tela de Skills
-    internal static ConfigEntry<bool>? PerksPanelEnabled;
-    internal static ConfigEntry<float>? PerksPanelPosX;
-    internal static ConfigEntry<float>? PerksPanelPosY;
+    // UI (059) — ajuste fino da posição X do botão da aba CLASS
+    internal static ConfigEntry<float>? ClassTabOffsetX;
 
     // 🔻 Heavy Frame (Tanque) — velocidade (050.1) + fome/sede (050.3)
     internal static ConfigEntry<bool>? HeavyFrameEnabled;
@@ -120,22 +118,6 @@ internal static class PerksConfig
         ShowRaidPerksNotification = config.Bind(
             "Perks — UI", "Raid-start perks notification", true,
             "Notificação no início da raid listando os perks (verde) e drawbacks (vermelho) da classe. / Raid-start notification listing the class's perks/drawbacks.");
-
-        PerksPanelEnabled = config.Bind(
-            "Perks — UI", "Skills-screen perks panel", true,
-            "Painel de perks/drawbacks da classe na tela de Skills. / Perks/drawbacks panel on the Skills screen.");
-        PerksPanelPosX = config.Bind(
-            "Perks — UI", "Perks panel — X offset", -24f,
-            new ConfigDescription(
-                "Deslocamento X do painel a partir da borda direita (mais negativo = mais pra esquerda). / Panel X offset from the right edge.",
-                new AcceptableValueRange<float>(-1800f, 0f)));
-        PerksPanelPosY = config.Bind(
-            "Perks — UI", "Perks panel — Y offset", -90f,
-            new ConfigDescription(
-                "Deslocamento Y do painel a partir do topo (mais negativo = mais pra baixo). / Panel Y offset from the top.",
-                new AcceptableValueRange<float>(-1000f, 0f)));
-        PerksPanelPosX.SettingChanged += (_, _) => SkillsPerksPanelPatch.Reposition();
-        PerksPanelPosY.SettingChanged += (_, _) => SkillsPerksPanelPatch.Reposition();
 
         HeavyFrameEnabled = config.Bind(
             "Drawbacks — Tank", "Heavy Frame — Enabled", true,
@@ -309,5 +291,11 @@ internal static class PerksConfig
         DiagnosticsEnabled = config.Bind(
             "Diagnostics", "Perk Diagnostics overlay", false,
             "Overlay ao vivo das propriedades afetadas pelos perks do seu player (validação). / Live overlay of perk-affected properties.");
+
+        ClassTabOffsetX = config.Bind(
+            "Perks — UI", "Class Tab — X offset", 0f,
+            new ConfigDescription(
+                "Ajuste fino da posição horizontal do botão da aba CLASS (px). Só use se a aba não alinhar. / Fine-tune the CLASS tab button X position (px).",
+                new AcceptableValueRange<float>(-400f, 400f)));
     }
 }

@@ -32,8 +32,17 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 > - **Descrição da edition no launcher:** resolvida no **servidor** (locale do servidor), não pelo EFT — é uma limitação do launcher do SPT. Para vê-la em inglês, configure o **server locale = en** (config do SPT). Os **nomes das edições** na tela de criação são a chave (PT).
 > - Trocar o `.dll` do client exige **reiniciar o jogo** (plugin BepInEx).
 
+## Seção `Perks — UI`
+
+> Ajustes finos da UI de perks/drawbacks na tela de Skills (item 059).
+
+| Nome (EN) | Tradução pt-BR | Tipo | Padrão | Tooltip (pt-BR) |
+|---|---|---|---|---|
+| `Class Tab — X offset` | Aba CLASS — offset X | float | `0` | Ajuste fino da posição horizontal do botão da aba CLASS (px). Só use se a aba não alinhar. Faixa −400..400. (item 059) |
+
 ## Histórico
 
 | Data | Alteração |
 |---|---|
 | 2026-06-07 | Criado (item 008). Documenta `EnableSkillMultipliers`, `ShowMultiplierOnSkills` (itens 005/010) e `Language` (008). |
+| 2026-07-02 | Item 059 — adicionada seção `Perks — UI` com `Class Tab — X offset` (ajuste da posição da aba CLASS). |

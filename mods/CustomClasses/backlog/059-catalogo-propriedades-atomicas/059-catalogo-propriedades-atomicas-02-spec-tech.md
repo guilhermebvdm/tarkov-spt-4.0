@@ -217,18 +217,18 @@ deferidos fica **só no painel** (PA-01-04).
 ## 8. Checklist de implementação
 
 **Fatia A (aba):**
-- [ ] Trocar `tabLabel` p/ genérico "CLASS"/"CLASSE".
-- [ ] `StyleClassTab`: esconder texto + ícone nativos (preservar `_targetImage`); overlay `[ícone][CLASS]` idempotente; reaplicar em `OnSelectionChanged`.
-- [ ] Reposicionar CLASS à esquerda da SKILLS (`sRt.x − larguraCLASS − gap`, com proxy de largura); não mover SKILLS/MASTERING.
-- [ ] Compile → checkpoint.
+- [x] Trocar `tabLabel` p/ genérico "CLASS"/"CLASSE".
+- [x] `StyleClassTab`: esconder texto + ícone nativos (preservar `_targetImage`); overlay `[ícone][CLASS]` idempotente; reaplicar em `OnSelectionChanged`.
+- [x] Reposicionar CLASS à esquerda da SKILLS (`sRt.x − larguraCLASS − gap`, com proxy de largura); não mover SKILLS/MASTERING.
+- [x] Compile → checkpoint.
 
 **Fatia B (catálogo + display):**
-- [ ] `PerksCatalog`: enums `Polarity`/`ValueFormat`, `PerkLine`/`PerkGroup`, `Library` (dados das 6 classes, deferidos marcados), `ByClass` (chaves), `LocalGroups`, `IconSprite`, `BuildNotificationText` compacto; remover `Entry`/`BuildPanelText`/`SplitNameEffect`; `using System.Linq`.
-- [ ] `MultiplierFormat.ValueToken` (Percent/Multiplier/Flag).
-- [ ] `SkillsClassTabPatch`: `BuildPanel` 2 colunas; `RefreshPanel` particiona; `BuildGroupCard`; remover `PillifyValues`; caso vanilla largura total.
-- [ ] `RaidPerksNotificationPatch` + `PerkDiagnostics` adaptados.
-- [ ] **Deletar** `SkillsPerksPanelPatch.cs`; grep 0 refs.
-- [ ] Compile 0/0 → checkpoint.
+- [x] `PerksCatalog`: enums `Polarity`/`ValueFormat`, `PerkLine`/`PerkGroup`, `Library` (dados das 6 classes, deferidos marcados), `ByClass` (chaves), `LocalGroups`, `IconSprite`, `BuildNotificationText` compacto; remover `Entry`/`BuildPanelText`/`SplitNameEffect`; `using System.Linq`.
+- [x] `MultiplierFormat.ValueToken` (Percent/Multiplier/Flag).
+- [x] `SkillsClassTabPatch`: `BuildPanel` 2 colunas; `RefreshPanel` particiona; `BuildGroupCard`; remover `PillifyValues`; caso vanilla largura total.
+- [x] `RaidPerksNotificationPatch` + `PerkDiagnostics` adaptados.
+- [x] **Deletar** `SkillsPerksPanelPatch.cs`; grep 0 refs.
+- [x] Compile 0/0 → checkpoint.
 
 ## 9. Conformidade com skills (auto-checklist)
 

@@ -90,8 +90,7 @@ public class Plugin : BaseUnityPlugin
         new SkillIconBorderPatch().Enable();    // (010) UI — borda colorida no ícone
         new MenuClassIdentityPatch().Enable();              // (015) identidade no nome do jogador no menu (Menu-Overhaul)
         new SkillsScreenIdentityPatch().Enable();           // (012) selo da classe no topo da tela de Skills
-        // (053) overlay DESATIVADO — substituído pela aba CLASS nativa (abaixo). Reativar se a aba falhar.
-        // new SkillsPerksPanelPatch().Enable();
+        // (059) o overlay legado (SkillsPerksPanelPatch) foi removido — substituído pela aba CLASS nativa (abaixo).
         try
         {
             new SkillsClassTabPatch().Enable();             // (053) sub-aba CLASS (CLASS | SKILLS | MASTERING)

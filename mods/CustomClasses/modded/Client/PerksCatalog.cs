@@ -1,86 +1,195 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using EFT;            // ESkillId
 using UnityEngine;    // Sprite
 
 namespace CustomClasses.Client;
 
+/// <summary>Direção "boa" da propriedade: maior é melhor (speed/carry/ergo) vs menor é melhor (dano/recuo/fome/ruído).</summary>
+internal enum Polarity { HigherBetter, LowerBetter }
+
+/// <summary>Como exibir o valor de uma propriedade.</summary>
+internal enum ValueFormat { Percent, Multiplier, Flag }
+
 /// <summary>
-///     Item 050/053 — catálogo bilíngue (EN/pt-br) dos perks 🔧 e drawbacks 🔻 por classe (chave estável = `name`).
-///     Fonte: docs/class-design.md. Usado pela notificação de início de raid (RaidPerksNotificationPatch) e pela
-///     aba "CLASS" (item 053, lista de cards). Cada entrada carrega um <see cref="ESkillId"/> temático (domínio) cujo
-///     sprite é reusado do próprio EFT (mesmo ícone que aparece sobre a barra de progresso da skill). Idioma via GameLocale.
+///     Item 050/053/059 — catálogo bilíngue (EN/pt-br) das classes como **propriedades atômicas**. Cada perk/drawback
+///     nomeado é um <see cref="PerkGroup"/>; cada efeito é um <see cref="PerkLine"/>. **Perk/drawback e o token de valor
+///     são DERIVADOS** de `Multiplier` + `Polarity` + `Format` (nada escrito à mão). Biblioteca compartilhada por chave
+///     (Pack Mule definido 1×). Fonte dos multiplicadores: docs/class-design.md + defaults do <see cref="PerksConfig"/>.
+///     Consumido por: aba CLASS (059, cards em 2 colunas), notificação de raid (compacta) e PerkDiagnostics.
 /// </summary>
 internal static class PerksCatalog
 {
-    internal sealed class Entry
+    /// <summary>Propriedade atômica (1 variável). perk/drawback + token de valor DERIVADOS.</summary>
+    internal sealed class PerkLine
     {
-        public bool IsPerk;
-        public string En = "";
-        public string Pt = "";
-        public ESkillId? Icon;      // ícone temático (domínio); sprite via SkillIdSprites. null = sem ícone.
-        public ESkillId? IconAlt;   // CR-01-05: fallback quando Icon não tem sprite no dicionário (ex.: LMG/HeavyVests).
-        public bool Pending;        // CR-02-01/02: efeito ainda DEFERIDO (não implementado in-game) → UI marca "em breve".
-        public string Text => GameLocale.IsPortuguese ? Pt : En;
-        public string Name => SplitNameEffect(Text).name;      // parte antes do " — "
-        public string Effect => SplitNameEffect(Text).effect;  // parte depois do " — "
+        public string LabelEn = "", LabelPt = "";
+        public ValueFormat Format;
+        public float Multiplier = 1f;   // Percent/Multiplier (ignorado em Flag)
+        public Polarity Polarity;       // classifica (Percent/Multiplier)
+        public bool FlagIsPerk;         // Flag qualitativa: perk/drawback explícito
+        public bool Pending;            // efeito deferido → "em breve" só nesta linha
+
+        public bool IsPerk => Format == ValueFormat.Flag
+            ? FlagIsPerk
+            : (Polarity == Polarity.HigherBetter) == (Multiplier > 1f);
+        public string Label => GameLocale.IsPortuguese ? LabelPt : LabelEn;
+        public string ValueToken => MultiplierFormat.ValueToken(this);   // "+30%" / "×0.85" / ""
+        public string Text => (ValueToken.Length > 0 ? ValueToken + " " : "") + Label;
     }
 
-    private static Entry P(string en, string pt, ESkillId? icon = null, ESkillId? iconAlt = null, bool pending = false) => new() { IsPerk = true, En = en, Pt = pt, Icon = icon, IconAlt = iconAlt, Pending = pending };
-    private static Entry D(string en, string pt, ESkillId? icon = null, ESkillId? iconAlt = null, bool pending = false) => new() { IsPerk = false, En = en, Pt = pt, Icon = icon, IconAlt = iconAlt, Pending = pending };
-
-    // Chaveado pelo `name` estável (= displayName.en). Case-insensitive na consulta.
-    // Ícone = DOMÍNIO do efeito (ex.: recuo→RecoilControl, som→SilentOps); a cor perk/drawback dá a valência.
-    private static readonly Dictionary<string, Entry[]> ByClass = new(System.StringComparer.OrdinalIgnoreCase)
+    /// <summary>Grupo nomeado (o "perk") = linhas atômicas HOMOGÊNEAS (todas perk OU todas drawback).</summary>
+    internal sealed class PerkGroup
     {
-        ["Combat Medic"] = new[]
+        public string NameEn = "", NamePt = "";
+        public ESkillId? Icon, IconAlt;
+        public PerkLine[] Lines = Array.Empty<PerkLine>();
+
+        public bool IsPerk => Lines.Length > 0 && Lines[0].IsPerk;   // seção (homogêneo)
+        public string Name => GameLocale.IsPortuguese ? NamePt : NameEn;
+        public bool AllPending => Lines.Length > 0 && Lines.All(l => l.Pending);
+    }
+
+    // Fábricas de linha.
+    private static PerkLine P(string en, string pt, ValueFormat fmt, float mult, Polarity pol, bool pending = false)
+        => new() { LabelEn = en, LabelPt = pt, Format = fmt, Multiplier = mult, Polarity = pol, Pending = pending };
+    private static PerkLine Flag(string en, string pt, bool isPerk, bool pending = false)
+        => new() { LabelEn = en, LabelPt = pt, Format = ValueFormat.Flag, FlagIsPerk = isPerk, Pending = pending };
+    private static PerkGroup G(string nameEn, string namePt, ESkillId? icon, PerkLine[] lines, ESkillId? iconAlt = null)
+        => new() { NameEn = nameEn, NamePt = namePt, Icon = icon, IconAlt = iconAlt, Lines = lines };
+
+    // Biblioteca: cada perk/drawback definido 1× por chave estável. Ícone = domínio (sprite via SkillIdSprites).
+    private static readonly Dictionary<string, PerkGroup> Library = new(StringComparer.OrdinalIgnoreCase)
+    {
+        // 🩺 Médico
+        ["combat_medic"] = G("Combat Medic", "Médico de Combate", ESkillId.Surgery, new[]
         {
-            P("Combat Medic — faster meds & surgery, surgery on the move", "Médico de Combate — cura/cirurgia mais rápidas, cirurgia em movimento", ESkillId.Surgery, pending: true),   // CR-02-01: deferido
-            D("Shaky Hands — recoil ×1.25", "Mãos Trêmulas — recuo ×1.25", ESkillId.RecoilControl),
-        },
-        ["Rifleman"] = new[]
+            P("heal/stab use time", "tempo de cura/estabilização", ValueFormat.Percent, 0.7f, Polarity.LowerBetter, pending: true),
+            P("surgery time", "tempo de cirurgia", ValueFormat.Percent, 0.5f, Polarity.LowerBetter, pending: true),
+            Flag("surgery on the move", "cirurgia em movimento", isPerk: true, pending: true),
+        }),
+        ["shaky_hands"] = G("Shaky Hands", "Mãos Trêmulas", ESkillId.RecoilControl, new[]
         {
-            P("Cool Under Fire — less flinch when hit, anti-jam", "Sangue-frio — menos flinch ao levar dano, antitravamento", ESkillId.StressResistance),
-            P("Adrenaline — combat window: −recoil/−reload/−ADS", "Adrenalina — janela de combate: −recuo/−recarga/−ADS", ESkillId.AimMaster),
-            D("Loud Operator — +30% noise", "Barulhento — +30% de ruído", ESkillId.SilentOps),
-        },
-        ["Hunter"] = new[]
+            P("recoil", "recuo", ValueFormat.Multiplier, 1.25f, Polarity.LowerBetter),
+        }),
+
+        // 🔫 Fuzileiro
+        ["cool_under_fire"] = G("Cool Under Fire", "Sangue-frio", ESkillId.StressResistance, new[]
         {
-            P("Sharpshooter — faster aim (ADS) on all weapons", "Atirador — mira (ADS) mais rápida em todas as armas", ESkillId.DrawMaster),   // CR-02-04: impl = ADS ×0.85 sempre (sem saque de pistola / penalidade de AR)
-            P("Iron Lungs — longer breath hold & less arm fatigue", "Fôlego de Aço — respiração longa e menos fadiga de braço", ESkillId.Sniping),   // CR-02-03: "less sway" removido (deferido)
-            D("Rooted — −15% move speed while aiming", "Enraizado — −15% de velocidade enquanto mira", ESkillId.CovertMovement),
-        },
-        ["Stealth"] = new[]
+            P("flinch when hit", "flinch ao levar dano", ValueFormat.Multiplier, 0.5f, Polarity.LowerBetter),
+            P("weapon jam chance", "chance de travamento", ValueFormat.Multiplier, 0.5f, Polarity.LowerBetter),
+        }),
+        ["adrenaline"] = G("Adrenaline", "Adrenalina", ESkillId.AimMaster, new[]
         {
-            P("Ghost Step — −30% all player noise", "Passo Fantasma — −30% de todo o ruído do player", ESkillId.CovertMovement),
-            P("Execution — ×5 melee, +10% speed with melee", "Execução — melee ×5, +10% de velocidade c/ melee", ESkillId.Melee),
-            D("Rattled — +50% aim punch when hit", "Abalado — +50% de tranco na mira ao ser atingido", ESkillId.StressResistance),
-        },
-        ["Scavenger"] = new[]
+            P("recoil (combat window)", "recuo (janela de combate)", ValueFormat.Multiplier, 0.7f, Polarity.LowerBetter),
+            P("reload time (combat window)", "recarga (janela de combate)", ValueFormat.Multiplier, 0.8f, Polarity.LowerBetter),
+            P("ADS time (combat window)", "ADS (janela de combate)", ValueFormat.Multiplier, 0.8f, Polarity.LowerBetter),
+        }),
+        ["loud_operator"] = G("Loud Operator", "Barulhento", ESkillId.SilentOps, new[]
         {
-            P("Quick Hands — search 2 items at once", "Mãos Rápidas — revista 2 itens de uma vez", ESkillId.Search, pending: true),   // CR-02-02: deferido (server-side)
-            P("Silent Looter — quieter looting (bots hear it less + your ears)", "Saque Silencioso — saque mais silencioso (bots ouvem menos + no seu fone)", ESkillId.SilentOps),
-            P("Pack Mule — +30% carry limit", "Mula de Carga — +30% de limite de carga", ESkillId.Strength),
-            D("Overladen — inertia scales with weight", "Sobrecarregado — inércia escala com o peso", ESkillId.Endurance),
-        },
-        ["Tank"] = new[]
+            P("noise", "ruído", ValueFormat.Percent, 1.3f, Polarity.LowerBetter),
+        }),
+
+        // 🎯 Caçador
+        ["sharpshooter"] = G("Sharpshooter", "Atirador", ESkillId.DrawMaster, new[]
         {
-            P("Pack Mule — +30% carry limit", "Mula de Carga — +30% de limite de carga", ESkillId.Strength),
-            P("Bulwark — −15% damage taken", "Couraça — −15% de dano recebido", ESkillId.HeavyVests, ESkillId.Vitality),
-            P("Bunker — heavy weapons (LMG/HMG/GL): −recoil, +ergo; GL no ergo penalty; no arm fatigue", "Bunker — armas pesadas (LMG/HMG/GL): −recuo, +ergo; lança-granadas sem penalidade de ergo; braço não cansa", ESkillId.LMG, ESkillId.RecoilControl),
-            D("Heavy Frame — −10% speed, +30% hunger/thirst", "Estrutura Pesada — −10% velocidade, +30% fome/sede", ESkillId.Endurance),
-        },
+            P("aim (ADS) time, all weapons", "mira (ADS), todas as armas", ValueFormat.Percent, 0.85f, Polarity.LowerBetter),
+        }),
+        ["iron_lungs"] = G("Iron Lungs", "Fôlego de Aço", ESkillId.Sniping, new[]
+        {
+            P("breath hold duration", "duração da respiração", ValueFormat.Percent, 1.5f, Polarity.HigherBetter),
+            P("arm fatigue when aiming", "fadiga de braço ao mirar", ValueFormat.Percent, 0.65f, Polarity.LowerBetter),
+            P("sway", "oscilação (sway)", ValueFormat.Percent, 0.7f, Polarity.LowerBetter, pending: true),
+        }),
+        ["rooted"] = G("Rooted", "Enraizado", ESkillId.CovertMovement, new[]
+        {
+            P("move speed while aiming", "velocidade ao mirar", ValueFormat.Percent, 0.85f, Polarity.HigherBetter),
+        }),
+
+        // 👻 Furtivo
+        ["ghost_step"] = G("Ghost Step", "Passo Fantasma", ESkillId.CovertMovement, new[]
+        {
+            P("all player noise", "todo o ruído do player", ValueFormat.Percent, 0.7f, Polarity.LowerBetter),
+        }),
+        ["execution"] = G("Execution", "Execução", ESkillId.Melee, new[]
+        {
+            P("melee damage", "dano de melee", ValueFormat.Multiplier, 5f, Polarity.HigherBetter),
+            P("move speed with melee", "velocidade c/ melee na mão", ValueFormat.Percent, 1.1f, Polarity.HigherBetter),
+        }),
+        ["rattled"] = G("Rattled", "Abalado", ESkillId.StressResistance, new[]
+        {
+            P("aim punch when hit", "tranco na mira ao ser atingido", ValueFormat.Percent, 1.5f, Polarity.LowerBetter),
+        }),
+
+        // 🎒 Saqueador
+        ["quick_hands"] = G("Quick Hands", "Mãos Rápidas", ESkillId.Search, new[]
+        {
+            Flag("search 2 items at once", "revista 2 itens de uma vez", isPerk: true, pending: true),
+        }),
+        ["silent_looter"] = G("Silent Looter", "Saque Silencioso", ESkillId.SilentOps, new[]
+        {
+            Flag("silent looting", "saque silencioso", isPerk: true),
+        }),
+        ["overladen"] = G("Overladen", "Sobrecarregado", ESkillId.Endurance, new[]
+        {
+            Flag("inertia scales with weight", "inércia escala com o peso", isPerk: false),
+        }),
+
+        // 🛡️ Tanque
+        ["pack_mule"] = G("Pack Mule", "Mula de Carga", ESkillId.Strength, new[]   // compartilhado Saqueador + Tanque
+        {
+            P("carry limit", "limite de carga", ValueFormat.Percent, 1.3f, Polarity.HigherBetter),
+        }),
+        ["bulwark"] = G("Bulwark", "Couraça", ESkillId.HeavyVests, new[]
+        {
+            P("damage taken", "dano recebido", ValueFormat.Percent, 0.85f, Polarity.LowerBetter),
+        }, iconAlt: ESkillId.Vitality),
+        ["bunker"] = G("Bunker", "Bunker", ESkillId.LMG, new[]
+        {
+            P("recoil (LMG/HMG/GL)", "recuo (LMG/HMG/GL)", ValueFormat.Multiplier, 0.85f, Polarity.LowerBetter),
+            P("ergonomics (LMG/HMG/GL)", "ergonomia (LMG/HMG/GL)", ValueFormat.Multiplier, 1.15f, Polarity.HigherBetter),
+            Flag("GL: no ergo penalty", "lança-granadas: sem penalidade de ergo", isPerk: true),
+            Flag("no arm fatigue (heavy weapon)", "braço não cansa (arma pesada)", isPerk: true),
+        }, iconAlt: ESkillId.RecoilControl),
+        ["heavy_frame"] = G("Heavy Frame", "Estrutura Pesada", ESkillId.Endurance, new[]
+        {
+            P("move speed", "velocidade", ValueFormat.Percent, 0.9f, Polarity.HigherBetter),
+            P("hunger/thirst drain", "fome/sede", ValueFormat.Percent, 1.3f, Polarity.LowerBetter),
+        }),
     };
 
-    /// <summary>Entradas da classe local (resolvida via SkillMultipliers.ClassNameEn). Null se vanilla/desconhecida.</summary>
-    internal static Entry[]? LocalEntries()
+    // Composição por classe (chave EN estável = displayName.en). Ordem = ordem de exibição.
+    private static readonly Dictionary<string, string[]> ByClass = new(StringComparer.OrdinalIgnoreCase)
     {
+        ["Combat Medic"] = new[] { "combat_medic", "shaky_hands" },
+        ["Rifleman"]     = new[] { "cool_under_fire", "adrenaline", "loud_operator" },
+        ["Hunter"]       = new[] { "sharpshooter", "iron_lungs", "rooted" },
+        ["Stealth"]      = new[] { "ghost_step", "execution", "rattled" },
+        ["Scavenger"]    = new[] { "quick_hands", "silent_looter", "pack_mule", "overladen" },
+        ["Tank"]         = new[] { "pack_mule", "bulwark", "bunker", "heavy_frame" },
+    };
+
+    private static bool _validated;
+
+    /// <summary>Grupos da classe local (via SkillMultipliers.ClassNameEn). Null se vanilla/desconhecida.</summary>
+    internal static PerkGroup[]? LocalGroups()
+    {
+        ValidateOnce();
         var key = SkillMultipliers.ClassNameEn;
-        return key != null && ByClass.TryGetValue(key, out var e) ? e : null;
+        if (key == null || !ByClass.TryGetValue(key, out var keys))
+        {
+            return null;
+        }
+
+        return keys.Select(k => Library.TryGetValue(k, out var g) ? g : null)
+                   .Where(g => g != null)
+                   .ToArray()!;
     }
 
-    /// <summary>Sprite do ícone temático da entrada (mesmo dicionário que a tela de Skills usa). Null se sem ícone/ausente.</summary>
-    internal static Sprite? IconSprite(Entry e)
+    /// <summary>Sprite do ícone temático do grupo (mesmo dicionário da tela de Skills). Icon → IconAlt → null.</summary>
+    internal static Sprite? IconSprite(PerkGroup g)
     {
         try
         {
@@ -90,13 +199,8 @@ internal static class PerksCatalog
                 return null;
             }
 
-            var sprite = e.Icon != null ? dict.GetValueOrDefault(e.Icon.Value) : null;
-            if (sprite == null && e.IconAlt != null)
-            {
-                sprite = dict.GetValueOrDefault(e.IconAlt.Value);   // CR-01-05: fallback quando o ícone primário não tem sprite
-            }
-
-            return sprite;
+            var sprite = g.Icon != null ? dict.GetValueOrDefault(g.Icon.Value) : null;
+            return sprite == null && g.IconAlt != null ? dict.GetValueOrDefault(g.IconAlt.Value) : sprite;
         }
         catch
         {
@@ -105,13 +209,13 @@ internal static class PerksCatalog
     }
 
     /// <summary>
-    ///     Texto rich-text multilinha p/ a notificação: perks em verde, drawbacks em vermelho.
-    ///     Null se a classe não tem entradas. Cores reusam o MultiplierFormat (mesmo padrão da tela de Skills).
+    ///     Notificação de início de raid — COMPACTA: título + **uma linha por grupo** (nome colorido por IsPerk).
+    ///     Sem linhas atômicas (o toast é pequeno). Deferidos entram normal aqui; o "em breve" fica só no painel.
     /// </summary>
     internal static string? BuildNotificationText()
     {
-        var entries = LocalEntries();
-        if (entries == null || entries.Length == 0)
+        var groups = LocalGroups();
+        if (groups == null || groups.Length == 0)
         {
             return null;
         }
@@ -123,58 +227,37 @@ internal static class PerksCatalog
             sb.Append("<b>").Append(header).Append("</b>\n");
         }
 
-        foreach (var e in entries)
+        foreach (var g in groups)
         {
-            var hex = e.IsPerk ? MultiplierFormat.GreenHex : MultiplierFormat.RedHex;
-            sb.Append("<color=").Append(hex).Append(">").Append(e.Text).Append("</color>\n");
+            var hex = g.IsPerk ? MultiplierFormat.GreenHex : MultiplierFormat.RedHex;
+            sb.Append("<color=").Append(hex).Append(">").Append(g.Name).Append("</color>\n");
         }
 
         return sb.ToString().TrimEnd('\n');
     }
 
-    /// <summary>
-    ///     Fallback (overlay legado): texto rich-text do painel — título + lista com ▲/▼. Null se sem entradas.
-    ///     A aba CLASS (053) usa cards em vez deste texto, mas o overlay desabilitado ainda referencia isto.
-    /// </summary>
-    internal static string? BuildPanelText()
+    /// <summary>Invariantes (1×): grupo homogêneo + linha quantitativa com Multiplier ≠ 1. Só loga aviso.</summary>
+    private static void ValidateOnce()
     {
-        var entries = LocalEntries();
-        if (entries == null || entries.Length == 0)
+        if (_validated)
         {
-            return null;
+            return;
         }
 
-        var sb = new StringBuilder();
-        var header = SkillMultipliers.ClassName;
-        var classHex = string.IsNullOrWhiteSpace(SkillMultipliers.NameColor) ? "#ffffff" : SkillMultipliers.NameColor;
-        var title = GameLocale.IsPortuguese ? "Perks e Drawbacks" : "Perks & Drawbacks";
-        if (!string.IsNullOrEmpty(header))
+        _validated = true;
+        foreach (var kv in Library)
         {
-            sb.Append("<size=150%><b><color=").Append(classHex).Append(">").Append(header.ToUpperInvariant())
-                .Append("</color></b></size>   <color=#7a7a7a><i>").Append(title).Append("</i></size>\n\n");
-        }
-
-        foreach (var e in entries)
-        {
-            var mark = e.IsPerk
-                ? "<color=" + MultiplierFormat.GreenHex + ">▲</color>"
-                : "<color=" + MultiplierFormat.RedHex + ">▼</color>";
-            sb.Append(mark).Append("  <b>").Append(e.Name).Append("</b>");
-            if (!string.IsNullOrEmpty(e.Effect))
+            var key = kv.Key;
+            var g = kv.Value;
+            if (g.Lines.Length > 0 && !g.Lines.All(l => l.IsPerk == g.Lines[0].IsPerk))
             {
-                sb.Append("   <color=#a8a8a8>").Append(e.Effect).Append("</color>");
+                Plugin.Log?.LogWarning($"[CustomClasses][059] grupo '{key}' NÃO é homogêneo (perk/drawback misturados na coluna).");
             }
 
-            sb.Append('\n');
+            foreach (var l in g.Lines.Where(l => l.Format != ValueFormat.Flag && Mathf.Approximately(l.Multiplier, 1f)))
+            {
+                Plugin.Log?.LogWarning($"[CustomClasses][059] linha '{l.LabelEn}' em '{key}' tem Multiplier==1 (sem efeito → classificação inválida).");
+            }
         }
-
-        return sb.ToString().TrimEnd('\n');
-    }
-
-    /// <summary>Separa "Nome — efeito" (em-dash) em (nome, efeito). Sem em-dash → (texto, "").</summary>
-    private static (string name, string effect) SplitNameEffect(string text)
-    {
-        var idx = text.IndexOf(" — ", System.StringComparison.Ordinal);   // " — " (em-dash)
-        return idx >= 0 ? (text.Substring(0, idx), text.Substring(idx + 3)) : (text, string.Empty);
     }
 }
