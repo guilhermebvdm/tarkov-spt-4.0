@@ -118,6 +118,7 @@ resolve_references() {
     "Newtonsoft.Json.dll|$spt/EscapeFromTarkov_Data/Managed/Newtonsoft.Json.dll"
     "Unity.TextMeshPro.dll|$spt/EscapeFromTarkov_Data/Managed/Unity.TextMeshPro.dll"
     "UnityEngine.UI.dll|$spt/EscapeFromTarkov_Data/Managed/UnityEngine.UI.dll"
+    "UnityEngine.UIModule.dll|$spt/EscapeFromTarkov_Data/Managed/UnityEngine.UIModule.dll"
     "UnityEngine.TextRenderingModule.dll|$spt/EscapeFromTarkov_Data/Managed/UnityEngine.TextRenderingModule.dll"
     "UnityEngine.ImageConversionModule.dll|$spt/EscapeFromTarkov_Data/Managed/UnityEngine.ImageConversionModule.dll"
     "UnityEngine.IMGUIModule.dll|$spt/EscapeFromTarkov_Data/Managed/UnityEngine.IMGUIModule.dll"
