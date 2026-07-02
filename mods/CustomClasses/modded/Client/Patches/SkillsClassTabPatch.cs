@@ -506,7 +506,7 @@ internal class SkillsClassTabPatch : ModulePatch
         ntmp.fontStyle = FontStyles.Bold;
         ntmp.color = Color.white;
         ntmp.raycastTarget = false;
-        ntmp.enableWordWrapping = false;
+        ntmp.enableWordWrapping = true;   // 059-CR: nome quebra linha em coluna estreita (evita transbordar o card)
         ntmp.overflowMode = TextOverflowModes.Overflow;
 
         foreach (var line in group.Lines)
