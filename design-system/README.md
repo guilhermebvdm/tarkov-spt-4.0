@@ -18,6 +18,7 @@ Linguagem visual padrão dos **editores web dos mods TRL** (Tarkov Red Line · S
 <link rel="stylesheet" href="design-system/tokens.css">
 <link rel="stylesheet" href="design-system/components.css">
 <link rel="stylesheet" href="design-system/utilities.css">
+<style>html, body { margin: 0; height: 100% }</style>  <!-- .trl-shell usa 100vh -->
 
 <body class="trl-app"> … </body>
 ```
@@ -36,7 +37,7 @@ Editor novo? Copie [`templates/editor-starter.html`](./templates/editor-starter.
 | [`PATTERNS.md`](./PATTERNS.md) | Regras normativas (disciplina do vermelho, radius 0, AA) + receitas |
 | [`CLAUDE.md`](./CLAUDE.md) | Contexto de uso para agentes |
 | [`fonts/`](./fonts/) | Bender woff2 + `@font-face` + nota de licença |
-| [`assets/`](./assets/) | Logo TRL (integral + marca compacta p/ topbar) |
+| [`assets/`](./assets/) | Logo TRL (`trl-logo-dark` integral p/ hero · `trl-logo-mark` cópia aparada p/ topbar) |
 
 ## Versionamento
 

@@ -31,7 +31,8 @@
   --trl-ground:      #12130d;
   --trl-surface-1:   #1b1d14;
   --trl-surface-2:   #22251a;
-  --trl-surface-3:   #282c1e;
+  --trl-surface-3:   #282c1e;   /* solid elevated blocks (not hovers —
+                                    hovers use --trl-bg-hover wash) */
   --trl-surface-4:   #2f3424;
 
   /* ── Tan / gold ramp (workhorse accent) ────────────────────────────────
@@ -64,6 +65,10 @@
   --trl-amber-400: #cc9a3e;
   --trl-amber-600: #8a6a2c;
 
+  /* ── Muted blue (faction USEC, informational) ───────────────────────── */
+  --trl-blue-400: #6f93bd;
+  --trl-blue-600: #46617f;
+
   /* ── Ink (neutral warm text scale) ──────────────────────────────────────
    * ink-faint is decorative-only below 11px (see PATTERNS.md · contrast). */
   --trl-ink:         #e9e7dd;
@@ -71,20 +76,6 @@
   --trl-ink-faint:   #6f6d60;
   --trl-ink-ghost:   #45443a;
   --trl-ink-inverse: #12130d;
-
-  /* ── Edges (translucent tan hairlines — the signature border) ───────── */
-  --trl-edge-faint:  rgba(199, 180, 138, .10);
-  --trl-edge:        rgba(199, 180, 138, .20);
-  --trl-edge-strong: rgba(199, 180, 138, .42);
-  --trl-edge-red:    rgba(255, 48, 32, .35);
-
-  /* ── Washes (translucent tint fills for tags, hovers, selections) ───── */
-  --trl-wash-tan:    rgba(199, 180, 138, .08);
-  --trl-wash-tan-2:  rgba(199, 180, 138, .14);
-  --trl-wash-green:  rgba(154, 210, 122, .10);
-  --trl-wash-amber:  rgba(204, 154, 62, .12);
-  --trl-wash-red:    rgba(210, 122, 122, .10);
-  --trl-wash-brand:  rgba(255, 0, 0, .06);
 
   /* ── Typography ─────────────────────────────────────────────────────────
    * display: Bender (EFT official; fonts/bender.css) → Bahnschrift (Win10+).
@@ -146,7 +137,9 @@
   --trl-glow-amber: 0 0 6px rgba(204, 154, 62, .55);
   --trl-glow-red:   0 0 8px rgba(255, 0, 0, .45);
 
-  /* ── Z-index scale ──────────────────────────────────────────────────── */
+  /* ── Z-index scale ──────────────────────────────────────────────────────
+   * z-overlay: consumer-owned full-screen layers below modal (e.g. loading
+   * veil). z-drag: dragged ghosts/previews (stash grid DnD refactor). */
   --trl-z-sticky:  10;
   --trl-z-nav:     50;
   --trl-z-overlay: 100;
@@ -162,24 +155,46 @@
   --trl-ease: cubic-bezier(.2, .7, .3, 1);
 
   /* ── Layout geometry ────────────────────────────────────────────────── */
-  --trl-container-md: 1160px;
-  --trl-container-lg: 1440px;
+  --trl-container-md: 1160px;   /* document pages (.trl-container) */
+  --trl-container-lg: 1440px;   /* wide data tools (consumer opt-in) */
   --trl-sidebar-w:    280px;
   --trl-topbar-h:     48px;
   --trl-row-h:        36px;
 
   /* ==========================================================================
    * TIER 2 — SEMANTIC (what product code consumes)
+   * Includes edges & washes: they are role-named and part of the public API.
    * ======================================================================= */
 
-  /* Backgrounds by role */
+  /* Backgrounds by role — hover/active are the SAME values the DS
+   * components use, so custom consumer CSS matches them by construction */
   --trl-bg-app:     var(--trl-ground);
   --trl-bg-panel:   var(--trl-surface-1);
   --trl-bg-raised:  var(--trl-surface-2);
   --trl-bg-input:   var(--trl-ground-deep);
-  --trl-bg-hover:   var(--trl-surface-3);
+  --trl-bg-hover:   var(--trl-wash-tan);
   --trl-bg-active:  var(--trl-wash-tan-2);
   --trl-bg-overlay: rgba(8, 9, 5, .65);
+
+  /* Edges (translucent tan hairlines — the signature border) */
+  --trl-edge-faint:  rgba(199, 180, 138, .10);
+  --trl-edge:        rgba(199, 180, 138, .20);
+  --trl-edge-strong: rgba(199, 180, 138, .42);
+  --trl-edge-red:    rgba(255, 48, 32, .35);
+
+  /* Washes (translucent tint fills for tags, highlights, status blocks) */
+  --trl-wash-tan:    rgba(199, 180, 138, .08);
+  --trl-wash-tan-2:  rgba(199, 180, 138, .14);
+  --trl-wash-green:  rgba(154, 210, 122, .10);
+  --trl-wash-amber:  rgba(204, 154, 62, .12);
+  --trl-wash-red:    rgba(210, 122, 122, .10);
+  --trl-wash-blue:   rgba(111, 147, 189, .10);
+  --trl-wash-brand:  rgba(255, 0, 0, .06);  /* reserved: brand-tinted hero
+                                               surfaces (unused in v1) */
+
+  /* Factions (Tarkov domain) */
+  --trl-faction-usec: var(--trl-blue-400);
+  --trl-faction-bear: var(--trl-red-soft);
 
   /* Foregrounds by role */
   --trl-fg:           var(--trl-ink);
@@ -239,4 +254,8 @@
       100% calc(100% - var(--trl-chamfer-size)),
       calc(100% - var(--trl-chamfer-size)) 100%, 0 100%,
       0 var(--trl-chamfer-size));
+
+  /* Game data (block H): inventory cell unit and 2D-grid line color */
+  --trl-cell-unit:   36px;
+  --trl-grid2d-line: rgba(199, 180, 138, .07);
 }

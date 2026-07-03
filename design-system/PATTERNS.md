@@ -46,7 +46,8 @@ Usos permitidos de `--trl-brand` (`#ff0000`), lista exaustiva:
 
 ### R4. Cor e tokens
 
-- Produto consome **apenas tokens semânticos** (camada 2: `--trl-bg-*`, `--trl-fg-*`, `--trl-accent*`, `--trl-danger*`...). Primitivos (camada 1) são internos do DS.
+- Produto consome **apenas tokens semânticos** (camada 2: `--trl-bg-*`, `--trl-fg-*`, `--trl-accent*`, `--trl-danger*`, `--trl-edge*`, `--trl-wash-*`). Primitivos (camada 1: ramps `tan-N`/`red-N`, surfaces) são internos do DS.
+- Hover/seleção em CSS custom: usar `--trl-bg-hover`/`--trl-bg-active` — são os mesmos valores que os componentes do DS usam, por construção.
 - **Hex hardcoded em editor é defeito de review.**
 - Elevação = superfície mais clara (ladder `ground-deep → surface-4`), sombra reforça mas não substitui.
 
@@ -65,6 +66,7 @@ Usos permitidos de `--trl-brand` (`#ff0000`), lista exaustiva:
 - Critério: ≥4.5:1 texto normal; ≥3:1 texto ≥18px/bold e componentes de UI.
 - `:focus-visible` vem de graça no escopo `.trl-app` (ring tan de 2 camadas) — não remover outline sem substituto.
 - Animações desligam sozinhas com `prefers-reduced-motion` — não criar animação fora dos keyframes `trl-*` sem cobrir esse caso.
+- **Comportamento (aria/teclado) é responsabilidade do consumidor** — o DS é CSS-only. Dropdown custom e tabs precisam de roles/teclado no app; para seleção simples, prefira o `.trl-select` nativo (acessível de graça).
 
 ### R6. Densidade
 
@@ -125,6 +127,36 @@ function toast(kind, title, msg) {  // kind: ok | warn | error
   setTimeout(() => el.remove(), 4000);
 }
 ```
+
+### Receitas game data (bloco H)
+
+O bloco H fornece a **casca visual** dos componentes de domínio Tarkov; todo comportamento (DnD, rotação, validação de colisão, fallback de ícone) é do consumidor — no CustomClasses hoje isso vive em JS interop (`ccGridDnd`) e C# (`CanPlace`).
+
+**Item cell** — dimensiona em unidades de jogo via CSS vars inline:
+
+```html
+<div class="trl-cell is-editable" style="--w:2;--h:1">
+  <div class="trl-cell__icon"><img src="…" alt=""></div>
+  <span class="trl-cell__qty">×30</span>        <!-- stack -->
+  <span class="trl-cell__contents">▤4</span>    <!-- container c/ 4 itens -->
+</div>
+```
+
+Estados: `is-empty` · `is-editable` · `is-invalid` (unresolved) · `is-dragging` (origem esmaecida durante drag). Cadeia de fallback de ícone (preset → tpl → ícone de categoria → `__label` texto) é lógica do consumidor.
+
+**Stash grid 2D** — `--cols` define a largura; itens entram como `.trl-grid2d__item` com `grid-column/grid-row` inline (start/span). Durante o drag: classe `is-dragging` no grid (outline tracejado), hints `.trl-grid2d__hint--ok/--bad` posicionados na mesma grid-area do alvo, e `.trl-grid2d__ghost` (position:fixed) seguindo o cursor via JS.
+
+**Paper doll** — o container usa container queries; células internas escalam em `cqw` (`--trl-cell` dentro de `.trl-doll` muda de px para 7cqw por unidade). As **posições dos slots** (`left/top` %) são dados de jogo medidos da tela Gear do EFT — ficam no consumidor, não no DS. `is-required-missing` marca slot obrigatório vazio.
+
+**Mod tree** — linhas recursivas com `__slot` (id mono lowercase: `mod_magazine`), `__name`, badges reutilizados (`trl-badge--green` required, `--red` unknown slot) e `__actions` que aparecem no hover. Aninhamento via `__children` (indent + hairline, mesmo pattern do `.trl-tree`).
+
+**Heatmap** — buckets monocromáticos tan em células de tabela: `trl-heat--none/low/mid/high` (0 / 1–3 / 4–6 / 7+). Nunca usar cores de status para heat — heat é intensidade, não semântica.
+
+**Categorias de skill** (Physical/Mental/Combat/Practical/Elite) — mapear para as cores de status existentes no consumidor (ex.: Physical=green, Practical=amber, Combat=red-soft, Mental=blue-400, Elite=tan). Não criar novas hues.
+
+**Facções** — `trl-card--usec` / `trl-card--bear` (tokens `--trl-faction-*`). Azul `--trl-blue-400` existe para facção USEC e usos informacionais — não vira accent de UI.
+
+**Fullscreen** — `.trl-fullscreen` ( `hidden` controla) + `.trl-fullscreen__exit`; usado para maximizar matrizes/tabelas densas.
 
 ### Consumo em Blazor/MudBlazor (fase futura)
 

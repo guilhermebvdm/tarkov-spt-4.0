@@ -4,7 +4,7 @@ Semver: **MAJOR** quebra token/classe · **MINOR** componente/token novo · **PA
 
 ## 1.0.0 — 2026-07-03
 
-Primeira versão.
+Primeira versão. Inclui o bloco **H. Game data** (primitivos de domínio Tarkov, derivados do inventário dos editores existentes): `trl-cell` (célula de item em unidades de jogo, qty/contents/label, estados empty/invalid/editable/dragging), `trl-grid2d` (stash 2D com hints de drop e ghost de drag), `trl-doll` (paper doll com slots em cqw), `trl-mod-tree` (árvore recursiva de slots de arma), `trl-heat--*` (heatmap tan p/ matrizes), `trl-card--usec/--bear` (facções, tokens `--trl-faction-*` + primitivo `--trl-blue-400`), `trl-crest`, `trl-fullscreen`. Comportamento (DnD/rotação/validação) permanece no consumidor — receitas no PATTERNS.md.
 
 - `tokens.css` — namespace `--trl-*` em 3 camadas: primitivos (surfaces oliva, ramps tan/red/status, ink, edges, washes, tipo, spacing 4px, sombras/glows, z-index, motion), semânticos (`--trl-bg-*`, `--trl-fg-*`, `--trl-accent*`, `--trl-brand`, `--trl-danger*`, focus ring) e assinaturas (laser, texturas, progress fill, chamfer).
 - `components.css` — blocos A–H: base `.trl-app` (texturas + scrollbars + focus-visible), shell (`trl-shell/topbar/screen-bar/panel/toolbar/workspace`), navegação (`trl-nav/tree/tabs/breadcrumb/pagination`), forms (`trl-btn` + variantes, `trl-field/input/select/checkbox/radio/switch/search/dropdown/slider/form-grid`), data display (`trl-table/kv/card/tag/chip/badge/stat/progress/eyebrow/sec/divider/h1-h3/lede/code/mono`), feedback (`trl-toast/alert/spinner/skeleton/empty` + tooltip `[data-trl-tip]`), overlays (`trl-modal/popover/menu`), motion (keyframes `trl-*` + reduced-motion).

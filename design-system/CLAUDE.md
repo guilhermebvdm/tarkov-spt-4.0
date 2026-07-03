@@ -7,7 +7,7 @@
 | Arquivo | Papel |
 |---|---|
 | `tokens.css` | 3 camadas: primitivos → **semânticos (consuma estes)** → assinaturas. Namespace `--trl-*` |
-| `components.css` | Componentes `.trl-*` (BEM; estados `.is-*`). Blocos: base, shell, nav, forms, data, feedback, overlays, motion |
+| `components.css` | Componentes `.trl-*` (BEM; estados `.is-*`). Blocos: base, shell, nav, forms, data, feedback, overlays, **game data** (cell/grid2d/doll/mod-tree/heat/faction — casca visual; comportamento é do consumidor), motion |
 | `utilities.css` | Utilitários mínimos `.trl-u-*` |
 | `fonts/bender.css` | `@font-face` Bender (opcional — fallback Bahnschrift). Licença: `fonts/LICENSE-NOTE.txt` |
 | `design-system.html` | Showcase navegável — **abra para ver tudo vivo**; é também o teste de integração |
@@ -22,12 +22,13 @@ Ordem de consumo:
 <link rel="stylesheet" href="design-system/tokens.css">
 <link rel="stylesheet" href="design-system/components.css">
 <link rel="stylesheet" href="design-system/utilities.css">
+<style>html, body { margin: 0; height: 100% }</style>  <!-- .trl-shell usa 100vh -->
 <body class="trl-app"> … </body>
 ```
 
 ## Regras de ouro (detalhes em PATTERNS.md)
 
-1. Consumir **só tokens semânticos** (`--trl-bg-*`, `--trl-fg-*`, `--trl-accent*`, `--trl-danger*`). Hex hardcoded em editor = defeito.
+1. Consumir **só tokens semânticos da camada 2** (`--trl-bg-*`, `--trl-fg-*`, `--trl-accent*`, `--trl-danger*`, `--trl-edge*`, `--trl-wash-*`). Hex hardcoded em editor = defeito.
 2. **Vermelho é raro** (R1): laser divider, dot live/dirty, botão destrutivo. `#ff0000` nunca em texto/fill. >~5% da tela em vermelho = errado.
 3. `--trl-radius: 0`, bordas 1px `--trl-edge*`. Uppercase+tracking só em display/labels.
 4. Mudanças no DS são **aditivas**; breaking = MAJOR no CHANGELOG. Componente novo entra no showcase **na mesma mudança**.

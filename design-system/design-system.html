@@ -86,12 +86,6 @@
   .ds-aa .ok   { color: var(--trl-success); }
   .ds-aa .warn { color: var(--trl-warning); }
 
-  /* sidebar brand block */
-  .ds-nav-title { padding: var(--trl-space-2) var(--trl-space-3);
-    font-family: var(--trl-font-display); text-transform: uppercase;
-    letter-spacing: var(--trl-track-widest); font-size: var(--trl-text-2xs);
-    color: var(--trl-fg-faint); }
-
   /* anti-pattern mockups (deliberately wrong, showcase-only) */
   .ds-bad-btn { height: 30px; padding: 0 16px; border-radius: 8px; border: none;
     background: #ff0000; color: #fff; font-weight: 700; cursor: default; }
@@ -115,18 +109,19 @@
 
   <!-- ══ SIDEBAR NAV ═════════════════════════════════════════════════════ -->
   <aside class="trl-sidebar">
-    <div class="ds-nav-title">Foundation</div>
     <nav class="trl-nav" id="ds-nav">
+      <div class="trl-nav__label">Foundation</div>
       <a class="trl-nav__item is-active" href="#brand">Brand</a>
       <a class="trl-nav__item" href="#colors">Colors</a>
       <a class="trl-nav__item" href="#typography">Typography</a>
       <a class="trl-nav__item" href="#spacing">Spacing</a>
       <a class="trl-nav__item" href="#surfaces">Surfaces &amp; elevation</a>
-      <div class="ds-nav-title">System</div>
+      <div class="trl-nav__label">System</div>
       <a class="trl-nav__item" href="#signatures">Signature elements</a>
       <a class="trl-nav__item" href="#components">Components</a>
+      <a class="trl-nav__item" href="#gamedata">Game data</a>
       <a class="trl-nav__item" href="#feedback">Feedback &amp; overlays</a>
-      <div class="ds-nav-title">Usage</div>
+      <div class="trl-nav__label">Usage</div>
       <a class="trl-nav__item" href="#dosdonts">Do's &amp; Don'ts</a>
       <a class="trl-nav__item" href="#consume">Consuming the DS</a>
     </nav>
@@ -316,6 +311,7 @@ tracking: .08em wide · .14em wider · .22em widest     (display/labels only)</p
         <span class="trl-tag"><span class="trl-tag__dot"></span>tan</span>
         <span class="trl-tag trl-tag--green"><span class="trl-tag__dot"></span>green</span>
         <span class="trl-tag trl-tag--amber"><span class="trl-tag__dot"></span>amber</span>
+        <span class="trl-tag trl-tag--red"><span class="trl-tag__dot"></span>danger</span>
         <span class="trl-tag trl-tag--brand"><span class="trl-tag__dot"></span>brand</span>
       </div>
     </section>
@@ -361,6 +357,10 @@ tracking: .08em wide · .14em wider · .22em widest     (display/labels only)</p
           <div class="trl-card__title">🧱 Heavy Frame</div>
           <div class="trl-card__body"><span class="trl-chip trl-chip--down">−10%</span> move speed</div>
         </div>
+        <div class="trl-card trl-card--accent-amber" style="flex:1;min-width:200px">
+          <div class="trl-card__title">⚠ Needs test</div>
+          <div class="trl-card__body">Awaiting in-raid validation</div>
+        </div>
         <div style="flex:1;min-width:220px">
           <ul class="trl-kv">
             <li class="trl-kv__row"><span class="trl-kv__k">Where</span><span class="trl-kv__v">Coop loading screen, <b>your row</b></span></li>
@@ -375,6 +375,7 @@ tracking: .08em wide · .14em wider · .22em widest     (display/labels only)</p
         <div class="trl-progress"><div class="trl-progress__fill" style="width:72%"></div></div>
         <div class="trl-progress trl-progress--green"><div class="trl-progress__fill" style="width:56%"></div></div>
         <div class="trl-progress trl-progress--amber"><div class="trl-progress__fill" style="width:34%"></div></div>
+        <div class="trl-progress trl-progress--red"><div class="trl-progress__fill" style="width:12%"></div></div>
         <div class="trl-progress trl-progress--dead"></div>
       </div>
 
@@ -522,13 +523,188 @@ tracking: .08em wide · .14em wider · .22em widest     (display/labels only)</p
           <span class="trl-stat__label">Recoil (weapon)</span>
           <span class="trl-stat__value">54 <span class="trl-badge">base item</span></span>
         </div>
+        <div class="trl-u-flex trl-u-gap-2">
+          <span class="trl-badge">default</span>
+          <span class="trl-badge trl-badge--green">buffed</span>
+          <span class="trl-badge trl-badge--amber">needs test</span>
+          <span class="trl-badge trl-badge--red">flea banned</span>
+        </div>
         <div>Template id <span class="trl-mono">5c0e625a86f7742d77340f62</span> resolves via <span class="trl-mono">DatabaseService</span>.</div>
       </div>
     </section>
 
-    <!-- ── 8 · FEEDBACK & OVERLAYS ───────────────────────────────────────── -->
+
+    <!-- ── 8 · GAME DATA ─────────────────────────────────────────────────── -->
+    <section class="ds-section" id="gamedata">
+      <div class="trl-eyebrow">07 · Game data</div>
+      <h2 class="trl-h2">Game data</h2>
+      <p class="ds-intro">Tarkov domain primitives shared by every mod editor: item cells in
+        game units, the 2D stash grid, the equipment paper doll, recursive mod trees and
+        heat-mapped matrices. <b>CSS-only</b> — drag-and-drop, rotation and validation stay in
+        the consumer (recipes in PATTERNS.md).</p>
+
+      <div class="ds-label">Item cell — game units via --w/--h · qty · contents · states</div>
+      <div class="ds-demo" style="align-items:flex-end">
+        <div class="trl-cell" style="--w:1;--h:1"><div class="trl-cell__icon">🔧</div></div>
+        <div class="trl-cell" style="--w:2;--h:1">
+          <div class="trl-cell__icon">🔫</div>
+          <span class="trl-cell__qty">×30</span>
+        </div>
+        <div class="trl-cell" style="--w:2;--h:2">
+          <div class="trl-cell__icon">🎒</div>
+          <span class="trl-cell__contents">▤4</span>
+        </div>
+        <div class="trl-cell is-editable" style="--w:1;--h:1" data-trl-tip="is-editable — click to edit">
+          <div class="trl-cell__icon">🧰</div>
+        </div>
+        <div class="trl-cell is-empty" style="--w:1;--h:1"></div>
+        <div class="trl-cell is-invalid" style="--w:1;--h:1">
+          <div class="trl-cell__icon">❓</div>
+          <span class="trl-cell__label">unresolved</span>
+        </div>
+      </div>
+      <pre class="trl-code">&lt;div class="trl-cell is-editable" style="--w:2;--h:1"&gt;
+  &lt;div class="trl-cell__icon"&gt;&lt;img src="…" alt=""&gt;&lt;/div&gt;
+  &lt;span class="trl-cell__qty"&gt;×30&lt;/span&gt;
+&lt;/div&gt;</pre>
+
+      <div class="ds-label">2D stash grid — items placed via grid-column/row · drop hints · dashed outline while dragging</div>
+      <div class="ds-demo" style="overflow-x:auto">
+        <div class="trl-grid2d is-dragging" style="--cols:8;grid-template-rows:repeat(4,var(--trl-cell-unit))">
+          <div class="trl-grid2d__item" style="grid-column:1/span 2;grid-row:1/span 1">
+            <div class="trl-cell"><div class="trl-cell__icon">🔫</div></div>
+          </div>
+          <div class="trl-grid2d__item" style="grid-column:4/span 2;grid-row:2/span 2">
+            <div class="trl-cell"><div class="trl-cell__icon">🎒</div><span class="trl-cell__contents">▤2</span></div>
+          </div>
+          <div class="trl-grid2d__item" style="grid-column:7/span 1;grid-row:1/span 1">
+            <div class="trl-cell"><div class="trl-cell__icon">💊</div><span class="trl-cell__qty">×3</span></div>
+          </div>
+          <div class="trl-grid2d__hint--ok" style="grid-column:1/span 2;grid-row:3/span 1"></div>
+          <div class="trl-grid2d__hint--bad" style="grid-column:6/span 2;grid-row:4/span 1"></div>
+        </div>
+      </div>
+
+      <div class="ds-label">Paper doll — slots in container units (cqw); positions are consumer-owned game data</div>
+      <div class="ds-demo" style="align-items:flex-start">
+        <div class="trl-doll" style="width:260px">
+          <div class="trl-doll__silhouette"></div>
+          <div class="trl-doll__slot" style="left:38%;top:2%">
+            <span class="trl-doll__label">Headwear</span>
+            <div class="trl-cell" style="--w:2;--h:2"><div class="trl-cell__icon">🪖</div></div>
+          </div>
+          <div class="trl-doll__slot" style="left:36%;top:34%">
+            <span class="trl-doll__label">Body armor</span>
+            <div class="trl-cell" style="--w:2;--h:2"><div class="trl-cell__icon">🦺</div></div>
+          </div>
+          <div class="trl-doll__slot" style="left:2%;top:40%">
+            <span class="trl-doll__label">On sling</span>
+            <div class="trl-cell" style="--w:4;--h:2"><div class="trl-cell__icon">🔫</div></div>
+          </div>
+          <div class="trl-doll__slot is-required-missing" style="left:66%;top:40%">
+            <span class="trl-doll__label">⚠ Tactical rig</span>
+            <div class="trl-cell is-empty" style="--w:2;--h:2"></div>
+          </div>
+          <div class="trl-doll__slot" style="left:30%;top:72%">
+            <span class="trl-doll__label">Pockets</span>
+            <div class="trl-cell" style="--w:4;--h:1"><div class="trl-cell__icon">▫▫▫▫</div></div>
+          </div>
+        </div>
+        <div style="flex:1;min-width:220px">
+          <ul class="trl-kv">
+            <li class="trl-kv__row"><span class="trl-kv__k">Scale</span><span class="trl-kv__v">Slots size in <b>cqw</b> — the doll scales with its column</span></li>
+            <li class="trl-kv__row"><span class="trl-kv__k">Positions</span><span class="trl-kv__v">Game-accurate <span class="trl-mono">left/top %</span> live in the consumer</span></li>
+            <li class="trl-kv__row"><span class="trl-kv__k">States</span><span class="trl-kv__v"><span class="trl-mono">is-empty</span> · <span class="trl-mono">is-required-missing</span> · <span class="trl-mono">is-invalid</span></span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="ds-label">Mod tree — recursive weapon slots · hover actions · orphan state</div>
+      <div class="ds-demo ds-demo--col" style="max-width:520px">
+        <div class="trl-mod-tree">
+          <div class="trl-mod-tree__row">
+            <span class="trl-mod-tree__arrow">↳</span>
+            <span class="trl-mod-tree__slot">mod_pistol_grip</span>
+            <span class="trl-mod-tree__name">AK-74 bakelite grip (6P4 Sb.9)</span>
+            <span class="trl-mod-tree__actions">
+              <button class="trl-btn trl-btn--ghost trl-btn--sm trl-btn--icon">✎</button>
+              <button class="trl-btn trl-btn--ghost trl-btn--sm trl-btn--icon">✕</button>
+            </span>
+          </div>
+          <div class="trl-mod-tree__row">
+            <span class="trl-mod-tree__arrow">↳</span>
+            <span class="trl-mod-tree__slot">mod_magazine</span>
+            <span class="trl-mod-tree__name">6L31 60-round magazine</span>
+            <span class="trl-badge trl-badge--green">required</span>
+            <span class="trl-mod-tree__actions">
+              <button class="trl-btn trl-btn--ghost trl-btn--sm trl-btn--icon">✎</button>
+            </span>
+          </div>
+          <div class="trl-mod-tree__children">
+            <div class="trl-mod-tree__row is-empty">
+              <span class="trl-mod-tree__arrow">↳</span>
+              <span class="trl-mod-tree__slot">mod_muzzle</span>
+              <span class="trl-mod-tree__name">empty slot</span>
+            </div>
+            <div class="trl-mod-tree__row is-invalid">
+              <span class="trl-mod-tree__arrow">↳</span>
+              <span class="trl-mod-tree__slot">mod_launcher</span>
+              <span class="trl-mod-tree__name">GP-25 Kostyor</span>
+              <span class="trl-badge trl-badge--red">unknown slot</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ds-label">Heatmap — monochrome tan buckets for matrix cells</div>
+      <div class="ds-demo ds-demo--col" style="padding:0;max-width:520px">
+        <table class="trl-table">
+          <thead><tr><th>Skill</th><th class="num">Tank</th><th class="num">Medic</th><th class="num">Hunter</th></tr></thead>
+          <tbody>
+            <tr><td>Strength</td><td class="num trl-heat--high">9</td><td class="num trl-heat--low">2</td><td class="num trl-heat--mid">5</td></tr>
+            <tr><td>Vitality</td><td class="num trl-heat--mid">6</td><td class="num trl-heat--high">8</td><td class="num trl-heat--low">3</td></tr>
+            <tr><td>Sniper</td><td class="num trl-heat--none">0</td><td class="num trl-heat--none">0</td><td class="num trl-heat--high">10</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="ds-label">Faction cards · class headline (crest + stats)</div>
+      <div class="ds-demo" style="align-items:stretch">
+        <div class="trl-card trl-card--usec" style="flex:1;min-width:180px">
+          <div class="trl-card__title">USEC — Body</div>
+          <div class="trl-card__body">Commando outfit</div>
+        </div>
+        <div class="trl-card trl-card--bear" style="flex:1;min-width:180px">
+          <div class="trl-card__title">BEAR — Body</div>
+          <div class="trl-card__body">Ghost balaclava</div>
+        </div>
+      </div>
+      <div class="ds-demo">
+        <span class="trl-crest trl-crest--lg">🛡</span>
+        <div>
+          <h3 class="trl-h3" style="margin:0">Tank</h3>
+          <span class="trl-u-faint" style="font-size:11px">Perks &amp; drawbacks</span>
+        </div>
+        <span class="trl-topbar__spacer"></span>
+        <div class="trl-stat trl-stat--hi" style="min-width:150px">
+          <span class="trl-stat__label">Skill cost</span>
+          <span class="trl-stat__value">1,240</span>
+        </div>
+        <div class="trl-stat" style="min-width:150px">
+          <span class="trl-stat__label">Loadout ₽</span>
+          <span class="trl-stat__value">418,200</span>
+        </div>
+      </div>
+
+      <div class="ds-label">Fullscreen takeover — maximized matrix/table view</div>
+      <div class="ds-demo">
+        <button class="trl-btn" id="ds-open-fullscreen">Open fullscreen</button>
+      </div>
+    </section>
+
+    <!-- ── 9 · FEEDBACK & OVERLAYS ───────────────────────────────────────── -->
     <section class="ds-section" id="feedback">
-      <div class="trl-eyebrow">07 · Feedback &amp; overlays</div>
+      <div class="trl-eyebrow">08 · Feedback &amp; overlays</div>
       <h2 class="trl-h2">Feedback</h2>
 
       <div class="ds-label">Toasts (static preview — live ones stack fixed bottom-right)</div>
@@ -553,6 +729,11 @@ tracking: .08em wide · .14em wider · .22em widest     (display/labels only)</p
           <div class="trl-skeleton trl-skeleton--text" style="width:70%"></div>
           <div class="trl-skeleton trl-skeleton--text" style="width:45%"></div>
           <div class="trl-skeleton trl-skeleton--row"></div>
+          <div class="trl-u-flex trl-u-gap-2">
+            <div class="trl-skeleton trl-skeleton--cell"></div>
+            <div class="trl-skeleton trl-skeleton--cell"></div>
+            <div class="trl-skeleton trl-skeleton--cell"></div>
+          </div>
         </div>
         <div class="trl-empty" style="flex:1;min-width:220px;padding:16px">
           <div class="trl-empty__icon">▦</div>
@@ -566,11 +747,52 @@ tracking: .08em wide · .14em wider · .22em widest     (display/labels only)</p
         <button class="trl-btn" data-trl-tip="Hover tooltips are CSS-only">Hover me</button>
         <button class="trl-btn trl-btn--primary" id="ds-open-modal">Open modal</button>
       </div>
+
+      <div class="ds-label">Menu · popover — position the menu yourself or nest it in a popover</div>
+      <div class="ds-demo" style="align-items:flex-start">
+        <div class="trl-menu">
+          <button class="trl-menu__item">Duplicate class</button>
+          <button class="trl-menu__item">Export JSON</button>
+          <div class="trl-menu__sep"></div>
+          <button class="trl-menu__item trl-menu__item--danger">Delete class</button>
+        </div>
+        <div class="trl-popover" style="position:static;max-width:260px">
+          <div class="trl-sec">Popover</div>
+          <p style="margin:0;font-size:12px;color:var(--trl-fg-muted)">Anchored floating surface —
+            <span class="trl-mono">position:absolute</span> relative to its trigger, shown static here.</p>
+        </div>
+      </div>
+
+      <div class="ds-label">Panel with scrolling body — trl-panel--scroll (fixed height here)</div>
+      <div class="ds-demo" style="align-items:stretch">
+        <div class="trl-panel trl-panel--flush trl-panel--scroll" style="height:180px;flex:1;max-width:340px">
+          <div class="trl-screen-bar">
+            <span class="trl-screen-bar__dot trl-screen-bar__dot--ok"></span>
+            <span class="trl-screen-bar__title">◪ Long list</span>
+            <span class="trl-screen-bar__meta">12</span>
+          </div>
+          <div class="trl-panel__body" style="padding:8px 0">
+            <div class="trl-tree">              <div class="trl-tree__node"><span class="trl-tree__chev" style="visibility:hidden"></span>Item 01</div>
+              <div class="trl-tree__node"><span class="trl-tree__chev" style="visibility:hidden"></span>Item 02</div>
+              <div class="trl-tree__node"><span class="trl-tree__chev" style="visibility:hidden"></span>Item 03</div>
+              <div class="trl-tree__node"><span class="trl-tree__chev" style="visibility:hidden"></span>Item 04</div>
+              <div class="trl-tree__node"><span class="trl-tree__chev" style="visibility:hidden"></span>Item 05</div>
+              <div class="trl-tree__node"><span class="trl-tree__chev" style="visibility:hidden"></span>Item 06</div>
+              <div class="trl-tree__node"><span class="trl-tree__chev" style="visibility:hidden"></span>Item 07</div>
+              <div class="trl-tree__node"><span class="trl-tree__chev" style="visibility:hidden"></span>Item 08</div>
+              <div class="trl-tree__node"><span class="trl-tree__chev" style="visibility:hidden"></span>Item 09</div>
+              <div class="trl-tree__node"><span class="trl-tree__chev" style="visibility:hidden"></span>Item 10</div>
+              <div class="trl-tree__node"><span class="trl-tree__chev" style="visibility:hidden"></span>Item 11</div>
+              <div class="trl-tree__node"><span class="trl-tree__chev" style="visibility:hidden"></span>Item 12</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- ── 9 · DO'S & DON'TS ─────────────────────────────────────────────── -->
     <section class="ds-section" id="dosdonts">
-      <div class="trl-eyebrow">08 · Do's &amp; Don'ts</div>
+      <div class="trl-eyebrow">09 · Do's &amp; Don'ts</div>
       <h2 class="trl-h2">Discipline</h2>
 
       <div class="ds-dd">
@@ -658,7 +880,7 @@ border-color: #444;   /* not even ours */</pre>
 
     <!-- ── 10 · CONSUME ──────────────────────────────────────────────────── -->
     <section class="ds-section" id="consume">
-      <div class="trl-eyebrow">09 · Consuming the DS</div>
+      <div class="trl-eyebrow">10 · Consuming the DS</div>
       <h2 class="trl-h2">Consuming</h2>
       <p class="ds-intro">Copy the <span class="trl-mono">design-system/</span> folder (or mount it)
         into your editor's static root, link the four files in order, and put
@@ -668,8 +890,11 @@ border-color: #444;   /* not even ours */</pre>
 &lt;link rel="stylesheet" href="design-system/tokens.css"&gt;
 &lt;link rel="stylesheet" href="design-system/components.css"&gt;
 &lt;link rel="stylesheet" href="design-system/utilities.css"&gt;
+&lt;style&gt;html, body { margin: 0; height: 100% }&lt;/style&gt;  &lt;!-- .trl-shell uses 100vh --&gt;
 
-&lt;body class="trl-app"&gt; … &lt;/body&gt;</pre>
+&lt;body class="trl-app"&gt; … &lt;/body&gt;
+
+&lt;!-- app shells use .trl-shell; document-style pages use .trl-container --&gt;</pre>
       <div class="ds-demo ds-demo--col">
         <ul class="trl-kv">
           <li class="trl-kv__row"><span class="trl-kv__k">Rules</span><span class="trl-kv__v">Normative rules &amp; composition recipes live in <b>PATTERNS.md</b></span></li>
@@ -687,6 +912,22 @@ border-color: #444;   /* not even ours */</pre>
       <span style="margin-left:auto">Bender © Zhuravlev &amp; Gladkikh · see fonts/LICENSE-NOTE.txt</span>
     </footer>
   </main>
+</div>
+
+<!-- ══ FULLSCREEN DEMO ═══════════════════════════════════════════════════ -->
+<div class="trl-fullscreen" id="ds-fullscreen" hidden>
+  <button class="trl-btn trl-btn--sm trl-fullscreen__exit" id="ds-close-fullscreen">✕ Exit</button>
+  <div class="trl-eyebrow">Skills × Classes</div>
+  <h2 class="trl-h2">Maximized matrix</h2>
+  <table class="trl-table" style="max-width:560px">
+    <thead><tr><th>Skill</th><th class="num">Tank</th><th class="num">Medic</th><th class="num">Hunter</th></tr></thead>
+    <tbody>
+      <tr><td>Strength</td><td class="num trl-heat--high">9</td><td class="num trl-heat--low">2</td><td class="num trl-heat--mid">5</td></tr>
+      <tr><td>Endurance</td><td class="num trl-heat--high">8</td><td class="num trl-heat--mid">4</td><td class="num trl-heat--mid">6</td></tr>
+      <tr><td>Vitality</td><td class="num trl-heat--mid">6</td><td class="num trl-heat--high">8</td><td class="num trl-heat--low">3</td></tr>
+      <tr><td>Sniper</td><td class="num trl-heat--none">0</td><td class="num trl-heat--none">0</td><td class="num trl-heat--high">10</td></tr>
+    </tbody>
+  </table>
 </div>
 
 <!-- ══ MODAL DEMO ════════════════════════════════════════════════════════ -->
@@ -787,6 +1028,13 @@ border-color: #444;   /* not even ours */</pre>
       if (!dd.contains(e.target)) dd.classList.remove('is-open');
     });
   }
+
+  /* fullscreen demo */
+  var fs = document.getElementById('ds-fullscreen');
+  var fsOpen = document.getElementById('ds-open-fullscreen');
+  if (fsOpen) fsOpen.addEventListener('click', function () { fs.hidden = false; });
+  var fsClose = document.getElementById('ds-close-fullscreen');
+  if (fsClose) fsClose.addEventListener('click', function () { fs.hidden = true; });
 
   /* modal demo */
   var modal = document.getElementById('ds-modal');

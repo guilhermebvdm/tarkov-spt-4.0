@@ -10,8 +10,10 @@
  *   D. Forms             .trl-btn .trl-field .trl-input .trl-dropdown …
  *   E. Data display      .trl-table .trl-kv .trl-card .trl-tag .trl-progress …
  *   F. Feedback          .trl-toast .trl-alert .trl-skeleton .trl-empty …
- *   G. Overlays          .trl-modal .trl-popover .trl-menu
- *   H. Motion            keyframes + reduced-motion kill-switch
+ *   G. Overlays          .trl-modal .trl-popover .trl-menu .trl-fullscreen
+ *   H. Game data         .trl-cell .trl-grid2d .trl-doll .trl-mod-tree
+ *                        .trl-heat-* .trl-card--usec/--bear (Tarkov domain)
+ *   I. Motion            keyframes + reduced-motion kill-switch
  * ========================================================================== */
 
 
@@ -50,21 +52,28 @@
   box-shadow: var(--trl-focus-ring);
 }
 
-/* Scrollbars — recessed gunmetal track, tan on hover */
+/* Scrollbars — recessed gunmetal track, tan on hover.
+ * Both selectors: descendants AND the .trl-app element itself (covers the
+ * viewport scrollbar when .trl-app sits on <body>). */
+.trl-app::-webkit-scrollbar,
 .trl-app ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
+.trl-app::-webkit-scrollbar-track,
 .trl-app ::-webkit-scrollbar-track {
   background: var(--trl-ground);
 }
+.trl-app::-webkit-scrollbar-thumb,
 .trl-app ::-webkit-scrollbar-thumb {
   background: var(--trl-surface-3);
   border: 2px solid var(--trl-ground);
 }
+.trl-app::-webkit-scrollbar-thumb:hover,
 .trl-app ::-webkit-scrollbar-thumb:hover {
   background: var(--trl-tan-700);
 }
+.trl-app::-webkit-scrollbar-corner,
 .trl-app ::-webkit-scrollbar-corner {
   background: var(--trl-ground);
 }
@@ -249,9 +258,18 @@
 
 .trl-panel--flush .trl-panel__body { padding: 0; }
 
+/* --scroll: body scrolls inside the panel. Works with an explicit height on
+ * the panel OR stretched inside a grid/flex cell (min-height: 0 unlocks it). */
+.trl-panel--scroll {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
 .trl-panel--scroll .trl-panel__body {
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
-  max-height: 100%;
 }
 
 .trl-panel--raised {
@@ -302,8 +320,14 @@
   gap: var(--trl-space-h);
 }
 
-.trl-nav__group {
+/* group label between nav blocks */
+.trl-nav__label {
   padding: var(--trl-space-3) var(--trl-space-3) var(--trl-space-1);
+  font-family: var(--trl-font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--trl-track-widest);
+  font-size: var(--trl-text-2xs);
+  color: var(--trl-fg-faint);
 }
 
 .trl-nav__item {
@@ -321,13 +345,13 @@
 }
 
 .trl-nav__item:hover {
-  background: var(--trl-wash-tan);
+  background: var(--trl-bg-hover);
   color: var(--trl-fg);
 }
 
 .trl-nav__item.is-active {
   border-left-color: var(--trl-accent);
-  background: var(--trl-wash-tan);
+  background: var(--trl-bg-active);
   color: var(--trl-fg);
 }
 
@@ -347,13 +371,13 @@
 }
 
 .trl-tree__node:hover {
-  background: var(--trl-wash-tan);
+  background: var(--trl-bg-hover);
   color: var(--trl-fg);
 }
 
 .trl-tree__node.is-active {
   border-left-color: var(--trl-accent);
-  background: var(--trl-wash-tan);
+  background: var(--trl-bg-active);
   color: var(--trl-fg);
 }
 
@@ -464,7 +488,7 @@
 
 .trl-pagination__page.is-active {
   border-color: var(--trl-edge-strong);
-  background: var(--trl-wash-tan-2);
+  background: var(--trl-bg-active);
   color: var(--trl-accent);
 }
 
@@ -507,7 +531,7 @@
 }
 
 .trl-btn:hover {
-  background: var(--trl-wash-tan);
+  background: var(--trl-bg-hover);
   color: var(--trl-accent-strong);
 }
 
@@ -552,7 +576,7 @@
 
 .trl-btn--ghost:hover {
   color: var(--trl-fg);
-  background: var(--trl-wash-tan);
+  background: var(--trl-bg-hover);
 }
 
 .trl-btn--icon {
@@ -568,7 +592,10 @@
 
 .trl-btn--sm.trl-btn--icon { width: 24px; }
 
-.trl-btn--chamfer {
+/* chamfer only combines with SOLID variants — the selector enforces it,
+ * because the clip-path would eat the outline button's 1px border */
+.trl-btn--primary.trl-btn--chamfer,
+.trl-btn--danger.trl-btn--chamfer {
   clip-path: var(--trl-chamfer);
   border: none;
   padding: 0 calc(var(--trl-space-4) + var(--trl-chamfer-size) / 2);
@@ -746,7 +773,7 @@ textarea.trl-input {
 }
 
 .trl-switch input:checked {
-  background: var(--trl-wash-tan-2);
+  background: var(--trl-bg-active);
   border-color: var(--trl-accent);
 }
 
@@ -886,12 +913,12 @@ textarea.trl-input {
 }
 
 .trl-dropdown__option:hover {
-  background: var(--trl-wash-tan);
+  background: var(--trl-bg-hover);
   color: var(--trl-fg);
 }
 
 .trl-dropdown__option.is-selected {
-  background: var(--trl-wash-tan-2);
+  background: var(--trl-bg-active);
   color: var(--trl-accent);
 }
 
@@ -1003,12 +1030,12 @@ textarea.trl-input {
 }
 
 .trl-table tbody tr:hover td {
-  background: var(--trl-wash-tan);
+  background: var(--trl-bg-hover);
   color: var(--trl-fg);
 }
 
 .trl-table tbody tr.is-selected td {
-  background: var(--trl-wash-tan-2);
+  background: var(--trl-bg-active);
   color: var(--trl-fg);
 }
 
@@ -1255,6 +1282,24 @@ textarea.trl-input {
 .trl-progress--dead {
   background: repeating-linear-gradient(45deg,
       rgba(210, 122, 122, .10) 0 6px, transparent 6px 12px);
+}
+
+/* ── Crest (bordered icon square — class/entity emblem) ─────────────────── */
+.trl-crest {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  border: var(--trl-border-w) solid var(--trl-edge-strong);
+  color: var(--trl-accent);
+  font-size: 14px;
+}
+
+.trl-crest--lg {
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
 }
 
 /* ── Eyebrow (signature section header) ─────────────────────────────────── */
@@ -1549,6 +1594,9 @@ textarea.trl-input {
 
 .trl-modal {
   width: min(520px, 100%);
+  max-height: calc(100vh - var(--trl-space-8));
+  display: flex;
+  flex-direction: column;
   background: var(--trl-surface-1);
   border: var(--trl-border-w) solid var(--trl-edge-strong);
   box-shadow: var(--trl-shadow-3);
@@ -1591,6 +1639,7 @@ textarea.trl-input {
   padding: var(--trl-space-4) var(--trl-space-3);
   font-size: var(--trl-text-md);
   color: var(--trl-fg-muted);
+  overflow-y: auto;
 }
 
 .trl-modal__actions {
@@ -1613,7 +1662,9 @@ textarea.trl-input {
   animation: trl-fade-in var(--trl-dur-2) var(--trl-ease);
 }
 
-/* ── Menu ───────────────────────────────────────────────────────────────── */
+/* ── Menu ─────────────────────────────────────────────────────────────────
+ * Statically positioned on purpose: nest it inside a .trl-popover or
+ * position it yourself (absolute/fixed) — the z-index applies then. */
 .trl-menu {
   min-width: 180px;
   background: var(--trl-surface-2);
@@ -1639,7 +1690,7 @@ textarea.trl-input {
 }
 
 .trl-menu__item:hover {
-  background: var(--trl-wash-tan);
+  background: var(--trl-bg-hover);
   color: var(--trl-fg);
 }
 
@@ -1656,9 +1707,338 @@ textarea.trl-input {
   margin: var(--trl-space-1) 0;
 }
 
+/* ── Fullscreen takeover (e.g. maximized matrix/table view) ─────────────── */
+.trl-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: var(--trl-z-overlay);
+  background:
+    var(--trl-texture-vignette),
+    var(--trl-texture-scanlines),
+    var(--trl-bg-app);
+  padding: var(--trl-space-6);
+  overflow: auto;
+}
+
+.trl-fullscreen__exit {
+  position: fixed;
+  top: var(--trl-space-3);
+  right: var(--trl-space-4);
+  z-index: 1;
+}
+
 
 /* ============================================================================
- * H. MOTION
+ * H. GAME DATA — Tarkov domain primitives shared by mod editors
+ * CSS-only: geometry, badges and visual states. Behavior (drag-and-drop,
+ * rotation, placement validation, data fallbacks) stays in the consumer —
+ * recipes in PATTERNS.md · Receitas game data.
+ * ========================================================================== */
+
+/* ── Item cell ─────────────────────────────────────────────────────────────
+ * Sized in game units via --w/--h (integers × --trl-cell-unit).
+ * <div class="trl-cell" style="--w:2;--h:1"> <div class="trl-cell__icon">…
+ */
+.trl-cell {
+  --w: 1;
+  --h: 1;
+  position: relative;
+  width: calc(var(--w) * var(--trl-cell-unit));
+  height: calc(var(--h) * var(--trl-cell-unit));
+  background: rgba(0, 0, 0, .25);
+  border: var(--trl-border-w) solid var(--trl-edge);
+  overflow: hidden;
+  flex: none;
+}
+
+/* icon wrapper centers an <img> (or a fallback glyph) inside the cell */
+.trl-cell__icon {
+  position: absolute;
+  inset: 2px;
+  display: grid;
+  place-items: center;
+  font-size: calc(var(--trl-cell-unit) * .5);
+  overflow: hidden;
+}
+
+.trl-cell__icon img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* stack count — bottom-right, dark backdrop for readability over icons */
+.trl-cell__qty {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  padding: 0 3px;
+  background: rgba(0, 0, 0, .6);
+  font-family: var(--trl-font-mono);
+  font-size: var(--trl-text-2xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--trl-ink);
+  line-height: 1.4;
+}
+
+/* container contents indicator (▤N) — bottom-left */
+.trl-cell__contents {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 0 3px;
+  background: rgba(0, 0, 0, .6);
+  font-family: var(--trl-font-mono);
+  font-size: var(--trl-text-2xs);
+  color: var(--trl-accent-dim);
+  line-height: 1.4;
+}
+
+/* name overlay for icon-less fallbacks */
+.trl-cell__label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 1px 3px;
+  background: rgba(0, 0, 0, .6);
+  font-size: 9px;
+  color: var(--trl-fg-muted);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trl-cell.is-empty { opacity: .35; }
+
+.trl-cell.is-invalid { border-color: var(--trl-edge-red); }
+
+.trl-cell.is-invalid::after {
+  content: "⚠";
+  position: absolute;
+  top: 0;
+  right: 2px;
+  font-size: 10px;
+}
+
+.trl-cell.is-editable { cursor: pointer; }
+
+.trl-cell.is-editable:hover {
+  border-color: var(--trl-accent-dim);
+  box-shadow: var(--trl-glow-tan);
+}
+
+.trl-cell.is-dragging { opacity: .3; }
+
+/* ── 2D stash grid ─────────────────────────────────────────────────────────
+ * CSS Grid in game units; --cols sets width. Items are placed by the
+ * consumer via inline grid-column/grid-row (start / span …).
+ */
+.trl-grid2d {
+  --cols: 10;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), var(--trl-cell-unit));
+  grid-auto-rows: var(--trl-cell-unit);
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+  background:
+    linear-gradient(var(--trl-grid2d-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--trl-grid2d-line) 1px, transparent 1px),
+    rgba(0, 0, 0, .25);
+  background-size: var(--trl-cell-unit) var(--trl-cell-unit);
+  border: var(--trl-border-w) solid var(--trl-edge);
+}
+
+/* while a drag is in progress (class set by consumer JS) */
+.trl-grid2d.is-dragging {
+  outline: 1px dashed var(--trl-edge-strong);
+  outline-offset: 2px;
+}
+
+/* a placed item: cells stretch to their grid area */
+.trl-grid2d__item { position: relative; }
+
+.trl-grid2d__item .trl-cell,
+.trl-grid2d .trl-cell {
+  width: 100%;
+  height: 100%;
+}
+
+/* drop feasibility hints — position via the same grid-area as the drag */
+.trl-grid2d__hint--ok {
+  background: var(--trl-wash-green);
+  box-shadow: inset 0 0 0 1px rgba(154, 210, 122, .45);
+  pointer-events: none;
+}
+
+.trl-grid2d__hint--bad {
+  background: var(--trl-wash-red);
+  box-shadow: inset 0 0 0 1px var(--trl-edge-red);
+  pointer-events: none;
+}
+
+/* drag ghost — consumer positions it under the pointer (position: fixed) */
+.trl-grid2d__ghost {
+  position: fixed;
+  pointer-events: none;
+  z-index: var(--trl-z-drag);
+  opacity: .85;
+  box-shadow: var(--trl-shadow-2);
+}
+
+/* ── Paper doll (equipment silhouette) ─────────────────────────────────────
+ * Container-query scoped: slots size in cqw so the doll scales with its
+ * column. Slot positions (left/top %) are game-accurate values owned by
+ * the consumer via inline style.
+ */
+.trl-doll {
+  position: relative;
+  container-type: inline-size;
+  aspect-ratio: 3 / 4;
+  background: rgba(0, 0, 0, .18);
+  border: var(--trl-border-w) solid var(--trl-edge-faint);
+}
+
+/* decorative silhouette — head + torso, barely-there */
+.trl-doll__silhouette {
+  position: absolute;
+  inset: 0;
+  opacity: .10;
+  pointer-events: none;
+}
+
+.trl-doll__silhouette::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 3%;
+  width: 13cqw;
+  height: 13cqw;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: var(--trl-tan-300);
+}
+
+.trl-doll__silhouette::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 17%;
+  width: 30cqw;
+  height: 52cqw;
+  transform: translateX(-50%);
+  background: var(--trl-tan-300);
+  clip-path: polygon(18% 0, 82% 0, 100% 16%, 90% 100%, 10% 100%, 0 16%);
+}
+
+.trl-doll__slot {
+  position: absolute;   /* consumer: left/top % via inline style */
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.trl-doll__label {
+  font-family: var(--trl-font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--trl-track-wide);
+  font-size: 8px;
+  color: var(--trl-fg-faint);
+  white-space: nowrap;
+}
+
+/* inside the doll, cells size in container units instead of pixels */
+.trl-doll .trl-cell {
+  width: calc(var(--w) * 7cqw);
+  height: calc(var(--h) * 7cqw);
+}
+
+.trl-doll__slot.is-required-missing .trl-doll__label { color: var(--trl-warning); }
+
+.trl-doll__slot.is-required-missing .trl-cell { border-color: rgba(204, 154, 62, .45); }
+
+/* ── Mod tree (recursive weapon-slot editor rows) ────────────────────────── */
+.trl-mod-tree { font-size: var(--trl-text-sm); }
+
+.trl-mod-tree__row {
+  display: flex;
+  align-items: center;
+  gap: var(--trl-space-2);
+  padding: var(--trl-space-1) var(--trl-space-2);
+}
+
+.trl-mod-tree__row:hover { background: var(--trl-bg-hover); }
+
+.trl-mod-tree__arrow {
+  color: var(--trl-ink-ghost);
+  font-size: var(--trl-text-2xs);
+  flex: none;
+}
+
+/* slot id — always mono lowercase (mod_pistol_grip, mod_magazine…) */
+.trl-mod-tree__slot {
+  font-family: var(--trl-font-mono);
+  font-size: var(--trl-text-2xs);
+  color: var(--trl-accent-dim);
+}
+
+.trl-mod-tree__name { color: var(--trl-fg-muted); }
+
+.trl-mod-tree__row:hover .trl-mod-tree__name { color: var(--trl-fg); }
+
+/* empty slot */
+.trl-mod-tree__row.is-empty .trl-mod-tree__name {
+  color: var(--trl-ink-ghost);
+  font-style: italic;
+}
+
+/* unknown/orphan slot */
+.trl-mod-tree__row.is-invalid { background: var(--trl-wash-red); }
+
+.trl-mod-tree__row.is-invalid .trl-mod-tree__slot { color: var(--trl-danger); }
+
+.trl-mod-tree__children {
+  margin-left: var(--trl-space-5);
+  border-left: var(--trl-border-w) solid var(--trl-edge-faint);
+}
+
+/* row actions (edit/remove) appear on hover */
+.trl-mod-tree__actions {
+  margin-left: auto;
+  display: flex;
+  gap: var(--trl-space-h);
+  opacity: 0;
+  transition: opacity var(--trl-dur-1) var(--trl-ease);
+}
+
+.trl-mod-tree__row:hover .trl-mod-tree__actions,
+.trl-mod-tree__actions:focus-within { opacity: 1; }
+
+/* ── Heatmap tints (matrix/table cells) ────────────────────────────────────
+ * Monochrome tan ramp — level buckets: none / low / mid / high.
+ */
+.trl-heat--none { color: var(--trl-ink-ghost); }
+.trl-heat--low  { background: rgba(199, 180, 138, .08); }
+.trl-heat--mid  { background: rgba(199, 180, 138, .18); }
+.trl-heat--high { background: rgba(199, 180, 138, .32); color: var(--trl-ink); }
+
+/* ── Faction accents (extends .trl-card) ────────────────────────────────── */
+.trl-card--usec {
+  border-left: var(--trl-accent-bar-w) solid var(--trl-faction-usec);
+  background: var(--trl-wash-blue);
+}
+
+.trl-card--bear {
+  border-left: var(--trl-accent-bar-w) solid var(--trl-faction-bear);
+  background: var(--trl-wash-red);
+}
+
+
+/* ============================================================================
+ * I. MOTION
  * ========================================================================== */
 
 @keyframes trl-fade-in {
