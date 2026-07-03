@@ -29,7 +29,8 @@ internal static class MultiplierFormat
     {
         ValueFormat.Percent => (l.Multiplier > 1f ? "+" : "−") + Mathf.RoundToInt(Mathf.Abs(l.Multiplier - 1f) * 100f) + "%",
         ValueFormat.Multiplier => "×" + l.Multiplier.ToString("0.##"),
-        _ => "",
+        // 059: Flag qualitativa ganha chip destacado (mesmo negrito/cor dos números). ✓ = tem o benefício · ✗ = desvantagem.
+        _ => l.IsPerk ? "✓" : "✗",
     };
 
     /// <summary>

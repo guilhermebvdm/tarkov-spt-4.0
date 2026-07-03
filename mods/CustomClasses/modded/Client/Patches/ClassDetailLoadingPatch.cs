@@ -6,6 +6,7 @@ using SPT.Reflection.Patching;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace CustomClasses.Client;
 
@@ -87,7 +88,29 @@ internal sealed class LoadingClassHover : MonoBehaviour, IPointerEnterHandler, I
 {
     private GameObject? _panel;
 
-    private void OnEnable() => Show();   // auto-visível (PA-01-01)
+    private void Awake() => EnsureRaycast();   // garante que o hover pegue em qualquer ponto da linha do player
+
+    // hover-only (feedback in-game): NÃO mostra sozinho — o painel auto-visível cobria o carrossel do deploy.
+    private void OnEnable()
+    {
+        if (_panel != null)
+        {
+            _panel.SetActive(false);
+        }
+    }
+
+    /// <summary>Um Image transparente raycast-target no root da linha, p/ o hover disparar em toda a área do nome.</summary>
+    private void EnsureRaycast()
+    {
+        var img = GetComponent<Image>();
+        if (img == null)
+        {
+            img = gameObject.AddComponent<Image>();
+            img.color = new Color(0f, 0f, 0f, 0f);   // transparente — só captura o ponteiro
+        }
+
+        img.raycastTarget = true;
+    }
 
     /// <summary>Monta (lazy) e exibe o painel — TODO o caminho protegido (F-3: OnPointerEnter fica fora do try/catch do Postfix).</summary>
     private void Show()
@@ -133,7 +156,10 @@ internal sealed class LoadingClassHover : MonoBehaviour, IPointerEnterHandler, I
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        // auto-visível: mantém aberto durante o loading (decisão de gate).
+        if (_panel != null)
+        {
+            _panel.SetActive(false);   // popover: some ao tirar o mouse do nome
+        }
     }
 
     // F-9: se a linha for desativada (sem destruir), esconde o painel junto (ele é filho do Canvas, não da linha).
