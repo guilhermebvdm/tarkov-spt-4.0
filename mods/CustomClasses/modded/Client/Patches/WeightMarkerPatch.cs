@@ -67,8 +67,10 @@ internal class WeightMarkerPatch : ModulePatch
             }
 
             tmp.text = MultiplierFormat.Marker(factor);
-            // posiciona logo após o fim do "/NN" do peso (padrão SkillPanelPatch).
-            ((RectTransform)marker.transform).anchoredPosition = new Vector2(maxTmp.preferredWidth + MarkerGap, 0f);
+            // posiciona logo após o fim do "/NN" do peso (padrão SkillPanelPatch) + offset X/Y do F12 (056: ajuste fino).
+            var offX = PerksConfig.WeightMarkerOffsetX?.Value ?? 0f;
+            var offY = PerksConfig.WeightMarkerOffsetY?.Value ?? 0f;
+            ((RectTransform)marker.transform).anchoredPosition = new Vector2(maxTmp.preferredWidth + MarkerGap + offX, offY);
             marker.GetComponent<HoverTooltipArea>()
                 .SetMessageText(MultiplierFormat.CarryTooltip(factor, SkillMultipliers.ClassName), rawText: true);
             marker.SetActive(true);

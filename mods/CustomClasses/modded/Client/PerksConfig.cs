@@ -26,6 +26,10 @@ internal static class PerksConfig
     // UI (055) — detalhe da classe na tela de carregamento da raid (FIKA)
     internal static ConfigEntry<bool>? ClassDetailOnLoading;
 
+    // UI (056) — offset X/Y do marcador "▲ +X%" no peso (aba Health)
+    internal static ConfigEntry<float>? WeightMarkerOffsetX;
+    internal static ConfigEntry<float>? WeightMarkerOffsetY;
+
     // 🔻 Heavy Frame (Tanque) — velocidade (050.1) + fome/sede (050.3)
     internal static ConfigEntry<bool>? HeavyFrameEnabled;
     internal static ConfigEntry<float>? HeavyFrameMoveSpeed;
@@ -304,5 +308,16 @@ internal static class PerksConfig
         ClassDetailOnLoading = config.Bind(
             "Perks — UI", "Class Detail on Loading Screen", true,
             "Mostra o detalhe da sua classe (perks/drawbacks) no seu nome na tela de carregamento da raid (FIKA). / Show your class detail on the FIKA raid loading screen.");
+
+        WeightMarkerOffsetX = config.Bind(
+            "Perks — UI", "Weight Marker — X offset", 0f,
+            new ConfigDescription(
+                "Ajuste horizontal (px) do marcador '▲ +X%' no peso (aba Health). Negativo = esquerda. / Horizontal offset of the weight '▲ +X%' marker.",
+                new AcceptableValueRange<float>(-600f, 600f)));
+        WeightMarkerOffsetY = config.Bind(
+            "Perks — UI", "Weight Marker — Y offset", 0f,
+            new ConfigDescription(
+                "Ajuste vertical (px) do marcador '▲ +X%' no peso (aba Health). Positivo = para cima (ex.: acima do '20.7 kg'). / Vertical offset of the weight '▲ +X%' marker (positive = up).",
+                new AcceptableValueRange<float>(-600f, 600f)));
     }
 }

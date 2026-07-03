@@ -40,6 +40,8 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 |---|---|---|---|---|
 | `Class Tab — X offset` | Aba CLASS — offset X | float | `0` | Ajuste fino da posição horizontal do botão da aba CLASS (px). Só use se a aba não alinhar. Faixa −400..400. (item 059) |
 | `Class Detail on Loading Screen` | Detalhe da classe no loading | bool | `true` | Mostra o detalhe da sua classe (perks/drawbacks) no seu nome na tela de carregamento da raid (FIKA). (item 055) |
+| `Weight Marker — X offset` | Marcador do peso — offset X | float | `0` | Ajuste horizontal (px) do marcador `▲ +X%` no peso (aba Health). Negativo = esquerda. Faixa −600..600. (item 056) |
+| `Weight Marker — Y offset` | Marcador do peso — offset Y | float | `0` | Ajuste vertical (px) do marcador `▲ +X%` no peso (aba Health). Positivo = para cima. Faixa −600..600. (item 056) |
 
 ## Histórico
 
@@ -48,3 +50,4 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 | 2026-06-07 | Criado (item 008). Documenta `EnableSkillMultipliers`, `ShowMultiplierOnSkills` (itens 005/010) e `Language` (008). |
 | 2026-07-02 | Item 059 — adicionada seção `Perks — UI` com `Class Tab — X offset` (ajuste da posição da aba CLASS). |
 | 2026-07-02 | Item 055 — `Class Detail on Loading Screen` (detalhe da classe no loading da raid, FIKA). |
+| 2026-07-03 | Item 056 — `Weight Marker — X/Y offset` (posicionar o marcador ▲ +X% do peso). |

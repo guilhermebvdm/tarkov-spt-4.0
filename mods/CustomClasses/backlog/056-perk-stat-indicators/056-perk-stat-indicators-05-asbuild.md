@@ -34,7 +34,9 @@
 
 ## Mudanças posteriores
 
-(vazio inicialmente — preenchido por `/apply-code-review`)
+| Data | Origem | Mudança |
+| --- | --- | --- |
+| 2026-07-03 | validação in-game (screenshot) | Marcador funcionou (tooltip OK) mas mal posicionado (foi p/ a direita, sobre a stamina). + F12 `Weight Marker — X/Y offset` (`Perks — UI`, −600..600, F12-live) aplicado em `WeightMarkerPatch` pra reposicionar (ex.: acima do "20.7 kg"). DLL 109056, compile 0/0. |
 
 ## Histórico
 
