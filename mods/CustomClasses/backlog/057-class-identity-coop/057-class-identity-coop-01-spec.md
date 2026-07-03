@@ -22,20 +22,23 @@ demais superfícies coop (painel de ready do lobby, nametag in-raid, chat) ficam
 - O cache de ícones do cliente (`ClassIconCache`) carrega apenas o ícone da própria classe.
 - O servidor conhece a classe de **todos** os perfis (registry de classes completo, com nome en+pt, cor e ícone de
   cada uma), mas não expõe esse catálogo aos clientes.
-- A informação que permite descobrir a classe de um player remoto já **existe e é sincronizada pelo coop**: a
-  "edição" do perfil, onde o mod grava o nome de exibição da classe na criação do personagem. Esse nome fica gravado
-  **no idioma do jogo de quem criou o perfil** (en OU pt).
+- **Hipótese do recon do backlog (a confirmar na spec técnica):** a informação que permite descobrir a classe de um
+  player remoto já existiria sincronizada pelo coop — a "edição" do perfil, onde o mod grava o nome de exibição da
+  classe na criação do personagem, **no idioma do jogo de quem criou** (en OU pt). Caminho alternativo caso não se
+  confirme: o servidor (que conhece todos os perfis) expõe o mapeamento player→classe diretamente.
 
 ## Comportamento desejado
 
 - O cliente busca **uma vez** no servidor o **catálogo completo de classes** (por classe: nome de exibição en E pt,
   cor, arquivo de ícone) e o mantém em cache.
-- Na tela de carregamento da raid (FIKA), **cada linha de player** cuja classe for resolvida ganha o mesmo
-  comportamento que hoje só o local tem: hover abre o popover (hover-only + zoom, como entregue no 055) com header,
-  brasão, cor e cards de perks/drawbacks **da classe daquele player**.
-- A resolução da classe de um player remoto usa a informação de perfil já sincronizada pelo coop (a "edição" gravada
-  na criação do personagem), casando contra o nome de exibição **en E pt** do catálogo (o idioma de quem criou o
-  perfil é desconhecido).
+- Na tela de carregamento da raid (FIKA), **cada linha de player** cuja classe for resolvida ganha:
+  - **Identidade visível sem hover:** indicação visual da classe na própria linha (cor da classe no nome e/ou
+    brasão junto ao nome — mesmo vocabulário visual da identidade local existente).
+  - **Popover no hover:** o mesmo popover do 055 (hover-only + zoom) com header, brasão, cor e cards de
+    perks/drawbacks **da classe daquele player**.
+- A resolução da classe de um player remoto deve funcionar **independente do idioma do jogo de quem criou o
+  perfil** (perfis gravam o nome de exibição no idioma do criador — en OU pt). O mecanismo concreto (informação
+  sincronizada pelo coop vs. mapeamento player→classe exposto pelo servidor) é decisão da spec técnica.
 - O player local continua funcionando exatamente como hoje (mesmo caminho ou equivalente — sem regressão do 055).
 - Player com classe vanilla/desconhecida: linha sem identidade e sem popover, como hoje — sem erro e sem log de spam.
 
@@ -44,6 +47,8 @@ demais superfícies coop (painel de ready do lobby, nametag in-raid, chat) ficam
 - [ ] Em coop com 2+ players de **classes diferentes** do mod, o hover na linha de cada player na tela de
       carregamento abre o popover com a classe **correta daquele player** (nome, cor, brasão e cards — não os do
       player local).
+- [ ] Sem hover, a linha de cada player com classe do mod já mostra **indicação visual da classe** (cor do nome
+      e/ou brasão) — inclusive players criados com o jogo em idioma diferente do observador.
 - [ ] Player com perfil vanilla (sem classe do mod) não ganha popover nem identidade na própria linha; nenhum erro
       no console do cliente.
 - [ ] Com o mod server **desatualizado ou sem a rota do catálogo**, o cliente degrada para o comportamento atual
@@ -69,6 +74,10 @@ demais superfícies coop (painel de ready do lobby, nametag in-raid, chat) ficam
       bloqueia o carregamento; identidade aparece se/quando resolvida (mínimo aceitável: comportamento atual).
 - [ ] **Mapa com trânsito** (ex. Streets): na segunda passagem pela tela de carregamento, os hovers são
       re-adicionados (mesma família do CR-02-03 do 055).
+- [ ] **Player entrando como SCAV:** perfil scav não tem classe do mod → linha sem identidade, sem erro (não
+      herdar a classe do perfil PMC do mesmo dono).
+- [ ] **Nicknames duplicados no servidor** (se o SPT permitir): resolução ambígua não pode crashar nem travar a
+      tela — aceitar a primeira correspondência ou nenhuma, de forma determinística.
 
 ## Fora de escopo
 
@@ -90,3 +99,4 @@ demais superfícies coop (painel de ready do lobby, nametag in-raid, chat) ficam
 |---|---|
 | 2026-06-23 | Item registrado no `mod-backlog.md` (sessão 10 do redesign 11→6) |
 | 2026-07-03 | Spec funcional criada via `/create-spec`; decisões do usuário: escopo restrito ao **loading FIKA** e `modded/Server` **liberado** para esta sessão |
+| 2026-07-03 | Revisão `/review-spec` — 2 gaps (identidade na linha sem hover; mecanismo de resolução rebaixado a hipótese/decisão da spec técnica) + 2 corner cases (SCAV, nickname duplicado) corrigidos |
