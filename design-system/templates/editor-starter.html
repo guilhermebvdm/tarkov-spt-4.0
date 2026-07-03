@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Mod Editor · TRL</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%2312130d'/%3E%3Crect y='7' width='16' height='2' fill='%23ff0000'/%3E%3C/svg%3E">
+<!--
+  TRL editor starter — copy this file next to a copy (or mount) of the
+  design-system folder and adjust the four hrefs below. Everything on this
+  page is a plain .trl-* component; no build step, no framework required.
+  Rules & recipes: ../PATTERNS.md · Agent context: ../CLAUDE.md
+-->
+<link rel="stylesheet" href="../fonts/bender.css">
+<link rel="stylesheet" href="../tokens.css">
+<link rel="stylesheet" href="../components.css">
+<link rel="stylesheet" href="../utilities.css">
+<style>html, body { margin: 0; height: 100%; }</style>
+</head>
+<body class="trl-app">
+<div class="trl-shell">
+
+  <!-- topbar: brand + laser (comes free with .trl-topbar) -->
+  <header class="trl-topbar">
+    <a class="trl-brand" href="#">
+      <img src="../assets/trl-logo-mark.png" alt="Tarkov Red Line">
+      <span>My Mod</span>
+      <span class="trl-brand__version">v0.1.0</span>
+    </a>
+    <span class="trl-topbar__sep"></span>
+    <span class="trl-breadcrumb">
+      <a href="#">Profiles</a><span class="trl-breadcrumb__sep">/</span>
+      <span class="trl-breadcrumb__current">Default</span>
+    </span>
+    <span class="trl-topbar__spacer"></span>
+    <button class="trl-btn trl-btn--sm">Reload</button>
+    <button class="trl-btn trl-btn--primary trl-btn--sm">Save all</button>
+  </header>
+
+  <!-- sidebar: primary navigation -->
+  <aside class="trl-sidebar">
+    <nav class="trl-nav">
+      <a class="trl-nav__item is-active" href="#">Overview</a>
+      <a class="trl-nav__item" href="#">Items</a>
+      <a class="trl-nav__item" href="#">Settings</a>
+    </nav>
+  </aside>
+
+  <!-- main: toolbar + 3-column workspace (collapses under 1100px) -->
+  <main class="trl-main">
+    <div class="trl-eyebrow">My Mod · Editor</div>
+    <h1 class="trl-h2">Overview</h1>
+
+    <div class="trl-toolbar">
+      <span class="trl-search" style="width:260px">
+        <input class="trl-input" name="search" placeholder="Search…">
+        <button class="trl-search__clear" type="button">×</button>
+      </span>
+      <span class="trl-toolbar__spacer"></span>
+      <span class="trl-tag trl-tag--green"><span class="trl-tag__dot"></span>Server online</span>
+    </div>
+
+    <div class="trl-workspace trl-u-mt-3">
+
+      <!-- left: list/tree panel -->
+      <div class="trl-panel trl-panel--flush">
+        <div class="trl-screen-bar">
+          <span class="trl-screen-bar__dot trl-screen-bar__dot--ok"></span>
+          <span class="trl-screen-bar__title">◪ Entries</span>
+          <span class="trl-screen-bar__meta">3</span>
+        </div>
+        <div class="trl-panel__body" style="padding:8px 0">
+          <div class="trl-tree">
+            <div class="trl-tree__node is-active"><span class="trl-tree__chev" style="visibility:hidden"></span>First entry</div>
+            <div class="trl-tree__node"><span class="trl-tree__chev" style="visibility:hidden"></span>Second entry</div>
+            <div class="trl-tree__node"><span class="trl-tree__chev" style="visibility:hidden"></span>Third entry</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- center: main editing surface -->
+      <div class="trl-panel trl-panel--flush">
+        <div class="trl-screen-bar">
+          <!-- swap --ok for --live while there are unsaved changes -->
+          <span class="trl-screen-bar__dot trl-screen-bar__dot--ok"></span>
+          <span class="trl-screen-bar__title">◪ First entry</span>
+          <span class="trl-screen-bar__meta">synced</span>
+        </div>
+        <div class="trl-panel__body">
+          <div class="trl-form-grid">
+            <label class="trl-field">
+              <span class="trl-field__label">Name</span>
+              <input class="trl-input" name="entry-name" value="First entry">
+            </label>
+            <label class="trl-field">
+              <span class="trl-field__label">Category</span>
+              <select class="trl-select" name="category"><option>General</option><option>Advanced</option></select>
+            </label>
+            <label class="trl-field trl-form-grid__full">
+              <span class="trl-field__label">Description</span>
+              <textarea class="trl-input" name="description" placeholder="Optional notes…"></textarea>
+            </label>
+          </div>
+          <div class="trl-u-flex trl-u-gap-4 trl-u-mt-3">
+            <label class="trl-switch"><input type="checkbox" name="enabled" checked><span>Enabled</span></label>
+            <label class="trl-checkbox"><input type="checkbox" name="fika-only"><span>Fika-only</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- right: summary / details -->
+      <div class="trl-panel">
+        <div class="trl-panel__head"><h2 class="trl-panel__title">Summary</h2></div>
+        <div class="trl-panel__body">
+          <ul class="trl-kv">
+            <li class="trl-kv__row"><span class="trl-kv__k">Status</span><span class="trl-kv__v"><b>Valid</b></span></li>
+            <li class="trl-kv__row"><span class="trl-kv__k">Updated</span><span class="trl-kv__v trl-u-num">2026-07-03</span></li>
+          </ul>
+          <hr class="trl-divider">
+          <div class="trl-sec">Progress</div>
+          <div class="trl-progress"><div class="trl-progress__fill" style="width:66%"></div></div>
+          <div class="trl-u-faint trl-u-mt-1" style="font-size:11px">2 of 3 entries configured</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- toasts mount here; append .trl-toast nodes from your app code -->
+<div class="trl-toast-container" id="toasts"></div>
+
+<script>
+/* keep scripts inline if this ever ships inside a mod's wwwroot —
+ * SPT's ModValidator rejects loose .js files. */
+</script>
+</body>
+</html>

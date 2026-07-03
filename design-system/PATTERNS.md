@@ -1,0 +1,137 @@
+# TRL Design System — Patterns
+
+> **Data:** 2026-07-03<br>
+> **Status:** 🟢 Vivo<br>
+> **Responsáveis:** Guilherme<br>
+> **Referências:** [CLAUDE.md](./CLAUDE.md)<br>
+
+---
+
+Parte 1 = **Regras** (normativas — MUST/NEVER, valem para todo editor).
+Parte 2 = **Receitas** (composições prontas de componentes).
+
+## Parte 1 — Regras
+
+### R1. Disciplina do vermelho
+
+O vermelho é a marca TRL — ele fala porque é raro. **Se o vermelho ocupa mais de ~5% da área da tela, está errado.**
+
+Usos permitidos de `--trl-brand` (`#ff0000`), lista exaustiva:
+
+| Uso | Componente |
+|---|---|
+| Laser divider (máx. **1 por view**) | `.trl-divider--laser` |
+| Laser do topbar (vem de graça com o componente) | `.trl-topbar::after` |
+| Dot "live/dirty" pulsante (estado não salvo) | `.trl-screen-bar__dot--live` |
+| Dot de tag de marca | `.trl-tag--brand` |
+| Logo TRL | `assets/` |
+
+- `#ff0000` **nunca** colore texto nem preenche áreas — é luz (glow/laser), não pigmento.
+- Texto de status de erro/perigo: **só** `--trl-danger` (`red-soft #d27a7a`).
+- Ação destrutiva: `.trl-btn--danger` (`red-500`). Botão vermelho em ação **não destrutiva** é defeito.
+- Ênfase pontual em ícone/valor: `--trl-red-300` (`#ff6b60`), com moderação.
+
+### R2. Geometria
+
+- `--trl-radius: 0` — **sempre**. Nenhum componente redondo (exceção: dots de status e radio, círculos por natureza).
+- Bordas: `1px` com os tokens `--trl-edge*` (tan translúcido). Nunca cinza neutro (`#444`, `#555`).
+- Barra de acento lateral: `2px` (`--trl-accent-bar-w`) — nav ativa, cards, alerts, toasts.
+- **Chamfer** (`--trl-chamfer`): só em superfícies **sólidas sem borda** (`.trl-btn--primary`, `.trl-btn--danger`). `clip-path` corta a própria borda de 1px do elemento — chanfro em elemento com borda exige pseudo-elemento/gradiente e não faz parte do v1.
+
+### R3. Tipografia
+
+- Uppercase + letter-spacing (`--trl-track-*`) **só** em display: títulos, labels, chrome (screen-bar, tags, botões, th). Corpo de texto **nunca** — mais de ~4 palavras = corpo.
+- Corpo é **Segoe UI** 12–13px, e não Bender: condensadas degradam leitura em tabelas densas. Bender fica no display. Refatorações futuras não devem "corrigir" isso para Bender-em-tudo.
+- Todo número comparável/alinhável usa mono + `tabular-nums` (`.trl-u-num` ou `.num` em tabela).
+
+### R4. Cor e tokens
+
+- Produto consome **apenas tokens semânticos** (camada 2: `--trl-bg-*`, `--trl-fg-*`, `--trl-accent*`, `--trl-danger*`...). Primitivos (camada 1) são internos do DS.
+- **Hex hardcoded em editor é defeito de review.**
+- Elevação = superfície mais clara (ladder `ground-deep → surface-4`), sombra reforça mas não substitui.
+
+### R5. Acessibilidade (WCAG AA, valores medidos)
+
+| Par | Razão | Veredito |
+|---|---|---|
+| `ink` sobre qualquer superfície | 11.5–15.1:1 | ✓ AAA — corpo padrão |
+| `ink-muted` sobre qualquer superfície | 4.9–6.4:1 | ✓ AA — secundário padrão |
+| `tan-300` sobre qualquer superfície | 7.0–9.2:1 | ✓ AA+ |
+| `red-soft` sobre qualquer superfície | 4.6–6.1:1 | ✓ AA — único vermelho para texto |
+| `fg-on-accent` sobre `tan-300` / branco sobre `red-500` | 9.2 / 4.9:1 | ✓ AA |
+| `tan-500` (dim) | 5.1 ground · 4.6 surface-1 · **3.9–4.2 surface-2/3** | ◇ só labels uppercase ≥11px; nunca conteúdo essencial em superfície elevada |
+| `ink-faint` | 2.7–3.6:1 | ◇ decorativo (captions, placeholders, separadores) |
+
+- Critério: ≥4.5:1 texto normal; ≥3:1 texto ≥18px/bold e componentes de UI.
+- `:focus-visible` vem de graça no escopo `.trl-app` (ring tan de 2 camadas) — não remover outline sem substituto.
+- Animações desligam sozinhas com `prefers-reduced-motion` — não criar animação fora dos keyframes `trl-*` sem cobrir esse caso.
+
+### R6. Densidade
+
+- Alturas de controle: 30px (padrão) / 24px (`--sm`). Linha de tabela ~36px.
+- Paddings internos: `space-2`/`space-3`. Gutters de página: `space-6`.
+- Editores são ferramentas de dados: densidade é feature, espaçamento generoso é para o showcase/hero, não para o CRUD.
+
+### R7. Assets e scripts
+
+- Nenhum recurso externo (CDN, Google Fonts) — editores rodam offline/localhost.
+- Se o DS for copiado para o `wwwroot` de um mod: **nenhum `.js` solto** (o ModValidator do SPT rejeita) — scripts ficam inline no HTML.
+
+## Parte 2 — Receitas
+
+### Shell de editor completo
+
+Não duplicar markup: partir de [`templates/editor-starter.html`](./templates/editor-starter.html) — topbar com brand+laser, sidebar nav, workspace 3 colunas com screen-bars, form, kv, progress e mount de toasts, tudo funcional.
+
+### Screen-bar + estado dirty
+
+O painel que edita dados troca o dot conforme o estado:
+
+```html
+<!-- sincronizado -->
+<span class="trl-screen-bar__dot trl-screen-bar__dot--ok"></span> … <span class="trl-screen-bar__meta">synced</span>
+<!-- com edição pendente (dot vermelho pulsante = momento de marca legítimo) -->
+<span class="trl-screen-bar__dot trl-screen-bar__dot--live"></span> … <span class="trl-screen-bar__meta">unsaved changes</span>
+```
+
+### Página de formulário
+
+`trl-panel--flush` + `trl-screen-bar` no topo, `trl-form-grid` no body (campos `trl-field` com label/hint/error; `is-invalid` no field marca o input), ações no rodapé alinhadas à direita: ghost à esquerda do primário.
+
+### Página de tabela de dados
+
+`trl-toolbar` (search à esquerda, filtros, tag de status à direita) + `trl-panel--flush` com `trl-table` (thead sticky funciona dentro de container com scroll) + `trl-pagination` no rodapé. Colunas numéricas levam `class="num"`. Linha selecionada: `is-selected`.
+
+### Dashboard de stats
+
+Grid de `trl-stat` (destaque com `--hi`, indisponível com `--dim` + `trl-badge` explicando por quê), deltas com `trl-chip--up/--down`, barras `trl-progress` com variante de cor por significado — nunca por estética.
+
+### Modal de confirmação
+
+`trl-modal-overlay[hidden]` + `trl-modal` (head com dot de contexto, close ×; actions: ghost "cancelar" + primário ou danger). Overlay fecha no clique fora; `hidden` controla visibilidade. Destrutivo = botão danger + verbo explícito ("Discard", "Delete"), nunca "OK".
+
+### Toast programático
+
+Container fixo `#toasts` (`.trl-toast-container`) já no starter; o app appenda:
+
+```js
+function toast(kind, title, msg) {  // kind: ok | warn | error
+  const el = document.createElement('div');
+  el.className = 'trl-toast trl-toast--' + kind;
+  el.innerHTML = '<div class="trl-toast__title"></div><div class="trl-toast__msg"></div>';
+  el.children[0].textContent = title;
+  el.children[1].textContent = msg;
+  document.getElementById('toasts').append(el);
+  setTimeout(() => el.remove(), 4000);
+}
+```
+
+### Consumo em Blazor/MudBlazor (fase futura)
+
+O adapter oficial (`bridge/trl-mudblazor.css`, mapeando `--mud-palette-*` → tokens TRL) **não faz parte do v1** — será criado na refatoração do CustomClasses. Até lá: páginas Blazor podem usar componentes `.trl-*` em ilhas com `class="trl-app"` no wrapper, sem conflito de namespace com o Mud.
+
+## Histórico de Alterações
+
+| Data | Autor | Alteração |
+|---|---|---|
+| 2026-07-03 | Guilherme | Criação (v1.0.0) — regras R1–R7 + receitas iniciais |
