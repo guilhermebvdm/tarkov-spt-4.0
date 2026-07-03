@@ -40,3 +40,5 @@ Dependência opcional (recomendada): `jq` para o pre-commit hook.
 ```
 
 Ver [AGENTS.md](AGENTS.md) para o contrato completo dos agentes de IA.
+
+Teste
