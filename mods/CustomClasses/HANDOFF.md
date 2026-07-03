@@ -42,10 +42,13 @@ tela SKILLS** (`EFT.UI.BuffIcon.smethod_0` → `StaticIcons.BuffIdSprites[EBuffI
   (ex.: flinch/aim punch → `AimMasterWiggle`, dano recebido → `HealthEliteAbsorbDamage`); (c) altura dos cards no
   Tanque (6 cards na coluna de perks) cabe sem scroll.
 
-### 2. 🟠 059 CLASS #1 — título da aba cortado ("ASS" em vez de "CLASS")
+### 2. 🟡 059 CLASS #1 — título da aba cortado (F12 LIVE implementado 2026-07-03; calibrar in-game)
 A aba CLASS fica muito à esquerda e o "CL" é cortado pela margem da tela.
-- **Falta:** o log `[CustomClasses][053-tabs]` do console BepInEx (dá as posições X reais de CLASS/SKILLS/MASTERING) — o usuário vai colar. Com ele, corrigir o cálculo em [`SkillsClassTabPatch.cs`](modded/Client/Patches/SkillsClassTabPatch.cs) (`cRt.anchoredPosition = sRt.x - classW - gap + offsetX`).
-- **Melhoria:** o F12 `Class Tab — X offset` **só aplica no boot** (a aba é montada 1× — idempotência bloqueia recalcular). Tornar "live" (reposicionar no `SettingChanged`) OU recalcular a cada `Show`.
+- **F12 `Class Tab — X offset` agora é LIVE** (`RepositionClassTab` extraído do Postfix): reaplica (a) a cada
+  `Show` da tela e (b) no `SettingChanged` (slider mexe → aba move na hora, tela aberta). Não precisa mais do log
+  — **o usuário calibra o offset no F12 até "CLASS" aparecer inteiro e passa o valor** → fixar como default.
+- O log `[CustomClasses][053-tabs]` continua útil pra corrigir a CAUSA (cálculo `sRt.x - classW - gap`), se quisermos
+  default 0 de fábrica em vez de offset calibrado.
 
 ### 3. 🟡 059 CLASS #2 — chip ✓/✗ nas flags (implementado `76904b9`, VERIFICAR)
 Linhas Flag (`no ergo penalty`, `no arm fatigue`) agora têm chip **✓** (perk) / **✗** (drawback) — `MultiplierFormat.ValueToken`.

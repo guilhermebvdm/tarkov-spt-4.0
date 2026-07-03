@@ -57,6 +57,12 @@ internal class SkillsClassTabPatch : ModulePatch
 
     private static bool _loggedTabImages;      // req 1: loga os nomes dos Images da aba 1× (ajuste fino do ícone).
 
+    // 059 CLASS#1 (F12 live): última tela/aba montadas, p/ reposicionar no SettingChanged com a tela aberta.
+    // MonoBehaviours → o == sobrecarregado do Unity detecta instância destruída (pooling/troca de cena).
+    private static SkillsAndMasteringScreen? _lastScreen;
+    private static Tab? _lastClassTab;
+    private static bool _settingHooked;
+
     protected override MethodBase GetTargetMethod()
     {
         return AccessTools.GetDeclaredMethods(typeof(SkillsAndMasteringScreen))
@@ -73,13 +79,20 @@ internal class SkillsClassTabPatch : ModulePatch
                 return;
             }
 
+            EnsureSettingHook();   // 059 CLASS#1: F12 live (reposiciona no SettingChanged)
+
             // idempotência: a tela dá Show() várias vezes; só monta a aba 1×.
             // CR-03-05: na reabertura (screen pooled) NÃO re-normalizo a seleção aqui — o `Show` nativo termina em
             // `gclass3808_0.Show(null)` → `SelectTab(Tab_2)`, que restaura a ÚLTIMA aba (não força SKILLS). Por isso
             // a reabertura não re-quebra o double-select. Se um build futuro do EFT trocar por `Show(_skillsTab)`,
             // revisitar (mover a des-seleção das não-CLASS pra fora deste guard).
-            if (__instance.GetComponentsInChildren<Tab>(true).Any(x => x.name == TabName))
+            var existingTab = __instance.GetComponentsInChildren<Tab>(true).FirstOrDefault(x => x.name == TabName);
+            if (existingTab != null)
             {
+                // 059 CLASS#1: aba já montada → só REPOSICIONA (F12 live também entre aberturas da tela).
+                _lastScreen = __instance;
+                _lastClassTab = existingTab;
+                RepositionClassTab(__instance, existingTab);
                 return;
             }
 
@@ -155,29 +168,75 @@ internal class SkillsClassTabPatch : ModulePatch
 
             // as abas têm posição FIXA (não é layout group). Coloco CLASS à ESQUERDA da SKILLS e NÃO mexo em
             // SKILLS/MASTERING → a caixa de busca da MASTERING (ancorada à posição nativa dela) não é empurrada.
-            var sRt = (RectTransform)skillsTab.transform;
             var mRt = (RectTransform)masteringTab.transform;
-            var cRt = (RectTransform)classTab.transform;
             var bar = (RectTransform)skillsTab.transform.parent;
-            var barLg = bar.GetComponent<LayoutGroup>();
             LayoutRebuilder.ForceRebuildLayoutImmediate(bar);
 
-            if (barLg == null)
-            {
-                // 059: CLASS ADJACENTE à esquerda da SKILLS (largura do clone + gap). cRt.rect.width pode ser 0
-                // pré-layout → proxy = largura da SKILLS (a aba clonada tem largura equivalente). +F12 offset opcional.
-                const float gap = 24f;
-                var classW = cRt.rect.width > 1f ? cRt.rect.width : sRt.rect.width;
-                var offsetX = PerksConfig.ClassTabOffsetX?.Value ?? 0f;
-                cRt.anchoredPosition = new Vector2(sRt.anchoredPosition.x - classW - gap + offsetX, sRt.anchoredPosition.y);
-            }
+            _lastScreen = __instance;
+            _lastClassTab = classTab;
+            RepositionClassTab(__instance, classTab);
 
-            Plugin.Log?.LogInfo($"[CustomClasses][053-tabs] barLG={barLg?.GetType().Name ?? "none"} | CLASS={cRt.anchoredPosition} w={cRt.rect.width:F0} | SKILLS={sRt.anchoredPosition} | MASTER={mRt.anchoredPosition}");
+            Plugin.Log?.LogInfo($"[CustomClasses][053-tabs] barLG={bar.GetComponent<LayoutGroup>()?.GetType().Name ?? "none"} | CLASS={((RectTransform)classTab.transform).anchoredPosition} w={((RectTransform)classTab.transform).rect.width:F0} | SKILLS={((RectTransform)skillsTab.transform).anchoredPosition} | MASTER={mRt.anchoredPosition}");
         }
         catch (Exception ex)
         {
             Plugin.Log?.LogError($"[CustomClasses] (053) aba CLASS falhou: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    ///     059 CLASS#1 — posiciona a aba CLASS à esquerda da SKILLS (+ offset do F12). Extraído do Postfix pra
+    ///     rodar também (a) a cada Show da tela (aba montada 1× — antes o offset só valia no boot) e (b) no
+    ///     SettingChanged do F12 (ajuste ao vivo com a tela aberta). No-op se a barra tiver LayoutGroup.
+    /// </summary>
+    private static void RepositionClassTab(SkillsAndMasteringScreen screen, Tab classTab)
+    {
+        try
+        {
+            var skillsTab = AccessTools.Field(typeof(SkillsAndMasteringScreen), "_skillsTab")?.GetValue(screen) as Tab;
+            if (skillsTab == null || classTab == null)
+            {
+                return;
+            }
+
+            var bar = (RectTransform)skillsTab.transform.parent;
+            if (bar.GetComponent<LayoutGroup>() != null)
+            {
+                return;   // layout group manda na posição — offset manual não se aplica
+            }
+
+            // 059: CLASS ADJACENTE à esquerda da SKILLS (largura do clone + gap). cRt.rect.width pode ser 0
+            // pré-layout → proxy = largura da SKILLS (a aba clonada tem largura equivalente). +F12 offset opcional.
+            const float gap = 24f;
+            var sRt = (RectTransform)skillsTab.transform;
+            var cRt = (RectTransform)classTab.transform;
+            var classW = cRt.rect.width > 1f ? cRt.rect.width : sRt.rect.width;
+            var offsetX = PerksConfig.ClassTabOffsetX?.Value ?? 0f;
+            cRt.anchoredPosition = new Vector2(sRt.anchoredPosition.x - classW - gap + offsetX, sRt.anchoredPosition.y);
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log?.LogError($"[CustomClasses] (059) reposition tab: {ex.Message}");
+        }
+    }
+
+    /// <summary>Assina o SettingChanged do offset (1×): mexeu no slider do F12 → reposiciona na hora.</summary>
+    private static void EnsureSettingHook()
+    {
+        if (_settingHooked || PerksConfig.ClassTabOffsetX == null)
+        {
+            return;
+        }
+
+        _settingHooked = true;
+        PerksConfig.ClassTabOffsetX.SettingChanged += (_, _) =>
+        {
+            // == do Unity: instância destruída (pooling/cena) → null → ignora até a próxima montagem.
+            if (_lastScreen != null && _lastClassTab != null)
+            {
+                RepositionClassTab(_lastScreen, _lastClassTab);
+            }
+        };
     }
 
     /// <summary>
