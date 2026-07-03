@@ -9,7 +9,8 @@ namespace CustomClasses.Client;
 
 /// <summary>
 ///     059/055 — painel REUTILIZÁVEL de detalhe da classe: header (brasão + nome) + 2 colunas (perks à esquerda,
-///     drawbacks à direita), card por grupo com efeitos em linhas, marca d'água e fade-in. Reusa o <see cref="PerksCatalog"/>
+///     drawbacks à direita), UM card por EFEITO atômico (CLASS#3) com o ícone de buff da tela de Skills,
+///     marca d'água e fade-in. Reusa o <see cref="PerksCatalog"/>
 ///     (dados derivados). Usado por dois pontos de entrada: a aba CLASS na tela de Skills (053/059,
 ///     <see cref="SkillsClassTabPatch"/>) e o loading da raid no FIKA (055, <see cref="ClassDetailLoadingPatch"/>).
 ///     Extraído do <see cref="SkillsClassTabPatch"/> no 055 (DRY). Só exibição; lê a classe local.
@@ -179,7 +180,8 @@ internal static class PerksPanelView
             }
             else
             {
-                // 059: perks à ESQUERDA, drawbacks à DIREITA. Um card por grupo, efeitos em linhas.
+                // 059 CLASS#3: perks à ESQUERDA, drawbacks à DIREITA. UM card por EFEITO atômico (decisão
+                // 2026-07-03); a coluna continua definida por group.IsPerk (grupos homogêneos).
                 var perks = groups.Where(g => g.IsPerk).ToArray();
                 var draws = groups.Where(g => !g.IsPerk).ToArray();
                 if (perks.Length > 0)
@@ -187,7 +189,10 @@ internal static class PerksPanelView
                     BuildSectionHeader(perksCol, font, "PERKS");
                     foreach (var g in perks)
                     {
-                        BuildGroupCard(perksCol, g, font);
+                        foreach (var line in g.Lines)
+                        {
+                            BuildEffectCard(perksCol, g, line, font);
+                        }
                     }
                 }
 
@@ -196,7 +201,10 @@ internal static class PerksPanelView
                     BuildSectionHeader(drawbacksCol, font, "DRAWBACKS");
                     foreach (var g in draws)
                     {
-                        BuildGroupCard(drawbacksCol, g, font);
+                        foreach (var line in g.Lines)
+                        {
+                            BuildEffectCard(drawbacksCol, g, line, font);
+                        }
                     }
                 }
             }
@@ -225,23 +233,24 @@ internal static class PerksPanelView
     }
 
     /// <summary>
-    ///     059 — card de um <see cref="PerksCatalog.PerkGroup"/>: acento + frame do ícone + [Nome do perk] e
-    ///     **uma linha por efeito atômico** (chip do ValueToken colorido por line.IsPerk + label). Linha/grupo
-    ///     deferido → "· em breve". A cor/seção do grupo saem de <c>group.IsPerk</c> (derivado).
+    ///     059 CLASS#3 — card de UM efeito atômico (<see cref="PerksCatalog.PerkLine"/>): acento + frame com o
+    ///     ícone de buff da tela de Skills (<see cref="PerksCatalog.BuffSprite"/>; fallback = ícone do grupo) +
+    ///     nome do GRUPO esmaecido em cima + chip do ValueToken e label do efeito em destaque. Efeito deferido →
+    ///     "· em breve". Cor/acento saem de <c>line.IsPerk</c> (a COLUNA continua por <c>group.IsPerk</c>).
     /// </summary>
-    private static void BuildGroupCard(Transform parent, PerksCatalog.PerkGroup group, TMP_FontAsset? font)
+    private static void BuildEffectCard(Transform parent, PerksCatalog.PerkGroup group, PerksCatalog.PerkLine line,
+        TMP_FontAsset? font)
     {
-        var allPending = group.AllPending;
-        var accent = allPending
+        var accent = line.Pending
             ? new Color(0.80f, 0.62f, 0.28f, 1f)
-            : group.IsPerk ? MultiplierFormat.Green : MultiplierFormat.Red;
+            : line.IsPerk ? MultiplierFormat.Green : MultiplierFormat.Red;
 
         var card = new GameObject("Card", typeof(RectTransform), typeof(Image), typeof(HorizontalLayoutGroup));
         card.transform.SetParent(parent, false);
         var cardImg = card.GetComponent<Image>();
-        var cardBg = allPending
+        var cardBg = line.Pending
             ? new Color(0.10f, 0.09f, 0.055f, 0.55f)
-            : group.IsPerk
+            : line.IsPerk
                 ? new Color(0.07f, 0.10f, 0.08f, 0.55f)
                 : new Color(0.11f, 0.075f, 0.075f, 0.55f);
         cardImg.color = cardBg;
@@ -251,9 +260,9 @@ internal static class PerksPanelView
         hover.Normal = cardBg;
         hover.Hover = new Color(cardBg.r + 0.06f, cardBg.g + 0.06f, cardBg.b + 0.06f, Mathf.Min(1f, cardBg.a + 0.22f));
         var hl = card.GetComponent<HorizontalLayoutGroup>();
-        hl.padding = new RectOffset(16, 16, 10, 10);
+        hl.padding = new RectOffset(16, 16, 8, 8);
         hl.spacing = 13f;
-        hl.childAlignment = TextAnchor.UpperLeft;   // ícone no topo, nome + linhas fluindo (card multi-linha)
+        hl.childAlignment = TextAnchor.MiddleLeft;   // card compacto de 2 linhas → ícone centralizado
         hl.childControlWidth = true;
         hl.childControlHeight = true;
         hl.childForceExpandWidth = false;
@@ -280,10 +289,10 @@ internal static class PerksPanelView
         frameImg.color = new Color(accent.r, accent.g, accent.b, 0.85f);
         frameImg.raycastTarget = false;
         var fle = frame.GetComponent<LayoutElement>();
-        fle.minWidth = 46f;
-        fle.preferredWidth = 46f;
-        fle.minHeight = 46f;
-        fle.preferredHeight = 46f;
+        fle.minWidth = 40f;
+        fle.preferredWidth = 40f;
+        fle.minHeight = 40f;
+        fle.preferredHeight = 40f;
 
         var inset = new GameObject("Inset", typeof(RectTransform), typeof(Image));
         inset.transform.SetParent(frame.transform, false);
@@ -306,7 +315,13 @@ internal static class PerksPanelView
         var iimg = icon.GetComponent<Image>();
         iimg.preserveAspect = true;
         iimg.raycastTarget = false;
-        var sprite = PerksCatalog.IconSprite(group);
+        // 059 CLASS#3: ícone DO EFEITO (mesmo sprite dos quadradinhos da tela de Skills); fallback = ícone do grupo.
+        // == explícito (não ??): UnityEngine.Object sobrecarrega == pra "destroyed fake-null".
+        var sprite = PerksCatalog.BuffSprite(line);
+        if (sprite == null)
+        {
+            sprite = PerksCatalog.IconSprite(group);
+        }
         if (sprite != null)
         {
             iimg.sprite = sprite;
@@ -317,58 +332,54 @@ internal static class PerksPanelView
             iimg.enabled = false;
         }
 
-        // coluna de texto: [Nome do perk] + uma linha por efeito.
+        // coluna de texto: [NOME DO GRUPO esmaecido] + [chip + label do efeito em destaque].
         var col = new GameObject("Text", typeof(RectTransform), typeof(VerticalLayoutGroup));
         col.transform.SetParent(card.transform, false);
         var cvl = col.GetComponent<VerticalLayoutGroup>();
-        cvl.spacing = 3f;
+        cvl.spacing = 2f;
         cvl.childControlWidth = true;
         cvl.childControlHeight = true;
         cvl.childForceExpandWidth = true;
         cvl.childForceExpandHeight = false;
-        cvl.childAlignment = TextAnchor.UpperLeft;
+        cvl.childAlignment = TextAnchor.MiddleLeft;
         col.AddComponent<LayoutElement>().flexibleWidth = 1f;
 
-        var nameGo = new GameObject("Name", typeof(RectTransform), typeof(TextMeshProUGUI));
-        nameGo.transform.SetParent(col.transform, false);
-        var ntmp = nameGo.GetComponent<TextMeshProUGUI>();
+        var groupGo = new GameObject("Group", typeof(RectTransform), typeof(TextMeshProUGUI));
+        groupGo.transform.SetParent(col.transform, false);
+        var gtmp = groupGo.GetComponent<TextMeshProUGUI>();
         if (font != null)
         {
-            ntmp.font = font;
+            gtmp.font = font;
         }
 
-        ntmp.text = allPending
-            ? group.Name + $"  <size=60%><color=#cc9a3e><i>{(GameLocale.IsPortuguese ? "· em breve" : "· soon")}</i></color></size>"
-            : group.Name;
-        ntmp.fontSize = 20f;
-        ntmp.fontStyle = FontStyles.Bold;
-        ntmp.color = Color.white;
-        ntmp.raycastTarget = false;
-        ntmp.enableWordWrapping = true;   // 059-CR: nome quebra linha em coluna estreita (evita transbordar o card)
-        ntmp.overflowMode = TextOverflowModes.Overflow;
+        gtmp.text = group.Name;
+        gtmp.fontSize = 12.5f;
+        gtmp.fontStyle = FontStyles.Bold | FontStyles.UpperCase;
+        gtmp.characterSpacing = 3f;
+        gtmp.color = new Color(accent.r, accent.g, accent.b, 0.75f);   // esmaecido na cor do acento
+        gtmp.raycastTarget = false;
+        gtmp.enableWordWrapping = false;
+        gtmp.overflowMode = TextOverflowModes.Overflow;
 
-        foreach (var line in group.Lines)
+        var lineGo = new GameObject("Line", typeof(RectTransform), typeof(TextMeshProUGUI));
+        lineGo.transform.SetParent(col.transform, false);
+        var ltmp = lineGo.GetComponent<TextMeshProUGUI>();
+        if (font != null)
         {
-            var lineGo = new GameObject("Line", typeof(RectTransform), typeof(TextMeshProUGUI));
-            lineGo.transform.SetParent(col.transform, false);
-            var ltmp = lineGo.GetComponent<TextMeshProUGUI>();
-            if (font != null)
-            {
-                ltmp.font = font;
-            }
-
-            var hex = line.Pending ? "#cc9a3e" : (line.IsPerk ? MultiplierFormat.GreenHex : MultiplierFormat.RedHex);
-            var chip = line.ValueToken.Length > 0 ? $"<b><color={hex}>{line.ValueToken}</color></b> " : "";
-            var soon = line.Pending && !allPending
-                ? $"  <size=80%><color=#cc9a3e><i>{(GameLocale.IsPortuguese ? "· em breve" : "· soon")}</i></color></size>"
-                : "";
-            ltmp.text = chip + $"<color=#a8a8a8>{line.Label}</color>" + soon;
-            ltmp.fontSize = 15f;
-            ltmp.color = Color.white;
-            ltmp.raycastTarget = false;
-            ltmp.enableWordWrapping = true;
-            ltmp.richText = true;
+            ltmp.font = font;
         }
+
+        var hex = line.Pending ? "#cc9a3e" : (line.IsPerk ? MultiplierFormat.GreenHex : MultiplierFormat.RedHex);
+        var chip = line.ValueToken.Length > 0 ? $"<b><color={hex}>{line.ValueToken}</color></b> " : "";
+        var soon = line.Pending
+            ? $"  <size=75%><color=#cc9a3e><i>{(GameLocale.IsPortuguese ? "· em breve" : "· soon")}</i></color></size>"
+            : "";
+        ltmp.text = chip + $"<color=#d8d8d8>{line.Label}</color>" + soon;
+        ltmp.fontSize = 16.5f;
+        ltmp.color = Color.white;
+        ltmp.raycastTarget = false;
+        ltmp.enableWordWrapping = true;   // 059-CR: label quebra linha em coluna estreita (evita transbordar o card)
+        ltmp.richText = true;
     }
 
     /// <summary>Card simples de mensagem (classe vanilla / sem entradas).</summary>

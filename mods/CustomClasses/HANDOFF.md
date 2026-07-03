@@ -31,12 +31,16 @@
 
 ## PENDÊNCIAS (priorizadas)
 
-### 1. 🔴 059 CLASS #3 — "1 card por efeito" (DECISÃO DO USUÁRIO 2026-07-03, a implementar)
-O usuário escolheu: o Bunker (perk com 4 efeitos) deve virar **1 card por efeito** (não 1 card por perk com N linhas).
-- **Onde:** [`PerksPanelView.cs`](modded/Client/PerksPanelView.cs) — `Refresh()` itera `perks`/`draws` chamando `BuildGroupCard(col, group, font)`. Mudar para: `foreach group → foreach line → BuildEffectCard(col, group, line, font)`.
-- **`BuildEffectCard`** = 1 card por `PerkLine`: ícone do grupo (`PerksCatalog.IconSprite(group)`) + **nome do grupo** (repetido, esmaecido/cor do acento) + **chip (`line.ValueToken`) + `line.Label`** em destaque + "· em breve" se `line.Pending`. Acento verde/vermelho por `line.IsPerk` (não `group.IsPerk`).
-- **Decisão de layout a tomar:** as `PerkLine` NÃO têm "nome curto do efeito" (só `Label` completo, ex. "recoil (LMG/HMG/GL)"). Layout sugerido: `[ícone] GRUPO` (pequeno) na 1ª linha + `chip label` na 2ª. O ícone pode ir só no 1º card do grupo (ou repetir).
-- **Cuidado:** hoje o card usa `group.AllPending`/`group.IsPerk`; no card-por-efeito usar **`line.IsPerk`/`line.Pending`** por linha. `PerkGroup.IsPerk` continua definindo a COLUNA (perks × drawbacks) — grupos são homogêneos.
+### 1. 🟡 059 CLASS #3 — "1 card por efeito" (IMPLEMENTADO 2026-07-03, validar in-game)
+Implementado conforme a decisão do usuário + requisito novo: **ícone por efeito reusa os quadradinhos de buff da
+tela SKILLS** (`EFT.UI.BuffIcon.smethod_0` → `StaticIcons.BuffIdSprites[EBuffId]` — irmão do `SkillIdSprites`).
+- `PerksCatalog.PerkLine` ganhou `EBuffId Icon` (mapeado nas 18 entradas da Library) + `PerksCatalog.BuffSprite(line)`.
+- `PerksPanelView`: `BuildGroupCard` → **`BuildEffectCard`** (1 card por `PerkLine`): frame 40px com ícone do efeito
+  (fallback = ícone do grupo), nome do GRUPO esmaecido (UpperCase, cor do acento a 75%) + chip `ValueToken` +
+  `Label` em destaque; acento/bg por `line.IsPerk`/`line.Pending`; coluna continua por `group.IsPerk`.
+- **Validar in-game:** (a) os sprites de `BuffIdSprites` aparecem? (b) mapeamentos semânticos fazem sentido visual?
+  (ex.: flinch/aim punch → `AimMasterWiggle`, dano recebido → `HealthEliteAbsorbDamage`); (c) altura dos cards no
+  Tanque (6 cards na coluna de perks) cabe sem scroll.
 
 ### 2. 🟠 059 CLASS #1 — título da aba cortado ("ASS" em vez de "CLASS")
 A aba CLASS fica muito à esquerda e o "CL" é cortado pela margem da tela.
