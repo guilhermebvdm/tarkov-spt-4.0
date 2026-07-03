@@ -51,8 +51,11 @@ A aba CLASS fica muito à esquerda e o "CL" é cortado pela margem da tela.
 Linhas Flag (`no ergo penalty`, `no arm fatigue`) agora têm chip **✓** (perk) / **✗** (drawback) — `MultiplierFormat.ValueToken`.
 - **Verificar in-game:** o glyph ✓ (U+2713) / ✗ (U+2717) renderiza na fonte do EFT? Se aparecer **□**, trocar por `ON`/`OFF` ou `+`/`−` no `ValueToken` (Flag). **▲▼ sabidamente funcionam** (marcador de peso).
 
-### 4. 🟡 055 — validar hover-only + pendências do code-review 02
+### 4. 🟡 055 — validar hover-only + zoom-out + pendências do code-review 02
 - Confirmar in-game que o **hover** dispara na tela de deploy (EventSystem/GraphicRaycaster ativo?). Se não disparar, o popover não aparece.
+- **Zoom-out do popover (2026-07-03):** `LoadingClassHover.ApplyScale()` — escala default **0.75** com rect
+  compensado (÷ escala) → mesma pegada visual ~600×460, +33% de espaço interno pros cards por efeito. F12
+  `Class Detail — Loading panel scale` (0.5–1.0), lido **a cada hover** (live). Validar se cabe tudo (Tanque = pior caso).
 - `04-code-review-02`: **CR-02-03** (re-add do painel em mapa com **trânsito**, ex. Streets), **CR-02-04** (posição do painel 600×460 em 1280×720).
 
 ### 5. 🟡 056 — calibrar F12 e fixar default

@@ -112,6 +112,10 @@ internal sealed class LoadingClassHover : MonoBehaviour, IPointerEnterHandler, I
         img.raycastTarget = true;
     }
 
+    // Pegada VISUAL do popover na tela (constante, independente da escala).
+    private const float BaseWidth = 600f;
+    private const float BaseHeight = 460f;
+
     /// <summary>Monta (lazy) e exibe o painel — TODO o caminho protegido (F-3: OnPointerEnter fica fora do try/catch do Postfix).</summary>
     private void Show()
     {
@@ -120,6 +124,7 @@ internal sealed class LoadingClassHover : MonoBehaviour, IPointerEnterHandler, I
             Ensure();
             if (_panel != null)
             {
+                ApplyScale();   // lê o F12 a cada hover → ajuste "live" sem reiniciar
                 PerksPanelView.Refresh(_panel);
                 _panel.SetActive(true);
             }
@@ -144,11 +149,29 @@ internal sealed class LoadingClassHover : MonoBehaviour, IPointerEnterHandler, I
         _panel = PerksPanelView.Build(parent, font);
 
         // o Build ancora "fill" (bom p/ a aba); no loading reancoramos COMPACTO à direita da tela (não cobre tudo).
+        // sizeDelta fica no ApplyScale (depende da escala do F12).
         var rt = (RectTransform)_panel.transform;
         rt.anchorMin = rt.anchorMax = new Vector2(1f, 0.5f);
         rt.pivot = new Vector2(1f, 0.5f);
-        rt.sizeDelta = new Vector2(600f, 460f);
         rt.anchoredPosition = new Vector2(-60f, 0f);
+    }
+
+    /// <summary>
+    ///     Zoom-out do popover (CLASS#3 rende mais cards): escala o conteúdo (default 75%) e COMPENSA o rect
+    ///     lógico (÷ escala) → a pegada visual continua ~600×460, com mais espaço interno pros cards.
+    ///     Pivot (1, 0.5) → a escala encolhe a partir da borda direita/centro, sem deslocar o painel.
+    /// </summary>
+    private void ApplyScale()
+    {
+        if (_panel == null)
+        {
+            return;
+        }
+
+        var s = Mathf.Clamp(PerksConfig.LoadingPanelScale?.Value ?? 0.75f, 0.5f, 1f);
+        var rt = (RectTransform)_panel.transform;
+        rt.localScale = new Vector3(s, s, 1f);
+        rt.sizeDelta = new Vector2(BaseWidth / s, BaseHeight / s);
     }
 
     // hover = toggle OPCIONAL (refinamento; só dispara se houver GraphicRaycaster + EventSystem).

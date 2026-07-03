@@ -25,6 +25,7 @@ internal static class PerksConfig
 
     // UI (055) — detalhe da classe na tela de carregamento da raid (FIKA)
     internal static ConfigEntry<bool>? ClassDetailOnLoading;
+    internal static ConfigEntry<float>? LoadingPanelScale;   // zoom-out do popover (cabe os cards por efeito)
 
     // UI (056) — offset X/Y do marcador "▲ +X%" no peso (aba Health)
     internal static ConfigEntry<float>? WeightMarkerOffsetX;
@@ -308,6 +309,12 @@ internal static class PerksConfig
         ClassDetailOnLoading = config.Bind(
             "Perks — UI", "Class Detail on Loading Screen", true,
             "Mostra o detalhe da sua classe (perks/drawbacks) no seu nome na tela de carregamento da raid (FIKA). / Show your class detail on the FIKA raid loading screen.");
+
+        LoadingPanelScale = config.Bind(
+            "Perks — UI", "Class Detail — Loading panel scale", 0.75f,
+            new ConfigDescription(
+                "Escala (zoom-out) do popover de classe no loading (0.75 = 75%). O painel ocupa a MESMA área na tela; o conteúdo fica menor → mais espaço pros cards. / Scale of the loading-screen class popover (same footprint, smaller content).",
+                new AcceptableValueRange<float>(0.5f, 1f)));
 
         WeightMarkerOffsetX = config.Bind(
             "Perks — UI", "Weight Marker — X offset", 0f,
