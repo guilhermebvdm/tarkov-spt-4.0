@@ -70,4 +70,23 @@ internal static class MultiplierFormat
         var clsEn = string.IsNullOrWhiteSpace(className) ? "your Class" : $"Class <b>{className}</b>";
         return $"You have a {amountEn} on this skill from {clsEn}";
     }
+
+    /// <summary>
+    ///     Item 056 — tooltip do marcador de PESO (Pack Mule) na aba Health. Atribui o +X% de limite de carga à classe.
+    ///     "piso/floor" porque o Pack Mule é aplicado como piso (não soma com a Strength).
+    /// </summary>
+    public static string CarryTooltip(float factor, string? className)
+    {
+        var pct = Percent(factor);
+        var sign = pct >= 0 ? "+" : string.Empty;
+        var amount = $"<color={GreenHex}>{sign}{pct}%</color>";
+        if (GameLocale.IsPortuguese)
+        {
+            var cls = string.IsNullOrWhiteSpace(className) ? "sua Classe" : $"Classe <b>{className}</b>";
+            return $"Limite de carga {amount} pela {cls} (Pack Mule, piso)";
+        }
+
+        var clsEn = string.IsNullOrWhiteSpace(className) ? "your Class" : $"Class <b>{className}</b>";
+        return $"Carry limit {amount} from {clsEn} (Pack Mule, floor)";
+    }
 }
