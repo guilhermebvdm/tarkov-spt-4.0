@@ -1,16 +1,16 @@
-# Graph Report - mods\CustomClasses\modded  (2026-07-01)
+# Graph Report - mods\CustomClasses\modded  (2026-07-03)
 
 ## Corpus Check
-- 93 files · ~79,321 words
+- 97 files · ~85,858 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1412 nodes · 1790 edges · 92 communities (85 shown, 7 thin omitted)
+- 1511 nodes · 1941 edges · 94 communities (87 shown, 7 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f4a47df2`
+- Built from commit: `7714159b`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -100,6 +100,8 @@
 - [[_COMMUNITY_Community 89|Community 89]]
 - [[_COMMUNITY_Community 90|Community 90]]
 - [[_COMMUNITY_Community 91|Community 91]]
+- [[_COMMUNITY_Community 92|Community 92]]
+- [[_COMMUNITY_Community 93|Community 93]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `CatalogService` - 55 edges
@@ -107,28 +109,28 @@
 3. `InventoryBuilder` - 23 edges
 4. `CostService` - 20 edges
 5. `MongoId` - 18 edges
-6. `ClassIdentityView` - 12 edges
-7. `Item` - 12 edges
-8. `Plugin` - 11 edges
-9. `MenuOverhaulBridge` - 11 edges
-10. `SkillsNavButtonPatch` - 10 edges
+6. `LoadingClassHover` - 16 edges
+7. `SkillsClassTabPatch` - 12 edges
+8. `PerkLine` - 12 edges
+9. `ClassIdentityView` - 12 edges
+10. `Item` - 12 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `AdrenalineTriggerPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/AdrenalineTriggerPatch.cs →   _Bridges community 90 → community 80_
-- `ChatSpecialIconPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/ChatSpecialIconPatch.cs →   _Bridges community 80 → community 40_
+  Client/Patches/AdrenalineTriggerPatch.cs →   _Bridges community 90 → community 81_
+- `BulwarkPatch` --inherits--> `ModulePatch`  [EXTRACTED]
+  Client/Patches/BulwarkPatch.cs →   _Bridges community 81 → community 80_
 - `ChangeEnergyPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/ClassCombatHealthPatches.cs →   _Bridges community 80 → community 79_
-- `MaxSpeedPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/ClassMovementPatches.cs →   _Bridges community 80 → community 81_
+  Client/Patches/ClassCombatHealthPatches.cs →   _Bridges community 81 → community 79_
+- `ClassDetailLoadingPatch` --inherits--> `ModulePatch`  [EXTRACTED]
+  Client/Patches/ClassDetailLoadingPatch.cs →   _Bridges community 81 → community 86_
 - `AiSoundPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/ClassSoundPatches.cs →   _Bridges community 80 → community 82_
+  Client/Patches/ClassSoundPatches.cs →   _Bridges community 81 → community 82_
 
 ## Import Cycles
 - None detected.
 
-## Communities (92 total, 7 thin omitted)
+## Communities (94 total, 7 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.09
@@ -203,8 +205,8 @@ Cohesion: 0.16
 Nodes (11): FieldInfo, float, GameObject, IEnumerator, MenuScreen, MethodBase, PatchPostfix, string (+3 more)
 
 ### Community 18 - "Community 18"
-Cohesion: 0.15
-Nodes (8): BaseMeshEffect, Color, string, MultiplierFormat, Color, List, ClassIconGradient, VertexHelper
+Cohesion: 0.13
+Nodes (9): BaseMeshEffect, Color, PerkLine, string, MultiplierFormat, Color, List, ClassIconGradient (+1 more)
 
 ### Community 19 - "Community 19"
 Cohesion: 0.12
@@ -272,7 +274,7 @@ Nodes (6): bool, Dictionary, ESkillId, string, Payload, SkillMultipliers
 
 ### Community 35 - "Community 35"
 Cohesion: 0.20
-Nodes (7): bool, Color, PropertyInfo, string, MethodInfo, object, MenuOverhaulBridge
+Nodes (7): bool, Color, string, MethodInfo, object, PropertyInfo, MenuOverhaulBridge
 
 ### Community 36 - "Community 36"
 Cohesion: 0.24
@@ -291,8 +293,8 @@ Cohesion: 0.24
 Nodes (5): BaseUnityPlugin, bool, ConfigEntry, Plugin, ManualLogSource
 
 ### Community 40 - "Community 40"
-Cohesion: 0.25
-Nodes (5): Image, MethodBase, PatchPostfix, TextMeshProUGUI, ChatSpecialIconPatch
+Cohesion: 0.50
+Nodes (3): Image, PatchPostfix, TextMeshProUGUI
 
 ### Community 41 - "Community 41"
 Cohesion: 0.22
@@ -336,7 +338,7 @@ Nodes (5): Image, MethodBase, PatchPostfix, SkillClass, SkillIconBorderPatch
 
 ### Community 51 - "Community 51"
 Cohesion: 0.25
-Nodes (5): MethodBase, PatchPostfix, string, SkillsScreenIdentityPatch, SkillsAndMasteringScreen
+Nodes (5): MethodBase, PatchPostfix, SkillsAndMasteringScreen, string, SkillsScreenIdentityPatch
 
 ### Community 52 - "Community 52"
 Cohesion: 0.25
@@ -348,7 +350,7 @@ Nodes (4): AbstractSkillClass, MethodBase, PatchPrefix, OnTriggerPatch
 
 ### Community 54 - "Community 54"
 Cohesion: 0.27
-Nodes (5): Color, Dictionary, string, Sprite, ClassIconCache
+Nodes (5): Color, Dictionary, Sprite, string, ClassIconCache
 
 ### Community 55 - "Community 55"
 Cohesion: 0.33
@@ -395,36 +397,36 @@ Cohesion: 0.20
 Nodes (9): CustomClasses.Web, DialogActions, DialogContent, ItemSpecEditor, MudButton, MudDialog, MudText, TitleContent (+1 more)
 
 ### Community 79 - "Community 79"
-Cohesion: 0.14
-Nodes (11): FirearmController, float, MethodBase, PatchPostfix, ChangeEnergyPatch, ChangeHydrationPatch, ExecutionMeleePatch, HeavyFrameMetabolism (+3 more)
+Cohesion: 0.11
+Nodes (14): ActiveHealthController, DamageInfoStruct, FirearmController, float, MethodBase, PatchPostfix, PatchPrefix, ChangeEnergyPatch (+6 more)
 
 ### Community 80 - "Community 80"
-Cohesion: 0.15
-Nodes (11): MethodBase, float, MethodBase, ModulePatch, BulwarkPatch, AdsSpeedPatch, AimPunchPatch, HeavyWeaponErgoPatch (+3 more)
+Cohesion: 0.25
+Nodes (5): DamageInfoStruct, MethodBase, PatchPrefix, Player, BulwarkPatch
 
 ### Community 81 - "Community 81"
-Cohesion: 0.15
-Nodes (11): BasePhysicalClass, MethodBase, PatchPostfix, PatchPrefix, MovementContext, ClassMoveSpeed, MaxSpeedPatch, OverladenInertiaPatch (+3 more)
+Cohesion: 0.16
+Nodes (10): MethodBase, MethodBase, ModulePatch, ChatSpecialIconPatch, ClassMoveSpeed, MaxSpeedPatch, OverladenInertiaPatch, SetCharacterMovementSpeedPatch (+2 more)
 
 ### Community 82 - "Community 82"
 Cohesion: 0.12
-Nodes (12): AISoundType, int, MethodBase, PatchPostfix, PatchPrefix, Player, PropertyInfo, IPlayer (+4 more)
+Nodes (12): AISoundType, Func, int, MethodBase, PatchPostfix, PatchPrefix, Player, IPlayer (+4 more)
 
 ### Community 83 - "Community 83"
-Cohesion: 0.16
-Nodes (8): FirearmController, PatchPostfix, PatchPrefix, Player, ForceEffector, HeavyWeapon, ProceduralWeaponAnimation, Weapon
+Cohesion: 0.10
+Nodes (16): FirearmController, float, MethodBase, PatchPostfix, PatchPrefix, Player, ForceEffector, AdsSpeedPatch (+8 more)
 
 ### Community 84 - "Community 84"
-Cohesion: 0.29
-Nodes (5): bool, Dictionary, string, Entry, PerksCatalog
+Cohesion: 0.18
+Nodes (12): bool, Dictionary, ESkillId, float, Sprite, string, PerkGroup, PerkLine (+4 more)
 
 ### Community 85 - "Community 85"
 Cohesion: 0.25
 Nodes (5): IEnumerator, MethodBase, PatchPostfix, GameWorld, RaidPerksNotificationPatch
 
 ### Community 86 - "Community 86"
-Cohesion: 0.50
-Nodes (3): DamageInfoStruct, PatchPrefix, Player
+Cohesion: 0.06
+Nodes (26): CanvasGroup, FieldInfo, float, GameObject, MethodBase, PatchPostfix, PointerEventData, Type (+18 more)
 
 ### Community 87 - "Community 87"
 Cohesion: 0.29
@@ -439,23 +441,31 @@ Cohesion: 0.25
 Nodes (5): DamageInfoStruct, MethodBase, PatchPostfix, Player, AdrenalineTriggerPatch
 
 ### Community 91 - "Community 91"
-Cohesion: 0.43
-Nodes (3): ActiveHealthController, DamageInfoStruct, PatchPrefix
+Cohesion: 0.16
+Nodes (11): bool, GameObject, MethodBase, PatchPostfix, SkillsAndMasteringScreen, string, Task, GInterface486 (+3 more)
+
+### Community 92 - "Community 92"
+Cohesion: 0.17
+Nodes (9): FieldInfo, float, GameObject, MethodBase, PatchPostfix, string, HealthParametersPanel, WeightMarkerPatch (+1 more)
+
+### Community 93 - "Community 93"
+Cohesion: 0.33
+Nodes (4): BasePhysicalClass, PatchPostfix, PatchPrefix, MovementContext
 
 ## Knowledge Gaps
-- **847 isolated node(s):** `float`, `netstandard2.1`, `Microsoft.NET.Sdk`, `string`, `MethodBase` (+842 more)
+- **873 isolated node(s):** `float`, `netstandard2.1`, `Microsoft.NET.Sdk`, `string`, `PerkLine` (+868 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **7 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `MenuClassIdentityPatch` connect `Community 20` to `Community 80`?**
-  _High betweenness centrality (0.004) - this node is a cross-community bridge._
-- **Why does `SkillPanelPatch` connect `Community 27` to `Community 80`?**
-  _High betweenness centrality (0.003) - this node is a cross-community bridge._
+- **Why does `ClassDetailLoadingPatch` connect `Community 86` to `Community 81`?**
+  _High betweenness centrality (0.013) - this node is a cross-community bridge._
+- **Why does `ShootRecoilPatch` connect `Community 83` to `Community 81`?**
+  _High betweenness centrality (0.005) - this node is a cross-community bridge._
 - **What connects `float`, `netstandard2.1`, `Microsoft.NET.Sdk` to the rest of the system?**
-  _847 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _873 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.09090909090909091 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
