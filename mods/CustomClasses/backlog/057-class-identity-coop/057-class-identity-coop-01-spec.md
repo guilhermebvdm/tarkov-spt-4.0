@@ -74,8 +74,10 @@ demais superfícies coop (painel de ready do lobby, nametag in-raid, chat) ficam
       bloqueia o carregamento; identidade aparece se/quando resolvida (mínimo aceitável: comportamento atual).
 - [ ] **Mapa com trânsito** (ex. Streets): na segunda passagem pela tela de carregamento, os hovers são
       re-adicionados (mesma família do CR-02-03 do 055).
-- [ ] **Player entrando como SCAV:** perfil scav não tem classe do mod → linha sem identidade, sem erro (não
-      herdar a classe do perfil PMC do mesmo dono).
+- [ ] **Player entrando como SCAV** (emendado na review técnica 01, PA-01-02): raid scav **local** → nenhuma
+      linha ganha identidade (patch no-op). Player **remoto** em raid scav pode exibir a classe do PMC do dono —
+      **limitação conhecida** do mecanismo por nickname (o FIKA usa o nickname do PMC no loading e o side da raid
+      remota não trafega); cosmético e aceito.
 - [ ] **Nicknames duplicados no servidor** (se o SPT permitir): resolução ambígua não pode crashar nem travar a
       tela — aceitar a primeira correspondência ou nenhuma, de forma determinística.
 
@@ -100,3 +102,4 @@ demais superfícies coop (painel de ready do lobby, nametag in-raid, chat) ficam
 | 2026-06-23 | Item registrado no `mod-backlog.md` (sessão 10 do redesign 11→6) |
 | 2026-07-03 | Spec funcional criada via `/create-spec`; decisões do usuário: escopo restrito ao **loading FIKA** e `modded/Server` **liberado** para esta sessão |
 | 2026-07-03 | Revisão `/review-spec` — 2 gaps (identidade na linha sem hover; mecanismo de resolução rebaixado a hipótese/decisão da spec técnica) + 2 corner cases (SCAV, nickname duplicado) corrigidos |
+| 2026-07-03 | Corner SCAV emendado pela review técnica 01 (PA-01-02): no-op em raid scav local; scav remoto pode exibir classe do PMC do dono (limitação do mecanismo por nickname, documentada) |
