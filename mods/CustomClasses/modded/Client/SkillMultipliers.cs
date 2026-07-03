@@ -32,6 +32,9 @@ internal static class SkillMultipliers
     /// <summary>Item 050: nome EN estável da classe (= campo `name` do config) — chave de gating idioma-independente. Null se vanilla.</summary>
     public static string? ClassNameEn => _classNameEn;
 
+    /// <summary>Item 057 (PA-01-08): nome PT da classe local — p/ o fallback <c>ClassIdentities.Local()</c> não degradar pt→EN.</summary>
+    public static string? ClassNamePt => _classNamePt;
+
     /// <summary>Item 050: true se a classe do perfil local é <paramref name="nameEn"/> (compara o nome EN estável, case-insensitive).</summary>
     public static bool IsLocalClass(string nameEn)
     {

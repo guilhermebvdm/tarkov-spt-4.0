@@ -13,14 +13,22 @@ namespace CustomClasses.Client;
 ///     marca d'água e fade-in. Reusa o <see cref="PerksCatalog"/>
 ///     (dados derivados). Usado por dois pontos de entrada: a aba CLASS na tela de Skills (053/059,
 ///     <see cref="SkillsClassTabPatch"/>) e o loading da raid no FIKA (055, <see cref="ClassDetailLoadingPatch"/>).
-///     Extraído do <see cref="SkillsClassTabPatch"/> no 055 (DRY). Só exibição; lê a classe local.
-///     PA-01-03: os dois hosts NÃO coexistem (Skills no menu × loading na raid) → o cache estático abaixo é benigno.
+///     Extraído do <see cref="SkillsClassTabPatch"/> no 055 (DRY). Só exibição. 057: parametrizado por
+///     <see cref="ClassIdentities.Identity"/> (qualquer classe — per-player no loading); wrapper sem identidade
+///     mantém os call-sites locais. Idempotência per-panel via <see cref="PanelState"/> (N painéis no loading).
 /// </summary>
 internal static class PerksPanelView
 {
     internal const string PanelName = "CC_ClassPanel";
 
-    private static string? _lastPanelClass;   // CR-01-03 (059): evita rebuild dos cards quando a classe não mudou.
+    /// <summary>
+    ///     057 PA-01-07 — idempotência PER-PANEL (CR-01-03 do 059 era estático; no loading coexistem N painéis,
+    ///     um por linha de player): guarda a última classe renderizada NESTE painel.
+    /// </summary>
+    internal sealed class PanelState : MonoBehaviour
+    {
+        public string? LastClass;
+    }
 
     /// <summary>
     ///     Painel = caixa escura (fill) com VerticalLayoutGroup: [Header (brasão + nome)] [Columns (perks | drawbacks)]
@@ -116,12 +124,17 @@ internal static class PerksPanelView
         return go;
     }
 
-    /// <summary>Reconstrói o painel (header + colunas) a partir da classe local. Idempotente por classe.</summary>
-    internal static void Refresh(GameObject panel)
+    /// <summary>Reconstrói o painel a partir da classe LOCAL (call-sites 053/059). Idempotente por classe.</summary>
+    internal static void Refresh(GameObject panel) => Refresh(panel, ClassIdentities.Local());
+
+    /// <summary>
+    ///     057 — reconstrói o painel (header + colunas) a partir de UMA identidade de classe (qualquer player).
+    ///     <paramref name="identity"/> null → caminho vanilla (mensagem). Idempotente por classe VIA PanelState.
+    /// </summary>
+    internal static void Refresh(GameObject panel, ClassIdentities.Identity? identity)
     {
         try
         {
-            SkillMultipliers.EnsureLoaded();
             panel.GetComponent<FadeIn>()?.Restart();   // CR-03-03: re-dispara o fade a cada exibição
             var headerTmp = panel.transform.Find("Header/HeaderText")?.GetComponent<TextMeshProUGUI>();
             var headerIcon = panel.transform.Find("Header/Icon")?.GetComponent<Image>();
@@ -134,24 +147,31 @@ internal static class PerksPanelView
 
             var font = headerTmp.font;
 
-            // CR-01-03: só reconstrói quando a classe muda (evita flicker de Destroy-deferido e trabalho redundante).
-            var cls = SkillMultipliers.ClassNameEn;
-            if ((perksCol.childCount > 0 || drawbacksCol.childCount > 0) && _lastPanelClass == cls)
+            // CR-01-03 + PA-01-07 (057): só reconstrói quando a classe DESTE painel muda (estado per-panel —
+            // no loading há N painéis; um estático contaminaria os vizinhos).
+            var state = panel.GetComponent<PanelState>();
+            if (state == null)
+            {
+                state = panel.AddComponent<PanelState>();
+            }
+
+            var cls = identity?.NameEn;
+            if ((perksCol.childCount > 0 || drawbacksCol.childCount > 0) && state.LastClass == cls)
             {
                 return;
             }
 
-            _lastPanelClass = cls;
+            state.LastClass = cls;
 
             // header: ícone da classe (brasão) + nome (cor da classe) + subtítulo esmaecido.
-            ClassIdentityView.ApplyClassIcon(headerIcon, SkillMultipliers.IconFile, SkillMultipliers.NameColor, 40f);
+            ClassIdentityView.ApplyClassIcon(headerIcon, identity?.IconFile, identity?.NameColor, 40f);
 
             // idéia 3: marca d'água = brasão da classe, bem apagado.
             var watermark = panel.transform.Find("Watermark")?.GetComponent<Image>();
             if (watermark != null)
             {
-                var wmColor = ClassIdentityView.ResolveColor(SkillMultipliers.NameColor, Color.white);
-                var wmSprite = ClassIconCache.GetTinted(SkillMultipliers.IconFile, wmColor, wmColor);
+                var wmColor = ClassIdentityView.ResolveColor(identity?.NameColor, Color.white);
+                var wmSprite = ClassIconCache.GetTinted(identity?.IconFile, wmColor, wmColor);
                 if (wmSprite != null)
                 {
                     watermark.sprite = wmSprite;
@@ -159,18 +179,18 @@ internal static class PerksPanelView
                     watermark.gameObject.SetActive(true);   // CR-03-01: só ativa a marca d'água quando há brasão
                 }
             }
-            var name = SkillMultipliers.ClassName;
-            var classHex = string.IsNullOrWhiteSpace(SkillMultipliers.NameColor) ? "#ffffff" : SkillMultipliers.NameColor;
+            var name = identity?.DisplayName;
+            var classHex = string.IsNullOrWhiteSpace(identity?.NameColor) ? "#ffffff" : identity!.NameColor;
             var sub = GameLocale.IsPortuguese ? "Perks e Drawbacks" : "Perks & Drawbacks";
             headerTmp.text = string.IsNullOrEmpty(name)
                 ? sub
-                : $"<b><color={classHex}>{name.ToUpperInvariant()}</color></b>   <size=55%><color=#7a7a7a><i>{sub}</i></color></size>";
+                : $"<b><color={classHex}>{name!.ToUpperInvariant()}</color></b>   <size=55%><color=#7a7a7a><i>{sub}</i></color></size>";
 
             // limpa as duas colunas e reconstrói.
             ClearChildren(perksCol);
             ClearChildren(drawbacksCol);
 
-            var groups = PerksCatalog.LocalGroups();
+            var groups = PerksCatalog.GroupsFor(identity?.NameEn);
             if (groups == null || groups.Length == 0)
             {
                 // vanilla (edge raro — classe não-mod): mensagem na coluna esquerda.

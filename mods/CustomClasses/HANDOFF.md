@@ -64,8 +64,16 @@ Linhas Flag (`no ergo penalty`, `no arm fatigue`) agora têm chip **✓** (perk)
 ### 5. 🟡 056 — calibrar F12 e fixar default
 Usuário ajusta `Weight Marker — X/Y offset` (F12 → `Perks — UI`) até posicionar bem (chute inicial X≈−70, Y≈+30) e passa os valores → fixar como **default** no `PerksConfig` (aí dispensa o F12).
 
-### 6. 🟢 057 — identidade de classe **per-player** em coop (o que o usuário quer no loading)
-Fazer o popover do 055 funcionar no nome de **cada** player (não só o local) — o caso coop mais útil. Exige **rota no server** expondo o registry de classes (resolver por `Profile.Info.GameVersion` → displayName en+pt) + `ClassIconCache` de todas as classes. **⚠️ toca `modded/Server`** → coordenar com a sessão do editor. Backlog item 057. **Desbloqueia o per-player do 055.**
+### 6. 🟡 057 — identidade per-player no loading (IMPLEMENTADO 2026-07-03 via /g-autodev; validar in-game)
+Ciclo SDD completo (spec → reviews → code-mod → code-review) na pasta [backlog/057-class-identity-coop/](backlog/057-class-identity-coop/).
+Entregue: rota server `/customclasses/class-identities` (nickname→classe de TODOS os perfis; a Edition do perfil
+é a chave do `ClassVisualRegistry` — a hipótese `GameVersion`-no-client foi DESCARTADA: no loading o client só tem
+netId+nickname) + `ClassIdentities` client (refetch por tela de loading) + popover 055 per-player + tint do nickname.
+- **Validar in-game (coop, 2+ players, como CLIENTE):** classe correta por player · vanilla sem identidade ·
+  raid scav local = nada · fallback com server sem a rota (1 warn) · trânsito.
+- ⚠️ Rota nova só carrega com **restart do SPT.Server** (DLL já instalada).
+- Limitação documentada: scav REMOTO pode exibir a classe do PMC do dono (nickname é sempre o do PMC no FIKA).
+- Implementado no worktree `tarkov-spt-4.0-wt-057` (tree principal estava na branch da sessão do editor).
 
 ### 7. 🟢 058 — rodar validação prévia in-game (destrava o code-mod)
 Protocolo V1–V4 na [`058-...-01-spec.md`](backlog/058-ativar-masteries-inertes/058-ativar-masteries-inertes-01-spec.md):

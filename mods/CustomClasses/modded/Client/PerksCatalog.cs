@@ -174,12 +174,11 @@ internal static class PerksCatalog
 
     private static bool _validated;
 
-    /// <summary>Grupos da classe local (via SkillMultipliers.ClassNameEn). Null se vanilla/desconhecida.</summary>
-    internal static PerkGroup[]? LocalGroups()
+    /// <summary>057 — grupos de QUALQUER classe pela chave EN estável (ByClass). Null se desconhecida.</summary>
+    internal static PerkGroup[]? GroupsFor(string? classNameEn)
     {
         ValidateOnce();
-        var key = SkillMultipliers.ClassNameEn;
-        if (key == null || !ByClass.TryGetValue(key, out var keys))
+        if (classNameEn == null || !ByClass.TryGetValue(classNameEn, out var keys))
         {
             return null;
         }
@@ -188,6 +187,9 @@ internal static class PerksCatalog
                    .Where(g => g != null)
                    .ToArray()!;
     }
+
+    /// <summary>Grupos da classe local (via SkillMultipliers.ClassNameEn). Null se vanilla/desconhecida.</summary>
+    internal static PerkGroup[]? LocalGroups() => GroupsFor(SkillMultipliers.ClassNameEn);
 
     /// <summary>Sprite do ícone temático do grupo (mesmo dicionário da tela de Skills). Icon → IconAlt → null.</summary>
     internal static Sprite? IconSprite(PerkGroup g)

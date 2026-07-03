@@ -405,16 +405,16 @@ private static void Postfix(object __instance, int netId, string nickname)
 
 ## 8. Checklist de implementação
 
-- [ ] Server: `ClassIdentitiesResponse.cs` (DTOs) — molde `SkillMultipliersResponse.cs`.
-- [ ] Server: `ClassIdentitiesRouter.cs` — usings 1:1 da `SkillMultipliersRouter.cs`; `OrderBy` (PA-01-10); dedup de nickname; null-safety de perfil; órfãs em `LoggedOrphans` (PA-01-09).
-- [ ] Client: `SkillMultipliers.ClassNamePt` (accessor 1 linha — PA-01-08).
-- [ ] Client: `ClassIdentities.cs` (cache lazy + `TryResolve` + `Local()` + `Reset()` + aviso 1×).
-- [ ] Client: `PerksCatalog.GroupsFor(nameEn)` + `LocalGroups` delegando.
-- [ ] Client: `PerksPanelView` — `PanelState` per-panel (`GetComponent ?? AddComponent`) substitui `_lastPanelClass`; `Refresh(panel, Identity?)` (wrapper local mantém call-sites do 053/059 intactos; null → mensagem vanilla).
-- [ ] Client: `ClassDetailLoadingPatch` — gate `IsScav` local (PA-01-02); refetch por instância (PA-01-04); remover gate nickname-local; resolver por nickname c/ fallback `Local()`; tinge `Nickname` TMP (tint-only).
-- [ ] Client: `LoadingClassHover` — campo `Identity`; `Show()` usa `Refresh(_panel, Identity)`; `Ensure()` desabilita raycast do painel inteiro (PA-01-11); zoom 0.75 do 055 preservado.
-- [ ] `/compile-mod CustomClasses` (client + server buildam e instalam).
-- [ ] Atualizar `HANDOFF.md` (pendência #6) + backlog status 057 → 🟡 (aguardando gate in-game).
+- [x] Server: `ClassIdentitiesResponse.cs` (DTOs) — molde `SkillMultipliersResponse.cs`.
+- [x] Server: `ClassIdentitiesRouter.cs` — usings 1:1 da `SkillMultipliersRouter.cs`; `OrderBy` (PA-01-10); dedup de nickname; null-safety de perfil; órfãs em `SeenUnknownEditions` (PA-01-09).
+- [x] Client: `SkillMultipliers.ClassNamePt` (accessor 1 linha — PA-01-08).
+- [x] Client: `ClassIdentities.cs` (cache lazy + `TryResolve` + `Local()` + `Reset()` + aviso 1×).
+- [x] Client: `PerksCatalog.GroupsFor(nameEn)` + `LocalGroups` delegando.
+- [x] Client: `PerksPanelView` — `PanelState` per-panel (`GetComponent ?? AddComponent`) substitui `_lastPanelClass`; `Refresh(panel, Identity?)` (wrapper local mantém call-sites do 053/059 intactos; null → mensagem vanilla).
+- [x] Client: `ClassDetailLoadingPatch` — gate `IsScav` local (PA-01-02); refetch por instância (PA-01-04); remover gate nickname-local; resolver por nickname c/ fallback `Local()`; tinge `Nickname` TMP (tint-only).
+- [x] Client: `LoadingClassHover` — campo `Identity`; `Show()` usa `Refresh(_panel, Identity)`; `DisableRaycast()` pós-Refresh (PA-01-11 — as-built moveu do `Ensure` pro `Show`: o rebuild de cards cria Graphics novos); zoom 0.75 do 055 preservado.
+- [x] `/compile-mod CustomClasses` (client + server buildam e instalam — 0 erros, 2026-07-03).
+- [x] Atualizar `HANDOFF.md` (pendência #6) + backlog status 057 → 🟡 (aguardando gate in-game).
 
 ## 9. Conformidade com skills (auto-checklist)
 

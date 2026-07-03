@@ -11,18 +11,27 @@ using UnityEngine.UI;
 namespace CustomClasses.Client;
 
 /// <summary>
-///     (055) Detalhe da classe LOCAL na tela de carregamento do FIKA. Postfix soft-detect em
-///     <c>LoadingScreenUI.AddPlayer(int netId, string nickname)</c>: na linha do player local
-///     (nickname == <see cref="SkillMultipliers.Nickname"/>, padrão do 015) anexa um <see cref="LoadingClassHover"/>
-///     que mostra o painel <see cref="PerksPanelView"/> (2 colunas). **Nenhum tipo FIKA no IL** — o alvo é resolvido
-///     por <c>AccessTools.TypeByName</c> (padrão SAIN, Plugin.cs:126) e o GameObject da linha sai de
-///     <c>_loadingPlayers[netId]</c> castado para <see cref="Component"/> (Unity, não FIKA). Degrada 100% solo.
-///     ref: fika-plugin/Fika.Core/UI/Custom/LoadingScreenUI.cs:97 (AddPlayer) / :14 (_loadingPlayers).
+///     (055/057) Detalhe da classe na tela de carregamento do FIKA — PER-PLAYER (057): cada linha com classe
+///     resolvida ganha tint do nickname (cor da classe) + <see cref="LoadingClassHover"/> com o popover da classe
+///     DAQUELE player. Resolução via <see cref="ClassIdentities"/> (mapa nickname→classe do server, refetch por
+///     tela — PA-01-04) com fallback local (rota ausente → comportamento 055). Raid scav local → no-op (PA-01-02).
+///     **Nenhum tipo FIKA no IL** — alvos por <c>AccessTools.TypeByName</c>/reflection (padrão SAIN, Plugin.cs:126);
+///     a linha sai de <c>_loadingPlayers[netId]</c> castada para <see cref="Component"/>. Degrada 100% solo.
+///     ref: fika-plugin/Fika.Core/UI/Custom/LoadingScreenUI.cs:97 (AddPlayer) / :14 (_loadingPlayers) /
+///     LoadingScreenPlayer.cs:7 (Nickname) / FikaBackendUtils.cs:47 (IsScav).
 /// </summary>
 internal class ClassDetailLoadingPatch : ModulePatch
 {
     private static readonly Type? UiType = AccessTools.TypeByName("LoadingScreenUI");
     private static readonly FieldInfo? PlayersField = UiType != null ? AccessTools.Field(UiType, "_loadingPlayers") : null;
+
+    // 057 PA-01-02: raid scav local → sem identidade em nenhuma linha (o loading só conhece nicknames de PMC).
+    private static readonly Type? BackendUtilsType = AccessTools.TypeByName("FikaBackendUtils");
+    private static readonly MethodInfo? IsScavGetter =
+        BackendUtilsType != null ? AccessTools.PropertyGetter(BackendUtilsType, "IsScav") : null;
+
+    // 057 PA-01-04: instância da tela mudou (nova raid/loading) → refetch do mapa (perfis novos sem restart).
+    private static object? _lastLoadingScreen;
 
     protected override MethodBase GetTargetMethod()
     {
@@ -35,22 +44,39 @@ internal class ClassDetailLoadingPatch : ModulePatch
     {
         try
         {
-            if (PerksConfig.ClassDetailOnLoading?.Value != true)
+            if (PerksConfig.ClassDetailOnLoading?.Value != true || string.IsNullOrEmpty(nickname))
             {
                 return;
             }
 
-            SkillMultipliers.EnsureLoaded();
-            if (SkillMultipliers.ClassName == null)
-            {
-                return;   // classe vanilla → sem painel
-            }
-
-            // só o player LOCAL (padrão do 015 — sem tipo FIKA). ref: PlayerNamePanelPatch.cs:48
-            if (string.IsNullOrEmpty(nickname)
-                || !string.Equals(nickname, SkillMultipliers.Nickname, StringComparison.Ordinal))
+            // PA-01-02: scav run local → no-op total. ref: fika-plugin FikaBackendUtils.cs:47 (getter público).
+            if (IsScavGetter?.Invoke(null, null) is true)
             {
                 return;
+            }
+
+            // PA-01-04: nova tela de loading → Reset (o TryResolve abaixo refaz o fetch; 1×/raid).
+            if (!ReferenceEquals(_lastLoadingScreen, __instance))
+            {
+                _lastLoadingScreen = __instance;
+                ClassIdentities.Reset();
+            }
+
+            // 057: resolve a identidade DESTE nickname (o mapa cobre todos os perfis do server, local incluso).
+            // Fallback (rota ausente → mapa vazio): nickname local resolve via SkillMultipliers (comportamento 055).
+            if (!ClassIdentities.TryResolve(nickname, out var id))
+            {
+                SkillMultipliers.EnsureLoaded();
+                if (!string.Equals(nickname, SkillMultipliers.Nickname, StringComparison.Ordinal))
+                {
+                    return;
+                }
+
+                id = ClassIdentities.Local()!;
+                if (id == null)
+                {
+                    return;   // local vanilla → linha intocada (critério da 01-spec)
+                }
             }
 
             // GameObject da linha via _loadingPlayers[netId] (LoadingScreenPlayer é MonoBehaviour → Component).
@@ -64,29 +90,41 @@ internal class ClassDetailLoadingPatch : ModulePatch
                 return;
             }
 
-            if (row.GetComponent<LoadingClassHover>() != null)
+            // (a) 057: identidade SEM hover (tint-only — PA-01-03): nickname na cor da classe.
+            //     Campo público `Nickname` do LoadingScreenPlayer via reflection (zero tipos FIKA no IL).
+            //     ref: fika-plugin/Fika.Core/UI/Custom/LoadingScreenPlayer.cs:7
+            if (AccessTools.Field(row.GetType(), "Nickname")?.GetValue(row) is TextMeshProUGUI nickTmp)
             {
-                return;   // idempotência (re-init do loading na mesma sessão)
+                ClassIdentityView.ApplyGradient(nickTmp, id.NameColor, Color.white);   // ref: ClassIdentityView.cs:39
             }
 
-            row.gameObject.AddComponent<LoadingClassHover>();
+            // (b) popover no hover, parametrizado pela identidade DESTE player (idempotente: reusa o componente).
+            var hover = row.GetComponent<LoadingClassHover>();
+            if (hover == null)
+            {
+                hover = row.gameObject.AddComponent<LoadingClassHover>();
+            }
+
+            hover.Identity = id;
         }
         catch (Exception ex)
         {
-            Plugin.Log?.LogError($"[CustomClasses] (055) class detail loading: {ex.Message}");
+            Plugin.Log?.LogError($"[CustomClasses] (057) class detail loading: {ex.Message}");
         }
     }
 }
 
 /// <summary>
-///     (055) Na linha do player local, monta e mostra o painel de detalhe da classe. PA-01-01: **auto-visível**
-///     no OnEnable (a tela de carregamento é transiente e pode não ter EventSystem/raycast ativo — não dependemos
-///     de hover). O hover/click é um toggle OPCIONAL (só atua se houver GraphicRaycaster + EventSystem).
-///     PA-01-02: a fonte vem de um TMP da própria linha (Nickname/Percentage).
+///     (055/057) Na linha de UM player, mostra no hover o painel de detalhe da classe DELE (<see cref="Identity"/>,
+///     setada pelo Postfix — 057). Hover-only (o painel auto-visível cobria o carrossel do deploy); só atua se
+///     houver GraphicRaycaster + EventSystem. PA-01-02 (055): a fonte vem de um TMP da própria linha.
 /// </summary>
 internal sealed class LoadingClassHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     private GameObject? _panel;
+
+    /// <summary>057 — identidade da classe DESTE player (setada pelo Postfix; re-setada a cada AddPlayer).</summary>
+    internal ClassIdentities.Identity? Identity;
 
     private void Awake() => EnsureRaycast();   // garante que o hover pegue em qualquer ponto da linha do player
 
@@ -125,7 +163,8 @@ internal sealed class LoadingClassHover : MonoBehaviour, IPointerEnterHandler, I
             if (_panel != null)
             {
                 ApplyScale();   // lê o F12 a cada hover → ajuste "live" sem reiniciar
-                PerksPanelView.Refresh(_panel);
+                PerksPanelView.Refresh(_panel, Identity ?? ClassIdentities.Local());   // 057: classe DESTE player
+                DisableRaycast();   // PA-01-11: DEPOIS do Refresh — o rebuild de cards cria Graphics novos
                 _panel.SetActive(true);
             }
         }
@@ -154,6 +193,24 @@ internal sealed class LoadingClassHover : MonoBehaviour, IPointerEnterHandler, I
         rt.anchorMin = rt.anchorMax = new Vector2(1f, 0.5f);
         rt.pivot = new Vector2(1f, 0.5f);
         rt.anchoredPosition = new Vector2(-60f, 0f);
+    }
+
+    /// <summary>
+    ///     057 PA-01-11: popover é SÓ-exibição no loading — raycast desligado no painel inteiro pra não roubar
+    ///     o hover de outra linha (roubo → OnPointerExit → esconde → flicker). CardHover deixa de atuar aqui (ok).
+    ///     Chamado após CADA Refresh (o rebuild de cards cria Graphics novos raycast-target).
+    /// </summary>
+    private void DisableRaycast()
+    {
+        if (_panel == null)
+        {
+            return;
+        }
+
+        foreach (var g in _panel.GetComponentsInChildren<Graphic>(true))
+        {
+            g.raycastTarget = false;
+        }
     }
 
     /// <summary>
