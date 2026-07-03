@@ -25,7 +25,8 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 
 - 🔴 [P-10.1] (aberta 2026-06-23) **Validação in-game 050.0–050.4** (~21 efeitos) + 047 — vários **gates de runtime** que o compile não pega (`method_67` som, `method_12` fôlego, injeção `_aimingSpeed`, getter `TotalErgonomics`, `IPlayerOwner.iPlayer`, weapClass vs DB). Regra `feedback_spt_validation`. (Supersede P-8.1.)
 - 🟡 [P-10.2] (aberta 2026-06-23) **Deferrals do 050:** Combat Medic (transpiler em `DoMedEffect` + lock de cirurgia runtime), Quick Hands (buff `SearchDouble` server-side), Iron Lungs sway (`BreathEffector`). Detalhe em 050…-05-asbuild.
-- 🟡 [P-10.3] (aberta 2026-06-23) **Redesign restante (backlog):** 051 (zona stances — coordenar stances mod), 057 (identidade coop — toca `modded/Server`), 053/055/056 (UI), 054 (propagar rename `--force-config`), 052 (validação final). (Supersede P-8.2.)
+- 🟡 [P-10.3] (aberta 2026-06-23, atualizada 2026-07-03) **Redesign restante (backlog):** 051 (zona stances — coordenar stances mod), 054 (propagar rename `--force-config`), 052 (validação final), 058 (masteries — specs prontas, aguarda validação V1/V2/V4). 053/055/056/059 e **057 entregues** (ver P-11.1). (Supersede P-8.2.)
+- 🟡 [P-11.1] (aberta 2026-07-03) **Validação in-game da leva de UI + 057** — checklist no `HANDOFF.md`: 059 cards-por-efeito + ícones `BuffIdSprites` + chips ✓/✗ · 055 hover + zoom 0.75 · aba CLASS F12 live (calibrar offset) · 056 calibrar X/Y do peso · **057 em coop 2+ players COMO CLIENTE** (classe certa por linha, vanilla sem identidade, scav local no-op, fallback sem rota = 1 warn, trânsito). ⚠️ 057 exige **restart do SPT.Server** (rota nova; DLL instalada). Após calibrar: fixar defaults dos F12.
 - 🟢 [P-8.3] (aberta 2026-06-21) **Badge "Not registered" no editor** — server registra a edition por `displayName.pt` mas o editor chaveia por `name` en. Cosmético; corrigir se incomodar.
 - 🟡 [P-8.4] (aberta 2026-06-21) **Gear + identidade visual de furtivo/tanque são placeholder** (loadout/`iconFile` clonados do furtivo/tático) — curar (ícones próprios, gear definitivo).
 - 🔴 [P-7.9] (aberta 2026-06-12) **PUSH dos 15 commits do épico** + QA visual no viewer (build-gate ≠ correção: matriz em células estreitas 032, dashboard em viewport estreito 033, comparação A×B 036).
@@ -332,3 +333,48 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 - Mapeamento pt-BR → `pt` + inclusão em `ServerSupportedLocales`.
 - Capacidade do stash (lição de overflow do RZ).
 
+
+### 2026-07-03 ~20:40 (GMT-3) — Sessão 11: UI perks (059/055/053) + 057 identidade per-player ponta a ponta (/g-autodev)
+
+Branch `feat/053-perks-property-model` (nada em push). Duas metades:
+
+**Metade 1 — fixes de UI direto (retomada do HANDOFF.md):**
+- 059 CLASS#3 (`2b42db9`): **1 card por efeito** (decisão do usuário) + descoberta-chave: os quadradinhos da tela
+  SKILLS são `EFT.UI.BuffIcon` com sprite POR EFEITO em `StaticIcons.BuffIdSprites[EBuffId]` (irmão do
+  `SkillIdSprites`) — `PerkLine` ganhou `EBuffId Icon` mapeado nas 18 entradas.
+- 055 (`b568343`): zoom-out do popover do loading — escala 0.75 com rect compensado (mesma pegada ~600×460,
+  +33% de espaço interno); F12 `Class Detail — Loading panel scale` lido A CADA hover (live).
+- 059 CLASS#1 (`7714159`): F12 `Class Tab — X offset` virou **live** (`RepositionClassTab` a cada Show +
+  `SettingChanged`) — elimina a dependência do log `[053-tabs]`; usuário calibra e passa o valor.
+
+**Metade 2 — item 057 completo via /g-autodev (spec→review→spec-tech→review-tech→code-mod→code-review→apply):**
+- Decisões do usuário (AskUserQuestion): escopo = **só o loading FIKA** (lobby/nametag/chat = futuro);
+  `modded/Server` liberado.
+- **Descoberta que mudou o design:** no loading o client só tem `netId+nickname` (perfis remotos indisponíveis)
+  → hipótese `GameVersion`-no-client do backlog DESCARTADA; mecanismo = rota server
+  `/customclasses/class-identities` (nickname→classe de todos os perfis; `ProfileInfo.Edition` é a chave direta
+  do `ClassVisualRegistry` → matching en/pt vira não-problema).
+- Reviews por agentes adversariais de contexto limpo: review técnica 11 pontos (1 🔴: **SCAV herda classe do
+  PMC** — FIKA usa sempre o nickname do PMC → gate local `FikaBackendUtils.IsScav` via reflection + limitação
+  remota documentada/emendada) · code review 9 achados (0 🔴; aplicados 8 — warn-once, HashSet estático
+  write-only removido do router, tint pulado sem `nameColor`, guard de row velha, etc.).
+- Código (`9c912a9` + `5538dab`): router+DTOs server (arquivos NOVOS, zero merge-risk), `ClassIdentities`
+  client (refetch por tela de loading), `PerksPanelView.Refresh(panel, Identity?)` parametrizado com
+  idempotência per-panel (`PanelState` substitui o static — N painéis no loading), patch generalizado
+  (tint do nickname + popover per-player, raycast do popover OFF pós-Refresh).
+- **Incidente de sessão:** o working tree principal foi trocado pra `feat/design-system-trl` pela sessão
+  paralela DURANTE o trabalho → 057 seguiu em **git worktree** `../tarkov-spt-4.0-wt-057` (mesma branch;
+  deps gitignored replicadas: `Client/References/`, `.spt-path`). Lição: worktree é a saída limpa pra
+  multi-sessão no mesmo repo.
+- Grafo regenerado 2× (`e3d1412` na main-tree; worktree pós-057). Backlog 057 ⚪→🟡; HANDOFF.md atualizado.
+
+**Lições:**
+- `StaticIcons.BuffIdSprites` (EBuffId→Sprite) é a fonte dos ícones por efeito da tela SKILLS — reusável em
+  qualquer UI de buff custom (`BuffIcon.smethod_0` é a ref).
+- Tela de loading FIKA: identidade de players remotos SÓ via server (nickname é a única chave que trafega);
+  o nickname é SEMPRE o do PMC (mesmo em raid scav) — `MatchmakerAcceptScreen_Show_Patch.cs:36`.
+- `ApplyGradient` sobrescreve a cor do TMP sem revert — nunca aplicar com `nameColor` null em UI de terceiro.
+- Static mutável em router SPT (Kestrel) = requests concorrentes; evitar ou lockar.
+
+**Pendências:** P-11.1 (validação in-game da leva + 057; restart do SPT.Server) · defaults dos F12 após
+calibração do usuário · próximo da fila: 058 (V1/V2/V4) ou 051 (decisão stances).
