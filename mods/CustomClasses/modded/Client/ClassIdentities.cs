@@ -23,6 +23,7 @@ internal static class ClassIdentities
 
     private static readonly Dictionary<string, Identity> ByNickname = new(StringComparer.Ordinal);
     private static bool _loaded;
+    private static bool _warnedUnavailable;   // ref: CR-01-01 — NÃO é limpa pelo Reset: 1 aviso por sessão (critério da 01-spec)
 
     /// <summary>Resolve a identidade da classe de um player pelo nickname (mapa do server). False se vanilla/desconhecido.</summary>
     public static bool TryResolve(string? nickname, out Identity identity)
@@ -89,7 +90,16 @@ internal static class ClassIdentities
         catch (Exception ex)
         {
             // rota ausente (mod server antigo) ou erro de rede → degrada p/ identidade só do local (critério da 01-spec).
-            Plugin.Log?.LogWarning($"[CustomClasses] (057) class-identities indisponível — identidade só local: {ex.Message}");
+            // ref: CR-01-01 — o Reset() por raid re-dispara o fetch; o WARNING sai 1× por sessão (resto em Debug).
+            if (!_warnedUnavailable)
+            {
+                _warnedUnavailable = true;
+                Plugin.Log?.LogWarning($"[CustomClasses] (057) class-identities indisponível — identidade só local: {ex.Message}");
+            }
+            else
+            {
+                Plugin.Log?.LogDebug($"[CustomClasses] (057) class-identities ainda indisponível: {ex.Message}");
+            }
         }
     }
 

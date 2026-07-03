@@ -63,8 +63,9 @@ demais superfícies coop (painel de ready do lobby, nametag in-raid, chat) ficam
 
 - [ ] **Idiomas mistos no grupo:** perfil criado com o jogo em pt × en grava nomes diferentes — o matching aceita
       os dois; classes em que o nome en == pt não podem gerar resolução duplicada/ambígua.
-- [ ] **Perfil "órfão":** classe renomeada ou apagada no editor web depois da criação do perfil → player sem
-      identidade, sem crash, log informativo 1×.
+- [ ] **Perfil "órfão"** (emendado no code-review 01, CR-01-03): classe renomeada ou apagada no editor web
+      depois da criação do perfil → player sem identidade, sem crash, **sem log** (o server não distingue edition
+      órfã de edition vanilla legítima; comportamento seguro — diagnóstico via editor web quando necessário).
 - [ ] **Dois players com a mesma classe:** ambos resolvem e mostram o popover correto (cache por classe, não por
       player).
 - [ ] **Late join/reconnect:** linha de player adicionada tardiamente à tela de carregamento também ganha o hover.

@@ -46,7 +46,16 @@
 
 > Atualizado por `/apply-code-review` a cada rodada. Cada entrada lista os achados aplicados/rejeitados/pulados naquela rodada e os arquivos tocados.
 
-(vazio inicialmente — preenchido por `/apply-code-review`)
+### 2026-07-03 — Rodada 01 ([04-code-review-01](057-class-identity-coop-04-code-review-01.md))
+
+- **Aplicados (8):** CR-01-01 (`_warnedUnavailable` — warn 1×/sessão, resto Debug) · CR-01-02+03
+  (`SeenUnknownEditions` REMOVIDO — thread-hazard write-only; corner órfão da 01-spec emendado p/ "sem log") ·
+  CR-01-04 (tint pulado quando `nameColor` null — preserva estilo FIKA) · CR-01-05 (guard `nickTmp.text !=
+  nickname` espelha early-return do FIKA) · CR-01-06 (sem null-forgiving no fallback) · CR-01-07
+  (`Show()` retorna se `Identity == null` — nunca cai pro local) · CR-01-08 (`_nicknameField` cacheado).
+- **Rejeitado (1):** CR-01-09 (retenção do `_lastLoadingScreen` — intencional, anotada no código).
+- **Arquivos:** `ClassIdentities.cs`, `ClassIdentitiesRouter.cs`, `ClassDetailLoadingPatch.cs`,
+  `057-class-identity-coop-01-spec.md` (emenda).
 
 ## Histórico
 

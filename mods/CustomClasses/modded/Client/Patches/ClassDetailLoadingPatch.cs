@@ -31,7 +31,11 @@ internal class ClassDetailLoadingPatch : ModulePatch
         BackendUtilsType != null ? AccessTools.PropertyGetter(BackendUtilsType, "IsScav") : null;
 
     // 057 PA-01-04: instância da tela mudou (nova raid/loading) → refetch do mapa (perfis novos sem restart).
+    // ref: CR-01-09 — retenção do shell destruído entre raids é intencional (só p/ ReferenceEquals; sem recursos Unity).
     private static object? _lastLoadingScreen;
+
+    // ref: CR-01-08 — FieldInfo do TMP `Nickname` cacheado 1× (o tipo da row é sempre LoadingScreenPlayer).
+    private static FieldInfo? _nicknameField;
 
     protected override MethodBase GetTargetMethod()
     {
@@ -72,11 +76,13 @@ internal class ClassDetailLoadingPatch : ModulePatch
                     return;
                 }
 
-                id = ClassIdentities.Local()!;
-                if (id == null)
+                var local = ClassIdentities.Local();   // ref: CR-01-06 — sem null-forgiving
+                if (local == null)
                 {
                     return;   // local vanilla → linha intocada (critério da 01-spec)
                 }
+
+                id = local;
             }
 
             // GameObject da linha via _loadingPlayers[netId] (LoadingScreenPlayer é MonoBehaviour → Component).
@@ -90,10 +96,22 @@ internal class ClassDetailLoadingPatch : ModulePatch
                 return;
             }
 
+            // Campo público `Nickname` do LoadingScreenPlayer via reflection (zero tipos FIKA no IL).
+            // ref: fika-plugin/Fika.Core/UI/Custom/LoadingScreenPlayer.cs:7 · CR-01-08 (FieldInfo cacheado)
+            _nicknameField ??= AccessTools.Field(row.GetType(), "Nickname");
+            var nickTmp = _nicknameField?.GetValue(row) as TextMeshProUGUI;
+
+            // ref: CR-01-05 — espelha o early-return do AddPlayer do FIKA (LoadingScreenUI.cs:99-101): netId já
+            // existente → row VELHA com outro nickname; não aplicar a identidade de B na linha de A.
+            if (nickTmp != null && !string.Equals(nickTmp.text, nickname, StringComparison.Ordinal))
+            {
+                return;
+            }
+
             // (a) 057: identidade SEM hover (tint-only — PA-01-03): nickname na cor da classe.
-            //     Campo público `Nickname` do LoadingScreenPlayer via reflection (zero tipos FIKA no IL).
-            //     ref: fika-plugin/Fika.Core/UI/Custom/LoadingScreenPlayer.cs:7
-            if (AccessTools.Field(row.GetType(), "Nickname")?.GetValue(row) is TextMeshProUGUI nickTmp)
+            //     ref: CR-01-04 — classe SEM nameColor → não pinta (ApplyGradient pintaria branco por cima do
+            //     estilo FIKA, sem revert); a identidade dessas classes fica só no popover.
+            if (nickTmp != null && !string.IsNullOrWhiteSpace(id.NameColor))
             {
                 ClassIdentityView.ApplyGradient(nickTmp, id.NameColor, Color.white);   // ref: ClassIdentityView.cs:39
             }
@@ -159,11 +177,16 @@ internal sealed class LoadingClassHover : MonoBehaviour, IPointerEnterHandler, I
     {
         try
         {
+            if (Identity == null)
+            {
+                return;   // ref: CR-01-07 — sem identidade → não mostrar (nunca cair pro LOCAL numa linha remota)
+            }
+
             Ensure();
             if (_panel != null)
             {
                 ApplyScale();   // lê o F12 a cada hover → ajuste "live" sem reiniciar
-                PerksPanelView.Refresh(_panel, Identity ?? ClassIdentities.Local());   // 057: classe DESTE player
+                PerksPanelView.Refresh(_panel, Identity);   // 057: classe DESTE player
                 DisableRaycast();   // PA-01-11: DEPOIS do Refresh — o rebuild de cards cria Graphics novos
                 _panel.SetActive(true);
             }

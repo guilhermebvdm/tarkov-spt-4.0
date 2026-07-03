@@ -15,10 +15,6 @@ namespace CustomClasses;
 [Injectable]
 public class ClassIdentitiesRouter : StaticRouter
 {
-    // PA-01-09: editions fora do registry já vistas (vanilla legítima OU classe renomeada/apagada — indistinguíveis
-    // aqui). Acumuladas 1× por edition, nunca por request; diagnóstico via inspeção, sem logger no molde do router.
-    private static readonly HashSet<string> SeenUnknownEditions = new(StringComparer.Ordinal);
-
     public ClassIdentitiesRouter(JsonUtil jsonUtil, ClassVisualRegistry visualRegistry, SaveServer saveServer)
         : base(jsonUtil, GetRoutes(jsonUtil, visualRegistry, saveServer))
     {
@@ -48,8 +44,9 @@ public class ClassIdentitiesRouter : StaticRouter
                         var visual = visualRegistry.Get(edition!);   // ref: ClassVisualRegistry.cs:29
                         if (visual == null)
                         {
-                            SeenUnknownEditions.Add(edition!);   // PA-01-09
-                            continue;   // edition vanilla ou órfã → sem identidade (corner da 01-spec)
+                            // ref: CR-01-02/03 — edition vanilla ou órfã → sem identidade, SEM log (server não
+                            // distingue as duas; comportamento seguro; corner da 01-spec emendado nesta decisão).
+                            continue;
                         }
 
                         if (!seen.Add(nickname!))
