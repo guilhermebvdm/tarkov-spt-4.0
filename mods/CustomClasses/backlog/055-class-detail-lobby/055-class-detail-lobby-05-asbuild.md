@@ -38,7 +38,10 @@
 
 ## Mudanças posteriores
 
-(vazio inicialmente — preenchido por `/apply-code-review`)
+| Data | Origem | Mudança |
+| --- | --- | --- |
+| 2026-07-03 | code-review 02 · CR-02-01 (F-3) | `LoadingClassHover`: `Show()` com try/catch cobrindo `OnEnable` **e** `OnPointerEnter` (Build/Ensure protegidos). |
+| 2026-07-03 | code-review 02 · CR-02-02 (F-9) | `OnDisable` esconde o painel (linha desativada sem destruir). DLL 106496 bytes, compile 0/0. |
 
 ## Histórico
 

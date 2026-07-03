@@ -87,13 +87,23 @@ internal sealed class LoadingClassHover : MonoBehaviour, IPointerEnterHandler, I
 {
     private GameObject? _panel;
 
-    private void OnEnable()
+    private void OnEnable() => Show();   // auto-visível (PA-01-01)
+
+    /// <summary>Monta (lazy) e exibe o painel — TODO o caminho protegido (F-3: OnPointerEnter fica fora do try/catch do Postfix).</summary>
+    private void Show()
     {
-        Ensure();
-        if (_panel != null)
+        try
         {
-            PerksPanelView.Refresh(_panel);
-            _panel.SetActive(true);   // auto-visível (default robusto)
+            Ensure();
+            if (_panel != null)
+            {
+                PerksPanelView.Refresh(_panel);
+                _panel.SetActive(true);
+            }
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log?.LogError($"[CustomClasses] (055) show detail: {ex.Message}");
         }
     }
 
@@ -119,19 +129,20 @@ internal sealed class LoadingClassHover : MonoBehaviour, IPointerEnterHandler, I
     }
 
     // hover = toggle OPCIONAL (refinamento; só dispara se houver GraphicRaycaster + EventSystem).
-    public void OnPointerEnter(PointerEventData eventData)
-    {
-        Ensure();
-        if (_panel != null)
-        {
-            PerksPanelView.Refresh(_panel);
-            _panel.SetActive(true);
-        }
-    }
+    public void OnPointerEnter(PointerEventData eventData) => Show();
 
     public void OnPointerExit(PointerEventData eventData)
     {
         // auto-visível: mantém aberto durante o loading (decisão de gate).
+    }
+
+    // F-9: se a linha for desativada (sem destruir), esconde o painel junto (ele é filho do Canvas, não da linha).
+    private void OnDisable()
+    {
+        if (_panel != null)
+        {
+            _panel.SetActive(false);
+        }
     }
 
     private void OnDestroy()
