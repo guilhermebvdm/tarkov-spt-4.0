@@ -44,6 +44,19 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 | `Weight Marker — Y offset` | Marcador do peso — offset Y | float | `0` | Ajuste vertical (px) do marcador `▲ +X%` no peso (aba Health). Positivo = para cima. Faixa −600..600. (item 056) |
 | `Class Detail — Loading panel scale` | Popover do loading — escala | float | `0.75` | Escala (zoom-out) do popover de classe no deploy/loading (0.75 = 75%). Mesma área na tela, conteúdo menor → mais espaço pros cards. Faixa 0.5..1.0. Lido a cada hover (live). (item 055) |
 
+## Seção `Weapon Mastery` (item 058)
+
+> Dá vida às maestrias inertes da tela SKILLS. XP: só o **underbarrel** (SMG/LMG/Launcher sobem no vanilla —
+> anti-XP-duplo); efeito por nível vale pras categorias alcançáveis com a arma na mão (HMG deferida — só existe
+> estacionária de mapa).
+
+| Nome (EN) | Tradução pt-BR | Tipo | Padrão | Tooltip (pt-BR) |
+|---|---|---|---|---|
+| `Weapon Mastery — Enabled` | Maestria de armas — ativa | bool | `true` | Ativa XP por disparo do underbarrel (GP-25/M203) + bônus por nível de SMG/LMG/Launcher/Underbarrel. |
+| `Underbarrel XP per shot` | XP do underbarrel por disparo | float | `0.1` | XP de Underbarrel Launchers por DISPARO (0.1 = paridade com o XP por acerto vanilla). Faixa 0..1. |
+| `Recoil bonus per level` | Bônus de recuo por nível | float | `0.004` | Redução de recuo por nível da maestria da arma em mãos (−0.4%/nível; paridade `WeaponSkillRecoilBonusPerLevel`). Faixa 0..0.02. |
+| `Ergo bonus per level` | Bônus de ergo por nível | float | `0.002` | Aumento de ergonomia por nível da maestria da arma em mãos (+0.2%/nível). Faixa 0..0.02. |
+
 ## Histórico
 
 | Data | Alteração |
@@ -53,3 +66,4 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 | 2026-07-02 | Item 055 — `Class Detail on Loading Screen` (detalhe da classe no loading da raid, FIKA). |
 | 2026-07-03 | Item 056 — `Weight Marker — X/Y offset` (posicionar o marcador ▲ +X% do peso). |
 | 2026-07-03 | Item 055 — `Class Detail — Loading panel scale` (zoom-out do popover; faltava documentar — pego na varredura de pendências). |
+| 2026-07-04 | Item 058 — seção `Weapon Mastery` (XP do underbarrel por disparo + bônus por nível de recuo/ergo). |

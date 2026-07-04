@@ -90,13 +90,18 @@ netId+nickname) + `ClassIdentities` client (refetch por tela de loading) + popov
 - Limitação documentada: scav REMOTO pode exibir a classe do PMC do dono (nickname é sempre o do PMC no FIKA).
 - Implementado no worktree `tarkov-spt-4.0-wt-057` (tree principal estava na branch da sessão do editor).
 
-### 7. 🟢 058 — rodar validação prévia in-game (destrava o code-mod)
-Protocolo V1–V4 na [`058-...-01-spec.md`](backlog/058-ativar-masteries-inertes/058-ativar-masteries-inertes-01-spec.md):
-V1 (SMG/LMG já sobem?) · V2 (persiste entre raids? — se não, precisa server) · V4 (underbarrel detectável? HMG≠LMG?).
-Sem esses resultados, codar a mecânica é chute. Assunção registrada: coexistir com Bunker.
+### 7. 🟡 058 — IMPLEMENTADO 2026-07-04 (gate V rodado + code-mod completo; validar in-game)
+Gate V fechado com o usuário (perfil zerado): SMG/LMG/GL sobem VANILLA → anti-XP-duplo; **underbarrel = única
+morta** → XP POR DISPARO (Postfix em `FirearmController.method_57`, Player.cs:14231) × fator de classe + efeito
+por nível (recuo/ergo — Prefix/Postfix novos nos alvos do 050) pras categorias alcançáveis; **HMG deferida**
+(só existe estacionária). F12: seção `Weapon Mastery` (Enabled · XP 0.1/disparo · recuo 0.004/nível · ergo 0.002/nível).
+**Validar:** GP-25 sobe a barra de Underbarrel ao vivo → extract persiste (V3 mod-side!) → `Recoil str` no overlay
+052 cai com nível ≥1 → sem XP duplo nas 3 vanilla. Checklist completo no [05-asbuild](backlog/058-ativar-masteries-inertes/058-ativar-masteries-inertes-05-asbuild.md).
 
-### 8. 🟢 051 — decisão de design (stances zone)
-Iron Lungs (braço-ADS) + Bunker (arm stamina) caem na zona do stances mod. Decidir **(a) coordenar** (mexer nos 2 mods) vs **(b) trocar o lever** (fora da zona). Só kickoff, sem spec. Detalhe já explicado ao usuário nesta sessão.
+### 8. 🟢 051 — decisão (a) TRAVADA (2026-07-04) + spec funcional criada
+Usuário escolheu **(a) coordenar**: hook de composição no `StaminaController` do stances (soft-detect, análise no
+kickoff). [01-spec](backlog/051-stances-zone-levers/051-stances-zone-levers-01-spec.md) pronta. Próximo:
+review-spec → spec-tech → code-mod (⚠️ toca `mods/stancesAndCameraPositionSPT4.0.11` — coordenar com a sessão do stances).
 
 ## Arquitetura / arquivos-chave (client)
 

@@ -68,6 +68,12 @@ internal static class PerksConfig
     internal static ConfigEntry<bool>? IronLungsEnabled;
     internal static ConfigEntry<float>? IronLungsBreathDrain;
 
+    // 🎖️ Weapon Mastery (058) — maestrias inertes: XP do underbarrel + efeito por nível (SMG/LMG/Launcher/underbarrel)
+    internal static ConfigEntry<bool>? WeaponMasteryEnabled;
+    internal static ConfigEntry<float>? MasteryXpPerShot;
+    internal static ConfigEntry<float>? MasteryRecoilPerLevel;
+    internal static ConfigEntry<float>? MasteryErgoPerLevel;
+
     // 🔍 Diagnóstico (052) — overlay "super espião" das propriedades afetadas
     internal static ConfigEntry<bool>? DiagnosticsEnabled;
 
@@ -295,6 +301,25 @@ internal static class PerksConfig
             new ConfigDescription(
                 "Multiplicador do TEMPO de ADS na janela (0.80 = 20% mais rápido). / ADS time multiplier.",
                 new AcceptableValueRange<float>(0.3f, 1f)));
+
+        WeaponMasteryEnabled = config.Bind(
+            "Weapon Mastery", "Weapon Mastery — Enabled", true,
+            "058: dá vida às maestrias inertes — XP por disparo do underbarrel (GP-25/M203) + bônus por nível de SMG/LMG/Launcher/Underbarrel. / Enables inert weapon masteries: underbarrel XP per shot + per-level recoil/ergo bonuses.");
+        MasteryXpPerShot = config.Bind(
+            "Weapon Mastery", "Underbarrel XP per shot", 0.1f,
+            new ConfigDescription(
+                "XP de Underbarrel Launchers por DISPARO do GP-25/M203 (0.1 = paridade com o XP por acerto vanilla). / Underbarrel Launchers XP per shot fired.",
+                new AcceptableValueRange<float>(0f, 1f)));
+        MasteryRecoilPerLevel = config.Bind(
+            "Weapon Mastery", "Recoil bonus per level", 0.004f,
+            new ConfigDescription(
+                "Redução de recuo por nível da maestria da arma em mãos (0.004 = -0.4%/nível; paridade WeaponSkillRecoilBonusPerLevel). / Recoil reduction per mastery level.",
+                new AcceptableValueRange<float>(0f, 0.02f)));
+        MasteryErgoPerLevel = config.Bind(
+            "Weapon Mastery", "Ergo bonus per level", 0.002f,
+            new ConfigDescription(
+                "Aumento de ergonomia por nível da maestria da arma em mãos (0.002 = +0.2%/nível). / Ergonomics increase per mastery level.",
+                new AcceptableValueRange<float>(0f, 0.02f)));
 
         DiagnosticsEnabled = config.Bind(
             "Diagnostics", "Perk Diagnostics overlay", false,

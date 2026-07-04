@@ -122,6 +122,9 @@ public class Plugin : BaseUnityPlugin
         new WeightMarkerPatch().Enable();                   // (056) marcador "▲ +X%" no peso (aba Health) — atribui ao Pack Mule
         new RaidPerksNotificationPatch().Enable();          // (050) notificação de perks/drawbacks no início da raid
         new NotificationDurationPatch().Enable();           // (fix 2026-07-03) notificação de perks por 10s (Infinite + hide agendado)
+        new UnderbarrelMasteryXpPatch().Enable();           // (058) XP de Underbarrel Launchers por disparo do GP-25/M203
+        new WeaponMasteryRecoilPatch().Enable();            // (058) recuo × (1 − rec/nível) pela maestria da arma em mãos
+        new WeaponMasteryErgoPatch().Enable();              // (058) ergo × (1 + ergo/nível) pela maestria da arma em mãos
         // (050.1 fix 2026-06-24) MaxSpeedPatch/SprintSpeedPatch (getters) REMOVIDOS:
         //   - MaxSpeed é só TETO/denominador da razão RelativeSpeed = CharSpeed/MaxSpeed → aplicar no getter E no
         //     SetCharacterMovementSpeed CANCELAVA o efeito na razão. Agora só o driver real é patchado (abaixo).
