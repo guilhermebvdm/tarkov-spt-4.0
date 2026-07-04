@@ -34,7 +34,7 @@ Usos permitidos de `--trl-brand` (`#ff0000`), lista exaustiva:
 ### R2. Geometria
 
 - `--trl-radius: 0` — **sempre**. Nenhum componente redondo (exceção: dots de status e radio, círculos por natureza).
-- Bordas: `1px` com os tokens `--trl-edge*` (tan translúcido). Nunca cinza neutro (`#444`, `#555`).
+- Bordas: `1px` **neutras** via `--trl-edge*` (a estrutura não é dourada). A moldura tan é `--trl-edge-accent`, reservada a elementos de accent (tag, badge). Nunca hex solto (`#444`).
 - Barra de acento lateral: `2px` (`--trl-accent-bar-w`) — nav ativa, cards, alerts, toasts.
 - **Chamfer** (`--trl-chamfer`): só em superfícies **sólidas sem borda** (`.trl-btn--primary`, `.trl-btn--danger`). `clip-path` corta a própria borda de 1px do elemento — chanfro em elemento com borda exige pseudo-elemento/gradiente e não faz parte do v1.
 
@@ -46,6 +46,7 @@ Usos permitidos de `--trl-brand` (`#ff0000`), lista exaustiva:
 
 ### R4. Cor e tokens
 
+- Labels de chrome (título de painel, label de field, chave de kv, thead) usam `--trl-fg-label` (neutro) — gold em label é defeito; gold marca **significado** (ativo, selecionado, primário, assinaturas).
 - Produto consome **apenas tokens semânticos** (camada 2: `--trl-bg-*`, `--trl-fg-*`, `--trl-accent*`, `--trl-danger*`, `--trl-edge*`, `--trl-wash-*`). Primitivos (camada 1: ramps `tan-N`/`red-N`, surfaces) são internos do DS.
 - Hover/seleção em CSS custom: usar `--trl-bg-hover`/`--trl-bg-active` — são os mesmos valores que os componentes do DS usam, por construção.
 - **Hex hardcoded em editor é defeito de review.**
@@ -55,13 +56,13 @@ Usos permitidos de `--trl-brand` (`#ff0000`), lista exaustiva:
 
 | Par | Razão | Veredito |
 |---|---|---|
-| `ink` sobre qualquer superfície | 11.5–15.1:1 | ✓ AAA — corpo padrão |
-| `ink-muted` sobre qualquer superfície | 4.9–6.4:1 | ✓ AA — secundário padrão |
-| `tan-300` sobre qualquer superfície | 7.0–9.2:1 | ✓ AA+ |
-| `red-soft` sobre qualquer superfície | 4.6–6.1:1 | ✓ AA — único vermelho para texto |
-| `fg-on-accent` sobre `tan-300` / branco sobre `red-500` | 9.2 / 4.9:1 | ✓ AA |
-| `tan-500` (dim) | 5.1 ground · 4.6 surface-1 · **3.9–4.2 surface-2/3** | ◇ só labels uppercase ≥11px; nunca conteúdo essencial em superfície elevada |
-| `ink-faint` | 2.7–3.6:1 | ◇ decorativo (captions, placeholders, separadores) |
+| `ink` sobre qualquer superfície | 11.7–15.0:1 | ✓ AAA — corpo padrão |
+| `ink-muted` sobre qualquer superfície | 5.2–6.6:1 | ✓ AA — secundário + labels de chrome (`--trl-fg-label`) |
+| `tan-300` sobre qualquer superfície | 7.1–9.1:1 | ✓ AA+ |
+| `red-soft` sobre qualquer superfície | 4.7–6.0:1 | ✓ AA — único vermelho para texto |
+| `fg-on-accent` sobre `tan-300` / branco sobre `red-500` | 9.1 / 4.9:1 | ✓ AA |
+| `tan-500` (dim) | 5.0 ground · 4.7 surface-1 · **3.9–4.3 surface-2/3** | ◇ só labels uppercase ≥11px; nunca conteúdo essencial em superfície elevada |
+| `ink-faint` | 2.9–3.7:1 | ◇ decorativo (captions, placeholders, separadores) |
 
 - Critério: ≥4.5:1 texto normal; ≥3:1 texto ≥18px/bold e componentes de UI.
 - `:focus-visible` vem de graça no escopo `.trl-app` (ring tan de 2 camadas) — não remover outline sem substituto.
@@ -110,7 +111,7 @@ O painel que edita dados troca o dot conforme o estado:
 
 ### Página de formulário
 
-`trl-panel--flush` + `trl-screen-bar` no topo, `trl-form-grid` no body (campos `trl-field` com label/hint/error; `is-invalid` no field marca o input), ações no rodapé alinhadas à direita: ghost à esquerda do primário.
+`trl-panel` (**sem `--flush`** — formulário precisa do respiro do `__body`) + `trl-screen-bar` no topo, `trl-form-grid` no body (campos `trl-field` com label/hint/error; `is-invalid` no field marca o input), ações no rodapé alinhadas à direita: ghost à esquerda do primário.
 
 ### Página de tabela de dados
 
@@ -194,4 +195,5 @@ O adapter oficial (`bridge/trl-mudblazor.css`, mapeando `--mud-palette-*` → to
 | Data | Autor | Alteração |
 |---|---|---|
 | 2026-07-03 | Guilherme | Criação (v1.0.0) — regras R1–R7 + receitas iniciais |
+| 2026-07-03 | Guilherme | Recalibração "grafite + chrome neutro": base neutra, edges neutras (+`--trl-edge-accent`), labels via `--trl-fg-label`; R2/R4/R5 atualizadas |
 | 2026-07-03 | Guilherme | Review por lentes: R6 (px por decisão) e R8 (i18n) inseridas — Densidade→R7, Assets→R9; receita "Gráficos (dataviz)" com tokens `--trl-viz-*` validados; heat exige valor visível |

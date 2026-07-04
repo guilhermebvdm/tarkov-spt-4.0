@@ -7,7 +7,7 @@
 
 ---
 
-Linguagem visual padrão dos **editores web dos mods TRL** (Tarkov Red Line · SPT 4.0 · Fika Coop): superfícies dark militares, tipografia **Bender** (a fonte oficial do EFT), accent **tan/gold** de trabalho e **vermelho** disciplinado como cor de marca (laser da logo).
+Linguagem visual padrão dos **editores web dos mods TRL** (Tarkov Red Line · SPT 4.0 · Fika Coop): base **grafite neutra** (como a UI real do EFT), tipografia **Bender** (a fonte oficial do jogo), **tan/gold** como accent de significado e **vermelho** disciplinado como cor de marca (laser da logo).
 
 **Veja tudo vivo:** abra [`design-system.html`](./design-system.html) no browser (funciona via `file://`).
 

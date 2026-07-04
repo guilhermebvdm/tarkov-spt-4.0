@@ -1,6 +1,6 @@
 # design-system/ — contexto para agentes
 
-**TRL Design System v1.0.0** — linguagem visual padrão de **todo editor web** de mod deste repo (comunidade Tarkov Red Line · SPT 4.0 · Fika Coop). Dark militar, accent tan/gold de trabalho, vermelho reservado à marca.
+**TRL Design System v1.0.0** — linguagem visual padrão de **todo editor web** de mod deste repo (comunidade Tarkov Red Line · SPT 4.0 · Fika Coop). Base grafite neutra; tan/gold marca **significado** (ativo, selecionado, primário, assinaturas); vermelho reservado à marca.
 
 ## Mapa
 

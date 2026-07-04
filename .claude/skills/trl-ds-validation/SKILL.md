@@ -18,7 +18,7 @@ Fonte de verdade dos tokens/regras: `design-system/` (ler `CLAUDE.md` + `PATTERN
 
 ## Lente 2 — A11y (WCAG AA + 2.2)
 
-- Contraste medido (não estimado): `ink` AAA, `ink-muted` AA em toda superfície; `tan-500` só labels uppercase ≥11px em ground/surface-1; `ink-faint` decorativo. Números completos: PATTERNS R5.
+- Contraste medido (não estimado): `ink` AAA, `ink-muted` AA em toda superfície; `tan-500` só labels uppercase ≥11px em ground/surface-1; `ink-faint` decorativo. **Labels de chrome = `--trl-fg-label` (neutro)** — gold em label é defeito (gold marca significado). Números completos: PATTERNS R5.
 - `:focus-visible` vem do escopo `.trl-app` — **verificar por tab real** que todo interativo é alcançável e mostra ring.
 - **Targets ≥24×24px** (WCAG 2.2): botões `--sm` 24 ✓; ícones de fechar/limpar precisam de 24; área de clique de links de toolbar via padding. Checkbox/switch: o `<label>` inteiro é o alvo (ok por construção).
 - `prefers-reduced-motion` desliga keyframes `trl-*` — animação nova fora deles é defeito.
@@ -36,10 +36,10 @@ Fonte de verdade dos tokens/regras: `design-system/` (ler `CLAUDE.md` + `PATTERN
 Regra de ouro: **cor de UI ≠ cor de série. Rodar o validador, não estimar.**
 
 ```
-node <dataviz-skill>/scripts/validate_palette.js "<hex,...>" --mode dark --surface "#1b1d14" [--ordinal]
+node <dataviz-skill>/scripts/validate_palette.js "<hex,...>" --mode dark --surface "#1b1b1d" [--ordinal]
 ```
 
-Parâmetros TRL validados (2026-07-03, surface-1 `#1b1d14`):
+Parâmetros TRL validados (2026-07-03, surface-1 `#1b1b1d`):
 
 | Slot | Valor | Status |
 |---|---|---|

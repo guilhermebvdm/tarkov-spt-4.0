@@ -254,7 +254,7 @@
   text-transform: uppercase;
   letter-spacing: var(--trl-track-wider);
   font-size: var(--trl-text-xs);
-  color: var(--trl-accent-dim);
+  color: var(--trl-fg-label);
   margin: 0;
 }
 
@@ -542,7 +542,7 @@
   background: transparent;
   border: var(--trl-border-w) solid var(--trl-edge-strong);
   border-radius: var(--trl-radius);
-  color: var(--trl-accent);
+  color: var(--trl-fg-muted);
   font-family: var(--trl-font-display);
   text-transform: uppercase;
   letter-spacing: var(--trl-track-wide);
@@ -556,7 +556,7 @@
 
 .trl-btn:hover {
   background: var(--trl-bg-hover);
-  color: var(--trl-accent-strong);
+  color: var(--trl-fg);
 }
 
 .trl-btn:active { transform: translateY(1px); }
@@ -640,7 +640,7 @@
   text-transform: uppercase;
   letter-spacing: var(--trl-track-wide);
   font-size: var(--trl-text-xs);
-  color: var(--trl-accent-dim);
+  color: var(--trl-fg-label);
 }
 
 .trl-field__hint {
@@ -1151,7 +1151,7 @@ textarea.trl-input {
   letter-spacing: var(--trl-track-wide);
   font-size: var(--trl-text-xs);
   font-weight: var(--trl-weight-regular);
-  color: var(--trl-accent-dim);
+  color: var(--trl-fg-label);
   text-align: left;
   white-space: nowrap;
   cursor: default;
@@ -1227,12 +1227,12 @@ textarea.trl-input {
   text-transform: uppercase;
   letter-spacing: var(--trl-track-wide);
   font-size: var(--trl-text-xs);
-  color: var(--trl-accent-dim);
+  color: var(--trl-fg-label);
   padding-top: 2px;
 }
 
 .trl-kv__v {
-  color: var(--trl-fg-muted);
+  color: var(--trl-fg);
   min-width: 0;
   overflow-wrap: break-word;   /* template ids (24ch) wrap instead of overflowing */
 }
@@ -1312,7 +1312,7 @@ textarea.trl-input {
   align-items: center;
   gap: var(--trl-space-2);
   padding: var(--trl-space-1) var(--trl-space-2);
-  border: var(--trl-border-w) solid var(--trl-edge-strong);
+  border: var(--trl-border-w) solid var(--trl-edge-accent);
   font-family: var(--trl-font-display);
   text-transform: uppercase;
   letter-spacing: var(--trl-track-wider);
@@ -1371,7 +1371,7 @@ textarea.trl-input {
 .trl-badge {
   display: inline-block;
   padding: 1px var(--trl-space-2);
-  border: var(--trl-border-w) solid var(--trl-edge-strong);
+  border: var(--trl-border-w) solid var(--trl-edge-accent);
   font-family: var(--trl-font-display);
   text-transform: uppercase;
   letter-spacing: var(--trl-track-wide);
@@ -1509,7 +1509,7 @@ textarea.trl-input {
   text-transform: uppercase;
   letter-spacing: var(--trl-track-widest);
   font-size: var(--trl-text-2xs);
-  color: var(--trl-accent-dim);
+  color: var(--trl-fg-label);
   padding-bottom: var(--trl-space-1);
   margin-bottom: var(--trl-space-2);
   border-bottom: var(--trl-border-w) solid var(--trl-edge);

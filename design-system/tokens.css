@@ -11,7 +11,8 @@
  *                        progress fill) shared by components.css.
  *
  * Color model:
- *   tan/gold  = working accent — every frequent interactive state
+ *   base      = neutral graphite (surfaces, edges, labels) — never tinted
+ *   tan/gold  = meaning accent — active, selected, primary, signatures
  *   red       = brand — laser line, live dot, rare key moments, destructive
  *   #ff0000 (red-brand) never colors text; glow/laser/logo only.
  *
@@ -25,15 +26,16 @@
    * ======================================================================= */
 
   /* ── Ground & surfaces ─────────────────────────────────────────────────
-   * Dark olive scale. Elevation = lighter surface (never shadows alone).
-   * ground-deep sits behind everything; each surface step is one level up. */
-  --trl-ground-deep: #0d0e09;
-  --trl-ground:      #12130d;
-  --trl-surface-1:   #1b1d14;
-  --trl-surface-2:   #22251a;
-  --trl-surface-3:   #282c1e;   /* solid elevated blocks (not hovers —
+   * Neutral graphite scale (like the real EFT UI) — the warmth comes from
+   * the vignette texture and the tan/red ACCENTS, never from the base.
+   * Elevation = lighter surface (never shadows alone). */
+  --trl-ground-deep: #0d0d0e;
+  --trl-ground:      #131314;
+  --trl-surface-1:   #1b1b1d;
+  --trl-surface-2:   #222225;
+  --trl-surface-3:   #29292c;   /* solid elevated blocks (not hovers —
                                     hovers use --trl-bg-hover wash) */
-  --trl-surface-4:   #2f3424;
+  --trl-surface-4:   #303034;
 
   /* ── Tan / gold ramp (workhorse accent) ────────────────────────────────
    * 300 is the base. 100–200 for emphasis text, 500 for dimmed labels,
@@ -69,13 +71,13 @@
   --trl-blue-400: #6f93bd;
   --trl-blue-600: #46617f;
 
-  /* ── Ink (neutral warm text scale) ──────────────────────────────────────
-   * ink-faint is decorative-only below 11px (see PATTERNS.md · contrast). */
-  --trl-ink:         #e9e7dd;
-  --trl-ink-muted:   #9a978a;
-  --trl-ink-faint:   #6f6d60;
-  --trl-ink-ghost:   #45443a;
-  --trl-ink-inverse: #12130d;
+  /* ── Ink (neutral text scale) ───────────────────────────────────────────
+   * ink-faint is decorative-only (see PATTERNS.md · contrast). */
+  --trl-ink:         #e8e7e4;
+  --trl-ink-muted:   #9b9a96;
+  --trl-ink-faint:   #706f6b;
+  --trl-ink-ghost:   #464541;
+  --trl-ink-inverse: #131314;
 
   /* ── Typography ─────────────────────────────────────────────────────────
    * display: Bender (EFT official; fonts/bender.css) → Bahnschrift (Win10+).
@@ -176,10 +178,12 @@
   --trl-bg-active:  var(--trl-wash-tan-2);
   --trl-bg-overlay: rgba(8, 9, 5, .65);
 
-  /* Edges (translucent tan hairlines — the signature border) */
-  --trl-edge-faint:  rgba(199, 180, 138, .10);
-  --trl-edge:        rgba(199, 180, 138, .20);
-  --trl-edge-strong: rgba(199, 180, 138, .42);
+  /* Edges — NEUTRAL hairlines for structure; edge-accent is the tan frame
+   * reserved for accent elements (tags, badges) that must read gold */
+  --trl-edge-faint:  rgba(255, 255, 255, .05);
+  --trl-edge:        rgba(255, 255, 255, .09);
+  --trl-edge-strong: rgba(255, 255, 255, .20);
+  --trl-edge-accent: rgba(199, 180, 138, .42);
   --trl-edge-red:    rgba(255, 48, 32, .35);
 
   /* Washes (translucent tint fills for tags, highlights, status blocks) */
@@ -196,10 +200,13 @@
   --trl-faction-usec: var(--trl-blue-400);
   --trl-faction-bear: var(--trl-red-soft);
 
-  /* Foregrounds by role */
+  /* Foregrounds by role — fg-label is the CHROME label color (panel
+   * titles, field labels, kv keys, table headers): neutral, so gold stays
+   * a meaning-accent instead of tinting the whole screen */
   --trl-fg:           var(--trl-ink);
   --trl-fg-muted:     var(--trl-ink-muted);
   --trl-fg-faint:     var(--trl-ink-faint);
+  --trl-fg-label:     var(--trl-ink-muted);
   --trl-fg-on-accent: var(--trl-ink-inverse);
 
   /* Accent (tan — the working accent) */
@@ -257,7 +264,7 @@
 
   /* Game data (block H): inventory cell unit and 2D-grid line color */
   --trl-cell-unit:   36px;
-  --trl-grid2d-line: rgba(199, 180, 138, .07);
+  --trl-grid2d-line: rgba(255, 255, 255, .05);
 
   /* ── Dataviz (chart series) ──────────────────────────────────────────────
    * UI colors FAIL as series colors (validated 2026-07-03 with the dataviz
