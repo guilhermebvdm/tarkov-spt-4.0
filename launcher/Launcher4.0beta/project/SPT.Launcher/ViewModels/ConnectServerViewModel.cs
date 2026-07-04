@@ -36,17 +36,28 @@ namespace SPT.Launcher.ViewModels
             });
         }
 
+        /// <summary>
+        /// Item 022 (Grupo C / RN-4) — ConnectServer roda em Task.Run (pool) porque tem chamadas
+        /// bloqueantes (PingServer, LoadDefaultServerAsync, TailscaleHelper). O modelo de notificação
+        /// (ConnectServerModel / LauncherSettingsProvider) NÃO marshala sozinho, então toda escrita
+        /// de propriedade bound tem de ir para a UI thread. Post = fire-and-forget (não bloqueia a
+        /// pool nem arrisca deadlock — NUNCA usar InvokeAsync(...).Wait() aqui, R4). Escritas em
+        /// Server.Url NÃO passam por aqui: não são bound e são lidas de volta de forma síncrona logo
+        /// adiante (marshalar criaria corrida de leitura).
+        /// </summary>
+        private static void OnUi(Action action) => Dispatcher.UIThread.Post(action);
+
         public async Task ConnectServer()
         {
             try
             {
-                LauncherSettingsProvider.Instance.AllowSettings = false;
+                OnUi(() => LauncherSettingsProvider.Instance.AllowSettings = false);
                 LogManager.Instance.Info("[Connect] Iniciando conexão ao servidor...");
 
                 // 1. Obtém a URL oficial do servidor via Pastebin (precisa ser antes da VPN para sabermos para onde mandar o registro)
                 if (!LauncherSettingsProvider.Instance.IsDevMode)
                 {
-                    connectModel.InfoText = "Obtendo URL do servidor...";
+                    OnUi(() => connectModel.InfoText = "Obtendo URL do servidor...");
                     try
                     {
                         using var client = new System.Net.Http.HttpClient();
@@ -72,13 +83,13 @@ namespace SPT.Launcher.ViewModels
                 // Automação do Tailscale: Verifica, instala, autentica e configura Fika (Apenas se o Path do jogo for válido)
                 if (!string.IsNullOrEmpty(LauncherSettingsProvider.Instance.GamePath))
                 {
-                    connectModel.InfoText = "Conectando na rede P2P (Tailscale)...";
+                    OnUi(() => connectModel.InfoText = "Conectando na rede P2P (Tailscale)...");
                     LogManager.Instance.Info("[Connect] Verificando e conectando Tailscale...");
                     bool tailscaleConnected = await TailscaleHelper.EnsureTailscaleConnected();
 
                     if (tailscaleConnected)
                     {
-                        connectModel.InfoText = "Atualizando configurações de rede (Fika)...";
+                        OnUi(() => connectModel.InfoText = "Atualizando configurações de rede (Fika)...");
                         LogManager.Instance.Info("[Connect] Configurando IP do Fika...");
                         await TailscaleHelper.ConfigureFikaAsync(LauncherSettingsProvider.Instance.GamePath);
                     }
@@ -92,29 +103,38 @@ namespace SPT.Launcher.ViewModels
                         // Falha de VPN é fatal fora do Dev Mode: sem IP Tailscale o servidor é inalcançável.
                         // Erro claro no launcher (nunca navegador) + botão de retry via ConnectionFailed.
                         LogManager.Instance.Error("[Connect] Falha ao autenticar/conectar no Tailscale. Abortando conexão — ver logs acima.");
-                        connectModel.ConnectionFailed = true;
-                        connectModel.InfoText = "Falha na rede P2P (Tailscale): não foi possível autenticar/conectar. Verifique sua internet e clique em tentar novamente.";
-                        LauncherSettingsProvider.Instance.AllowSettings = true;
+                        OnUi(() =>
+                        {
+                            connectModel.ConnectionFailed = true;
+                            connectModel.InfoText = "Falha na rede P2P (Tailscale): não foi possível autenticar/conectar. Verifique sua internet e clique em tentar novamente.";
+                            LauncherSettingsProvider.Instance.AllowSettings = true;
+                        });
                         return;
                     }
                 }
 
                 if (!LauncherSettingsProvider.Instance.DisableUpdates)
                 {
-                    connectModel.InfoText = "Verificando atualizações do launcher...";
+                    OnUi(() => connectModel.InfoText = "Verificando atualizações do launcher...");
                     LogManager.Instance.Info("[Connect] Verificando versão do launcher no servidor...");
-                    
-                    var progress = new Progress<int>(percent => 
+
+                    // CC-6/C3: o Progress<int> é construído dentro do Task.Run, capturando o
+                    // SynchronizationContext da pool (nulo) → o handler roda na pool. Marshalar as
+                    // escritas bound via OnUi cobre isso independentemente do contexto capturado.
+                    var progress = new Progress<int>(percent =>
                     {
-                        connectModel.IsDownloading = true;
-                        connectModel.DownloadProgress = percent;
-                        connectModel.InfoText = $"Baixando atualização do launcher... {percent}%";
+                        OnUi(() =>
+                        {
+                            connectModel.IsDownloading = true;
+                            connectModel.DownloadProgress = percent;
+                            connectModel.InfoText = $"Baixando atualização do launcher... {percent}%";
+                        });
                     });
 
                     bool isUpdating = await LauncherUpdateHelper.CheckAndUpdateAsync(LauncherSettingsProvider.Instance.Server.Url, progress);
                     if (isUpdating)
                     {
-                        connectModel.InfoText = "Atualizando o launcher! Reiniciando...";
+                        OnUi(() => connectModel.InfoText = "Atualizando o launcher! Reiniciando...");
                         return;
                     }
                 }
@@ -123,8 +143,8 @@ namespace SPT.Launcher.ViewModels
                     LogManager.Instance.Info("[Connect] Verificação de atualização bloqueada pelas configurações (Desativada).");
                 }
 
-                connectModel.InfoText = LocalizationProvider.Instance.server_connecting;
-                
+                OnUi(() => connectModel.InfoText = LocalizationProvider.Instance.server_connecting);
+
                 LogManager.Instance.Info($"[Connect] Carregando servidor: {LauncherSettingsProvider.Instance.Server.Url}");
                 bool serverLoaded = await ServerManager.LoadDefaultServerAsync(LauncherSettingsProvider.Instance.Server.Url);
                 
@@ -132,7 +152,7 @@ namespace SPT.Launcher.ViewModels
                 if (!serverLoaded)
                 {
                     LogManager.Instance.Warning("[Connect] Primeira tentativa falhou. Aguardando 2s e tentando novamente...");
-                    connectModel.InfoText = "Reconectando ao servidor...";
+                    OnUi(() => connectModel.InfoText = "Reconectando ao servidor...");
                     await Task.Delay(2000);
                     serverLoaded = await ServerManager.LoadDefaultServerAsync(LauncherSettingsProvider.Instance.Server.Url);
                 }
@@ -140,11 +160,13 @@ namespace SPT.Launcher.ViewModels
                 if (!serverLoaded)
                 {
                     LogManager.Instance.Error("[Connect] Falha ao carregar servidor após 2 tentativas.");
-                    connectModel.ConnectionFailed = true;
-                    connectModel.InfoText = string.Format(LocalizationProvider.Instance.server_unavailable_format_1,
-                        LauncherSettingsProvider.Instance.Server.Name);
-                    
-                    LauncherSettingsProvider.Instance.AllowSettings = true;
+                    OnUi(() =>
+                    {
+                        connectModel.ConnectionFailed = true;
+                        connectModel.InfoText = string.Format(LocalizationProvider.Instance.server_unavailable_format_1,
+                            LauncherSettingsProvider.Instance.Server.Name);
+                        LauncherSettingsProvider.Instance.AllowSettings = true;
+                    });
                     return;
                 }
                 
@@ -153,9 +175,11 @@ namespace SPT.Launcher.ViewModels
                 bool connected = ServerManager.PingServer();
                 LogManager.Instance.Info($"[Connect] Ping resultado: {(connected ? "OK" : "FALHOU")}");
 
-                connectModel.ConnectionFailed = !connected;
-
-                connectModel.InfoText = connected ? LocalizationProvider.Instance.ok : string.Format(LocalizationProvider.Instance.server_unavailable_format_1, LauncherSettingsProvider.Instance.Server.Name);
+                OnUi(() =>
+                {
+                    connectModel.ConnectionFailed = !connected;
+                    connectModel.InfoText = connected ? LocalizationProvider.Instance.ok : string.Format(LocalizationProvider.Instance.server_unavailable_format_1, LauncherSettingsProvider.Instance.Server.Name);
+                });
 
                 if (connected)
                 {
@@ -171,14 +195,17 @@ namespace SPT.Launcher.ViewModels
                     NavigateTo(new LoginViewModel(HostScreen, noAutoLogin));
                     LogManager.Instance.Info($"[Connect] Navegação disparada para LoginView.");
                 }
-                
-                LauncherSettingsProvider.Instance.AllowSettings = true;
+
+                OnUi(() => LauncherSettingsProvider.Instance.AllowSettings = true);
             }
             catch (Exception ex)
             {
                 LogManager.Instance.Error($"[FATAL ERROR IN CONNECT SERVER]: {ex.Message}\n{ex.StackTrace}");
-                connectModel.InfoText = "Erro Fatal Crítico: " + ex.Message;
-                connectModel.ConnectionFailed = true;
+                OnUi(() =>
+                {
+                    connectModel.InfoText = "Erro Fatal Crítico: " + ex.Message;
+                    connectModel.ConnectionFailed = true;
+                });
             }
         }
 

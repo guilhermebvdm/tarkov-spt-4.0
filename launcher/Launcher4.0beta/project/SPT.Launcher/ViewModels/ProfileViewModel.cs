@@ -1019,7 +1019,39 @@ namespace SPT.Launcher.ViewModels
             });
         }
 
-        public async Task StartGameCommand()
+        /// <summary>
+        /// Item 022 (Grupo B / RN-3, AC-022.8/9) — envelope guardado para os comandos async Task
+        /// ligados por nome. O binding do Avalonia invoca o método sem await, então uma exceção
+        /// após o 1º await viraria unobserved task exception (some sem log nem toast) e poderia
+        /// deixar flags de UI presas. Aqui a exceção é logada, o <paramref name="onError"/> restaura
+        /// o estado específico do comando (só StartGame mexe em GameRunning — CC-2/CC-3) e o usuário
+        /// recebe uma notificação de erro. Nunca uma falha 100% silenciosa.
+        /// </summary>
+        private async Task GuardedAsync(Func<Task> body, string context, Action onError = null)
+        {
+            try
+            {
+                await body();
+            }
+            catch (Exception ex)
+            {
+                LogManager.Instance.Error($"[Profile] {context}: {ex.Message}\n{ex.StackTrace}");
+                onError?.Invoke();
+                SendNotification("", "Ocorreu um erro ao executar a ação. Tente novamente.",
+                    Avalonia.Controls.Notifications.NotificationType.Error);
+            }
+        }
+
+        public async Task StartGameCommand() => await GuardedAsync(StartGameCore, "StartGame", onError: () =>
+        {
+            // CC-2/CC-3/AC-022.5/6/7: só StartGame gerencia GameRunning e a restauração é SÓ no catch —
+            // o caminho feliz mantém GameRunning=true até o GameExitCallback (um finally cego zeraria o
+            // jogo iniciado com sucesso). AllowSettings volta a true para destravar a tela de Settings.
+            LauncherSettingsProvider.Instance.GameRunning = false;
+            LauncherSettingsProvider.Instance.AllowSettings = true;
+        });
+
+        private async Task StartGameCore()
         {
             LauncherSettingsProvider.Instance.AllowSettings = false;
             LogManager.Instance.Info("[Profile] Iniciando jogo...");
@@ -1141,24 +1173,30 @@ namespace SPT.Launcher.ViewModels
             return AccountStatus.OK;
         }
 
-        public async Task ChangeEditionCommand()
+        public async Task ChangeEditionCommand() => await GuardedAsync(ChangeEditionCore, "ChangeEdition");
+
+        private async Task ChangeEditionCore()
         {
             var result = await ShowDialog(new ChangeEditionDialogViewModel(null));
 
+            // CC-1: confirmação já é segura por positive-match (só prossegue com um SPTEdition).
             if(result != null && result is SPTEdition edition)
             {
                 await WipeProfile(edition.Name);
             }
         }
 
-        public async Task WipeConfirmCommand()
+        public async Task WipeConfirmCommand() => await GuardedAsync(WipeConfirmCore, "WipeConfirm");
+
+        private async Task WipeConfirmCore()
         {
             ConfirmationDialogViewModel confirmation = new ConfirmationDialogViewModel(null,
                 "Tem certeza que deseja resetar sua conta? Esta ação não pode ser revertida. Todo seu progresso será perdido.");
 
             var result = await ShowDialog(confirmation);
 
-            if (result is bool b && !b) return;
+            // RN-1/AC-022.2: abortar no ambíguo — só o bool true explícito prossegue para o wipe.
+            if (!DialogConfirmation.IsConfirmed(result)) return;
 
             await WipeProfile(AccountManager.SelectedAccount.edition);
         }
@@ -1167,14 +1205,17 @@ namespace SPT.Launcher.ViewModels
         /// Item 010 — exclusão definitiva da conta (≠ wipe): confirmação forte
         /// digitando o username, remove no server, limpa auto-login e volta ao login.
         /// </summary>
-        public async Task DeleteAccountCommand()
+        public async Task DeleteAccountCommand() => await GuardedAsync(DeleteAccountCore, "DeleteAccount");
+
+        private async Task DeleteAccountCore()
         {
             string username = AccountManager.SelectedAccount.username;
 
             var dialog = new DeleteAccountDialogViewModel(null, username);
             var result = await ShowDialog(dialog);
 
-            if (result is not bool confirmed || !confirmed) return;
+            // RN-1: abortar no ambíguo — mesma regra pura das demais confirmações destrutivas.
+            if (!DialogConfirmation.IsConfirmed(result)) return;
 
             LogManager.Instance.Info($"[Profile] Excluindo conta '{username}'...");
 
@@ -1251,13 +1292,16 @@ namespace SPT.Launcher.ViewModels
             }
         }
 
-        public async Task RemoveProfileCommand()
+        public async Task RemoveProfileCommand() => await GuardedAsync(RemoveProfileCore, "RemoveProfile");
+
+        private async Task RemoveProfileCore()
         {
             ConfirmationDialogViewModel confirmation = new ConfirmationDialogViewModel(null, string.Format(LocalizationProvider.Instance.profile_remove_question_format_1, AccountManager.SelectedAccount.username));
 
             var result = await ShowDialog(confirmation);
 
-            if (result is bool b && !b) return;
+            // RN-1/AC-022.3: abortar no ambíguo — só o bool true explícito prossegue para o RemoveAsync.
+            if (!DialogConfirmation.IsConfirmed(result)) return;
 
             AccountStatus status = await AccountManager.RemoveAsync();
 

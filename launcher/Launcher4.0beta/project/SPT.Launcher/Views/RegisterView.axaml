@@ -61,7 +61,7 @@
                     <!-- Footer (Versão) -->
                     <cc:TrlVersionFooter Grid.Row="2" HorizontalAlignment="Center" Margin="0,16,0,0"
                                          LauncherVersion="{x:Static helpers:LauncherUpdateHelper.CurrentVersion}"
-                                         ServerVersion="{x:Static base:ServerManager.TrlServerVersion}"/>
+                                         ServerVersion="{Binding ServerVersion}"/>
                 </Grid>
             </Border>
         </Grid>
