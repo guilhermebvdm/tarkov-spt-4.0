@@ -30,6 +30,7 @@
 
 	<StyleInclude Source="/Assets/Theme/Controls/Text.axaml"/>
 	<StyleInclude Source="/Assets/Theme/Controls/Button.axaml"/>
+	<StyleInclude Source="/Assets/Theme/Controls/Nav.axaml"/>
 	<StyleInclude Source="/Assets/Theme/Controls/TextBox.axaml"/>
 	<StyleInclude Source="/Assets/Theme/Controls/CheckBox.axaml"/>
 	<StyleInclude Source="/Assets/Theme/Controls/ComboBox.axaml"/>

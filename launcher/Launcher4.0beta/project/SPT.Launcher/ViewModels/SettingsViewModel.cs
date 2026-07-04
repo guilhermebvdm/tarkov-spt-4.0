@@ -47,7 +47,8 @@ namespace SPT.Launcher.ViewModels
             this.RaisePropertyChanged(nameof(DevPasswordEyeIcon));
         }
 
-        public string DevModeStatusColor => LauncherSettingsProvider.Instance.IsDevMode ? "#4CAF50" : "#555555";
+        // Cor do dot de status migrou para o XAML (Border.dev-dot + class binding em
+        // IsDevMode, tokens TrlSuccessBrush/TrlFgFaintBrush). A VM só expõe o texto do tooltip.
         public string DevModeStatusText => LauncherSettingsProvider.Instance.IsDevMode ? "Dev Mode ATIVO" : "Dev Mode INATIVO";
 
         /// <summary>
@@ -112,7 +113,6 @@ namespace SPT.Launcher.ViewModels
             }
 
             DevPassword = "";
-            this.RaisePropertyChanged(nameof(DevModeStatusColor));
             this.RaisePropertyChanged(nameof(DevModeStatusText));
         }
 
