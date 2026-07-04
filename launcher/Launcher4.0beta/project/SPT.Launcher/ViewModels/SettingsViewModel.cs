@@ -326,7 +326,9 @@ namespace SPT.Launcher.ViewModels
         {
             if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                var startPath = await desktop.MainWindow.StorageProvider.TryGetFolderFromPathAsync(Assembly.GetExecutingAssembly().Location);
+                // AppContext.BaseDirectory em vez de Assembly.Location: este último é vazio
+                // em publish single-file (IL3000), zerando a sugestão de pasta do picker (item 014).
+                var startPath = await desktop.MainWindow.StorageProvider.TryGetFolderFromPathAsync(AppContext.BaseDirectory);
                 
                 var dir = await desktop.MainWindow.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions()
                 {

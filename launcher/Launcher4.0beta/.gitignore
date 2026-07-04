@@ -356,3 +356,6 @@ MigrationBackup/
 .idea/
 
 project/user/launcher
+
+# Release artifacts (item 014)
+dist/
