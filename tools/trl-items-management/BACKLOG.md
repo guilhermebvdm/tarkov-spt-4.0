@@ -6,6 +6,15 @@
 
 ---
 
+## Progresso — run autônomo /g-autodev (2026-07-04, branch `feat/trl-items-autodev`)
+
+| Item | Estado | O que foi feito |
+|---|---|---|
+| **B-1** teto flea | ✅ **Implementado + testado** | endpoint `GET/POST /api/flea-cap` (dacd3b1) + toggle no topbar (34e395f). Testado: rota (checks.dat atualiza, mults preservados) + UI via Chrome MCP. **Pendente: validação in-game** (desligar → GPU > 2.178M no jogo). |
+| **B-2** virar mod | 🟢 **Spec + SPIKE PROVADO** | spec (203b844) + spike (bf239e7): mod Sdk.Web (`SPTarkov.Server.Web`) serve `wwwroot/index.html` + controller `/api/ping` na Kestrel do SPT (6969) — verificado no boot (mod carregado, 200/200). **Falta: Milestone 1** (portar os endpoints do serve.js + servir o index.html real). |
+| **B-3** buy price | 🟡 **Spec + DECISÃO ESCALADA** | pesquisa revelou: buyback é client-side; server-only muda o recebido mas não o exibido (desync). **Precisa da sua decisão:** rota A (server-only, UX confusa) vs rota B (mod client, coerente). Não implementado de propósito. |
+| **B-4** bulk flea | 🟢 **Spec (adiada)** | spec pronta (abc03cd); depende do B-2 M1 (UI nasce no mod novo). |
+
 ## Baseline (já implementado)
 
 - ✅ **Preço de VENDA do trader** (player compra do trader) — moeda nativa (₽/$/€/GP), **vanilla + mod** (items e traders). Mod `TRLTraderPrices` muta o `BarterScheme` do assort. Cobre os 4 cenários (vanilla×vanilla, vanilla×mod, mod×mod, mod×vanilla). **v1.1.0**, testado 8/8.
