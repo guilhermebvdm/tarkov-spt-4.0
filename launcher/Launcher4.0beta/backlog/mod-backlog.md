@@ -27,7 +27,7 @@
 | 011 | Lista de mods | **ADIADO (decisão 2026-07-03)** — item vago no card (Trello 5); escopo será definido com o usuário quando sair do adiamento. Base: `ModInfoCollection`/`TotalModsCard`/`ModInfoView`. | [011-lista-mods/](./011-lista-mods/) | ⚫ |
 | 012 | Remover Targram do menu | Remover botão/command Targram dos menus (Trello 6.1). 4 pontos já mapeados. | [012-remover-targram/](./012-remover-targram/) | 🟢 |
 | 013 | Versão do server dinâmica | Server reporta `0.1.0-beta` via arquivo/endpoint; launcher exibe dinamicamente (hoje footers hardcoded) (Trello 6.2). | [013-versao-server-dinamica/](./013-versao-server-dinamica/) | 🟢 |
-| 014 | Release launcher 2.0.0 | Bump de versão (hoje `1.4.7.0`) + strings hardcoded + build + distribuição (Trello 6.3). Fecha o épico — depende de todos. | [014-release-v2/](./014-release-v2/) | ⚪ |
+| 014 | Release launcher 2.0.0 | Bump de versão (hoje `1.4.7.0`) + strings hardcoded + build + distribuição (Trello 6.3). Fecha o épico — depende de todos. | [014-release-v2/](./014-release-v2/) | 🟢 |
 
 ## Épico: Tela Logado (Trello 4.x → itens 007–010)
 
