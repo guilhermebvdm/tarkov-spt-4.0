@@ -28,6 +28,8 @@
 | 012 | Remover Targram do menu | Remover botão/command Targram dos menus (Trello 6.1). 4 pontos já mapeados. | [012-remover-targram/](./012-remover-targram/) | 🟢 |
 | 013 | Versão do server dinâmica | Server reporta `0.1.0-beta` via arquivo/endpoint; launcher exibe dinamicamente (hoje footers hardcoded) (Trello 6.2). | [013-versao-server-dinamica/](./013-versao-server-dinamica/) | 🟢 |
 | 014 | Release launcher 2.0.0 | Bump de versão (hoje `1.4.7.0`) + strings hardcoded + build + distribuição (Trello 6.3). Fecha o épico — depende de todos. | [014-release-v2/](./014-release-v2/) | 🟢 |
+| 016 | Velocidade de download na "Verificar arquivos" | Exibir a velocidade do download (ex.: MB/s) durante a verificação/sync de arquivos, na barra de update da ProfileView e/ou na `ModUpdateView`. Estende o motor/relatório do 007. | [016-velocidade-download-verificacao/](./016-velocidade-download-verificacao/) | ⚪ |
+| 017 | Preencher `config` do usuário a partir de `config-server` (seed por nome) | Seed unidirecional: para cada arquivo em `BepInEx/config-server` do server, se **não existir por nome** em `BepInEx/config` do usuário → copiar; se **já existir por nome** (metadados/conteúdo irrelevantes) → não fazer nada. ⚠️ **Reconcilia/ajusta a regra `config-server` do [007](./007-sincronizacao-arquivos/)** (hoje mirror-delete). | [017-seed-config-de-config-server/](./017-seed-config-de-config-server/) | ⚪ |
 
 ## Épico: Tela Logado (Trello 4.x → itens 007–010)
 
