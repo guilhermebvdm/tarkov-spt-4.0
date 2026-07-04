@@ -120,8 +120,52 @@ internal static class PerksPanelView
         BuildColumn(columns.transform, "PerksCol");
         BuildColumn(columns.transform, "DrawbacksCol");
 
+        // 060 (RN-04): rodapé informativo da Weapon Mastery — texto setado no Refresh (valores vivos do F12).
+        var footer = new GameObject("MasteryFooter", typeof(RectTransform), typeof(TextMeshProUGUI), typeof(LayoutElement));
+        footer.transform.SetParent(go.transform, false);
+        var ftmp = footer.GetComponent<TextMeshProUGUI>();
+        if (font != null)
+        {
+            ftmp.font = font;
+        }
+
+        ftmp.fontSize = 13f;
+        ftmp.richText = true;
+        ftmp.raycastTarget = false;
+        ftmp.enableWordWrapping = true;
+        ftmp.alignment = TextAlignmentOptions.BottomLeft;
+        ftmp.color = new Color(0.45f, 0.47f, 0.50f, 1f);
+        footer.GetComponent<LayoutElement>().minHeight = 22f;
+        footer.SetActive(false);   // Refresh ativa quando WeaponMasteryEnabled
+
         go.SetActive(false);   // começa escondido
         return go;
+    }
+
+    /// <summary>
+    ///     060 (RN-04) — popula o rodapé da Weapon Mastery com os valores VIVOS do F12 (a tela SKILLS não mostra
+    ///     buff nenhum pras 4 maestrias do 058 — este rodapé é a transparência mínima do efeito por nível).
+    /// </summary>
+    private static void RefreshMasteryFooter(GameObject panel)
+    {
+        var footer = panel.transform.Find("MasteryFooter")?.GetComponent<TextMeshProUGUI>();
+        if (footer == null)
+        {
+            return;
+        }
+
+        var on = PerksConfig.WeaponMasteryEnabled?.Value == true;
+        footer.gameObject.SetActive(on);
+        if (!on)
+        {
+            return;
+        }
+
+        var rec = (PerksConfig.MasteryRecoilPerLevel?.Value ?? 0f) * 100f;
+        var ergo = (PerksConfig.MasteryErgoPerLevel?.Value ?? 0f) * 100f;
+        footer.text = GameLocale.IsPortuguese
+            ? $"<b>WEAPON MASTERY</b>  <color=#8a8a8a>SMG · LMG · Lançador · Underbarrel:</color> −{rec:0.#}% recuo · +{ergo:0.#}% ergo <color=#8a8a8a>por nível da skill</color>"
+            : $"<b>WEAPON MASTERY</b>  <color=#8a8a8a>SMG · LMG · Launcher · Underbarrel:</color> −{rec:0.#}% recoil · +{ergo:0.#}% ergo <color=#8a8a8a>per skill level</color>";
     }
 
     /// <summary>Reconstrói o painel a partir da classe LOCAL (call-sites 053/059). Idempotente por classe.</summary>
@@ -136,6 +180,7 @@ internal static class PerksPanelView
         try
         {
             panel.GetComponent<FadeIn>()?.Restart();   // CR-03-03: re-dispara o fade a cada exibição
+            RefreshMasteryFooter(panel);   // 060: ANTES do guard de idempotência (toggle/valores do F12 refletem sempre)
             var headerTmp = panel.transform.Find("Header/HeaderText")?.GetComponent<TextMeshProUGUI>();
             var headerIcon = panel.transform.Find("Header/Icon")?.GetComponent<Image>();
             var perksCol = panel.transform.Find("Columns/PerksCol");
