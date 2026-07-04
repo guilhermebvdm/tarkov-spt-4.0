@@ -74,11 +74,29 @@ namespace SPT.Launcher.ViewModels
                 {
                     connectModel.InfoText = "Conectando na rede P2P (Tailscale)...";
                     LogManager.Instance.Info("[Connect] Verificando e conectando Tailscale...");
-                    await TailscaleHelper.EnsureTailscaleConnected();
+                    bool tailscaleConnected = await TailscaleHelper.EnsureTailscaleConnected();
 
-                    connectModel.InfoText = "Atualizando configurações de rede (Fika)...";
-                    LogManager.Instance.Info("[Connect] Configurando IP do Fika...");
-                    await TailscaleHelper.ConfigureFikaAsync(LauncherSettingsProvider.Instance.GamePath);
+                    if (tailscaleConnected)
+                    {
+                        connectModel.InfoText = "Atualizando configurações de rede (Fika)...";
+                        LogManager.Instance.Info("[Connect] Configurando IP do Fika...");
+                        await TailscaleHelper.ConfigureFikaAsync(LauncherSettingsProvider.Instance.GamePath);
+                    }
+                    else if (LauncherSettingsProvider.Instance.IsDevMode)
+                    {
+                        // Dev Mode pode apontar para servidor local — VPN não é obrigatória; segue com aviso no log
+                        LogManager.Instance.Warning("[Connect] Tailscale indisponível, mas Dev Mode ativo — prosseguindo sem VPN.");
+                    }
+                    else
+                    {
+                        // Falha de VPN é fatal fora do Dev Mode: sem IP Tailscale o servidor é inalcançável.
+                        // Erro claro no launcher (nunca navegador) + botão de retry via ConnectionFailed.
+                        LogManager.Instance.Error("[Connect] Falha ao autenticar/conectar no Tailscale. Abortando conexão — ver logs acima.");
+                        connectModel.ConnectionFailed = true;
+                        connectModel.InfoText = "Falha na rede P2P (Tailscale): não foi possível autenticar/conectar. Verifique sua internet e clique em tentar novamente.";
+                        LauncherSettingsProvider.Instance.AllowSettings = true;
+                        return;
+                    }
                 }
 
                 if (!LauncherSettingsProvider.Instance.DisableUpdates)

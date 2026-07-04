@@ -11,51 +11,49 @@ namespace SPT.Launcher.Helpers
 {
     public static class TailscaleHelper
     {
-        public static async Task EnsureTailscaleConnected()
+        private const string TailscalePath = @"C:\Program Files\Tailscale\tailscale.exe";
+        private const string TailscaleIpnPath = @"C:\Program Files\Tailscale\tailscale-ipn.exe";
+        private const string AuthKeyGistUrl = "https://gist.githubusercontent.com/rockettechnology-dev/658aa44f55b3ee907f3e65f07664d112/raw/gistfile1.txt";
+        private const string FallbackAuthKey = "tskey-auth-kk2aP5b1GG11CNTRL-q87keuNrjfCdZinyiQhAgCr7f9nR2HSx"; // Fallback embutido
+
+        /// <summary>
+        /// Ensures Tailscale is installed, authenticated (via authkey, never browser) and connected.
+        /// Returns true when a Tailscale IP was obtained; false on failure (caller must surface the error).
+        /// Never opens a browser: auth is authkey-only and the GUI is only started AFTER a confirmed connection.
+        /// </summary>
+        public static async Task<bool> EnsureTailscaleConnected()
         {
-            string tailscalePath = @"C:\Program Files\Tailscale\tailscale.exe";
-            string tailscaleIpnPath = @"C:\Program Files\Tailscale\tailscale-ipn.exe";
-
             // Always disable Tailscale GUI Auto-Start on Windows boot to prevent browser login popup
-            try
-            {
-                using (var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true))
-                    key?.DeleteValue("Tailscale", false);
-                using (var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true))
-                    key?.DeleteValue("Tailscale", false);
-
-                string startupFolder = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
-                string tsShortcut = Path.Combine(startupFolder, "Tailscale.lnk");
-                if (File.Exists(tsShortcut)) File.Delete(tsShortcut);
-                
-                string commonStartup = Environment.GetFolderPath(Environment.SpecialFolder.CommonStartup);
-                string commonTsShortcut = Path.Combine(commonStartup, "Tailscale.lnk");
-                if (File.Exists(commonTsShortcut)) File.Delete(commonTsShortcut);
-            }
-            catch { }
+            DisableGuiAutostart();
 
             for (int retry = 0; retry < 2; retry++)
             {
                 LogManager.Instance.Info($"[Connect] Tailscale connection attempt {retry + 1}...");
 
                 // 1. Fetch AuthKey dynamically FIRST
-                string authKey = "";
+                string authKey;
                 try
                 {
                     using var httpClient = new System.Net.Http.HttpClient();
-                    authKey = await httpClient.GetStringAsync("https://gist.githubusercontent.com/rockettechnology-dev/658aa44f55b3ee907f3e65f07664d112/raw/gistfile1.txt");
-                    authKey = authKey.Trim();
+                    httpClient.Timeout = TimeSpan.FromSeconds(10); // don't hang launcher start on slow/broken network
+                    authKey = (await httpClient.GetStringAsync(AuthKeyGistUrl)).Trim();
+
+                    if (string.IsNullOrEmpty(authKey))
+                    {
+                        LogManager.Instance.Warning("[Connect] Gist returned an empty AuthKey. Using embedded fallback key.");
+                        authKey = FallbackAuthKey;
+                    }
                 }
                 catch (Exception ex)
                 {
                     LogManager.Instance.Error($"[Connect] Failed to fetch Tailscale AuthKey: {ex.Message}");
-                    authKey = "tskey-auth-kk2aP5b1GG11CNTRL-q87keuNrjfCdZinyiQhAgCr7f9nR2HSx"; // Fallback embutido
-                    LogManager.Instance.Info("[Connect] Usando AuthKey de fallback embutida devido à falha de DNS.");
+                    authKey = FallbackAuthKey;
+                    LogManager.Instance.Info("[Connect] Usando AuthKey de fallback embutida devido à falha de rede/DNS.");
                 }
 
-                // 2. Install if not found
-                bool justInstalled = false;
-                if (!File.Exists(tailscalePath))
+                // 2. Install if not found (fully silent: /quiet /norestart suppresses the MSI UI sequence,
+                //    so the installer never launches the GUI / browser post-install)
+                if (!File.Exists(TailscalePath))
                 {
                     LogManager.Instance.Info("[Connect] Tailscale not found. Extracting and installing silently...");
                     try
@@ -69,7 +67,7 @@ namespace SPT.Launcher.Helpers
                             {
                                 stream.CopyTo(fileStream);
                             }
-                            
+
                             string arguments = $"/i \"{tempPath}\" /quiet /norestart";
                             if (!string.IsNullOrEmpty(authKey))
                             {
@@ -87,13 +85,24 @@ namespace SPT.Launcher.Helpers
                                 }
                             };
                             process.Start();
-                            process.WaitForExit();
-                            justInstalled = true;
+                            if (!process.WaitForExit(300_000)) // 5 min safety timeout
+                            {
+                                LogManager.Instance.Error("[Connect] Tailscale MSI install timed out after 5 minutes.");
+                                try { process.Kill(); } catch { }
+                            }
                             LogManager.Instance.Info("[Connect] Tailscale installation finished.");
-                            
+
+                            // The MSI re-creates the GUI autostart (Run key). Remove it again so a future
+                            // Windows boot never auto-starts an unauthenticated GUI (which opens the browser).
+                            DisableGuiAutostart();
+
                             // Aguarda o serviço (daemon) do Tailscale subir antes de tentar se comunicar via CLI
                             LogManager.Instance.Info("[Connect] Aguardando o serviço Tailscale iniciar...");
                             await Task.Delay(5000);
+                        }
+                        else
+                        {
+                            LogManager.Instance.Error("[Connect] Embedded TailscaleInstaller resource not found in launcher binary.");
                         }
                     }
                     catch (Exception ex)
@@ -102,62 +111,156 @@ namespace SPT.Launcher.Helpers
                     }
                 }
 
-                // 3. Force Tailscale UP and authenticate BEFORE opening GUI
-                // We do this every time to intercept browser login and ensure connection is alive!
-                if (File.Exists(tailscalePath) && !string.IsNullOrEmpty(authKey))
+                // 3. Force Tailscale UP and authenticate via authkey — never interactive, never a browser.
+                //    We do this every time to refresh/repair the login and ensure the connection is alive.
+                bool upSucceeded = false;
+                if (File.Exists(TailscalePath) && !string.IsNullOrEmpty(authKey))
                 {
                     LogManager.Instance.Info("[Connect] Connecting Tailscale via CLI with AuthKey...");
-                    try
+                    upSucceeded = RunTailscaleUp(authKey);
+
+                    if (!upSucceeded)
                     {
-                        // Se o Tailscale-ipn estiver rodando, ele pode tentar abrir o browser. 
-                        // Mas --authkey deve fazer o login invisivel.
-                        var tsProcess = new Process
-                        {
-                            StartInfo = new ProcessStartInfo
-                            {
-                                FileName = tailscalePath,
-                                Arguments = $"up --authkey={authKey} --unattended --reset --accept-dns=false --accept-routes=false",
-                                UseShellExecute = false,
-                                CreateNoWindow = true
-                            }
-                        };
-                        tsProcess.Start();
-                        tsProcess.WaitForExit();
-                    }
-                    catch (Exception ex)
-                    {
-                        LogManager.Instance.Error($"[Connect] Failed to run tailscale up: {ex.Message}");
+                        // Auth failed (expired/invalid key, control server unreachable, etc.).
+                        // Kill any running GUI so it cannot pop a browser login while unauthenticated.
+                        LogManager.Instance.Error("[Connect] 'tailscale up' FAILED — AuthKey inválida/expirada ou servidor de controle inacessível. Nenhum navegador será aberto.");
+                        KillTailscaleGui();
                     }
                 }
-
-                // 4. Ensure GUI is running AFTER authentication
-                if (File.Exists(tailscaleIpnPath))
+                else if (!File.Exists(TailscalePath))
                 {
-                    if (Process.GetProcessesByName("tailscale-ipn").Length == 0)
-                    {
-                        LogManager.Instance.Info("[Connect] Starting Tailscale GUI app...");
-                        try
-                        {
-                            Process.Start(new ProcessStartInfo { FileName = tailscaleIpnPath, UseShellExecute = true });
-                            await Task.Delay(2000); // Aguarda o app iniciar na bandeja
-                        }
-                        catch { }
-                    }
+                    LogManager.Instance.Error("[Connect] Tailscale CLI not found after install attempt.");
                 }
 
-                // Wait up to 10 seconds for Tailscale to assign an IP
+                // 4. Wait up to 10 seconds for Tailscale to assign an IP.
+                //    Note: even if 'up' failed, a previous valid session may still hold an IP — that counts as success.
                 for (int wait = 0; wait < 10; wait++)
                 {
                     if (!string.IsNullOrEmpty(GetTailscaleIp()))
                     {
                         LogManager.Instance.Info("[Connect] Tailscale is connected with IP.");
-                        return; // Sucesso!
+                        // 5. Only start the GUI AFTER a confirmed, authenticated connection —
+                        //    an authenticated GUI never opens the browser login.
+                        StartGuiIfNotRunning();
+                        return true; // Sucesso!
                     }
                     await Task.Delay(1000);
                 }
-                
+
                 LogManager.Instance.Warning($"[Connect] Tailscale IP not found after attempt {retry + 1}. Retrying process...");
             }
+
+            LogManager.Instance.Error("[Connect] Tailscale FAILED to connect after 2 attempts (install/auth/IP). Propagating error to caller — no browser fallback.");
+            return false;
+        }
+
+        /// <summary>
+        /// Runs 'tailscale up' with the authkey in unattended mode. Captures exit code and stderr.
+        /// Returns true on exit code 0. Never opens a browser (authkey login is non-interactive).
+        /// </summary>
+        private static bool RunTailscaleUp(string authKey)
+        {
+            try
+            {
+                var tsProcess = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = TailscalePath,
+                        Arguments = $"up --authkey={authKey} --unattended --reset --accept-dns=false --accept-routes=false",
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true
+                    }
+                };
+                tsProcess.Start();
+                string stdErr = tsProcess.StandardError.ReadToEnd();
+                tsProcess.StandardOutput.ReadToEnd(); // drain to avoid pipe deadlock
+
+                if (!tsProcess.WaitForExit(60_000)) // 'up' can hang if the control plane is unreachable
+                {
+                    LogManager.Instance.Error("[Connect] 'tailscale up' timed out after 60s. Killing process.");
+                    try { tsProcess.Kill(); } catch { }
+                    return false;
+                }
+
+                if (tsProcess.ExitCode != 0)
+                {
+                    LogManager.Instance.Error($"[Connect] 'tailscale up' exited with code {tsProcess.ExitCode}. stderr: {stdErr.Trim()}");
+                    return false;
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogManager.Instance.Error($"[Connect] Failed to run tailscale up: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Removes every known Tailscale GUI autostart entry (HKCU/HKLM Run keys and Startup folder
+        /// shortcuts) so tailscale-ipn never auto-starts on Windows boot in an unauthenticated state
+        /// and pops a browser login. Called on every launcher start AND right after MSI install
+        /// (the installer re-creates the Run key).
+        /// </summary>
+        private static void DisableGuiAutostart()
+        {
+            try
+            {
+                using (var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true))
+                    key?.DeleteValue("Tailscale", false);
+                using (var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true))
+                    key?.DeleteValue("Tailscale", false);
+
+                string startupFolder = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
+                string tsShortcut = Path.Combine(startupFolder, "Tailscale.lnk");
+                if (File.Exists(tsShortcut)) File.Delete(tsShortcut);
+
+                string commonStartup = Environment.GetFolderPath(Environment.SpecialFolder.CommonStartup);
+                string commonTsShortcut = Path.Combine(commonStartup, "Tailscale.lnk");
+                if (File.Exists(commonTsShortcut)) File.Delete(commonTsShortcut);
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// Starts the Tailscale tray GUI if not already running. Only called after the connection
+        /// is confirmed (authenticated), so the GUI has no reason to open a browser login.
+        /// </summary>
+        private static void StartGuiIfNotRunning()
+        {
+            if (!File.Exists(TailscaleIpnPath)) return;
+
+            if (Process.GetProcessesByName("tailscale-ipn").Length == 0)
+            {
+                LogManager.Instance.Info("[Connect] Starting Tailscale GUI app (post-auth)...");
+                try
+                {
+                    Process.Start(new ProcessStartInfo { FileName = TailscaleIpnPath, UseShellExecute = true });
+                }
+                catch { }
+            }
+        }
+
+        /// <summary>
+        /// Kills any running Tailscale GUI processes. Used when authentication failed, so an
+        /// unauthenticated GUI cannot open a browser login popup on its own.
+        /// </summary>
+        private static void KillTailscaleGui()
+        {
+            try
+            {
+                foreach (var proc in Process.GetProcessesByName("tailscale-ipn"))
+                {
+                    LogManager.Instance.Info("[Connect] Killing unauthenticated Tailscale GUI to prevent browser login popup.");
+                    try { proc.Kill(); } catch { }
+                    proc.Dispose();
+                }
+            }
+            catch { }
         }
 
         public static string GetTailscaleIp()
@@ -187,7 +290,7 @@ namespace SPT.Launcher.Helpers
             try
             {
                 string fikaConfigPath = Path.Combine(gamePath, "BepInEx", "config", "com.fika.core.cfg");
-                
+
                 if (File.Exists(fikaConfigPath))
                 {
                     string tailscaleIp = GetTailscaleIp();
@@ -199,7 +302,7 @@ namespace SPT.Launcher.Helpers
                     }
 
                     LogManager.Instance.Info($"[Connect] Injecting Fika Auto-Config for P2P... Tailscale IP: {tailscaleIp}");
-                    
+
                     var lines = File.ReadAllLines(fikaConfigPath).ToList();
                     bool modified = false;
 
