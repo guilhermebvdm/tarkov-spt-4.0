@@ -113,6 +113,8 @@ O painel que edita dados troca o dot conforme o estado:
 
 `trl-panel` (**sem `--flush`** — formulário precisa do respiro do `__body`) + `trl-screen-bar` no topo, `trl-form-grid` no body (campos `trl-field` com label/hint/error; `is-invalid` no field marca o input), ações no rodapé alinhadas à direita: ghost à esquerda do primário.
 
+**Slider com valor vivo:** o incremento por arraste é o atributo nativo `step` (**default `1`** — ex.: 1%); o valor atual vai no label, num `<span class="js-slider-val">` que o consumidor atualiza no evento `input` (JS de 4 linhas — ver demo do showcase). Nunca slider sem o valor numérico visível.
+
 ### Página de tabela de dados
 
 `trl-toolbar` (search à esquerda, filtros, tag de status à direita) + `trl-panel--flush` com `trl-table` (thead sticky funciona dentro de container com scroll) + `trl-pagination` no rodapé. Colunas numéricas levam `class="num"`. Linha selecionada: `is-selected`.

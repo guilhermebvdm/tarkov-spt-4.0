@@ -693,8 +693,9 @@ tracking: .08em wide · .14em wider · .22em widest     (display/labels only)</p
           <label class="trl-switch"><input type="checkbox" name="fika-sync" checked><span>Fika sync</span></label>
         </div>
         <label class="trl-field">
-          <span class="trl-field__label">Spawn chance · 65%</span>
-          <input type="range" class="trl-slider" name="spawn-chance" value="65" min="0" max="100">
+          <span class="trl-field__label">Spawn chance · <span class="js-slider-val">65</span>%</span>
+          <!-- step = incremento por arraste (default 1 = 1%) -->
+          <input type="range" class="trl-slider" name="spawn-chance" value="65" min="0" max="100" step="1">
         </label>
       </div>
 
@@ -1441,6 +1442,13 @@ border-color: #444;   /* not even ours */</pre>
       sp.textContent = 'copied ✓';
       setTimeout(function () { sp.textContent = prev; }, 800);
     });
+  });
+
+  /* slider: valor vivo no label (step do input = incremento; default 1) */
+  document.querySelectorAll('.trl-slider').forEach(function (sl) {
+    var field = sl.closest('.trl-field');
+    var out = field && field.querySelector('.js-slider-val');
+    if (out) sl.addEventListener('input', function () { out.textContent = sl.value; });
   });
 
   /* filter chip remove demo */
