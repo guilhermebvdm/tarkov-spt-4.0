@@ -322,8 +322,8 @@ internal class SkillsClassTabPatch : ModulePatch
         try
         {
             // TEXTO: re-texta TODOS os TMPs nativos (normal + selected) — estilo/estados nativos preservados.
-            // Rodada 3 (texto sumiu in-game): além do text, força enabled + alpha>0 + GO ativo dentro da versão
-            // (defesa contra estado herdado do clone) e loga o diagnóstico completo 1× pra fechar a causa.
+            // Rodada 4: NÃO força mais SetActive em GO inativo (podia acordar badge/label auxiliar do prefab);
+            // o render voltou com o DestroyImmediate do LocalizedText (rodada 3).
             var tmps = tab.GetComponentsInChildren<TextMeshProUGUI>(true);
             foreach (var tmp in tmps)
             {
@@ -332,11 +332,6 @@ internal class SkillsClassTabPatch : ModulePatch
                 if (tmp.color.a < 0.05f)
                 {
                     tmp.color = new Color(tmp.color.r, tmp.color.g, tmp.color.b, 1f);
-                }
-
-                if (!tmp.gameObject.activeSelf)
-                {
-                    tmp.gameObject.SetActive(true);   // o pai (versão normal/selected) continua controlando a visibilidade
                 }
             }
 
@@ -354,6 +349,19 @@ internal class SkillsClassTabPatch : ModulePatch
 
                 if (crest != null)
                 {
+                    // Rodada 4 (texto empurrado pra FORA da aba): com layout controlando a largura, um Image sem
+                    // LayoutElement usa preferredWidth = LARGURA EM PX DO SPRITE — o brasão (~512px) desenhava
+                    // pequeno (preserveAspect) mas OCUPAVA um rect gigante, expulsando o rótulo. Cap 1× no
+                    // tamanho do sprite NATIVO (medalha) antes do swap; fallback 24px.
+                    var le = img.GetComponent<LayoutElement>();
+                    if (le == null)
+                    {
+                        le = img.gameObject.AddComponent<LayoutElement>();
+                        var native = img.sprite != null && img.sprite != crest ? img.sprite : null;
+                        le.preferredWidth = native != null ? native.rect.width : 24f;
+                        le.preferredHeight = native != null ? native.rect.height : 24f;
+                    }
+
                     img.sprite = crest;
                     img.preserveAspect = true;
                     img.gameObject.SetActive(true);
@@ -367,7 +375,7 @@ internal class SkillsClassTabPatch : ModulePatch
             if (!_loggedTabImages)
             {
                 _loggedTabImages = true;
-                Plugin.Log?.LogInfo($"[CustomClasses][053-tabicon] images=[{string.Join(", ", images.Select(i => i.gameObject.name))}]");
+                Plugin.Log?.LogInfo($"[CustomClasses][053-tabicon] images=[{string.Join(", ", images.Select(i => $"{i.gameObject.name} w={((RectTransform)i.transform).rect.width:F0} spr={(i.sprite != null ? i.sprite.name : "null")}"))}]");
                 // Rodada 3 — diagnóstico do texto: caminho, ativo, enabled, alpha e fonte de cada TMP da aba.
                 foreach (var tmp in tmps)
                 {
