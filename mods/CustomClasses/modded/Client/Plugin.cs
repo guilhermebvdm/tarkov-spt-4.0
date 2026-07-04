@@ -121,6 +121,7 @@ public class Plugin : BaseUnityPlugin
         new PackMulePatch().Enable();                       // (050.0) 🎒🛡️ Pack Mule — +30% limite de carga (piso, stash+raid)
         new WeightMarkerPatch().Enable();                   // (056) marcador "▲ +X%" no peso (aba Health) — atribui ao Pack Mule
         new RaidPerksNotificationPatch().Enable();          // (050) notificação de perks/drawbacks no início da raid
+        new NotificationDurationPatch().Enable();           // (fix 2026-07-03) notificação de perks por 10s (Infinite + hide agendado)
         // (050.1 fix 2026-06-24) MaxSpeedPatch/SprintSpeedPatch (getters) REMOVIDOS:
         //   - MaxSpeed é só TETO/denominador da razão RelativeSpeed = CharSpeed/MaxSpeed → aplicar no getter E no
         //     SetCharacterMovementSpeed CANCELAVA o efeito na razão. Agora só o driver real é patchado (abaixo).

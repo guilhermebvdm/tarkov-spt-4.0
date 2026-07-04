@@ -18,6 +18,9 @@ namespace CustomClasses.Client;
 /// </summary>
 internal class RaidPerksNotificationPatch : ModulePatch
 {
+    /// <summary>Fix 2026-07-03 — texto da última notificação exibida; o <see cref="NotificationDurationPatch"/> casa por ele (10s).</summary>
+    internal static string? LastNotificationText;
+
     protected override MethodBase GetTargetMethod()
     {
         return AccessTools.Method(typeof(GameWorld), nameof(GameWorld.OnGameStarted));
@@ -69,7 +72,9 @@ internal class RaidPerksNotificationPatch : ModulePatch
 
         if (!string.IsNullOrEmpty(text))
         {
-            // Long ≈ 10s (≥5s pedido) — a notificação default sumia rápido demais.
+            // Fix 2026-07-03: 10s exatos via NotificationDurationPatch (casa pelo texto e promove p/ Infinite
+            // + hide agendado). O `Long` fica de FALLBACK caso o patch da view não case (≈2× o default).
+            LastNotificationText = text;
             NotificationManagerClass.DisplayMessageNotification(text, ENotificationDurationType.Long);
         }
     }

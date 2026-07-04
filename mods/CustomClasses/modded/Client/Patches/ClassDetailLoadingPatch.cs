@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
 using SPT.Reflection.Patching;
@@ -37,6 +38,12 @@ internal class ClassDetailLoadingPatch : ModulePatch
     // ref: CR-01-08 — FieldInfo do TMP `Nickname` cacheado 1× (o tipo da row é sempre LoadingScreenPlayer).
     private static FieldInfo? _nicknameField;
 
+    // 06-fix-01 (CR-01-05 v2): espelho FIEL do early-return do AddPlayer do FIKA (netId já visto → no-op se o
+    // nickname divergir). O guard antigo comparava `nickTmp.text` — mas o FIKA usa TMP `SetText()`, que NÃO
+    // atualiza a property `.text` → o texto ficava o placeholder do prefab e o guard matava TODAS as linhas
+    // (popover nunca aparecia — feedback in-game 2026-07-03). Limpo junto com o Reset por instância.
+    private static readonly Dictionary<int, string> SeenNetIds = new();
+
     protected override MethodBase GetTargetMethod()
     {
         // ref: fika-plugin/Fika.Core/UI/Custom/LoadingScreenUI.cs:97
@@ -63,7 +70,22 @@ internal class ClassDetailLoadingPatch : ModulePatch
             if (!ReferenceEquals(_lastLoadingScreen, __instance))
             {
                 _lastLoadingScreen = __instance;
+                SeenNetIds.Clear();
                 ClassIdentities.Reset();
+            }
+
+            // 06-fix-01 (CR-01-05 v2): AddPlayer do FIKA é no-op p/ netId existente (LoadingScreenUI.cs:99-101) —
+            // se o nickname divergir do 1º visto, a row em tela é de OUTRO player → não aplicar nada.
+            if (SeenNetIds.TryGetValue(netId, out var firstNickname))
+            {
+                if (!string.Equals(firstNickname, nickname, StringComparison.Ordinal))
+                {
+                    return;
+                }
+            }
+            else
+            {
+                SeenNetIds[netId] = nickname;
             }
 
             // 057: resolve a identidade DESTE nickname (o mapa cobre todos os perfis do server, local incluso).
@@ -98,15 +120,10 @@ internal class ClassDetailLoadingPatch : ModulePatch
 
             // Campo público `Nickname` do LoadingScreenPlayer via reflection (zero tipos FIKA no IL).
             // ref: fika-plugin/Fika.Core/UI/Custom/LoadingScreenPlayer.cs:7 · CR-01-08 (FieldInfo cacheado)
+            // (06-fix-01: o guard por `nickTmp.text` foi REMOVIDO — TMP.SetText não atualiza `.text`; o espelho
+            //  do early-return do FIKA agora é o SeenNetIds acima.)
             _nicknameField ??= AccessTools.Field(row.GetType(), "Nickname");
             var nickTmp = _nicknameField?.GetValue(row) as TextMeshProUGUI;
-
-            // ref: CR-01-05 — espelha o early-return do AddPlayer do FIKA (LoadingScreenUI.cs:99-101): netId já
-            // existente → row VELHA com outro nickname; não aplicar a identidade de B na linha de A.
-            if (nickTmp != null && !string.Equals(nickTmp.text, nickname, StringComparison.Ordinal))
-            {
-                return;
-            }
 
             // (a) 057: identidade SEM hover (tint-only — PA-01-03): nickname na cor da classe.
             //     ref: CR-01-04 — classe SEM nameColor → não pinta (ApplyGradient pintaria branco por cima do

@@ -42,13 +42,17 @@ tela SKILLS** (`EFT.UI.BuffIcon.smethod_0` → `StaticIcons.BuffIdSprites[EBuffI
   (ex.: flinch/aim punch → `AimMasterWiggle`, dano recebido → `HealthEliteAbsorbDamage`); (c) altura dos cards no
   Tanque (6 cards na coluna de perks) cabe sem scroll.
 
-### 2. 🟡 059 CLASS #1 — título da aba cortado (F12 LIVE implementado 2026-07-03; calibrar in-game)
-A aba CLASS fica muito à esquerda e o "CL" é cortado pela margem da tela.
-- **F12 `Class Tab — X offset` agora é LIVE** (`RepositionClassTab` extraído do Postfix): reaplica (a) a cada
-  `Show` da tela e (b) no `SettingChanged` (slider mexe → aba move na hora, tela aberta). Não precisa mais do log
-  — **o usuário calibra o offset no F12 até "CLASS" aparecer inteiro e passa o valor** → fixar como default.
-- O log `[CustomClasses][053-tabs]` continua útil pra corrigir a CAUSA (cálculo `sRt.x - classW - gap`), se quisermos
-  default 0 de fábrica em vez de offset calibrado.
+### 2. 🟡 059 CLASS #1 — aba CLASS v2 (rodada de fixes in-game 2026-07-03 NOITE; re-validar)
+Feedback do teste: aba desformatada mesmo com offset 185; fonte/hover destoando; sem espaço pros nativos.
+**Implementado na rodada 2:**
+- **Posição:** CLASS agora começa na **borda esquerda do conteúdo** (`_skillsScreen` convertido pro espaço da
+  barra — a "linha vermelha" do print) e **SKILLS/MASTERING são empurrados pra direita** (delta nativo
+  preservado; posições nativas capturadas 1× por instância). F12 `Class Tab — X offset` continua live pra ajuste fino.
+- **Fonte/hover:** overlay REMOVIDO — o rótulo "CLASS" agora é escrito nos **TMPs nativos** das versões
+  normal/selected do Tab → fonte, tamanho, prancha de seleção e hover idênticos a SKILLS/MASTERING. O ícone
+  nativo (herdado do clone) recebe o brasão da classe.
+- **MASTERING "vazio" NÃO é bug:** evidência `MasteringScreen.Show` (Assembly) — a lista vem de
+  `profile.Skills.Mastering` (só armas com progresso); perfil novo = "All types (0)". Atire com uma arma e reabra.
 
 ### 3. 🟡 059 CLASS #2 — chip ✓/✗ nas flags (implementado `76904b9`, VERIFICAR)
 Linhas Flag (`no ergo penalty`, `no arm fatigue`) agora têm chip **✓** (perk) / **✗** (drawback) — `MultiplierFormat.ValueToken`.
@@ -64,7 +68,10 @@ Linhas Flag (`no ergo penalty`, `no arm fatigue`) agora têm chip **✓** (perk)
 ### 5. 🟡 056 — calibrar F12 e fixar default
 Usuário ajusta `Weight Marker — X/Y offset` (F12 → `Perks — UI`) até posicionar bem (chute inicial X≈−70, Y≈+30) e passa os valores → fixar como **default** no `PerksConfig` (aí dispensa o F12).
 
-### 6. 🟡 057 — identidade per-player no loading (IMPLEMENTADO 2026-07-03 via /g-autodev; validar in-game)
+### 6. 🟡 057 — identidade per-player no loading (IMPLEMENTADO 2026-07-03; **06-fix-01 aplicado** — re-validar)
+**Gate 1 falhou:** popover não abria em NENHUMA linha — guard do CR-01-05 comparava `nickTmp.text`, mas o FIKA usa
+`TMP.SetText()` que **não atualiza `.text`** → falso-positivo universal. Fix: mapa `SeenNetIds` (netId→nickname)
+espelha o early-return do FIKA sem depender de TMP ([06-fix-01](backlog/057-class-identity-coop/057-class-identity-coop-06-fix-01.md)).
 Ciclo SDD completo (spec → reviews → code-mod → code-review) na pasta [backlog/057-class-identity-coop/](backlog/057-class-identity-coop/).
 Entregue: rota server `/customclasses/class-identities` (nickname→classe de TODOS os perfis; a Edition do perfil
 é a chave do `ClassVisualRegistry` — a hipótese `GameVersion`-no-client foi DESCARTADA: no loading o client só tem

@@ -372,7 +372,7 @@ internal static class PerksPanelView
             gtmp.font = font;
         }
 
-        gtmp.text = group.Name;
+        gtmp.text = line.Title;   // fix in-game 2026-07-03: título ÚNICO por efeito (não repete o nome do grupo)
         gtmp.fontSize = 12.5f;
         gtmp.fontStyle = FontStyles.Bold | FontStyles.UpperCase;
         gtmp.characterSpacing = 3f;
@@ -439,7 +439,8 @@ internal static class PerksPanelView
         tmp.color = new Color(0.55f, 0.57f, 0.60f, 1f);
         tmp.raycastTarget = false;
         tmp.alignment = TextAlignmentOptions.BottomLeft;
-        go.GetComponent<LayoutElement>().minHeight = 28f;
+        tmp.margin = new Vector4(0f, 0f, 0f, 8f);   // fix in-game 2026-07-03: respiro entre o rótulo e a divisória
+        go.GetComponent<LayoutElement>().minHeight = 34f;
 
         // idéia 2: linha divisória fininha na base do rótulo.
         var line = new GameObject("Divider", typeof(RectTransform), typeof(Image));
