@@ -69,13 +69,24 @@ Usos permitidos de `--trl-brand` (`#ff0000`), lista exaustiva:
 - **Comportamento (aria/teclado) é responsabilidade do consumidor** — o DS é CSS-only. Dropdown custom e tabs precisam de roles/teclado no app; para seleção simples, prefira o `.trl-select` nativo (acessível de graça).
 - **Exceção de game-chrome:** os labels do paper doll usam 8px (fiéis à tela Gear do EFT), abaixo da diretriz de ≥11px — a cor é `--trl-fg-muted` (AA) e a informação completa do slot deve estar disponível via tooltip/aria no consumidor.
 
-### R6. Densidade
+### R6. Tipografia em px (decisão registrada)
+
+A escala tipográfica usa **px por decisão**: ferramenta densa desktop, o mecanismo de ampliação suportado é o **zoom do browser** (funciona em tudo); a preferência de tamanho de fonte do SO não escala a UI. Migração para `rem` é candidata a v2 (MAJOR) — não "corrigir" pontualmente.
+
+### R7. Densidade
 
 - Alturas de controle: 30px (padrão) / 24px (`--sm`). Linha de tabela ~36px.
 - Paddings internos: `space-2`/`space-3`. Gutters de página: `space-6`.
 - Editores são ferramentas de dados: densidade é feature, espaçamento generoso é para o showcase/hero, não para o CRUD.
 
-### R7. Assets e scripts
+### R8. I18n (PT-BR/EN)
+
+- **Orçamento de expansão: PT ≈ +30% sobre EN.** Todo rótulo com `white-space: nowrap` tem contenção no DS (ellipsis) — mas telas novas devem ser **testadas com strings PT reais**, não lorem/EN.
+- Números, moeda (₽/$/€) e datas: formatação com o locale do jogo é responsabilidade do consumidor; o DS garante alinhamento (`tabular-nums`).
+- Sem texto em imagem; uppercase CSS preserva acentos.
+- Fora de escopo por decisão: RTL, framework de pluralização/ICU, tema claro.
+
+### R9. Assets e scripts
 
 - Nenhum recurso externo (CDN, Google Fonts) — editores rodam offline/localhost.
 - Se o DS for copiado para o `wwwroot` de um mod: **nenhum `.js` solto** (o ModValidator do SPT rejeita) — scripts ficam inline no HTML.
@@ -155,13 +166,24 @@ Estados: `is-empty` · `is-editable` · `is-invalid` (unresolved) · `is-draggin
 
 **Mod tree** — linhas recursivas com `__slot` (id mono lowercase: `mod_magazine`), `__name`, badges reutilizados (`trl-badge--green` required, `--red` unknown slot) e `__actions` que aparecem no hover. Aninhamento via `__children` (indent + hairline, mesmo pattern do `.trl-tree`).
 
-**Heatmap** — buckets monocromáticos tan em células de tabela: `trl-heat--none/low/mid/high` (0 / 1–3 / 4–6 / 7+). Nunca usar cores de status para heat — heat é intensidade, não semântica.
+**Heatmap** — buckets monocromáticos tan em células de tabela: `trl-heat--none/low/mid/high` (0 / 1–3 / 4–6 / 7+). Nunca usar cores de status para heat — heat é intensidade, não semântica. **A célula sempre exibe o valor** — cor nunca é o único encoding (mesma regra dos chips ±%).
 
 **Categorias de skill** (Physical/Mental/Combat/Practical/Elite) — mapear para as cores de status existentes no consumidor (ex.: Physical=green, Practical=amber, Combat=red-soft, Mental=blue-400, Elite=tan). Não criar novas hues.
 
 **Facções** — `trl-card--usec` / `trl-card--bear` (tokens `--trl-faction-*`). Azul `--trl-blue-400` existe para facção USEC e usos informacionais — não vira accent de UI.
 
 **Fullscreen** — `.trl-fullscreen` ( `hidden` controla) + `.trl-fullscreen__exit`; usado para maximizar matrizes/tabelas densas.
+
+### Gráficos (dataviz)
+
+Cores de UI **reprovam** como cores de série (validado por script — banda de luminosidade, chroma, CVD). Usar os slots `--trl-viz-*` do tokens.css:
+
+- **Categórica** (identidade): `viz-cat-1..4` em **ordem fixa** — nunca ciclar, nunca repintar séries sobreviventes ao filtrar; 5ª série vira "Other" (`viz-neutral`), small multiples ou encoding composto.
+- **Sequencial** (magnitude): `viz-seq-1..4` (ramp tan 600→300; 700/800 reprovam o piso de contraste 2:1 — não estender).
+- **Divergente** (polaridade): `viz-cat-3` ↔ `viz-neutral` ↔ `viz-cat-4` (midpoint neutro por design).
+- **Status é reservado** (success/warning/danger) — nunca vira série.
+- **Nunca dual-axis** (2 escalas Y): duas medidas = dois gráficos ou indexação a base comum. ≥2 séries = legenda sempre; texto (valores/labels) usa tokens de texto, nunca a cor da série. Heat/chips sempre com valor visível.
+- Paleta nova ou mudança nos slots: **rodar o validador** da skill `dataviz` contra `--trl-surface-1` (procedimento na skill do repo `trl-ds-validation`) — nunca aprovar no olho.
 
 ### Consumo em Blazor/MudBlazor (fase futura)
 
@@ -172,3 +194,4 @@ O adapter oficial (`bridge/trl-mudblazor.css`, mapeando `--mud-palette-*` → to
 | Data | Autor | Alteração |
 |---|---|---|
 | 2026-07-03 | Guilherme | Criação (v1.0.0) — regras R1–R7 + receitas iniciais |
+| 2026-07-03 | Guilherme | Review por lentes: R6 (px por decisão) e R8 (i18n) inseridas — Densidade→R7, Assets→R9; receita "Gráficos (dataviz)" com tokens `--trl-viz-*` validados; heat exige valor visível |

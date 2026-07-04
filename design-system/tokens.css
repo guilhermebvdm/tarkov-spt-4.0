@@ -258,4 +258,22 @@
   /* Game data (block H): inventory cell unit and 2D-grid line color */
   --trl-cell-unit:   36px;
   --trl-grid2d-line: rgba(199, 180, 138, .07);
+
+  /* ── Dataviz (chart series) ──────────────────────────────────────────────
+   * UI colors FAIL as series colors (validated 2026-07-03 with the dataviz
+   * skill script against surface-1: lightness band, chroma floor, CVD).
+   * These pass all checks. Categorical order is FIXED — never cycle, never
+   * repaint survivors on filter; 5th series folds into "Other" (viz-neutral).
+   * Sequential = tan 600→300 (tan-700/800 fail the 2:1 surface floor).
+   * Diverging = viz-cat-3 ↔ viz-neutral ↔ viz-cat-4.
+   * Status colors (success/warning/danger) are reserved — never a series. */
+  --trl-viz-cat-1:   #4a86c8;
+  --trl-viz-cat-2:   #b8892e;
+  --trl-viz-cat-3:   #4f9a6a;
+  --trl-viz-cat-4:   #cf4b3c;
+  --trl-viz-seq-1:   #6b6247;
+  --trl-viz-seq-2:   #8f8560;
+  --trl-viz-seq-3:   #ab9a71;
+  --trl-viz-seq-4:   #c7b48a;
+  --trl-viz-neutral: #7a786e;
 }

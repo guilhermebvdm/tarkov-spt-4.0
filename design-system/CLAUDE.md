@@ -12,7 +12,7 @@
 | `fonts/bender.css` | `@font-face` Bender (opcional — fallback Bahnschrift). Licença: `fonts/LICENSE-NOTE.txt` |
 | `design-system.html` | Showcase navegável — **abra para ver tudo vivo**; é também o teste de integração |
 | `templates/editor-starter.html` | Ponto de partida copy-paste de editor novo |
-| `PATTERNS.md` | **Regras normativas (R1–R7) + receitas** — leia antes de estilizar qualquer editor |
+| `PATTERNS.md` | **Regras normativas (R1–R9) + receitas** — leia antes de estilizar qualquer editor |
 | `CHANGELOG.md` | Semver: MAJOR quebra token/classe · MINOR componente novo · PATCH ajuste visual |
 
 Ordem de consumo:
@@ -34,6 +34,7 @@ Ordem de consumo:
 4. Mudanças no DS são **aditivas**; breaking = MAJOR no CHANGELOG. Componente novo entra no showcase **na mesma mudança**.
 5. Estilo novo específico de um mod fica no CSS do mod (consumindo tokens) — só entra aqui o que ≥2 editores usariam.
 6. Se copiar esta pasta para `wwwroot` de mod: **nenhum `.js` solto** (ModValidator rejeita) — scripts inline.
+7. Ao revisar/refatorar telas, validar com a skill do repo **`trl-ds-validation`** (lentes readability/a11y/i18n/dataviz + paletas de gráfico validadas). Gráficos usam os tokens `--trl-viz-*` — cores de UI reprovam como série.
 
 ## Consumidores e fases futuras
 

@@ -8,6 +8,8 @@ Primeira versão. Inclui o bloco **H. Game data** (primitivos de domínio Tarkov
 
 Filtros: `trl-multiselect` (dropdown de checkboxes com count no trigger, counts por opção, `__search` sticky p/ listas longas, Select all/Clear; painel persiste entre cliques) + `trl-filter-chip` (chips de filtros aplicados com remove) — receita "Barra de filtros" no PATTERNS.md. Dropdown e multiselect compartilham a casca (trigger/caret/painel/option) em seletores agrupados; diferenças intencionais são overrides explícitos comentados.
 
+Review por lentes (readability/a11y/i18n/dataviz — skill do repo `trl-ds-validation`): tokens `--trl-viz-*` de gráfico validados por script (categórica fixa 4 hues ΔE≥17, sequencial tan-600→300, divergente c/ neutro) + receita "Gráficos" no PATTERNS; screen-bar e doll label contidos p/ títulos PT longos (ellipsis); targets WCAG 2.2 ≥24px (search clear, modal close, breadcrumb via hit-area); regras novas R6 (px por decisão) e R8 (i18n PT-BR/EN); heat exige valor visível na célula.
+
 Auditoria funcional via DevTools: fix de grid blowout no `trl-kv` (`minmax(0,1fr)` + `overflow-wrap` — ids longos quebravam o layout <900px); botão × do `trl-search` funcional nos templates; Esc fecha modal e fullscreen (demos); starter sem `--flush` no painel de formulário (respiro do `__body`).
 
 Passe de polimento premium/fluidez: `trl-doll` espelha a tela Gear do EFT — grade de slots com áreas nomeadas 1:1 (`__slot--earpiece` … `--scabbard`, armas cruzando 2 colunas) sobre a silhueta SVG de soldado + coluna `__carry` (rig/pockets/backpack/pouch), em vez de posicionamento absoluto obrigatório; tabs com underline animada (scaleX); modal com entrada `trl-pop` + fade no overlay; `trl-cell` com transições e lift no hover editável; botões sólidos com luz superior sutil; `trl-card--interactive` (lift + `is-selected` p/ pickers); transições consistentes em table rows, menu, pagination, closes.
@@ -19,4 +21,4 @@ Passe de polimento premium/fluidez: `trl-doll` espelha a tela Gear do EFT — gr
 - `templates/editor-starter.html` — shell de editor funcional.
 - `fonts/` — Bender Regular/Bold woff2 (origem tarkov.dev; ver LICENSE-NOTE.txt) com fallback Bahnschrift.
 - `assets/` — logo TRL integral + marca compacta.
-- Docs: `README.md`, `CLAUDE.md`, `PATTERNS.md` (regras R1–R7 + receitas).
+- Docs: `README.md`, `CLAUDE.md`, `PATTERNS.md` (regras R1–R9 + receitas).

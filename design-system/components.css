@@ -194,12 +194,18 @@
   color: var(--trl-fg-faint);
 }
 
+/* contained: long (PT) titles truncate instead of crushing the meta */
 .trl-screen-bar__title {
   color: var(--trl-accent);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .trl-screen-bar__meta {
   margin-left: auto;
+  flex: none;
   letter-spacing: var(--trl-track-wide);
   color: var(--trl-fg-faint);
 }
@@ -463,6 +469,10 @@
 .trl-breadcrumb a {
   color: var(--trl-fg-muted);
   text-decoration: none;
+  /* invisible hit-area padding → ≥24px target without layout shift */
+  display: inline-block;
+  padding: var(--trl-space-1) var(--trl-space-h);
+  margin: calc(-1 * var(--trl-space-1)) calc(-1 * var(--trl-space-h));
 }
 
 .trl-breadcrumb a:hover { color: var(--trl-accent); }
@@ -838,11 +848,11 @@ textarea.trl-input {
 
 .trl-search__clear {
   position: absolute;
-  right: 4px;
+  right: 3px;
   top: 50%;
   transform: translateY(-50%);
-  width: 22px;
-  height: 22px;
+  width: 24px;   /* WCAG 2.2 target size */
+  height: 24px;
   border: none;
   background: none;
   color: var(--trl-fg-faint);
@@ -1795,8 +1805,8 @@ textarea.trl-input {
 
 .trl-modal__close {
   margin-left: auto;
-  width: 22px;
-  height: 22px;
+  width: 24px;   /* WCAG 2.2 target size */
+  height: 24px;
   border: none;
   background: none;
   color: var(--trl-fg-faint);
@@ -2180,6 +2190,12 @@ textarea.trl-input {
   font-size: 8px;
   color: var(--trl-fg-muted);
   white-space: nowrap;
+  /* width:0 + min-width:100%: the label never sets the slot width (the
+   * cell does) — long PT labels truncate instead of widening the column */
+  width: 0;
+  min-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* inside the doll, cells size in container units instead of pixels */
