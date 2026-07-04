@@ -30,7 +30,11 @@ internal static class ClassIdentityView
     public static void ApplyGradient(TextMeshProUGUI tmp, Color baseColor)
     {
         var light = Color.Lerp(baseColor, Color.white, GradientLighten);
-        tmp.color = baseColor;   // base/fallback caso o vertex gradient seja ignorado
+        // Fix 2026-07-04 ("texto bem mais escuro que o ícone", feedback com prints): o TMP MULTIPLICA o
+        // vertex gradient pela cor base (tmp.color) — com AMBOS na cor da classe o render era cor×cor
+        // (cinza 0.55 → 0.30). A cor vive SÓ no gradiente; a base fica branca (fallback: branco se o
+        // gradient for ignorado). O ícone nunca sofreu disso (cor embutida na textura, vértice branco).
+        tmp.color = Color.white;
         tmp.enableVertexGradient = true;
         tmp.colorGradient = new VertexGradient(light, light, baseColor, baseColor);   // TL, TR, BL, BR
     }
