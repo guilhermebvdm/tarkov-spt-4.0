@@ -110,9 +110,11 @@ namespace SPT.Launcher.ViewModels
 
             FinalizeAccountCommand = ReactiveCommand.CreateFromTask(async () =>
             {
-                RegisterErrorMsg = "";
-
+                // ref: CR-01-02 — guard ANTES de limpar a mensagem: clique no estado vazio
+                // não pode apagar a única orientação visível da tela.
                 if (SelectedClass == null) return;
+
+                RegisterErrorMsg = "";
 
                 // A edition enviada é a chave EXATA registrada no ProfileTemplates (contrato SP0),
                 // nunca o displayName exibido na UI.
@@ -165,56 +167,75 @@ namespace SPT.Launcher.ViewModels
         /// </summary>
         private async Task LoadClassesAsync()
         {
+            // ref: CR-01-01 — try/catch de última instância + finally: o Post final NUNCA é pulado.
+            // O chamador é Task.Run fire-and-forget (exceção seria engolida em silêncio); qualquer
+            // falha inesperada fora do caminho feliz (ex.: IOException do LogManager sob escrita
+            // concorrente) não pode deixar "Carregando classes..." eterno sem fallback.
             List<ClassProfile> classes = null;
 
             try
             {
-                string json = await Task.Run(() => RequestHandler.RequestClassList());
-                List<ClassInfo> serverClasses = Json.Deserialize<List<ClassInfo>>(json);
+                try
+                {
+                    // ref: CR-01-08.1 — chamada direta (sem Task.Run aninhado): este método já roda
+                    // em thread de fundo (WhenActivated → Task.Run).
+                    string json = RequestHandler.RequestClassList();
+                    List<ClassInfo> serverClasses = Json.Deserialize<List<ClassInfo>>(json);
 
-                if (serverClasses != null && serverClasses.Count > 0)
-                {
-                    classes = BuildFromServer(serverClasses);
+                    if (serverClasses != null && serverClasses.Count > 0)
+                    {
+                        classes = await BuildFromServerAsync(serverClasses);
+                    }
+                    else
+                    {
+                        LogManager.Instance.Warning("[ClassSelection] /customclasses/classes returned null/empty list");
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    LogManager.Instance.Warning("[ClassSelection] /customclasses/classes returned null/empty list");
+                    LogManager.Instance.Warning($"[ClassSelection] Failed to load /customclasses/classes: {ex.GetType().Name}: {ex.Message}");
+                }
+
+                if (classes == null || classes.Count == 0)
+                {
+                    LogManager.Instance.Warning("[ClassSelection] Falling back to vanilla editions + profileDescriptions");
+                    classes = BuildFromEditionsFallback();
                 }
             }
             catch (Exception ex)
             {
-                LogManager.Instance.Warning($"[ClassSelection] Failed to load /customclasses/classes: {ex.Message}");
+                // Última instância: nem o próprio log pode derrubar o load.
+                try { LogManager.Instance.Error($"[ClassSelection] Unexpected failure loading classes: {ex}"); } catch { /* sem canal de log confiável aqui */ }
             }
-
-            if (classes == null || classes.Count == 0)
+            finally
             {
-                LogManager.Instance.Warning("[ClassSelection] Falling back to vanilla editions + profileDescriptions");
-                classes = BuildFromEditionsFallback();
+                List<ClassProfile> publishable = classes ?? new List<ClassProfile>();
+
+                Dispatcher.UIThread.Post(() =>
+                {
+                    AvailableClasses.Clear();
+
+                    foreach (ClassProfile profile in publishable)
+                    {
+                        AvailableClasses.Add(profile);
+                    }
+
+                    SelectedClass = AvailableClasses.Count > 0 ? AvailableClasses[0] : null;
+                    IsLoading = false;
+
+                    if (AvailableClasses.Count == 0)
+                    {
+                        RegisterErrorMsg = "Nenhuma classe disponível. Verifique a conexão com o servidor e tente novamente.";
+                    }
+                });
             }
-
-            Dispatcher.UIThread.Post(() =>
-            {
-                AvailableClasses.Clear();
-
-                foreach (ClassProfile profile in classes)
-                {
-                    AvailableClasses.Add(profile);
-                }
-
-                SelectedClass = AvailableClasses.Count > 0 ? AvailableClasses[0] : null;
-                IsLoading = false;
-
-                if (AvailableClasses.Count == 0)
-                {
-                    RegisterErrorMsg = "Nenhuma classe disponível. Verifique a conexão com o servidor e tente novamente.";
-                }
-            });
         }
 
         /// <summary>Maps the SP0 payload to UI items. Dedupes by editionKey defensively (P-058.4).</summary>
-        private List<ClassProfile> BuildFromServer(List<ClassInfo> serverClasses)
+        private async Task<List<ClassProfile>> BuildFromServerAsync(List<ClassInfo> serverClasses)
         {
             var result = new List<ClassProfile>();
+            var iconTasks = new List<Task>();
             var seenKeys = new HashSet<string>(StringComparer.Ordinal);
             Dictionary<string, string> vanillaDescriptions = ServerManager.SelectedServer?.profileDescriptions;
 
@@ -239,17 +260,31 @@ namespace SPT.Launcher.ViewModels
                     description = vanillaDescription;
                 }
 
-                result.Add(new ClassProfile
+                ClassProfile profile = new ClassProfile
                 {
                     EditionKey = info.EditionKey,
                     Name = FirstNonEmpty(info.DisplayName?.Pt, info.DisplayName?.En) ?? info.EditionKey,
                     Description = description ?? string.Empty,
-                    IconPath = CacheIcon(info),
                     NameBrush = ParseNameColor(info.NameColor),
                     Skills = info.Skills,
                     SkillMultipliers = info.SkillMultipliers
-                });
+                };
+
+                result.Add(profile);
+
+                // ref: CR-01-03 — ícones em PARALELO (Task.WhenAll): pior caso colapsa de ~7×15 s em
+                // série para ~1 timeout (15 s). Opção de menor risco vs publicar-antes-e-preencher:
+                // não exige ClassProfile reativo nem Post por item (perfis ainda não estão bound à UI
+                // aqui — escrever IconPath em threads do pool antes do publish é seguro; o await do
+                // WhenAll estabelece a visibilidade de memória antes do Post).
+                if (!string.IsNullOrWhiteSpace(info.IconUrl))
+                {
+                    ClassInfo captured = info;
+                    iconTasks.Add(Task.Run(() => profile.IconPath = CacheIcon(captured)));
+                }
             }
+
+            await Task.WhenAll(iconTasks);
 
             return result;
         }

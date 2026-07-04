@@ -5,6 +5,8 @@
              xmlns:cc="using:SPT.Launcher.CustomControls"
              xmlns:cvt="using:SPT.Launcher.Converters"
              mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="720"
+             xmlns:helpers="using:SPT.Launcher.Helpers"
+             xmlns:base="clr-namespace:SPT.Launcher;assembly=SPT.Launcher.Base"
              x:Class="SPT.Launcher.Views.ClassSelectionView">
 
     <UserControl.Resources>
@@ -69,7 +71,9 @@
                         <Button Content="VOLTAR" Command="{Binding GoToRegisterCommand}"
                                 Classes="ghost" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
 
-                        <cc:TrlVersionFooter HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                        <cc:TrlVersionFooter HorizontalAlignment="Center" Margin="0,10,0,0"
+                                             LauncherVersion="{x:Static helpers:LauncherUpdateHelper.CurrentVersion}"
+                                             ServerVersion="{x:Static base:ServerManager.TrlServerVersion}"/>
                     </StackPanel>
                 </Grid>
             </Border>
