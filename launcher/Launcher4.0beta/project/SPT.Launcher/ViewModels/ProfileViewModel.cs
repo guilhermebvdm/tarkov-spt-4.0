@@ -10,9 +10,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using SPT.Launcher.Sync;
 using SPT.Launcher.Attributes;
 using SPT.Launcher.ViewModels.Dialogs;
 using Avalonia.Threading;
@@ -119,11 +120,34 @@ namespace SPT.Launcher.ViewModels
             set => this.RaiseAndSetIfChanged(ref _outdatedFiles, value);
         }
 
+        // === Item 007 — sync engine (SPT.Launcher.Base/Sync) ===
+
+        private bool _canCancelUpdate;
+        public bool CanCancelUpdate
+        {
+            get => _canCancelUpdate;
+            set => this.RaiseAndSetIfChanged(ref _canCancelUpdate, value);
+        }
+
+        private string _lastUpdateText = "";
+        public string LastUpdateText
+        {
+            get => _lastUpdateText;
+            set => this.RaiseAndSetIfChanged(ref _lastUpdateText, value);
+        }
+
+        private bool _hasLastUpdate;
+        public bool HasLastUpdate
+        {
+            get => _hasLastUpdate;
+            set => this.RaiseAndSetIfChanged(ref _hasLastUpdate, value);
+        }
+
         public ICommand UpdateModsCommand { get; }
         public ICommand VerifyFilesCommand { get; }
+        public ICommand CancelUpdateCommand { get; }
 
-        private List<ManifestFile> _filesToUpdate = new List<ManifestFile>();
-        private List<string> _filesToDelete = new List<string>();
+        private CancellationTokenSource _syncCts;
 
         public ProfileViewModel(IScreen Host) : base(Host)
         {
@@ -141,8 +165,11 @@ namespace SPT.Launcher.ViewModels
 
             CurrentId = AccountManager.SelectedAccount.id;
 
-            UpdateModsCommand = ReactiveCommand.CreateFromTask(async () => await DoUpdateMods());
+            UpdateModsCommand = ReactiveCommand.CreateFromTask(async () => await ForceCheckForUpdates());
             VerifyFilesCommand = ReactiveCommand.CreateFromTask(async () => await ForceCheckForUpdates());
+            CancelUpdateCommand = ReactiveCommand.CreateFromTask(async () => await CancelUpdate());
+
+            LoadLastUpdateInfo();
 
             LauncherSettingsProvider.Instance.PropertyChanged += (s, e) =>
             {
@@ -272,7 +299,9 @@ namespace SPT.Launcher.ViewModels
 
 
         /// <summary>
-        /// Verificação manual — ignora versão local e faz scan completo
+        /// Verificação manual — ignora versão local e faz scan completo.
+        /// Em Dev Mode a verificação manual RODA o motor (com proteção R5 — divergentes do
+        /// baseline são preservados), enquanto o auto-check do login continua pulando.
         /// </summary>
         private async Task ForceCheckForUpdates()
         {
@@ -284,27 +313,30 @@ namespace SPT.Launcher.ViewModels
                 File.Delete(hashFilePath);
 
             LogManager.Instance.Info("[Profile] Verificação manual solicitada — forçando scan completo...");
-            await CheckForUpdates();
+            await CheckForUpdates(manual: true);
         }
 
         /// <summary>
-        /// Verifica atualizações comparando versão do servidor.
-        /// Se a versão for a mesma, pula o scan completo (rápido).
-        /// Se manifest hash igual, pula scan (mods atualizados).
-        /// Se diferente, compara hashes com o manifesto do servidor.
+        /// Item 007: verificação + aplicação via motor de sync (SPT.Launcher.Base/Sync).
+        /// Regras por pasta (config preserva divergentes do baseline, config-server espelha
+        /// com delete, patchers/plugins espelham movendo removidos p/ -disabled), apply
+        /// atômico, cancelamento com confirmação e manifesto de mudanças em last-update.json.
         /// </summary>
-        private async Task CheckForUpdates()
+        private async Task CheckForUpdates(bool manual = false)
         {
             // Sempre usa a pasta onde o jogo está configurado
             string gamePath = LauncherSettingsProvider.Instance.GamePath;
 
             bool manifestFailed = false;
+            bool devMode = LauncherSettingsProvider.Instance.IsDevMode;
 
             try
             {
-                if (LauncherSettingsProvider.Instance.IsDevMode)
+                if (devMode && !manual)
                 {
-                    LogManager.Instance.Info("[Profile] DevMode ativo. Pulando varredura e download do manifesto...");
+                    // Auto-check do login continua pulando em Dev Mode (login rápido, server
+                    // pode nem estar de pé). A verificação manual roda o motor com R5.
+                    LogManager.Instance.Info("[Profile] DevMode ativo. Pulando varredura automática (verificação manual disponível)...");
                     LauncherSettingsProvider.Instance.IsUpdating = false;
                     IsUpdateVisible = false;
                     return;
@@ -314,8 +346,6 @@ namespace SPT.Launcher.ViewModels
                 IsUpdateVisible = true;
                 UpdateStatusText = LocalizationProvider.Instance.update_checking;
                 UpdateProgress = 0;
-                _filesToUpdate.Clear();
-                _filesToDelete.Clear();
                 LogManager.Instance.Info("[Profile] Verificando atualizações de mods...");
 
                 // 1. Buscar hash do manifesto do servidor (endpoint leve)
@@ -383,7 +413,7 @@ namespace SPT.Launcher.ViewModels
 
                     manifestFailed = false;
                     // Retry recursivo — tenta novamente todo o fluxo
-                    await CheckForUpdates();
+                    await CheckForUpdates(manual);
                     return;
                 }
 
@@ -392,6 +422,7 @@ namespace SPT.Launcher.ViewModels
                 var managedPaths = manifest["managedPaths"]?.ToObject<List<string>>() ?? new List<string>();
                 var deleteFiles = manifest["deleteFiles"]?.ToObject<List<string>>() ?? new List<string>();
                 var ignoredFiles = manifest["ignoredFiles"]?.ToObject<List<string>>() ?? new List<string>();
+                var folderRules = manifest["folderRules"]?.ToObject<Dictionary<string, string>>();
                 var optionalGroups = manifest["optionalGroups"]?.ToObject<List<OptionalModsHelper.OptionalGroupInfo>>() ?? new List<OptionalModsHelper.OptionalGroupInfo>();
 
                 // Atualizar cache de opcionais e popular toggles na UI
@@ -428,82 +459,7 @@ namespace SPT.Launcher.ViewModels
                     return;
                 }
 
-                // Separar arquivos: obrigatórios vs opcionais
-                var mandatoryFiles = allFiles.Where(f => !f.optional).ToList();
-                var optionalFiles = allFiles.Where(f => f.optional).ToList();
-
-                // Criar set de TODOS os caminhos do manifesto (obrigatórios + opcionais) para proteção
-                var manifestFilePaths = new HashSet<string>(
-                    allFiles.Select(f => f.path.Replace('/', Path.DirectorySeparatorChar).ToLowerInvariant())
-                );
-
-                // Determinar quais arquivos opcionais precisam de update (só se grupo ativo)
-                var activeOptionalFiles = optionalFiles
-                    .Where(f => LauncherSettingsProvider.Instance.IsOptionalEnabled(f.optionalGroup))
-                    .ToList();
-
-                var filesToCheck = mandatoryFiles.Concat(activeOptionalFiles).ToList();
-
-                UpdateMaxProgress = filesToCheck.Count;
-                int checkedCount = 0;
-                int outdated = 0;
-
-                // 1. Verificar arquivos do manifesto (faltantes ou desatualizados)
-                foreach (var file in filesToCheck)
-                {
-                    checkedCount++;
-                    UpdateProgress = checkedCount;
-                    UpdateStatusText = string.Format(LocalizationProvider.Instance.update_checking_file, checkedCount, filesToCheck.Count) + " - " + file.path;
-
-                    string localPath = Path.Combine(gamePath, file.path.Replace('/', Path.DirectorySeparatorChar));
-
-                    bool needsUpdate = false;
-                    if (!File.Exists(localPath))
-                    {
-                        needsUpdate = true;
-                        LogManager.Instance.Info($"[Profile] Arquivo faltando: {file.path}");
-                    }
-                    else
-                    {
-                        string localHash = await Task.Run(() => GetFileMD5(localPath));
-                        if (localHash != file.hash)
-                        {
-                            needsUpdate = true;
-                            LogManager.Instance.Info($"[Profile] Hash diferente: {file.path} (local={localHash}, servidor={file.hash})");
-                        }
-                    }
-
-                    if (needsUpdate)
-                    {
-                        _filesToUpdate.Add(file);
-                        outdated++;
-                    }
-                }
-
-                // 2. Verificar arquivos extras nas pastas gerenciadas (managedPaths)
-                // Proteger TODOS os opcionais conhecidos (ativos E inativos) contra deleção
-                foreach (var managedPath in managedPaths)
-                {
-                    string localManagedDir = Path.Combine(gamePath, managedPath.Replace('/', Path.DirectorySeparatorChar));
-                    if (!Directory.Exists(localManagedDir)) continue;
-
-                    var localFiles = Directory.GetFiles(localManagedDir, "*", SearchOption.AllDirectories);
-                    foreach (var localFile in localFiles)
-                    {
-                        string relativePath = Path.GetRelativePath(gamePath, localFile).ToLowerInvariant();
-                        string relPathNormalized = relativePath.Replace('\\', '/');
-                        
-                        bool isIgnored = ignoredFiles.Any(ig => relPathNormalized.Contains(ig.Replace('\\', '/').ToLowerInvariant()));
-
-                        // Proteger: se está no manifesto (obrigatório ou opcional) → não deletar
-                        if (!manifestFilePaths.Contains(relativePath) && !isIgnored)
-                        {
-                            _filesToDelete.Add(localFile);
-                        }
-                    }
-                }
-
-                // 3. Deletar automaticamente arquivos da lista deleteFiles (não precisa de clique)
+                // deleteFiles: lista explícita do server — mantida fora do motor (lixeira)
                 foreach (var deleteFile in deleteFiles)
                 {
                     string localPath = Path.Combine(gamePath, deleteFile.Replace('/', Path.DirectorySeparatorChar));
@@ -511,10 +467,8 @@ namespace SPT.Launcher.ViewModels
                     {
                         try
                         {
-                            Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(localPath, 
-                                Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs, 
-                                Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin);
-                            LogManager.Instance.Info($"[Profile] Movido para lixeira: {deleteFile}");
+                            DeleteToRecycleBin(localPath);
+                            LogManager.Instance.Info($"[Profile] Movido para lixeira (deleteFiles): {deleteFile}");
                         }
                         catch (Exception ex)
                         {
@@ -523,27 +477,99 @@ namespace SPT.Launcher.ViewModels
                     }
                 }
 
-                OutdatedFiles = outdated;
-                int totalActions = outdated + _filesToDelete.Count;
+                // === Item 007: planejamento via motor (regras por pasta + baseline) ===
+                _syncCts = new CancellationTokenSource();
+                CanCancelUpdate = true;
 
-                if (totalActions > 0)
+                var resolver = new SyncRuleResolver(folderRules);
+                var baseline = SyncBaseline.Load(Path.Combine(SyncStateDir, "sync-state.json"));
+
+                var plannerOptions = new SyncPlannerOptions
                 {
-                    LogManager.Instance.Info($"[Profile] {outdated} arquivos para atualizar, {_filesToDelete.Count} extras para deletar. Iniciando auto-update...");
-                    // Atualização automática — sem botão
-                    await DoUpdateMods();
+                    GameRoot = gamePath,
+                    DevMode = devMode,
+                    IgnoredFiles = ignoredFiles,
+                    ExcludeFromCleanup = LauncherSettingsProvider.Instance.ExcludeFromCleanup ?? Array.Empty<string>(),
+                    ProtectedPaths = OptionalModsHelper.GetAllKnownOptionalPaths()
+                        .Select(p => p.Replace(Path.DirectorySeparatorChar, '/'))
+                        .ToList(),
+                    ManagedPaths = managedPaths,
+                    IsOptionalGroupEnabled = id => LauncherSettingsProvider.Instance.IsOptionalEnabled(id),
+                };
+
+                var planner = new SyncPlanner(resolver, baseline, plannerOptions);
+                var planProgress = new Progress<SyncProgress>(p =>
+                {
+                    UpdateMaxProgress = Math.Max(1, p.Total);
+                    UpdateProgress = p.Current;
+                    UpdateStatusText = string.Format(LocalizationProvider.Instance.update_checking_file, p.Current, p.Total) + " - " + p.CurrentPath;
+                });
+
+                var plan = await planner.BuildPlanAsync(allFiles, planProgress, _syncCts.Token);
+
+                OutdatedFiles = plan.DownloadCount;
+
+                // === Execução (auto-apply, como o fluxo antigo) — atômica e cancelável ===
+                var engine = BuildSyncEngine(gamePath, baseline);
+                SyncResult result;
+
+                if (plan.IoActionCount > 0)
+                {
+                    LogManager.Instance.Info($"[Profile] Plano: {plan.DownloadCount} downloads, {plan.DeleteCount} remoções, {plan.MoveCount} p/ -disabled, {plan.PreserveCount} preservados. Aplicando...");
+                    UpdateMaxProgress = Math.Max(1, plan.IoActionCount);
+                    UpdateProgress = 0;
+
+                    var applyProgress = new Progress<SyncProgress>(p =>
+                    {
+                        UpdateProgress = p.Current;
+                        UpdateStatusText = string.Format(LocalizationProvider.Instance.update_downloading, p.CurrentPath, p.Current, p.Total);
+                    });
+
+                    result = await engine.ExecuteAsync(plan, ReportFilePath, applyProgress, _syncCts.Token);
                 }
                 else
                 {
-                    UpdateStatusText = LocalizationProvider.Instance.update_up_to_date;
+                    // Nada a aplicar — ainda persiste o seed do baseline + report de preservados
+                    result = await engine.ExecuteAsync(plan, ReportFilePath, null, CancellationToken.None);
+                }
+
+                foreach (var warning in result.Warnings)
+                {
+                    LogManager.Instance.Warning($"[Profile] {warning}");
+                }
+
+                SetLastUpdate(result.Updated);
+                OutdatedFiles = 0;
+
+                if (result.Cancelled)
+                {
+                    UpdateStatusText = $"Atualização cancelada — estado parcial gravado ({result.Pending} ações pendentes). Verifique novamente para completar.";
+                    LogManager.Instance.Warning($"[Profile] Atualização cancelada com {result.Pending} ações pendentes");
+                }
+                else if (result.Errors > 0)
+                {
+                    UpdateStatusText = string.Format(LocalizationProvider.Instance.update_completed_with_errors, result.Updated, result.Errors);
+                    LogManager.Instance.Warning($"[Profile] Atualização concluída com {result.Errors} erros: {result.Summary}");
+                }
+                else if (plan.IoActionCount > 0)
+                {
+                    UpdateStatusText = result.Summary;
+                    LogManager.Instance.Info($"[Profile] Atualização concluída: {result.Summary}");
+                }
+                else
+                {
+                    UpdateStatusText = result.Preserved + result.PreservedDevMode > 0
+                        ? $"{LocalizationProvider.Instance.update_up_to_date} ({result.Preserved + result.PreservedDevMode} preservados)"
+                        : LocalizationProvider.Instance.update_up_to_date;
                     UpdateMaxProgress = 1;
                     UpdateProgress = 1;
                     LogManager.Instance.Info("[Profile] Todos os mods estão atualizados.");
                 }
 
-                // Salvar manifest hash local — na próxima abertura, pula scan se igual
+                // Salvar manifest hash local (não salvar se cancelado — força rescan no próximo login)
                 try
                 {
-                    if (!string.IsNullOrEmpty(serverManifestHash))
+                    if (!string.IsNullOrEmpty(serverManifestHash) && !result.Cancelled)
                     {
                         Directory.CreateDirectory(Path.GetDirectoryName(hashFilePath));
                         File.WriteAllText(hashFilePath, serverManifestHash);
@@ -555,6 +581,12 @@ namespace SPT.Launcher.ViewModels
                     LogManager.Instance.Warning($"[Profile] Falha ao salvar manifest hash: {ex.Message}");
                 }
             }
+            catch (OperationCanceledException)
+            {
+                // Cancelado durante o planejamento (nada foi escrito)
+                UpdateStatusText = "Verificação cancelada pelo usuário.";
+                LogManager.Instance.Info("[Profile] Verificação cancelada pelo usuário");
+            }
             catch (Exception ex)
             {
                 LogManager.Instance.Error($"[Profile] Erro ao verificar atualizações: {ex.Message}");
@@ -562,103 +594,106 @@ namespace SPT.Launcher.ViewModels
             }
             finally
             {
+                CanCancelUpdate = false;
+                _syncCts?.Dispose();
+                _syncCts = null;
+
                 if (!manifestFailed)
                     LauncherSettingsProvider.Instance.IsUpdating = false;
             }
         }
 
+        // === Item 007 — helpers do motor de sync ===
 
+        private static string SyncStateDir =>
+            Path.Combine(SPT.Launcher.Base.Helpers.SptPathHelper.SptRootPath, "user", "launcher");
 
-        /// <summary>
-        /// Baixa e instala todos os arquivos desatualizados
-        /// </summary>
-        private async Task DoUpdateMods()
+        private static string ReportFilePath => Path.Combine(SyncStateDir, SyncReport.DefaultFileName);
+
+        private SyncEngine BuildSyncEngine(string gamePath, SyncBaseline baseline)
         {
-            if (_filesToUpdate.Count == 0 && _filesToDelete.Count == 0) return;
-
-            LogManager.Instance.Info($"[Profile] Iniciando atualização: {_filesToUpdate.Count} arquivos para baixar, {_filesToDelete.Count} para deletar");
-            string gamePath = LauncherSettingsProvider.Instance.GamePath;
-            CanUpdate = false;
-            LauncherSettingsProvider.Instance.IsUpdating = true;
-            int totalActions = _filesToUpdate.Count + _filesToDelete.Count;
-            UpdateMaxProgress = totalActions;
-            UpdateProgress = 0;
-
-            int completed = 0;
-            int errors = 0;
-
-            // 1. Baixar arquivos atualizados/faltantes
-            foreach (var file in _filesToUpdate)
-            {
-                UpdateStatusText = string.Format(LocalizationProvider.Instance.update_downloading, file.path, completed + 1, totalActions);
-
-                try
-                {
-                    string localPath = Path.Combine(gamePath, file.path.Replace('/', Path.DirectorySeparatorChar));
-                    string directory = Path.GetDirectoryName(localPath);
-                    if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
-                        Directory.CreateDirectory(directory);
-
-                    byte[] fileData = await Task.Run(() => RequestHandler.DownloadModFile(file.path));
-                    await File.WriteAllBytesAsync(localPath, fileData);
-                }
-                catch (Exception ex)
-                {
-                    errors++;
-                    LogManager.Instance.Error($"[ModUpdate] Failed to update {file.path}: {ex.Message}");
-                }
-
-                completed++;
-                UpdateProgress = completed;
-            }
-
-            // 2. Deletar arquivos extras dentro das pastas gerenciadas
-            foreach (var fileToDelete in _filesToDelete)
-            {
-                string relativePath = Path.GetRelativePath(gamePath, fileToDelete);
-                UpdateStatusText = string.Format(LocalizationProvider.Instance.update_deleting, relativePath, completed + 1, totalActions);
-
-                try
-                {
-                    Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(fileToDelete, 
-                        Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs, 
-                        Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin);
-                    LogManager.Instance.Info($"[ModUpdate] Movido para lixeira: {relativePath}");
-                }
-                catch (Exception ex)
-                {
-                    errors++;
-                    LogManager.Instance.Error($"[ModUpdate] Failed to delete {relativePath}: {ex.Message}");
-                }
-
-                completed++;
-                UpdateProgress = completed;
-            }
-
-            if (errors > 0)
-            {
-                LogManager.Instance.Warning($"[Profile] Atualização concluída com {errors} erros de {totalActions} ações");
-                UpdateStatusText = string.Format(LocalizationProvider.Instance.update_completed_with_errors, totalActions - errors, errors);
-            }
-            else
-            {
-                LogManager.Instance.Info($"[Profile] Atualização concluída: {totalActions} ações sem erros");
-                UpdateStatusText = string.Format(LocalizationProvider.Instance.update_completed, totalActions);
-            }
-
-            _filesToUpdate.Clear();
-            _filesToDelete.Clear();
-            OutdatedFiles = 0;
+            return new SyncEngine(
+                gamePath,
+                baseline,
+                downloader: (path, ct) => Task.Run(() => RequestHandler.DownloadModFile(path), ct),
+                deleteFile: DeleteToRecycleBin,
+                log: msg => LogManager.Instance.Info(msg));
         }
 
-        private static string GetFileMD5(string filePath)
+        /// <summary>Extras vão pra lixeira (mesma rede de segurança do fluxo antigo).</summary>
+        private static void DeleteToRecycleBin(string path)
         {
-            using (var md5 = MD5.Create())
-            using (var stream = File.OpenRead(filePath))
+            try
             {
-                byte[] hash = md5.ComputeHash(stream);
-                return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+                Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(path,
+                    Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs,
+                    Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin);
             }
+            catch (PlatformNotSupportedException)
+            {
+                File.Delete(path);
+            }
+        }
+
+        /// <summary>
+        /// Requisito 4.1.2: cancelar com confirmação + alerta de consequência.
+        /// O arquivo em voo termina atômico; o run para entre arquivos.
+        /// </summary>
+        private async Task CancelUpdate()
+        {
+            if (!CanCancelUpdate || _syncCts == null) return;
+
+            var confirm = await ShowDialog(new ConfirmationDialogViewModel(null,
+                "Cancelar a sincronização agora pode deixar a instalação em estado parcial. " +
+                "Uma nova verificação completará o processo depois. Cancelar mesmo assim?",
+                "Sim, cancelar", "Continuar"));
+
+            if (confirm is not (bool and true)) return;
+
+            try
+            {
+                _syncCts?.Cancel();
+            }
+            catch (ObjectDisposedException)
+            {
+                // o run terminou enquanto o dialog estava aberto — nada a cancelar
+            }
+        }
+
+        /// <summary>Requisito 4.1.3: link "X arquivos foram atualizados" abre a pasta do relatório.</summary>
+        public void OpenLastUpdateFolderCommand()
+        {
+            try
+            {
+                SyncReport.OpenReportFolder(SyncStateDir);
+            }
+            catch (Exception ex)
+            {
+                LogManager.Instance.Warning($"[Profile] Falha ao abrir pasta do relatório: {ex.Message}");
+            }
+        }
+
+        /// <summary>Carrega a contagem do last-update.json anterior (link persiste entre sessões).</summary>
+        private void LoadLastUpdateInfo()
+        {
+            try
+            {
+                if (!File.Exists(ReportFilePath)) return;
+
+                var report = JObject.Parse(File.ReadAllText(ReportFilePath));
+                int updated = report["counts"]?["updated"]?.Value<int>() ?? 0;
+                SetLastUpdate(updated);
+            }
+            catch
+            {
+                // report ausente/corrompido — sem link
+            }
+        }
+
+        private void SetLastUpdate(int updatedCount)
+        {
+            LastUpdateText = $"{updatedCount} arquivo(s) foram atualizados — ver detalhes";
+            HasLastUpdate = updatedCount > 0;
         }
 
         public void LogoutCommand()

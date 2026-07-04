@@ -1,8 +1,8 @@
 # 007 — Sincronização de arquivos por pasta · As-built
 
-**Launcher:** Launcher4.0beta · **Data:** 2026-07-04 · **Specs:** [01-spec](./007-sincronizacao-arquivos-01-spec.md) · [02-spec-tech](./007-sincronizacao-arquivos-02-spec-tech.md)
+**Launcher:** Launcher4.0beta · **Data:** 2026-07-04 (2ª passada: P-007.1/P-007.3 resolvidas) · **Specs:** [01-spec](./007-sincronizacao-arquivos-01-spec.md) · [02-spec-tech](./007-sincronizacao-arquivos-02-spec-tech.md)
 
-> Desvio de processo registrado: reviews 03/04 fundidas neste as-built (instrução do coordenador — sessão autônoma). Restrição da sessão: `ProfileView.axaml`/`ProfileViewModel.cs` bloqueados (outro agente) — apenas lidos.
+> Desvio de processo registrado: reviews 03/04 fundidas neste as-built (instrução do coordenador — sessão autônoma). O motor foi entregue com `ProfileView*` sob lock de outro agente (commit 0d355f3); após o merge do UI-pack (50cfce1, ProfileView restylada com TrlSidebarNav/TrlPanel) o lock caiu e P-007.1 (integração) + P-007.3 (ModUpdateView) foram concluídas na 2ª passada.
 
 ## O que foi construído
 
@@ -24,7 +24,20 @@
 
 ### UI deste item — `SPT.Launcher/ViewModels/ModUpdateViewModel.cs`
 
-Reescrito sobre o motor (VM órfã — nenhuma view a referencia hoje; vira implementação de referência): plano via `SyncPlanner`, apply via `SyncEngine`, `CancelCommand` com `ConfirmationDialogViewModel` (4.1.2), `SummaryText`, `OpenLastUpdateFolder()`, lixeira injetada no delete (mesmo mecanismo legado), status/ícones novos (`preserved`/`moved`/`deleted`). Nenhum XAML tocado.
+Reescrito sobre o motor: plano via `SyncPlanner`, apply via `SyncEngine`, `CancelCommand` com `ConfirmationDialogViewModel` (4.1.2), `SummaryText`, `OpenLastUpdateFolder()`, lixeira injetada no delete (mesmo mecanismo legado), status/ícones novos (`preserved`/`moved`/`deleted`), `IsBusy` p/ estados da view.
+
+### Integração P-007.1 — `ProfileViewModel.cs` + `ProfileView.axaml` (2ª passada, pós-UI-pack)
+
+- **Fluxo de login/verify roda o motor**: o loop inline legado (scan MD5 + deleção de extras em `managedPaths` + `File.WriteAllBytesAsync` direto) foi substituído por `SyncPlanner` + `SyncEngine` — o `config` divergente do baseline agora é **preservado** no login (gap do legado fechado). Mantidos: retry do manifesto (5×3s + countdown 30s), população dos toggles opcionais, `deleteFiles` explícito do server (lixeira), save do `manifest_hash.txt` (**pulado se cancelado**, forçando rescan no próximo login).
+- **Cancelamento (4.1.2)**: `CancelUpdateCommand` + `CanCancelUpdate`; botão "CANCELAR" `.ghost sm` ao lado da ProgressBar da área de update; confirmação via `ConfirmationDialogViewModel` com alerta de estado parcial; token cobre planejamento e apply.
+- **Link 4.1.3**: propriedades `LastUpdateText`/`HasLastUpdate` + botão `.link` "N arquivo(s) foram atualizados — ver detalhes" → `SyncReport.OpenReportFolder(user/launcher)`. Contagem populada após cada run **e** carregada do `last-update.json` anterior no ctor (persiste entre sessões).
+- **Dev Mode (decisão D1 da 2ª passada)**: o auto-check do login **continua pulando** em Dev Mode (login rápido; server pode nem estar de pé em dev), mas a **verificação manual** ("VERIFICAR ARQUIVOS" / `UpdateModsCommand`) roda o motor com proteção R5 (divergentes do baseline preservados + aviso). Meio-termo entre o legado (pulava sempre) e a spec R5 pura (sincronizava sempre).
+- **Removidos**: `DoUpdateMods` legado, `GetFileMD5`, `_filesToUpdate`/`_filesToDelete`. `UpdateModsCommand` agora delega p/ `ForceCheckForUpdates` (o legado já era auto-apply sem botão).
+- **Restyle preservado**: só a `StackPanel` da barra de update foi tocada na view (cancelar + link); tudo com tokens `Trl*`/classes do tema, zero hex.
+
+### P-007.3 — `Views/ModUpdateView.axaml` (+ `.axaml.cs`)
+
+View da VM de update (resolvida pelo `ViewLocator` por convenção de nome): título + status, `ProgressBar` do tema com "CANCELAR" `.ghost sm`, resumo (`SummaryText`), lista de arquivos (ícone/nome/tamanho) em `Border` com `TrlBgPanelBrush`/`TrlEdgeBrush`, ações "VERIFICAR NOVAMENTE" (`.sm`, `!IsBusy`), "ATUALIZAR" (`.primary`, `CanUpdate`) e link "ABRIR PASTA DO RELATÓRIO" (4.1.3). Codebehind no padrão `ReactiveUserControl<T>` (igual `ModInfoView`).
 
 ### Consolidação `ManifestFile`
 
@@ -60,14 +73,19 @@ xUnit net9.0, referencia só o Base, roda contra diretório temp real. **39/39 v
 ## Gates
 
 ```
+1ª passada (motor):
 dotnet build SPT.Launcher.csproj -c Release            → 0 Erro(s)  (148 warnings pré-existentes de nullability/CA1416)
 dotnet test  SPT.Launcher.Tests.csproj -c Release      → Aprovado! 39/39, 0 falhas
 dotnet build TarkovRedLine.Server.csproj -c Release    → 0 Erro(s)
+
+2ª passada (integração P-007.1 + view P-007.3):
+dotnet build SPT.Launcher.csproj -c Release            → 0 Erro(s)
+dotnet test  SPT.Launcher.Tests.csproj -c Release      → Aprovado! 39/39, 0 falhas
 ```
 
 ## Pendências
 
-- **P-007.1 — Integração ProfileView/ProfileViewModel** (arquivos bloqueados nesta sessão): rotear `CheckForUpdates`/`DoUpdateMods` pelo motor (substituindo o loop inline e a deleção legada de extras), link "X arquivos foram atualizados" → `SyncReport.OpenReportFolder`, botão cancelar no fluxo de login. Até lá o legado ainda re-baixa `config` divergente no fluxo de login (gap conhecido).
-- **P-007.2 — E2E contra `D:\SPT` real** (memória do repo: escrita em SPT exige validação no jogo): rodar verificação+apply contra o server real, validar `sync-state.json`/`last-update.json`/`plugins-disabled` no disco e configurar `folderRules` no `Launcher-Updater/config.json` do server conforme o layout real do `mods_repo`.
-- **P-007.3 — View p/ ModUpdateViewModel**: a VM está pronta (progresso/cancelar/resumo) mas não há `ModUpdateView.axaml`; criar quando a UI do item for desenhada (tokens `Trl*`).
+- ~~**P-007.1** — Integração ProfileView/ProfileViewModel~~ → **resolvida na 2ª passada** (ver seção "Integração P-007.1").
+- **P-007.2 — E2E contra `D:\SPT` real** (gate humano; memória do repo: escrita em SPT exige validação no jogo): rodar login+verify contra o server real, validar `sync-state.json`/`last-update.json`/`plugins-disabled` no disco, o link "X arquivos foram atualizados" abrindo a pasta, o cancelamento no meio de um download e configurar `folderRules` no `Launcher-Updater/config.json` do server conforme o layout real do `mods_repo`.
+- ~~**P-007.3** — View p/ ModUpdateViewModel~~ → **resolvida na 2ª passada** (`Views/ModUpdateView.axaml`). Obs.: nenhuma navegação aponta p/ `ModUpdateViewModel` ainda — a tela existe e resolve pelo ViewLocator; plugá-la num menu é decisão de UX futura (o fluxo principal de update é o da ProfileView).
 - Item 008 (configs de performance) reusa este motor, conforme kickoff.

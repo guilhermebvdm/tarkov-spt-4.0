@@ -16,10 +16,10 @@ using SPT.Launcher.ViewModels.Dialogs;
 namespace SPT.Launcher.ViewModels
 {
     /// <summary>
-    /// Reference implementation of the item-007 sync engine (SPT.Launcher.Base/Sync).
-    /// Folder rules: config = preserve divergent · config-server = mirror delete ·
-    /// patchers/plugins = mirror move to -disabled · rest = legacy behavior.
-    /// ProfileViewModel integration is pending (P-007.1) — do not edit ProfileView* in this item.
+    /// Standalone update screen backed by the item-007 sync engine (SPT.Launcher.Base/Sync),
+    /// rendered by Views/ModUpdateView.axaml. Folder rules: config = preserve divergent ·
+    /// config-server = mirror delete · patchers/plugins = mirror move to -disabled · rest =
+    /// legacy behavior. The login flow (ProfileViewModel) uses the same engine (P-007.1).
     /// </summary>
     public class ModUpdateViewModel : ViewModelBase
     {
@@ -57,15 +57,26 @@ namespace SPT.Launcher.ViewModels
         public bool IsChecking
         {
             get => _isChecking;
-            set => this.RaiseAndSetIfChanged(ref _isChecking, value);
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _isChecking, value);
+                this.RaisePropertyChanged(nameof(IsBusy));
+            }
         }
 
         private bool _isUpdating = false;
         public bool IsUpdating
         {
             get => _isUpdating;
-            set => this.RaiseAndSetIfChanged(ref _isUpdating, value);
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _isUpdating, value);
+                this.RaisePropertyChanged(nameof(IsBusy));
+            }
         }
+
+        /// <summary>True while checking or applying — drives the view's disabled states.</summary>
+        public bool IsBusy => IsChecking || IsUpdating;
 
         private bool _canUpdate = false;
         public bool CanUpdate
