@@ -322,8 +322,9 @@ internal class SkillsClassTabPatch : ModulePatch
         try
         {
             // TEXTO: re-texta TODOS os TMPs nativos (normal + selected) — estilo/estados nativos preservados.
-            // Rodada 4: NÃO força mais SetActive em GO inativo (podia acordar badge/label auxiliar do prefab);
-            // o render voltou com o DestroyImmediate do LocalizedText (rodada 3).
+            // Rodada 5 (in-game): o label da versão NORMAL vem INATIVO no clone → sem o SetActive o "CLASS"
+            // some quando a aba está desselecionada (a rodada 4 removeu por medo de badge fantasma — não há;
+            // rodada 3 com a ativação mostrava o texto). Reativado.
             var tmps = tab.GetComponentsInChildren<TextMeshProUGUI>(true);
             foreach (var tmp in tmps)
             {
@@ -333,11 +334,19 @@ internal class SkillsClassTabPatch : ModulePatch
                 {
                     tmp.color = new Color(tmp.color.r, tmp.color.g, tmp.color.b, 1f);
                 }
+
+                if (!tmp.gameObject.activeSelf)
+                {
+                    tmp.gameObject.SetActive(true);   // o pai (versão normal/selected) segue controlando a visibilidade
+                }
             }
 
             // ÍCONE: troca o sprite nativo (medalha da MASTERING clonada) pelo brasão da classe, nas duas
             // versões. Preserva o fundo (`_targetImage` — ref: Tab decompilado) e os gráficos de hover.
+            // Rodada 5: o sprite nativo da prancha é PRÉ-escurecido; o brasão é silhueta BRANCA → na versão
+            // SELECIONADA tinge de escuro via Image.color (mesmo tom do texto nativo na prancha).
             var targetImage = AccessTools.Field(typeof(Tab), "_targetImage")?.GetValue(tab) as Image;
+            var selectedVersion = AccessTools.Field(typeof(Tab), "_selectedVersion")?.GetValue(tab) as GameObject;
             var crest = ClassIconCache.Get(SkillMultipliers.IconFile);
             var images = tab.GetComponentsInChildren<Image>(true);
             foreach (var img in images)
@@ -364,6 +373,14 @@ internal class SkillsClassTabPatch : ModulePatch
 
                     img.sprite = crest;
                     img.preserveAspect = true;
+
+                    // Rodada 5: prancha selecionada = fundo claro → brasão escuro (como o texto nativo);
+                    // versão normal = fundo escuro → brasão claro (cor nativa preservada).
+                    if (selectedVersion != null && img.transform.IsChildOf(selectedVersion.transform))
+                    {
+                        img.color = new Color(0.07f, 0.07f, 0.07f, 1f);
+                    }
+
                     img.gameObject.SetActive(true);
                 }
                 else
