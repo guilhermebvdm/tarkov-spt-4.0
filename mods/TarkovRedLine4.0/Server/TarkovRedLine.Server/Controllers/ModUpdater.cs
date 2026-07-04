@@ -300,6 +300,88 @@ public class ModUpdaterController : ControllerBase
         return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
     }
 
+    /// <summary>
+    /// Item 021 (D-021.B): tag optional-group files into the manifest so the launcher's group download
+    /// actually fetches them (before, GenerateManifest only scanned mods_repo, so optionalGroup files
+    /// were never emitted → the client's per-group cache was empty → "activate" downloaded nothing).
+    /// Mirrors the legacy TS scan (modUpdater.ts): for each group, walk every Opcionais/&lt;folder&gt;,
+    /// emit { path = targetSubDir + relPath, optional = true, optionalGroup = id }, and map the FINAL
+    /// path to the physical file so the existing /download?file= endpoint serves it (via _fileMapCache).
+    /// The group folders + their contents are operator-deployed content (gate G-5): a missing folder is
+    /// logged and skipped, leaving the group with 0 files — which the launcher now surfaces as an error.
+    /// </summary>
+    private static void ScanOptionalGroups(JsonElement optionalGroups, List<object> files)
+    {
+        var optionalsRoot = GetOptionalsPath();
+        if (!Directory.Exists(optionalsRoot))
+        {
+            Console.WriteLine($"[ModUpdater] Pasta Opcionais inexistente: {optionalsRoot} — nenhum opcional taggeado (gate de conteúdo G-5).");
+            return;
+        }
+
+        foreach (var group in optionalGroups.EnumerateArray())
+        {
+            if (group.ValueKind != JsonValueKind.Object) continue;
+
+            string id = group.TryGetProperty("id", out var idProp) && idProp.ValueKind == JsonValueKind.String
+                ? idProp.GetString() : null;
+            if (string.IsNullOrWhiteSpace(id)) continue;
+
+            string targetSubDir = group.TryGetProperty("targetSubDir", out var tsProp) && tsProp.ValueKind == JsonValueKind.String
+                ? tsProp.GetString() : "";
+
+            if (!group.TryGetProperty("folders", out var foldersProp) || foldersProp.ValueKind != JsonValueKind.Array)
+            {
+                continue;
+            }
+
+            int groupFileCount = 0;
+            foreach (var folderEl in foldersProp.EnumerateArray())
+            {
+                if (folderEl.ValueKind != JsonValueKind.String) continue;
+                var folder = folderEl.GetString();
+                if (string.IsNullOrWhiteSpace(folder)) continue;
+
+                // Same containment guard as the download/list endpoints (ref: CR-01-01).
+                if (!TryResolveUnder(optionalsRoot, folder, out var folderPath) || !Directory.Exists(folderPath))
+                {
+                    Console.WriteLine($"[ModUpdater] Pasta opcional não encontrada para grupo '{id}': {folder}");
+                    continue;
+                }
+
+                foreach (var file in Directory.GetFiles(folderPath, "*.*", SearchOption.AllDirectories))
+                {
+                    var relPath = Path.GetRelativePath(folderPath, file).Replace("\\", "/");
+
+                    // Item 009: the group descriptor is metadata, never synced into the game folder.
+                    if (string.Equals(relPath, "description.json", StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    // Trim('/') (não só TrimEnd): barra INICIAL no targetSubDir furaria o
+                    // _fileMapCache — o endpoint /download normaliza a request com TrimStart('/').
+                    var finalPath = string.IsNullOrEmpty(targetSubDir)
+                        ? relPath
+                        : $"{targetSubDir.Replace("\\", "/").Trim('/')}/{relPath}";
+
+                    files.Add(new
+                    {
+                        path = finalPath,
+                        hash = GetFileHash(file),
+                        size = new FileInfo(file).Length,
+                        optional = true,
+                        optionalGroup = id
+                    });
+                    _fileMapCache[finalPath] = file;
+                    groupFileCount++;
+                }
+            }
+
+            Console.WriteLine($"[ModUpdater] Opcional '{id}': {groupFileCount} arquivo(s) taggeado(s)");
+        }
+    }
+
     private static async Task GenerateManifestAsync()
     {
         if (_manifestGenerating) return;
@@ -393,7 +475,11 @@ public class ModUpdaterController : ControllerBase
                 if (root.TryGetProperty("ignoredFiles", out var ifProp) && ifProp.ValueKind == JsonValueKind.Array)
                     ignoredFiles = ifProp.EnumerateArray().Select(x => x.GetString()).Where(x => x != null).Cast<string>().ToArray();
                 if (root.TryGetProperty("optionalGroups", out var ogProp) && ogProp.ValueKind == JsonValueKind.Array)
+                {
                     optionalGroupsArray = JsonSerializer.Deserialize<object[]>(ogProp.GetRawText()) ?? Array.Empty<object>();
+                    // Item 021 (D-021.B): tag optional files so the launcher's group download fetches them.
+                    ScanOptionalGroups(ogProp, files);
+                }
                 if (root.TryGetProperty("folderRules", out var frProp) && frProp.ValueKind == JsonValueKind.Object)
                     folderRules = JsonSerializer.Deserialize<Dictionary<string, string>>(frProp.GetRawText()) ?? new();
             }

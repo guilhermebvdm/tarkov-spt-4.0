@@ -178,11 +178,37 @@ namespace SPT.Launcher
         }
 
         /// <summary>
-        /// Baixa um arquivo de mod do servidor (porta 7075)
+        /// Baixa um arquivo de mod do servidor (porta 7075).
+        /// Item 021: <paramref name="timeoutMs"/> parametrizado — o download de grupos opcionais
+        /// (arquivos grandes) passa um limite maior que os 30 s default do sync (R-1).
         /// </summary>
-        public static byte[] DownloadModFile(string filePath)
+        public static byte[] DownloadModFile(string filePath, int timeoutMs = 30000)
         {
-            return DownloadBinary($"{request.RemoteEndPoint}/launcher/mods/download?file={Uri.EscapeDataString(filePath)}");
+            return DownloadBinary($"{request.RemoteEndPoint}/launcher/mods/download?file={Uri.EscapeDataString(filePath)}", timeoutMs);
+        }
+
+        /// <summary>
+        /// Item 021: baixa um arquivo de uma subpasta de Opcionais (offFolders), via a MESMA via
+        /// <see cref="WebRequest"/> do resto do launcher (honra o bypass TLS self-signed do
+        /// ServicePointManager, esquema+porta reais do <c>RemoteEndPoint</c>) — não mais HttpClient
+        /// cru com URL http:80 reinventada (CA-021.1/2/3, CC-2). Timeout largo por serem binários.
+        /// </summary>
+        public static byte[] DownloadOptionalFile(string folder, string file, int timeoutMs = 300000)
+        {
+            return DownloadBinary(
+                $"{request.RemoteEndPoint}/launcher/mods/optional-download?folder={Uri.EscapeDataString(folder)}&file={Uri.EscapeDataString(file)}",
+                timeoutMs);
+        }
+
+        /// <summary>
+        /// Item 021: busca o manifesto de uma subpasta de Opcionais (JSON puro) pelo backend real
+        /// (RemoteEndPoint). Lança em erro/timeout — o chamador conta como falha visível (CA-021.4).
+        /// </summary>
+        public static string RequestOptionalsManifest(string folder)
+        {
+            return GetString(
+                $"{request.RemoteEndPoint}/launcher/mods/optionals-manifest?folder={Uri.EscapeDataString(folder)}",
+                10000);
         }
 
         /// <summary>
@@ -203,13 +229,13 @@ namespace SPT.Launcher
             return GetFromHwidManager("/launcher/mods/optionals-list");
         }
 
-        private static byte[] DownloadBinary(string url)
+        private static byte[] DownloadBinary(string url, int timeoutMs = 30000)
         {
             try
             {
                 var httpRequest = WebRequest.Create(new Uri(url));
                 httpRequest.Method = "GET";
-                httpRequest.Timeout = 30000;
+                httpRequest.Timeout = timeoutMs;
 
                 using (var response = httpRequest.GetResponse())
                 using (var responseStream = response.GetResponseStream())
@@ -223,6 +249,25 @@ namespace SPT.Launcher
             {
                 LogManager.Instance.Error($"[ModUpdate] Download error: {ex.Message}");
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// Item 021: GET de texto puro (sem zlib) pelo backend real, rethrow em erro para o chamador
+        /// tratar como falha visível — distinto de <see cref="GetFromHwidManager"/>, que engole o erro
+        /// devolvendo um JSON placeholder (bom para versão/ping, ruim para um manifesto).
+        /// </summary>
+        private static string GetString(string url, int timeoutMs)
+        {
+            var httpRequest = WebRequest.Create(new Uri(url));
+            httpRequest.Method = "GET";
+            httpRequest.Timeout = timeoutMs;
+
+            using (var response = httpRequest.GetResponse())
+            using (var responseStream = response.GetResponseStream())
+            using (var reader = new StreamReader(responseStream))
+            {
+                return reader.ReadToEnd();
             }
         }
 

@@ -32,5 +32,13 @@ namespace SPT.Launcher.ViewModels
             get => _isEnabled;
             set => this.RaiseAndSetIfChanged(ref _isEnabled, value);
         }
+
+        /// <summary>
+        /// Item 021 (R-3): guard consumido uma vez pelo handler do toggle. Quando a UI reverte
+        /// <see cref="IsEnabled"/> programaticamente após uma falha total (D-021.A), o Subscribe
+        /// re-dispara sincronamente — este flag faz o handler ignorar esse disparo (sem loop de
+        /// "desativar"). Não é reativo de propósito: só um sinal transitório de controle.
+        /// </summary>
+        public bool SuppressToggleHandler { get; set; }
     }
 }

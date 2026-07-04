@@ -247,52 +247,122 @@ namespace SPT.Launcher.ViewModels
         /// </summary>
         private async Task OnOptionalToggled(OptionalModToggle toggle)
         {
+            // R-3: disparo programático (revert de falha total, D-021.A) — consome o guard e sai,
+            // sem re-entrar no fluxo (evita o loop "desativar" que tentaria baixar offFolders).
+            if (toggle.SuppressToggleHandler)
+            {
+                toggle.SuppressToggleHandler = false;
+                return;
+            }
+
             await _optionalToggleSemaphore.WaitAsync();
+
+            Action<double> progressHandler = p => Dispatcher.UIThread.Post(() => UpdateProgress = p);
+            Action<string> statusHandler = msg => Dispatcher.UIThread.Post(() => UpdateStatusText = msg);
+            bool enabling = toggle.IsEnabled;
+
             try
             {
-                LauncherSettingsProvider.Instance.SetOptionalEnabled(toggle.Id, toggle.IsEnabled);
-
                 LauncherSettingsProvider.Instance.IsUpdating = true;
                 UpdateMaxProgress = 100;
                 UpdateProgress = 0;
 
-                Action<double> progressHandler = p => Dispatcher.UIThread.Post(() => UpdateProgress = p);
-                Action<string> statusHandler = msg => Dispatcher.UIThread.Post(() => UpdateStatusText = msg);
                 OptionalModsHelper.OnProgressChanged += progressHandler;
                 OptionalModsHelper.OnStatusMessageChanged += statusHandler;
 
-                if (toggle.IsEnabled)
+                // Item 021: a persistência do estado "ligado" saiu daqui (era feita ANTES do download,
+                // fingindo sucesso) — agora é decidida pelo resultado, em ApplyOptionalResult.
+                OptionalOpResult result;
+                if (enabling)
                 {
                     LogManager.Instance.Info($"[Profile] Ativando mod opcional '{toggle.Id}'...");
-                    await OptionalModsHelper.DownloadOptionalGroupAsync(toggle.Id);
+                    result = await OptionalModsHelper.DownloadOptionalGroupAsync(toggle.Id);
                 }
                 else
                 {
                     LogManager.Instance.Info($"[Profile] Desativando mod opcional '{toggle.Id}'...");
-                    await OptionalModsHelper.RemoveOptionalGroupAsync(toggle.Id);
+                    result = await OptionalModsHelper.RemoveOptionalGroupAsync(toggle.Id);
                 }
 
-                OptionalModsHelper.OnProgressChanged -= progressHandler;
-                OptionalModsHelper.OnStatusMessageChanged -= statusHandler;
-
-                Dispatcher.UIThread.Post(() =>
-                {
-                    UpdateStatusText = LocalizationProvider.Instance.update_up_to_date;
-                    UpdateMaxProgress = 1;
-                    UpdateProgress = 1;
-                });
-                LogManager.Instance.Info($"[Profile] Mod opcional '{toggle.Id}' {(toggle.IsEnabled ? "ativado" : "desativado")} com sucesso.");
+                ApplyOptionalResult(toggle, enabling, result);
             }
             catch (Exception ex)
             {
                 LogManager.Instance.Error($"[Profile] Erro ao aplicar mod opcional '{toggle.Id}': {ex.Message}");
-                UpdateStatusText = $"Erro ao aplicar mod opcional: {ex.Message}";
+                Dispatcher.UIThread.Post(() => UpdateStatusText = $"Erro ao aplicar mod opcional: {ex.Message}");
             }
             finally
             {
+                OptionalModsHelper.OnProgressChanged -= progressHandler;
+                OptionalModsHelper.OnStatusMessageChanged -= statusHandler;
                 LauncherSettingsProvider.Instance.IsUpdating = false;
                 _optionalToggleSemaphore.Release();
             }
+        }
+
+        /// <summary>
+        /// Item 021 (B / RN-2 / D-021.A): traduz o <see cref="OptionalOpResult"/> em estado persistido + UI.
+        /// Enable pleno → persiste true + "atualizado". Enable parcial (algo aplicou, algo falhou) →
+        /// persiste true + erro visível "N de M". Enable falha TOTAL (nada aplicou / grupo não resolvido)
+        /// → reverte para false, desmarca o toggle (guard R-3) e mostra erro. Disable → persiste false
+        /// (intenção honrada); erro visível se algum arquivo falhou. Nunca mostra o verde silencioso quando
+        /// houve falha (CA-021.4/5/6). Toda mudança de UI é marshalada para a UI thread.
+        /// </summary>
+        private void ApplyOptionalResult(OptionalModToggle toggle, bool enabling, OptionalOpResult result)
+        {
+            if (enabling && result.TotalFailure)
+            {
+                // D-021.A — reverter: estado persistido volta a false e o toggle desmarca sem re-disparar.
+                LauncherSettingsProvider.Instance.SetOptionalEnabled(toggle.Id, false);
+                string msg = result.GroupResolved
+                    ? $"Falha ao ativar '{toggle.Id}': {result.Failed} de {result.Total} arquivo(s) falharam. Não aplicado."
+                    : $"Falha ao ativar '{toggle.Id}': grupo indisponível no servidor. Não aplicado.";
+                LogManager.Instance.Error($"[Profile] {msg}");
+                Dispatcher.UIThread.Post(() =>
+                {
+                    // R-3 fix: só armar o guard se a atribuição realmente muda o valor.
+                    // RaiseAndSetIfChanged é no-op quando IsEnabled já é false (usuário desmarcou
+                    // durante o download) → o Subscribe não dispararia e o guard ficaria preso,
+                    // engolindo em silêncio o próximo enable legítimo daquele grupo.
+                    if (toggle.IsEnabled)
+                    {
+                        toggle.SuppressToggleHandler = true;
+                        toggle.IsEnabled = false;
+                    }
+                    UpdateStatusText = msg;
+                    UpdateMaxProgress = 1;
+                    UpdateProgress = 1;
+                });
+                return;
+            }
+
+            // Persiste a intenção: enable-com-algo-aplicado → true; disable → false.
+            LauncherSettingsProvider.Instance.SetOptionalEnabled(toggle.Id, enabling);
+
+            if (result.Failed > 0)
+            {
+                // Sucesso parcial / disable com falhas — visível como erro, mantém o que aplicou (RN-2).
+                string msg = enabling
+                    ? $"'{toggle.Id}' ativado com falhas: {result.Failed} de {result.Total} arquivo(s) falharam."
+                    : $"'{toggle.Id}' desativado com falhas: {result.Failed} arquivo(s) não aplicado(s).";
+                LogManager.Instance.Warning($"[Profile] {msg}");
+                Dispatcher.UIThread.Post(() =>
+                {
+                    UpdateStatusText = msg;
+                    UpdateMaxProgress = 1;
+                    UpdateProgress = 1;
+                });
+                return;
+            }
+
+            // Sucesso pleno.
+            Dispatcher.UIThread.Post(() =>
+            {
+                UpdateStatusText = LocalizationProvider.Instance.update_up_to_date;
+                UpdateMaxProgress = 1;
+                UpdateProgress = 1;
+            });
+            LogManager.Instance.Info($"[Profile] Mod opcional '{toggle.Id}' {(enabling ? "ativado" : "desativado")} com sucesso.");
         }
 
         public bool CanStartGame => LauncherSettingsProvider.Instance.CanStartGame;
