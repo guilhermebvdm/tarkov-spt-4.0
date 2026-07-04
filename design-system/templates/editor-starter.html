@@ -40,6 +40,7 @@
   <!-- sidebar: primary navigation -->
   <aside class="trl-sidebar">
     <nav class="trl-nav">
+      <div class="trl-nav__label">My Mod</div>
       <a class="trl-nav__item is-active" href="#">Overview</a>
       <a class="trl-nav__item" href="#">Items</a>
       <a class="trl-nav__item" href="#">Settings</a>
@@ -56,6 +57,16 @@
         <input class="trl-input" name="search" placeholder="Search…">
         <button class="trl-search__clear" type="button">×</button>
       </span>
+      <div class="trl-multiselect" id="filter-category">
+        <button class="trl-multiselect__trigger" type="button">
+          Category
+          <span class="trl-multiselect__count">1</span>
+        </button>
+        <div class="trl-multiselect__panel">
+          <div class="trl-multiselect__option is-checked">General</div>
+          <div class="trl-multiselect__option">Advanced</div>
+        </div>
+      </div>
       <span class="trl-toolbar__spacer"></span>
       <span class="trl-tag trl-tag--green"><span class="trl-tag__dot"></span>Server online</span>
     </div>
@@ -132,6 +143,24 @@
 <script>
 /* keep scripts inline if this ever ships inside a mod's wwwroot —
  * SPT's ModValidator rejects loose .js files. */
+(function () {
+  'use strict';
+  /* multiselect: toggle + check + count (panel persists across clicks) */
+  var ms = document.getElementById('filter-category');
+  var count = ms.querySelector('.trl-multiselect__count');
+  ms.querySelector('.trl-multiselect__trigger').addEventListener('click', function () {
+    ms.classList.toggle('is-open');
+  });
+  ms.querySelectorAll('.trl-multiselect__option').forEach(function (opt) {
+    opt.addEventListener('click', function () {
+      opt.classList.toggle('is-checked');
+      count.textContent = ms.querySelectorAll('.trl-multiselect__option.is-checked').length;
+    });
+  });
+  document.addEventListener('click', function (e) {
+    if (!ms.contains(e.target)) ms.classList.remove('is-open');
+  });
+})();
 </script>
 </body>
 </html>

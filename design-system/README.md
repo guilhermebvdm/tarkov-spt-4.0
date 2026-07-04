@@ -30,7 +30,7 @@ Editor novo? Copie [`templates/editor-starter.html`](./templates/editor-starter.
 | Arquivo | Conteúdo |
 |---|---|
 | [`tokens.css`](./tokens.css) | Design tokens `--trl-*` em 3 camadas (primitivos → semânticos → assinaturas) |
-| [`components.css`](./components.css) | Componentes `.trl-*`: shell, nav, forms, tabelas, cards, tags, progress, toasts, modal… |
+| [`components.css`](./components.css) | Componentes `.trl-*`: shell, nav, forms (incl. multi-select de filtros), tabelas, cards, tags, progress, toasts, modal + **game data** (cell, grid2d, doll, mod-tree, heatmap, facções) |
 | [`utilities.css`](./utilities.css) | Utilitários mínimos `.trl-u-*` |
 | [`design-system.html`](./design-system.html) | Showcase premium navegável (cores, tipo, componentes, do's & don'ts) |
 | [`templates/editor-starter.html`](./templates/editor-starter.html) | Shell de editor funcional para copiar |

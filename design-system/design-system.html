@@ -130,7 +130,7 @@
   <!-- ══ MAIN ════════════════════════════════════════════════════════════ -->
   <main class="trl-main">
 
-    <!-- ── 1 · BRAND ─────────────────────────────────────────────────────── -->
+    <!-- ── BRAND ─────────────────────────────────────────────────────── -->
     <section class="ds-section" id="brand">
       <div class="ds-hero">
         <img src="assets/trl-logo-dark.png" alt="Tarkov Red Line logo">
@@ -166,7 +166,7 @@
       </div>
     </section>
 
-    <!-- ── 2 · COLORS ────────────────────────────────────────────────────── -->
+    <!-- ── 01 · COLORS ────────────────────────────────────────────────────── -->
     <section class="ds-section" id="colors">
       <div class="trl-eyebrow">01 · Colors</div>
       <h2 class="trl-h2">Color</h2>
@@ -241,7 +241,7 @@
       </div>
     </section>
 
-    <!-- ── 3 · TYPOGRAPHY ────────────────────────────────────────────────── -->
+    <!-- ── 02 · TYPOGRAPHY ────────────────────────────────────────────────── -->
     <section class="ds-section" id="typography">
       <div class="trl-eyebrow">02 · Typography</div>
       <h2 class="trl-h2">Type</h2>
@@ -267,7 +267,7 @@ scale:    10 · 11 · 12 · 13 · 15 · 18 · 22 · 28 px   (--trl-text-2xs … 
 tracking: .08em wide · .14em wider · .22em widest     (display/labels only)</pre>
     </section>
 
-    <!-- ── 4 · SPACING ───────────────────────────────────────────────────── -->
+    <!-- ── 03 · SPACING ───────────────────────────────────────────────────── -->
     <section class="ds-section" id="spacing">
       <div class="trl-eyebrow">03 · Spacing</div>
       <h2 class="trl-h2">Spacing</h2>
@@ -287,7 +287,7 @@ tracking: .08em wide · .14em wider · .22em widest     (display/labels only)</p
       </div>
     </section>
 
-    <!-- ── 5 · SURFACES ──────────────────────────────────────────────────── -->
+    <!-- ── 04 · SURFACES ──────────────────────────────────────────────────── -->
     <section class="ds-section" id="surfaces">
       <div class="trl-eyebrow">04 · Surfaces &amp; elevation</div>
       <h2 class="trl-h2">Surfaces</h2>
@@ -316,7 +316,7 @@ tracking: .08em wide · .14em wider · .22em widest     (display/labels only)</p
       </div>
     </section>
 
-    <!-- ── 6 · SIGNATURES ────────────────────────────────────────────────── -->
+    <!-- ── 05 · SIGNATURES ────────────────────────────────────────────────── -->
     <section class="ds-section" id="signatures">
       <div class="trl-eyebrow">05 · Signature elements</div>
       <h2 class="trl-h2">Signatures</h2>
@@ -390,7 +390,7 @@ tracking: .08em wide · .14em wider · .22em widest     (display/labels only)</p
       </div>
     </section>
 
-    <!-- ── 7 · COMPONENTS ────────────────────────────────────────────────── -->
+    <!-- ── 06 · COMPONENTS ────────────────────────────────────────────────── -->
     <section class="ds-section" id="components">
       <div class="trl-eyebrow">06 · Components</div>
       <h2 class="trl-h2">Components</h2>
@@ -467,6 +467,9 @@ tracking: .08em wide · .14em wider · .22em widest     (display/labels only)</p
             <span class="trl-multiselect__count" id="ds-ms-count">2</span>
           </button>
           <div class="trl-multiselect__panel">
+            <div class="trl-multiselect__search">
+              <input class="trl-input" name="ms-filter" placeholder="Filter…" id="ds-ms-filter">
+            </div>
             <div class="trl-multiselect__option is-checked">Prapor<span class="trl-multiselect__opt-count">312</span></div>
             <div class="trl-multiselect__option is-checked">Therapist<span class="trl-multiselect__opt-count">184</span></div>
             <div class="trl-multiselect__option">Mechanic<span class="trl-multiselect__opt-count">406</span></div>
@@ -575,7 +578,7 @@ tracking: .08em wide · .14em wider · .22em widest     (display/labels only)</p
     </section>
 
 
-    <!-- ── 8 · GAME DATA ─────────────────────────────────────────────────── -->
+    <!-- ── 07 · GAME DATA ─────────────────────────────────────────────────── -->
     <section class="ds-section" id="gamedata">
       <div class="trl-eyebrow">07 · Game data</div>
       <h2 class="trl-h2">Game data</h2>
@@ -803,7 +806,7 @@ tracking: .08em wide · .14em wider · .22em widest     (display/labels only)</p
       </div>
     </section>
 
-    <!-- ── 9 · FEEDBACK & OVERLAYS ───────────────────────────────────────── -->
+    <!-- ── 08 · FEEDBACK & OVERLAYS ───────────────────────────────────────── -->
     <section class="ds-section" id="feedback">
       <div class="trl-eyebrow">08 · Feedback &amp; overlays</div>
       <h2 class="trl-h2">Feedback</h2>
@@ -891,7 +894,7 @@ tracking: .08em wide · .14em wider · .22em widest     (display/labels only)</p
       </div>
     </section>
 
-    <!-- ── 9 · DO'S & DON'TS ─────────────────────────────────────────────── -->
+    <!-- ── 09 · DO'S & DON'TS ─────────────────────────────────────────────── -->
     <section class="ds-section" id="dosdonts">
       <div class="trl-eyebrow">09 · Do's &amp; Don'ts</div>
       <h2 class="trl-h2">Discipline</h2>
@@ -1157,6 +1160,12 @@ border-color: #444;   /* not even ours */</pre>
     });
     document.addEventListener('click', function (e) {
       if (!ms.contains(e.target)) ms.classList.remove('is-open');
+    });
+    document.getElementById('ds-ms-filter').addEventListener('input', function (e) {
+      var q = e.target.value.toLowerCase();
+      msOpts.forEach(function (o) {
+        o.style.display = o.textContent.toLowerCase().indexOf(q) === -1 ? 'none' : '';
+      });
     });
   }
 

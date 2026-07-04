@@ -67,6 +67,7 @@ Usos permitidos de `--trl-brand` (`#ff0000`), lista exaustiva:
 - `:focus-visible` vem de graça no escopo `.trl-app` (ring tan de 2 camadas) — não remover outline sem substituto.
 - Animações desligam sozinhas com `prefers-reduced-motion` — não criar animação fora dos keyframes `trl-*` sem cobrir esse caso.
 - **Comportamento (aria/teclado) é responsabilidade do consumidor** — o DS é CSS-only. Dropdown custom e tabs precisam de roles/teclado no app; para seleção simples, prefira o `.trl-select` nativo (acessível de graça).
+- **Exceção de game-chrome:** os labels do paper doll usam 8px (fiéis à tela Gear do EFT), abaixo da diretriz de ≥11px — a cor é `--trl-fg-muted` (AA) e a informação completa do slot deve estar disponível via tooltip/aria no consumidor.
 
 ### R6. Densidade
 
@@ -106,7 +107,7 @@ O painel que edita dados troca o dot conforme o estado:
 
 ### Barra de filtros
 
-`trl-toolbar` com `trl-search` + um `trl-multiselect` por dimensão (trader, categoria…): trigger mostra o rótulo da dimensão + `__count` da seleção; painel fica **aberto entre cliques** (toggle de `is-checked` é JS do consumidor) e fecha no clique fora; `__actions` traz Select all/Clear. Abaixo da toolbar, os filtros aplicados viram uma linha de `trl-filter-chip` (`dimensão: <b>valor</b>` + `__remove`) com um botão ghost "Clear all" no fim — o usuário vê e desfaz o estado do filtro sem abrir dropdown. Para seleção única, use `trl-dropdown`; para booleano, `trl-switch`.
+`trl-toolbar` com `trl-search` + um `trl-multiselect` por dimensão (trader, categoria…): trigger mostra o rótulo da dimensão + `__count` da seleção; painel fica **aberto entre cliques** (toggle de `is-checked` é JS do consumidor) e fecha no clique fora; `__actions` traz Select all/Clear. Lista longa (categorias, 100+ opções)? `__search` sticky no topo do painel (filtragem é JS do consumidor). Abaixo da toolbar, os filtros aplicados viram uma linha de `trl-filter-chip` (`dimensão: <b>valor</b>` + `__remove`) com um botão ghost "Clear all" no fim — o usuário vê e desfaz o estado do filtro sem abrir dropdown. Para seleção única, use `trl-dropdown`; para booleano, `trl-switch`.
 
 ### Dashboard de stats
 
