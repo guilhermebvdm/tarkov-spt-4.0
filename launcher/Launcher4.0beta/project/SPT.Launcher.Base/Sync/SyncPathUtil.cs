@@ -23,6 +23,29 @@ namespace SPT.Launcher.Sync
             return Path.Combine(root, relativePath.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar));
         }
 
+        /// <summary>
+        /// ref: CR-01-05 / item 019 — defense in depth guard, single source of truth shared by the
+        /// sync engine AND the legacy FS paths (deleteFiles loop, OptionalModsHelper). Resolves
+        /// <paramref name="relativePath"/> under <paramref name="root"/> and requires the result to
+        /// stay under the root: rejects "..", absolute paths and sibling-prefix escapes
+        /// (the trailing separator stops "D:\SPT" from matching "D:\SPTevil").
+        /// Throws <see cref="InvalidOperationException"/> ("path escapes game root: ...") on escape —
+        /// the same message the engine's traversal test asserts on.
+        /// </summary>
+        public static string ResolveUnderRoot(string root, string relativePath)
+        {
+            string fullPath = Path.GetFullPath(ToLocalPath(root, relativePath));
+            string rootPrefix = Path.GetFullPath(root)
+                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+
+            if (!fullPath.StartsWith(rootPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException($"path escapes game root: {relativePath}");
+            }
+
+            return fullPath;
+        }
+
         /// <summary>True when <paramref name="normalizedPath"/> is equal to or nested under <paramref name="normalizedPrefix"/>.</summary>
         public static bool IsUnderPrefix(string normalizedPath, string normalizedPrefix)
         {

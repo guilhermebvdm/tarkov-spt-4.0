@@ -640,21 +640,28 @@ namespace SPT.Launcher.ViewModels
                     return;
                 }
 
-                // deleteFiles: lista explícita do server — mantida fora do motor (lixeira)
+                // deleteFiles: lista explícita do server — mantida fora do motor (guard + lixeira).
+                // ref: item 019 (B2) — cada entrada passa pelo MESMO ResolveUnderRoot do motor antes
+                // de tocar disco: um manifesto adulterado com ".." ou caminho absoluto é rejeitado +
+                // logado (Warning), sem escrever/deletar fora da raiz e sem abortar o loop (RN-1).
                 foreach (var deleteFile in deleteFiles)
                 {
-                    string localPath = Path.Combine(gamePath, deleteFile.Replace('/', Path.DirectorySeparatorChar));
-                    if (File.Exists(localPath))
+                    try
                     {
-                        try
+                        string localPath = SyncPathUtil.ResolveUnderRoot(gamePath, deleteFile);
+                        if (File.Exists(localPath))
                         {
-                            DeleteToRecycleBin(localPath);
+                            RecycleBinHelper.Delete(localPath);
                             LogManager.Instance.Info($"[Profile] Movido para lixeira (deleteFiles): {deleteFile}");
                         }
-                        catch (Exception ex)
-                        {
-                            LogManager.Instance.Error($"[Profile] Falha ao deletar {deleteFile}: {ex.Message}");
-                        }
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        LogManager.Instance.Warning($"[Profile] deleteFiles rejeitado (fora da raiz): {deleteFile} — {ex.Message}");
+                    }
+                    catch (Exception ex)
+                    {
+                        LogManager.Instance.Error($"[Profile] Falha ao deletar {deleteFile}: {ex.Message}");
                     }
                 }
 
@@ -824,7 +831,7 @@ namespace SPT.Launcher.ViewModels
                 gamePath,
                 baseline,
                 downloader,
-                deleteFile: DeleteToRecycleBin,
+                deleteFile: RecycleBinHelper.Delete, // item 019 — fonte única de deleção recuperável
                 log: msg => LogManager.Instance.Info(msg));
         }
 
@@ -852,21 +859,6 @@ namespace SPT.Launcher.ViewModels
 
                 return data;
             };
-        }
-
-        /// <summary>Extras vão pra lixeira (mesma rede de segurança do fluxo antigo).</summary>
-        private static void DeleteToRecycleBin(string path)
-        {
-            try
-            {
-                Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(path,
-                    Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs,
-                    Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin);
-            }
-            catch (PlatformNotSupportedException)
-            {
-                File.Delete(path);
-            }
         }
 
         /// <summary>

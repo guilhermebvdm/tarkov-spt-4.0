@@ -17,10 +17,7 @@ namespace SPT.Launcher.Sync
     /// </summary>
     public sealed class SyncEngine
     {
-        private const string TempSuffix = ".sync-tmp";
-
         private readonly string _gameRoot;
-        private readonly string _gameRootFullPrefix; // ref: CR-01-05 — raiz resolvida p/ validação de traversal
         private readonly SyncBaseline _baseline;
         private readonly SyncDownloader _downloader;
         private readonly Action<string> _deleteFile;
@@ -38,8 +35,6 @@ namespace SPT.Launcher.Sync
             Action<string> log = null)
         {
             _gameRoot = !string.IsNullOrEmpty(gameRoot) ? gameRoot : throw new ArgumentException("gameRoot is required", nameof(gameRoot));
-            _gameRootFullPrefix = Path.GetFullPath(_gameRoot)
-                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
             _baseline = baseline ?? throw new ArgumentNullException(nameof(baseline));
             _downloader = downloader ?? throw new ArgumentNullException(nameof(downloader));
             _deleteFile = deleteFile ?? File.Delete;
@@ -94,7 +89,7 @@ namespace SPT.Launcher.Sync
                                 // não pode escrever fora do GameRoot (conta como erro por-arquivo).
                                 string destinationPath = ResolveUnderRoot(action.RelativePath);
                                 byte[] data = await _downloader(action.RelativePath, cancellationToken);
-                                ApplyAtomic(destinationPath, data);
+                                SyncFileOps.WriteAtomic(destinationPath, data);
 
                                 // ref: CR-01-05 — baseline records the hash of the bytes actually
                                 // written, NOT the manifest hash: a stale manifest (e.g. pack edited
@@ -185,7 +180,7 @@ namespace SPT.Launcher.Sync
                                 }
 
                                 byte[] seedData = await _downloader(action.RelativePath, cancellationToken); // baixa da FONTE (config-server)
-                                ApplyAtomic(seedDestination, seedData);
+                                SyncFileOps.WriteAtomic(seedDestination, seedData);
 
                                 result.Seeded++;
                                 ioDone++;
@@ -242,51 +237,12 @@ namespace SPT.Launcher.Sync
         }
 
         /// <summary>
-        /// ref: CR-01-05 — defense in depth: resolves the relative path and requires the result to
-        /// stay under the game root ("..", absolute paths, etc. throw → counted as per-file error).
+        /// ref: CR-01-05 / item 019 — defense in depth: delegates to the shared guard
+        /// (<see cref="SyncPathUtil.ResolveUnderRoot"/>) so the engine and the legacy FS paths
+        /// reject the same escaping paths. "..", absolute paths, etc. throw → counted as per-file error.
         /// </summary>
-        private string ResolveUnderRoot(string relativePath)
-        {
-            string fullPath = Path.GetFullPath(SyncPathUtil.ToLocalPath(_gameRoot, relativePath));
-
-            if (!fullPath.StartsWith(_gameRootFullPrefix, StringComparison.OrdinalIgnoreCase))
-            {
-                throw new InvalidOperationException($"path escapes game root: {relativePath}");
-            }
-
-            return fullPath;
-        }
-
-        /// <summary>E3: write to "&lt;dest&gt;.sync-tmp" in the same directory (same volume), then atomic move.</summary>
-        private static void ApplyAtomic(string destinationPath, byte[] data)
-        {
-            string directory = Path.GetDirectoryName(destinationPath);
-            if (!string.IsNullOrEmpty(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
-
-            string tempPath = destinationPath + TempSuffix;
-
-            try
-            {
-                File.WriteAllBytes(tempPath, data);
-                File.Move(tempPath, destinationPath, overwrite: true);
-            }
-            catch
-            {
-                try
-                {
-                    if (File.Exists(tempPath)) File.Delete(tempPath);
-                }
-                catch
-                {
-                    // best effort — never mask the original exception
-                }
-
-                throw;
-            }
-        }
+        private string ResolveUnderRoot(string relativePath) =>
+            SyncPathUtil.ResolveUnderRoot(_gameRoot, relativePath);
 
         /// <summary>R3.3: collision in the -disabled folder → the freshly moved file wins.</summary>
         private static void MoveWithOverwrite(string sourcePath, string destinationPath)

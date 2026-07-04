@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using SPT.Launcher.Controllers;
+using SPT.Launcher.Sync;
 
 namespace SPT.Launcher.Helpers
 {
@@ -230,8 +231,9 @@ namespace SPT.Launcher.Helpers
 
                 try
                 {
-                    string relativePath = file.path.Replace("/", Path.DirectorySeparatorChar.ToString());
-                    string localPath = Path.Combine(GamePath, relativePath);
+                    // ref: item 019 — resolve+valida sob a raiz ANTES de tocar disco: um path opcional
+                    // adulterado com ".."/absoluto lança e cai no catch (Warning), sem escrever fora.
+                    string localPath = SyncPathUtil.ResolveUnderRoot(GamePath, file.path);
 
                     // Verificar hash local antes de baixar
                     if (File.Exists(localPath))
@@ -249,10 +251,8 @@ namespace SPT.Launcher.Helpers
 
                     var fileData = await client.GetByteArrayAsync(downloadUrl);
 
-                    // Salvar no GamePath
-                    string destDir = Path.GetDirectoryName(localPath);
-                    if (!Directory.Exists(destDir)) Directory.CreateDirectory(destDir);
-                    File.WriteAllBytes(localPath, fileData);
+                    // item 019 — write atômico (temp+move), destino já validado sob a raiz
+                    SyncFileOps.WriteAtomic(localPath, fileData);
                 }
                 catch (Exception ex)
                 {
@@ -298,9 +298,17 @@ namespace SPT.Launcher.Helpers
                 count++;
                 UpdateProgress((count / (double)total) * 100);
 
-                string relativePath = file.path.Replace("/", Path.DirectorySeparatorChar.ToString());
-                string localPath = Path.Combine(GamePath, relativePath);
-                DeleteFileIfExists(localPath);
+                try
+                {
+                    // ref: item 019 — resolve sob a raiz + lixeira (recuperável) em vez de File.Delete
+                    // permanente; entrada adulterada com ".."/absoluto é rejeitada + logada, sem abortar.
+                    string localPath = SyncPathUtil.ResolveUnderRoot(GamePath, file.path);
+                    if (File.Exists(localPath)) RecycleBinHelper.Delete(localPath);
+                }
+                catch (Exception ex)
+                {
+                    LogManager.Instance.Warning($"[OptionalMods] Erro ao remover {file.path}: {ex.Message}");
+                }
             }
 
             LogManager.Instance.Info($"[OptionalMods] Grupo '{groupId}' desativado ({total} arquivos removidos)");
@@ -332,7 +340,6 @@ namespace SPT.Launcher.Helpers
 
                 if (manifest?.files == null || manifest.files.Length == 0) return;
 
-                string baseDestPath = string.IsNullOrEmpty(targetSubDir) ? GamePath : Path.Combine(GamePath, targetSubDir);
                 int total = manifest.files.Length;
                 int count = 0;
                 UpdateProgress(0, $"Aplicando configuração: {folderName}...");
@@ -348,10 +355,11 @@ namespace SPT.Launcher.Helpers
                         string downloadUrl = $"{baseUrl}/launcher/mods/optional-download?folder={encodedFolder}&file={encodedFile}";
                         var fileData = await client.GetByteArrayAsync(downloadUrl);
 
-                        string destPath = Path.Combine(baseDestPath, file.path.Replace("/", Path.DirectorySeparatorChar.ToString()));
-                        string destDir = Path.GetDirectoryName(destPath);
-                        if (!Directory.Exists(destDir)) Directory.CreateDirectory(destDir);
-                        File.WriteAllBytes(destPath, fileData);
+                        // ref: item 019 (CA-6) — valida o destino FINAL (targetSubDir do grupo + file.path
+                        // do offFolder, ambos vindos do server) sob a raiz numa só chamada; depois grava
+                        // atômico. Traversal em qualquer um dos dois é rejeitado + logado, sem abortar.
+                        string destPath = SyncPathUtil.ResolveUnderRoot(GamePath, Path.Combine(targetSubDir ?? "", file.path));
+                        SyncFileOps.WriteAtomic(destPath, fileData);
                     }
                     catch (Exception ex)
                     {
@@ -381,11 +389,6 @@ namespace SPT.Launcher.Helpers
             OnProgressChanged?.Invoke(percent);
             if (message != null)
                 OnStatusMessageChanged?.Invoke(message);
-        }
-
-        private static void DeleteFileIfExists(string path)
-        {
-            if (File.Exists(path)) File.Delete(path);
         }
 
         // === Classes para desserialização ===

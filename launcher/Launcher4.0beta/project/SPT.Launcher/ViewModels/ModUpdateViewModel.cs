@@ -431,7 +431,7 @@ namespace SPT.Launcher.ViewModels
                 _gamePath,
                 _baseline,
                 downloader,
-                deleteFile: DeleteToRecycleBin,
+                deleteFile: Helpers.RecycleBinHelper.Delete, // item 019 — fonte única de deleção recuperável
                 log: msg => Controllers.LogManager.Instance.Info(msg));
         }
 
@@ -459,21 +459,6 @@ namespace SPT.Launcher.ViewModels
 
                 return data;
             };
-        }
-
-        /// <summary>Same safety net as the legacy flow: extras go to the recycle bin, not hard-deleted.</summary>
-        private static void DeleteToRecycleBin(string path)
-        {
-            try
-            {
-                Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(path,
-                    Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs,
-                    Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin);
-            }
-            catch (PlatformNotSupportedException)
-            {
-                File.Delete(path);
-            }
         }
 
         private static string BuildPlanSummary(SyncPlan plan)
