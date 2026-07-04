@@ -16,6 +16,9 @@ namespace SPT.Launcher.Sync
 
         /// <summary>Local extra moved to the sibling "&lt;folder&gt;-disabled" directory (MirrorMoveDisabled rule).</summary>
         MoveToDisabled,
+
+        /// <summary>Item 017: seed a default from config-server → config when the target is absent by name (never overwrites).</summary>
+        SeedCopy,
     }
 
     /// <summary>One planned action produced by <see cref="SyncPlanner"/> and executed by <see cref="SyncEngine"/>.</summary>
@@ -33,6 +36,12 @@ namespace SPT.Launcher.Sync
 
         /// <summary>Relative destination — set for <see cref="SyncActionKind.MoveToDisabled"/>.</summary>
         public string MoveTargetRelative { get; set; }
+
+        /// <summary>
+        /// Item 017: relative WRITE destination under 'config' — set for <see cref="SyncActionKind.SeedCopy"/>.
+        /// <see cref="RelativePath"/> stays the SERVER source (config-server/&lt;rel&gt;) used to download.
+        /// </summary>
+        public string SeedTargetRelative { get; set; }
 
         /// <summary>Human-readable reason (logged and written to last-update.json).</summary>
         public string Reason { get; set; }

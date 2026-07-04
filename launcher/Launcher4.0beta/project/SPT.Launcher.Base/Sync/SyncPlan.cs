@@ -39,7 +39,10 @@ namespace SPT.Launcher.Sync
         public int DeleteCount => Actions.Count(a => a.Kind == SyncActionKind.DeleteExtra);
         public int MoveCount => Actions.Count(a => a.Kind == SyncActionKind.MoveToDisabled);
 
-        /// <summary>Actions that actually touch the disk (downloads, deletes, moves).</summary>
-        public int IoActionCount => DownloadCount + DeleteCount + MoveCount;
+        /// <summary>Item 017: config-server → config seed copies (target absent by name).</summary>
+        public int SeedCount => Actions.Count(a => a.Kind == SyncActionKind.SeedCopy);
+
+        /// <summary>Actions that actually touch the disk (downloads, deletes, moves, seeds).</summary>
+        public int IoActionCount => DownloadCount + DeleteCount + MoveCount + SeedCount;
     }
 }

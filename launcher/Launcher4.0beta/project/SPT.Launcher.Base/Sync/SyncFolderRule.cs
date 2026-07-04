@@ -18,6 +18,13 @@ namespace SPT.Launcher.Sync
 
         /// <summary>patchers/plugins: full mirror; local extras are moved to a sibling "&lt;folder&gt;-disabled" directory.</summary>
         MirrorMoveDisabled = 3,
+
+        /// <summary>
+        /// Item 017: config-server → config seed. Each SERVER file under "&lt;name&gt;-server/&lt;rel&gt;"
+        /// is copied to the USER "&lt;name&gt;/&lt;rel&gt;" ONLY when the target is absent by name.
+        /// Never deletes, never overwrites, never consults hash/baseline (memory-less seed).
+        /// </summary>
+        SeedIfMissingByName = 4,
     }
 
     public static class SyncFolderRuleParser
@@ -41,6 +48,9 @@ namespace SPT.Launcher.Sync
                     return true;
                 case "mirror-move-disabled":
                     rule = SyncFolderRule.MirrorMoveDisabled;
+                    return true;
+                case "seed-if-missing":
+                    rule = SyncFolderRule.SeedIfMissingByName;
                     return true;
                 default:
                     rule = SyncFolderRule.Default;

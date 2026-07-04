@@ -34,6 +34,7 @@ namespace SPT.Launcher.Sync
                     preservedDevMode = result.PreservedDevMode,
                     deleted = result.Deleted,
                     movedToDisabled = result.MovedToDisabled,
+                    seeded = result.Seeded,
                     errors = result.Errors,
                     pending = result.Pending,
                 },

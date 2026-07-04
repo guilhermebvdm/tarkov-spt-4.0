@@ -18,11 +18,17 @@ namespace SPT.Launcher.Sync
         /// ref: CR-01-03 — mirror-delete (a regra mais destrutiva) NÃO entra no fallback: o layout
         /// de config-server no mods_repo real nunca foi verificado (A2), então config-server só
         /// vira espelho-com-delete via folderRules EXPLÍCITO do server. Default seguro até P-007.2.
+        /// ref: item 017 — config-server passa a ser SEED (config-server → config, cópia só-se-ausente,
+        /// nunca deleta/sobrescreve). Por ser NÃO-destrutiva (o oposto do mirror-delete), a regra de
+        /// seed É segura no fallback: mesmo sem folderRules do server, o client semeia os defaults.
+        /// Substitui o antigo config-server→mirror-delete (que era opt-in e nunca ativado pelo operador).
         /// </summary>
         public static readonly IReadOnlyDictionary<string, string> FallbackRules = new Dictionary<string, string>
         {
             ["config"] = "preserve-divergent",
             ["BepInEx/config"] = "preserve-divergent",
+            ["config-server"] = "seed-if-missing",
+            ["BepInEx/config-server"] = "seed-if-missing",
             ["patchers"] = "mirror-move-disabled",
             ["BepInEx/patchers"] = "mirror-move-disabled",
             ["plugins"] = "mirror-move-disabled",

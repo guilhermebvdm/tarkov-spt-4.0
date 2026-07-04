@@ -167,6 +167,43 @@ namespace SPT.Launcher.Sync
                             }
 
                             break;
+
+                        case SyncActionKind.SeedCopy:
+                            try
+                            {
+                                // ref: CR-01-05 — destino validado sob o GameRoot ANTES de baixar.
+                                string seedDestination = ResolveUnderRoot(action.SeedTargetRelative);
+
+                                // Item 017: NUNCA sobrescreve. O planner já decidiu por ausência, mas
+                                // re-checa aqui (TOCTOU) — se o alvo surgiu entre o plano e o apply,
+                                // pula sem baixar e sem erro. Baseline intocado (seed sem memória).
+                                if (File.Exists(seedDestination))
+                                {
+                                    ioDone++;
+                                    AddEntry(result, action.SeedTargetRelative, "seed-skipped", "target already present");
+                                    break;
+                                }
+
+                                byte[] seedData = await _downloader(action.RelativePath, cancellationToken); // baixa da FONTE (config-server)
+                                ApplyAtomic(seedDestination, seedData);
+
+                                result.Seeded++;
+                                ioDone++;
+                                AddEntry(result, action.SeedTargetRelative, "seeded", action.RelativePath);
+                            }
+                            catch (OperationCanceledException)
+                            {
+                                throw; // download em voo cancelado → nada aplicado, conta como pendente
+                            }
+                            catch (Exception ex)
+                            {
+                                result.Errors++;
+                                ioDone++;
+                                AddEntry(result, action.SeedTargetRelative, "error", ex.Message);
+                                _log($"[Sync] Falha ao semear {action.SeedTargetRelative}: {ex.Message}");
+                            }
+
+                            break;
                     }
                 }
             }

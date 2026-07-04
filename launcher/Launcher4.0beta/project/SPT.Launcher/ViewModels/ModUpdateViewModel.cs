@@ -113,6 +113,31 @@ namespace SPT.Launcher.ViewModels
             set => this.RaiseAndSetIfChanged(ref _outdatedFiles, value);
         }
 
+        // === Item 016 — taxa de download (média móvel, MB/s decimal, separador PT-BR) ===
+
+        private readonly DownloadRateMeter _rateMeter = new DownloadRateMeter();
+
+        private string _downloadSpeedText = "";
+        public string DownloadSpeedText
+        {
+            get => _downloadSpeedText;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _downloadSpeedText, value);
+                this.RaisePropertyChanged(nameof(HasDownloadSpeed));
+            }
+        }
+
+        private double _downloadBytesPerSec;
+        public double DownloadBytesPerSec
+        {
+            get => _downloadBytesPerSec;
+            set => this.RaiseAndSetIfChanged(ref _downloadBytesPerSec, value);
+        }
+
+        /// <summary>Cache hit / nothing downloading → empty text → the speed label is hidden.</summary>
+        public bool HasDownloadSpeed => !string.IsNullOrEmpty(DownloadSpeedText);
+
         public ObservableCollection<ModFileStatus> FileStatuses { get; } = new ObservableCollection<ModFileStatus>();
 
         public ICommand UpdateCommand { get; }
@@ -157,6 +182,8 @@ namespace SPT.Launcher.ViewModels
             Progress = 0;
             FileStatuses.Clear();
             _plan = null;
+            _rateMeter.Reset();       // item 016 — taxa começa limpa a cada verificação
+            DownloadSpeedText = "";
 
             _cts = new CancellationTokenSource();
             CanCancel = true;
@@ -283,6 +310,8 @@ namespace SPT.Launcher.ViewModels
                 $"[ModUpdateView] Aplicando plano: {plan.DownloadCount} downloads, {plan.DeleteCount} remoções, {plan.MoveCount} movimentos p/ -disabled");
             MaxProgress = Math.Max(1, plan.IoActionCount);
             Progress = 0;
+            _rateMeter.Reset(); // item 016
+            DownloadSpeedText = "";
 
             _cts = new CancellationTokenSource();
             CanCancel = true;
@@ -336,6 +365,7 @@ namespace SPT.Launcher.ViewModels
             {
                 IsUpdating = false;
                 CanCancel = false;
+                DownloadSpeedText = ""; // item 016 — some com a taxa ao terminar o apply
                 _cts?.Dispose();
                 _cts = null;
             }
@@ -393,12 +423,42 @@ namespace SPT.Launcher.ViewModels
                     (path, ct) => Task.Run(() => RequestHandler.DownloadPerformanceFile(path), ct));
             }
 
+            // Item 016 — mede a taxa como camada MAIS EXTERNA: captura todos os downloads
+            // (base, overlay do 008 e seeds do 017), independente da origem.
+            downloader = WithSpeedMeter(downloader);
+
             return new SyncEngine(
                 _gamePath,
                 _baseline,
                 downloader,
                 deleteFile: DeleteToRecycleBin,
                 log: msg => Controllers.LogManager.Instance.Info(msg));
+        }
+
+        /// <summary>
+        /// Item 016: wraps a downloader to measure bytes/time per file and push the smoothed rate to
+        /// the VM via the UI thread (the delegate runs on a Task thread). No coupling to the engine.
+        /// </summary>
+        private SyncDownloader WithSpeedMeter(SyncDownloader inner)
+        {
+            return async (path, ct) =>
+            {
+                var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+                byte[] data = await inner(path, ct);
+                stopwatch.Stop();
+
+                _rateMeter.AddSample(data?.LongLength ?? 0, stopwatch.Elapsed);
+                double bytesPerSec = _rateMeter.BytesPerSecond;
+                string text = DownloadRateMeter.Format(bytesPerSec);
+
+                Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                {
+                    DownloadBytesPerSec = bytesPerSec;
+                    DownloadSpeedText = text;
+                });
+
+                return data;
+            };
         }
 
         /// <summary>Same safety net as the legacy flow: extras go to the recycle bin, not hard-deleted.</summary>
@@ -424,6 +484,7 @@ namespace SPT.Launcher.ViewModels
                 $"{plan.PreserveCount} preservados",
             };
 
+            if (plan.SeedCount > 0) parts.Add($"{plan.SeedCount} p/ semear");
             if (plan.MoveCount > 0) parts.Add($"{plan.MoveCount} p/ mover p/ disabled");
             if (plan.DeleteCount > 0) parts.Add($"{plan.DeleteCount} p/ remover");
             if (plan.Warnings.Count > 0) parts.Add($"{plan.Warnings.Count} avisos Dev Mode");
@@ -439,7 +500,8 @@ namespace SPT.Launcher.ViewModels
 
             var statuses = plan.Actions.Select(action => new ModFileStatus
             {
-                FileName = action.RelativePath,
+                // Item 017: seed shows the USER target (config/<rel>) — that's what lands on disk.
+                FileName = action.Kind == SyncActionKind.SeedCopy ? action.SeedTargetRelative : action.RelativePath,
                 Status = action.Kind switch
                 {
                     SyncActionKind.Download => "outdated",
@@ -447,6 +509,7 @@ namespace SPT.Launcher.ViewModels
                     SyncActionKind.PreserveDevMode => "preserved",
                     SyncActionKind.DeleteExtra => "to-delete",
                     SyncActionKind.MoveToDisabled => "to-move",
+                    SyncActionKind.SeedCopy => "to-seed",
                     _ => "outdated",
                 },
                 Size = sizeByPath.TryGetValue(action.RelativePath, out long size) ? size : 0,
@@ -467,6 +530,8 @@ namespace SPT.Launcher.ViewModels
             "updated" => "updated",
             "deleted" => "deleted",
             "moved-to-disabled" => "moved",
+            "seeded" => "seeded",
+            "seed-skipped" => "preserved",
             "preserved" => "preserved",
             "preserved-devmode" => "preserved",
             "error" => "error",
@@ -521,6 +586,8 @@ namespace SPT.Launcher.ViewModels
             "deleted" => "🗑️",
             "to-move" => "📁",
             "moved" => "📁",
+            "to-seed" => "🌱",
+            "seeded" => "🌱",
             "error" => "❌",
             _ => "⏳"
         };

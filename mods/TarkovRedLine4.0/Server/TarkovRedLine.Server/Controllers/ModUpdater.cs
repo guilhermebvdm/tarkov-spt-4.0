@@ -368,6 +368,11 @@ public class ModUpdaterController : ControllerBase
                     folderRules = new Dictionary<string, string>
                     {
                         ["BepInEx/config"] = "preserve-divergent",
+                        // Item 017: seed defaults — files placed under mods_repo/BepInEx/config-server/
+                        // are copied into the user's BepInEx/config/ ONLY when absent by name (never
+                        // deletes/overwrites). Existing servers rely on the client's built-in fallback,
+                        // so this default only matters on a fresh config.json.
+                        ["BepInEx/config-server"] = "seed-if-missing",
                         ["BepInEx/patchers"] = "mirror-move-disabled",
                         ["BepInEx/plugins"] = "mirror-move-disabled"
                     }

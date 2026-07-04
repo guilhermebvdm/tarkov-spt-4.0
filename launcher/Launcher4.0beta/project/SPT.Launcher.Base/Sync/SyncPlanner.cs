@@ -81,7 +81,38 @@ namespace SPT.Launcher.Sync
                 // extras contra deleção no ScanExtras, nunca bloqueia update). Filtrar aqui pulava
                 // silenciosamente os updates do SPT core (ignoredFiles default = "BepInEx/plugins/spt").
 
-                var rule = _resolver.Resolve(normalized);
+                var rule = _resolver.Resolve(normalized, out string matchedPrefix);
+
+                // Item 017: seed rule — copy SERVER config-server/<rel> to USER config/<rel> only
+                // when the target is ABSENT BY NAME. Handled before the missing/hash logic below
+                // because the SOURCE (config-server) is a server-only folder the user never has on
+                // disk — the normal path would wrongly plan a Download of config-server onto the user.
+                // No hash, no baseline: the seed is memory-less (a file the user deleted reappears).
+                if (rule == SyncFolderRule.SeedIfMissingByName)
+                {
+                    string targetRel = SyncPathUtil.DeriveSeedTarget(file.path, matchedPrefix);
+                    if (targetRel == null)
+                    {
+                        continue; // no file remainder after the prefix — nothing to seed
+                    }
+
+                    string targetLocal = SyncPathUtil.ToLocalPath(_options.GameRoot, targetRel);
+                    if (!File.Exists(targetLocal))
+                    {
+                        plan.Actions.Add(new SyncAction
+                        {
+                            RelativePath = file.path,       // download source (config-server/<rel>)
+                            SeedTargetRelative = targetRel, // write destination (config/<rel>)
+                            Kind = SyncActionKind.SeedCopy,
+                            Rule = rule,
+                            ServerHash = file.hash,
+                            Reason = "seed (target missing by name)",
+                        });
+                    }
+                    // target present (any content, any hash) -> no-op: seed never overwrites.
+                    continue;
+                }
+
                 string localPath = SyncPathUtil.ToLocalPath(_options.GameRoot, file.path);
 
                 if (!File.Exists(localPath))
@@ -197,9 +228,11 @@ namespace SPT.Launcher.Sync
 
                     var rule = _resolver.Resolve(normalized, out string matchedPrefix);
 
-                    if (rule == SyncFolderRule.PreserveDivergent)
+                    if (rule == SyncFolderRule.PreserveDivergent || rule == SyncFolderRule.SeedIfMissingByName)
                     {
-                        // Extras in config folders are never touched (R1 is not a mirror).
+                        // Extras in config / config-server folders are never touched (neither is a
+                        // mirror). Item 017: seeded files live under 'config' (preserve-divergent) and
+                        // are never manifest entries, so they must survive any managedPaths overlap.
                         continue;
                     }
 

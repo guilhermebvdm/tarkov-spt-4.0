@@ -25,6 +25,10 @@ namespace SPT.Launcher.Sync
         public int PreservedDevMode { get; set; }
         public int Deleted { get; set; }
         public int MovedToDisabled { get; set; }
+
+        /// <summary>Item 017: default configs copied from config-server into config (target was absent by name).</summary>
+        public int Seeded { get; set; }
+
         public int Errors { get; set; }
 
         /// <summary>Disk actions not attempted because the run was cancelled (C4).</summary>
@@ -44,6 +48,7 @@ namespace SPT.Launcher.Sync
                 var sb = new StringBuilder();
                 sb.Append($"{Updated} atualizados · {Preserved + PreservedDevMode} preservados · {MovedToDisabled} movidos p/ disabled");
 
+                if (Seeded > 0) sb.Append($" · {Seeded} semeados");
                 if (Deleted > 0) sb.Append($" · {Deleted} removidos");
                 if (Errors > 0) sb.Append($" · {Errors} erros");
                 if (PreservedDevMode > 0) sb.Append($" · {PreservedDevMode} preservados por Dev Mode");

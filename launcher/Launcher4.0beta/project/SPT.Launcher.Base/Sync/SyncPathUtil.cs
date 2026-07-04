@@ -31,6 +31,45 @@ namespace SPT.Launcher.Sync
                    || normalizedPath.StartsWith(normalizedPrefix + "/", StringComparison.Ordinal);
         }
 
+        /// <summary>
+        /// Item 017: maps a SERVER seed-source path (e.g. "BepInEx/config-server/a/x.cfg") to the
+        /// USER target under the sibling folder without the "-server" suffix ("BepInEx/config/a/x.cfg").
+        /// "Same name" = relative path within the folder, so subfolders are preserved and keep their
+        /// original casing. Returns null when there is no file remainder after the prefix, or when
+        /// the inputs are empty.
+        /// </summary>
+        /// <param name="originalPath">Manifest path, original casing (may use back- or forward slashes).</param>
+        /// <param name="normalizedMatchedPrefix">The seed-rule prefix returned by <see cref="SyncRuleResolver.Resolve(string, out string)"/> (normalized/lower-case, length-preserving vs the original).</param>
+        public static string DeriveSeedTarget(string originalPath, string normalizedMatchedPrefix)
+        {
+            if (string.IsNullOrEmpty(originalPath) || string.IsNullOrEmpty(normalizedMatchedPrefix))
+            {
+                return null;
+            }
+
+            string forward = originalPath.Replace('\\', '/').TrimStart('/');
+            if (forward.Length < normalizedMatchedPrefix.Length)
+            {
+                return null;
+            }
+
+            // Normalize() only lower-cases + swaps slashes (length-preserving), so the prefix span
+            // aligns byte-for-byte with the original — Substring recovers the original casing.
+            string originalPrefix = forward.Substring(0, normalizedMatchedPrefix.Length);
+            string remainder = forward.Substring(normalizedMatchedPrefix.Length).TrimStart('/');
+            if (remainder.Length == 0)
+            {
+                return null;
+            }
+
+            const string serverSuffix = "-server";
+            string targetPrefix = originalPrefix.EndsWith(serverSuffix, StringComparison.OrdinalIgnoreCase)
+                ? originalPrefix.Substring(0, originalPrefix.Length - serverSuffix.Length)
+                : originalPrefix; // non "-server" seed prefix (operator misconfig): seeds into itself
+
+            return targetPrefix + "/" + remainder;
+        }
+
         /// <summary>True when any segment of the path ends with "-disabled" (quarantine folders are never re-synced).</summary>
         public static bool ContainsDisabledSegment(string normalizedPath)
         {

@@ -143,6 +143,31 @@ namespace SPT.Launcher.ViewModels
             set => this.RaiseAndSetIfChanged(ref _hasLastUpdate, value);
         }
 
+        // === Item 016 — taxa de download na barra de update (média móvel, MB/s decimal, PT-BR) ===
+
+        private readonly DownloadRateMeter _rateMeter = new DownloadRateMeter();
+
+        private string _downloadSpeedText = "";
+        public string DownloadSpeedText
+        {
+            get => _downloadSpeedText;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _downloadSpeedText, value);
+                this.RaisePropertyChanged(nameof(HasDownloadSpeed));
+            }
+        }
+
+        private double _downloadBytesPerSec;
+        public double DownloadBytesPerSec
+        {
+            get => _downloadBytesPerSec;
+            set => this.RaiseAndSetIfChanged(ref _downloadBytesPerSec, value);
+        }
+
+        /// <summary>Cache hit / nada baixando → texto vazio → o rótulo da taxa fica oculto.</summary>
+        public bool HasDownloadSpeed => !string.IsNullOrEmpty(DownloadSpeedText);
+
         public ICommand UpdateModsCommand { get; }
         public ICommand VerifyFilesCommand { get; }
         public ICommand CancelUpdateCommand { get; }
@@ -494,6 +519,8 @@ namespace SPT.Launcher.ViewModels
                 IsUpdateVisible = true;
                 UpdateStatusText = LocalizationProvider.Instance.update_checking;
                 UpdateProgress = 0;
+                _rateMeter.Reset();      // item 016 — taxa limpa a cada verificação
+                DownloadSpeedText = "";
                 LogManager.Instance.Info("[Profile] Verificando atualizações de mods...");
 
                 // 1. Buscar hash do manifesto do servidor (endpoint leve)
@@ -682,7 +709,7 @@ namespace SPT.Launcher.ViewModels
 
                 if (plan.IoActionCount > 0)
                 {
-                    LogManager.Instance.Info($"[Profile] Plano: {plan.DownloadCount} downloads, {plan.DeleteCount} remoções, {plan.MoveCount} p/ -disabled, {plan.PreserveCount} preservados. Aplicando...");
+                    LogManager.Instance.Info($"[Profile] Plano: {plan.DownloadCount} downloads, {plan.SeedCount} seeds, {plan.DeleteCount} remoções, {plan.MoveCount} p/ -disabled, {plan.PreserveCount} preservados. Aplicando...");
                     UpdateMaxProgress = Math.Max(1, plan.IoActionCount);
                     UpdateProgress = 0;
 
@@ -762,6 +789,7 @@ namespace SPT.Launcher.ViewModels
             finally
             {
                 CanCancelUpdate = false;
+                DownloadSpeedText = ""; // item 016 — some com a taxa ao terminar a verificação
                 _syncCts?.Dispose();
                 _syncCts = null;
 
@@ -789,12 +817,41 @@ namespace SPT.Launcher.ViewModels
                     (path, ct) => Task.Run(() => RequestHandler.DownloadPerformanceFile(path), ct));
             }
 
+            // Item 016 — camada MAIS EXTERNA: mede a taxa de todos os downloads (base/overlay/seed).
+            downloader = WithSpeedMeter(downloader);
+
             return new SyncEngine(
                 gamePath,
                 baseline,
                 downloader,
                 deleteFile: DeleteToRecycleBin,
                 log: msg => LogManager.Instance.Info(msg));
+        }
+
+        /// <summary>
+        /// Item 016: envolve o downloader para medir bytes/tempo por arquivo e empurrar a taxa
+        /// suavizada pra barra de update via UI thread (o delegate roda em thread de Task).
+        /// </summary>
+        private SyncDownloader WithSpeedMeter(SyncDownloader inner)
+        {
+            return async (path, ct) =>
+            {
+                var stopwatch = Stopwatch.StartNew();
+                byte[] data = await inner(path, ct);
+                stopwatch.Stop();
+
+                _rateMeter.AddSample(data?.LongLength ?? 0, stopwatch.Elapsed);
+                double bytesPerSec = _rateMeter.BytesPerSecond;
+                string text = DownloadRateMeter.Format(bytesPerSec);
+
+                Dispatcher.UIThread.Post(() =>
+                {
+                    DownloadBytesPerSec = bytesPerSec;
+                    DownloadSpeedText = text;
+                });
+
+                return data;
+            };
         }
 
         /// <summary>Extras vão pra lixeira (mesma rede de segurança do fluxo antigo).</summary>
