@@ -87,14 +87,21 @@ namespace SPT.Launcher.MiniCommon
             return null;
         }
 
-        public string GetJson(string url, bool compress = true)
+        public string GetJson(string url, bool compress = true, bool decompressResponse = true)
         {
             using (var stream = Send(url, "GET", null, compress))
             {
                 using (var ms = new MemoryStream())
                 {
                     stream.CopyTo(ms);
-                    return SimpleZlib.Decompress(ms.ToArray(), null);
+                    if (decompressResponse)
+                    {
+                        return SimpleZlib.Decompress(ms.ToArray(), null);
+                    }
+                    else
+                    {
+                        return Encoding.UTF8.GetString(ms.ToArray());
+                    }
                 }
             }
         }

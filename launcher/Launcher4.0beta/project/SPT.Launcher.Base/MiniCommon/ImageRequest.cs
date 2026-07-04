@@ -32,6 +32,52 @@ namespace SPT.Launcher.MiniCommon
             CacheImage($"{LauncherRoute}side_{Side.ToLower()}.png", SideImagePath);
         }
 
+        /// <summary>
+        /// Caches an image served by the CONNECTED backend (RequestHandler endpoint) under
+        /// Image_Cache/<paramref name="fileName"/> and returns the local path, or null on failure.
+        /// Used for CustomClasses class icons (item 004). Static files come raw (no zlib).
+        /// </summary>
+        public static string CacheServerImage(string route, string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(route) || string.IsNullOrWhiteSpace(fileName)) return null;
+
+            try
+            {
+                Directory.CreateDirectory(ImageCacheFolder);
+
+                string filePath = Path.Combine(ImageCacheFolder, fileName);
+
+                if (CachedRoutes.Contains(route) && File.Exists(filePath))
+                {
+                    return filePath;
+                }
+
+                using Stream s = new Request(null, RequestHandler.GetBackendUrl()).Send(route, "GET", null, false);
+
+                if (s == null) return null;
+
+                using MemoryStream ms = new MemoryStream();
+
+                s.CopyTo(ms);
+
+                if (ms.Length == 0) return null;
+
+                using (FileStream fs = File.Create(filePath))
+                {
+                    ms.Seek(0, SeekOrigin.Begin);
+                    ms.CopyTo(fs);
+                }
+
+                CachedRoutes.Add(route);
+                return filePath;
+            }
+            catch (Exception ex)
+            {
+                LogManager.Instance.Exception(ex);
+                return null;
+            }
+        }
+
         private static void CacheImage(string route, string filePath)
         {
             try

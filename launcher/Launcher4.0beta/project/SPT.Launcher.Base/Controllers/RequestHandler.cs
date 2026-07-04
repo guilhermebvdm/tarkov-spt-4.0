@@ -78,6 +78,15 @@ namespace SPT.Launcher
             return request.PostJson("/launcher/profile/change/wipe", Json.Serialize(data));
         }
 
+        /// <summary>
+        /// Lista de classes do CustomClasses (item 058) — contrato SP0.
+        /// Resposta vem zlib por default; GetJson já descomprime.
+        /// </summary>
+        public static string RequestClassList()
+        {
+            return request.GetJson("/customclasses/classes");
+        }
+
         public static string SendPing()
         {
             return request.GetJson("/launcher/ping");
@@ -86,6 +95,14 @@ namespace SPT.Launcher
         public static string RequestServerVersion()
         {
             return request.GetJson("/launcher/server/version");
+        }
+
+        /// <summary>
+        /// Busca a versão TRL do servidor (endpoint redline, resposta JSON pura — sem zlib)
+        /// </summary>
+        public static string RequestTrlServerVersion()
+        {
+            return request.GetJson("/redline/server/version", decompressResponse: false);
         }
 
         public static string RequestCompatibleGameVersion()
