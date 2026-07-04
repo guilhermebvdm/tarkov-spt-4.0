@@ -306,9 +306,9 @@ internal static class PerksConfig
             "Weapon Mastery", "Weapon Mastery — Enabled", true,
             "058: dá vida às maestrias inertes — XP por disparo do underbarrel (GP-25/M203) + bônus por nível de SMG/LMG/Launcher/Underbarrel. / Enables inert weapon masteries: underbarrel XP per shot + per-level recoil/ergo bonuses.");
         MasteryXpPerShot = config.Bind(
-            "Weapon Mastery", "Underbarrel XP per shot", 0.1f,
+            "Weapon Mastery", "Underbarrel XP per shot", 0.5f,
             new ConfigDescription(
-                "XP de Underbarrel Launchers por DISPARO do GP-25/M203 (0.1 = paridade com o XP por acerto vanilla). / Underbarrel Launchers XP per shot fired.",
+                "XP de Underbarrel Launchers por DISPARO do GP-25/M203. 0.5 = paridade de ESFORÇO com SMG (RN-01: granada é cara/rara — 0.1 'por ação' deixava nível 5 a 75-250 raids). / Underbarrel Launchers XP per shot fired.",
                 new AcceptableValueRange<float>(0f, 1f)));
         MasteryRecoilPerLevel = config.Bind(
             "Weapon Mastery", "Recoil bonus per level", 0.004f,

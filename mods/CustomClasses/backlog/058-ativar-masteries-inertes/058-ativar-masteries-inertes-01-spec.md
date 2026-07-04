@@ -68,7 +68,7 @@ de implementar (resultados alimentam a spec técnica):
 - [ ] **XP duplo** (V1): categoria que já sobe no vanilla não deve receber XP do mod.
 - [ ] **HMG vs LMG** (V4): ambas `weapClass=machinegun` — se indistinguíveis, unificar num buff só ou achar discriminante.
 - [ ] **Underbarrel acoplado** (V4): detectar o modo de disparo do GP-25/M203 é a maior incógnita de gating.
-- [ ] **Arma trocada rápido / disparo sem acerto:** o XP é por **acerto** (não por tiro no ar) — segue a semântica vanilla.
+- [x] ~~**Arma trocada rápido / disparo sem acerto:** o XP é por **acerto**~~ — OBSOLETO (RN-07): após V1d o design final do underbarrel é XP por **DISPARO** (o acerto da explosão reporta a munição e nunca casa); as demais categorias seguem o vanilla por acerto.
 - [ ] **Coop:** XP/efeito locais; nenhum caminho depende do host.
 
 ## Fora de escopo / decisões

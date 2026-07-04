@@ -47,6 +47,8 @@
 - [ ] Efeito: overlay 052 mostra `Recoil str` menor com nível ≥1 de SMG/LMG (comparar com nível 0).
 - [ ] Sem XP duplo: SMG/LMG/GL continuam subindo SÓ pelo vanilla (taxa igual à medida em 2026-07-04).
 - [ ] Fika: rodar como CLIENTE; bots atirando underbarrel NÃO creditam XP no seu perfil.
+- [ ] **RN-02 (rodada 2):** ao sacar SMG/LMG/GL, procurar no LogOutput a linha `"<tipo> has no buffs"` (SkillManager.cs:1900). Logou = vanilla sem efeito por nível → Perna 2 limpa; NÃO logou = vanilla JÁ aplica −0.4%/nível → isentar SMG/LMG/Launcher da Perna 2 (fix de 3 linhas no WeaponMastery.SkillForHeld).
+- [ ] **R2-02 (rodada 2):** validar o efeito de RECUO com SPTRecoilRework OFF (o RealRecoil dirige a câmera fora do funil `str` — com ele ON o efeito da maestria/perks só atua no recuo procedural).
 
 ## Mudanças posteriores
 
@@ -58,6 +60,13 @@
   dá XP no vanilla) · CR-01-05 (piso 0.5 no excesso do float_5) · CR-01-06 (fator de classe respeita
   `EnableSkillMultipliers`) · CR-01-07 (clamp de fator negativo).
 - **Arquivos:** `WeaponMasteryPatches.cs`, `Plugin.cs`. Recompile 0/0; DLL instalada.
+
+### 2026-07-04 — Rodada 02 ([04-code-review-02](058-ativar-masteries-inertes-04-code-review-02.md): código pós-apply + regras de negócio)
+
+- **Aplicados (4):** R2-01 (gate do hideout bloqueia SÓ o XP — efeito por nível vale no range) · RN-01 (**default XP 0.5**/disparo — paridade de ESFORÇO; 0.1 deixava nível 5 a 75–250 raids) · RN-05 (nota de paridade parcial no PROPRIEDADES) · RN-07 (corner obsoleto riscado na 01-spec).
+- **Registrados:** RN-02 + R2-02 no checklist do gate (acima) · RN-03 proposto ao usuário (multiplicadores de maestria nos .jsonc de classe) · RN-04 → item 060 · R2-03/04, RN-06/08 anotados.
+- **Fato-chave:** `HarmonyPriority` confirmado HONRADO pelo pipeline SPT (cadeia decompilada) — CR-01-03 efetivo.
+- **Arquivos:** `WeaponMasteryPatches.cs`, `PerksConfig.cs`, `PROPRIEDADES.md`, `01-spec`, `mod-backlog.md` (060).
 
 ## Histórico
 

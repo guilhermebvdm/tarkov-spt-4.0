@@ -53,7 +53,7 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 | Nome (EN) | Tradução pt-BR | Tipo | Padrão | Tooltip (pt-BR) |
 |---|---|---|---|---|
 | `Weapon Mastery — Enabled` | Maestria de armas — ativa | bool | `true` | Ativa XP por disparo do underbarrel (GP-25/M203) + bônus por nível de SMG/LMG/Launcher/Underbarrel. |
-| `Underbarrel XP per shot` | XP do underbarrel por disparo | float | `0.1` | XP de Underbarrel Launchers por DISPARO (0.1 = paridade com o XP por acerto vanilla). Faixa 0..1. |
+| `Underbarrel XP per shot` | XP do underbarrel por disparo | float | `0.5` | XP de Underbarrel Launchers por DISPARO. 0.5 = paridade de ESFORÇO com SMG (granada é cara/rara; nível 1 ≈ 20 disparos). Faixa 0..1. |
 | `Recoil bonus per level` | Bônus de recuo por nível | float | `0.004` | Redução de recuo por nível da maestria da arma em mãos (−0.4%/nível; paridade `WeaponSkillRecoilBonusPerLevel`). Faixa 0..0.02. |
 | `Ergo bonus per level` | Bônus de ergo por nível | float | `0.002` | Aumento de ergonomia por nível da maestria da arma em mãos (+0.2%/nível). Faixa 0..0.02. |
 
@@ -67,3 +67,4 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 | 2026-07-03 | Item 056 — `Weight Marker — X/Y offset` (posicionar o marcador ▲ +X% do peso). |
 | 2026-07-03 | Item 055 — `Class Detail — Loading panel scale` (zoom-out do popover; faltava documentar — pego na varredura de pendências). |
 | 2026-07-04 | Item 058 — seção `Weapon Mastery` (XP do underbarrel por disparo + bônus por nível de recuo/ergo). |
+| 2026-07-04 | 058 review 2: default do XP 0.1→0.5 (RN-01, paridade de esforço). Nota RN-05: a maestria modded dá só recuo+ergo por nível (a vanilla tem também reload/swap/elite ×2) — escopo consciente. |

@@ -44,40 +44,40 @@ internal class UnderbarrelMasteryXpPatch : ModulePatch
                 return;
             }
 
-            // ref: CR-01-04 — o shooting range do hideout NÃO dá XP de weapon skill no vanilla
-            // (HideoutPlayer.ExecuteShotSkill é override VAZIO — HideoutPlayer.cs:653); paridade aqui também.
-            // Mesmo padrão de detecção por nome do RaidPerksNotificationPatch (sem tipo hard no IL).
-            if (p.GetType().Name.IndexOf("Hideout", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return;
-            }
-
             var skill = p.Skills?.AttachedLauncher;   // ref: SkillManager.cs:1320
             if (skill == null)
             {
                 return;
             }
 
-            // XP por disparo × fator de XP da classe (consistência com o OnTriggerPatch — PA-01-02).
-            // silent: true → sem LevelChanged por tiro (PA-01-03; ref: AbstractSkillClass.cs:115).
-            var xp = PerksConfig.MasteryXpPerShot?.Value ?? 0f;
-            SkillMultipliers.EnsureLoaded();   // ref: CR-01-02 — todo call-site de TryGet vem pareado com EnsureLoaded
-            if (Plugin.Enabled && SkillMultipliers.TryGet(ESkillId.AttachedLauncher, out var f))   // ref: CR-01-06 — respeita o master switch
+            // ref: CR-01-04 (ajustado R2-01) — o shooting range do hideout NÃO dá XP de weapon skill no
+            // vanilla (HideoutPlayer.ExecuteShotSkill é override VAZIO — HideoutPlayer.cs:653) → o gate
+            // bloqueia SÓ o XP; o EFEITO por nível (abaixo) vale no range também, como nos patches irmãos
+            // de recuo/ergo (o range é onde o jogador testa recuo — não pode mentir sobre o in-raid).
+            var inHideout = p.GetType().Name.IndexOf("Hideout", StringComparison.OrdinalIgnoreCase) >= 0;
+            if (!inHideout)
             {
-                xp *= Mathf.Max(0f, f);   // ref: CR-01-07 — clamp explícito de fator negativo (como no OnTriggerPatch)
-            }
-
-            if (xp > 0f)
-            {
-                // ref: CR-01-01 — PARIDADE nos primeiros níveis: o funil vanilla amplifica o XP cru em
-                // Level<9 (×10/(nível+1) — SkillClass.cs:228-241/108). Sem isso, nível 0→1 = ~1000 disparos
-                // (10× mais lento que a paridade prometida). Fadiga/BonusController: skip documentado (PA-01-02).
-                if (skill.Level < 9)
+                // XP por disparo × fator de XP da classe (consistência com o OnTriggerPatch — PA-01-02).
+                // silent: true → sem LevelChanged por tiro (PA-01-03; ref: AbstractSkillClass.cs:115).
+                var xp = PerksConfig.MasteryXpPerShot?.Value ?? 0f;
+                SkillMultipliers.EnsureLoaded();   // ref: CR-01-02 — todo call-site de TryGet vem pareado com EnsureLoaded
+                if (Plugin.Enabled && SkillMultipliers.TryGet(ESkillId.AttachedLauncher, out var f))   // ref: CR-01-06 — respeita o master switch
                 {
-                    xp = skill.CalculateExpOnFirstLevels(xp);   // público — SkillClass.cs:108
+                    xp *= Mathf.Max(0f, f);   // ref: CR-01-07 — clamp explícito de fator negativo (como no OnTriggerPatch)
                 }
 
-                skill.SetCurrent(skill.Current + xp, true);
+                if (xp > 0f)
+                {
+                    // ref: CR-01-01 — PARIDADE nos primeiros níveis: o funil vanilla amplifica o XP cru em
+                    // Level<9 (×10/(nível+1) — SkillClass.cs:228-241/108). Sem isso, nível 0→1 = ~1000 disparos
+                    // (10× mais lento que a paridade prometida). Fadiga/BonusController: skip documentado (PA-01-02).
+                    if (skill.Level < 9)
+                    {
+                        xp = skill.CalculateExpOnFirstLevels(xp);   // público — SkillClass.cs:108
+                    }
+
+                    skill.SetCurrent(skill.Current + xp, true);
+                }
             }
 
             // Efeito por nível do PRÓPRIO underbarrel: method_57 seta float_5 = 1 + ammoRec/100 (força do
