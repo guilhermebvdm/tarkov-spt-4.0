@@ -17,6 +17,10 @@
 
 	<Application.Resources>
 		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<!-- TRL Design System icons (Tabler stroked geometries, StreamGeometry keys TrlIcon*) -->
+				<ResourceInclude Source="/Assets/Theme/Icons.axaml"/>
+			</ResourceDictionary.MergedDictionaries>
 			<!-- R2: no rounded corners, anywhere -->
 			<CornerRadius x:Key="ControlCornerRadius">0</CornerRadius>
 			<CornerRadius x:Key="OverlayCornerRadius">0</CornerRadius>

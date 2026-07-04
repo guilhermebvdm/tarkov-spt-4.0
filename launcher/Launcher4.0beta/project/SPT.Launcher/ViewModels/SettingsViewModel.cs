@@ -38,13 +38,14 @@ namespace SPT.Launcher.ViewModels
 
         private bool _devPasswordVisible = false;
         public char DevPasswordChar => _devPasswordVisible ? '\0' : '●';
-        public string DevPasswordEyeIcon => _devPasswordVisible ? "🙉" : "🙈";
+        // Estado exposto p/ o XAML alternar os ícones traçados do DS (TrlIconEye / TrlIconEyeOff).
+        public bool IsDevPasswordVisible => _devPasswordVisible;
 
         public void ToggleDevPasswordVisibilityCommand()
         {
             _devPasswordVisible = !_devPasswordVisible;
             this.RaisePropertyChanged(nameof(DevPasswordChar));
-            this.RaisePropertyChanged(nameof(DevPasswordEyeIcon));
+            this.RaisePropertyChanged(nameof(IsDevPasswordVisible));
         }
 
         // Cor do dot de status migrou para o XAML (Border.dev-dot + class binding em

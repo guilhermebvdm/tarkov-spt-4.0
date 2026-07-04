@@ -34,8 +34,16 @@
 		<Setter Property="BorderBrush" Value="{DynamicResource TrlAccentBrush}"/>
 		<Setter Property="Foreground" Value="{DynamicResource TrlAccentBrush}"/>
 	</Style>
+	<!-- DS icons são traçados (Tabler): render com Stroke + hard-edges, não Fill -->
 	<Style Selector="Button.nav Path">
-		<Setter Property="Fill" Value="{Binding $parent[Button].Foreground}"/>
+		<Setter Property="Stroke" Value="{Binding $parent[Button].Foreground}"/>
+		<Setter Property="StrokeThickness" Value="1.75"/>
+		<Setter Property="Fill" Value="{x:Null}"/>
+		<Setter Property="Stretch" Value="Uniform"/>
+		<Setter Property="Width" Value="18"/>
+		<Setter Property="Height" Value="18"/>
+		<Setter Property="StrokeLineCap" Value="Flat"/>
+		<Setter Property="StrokeJoin" Value="Miter"/>
 	</Style>
 
 </Styles>

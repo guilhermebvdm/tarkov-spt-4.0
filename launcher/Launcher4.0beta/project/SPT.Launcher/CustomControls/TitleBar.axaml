@@ -46,8 +46,11 @@
             >
 			<Viewbox Width="14" Height="14">
 				<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center">
-					<Path Data="{StaticResource Minimize}"
-					      Fill="{Binding $parent[TextBlock].Foreground}"
+					<Path Data="{StaticResource TrlIconMinus}"
+					      Stroke="{Binding $parent[TextBlock].Foreground}"
+					      StrokeThickness="1.75" Fill="{x:Null}"
+					      Width="14" Height="14" Stretch="Uniform"
+					      StrokeLineCap="Flat" StrokeJoin="Miter"
 					/>
 				</TextBlock>
 			</Viewbox>
@@ -79,8 +82,11 @@
             >
 			<Viewbox Width="14" Height="14">
 				<TextBlock>
-					<Path Data="{StaticResource Close}"
-					      Fill="{Binding $parent[TextBlock].Foreground}"
+					<Path Data="{StaticResource TrlIconX}"
+					      Stroke="{Binding $parent[TextBlock].Foreground}"
+					      StrokeThickness="1.75" Fill="{x:Null}"
+					      Width="14" Height="14" Stretch="Uniform"
+					      StrokeLineCap="Flat" StrokeJoin="Miter"
 					/>
 				</TextBlock>
 			</Viewbox>
