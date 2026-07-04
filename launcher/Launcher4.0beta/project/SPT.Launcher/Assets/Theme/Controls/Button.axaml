@@ -67,18 +67,18 @@
 	<Style Selector="Button.danger">
 		<Setter Property="Background" Value="{DynamicResource TrlDangerStrongBrush}"/>
 		<Setter Property="BorderBrush" Value="{DynamicResource TrlDangerStrongBrush}"/>
-		<Setter Property="Foreground" Value="White"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgOnDanger}"/>
 		<Setter Property="FontWeight" Value="Bold"/>
 	</Style>
 	<Style Selector="Button.danger:pointerover /template/ ContentPresenter#PART_ContentPresenter">
 		<Setter Property="Background" Value="{DynamicResource TrlDangerHoverBrush}"/>
 		<Setter Property="BorderBrush" Value="{DynamicResource TrlDangerHoverBrush}"/>
-		<Setter Property="Foreground" Value="White"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgOnDanger}"/>
 	</Style>
 	<Style Selector="Button.danger:pressed /template/ ContentPresenter#PART_ContentPresenter">
 		<Setter Property="Background" Value="{DynamicResource TrlDangerPressedBrush}"/>
 		<Setter Property="BorderBrush" Value="{DynamicResource TrlDangerPressedBrush}"/>
-		<Setter Property="Foreground" Value="White"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgOnDanger}"/>
 	</Style>
 
 	<!-- == .ghost: borderless, muted ======================================== -->

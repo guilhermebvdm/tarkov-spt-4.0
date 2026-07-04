@@ -12,38 +12,7 @@
         <cvt:ImageSourceConverter x:Key="imageSourceCvt"/>
     </UserControl.Resources>
 
-    <!-- Nav buttons: command-based twin of ListBox.trl-nav (token-pure, item 010) -->
-    <UserControl.Styles>
-        <Style Selector="Button.nav">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="2,0,0,0"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="CornerRadius" Value="0"/>
-            <Setter Property="MinHeight" Value="36"/>
-            <Setter Property="Padding" Value="12,0"/>
-            <Setter Property="HorizontalAlignment" Value="Stretch"/>
-            <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="Foreground" Value="{DynamicResource TrlFgMutedBrush}"/>
-        </Style>
-        <Style Selector="Button.nav:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="{DynamicResource TrlBgHoverBrush}"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="Foreground" Value="{DynamicResource TrlFgBrush}"/>
-        </Style>
-        <Style Selector="Button.nav.active">
-            <Setter Property="BorderBrush" Value="{DynamicResource TrlAccentBrush}"/>
-            <Setter Property="Background" Value="{DynamicResource TrlBgActiveBrush}"/>
-            <Setter Property="Foreground" Value="{DynamicResource TrlAccentBrush}"/>
-        </Style>
-        <Style Selector="Button.nav.active:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="{DynamicResource TrlBgActiveBrush}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource TrlAccentBrush}"/>
-            <Setter Property="Foreground" Value="{DynamicResource TrlAccentBrush}"/>
-        </Style>
-        <Style Selector="Button.nav Path">
-            <Setter Property="Fill" Value="{Binding $parent[Button].Foreground}"/>
-        </Style>
-    </UserControl.Styles>
+    <!-- Nav buttons: Button.nav agora é global (Assets/Theme/Controls/Nav.axaml, item 024) -->
 
     <Grid ColumnDefinitions="Auto, *">
 

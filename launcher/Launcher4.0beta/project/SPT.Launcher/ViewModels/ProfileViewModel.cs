@@ -455,30 +455,6 @@ namespace SPT.Launcher.ViewModels
             await CheckForUpdates();
         }
 
-        private async Task GameVersionCheck()
-        {
-            string compatibleGameVersion = ServerManager.GetCompatibleGameVersion();
-
-            if (compatibleGameVersion == "") return;
-
-            // get the product version of the exe
-            string gameVersion = FileVersionInfo.GetVersionInfo(Path.Join(LauncherSettingsProvider.Instance.GamePath, "EscapeFromTarkov.exe")).FileVersion;
-
-            if (gameVersion == null) return;
-
-            // if the compatible version isn't the same as the game version show a warning dialog
-            if(compatibleGameVersion != gameVersion)
-            {
-                WarningDialogViewModel warning = new WarningDialogViewModel(null,
-                                                     string.Format(LocalizationProvider.Instance.game_version_mismatch_format_2, gameVersion, compatibleGameVersion),
-                                                     LocalizationProvider.Instance.i_understand);
-                Dispatcher.UIThread.InvokeAsync(async() =>
-                {
-                    await ShowDialog(warning);
-                });
-            }
-        }
-
         public void OpenModsInfoCommand() =>
             NavigateTo(new ModInfoViewModel(HostScreen, ModInfoCollection));
 

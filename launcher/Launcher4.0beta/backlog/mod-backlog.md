@@ -37,7 +37,7 @@
 | 022 | Robustez de comandos + thread-safety de UI | 🟡 confirmação frágil de wipe/remove; `async Task` commands com exceção não observada; ConnectServer fora da UI thread. AUDIT (client). | [022-command-ui-robustness/](./022-command-ui-robustness/) | 🟢 |
 | 023 | Coop-sync hardening (Fika) | 🟡 mirror-move quarentena `Fika.Core.dll` ausente do manifesto; excluir conta do host em sessão coop; authkey headless reusável. AUDIT (coop). | [023-coop-sync-hardening/](./023-coop-sync-hardening/) | 🟢 |
 | 024 | Migração DS da SettingsView + unificar chrome | 🔴 (DS) SettingsView não migrou (~20 hex + sidebar/cards próprios); dot Dev Mode hex. AUDIT §B3. | [024-settingsview-ds-migration/](./024-settingsview-ds-migration/) | 🟢 |
-| 025 | Aposentar código morto + fechar shims Legacy | 🟡 5 controls órfãos + helpers mortos (WireGuard TLS bypass); ModInfoView legada; shims `.card/.acc/.alt` (fecha débito do 014). AUDIT (DS/client). | [025-dead-code-legacy-shims/](./025-dead-code-legacy-shims/) | ⚪ |
+| 025 | Aposentar código morto + fechar shims Legacy | 🟡 5 controls órfãos + helpers mortos (WireGuard TLS bypass); ModInfoView legada; shims `.card/.acc/.alt` (fecha débito do 014). AUDIT (DS/client). | [025-dead-code-legacy-shims/](./025-dead-code-legacy-shims/) | 🟢 |
 
 ## Itens 018–025 (derivados do review)
 

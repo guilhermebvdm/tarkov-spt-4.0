@@ -50,6 +50,8 @@
 	<SolidColorBrush x:Key="TrlDangerPressedBrush">#A8231A</SolidColorBrush>
 	<SolidColorBrush x:Key="TrlSuccessBrush">#9AD27A</SolidColorBrush>
 	<SolidColorBrush x:Key="TrlWarningBrush">#CC9A3E</SolidColorBrush>
+	<!-- Texto/ícone sobre superfície .danger (branco puro: contraste AA sobre danger-strong/hover/pressed) -->
+	<SolidColorBrush x:Key="TrlFgOnDanger">#FFFFFF</SolidColorBrush>
 
 	<!-- Brand red: LIGHT SOURCE only (laser/logo/glow) - never text or fills (R1) -->
 	<SolidColorBrush x:Key="TrlBrandBrush">#FF0000</SolidColorBrush>

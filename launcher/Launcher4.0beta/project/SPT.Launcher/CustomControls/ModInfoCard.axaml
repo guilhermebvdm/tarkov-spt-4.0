@@ -5,7 +5,13 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
 			 xmlns:helpers="using:SPT.Launcher.Helpers"
              x:Class="SPT.Launcher.CustomControls.ModInfoCard">
-	<Border Classes="card" HorizontalAlignment="Stretch">
+	<Border HorizontalAlignment="Stretch"
+	        Background="{DynamicResource TrlBgPanelBrush}"
+	        BorderBrush="{DynamicResource TrlEdgeBrush}"
+	        BorderThickness="1"
+	        CornerRadius="0"
+	        BoxShadow="{DynamicResource TrlShadow2}"
+	        Margin="10">
 		<Grid RowDefinitions="10,AUTO,AUTO,AUTO,10" ColumnDefinitions="10,AUTO,*,AUTO,10" 
 			  Background="{DynamicResource TrlBgAppBrush}"
 			  Margin="2"
@@ -76,7 +82,7 @@
 			<!-- Mod Version -->
 			<Label Grid.Row="3" Grid.Column="3" FontSize="12"
 				   Content="{Binding Version, RelativeSource={RelativeSource AncestorType=UserControl}}"
-				   Classes="acc"
+				   Foreground="{DynamicResource TrlAccentBrush}"
 				   />
 		</Grid>
 	</Border>

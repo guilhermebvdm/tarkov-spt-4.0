@@ -7,24 +7,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:cc="using:SPT.Launcher.CustomControls">
 
-	<!-- TextBlock legacy classes -->
-	<Style Selector="TextBlock.alt">
-		<Setter Property="Foreground" Value="{DynamicResource TrlAccentDimBrush}"/>
-	</Style>
-	<Style Selector="TextBlock.acc">
-		<Setter Property="Foreground" Value="{DynamicResource TrlAccentBrush}"/>
-	</Style>
-
-	<!-- Card (was CornerRadius=5 - violated R2) -->
-	<Style Selector="Border.card">
-		<Setter Property="CornerRadius" Value="0"/>
-		<Setter Property="BoxShadow" Value="{DynamicResource TrlShadow2}"/>
-		<Setter Property="BorderBrush" Value="{DynamicResource TrlEdgeBrush}"/>
-		<Setter Property="Background" Value="{DynamicResource TrlBgPanelBrush}"/>
-		<Setter Property="BorderThickness" Value="1"/>
-		<Setter Property="Margin" Value="10"/>
-	</Style>
-
 	<!-- Notification manager chrome -->
 	<Style Selector="WindowNotificationManager">
 		<Setter Property="Margin" Value="0 35 0 0"/>
@@ -66,15 +48,6 @@
 	<!-- Labels -->
 	<Style Selector="Label">
 		<Setter Property="Foreground" Value="{DynamicResource TrlFgBrush}"/>
-	</Style>
-	<Style Selector="Label.acc">
-		<Setter Property="Foreground" Value="{DynamicResource TrlAccentBrush}"/>
-	</Style>
-	<Style Selector="Label.alt">
-		<Setter Property="Foreground" Value="{DynamicResource TrlAccentDimBrush}"/>
-	</Style>
-	<Style Selector="Label.versionMismatch">
-		<Setter Property="Foreground" Value="{DynamicResource TrlWarningBrush}"/>
 	</Style>
 
 	<!-- Separator -->

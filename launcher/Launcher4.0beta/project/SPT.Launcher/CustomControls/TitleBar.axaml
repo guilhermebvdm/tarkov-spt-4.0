@@ -87,7 +87,7 @@
 			<Button.Styles>
 				<Style Selector="Button:pointerover /template/ ContentPresenter">
 					<Setter Property="Background" Value="{DynamicResource TrlDangerStrongBrush}"/>
-					<Setter Property="TextBlock.Foreground" Value="White"/>
+					<Setter Property="TextBlock.Foreground" Value="{DynamicResource TrlFgOnDanger}"/>
 					<Setter Property="BorderThickness" Value="0"/>
 				</Style>
 				<Style Selector="Button:pressed /template/ ContentPresenter">
