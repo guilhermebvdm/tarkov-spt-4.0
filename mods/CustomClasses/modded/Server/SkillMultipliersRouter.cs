@@ -30,7 +30,19 @@ public class SkillMultipliersRouter : StaticRouter
                 (url, info, sessionId, output) =>
                 {
                     // ref: SaveServer.cs:118 (GetProfile(MongoId)); Edition usada em CreateProfileService.cs:44
-                    var profile = saveServer.GetProfile(sessionId);
+                    // (fix 2026-07-04) server reiniciado com o client ABERTO → sessionId vazio e GetProfile
+                    // lança ("did you restart the server while the game was running?"), sujando o console com
+                    // stack — cenário conhecido/benigno. Sem sessão resolvível → payload vazio (o client
+                    // degrada: sem identidade até reiniciar o EFT, com 1 log próprio).
+                    SPTarkov.Server.Core.Models.Eft.Profile.SptProfile? profile;
+                    try
+                    {
+                        profile = saveServer.GetProfile(sessionId);
+                    }
+                    catch
+                    {
+                        return new ValueTask<string>("{}");
+                    }
                     var edition = profile?.ProfileInfo?.Edition ?? string.Empty;
                     var isClass = visualRegistry.Contains(edition);   // item 011: é classe do mod?
                     var visual = visualRegistry.Get(edition);
