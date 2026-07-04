@@ -73,11 +73,11 @@
 						        BorderThickness="1"
 						        CornerRadius="0"/>
 
-						<!-- on track -->
+						<!-- on track (ref: CR-01-03 (015) — era o ultimo hex olive orfao do launcher) -->
 						<Border x:Name="SwitchKnobBounds"
 						        Grid.Row="1"
 						        Width="32" Height="16"
-						        Background="#27251B"
+						        Background="{DynamicResource TrlBgActiveBrush}"
 						        BorderBrush="{DynamicResource TrlAccentBrush}"
 						        BorderThickness="1"
 						        CornerRadius="0"/>

@@ -2,15 +2,18 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="SPT.Launcher.CustomControls.TrlTag">
 
-	<!-- Signature tag: glowing status dot + uppercase display text. -->
-	<Border BorderBrush="{DynamicResource TrlEdgeStrongBrush}"
+	<!-- Signature tag: glowing status dot + uppercase display text.
+	     ref: CR-01-01 (015) — moldura GOLD (edge-accent, components.css .trl-tag) + dot com
+	     default tan e glow (Border com CornerRadius em vez de Ellipse: Ellipse nao tem BoxShadow). -->
+	<Border BorderBrush="{DynamicResource TrlEdgeAccentBrush}"
 	        BorderThickness="1"
 	        Padding="8,4"
 	        HorizontalAlignment="Left">
 		<StackPanel Orientation="Horizontal" Spacing="8">
-			<Ellipse Width="7" Height="7"
-			         VerticalAlignment="Center"
-			         Fill="{Binding DotBrush, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+			<Border Width="7" Height="7" CornerRadius="99"
+			        VerticalAlignment="Center"
+			        BoxShadow="{DynamicResource TrlGlowTanShadow}"
+			        Background="{Binding DotBrush, RelativeSource={RelativeSource AncestorType=UserControl}, FallbackValue={StaticResource TrlAccentBrush}, TargetNullValue={StaticResource TrlAccentBrush}}"/>
 			<TextBlock Text="{Binding Text, RelativeSource={RelativeSource AncestorType=UserControl}}"
 			           VerticalAlignment="Center"
 			           FontFamily="{DynamicResource TrlFontDisplay}"

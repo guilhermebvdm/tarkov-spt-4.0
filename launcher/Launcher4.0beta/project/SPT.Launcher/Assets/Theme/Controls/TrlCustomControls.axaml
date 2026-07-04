@@ -28,11 +28,12 @@
 						        BorderBrush="{DynamicResource TrlEdgeBrush}"
 						        BorderThickness="0,0,0,1"
 						        Padding="12,8">
+							<!-- ref: CR-01-02 (015) — titulo de painel e chrome label: NEUTRO no grafite v2 -->
 							<TextBlock Text="{TemplateBinding Title}"
 							           FontFamily="{DynamicResource TrlFontDisplay}"
 							           FontSize="{DynamicResource TrlTextXs}"
 							           LetterSpacing="{DynamicResource TrlTrackWider}"
-							           Foreground="{DynamicResource TrlAccentDimBrush}"/>
+							           Foreground="{DynamicResource TrlFgLabelBrush}"/>
 						</Border>
 						<ContentPresenter Content="{TemplateBinding Content}"
 						                  ContentTemplate="{TemplateBinding ContentTemplate}"
