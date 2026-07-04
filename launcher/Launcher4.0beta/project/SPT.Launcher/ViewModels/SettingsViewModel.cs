@@ -50,6 +50,24 @@ namespace SPT.Launcher.ViewModels
         public string DevModeStatusColor => LauncherSettingsProvider.Instance.IsDevMode ? "#4CAF50" : "#555555";
         public string DevModeStatusText => LauncherSettingsProvider.Instance.IsDevMode ? "Dev Mode ATIVO" : "Dev Mode INATIVO";
 
+        /// <summary>
+        /// Item 008: toggle "USAR CONFIGS PERFORMANCE" — persiste imediatamente; o efeito
+        /// acontece na próxima verificação de arquivos (overlay via motor de sync do 007).
+        /// </summary>
+        public bool UsePerformanceConfigs
+        {
+            get => LauncherSettingsProvider.Instance.UsePerformanceConfigs;
+            set
+            {
+                if (LauncherSettingsProvider.Instance.UsePerformanceConfigs == value) return;
+
+                LauncherSettingsProvider.Instance.UsePerformanceConfigs = value;
+                LauncherSettingsProvider.Instance.SaveSettings();
+                this.RaisePropertyChanged(nameof(UsePerformanceConfigs));
+                LogManager.Instance.Info($"[Settings] Configs performance {(value ? "ativadas" : "desativadas")} — aplica na próxima verificação de arquivos");
+            }
+        }
+
         public SettingsViewModel(IScreen Host) : base(Host)
         {
             if(Application.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)

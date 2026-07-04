@@ -17,6 +17,8 @@ public class ModUpdaterController : ControllerBase
     private static object _manifestCache = null;
     private static bool _manifestGenerating = false;
     private static Dictionary<string, string> _fileMapCache = new();
+    // Item 008: performance overlay pack (Launcher-Updater/config-performance) — rel path -> physical path.
+    private static Dictionary<string, string> _performanceFileMapCache = new();
 
     private static string GetUpdaterBasePath()
     {
@@ -42,6 +44,7 @@ public class ModUpdaterController : ControllerBase
 
     private static string GetModsRepoPath() => Path.Combine(GetUpdaterBasePath(), "mods_repo");
     private static string GetOptionalsPath() => Path.Combine(GetUpdaterBasePath(), "Opcionais");
+    private static string GetPerformancePath() => Path.Combine(GetUpdaterBasePath(), "config-performance");
 
     [HttpGet("manifest-hash")]
     public IActionResult GetManifestHash()
@@ -92,16 +95,95 @@ public class ModUpdaterController : ControllerBase
         return NotFound(new { error = "File not found" });
     }
 
+    /// <summary>
+    /// Item 008: serves a file from the performance overlay pack (Launcher-Updater/config-performance).
+    /// Separate from /download because pack paths intentionally collide with mods_repo paths (overrides).
+    /// </summary>
+    [HttpGet("performance-download")]
+    public IActionResult DownloadPerformanceFile([FromQuery] string file)
+    {
+        if (string.IsNullOrEmpty(file))
+        {
+            return BadRequest(new { error = "Missing 'file'" });
+        }
+
+        var normalizedFile = file.Replace("\\", "/").TrimStart('/');
+
+        if (_performanceFileMapCache.TryGetValue(normalizedFile, out string physicalPath) && System.IO.File.Exists(physicalPath))
+        {
+            return PhysicalFile(physicalPath, "application/octet-stream");
+        }
+
+        var perfPath = GetPerformancePath();
+        var fallbackPath = Path.GetFullPath(Path.Combine(perfPath, file.Replace("..", "")));
+        if (fallbackPath.StartsWith(perfPath) && System.IO.File.Exists(fallbackPath))
+        {
+            return PhysicalFile(fallbackPath, "application/octet-stream");
+        }
+
+        return NotFound(new { error = "File not found" });
+    }
+
+    /// <summary>
+    /// Item 009 (contrato SP0): each optional group folder may carry a description.json
+    /// descriptor: { "name": "...", "description": { "pt": "...", "en": "..." } }.
+    /// Response: { folders: [ { id, name, description } ] }.
+    /// Retrocompat: folder without (or with invalid) descriptor -> name = folder name, description = null.
+    /// </summary>
     [HttpGet("optionals-list")]
     public IActionResult GetOptionalsList()
     {
         var optsPath = GetOptionalsPath();
         if (!Directory.Exists(optsPath))
         {
-            return Ok(new { folders = Array.Empty<string>() });
+            return Ok(new { folders = Array.Empty<object>() });
         }
 
-        var folders = Directory.GetDirectories(optsPath).Select(Path.GetFileName).ToArray();
+        var folders = new List<object>();
+
+        foreach (var dir in Directory.GetDirectories(optsPath))
+        {
+            var id = Path.GetFileName(dir);
+            var name = id;
+            object description = null;
+
+            var descriptorPath = Path.Combine(dir, "description.json");
+            if (System.IO.File.Exists(descriptorPath))
+            {
+                try
+                {
+                    using var doc = JsonDocument.Parse(System.IO.File.ReadAllText(descriptorPath));
+                    var root = doc.RootElement;
+
+                    if (root.TryGetProperty("name", out var nameProp) && nameProp.ValueKind == JsonValueKind.String
+                        && !string.IsNullOrWhiteSpace(nameProp.GetString()))
+                    {
+                        name = nameProp.GetString();
+                    }
+
+                    if (root.TryGetProperty("description", out var descProp) && descProp.ValueKind == JsonValueKind.Object)
+                    {
+                        string pt = descProp.TryGetProperty("pt", out var ptProp) && ptProp.ValueKind == JsonValueKind.String
+                            ? ptProp.GetString() : null;
+                        string en = descProp.TryGetProperty("en", out var enProp) && enProp.ValueKind == JsonValueKind.String
+                            ? enProp.GetString() : null;
+
+                        if (pt != null || en != null)
+                        {
+                            description = new { pt, en };
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Invalid descriptor -> treated as absent (retrocompat), just logged.
+                    Console.WriteLine($"[ModUpdater] description.json inválido em '{id}': {ex.Message}");
+                }
+            }
+
+            folders.Add(new { id, name, description });
+        }
+
         return Ok(new { folders });
     }
 
@@ -127,6 +209,13 @@ public class ModUpdaterController : ControllerBase
         foreach (var file in allFiles)
         {
             var relPath = Path.GetRelativePath(targetFolder, file).Replace("\\", "/");
+
+            // Item 009: the group descriptor is metadata, never synced into the game folder.
+            if (string.Equals(relPath, "description.json", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
             var hash = GetFileHash(file);
             var size = new FileInfo(file).Length;
             filesList.Add(new { path = relPath, hash, size });
@@ -200,6 +289,25 @@ public class ModUpdaterController : ControllerBase
                 _fileMapCache[relPath] = file;
             }
 
+            // Item 008: performance overlay pack — paths relative to the game root, mirroring
+            // mods_repo layout. Exposed in the manifest so pack changes also change the manifest
+            // hash (clients rescan). Downloaded via /launcher/mods/performance-download.
+            var performanceFiles = new List<object>();
+            _performanceFileMapCache.Clear();
+
+            var perfPath = GetPerformancePath();
+            if (!Directory.Exists(perfPath))
+            {
+                Directory.CreateDirectory(perfPath);
+            }
+
+            foreach (var file in Directory.GetFiles(perfPath, "*.*", SearchOption.AllDirectories))
+            {
+                var relPath = Path.GetRelativePath(perfPath, file).Replace("\\", "/");
+                performanceFiles.Add(new { path = relPath, hash = GetFileHash(file), size = new FileInfo(file).Length });
+                _performanceFileMapCache[relPath] = file;
+            }
+
             string[] managedPaths = Array.Empty<string>();
             string[] deleteFiles = Array.Empty<string>();
             string[] ignoredFiles = Array.Empty<string>();
@@ -261,6 +369,7 @@ public class ModUpdaterController : ControllerBase
                 ignoredFiles = ignoredFiles,
                 optionalGroups = optionalGroupsArray,
                 folderRules = folderRules,
+                performanceOverlay = performanceFiles,
                 files = files
             };
 

@@ -153,6 +153,19 @@
                                 <cc:LocalizedLauncherActionSelector />
                             </StackPanel>
 
+                            <!-- Item 008: configs de performance (overlay via motor de sync) -->
+                            <StackPanel Spacing="4">
+                                <ToggleSwitch IsChecked="{Binding UsePerformanceConfigs, Mode=TwoWay}"
+                                              OnContent="Ativado" OffContent="Desativado" Cursor="Hand">
+                                    <ToggleSwitch.Content>
+                                        <TextBlock Classes="trl-label" Text="USAR CONFIGS PERFORMANCE"/>
+                                    </ToggleSwitch.Content>
+                                </ToggleSwitch>
+                                <TextBlock Classes="trl-muted" FontSize="{DynamicResource TrlTextXs}" TextWrapping="Wrap"
+                                           MaxWidth="460" HorizontalAlignment="Left"
+                                           Text="Aplica o pacote de configurações de performance do servidor na próxima verificação de arquivos. Configs que você personalizou são preservadas. Ao desligar, a próxima verificação restaura as configs padrão do servidor."/>
+                            </StackPanel>
+
                             <!-- Dev Mode — protegido por senha -->
                             <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                                 <Grid Width="300">

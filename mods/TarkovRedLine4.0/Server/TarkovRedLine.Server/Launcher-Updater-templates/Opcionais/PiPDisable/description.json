@@ -1,0 +1,7 @@
+{
+  "name": "PiP Disable",
+  "description": {
+    "pt": "Desativa a renderização picture-in-picture das miras telescópicas para ganhar FPS ao mirar. Não recomendado junto com o Dynamic External Resolution.",
+    "en": "Disables picture-in-picture rendering of telescopic sights for an FPS boost while aiming. Not recommended together with Dynamic External Resolution."
+  }
+}

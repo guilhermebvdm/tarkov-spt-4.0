@@ -64,7 +64,7 @@ namespace SPT.Launcher.Helpers
             // Incrementar EXPECTED_CONFIG_VERSION a cada mudança estrutural no config.
             // Quando a versão salva < esperada, força re-save para limpar campos obsoletos
             // e gravar novos campos com defaults, sem perder dados do jogador.
-            const int EXPECTED_CONFIG_VERSION = 2;
+            const int EXPECTED_CONFIG_VERSION = 3; // v3: UsePerformanceConfigs (item 008)
             if (settings.ConfigVersion < EXPECTED_CONFIG_VERSION)
             {
                 LogManager.Instance.Info($"[Settings] Config desatualizado (v{settings.ConfigVersion} → v{EXPECTED_CONFIG_VERSION}). Atualizando...");
@@ -321,6 +321,19 @@ namespace SPT.Launcher.Helpers
         {
             get => _disableUpdates;
             set => SetProperty(ref _disableUpdates, value);
+        }
+
+        /// <summary>
+        /// Item 008: when true, the file verification applies the server performance-config
+        /// overlay (Launcher-Updater/config-performance) on top of the normal sync — user
+        /// customizations (divergent from baseline) are never overwritten. Turning it off
+        /// makes the next verification restore the server defaults. Per machine (D5).
+        /// </summary>
+        private bool _usePerformanceConfigs;
+        public bool UsePerformanceConfigs
+        {
+            get => _usePerformanceConfigs;
+            set => SetProperty(ref _usePerformanceConfigs, value);
         }
 
         private string _gamePath;

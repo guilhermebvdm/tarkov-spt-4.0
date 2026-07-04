@@ -182,10 +182,31 @@ namespace SPT.Launcher
         /// </summary>
         public static byte[] DownloadModFile(string filePath)
         {
+            return DownloadBinary($"{request.RemoteEndPoint}/launcher/mods/download?file={Uri.EscapeDataString(filePath)}");
+        }
+
+        /// <summary>
+        /// Item 008: baixa um arquivo do pacote de configs de performance
+        /// (Launcher-Updater/config-performance no servidor)
+        /// </summary>
+        public static byte[] DownloadPerformanceFile(string filePath)
+        {
+            return DownloadBinary($"{request.RemoteEndPoint}/launcher/mods/performance-download?file={Uri.EscapeDataString(filePath)}");
+        }
+
+        /// <summary>
+        /// Item 009: busca a lista de grupos opcionais com descritores
+        /// (GET /launcher/mods/optionals-list)
+        /// </summary>
+        public static string RequestOptionalsList()
+        {
+            return GetFromHwidManager("/launcher/mods/optionals-list");
+        }
+
+        private static byte[] DownloadBinary(string url)
+        {
             try
             {
-                string url = $"{request.RemoteEndPoint}/launcher/mods/download?file={Uri.EscapeDataString(filePath)}";
-
                 var httpRequest = WebRequest.Create(new Uri(url));
                 httpRequest.Method = "GET";
                 httpRequest.Timeout = 30000;
