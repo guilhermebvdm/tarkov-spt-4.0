@@ -104,6 +104,10 @@ O painel que edita dados troca o dot conforme o estado:
 
 `trl-toolbar` (search à esquerda, filtros, tag de status à direita) + `trl-panel--flush` com `trl-table` (thead sticky funciona dentro de container com scroll) + `trl-pagination` no rodapé. Colunas numéricas levam `class="num"`. Linha selecionada: `is-selected`.
 
+### Barra de filtros
+
+`trl-toolbar` com `trl-search` + um `trl-multiselect` por dimensão (trader, categoria…): trigger mostra o rótulo da dimensão + `__count` da seleção; painel fica **aberto entre cliques** (toggle de `is-checked` é JS do consumidor) e fecha no clique fora; `__actions` traz Select all/Clear. Abaixo da toolbar, os filtros aplicados viram uma linha de `trl-filter-chip` (`dimensão: <b>valor</b>` + `__remove`) com um botão ghost "Clear all" no fim — o usuário vê e desfaz o estado do filtro sem abrir dropdown. Para seleção única, use `trl-dropdown`; para booleano, `trl-switch`.
+
 ### Dashboard de stats
 
 Grid de `trl-stat` (destaque com `--hi`, indisponível com `--dim` + `trl-badge` explicando por quê), deltas com `trl-chip--up/--down`, barras `trl-progress` com variante de cor por significado — nunca por estética.
@@ -146,7 +150,7 @@ Estados: `is-empty` · `is-editable` · `is-invalid` (unresolved) · `is-draggin
 
 **Stash grid 2D** — `--cols` define a largura; itens entram como `.trl-grid2d__item` com `grid-column/grid-row` inline (start/span). Durante o drag: classe `is-dragging` no grid (outline tracejado), hints `.trl-grid2d__hint--ok/--bad` posicionados na mesma grid-area do alvo, e `.trl-grid2d__ghost` (position:fixed) seguindo o cursor via JS.
 
-**Paper doll** — layout estruturado no arranjo da tela Gear do EFT: `__rail` esquerdo (earpiece, headwear, face cover, eyewear, armband), `__center` (body armor + tactical rig sobre a `__silhouette` SVG decorativa), `__rail --right` (backpack, pouch, holster, sheath) e `__bottom` (on sling, on back, pockets via `__cells`, dog tag). Células escalam em `cqw` (7cqw/unidade — o doll acompanha a coluna). `is-required-missing` marca slot obrigatório vazio. Consumidor que precisar de posições pixel-accurate pode posicionar slots com `style="position:absolute;left…"` — os trilhos são o default.
+**Paper doll** — espelho da tela **Gear** do EFT: grade de slots **sobre** a `__silhouette` (SVG decorativa) + `__carry` (coluna de carga separada por hairline: tactical rig, pockets via `__cells`, backpack, pouch). Slots usam áreas nomeadas 1:1 com os equipment slots do jogo: `__slot--earpiece/--headwear/--facecover` (linha 1), `--armband/--bodyarmor/--eyewear` (linha 2), `--onsling` (largo, cruza 2 colunas) `/--holster` (linha 3), `--onback/--scabbard` (linha 4). Células escalam em `cqw` (7cqw/unidade — o doll acompanha a coluna). `is-required-missing` marca slot obrigatório vazio. Slot custom ou posição pixel-accurate: `style="position:absolute;left…"`.
 
 **Mod tree** — linhas recursivas com `__slot` (id mono lowercase: `mod_magazine`), `__name`, badges reutilizados (`trl-badge--green` required, `--red` unknown slot) e `__actions` que aparecem no hover. Aninhamento via `__children` (indent + hairline, mesmo pattern do `.trl-tree`).
 

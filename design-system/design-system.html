@@ -459,6 +459,43 @@ tracking: .08em wide · .14em wider · .22em widest     (display/labels only)</p
         </div>
       </div>
 
+      <div class="ds-label">Multi-select (filters) — checkbox options · count no trigger · select all/clear · chips de filtros aplicados</div>
+      <div class="ds-demo ds-demo--col" style="align-items:flex-start;min-height:120px">
+        <div class="trl-multiselect" id="ds-multiselect">
+          <button class="trl-multiselect__trigger" type="button">
+            Traders
+            <span class="trl-multiselect__count" id="ds-ms-count">2</span>
+          </button>
+          <div class="trl-multiselect__panel">
+            <div class="trl-multiselect__option is-checked">Prapor<span class="trl-multiselect__opt-count">312</span></div>
+            <div class="trl-multiselect__option is-checked">Therapist<span class="trl-multiselect__opt-count">184</span></div>
+            <div class="trl-multiselect__option">Mechanic<span class="trl-multiselect__opt-count">406</span></div>
+            <div class="trl-multiselect__option">Peacekeeper<span class="trl-multiselect__opt-count">228</span></div>
+            <div class="trl-multiselect__option">Jaeger<span class="trl-multiselect__opt-count">157</span></div>
+            <div class="trl-multiselect__actions">
+              <button class="trl-btn trl-btn--ghost trl-btn--sm" id="ds-ms-all" type="button">Select all</button>
+              <button class="trl-btn trl-btn--ghost trl-btn--sm" id="ds-ms-none" type="button">Clear</button>
+            </div>
+          </div>
+        </div>
+        <div class="trl-u-flex trl-u-gap-2" style="flex-wrap:wrap">
+          <span class="trl-filter-chip">trader: <b>Prapor</b><button class="trl-filter-chip__remove" type="button">×</button></span>
+          <span class="trl-filter-chip">trader: <b>Therapist</b><button class="trl-filter-chip__remove" type="button">×</button></span>
+          <span class="trl-filter-chip">price ≤ <b>50k ₽</b><button class="trl-filter-chip__remove" type="button">×</button></span>
+          <button class="trl-btn trl-btn--ghost trl-btn--sm" type="button">Clear all</button>
+        </div>
+      </div>
+      <pre class="trl-code">&lt;div class="trl-multiselect is-open"&gt;
+  &lt;button class="trl-multiselect__trigger"&gt;Traders
+    &lt;span class="trl-multiselect__count"&gt;2&lt;/span&gt;&lt;/button&gt;
+  &lt;div class="trl-multiselect__panel"&gt;
+    &lt;div class="trl-multiselect__option is-checked"&gt;Prapor
+      &lt;span class="trl-multiselect__opt-count"&gt;312&lt;/span&gt;&lt;/div&gt;
+    …
+    &lt;div class="trl-multiselect__actions"&gt;…&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+
       <div class="ds-label">Tabs · breadcrumb · pagination — click tabs to switch</div>
       <div class="ds-demo ds-demo--col">
         <div class="trl-tabs" id="ds-tabs">
@@ -589,72 +626,59 @@ tracking: .08em wide · .14em wider · .22em widest     (display/labels only)</p
         </div>
       </div>
 
-      <div class="ds-label">Paper doll — full EFT gear layout · rails + center + bottom · slots in container units (cqw)</div>
+      <div class="ds-label">Paper doll — espelho da tela Gear do EFT: grade de slots sobre a silhueta + coluna de carga</div>
       <div class="ds-demo" style="align-items:flex-start">
-        <div class="trl-doll" style="width:min(420px,100%)">
+        <div class="trl-doll" style="width:min(460px,100%)">
           <div class="trl-doll__silhouette"></div>
 
-          <div class="trl-doll__rail">
-            <div class="trl-doll__slot">
-              <span class="trl-doll__label">Earpiece</span>
-              <div class="trl-cell" style="--w:2;--h:2"><div class="trl-cell__icon">🎧</div></div>
-            </div>
-            <div class="trl-doll__slot">
-              <span class="trl-doll__label">Headwear</span>
-              <div class="trl-cell" style="--w:2;--h:2"><div class="trl-cell__icon">🪖</div></div>
-            </div>
-            <div class="trl-doll__slot">
-              <span class="trl-doll__label">Face cover</span>
-              <div class="trl-cell is-empty" style="--w:2;--h:2"></div>
-            </div>
-            <div class="trl-doll__slot">
-              <span class="trl-doll__label">Eyewear</span>
-              <div class="trl-cell" style="--w:2;--h:1"><div class="trl-cell__icon">🥽</div></div>
-            </div>
-            <div class="trl-doll__slot">
-              <span class="trl-doll__label">Armband</span>
-              <div class="trl-cell is-empty" style="--w:2;--h:1"></div>
-            </div>
+          <div class="trl-doll__slot trl-doll__slot--earpiece">
+            <span class="trl-doll__label">Earpiece</span>
+            <div class="trl-cell" style="--w:2;--h:2"><div class="trl-cell__icon">🎧</div></div>
+          </div>
+          <div class="trl-doll__slot trl-doll__slot--headwear">
+            <span class="trl-doll__label">Headwear</span>
+            <div class="trl-cell" style="--w:2;--h:2"><div class="trl-cell__icon">🪖</div></div>
+          </div>
+          <div class="trl-doll__slot trl-doll__slot--facecover">
+            <span class="trl-doll__label">Face cover</span>
+            <div class="trl-cell is-empty" style="--w:2;--h:2"></div>
           </div>
 
-          <div class="trl-doll__center">
-            <div class="trl-doll__slot">
-              <span class="trl-doll__label">Body armor</span>
-              <div class="trl-cell" style="--w:2;--h:2"><div class="trl-cell__icon">🦺</div></div>
-            </div>
+          <div class="trl-doll__slot trl-doll__slot--armband">
+            <span class="trl-doll__label">Armband</span>
+            <div class="trl-cell is-empty" style="--w:2;--h:1"></div>
+          </div>
+          <div class="trl-doll__slot trl-doll__slot--bodyarmor">
+            <span class="trl-doll__label">Body armor</span>
+            <div class="trl-cell" style="--w:2;--h:2"><div class="trl-cell__icon">🦺</div></div>
+          </div>
+          <div class="trl-doll__slot trl-doll__slot--eyewear">
+            <span class="trl-doll__label">Eyewear</span>
+            <div class="trl-cell" style="--w:2;--h:1"><div class="trl-cell__icon">🥽</div></div>
+          </div>
+
+          <div class="trl-doll__slot trl-doll__slot--onsling">
+            <span class="trl-doll__label">On sling</span>
+            <div class="trl-cell is-editable" style="--w:4;--h:2"><div class="trl-cell__icon">🔫</div></div>
+          </div>
+          <div class="trl-doll__slot trl-doll__slot--holster">
+            <span class="trl-doll__label">Holster</span>
+            <div class="trl-cell is-empty" style="--w:2;--h:2"></div>
+          </div>
+
+          <div class="trl-doll__slot trl-doll__slot--onback">
+            <span class="trl-doll__label">On back</span>
+            <div class="trl-cell is-empty" style="--w:4;--h:2"></div>
+          </div>
+          <div class="trl-doll__slot trl-doll__slot--scabbard">
+            <span class="trl-doll__label">Scabbard</span>
+            <div class="trl-cell" style="--w:2;--h:2"><div class="trl-cell__icon">🔪</div></div>
+          </div>
+
+          <div class="trl-doll__carry">
             <div class="trl-doll__slot is-required-missing">
               <span class="trl-doll__label">⚠ Tactical rig</span>
               <div class="trl-cell is-empty" style="--w:2;--h:2"></div>
-            </div>
-          </div>
-
-          <div class="trl-doll__rail trl-doll__rail--right">
-            <div class="trl-doll__slot">
-              <span class="trl-doll__label">Backpack</span>
-              <div class="trl-cell" style="--w:2;--h:2"><div class="trl-cell__icon">🎒</div><span class="trl-cell__contents">▤6</span></div>
-            </div>
-            <div class="trl-doll__slot">
-              <span class="trl-doll__label">Pouch</span>
-              <div class="trl-cell" style="--w:2;--h:2"><div class="trl-cell__icon">🔒</div></div>
-            </div>
-            <div class="trl-doll__slot">
-              <span class="trl-doll__label">Holster</span>
-              <div class="trl-cell is-empty" style="--w:2;--h:2"></div>
-            </div>
-            <div class="trl-doll__slot">
-              <span class="trl-doll__label">Sheath</span>
-              <div class="trl-cell" style="--w:1;--h:2"><div class="trl-cell__icon">🔪</div></div>
-            </div>
-          </div>
-
-          <div class="trl-doll__bottom">
-            <div class="trl-doll__slot">
-              <span class="trl-doll__label">On sling</span>
-              <div class="trl-cell is-editable" style="--w:4;--h:2"><div class="trl-cell__icon">🔫</div></div>
-            </div>
-            <div class="trl-doll__slot">
-              <span class="trl-doll__label">On back</span>
-              <div class="trl-cell is-empty" style="--w:4;--h:2"></div>
             </div>
             <div class="trl-doll__slot">
               <span class="trl-doll__label">Pockets</span>
@@ -666,20 +690,33 @@ tracking: .08em wide · .14em wider · .22em widest     (display/labels only)</p
               </div>
             </div>
             <div class="trl-doll__slot">
-              <span class="trl-doll__label">Dog tag</span>
-              <div class="trl-cell" style="--w:1;--h:1"><div class="trl-cell__icon">🏷</div></div>
+              <span class="trl-doll__label">Backpack</span>
+              <div class="trl-cell" style="--w:2;--h:2"><div class="trl-cell__icon">🎒</div><span class="trl-cell__contents">▤6</span></div>
+            </div>
+            <div class="trl-doll__slot">
+              <span class="trl-doll__label">Pouch</span>
+              <div class="trl-cell" style="--w:2;--h:2"><div class="trl-cell__icon">🔒</div></div>
             </div>
           </div>
         </div>
 
         <div style="flex:1;min-width:220px">
           <ul class="trl-kv">
-            <li class="trl-kv__row"><span class="trl-kv__k">Layout</span><span class="trl-kv__v">EFT gear: <b>rails</b> (head/carry gear) + <b>center</b> (armor/rig sobre a silhueta) + <b>bottom</b> (armas, pockets)</span></li>
-            <li class="trl-kv__row"><span class="trl-kv__k">Scale</span><span class="trl-kv__v">Slots em <b>cqw</b> — o doll escala com a coluna</span></li>
-            <li class="trl-kv__row"><span class="trl-kv__k">Slots</span><span class="trl-kv__v">14: earpiece · headwear · face cover · eyewear · armband · body armor · rig · backpack · pouch · holster · sheath · on sling · on back · pockets ×4 (+ dog tag)</span></li>
-            <li class="trl-kv__row"><span class="trl-kv__k">Custom</span><span class="trl-kv__v">Posições absolutas game-accurate seguem possíveis via <span class="trl-mono">style="position:absolute;left…"</span></span></li>
+            <li class="trl-kv__row"><span class="trl-kv__k">Layout</span><span class="trl-kv__v">Espelho da tela <b>Gear</b>: grade 3 colunas sobre a silhueta (armas cruzam 2 colunas) + coluna de carga separada por hairline</span></li>
+            <li class="trl-kv__row"><span class="trl-kv__k">Slots</span><span class="trl-kv__v">Áreas nomeadas 1:1 com o EFT: <span class="trl-mono">--earpiece --headwear --facecover --armband --bodyarmor --eyewear --onsling --onback --holster --scabbard</span> + carry (rig · pockets ×4 · backpack · pouch)</span></li>
+            <li class="trl-kv__row"><span class="trl-kv__k">Scale</span><span class="trl-kv__v">Células em <b>cqw</b> — o doll escala com a coluna</span></li>
+            <li class="trl-kv__row"><span class="trl-kv__k">Custom</span><span class="trl-kv__v">Slot extra ou posição pixel-accurate: <span class="trl-mono">style="position:absolute;left…"</span></span></li>
             <li class="trl-kv__row"><span class="trl-kv__k">States</span><span class="trl-kv__v"><span class="trl-mono">is-empty</span> · <span class="trl-mono">is-required-missing</span> · <span class="trl-mono">is-editable</span> · <span class="trl-mono">is-invalid</span></span></li>
           </ul>
+          <pre class="trl-code" style="margin-top:12px">&lt;div class="trl-doll"&gt;
+  &lt;div class="trl-doll__silhouette"&gt;&lt;/div&gt;
+  &lt;div class="trl-doll__slot trl-doll__slot--headwear"&gt;
+    &lt;span class="trl-doll__label"&gt;Headwear&lt;/span&gt;
+    &lt;div class="trl-cell" style="--w:2;--h:2"&gt;…&lt;/div&gt;
+  &lt;/div&gt;
+  …
+  &lt;div class="trl-doll__carry"&gt;…&lt;/div&gt;
+&lt;/div&gt;</pre>
         </div>
       </div>
 
@@ -1092,6 +1129,41 @@ border-color: #444;   /* not even ours */</pre>
       if (!dd.contains(e.target)) dd.classList.remove('is-open');
     });
   }
+
+  /* multiselect demo — panel stays open across option clicks */
+  var ms = document.getElementById('ds-multiselect');
+  if (ms) {
+    var msCount = document.getElementById('ds-ms-count');
+    var msOpts = ms.querySelectorAll('.trl-multiselect__option');
+    var msSync = function () {
+      msCount.textContent = ms.querySelectorAll('.trl-multiselect__option.is-checked').length;
+    };
+    ms.querySelector('.trl-multiselect__trigger').addEventListener('click', function () {
+      ms.classList.toggle('is-open');
+    });
+    msOpts.forEach(function (opt) {
+      opt.addEventListener('click', function () {
+        opt.classList.toggle('is-checked');
+        msSync();
+      });
+    });
+    document.getElementById('ds-ms-all').addEventListener('click', function () {
+      msOpts.forEach(function (o) { o.classList.add('is-checked'); });
+      msSync();
+    });
+    document.getElementById('ds-ms-none').addEventListener('click', function () {
+      msOpts.forEach(function (o) { o.classList.remove('is-checked'); });
+      msSync();
+    });
+    document.addEventListener('click', function (e) {
+      if (!ms.contains(e.target)) ms.classList.remove('is-open');
+    });
+  }
+
+  /* filter chip remove demo */
+  document.querySelectorAll('.trl-filter-chip__remove').forEach(function (b) {
+    b.addEventListener('click', function () { b.closest('.trl-filter-chip').remove(); });
+  });
 
   /* fullscreen demo */
   var fs = document.getElementById('ds-fullscreen');

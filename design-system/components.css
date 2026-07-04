@@ -946,6 +946,182 @@ textarea.trl-input {
   color: var(--trl-accent);
 }
 
+/* ── Multi-select (filter dropdown with checkbox options) ──────────────────
+ * Same shell as .trl-dropdown, but options toggle .is-checked and the
+ * panel stays open across clicks (consumer JS). Trigger shows a count.
+ */
+.trl-multiselect {
+  position: relative;
+  display: inline-block;
+  min-width: 180px;
+}
+
+.trl-multiselect__trigger {
+  width: 100%;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  gap: var(--trl-space-2);
+  padding: 0 var(--trl-space-6) 0 var(--trl-space-2);
+  background: var(--trl-bg-input);
+  border: var(--trl-border-w) solid var(--trl-edge);
+  color: var(--trl-fg-muted);
+  font-family: var(--trl-font-body);
+  font-size: var(--trl-text-md);
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+  transition: border-color var(--trl-dur-1) var(--trl-ease);
+}
+
+.trl-multiselect__trigger::after {
+  content: "";
+  position: absolute;
+  right: 10px;
+  top: 12px;
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid var(--trl-accent-dim);
+  transition: transform var(--trl-dur-1) var(--trl-ease);
+}
+
+.trl-multiselect__trigger:hover { border-color: var(--trl-edge-strong); }
+
+.trl-multiselect.is-open .trl-multiselect__trigger {
+  border-color: var(--trl-accent-dim);
+}
+
+.trl-multiselect.is-open .trl-multiselect__trigger::after {
+  transform: rotate(180deg);
+}
+
+/* selection count in the trigger — hide it (or set "0") when nothing on */
+.trl-multiselect__count {
+  margin-left: auto;
+  min-width: 18px;
+  height: 16px;
+  padding: 0 4px;
+  display: inline-grid;
+  place-items: center;
+  background: var(--trl-bg-active);
+  border: var(--trl-border-w) solid var(--trl-edge-strong);
+  font-family: var(--trl-font-mono);
+  font-size: var(--trl-text-2xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--trl-accent);
+}
+
+.trl-multiselect__panel {
+  display: none;
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  min-width: 100%;
+  max-height: 280px;
+  overflow-y: auto;
+  background: var(--trl-surface-2);
+  border: var(--trl-border-w) solid var(--trl-edge-strong);
+  box-shadow: var(--trl-shadow-2);
+  z-index: var(--trl-z-popover);
+}
+
+.trl-multiselect.is-open .trl-multiselect__panel {
+  display: block;
+  animation: trl-fade-in var(--trl-dur-2) var(--trl-ease);
+}
+
+.trl-multiselect__option {
+  display: flex;
+  align-items: center;
+  gap: var(--trl-space-2);
+  padding: var(--trl-space-2) var(--trl-space-3);
+  font-size: var(--trl-text-md);
+  color: var(--trl-fg-muted);
+  cursor: pointer;
+  user-select: none;
+  transition: background var(--trl-dur-1) var(--trl-ease),
+              color var(--trl-dur-1) var(--trl-ease);
+}
+
+/* built-in checkbox square */
+.trl-multiselect__option::before {
+  content: "";
+  width: 13px;
+  height: 13px;
+  flex: none;
+  background: var(--trl-bg-input);
+  border: var(--trl-border-w) solid var(--trl-edge-strong);
+  transition: background var(--trl-dur-1) var(--trl-ease),
+              border-color var(--trl-dur-1) var(--trl-ease);
+}
+
+.trl-multiselect__option:hover {
+  background: var(--trl-bg-hover);
+  color: var(--trl-fg);
+}
+
+.trl-multiselect__option.is-checked { color: var(--trl-fg); }
+
+.trl-multiselect__option.is-checked::before {
+  border-color: var(--trl-accent);
+  background: var(--trl-accent);
+  /* dark inset ring → filled square with a breathing gap */
+  box-shadow: inset 0 0 0 2px var(--trl-bg-input);
+}
+
+/* per-option count (e.g. items per trader) */
+.trl-multiselect__opt-count {
+  margin-left: auto;
+  font-family: var(--trl-font-mono);
+  font-size: var(--trl-text-2xs);
+  color: var(--trl-fg-faint);
+}
+
+/* select all / clear footer */
+.trl-multiselect__actions {
+  display: flex;
+  gap: var(--trl-space-2);
+  padding: var(--trl-space-1) var(--trl-space-2);
+  border-top: var(--trl-border-w) solid var(--trl-edge);
+}
+
+/* ── Applied-filter chips (summary row above tables) ────────────────────── */
+.trl-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--trl-space-1);
+  padding: 2px var(--trl-space-1) 2px var(--trl-space-2);
+  border: var(--trl-border-w) solid var(--trl-edge-strong);
+  background: var(--trl-wash-tan);
+  font-size: var(--trl-text-xs);
+  color: var(--trl-fg-muted);
+  white-space: nowrap;
+}
+
+.trl-filter-chip b,
+.trl-filter-chip strong {
+  color: var(--trl-accent);
+  font-weight: var(--trl-weight-semibold);
+}
+
+.trl-filter-chip__remove {
+  width: 16px;
+  height: 16px;
+  display: grid;
+  place-items: center;
+  border: none;
+  background: none;
+  color: var(--trl-fg-faint);
+  font-size: var(--trl-text-sm);
+  line-height: 1;
+  cursor: pointer;
+  transition: color var(--trl-dur-1) var(--trl-ease);
+}
+
+.trl-filter-chip__remove:hover { color: var(--trl-danger); }
+
 /* ── Range slider ───────────────────────────────────────────────────────── */
 .trl-slider {
   appearance: none;
@@ -1939,30 +2115,39 @@ textarea.trl-input {
   box-shadow: var(--trl-shadow-2);
 }
 
-/* ── Paper doll (equipment silhouette) ─────────────────────────────────────
- * Structured gear layout in the EFT arrangement: left rail (head gear),
- * center (silhouette + armor/rig), right rail (carry gear), bottom
- * (weapons, pockets). Container-query scoped: slots size in cqw so the
- * doll scales with its column. Consumers needing pixel-accurate game
- * positions may still absolutely position slots via inline style.
+/* ── Paper doll (EFT Gear screen layout) ───────────────────────────────────
+ * Mirrors the real Gear tab: a 3-column slot grid OVER the character
+ * silhouette + a separate carry column (rig, pockets, backpack, pouch).
+ * Named slot areas map 1:1 to EFT equipment slots:
+ *
+ *   earpiece  headwear   facecover | carry (rig, pockets,
+ *   armband   bodyarmor  eyewear   |        backpack, pouch)
+ *   onsling   onsling    holster   |
+ *   onback    onback     scabbard  |
+ *
+ * Container-query scoped: slots size in cqw so the doll scales with its
+ * column. Custom slots may still be absolutely positioned inline.
  */
 .trl-doll {
   position: relative;
   container-type: inline-size;
   display: grid;
-  grid-template-columns: max-content 1fr max-content;
+  grid-template-columns: max-content max-content max-content max-content;
   grid-template-areas:
-    "left center right"
-    "bottom bottom bottom";
+    "earpiece headwear  facecover carry"
+    "armband  bodyarmor eyewear   carry"
+    "onsling  onsling   holster   carry"
+    "onback   onback    scabbard  carry";
+  align-items: center;
   gap: 3cqw;
   padding: 3cqw;
   background:
-    radial-gradient(55% 45% at 50% 26%, rgba(199, 180, 138, .05), transparent 70%),
+    radial-gradient(45% 45% at 33% 40%, rgba(199, 180, 138, .05), transparent 70%),
     rgba(0, 0, 0, .18);
   border: var(--trl-border-w) solid var(--trl-edge-faint);
 }
 
-/* decorative soldier silhouette behind the center column */
+/* decorative soldier silhouette behind the slot grid */
 .trl-doll__silhouette {
   position: absolute;
   inset: 0;
@@ -1970,52 +2155,47 @@ textarea.trl-input {
   pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 200'%3E%3Cg fill='%23c7b48a'%3E%3Ccircle cx='60' cy='16' r='12'/%3E%3Cpath d='M42 34 L78 34 L86 40 L89 48 L89 95 L82 100 L84 170 L70 170 L63 110 L60 106 L57 110 L50 170 L36 170 L38 100 L31 95 L31 48 L34 40 Z'/%3E%3C/g%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: center 8%;
-  background-size: auto 88%;
+  background-position: center 4%;
+  background-size: auto 92%;
 }
 
-.trl-doll__rail {
-  grid-area: left;
+/* when the carry column is present, the character stays behind the 3
+ * slot columns only */
+.trl-doll:has(.trl-doll__carry) .trl-doll__silhouette {
+  right: 34cqw;
+}
+
+/* named slots — same ids as EFT equipment slots */
+.trl-doll__slot--earpiece  { grid-area: earpiece; }
+.trl-doll__slot--headwear  { grid-area: headwear; }
+.trl-doll__slot--facecover { grid-area: facecover; }
+.trl-doll__slot--armband   { grid-area: armband; }
+.trl-doll__slot--bodyarmor { grid-area: bodyarmor; }
+.trl-doll__slot--eyewear   { grid-area: eyewear; }
+.trl-doll__slot--onsling   { grid-area: onsling; }
+.trl-doll__slot--onback    { grid-area: onback; }
+.trl-doll__slot--holster   { grid-area: holster; }
+.trl-doll__slot--scabbard  { grid-area: scabbard; }
+
+/* carry column — EFT's middle panel (rig, pockets, backpack, pouch) */
+.trl-doll__carry {
+  grid-area: carry;
+  align-self: start;
   display: flex;
   flex-direction: column;
-  gap: 2cqw;
+  gap: 3cqw;
+  padding-left: 3cqw;
+  border-left: var(--trl-border-w) solid var(--trl-edge-faint);
   position: relative;
   z-index: 1;
-}
-
-.trl-doll__rail--right {
-  grid-area: right;
-}
-
-.trl-doll__rail--right .trl-doll__slot { align-items: flex-end; }
-
-.trl-doll__center {
-  grid-area: center;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2cqw;
-  padding-top: 15cqw;   /* keeps the silhouette head visible */
-  z-index: 1;
-}
-
-.trl-doll__bottom {
-  grid-area: bottom;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 2cqw 4cqw;
-  position: relative;
-  z-index: 1;
-  border-top: var(--trl-border-w) solid var(--trl-edge-faint);
-  padding-top: 2cqw;
 }
 
 .trl-doll__slot {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  position: relative;
+  z-index: 1;
 }
 
 /* multi-cell slot row (e.g. the four 1×1 pockets) */
