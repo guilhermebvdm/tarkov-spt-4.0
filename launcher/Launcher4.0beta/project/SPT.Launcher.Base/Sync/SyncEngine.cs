@@ -95,7 +95,20 @@ namespace SPT.Launcher.Sync
                                 string destinationPath = ResolveUnderRoot(action.RelativePath);
                                 byte[] data = await _downloader(action.RelativePath, cancellationToken);
                                 ApplyAtomic(destinationPath, data);
-                                _baseline.SetHash(action.RelativePath, action.ServerHash);
+
+                                // ref: CR-01-05 — baseline records the hash of the bytes actually
+                                // written, NOT the manifest hash: a stale manifest (e.g. pack edited
+                                // without /refresh) would poison the baseline (local != baseline
+                                // forever => file wedged as "customized"; ON can't re-apply, OFF
+                                // can't revert). Mismatch is logged — it means the manifest is stale.
+                                string appliedHash = SyncPathUtil.ComputeMd5(data);
+                                if (!string.IsNullOrEmpty(action.ServerHash)
+                                    && !string.Equals(appliedHash, action.ServerHash, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    _log($"[Sync] Aviso: bytes baixados de {action.RelativePath} não batem com o hash do manifesto — manifesto desatualizado no server? (baseline gravado com o hash real do disco)");
+                                }
+
+                                _baseline.SetHash(action.RelativePath, appliedHash);
                                 result.Updated++;
                                 ioDone++;
                                 AddEntry(result, action.RelativePath, "updated", action.Reason);

@@ -320,23 +320,33 @@ namespace SPT.Launcher.ViewModels
             }
         }
 
+        // ref: CR-01-01 (009) — três passadas com precedência GLOBAL (id exato → pastas do
+        // grupo → nome), não first-match por descriptor: a ordem alfabética das pastas no
+        // disco do server não pode decidir o match (grupo multi-pasta herdava a descrição da
+        // primeira pasta alfabética mesmo existindo match mais forte adiante). No desempate
+        // por pastas, vale a ordem de group.folders (curada pelo operador no config.json).
         private static OptionalModsHelper.OptionalFolderDescriptor FindOptionalDescriptor(
             List<OptionalModsHelper.OptionalFolderDescriptor> descriptors,
             OptionalModToggle toggle,
             OptionalModsHelper.OptionalGroupInfo group)
         {
-            foreach (var descriptor in descriptors)
+            static bool Eq(string a, string b) => string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
+
+            var byId = descriptors.FirstOrDefault(d => Eq(d.Id, toggle.Id));
+            if (byId != null) return byId;
+
+            if (group?.folders != null)
             {
-                if (string.Equals(descriptor.Id, toggle.Id, StringComparison.OrdinalIgnoreCase))
-                    return descriptor;
+                foreach (var folder in group.folders)
+                {
+                    var byFolder = descriptors.FirstOrDefault(d => Eq(d.Id, folder));
+                    if (byFolder != null) return byFolder;
+                }
+            }
 
-                if (group?.folders != null
-                    && group.folders.Any(f => string.Equals(f, descriptor.Id, StringComparison.OrdinalIgnoreCase)))
-                    return descriptor;
-
-                if (!string.IsNullOrWhiteSpace(group?.name)
-                    && string.Equals(descriptor.Name, group.name, StringComparison.OrdinalIgnoreCase))
-                    return descriptor;
+            if (!string.IsNullOrWhiteSpace(group?.name))
+            {
+                return descriptors.FirstOrDefault(d => Eq(d.Name, group.name));
             }
 
             return null;

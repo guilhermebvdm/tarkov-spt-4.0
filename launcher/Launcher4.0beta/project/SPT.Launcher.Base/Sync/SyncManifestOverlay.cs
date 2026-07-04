@@ -47,7 +47,10 @@ namespace SPT.Launcher.Sync
             foreach (var overlay in overlayFiles)
             {
                 if (overlay == null || string.IsNullOrWhiteSpace(overlay.path)) continue;
-                overlayByPath[SyncPathUtil.Normalize(overlay.path)] = overlay;
+                // ref: CR-01-07 — duplicata dentro do pack: a PRIMEIRA ocorrência vence, igual
+                // ao loop de append (antes o override usava a última — inconsistente, embora
+                // inalcançável com o scan de disco do server).
+                overlayByPath.TryAdd(SyncPathUtil.Normalize(overlay.path), overlay);
             }
 
             var files = new List<ManifestFile>(baseFiles.Count + overlayByPath.Count);

@@ -1,8 +1,16 @@
 # 009 — Mods opcionais com descrição · As-built
 
-**Launcher:** Launcher4.0beta · **Data:** 2026-07-04 · **Specs:** [00-kickoff](./009-mods-opcionais-descricao-00-kickoff.md) · [01-spec (fundida)](./009-mods-opcionais-descricao-01-spec.md)
+**Launcher:** Launcher4.0beta · **Data:** 2026-07-04 (2ª passada: code review 01 aplicado) · **Specs:** [00-kickoff](./009-mods-opcionais-descricao-00-kickoff.md) · [01-spec (fundida)](./009-mods-opcionais-descricao-01-spec.md) · **Review:** [04-code-review-01](./009-mods-opcionais-descricao-04-code-review-01.md) (seção Resoluções)
 
-> Desvio de processo registrado: sessão autônoma (Wave 3) — spec fundida e reviews dispensadas por instrução do coordenador. Mudanças server saíram em lote coordenado com o item 008 (mesmo `ModUpdater.cs`).
+> Desvio de processo registrado: sessão autônoma (Wave 3) — spec fundida; review adversarial aplicada na 2ª passada. Mudanças server saíram em lote coordenado com o item 008 (mesmo `ModUpdater.cs`).
+
+## 2ª passada — code review 01 aplicado
+
+- **CR-01-01 🟡 APLICADO**: `FindOptionalDescriptor` (`ProfileViewModel.cs`, edit cirúrgico) reescrito em **3 passadas com precedência global** — id exato → pastas do grupo (ordem de `group.folders` do config.json, curada pelo operador) → nome. A ordem alfabética das pastas no disco do server deixou de decidir o match (grupo multi-pasta herdava a descrição errada).
+- **CR-01-02 🟢 registrado**: troca de idioma só re-enriquece na próxima verificação/re-login (cosmético, auto-corrigível).
+- **CR-01-03 🟢 registrado**: fluxos legados de ativação usam `GetServerBaseUrl()` sem porta (pré-existente) — migração p/ `RequestHandler` fica com o P-009.2.
+- **CR-01-04 🟢 registrado**: descriptor órfão herdado só num layout futuro — sem ação.
+- Os endpoints de opcionais também receberam o guard de contenção **CR-01-01 🔴 do review do 008** (`optionals-manifest`/`optional-download` via `TryResolveUnder` — lote server coordenado).
 
 ## O que foi construído
 
@@ -53,9 +61,15 @@ Evidência da instalação real `D:\SPT` (ambos os mods presentes, ambos **desli
 ## Gates
 
 ```
+1ª passada (feature):
 dotnet build SPT.Launcher.csproj -c Release            → 0 Erro(s)
 dotnet build TarkovRedLine.Server.csproj -c Release    → 0 Erro(s)
 dotnet test  SPT.Launcher.Tests.csproj -c Release      → Aprovado! 48/48, 0 falhas
+
+2ª passada (apply code review 01, lote com o 008):
+dotnet build SPT.Launcher.csproj -c Release            → 0 Erro(s)
+dotnet build TarkovRedLine.Server.csproj -c Release    → 0 Erro(s)
+dotnet test  SPT.Launcher.Tests.csproj -c Release      → Aprovado! 55/55, 0 falhas
 ```
 
 Obs.: uma rodada intermediária ficou vermelha (4 falhas em testes do 007) por **corrida com edição concorrente** de outra wave (review CR-01-03: `config-server` saiu do fallback do resolver e os testes estavam sendo ajustados no mesmo momento); re-rodada após a convergência ⇒ 48/48. Nenhuma falha relacionada aos itens 008/009.

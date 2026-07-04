@@ -16,9 +16,12 @@ public class ModUpdaterController : ControllerBase
     private static string _manifestHash = string.Empty;
     private static object _manifestCache = null;
     private static bool _manifestGenerating = false;
-    private static Dictionary<string, string> _fileMapCache = new();
+    // ref: CR-01-06 — case-insensitive lookups: manifest-path casing may differ from the
+    // client's request casing (merge preserves base casing); on a case-sensitive host the
+    // miss would 404 instead of falling back.
+    private static Dictionary<string, string> _fileMapCache = new(StringComparer.OrdinalIgnoreCase);
     // Item 008: performance overlay pack (Launcher-Updater/config-performance) — rel path -> physical path.
-    private static Dictionary<string, string> _performanceFileMapCache = new();
+    private static Dictionary<string, string> _performanceFileMapCache = new(StringComparer.OrdinalIgnoreCase);
 
     private static string GetUpdaterBasePath()
     {
@@ -45,6 +48,42 @@ public class ModUpdaterController : ControllerBase
     private static string GetModsRepoPath() => Path.Combine(GetUpdaterBasePath(), "mods_repo");
     private static string GetOptionalsPath() => Path.Combine(GetUpdaterBasePath(), "Opcionais");
     private static string GetPerformancePath() => Path.Combine(GetUpdaterBasePath(), "config-performance");
+
+    /// <summary>
+    /// ref: CR-01-01 (008) — containment guard shared by all download/list endpoints.
+    /// Path.Combine with a ROOTED second argument discards the base dir, and
+    /// .Replace("..", "") is a no-op for rooted inputs — so the resolved path MUST be
+    /// re-checked against the base prefix (with trailing separator, ref: CR-01-06, so a
+    /// sibling like "config-performance-bak" cannot pass by prefix).
+    /// </summary>
+    private static bool TryResolveUnder(string baseDir, string relativeInput, out string fullPath)
+    {
+        fullPath = null;
+
+        if (string.IsNullOrEmpty(relativeInput))
+        {
+            return false;
+        }
+
+        try
+        {
+            var basePrefix = Path.GetFullPath(baseDir)
+                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+            var resolved = Path.GetFullPath(Path.Combine(baseDir, relativeInput.Replace("..", "")));
+
+            if (!resolved.StartsWith(basePrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            fullPath = resolved;
+            return true;
+        }
+        catch
+        {
+            return false; // invalid path characters etc. — treat as not found
+        }
+    }
 
     [HttpGet("manifest-hash")]
     public IActionResult GetManifestHash()
@@ -86,8 +125,10 @@ public class ModUpdaterController : ControllerBase
             }
         }
 
-        var fallbackPath = Path.Combine(GetModsRepoPath(), file.Replace("..", ""));
-        if (System.IO.File.Exists(fallbackPath))
+        // ref: CR-01-01 — the old fallback served ANY rooted path (Path.Combine discards the
+        // base for rooted args; ".." replace is a no-op there): profile/config exfiltration
+        // over the Tailscale network. Same containment guard as performance-download.
+        if (TryResolveUnder(GetModsRepoPath(), file, out var fallbackPath) && System.IO.File.Exists(fallbackPath))
         {
             return PhysicalFile(fallbackPath, "application/octet-stream");
         }
@@ -114,9 +155,9 @@ public class ModUpdaterController : ControllerBase
             return PhysicalFile(physicalPath, "application/octet-stream");
         }
 
-        var perfPath = GetPerformancePath();
-        var fallbackPath = Path.GetFullPath(Path.Combine(perfPath, file.Replace("..", "")));
-        if (fallbackPath.StartsWith(perfPath) && System.IO.File.Exists(fallbackPath))
+        // ref: CR-01-06 — trailing-separator prefix check via the shared guard (a sibling
+        // folder like "config-performance-bak" must not pass by raw StartsWith prefix).
+        if (TryResolveUnder(GetPerformancePath(), file, out var fallbackPath) && System.IO.File.Exists(fallbackPath))
         {
             return PhysicalFile(fallbackPath, "application/octet-stream");
         }
@@ -195,10 +236,9 @@ public class ModUpdaterController : ControllerBase
             return BadRequest(new { error = "Missing 'folder'" });
         }
 
-        var optsPath = GetOptionalsPath();
-        var targetFolder = Path.Combine(optsPath, folder.Replace("..", ""));
-
-        if (!Directory.Exists(targetFolder) || !targetFolder.StartsWith(optsPath))
+        // ref: CR-01-01 — same containment guard as the download endpoints (rooted input
+        // to Path.Combine would discard the base dir; separator-suffixed prefix check).
+        if (!TryResolveUnder(GetOptionalsPath(), folder, out var targetFolder) || !Directory.Exists(targetFolder))
         {
             return NotFound(new { error = "Folder not found" });
         }
@@ -232,10 +272,9 @@ public class ModUpdaterController : ControllerBase
             return BadRequest(new { error = "Missing params" });
         }
 
-        var optsPath = GetOptionalsPath();
-        var fullPath = Path.Combine(optsPath, folder.Replace("..", ""), file.Replace("..", ""));
-
-        if (!fullPath.StartsWith(optsPath) || !System.IO.File.Exists(fullPath))
+        // ref: CR-01-01 — folder+file resolved through the shared containment guard
+        // (rooted 'file' would discard base+folder in Path.Combine; suffixed prefix check).
+        if (!TryResolveUnder(GetOptionalsPath(), folder + "/" + file, out var fullPath) || !System.IO.File.Exists(fullPath))
         {
             return NotFound(new { error = "File not found" });
         }

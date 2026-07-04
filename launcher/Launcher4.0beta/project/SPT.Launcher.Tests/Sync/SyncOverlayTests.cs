@@ -178,6 +178,127 @@ namespace SPT.Launcher.Tests.Sync
             Assert.Equal(SyncTestFixture.Md5Of("default"), hash);
         }
 
+        /// <summary>
+        /// ref: CR-01-02 — comportamento DOCUMENTADO (o real, não o desejável): overlay ON sem
+        /// baseline (primeira sync da instalação, sync-state.json corrompido/apagado) cai em
+        /// R1.5 → o pack NÃO aplica e o arquivo fica "preservado" silenciosamente; ações
+        /// preservadas não semeiam baseline, então o estado se repete enquanto ON. Destrava
+        /// com OFF → verificar (CC7 semeia) → ON. Cenário somado ao P-008.1 (E2E).
+        /// </summary>
+        [Fact]
+        public async Task OverlayOn_WithoutBaseline_DoesNotApplyPack_KnownWedge()
+        {
+            const string path = "BepInEx/config/graphics.cfg";
+
+            _fx.WriteLocal(path, "default"); // local == default do server, mas SEM baseline
+            var baseManifest = new List<ManifestFile> { _fx.Entry(path, "default") };
+            var merged = SyncManifestOverlay.Merge(baseManifest, new List<ManifestFile> { Overlay(path, "performance") });
+
+            var overlayDownloads = new List<string>();
+            SyncDownloader overlayDownloader = (p, ct) =>
+            {
+                overlayDownloads.Add(p);
+                return Task.FromResult(System.Text.Encoding.UTF8.GetBytes("performance"));
+            };
+
+            var baseline = _fx.LoadBaseline(); // vazio — primeiro run
+            var planner = new SyncPlanner(new SyncRuleResolver(), baseline, _fx.Options());
+            var plan = await planner.BuildPlanAsync(merged.Files.ToList());
+
+            var action = Assert.Single(plan.Actions);
+            Assert.Equal(SyncActionKind.PreserveCustomized, action.Kind); // R1.5 conservador
+
+            var engine = new SyncEngine(_fx.Root, baseline, merged.CreateDownloader(_fx.Downloader, overlayDownloader));
+            var result = await engine.ExecuteAsync(plan, _fx.ReportPath);
+
+            Assert.Equal(0, result.Updated);
+            Assert.Equal(1, result.Preserved);
+            Assert.Equal("default", _fx.ReadLocal(path)); // pack não aplicou
+            Assert.Empty(overlayDownloads);
+
+            // e o baseline continua sem a entrada — o wedge persiste enquanto ON
+            Assert.False(_fx.LoadBaseline().TryGetHash(path, out _));
+        }
+
+        /// <summary>
+        /// ref: CR-01-03 — comportamento DOCUMENTADO: arquivo tocado após o apply do pack
+        /// (ex.: BepInEx re-serializa cfgs no boot do plugin) diverge do baseline ⇒ o OFF
+        /// preserva em vez de restaurar o padrão (R1.4 — correto p/ customização; texto da UI
+        /// ajustado p/ não prometer restauração incondicional). Somado ao P-008.1 (E2E).
+        /// </summary>
+        [Fact]
+        public async Task Off_AfterFileTouchedPostApply_PreservesInsteadOfReverting()
+        {
+            const string path = "BepInEx/config/graphics.cfg";
+
+            // converge no default, aplica o pack (regime ON)
+            _fx.WriteLocal(path, "default");
+            var baseManifest = new List<ManifestFile> { _fx.Entry(path, "default") };
+            await _fx.PlanAndRunAsync(baseManifest); // baseline := default
+
+            var merged = SyncManifestOverlay.Merge(baseManifest, new List<ManifestFile> { Overlay(path, "performance") });
+            var baseline = _fx.LoadBaseline();
+            var planner = new SyncPlanner(new SyncRuleResolver(), baseline, _fx.Options());
+            var plan = await planner.BuildPlanAsync(merged.Files.ToList());
+            var engine = new SyncEngine(_fx.Root, baseline,
+                merged.CreateDownloader(_fx.Downloader, (p, ct) => Task.FromResult(System.Text.Encoding.UTF8.GetBytes("performance"))));
+            await engine.ExecuteAsync(plan, _fx.ReportPath);
+            Assert.Equal("performance", _fx.ReadLocal(path));
+
+            // o "jogo" reescreve o cfg (keys/whitespace normalizados ⇒ hash muda)
+            _fx.WriteLocal(path, "performance-rewritten-by-game");
+
+            // OFF: verificação com o manifesto base — NÃO restaura (divergiu do baseline)
+            var (offPlan, offResult, _) = await _fx.PlanAndRunAsync(baseManifest);
+
+            var offAction = Assert.Single(offPlan.Actions);
+            Assert.Equal(SyncActionKind.PreserveCustomized, offAction.Kind);
+            Assert.Equal(0, offResult.Updated);
+            Assert.Equal("performance-rewritten-by-game", _fx.ReadLocal(path));
+        }
+
+        /// <summary>
+        /// ref: CR-01-05 — o baseline grava o hash dos BYTES gravados, não o hash do manifesto:
+        /// pack editado no server sem /refresh (manifesto stale) não pode envenenar o baseline
+        /// (local != baseline para sempre ⇒ wedge dos CR-01-02/CR-01-03).
+        /// </summary>
+        [Fact]
+        public async Task Baseline_RecordsHashOfWrittenBytes_NotStaleManifestHash()
+        {
+            const string path = "BepInEx/config/graphics.cfg";
+
+            // manifesto anuncia o hash ANTIGO, mas o server entrega bytes NOVOS
+            var staleEntry = new ManifestFile
+            {
+                path = path,
+                hash = SyncTestFixture.Md5Of("old-pack-bytes"),
+                size = 14,
+            };
+
+            SyncDownloader freshDownloader = (p, ct) =>
+                Task.FromResult(System.Text.Encoding.UTF8.GetBytes("fresh-pack-bytes"));
+
+            var warnings = new List<string>();
+            var baseline = _fx.LoadBaseline();
+            var planner = new SyncPlanner(new SyncRuleResolver(), baseline, _fx.Options());
+            var plan = await planner.BuildPlanAsync(new List<ManifestFile> { staleEntry }); // ausente ⇒ download
+
+            var engine = new SyncEngine(_fx.Root, baseline, freshDownloader, log: warnings.Add);
+            var result = await engine.ExecuteAsync(plan, _fx.ReportPath);
+
+            Assert.Equal(1, result.Updated);
+            Assert.Equal("fresh-pack-bytes", _fx.ReadLocal(path));
+
+            // baseline reflete o DISCO — próxima verificação vê local == baseline (sem wedge)
+            var persisted = _fx.LoadBaseline();
+            Assert.True(persisted.TryGetHash(path, out var hash));
+            Assert.Equal(SyncTestFixture.Md5Of("fresh-pack-bytes"), hash);
+            Assert.NotEqual(staleEntry.hash, hash);
+
+            // e o desalinhamento manifesto×bytes foi logado (operador esqueceu o /refresh)
+            Assert.Contains(warnings, w => w.Contains("não batem"));
+        }
+
         [Fact]
         public async Task SteadyStateOn_SecondRunHasNoIoActions()
         {

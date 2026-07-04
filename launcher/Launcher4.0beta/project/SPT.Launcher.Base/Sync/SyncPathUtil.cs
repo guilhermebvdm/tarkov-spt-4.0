@@ -55,5 +55,19 @@ namespace SPT.Launcher.Sync
                 return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
             }
         }
+
+        /// <summary>
+        /// MD5 hex (lower-case) of an in-memory buffer.
+        /// ref: CR-01-05 (008) — the engine hashes the bytes it actually writes so the baseline
+        /// reflects the DISK, not a possibly stale manifest hash.
+        /// </summary>
+        public static string ComputeMd5(byte[] data)
+        {
+            using (var md5 = MD5.Create())
+            {
+                byte[] hash = md5.ComputeHash(data ?? Array.Empty<byte>());
+                return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+            }
+        }
     }
 }
