@@ -76,7 +76,10 @@ namespace SPT.Launcher.Sync
                 progress?.Report(new SyncProgress("checking", file.path, checkedCount, filesToCheck.Count));
 
                 string normalized = SyncPathUtil.Normalize(file.path);
-                if (IsIgnored(normalized)) continue;
+
+                // ref: CR-01-02 — ignoredFiles NÃO filtra o manifesto (semântica legada: protege
+                // extras contra deleção no ScanExtras, nunca bloqueia update). Filtrar aqui pulava
+                // silenciosamente os updates do SPT core (ignoredFiles default = "BepInEx/plugins/spt").
 
                 var rule = _resolver.Resolve(normalized);
                 string localPath = SyncPathUtil.ToLocalPath(_options.GameRoot, file.path);

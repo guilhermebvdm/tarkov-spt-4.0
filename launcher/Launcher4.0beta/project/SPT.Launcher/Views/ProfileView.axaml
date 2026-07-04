@@ -118,15 +118,21 @@
                         </StackPanel>
                     </cc:TrlPanel>
 
-                    <!-- Box: MODS OPCIONAIS -->
+                    <!-- Box: MODS OPCIONAIS (item 009: descrição visível abaixo do nome) -->
                     <cc:TrlPanel Title="MODS OPCIONAIS">
                         <ItemsControl ItemsSource="{Binding OptionalMods}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <CheckBox Content="{Binding Name}"
-                                              Cursor="Hand"
-                                              IsChecked="{Binding IsEnabled}"
-                                              ToolTip.Tip="{Binding Description}"/>
+                                    <StackPanel Spacing="2" Margin="0,0,0,6">
+                                        <CheckBox Content="{Binding Name}"
+                                                  Cursor="Hand"
+                                                  IsChecked="{Binding IsEnabled}"/>
+                                        <TextBlock Classes="trl-muted"
+                                                   FontSize="{DynamicResource TrlTextXs}"
+                                                   TextWrapping="Wrap"
+                                                   Text="{Binding Description}"
+                                                   IsVisible="{Binding Description, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                                    </StackPanel>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
@@ -198,8 +204,8 @@
 
                         <!-- Ações (Direita) -->
                         <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="10" Width="180">
-                            <!-- Verificar Arquivos (outlined base) -->
-                            <Button Content="VERIFICAR ARQUIVOS" Classes="sm" Cursor="Hand" Command="{Binding VerifyFilesCommand}" IsEnabled="{Binding CanStartGame}"
+                            <!-- Verificar Arquivos (outlined base) — ref: CR-01-01: também travado durante sync -->
+                            <Button Content="VERIFICAR ARQUIVOS" Classes="sm" Cursor="Hand" Command="{Binding VerifyFilesCommand}" IsEnabled="{Binding CanVerifyFiles}"
                                     HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
 
                             <!-- JOGAR (.primary — tan, R1) -->

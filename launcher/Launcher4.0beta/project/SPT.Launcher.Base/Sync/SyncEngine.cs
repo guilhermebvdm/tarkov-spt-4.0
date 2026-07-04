@@ -20,6 +20,7 @@ namespace SPT.Launcher.Sync
         private const string TempSuffix = ".sync-tmp";
 
         private readonly string _gameRoot;
+        private readonly string _gameRootFullPrefix; // ref: CR-01-05 — raiz resolvida p/ validação de traversal
         private readonly SyncBaseline _baseline;
         private readonly SyncDownloader _downloader;
         private readonly Action<string> _deleteFile;
@@ -37,6 +38,8 @@ namespace SPT.Launcher.Sync
             Action<string> log = null)
         {
             _gameRoot = !string.IsNullOrEmpty(gameRoot) ? gameRoot : throw new ArgumentException("gameRoot is required", nameof(gameRoot));
+            _gameRootFullPrefix = Path.GetFullPath(_gameRoot)
+                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
             _baseline = baseline ?? throw new ArgumentNullException(nameof(baseline));
             _downloader = downloader ?? throw new ArgumentNullException(nameof(downloader));
             _deleteFile = deleteFile ?? File.Delete;
@@ -87,8 +90,11 @@ namespace SPT.Launcher.Sync
                         case SyncActionKind.Download:
                             try
                             {
+                                // ref: CR-01-05 — valida ANTES de baixar: manifesto adulterado com ".."
+                                // não pode escrever fora do GameRoot (conta como erro por-arquivo).
+                                string destinationPath = ResolveUnderRoot(action.RelativePath);
                                 byte[] data = await _downloader(action.RelativePath, cancellationToken);
-                                ApplyAtomic(SyncPathUtil.ToLocalPath(_gameRoot, action.RelativePath), data);
+                                ApplyAtomic(destinationPath, data);
                                 _baseline.SetHash(action.RelativePath, action.ServerHash);
                                 result.Updated++;
                                 ioDone++;
@@ -111,7 +117,7 @@ namespace SPT.Launcher.Sync
                         case SyncActionKind.DeleteExtra:
                             try
                             {
-                                _deleteFile(SyncPathUtil.ToLocalPath(_gameRoot, action.RelativePath));
+                                _deleteFile(ResolveUnderRoot(action.RelativePath)); // ref: CR-01-05
                                 _baseline.Remove(action.RelativePath);
                                 result.Deleted++;
                                 ioDone++;
@@ -130,9 +136,10 @@ namespace SPT.Launcher.Sync
                         case SyncActionKind.MoveToDisabled:
                             try
                             {
+                                // ref: CR-01-05 — origem E destino (-disabled) validados sob o GameRoot
                                 MoveWithOverwrite(
-                                    SyncPathUtil.ToLocalPath(_gameRoot, action.RelativePath),
-                                    SyncPathUtil.ToLocalPath(_gameRoot, action.MoveTargetRelative));
+                                    ResolveUnderRoot(action.RelativePath),
+                                    ResolveUnderRoot(action.MoveTargetRelative));
                                 _baseline.Remove(action.RelativePath);
                                 result.MovedToDisabled++;
                                 ioDone++;
@@ -182,6 +189,22 @@ namespace SPT.Launcher.Sync
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// ref: CR-01-05 — defense in depth: resolves the relative path and requires the result to
+        /// stay under the game root ("..", absolute paths, etc. throw → counted as per-file error).
+        /// </summary>
+        private string ResolveUnderRoot(string relativePath)
+        {
+            string fullPath = Path.GetFullPath(SyncPathUtil.ToLocalPath(_gameRoot, relativePath));
+
+            if (!fullPath.StartsWith(_gameRootFullPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException($"path escapes game root: {relativePath}");
+            }
+
+            return fullPath;
         }
 
         /// <summary>E3: write to "&lt;dest&gt;.sync-tmp" in the same directory (same volume), then atomic move.</summary>

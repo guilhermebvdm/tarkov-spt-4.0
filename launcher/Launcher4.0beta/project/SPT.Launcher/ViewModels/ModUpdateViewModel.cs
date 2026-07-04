@@ -122,6 +122,7 @@ namespace SPT.Launcher.ViewModels
         // Internal state
         private SyncPlan _plan;
         private SyncBaseline _baseline;
+        private SyncManifestOverlay _performanceOverlay; // item 008 — null when the toggle is off
         private CancellationTokenSource _cts;
         private readonly string _gamePath;
 
@@ -172,6 +173,7 @@ namespace SPT.Launcher.ViewModels
                 var folderRules = manifest["folderRules"]?.ToObject<Dictionary<string, string>>();
                 var optionalGroups = manifest["optionalGroups"]?.ToObject<List<OptionalModsHelper.OptionalGroupInfo>>()
                                      ?? new List<OptionalModsHelper.OptionalGroupInfo>();
+                var performanceOverlayFiles = manifest["performanceOverlay"]?.ToObject<List<ManifestFile>>() ?? new List<ManifestFile>();
 
                 // Refresh the optional-mods cache so GetAllKnownOptionalPaths() protects inactive groups too (CC3)
                 var optionalManifestFiles = files
@@ -185,6 +187,17 @@ namespace SPT.Launcher.ViewModels
 
                 TotalFiles = files.Count;
                 MaxProgress = Math.Max(1, files.Count);
+
+                // Item 008: overlay de configs performance (merge — spec 008 D3)
+                IReadOnlyList<ManifestFile> effectiveFiles = files;
+                _performanceOverlay = null;
+
+                if (LauncherSettingsProvider.Instance.UsePerformanceConfigs && performanceOverlayFiles.Count > 0)
+                {
+                    _performanceOverlay = SyncManifestOverlay.Merge(files, performanceOverlayFiles);
+                    effectiveFiles = _performanceOverlay.Files;
+                    Controllers.LogManager.Instance.Info($"[ModUpdateView] Configs performance ON — overlay com {performanceOverlayFiles.Count} arquivo(s)");
+                }
 
                 var resolver = new SyncRuleResolver(folderRules);
                 _baseline = SyncBaseline.Load(Path.Combine(LauncherStateDir, "sync-state.json"));
@@ -212,10 +225,10 @@ namespace SPT.Launcher.ViewModels
                                  + " - " + p.CurrentPath;
                 });
 
-                var plan = await planner.BuildPlanAsync(files, progress, _cts.Token);
+                var plan = await planner.BuildPlanAsync(effectiveFiles, progress, _cts.Token);
                 _plan = plan;
 
-                PopulateFileStatuses(plan, files);
+                PopulateFileStatuses(plan, effectiveFiles);
                 OutdatedFiles = plan.DownloadCount;
 
                 SummaryText = BuildPlanSummary(plan);
@@ -370,10 +383,20 @@ namespace SPT.Launcher.ViewModels
 
         private SyncEngine CreateEngine()
         {
+            SyncDownloader downloader = (path, ct) => Task.Run(() => RequestHandler.DownloadModFile(path), ct);
+
+            if (_performanceOverlay != null)
+            {
+                // Item 008: paths do pack baixam do endpoint performance-download
+                downloader = _performanceOverlay.CreateDownloader(
+                    downloader,
+                    (path, ct) => Task.Run(() => RequestHandler.DownloadPerformanceFile(path), ct));
+            }
+
             return new SyncEngine(
                 _gamePath,
                 _baseline,
-                downloader: (path, ct) => Task.Run(() => RequestHandler.DownloadModFile(path), ct),
+                downloader,
                 deleteFile: DeleteToRecycleBin,
                 log: msg => Controllers.LogManager.Instance.Info(msg));
         }
@@ -408,7 +431,7 @@ namespace SPT.Launcher.ViewModels
             return string.Join(" · ", parts);
         }
 
-        private void PopulateFileStatuses(SyncPlan plan, List<ManifestFile> manifestFiles)
+        private void PopulateFileStatuses(SyncPlan plan, IReadOnlyList<ManifestFile> manifestFiles)
         {
             var sizeByPath = manifestFiles
                 .GroupBy(f => f.path, StringComparer.OrdinalIgnoreCase)

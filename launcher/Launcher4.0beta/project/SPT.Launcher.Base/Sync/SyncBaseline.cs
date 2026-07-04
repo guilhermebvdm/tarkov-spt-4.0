@@ -84,7 +84,12 @@ namespace SPT.Launcher.Sync
             }
 
             var model = new PersistedModel { files = new Dictionary<string, string>(_files) };
-            File.WriteAllText(FilePath, JsonConvert.SerializeObject(model, Formatting.Indented));
+
+            // ref: CR-01-04 — escrita atômica (temp + move, mesmo padrão dos applies): crash no
+            // meio do WriteAllText cru truncava o sync-state.json → baseline vazio no próximo run.
+            string tempPath = FilePath + ".tmp";
+            File.WriteAllText(tempPath, JsonConvert.SerializeObject(model, Formatting.Indented));
+            File.Move(tempPath, FilePath, overwrite: true);
         }
     }
 }

@@ -60,11 +60,11 @@ xUnit net9.0, referencia só o Base, roda contra diretório temp real. **39/39 v
 ## Assunções registradas
 
 1. **A1 — "substituir os iguais" = igual ao baseline** da última sync (não server×local). Já registrada no kickoff; implementada como R1 (spec 01).
-2. **A2 — layout do `mods_repo`**: não vejo o disco do server; os paths do manifesto espelham a raiz do jogo (o client faz `Path.Combine(gamePath, path)`). Assumi `config`→`BepInEx/config`, `patchers`→`BepInEx/patchers`, `plugins`→`BepInEx/plugins`; `config-server` sem equivalente conhecido → fallback só o prefixo literal `config-server/`. A tabela fallback inclui os nomes crus do card **e** os BepInEx (prefixo sem match é inócuo).
+2. **A2 — layout do `mods_repo`**: não vejo o disco do server; os paths do manifesto espelham a raiz do jogo (o client faz `Path.Combine(gamePath, path)`). Assumi `config`→`BepInEx/config`, `patchers`→`BepInEx/patchers`, `plugins`→`BepInEx/plugins`. A tabela fallback inclui os nomes crus do card **e** os BepInEx (prefixo sem match é inócuo). **Revisado (CR-01-03):** `config-server → mirror-delete` SAIU do fallback — a regra mais destrutiva só ativa via `folderRules` explícito do server (default seguro até P-007.2).
 3. **A3 — mapa `folderRules` top-level em vez de campo por arquivo** (desvio consciente do enunciado): mesmo poder de expressão, mudança server menor, configurável pelo operador sem rebuild do launcher. O server em produção não tem `folderRules` no config hoje ⇒ vale o fallback do client até configurarem.
 4. **A4 — Dev Mode ON sincroniza** (só protege divergentes do baseline + extras, com aviso) — upgrade sobre o legado que pulava a sync inteira. Extra local sob Dev Mode = build de dev ⇒ preservado + aviso.
 5. **A5 — colisão no `-disabled`**: o arquivo recém-movido substitui o antigo (a versão mais nova do usuário vale).
-6. **A6 — MirrorDelete no primeiro run deleta mesmo sem baseline** (card manda espelhar; deleção via lixeira quando executado pela UI — deleter injetado).
+6. **A6 — MirrorDelete no primeiro run deleta mesmo sem baseline** (card manda espelhar; deleção via lixeira quando executado pela UI — deleter injetado). **Revisado (CR-01-03):** só se aplica quando o server ativou a regra via `folderRules` — sem isso, nenhum MirrorDelete existe.
 7. **A7 — deleção via lixeira só na UI**: o Base não referencia `Microsoft.VisualBasic`; default `File.Delete`, `ModUpdateViewModel` injeta lixeira (paridade com o legado, testes não poluem a lixeira).
 8. **A8 — strings novas em PT hardcoded** (precedente do código atual); keys `update_*` existentes reutilizadas onde servem.
 9. **A9 — cancelamento não aborta o download em curso** (o `RequestHandler.DownloadModFile` legado não é cancelável mid-transfer); o token vale entre arquivos — o arquivo em voo termina atômico ou é descartado.
@@ -81,7 +81,16 @@ dotnet build TarkovRedLine.Server.csproj -c Release    → 0 Erro(s)
 2ª passada (integração P-007.1 + view P-007.3):
 dotnet build SPT.Launcher.csproj -c Release            → 0 Erro(s)
 dotnet test  SPT.Launcher.Tests.csproj -c Release      → Aprovado! 39/39, 0 falhas
+
+3ª passada (apply do code review 04-01 — 1 🔴 + 5 🟡, todos aplicados):
+dotnet build SPT.Launcher.csproj -c Release            → 0 Erro(s)
+dotnet test  SPT.Launcher.Tests.csproj -c Release      → Aprovado! 52/52, 0 falhas
+                                                          (39 + 8 novos do review + 5 do SyncOverlayTests, track 008)
 ```
+
+## Code review aplicado (3ª passada)
+
+Review adversarial em [007-sincronizacao-arquivos-04-code-review-01.md](./007-sincronizacao-arquivos-04-code-review-01.md) — ver a seção "Resoluções" lá para o detalhe por achado. Resumo: guard de reentrância no sync da ProfileViewModel (`Interlocked` + `CheckForUpdatesCore` p/ o retry recursivo + `CanVerifyFiles` no botão) [CR-01-01 🔴]; `ignoredFiles` não filtra mais o manifesto (SPT core volta a atualizar) [CR-01-02]; `config-server → mirror-delete` fora do fallback (só via `folderRules` do server) [CR-01-03]; `sync-state.json`/`last-update.json` com escrita atômica temp+move [CR-01-04]; guard anti-traversal `ResolveUnderRoot` em todo write/move/delete do engine [CR-01-05]; 8 testes novos cobrindo os cenários acima [CR-01-06].
 
 ## Pendências
 

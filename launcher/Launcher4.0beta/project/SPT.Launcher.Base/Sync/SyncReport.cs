@@ -41,7 +41,10 @@ namespace SPT.Launcher.Sync
                 entries = result.Entries,
             };
 
-            File.WriteAllText(filePath, JsonConvert.SerializeObject(model, Formatting.Indented));
+            // ref: CR-01-04 — escrita atômica (temp + move), como o baseline e os applies.
+            string tempPath = filePath + ".tmp";
+            File.WriteAllText(tempPath, JsonConvert.SerializeObject(model, Formatting.Indented));
+            File.Move(tempPath, filePath, overwrite: true);
         }
 
         /// <summary>Entry count grouped by the path's top-level folder — for the future per-folder UI summary.</summary>

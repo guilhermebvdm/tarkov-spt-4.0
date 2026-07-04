@@ -9,7 +9,8 @@ namespace SPT.Launcher.Tests.Sync
         [Theory]
         [InlineData("config/foo.cfg", SyncFolderRule.PreserveDivergent)]
         [InlineData("BepInEx/config/foo.cfg", SyncFolderRule.PreserveDivergent)]
-        [InlineData("config-server/db/items.json", SyncFolderRule.MirrorDelete)]
+        // ref: CR-01-03 — mirror-delete NÃO é default: config-server sem folderRules do server = Default
+        [InlineData("config-server/db/items.json", SyncFolderRule.Default)]
         [InlineData("patchers/x.dll", SyncFolderRule.MirrorMoveDisabled)]
         [InlineData("BepInEx/patchers/x.dll", SyncFolderRule.MirrorMoveDisabled)]
         [InlineData("plugins/mod/mod.dll", SyncFolderRule.MirrorMoveDisabled)]
@@ -21,6 +22,21 @@ namespace SPT.Launcher.Tests.Sync
             var resolver = new SyncRuleResolver();
 
             Assert.Equal(expected, resolver.Resolve(path));
+        }
+
+        [Fact]
+        public void Mirror_delete_requires_explicit_server_rule()
+        {
+            // ref: CR-01-03 — a regra mais destrutiva só ativa via folderRules explícito do server
+            var withoutRule = new SyncRuleResolver();
+            Assert.Equal(SyncFolderRule.Default, withoutRule.Resolve("config-server/db/items.json"));
+            Assert.DoesNotContain(withoutRule.MirrorPrefixes, p => p.Value == SyncFolderRule.MirrorDelete);
+
+            var withRule = new SyncRuleResolver(new Dictionary<string, string>
+            {
+                ["config-server"] = "mirror-delete",
+            });
+            Assert.Equal(SyncFolderRule.MirrorDelete, withRule.Resolve("config-server/db/items.json"));
         }
 
         [Fact]

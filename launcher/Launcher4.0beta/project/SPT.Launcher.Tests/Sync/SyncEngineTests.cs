@@ -27,7 +27,9 @@ namespace SPT.Launcher.Tests.Sync
                 fx.Entry("BepInEx/plugins/Current/cur.dll", "cur"),
             };
 
-            var (plan, result, baseline) = await fx.PlanAndRunAsync(manifest);
+            // ref: CR-01-03 — mirror-delete de config-server ativado via regra explícita
+            var (plan, result, baseline) = await fx.PlanAndRunAsync(manifest,
+                resolver: SyncTestFixture.ResolverWithConfigServerMirror());
 
             Assert.Equal(2, result.Updated);
             Assert.Equal(1, result.Deleted);
@@ -188,7 +190,9 @@ namespace SPT.Launcher.Tests.Sync
 
             var manifest = new[] { fx.Entry("user/mods/a/a.js", "content-a") };
 
-            var (_, result, _) = await fx.PlanAndRunAsync(manifest);
+            // ref: CR-01-03 — regra explícita p/ manter o cenário de delete no report
+            var (_, result, _) = await fx.PlanAndRunAsync(manifest,
+                resolver: SyncTestFixture.ResolverWithConfigServerMirror());
 
             Assert.True(File.Exists(fx.ReportPath));
             var report = JObject.Parse(File.ReadAllText(fx.ReportPath));
@@ -235,7 +239,8 @@ namespace SPT.Launcher.Tests.Sync
             var manifest = new[] { fx.Entry("config-server/keep.json", "keep") };
 
             var baseline = fx.LoadBaseline();
-            var planner = new SyncPlanner(new SyncRuleResolver(), baseline, fx.Options());
+            // ref: CR-01-03
+            var planner = new SyncPlanner(SyncTestFixture.ResolverWithConfigServerMirror(), baseline, fx.Options());
             var plan = await planner.BuildPlanAsync(manifest);
 
             string deletedViaStrategy = null;
@@ -247,6 +252,130 @@ namespace SPT.Launcher.Tests.Sync
             Assert.Equal(1, result.Deleted);
             Assert.NotNull(deletedViaStrategy);
             Assert.EndsWith("stale.json", deletedViaStrategy);
+        }
+
+        [Fact]
+        public async Task Download_path_with_traversal_does_not_escape_game_root()
+        {
+            // ref: CR-01-05 / CR-01-06b — manifesto adulterado com ".." vira erro por-arquivo,
+            // nada é baixado nem escrito fora do GameRoot, e o run continua nos demais.
+            using var fx = new SyncTestFixture();
+
+            var plan = new SyncPlan();
+            plan.Actions.Add(new SyncAction
+            {
+                RelativePath = "../evil.dll",
+                Kind = SyncActionKind.Download,
+                ServerHash = "0123456789abcdef0123456789abcdef",
+            });
+            fx.ServerContent["user/mods/ok/ok.js"] = System.Text.Encoding.UTF8.GetBytes("ok");
+            plan.Actions.Add(new SyncAction
+            {
+                RelativePath = "user/mods/ok/ok.js",
+                Kind = SyncActionKind.Download,
+                ServerHash = SyncTestFixture.Md5Of("ok"),
+            });
+
+            var baseline = fx.LoadBaseline();
+            var engine = new SyncEngine(fx.Root, baseline, fx.Downloader);
+            var result = await engine.ExecuteAsync(plan, fx.ReportPath, null, CancellationToken.None);
+
+            Assert.Equal(1, result.Errors);
+            Assert.Equal(1, result.Updated);
+            Assert.False(result.Cancelled);
+
+            // Validação acontece ANTES do download: o path malicioso nem chega ao downloader
+            Assert.DoesNotContain(fx.DownloadedPaths, p => p.Contains(".."));
+
+            string escaped = Path.GetFullPath(Path.Combine(fx.Root, "..", "evil.dll"));
+            Assert.False(File.Exists(escaped));
+            Assert.Contains(result.Entries, e => e.action == "error" && e.detail.Contains("escapes game root"));
+        }
+
+        [Fact]
+        public async Task Delete_failure_mid_run_does_not_abort_remaining_actions()
+        {
+            // ref: CR-01-06c — IOException num delete (ex.: arquivo travado pelo EFT) conta erro
+            // e o run segue nas próximas ações.
+            using var fx = new SyncTestFixture();
+            fx.WriteLocal("config-server/aaa-locked.json", "locked");
+            fx.WriteLocal("config-server/zzz-ok.json", "deletable");
+
+            var manifest = new[] { fx.Entry("config-server/keep.json", "keep") };
+
+            var baseline = fx.LoadBaseline();
+            var planner = new SyncPlanner(SyncTestFixture.ResolverWithConfigServerMirror(), baseline, fx.Options());
+            var plan = await planner.BuildPlanAsync(manifest);
+            Assert.Equal(3, plan.IoActionCount); // 1 download + 2 deletes
+
+            var engine = new SyncEngine(fx.Root, baseline, fx.Downloader,
+                deleteFile: path =>
+                {
+                    if (path.Contains("aaa-locked")) throw new IOException("file in use");
+                    File.Delete(path);
+                });
+
+            var result = await engine.ExecuteAsync(plan, fx.ReportPath, null, CancellationToken.None);
+
+            Assert.Equal(1, result.Errors);
+            Assert.Equal(1, result.Deleted);
+            Assert.Equal(1, result.Updated);
+            Assert.False(result.Cancelled);
+            Assert.Equal(0, result.Pending);
+            Assert.True(fx.LocalExists("config-server/aaa-locked.json"));   // falhou, ficou no lugar
+            Assert.False(fx.LocalExists("config-server/zzz-ok.json"));      // ação seguinte aplicada
+            Assert.True(fx.LocalExists("config-server/keep.json"));
+        }
+
+        [Fact]
+        public async Task Move_failure_on_locked_target_does_not_abort_remaining_actions()
+        {
+            // ref: CR-01-06c — destino no -disabled travado (handle exclusivo) → erro por-arquivo,
+            // origem intocada, demais moves seguem.
+            using var fx = new SyncTestFixture();
+            fx.WriteLocal("BepInEx/plugins/AAA/locked.dll", "new-quarantine");
+            fx.WriteLocal("BepInEx/plugins/ZZZ/free.dll", "movable");
+            string lockedTarget = fx.WriteLocal("BepInEx/plugins-disabled/AAA/locked.dll", "old-quarantine");
+
+            var manifest = new[] { fx.Entry("BepInEx/plugins/Current/cur.dll", "cur") };
+
+            var baseline = fx.LoadBaseline();
+            var planner = new SyncPlanner(new SyncRuleResolver(), baseline, fx.Options());
+            var plan = await planner.BuildPlanAsync(manifest);
+
+            var engine = new SyncEngine(fx.Root, baseline, fx.Downloader);
+
+            SyncResult result;
+            using (new FileStream(lockedTarget, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+            {
+                result = await engine.ExecuteAsync(plan, fx.ReportPath, null, CancellationToken.None);
+            }
+
+            Assert.Equal(1, result.Errors);
+            Assert.Equal(1, result.MovedToDisabled);
+            Assert.False(result.Cancelled);
+            Assert.True(fx.LocalExists("BepInEx/plugins/AAA/locked.dll"));            // origem preservada
+            Assert.False(fx.LocalExists("BepInEx/plugins/ZZZ/free.dll"));             // outro move aplicado
+            Assert.Equal("movable", fx.ReadLocal("BepInEx/plugins-disabled/ZZZ/free.dll"));
+        }
+
+        [Fact]
+        public async Task Baseline_save_is_atomic_and_leaves_no_temp_file()
+        {
+            // ref: CR-01-04 / CR-01-06d — Save via temp+move: resultado carregável e sem .tmp órfão.
+            using var fx = new SyncTestFixture();
+
+            var manifest = new[] { fx.Entry("user/mods/a/a.js", "content-a") };
+            await fx.PlanAndRunAsync(manifest);
+
+            Assert.True(File.Exists(fx.BaselinePath));
+            Assert.False(File.Exists(fx.BaselinePath + ".tmp"));
+            Assert.False(File.Exists(fx.ReportPath + ".tmp"));
+            Assert.Empty(Directory.GetFiles(Path.GetDirectoryName(fx.BaselinePath), "*.tmp"));
+
+            var reloaded = fx.LoadBaseline();
+            Assert.True(reloaded.TryGetHash("user/mods/a/a.js", out string hash));
+            Assert.Equal(SyncTestFixture.Md5Of("content-a"), hash);
         }
     }
 }

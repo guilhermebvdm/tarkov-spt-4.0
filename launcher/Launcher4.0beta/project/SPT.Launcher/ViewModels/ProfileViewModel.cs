@@ -149,6 +149,24 @@ namespace SPT.Launcher.ViewModels
 
         private CancellationTokenSource _syncCts;
 
+        // ref: CR-01-01 — gate de reentrância do sync (0 = idle, 1 = rodando). Interlocked fecha a
+        // janela entre o auto-check do login e um clique quase simultâneo em VERIFICAR ARQUIVOS.
+        private int _syncGate;
+
+        private bool _isSyncRunning;
+        public bool IsSyncRunning
+        {
+            get => _isSyncRunning;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _isSyncRunning, value);
+                this.RaisePropertyChanged(nameof(CanVerifyFiles));
+            }
+        }
+
+        /// <summary>ref: CR-01-01 — botão VERIFICAR ARQUIVOS: além de CanStartGame, nunca durante um sync.</summary>
+        public bool CanVerifyFiles => CanStartGame && !IsSyncRunning;
+
         public ProfileViewModel(IScreen Host) : base(Host)
         {
             // cache and load side image if profile has a side
@@ -176,6 +194,7 @@ namespace SPT.Launcher.ViewModels
                 if (e.PropertyName == nameof(LauncherSettingsProvider.Instance.CanStartGame))
                 {
                     this.RaisePropertyChanged(nameof(CanStartGame));
+                    this.RaisePropertyChanged(nameof(CanVerifyFiles)); // ref: CR-01-01
                 }
             };
 
@@ -239,6 +258,76 @@ namespace SPT.Launcher.ViewModels
         }
 
         public bool CanStartGame => LauncherSettingsProvider.Instance.CanStartGame;
+
+        /// <summary>
+        /// Item 009: enriquece os toggles com as descrições do optionals-list
+        /// (description.json por pasta de grupo no server). Join tolerante (spec 009 D2):
+        /// descriptor.id == group.id, OU group.folders contém descriptor.id, OU
+        /// descriptor.name == group.name — tudo case-insensitive. Falha é silenciosa
+        /// (fica a descrição do optionalGroups, comportamento atual).
+        /// </summary>
+        private async Task EnrichOptionalDescriptionsAsync(List<OptionalModsHelper.OptionalGroupInfo> optionalGroups)
+        {
+            try
+            {
+                var descriptors = await OptionalModsHelper.FetchOptionalsListAsync();
+                if (descriptors.Count == 0) return;
+
+                bool preferPt = (LauncherSettingsProvider.Instance.DefaultLocale ?? "")
+                    .StartsWith("Portuguese", StringComparison.OrdinalIgnoreCase);
+
+                Dispatcher.UIThread.Post(() =>
+                {
+                    foreach (var toggle in OptionalMods)
+                    {
+                        var group = optionalGroups.FirstOrDefault(g =>
+                            string.Equals(g.id, toggle.Id, StringComparison.OrdinalIgnoreCase));
+
+                        var descriptor = FindOptionalDescriptor(descriptors, toggle, group);
+                        if (descriptor == null) continue;
+
+                        var text = OptionalModsHelper.ResolveDescription(descriptor, preferPt);
+                        if (!string.IsNullOrWhiteSpace(text))
+                        {
+                            toggle.Description = text;
+                        }
+
+                        // O name do optionalGroups é curado pelo operador — o do descriptor
+                        // só entra quando o grupo não tem nome (spec 009 D1).
+                        if (string.IsNullOrWhiteSpace(toggle.Name) && !string.IsNullOrWhiteSpace(descriptor.Name))
+                        {
+                            toggle.Name = descriptor.Name;
+                        }
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                LogManager.Instance.Warning($"[Profile] Falha ao enriquecer descrições dos opcionais: {ex.Message}");
+            }
+        }
+
+        private static OptionalModsHelper.OptionalFolderDescriptor FindOptionalDescriptor(
+            List<OptionalModsHelper.OptionalFolderDescriptor> descriptors,
+            OptionalModToggle toggle,
+            OptionalModsHelper.OptionalGroupInfo group)
+        {
+            foreach (var descriptor in descriptors)
+            {
+                if (string.Equals(descriptor.Id, toggle.Id, StringComparison.OrdinalIgnoreCase))
+                    return descriptor;
+
+                if (group?.folders != null
+                    && group.folders.Any(f => string.Equals(f, descriptor.Id, StringComparison.OrdinalIgnoreCase)))
+                    return descriptor;
+
+                if (!string.IsNullOrWhiteSpace(group?.name)
+                    && string.Equals(descriptor.Name, group.name, StringComparison.OrdinalIgnoreCase))
+                    return descriptor;
+            }
+
+            return null;
+        }
 
         private async Task InitializeAsync()
         {
@@ -305,6 +394,13 @@ namespace SPT.Launcher.ViewModels
         /// </summary>
         private async Task ForceCheckForUpdates()
         {
+            // ref: CR-01-01 — não deletar o manifest_hash no meio de um sync em andamento
+            if (IsSyncRunning)
+            {
+                LogManager.Instance.Info("[Profile] Sync já em andamento — verificação manual ignorada.");
+                return;
+            }
+
             string gamePath = LauncherSettingsProvider.Instance.GamePath;
             string hashFilePath = Path.Combine(gamePath, "SPT", "user", "launcher", "manifest_hash.txt");
 
@@ -317,12 +413,41 @@ namespace SPT.Launcher.ViewModels
         }
 
         /// <summary>
+        /// ref: CR-01-01 — ponto de entrada ÚNICO do sync, com guard de reentrância: auto-check do
+        /// login, clique em VERIFICAR ARQUIVOS e navegar-sair-voltar não podem rodar dois motores
+        /// destrutivos concorrentes sobre os mesmos arquivos/baseline. O corpo fica em
+        /// <see cref="CheckForUpdatesCore"/> (sem guard) porque o retry recursivo interno é o MESMO
+        /// fluxo lógico e deve manter o "lock".
+        /// </summary>
+        private async Task CheckForUpdates(bool manual = false)
+        {
+            if (Interlocked.CompareExchange(ref _syncGate, 1, 0) != 0)
+            {
+                LogManager.Instance.Info("[Profile] Sync já em andamento — disparo concorrente ignorado.");
+                return;
+            }
+
+            IsSyncRunning = true;
+
+            try
+            {
+                await CheckForUpdatesCore(manual);
+            }
+            finally
+            {
+                IsSyncRunning = false;
+                Interlocked.Exchange(ref _syncGate, 0);
+            }
+        }
+
+        /// <summary>
         /// Item 007: verificação + aplicação via motor de sync (SPT.Launcher.Base/Sync).
         /// Regras por pasta (config preserva divergentes do baseline, config-server espelha
         /// com delete, patchers/plugins espelham movendo removidos p/ -disabled), apply
         /// atômico, cancelamento com confirmação e manifesto de mudanças em last-update.json.
+        /// NÃO chamar diretamente — sempre via <see cref="CheckForUpdates"/> (guard CR-01-01).
         /// </summary>
-        private async Task CheckForUpdates(bool manual = false)
+        private async Task CheckForUpdatesCore(bool manual)
         {
             // Sempre usa a pasta onde o jogo está configurado
             string gamePath = LauncherSettingsProvider.Instance.GamePath;
@@ -412,8 +537,9 @@ namespace SPT.Launcher.ViewModels
                     }
 
                     manifestFailed = false;
-                    // Retry recursivo — tenta novamente todo o fluxo
-                    await CheckForUpdates(manual);
+                    // Retry recursivo — tenta novamente todo o fluxo. Chama o Core direto (sem
+                    // guard): é o mesmo fluxo lógico e o "lock" do CR-01-01 permanece ativo.
+                    await CheckForUpdatesCore(manual);
                     return;
                 }
 
@@ -424,6 +550,7 @@ namespace SPT.Launcher.ViewModels
                 var ignoredFiles = manifest["ignoredFiles"]?.ToObject<List<string>>() ?? new List<string>();
                 var folderRules = manifest["folderRules"]?.ToObject<Dictionary<string, string>>();
                 var optionalGroups = manifest["optionalGroups"]?.ToObject<List<OptionalModsHelper.OptionalGroupInfo>>() ?? new List<OptionalModsHelper.OptionalGroupInfo>();
+                var performanceOverlayFiles = manifest["performanceOverlay"]?.ToObject<List<ManifestFile>>() ?? new List<ManifestFile>();
 
                 // Atualizar cache de opcionais e popular toggles na UI
                 var optionalManifestFiles = allFiles
@@ -449,6 +576,10 @@ namespace SPT.Launcher.ViewModels
                         OptionalMods.Add(toggle);
                     }
                 });
+
+                // Item 009: descrições vêm do server (description.json por grupo, via
+                // optionals-list) — enriquecimento assíncrono, não bloqueia a verificação.
+                _ = EnrichOptionalDescriptionsAsync(optionalGroups);
 
                 // Se as hashes são iguais, já terminamos o trabalho inicial (que era só montar a UI)
                 if (skipFileScan)
@@ -484,6 +615,19 @@ namespace SPT.Launcher.ViewModels
                 var resolver = new SyncRuleResolver(folderRules);
                 var baseline = SyncBaseline.Load(Path.Combine(SyncStateDir, "sync-state.json"));
 
+                // === Item 008: overlay de configs performance como fonte extra do planner ===
+                // Merge (não 2ª passada) — spec 008 D3: o pack sobrepõe o manifesto principal por
+                // path e o engine grava o hash efetivo no baseline, o que torna o OFF reversível.
+                IReadOnlyList<ManifestFile> effectiveFiles = allFiles;
+                SyncManifestOverlay performanceOverlay = null;
+
+                if (LauncherSettingsProvider.Instance.UsePerformanceConfigs && performanceOverlayFiles.Count > 0)
+                {
+                    performanceOverlay = SyncManifestOverlay.Merge(allFiles, performanceOverlayFiles);
+                    effectiveFiles = performanceOverlay.Files;
+                    LogManager.Instance.Info($"[Profile] Configs performance ON — overlay com {performanceOverlayFiles.Count} arquivo(s) sobreposto ao manifesto");
+                }
+
                 var plannerOptions = new SyncPlannerOptions
                 {
                     GameRoot = gamePath,
@@ -505,12 +649,12 @@ namespace SPT.Launcher.ViewModels
                     UpdateStatusText = string.Format(LocalizationProvider.Instance.update_checking_file, p.Current, p.Total) + " - " + p.CurrentPath;
                 });
 
-                var plan = await planner.BuildPlanAsync(allFiles, planProgress, _syncCts.Token);
+                var plan = await planner.BuildPlanAsync(effectiveFiles, planProgress, _syncCts.Token);
 
                 OutdatedFiles = plan.DownloadCount;
 
                 // === Execução (auto-apply, como o fluxo antigo) — atômica e cancelável ===
-                var engine = BuildSyncEngine(gamePath, baseline);
+                var engine = BuildSyncEngine(gamePath, baseline, performanceOverlay);
                 SyncResult result;
 
                 if (plan.IoActionCount > 0)
@@ -610,12 +754,22 @@ namespace SPT.Launcher.ViewModels
 
         private static string ReportFilePath => Path.Combine(SyncStateDir, SyncReport.DefaultFileName);
 
-        private SyncEngine BuildSyncEngine(string gamePath, SyncBaseline baseline)
+        private SyncEngine BuildSyncEngine(string gamePath, SyncBaseline baseline, SyncManifestOverlay performanceOverlay = null)
         {
+            SyncDownloader downloader = (path, ct) => Task.Run(() => RequestHandler.DownloadModFile(path), ct);
+
+            if (performanceOverlay != null)
+            {
+                // Item 008: paths do pack baixam do endpoint performance-download
+                downloader = performanceOverlay.CreateDownloader(
+                    downloader,
+                    (path, ct) => Task.Run(() => RequestHandler.DownloadPerformanceFile(path), ct));
+            }
+
             return new SyncEngine(
                 gamePath,
                 baseline,
-                downloader: (path, ct) => Task.Run(() => RequestHandler.DownloadModFile(path), ct),
+                downloader,
                 deleteFile: DeleteToRecycleBin,
                 log: msg => LogManager.Instance.Info(msg));
         }

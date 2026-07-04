@@ -15,12 +15,14 @@ namespace SPT.Launcher.Sync
         /// Both the raw card names (config/, plugins/, ...) and the BepInEx-style equivalents are
         /// mapped — unmatched prefixes are harmless. The server can override everything via
         /// "folderRules" in Launcher-Updater/config.json without a launcher rebuild.
+        /// ref: CR-01-03 — mirror-delete (a regra mais destrutiva) NÃO entra no fallback: o layout
+        /// de config-server no mods_repo real nunca foi verificado (A2), então config-server só
+        /// vira espelho-com-delete via folderRules EXPLÍCITO do server. Default seguro até P-007.2.
         /// </summary>
         public static readonly IReadOnlyDictionary<string, string> FallbackRules = new Dictionary<string, string>
         {
             ["config"] = "preserve-divergent",
             ["BepInEx/config"] = "preserve-divergent",
-            ["config-server"] = "mirror-delete",
             ["patchers"] = "mirror-move-disabled",
             ["BepInEx/patchers"] = "mirror-move-disabled",
             ["plugins"] = "mirror-move-disabled",

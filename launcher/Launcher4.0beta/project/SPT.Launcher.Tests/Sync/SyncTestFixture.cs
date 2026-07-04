@@ -84,6 +84,13 @@ namespace SPT.Launcher.Tests.Sync
 
         public SyncBaseline LoadBaseline() => SyncBaseline.Load(BaselinePath);
 
+        /// <summary>
+        /// ref: CR-01-03 — mirror-delete saiu do fallback; testes de config-server ativam a regra
+        /// como o server real faria: via folderRules explícito no manifesto.
+        /// </summary>
+        public static SyncRuleResolver ResolverWithConfigServerMirror() =>
+            new SyncRuleResolver(new Dictionary<string, string> { ["config-server"] = "mirror-delete" });
+
         public SyncPlannerOptions Options(bool devMode = false) => new()
         {
             GameRoot = Root,

@@ -12,9 +12,9 @@ namespace SPT.Launcher.Tests.Sync
         private const string ConfigPath = "BepInEx/config/mod.cfg";
 
         private static async Task<SyncPlan> PlanAsync(SyncTestFixture fx, IReadOnlyList<ManifestFile> manifest,
-            SyncPlannerOptions options = null, SyncBaseline baseline = null)
+            SyncPlannerOptions options = null, SyncBaseline baseline = null, SyncRuleResolver resolver = null)
         {
-            var planner = new SyncPlanner(new SyncRuleResolver(), baseline ?? fx.LoadBaseline(), options ?? fx.Options());
+            var planner = new SyncPlanner(resolver ?? new SyncRuleResolver(), baseline ?? fx.LoadBaseline(), options ?? fx.Options());
             return await planner.BuildPlanAsync(manifest);
         }
 
@@ -101,10 +101,42 @@ namespace SPT.Launcher.Tests.Sync
             fx.WriteLocal("config-server/stale.json", "old");
 
             var manifest = new[] { fx.Entry("config-server/keep.json", "keep") };
-            var plan = await PlanAsync(fx, manifest);
+            // ref: CR-01-03 — mirror-delete só via folderRules explícito do server
+            var plan = await PlanAsync(fx, manifest, resolver: SyncTestFixture.ResolverWithConfigServerMirror());
 
             Assert.Contains(plan.Actions, a =>
                 a.Kind == SyncActionKind.DeleteExtra && a.RelativePath.Replace('\\', '/') == "config-server/stale.json");
+        }
+
+        [Fact]
+        public async Task ConfigServer_extra_without_explicit_rule_is_untouched()
+        {
+            // ref: CR-01-03 — sem folderRules do server, config-server NÃO é espelho: extra sobrevive
+            using var fx = new SyncTestFixture();
+            fx.WriteLocal("config-server/stale.json", "old");
+
+            var manifest = new[] { fx.Entry("config-server/keep.json", "keep") };
+            var plan = await PlanAsync(fx, manifest); // fallback puro, sem regra explícita
+
+            Assert.DoesNotContain(plan.Actions, a => a.Kind == SyncActionKind.DeleteExtra);
+        }
+
+        [Fact]
+        public async Task Manifest_file_matching_ignored_substring_is_still_downloaded()
+        {
+            // ref: CR-01-06a / CR-01-02 — ignoredFiles protege extras de deleção, NUNCA bloqueia
+            // update de arquivo do manifesto (senão o SPT core para de atualizar silenciosamente).
+            using var fx = new SyncTestFixture();
+            fx.WriteLocal("BepInEx/plugins/spt/spt-core.dll", "old-core");
+
+            var options = fx.Options();
+            options.IgnoredFiles = new[] { "BepInEx/plugins/spt" };
+
+            var manifest = new[] { fx.Entry("BepInEx/plugins/spt/spt-core.dll", "new-core") };
+            var plan = await PlanAsync(fx, manifest, options);
+
+            var action = Assert.Single(plan.Actions);
+            Assert.Equal(SyncActionKind.Download, action.Kind);
         }
 
         [Fact]
@@ -150,7 +182,8 @@ namespace SPT.Launcher.Tests.Sync
             options.ExcludeFromCleanup = new[] { "config-server/user-thing.json" };
 
             var manifest = new[] { fx.Entry("config-server/keep.json", "keep") };
-            var plan = await PlanAsync(fx, manifest, options);
+            // ref: CR-01-03 — regra de espelho ativada explicitamente p/ o teste de proteção ser real
+            var plan = await PlanAsync(fx, manifest, options, resolver: SyncTestFixture.ResolverWithConfigServerMirror());
 
             Assert.DoesNotContain(plan.Actions, a => a.Kind == SyncActionKind.DeleteExtra); // R2.3
         }
@@ -229,6 +262,22 @@ namespace SPT.Launcher.Tests.Sync
             Assert.DoesNotContain(plan.Actions, a => a.Kind == SyncActionKind.MoveToDisabled);
             Assert.Contains(plan.Actions, a =>
                 a.Kind == SyncActionKind.PreserveDevMode && a.RelativePath.Contains("wip.dll")); // R5.2
+        }
+
+        [Fact]
+        public async Task DevMode_preserves_extras_in_mirror_delete_folders()
+        {
+            // ref: CR-01-06f — R5.2 também em MirrorDelete (só plugins/move tinha cobertura)
+            using var fx = new SyncTestFixture();
+            fx.WriteLocal("config-server/wip-config.json", "work-in-progress");
+
+            var manifest = new[] { fx.Entry("config-server/keep.json", "keep") };
+            var plan = await PlanAsync(fx, manifest, fx.Options(devMode: true),
+                resolver: SyncTestFixture.ResolverWithConfigServerMirror());
+
+            Assert.DoesNotContain(plan.Actions, a => a.Kind == SyncActionKind.DeleteExtra);
+            Assert.Contains(plan.Actions, a =>
+                a.Kind == SyncActionKind.PreserveDevMode && a.RelativePath.Contains("wip-config.json"));
         }
     }
 }
