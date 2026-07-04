@@ -14,8 +14,8 @@
     </UserControl.Resources>
 
     <Grid>
-        <!-- Fundo hero + overlay TRL (padrão dos pilotos Login/Register) -->
-        <Image Source="/Assets/bg-hero.jpg" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+        <!-- Fundo Taquila + overlay TRL (mesmo fluxo pré-login do Login/Cadastro) -->
+        <Image Source="/Assets/bg1.png" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality"/>
         <Border Background="{DynamicResource TrlPhotoOverlayBrush}" IsHitTestVisible="False"/>
 
         <Grid ColumnDefinitions="300, *">

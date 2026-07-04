@@ -14,26 +14,27 @@
     </UserControl.Resources>
 
     <Grid>
-        <!-- Fundo cobrindo tudo + overlay olive TRL -->
-        <Image Source="/Assets/bg-hero.jpg" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality"/>
-        <Border Background="{DynamicResource TrlPhotoOverlayBrush}" IsHitTestVisible="False"/>
+        <!-- TAQUILA em tela cheia, render nítido (posição original) — a cena aparece através do painel de vidro -->
+        <Image Source="/Assets/bg1.png" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality"/>
 
         <Grid ColumnDefinitions="*, 450">
-            <!-- Coluna 0 vazia para mostrar a imagem -->
 
-            <!-- 2. ÁREA CENTRAL (REGISTRO) - painel translúcido sobre a foto -->
+            <!-- Scrim atrás do painel (Coluna 1) p/ legibilidade AA — a arte à esquerda fica nítida -->
+            <Border Grid.Column="1" Background="{DynamicResource TrlPhotoOverlayBrush}" IsHitTestVisible="False"/>
+
+            <!-- 2. ÁREA CENTRAL (REGISTRO) - painel de vidro (50%) com margem uniforme -->
             <Border Grid.Column="1"
                     BorderBrush="{DynamicResource TrlEdgeBrush}"
                     BorderThickness="1,0,0,0"
-                    Background="{DynamicResource TrlPanelOverPhotoBrush}"
-                    Padding="0,34,0,0">
-                <Grid RowDefinitions="120, *">
+                    Background="{DynamicResource TrlPanelAuthBrush}"
+                    Padding="40,56,40,40">
+                <Grid RowDefinitions="Auto, *, Auto">
 
-                    <!-- Logo Topo -->
-                    <Image Grid.Row="0" Margin="15" Source="/Assets/logo-redline.png" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <!-- Logo Topo (abaixo da top bar de 34px; respeita a margem do painel) -->
+                    <Image Grid.Row="0" Source="/Assets/logo-redline.png" Stretch="Uniform" MaxHeight="56" HorizontalAlignment="Center" Margin="0,4,0,0"/>
 
                     <!-- Painel de Registro -->
-                    <StackPanel Grid.Row="1" Spacing="15" Margin="40,20" VerticalAlignment="Center">
+                    <StackPanel Grid.Row="1" Spacing="15" VerticalAlignment="Center">
                         <TextBlock Text="CRIE SUA CONTA" Classes="trl-h3"
                                    LetterSpacing="{DynamicResource TrlTrackWider}"
                                    HorizontalAlignment="Center" Margin="0,0,0,20"/>
@@ -58,7 +59,7 @@
                     </StackPanel>
 
                     <!-- Footer (Versão) -->
-                    <cc:TrlVersionFooter Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,15"
+                    <cc:TrlVersionFooter Grid.Row="2" HorizontalAlignment="Center" Margin="0,16,0,0"
                                          LauncherVersion="{x:Static helpers:LauncherUpdateHelper.CurrentVersion}"
                                          ServerVersion="{x:Static base:ServerManager.TrlServerVersion}"/>
                 </Grid>

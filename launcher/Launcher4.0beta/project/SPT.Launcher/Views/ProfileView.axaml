@@ -49,10 +49,10 @@
 
         <!-- 1. SIDEBAR (TrlSidebarNav — chrome do tema) -->
         <cc:TrlSidebarNav Grid.Column="0">
-            <Grid RowDefinitions="120, *, Auto">
+            <Grid RowDefinitions="Auto, *, Auto">
 
-                <!-- Logo Topo -->
-                <Image Grid.Row="0" Margin="15" Source="/Assets/logo-redline.png" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <!-- Logo Topo (abaixo da top bar de 34px; respeita a margem do sidebar) -->
+                <Image Grid.Row="0" Source="/Assets/logo-redline.png" Stretch="Uniform" MaxHeight="52" HorizontalAlignment="Center" Margin="24,44,24,8"/>
 
                 <!-- Menu Central -->
                 <StackPanel Grid.Row="1" Spacing="2" Margin="0,20,0,0">
@@ -95,8 +95,9 @@
         <!-- 2. ÁREA CENTRAL (CARROSSEL E JOGO) -->
         <Grid Grid.Column="1">
 
-            <!-- Imagem de Fundo Estática (Futuro: Carrossel) -->
-            <Image Source="{Binding Background.Path, Converter={StaticResource imageSourceCvt}}" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+            <!-- Fundo da tela logada: key art do EFT (bg-hero, vinda da tela de login) + overlay olive p/ legibilidade -->
+            <Image Source="/Assets/bg-hero.jpg" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+            <Border Background="{DynamicResource TrlPhotoOverlayBrush}" IsHitTestVisible="False"/>
 
             <!-- Layout Sobreposto da Tela Principal -->
             <Grid RowDefinitions="*, AUTO, AUTO">
@@ -105,7 +106,7 @@
                 <StackPanel Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="20,50,20,0" Width="250" Spacing="8">
 
                     <!-- Box: VERSÃO -->
-                    <cc:TrlPanel Title="VERSÃO">
+                    <cc:TrlPanel Title="VERSÃO" Background="{DynamicResource TrlPanelOverPhotoBrush}">
                         <StackPanel Spacing="6">
                             <Grid ColumnDefinitions="*,Auto">
                                 <TextBlock Classes="trl-label" Text="SERVIDOR" VerticalAlignment="Center"/>
@@ -119,7 +120,7 @@
                     </cc:TrlPanel>
 
                     <!-- Box: MODS OPCIONAIS (item 009: descrição visível abaixo do nome) -->
-                    <cc:TrlPanel Title="MODS OPCIONAIS">
+                    <cc:TrlPanel Title="MODS OPCIONAIS" Background="{DynamicResource TrlPanelOverPhotoBrush}">
                         <ItemsControl ItemsSource="{Binding OptionalMods}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
@@ -139,7 +140,7 @@
                     </cc:TrlPanel>
 
                     <!-- Box: CONTA -->
-                    <cc:TrlPanel Title="CONTA">
+                    <cc:TrlPanel Title="CONTA" Background="{DynamicResource TrlPanelOverPhotoBrush}">
                         <StackPanel Spacing="8">
                             <!-- ref: CR-01-03 — mesmo gate do EXCLUIR: mudar edição dispara wipe
                                  (Remove+Register) e não pode rodar com o jogo em execução -->
@@ -171,9 +172,14 @@
                 <!-- BARRA DE PROGRESSO / UPDATE (item 007: cancelar + link do relatório) -->
                 <StackPanel Grid.Row="1" Margin="20,0,20,5" IsVisible="{Binding IsUpdateVisible}" Spacing="5" VerticalAlignment="Bottom">
                     <TextBlock Text="{Binding UpdateStatusText}" Classes="trl-muted" FontSize="{DynamicResource TrlTextXs}"/>
-                    <Grid ColumnDefinitions="*,Auto">
+                    <Grid ColumnDefinitions="*,Auto,Auto">
                         <ProgressBar Minimum="0" Maximum="{Binding UpdateMaxProgress}" Value="{Binding UpdateProgress}" VerticalAlignment="Center"/>
-                        <Button Grid.Column="1" Content="CANCELAR" Classes="ghost sm" Cursor="Hand" Margin="8,0,0,0"
+                        <!-- Item 016: taxa de download (média móvel, MB/s decimal, separador PT-BR) -->
+                        <TextBlock Grid.Column="1" Text="{Binding DownloadSpeedText}" IsVisible="{Binding HasDownloadSpeed}"
+                                   Classes="trl-mono trl-accent" FontSize="{DynamicResource TrlTextXs}"
+                                   VerticalAlignment="Center" Margin="10,0,0,0"
+                                   ToolTip.Tip="Velocidade de download atual"/>
+                        <Button Grid.Column="2" Content="CANCELAR" Classes="ghost sm" Cursor="Hand" Margin="8,0,0,0"
                                 Command="{Binding CancelUpdateCommand}" IsVisible="{Binding CanCancelUpdate}"
                                 ToolTip.Tip="Cancelar a verificação/atualização (pede confirmação)"/>
                     </Grid>
@@ -185,7 +191,7 @@
                 </StackPanel>
 
                 <!-- STATUS BAR INFERIOR (PERFIL E AÇÕES) -->
-                <Border Grid.Row="2" Background="{DynamicResource TrlBgPanelBrush}" BorderBrush="{DynamicResource TrlEdgeBrush}" BorderThickness="0,1,0,0" CornerRadius="0" Margin="0" Padding="15,10">
+                <Border Grid.Row="2" Background="{DynamicResource TrlPanelOverPhotoBrush}" BorderBrush="{DynamicResource TrlEdgeBrush}" BorderThickness="0,1,0,0" CornerRadius="0" Margin="0" Padding="15,10">
                     <Grid ColumnDefinitions="AUTO, *, AUTO">
 
                         <!-- Perfil (Esquerda) -->

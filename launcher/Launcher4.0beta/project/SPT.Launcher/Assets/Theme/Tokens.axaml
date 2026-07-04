@@ -78,12 +78,17 @@
 	<!-- Screen-bar background (black 25% over any surface) -->
 	<SolidColorBrush x:Key="TrlScreenBarBgBrush">#40000000</SolidColorBrush>
 
+	<!-- Top bar (chrome da janela): GroundDeep a 30% — deixa a arte transparecer atrás -->
+	<SolidColorBrush x:Key="TrlTitleBarBgBrush">#4D0D0D0E</SolidColorBrush>
+
 	<!-- Photo treatment: olive overlay over bg photos + translucent panel on top -->
 	<RadialGradientBrush x:Key="TrlPhotoOverlayBrush" Center="50%,50%" GradientOrigin="50%,50%">
 		<GradientStop Offset="0" Color="#80131314"/>
 		<GradientStop Offset="1" Color="#E6131314"/>
 	</RadialGradientBrush>
-	<SolidColorBrush x:Key="TrlPanelOverPhotoBrush">#F21B1B1D</SolidColorBrush>
+	<!-- Painéis verticais sobre foto: vidro a 50% de opacidade (revela a arte por trás) -->
+	<SolidColorBrush x:Key="TrlPanelOverPhotoBrush">#801B1B1D</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlPanelAuthBrush">#801B1B1D</SolidColorBrush>
 
 	<!-- Vignette (ambient texture, optional per view) -->
 	<RadialGradientBrush x:Key="TrlVignetteBrush" Center="80%,0%" GradientOrigin="80%,0%">

@@ -51,11 +51,12 @@
 		</Setter>
 	</Style>
 
-	<!-- TitleBar chrome (military window bar) -->
+	<!-- TitleBar chrome (military window bar) — 30% p/ transparecer a arte -->
 	<Style Selector="cc|TitleBar">
-		<Setter Property="Background" Value="{DynamicResource TrlGroundDeepBrush}"/>
+		<Setter Property="Background" Value="{DynamicResource TrlTitleBarBgBrush}"/>
 		<Setter Property="Foreground" Value="{DynamicResource TrlFgMutedBrush}"/>
-		<Setter Property="ButtonForeground" Value="{DynamicResource TrlFgMutedBrush}"/>
+		<!-- glifos min/close em Fg (não muted) p/ contraste sobre a barra translúcida 30% -->
+		<Setter Property="ButtonForeground" Value="{DynamicResource TrlFgBrush}"/>
 	</Style>
 	<Style Selector="cc|TitleBar.versiontag">
 		<Setter Property="BorderBrush" Value="{DynamicResource TrlAccentBrush}"/>
