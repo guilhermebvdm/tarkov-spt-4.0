@@ -8,6 +8,8 @@ Primeira versão. Inclui o bloco **H. Game data** (primitivos de domínio Tarkov
 
 Filtros: `trl-multiselect` (dropdown de checkboxes com count no trigger, counts por opção, `__search` sticky p/ listas longas, Select all/Clear; painel persiste entre cliques) + `trl-filter-chip` (chips de filtros aplicados com remove) — receita "Barra de filtros" no PATTERNS.md. Dropdown e multiselect compartilham a casca (trigger/caret/painel/option) em seletores agrupados; diferenças intencionais são overrides explícitos comentados.
 
+Iconografia oficial: Tabler Icons (MIT) requadrada para o hard-edges (caps butt/joins miter, stroke 1.75) — sprite curado `assets/icons.svg` (55 ícones UI + domínio: crosshair/target/shield/radar/swords/backpack…), componente `.trl-icon` (13/16/20px, currentColor), grade com click-copy no showcase, receita "Ícones" no PATTERNS; starter usa refresh/device-floppy nos botões do topbar.
+
 Fundo ambiente com a key art oficial (escolha do user entre 3 protótipos ao vivo): `assets/bg-ambient.jpg` (1920w/317KB, proveniência documentada) + tokens `--trl-photo`/`--trl-scrim` + modifier `.trl-app--photo` (foto fixa sob scrim 86–93%; painéis opacos seguram AA). Editor-starter usa o ambiente; hero do showcase usa a banda com fade — receita "Fundo ambiente & hero" no PATTERNS.
 
 Recalibração "grafite + chrome neutro" (feedback do user: gold constante na tela inteira): superfícies e ink neutros (o calor vem da vignette e dos accents), edges neutras com `--trl-edge-accent` reservada a tag/badge, labels de chrome via `--trl-fg-label`, botão base neutro, kv value promovido a `fg`. Gold agora só marca significado (ativo, selecionado, primário, assinaturas). Contrastes remedidos (muted 5.2–6.6 AA) e paleta viz revalidada contra a surface nova — tudo PASS.

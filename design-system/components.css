@@ -91,6 +91,22 @@
 }
 
 
+/* ── Icon (Tabler requadrada — sprite em assets/icons.svg) ─────────────────
+ * Inline the sprite once at the top of <body>, then:
+ *   <svg class="trl-icon"><use href="#trl-i-search"/></svg>
+ * Color inherits (currentColor). Icon-only buttons need aria-label.
+ * Recipe + how to add icons: PATTERNS · Ícones. */
+.trl-icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  vertical-align: -3px;
+}
+
+.trl-icon--sm { width: 13px; height: 13px; vertical-align: -2px; }
+.trl-icon--lg { width: 20px; height: 20px; vertical-align: -4px; }
+
+
 /* ============================================================================
  * B. LAYOUT / SHELL
  * ========================================================================== */

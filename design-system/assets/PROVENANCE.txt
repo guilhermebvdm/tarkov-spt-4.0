@@ -14,3 +14,10 @@ bg-ambient.jpg
   repo porque os editores rodam offline (PATTERNS R9 — nunca hotlinkar).
   Se uma restrição formal surgir, remover o arquivo — o DS degrada para
   o grafite puro (o modifier .trl-app--photo simplesmente perde a foto).
+
+icons.svg
+  Sprite curado (55 ícones) da Tabler Icons (MIT, © Paweł Kuna,
+  https://tabler.io/icons — baixados de github.com/tabler/tabler-icons
+  em 2026-07-04, pasta icons/outline). Pós-processados para o hard-edges
+  do DS: stroke-linecap round→butt, stroke-linejoin round→miter,
+  stroke-width 1.75. Adicionar ícone novo: receita "Ícones" no PATTERNS.

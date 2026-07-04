@@ -186,6 +186,15 @@ Cores de UI **reprovam** como cores de série (validado por script — banda de 
 - **Nunca dual-axis** (2 escalas Y): duas medidas = dois gráficos ou indexação a base comum. ≥2 séries = legenda sempre; texto (valores/labels) usa tokens de texto, nunca a cor da série. Heat/chips sempre com valor visível.
 - Paleta nova ou mudança nos slots: **rodar o validador** da skill `dataviz` contra `--trl-surface-1` (procedimento na skill do repo `trl-ds-validation`) — nunca aprovar no olho.
 
+### Ícones (Tabler requadrada)
+
+Biblioteca oficial: **Tabler Icons** (MIT), requadrada para o hard-edges do DS (caps `butt`, joins `miter`, stroke 1.75) — sprite curado em `assets/icons.svg` (55 ícones, ~17KB).
+
+- **Uso:** inline o conteúdo de `icons.svg` uma vez no topo do `<body>` (funciona em `file://`, HTML puro e Blazor; nada de `.js` — R9) e referencie `<svg class="trl-icon"><use href="#trl-i-search"/></svg>`. Tamanhos: `--sm` 13px · base 16px · `--lg` 20px. Cor herda (`currentColor`) — pinte pelo token do contexto, nunca hex.
+- **Botão só-ícone** exige `aria-label`; ícone decorativo ao lado de texto dispensa (o sprite já é `aria-hidden`).
+- **Adicionar ícone:** baixar de `github.com/tabler/tabler-icons/icons/outline/<nome>.svg`, aplicar o requadramento (round→butt/miter), embrulhar em `<symbol id="trl-i-<nome>" viewBox="0 0 24 24" …>` no sprite e **incluir na grade do showcase no mesmo commit** (regra 4 do CLAUDE.md).
+- Nunca misturar bibliotecas nem usar emoji como ícone de UI (emoji só como placeholder de imagem de item em demos).
+
 ### Fundo ambiente & hero (key art)
 
 Asset embutido: `assets/bg-ambient.jpg` (key art oficial do EFT, 1920w/317KB — proveniência em `assets/PROVENANCE.txt`; **nunca hotlinkar**, R9).
@@ -211,6 +220,7 @@ O adapter oficial (`bridge/trl-mudblazor.css`, mapeando `--mud-palette-*` → to
 | Data | Autor | Alteração |
 |---|---|---|
 | 2026-07-03 | Guilherme | Criação (v1.0.0) — regras R1–R7 + receitas iniciais |
+| 2026-07-04 | Guilherme | Receita "Ícones": Tabler requadrada (MIT), sprite curado + `.trl-icon` |
 | 2026-07-04 | Guilherme | Receita "Fundo ambiente & hero" (key art embutida, `--trl-photo`/`--trl-scrim`, `.trl-app--photo`) |
 | 2026-07-03 | Guilherme | Recalibração "grafite + chrome neutro": base neutra, edges neutras (+`--trl-edge-accent`), labels via `--trl-fg-label`; R2/R4/R5 atualizadas |
 | 2026-07-03 | Guilherme | Review por lentes: R6 (px por decisão) e R8 (i18n) inseridas — Densidade→R7, Assets→R9; receita "Gráficos (dataviz)" com tokens `--trl-viz-*` validados; heat exige valor visível |

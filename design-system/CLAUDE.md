@@ -34,7 +34,8 @@ Ordem de consumo:
 4. Mudanças no DS são **aditivas**; breaking = MAJOR no CHANGELOG. Componente novo entra no showcase **na mesma mudança**.
 5. Estilo novo específico de um mod fica no CSS do mod (consumindo tokens) — só entra aqui o que ≥2 editores usariam.
 6. Se copiar esta pasta para `wwwroot` de mod: **nenhum `.js` solto** (ModValidator rejeita) — scripts inline.
-7. Ao revisar/refatorar telas, validar com a skill do repo **`trl-ds-validation`** (lentes readability/a11y/i18n/dataviz + paletas de gráfico validadas). Gráficos usam os tokens `--trl-viz-*` — cores de UI reprovam como série.
+7. Ícones: **só** o sprite Tabler requadrado (`assets/icons.svg`, inline no body + `<use href="#trl-i-…">`); nunca emoji como ícone de UI, nunca outra biblioteca (receita "Ícones" no PATTERNS).
+8. Ao revisar/refatorar telas, validar com a skill do repo **`trl-ds-validation`** (lentes readability/a11y/i18n/dataviz + paletas de gráfico validadas). Gráficos usam os tokens `--trl-viz-*` — cores de UI reprovam como série.
 
 ## Consumidores e fases futuras
 
