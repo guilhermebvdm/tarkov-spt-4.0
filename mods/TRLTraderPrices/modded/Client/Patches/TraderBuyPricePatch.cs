@@ -1,5 +1,5 @@
+using System;
 using System.Reflection;
-using EFT;                       // MongoID
 using EFT.InventoryLogic;        // Item
 using HarmonyLib;                // AccessTools
 using SPT.Reflection.Patching;   // ModulePatch, PatchPostfix
@@ -15,8 +15,8 @@ namespace TRLTraderPrices.Client.Patches;
 ///     from — vanilla computes it entirely client-side (handbook × buy_price_coef × condition); the
 ///     server never sees a price until the player confirms the sale. The server-side backstop
 ///     (<c>modded/Server/TraderBuyPricePatch.cs</c>, Prefix on <c>TradeHelper.SellItem</c>) reads the
-///     SAME <c>buy-overrides.json</c> config via <see cref="BuyPriceOverrides"/>, so what this patch
-///     shows and what the player actually receives always match.
+///     SAME buy-overrides via <see cref="BuyPriceOverrides"/>, so what this patch shows and what the
+///     player actually receives always match.
 /// </summary>
 public class TraderBuyPricePatch : ModulePatch
 {
@@ -28,15 +28,28 @@ public class TraderBuyPricePatch : ModulePatch
     [PatchPostfix]
     private static void Postfix(TraderClass __instance, Item item, ref TraderClass.GStruct300? __result)
     {
-        if (__instance == null || item == null)
+        // CR-02: only apply an override if its currency matches the TRADER'S ACTUAL currency —
+        // mirrors the server backstop's own currency-match guard (modded/Server/TraderBuyPricePatch.cs).
+        // The vanilla __result (Postfix runs AFTER the original call) already carries that real
+        // currency as CurrencyId, computed by the game from the trader's own settings — comparing
+        // against it (instead of trusting whatever currency string sits in the config) means a
+        // mismatched/manually-edited config entry can never make the display lie about the currency.
+        if (__instance == null || item == null || __result is not { } vanilla || vanilla.CurrencyId is not { } vanillaCurrency)
         {
             return;
         }
 
         string tpl = item.TemplateId; // MongoID -> string, implicit conversion (EFT/MongoID.cs)
-        if (BuyPriceOverrides.TryGetPrice(__instance.Id, tpl, out var currencyTplId, out var amount))
+        if (!BuyPriceOverrides.TryGetPrice(__instance.Id, tpl, out var currencyTplId, out var amount))
         {
-            __result = new TraderClass.GStruct300(new MongoID(currencyTplId), amount);
+            return;
         }
+
+        if (!string.Equals(vanillaCurrency, currencyTplId, StringComparison.OrdinalIgnoreCase))
+        {
+            return; // override's currency doesn't match this trader's real currency -> leave vanilla
+        }
+
+        __result = new TraderClass.GStruct300(vanillaCurrency, amount);
     }
 }

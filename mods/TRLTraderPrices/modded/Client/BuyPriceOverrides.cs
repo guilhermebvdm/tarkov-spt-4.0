@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SPT.Common.Http;     // RequestHandler
 
 namespace TRLTraderPrices.Client;
@@ -41,15 +41,6 @@ internal static class BuyPriceOverrides
         }
     }
 
-    // Raw JSON shape mirrors the server's TraderOverride record (config/buy-overrides.json keys are
-    // lowercase "count"/"currency"). Newtonsoft matches property names case-insensitively by default,
-    // but the explicit JsonProperty keeps this file self-documenting and immune to that default changing.
-    private sealed class RawOverride
-    {
-        [JsonProperty("count")] public int Count { get; set; }
-        [JsonProperty("currency")] public string? Currency { get; set; }
-    }
-
     private static void EnsureLoaded()
     {
         if (_loaded)
@@ -66,32 +57,53 @@ internal static class BuyPriceOverrides
 
             if (!string.IsNullOrWhiteSpace(json))
             {
-                var raw = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, RawOverride>>>(json);
-                if (raw != null)
+                // CR-03: parsed leaf-by-leaf via JObject/JToken (never a single strongly-typed
+                // Dictionary<string, Dictionary<string, RawOverride>> deserialize) so ONE malformed
+                // entry (wrong JSON type, a fractional "count", a future schema change — whatever a
+                // hand-edit of buy-overrides.json might introduce) can only drop THAT entry, never
+                // abort the whole parse and disable buy-price overrides for every other trader/item
+                // for the rest of the game session. "count" is read as double (matches the server's
+                // TraderOverride.Count type) and rounded, instead of binding straight into an int that
+                // would throw on a fractional value.
+                var root = JObject.Parse(json);
+                foreach (var traderProp in root.Properties())
                 {
-                    foreach (var (traderId, tplMap) in raw)
+                    var traderId = traderProp.Name;
+                    if (string.IsNullOrWhiteSpace(traderId) || traderProp.Value is not JObject tplMap)
                     {
-                        if (string.IsNullOrWhiteSpace(traderId) || tplMap is null)
+                        continue;
+                    }
+
+                    var inner = new Dictionary<string, Entry>(StringComparer.OrdinalIgnoreCase);
+                    foreach (var tplProp in tplMap.Properties())
+                    {
+                        var tpl = tplProp.Name;
+                        if (string.IsNullOrWhiteSpace(tpl) || tplProp.Value is not JObject node)
                         {
                             continue;
                         }
 
-                        var inner = new Dictionary<string, Entry>(StringComparer.OrdinalIgnoreCase);
-                        foreach (var (tpl, ovr) in tplMap)
+                        try
                         {
-                            if (ovr is null || string.IsNullOrWhiteSpace(tpl) || string.IsNullOrWhiteSpace(ovr.Currency)
-                                || !CurrencyTpl.TryGetValue(ovr.Currency.Trim(), out var currencyTplId))
+                            var currency = node["currency"]?.ToObject<string>();
+                            var count = node["count"]?.ToObject<double?>();
+                            if (count is null or <= 0 || string.IsNullOrWhiteSpace(currency)
+                                || !CurrencyTpl.TryGetValue(currency.Trim(), out var currencyTplId))
                             {
                                 continue;
                             }
 
-                            inner[tpl] = new Entry(ovr.Count, currencyTplId);
+                            inner[tpl] = new Entry((int)Math.Round(count.Value), currencyTplId);
                         }
-
-                        if (inner.Count > 0)
+                        catch
                         {
-                            result[traderId] = inner;
+                            // Malformed leaf (wrong JSON type for count/currency, etc.) — skip just this entry.
                         }
+                    }
+
+                    if (inner.Count > 0)
+                    {
+                        result[traderId] = inner;
                     }
                 }
             }

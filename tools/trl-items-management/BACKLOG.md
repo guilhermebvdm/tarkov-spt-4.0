@@ -45,6 +45,7 @@
   - Server (`mods/TRLTraderPrices/modded/Server/`): Harmony Prefix em `TradeHelper.SellItem` (backstop — garante que o dinheiro creditado bate com o exibido) + `StaticRouter` servindo `/trltraderprices/buy-overrides` pro client ler o mesmo config.
   - Viewer: coluna "B" (antes só referência do tarkov.dev) agora **editável**, espelhando a UI/API do "S" (`PATCH /api/trader-buy-price`).
 - **Validado:** build limpo (client+server), boot do SPT sem erros (Harmony aplicado, rota respondendo), round-trip da API do viewer via Chrome DevTools (editar → override aplicado com badge → restaurar → estado limpo).
+- **Code review:** revisão adversarial encontrou 6 pontos (Fence escapando pro client via rota crua, client não validando moeda contra o trader real, schema `int`/`double` causando crash-e-trava do cache no client, célula "B" da lista principal não refletindo override, endpoint de reset-all sem botão, duplicação sell↔buy) — **todos corrigidos** e revalidados (build+boot+UI). Detalhe completo em [HANDOFF.md](HANDOFF.md) §7.
 - **Pendente:** validação in-game (vender 1 item com override setado → confirmar que o preço exibido na tela E o dinheiro recebido batem com o override).
 
 ### B-4 · Bulk: copiar preço tarkov.dev / tarkov-market → override de FLEA

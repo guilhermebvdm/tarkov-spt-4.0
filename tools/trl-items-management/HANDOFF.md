@@ -4,11 +4,13 @@
 
 ## ⭐ Próxima ação (a única coisa que importa começar)
 
-**Validar o B-3 in-game.** Implementação (client + server + viewer) está **100% pronta, buildada, deployada e boot-testada** — falta só o usuário jogar. Passos:
+**Validar o B-3 in-game.** Implementação (client + server + viewer) + **code review completa (6 achados, todos corrigidos)** — falta só o usuário jogar. Passos:
 1. Setar 1 override de buy-price em qualquer item pelo viewer (`http://127.0.0.1:8080/viewer/` → busca o item → expande o detalhe → seção "Trader buy (tarkov.dev ref)" → clica no valor de um trader editável → salva).
 2. Bootar o SPT server (se não estiver rodando: `Start-Process 'D:\SPT\SPT\SPT.Server.exe'`) + o launcher/EFT.
 3. **Vender o item pro trader que recebeu o override**: confirmar que o **preço exibido** na tela de venda = override **E** o **dinheiro recebido** após confirmar = override.
-4. Se bater → B-3 fechado. Reportar no BACKLOG.md e considerar `/g-review-content` na implementação.
+4. Se bater → B-3 fechado. Reportar no BACKLOG.md.
+
+**Gap de verificação em aberto (da própria code review):** o critério de aceite do B-3 pede prova "por rota `getUserAssort`/venda simulada **ou** log do patch" — só entreguei a forma mais fraca (log confirmando que o patch carregou). Uma venda simulada via HTTP contra o servidor rodando (sem precisar do client EFT) fecharia esse gap com mais confiança antes do teste in-game; não fiz por não ter session/profile válido à mão na sessão.
 
 Depois disso, os próximos itens do backlog (sem decisão pendente) são B-2 Milestone 1 (portar `serve.js` → controllers C#) e B-4 (depende do B-2 M1) — ver [BACKLOG.md](BACKLOG.md).
 
@@ -65,6 +67,20 @@ Depois disso, os próximos itens do backlog (sem decisão pendente) são B-2 Mil
 
 ### 6. Validação in-game (fecha o B-3 — precisa do usuário)
 Ver "⭐ Próxima ação" no topo.
+
+### 7. Code review + fixes (mesma sessão)
+Revisão adversarial (sub-agent independente + verificação linha a linha) achou 6 pontos; **todos corrigidos e rebuildados/redeployados/reboot-testados**:
+
+| ID | Achado | Fix |
+|---|---|---|
+| CR-01 | Router servia o `buy-overrides.json` **cru** — Fence (excluída só no parse do server) escapava pro client se alguém editasse o arquivo à mão | `TraderBuyPriceRouter` agora serve o dict **já parseado/validado** (`TRLTraderPricesMod.BuyOverrides`) — mesma fonte que o backstop do server usa, Fence nunca chega no client |
+| CR-02 | Client não validava a moeda do override contra a moeda real do trader (só o server validava) | Postfix client compara contra `vanilla.CurrencyId` (já computado pelo método original) antes de aplicar — mesmo critério do server, sem confiar cegamente na config |
+| CR-03 | `Count` era `int` no client / `double` no server — um valor fracionário derrubava o parse do arquivo **inteiro**, desativando overrides de compra pro resto da sessão do jogo | Parse via `JObject`/`JToken` folha-a-folha (não mais um único `Dictionary<...,RawOverride>`) — uma entrada malformada só é pulada, nunca aborta o resto |
+| CR-04 | A célula "B" da lista principal não refletia override (só o painel de detalhe) | `renderRow` agora resolve o traderId do vendor de referência e aplica `buyOverrideFor` + badge OVR, igual à célula "S" |
+| CR-05 | Endpoint `DELETE /api/trader-buy-price/all` existia mas sem botão nenhum na UI | Botão + pill "Clear buyback overrides" no topbar, espelhando o de venda |
+| CR-06 | Duplicação de código sell↔buy (parser + JS/CSS do viewer) já "descolando" entre as duas cópias | **Aceito como dívida documentada** — não refatorado (risco de mexer no que já funciona no sell, v1.1.0); comentários inline já explicam o porquê |
+
+Revalidado após os fixes: build 0 erros, boot do SPT limpo (mesmas linhas de log de antes), rota `/trltraderprices/buy-overrides` decodificada manualmente (segue servindo JSON válido pela nova fonte), fluxo completo editar→override→badge→topbar→restaurar→reset-all testado via Chrome DevTools sem erros novos no console.
 
 ---
 
