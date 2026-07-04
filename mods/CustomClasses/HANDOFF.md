@@ -98,10 +98,12 @@ por nível (recuo/ergo — Prefix/Postfix novos nos alvos do 050) pras categoria
 **Validar:** GP-25 sobe a barra de Underbarrel ao vivo → extract persiste (V3 mod-side!) → `Recoil str` no overlay
 052 cai com nível ≥1 → sem XP duplo nas 3 vanilla. Checklist completo no [05-asbuild](backlog/058-ativar-masteries-inertes/058-ativar-masteries-inertes-05-asbuild.md).
 
-### 8. 🟢 051 — decisão (a) TRAVADA (2026-07-04) + spec funcional criada
-Usuário escolheu **(a) coordenar**: hook de composição no `StaminaController` do stances (soft-detect, análise no
-kickoff). [01-spec](backlog/051-stances-zone-levers/051-stances-zone-levers-01-spec.md) pronta. Próximo:
-review-spec → spec-tech → code-mod (⚠️ toca `mods/stancesAndCameraPositionSPT4.0.11` — coordenar com a sessão do stances).
+### 8. 🟡 051 — IMPLEMENTADO 2026-07-04 (ciclo completo; validar in-game)
+Hook `ExternalHandsDrainMult` no Tick do stances (só no DRENO) + `StancesArmStaminaBridge` no CustomClasses
+(soft-detect; Hunter em ADS ×0.65 · Tank c/ arma pesada ×0). Review técnica 01: 0🔴 (premissa "delta<0=dreno"
+PROVADA nos 16 cenários). Cards Steady/Tireless Arms SEM "em breve". Deploy: stances manual em
+`RealisticMobility/` (17:08; duplicata do script removida). **Validar:** checklist no
+[05-asbuild](backlog/051-stances-zone-levers/051-stances-zone-levers-05-asbuild.md).
 
 ## Arquitetura / arquivos-chave (client)
 

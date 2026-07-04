@@ -68,6 +68,12 @@ internal static class PerksConfig
     internal static ConfigEntry<bool>? IronLungsEnabled;
     internal static ConfigEntry<float>? IronLungsBreathDrain;
 
+    // 🔧 Steady Arms (Caçador) + Tireless Arms (Tanque) — dreno de braço via hook do stances (051)
+    internal static ConfigEntry<bool>? SteadyArmsEnabled;
+    internal static ConfigEntry<float>? SteadyArmsDrain;
+    internal static ConfigEntry<bool>? TirelessArmsEnabled;
+    internal static ConfigEntry<float>? TirelessArmsDrain;
+
     // 🎖️ Weapon Mastery (058) — maestrias inertes: XP do underbarrel + efeito por nível (SMG/LMG/Launcher/underbarrel)
     internal static ConfigEntry<bool>? WeaponMasteryEnabled;
     internal static ConfigEntry<float>? MasteryXpPerShot;
@@ -301,6 +307,24 @@ internal static class PerksConfig
             new ConfigDescription(
                 "Multiplicador do TEMPO de ADS na janela (0.80 = 20% mais rápido). / ADS time multiplier.",
                 new AcceptableValueRange<float>(0.3f, 1f)));
+
+        SteadyArmsEnabled = config.Bind(
+            "Perks — Hunter", "Steady Arms — Enabled", true,
+            "Hunter: braço cansa mais devagar ao mirar (compõe com o stances mod; sem ele, inativo). / Hunter: slower arm fatigue while aiming (requires the stances mod).");
+        SteadyArmsDrain = config.Bind(
+            "Perks — Hunter", "Steady Arms — ADS arm drain mult", 0.65f,
+            new ConfigDescription(
+                "Multiplicador do dreno de braço do Caçador em ADS (0.65 = 35% mais lento). Requer o stances mod. / Hunter ADS arm-drain multiplier.",
+                new AcceptableValueRange<float>(0.2f, 1f)));
+
+        TirelessArmsEnabled = config.Bind(
+            "Perks — Tank", "Tireless Arms — Enabled", true,
+            "Tank: braço não cansa segurando arma pesada (compõe com o stances mod; sem ele, inativo). / Tank: no arm fatigue holding heavy weapons (requires the stances mod).");
+        TirelessArmsDrain = config.Bind(
+            "Perks — Tank", "Tireless Arms — Heavy arm drain mult", 0f,
+            new ConfigDescription(
+                "Multiplicador do dreno de braço do Tanque com LMG/HMG/GL em mãos (0 = não drena). Requer o stances mod. / Tank heavy-weapon arm-drain multiplier.",
+                new AcceptableValueRange<float>(0f, 1f)));
 
         WeaponMasteryEnabled = config.Bind(
             "Weapon Mastery", "Weapon Mastery — Enabled", true,

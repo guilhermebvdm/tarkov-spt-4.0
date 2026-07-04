@@ -30,6 +30,13 @@ namespace CameraRotationMod
         public static bool ControllingHands { get; private set; }   // lido pelos Prefixes de neutralização
         private static StaminaScenario _prev = StaminaScenario.Inactive;
 
+        // (051/CustomClasses) ⚠️ CONTRATO EXTERNO: fator de dreno de braço composto por OUTRO mod. O CustomClasses
+        // resolve "CameraRotationMod.StaminaController.ExternalHandsDrainMult" por reflection (soft-detect) e seta
+        // um Func<float> que retorna o multiplicador do frame (perks de classe: Steady Arms/Tireless Arms).
+        // NÃO renomear tipo/campo sem coordenar com o CustomClasses. Null = comportamento idêntico ao atual.
+        // Aplicado SÓ no ramo de DRENO (delta < 0) do Tick — a recuperação nunca é tocada.
+        public static Func<float> ExternalHandsDrainMult;
+
         // Índice = (int)StaminaScenario; preenchido por Plugin.BindStaminaManagement().
         public static ConfigEntry<float>[] Multipliers = new ConfigEntry<float>[16];
 
@@ -70,6 +77,14 @@ namespace CameraRotationMod
                 ConfigEntry<float> cfg = Multipliers[(int)s];
                 float mult = cfg != null ? cfg.Value : 1f;
                 float delta = StanceManager.CachedAimDrainRate * (mult - 1f) * Time.deltaTime;
+
+                // (051) composição EXTERNA só no DRENO (delta<0 ⟺ stamina desce — o delta é a variação literal
+                // aplicada abaixo). Cópia local do delegate (thread-safe por estilo); clamp defensivo 0..2.
+                Func<float> hook = ExternalHandsDrainMult;
+                if (delta < 0f && hook != null)
+                {
+                    delta *= Mathf.Clamp(hook(), 0f, 2f);
+                }
 
                 float prev = hands.Current;   // ref: GClass774.cs:23
                 float target = Mathf.Clamp(prev + delta, 0f, (float)hands.TotalCapacity);

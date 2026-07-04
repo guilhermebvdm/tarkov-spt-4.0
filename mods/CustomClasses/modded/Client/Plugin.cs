@@ -122,6 +122,7 @@ public class Plugin : BaseUnityPlugin
         new WeightMarkerPatch().Enable();                   // (056) marcador "▲ +X%" no peso (aba Health) — atribui ao Pack Mule
         new RaidPerksNotificationPatch().Enable();          // (050) notificação de perks/drawbacks no início da raid
         new NotificationDurationPatch().Enable();           // (fix 2026-07-03) notificação de perks por 10s (Infinite + hide agendado)
+        StancesArmStaminaBridge.TryAttach();                // (051) hook de stamina de braço no stances (re-try no raid-start)
         new UnderbarrelMasteryXpPatch().Enable();           // (058) XP de Underbarrel Launchers por disparo do GP-25/M203
         new WeaponMasteryRecoilPatch().Enable();            // (058) recuo × (1 − rec/nível) — ANTES do ShootRecoilPatch (ordem intencional
                                                             //       + HarmonyPriority.High: maestria entra no baseline do PerkDiag — CR-01-03)

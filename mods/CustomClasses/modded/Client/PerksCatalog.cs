@@ -103,7 +103,7 @@ internal static class PerksCatalog
         ["iron_lungs"] = G("Iron Lungs", "Fôlego de Aço", ESkillId.Sniping, new[]
         {
             P("Iron Lungs", "Fôlego de Aço", "breath hold duration", "duração da respiração", ValueFormat.Percent, 1.5f, Polarity.HigherBetter, EBuffId.EnduranceBuffBreathTimeInc),
-            P("Steady Arms", "Braços Firmes", "arm fatigue when aiming", "fadiga de braço ao mirar", ValueFormat.Percent, 0.65f, Polarity.LowerBetter, EBuffId.EnduranceHands, pending: true),   // 051: zona do stances
+            P("Steady Arms", "Braços Firmes", "arm fatigue when aiming", "fadiga de braço ao mirar", ValueFormat.Percent, 0.65f, Polarity.LowerBetter, EBuffId.EnduranceHands),   // 051 ENTREGUE (hook no stances)
             P("Calm Sights", "Mira Serena", "sway", "oscilação (sway)", ValueFormat.Percent, 0.7f, Polarity.LowerBetter, EBuffId.AimMasterWiggle, pending: true),
         }),
         ["rooted"] = G("Rooted", "Enraizado", ESkillId.CovertMovement, new[]
@@ -156,7 +156,7 @@ internal static class PerksCatalog
             P("Steady Mount", "Apoio Firme", "recoil (LMG/HMG/GL)", "recuo (LMG/HMG/GL)", ValueFormat.Multiplier, 0.85f, Polarity.LowerBetter, EBuffId.RecoilControlImprove),
             P("Heavy Handling", "Manejo Pesado", "ergonomics (LMG/HMG/GL)", "ergonomia (LMG/HMG/GL)", ValueFormat.Multiplier, 1.15f, Polarity.HigherBetter, EBuffId.BipodErgonomicsGainPerLevel),
             Flag("Grenadier", "Granadeiro", "GL: no ergo penalty", "lança-granadas: sem penalidade de ergo", isPerk: true, EBuffId.StrengthBuffThrowDistanceInc),
-            Flag("Tireless Arms", "Braços Incansáveis", "no arm fatigue (heavy weapon)", "braço não cansa (arma pesada)", isPerk: true, EBuffId.EnduranceHands, pending: true),   // 051: zona do stances
+            Flag("Tireless Arms", "Braços Incansáveis", "no arm fatigue (heavy weapon)", "braço não cansa (arma pesada)", isPerk: true, EBuffId.EnduranceHands),   // 051 ENTREGUE (hook no stances)
         }, iconAlt: ESkillId.RecoilControl),
         ["heavy_frame"] = G("Heavy Frame", "Estrutura Pesada", ESkillId.Endurance, new[]
         {

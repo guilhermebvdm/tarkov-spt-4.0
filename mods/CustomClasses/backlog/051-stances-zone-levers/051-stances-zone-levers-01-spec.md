@@ -52,8 +52,11 @@ e o CustomClasses o preenche por soft-detect, sem dependência hard entre os mod
 ## Corner cases
 
 - [ ] **Troca rápida de arma** (pesada↔leve) durante o dreno: fator atualiza no próximo tick, sem "grudar" o ×0.
-- [ ] **Hold breath** (cenários `*HoldBreath` do stances): definir na spec técnica se o fator compõe também ali
-      (proposta: sim — é dreno de braço).
+- [ ] **Hold breath** (cenários `*HoldBreath` do stances): o fator compõe também ali (revisão: SIM por
+      construção — o fator entra no `delta` de DRENO, agnóstico ao cenário; recuperação nunca é tocada).
+- [ ] **Arma estacionária montada** (NSV/AGS — cenário ActiveStance0 do stances): Tireless Arms NÃO aplica (o
+      gate é "arma pesada EM MÃOS"; stationary não é FirearmController) — fora de escopo, comportamento do
+      stances puro (revisão: corner adicionado).
 - [ ] **Stances desligado mid-session** (config/contexto inativo → `ControllingHands=false`): vanilla volta a
       mandar; o CustomClasses NÃO aplica nada no caminho vanilla (fora de escopo) — sem efeito e sem crash.
 - [ ] **Os dois perks na mesma situação impossível** (Caçador ≠ Tanque) — fator é por classe local; nunca compõe
@@ -81,3 +84,4 @@ e o CustomClasses o preenche por soft-detect, sem dependência hard entre os mod
 | 2026-06-20 | Kickoff criado (redesign 11→6, ponta solta #6) |
 | 2026-07-03 | Análise de decisão no kickoff; decisão do usuário: **(a) coordenar** |
 | 2026-07-03 | Spec funcional criada via `/create-spec` com a decisão fixada |
+| 2026-07-04 | Revisão `/review-spec` (inline) — semântica do fator fixada no DRENO (recuperação intocada, hold-breath incluso por construção) + corner de arma estacionária adicionado |

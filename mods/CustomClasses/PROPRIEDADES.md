@@ -44,6 +44,18 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 | `Weight Marker — Y offset` | Marcador do peso — offset Y | float | `0` | Ajuste vertical (px) do marcador `▲ +X%` no peso (aba Health). Positivo = para cima. Faixa −600..600. (item 056) |
 | `Class Detail — Loading panel scale` | Popover do loading — escala | float | `0.75` | Escala (zoom-out) do popover de classe no deploy/loading (0.75 = 75%). Mesma área na tela, conteúdo menor → mais espaço pros cards. Faixa 0.5..1.0. Lido a cada hover (live). (item 055) |
 
+## Seção `Perks — Hunter` / `Perks — Tank` — braço (item 051)
+
+> Dreno de stamina de braço por classe, **composto com o stances mod** via hook (`ExternalHandsDrainMult`).
+> Sem o stances instalado: inativo (1 aviso no log), sem crash.
+
+| Nome (EN) | Tradução pt-BR | Tipo | Padrão | Tooltip (pt-BR) |
+|---|---|---|---|---|
+| `Steady Arms — Enabled` | Braços Firmes — ativo | bool | `true` | Caçador: braço cansa mais devagar ao mirar (compõe com o stances mod). |
+| `Steady Arms — ADS arm drain mult` | Dreno de braço em ADS | float | `0.65` | Multiplicador do dreno de braço do Caçador em ADS (0.65 = 35% mais lento). Faixa 0.2..1. |
+| `Tireless Arms — Enabled` | Braços Incansáveis — ativo | bool | `true` | Tanque: braço não cansa segurando arma pesada (LMG/HMG/GL). |
+| `Tireless Arms — Heavy arm drain mult` | Dreno de braço c/ arma pesada | float | `0` | Multiplicador do dreno de braço do Tanque com arma pesada em mãos (0 = não drena). Faixa 0..1. |
+
 ## Seção `Weapon Mastery` (item 058)
 
 > Dá vida às maestrias inertes da tela SKILLS. XP: só o **underbarrel** (SMG/LMG/Launcher sobem no vanilla —
@@ -68,3 +80,4 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 | 2026-07-03 | Item 055 — `Class Detail — Loading panel scale` (zoom-out do popover; faltava documentar — pego na varredura de pendências). |
 | 2026-07-04 | Item 058 — seção `Weapon Mastery` (XP do underbarrel por disparo + bônus por nível de recuo/ergo). |
 | 2026-07-04 | 058 review 2: default do XP 0.1→0.5 (RN-01, paridade de esforço). Nota RN-05: a maestria modded dá só recuo+ergo por nível (a vanilla tem também reload/swap/elite ×2) — escopo consciente. |
+| 2026-07-04 | Item 051 — Steady Arms (Hunter) + Tireless Arms (Tank): dreno de braço por classe via hook no stances mod. Cards saem do "em breve". |
