@@ -1,7 +1,8 @@
 <!--
   TRL Theme - Button.axaml
-  Base = outlined tan. Variants: .primary (solid tan), .danger (destructive only),
-  .ghost, .icon, .sm. Legacy class shims at the bottom (acc/alt/outlined/link/ulink/transparent).
+  Base = outlined NEUTRO (borda edge-strong + texto fg-muted; hover -> fg) — grafite v2:
+  gold so em significado (.primary/selecionado). Variants: .primary (solid tan),
+  .danger (destructive only), .ghost, .icon, .sm. Legacy shims no rodape.
 -->
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
@@ -14,7 +15,8 @@
 		<Setter Property="BorderBrush" Value="{DynamicResource TrlEdgeStrongBrush}"/>
 		<Setter Property="BorderThickness" Value="1"/>
 		<Setter Property="CornerRadius" Value="0"/>
-		<Setter Property="Foreground" Value="{DynamicResource TrlAccentBrush}"/>
+		<!-- ref: handoff grafite regra 4 — base neutra; .trl-btn v2 = color fg-muted -->
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgMutedBrush}"/>
 		<Setter Property="FontFamily" Value="{DynamicResource TrlFontDisplay}"/>
 		<Setter Property="FontSize" Value="{DynamicResource TrlTextSm}"/>
 		<Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -23,13 +25,13 @@
 	<Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
 		<Setter Property="Background" Value="{DynamicResource TrlBgHoverBrush}"/>
 		<Setter Property="BorderBrush" Value="{DynamicResource TrlEdgeStrongBrush}"/>
-		<Setter Property="Foreground" Value="{DynamicResource TrlAccentStrongBrush}"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgBrush}"/>
 	</Style>
 
 	<Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
 		<Setter Property="Background" Value="{DynamicResource TrlBgActiveBrush}"/>
 		<Setter Property="BorderBrush" Value="{DynamicResource TrlAccentDimBrush}"/>
-		<Setter Property="Foreground" Value="{DynamicResource TrlAccentStrongBrush}"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgBrush}"/>
 	</Style>
 
 	<Style Selector="Button:disabled /template/ ContentPresenter#PART_ContentPresenter">
