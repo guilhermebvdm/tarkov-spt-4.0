@@ -27,7 +27,7 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 - 🟡 [P-10.2] (aberta 2026-06-23) **Deferrals do 050:** Combat Medic (transpiler em `DoMedEffect` + lock de cirurgia runtime), Quick Hands (buff `SearchDouble` server-side), Iron Lungs sway (`BreathEffector`). Detalhe em 050…-05-asbuild.
 - 🟡 [P-10.3] (aberta 2026-06-23, atualizada 2026-07-04) **Redesign restante (backlog):** 054 (propagar rename `--force-config`) e 052 (validação final). 051 e 058 têm pendência própria (P-12.2/P-12.1). (Supersede P-8.2.)
 - 🟡 [P-11.1] (aberta 2026-07-03, atualizada 2026-07-04) **Re-teste da leva de UI (rodada 4) + 057 coop** — VALIDADOS ✅ in-game: notificação por-efeito/10s (aprovada), chips ✓, títulos únicos por efeito, alinhamento do painel, ícones por efeito, zoom 0.75. RE-TESTAR: texto "CLASS" na aba (fix preferredWidth 817df0b) · cores dos nomes pós-fix cor² (5f0ada2) · popover no PAINEL DE GRUPO do deploy (06-fix-02) · **057 em coop 2+ COMO CLIENTE** (+ trânsito). Calibração: Weight Marker X=−107/Y=+50.7 vistos no print — user confirmar pra fixar default.
-- 🟡 [P-12.1] (aberta 2026-07-04) **058 code-mod em andamento** — gate V FECHADO (underbarrel = única skill morta; SMG/LMG/GL sobem vanilla → anti-XP-duplo; design POR DISPARO). Falta: aplicar as 11 resoluções da review 01 na spec-tech + implementar (recon do ponto de patch em background). Validação pós-implementação inclui V3 (XP via SetCurrent persiste?).
+- 🟡 [P-12.1] (aberta 2026-07-04, atualizada 14:52) **058 IMPLEMENTADO — aguardando gate in-game** — ciclo completo (spec §10 → code-mod e6f3816 → code review 7/7 aplicados 656ca97; compile 0/0, DLL instalada). Validar: GP-25 sobe a barra de Underbarrel AO VIVO (com CalculateExpOnFirstLevels a paridade é ~100 disparos p/ nível 1) → extract persiste (V3 mod-side!) → Recoil str no overlay 052 cai com nível ≥1 → sem XP duplo nas 3 vanilla → coop como cliente. Checklist no 05-asbuild.
 - 🟢 [P-12.2] (aberta 2026-07-04) **051 ciclo** — decisão (a) travada + 01-spec criada; próximo: review-spec → spec-tech → code-mod TOCA `mods/stancesAndCameraPositionSPT4.0.11` (hook no StaminaController) — coordenar com a sessão/handoff do stances.
 - 🟢 [P-8.3] (aberta 2026-06-21) **Badge "Not registered" no editor** — server registra a edition por `displayName.pt` mas o editor chaveia por `name` en. Cosmético; corrigir se incomodar.
 - 🟡 [P-8.4] (aberta 2026-06-21) **Gear + identidade visual de furtivo/tanque são placeholder** (loadout/`iconFile` clonados do furtivo/tático) — curar (ícones próprios, gear definitivo).
@@ -414,4 +414,34 @@ calibração do usuário · próximo da fila: 058 (V1/V2/V4) ou 051 (decisão st
 **Cross-refs:**
 - Atualiza [P-11.1] (validados ✅: notificação, chips, títulos, alinhamento; re-teste da rodada 4 pendente) e [P-10.3] (051/058 ganharam pendência própria).
 - Handoff vivo: `HANDOFF.md` (rodadas anotadas por item); artefatos 057 (06-fix-01/02) e 058 (03-review + resultados V na 01-spec).
+
+### 2026-07-04 14:52 (GMT-3) — Sessão 12b: 058 implementado ponta a ponta (/g-autodev autônomo)
+
+**Tema central:** fechamento do 058 (weapon mastery) 100% autônomo — spec §10 (redesenho pós-V), code-mod, review adversarial e apply, com o usuário dormindo.
+
+**Decisões-chave:**
+- **Perna 1 = XP POR DISPARO do underbarrel** via Postfix em `FirearmController.method_57(LauncherItemClass, AmmoItemClass)` (Player.cs:14231 — caller único no OnFireEvent do lançador; recon próprio, o agente da madrugada ficou órfão do restart). Gate AP-02 por `ReferenceEquals(controller, MainPlayer.HandsController)` (bots usam o mesmo controller). Fator de XP da classe aplicado (consistência com OnTriggerPatch).
+- **Perna 2 = efeito por nível** (recuo ×(1−0.004·lvl), ergo ×(1+0.002·lvl)) pela maestria da ARMA EM MÃOS (`smg`→SMG, `machinegun`→LMG, `grenadeLauncher`→Launcher) — Prefix/Postfix novos nos MESMOS alvos do 050, compondo com Shaky Hands/Adrenaline/Bunker. Bônus: escala do EXCESSO do coice do próprio underbarrel (`float_5`).
+- **HMG deferida** (só existe estacionária — outro controller, sem como validar); anti-XP-duplo nas 3 que sobem vanilla; F12 seção `Weapon Mastery` (0.1/disparo · 0.004 · 0.002).
+- **Review 01 (adversarial, 10 verificações): 0🔴/1🟠/3🟡/3🟢 — 7/7 aplicados**, destaque 🟠: `SetCurrent` cru pulava `CalculateExpOnFirstLevels` (nível 0→1 seria 10× mais lento que a paridade prometida) → corrigido chamando o método público em Level<9.
+
+**Lições / hipóteses descartadas:**
+- **XP de skill "cru" ≠ XP vanilla:** o funil `SkillClass.OnTrigger` amplifica o XP nos primeiros níveis (×10/(nível+1), Level<9) além de fadiga/BonusController — creditar direto via `SetCurrent` sem `CalculateExpOnFirstLevels` quebra a paridade onde ela mais importa (validação do nível 1). Ref: SkillClass.cs:228-241/108.
+- **Ordem de Prefixes Harmony é load-bearing quando um patch instrumenta o outro:** o PerkDiag captura baseline no Prefix do 050; a maestria precisa rodar ANTES pra aparecer no overlay — ordem via Enable() é frágil, `[HarmonyPriority]` explícito é a forma correta. Ref: CR-01-03.
+- **Shooting range do hideout não dá XP de weapon skill no vanilla** (`HideoutPlayer.ExecuteShotSkill` é override vazio) — hooks fora do funil `ExecuteShotSkill` precisam replicar esse gate manualmente.
+- **Fika confirmado por fonte:** `FikaClientFirearmController` herda `method_57` (patch pega no cliente); `ObservedFirearmController` replica tiro remoto SEM `method_57` (remoto nunca credita).
+- **Operacional:** script `update-graphs.sh` rodado sem `cd` executa no tree PRINCIPAL (cwd reseta) — em worktree, sempre `cd` antes; conferir `git status` do tree vizinho após o vacilo (desta vez sem estrago).
+
+**Atividade cronológica:**
+1. Spec-tech §10 (redesenho pós-V + 11 resoluções da review técnica incorporadas) — parte do commit e6f3816.
+2. Recon próprio do disparo (method_57/float_5/SkillManager.AttachedLauncher) — agente órfão descartado.
+3. Code-mod: `WeaponMastery.cs` + `WeaponMasteryPatches.cs` (3 patches) + F12 + Plugin + PROPRIEDADES + asbuild + backlog/handoff — e6f3816; compile 0/0 de primeira.
+4. Grafo regenerado (1580 nós · 2021 arestas) — b860ead.
+5. Review adversarial (10 verificações com evidência) → 7 achados → todos aplicados + recompile 0/0 — 656ca97.
+
+**Pendências abertas nesta sessão:** (P-12.1 atualizada no topo — 058 aguardando gate in-game.)
+
+**Cross-refs:**
+- Continua a Sessão 12 (mesmo chat); resolve o "falta" da P-12.1.
+- Config global do harness: `~/.claude/settings.json` ganhou `additionalDirectories: /c/Repos/spt` (worktrees sem prompt) — trabalho não-mod, registrado aqui só como contexto.
 
