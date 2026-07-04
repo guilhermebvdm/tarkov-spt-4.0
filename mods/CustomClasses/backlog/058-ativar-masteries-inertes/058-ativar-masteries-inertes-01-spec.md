@@ -52,9 +52,11 @@ de implementar (resultados alimentam a spec técnica):
       (a review PA-01-01 acertou: Launcher não estava morta). **Underbarrel (GP-25+VOG-25) = 0** → ÚNICA skill
       comprovadamente morta e alvo real da Perna 1. Consequência anti-XP-duplo: o mod NÃO credita XP em
       SMG/LMG/Launcher.
-- [ ] **V2 — Persistência.** Pendente confirmar pós-extract (para as que sobem vanilla é o sistema nativo — baixo
-      risco); a persistência do XP creditado PELO MOD (AttachedLauncher via SetCurrent) só é testável pós-implementação
-      → vira item do checklist de validação do code-mod.
+- [x] **V2 — CONFIRMADO 2026-07-04:** valores persistiram pós-extract (SMG 2.46 / LMG 2.76 / GL 0.91). Morte não
+      testada (baixo risco — sistema nativo). A persistência do XP creditado PELO MOD (AttachedLauncher via
+      SetCurrent) só é testável pós-implementação → item do checklist de validação do code-mod.
+- [x] **V1d-extra (2026-07-04):** usuário NÃO acertou granada em cheio (só explosões próximas) e nada creditou →
+      sela o design POR DISPARO na Perna 1 (detectar o tiro do underbarrel, não o acerto).
 - [ ] **V3 — `SetCurrent` funciona?** (validado no code-mod) Confirmar que creditar XP numa skill inerte reflete na UI.
 - [~] **V4 — PARCIAL 2026-07-04:** o disparo do underbarrel NÃO credita nada (nem Launcher) → o Item reportado no
       acerto da explosão da VOG não casa com nenhum weaponType (provável: a granada/munição). Detectar o DISPARO do
