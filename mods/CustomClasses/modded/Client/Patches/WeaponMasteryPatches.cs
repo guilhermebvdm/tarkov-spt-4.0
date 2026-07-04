@@ -44,6 +44,14 @@ internal class UnderbarrelMasteryXpPatch : ModulePatch
                 return;
             }
 
+            // ref: CR-01-04 — o shooting range do hideout NÃO dá XP de weapon skill no vanilla
+            // (HideoutPlayer.ExecuteShotSkill é override VAZIO — HideoutPlayer.cs:653); paridade aqui também.
+            // Mesmo padrão de detecção por nome do RaidPerksNotificationPatch (sem tipo hard no IL).
+            if (p.GetType().Name.IndexOf("Hideout", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return;
+            }
+
             var skill = p.Skills?.AttachedLauncher;   // ref: SkillManager.cs:1320
             if (skill == null)
             {
@@ -53,23 +61,33 @@ internal class UnderbarrelMasteryXpPatch : ModulePatch
             // XP por disparo × fator de XP da classe (consistência com o OnTriggerPatch — PA-01-02).
             // silent: true → sem LevelChanged por tiro (PA-01-03; ref: AbstractSkillClass.cs:115).
             var xp = PerksConfig.MasteryXpPerShot?.Value ?? 0f;
-            if (SkillMultipliers.TryGet(ESkillId.AttachedLauncher, out var f))
+            SkillMultipliers.EnsureLoaded();   // ref: CR-01-02 — todo call-site de TryGet vem pareado com EnsureLoaded
+            if (Plugin.Enabled && SkillMultipliers.TryGet(ESkillId.AttachedLauncher, out var f))   // ref: CR-01-06 — respeita o master switch
             {
-                xp *= f;
+                xp *= Mathf.Max(0f, f);   // ref: CR-01-07 — clamp explícito de fator negativo (como no OnTriggerPatch)
             }
 
             if (xp > 0f)
             {
+                // ref: CR-01-01 — PARIDADE nos primeiros níveis: o funil vanilla amplifica o XP cru em
+                // Level<9 (×10/(nível+1) — SkillClass.cs:228-241/108). Sem isso, nível 0→1 = ~1000 disparos
+                // (10× mais lento que a paridade prometida). Fadiga/BonusController: skip documentado (PA-01-02).
+                if (skill.Level < 9)
+                {
+                    xp = skill.CalculateExpOnFirstLevels(xp);   // público — SkillClass.cs:108
+                }
+
                 skill.SetCurrent(skill.Current + xp, true);
             }
 
-            // Efeito por nível do PRÓPRIO underbarrel: method_57 seta float_5 = 1 + ammoRec/100 (coice
-            // pós-tiro) — escala só o EXCESSO acima de 1 (nível 10 × 0.004 = −4% do excesso).
+            // Efeito por nível do PRÓPRIO underbarrel: method_57 seta float_5 = 1 + ammoRec/100 (força do
+            // recuo deste tiro, consumo único em ManualLateUpdate — Player.cs:14479) — escala só o EXCESSO
+            // acima de 1. ref: CR-01-05 — mesmo piso 0.5 da perna de recuo (teto do F12 × nível alto zeraria).
             var rec = PerksConfig.MasteryRecoilPerLevel?.Value ?? 0f;
             var lvl = skill.Level;
             if (rec > 0f && lvl > 0 && ___float_5 > 1f)
             {
-                ___float_5 = 1f + (___float_5 - 1f) * Mathf.Max(0f, 1f - rec * lvl);
+                ___float_5 = 1f + (___float_5 - 1f) * Mathf.Max(0.5f, 1f - rec * lvl);
             }
         }
         catch (Exception ex)
@@ -92,6 +110,10 @@ internal class WeaponMasteryRecoilPatch : ModulePatch
         return AccessTools.Method(typeof(ProceduralWeaponAnimation), nameof(ProceduralWeaponAnimation.Shoot));
     }
 
+    // ref: CR-01-03 — prioridade EXPLÍCITA: este Prefix precisa rodar ANTES do ShootRecoilPatch (050) pra
+    // maestria entrar no baseline `str0` que o PerkDiag (052) captura — senão o overlay não mostra o efeito.
+    // Hoje a ordem dos Enable() no Plugin.cs já garante isso; o atributo torna a intenção à prova de refactor.
+    [HarmonyPriority(Priority.High)]
     [PatchPrefix]
     private static void Prefix(ProceduralWeaponAnimation __instance, ref float str)
     {

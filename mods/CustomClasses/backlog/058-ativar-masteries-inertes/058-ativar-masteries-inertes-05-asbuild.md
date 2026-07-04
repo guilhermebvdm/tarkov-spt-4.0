@@ -50,7 +50,14 @@
 
 ## Mudanças posteriores
 
-(preenchido por `/apply-code-review`)
+### 2026-07-04 — Rodada 01 ([04-code-review-01](058-ativar-masteries-inertes-04-code-review-01.md))
+
+- **Aplicados (7/7):** CR-01-01 (`CalculateExpOnFirstLevels` em Level<9 — paridade real dos primeiros níveis) ·
+  CR-01-02 (`EnsureLoaded` antes do TryGet) · CR-01-03 (`HarmonyPriority.High` + ordem documentada no Plugin.cs;
+  caveat: com maestria >0 o "Before" do overlay 052 inclui a maestria) · CR-01-04 (no-op no hideout — range não
+  dá XP no vanilla) · CR-01-05 (piso 0.5 no excesso do float_5) · CR-01-06 (fator de classe respeita
+  `EnableSkillMultipliers`) · CR-01-07 (clamp de fator negativo).
+- **Arquivos:** `WeaponMasteryPatches.cs`, `Plugin.cs`. Recompile 0/0; DLL instalada.
 
 ## Histórico
 

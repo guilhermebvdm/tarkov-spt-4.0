@@ -123,7 +123,8 @@ public class Plugin : BaseUnityPlugin
         new RaidPerksNotificationPatch().Enable();          // (050) notificação de perks/drawbacks no início da raid
         new NotificationDurationPatch().Enable();           // (fix 2026-07-03) notificação de perks por 10s (Infinite + hide agendado)
         new UnderbarrelMasteryXpPatch().Enable();           // (058) XP de Underbarrel Launchers por disparo do GP-25/M203
-        new WeaponMasteryRecoilPatch().Enable();            // (058) recuo × (1 − rec/nível) pela maestria da arma em mãos
+        new WeaponMasteryRecoilPatch().Enable();            // (058) recuo × (1 − rec/nível) — ANTES do ShootRecoilPatch (ordem intencional
+                                                            //       + HarmonyPriority.High: maestria entra no baseline do PerkDiag — CR-01-03)
         new WeaponMasteryErgoPatch().Enable();              // (058) ergo × (1 + ergo/nível) pela maestria da arma em mãos
         // (050.1 fix 2026-06-24) MaxSpeedPatch/SprintSpeedPatch (getters) REMOVIDOS:
         //   - MaxSpeed é só TETO/denominador da razão RelativeSpeed = CharSpeed/MaxSpeed → aplicar no getter E no
