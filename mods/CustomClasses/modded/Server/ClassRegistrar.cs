@@ -82,6 +82,7 @@ public class ClassRegistrar(
     OutfitBuilder outfitBuilder,
     SkillMultiplierRegistry skillMultiplierRegistry,
     ClassVisualRegistry classVisualRegistry,
+    ClassEditionKeyRegistry classEditionKeyRegistry,   // item 058: fileName → chave efetiva registrada
     IReadOnlyList<SptMod> loadedMods,   // item 006: soft-detect do Skills-Extended
     ISptLogger<ClassRegistrar> logger
 )
@@ -276,6 +277,13 @@ public class ClassRegistrar(
         var def = plan.Definition;
         classVisualRegistry.Set(plan.Name, def.IconFile, def.NameColor, def.DisplayName?.En, def.DisplayName?.Pt);
 
+        // Item 058: grava a chave EFETIVA registrada a partir deste arquivo (com language=pt/en o boot
+        // re-chaveia p/ displayName[lang]) — consumida pelo ClassListRouter (editionKey do contrato SP0).
+        if (!string.IsNullOrWhiteSpace(plan.SourceFileName))
+        {
+            classEditionKeyRegistry.Set(plan.SourceFileName!, plan.Name);
+        }
+
         // Build-then-swap: single reference write — readers (CreateProfileService → ProfileHelper.
         // GetProfileTemplateForSide, ref: ProfileHelper.cs:804/806) always see either the old or the new
         // fully built sides, never a half-mutated one.
@@ -305,6 +313,7 @@ public class ClassRegistrar(
         var removed = databaseService.GetProfileTemplates().Remove(name);
         skillMultiplierRegistry.Remove(name);
         classVisualRegistry.Remove(name);
+        classEditionKeyRegistry.RemoveByEdition(name);   // item 058: limpa fileName → editionKey
         logger.Info($"[CustomClasses] Removed class '{name}' (edition unregistered{(removed ? string.Empty : "; template entry was already absent")}).");
         return removed;
     }
