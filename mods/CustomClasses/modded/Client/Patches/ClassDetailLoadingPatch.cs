@@ -161,6 +161,9 @@ internal sealed class LoadingClassHover : MonoBehaviour, IPointerEnterHandler, I
     /// <summary>057 — identidade da classe DESTE player (setada pelo Postfix; re-setada a cada AddPlayer).</summary>
     internal ClassIdentities.Identity? Identity;
 
+    /// <summary>057 06-fix-03 — popover abre NO CURSOR (painel de grupo do deploy) em vez da âncora fixa à direita.</summary>
+    internal bool FollowCursor;
+
     private void Awake() => EnsureRaycast();   // garante que o hover pegue em qualquer ponto da linha do player
 
     // hover-only (feedback in-game): NÃO mostra sozinho — o painel auto-visível cobria o carrossel do deploy.
@@ -190,7 +193,7 @@ internal sealed class LoadingClassHover : MonoBehaviour, IPointerEnterHandler, I
     private const float BaseHeight = 460f;
 
     /// <summary>Monta (lazy) e exibe o painel — TODO o caminho protegido (F-3: OnPointerEnter fica fora do try/catch do Postfix).</summary>
-    private void Show()
+    private void Show(PointerEventData? eventData = null)
     {
         try
         {
@@ -205,6 +208,11 @@ internal sealed class LoadingClassHover : MonoBehaviour, IPointerEnterHandler, I
                 ApplyScale();   // lê o F12 a cada hover → ajuste "live" sem reiniciar
                 PerksPanelView.Refresh(_panel, Identity);   // 057: classe DESTE player
                 DisableRaycast();   // PA-01-11: DEPOIS do Refresh — o rebuild de cards cria Graphics novos
+                if (FollowCursor && eventData != null)
+                {
+                    PositionAtPointer(eventData);   // 06-fix-03: popover abre onde está o mouse
+                }
+
                 _panel.SetActive(true);
             }
         }
@@ -212,6 +220,42 @@ internal sealed class LoadingClassHover : MonoBehaviour, IPointerEnterHandler, I
         {
             Plugin.Log?.LogError($"[CustomClasses] (055) show detail: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    ///     057 06-fix-03 — posiciona o popover NO CURSOR (pivot topo-esquerdo, abre pra baixo/direita), com
+    ///     clamp pros limites do canvas. A área VISUAL é constante (BaseWidth×BaseHeight — a escala do F12 é
+    ///     compensada no ApplyScale), então o clamp usa as constantes Base.
+    /// </summary>
+    private void PositionAtPointer(PointerEventData eventData)
+    {
+        if (_panel == null)
+        {
+            return;
+        }
+
+        var canvas = _panel.GetComponentInParent<Canvas>();
+        if (canvas == null || canvas.transform is not RectTransform canvasRt)
+        {
+            return;
+        }
+
+        var cam = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
+        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRt, eventData.position, cam, out var local))
+        {
+            return;
+        }
+
+        var rt = (RectTransform)_panel.transform;
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);   // local point é relativo ao pivot/centro do canvas
+        rt.pivot = new Vector2(0f, 1f);
+        var pos = local + new Vector2(18f, -14f);   // respiro: o cursor não cobre o header do painel
+
+        // clamp: painel ocupa [x, x+W] × [y−H, y] no espaço local do canvas.
+        var half = canvasRt.rect.size * 0.5f;
+        pos.x = Mathf.Clamp(pos.x, -half.x + 8f, half.x - BaseWidth - 8f);
+        pos.y = Mathf.Clamp(pos.y, -half.y + BaseHeight + 8f, half.y - 8f);
+        rt.anchoredPosition = pos;
     }
 
     private void Ensure()
@@ -227,12 +271,15 @@ internal sealed class LoadingClassHover : MonoBehaviour, IPointerEnterHandler, I
 
         _panel = PerksPanelView.Build(parent, font);
 
-        // o Build ancora "fill" (bom p/ a aba); no loading reancoramos COMPACTO à direita da tela (não cobre tudo).
-        // sizeDelta fica no ApplyScale (depende da escala do F12).
+        // o Build ancora "fill" (bom p/ a aba); aqui reancoramos COMPACTO. Com FollowCursor (painel de
+        // grupo, 06-fix-03) quem posiciona é o PositionAtPointer a cada hover; senão, âncora fixa (legado).
         var rt = (RectTransform)_panel.transform;
-        rt.anchorMin = rt.anchorMax = new Vector2(1f, 0.5f);
-        rt.pivot = new Vector2(1f, 0.5f);
-        rt.anchoredPosition = new Vector2(-60f, 0f);
+        if (!FollowCursor)
+        {
+            rt.anchorMin = rt.anchorMax = new Vector2(1f, 0.5f);
+            rt.pivot = new Vector2(1f, 0.5f);
+            rt.anchoredPosition = new Vector2(-60f, 0f);
+        }
     }
 
     /// <summary>
@@ -272,7 +319,7 @@ internal sealed class LoadingClassHover : MonoBehaviour, IPointerEnterHandler, I
     }
 
     // hover = toggle OPCIONAL (refinamento; só dispara se houver GraphicRaycaster + EventSystem).
-    public void OnPointerEnter(PointerEventData eventData) => Show();
+    public void OnPointerEnter(PointerEventData eventData) => Show(eventData);
 
     public void OnPointerExit(PointerEventData eventData)
     {

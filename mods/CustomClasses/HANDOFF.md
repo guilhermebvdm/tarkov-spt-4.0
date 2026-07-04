@@ -72,7 +72,11 @@ Linhas Flag (`no ergo penalty`, `no arm fatigue`) agora têm chip **✓** (perk)
 ### 5. 🟡 056 — calibrar F12 e fixar default
 Usuário ajusta `Weight Marker — X/Y offset` (F12 → `Perks — UI`) até posicionar bem (chute inicial X≈−70, Y≈+30) e passa os valores → fixar como **default** no `PerksConfig` (aí dispensa o F12).
 
-### 6. 🟡 057 — identidade per-player no deploy (06-fix-02: HOST NOVO — painel de grupo; re-validar)
+### 6. 🟡 057 — identidade per-player no deploy (06-fix-03: host DEFINITIVO + popover no cursor; re-validar)
+**Direcionamento do usuário (2026-07-04):** lista inferior do FIKA = INTOCÁVEL (patch das rows DESREGISTRADO);
+host = listagem SUPERIOR-esquerda do jogo (`RaidReadyPlayerPanel`) com **brasão+cor por player na linha** e
+**popover abrindo NO CURSOR** (clamp na tela). Refetch por raid migrou pro raid-start.
+
 **Gate 2 falhou de novo nas linhas do FIKA** (hover nunca dispara lá — canvas sem raycast confiável). Pivô:
 o popover agora mora no **painel de grupo do deploy** (`RaidReadyPlayerPanel`, topo-esquerdo — onde tooltips já
 funcionam), resolvido por `player.Info.Nickname` → funciona pra QUALQUER membro do grupo. O caminho antigo

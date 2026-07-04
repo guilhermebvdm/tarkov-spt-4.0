@@ -99,19 +99,9 @@ public class Plugin : BaseUnityPlugin
         {
             Log.LogError($"[CustomClasses] (053) aba CLASS não aplicada: {ex.Message}");
         }
-        // (055) detalhe da classe no loading da raid — SÓ com FIKA (soft-detect, padrão SAIN da linha ~126). Degrada solo.
-        if (HarmonyLib.AccessTools.TypeByName("LoadingScreenUI") != null)
-        {
-            try
-            {
-                new ClassDetailLoadingPatch().Enable();     // (055) detalhe da classe local na tela de carregamento (FIKA)
-                Log.LogInfo("[CustomClasses] (055) FIKA detectado — detalhe da classe no loading da raid.");
-            }
-            catch (System.Exception ex)
-            {
-                Log.LogError($"[CustomClasses] (055) detalhe no loading não aplicado: {ex.Message}");
-            }
-        }
+        // (057 06-fix-03) O patch das ROWS do FIKA (ClassDetailLoadingPatch) foi DESATIVADO por decisão do
+        // usuário: a lista inferior (progresso de carregamento do FIKA) não deve ser tocada. O host do
+        // popover/identidade no deploy é o painel de grupo SUPERIOR-esquerdo (RaidReadyPlayerPanelPatch).
         new ChatSpecialIconPatch().Enable();                // (015) identidade no nome — deploy/chat/grupo (ChatSpecialIcon)
         new PlayerModelWithStatsIdentityPatch().Enable();   // (015) identidade no nome — tela de character (OVERALL)
         new PlayerNamePanelPatch().Enable();                // (015) identidade no nome — confirmation (PlayerNamePanel)

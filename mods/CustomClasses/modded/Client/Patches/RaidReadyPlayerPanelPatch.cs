@@ -75,6 +75,19 @@ internal class RaidReadyPlayerPanelPatch : ModulePatch
                 return;   // vanilla/scav/desconhecido → linha intocada
             }
 
+            // (06-fix-03) identidade NA LINHA (listagem superior-esquerda do jogo): brasão + cor da classe
+            // pra CADA player resolvido — o 015 já fazia só pro LOCAL via ChatSpecialIconPatch (idempotente,
+            // mesmos valores pro local).
+            if (IconField?.GetValue(__instance) is ChatSpecialIcon icon)
+            {
+                var nameTmp = icon.GetComponentInChildren<TMPro.TextMeshProUGUI>(true);
+                ClassIdentityView.ApplyClassIcon(icon, id.IconFile, id.NameColor, ClassIdentityView.IconSizeFor(nameTmp));
+                if (nameTmp != null && !string.IsNullOrWhiteSpace(id.NameColor))
+                {
+                    ClassIdentityView.ApplyGradient(nameTmp, id.NameColor, Color.white);   // tint-only (CR-01-04)
+                }
+            }
+
             var hover = __instance.GetComponent<LoadingClassHover>();
             if (hover == null)
             {
@@ -82,6 +95,7 @@ internal class RaidReadyPlayerPanelPatch : ModulePatch
             }
 
             hover.Identity = id;
+            hover.FollowCursor = true;   // (06-fix-03) popover abre NO CURSOR, não sobre o carrossel
         }
         catch (Exception ex)
         {

@@ -35,6 +35,7 @@ internal class RaidPerksNotificationPatch : ModulePatch
             // anterior (Time.time é monotônico no processo). Roda independente do toggle da notificação.
             AdrenalineState.Reset();
             StancesArmStaminaBridge.TryAttach();   // (051 PA-01-01) re-try do hook — aqui todos os plugins já carregaram
+            ClassIdentities.Reset();   // (057 06-fix-03) refetch por raid (PA-01-04) — o próximo deploy busca o mapa fresco
 
             if (PerksConfig.ShowRaidPerksNotification?.Value != true)
             {
