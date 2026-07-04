@@ -208,9 +208,11 @@ internal sealed class LoadingClassHover : MonoBehaviour, IPointerEnterHandler, I
                 ApplyScale();   // lê o F12 a cada hover → ajuste "live" sem reiniciar
                 PerksPanelView.Refresh(_panel, Identity);   // 057: classe DESTE player
                 DisableRaycast();   // PA-01-11: DEPOIS do Refresh — o rebuild de cards cria Graphics novos
-                if (FollowCursor && eventData != null)
+                // (review CR-057F3-06) FollowCursor SEM posição confiável → não mostrar (um early-return no
+                // posicionamento ativaria o painel onde ele estivesse — pior caso, cobrindo a tela).
+                if (FollowCursor && (eventData == null || !PositionAtPointer(eventData)))
                 {
-                    PositionAtPointer(eventData);   // 06-fix-03: popover abre onde está o mouse
+                    return;
                 }
 
                 _panel.SetActive(true);
@@ -224,38 +226,36 @@ internal sealed class LoadingClassHover : MonoBehaviour, IPointerEnterHandler, I
 
     /// <summary>
     ///     057 06-fix-03 — posiciona o popover NO CURSOR (pivot topo-esquerdo, abre pra baixo/direita), com
-    ///     clamp pros limites do canvas. A área VISUAL é constante (BaseWidth×BaseHeight — a escala do F12 é
-    ///     compensada no ApplyScale), então o clamp usa as constantes Base.
+    ///     clamp pros limites do PARENT (= root canvas, ver Ensure). A área VISUAL é constante
+    ///     (BaseWidth×BaseHeight — a escala do F12 é compensada no ApplyScale), então o clamp usa as Base.
+    ///     (review CR-057F3-05) local point calculado no rect do PARENT REAL do painel (anchoredPosition é
+    ///     relativo a ele) e com a CÂMERA DO EVENTO (enterEventCamera: null em overlay, a câmera certa em
+    ///     ScreenSpaceCamera — canvas aninhado com renderMode/worldCamera divergentes não engana mais).
+    ///     Retorna false quando não há posição confiável (o Show então NÃO exibe — CR-057F3-06).
     /// </summary>
-    private void PositionAtPointer(PointerEventData eventData)
+    private bool PositionAtPointer(PointerEventData eventData)
     {
-        if (_panel == null)
+        if (_panel == null || _panel.transform.parent is not RectTransform parentRt)
         {
-            return;
+            return false;
         }
 
-        var canvas = _panel.GetComponentInParent<Canvas>();
-        if (canvas == null || canvas.transform is not RectTransform canvasRt)
+        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(parentRt, eventData.position, eventData.enterEventCamera, out var local))
         {
-            return;
-        }
-
-        var cam = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
-        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRt, eventData.position, cam, out var local))
-        {
-            return;
+            return false;
         }
 
         var rt = (RectTransform)_panel.transform;
-        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);   // local point é relativo ao pivot/centro do canvas
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);   // local point é relativo ao centro do parent
         rt.pivot = new Vector2(0f, 1f);
         var pos = local + new Vector2(18f, -14f);   // respiro: o cursor não cobre o header do painel
 
-        // clamp: painel ocupa [x, x+W] × [y−H, y] no espaço local do canvas.
-        var half = canvasRt.rect.size * 0.5f;
+        // clamp: painel ocupa [x, x+W] × [y−H, y] no espaço local do parent (= tela, pois parent é o root canvas).
+        var half = parentRt.rect.size * 0.5f;
         pos.x = Mathf.Clamp(pos.x, -half.x + 8f, half.x - BaseWidth - 8f);
         pos.y = Mathf.Clamp(pos.y, -half.y + BaseHeight + 8f, half.y - 8f);
         rt.anchoredPosition = pos;
+        return true;
     }
 
     private void Ensure()
@@ -266,15 +266,24 @@ internal sealed class LoadingClassHover : MonoBehaviour, IPointerEnterHandler, I
         }
 
         var font = GetComponentInChildren<TMP_Text>()?.font;   // PA-01-02: fonte da própria linha
+        // (review CR-057F3-05) parent = ROOT canvas (não o canvas aninhado mais próximo): o PositionAtPointer
+        // converte o cursor pro rect do parent — no root ele cobre a tela inteira e o clamp fica correto.
         var canvas = GetComponentInParent<Canvas>();
-        var parent = canvas != null ? canvas.transform : transform.root;
+        var rootCanvas = canvas != null ? canvas.rootCanvas : null;
+        var parent = rootCanvas != null ? rootCanvas.transform : (canvas != null ? canvas.transform : transform.root);
 
         _panel = PerksPanelView.Build(parent, font);
 
-        // o Build ancora "fill" (bom p/ a aba); aqui reancoramos COMPACTO. Com FollowCursor (painel de
-        // grupo, 06-fix-03) quem posiciona é o PositionAtPointer a cada hover; senão, âncora fixa (legado).
+        // o Build ancora "fill" (bom p/ a aba); aqui reancoramos COMPACTO. Com FollowCursor as âncoras/pivot
+        // entram JÁ AQUI (review CR-057F3-06: com as âncoras "fill" residuais, o ApplyScale interpretaria o
+        // sizeDelta como OFFSET → rect gigante no 1º layout); a POSIÇÃO vem do PositionAtPointer a cada hover.
         var rt = (RectTransform)_panel.transform;
-        if (!FollowCursor)
+        if (FollowCursor)
+        {
+            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0f, 1f);
+        }
+        else
         {
             rt.anchorMin = rt.anchorMax = new Vector2(1f, 0.5f);
             rt.pivot = new Vector2(1f, 0.5f);

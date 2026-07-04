@@ -102,6 +102,9 @@ internal class SkillsClassTabPatch : ModulePatch
                 _lastScreen = __instance;
                 _lastClassTab = existingTab;
                 RepositionClassTab(__instance, existingTab);
+                // (review CR-UI5-05) re-estiliza também na reabertura: troca de classe in-session deixava o
+                // brasão/tint da classe ANTIGA na aba até o 1º clique (StyleClassTab é idempotente).
+                StyleClassTab(existingTab, GameLocale.IsPortuguese ? "CLASSE" : "CLASS");
                 return;
             }
 

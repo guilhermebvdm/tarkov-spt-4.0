@@ -75,7 +75,9 @@ public class Plugin : BaseUnityPlugin
         ClassIconRatio = Config.Bind("Class identity position", "ClassIconRatio", 1.35f,
             new ConfigDescription("Class icon size as a multiple of each screen's name font size (icon = nameFontSize × ratio). Keeps the icon:font proportion consistent across screens.",
                 new AcceptableValueRange<float>(0.8f, 2.5f)));
-        DeployNameScale = Config.Bind("Class identity position", "DeployNameScale", 3.0f,
+        // (review CR-057F3-01) default era 3.0 calibrado ÀS CEGAS (o host antigo nunca disparava — a escala
+        // nunca foi aplicada in-game). Agora que o host real (PartyPlayerItem) funciona, 1.2 = leve e seguro.
+        DeployNameScale = Config.Bind("Class identity position", "DeployNameScale", 1.2f,
             new ConfigDescription("Scale of the player icon+name on the raid loading (deploy) screen (1.0 = original). Icon and name grow together (same proportion).",
                 new AcceptableValueRange<float>(1.0f, 4.0f)));
         // Real-time reposition when the F12 value changes (same pattern as Menu-Overhaul: SettingChanged event).
@@ -101,11 +103,13 @@ public class Plugin : BaseUnityPlugin
         }
         // (057 06-fix-03) O patch das ROWS do FIKA (ClassDetailLoadingPatch) foi DESATIVADO por decisão do
         // usuário: a lista inferior (progresso de carregamento do FIKA) não deve ser tocada. O host do
-        // popover/identidade no deploy é o painel de grupo SUPERIOR-esquerdo (RaidReadyPlayerPanelPatch).
-        new ChatSpecialIconPatch().Enable();                // (015) identidade no nome — deploy/chat/grupo (ChatSpecialIcon)
+        // popover/identidade no deploy é a listagem de grupo SUPERIOR-esquerda (PartyPlayerItemPatch —
+        // review CR-057F3-01: o RaidReadyPlayerPanel era código morto no SPT).
+        new ChatSpecialIconPatch().Enable();                // (015/057) identidade no nome — deploy/chat/grupo (local + remotos)
         new PlayerModelWithStatsIdentityPatch().Enable();   // (015) identidade no nome — tela de character (OVERALL)
         new PlayerNamePanelPatch().Enable();                // (015) identidade no nome — confirmation (PlayerNamePanel)
-        new RaidReadyPlayerPanelPatch().Enable();           // (015) aumenta ícone+nome na tela de deploy
+        new PartyPlayerItemPatch().Enable();                // (015/057) escala + popover no cursor — host REAL do deploy
+        new PartyInfoPanelPrefetchPatch().Enable();         // (057) caches frescos por tela de deploy (classe local + mapa)
         new SkillsNavButtonPatch().Enable();                // (013) botão SKILLS no menu → abre a aba Skills
         new BulwarkPatch().Enable();                        // (050.0) 🛡️ Tanque — dano recebido ×0.85
         new PackMulePatch().Enable();                       // (050.0) 🎒🛡️ Pack Mule — +30% limite de carga (piso, stash+raid)

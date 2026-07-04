@@ -146,7 +146,7 @@ internal static class PerksPanelView
     ///     060 (RN-04) — popula o rodapé da Weapon Mastery com os valores VIVOS do F12 (a tela SKILLS não mostra
     ///     buff nenhum pras 4 maestrias do 058 — este rodapé é a transparência mínima do efeito por nível).
     /// </summary>
-    private static void RefreshMasteryFooter(GameObject panel)
+    private static void RefreshMasteryFooter(GameObject panel, bool show)
     {
         var footer = panel.transform.Find("MasteryFooter")?.GetComponent<TextMeshProUGUI>();
         if (footer == null)
@@ -154,7 +154,10 @@ internal static class PerksPanelView
             return;
         }
 
-        var on = PerksConfig.WeaponMasteryEnabled?.Value == true;
+        // (review CR-060-01/03) o footer descreve o F12 do CLIENT LOCAL (mecânica 058 é local) — no popover
+        // per-player do deploy ele atribuiria a MINHA config ao teammate, além de apertar a altura fixa.
+        // Só aparece no host da aba CLASS (show=true).
+        var on = show && PerksConfig.WeaponMasteryEnabled?.Value == true;
         footer.gameObject.SetActive(on);
         if (!on)
         {
@@ -169,18 +172,19 @@ internal static class PerksPanelView
     }
 
     /// <summary>Reconstrói o painel a partir da classe LOCAL (call-sites 053/059). Idempotente por classe.</summary>
-    internal static void Refresh(GameObject panel) => Refresh(panel, ClassIdentities.Local());
+    internal static void Refresh(GameObject panel) => Refresh(panel, ClassIdentities.Local(), showMasteryFooter: true);
 
     /// <summary>
     ///     057 — reconstrói o painel (header + colunas) a partir de UMA identidade de classe (qualquer player).
     ///     <paramref name="identity"/> null → caminho vanilla (mensagem). Idempotente por classe VIA PanelState.
+    ///     <paramref name="showMasteryFooter"/>: só a aba CLASS local (CR-060-01 — o footer é config do client local).
     /// </summary>
-    internal static void Refresh(GameObject panel, ClassIdentities.Identity? identity)
+    internal static void Refresh(GameObject panel, ClassIdentities.Identity? identity, bool showMasteryFooter = false)
     {
         try
         {
             panel.GetComponent<FadeIn>()?.Restart();   // CR-03-03: re-dispara o fade a cada exibição
-            RefreshMasteryFooter(panel);   // 060: ANTES do guard de idempotência (toggle/valores do F12 refletem sempre)
+            RefreshMasteryFooter(panel, showMasteryFooter);   // 060: ANTES do guard de idempotência (toggle/valores do F12 refletem sempre)
             var headerTmp = panel.transform.Find("Header/HeaderText")?.GetComponent<TextMeshProUGUI>();
             var headerIcon = panel.transform.Find("Header/Icon")?.GetComponent<Image>();
             var perksCol = panel.transform.Find("Columns/PerksCol");

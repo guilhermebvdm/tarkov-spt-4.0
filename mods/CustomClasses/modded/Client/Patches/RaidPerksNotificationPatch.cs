@@ -34,8 +34,13 @@ internal class RaidPerksNotificationPatch : ModulePatch
             // (review fix) reseta a Adrenaline no início da raid — o cooldown não deve atravessar de uma raid
             // anterior (Time.time é monotônico no processo). Roda independente do toggle da notificação.
             AdrenalineState.Reset();
-            StancesArmStaminaBridge.TryAttach();   // (051 PA-01-01) re-try do hook — aqui todos os plugins já carregaram
-            ClassIdentities.Reset();   // (057 06-fix-03) refetch por raid (PA-01-04) — o próximo deploy busca o mapa fresco
+            // (review CR-051-01) warm do cache AQUI (tela de load, hitch invisível): com as UIs de identidade
+            // desligadas no F12, o 1º consumidor seria o Factor() DENTRO do Tick de stamina do stances —
+            // HTTP síncrono no 1º ADS. EnsureLoaded é no-op se o deploy (PartyInfoPanelPrefetchPatch) já buscou.
+            SkillMultipliers.EnsureLoaded();
+            StancesArmStaminaBridge.TryAttach(finalAttempt: true);   // (051 PA-01-01) re-try do hook — aqui todos os plugins já carregaram
+            // (057 CR-057F3-03) o refetch do mapa nickname→classe migrou pro host real: Prefix de
+            // PartyInfoPanel.Show (PartyPlayerItemPatch.cs) — a tela de deploy abre ANTES do raid-start.
 
             if (PerksConfig.ShowRaidPerksNotification?.Value != true)
             {

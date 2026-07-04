@@ -56,15 +56,19 @@ internal class PlayerModelWithStatsIdentityPatch : ModulePatch
             }
 
             // Nome com GRADIENTE da cor da classe (efeito canônico) — sem texto da classe (vai no tooltip).
+            // (review CR-UI5-01) sem nameColor → label NATIVO (fallback `.color` vivo = drift de clareamento).
             ____nicknameLabel.text = nickname;
-            ClassIdentityView.ApplyGradient(____nicknameLabel, SkillMultipliers.NameColor, ____nicknameLabel.color);
+            if (!string.IsNullOrWhiteSpace(SkillMultipliers.NameColor))
+            {
+                ClassIdentityView.ApplyGradient(____nicknameLabel, SkillMultipliers.NameColor, Color.white);
+            }
 
             // Ícone da classe (tint silhueta) no _specialIcon. 006-fix: tamanho proporcional à fonte do nome.
             ClassIdentityView.ApplyClassIcon(____specialIcon, SkillMultipliers.IconFile, SkillMultipliers.NameColor, ClassIdentityView.IconSizeFor(____nicknameLabel));
 
             // Tooltip "This player is <classe>" (i18n) no nome.
             ClassTooltip.Attach(____nicknameLabel.gameObject,
-                ClassIdentityView.BuildTooltip(SkillMultipliers.ClassName!, SkillMultipliers.NameColor, ____nicknameLabel.color));
+                ClassIdentityView.BuildTooltip(SkillMultipliers.ClassName!, SkillMultipliers.NameColor, Color.white));
         }
         catch (Exception ex)
         {

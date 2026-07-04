@@ -52,12 +52,18 @@ internal class PlayerNamePanelPatch : ModulePatch
             }
 
             // Nome com GRADIENTE da cor da classe (efeito canônico) + tooltip.
+            // (review CR-UI5-01) sem nameColor → label NATIVO (fallback `label.color` vivo compunha o
+            // clareamento a cada re-apply — drift geométrico rumo ao branco).
             if (NickField?.GetValue(__instance) is TextMeshProUGUI label)
             {
                 label.text = nickname;
-                ClassIdentityView.ApplyGradient(label, SkillMultipliers.NameColor, label.color);
+                if (!string.IsNullOrWhiteSpace(SkillMultipliers.NameColor))
+                {
+                    ClassIdentityView.ApplyGradient(label, SkillMultipliers.NameColor, Color.white);
+                }
+
                 ClassTooltip.Attach(label.gameObject,
-                    ClassIdentityView.BuildTooltip(SkillMultipliers.ClassName!, SkillMultipliers.NameColor, label.color));
+                    ClassIdentityView.BuildTooltip(SkillMultipliers.ClassName!, SkillMultipliers.NameColor, Color.white));
             }
 
             // Ícone da classe (tint silhueta) — o _icon é um ChatSpecialIcon (playerName null aqui).

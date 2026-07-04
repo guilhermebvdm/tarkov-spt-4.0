@@ -22,6 +22,30 @@ internal static class ClassIdentityView
     // fica bem perto da cor base → praticamente a mesma tonalidade do glow, mantendo um leve efeito.
     private const float GradientLighten = 0.15f;
 
+    // (review 2026-07-04 CR-UI5-02) cor NATIVA de cada label capturada 1× ANTES do 1º ApplyGradient — na v2 o
+    // `.color` virou o portador da cor da classe, então o revert de célula reciclada precisa devolver a original
+    // (não branco fixo). ConditionalWeakTable → labels destruídos saem sozinhos (sem leak).
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<TextMeshProUGUI, object> NativeColors = new();
+
+    /// <summary>
+    ///     (review CR-UI5-02) Reverte um label ao estado nativo (célula reciclada p/ player vanilla): desliga o
+    ///     gradiente e devolve a cor capturada antes do 1º <see cref="ApplyGradient(TextMeshProUGUI, Color)"/>.
+    ///     Label nunca estilizado → só desliga o gradiente (cor intocada).
+    /// </summary>
+    public static void RestoreNativeLabel(TextMeshProUGUI? tmp)
+    {
+        if (tmp == null)
+        {
+            return;
+        }
+
+        tmp.enableVertexGradient = false;
+        if (NativeColors.TryGetValue(tmp, out var boxed))
+        {
+            tmp.color = (Color)boxed;
+        }
+    }
+
     /// <summary>
     ///     (015 — efeito CANÔNICO de cor): gradiente vertical SUTIL na cor da classe (topo = Lerp(cor,
     ///     branco, <see cref="GradientLighten"/>), base = cor). Usado em TODOS os nomes (menu, OVERALL,
@@ -29,14 +53,22 @@ internal static class ClassIdentityView
     /// </summary>
     public static void ApplyGradient(TextMeshProUGUI tmp, Color baseColor)
     {
+        if (!NativeColors.TryGetValue(tmp, out _))
+        {
+            NativeColors.Add(tmp, (object)tmp.color);   // CR-UI5-02: captura a cor nativa 1× (p/ o RestoreNativeLabel)
+        }
+
         var light = Color.Lerp(baseColor, Color.white, GradientLighten);
+        light.a = tmp.color.a;   // CR-UI5-03: preserva o alpha corrente (fade/translucidez nativa do EFT)
         // Fix 2026-07-04 v2 ("nome do menu ainda escuro" — Menu-Overhaul): o TMP MULTIPLICA o vertex gradient
         // pela cor base (tmp.color). A v1 pôs a cor SÓ no gradiente (base branca) — mas o MO repinta o nome do
         // MENU com o AccentColor (= a cor da classe, que a NOSSA MenuOverhaulBridge injeta lá) via tmp.color →
         // cor×cor voltava por essa porta. v2 INVERTE o portador: a cor vive no tmp.color (topo clareado) e o
-        // gradiente vira um RATIO ≤1 (topo=1, base=base/topo) → topo×1 = claro, topo×ratio = cor base. Quem
-        // quer que escreva .color por último (nós/MO/EFT) nunca eleva ao quadrado — no pior caso (MO escreve o
-        // accent = mesma cor) o render continua a cor da classe. `light` ≥ 0.15 por canal (Lerp c/ branco).
+        // gradiente vira um RATIO ≤1 (topo=1, base=base/topo) → topo×1 = claro, topo×ratio = cor base.
+        // (review CR-UI5-04) Invariância PARCIAL a escritas externas de .color: se o MO escrever o accent
+        // (= cor base sólida) por último, o render vira [base → base·ratio] — canais médios ~0.87 (ok), canais
+        // escuros escurecem mais na metade de baixo. Melhor que a v1 (base² total); aceito e documentado.
+        // `light` ≥ 0.15 por canal (Lerp c/ branco).
         var ratio = new Color(
             light.r > 0f ? baseColor.r / light.r : 1f,
             light.g > 0f ? baseColor.g / light.g : 1f,

@@ -72,10 +72,20 @@ Linhas Flag (`no ergo penalty`, `no arm fatigue`) agora têm chip **✓** (perk)
 ### 5. 🟡 056 — calibrar F12 e fixar default
 Usuário ajusta `Weight Marker — X/Y offset` (F12 → `Perks — UI`) até posicionar bem (chute inicial X≈−70, Y≈+30) e passa os valores → fixar como **default** no `PerksConfig` (aí dispensa o F12).
 
-### 6. 🟡 057 — identidade per-player no deploy (06-fix-03: host DEFINITIVO + popover no cursor; re-validar)
+### 6. 🟡 057 — identidade per-player no deploy (06-fix-04: host REAL = PartyPlayerItem; re-validar)
+**Code-review adversarial 2026-07-04 (CR-057F3-01, ALTA):** o host do 06-fix-03 (`RaidReadyPlayerPanel.Show`)
+é **código morto no SPT** — o branch `ERaidMode.Local` (forçado pelo SPT) fecha esse painel incondicionalmente
+(decompile `MatchMakerAcceptScreen:354-357`); a listagem superior-esquerda REAL é `PartyInfoPanel`/
+`PartyPlayerItem` (populada pelo FIKA). Consequência: a **escala do 015 (`DeployNameScale`) nunca tinha
+disparado** — default 3.0 era calibragem às cegas → **resetado p/ 1.2** (código + cfg instalado; recalibrar no F12).
+Re-host aplicado ([06-fix-04](backlog/057-class-identity-coop/057-class-identity-coop-06-fix-04.md)):
+`PartyPlayerItemPatch` (escala + popover no cursor + limpa tooltip redundante), identidade por linha (local E
+remoto) via `ChatSpecialIconPatch` (que antes REVERTIA remotos — CR-057F3-02), caches frescos por tela de
+deploy (`PartyInfoPanelPrefetchPatch` — CR-057F3-03) e popover: posição no rect do parent + câmera do evento +
+só exibe com posição válida (CR-057F3-05/06).
 **Direcionamento do usuário (2026-07-04):** lista inferior do FIKA = INTOCÁVEL (patch das rows DESREGISTRADO);
-host = listagem SUPERIOR-esquerda do jogo (`RaidReadyPlayerPanel`) com **brasão+cor por player na linha** e
-**popover abrindo NO CURSOR** (clamp na tela). Refetch por raid migrou pro raid-start.
+host = listagem SUPERIOR-esquerda do jogo com **brasão+cor por player na linha** e **popover abrindo NO
+CURSOR** (clamp na tela).
 
 **Gate 2 falhou de novo nas linhas do FIKA** (hover nunca dispara lá — canvas sem raycast confiável). Pivô:
 o popover agora mora no **painel de grupo do deploy** (`RaidReadyPlayerPanel`, topo-esquerdo — onde tooltips já

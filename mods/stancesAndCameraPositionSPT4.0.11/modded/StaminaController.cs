@@ -80,10 +80,16 @@ namespace CameraRotationMod
 
                 // (051) composição EXTERNA só no DRENO (delta<0 ⟺ stamina desce — o delta é a variação literal
                 // aplicada abaixo). Cópia local do delegate (thread-safe por estilo); clamp defensivo 0..2.
+                // (review CustomClasses CR-051-02) Mathf.Clamp NÃO segura NaN (comparações IEEE falsas) e NaN
+                // envenenaria hands.Current até o fim da raid — contrato PÚBLICO exige defesa própria aqui.
                 Func<float> hook = ExternalHandsDrainMult;
                 if (delta < 0f && hook != null)
                 {
-                    delta *= Mathf.Clamp(hook(), 0f, 2f);
+                    float f = hook();
+                    if (!float.IsNaN(f))
+                    {
+                        delta *= Mathf.Clamp(f, 0f, 2f);
+                    }
                 }
 
                 float prev = hands.Current;   // ref: GClass774.cs:23

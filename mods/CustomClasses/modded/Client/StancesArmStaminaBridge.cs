@@ -21,8 +21,13 @@ internal static class StancesArmStaminaBridge
     private static bool _warnedMissing;
     private static bool _warnedFactorError;
 
-    /// <summary>Acopla o Factor ao hook do stances. Idempotente; chamado no Awake e re-tentado no raid-start.</summary>
-    public static void TryAttach()
+    /// <summary>
+    ///     Acopla o Factor ao hook do stances. Idempotente; chamado no Awake e re-tentado no raid-start.
+    ///     (review CR-051-04) <paramref name="finalAttempt"/>: no Awake o miss é ESPERADO (ordem alfabética do
+    ///     chainloader: "CustomClasses" &lt; "RealisticMobility") → só Info, sem consumir o warn-once; o WARNING
+    ///     conclusivo ("instale/atualize") fica pro re-try do raid-start, quando todos os plugins já carregaram.
+    /// </summary>
+    public static void TryAttach(bool finalAttempt = false)
     {
         if (_attached)
         {
@@ -35,12 +40,7 @@ internal static class StancesArmStaminaBridge
             var field = t != null ? AccessTools.Field(t, "ExternalHandsDrainMult") : null;
             if (field == null)
             {
-                if (!_warnedMissing)
-                {
-                    _warnedMissing = true;
-                    Plugin.Log?.LogWarning("[CustomClasses] (051) hook do stances indisponível — Steady Arms/Tireless Arms inativos (instale/atualize o stances mod).");
-                }
-
+                WarnUnavailable(finalAttempt, "hook do stances indisponível — Steady Arms/Tireless Arms inativos (instale/atualize o stances mod).");
                 return;
             }
 
@@ -50,11 +50,23 @@ internal static class StancesArmStaminaBridge
         }
         catch (Exception ex)
         {
-            if (!_warnedMissing)
-            {
-                _warnedMissing = true;
-                Plugin.Log?.LogWarning($"[CustomClasses] (051) attach no stances falhou: {ex.Message}");
-            }
+            WarnUnavailable(finalAttempt, $"attach no stances falhou: {ex.Message}");
+        }
+    }
+
+    /// <summary>(review CR-051-04) Info no boot (miss esperado); Warning warn-once só no attempt conclusivo.</summary>
+    private static void WarnUnavailable(bool finalAttempt, string message)
+    {
+        if (!finalAttempt)
+        {
+            Plugin.Log?.LogInfo("[CustomClasses] (051) stances ainda não carregado no boot — re-try no raid-start.");
+            return;
+        }
+
+        if (!_warnedMissing)
+        {
+            _warnedMissing = true;
+            Plugin.Log?.LogWarning($"[CustomClasses] (051) {message}");
         }
     }
 
