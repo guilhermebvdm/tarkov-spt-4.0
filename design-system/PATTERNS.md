@@ -146,7 +146,7 @@ Estados: `is-empty` · `is-editable` · `is-invalid` (unresolved) · `is-draggin
 
 **Stash grid 2D** — `--cols` define a largura; itens entram como `.trl-grid2d__item` com `grid-column/grid-row` inline (start/span). Durante o drag: classe `is-dragging` no grid (outline tracejado), hints `.trl-grid2d__hint--ok/--bad` posicionados na mesma grid-area do alvo, e `.trl-grid2d__ghost` (position:fixed) seguindo o cursor via JS.
 
-**Paper doll** — o container usa container queries; células internas escalam em `cqw` (`--trl-cell` dentro de `.trl-doll` muda de px para 7cqw por unidade). As **posições dos slots** (`left/top` %) são dados de jogo medidos da tela Gear do EFT — ficam no consumidor, não no DS. `is-required-missing` marca slot obrigatório vazio.
+**Paper doll** — layout estruturado no arranjo da tela Gear do EFT: `__rail` esquerdo (earpiece, headwear, face cover, eyewear, armband), `__center` (body armor + tactical rig sobre a `__silhouette` SVG decorativa), `__rail --right` (backpack, pouch, holster, sheath) e `__bottom` (on sling, on back, pockets via `__cells`, dog tag). Células escalam em `cqw` (7cqw/unidade — o doll acompanha a coluna). `is-required-missing` marca slot obrigatório vazio. Consumidor que precisar de posições pixel-accurate pode posicionar slots com `style="position:absolute;left…"` — os trilhos são o default.
 
 **Mod tree** — linhas recursivas com `__slot` (id mono lowercase: `mod_magazine`), `__name`, badges reutilizados (`trl-badge--green` required, `--red` unknown slot) e `__actions` que aparecem no hover. Aninhamento via `__children` (indent + hairline, mesmo pattern do `.trl-tree`).
 

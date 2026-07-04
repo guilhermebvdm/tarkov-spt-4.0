@@ -418,8 +418,7 @@
   appearance: none;
   background: none;
   border: none;
-  border-bottom: var(--trl-accent-bar-w) solid transparent;
-  margin-bottom: calc(-1 * var(--trl-border-w));
+  position: relative;
   padding: var(--trl-space-2) var(--trl-space-3);
   font-family: var(--trl-font-display);
   text-transform: uppercase;
@@ -430,12 +429,24 @@
   transition: color var(--trl-dur-1) var(--trl-ease);
 }
 
+/* animated underline — grows from center on activation */
+.trl-tabs__tab::after {
+  content: "";
+  position: absolute;
+  left: var(--trl-space-3);
+  right: var(--trl-space-3);
+  bottom: calc(-1 * var(--trl-border-w));
+  height: var(--trl-accent-bar-w);
+  background: var(--trl-accent);
+  transform: scaleX(0);
+  transition: transform var(--trl-dur-2) var(--trl-ease);
+}
+
 .trl-tabs__tab:hover { color: var(--trl-fg); }
 
-.trl-tabs__tab.is-active {
-  color: var(--trl-accent);
-  border-bottom-color: var(--trl-accent);
-}
+.trl-tabs__tab.is-active { color: var(--trl-accent); }
+
+.trl-tabs__tab.is-active::after { transform: scaleX(1); }
 
 /* ── Breadcrumb ─────────────────────────────────────────────────────────── */
 .trl-breadcrumb {
@@ -479,6 +490,9 @@
   font-family: var(--trl-font-mono);
   font-size: var(--trl-text-sm);
   cursor: pointer;
+  transition: border-color var(--trl-dur-1) var(--trl-ease),
+              color var(--trl-dur-1) var(--trl-ease),
+              background var(--trl-dur-1) var(--trl-ease);
 }
 
 .trl-pagination__page:hover {
@@ -545,6 +559,8 @@
 
 .trl-btn--primary {
   background: var(--trl-accent);
+  /* faint top light — machined-metal depth on solid buttons */
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, .12), rgba(255, 255, 255, 0) 55%);
   border-color: var(--trl-accent);
   color: var(--trl-fg-on-accent);
   font-weight: var(--trl-weight-bold);
@@ -558,6 +574,7 @@
 
 .trl-btn--danger {
   background: var(--trl-danger-strong);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, 0) 55%);
   border-color: var(--trl-danger-strong);
   color: #fff;
   font-weight: var(--trl-weight-bold);
@@ -832,6 +849,7 @@ textarea.trl-input {
   font-size: var(--trl-text-lg);
   line-height: 1;
   cursor: pointer;
+  transition: color var(--trl-dur-1) var(--trl-ease);
 }
 
 .trl-search__clear:hover { color: var(--trl-danger); }
@@ -1023,6 +1041,8 @@ textarea.trl-input {
   padding: var(--trl-space-2) var(--trl-space-3);
   border-bottom: var(--trl-border-w) solid var(--trl-edge-faint);
   color: var(--trl-fg-muted);
+  transition: background var(--trl-dur-1) var(--trl-ease),
+              color var(--trl-dur-1) var(--trl-ease);
 }
 
 .trl-table tbody tr:nth-child(even) td {
@@ -1103,6 +1123,27 @@ textarea.trl-input {
 .trl-card__body {
   font-size: var(--trl-text-sm);
   color: var(--trl-fg-muted);
+}
+
+/* clickable card (pickers, galleries) — subtle lift, never a color change */
+.trl-card--interactive {
+  cursor: pointer;
+  transition: border-color var(--trl-dur-1) var(--trl-ease),
+              transform var(--trl-dur-1) var(--trl-ease),
+              box-shadow var(--trl-dur-1) var(--trl-ease);
+}
+
+.trl-card--interactive:hover {
+  border-color: var(--trl-edge-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--trl-shadow-1);
+}
+
+.trl-card--interactive:active { transform: translateY(0); }
+
+.trl-card--interactive.is-selected {
+  border-color: var(--trl-accent-dim);
+  box-shadow: inset var(--trl-accent-bar-w) 0 0 var(--trl-accent);
 }
 
 .trl-card--accent-tan {
@@ -1588,6 +1629,7 @@ textarea.trl-input {
   place-items: center;
   padding: var(--trl-space-4);
   z-index: var(--trl-z-modal);
+  animation: trl-fade var(--trl-dur-2) var(--trl-ease);
 }
 
 .trl-modal-overlay[hidden] { display: none; }
@@ -1600,7 +1642,7 @@ textarea.trl-input {
   background: var(--trl-surface-1);
   border: var(--trl-border-w) solid var(--trl-edge-strong);
   box-shadow: var(--trl-shadow-3);
-  animation: trl-fade-in var(--trl-dur-3) var(--trl-ease);
+  animation: trl-pop var(--trl-dur-3) var(--trl-ease);
 }
 
 .trl-modal__head {
@@ -1631,6 +1673,7 @@ textarea.trl-input {
   font-size: var(--trl-text-lg);
   line-height: 1;
   cursor: pointer;
+  transition: color var(--trl-dur-1) var(--trl-ease);
 }
 
 .trl-modal__close:hover { color: var(--trl-danger); }
@@ -1687,6 +1730,8 @@ textarea.trl-input {
   color: var(--trl-fg-muted);
   text-align: left;
   cursor: pointer;
+  transition: background var(--trl-dur-1) var(--trl-ease),
+              color var(--trl-dur-1) var(--trl-ease);
 }
 
 .trl-menu__item:hover {
@@ -1749,6 +1794,10 @@ textarea.trl-input {
   border: var(--trl-border-w) solid var(--trl-edge);
   overflow: hidden;
   flex: none;
+  transition: border-color var(--trl-dur-1) var(--trl-ease),
+              box-shadow var(--trl-dur-1) var(--trl-ease),
+              transform var(--trl-dur-1) var(--trl-ease),
+              opacity var(--trl-dur-2) var(--trl-ease);
 }
 
 /* icon wrapper centers an <img> (or a fallback glyph) inside the cell */
@@ -1827,6 +1876,7 @@ textarea.trl-input {
 .trl-cell.is-editable:hover {
   border-color: var(--trl-accent-dim);
   box-shadow: var(--trl-glow-tan);
+  transform: translateY(-1px);
 }
 
 .trl-cell.is-dragging { opacity: .3; }
@@ -1890,55 +1940,88 @@ textarea.trl-input {
 }
 
 /* ── Paper doll (equipment silhouette) ─────────────────────────────────────
- * Container-query scoped: slots size in cqw so the doll scales with its
- * column. Slot positions (left/top %) are game-accurate values owned by
- * the consumer via inline style.
+ * Structured gear layout in the EFT arrangement: left rail (head gear),
+ * center (silhouette + armor/rig), right rail (carry gear), bottom
+ * (weapons, pockets). Container-query scoped: slots size in cqw so the
+ * doll scales with its column. Consumers needing pixel-accurate game
+ * positions may still absolutely position slots via inline style.
  */
 .trl-doll {
   position: relative;
   container-type: inline-size;
-  aspect-ratio: 3 / 4;
-  background: rgba(0, 0, 0, .18);
+  display: grid;
+  grid-template-columns: max-content 1fr max-content;
+  grid-template-areas:
+    "left center right"
+    "bottom bottom bottom";
+  gap: 3cqw;
+  padding: 3cqw;
+  background:
+    radial-gradient(55% 45% at 50% 26%, rgba(199, 180, 138, .05), transparent 70%),
+    rgba(0, 0, 0, .18);
   border: var(--trl-border-w) solid var(--trl-edge-faint);
 }
 
-/* decorative silhouette — head + torso, barely-there */
+/* decorative soldier silhouette behind the center column */
 .trl-doll__silhouette {
   position: absolute;
   inset: 0;
-  opacity: .10;
+  opacity: .12;
   pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 200'%3E%3Cg fill='%23c7b48a'%3E%3Ccircle cx='60' cy='16' r='12'/%3E%3Cpath d='M42 34 L78 34 L86 40 L89 48 L89 95 L82 100 L84 170 L70 170 L63 110 L60 106 L57 110 L50 170 L36 170 L38 100 L31 95 L31 48 L34 40 Z'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center 8%;
+  background-size: auto 88%;
 }
 
-.trl-doll__silhouette::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 3%;
-  width: 13cqw;
-  height: 13cqw;
-  transform: translateX(-50%);
-  border-radius: 50%;
-  background: var(--trl-tan-300);
+.trl-doll__rail {
+  grid-area: left;
+  display: flex;
+  flex-direction: column;
+  gap: 2cqw;
+  position: relative;
+  z-index: 1;
 }
 
-.trl-doll__silhouette::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 17%;
-  width: 30cqw;
-  height: 52cqw;
-  transform: translateX(-50%);
-  background: var(--trl-tan-300);
-  clip-path: polygon(18% 0, 82% 0, 100% 16%, 90% 100%, 10% 100%, 0 16%);
+.trl-doll__rail--right {
+  grid-area: right;
+}
+
+.trl-doll__rail--right .trl-doll__slot { align-items: flex-end; }
+
+.trl-doll__center {
+  grid-area: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2cqw;
+  padding-top: 15cqw;   /* keeps the silhouette head visible */
+  z-index: 1;
+}
+
+.trl-doll__bottom {
+  grid-area: bottom;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 2cqw 4cqw;
+  position: relative;
+  z-index: 1;
+  border-top: var(--trl-border-w) solid var(--trl-edge-faint);
+  padding-top: 2cqw;
 }
 
 .trl-doll__slot {
-  position: absolute;   /* consumer: left/top % via inline style */
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+
+/* multi-cell slot row (e.g. the four 1×1 pockets) */
+.trl-doll__cells {
+  display: flex;
+  gap: 1cqw;
 }
 
 .trl-doll__label {
@@ -2044,6 +2127,17 @@ textarea.trl-input {
 @keyframes trl-fade-in {
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes trl-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* modal entrance — settles into place */
+@keyframes trl-pop {
+  from { opacity: 0; transform: translateY(6px) scale(.985); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes trl-shimmer {

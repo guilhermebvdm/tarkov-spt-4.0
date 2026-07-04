@@ -361,6 +361,10 @@ tracking: .08em wide · .14em wider · .22em widest     (display/labels only)</p
           <div class="trl-card__title">⚠ Needs test</div>
           <div class="trl-card__body">Awaiting in-raid validation</div>
         </div>
+        <div class="trl-card trl-card--interactive" style="flex:1;min-width:200px">
+          <div class="trl-card__title">Interactive card</div>
+          <div class="trl-card__body">Hover: lift + edge. <span class="trl-mono">is-selected</span> marca a escolha em pickers.</div>
+        </div>
         <div style="flex:1;min-width:220px">
           <ul class="trl-kv">
             <li class="trl-kv__row"><span class="trl-kv__k">Where</span><span class="trl-kv__v">Coop loading screen, <b>your row</b></span></li>
@@ -585,36 +589,96 @@ tracking: .08em wide · .14em wider · .22em widest     (display/labels only)</p
         </div>
       </div>
 
-      <div class="ds-label">Paper doll — slots in container units (cqw); positions are consumer-owned game data</div>
+      <div class="ds-label">Paper doll — full EFT gear layout · rails + center + bottom · slots in container units (cqw)</div>
       <div class="ds-demo" style="align-items:flex-start">
-        <div class="trl-doll" style="width:260px">
+        <div class="trl-doll" style="width:min(420px,100%)">
           <div class="trl-doll__silhouette"></div>
-          <div class="trl-doll__slot" style="left:38%;top:2%">
-            <span class="trl-doll__label">Headwear</span>
-            <div class="trl-cell" style="--w:2;--h:2"><div class="trl-cell__icon">🪖</div></div>
+
+          <div class="trl-doll__rail">
+            <div class="trl-doll__slot">
+              <span class="trl-doll__label">Earpiece</span>
+              <div class="trl-cell" style="--w:2;--h:2"><div class="trl-cell__icon">🎧</div></div>
+            </div>
+            <div class="trl-doll__slot">
+              <span class="trl-doll__label">Headwear</span>
+              <div class="trl-cell" style="--w:2;--h:2"><div class="trl-cell__icon">🪖</div></div>
+            </div>
+            <div class="trl-doll__slot">
+              <span class="trl-doll__label">Face cover</span>
+              <div class="trl-cell is-empty" style="--w:2;--h:2"></div>
+            </div>
+            <div class="trl-doll__slot">
+              <span class="trl-doll__label">Eyewear</span>
+              <div class="trl-cell" style="--w:2;--h:1"><div class="trl-cell__icon">🥽</div></div>
+            </div>
+            <div class="trl-doll__slot">
+              <span class="trl-doll__label">Armband</span>
+              <div class="trl-cell is-empty" style="--w:2;--h:1"></div>
+            </div>
           </div>
-          <div class="trl-doll__slot" style="left:36%;top:34%">
-            <span class="trl-doll__label">Body armor</span>
-            <div class="trl-cell" style="--w:2;--h:2"><div class="trl-cell__icon">🦺</div></div>
+
+          <div class="trl-doll__center">
+            <div class="trl-doll__slot">
+              <span class="trl-doll__label">Body armor</span>
+              <div class="trl-cell" style="--w:2;--h:2"><div class="trl-cell__icon">🦺</div></div>
+            </div>
+            <div class="trl-doll__slot is-required-missing">
+              <span class="trl-doll__label">⚠ Tactical rig</span>
+              <div class="trl-cell is-empty" style="--w:2;--h:2"></div>
+            </div>
           </div>
-          <div class="trl-doll__slot" style="left:2%;top:40%">
-            <span class="trl-doll__label">On sling</span>
-            <div class="trl-cell" style="--w:4;--h:2"><div class="trl-cell__icon">🔫</div></div>
+
+          <div class="trl-doll__rail trl-doll__rail--right">
+            <div class="trl-doll__slot">
+              <span class="trl-doll__label">Backpack</span>
+              <div class="trl-cell" style="--w:2;--h:2"><div class="trl-cell__icon">🎒</div><span class="trl-cell__contents">▤6</span></div>
+            </div>
+            <div class="trl-doll__slot">
+              <span class="trl-doll__label">Pouch</span>
+              <div class="trl-cell" style="--w:2;--h:2"><div class="trl-cell__icon">🔒</div></div>
+            </div>
+            <div class="trl-doll__slot">
+              <span class="trl-doll__label">Holster</span>
+              <div class="trl-cell is-empty" style="--w:2;--h:2"></div>
+            </div>
+            <div class="trl-doll__slot">
+              <span class="trl-doll__label">Sheath</span>
+              <div class="trl-cell" style="--w:1;--h:2"><div class="trl-cell__icon">🔪</div></div>
+            </div>
           </div>
-          <div class="trl-doll__slot is-required-missing" style="left:66%;top:40%">
-            <span class="trl-doll__label">⚠ Tactical rig</span>
-            <div class="trl-cell is-empty" style="--w:2;--h:2"></div>
-          </div>
-          <div class="trl-doll__slot" style="left:30%;top:72%">
-            <span class="trl-doll__label">Pockets</span>
-            <div class="trl-cell" style="--w:4;--h:1"><div class="trl-cell__icon">▫▫▫▫</div></div>
+
+          <div class="trl-doll__bottom">
+            <div class="trl-doll__slot">
+              <span class="trl-doll__label">On sling</span>
+              <div class="trl-cell is-editable" style="--w:4;--h:2"><div class="trl-cell__icon">🔫</div></div>
+            </div>
+            <div class="trl-doll__slot">
+              <span class="trl-doll__label">On back</span>
+              <div class="trl-cell is-empty" style="--w:4;--h:2"></div>
+            </div>
+            <div class="trl-doll__slot">
+              <span class="trl-doll__label">Pockets</span>
+              <div class="trl-doll__cells">
+                <div class="trl-cell" style="--w:1;--h:1"><div class="trl-cell__icon">💊</div></div>
+                <div class="trl-cell" style="--w:1;--h:1"><div class="trl-cell__icon">🔦</div></div>
+                <div class="trl-cell is-empty" style="--w:1;--h:1"></div>
+                <div class="trl-cell is-empty" style="--w:1;--h:1"></div>
+              </div>
+            </div>
+            <div class="trl-doll__slot">
+              <span class="trl-doll__label">Dog tag</span>
+              <div class="trl-cell" style="--w:1;--h:1"><div class="trl-cell__icon">🏷</div></div>
+            </div>
           </div>
         </div>
+
         <div style="flex:1;min-width:220px">
           <ul class="trl-kv">
-            <li class="trl-kv__row"><span class="trl-kv__k">Scale</span><span class="trl-kv__v">Slots size in <b>cqw</b> — the doll scales with its column</span></li>
-            <li class="trl-kv__row"><span class="trl-kv__k">Positions</span><span class="trl-kv__v">Game-accurate <span class="trl-mono">left/top %</span> live in the consumer</span></li>
-            <li class="trl-kv__row"><span class="trl-kv__k">States</span><span class="trl-kv__v"><span class="trl-mono">is-empty</span> · <span class="trl-mono">is-required-missing</span> · <span class="trl-mono">is-invalid</span></span></li>
+            <li class="trl-kv__row"><span class="trl-kv__k">Layout</span><span class="trl-kv__v">EFT gear: <b>rails</b> (head/carry gear) + <b>center</b> (armor/rig sobre a silhueta) + <b>bottom</b> (armas, pockets)</span></li>
+            <li class="trl-kv__row"><span class="trl-kv__k">Scale</span><span class="trl-kv__v">Slots em <b>cqw</b> — o doll escala com a coluna</span></li>
+            <li class="trl-kv__row"><span class="trl-kv__k">Slots</span><span class="trl-kv__v">14: earpiece · headwear · face cover · eyewear · armband · body armor · rig · backpack · pouch · holster · sheath · on sling · on back · pockets ×4 (+ dog tag)</span></li>
+            <li class="trl-kv__row"><span class="trl-kv__k">Custom</span><span class="trl-kv__v">Posições absolutas game-accurate seguem possíveis via <span class="trl-mono">style="position:absolute;left…"</span></span></li>
+            <li class="trl-kv__row"><span class="trl-kv__k">States</span><span class="trl-kv__v"><span class="trl-mono">is-empty</span> · <span class="trl-mono">is-required-missing</span> · <span class="trl-mono">is-editable</span> · <span class="trl-mono">is-invalid</span></span></li>
           </ul>
         </div>
       </div>
