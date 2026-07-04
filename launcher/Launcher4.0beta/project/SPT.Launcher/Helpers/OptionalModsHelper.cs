@@ -316,13 +316,12 @@ namespace SPT.Launcher.Helpers
             public bool hasOffMode => offFolders != null && offFolders.Count > 0;
         }
 
-        public class ManifestFile
+        /// <summary>
+        /// Shell kept for source compatibility (ProfileViewModel uses the nested name) —
+        /// the canonical definition lives in SPT.Launcher.Models.Launcher.ManifestFile (item 007).
+        /// </summary>
+        public class ManifestFile : SPT.Launcher.Models.Launcher.ManifestFile
         {
-            public string path { get; set; }
-            public string hash { get; set; }
-            public long size { get; set; }
-            public bool optional { get; set; }
-            public string optionalGroup { get; set; }
         }
 
         private class OptionalManifest

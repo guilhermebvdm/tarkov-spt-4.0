@@ -204,6 +204,10 @@ public class ModUpdaterController : ControllerBase
             string[] deleteFiles = Array.Empty<string>();
             string[] ignoredFiles = Array.Empty<string>();
             object optionalGroupsArray = Array.Empty<object>();
+            // Item 007: optional per-folder sync rules (prefix -> rule name), pass-through to the manifest.
+            // Rule names: "default" | "preserve-divergent" | "mirror-delete" | "mirror-move-disabled".
+            // Absent -> launcher falls back to its built-in prefix table.
+            Dictionary<string, string> folderRules = new();
 
             string configPath = Path.Combine(GetUpdaterBasePath(), "config.json");
             if (!System.IO.File.Exists(configPath))
@@ -213,7 +217,13 @@ public class ModUpdaterController : ControllerBase
                     managedPaths = new[] { "BepInEx/plugins", "user/mods" },
                     deleteFiles = Array.Empty<string>(),
                     ignoredFiles = new[] { "BepInEx/plugins/spt", "user/mods/spt" },
-                    optionalGroups = Array.Empty<object>()
+                    optionalGroups = Array.Empty<object>(),
+                    folderRules = new Dictionary<string, string>
+                    {
+                        ["BepInEx/config"] = "preserve-divergent",
+                        ["BepInEx/patchers"] = "mirror-move-disabled",
+                        ["BepInEx/plugins"] = "mirror-move-disabled"
+                    }
                 };
                 System.IO.File.WriteAllText(configPath, JsonSerializer.Serialize(defaultConfig, new JsonSerializerOptions { WriteIndented = true }));
             }
@@ -232,6 +242,8 @@ public class ModUpdaterController : ControllerBase
                     ignoredFiles = ifProp.EnumerateArray().Select(x => x.GetString()).Where(x => x != null).Cast<string>().ToArray();
                 if (root.TryGetProperty("optionalGroups", out var ogProp) && ogProp.ValueKind == JsonValueKind.Array)
                     optionalGroupsArray = JsonSerializer.Deserialize<object[]>(ogProp.GetRawText()) ?? Array.Empty<object>();
+                if (root.TryGetProperty("folderRules", out var frProp) && frProp.ValueKind == JsonValueKind.Object)
+                    folderRules = JsonSerializer.Deserialize<Dictionary<string, string>>(frProp.GetRawText()) ?? new();
             }
             catch (Exception ex)
             {
@@ -248,6 +260,7 @@ public class ModUpdaterController : ControllerBase
                 deleteFiles = deleteFiles,
                 ignoredFiles = ignoredFiles,
                 optionalGroups = optionalGroupsArray,
+                folderRules = folderRules,
                 files = files
             };
 
