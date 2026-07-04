@@ -20,6 +20,11 @@
       <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=wipe_warning}"
                  Classes="trl-danger" FontWeight="Bold" TextWrapping="Wrap" FontSize="{DynamicResource TrlTextMd}"/>
 
+      <!-- Item 023 (Frente B / RN-4 / CA-B2): mudar edição dispara wipe (Remove/Register no server).
+           Aviso de coop porque o gate local não vê a sessão Fika Coop dos outros jogadores. -->
+      <TextBlock Classes="trl-danger" TextWrapping="Wrap"
+                 Text="Atenção coop: se houver uma sessão Fika Coop PVE ativa, trocar a edição agora reseta o perfil e pode corromper a raid dos outros jogadores. Confirme que ninguém está em raid."/>
+
       <ComboBox ItemsSource="{Binding editions.AvailableEditions}"
                 SelectedItem="{Binding editions.SelectedEdition}"
                 PlaceholderText="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=select_edition}"

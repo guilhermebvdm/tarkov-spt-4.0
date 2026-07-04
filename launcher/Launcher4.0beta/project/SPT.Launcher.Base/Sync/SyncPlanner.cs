@@ -250,6 +250,21 @@ namespace SPT.Launcher.Sync
                         continue;
                     }
 
+                    // Item 023 (Frente A / RN-1..RN-3): coop-safe allowlist. A coop-essential client
+                    // plugin (Fika family) present locally but absent from the manifest would be
+                    // quarantined to <prefix>-disabled/ below, silently breaking every non-host
+                    // client's ability to join the host's raid. Preserve it and WARN (never silent).
+                    // Placed AFTER manifestPaths (:223, RN-2 — Fika in the manifest downloads/updates
+                    // normally) and AFTER the Dev Mode block (:239 — Dev Mode already preserves it as
+                    // an extra, no double action / no coop-safe warning, CA-A5); gated to
+                    // MirrorMoveDisabled so non-Fika extras keep being cleaned (CA-A3).
+                    if (rule == SyncFolderRule.MirrorMoveDisabled
+                        && SyncCoopSafe.IsCoopEssentialPlugin(normalized))
+                    {
+                        plan.Warnings.Add($"coop-safe: preservado plugin essencial fora do manifesto: {relative}");
+                        continue; // nunca vira MoveToDisabled
+                    }
+
                     if (rule == SyncFolderRule.MirrorMoveDisabled)
                     {
                         plan.Actions.Add(new SyncAction

@@ -85,9 +85,10 @@ namespace SPT.Launcher.ViewModels
                 {
                     OnUi(() => connectModel.InfoText = "Conectando na rede P2P (Tailscale)...");
                     LogManager.Instance.Info("[Connect] Verificando e conectando Tailscale...");
-                    bool tailscaleConnected = await TailscaleHelper.EnsureTailscaleConnected();
+                    // Item 023 (Frente C / RN-7): resultado tipado para distinguir chave rejeitada de falha de rede.
+                    TailscaleConnectResult tailscaleResult = await TailscaleHelper.EnsureTailscaleConnected();
 
-                    if (tailscaleConnected)
+                    if (tailscaleResult == TailscaleConnectResult.Connected)
                     {
                         OnUi(() => connectModel.InfoText = "Atualizando configurações de rede (Fika)...");
                         LogManager.Instance.Info("[Connect] Configurando IP do Fika...");
@@ -102,11 +103,16 @@ namespace SPT.Launcher.ViewModels
                     {
                         // Falha de VPN é fatal fora do Dev Mode: sem IP Tailscale o servidor é inalcançável.
                         // Erro claro no launcher (nunca navegador) + botão de retry via ConnectionFailed.
-                        LogManager.Instance.Error("[Connect] Falha ao autenticar/conectar no Tailscale. Abortando conexão — ver logs acima.");
+                        // RN-7/CA-C1: chave rejeitada/esgotada tem mensagem específica (não é a internet do
+                        // cliente); qualquer outra falha (rede/DNS/CLI ausente) mantém a mensagem genérica (CA-C2).
+                        bool authKeyRejected = tailscaleResult == TailscaleConnectResult.AuthKeyRejected;
+                        LogManager.Instance.Error($"[Connect] Falha ao autenticar/conectar no Tailscale (motivo={tailscaleResult}). Abortando conexão — ver logs acima.");
                         OnUi(() =>
                         {
                             connectModel.ConnectionFailed = true;
-                            connectModel.InfoText = "Falha na rede P2P (Tailscale): não foi possível autenticar/conectar. Verifique sua internet e clique em tentar novamente.";
+                            connectModel.InfoText = authKeyRejected
+                                ? "Falha na rede P2P (Tailscale): a chave de acesso à rede foi rejeitada ou esgotada. Isso NÃO é problema da sua internet — avise o host para gerar/renovar a chave compartilhada."
+                                : "Falha na rede P2P (Tailscale): não foi possível autenticar/conectar. Verifique sua internet e clique em tentar novamente.";
                             LauncherSettingsProvider.Instance.AllowSettings = true;
                         });
                         return;

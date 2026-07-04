@@ -1191,7 +1191,10 @@ namespace SPT.Launcher.ViewModels
         private async Task WipeConfirmCore()
         {
             ConfirmationDialogViewModel confirmation = new ConfirmationDialogViewModel(null,
-                "Tem certeza que deseja resetar sua conta? Esta ação não pode ser revertida. Todo seu progresso será perdido.");
+                "Tem certeza que deseja resetar sua conta? Esta ação não pode ser revertida. Todo seu progresso será perdido."
+                // Item 023 (Frente B / RN-4 / CA-B2): aviso de coop — o gate local não prova que
+                // ninguém está em raid; wipe dispara Remove/Register no server.
+                + "\n\nAtenção coop: se houver uma sessão Fika Coop PVE ativa, resetar agora pode corromper a raid dos outros jogadores. Confirme que ninguém está em raid.");
 
             var result = await ShowDialog(confirmation);
 

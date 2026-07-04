@@ -279,5 +279,70 @@ namespace SPT.Launcher.Tests.Sync
             Assert.Contains(plan.Actions, a =>
                 a.Kind == SyncActionKind.PreserveDevMode && a.RelativePath.Contains("wip-config.json"));
         }
+
+        // === Item 023 (Frente A) — coop-safe allowlist (Fika) ===
+
+        [Fact]
+        public async Task Fika_plugin_extra_is_never_quarantined()
+        {
+            // CA-A1/CA-A2: Fika.*.dll local under plugins, absent from the manifest → preserved (no
+            // MoveToDisabled touches it) + a "coop-safe" warning (RN-3, never silent).
+            using var fx = new SyncTestFixture();
+            fx.WriteLocal("BepInEx/plugins/Fika.Core.dll", "fika-bytes");
+
+            var manifest = new[] { fx.Entry("BepInEx/plugins/Current/cur.dll", "cur") };
+            var plan = await PlanAsync(fx, manifest);
+
+            Assert.DoesNotContain(plan.Actions, a => a.RelativePath.Contains("Fika.Core.dll"));
+            Assert.Contains(plan.Warnings, w => w.Contains("coop-safe") && w.Contains("Fika.Core.dll"));
+        }
+
+        [Fact]
+        public async Task NonFika_plugin_extra_still_quarantined()
+        {
+            // CA-A3 regression: the allowlist must NOT loosen cleanup of unrelated extras.
+            using var fx = new SyncTestFixture();
+            fx.WriteLocal("BepInEx/plugins/OldMod/old.dll", "bytes");
+
+            var manifest = new[] { fx.Entry("BepInEx/plugins/Current/cur.dll", "cur") };
+            var plan = await PlanAsync(fx, manifest);
+
+            var move = Assert.Single(plan.Actions, a => a.Kind == SyncActionKind.MoveToDisabled);
+            Assert.Equal("BepInEx/plugins-disabled/OldMod/old.dll", move.MoveTargetRelative);
+        }
+
+        [Fact]
+        public async Task Fika_in_manifest_is_downloaded_not_preserved()
+        {
+            // CA-A4/RN-2: Fika present in the manifest with a divergent hash → normal Download; the
+            // allowlist never blocks a server-driven update and emits no coop-safe warning.
+            using var fx = new SyncTestFixture();
+            fx.WriteLocal("BepInEx/plugins/Fika.Core.dll", "old-fika");
+
+            var manifest = new[] { fx.Entry("BepInEx/plugins/Fika.Core.dll", "new-fika") };
+            var plan = await PlanAsync(fx, manifest);
+
+            var action = Assert.Single(plan.Actions);
+            Assert.Equal(SyncActionKind.Download, action.Kind);
+            Assert.DoesNotContain(plan.Warnings, w => w.Contains("coop-safe"));
+        }
+
+        [Fact]
+        public async Task DevMode_preserves_fika_without_coopsafe_warning_conflict()
+        {
+            // CA-A5: Dev Mode already preserves any extra (as PreserveDevMode); the coop-safe skip sits
+            // AFTER the Dev Mode block, so Fika is preserved with the Dev Mode warning and NOT a
+            // duplicate coop-safe action/warning.
+            using var fx = new SyncTestFixture();
+            fx.WriteLocal("BepInEx/plugins/Fika.Core.dll", "local-fika");
+
+            var manifest = new[] { fx.Entry("BepInEx/plugins/Current/cur.dll", "cur") };
+            var plan = await PlanAsync(fx, manifest, fx.Options(devMode: true));
+
+            Assert.Contains(plan.Actions, a =>
+                a.Kind == SyncActionKind.PreserveDevMode && a.RelativePath.Contains("Fika.Core.dll"));
+            Assert.DoesNotContain(plan.Actions, a => a.Kind == SyncActionKind.MoveToDisabled);
+            Assert.DoesNotContain(plan.Warnings, w => w.Contains("coop-safe"));
+        }
     }
 }

@@ -18,13 +18,21 @@ namespace SPT.Launcher.Helpers
 
         /// <summary>
         /// Ensures Tailscale is installed, authenticated (via authkey, never browser) and connected.
-        /// Returns true when a Tailscale IP was obtained; false on failure (caller must surface the error).
+        /// Item 023 (Frente C / RN-7): returns a <see cref="TailscaleConnectResult"/> instead of a bare
+        /// bool so the caller can distinguish an authkey rejection from a network failure.
+        /// <see cref="TailscaleConnectResult.Connected"/> when a Tailscale IP was obtained; otherwise the
+        /// most specific failure reason seen across the attempts (caller must surface the error).
         /// Never opens a browser: auth is authkey-only and the GUI is only started AFTER a confirmed connection.
         /// </summary>
-        public static async Task<bool> EnsureTailscaleConnected()
+        public static async Task<TailscaleConnectResult> EnsureTailscaleConnected()
         {
             // Always disable Tailscale GUI Auto-Start on Windows boot to prevent browser login popup
             DisableGuiAutostart();
+
+            // Remembers WHY the last attempt failed so the final return distinguishes authkey vs network
+            // vs not-installed (RN-7). Defaults to a generic network failure until a more specific
+            // reason is observed.
+            var lastFailure = TailscaleConnectResult.NetworkFailure;
 
             for (int retry = 0; retry < 2; retry++)
             {
@@ -119,18 +127,22 @@ namespace SPT.Launcher.Helpers
                 if (File.Exists(TailscalePath) && !string.IsNullOrEmpty(authKey))
                 {
                     LogManager.Instance.Info("[Connect] Connecting Tailscale via CLI with AuthKey...");
-                    upSucceeded = RunTailscaleUp(authKey);
+                    var upResult = RunTailscaleUp(authKey);
+                    upSucceeded = upResult == TailscaleConnectResult.Connected;
 
                     if (!upSucceeded)
                     {
                         // Auth failed (expired/invalid key, control server unreachable, etc.).
+                        // Remember the specific reason (authkey vs network) for the final return (RN-7).
                         // Kill any running GUI so it cannot pop a browser login while unauthenticated.
+                        lastFailure = upResult;
                         LogManager.Instance.Error("[Connect] 'tailscale up' FAILED — AuthKey inválida/expirada ou servidor de controle inacessível. Nenhum navegador será aberto.");
                         KillTailscaleGui();
                     }
                 }
                 else if (!File.Exists(TailscalePath))
                 {
+                    lastFailure = TailscaleConnectResult.NotInstalled;
                     LogManager.Instance.Error("[Connect] Tailscale CLI not found after install attempt.");
                 }
 
@@ -151,7 +163,7 @@ namespace SPT.Launcher.Helpers
                         // 5. Only start the GUI AFTER a confirmed, authenticated connection —
                         //    an authenticated GUI never opens the browser login.
                         StartGuiIfNotRunning();
-                        return true; // Sucesso!
+                        return TailscaleConnectResult.Connected; // Sucesso!
                     }
                     await Task.Delay(1000);
                 }
@@ -159,15 +171,19 @@ namespace SPT.Launcher.Helpers
                 LogManager.Instance.Warning($"[Connect] Tailscale IP not found after attempt {retry + 1}. Retrying process...");
             }
 
-            LogManager.Instance.Error("[Connect] Tailscale FAILED to connect after 2 attempts (install/auth/IP). Propagating error to caller — no browser fallback.");
-            return false;
+            LogManager.Instance.Error($"[Connect] Tailscale FAILED to connect after 2 attempts (install/auth/IP), reason={lastFailure}. Propagating error to caller — no browser fallback.");
+            return lastFailure;
         }
 
         /// <summary>
         /// Runs 'tailscale up' with the authkey in unattended mode. Captures exit code and stderr.
-        /// Returns true on exit code 0. Never opens a browser (authkey login is non-interactive).
+        /// Item 023 (Frente C / RN-7): returns a <see cref="TailscaleConnectResult"/> so the caller can
+        /// distinguish an authkey rejection (rejected/expired/exhausted) from a network failure — the
+        /// stderr is classified by <see cref="TailscaleUpClassifier.ClassifyUpFailure"/>. Exit code 0 →
+        /// <see cref="TailscaleConnectResult.Connected"/>. Never opens a browser (authkey login is
+        /// non-interactive).
         /// </summary>
-        private static bool RunTailscaleUp(string authKey)
+        private static TailscaleConnectResult RunTailscaleUp(string authKey)
         {
             try
             {
@@ -194,7 +210,7 @@ namespace SPT.Launcher.Helpers
                 {
                     LogManager.Instance.Error("[Connect] 'tailscale up' timed out after 60s. Killing process.");
                     try { tsProcess.Kill(); } catch { }
-                    return false;
+                    return TailscaleConnectResult.NetworkFailure; // a hang is a control-plane/network symptom, not the key
                 }
 
                 // Processo saiu → pipes fechados → as tasks completam sem bloquear.
@@ -203,16 +219,17 @@ namespace SPT.Launcher.Helpers
 
                 if (tsProcess.ExitCode != 0)
                 {
-                    LogManager.Instance.Error($"[Connect] 'tailscale up' exited with code {tsProcess.ExitCode}. stderr: {stdErr.Trim()}");
-                    return false;
+                    var classified = TailscaleUpClassifier.ClassifyUpFailure(stdErr, tsProcess.ExitCode);
+                    LogManager.Instance.Error($"[Connect] 'tailscale up' exited with code {tsProcess.ExitCode} ({classified}). stderr: {stdErr.Trim()}");
+                    return classified;
                 }
 
-                return true;
+                return TailscaleConnectResult.Connected;
             }
             catch (Exception ex)
             {
                 LogManager.Instance.Error($"[Connect] Failed to run tailscale up: {ex.Message}");
-                return false;
+                return TailscaleConnectResult.NetworkFailure;
             }
         }
 

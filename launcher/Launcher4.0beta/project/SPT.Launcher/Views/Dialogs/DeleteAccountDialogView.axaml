@@ -26,6 +26,11 @@
       <TextBlock TextWrapping="Wrap" Classes="trl-muted"
                  Text="A conta e o perfil serão removidos do servidor. Diferente do wipe — que apenas reseta o progresso e mantém a conta — aqui a conta deixa de existir."/>
 
+      <!-- Item 023 (Frente B / RN-4 / CA-B1): aviso de coop. O gate local só enxerga o EFT deste
+           launcher, nunca a sessão Fika Coop dos outros jogadores. Assume-se o pior. -->
+      <TextBlock TextWrapping="Wrap" Classes="trl-danger"
+                 Text="Atenção coop: se houver uma sessão Fika Coop PVE ativa agora, excluir esta conta pode corromper a raid dos outros jogadores. Confirme que ninguém está em raid antes de prosseguir."/>
+
       <StackPanel Spacing="6">
         <TextBlock Classes="trl-label" Text="DIGITE O NOME DA CONTA PARA CONFIRMAR"/>
         <TextBlock Classes="trl-mono trl-accent" Text="{Binding Username}"/>
