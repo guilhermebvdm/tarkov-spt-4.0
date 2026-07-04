@@ -17,16 +17,21 @@
 
 **Consequência:** um patch **server-only** (Harmony Prefix em `TradeHelper.SellItem`) muda **o dinheiro que o player recebe**, mas **NÃO o número exibido** antes de confirmar → **desync visível** (vê vanilla, recebe override). Pra display + recebido baterem, precisa de **patch client-side (BepInEx + Harmony)** no cálculo de preço do cliente.
 
-## 3. Decisão de produto a escalar (bloqueia a implementação)
-
-Duas rotas, tradeoff real de UX — **precisa da decisão do usuário**:
+## 3. Decisão: **Rota B escolhida** (2026-07-04) — client + server, UX coerente
 
 | Rota | O que entrega | Custo |
 |---|---|---|
-| **A · Server-only** (Harmony Prefix em `TradeHelper.SellItem` no TRLTraderPrices) | Player **recebe** o override ao vender | Baixo. **Mas a tela mostra o preço vanilla** (desync recebido≠exibido) — confuso |
-| **B · Client + server** (novo patch BepInEx client no cálculo de exibição + prefix server de backstop) | Exibido **e** recebido = override, coerente | Alto. Novo **mod client** (padrão `mods/*/modded/Client/Patches/`), exige **validação in-game** |
+| A · Server-only | recebido = override, **exibido = vanilla** (desync) | baixo, mas confuso |
+| **B · Client + server** ✅ | **exibido E recebido = override** (coerente) | mod client BepInEx + prefix server, exige validação in-game |
 
-**Recomendação:** Rota B (coerência de UX), mas é um mod client novo + validação in-game → **fora do que dá pra fazer autonomamente enquanto o user dorme**. Rota A é rápida mas entrega uma UX confusa que provavelmente não é o que se quer.
+Os dois lados leem o **mesmo override** → o número na tela de venda e o dinheiro creditado batem.
+
+### Plano de implementação (Rota B)
+1. **Config compartilhada:** arquivo novo `user/mods/TRLTraderPrices/config/buy-overrides.json`, mesma shape do sell (`traderId → tpl → { count, currency }`). O viewer escreve; server e client leem. (Separado do `overrides.json` de venda p/ não reestruturar o que já funciona.)
+2. **Patch CLIENT** (mod BepInEx novo — `TRLTraderBuyPrices` client, ou pasta Client no TRLTraderPrices): Harmony no método do cliente que calcula o preço exibido de venda-ao-trader (**a achar na pesquisa** — decompilado EFT) → se há override p/ (trader, tpl), retorna ele. Lê o `buy-overrides.json`.
+3. **Prefix SERVER** (backstop no TRLTraderPrices, §4): garante o dinheiro creditado = override, caso o cliente mande o preço vanilla.
+4. **UI:** tornar o "B" (coluna trader, hoje referência tarkov.dev) **editável** → PATCH `/api/trader-buy-price` → grava `buy-overrides.json`. (Nasce no viewer atual; migra pro mod no B-2 M1.)
+5. **Validação in-game:** vender item com override → tela mostra o valor E o player recebe o valor.
 
 ## 4. Design (quando a decisão sair)
 
