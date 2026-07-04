@@ -137,11 +137,28 @@ namespace SPT.Launcher.ViewModels
                         });
                     });
 
-                    bool isUpdating = await LauncherUpdateHelper.CheckAndUpdateAsync(LauncherSettingsProvider.Instance.Server.Url, progress);
-                    if (isUpdating)
+                    // Item 018 (auto-update-security): resultado tipado de 3+1 estados. Só 'Restarting'
+                    // interrompe o fluxo (o launcher vai reiniciar). 'VerificationFailed' é fail-closed —
+                    // a versão atual segue JOGÁVEL, então mostramos um aviso não-bloqueante e CONTINUAMOS
+                    // o login (CA-2/CA-3). 'UpToDate'/'NetworkError' seguem silenciosos (CA-5 / corner case).
+                    UpdateOutcome updateOutcome = await LauncherUpdateHelper.CheckAndUpdateAsync(LauncherSettingsProvider.Instance.Server.Url, progress);
+                    if (updateOutcome == UpdateOutcome.Restarting)
                     {
                         OnUi(() => connectModel.InfoText = "Atualizando o launcher! Reiniciando...");
                         return;
+                    }
+                    if (updateOutcome == UpdateOutcome.VerificationFailed)
+                    {
+                        LogManager.Instance.Error("[Connect] Atualização do launcher abortada: verificação de assinatura falhou (fail-closed). Seguindo na versão atual.");
+                        OnUi(() =>
+                        {
+                            connectModel.IsDownloading = false;
+                            connectModel.InfoText = "Atualização do launcher indisponível (verificação de segurança falhou). Seguindo na versão atual...";
+                        });
+                        // Pausa breve NÃO-bloqueante (rodamos na pool): sem ela a InfoText seria sobrescrita
+                        // imediatamente pelo "server_connecting" abaixo e o aviso piscaria invisível. Só
+                        // ocorre no caminho raro de fail-closed; o jogo segue jogável (CA-2).
+                        await Task.Delay(2500);
                     }
                 }
                 else
