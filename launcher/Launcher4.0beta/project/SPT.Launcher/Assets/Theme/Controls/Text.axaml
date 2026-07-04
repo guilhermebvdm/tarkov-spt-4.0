@@ -2,11 +2,12 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-	<!-- Display label: uppercase written in XAML by the consumer (no text-transform in Avalonia) -->
+	<!-- Display label: uppercase written in XAML by the consumer (no text-transform in Avalonia).
+	     v2 grafite: label de chrome e NEUTRO (fg-label) — gold marca significado, nao chrome. -->
 	<Style Selector="TextBlock.trl-label">
 		<Setter Property="FontFamily" Value="{DynamicResource TrlFontDisplay}"/>
 		<Setter Property="FontSize" Value="{DynamicResource TrlTextXs}"/>
-		<Setter Property="Foreground" Value="{DynamicResource TrlAccentDimBrush}"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgLabelBrush}"/>
 		<Setter Property="LetterSpacing" Value="{DynamicResource TrlTrackWide}"/>
 	</Style>
 

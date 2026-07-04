@@ -14,7 +14,7 @@
 
     <Grid>
         <!-- Fundo cobrindo tudo + overlay olive TRL -->
-        <Image Source="/Assets/bg1.png" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+        <Image Source="/Assets/bg-hero.jpg" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality"/>
         <Border Background="{DynamicResource TrlPhotoOverlayBrush}" IsHitTestVisible="False"/>
 
         <Grid ColumnDefinitions="*, 450">

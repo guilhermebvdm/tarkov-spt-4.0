@@ -18,8 +18,8 @@
 			<!-- Fluent resource-key overrides (popup surfaces, list items, scrollbar size).
 			     Values duplicate Tokens.axaml on purpose: resource-in-resource refs are
 			     parse-order sensitive; single source of truth remains tokens.css. -->
-			<SolidColorBrush x:Key="ComboBoxDropDownBackground">#22251A</SolidColorBrush>
-			<SolidColorBrush x:Key="ComboBoxDropDownBorderBrush">#6BC7B48A</SolidColorBrush>
+			<SolidColorBrush x:Key="ComboBoxDropDownBackground">#222225</SolidColorBrush>
+			<SolidColorBrush x:Key="ComboBoxDropDownBorderBrush">#33FFFFFF</SolidColorBrush>
 			<SolidColorBrush x:Key="ComboBoxItemBackgroundPointerOver">#14C7B48A</SolidColorBrush>
 			<SolidColorBrush x:Key="ComboBoxItemBackgroundSelected">#24C7B48A</SolidColorBrush>
 			<SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPointerOver">#24C7B48A</SolidColorBrush>

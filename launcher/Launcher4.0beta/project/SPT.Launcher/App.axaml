@@ -46,11 +46,11 @@
 					<SolidColorBrush x:Key="AltAccentBrush2">#8F8560</SolidColorBrush>
 					<SolidColorBrush x:Key="AltAccentBrush3">#453F2D</SolidColorBrush>
 					<!-- Cores Base de Fundo (oliva TRL) -->
-					<SolidColorBrush x:Key="BackgroundBrush">#12130D</SolidColorBrush>
-					<SolidColorBrush x:Key="BackgroundBrush2">#1B1D14</SolidColorBrush>
-					<SolidColorBrush x:Key="AltBackgroundBrush">#22251A</SolidColorBrush>
+					<SolidColorBrush x:Key="BackgroundBrush">#131314</SolidColorBrush>
+					<SolidColorBrush x:Key="BackgroundBrush2">#1B1B1D</SolidColorBrush>
+					<SolidColorBrush x:Key="AltBackgroundBrush">#222225</SolidColorBrush>
 					<!-- Texto -->
-					<SolidColorBrush x:Key="ForegroundBrush">#E9E7DD</SolidColorBrush>
+					<SolidColorBrush x:Key="ForegroundBrush">#E8E7E4</SolidColorBrush>
 				</ResourceDictionary>
 			</ResourceDictionary.ThemeDictionaries>
 		</ResourceDictionary>

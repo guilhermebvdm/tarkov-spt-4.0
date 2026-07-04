@@ -7,28 +7,33 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
 	<!-- == Backgrounds by role ============================================== -->
-	<SolidColorBrush x:Key="TrlGroundDeepBrush">#0D0E09</SolidColorBrush>
-	<SolidColorBrush x:Key="TrlBgAppBrush">#12130D</SolidColorBrush>
-	<SolidColorBrush x:Key="TrlBgPanelBrush">#1B1D14</SolidColorBrush>
-	<SolidColorBrush x:Key="TrlBgRaisedBrush">#22251A</SolidColorBrush>
-	<SolidColorBrush x:Key="TrlBgInputBrush">#0D0E09</SolidColorBrush>
-	<SolidColorBrush x:Key="TrlSurface3Brush">#282C1E</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlGroundDeepBrush">#0D0D0E</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlBgAppBrush">#131314</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlBgPanelBrush">#1B1B1D</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlBgRaisedBrush">#222225</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlBgInputBrush">#0D0D0E</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlSurface3Brush">#29292C</SolidColorBrush>
 	<SolidColorBrush x:Key="TrlBgHoverBrush">#14C7B48A</SolidColorBrush>
 	<SolidColorBrush x:Key="TrlBgActiveBrush">#24C7B48A</SolidColorBrush>
 	<SolidColorBrush x:Key="TrlBgOverlayBrush">#A6080905</SolidColorBrush>
 
-	<!-- == Edges (translucent tan hairlines) ================================ -->
-	<SolidColorBrush x:Key="TrlEdgeFaintBrush">#1AC7B48A</SolidColorBrush>
-	<SolidColorBrush x:Key="TrlEdgeBrush">#33C7B48A</SolidColorBrush>
-	<SolidColorBrush x:Key="TrlEdgeStrongBrush">#6BC7B48A</SolidColorBrush>
+	<!-- == Edges (NEUTRAL hairlines — recalibracao grafite v2; edge-accent e a
+	     moldura tan reservada a elementos que precisam ler gold: tags/badges) == -->
+	<SolidColorBrush x:Key="TrlEdgeFaintBrush">#0DFFFFFF</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlEdgeBrush">#17FFFFFF</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlEdgeStrongBrush">#33FFFFFF</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlEdgeAccentBrush">#6BC7B48A</SolidColorBrush>
 	<SolidColorBrush x:Key="TrlEdgeRedBrush">#59FF3020</SolidColorBrush>
 
 	<!-- == Foregrounds ====================================================== -->
-	<SolidColorBrush x:Key="TrlFgBrush">#E9E7DD</SolidColorBrush>
-	<SolidColorBrush x:Key="TrlFgMutedBrush">#9A978A</SolidColorBrush>
-	<SolidColorBrush x:Key="TrlFgFaintBrush">#6F6D60</SolidColorBrush>
-	<SolidColorBrush x:Key="TrlFgGhostBrush">#45443A</SolidColorBrush>
-	<SolidColorBrush x:Key="TrlFgOnAccentBrush">#12130D</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlFgBrush">#E8E7E4</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlFgMutedBrush">#9B9A96</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlFgFaintBrush">#706F6B</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlFgGhostBrush">#464541</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlFgOnAccentBrush">#131314</SolidColorBrush>
+	<!-- fg-label: cor NEUTRA do chrome (titulos de painel, labels de campo, kv keys)
+	     — gold marca significado, nao tinge a tela inteira (v2) -->
+	<SolidColorBrush x:Key="TrlFgLabelBrush">#9B9A96</SolidColorBrush>
 
 	<!-- == Accent (tan = working accent) ==================================== -->
 	<SolidColorBrush x:Key="TrlAccentBrush">#C7B48A</SolidColorBrush>
@@ -75,10 +80,10 @@
 
 	<!-- Photo treatment: olive overlay over bg photos + translucent panel on top -->
 	<RadialGradientBrush x:Key="TrlPhotoOverlayBrush" Center="50%,50%" GradientOrigin="50%,50%">
-		<GradientStop Offset="0" Color="#8012130D"/>
-		<GradientStop Offset="1" Color="#E612130D"/>
+		<GradientStop Offset="0" Color="#80131314"/>
+		<GradientStop Offset="1" Color="#E6131314"/>
 	</RadialGradientBrush>
-	<SolidColorBrush x:Key="TrlPanelOverPhotoBrush">#F21B1D14</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlPanelOverPhotoBrush">#F21B1B1D</SolidColorBrush>
 
 	<!-- Vignette (ambient texture, optional per view) -->
 	<RadialGradientBrush x:Key="TrlVignetteBrush" Center="80%,0%" GradientOrigin="80%,0%">
