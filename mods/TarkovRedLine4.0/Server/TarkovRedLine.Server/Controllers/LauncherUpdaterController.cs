@@ -9,7 +9,7 @@ namespace TarkovRedLine.Server.Controllers;
 [Route("redline/launcher")]
 public class LauncherUpdaterController : ControllerBase
 {
-    private static string GetUpdaterBasePath()
+    internal static string GetUpdaterBasePath()
     {
         string currentDir = AppDomain.CurrentDomain.BaseDirectory;
         
