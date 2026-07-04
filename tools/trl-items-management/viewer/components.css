@@ -860,6 +860,9 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
 }
 .flea-level-widget:hover { color: var(--accent-bright); border-color: var(--accent-dim); }
 .flea-level-widget.is-editing { cursor: default; border-color: var(--accent); }
+/* Flea-cap toggle OFF = SPT ceiling lifted for mods/electronics (B-1). Gold = active override. */
+#flea-cap-toggle.is-cap-off { color: #ecc94b; border-color: #3d3410; background: #26220f; }
+#flea-cap-toggle.is-cap-off #flea-cap-state { font-weight: 700; }
 .flea-level-widget__input {
   width: 32px;
   font-size: var(--fs-sm); font-weight: 600;

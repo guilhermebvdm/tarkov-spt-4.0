@@ -51,6 +51,9 @@
     <button type="button" class="flea-level-widget" id="flea-level-widget" title="Edit minimum flea level (globals.json)">
       Flea Lvl <span id="flea-level-num">15</span>+
     </button>
+    <button type="button" class="flea-level-widget" id="flea-cap-toggle" data-tip="SPT flea ceiling on Weapon Mod (×6) / Electronics (×11). OFF = those can be priced above handbook×mult. Restart SPT to apply in-game; rebuild the catalog to lift the editor limit." data-tip-pos="bottom">
+      Flea cap <span id="flea-cap-state">…</span>
+    </button>
     <span class="trader-pending-pill" id="trader-pending-pill" hidden data-tip="Trader sell-price overrides written via TRLTraderPrices. Restart SPT to apply." data-tip-pos="bottom"></span>
     <button type="button" class="bulk-btn bulk-btn--danger" id="clear-trader-overrides" hidden data-tip="Remove every trader sell-price override (TRLTraderPrices)." data-tip-pos="bottom">Clear trader overrides</button>
   </div>
@@ -963,6 +966,36 @@ function bindControls() {
     fleaNumEl.textContent = META.sources.spt.fleaMinUserLevel || 15;
   }
   fleaWidget.addEventListener('click', () => openFleaMinLevelEditor(fleaWidget));
+
+  // Flea cap (SPT unreasonableModPrices) on/off toggle in topbar — B-1.
+  (function initFleaCapToggle() {
+    const btn = document.getElementById('flea-cap-toggle');
+    const stateEl = document.getElementById('flea-cap-state');
+    if (!btn || !stateEl) return;
+    let enabled = null;
+    const notify = (m) => { try { if (typeof toast === 'function') toast(m); } catch (_) {} };
+    const render = () => {
+      stateEl.textContent = enabled == null ? '…' : (enabled ? 'on' : 'OFF');
+      btn.classList.toggle('is-cap-off', enabled === false);
+    };
+    (async () => {
+      try { const j = await (await fetch('/api/flea-cap')).json(); enabled = !!j.enabled; }
+      catch (_) { enabled = null; stateEl.textContent = '?'; return; }
+      render();
+    })();
+    btn.addEventListener('click', async () => {
+      if (enabled == null) return;
+      const next = !enabled;
+      btn.disabled = true;
+      try {
+        const r = await fetch('/api/flea-cap', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled: next }) });
+        const j = await r.json();
+        if (r.ok) { enabled = j.enabled; render(); notify(next ? 'Flea cap ON — restart SPT + rebuild catalog to apply' : 'Flea cap OFF — mods/electronics uncapped; restart SPT + rebuild catalog to apply'); }
+        else { notify('Flea cap failed: ' + (j.error || r.status)); }
+      } catch (e) { notify('Flea cap failed: ' + e.message); }
+      finally { btn.disabled = false; }
+    });
+  })();
 
   // Bulk "⟳ Update" menu (rescan / update-all-dev / update-all-market).
   bindUpdateMenu();
