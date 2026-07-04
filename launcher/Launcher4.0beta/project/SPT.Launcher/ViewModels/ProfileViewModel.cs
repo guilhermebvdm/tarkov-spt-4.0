@@ -198,6 +198,19 @@ namespace SPT.Launcher.ViewModels
                 }
             };
 
+            // ref: CR-02-01 (013L) — se o fetch do connect falhou transitoriamente, a versão
+            // fica "—" a sessão toda (read-once). Refetch async barato aqui: ServerVersion é
+            // reativo, então a ProfileView atualiza; síncrono seria pior (até 15s de UI freeze
+            // no timeout — exatamente o cenário de falha).
+            if (_serverVersion == "—")
+            {
+                _ = Task.Run(() =>
+                {
+                    var refreshed = ServerManager.RefreshTrlServerVersionIfUnknown();
+                    Dispatcher.UIThread.Post(() => ServerVersion = refreshed);
+                });
+            }
+
             // Auto-check for updates, depois aplica opcionais pendentes
             _ = InitializeAsync();
         }
@@ -1024,6 +1037,17 @@ namespace SPT.Launcher.ViewModels
             if (result is not bool confirmed || !confirmed) return;
 
             LogManager.Instance.Info($"[Profile] Excluindo conta '{username}'...");
+
+            // ref: CR-01-01 — esvaziar o cofre de senha ANTES do remove (best-effort): o
+            // /launcher/profile/remove não toca o redline_passwords.json, e um username
+            // reciclado herdaria a senha do dono anterior. O gate D2 passa por construção
+            // (ChangePassword envia a senha atual). Falha não bloqueia a exclusão.
+            AccountStatus vaultStatus = await AccountManager.ChangePasswordAsync("");
+            if (vaultStatus != AccountStatus.OK)
+            {
+                LogManager.Instance.Warning($"[Profile] Não foi possível limpar a senha do cofre antes da exclusão ({vaultStatus}) — seguindo com o remove.");
+            }
+
             AccountStatus status = await AccountManager.RemoveAsync();
 
             switch (status)
@@ -1032,6 +1056,12 @@ namespace SPT.Launcher.ViewModels
                     {
                         // Sem isso o auto-login tentaria uma conta que não existe mais
                         LauncherSettingsProvider.Instance.Server.AutoLoginCreds = null;
+
+                        // ref: CR-01-02 — RememberUsername não pode ressuscitar credenciais
+                        // da conta morta pré-preenchendo a LoginView
+                        LauncherSettingsProvider.Instance.LastUsername = "";
+                        LauncherSettingsProvider.Instance.LastPassword = "";
+
                         LauncherSettingsProvider.Instance.SaveSettings();
 
                         AccountManager.Logout(); // idempotente — Remove() já anulou a conta

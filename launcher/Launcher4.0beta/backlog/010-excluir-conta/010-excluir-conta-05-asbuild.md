@@ -19,7 +19,7 @@
 - **Painéis** Versão/Mods Opcionais/Conta → `TrlPanel` com títulos uppercase. Versão virou par de kv-rows (`trl-label` + valor `trl-mono trl-accent`); consome `ServerVersion` (dinâmico desde o 013L) e `LauncherUpdateHelper.CurrentVersion`.
 - **Painel Conta**: MUDAR EDIÇÃO (outlined base) · RESETAR PROGRESSO (WIPE) `.danger` · **EXCLUIR CONTA `.danger`** (novo) + caption `trl-faint` explicando wipe≠excluir. Distinção visual wipe/excluir ficou **textual + caption** (prompt fixou `.danger` para ambos).
 - **Barra inferior**: JOGAR = `.primary` (tan — R1, vermelho não é fill de trabalho), VERIFICAR ARQUIVOS = outlined base; XP e update usam `ProgressBar` do tema (overrides de cor removidos); textos → classes `trl-*`.
-- Overlay `TrlPhotoOverlayBrush` adicionado sobre o BG (padrão das views já migradas).
+- ~~Overlay `TrlPhotoOverlayBrush` adicionado sobre o BG~~ **Correção (ref: CR-01-04):** o overlay NÃO foi incluído no XAML entregue — a frase original era incorreta. A ProfileView segue sem o escurecimento padronizado que Login/Register/ClassSelection têm; avaliar na validação visual em runtime se os textos sobre a foto precisam dele (1 `Border` entre o `Image` e o Grid, se sim).
 - Bindings/commands preservados 1:1 (inclusive os dois primeiros botões da sidebar apontando para `OpenSettingsCommand`, como estava — não corrigi comportamento fora de escopo); único acréscimo: `DeleteAccountCommand`.
 
 ## Decisões / assunções
@@ -34,3 +34,11 @@
 `dotnet build project/SPT.Launcher/SPT.Launcher.csproj` → **0 erros** (warnings pré-existentes; alguns de `ClassSelectionViewModel` são do item 004L em curso paralelo).
 
 Validação visual/runtime (dialog, restyle, fluxo excluir→login) fica com o orquestrador.
+
+## Pós-review (2026-07-04 — [04-code-review-01](./010-excluir-conta-04-code-review-01.md))
+
+- **CR-01-01:** `DeleteAccountCommand` agora esvazia o cofre de senha (`ChangePasswordAsync("")`, best-effort) ANTES do `RemoveAsync` — username reciclado não herda mais a senha do dono anterior; falha só loga warning e a exclusão segue.
+- **CR-01-02:** sucesso do delete também limpa `LastUsername`/`LastPassword` (RememberUsername não pré-preenche a LoginView com a conta morta).
+- **CR-01-03:** gate `CanStartGame` estendido a WIPE e MUDAR EDIÇÃO (ambos disparam Remove+Register — tão destrutivos quanto o delete com o jogo aberto).
+- **CR-01-04:** claim do overlay corrigida acima (doc only).
+- Gates pós-fix: build launcher **0 erros** · `dotnet test` **52/52**.

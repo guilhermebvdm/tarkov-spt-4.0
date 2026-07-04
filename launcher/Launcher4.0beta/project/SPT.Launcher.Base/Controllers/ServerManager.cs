@@ -46,6 +46,20 @@ namespace SPT.Launcher
             }
         }
 
+        /// <summary>
+        /// ref: CR-02-01 (013L) — refetch para sessões em que o fetch do connect falhou
+        /// transitoriamente. Síncrono (chamar fora da UI thread); no-op quando já resolvida.
+        /// </summary>
+        public static string RefreshTrlServerVersionIfUnknown()
+        {
+            if (TrlServerVersion == "—")
+            {
+                LoadTrlServerVersion();
+            }
+
+            return TrlServerVersion;
+        }
+
         public static bool PingServer()
         {
             string json = "";

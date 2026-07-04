@@ -141,13 +141,18 @@
                     <!-- Box: CONTA -->
                     <cc:TrlPanel Title="CONTA">
                         <StackPanel Spacing="8">
+                            <!-- ref: CR-01-03 — mesmo gate do EXCLUIR: mudar edição dispara wipe
+                                 (Remove+Register) e não pode rodar com o jogo em execução -->
                             <Button Content="MUDAR EDIÇÃO DO PERFIL" Classes="sm" Cursor="Hand"
                                     HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
-                                    Command="{Binding ChangeEditionCommand}"/>
+                                    Command="{Binding ChangeEditionCommand}"
+                                    IsEnabled="{Binding CanStartGame}"/>
 
+                            <!-- ref: CR-01-03 — idem: wipe no meio da sessão é tão destrutivo quanto o delete -->
                             <Button Content="RESETAR PROGRESSO (WIPE)" Classes="danger sm" Cursor="Hand"
                                     HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
                                     Command="{Binding WipeConfirmCommand}"
+                                    IsEnabled="{Binding CanStartGame}"
                                     ToolTip.Tip="Zera o progresso do perfil — a conta continua existindo"/>
 
                             <Button Content="EXCLUIR CONTA" Classes="danger sm" Cursor="Hand"

@@ -31,31 +31,64 @@ public class PasswordController : ControllerBase
     }
 
     /// <summary>
-    /// D4: lookup do cofre case-insensitive, consistente com o match de profile
-    /// (cobre chaves novas em lowercase e chaves legadas com casing original).
-    /// Retorna null quando não há entrada.
+    /// D4: lookup do cofre case-insensitive, consistente com o match de profile.
+    /// ref: CR-01-01 — prioridade de leitura quando há duplicatas legadas de casing:
+    /// 1) chave canônica lowercase (formato pós-D4 = sempre a escrita mais recente),
+    /// 2) match exato de casing, 3) qualquer match case-insensitive. Sem isso, a
+    /// primeira duplicata em ordem de documento sombrearia a senha mais recente.
+    /// ref: CR-01-02 — retorna false em erro de leitura (cofre corrompido/IO), para o
+    /// gate D2 poder ser fail-closed: "erro lendo o cofre" ≠ "não há senha".
     /// </summary>
-    private static string? GetVaultPassword(string username)
+    private static bool TryGetVaultPassword(string username, out string? password)
     {
+        password = null;
+
         try
         {
-            if (!System.IO.File.Exists(VaultPath)) return null;
-            if (JsonNode.Parse(System.IO.File.ReadAllText(VaultPath)) is not JsonObject vault) return null;
+            // Sem arquivo = sem entrada (estado legítimo, não é erro)
+            if (!System.IO.File.Exists(VaultPath)) return true;
+
+            // Raiz que não é objeto = cofre corrompido
+            if (JsonNode.Parse(System.IO.File.ReadAllText(VaultPath)) is not JsonObject vault) return false;
+
+            string canonicalKey = username.ToLowerInvariant();
+            string? exactMatch = null, looseMatch = null;
+            bool hasExact = false, hasLoose = false;
 
             foreach (var entry in vault)
             {
-                if (string.Equals(entry.Key, username, StringComparison.OrdinalIgnoreCase))
+                if (!string.Equals(entry.Key, username, StringComparison.OrdinalIgnoreCase)) continue;
+
+                string? value = entry.Value?.GetValue<string>();
+
+                if (string.Equals(entry.Key, canonicalKey, StringComparison.Ordinal))
                 {
-                    return entry.Value?.GetValue<string>();
+                    password = value; // prioridade 1 — encerra a busca
+                    return true;
+                }
+
+                if (!hasExact && string.Equals(entry.Key, username, StringComparison.Ordinal))
+                {
+                    exactMatch = value;
+                    hasExact = true;
+                }
+                else if (!hasLoose)
+                {
+                    looseMatch = value;
+                    hasLoose = true;
                 }
             }
+
+            if (hasExact) password = exactMatch;
+            else if (hasLoose) password = looseMatch;
+
+            return true;
         }
         catch
         {
-            // cofre ilegível = sem entrada
+            // Erro de leitura/parse/valor não-string → sinalizar erro (fail-closed no gate)
+            return false;
         }
-
-        return null;
     }
 
     [HttpPost("password/change")]
@@ -81,7 +114,14 @@ public class PasswordController : ControllerBase
                 // só quando não há senha). Server-only e compatível com o launcher atual: todos
                 // os fluxos enviam request.password com a senha real obtida no login via
                 // /redline/profile/get (inclusive o reset HWID, que loga antes de zerar).
-                string? currentVaultPassword = GetVaultPassword(request.username);
+                // ref: CR-01-02 — fail-closed: erro lendo o cofre nega a troca em vez de
+                // tratar como "sem senha" e liberar a troca cega que o gate existe pra impedir.
+                if (!TryGetVaultPassword(request.username, out string? currentVaultPassword))
+                {
+                    System.IO.File.AppendAllText(debugLogPath, $"[DENIED] Vault unreadable while changing password for {request.username}\n");
+                    return Content("FAILED", "text/plain");
+                }
+
                 if (!string.IsNullOrEmpty(currentVaultPassword) && request.password != currentVaultPassword)
                 {
                     System.IO.File.AppendAllText(debugLogPath, $"[DENIED] Wrong current password for {request.username}\n");
@@ -227,11 +267,12 @@ public class PasswordController : ControllerBase
                     if (usernameNode != null && string.Equals(usernameNode.GetValue<string>(), request.username, StringComparison.OrdinalIgnoreCase))
                     {
                         // Injetar a senha do cofre de volta no JSON antes de mandar pro Launcher!
-                        // D4: lookup case-insensitive (chaves novas em lowercase, legadas com casing original)
+                        // D4/CR-01-01: lookup priorizado (canônica lowercase > casing exato > case-insensitive).
+                        // Aqui a falha de leitura segue best-effort (sem injeção) — o fail-closed
+                        // do CR-01-02 é só no gate do change, onde há decisão de segurança.
                         try
                         {
-                            string? vaultPassword = GetVaultPassword(request.username);
-                            if (vaultPassword != null) {
+                            if (TryGetVaultPassword(request.username, out string? vaultPassword) && vaultPassword != null) {
                                 json["info"]["password"] = vaultPassword;
                             }
                         } catch {}

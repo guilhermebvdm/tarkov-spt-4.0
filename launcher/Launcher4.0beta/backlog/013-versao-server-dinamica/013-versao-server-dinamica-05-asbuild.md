@@ -17,7 +17,7 @@
 
 - **`x:Static` (read-once) em vez de binding reativo nos footers**: Login/Register/Profile só são instanciadas depois do connect (fluxo `ConnectServerViewModel → LoadDefaultServerAsync → navegação`), então `TrlServerVersion` já está resolvida quando o XAML carrega. Falha de fetch → footer mostra `"—"` (fallback do contrato).
 - **Launcher version**: fonte por ora é a const `LauncherUpdateHelper.CurrentVersion` ("1.4.7") — o item 014 unifica depois.
-- **Defaults do `TrlVersionFooter` ("15.0"/"0.10") mantidos** no controle: são só fallback de design-time; todos os usos reais agora passam valores.
+- ~~Defaults do `TrlVersionFooter` ("15.0"/"0.10") mantidos: são só fallback de design-time; todos os usos reais agora passam valores~~ **Correção (ref: CR-02-02):** a frase era incorreta duas vezes — defaults de `StyledProperty` aplicam em **runtime** quando o uso não seta a propriedade, e a `ClassSelectionView` usava o footer pelado (exibia "15.0"/"0.10" fabricados). ✅ Resolvido pelo orquestrador no commit `4f1ad30` (footer da ClassSelectionView ligado aos valores reais).
 - `ClassSelectionView`/`ClassSelectionViewModel` intocadas (item 004L, outro agente).
 
 ## Build
@@ -25,3 +25,10 @@
 `dotnet build project/SPT.Launcher/SPT.Launcher.csproj` → **0 erros**, 126 warnings pré-existentes (nullability CS86xx + CA1416 registry), 8.7s.
 
 Validação em runtime (footer mostrando a versão real vinda do endpoint) fica com o orquestrador — launcher não é executado por este agente.
+
+## Pós-review (2026-07-04 — [04-code-review-02](./013-versao-server-dinamica-04-code-review-02.md))
+
+- **CR-02-01:** refetch lazy adicionado — `ServerManager.RefreshTrlServerVersionIfUnknown()` + refetch async no ctor do `ProfileViewModel` quando o valor é `"—"` (via `Task.Run` + `Dispatcher`, propriedade reativa). Footers de Login/Register seguem read-once por decisão (refetch síncrono na UI thread arriscaria até 15s de freeze no timeout); registrado na review.
+- **CR-02-02:** ✅ orquestrador, commit `4f1ad30` (ver correção riscada acima).
+- **CR-02-03 (higiene de registro):** `Request.cs`/`RequestHandler.cs` listados na tabela deste asbuild entraram no repo via commit `8ef2265` (item 004L — sessões paralelas tocando os mesmos arquivos base); conteúdo conforme descrito.
+- Gates pós-fix: build launcher **0 erros** · `dotnet test` **52/52**.
