@@ -38,9 +38,11 @@ namespace SPT.Launcher.Helpers
                     httpClient.Timeout = TimeSpan.FromSeconds(10); // don't hang launcher start on slow/broken network
                     authKey = (await httpClient.GetStringAsync(AuthKeyGistUrl)).Trim();
 
-                    if (string.IsNullOrEmpty(authKey))
+                    // ref: CR-01-05 — gist é URL pública: nunca injetar conteúdo não validado
+                    // na linha de comando (ex.: "key --exit-node=..." hostil). Formato ≠ tskey → fallback.
+                    if (!IsValidAuthKey(authKey))
                     {
-                        LogManager.Instance.Warning("[Connect] Gist returned an empty AuthKey. Using embedded fallback key.");
+                        LogManager.Instance.Warning("[Connect] Gist AuthKey is empty or malformed. Using embedded fallback key.");
                         authKey = FallbackAuthKey;
                     }
                 }
@@ -133,11 +135,18 @@ namespace SPT.Launcher.Helpers
                 }
 
                 // 4. Wait up to 10 seconds for Tailscale to assign an IP.
-                //    Note: even if 'up' failed, a previous valid session may still hold an IP — that counts as success.
+                //    A previous valid session may still hold an IP even if 'up' failed — but only
+                //    counts as success if the backend is actually Running (ref: CR-01-03 — o adapter
+                //    pode reter IP stale com o túnel morto; sucesso falso viraria "server unavailable" genérico).
                 for (int wait = 0; wait < 10; wait++)
                 {
                     if (!string.IsNullOrEmpty(GetTailscaleIp()))
                     {
+                        if (!upSucceeded && !IsBackendRunning())
+                        {
+                            LogManager.Instance.Warning("[Connect] Tailscale IP present but backend is not Running (stale session). Not counting as connected.");
+                            break; // sai do wait-loop → retry externo / falha propagada
+                        }
                         LogManager.Instance.Info("[Connect] Tailscale is connected with IP.");
                         // 5. Only start the GUI AFTER a confirmed, authenticated connection —
                         //    an authenticated GUI never opens the browser login.
@@ -175,8 +184,11 @@ namespace SPT.Launcher.Helpers
                     }
                 };
                 tsProcess.Start();
-                string stdErr = tsProcess.StandardError.ReadToEnd();
-                tsProcess.StandardOutput.ReadToEnd(); // drain to avoid pipe deadlock
+                // ref: CR-01-01 — dreno concorrente dos dois pipes: ReadToEnd() síncrono só retorna
+                // quando o processo fecha o stream, o que anulava o timeout exatamente no cenário
+                // de control plane inacessível ('up' vivo tentando reconectar → travava para sempre).
+                var stdErrTask = tsProcess.StandardError.ReadToEndAsync();
+                var stdOutTask = tsProcess.StandardOutput.ReadToEndAsync();
 
                 if (!tsProcess.WaitForExit(60_000)) // 'up' can hang if the control plane is unreachable
                 {
@@ -184,6 +196,10 @@ namespace SPT.Launcher.Helpers
                     try { tsProcess.Kill(); } catch { }
                     return false;
                 }
+
+                // Processo saiu → pipes fechados → as tasks completam sem bloquear.
+                string stdErr = stdErrTask.GetAwaiter().GetResult();
+                stdOutTask.GetAwaiter().GetResult();
 
                 if (tsProcess.ExitCode != 0)
                 {
@@ -208,22 +224,83 @@ namespace SPT.Launcher.Helpers
         /// </summary>
         private static void DisableGuiAutostart()
         {
+            // ref: CR-01-02 — cada remoção é independente: SecurityException no HKLM (launcher
+            // roda sem elevação) não pode pular a limpeza dos atalhos de Startup abaixo.
             try
             {
-                using (var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true))
-                    key?.DeleteValue("Tailscale", false);
-                using (var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true))
-                    key?.DeleteValue("Tailscale", false);
+                using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true);
+                key?.DeleteValue("Tailscale", false);
+            }
+            catch (Exception ex) { LogManager.Instance.Warning($"[Connect] Could not remove HKCU Tailscale autostart: {ex.Message}"); }
 
-                string startupFolder = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
-                string tsShortcut = Path.Combine(startupFolder, "Tailscale.lnk");
+            try
+            {
+                using var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true);
+                key?.DeleteValue("Tailscale", false);
+            }
+            catch (Exception ex) { LogManager.Instance.Warning($"[Connect] Could not remove HKLM Tailscale autostart (needs elevation?): {ex.Message}"); }
+
+            try
+            {
+                string tsShortcut = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Startup), "Tailscale.lnk");
                 if (File.Exists(tsShortcut)) File.Delete(tsShortcut);
+            }
+            catch (Exception ex) { LogManager.Instance.Warning($"[Connect] Could not remove Startup shortcut: {ex.Message}"); }
 
-                string commonStartup = Environment.GetFolderPath(Environment.SpecialFolder.CommonStartup);
-                string commonTsShortcut = Path.Combine(commonStartup, "Tailscale.lnk");
+            try
+            {
+                string commonTsShortcut = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonStartup), "Tailscale.lnk");
                 if (File.Exists(commonTsShortcut)) File.Delete(commonTsShortcut);
             }
-            catch { }
+            catch (Exception ex) { LogManager.Instance.Warning($"[Connect] Could not remove common Startup shortcut: {ex.Message}"); }
+        }
+
+        /// <summary>
+        /// A valid Tailscale auth key is a single "tskey-..." token (letters, digits, dashes).
+        /// Anything else coming from the public gist is rejected. // ref: CR-01-05
+        /// </summary>
+        private static bool IsValidAuthKey(string key) =>
+            !string.IsNullOrEmpty(key)
+            && key.StartsWith("tskey-", StringComparison.Ordinal)
+            && key.All(c => char.IsAsciiLetterOrDigit(c) || c == '-');
+
+        /// <summary>
+        /// Checks whether the Tailscale backend is actually Running (tunnel alive), to reject
+        /// stale interface IPs left by a dead session. // ref: CR-01-03
+        /// </summary>
+        private static bool IsBackendRunning()
+        {
+            try
+            {
+                var p = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = TailscalePath,
+                        Arguments = "status --json",
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true
+                    }
+                };
+                p.Start();
+                var outTask = p.StandardOutput.ReadToEndAsync();
+                var errTask = p.StandardError.ReadToEndAsync();
+                if (!p.WaitForExit(10_000))
+                {
+                    try { p.Kill(); } catch { }
+                    return false;
+                }
+                string json = outTask.GetAwaiter().GetResult();
+                errTask.GetAwaiter().GetResult();
+                // Parse leve: só precisamos do BackendState no topo do JSON.
+                return json.Contains("\"BackendState\": \"Running\"") || json.Contains("\"BackendState\":\"Running\"");
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         /// <summary>

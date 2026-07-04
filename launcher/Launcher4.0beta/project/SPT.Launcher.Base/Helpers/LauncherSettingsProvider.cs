@@ -349,7 +349,9 @@ namespace SPT.Launcher.Helpers
                 LauncherStartGameAction = LauncherAction.MinimizeAction;
                 UseAutoLogin = true;
                 GamePath = AppContext.BaseDirectory;
-                IsDevMode = true;
+                // ref: CR-01-04 — instalação limpa é jogador, não dev: Dev Mode default true
+                // pulava a VPN/gist e engolia o erro claro de Tailscale em toda máquina nova.
+                IsDevMode = false;
 
                 Server = new ServerSetting
                 {
