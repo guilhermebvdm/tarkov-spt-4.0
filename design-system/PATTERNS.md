@@ -115,7 +115,7 @@ Grid de `trl-stat` (destaque com `--hi`, indisponível com `--dim` + `trl-badge`
 
 ### Modal de confirmação
 
-`trl-modal-overlay[hidden]` + `trl-modal` (head com dot de contexto, close ×; actions: ghost "cancelar" + primário ou danger). Overlay fecha no clique fora; `hidden` controla visibilidade. Destrutivo = botão danger + verbo explícito ("Discard", "Delete"), nunca "OK".
+`trl-modal-overlay[hidden]` + `trl-modal` (head com dot de contexto, close ×; actions: ghost "cancelar" + primário ou danger). Overlay fecha no clique fora **e no Esc** (JS do consumidor — ver demo do showcase); `hidden` controla visibilidade. Destrutivo = botão danger + verbo explícito ("Discard", "Delete"), nunca "OK". Painel que hospeda **formulário nunca usa `--flush`** — o respiro vem do padding do `__body` (`--flush` é para listas/tabelas coladas na borda).
 
 ### Toast programático
 

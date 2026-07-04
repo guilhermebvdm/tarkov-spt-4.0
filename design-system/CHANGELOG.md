@@ -8,6 +8,8 @@ Primeira versão. Inclui o bloco **H. Game data** (primitivos de domínio Tarkov
 
 Filtros: `trl-multiselect` (dropdown de checkboxes com count no trigger, counts por opção, `__search` sticky p/ listas longas, Select all/Clear; painel persiste entre cliques) + `trl-filter-chip` (chips de filtros aplicados com remove) — receita "Barra de filtros" no PATTERNS.md. Dropdown e multiselect compartilham a casca (trigger/caret/painel/option) em seletores agrupados; diferenças intencionais são overrides explícitos comentados.
 
+Auditoria funcional via DevTools: fix de grid blowout no `trl-kv` (`minmax(0,1fr)` + `overflow-wrap` — ids longos quebravam o layout <900px); botão × do `trl-search` funcional nos templates; Esc fecha modal e fullscreen (demos); starter sem `--flush` no painel de formulário (respiro do `__body`).
+
 Passe de polimento premium/fluidez: `trl-doll` espelha a tela Gear do EFT — grade de slots com áreas nomeadas 1:1 (`__slot--earpiece` … `--scabbard`, armas cruzando 2 colunas) sobre a silhueta SVG de soldado + coluna `__carry` (rig/pockets/backpack/pouch), em vez de posicionamento absoluto obrigatório; tabs com underline animada (scaleX); modal com entrada `trl-pop` + fade no overlay; `trl-cell` com transições e lift no hover editável; botões sólidos com luz superior sutil; `trl-card--interactive` (lift + `is-selected` p/ pickers); transições consistentes em table rows, menu, pagination, closes.
 
 - `tokens.css` — namespace `--trl-*` em 3 camadas: primitivos (surfaces oliva, ramps tan/red/status, ink, edges, washes, tipo, spacing 4px, sombras/glows, z-index, motion), semânticos (`--trl-bg-*`, `--trl-fg-*`, `--trl-accent*`, `--trl-brand`, `--trl-danger*`, focus ring) e assinaturas (laser, texturas, progress fill, chamfer).

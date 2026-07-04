@@ -1204,7 +1204,9 @@ textarea.trl-input {
 
 .trl-kv__row {
   display: grid;
-  grid-template-columns: 96px 1fr;
+  /* minmax(0, 1fr): without it the value column refuses to shrink below
+   * its min-content and long ids/tokens blow the row out of the panel */
+  grid-template-columns: 96px minmax(0, 1fr);
   gap: var(--trl-space-3);
   align-items: baseline;
   font-size: var(--trl-text-md);
@@ -1219,7 +1221,11 @@ textarea.trl-input {
   padding-top: 2px;
 }
 
-.trl-kv__v { color: var(--trl-fg-muted); }
+.trl-kv__v {
+  color: var(--trl-fg-muted);
+  min-width: 0;
+  overflow-wrap: break-word;   /* template ids (24ch) wrap instead of overflowing */
+}
 
 .trl-kv__v b, .trl-kv__v strong { color: var(--trl-fg); }
 

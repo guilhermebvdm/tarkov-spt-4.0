@@ -1169,6 +1169,17 @@ border-color: #444;   /* not even ours */</pre>
     });
   }
 
+  /* search clear buttons — clear + refocus */
+  document.querySelectorAll('.trl-search').forEach(function (sw) {
+    var clear = sw.querySelector('.trl-search__clear');
+    var input = sw.querySelector('.trl-input');
+    if (clear && input) clear.addEventListener('click', function () {
+      input.value = '';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.focus();
+    });
+  });
+
   /* filter chip remove demo */
   document.querySelectorAll('.trl-filter-chip__remove').forEach(function (b) {
     b.addEventListener('click', function () { b.closest('.trl-filter-chip').remove(); });
@@ -1191,6 +1202,13 @@ border-color: #444;   /* not even ours */</pre>
   });
   modal.addEventListener('click', function (e) {
     if (e.target === modal) modal.hidden = true;
+  });
+
+  /* Esc closes topmost overlay (modal wins over fullscreen) */
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    if (!modal.hidden) { modal.hidden = true; return; }
+    if (fs && !fs.hidden) fs.hidden = true;
   });
 })();
 </script>

@@ -89,8 +89,8 @@
         </div>
       </div>
 
-      <!-- center: main editing surface -->
-      <div class="trl-panel trl-panel--flush">
+      <!-- center: main editing surface (no --flush: forms need the body padding) -->
+      <div class="trl-panel">
         <div class="trl-screen-bar">
           <!-- swap --ok for --live while there are unsaved changes -->
           <span class="trl-screen-bar__dot trl-screen-bar__dot--ok"></span>
@@ -159,6 +159,17 @@
   });
   document.addEventListener('click', function (e) {
     if (!ms.contains(e.target)) ms.classList.remove('is-open');
+  });
+
+  /* search clear */
+  document.querySelectorAll('.trl-search').forEach(function (sw) {
+    var clear = sw.querySelector('.trl-search__clear');
+    var input = sw.querySelector('.trl-input');
+    if (clear && input) clear.addEventListener('click', function () {
+      input.value = '';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.focus();
+    });
   });
 })();
 </script>
