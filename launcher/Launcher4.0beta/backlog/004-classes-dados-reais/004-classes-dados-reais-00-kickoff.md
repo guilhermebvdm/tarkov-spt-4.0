@@ -17,14 +17,38 @@ Substituir o mock da tela de classes por dados reais servidos pelo CustomClasses
 - **Ícones**: 13 PNGs em `mods/CustomClasses/modded/Server/wwwroot/icons/` — rota HTTP estática p/ consumo externo a confirmar/criar.
 - **Vantagens/desvantagens não existem estruturadas** no schema — decisão de design: derivar de `skillMultipliers` (>1 = vantagem, <1 = desvantagem) vs campos novos `advantages`/`disadvantages` (PT/EN) vs híbrido (deriva + override).
 
+## Decisões do usuário (2026-07-03)
+
+- **Vantagens/desvantagens: DESCOPADO por ora** — seção sai da tela (skills/multiplicadores ficam no DTO para uso futuro, sem render).
+- **Painel de arte grande: DESCOPADO por ora** — sai do layout; ícone pequeno pode aparecer na lista.
+
+## Contrato SP0 — `GET /customclasses/classes` (congelado 2026-07-03)
+
+```json
+[
+  {
+    "editionKey": "Caçador",              // chave EXATA registrada no ProfileTemplates (displayName.pt com language=pt)
+    "displayName": { "en": "Hunter", "pt": "Caçador" },
+    "description": { "en": "...", "pt": "..." },
+    "iconUrl": "/CustomClasses-Server/icons/cacador.png",   // relativo ao backend; static files já servem
+    "nameColor": "#c2973f",
+    "skills": { "Sniper": 7 },
+    "skillMultipliers": { "Sniper": 2.5 }
+  }
+]
+```
+
+- Só classes `Enabled && Registered`; sem sessionId (pré-registro). Fonte: `ClassEditorService.GetCachedEntries()`.
+- Item irmão no CustomClasses: **058** (rota também serve o item 057 — identidade coop).
+
 ## Escopo previsto
 
-1. **Server (item irmão no CustomClasses):** rota pública `GET /customclasses/classes` — lista de classes habilitadas com metadados de display (displayName en/pt, description en/pt, iconFile, nameColor, skills, skillMultipliers) + acesso HTTP aos ícones.
-2. **Launcher:** client HTTP da rota; popular `AvailableClasses` no `ClassSelectionViewModel` (remover `LoadMockClasses`); carregar imagem por ícone; render das vantagens/desvantagens conforme decisão de design.
-3. **Fallback:** servidor sem CustomClasses → degradar para `editions[]`+`profileDescriptions{}` vanilla (sem imagem/atributos).
+1. **Server (item 058 do CustomClasses):** rota pública conforme contrato acima, padrão `[Injectable] StaticRouter` (modelo `SkillMultipliersRouter.cs`).
+2. **Launcher:** client HTTP da rota; popular `AvailableClasses` no `ClassSelectionViewModel` (remover `LoadMockClasses`); restyle TRL da tela (lista `trl-nav` + painel de descrição; instala o `TrlVersionFooter` no lugar do footer hardcoded — 013L só liga o dado).
+3. **Fallback:** rota indisponível → degradar para `editions[]`+`profileDescriptions{}` vanilla, sem crash.
 
 ## DoD (resumo)
 
-- Tela lista **exatamente** as classes servidas pelo server (nada de classe fantasma), com imagem e descrição PT.
-- Escolher classe → perfil criado com a edition correta (validar no server).
+- Tela lista **exatamente** as classes servidas pelo server (nada de classe fantasma), com descrição PT.
+- Escolher classe → perfil criado com a edition correta (validar no server — gate humano).
 - Sem o mod no server, a tela degrada sem crash.

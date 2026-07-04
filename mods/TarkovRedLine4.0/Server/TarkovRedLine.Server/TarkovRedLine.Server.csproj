@@ -12,20 +12,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="SPTarkov.Server.Core">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\SPT\SPTarkov.Server.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="SPTarkov.Common">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\SPT\SPTarkov.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="SPTarkov.DI">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\SPT\SPTarkov.DI.dll</HintPath>
-    </Reference>
-    <Reference Include="SPTarkov.Server.Web">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\SPT\SPTarkov.Server.Web.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
+    <!-- NuGet em vez de HintPath local (E:\TORRENT era path de outra máquina) — mesmo padrão validado no CustomClasses.Server -->
+    <PackageReference Include="SPTarkov.Server.Core" Version="4.0.2" />
+    <PackageReference Include="SPTarkov.Server.Web" Version="4.0.2" />
+    <PackageReference Include="SPTarkov.DI" Version="4.0.2" />
+    <PackageReference Include="SPTarkov.Common" Version="4.0.2" />
     <PackageReference Include="SemanticVersioning" Version="3.0.0" />
   </ItemGroup>
 </Project>

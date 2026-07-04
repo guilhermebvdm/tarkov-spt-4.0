@@ -16,14 +16,15 @@
 | 001 | Nova tela de login | Redesign TRL da tela de login (Trello 1 ✅). Entregue no commit 88db747. | [001-tela-login/](./001-tela-login/) | 🟢 code-review pendente |
 | 002 | Tela de criação de conta | Redesign TRL do fluxo de criar conta (Trello 2 ✅). Entregue no commit 88db747. | [002-tela-criacao-conta/](./002-tela-criacao-conta/) | 🟢 code-review pendente |
 | 003 | Tela de classes — listagem | Tela de seleção de classe (lista + painel de detalhe) (Trello 3.1 ✅). Entregue no 88db747, **mas com dados 100% mockados** — dados reais são o 004. | [003-classes-listagem/](./003-classes-listagem/) | 🟢 code-review pendente |
-| 004 | Tela de classes — dados reais (CustomClasses) | Núcleo do card (Trello 3 + 3.2): endpoint público de classes no CustomClasses (item irmão lá) + launcher consome imagem/descrição/skills reais, remove mock, fallback p/ editions vanilla. | [004-classes-dados-reais/](./004-classes-dados-reais/) | ⚪ |
+| 015 | Fundação de tema TRL | Tradução do TRL Design System p/ Avalonia: tokens semânticos `Trl*`, ControlThemes (radius 0, tan accent, vermelho disciplinado), fontes Bender, controles de assinatura (laser, panel, screen-bar) + shim de keys legadas + views-piloto (Login/Register/ConnectServer/notifications). Executa ANTES do 004. | [015-tema-trl-fundacao/](./015-tema-trl-fundacao/) | ⚪ |
+| 004 | Tela de classes — dados reais (CustomClasses) | Núcleo do card (Trello 3 + 3.2): rota pública de classes no CustomClasses (item irmão 058 lá) + launcher consome lista/descrição reais, remove mock, fallback p/ editions vanilla. **Vant/desv e painel de arte descopados (decisão 2026-07-03).** | [004-classes-dados-reais/](./004-classes-dados-reais/) | ⚪ |
 | 005 | Definir senha em conta sem senha | Validar/corrigir o fluxo de criar senha ao logar em conta sem senha (Trello 1.1). `CreatePasswordDialog` já existe — validar ponta a ponta. | [005-definir-senha-conta-sem-senha/](./005-definir-senha-conta-sem-senha/) | ⚪ |
 | 006 | Login Tailscale sem navegador | Ao abrir o launcher, não abrir navegador p/ login do Tailscale (Trello 0 + 0.1). | [006-login-tailscale-sem-navegador/](./006-login-tailscale-sem-navegador/) | ⚪ |
 | 007 | Sincronização de arquivos | Regras por pasta: `config` (preserva divergentes), `config-server` (espelho c/ exclusão), `patchers`/`plugins` (espelho movendo removidos p/ `*-disabled`) + cancelar verificação c/ confirmação + manifesto "X arquivos atualizados" em `/user/launcher` (Trello 4.1, 4.1.1×4, 4.1.2, 4.1.3). | [007-sincronizacao-arquivos/](./007-sincronizacao-arquivos/) | ⚪ |
 | 008 | Opções customizadas: configs performance | Toggle "Usar configs performance" + descrição; sobrepõe `config-performance` do server na `config` do usuário, mantendo divergentes (Trello 4.2 + 4.2.1). Usa o motor de sync do 007. | [008-configs-performance/](./008-configs-performance/) | ⚪ |
 | 009 | Mods opcionais com descrição | Descrição em todos os mods opcionais + toggles: Hollywood Effects, PiP Disable (avaliar desabilitar ExternalResolution), IRL, Visceral (Trello 4.3 + 4.3.2.1–4). | [009-mods-opcionais-descricao/](./009-mods-opcionais-descricao/) | ⚪ |
 | 010 | Botão "Excluir conta" | Excluir conta na tela logada — excluir ≠ wipe (hoje só existe wipe); verificar suporte do server SPT (Trello 4.4). | [010-excluir-conta/](./010-excluir-conta/) | ⚪ |
-| 011 | Lista de mods | Item vago no card (Trello 5) — escopo a refinar na spec com o usuário. Base: `ModInfoCollection`/`TotalModsCard`/`ModInfoView`. | [011-lista-mods/](./011-lista-mods/) | ⚪ |
+| 011 | Lista de mods | **ADIADO (decisão 2026-07-03)** — item vago no card (Trello 5); escopo será definido com o usuário quando sair do adiamento. Base: `ModInfoCollection`/`TotalModsCard`/`ModInfoView`. | [011-lista-mods/](./011-lista-mods/) | ⚫ |
 | 012 | Remover Targram do menu | Remover botão/command Targram dos menus (Trello 6.1). 4 pontos já mapeados. | [012-remover-targram/](./012-remover-targram/) | ⚪ |
 | 013 | Versão do server dinâmica | Server reporta `0.1.0-beta` via arquivo/endpoint; launcher exibe dinamicamente (hoje footers hardcoded) (Trello 6.2). | [013-versao-server-dinamica/](./013-versao-server-dinamica/) | ⚪ |
 | 014 | Release launcher 2.0.0 | Bump de versão (hoje `1.4.7.0`) + strings hardcoded + build + distribuição (Trello 6.3). Fecha o épico — depende de todos. | [014-release-v2/](./014-release-v2/) | ⚪ |
@@ -34,7 +35,7 @@
 
 ## Legenda
 
-- ⚪ Backlog · 🟡 Em progresso · 🟢 Entregue · 🔴 Cancelado
+- ⚪ Backlog · 🟡 Em progresso · 🟢 Entregue · 🔴 Cancelado · ⚫ Adiado/descopado
 
 ## Fluxo
 
