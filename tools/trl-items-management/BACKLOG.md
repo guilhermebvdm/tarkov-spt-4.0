@@ -12,7 +12,7 @@
 |---|---|---|
 | **B-1** teto flea | ✅ **Implementado + testado** | endpoint `GET/POST /api/flea-cap` (dacd3b1) + toggle no topbar (34e395f). Testado: rota (checks.dat atualiza, mults preservados) + UI via Chrome MCP. **Pendente: validação in-game** (desligar → GPU > 2.178M no jogo). |
 | **B-2** virar mod | 🟢 **Spec + SPIKE PROVADO** | spec (203b844) + spike (bf239e7): mod Sdk.Web (`SPTarkov.Server.Web`) serve `wwwroot/index.html` + controller `/api/ping` na Kestrel do SPT (6969) — verificado no boot (mod carregado, 200/200). **Falta: Milestone 1** (portar os endpoints do serve.js + servir o index.html real). |
-| **B-3** buy price | 🟡 **Spec + DECISÃO ESCALADA** | pesquisa revelou: buyback é client-side; server-only muda o recebido mas não o exibido (desync). **Precisa da sua decisão:** rota A (server-only, UX confusa) vs rota B (mod client, coerente). Não implementado de propósito. |
+| **B-3** buy price | ✅ **Implementado (Rota B)** | client (Postfix `TraderClass.GetUserItemPrice`) + server backstop (Prefix `TradeHelper.SellItem`, Harmony) + rota `/trltraderprices/buy-overrides` + UI do viewer ("B" agora editável, espelha o "S"). Build+deploy limpos (client `BepInEx/plugins`, server `user/mods`); boot do SPT confirmado sem erros; API do viewer testada ponta a ponta (Chrome DevTools). **Falta: validação in-game** (vender 1 item com override → exibido = recebido). |
 | **B-4** bulk flea | 🟢 **Spec (adiada)** | spec pronta (abc03cd); depende do B-2 M1 (UI nasce no mod novo). |
 
 ## Baseline (já implementado)
@@ -35,11 +35,17 @@
 - **Viabilidade:** 🟡 alta (re-arquitetura). Ganhos: 1 instalação; **auto-start** (resolve [P-1.2] da memória); sem processo Node separado; sem `serve.js`/`update-vm.ps1`.
 - **A validar:** um server mod SPT consegue registrar rotas HTTP + servir estáticos na porta do SPT? O que muda no deploy? Estratégia de transição (conviver com o Node atual durante a migração?). Onde ficam os dados (`items.json`, caches, `.env`).
 
-### B-3 · Editar preço de COMPRA do trader (buyback)
+### B-3 · Editar preço de COMPRA do trader (buyback) — ✅ Implementado (Rota B)
 - **O quê:** complementar o de venda — editar quanto o **trader paga** por um item (player vende pro trader).
 - **Contexto (assort):** o **assort** é o estoque de loja do trader (`assort.json`: `items` = o que vende + `barter_scheme` = preço/requisito de cada + `loyal_level_items` = loyalty). A feature de **venda** edita o `count` do `barter_scheme`. O **buy price NÃO está no assort** — o SPT o **calcula** (`handbook × buy_price_coef` por trader/loyalty × condição). Por isso o método é diferente.
-- **Viabilidade:** 🟠 média-alta. Override per-item exige o mod **interceptar o cálculo de buyback** (patch no método de preço), não uma edição de campo como na venda. Mesmo mod companion, técnica diferente. O "**B**" que o viewer mostra hoje é **referência do tarkov.dev**, não o buyback real do SPT.
-- **A validar:** ponto de patch onde o SPT calcula o preço de compra do trader; se dá pra override per-item sem quebrar o coeficiente global; se vale a pena vs. ajustar o `buy_price_coef` por trader.
+- **Achado (pesquisa 2026-07-04):** o buyback é calculado **inteiramente no cliente** (`TraderClass.GetUserItemPrice`); o servidor só confia no `sellRequest.Price` agregado que o cliente manda (`TradeHelper.SellItem`). Um patch só-server mudaria o dinheiro recebido mas não o exibido (desync).
+- **Implementação (Rota B — client + server, mesmo override):**
+  - Config: `user/mods/TRLTraderPrices/config/buy-overrides.json` (mesma shape do sell: `traderId → tpl → {count, currency}`).
+  - Client (`mods/TRLTraderPrices/modded/Client/`, novo projeto BepInEx): Postfix em `TraderClass.GetUserItemPrice` (padrão `GetBarterPricePatch` do Skills-Extended) — reescreve o preço exibido na tela de venda.
+  - Server (`mods/TRLTraderPrices/modded/Server/`): Harmony Prefix em `TradeHelper.SellItem` (backstop — garante que o dinheiro creditado bate com o exibido) + `StaticRouter` servindo `/trltraderprices/buy-overrides` pro client ler o mesmo config.
+  - Viewer: coluna "B" (antes só referência do tarkov.dev) agora **editável**, espelhando a UI/API do "S" (`PATCH /api/trader-buy-price`).
+- **Validado:** build limpo (client+server), boot do SPT sem erros (Harmony aplicado, rota respondendo), round-trip da API do viewer via Chrome DevTools (editar → override aplicado com badge → restaurar → estado limpo).
+- **Pendente:** validação in-game (vender 1 item com override setado → confirmar que o preço exibido na tela E o dinheiro recebido batem com o override).
 
 ### B-4 · Bulk: copiar preço tarkov.dev / tarkov-market → override de FLEA
 - **O quê:** multi-selecionar itens + ação "copiar preço [tarkov.dev | tarkov-market]" → aplica como override de **flea** (decidido: alvo = flea) **em massa**.

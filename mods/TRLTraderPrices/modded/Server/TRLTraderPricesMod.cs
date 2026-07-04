@@ -1,3 +1,4 @@
+using HarmonyLib;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;                       // IOnLoad, OnLoadOrder
 using SPTarkov.Server.Core.Helpers;                  // PaymentHelper
@@ -49,8 +50,10 @@ public class TRLTraderPricesMod(
     ///     Per-tpl override: the native <c>Count</c> the game charges and the <c>Currency</c> it is
     ///     denominated in ("RUB" | "USD" | "EUR" | "GP"). Count is a double because BarterScheme.Count is
     ///     <c>double?</c>. Currency may be absent/empty, in which case the override applies to any money entry.
+    ///     Shared shape between the sell (<c>overrides.json</c>) and buy (<c>buy-overrides.json</c>, B-3)
+    ///     configs — <see cref="TraderBuyPricePatch"/> reuses this record.
     /// </summary>
-    private sealed record TraderOverride
+    internal sealed record TraderOverride
     {
         // The overrides.json keys are lowercase ("count"/"currency"); SPT's JsonUtil binds
         // case-sensitively, so without these attributes Count deserialized to 0 (free items!)
@@ -58,6 +61,23 @@ public class TRLTraderPricesMod(
         [JsonPropertyName("count")]    public double Count { get; init; }
         [JsonPropertyName("currency")] public string? Currency { get; init; }
     }
+
+    /// <summary>
+    ///     B-3: parsed <c>buy-overrides.json</c> (traderId → tpl → override), read by the Harmony backstop
+    ///     <see cref="TraderBuyPricePatch"/> at <c>TradeHelper.SellItem</c> time. Pre-parsed into
+    ///     <see cref="MongoId"/> keys at load (not raw strings) so the patch does zero string parsing on
+    ///     the request path. Null until <see cref="OnLoad"/> runs; empty (not null) once loaded with no
+    ///     entries.
+    /// </summary>
+    internal static Dictionary<MongoId, Dictionary<MongoId, TraderOverride>>? BuyOverrides;
+
+    /// <summary>Exposed to <see cref="TraderBuyPricePatch"/> (a static Harmony patch has no DI) to resolve <c>trader.Base.Currency</c>.</summary>
+    internal static DatabaseService? Db;
+
+    /// <summary>Exposed to <see cref="TraderBuyPricePatch"/> for diagnostics (same pattern as OutfitPersistenceFixMod).</summary>
+    internal static ISptLogger<TRLTraderPricesMod>? Log;
+
+    private static bool _harmonyPatched;
 
     /// <summary>Maps an override currency code to its Money tpl. Returns null for unknown/empty (match any money entry).</summary>
     private static MongoId? CurrencyToMoneyTpl(string? currency)
@@ -253,6 +273,118 @@ public class TRLTraderPricesMod(
             logger.Error("[TRLTraderPrices] failed to load/apply overrides: " + ex);
         }
 
+        // B-3: expose Db/Log to the static Harmony patch (no DI in a HarmonyPatch class), patch
+        // TradeHelper.SellItem once (idempotent — OnLoad can in principle run more than once), and
+        // load the buy-side config. Kept in its own try/catch so a Harmony/config failure here can
+        // never take down the sell-override logic above (or vice versa).
+        Db = databaseService;
+        Log = logger;
+
+        if (!_harmonyPatched)
+        {
+            try
+            {
+                new Harmony("trltraderbuyprice.trl").PatchAll(typeof(TRLTraderPricesMod).Assembly);
+                _harmonyPatched = true;
+                logger.Info("[TRLTraderPrices] Harmony patch applied — buy price backstop (TradeHelper.SellItem).");
+            }
+            catch (Exception ex)
+            {
+                logger.Error("[TRLTraderPrices] failed to apply Harmony patch (buy price backstop): " + ex.Message);
+            }
+        }
+
+        try
+        {
+            var buyConfigPath = Path.Combine(fileUtil.GetModPath("TRLTraderPrices"), "config", "buy-overrides.json");
+            var rawBuyOverrides = jsonUtil.DeserializeFromFile<Dictionary<string, Dictionary<string, TraderOverride>>>(buyConfigPath);
+            BuyOverrides = ParseBuyOverrides(rawBuyOverrides, logger);
+        }
+        catch (Exception ex)
+        {
+            logger.Error("[TRLTraderPrices] failed to load buy-overrides.json: " + ex.Message);
+            BuyOverrides = new Dictionary<MongoId, Dictionary<MongoId, TraderOverride>>();
+        }
+
         return Task.CompletedTask;
+    }
+
+    /// <summary>
+    ///     Validates + pre-parses the raw buy-overrides.json map into MongoId keys so
+    ///     <see cref="TraderBuyPricePatch"/> does zero string parsing per sell request. Fence is dropped
+    ///     at load (dynamic assort — a buyback override there would be meaningless/unsafe). Malformed
+    ///     traderId/tpl entries are dropped and counted, mirroring the sell-side loader above.
+    /// </summary>
+    private static Dictionary<MongoId, Dictionary<MongoId, TraderOverride>> ParseBuyOverrides(
+        Dictionary<string, Dictionary<string, TraderOverride>>? raw,
+        ISptLogger<TRLTraderPricesMod> logger)
+    {
+        var result = new Dictionary<MongoId, Dictionary<MongoId, TraderOverride>>();
+        if (raw is null || raw.Count == 0)
+        {
+            logger.Info("[TRLTraderPrices] No buy-overrides configured (config/buy-overrides.json empty or missing) — buyback backstop inert.");
+            return result;
+        }
+
+        var badTrader = 0;
+        var badTpl = 0;
+        var entries = 0;
+
+        foreach (var (traderIdStr, tplMap) in raw)
+        {
+            if (string.IsNullOrWhiteSpace(traderIdStr) || traderIdStr.Length != 24)
+            {
+                badTrader++;
+                continue;
+            }
+
+            MongoId traderId;
+            try
+            {
+                traderId = new MongoId(traderIdStr);
+            }
+            catch
+            {
+                badTrader++;
+                continue;
+            }
+
+            if (traderId == FenceId || tplMap is null)
+            {
+                continue;
+            }
+
+            if (!result.TryGetValue(traderId, out var parsedTplMap))
+            {
+                parsedTplMap = new Dictionary<MongoId, TraderOverride>();
+                result[traderId] = parsedTplMap;
+            }
+
+            foreach (var (tplStr, ovr) in tplMap)
+            {
+                if (ovr is null || string.IsNullOrWhiteSpace(tplStr) || tplStr.Length != 24)
+                {
+                    badTpl++;
+                    continue;
+                }
+
+                MongoId tpl;
+                try
+                {
+                    tpl = new MongoId(tplStr);
+                }
+                catch
+                {
+                    badTpl++;
+                    continue;
+                }
+
+                parsedTplMap[tpl] = ovr;
+                entries++;
+            }
+        }
+
+        logger.Info($"[TRLTraderPrices] buy-overrides.json: {entries} entr{(entries == 1 ? "y" : "ies")} parsed (badTrader {badTrader}, badTpl {badTpl}).");
+        return result;
     }
 }
