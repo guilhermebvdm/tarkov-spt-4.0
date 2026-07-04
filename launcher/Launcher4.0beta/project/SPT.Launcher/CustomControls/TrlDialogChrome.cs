@@ -18,5 +18,18 @@ namespace SPT.Launcher.CustomControls
             get => GetValue(TitleProperty);
             set => SetValue(TitleProperty, value);
         }
+
+        /// <summary>
+        /// Optional content docked to the right side of the header bar —
+        /// typically a close (✕) button wired to the DialogHost close command.
+        /// </summary>
+        public static readonly StyledProperty<object?> HeaderContentProperty =
+            AvaloniaProperty.Register<TrlDialogChrome, object?>(nameof(HeaderContent));
+
+        public object? HeaderContent
+        {
+            get => GetValue(HeaderContentProperty);
+            set => SetValue(HeaderContentProperty, value);
+        }
     }
 }

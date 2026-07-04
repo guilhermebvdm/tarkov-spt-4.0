@@ -4,6 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:cc="using:SPT.Launcher.CustomControls"
              xmlns:cvt="using:SPT.Launcher.Converters"
+             xmlns:helpers="using:SPT.Launcher.Helpers"
+             xmlns:base="clr-namespace:SPT.Launcher;assembly=SPT.Launcher.Base"
              mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="720"
              x:Class="SPT.Launcher.Views.RegisterView">
 
@@ -56,7 +58,9 @@
                     </StackPanel>
 
                     <!-- Footer (Versão) -->
-                    <cc:TrlVersionFooter Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,15"/>
+                    <cc:TrlVersionFooter Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,15"
+                                         LauncherVersion="{x:Static helpers:LauncherUpdateHelper.CurrentVersion}"
+                                         ServerVersion="{x:Static base:ServerManager.TrlServerVersion}"/>
                 </Grid>
             </Border>
         </Grid>

@@ -17,6 +17,35 @@ namespace SPT.Launcher
     {
         public static ServerInfo SelectedServer { get; private set; } = null;
 
+        /// <summary>
+        /// Versão TRL do servidor (endpoint /redline/server/version). "—" enquanto
+        /// desconhecida ou se o fetch falhar; populada após o connect bem-sucedido.
+        /// </summary>
+        public static string TrlServerVersion { get; private set; } = "—";
+
+        private class TrlServerVersionResponse
+        {
+            public string version { get; set; }
+        }
+
+        private static void LoadTrlServerVersion()
+        {
+            try
+            {
+                string json = RequestHandler.RequestTrlServerVersion();
+                var data = Json.Deserialize<TrlServerVersionResponse>(json);
+
+                if (!string.IsNullOrWhiteSpace(data?.version))
+                {
+                    TrlServerVersion = data.version;
+                }
+            }
+            catch
+            {
+                // mantém "—" — footer nunca deve quebrar por falha de rede
+            }
+        }
+
         public static bool PingServer()
         {
             string json = "";
@@ -106,6 +135,8 @@ namespace SPT.Launcher
                 SelectedServer = null;
                 return false;
             }
+
+            LoadTrlServerVersion();
 
             return true;
         }

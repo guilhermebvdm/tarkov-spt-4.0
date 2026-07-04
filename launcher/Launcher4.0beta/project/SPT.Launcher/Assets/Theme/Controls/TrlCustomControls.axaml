@@ -66,13 +66,18 @@
 						        Background="{DynamicResource TrlScreenBarBgBrush}"
 						        BorderBrush="{DynamicResource TrlEdgeBrush}"
 						        BorderThickness="0,0,0,1"
-						        Padding="12,0">
-							<TextBlock Text="{TemplateBinding Title}"
-							           VerticalAlignment="Center"
-							           FontFamily="{DynamicResource TrlFontDisplay}"
-							           FontSize="{DynamicResource TrlTextXs}"
-							           LetterSpacing="{DynamicResource TrlTrackWider}"
-							           Foreground="{DynamicResource TrlAccentBrush}"/>
+						        Padding="12,0,6,0">
+							<DockPanel>
+								<ContentPresenter DockPanel.Dock="Right"
+								                  Content="{TemplateBinding HeaderContent}"
+								                  VerticalAlignment="Center"/>
+								<TextBlock Text="{TemplateBinding Title}"
+								           VerticalAlignment="Center"
+								           FontFamily="{DynamicResource TrlFontDisplay}"
+								           FontSize="{DynamicResource TrlTextXs}"
+								           LetterSpacing="{DynamicResource TrlTrackWider}"
+								           Foreground="{DynamicResource TrlAccentBrush}"/>
+							</DockPanel>
 						</Border>
 						<ContentPresenter Content="{TemplateBinding Content}"
 						                  ContentTemplate="{TemplateBinding ContentTemplate}"

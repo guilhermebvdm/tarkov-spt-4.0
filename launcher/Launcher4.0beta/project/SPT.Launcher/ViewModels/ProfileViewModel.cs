@@ -63,7 +63,8 @@ namespace SPT.Launcher.ViewModels
         // === Mods Opcionais Dinâmicos ===
         public ObservableCollection<OptionalModToggle> OptionalMods { get; } = new ObservableCollection<OptionalModToggle>();
 
-        private string _serverVersion = "1.5.7";
+        // Fonte canônica: GET /redline/server/version, buscada pelo ServerManager no connect (item 013)
+        private string _serverVersion = ServerManager.TrlServerVersion;
         public string ServerVersion
         {
             get => _serverVersion;
@@ -214,23 +215,9 @@ namespace SPT.Launcher.ViewModels
 
         private async Task InitializeAsync()
         {
-            try
-            {
-                string configPath = Path.Combine(LauncherSettingsProvider.Instance.GamePath, "SPT", "user", "mods", "TarkovRedLine-ServerMod", "config.json");
-                if (File.Exists(configPath))
-                {
-                    var config = JObject.Parse(File.ReadAllText(configPath));
-                    if (config["serverVersion"] != null)
-                    {
-                        ServerVersion = config["serverVersion"].ToString();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogManager.Instance.Warning($"[Profile] Failed to parse ServerMod config.json: {ex.Message}");
-            }
-
+            // Item 013: versão do server agora vem do endpoint /redline/server/version
+            // (populada no connect via ServerManager) — o read do config.json do
+            // TarkovRedLine-ServerMod foi removido por ser fonte local defasável.
             await CheckForUpdates();
         }
 
@@ -832,6 +819,58 @@ namespace SPT.Launcher.ViewModels
             if (result is bool b && !b) return;
 
             await WipeProfile(AccountManager.SelectedAccount.edition);
+        }
+
+        /// <summary>
+        /// Item 010 — exclusão definitiva da conta (≠ wipe): confirmação forte
+        /// digitando o username, remove no server, limpa auto-login e volta ao login.
+        /// </summary>
+        public async Task DeleteAccountCommand()
+        {
+            string username = AccountManager.SelectedAccount.username;
+
+            var dialog = new DeleteAccountDialogViewModel(null, username);
+            var result = await ShowDialog(dialog);
+
+            if (result is not bool confirmed || !confirmed) return;
+
+            LogManager.Instance.Info($"[Profile] Excluindo conta '{username}'...");
+            AccountStatus status = await AccountManager.RemoveAsync();
+
+            switch (status)
+            {
+                case AccountStatus.OK:
+                    {
+                        // Sem isso o auto-login tentaria uma conta que não existe mais
+                        LauncherSettingsProvider.Instance.Server.AutoLoginCreds = null;
+                        LauncherSettingsProvider.Instance.SaveSettings();
+
+                        AccountManager.Logout(); // idempotente — Remove() já anulou a conta
+
+                        LogManager.Instance.Info($"[Profile] Conta '{username}' excluída.");
+                        SendNotification("", $"Conta '{username}' excluída definitivamente.",
+                            Avalonia.Controls.Notifications.NotificationType.Success);
+
+                        NavigateTo(new LoginViewModel(HostScreen, true));
+                        break;
+                    }
+                case AccountStatus.NoConnection:
+                    {
+                        LogManager.Instance.Error($"[Profile] Falha ao excluir conta '{username}': sem conexão.");
+                        SendNotification("", "Sem conexão com o servidor — a conta não foi excluída.",
+                            Avalonia.Controls.Notifications.NotificationType.Error);
+
+                        NavigateTo(new ConnectServerViewModel(HostScreen));
+                        break;
+                    }
+                default:
+                    {
+                        LogManager.Instance.Error($"[Profile] Falha ao excluir conta '{username}': {status}.");
+                        SendNotification("", "Falha ao excluir a conta no servidor. Tente novamente.",
+                            Avalonia.Controls.Notifications.NotificationType.Error);
+                        break;
+                    }
+            }
         }
 
         public async Task CopyCommand(object parameter)

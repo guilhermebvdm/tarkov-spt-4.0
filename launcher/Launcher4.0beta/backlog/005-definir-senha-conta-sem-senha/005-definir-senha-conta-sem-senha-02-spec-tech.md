@@ -63,3 +63,33 @@ Na volta, a leitura (`POST /redline/profile/get`, `PasswordController.cs:148-193
 1. **Mata o D1 (launcher, ~3 linhas):** em `ClassSelectionViewModel`, após `RegisterAsync == OK` (`ClassSelectionViewModel.cs:87-91`), chamar `await AccountManager.ChangePasswordAsync(_password)` para semear o cofre; falha → notificar e seguir (o usuário cai no dialog no próximo login, comportamento atual).
 2. **Opcional 005S (server, se quiser endurecer — fora do W2):** no `/redline/password/change`, exigir `request.password == vault[username]` quando o cofre já tem senha não-vazia (troca livre só quando não há senha) — resolve D2 sem quebrar o reset HWID (que zera o cofre antes); normalizar a chave do cofre para lowercase invariant nas três operações + migração lazy das chaves existentes — resolve D4.
 3. D3/D5 ficam registrados; não bloqueiam o 005.
+
+## Launcher (005L) — entregue
+
+Executado em 2026-07-04 (W2). **D1 não é deste item** — fica no 004L (`ClassSelectionViewModel` é de outro agente; intocado aqui).
+
+### Server — `Controllers/PasswordController.cs`
+
+- **D4 (aplicado):** cofre com casing consistente com o match de profile.
+  - Novo helper `GetVaultPassword(username)` — lookup **case-insensitive** (cobre chaves novas lowercase e legadas com casing original), usado no `/redline/profile/get` (injeção) e no gate do change.
+  - Escrita: chave normalizada `ToLowerInvariant()` + **migração lazy** — remove do cofre qualquer chave duplicada que difira só no casing antes de gravar.
+- **D2 (aplicado — decisão registrada):** gate no `/redline/password/change`: se o cofre já tem senha **não-vazia** para o username, `request.password` precisa bater com ela; senão `FAILED`. Troca livre continua quando não há senha (criação) — e o reset HWID **não quebra**: verificado no código que o `HwidManager.ResetPassword` (porta 7075) só valida HWID (não zera o cofre — a auditoria supunha que zerava), mas o launcher faz `LoginAsync` **antes** do `ChangePasswordAsync("")` (`LoginViewModel.cs`, ResetPasswordCommand), e o login popula `SelectedAccount.password` com a senha real vinda do cofre via `/redline/profile/get` — então `request.password` sempre chega correto. Todos os callers atuais passam pelo `AccountManager.ChangePassword`, que envia a senha corrente. **Server-only, sem mudança de contrato** → implementado (P-005.2 não foi necessária). Bônus: o edge "dois clientes criam senha ao mesmo tempo" (§2) agora falha explícito no segundo em vez de sobrescrever silenciosamente.
+  - *Ressalva:* enquanto D3 existir (senha plaintext no `/redline/profile/get`), o D2 protege contra troca cega, não contra quem consulta a senha antes. Registrado, sem fix agora.
+- **D5 (parcial):** removida a variável morta `userFound` (CS0219 — warnings do projeto caíram 33→31); o loop do change agora **pula `redline_passwords.json`** (mesmo skip do ProfileInfo — elimina o ruído de log). **Pulados com anotação:** rotação/CWD do `password_debug_log.txt` (útil em produção pra depurar o próprio 005; mover pro `BaseDirectory` + rotação fica pra limpeza futura) e a validação em jogo do round-trip de `ExtensionData` (mitigada pelo cofre).
+- Build gate: `dotnet build TarkovRedLine.Server.csproj -c Release` → **0 erros** (31 warnings pré-existentes de nullability). **Deploy da DLL no server necessário** para valer (rotina padrão: parar SPT.Server → copiar → reiniciar).
+
+### Launcher — dialogs → `TrlDialogChrome` (só XAML, VMs/commands intactos)
+
+Todos os 5 dialogs reescritos no chrome do tema (head 34px com título + ✕ à direita via slot `HeaderContent`, criado no item 010; ações à direita: cancelar `.ghost` + confirmar `.primary`/`.danger`):
+
+| Dialog | Título | Confirmar | Nota do ✕ |
+|---|---|---|---|
+| `CreatePasswordDialogView` | `{Binding Title}` (localizado) | `.primary` (param `Password`) | sem param → null = cancela (caller checa `is string`) |
+| `ConfirmationDialogView` | `CONFIRMAÇÃO` | `.primary` (gate `AllowConfirm`) | param `False` **obrigatório** — null seria lido como confirmado (`result is bool b && !b`) |
+| `WarningDialogView` | `ATENÇÃO` | `.primary` (OK único) | sem param (resultado ignorado) |
+| `RegisterDialogView` | `CRIAR CONTA` | `.primary` (param = VM, `CanRegister`, `IsDefault`) | sem param → null = cancela |
+| `ChangeEditionDialogView` | `MUDAR EDIÇÃO DO PERFIL` | **`.danger`** (confirmar dispara wipe) | sem param → null = cancela (caller checa `is SPTEdition`) |
+
+Hex/brushes legados (`BackgroundBrush`, `IndianRed`, `AltAccentBrush`, `BackgroundBrush2`, CornerRadius 10) removidos → tokens `Trl*`/classes `trl-*`. Nenhum binding/command alterado; a única mudança estrutural é a ordem visual dos botões (cancelar à esquerda do confirmar). Build launcher → **0 erros**.
+
+**Pendência visual (não bloqueante):** o popup do DialogHost não tem override de estilo no tema; o chrome opaco deve cobrir o card default (CornerRadius/DialogMargin já são 0 no `MainWindow`), mas se sobrar um anel claro na validação em runtime, estilizar o `DialogHost` (Background/dialog surface) no tema.

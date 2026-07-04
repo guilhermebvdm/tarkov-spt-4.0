@@ -50,3 +50,14 @@ Metade cliente, a executar em item próprio (W2):
 3. **Binding nos footers** — substituir o texto hardcoded "Versão do servidor: 0.10" pelo binding da propriedade (via `TrlVersionFooter`, que nasce no item 015 — tema TRL fundação) nas views que hoje têm o footer hardcoded: `LoginView.axaml`, `RegisterView.axaml`. `ClassSelectionView.axaml` fica de fora — o item 004L (classes com dados reais) é quem instala o `TrlVersionFooter` lá. ProfileView: verificar na hora — a varredura de hoje não encontrou o padrão "Versão do servidor" nela.
 
 Dependências: 015 (`TrlVersionFooter`) para o passo 3; passos 1–2 são independentes e podem ir antes.
+
+## Launcher (013L) — entregue
+
+Executado em 2026-07-04 conforme o plano acima. Detalhes em [013-versao-server-dinamica-05-asbuild.md](./013-versao-server-dinamica-05-asbuild.md).
+
+- `RequestHandler.RequestTrlServerVersion()` → `GET /redline/server/version` com `decompressResponse: false` (endpoint redline responde JSON puro, sem zlib — mesmo motivo do `RequestAccount`). Para isso, `Request.GetJson()` ganhou o parâmetro opcional `decompressResponse` (default `true`, espelho do `PostJson` — nenhum caller existente muda de comportamento).
+- `ServerManager.TrlServerVersion` (default `"—"`), populada por `LoadTrlServerVersion()` chamado no fim de `LoadServer()` após connect bem-sucedido; qualquer falha mantém `"—"`. (Desvio menor do plano: sem método `GetTrlServerVersion()` público — a propriedade estática basta para os consumidores atuais.)
+- Footers de `LoginView`/`RegisterView`: `TrlVersionFooter` recebeu `LauncherVersion="{x:Static LauncherUpdateHelper.CurrentVersion}"` e `ServerVersion="{x:Static ServerManager.TrlServerVersion}"` (views só existem depois do connect, então o valor estático já está resolvido). `ClassSelectionView` intocada (004L).
+- `ProfileViewModel.ServerVersion`: default `"1.5.7"` → `ServerManager.TrlServerVersion`; o read do `config.json` do TarkovRedLine-ServerMod em `InitializeAsync()` foi **removido** (fonte local defasável, substituída pelo endpoint).
+
+**Build gate:** `dotnet build SPT.Launcher.csproj` → **0 erros** (126 warnings pré-existentes de nullability/CA1416).
