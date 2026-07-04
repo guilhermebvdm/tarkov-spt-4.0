@@ -30,13 +30,21 @@ internal static class ClassIdentityView
     public static void ApplyGradient(TextMeshProUGUI tmp, Color baseColor)
     {
         var light = Color.Lerp(baseColor, Color.white, GradientLighten);
-        // Fix 2026-07-04 ("texto bem mais escuro que o ícone", feedback com prints): o TMP MULTIPLICA o
-        // vertex gradient pela cor base (tmp.color) — com AMBOS na cor da classe o render era cor×cor
-        // (cinza 0.55 → 0.30). A cor vive SÓ no gradiente; a base fica branca (fallback: branco se o
-        // gradient for ignorado). O ícone nunca sofreu disso (cor embutida na textura, vértice branco).
-        tmp.color = Color.white;
+        // Fix 2026-07-04 v2 ("nome do menu ainda escuro" — Menu-Overhaul): o TMP MULTIPLICA o vertex gradient
+        // pela cor base (tmp.color). A v1 pôs a cor SÓ no gradiente (base branca) — mas o MO repinta o nome do
+        // MENU com o AccentColor (= a cor da classe, que a NOSSA MenuOverhaulBridge injeta lá) via tmp.color →
+        // cor×cor voltava por essa porta. v2 INVERTE o portador: a cor vive no tmp.color (topo clareado) e o
+        // gradiente vira um RATIO ≤1 (topo=1, base=base/topo) → topo×1 = claro, topo×ratio = cor base. Quem
+        // quer que escreva .color por último (nós/MO/EFT) nunca eleva ao quadrado — no pior caso (MO escreve o
+        // accent = mesma cor) o render continua a cor da classe. `light` ≥ 0.15 por canal (Lerp c/ branco).
+        var ratio = new Color(
+            light.r > 0f ? baseColor.r / light.r : 1f,
+            light.g > 0f ? baseColor.g / light.g : 1f,
+            light.b > 0f ? baseColor.b / light.b : 1f,
+            1f);
+        tmp.color = light;
         tmp.enableVertexGradient = true;
-        tmp.colorGradient = new VertexGradient(light, light, baseColor, baseColor);   // TL, TR, BL, BR
+        tmp.colorGradient = new VertexGradient(Color.white, Color.white, ratio, ratio);   // TL, TR, BL, BR
     }
 
     /// <summary>(015) Aplica o gradiente da classe a um TMP (resolve a cor do hex). No-op se tmp null.</summary>
