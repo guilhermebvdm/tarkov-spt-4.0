@@ -68,4 +68,5 @@ As linhas do catálogo **"Steady Arms" (Iron Lungs, ×0.65)** e **"Tireless Arms
 prometem efeito inativo → marcar `pending: true` nas duas linhas no próximo build round (1 linha cada em
 `PerksCatalog.cs`).
 
-**Próximo passo:** usuário escolhe (a) ou (b) → `/create-spec 051` com a decisão fixada.
+**Próximo passo:** ~~usuário escolhe (a) ou (b)~~ → **DECIDIDO 2026-07-03: opção (a) — coordenar via hook de
+composição no `StaminaController`** (decisão do usuário). Spec funcional criada com a decisão fixada.

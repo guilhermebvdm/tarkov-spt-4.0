@@ -42,6 +42,7 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 | `Class Detail on Loading Screen` | Detalhe da classe no loading | bool | `true` | Mostra o detalhe da sua classe (perks/drawbacks) no seu nome na tela de carregamento da raid (FIKA). (item 055) |
 | `Weight Marker — X offset` | Marcador do peso — offset X | float | `0` | Ajuste horizontal (px) do marcador `▲ +X%` no peso (aba Health). Negativo = esquerda. Faixa −600..600. (item 056) |
 | `Weight Marker — Y offset` | Marcador do peso — offset Y | float | `0` | Ajuste vertical (px) do marcador `▲ +X%` no peso (aba Health). Positivo = para cima. Faixa −600..600. (item 056) |
+| `Class Detail — Loading panel scale` | Popover do loading — escala | float | `0.75` | Escala (zoom-out) do popover de classe no deploy/loading (0.75 = 75%). Mesma área na tela, conteúdo menor → mais espaço pros cards. Faixa 0.5..1.0. Lido a cada hover (live). (item 055) |
 
 ## Histórico
 
@@ -51,3 +52,4 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 | 2026-07-02 | Item 059 — adicionada seção `Perks — UI` com `Class Tab — X offset` (ajuste da posição da aba CLASS). |
 | 2026-07-02 | Item 055 — `Class Detail on Loading Screen` (detalhe da classe no loading da raid, FIKA). |
 | 2026-07-03 | Item 056 — `Weight Marker — X/Y offset` (posicionar o marcador ▲ +X% do peso). |
+| 2026-07-03 | Item 055 — `Class Detail — Loading panel scale` (zoom-out do popover; faltava documentar — pego na varredura de pendências). |
