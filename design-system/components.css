@@ -64,6 +64,16 @@
   box-shadow: var(--trl-focus-ring);
 }
 
+/* every clickable thing gets the hand — safety net on top of the
+ * per-component rules */
+.trl-app button:not(:disabled),
+.trl-app a[href],
+.trl-app select,
+.trl-app summary,
+.trl-app [role="button"] {
+  cursor: pointer;
+}
+
 /* Scrollbars — recessed gunmetal track, tan on hover.
  * Both selectors: descendants AND the .trl-app element itself (covers the
  * viewport scrollbar when .trl-app sits on <body>). */
@@ -608,6 +618,7 @@
   background: var(--trl-accent-strong);
   border-color: var(--trl-accent-strong);
   color: var(--trl-fg-on-accent);
+  box-shadow: var(--trl-glow-tan);
 }
 
 .trl-btn--danger {
@@ -622,6 +633,7 @@
   background: var(--trl-red-400);
   border-color: var(--trl-red-400);
   color: #fff;
+  box-shadow: 0 0 6px rgba(217, 44, 32, .40);
 }
 
 .trl-btn--ghost {
@@ -739,6 +751,46 @@ textarea.trl-input {
   color: var(--trl-fg);
 }
 
+/* customizable select (Chromium): the OS blue highlight dies here — the
+ * picker becomes a DS panel. Browsers without support keep the native
+ * picker (or use .trl-dropdown for full control everywhere). */
+.trl-select,
+.trl-select::picker(select) {
+  appearance: base-select;
+}
+
+.trl-select::picker(select) {
+  background: var(--trl-surface-2);
+  border: var(--trl-border-w) solid var(--trl-edge-strong);
+  box-shadow: var(--trl-shadow-2);
+  padding: 0;
+  margin-top: 2px;
+}
+
+.trl-select::picker-icon { display: none; }  /* keep the token caret */
+
+.trl-select option {
+  padding: var(--trl-space-2) var(--trl-space-3);
+  font-family: var(--trl-font-body);
+  font-size: var(--trl-text-md);
+  color: var(--trl-fg-muted);
+  transition: background var(--trl-dur-1) var(--trl-ease),
+              color var(--trl-dur-1) var(--trl-ease);
+}
+
+.trl-select option:hover,
+.trl-select option:focus {
+  background: var(--trl-bg-hover);
+  color: var(--trl-fg);
+}
+
+.trl-select option:checked {
+  background: var(--trl-bg-active);
+  color: var(--trl-accent);
+}
+
+.trl-select option::checkmark { color: var(--trl-accent); }
+
 /* ── Checkbox & radio ───────────────────────────────────────────────────── */
 .trl-checkbox,
 .trl-radio {
@@ -768,24 +820,26 @@ textarea.trl-input {
 
 .trl-radio input { border-radius: 50%; }
 
+.trl-checkbox input::before,
+.trl-radio input::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  background: var(--trl-accent);
+  transform: scale(0);
+  transition: transform var(--trl-dur-2) var(--trl-ease);
+}
+
+.trl-radio input::before { border-radius: 50%; }
+
 .trl-checkbox input:checked,
 .trl-radio input:checked {
   border-color: var(--trl-accent);
 }
 
-.trl-checkbox input:checked::before {
-  content: "";
-  width: 7px;
-  height: 7px;
-  background: var(--trl-accent);
-}
-
+.trl-checkbox input:checked::before,
 .trl-radio input:checked::before {
-  content: "";
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--trl-accent);
+  transform: scale(1);
 }
 
 .trl-checkbox:hover,
@@ -972,7 +1026,8 @@ textarea.trl-input {
 .trl-dropdown.is-open .trl-dropdown__panel,
 .trl-multiselect.is-open .trl-multiselect__panel {
   display: block;
-  animation: trl-fade-in var(--trl-dur-2) var(--trl-ease);
+  transform-origin: top center;
+  animation: trl-pop var(--trl-dur-2) var(--trl-ease);
 }
 
 .trl-dropdown__option,
@@ -1126,7 +1181,12 @@ textarea.trl-input {
   background: var(--trl-accent);
   border: var(--trl-border-w) solid var(--trl-tan-100);
   cursor: grab;
+  transition: box-shadow var(--trl-dur-1) var(--trl-ease);
 }
+
+.trl-slider::-webkit-slider-thumb:hover { box-shadow: var(--trl-glow-tan); }
+
+.trl-slider:active::-webkit-slider-thumb { cursor: grabbing; }
 
 .trl-slider::-moz-range-thumb {
   width: 12px;
@@ -1630,7 +1690,7 @@ textarea.trl-input {
   border-left-color: var(--trl-accent);
   box-shadow: var(--trl-shadow-2);
   padding: var(--trl-space-2) var(--trl-space-3);
-  animation: trl-fade-in var(--trl-dur-3) var(--trl-ease);
+  animation: trl-slide-in var(--trl-dur-3) var(--trl-ease);
 }
 
 .trl-toast__title {
@@ -2330,6 +2390,11 @@ textarea.trl-input {
 @keyframes trl-fade {
   from { opacity: 0; }
   to   { opacity: 1; }
+}
+
+@keyframes trl-slide-in {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
 /* modal entrance — settles into place */

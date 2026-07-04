@@ -121,7 +121,7 @@ O painel que edita dados troca o dot conforme o estado:
 
 ### Barra de filtros
 
-`trl-toolbar` com `trl-search` + um `trl-multiselect` por dimensão (trader, categoria…): trigger mostra o rótulo da dimensão + `__count` da seleção; painel fica **aberto entre cliques** (toggle de `is-checked` é JS do consumidor) e fecha no clique fora; `__actions` traz Select all/Clear. Lista longa (categorias, 100+ opções)? `__search` sticky no topo do painel (filtragem é JS do consumidor). Abaixo da toolbar, os filtros aplicados viram uma linha de `trl-filter-chip` (`dimensão: <b>valor</b>` + `__remove`) com um botão ghost "Clear all" no fim — o usuário vê e desfaz o estado do filtro sem abrir dropdown. Para seleção única, use `trl-dropdown`; para booleano, `trl-switch`.
+`trl-toolbar` com `trl-search` + um `trl-multiselect` por dimensão (trader, categoria…): trigger mostra o rótulo da dimensão + `__count` da seleção; painel fica **aberto entre cliques** (toggle de `is-checked` é JS do consumidor) e fecha no clique fora; `__actions` traz Select all/Clear. Lista longa (categorias, 100+ opções)? `__search` sticky no topo do painel (filtragem é JS do consumidor). Abaixo da toolbar, os filtros aplicados viram uma linha de `trl-filter-chip` (`dimensão: <b>valor</b>` + `__remove`) com um botão ghost "Clear all" no fim — o usuário vê e desfaz o estado do filtro sem abrir dropdown. Para seleção única, use `trl-dropdown`; para booleano, `trl-switch`. O `.trl-select` nativo tem picker estilizado pelos tokens via `appearance: base-select` (Chromium — elimina o highlight azul do SO); em browser sem suporte o picker volta ao nativo — se isso importar, use `trl-dropdown`.
 
 ### Dashboard de stats
 

@@ -8,6 +8,8 @@ Primeira versão. Inclui o bloco **H. Game data** (primitivos de domínio Tarkov
 
 Filtros: `trl-multiselect` (dropdown de checkboxes com count no trigger, counts por opção, `__search` sticky p/ listas longas, Select all/Clear; painel persiste entre cliques) + `trl-filter-chip` (chips de filtros aplicados com remove) — receita "Barra de filtros" no PATTERNS.md. Dropdown e multiselect compartilham a casca (trigger/caret/painel/option) em seletores agrupados; diferenças intencionais são overrides explícitos comentados.
 
+Polimento de interação: garantia global de `cursor: pointer` em todo clicável (auditado por script — zero gaps); picker do `.trl-select` estilizado pelos tokens via `appearance: base-select` (fim do highlight azul do SO; fallback nativo documentado); painéis de dropdown/multiselect abrem com `trl-pop`; checkbox/radio marcam com pop (scale); botões sólidos com glow no hover; toasts deslizam da direita (`trl-slide-in`); thumb do slider com glow no hover e cursor grabbing.
+
 Iconografia oficial: Tabler Icons (MIT) requadrada para o hard-edges (caps butt/joins miter, stroke 1.75) — sprite curado `assets/icons.svg` (55 ícones UI + domínio: crosshair/target/shield/radar/swords/backpack…), componente `.trl-icon` (13/16/20px, currentColor), grade com click-copy no showcase, receita "Ícones" no PATTERNS; starter usa refresh/device-floppy nos botões do topbar.
 
 Fundo ambiente com a key art oficial (escolha do user entre 3 protótipos ao vivo): `assets/bg-ambient.jpg` (1920w/317KB, proveniência documentada) + tokens `--trl-photo`/`--trl-scrim` + modifier `.trl-app--photo` (foto fixa sob scrim 86–93%; painéis opacos seguram AA). Editor-starter usa o ambiente; hero do showcase usa a banda com fade — receita "Fundo ambiente & hero" no PATTERNS.
