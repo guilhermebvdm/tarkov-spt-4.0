@@ -1,0 +1,47 @@
+# Backlog — Launcher (Launcher4.0beta)
+
+> Índice de itens de backlog do launcher TRL (fork do SPT Launcher, Avalonia). Origem: card Trello [MTav8H5f — "Ajustes no Launcher para aceitar classes de personagens"](https://trello.com/c/MTav8H5f/19-ajustes-no-launcher-para-aceitar-classes-de-personagens), importado em 2026-07-03 — cada item cita o nº do checklist do card. Ciclo: mesmo workflow SDD dos mods ([WORKFLOW.md](../../../WORKFLOW.md)) com as adaptações abaixo.
+
+## Adaptações do workflow (launcher ≠ mod)
+
+- **Sandbox:** todo o `launcher/Launcher4.0beta/` é editável (papel do `modded/`). O upstream intocado é [`launcher/Launcher4.0/`](../../Launcher4.0/) (papel do `original/` — **nunca editar**; citar como `// ref: Launcher4.0/<arquivo>:<linha>`).
+- **Build:** `dotnet build launcher/Launcher4.0beta/project/Launcher.sln` — o `/compile-mod` não cobre o launcher. Deploy: o exe **tem** que rodar de `D:\SPT` (deriva `GamePath` de `AppContext.BaseDirectory`).
+- **Evidência:** hierarquia normal do repo; o upstream `Launcher4.0/` entra como fonte 🥈 (padrões do launcher vanilla).
+- **`<ref>` nos commands:** `Launcher4.0beta NNN` ou o path da pasta do item.
+- **Itens 001–003 (entregues antes deste backlog existir):** status 🟢 com **code-review retroativo pendente** — o `/code-review` roda direto sobre o código entregue (sem `05-asbuild` prévio; gerar o asbuild retroativo durante a review se fizer sentido).
+- **Server-side:** quando um item exigir mudança no mod CustomClasses (ex.: item 004), a parte server vive num **item irmão no backlog do CustomClasses** — aqui fica só a parte launcher + o link.
+
+| # | Título | Resumo | Pasta | Status |
+|---|---|---|---|---|
+| 001 | Nova tela de login | Redesign TRL da tela de login (Trello 1 ✅). Entregue no commit 88db747. | [001-tela-login/](./001-tela-login/) | 🟢 code-review pendente |
+| 002 | Tela de criação de conta | Redesign TRL do fluxo de criar conta (Trello 2 ✅). Entregue no commit 88db747. | [002-tela-criacao-conta/](./002-tela-criacao-conta/) | 🟢 code-review pendente |
+| 003 | Tela de classes — listagem | Tela de seleção de classe (lista + painel de detalhe) (Trello 3.1 ✅). Entregue no 88db747, **mas com dados 100% mockados** — dados reais são o 004. | [003-classes-listagem/](./003-classes-listagem/) | 🟢 code-review pendente |
+| 004 | Tela de classes — dados reais (CustomClasses) | Núcleo do card (Trello 3 + 3.2): endpoint público de classes no CustomClasses (item irmão lá) + launcher consome imagem/descrição/skills reais, remove mock, fallback p/ editions vanilla. | [004-classes-dados-reais/](./004-classes-dados-reais/) | ⚪ |
+| 005 | Definir senha em conta sem senha | Validar/corrigir o fluxo de criar senha ao logar em conta sem senha (Trello 1.1). `CreatePasswordDialog` já existe — validar ponta a ponta. | [005-definir-senha-conta-sem-senha/](./005-definir-senha-conta-sem-senha/) | ⚪ |
+| 006 | Login Tailscale sem navegador | Ao abrir o launcher, não abrir navegador p/ login do Tailscale (Trello 0 + 0.1). | [006-login-tailscale-sem-navegador/](./006-login-tailscale-sem-navegador/) | ⚪ |
+| 007 | Sincronização de arquivos | Regras por pasta: `config` (preserva divergentes), `config-server` (espelho c/ exclusão), `patchers`/`plugins` (espelho movendo removidos p/ `*-disabled`) + cancelar verificação c/ confirmação + manifesto "X arquivos atualizados" em `/user/launcher` (Trello 4.1, 4.1.1×4, 4.1.2, 4.1.3). | [007-sincronizacao-arquivos/](./007-sincronizacao-arquivos/) | ⚪ |
+| 008 | Opções customizadas: configs performance | Toggle "Usar configs performance" + descrição; sobrepõe `config-performance` do server na `config` do usuário, mantendo divergentes (Trello 4.2 + 4.2.1). Usa o motor de sync do 007. | [008-configs-performance/](./008-configs-performance/) | ⚪ |
+| 009 | Mods opcionais com descrição | Descrição em todos os mods opcionais + toggles: Hollywood Effects, PiP Disable (avaliar desabilitar ExternalResolution), IRL, Visceral (Trello 4.3 + 4.3.2.1–4). | [009-mods-opcionais-descricao/](./009-mods-opcionais-descricao/) | ⚪ |
+| 010 | Botão "Excluir conta" | Excluir conta na tela logada — excluir ≠ wipe (hoje só existe wipe); verificar suporte do server SPT (Trello 4.4). | [010-excluir-conta/](./010-excluir-conta/) | ⚪ |
+| 011 | Lista de mods | Item vago no card (Trello 5) — escopo a refinar na spec com o usuário. Base: `ModInfoCollection`/`TotalModsCard`/`ModInfoView`. | [011-lista-mods/](./011-lista-mods/) | ⚪ |
+| 012 | Remover Targram do menu | Remover botão/command Targram dos menus (Trello 6.1). 4 pontos já mapeados. | [012-remover-targram/](./012-remover-targram/) | ⚪ |
+| 013 | Versão do server dinâmica | Server reporta `0.1.0-beta` via arquivo/endpoint; launcher exibe dinamicamente (hoje footers hardcoded) (Trello 6.2). | [013-versao-server-dinamica/](./013-versao-server-dinamica/) | ⚪ |
+| 014 | Release launcher 2.0.0 | Bump de versão (hoje `1.4.7.0`) + strings hardcoded + build + distribuição (Trello 6.3). Fecha o épico — depende de todos. | [014-release-v2/](./014-release-v2/) | ⚪ |
+
+## Épico: Tela Logado (Trello 4.x → itens 007–010)
+
+> O item "4. Tela Logado" do card é um guarda-chuva: sync de arquivos (4.1 → **007**), opções customizadas (4.2 → **008**), mods opcionais (4.3 → **009**) e excluir conta (4.4 → **010**). O 008 consome o motor de sync do 007 — executar 007 antes.
+
+## Legenda
+
+- ⚪ Backlog · 🟡 Em progresso · 🟢 Entregue · 🔴 Cancelado
+
+## Fluxo
+
+1. `/create-spec <ref>` → spec funcional (critérios de aceite + corner cases)
+2. `/review-spec <ref>` → editor crítico da spec funcional
+3. `/create-technical-spec <ref>` → pré-código com refs
+4. `/review-technical-spec <ref>` → review-NN.md incremental; resolver até zerar 🔴
+5. `/code-mod <ref>` → implementa em `Launcher4.0beta/`
+6. `dotnet build project/Launcher.sln` → build (fora do `/compile-mod`)
+7. `/code-review <ref>` → revisão do build
