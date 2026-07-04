@@ -30,6 +30,18 @@
 | 014 | Release launcher 2.0.0 | Bump de versão (hoje `1.4.7.0`) + strings hardcoded + build + distribuição (Trello 6.3). Fecha o épico — depende de todos. | [014-release-v2/](./014-release-v2/) | 🟢 |
 | 016 | Velocidade de download na "Verificar arquivos" | Exibir a velocidade do download (ex.: MB/s) durante a verificação/sync de arquivos, na barra de update da ProfileView e/ou na `ModUpdateView`. Estende o motor/relatório do 007. | [016-velocidade-download-verificacao/](./016-velocidade-download-verificacao/) | 🟢 |
 | 017 | Preencher `config` do usuário a partir de `config-server` (seed por nome) | Seed unidirecional: para cada arquivo em `BepInEx/config-server` do server, se **não existir por nome** em `BepInEx/config` do usuário → copiar; se **já existir por nome** (metadados/conteúdo irrelevantes) → não fazer nada. ⚠️ **Reconcilia/ajusta a regra `config-server` do [007](./007-sincronizacao-arquivos/)** (hoje mirror-delete). | [017-seed-config-de-config-server/](./017-seed-config-de-config-server/) | 🟢 |
+| 018 | Segurança do auto-update (cert pinning + assinatura) | 🔴 RCE: TLS desligado + exe executado sem verificar assinatura/hash. [AUDIT](../AUDIT-2026-07-04-code-product-ds.md) §B1. | [018-auto-update-security/](./018-auto-update-security/) | ⚪ |
+| 019 | Guard de raiz + atomicidade nos caminhos legados de FS | 🔴 `deleteFiles` do manifesto + `OptionalModsHelper` deletam/escrevem com traversal, sem guard/atômico. AUDIT §B2. | [019-fs-root-guard-legacy/](./019-fs-root-guard-legacy/) | ⚪ |
+| 020 | Integridade do cofre de senhas | 🟡 match case-insensitive grava no perfil errado / colide contas; delete não-atômico; `/profile/get` plaintext. AUDIT (005/010). | [020-password-vault-integrity/](./020-password-vault-integrity/) | ⚪ |
+| 021 | Mods opcionais: grupos faltantes + base-URL | 🟡 toggles PiP/IRL não existem; descrição só alcança hollywood; `GetServerBaseUrl` derruba porta/TLS → download falha em silêncio. AUDIT (009). | [021-optional-mods-groups-baseurl/](./021-optional-mods-groups-baseurl/) | ⚪ |
+| 022 | Robustez de comandos + thread-safety de UI | 🟡 confirmação frágil de wipe/remove; `async Task` commands com exceção não observada; ConnectServer fora da UI thread. AUDIT (client). | [022-command-ui-robustness/](./022-command-ui-robustness/) | ⚪ |
+| 023 | Coop-sync hardening (Fika) | 🟡 mirror-move quarentena `Fika.Core.dll` ausente do manifesto; excluir conta do host em sessão coop; authkey headless reusável. AUDIT (coop). | [023-coop-sync-hardening/](./023-coop-sync-hardening/) | ⚪ |
+| 024 | Migração DS da SettingsView + unificar chrome | 🔴 (DS) SettingsView não migrou (~20 hex + sidebar/cards próprios); dot Dev Mode hex. AUDIT §B3. | [024-settingsview-ds-migration/](./024-settingsview-ds-migration/) | ⚪ |
+| 025 | Aposentar código morto + fechar shims Legacy | 🟡 5 controls órfãos + helpers mortos (WireGuard TLS bypass); ModInfoView legada; shims `.card/.acc/.alt` (fecha débito do 014). AUDIT (DS/client). | [025-dead-code-legacy-shims/](./025-dead-code-legacy-shims/) | ⚪ |
+
+## Itens 018–025 (derivados do review)
+
+> Gerados a partir da auditoria [AUDIT-2026-07-04-code-product-ds.md](../AUDIT-2026-07-04-code-product-ds.md) (review de código + produto + DS de todo o launcher, 2026-07-04). Cada item tem `00-kickoff.md` com achados, `file:line` e critérios de aceite seed. **Bloqueadores (fazer antes de distribuir em produção):** 018 (RCE auto-update), 019 (guard de FS), 024 (DS SettingsView). Riscos de negócio: 020 (senha), 021 (mods opcionais/coop). Os 🟢 menores foram absorvidos como "correlatos" dentro dos kickoffs temáticos (019/022/025).
 
 ## Épico: Tela Logado (Trello 4.x → itens 007–010)
 
