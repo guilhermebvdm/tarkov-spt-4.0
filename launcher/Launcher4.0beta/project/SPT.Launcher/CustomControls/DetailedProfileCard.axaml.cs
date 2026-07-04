@@ -54,7 +54,7 @@ public partial class DetailedProfileCard : UserControl
 
     private void InputElement_OnPointerEntered(object? sender, PointerEventArgs e)
     {
-        if (Application.Current != null && Application.Current.TryFindResource("AltBackgroundBrush", this.ActualThemeVariant, out var brush))
+        if (Application.Current != null && Application.Current.TryFindResource("TrlBgRaisedBrush", this.ActualThemeVariant, out var brush))
         {
             if (brush is ImmutableSolidColorBrush immutableBrush)
             {
@@ -69,7 +69,7 @@ public partial class DetailedProfileCard : UserControl
 
     private void InputElement_OnPointerExited(object? sender, PointerEventArgs e)
     {
-        if (Application.Current != null && Application.Current.TryFindResource("BackgroundBrush", this.ActualThemeVariant, out var brush))
+        if (Application.Current != null && Application.Current.TryFindResource("TrlBgAppBrush", this.ActualThemeVariant, out var brush))
         {
             if (brush is ImmutableSolidColorBrush immutableBrush)
             {

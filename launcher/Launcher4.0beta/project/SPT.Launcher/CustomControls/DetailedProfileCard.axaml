@@ -97,7 +97,7 @@
             <Viewbox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Stretch="Uniform" IsVisible="{Binding $parent[UserControl].ProfileInfo.HasData}">
                 <TextBlock>
                     <Run Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=next_level_in}"/>
-                    <Run Text="{Binding $parent[UserControl].ProfileInfo.RemainingExp}" Foreground="{DynamicResource AccentBrush}"/>
+                    <Run Text="{Binding $parent[UserControl].ProfileInfo.RemainingExp}" Foreground="{DynamicResource TrlAccentBrush}"/>
                     <Run>xp</Run>
                 </TextBlock>
             </Viewbox>

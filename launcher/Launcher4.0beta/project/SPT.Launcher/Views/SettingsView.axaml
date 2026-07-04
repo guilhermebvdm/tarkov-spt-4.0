@@ -32,12 +32,12 @@
             <Setter Property="BorderThickness" Value="0,0,3,0"/>
         </Style>
         <Style Selector="Button.SidebarMenu.Active">
-            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource TrlAccentBrush}"/>
             <Setter Property="Background" Value="#1A1A1A"/>
-            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TrlAccentBrush}"/>
         </Style>
         <Style Selector="Button.SidebarMenu.Active:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource TrlAccentBrush}"/>
             <Setter Property="Background" Value="#222222"/>
         </Style>
         <Style Selector="Button.SidebarMenu Path">

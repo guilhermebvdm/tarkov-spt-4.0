@@ -9,7 +9,9 @@ namespace SPT.Launcher.Helpers
 {
     public static class LauncherUpdateHelper
     {
-        public const string CurrentVersion = "1.4.7"; // Versão corrente do launcher que será compilado agora.
+        // Fonte única: lê a AssemblyVersion do csproj (item 014) — nada de const p/ manter em sincronia.
+        public static readonly string CurrentVersion =
+            System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "2.0.0";
 
         public static async Task<bool> CheckAndUpdateAsync(string serverUrl, IProgress<int> progress = null)
         {

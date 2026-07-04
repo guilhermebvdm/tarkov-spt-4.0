@@ -18,7 +18,7 @@
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaTitleBarHeightHint="-1"
-        Background="{DynamicResource AltBackgroundBrush}">
+        Background="{DynamicResource TrlBgRaisedBrush}">
 
 	<Window.Resources>
 		<cvt:ImageSourceConverter x:Key="imageSourceCvt"/>

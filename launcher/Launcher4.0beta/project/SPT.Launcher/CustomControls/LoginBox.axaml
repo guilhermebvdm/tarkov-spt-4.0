@@ -79,7 +79,7 @@
                         Padding="5,2"
                         Margin="0"
                         VerticalAlignment="Center"
-                        Foreground="{DynamicResource AccentBrush}"
+                        Foreground="{DynamicResource TrlAccentBrush}"
                         />
             </StackPanel>
         </Grid>

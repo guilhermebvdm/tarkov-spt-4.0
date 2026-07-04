@@ -20,39 +20,6 @@
 			<!-- R2: no rounded corners, anywhere -->
 			<CornerRadius x:Key="ControlCornerRadius">0</CornerRadius>
 			<CornerRadius x:Key="OverlayCornerRadius">0</CornerRadius>
-			<ResourceDictionary.ThemeDictionaries>
-				<!-- let's be real... we are never going to use a light theme lol -waffle.lazy -->
-				<ResourceDictionary x:Key="Light">
-					<SolidColorBrush x:Key="AccentBrush">#436082</SolidColorBrush>
-					<SolidColorBrush x:Key="AccentBrush2">#567ca8</SolidColorBrush>
-					<SolidColorBrush x:Key="AccentBrush3">#6998ce</SolidColorBrush>
-					<SolidColorBrush x:Key="AltAccentBrush">#6a6357</SolidColorBrush>
-					<SolidColorBrush x:Key="AltAccentBrush2">#908676</SolidColorBrush>
-					<SolidColorBrush x:Key="AltAccentBrush3">#b6a995</SolidColorBrush>
-					<SolidColorBrush x:Key="BackgroundBrush">White</SolidColorBrush>
-					<SolidColorBrush x:Key="BackgroundBrush2">#cccccc</SolidColorBrush>
-					<SolidColorBrush x:Key="AltBackgroundBrush">#cca480</SolidColorBrush>
-					<SolidColorBrush x:Key="ForegroundBrush">Black</SolidColorBrush>
-				</ResourceDictionary>
-				<ResourceDictionary x:Key="Dark">
-					<!-- 015 SHIM: legacy keys re-pointed at the TRL palette (tan accent, olive
-					     surfaces) so non-migrated views change skin without breaking.
-					     Values mirror Assets/Theme/Tokens.axaml. Removed in item 014. -->
-					<SolidColorBrush x:Key="AccentBrush">#C7B48A</SolidColorBrush>
-					<SolidColorBrush x:Key="AccentBrush2">#8F8560</SolidColorBrush>
-					<SolidColorBrush x:Key="AccentBrush3">#6B6247</SolidColorBrush>
-					<!-- Tons secundários (tan ramp) -->
-					<SolidColorBrush x:Key="AltAccentBrush">#AB9A71</SolidColorBrush>
-					<SolidColorBrush x:Key="AltAccentBrush2">#8F8560</SolidColorBrush>
-					<SolidColorBrush x:Key="AltAccentBrush3">#453F2D</SolidColorBrush>
-					<!-- Cores Base de Fundo (oliva TRL) -->
-					<SolidColorBrush x:Key="BackgroundBrush">#131314</SolidColorBrush>
-					<SolidColorBrush x:Key="BackgroundBrush2">#1B1B1D</SolidColorBrush>
-					<SolidColorBrush x:Key="AltBackgroundBrush">#222225</SolidColorBrush>
-					<!-- Texto -->
-					<SolidColorBrush x:Key="ForegroundBrush">#E8E7E4</SolidColorBrush>
-				</ResourceDictionary>
-			</ResourceDictionary.ThemeDictionaries>
 		</ResourceDictionary>
 		
 		<!-- Path Geometry for re-usable icons -->

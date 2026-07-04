@@ -11,7 +11,7 @@
     </UserControl.Resources>
     
     <Border Classes="card">
-        <StackPanel Background="{DynamicResource BackgroundBrush}" Margin="2">
+        <StackPanel Background="{DynamicResource TrlBgAppBrush}" Margin="2">
 
             <!-- Update bar (topo) -->
             <DockPanel Margin="10 4 10 0">

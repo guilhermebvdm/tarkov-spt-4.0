@@ -7,7 +7,7 @@
              x:Class="SPT.Launcher.CustomControls.ProfileCard">
     <Border Classes="card">
             <Grid RowDefinitions="10,AUTO,AUTO,AUTO,AUTO,10" ColumnDefinitions="10,AUTO,*,10" Margin="2"
-                  Background="{DynamicResource BackgroundBrush}">
+                  Background="{DynamicResource TrlBgAppBrush}">
                 <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1">
                     <Label Content="{Binding  $parent[UserControl].ProfileInfo.Username}" Margin="5 0" />
 

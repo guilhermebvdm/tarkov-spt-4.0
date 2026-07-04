@@ -7,7 +7,7 @@
              x:Class="SPT.Launcher.CustomControls.TotalModsCard">
     <Border Classes="card" IsVisible="{Binding ModInfoCollection.HasMods}">
         <Grid RowDefinitions="10,AUTO,AUTO,10" ColumnDefinitions="10,Auto,*,AUTO,10" Margin="2"
-              Background="{DynamicResource BackgroundBrush}">
+              Background="{DynamicResource TrlBgAppBrush}">
                 
             <!-- version text -->
             <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Orientation="Horizontal">
@@ -28,7 +28,7 @@
                     Command="{Binding $parent[UserControl].OpenModsInfoCommand}"
                     Classes="icon">
                 <Button.Content>
-                    <Path Data="{StaticResource Open}" Fill="{DynamicResource ForegroundBrush}"
+                    <Path Data="{StaticResource Open}" Fill="{DynamicResource TrlFgBrush}"
                           VerticalAlignment="Center"
                     />
                 </Button.Content>
