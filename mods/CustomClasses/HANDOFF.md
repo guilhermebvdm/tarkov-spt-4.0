@@ -42,7 +42,11 @@ tela SKILLS** (`EFT.UI.BuffIcon.smethod_0` → `StaticIcons.BuffIdSprites[EBuffI
   (ex.: flinch/aim punch → `AimMasterWiggle`, dano recebido → `HealthEliteAbsorbDamage`); (c) altura dos cards no
   Tanque (6 cards na coluna de perks) cabe sem scroll.
 
-### 2. 🟡 059 CLASS #1 — aba CLASS v2 (rodada de fixes in-game 2026-07-03 NOITE; re-validar)
+### 2. 🟡 059 CLASS #1 — aba CLASS v3 (rodada 3 de fixes in-game; re-validar)
+**Rodada 3 (feedback com prints):** (1) texto "CLASS" sumiu no estilo nativo → `DestroyImmediate` no
+LocalizedText + texto/enabled/alpha forçados + **log diagnóstico `[053-tabtext]`** (se ainda falhar, colar o log);
+(2) conteúdo do painel agora ALINHA com a borda esquerda da aba CLASS + margem espelhada à direita
+(`AlignPanelToTab`, live com o F12). Rodada 2 (posição/push/fonte nativa) mantida.
 Feedback do teste: aba desformatada mesmo com offset 185; fonte/hover destoando; sem espaço pros nativos.
 **Implementado na rodada 2:**
 - **Posição:** CLASS agora começa na **borda esquerda do conteúdo** (`_skillsScreen` convertido pro espaço da
@@ -68,7 +72,11 @@ Linhas Flag (`no ergo penalty`, `no arm fatigue`) agora têm chip **✓** (perk)
 ### 5. 🟡 056 — calibrar F12 e fixar default
 Usuário ajusta `Weight Marker — X/Y offset` (F12 → `Perks — UI`) até posicionar bem (chute inicial X≈−70, Y≈+30) e passa os valores → fixar como **default** no `PerksConfig` (aí dispensa o F12).
 
-### 6. 🟡 057 — identidade per-player no loading (IMPLEMENTADO 2026-07-03; **06-fix-01 aplicado** — re-validar)
+### 6. 🟡 057 — identidade per-player no deploy (06-fix-02: HOST NOVO — painel de grupo; re-validar)
+**Gate 2 falhou de novo nas linhas do FIKA** (hover nunca dispara lá — canvas sem raycast confiável). Pivô:
+o popover agora mora no **painel de grupo do deploy** (`RaidReadyPlayerPanel`, topo-esquerdo — onde tooltips já
+funcionam), resolvido por `player.Info.Nickname` → funciona pra QUALQUER membro do grupo. O caminho antigo
+(rows do LoadingScreenUI) continua instalado como redundância.
 **Gate 1 falhou:** popover não abria em NENHUMA linha — guard do CR-01-05 comparava `nickTmp.text`, mas o FIKA usa
 `TMP.SetText()` que **não atualiza `.text`** → falso-positivo universal. Fix: mapa `SeenNetIds` (netId→nickname)
 espelha o early-return do FIKA sem depender de TMP ([06-fix-01](backlog/057-class-identity-coop/057-class-identity-coop-06-fix-01.md)).

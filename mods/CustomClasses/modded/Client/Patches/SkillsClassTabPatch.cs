@@ -129,11 +129,11 @@ internal class SkillsClassTabPatch : ModulePatch
             classTab.name = TabName;
             classTab.transform.SetSiblingIndex(0);
 
-            // 059: LocalizedText re-localizaria o texto nativo → remove. StyleClassTab escreve o rótulo nos
-            // TMPs NATIVOS (versões normal/selected) — fonte/seleção/hover idênticos a SKILLS/MASTERING.
+            // 059: LocalizedText re-localizaria o texto nativo → remove IMEDIATO (rodada 3: Destroy deferido
+            // deixava o componente vivo até o fim do frame — janela p/ re-localizar por cima do nosso texto).
             foreach (var loc in classTab.GetComponentsInChildren<LocalizedText>(true))
             {
-                UnityEngine.Object.Destroy(loc);
+                UnityEngine.Object.DestroyImmediate(loc);
             }
 
             classTab.LocalizedText = null;
@@ -255,11 +255,40 @@ internal class SkillsClassTabPatch : ModulePatch
             var skillsX = classX + classW + gap;
             sRt.anchoredPosition = new Vector2(skillsX, sRt.anchoredPosition.y);
             mRt.anchoredPosition = new Vector2(skillsX + (_masteringNativeX - _skillsNativeX), mRt.anchoredPosition.y);
+
+            AlignPanelToTab(skillsScreen, cRt);
         }
         catch (Exception ex)
         {
             Plugin.Log?.LogError($"[CustomClasses] (059) reposition tab: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    ///     Rodada 3 (fix in-game 2026-07-03) — o CONTEÚDO do painel alinha com a aba: a borda esquerda dos
+    ///     cards coincide com a borda esquerda da aba CLASS, e a borda direita dos drawbacks recebe a MESMA
+    ///     margem espelhada. Ajusta offsetMin/offsetMax.x do painel (anchors 0..1); o padding interno (28px,
+    ///     ref: PerksPanelView.Build) é descontado. Roda junto com o Reposition (live com o F12).
+    /// </summary>
+    private static void AlignPanelToTab(UIElement? skillsScreen, RectTransform classTabRt)
+    {
+        if (skillsScreen == null)
+        {
+            return;
+        }
+
+        var panelTf = skillsScreen.transform.parent.Find(PerksPanelView.PanelName) as RectTransform;
+        if (panelTf == null || panelTf.parent is not RectTransform parentRt)
+        {
+            return;
+        }
+
+        const float panelPadding = 28f;   // VerticalLayoutGroup.padding.left/right do painel
+        var worldTabLeft = classTabRt.TransformPoint(new Vector3(classTabRt.rect.xMin, 0f, 0f));
+        var localFromLeft = parentRt.InverseTransformPoint(worldTabLeft).x - parentRt.rect.xMin;
+        var margin = Mathf.Max(0f, localFromLeft - panelPadding);
+        panelTf.offsetMin = new Vector2(margin, panelTf.offsetMin.y);
+        panelTf.offsetMax = new Vector2(-margin, panelTf.offsetMax.y);
     }
 
     /// <summary>Assina o SettingChanged do offset (1×): mexeu no slider do F12 → reposiciona na hora.</summary>
@@ -293,9 +322,22 @@ internal class SkillsClassTabPatch : ModulePatch
         try
         {
             // TEXTO: re-texta TODOS os TMPs nativos (normal + selected) — estilo/estados nativos preservados.
-            foreach (var tmp in tab.GetComponentsInChildren<TextMeshProUGUI>(true))
+            // Rodada 3 (texto sumiu in-game): além do text, força enabled + alpha>0 + GO ativo dentro da versão
+            // (defesa contra estado herdado do clone) e loga o diagnóstico completo 1× pra fechar a causa.
+            var tmps = tab.GetComponentsInChildren<TextMeshProUGUI>(true);
+            foreach (var tmp in tmps)
             {
                 tmp.text = label;
+                tmp.enabled = true;
+                if (tmp.color.a < 0.05f)
+                {
+                    tmp.color = new Color(tmp.color.r, tmp.color.g, tmp.color.b, 1f);
+                }
+
+                if (!tmp.gameObject.activeSelf)
+                {
+                    tmp.gameObject.SetActive(true);   // o pai (versão normal/selected) continua controlando a visibilidade
+                }
             }
 
             // ÍCONE: troca o sprite nativo (medalha da MASTERING clonada) pelo brasão da classe, nas duas
@@ -326,11 +368,31 @@ internal class SkillsClassTabPatch : ModulePatch
             {
                 _loggedTabImages = true;
                 Plugin.Log?.LogInfo($"[CustomClasses][053-tabicon] images=[{string.Join(", ", images.Select(i => i.gameObject.name))}]");
+                // Rodada 3 — diagnóstico do texto: caminho, ativo, enabled, alpha e fonte de cada TMP da aba.
+                foreach (var tmp in tmps)
+                {
+                    Plugin.Log?.LogInfo(
+                        $"[CustomClasses][053-tabtext] '{TabPath(tmp.transform, tab.transform)}' active={tmp.gameObject.activeInHierarchy} " +
+                        $"enabled={tmp.enabled} text='{tmp.text}' size={tmp.fontSize} alpha={tmp.color.a:F2} font={(tmp.font != null ? tmp.font.name : "null")}");
+                }
             }
         }
         catch (Exception ex)
         {
             Plugin.Log?.LogError($"[CustomClasses] (059) style tab: {ex.Message}");
         }
+    }
+
+    /// <summary>Caminho relativo de um transform dentro da aba (diagnóstico do rótulo).</summary>
+    private static string TabPath(Transform t, Transform root)
+    {
+        var path = t.name;
+        while (t.parent != null && t.parent != root)
+        {
+            t = t.parent;
+            path = t.name + "/" + path;
+        }
+
+        return path;
     }
 }
