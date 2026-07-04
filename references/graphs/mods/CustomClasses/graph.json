@@ -330,7 +330,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_adrenalinetriggerpatch",
-      "community": 17,
+      "community": 21,
       "norm_label": "adrenalinetriggerpatch.cs"
     },
     {
@@ -340,7 +340,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "patches_adrenalinetriggerpatch_adrenalinetriggerpatch",
-      "community": 17,
+      "community": 21,
       "norm_label": "adrenalinetriggerpatch"
     },
     {
@@ -350,7 +350,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "modulepatch",
-      "community": 17,
+      "community": 21,
       "norm_label": "modulepatch"
     },
     {
@@ -360,7 +360,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "patches_adrenalinetriggerpatch_adrenalinetriggerpatch_gettargetmethod",
-      "community": 17,
+      "community": 21,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -370,7 +370,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "client_patches_adrenalinetriggerpatch_cs_methodbase",
-      "community": 17,
+      "community": 21,
       "norm_label": "methodbase"
     },
     {
@@ -1160,7 +1160,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "patches_classmovementpatches_classmovespeed_apply",
-      "community": 85,
+      "community": 17,
       "norm_label": ".apply()"
     },
     {
@@ -1170,7 +1170,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "movementcontext",
-      "community": 85,
+      "community": 17,
       "norm_label": "movementcontext"
     },
     {
@@ -1210,7 +1210,7 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "patches_classmovementpatches_maxspeedpatch_postfix",
-      "community": 85,
+      "community": 17,
       "norm_label": ".postfix()"
     },
     {
@@ -1220,7 +1220,7 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "client_patches_classmovementpatches_cs_patchpostfix",
-      "community": 85,
+      "community": 17,
       "norm_label": "patchpostfix"
     },
     {
@@ -1250,7 +1250,7 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "patches_classmovementpatches_sprintspeedpatch_postfix",
-      "community": 85,
+      "community": 17,
       "norm_label": ".postfix()"
     },
     {
@@ -1280,7 +1280,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "patches_classmovementpatches_overladeninertiapatch_postfix",
-      "community": 85,
+      "community": 17,
       "norm_label": ".postfix()"
     },
     {
@@ -1290,7 +1290,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "basephysicalclass",
-      "community": 85,
+      "community": 17,
       "norm_label": "basephysicalclass"
     },
     {
@@ -1320,7 +1320,7 @@
       "source_location": "L145",
       "_origin": "ast",
       "id": "patches_classmovementpatches_setcharactermovementspeedpatch_prefix",
-      "community": 85,
+      "community": 17,
       "norm_label": ".prefix()"
     },
     {
@@ -1330,7 +1330,7 @@
       "source_location": "L145",
       "_origin": "ast",
       "id": "client_patches_classmovementpatches_cs_patchprefix",
-      "community": 85,
+      "community": 17,
       "norm_label": "patchprefix"
     },
     {
@@ -1360,7 +1360,7 @@
       "source_location": "L165",
       "_origin": "ast",
       "id": "patches_classmovementpatches_sprintaccelerationpatch_postfix",
-      "community": 85,
+      "community": 17,
       "norm_label": ".postfix()"
     },
     {
@@ -1620,7 +1620,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "patches_classweaponpatches_shootrecoilpatch_prefix",
-      "community": 21,
+      "community": 58,
       "norm_label": ".prefix()"
     },
     {
@@ -1630,7 +1630,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_proceduralweaponanimation",
-      "community": 21,
+      "community": 58,
       "norm_label": "proceduralweaponanimation"
     },
     {
@@ -1640,7 +1640,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_patchprefix",
-      "community": 21,
+      "community": 58,
       "norm_label": "patchprefix"
     },
     {
@@ -1670,7 +1670,7 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "patches_classweaponpatches_reloadspeedpatch_postfix",
-      "community": 21,
+      "community": 58,
       "norm_label": ".postfix()"
     },
     {
@@ -1680,7 +1680,7 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_firearmcontroller",
-      "community": 21,
+      "community": 58,
       "norm_label": "firearmcontroller"
     },
     {
@@ -1690,7 +1690,7 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_patchpostfix",
-      "community": 21,
+      "community": 58,
       "norm_label": "patchpostfix"
     },
     {
@@ -1720,7 +1720,7 @@
       "source_location": "L124",
       "_origin": "ast",
       "id": "patches_classweaponpatches_adsspeedpatch_postfix",
-      "community": 21,
+      "community": 58,
       "norm_label": ".postfix()"
     },
     {
@@ -1750,7 +1750,7 @@
       "source_location": "L174",
       "_origin": "ast",
       "id": "patches_classweaponpatches_heavyweaponergopatch_postfix",
-      "community": 21,
+      "community": 58,
       "norm_label": ".postfix()"
     },
     {
@@ -1760,7 +1760,7 @@
       "source_location": "L202",
       "_origin": "ast",
       "id": "patches_classweaponpatches_heavyweapon",
-      "community": 21,
+      "community": 58,
       "norm_label": "heavyweapon"
     },
     {
@@ -1770,7 +1770,7 @@
       "source_location": "L204",
       "_origin": "ast",
       "id": "patches_classweaponpatches_heavyweapon_isheavy",
-      "community": 21,
+      "community": 58,
       "norm_label": ".isheavy()"
     },
     {
@@ -1780,7 +1780,7 @@
       "source_location": "L204",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_weapon",
-      "community": 21,
+      "community": 58,
       "norm_label": "weapon"
     },
     {
@@ -1790,7 +1790,7 @@
       "source_location": "L217",
       "_origin": "ast",
       "id": "patches_classweaponpatches_heavyweapon_inhand",
-      "community": 21,
+      "community": 58,
       "norm_label": ".inhand()"
     },
     {
@@ -1800,7 +1800,7 @@
       "source_location": "L217",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_player",
-      "community": 21,
+      "community": 58,
       "norm_label": "player"
     },
     {
@@ -1880,7 +1880,7 @@
       "source_location": "L294",
       "_origin": "ast",
       "id": "patches_classweaponpatches_localhittypepatch_prefix",
-      "community": 21,
+      "community": 58,
       "norm_label": ".prefix()"
     },
     {
@@ -2390,7 +2390,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_playernamepanelpatch",
-      "community": 68,
+      "community": 46,
       "norm_label": "playernamepanelpatch.cs"
     },
     {
@@ -2400,7 +2400,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "patches_playernamepanelpatch_playernamepanelpatch",
-      "community": 68,
+      "community": 46,
       "norm_label": "playernamepanelpatch"
     },
     {
@@ -2410,7 +2410,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "client_patches_playernamepanelpatch_cs_fieldinfo",
-      "community": 68,
+      "community": 46,
       "norm_label": "fieldinfo"
     },
     {
@@ -2420,7 +2420,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "patches_playernamepanelpatch_playernamepanelpatch_gettargetmethod",
-      "community": 68,
+      "community": 46,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2430,7 +2430,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "client_patches_playernamepanelpatch_cs_methodbase",
-      "community": 68,
+      "community": 46,
       "norm_label": "methodbase"
     },
     {
@@ -2440,7 +2440,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "patches_playernamepanelpatch_playernamepanelpatch_postfix",
-      "community": 68,
+      "community": 46,
       "norm_label": ".postfix()"
     },
     {
@@ -2450,7 +2450,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "playernamepanel",
-      "community": 68,
+      "community": 46,
       "norm_label": "playernamepanel"
     },
     {
@@ -2460,7 +2460,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "client_patches_playernamepanelpatch_cs_patchpostfix",
-      "community": 68,
+      "community": 46,
       "norm_label": "patchpostfix"
     },
     {
@@ -2470,7 +2470,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_raidperksnotificationpatch",
-      "community": 58,
+      "community": 46,
       "norm_label": "raidperksnotificationpatch.cs"
     },
     {
@@ -2480,7 +2480,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "patches_raidperksnotificationpatch_raidperksnotificationpatch",
-      "community": 58,
+      "community": 46,
       "norm_label": "raidperksnotificationpatch"
     },
     {
@@ -2490,7 +2490,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "client_patches_raidperksnotificationpatch_cs_string",
-      "community": 58,
+      "community": 46,
       "norm_label": "string"
     },
     {
@@ -2500,7 +2500,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "patches_raidperksnotificationpatch_raidperksnotificationpatch_gettargetmethod",
-      "community": 58,
+      "community": 46,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2510,7 +2510,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "client_patches_raidperksnotificationpatch_cs_methodbase",
-      "community": 58,
+      "community": 46,
       "norm_label": "methodbase"
     },
     {
@@ -2520,7 +2520,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "patches_raidperksnotificationpatch_raidperksnotificationpatch_postfix",
-      "community": 58,
+      "community": 46,
       "norm_label": ".postfix()"
     },
     {
@@ -2530,7 +2530,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "gameworld",
-      "community": 58,
+      "community": 46,
       "norm_label": "gameworld"
     },
     {
@@ -2540,27 +2540,27 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "client_patches_raidperksnotificationpatch_cs_patchpostfix",
-      "community": 58,
+      "community": 46,
       "norm_label": "patchpostfix"
     },
     {
       "label": ".ShowAfterLoad()",
       "file_type": "code",
       "source_file": "Client/Patches/RaidPerksNotificationPatch.cs",
-      "source_location": "L57",
+      "source_location": "L58",
       "_origin": "ast",
       "id": "patches_raidperksnotificationpatch_raidperksnotificationpatch_showafterload",
-      "community": 58,
+      "community": 46,
       "norm_label": ".showafterload()"
     },
     {
       "label": "IEnumerator",
       "file_type": "code",
       "source_file": "Client/Patches/RaidPerksNotificationPatch.cs",
-      "source_location": "L57",
+      "source_location": "L58",
       "_origin": "ast",
       "id": "client_patches_raidperksnotificationpatch_cs_ienumerator",
-      "community": 58,
+      "community": 46,
       "norm_label": "ienumerator"
     },
     {
@@ -3527,7 +3527,7 @@
       "label": "WeaponMasteryRecoilPatch",
       "file_type": "code",
       "source_file": "Client/Patches/WeaponMasteryPatches.cs",
-      "source_location": "L88",
+      "source_location": "L106",
       "_origin": "ast",
       "id": "patches_weaponmasterypatches_weaponmasteryrecoilpatch",
       "community": 45,
@@ -3537,7 +3537,7 @@
       "label": ".GetTargetMethod()",
       "file_type": "code",
       "source_file": "Client/Patches/WeaponMasteryPatches.cs",
-      "source_location": "L90",
+      "source_location": "L108",
       "_origin": "ast",
       "id": "patches_weaponmasterypatches_weaponmasteryrecoilpatch_gettargetmethod",
       "community": 45,
@@ -3547,7 +3547,7 @@
       "label": ".Prefix()",
       "file_type": "code",
       "source_file": "Client/Patches/WeaponMasteryPatches.cs",
-      "source_location": "L95",
+      "source_location": "L116",
       "_origin": "ast",
       "id": "patches_weaponmasterypatches_weaponmasteryrecoilpatch_prefix",
       "community": 45,
@@ -3557,17 +3557,27 @@
       "label": "ProceduralWeaponAnimation",
       "file_type": "code",
       "source_file": "Client/Patches/WeaponMasteryPatches.cs",
-      "source_location": "L95",
+      "source_location": "L116",
       "_origin": "ast",
       "id": "client_patches_weaponmasterypatches_cs_proceduralweaponanimation",
       "community": 45,
       "norm_label": "proceduralweaponanimation"
     },
     {
+      "label": "HarmonyPriority",
+      "file_type": "code",
+      "source_file": "Client/Patches/WeaponMasteryPatches.cs",
+      "source_location": "L116",
+      "_origin": "ast",
+      "id": "harmonypriority",
+      "community": 45,
+      "norm_label": "harmonypriority"
+    },
+    {
       "label": "PatchPrefix",
       "file_type": "code",
       "source_file": "Client/Patches/WeaponMasteryPatches.cs",
-      "source_location": "L95",
+      "source_location": "L116",
       "_origin": "ast",
       "id": "client_patches_weaponmasterypatches_cs_patchprefix",
       "community": 45,
@@ -3577,7 +3587,7 @@
       "label": "WeaponMasteryErgoPatch",
       "file_type": "code",
       "source_file": "Client/Patches/WeaponMasteryPatches.cs",
-      "source_location": "L130",
+      "source_location": "L152",
       "_origin": "ast",
       "id": "patches_weaponmasterypatches_weaponmasteryergopatch",
       "community": 45,
@@ -3587,7 +3597,7 @@
       "label": ".GetTargetMethod()",
       "file_type": "code",
       "source_file": "Client/Patches/WeaponMasteryPatches.cs",
-      "source_location": "L132",
+      "source_location": "L154",
       "_origin": "ast",
       "id": "patches_weaponmasterypatches_weaponmasteryergopatch_gettargetmethod",
       "community": 45,
@@ -3597,7 +3607,7 @@
       "label": ".Postfix()",
       "file_type": "code",
       "source_file": "Client/Patches/WeaponMasteryPatches.cs",
-      "source_location": "L137",
+      "source_location": "L159",
       "_origin": "ast",
       "id": "patches_weaponmasterypatches_weaponmasteryergopatch_postfix",
       "community": 45,
@@ -4227,7 +4237,7 @@
       "label": ".Bind()",
       "file_type": "code",
       "source_file": "Client/PerksConfig.cs",
-      "source_location": "L112",
+      "source_location": "L118",
       "_origin": "ast",
       "id": "client_perksconfig_perksconfig_bind",
       "community": 80,
@@ -4237,7 +4247,7 @@
       "label": "ConfigFile",
       "file_type": "code",
       "source_file": "Client/PerksConfig.cs",
-      "source_location": "L112",
+      "source_location": "L118",
       "_origin": "ast",
       "id": "configfile",
       "community": 80,
@@ -4324,10 +4334,20 @@
       "norm_label": "gameobject"
     },
     {
+      "label": ".RefreshMasteryFooter()",
+      "file_type": "code",
+      "source_file": "Client/PerksPanelView.cs",
+      "source_location": "L149",
+      "_origin": "ast",
+      "id": "client_perkspanelview_perkspanelview_refreshmasteryfooter",
+      "community": 2,
+      "norm_label": ".refreshmasteryfooter()"
+    },
+    {
       "label": ".Refresh()",
       "file_type": "code",
       "source_file": "Client/PerksPanelView.cs",
-      "source_location": "L128",
+      "source_location": "L172",
       "_origin": "ast",
       "id": "client_perkspanelview_perkspanelview_refresh",
       "community": 2,
@@ -4337,7 +4357,7 @@
       "label": "Identity",
       "file_type": "code",
       "source_file": "Client/PerksPanelView.cs",
-      "source_location": "L134",
+      "source_location": "L178",
       "_origin": "ast",
       "id": "client_perkspanelview_cs_identity",
       "community": 2,
@@ -4347,7 +4367,7 @@
       "label": ".BuildColumn()",
       "file_type": "code",
       "source_file": "Client/PerksPanelView.cs",
-      "source_location": "L241",
+      "source_location": "L286",
       "_origin": "ast",
       "id": "client_perkspanelview_perkspanelview_buildcolumn",
       "community": 2,
@@ -4357,7 +4377,7 @@
       "label": ".BuildEffectCard()",
       "file_type": "code",
       "source_file": "Client/PerksPanelView.cs",
-      "source_location": "L261",
+      "source_location": "L306",
       "_origin": "ast",
       "id": "client_perkspanelview_perkspanelview_buildeffectcard",
       "community": 2,
@@ -4367,7 +4387,7 @@
       "label": "PerkGroup",
       "file_type": "code",
       "source_file": "Client/PerksPanelView.cs",
-      "source_location": "L261",
+      "source_location": "L306",
       "_origin": "ast",
       "id": "perkgroup",
       "community": 2,
@@ -4377,7 +4397,7 @@
       "label": "PerkLine",
       "file_type": "code",
       "source_file": "Client/PerksPanelView.cs",
-      "source_location": "L261",
+      "source_location": "L306",
       "_origin": "ast",
       "id": "client_perkspanelview_cs_perkline",
       "community": 2,
@@ -4387,7 +4407,7 @@
       "label": ".BuildMessageCard()",
       "file_type": "code",
       "source_file": "Client/PerksPanelView.cs",
-      "source_location": "L406",
+      "source_location": "L451",
       "_origin": "ast",
       "id": "client_perkspanelview_perkspanelview_buildmessagecard",
       "community": 2,
@@ -4397,7 +4417,7 @@
       "label": ".BuildSectionHeader()",
       "file_type": "code",
       "source_file": "Client/PerksPanelView.cs",
-      "source_location": "L425",
+      "source_location": "L470",
       "_origin": "ast",
       "id": "client_perkspanelview_perkspanelview_buildsectionheader",
       "community": 2,
@@ -4407,7 +4427,7 @@
       "label": ".ClearChildren()",
       "file_type": "code",
       "source_file": "Client/PerksPanelView.cs",
-      "source_location": "L460",
+      "source_location": "L505",
       "_origin": "ast",
       "id": "client_perkspanelview_perkspanelview_clearchildren",
       "community": 2,
@@ -4417,7 +4437,7 @@
       "label": "CardHover",
       "file_type": "code",
       "source_file": "Client/PerksPanelView.cs",
-      "source_location": "L470",
+      "source_location": "L515",
       "_origin": "ast",
       "id": "client_perkspanelview_cardhover",
       "community": 2,
@@ -4427,7 +4447,7 @@
       "label": "Image",
       "file_type": "code",
       "source_file": "Client/PerksPanelView.cs",
-      "source_location": "L472",
+      "source_location": "L517",
       "_origin": "ast",
       "id": "client_perkspanelview_cs_image",
       "community": 2,
@@ -4437,7 +4457,7 @@
       "label": "Color",
       "file_type": "code",
       "source_file": "Client/PerksPanelView.cs",
-      "source_location": "L473",
+      "source_location": "L518",
       "_origin": "ast",
       "id": "client_perkspanelview_cs_color",
       "community": 2,
@@ -4447,7 +4467,7 @@
       "label": ".OnPointerEnter()",
       "file_type": "code",
       "source_file": "Client/PerksPanelView.cs",
-      "source_location": "L476",
+      "source_location": "L521",
       "_origin": "ast",
       "id": "client_perkspanelview_cardhover_onpointerenter",
       "community": 2,
@@ -4457,7 +4477,7 @@
       "label": "PointerEventData",
       "file_type": "code",
       "source_file": "Client/PerksPanelView.cs",
-      "source_location": "L476",
+      "source_location": "L521",
       "_origin": "ast",
       "id": "client_perkspanelview_cs_pointereventdata",
       "community": 2,
@@ -4467,7 +4487,7 @@
       "label": ".OnPointerExit()",
       "file_type": "code",
       "source_file": "Client/PerksPanelView.cs",
-      "source_location": "L484",
+      "source_location": "L529",
       "_origin": "ast",
       "id": "client_perkspanelview_cardhover_onpointerexit",
       "community": 2,
@@ -4477,7 +4497,7 @@
       "label": "FadeIn",
       "file_type": "code",
       "source_file": "Client/PerksPanelView.cs",
-      "source_location": "L498",
+      "source_location": "L543",
       "_origin": "ast",
       "id": "client_perkspanelview_fadein",
       "community": 2,
@@ -4487,7 +4507,7 @@
       "label": "float",
       "file_type": "code",
       "source_file": "Client/PerksPanelView.cs",
-      "source_location": "L500",
+      "source_location": "L545",
       "_origin": "ast",
       "id": "client_perkspanelview_cs_float",
       "community": 2,
@@ -4497,7 +4517,7 @@
       "label": "CanvasGroup",
       "file_type": "code",
       "source_file": "Client/PerksPanelView.cs",
-      "source_location": "L501",
+      "source_location": "L546",
       "_origin": "ast",
       "id": "canvasgroup",
       "community": 2,
@@ -4507,7 +4527,7 @@
       "label": ".OnEnable()",
       "file_type": "code",
       "source_file": "Client/PerksPanelView.cs",
-      "source_location": "L504",
+      "source_location": "L549",
       "_origin": "ast",
       "id": "client_perkspanelview_fadein_onenable",
       "community": 2,
@@ -4517,7 +4537,7 @@
       "label": ".Restart()",
       "file_type": "code",
       "source_file": "Client/PerksPanelView.cs",
-      "source_location": "L506",
+      "source_location": "L551",
       "_origin": "ast",
       "id": "client_perkspanelview_fadein_restart",
       "community": 2,
@@ -4527,7 +4547,7 @@
       "label": ".Update()",
       "file_type": "code",
       "source_file": "Client/PerksPanelView.cs",
-      "source_location": "L518",
+      "source_location": "L563",
       "_origin": "ast",
       "id": "client_perkspanelview_fadein_update",
       "community": 2,
@@ -4607,7 +4627,7 @@
       "label": ".OnGUI()",
       "file_type": "code",
       "source_file": "Client/Plugin.cs",
-      "source_location": "L210",
+      "source_location": "L212",
       "_origin": "ast",
       "id": "client_plugin_plugin_ongui",
       "community": 52,
@@ -4617,7 +4637,7 @@
       "label": ".OnDestroy()",
       "file_type": "code",
       "source_file": "Client/Plugin.cs",
-      "source_location": "L215",
+      "source_location": "L217",
       "_origin": "ast",
       "id": "client_plugin_plugin_ondestroy",
       "community": 52,
@@ -4627,7 +4647,7 @@
       "label": ".RepositionSeals()",
       "file_type": "code",
       "source_file": "Client/Plugin.cs",
-      "source_location": "L225",
+      "source_location": "L227",
       "_origin": "ast",
       "id": "client_plugin_plugin_repositionseals",
       "community": 52,
@@ -4742,6 +4762,66 @@
       "id": "client_skillmultipliers_payload",
       "community": 47,
       "norm_label": "payload"
+    },
+    {
+      "label": "StancesArmStaminaBridge.cs",
+      "file_type": "code",
+      "source_file": "Client/StancesArmStaminaBridge.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "client_stancesarmstaminabridge",
+      "community": 68,
+      "norm_label": "stancesarmstaminabridge.cs"
+    },
+    {
+      "label": "StancesArmStaminaBridge",
+      "file_type": "code",
+      "source_file": "Client/StancesArmStaminaBridge.cs",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "client_stancesarmstaminabridge_stancesarmstaminabridge",
+      "community": 68,
+      "norm_label": "stancesarmstaminabridge"
+    },
+    {
+      "label": "bool",
+      "file_type": "code",
+      "source_file": "Client/StancesArmStaminaBridge.cs",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "client_stancesarmstaminabridge_cs_bool",
+      "community": 68,
+      "norm_label": "bool"
+    },
+    {
+      "label": ".TryAttach()",
+      "file_type": "code",
+      "source_file": "Client/StancesArmStaminaBridge.cs",
+      "source_location": "L25",
+      "_origin": "ast",
+      "id": "client_stancesarmstaminabridge_stancesarmstaminabridge_tryattach",
+      "community": 68,
+      "norm_label": ".tryattach()"
+    },
+    {
+      "label": ".Factor()",
+      "file_type": "code",
+      "source_file": "Client/StancesArmStaminaBridge.cs",
+      "source_location": "L66",
+      "_origin": "ast",
+      "id": "client_stancesarmstaminabridge_stancesarmstaminabridge_factor",
+      "community": 68,
+      "norm_label": ".factor()"
+    },
+    {
+      "label": ".Sane()",
+      "file_type": "code",
+      "source_file": "Client/StancesArmStaminaBridge.cs",
+      "source_location": "L106",
+      "_origin": "ast",
+      "id": "client_stancesarmstaminabridge_stancesarmstaminabridge_sane",
+      "community": 68,
+      "norm_label": ".sane()"
     },
     {
       "label": "ClassIconCache.cs",
@@ -16475,9 +16555,9 @@
       "source_file": "Client/Patches/NotificationDurationPatch.cs",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_notificationdurationpatch_notificationdurationpatch",
-      "target": "modulepatch",
-      "confidence_score": 1.0
+      "target": "modulepatch"
     },
     {
       "relation": "inherits",
@@ -16605,9 +16685,9 @@
       "source_file": "Client/Patches/WeaponMasteryPatches.cs",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_weaponmasterypatches_underbarrelmasteryxppatch",
-      "target": "modulepatch",
-      "confidence_score": 1.0
+      "target": "modulepatch"
     },
     {
       "relation": "inherits",
@@ -16615,9 +16695,9 @@
       "source_file": "Client/Patches/WeaponMasteryPatches.cs",
       "source_location": "L130",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_weaponmasterypatches_weaponmasteryergopatch",
-      "target": "modulepatch",
-      "confidence_score": 1.0
+      "target": "modulepatch"
     },
     {
       "relation": "inherits",
@@ -16625,9 +16705,9 @@
       "source_file": "Client/Patches/WeaponMasteryPatches.cs",
       "source_location": "L88",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_weaponmasterypatches_weaponmasteryrecoilpatch",
-      "target": "modulepatch",
-      "confidence_score": 1.0
+      "target": "modulepatch"
     },
     {
       "relation": "inherits",
@@ -17258,9 +17338,9 @@
       "source_location": "L45",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "patches_classdetailloadingpatch_classdetailloadingpatch",
-      "target": "client_patches_classdetailloadingpatch_cs_dictionary",
-      "confidence_score": 1.0
+      "target": "client_patches_classdetailloadingpatch_cs_dictionary"
     },
     {
       "relation": "references",
@@ -18486,9 +18566,9 @@
       "source_location": "L25",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_classweaponpatches_shootrecoilpatch_prefix",
-      "target": "client_patches_classweaponpatches_cs_proceduralweaponanimation",
-      "confidence_score": 1.0
+      "target": "client_patches_classweaponpatches_cs_proceduralweaponanimation"
     },
     {
       "relation": "calls",
@@ -18508,9 +18588,9 @@
       "source_location": "L124",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_classweaponpatches_adsspeedpatch_postfix",
-      "target": "client_patches_classweaponpatches_cs_proceduralweaponanimation",
-      "confidence_score": 1.0
+      "target": "client_patches_classweaponpatches_cs_proceduralweaponanimation"
     },
     {
       "relation": "references",
@@ -18698,9 +18778,9 @@
       "source_location": "L204",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_classweaponpatches_heavyweapon_isheavy",
-      "target": "client_patches_classweaponpatches_cs_weapon",
-      "confidence_score": 1.0
+      "target": "client_patches_classweaponpatches_cs_weapon"
     },
     {
       "relation": "references",
@@ -19027,9 +19107,9 @@
       "source_file": "Client/Patches/NotificationDurationPatch.cs",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_notificationdurationpatch",
-      "target": "patches_notificationdurationpatch_notificationdurationpatch",
-      "confidence_score": 1.0
+      "target": "patches_notificationdurationpatch_notificationdurationpatch"
     },
     {
       "relation": "references",
@@ -19038,9 +19118,9 @@
       "source_location": "L23",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "patches_notificationdurationpatch_notificationdurationpatch",
-      "target": "client_patches_notificationdurationpatch_cs_float",
-      "confidence_score": 1.0
+      "target": "client_patches_notificationdurationpatch_cs_float"
     },
     {
       "relation": "method",
@@ -19048,9 +19128,9 @@
       "source_file": "Client/Patches/NotificationDurationPatch.cs",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_notificationdurationpatch_notificationdurationpatch",
-      "target": "patches_notificationdurationpatch_notificationdurationpatch_gettargetmethod",
-      "confidence_score": 1.0
+      "target": "patches_notificationdurationpatch_notificationdurationpatch_gettargetmethod"
     },
     {
       "relation": "method",
@@ -19058,9 +19138,9 @@
       "source_file": "Client/Patches/NotificationDurationPatch.cs",
       "source_location": "L52",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_notificationdurationpatch_notificationdurationpatch",
-      "target": "patches_notificationdurationpatch_notificationdurationpatch_hideafter",
-      "confidence_score": 1.0
+      "target": "patches_notificationdurationpatch_notificationdurationpatch_hideafter"
     },
     {
       "relation": "method",
@@ -19068,9 +19148,9 @@
       "source_file": "Client/Patches/NotificationDurationPatch.cs",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_notificationdurationpatch_notificationdurationpatch",
-      "target": "patches_notificationdurationpatch_notificationdurationpatch_prefix",
-      "confidence_score": 1.0
+      "target": "patches_notificationdurationpatch_notificationdurationpatch_prefix"
     },
     {
       "relation": "references",
@@ -19079,9 +19159,9 @@
       "source_location": "L25",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "patches_notificationdurationpatch_notificationdurationpatch_gettargetmethod",
-      "target": "client_patches_notificationdurationpatch_cs_methodbase",
-      "confidence_score": 1.0
+      "target": "client_patches_notificationdurationpatch_cs_methodbase"
     },
     {
       "relation": "references",
@@ -19090,9 +19170,9 @@
       "source_location": "L30",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_notificationdurationpatch_notificationdurationpatch_prefix",
-      "target": "basenotificationview",
-      "confidence_score": 1.0
+      "target": "basenotificationview"
     },
     {
       "relation": "references",
@@ -19101,9 +19181,9 @@
       "source_location": "L30",
       "weight": 1.0,
       "context": "attribute",
+      "confidence_score": 1.0,
       "source": "patches_notificationdurationpatch_notificationdurationpatch_prefix",
-      "target": "client_patches_notificationdurationpatch_cs_patchprefix",
-      "confidence_score": 1.0
+      "target": "client_patches_notificationdurationpatch_cs_patchprefix"
     },
     {
       "relation": "references",
@@ -19112,9 +19192,9 @@
       "source_location": "L30",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_notificationdurationpatch_notificationdurationpatch_prefix",
-      "target": "notificationabstractclass",
-      "confidence_score": 1.0
+      "target": "notificationabstractclass"
     },
     {
       "relation": "calls",
@@ -19123,9 +19203,9 @@
       "source_file": "Client/Patches/NotificationDurationPatch.cs",
       "source_location": "L44",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_notificationdurationpatch_notificationdurationpatch_prefix",
-      "target": "patches_notificationdurationpatch_notificationdurationpatch_hideafter",
-      "confidence_score": 1.0
+      "target": "patches_notificationdurationpatch_notificationdurationpatch_hideafter"
     },
     {
       "relation": "references",
@@ -19134,9 +19214,9 @@
       "source_location": "L52",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_notificationdurationpatch_notificationdurationpatch_hideafter",
-      "target": "basenotificationview",
-      "confidence_score": 1.0
+      "target": "basenotificationview"
     },
     {
       "relation": "references",
@@ -19145,9 +19225,9 @@
       "source_location": "L52",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_notificationdurationpatch_notificationdurationpatch_hideafter",
-      "target": "notificationabstractclass",
-      "confidence_score": 1.0
+      "target": "notificationabstractclass"
     },
     {
       "relation": "references",
@@ -19156,9 +19236,9 @@
       "source_location": "L52",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "patches_notificationdurationpatch_notificationdurationpatch_hideafter",
-      "target": "client_patches_notificationdurationpatch_cs_ienumerator",
-      "confidence_score": 1.0
+      "target": "client_patches_notificationdurationpatch_cs_ienumerator"
     },
     {
       "relation": "contains",
@@ -19282,9 +19362,9 @@
       "source_location": "L25",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_packmulepatch_packmulepatch_postfix",
-      "target": "client_patches_packmulepatch_cs_skillmanager",
-      "confidence_score": 1.0
+      "target": "client_patches_packmulepatch_cs_skillmanager"
     },
     {
       "relation": "contains",
@@ -19451,9 +19531,9 @@
       "source_location": "L22",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "patches_raidperksnotificationpatch_raidperksnotificationpatch",
-      "target": "client_patches_raidperksnotificationpatch_cs_string",
-      "confidence_score": 1.0
+      "target": "client_patches_raidperksnotificationpatch_cs_string"
     },
     {
       "relation": "method",
@@ -19610,9 +19690,9 @@
       "source_location": "L29",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_raidreadyplayerpanelpatch_raidreadyplayerpanelpatch_postfix",
-      "target": "groupplayerviewmodelclass",
-      "confidence_score": 1.0
+      "target": "groupplayerviewmodelclass"
     },
     {
       "relation": "references",
@@ -20013,9 +20093,9 @@
       "source_location": "L73",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "patches_skillsclasstabpatch_skillsclasstabpatch",
-      "target": "client_patches_skillsclasstabpatch_cs_float",
-      "confidence_score": 1.0
+      "target": "client_patches_skillsclasstabpatch_cs_float"
     },
     {
       "relation": "references",
@@ -20024,9 +20104,9 @@
       "source_location": "L71",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "patches_skillsclasstabpatch_skillsclasstabpatch",
-      "target": "client_patches_skillsclasstabpatch_cs_object",
-      "confidence_score": 1.0
+      "target": "client_patches_skillsclasstabpatch_cs_object"
     },
     {
       "relation": "references",
@@ -20056,9 +20136,9 @@
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
       "source_location": "L273",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_skillsclasstabpatch_skillsclasstabpatch",
-      "target": "patches_skillsclasstabpatch_skillsclasstabpatch_alignpaneltotab",
-      "confidence_score": 1.0
+      "target": "patches_skillsclasstabpatch_skillsclasstabpatch_alignpaneltotab"
     },
     {
       "relation": "method",
@@ -20116,9 +20196,9 @@
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
       "source_location": "L395",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_skillsclasstabpatch_skillsclasstabpatch",
-      "target": "patches_skillsclasstabpatch_skillsclasstabpatch_tabpath",
-      "confidence_score": 1.0
+      "target": "patches_skillsclasstabpatch_skillsclasstabpatch_tabpath"
     },
     {
       "relation": "references",
@@ -20248,9 +20328,9 @@
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
       "source_location": "L259",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_skillsclasstabpatch_skillsclasstabpatch_repositionclasstab",
-      "target": "patches_skillsclasstabpatch_skillsclasstabpatch_alignpaneltotab",
-      "confidence_score": 1.0
+      "target": "patches_skillsclasstabpatch_skillsclasstabpatch_alignpaneltotab"
     },
     {
       "relation": "references",
@@ -20259,9 +20339,9 @@
       "source_location": "L273",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_skillsclasstabpatch_skillsclasstabpatch_alignpaneltotab",
-      "target": "recttransform",
-      "confidence_score": 1.0
+      "target": "recttransform"
     },
     {
       "relation": "references",
@@ -20270,9 +20350,9 @@
       "source_location": "L273",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_skillsclasstabpatch_skillsclasstabpatch_alignpaneltotab",
-      "target": "uielement",
-      "confidence_score": 1.0
+      "target": "uielement"
     },
     {
       "relation": "calls",
@@ -20281,9 +20361,9 @@
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
       "source_location": "L383",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_skillsclasstabpatch_skillsclasstabpatch_styleclasstab",
-      "target": "patches_skillsclasstabpatch_skillsclasstabpatch_tabpath",
-      "confidence_score": 1.0
+      "target": "patches_skillsclasstabpatch_skillsclasstabpatch_tabpath"
     },
     {
       "relation": "references",
@@ -20292,9 +20372,9 @@
       "source_location": "L395",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_skillsclasstabpatch_skillsclasstabpatch_tabpath",
-      "target": "client_patches_skillsclasstabpatch_cs_transform",
-      "confidence_score": 1.0
+      "target": "client_patches_skillsclasstabpatch_cs_transform"
     },
     {
       "relation": "contains",
@@ -20612,9 +20692,9 @@
       "source_file": "Client/Patches/WeaponMasteryPatches.cs",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_weaponmasterypatches",
-      "target": "patches_weaponmasterypatches_underbarrelmasteryxppatch",
-      "confidence_score": 1.0
+      "target": "patches_weaponmasterypatches_underbarrelmasteryxppatch"
     },
     {
       "relation": "contains",
@@ -20622,9 +20702,9 @@
       "source_file": "Client/Patches/WeaponMasteryPatches.cs",
       "source_location": "L130",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_weaponmasterypatches",
-      "target": "patches_weaponmasterypatches_weaponmasteryergopatch",
-      "confidence_score": 1.0
+      "target": "patches_weaponmasterypatches_weaponmasteryergopatch"
     },
     {
       "relation": "contains",
@@ -20632,9 +20712,9 @@
       "source_file": "Client/Patches/WeaponMasteryPatches.cs",
       "source_location": "L88",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_weaponmasterypatches",
-      "target": "patches_weaponmasterypatches_weaponmasteryrecoilpatch",
-      "confidence_score": 1.0
+      "target": "patches_weaponmasterypatches_weaponmasteryrecoilpatch"
     },
     {
       "relation": "method",
@@ -20642,9 +20722,9 @@
       "source_file": "Client/Patches/WeaponMasteryPatches.cs",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_weaponmasterypatches_underbarrelmasteryxppatch",
-      "target": "patches_weaponmasterypatches_underbarrelmasteryxppatch_gettargetmethod",
-      "confidence_score": 1.0
+      "target": "patches_weaponmasterypatches_underbarrelmasteryxppatch_gettargetmethod"
     },
     {
       "relation": "method",
@@ -20652,9 +20732,9 @@
       "source_file": "Client/Patches/WeaponMasteryPatches.cs",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_weaponmasterypatches_underbarrelmasteryxppatch",
-      "target": "patches_weaponmasterypatches_underbarrelmasteryxppatch_postfix",
-      "confidence_score": 1.0
+      "target": "patches_weaponmasterypatches_underbarrelmasteryxppatch_postfix"
     },
     {
       "relation": "references",
@@ -20663,9 +20743,9 @@
       "source_location": "L22",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "patches_weaponmasterypatches_underbarrelmasteryxppatch_gettargetmethod",
-      "target": "client_patches_weaponmasterypatches_cs_methodbase",
-      "confidence_score": 1.0
+      "target": "client_patches_weaponmasterypatches_cs_methodbase"
     },
     {
       "relation": "references",
@@ -20674,9 +20754,9 @@
       "source_location": "L132",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "patches_weaponmasterypatches_weaponmasteryergopatch_gettargetmethod",
-      "target": "client_patches_weaponmasterypatches_cs_methodbase",
-      "confidence_score": 1.0
+      "target": "client_patches_weaponmasterypatches_cs_methodbase"
     },
     {
       "relation": "references",
@@ -20685,9 +20765,9 @@
       "source_location": "L90",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "patches_weaponmasterypatches_weaponmasteryrecoilpatch_gettargetmethod",
-      "target": "client_patches_weaponmasterypatches_cs_methodbase",
-      "confidence_score": 1.0
+      "target": "client_patches_weaponmasterypatches_cs_methodbase"
     },
     {
       "relation": "references",
@@ -20696,9 +20776,9 @@
       "source_location": "L30",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_weaponmasterypatches_underbarrelmasteryxppatch_postfix",
-      "target": "client_patches_weaponmasterypatches_cs_firearmcontroller",
-      "confidence_score": 1.0
+      "target": "client_patches_weaponmasterypatches_cs_firearmcontroller"
     },
     {
       "relation": "references",
@@ -20707,9 +20787,9 @@
       "source_location": "L30",
       "weight": 1.0,
       "context": "attribute",
+      "confidence_score": 1.0,
       "source": "patches_weaponmasterypatches_underbarrelmasteryxppatch_postfix",
-      "target": "client_patches_weaponmasterypatches_cs_patchpostfix",
-      "confidence_score": 1.0
+      "target": "client_patches_weaponmasterypatches_cs_patchpostfix"
     },
     {
       "relation": "references",
@@ -20718,9 +20798,9 @@
       "source_location": "L137",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_weaponmasterypatches_weaponmasteryergopatch_postfix",
-      "target": "client_patches_weaponmasterypatches_cs_firearmcontroller",
-      "confidence_score": 1.0
+      "target": "client_patches_weaponmasterypatches_cs_firearmcontroller"
     },
     {
       "relation": "references",
@@ -20729,9 +20809,9 @@
       "source_location": "L137",
       "weight": 1.0,
       "context": "attribute",
+      "confidence_score": 1.0,
       "source": "patches_weaponmasterypatches_weaponmasteryergopatch_postfix",
-      "target": "client_patches_weaponmasterypatches_cs_patchpostfix",
-      "confidence_score": 1.0
+      "target": "client_patches_weaponmasterypatches_cs_patchpostfix"
     },
     {
       "relation": "method",
@@ -20739,9 +20819,9 @@
       "source_file": "Client/Patches/WeaponMasteryPatches.cs",
       "source_location": "L90",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_weaponmasterypatches_weaponmasteryrecoilpatch",
-      "target": "patches_weaponmasterypatches_weaponmasteryrecoilpatch_gettargetmethod",
-      "confidence_score": 1.0
+      "target": "patches_weaponmasterypatches_weaponmasteryrecoilpatch_gettargetmethod"
     },
     {
       "relation": "method",
@@ -20749,9 +20829,9 @@
       "source_file": "Client/Patches/WeaponMasteryPatches.cs",
       "source_location": "L95",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_weaponmasterypatches_weaponmasteryrecoilpatch",
-      "target": "patches_weaponmasterypatches_weaponmasteryrecoilpatch_prefix",
-      "confidence_score": 1.0
+      "target": "patches_weaponmasterypatches_weaponmasteryrecoilpatch_prefix"
     },
     {
       "relation": "references",
@@ -20760,9 +20840,9 @@
       "source_location": "L95",
       "weight": 1.0,
       "context": "attribute",
+      "confidence_score": 1.0,
       "source": "patches_weaponmasterypatches_weaponmasteryrecoilpatch_prefix",
-      "target": "client_patches_weaponmasterypatches_cs_patchprefix",
-      "confidence_score": 1.0
+      "target": "client_patches_weaponmasterypatches_cs_patchprefix"
     },
     {
       "relation": "references",
@@ -20771,9 +20851,20 @@
       "source_location": "L95",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_weaponmasterypatches_weaponmasteryrecoilpatch_prefix",
-      "target": "client_patches_weaponmasterypatches_cs_proceduralweaponanimation",
-      "confidence_score": 1.0
+      "target": "client_patches_weaponmasterypatches_cs_proceduralweaponanimation"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/WeaponMasteryPatches.cs",
+      "source_location": "L116",
+      "weight": 1.0,
+      "context": "attribute",
+      "confidence_score": 1.0,
+      "source": "patches_weaponmasterypatches_weaponmasteryrecoilpatch_prefix",
+      "target": "harmonypriority"
     },
     {
       "relation": "method",
@@ -20781,9 +20872,9 @@
       "source_file": "Client/Patches/WeaponMasteryPatches.cs",
       "source_location": "L132",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_weaponmasterypatches_weaponmasteryergopatch",
-      "target": "patches_weaponmasterypatches_weaponmasteryergopatch_gettargetmethod",
-      "confidence_score": 1.0
+      "target": "patches_weaponmasterypatches_weaponmasteryergopatch_gettargetmethod"
     },
     {
       "relation": "method",
@@ -20791,9 +20882,9 @@
       "source_file": "Client/Patches/WeaponMasteryPatches.cs",
       "source_location": "L137",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_weaponmasterypatches_weaponmasteryergopatch",
-      "target": "patches_weaponmasterypatches_weaponmasteryergopatch_postfix",
-      "confidence_score": 1.0
+      "target": "patches_weaponmasterypatches_weaponmasteryergopatch_postfix"
     },
     {
       "relation": "contains",
@@ -21877,6 +21968,16 @@
       "target": "client_perkspanelview_perkspanelview_refresh"
     },
     {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/PerksPanelView.cs",
+      "source_location": "L149",
+      "weight": 1.0,
+      "source": "client_perkspanelview_perkspanelview",
+      "target": "client_perkspanelview_perkspanelview_refreshmasteryfooter",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Client/PerksPanelView.cs",
@@ -22029,6 +22130,28 @@
       "confidence_score": 1.0,
       "source": "client_perkspanelview_perkspanelview_refresh",
       "target": "client_perkspanelview_cs_gameobject"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/PerksPanelView.cs",
+      "source_location": "L149",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "client_perkspanelview_perkspanelview_refreshmasteryfooter",
+      "target": "client_perkspanelview_cs_gameobject",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/PerksPanelView.cs",
+      "source_location": "L183",
+      "weight": 1.0,
+      "source": "client_perkspanelview_perkspanelview_refresh",
+      "target": "client_perkspanelview_perkspanelview_refreshmasteryfooter",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -22474,6 +22597,68 @@
       "confidence_score": 1.0,
       "source": "client_skillmultipliers_skillmultipliers_tryget",
       "target": "client_skillmultipliers_cs_eskillid"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/StancesArmStaminaBridge.cs",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "client_stancesarmstaminabridge",
+      "target": "client_stancesarmstaminabridge_stancesarmstaminabridge",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/StancesArmStaminaBridge.cs",
+      "source_location": "L22",
+      "weight": 1.0,
+      "context": "field",
+      "source": "client_stancesarmstaminabridge_stancesarmstaminabridge",
+      "target": "client_stancesarmstaminabridge_cs_bool",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/StancesArmStaminaBridge.cs",
+      "source_location": "L66",
+      "weight": 1.0,
+      "source": "client_stancesarmstaminabridge_stancesarmstaminabridge",
+      "target": "client_stancesarmstaminabridge_stancesarmstaminabridge_factor",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/StancesArmStaminaBridge.cs",
+      "source_location": "L106",
+      "weight": 1.0,
+      "source": "client_stancesarmstaminabridge_stancesarmstaminabridge",
+      "target": "client_stancesarmstaminabridge_stancesarmstaminabridge_sane",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/StancesArmStaminaBridge.cs",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "client_stancesarmstaminabridge_stancesarmstaminabridge",
+      "target": "client_stancesarmstaminabridge_stancesarmstaminabridge_tryattach",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/StancesArmStaminaBridge.cs",
+      "source_location": "L81",
+      "weight": 1.0,
+      "source": "client_stancesarmstaminabridge_stancesarmstaminabridge_factor",
+      "target": "client_stancesarmstaminabridge_stancesarmstaminabridge_sane",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -23320,9 +23505,9 @@
       "source_file": "Client/WeaponMastery.cs",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "client_weaponmastery",
-      "target": "client_weaponmastery_weaponmastery",
-      "confidence_score": 1.0
+      "target": "client_weaponmastery_weaponmastery"
     },
     {
       "relation": "method",
@@ -23330,9 +23515,9 @@
       "source_file": "Client/WeaponMastery.cs",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "client_weaponmastery_weaponmastery",
-      "target": "client_weaponmastery_weaponmastery_skillforheld",
-      "confidence_score": 1.0
+      "target": "client_weaponmastery_weaponmastery_skillforheld"
     },
     {
       "relation": "references",
@@ -23341,9 +23526,9 @@
       "source_location": "L16",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "client_weaponmastery_weaponmastery_skillforheld",
-      "target": "client_weaponmastery_cs_skillmanager",
-      "confidence_score": 1.0
+      "target": "client_weaponmastery_cs_skillmanager"
     },
     {
       "relation": "references",
@@ -23352,9 +23537,9 @@
       "source_location": "L16",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "client_weaponmastery_weaponmastery_skillforheld",
-      "target": "client_weaponmastery_cs_weapon",
-      "confidence_score": 1.0
+      "target": "client_weaponmastery_cs_weapon"
     },
     {
       "relation": "references",
@@ -23363,9 +23548,9 @@
       "source_location": "L16",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "client_weaponmastery_weaponmastery_skillforheld",
-      "target": "weaponskillclass",
-      "confidence_score": 1.0
+      "target": "weaponskillclass"
     },
     {
       "relation": "contains",
@@ -36661,5 +36846,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "e6f3816201000ad95e62bf5b3054a7839482192a"
+  "built_at_commit": "74a9f29975a9886b43afd434e965fda2f6967c31"
 }
