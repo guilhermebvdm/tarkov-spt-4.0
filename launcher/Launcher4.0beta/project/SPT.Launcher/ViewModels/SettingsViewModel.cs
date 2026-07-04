@@ -98,15 +98,6 @@ namespace SPT.Launcher.ViewModels
             this.RaisePropertyChanged(nameof(DevModeStatusText));
         }
 
-        public void OpenTargramCommand()
-        {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = "https://targram.lovable.app/",
-                UseShellExecute = true
-            });
-        }
-
         public void OpenKofiCommand()
         {
             Process.Start(new ProcessStartInfo

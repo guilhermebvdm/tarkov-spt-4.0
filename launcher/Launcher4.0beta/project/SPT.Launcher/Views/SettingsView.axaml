@@ -89,12 +89,6 @@
                             <TextBlock Text="CONFIGURAÇÕES" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>    
-                    <Button Classes="SidebarMenu" Cursor="Hand" Command="{Binding OpenTargramCommand}">
-                        <StackPanel Orientation="Horizontal" Spacing="10">
-                            <Path Data="M16.36,14C16.44,13.34 16.5,12.68 16.5,12C16.5,11.32 16.44,10.66 16.36,10H19.74C19.9,10.64 20,11.31 20,12C20,12.69 19.9,13.36 19.74,14M14.59,19.56C15.19,18.45 15.65,17.25 15.97,16H18.92C17.96,17.65 16.43,18.93 14.59,19.56M14.34,14H9.66C9.56,13.34 9.5,12.68 9.5,12C9.5,11.32 9.56,10.66 9.66,10H14.34C14.44,10.66 14.5,11.32 14.5,12C14.5,12.68 14.44,13.34 14.34,14M12,19.96C11.16,18.76 10.5,17.43 10.09,16H13.91C13.5,17.43 12.84,18.76 12,19.96M8.03,16C8.35,17.25 8.81,18.45 9.41,19.56C7.57,18.93 6.04,17.65 5.08,16M4.26,14C4.1,13.36 4,12.69 4,12C4,11.31 4.1,10.64 4.26,10H7.64C7.56,10.66 7.5,11.32 7.5,12C7.5,12.68 7.56,13.34 7.64,14M5.08,8H8.03C8.35,6.75 8.81,5.55 9.41,4.44C7.57,5.07 6.04,6.35 5.08,8M12,4.04C12.84,5.24 13.5,6.57 13.91,8H10.09C10.5,6.57 11.16,5.24 12,4.04M14.59,4.44C13.99,5.55 13.53,6.75 13.21,8H16.16C17.12,6.35 18.65,5.07 14.59,4.44M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z" VerticalAlignment="Center"/>
-                            <TextBlock Text="TARGRAM" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button> 
                     <Button Classes="SidebarMenu" Cursor="Hand" Command="{Binding OpenKofiCommand}">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <Path Data="M2,21H20V19H2M20,8H18V5H20M20,3H4V13A4,4 0 0,0 8,17H14A4,4 0 0,0 18,13V10H20A2,2 0 0,0 22,8V5C22,3.89 21.1,3 20,3M16,5V13A2,2 0 0,1 14,15H8A2,2 0 0,1 6,13V5H16Z" VerticalAlignment="Center"/>

@@ -122,7 +122,6 @@
             englishLocale.update_error = "Update check failed: {0}";
             englishLocale.update_files_to_delete = "{0} file(s) to remove";
             englishLocale.update_deleting = "Removing: {0} ({1}/{2})";
-            englishLocale.sidebar_targram = "TARGRAM";
             englishLocale.version_box_title = "Version";
             englishLocale.server_label = "Server: {0}";
             englishLocale.launcher_label = "Launcher: {0}";
