@@ -1,7 +1,7 @@
 # 058 — Rota pública de classes p/ launcher · Spec (fundida)
 
 **Mod:** CustomClasses
-**Status:** Em execução
+**Status:** Entregue (ver adendo pós-review no fim)
 **Criado:** 2026-07-03
 **Kickoff:** [058-launcher-classes-route-00-kickoff.md](058-launcher-classes-route-00-kickoff.md) · Contrato SP0: [004-classes-dados-reais-00-kickoff.md](../../../../launcher/Launcher4.0beta/backlog/004-classes-dados-reais/004-classes-dados-reais-00-kickoff.md) §"Contrato SP0"
 
@@ -87,3 +87,11 @@ Gate "Registered" da rota = `keyRegistry.GetEditionKey(fileName) != null && visu
 | `modded/Server/ClassListResponse.cs` | novo — DTOs `ClassListItem` + `LocalizedPair` (não usar `LocalizedText`: o converter colapsa `Pt==null` p/ string legada, quebrando o shape) |
 | `modded/Server/ClassListRouter.cs` | novo — `[Injectable] StaticRouter`, rota `/customclasses/classes` |
 | `modded/Server/ClassRegistrar.cs` | editado — ctor + `Commit` + `Remove` (3 micro-edições) |
+
+## Adendo (pós-review 01, 2026-07-03)
+
+A review adversarial ([04-code-review-01](058-launcher-classes-route-04-code-review-01.md), 1 🔴 + 4 🟡) mudou duas posições desta spec — o as-built rev. 2 é a descrição vigente:
+
+- **§Edge cases "hot-apply do editor" e §Fora de escopo (itens 1-2) SUPERADOS:** o CR-01-01 reclassificou o bug como bloqueador (perfis de jogadores criados na janela ficam com edition fantasma — a claim "restart reconverge" não vale para perfis) e o fix ESTRUTURAL foi aplicado: a resolução de língua saiu do boot para o singleton novo `LauncherLanguageConfig`, consumido por `ClassRegistrar.ValidateAndBuild` — boot, Save/hotApply e Delete produzem a MESMA editionKey; `Registered`/hot-remove do `ClassEditorService` usam a chave efetiva. P-058.2 fechada na raiz.
+- **Arquivos adicionais tocados** (além da tabela acima): `LauncherLanguageConfig.cs` (novo), `CustomClassesMod.cs` (lógica privada de língua removida), `ClassEditorService.cs` (`BuildEntry` + `Delete`), `ClassListRouter.cs` (dedupe CR-01-03 + normalização de skills CR-01-05).
+- **Teste manual:** curl exige `-H "responsecompressed: 0"` (resposta default é zlib — CR-01-04).

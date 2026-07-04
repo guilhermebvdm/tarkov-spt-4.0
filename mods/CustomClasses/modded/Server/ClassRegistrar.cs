@@ -83,6 +83,7 @@ public class ClassRegistrar(
     SkillMultiplierRegistry skillMultiplierRegistry,
     ClassVisualRegistry classVisualRegistry,
     ClassEditionKeyRegistry classEditionKeyRegistry,   // item 058: fileName → chave efetiva registrada
+    LauncherLanguageConfig launcherLanguageConfig,     // item 058 (CR-01-01): língua da chave de edition
     IReadOnlyList<SptMod> loadedMods,   // item 006: soft-detect do Skills-Extended
     ISptLogger<ClassRegistrar> logger
 )
@@ -94,6 +95,14 @@ public class ClassRegistrar(
 
     /// <summary>Item 006: Skills-Extended present among loaded mods (lazy — resolved on first use, post mod load).</summary>
     public bool SkillsExtendedInstalled => _seInstalled ??= SkillsExtendedCompat.IsPresent(loadedMods);
+
+    /// <summary>
+    ///     Item 058 (ref: CR-01-01/CR-01-02): chave de edition EFETIVA de uma definição — a mesma que
+    ///     <see cref="ValidateAndBuild"/> usa em <c>plan.Name</c> (language do settings.jsonc aplicada:
+    ///     pt/en → displayName[lang], fallback name; trimmed). Para callers que precisam da chave SEM
+    ///     montar um plan (ex.: ClassEditorService.Delete → hot-remove, BuildEntry → flag Registered).
+    /// </summary>
+    public string ResolveEditionKey(ClassDefinition def) => launcherLanguageConfig.ResolveEditionKey(def);
 
     /// <summary>
     ///     Phase 1 — PURE dry-run. Runs every validation the pre-021 loader ran (blank name, edition
@@ -135,8 +144,13 @@ public class ClassRegistrar(
             // Not blocking: still validate/build so the editor can preview a disabled class.
         }
 
-        // CR-01-03: trim para evitar chave/edition com espaço acidental vindo do JSON editado à mão.
-        var name = def.Name!.Trim();
+        // ref: CR-01-01 (item 058, fix estrutural): a chave EFETIVA é resolvida AQUI, no pipeline
+        // compartilhado — boot, Save/hotApply e Delete produzem a MESMA editionKey em qualquer
+        // language do settings.jsonc (antes o transform era privado do boot e um Save+hotApply sob
+        // language=pt registrava a edition EN transitória → perfis com edition fantasma pós-restart).
+        // ResolveEditionKey já faz o trim (CR-01-03 do item 021: chave sem espaço acidental).
+        // O def/arquivo mantém o name cru — re-chaveamento é preocupação de registro, não de disco.
+        var name = launcherLanguageConfig.ResolveEditionKey(def);
         var templates = databaseService.GetProfileTemplates();   // ref: DatabaseService.cs:141
 
         // Collision guard: never overwrite a vanilla / other-mod / duplicate edition. With allowReplace the

@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Text.Json.Serialization;                   // JsonPropertyName (settings.jsonc)
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;                          // IOnLoad, OnLoadOrder
 using SPTarkov.Server.Core.Helpers;                     // ModHelper
@@ -40,11 +39,10 @@ public class CustomClassesMod(
         // Item 006: detecta o Skills-Extended (soft) p/ avisar sobre multiplicadores de skills que dependem dele.
         logger.Info($"[CustomClasses] Skills-Extended detectado: {(classRegistrar.SkillsExtendedInstalled ? "sim" : "não")}.");
 
-        // Língua dos NOMES de classe no launcher (config/settings.jsonc). O launcher mostra a CHAVE da
-        // edition (= name); não há locale p/ o nome. Então, em "pt"/"en", registramos a edition usando
-        // displayName[língua] (Caçador/Hunter). "name"/ausente = usa o name cru. ⚠ re-chaveia editions.
-        var language = LoadLauncherLanguage();
-        if (language != "name") logger.Info($"[CustomClasses] launcher language = '{language}' — editions registradas pelo displayName.{language}.");
+        // Língua dos NOMES de classe no launcher: o re-chaveamento (pt/en → displayName[lang]) vive
+        // no pipeline compartilhado desde o item 058 (ref: CR-01-01) — LauncherLanguageConfig →
+        // ClassRegistrar.ValidateAndBuild. Boot, Save/hotApply e Delete produzem a MESMA chave;
+        // o boot não tem mais lógica própria de língua (o config loga a língua ativa no 1º uso).
 
         // Non-recursive: only the top of config/classes/ (subfolders ignored — handy for drafts). PA-01-03
         var files = fileUtil.GetFiles(classesPath, false, "*.json")   // ref: FileUtil.cs:11
@@ -74,8 +72,6 @@ public class CustomClassesMod(
                     continue;
                 }
 
-                def = ApplyLauncherLanguage(def, language);   // edition key = displayName[língua] quando configurado
-
                 // Item 021: dry-run (validate + build) then commit — same logs/behaviour as the pre-021
                 // monolithic RegisterClass. allowReplace=false at boot: never overwrite an existing edition.
                 var plan = classRegistrar.ValidateAndBuild(def, fileName, allowReplace: false, out _);
@@ -100,49 +96,4 @@ public class CustomClassesMod(
         return Task.CompletedTask;
     }
 
-    /// <summary>Lê config/settings.jsonc → língua dos nomes de edition no launcher ("pt"/"en"/"name").</summary>
-    private string LoadLauncherLanguage()
-    {
-        try
-        {
-            var settingsPath = System.IO.Path.Combine(
-                modHelper.GetAbsolutePathToModFolder(Assembly.GetExecutingAssembly()), "config", "settings.jsonc");
-            if (!System.IO.File.Exists(settingsPath))
-            {
-                return "name";   // sem config → mantém o name cru (compat)
-            }
-
-            var settings = jsonUtil.Deserialize<LauncherSettings>(fileUtil.ReadFile(settingsPath));
-            var lang = settings?.Language?.Trim().ToLowerInvariant();
-            return lang is "pt" or "en" ? lang : "name";
-        }
-        catch (Exception ex)
-        {
-            logger.Warning($"[CustomClasses] config/settings.jsonc inválido — usando 'name'. {ex.Message}");
-            return "name";
-        }
-    }
-
-    /// <summary>Quando a língua é "pt"/"en", troca o name (chave da edition no launcher) pelo displayName
-    /// correspondente. Sem displayName na língua → mantém o name. NÃO altera o displayName (in-game segue
-    /// localizado normalmente).</summary>
-    private static ClassDefinition ApplyLauncherLanguage(ClassDefinition def, string language)
-    {
-        var localized = language switch
-        {
-            "pt" => def.DisplayName?.Pt,
-            "en" => def.DisplayName?.En,
-            _ => null,
-        };
-        return string.IsNullOrWhiteSpace(localized) || localized == def.Name
-            ? def
-            : def with { Name = localized! };
-    }
-
-    /// <summary>config/settings.jsonc — opções globais do mod (separadas dos arquivos de classe).</summary>
-    private sealed record LauncherSettings
-    {
-        /// <summary>"pt" | "en" → nome de edition no launcher pelo displayName; "name"/ausente = name cru.</summary>
-        [JsonPropertyName("language")] public string? Language { get; init; }
-    }
 }
