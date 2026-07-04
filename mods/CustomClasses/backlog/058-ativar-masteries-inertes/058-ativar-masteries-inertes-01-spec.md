@@ -47,14 +47,19 @@ O progresso **persiste** entre raids. **Coexiste** com o Bunker (decisão de esc
 O recon deixou 4 incógnitas que **só o jogo resolve** e que **mudam o design**. Rodar este protocolo in-game **antes**
 de implementar (resultados alimentam a spec técnica):
 
-- [ ] **V1 — SMG/LMG sobem sozinhas?** Equipar uma SMG, acertar ~10 tiros em bot, abrir Skills: a barra de **SMG** subiu?
-      Repetir com **LMG**. → Se subirem, saem do escopo da Perna 1 (só HMG/Launcher/AttachedLauncher recebem XP do mod).
-- [ ] **V2 — Persistência.** Após ganhar qualquer XP numa dessas skills, **sair da raid** e reabrir Skills: o progresso
-      **permaneceu**? → Se zerar, a feature exige também persistir server-side (muda o escopo: deixa de ser só client).
+- [x] **V1 — RODADO 2026-07-04** (perfil zerado, protocolo estendido da review 01): **SMG 2.46** e **LMG 2.76**
+      SOBEM VANILLA → fora da Perna 1. **Launcher standalone (MSGL/FN40GL) 0.91** SOBE VANILLA → fora da Perna 1
+      (a review PA-01-01 acertou: Launcher não estava morta). **Underbarrel (GP-25+VOG-25) = 0** → ÚNICA skill
+      comprovadamente morta e alvo real da Perna 1. Consequência anti-XP-duplo: o mod NÃO credita XP em
+      SMG/LMG/Launcher.
+- [ ] **V2 — Persistência.** Pendente confirmar pós-extract (para as que sobem vanilla é o sistema nativo — baixo
+      risco); a persistência do XP creditado PELO MOD (AttachedLauncher via SetCurrent) só é testável pós-implementação
+      → vira item do checklist de validação do code-mod.
 - [ ] **V3 — `SetCurrent` funciona?** (validado no code-mod) Confirmar que creditar XP numa skill inerte reflete na UI.
-- [ ] **V4 — Underbarrel & HMG/LMG.** Confirmar se o cliente distingue disparo de **underbarrel acoplado** e se
-      **HMG vs LMG** têm algum discriminante além de `weapClass=machinegun` (peso/handbook). → Define se separamos ou
-      unificamos essas skills.
+- [~] **V4 — PARCIAL 2026-07-04:** o disparo do underbarrel NÃO credita nada (nem Launcher) → o Item reportado no
+      acerto da explosão da VOG não casa com nenhum weaponType (provável: a granada/munição). Detectar o DISPARO do
+      underbarrel (FirearmController.UnderbarrelWeapon) é o caminho da Perna 1. **HMG segue indeterminada** (NSV é
+      estacionária de mapa; não testada) → HMG entra como best-effort/deferível na spec técnica.
 
 ## Corner cases
 
