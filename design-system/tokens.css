@@ -252,6 +252,12 @@
   --trl-texture-scanlines: repeating-linear-gradient(115deg,
       rgba(0, 0, 0, 0) 0 12px, rgba(255, 255, 255, .010) 12px 13px);
 
+  /* Ambient key-art background (opt-in via .trl-app--photo).
+   * The scrim (~86–93% ground) is what keeps ground-level text AA —
+   * never show the photo without it. Asset provenance: assets/PROVENANCE.txt */
+  --trl-photo: url("assets/bg-ambient.jpg");
+  --trl-scrim: linear-gradient(rgba(19, 19, 20, .86), rgba(19, 19, 20, .93));
+
   /* Chamfer (EFT corner cut) — solid surfaces only; a clip-path eats the
    * element's own 1px border, so bordered elements must not use it
    * (see PATTERNS.md · chamfer). */

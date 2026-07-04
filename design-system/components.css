@@ -35,6 +35,18 @@
   scrollbar-color: var(--trl-surface-3) var(--trl-ground);
 }
 
+/* opt-in ambient key-art background — panels stay opaque; the scrim keeps
+ * text on the ground AA-readable. Remove the asset and this degrades
+ * cleanly to plain graphite. */
+.trl-app--photo {
+  background:
+    var(--trl-texture-vignette),
+    var(--trl-texture-scanlines),
+    var(--trl-scrim),
+    var(--trl-photo) center top / cover no-repeat fixed,
+    var(--trl-bg-app);
+}
+
 .trl-app,
 .trl-app *,
 .trl-app *::before,

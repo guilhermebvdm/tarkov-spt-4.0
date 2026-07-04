@@ -186,6 +186,22 @@ Cores de UI **reprovam** como cores de série (validado por script — banda de 
 - **Nunca dual-axis** (2 escalas Y): duas medidas = dois gráficos ou indexação a base comum. ≥2 séries = legenda sempre; texto (valores/labels) usa tokens de texto, nunca a cor da série. Heat/chips sempre com valor visível.
 - Paleta nova ou mudança nos slots: **rodar o validador** da skill `dataviz` contra `--trl-surface-1` (procedimento na skill do repo `trl-ds-validation`) — nunca aprovar no olho.
 
+### Fundo ambiente & hero (key art)
+
+Asset embutido: `assets/bg-ambient.jpg` (key art oficial do EFT, 1920w/317KB — proveniência em `assets/PROVENANCE.txt`; **nunca hotlinkar**, R9).
+
+- **Ambiente** (usado no editor-starter): `class="trl-app trl-app--photo"` — foto fixa atrás de tudo, sob `--trl-scrim` (86–93% ground). Painéis permanecem **opacos**; texto direto no ground só existe porque o scrim segura o AA. Nunca exibir a foto sem scrim, nunca deixar painel translúcido sobre ela.
+- **Hero band** (usado no hero do showcase): banda de destaque com a foto + fade para o ground —
+
+```css
+background:
+  linear-gradient(rgba(19,19,20,.55), rgba(19,19,20,.82) 70%, var(--trl-ground) 100%),
+  var(--trl-photo) center 22% / cover no-repeat;
+```
+
+- O logotype EFT embutido na arte fica no terço inferior — posicione com `center top`/`center 22%` para mantê-lo fora do enquadramento.
+- Remover o asset degrada limpo para grafite puro.
+
 ### Consumo em Blazor/MudBlazor (fase futura)
 
 O adapter oficial (`bridge/trl-mudblazor.css`, mapeando `--mud-palette-*` → tokens TRL) **não faz parte do v1** — será criado na refatoração do CustomClasses. Até lá: páginas Blazor podem usar componentes `.trl-*` em ilhas com `class="trl-app"` no wrapper, sem conflito de namespace com o Mud.
@@ -195,5 +211,6 @@ O adapter oficial (`bridge/trl-mudblazor.css`, mapeando `--mud-palette-*` → to
 | Data | Autor | Alteração |
 |---|---|---|
 | 2026-07-03 | Guilherme | Criação (v1.0.0) — regras R1–R7 + receitas iniciais |
+| 2026-07-04 | Guilherme | Receita "Fundo ambiente & hero" (key art embutida, `--trl-photo`/`--trl-scrim`, `.trl-app--photo`) |
 | 2026-07-03 | Guilherme | Recalibração "grafite + chrome neutro": base neutra, edges neutras (+`--trl-edge-accent`), labels via `--trl-fg-label`; R2/R4/R5 atualizadas |
 | 2026-07-03 | Guilherme | Review por lentes: R6 (px por decisão) e R8 (i18n) inseridas — Densidade→R7, Assets→R9; receita "Gráficos (dataviz)" com tokens `--trl-viz-*` validados; heat exige valor visível |

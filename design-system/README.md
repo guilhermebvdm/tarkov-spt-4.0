@@ -37,7 +37,7 @@ Editor novo? Copie [`templates/editor-starter.html`](./templates/editor-starter.
 | [`PATTERNS.md`](./PATTERNS.md) | Regras normativas (disciplina do vermelho, radius 0, AA) + receitas |
 | [`CLAUDE.md`](./CLAUDE.md) | Contexto de uso para agentes |
 | [`fonts/`](./fonts/) | Bender woff2 + `@font-face` + nota de licença |
-| [`assets/`](./assets/) | Logo TRL (`trl-logo-dark` integral p/ hero · `trl-logo-mark` cópia aparada p/ topbar) |
+| [`assets/`](./assets/) | Logo TRL (`trl-logo-dark` hero · `trl-logo-mark` topbar) + `bg-ambient.jpg` (key art p/ `.trl-app--photo` e hero band — PROVENANCE.txt) |
 
 ## Versionamento
 

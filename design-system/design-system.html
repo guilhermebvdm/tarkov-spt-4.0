@@ -18,8 +18,12 @@
   .ds-intro { color: var(--trl-fg-muted); max-width: 72ch; margin: 0 0 var(--trl-space-4); font-size: var(--trl-text-md); }
   .ds-intro b { color: var(--trl-fg); }
 
-  /* hero */
-  .ds-hero { padding: var(--trl-space-10) 0 var(--trl-space-8); text-align: center; }
+  /* hero — key art com fade para o ground (receita "hero band" do PATTERNS) */
+  .ds-hero { padding: var(--trl-space-10) var(--trl-space-6) var(--trl-space-8); text-align: center;
+    background:
+      linear-gradient(rgba(19,19,20,.55), rgba(19,19,20,.82) 70%, var(--trl-ground) 100%),
+      var(--trl-photo) center 22% / cover no-repeat;
+    border: var(--trl-border-w) solid var(--trl-edge); }
   .ds-hero img { max-width: min(420px, 80%); height: auto; }
   .ds-hero .trl-divider--laser { max-width: 520px; margin: var(--trl-space-5) auto;
     background-size: 200% 100%; animation: trl-laser-sweep 3.5s linear infinite; }
@@ -320,6 +324,17 @@ tracking: .08em wide · .14em wider · .22em widest     (display/labels only)</p
           </div>
         </div>
       </div>
+      <div class="ds-label">Ambient photo — opt-in <span style="text-transform:none">.trl-app--photo</span> (usado no editor-starter; scrim ≥86% obrigatório)</div>
+      <div class="ds-demo ds-demo--col" style="padding:0">
+        <div style="background: var(--trl-scrim), var(--trl-photo) center 30% / cover no-repeat; padding: 28px 16px">
+          <div class="trl-panel" style="max-width:380px;margin:0 auto">
+            <div class="trl-panel__body" style="font-size:12px">Painéis continuam opacos sobre a foto — o scrim
+              (<span class="trl-mono">--trl-scrim</span>) segura o AA do texto no ground. Asset embutido:
+              <span class="trl-mono">assets/bg-ambient.jpg</span> (317 KB · PROVENANCE.txt).</div>
+          </div>
+        </div>
+      </div>
+
       <div class="ds-demo">
         <div class="ds-label">glows — signals, not decoration</div>
         <span class="trl-tag"><span class="trl-tag__dot"></span>tan</span>
