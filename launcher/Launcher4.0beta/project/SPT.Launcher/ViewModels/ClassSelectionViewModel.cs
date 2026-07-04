@@ -116,6 +116,38 @@ namespace SPT.Launcher.ViewModels
 
                 RegisterErrorMsg = "";
 
+                // Item 020 (DP-020.A = A2, BR-020.1, AC-020.4) — BLOQUEAR REGISTRO COLIDENTE.
+                // Um username que colida case-insensitive com um perfil já existente (Bob vs bob)
+                // colapsaria na mesma chave lowercase do cofre (redline_passwords.json) e uma senha
+                // gravaria no perfil errado. Recusar aqui torna a colisão impossível na origem, sem
+                // depender de o core casar case-sensitive. O critério é o único ponto VaultKeyMatcher.
+                // (O wipe reusa o MESMO username via WipeProfile, não passa por este comando — imune.)
+                try
+                {
+                    var existingProfiles = await Task.Run(() => AccountManager.GetExistingProfiles());
+                    var existingUsernames = new List<string>();
+                    if (existingProfiles != null)
+                    {
+                        foreach (var profile in existingProfiles)
+                        {
+                            existingUsernames.Add(profile?.username);
+                        }
+                    }
+
+                    if (VaultKeyMatcher.CollidesWith(existingUsernames, _username))
+                    {
+                        RegisterErrorMsg = "Já existe uma conta com esse nome (ou uma variação de maiúsculas/minúsculas). Escolha outro nome.";
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Fail-closed: sem conseguir listar os perfis, não arriscar criar uma colisão.
+                    LogManager.Instance.Error($"[ClassSelection] Falha ao verificar colisão de username: {ex.Message}");
+                    RegisterErrorMsg = "Não foi possível verificar o nome de usuário no servidor. Tente novamente.";
+                    return;
+                }
+
                 // A edition enviada é a chave EXATA registrada no ProfileTemplates (contrato SP0),
                 // nunca o displayName exibido na UI.
                 string editionToUse = SelectedClass.EditionKey;

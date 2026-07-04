@@ -1111,6 +1111,17 @@ namespace SPT.Launcher.ViewModels
             if (registerStatus != AccountStatus.OK)
             {
                 LogManager.Instance.Error($"[Profile] Falha ao recriar perfil: {registerStatus}");
+
+                // Item 020 (A4/AC-020.12) — o perfil antigo já foi removido; sem o re-register a chave
+                // do cofre vira órfã apontando pra uma conta inexistente (e um futuro re-register do
+                // mesmo username herdaria a senha antiga, BR-020.4). Limpar best-effort; a varredura de
+                // órfãos do server reconcilia se esta falhar também.
+                AccountStatus orphanCleanup = await AccountManager.DeleteVaultEntryAsync(username);
+                if (orphanCleanup != AccountStatus.OK)
+                {
+                    LogManager.Instance.Warning($"[Profile] Não foi possível apagar a chave órfã do cofre para '{username}' ({orphanCleanup}) — será reconciliada no próximo delete/wipe.");
+                }
+
                 if (registerStatus == AccountStatus.NoConnection)
                     NavigateTo(new ConnectServerViewModel(HostScreen));
                 else
@@ -1167,22 +1178,27 @@ namespace SPT.Launcher.ViewModels
 
             LogManager.Instance.Info($"[Profile] Excluindo conta '{username}'...");
 
-            // ref: CR-01-01 — esvaziar o cofre de senha ANTES do remove (best-effort): o
-            // /launcher/profile/remove não toca o redline_passwords.json, e um username
-            // reciclado herdaria a senha do dono anterior. O gate D2 passa por construção
-            // (ChangePassword envia a senha atual). Falha não bloqueia a exclusão.
-            AccountStatus vaultStatus = await AccountManager.ChangePasswordAsync("");
-            if (vaultStatus != AccountStatus.OK)
-            {
-                LogManager.Instance.Warning($"[Profile] Não foi possível limpar a senha do cofre antes da exclusão ({vaultStatus}) — seguindo com o remove.");
-            }
-
+            // Item 020 (BR-020.2/BR-020.3, AC-020.5/AC-020.6) — ORDEM SEGURA: remove no server
+            // (fonte de verdade) PRIMEIRO; só no sucesso limpa o cofre. Corrige o defeito herdado:
+            // antes o cofre era zerado ANTES do remove, então um remove que falhasse (ex.:
+            // NoConnection) deixava a conta viva com senha VAZIA no cofre (takeover livre). Além
+            // disso a limpeza APAGA a chave (DeleteVaultEntry), não grava senha vazia — senha vazia
+            // == gate aberto e indistinguível de "conta sem senha".
             AccountStatus status = await AccountManager.RemoveAsync();
 
             switch (status)
             {
                 case AccountStatus.OK:
                     {
+                        // Só agora que a conta não existe mais no server: apagar a chave do cofre.
+                        // Best-effort — a falha aqui não ressuscita a conta (já removida); a varredura
+                        // de órfãos do server reconcilia (A4). NUNCA grava senha vazia (BR-020.3).
+                        AccountStatus vaultStatus = await AccountManager.DeleteVaultEntryAsync(username);
+                        if (vaultStatus != AccountStatus.OK)
+                        {
+                            LogManager.Instance.Warning($"[Profile] Conta '{username}' removida, mas a chave do cofre não pôde ser apagada agora ({vaultStatus}) — será reconciliada como órfã no próximo delete/wipe.");
+                        }
+
                         // Sem isso o auto-login tentaria uma conta que não existe mais
                         LauncherSettingsProvider.Instance.Server.AutoLoginCreds = null;
 

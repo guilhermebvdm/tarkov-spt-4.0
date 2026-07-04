@@ -73,6 +73,16 @@ namespace SPT.Launcher
             return request.PostJson("/redline/password/change", Json.Serialize(data), compress: false, decompressResponse: false);
         }
 
+        /// <summary>
+        /// Item 020 (A4/BR-020.3) — APAGA a chave do username no cofre TRL (redline_passwords.json),
+        /// nunca grava senha vazia. Idempotente: username inexistente responde "OK". Usado após um
+        /// remove/wipe bem-sucedido para não deixar entrada órfã reciclável.
+        /// </summary>
+        public static string RequestDeleteVaultEntry(ChangeRequestData data)
+        {
+            return request.PostJson("/redline/password/delete", Json.Serialize(data), compress: false, decompressResponse: false);
+        }
+
         public static string RequestWipe(RegisterRequestData data)
         {
             return request.PostJson("/launcher/profile/change/wipe", Json.Serialize(data));

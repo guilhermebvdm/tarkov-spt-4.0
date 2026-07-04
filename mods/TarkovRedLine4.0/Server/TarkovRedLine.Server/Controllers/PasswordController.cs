@@ -30,6 +30,110 @@ public class PasswordController : ControllerBase
         _saveServer = saveServer;
     }
 
+    // ── Item 020 (DP-020.A = A2): critério ÚNICO de igualdade de username do cofre ──
+    // Espelha SPT.Launcher.Base/Helpers/VaultKeyMatcher (assemblies separados não compartilham
+    // código; a suíte .Tests referencia só o .Base). A2 = chave canônica lowercase + match
+    // case-insensitive, comportamento PRESERVADO do fix D4 — a colisão Bob/bob é barrada na ORIGEM
+    // pelo launcher (bloqueio no registro), não aqui. Aqui só unificamos o critério espalhado
+    // (antes: ToLowerInvariant na chave + OrdinalIgnoreCase no match, em ~6 pontos).
+
+    /// <summary>Chave canônica do cofre: lowercase invariant. null/vazio/whitespace → "".</summary>
+    private static string CanonicalKey(string username)
+        => string.IsNullOrWhiteSpace(username) ? string.Empty : username.ToLowerInvariant();
+
+    /// <summary>true quando dois usernames são "o mesmo usuário" sob o critério do cofre. Vazios nunca casam.</summary>
+    private static bool UsernameMatches(string a, string b)
+    {
+        string ca = CanonicalKey(a);
+        return ca.Length > 0 && string.Equals(ca, CanonicalKey(b), StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// CC-5 — escrita ATÔMICA do cofre (temp + move com overwrite): clientes coop concorrentes não
+    /// podem observar nem produzir um JSON truncado. Não serializa writers (last-writer-wins), mas
+    /// nunca corrompe o arquivo (era File.WriteAllText direto).
+    /// </summary>
+    private static void WriteVaultAtomic(string json)
+    {
+        string tmp = VaultPath + ".tmp";
+        System.IO.File.WriteAllText(tmp, json);
+        System.IO.File.Move(tmp, VaultPath, overwrite: true);
+    }
+
+    /// <summary>
+    /// Item 020 A4/DP-020.C — reconciliação de órfãos do cofre. Enumera o redline_passwords.json,
+    /// cruza com os perfis vivos (info.username) e remove chaves sem perfil correspondente (mesmo
+    /// critério de casing). Quando <paramref name="explicitDeleteUsername"/> != null, remove também a
+    /// chave desse username (cujo perfil já pode ter sido apagado pelo core no delete/wipe). Escrita
+    /// atômica. FAIL-SAFE: só varre órfãos se conseguiu ler os perfis SEM erro — nunca apaga a senha de
+    /// um perfil vivo por causa de uma leitura falha (R-3). Idempotente: roda de novo e converge.
+    /// ref DP-020.C — só no delete/wipe; SEM sweep no boot do server.
+    /// </summary>
+    private static void ReconcileVault(string explicitDeleteUsername = null)
+    {
+        if (!System.IO.File.Exists(VaultPath)) return;
+
+        JsonObject vault;
+        try
+        {
+            if (JsonNode.Parse(System.IO.File.ReadAllText(VaultPath)) is not JsonObject parsed) return; // corrompido → não tocar
+            vault = parsed;
+        }
+        catch { return; }
+
+        string debugLogPath = Path.Combine(Directory.GetCurrentDirectory(), "password_debug_log.txt");
+
+        // Conjunto de usernames vivos (canônicos), a partir dos arquivos de perfil.
+        var liveUsers = new HashSet<string>(StringComparer.Ordinal);
+        bool profilesReadClean = true;
+
+        if (Directory.Exists(ProfilesPath))
+        {
+            foreach (var file in Directory.GetFiles(ProfilesPath, "*.json"))
+            {
+                if (file.EndsWith("redline_passwords.json")) continue;
+
+                try
+                {
+                    var json = JsonNode.Parse(System.IO.File.ReadAllText(file));
+                    var u = json?["info"]?["username"]?.GetValue<string>();
+                    if (!string.IsNullOrEmpty(u)) liveUsers.Add(CanonicalKey(u));
+                }
+                catch
+                {
+                    profilesReadClean = false; // leitura suja → não varrer órfãos neste run (fail-safe)
+                }
+            }
+        }
+        else
+        {
+            profilesReadClean = false; // sem diretório de perfis → não arriscar apagar tudo
+        }
+
+        var keysToRemove = new List<string>();
+        foreach (var entry in vault)
+        {
+            bool isExplicitTarget = explicitDeleteUsername != null && UsernameMatches(entry.Key, explicitDeleteUsername);
+            bool isOrphan = profilesReadClean && !liveUsers.Contains(CanonicalKey(entry.Key));
+
+            if (isExplicitTarget || isOrphan)
+            {
+                keysToRemove.Add(entry.Key);
+            }
+        }
+
+        if (keysToRemove.Count == 0) return;
+
+        foreach (var key in keysToRemove)
+        {
+            bool explicitTarget = explicitDeleteUsername != null && UsernameMatches(key, explicitDeleteUsername);
+            vault.Remove(key);
+            try { System.IO.File.AppendAllText(debugLogPath, $"[Vault] Removed key '{key}' (explicitDelete={explicitTarget})\n"); } catch { }
+        }
+
+        WriteVaultAtomic(vault.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+    }
+
     /// <summary>
     /// D4: lookup do cofre case-insensitive, consistente com o match de profile.
     /// ref: CR-01-01 — prioridade de leitura quando há duplicatas legadas de casing:
@@ -51,13 +155,13 @@ public class PasswordController : ControllerBase
             // Raiz que não é objeto = cofre corrompido
             if (JsonNode.Parse(System.IO.File.ReadAllText(VaultPath)) is not JsonObject vault) return false;
 
-            string canonicalKey = username.ToLowerInvariant();
+            string canonicalKey = CanonicalKey(username);
             string? exactMatch = null, looseMatch = null;
             bool hasExact = false, hasLoose = false;
 
             foreach (var entry in vault)
             {
-                if (!string.Equals(entry.Key, username, StringComparison.OrdinalIgnoreCase)) continue;
+                if (!UsernameMatches(entry.Key, username)) continue;
 
                 string? value = entry.Value?.GetValue<string>();
 
@@ -149,7 +253,7 @@ public class PasswordController : ControllerBase
                                 string fileUsername = usernameNode.GetValue<string>();
                                 System.IO.File.AppendAllText(debugLogPath, $"Checking file {Path.GetFileName(file)} -> username in file is: '{fileUsername}'\n");
 
-                                if (string.Equals(fileUsername, request.username, StringComparison.OrdinalIgnoreCase))
+                                if (UsernameMatches(fileUsername, request.username))
                                 {
                                     // Encontrou o perfil! Atualizar a senha
                                     json["info"]["password"] = request.change;
@@ -172,7 +276,7 @@ public class PasswordController : ControllerBase
                                         if (vault is JsonObject vaultObj)
                                         {
                                             List<string> legacyKeys = vaultObj
-                                                .Where(entry => string.Equals(entry.Key, request.username, StringComparison.OrdinalIgnoreCase))
+                                                .Where(entry => UsernameMatches(entry.Key, request.username))
                                                 .Select(entry => entry.Key)
                                                 .ToList();
 
@@ -182,8 +286,9 @@ public class PasswordController : ControllerBase
                                             }
                                         }
 
-                                        vault[request.username.ToLowerInvariant()] = request.change;
-                                        System.IO.File.WriteAllText(VaultPath, vault.ToJsonString(options));
+                                        vault[CanonicalKey(request.username)] = request.change;
+                                        // CC-5: escrita atômica (temp+move) — coop concorrente não corrompe o cofre.
+                                        WriteVaultAtomic(vault.ToJsonString(options));
                                     }
                                     catch(Exception exVault)
                                     {
@@ -196,7 +301,7 @@ public class PasswordController : ControllerBase
                                         var profiles = _saveServer.GetProfiles();
                                         foreach (var kvp in profiles)
                                         {
-                                            if (string.Equals(kvp.Value.ProfileInfo?.Username, request.username, StringComparison.OrdinalIgnoreCase))
+                                            if (UsernameMatches(kvp.Value.ProfileInfo?.Username, request.username))
                                             {
                                                 if (kvp.Value.ProfileInfo.ExtensionData == null)
                                                 {
@@ -244,6 +349,36 @@ public class PasswordController : ControllerBase
             return Content("FAILED", "text/plain");
     }
 
+    /// <summary>
+    /// Item 020 (A4/BR-020.3/BR-020.4) — APAGA a chave do username no cofre (nunca grava vazio) e
+    /// reconcilia órfãos no mesmo passo (DP-020.C: só no delete/wipe). Chamado pelo launcher DEPOIS
+    /// de um remove/wipe bem-sucedido no core. Idempotente: username inexistente responde "OK".
+    /// </summary>
+    [HttpPost("password/delete")]
+    public IActionResult DeletePassword([FromBody] ChangeRequestData request)
+    {
+        if (string.IsNullOrEmpty(request?.username))
+        {
+            return Content("FAILED", "text/plain");
+        }
+
+        try
+        {
+            ReconcileVault(request.username);
+            return Content("OK", "text/plain");
+        }
+        catch (Exception ex)
+        {
+            try
+            {
+                string debugLogPath = Path.Combine(Directory.GetCurrentDirectory(), "password_debug_log.txt");
+                System.IO.File.AppendAllText(debugLogPath, $"[ERROR] deleting vault entry for {request.username}: {ex.Message}\n");
+            }
+            catch { }
+            return Content("FAILED", "text/plain");
+        }
+    }
+
     [HttpPost("profile/get")]
     public IActionResult ProfileInfo([FromBody] ChangeRequestData request)
     {
@@ -264,7 +399,7 @@ public class PasswordController : ControllerBase
                 if (json != null && json["info"] != null)
                 {
                     var usernameNode = json["info"]["username"];
-                    if (usernameNode != null && string.Equals(usernameNode.GetValue<string>(), request.username, StringComparison.OrdinalIgnoreCase))
+                    if (usernameNode != null && UsernameMatches(usernameNode.GetValue<string>(), request.username))
                     {
                         // Injetar a senha do cofre de volta no JSON antes de mandar pro Launcher!
                         // D4/CR-01-01: lookup priorizado (canônica lowercase > casing exato > case-insensitive).
