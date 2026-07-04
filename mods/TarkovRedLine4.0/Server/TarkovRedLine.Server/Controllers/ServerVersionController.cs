@@ -10,12 +10,12 @@ public class ServerVersionController : ControllerBase
     /// <summary>
     /// Fallback used when Launcher-Updater/server-version.txt is missing or empty.
     /// </summary>
-    internal const string DefaultServerVersion = "0.1.0-beta";
+    internal const string DefaultServerVersion = "0.10.0-beta";
 
     private const string VersionFileName = "server-version.txt";
 
     /// <summary>
-    /// GET /redline/server/version → { "version": "0.1.0-beta" }
+    /// GET /redline/server/version → { "version": "0.10.0-beta" }
     /// Reads the TRL server version from Launcher-Updater/server-version.txt (trimmed).
     /// Not to be confused with /launcher/server/version (SPT core version).
     /// </summary>

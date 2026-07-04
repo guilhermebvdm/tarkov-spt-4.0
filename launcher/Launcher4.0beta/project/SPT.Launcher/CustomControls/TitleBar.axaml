@@ -97,8 +97,10 @@
 			</Button.Styles>
 		</Button>
 
-		<!-- Global brand laser divider (the ONE red moment per view - R1) -->
-		<cc:TrlLaserDivider Grid.ColumnSpan="6" VerticalAlignment="Bottom"/>
+		<!-- Global brand laser divider (the ONE red moment per view - R1).
+		     LaserMargin recua o laser p/ só o painel nas telas de auth (item 001). -->
+		<cc:TrlLaserDivider Grid.ColumnSpan="6" VerticalAlignment="Bottom"
+		                    Margin="{Binding LaserMargin, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
 
 	</Grid>
 

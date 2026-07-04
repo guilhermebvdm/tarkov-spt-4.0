@@ -94,5 +94,16 @@ namespace SPT.Launcher.CustomControls
             get => GetValue(SettingsButtonCommandProperty);
             set => SetValue(SettingsButtonCommandProperty, value);
         }
+
+        // Item 001 — recuo esquerdo do laser (linha vermelha). Nas telas de auth (Login/Cadastro)
+        // o MainWindowViewModel injeta um inset p/ o laser ficar só sobre o painel, não sobre a arte.
+        public static readonly StyledProperty<Thickness> LaserMarginProperty =
+            AvaloniaProperty.Register<TitleBar, Thickness>(nameof(LaserMargin));
+
+        public Thickness LaserMargin
+        {
+            get => GetValue(LaserMarginProperty);
+            set => SetValue(LaserMarginProperty, value);
+        }
     }
 }

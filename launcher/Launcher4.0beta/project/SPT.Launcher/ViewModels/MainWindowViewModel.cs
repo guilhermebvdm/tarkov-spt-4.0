@@ -1,3 +1,4 @@
+using System;
 using Avalonia;
 using ReactiveUI;
 using System.Reactive.Disposables;
@@ -26,6 +27,15 @@ namespace SPT.Launcher.ViewModels
         {
             Path = Path.Join(ImageRequest.ImageCacheFolder, "bg.png")
         };
+
+        // Item 001 — recuo do laser: telas de auth (Login/Cadastro) mantêm a linha vermelha só
+        // sobre o painel (janela fixa 1140, painel 450 → inset esquerdo 690); demais telas full-width.
+        private Thickness _laserMargin;
+        public Thickness LaserMargin
+        {
+            get => _laserMargin;
+            set => this.RaiseAndSetIfChanged(ref _laserMargin, value);
+        }
 
         public MainWindowViewModel()
         {
@@ -63,6 +73,10 @@ namespace SPT.Launcher.ViewModels
                 });
                 */
             }
+
+            // Item 001 — laser (linha vermelha) só sobre o painel nas telas de auth.
+            Router.CurrentViewModel.Subscribe(vm =>
+                LaserMargin = vm is LoginViewModel or RegisterViewModel ? new Thickness(690, 0, 0, 0) : default);
 
             this.WhenActivated((CompositeDisposable disposables) =>
             {

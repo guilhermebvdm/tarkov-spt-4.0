@@ -15,6 +15,8 @@
 		<Setter Property="VerticalAlignment" Value="Center"/>
 		<Setter Property="HorizontalContentAlignment" Value="Left"/>
 		<Setter Property="VerticalContentAlignment" Value="Center"/>
+		<!-- item 002: hand cursor -->
+		<Setter Property="Cursor" Value="Hand"/>
 		<Setter Property="KnobTransitions">
 			<Transitions>
 				<DoubleTransition Easing="CubicEaseOut" Property="Canvas.Left" Duration="0:0:0.16"/>
@@ -82,9 +84,14 @@
 						        BorderThickness="1"
 						        CornerRadius="0"/>
 
+						<!-- item 004: Fluent's UpdateKnobPos sets Canvas.Left = _switchKnob.Bounds.Width
+						     (the FULL canvas width) when ON, not width-minus-knob. So the canvas
+						     width MUST equal the travel distance (18), otherwise the 10px knob
+						     overshoots past the 32px track. 18 travel + 2px left margin =>
+						     OFF knob at 2..12, ON knob at 20..30 (2px inset both ends). -->
 						<Canvas x:Name="PART_SwitchKnob"
 						        Grid.Row="1"
-						        Width="28" Height="10"
+						        Width="18" Height="10"
 						        Margin="2,0,0,0"
 						        VerticalAlignment="Center"
 						        HorizontalAlignment="Left">

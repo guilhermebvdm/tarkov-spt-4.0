@@ -10,6 +10,8 @@
 
     <UserControl.Resources>
         <cvt:ImageSourceConverter x:Key="imageSourceCvt"/>
+        <!-- item 012: separador de milhar PT-BR no contador de XP -->
+        <cvt:ThousandSeparatorConverter x:Key="thousandsCvt"/>
     </UserControl.Resources>
 
     <!-- Nav buttons: Button.nav agora é global (Assets/Theme/Controls/Nav.axaml, item 024) -->
@@ -20,11 +22,11 @@
         <cc:TrlSidebarNav Grid.Column="0">
             <Grid RowDefinitions="Auto, *, Auto">
 
-                <!-- Logo Topo (abaixo da top bar de 34px; respeita a margem do sidebar) -->
-                <Image Grid.Row="0" Source="/Assets/logo-redline.png" Stretch="Uniform" MaxHeight="52" HorizontalAlignment="Center" Margin="24,44,24,8"/>
+                <!-- Logo Topo (item 006: desce um pouco + respiro antes do menu) -->
+                <Image Grid.Row="0" Source="/Assets/logo-redline.png" Stretch="Uniform" MaxHeight="52" HorizontalAlignment="Center" Margin="24,56,24,16"/>
 
                 <!-- Menu Central -->
-                <StackPanel Grid.Row="1" Spacing="2" Margin="0,20,0,0">
+                <StackPanel Grid.Row="1" Spacing="2" Margin="0,28,0,0">
                     <Button Classes="nav active" Cursor="Hand" Command="{Binding OpenSettingsCommand}">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <Path Data="M12 5.69l5 4.5V18h-2v-6H9v6H7v-7.81l5-4.5M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z" VerticalAlignment="Center"/>
@@ -41,6 +43,9 @@
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <Path Data="M2,21H20V19H2M20,8H18V5H20M20,3H4V13A4,4 0 0,0 8,17H14A4,4 0 0,0 18,13V10H20A2,2 0 0,0 22,8V5C22,3.89 21.1,3 20,3M16,5V13A2,2 0 0,1 14,15H8A2,2 0 0,1 6,13V5H16Z" VerticalAlignment="Center"/>
                             <TextBlock Text="APOIE UM CAFEZINHO" VerticalAlignment="Center"/>
+                            <!-- item 005: ícone de link externo (abre no navegador) -->
+                            <Path Data="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z"
+                                  Width="11" Height="11" Stretch="Uniform" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                     <Button Classes="nav" Cursor="Hand" ToolTip.Tip="Em construção" IsEnabled="False" Opacity="0.5">
@@ -62,10 +67,20 @@
         </cc:TrlSidebarNav>
 
         <!-- 2. ÁREA CENTRAL (CARROSSEL E JOGO) -->
-        <Grid Grid.Column="1">
+        <!-- item 010: ClipToBounds contém o zoom do fundo dentro da coluna (não vaza p/ o sidebar) -->
+        <Grid Grid.Column="1" ClipToBounds="True">
 
-            <!-- Fundo da tela logada: key art do EFT (bg-hero, vinda da tela de login) + overlay olive p/ legibilidade -->
-            <Image Source="/Assets/bg-hero.jpg" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+            <!-- Fundo da tela logada: key art do EFT (bg-hero, vinda da tela de login) + overlay olive p/ legibilidade.
+                 item 010: a imagem (2500x1610) preenche exatamente a altura e é cortada só na horizontal,
+                 então VerticalAlignment não teria efeito. Zoom ancorado no topo (origem 0.5,0) empurra as
+                 cabeças e a logo EFT p/ baixo (longe do laser) e corta a base (menos relevante). UniformToFill
+                 preservado (escala uniforme, sem distorção). -->
+            <Image Source="/Assets/bg-hero.jpg" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality"
+                   RenderTransformOrigin="0.5,0">
+                <Image.RenderTransform>
+                    <ScaleTransform ScaleX="1.12" ScaleY="1.12"/>
+                </Image.RenderTransform>
+            </Image>
             <Border Background="{DynamicResource TrlPhotoOverlayBrush}" IsHitTestVisible="False"/>
 
             <!-- Layout Sobreposto da Tela Principal -->
@@ -171,10 +186,13 @@
                                 <TextBlock Text="{Binding ProfileInfo.Level, StringFormat='Nível: {0}'}" Classes="trl-accent" FontWeight="Bold" FontSize="{DynamicResource TrlTextSm}"/>
                                 <!-- XP barra expandida (ProgressBar do tema) -->
                                 <ProgressBar Value="{Binding ProfileInfo.XPLevelProgress}" Maximum="100" VerticalAlignment="Center" HorizontalAlignment="Stretch" MinWidth="150"/>
-                                <TextBlock Text="{Binding ProfileInfo.RemainingExp, StringFormat='Faltam: {0} xp'}" Classes="trl-muted" FontSize="{DynamicResource TrlTextXs}" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding ProfileInfo.RemainingExp, Converter={StaticResource thousandsCvt}, ConverterParameter='Faltam: {0:N0} xp'}" Classes="trl-muted" FontSize="{DynamicResource TrlTextXs}" VerticalAlignment="Center"/>
                             </StackPanel>
 
                             <TextBlock Text="{Binding ProfileInfo.Nickname, StringFormat='Operador: {0}'}" Foreground="{DynamicResource TrlFgBrush}" FontWeight="Bold" FontSize="{DynamicResource TrlTextSm}"/>
+                            <!-- item 013: classe do operador (edição do CustomClasses) -->
+                            <TextBlock Text="{Binding CurrentEdition, StringFormat='Classe: {0}'}" Classes="trl-muted" FontSize="{DynamicResource TrlTextXs}"
+                                       IsVisible="{Binding CurrentEdition, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
                             <TextBlock Text="{Binding CurrentId, StringFormat='Id: {0}'}" Classes="trl-faint" FontSize="{DynamicResource TrlText2Xs}" Cursor="Hand"
                                        ToolTip.Tip="Clique para copiar"
                                        PointerPressed="CopyIdToClipboard"
@@ -190,7 +208,7 @@
 
                             <!-- JOGAR (.primary — tan, R1) -->
                             <Button Content="▶ JOGAR" Classes="primary" Cursor="Hand" Command="{Binding StartGameCommand}" IsEnabled="{Binding CanStartGame}"
-                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="15,10" FontWeight="Black" FontSize="{DynamicResource TrlTextLg}"/>
+                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="15,10" FontWeight="Bold" FontSize="{DynamicResource TrlTextLg}"/>
                         </StackPanel>
 
                     </Grid>

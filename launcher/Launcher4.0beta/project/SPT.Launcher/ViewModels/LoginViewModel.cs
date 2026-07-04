@@ -130,19 +130,23 @@ namespace SPT.Launcher.ViewModels
                                 }
                             });
 
-                            if (LauncherSettingsProvider.Instance.UseAutoLogin && LauncherSettingsProvider.Instance.Server.AutoLoginCreds != Login)
-                            {
-                                LauncherSettingsProvider.Instance.Server.AutoLoginCreds = Login;
-                            }
-
+                            // item 015: o checkbox "Lembrar usuário e entrar automaticamente"
+                            // (RememberUsername) governa tanto o preenchimento quanto o auto-login
+                            // no próximo boot. Marcado → grava credenciais e arma o auto-login;
+                            // desmarcado → limpa tudo (não persiste senha nem credencial de boot).
                             if (LauncherSettingsProvider.Instance.RememberUsername)
                             {
                                 LauncherSettingsProvider.Instance.LastUsername = Login.Username;
                                 LauncherSettingsProvider.Instance.LastPassword = Login.Password;
+                                LauncherSettingsProvider.Instance.UseAutoLogin = true;
+                                LauncherSettingsProvider.Instance.Server.AutoLoginCreds = Login;
                             }
                             else
                             {
+                                LauncherSettingsProvider.Instance.LastUsername = "";
                                 LauncherSettingsProvider.Instance.LastPassword = "";
+                                LauncherSettingsProvider.Instance.UseAutoLogin = false;
+                                LauncherSettingsProvider.Instance.Server.AutoLoginCreds = null;
                             }
 
                             LauncherSettingsProvider.Instance.SaveSettings();
@@ -261,9 +265,21 @@ namespace SPT.Launcher.ViewModels
                 Login.Password = LauncherSettingsProvider.Instance.LastPassword;
             }
 
+            // item 015: desmarcar "Lembrar usuário" no meio da sessão desarma o auto-login na
+            // hora (sem depender de um novo login) e persiste.
             LauncherSettingsProvider.Instance.PropertyChanged += (s, e) =>
             {
-                if (e.PropertyName == "UseAutoLogin" || e.PropertyName == "RememberUsername")
+                if (e.PropertyName == "RememberUsername")
+                {
+                    if (!LauncherSettingsProvider.Instance.RememberUsername)
+                    {
+                        LauncherSettingsProvider.Instance.UseAutoLogin = false;
+                        LauncherSettingsProvider.Instance.Server.AutoLoginCreds = null;
+                        LauncherSettingsProvider.Instance.LastPassword = "";
+                    }
+                    LauncherSettingsProvider.Instance.SaveSettings();
+                }
+                else if (e.PropertyName == "UseAutoLogin")
                 {
                     LauncherSettingsProvider.Instance.SaveSettings();
                 }

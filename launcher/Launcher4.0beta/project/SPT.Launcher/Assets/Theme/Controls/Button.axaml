@@ -5,7 +5,13 @@
   .danger (destructive only), .ghost, .icon, .sm. Legacy shims no rodape.
 -->
 <Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:cvt="using:SPT.Launcher.Converters">
+
+	<Styles.Resources>
+		<!-- item 003: DS chamfer token as a live geometry, bound to Bounds -->
+		<cvt:ChamferClipConverter x:Key="ChamferClip"/>
+	</Styles.Resources>
 
 	<!-- == Base: outlined tan =============================================== -->
 	<Style Selector="Button">
@@ -15,6 +21,8 @@
 		<Setter Property="BorderBrush" Value="{DynamicResource TrlEdgeStrongBrush}"/>
 		<Setter Property="BorderThickness" Value="1"/>
 		<Setter Property="CornerRadius" Value="0"/>
+		<!-- item 002: hand cursor on every button (covers the app by inheritance) -->
+		<Setter Property="Cursor" Value="Hand"/>
 		<!-- ref: handoff grafite regra 4 — base neutra; .trl-btn v2 = color fg-muted -->
 		<Setter Property="Foreground" Value="{DynamicResource TrlFgMutedBrush}"/>
 		<Setter Property="FontFamily" Value="{DynamicResource TrlFontDisplay}"/>
@@ -45,7 +53,10 @@
 		<Setter Property="Background" Value="{DynamicResource TrlAccentBrush}"/>
 		<Setter Property="BorderBrush" Value="{DynamicResource TrlAccentBrush}"/>
 		<Setter Property="Foreground" Value="{DynamicResource TrlFgOnAccentBrush}"/>
-		<Setter Property="FontWeight" Value="Bold"/>
+		<!-- item 011b: peso reduzido Bold -> SemiBold -->
+		<Setter Property="FontWeight" Value="SemiBold"/>
+		<!-- item 003: chanfro (top-left + bottom-right), só variantes sólidas -->
+		<Setter Property="Clip" Value="{Binding Bounds, RelativeSource={RelativeSource Self}, Converter={StaticResource ChamferClip}}"/>
 	</Style>
 	<Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
 		<Setter Property="Background" Value="{DynamicResource TrlAccentStrongBrush}"/>
@@ -68,7 +79,10 @@
 		<Setter Property="Background" Value="{DynamicResource TrlDangerStrongBrush}"/>
 		<Setter Property="BorderBrush" Value="{DynamicResource TrlDangerStrongBrush}"/>
 		<Setter Property="Foreground" Value="{DynamicResource TrlFgOnDanger}"/>
-		<Setter Property="FontWeight" Value="Bold"/>
+		<!-- item 011b: peso reduzido Bold -> SemiBold -->
+		<Setter Property="FontWeight" Value="SemiBold"/>
+		<!-- item 003: chanfro (top-left + bottom-right), só variantes sólidas -->
+		<Setter Property="Clip" Value="{Binding Bounds, RelativeSource={RelativeSource Self}, Converter={StaticResource ChamferClip}}"/>
 	</Style>
 	<Style Selector="Button.danger:pointerover /template/ ContentPresenter#PART_ContentPresenter">
 		<Setter Property="Background" Value="{DynamicResource TrlDangerHoverBrush}"/>

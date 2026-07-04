@@ -30,6 +30,7 @@
 				     XButtonCommand="{Binding CloseCommand}"
 					 MinButtonCommand="{Binding MinimizeCommand}"
 					 SettingsButtonCommand="{Binding GoToSettingsCommand}"
+					 LaserMargin="{Binding LaserMargin}"
 					 Classes.versiontag="False"
                      VerticalAlignment="Top"
 					 ZIndex="10"

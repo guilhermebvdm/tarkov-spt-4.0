@@ -5,6 +5,8 @@
 	<Style Selector="CheckBox">
 		<Setter Property="Foreground" Value="{DynamicResource TrlFgMutedBrush}"/>
 		<Setter Property="FontSize" Value="{DynamicResource TrlTextMd}"/>
+		<!-- item 002: hand cursor -->
+		<Setter Property="Cursor" Value="Hand"/>
 	</Style>
 
 	<Style Selector="CheckBox /template/ Border#NormalRectangle">

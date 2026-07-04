@@ -45,7 +45,8 @@
 
 	<!-- == Status =========================================================== -->
 	<SolidColorBrush x:Key="TrlDangerBrush">#D27A7A</SolidColorBrush>
-	<SolidColorBrush x:Key="TrlDangerStrongBrush">#D92C20</SolidColorBrush>
+	<!-- item 011a: vermelho destrutivo menos saturado (ainda AA sobre branco) -->
+	<SolidColorBrush x:Key="TrlDangerStrongBrush">#C43C31</SolidColorBrush>
 	<SolidColorBrush x:Key="TrlDangerHoverBrush">#F04438</SolidColorBrush>
 	<SolidColorBrush x:Key="TrlDangerPressedBrush">#A8231A</SolidColorBrush>
 	<SolidColorBrush x:Key="TrlSuccessBrush">#9AD27A</SolidColorBrush>
