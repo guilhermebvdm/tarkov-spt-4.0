@@ -9,12 +9,17 @@
 	</Application.DataTemplates>
 
 	<Application.Styles>
-		<StyleInclude Source="avares://DialogHost.Avalonia/Styles.xaml"/>
 		<FluentTheme />
+		<StyleInclude Source="avares://DialogHost.Avalonia/Styles.xaml"/>
+		<!-- TRL theme foundation (tokens + control styles) - must come last so it wins -->
+		<StyleInclude Source="/Assets/Theme/Trl.axaml"/>
 	</Application.Styles>
 
 	<Application.Resources>
 		<ResourceDictionary>
+			<!-- R2: no rounded corners, anywhere -->
+			<CornerRadius x:Key="ControlCornerRadius">0</CornerRadius>
+			<CornerRadius x:Key="OverlayCornerRadius">0</CornerRadius>
 			<ResourceDictionary.ThemeDictionaries>
 				<!-- let's be real... we are never going to use a light theme lol -waffle.lazy -->
 				<ResourceDictionary x:Key="Light">
@@ -30,20 +35,22 @@
 					<SolidColorBrush x:Key="ForegroundBrush">Black</SolidColorBrush>
 				</ResourceDictionary>
 				<ResourceDictionary x:Key="Dark">
-					<!-- Cores de Acento (Vermelhos Tarkov Red Line) -->
-					<SolidColorBrush x:Key="AccentBrush">#d1231f</SolidColorBrush>
-					<SolidColorBrush x:Key="AccentBrush2">#a81b17</SolidColorBrush>
-					<SolidColorBrush x:Key="AccentBrush3">#851411</SolidColorBrush>
-					<!-- Tons secundários -->
-					<SolidColorBrush x:Key="AltAccentBrush">#b2a58d</SolidColorBrush>
-					<SolidColorBrush x:Key="AltAccentBrush2">#7f7564</SolidColorBrush>
-					<SolidColorBrush x:Key="AltAccentBrush3">#4c463b</SolidColorBrush>
-					<!-- Cores Base de Fundo (Grayscales escuros) -->
-					<SolidColorBrush x:Key="BackgroundBrush">#111111</SolidColorBrush>
-					<SolidColorBrush x:Key="BackgroundBrush2">#1a1a1a</SolidColorBrush>
-					<SolidColorBrush x:Key="AltBackgroundBrush">#2c2c2c</SolidColorBrush>
+					<!-- 015 SHIM: legacy keys re-pointed at the TRL palette (tan accent, olive
+					     surfaces) so non-migrated views change skin without breaking.
+					     Values mirror Assets/Theme/Tokens.axaml. Removed in item 014. -->
+					<SolidColorBrush x:Key="AccentBrush">#C7B48A</SolidColorBrush>
+					<SolidColorBrush x:Key="AccentBrush2">#8F8560</SolidColorBrush>
+					<SolidColorBrush x:Key="AccentBrush3">#6B6247</SolidColorBrush>
+					<!-- Tons secundários (tan ramp) -->
+					<SolidColorBrush x:Key="AltAccentBrush">#AB9A71</SolidColorBrush>
+					<SolidColorBrush x:Key="AltAccentBrush2">#8F8560</SolidColorBrush>
+					<SolidColorBrush x:Key="AltAccentBrush3">#453F2D</SolidColorBrush>
+					<!-- Cores Base de Fundo (oliva TRL) -->
+					<SolidColorBrush x:Key="BackgroundBrush">#12130D</SolidColorBrush>
+					<SolidColorBrush x:Key="BackgroundBrush2">#1B1D14</SolidColorBrush>
+					<SolidColorBrush x:Key="AltBackgroundBrush">#22251A</SolidColorBrush>
 					<!-- Texto -->
-					<SolidColorBrush x:Key="ForegroundBrush">White</SolidColorBrush>
+					<SolidColorBrush x:Key="ForegroundBrush">#E9E7DD</SolidColorBrush>
 				</ResourceDictionary>
 			</ResourceDictionary.ThemeDictionaries>
 		</ResourceDictionary>

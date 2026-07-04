@@ -1,0 +1,41 @@
+<!--
+  TRL Theme - Trl.axaml (master include)
+  Registered in App.axaml AFTER FluentTheme and DialogHost so TRL resources/styles win.
+  Order inside matters: base control styles first, Legacy shims last.
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+	<Styles.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceInclude Source="/Assets/Theme/Tokens.axaml"/>
+				<ResourceInclude Source="/Assets/Theme/Typography.axaml"/>
+				<ResourceInclude Source="/Assets/Theme/Controls/ToggleSwitch.axaml"/>
+				<ResourceInclude Source="/Assets/Theme/Controls/TrlCustomControls.axaml"/>
+			</ResourceDictionary.MergedDictionaries>
+
+			<!-- Fluent resource-key overrides (popup surfaces, list items, scrollbar size).
+			     Values duplicate Tokens.axaml on purpose: resource-in-resource refs are
+			     parse-order sensitive; single source of truth remains tokens.css. -->
+			<SolidColorBrush x:Key="ComboBoxDropDownBackground">#22251A</SolidColorBrush>
+			<SolidColorBrush x:Key="ComboBoxDropDownBorderBrush">#6BC7B48A</SolidColorBrush>
+			<SolidColorBrush x:Key="ComboBoxItemBackgroundPointerOver">#14C7B48A</SolidColorBrush>
+			<SolidColorBrush x:Key="ComboBoxItemBackgroundSelected">#24C7B48A</SolidColorBrush>
+			<SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPointerOver">#24C7B48A</SolidColorBrush>
+			<SolidColorBrush x:Key="ComboBoxItemForegroundSelected">#D8C9A4</SolidColorBrush>
+			<x:Double x:Key="ScrollBarSize">10</x:Double>
+		</ResourceDictionary>
+	</Styles.Resources>
+
+	<StyleInclude Source="/Assets/Theme/Controls/Text.axaml"/>
+	<StyleInclude Source="/Assets/Theme/Controls/Button.axaml"/>
+	<StyleInclude Source="/Assets/Theme/Controls/TextBox.axaml"/>
+	<StyleInclude Source="/Assets/Theme/Controls/CheckBox.axaml"/>
+	<StyleInclude Source="/Assets/Theme/Controls/ComboBox.axaml"/>
+	<StyleInclude Source="/Assets/Theme/Controls/ListBox.axaml"/>
+	<StyleInclude Source="/Assets/Theme/Controls/ScrollBar.axaml"/>
+	<StyleInclude Source="/Assets/Theme/Controls/ProgressBar.axaml"/>
+	<StyleInclude Source="/Assets/Theme/Controls/Legacy.axaml"/>
+
+</Styles>

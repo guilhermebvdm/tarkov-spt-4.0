@@ -1,0 +1,29 @@
+<!--
+  TRL Theme - Typography.axaml
+  display = Bender (embedded TTF, converted from design-system woff2) with
+  Bahnschrift/Segoe UI fallback; body = Segoe UI; mono = Cascadia Mono.
+  AssemblyName contains spaces => percent-encoded avares authority.
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+	<FontFamily x:Key="TrlFontDisplay">avares://Tarkov%20Red%20Line/Assets/Fonts#Bender, Bahnschrift, Segoe UI</FontFamily>
+	<FontFamily x:Key="TrlFontBody">Segoe UI, sans-serif</FontFamily>
+	<FontFamily x:Key="TrlFontMono">Cascadia Mono, Consolas, monospace</FontFamily>
+
+	<!-- Type scale (px) -->
+	<x:Double x:Key="TrlText2Xs">10</x:Double>
+	<x:Double x:Key="TrlTextXs">11</x:Double>
+	<x:Double x:Key="TrlTextSm">12</x:Double>
+	<x:Double x:Key="TrlTextMd">13</x:Double>
+	<x:Double x:Key="TrlTextLg">15</x:Double>
+	<x:Double x:Key="TrlTextXl">18</x:Double>
+	<x:Double x:Key="TrlText2Xl">22</x:Double>
+	<x:Double x:Key="TrlText3Xl">28</x:Double>
+
+	<!-- Tracking (LetterSpacing px @ 11-12px, approximating .08/.14/.22em) -->
+	<x:Double x:Key="TrlTrackWide">1.0</x:Double>
+	<x:Double x:Key="TrlTrackWider">1.6</x:Double>
+	<x:Double x:Key="TrlTrackWidest">2.4</x:Double>
+
+</ResourceDictionary>

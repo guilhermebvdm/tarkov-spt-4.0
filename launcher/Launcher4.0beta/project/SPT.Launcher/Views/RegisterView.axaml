@@ -12,50 +12,51 @@
     </UserControl.Resources>
 
     <Grid>
-        <!-- Fundo cobrindo tudo -->
+        <!-- Fundo cobrindo tudo + overlay olive TRL -->
         <Image Source="/Assets/bg1.png" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+        <Border Background="{DynamicResource TrlPhotoOverlayBrush}" IsHitTestVisible="False"/>
 
         <Grid ColumnDefinitions="*, 450">
             <!-- Coluna 0 vazia para mostrar a imagem -->
 
-            <!-- 2. ÁREA CENTRAL (REGISTRO) -->
-            <Border Grid.Column="1" BorderBrush="#333" BorderThickness="1,0,0,0" Background="#B3000000">
+            <!-- 2. ÁREA CENTRAL (REGISTRO) - painel translúcido sobre a foto -->
+            <Border Grid.Column="1"
+                    BorderBrush="{DynamicResource TrlEdgeBrush}"
+                    BorderThickness="1,0,0,0"
+                    Background="{DynamicResource TrlPanelOverPhotoBrush}"
+                    Padding="0,34,0,0">
                 <Grid RowDefinitions="120, *">
-                
+
                     <!-- Logo Topo -->
                     <Image Grid.Row="0" Margin="15" Source="/Assets/logo-redline.png" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
                     <!-- Painel de Registro -->
                     <StackPanel Grid.Row="1" Spacing="15" Margin="40,20" VerticalAlignment="Center">
-                        <TextBlock Text="CRIE SUA CONTA" Foreground="White" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,20"/>
-                        
-                        <TextBlock Text="Defina seu usuário" Foreground="White" FontSize="14" Margin="0,0,0,-10"/>
-                        <TextBox Text="{Binding RegisterUsername, Mode=TwoWay}" Watermark="Escolha um nome de usuário" Classes="dark"/>
-                        
-                        <TextBlock Text="Crie uma senha" Foreground="White" FontSize="14" Margin="0,0,0,-10"/>
-                        <TextBox Text="{Binding RegisterPassword, Mode=TwoWay}" PasswordChar="●" Watermark="Digite sua senha" Classes="dark"/>
-                        
-                        <TextBlock Text="Confirme a senha" Foreground="White" FontSize="14" Margin="0,0,0,-10"/>
-                        <TextBox Text="{Binding ConfirmPassword, Mode=TwoWay}" PasswordChar="●" Watermark="Repita a senha" Classes="dark"/>
+                        <TextBlock Text="CRIE SUA CONTA" Classes="trl-h3"
+                                   LetterSpacing="{DynamicResource TrlTrackWider}"
+                                   HorizontalAlignment="Center" Margin="0,0,0,20"/>
 
-                        <TextBlock Text="{Binding RegisterErrorMsg}" Foreground="#CC1111" FontSize="12" FontWeight="Bold" IsVisible="{Binding RegisterErrorMsg, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                        <TextBlock Text="DEFINA SEU USUÁRIO" Classes="trl-label" Margin="0,0,0,-10"/>
+                        <TextBox Text="{Binding RegisterUsername, Mode=TwoWay}" Watermark="Escolha um nome de usuário"/>
 
-                        <Button Content="Criar conta" Command="{Binding GoToClassSelectionCommand}" Background="#990000" Foreground="White" FontWeight="Bold" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="0,10,0,20"/>
-                        
-                        <Separator Background="#333" Margin="0,10"/>
+                        <TextBlock Text="CRIE UMA SENHA" Classes="trl-label" Margin="0,0,0,-10"/>
+                        <TextBox Text="{Binding RegisterPassword, Mode=TwoWay}" PasswordChar="●" Watermark="Digite sua senha"/>
 
-                        <TextBlock Text="Já possui uma conta?" Foreground="LightGray" FontSize="12" HorizontalAlignment="Center" Margin="0,10,0,0"/>
-                        <Button Content="Voltar para Login" Command="{Binding GoToLoginCommand}" Background="#333333" Foreground="White" FontWeight="Bold" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+                        <TextBlock Text="CONFIRME A SENHA" Classes="trl-label" Margin="0,0,0,-10"/>
+                        <TextBox Text="{Binding ConfirmPassword, Mode=TwoWay}" PasswordChar="●" Watermark="Repita a senha"/>
+
+                        <TextBlock Text="{Binding RegisterErrorMsg}" Classes="trl-danger" FontSize="{DynamicResource TrlTextSm}" FontWeight="Bold" TextWrapping="Wrap" IsVisible="{Binding RegisterErrorMsg, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+
+                        <Button Content="CRIAR CONTA" Command="{Binding GoToClassSelectionCommand}" Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="0,10,0,20"/>
+
+                        <Separator Margin="0,10"/>
+
+                        <TextBlock Text="Já possui uma conta?" Classes="trl-muted" FontSize="{DynamicResource TrlTextSm}" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                        <Button Content="VOLTAR PARA LOGIN" Command="{Binding GoToLoginCommand}" Classes="ghost" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
                     </StackPanel>
 
                     <!-- Footer (Versão) -->
-                    <StackPanel Grid.Row="1" VerticalAlignment="Bottom" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15" Spacing="5">
-                        <TextBlock Text="Versão do launcher: " Foreground="LightGray" FontSize="10" FontWeight="Bold"/>
-                        <TextBlock Text="15.0" Foreground="#CC1111" FontSize="10" FontWeight="Bold"/>
-                        <TextBlock Text=" | " Foreground="LightGray" FontSize="10" FontWeight="Bold"/>
-                        <TextBlock Text="Versão do servidor: " Foreground="LightGray" FontSize="10" FontWeight="Bold"/>
-                        <TextBlock Text="0.10" Foreground="#CC1111" FontSize="10" FontWeight="Bold"/>
-                    </StackPanel>
+                    <cc:TrlVersionFooter Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,15"/>
                 </Grid>
             </Border>
         </Grid>

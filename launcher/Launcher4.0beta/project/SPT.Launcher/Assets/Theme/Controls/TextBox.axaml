@@ -1,0 +1,49 @@
+<!-- TRL Theme - TextBox.axaml: bg input, edge border, focus = accent-dim border + tan glow -->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+	<Style Selector="TextBox">
+		<Setter Property="Background" Value="{DynamicResource TrlBgInputBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlEdgeBrush}"/>
+		<Setter Property="BorderThickness" Value="1"/>
+		<Setter Property="CornerRadius" Value="0"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgBrush}"/>
+		<Setter Property="CaretBrush" Value="{DynamicResource TrlAccentBrush}"/>
+		<Setter Property="SelectionBrush" Value="{DynamicResource TrlBgActiveBrush}"/>
+		<Setter Property="MinHeight" Value="{DynamicResource TrlControlHeight}"/>
+		<Setter Property="FontSize" Value="{DynamicResource TrlTextMd}"/>
+		<Setter Property="Padding" Value="8,5"/>
+		<Setter Property="VerticalContentAlignment" Value="Center"/>
+	</Style>
+
+	<Style Selector="TextBox /template/ TextBlock#PART_Watermark">
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgGhostBrush}"/>
+	</Style>
+	<Style Selector="TextBox /template/ TextBlock#PART_FloatingWatermark">
+		<Setter Property="Foreground" Value="{DynamicResource TrlAccentDimBrush}"/>
+	</Style>
+
+	<Style Selector="TextBox:pointerover">
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgBrush}"/>
+	</Style>
+	<Style Selector="TextBox:pointerover /template/ Border#PART_BorderElement">
+		<Setter Property="Background" Value="{DynamicResource TrlBgInputBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlEdgeStrongBrush}"/>
+	</Style>
+
+	<Style Selector="TextBox:focus">
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgBrush}"/>
+	</Style>
+	<Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+		<Setter Property="Background" Value="{DynamicResource TrlBgInputBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlAccentDimBrush}"/>
+		<Setter Property="BorderThickness" Value="1"/>
+		<Setter Property="BoxShadow" Value="{DynamicResource TrlGlowTanShadow}"/>
+	</Style>
+
+	<Style Selector="TextBox:disabled /template/ Border#PART_BorderElement">
+		<Setter Property="Background" Value="{DynamicResource TrlBgInputBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlEdgeFaintBrush}"/>
+	</Style>
+
+</Styles>

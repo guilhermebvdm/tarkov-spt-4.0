@@ -1,0 +1,53 @@
+<!-- TRL Theme - Text.axaml: TextBlock/Label utility classes (display labels, headings, status text) -->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+	<!-- Display label: uppercase written in XAML by the consumer (no text-transform in Avalonia) -->
+	<Style Selector="TextBlock.trl-label">
+		<Setter Property="FontFamily" Value="{DynamicResource TrlFontDisplay}"/>
+		<Setter Property="FontSize" Value="{DynamicResource TrlTextXs}"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlAccentDimBrush}"/>
+		<Setter Property="LetterSpacing" Value="{DynamicResource TrlTrackWide}"/>
+	</Style>
+
+	<!-- Headings -->
+	<Style Selector="TextBlock.trl-h1">
+		<Setter Property="FontFamily" Value="{DynamicResource TrlFontDisplay}"/>
+		<Setter Property="FontSize" Value="{DynamicResource TrlText3Xl}"/>
+		<Setter Property="FontWeight" Value="SemiBold"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgBrush}"/>
+	</Style>
+	<Style Selector="TextBlock.trl-h2">
+		<Setter Property="FontFamily" Value="{DynamicResource TrlFontDisplay}"/>
+		<Setter Property="FontSize" Value="{DynamicResource TrlText2Xl}"/>
+		<Setter Property="FontWeight" Value="SemiBold"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgBrush}"/>
+	</Style>
+	<Style Selector="TextBlock.trl-h3">
+		<Setter Property="FontFamily" Value="{DynamicResource TrlFontDisplay}"/>
+		<Setter Property="FontSize" Value="{DynamicResource TrlTextXl}"/>
+		<Setter Property="FontWeight" Value="SemiBold"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgBrush}"/>
+	</Style>
+
+	<!-- Body status colors -->
+	<Style Selector="TextBlock.trl-muted">
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgMutedBrush}"/>
+	</Style>
+	<Style Selector="TextBlock.trl-faint">
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgFaintBrush}"/>
+	</Style>
+	<Style Selector="TextBlock.trl-danger">
+		<Setter Property="Foreground" Value="{DynamicResource TrlDangerBrush}"/>
+	</Style>
+	<Style Selector="TextBlock.trl-success">
+		<Setter Property="Foreground" Value="{DynamicResource TrlSuccessBrush}"/>
+	</Style>
+	<Style Selector="TextBlock.trl-accent">
+		<Setter Property="Foreground" Value="{DynamicResource TrlAccentBrush}"/>
+	</Style>
+	<Style Selector="TextBlock.trl-mono">
+		<Setter Property="FontFamily" Value="{DynamicResource TrlFontMono}"/>
+	</Style>
+
+</Styles>

@@ -22,7 +22,8 @@
     <Compile Remove="Properties\**" />
     <EmbeddedResource Remove="Properties\**" />
     <None Remove="Properties\**" />
-    <AvaloniaResource Remove="Assets\Styles.axaml" />
+    <!-- Theme axaml files are compiled XAML (AvaloniaXaml default glob), not raw resources -->
+    <AvaloniaResource Remove="Assets\Theme\**\*.axaml" />
     <None Remove=".gitignore" />
     <None Remove="Assets\SPT-logo.png" />
     <None Remove="Assets\icon.ico" />
@@ -47,10 +48,5 @@
     <Reference Include="zlib.net">
       <HintPath>References\zlib.net.dll</HintPath>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <AvaloniaXaml Update="Assets\Styles.axaml">
-      <SubType>Designer</SubType>
-    </AvaloniaXaml>
   </ItemGroup>
 </Project>

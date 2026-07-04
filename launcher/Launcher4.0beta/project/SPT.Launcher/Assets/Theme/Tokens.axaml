@@ -1,0 +1,100 @@
+<!--
+  TRL Theme - Tokens.axaml
+  Semantic brushes mapped 1:1 from design-system/tokens.css (tier 2 + shared tier 3).
+  This file is the ONLY place hex values are allowed; product XAML consumes {DynamicResource Trl*}.
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+	<!-- == Backgrounds by role ============================================== -->
+	<SolidColorBrush x:Key="TrlGroundDeepBrush">#0D0E09</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlBgAppBrush">#12130D</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlBgPanelBrush">#1B1D14</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlBgRaisedBrush">#22251A</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlBgInputBrush">#0D0E09</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlSurface3Brush">#282C1E</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlBgHoverBrush">#14C7B48A</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlBgActiveBrush">#24C7B48A</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlBgOverlayBrush">#A6080905</SolidColorBrush>
+
+	<!-- == Edges (translucent tan hairlines) ================================ -->
+	<SolidColorBrush x:Key="TrlEdgeFaintBrush">#1AC7B48A</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlEdgeBrush">#33C7B48A</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlEdgeStrongBrush">#6BC7B48A</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlEdgeRedBrush">#59FF3020</SolidColorBrush>
+
+	<!-- == Foregrounds ====================================================== -->
+	<SolidColorBrush x:Key="TrlFgBrush">#E9E7DD</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlFgMutedBrush">#9A978A</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlFgFaintBrush">#6F6D60</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlFgGhostBrush">#45443A</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlFgOnAccentBrush">#12130D</SolidColorBrush>
+
+	<!-- == Accent (tan = working accent) ==================================== -->
+	<SolidColorBrush x:Key="TrlAccentBrush">#C7B48A</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlAccentStrongBrush">#D8C9A4</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlAccentDimBrush">#8F8560</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlTan400Brush">#AB9A71</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlTan600Brush">#6B6247</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlTan700Brush">#453F2D</SolidColorBrush>
+
+	<!-- == Status =========================================================== -->
+	<SolidColorBrush x:Key="TrlDangerBrush">#D27A7A</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlDangerStrongBrush">#D92C20</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlDangerHoverBrush">#F04438</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlDangerPressedBrush">#A8231A</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlSuccessBrush">#9AD27A</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlWarningBrush">#CC9A3E</SolidColorBrush>
+
+	<!-- Brand red: LIGHT SOURCE only (laser/logo/glow) - never text or fills (R1) -->
+	<SolidColorBrush x:Key="TrlBrandBrush">#FF0000</SolidColorBrush>
+
+	<!-- == Washes =========================================================== -->
+	<SolidColorBrush x:Key="TrlWashGreenBrush">#1A9AD27A</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlWashAmberBrush">#1FCC9A3E</SolidColorBrush>
+	<SolidColorBrush x:Key="TrlWashRedBrush">#1AD27A7A</SolidColorBrush>
+
+	<!-- == Tier 3 - component signature values ============================== -->
+	<!-- Laser line (brand divider, derived from the TRL logo) -->
+	<LinearGradientBrush x:Key="TrlLaserBrush" StartPoint="0%,50%" EndPoint="100%,50%">
+		<GradientStop Offset="0" Color="#00FF0000"/>
+		<GradientStop Offset="0.22" Color="#8CFF0000"/>
+		<GradientStop Offset="0.5" Color="#FFFF0000"/>
+		<GradientStop Offset="0.78" Color="#8CFF0000"/>
+		<GradientStop Offset="1" Color="#00FF0000"/>
+	</LinearGradientBrush>
+
+	<!-- Progress fill (tan gradient) -->
+	<LinearGradientBrush x:Key="TrlProgressFillBrush" StartPoint="0%,50%" EndPoint="100%,50%">
+		<GradientStop Offset="0" Color="#6B6247"/>
+		<GradientStop Offset="1" Color="#C7B48A"/>
+	</LinearGradientBrush>
+
+	<!-- Screen-bar background (black 25% over any surface) -->
+	<SolidColorBrush x:Key="TrlScreenBarBgBrush">#40000000</SolidColorBrush>
+
+	<!-- Photo treatment: olive overlay over bg photos + translucent panel on top -->
+	<RadialGradientBrush x:Key="TrlPhotoOverlayBrush" Center="50%,50%" GradientOrigin="50%,50%">
+		<GradientStop Offset="0" Color="#8012130D"/>
+		<GradientStop Offset="1" Color="#E612130D"/>
+	</RadialGradientBrush>
+	<SolidColorBrush x:Key="TrlPanelOverPhotoBrush">#F21B1D14</SolidColorBrush>
+
+	<!-- Vignette (ambient texture, optional per view) -->
+	<RadialGradientBrush x:Key="TrlVignetteBrush" Center="80%,0%" GradientOrigin="80%,0%">
+		<GradientStop Offset="0" Color="#0FC7B48A"/>
+		<GradientStop Offset="0.6" Color="#00C7B48A"/>
+	</RadialGradientBrush>
+
+	<!-- Glows (signals) and shadows (depth) -->
+	<BoxShadows x:Key="TrlGlowTanShadow">0 0 6 0 #59C7B48A</BoxShadows>
+	<BoxShadows x:Key="TrlGlowRedShadow">0 0 8 0 #73FF0000</BoxShadows>
+	<BoxShadows x:Key="TrlShadow2">0 8 24 0 #80000000</BoxShadows>
+
+	<!-- == Metrics ========================================================== -->
+	<x:Double x:Key="TrlControlHeight">30</x:Double>
+	<x:Double x:Key="TrlControlHeightSm">24</x:Double>
+	<x:Double x:Key="TrlScreenBarHeight">34</x:Double>
+	<x:Double x:Key="TrlSidebarWidth">280</x:Double>
+
+</ResourceDictionary>

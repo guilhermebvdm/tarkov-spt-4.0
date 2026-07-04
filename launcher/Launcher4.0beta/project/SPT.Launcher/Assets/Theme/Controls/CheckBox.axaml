@@ -1,0 +1,40 @@
+<!-- TRL Theme - CheckBox.axaml: square box, edge-strong border, accent glyph when checked -->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+	<Style Selector="CheckBox">
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgMutedBrush}"/>
+		<Setter Property="FontSize" Value="{DynamicResource TrlTextMd}"/>
+	</Style>
+
+	<Style Selector="CheckBox /template/ Border#NormalRectangle">
+		<Setter Property="Background" Value="{DynamicResource TrlBgInputBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlEdgeStrongBrush}"/>
+		<Setter Property="CornerRadius" Value="0"/>
+	</Style>
+
+	<Style Selector="CheckBox:pointerover">
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgBrush}"/>
+	</Style>
+	<Style Selector="CheckBox:pointerover /template/ Border#NormalRectangle">
+		<Setter Property="Background" Value="{DynamicResource TrlBgInputBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlAccentDimBrush}"/>
+	</Style>
+
+	<Style Selector="CheckBox:checked">
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgBrush}"/>
+	</Style>
+	<Style Selector="CheckBox:checked /template/ Border#NormalRectangle">
+		<Setter Property="Background" Value="{DynamicResource TrlBgInputBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlAccentBrush}"/>
+	</Style>
+	<Style Selector="CheckBox:checked /template/ Path#CheckGlyph">
+		<Setter Property="Fill" Value="{DynamicResource TrlAccentBrush}"/>
+	</Style>
+
+	<Style Selector="CheckBox:indeterminate /template/ Border#NormalRectangle">
+		<Setter Property="Background" Value="{DynamicResource TrlBgInputBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlAccentDimBrush}"/>
+	</Style>
+
+</Styles>

@@ -1,0 +1,13 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="SPT.Launcher.CustomControls.TrlLaserDivider"
+             Height="1"
+             IsHitTestVisible="False">
+
+	<!-- THE red moment: brand laser line + glow. Max 1 per view (R1);
+	     the global one lives at the bottom of the TitleBar. -->
+	<Border Height="1"
+	        Background="{DynamicResource TrlLaserBrush}"
+	        BoxShadow="{DynamicResource TrlGlowRedShadow}"/>
+
+</UserControl>

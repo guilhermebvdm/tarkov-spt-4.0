@@ -6,19 +6,24 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SPT.Launcher.Views.ConnectServerView">
 
-  <Grid RowDefinitions="*,AUTO,AUTO,AUTO,*">
-    
+  <Grid RowDefinitions="*,AUTO,AUTO,AUTO,*" Background="{DynamicResource TrlBgAppBrush}">
+
     <Label Content="{Binding connectModel.InfoText}" Grid.Row="1"
            HorizontalAlignment="Center"
            VerticalAlignment="Center"
+           Foreground="{DynamicResource TrlFgMutedBrush}"
+           FontFamily="{DynamicResource TrlFontDisplay}"
+           FontSize="{DynamicResource TrlTextMd}"
+           Margin="0,0,0,10"
            />
     <ProgressBar Grid.Row="2" HorizontalAlignment="Center"
                  VerticalAlignment="Center"
+                 Width="300"
                  IsIndeterminate="{Binding !connectModel.ConnectionFailed}"
                  Classes.error="{Binding connectModel.ConnectionFailed}"
                  IsVisible="{Binding !connectModel.IsDownloading}"
                  />
-    
+
     <ProgressBar Grid.Row="2" HorizontalAlignment="Center"
                  VerticalAlignment="Center"
                  Width="300"
@@ -29,13 +34,12 @@
 
     <Button Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=retry}"
             Grid.Row="3"
-            Margin="10"
+            Margin="10,16"
             HorizontalAlignment="Center"
             IsVisible="{Binding connectModel.ConnectionFailed}"
             Command="{Binding RetryCommand}"
-            Classes="alt"
             />
-    
+
   </Grid>
-  
+
 </UserControl>

@@ -3,10 +3,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:helpers="using:SPT.Launcher.Helpers"
+			 xmlns:cc="using:SPT.Launcher.CustomControls"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SPT.Launcher.CustomControls.TitleBar">
 
-	<Grid ColumnDefinitions="AUTO,*,AUTO,10,AUTO,AUTO" Background="Transparent">
+	<!-- TRL military chrome: 34px screen-bar height, GroundDeep background (via
+	     cc|TitleBar theme style), global brand laser divider at the bottom (R1: the one laser). -->
+	<Grid ColumnDefinitions="AUTO,*,AUTO,10,AUTO,AUTO" Height="34" Background="Transparent">
 
 		<Rectangle Grid.ColumnSpan="6" IsHitTestVisible="False"
 				   Fill="{Binding Background, RelativeSource={
@@ -19,6 +22,9 @@
 			   Foreground="{Binding Foreground, RelativeSource={
 			                  RelativeSource AncestorType=UserControl}}"
 			   Background="Transparent"
+			   FontFamily="{DynamicResource TrlFontDisplay}"
+			   FontSize="{DynamicResource TrlTextXs}"
+			   Margin="8,0,0,0"
 			   VerticalContentAlignment="Center"
 			     />
 
@@ -31,13 +37,14 @@
 				Command="{Binding MinButtonCommand, RelativeSource={
 			                RelativeSource AncestorType=UserControl}}"
 				Background="Transparent"
+				BorderThickness="0"
 				HorizontalContentAlignment="Center"
 				VerticalContentAlignment="Center"
 				VerticalAlignment="Stretch"
 				CornerRadius="0"
-				Width="35"
+				Width="38"
             >
-			<Viewbox Width="15" Height="15">
+			<Viewbox Width="14" Height="14">
 				<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center">
 					<Path Data="{StaticResource Minimize}"
 					      Fill="{Binding $parent[TextBlock].Foreground}"
@@ -46,11 +53,12 @@
 			</Viewbox>
 			<Button.Styles>
 				<Style Selector="Button:pointerover /template/ ContentPresenter">
-					<Setter Property="Background" Value="{DynamicResource AccentBrush2}"/>
+					<Setter Property="Background" Value="{DynamicResource TrlBgHoverBrush}"/>
 					<Setter Property="BorderThickness" Value="0"/>
 				</Style>
 				<Style Selector="Button:pressed /template/ ContentPresenter">
-					<Setter Property="Background" Value="{DynamicResource AccentBrush3}"/>
+					<Setter Property="Background" Value="{DynamicResource TrlBgActiveBrush}"/>
+					<Setter Property="BorderThickness" Value="0"/>
 				</Style>
 			</Button.Styles>
 		</Button>
@@ -62,13 +70,14 @@
 				Command="{Binding XButtonCommand, RelativeSource={
 			                RelativeSource AncestorType=UserControl}}"
 				Background="Transparent"
+				BorderThickness="0"
 				HorizontalContentAlignment="Center"
 				VerticalContentAlignment="Center"
 				VerticalAlignment="Stretch"
 				CornerRadius="0"
-				Width="35"
+				Width="38"
             >
-			<Viewbox Width="15" Height="15">
+			<Viewbox Width="14" Height="14">
 				<TextBlock>
 					<Path Data="{StaticResource Close}"
 					      Fill="{Binding $parent[TextBlock].Foreground}"
@@ -77,14 +86,19 @@
 			</Viewbox>
 			<Button.Styles>
 				<Style Selector="Button:pointerover /template/ ContentPresenter">
-					<Setter Property="Background" Value="IndianRed"/>
+					<Setter Property="Background" Value="{DynamicResource TrlDangerStrongBrush}"/>
+					<Setter Property="TextBlock.Foreground" Value="White"/>
 					<Setter Property="BorderThickness" Value="0"/>
 				</Style>
 				<Style Selector="Button:pressed /template/ ContentPresenter">
-					<Setter Property="Background" Value="Crimson"/>
+					<Setter Property="Background" Value="{DynamicResource TrlDangerPressedBrush}"/>
+					<Setter Property="BorderThickness" Value="0"/>
 				</Style>
 			</Button.Styles>
 		</Button>
+
+		<!-- Global brand laser divider (the ONE red moment per view - R1) -->
+		<cc:TrlLaserDivider Grid.ColumnSpan="6" VerticalAlignment="Bottom"/>
 
 	</Grid>
 

@@ -1,0 +1,117 @@
+<!--
+  TRL Theme - TrlCustomControls.axaml
+  ControlThemes for the content-hosting signature controls
+  (TrlPanel / TrlDialogChrome / TrlSidebarNav).
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:cc="using:SPT.Launcher.CustomControls">
+
+	<!-- Panel: the workhorse container -->
+	<ControlTheme x:Key="{x:Type cc:TrlPanel}" TargetType="cc:TrlPanel">
+		<Setter Property="Background" Value="{DynamicResource TrlBgPanelBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlEdgeBrush}"/>
+		<Setter Property="BorderThickness" Value="1"/>
+		<Setter Property="CornerRadius" Value="0"/>
+		<Setter Property="Padding" Value="12"/>
+		<Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+		<Setter Property="VerticalContentAlignment" Value="Stretch"/>
+		<Setter Property="Template">
+			<ControlTemplate>
+				<Border Background="{TemplateBinding Background}"
+				        BorderBrush="{TemplateBinding BorderBrush}"
+				        BorderThickness="{TemplateBinding BorderThickness}"
+				        CornerRadius="0">
+					<DockPanel>
+						<Border DockPanel.Dock="Top"
+						        IsVisible="{TemplateBinding ShowHeader}"
+						        BorderBrush="{DynamicResource TrlEdgeBrush}"
+						        BorderThickness="0,0,0,1"
+						        Padding="12,8">
+							<TextBlock Text="{TemplateBinding Title}"
+							           FontFamily="{DynamicResource TrlFontDisplay}"
+							           FontSize="{DynamicResource TrlTextXs}"
+							           LetterSpacing="{DynamicResource TrlTrackWider}"
+							           Foreground="{DynamicResource TrlAccentDimBrush}"/>
+						</Border>
+						<ContentPresenter Content="{TemplateBinding Content}"
+						                  ContentTemplate="{TemplateBinding ContentTemplate}"
+						                  Padding="{TemplateBinding Padding}"
+						                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+						                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+					</DockPanel>
+				</Border>
+			</ControlTemplate>
+		</Setter>
+	</ControlTheme>
+
+	<!-- Dialog chrome: raised surface + screen-bar header -->
+	<ControlTheme x:Key="{x:Type cc:TrlDialogChrome}" TargetType="cc:TrlDialogChrome">
+		<Setter Property="Background" Value="{DynamicResource TrlBgRaisedBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlEdgeStrongBrush}"/>
+		<Setter Property="BorderThickness" Value="1"/>
+		<Setter Property="CornerRadius" Value="0"/>
+		<Setter Property="Padding" Value="16"/>
+		<Setter Property="MinWidth" Value="360"/>
+		<Setter Property="Template">
+			<ControlTemplate>
+				<Border Background="{TemplateBinding Background}"
+				        BorderBrush="{TemplateBinding BorderBrush}"
+				        BorderThickness="{TemplateBinding BorderThickness}"
+				        BoxShadow="{DynamicResource TrlShadow2}"
+				        CornerRadius="0">
+					<DockPanel>
+						<Border DockPanel.Dock="Top"
+						        Height="{DynamicResource TrlScreenBarHeight}"
+						        Background="{DynamicResource TrlScreenBarBgBrush}"
+						        BorderBrush="{DynamicResource TrlEdgeBrush}"
+						        BorderThickness="0,0,0,1"
+						        Padding="12,0">
+							<TextBlock Text="{TemplateBinding Title}"
+							           VerticalAlignment="Center"
+							           FontFamily="{DynamicResource TrlFontDisplay}"
+							           FontSize="{DynamicResource TrlTextXs}"
+							           LetterSpacing="{DynamicResource TrlTrackWider}"
+							           Foreground="{DynamicResource TrlAccentBrush}"/>
+						</Border>
+						<ContentPresenter Content="{TemplateBinding Content}"
+						                  ContentTemplate="{TemplateBinding ContentTemplate}"
+						                  Padding="{TemplateBinding Padding}"/>
+					</DockPanel>
+				</Border>
+			</ControlTemplate>
+		</Setter>
+	</ControlTheme>
+
+	<!-- Sidebar nav chrome: 280px column, right hairline -->
+	<ControlTheme x:Key="{x:Type cc:TrlSidebarNav}" TargetType="cc:TrlSidebarNav">
+		<Setter Property="Background" Value="{DynamicResource TrlBgPanelBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlEdgeBrush}"/>
+		<Setter Property="Width" Value="{DynamicResource TrlSidebarWidth}"/>
+		<Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+		<Setter Property="VerticalContentAlignment" Value="Stretch"/>
+		<Setter Property="Template">
+			<ControlTemplate>
+				<Border Background="{TemplateBinding Background}"
+				        BorderBrush="{TemplateBinding BorderBrush}"
+				        BorderThickness="0,0,1,0"
+				        CornerRadius="0">
+					<DockPanel>
+						<TextBlock DockPanel.Dock="Top"
+						           Text="{TemplateBinding Header}"
+						           IsVisible="{Binding Header, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+						           Margin="12,12,12,4"
+						           FontFamily="{DynamicResource TrlFontDisplay}"
+						           FontSize="{DynamicResource TrlText2Xs}"
+						           LetterSpacing="{DynamicResource TrlTrackWidest}"
+						           Foreground="{DynamicResource TrlFgFaintBrush}"/>
+						<ContentPresenter Content="{TemplateBinding Content}"
+						                  ContentTemplate="{TemplateBinding ContentTemplate}"
+						                  Margin="0,8"/>
+					</DockPanel>
+				</Border>
+			</ControlTemplate>
+		</Setter>
+	</ControlTheme>
+
+</ResourceDictionary>

@@ -1,0 +1,23 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="SPT.Launcher.CustomControls.TrlTag">
+
+	<!-- Signature tag: glowing status dot + uppercase display text. -->
+	<Border BorderBrush="{DynamicResource TrlEdgeStrongBrush}"
+	        BorderThickness="1"
+	        Padding="8,4"
+	        HorizontalAlignment="Left">
+		<StackPanel Orientation="Horizontal" Spacing="8">
+			<Ellipse Width="7" Height="7"
+			         VerticalAlignment="Center"
+			         Fill="{Binding DotBrush, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+			<TextBlock Text="{Binding Text, RelativeSource={RelativeSource AncestorType=UserControl}}"
+			           VerticalAlignment="Center"
+			           FontFamily="{DynamicResource TrlFontDisplay}"
+			           FontSize="{DynamicResource TrlTextXs}"
+			           LetterSpacing="{DynamicResource TrlTrackWider}"
+			           Foreground="{DynamicResource TrlAccentBrush}"/>
+		</StackPanel>
+	</Border>
+
+</UserControl>

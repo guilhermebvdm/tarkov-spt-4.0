@@ -24,17 +24,13 @@
 		<cvt:ImageSourceConverter x:Key="imageSourceCvt"/>
 	</Window.Resources>
 
-	<Window.Styles>
-		<StyleInclude Source="/Assets/Styles.axaml"/>
-	</Window.Styles>
-
 	<Grid>
+		<!-- Background comes from the TRL theme (GroundDeep + global laser divider) -->
 		<cc:TitleBar Title=""
 				     XButtonCommand="{Binding CloseCommand}"
 					 MinButtonCommand="{Binding MinimizeCommand}"
 					 SettingsButtonCommand="{Binding GoToSettingsCommand}"
 					 Classes.versiontag="False"
-                     Background="Transparent"
                      VerticalAlignment="Top"
 					 ZIndex="10"
 				     />
@@ -42,7 +38,7 @@
 		<dialogHost:DialogHost Identifier="mainHost"
 							   CornerRadius="0"
 							   DialogMargin="0"
-							   OverlayBackground="Gray"
+							   OverlayBackground="{DynamicResource TrlBgOverlayBrush}"
 							   ZIndex="5">
 			<rxui:RoutedViewHost Router="{Binding Router}" />
 		</dialogHost:DialogHost>
