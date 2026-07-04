@@ -1117,7 +1117,70 @@ function handleFleaMinLevel(req, res) {
   });
 }
 
+// GET /api/flea-cap — state of SPT's flea ceiling (unreasonableModPrices: Weapon Mod ×6 /
+// Electronics ×11). Returns { enabled, categories:[{tpl,itemType,overMult,newMult,enabled}] };
+// enabled = at least one category still capping.
+function handleGetFleaCap(req, res) {
+  try {
+    const ragfair = readJsonFile(RAGFAIR_JSON);
+    const ump = (ragfair.dynamic && ragfair.dynamic.unreasonableModPrices) || {};
+    const categories = Object.entries(ump).map(([tpl, c]) => ({
+      tpl, itemType: c.itemType || null,
+      overMult: c.handbookPriceOverMultiplier ?? null,
+      newMult: c.newPriceHandbookMultiplier ?? null,
+      enabled: !!c.enabled,
+    }));
+    return sendJson(res, 200, { ok: true, enabled: categories.some(c => c.enabled), categories });
+  } catch (e) {
+    return sendJson(res, 500, { error: e.message });
+  }
+}
+
+// POST /api/flea-cap — toggle SPT's flea ceiling on/off. Body: { enabled: boolean }.
+// Flips `enabled` on EVERY unreasonableModPrices category; the multipliers are left intact,
+// so re-enabling restores the exact vanilla cap (no backup needed). When disabled, load-spt
+// derives fleaCeiling=null for those items (it filters by `enabled`), which also lifts the
+// viewer's edit restriction — but only after the catalog is rebuilt; the SPT flea itself
+// changes on the next server boot.
+function handlePostFleaCap(req, res) {
+  let body = '';
+  req.on('data', c => { body += c; if (body.length > 1e6) req.destroy(); });
+  req.on('end', () => {
+    let payload;
+    try { payload = JSON.parse(body || '{}'); }
+    catch (e) { return sendJson(res, 400, { error: 'invalid JSON' }); }
+    if (typeof payload.enabled !== 'boolean') {
+      return sendJson(res, 400, { error: 'invalid body (expected { enabled: boolean })' });
+    }
+    withWriteLock(() => {
+      const ragfair = readJsonFile(RAGFAIR_JSON);
+      if (!ragfair.dynamic || !ragfair.dynamic.unreasonableModPrices) {
+        return sendJson(res, 200, { ok: true, enabled: false, changed: 0, note: 'no unreasonableModPrices — no cap to toggle' });
+      }
+      let changed = 0;
+      for (const c of Object.values(ragfair.dynamic.unreasonableModPrices)) {
+        if (c && typeof c === 'object' && !!c.enabled !== payload.enabled) { c.enabled = payload.enabled; changed++; }
+      }
+      writeJsonPreservingStyle(RAGFAIR_JSON, ragfair);
+      const checksResult = updateSptChecks({ 'configs/ragfair.json': RAGFAIR_JSON });
+      appendEditLog({
+        at: new Date().toISOString(), action: 'set-flea-cap', enabled: payload.enabled,
+        changed, ip: req.socket.remoteAddress || null,
+      });
+      return sendJson(res, 200, {
+        ok: true, enabled: payload.enabled, changed, checks: checksResult,
+        note: 'Restart SPT to apply in-game. Rebuild the catalog (or restart the viewer) to lift the editor cap in the UI.',
+      });
+    }).catch(e => {
+      console.error('set-flea-cap failed:', e);
+      if (!res.headersSent) return sendJson(res, 500, { error: e.message });
+    });
+  });
+}
+
 http.createServer((req, res) => {
+  if (req.method === 'GET'  && req.url === '/api/flea-cap')       return handleGetFleaCap(req, res);
+  if (req.method === 'POST' && req.url === '/api/flea-cap')       return handlePostFleaCap(req, res);
   if (req.method === 'POST'   && req.url === '/api/price')        return handlePatchPrice(req, res);
   if (req.method === 'DELETE' && req.url === '/api/price')        return handleDeletePrice(req, res);
   if (req.method === 'GET'    && req.url === '/api/overrides')    return handleGetOverrides(req, res);
