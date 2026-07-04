@@ -38,6 +38,8 @@
 | 023 | Coop-sync hardening (Fika) | 🟡 mirror-move quarentena `Fika.Core.dll` ausente do manifesto; excluir conta do host em sessão coop; authkey headless reusável. AUDIT (coop). | [023-coop-sync-hardening/](./023-coop-sync-hardening/) | 🟢 |
 | 024 | Migração DS da SettingsView + unificar chrome | 🔴 (DS) SettingsView não migrou (~20 hex + sidebar/cards próprios); dot Dev Mode hex. AUDIT §B3. | [024-settingsview-ds-migration/](./024-settingsview-ds-migration/) | 🟢 |
 | 025 | Aposentar código morto + fechar shims Legacy | 🟡 5 controls órfãos + helpers mortos (WireGuard TLS bypass); ModInfoView legada; shims `.card/.acc/.alt` (fecha débito do 014). AUDIT (DS/client). | [025-dead-code-legacy-shims/](./025-dead-code-legacy-shims/) | 🟢 |
+| 026 | Integridade MD5 → SHA-256 (manifesto + baseline) | 🟡 MD5 tem colisão forjável — arquivo malicioso com hash colidente vira "up-to-date". Deferido do [019](./019-fs-root-guard-legacy/) (correlato 🟢). | [026-hash-sha256-migration/](./026-hash-sha256-migration/) | ⚪ |
+| 027 | Hardening de auth/transporte (plaintext + password/delete + TLS global) | 🟡 remover eco plaintext do `/profile/get` (+ `/password/verify`), gatear o `password/delete` não-auth (020), e o TLS bypass global do `Request.cs`. Deferido de [020](./020-password-vault-integrity/) + [018](./018-auto-update-security/). | [027-auth-transport-hardening/](./027-auth-transport-hardening/) | ⚪ |
 
 ## Itens 018–025 (derivados do review)
 
