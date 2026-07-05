@@ -43,8 +43,14 @@ public class VoteManagerController : ControllerBase
             CheckVoteLogic();
 
             long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-            long timeLeft = _inProgress ? Math.Max(0, _endTime - now) : 0;
-            long cooldownLeft = Math.Max(0, _cooldownUntil - now);
+            long timeLeftMs = _inProgress ? Math.Max(0, _endTime - now) : 0;
+            long cooldownLeftMs = Math.Max(0, _cooldownUntil - now);
+
+            // Paridade com o mod TS e o cliente in-game: RedLineUI exibe "{TimeLeft}s"/"{CooldownLeft}s"
+            // direto como SEGUNDOS. Devolver ms mostraria "180000s". O TS usa Math.floor((end-now)/1000)
+            // (mod.ts) — replicar com divisão inteira (ms >= 0) para paridade exata.
+            long timeLeft = timeLeftMs / 1000;
+            long cooldownLeft = cooldownLeftMs / 1000;
 
             return Ok(new {
                 inProgress = _inProgress,

@@ -50,6 +50,50 @@ public class ModUpdaterController : ControllerBase
     private static string GetPerformancePath() => Path.Combine(GetUpdaterBasePath(), "config-performance");
 
     /// <summary>
+    /// Versão do server/mods, de Launcher-Updater/server-version.txt (paridade com ServerVersionController).
+    /// Substitui o "1.4.1" hardcoded que antes ia no manifesto.
+    /// </summary>
+    private static string GetServerVersionString()
+    {
+        try
+        {
+            var path = Path.Combine(GetUpdaterBasePath(), "server-version.txt");
+            if (System.IO.File.Exists(path))
+            {
+                var v = System.IO.File.ReadAllText(path).Trim();
+                if (!string.IsNullOrEmpty(v)) return v;
+            }
+        }
+        catch { }
+        return ServerVersionController.DefaultServerVersion; // fonte única do default
+    }
+
+    /// <summary>
+    /// Versão do launcher, do ProductVersion do exe servido (paridade com LauncherUpdaterController),
+    /// removendo o sufixo "+commit". Fallback = versão do server.
+    /// </summary>
+    private static string GetLauncherVersionString()
+    {
+        try
+        {
+            var exe = Path.Combine(GetUpdaterBasePath(), "Tarkov Red Line.exe");
+            if (System.IO.File.Exists(exe))
+            {
+                var info = System.Diagnostics.FileVersionInfo.GetVersionInfo(exe);
+                var v = info.ProductVersion ?? info.FileVersion;
+                if (!string.IsNullOrEmpty(v))
+                {
+                    int plus = v.IndexOf('+');
+                    if (plus >= 0) v = v.Substring(0, plus);
+                    return v.Trim();
+                }
+            }
+        }
+        catch { }
+        return GetServerVersionString();
+    }
+
+    /// <summary>
     /// ref: CR-01-01 (008) — containment guard shared by all download/list endpoints.
     /// Path.Combine with a ROOTED second argument discards the base dir, and
     /// .Replace("..", "") is a no-op for rooted inputs — so the resolved path MUST be
@@ -105,6 +149,14 @@ public class ModUpdaterController : ControllerBase
             return StatusCode(503, new { error = "Manifesto ainda sendo gerado" });
         }
         return Ok(_manifestCache);
+    }
+
+    // B2 (paridade TS): o launcher chama GET /launcher/mods/version (RequestHandler.GetModVersion).
+    // O TS devolvia config.serverVersion; aqui devolvemos a versão do server-version.txt.
+    [HttpGet("version")]
+    public IActionResult GetVersion()
+    {
+        return Ok(new { version = GetServerVersionString() });
     }
 
     [HttpGet("download")]
@@ -490,8 +542,8 @@ public class ModUpdaterController : ControllerBase
 
             var manifestObj = new
             {
-                serverVersion = "1.4.1",
-                launcherVersion = "1.4.1",
+                serverVersion = GetServerVersionString(),
+                launcherVersion = GetLauncherVersionString(),
                 generatedAt = DateTime.UtcNow.ToString("O"),
                 totalFiles = files.Count,
                 managedPaths = managedPaths,

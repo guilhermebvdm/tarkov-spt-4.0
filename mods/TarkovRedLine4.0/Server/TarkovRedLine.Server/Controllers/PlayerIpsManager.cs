@@ -78,6 +78,9 @@ public class PlayerIpsManagerController : ControllerBase
         }
     }
 
+    // Canônico = "register-player-ip" (o que o launcher chama, RequestHandler.cs:163, e o mod TS de prod).
+    // "register-ip" mantido como alias por retrocompat.
+    [HttpPost("register-player-ip")]
     [HttpPost("register-ip")]
     public IActionResult RegisterIp([FromBody] RegisterIpRequest request)
     {

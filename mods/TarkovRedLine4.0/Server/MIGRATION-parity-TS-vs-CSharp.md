@@ -15,14 +15,14 @@
 
 ---
 
-## 1. 🔴 Bloqueadores (o launcher chama, o C# não serve / serve diferente)
+## 1. ✅ Bloqueadores — RESOLVIDOS na Fase 2
 
-| # | Launcher chama | C# hoje | Correção no C# |
+| # | Launcher chama | C# antes | Correção aplicada |
 |---|---|---|---|
-| B1 | `POST /redline/register-player-ip` (`RequestHandler.cs:163`) | `POST /redline/register-ip` (`PlayerIpsManager.cs`) | **Renomear** a rota do C# para `register-player-ip` (ou aceitar as duas). Path exato importa. |
-| B2 | `GET /launcher/mods/version` (`RequestHandler.cs:171`, `GetModVersion`) | não existe (C# tem `/redline/server/version` e o manifesto) | **Adicionar** `GET /launcher/mods/version → {"version": <serverVersion>}` no `ModUpdaterController`. O launcher usa `/redline/server/version` (013, footer) **e** `/launcher/mods/version` (versão dos mods) — são consumidos em pontos distintos. |
+| B1 | `POST /redline/register-player-ip` (`RequestHandler.cs:163`) | `POST /redline/register-ip` | `PlayerIpsManager.RegisterIp` agora tem `[HttpPost("register-player-ip")]` + `[HttpPost("register-ip")]` (alias retrocompat). |
+| B2 | `GET /launcher/mods/version` (`RequestHandler.cs:171`, `GetModVersion`) | não existia | `ModUpdaterController` ganhou `[HttpGet("version")] → {version = GetServerVersionString()}` (lê `server-version.txt`). |
 
-Ambos são de 1 linha de rota. Sem eles, o registro de IP do jogador e o display de versão de mods falham silenciosamente (o launcher trata erro e segue, mas a função perde efeito).
+Sem eles, o registro de IP do jogador e o display de versão de mods falhavam silenciosamente (o launcher trata erro e segue, mas a função perdia efeito).
 
 ## 2. 🟢 C# adiciona (aditivo — launcher já preparado, TS não tinha)
 
@@ -42,8 +42,8 @@ O mod TS também serve o **cliente in-game** (plugin BepInEx) e um serviço de p
 
 | Recurso | Situação | Ação |
 |---|---|---|
-| **Vote/restart** (`/redline/vote/*`, `/redline/headless/ack-restart`) | C# tem **paridade completa** de rotas. **PORÉM:** `vote/status` retorna `timeLeft`/`cooldownLeft` em **milissegundos** no C# e em **segundos** no TS. | ⚠️ **Verificar contra o plugin in-game** — divergência de 1000×. Alinhar a unidade ao que o cliente espera antes de trocar em prod. C# também adiciona `noVotes` (aditivo, ok). |
-| **PlayerStatus → Supabase** (monkey-patch de `HttpListener.getResponse` no TS) | C# **não tem**. Empurra presença in-game (No inventário / Em Raid / etc.) pro Supabase. | **Decisão:** portar ou descartar. Não é rota do launcher. Se a comunidade usa o status, portar; senão, descartar. |
+| **Vote/restart** (`/redline/vote/*`, `/redline/headless/ack-restart`) | C# tem **paridade completa** de rotas. Havia divergência: `vote/status` devolvia `timeLeft`/`cooldownLeft` em **ms** (C#) vs **segundos** (TS). Confirmado que o cliente in-game (`RedLineUI.cs:31,71,96`) exibe `"{TimeLeft}s"` direto como segundos. | ✅ **RESOLVIDO na Fase 2** — `VoteManager.GetStatus` agora converte pra segundos por **divisão inteira** (`ms/1000`, = `Math.floor` do TS, paridade exata). C# também adiciona `noVotes` (aditivo, ok). |
+| **PlayerStatus → Supabase** (monkey-patch de `HttpListener.getResponse` no TS) | C# **não tem**. É a integração do **Targram** (`playerStatus.ts` importa `supabaseRequest` de `targramSync.ts`, que está 100% comentado). | ✅ **DECIDIDO: descartar** — o Targram foi fechado (decisão do usuário 2026-07-05). Não portar. |
 | **WireGuard VPN** (`POST /api/vpn/register`, reescreve `.conf`, roda `wg.exe`) | C# não tem. | **Descartar** — o launcher hoje usa **Tailscale** (`TailscaleHelper`), não este endpoint. Superseded. |
 | `/redline/debug/state` (dump diagnóstico TS) | C# não tem. | Opcional — portar só se útil no diagnóstico. |
 | Patches de runtime TS: **Fika `getCompleteProfile` fix** + **flash-reload IA fix** (zera `BotReload.min/max`) | C# **não tem** (`FikaProfilePatch.Enable()` é stub vazio) | ⚠️ **Verificar se ainda são necessários** no server 4.0. O Fika fix evitava crash do `sanitizeProfileForClient`; se o core 4.0 já resolve, dispensável. O flash-reload é ajuste de gameplay. |
@@ -77,7 +77,7 @@ O mod TS também serve o **cliente in-game** (plugin BepInEx) e um serviço de p
 | `GET /launcher/mods/optionals-manifest` | ✅ | ✅ | launcher | |
 | `GET /launcher/mods/optional-download` | ✅ | ✅ | launcher | |
 | `GET /launcher/mods/refresh` | ✅ | ✅ | launcher/op | |
-| `GET /launcher/mods/version` | ✅ | ❌ **B2** | launcher | **portar** |
+| `GET /launcher/mods/version` | ✅ | ✅ (B2 Fase 2) | launcher | portado |
 | `GET /redline/launcher/version` | ✅ | ✅ (+signature/algorithm) | launcher | |
 | `GET /redline/launcher/download` | ✅ | ✅ | launcher | |
 | `GET /redline/launcher/signature` | ❌ | ✅ (018) | launcher | aditivo |
@@ -88,9 +88,9 @@ O mod TS também serve o **cliente in-game** (plugin BepInEx) e um serviço de p
 | `POST /launcher/hwid/register` | ✅ | ✅ | launcher | |
 | `POST /launcher/hwid/reset-password` | ✅ | ✅ | launcher | |
 | `GET /launcher/hwid/version` | ✅ | ✅ | launcher | |
-| `POST /redline/register-player-ip` | ✅ | ❌ (é `register-ip`) **B1** | launcher | **renomear** |
+| `POST /redline/register-player-ip` | ✅ | ✅ (B1 Fase 2, + alias `register-ip`) | launcher | resolvido |
 | `GET /redline/player-ips` | ✅ | ✅ | launcher/op | |
-| `GET/POST /redline/vote/status·cast·cancel·terminate` | ✅ | ✅ | **in-game** | ⚠️ unidade timeLeft (s vs ms) |
+| `GET/POST /redline/vote/status·cast·cancel·terminate` | ✅ | ✅ | **in-game** | ✅ unidade timeLeft alinhada (s), Fase 2 |
 | `POST /redline/headless/ack-restart` | ✅ | ✅ | headless | |
 | `GET /redline/debug/state` | ✅ | ❌ | diag | opcional |
 | `POST /api/vpn/register` | ✅ | ❌ | — | **descartar** (Tailscale) |
@@ -99,7 +99,7 @@ O mod TS também serve o **cliente in-game** (plugin BepInEx) e um serviço de p
 
 ## 6. Plano de corte (Fase 2 → 3)
 
-1. **Fase 2 (código, no homolog dev):** aplicar B1 + B2 no C#; alinhar unidade do `vote/status` (verificar plugin in-game); unificar fontes de versão do manifesto; decidir PlayerStatus/Supabase + patches Fika/flash-reload. Cada mudança com build + review.
+1. **Fase 2 (código, no homolog dev):** ✅ B1 + B2 aplicados; ✅ `vote/status` em segundos; ✅ versão do manifesto unificada (`server-version.txt` + exe); ✅ PlayerStatus/Supabase descartado (Targram off). **Pendente:** decidir patches Fika/flash-reload (§3) — exige teste in-game pra saber se o core 4.0 ainda precisa deles.
 2. **Deploy no homolog:** montar a árvore `Launcher-Updater/` com o conteúdo de prod (config, mods_repo, Opcionais, server-version.txt); assinar o exe (018).
 3. **Teste no dev** (`C:\Escape From Tarkov\SPT-4.0`): launcher → connect → sync completo → self-update → login/senha → optionals → vote (com cliente in-game). Server Fika coop compartilhado ⇒ janela combinada.
 4. **Só então** produção (`100.106.152.7`) — gate humano, afeta todos os jogadores.
