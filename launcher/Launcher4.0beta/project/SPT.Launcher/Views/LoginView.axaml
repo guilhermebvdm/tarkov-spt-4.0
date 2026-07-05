@@ -44,7 +44,21 @@
                         <TextBox Text="{Binding Login.Username, Mode=TwoWay}" Watermark="Insira seu usuário"/>
 
                         <TextBlock Text="SENHA" Classes="trl-label" Margin="0,0,0,-10"/>
-                        <TextBox Text="{Binding Login.Password, Mode=TwoWay}" PasswordChar="●" Watermark="Insira sua senha"/>
+                        <Grid>
+                            <TextBox Text="{Binding Login.Password, Mode=TwoWay}" PasswordChar="{Binding PasswordChar}" Watermark="Insira sua senha" Padding="8,5,32,5"/>
+                            <Button Classes="icon" Command="{Binding TogglePasswordVisibilityCommand}"
+                                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                                    Margin="0,0,2,0" Cursor="Hand" ToolTip.Tip="Mostrar/ocultar senha">
+                                <Panel>
+                                    <Path Data="{StaticResource TrlIconEye}" IsVisible="{Binding !IsPasswordVisible}"
+                                          Stroke="{DynamicResource TrlFgMutedBrush}" StrokeThickness="1.75" Fill="{x:Null}"
+                                          Width="16" Height="16" Stretch="Uniform" StrokeLineCap="Flat" StrokeJoin="Miter"/>
+                                    <Path Data="{StaticResource TrlIconEyeOff}" IsVisible="{Binding IsPasswordVisible}"
+                                          Stroke="{DynamicResource TrlFgMutedBrush}" StrokeThickness="1.75" Fill="{x:Null}"
+                                          Width="16" Height="16" Stretch="Uniform" StrokeLineCap="Flat" StrokeJoin="Miter"/>
+                                </Panel>
+                            </Button>
+                        </Grid>
 
                         <StackPanel Orientation="Horizontal" Spacing="5" Margin="0,5,0,0">
                             <TextBlock Text="Esqueceu a senha?" Classes="trl-muted" FontSize="{DynamicResource TrlTextSm}" VerticalAlignment="Center"/>
@@ -56,11 +70,9 @@
                                   IsChecked="{Binding RememberUsername, Source={x:Static helpers:LauncherSettingsProvider.Instance}, Mode=TwoWay}"
                                   Cursor="Hand" FontSize="{DynamicResource TrlTextSm}"/>
 
-                        <Button Content="ENTRAR" Command="{Binding LoginCommand}" Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="0,8,0,10"/>
+                        <Button Content="ENTRAR" Command="{Binding LoginCommand}" Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="0,8,0,0"/>
 
-                        <Separator Margin="0,6"/>
-
-                        <TextBlock Text="Ainda não possui uma conta?" Classes="trl-muted" FontSize="{DynamicResource TrlTextSm}" HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                        <TextBlock Text="Ainda não possui uma conta?" Classes="trl-muted" FontSize="{DynamicResource TrlTextSm}" HorizontalAlignment="Center" Margin="0,0,0,0"/>
                         <Button Content="CADASTRAR" Command="{Binding GoToRegisterCommand}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
                     </StackPanel>
 

@@ -79,8 +79,8 @@
 		<Setter Property="Background" Value="{DynamicResource TrlDangerStrongBrush}"/>
 		<Setter Property="BorderBrush" Value="{DynamicResource TrlDangerStrongBrush}"/>
 		<Setter Property="Foreground" Value="{DynamicResource TrlFgOnDanger}"/>
-		<!-- item 011b: peso reduzido Bold -> SemiBold -->
-		<Setter Property="FontWeight" Value="SemiBold"/>
+		<!-- texto sem peso nos botões destrutivos (WIPE / EXCLUIR CONTA) -->
+		<Setter Property="FontWeight" Value="Normal"/>
 		<!-- item 003: chanfro (top-left + bottom-right), só variantes sólidas -->
 		<Setter Property="Clip" Value="{Binding Bounds, RelativeSource={RelativeSource Self}, Converter={StaticResource ChamferClip}}"/>
 	</Style>

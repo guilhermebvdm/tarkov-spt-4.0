@@ -5,6 +5,7 @@ using SPT.Launcher.Models.Launcher;
 using Avalonia;
 using ReactiveUI;
 using System;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -58,6 +59,11 @@ namespace SPT.Launcher.ViewModels
 
         public ImageHelper Background => Splat.Locator.Current.GetService<ImageHelper>("bgimage");
         public SPTVersion VersionInfo => Splat.Locator.Current.GetService<SPTVersion>("sptversion");
+
+        // Carrossel do fundo da tela principal: fonte = Image_Cache/bg/ (server) ∪ Assets/Backgrounds
+        // (bundlado, fallback), troca a cada 10s, dots na base. Criado no ctor (semeia o 1º frame,
+        // sem flash); timer só roda enquanto a tela está ativa (Start/Stop no WhenActivated).
+        public BackgroundCarousel Carousel { get; } = new BackgroundCarousel();
 
         public ModInfoCollection ModInfoCollection { get; set; } = new ModInfoCollection();
 
@@ -235,6 +241,15 @@ namespace SPT.Launcher.ViewModels
                     Dispatcher.UIThread.Post(() => ServerVersion = refreshed);
                 });
             }
+
+            // Carrossel: o timer só avança enquanto a ProfileView está ativa (para ao ir p/ Settings,
+            // retoma ao voltar) — evita timer rodando fora de tela (leak/CPU). Dispose real do
+            // carrossel ocorre no logout via GC (timer parado não fica ancorado no Dispatcher).
+            this.WhenActivated((CompositeDisposable disposables) =>
+            {
+                Carousel.Start();
+                Disposable.Create(() => Carousel.Stop()).DisposeWith(disposables);
+            });
 
             // Auto-check for updates, depois aplica opcionais pendentes
             _ = InitializeAsync();

@@ -89,6 +89,12 @@
 		<GradientStop Offset="0" Color="#80131314"/>
 		<GradientStop Offset="1" Color="#E6131314"/>
 	</RadialGradientBrush>
+	<!-- Photo treatment SOFT: overlay mais leve p/ deixar a key art da tela principal mais
+	     visível (centro ~30%, borda ~60%) — usado na ProfileView (menos ofuscação). -->
+	<RadialGradientBrush x:Key="TrlPhotoOverlaySoftBrush" Center="50%,50%" GradientOrigin="50%,50%">
+		<GradientStop Offset="0" Color="#4D131314"/>
+		<GradientStop Offset="1" Color="#99131314"/>
+	</RadialGradientBrush>
 	<!-- Painéis verticais sobre foto: vidro a 50% de opacidade (revela a arte por trás) -->
 	<SolidColorBrush x:Key="TrlPanelOverPhotoBrush">#801B1B1D</SolidColorBrush>
 	<SolidColorBrush x:Key="TrlPanelAuthBrush">#801B1B1D</SolidColorBrush>

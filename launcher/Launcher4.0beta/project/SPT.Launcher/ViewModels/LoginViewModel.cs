@@ -38,6 +38,19 @@ namespace SPT.Launcher.ViewModels
             set => this.RaiseAndSetIfChanged(ref _isLoggedIn, value);
         }
 
+        // Mostrar/ocultar senha (mesmo padrão do Settings): oculto => PasswordChar '●' + olho aberto
+        // (clique p/ revelar); visível => PasswordChar '\0' + olho cortado.
+        private bool _passwordVisible = false;
+        public char PasswordChar => _passwordVisible ? '\0' : '●';
+        public bool IsPasswordVisible => _passwordVisible;
+
+        public void TogglePasswordVisibilityCommand()
+        {
+            _passwordVisible = !_passwordVisible;
+            this.RaisePropertyChanged(nameof(PasswordChar));
+            this.RaisePropertyChanged(nameof(IsPasswordVisible));
+        }
+
         // Item 022 (Grupo D / 013L, AC-022.13/14) — footer de versão reativo. Antes era x:Static
         // read-once: se o fetch do connect falhou transitoriamente, "—" congelava a sessão toda
         // nesta tela. Agora é bind reativo com refetch async barato (mesmo pattern do ProfileView).

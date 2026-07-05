@@ -14,8 +14,9 @@
     </UserControl.Resources>
 
     <Grid>
-        <!-- Fundo Taquila + overlay TRL (mesmo fluxo pré-login do Login/Cadastro) -->
-        <Image Source="/Assets/bg1.png" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+        <!-- Fundo + overlay TRL. bg_02 é placeholder: a arte-alvo (post do Reddit) não foi
+             extraível — trocar por bg dedicado quando houver o URL direto da imagem. -->
+        <Image Source="/Assets/Backgrounds/bg_02.jpg" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality"/>
         <Border Background="{DynamicResource TrlPhotoOverlayBrush}" IsHitTestVisible="False"/>
 
         <Grid ColumnDefinitions="300, *">
@@ -25,7 +26,8 @@
                     Background="{DynamicResource TrlPanelOverPhotoBrush}"
                     BorderBrush="{DynamicResource TrlEdgeBrush}"
                     BorderThickness="0,0,1,0">
-                <Grid RowDefinitions="Auto, *, Auto, Auto" Margin="16">
+                <!-- top 44: título desce abaixo da top bar (34px) + respiro -->
+                <Grid RowDefinitions="Auto, *, Auto, Auto" Margin="16,44,16,16">
 
                     <TextBlock Grid.Row="0" Text="SELEÇÃO DE CLASSE" Classes="trl-label"
                                LetterSpacing="{DynamicResource TrlTrackWider}"
@@ -38,10 +40,17 @@
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <!-- ícone do server (arquivo em cache) -->
                                         <Image Width="24" Height="24"
                                                VerticalAlignment="Center"
                                                Source="{Binding IconPath, Converter={StaticResource imageSourceCvt}}"
                                                IsVisible="{Binding HasIcon}"
+                                               RenderOptions.BitmapInterpolationMode="HighQuality"/>
+                                        <!-- fallback local bundlado (Assets/ClassIcons) quando o server não trouxe ícone -->
+                                        <Image Width="24" Height="24"
+                                               VerticalAlignment="Center"
+                                               Source="{Binding FallbackIcon}"
+                                               IsVisible="{Binding HasFallbackIcon}"
                                                RenderOptions.BitmapInterpolationMode="HighQuality"/>
                                         <!-- Dois TextBlocks alternados: com nameColor do server ou herdando o foreground por estado do trl-nav -->
                                         <TextBlock Text="{Binding Name}" VerticalAlignment="Center"

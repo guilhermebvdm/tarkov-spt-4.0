@@ -7,13 +7,18 @@ using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
 using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using SPT.Launcher.Controllers;
 using Avalonia.Media;
 using Avalonia.Media.Immutable;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using Avalonia.Threading;
 using Avalonia.Controls.Notifications;
 
@@ -41,6 +46,12 @@ namespace SPT.Launcher.ViewModels
         public string IconPath { get; set; }
 
         public bool HasIcon => !string.IsNullOrEmpty(IconPath);
+
+        /// <summary>Bundled local icon (Assets/ClassIcons) resolved by name — only when the
+        /// server did not provide an icon. Null when there is no name match.</summary>
+        public Bitmap FallbackIcon { get; set; }
+
+        public bool HasFallbackIcon => FallbackIcon != null;
 
         /// <summary>Parsed nameColor brush; null when absent/invalid (trl-nav default foreground applies).</summary>
         public IBrush NameBrush { get; set; }
@@ -243,6 +254,18 @@ namespace SPT.Launcher.ViewModels
             {
                 List<ClassProfile> publishable = classes ?? new List<ClassProfile>();
 
+                // Fallback local: classes sem ícone do server tentam um ícone bundlado por nome
+                // (Assets/ClassIcons). Sem match (ex.: "SPT Developer", "Tanque") → segue sem ícone.
+                // Decode fora da UI thread aqui (Bitmap não é controle) — visibilidade garantida
+                // pelo Post subsequente.
+                foreach (ClassProfile profile in publishable)
+                {
+                    if (!profile.HasIcon && profile.FallbackIcon == null)
+                    {
+                        profile.FallbackIcon = ResolveBundledIcon(profile.Name);
+                    }
+                }
+
                 Dispatcher.UIThread.Post(() =>
                 {
                     AvailableClasses.Clear();
@@ -392,6 +415,91 @@ namespace SPT.Launcher.ViewModels
             }
 
             return null;
+        }
+
+        // === Fallback de ícone bundlado (Assets/ClassIcons) por match de nome ===
+
+        // keyword normalizada (lowercase, sem acento/espaço) que DEVE aparecer no nome → arquivo.
+        // Cobre nomes curtos ("Furtivo") e compostos ("Operador Furtivo") via Contains.
+        private static readonly (string Keyword, string File)[] IconNameMap =
+        {
+            ("cacador", "cacador.png"),
+            ("fuzileiro", "fuzileiro.png"),
+            ("medico", "medicoDeCombate.png"),
+            ("furtivo", "operadorFurtivo.png"),
+            ("peladao", "peladao.png"),
+            ("saqueador", "saqueador.png"),
+            ("tatico", "operadorTatico.png"),
+            ("batedor", "batedor.png"),
+            ("armeiro", "armeiro.png"),
+            ("gerente", "gerenteDeOperacoes.png"),
+            ("sobreviv", "sobrevivencialista.png"),
+        };
+
+        private static readonly object BundledIconLock = new object();
+        private static readonly Dictionary<string, Bitmap> BundledIconCache = new Dictionary<string, Bitmap>(StringComparer.Ordinal);
+
+        /// <summary>Resolves a bundled icon from the class name; null when there is no keyword match.</summary>
+        private static Bitmap ResolveBundledIcon(string name)
+        {
+            string normalized = NormalizeName(name);
+
+            if (string.IsNullOrEmpty(normalized)) return null;
+
+            foreach ((string keyword, string file) in IconNameMap)
+            {
+                if (normalized.Contains(keyword))
+                {
+                    return LoadBundledIcon(file);
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>Loads (and memoizes) a bundled ClassIcons bitmap. Caches null on failure too.</summary>
+        private static Bitmap LoadBundledIcon(string file)
+        {
+            lock (BundledIconLock)
+            {
+                if (BundledIconCache.TryGetValue(file, out Bitmap cached)) return cached;
+            }
+
+            Bitmap bitmap = null;
+
+            try
+            {
+                string assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
+                using Stream stream = AssetLoader.Open(new Uri($"avares://{assemblyName}/Assets/ClassIcons/{file}"));
+                bitmap = new Bitmap(stream);
+            }
+            catch (Exception ex)
+            {
+                LogManager.Instance.Warning($"[ClassSelection] Falha ao carregar ícone bundlado '{file}': {ex.Message}");
+            }
+
+            lock (BundledIconLock)
+            {
+                BundledIconCache[file] = bitmap;
+                return bitmap;
+            }
+        }
+
+        /// <summary>Lowercase, strip accents and non-alphanumerics (spaces/punctuation).</summary>
+        private static string NormalizeName(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return string.Empty;
+
+            string decomposed = value.Trim().ToLowerInvariant().Normalize(NormalizationForm.FormD);
+            var builder = new StringBuilder(decomposed.Length);
+
+            foreach (char c in decomposed)
+            {
+                if (CharUnicodeInfo.GetUnicodeCategory(c) == UnicodeCategory.NonSpacingMark) continue;
+                if (char.IsLetterOrDigit(c)) builder.Append(c);
+            }
+
+            return builder.ToString();
         }
     }
 }

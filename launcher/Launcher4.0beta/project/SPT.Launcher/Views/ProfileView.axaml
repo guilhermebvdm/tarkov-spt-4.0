@@ -14,6 +14,33 @@
         <cvt:ThousandSeparatorConverter x:Key="thousandsCvt"/>
     </UserControl.Resources>
 
+    <!-- Dots do carrossel de fundo: quadradinho (radius 0), inativo faint / ativo accent, cursor hand -->
+    <UserControl.Styles>
+        <Style Selector="Button.carousel-dot">
+            <Setter Property="Width" Value="16"/>
+            <Setter Property="Height" Value="16"/>
+            <Setter Property="MinHeight" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.carousel-dot:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+        </Style>
+        <Style Selector="Border.carousel-dot-fill">
+            <Setter Property="Width" Value="9"/>
+            <Setter Property="Height" Value="9"/>
+            <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="Background" Value="{DynamicResource TrlFgFaintBrush}"/>
+        </Style>
+        <Style Selector="Border.carousel-dot-fill.active">
+            <Setter Property="Background" Value="{DynamicResource TrlAccentBrush}"/>
+        </Style>
+    </UserControl.Styles>
+
     <!-- Nav buttons: Button.nav agora é global (Assets/Theme/Controls/Nav.axaml, item 024) -->
 
     <Grid ColumnDefinitions="Auto, *">
@@ -40,10 +67,12 @@
                         </StackPanel>
                     </Button>
                     <Button Classes="nav" Cursor="Hand" Command="{Binding OpenKofiCommand}">
-                        <StackPanel Orientation="Horizontal" Spacing="10">
-                            <Path Data="{StaticResource TrlIconExternalLink}" VerticalAlignment="Center"/>
+                        <!-- xícara à esquerda, texto no meio, link-externo à extremidade direita -->
+                        <DockPanel LastChildFill="True">
+                            <Path DockPanel.Dock="Left" Data="{StaticResource TrlIconCoffee}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <Path DockPanel.Dock="Right" Data="{StaticResource TrlIconExternalLink}" VerticalAlignment="Center" Margin="10,0,0,0"/>
                             <TextBlock Text="APOIE UM CAFEZINHO" VerticalAlignment="Center"/>
-                        </StackPanel>
+                        </DockPanel>
                     </Button>
                     <Button Classes="nav" Cursor="Hand" ToolTip.Tip="Em construção" IsEnabled="False" Opacity="0.5">
                         <StackPanel Orientation="Horizontal" Spacing="10">
@@ -72,13 +101,19 @@
                  então VerticalAlignment não teria efeito. Zoom ancorado no topo (origem 0.5,0) empurra as
                  cabeças e a logo EFT p/ baixo (longe do laser) e corta a base (menos relevante). UniformToFill
                  preservado (escala uniforme, sem distorção). -->
-            <Image Source="/Assets/bg-hero.jpg" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality"
+            <!-- item carrossel: Source dinâmico (Image_Cache/bg ∪ bundlado) trocando a cada 10s.
+                 TranslateTransform X=-50 desloca a arte ~50px à esquerda (dentro do ClipToBounds). -->
+            <Image Source="{Binding Carousel.CurrentBackground}" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality"
                    RenderTransformOrigin="0.5,0">
                 <Image.RenderTransform>
-                    <ScaleTransform ScaleX="1.12" ScaleY="1.12"/>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="1.12" ScaleY="1.12"/>
+                        <TranslateTransform X="-50"/>
+                    </TransformGroup>
                 </Image.RenderTransform>
             </Image>
-            <Border Background="{DynamicResource TrlPhotoOverlayBrush}" IsHitTestVisible="False"/>
+            <!-- overlay mais leve (menos ofuscação) — a key art fica mais visível -->
+            <Border Background="{DynamicResource TrlPhotoOverlaySoftBrush}" IsHitTestVisible="False"/>
 
             <!-- Layout Sobreposto da Tela Principal -->
             <Grid RowDefinitions="*, AUTO, AUTO">
@@ -150,6 +185,24 @@
 
                 </StackPanel>
 
+                <!-- Dots do carrossel: base central, logo acima da barra de progresso/status -->
+                <ItemsControl Grid.Row="0" ItemsSource="{Binding Carousel.Dots}" IsVisible="{Binding Carousel.HasMultiple}"
+                              HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,12">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" Spacing="6"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Classes="carousel-dot" Command="{Binding SelectCommand}" Cursor="Hand"
+                                    ToolTip.Tip="Trocar imagem de fundo">
+                                <Border Classes="carousel-dot-fill" Classes.active="{Binding IsActive}"/>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
                 <!-- BARRA DE PROGRESSO / UPDATE (item 007: cancelar + link do relatório) -->
                 <StackPanel Grid.Row="1" Margin="20,0,20,5" IsVisible="{Binding IsUpdateVisible}" Spacing="5" VerticalAlignment="Bottom">
                     <TextBlock Text="{Binding UpdateStatusText}" Classes="trl-muted" FontSize="{DynamicResource TrlTextXs}"/>
@@ -200,8 +253,14 @@
                         <!-- Ações (Direita) -->
                         <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="10" Width="180">
                             <!-- Verificar Arquivos (outlined base) — ref: CR-01-01: também travado durante sync -->
-                            <Button Content="VERIFICAR ARQUIVOS" Classes="sm" Cursor="Hand" Command="{Binding VerifyFilesCommand}" IsEnabled="{Binding CanVerifyFiles}"
-                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+                            <Button Classes="sm" Cursor="Hand" Command="{Binding VerifyFilesCommand}" IsEnabled="{Binding CanVerifyFiles}"
+                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <Path Data="{StaticResource TrlIconSearch}" Stroke="{DynamicResource TrlFgMutedBrush}" StrokeThickness="1.75" Fill="{x:Null}"
+                                          Width="16" Height="16" Stretch="Uniform" StrokeLineCap="Flat" StrokeJoin="Miter" VerticalAlignment="Center"/>
+                                    <TextBlock Text="VERIFICAR ARQUIVOS" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
 
                             <!-- JOGAR (.primary — tan, R1) -->
                             <Button Content="▶ JOGAR" Classes="primary" Cursor="Hand" Command="{Binding StartGameCommand}" IsEnabled="{Binding CanStartGame}"

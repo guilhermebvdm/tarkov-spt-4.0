@@ -51,10 +51,12 @@
                         </StackPanel>
                     </Button>
                     <Button Classes="nav" Cursor="Hand" Command="{Binding OpenKofiCommand}">
-                        <StackPanel Orientation="Horizontal" Spacing="10">
-                            <Path Data="{StaticResource TrlIconExternalLink}" VerticalAlignment="Center"/>
+                        <!-- xícara à esquerda, texto no meio, link-externo à extremidade direita -->
+                        <DockPanel LastChildFill="True">
+                            <Path DockPanel.Dock="Left" Data="{StaticResource TrlIconCoffee}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <Path DockPanel.Dock="Right" Data="{StaticResource TrlIconExternalLink}" VerticalAlignment="Center" Margin="10,0,0,0"/>
                             <TextBlock Text="APOIE UM CAFEZINHO" VerticalAlignment="Center"/>
-                        </StackPanel>
+                        </DockPanel>
                     </Button>
                     <Button Classes="nav" Cursor="Hand" ToolTip.Tip="Em construção" IsEnabled="False" Opacity="0.5">
                         <StackPanel Orientation="Horizontal" Spacing="10">
@@ -85,15 +87,18 @@
                         <Grid ColumnDefinitions="*, *, *">
                             <Button Grid.Column="0" Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=clear_game_settings}"
                                     Command="{Binding ClearGameSettingsCommand}" Cursor="Hand" Margin="0,0,5,0"
-                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                    ToolTip.Tip="Apaga as configurações do jogo (pasta SPT/user/sptsettings). Gráficos, áudio, controles e outras preferências voltam ao padrão. Não afeta seu perfil nem seu progresso."/>
 
                             <Button Grid.Column="1" Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=clean_temp_files}"
                                     Command="{Binding CleanTempFilesCommand}" Cursor="Hand" Margin="5,0,5,0"
-                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                    ToolTip.Tip="Remove os arquivos temporários gerados pelo jogo (cache). Libera espaço e ajuda a resolver travamentos ou telas de carregamento presas. Seguro: nada de progresso é apagado."/>
 
                             <Button Grid.Column="2" Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=copy_logs_to_clipboard}"
                                     Command="{Binding CopyLogsToClipboard}" Cursor="Hand" Margin="5,0,0,0"
-                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                    ToolTip.Tip="Copia os arquivos de log (launcher, servidor, BepInEx e seu perfil) para a área de transferência, prontos para colar ao pedir suporte."/>
                         </Grid>
                     </cc:TrlPanel>
 
@@ -132,10 +137,15 @@
                             <!-- Dev Mode — protegido por senha -->
                             <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                                 <Grid Width="300">
-                                    <TextBox Watermark="🔒 Senha admin"
+                                    <TextBox Watermark="Senha admin"
                                              PasswordChar="{Binding DevPasswordChar}"
                                              Text="{Binding DevPassword, Mode=TwoWay}"
-                                             Padding="8,6,30,6"/>
+                                             Padding="30,6,30,6"/>
+                                    <!-- adorno de cadeado (DS) à esquerda; não intercepta clique no campo -->
+                                    <Path Data="{StaticResource TrlIconLock}" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                          Margin="8,0,0,0" IsHitTestVisible="False"
+                                          Stroke="{DynamicResource TrlFgMutedBrush}" StrokeThickness="1.75" Fill="{x:Null}"
+                                          Width="16" Height="16" Stretch="Uniform" StrokeLineCap="Flat" StrokeJoin="Miter"/>
                                     <Button Classes="icon" Command="{Binding ToggleDevPasswordVisibilityCommand}"
                                             HorizontalAlignment="Right" VerticalAlignment="Center"
                                             Margin="0,0,2,0" Cursor="Hand" ToolTip.Tip="Mostrar/ocultar senha">
@@ -152,7 +162,12 @@
                                 </Grid>
                                 <Button Command="{Binding ToggleDevModeCommand}" Cursor="Hand"
                                         ToolTip.Tip="Ativar/Desativar modo desenvolvedor">
-                                    <TextBlock Text="🔑 Dev Mode"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <Path Data="{StaticResource TrlIconLockOpen}" VerticalAlignment="Center"
+                                              Stroke="{DynamicResource TrlFgMutedBrush}" StrokeThickness="1.75" Fill="{x:Null}"
+                                              Width="16" Height="16" Stretch="Uniform" StrokeLineCap="Flat" StrokeJoin="Miter"/>
+                                        <TextBlock Text="Dev Mode" VerticalAlignment="Center"/>
+                                    </StackPanel>
                                 </Button>
                                 <Border Classes="dev-dot"
                                         Classes.on="{Binding IsDevMode, Source={x:Static helpers:LauncherSettingsProvider.Instance}}"

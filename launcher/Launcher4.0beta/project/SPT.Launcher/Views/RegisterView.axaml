@@ -43,18 +43,44 @@
                         <TextBox Text="{Binding RegisterUsername, Mode=TwoWay}" Watermark="Escolha um nome de usuário"/>
 
                         <TextBlock Text="CRIE UMA SENHA" Classes="trl-label" Margin="0,0,0,-10"/>
-                        <TextBox Text="{Binding RegisterPassword, Mode=TwoWay}" PasswordChar="●" Watermark="Digite sua senha"/>
+                        <Grid>
+                            <TextBox Text="{Binding RegisterPassword, Mode=TwoWay}" PasswordChar="{Binding PasswordChar}" Watermark="Digite sua senha" Padding="8,5,32,5"/>
+                            <Button Classes="icon" Command="{Binding TogglePasswordVisibilityCommand}"
+                                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                                    Margin="0,0,2,0" Cursor="Hand" ToolTip.Tip="Mostrar/ocultar senha">
+                                <Panel>
+                                    <Path Data="{StaticResource TrlIconEye}" IsVisible="{Binding !IsPasswordVisible}"
+                                          Stroke="{DynamicResource TrlFgMutedBrush}" StrokeThickness="1.75" Fill="{x:Null}"
+                                          Width="16" Height="16" Stretch="Uniform" StrokeLineCap="Flat" StrokeJoin="Miter"/>
+                                    <Path Data="{StaticResource TrlIconEyeOff}" IsVisible="{Binding IsPasswordVisible}"
+                                          Stroke="{DynamicResource TrlFgMutedBrush}" StrokeThickness="1.75" Fill="{x:Null}"
+                                          Width="16" Height="16" Stretch="Uniform" StrokeLineCap="Flat" StrokeJoin="Miter"/>
+                                </Panel>
+                            </Button>
+                        </Grid>
 
                         <TextBlock Text="CONFIRME A SENHA" Classes="trl-label" Margin="0,0,0,-10"/>
-                        <TextBox Text="{Binding ConfirmPassword, Mode=TwoWay}" PasswordChar="●" Watermark="Repita a senha"/>
+                        <Grid>
+                            <TextBox Text="{Binding ConfirmPassword, Mode=TwoWay}" PasswordChar="{Binding ConfirmPasswordChar}" Watermark="Repita a senha" Padding="8,5,32,5"/>
+                            <Button Classes="icon" Command="{Binding ToggleConfirmVisibilityCommand}"
+                                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                                    Margin="0,0,2,0" Cursor="Hand" ToolTip.Tip="Mostrar/ocultar senha">
+                                <Panel>
+                                    <Path Data="{StaticResource TrlIconEye}" IsVisible="{Binding !IsConfirmVisible}"
+                                          Stroke="{DynamicResource TrlFgMutedBrush}" StrokeThickness="1.75" Fill="{x:Null}"
+                                          Width="16" Height="16" Stretch="Uniform" StrokeLineCap="Flat" StrokeJoin="Miter"/>
+                                    <Path Data="{StaticResource TrlIconEyeOff}" IsVisible="{Binding IsConfirmVisible}"
+                                          Stroke="{DynamicResource TrlFgMutedBrush}" StrokeThickness="1.75" Fill="{x:Null}"
+                                          Width="16" Height="16" Stretch="Uniform" StrokeLineCap="Flat" StrokeJoin="Miter"/>
+                                </Panel>
+                            </Button>
+                        </Grid>
 
                         <TextBlock Text="{Binding RegisterErrorMsg}" Classes="trl-danger" FontSize="{DynamicResource TrlTextSm}" FontWeight="Bold" TextWrapping="Wrap" IsVisible="{Binding RegisterErrorMsg, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
 
-                        <Button Content="CRIAR CONTA" Command="{Binding GoToClassSelectionCommand}" Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="0,8,0,10"/>
+                        <Button Content="CRIAR CONTA" Command="{Binding GoToClassSelectionCommand}" Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="0,8,0,0"/>
 
-                        <Separator Margin="0,6"/>
-
-                        <TextBlock Text="Já possui uma conta?" Classes="trl-muted" FontSize="{DynamicResource TrlTextSm}" HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                        <TextBlock Text="Já possui uma conta?" Classes="trl-muted" FontSize="{DynamicResource TrlTextSm}" HorizontalAlignment="Center" Margin="0,0,0,0"/>
                         <Button Content="VOLTAR PARA LOGIN" Command="{Binding GoToLoginCommand}" Classes="ghost" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
                     </StackPanel>
 
