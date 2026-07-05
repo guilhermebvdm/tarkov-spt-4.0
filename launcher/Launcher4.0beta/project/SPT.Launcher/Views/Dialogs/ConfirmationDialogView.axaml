@@ -30,7 +30,17 @@
             <s:Boolean>False</s:Boolean>
           </Button.CommandParameter>
         </Button>
+        <!-- confirmar: .primary (tan) normal; .danger (vermelho) quando IsDestructive (wipe/reset) -->
         <Button Content="{Binding ConfirmButtonText}" Classes="primary" Cursor="Hand"
+                IsVisible="{Binding !IsDestructive}"
+                IsEnabled="{Binding AllowConfirm}"
+                Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHost:DialogHost}, Path=CloseDialogCommand}">
+          <Button.CommandParameter>
+            <s:Boolean>True</s:Boolean>
+          </Button.CommandParameter>
+        </Button>
+        <Button Content="{Binding ConfirmButtonText}" Classes="danger" Cursor="Hand"
+                IsVisible="{Binding IsDestructive}"
                 IsEnabled="{Binding AllowConfirm}"
                 Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHost:DialogHost}, Path=CloseDialogCommand}">
           <Button.CommandParameter>

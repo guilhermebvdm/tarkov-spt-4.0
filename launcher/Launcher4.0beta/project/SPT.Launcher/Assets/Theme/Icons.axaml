@@ -48,6 +48,9 @@
 	<StreamGeometry x:Key="TrlIconAlertCircle">M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0 M12 8v4 M12 16h.01</StreamGeometry>
 	<StreamGeometry x:Key="TrlIconCircleCheck">M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0 M9 12l2 2l4 -4</StreamGeometry>
 
+	<!-- nav -->
+	<StreamGeometry x:Key="TrlIconHome">M5 12l-2 0l9 -9l9 9l-2 0 M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7 M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6</StreamGeometry>
+
 	<!-- táticos / nav sem 1:1 -->
 	<StreamGeometry x:Key="TrlIconTarget">M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0 M7 12a5 5 0 1 0 10 0a5 5 0 1 0 -10 0 M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0</StreamGeometry>
 	<StreamGeometry x:Key="TrlIconCrosshair">M4 8v-2a2 2 0 0 1 2 -2h2 M4 16v2a2 2 0 0 0 2 2h2 M16 4h2a2 2 0 0 1 2 2v2 M16 20h2a2 2 0 0 0 2 -2v-2 M9 12l6 0 M12 9l0 6</StreamGeometry>

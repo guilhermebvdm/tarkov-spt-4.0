@@ -95,8 +95,8 @@
 		<GradientStop Offset="0" Color="#4D131314"/>
 		<GradientStop Offset="1" Color="#99131314"/>
 	</RadialGradientBrush>
-	<!-- Painéis verticais sobre foto: vidro a 50% de opacidade (revela a arte por trás) -->
-	<SolidColorBrush x:Key="TrlPanelOverPhotoBrush">#801B1B1D</SolidColorBrush>
+	<!-- OverPhoto (Profile/Class): 80% p/ legibilidade sobre a foto; Auth (Login) segue 50% -->
+	<SolidColorBrush x:Key="TrlPanelOverPhotoBrush">#CC1B1B1D</SolidColorBrush>
 	<SolidColorBrush x:Key="TrlPanelAuthBrush">#801B1B1D</SolidColorBrush>
 
 	<!-- Vignette (ambient texture, optional per view) -->

@@ -36,6 +36,20 @@
 	<Style Selector="ComboBoxItem">
 		<Setter Property="Foreground" Value="{DynamicResource TrlFgBrush}"/>
 		<Setter Property="CornerRadius" Value="0"/>
+		<Setter Property="Cursor" Value="Hand"/>
+	</Style>
+
+	<!-- estados do item no popup: wash tan do DS (era cinza flat do Fluent) -->
+	<Style Selector="ComboBoxItem:pointerover /template/ ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource TrlBgHoverBrush}"/>
+		<Setter Property="TextBlock.Foreground" Value="{DynamicResource TrlFgBrush}"/>
+	</Style>
+	<Style Selector="ComboBoxItem:selected /template/ ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource TrlBgActiveBrush}"/>
+		<Setter Property="TextBlock.Foreground" Value="{DynamicResource TrlAccentBrush}"/>
+	</Style>
+	<Style Selector="ComboBoxItem:selected:pointerover /template/ ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource TrlBgActiveBrush}"/>
 	</Style>
 
 </Styles>
