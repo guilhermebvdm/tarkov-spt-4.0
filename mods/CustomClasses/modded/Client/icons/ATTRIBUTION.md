@@ -19,6 +19,7 @@ silhouette is an alpha mask: the client tints it with the class color at runtime
 | `operadorTatico.png` | Operador Tático | Star medal | Delapouite | https://game-icons.net/1x1/delapouite/star-medal.html |
 | `saqueador.png` | Saqueador | Swap bag | Lorc | https://game-icons.net/1x1/lorc/swap-bag.html |
 | `sobrevivencialista.png` | Sobrevivencialista | Campfire | Lorc | https://game-icons.net/1x1/lorc/campfire.html |
+| `tanque.png` | Tanque | Kevlar vest | Skoll | https://game-icons.net/1x1/skoll/kevlar-vest.html |
 | `peladao.png` | Peladão (item 016) | Underwear | Delapouite | https://game-icons.net/1x1/delapouite/underwear.html |
 
 > Under CC BY 3.0 you must keep this credit if you redistribute the icons. To swap an icon,
