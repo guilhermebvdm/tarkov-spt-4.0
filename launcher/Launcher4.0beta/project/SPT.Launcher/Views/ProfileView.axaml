@@ -208,11 +208,7 @@
                     <TextBlock Text="{Binding UpdateStatusText}" Classes="trl-muted" FontSize="{DynamicResource TrlTextXs}"/>
                     <Grid ColumnDefinitions="*,Auto,Auto">
                         <ProgressBar Minimum="0" Maximum="{Binding UpdateMaxProgress}" Value="{Binding UpdateProgress}" VerticalAlignment="Center"/>
-                        <!-- Item 016: taxa de download (média móvel, MB/s decimal, separador PT-BR) -->
-                        <TextBlock Grid.Column="1" Text="{Binding DownloadSpeedText}" IsVisible="{Binding HasDownloadSpeed}"
-                                   Classes="trl-mono trl-accent" FontSize="{DynamicResource TrlTextXs}"
-                                   VerticalAlignment="Center" Margin="10,0,0,0"
-                                   ToolTip.Tip="Velocidade de download atual"/>
+                        <!-- velocidade de download removida a pedido -->
                         <Button Grid.Column="2" Content="CANCELAR" Classes="ghost sm" Cursor="Hand" Margin="8,0,0,0"
                                 Command="{Binding CancelUpdateCommand}" IsVisible="{Binding CanCancelUpdate}"
                                 ToolTip.Tip="Cancelar a verificação/atualização (pede confirmação)"/>

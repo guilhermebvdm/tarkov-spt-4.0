@@ -815,7 +815,7 @@ namespace SPT.Launcher.ViewModels
                 }
                 else if (plan.IoActionCount > 0)
                 {
-                    UpdateStatusText = result.Summary;
+                    UpdateStatusText = $"Atualização concluída com sucesso — {result.Summary}";
                     LogManager.Instance.Info($"[Profile] Atualização concluída: {result.Summary}");
                 }
                 else
