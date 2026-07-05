@@ -229,13 +229,15 @@ internal static class PerksConfig
                 "Multiplicador do raio de som de movimento do Stealth (0.40 = -60%). / Stealth movement-sound radius multiplier.",
                 new AcceptableValueRange<float>(0.1f, 1f)));
 
+        // (2026-07-05) Loud Operator agora é compartilhado Rifleman + Tank — a SEÇÃO do cfg fica "Drawbacks —
+        // Rifleman" por estabilidade (renomear seção BepInEx descarta o valor salvo do usuário).
         LoudOperatorEnabled = config.Bind(
             "Drawbacks — Rifleman", "Loud Operator — Enabled", true,
-            "Rifleman: aumenta o raio de audibilidade dos seus sons de movimento. / Rifleman: louder movement (bigger audibility radius).");
+            "Rifleman/Tank: aumenta o raio de audibilidade dos seus sons de movimento. / Rifleman/Tank: louder movement (bigger audibility radius).");
         LoudOperatorSoundRadius = config.Bind(
             "Drawbacks — Rifleman", "Loud Operator — Sound radius mult", 1.30f,
             new ConfigDescription(
-                "Multiplicador do raio de som de movimento do Rifleman (1.30 = +30%). / Rifleman movement-sound radius multiplier.",
+                "Multiplicador do raio de som de movimento do Rifleman/Tank (1.30 = +30%). / Rifleman/Tank movement-sound radius multiplier.",
                 new AcceptableValueRange<float>(1f, 2f)));
 
         SilentLooterEnabled = config.Bind(

@@ -90,7 +90,7 @@ internal static class PerksCatalog
             P("Adrenaline Reload", "Recarga de Adrenalina", "reload time (combat window)", "recarga (janela de combate)", ValueFormat.Multiplier, 0.8f, Polarity.LowerBetter, EBuffId.WeaponReloadBuff),
             P("Adrenaline Focus", "Foco de Adrenalina", "ADS time (combat window)", "ADS (janela de combate)", ValueFormat.Multiplier, 0.8f, Polarity.LowerBetter, EBuffId.AimMasterSpeed),
         }),
-        ["loud_operator"] = G("Loud Operator", "Barulhento", ESkillId.SilentOps, new[]
+        ["loud_operator"] = G("Loud Operator", "Barulhento", ESkillId.SilentOps, new[]   // compartilhado Fuzileiro + Tanque (2026-07-05)
         {
             P("Loud Operator", "Barulhento", "noise", "ruído", ValueFormat.Percent, 1.3f, Polarity.LowerBetter, EBuffId.CovertMovementSoundVolume),
         }),
@@ -173,7 +173,7 @@ internal static class PerksCatalog
         ["Hunter"]       = new[] { "sharpshooter", "iron_lungs", "rooted" },
         ["Stealth"]      = new[] { "ghost_step", "execution", "rattled" },
         ["Scavenger"]    = new[] { "quick_hands", "silent_looter", "pack_mule", "overladen" },
-        ["Tank"]         = new[] { "pack_mule", "bulwark", "bunker", "heavy_frame" },
+        ["Tank"]         = new[] { "pack_mule", "bulwark", "bunker", "heavy_frame", "loud_operator" },   // loud_operator: +ruído (2026-07-05, decisão do usuário)
     };
 
     private static bool _validated;
