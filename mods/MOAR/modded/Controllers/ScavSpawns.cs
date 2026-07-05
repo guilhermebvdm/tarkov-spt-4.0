@@ -59,14 +59,15 @@ public class ScavSpawns(
         
         for (int i = 0; i < totalWaves; i++)
         {
+            var difficulty = MOARServer.Helpers.WaveBuilder.GetDifficulty(ModConfig.Config.ScavDifficulty);
             var scav = new BossLocationSpawn
             {
                 BossName = "assault",
                 BossChance = 100,
                 BossZone = "",
-                BossDifficulty = "normal",
+                BossDifficulty = difficulty,
                 BossEscortType = "assault",
-                BossEscortDifficulty = "normal",
+                BossEscortDifficulty = difficulty,
                 BossEscortAmount = (randomUtil.GetInt(1, 100) <= ModConfig.Config.ScavGroupChance * 100) 
                     ? randomUtil.GetInt(1, ModConfig.Config.ScavMaxGroupSize - 1).ToString() 
                     : "0",
@@ -97,14 +98,15 @@ public class ScavSpawns(
             
             for (int i = 0; i < sniperWaves; i++)
             {
+                var difficulty = MOARServer.Helpers.WaveBuilder.GetDifficulty(ModConfig.Config.ScavDifficulty);
                 var sniper = new BossLocationSpawn
                 {
                     BossName = "marksman",
                     BossChance = 100,
                     BossZone = "",
-                    BossDifficulty = "normal",
+                    BossDifficulty = difficulty,
                     BossEscortType = "marksman",
-                    BossEscortDifficulty = "normal",
+                    BossEscortDifficulty = difficulty,
                     BossEscortAmount = "0",
                     Time = (int)Math.Round(sniperStartTime),
                     Delay = 0,

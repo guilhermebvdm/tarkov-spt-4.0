@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Comfort.Common;
 using System.Linq;
 using System.Reflection;
 using EFT;
@@ -75,49 +76,6 @@ namespace MOAR.Patches
                         $"marker name: {marker.SpawnPoint.Position} ID: {marker.SpawnPoint.Id}"
                     );
             }
-        }
-    }
-
-    public class AddEnemyPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return typeof(BotsGroup).GetMethod(
-                nameof(BotsGroup.AddEnemy),
-                BindingFlags.Public | BindingFlags.Instance
-            );
-        }
-
-        [PatchPrefix]
-        protected static bool PatchPrefix(
-            BotsGroup __instance,
-            IPlayer person,
-            EBotEnemyCause cause
-        )
-        {
-            if (cause != EBotEnemyCause.initial)
-                return true;
-
-            if (__instance == null || person == null || !person.IsAI)
-                return true;
-
-            if (
-                __instance.Side != person.Side
-                || person.Side == EPlayerSide.Savage
-                || __instance.Side == EPlayerSide.Savage
-            )
-            {
-                return true;
-            }
-
-            List<BotOwner> groupMemberList = __instance.Members;
-
-            // Plugin.LogSource.LogWarning("--------" + Settings.factionAggression.Value);
-            if (Settings.factionAggression.Value || groupMemberList.Count == 1)
-                return false;
-
-            // Plugin.LogSource.LogWarning("--------");
-            return true;
         }
     }
 
@@ -379,55 +337,34 @@ namespace MOAR.Patches
         }
     }
 
-    public class NotificationPatch : ModulePatch
+    public class SetMaxBotCountPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(GameWorld), nameof(GameWorld.OnGameStarted));
+            return AccessTools.Method(typeof(BotsController), nameof(BotsController.SetSettings));
         }
 
-        [PatchPrefix]
-        static bool Prefix()
+        [PatchPostfix]
+        private static void PatchPostfix(BotsController __instance, int maxCount)
         {
-            if (!Settings.ShowPresetOnRaidStart.Value)
-                return false;
+            var gameWorld = Singleton<GameWorld>.Instance;
+            if (gameWorld == null) return;
 
-            List<string> messages =
-            [
-                ", good luck!",
-                ", may the bots ever be in your favour.",
-                ", you're probably screwed.",
-                ", may your raids be bug-free.",
-                ", enjoy the dumpster fire.",
-                ", hope you brought snacks.",
-                ", good luck, seriously.",
-                ", prepare to be crushed.",
-                ", you’re about to get wrecked.",
-                ", enjoy the show.",
-                ", good luck, you'll need it.",
-                ", enjoy the carnage.",
-                ", try not to rage-quit.",
-                ", don’t say I didn’t warn you.",
-                ", best of luck surviving that.",
-                ", it’s going to be a long day for you.",
-                ", be water my friend.",
-                ", let the feelings of dread pass over you.",
-                ", black a leg!",
-                ", it's about to get ugly. Enjoy.",
-            ];
+            var location = gameWorld.LocationId;
+            if (string.IsNullOrEmpty(location)) return;
 
-            System.Random randNum = new();
+            int localCap = Settings.GetMapCap(location);
+            
+            Plugin.LogSource.LogInfo($"[MOAR] Local Host Performance: Setting max bots to {localCap} on {location}");
+            __instance.MaxCount = localCap;
 
-            int aRandomPos = randNum.Next(messages.Count);
-
-            string currName = messages[aRandomPos];
-
-            Methods.DisplayMessage(
-                "Current preset is " + Routers.GetAnnouncePresetName() + currName,
-                EFT.Communications.ENotificationIconType.EntryPoint
-            );
-
-            return true;
+            if (__instance.BotSpawner == null)
+            {
+                return;
+            }
+                
+            __instance.BotSpawner.SetMaxBots(__instance.MaxCount);
+            __instance.ZonesLeaveController.SetMaxBots(__instance.MaxCount);
         }
     }
 }

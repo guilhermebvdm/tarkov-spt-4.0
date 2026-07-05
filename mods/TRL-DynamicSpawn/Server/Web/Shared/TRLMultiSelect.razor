@@ -1,0 +1,95 @@
+@using System.Linq
+@using Microsoft.AspNetCore.Components.Web
+
+<div class="trl-select-container" tabindex="-1" @onfocusout="HandleFocusOut">
+    @if (!string.IsNullOrEmpty(Label))
+    {
+        <label class="trl-label">@Label</label>
+    }
+    
+    <div class="trl-select-box" @onclick="ToggleDropdown">
+        <div class="trl-select-text">
+            <span>@(SelectedValues != null && SelectedValues.Any() ? string.Join(", ", SelectedValues.Select(v => Localization.T(v))) : Localization.T("Select..."))</span>
+        </div>
+        <svg focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5z"></path></svg>
+    </div>
+
+    <div class="trl-select-popover" style="display: @(_isOpen ? "block" : "none")">
+        @if (Items != null)
+        {
+            @foreach (var item in Items)
+            {
+                <div class="trl-select-item" @onclick="() => ToggleItem(item)">
+                    <input type="checkbox" checked="@IsSelected(item)" class="trl-checkbox" readonly />
+                    <span>@Localization.T(item)</span>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Label { get; set; } = "";
+    [Parameter] public IEnumerable<string> SelectedValues { get; set; } = new List<string>();
+    [Parameter] public EventCallback<IEnumerable<string>> SelectedValuesChanged { get; set; }
+    [Parameter] public List<string> Items { get; set; } = new List<string>();
+
+    private bool _isOpen = false;
+
+    private void ToggleDropdown()
+    {
+        _isOpen = !_isOpen;
+    }
+
+    private void HandleFocusOut()
+    {
+        // Delay closing slightly so click events on items can fire
+        Task.Delay(150).ContinueWith(_ => { _isOpen = false; InvokeAsync(StateHasChanged); });
+    }
+
+    private bool IsSelected(string item)
+    {
+        return SelectedValues != null && SelectedValues.Contains(item);
+    }
+
+    private async Task ToggleItem(string item)
+    {
+        var list = SelectedValues != null ? SelectedValues.ToList() : new List<string>();
+        
+        // Special logic for 'All' and 'Random' in boss/map events
+        if (item == "All")
+        {
+            list.Clear();
+            list.AddRange(Items.Where(i => i != "Random"));
+        }
+        else if (item == "Random")
+        {
+            list.Clear();
+            list.Add("Random");
+        }
+        else
+        {
+            if (list.Contains(item))
+            {
+                list.Remove(item);
+            }
+            else
+            {
+                list.Add(item);
+            }
+            
+            // Uncheck Random if a specific item is chosen
+            list.Remove("Random");
+            // Uncheck All if not everything is selected
+            if (list.Contains("All") && list.Count < Items.Count - 1)
+            {
+                list.Remove("All");
+            }
+        }
+
+        SelectedValues = list;
+        await SelectedValuesChanged.InvokeAsync(SelectedValues);
+        StateHasChanged();
+    }
+}
+

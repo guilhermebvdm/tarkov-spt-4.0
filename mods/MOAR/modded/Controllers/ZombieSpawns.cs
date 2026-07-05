@@ -85,16 +85,18 @@ public class ZombieSpawns(
         for (int i = 0; i < zombieTotalWaveCount; i++)
         {
             var allowGroup = randomUtil.GetInt(1, 100) < 20;
+            var mainType = zombieTypes[randomUtil.GetInt(0, zombieTypes.Length - 1)];
+            var difficulty = MOARServer.Helpers.WaveBuilder.GetDifficulty(Math.Round(Random.Shared.NextDouble() * 1.5 * 10) / 10.0);
             var bossEscortAmount = allowGroup ? randomUtil.GetInt(0, 4) : 0;
             
             var zombieGroup = new BossLocationSpawn
             {
-                BossName = zombieTypes[randomUtil.GetInt(0, zombieTypes.Length - 1)],
+                BossName = mainType,
                 BossChance = 100,
                 BossZone = "",
-                BossDifficulty = "normal",
-                BossEscortType = zombieTypes[randomUtil.GetInt(0, zombieTypes.Length - 1)],
-                BossEscortDifficulty = "normal",
+                BossDifficulty = difficulty,
+                BossEscortType = mainType,
+                BossEscortDifficulty = difficulty,
                 BossEscortAmount = "0",
                 Delay = 0,
                 IgnoreMaxBots = false,

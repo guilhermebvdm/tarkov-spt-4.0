@@ -1,0 +1,161 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Comfort.Common;
+using EFT;
+using EFT.Game.Spawning;
+using SPT.Reflection.Utils;
+using UnityEngine;
+
+namespace BotPlacementSystemClient.Utils;
+
+internal class Utility
+{
+    public static bool Initialized;
+        
+    // Spawn Points
+    private static List<ISpawnPoint> _allSpawnPoints = new();
+    public static List<ISpawnPoint> PlayerSpawnPoints = new();
+    public static List<ISpawnPoint> BackupPlayerSpawnPoints = new();
+    public static List<ISpawnPoint> CombinedSpawnPoints = new();
+    private static Dictionary<string, List<ISpawnPoint>> _cachedZoneSpawnPoints = new();
+        
+    // Zones
+    public static List<BotZone> CurrentMapZones = new();
+    public static List<BotZone> CachedNonSnipeZones = new();
+        
+    // Bot Trackers
+    public static readonly HashSet<Vector3> ReservedSpawnPositions = new();
+    public static readonly object SpawnPointLock = new object();
+    public static List<Player> CachedPmcs = new();
+    public static List<Player> CachedAssaultBots = new();
+    public static List<Player> CachedBosses = new();
+    public static List<Player> CachedConnectedPlayers = new();
+    public static double BotsSpawnedPerPlayer = 0.0d;
+
+    public static readonly Dictionary<string, string[]> MapHotSpots = new()
+    {
+        {"rezervbase", ["ZoneSubStorage", "ZoneBarrack"]},
+        {"shoreline", ["ZoneSanatorium1", "ZoneSanatorium2"]},
+        {"lighthouse", ["Zone_LongRoad", "Zone_Chalet", "Zone_Village"]},
+        {"interchange", ["ZoneCenter", "ZoneCenterBot"]},
+        {"bigmap", ["ZoneDormitory", "ZoneScavBase", "ZoneOldAZS", "ZoneGasStation"]}
+    };
+
+    public static Profile GetPlayerProfile()
+    {
+        return ClientAppUtils.GetClientApp().GetClientBackEndSession().Profile;
+    }
+
+    public static string CurrentLocation
+    {
+        get
+        {
+            var gameWorld = Singleton<GameWorld>.Instance;
+            return gameWorld != null ? gameWorld.LocationId.ToLowerInvariant() : "default";
+        }
+    }
+        
+    public static void InitializeSpawnPoints(BotZone[] allBotZones)
+    {
+        _allSpawnPoints.Clear();
+        PlayerSpawnPoints.Clear();
+        BackupPlayerSpawnPoints.Clear();
+        CombinedSpawnPoints.Clear();
+            
+        CachedNonSnipeZones.Clear();
+        CurrentMapZones.Clear();
+            
+        ReservedSpawnPositions.Clear();
+        CachedPmcs.Clear();
+        CachedAssaultBots.Clear();
+        CachedBosses.Clear();
+        CachedConnectedPlayers.Clear();
+            
+        _cachedZoneSpawnPoints.Clear();
+            
+        BotsSpawnedPerPlayer = 0.0;
+            
+        // Recache spawn points now
+        _allSpawnPoints = SpawnPointManagerClass.CreateFromScene().ToList();
+    
+        PlayerSpawnPoints = _allSpawnPoints
+            .Where(x => x.Categories.ContainPlayerCategory() && x.Infiltration != null)
+            .ToList();
+        
+        BackupPlayerSpawnPoints = _allSpawnPoints
+            .Where(x => x.Categories.ContainBotCategory() 
+                        && !x.Categories.ContainBossCategory() 
+                        && !x.IsSnipeZone)
+            .ToList();
+        
+        CombinedSpawnPoints = PlayerSpawnPoints
+            .Concat(BackupPlayerSpawnPoints)
+            .ToList();
+            
+        foreach (var botZone in allBotZones)
+        {
+            var zoneName = botZone.NameZone;
+            foreach (var spawnPoint in botZone.SpawnPoints)
+            {
+                if (spawnPoint.Categories != ESpawnCategoryMask.All && !spawnPoint.Categories.ContainBotCategory())
+                {
+                    continue;
+                }
+                if (!_cachedZoneSpawnPoints.TryGetValue(zoneName, out var list))
+                {
+                    list = new List<ISpawnPoint>();
+                    _cachedZoneSpawnPoints[zoneName] = list;
+                }
+
+                list.Add(spawnPoint);
+            }
+        }
+            
+        Initialized = true;
+    }
+        
+    public static List<ISpawnPoint> GetZoneSpawnPoints(BotZone botZone)
+    {
+        return _cachedZoneSpawnPoints.TryGetValue(botZone.NameZone, out var points) ? points : new List<ISpawnPoint>();
+    }
+        
+    public static BotZone GetNewValidBotZone()
+    {
+        var randomIndex = UnityEngine.Random.Range(0, CachedNonSnipeZones.Count);
+        return CachedNonSnipeZones[randomIndex];
+    }
+
+    public static bool IsPlayerHeadless(Player player)
+    {
+        return player.Profile.Info.MemberCategory == EMemberCategory.UnitTest;
+    }
+
+    public static bool IsPlayerHeadless(IPlayer player)
+    {
+        return player.Profile.Info.MemberCategory == EMemberCategory.UnitTest;
+    }
+        
+    public static async Task<bool> WaitForHumanPlayer()
+    {
+        var gameWorld = Singleton<GameWorld>.Instance;
+        var timeout = DateTime.UtcNow.AddSeconds(Plugin.ConnectedPlayerTimeout);
+
+        while (!gameWorld.RegisteredPlayers.Any(p => p is Player player && !player.IsAI && !IsPlayerHeadless(player) && player.Profile.Info.Settings.Role != WildSpawnType.marksman))
+        {
+            if (DateTime.UtcNow > timeout)
+            {
+                Plugin.LogSource.LogError("Timed out waiting for a human player in RegisteredPlayers. Bot's are going to be spawning weird. Fix your shit.");
+                return false;
+            }
+
+            if (Plugin.DebugLogging)
+                Plugin.LogSource.LogInfo("Waiting for human players to appear in RegisteredPlayers...");
+
+            await Task.Delay(Plugin.ConnectedPlayerCheckTimer);
+        }
+
+        return true;
+    }
+}

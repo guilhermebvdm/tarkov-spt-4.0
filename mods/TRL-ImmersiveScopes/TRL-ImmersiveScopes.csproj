@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <AssemblyName>TRL-ImmersiveScopes</AssemblyName>
+    <Description>Adiciona um efeito Fisheye realista nas bordas de miras PIP.</Description>
+    <Version>1.0.0</Version>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Referências Vitais de Client Mod (BepInEx) baseadas na documentação do SPT 4.0 -->
+    <!-- Ajuste o caminho "C:\Seu\SPT" para a raiz da instalação real do seu SPT -->
+    
+    <Reference Include="BepInEx">
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\BepInEx\core\BepInEx.dll</HintPath>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\BepInEx\core\0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

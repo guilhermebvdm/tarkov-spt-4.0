@@ -42,6 +42,16 @@ public class WaveBuilder(
         
         return result;
     }
+
+    public static string GetDifficulty(double diff)
+    {
+        var randomNumb = Random.Shared.NextDouble() + diff;
+        if (randomNumb < 0.55) return "easy";
+        if (randomNumb < 1.4) return "normal";
+        if (randomNumb < 1.85) return "hard";
+        return "impossible";
+    }
+
     public static void EnforceSmoothing(List<BossLocationSpawn> waves, double smoothingDistribution)
     {
         var bosses = new List<BossLocationSpawn>();

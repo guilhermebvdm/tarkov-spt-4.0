@@ -1,0 +1,19 @@
+# Build artifacts
+bin/
+obj/
+*.dll
+*.pdb
+*.cache
+*.user
+.vs/
+
+# IDE
+.idea/
+*.suo
+
+# Local-only dev folders
+dashboard/
+scripts/
+dist/
+notes/
+.claude/

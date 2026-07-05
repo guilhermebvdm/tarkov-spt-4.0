@@ -71,17 +71,20 @@ public class PmcSpawns(
             var isUsec = i % 2 == 0;
             var pmcType = isUsec ? "pmcUSEC" : "pmcBEAR";
             
+            var difficulty = MOARServer.Helpers.WaveBuilder.GetDifficulty(ModConfig.Config.PmcDifficulty);
+            var bossEscortAmount = (randomUtil.GetInt(1, 100) <= ModConfig.Config.PmcGroupChance * 100) 
+                    ? randomUtil.GetInt(1, ModConfig.Config.PmcMaxGroupSize - 1) 
+                    : 0;
+
             var boss = new BossLocationSpawn
             {
                 BossName = pmcType,
                 BossChance = 100,
                 BossZone = "", // In a full implementation, pick from pmcZones
-                BossDifficulty = "normal",
+                BossDifficulty = difficulty,
                 BossEscortType = pmcType,
-                BossEscortDifficulty = "normal",
-                BossEscortAmount = (randomUtil.GetInt(1, 100) <= ModConfig.Config.PmcGroupChance * 100) 
-                    ? randomUtil.GetInt(1, ModConfig.Config.PmcMaxGroupSize - 1).ToString() 
-                    : "0",
+                BossEscortDifficulty = difficulty,
+                BossEscortAmount = bossEscortAmount.ToString(),
                 Time = (int)Math.Round(startTime),
                 Delay = 0,
                 Supports = []

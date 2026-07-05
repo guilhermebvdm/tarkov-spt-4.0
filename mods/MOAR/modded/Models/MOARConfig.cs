@@ -1,9 +1,13 @@
 using System.Text.Json.Serialization;
+using SPTarkov.Server.Core.Models.Utils;
 
 namespace MOARServer.Models;
 
-public class MOARConfig
+public class MOARConfig : IRequestData
 {
+    [JsonPropertyName("currentPreset")]
+    public string CurrentPreset { get; set; } = "Random";
+
     [JsonPropertyName("enableBotSpawning")]
     public bool EnableBotSpawning { get; set; }
 
@@ -68,7 +72,7 @@ public class MOARConfig
     public int ScavMaxGroupSize { get; set; }
 
     [JsonPropertyName("sniperMaxGroupSize")]
-    public int SniperMaxGroupSize { get; set; }
+    public double SniperMaxGroupSize { get; set; }
 
     [JsonPropertyName("bossOpenZones")]
     public bool BossOpenZones { get; set; }

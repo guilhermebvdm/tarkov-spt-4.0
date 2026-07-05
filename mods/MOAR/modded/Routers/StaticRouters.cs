@@ -52,21 +52,39 @@ public class StaticRouters : StaticRouter
             new RouteAction("/moar/getPresets",
                 async (url, info, sessionID, output) =>
                 {
-                    // Mocked for now, needs Presets logic
-                    var result = new { data = new[] { new { Name = "Random", Label = "random" }, new { Name = "Custom", Label = "custom" } } };
+                    var presets = new List<object>();
+                    foreach (var key in ModConfig.PresetWeights.Keys)
+                    {
+                        var nameParts = key.Split('-');
+                        for (int i = 0; i < nameParts.Length; i++)
+                        {
+                            if (nameParts[i].Length > 0)
+                                nameParts[i] = char.ToUpper(nameParts[i][0]) + nameParts[i].Substring(1);
+                        }
+                        presets.Add(new { Name = string.Join(" ", nameParts), Label = key });
+                    }
+                    presets.Add(new { Name = "Random", Label = "Random" });
+                    presets.Add(new { Name = "Custom", Label = "Custom" });
+
+                    var result = new { data = presets };
                     return await new ValueTask<string>(_jsonUtil.Serialize(result));
                 }
             ),
             new RouteAction("/moar/announcePreset",
                 async (url, info, sessionID, output) =>
                 {
-                    return await new ValueTask<string>("Custom");
+                    string p = ModConfig.Config.CurrentPreset;
+                    if (string.IsNullOrEmpty(p) || p.Equals("Random", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return await new ValueTask<string>(_jsonUtil.Serialize(p));
+                    }
+                    return await new ValueTask<string>(_jsonUtil.Serialize(p));
                 }
             ),
             new RouteAction("/moar/currentPreset",
                 async (url, info, sessionID, output) =>
                 {
-                    return await new ValueTask<string>("Custom");
+                    return await new ValueTask<string>(_jsonUtil.Serialize(ModConfig.Config.CurrentPreset ?? "Random"));
                 }
             ),
             new RouteAction("/moar/addBotSpawn",
