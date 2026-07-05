@@ -54,7 +54,7 @@
                         <!-- xícara à esquerda, texto no meio, link-externo à extremidade direita -->
                         <DockPanel LastChildFill="True">
                             <Path DockPanel.Dock="Left" Data="{StaticResource TrlIconCoffee}" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                            <Path DockPanel.Dock="Right" Data="{StaticResource TrlIconExternalLink}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                            <Path DockPanel.Dock="Right" Data="{StaticResource TrlIconExternalLink}" Width="12" Height="12" VerticalAlignment="Center" Margin="10,0,0,0"/>
                             <TextBlock Text="APOIE UM CAFEZINHO" VerticalAlignment="Center"/>
                         </DockPanel>
                     </Button>

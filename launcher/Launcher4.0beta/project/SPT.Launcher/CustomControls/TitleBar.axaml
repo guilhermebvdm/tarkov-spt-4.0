@@ -45,14 +45,10 @@
 				Width="38"
             >
 			<Viewbox Width="14" Height="14">
-				<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center">
-					<Path Data="{StaticResource TrlIconMinus}"
-					      Stroke="{Binding $parent[TextBlock].Foreground}"
-					      StrokeThickness="1.75" Fill="{x:Null}"
-					      Width="14" Height="14" Stretch="Uniform"
-					      StrokeLineCap="Flat" StrokeJoin="Miter"
-					/>
-				</TextBlock>
+				<!-- minimize = Rectangle (a linha plana TrlIconMinus com Stretch=Uniform tem bounds
+				     de altura 0 → colapsa e some; o Rectangle é sempre visível). -->
+				<Rectangle Width="12" Height="1.6" VerticalAlignment="Center"
+				           Fill="{Binding $parent[Button].Foreground}"/>
 			</Viewbox>
 			<Button.Styles>
 				<Style Selector="Button:pointerover /template/ ContentPresenter">

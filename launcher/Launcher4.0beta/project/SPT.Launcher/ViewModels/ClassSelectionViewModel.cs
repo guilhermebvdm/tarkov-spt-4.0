@@ -434,6 +434,7 @@ namespace SPT.Launcher.ViewModels
             ("armeiro", "armeiro.png"),
             ("gerente", "gerenteDeOperacoes.png"),
             ("sobreviv", "sobrevivencialista.png"),
+            ("tanque", "tanque.png"),
         };
 
         private static readonly object BundledIconLock = new object();

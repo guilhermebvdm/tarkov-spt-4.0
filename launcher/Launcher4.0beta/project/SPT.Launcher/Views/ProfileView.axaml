@@ -70,7 +70,7 @@
                         <!-- xícara à esquerda, texto no meio, link-externo à extremidade direita -->
                         <DockPanel LastChildFill="True">
                             <Path DockPanel.Dock="Left" Data="{StaticResource TrlIconCoffee}" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                            <Path DockPanel.Dock="Right" Data="{StaticResource TrlIconExternalLink}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                            <Path DockPanel.Dock="Right" Data="{StaticResource TrlIconExternalLink}" Width="12" Height="12" VerticalAlignment="Center" Margin="10,0,0,0"/>
                             <TextBlock Text="APOIE UM CAFEZINHO" VerticalAlignment="Center"/>
                         </DockPanel>
                     </Button>
@@ -257,7 +257,7 @@
                                     HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <Path Data="{StaticResource TrlIconSearch}" Stroke="{DynamicResource TrlFgMutedBrush}" StrokeThickness="1.75" Fill="{x:Null}"
-                                          Width="16" Height="16" Stretch="Uniform" StrokeLineCap="Flat" StrokeJoin="Miter" VerticalAlignment="Center"/>
+                                          Width="13" Height="13" Stretch="Uniform" StrokeLineCap="Flat" StrokeJoin="Miter" VerticalAlignment="Center"/>
                                     <TextBlock Text="VERIFICAR ARQUIVOS" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Button>
