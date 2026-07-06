@@ -1,0 +1,49 @@
+<!--
+  TRL Theme - Nav.axaml
+  Sidebar nav buttons: command-based twin of ListBox.trl-nav (token-pure).
+  Promoted from ProfileView.axaml local styles (item 024) so SettingsView and
+  ProfileView share the same chrome (single source). Consumed via Classes="nav"
+  (+ .active for the current screen), inside a cc:TrlSidebarNav.
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+	<Style Selector="Button.nav">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="BorderThickness" Value="2,0,0,0"/>
+		<Setter Property="BorderBrush" Value="Transparent"/>
+		<Setter Property="CornerRadius" Value="0"/>
+		<Setter Property="MinHeight" Value="36"/>
+		<Setter Property="Padding" Value="12,0"/>
+		<Setter Property="HorizontalAlignment" Value="Stretch"/>
+		<Setter Property="HorizontalContentAlignment" Value="Left"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgMutedBrush}"/>
+	</Style>
+	<Style Selector="Button.nav:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource TrlBgHoverBrush}"/>
+		<Setter Property="BorderBrush" Value="Transparent"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgBrush}"/>
+	</Style>
+	<Style Selector="Button.nav.active">
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlAccentBrush}"/>
+		<Setter Property="Background" Value="{DynamicResource TrlBgActiveBrush}"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlAccentBrush}"/>
+	</Style>
+	<Style Selector="Button.nav.active:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource TrlBgActiveBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlAccentBrush}"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlAccentBrush}"/>
+	</Style>
+	<!-- DS icons são traçados (Tabler): render com Stroke + hard-edges, não Fill -->
+	<Style Selector="Button.nav Path">
+		<Setter Property="Stroke" Value="{Binding $parent[Button].Foreground}"/>
+		<Setter Property="StrokeThickness" Value="1.75"/>
+		<Setter Property="Fill" Value="{x:Null}"/>
+		<Setter Property="Stretch" Value="Uniform"/>
+		<Setter Property="Width" Value="18"/>
+		<Setter Property="Height" Value="18"/>
+		<Setter Property="StrokeLineCap" Value="Flat"/>
+		<Setter Property="StrokeJoin" Value="Miter"/>
+	</Style>
+
+</Styles>

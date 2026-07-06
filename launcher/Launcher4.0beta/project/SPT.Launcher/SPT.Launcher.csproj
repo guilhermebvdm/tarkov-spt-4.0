@@ -9,9 +9,13 @@
     <NoWin32Manifest>true</NoWin32Manifest>
     <AssemblyName>Tarkov Red Line</AssemblyName>
     <Product>Tarkov Red Line</Product>
-    <Version>1.4.7</Version>
-    <AssemblyVersion>1.4.7.0</AssemblyVersion>
-    <FileVersion>1.4.7.0</FileVersion>
+    <Version>2.0.0</Version>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
+    <InformationalVersion>2.0.0</InformationalVersion>
+    <!-- Server lê ProductVersion (=InformationalVersion) do exe p/ auto-update:
+         sem o sufixo +sha, senão IsNewerVersion/Version.TryParse falha (item 014). -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\tailscale-setup-1.98.4-amd64.msi">
@@ -22,7 +26,8 @@
     <Compile Remove="Properties\**" />
     <EmbeddedResource Remove="Properties\**" />
     <None Remove="Properties\**" />
-    <AvaloniaResource Remove="Assets\Styles.axaml" />
+    <!-- Theme axaml files are compiled XAML (AvaloniaXaml default glob), not raw resources -->
+    <AvaloniaResource Remove="Assets\Theme\**\*.axaml" />
     <None Remove=".gitignore" />
     <None Remove="Assets\SPT-logo.png" />
     <None Remove="Assets\icon.ico" />
@@ -47,10 +52,5 @@
     <Reference Include="zlib.net">
       <HintPath>References\zlib.net.dll</HintPath>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <AvaloniaXaml Update="Assets\Styles.axaml">
-      <SubType>Designer</SubType>
-    </AvaloniaXaml>
   </ItemGroup>
 </Project>

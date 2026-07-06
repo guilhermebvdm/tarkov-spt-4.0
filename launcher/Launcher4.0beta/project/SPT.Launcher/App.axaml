@@ -9,43 +9,21 @@
 	</Application.DataTemplates>
 
 	<Application.Styles>
-		<StyleInclude Source="avares://DialogHost.Avalonia/Styles.xaml"/>
 		<FluentTheme />
+		<StyleInclude Source="avares://DialogHost.Avalonia/Styles.xaml"/>
+		<!-- TRL theme foundation (tokens + control styles) - must come last so it wins -->
+		<StyleInclude Source="/Assets/Theme/Trl.axaml"/>
 	</Application.Styles>
 
 	<Application.Resources>
 		<ResourceDictionary>
-			<ResourceDictionary.ThemeDictionaries>
-				<!-- let's be real... we are never going to use a light theme lol -waffle.lazy -->
-				<ResourceDictionary x:Key="Light">
-					<SolidColorBrush x:Key="AccentBrush">#436082</SolidColorBrush>
-					<SolidColorBrush x:Key="AccentBrush2">#567ca8</SolidColorBrush>
-					<SolidColorBrush x:Key="AccentBrush3">#6998ce</SolidColorBrush>
-					<SolidColorBrush x:Key="AltAccentBrush">#6a6357</SolidColorBrush>
-					<SolidColorBrush x:Key="AltAccentBrush2">#908676</SolidColorBrush>
-					<SolidColorBrush x:Key="AltAccentBrush3">#b6a995</SolidColorBrush>
-					<SolidColorBrush x:Key="BackgroundBrush">White</SolidColorBrush>
-					<SolidColorBrush x:Key="BackgroundBrush2">#cccccc</SolidColorBrush>
-					<SolidColorBrush x:Key="AltBackgroundBrush">#cca480</SolidColorBrush>
-					<SolidColorBrush x:Key="ForegroundBrush">Black</SolidColorBrush>
-				</ResourceDictionary>
-				<ResourceDictionary x:Key="Dark">
-					<!-- Cores de Acento (Vermelhos Tarkov Red Line) -->
-					<SolidColorBrush x:Key="AccentBrush">#d1231f</SolidColorBrush>
-					<SolidColorBrush x:Key="AccentBrush2">#a81b17</SolidColorBrush>
-					<SolidColorBrush x:Key="AccentBrush3">#851411</SolidColorBrush>
-					<!-- Tons secundários -->
-					<SolidColorBrush x:Key="AltAccentBrush">#b2a58d</SolidColorBrush>
-					<SolidColorBrush x:Key="AltAccentBrush2">#7f7564</SolidColorBrush>
-					<SolidColorBrush x:Key="AltAccentBrush3">#4c463b</SolidColorBrush>
-					<!-- Cores Base de Fundo (Grayscales escuros) -->
-					<SolidColorBrush x:Key="BackgroundBrush">#111111</SolidColorBrush>
-					<SolidColorBrush x:Key="BackgroundBrush2">#1a1a1a</SolidColorBrush>
-					<SolidColorBrush x:Key="AltBackgroundBrush">#2c2c2c</SolidColorBrush>
-					<!-- Texto -->
-					<SolidColorBrush x:Key="ForegroundBrush">White</SolidColorBrush>
-				</ResourceDictionary>
-			</ResourceDictionary.ThemeDictionaries>
+			<ResourceDictionary.MergedDictionaries>
+				<!-- TRL Design System icons (Tabler stroked geometries, StreamGeometry keys TrlIcon*) -->
+				<ResourceInclude Source="/Assets/Theme/Icons.axaml"/>
+			</ResourceDictionary.MergedDictionaries>
+			<!-- R2: no rounded corners, anywhere -->
+			<CornerRadius x:Key="ControlCornerRadius">0</CornerRadius>
+			<CornerRadius x:Key="OverlayCornerRadius">0</CornerRadius>
 		</ResourceDictionary>
 		
 		<!-- Path Geometry for re-usable icons -->

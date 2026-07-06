@@ -51,8 +51,13 @@
     <button type="button" class="flea-level-widget" id="flea-level-widget" title="Edit minimum flea level (globals.json)">
       Flea Lvl <span id="flea-level-num">15</span>+
     </button>
+    <button type="button" class="flea-level-widget" id="flea-cap-toggle" data-tip="SPT flea ceiling on Weapon Mod (×6) / Electronics (×11). OFF = those can be priced above handbook×mult. Restart SPT to apply in-game; rebuild the catalog to lift the editor limit." data-tip-pos="bottom">
+      Flea cap <span id="flea-cap-state">…</span>
+    </button>
     <span class="trader-pending-pill" id="trader-pending-pill" hidden data-tip="Trader sell-price overrides written via TRLTraderPrices. Restart SPT to apply." data-tip-pos="bottom"></span>
     <button type="button" class="bulk-btn bulk-btn--danger" id="clear-trader-overrides" hidden data-tip="Remove every trader sell-price override (TRLTraderPrices)." data-tip-pos="bottom">Clear trader overrides</button>
+    <span class="trader-pending-pill" id="buy-pending-pill" hidden data-tip="Trader buyback-price overrides written via TRLTraderPrices. Restart SPT to apply." data-tip-pos="bottom"></span>
+    <button type="button" class="bulk-btn bulk-btn--danger" id="clear-buy-overrides" hidden data-tip="Remove every trader buyback-price override (TRLTraderPrices)." data-tip-pos="bottom">Clear buyback overrides</button>
   </div>
 
   <span class="topbar-sep" aria-hidden="true"></span>
@@ -84,6 +89,8 @@ let TRADERS = {};       // nickname → { id, avatar }
 let TRADER_ID_TO_NAME = {}; // trader MongoId → nickname (built from TRADERS)
 let TRADER_OVERRIDES = {};  // traderId → { tpl → { count, currency } } (NATIVE amount; from GET /api/trader-overrides)
 let TRADER_MOD_INSTALLED = true;  // companion mod TRLTraderPrices present? (from GET /api/trader-overrides)
+let BUY_OVERRIDES = {};    // B-3: traderId → { tpl → { count, currency } } (buyback; from GET /api/trader-buy-overrides)
+let BUY_MOD_INSTALLED = true;  // companion mod TRLTraderPrices (buy-price half) present?
 let CURRENCY_RATES = { RUB: 1 };  // { RUB:1, USD, EUR, GP } rubles-per-native-unit (from meta.json)
 const FENCE_ID = '579dc571d53a0658a154fbec'; // Fence — dynamic assort, not editable
 let META = null;
@@ -435,6 +442,14 @@ async function load() {
       TRADER_OVERRIDES = (tr && tr.ok && tr.overrides) ? tr.overrides : {};
       TRADER_MOD_INSTALLED = (tr && tr.ok) ? (tr.modInstalled !== false) : true;
     } catch (_) { TRADER_OVERRIDES = {}; TRADER_MOD_INSTALLED = true; }
+
+    // B-3: buy-price (buyback) overrides — same companion mod, separate config file. Tolerate
+    // failure the same way (base tarkov.dev reference prices still render without OVR badges).
+    try {
+      const bo = await fetch('/api/trader-buy-overrides').then(r => r.json());
+      BUY_OVERRIDES = (bo && bo.ok && bo.overrides) ? bo.overrides : {};
+      BUY_MOD_INSTALLED = (bo && bo.ok) ? (bo.modInstalled !== false) : true;
+    } catch (_) { BUY_OVERRIDES = {}; BUY_MOD_INSTALLED = true; }
 
     // Walk category tree once and index icon URLs by both id and name so the
     // table's Group column can find the right icon for any item.
@@ -964,6 +979,36 @@ function bindControls() {
   }
   fleaWidget.addEventListener('click', () => openFleaMinLevelEditor(fleaWidget));
 
+  // Flea cap (SPT unreasonableModPrices) on/off toggle in topbar — B-1.
+  (function initFleaCapToggle() {
+    const btn = document.getElementById('flea-cap-toggle');
+    const stateEl = document.getElementById('flea-cap-state');
+    if (!btn || !stateEl) return;
+    let enabled = null;
+    const notify = (m) => { try { if (typeof toast === 'function') toast(m); } catch (_) {} };
+    const render = () => {
+      stateEl.textContent = enabled == null ? '…' : (enabled ? 'on' : 'OFF');
+      btn.classList.toggle('is-cap-off', enabled === false);
+    };
+    (async () => {
+      try { const j = await (await fetch('/api/flea-cap')).json(); enabled = !!j.enabled; }
+      catch (_) { enabled = null; stateEl.textContent = '?'; return; }
+      render();
+    })();
+    btn.addEventListener('click', async () => {
+      if (enabled == null) return;
+      const next = !enabled;
+      btn.disabled = true;
+      try {
+        const r = await fetch('/api/flea-cap', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled: next }) });
+        const j = await r.json();
+        if (r.ok) { enabled = j.enabled; render(); notify(next ? 'Flea cap ON — restart SPT + rebuild catalog to apply' : 'Flea cap OFF — mods/electronics uncapped; restart SPT + rebuild catalog to apply'); }
+        else { notify('Flea cap failed: ' + (j.error || r.status)); }
+      } catch (e) { notify('Flea cap failed: ' + e.message); }
+      finally { btn.disabled = false; }
+    });
+  })();
+
   // Bulk "⟳ Update" menu (rescan / update-all-dev / update-all-market).
   bindUpdateMenu();
 
@@ -971,6 +1016,11 @@ function bindControls() {
   const clearTraderBtn = document.getElementById('clear-trader-overrides');
   if (clearTraderBtn) clearTraderBtn.addEventListener('click', () => clearAllTraderOverrides());
   updateTraderTopbar();
+
+  // CR-05: Clear ALL trader buyback-price overrides (B-3, TRLTraderPrices) — mirrors the sell button above.
+  const clearBuyBtn = document.getElementById('clear-buy-overrides');
+  if (clearBuyBtn) clearBuyBtn.addEventListener('click', () => clearAllBuyOverrides());
+  updateBuyTopbar();
 
   // Condition / Group / Ban are handled by multi-select dropdowns
   // (buildConditionFilter / buildGroupFilter / buildBanFilter).
@@ -1336,6 +1386,16 @@ function renderRow(it) {
   // Trader cell — stacked SELL (player→trader, tarkov.dev) and BUY (trader→player, SPT assort)
   const traderSellValue = c.priceTraderSell ? c.priceTraderSell.value : null;
   const traderSellName  = c.priceTraderSell ? c.priceTraderSell.vendor : null;
+  // CR-04: reflect a buyback (B-3) override on the "B" line too, same as "S" already does for
+  // sell overrides — otherwise an edited buyback price is invisible outside the detail panel.
+  const traderSellTraderId = traderSellName && TRADERS[traderSellName] ? TRADERS[traderSellName].id : null;
+  const buyOvr = traderSellTraderId ? buyOverrideFor(traderSellTraderId, it.id) : null;
+  const buyOvrCount = buyOvr != null ? ((typeof buyOvr === 'object') ? buyOvr.count : buyOvr) : null;
+  const buyOvrCurrency = (buyOvr && typeof buyOvr === 'object' && buyOvr.currency) ? buyOvr.currency : 'RUB';
+  const buyOverridden = buyOvrCount != null;
+  const buyEffRUB = buyOverridden
+    ? Math.round(buyOvrCount * (CURRENCY_RATES[buyOvrCurrency] != null ? CURRENCY_RATES[buyOvrCurrency] : 1))
+    : traderSellValue;
   // Best buy = cheapest non-BARTER trader offer in spt.traders[], with its loyaltyLevel.
   // Trader OVERRIDES are applied here (effective price = override count × currency rate) so
   // an edited trader price shows in the item row, not only in the detail panel.
@@ -1372,7 +1432,7 @@ function renderRow(it) {
           ? `<div class="cell-trader__line cell-trader__line--sell" data-tip="S = trader SELLS this to you — the assort price you pay (SPT)"><span class="cell-trader__tag cell-trader__tag--sell" aria-label="Trader sells to you">S</span>${avatarFor(traderBuy.name)}<span class="cell-trader__num${traderBuy.overridden?' is-overridden':''}">${fmtRub(traderBuy.effPriceRUB)}</span>${traderBuy.overridden?` <span class="badge badge--override cell-trader__ovr" data-tip="Trader sell-price override — restart SPT to apply">OVR</span>`:''}<small class="cell-trader__ll">LL${traderBuy.loyaltyLevel}${traderBuy.questLocked?` <span class="trader-lock" data-tip="Quest-locked — an override applies only after you unlock the quest">🔒</span>`:''}</small></div>`
           : '') +
         (traderSellValue != null
-          ? `<div class="cell-trader__line cell-trader__line--buy" data-tip="B = trader BUYS this from you — buyback (tarkov.dev)"><span class="cell-trader__tag cell-trader__tag--buy" aria-label="Trader buys from you">B</span>${avatarFor(traderSellName)}<span class="cell-trader__num">${fmtRub(traderSellValue)}</span></div>`
+          ? `<div class="cell-trader__line cell-trader__line--buy" data-tip="B = trader BUYS this from you — buyback (tarkov.dev${buyOverridden?' + override':''})"><span class="cell-trader__tag cell-trader__tag--buy" aria-label="Trader buys from you">B</span>${avatarFor(traderSellName)}<span class="cell-trader__num${buyOverridden?' is-overridden':''}">${fmtRub(buyEffRUB)}</span>${buyOverridden?` <span class="badge badge--override cell-trader__ovr" data-tip="Trader buyback-price override — restart SPT to apply">OVR</span>`:''}</div>`
           : '') +
       `</div>`
     : '<span class="price is-null">—</span>';
@@ -1522,6 +1582,25 @@ function onTableClick(e) {
     e.stopPropagation();
     const row = traderCell.closest('tr.trader-row');
     if (row) openTraderEdit(row);
+    return;
+  }
+
+  // B-3: inline restore ↺ on an overridden BUY (buyback) row → delete the override directly.
+  const buyRestoreBtn = e.target.closest('.buy-restore-btn');
+  if (buyRestoreBtn) {
+    e.stopPropagation();
+    const row = buyRestoreBtn.closest('tr.buy-row');
+    if (row) restoreBuyOverride(row);
+    return;
+  }
+  // Clicks inside an open buy-edit form: let the form's own handlers fire.
+  if (e.target.closest('.buy-edit-form')) { e.stopPropagation(); return; }
+  // Click anywhere on an editable BUY cell (not just the pencil) → inline edit.
+  const buyCell = e.target.closest('td.buy-edit-cell');
+  if (buyCell) {
+    e.stopPropagation();
+    const row = buyCell.closest('tr.buy-row');
+    if (row) openBuyEdit(row);
     return;
   }
 
@@ -2173,6 +2252,71 @@ function rerenderTraderTable(table) {
   table.innerHTML = traders.map(t => renderTraderRow(item, t)).join('');
 }
 
+// CR-05: buyback-override equivalents of traderOverrideTotals/updateTraderTopbar/
+// clearAllTraderOverrides/rerenderTraderTable above — same pattern, over BUY_OVERRIDES /
+// /api/trader-buy-price/all / .buy-edit-table (the endpoint already existed server-side but had
+// no UI wired to it).
+function buyOverrideTotals() {
+  let total = 0; let traders = 0;
+  for (const tpls of Object.values(BUY_OVERRIDES)) {
+    const n = tpls ? Object.keys(tpls).length : 0;
+    if (n > 0) { total += n; traders++; }
+  }
+  return { total, traders };
+}
+
+function updateBuyTopbar() {
+  const { total } = buyOverrideTotals();
+  const btn  = document.getElementById('clear-buy-overrides');
+  const pill = document.getElementById('buy-pending-pill');
+  if (btn)  btn.hidden  = total === 0;
+  if (pill) {
+    pill.hidden = total === 0;
+    pill.textContent = total > 0 ? `${total} buyback edit${total === 1 ? '' : 's'} pending` : '';
+  }
+}
+
+async function clearAllBuyOverrides() {
+  const { total, traders } = buyOverrideTotals();
+  if (total === 0) return;
+  const ok = await confirmDialog({
+    title: 'Reset ALL trader buyback-price overrides?',
+    body: `Removes ${total} override${total === 1 ? '' : 's'} across ${traders} trader${traders === 1 ? '' : 's'}. Cannot be undone.`,
+    confirmText: 'Reset all',
+  });
+  if (!ok) return;
+  const btn = document.getElementById('clear-buy-overrides');
+  if (btn) { btn.disabled = true; btn.classList.add('is-busy'); }
+  try {
+    const r = await fetch('/api/trader-buy-price/all', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    const data = await r.json();
+    if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+    BUY_OVERRIDES = {};
+    document.querySelectorAll('tr.detail .buy-edit-table').forEach(rerenderBuyTable);
+    document.querySelectorAll('tr[data-id]').forEach(r => {
+      if (r.querySelector('.cell-trader__ovr')) rerenderMainRow(r.getAttribute('data-id'));
+    });
+    updateBuyTopbar();
+    const n = data.removedCount != null ? data.removedCount : total;
+    toast(`${n} buyback override${n === 1 ? '' : 's'} removed · restart SPT to apply${data.warning ? ` (${data.warning})` : ''}`, data.warning ? 'warn' : 'ok');
+  } catch (err) {
+    toast('Failed to reset buyback overrides: ' + err.message, 'err');
+  } finally {
+    if (btn) { btn.disabled = false; btn.classList.remove('is-busy'); }
+  }
+}
+
+// Re-render every buyback row in a given <table.buy-edit-table> from ITEMS/dev.sellFor.
+function rerenderBuyTable(table) {
+  const tpl = table.dataset.buyTpl;
+  const item = ITEMS[tpl];
+  if (!item) return;
+  const dev = item.tarkovDev && item.tarkovDev.pve;
+  const sellFor = dev && dev.sellFor ? dev.sellFor.filter(s => s.vendor && s.vendor.normalizedName !== 'flea-market') : [];
+  if (sellFor.length === 0) return;
+  table.innerHTML = sellFor.map(s => renderBuyRow(item, s)).join('');
+}
+
 // Resolve the current override for a (trader, tpl) as { count, currency }, or null.
 // `count` is the NATIVE amount the game charges (not rouble-equivalent).
 function traderOverrideFor(traderId, tpl) {
@@ -2185,6 +2329,19 @@ function traderOverrideFor(traderId, tpl) {
 // Override's native count, or null. Tolerates a legacy plain-number override.
 function traderOverrideCount(traderId, tpl) {
   const ovr = traderOverrideFor(traderId, tpl);
+  if (ovr == null) return null;
+  return (typeof ovr === 'object') ? ovr.count : ovr;
+}
+
+// B-3: same lookups as traderOverrideFor/traderOverrideCount, over BUY_OVERRIDES (buyback).
+function buyOverrideFor(traderId, tpl) {
+  if (!traderId) return null;
+  const byTrader = BUY_OVERRIDES[traderId];
+  if (!byTrader || byTrader[tpl] == null) return null;
+  return byTrader[tpl];
+}
+function buyOverrideCount(traderId, tpl) {
+  const ovr = buyOverrideFor(traderId, tpl);
   if (ovr == null) return null;
   return (typeof ovr === 'object') ? ovr.count : ovr;
 }
@@ -2488,6 +2645,244 @@ function openTraderEdit(row) {
   };
 }
 
+// ── B-3: trader BUY price (buyback, tarkov.dev reference — now editable) ────────────────────
+// Mirrors renderTraderRow/openTraderEdit/restoreTraderOverride (sell side) exactly, over
+// BUY_OVERRIDES + /api/trader-buy-price instead of TRADER_OVERRIDES + /api/trader-price. The
+// reference "base" price here is tarkov.dev's sellFor (not SPT's live assort — there is no
+// buyback assort to read from; see BACKLOG.md B-3).
+
+// Render one tarkov.dev sellFor row. Editable when the vendor resolves to a known traderId
+// (not Fence, money currency) — same editability rule as the sell table.
+function renderBuyRow(it, s) {
+  const tpl = it.id;
+  const vendorName = s.vendor && s.vendor.name;
+  const traderId = vendorName && TRADERS[vendorName] ? TRADERS[vendorName].id : null;
+  const isFence = traderId === FENCE_ID;
+  const cur = s.currency || 'RUB';
+  const isMoney = TRADER_MONEY_CURRENCIES.has(cur);
+  const editable = !!traderId && !isFence && isMoney;
+  const nameCell = `<td class="k">${escapeHtml(vendorName || '?')}</td>`;
+  const readOnlyMarkup = `${fmt(s.priceRUB)} ₽${cur !== 'RUB' ? ` <small class="vendor">(${s.price} ${cur})</small>` : ''}`;
+
+  if (isFence) {
+    return `<tr>${nameCell}<td class="v">${readOnlyMarkup} <span class="vendor trader-fence-tag" data-tip="Fence — dynamic assort, not editable">Fence — not editable</span></td></tr>`;
+  }
+  if (!editable) {
+    return `<tr>${nameCell}<td class="v">${readOnlyMarkup}</td></tr>`;
+  }
+
+  const ovr = buyOverrideFor(traderId, tpl);
+  const hasOvr = ovr != null;
+  const ovrCount = hasOvr ? ((typeof ovr === 'object') ? ovr.count : ovr) : null;
+  const base = s.price; // native amount (tarkov.dev reference)
+  const eff = hasOvr && ovrCount != null ? ovrCount : base;
+  const rubHint = eff != null ? rubHintMarkup(eff, cur) : '';
+  const sym = CURRENCY_SYMBOL[cur] || cur;
+  const badge = hasOvr
+    ? ` <span class="badge badge--override" data-tip="${escapeAttr('Buyback override active — trader pays you ' + (eff != null ? eff.toLocaleString('en-US') : '?') + ' ' + sym + ' (tarkov.dev ref ' + (base != null ? base.toLocaleString('en-US') : '?') + ' ' + sym + '). Edit / restore here.')}">OVR</span>`
+    : '';
+
+  const nullCell = `<span class="trader-price-val is-null">—</span>`;
+  let priceMarkup;
+  if (eff == null) {
+    priceMarkup = nullCell;
+  } else if (hasOvr) {
+    priceMarkup = (base != null ? `<s class="trader-price-base">${nativeValueMarkup(base, cur)}</s> → ` : '') +
+      `<span class="is-overridden">${nativeValueMarkup(eff, cur)}</span>${rubHint}`;
+  } else {
+    priceMarkup = `${nativeValueMarkup(eff, cur)}${rubHint}`;
+  }
+
+  const restoreBtn = hasOvr
+    ? `<button class="buy-restore-btn" type="button" data-tip="Restore reference buyback price" aria-label="Restore reference buyback price">↺</button>`
+    : '';
+
+  return `<tr class="buy-row is-editable${hasOvr ? ' is-overridden' : ''}" data-buy-trader-id="${escapeAttr(traderId)}" data-buy-tpl="${escapeAttr(tpl)}" data-buy-base="${base != null ? base : ''}" data-buy-cur="${escapeAttr(cur)}">` +
+    nameCell +
+    `<td class="v buy-edit-cell" data-tip="Click to edit what this trader pays you (buyback)" tabindex="0" role="button" aria-label="Edit trader buy price">` +
+      priceMarkup + badge + restoreBtn +
+      `<button class="buy-edit-btn" type="button" title="Edit trader buy price" tabindex="-1">${ICON_EDIT}</button>` +
+    `</td>` +
+  `</tr>`;
+}
+
+// Re-render a single BUY row from ITEMS/dev.sellFor, returning a fresh <tr>.
+function rerenderBuyRowEl(row, focusBack) {
+  const tpl = row.dataset.buyTpl;
+  const traderId = row.dataset.buyTraderId;
+  const item = ITEMS[tpl];
+  if (!item) return null;
+  const dev = item.tarkovDev && item.tarkovDev.pve;
+  const sellFor = dev && dev.sellFor ? dev.sellFor.filter(x => x.vendor && x.vendor.normalizedName !== 'flea-market') : [];
+  const s = sellFor.find(x => x.vendor && TRADERS[x.vendor.name] && TRADERS[x.vendor.name].id === traderId);
+  if (!s) return null;
+  const tmp = document.createElement('tbody');
+  tmp.innerHTML = renderBuyRow(item, s);
+  const fresh = tmp.firstElementChild;
+  row.replaceWith(fresh);
+  if (focusBack) {
+    const cell = fresh.querySelector('.buy-edit-cell');
+    if (cell) cell.focus();
+  }
+  return fresh;
+}
+
+// Inline restore (↺ on the row, no editor). DELETEs the buyback override directly.
+async function restoreBuyOverride(row) {
+  const tpl = row.dataset.buyTpl;
+  const traderId = row.dataset.buyTraderId;
+  const btn = row.querySelector('.buy-restore-btn');
+  if (btn) btn.disabled = true;
+  try {
+    const r = await fetch('/api/trader-buy-price', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tpl, traderId }),
+    });
+    const data = await r.json();
+    if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+    if (BUY_OVERRIDES[traderId]) {
+      delete BUY_OVERRIDES[traderId][tpl];
+      if (Object.keys(BUY_OVERRIDES[traderId]).length === 0) delete BUY_OVERRIDES[traderId];
+    }
+    rerenderBuyRowEl(row, true);
+    rerenderMainRow(tpl); // CR-04: keep the main-list "B" cell in sync
+    updateBuyTopbar(); // CR-05: keep the "N buyback edits pending" pill in sync
+    const item = ITEMS[tpl];
+    toast(`${(item && (item.shortName || item.name)) || tpl}: buyback override removed → reference · restart SPT to apply${data.warning ? ` (${data.warning})` : ''}`, data.warning ? 'warn' : 'ok');
+  } catch (err) {
+    if (btn) btn.disabled = false;
+    toast('Failed to restore: ' + err.message, 'err');
+  }
+}
+
+// Open the inline editor on a BUY row. Mirrors openTraderEdit (sell side).
+function openBuyEdit(row) {
+  if (row.querySelector('.buy-edit-form')) return; // already editing
+  const tpl = row.dataset.buyTpl;
+  const traderId = row.dataset.buyTraderId;
+  const cur = row.dataset.buyCur;
+  const sym = CURRENCY_SYMBOL[cur] || cur || '';
+  const base = row.dataset.buyBase !== '' ? Number(row.dataset.buyBase) : null;
+  const ovrCount = buyOverrideCount(traderId, tpl);
+  const current = ovrCount != null ? ovrCount : (base != null ? base : '');
+  const hasOvr = ovrCount != null;
+
+  const isRub = cur === 'RUB';
+  const rate = CURRENCY_RATES[cur];
+  const showRubPreview = CURRENCY_RUB_HINT.has(cur) && rate && rate > 0;
+
+  const cell = row.querySelector('.buy-edit-cell');
+  cell.classList.add('is-editing');
+  const form = document.createElement('form');
+  form.className = 'buy-edit-form trader-edit-form'; // reuses the sell editor's CSS
+  form.onsubmit = (e) => { e.preventDefault(); return false; };
+  form.innerHTML =
+    `<input type="number" min="1" step="1" value="${current}" autofocus aria-label="Trader buy price in ${escapeAttr(cur)}">` +
+    `<div class="trader-edit-form__preview" aria-live="polite"></div>` +
+    `<div class="trader-edit-form__actions">` +
+      `<button class="save" type="button" title="Save (Enter)">Save</button>` +
+      (hasOvr ? `<button class="restore" type="button" title="Restore reference buy price (undo edit)">↺</button>` : '') +
+      `<button class="cancel" type="button" title="Cancel (Esc)">×</button>` +
+    `</div>` +
+    `<div class="trader-edit-form__hint">edit in ${escapeHtml(cur)} · what this trader pays you · restart SPT to apply</div>`;
+  cell.appendChild(form);
+
+  const input   = form.querySelector('input');
+  const preview = form.querySelector('.trader-edit-form__preview');
+  const save    = form.querySelector('button.save');
+  const cancel  = form.querySelector('button.cancel');
+  const restore = form.querySelector('button.restore');
+  input.focus(); input.select();
+
+  function updatePreview() {
+    const v = parseInt(input.value, 10);
+    if (!Number.isFinite(v) || v <= 0) { preview.textContent = ''; return; }
+    if (showRubPreview) {
+      const rub = Math.round(v * rate);
+      preview.textContent = `≈ ${rub.toLocaleString('en-US')} ₽ (@ ${rate.toLocaleString('en-US')} ₽/${sym})`;
+    } else if (isRub) {
+      preview.textContent = `= ${v.toLocaleString('en-US')} ₽`;
+    } else {
+      preview.textContent = `= ${v.toLocaleString('en-US')} ${sym}`;
+    }
+  }
+  input.addEventListener('input', updatePreview);
+  updatePreview();
+
+  let docClickHandler = null;
+  function closeForm() {
+    cell.classList.remove('is-editing');
+    form.remove();
+    if (docClickHandler) document.removeEventListener('mousedown', docClickHandler, true);
+  }
+  function rerenderRow() { return rerenderBuyRowEl(row, true); }
+
+  cancel.onclick = () => { closeForm(); const cell2 = row.querySelector('.buy-edit-cell'); if (cell2) cell2.focus(); };
+  input.onkeydown = (ev) => {
+    if (ev.key === 'Escape') closeForm();
+    if (ev.key === 'Enter')  { ev.preventDefault(); save.click(); }
+  };
+  docClickHandler = (ev) => { if (!row.contains(ev.target)) closeForm(); };
+  setTimeout(() => document.addEventListener('mousedown', docClickHandler, true), 0);
+
+  save.onclick = async () => {
+    const count = parseInt(input.value, 10);
+    if (!Number.isFinite(count) || count <= 0) { toast('Invalid value', 'err'); input.focus(); return; }
+    save.disabled = true; cancel.disabled = true; if (restore) restore.disabled = true;
+    try {
+      const r = await fetch('/api/trader-buy-price', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tpl, traderId, count, currency: cur }),
+      });
+      const data = await r.json();
+      if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+      if (!BUY_OVERRIDES[traderId]) BUY_OVERRIDES[traderId] = {};
+      BUY_OVERRIDES[traderId][tpl] = { count, currency: cur };
+      closeForm();
+      rerenderRow();
+      rerenderMainRow(tpl); // CR-04: keep the main-list "B" cell in sync
+      updateBuyTopbar(); // CR-05: keep the "N buyback edits pending" pill in sync
+      const item = ITEMS[tpl];
+      const prevCount = data.previousCount != null ? data.previousCount : data.previousPrice;
+      const prev = prevCount != null ? `${prevCount.toLocaleString('en-US')} → ` : '';
+      let msg = `${(item && (item.shortName || item.name)) || tpl}: trader buy ${prev}${count.toLocaleString('en-US')} ${sym} · restart SPT to apply`;
+      if (data.warning) msg += ` (${data.warning})`;
+      toast(msg, data.warning ? 'warn' : 'ok');
+    } catch (err) {
+      toast('Failed to save: ' + err.message, 'err');
+      save.disabled = false; cancel.disabled = false; if (restore) restore.disabled = false;
+    }
+  };
+
+  if (restore) restore.onclick = async () => {
+    restore.disabled = true; save.disabled = true; cancel.disabled = true;
+    try {
+      const r = await fetch('/api/trader-buy-price', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tpl, traderId }),
+      });
+      const data = await r.json();
+      if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+      if (BUY_OVERRIDES[traderId]) {
+        delete BUY_OVERRIDES[traderId][tpl];
+        if (Object.keys(BUY_OVERRIDES[traderId]).length === 0) delete BUY_OVERRIDES[traderId];
+      }
+      closeForm();
+      rerenderRow();
+      rerenderMainRow(tpl); // CR-04: keep the main-list "B" cell in sync
+      updateBuyTopbar(); // CR-05: keep the "N buyback edits pending" pill in sync
+      const item = ITEMS[tpl];
+      toast(`${(item && (item.shortName || item.name)) || tpl}: buyback override removed → reference · restart SPT to apply${data.warning ? ` (${data.warning})` : ''}`, data.warning ? 'warn' : 'ok');
+    } catch (err) {
+      toast('Failed to restore: ' + err.message, 'err');
+      restore.disabled = false; save.disabled = false; cancel.disabled = false;
+    }
+  };
+}
+
 function renderDetail(it) {
   const c = it.consolidated;
   const dev = it.tarkovDev && it.tarkovDev.pve;
@@ -2562,12 +2957,15 @@ function renderDetail(it) {
         </table>
       </div>
 
-      <div class="detail-section">
-        <h3>Trader buy (tarkov.dev) — best: <span class="price is-canonical" data-tip="What the trader pays you (buyback)">${c.priceTraderSell ? fmt(c.priceTraderSell.value)+' ₽ ('+escapeHtml(c.priceTraderSell.vendor)+')' : '—'}</span></h3>
-        <table>
+      <div class="detail-section detail-section--full">
+        <h3>Trader buy (tarkov.dev ref) — best: <span class="price is-canonical" data-tip="What the trader pays you (buyback)">${c.priceTraderSell ? fmt(c.priceTraderSell.value)+' ₽ ('+escapeHtml(c.priceTraderSell.vendor)+')' : '—'}</span>${BUY_MOD_INSTALLED ? '' : ' <span class="trader-mod-warn" data-tip="Install TRLTraderPrices (client + server) for edits to take effect in-game.">⚠ mod not installed</span>'}</h3>
+        <table class="buy-edit-table" data-buy-tpl="${escapeAttr(it.id)}">
           ${traderSell.length === 0 ? '<tr><td>—</td></tr>' :
-            traderSell.map(s => `<tr><td class="k">${escapeHtml(s.vendor.name)}</td><td class="v">${fmt(s.priceRUB)} ₽ ${s.currency!=='RUB' ? '<small class="vendor">('+s.price+' '+s.currency+')</small>' : ''}</td></tr>`).join('')}
+            traderSell.map(s => renderBuyRow(it, s)).join('')}
         </table>
+        <div class="trader-edit-note${BUY_MOD_INSTALLED ? '' : ' is-warn'}">${BUY_MOD_INSTALLED
+          ? 'Edit in the trader\'s native currency — what the trader pays YOU (buyback). Requires the client-side patch too (Rota B); restart SPT to apply.'
+          : 'TRLTraderPrices not installed — edits are saved but inert. Install both mod halves (client + server), then restart SPT to apply.'}</div>
       </div>
 
       <div class="detail-section detail-section--full">

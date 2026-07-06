@@ -4,41 +4,47 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:helpers="using:SPT.Launcher.Helpers"
              xmlns:dialogHost="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
-             xmlns:s="clr-namespace:System;assembly=mscorlib"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:cc="using:SPT.Launcher.CustomControls"
+             mc:Ignorable="d" d:DesignWidth="460" d:DesignHeight="240"
              x:Class="SPT.Launcher.Views.Dialogs.ChangeEditionDialogView"
-             Background="{DynamicResource BackgroundBrush}"
-             >
-  
-  <Grid RowDefinitions="10,AUTO,AUTO,AUTO,10" ColumnDefinitions="10,*,AUTO,10">
-    
-    <Label Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
-           Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=wipe_warning}"
-           Foreground="IndianRed"
-           />
-	  <ComboBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
-				ItemsSource="{Binding editions.AvailableEditions}"
-				SelectedItem="{Binding editions.SelectedEdition}"
-				PlaceholderText="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=select_edition}"
-                MaxDropDownHeight="400"
-              >
-		  <ComboBox.ItemTemplate>
-			  <DataTemplate>
-				  <TextBlock Background="Transparent" Text="{Binding Name}" ToolTip.Tip="{Binding Description}"/>
-			  </DataTemplate>
-		  </ComboBox.ItemTemplate>
-	  </ComboBox>
+             MaxWidth="500">
 
-    <StackPanel Spacing="10" Grid.Row="3" Grid.Column="2" Orientation="Horizontal">
-      <Button Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=update}"
-              Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHost:DialogHost}, Path=CloseDialogCommand}"
-              CommandParameter="{Binding editions.SelectedEdition}"
-              Classes="acc"
-              />
-      <Button Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=cancel}"
-              Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHost:DialogHost}, Path=CloseDialogCommand}"
-              />
+  <cc:TrlDialogChrome Title="MUDAR EDIÇÃO DO PERFIL">
+    <cc:TrlDialogChrome.HeaderContent>
+      <!-- ✕ = cancelar (retorna null; caller só age com SPTEdition) -->
+      <Button Classes="icon sm" Content="✕" Cursor="Hand"
+              Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHost:DialogHost}, Path=CloseDialogCommand}"/>
+    </cc:TrlDialogChrome.HeaderContent>
+
+    <StackPanel Spacing="12">
+      <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=wipe_warning}"
+                 Classes="trl-danger" FontWeight="Bold" TextWrapping="Wrap" FontSize="{DynamicResource TrlTextMd}"/>
+
+      <!-- Item 023 (Frente B / RN-4 / CA-B2): mudar edição dispara wipe (Remove/Register no server).
+           Aviso de coop porque o gate local não vê a sessão Fika Coop dos outros jogadores. -->
+      <TextBlock Classes="trl-danger" TextWrapping="Wrap"
+                 Text="Atenção coop: se houver uma sessão Fika Coop PVE ativa, trocar a edição agora reseta o perfil e pode corromper a raid dos outros jogadores. Confirme que ninguém está em raid."/>
+
+      <ComboBox ItemsSource="{Binding editions.AvailableEditions}"
+                SelectedItem="{Binding editions.SelectedEdition}"
+                PlaceholderText="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=select_edition}"
+                MaxDropDownHeight="400"
+                HorizontalAlignment="Stretch">
+        <ComboBox.ItemTemplate>
+          <DataTemplate>
+            <TextBlock Background="Transparent" Text="{Binding Name}" ToolTip.Tip="{Binding Description}"/>
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+
+      <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" Margin="0,4,0,0">
+        <Button Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=cancel}" Classes="ghost" Cursor="Hand"
+                Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHost:DialogHost}, Path=CloseDialogCommand}"/>
+        <!-- .danger: confirmar aqui dispara wipe do perfil (destrutivo) -->
+        <Button Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=update}" Classes="danger" Cursor="Hand"
+                Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHost:DialogHost}, Path=CloseDialogCommand}"
+                CommandParameter="{Binding editions.SelectedEdition}"/>
+      </StackPanel>
     </StackPanel>
-    
-  </Grid>
+  </cc:TrlDialogChrome>
 </UserControl>

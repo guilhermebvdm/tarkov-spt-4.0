@@ -1,0 +1,58 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:dialogHost="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
+             xmlns:cc="using:SPT.Launcher.CustomControls"
+             xmlns:s="clr-namespace:System;assembly=mscorlib"
+             mc:Ignorable="d" d:DesignWidth="460" d:DesignHeight="320"
+             x:Class="SPT.Launcher.Views.Dialogs.DeleteAccountDialogView"
+             MaxWidth="460">
+
+  <cc:TrlDialogChrome Title="EXCLUIR CONTA">
+    <cc:TrlDialogChrome.HeaderContent>
+      <Button Classes="icon sm" Content="✕" Cursor="Hand"
+              Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHost:DialogHost}, Path=CloseDialogCommand}">
+        <Button.CommandParameter>
+          <s:Boolean>False</s:Boolean>
+        </Button.CommandParameter>
+      </Button>
+    </cc:TrlDialogChrome.HeaderContent>
+
+    <StackPanel Spacing="12">
+      <TextBlock TextWrapping="Wrap" Classes="trl-danger" FontWeight="Bold"
+                 Text="Esta ação é definitiva e não pode ser desfeita."/>
+
+      <TextBlock TextWrapping="Wrap" Classes="trl-muted"
+                 Text="A conta e o perfil serão removidos do servidor. Diferente do wipe — que apenas reseta o progresso e mantém a conta — aqui a conta deixa de existir."/>
+
+      <!-- Item 023 (Frente B / RN-4 / CA-B1): aviso de coop. O gate local só enxerga o EFT deste
+           launcher, nunca a sessão Fika Coop dos outros jogadores. Assume-se o pior. -->
+      <TextBlock TextWrapping="Wrap" Classes="trl-danger"
+                 Text="Atenção coop: se houver uma sessão Fika Coop PVE ativa agora, excluir esta conta pode corromper a raid dos outros jogadores. Confirme que ninguém está em raid antes de prosseguir."/>
+
+      <StackPanel Spacing="6">
+        <TextBlock Classes="trl-label" Text="DIGITE O NOME DA CONTA PARA CONFIRMAR"/>
+        <TextBlock Classes="trl-mono trl-accent" Text="{Binding Username}"/>
+        <TextBox Text="{Binding TypedUsername, Mode=TwoWay}"
+                 Watermark="{Binding Username}"/>
+      </StackPanel>
+
+      <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" Margin="0,8,0,0">
+        <Button Content="CANCELAR" Classes="ghost" Cursor="Hand"
+                Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHost:DialogHost}, Path=CloseDialogCommand}">
+          <Button.CommandParameter>
+            <s:Boolean>False</s:Boolean>
+          </Button.CommandParameter>
+        </Button>
+        <Button Content="EXCLUIR DEFINITIVAMENTE" Classes="danger" Cursor="Hand"
+                IsEnabled="{Binding CanConfirm}"
+                Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHost:DialogHost}, Path=CloseDialogCommand}">
+          <Button.CommandParameter>
+            <s:Boolean>True</s:Boolean>
+          </Button.CommandParameter>
+        </Button>
+      </StackPanel>
+    </StackPanel>
+  </cc:TrlDialogChrome>
+</UserControl>

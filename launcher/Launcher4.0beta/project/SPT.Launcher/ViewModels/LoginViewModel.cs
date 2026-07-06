@@ -38,9 +38,43 @@ namespace SPT.Launcher.ViewModels
             set => this.RaiseAndSetIfChanged(ref _isLoggedIn, value);
         }
 
+        // Mostrar/ocultar senha (mesmo padrão do Settings): oculto => PasswordChar '●' + olho aberto
+        // (clique p/ revelar); visível => PasswordChar '\0' + olho cortado.
+        private bool _passwordVisible = false;
+        public char PasswordChar => _passwordVisible ? '\0' : '●';
+        public bool IsPasswordVisible => _passwordVisible;
+
+        public void TogglePasswordVisibilityCommand()
+        {
+            _passwordVisible = !_passwordVisible;
+            this.RaisePropertyChanged(nameof(PasswordChar));
+            this.RaisePropertyChanged(nameof(IsPasswordVisible));
+        }
+
+        // Item 022 (Grupo D / 013L, AC-022.13/14) — footer de versão reativo. Antes era x:Static
+        // read-once: se o fetch do connect falhou transitoriamente, "—" congelava a sessão toda
+        // nesta tela. Agora é bind reativo com refetch async barato (mesmo pattern do ProfileView).
+        private string _serverVersion = ServerManager.TrlServerVersion;
+        public string ServerVersion
+        {
+            get => _serverVersion;
+            set => this.RaiseAndSetIfChanged(ref _serverVersion, value);
+        }
+
         public LoginViewModel(IScreen Host, bool NoAutoLogin = false) : base(Host)
         {
-            GoToRegisterCommand = ReactiveCommand.Create(() => 
+            // Refetch barato quando a versão ficou desconhecida no connect (síncrono seria pior:
+            // até 15s de freeze de UI no timeout — justamente o cenário de falha).
+            if (_serverVersion == "—")
+            {
+                _ = Task.Run(() =>
+                {
+                    var refreshed = ServerManager.RefreshTrlServerVersionIfUnknown();
+                    Dispatcher.UIThread.Post(() => ServerVersion = refreshed);
+                });
+            }
+
+            GoToRegisterCommand = ReactiveCommand.Create(() =>
             {
                 NavigateTo(new RegisterViewModel(HostScreen));
             });
@@ -109,19 +143,23 @@ namespace SPT.Launcher.ViewModels
                                 }
                             });
 
-                            if (LauncherSettingsProvider.Instance.UseAutoLogin && LauncherSettingsProvider.Instance.Server.AutoLoginCreds != Login)
-                            {
-                                LauncherSettingsProvider.Instance.Server.AutoLoginCreds = Login;
-                            }
-
+                            // item 015: o checkbox "Lembrar usuário e entrar automaticamente"
+                            // (RememberUsername) governa tanto o preenchimento quanto o auto-login
+                            // no próximo boot. Marcado → grava credenciais e arma o auto-login;
+                            // desmarcado → limpa tudo (não persiste senha nem credencial de boot).
                             if (LauncherSettingsProvider.Instance.RememberUsername)
                             {
                                 LauncherSettingsProvider.Instance.LastUsername = Login.Username;
                                 LauncherSettingsProvider.Instance.LastPassword = Login.Password;
+                                LauncherSettingsProvider.Instance.UseAutoLogin = true;
+                                LauncherSettingsProvider.Instance.Server.AutoLoginCreds = Login;
                             }
                             else
                             {
+                                LauncherSettingsProvider.Instance.LastUsername = "";
                                 LauncherSettingsProvider.Instance.LastPassword = "";
+                                LauncherSettingsProvider.Instance.UseAutoLogin = false;
+                                LauncherSettingsProvider.Instance.Server.AutoLoginCreds = null;
                             }
 
                             LauncherSettingsProvider.Instance.SaveSettings();
@@ -240,9 +278,21 @@ namespace SPT.Launcher.ViewModels
                 Login.Password = LauncherSettingsProvider.Instance.LastPassword;
             }
 
+            // item 015: desmarcar "Lembrar usuário" no meio da sessão desarma o auto-login na
+            // hora (sem depender de um novo login) e persiste.
             LauncherSettingsProvider.Instance.PropertyChanged += (s, e) =>
             {
-                if (e.PropertyName == "UseAutoLogin" || e.PropertyName == "RememberUsername")
+                if (e.PropertyName == "RememberUsername")
+                {
+                    if (!LauncherSettingsProvider.Instance.RememberUsername)
+                    {
+                        LauncherSettingsProvider.Instance.UseAutoLogin = false;
+                        LauncherSettingsProvider.Instance.Server.AutoLoginCreds = null;
+                        LauncherSettingsProvider.Instance.LastPassword = "";
+                    }
+                    LauncherSettingsProvider.Instance.SaveSettings();
+                }
+                else if (e.PropertyName == "UseAutoLogin")
                 {
                     LauncherSettingsProvider.Instance.SaveSettings();
                 }

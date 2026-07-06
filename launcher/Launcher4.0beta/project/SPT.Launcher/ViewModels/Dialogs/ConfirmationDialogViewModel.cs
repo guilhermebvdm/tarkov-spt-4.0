@@ -10,6 +10,9 @@ namespace SPT.Launcher.ViewModels.Dialogs
         public string DenyButtonText { get; set; }
         public bool AllowConfirm { get; set; }
 
+        /// <summary>Quando true, o botão de confirmar usa .danger (vermelho) — ações destrutivas (wipe/reset).</summary>
+        public bool IsDestructive { get; set; }
+
         /// <summary>
         /// A confirmation dialog
         /// </summary>
@@ -17,12 +20,14 @@ namespace SPT.Launcher.ViewModels.Dialogs
         /// <param name="Question"></param>
         /// <param name="ConfirmButtonText"></param>
         /// <param name="DenyButtonText"></param>
-        public ConfirmationDialogViewModel(IScreen Host, string Question, string? ConfirmButtonText = null, string? DenyButtonText = null, bool allowConfirm = true) : base(Host)
+        /// <param name="isDestructive">true → botão de confirmar vermelho (.danger)</param>
+        public ConfirmationDialogViewModel(IScreen Host, string Question, string? ConfirmButtonText = null, string? DenyButtonText = null, bool allowConfirm = true, bool isDestructive = false) : base(Host)
         {
             this.Question = Question;
             this.ConfirmButtonText = ConfirmButtonText ?? LocalizationProvider.Instance.yes;
             this.DenyButtonText = DenyButtonText ?? LocalizationProvider.Instance.no;
             this.AllowConfirm = allowConfirm;
+            this.IsDestructive = isDestructive;
         }
     }
 }

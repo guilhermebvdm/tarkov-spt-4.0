@@ -122,7 +122,6 @@
         private string _update_error;
         private string _update_files_to_delete;
         private string _update_deleting;
-        private string _sidebar_targram;
         private string _version_box_title;
         private string _server_label;
         private string _launcher_label;

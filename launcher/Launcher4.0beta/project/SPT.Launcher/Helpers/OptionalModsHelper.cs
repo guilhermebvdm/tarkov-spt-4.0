@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using SPT.Launcher.Controllers;
+using SPT.Launcher.Sync;
 
 namespace SPT.Launcher.Helpers
 {
@@ -40,21 +40,6 @@ namespace SPT.Launcher.Helpers
         /// OffFolders por grupo: groupId → lista de nomes de pasta 
         /// </summary>
         private static Dictionary<string, List<string>> _cachedGroupOffFolders = new Dictionary<string, List<string>>();
-
-        // Usa a URL base do server (porta 7075 do HwidManager)
-        private static string GetServerBaseUrl()
-        {
-            var serverUrl = LauncherSettingsProvider.Instance.Server?.Url ?? "https://127.0.0.1:6969";
-            try
-            {
-                var uri = new Uri(serverUrl);
-                return $"http://{uri.Host}";
-            }
-            catch
-            {
-                return "http://127.0.0.1";
-            }
-        }
 
         /// <summary>
         /// Atualiza o cache de grupos e arquivos a partir do manifesto principal.
@@ -98,6 +83,91 @@ namespace SPT.Launcher.Helpers
         /// </summary>
         public static List<OptionalGroupInfo> GetCachedGroups() => _cachedGroups;
 
+        // === Item 009 — descritores dos grupos (description.json por pasta em Opcionais/) ===
+
+        /// <summary>
+        /// Busca GET /launcher/mods/optionals-list e parseia com tolerância aos dois shapes:
+        /// novo (item 009) { "folders": [ { "id", "name", "description": { "pt", "en" } } ] }
+        /// e antigo { "folders": [ "PastaA", "PastaB" ] } (retrocompat com server antigo).
+        /// Erro/timeout/shape inesperado ⇒ lista vazia (as descrições ficam como estão).
+        /// </summary>
+        public static async Task<List<OptionalFolderDescriptor>> FetchOptionalsListAsync()
+        {
+            var descriptors = new List<OptionalFolderDescriptor>();
+
+            try
+            {
+                string response = await Task.Run(() => RequestHandler.RequestOptionalsList());
+                if (string.IsNullOrWhiteSpace(response)) return descriptors;
+
+                using var doc = JsonDocument.Parse(response);
+
+                if (!doc.RootElement.TryGetProperty("folders", out var foldersProp)
+                    || foldersProp.ValueKind != JsonValueKind.Array)
+                {
+                    return descriptors;
+                }
+
+                foreach (var entry in foldersProp.EnumerateArray())
+                {
+                    if (entry.ValueKind == JsonValueKind.String)
+                    {
+                        // shape antigo: só o nome da pasta
+                        var folderName = entry.GetString();
+                        if (!string.IsNullOrWhiteSpace(folderName))
+                        {
+                            descriptors.Add(new OptionalFolderDescriptor { Id = folderName, Name = folderName });
+                        }
+
+                        continue;
+                    }
+
+                    if (entry.ValueKind != JsonValueKind.Object) continue;
+
+                    var descriptor = new OptionalFolderDescriptor();
+
+                    if (entry.TryGetProperty("id", out var idProp) && idProp.ValueKind == JsonValueKind.String)
+                        descriptor.Id = idProp.GetString();
+                    if (entry.TryGetProperty("name", out var nameProp) && nameProp.ValueKind == JsonValueKind.String)
+                        descriptor.Name = nameProp.GetString();
+
+                    if (entry.TryGetProperty("description", out var descProp) && descProp.ValueKind == JsonValueKind.Object)
+                    {
+                        if (descProp.TryGetProperty("pt", out var ptProp) && ptProp.ValueKind == JsonValueKind.String)
+                            descriptor.DescriptionPt = ptProp.GetString();
+                        if (descProp.TryGetProperty("en", out var enProp) && enProp.ValueKind == JsonValueKind.String)
+                            descriptor.DescriptionEn = enProp.GetString();
+                    }
+
+                    if (string.IsNullOrWhiteSpace(descriptor.Id)) descriptor.Id = descriptor.Name;
+                    if (string.IsNullOrWhiteSpace(descriptor.Name)) descriptor.Name = descriptor.Id;
+
+                    if (!string.IsNullOrWhiteSpace(descriptor.Id))
+                    {
+                        descriptors.Add(descriptor);
+                    }
+                }
+
+                LogManager.Instance.Info($"[OptionalMods] optionals-list: {descriptors.Count} grupo(s) com descritor");
+            }
+            catch (Exception ex)
+            {
+                LogManager.Instance.Warning($"[OptionalMods] Falha ao buscar optionals-list: {ex.Message}");
+            }
+
+            return descriptors;
+        }
+
+        /// <summary>Escolhe o texto no idioma preferido, com fallback pro outro (decisão D3 do item 009).</summary>
+        public static string ResolveDescription(OptionalFolderDescriptor descriptor, bool preferPt)
+        {
+            if (descriptor == null) return null;
+
+            return preferPt
+                ? descriptor.DescriptionPt ?? descriptor.DescriptionEn
+                : descriptor.DescriptionEn ?? descriptor.DescriptionPt;
+        }
+
         /// <summary>
         /// Retorna TODOS os paths de arquivos opcionais conhecidos (ativos e inativos).
         /// Usado pela verificação de managedPaths para NÃO deletar opcionais.
@@ -120,172 +190,176 @@ namespace SPT.Launcher.Helpers
 
         /// <summary>
         /// Baixa e instala todos os arquivos de um grupo opcional.
+        /// Item 021: retorna <see cref="OptionalOpResult"/> (Total/Ok/Skipped/Failed) para a UI
+        /// mostrar falha visível (CA-021.4/5); download+hash+escrita rodam off-thread (CA-021.7)
+        /// via <see cref="OptionalGroupApplier"/>, que reusa guard de raiz + escrita atômica do motor.
+        /// A via de rede é o <see cref="RequestHandler"/> (WebRequest — honra o bypass TLS e usa o
+        /// esquema+porta reais do backend), não mais HttpClient cru com URL http:80 (CA-021.1/2/3).
         /// </summary>
-        public static async Task DownloadOptionalGroupAsync(string groupId)
+        public static async Task<OptionalOpResult> DownloadOptionalGroupAsync(string groupId)
         {
-            if (!_cachedGroupFiles.ContainsKey(groupId))
+            if (!_cachedGroupFiles.TryGetValue(groupId, out var files) || files == null || files.Count == 0)
             {
+                // CC-5: cache vazio para o grupo — antes logava Warning e "sucesso" silencioso;
+                // agora sinaliza não-resolvido para virar estado de erro na UI.
                 LogManager.Instance.Warning($"[OptionalMods] Grupo '{groupId}' não encontrado no cache");
-                return;
+                return new OptionalOpResult { GroupResolved = false };
             }
 
-            var files = _cachedGroupFiles[groupId];
-            string baseUrl = GetServerBaseUrl();
-            using var client = new HttpClient();
-            client.Timeout = TimeSpan.FromMinutes(5);
+            UpdateProgress(0, "Ativando mod opcional...");
 
-            int totalFiles = files.Count;
-            int currentFile = 0;
-            UpdateProgress(0, $"Ativando mod opcional...");
+            var entries = files
+                .Select(f => new OptionalGroupApplier.Entry(f.path, f.path, f.hash))
+                .ToList();
 
-            foreach (var file in files)
-            {
-                currentFile++;
-                UpdateProgress((currentFile / (double)totalFiles) * 100);
+            string gamePath = GamePath;
 
-                try
-                {
-                    string relativePath = file.path.Replace("/", Path.DirectorySeparatorChar.ToString());
-                    string localPath = Path.Combine(GamePath, relativePath);
+            var result = await Task.Run(() => OptionalGroupApplier.Apply(
+                gamePath,
+                entries,
+                // R-1: timeout largo (5 min) p/ binários grandes, não os 30 s default do sync.
+                downloadKey => RequestHandler.DownloadModFile(downloadKey, 300000),
+                onProgress: (current, total) => UpdateProgress((current / (double)total) * 100),
+                onError: (path, ex) => LogManager.Instance.Warning($"[OptionalMods] Erro ao baixar {path}: {ex.Message}")));
 
-                    // Verificar hash local antes de baixar
-                    if (File.Exists(localPath))
-                    {
-                        string localHash = GetFileMd5(localPath);
-                        if (localHash == file.hash)
-                        {
-                            continue; // Já atualizado
-                        }
-                    }
-
-                    // Baixar do server (via endpoint de mods normal)
-                    string encodedFile = Uri.EscapeDataString(file.path);
-                    string downloadUrl = $"{baseUrl}/launcher/mods/download?file={encodedFile}";
-
-                    var fileData = await client.GetByteArrayAsync(downloadUrl);
-
-                    // Salvar no GamePath
-                    string destDir = Path.GetDirectoryName(localPath);
-                    if (!Directory.Exists(destDir)) Directory.CreateDirectory(destDir);
-                    File.WriteAllBytes(localPath, fileData);
-                }
-                catch (Exception ex)
-                {
-                    LogManager.Instance.Warning($"[OptionalMods] Erro ao baixar {file.path}: {ex.Message}");
-                }
-            }
-
-            LogManager.Instance.Info($"[OptionalMods] Grupo '{groupId}' ativado ({totalFiles} arquivos)");
+            LogManager.Instance.Info(
+                $"[OptionalMods] Grupo '{groupId}' — ok:{result.Ok} skip:{result.Skipped} falha:{result.Failed} (de {result.Total})");
+            return result;
         }
 
         /// <summary>
-        /// Remove todos os arquivos de um grupo opcional. 
-        /// Se o grupo tiver offFolders, baixa esses arquivos em vez de apenas deletar.
+        /// Remove todos os arquivos de um grupo opcional.
+        /// Se o grupo tiver offFolders, baixa esses arquivos em vez de apenas deletar (CC-2).
+        /// Item 021: retorna <see cref="OptionalOpResult"/> e roda a exclusão off-thread (CA-021.7);
+        /// a exclusão vai para a lixeira (item 019) e o guard de raiz continua (CA-021.8/9).
         /// </summary>
-        public static async Task RemoveOptionalGroupAsync(string groupId)
+        public static async Task<OptionalOpResult> RemoveOptionalGroupAsync(string groupId)
         {
-            // Se tem offFolders, baixar arquivos de desativação (ex: "Remover grama Off")
-            if (_cachedGroupOffFolders.ContainsKey(groupId))
+            // Se tem offFolders, baixar arquivos de desativação (ex: "Remover grama Off") — CC-2.
+            if (_cachedGroupOffFolders.TryGetValue(groupId, out var offFolders))
             {
-                var offFolders = _cachedGroupOffFolders[groupId];
+                var aggregate = new OptionalOpResult();
+                string targetSubDir = _cachedGroupTargetSubDir.GetValueOrDefault(groupId, "");
                 foreach (var offFolder in offFolders)
                 {
-                    await DownloadFromOpcionaisFolder(offFolder, _cachedGroupTargetSubDir.GetValueOrDefault(groupId, ""));
+                    Merge(aggregate, await DownloadFromOpcionaisFolder(offFolder, targetSubDir));
                 }
-                LogManager.Instance.Info($"[OptionalMods] Grupo '{groupId}' desativado (offFolders aplicados)");
-                return;
+                LogManager.Instance.Info(
+                    $"[OptionalMods] Grupo '{groupId}' desativado (offFolders) — ok:{aggregate.Ok} skip:{aggregate.Skipped} falha:{aggregate.Failed}");
+                return aggregate;
             }
 
             // Sem offFolders: deletar os arquivos
-            if (!_cachedGroupFiles.ContainsKey(groupId))
+            if (!_cachedGroupFiles.TryGetValue(groupId, out var files) || files == null || files.Count == 0)
             {
                 LogManager.Instance.Warning($"[OptionalMods] Grupo '{groupId}' não encontrado no cache para remoção");
-                return;
+                return new OptionalOpResult { GroupResolved = false };
             }
 
-            var files = _cachedGroupFiles[groupId];
-            int total = files.Count;
-            int count = 0;
-            UpdateProgress(0, $"Desativando mod opcional...");
+            UpdateProgress(0, "Desativando mod opcional...");
+            string gamePath = GamePath;
 
-            foreach (var file in files)
+            var result = await Task.Run(() =>
             {
-                count++;
-                UpdateProgress((count / (double)total) * 100);
+                var r = new OptionalOpResult { Total = files.Count };
+                int count = 0;
+                foreach (var file in files)
+                {
+                    count++;
+                    UpdateProgress((count / (double)files.Count) * 100);
 
-                string relativePath = file.path.Replace("/", Path.DirectorySeparatorChar.ToString());
-                string localPath = Path.Combine(GamePath, relativePath);
-                DeleteFileIfExists(localPath);
-            }
+                    try
+                    {
+                        // ref: item 019 — resolve sob a raiz + lixeira (recuperável) em vez de File.Delete
+                        // permanente; entrada adulterada com ".."/absoluto é rejeitada + contada como falha.
+                        string localPath = SyncPathUtil.ResolveUnderRoot(gamePath, file.path);
+                        if (File.Exists(localPath)) RecycleBinHelper.Delete(localPath);
+                        r.Ok++;
+                    }
+                    catch (Exception ex)
+                    {
+                        r.Failed++;
+                        r.FailedPaths.Add(file.path);
+                        LogManager.Instance.Warning($"[OptionalMods] Erro ao remover {file.path}: {ex.Message}");
+                    }
+                }
+                return r;
+            });
 
-            LogManager.Instance.Info($"[OptionalMods] Grupo '{groupId}' desativado ({total} arquivos removidos)");
+            LogManager.Instance.Info(
+                $"[OptionalMods] Grupo '{groupId}' desativado — ok:{result.Ok} falha:{result.Failed} (de {result.Total})");
+            return result;
+        }
+
+        /// <summary>Soma um resultado parcial (offFolder) no agregado do grupo.</summary>
+        private static void Merge(OptionalOpResult into, OptionalOpResult from)
+        {
+            into.Total += from.Total;
+            into.Ok += from.Ok;
+            into.Skipped += from.Skipped;
+            into.Failed += from.Failed;
+            into.FailedPaths.AddRange(from.FailedPaths);
+            if (!from.GroupResolved) into.GroupResolved = false;
         }
 
         /// <summary>
         /// Baixa arquivos de uma subpasta de Opcionais do server (para offFolders).
+        /// Item 021: via <see cref="RequestHandler"/> (WebRequest — CA-021.1/2/3, CC-2), off-thread,
+        /// retornando <see cref="OptionalOpResult"/>. Manifesto/deserialização com falha viram falha
+        /// visível (não silêncio). Escrita atômica + guard de raiz do destino final preservados.
         /// </summary>
-        private static async Task DownloadFromOpcionaisFolder(string folderName, string targetSubDir)
+        private static async Task<OptionalOpResult> DownloadFromOpcionaisFolder(string folderName, string targetSubDir)
         {
-            string baseUrl = GetServerBaseUrl();
-            using var client = new HttpClient();
-            client.Timeout = TimeSpan.FromMinutes(5);
+            string gamePath = GamePath;
 
-            string encodedFolder = Uri.EscapeDataString(folderName);
-            string manifestUrl = $"{baseUrl}/launcher/mods/optionals-manifest?folder={encodedFolder}";
-
-            try
+            return await Task.Run(() =>
             {
-                var response = await client.GetAsync(manifestUrl);
-                if (!response.IsSuccessStatusCode)
+                string json;
+                try
                 {
-                    LogManager.Instance.Warning($"[OptionalMods] Server retornou {response.StatusCode} para offFolder '{folderName}'");
-                    return;
+                    json = RequestHandler.RequestOptionalsManifest(folderName);
+                }
+                catch (Exception ex)
+                {
+                    LogManager.Instance.Error($"[OptionalMods] Erro ao buscar manifesto do offFolder '{folderName}': {ex.Message}");
+                    return new OptionalOpResult { Total = 1, Failed = 1, FailedPaths = { folderName } };
                 }
 
-                var json = await response.Content.ReadAsStringAsync();
-                var manifest = JsonSerializer.Deserialize<OptionalManifest>(json);
+                OptionalManifest manifest;
+                try
+                {
+                    manifest = JsonSerializer.Deserialize<OptionalManifest>(json);
+                }
+                catch (Exception ex)
+                {
+                    LogManager.Instance.Error($"[OptionalMods] Manifesto inválido do offFolder '{folderName}': {ex.Message}");
+                    return new OptionalOpResult { Total = 1, Failed = 1, FailedPaths = { folderName } };
+                }
 
-                if (manifest?.files == null || manifest.files.Length == 0) return;
+                if (manifest?.files == null || manifest.files.Length == 0)
+                {
+                    return new OptionalOpResult();
+                }
 
-                string baseDestPath = string.IsNullOrEmpty(targetSubDir) ? GamePath : Path.Combine(GamePath, targetSubDir);
-                int total = manifest.files.Length;
-                int count = 0;
                 UpdateProgress(0, $"Aplicando configuração: {folderName}...");
 
-                foreach (var file in manifest.files)
-                {
-                    count++;
-                    UpdateProgress((count / (double)total) * 100);
+                // ref: item 019 (CA-6) — o destino FINAL (targetSubDir do grupo + file.path do offFolder,
+                // ambos do server) é validado sob a raiz dentro do Apply; a chave de download é o file.path
+                // dentro da pasta (endpoint optional-download?folder=&file=).
+                var entries = manifest.files
+                    .Select(f => new OptionalGroupApplier.Entry(
+                        Path.Combine(targetSubDir ?? "", f.path),
+                        f.path,
+                        f.hash))
+                    .ToList();
 
-                    try
-                    {
-                        string encodedFile = Uri.EscapeDataString(file.path);
-                        string downloadUrl = $"{baseUrl}/launcher/mods/optional-download?folder={encodedFolder}&file={encodedFile}";
-                        var fileData = await client.GetByteArrayAsync(downloadUrl);
-
-                        string destPath = Path.Combine(baseDestPath, file.path.Replace("/", Path.DirectorySeparatorChar.ToString()));
-                        string destDir = Path.GetDirectoryName(destPath);
-                        if (!Directory.Exists(destDir)) Directory.CreateDirectory(destDir);
-                        File.WriteAllBytes(destPath, fileData);
-                    }
-                    catch (Exception ex)
-                    {
-                        LogManager.Instance.Warning($"[OptionalMods] Erro ao baixar {file.path}: {ex.Message}");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogManager.Instance.Error($"[OptionalMods] Erro ao processar offFolder '{folderName}': {ex.Message}");
-            }
-        }
-
-        private static string GetFileMd5(string filePath)
-        {
-            using var md5 = System.Security.Cryptography.MD5.Create();
-            using var stream = File.OpenRead(filePath);
-            var hash = md5.ComputeHash(stream);
-            return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+                return OptionalGroupApplier.Apply(
+                    gamePath,
+                    entries,
+                    downloadKey => RequestHandler.DownloadOptionalFile(folderName, downloadKey, 300000),
+                    onProgress: (current, total) => UpdateProgress((current / (double)total) * 100),
+                    onError: (path, ex) => LogManager.Instance.Warning($"[OptionalMods] Erro ao baixar {path}: {ex.Message}"));
+            });
         }
 
         public static Action<double> OnProgressChanged;
@@ -296,11 +370,6 @@ namespace SPT.Launcher.Helpers
             OnProgressChanged?.Invoke(percent);
             if (message != null)
                 OnStatusMessageChanged?.Invoke(message);
-        }
-
-        private static void DeleteFileIfExists(string path)
-        {
-            if (File.Exists(path)) File.Delete(path);
         }
 
         // === Classes para desserialização ===
@@ -316,13 +385,24 @@ namespace SPT.Launcher.Helpers
             public bool hasOffMode => offFolders != null && offFolders.Count > 0;
         }
 
-        public class ManifestFile
+        /// <summary>
+        /// Item 009: entrada do optionals-list — descriptor (description.json) de um grupo
+        /// em Launcher-Updater/Opcionais/&lt;grupo&gt;/ no server.
+        /// </summary>
+        public class OptionalFolderDescriptor
         {
-            public string path { get; set; }
-            public string hash { get; set; }
-            public long size { get; set; }
-            public bool optional { get; set; }
-            public string optionalGroup { get; set; }
+            public string Id { get; set; }
+            public string Name { get; set; }
+            public string DescriptionPt { get; set; }
+            public string DescriptionEn { get; set; }
+        }
+
+        /// <summary>
+        /// Shell kept for source compatibility (ProfileViewModel uses the nested name) —
+        /// the canonical definition lives in SPT.Launcher.Models.Launcher.ManifestFile (item 007).
+        /// </summary>
+        public class ManifestFile : SPT.Launcher.Models.Launcher.ManifestFile
+        {
         }
 
         private class OptionalManifest

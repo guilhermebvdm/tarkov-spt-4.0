@@ -6,6 +6,8 @@ using SPT.Launcher.Models.SPT;
 using ReactiveUI;
 using Splat;
 using System.Reactive;
+using System.Threading.Tasks;
+using Avalonia.Threading;
 
 namespace SPT.Launcher.ViewModels
 {
@@ -42,12 +44,54 @@ namespace SPT.Launcher.ViewModels
             set => this.RaiseAndSetIfChanged(ref _registerErrorMsg, value);
         }
 
+        // Mostrar/ocultar senha por campo (senha + confirmar), mesmo padrão do Settings/Login.
+        private bool _passwordVisible = false;
+        public char PasswordChar => _passwordVisible ? '\0' : '●';
+        public bool IsPasswordVisible => _passwordVisible;
+
+        public void TogglePasswordVisibilityCommand()
+        {
+            _passwordVisible = !_passwordVisible;
+            this.RaisePropertyChanged(nameof(PasswordChar));
+            this.RaisePropertyChanged(nameof(IsPasswordVisible));
+        }
+
+        private bool _confirmVisible = false;
+        public char ConfirmPasswordChar => _confirmVisible ? '\0' : '●';
+        public bool IsConfirmVisible => _confirmVisible;
+
+        public void ToggleConfirmVisibilityCommand()
+        {
+            _confirmVisible = !_confirmVisible;
+            this.RaisePropertyChanged(nameof(ConfirmPasswordChar));
+            this.RaisePropertyChanged(nameof(IsConfirmVisible));
+        }
+
+        // Item 022 (Grupo D / 013L, AC-022.13/14) — footer de versão reativo (idem LoginViewModel):
+        // substitui o x:Static read-once que congelava "—" a sessão toda em caso de fetch falho.
+        private string _serverVersion = ServerManager.TrlServerVersion;
+        public string ServerVersion
+        {
+            get => _serverVersion;
+            set => this.RaiseAndSetIfChanged(ref _serverVersion, value);
+        }
+
         public ReactiveCommand<Unit, Unit> GoToLoginCommand { get; set; }
         public ReactiveCommand<Unit, Unit> GoToClassSelectionCommand { get; set; }
 
         public RegisterViewModel(IScreen Host, string initialUsername = "") : base(Host)
         {
             RegisterUsername = initialUsername;
+
+            // Refetch barato quando a versão ficou desconhecida no connect (async: evita freeze de UI).
+            if (_serverVersion == "—")
+            {
+                _ = Task.Run(() =>
+                {
+                    var refreshed = ServerManager.RefreshTrlServerVersionIfUnknown();
+                    Dispatcher.UIThread.Post(() => ServerVersion = refreshed);
+                });
+            }
 
             GoToLoginCommand = ReactiveCommand.Create(() => 
             {

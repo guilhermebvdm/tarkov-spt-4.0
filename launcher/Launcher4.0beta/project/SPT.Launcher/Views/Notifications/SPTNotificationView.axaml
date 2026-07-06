@@ -6,14 +6,27 @@
              x:Class="SPT.Launcher.Views.Notifications.SPTNotificationView"
              >
 
-  <Border Padding="12" MinHeight="20" Background="{DynamicResource BackgroundBrush}"
-          BorderBrush="{Binding BarColor}"
-          BorderThickness="3 0 0 0">
-    <Grid>
-      <DockPanel Grid.Column="1">
-        <TextBlock DockPanel.Dock="Top" Text="{Binding Title}" FontWeight="Medium" />
-        <TextBlock Text="{Binding Message}" TextWrapping="Wrap" Opacity=".8" Margin="0,8,0,0"/>
+  <!-- TRL toast: raised surface, strong hairline, 2px status bar on the left
+       (bar color per type still comes from the VM - token migration = phase 2) -->
+  <Border MinHeight="20"
+          Background="{DynamicResource TrlBgRaisedBrush}"
+          BorderBrush="{DynamicResource TrlEdgeStrongBrush}"
+          BorderThickness="1">
+    <Border Padding="12"
+            BorderBrush="{Binding BarColor}"
+            BorderThickness="2 0 0 0">
+      <DockPanel>
+        <TextBlock DockPanel.Dock="Top" Text="{Binding Title}"
+                   FontFamily="{DynamicResource TrlFontDisplay}"
+                   FontSize="{DynamicResource TrlTextSm}"
+                   LetterSpacing="{DynamicResource TrlTrackWide}"
+                   FontWeight="Medium"
+                   Foreground="{DynamicResource TrlFgBrush}"/>
+        <TextBlock Text="{Binding Message}" TextWrapping="Wrap"
+                   FontSize="{DynamicResource TrlTextSm}"
+                   Foreground="{DynamicResource TrlFgMutedBrush}"
+                   Margin="0,8,0,0"/>
       </DockPanel>
-    </Grid>
+    </Border>
   </Border>
 </UserControl>

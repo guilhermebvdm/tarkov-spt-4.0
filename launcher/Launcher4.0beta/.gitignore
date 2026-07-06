@@ -356,3 +356,10 @@ MigrationBackup/
 .idea/
 
 project/user/launcher
+
+# Release artifacts (item 014)
+dist/
+
+# Auto-update signing keys (item 018) — the PRIVATE key must NEVER be committed or synced.
+# Only the PUBLIC key is embedded in source (SPT.Launcher.Base/Security/UpdateTrust.cs).
+.keys/

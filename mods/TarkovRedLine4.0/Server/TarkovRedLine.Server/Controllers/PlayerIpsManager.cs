@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 namespace TarkovRedLine.Server.Controllers;
 
 [ApiController]
-[Route("redline")]
+[Route(ModRouting.RoutePrefix + "redline")]
 public class PlayerIpsManagerController : ControllerBase
 {
-    private static readonly string PlayerIpsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "user", "player_ips.json");
+    private static readonly string PlayerIpsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "user", $"player_ips{ModRouting.StateSuffix}.json");
     private static Dictionary<string, PlayerIpEntry> _playerIps = new();
     private static bool _loaded = false;
     private static readonly object _lock = new();
@@ -78,6 +78,9 @@ public class PlayerIpsManagerController : ControllerBase
         }
     }
 
+    // Canônico = "register-player-ip" (o que o launcher chama, RequestHandler.cs:163, e o mod TS de prod).
+    // "register-ip" mantido como alias por retrocompat.
+    [HttpPost("register-player-ip")]
     [HttpPost("register-ip")]
     public IActionResult RegisterIp([FromBody] RegisterIpRequest request)
     {

@@ -1,0 +1,23 @@
+Assets — provenance
+===================
+
+trl-logo-dark.png / trl-logo-mark.png
+  Logo da comunidade Tarkov Red Line (TRL). Fonte: TRL-black.png na raiz
+  do repo (mark = cópia aparada). Uso interno da comunidade.
+
+bg-ambient.jpg
+  Key art oficial de Escape from Tarkov (© Battlestate Games).
+  Origem: imagem do clã Steam oficial do EFT, baixada em 2026-07-04 de
+  https://clan.fastly.steamstatic.com/images//45781996/88b41ee613238ac6b22f26b786d7caf34c272572.jpg
+  Otimizada para 1920w JPEG q72 (~317 KB). Uso: fundo ambiente das
+  ferramentas internas da comunidade TRL (não comercial). Embutida no
+  repo porque os editores rodam offline (PATTERNS R9 — nunca hotlinkar).
+  Se uma restrição formal surgir, remover o arquivo — o DS degrada para
+  o grafite puro (o modifier .trl-app--photo simplesmente perde a foto).
+
+icons.svg
+  Sprite curado (55 ícones) da Tabler Icons (MIT, © Paweł Kuna,
+  https://tabler.io/icons — baixados de github.com/tabler/tabler-icons
+  em 2026-07-04, pasta icons/outline). Pós-processados para o hard-edges
+  do DS: stroke-linecap round→butt, stroke-linejoin round→miter,
+  stroke-width 1.75. Adicionar ícone novo: receita "Ícones" no PATTERNS.

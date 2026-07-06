@@ -37,6 +37,11 @@ const CHECKS_DAT   = path.join(SPT_DATA, 'checks.dat');
 // (presence check) and the config file (read/written at serve time).
 const TRL_MOD_DIR        = path.join(SPT_PATH, 'user', 'mods', 'TRLTraderPrices');
 const TRADER_OVERRIDES   = path.join(TRL_MOD_DIR, 'config', 'overrides.json');
+// B-3: buy-price (buyback) overrides — same shape/dir, separate file so the sell feature (already
+// shipped, v1.1.0) is never touched by the buy-price code path. Read by BOTH mod halves: server
+// backstop (TradeHelper.SellItem Prefix) and client display patch (TraderClass.GetUserItemPrice,
+// via the paired /trltraderprices/buy-overrides route) — see mods/TRLTraderPrices/modded/{Server,Client}.
+const BUY_OVERRIDES      = path.join(TRL_MOD_DIR, 'config', 'buy-overrides.json');
 const LOG_FILE              = path.join(ROOT, 'logs', 'price-edits.jsonl');
 const BAN_LOG_FILE          = path.join(ROOT, 'logs', 'ban-edits.jsonl');
 const HISTORY_LOG_FILE      = path.join(ROOT, 'logs', 'price-history.jsonl');
@@ -976,6 +981,178 @@ function handleDeleteAllTraderPrices(req, res) {
   });
 }
 
+// ---------------------------------------------------------------------------
+// Trader BUY-price overrides (B-3, Rota B) — same companion mod TRLTraderPrices,
+// separate config file (buy-overrides.json). Shape identical to the sell overrides:
+//   { "<traderId>": { "<tpl>": { "count": <positive int>, "currency": "RUB"|"USD"|"EUR"|"GP" } } }
+// Rota B requires BOTH mod halves (client display patch + server backstop) to be built/deployed
+// for an edit here to take effect in-game — the viewer just maintains the file either way.
+// ---------------------------------------------------------------------------
+
+function readBuyOverrides() {
+  if (!fs.existsSync(BUY_OVERRIDES)) return {};
+  try {
+    const obj = readJsonFile(BUY_OVERRIDES);
+    return obj && typeof obj === 'object' ? obj : {};
+  } catch (e) {
+    const backup = BUY_OVERRIDES + '.corrupt.bak';
+    try {
+      fs.renameSync(BUY_OVERRIDES, backup);
+      console.error(`buy-overrides.json is corrupt (${e.message}); backed up to ${backup} and resetting to {}`);
+    } catch (renameErr) {
+      console.error(`buy-overrides.json is corrupt (${e.message}); failed to back up: ${renameErr.message}`);
+    }
+    return {};
+  }
+}
+
+function writeBuyOverrides(obj) {
+  fs.mkdirSync(path.dirname(BUY_OVERRIDES), { recursive: true });
+  const serialized = JSON.stringify(obj, null, 2) + '\n';
+  const tmp = BUY_OVERRIDES + '.tmp';
+  fs.writeFileSync(tmp, serialized, 'utf8');
+  fs.renameSync(tmp, BUY_OVERRIDES);
+}
+
+// GET /api/trader-buy-overrides — current buy-overrides.json map (read at serve time).
+function handleGetBuyOverrides(req, res) {
+  try {
+    return sendJson(res, 200, {
+      ok: true,
+      overrides: readBuyOverrides(),
+      modInstalled: fs.existsSync(TRL_MOD_DIR),
+    });
+  } catch (e) {
+    return sendJson(res, 500, { error: e.message });
+  }
+}
+
+// PATCH /api/trader-buy-price — set what a trader PAYS the player for a tpl (buyback), in the
+// trader's NATIVE currency. Body: { tpl, traderId, count, currency }.
+function handlePatchBuyPrice(req, res) {
+  let body = '';
+  req.on('data', c => { body += c; if (body.length > 1e6) { req.destroy(); }});
+  req.on('end', () => {
+    let payload;
+    try { payload = JSON.parse(body); }
+    catch (e) { return sendJson(res, 400, { error: 'invalid JSON' }); }
+
+    const tpl      = payload.tpl;
+    const traderId = payload.traderId;
+    const count    = payload.count;
+    const currency = payload.currency;
+    if (typeof tpl !== 'string' || !/^[a-f0-9]{24}$/i.test(tpl)) {
+      return sendJson(res, 400, { error: 'invalid tpl (expected 24-char hex BSG id)' });
+    }
+    if (typeof traderId !== 'string' || !/^[a-f0-9]{24}$/i.test(traderId)) {
+      return sendJson(res, 400, { error: 'invalid traderId (expected 24-char hex MongoId)' });
+    }
+    if (!Number.isInteger(count) || count <= 0) {
+      return sendJson(res, 400, { error: 'invalid count (expected positive integer)' });
+    }
+    if (typeof currency !== 'string' || !TRADER_CURRENCIES.includes(currency)) {
+      return sendJson(res, 400, { error: 'invalid currency' });
+    }
+
+    withWriteLock(() => {
+      const overrides = readBuyOverrides();
+      if (!overrides[traderId] || typeof overrides[traderId] !== 'object') overrides[traderId] = {};
+      const prev = overrides[traderId][tpl];
+      const previousCount = (prev && typeof prev === 'object' && prev.count != null) ? prev.count : null;
+      overrides[traderId][tpl] = { count, currency };
+      writeBuyOverrides(overrides);
+
+      appendEditLog({
+        at: new Date().toISOString(), action: 'set-trader-buy-price', tpl, traderId,
+        count, currency, previousCount, ip: req.socket.remoteAddress || null,
+      });
+
+      const modInstalled = fs.existsSync(TRL_MOD_DIR);
+      const resp = {
+        ok: true, tpl, traderId, count, currency, previousPrice: previousCount,
+      };
+      if (!modInstalled) {
+        resp.warning = 'mod not installed — saved but will not apply until TRLTraderPrices is installed';
+      }
+      return sendJson(res, 200, resp);
+    }).catch(e => {
+      console.error('set-trader-buy-price failed:', e);
+      if (!res.headersSent) return sendJson(res, 500, { error: e.message });
+    });
+  });
+}
+
+// DELETE /api/trader-buy-price — remove a single buy-price override for a tpl.
+// Body: { tpl, traderId }. Prunes the trader object when it becomes empty.
+function handleDeleteBuyPrice(req, res) {
+  let body = '';
+  req.on('data', c => { body += c; if (body.length > 1e6) { req.destroy(); }});
+  req.on('end', () => {
+    let payload;
+    try { payload = JSON.parse(body || '{}'); }
+    catch (e) { return sendJson(res, 400, { error: 'invalid JSON' }); }
+
+    const tpl      = payload.tpl;
+    const traderId = payload.traderId;
+    if (typeof tpl !== 'string' || !/^[a-f0-9]{24}$/i.test(tpl)) {
+      return sendJson(res, 400, { error: 'invalid tpl (expected 24-char hex BSG id)' });
+    }
+    if (typeof traderId !== 'string' || !/^[a-f0-9]{24}$/i.test(traderId)) {
+      return sendJson(res, 400, { error: 'invalid traderId (expected 24-char hex MongoId)' });
+    }
+
+    withWriteLock(() => {
+      const overrides = readBuyOverrides();
+      const traderMap = overrides[traderId];
+      const prev = (traderMap && traderMap[tpl] != null) ? traderMap[tpl] : null;
+      const previousCount = (prev && typeof prev === 'object' && prev.count != null) ? prev.count : null;
+      if (prev == null) {
+        return sendJson(res, 200, { ok: true, tpl, traderId, noop: true, message: 'no override to remove' });
+      }
+      delete traderMap[tpl];
+      if (Object.keys(traderMap).length === 0) delete overrides[traderId];  // prune empty trader
+      writeBuyOverrides(overrides);
+
+      appendEditLog({
+        at: new Date().toISOString(), action: 'delete-trader-buy-price', tpl, traderId,
+        previousCount, ip: req.socket.remoteAddress || null,
+      });
+
+      const resp = { ok: true, tpl, traderId, removed: true, previousPrice: previousCount };
+      if (!fs.existsSync(TRL_MOD_DIR)) {
+        resp.warning = 'mod not installed — saved but will not apply until TRLTraderPrices is installed';
+      }
+      return sendJson(res, 200, resp);
+    }).catch(e => {
+      console.error('delete-trader-buy-price failed:', e);
+      if (!res.headersSent) return sendJson(res, 500, { error: e.message });
+    });
+  });
+}
+
+// DELETE /api/trader-buy-price/all — reset all buy-price overrides to {} (atomic).
+function handleDeleteAllBuyPrices(req, res) {
+  withWriteLock(() => {
+    const overrides = readBuyOverrides();
+    const count = Object.values(overrides).reduce((n, m) => n + (m && typeof m === 'object' ? Object.keys(m).length : 0), 0);
+    writeBuyOverrides({});
+
+    appendEditLog({
+      at: new Date().toISOString(), action: 'reset-trader-buy-prices', removedCount: count,
+      ip: req.socket.remoteAddress || null,
+    });
+
+    const resp = { ok: true, reset: true, removedCount: count };
+    if (!fs.existsSync(TRL_MOD_DIR)) {
+      resp.warning = 'mod not installed — saved but will not apply until TRLTraderPrices is installed';
+    }
+    return sendJson(res, 200, resp);
+  }).catch(e => {
+    console.error('reset-trader-buy-prices failed:', e);
+    if (!res.headersSent) return sendJson(res, 500, { error: e.message });
+  });
+}
+
 // POST /api/ban — toggles _props.CanSellOnRagfair in SPT's items.json.
 // Body: { tpl: "<bsgTpl>", banned: true|false }.
 //
@@ -1117,7 +1294,70 @@ function handleFleaMinLevel(req, res) {
   });
 }
 
+// GET /api/flea-cap — state of SPT's flea ceiling (unreasonableModPrices: Weapon Mod ×6 /
+// Electronics ×11). Returns { enabled, categories:[{tpl,itemType,overMult,newMult,enabled}] };
+// enabled = at least one category still capping.
+function handleGetFleaCap(req, res) {
+  try {
+    const ragfair = readJsonFile(RAGFAIR_JSON);
+    const ump = (ragfair.dynamic && ragfair.dynamic.unreasonableModPrices) || {};
+    const categories = Object.entries(ump).map(([tpl, c]) => ({
+      tpl, itemType: c.itemType || null,
+      overMult: c.handbookPriceOverMultiplier ?? null,
+      newMult: c.newPriceHandbookMultiplier ?? null,
+      enabled: !!c.enabled,
+    }));
+    return sendJson(res, 200, { ok: true, enabled: categories.some(c => c.enabled), categories });
+  } catch (e) {
+    return sendJson(res, 500, { error: e.message });
+  }
+}
+
+// POST /api/flea-cap — toggle SPT's flea ceiling on/off. Body: { enabled: boolean }.
+// Flips `enabled` on EVERY unreasonableModPrices category; the multipliers are left intact,
+// so re-enabling restores the exact vanilla cap (no backup needed). When disabled, load-spt
+// derives fleaCeiling=null for those items (it filters by `enabled`), which also lifts the
+// viewer's edit restriction — but only after the catalog is rebuilt; the SPT flea itself
+// changes on the next server boot.
+function handlePostFleaCap(req, res) {
+  let body = '';
+  req.on('data', c => { body += c; if (body.length > 1e6) req.destroy(); });
+  req.on('end', () => {
+    let payload;
+    try { payload = JSON.parse(body || '{}'); }
+    catch (e) { return sendJson(res, 400, { error: 'invalid JSON' }); }
+    if (typeof payload.enabled !== 'boolean') {
+      return sendJson(res, 400, { error: 'invalid body (expected { enabled: boolean })' });
+    }
+    withWriteLock(() => {
+      const ragfair = readJsonFile(RAGFAIR_JSON);
+      if (!ragfair.dynamic || !ragfair.dynamic.unreasonableModPrices) {
+        return sendJson(res, 200, { ok: true, enabled: false, changed: 0, note: 'no unreasonableModPrices — no cap to toggle' });
+      }
+      let changed = 0;
+      for (const c of Object.values(ragfair.dynamic.unreasonableModPrices)) {
+        if (c && typeof c === 'object' && !!c.enabled !== payload.enabled) { c.enabled = payload.enabled; changed++; }
+      }
+      writeJsonPreservingStyle(RAGFAIR_JSON, ragfair);
+      const checksResult = updateSptChecks({ 'configs/ragfair.json': RAGFAIR_JSON });
+      appendEditLog({
+        at: new Date().toISOString(), action: 'set-flea-cap', enabled: payload.enabled,
+        changed, ip: req.socket.remoteAddress || null,
+      });
+      return sendJson(res, 200, {
+        ok: true, enabled: payload.enabled, changed, checks: checksResult,
+        note: 'Restart SPT to apply in-game. Rebuild the catalog (or restart the viewer) to lift the editor cap in the UI.',
+      });
+    }).catch(e => {
+      console.error('set-flea-cap failed:', e);
+      if (!res.headersSent) return sendJson(res, 500, { error: e.message });
+    });
+  });
+}
+
 http.createServer((req, res) => {
+  if (req.method === 'GET'  && req.url === '/api/flea-cap')       return handleGetFleaCap(req, res);
+  if (req.method === 'POST' && req.url === '/api/flea-cap')       return handlePostFleaCap(req, res);
   if (req.method === 'POST'   && req.url === '/api/price')        return handlePatchPrice(req, res);
   if (req.method === 'DELETE' && req.url === '/api/price')        return handleDeletePrice(req, res);
   if (req.method === 'GET'    && req.url === '/api/overrides')    return handleGetOverrides(req, res);
@@ -1125,6 +1365,10 @@ http.createServer((req, res) => {
   if (req.method === 'PATCH'  && req.url === '/api/trader-price') return handlePatchTraderPrice(req, res);
   if (req.method === 'DELETE' && req.url === '/api/trader-price/all') return handleDeleteAllTraderPrices(req, res);
   if (req.method === 'DELETE' && req.url === '/api/trader-price') return handleDeleteTraderPrice(req, res);
+  if (req.method === 'GET'    && req.url === '/api/trader-buy-overrides') return handleGetBuyOverrides(req, res);
+  if (req.method === 'PATCH'  && req.url === '/api/trader-buy-price') return handlePatchBuyPrice(req, res);
+  if (req.method === 'DELETE' && req.url === '/api/trader-buy-price/all') return handleDeleteAllBuyPrices(req, res);
+  if (req.method === 'DELETE' && req.url === '/api/trader-buy-price') return handleDeleteBuyPrice(req, res);
   if (req.method === 'POST' && req.url === '/api/ban')            return handleBanToggle(req, res);
   if (req.method === 'POST' && req.url === '/api/refresh-dev')    return handleRefreshDev(req, res);
   if (req.method === 'POST' && req.url === '/api/refresh-market') return handleRefreshMarket(req, res);

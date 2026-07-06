@@ -1,0 +1,747 @@
+{
+    "Class99": {
+        "NewName": "AdvAssaultTargetLayer"
+    },
+    "Class100": {
+        "NewName": "ObdolbosEventFightLayer"
+    },
+    "Class101": {
+        "NewName": "InfectedTargetLayer"
+    },
+    "Class102": {
+        "NewName": "InfectedWaitLayer"
+    },
+    "Class103": {
+        "NewName": "LeaveMapLayer"
+    },
+    "Class104": {
+        "NewName": "PmcPveTargetLayer"
+    },
+    "Class105": {
+        "NewName": "PursuitLayer"
+    },
+    "Class687": {
+        "NewName": "StateSwitcher"
+    },
+    "Class1028": {
+        "NewName": "JobAwaitable",
+        "NewNamespace": "Diz.Jobs"
+    },
+    "Class1029": {
+        "NewName": "JobAwaiter",
+        "NewNamespace": "Diz.Jobs"
+    },
+    "Class1030": {
+        "NewName": "ContinuationProfiler",
+        "NewNamespace": "Diz.Jobs"
+    },
+    "Class1031": {
+        "NewName": "ExecuteConditionGeneral",
+        "NewNamespace": "Diz.Jobs"
+    },
+    "Class1032": {
+        "NewName": "ExecuteConditionJobFinish",
+        "NewNamespace": "Diz.Jobs"
+    },
+    "Class1051": {
+        "NewName": "EasyBundle",
+        "NewNamespace": "Diz.Resources"
+    },
+    "Class1072": {
+        "NewName": "ChartDateUtility",
+        "NewNamespace": "ChartAndGraph"
+    },
+    "Class1073": {
+        "NewName": "ChartColumnCollection",
+        "NewNamespace": "ChartAndGraph.DataSource"
+    },
+    "Class1074": {
+        "NewName": "ChartRowCollection",
+        "NewNamespace": "ChartAndGraph.DataSource"
+    },
+    "Class1082": {
+        "NewName": "CanvasChartMesh",
+        "NewNamespace": "ChartAndGraph"
+    },
+    "Class1084": {
+        "NewName": "ChartDataItemBase",
+        "NewNamespace": "ChartAndGraph.DataSource"
+    },
+    "Class1085": {
+        "NewName": "ChartDataColumn",
+        "NewNamespace": "ChartAndGraph.DataSource"
+    },
+    "Class1086": {
+        "NewName": "ChartDataRow",
+        "NewNamespace": "ChartAndGraph.DataSource"
+    },
+    "Class1087": {
+        "NewName": "ChartDataSourceBase",
+        "NewNamespace": "ChartAndGraph.DataSource",
+        "NestedTypes": {
+            "EventArgs0": {
+                "NewName": "DataValueChangedEventArgs"
+            }
+        },
+    },
+    "Class1088": {
+        "NestedTypes": {
+            "Struct272": {
+                "NewName": "KeyElement"
+            }
+        },
+        "NewName": "ChartSparseDataSource",
+        "NewNamespace": "ChartAndGraph"
+    },
+    "Class1124": {
+        "NewName": "ClientCertificateHandler",
+        "NewNamespace": "EFT"
+    },
+    "Class1128": {
+        "NewName": "UrlsExtension",
+        "NewNamespace": "EFT"
+    },
+    "Class1394": {
+        "NewName": "LeftHandInteractionsEventConsumer",
+        "NewNamespace": "EFT"
+    },
+    "Class1400": {
+        "NewName": "LootPlayerState",
+        "NewNamespace": "EFT"
+    },
+    "Class1466": {
+        "NewName": "NetworkConnectionExtension",
+        "NewNamespace": "EFT"
+    },
+    "Class1467": {
+        "NewName": "SystemInfoExtension",
+        "NewNamespace": "EFT"
+    },
+    "Class1481": {
+        "NewName": "LoginStore",
+        "NewNamespace": "EFT"
+    },
+    "Class1507": {
+        "NewName": "AnticheatValidationOperation",
+        "NewNamespace": "EFT"
+    },
+    "Class1513": {
+        "NewName": "DataPrepareOperation",
+        "NewNamespace": "EFT"
+    },
+    "Class1523": {
+        "NewName": "MatchingOperation",
+        "NewNamespace": "EFT"
+    },
+    "Class1524": {
+        "NewName": "SessionResultShowOperation",
+        "NewNamespace": "EFT"
+    },
+    "Class1650": {
+        "NestedTypes": {
+            "Interface12": {
+                "NewName": "ISession"
+            }
+        },
+        "NewName": "ConnectionClient",
+        "NewNamespace": "EFT"
+    },
+    "Class1716": {
+        "NewName": "HideoutGrenadeInputTranslator",
+        "NewNamespace": "EFT"
+    },
+    "Class1725": {
+        "NewName": "PlayerInputTranslator",
+        "NewNamespace": "EFT"
+    },
+    "Class1726": {
+        "NewName": "HideoutPlayerInputTranslator",
+        "NewNamespace": "EFT"
+    },
+    "Class1728": {
+        "NewName": "MoveInputTranslator",
+        "NewNamespace": "EFT"
+    },
+    "Class1729": {
+        "NewName": "DummyHandsInputTranslator",
+        "NewNamespace": "EFT"
+    },
+    "Class1730": {
+        "NewName": "FirearmHandsInputTranslator",
+        "NewNamespace": "EFT"
+    },
+    "Class1742": {
+        "NewName": "GrenadeInputTranslator",
+        "NewNamespace": "EFT"
+    },
+    "Class1743": {
+        "NewName": "KnifeInputTranslator",
+        "NewNamespace": "EFT"
+    },
+    "Class1744": {
+        "NewName": "UsableItemInputTranslator",
+        "NewNamespace": "EFT"
+    },
+    "Class1745": {
+        "NewName": "EmptyHandsInputTranslator",
+        "NewNamespace": "EFT"
+    },
+    "Class1746": {
+        "NewName": "MedsInputTranslator",
+        "NewNamespace": "EFT"
+    },
+    "Class1820": {
+        "NewName": "HDShaderIDs",
+        "NewNamespace": "EFT.Rendering.Clouds"
+    },
+    "Class1821": {
+        "NewName": "CloudLayerRenderer",
+        "NewNamespace": "EFT.Rendering.Clouds",
+        "NestedTypes": {
+            "Class1817": {
+                "NewName": "PrecomputationCache",
+                "NestedTypes": {
+                    "Class1818": {
+                        "NewName": "RefCountedData"
+                    }
+                }
+            },
+            "Class1819": {
+                "NewName": "PrecomputationData",
+                "NestedTypes": {
+                "Struct577": {
+                    "NewName": "TextureCache"
+                }
+            }
+            },
+            "Struct576": {
+                "NewName": "UpdateGuard"
+            }
+        }
+    },
+    "Class1824": {
+        "NewName": "EFTAspectHelper",
+        "NewNamespace": "EFT.Settings.Graphics"
+    },
+    "Class1826": {
+        "NewName": "EFTDisplayHelper",
+        "NewNamespace": "EFT.Settings.Graphics",
+        "NestedTypes": {
+            "Class1827": {
+                "NewName": "Api",
+                "NestedTypes": {
+                    "Struct584": {
+                        "NewName": "RECT"
+                    }
+                }
+            }
+        }
+    },
+    "Class2046": {
+        "NewName": "LongPollingRequestAbstract",
+        "NewNamespace": "EFT.Communications"
+    },
+    "Class2047": {
+        "NewName": "LongPollingRequest",
+        "NewNamespace": "EFT.Communications"
+    },
+    "Class2048": {
+        "NewName": "LongPollingWebSocketRequest",
+        "NewNamespace": "EFT.Communications"
+    },
+    "Class2097": {
+        "NewName": "ImpostorsCameraContextAbstract",
+        "NewNamespace": "EFT.Impostors"
+    },
+    "Class2098": {
+        "NewName": "ImpostorsMainCameraContext",
+        "NewNamespace": "EFT.Impostors",
+        "NestedTypes": {
+            "Interface17": {
+                "NewName": "IDrawInstance"
+            },
+            "Class2102": {
+                "NewName": "DrawShader"
+            },
+            "Class2103": {
+                "NewName": "SharedShader"
+            },
+            "Class2104": {
+                "NewName": "CullingShader"
+            }
+        }
+    },
+    "Class2099": {
+        "NewName": "ImpostorsOpticCameraContext",
+        "NewNamespace": "EFT.Impostors"
+    },
+    "Class2100": {
+        "NewName": "ImpostorsDrawInstance",
+        "NewNamespace": "EFT.Impostors"
+    },
+    "Class2101": {
+        "NewName": "ImpostorsGroup",
+        "NewNamespace": "EFT.Impostors"
+    },
+    "Class2105": {
+        "NestedTypes": {
+            "Class2106": {
+                "NewName": "State"
+            },
+            "Class2107": {
+                "NewName": "StateQualityHigh"
+            },
+            "Class2108": {
+                "NewName": "StateQualityLow"
+            },
+            "Class2109": {
+                "NewName": "StateQualityMedium"
+            }
+        },
+        "NewName": "ImpostorsMaterialLoader",
+        "NewNamespace": "EFT.Impostors"
+    },
+    "Class2112": {
+        "NewName": "ImpostorTextureParams",
+        "NewNamespace": "EFT.Impostors"
+    },
+    "Class2116": {
+        "NewName": "WindParamsHelper",
+        "NewNamespace": "EFT.Weather"
+    },
+    "Class2117": {
+        "NewName": "WindCalculator",
+        "NewNamespace": "EFT.Weather"
+    },
+    "Class2275": {
+        "NestedTypes": {
+            "Class2277": {
+                "NewName": "Core"
+            },
+            "Class2276": {
+                "NewName": "KickCommand"
+            }
+        },
+        "NewName": "NetworkQualityWatcher",
+        "NewNamespace": "EFT.Network.Quality"
+    },
+    "Class2500": {
+        "NewName": "PlayerToggleOperation",
+        "NewNamespace": "EFT.InventoryLogic.Operations"
+    },
+    "Class2545": {
+        "NestedTypes": {
+            "Class2546": {
+                "NewName": "SpawnPointsFilteredCollection"
+            },
+            "Class2547": {
+                "NewName": "InvalidSpawnPoint"
+            },
+            "Class408": {
+                "NewName": "Logger"
+            }
+        },
+        "NewName": "SpawnSystem",
+        "NewNamespace": "EFT.Game.Spawning"
+    },
+    "Class2559": {
+        "NewName": "LoggerExtension",
+        "NewNamespace": "EFT.Game.Spawning"
+    },
+    "Class2723": {
+        "NestedTypes": {
+            "Class409": {
+                "NewName": "Logger"
+            },
+            "Class2724": {
+                "NewName": "Diagnostics"
+            },
+            "Class2725": {
+                "NewName": "PingDiagnostics"
+            },
+            "Class2726": {
+                "NewName": "ProcessDiagnostics"
+            },
+            "Class2727": {
+                "NewName": "UnityPingDiagnostics"
+            },
+            "Class2728": {
+                "NewName": "UnityWebDiagnostics"
+            },
+            "Class2729": {
+                "NewName": "WebDiagnostics"
+            }
+        },
+        "NewName": "ConnectionDiagnostics",
+        "NewNamespace": "EFT.BackEnd"
+    },
+    "Class280": {
+        "NewName": "GetInCoverRequest"
+    },
+    "Class281": {
+        "NewName": "WaitPlayerRequest"
+    },
+    "Class304": {
+        "NewName": "Backend",
+        "NestedTypes": {
+            "Class386": {
+                "NewName": "BackendLogger"
+            }
+        }
+    },
+    "Class305`1": {
+        "NewName": "ClientBackend",
+        "NewNamespace": "EFT"
+    },
+    "Class306": {
+        "NewName": "EftClientBackend",
+        "NewNamespace": "EFT"
+    },
+    "Class307": {
+        "NewName": "ClientBackendSession",
+        "NewNamespace": "EFT",
+        "NestedTypes": {
+            "Class397": {
+                "NewName": "BackendQueueLogger"
+            },
+            "Class1547": {
+                "NewName": "OperationWithCallback"
+            },
+            "Class1548": {
+                "NewName": "QueuedCommand"
+            },
+            "Class1549": {
+                "NewName": "ImmediateCommand"
+            },
+        }
+    },
+    "Class308": {
+        "NewName": "EftClientBackendSession",
+        "NewNamespace": "EFT",
+        "NestedTypes": {
+            "Class398": {
+                "NewName": "PingLogger"
+            }
+        }
+    },
+    "Class310": {
+        "NestedTypes": {
+            "Class387": {
+                "NewName": "BackendCacheLogger"
+            }
+        },
+        "NewName": "BackendCache"
+    },
+    "Class311": {
+        "NewName": "BackendCacheExtension"
+    },
+    "Class312": {
+        "NewName": "BackendRequestParams"
+    },
+    "Class313": {
+        "NewName": "HTTPTransportManager",
+        "NestedTypes": {
+            "Struct29`1": {
+                "NewName": "HTTPRequestResult"
+            },
+            "Class314": {
+                "NewName": "IVPoolStrategy"
+            }
+        },
+    },
+    "Class319": {
+        "NewName": "HttpWebSender"
+    },
+    "Class320": {
+        "NewName": "UnityWebSender"
+    },
+    "Class321": {
+        "NewName": "WsTransportManager"
+    },
+    "Class3513": {
+        "NewName": "AssetBundleExtension",
+        "NewNamespace": "EFT.AssetsManager"
+    },
+    "Class3637": {
+        "NewName": "ClothState",
+        "NewNamespace": "AmplifyMotion"
+    },
+    "Class3638": {
+        "NestedTypes": {
+            "Class3641": {
+                "NewName": "Particle"
+            }
+        },
+        "NewName": "ParticleState",
+        "NewNamespace": "AmplifyMotion"
+    },
+    "Class3639": {
+        "NewName": "SkinnedState",
+        "NewNamespace": "AmplifyMotion"
+    },
+    "Class3640": {
+        "NewName": "SolidState",
+        "NewNamespace": "AmplifyMotion"
+    },
+    "Class3642": {
+        "NewName": "WorkerThreadPool",
+        "NewNamespace": "AmplifyMotion"
+    },
+    "Class3646": {
+        "NewName": "JobReflectionRegistration"
+    },
+    "Class393": {
+        "NewName": "SurprisesLogger"
+    },
+    "Class403": {
+        "NewName": "DisplayLogger"
+    },
+    "Class443": {
+        "NestedTypes": {
+            "Class388": {
+                "NewName": "SeasonsLogger"
+            }
+        },
+        "NewName": "Seasons"
+    },
+    "Class444": {
+        "NestedTypes": {
+            "Class445": {
+                "NewName": "AbstractState"
+            },
+            "Class446": {
+                "NewName": "StateSummer"
+            },
+            "Class447": {
+                "NewName": "StateSpring"
+            },
+            "Class448": {
+                "NewName": "StateSpringEarly"
+            },
+            "Class449": {
+                "NewName": "StateAutumn"
+            },
+            "Class450": {
+                "NewName": "StateAutumnLate"
+            },
+            "Class451": {
+                "NewName": "StateStorm"
+            },
+            "Class452": {
+                "NewName": "StateStormReconnect"
+            },
+            "Class453": {
+                "NewName": "StateWinter"
+            },
+            "Class454": {
+                "NewName": "StateUnknown"
+            },
+            "Class455": {
+                "NewName": "StateFactoryDefault"
+            },
+            "Class456": {
+                "NewName": "StateFactoryWinter"
+            },
+            "Interface3": {
+                "NewName": "IState"
+            }
+        },
+        "NewName": "SeasonsController"
+    },
+    "Class494": {
+        "NewName": "BuffersExtension"
+    },
+    "Class500": {
+        "NewName": "BokehRenderer"
+    },
+    "Class534": {
+        "NewName": "AnimationQueue",
+        "NestedTypes": {
+            "Class535": {
+                "NewName": "Sample"
+            }
+        }
+    },
+    "Class536": {
+        "NewName": "AudioQueue",
+        "NestedTypes": {
+            "Class537": {
+                "NewName": "Sample"
+            }
+        }
+    },
+    "Class587`1": {
+        "NewName": "CircularArray"
+    },
+    "Class591": {
+        "NewName": "GameObjectPathFinder"
+    },
+    "Class679": {
+        "NewName": "SnowRenderer",
+        "NestedTypes": {
+            "Class680": {
+                "NewName": "Data"
+            }
+        }
+    },
+    "Class682": {
+        "NewName": "GUIMaskTex"
+    },
+    "Class683": {
+        "NewName": "GUIScreenTex"
+    },
+    "Class684": {
+        "NewName": "GUITiledTex"
+    },
+    "Class685": {
+        "NewName": "GUIProgressBar"
+    },
+    "Class686": {
+        "NewName": "GUITextLabel"
+    },
+    "Class688": {
+        "NewName": "SnowFlakesMeshFactory"
+    },
+    "Class702": {
+        "NewName": "Extension"
+    },
+    "Class706": {
+        "NewName": "CameraRenderData",
+        "NewNamespace": "WindowsManagerUtilities"
+    },
+    "Class707": {
+        "NewName": "GeometryComputeBuffers",
+        "NewNamespace": "WindowsManagerUtilities"
+    },
+    "Class708": {
+        "NewName": "PieceOffsets",
+        "NewNamespace": "WindowsManagerUtilities"
+    },
+    "Class774": {
+        "NewName": "VehicleSoundAbstractState",
+        "NewNamespace": "Audio.Vehicles"
+    },
+    "Class775": {
+        "NewName": "VehicleSoundStartState",
+        "NewNamespace": "Audio.Vehicles"
+    },
+    "Class776": {
+        "NewName": "VehicleSoundStopState",
+        "NewNamespace": "Audio.Vehicles"
+    },
+    "Class777": {
+        "NewName": "VehicleSoundIdleState",
+        "NewNamespace": "Audio.Vehicles"
+    },
+    "Class778": {
+        "NewName": "VehicleSoundRunningState",
+        "NewNamespace": "Audio.Vehicles"
+    },
+    "Class780": {
+        "NewName": "AudioDebugGUIStyleFactory",
+        "NewNamespace": "Audio.DebugTools"
+    },
+    "Class781": {
+        "NewName": "GUIAudioDebugInfo",
+        "NewNamespace": "Audio.DebugTools"
+    },
+    "Class804": {
+        "NewName": "StairsOcclusionTransition",
+        "NewNamespace": "Audio.SpatialSystem.Utils"
+    },
+    "Class805": {
+        "NewName": "TransmissionCalculatorUtils",
+        "NewNamespace": "Audio.SpatialSystem.SpatialAudioCalculator"
+    },
+    "Class822": {
+        "NewName": "AverageAttenuatedDirectionJobScheduler",
+        "NewNamespace": "Audio.AmbientSubsystem.AmbientSplineEmitter"
+    },
+    "Class823": {
+        "NewName": "AmbientZoneMathfUtils",
+        "NewNamespace": "Audio.AmbientSubsystem.AmbientSplineEmitter.Utils"
+    },
+    "Class839": {
+        "NewName": "LightVolumeGeometryUtility",
+        "NewNamespace": "Koenigz.PerfectCulling.EFT"
+    },
+    "Class850": {
+        "NewName": "DeflateUtils",
+        "NewNamespace": "Koenigz.PerfectCulling.EFT"
+    },
+    "Class933": {
+        "NewName": "BaseChannel",
+        "NewNamespace": "FlyingWormConsole3.LiteNetLib"
+    },
+    "Class934": {
+        "NewName": "ReliableChannel",
+        "NewNamespace": "FlyingWormConsole3.LiteNetLib",
+        "NestedTypes": {
+            "Struct257": {
+                "NewName": "PendingPacket"
+            }
+        }
+    },
+    "Class935": {
+        "NewName": "SequencedChannel",
+        "NewNamespace": "FlyingWormConsole3.LiteNetLib"
+    },
+    "Class939": {
+        "NewName": "NetEvent",
+        "NewNamespace": "FlyingWormConsole3.LiteNetLib"
+    },
+    "Class941": {
+        "NewName": "NetPacket",
+        "NewNamespace": "FlyingWormConsole3.LiteNetLib"
+    },
+    "Class942": {
+        "NewName": "NetConnectRequestPacket",
+        "NewNamespace": "FlyingWormConsole3.LiteNetLib"
+    },
+    "Class943": {
+        "NewName": "NetConnectAcceptPacket",
+        "NewNamespace": "FlyingWormConsole3.LiteNetLib"
+    },
+    "Class944": {
+        "NewName": "NetPacketPool",
+        "NewNamespace": "FlyingWormConsole3.LiteNetLib"
+    },
+    "Class946": {
+        "NewName": "NetSocket",
+        "NewNamespace": "FlyingWormConsole3.LiteNetLib"
+    },
+    "Class983": {
+        "NewName": "NtpRequest",
+        "NewNamespace": "FlyingWormConsole3.LiteNetLib.Utils"
+    },
+    "Class1123": {
+        "NewName": "BuildInfo"
+    },
+    "Class461`1": {
+        "RemoveType": true
+    },
+    "Class3647": {
+        "RemoveType": true
+    },
+    "Class3649": {
+        "RemoveType": true
+    },
+    "Class3650": {
+        "RemoveType": true
+    },
+    "Class3654": {
+        "RemoveType": true
+    },
+    "Class3655": {
+        "RemoveType": true
+    },
+    "Class3652": {
+        "RemoveType": true
+    },
+    "Class3653": {
+        "RemoveType": true
+    },
+    "Class929": {
+        "RemoveType": true
+    }
+}

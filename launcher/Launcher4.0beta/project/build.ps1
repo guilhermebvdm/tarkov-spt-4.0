@@ -1,6 +1,8 @@
 ﻿$buildFolder = "..\Build"
 $SPTDataFolder = "..\Build\SPT_Data"
-$launcherExeFolder = "..\SPT.Launcher\bin\Release\net8.0\win-x64\publish"
+# net9.0 (SPT 4.0) e AssemblyName "Tarkov Red Line" — atualizado no item 014.
+$launcherExeFolder = "..\SPT.Launcher\bin\Release\net9.0\win-x64\publish"
+$launcherExeName = "Tarkov Red Line.exe"
 $launcherAssetFolder = "..\SPT.Launcher\SPT_Data"
 $licenseFile = "..\..\LICENSE.md"
 
@@ -14,7 +16,7 @@ foreach ($folder in $foldersToCreate) {
 }
 
 # Move built files to the build folder
-Copy-Item -Path "$launcherExeFolder\SPT.Launcher.exe" -Destination "$buildFolder" -Force
+Copy-Item -Path "$launcherExeFolder\$launcherExeName" -Destination "$buildFolder" -Force
 Copy-Item -Path "$launcherAssetFolder" -Destination "$buildFolder" -Recurse -Force
 # If any new DLLs need to be copied, add here
 

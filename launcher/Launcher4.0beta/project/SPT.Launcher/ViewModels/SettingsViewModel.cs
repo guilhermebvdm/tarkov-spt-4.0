@@ -38,17 +38,37 @@ namespace SPT.Launcher.ViewModels
 
         private bool _devPasswordVisible = false;
         public char DevPasswordChar => _devPasswordVisible ? '\0' : '●';
-        public string DevPasswordEyeIcon => _devPasswordVisible ? "🙉" : "🙈";
+        // Estado exposto p/ o XAML alternar os ícones traçados do DS (TrlIconEye / TrlIconEyeOff).
+        public bool IsDevPasswordVisible => _devPasswordVisible;
 
         public void ToggleDevPasswordVisibilityCommand()
         {
             _devPasswordVisible = !_devPasswordVisible;
             this.RaisePropertyChanged(nameof(DevPasswordChar));
-            this.RaisePropertyChanged(nameof(DevPasswordEyeIcon));
+            this.RaisePropertyChanged(nameof(IsDevPasswordVisible));
         }
 
-        public string DevModeStatusColor => LauncherSettingsProvider.Instance.IsDevMode ? "#4CAF50" : "#555555";
+        // Cor do dot de status migrou para o XAML (Border.dev-dot + class binding em
+        // IsDevMode, tokens TrlSuccessBrush/TrlFgFaintBrush). A VM só expõe o texto do tooltip.
         public string DevModeStatusText => LauncherSettingsProvider.Instance.IsDevMode ? "Dev Mode ATIVO" : "Dev Mode INATIVO";
+
+        /// <summary>
+        /// Item 008: toggle "USAR CONFIGS PERFORMANCE" — persiste imediatamente; o efeito
+        /// acontece na próxima verificação de arquivos (overlay via motor de sync do 007).
+        /// </summary>
+        public bool UsePerformanceConfigs
+        {
+            get => LauncherSettingsProvider.Instance.UsePerformanceConfigs;
+            set
+            {
+                if (LauncherSettingsProvider.Instance.UsePerformanceConfigs == value) return;
+
+                LauncherSettingsProvider.Instance.UsePerformanceConfigs = value;
+                LauncherSettingsProvider.Instance.SaveSettings();
+                this.RaisePropertyChanged(nameof(UsePerformanceConfigs));
+                LogManager.Instance.Info($"[Settings] Configs performance {(value ? "ativadas" : "desativadas")} — aplica na próxima verificação de arquivos");
+            }
+        }
 
         public SettingsViewModel(IScreen Host) : base(Host)
         {
@@ -94,17 +114,7 @@ namespace SPT.Launcher.ViewModels
             }
 
             DevPassword = "";
-            this.RaisePropertyChanged(nameof(DevModeStatusColor));
             this.RaisePropertyChanged(nameof(DevModeStatusText));
-        }
-
-        public void OpenTargramCommand()
-        {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = "https://targram.lovable.app/",
-                UseShellExecute = true
-            });
         }
 
         public void OpenKofiCommand()
@@ -317,7 +327,9 @@ namespace SPT.Launcher.ViewModels
         {
             if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                var startPath = await desktop.MainWindow.StorageProvider.TryGetFolderFromPathAsync(Assembly.GetExecutingAssembly().Location);
+                // AppContext.BaseDirectory em vez de Assembly.Location: este último é vazio
+                // em publish single-file (IL3000), zerando a sugestão de pasta do picker (item 014).
+                var startPath = await desktop.MainWindow.StorageProvider.TryGetFolderFromPathAsync(AppContext.BaseDirectory);
                 
                 var dir = await desktop.MainWindow.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions()
                 {

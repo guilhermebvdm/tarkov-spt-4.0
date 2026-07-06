@@ -1,0 +1,55 @@
+<!-- TRL Theme - ComboBox.axaml: input-look trigger; popup/item colors come from Fluent key overrides in Trl.axaml -->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+	<Style Selector="ComboBox">
+		<Setter Property="Background" Value="{DynamicResource TrlBgInputBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlEdgeBrush}"/>
+		<Setter Property="BorderThickness" Value="1"/>
+		<Setter Property="CornerRadius" Value="0"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgBrush}"/>
+		<Setter Property="PlaceholderForeground" Value="{DynamicResource TrlFgGhostBrush}"/>
+		<Setter Property="MinHeight" Value="{DynamicResource TrlControlHeight}"/>
+		<Setter Property="FontSize" Value="{DynamicResource TrlTextMd}"/>
+	</Style>
+
+	<Style Selector="ComboBox:pointerover /template/ Border#Background">
+		<Setter Property="Background" Value="{DynamicResource TrlBgInputBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlEdgeStrongBrush}"/>
+	</Style>
+
+	<Style Selector="ComboBox:focus /template/ Border#Background">
+		<Setter Property="Background" Value="{DynamicResource TrlBgInputBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlAccentDimBrush}"/>
+	</Style>
+
+	<Style Selector="ComboBox /template/ Border#PopupBorder">
+		<Setter Property="Background" Value="{DynamicResource TrlBgRaisedBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlEdgeStrongBrush}"/>
+		<Setter Property="CornerRadius" Value="0"/>
+	</Style>
+
+	<Style Selector="ComboBox /template/ PathIcon#DropDownGlyph">
+		<Setter Property="Foreground" Value="{DynamicResource TrlAccentDimBrush}"/>
+	</Style>
+
+	<Style Selector="ComboBoxItem">
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgBrush}"/>
+		<Setter Property="CornerRadius" Value="0"/>
+		<Setter Property="Cursor" Value="Hand"/>
+	</Style>
+
+	<!-- estados do item no popup: wash tan do DS (era cinza flat do Fluent) -->
+	<Style Selector="ComboBoxItem:pointerover /template/ ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource TrlBgHoverBrush}"/>
+		<Setter Property="TextBlock.Foreground" Value="{DynamicResource TrlFgBrush}"/>
+	</Style>
+	<Style Selector="ComboBoxItem:selected /template/ ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource TrlBgActiveBrush}"/>
+		<Setter Property="TextBlock.Foreground" Value="{DynamicResource TrlAccentBrush}"/>
+	</Style>
+	<Style Selector="ComboBoxItem:selected:pointerover /template/ ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource TrlBgActiveBrush}"/>
+	</Style>
+
+</Styles>

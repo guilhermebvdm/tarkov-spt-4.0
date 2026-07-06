@@ -1,6 +1,7 @@
 # .NET / C#
 bin/
 obj/
+bin-homolog/
 *.user
 *.suo
 *.userprefs

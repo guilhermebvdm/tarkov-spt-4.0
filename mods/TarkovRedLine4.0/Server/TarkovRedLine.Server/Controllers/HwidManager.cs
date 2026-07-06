@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace TarkovRedLine.Server.Controllers;
 
 [ApiController]
-[Route("launcher/hwid")]
+[Route(ModRouting.RoutePrefix + "launcher/hwid")]
 public class HwidManagerController : ControllerBase
 {
     private static readonly string ProfilesPath = Path.Combine(Directory.GetCurrentDirectory(), "user", "profiles");
@@ -32,7 +32,7 @@ public class HwidManagerController : ControllerBase
             return BadRequest(new { status = "INVALID_REQUEST" });
         }
 
-        string debugLogPath = Path.Combine(Directory.GetCurrentDirectory(), "hwid_debug_log.txt");
+        string debugLogPath = Path.Combine(Directory.GetCurrentDirectory(), $"hwid_debug_log{ModRouting.StateSuffix}.txt");
 
         try
         {

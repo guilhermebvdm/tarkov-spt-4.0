@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TRL Design System · v1.0.0</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%2312130d'/%3E%3Crect y='7' width='16' height='2' fill='%23ff0000'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="fonts/bender.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="components.css">
+<link rel="stylesheet" href="utilities.css">
+<style>
+  /* ── showcase-only styles (.ds-*) — NOT part of the design system ────── */
+  html, body { margin: 0; height: 100%; }
+
+  .ds-section { margin-bottom: var(--trl-space-12); scroll-margin-top: var(--trl-space-4); }
+  .ds-section > .trl-eyebrow { margin-bottom: var(--trl-space-2); }
+  .ds-intro { color: var(--trl-fg-muted); max-width: 72ch; margin: 0 0 var(--trl-space-4); font-size: var(--trl-text-md); }
+  .ds-intro b { color: var(--trl-fg); }
+
+  /* hero — key art com fade para o ground (receita "hero band" do PATTERNS) */
+  .ds-hero { padding: var(--trl-space-10) var(--trl-space-6) var(--trl-space-8); text-align: center;
+    background:
+      linear-gradient(rgba(19,19,20,.55), rgba(19,19,20,.82) 70%, var(--trl-ground) 100%),
+      var(--trl-photo) center 22% / cover no-repeat;
+    border: var(--trl-border-w) solid var(--trl-edge); }
+  .ds-hero img { max-width: min(420px, 80%); height: auto; }
+  .ds-hero .trl-divider--laser { max-width: 520px; margin: var(--trl-space-5) auto;
+    background-size: 200% 100%; animation: trl-laser-sweep 3.5s linear infinite; }
+  .ds-principles { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--trl-space-3); margin-top: var(--trl-space-6); text-align: left; }
+
+  /* swatches */
+  .ds-ramp { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+    gap: var(--trl-space-2); margin-bottom: var(--trl-space-4); }
+  .ds-swatch { border: var(--trl-border-w) solid var(--trl-edge); cursor: pointer;
+    background: var(--trl-surface-1); }
+  .ds-swatch:hover { border-color: var(--trl-edge-strong); }
+  .ds-swatch__chip { height: 52px; }
+  .ds-swatch__meta { padding: var(--trl-space-1) var(--trl-space-2);
+    font-family: var(--trl-font-mono); font-size: var(--trl-text-2xs);
+    color: var(--trl-fg-muted); display: flex; flex-direction: column; gap: 1px; }
+  .ds-swatch__name { color: var(--trl-fg); }
+  .ds-swatch.is-copied .ds-swatch__name { color: var(--trl-success); }
+
+  /* demo frames */
+  .ds-demo { border: var(--trl-border-w) solid var(--trl-edge);
+    background: var(--trl-surface-1); padding: var(--trl-space-4);
+    display: flex; flex-wrap: wrap; gap: var(--trl-space-3); align-items: center;
+    margin-bottom: var(--trl-space-2); }
+  .ds-demo--col { flex-direction: column; align-items: stretch; }
+  .ds-demo--ground { background: var(--trl-ground); }
+  .ds-demo + .trl-code { margin-bottom: var(--trl-space-4); }
+  .ds-label { width: 100%; font-family: var(--trl-font-display); text-transform: uppercase;
+    letter-spacing: var(--trl-track-wider); font-size: var(--trl-text-2xs);
+    color: var(--trl-fg-faint); }
+
+  /* type specimens */
+  .ds-specimen { display: grid; grid-template-columns: 120px 1fr; gap: var(--trl-space-3);
+    align-items: baseline; padding: var(--trl-space-2) 0;
+    border-bottom: var(--trl-border-w) solid var(--trl-edge-faint); }
+  .ds-specimen__tag { font-family: var(--trl-font-mono); font-size: var(--trl-text-2xs);
+    color: var(--trl-fg-faint); }
+
+  /* spacing bars */
+  .ds-space-row { display: grid; grid-template-columns: 110px 1fr; gap: var(--trl-space-3);
+    align-items: center; margin-bottom: var(--trl-space-1); }
+  .ds-space-row .bar { height: 14px; background: var(--trl-wash-tan-2);
+    border-left: 2px solid var(--trl-accent); }
+
+  /* do / don't */
+  .ds-dd { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--trl-space-4); margin-bottom: var(--trl-space-6); }
+  .ds-dd__frame { border: var(--trl-border-w) solid var(--trl-edge); }
+  .ds-dd__head { display: flex; align-items: center; gap: var(--trl-space-2);
+    padding: var(--trl-space-1) var(--trl-space-3);
+    font-family: var(--trl-font-display); text-transform: uppercase;
+    letter-spacing: var(--trl-track-wider); font-size: var(--trl-text-xs); }
+  .ds-dd__frame--do .ds-dd__head { color: var(--trl-success); background: var(--trl-wash-green);
+    border-bottom: 1px solid rgba(154,210,122,.3); }
+  .ds-dd__frame--dont .ds-dd__head { color: var(--trl-danger); background: var(--trl-wash-red);
+    border-bottom: 1px solid var(--trl-edge-red); }
+  .ds-dd__body { padding: var(--trl-space-4); display: flex; flex-direction: column;
+    gap: var(--trl-space-2); }
+  .ds-dd__note { font-size: var(--trl-text-xs); color: var(--trl-fg-faint);
+    padding: 0 var(--trl-space-3) var(--trl-space-2); }
+
+  /* contrast table */
+  .ds-aa { font-family: var(--trl-font-mono); font-size: var(--trl-text-xs); }
+  .ds-aa .ok   { color: var(--trl-success); }
+  .ds-aa .warn { color: var(--trl-warning); }
+
+  /* icon grid */
+  .ds-icons { display: grid; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+    gap: var(--trl-space-1); }
+  .ds-icon { display: flex; align-items: center; gap: var(--trl-space-2);
+    padding: var(--trl-space-1) var(--trl-space-2); cursor: pointer;
+    color: var(--trl-fg-muted); border: 1px solid transparent; }
+  .ds-icon:hover { color: var(--trl-fg); border-color: var(--trl-edge); background: var(--trl-bg-hover); }
+  .ds-icon span { font-family: var(--trl-font-mono); font-size: var(--trl-text-2xs);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* anti-pattern mockups (deliberately wrong, showcase-only) */
+  .ds-bad-btn { height: 30px; padding: 0 16px; border-radius: 8px; border: none;
+    background: #ff0000; color: #fff; font-weight: 700; cursor: default; }
+  .ds-bad-panel { border-radius: 12px; border: 1px solid #ff0000;
+    background: rgba(255,0,0,.12); padding: 12px; color: #ff6b60; }
+</style>
+</head>
+<body class="trl-app">
+<!-- TRL icon sprite (assets/icons.svg inline — ver PATTERNS · Ícones) -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <symbol id="trl-i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+  <path d="M21 21l-6 -6" /></symbol>
+  <symbol id="trl-i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M18 6l-12 12" />
+  <path d="M6 6l12 12" /></symbol>
+  <symbol id="trl-i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M12 5l0 14" />
+  <path d="M5 12l14 0" /></symbol>
+  <symbol id="trl-i-minus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M5 12l14 0" /></symbol>
+  <symbol id="trl-i-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+  <path d="M13.5 6.5l4 4" /></symbol>
+  <symbol id="trl-i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M4 7l16 0" />
+  <path d="M10 11l0 6" />
+  <path d="M14 11l0 6" />
+  <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+  <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></symbol>
+  <symbol id="trl-i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M7 9.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667l0 -8.666" />
+  <path d="M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1" /></symbol>
+  <symbol id="trl-i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M5 12l5 5l10 -10" /></symbol>
+  <symbol id="trl-i-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M6 9l6 6l6 -6" /></symbol>
+  <symbol id="trl-i-chevron-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M6 15l6 -6l6 6" /></symbol>
+  <symbol id="trl-i-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M15 6l-6 6l6 6" /></symbol>
+  <symbol id="trl-i-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M9 6l6 6l-6 6" /></symbol>
+  <symbol id="trl-i-arrows-sort" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M3 9l4 -4l4 4m-4 -4v14" />
+  <path d="M21 15l-4 4l-4 -4m4 4v-14" /></symbol>
+  <symbol id="trl-i-filter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M4 4h16v2.172a2 2 0 0 1 -.586 1.414l-4.414 4.414v7l-6 2v-8.5l-4.48 -4.928a2 2 0 0 1 -.52 -1.345v-2.227" /></symbol>
+  <symbol id="trl-i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065" />
+  <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /></symbol>
+  <symbol id="trl-i-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" />
+  <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" /></symbol>
+  <symbol id="trl-i-device-floppy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" />
+  <path d="M10 14a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+  <path d="M14 4l0 4l-6 0l0 -4" /></symbol>
+  <symbol id="trl-i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
+  <path d="M7 11l5 5l5 -5" />
+  <path d="M12 4l0 12" /></symbol>
+  <symbol id="trl-i-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
+  <path d="M7 9l5 -5l5 5" />
+  <path d="M12 4l0 12" /></symbol>
+  <symbol id="trl-i-external-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
+  <path d="M11 13l9 -9" />
+  <path d="M15 4h5v5" /></symbol>
+  <symbol id="trl-i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+  <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" /></symbol>
+  <symbol id="trl-i-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M10.585 10.587a2 2 0 0 0 2.829 2.828" />
+  <path d="M16.681 16.673a8.717 8.717 0 0 1 -4.681 1.327c-3.6 0 -6.6 -2 -9 -6c1.272 -2.12 2.712 -3.678 4.32 -4.674m2.86 -1.146a9.055 9.055 0 0 1 1.82 -.18c3.6 0 6.6 2 9 6c-.666 1.11 -1.379 2.067 -2.138 2.87" />
+  <path d="M3 3l18 18" /></symbol>
+  <symbol id="trl-i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6" />
+  <path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" />
+  <path d="M8 11v-4a4 4 0 1 1 8 0v4" /></symbol>
+  <symbol id="trl-i-lock-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2l0 -6" />
+  <path d="M11 16a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M8 11v-5a4 4 0 0 1 8 0" /></symbol>
+  <symbol id="trl-i-info-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
+  <path d="M12 9h.01" />
+  <path d="M11 12h1v4h1" /></symbol>
+  <symbol id="trl-i-alert-triangle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M12 9v4" />
+  <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0" />
+  <path d="M12 16h.01" /></symbol>
+  <symbol id="trl-i-alert-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
+  <path d="M12 8v4" />
+  <path d="M12 16h.01" /></symbol>
+  <symbol id="trl-i-circle-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+  <path d="M9 12l2 2l4 -4" /></symbol>
+  <symbol id="trl-i-ban" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+  <path d="M5.7 5.7l12.6 12.6" /></symbol>
+  <symbol id="trl-i-dots" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M4 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M18 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /></symbol>
+  <symbol id="trl-i-dots-vertical" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M11 19a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M11 5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /></symbol>
+  <symbol id="trl-i-menu-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M4 6l16 0" />
+  <path d="M4 12l16 0" />
+  <path d="M4 18l16 0" /></symbol>
+  <symbol id="trl-i-maximize" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M4 8v-2a2 2 0 0 1 2 -2h2" />
+  <path d="M4 16v2a2 2 0 0 0 2 2h2" />
+  <path d="M16 4h2a2 2 0 0 1 2 2v2" />
+  <path d="M16 20h2a2 2 0 0 0 2 -2v-2" /></symbol>
+  <symbol id="trl-i-minimize" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M15 19v-2a2 2 0 0 1 2 -2h2" />
+  <path d="M15 5v2a2 2 0 0 0 2 2h2" />
+  <path d="M5 15h2a2 2 0 0 1 2 2v2" />
+  <path d="M5 9h2a2 2 0 0 0 2 -2v-2" /></symbol>
+  <symbol id="trl-i-arrow-back-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M9 14l-4 -4l4 -4" />
+  <path d="M5 10h11a4 4 0 1 1 0 8h-1" /></symbol>
+  <symbol id="trl-i-corner-down-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M6 6v6a3 3 0 0 0 3 3h10l-4 -4m0 8l4 -4" /></symbol>
+  <symbol id="trl-i-grip-vertical" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M8 5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M8 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M8 19a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M14 5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M14 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M14 19a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /></symbol>
+  <symbol id="trl-i-rotate-clockwise" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M4.05 11a8 8 0 1 1 .5 4m-.5 5v-5h5" /></symbol>
+  <symbol id="trl-i-question-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M8 8a3.5 3 0 0 1 3.5 -3h1a3.5 3 0 0 1 3.5 3a3 3 0 0 1 -2 3a3 4 0 0 0 -2 4" />
+  <path d="M12 19l0 .01" /></symbol>
+  <symbol id="trl-i-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2" /></symbol>
+  <symbol id="trl-i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M14 3v4a1 1 0 0 0 1 1h4" />
+  <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" /></symbol>
+  <symbol id="trl-i-clipboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2" />
+  <path d="M9 5a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2" /></symbol>
+  <symbol id="trl-i-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M9 15l6 -6" />
+  <path d="M11 6l.463 -.536a5 5 0 0 1 7.071 7.072l-.534 .464" />
+  <path d="M13 18l-.397 .534a5.068 5.068 0 0 1 -7.127 0a4.972 4.972 0 0 1 0 -7.071l.524 -.463" /></symbol>
+  <symbol id="trl-i-loader-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M12 3a9 9 0 1 0 9 9" /></symbol>
+  <symbol id="trl-i-crosshair" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M4 8v-2a2 2 0 0 1 2 -2h2" />
+  <path d="M4 16v2a2 2 0 0 0 2 2h2" />
+  <path d="M16 4h2a2 2 0 0 1 2 2v2" />
+  <path d="M16 20h2a2 2 0 0 0 2 -2v-2" />
+  <path d="M9 12l6 0" />
+  <path d="M12 9l0 6" /></symbol>
+  <symbol id="trl-i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M7 12a5 5 0 1 0 10 0a5 5 0 1 0 -10 0" />
+  <path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /></symbol>
+  <symbol id="trl-i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" /></symbol>
+  <symbol id="trl-i-shield-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M11.46 20.846a12 12 0 0 1 -7.96 -14.846a12 12 0 0 0 8.5 -3a12 12 0 0 0 8.5 3a12 12 0 0 1 -.09 7.06" />
+  <path d="M15 19l2 2l4 -4" /></symbol>
+  <symbol id="trl-i-radar-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M15.51 15.56a5 5 0 1 0 -3.51 1.44" />
+  <path d="M18.832 17.86a9 9 0 1 0 -6.832 3.14" />
+  <path d="M12 12v9" /></symbol>
+  <symbol id="trl-i-swords" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M21 3v5l-11 9l-4 4l-3 -3l4 -4l9 -11l5 0" />
+  <path d="M5 13l6 6" />
+  <path d="M14.32 17.32l3.68 3.68l3 -3l-3.365 -3.365" />
+  <path d="M10 5.5l-2 -2.5h-5v5l3 2.5" /></symbol>
+  <symbol id="trl-i-bomb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M15.349 5.349l3.301 3.301a1.2 1.2 0 0 1 0 1.698l-.972 .972a7.5 7.5 0 1 1 -5 -5l.972 -.972a1.2 1.2 0 0 1 1.698 0l.001 .001" />
+  <path d="M17 7l1.293 -1.293a2.414 2.414 0 0 0 .707 -1.707a1 1 0 0 1 1 -1h1" />
+  <path d="M7 13a3 3 0 0 1 3 -3" /></symbol>
+  <symbol id="trl-i-backpack" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M5 18v-6a6 6 0 0 1 6 -6h2a6 6 0 0 1 6 6v6a3 3 0 0 1 -3 3h-8a3 3 0 0 1 -3 -3" />
+  <path d="M10 6v-1a2 2 0 1 1 4 0v1" />
+  <path d="M9 21v-4a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v4" />
+  <path d="M11 10h2" /></symbol>
+  <symbol id="trl-i-first-aid-kit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M8 8v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2" />
+  <path d="M4 10a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2l0 -8" />
+  <path d="M10 14h4" />
+  <path d="M12 12v4" /></symbol>
+  <symbol id="trl-i-skull" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M12 4c4.418 0 8 3.358 8 7.5c0 1.901 -.755 3.637 -2 4.96l0 2.54a1 1 0 0 1 -1 1h-10a1 1 0 0 1 -1 -1v-2.54c-1.245 -1.322 -2 -3.058 -2 -4.96c0 -4.142 3.582 -7.5 8 -7.5" />
+  <path d="M10 17v3" />
+  <path d="M14 17v3" />
+  <path d="M8 11a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M14 11a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /></symbol>
+  <symbol id="trl-i-map-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M12 18.5l-3 -1.5l-6 3v-13l6 -3l6 3l6 -3v7.5" />
+  <path d="M9 4v13" />
+  <path d="M15 7v5.5" />
+  <path d="M21.121 20.121a3 3 0 1 0 -4.242 0c.418 .419 1.125 1.045 2.121 1.879c1.051 -.89 1.759 -1.516 2.121 -1.879" />
+  <path d="M19 18v.01" /></symbol>
+</svg>
+<div class="trl-shell">
+
+  <!-- ══ TOPBAR ══════════════════════════════════════════════════════════ -->
+  <header class="trl-topbar">
+    <a class="trl-brand" href="#brand">
+      <img src="assets/trl-logo-mark.png" alt="Tarkov Red Line">
+      <span>Design System</span>
+      <span class="trl-brand__version">v1.0.0</span>
+    </a>
+    <span class="trl-topbar__spacer"></span>
+    <span class="trl-tag trl-tag--brand"><span class="trl-tag__dot"></span>TRL · Fika Coop</span>
+  </header>
+
+  <!-- ══ SIDEBAR NAV ═════════════════════════════════════════════════════ -->
+  <aside class="trl-sidebar">
+    <nav class="trl-nav" id="ds-nav">
+      <div class="trl-nav__label">Foundation</div>
+      <a class="trl-nav__item is-active" href="#brand">Brand</a>
+      <a class="trl-nav__item" href="#colors">Colors</a>
+      <a class="trl-nav__item" href="#typography">Typography</a>
+      <a class="trl-nav__item" href="#spacing">Spacing</a>
+      <a class="trl-nav__item" href="#surfaces">Surfaces &amp; elevation</a>
+      <div class="trl-nav__label">System</div>
+      <a class="trl-nav__item" href="#signatures">Signature elements</a>
+      <a class="trl-nav__item" href="#components">Components</a>
+      <a class="trl-nav__item" href="#gamedata">Game data</a>
+      <a class="trl-nav__item" href="#feedback">Feedback &amp; overlays</a>
+      <div class="trl-nav__label">Usage</div>
+      <a class="trl-nav__item" href="#dosdonts">Do's &amp; Don'ts</a>
+      <a class="trl-nav__item" href="#consume">Consuming the DS</a>
+    </nav>
+  </aside>
+
+  <!-- ══ MAIN ════════════════════════════════════════════════════════════ -->
+  <main class="trl-main">
+
+    <!-- ── BRAND ─────────────────────────────────────────────────────── -->
+    <section class="ds-section" id="brand">
+      <div class="ds-hero">
+        <img src="assets/trl-logo-dark.png" alt="Tarkov Red Line logo">
+        <hr class="trl-divider trl-divider--laser">
+        <h1 class="trl-h1">TRL Design System</h1>
+        <p class="trl-lede" style="margin-inline:auto">The standard visual language for every
+          <b>Tarkov Red Line</b> mod web editor. A neutral graphite base, <b>tan/gold</b>
+          reserved for meaning (active, selected, primary), and <b>red</b> for the moments that matter.</p>
+        <div class="ds-principles">
+          <div class="trl-card trl-card--accent-tan">
+            <div class="trl-card__title">Gold means, red speaks</div>
+            <div class="trl-card__body">The base is neutral graphite. Tan marks meaning — active,
+              selected, primary, signatures. Red is the brand: laser, live dot, destructive —
+              more than ~5% of the screen in either accent is wrong.</div>
+          </div>
+          <div class="trl-card trl-card--accent-tan">
+            <div class="trl-card__title">Hard edges</div>
+            <div class="trl-card__body">1px neutral hairlines, radius 0 everywhere; the tan frame
+              (edge-accent) is reserved for accent chips. Military hardware has no rounded corners.</div>
+          </div>
+          <div class="trl-card trl-card--accent-tan">
+            <div class="trl-card__title">Elevation by light</div>
+            <div class="trl-card__body">Higher surfaces are lighter graphite, never just shadowed.
+              Six neutral steps from ground-deep to popover — warmth comes from accents.</div>
+          </div>
+          <div class="trl-card trl-card--accent-tan">
+            <div class="trl-card__title">Tokens only</div>
+            <div class="trl-card__body">Product code consumes tier-2 semantic tokens
+              (<span class="trl-mono">--trl-accent</span>, <span class="trl-mono">--trl-bg-panel</span>).
+              Raw hex in an editor is a defect.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 01 · COLORS ────────────────────────────────────────────────────── -->
+    <section class="ds-section" id="colors">
+      <div class="trl-eyebrow">01 · Colors</div>
+      <h2 class="trl-h2">Color</h2>
+      <p class="ds-intro">Click any swatch to copy its <b>var()</b>. Tier-1 primitives shown here;
+        consumers should reach for the tier-2 semantic aliases listed below each ramp.</p>
+
+      <div class="trl-sec">Ground &amp; surfaces — elevation ladder</div>
+      <div class="ds-ramp">
+        <div class="ds-swatch" data-var="--trl-ground-deep"><div class="ds-swatch__chip" style="background:#0d0d0e"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">ground-deep</span><span>#0d0d0e</span></div></div>
+        <div class="ds-swatch" data-var="--trl-ground"><div class="ds-swatch__chip" style="background:#131314"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">ground</span><span>#131314</span></div></div>
+        <div class="ds-swatch" data-var="--trl-surface-1"><div class="ds-swatch__chip" style="background:#1b1b1d"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">surface-1</span><span>#1b1b1d</span></div></div>
+        <div class="ds-swatch" data-var="--trl-surface-2"><div class="ds-swatch__chip" style="background:#222225"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">surface-2</span><span>#222225</span></div></div>
+        <div class="ds-swatch" data-var="--trl-surface-3"><div class="ds-swatch__chip" style="background:#29292c"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">surface-3</span><span>#29292c</span></div></div>
+        <div class="ds-swatch" data-var="--trl-surface-4"><div class="ds-swatch__chip" style="background:#303034"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">surface-4</span><span>#303034</span></div></div>
+      </div>
+
+      <div class="trl-sec">Tan / gold — the working accent</div>
+      <div class="ds-ramp">
+        <div class="ds-swatch" data-var="--trl-tan-100"><div class="ds-swatch__chip" style="background:#e8ddc4"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">tan-100</span><span>#e8ddc4</span></div></div>
+        <div class="ds-swatch" data-var="--trl-tan-200"><div class="ds-swatch__chip" style="background:#d8c9a4"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">tan-200</span><span>#d8c9a4</span></div></div>
+        <div class="ds-swatch" data-var="--trl-tan-300"><div class="ds-swatch__chip" style="background:#c7b48a"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">tan-300 · base</span><span>#c7b48a</span></div></div>
+        <div class="ds-swatch" data-var="--trl-tan-400"><div class="ds-swatch__chip" style="background:#ab9a71"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">tan-400</span><span>#ab9a71</span></div></div>
+        <div class="ds-swatch" data-var="--trl-tan-500"><div class="ds-swatch__chip" style="background:#8f8560"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">tan-500 · dim</span><span>#8f8560</span></div></div>
+        <div class="ds-swatch" data-var="--trl-tan-600"><div class="ds-swatch__chip" style="background:#6b6247"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">tan-600</span><span>#6b6247</span></div></div>
+        <div class="ds-swatch" data-var="--trl-tan-700"><div class="ds-swatch__chip" style="background:#453f2d"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">tan-700</span><span>#453f2d</span></div></div>
+        <div class="ds-swatch" data-var="--trl-tan-800"><div class="ds-swatch__chip" style="background:#2b2719"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">tan-800</span><span>#2b2719</span></div></div>
+      </div>
+
+      <div class="trl-sec">Red — brand &amp; danger</div>
+      <div class="ds-ramp">
+        <div class="ds-swatch" data-var="--trl-red-brand"><div class="ds-swatch__chip" style="background:#ff0000"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">red-brand ⚠</span><span>#ff0000 · glow/laser only</span></div></div>
+        <div class="ds-swatch" data-var="--trl-red-300"><div class="ds-swatch__chip" style="background:#ff6b60"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">red-300</span><span>#ff6b60</span></div></div>
+        <div class="ds-swatch" data-var="--trl-red-400"><div class="ds-swatch__chip" style="background:#f04438"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">red-400</span><span>#f04438</span></div></div>
+        <div class="ds-swatch" data-var="--trl-red-500"><div class="ds-swatch__chip" style="background:#d92c20"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">red-500</span><span>#d92c20</span></div></div>
+        <div class="ds-swatch" data-var="--trl-red-600"><div class="ds-swatch__chip" style="background:#a8231a"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">red-600</span><span>#a8231a</span></div></div>
+        <div class="ds-swatch" data-var="--trl-red-700"><div class="ds-swatch__chip" style="background:#711712"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">red-700</span><span>#711712</span></div></div>
+        <div class="ds-swatch" data-var="--trl-red-soft"><div class="ds-swatch__chip" style="background:#d27a7a"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">red-soft · text</span><span>#d27a7a</span></div></div>
+      </div>
+
+      <div class="trl-sec">Status &amp; ink</div>
+      <div class="ds-ramp">
+        <div class="ds-swatch" data-var="--trl-green-400"><div class="ds-swatch__chip" style="background:#9ad27a"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">green-400</span><span>#9ad27a</span></div></div>
+        <div class="ds-swatch" data-var="--trl-green-600"><div class="ds-swatch__chip" style="background:#5f8a49"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">green-600</span><span>#5f8a49</span></div></div>
+        <div class="ds-swatch" data-var="--trl-amber-400"><div class="ds-swatch__chip" style="background:#cc9a3e"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">amber-400</span><span>#cc9a3e</span></div></div>
+        <div class="ds-swatch" data-var="--trl-amber-600"><div class="ds-swatch__chip" style="background:#8a6a2c"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">amber-600</span><span>#8a6a2c</span></div></div>
+        <div class="ds-swatch" data-var="--trl-ink"><div class="ds-swatch__chip" style="background:#e8e7e4"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">ink</span><span>#e8e7e4</span></div></div>
+        <div class="ds-swatch" data-var="--trl-ink-muted"><div class="ds-swatch__chip" style="background:#9b9a96"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">ink-muted</span><span>#9b9a96</span></div></div>
+        <div class="ds-swatch" data-var="--trl-ink-faint"><div class="ds-swatch__chip" style="background:#706f6b"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">ink-faint</span><span>#706f6b</span></div></div>
+        <div class="ds-swatch" data-var="--trl-ink-ghost"><div class="ds-swatch__chip" style="background:#464541"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">ink-ghost</span><span>#464541</span></div></div>
+      </div>
+
+      <div class="trl-sec">Dataviz series — validated by script (fixed order · never cycle · UI colors FAIL as series)</div>
+      <div class="ds-ramp">
+        <div class="ds-swatch" data-var="--trl-viz-cat-1"><div class="ds-swatch__chip" style="background:#4a86c8"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">viz-cat-1</span><span>#4a86c8 · série 1</span></div></div>
+        <div class="ds-swatch" data-var="--trl-viz-cat-2"><div class="ds-swatch__chip" style="background:#b8892e"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">viz-cat-2</span><span>#b8892e · série 2</span></div></div>
+        <div class="ds-swatch" data-var="--trl-viz-cat-3"><div class="ds-swatch__chip" style="background:#4f9a6a"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">viz-cat-3</span><span>#4f9a6a · série 3 / pole +</span></div></div>
+        <div class="ds-swatch" data-var="--trl-viz-cat-4"><div class="ds-swatch__chip" style="background:#cf4b3c"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">viz-cat-4</span><span>#cf4b3c · série 4 / pole −</span></div></div>
+        <div class="ds-swatch" data-var="--trl-viz-neutral"><div class="ds-swatch__chip" style="background:#7a786e"></div><div class="ds-swatch__meta"><span class="ds-swatch__name">viz-neutral</span><span>#7a786e · Other / midpoint</span></div></div>
+      </div>
+      <div class="ds-demo ds-demo--col ds-aa" style="margin-bottom:16px">
+        <div><span class="ok">✓ categórica</span> — pior par adjacente ΔE 17.0 (alvo ≥12) · contraste ≥3:1 na surface-1</div>
+        <div><span class="ok">✓ sequencial</span> — tan 600→300 monotônico (700/800 reprovam o piso 2:1 — não estender)</div>
+        <div><span class="warn">◇ regra</span> — status (green/amber/red-soft) é reservado, nunca série; 5ª série = "Other"; nunca dual-axis (PATTERNS · Gráficos)</div>
+      </div>
+
+      <div class="trl-sec">Semantic roles (tier 2 — use these)</div>
+      <div class="ds-demo ds-demo--col">
+        <ul class="trl-kv">
+          <li class="trl-kv__row"><span class="trl-kv__k">Backgrounds</span><span class="trl-kv__v trl-u-mono">--trl-bg-app · --trl-bg-panel · --trl-bg-raised · --trl-bg-input · --trl-bg-hover · --trl-bg-active · --trl-bg-overlay</span></li>
+          <li class="trl-kv__row"><span class="trl-kv__k">Foregrounds</span><span class="trl-kv__v trl-u-mono">--trl-fg · --trl-fg-muted · --trl-fg-faint · --trl-fg-on-accent</span></li>
+          <li class="trl-kv__row"><span class="trl-kv__k">Accent</span><span class="trl-kv__v trl-u-mono">--trl-accent · --trl-accent-strong · --trl-accent-dim</span></li>
+          <li class="trl-kv__row"><span class="trl-kv__k">Brand</span><span class="trl-kv__v trl-u-mono">--trl-brand <span style="color:var(--trl-fg-faint)">(laser · live dot · logo — never text)</span></span></li>
+          <li class="trl-kv__row"><span class="trl-kv__k">Status</span><span class="trl-kv__v trl-u-mono">--trl-success · --trl-warning · --trl-danger · --trl-danger-strong</span></li>
+        </ul>
+      </div>
+
+      <div class="trl-sec">Contrast (WCAG AA, measured)</div>
+      <div class="ds-demo ds-demo--col ds-aa">
+        <div><span class="ok">✓ ink</span> — 11.7–15.0 : 1 on every surface (AAA). Body text default.</div>
+        <div><span class="ok">✓ ink-muted</span> — 5.2–6.6 : 1 on every surface (AA). Secondary text + chrome labels (--trl-fg-label).</div>
+        <div><span class="ok">✓ tan-300</span> — 7.1–9.1 : 1 (AA+). Accent text safe everywhere.</div>
+        <div><span class="ok">✓ red-soft</span> — 4.7–6.0 : 1 (AA). The only red for status text.</div>
+        <div><span class="ok">✓ on-accent / on-danger</span> — 9.1 : 1 on tan-300 · 4.9 : 1 white on red-500 (AA).</div>
+        <div><span class="warn">◇ tan-500 (dim)</span> — 5.0 on ground, 4.7 on surface-1, <b>3.9–4.3 on surface-2/3</b> → uppercase labels ≥11px only; never essential content on raised surfaces.</div>
+        <div><span class="warn">◇ ink-faint</span> — 2.9–3.7 : 1 → decorative only (captions, separators, placeholders).</div>
+      </div>
+    </section>
+
+    <!-- ── 02 · TYPOGRAPHY ────────────────────────────────────────────────── -->
+    <section class="ds-section" id="typography">
+      <div class="trl-eyebrow">02 · Typography</div>
+      <h2 class="trl-h2">Type</h2>
+      <p class="ds-intro"><b>Bender</b> (the official EFT typeface) drives display — always
+        uppercase with wide tracking. <b>Segoe UI</b> carries dense body data at 12–13px, and
+        <b>Cascadia Mono</b> owns every number that must align.</p>
+
+      <div class="ds-demo ds-demo--col">
+        <div class="ds-specimen"><span class="ds-specimen__tag">display · 3xl</span><span class="trl-h1" style="margin:0">Raid Loadout Editor</span></div>
+        <div class="ds-specimen"><span class="ds-specimen__tag">display · 2xl</span><span class="trl-h2" style="margin:0">Class Perks &amp; Drawbacks</span></div>
+        <div class="ds-specimen"><span class="ds-specimen__tag">display · xl</span><span class="trl-h3" style="margin:0">Stash Configuration</span></div>
+        <div class="ds-specimen"><span class="ds-specimen__tag">eyebrow · sm</span><span class="trl-eyebrow">Section header · tracked widest</span></div>
+        <div class="ds-specimen"><span class="ds-specimen__tag">label · xs</span><span class="trl-field__label">Field label · tracked wide</span></div>
+        <div class="ds-specimen"><span class="ds-specimen__tag">body · md 13px</span><span>Body copy uses Segoe UI — readable at data density, never uppercase, never tracked.</span></div>
+        <div class="ds-specimen"><span class="ds-specimen__tag">body · muted</span><span class="trl-u-muted">Secondary body copy in ink-muted, AA on every surface.</span></div>
+        <div class="ds-specimen"><span class="ds-specimen__tag">mono · num</span><span class="trl-u-num">42.30 / 65.00 · ×1.15 · 78% · 1,240,500 ₽</span></div>
+      </div>
+      <pre class="trl-code">--trl-font-display: 'Bender', 'Bahnschrift', 'Segoe UI', system-ui, sans-serif;
+--trl-font-body:    'Segoe UI', system-ui, -apple-system, sans-serif;
+--trl-font-mono:    'Cascadia Mono', 'Consolas', ui-monospace, monospace;
+
+scale:    10 · 11 · 12 · 13 · 15 · 18 · 22 · 28 px   (--trl-text-2xs … 3xl)
+tracking: .08em wide · .14em wider · .22em widest     (display/labels only)</pre>
+    </section>
+
+    <!-- ── 03 · SPACING ───────────────────────────────────────────────────── -->
+    <section class="ds-section" id="spacing">
+      <div class="trl-eyebrow">03 · Spacing</div>
+      <h2 class="trl-h2">Spacing</h2>
+      <p class="ds-intro">4px grid with a 2px half-step. Editor UIs are dense by design:
+        default paddings sit at <b>space-2/space-3</b>, page gutters at <b>space-6</b>.</p>
+      <div class="ds-demo ds-demo--col">
+        <div class="ds-space-row"><span class="ds-specimen__tag">space-h · 2px</span><div class="bar" style="width:2px"></div></div>
+        <div class="ds-space-row"><span class="ds-specimen__tag">space-1 · 4px</span><div class="bar" style="width:4px"></div></div>
+        <div class="ds-space-row"><span class="ds-specimen__tag">space-2 · 8px</span><div class="bar" style="width:8px"></div></div>
+        <div class="ds-space-row"><span class="ds-specimen__tag">space-3 · 12px</span><div class="bar" style="width:12px"></div></div>
+        <div class="ds-space-row"><span class="ds-specimen__tag">space-4 · 16px</span><div class="bar" style="width:16px"></div></div>
+        <div class="ds-space-row"><span class="ds-specimen__tag">space-5 · 20px</span><div class="bar" style="width:20px"></div></div>
+        <div class="ds-space-row"><span class="ds-specimen__tag">space-6 · 24px</span><div class="bar" style="width:24px"></div></div>
+        <div class="ds-space-row"><span class="ds-specimen__tag">space-8 · 32px</span><div class="bar" style="width:32px"></div></div>
+        <div class="ds-space-row"><span class="ds-specimen__tag">space-10 · 40px</span><div class="bar" style="width:40px"></div></div>
+        <div class="ds-space-row"><span class="ds-specimen__tag">space-12 · 48px</span><div class="bar" style="width:48px"></div></div>
+      </div>
+    </section>
+
+    <!-- ── 04 · SURFACES ──────────────────────────────────────────────────── -->
+    <section class="ds-section" id="surfaces">
+      <div class="trl-eyebrow">04 · Surfaces &amp; elevation</div>
+      <h2 class="trl-h2">Surfaces</h2>
+      <p class="ds-intro">Elevation reads as <b>lighter olive</b>, reinforced (not replaced) by
+        shadow. Ambient depth comes from two pure-CSS textures on the app ground: a warm
+        vignette and near-invisible diagonal scanlines.</p>
+      <div class="ds-demo ds-demo--ground" style="display:block">
+        <div class="ds-label" style="margin-bottom:8px">ground → panel → raised → popover</div>
+        <div class="trl-panel" style="padding:16px">
+          <span class="ds-specimen__tag">surface-1 · panel · edge</span>
+          <div class="trl-panel--raised trl-panel" style="padding:16px;margin-top:8px">
+            <span class="ds-specimen__tag">surface-2 · raised · edge-strong + shadow-1</span>
+            <div style="background:var(--trl-surface-4);border:1px solid var(--trl-edge-strong);box-shadow:var(--trl-shadow-2);padding:12px;margin-top:8px">
+              <span class="ds-specimen__tag">surface-4 · popover/tooltip · shadow-2</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ds-label">Ambient photo — opt-in <span style="text-transform:none">.trl-app--photo</span> (usado no editor-starter; scrim ≥86% obrigatório)</div>
+      <div class="ds-demo ds-demo--col" style="padding:0">
+        <div style="background: var(--trl-scrim), var(--trl-photo) center 30% / cover no-repeat; padding: 28px 16px">
+          <div class="trl-panel" style="max-width:380px;margin:0 auto">
+            <div class="trl-panel__body" style="font-size:12px">Painéis continuam opacos sobre a foto — o scrim
+              (<span class="trl-mono">--trl-scrim</span>) segura o AA do texto no ground. Asset embutido:
+              <span class="trl-mono">assets/bg-ambient.jpg</span> (317 KB · PROVENANCE.txt).</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ds-demo">
+        <div class="ds-label">glows — signals, not decoration</div>
+        <span class="trl-tag"><span class="trl-tag__dot"></span>tan</span>
+        <span class="trl-tag trl-tag--green"><span class="trl-tag__dot"></span>green</span>
+        <span class="trl-tag trl-tag--amber"><span class="trl-tag__dot"></span>amber</span>
+        <span class="trl-tag trl-tag--red"><span class="trl-tag__dot"></span>danger</span>
+        <span class="trl-tag trl-tag--brand"><span class="trl-tag__dot"></span>brand</span>
+      </div>
+    </section>
+
+    <!-- ── 05 · SIGNATURES ────────────────────────────────────────────────── -->
+    <section class="ds-section" id="signatures">
+      <div class="trl-eyebrow">05 · Signature elements</div>
+      <h2 class="trl-h2">Signatures</h2>
+      <p class="ds-intro">The elements that make a screen unmistakably <b>TRL</b>. Every editor
+        should use the screen-bar for panel chrome and may fire the laser divider <b>once</b> per view.</p>
+
+      <div class="ds-label">Screen-bar — military window chrome</div>
+      <div class="ds-demo ds-demo--col" style="padding:0;gap:0">
+        <div class="trl-screen-bar">
+          <span class="trl-screen-bar__dot trl-screen-bar__dot--ok"></span>
+          <span class="trl-screen-bar__title">◪ Loadout / Class</span> · Tank
+          <span class="trl-screen-bar__meta">synced</span>
+        </div>
+        <div class="trl-screen-bar">
+          <span class="trl-screen-bar__dot trl-screen-bar__dot--live"></span>
+          <span class="trl-screen-bar__title">◪ Loadout / Class</span> · Tank
+          <span class="trl-screen-bar__meta">unsaved changes</span>
+        </div>
+      </div>
+      <pre class="trl-code">&lt;div class="trl-screen-bar"&gt;
+  &lt;span class="trl-screen-bar__dot trl-screen-bar__dot--live"&gt;&lt;/span&gt;
+  &lt;span class="trl-screen-bar__title"&gt;◪ Loadout / Class&lt;/span&gt; · Tank
+  &lt;span class="trl-screen-bar__meta"&gt;unsaved changes&lt;/span&gt;
+&lt;/div&gt;</pre>
+
+      <div class="ds-label">Laser divider — the brand moment (max one per view)</div>
+      <div class="ds-demo ds-demo--col ds-demo--ground">
+        <hr class="trl-divider trl-divider--laser" style="margin:8px 0">
+      </div>
+
+      <div class="ds-label">Accent-spine cards · glowing tags · kv list</div>
+      <div class="ds-demo" style="align-items:stretch">
+        <div class="trl-card trl-card--accent-green" style="flex:1;min-width:200px">
+          <div class="trl-card__title">🎒 Pack Mule</div>
+          <div class="trl-card__body"><span class="trl-chip trl-chip--up">+30%</span> carry limit</div>
+        </div>
+        <div class="trl-card trl-card--accent-red" style="flex:1;min-width:200px">
+          <div class="trl-card__title">🧱 Heavy Frame</div>
+          <div class="trl-card__body"><span class="trl-chip trl-chip--down">−10%</span> move speed</div>
+        </div>
+        <div class="trl-card trl-card--accent-amber" style="flex:1;min-width:200px">
+          <div class="trl-card__title">⚠ Needs test</div>
+          <div class="trl-card__body">Awaiting in-raid validation</div>
+        </div>
+        <div class="trl-card trl-card--interactive" style="flex:1;min-width:200px">
+          <div class="trl-card__title">Interactive card</div>
+          <div class="trl-card__body">Hover: lift + edge. <span class="trl-mono">is-selected</span> marca a escolha em pickers.</div>
+        </div>
+        <div style="flex:1;min-width:220px">
+          <ul class="trl-kv">
+            <li class="trl-kv__row"><span class="trl-kv__k">Where</span><span class="trl-kv__v">Coop loading screen, <b>your row</b></span></li>
+            <li class="trl-kv__row"><span class="trl-kv__k">Locale</span><span class="trl-kv__v">PT-BR / EN, follows game</span></li>
+            <li class="trl-kv__row"><span class="trl-kv__k">Solo</span><span class="trl-kv__v">Hides itself — nothing breaks</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="ds-label">Progress — tan gradient fill · status variants · dead track</div>
+      <div class="ds-demo ds-demo--col">
+        <div class="trl-progress"><div class="trl-progress__fill" style="width:72%"></div></div>
+        <div class="trl-progress trl-progress--green"><div class="trl-progress__fill" style="width:56%"></div></div>
+        <div class="trl-progress trl-progress--amber"><div class="trl-progress__fill" style="width:34%"></div></div>
+        <div class="trl-progress trl-progress--red"><div class="trl-progress__fill" style="width:12%"></div></div>
+        <div class="trl-progress trl-progress--dead"></div>
+      </div>
+
+      <div class="ds-label">Chamfer — EFT corner cut (solid surfaces only; a clip-path would eat a 1px border)</div>
+      <div class="ds-demo">
+        <button class="trl-btn trl-btn--primary trl-btn--chamfer">Deploy</button>
+        <button class="trl-btn trl-btn--danger trl-btn--chamfer">Wipe profile</button>
+      </div>
+    </section>
+
+    <!-- ── 06 · COMPONENTS ────────────────────────────────────────────────── -->
+    <section class="ds-section" id="components">
+      <div class="trl-eyebrow">06 · Components</div>
+      <h2 class="trl-h2">Components</h2>
+
+      <div class="ds-label">Icons — Tabler requadrada (MIT · caps/joins retos · currentColor · click copia o id)</div>
+      <div class="ds-demo" style="display:block">
+        <div class="ds-icons">
+        <div class="ds-icon" data-copy="trl-i-search"><svg class="trl-icon"><use href="#trl-i-search"/></svg><span>search</span></div>
+        <div class="ds-icon" data-copy="trl-i-x"><svg class="trl-icon"><use href="#trl-i-x"/></svg><span>x</span></div>
+        <div class="ds-icon" data-copy="trl-i-plus"><svg class="trl-icon"><use href="#trl-i-plus"/></svg><span>plus</span></div>
+        <div class="ds-icon" data-copy="trl-i-minus"><svg class="trl-icon"><use href="#trl-i-minus"/></svg><span>minus</span></div>
+        <div class="ds-icon" data-copy="trl-i-pencil"><svg class="trl-icon"><use href="#trl-i-pencil"/></svg><span>pencil</span></div>
+        <div class="ds-icon" data-copy="trl-i-trash"><svg class="trl-icon"><use href="#trl-i-trash"/></svg><span>trash</span></div>
+        <div class="ds-icon" data-copy="trl-i-copy"><svg class="trl-icon"><use href="#trl-i-copy"/></svg><span>copy</span></div>
+        <div class="ds-icon" data-copy="trl-i-check"><svg class="trl-icon"><use href="#trl-i-check"/></svg><span>check</span></div>
+        <div class="ds-icon" data-copy="trl-i-chevron-down"><svg class="trl-icon"><use href="#trl-i-chevron-down"/></svg><span>chevron-down</span></div>
+        <div class="ds-icon" data-copy="trl-i-chevron-up"><svg class="trl-icon"><use href="#trl-i-chevron-up"/></svg><span>chevron-up</span></div>
+        <div class="ds-icon" data-copy="trl-i-chevron-left"><svg class="trl-icon"><use href="#trl-i-chevron-left"/></svg><span>chevron-left</span></div>
+        <div class="ds-icon" data-copy="trl-i-chevron-right"><svg class="trl-icon"><use href="#trl-i-chevron-right"/></svg><span>chevron-right</span></div>
+        <div class="ds-icon" data-copy="trl-i-arrows-sort"><svg class="trl-icon"><use href="#trl-i-arrows-sort"/></svg><span>arrows-sort</span></div>
+        <div class="ds-icon" data-copy="trl-i-filter"><svg class="trl-icon"><use href="#trl-i-filter"/></svg><span>filter</span></div>
+        <div class="ds-icon" data-copy="trl-i-settings"><svg class="trl-icon"><use href="#trl-i-settings"/></svg><span>settings</span></div>
+        <div class="ds-icon" data-copy="trl-i-refresh"><svg class="trl-icon"><use href="#trl-i-refresh"/></svg><span>refresh</span></div>
+        <div class="ds-icon" data-copy="trl-i-device-floppy"><svg class="trl-icon"><use href="#trl-i-device-floppy"/></svg><span>device-floppy</span></div>
+        <div class="ds-icon" data-copy="trl-i-download"><svg class="trl-icon"><use href="#trl-i-download"/></svg><span>download</span></div>
+        <div class="ds-icon" data-copy="trl-i-upload"><svg class="trl-icon"><use href="#trl-i-upload"/></svg><span>upload</span></div>
+        <div class="ds-icon" data-copy="trl-i-external-link"><svg class="trl-icon"><use href="#trl-i-external-link"/></svg><span>external-link</span></div>
+        <div class="ds-icon" data-copy="trl-i-eye"><svg class="trl-icon"><use href="#trl-i-eye"/></svg><span>eye</span></div>
+        <div class="ds-icon" data-copy="trl-i-eye-off"><svg class="trl-icon"><use href="#trl-i-eye-off"/></svg><span>eye-off</span></div>
+        <div class="ds-icon" data-copy="trl-i-lock"><svg class="trl-icon"><use href="#trl-i-lock"/></svg><span>lock</span></div>
+        <div class="ds-icon" data-copy="trl-i-lock-open"><svg class="trl-icon"><use href="#trl-i-lock-open"/></svg><span>lock-open</span></div>
+        <div class="ds-icon" data-copy="trl-i-info-circle"><svg class="trl-icon"><use href="#trl-i-info-circle"/></svg><span>info-circle</span></div>
+        <div class="ds-icon" data-copy="trl-i-alert-triangle"><svg class="trl-icon"><use href="#trl-i-alert-triangle"/></svg><span>alert-triangle</span></div>
+        <div class="ds-icon" data-copy="trl-i-alert-circle"><svg class="trl-icon"><use href="#trl-i-alert-circle"/></svg><span>alert-circle</span></div>
+        <div class="ds-icon" data-copy="trl-i-circle-check"><svg class="trl-icon"><use href="#trl-i-circle-check"/></svg><span>circle-check</span></div>
+        <div class="ds-icon" data-copy="trl-i-ban"><svg class="trl-icon"><use href="#trl-i-ban"/></svg><span>ban</span></div>
+        <div class="ds-icon" data-copy="trl-i-dots"><svg class="trl-icon"><use href="#trl-i-dots"/></svg><span>dots</span></div>
+        <div class="ds-icon" data-copy="trl-i-dots-vertical"><svg class="trl-icon"><use href="#trl-i-dots-vertical"/></svg><span>dots-vertical</span></div>
+        <div class="ds-icon" data-copy="trl-i-menu-2"><svg class="trl-icon"><use href="#trl-i-menu-2"/></svg><span>menu-2</span></div>
+        <div class="ds-icon" data-copy="trl-i-maximize"><svg class="trl-icon"><use href="#trl-i-maximize"/></svg><span>maximize</span></div>
+        <div class="ds-icon" data-copy="trl-i-minimize"><svg class="trl-icon"><use href="#trl-i-minimize"/></svg><span>minimize</span></div>
+        <div class="ds-icon" data-copy="trl-i-arrow-back-up"><svg class="trl-icon"><use href="#trl-i-arrow-back-up"/></svg><span>arrow-back-up</span></div>
+        <div class="ds-icon" data-copy="trl-i-corner-down-right"><svg class="trl-icon"><use href="#trl-i-corner-down-right"/></svg><span>corner-down-right</span></div>
+        <div class="ds-icon" data-copy="trl-i-grip-vertical"><svg class="trl-icon"><use href="#trl-i-grip-vertical"/></svg><span>grip-vertical</span></div>
+        <div class="ds-icon" data-copy="trl-i-rotate-clockwise"><svg class="trl-icon"><use href="#trl-i-rotate-clockwise"/></svg><span>rotate-clockwise</span></div>
+        <div class="ds-icon" data-copy="trl-i-question-mark"><svg class="trl-icon"><use href="#trl-i-question-mark"/></svg><span>question-mark</span></div>
+        <div class="ds-icon" data-copy="trl-i-folder"><svg class="trl-icon"><use href="#trl-i-folder"/></svg><span>folder</span></div>
+        <div class="ds-icon" data-copy="trl-i-file"><svg class="trl-icon"><use href="#trl-i-file"/></svg><span>file</span></div>
+        <div class="ds-icon" data-copy="trl-i-clipboard"><svg class="trl-icon"><use href="#trl-i-clipboard"/></svg><span>clipboard</span></div>
+        <div class="ds-icon" data-copy="trl-i-link"><svg class="trl-icon"><use href="#trl-i-link"/></svg><span>link</span></div>
+        <div class="ds-icon" data-copy="trl-i-loader-2"><svg class="trl-icon"><use href="#trl-i-loader-2"/></svg><span>loader-2</span></div>
+        <div class="ds-icon" data-copy="trl-i-crosshair"><svg class="trl-icon"><use href="#trl-i-crosshair"/></svg><span>crosshair</span></div>
+        <div class="ds-icon" data-copy="trl-i-target"><svg class="trl-icon"><use href="#trl-i-target"/></svg><span>target</span></div>
+        <div class="ds-icon" data-copy="trl-i-shield"><svg class="trl-icon"><use href="#trl-i-shield"/></svg><span>shield</span></div>
+        <div class="ds-icon" data-copy="trl-i-shield-check"><svg class="trl-icon"><use href="#trl-i-shield-check"/></svg><span>shield-check</span></div>
+        <div class="ds-icon" data-copy="trl-i-radar-2"><svg class="trl-icon"><use href="#trl-i-radar-2"/></svg><span>radar-2</span></div>
+        <div class="ds-icon" data-copy="trl-i-swords"><svg class="trl-icon"><use href="#trl-i-swords"/></svg><span>swords</span></div>
+        <div class="ds-icon" data-copy="trl-i-bomb"><svg class="trl-icon"><use href="#trl-i-bomb"/></svg><span>bomb</span></div>
+        <div class="ds-icon" data-copy="trl-i-backpack"><svg class="trl-icon"><use href="#trl-i-backpack"/></svg><span>backpack</span></div>
+        <div class="ds-icon" data-copy="trl-i-first-aid-kit"><svg class="trl-icon"><use href="#trl-i-first-aid-kit"/></svg><span>first-aid-kit</span></div>
+        <div class="ds-icon" data-copy="trl-i-skull"><svg class="trl-icon"><use href="#trl-i-skull"/></svg><span>skull</span></div>
+        <div class="ds-icon" data-copy="trl-i-map-2"><svg class="trl-icon"><use href="#trl-i-map-2"/></svg><span>map-2</span></div>
+        </div>
+      </div>
+      <pre class="trl-code">&lt;!-- 1. inline assets/icons.svg no topo do &lt;body&gt; (uma vez) --&gt;
+&lt;!-- 2. use: --&gt;
+&lt;svg class="trl-icon"&gt;&lt;use href="#trl-i-search"/&gt;&lt;/svg&gt;
+&lt;svg class="trl-icon trl-icon--sm"&gt;&lt;use href="#trl-i-filter"/&gt;&lt;/svg&gt;
+&lt;button class="trl-btn trl-btn--icon" aria-label="Settings"&gt;
+  &lt;svg class="trl-icon"&gt;&lt;use href="#trl-i-settings"/&gt;&lt;/svg&gt;&lt;/button&gt;</pre>
+
+      <div class="ds-label">Buttons</div>
+      <div class="ds-demo">
+        <button class="trl-btn">Default</button>
+        <button class="trl-btn trl-btn--primary">Primary</button>
+        <button class="trl-btn trl-btn--danger">Delete</button>
+        <button class="trl-btn trl-btn--ghost">Ghost</button>
+        <button class="trl-btn trl-btn--icon" data-trl-tip="Settings" aria-label="Settings"><svg class="trl-icon"><use href="#trl-i-settings"/></svg></button>
+        <button class="trl-btn trl-btn--sm">Small</button>
+        <button class="trl-btn" disabled>Disabled</button>
+      </div>
+      <pre class="trl-code">&lt;button class="trl-btn"&gt;Default&lt;/button&gt;
+&lt;button class="trl-btn trl-btn--primary"&gt;Primary&lt;/button&gt;
+&lt;button class="trl-btn trl-btn--danger"&gt;Delete&lt;/button&gt;   &lt;!-- destructive only --&gt;</pre>
+
+      <div class="ds-label">Form fields</div>
+      <div class="ds-demo ds-demo--col" style="max-width:560px">
+        <div class="trl-form-grid">
+          <label class="trl-field">
+            <span class="trl-field__label">Class name</span>
+            <input class="trl-input" name="class-name" value="Tank" placeholder="e.g. Medic">
+            <span class="trl-field__hint">Shown on the loading screen</span>
+          </label>
+          <label class="trl-field is-invalid">
+            <span class="trl-field__label">Carry multiplier</span>
+            <input class="trl-input" name="carry-mult" value="4.5">
+            <span class="trl-field__error">Must be between 0.5 and 3.0</span>
+          </label>
+          <label class="trl-field">
+            <span class="trl-field__label">Faction</span>
+            <select class="trl-select" name="faction"><option>USEC</option><option>BEAR</option></select>
+          </label>
+          <label class="trl-field">
+            <span class="trl-field__label">Search item</span>
+            <span class="trl-search">
+              <input class="trl-input" name="item-search" placeholder="Search 2,400 items…">
+              <button class="trl-search__clear" type="button">×</button>
+            </span>
+          </label>
+        </div>
+        <div class="trl-u-flex trl-u-gap-4" style="flex-wrap:wrap">
+          <label class="trl-checkbox"><input type="checkbox" name="enabled" checked><span>Enabled</span></label>
+          <label class="trl-radio"><input type="radio" name="r" checked><span>PMC</span></label>
+          <label class="trl-radio"><input type="radio" name="r"><span>Scav</span></label>
+          <label class="trl-switch"><input type="checkbox" name="fika-sync" checked><span>Fika sync</span></label>
+        </div>
+        <label class="trl-field">
+          <span class="trl-field__label">Spawn chance · <span class="js-slider-val">65</span>%</span>
+          <!-- step = incremento por arraste (default 1 = 1%) -->
+          <input type="range" class="trl-slider" name="spawn-chance" value="65" min="0" max="100" step="1">
+        </label>
+      </div>
+
+      <div class="ds-label">Dropdown (rich select) — click to toggle</div>
+      <div class="ds-demo" style="min-height:120px;align-items:flex-start">
+        <div class="trl-dropdown" id="ds-dropdown">
+          <button class="trl-dropdown__trigger" type="button">Medic</button>
+          <div class="trl-dropdown__panel">
+            <div class="trl-dropdown__option">Tank</div>
+            <div class="trl-dropdown__option is-selected">Medic</div>
+            <div class="trl-dropdown__option">Hunter</div>
+            <div class="trl-dropdown__option">Scout</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ds-label">Multi-select (filters) — checkbox options · count no trigger · select all/clear · chips de filtros aplicados</div>
+      <div class="ds-demo ds-demo--col" style="align-items:flex-start;min-height:120px">
+        <div class="trl-multiselect" id="ds-multiselect">
+          <button class="trl-multiselect__trigger" type="button">
+            Traders
+            <span class="trl-multiselect__count" id="ds-ms-count">2</span>
+          </button>
+          <div class="trl-multiselect__panel">
+            <div class="trl-multiselect__search">
+              <input class="trl-input" name="ms-filter" placeholder="Filter…" id="ds-ms-filter">
+            </div>
+            <div class="trl-multiselect__option is-checked">Prapor<span class="trl-multiselect__opt-count">312</span></div>
+            <div class="trl-multiselect__option is-checked">Therapist<span class="trl-multiselect__opt-count">184</span></div>
+            <div class="trl-multiselect__option">Mechanic<span class="trl-multiselect__opt-count">406</span></div>
+            <div class="trl-multiselect__option">Peacekeeper<span class="trl-multiselect__opt-count">228</span></div>
+            <div class="trl-multiselect__option">Jaeger<span class="trl-multiselect__opt-count">157</span></div>
+            <div class="trl-multiselect__actions">
+              <button class="trl-btn trl-btn--ghost trl-btn--sm" id="ds-ms-all" type="button">Select all</button>
+              <button class="trl-btn trl-btn--ghost trl-btn--sm" id="ds-ms-none" type="button">Clear</button>
+            </div>
+          </div>
+        </div>
+        <div class="trl-u-flex trl-u-gap-2" style="flex-wrap:wrap">
+          <span class="trl-filter-chip">trader: <b>Prapor</b><button class="trl-filter-chip__remove" type="button">×</button></span>
+          <span class="trl-filter-chip">trader: <b>Therapist</b><button class="trl-filter-chip__remove" type="button">×</button></span>
+          <span class="trl-filter-chip">price ≤ <b>50k ₽</b><button class="trl-filter-chip__remove" type="button">×</button></span>
+          <button class="trl-btn trl-btn--ghost trl-btn--sm" type="button">Clear all</button>
+        </div>
+      </div>
+      <pre class="trl-code">&lt;div class="trl-multiselect is-open"&gt;
+  &lt;button class="trl-multiselect__trigger"&gt;Traders
+    &lt;span class="trl-multiselect__count"&gt;2&lt;/span&gt;&lt;/button&gt;
+  &lt;div class="trl-multiselect__panel"&gt;
+    &lt;div class="trl-multiselect__option is-checked"&gt;Prapor
+      &lt;span class="trl-multiselect__opt-count"&gt;312&lt;/span&gt;&lt;/div&gt;
+    …
+    &lt;div class="trl-multiselect__actions"&gt;…&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+
+      <div class="ds-label">Tabs · breadcrumb · pagination — click tabs to switch</div>
+      <div class="ds-demo ds-demo--col">
+        <div class="trl-tabs" id="ds-tabs">
+          <button class="trl-tabs__tab is-active">Perks</button>
+          <button class="trl-tabs__tab">Drawbacks</button>
+          <button class="trl-tabs__tab">Loadout</button>
+        </div>
+        <div class="trl-breadcrumb">
+          <a href="#components">Classes</a><span class="trl-breadcrumb__sep">/</span>
+          <a href="#components">Tank</a><span class="trl-breadcrumb__sep">/</span>
+          <span class="trl-breadcrumb__current">Perks</span>
+        </div>
+        <div class="trl-pagination">
+          <button class="trl-pagination__page">‹</button>
+          <button class="trl-pagination__page">1</button>
+          <button class="trl-pagination__page is-active">2</button>
+          <button class="trl-pagination__page">3</button>
+          <button class="trl-pagination__page">›</button>
+          <span class="trl-pagination__info">41–80 of 312</span>
+        </div>
+      </div>
+
+      <div class="ds-label">Tree</div>
+      <div class="ds-demo ds-demo--col" style="max-width:320px">
+        <div class="trl-tree">
+          <div class="trl-tree__node is-open"><span class="trl-tree__chev"></span>Weapons<span class="trl-tree__count">148</span></div>
+          <div class="trl-tree__children">
+            <div class="trl-tree__node is-active"><span class="trl-tree__chev" style="visibility:hidden"></span>Assault rifles<span class="trl-tree__count">32</span></div>
+            <div class="trl-tree__node"><span class="trl-tree__chev" style="visibility:hidden"></span>SMGs<span class="trl-tree__count">18</span></div>
+          </div>
+          <div class="trl-tree__node"><span class="trl-tree__chev"></span>Gear<span class="trl-tree__count">96</span></div>
+        </div>
+      </div>
+
+      <div class="ds-label">Table — sticky header · zebra · sorted column · selected row</div>
+      <div class="ds-demo ds-demo--col" style="padding:0">
+        <table class="trl-table">
+          <thead>
+            <tr>
+              <th class="is-sortable">Item</th>
+              <th class="is-sortable is-sorted">Flea price</th>
+              <th>Trader</th>
+              <th class="num">Δ 24h</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Graphics card</td><td class="num">1,240,500 ₽</td><td>Mechanic</td><td class="num trl-chip--up">+4.2%</td></tr>
+            <tr class="is-selected"><td>LEDX Skin Transilluminator</td><td class="num">985,000 ₽</td><td>Therapist</td><td class="num trl-chip--down">−1.8%</td></tr>
+            <tr><td>Physical Bitcoin</td><td class="num">402,700 ₽</td><td>Mechanic</td><td class="num trl-chip--neutral">0.0%</td></tr>
+            <tr><td>Tetriz portable game</td><td class="num">220,150 ₽</td><td>Mechanic</td><td class="num trl-chip--up">+0.9%</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="ds-label">Stats · badges · inline code</div>
+      <div class="ds-demo ds-demo--col" style="max-width:460px">
+        <div class="trl-stat trl-stat--hi">
+          <span class="trl-stat__label">Weight</span>
+          <span class="trl-stat__value">42.3 / 65.0 <span class="trl-chip--up">▲</span> <span class="trl-badge trl-badge--green">Pack Mule +30%</span></span>
+        </div>
+        <div class="trl-stat">
+          <span class="trl-stat__label">Energy</span>
+          <span class="trl-stat__value">92 / 100</span>
+        </div>
+        <div class="trl-stat trl-stat--dim">
+          <span class="trl-stat__label">Recoil (weapon)</span>
+          <span class="trl-stat__value">54 <span class="trl-badge">base item</span></span>
+        </div>
+        <div class="trl-u-flex trl-u-gap-2">
+          <span class="trl-badge">default</span>
+          <span class="trl-badge trl-badge--green">buffed</span>
+          <span class="trl-badge trl-badge--amber">needs test</span>
+          <span class="trl-badge trl-badge--red">flea banned</span>
+        </div>
+        <div>Template id <span class="trl-mono">5c0e625a86f7742d77340f62</span> resolves via <span class="trl-mono">DatabaseService</span>.</div>
+      </div>
+    </section>
+
+
+    <!-- ── 07 · GAME DATA ─────────────────────────────────────────────────── -->
+    <section class="ds-section" id="gamedata">
+      <div class="trl-eyebrow">07 · Game data</div>
+      <h2 class="trl-h2">Game data</h2>
+      <p class="ds-intro">Tarkov domain primitives shared by every mod editor: item cells in
+        game units, the 2D stash grid, the equipment paper doll, recursive mod trees and
+        heat-mapped matrices. <b>CSS-only</b> — drag-and-drop, rotation and validation stay in
+        the consumer (recipes in PATTERNS.md).</p>
+
+      <div class="ds-label">Item cell — game units via --w/--h · qty · contents · states</div>
+      <div class="ds-demo" style="align-items:flex-end">
+        <div class="trl-cell" style="--w:1;--h:1"><div class="trl-cell__icon">🔧</div></div>
+        <div class="trl-cell" style="--w:2;--h:1">
+          <div class="trl-cell__icon">🔫</div>
+          <span class="trl-cell__qty">×30</span>
+        </div>
+        <div class="trl-cell" style="--w:2;--h:2">
+          <div class="trl-cell__icon">🎒</div>
+          <span class="trl-cell__contents">▤4</span>
+        </div>
+        <div class="trl-cell is-editable" style="--w:1;--h:1" data-trl-tip="is-editable — click to edit">
+          <div class="trl-cell__icon">🧰</div>
+        </div>
+        <div class="trl-cell is-empty" style="--w:1;--h:1"></div>
+        <div class="trl-cell is-invalid" style="--w:1;--h:1">
+          <div class="trl-cell__icon">❓</div>
+          <span class="trl-cell__label">unresolved</span>
+        </div>
+      </div>
+      <pre class="trl-code">&lt;div class="trl-cell is-editable" style="--w:2;--h:1"&gt;
+  &lt;div class="trl-cell__icon"&gt;&lt;img src="…" alt=""&gt;&lt;/div&gt;
+  &lt;span class="trl-cell__qty"&gt;×30&lt;/span&gt;
+&lt;/div&gt;</pre>
+
+      <div class="ds-label">2D stash grid — items placed via grid-column/row · drop hints · dashed outline while dragging</div>
+      <div class="ds-demo" style="overflow-x:auto">
+        <div class="trl-grid2d is-dragging" style="--cols:8;grid-template-rows:repeat(4,var(--trl-cell-unit))">
+          <div class="trl-grid2d__item" style="grid-column:1/span 2;grid-row:1/span 1">
+            <div class="trl-cell"><div class="trl-cell__icon">🔫</div></div>
+          </div>
+          <div class="trl-grid2d__item" style="grid-column:4/span 2;grid-row:2/span 2">
+            <div class="trl-cell"><div class="trl-cell__icon">🎒</div><span class="trl-cell__contents">▤2</span></div>
+          </div>
+          <div class="trl-grid2d__item" style="grid-column:7/span 1;grid-row:1/span 1">
+            <div class="trl-cell"><div class="trl-cell__icon">💊</div><span class="trl-cell__qty">×3</span></div>
+          </div>
+          <div class="trl-grid2d__hint--ok" style="grid-column:1/span 2;grid-row:3/span 1"></div>
+          <div class="trl-grid2d__hint--bad" style="grid-column:6/span 2;grid-row:4/span 1"></div>
+        </div>
+      </div>
+
+      <div class="ds-label">Paper doll — espelho da tela Gear do EFT: grade de slots sobre a silhueta + coluna de carga</div>
+      <div class="ds-demo" style="align-items:flex-start">
+        <div class="trl-doll" style="width:min(460px,100%)">
+          <div class="trl-doll__silhouette"></div>
+
+          <div class="trl-doll__slot trl-doll__slot--earpiece">
+            <span class="trl-doll__label">Earpiece</span>
+            <div class="trl-cell" style="--w:2;--h:2"><div class="trl-cell__icon">🎧</div></div>
+          </div>
+          <div class="trl-doll__slot trl-doll__slot--headwear">
+            <span class="trl-doll__label">Headwear</span>
+            <div class="trl-cell" style="--w:2;--h:2"><div class="trl-cell__icon">🪖</div></div>
+          </div>
+          <div class="trl-doll__slot trl-doll__slot--facecover">
+            <span class="trl-doll__label">Face cover</span>
+            <div class="trl-cell is-empty" style="--w:2;--h:2"></div>
+          </div>
+
+          <div class="trl-doll__slot trl-doll__slot--armband">
+            <span class="trl-doll__label">Armband</span>
+            <div class="trl-cell is-empty" style="--w:2;--h:1"></div>
+          </div>
+          <div class="trl-doll__slot trl-doll__slot--bodyarmor">
+            <span class="trl-doll__label">Body armor</span>
+            <div class="trl-cell" style="--w:2;--h:2"><div class="trl-cell__icon">🦺</div></div>
+          </div>
+          <div class="trl-doll__slot trl-doll__slot--eyewear">
+            <span class="trl-doll__label">Eyewear</span>
+            <div class="trl-cell" style="--w:2;--h:1"><div class="trl-cell__icon">🥽</div></div>
+          </div>
+
+          <div class="trl-doll__slot trl-doll__slot--onsling">
+            <span class="trl-doll__label">On sling</span>
+            <div class="trl-cell is-editable" style="--w:4;--h:2"><div class="trl-cell__icon">🔫</div></div>
+          </div>
+          <div class="trl-doll__slot trl-doll__slot--holster">
+            <span class="trl-doll__label">Holster</span>
+            <div class="trl-cell is-empty" style="--w:2;--h:2"></div>
+          </div>
+
+          <div class="trl-doll__slot trl-doll__slot--onback">
+            <span class="trl-doll__label">On back</span>
+            <div class="trl-cell is-empty" style="--w:4;--h:2"></div>
+          </div>
+          <div class="trl-doll__slot trl-doll__slot--scabbard">
+            <span class="trl-doll__label">Scabbard</span>
+            <div class="trl-cell" style="--w:2;--h:2"><div class="trl-cell__icon">🔪</div></div>
+          </div>
+
+          <div class="trl-doll__carry">
+            <div class="trl-doll__slot is-required-missing">
+              <span class="trl-doll__label">⚠ Tactical rig</span>
+              <div class="trl-cell is-empty" style="--w:2;--h:2"></div>
+            </div>
+            <div class="trl-doll__slot">
+              <span class="trl-doll__label">Pockets</span>
+              <div class="trl-doll__cells">
+                <div class="trl-cell" style="--w:1;--h:1"><div class="trl-cell__icon">💊</div></div>
+                <div class="trl-cell" style="--w:1;--h:1"><div class="trl-cell__icon">🔦</div></div>
+                <div class="trl-cell is-empty" style="--w:1;--h:1"></div>
+                <div class="trl-cell is-empty" style="--w:1;--h:1"></div>
+              </div>
+            </div>
+            <div class="trl-doll__slot">
+              <span class="trl-doll__label">Backpack</span>
+              <div class="trl-cell" style="--w:2;--h:2"><div class="trl-cell__icon">🎒</div><span class="trl-cell__contents">▤6</span></div>
+            </div>
+            <div class="trl-doll__slot">
+              <span class="trl-doll__label">Pouch</span>
+              <div class="trl-cell" style="--w:2;--h:2"><div class="trl-cell__icon">🔒</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="flex:1;min-width:220px">
+          <ul class="trl-kv">
+            <li class="trl-kv__row"><span class="trl-kv__k">Layout</span><span class="trl-kv__v">Espelho da tela <b>Gear</b>: grade 3 colunas sobre a silhueta (armas cruzam 2 colunas) + coluna de carga separada por hairline</span></li>
+            <li class="trl-kv__row"><span class="trl-kv__k">Slots</span><span class="trl-kv__v">Áreas nomeadas 1:1 com o EFT: <span class="trl-mono">--earpiece --headwear --facecover --armband --bodyarmor --eyewear --onsling --onback --holster --scabbard</span> + carry (rig · pockets ×4 · backpack · pouch)</span></li>
+            <li class="trl-kv__row"><span class="trl-kv__k">Scale</span><span class="trl-kv__v">Células em <b>cqw</b> — o doll escala com a coluna</span></li>
+            <li class="trl-kv__row"><span class="trl-kv__k">Custom</span><span class="trl-kv__v">Slot extra ou posição pixel-accurate: <span class="trl-mono">style="position:absolute;left…"</span></span></li>
+            <li class="trl-kv__row"><span class="trl-kv__k">States</span><span class="trl-kv__v"><span class="trl-mono">is-empty</span> · <span class="trl-mono">is-required-missing</span> · <span class="trl-mono">is-editable</span> · <span class="trl-mono">is-invalid</span></span></li>
+          </ul>
+          <pre class="trl-code" style="margin-top:12px">&lt;div class="trl-doll"&gt;
+  &lt;div class="trl-doll__silhouette"&gt;&lt;/div&gt;
+  &lt;div class="trl-doll__slot trl-doll__slot--headwear"&gt;
+    &lt;span class="trl-doll__label"&gt;Headwear&lt;/span&gt;
+    &lt;div class="trl-cell" style="--w:2;--h:2"&gt;…&lt;/div&gt;
+  &lt;/div&gt;
+  …
+  &lt;div class="trl-doll__carry"&gt;…&lt;/div&gt;
+&lt;/div&gt;</pre>
+        </div>
+      </div>
+
+      <div class="ds-label">Mod tree — recursive weapon slots · hover actions · orphan state</div>
+      <div class="ds-demo ds-demo--col" style="max-width:520px">
+        <div class="trl-mod-tree">
+          <div class="trl-mod-tree__row">
+            <span class="trl-mod-tree__arrow">↳</span>
+            <span class="trl-mod-tree__slot">mod_pistol_grip</span>
+            <span class="trl-mod-tree__name">AK-74 bakelite grip (6P4 Sb.9)</span>
+            <span class="trl-mod-tree__actions">
+              <button class="trl-btn trl-btn--ghost trl-btn--sm trl-btn--icon">✎</button>
+              <button class="trl-btn trl-btn--ghost trl-btn--sm trl-btn--icon">✕</button>
+            </span>
+          </div>
+          <div class="trl-mod-tree__row">
+            <span class="trl-mod-tree__arrow">↳</span>
+            <span class="trl-mod-tree__slot">mod_magazine</span>
+            <span class="trl-mod-tree__name">6L31 60-round magazine</span>
+            <span class="trl-badge trl-badge--green">required</span>
+            <span class="trl-mod-tree__actions">
+              <button class="trl-btn trl-btn--ghost trl-btn--sm trl-btn--icon">✎</button>
+            </span>
+          </div>
+          <div class="trl-mod-tree__children">
+            <div class="trl-mod-tree__row is-empty">
+              <span class="trl-mod-tree__arrow">↳</span>
+              <span class="trl-mod-tree__slot">mod_muzzle</span>
+              <span class="trl-mod-tree__name">empty slot</span>
+            </div>
+            <div class="trl-mod-tree__row is-invalid">
+              <span class="trl-mod-tree__arrow">↳</span>
+              <span class="trl-mod-tree__slot">mod_launcher</span>
+              <span class="trl-mod-tree__name">GP-25 Kostyor</span>
+              <span class="trl-badge trl-badge--red">unknown slot</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ds-label">Heatmap — monochrome tan buckets for matrix cells</div>
+      <div class="ds-demo ds-demo--col" style="padding:0;max-width:520px">
+        <table class="trl-table">
+          <thead><tr><th>Skill</th><th class="num">Tank</th><th class="num">Medic</th><th class="num">Hunter</th></tr></thead>
+          <tbody>
+            <tr><td>Strength</td><td class="num trl-heat--high">9</td><td class="num trl-heat--low">2</td><td class="num trl-heat--mid">5</td></tr>
+            <tr><td>Vitality</td><td class="num trl-heat--mid">6</td><td class="num trl-heat--high">8</td><td class="num trl-heat--low">3</td></tr>
+            <tr><td>Sniper</td><td class="num trl-heat--none">0</td><td class="num trl-heat--none">0</td><td class="num trl-heat--high">10</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="ds-label">Faction cards · class headline (crest + stats)</div>
+      <div class="ds-demo" style="align-items:stretch">
+        <div class="trl-card trl-card--usec" style="flex:1;min-width:180px">
+          <div class="trl-card__title">USEC — Body</div>
+          <div class="trl-card__body">Commando outfit</div>
+        </div>
+        <div class="trl-card trl-card--bear" style="flex:1;min-width:180px">
+          <div class="trl-card__title">BEAR — Body</div>
+          <div class="trl-card__body">Ghost balaclava</div>
+        </div>
+      </div>
+      <div class="ds-demo">
+        <span class="trl-crest trl-crest--lg">🛡</span>
+        <div>
+          <h3 class="trl-h3" style="margin:0">Tank</h3>
+          <span class="trl-u-faint" style="font-size:11px">Perks &amp; drawbacks</span>
+        </div>
+        <span class="trl-topbar__spacer"></span>
+        <div class="trl-stat trl-stat--hi" style="min-width:150px">
+          <span class="trl-stat__label">Skill cost</span>
+          <span class="trl-stat__value">1,240</span>
+        </div>
+        <div class="trl-stat" style="min-width:150px">
+          <span class="trl-stat__label">Loadout ₽</span>
+          <span class="trl-stat__value">418,200</span>
+        </div>
+      </div>
+
+      <div class="ds-label">Fullscreen takeover — maximized matrix/table view</div>
+      <div class="ds-demo">
+        <button class="trl-btn" id="ds-open-fullscreen">Open fullscreen</button>
+      </div>
+    </section>
+
+    <!-- ── 08 · FEEDBACK & OVERLAYS ───────────────────────────────────────── -->
+    <section class="ds-section" id="feedback">
+      <div class="trl-eyebrow">08 · Feedback &amp; overlays</div>
+      <h2 class="trl-h2">Feedback</h2>
+
+      <div class="ds-label">Toasts (static preview — live ones stack fixed bottom-right)</div>
+      <div class="ds-demo">
+        <div class="trl-toast trl-toast--ok"><div class="trl-toast__title">Saved</div><div class="trl-toast__msg">Class "Tank" synced to server.</div></div>
+        <div class="trl-toast trl-toast--warn"><div class="trl-toast__title">Heads up</div><div class="trl-toast__msg">3 items have no flea price.</div></div>
+        <div class="trl-toast trl-toast--error"><div class="trl-toast__title">Failed</div><div class="trl-toast__msg">Server rejected the loadout.</div></div>
+      </div>
+
+      <div class="ds-label">Alerts</div>
+      <div class="ds-demo ds-demo--col">
+        <div class="trl-alert"><b>Verdict</b><span>Server-side repopulation does not stick — the engine no longer reads it.</span></div>
+        <div class="trl-alert trl-alert--info"><b>Note</b><span>Prices refresh when the SPT server restarts.</span></div>
+        <div class="trl-alert trl-alert--success"><b>Done</b><span>All 14 classes validated against the schema.</span></div>
+        <div class="trl-alert trl-alert--danger"><b>Blocked</b><span>Fika headless client is offline.</span></div>
+      </div>
+
+      <div class="ds-label">Loading — spinner · skeletons · empty state</div>
+      <div class="ds-demo" style="align-items:flex-start">
+        <span class="trl-spinner"></span>
+        <div style="flex:1;min-width:200px;display:grid;gap:8px">
+          <div class="trl-skeleton trl-skeleton--text" style="width:70%"></div>
+          <div class="trl-skeleton trl-skeleton--text" style="width:45%"></div>
+          <div class="trl-skeleton trl-skeleton--row"></div>
+          <div class="trl-u-flex trl-u-gap-2">
+            <div class="trl-skeleton trl-skeleton--cell"></div>
+            <div class="trl-skeleton trl-skeleton--cell"></div>
+            <div class="trl-skeleton trl-skeleton--cell"></div>
+          </div>
+        </div>
+        <div class="trl-empty" style="flex:1;min-width:220px;padding:16px">
+          <div class="trl-empty__icon">▦</div>
+          <div class="trl-empty__title">No items match</div>
+          <div class="trl-empty__hint">Clear filters or search another category.</div>
+        </div>
+      </div>
+
+      <div class="ds-label">Tooltip · modal</div>
+      <div class="ds-demo">
+        <button class="trl-btn" data-trl-tip="Hover tooltips are CSS-only">Hover me</button>
+        <button class="trl-btn trl-btn--primary" id="ds-open-modal">Open modal</button>
+      </div>
+
+      <div class="ds-label">Menu · popover — position the menu yourself or nest it in a popover</div>
+      <div class="ds-demo" style="align-items:flex-start">
+        <div class="trl-menu">
+          <button class="trl-menu__item">Duplicate class</button>
+          <button class="trl-menu__item">Export JSON</button>
+          <div class="trl-menu__sep"></div>
+          <button class="trl-menu__item trl-menu__item--danger">Delete class</button>
+        </div>
+        <div class="trl-popover" style="position:static;max-width:260px">
+          <div class="trl-sec">Popover</div>
+          <p style="margin:0;font-size:12px;color:var(--trl-fg-muted)">Anchored floating surface —
+            <span class="trl-mono">position:absolute</span> relative to its trigger, shown static here.</p>
+        </div>
+      </div>
+
+      <div class="ds-label">Panel with scrolling body — trl-panel--scroll (fixed height here)</div>
+      <div class="ds-demo" style="align-items:stretch">
+        <div class="trl-panel trl-panel--flush trl-panel--scroll" style="height:180px;flex:1;max-width:340px">
+          <div class="trl-screen-bar">
+            <span class="trl-screen-bar__dot trl-screen-bar__dot--ok"></span>
+            <span class="trl-screen-bar__title">◪ Long list</span>
+            <span class="trl-screen-bar__meta">12</span>
+          </div>
+          <div class="trl-panel__body" style="padding:8px 0">
+            <div class="trl-tree">              <div class="trl-tree__node"><span class="trl-tree__chev" style="visibility:hidden"></span>Item 01</div>
+              <div class="trl-tree__node"><span class="trl-tree__chev" style="visibility:hidden"></span>Item 02</div>
+              <div class="trl-tree__node"><span class="trl-tree__chev" style="visibility:hidden"></span>Item 03</div>
+              <div class="trl-tree__node"><span class="trl-tree__chev" style="visibility:hidden"></span>Item 04</div>
+              <div class="trl-tree__node"><span class="trl-tree__chev" style="visibility:hidden"></span>Item 05</div>
+              <div class="trl-tree__node"><span class="trl-tree__chev" style="visibility:hidden"></span>Item 06</div>
+              <div class="trl-tree__node"><span class="trl-tree__chev" style="visibility:hidden"></span>Item 07</div>
+              <div class="trl-tree__node"><span class="trl-tree__chev" style="visibility:hidden"></span>Item 08</div>
+              <div class="trl-tree__node"><span class="trl-tree__chev" style="visibility:hidden"></span>Item 09</div>
+              <div class="trl-tree__node"><span class="trl-tree__chev" style="visibility:hidden"></span>Item 10</div>
+              <div class="trl-tree__node"><span class="trl-tree__chev" style="visibility:hidden"></span>Item 11</div>
+              <div class="trl-tree__node"><span class="trl-tree__chev" style="visibility:hidden"></span>Item 12</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 09 · DO'S & DON'TS ─────────────────────────────────────────────── -->
+    <section class="ds-section" id="dosdonts">
+      <div class="trl-eyebrow">09 · Do's &amp; Don'ts</div>
+      <h2 class="trl-h2">Discipline</h2>
+
+      <div class="ds-dd">
+        <div class="ds-dd__frame ds-dd__frame--do">
+          <div class="ds-dd__head">✓ Do — red as a moment</div>
+          <div class="ds-dd__body">
+            <hr class="trl-divider trl-divider--laser" style="margin:4px 0">
+            <div class="trl-u-flex trl-u-gap-2">
+              <span class="trl-screen-bar__dot trl-screen-bar__dot--live"></span>
+              <span class="trl-u-faint" style="font-size:12px">unsaved changes</span>
+              <span class="trl-topbar__spacer"></span>
+              <button class="trl-btn trl-btn--danger trl-btn--sm">Delete class</button>
+            </div>
+          </div>
+          <div class="ds-dd__note">One laser, one live dot, destructive actions. Red earns attention because it is rare.</div>
+        </div>
+        <div class="ds-dd__frame ds-dd__frame--dont">
+          <div class="ds-dd__head">✗ Don't — red as decoration</div>
+          <div class="ds-dd__body">
+            <div class="ds-bad-panel">Red panels, red borders, red text everywhere…</div>
+            <div class="trl-u-flex trl-u-gap-2">
+              <button class="ds-bad-btn">Save</button>
+              <button class="ds-bad-btn">Export</button>
+            </div>
+          </div>
+          <div class="ds-dd__note">#ff0000 never colors text or fills. Non-destructive actions never wear red.</div>
+        </div>
+
+        <div class="ds-dd__frame ds-dd__frame--do">
+          <div class="ds-dd__head">✓ Do — hard edges, tan hairlines</div>
+          <div class="ds-dd__body">
+            <div class="trl-panel" style="padding:10px">
+              <span class="trl-tag"><span class="trl-tag__dot"></span>Radius 0</span>
+            </div>
+          </div>
+          <div class="ds-dd__note">--trl-radius is a system knob and it is 0. Borders are 1px translucent tan.</div>
+        </div>
+        <div class="ds-dd__frame ds-dd__frame--dont">
+          <div class="ds-dd__head">✗ Don't — rounded, soft, gray</div>
+          <div class="ds-dd__body">
+            <div style="border-radius:12px;border:1px solid #555;background:#2a2a2a;padding:10px;color:#b0b0b8">
+              <span style="border-radius:999px;border:1px solid #555;padding:2px 10px;font-size:11px">pill tag</span>
+            </div>
+          </div>
+          <div class="ds-dd__note">Rounded corners and neutral grays read as generic dashboards, not TRL.</div>
+        </div>
+
+        <div class="ds-dd__frame ds-dd__frame--do">
+          <div class="ds-dd__head">✓ Do — tracking on display only</div>
+          <div class="ds-dd__body">
+            <div class="trl-eyebrow">Squad status</div>
+            <p style="margin:0;font-size:13px">Body text stays sentence case, Segoe UI, 13px — dense and readable.</p>
+          </div>
+          <div class="ds-dd__note">Uppercase + letter-spacing is chrome. Body copy never shouts.</div>
+        </div>
+        <div class="ds-dd__frame ds-dd__frame--dont">
+          <div class="ds-dd__head">✗ Don't — uppercase paragraphs</div>
+          <div class="ds-dd__body">
+            <p style="margin:0;font-size:13px;text-transform:uppercase;letter-spacing:.14em;font-family:var(--trl-font-display)">
+              Long tracked uppercase body text is exhausting to read and wastes space.</p>
+          </div>
+          <div class="ds-dd__note">If it is more than ~4 words, it is body — drop the transform and tracking.</div>
+        </div>
+
+        <div class="ds-dd__frame ds-dd__frame--do">
+          <div class="ds-dd__head">✓ Do — semantic tokens</div>
+          <div class="ds-dd__body">
+            <pre class="trl-code" style="margin:0">color: var(--trl-fg-muted);
+background: var(--trl-bg-raised);
+border-color: var(--trl-edge);</pre>
+          </div>
+          <div class="ds-dd__note">Tier-2 tokens keep every editor retintable from one file.</div>
+        </div>
+        <div class="ds-dd__frame ds-dd__frame--dont">
+          <div class="ds-dd__head">✗ Don't — raw hex in editors</div>
+          <div class="ds-dd__body">
+            <pre class="trl-code" style="margin:0">color: #9b9a96;      /* drift */
+background: #222225;  /* drift */
+border-color: #444;   /* not even ours */</pre>
+          </div>
+          <div class="ds-dd__note">Hardcoded hex forks the palette. It is a review defect.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 10 · CONSUME ──────────────────────────────────────────────────── -->
+    <section class="ds-section" id="consume">
+      <div class="trl-eyebrow">10 · Consuming the DS</div>
+      <h2 class="trl-h2">Consuming</h2>
+      <p class="ds-intro">Copy the <span class="trl-mono">design-system/</span> folder (or mount it)
+        into your editor's static root, link the four files in order, and put
+        <span class="trl-mono">class="trl-app"</span> on your root element.
+        Start new editors from <span class="trl-mono">templates/editor-starter.html</span>.</p>
+      <pre class="trl-code">&lt;link rel="stylesheet" href="design-system/fonts/bender.css"&gt;   &lt;!-- optional --&gt;
+&lt;link rel="stylesheet" href="design-system/tokens.css"&gt;
+&lt;link rel="stylesheet" href="design-system/components.css"&gt;
+&lt;link rel="stylesheet" href="design-system/utilities.css"&gt;
+&lt;style&gt;html, body { margin: 0; height: 100% }&lt;/style&gt;  &lt;!-- .trl-shell uses 100vh --&gt;
+
+&lt;body class="trl-app"&gt; … &lt;/body&gt;
+
+&lt;!-- app shells use .trl-shell; document-style pages use .trl-container --&gt;</pre>
+      <div class="ds-demo ds-demo--col">
+        <ul class="trl-kv">
+          <li class="trl-kv__row"><span class="trl-kv__k">Rules</span><span class="trl-kv__v">Normative rules &amp; composition recipes live in <b>PATTERNS.md</b></span></li>
+          <li class="trl-kv__row"><span class="trl-kv__k">Agents</span><span class="trl-kv__v"><b>AGENTS.md</b> is the entry point for AI sessions (CLAUDE.md/GEMINI.md point here)</span></li>
+          <li class="trl-kv__row"><span class="trl-kv__k">Versioning</span><span class="trl-kv__v">Semver in <b>CHANGELOG.md</b> — breaking token/class = major</span></li>
+          <li class="trl-kv__row"><span class="trl-kv__k">Blazor</span><span class="trl-kv__v">MudBlazor bridge is a planned adapter (see CLAUDE.md) — not shipped in v1</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <footer style="border-top:1px solid var(--trl-edge);padding-top:16px;margin-bottom:32px;
+      color:var(--trl-fg-faint);font-size:12px;display:flex;gap:16px;flex-wrap:wrap">
+      <span><b style="color:var(--trl-accent-dim)">TRL Design System</b> v1.0.0</span>
+      <span>Tarkov Red Line · SPT 4.0 · Fika Coop</span>
+      <span style="margin-left:auto">Bender © Zhuravlev &amp; Gladkikh · see fonts/LICENSE-NOTE.txt</span>
+    </footer>
+  </main>
+</div>
+
+<!-- ══ FULLSCREEN DEMO ═══════════════════════════════════════════════════ -->
+<div class="trl-fullscreen" id="ds-fullscreen" hidden>
+  <button class="trl-btn trl-btn--sm trl-fullscreen__exit" id="ds-close-fullscreen">✕ Exit</button>
+  <div class="trl-eyebrow">Skills × Classes</div>
+  <h2 class="trl-h2">Maximized matrix</h2>
+  <table class="trl-table" style="max-width:560px">
+    <thead><tr><th>Skill</th><th class="num">Tank</th><th class="num">Medic</th><th class="num">Hunter</th></tr></thead>
+    <tbody>
+      <tr><td>Strength</td><td class="num trl-heat--high">9</td><td class="num trl-heat--low">2</td><td class="num trl-heat--mid">5</td></tr>
+      <tr><td>Endurance</td><td class="num trl-heat--high">8</td><td class="num trl-heat--mid">4</td><td class="num trl-heat--mid">6</td></tr>
+      <tr><td>Vitality</td><td class="num trl-heat--mid">6</td><td class="num trl-heat--high">8</td><td class="num trl-heat--low">3</td></tr>
+      <tr><td>Sniper</td><td class="num trl-heat--none">0</td><td class="num trl-heat--none">0</td><td class="num trl-heat--high">10</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══ MODAL DEMO ════════════════════════════════════════════════════════ -->
+<div class="trl-modal-overlay" id="ds-modal" hidden>
+  <div class="trl-modal">
+    <div class="trl-modal__head">
+      <span class="trl-screen-bar__dot trl-screen-bar__dot--warn"></span>
+      <h3 class="trl-modal__title">Discard changes?</h3>
+      <button class="trl-modal__close" id="ds-close-modal" aria-label="Close">×</button>
+    </div>
+    <div class="trl-modal__body">
+      The class <b style="color:var(--trl-fg)">Tank</b> has unsaved edits. Discarding will restore
+      the last server-synced state.
+    </div>
+    <div class="trl-modal__actions">
+      <button class="trl-btn trl-btn--ghost" id="ds-cancel-modal">Keep editing</button>
+      <button class="trl-btn trl-btn--danger">Discard</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* showcase behaviour — inline on purpose: SPT's ModValidator rejects loose
+ * .js files if this folder is ever copied into a mod's wwwroot. */
+(function () {
+  'use strict';
+
+  /* scroll-spy */
+  var links = Array.prototype.slice.call(document.querySelectorAll('#ds-nav .trl-nav__item'));
+  var sections = links
+    .map(function (a) { return document.querySelector(a.getAttribute('href')); })
+    .filter(Boolean);
+  var byId = {};
+  links.forEach(function (a) { byId[a.getAttribute('href').slice(1)] = a; });
+  var spy = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      links.forEach(function (a) { a.classList.remove('is-active'); });
+      var link = byId[e.target.id];
+      if (link) link.classList.add('is-active');
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(function (s) { spy.observe(s); });
+
+  /* copy token on swatch click — progressive enhancement, selection fallback */
+  document.querySelectorAll('.ds-swatch').forEach(function (sw) {
+    sw.addEventListener('click', function () {
+      var text = 'var(' + sw.getAttribute('data-var') + ')';
+      var done = function () {
+        sw.classList.add('is-copied');
+        var name = sw.querySelector('.ds-swatch__name');
+        var prev = name.textContent;
+        name.textContent = 'copied ✓';
+        setTimeout(function () {
+          name.textContent = prev;
+          sw.classList.remove('is-copied');
+        }, 900);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { selectMeta(sw); });
+      } else {
+        selectMeta(sw);
+      }
+    });
+  });
+  function selectMeta(sw) {
+    var range = document.createRange();
+    range.selectNodeContents(sw.querySelector('.ds-swatch__meta'));
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  /* tabs demo */
+  var tabs = document.getElementById('ds-tabs');
+  if (tabs) tabs.addEventListener('click', function (e) {
+    var tab = e.target.closest('.trl-tabs__tab');
+    if (!tab) return;
+    tabs.querySelectorAll('.trl-tabs__tab').forEach(function (t) { t.classList.remove('is-active'); });
+    tab.classList.add('is-active');
+  });
+
+  /* dropdown demo */
+  var dd = document.getElementById('ds-dropdown');
+  if (dd) {
+    dd.querySelector('.trl-dropdown__trigger').addEventListener('click', function () {
+      dd.classList.toggle('is-open');
+    });
+    dd.querySelectorAll('.trl-dropdown__option').forEach(function (opt) {
+      opt.addEventListener('click', function () {
+        dd.querySelectorAll('.trl-dropdown__option').forEach(function (o) { o.classList.remove('is-selected'); });
+        opt.classList.add('is-selected');
+        dd.querySelector('.trl-dropdown__trigger').textContent = opt.textContent;
+        dd.classList.remove('is-open');
+      });
+    });
+    document.addEventListener('click', function (e) {
+      if (!dd.contains(e.target)) dd.classList.remove('is-open');
+    });
+  }
+
+  /* multiselect demo — panel stays open across option clicks */
+  var ms = document.getElementById('ds-multiselect');
+  if (ms) {
+    var msCount = document.getElementById('ds-ms-count');
+    var msOpts = ms.querySelectorAll('.trl-multiselect__option');
+    var msSync = function () {
+      msCount.textContent = ms.querySelectorAll('.trl-multiselect__option.is-checked').length;
+    };
+    ms.querySelector('.trl-multiselect__trigger').addEventListener('click', function () {
+      ms.classList.toggle('is-open');
+    });
+    msOpts.forEach(function (opt) {
+      opt.addEventListener('click', function () {
+        opt.classList.toggle('is-checked');
+        msSync();
+      });
+    });
+    document.getElementById('ds-ms-all').addEventListener('click', function () {
+      msOpts.forEach(function (o) { o.classList.add('is-checked'); });
+      msSync();
+    });
+    document.getElementById('ds-ms-none').addEventListener('click', function () {
+      msOpts.forEach(function (o) { o.classList.remove('is-checked'); });
+      msSync();
+    });
+    document.addEventListener('click', function (e) {
+      if (!ms.contains(e.target)) ms.classList.remove('is-open');
+    });
+    document.getElementById('ds-ms-filter').addEventListener('input', function (e) {
+      var q = e.target.value.toLowerCase();
+      msOpts.forEach(function (o) {
+        o.style.display = o.textContent.toLowerCase().indexOf(q) === -1 ? 'none' : '';
+      });
+    });
+  }
+
+  /* search clear buttons — clear + refocus */
+  document.querySelectorAll('.trl-search').forEach(function (sw) {
+    var clear = sw.querySelector('.trl-search__clear');
+    var input = sw.querySelector('.trl-input');
+    if (clear && input) clear.addEventListener('click', function () {
+      input.value = '';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.focus();
+    });
+  });
+
+  /* icon grid copy */
+  document.querySelectorAll('.ds-icon').forEach(function (it) {
+    it.addEventListener('click', function () {
+      var id = it.dataset.copy;
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(id);
+      var sp = it.querySelector('span'), prev = sp.textContent;
+      sp.textContent = 'copied ✓';
+      setTimeout(function () { sp.textContent = prev; }, 800);
+    });
+  });
+
+  /* slider: valor vivo no label (step do input = incremento; default 1) */
+  document.querySelectorAll('.trl-slider').forEach(function (sl) {
+    var field = sl.closest('.trl-field');
+    var out = field && field.querySelector('.js-slider-val');
+    if (out) sl.addEventListener('input', function () { out.textContent = sl.value; });
+  });
+
+  /* filter chip remove demo */
+  document.querySelectorAll('.trl-filter-chip__remove').forEach(function (b) {
+    b.addEventListener('click', function () { b.closest('.trl-filter-chip').remove(); });
+  });
+
+  /* fullscreen demo */
+  var fs = document.getElementById('ds-fullscreen');
+  var fsOpen = document.getElementById('ds-open-fullscreen');
+  if (fsOpen) fsOpen.addEventListener('click', function () { fs.hidden = false; });
+  var fsClose = document.getElementById('ds-close-fullscreen');
+  if (fsClose) fsClose.addEventListener('click', function () { fs.hidden = true; });
+
+  /* modal demo */
+  var modal = document.getElementById('ds-modal');
+  var open = document.getElementById('ds-open-modal');
+  if (open) open.addEventListener('click', function () { modal.hidden = false; });
+  ['ds-close-modal', 'ds-cancel-modal'].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('click', function () { modal.hidden = true; });
+  });
+  modal.addEventListener('click', function (e) {
+    if (e.target === modal) modal.hidden = true;
+  });
+
+  /* Esc closes topmost overlay (modal wins over fullscreen) */
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    if (!modal.hidden) { modal.hidden = true; return; }
+    if (fs && !fs.hidden) fs.hidden = true;
+  });
+})();
+</script>
+</body>
+</html>

@@ -8,212 +8,207 @@
              xmlns:cvt="using:SPT.Launcher.Converters"
              mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="720"
              x:Class="SPT.Launcher.Views.SettingsView">
-    
+
     <UserControl.Resources>
         <cvt:ImageSourceConverter x:Key="imageSourceCvt"/>
     </UserControl.Resources>
 
-    <!-- Estilos padrão de Sidebar e Cards de Configurações -->
+    <!-- Dot Dev Mode: quadrado (radius 0), cor 100% via token dirigida pelo
+         estado reativo IsDevMode (class binding) — nenhuma cor mora na VM. -->
     <UserControl.Styles>
-        <Style Selector="Button.SidebarMenu">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="HorizontalAlignment" Value="Stretch"/>
-            <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="Padding" Value="20,15"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="BorderThickness" Value="0,0,3,0"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-        </Style>
-        <Style Selector="Button.SidebarMenu:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="#1A1A1A"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0,0,3,0"/>
-        </Style>
-        <Style Selector="Button.SidebarMenu.Active">
-            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
-            <Setter Property="Background" Value="#1A1A1A"/>
-            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
-        </Style>
-        <Style Selector="Button.SidebarMenu.Active:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
-            <Setter Property="Background" Value="#222222"/>
-        </Style>
-        <Style Selector="Button.SidebarMenu Path">
-            <Setter Property="Fill" Value="{Binding $parent[Button].Foreground}"/>
-        </Style>
-        <Style Selector="Border.PanelCard">
-            <Setter Property="Background" Value="#F2111111"/> 
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="#333333"/>
+        <Style Selector="Border.dev-dot">
+            <Setter Property="Width" Value="10"/>
+            <Setter Property="Height" Value="10"/>
             <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="Background" Value="{DynamicResource TrlFgFaintBrush}"/>
         </Style>
-
-        <!-- Fix hover jitter para botões de limpeza -->
-        <Style Selector="Button.CleanupButton">
-            <Setter Property="Background" Value="#333"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="2,6"/>
-            <Setter Property="HorizontalAlignment" Value="Stretch"/>
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-        </Style>
-        <Style Selector="Button.CleanupButton:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="#444"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderThickness" Value="0"/>
+        <Style Selector="Border.dev-dot.on">
+            <Setter Property="Background" Value="{DynamicResource TrlSuccessBrush}"/>
         </Style>
     </UserControl.Styles>
 
-    <Grid ColumnDefinitions="250, *">
+    <Grid ColumnDefinitions="Auto, *">
 
-        <!-- 1. BARRA LATERAL ESQUERDA (SIDEBAR - CONFIGURAÇÕES) -->
-        <Border Grid.Column="0" Background="#111111" BorderThickness="0,0,1,0" BorderBrush="#222">
-            <Grid RowDefinitions="120, *, AUTO">
-                
-                <!-- Logo Topo -->
-                <Image Grid.Row="0" Margin="15" Source="/Assets/logo-redline.png" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <!-- 1. SIDEBAR (TrlSidebarNav — mesmo chrome da ProfileView) -->
+        <cc:TrlSidebarNav Grid.Column="0">
+            <Grid RowDefinitions="Auto, *, Auto">
+
+                <!-- Logo Topo (item 006: desce um pouco + respiro antes do menu; paridade com ProfileView) -->
+                <Image Grid.Row="0" Source="/Assets/logo-redline.png" Stretch="Uniform" MaxHeight="52" HorizontalAlignment="Center" Margin="24,56,24,16"/>
 
                 <!-- Menu Central -->
-                <StackPanel Grid.Row="1" Spacing="5" Margin="0,20,0,0">
-                    <Button Classes="SidebarMenu" Cursor="Hand" Command="{Binding GoBackCommand}">
+                <StackPanel Grid.Row="1" Spacing="2" Margin="0,28,0,0">
+                    <Button Classes="nav" Cursor="Hand" Command="{Binding GoBackCommand}">
                         <StackPanel Orientation="Horizontal" Spacing="10">
-                            <Path Data="M12 5.69l5 4.5V18h-2v-6H9v6H7v-7.81l5-4.5M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z" VerticalAlignment="Center"/>
+                            <Path Data="{StaticResource TrlIconHome}" VerticalAlignment="Center"/>
                             <TextBlock Text="LAUNCHER" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
-                    <Button Classes="SidebarMenu Active" Cursor="Hand" Content="⚙ CONFIGURAÇÕES">
+                    <Button Classes="nav active" Cursor="Hand">
                         <StackPanel Orientation="Horizontal" Spacing="10">
-                            <Path Data="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.68 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z" VerticalAlignment="Center"/>
+                            <Path Data="{StaticResource TrlIconSettings}" VerticalAlignment="Center"/>
                             <TextBlock Text="CONFIGURAÇÕES" VerticalAlignment="Center"/>
                         </StackPanel>
-                    </Button>    
-                    <Button Classes="SidebarMenu" Cursor="Hand" Command="{Binding OpenTargramCommand}">
-                        <StackPanel Orientation="Horizontal" Spacing="10">
-                            <Path Data="M16.36,14C16.44,13.34 16.5,12.68 16.5,12C16.5,11.32 16.44,10.66 16.36,10H19.74C19.9,10.64 20,11.31 20,12C20,12.69 19.9,13.36 19.74,14M14.59,19.56C15.19,18.45 15.65,17.25 15.97,16H18.92C17.96,17.65 16.43,18.93 14.59,19.56M14.34,14H9.66C9.56,13.34 9.5,12.68 9.5,12C9.5,11.32 9.56,10.66 9.66,10H14.34C14.44,10.66 14.5,11.32 14.5,12C14.5,12.68 14.44,13.34 14.34,14M12,19.96C11.16,18.76 10.5,17.43 10.09,16H13.91C13.5,17.43 12.84,18.76 12,19.96M8.03,16C8.35,17.25 8.81,18.45 9.41,19.56C7.57,18.93 6.04,17.65 5.08,16M4.26,14C4.1,13.36 4,12.69 4,12C4,11.31 4.1,10.64 4.26,10H7.64C7.56,10.66 7.5,11.32 7.5,12C7.5,12.68 7.56,13.34 7.64,14M5.08,8H8.03C8.35,6.75 8.81,5.55 9.41,4.44C7.57,5.07 6.04,6.35 5.08,8M12,4.04C12.84,5.24 13.5,6.57 13.91,8H10.09C10.5,6.57 11.16,5.24 12,4.04M14.59,4.44C13.99,5.55 13.53,6.75 13.21,8H16.16C17.12,6.35 18.65,5.07 14.59,4.44M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z" VerticalAlignment="Center"/>
-                            <TextBlock Text="TARGRAM" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button> 
-                    <Button Classes="SidebarMenu" Cursor="Hand" Command="{Binding OpenKofiCommand}">
-                        <StackPanel Orientation="Horizontal" Spacing="10">
-                            <Path Data="M2,21H20V19H2M20,8H18V5H20M20,3H4V13A4,4 0 0,0 8,17H14A4,4 0 0,0 18,13V10H20A2,2 0 0,0 22,8V5C22,3.89 21.1,3 20,3M16,5V13A2,2 0 0,1 14,15H8A2,2 0 0,1 6,13V5H16Z" VerticalAlignment="Center"/>
-                            <TextBlock Text="APOIE UM CAFEZINHO" VerticalAlignment="Center"/>
-                        </StackPanel>
                     </Button>
-                    <Button Classes="SidebarMenu" Cursor="Hand" ToolTip.Tip="Em construção" IsEnabled="False" Opacity="0.5">
+                    <Button Classes="nav" Cursor="Hand" Command="{Binding OpenKofiCommand}">
+                        <!-- xícara à esquerda, texto no meio, link-externo à extremidade direita -->
+                        <DockPanel LastChildFill="True">
+                            <Path DockPanel.Dock="Left" Data="{StaticResource TrlIconCoffee}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <Path DockPanel.Dock="Right" Data="{StaticResource TrlIconExternalLink}" Width="12" Height="12" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                            <TextBlock Text="APOIE UM CAFEZINHO" VerticalAlignment="Center"/>
+                        </DockPanel>
+                    </Button>
+                    <Button Classes="nav" Cursor="Hand" ToolTip.Tip="Em construção" IsEnabled="False" Opacity="0.5">
                         <StackPanel Orientation="Horizontal" Spacing="10">
-                            <Path Data="M12.87,15.07L8.33,12.46V7.22L12.87,9.84V15.07M22.67,10L17.43,13.06L12.5,10.22L17.73,7.17L22.67,10M21.5,11.3V15.33C21.5,15.33 21.08,16.5 19.33,16.5C17.58,16.5 17.17,15.33 17.17,15.33V11.3L15.33,12.37V16.5C15.33,16.5 15.33,19.25 19.33,19.25C23.33,19.25 23.33,16.5 23.33,16.5V11.3L21.5,11.3M8.33,13.62L3.8,16.24V11L8.33,8.38V13.62M12.5,22.25L3.8,17.22V6.15L12.5,1.11L21.2,6.15L21.2,9.3L19.33,10.37L12.5,6.43L2,12.5L12.5,18.57L15.33,16.94V19.11L12.5,20.73" VerticalAlignment="Center"/>
+                            <Path Data="{StaticResource TrlIconMenu2}" VerticalAlignment="Center"/>
                             <TextBlock Text="LISTA DE MODS" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>
 
             </Grid>
-        </Border>
+        </cc:TrlSidebarNav>
 
         <!-- 2. ÁREA CENTRAL (PAINEL DE CONFIGURAÇÕES) -->
         <Grid Grid.Column="1">
-            
-            <!-- Imagem de Fundo -->
+
+            <!-- Imagem de Fundo + overlay (legibilidade sobre foto clara, paridade ProfileView) -->
             <Image Source="{Binding Background.Path, Converter={StaticResource imageSourceCvt}}" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+            <Border Background="{DynamicResource TrlPhotoOverlayBrush}" IsHitTestVisible="False"/>
 
-            <!-- Conteúdo Scrolável -->
-            <ScrollViewer Grid.Row="0" Margin="30" VerticalScrollBarVisibility="Hidden">
+            <!-- Conteúdo Scrolável (item 007: top 34px da top bar + 30 de respiro → título não encosta) -->
+            <ScrollViewer Margin="30,64,30,30" VerticalScrollBarVisibility="Hidden">
                 <StackPanel Spacing="20">
-                    
-                    <TextBlock Text="CONFIGURAÇÕES" Foreground="White" FontWeight="Black" FontSize="24" Margin="0,0,0,10"/>
 
-                    <!-- Operações - Limpeza e Dados (AGORA NO TOPO) -->
-                    <Border Classes="PanelCard" Padding="20">
-                        <StackPanel Spacing="15">
-                            <TextBlock Text="LIMPEZA E DADOS" FontWeight="Bold" Foreground="White" FontSize="16"/>
+                    <TextBlock Classes="trl-h1" Text="CONFIGURAÇÕES" Margin="0,0,0,10"/>
 
-                            <Grid ColumnDefinitions="*, *, *">
-                                <Button Grid.Column="0" Classes="CleanupButton" Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=clear_game_settings}"
-                                        Command="{Binding ClearGameSettingsCommand}" Cursor="Hand" Margin="0,0,5,0"/>
-                                
-                                <Button Grid.Column="1" Classes="CleanupButton" Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=clean_temp_files}"
-                                        Command="{Binding CleanTempFilesCommand}" Cursor="Hand" Margin="5,0,5,0"/>
-                                
-                                <Button Grid.Column="2" Classes="CleanupButton" Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=copy_logs_to_clipboard}"
-                                        Command="{Binding CopyLogsToClipboard}" Cursor="Hand" Margin="5,0,0,0"/>
-                            </Grid>
-                        </StackPanel>
-                    </Border>
-                    
-                    <Border Classes="PanelCard" Padding="20">
+                    <!-- Operações - Limpeza e Dados -->
+                    <cc:TrlPanel Title="LIMPEZA E DADOS">
+                        <Grid ColumnDefinitions="*, *, *">
+                            <Button Grid.Column="0" Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=clear_game_settings}"
+                                    Command="{Binding ClearGameSettingsCommand}" Cursor="Hand" Margin="0,0,5,0"
+                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                    ToolTip.Tip="Apaga as configurações do jogo (pasta SPT/user/sptsettings). Gráficos, áudio, controles e outras preferências voltam ao padrão. Não afeta seu perfil nem seu progresso."/>
+
+                            <Button Grid.Column="1" Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=clean_temp_files}"
+                                    Command="{Binding CleanTempFilesCommand}" Cursor="Hand" Margin="5,0,5,0"
+                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                    ToolTip.Tip="Remove os arquivos temporários gerados pelo jogo (cache). Libera espaço e ajuda a resolver travamentos ou telas de carregamento presas. Seguro: nada de progresso é apagado."/>
+
+                            <Button Grid.Column="2" Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=copy_logs_to_clipboard}"
+                                    Command="{Binding CopyLogsToClipboard}" Cursor="Hand" Margin="5,0,0,0"
+                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                    ToolTip.Tip="Copia os arquivos de log (launcher, servidor, BepInEx e seu perfil) para a área de transferência, prontos para colar ao pedir suporte."/>
+                        </Grid>
+                    </cc:TrlPanel>
+
+                    <!-- Opções Básicas -->
+                    <cc:TrlPanel Title="OPÇÕES BÁSICAS">
                         <StackPanel Spacing="15">
-                            <TextBlock Text="OPÇÕES BÁSICAS" FontWeight="Bold" Foreground="White" FontSize="16"/>
-                            
-                            <StackPanel>
-                                <Label Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=default_language}" FontWeight="Bold" Foreground="LightGray"/>
+
+                            <StackPanel Spacing="4">
+                                <TextBlock Classes="trl-label" Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=default_language}"/>
                                 <ComboBox x:Name="LanguageCombo" ItemsSource="{Binding Locales.AvailableLocales}" MinWidth="300"
-                                          SelectedItem="{Binding Locales.SelectedLocale, Mode=TwoWay}"
-                                          Background="#222" Foreground="White" BorderThickness="0"
-                                          />
+                                          SelectedItem="{Binding Locales.SelectedLocale, Mode=TwoWay}"/>
                             </StackPanel>
 
-                            <StackPanel>
-                                <Label Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=on_game_start}" FontWeight="Bold" Foreground="LightGray"/>
+                            <StackPanel Spacing="4">
+                                <TextBlock Classes="trl-label" Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=on_game_start}"/>
                                 <cc:LocalizedLauncherActionSelector />
+                            </StackPanel>
+
+                            <!-- Item 008: configs de performance (overlay via motor de sync) -->
+                            <StackPanel Spacing="4">
+                                <ToggleSwitch IsChecked="{Binding UsePerformanceConfigs, Mode=TwoWay}"
+                                              OnContent="Ativado" OffContent="Desativado" Cursor="Hand">
+                                    <ToggleSwitch.Content>
+                                        <TextBlock Classes="trl-label" Text="USAR CONFIGS PERFORMANCE"/>
+                                    </ToggleSwitch.Content>
+                                </ToggleSwitch>
+                                <!-- ref: CR-01-03 — texto reflete a semântica real do preserve-divergent:
+                                     arquivo modificado desde a última sincronização (por você ou pelo
+                                     próprio jogo) é preservado também no desligar; não prometer
+                                     restauração incondicional. -->
+                                <TextBlock Classes="trl-muted" FontSize="{DynamicResource TrlTextXs}" TextWrapping="Wrap"
+                                           MaxWidth="460" HorizontalAlignment="Left"
+                                           Text="Aplica o pacote de configurações de performance do servidor na próxima verificação de arquivos. Configs que você personalizou são preservadas. Ao desligar, a próxima verificação restaura as configs padrão do servidor que não foram modificadas desde a última sincronização — as demais permanecem como estão."/>
                             </StackPanel>
 
                             <!-- Dev Mode — protegido por senha -->
                             <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                                 <Grid Width="300">
-                                    <TextBox Watermark="🔒 Senha admin" 
+                                    <TextBox Watermark="Senha admin"
                                              PasswordChar="{Binding DevPasswordChar}"
                                              Text="{Binding DevPassword, Mode=TwoWay}"
-                                             Background="#222" Foreground="White" BorderThickness="0"
-                                             FontSize="13" Padding="8,6,30,6"/>
-                                    <Button Command="{Binding ToggleDevPasswordVisibilityCommand}"
+                                             Padding="30,6,30,6"/>
+                                    <!-- adorno de cadeado (DS) à esquerda; não intercepta clique no campo -->
+                                    <Path Data="{StaticResource TrlIconLock}" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                          Margin="8,0,0,0" IsHitTestVisible="False"
+                                          Stroke="{DynamicResource TrlFgMutedBrush}" StrokeThickness="1.75" Fill="{x:Null}"
+                                          Width="16" Height="16" Stretch="Uniform" StrokeLineCap="Flat" StrokeJoin="Miter"/>
+                                    <Button Classes="icon" Command="{Binding ToggleDevPasswordVisibilityCommand}"
                                             HorizontalAlignment="Right" VerticalAlignment="Center"
-                                            Padding="4,2" Margin="0,0,4,0"
-                                            Background="Transparent" Foreground="Gray"
-                                            FontSize="13" Cursor="Hand" ToolTip.Tip="Mostrar/ocultar senha">
-                                        <TextBlock Text="{Binding DevPasswordEyeIcon}"/>
+                                            Margin="0,0,2,0" Cursor="Hand" ToolTip.Tip="Mostrar/ocultar senha">
+                                        <!-- ícones traçados do DS; olho fechado = senha oculta (clique p/ revelar) -->
+                                        <Panel>
+                                            <Path Data="{StaticResource TrlIconEye}" IsVisible="{Binding !IsDevPasswordVisible}"
+                                                  Stroke="{DynamicResource TrlFgMutedBrush}" StrokeThickness="1.75" Fill="{x:Null}"
+                                                  Width="16" Height="16" Stretch="Uniform" StrokeLineCap="Flat" StrokeJoin="Miter"/>
+                                            <Path Data="{StaticResource TrlIconEyeOff}" IsVisible="{Binding IsDevPasswordVisible}"
+                                                  Stroke="{DynamicResource TrlFgMutedBrush}" StrokeThickness="1.75" Fill="{x:Null}"
+                                                  Width="16" Height="16" Stretch="Uniform" StrokeLineCap="Flat" StrokeJoin="Miter"/>
+                                        </Panel>
                                     </Button>
                                 </Grid>
-                                <Button Command="{Binding ToggleDevModeCommand}"
-                                        Padding="8,6" Background="#333" Foreground="White" Cursor="Hand"
-                                        ToolTip.Tip="Ativar/Desativar modo desenvolvedor"
-                                        FontSize="13">
-                                    <TextBlock Text="🔑 Dev Mode"/>
+                                <Button Command="{Binding ToggleDevModeCommand}" Cursor="Hand"
+                                        ToolTip.Tip="Ativar/Desativar modo desenvolvedor">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <Path Data="{StaticResource TrlIconLockOpen}" VerticalAlignment="Center"
+                                              Stroke="{DynamicResource TrlFgMutedBrush}" StrokeThickness="1.75" Fill="{x:Null}"
+                                              Width="16" Height="16" Stretch="Uniform" StrokeLineCap="Flat" StrokeJoin="Miter"/>
+                                        <TextBlock Text="Dev Mode" VerticalAlignment="Center"/>
+                                    </StackPanel>
                                 </Button>
-                                <Border Background="{Binding DevModeStatusColor}" CornerRadius="10" 
-                                        Width="16" Height="16" VerticalAlignment="Center"
+                                <Border Classes="dev-dot"
+                                        Classes.on="{Binding IsDevMode, Source={x:Static helpers:LauncherSettingsProvider.Instance}}"
+                                        VerticalAlignment="Center"
                                         ToolTip.Tip="{Binding DevModeStatusText}"/>
                             </StackPanel>
                         </StackPanel>
-                    </Border>
-
+                    </cc:TrlPanel>
 
                     <!-- Painel Dev Mode -->
-                    <Border Classes="PanelCard" Padding="20" IsVisible="{Binding Source={x:Static helpers:LauncherSettingsProvider.Instance}, Path=IsDevMode}">
+                    <cc:TrlPanel Title="FERRAMENTAS DEV" IsVisible="{Binding Source={x:Static helpers:LauncherSettingsProvider.Instance}, Path=IsDevMode}">
                         <StackPanel Spacing="15">
-                            <TextBlock Text="FERRAMENTAS DEV" FontWeight="Bold" Foreground="White" FontSize="16"/>
 
                             <!-- Edição de URL Local -->
-                            <StackPanel>
-                                <Label Content="URL do Servidor (Local/Custom)" FontWeight="Bold" Foreground="LightGray"/>
-                                <TextBox Watermark="Ex: http://127.0.0.1:6969" 
+                            <StackPanel Spacing="4">
+                                <TextBlock Classes="trl-label" Text="URL DO SERVIDOR (LOCAL/CUSTOM)"/>
+                                <TextBox Watermark="Ex: http://127.0.0.1:6969"
                                          Text="{Binding Source={x:Static helpers:LauncherSettingsProvider.Instance}, Path=Server.Url, Mode=TwoWay}"
-                                         Background="#222" Foreground="White" BorderThickness="0" Padding="8" MaxWidth="300" HorizontalAlignment="Left"/>
+                                         MaxWidth="300" HorizontalAlignment="Left"/>
                             </StackPanel>
 
-                            <CheckBox Content="Bloquear atualizações (Desativar verificador)" 
-                                      IsChecked="{Binding Source={x:Static helpers:LauncherSettingsProvider.Instance}, Path=DisableUpdates}"
-                                      Foreground="LightGray"/>
+                            <CheckBox Content="Bloquear atualizações (Desativar verificador)"
+                                      IsChecked="{Binding Source={x:Static helpers:LauncherSettingsProvider.Instance}, Path=DisableUpdates}"/>
 
-                            <Button x:Name="ofb" Command="{Binding OpenGameFolderCommand}" Background="#333" Padding="15,10" Cursor="Hand">
-                                <StackPanel Orientation="Horizontal" Spacing="5">
-                                    <Path Data="{StaticResource OpenFolder}" Fill="White"/>
-                                    <Label Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=open_folder}" Foreground="White" Margin="5,0,0,-4"/>
+                            <!-- Modo homolog: prefixa as rotas do mod com /homolog (bate no TarkovRedLine.Server.Homolog) -->
+                            <StackPanel Spacing="2">
+                                <CheckBox Content="Modo homolog (rotas do mod → /homolog)"
+                                          IsChecked="{Binding Source={x:Static helpers:LauncherSettingsProvider.Instance}, Path=HomologMode}"
+                                          ToolTip.Tip="Aponta as rotas do mod TarkovRedLine para o mod de homologação (TarkovRedLine.Server.Homolog) no mesmo server. Rotas do SPT core não mudam. Requer reconectar."/>
+                                <TextBlock Classes="trl-faint" FontSize="{DynamicResource TrlText2Xs}"
+                                           Text="Só para testar contra a homologação. Deixe DESLIGADO para produção."/>
+                            </StackPanel>
+
+                            <Button x:Name="ofb" Command="{Binding OpenGameFolderCommand}" Cursor="Hand" HorizontalAlignment="Left">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <Path Data="{StaticResource TrlIconFolder}" Stroke="{DynamicResource TrlFgMutedBrush}" StrokeThickness="1.75" Fill="{x:Null}" Width="16" Height="16" Stretch="Uniform" StrokeLineCap="Flat" StrokeJoin="Miter" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=open_folder}" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Button>
                         </StackPanel>
-                    </Border>
+                    </cc:TrlPanel>
 
                 </StackPanel>
             </ScrollViewer>

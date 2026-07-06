@@ -17,7 +17,7 @@ Uma "leva" de ajustes foi implementada nos itens **004 (Mount)**, **008 (Esvazia
 **PRÓXIMO PASSO (crítico):**
 1. Instalar a DLL nova (`/compile-mod stancesAndCameraPositionSPT4.0.11 --flat`) e rodar uma raid.
 2. Abrir `D:/SPT/BepInEx/LogOutput.log` e procurar as linhas **`[enable]`**. Qualquer `[enable] FAIL <X>` identifica o patch que não resolve em 0.16 e a exceção.
-3. Para o(s) patch(es) que falham: corrigir o target (`GetTargetMethod`) consultando o **Assembly-CSharp 0.16 real** (em `D:/SPT/EscapeFromTarkov_Data/Managed/`) — decompilar com dnSpy/ILSpy ou usar `scratch/DumpSPT`. Os nomes `GClass####`/`method_##` usados foram validados por reflection numa sessão anterior, mas **nomes obfuscados mudam entre builds** — reconfirmar.
+3. Para o(s) patch(es) que falham: corrigir o target (`GetTargetMethod`) consultando o **Assembly-CSharp 0.16 real** (em `D:/SPT/EscapeFromTarkov_Data/Managed/`) — decompilar com dnSpy/ILSpy. Os nomes `GClass####`/`method_##` usados foram validados por reflection numa sessão anterior, mas **nomes obfuscados mudam entre builds** — reconfirmar.
 4. Habilitar Debug logging no BepInEx (`BepInEx/config/BepInEx.cfg` → `[Logging.Disk] LogLevels = ... Debug`) para ver os logs de comportamento `[Mount]` / `[Wiggle]` / `[ActionStance]` / `[ManualChamber]` e confirmar se os patches **disparam** (não só habilitam).
 
 ## Estado por item

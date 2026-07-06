@@ -1,0 +1,74 @@
+<!--
+  TRL Theme - Legacy.axaml
+  Absorbs the retired Assets/Styles.axaml: same class names, TRL tokens, radius 0 (R2).
+  Non-migrated views keep working; this file shrinks as 004+ restyles land and dies in 014.
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:cc="using:SPT.Launcher.CustomControls">
+
+	<!-- Notification manager chrome -->
+	<Style Selector="WindowNotificationManager">
+		<Setter Property="Margin" Value="0 35 0 0"/>
+		<Setter Property="MaxItems" Value="2"/>
+	</Style>
+
+	<Style Selector="NotificationCard">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="Template">
+			<ControlTemplate>
+				<LayoutTransformControl Name="PART_LayoutTransformControl" UseRenderTransform="True">
+					<Border CornerRadius="0" BoxShadow="{DynamicResource TrlShadow2}" Margin="5 5 5 10">
+						<Border Background="{TemplateBinding Background}"
+						        BorderBrush="{TemplateBinding BorderBrush}"
+						        BorderThickness="{TemplateBinding BorderThickness}"
+						        CornerRadius="0" ClipToBounds="True">
+							<DockPanel>
+								<ContentControl Name="PART_Content" Content="{TemplateBinding Content}" />
+							</DockPanel>
+						</Border>
+					</Border>
+				</LayoutTransformControl>
+			</ControlTemplate>
+		</Setter>
+	</Style>
+
+	<!-- TitleBar chrome (military window bar) — 30% p/ transparecer a arte -->
+	<Style Selector="cc|TitleBar">
+		<Setter Property="Background" Value="{DynamicResource TrlTitleBarBgBrush}"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgMutedBrush}"/>
+		<!-- glifos min/close em Fg (não muted) p/ contraste sobre a barra translúcida 30% -->
+		<Setter Property="ButtonForeground" Value="{DynamicResource TrlFgBrush}"/>
+	</Style>
+	<Style Selector="cc|TitleBar.versiontag">
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlAccentBrush}"/>
+		<Setter Property="BorderThickness" Value="0 0 0 2"/>
+	</Style>
+
+	<!-- Labels -->
+	<Style Selector="Label">
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgBrush}"/>
+	</Style>
+
+	<!-- Separator -->
+	<Style Selector="Separator">
+		<Setter Property="Background" Value="{DynamicResource TrlEdgeBrush}"/>
+		<Setter Property="Height" Value="1"/>
+	</Style>
+
+	<!-- ProgressBar error state (fills to 100% in danger color, as before) -->
+	<Style Selector="ProgressBar.error">
+		<Setter Property="Foreground" Value="{DynamicResource TrlDangerStrongBrush}"/>
+		<Style.Animations>
+			<Animation Duration="0:0:0.5" FillMode="Forward">
+				<KeyFrame Cue="0%">
+					<Setter Property="Value" Value="0"/>
+				</KeyFrame>
+				<KeyFrame Cue="100%">
+					<Setter Property="Value" Value="100"/>
+				</KeyFrame>
+			</Animation>
+		</Style.Animations>
+	</Style>
+
+</Styles>

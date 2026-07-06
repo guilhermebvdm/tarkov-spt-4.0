@@ -264,6 +264,51 @@ namespace SPT.Launcher
             return AccountStatus.OK;
         }
 
+        /// <summary>
+        /// Item 020 (A4/BR-020.3) — remove a chave do <paramref name="username"/> do cofre TRL
+        /// (redline_passwords.json) APAGANDO-a (não grava senha vazia). Best-effort: chamado após um
+        /// remove/wipe OK; a falha é reconciliada pela varredura de órfãos do server, não bloqueia a
+        /// exclusão. Recebe o username explícito porque <see cref="SelectedAccount"/> já pode ter sido
+        /// anulado pelo <see cref="Remove"/> anterior.
+        /// </summary>
+        public static async Task<AccountStatus> DeleteVaultEntryAsync(string username)
+        {
+            return await Task.Run(() =>
+            {
+                return DeleteVaultEntry(username);
+            });
+        }
+
+        public static AccountStatus DeleteVaultEntry(string username)
+        {
+            if (string.IsNullOrEmpty(username))
+            {
+                return AccountStatus.UpdateFailed;
+            }
+
+            // Só o username importa para o delete; password/change ficam nulos.
+            ChangeRequestData data = new ChangeRequestData(username, null, null);
+
+            try
+            {
+                string json = RequestHandler.RequestDeleteVaultEntry(data);
+
+                if (json != STATUS_OK)
+                {
+                    LogManager.Instance.Warning($"Failed to delete vault entry for: {username}");
+                    return AccountStatus.UpdateFailed;
+                }
+            }
+            catch
+            {
+                LogManager.Instance.Error($"Failed to delete vault entry for: {username} - NO CONNECTION");
+                return AccountStatus.NoConnection;
+            }
+
+            LogManager.Instance.Info($"Vault entry deleted: {username}");
+            return AccountStatus.OK;
+        }
+
         public static async Task<AccountStatus> WipeAsync(string edition)
         {
             return await Task.Run(() =>

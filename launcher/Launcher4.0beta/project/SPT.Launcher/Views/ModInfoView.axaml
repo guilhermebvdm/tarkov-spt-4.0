@@ -18,24 +18,22 @@
                 />
         
         <!-- Active Mods List Header -->
-        <Border Grid.Row="3" Grid.Column="1"
-                Classes="card"
-                >
-            <StackPanel Spacing="2" Margin="10">
+        <cc:TrlPanel Grid.Row="3" Grid.Column="1" ShowHeader="False">
+            <StackPanel Spacing="2">
                 <!-- Active mods count and text -->
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
                     <Label Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=active_server_mods}"/>
-                    <Label Content="{Binding ModsCollection.ActiveMods.Count}" Classes="acc"/>
+                    <Label Content="{Binding ModsCollection.ActiveMods.Count}" Foreground="{DynamicResource TrlAccentBrush}"/>
                 </StackPanel>
-                
+
                 <!-- Active mods info text -->
                 <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=active_server_mods_info_text}"
                            VerticalAlignment="Center" HorizontalAlignment="Center"
                            FontSize="12"
                            TextWrapping="Wrap"
-                           Classes="alt"/>
+                           Classes="trl-muted"/>
             </StackPanel>
-        </Border>
+        </cc:TrlPanel>
         
         <!-- Active Mods List -->
         <ScrollViewer Grid.Row="5" Grid.Column="1">
@@ -56,25 +54,23 @@
         </ScrollViewer>
         
         <!-- Inactive Mods List Header -->
-        <Border Grid.Row="3" Grid.Column="3"
-                Classes="card"
-                >
-            <StackPanel Spacing="2" Margin="10">
+        <cc:TrlPanel Grid.Row="3" Grid.Column="3" ShowHeader="False">
+            <StackPanel Spacing="2">
                 <!-- Inactive mods count and text -->
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
                     <Label Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=inactive_server_mods}"/>
-                    <Label Content="{Binding ModsCollection.InactiveMods.Count}" Classes="acc"/>
+                    <Label Content="{Binding ModsCollection.InactiveMods.Count}" Foreground="{DynamicResource TrlAccentBrush}"/>
                 </StackPanel>
-                
+
                 <!-- Inactive mods info text -->
                 <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=inactive_server_mods_info_text}"
                            VerticalAlignment="Center" HorizontalAlignment="Center"
                            FontSize="12"
                            TextWrapping="Wrap"
-                           Classes="alt"
+                           Classes="trl-muted"
                            />
             </StackPanel>
-        </Border>
+        </cc:TrlPanel>
         <!-- Inactive Mods List -->
         <ScrollViewer Grid.Row="5" Grid.Column="3" >
             <ItemsControl ItemsSource="{Binding ModsCollection.InactiveMods}">

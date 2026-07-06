@@ -1,0 +1,17 @@
+<!-- TRL Theme - ProgressBar.axaml: 6px track, tan gradient fill; .error = danger (legacy anim kept in Legacy.axaml) -->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+	<Style Selector="ProgressBar">
+		<Setter Property="Foreground" Value="{DynamicResource TrlProgressFillBrush}"/>
+		<Setter Property="Background" Value="{DynamicResource TrlBgInputBrush}"/>
+		<Setter Property="CornerRadius" Value="0"/>
+		<Setter Property="MinHeight" Value="6"/>
+		<Setter Property="MinWidth" Value="120"/>
+	</Style>
+
+	<Style Selector="ProgressBar:horizontal">
+		<Setter Property="Height" Value="6"/>
+	</Style>
+
+</Styles>

@@ -64,7 +64,7 @@ namespace SPT.Launcher.Helpers
             // Incrementar EXPECTED_CONFIG_VERSION a cada mudança estrutural no config.
             // Quando a versão salva < esperada, força re-save para limpar campos obsoletos
             // e gravar novos campos com defaults, sem perder dados do jogador.
-            const int EXPECTED_CONFIG_VERSION = 2;
+            const int EXPECTED_CONFIG_VERSION = 4; // v4: HomologMode (cenário homolog namespaced)
             if (settings.ConfigVersion < EXPECTED_CONFIG_VERSION)
             {
                 LogManager.Instance.Info($"[Settings] Config desatualizado (v{settings.ConfigVersion} → v{EXPECTED_CONFIG_VERSION}). Atualizando...");
@@ -323,6 +323,33 @@ namespace SPT.Launcher.Helpers
             set => SetProperty(ref _disableUpdates, value);
         }
 
+        /// <summary>
+        /// Item 008: when true, the file verification applies the server performance-config
+        /// overlay (Launcher-Updater/config-performance) on top of the normal sync — user
+        /// customizations (divergent from baseline) are never overwritten. Turning it off
+        /// makes the next verification restore the server defaults. Per machine (D5).
+        /// </summary>
+        private bool _usePerformanceConfigs;
+        public bool UsePerformanceConfigs
+        {
+            get => _usePerformanceConfigs;
+            set => SetProperty(ref _usePerformanceConfigs, value);
+        }
+
+        /// <summary>
+        /// Modo homolog: quando ligado, as rotas do mod TarkovRedLine ganham o prefixo "/homolog"
+        /// (ver <see cref="RequestHandler.ModRoutePrefix"/>), batendo no mod TarkovRedLine.Server.Homolog
+        /// que roda no MESMO server de produção sem colidir com as rotas de produção. Rotas do SPT core
+        /// (login/register/connect/customclasses) NÃO são afetadas. Uso: testar mudanças do launcher
+        /// contra o ambiente real antes de subir pra produção. Default off (produção).
+        /// </summary>
+        private bool _homologMode;
+        public bool HomologMode
+        {
+            get => _homologMode;
+            set => SetProperty(ref _homologMode, value);
+        }
+
         private string _gamePath;
         public string GamePath
         {
@@ -349,7 +376,9 @@ namespace SPT.Launcher.Helpers
                 LauncherStartGameAction = LauncherAction.MinimizeAction;
                 UseAutoLogin = true;
                 GamePath = AppContext.BaseDirectory;
-                IsDevMode = true;
+                // ref: CR-01-04 — instalação limpa é jogador, não dev: Dev Mode default true
+                // pulava a VPN/gist e engolia o erro claro de Tailscale em toda máquina nova.
+                IsDevMode = false;
 
                 Server = new ServerSetting
                 {

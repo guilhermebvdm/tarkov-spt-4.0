@@ -1,0 +1,15 @@
+<!-- TRL Theme - ScrollBar.axaml: thin 10px bar, surface-3 thumb (size key overridden in Trl.axaml resources) -->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+	<Style Selector="ScrollBar /template/ Thumb">
+		<Setter Property="Background" Value="{DynamicResource TrlSurface3Brush}"/>
+	</Style>
+	<Style Selector="ScrollBar /template/ Thumb:pointerover">
+		<Setter Property="Background" Value="{DynamicResource TrlTan700Brush}"/>
+	</Style>
+	<Style Selector="ScrollBar /template/ Thumb:pressed">
+		<Setter Property="Background" Value="{DynamicResource TrlTan600Brush}"/>
+	</Style>
+
+</Styles>

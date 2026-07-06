@@ -1,0 +1,36 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="SPT.Launcher.CustomControls.TrlScreenBar"
+             Height="34">
+
+	<!-- Military window chrome: 34px bar, status dot, uppercase display title, right meta.
+	     Pass Title/Meta already uppercase (no text-transform in Avalonia). -->
+	<Border Background="{DynamicResource TrlScreenBarBgBrush}"
+	        BorderBrush="{DynamicResource TrlEdgeBrush}"
+	        BorderThickness="0,0,0,1"
+	        Padding="12,0">
+		<Grid ColumnDefinitions="AUTO,*,AUTO" VerticalAlignment="Stretch">
+
+			<StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+				<Ellipse Width="7" Height="7"
+				         IsVisible="{Binding ShowDot, RelativeSource={RelativeSource AncestorType=UserControl}}"
+				         Fill="{Binding DotBrush, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+				<TextBlock Text="{Binding Title, RelativeSource={RelativeSource AncestorType=UserControl}}"
+				           VerticalAlignment="Center"
+				           FontFamily="{DynamicResource TrlFontDisplay}"
+				           FontSize="{DynamicResource TrlTextXs}"
+				           LetterSpacing="{DynamicResource TrlTrackWider}"
+				           Foreground="{DynamicResource TrlAccentBrush}"/>
+			</StackPanel>
+
+			<TextBlock Grid.Column="2"
+			           Text="{Binding Meta, RelativeSource={RelativeSource AncestorType=UserControl}}"
+			           VerticalAlignment="Center"
+			           FontFamily="{DynamicResource TrlFontDisplay}"
+			           FontSize="{DynamicResource TrlTextXs}"
+			           LetterSpacing="{DynamicResource TrlTrackWide}"
+			           Foreground="{DynamicResource TrlFgFaintBrush}"/>
+		</Grid>
+	</Border>
+
+</UserControl>

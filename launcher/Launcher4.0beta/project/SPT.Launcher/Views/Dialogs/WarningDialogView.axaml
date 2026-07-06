@@ -2,25 +2,24 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-			 xmlns:helpers="using:SPT.Launcher.Helpers"
              xmlns:dialogHost="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:cc="using:SPT.Launcher.CustomControls"
+             mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="200"
              x:Class="SPT.Launcher.Views.Dialogs.WarningDialogView"
-			 Background="{DynamicResource BackgroundBrush}"
-			 BorderBrush="IndianRed"
-			 BorderThickness="1"
-			 >
-	<Grid RowDefinitions="10,AUTO,10,AUTO,10" ColumnDefinitions="10,*,10">
-		<Label Content="{Binding WarningMessage}" Grid.Row="1" Grid.Column="1"
-			   HorizontalAlignment="Center"
-			   VerticalAlignment="Center"
-			   Foreground="IndianRed"
-			   />
-		<Button Content="{Binding ButtonText}" Grid.Row="3" Grid.Column="1"
-				HorizontalAlignment="Center"
-				VerticalAlignment="Center"
-				Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHost:DialogHost}, Path=CloseDialogCommand}"
-				Classes="acc"
-				/>
-	</Grid>
+             MaxWidth="520">
+
+  <cc:TrlDialogChrome Title="ATENÇÃO">
+    <cc:TrlDialogChrome.HeaderContent>
+      <!-- ✕ equivale ao OK (dialog informativo; resultado é ignorado pelo caller) -->
+      <Button Classes="icon sm" Content="✕" Cursor="Hand"
+              Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHost:DialogHost}, Path=CloseDialogCommand}"/>
+    </cc:TrlDialogChrome.HeaderContent>
+
+    <StackPanel Spacing="16">
+      <TextBlock Text="{Binding WarningMessage}" Classes="trl-danger" TextWrapping="Wrap" FontSize="{DynamicResource TrlTextMd}"/>
+
+      <Button Content="{Binding ButtonText}" Classes="primary" Cursor="Hand" HorizontalAlignment="Right"
+              Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHost:DialogHost}, Path=CloseDialogCommand}"/>
+    </StackPanel>
+  </cc:TrlDialogChrome>
 </UserControl>

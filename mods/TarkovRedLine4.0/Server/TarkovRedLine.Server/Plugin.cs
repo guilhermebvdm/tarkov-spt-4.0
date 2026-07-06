@@ -8,9 +8,9 @@ namespace TarkovRedLine.Server;
 
 public record TarkovRedLineModMetadata : AbstractModMetadata, IModWebMetadata
 {
-    public override string Name { get; init; } = "TarkovRedLine-ServerMod";
+    public override string Name { get; init; } = ModRouting.ModName;
     public override string Author { get; init; } = "Saraiva";
-    public override string ModGuid { get; init; } = "com.saraiva.tarkovredline";
+    public override string ModGuid { get; init; } = ModRouting.ModGuid;
     public override SemanticVersioning.Version Version { get; init; } = new(4, 0, 0);
     public override SemanticVersioning.Range SptVersion { get; init; } = new(">=4.0.0");
     public override bool? IsBundleMod { get; init; } = false;

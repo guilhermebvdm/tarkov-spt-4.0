@@ -1,0 +1,203 @@
+<!--
+  TRL Theme - Button.axaml
+  Base = outlined NEUTRO (borda edge-strong + texto fg-muted; hover -> fg) — grafite v2:
+  gold so em significado (.primary/selecionado). Variants: .primary (solid tan),
+  .danger (destructive only), .ghost, .icon, .sm. Legacy shims no rodape.
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:cvt="using:SPT.Launcher.Converters">
+
+	<Styles.Resources>
+		<!-- item 003: DS chamfer token as a live geometry, bound to Bounds -->
+		<cvt:ChamferClipConverter x:Key="ChamferClip"/>
+	</Styles.Resources>
+
+	<!-- == Base: outlined tan =============================================== -->
+	<Style Selector="Button">
+		<Setter Property="MinHeight" Value="{DynamicResource TrlControlHeight}"/>
+		<Setter Property="Padding" Value="16,0"/>
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlEdgeStrongBrush}"/>
+		<Setter Property="BorderThickness" Value="1"/>
+		<Setter Property="CornerRadius" Value="0"/>
+		<!-- item 002: hand cursor on every button (covers the app by inheritance) -->
+		<Setter Property="Cursor" Value="Hand"/>
+		<!-- ref: handoff grafite regra 4 — base neutra; .trl-btn v2 = color fg-muted -->
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgMutedBrush}"/>
+		<Setter Property="FontFamily" Value="{DynamicResource TrlFontDisplay}"/>
+		<Setter Property="FontSize" Value="{DynamicResource TrlTextSm}"/>
+		<Setter Property="VerticalContentAlignment" Value="Center"/>
+	</Style>
+
+	<Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource TrlBgHoverBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlEdgeStrongBrush}"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgBrush}"/>
+	</Style>
+
+	<Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource TrlBgActiveBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlAccentDimBrush}"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgBrush}"/>
+	</Style>
+
+	<Style Selector="Button:disabled /template/ ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlEdgeFaintBrush}"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgFaintBrush}"/>
+	</Style>
+
+	<!-- == .primary: solid tan, ink-inverse text ============================ -->
+	<Style Selector="Button.primary">
+		<Setter Property="Background" Value="{DynamicResource TrlAccentBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlAccentBrush}"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgOnAccentBrush}"/>
+		<!-- item 011b: peso reduzido Bold -> SemiBold -->
+		<Setter Property="FontWeight" Value="SemiBold"/>
+		<!-- item 003: chanfro (top-left + bottom-right), só variantes sólidas -->
+		<Setter Property="Clip" Value="{Binding Bounds, RelativeSource={RelativeSource Self}, Converter={StaticResource ChamferClip}}"/>
+	</Style>
+	<Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource TrlAccentStrongBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlAccentStrongBrush}"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgOnAccentBrush}"/>
+	</Style>
+	<Style Selector="Button.primary:pressed /template/ ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource TrlTan400Brush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlTan400Brush}"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgOnAccentBrush}"/>
+	</Style>
+	<Style Selector="Button.primary:disabled /template/ ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource TrlTan600Brush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlTan600Brush}"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgOnAccentBrush}"/>
+	</Style>
+
+	<!-- == .danger: destructive actions ONLY (R1) =========================== -->
+	<Style Selector="Button.danger">
+		<Setter Property="Background" Value="{DynamicResource TrlDangerStrongBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlDangerStrongBrush}"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgOnDanger}"/>
+		<!-- texto sem peso nos botões destrutivos (WIPE / EXCLUIR CONTA) -->
+		<Setter Property="FontWeight" Value="Normal"/>
+		<!-- item 003: chanfro (top-left + bottom-right), só variantes sólidas -->
+		<Setter Property="Clip" Value="{Binding Bounds, RelativeSource={RelativeSource Self}, Converter={StaticResource ChamferClip}}"/>
+	</Style>
+	<Style Selector="Button.danger:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource TrlDangerHoverBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlDangerHoverBrush}"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgOnDanger}"/>
+	</Style>
+	<Style Selector="Button.danger:pressed /template/ ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource TrlDangerPressedBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlDangerPressedBrush}"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgOnDanger}"/>
+	</Style>
+
+	<!-- == .ghost: borderless, muted ======================================== -->
+	<Style Selector="Button.ghost">
+		<Setter Property="BorderBrush" Value="Transparent"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgMutedBrush}"/>
+	</Style>
+	<Style Selector="Button.ghost:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource TrlBgHoverBrush}"/>
+		<Setter Property="BorderBrush" Value="Transparent"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgBrush}"/>
+	</Style>
+	<Style Selector="Button.ghost:pressed /template/ ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource TrlBgActiveBrush}"/>
+		<Setter Property="BorderBrush" Value="Transparent"/>
+	</Style>
+
+	<!-- == .icon / .sm ====================================================== -->
+	<Style Selector="Button.icon">
+		<Setter Property="Width" Value="30"/>
+		<Setter Property="Padding" Value="0"/>
+		<Setter Property="BorderBrush" Value="Transparent"/>
+		<Setter Property="HorizontalContentAlignment" Value="Center"/>
+	</Style>
+	<Style Selector="Button.icon:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource TrlBgHoverBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlEdgeStrongBrush}"/>
+	</Style>
+	<Style Selector="Button.icon:pressed /template/ ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource TrlBgActiveBrush}"/>
+	</Style>
+
+	<Style Selector="Button.sm">
+		<Setter Property="MinHeight" Value="{DynamicResource TrlControlHeightSm}"/>
+		<Setter Property="Height" Value="{DynamicResource TrlControlHeightSm}"/>
+		<Setter Property="Padding" Value="8,0"/>
+		<Setter Property="FontSize" Value="{DynamicResource TrlTextXs}"/>
+	</Style>
+
+	<!-- ================================================================== -->
+	<!-- Legacy class shims (kept for non-migrated views; removed in 014)   -->
+	<!-- ================================================================== -->
+
+	<!-- acc: was solid red accent -> now primary tan look -->
+	<Style Selector="Button.acc">
+		<Setter Property="Background" Value="{DynamicResource TrlAccentBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlAccentBrush}"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgOnAccentBrush}"/>
+		<Setter Property="FontWeight" Value="Bold"/>
+	</Style>
+	<Style Selector="Button.acc:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource TrlAccentStrongBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlAccentStrongBrush}"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgOnAccentBrush}"/>
+	</Style>
+	<Style Selector="Button.acc:pressed /template/ ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource TrlTan400Brush}"/>
+		<Setter Property="Foreground" Value="{DynamicResource TrlFgOnAccentBrush}"/>
+	</Style>
+	<Style Selector="Button.acc:disabled /template/ ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource TrlTan600Brush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlTan600Brush}"/>
+	</Style>
+
+	<!-- alt / outlined: base outlined tan look (base already covers; keep dim text for alt) -->
+	<Style Selector="Button.alt">
+		<Setter Property="Foreground" Value="{DynamicResource TrlAccentDimBrush}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TrlEdgeBrush}"/>
+	</Style>
+
+	<!-- link / ulink: text links, tan -->
+	<Style Selector="Button.ulink">
+		<Setter Property="TextBlock.TextDecorations" Value="Underline"/>
+	</Style>
+	<Style Selector="Button.link, Button.ulink">
+		<Setter Property="Foreground" Value="{DynamicResource TrlAccentBrush}"/>
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="BorderBrush" Value="Transparent"/>
+		<Setter Property="BorderThickness" Value="0"/>
+		<Setter Property="MinHeight" Value="0"/>
+		<Setter Property="Padding" Value="2,0"/>
+	</Style>
+	<Style Selector="Button.link:pointerover /template/ ContentPresenter#PART_ContentPresenter, Button.ulink:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="BorderBrush" Value="Transparent"/>
+		<Setter Property="TextBlock.Foreground" Value="{DynamicResource TrlAccentStrongBrush}"/>
+	</Style>
+	<Style Selector="Button.link:pressed /template/ ContentPresenter#PART_ContentPresenter, Button.ulink:pressed /template/ ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="BorderBrush" Value="Transparent"/>
+		<Setter Property="TextBlock.Foreground" Value="{DynamicResource TrlAccentDimBrush}"/>
+	</Style>
+
+	<!-- transparent: ghost-look -->
+	<Style Selector="Button.transparent">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="BorderBrush" Value="Transparent"/>
+		<Setter Property="BorderThickness" Value="0"/>
+	</Style>
+	<Style Selector="Button.transparent:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource TrlBgHoverBrush}"/>
+		<Setter Property="BorderBrush" Value="Transparent"/>
+	</Style>
+	<Style Selector="Button.transparent:pressed /template/ ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource TrlBgActiveBrush}"/>
+	</Style>
+
+</Styles>

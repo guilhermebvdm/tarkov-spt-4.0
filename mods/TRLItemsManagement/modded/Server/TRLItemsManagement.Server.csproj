@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!-- Sdk.Web defaults to Exe; a mod loaded by the SPT host must be a Library.
+       AssemblyName is the STATIC-FILE URL PREFIX: files in wwwroot/ are served at
+       /TRLItemsManagement-Server/... . Mirror of mods/CustomClasses/modded/Server. -->
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <AssemblyName>TRLItemsManagement-Server</AssemblyName>
+    <RootNamespace>TRLItemsManagement</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <Version>0.1.0</Version>
+    <Authors>trl</Authors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SPTarkov.Server.Core" Version="4.0.2" />
+    <PackageReference Include="SPTarkov.Server.Web" Version="4.0.2" />
+    <PackageReference Include="SPTarkov.DI" Version="4.0.2" />
+    <PackageReference Include="SPTarkov.Common" Version="4.0.2" />
+  </ItemGroup>
+
+</Project>

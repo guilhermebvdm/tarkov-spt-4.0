@@ -3,18 +3,24 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Security.Cryptography;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ReactiveUI;
 using SPT.Launcher.Helpers;
 using SPT.Launcher.Models.Launcher;
+using SPT.Launcher.Sync;
+using SPT.Launcher.ViewModels.Dialogs;
 
 namespace SPT.Launcher.ViewModels
 {
+    /// <summary>
+    /// Standalone update screen backed by the item-007 sync engine (SPT.Launcher.Base/Sync),
+    /// rendered by Views/ModUpdateView.axaml. Folder rules: config = preserve divergent ·
+    /// config-server = mirror delete · patchers/plugins = mirror move to -disabled · rest =
+    /// legacy behavior. The login flow (ProfileViewModel) uses the same engine (P-007.1).
+    /// </summary>
     public class ModUpdateViewModel : ViewModelBase
     {
         // === Properties for UI Binding ===
@@ -24,6 +30,13 @@ namespace SPT.Launcher.ViewModels
         {
             get => _statusText;
             set => this.RaiseAndSetIfChanged(ref _statusText, value);
+        }
+
+        private string _summaryText = "";
+        public string SummaryText
+        {
+            get => _summaryText;
+            set => this.RaiseAndSetIfChanged(ref _summaryText, value);
         }
 
         private double _progress = 0;
@@ -44,21 +57,39 @@ namespace SPT.Launcher.ViewModels
         public bool IsChecking
         {
             get => _isChecking;
-            set => this.RaiseAndSetIfChanged(ref _isChecking, value);
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _isChecking, value);
+                this.RaisePropertyChanged(nameof(IsBusy));
+            }
         }
 
         private bool _isUpdating = false;
         public bool IsUpdating
         {
             get => _isUpdating;
-            set => this.RaiseAndSetIfChanged(ref _isUpdating, value);
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _isUpdating, value);
+                this.RaisePropertyChanged(nameof(IsBusy));
+            }
         }
+
+        /// <summary>True while checking or applying — drives the view's disabled states.</summary>
+        public bool IsBusy => IsChecking || IsUpdating;
 
         private bool _canUpdate = false;
         public bool CanUpdate
         {
             get => _canUpdate;
             set => this.RaiseAndSetIfChanged(ref _canUpdate, value);
+        }
+
+        private bool _canCancel = false;
+        public bool CanCancel
+        {
+            get => _canCancel;
+            set => this.RaiseAndSetIfChanged(ref _canCancel, value);
         }
 
         private bool _updateComplete = false;
@@ -82,14 +113,46 @@ namespace SPT.Launcher.ViewModels
             set => this.RaiseAndSetIfChanged(ref _outdatedFiles, value);
         }
 
+        // === Item 016 — taxa de download (média móvel, MB/s decimal, separador PT-BR) ===
+
+        private readonly DownloadRateMeter _rateMeter = new DownloadRateMeter();
+
+        private string _downloadSpeedText = "";
+        public string DownloadSpeedText
+        {
+            get => _downloadSpeedText;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _downloadSpeedText, value);
+                this.RaisePropertyChanged(nameof(HasDownloadSpeed));
+            }
+        }
+
+        private double _downloadBytesPerSec;
+        public double DownloadBytesPerSec
+        {
+            get => _downloadBytesPerSec;
+            set => this.RaiseAndSetIfChanged(ref _downloadBytesPerSec, value);
+        }
+
+        /// <summary>Cache hit / nothing downloading → empty text → the speed label is hidden.</summary>
+        public bool HasDownloadSpeed => !string.IsNullOrEmpty(DownloadSpeedText);
+
         public ObservableCollection<ModFileStatus> FileStatuses { get; } = new ObservableCollection<ModFileStatus>();
 
         public ICommand UpdateCommand { get; }
         public ICommand CheckUpdatesCommand { get; }
+        public ICommand CancelCommand { get; }
 
         // Internal state
-        private List<ManifestFile> _filesToUpdate = new List<ManifestFile>();
-        private string _gamePath;
+        private SyncPlan _plan;
+        private SyncBaseline _baseline;
+        private SyncManifestOverlay _performanceOverlay; // item 008 — null when the toggle is off
+        private CancellationTokenSource _cts;
+        private readonly string _gamePath;
+
+        private static string LauncherStateDir =>
+            Path.Combine(SPT.Launcher.Base.Helpers.SptPathHelper.SptRootPath, "user", "launcher");
 
         public ModUpdateViewModel(IScreen Host) : base(Host)
         {
@@ -97,101 +160,126 @@ namespace SPT.Launcher.ViewModels
 
             UpdateCommand = ReactiveCommand.CreateFromTask(async () => await UpdateMods());
             CheckUpdatesCommand = ReactiveCommand.CreateFromTask(async () => await CheckForUpdates());
+            CancelCommand = ReactiveCommand.CreateFromTask(async () => await CancelSync());
 
             // Auto-check on load
             _ = CheckForUpdates();
         }
 
         /// <summary>
-        /// Check for updates by fetching manifest and comparing local files
+        /// Fetches the manifest and builds the sync plan (per-folder rules + baseline).
+        /// Cancellable (requirement 4.1.2 — "Verificação de arquivo").
         /// </summary>
         public async Task CheckForUpdates()
         {
+            if (IsChecking || IsUpdating) return;
+
             IsChecking = true;
             CanUpdate = false;
             UpdateComplete = false;
+            SummaryText = "";
             StatusText = LocalizationProvider.Instance.update_checking;
             Progress = 0;
             FileStatuses.Clear();
-            _filesToUpdate.Clear();
+            _plan = null;
+            _rateMeter.Reset();       // item 016 — taxa começa limpa a cada verificação
+            DownloadSpeedText = "";
+
+            _cts = new CancellationTokenSource();
+            CanCancel = true;
 
             try
             {
-                // Fetch manifest from server
                 Controllers.LogManager.Instance.Info("[ModUpdateView] Buscando manifesto de mods...");
                 string response = await Task.Run(() => RequestHandler.RequestModsManifest());
                 var manifest = JObject.Parse(response);
 
                 var files = manifest["files"]?.ToObject<List<ManifestFile>>() ?? new List<ManifestFile>();
                 var ignoredFiles = manifest["ignoredFiles"]?.ToObject<List<string>>() ?? new List<string>();
+                var managedPaths = manifest["managedPaths"]?.ToObject<List<string>>() ?? new List<string>();
+                var folderRules = manifest["folderRules"]?.ToObject<Dictionary<string, string>>();
+                var optionalGroups = manifest["optionalGroups"]?.ToObject<List<OptionalModsHelper.OptionalGroupInfo>>()
+                                     ?? new List<OptionalModsHelper.OptionalGroupInfo>();
+                var performanceOverlayFiles = manifest["performanceOverlay"]?.ToObject<List<ManifestFile>>() ?? new List<ManifestFile>();
+
+                // Refresh the optional-mods cache so GetAllKnownOptionalPaths() protects inactive groups too (CC3)
+                var optionalManifestFiles = files
+                    .Where(f => f.optional)
+                    .Select(f => new OptionalModsHelper.ManifestFile
+                    {
+                        path = f.path, hash = f.hash, size = f.size, optional = f.optional, optionalGroup = f.optionalGroup,
+                    })
+                    .ToList();
+                OptionalModsHelper.UpdateFromManifest(optionalGroups, optionalManifestFiles);
 
                 TotalFiles = files.Count;
-                MaxProgress = files.Count;
+                MaxProgress = Math.Max(1, files.Count);
 
-                int checkedCount = 0;
-                int outdated = 0;
+                // Item 008: overlay de configs performance (merge — spec 008 D3)
+                IReadOnlyList<ManifestFile> effectiveFiles = files;
+                _performanceOverlay = null;
 
-                foreach (var file in files)
+                if (LauncherSettingsProvider.Instance.UsePerformanceConfigs && performanceOverlayFiles.Count > 0)
                 {
-                    checkedCount++;
-                    Progress = checkedCount;
-                    StatusText = string.Format(LocalizationProvider.Instance.update_checking_file, checkedCount, files.Count);
-
-                    string relPathLower = file.path.Replace('\\', '/').ToLowerInvariant();
-                    if (ignoredFiles.Any(ig => relPathLower.Contains(ig.Replace('\\', '/').ToLowerInvariant())))
-                    {
-                        continue;
-                    }
-
-                    string localPath = Path.Combine(_gamePath, file.path.Replace('/', Path.DirectorySeparatorChar));
-
-                    string status;
-                    if (!File.Exists(localPath))
-                    {
-                        // File doesn't exist locally — needs download
-                        status = "missing";
-                        _filesToUpdate.Add(file);
-                        outdated++;
-                    }
-                    else
-                    {
-                        // Compare hash
-                        string localHash = await Task.Run(() => GetFileMD5(localPath));
-                        if (localHash != file.hash)
-                        {
-                            status = "outdated";
-                            _filesToUpdate.Add(file);
-                            outdated++;
-                        }
-                        else
-                        {
-                            status = "ok";
-                        }
-                    }
-
-                    Avalonia.Threading.Dispatcher.UIThread.Post(() =>
-                    {
-                        FileStatuses.Add(new ModFileStatus
-                        {
-                            FileName = file.path,
-                            Status = status,
-                            Size = file.size
-                        });
-                    });
+                    _performanceOverlay = SyncManifestOverlay.Merge(files, performanceOverlayFiles);
+                    effectiveFiles = _performanceOverlay.Files;
+                    Controllers.LogManager.Instance.Info($"[ModUpdateView] Configs performance ON — overlay com {performanceOverlayFiles.Count} arquivo(s)");
                 }
 
-                OutdatedFiles = outdated;
+                var resolver = new SyncRuleResolver(folderRules);
+                _baseline = SyncBaseline.Load(Path.Combine(LauncherStateDir, "sync-state.json"));
 
-                if (outdated > 0)
+                var options = new SyncPlannerOptions
+                {
+                    GameRoot = _gamePath,
+                    DevMode = LauncherSettingsProvider.Instance.IsDevMode,
+                    IgnoredFiles = ignoredFiles,
+                    ExcludeFromCleanup = LauncherSettingsProvider.Instance.ExcludeFromCleanup ?? Array.Empty<string>(),
+                    ProtectedPaths = OptionalModsHelper.GetAllKnownOptionalPaths()
+                        .Select(p => p.Replace(Path.DirectorySeparatorChar, '/'))
+                        .ToList(),
+                    ManagedPaths = managedPaths,
+                    IsOptionalGroupEnabled = id => LauncherSettingsProvider.Instance.IsOptionalEnabled(id),
+                };
+
+                var planner = new SyncPlanner(resolver, _baseline, options);
+
+                var progress = new Progress<SyncProgress>(p =>
+                {
+                    Progress = p.Current;
+                    MaxProgress = Math.Max(1, p.Total);
+                    StatusText = string.Format(LocalizationProvider.Instance.update_checking_file, p.Current, p.Total)
+                                 + " - " + p.CurrentPath;
+                });
+
+                var plan = await planner.BuildPlanAsync(effectiveFiles, progress, _cts.Token);
+                _plan = plan;
+
+                PopulateFileStatuses(plan, effectiveFiles);
+                OutdatedFiles = plan.DownloadCount;
+
+                SummaryText = BuildPlanSummary(plan);
+
+                if (plan.IoActionCount > 0)
                 {
                     CanUpdate = true;
-                    StatusText = string.Format(LocalizationProvider.Instance.update_available, outdated);
+                    StatusText = string.Format(LocalizationProvider.Instance.update_available, plan.DownloadCount);
                 }
                 else
                 {
                     StatusText = LocalizationProvider.Instance.update_up_to_date;
                     UpdateComplete = true;
+
+                    // Nothing to apply, but persist the converged baseline seed + report of preserved files
+                    var engine = CreateEngine();
+                    var result = await engine.ExecuteAsync(plan, ReportFilePath, null, CancellationToken.None);
+                    SummaryText = result.Summary;
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                StatusText = "Verificação cancelada pelo usuário.";
+                Controllers.LogManager.Instance.Info("[ModUpdateView] Verificação cancelada pelo usuário");
             }
             catch (Exception ex)
             {
@@ -201,77 +289,246 @@ namespace SPT.Launcher.ViewModels
             finally
             {
                 IsChecking = false;
+                CanCancel = false;
+                _cts?.Dispose();
+                _cts = null;
             }
         }
 
         /// <summary>
-        /// Download and install all outdated files
+        /// Executes the current plan through the sync engine: atomic downloads, mirror deletes,
+        /// moves to -disabled. Baseline + last-update.json are persisted even on cancel/error.
         /// </summary>
         public async Task UpdateMods()
         {
-            if (_filesToUpdate.Count == 0) return;
+            var plan = _plan;
+            if (plan == null || _baseline == null || plan.IoActionCount == 0 || IsUpdating) return;
 
             IsUpdating = true;
             CanUpdate = false;
-            Controllers.LogManager.Instance.Info($"[ModUpdateView] Iniciando download de {_filesToUpdate.Count} arquivos...");
-            MaxProgress = _filesToUpdate.Count;
+            Controllers.LogManager.Instance.Info(
+                $"[ModUpdateView] Aplicando plano: {plan.DownloadCount} downloads, {plan.DeleteCount} remoções, {plan.MoveCount} movimentos p/ -disabled");
+            MaxProgress = Math.Max(1, plan.IoActionCount);
             Progress = 0;
+            _rateMeter.Reset(); // item 016
+            DownloadSpeedText = "";
 
-            int completed = 0;
-            int errors = 0;
+            _cts = new CancellationTokenSource();
+            CanCancel = true;
 
-            foreach (var file in _filesToUpdate)
+            try
             {
-                completed++;
-                StatusText = string.Format(LocalizationProvider.Instance.update_downloading, file.path, completed, _filesToUpdate.Count);
-                Progress = completed;
+                var engine = CreateEngine();
 
-                try
+                var progress = new Progress<SyncProgress>(p =>
                 {
-                    string localPath = Path.Combine(_gamePath, file.path.Replace('/', Path.DirectorySeparatorChar));
+                    Progress = p.Current;
+                    StatusText = string.Format(LocalizationProvider.Instance.update_downloading, p.CurrentPath, p.Current, p.Total);
+                    UpdateFileStatus(p.CurrentPath, "updating");
+                });
 
-                    // Ensure directory exists
-                    string directory = Path.GetDirectoryName(localPath);
-                    if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
-                    {
-                        Directory.CreateDirectory(directory);
-                    }
+                var result = await engine.ExecuteAsync(plan, ReportFilePath, progress, _cts.Token);
 
-                    // Download file
-                    byte[] fileData = await Task.Run(() => RequestHandler.DownloadModFile(file.path));
-                    await File.WriteAllBytesAsync(localPath, fileData);
-
-                    // Update status in UI
-                    UpdateFileStatus(file.path, "updated");
+                foreach (var entry in result.Entries)
+                {
+                    UpdateFileStatus(entry.path, MapEntryStatus(entry.action));
                 }
-                catch (Exception ex)
+
+                SummaryText = result.Summary;
+                OutdatedFiles = 0;
+                _plan = null; // always re-check before another apply
+
+                if (result.Cancelled)
                 {
-                    errors++;
-                    UpdateFileStatus(file.path, "error");
-                    Controllers.LogManager.Instance.Error($"[ModUpdate] Failed to update {file.path}: {ex.Message}");
+                    StatusText = $"Atualização cancelada — estado parcial gravado ({result.Pending} ações pendentes).";
+                    Controllers.LogManager.Instance.Warning($"[ModUpdateView] Atualização cancelada com {result.Pending} ações pendentes");
+                }
+                else if (result.Errors > 0)
+                {
+                    UpdateComplete = true;
+                    StatusText = string.Format(LocalizationProvider.Instance.update_completed_with_errors, result.Updated, result.Errors);
+                    Controllers.LogManager.Instance.Warning($"[ModUpdateView] Atualização concluída com {result.Errors} erros");
+                }
+                else
+                {
+                    UpdateComplete = true;
+                    StatusText = string.Format(LocalizationProvider.Instance.update_completed, result.Updated);
+                    Controllers.LogManager.Instance.Info($"[ModUpdateView] Atualização concluída: {result.Summary}");
                 }
             }
-
-            IsUpdating = false;
-            UpdateComplete = true;
-
-            if (errors > 0)
+            catch (Exception ex)
             {
-                Controllers.LogManager.Instance.Warning($"[ModUpdateView] Atualização concluída com {errors} erros de {_filesToUpdate.Count}");
-                StatusText = string.Format(LocalizationProvider.Instance.update_completed_with_errors, _filesToUpdate.Count - errors, errors);
+                Controllers.LogManager.Instance.Error($"[ModUpdateView] Erro na atualização: {ex.Message}");
+                StatusText = string.Format(LocalizationProvider.Instance.update_error, ex.Message);
             }
-            else
+            finally
             {
-                Controllers.LogManager.Instance.Info($"[ModUpdateView] Atualização concluída: {_filesToUpdate.Count} arquivos sem erros");
-                StatusText = string.Format(LocalizationProvider.Instance.update_completed, _filesToUpdate.Count);
+                IsUpdating = false;
+                CanCancel = false;
+                DownloadSpeedText = ""; // item 016 — some com a taxa ao terminar o apply
+                _cts?.Dispose();
+                _cts = null;
             }
         }
+
+        /// <summary>
+        /// Requirement 4.1.2: cancel with confirmation + consequence warning.
+        /// The in-flight file finishes atomically; the run stops between files.
+        /// </summary>
+        public async Task CancelSync()
+        {
+            if (!CanCancel || _cts == null) return;
+
+            var confirm = await ShowDialog(new ConfirmationDialogViewModel(null,
+                "Cancelar a sincronização agora pode deixar a instalação em estado parcial. " +
+                "Uma nova verificação completará o processo depois. Cancelar mesmo assim?",
+                "Sim, cancelar", "Continuar"));
+
+            if (confirm is not (bool and true)) return;
+
+            try
+            {
+                _cts?.Cancel();
+            }
+            catch (ObjectDisposedException)
+            {
+                // run finished while the dialog was open — nothing to cancel
+            }
+        }
+
+        /// <summary>Opens the folder with last-update.json (requirement 4.1.3 — future UI link uses this too).</summary>
+        public void OpenLastUpdateFolder()
+        {
+            try
+            {
+                SyncReport.OpenReportFolder(LauncherStateDir);
+            }
+            catch (Exception ex)
+            {
+                Controllers.LogManager.Instance.Warning($"[ModUpdateView] Falha ao abrir pasta do relatório: {ex.Message}");
+            }
+        }
+
+        private static string ReportFilePath => Path.Combine(LauncherStateDir, SyncReport.DefaultFileName);
+
+        private SyncEngine CreateEngine()
+        {
+            SyncDownloader downloader = (path, ct) => Task.Run(() => RequestHandler.DownloadModFile(path), ct);
+
+            if (_performanceOverlay != null)
+            {
+                // Item 008: paths do pack baixam do endpoint performance-download
+                downloader = _performanceOverlay.CreateDownloader(
+                    downloader,
+                    (path, ct) => Task.Run(() => RequestHandler.DownloadPerformanceFile(path), ct));
+            }
+
+            // Item 016 — mede a taxa como camada MAIS EXTERNA: captura todos os downloads
+            // (base, overlay do 008 e seeds do 017), independente da origem.
+            downloader = WithSpeedMeter(downloader);
+
+            return new SyncEngine(
+                _gamePath,
+                _baseline,
+                downloader,
+                deleteFile: Helpers.RecycleBinHelper.Delete, // item 019 — fonte única de deleção recuperável
+                log: msg => Controllers.LogManager.Instance.Info(msg));
+        }
+
+        /// <summary>
+        /// Item 016: wraps a downloader to measure bytes/time per file and push the smoothed rate to
+        /// the VM via the UI thread (the delegate runs on a Task thread). No coupling to the engine.
+        /// </summary>
+        private SyncDownloader WithSpeedMeter(SyncDownloader inner)
+        {
+            return async (path, ct) =>
+            {
+                var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+                byte[] data = await inner(path, ct);
+                stopwatch.Stop();
+
+                _rateMeter.AddSample(data?.LongLength ?? 0, stopwatch.Elapsed);
+                double bytesPerSec = _rateMeter.BytesPerSecond;
+                string text = DownloadRateMeter.Format(bytesPerSec);
+
+                Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                {
+                    DownloadBytesPerSec = bytesPerSec;
+                    DownloadSpeedText = text;
+                });
+
+                return data;
+            };
+        }
+
+        private static string BuildPlanSummary(SyncPlan plan)
+        {
+            var parts = new List<string>
+            {
+                $"{plan.DownloadCount} p/ atualizar",
+                $"{plan.PreserveCount} preservados",
+            };
+
+            if (plan.SeedCount > 0) parts.Add($"{plan.SeedCount} p/ semear");
+            if (plan.MoveCount > 0) parts.Add($"{plan.MoveCount} p/ mover p/ disabled");
+            if (plan.DeleteCount > 0) parts.Add($"{plan.DeleteCount} p/ remover");
+            if (plan.Warnings.Count > 0) parts.Add($"{plan.Warnings.Count} avisos Dev Mode");
+
+            return string.Join(" · ", parts);
+        }
+
+        private void PopulateFileStatuses(SyncPlan plan, IReadOnlyList<ManifestFile> manifestFiles)
+        {
+            var sizeByPath = manifestFiles
+                .GroupBy(f => f.path, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First().size, StringComparer.OrdinalIgnoreCase);
+
+            var statuses = plan.Actions.Select(action => new ModFileStatus
+            {
+                // Item 017: seed shows the USER target (config/<rel>) — that's what lands on disk.
+                FileName = action.Kind == SyncActionKind.SeedCopy ? action.SeedTargetRelative : action.RelativePath,
+                Status = action.Kind switch
+                {
+                    SyncActionKind.Download => "outdated",
+                    SyncActionKind.PreserveCustomized => "preserved",
+                    SyncActionKind.PreserveDevMode => "preserved",
+                    SyncActionKind.DeleteExtra => "to-delete",
+                    SyncActionKind.MoveToDisabled => "to-move",
+                    SyncActionKind.SeedCopy => "to-seed",
+                    _ => "outdated",
+                },
+                Size = sizeByPath.TryGetValue(action.RelativePath, out long size) ? size : 0,
+            }).ToList();
+
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                FileStatuses.Clear();
+                foreach (var status in statuses)
+                {
+                    FileStatuses.Add(status);
+                }
+            });
+        }
+
+        private static string MapEntryStatus(string action) => action switch
+        {
+            "updated" => "updated",
+            "deleted" => "deleted",
+            "moved-to-disabled" => "moved",
+            "seeded" => "seeded",
+            "seed-skipped" => "preserved",
+            "preserved" => "preserved",
+            "preserved-devmode" => "preserved",
+            "error" => "error",
+            _ => "ok",
+        };
 
         private void UpdateFileStatus(string filePath, string newStatus)
         {
             Avalonia.Threading.Dispatcher.UIThread.Post(() =>
             {
-                var item = FileStatuses.FirstOrDefault(f => f.FileName == filePath);
+                var item = FileStatuses.FirstOrDefault(f =>
+                    string.Equals(f.FileName, filePath, StringComparison.OrdinalIgnoreCase));
                 if (item != null)
                 {
                     item.Status = newStatus;
@@ -279,29 +536,11 @@ namespace SPT.Launcher.ViewModels
             });
         }
 
-        private static string GetFileMD5(string filePath)
-        {
-            using (var md5 = MD5.Create())
-            using (var stream = File.OpenRead(filePath))
-            {
-                byte[] hash = md5.ComputeHash(stream);
-                return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
-            }
-        }
-
         public new void GoBackCommand() => NavigateTo(new ProfileViewModel(HostScreen));
     }
 
     // === Models ===
-
-    public class ManifestFile
-    {
-        public string path { get; set; }
-        public string hash { get; set; }
-        public long size { get; set; }
-        public bool optional { get; set; }
-        public string optionalGroup { get; set; }
-    }
+    // ManifestFile agora é único em SPT.Launcher.Models.Launcher (SPT.Launcher.Base) — item 007.
 
     public class ModFileStatus : ReactiveObject
     {
@@ -327,6 +566,13 @@ namespace SPT.Launcher.ViewModels
             "missing" => "⬇️",
             "updating" => "📦",
             "updated" => "✅",
+            "preserved" => "🛡️",
+            "to-delete" => "🗑️",
+            "deleted" => "🗑️",
+            "to-move" => "📁",
+            "moved" => "📁",
+            "to-seed" => "🌱",
+            "seeded" => "🌱",
             "error" => "❌",
             _ => "⏳"
         };

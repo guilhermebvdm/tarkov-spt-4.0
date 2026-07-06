@@ -197,7 +197,11 @@ public class ClassEditorService(
         var registered = false;
         if (def is not null)
         {
-            registered = !string.IsNullOrWhiteSpace(def.Name) && isRegistered(def.Name!.Trim());
+            // ref: CR-01-01/P-058.2 (item 058): checar pela chave EFETIVA (language aplicada) — com
+            // language=pt a edition registrada é displayName.pt, e checar def.Name cru dava
+            // falso-negativo em TODAS as classes com name EN (chips "Not registered" no editor).
+            registered = !string.IsNullOrWhiteSpace(def.Name)
+                && isRegistered(classRegistrar.ResolveEditionKey(def));
             _ = classRegistrar.ValidateAndBuild(def, fileName, allowReplace: true, out var dryRun);
             diagnostics.AddRange(dryRun);
         }
@@ -349,10 +353,14 @@ public class ClassEditorService(
         }
 
         // Best-effort: grab the edition name before the file disappears.
+        // ref: CR-01-02 (item 058): usar a chave EFETIVA (language aplicada) — com language=pt o name
+        // cru ("Hunter") não casa com a edition registrada ("Caçador"): o Remove virava no-op e o
+        // mapeamento fileName→editionKey ficava órfão (arquivo re-materializado viraria frankenclass).
         string? name = null;
         try
         {
-            name = jsonUtil.Deserialize<ClassDefinition>(fileUtil.ReadFile(fullPath))?.Name?.Trim();
+            var parsed = jsonUtil.Deserialize<ClassDefinition>(fileUtil.ReadFile(fullPath));
+            name = parsed is null ? null : classRegistrar.ResolveEditionKey(parsed);
         }
         catch (Exception ex)
         {

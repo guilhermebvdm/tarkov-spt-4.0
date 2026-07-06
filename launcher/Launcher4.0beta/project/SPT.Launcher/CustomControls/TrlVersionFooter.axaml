@@ -1,0 +1,36 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="SPT.Launcher.CustomControls.TrlVersionFooter">
+
+	<!-- Version footer. Defaults mirror the previously hardcoded values;
+	     item 013 binds the real server-provided versions to these properties. -->
+	<!-- item 009: VerticalAlignment=Center em todos alinha a baseline dos valores
+	     (mono/bold, altura de linha diferente) com os labels -->
+	<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="5">
+		<TextBlock Text="Versão do launcher:"
+		           FontSize="{DynamicResource TrlText2Xs}"
+		           VerticalAlignment="Center"
+		           Foreground="{DynamicResource TrlFgFaintBrush}"/>
+		<TextBlock Text="{Binding LauncherVersion, RelativeSource={RelativeSource AncestorType=UserControl}}"
+		           FontSize="{DynamicResource TrlText2Xs}"
+		           FontFamily="{DynamicResource TrlFontMono}"
+		           FontWeight="Bold"
+		           VerticalAlignment="Center"
+		           Foreground="{DynamicResource TrlAccentBrush}"/>
+		<TextBlock Text="|"
+		           FontSize="{DynamicResource TrlText2Xs}"
+		           VerticalAlignment="Center"
+		           Foreground="{DynamicResource TrlFgGhostBrush}"/>
+		<TextBlock Text="Versão do servidor:"
+		           FontSize="{DynamicResource TrlText2Xs}"
+		           VerticalAlignment="Center"
+		           Foreground="{DynamicResource TrlFgFaintBrush}"/>
+		<TextBlock Text="{Binding ServerVersion, RelativeSource={RelativeSource AncestorType=UserControl}}"
+		           FontSize="{DynamicResource TrlText2Xs}"
+		           FontFamily="{DynamicResource TrlFontMono}"
+		           FontWeight="Bold"
+		           VerticalAlignment="Center"
+		           Foreground="{DynamicResource TrlAccentBrush}"/>
+	</StackPanel>
+
+</UserControl>

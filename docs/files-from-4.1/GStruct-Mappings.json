@@ -1,0 +1,1445 @@
+{
+  "EFT.SkillManager+GStruct279": {
+    "NewName": "MovementParams"
+  },
+  "GStruct7": {
+    "NewName": "AICoreActionEnd"
+  },
+  "GStruct8`2": {
+    "NewName": "AICoreActionResult"
+  },
+  "GStruct18": {
+    "NewName": "DebugBotDataStructInner"
+  },
+  "GStruct20": {
+    // ActorDataStruct
+    "NewName": "DebugBotStruct"
+  },
+  "GStruct23": {
+    "NewName": "SpawnDelayDebugModel"
+  },
+  "GStruct26": {
+    // LegacyParamsStruct
+    "NewName": "SendRequest"
+  },
+  "GStruct29": {
+    "NewName": "IntVec2"
+  },
+  "GStruct39": {
+    "NewName": "SmokeGrenadeNetworkData"
+  },
+  "GStruct46": {
+    "NewName": "SynchronizableObjectPacket",
+    "NestedTypes": {
+      "GStruct47": {
+        "NewName": "Data"
+      }
+    }
+  },
+  "GStruct63": {
+    "NewName": "MarginsRect"
+  },
+  "GStruct74": {
+    "NewName": "FlareData",
+    "NewNamespace": "MultiFlare"
+  },
+  "GStruct75": {
+    "NewName": "FlareGpuData",
+    "NewNamespace": "MultiFlare"
+  },
+  "GStruct80": {
+    "NewName": "DecalMeshVertexData",
+    "NewNamespace": "AbsolutDecals"
+  },
+  "GStruct81": {
+    "NewName": "Segment",
+    "NewNamespace": "AbsolutDecals"
+  },
+  "GStruct129": {
+    // TimeRangeInfoStruct
+    "NewName": "TimeBound",
+    "NewNamespace": "Interpolation"
+  },
+  "GStruct139": {
+    "NewName": "ResourceTypeInfo",
+    "NewNamespace": "JsonType"
+  },
+  "GStruct141": {
+    "NewName": "MotionInfo",
+    "NewNamespace": "AnimationSystem.RootMotionTable"
+  },
+  "GStruct159": {
+    "NewName": "DoubleVector3",
+    "NewNamespace": "ChartAndGraph"
+  },
+  "GStruct217": {
+    "NewName": "InteractWithBtrPacket",
+    "NewNamespace": "EFT"
+  },
+  "GStruct239": {
+    "NewName": "TacticalComboStatus",
+    "NewNamespace": "EFT"
+  },
+  "GStruct255": {
+    "NewName": "PlayerSpiritFootprint",
+    "NewNamespace": "EFT"
+  },
+  "GStruct258": {
+    "NewName": "CharacterControllerFootprint",
+    "NewNamespace": "EFT"
+  },
+  "GStruct387": {
+    "NewName": "SyncPositionPacket",
+    "NewNamespace": "EFT.NetworkPackets"
+  },
+  "GStruct392": {
+    "NewName": "EnduranceEffectStore",
+    "NewNamespace": "EFT.HealthSystem"
+  },
+  "GStruct393": {
+    "NewName": "MedEffectStore",
+    "NewNamespace": "EFT.HealthSystem"
+  },
+  "GStruct394": {
+    "NewName": "StimulatorStore",
+    "NewNamespace": "EFT.HealthSystem"
+  },
+  "GStruct395": {
+    "NewName": "EffectInfoStorage",
+    "NewNamespace": "EFT.HealthSystem"
+  },
+  "GStruct396": {
+    "NewName": "SyncHealthPacket",
+    "NewNamespace": "EFT.HealthSystem",
+    "NestedTypes": {
+      "GStruct397": {
+        "NewName": "SyncAddEffect",
+        "NestedTypes": {
+          "GStruct398": {
+            "NewName": "ExtraDataUnion"
+          }
+        }
+      },
+      "GStruct399": {
+        "NewName": "SyncRemoveEffect"
+      },
+      "GStruct400": {
+        "NewName": "SyncEffectNextState"
+      },
+      "GStruct401": {
+        "NewName": "SyncEffectStateTime"
+      },
+      "GStruct402": {
+        "NewName": "SyncEffectStrength"
+      },
+      "GStruct403": {
+        "NewName": "SyncEffectMedResource"
+      },
+      "GStruct404": {
+        "NewName": "SyncEffectStimulatorBuff"
+      },
+      "GStruct405": {
+        "NewName": "SyncIsAlive"
+      },
+      "GStruct406": {
+        "NewName": "SyncBodyHealth"
+      },
+      "GStruct407": {
+        "NewName": "SyncHealthFactor"
+      },
+      "GStruct408": {
+        "NewName": "SyncDamageCoeff"
+      },
+      "GStruct409": {
+        "NewName": "SyncStaminaCoeff"
+      },
+      "GStruct410": {
+        "NewName": "SyncApplyDamage"
+      },
+      "GStruct411": {
+        "NewName": "SyncDestroyedBodyPart"
+      },
+      "GStruct412": {
+        "NewName": "SyncHealthRates"
+      },
+      "GStruct413": {
+        "NewName": "SyncHealerDone"
+      },
+      "GStruct414": {
+        "NewName": "SyncBurnEyes"
+      },
+      "GStruct415": {
+        "NewName": "NetworkSyncHealthDataUnion"
+      }
+    }
+  },
+  "GStruct418": {
+    "NewName": "DisconnectionInformation",
+    "NewNamespace": "EFT.Network.Transport"
+  },
+  "GStruct428": {
+    "NewName": "ShapshotBTRMessage",
+    "NewNamespace": "EFT.Vehicle"
+  },
+  "GStruct441": {
+    "NewName": "DamageInfo",
+    "NewNamespace": "EFT.Ballistics"
+  },
+  "GStruct210": {
+    "NewName": "Client2ServerPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct371": {
+    "NewName": "EmptyHandPacket",
+    "NewNamespace": "EFT.NetworkPackets",
+  },
+  "GStruct374": {
+    "NewName": "GrenadePacket",
+    "NewNamespace": "EFT.NetworkPackets",
+  },
+  "GStruct380": {
+    "NewName": "KnifePacket",
+    "NewNamespace": "EFT.NetworkPackets",
+  },
+  "GStruct391": {
+    "NewName": "UsableItemPacket",
+    "NewNamespace": "EFT.NetworkPackets",
+  },
+  "GStruct100": {
+    "NewName": "ProcessReflectionHitsJob",
+    "NewNamespace": "Audio.SpatialSystem.SpatialAudioCalculator",
+  },
+  "GStruct101": {
+    "NewName": "PathPointInfo",
+    "NewNamespace": "Audio.SpatialSystem.SpatialAudioCalculator",
+  },
+  "GStruct102": {
+    "NewName": "ReflectionPathResult",
+    "NewNamespace": "Audio.SpatialSystem.SpatialAudioCalculator",
+  },
+  "GStruct103": {
+    "NewName": "BatchProcessingOutput",
+    "NewNamespace": "Audio.SpatialSystem.SpatialAudioCalculator",
+  },
+  "GStruct104": {
+    "NewName": "ShortestPathResultData",
+    "NewNamespace": "Audio.SpatialSystem.SpatialAudioCalculator",
+  },
+  "GStruct105": {
+    "NewName": "ReflectionRayState",
+    "NewNamespace": "Audio.SpatialSystem.SpatialAudioCalculator",
+  },
+  "GStruct106": {
+    "NewName": "TransmissionPathResult",
+    "NewNamespace": "Audio.SpatialSystem.SpatialAudioCalculator.Data",
+  },
+  "GStruct107": {
+    "NewName": "AggregateOcclusionResult",
+    "NewNamespace": "Audio.SpatialSystem.SpatialAudioCalculator.CombinedOcclusionCalculator",
+  },
+  "GStruct108": {
+    "NewName": "PortalCalculatedData",
+    "NewNamespace": "Audio.AmbientSubsystem",
+  },
+  "GStruct109": {
+    "NewName": "SamplingTaskCellResult",
+    "NewNamespace": "Koenigz.PerfectCulling",
+  },
+  "GStruct11": {
+    "NewName": "DebugBotSpawnStruct",
+  },
+  "GStruct110": {
+    "NewName": "BakeSessionParameters",
+    "NewNamespace": "Koenigz.PerfectCulling.EFT",
+  },
+  "GStruct111": {
+    "NewName": "CullingGridVisibilityQueryResult",
+    "NewNamespace": "Koenigz.PerfectCulling.EFT",
+  },
+  "GStruct113": {
+    "NewName": "TemporaryCullingCellData",
+    "NewNamespace": "Koenigz.PerfectCulling.EFT",
+  },
+  "GStruct114": {
+    "NewName": "GrassPrefabStruct",
+    "NewNamespace": "GPUInstancer",
+  },
+  "GStruct115": {
+    "NewName": "GrassData",
+    "NewNamespace": "GPUInstancer",
+  },
+  "GStruct116": {
+    "NewName": "GrassPrefabData",
+    "NewNamespace": "GPUInstancer",
+  },
+  "GStruct117": {
+    "NewName": "MirrorConn",
+    "NewNamespace": "Dissonance.Integrations.MirrorIgnorance",
+  },
+  "GStruct119": {
+    "NewName": "TimeSnapshot",
+    "NewNamespace": "Mirror",
+  },
+  "GStruct12": {
+    "NewName": "DebugAIDataStruct",
+  },
+  "GStruct120": {
+    "NewName": "Vector2Byte",
+    "NewNamespace": "Mirror",
+  },
+  "GStruct121": {
+    "NewName": "Vector2Short",
+    "NewNamespace": "Mirror",
+  },
+  "GStruct122": {
+    "NewName": "Vector3Byte",
+    "NewNamespace": "Mirror",
+  },
+  "GStruct123": {
+    "NewName": "Vector3Short",
+    "NewNamespace": "Mirror",
+  },
+  "GStruct124": {
+    "NewName": "ExponentialMovingAverage",
+    "NewNamespace": "Mirror",
+  },
+  "GStruct125": {
+    "NewName": "TimeSample",
+    "NewNamespace": "Mirror",
+  },
+  "GStruct126": {
+    "NewName": "Vector3Long",
+    "NewNamespace": "Mirror",
+  },
+  "GStruct127`1": {
+    "NewName": "InterpolateFrame",
+    "NewNamespace": "Interpolation",
+  },
+  "GStruct128`3": {
+    "NewName": "InterpolatorSpan",
+    "NewNamespace": "Interpolation",
+  },
+  "GStruct13": {
+    "NewName": "DebugBotCoverStruct",
+  },
+  "GStruct130": {
+    "NewName": "SpanBound",
+    "NewNamespace": "Interpolation",
+  },
+  "GStruct131`1": {
+    "NewName": "TimeStampedValue",
+    "NewNamespace": "Interpolation",
+  },
+  "GStruct132": {
+    "NewName": "MeasurementData",
+    "NewNamespace": "UnityDiagnostics",
+  },
+  "GStruct133": {
+    "NewName": "DoubleULong",
+    "NewNamespace": "BitPacking",
+  },
+  "GStruct134": {
+    "NewName": "FloatQuantizer",
+    "NewNamespace": "BitPacking",
+  },
+  "GStruct135": {
+    "NewName": "FloatUInt",
+    "NewNamespace": "BitPacking",
+  },
+  "GStruct136": {
+    "NewName": "LimitedFloatSerializationSettings",
+    "NewNamespace": "BitPacking",
+  },
+  "GStruct137": {
+    "NewName": "LimitedIntSerializationSettings",
+    "NewNamespace": "BitPacking",
+  },
+  "GStruct138": {
+    "NewName": "TransformSync",
+    "NewNamespace": "JsonType",
+  },
+  "GStruct14": {
+    "NewName": "DebugBotVisionStruct",
+  },
+  "GStruct15": {
+    "NewName": "DebugEnemyVisionData",
+  },
+  "GStruct16": {
+    "NewName": "DebugEnemyPartVisionData",
+  },
+  "GStruct140": {
+    "NewName": "ServerMapBTRSettings",
+    "NewNamespace": "JsonType",
+  },
+  "GStruct148": {
+    "NewName": "DisconnectInfo",
+    "NewNamespace": "FlyingWormConsole3.LiteNetLib",
+  },
+  "GStruct150": {
+    "NewName": "AlarmStage",
+    "NewNamespace": "CommonAssets.Scripts.ArtilleryShelling",
+  },
+  "GStruct158": {
+    "NewName": "DoubleVector2",
+    "NewNamespace": "ChartAndGraph",
+  },
+  "GStruct161": {
+    "NewName": "DisconnectionReason",
+    "NewNamespace": "EFT",
+  },
+  "GStruct163": {
+    "NewName": "InitLevelProgress",
+    "NewNamespace": "EFT",
+  },
+  "GStruct164": {
+    "NewName": "GameWorldPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct165": {
+    "NewName": "InteractiveObjectsStatusPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct166": {
+    "NewName": "UpdateExfiltrationPointPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct167": {
+    "NewName": "LampChangeStatePacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct168": {
+    "NewName": "WindowHitPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct169": {
+    "NewName": "LootSyncPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct17": {
+    "NewName": "DebugHeathsDataStructInner",
+  },
+  "GStruct170": {
+    "NewName": "CorpseSyncPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct171": {
+    "NewName": "ArtilleryProjectileSyncPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct172": {
+    "NewName": "GrenadeSyncPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct173": {
+    "NewName": "PlatformSyncPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct174": {
+    "NewName": "BorderZonePacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct175": {
+    "NewName": "Oid",
+    "NewNamespace": "EFT",
+  },
+  "GStruct177": {
+    "NewName": "TrafficState",
+    "NewNamespace": "EFT",
+  },
+  "GStruct178": {
+    "NewName": "TransitionStatus",
+    "NewNamespace": "EFT",
+  },
+  "GStruct179": {
+    "NewName": "LighthouseTraderZoneData",
+    "NewNamespace": "EFT",
+  },
+  "GStruct434": {
+    "NewName": "LighthouseTraderZonePlayerData",
+    "NewNamespace": "EFT.Interactive",
+  },
+  "GStruct180": {
+    "NewName": "RadioTransmitterData",
+    "NewNamespace": "EFT",
+  },
+  "GStruct183": {
+    "NewName": "StopSearchContentPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct184": {
+    "NewName": "CancelApplyingItemPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct185": {
+    "NewName": "LootRayInfo",
+    "NewNamespace": "EFT",
+  },
+  "GStruct186": {
+    "NewName": "CutsceneInteractionPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct187": {
+    "NewName": "DevelopHealPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct188": {
+    "NewName": "DevelopTeleportPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct189": {
+    "NewName": "DevelopSetDamageCoeffPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct190": {
+    "NewName": "DevelopLighthouseKeeperServicesPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct191": {
+    "NewName": "DevelopBtrSupportServicePacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct192": {
+    "NewName": "DevelopContainerHidePacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct193": {
+    "NewName": "DevelopEnableServerHitDebuggingPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct194": {
+    "NewName": "DevelopKillAllAIsPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct195": {
+    "NewName": "DevelopSpawnAIPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct196": {
+    "NewName": "DevelopStartEvent",
+    "NewNamespace": "EFT",
+  },
+  "GStruct197": {
+    "NewName": "DevelopUnlockAllDoors",
+    "NewNamespace": "EFT",
+  },
+  "GStruct198": {
+    "NewName": "DevelopSnapshotAllPlayers",
+    "NewNamespace": "EFT",
+  },
+  "GStruct199": {
+    "NewName": "DevelopAirdrop",
+    "NewNamespace": "EFT",
+  },
+  "GStruct2": {
+    "NewName": "ProfilingRecorderConfig",
+  },
+  "GStruct200": {
+    "NewName": "DevelopKillMePacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct201": {
+    "NewName": "DevelopResetDiscardLimitsPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct202": {
+    "NewName": "DevelopSetBufferZoneAccessPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct203": {
+    "NewName": "DevelopResetBufferZoneUsageTimePacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct204": {
+    "NewName": "DevelopSetEncodedRadioTransmitterPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct205": {
+    "NewName": "DevelopSetActiveLighthouseTraderZoneDebugPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct206": {
+    "NewName": "PacketAuxiliaryData",
+    "NewNamespace": "EFT",
+  },
+  "GStruct207": {
+    "NewName": "DevelopSetArtilleryShellingPausePacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct208": {
+    "NewName": "DevelopArtilleryImmediateShellingZonePacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct209": {
+    "NewName": "DevelopArtilleryCalledShellingPositionPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct21": {
+    "NewName": "DebugGroupStruct",
+  },
+  "GStruct22": {
+    "NewName": "DebugZoneInfoStruct",
+  },
+  "GStruct24": {
+    "NewName": "BotRunDebug",
+  },
+  "GStruct25": {
+    "NewName": "FollowerPatrolTargetStruct",
+  },
+  "GStruct27": {
+    "NewName": "ArmorResistanceData",
+  },
+  "GStruct30": {
+    "NewName": "BoxOverlapCommand",
+  },
+  "GStruct31": {
+    "NewName": "BoxOverlapCommandResult",
+  },
+  "GStruct32": {
+    "NewName": "OBB",
+  },
+  "GStruct33": {
+    "NewName": "OverlapBoxJob",
+    "NestedTypes": {
+      "GClass741": {
+        "NewName": "OverlapBoxJobParameters"
+      }
+    }
+  },
+  "GStruct37": {
+    "NewName": "EPlayerStateComparer",
+  },
+  "GStruct38": {
+    "NewName": "AnimatorParam",
+  },
+  "GStruct42": {
+    "NewName": "AirdropDataPacket",
+  },
+  "GStruct43": {
+    "NewName": "AirplaneDataPacket",
+  },
+  "GStruct44": {
+    "NewName": "DevelopDataPacket",
+  },
+  "GStruct45": {
+    "NewName": "TripwireDataPacket",
+  },
+  "GStruct52": {
+    "NewName": "Vector3Serializer",
+  },
+  "GStruct53": {
+    "NewName": "Vector3NullableSerializer",
+  },
+  "GStruct54": {
+    "NewName": "BoundsSerializer",
+  },
+  "GStruct55`1": {
+    "NewName": "ClampValue",
+  },
+  "GStruct56": {
+    "NewName": "CustomRange",
+  },
+  "GStruct60": {
+    "NewName": "BodyRenderer",
+  },
+  "GStruct64": {
+    "NewName": "BloodDropData",
+  },
+  "GStruct76": {
+    "NewName": "FlareLightData",
+    "NewNamespace": "MultiFlare",
+  },
+  "GStruct77": {
+    "NewName": "GrabPositionsJob",
+    "NewNamespace": "MultiFlare",
+  },
+  "GStruct78": {
+    "NewName": "ManageFlareOverlap",
+    "NewNamespace": "MultiFlare",
+  },
+  "GStruct79": {
+    "NewName": "PrepareGpuData",
+    "NewNamespace": "MultiFlare",
+  },
+  "GStruct82": {
+    "NewName": "RaycastAllCommand",
+    "NewNamespace": "RaycastJobs",
+    "NestedTypes": {
+        "Struct180": {
+          "NewName": "CreateCommandsJob"
+        },
+        "Struct181": {
+          "NewName": "CombineResultsJob"
+        },
+        "Struct182": {
+          "NewName": "RestoreDistancesJob"
+        }
+    }
+  },
+  "GStruct83": {
+    "NewName": "SpherecastAllCommand",
+    "NewNamespace": "RaycastJobs",
+    "NestedTypes": {
+      "Struct183": {
+        "NewName": "CreateCommandsJob"
+      },
+      "Struct184": {
+        "NewName": "CombineResultsJob"
+      },
+      "Struct185": {
+        "NewName": "RestoreDistancesJob"
+      }
+    }
+  },
+  "GStruct87": {
+    "NewName": "ChatMessageProfileEvent",
+    "NewNamespace": "ChatShared",
+  },
+  "GStruct88": {
+    "NewName": "AudioNode",
+    "NewNamespace": "Audio.SpatialSystem",
+  },
+  "GStruct89": {
+    "NewName": "DirectionalWeights",
+    "NewNamespace": "Audio.SpatialSystem.Utils",
+  },
+  "GStruct9": {
+    "NewName": "AILayerDebugStruct",
+  },
+  "GStruct90": {
+    "NewName": "DiffractionPathResult",
+    "NewNamespace": "Audio.SpatialSystem.SpatialAudioCalculator",
+  },
+  "GStruct91": {
+    "NewName": "EdgeCheckResult",
+    "NewNamespace": "Audio.SpatialSystem.SpatialAudioCalculator",
+  },
+  "GStruct92": {
+    "NewName": "FindEdgeCandidatesJob",
+    "NewNamespace": "Audio.SpatialSystem.SpatialAudioCalculator",
+  },
+  "GStruct93": {
+    "NewName": "ProcessEdgeSearchHitsJob",
+    "NewNamespace": "Audio.SpatialSystem.SpatialAudioCalculator",
+  },
+  "GStruct94": {
+    "NewName": "ProcessInitialHitsJob",
+    "NewNamespace": "Audio.SpatialSystem.SpatialAudioCalculator",
+  },
+  "GStruct95": {
+    "NewName": "SelectBestEdgeJob",
+    "NewNamespace": "Audio.SpatialSystem.SpatialAudioCalculator",
+  },
+  "GStruct96": {
+    "NewName": "ValidateCandidatesJob",
+    "NewNamespace": "Audio.SpatialSystem.SpatialAudioCalculator",
+  },
+  "GStruct97": {
+    "NewName": "AggregateAndPrepareNextBatchJob",
+    "NewNamespace": "Audio.SpatialSystem.SpatialAudioCalculator",
+  },
+  "GStruct98": {
+    "NewName": "FindAndAggregateNextBatchJob",
+    "NewNamespace": "Audio.SpatialSystem.SpatialAudioCalculator",
+  },
+  "GStruct99": {
+    "NewName": "FindShortestPathJob",
+    "NewNamespace": "Audio.SpatialSystem.SpatialAudioCalculator",
+  },
+  "GStruct437": {
+    "NewName": "RelationParameters",
+    "NewNamespace": "EFT.Interactive"
+  },
+  "GStruct438": {
+    "NewName": "BrokenWindowPiece",
+    "NewNamespace": "EFT.Interactive"
+  },
+  "GStruct439": {
+    "NewName": "VisualAmmoInfo",
+    "NewNamespace": "EFT.Ballistics"
+  },
+  "GStruct440": {
+    "NewName": "ShotId",
+    "NewNamespace": "EFT.Ballistics"
+  },
+  "GStruct443": {
+    "NewName": "BallisticCoefficientValues",
+    "NewNamespace": "EFT.Ballistics"
+  },
+  "GStruct446": {
+    "NewName": "AcceptQuestChangeArgs",
+    "NewNamespace": "EFT.UI"
+  },
+  "GStruct453": {
+    "NewName": "AssetsManagerSettings",
+    "NewNamespace": "EFT.AssetsManager"
+  },
+  "GStruct444": {
+    "NewName": "ShotInfo",
+    "NewNamespace": "EFT.Ballistics"
+  },
+  "GStruct445": {
+    "NewName": "MoneyString",
+    "NewNamespace": "EFT.UI"
+  },
+  "GStruct451": {
+    "NewName": "OffersData",
+    "NewNamespace": "EFT.UI.Ragfair"
+  },
+  "GStruct455": {
+    "NewName": "ComputableUnit",
+    "NewNamespace": "EFT.RocketLauncher.Explosion"
+  },
+  "GStruct459": {
+    "NewName": "QuestChangeRequirement",
+    "NewNamespace": "EFT.Quests"
+  },
+  "GStruct461": {
+    "NewName": "AchievementsListDTO",
+    "NewNamespace": "EFT.Achievements"
+  },
+  "GStruct462": {
+    "NewName": "AchievementsGlobalProgressDTO",
+    "NewNamespace": "EFT.Achievements"
+  },
+  "GStruct429": {
+    "NewName": "SpawnSystemSettings",
+    "NewNamespace": "EFT.Game.Spawning"
+  },
+  "GStruct309": {
+    "NewName": "WindParamsSet",
+    "NewNamespace": "EFT.Weather"
+  },
+  "GStruct330": {
+    "NewName": "ObservedPlayerSpawnMessage",
+    "NewNamespace": "EFT.NextObservedPlayer"
+  },
+  "GStruct328": {
+    "NewName": "ArenaObservedPlayerSpawnMessage",
+    "NewNamespace": "EFT.NextObservedPlayer"
+  },
+  "GStruct342": {
+    "NewName": "ObservedPlayerMovementModel",
+    "NewNamespace": "EFT.NextObservedPlayer"
+  },
+  "GStruct213": {
+    "NewName": "MovementInfoPacket",
+    "NewNamespace": "EFT"
+  },
+  "GStruct321": {
+    "NewName": "GridSurfaceCalculatorDataTransferModel",
+    "NewNamespace": "EFT.Vaulting.Models"
+  },
+  "GStruct211": {
+    "NewName": "LightsState",
+    "NewNamespace": "EFT",
+  },
+  "GStruct212": {
+    "NewName": "ScopeState",
+    "NewNamespace": "EFT",
+  },
+  "GStruct214": {
+    "NewName": "MovementShortInfoPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct215": {
+    "NewName": "InteractWithDoorPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct216": {
+    "NewName": "InteractWithTripwirePacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct218": {
+    "NewName": "InteractWithTransitPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct219": {
+    "NewName": "InteractWithEventObjectPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct220": {
+    "NewName": "StationaryWeaponPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct221": {
+    "NewName": "PlantItemPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct222": {
+    "NewName": "MountingPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct223": {
+    "NewName": "VaultingPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct224": {
+    "NewName": "LeftHandPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct225": {
+    "NewName": "InteractionPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct226": {
+    "NewName": "InventoryInteractionPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct227": {
+    "NewName": "BreachDoorPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct228": {
+    "NewName": "LootInteractionPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct229": {
+    "NewName": "TripwireSoundInteractionPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct230": {
+    "NewName": "PlayerEmitterCache",
+    "NewNamespace": "EFT",
+  },
+  "GStruct231": {
+    "NewName": "ObserverMovementFrameInfo",
+    "NewNamespace": "EFT",
+  },
+  "GStruct232": {
+    "NewName": "FramePositionDebug",
+    "NewNamespace": "EFT",
+  },
+  "GStruct233": {
+    "NewName": "ObserverDebugInfo",
+    "NewNamespace": "EFT",
+  },
+  "GStruct234": {
+    "NewName": "HandsChangePacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct235": {
+    "NewName": "FiredShotInfo",
+    "NewNamespace": "EFT",
+  },
+  "GStruct236": {
+    "NewName": "FireModePacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct237": {
+    "NewName": "HeadlightsComboPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct238": {
+    "NewName": "ToggleTacticalComboPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct240": {
+    "NewName": "LauncherRangeStatePacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct241": {
+    "NewName": "SightsModePacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct242": {
+    "NewName": "SightModeStatus",
+    "NewNamespace": "EFT",
+  },
+  "GStruct243": {
+    "NewName": "FirearmPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct244": {
+    "NewName": "SetLeftStancePacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct245": {
+    "NewName": "ReloadMagPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct246": {
+    "NewName": "QuickReloadMag",
+    "NewNamespace": "EFT",
+  },
+  "GStruct247": {
+    "NewName": "ReloadBarrels",
+    "NewNamespace": "EFT",
+  },
+  "GStruct248": {
+    "NewName": "RollCylinderPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct249": {
+    "NewName": "CylinderMagStatus",
+    "NewNamespace": "EFT",
+  },
+  "GStruct250": {
+    "NewName": "ReloadWithAmmo",
+    "NewNamespace": "EFT",
+  },
+  "GStruct251": {
+    "NewName": "InventoryActionPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct252": {
+    "NewName": "InventoryCommandPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct253": {
+    "NewName": "ExplosionDamageInfo",
+    "NewNamespace": "EFT",
+  },
+  "GStruct254": {
+    "NewName": "InteractionInfo",
+    "NewNamespace": "EFT",
+  },
+  "GStruct256": {
+    "NewName": "AnimatorFootprint",
+    "NewNamespace": "EFT",
+  },
+  "GStruct257": {
+    "NewName": "AnimatorStateFootprint",
+    "NewNamespace": "EFT",
+  },
+  "GStruct259": {
+    "NewName": "Seed",
+    "NewNamespace": "EFT",
+  },
+  "GStruct260": {
+    "NewName": "SelfPlayerInfo",
+    "NewNamespace": "EFT",
+  },
+  "GStruct261": {
+    "NewName": "ChangeSkillExperiencePacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct262": {
+    "NewName": "ChangeMasteringExperiencePacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct264": {
+    "NewName": "TraderInfoPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct265": {
+    "NewName": "StringNotificationPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct266": {
+    "NewName": "RadioTransmitterPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct267": {
+    "NewName": "LighthouseTraderZoneDebugToolPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct268": {
+    "NewName": "ViewPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct269": {
+    "NewName": "AcceptHitDebugDataPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct270": {
+    "NewName": "ConditionValueChangedPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct271": {
+    "NewName": "CompletedAchievementConditionsData",
+    "NewNamespace": "EFT",
+  },
+  "GStruct272": {
+    "NewName": "AchievementConditionValueChangedData",
+    "NewNamespace": "EFT",
+  },
+  "GStruct273": {
+    "NewName": "ConditionalProgressData",
+    "NewNamespace": "EFT",
+  },
+  "GStruct274": {
+    "NewName": "QuestCondition",
+    "NewNamespace": "EFT",
+  },
+  "GStruct275": {
+    "NewName": "ShowStatNotificationPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct276": {
+    "NewName": "PlayerDiedPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct277": {
+    "NewName": "ClientConfirmCallbackPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct278": {
+    "NewName": "WeaponOverheatPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct280": {
+    "NewName": "ItemCounter",
+    "NewNamespace": "EFT",
+  },
+  "GStruct282": {
+    "NewName": "ScenePresetLoadConfig",
+    "NewNamespace": "EFT",
+  },
+  "GStruct284": {
+    "NewName": "CCLine",
+    "NewNamespace": "EFT",
+  },
+  "GStruct286": {
+    "NewName": "QuestionsPageData",
+    "NewNamespace": "EFT",
+  },
+  "GStruct289": {
+    "NewName": "CloudQualityPreset",
+    "NewNamespace": "EFT.Rendering.Clouds",
+  },
+  "GStruct290": {
+    "NewName": "CloudRemapRecord",
+    "NewNamespace": "EFT.Rendering.Clouds",
+  },
+  "GStruct291": {
+    "NewName": "BuiltinSunCookieParameters",
+    "NewNamespace": "EFT.Rendering.Clouds",
+  },
+  "GStruct292": {
+    "NewName": "CookieParameters",
+    "NewNamespace": "EFT.Rendering.Clouds",
+  },
+  "GStruct293": {
+    "NewName": "EftDisplaySettings",
+    "NewNamespace": "EFT.Settings.Graphics",
+  },
+  "GStruct294": {
+    "NewName": "QualityLevelPreset",
+    "NewNamespace": "EFT.Settings.Graphics",
+  },
+  "GStruct296": {
+    "NewName": "ScavProductVariation",
+    "NewNamespace": "EFT.Hideout",
+  },
+  "GStruct297": {
+    "NewName": "AreaDetailsCache",
+    "NewNamespace": "EFT.Hideout",
+  },
+  "GStruct299": {
+    "NewName": "HideoutItemReference",
+    "NewNamespace": "EFT.Hideout",
+  },
+  "GStruct302": {
+    "NewName": "CrossFadeStruct",
+    "NewNamespace": "EFT.Impostors",
+  },
+  "GStruct303": {
+    "NewName": "ImpostorWind",
+    "NewNamespace": "EFT.Impostors",
+  },
+  "GStruct304": {
+    "NewName": "FogRemapRecordV2Result",
+    "NewNamespace": "EFT.Weather",
+  },
+  "GStruct305": {
+    "NewName": "SHDataInput",
+    "NewNamespace": "EFT.Weather",
+  },
+  "GStruct307": {
+    "NewName": "Wind",
+    "NewNamespace": "EFT.Weather",
+  },
+  "GStruct308": {
+    "NewName": "WindParams",
+    "NewNamespace": "EFT.Weather",
+  },
+  "GStruct310": {
+    "NewName": "VaultingTransferModel",
+    "NewNamespace": "EFT.Vaulting",
+  },
+  "GStruct311": {
+    "NewName": "ApproximationVaultingDataModel",
+    "NewNamespace": "EFT.Vaulting.Debug.Models",
+  },
+  "GStruct312": {
+    "NewName": "AutomaticVaultingDataModel",
+    "NewNamespace": "EFT.Vaulting.Debug.Models",
+  },
+  "GStruct313": {
+    "NewName": "DiscreteSurfaceDataModel",
+    "NewNamespace": "EFT.Vaulting.Debug.Models",
+  },
+  "GStruct314": {
+    "NewName": "GridOptionsDataModel",
+    "NewNamespace": "EFT.Vaulting.Debug.Models",
+  },
+  "GStruct315": {
+    "NewName": "VaultingRestrictionsPageModel",
+    "NewNamespace": "EFT.Vaulting.Debug.Models",
+  },
+  "GStruct316": {
+    "NewName": "GridPointsDataModel",
+    "NewNamespace": "EFT.Vaulting.Debug.Models.DataModels",
+  },
+  "GStruct317": {
+    "NewName": "MotionParameters",
+    "NewNamespace": "EFT.Vaulting.Debug.Models.DataModels",
+  },
+  "GStruct318": {
+    "NewName": "SurfaceParameters",
+    "NewNamespace": "EFT.Vaulting.Debug.Models.DataModels",
+  },
+  "GStruct319": {
+    "NewName": "GridRootMoverTransferModel",
+    "NewNamespace": "EFT.Vaulting.Models",
+  },
+  "GStruct320": {
+    "NewName": "GridSettingsDataTransferModel",
+    "NewNamespace": "EFT.Vaulting.Models",
+  },
+  "GStruct322": {
+    "NewName": "AutoMoveRestrictionsTransferModel",
+    "NewNamespace": "EFT.Vaulting.Models",
+  },
+  "GStruct323": {
+    "NewName": "MoveRestrictionsTransferModel",
+    "NewNamespace": "EFT.Vaulting.Models",
+  },
+  "GStruct324": {
+    "NewName": "VaultingStateDataTransferModel",
+    "NewNamespace": "EFT.Vaulting.Models",
+  },
+  "GStruct325": {
+    "NewName": "DiscreteSurfaceSectionModel",
+    "NewNamespace": "EFT.Vaulting.Models",
+  },
+  "GStruct326": {
+    "NewName": "AnimatedInteractionCallback",
+    "NewNamespace": "EFT.AnimatedInteractionsSubsystem.Models",
+  },
+  "GStruct327": {
+    "NewName": "AnimatedInteractionInstruction",
+    "NewNamespace": "EFT.AnimatedInteractionsSubsystem.Models",
+  },
+  "GStruct329": {
+    "NewName": "ObservedPlayerSnapshotMessage",
+    "NewNamespace": "EFT.NextObservedPlayer",
+  },
+  "GStruct331": {
+    "NewName": "ObservedPlayerAnimatorModel",
+    "NewNamespace": "EFT.NextObservedPlayer",
+  },
+  "GStruct332": {
+    "NewName": "ServerFramerateMessage",
+    "NewNamespace": "EFT.NextObservedPlayer",
+  },
+  "GStruct333": {
+    "NewName": "DefaultHandsOperationResult",
+    "NewNamespace": "EFT.NextObservedPlayer",
+  },
+  "GStruct334": {
+    "NewName": "HandsOperationEmptyInput",
+    "NewNamespace": "EFT.NextObservedPlayer",
+  },
+  "GStruct336": {
+    "NewName": "ObservedPlayerCommandsProcessJob",
+    "NewNamespace": "EFT.NextObservedPlayer",
+  },
+  "GStruct337": {
+    "NewName": "ObservedUsableItemUpdatedData",
+    "NewNamespace": "EFT.NextObservedPlayer",
+  },
+  "GStruct338": {
+    "NewName": "ObservedPlayerChangeModelJob",
+    "NewNamespace": "EFT.NextObservedPlayer",
+  },
+  "GStruct339": {
+    "NewName": "ObservedPlayerCommandsMessagePrepareJob",
+    "NewNamespace": "EFT.NextObservedPlayer",
+  },
+  "GStruct340": {
+    "NewName": "ObservedPlayerSnapshotMessagePrepareJob",
+    "NewNamespace": "EFT.NextObservedPlayer",
+  },
+  "GStruct341": {
+    "NewName": "ObservedPlayerModel",
+    "NewNamespace": "EFT.NextObservedPlayer",
+  },
+  "GStruct366": {
+    "NewName": "ArmorUpdate",
+    "NewNamespace": "EFT.NetworkPackets",
+  },
+  "GStruct367": {
+    "NewName": "CompassPacket",
+    "NewNamespace": "EFT.NetworkPackets",
+  },
+  "GStruct368": {
+    "NewName": "DeathPacket",
+    "NewNamespace": "EFT.NetworkPackets",
+  },
+  "GStruct369": {
+    "NewName": "CorpseImpulse",
+    "NewNamespace": "EFT.NetworkPackets",
+  },
+  "GStruct370": {
+    "NewName": "DetailedHitInfo",
+    "NewNamespace": "EFT.NetworkPackets",
+  },
+  "GStruct372": {
+    "NewName": "EnableInventoryPacket",
+    "NewNamespace": "EFT.NetworkPackets",
+  },
+  "GStruct373": {
+    "NewName": "FlareShotInfo",
+    "NewNamespace": "EFT.NetworkPackets",
+  },
+  "GStruct375": {
+    "NewName": "GrenadeThrowData",
+    "NewNamespace": "EFT.NetworkPackets",
+  },
+  "GStruct376": {
+    "NewName": "HideWeaponPacket",
+    "NewNamespace": "EFT.NetworkPackets",
+  },
+  "GStruct377": {
+    "NewName": "HitInfo",
+    "NewNamespace": "EFT.NetworkPackets",
+  },
+  "GStruct378": {
+    "NewName": "InventoryOperationStatus",
+    "NewNamespace": "EFT.NetworkPackets",
+  },
+  "GStruct379": {
+    "NewName": "KnifeHitInfo",
+    "NewNamespace": "EFT.NetworkPackets",
+  },
+  "GStruct381": {
+    "NewName": "LauncherReloadInfo",
+    "NewNamespace": "EFT.NetworkPackets",
+  },
+  "GStruct382`1": {
+    "NewName": "OneAndList",
+    "NewNamespace": "EFT.NetworkPackets",
+  },
+  "GStruct383": {
+    "NewName": "PhraseCommandPacket",
+    "NewNamespace": "EFT.NetworkPackets",
+  },
+  "GStruct384": {
+    "NewName": "RocketShotInfo",
+    "NewNamespace": "EFT.NetworkPackets",
+  },
+  "GStruct385": {
+    "NewName": "ShotTrajectoryPart",
+    "NewNamespace": "EFT.NetworkPackets",
+  },
+  "GStruct386": {
+    "NewName": "SideEffectUpdate",
+    "NewNamespace": "EFT.NetworkPackets",
+  },
+  "GStruct389": {
+    "NewName": "InventoryHashPacket",
+    "NewNamespace": "EFT.NetworkPackets",
+  },
+  "GStruct390": {
+    "NewName": "DeathInventorySyncPacket",
+    "NewNamespace": "EFT.NetworkPackets",
+  },
+  "GStruct416": {
+    "NewName": "NetworkMessage",
+    "NewNamespace": "EFT.Network",
+  },
+  "GStruct419`1": {
+    "NewName": "DisposableArrayPool",
+    "NewNamespace": "EFT.Network.Tools",
+  },
+  "GStruct420": {
+    "NewName": "NetworkConnectionStatistics",
+    "NewNamespace": "EFT.Network.Statistics",
+  },
+  "GStruct422": {
+    "NewName": "ItemsCount",
+    "NewNamespace": "EFT.InventoryLogic",
+  },
+  "GStruct423": {
+    "NewName": "IntRect",
+    "NewNamespace": "EFT.InventoryLogic",
+  },
+  "GStruct424": {
+    "NewName": "NoContainerResizeResult",
+    "NewNamespace": "EFT.InventoryLogic",
+  },
+  "GStruct425": {
+    "NewName": "GridResizeResult",
+    "NewNamespace": "EFT.InventoryLogic",
+  },
+  "GStruct426`1": {
+    "NewName": "ConditionalFinishResult",
+    "NewNamespace": "EFT.InventoryLogic",
+  },
+  "GStruct431": {
+    "NewName": "WatchBundleInfo",
+    "NewNamespace": "EFT.Customization",
+  },
+  "GStruct433": {
+    "NewName": "LootableContainersGroupParams",
+    "NewNamespace": "EFT.Interactive",
+  },
+  "GStruct442": {
+    "NewName": "TrajectoryInfo",
+    "NewNamespace": "EFT.Ballistics",
+  },
+  "GStruct447": {
+    "NewName": "ExperienceArticle",
+    "NewNamespace": "EFT.UI.SessionEnd",
+  },
+  "GStruct456": {
+    "NewName": "OptimizedVector3",
+    "NewNamespace": "EFT.RocketLauncher.Explosion",
+  },
+  "GStruct458": {
+    "NewName": "ConditionCheck",
+    "NewNamespace": "EFT.Quests",
+  },
+  "GStruct460": {
+    "NewName": "QuestChangeCost",
+    "NewNamespace": "EFT.Quests",
+  },
+  "GStruct151": {
+    "NewName": "OperationCreationResult",
+    "NewNamespace": "Diz.LanguageExtensions",
+  },
+  "GStruct152`1": {
+    "NewName": "OperationCreationResult",
+    "NewNamespace": "Diz.LanguageExtensions",
+  },
+  "GStruct153": {
+    "NewName": "OperationResult",
+    "NewNamespace": "Diz.LanguageExtensions",
+  },
+  "GStruct154`1": {
+    "NewName": "OperationResult",
+    "NewNamespace": "Diz.LanguageExtensions",
+  },
+  "GStruct155": {
+    "NewName": "Option",
+    "NewNamespace": "Diz.LanguageExtensions",
+  },
+  "GStruct156`1": {
+    "NewName": "Option",
+    "NewNamespace": "Diz.LanguageExtensions",
+  },
+  "GStruct263": {
+    "NewName": "SwitchRenderersPacket",
+    "NewNamespace": "EFT",
+  },
+  "GStruct19": {
+    "RemoveType": true
+  },
+  "GStruct301": {
+    "RemoveType": true
+  },
+  "GStruct388": {
+    "RemoveType": true
+  }
+}

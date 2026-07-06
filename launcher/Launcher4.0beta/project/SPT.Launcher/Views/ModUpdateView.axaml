@@ -1,0 +1,79 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="720"
+             x:Class="SPT.Launcher.Views.ModUpdateView">
+
+    <!-- Item 007 — fluxo de atualização de arquivos (motor SPT.Launcher.Base/Sync) -->
+    <Grid RowDefinitions="Auto, Auto, *, Auto" Margin="24" MaxWidth="760">
+
+        <!-- Cabeçalho: título + voltar -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+            <StackPanel Spacing="2" VerticalAlignment="Center">
+                <TextBlock Text="ATUALIZAÇÃO DE ARQUIVOS" Classes="trl-accent" FontWeight="Bold"
+                           FontSize="{DynamicResource TrlTextLg}"/>
+                <TextBlock Text="{Binding StatusText}" Classes="trl-muted"
+                           FontSize="{DynamicResource TrlTextSm}" TextWrapping="Wrap"/>
+            </StackPanel>
+            <Button Grid.Column="1" Content="VOLTAR" Classes="ghost sm" Cursor="Hand" VerticalAlignment="Top"
+                    Command="{Binding GoBackCommand}" IsEnabled="{Binding !IsBusy}"/>
+        </Grid>
+
+        <!-- Progresso + cancelar + resumo -->
+        <StackPanel Grid.Row="1" Spacing="6" Margin="0,14,0,14">
+            <Grid ColumnDefinitions="*,Auto,Auto">
+                <ProgressBar Minimum="0" Maximum="{Binding MaxProgress}" Value="{Binding Progress}"
+                             VerticalAlignment="Center"/>
+                <!-- velocidade de download removida a pedido -->
+                <!-- 4.1.2: cancelar com confirmação (dialog na VM) -->
+                <Button Grid.Column="2" Content="CANCELAR" Classes="ghost sm" Cursor="Hand" Margin="8,0,0,0"
+                        Command="{Binding CancelCommand}" IsVisible="{Binding CanCancel}"
+                        ToolTip.Tip="Cancelar a verificação/atualização (pede confirmação)"/>
+            </Grid>
+            <!-- Resumo: "X atualizados · Y preservados · Z movidos p/ disabled" -->
+            <TextBlock Text="{Binding SummaryText}" Classes="trl-accent"
+                       FontSize="{DynamicResource TrlTextXs}" TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <!-- Lista de arquivos do plano/resultado -->
+        <Border Grid.Row="2"
+                Background="{DynamicResource TrlBgPanelBrush}"
+                BorderBrush="{DynamicResource TrlEdgeBrush}"
+                BorderThickness="1" CornerRadius="0" Padding="10">
+            <ScrollViewer>
+                <ItemsControl ItemsSource="{Binding FileStatuses}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,2">
+                                <TextBlock Text="{Binding StatusIcon}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="{Binding FileName}" Classes="trl-muted"
+                                           FontSize="{DynamicResource TrlTextXs}"
+                                           TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="2" Text="{Binding SizeFormatted}" Classes="trl-faint"
+                                           FontSize="{DynamicResource TrlText2Xs}" Margin="8,0,0,0"
+                                           VerticalAlignment="Center"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+
+        <!-- Ações -->
+        <Grid Grid.Row="3" ColumnDefinitions="Auto,*,Auto" Margin="0,14,0,0">
+            <!-- 4.1.3: abrir a pasta do last-update.json -->
+            <Button Grid.Column="0" Content="ABRIR PASTA DO RELATÓRIO" Classes="link" Cursor="Hand" Padding="0"
+                    FontSize="{DynamicResource TrlTextXs}" VerticalAlignment="Center"
+                    Command="{Binding OpenLastUpdateFolder}"
+                    ToolTip.Tip="Abrir a pasta com o relatório da última atualização (last-update.json)"/>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10">
+                <Button Content="VERIFICAR NOVAMENTE" Classes="sm" Cursor="Hand"
+                        Command="{Binding CheckUpdatesCommand}" IsEnabled="{Binding !IsBusy}"/>
+                <Button Content="ATUALIZAR" Classes="primary" Cursor="Hand"
+                        Command="{Binding UpdateCommand}" IsEnabled="{Binding CanUpdate}"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

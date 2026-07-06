@@ -23,6 +23,18 @@ namespace SPT.Launcher
             request.RemoteEndPoint = remoteEndPoint;
         }
 
+        /// <summary>
+        /// Prefixo aplicado APENAS às rotas do mod TarkovRedLine (não às do SPT core).
+        /// Quando "Modo homolog" está ligado, vira "/homolog" para bater no mod
+        /// TarkovRedLine.Server.Homolog (que roda no mesmo server, com rotas prefixadas).
+        /// "" = produção (rotas normais). Lido ao vivo do setting — toggle sem restart.
+        /// </summary>
+        public static string ModRoutePrefix =>
+            SPT.Launcher.Helpers.LauncherSettingsProvider.Instance.HomologMode ? "/homolog" : "";
+
+        /// <summary>Prefixa uma rota do mod com <see cref="ModRoutePrefix"/> (no-op em produção).</summary>
+        private static string M(string modPath) => ModRoutePrefix + modPath;
+
         public static void ChangeSession(string session)
         {
             request.Session = session;
@@ -50,7 +62,7 @@ namespace SPT.Launcher
 
         public static string RequestAccount(LoginRequestData data)
         {
-            return request.PostJson("/redline/profile/get", Json.Serialize(data), compress: false, decompressResponse: false);
+            return request.PostJson(M("/redline/profile/get"), Json.Serialize(data), compress: false, decompressResponse: false);
         }
 
         public static string RequestProfileInfo(LoginRequestData data)
@@ -70,12 +82,31 @@ namespace SPT.Launcher
 
         public static string RequestChangePassword(ChangeRequestData data)
         {
-            return request.PostJson("/redline/password/change", Json.Serialize(data), compress: false, decompressResponse: false);
+            return request.PostJson(M("/redline/password/change"), Json.Serialize(data), compress: false, decompressResponse: false);
+        }
+
+        /// <summary>
+        /// Item 020 (A4/BR-020.3) — APAGA a chave do username no cofre TRL (redline_passwords.json),
+        /// nunca grava senha vazia. Idempotente: username inexistente responde "OK". Usado após um
+        /// remove/wipe bem-sucedido para não deixar entrada órfã reciclável.
+        /// </summary>
+        public static string RequestDeleteVaultEntry(ChangeRequestData data)
+        {
+            return request.PostJson(M("/redline/password/delete"), Json.Serialize(data), compress: false, decompressResponse: false);
         }
 
         public static string RequestWipe(RegisterRequestData data)
         {
             return request.PostJson("/launcher/profile/change/wipe", Json.Serialize(data));
+        }
+
+        /// <summary>
+        /// Lista de classes do CustomClasses (item 058) — contrato SP0.
+        /// Resposta vem zlib por default; GetJson já descomprime.
+        /// </summary>
+        public static string RequestClassList()
+        {
+            return request.GetJson("/customclasses/classes");
         }
 
         public static string SendPing()
@@ -86,6 +117,14 @@ namespace SPT.Launcher
         public static string RequestServerVersion()
         {
             return request.GetJson("/launcher/server/version");
+        }
+
+        /// <summary>
+        /// Busca a versão TRL do servidor (endpoint redline, resposta JSON pura — sem zlib)
+        /// </summary>
+        public static string RequestTrlServerVersion()
+        {
+            return request.GetJson(M("/redline/server/version"), decompressResponse: false);
         }
 
         public static string RequestCompatibleGameVersion()
@@ -108,7 +147,7 @@ namespace SPT.Launcher
         /// </summary>
         public static string RequestHwidRegister(HwidRegisterRequestData data)
         {
-            return PostToHwidManager("/launcher/hwid/register", JsonConvert.SerializeObject(data));
+            return PostToHwidManager(M("/launcher/hwid/register"), JsonConvert.SerializeObject(data));
         }
 
         /// <summary>
@@ -116,7 +155,7 @@ namespace SPT.Launcher
         /// </summary>
         public static string RequestHwidResetPassword(HwidResetPasswordRequestData data)
         {
-            return PostToHwidManager("/launcher/hwid/reset-password", JsonConvert.SerializeObject(data));
+            return PostToHwidManager(M("/launcher/hwid/reset-password"), JsonConvert.SerializeObject(data));
         }
 
         /// <summary>
@@ -124,7 +163,7 @@ namespace SPT.Launcher
         /// </summary>
         public static string RequestRedLineVersion()
         {
-            return GetFromHwidManager("/launcher/hwid/version");
+            return GetFromHwidManager(M("/launcher/hwid/version"));
         }
 
         /// <summary>
@@ -133,7 +172,7 @@ namespace SPT.Launcher
         public static string RequestRegisterPlayerIp(string username, string ip)
         {
             var data = new { username = username, ip = ip };
-            return PostToHwidManager("/redline/register-player-ip", JsonConvert.SerializeObject(data));
+            return PostToHwidManager(M("/redline/register-player-ip"), JsonConvert.SerializeObject(data));
         }
 
         /// <summary>
@@ -141,7 +180,7 @@ namespace SPT.Launcher
         /// </summary>
         public static string RequestModsVersion()
         {
-            return GetFromHwidManager("/launcher/mods/version");
+            return GetFromHwidManager(M("/launcher/mods/version"));
         }
 
         /// <summary>
@@ -149,7 +188,7 @@ namespace SPT.Launcher
         /// </summary>
         public static string RequestManifestHash()
         {
-            return GetFromHwidManager("/launcher/mods/manifest-hash");
+            return GetFromHwidManager(M("/launcher/mods/manifest-hash"));
         }
 
         /// <summary>
@@ -157,21 +196,68 @@ namespace SPT.Launcher
         /// </summary>
         public static string RequestModsManifest()
         {
-            return GetFromHwidManager("/launcher/mods/manifest");
+            return GetFromHwidManager(M("/launcher/mods/manifest"));
         }
 
         /// <summary>
-        /// Baixa um arquivo de mod do servidor (porta 7075)
+        /// Baixa um arquivo de mod do servidor (porta 7075).
+        /// Item 021: <paramref name="timeoutMs"/> parametrizado — o download de grupos opcionais
+        /// (arquivos grandes) passa um limite maior que os 30 s default do sync (R-1).
         /// </summary>
-        public static byte[] DownloadModFile(string filePath)
+        public static byte[] DownloadModFile(string filePath, int timeoutMs = 30000)
+        {
+            return DownloadBinary($"{request.RemoteEndPoint}{M("/launcher/mods/download")}?file={Uri.EscapeDataString(filePath)}", timeoutMs);
+        }
+
+        /// <summary>
+        /// Item 021: baixa um arquivo de uma subpasta de Opcionais (offFolders), via a MESMA via
+        /// <see cref="WebRequest"/> do resto do launcher (honra o bypass TLS self-signed do
+        /// ServicePointManager, esquema+porta reais do <c>RemoteEndPoint</c>) — não mais HttpClient
+        /// cru com URL http:80 reinventada (CA-021.1/2/3, CC-2). Timeout largo por serem binários.
+        /// </summary>
+        public static byte[] DownloadOptionalFile(string folder, string file, int timeoutMs = 300000)
+        {
+            return DownloadBinary(
+                $"{request.RemoteEndPoint}{M("/launcher/mods/optional-download")}?folder={Uri.EscapeDataString(folder)}&file={Uri.EscapeDataString(file)}",
+                timeoutMs);
+        }
+
+        /// <summary>
+        /// Item 021: busca o manifesto de uma subpasta de Opcionais (JSON puro) pelo backend real
+        /// (RemoteEndPoint). Lança em erro/timeout — o chamador conta como falha visível (CA-021.4).
+        /// </summary>
+        public static string RequestOptionalsManifest(string folder)
+        {
+            return GetString(
+                $"{request.RemoteEndPoint}{M("/launcher/mods/optionals-manifest")}?folder={Uri.EscapeDataString(folder)}",
+                10000);
+        }
+
+        /// <summary>
+        /// Item 008: baixa um arquivo do pacote de configs de performance
+        /// (Launcher-Updater/config-performance no servidor)
+        /// </summary>
+        public static byte[] DownloadPerformanceFile(string filePath)
+        {
+            return DownloadBinary($"{request.RemoteEndPoint}{M("/launcher/mods/performance-download")}?file={Uri.EscapeDataString(filePath)}");
+        }
+
+        /// <summary>
+        /// Item 009: busca a lista de grupos opcionais com descritores
+        /// (GET /launcher/mods/optionals-list)
+        /// </summary>
+        public static string RequestOptionalsList()
+        {
+            return GetFromHwidManager(M("/launcher/mods/optionals-list"));
+        }
+
+        private static byte[] DownloadBinary(string url, int timeoutMs = 30000)
         {
             try
             {
-                string url = $"{request.RemoteEndPoint}/launcher/mods/download?file={Uri.EscapeDataString(filePath)}";
-
                 var httpRequest = WebRequest.Create(new Uri(url));
                 httpRequest.Method = "GET";
-                httpRequest.Timeout = 30000;
+                httpRequest.Timeout = timeoutMs;
 
                 using (var response = httpRequest.GetResponse())
                 using (var responseStream = response.GetResponseStream())
@@ -185,6 +271,25 @@ namespace SPT.Launcher
             {
                 LogManager.Instance.Error($"[ModUpdate] Download error: {ex.Message}");
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// Item 021: GET de texto puro (sem zlib) pelo backend real, rethrow em erro para o chamador
+        /// tratar como falha visível — distinto de <see cref="GetFromHwidManager"/>, que engole o erro
+        /// devolvendo um JSON placeholder (bom para versão/ping, ruim para um manifesto).
+        /// </summary>
+        private static string GetString(string url, int timeoutMs)
+        {
+            var httpRequest = WebRequest.Create(new Uri(url));
+            httpRequest.Method = "GET";
+            httpRequest.Timeout = timeoutMs;
+
+            using (var response = httpRequest.GetResponse())
+            using (var responseStream = response.GetResponseStream())
+            using (var reader = new StreamReader(responseStream))
+            {
+                return reader.ReadToEnd();
             }
         }
 

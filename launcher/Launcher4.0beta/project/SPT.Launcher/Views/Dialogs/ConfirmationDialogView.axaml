@@ -3,34 +3,51 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:dialogHost="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
+             xmlns:cc="using:SPT.Launcher.CustomControls"
              xmlns:s="clr-namespace:System;assembly=mscorlib"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="420" d:DesignHeight="200"
              x:Class="SPT.Launcher.Views.Dialogs.ConfirmationDialogView"
-             MinWidth="300"
-             MinHeight="100"
-             Background="{DynamicResource BackgroundBrush}"
-             >
-  <Grid RowDefinitions="*,AUTO" ColumnDefinitions="*,AUTO" Margin="10">
-    <TextBlock Text="{Binding Question}" Grid.ColumnSpan="2" FontSize="15"
-               />
-    <StackPanel Grid.Row="1" Grid.Column="1"
-                Orientation="Horizontal" Spacing="10">
-      <Button Content="{Binding ConfirmButtonText}"
-              Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHost:DialogHost}, Path=CloseDialogCommand}"
-              Classes="acc"
-              IsEnabled="{Binding AllowConfirm}"
-            >
-        <Button.CommandParameter>
-          <s:Boolean>True</s:Boolean>
-        </Button.CommandParameter>
-      </Button>
-      <Button Content="{Binding DenyButtonText}"
-              Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHost:DialogHost}, Path=CloseDialogCommand}"
-            >
+             MaxWidth="460">
+
+  <cc:TrlDialogChrome Title="CONFIRMAÇÃO">
+    <cc:TrlDialogChrome.HeaderContent>
+      <!-- ✕ = cancelar (False explícito — null seria lido como confirmado pelos callers) -->
+      <Button Classes="icon sm" Content="✕" Cursor="Hand"
+              Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHost:DialogHost}, Path=CloseDialogCommand}">
         <Button.CommandParameter>
           <s:Boolean>False</s:Boolean>
         </Button.CommandParameter>
       </Button>
+    </cc:TrlDialogChrome.HeaderContent>
+
+    <StackPanel Spacing="16">
+      <TextBlock Text="{Binding Question}" TextWrapping="Wrap" FontSize="{DynamicResource TrlTextMd}"/>
+
+      <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+        <Button Content="{Binding DenyButtonText}" Classes="ghost" Cursor="Hand"
+                Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHost:DialogHost}, Path=CloseDialogCommand}">
+          <Button.CommandParameter>
+            <s:Boolean>False</s:Boolean>
+          </Button.CommandParameter>
+        </Button>
+        <!-- confirmar: .primary (tan) normal; .danger (vermelho) quando IsDestructive (wipe/reset) -->
+        <Button Content="{Binding ConfirmButtonText}" Classes="primary" Cursor="Hand"
+                IsVisible="{Binding !IsDestructive}"
+                IsEnabled="{Binding AllowConfirm}"
+                Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHost:DialogHost}, Path=CloseDialogCommand}">
+          <Button.CommandParameter>
+            <s:Boolean>True</s:Boolean>
+          </Button.CommandParameter>
+        </Button>
+        <Button Content="{Binding ConfirmButtonText}" Classes="danger" Cursor="Hand"
+                IsVisible="{Binding IsDestructive}"
+                IsEnabled="{Binding AllowConfirm}"
+                Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHost:DialogHost}, Path=CloseDialogCommand}">
+          <Button.CommandParameter>
+            <s:Boolean>True</s:Boolean>
+          </Button.CommandParameter>
+        </Button>
+      </StackPanel>
     </StackPanel>
-  </Grid>
+  </cc:TrlDialogChrome>
 </UserControl>
