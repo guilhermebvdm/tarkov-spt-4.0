@@ -3,7 +3,7 @@
 > **Data:** 2026-07-05<br>
 > **Status:** 🔵 Análise — **nenhuma mudança aplicada**; decisões são marcadas no §2<br>
 > **Pedido:** "o que adicionar/remover/editar para deixar tudo mais equilibrado?"<br>
-> **Revisão:** /g-review-content 2026-07-05 — 9 itens endereçados (números validados contra a fórmula real; B14–B18 adicionados)<br>
+> **Revisões:** /g-review-content ×2 (2026-07-05) — rodada 1: 9 itens (B14–B18, números validados); rodada 2: 8 itens (ondas de aplicação, B14 concreto, antes→depois, Anexo C corrigido, B19)<br>
 
 ---
 
@@ -34,31 +34,40 @@ Cada linha é UMA mudança atômica. Marque a coluna **Decisão** (⬜ pendente 
 | # | Prio | Classe | Mudança proposta | Esforço | Depende de | Decisão | Aplicada |
 |---|---|---|---|---|---|---|---|
 | B1 | 🔴 | Médico | `Shaky Hands — Enabled` default **OFF** até os perks do Médico existirem | 1 linha | — | ⬜ | ⬜ |
-| B2 | 🔴 | Furtivo | Ghost Step: F12 `0.40 → 0.70` — **exatamente** o que o card anuncia (−30%) | 1 linha | ideal c/ B4 | ⬜ | ⬜ |
+| B2 | 🔴 | Furtivo | Ghost Step: F12 `0.40 → 0.70` — **exatamente** o que o card anuncia (−30%) · no mesmo commit: corrigir o **label** do card "todo o ruído do player" → "ruído de movimento/ações" (**tiros ficam de fora** dos 3 pipelines — rótulo atual mente) | 2 linhas | ideal c/ B4 | ⬜ | ⬜ |
 | B3 | 🔴 | Caçador | Iron Lungs: F12 `0.50 → 0.667` — dreno ×0.667 = **+50% de duração exatos** (o card) | 1 linha | ideal c/ B4 | ⬜ | ⬜ |
-| B4 | 🔴 | (UI) | Cards do painel CLASS lerem o **valor vivo do F12** (precedente: footer 060) — calibragem futura nunca mais mente | médio | — | ⬜ | ⬜ |
+| B4 | 🔴 | (UI) | Cards do painel CLASS lerem o **valor vivo do F12** (precedente: footer 060) — pré-requisito de VERDADE para qualquer recalibrada futura; por isso entra na Onda 0 | médio | — | ⬜ | ⬜ |
 | B5 | 🟠 | Tanque | Custo inicial (35.28 → alvo): **opção A** `HeavyVests 3→2` (−3.75 → **31.53**, 1 mexida; a classe treina HeavyVests ×2, recupera rápido) · opção B `Shotgun 5→4` + `Vitality 5→4` (−4.17 → **31.11**) | jsonc | — | ⬜ | ⬜ |
-| B6 | 🟠 | Tanque | **Couraça condicional**: dano ×0.85 só com colete pesado (classe 4+) equipado; sem colete ×1.0. Alternativa simples: `0.85 → 0.88`. Viável: `BulwarkPatch` é Prefix em `Player.ApplyDamageInfo` com acesso ao `__instance` (equipment) | patch | — | ⬜ | ⬜ |
-| B7 | 🟠 | Furtivo | Melee `×5 → ×3.5` (1 linha no default) · variante: manter ×5 só em golpe por trás (checar ângulo do `damageInfo` — médio) | 1 linha / médio | — | ⬜ | ⬜ |
+| B6 | 🟠 | Tanque | **Couraça condicional**: dano ×0.85 só com colete pesado (classe 4+) equipado; sem colete ×1.0. Alternativa simples: `0.85 → 0.88`. Viável: `BulwarkPatch` é Prefix em `Player.ApplyDamageInfo` com acesso ao `__instance` (equipment). **Onda 2** (ver ondas abaixo) | patch | Onda 1 testada | ⬜ | ⬜ |
+| B7 | 🟠 | Furtivo | Melee `×5 → ×3.5` (1 linha no default) · variante: manter ×5 só em golpe por trás (checar ângulo do `damageInfo` — médio). **Onda 2** | 1 linha / médio | Onda 1 testada | ⬜ | ⬜ |
 | B8 | 🟡 | Médico | Subir XP (⚠ **Health já é ×2 — não tocar**): `Vitality ×1→×1.5` (+0.84) + `FirstAid ×2.5→×3` (+0.47) + `Charisma ×1→×1.5` (+0.20) → netMult 11.31 → **≈12.8** (borda da faixa) | jsonc | — | ⬜ | ⬜ |
 | B9 | 🟡 | Saqueador | Subir XP (pacote — `Search ×3` sozinho rende só +0.43): `Search ×2→×3` (+0.43) + `Endurance ×1.5→×2` (+0.50) + `Attention ×1.5→×2` (+0.30) + `Charisma ×1.5→×2` (+0.20) → 11.56 → **≈13.0**; sinergia c/ 061 | jsonc | — | ⬜ | ⬜ |
 | B10 | 🟡 | Fuzileiro | Cortar buffs derived `BearRawpower ×1.5` + `UsecNegotiations ×1.5` (−2.50) → 18.63 → **16.13** | jsonc | — | ⬜ | ⬜ |
 | B11 | 🟡 | Furtivo | Trocar os 5 debuffs "grátis" por debuffs que mordem (ex.: `Endurance ×0.8`, `Throwing ×0.8`) mantendo netMult ≈14 | jsonc | — | ⬜ | ⬜ |
 | B12 | 🟡 | Médico | Implementar os perks (050 — perna transpiler: Rapid Care/Swift Surgeon) | item 050 | — | ⬜ | ⬜ |
 | B13 | ℹ️ | Tanque | RN-03 (mastery por classe): Tanque **×1.5, não ×2** — não amplificar quem já está no teto | decisão | B15 | ⬜ | ⬜ |
-| B14 | 🟠 | (coop) | **Som é host-only vs bots** (review #5): documentar nas fichas + investigar sync (multiplicador de som por player via rota 057, aplicado no host). Sem isso, Ghost Step/Loud Operator/ruído do Tanque **não mordem a IA para clientes** | médio (investigação) | rota 057 | ⬜ | ⬜ |
-| B15 | 🟡 | Tanque/Fuzileiro | **Piso COMBINADO de recuo** (review #6): Bunker ×0.85 × mastery lvl 51 ≈ **×0.68**; Adrenalina ×0.7 × mastery ≈ **×0.56** na janela. Mastery tem piso próprio (0.5), o produto não tem → definir piso combinado (ex.: 0.6) | pequeno | B13 | ⬜ | ⬜ |
-| B16 | 🟡 | Tanque | Tireless Arms `0 → 0.2–0.25` (review #7): imunidade ABSOLUTA é outlier — o especialista em mira (Caçador) tem ×0.65; fadiga 4–5× mais lenta preserva a fantasia sem imunidade | trivial | decidir c/ B6 | ⬜ | ⬜ |
-| B17 | 🟡 | Médico | **Perk vivo hoje** (review #8): "Metabolismo Eficiente" — fome/sede `×0.85` reutilizando o lever do Heavy Frame (`ClassCombatHealthPatches` branch por classe) + card no catálogo | pequeno | — | ⬜ | ⬜ |
-| B18 | 🟡 | Tanque | Baixar XP (review — §4.2 não tocava o netMult do Tanque): `Shotgun ×3→×2.5` (−1.25) + `LightVests ×2→×1.75` (−0.94) → 19.19 → **≈17.0** (teto da faixa) | jsonc | — | ⬜ | ⬜ |
+| B14 | 🟠 | (coop) | **Som host-side para remotos** — implementação DIRETA, sem protocolo novo: bots ouvem no HOST e o host já tem o mapa nickname→classe (rota 057) → `AiSoundPatch`/`SainSoundPatch` resolvem a classe do player REMOTO (`ClassIdentities.TryResolve(Profile.Nickname)`) e aplicam o multiplicador DELE. Única parte que exigiria sync real: o rolloff audível (`method_67`) para OUTROS humanos — fica de fora. Enquanto não aplicado: som = host-only nas avaliações | pequeno/médio | rota 057 (já existe) | ⬜ | ⬜ |
+| B15 | 🟡 | Tanque/Fuzileiro | **Piso COMBINADO de recuo**: Bunker ×0.85 × mastery 51 ≈ **×0.68**; Adrenalina ×0.7 × mastery ≈ **×0.56** na janela. Mastery tem piso próprio (0.5 — inalcançável no cap 51), o PRODUTO não tem → definir piso combinado (ex.: 0.6, que só morde a janela de Adrenalina). Decidir ANTES do B13 | pequeno | — | ⬜ | ⬜ |
+| B16 | 🟡 | Tanque | Tireless Arms `0 → 0.2–0.25`: imunidade ABSOLUTA é outlier — o especialista em mira (Caçador) tem ×0.65; fadiga 4–5× mais lenta preserva a fantasia sem imunidade. **Onda 2** | trivial | decidir c/ B6 | ⬜ | ⬜ |
+| B17 | 🟡 | Médico | **Perk vivo hoje**: "Metabolismo Eficiente" — fome/sede `×0.85` reutilizando o lever do Heavy Frame (`ClassCombatHealthPatches` branch por classe) + card no catálogo | pequeno | — | ⬜ | ⬜ |
+| B18 | 🟡 | Tanque | Baixar XP (§4.2 não tocava o netMult do Tanque): `Shotgun ×3→×2.5` (−1.25) + `LightVests ×2→×1.75` (−0.94) → 19.19 → **≈17.0** (teto da faixa) | jsonc | — | ⬜ | ⬜ |
+| B19 | 🔵 | (UI) | Cards **Flag** exibirem a magnitude quando houver F12 numérico: Silent Looter (real ×0.4) e Overladen (real ×1.5) hoje não mostram número — coerência com a transparência do B4 | pequeno | B4 | ⬜ | ⬜ |
 
-**Ordem sugerida:** B1 → B17 (Médico deixa de ser só-ônus com 1 perk real) → B2/B3 (alinhamento exato) → B5/B6/B16 (Tanque) → B7 → B8–B11 + B18 (passada nos .jsonc, snapshot antes/depois) → B15 → B4 → B12 → B13/B14 (junto do RN-03 / rota 057).
+### Ondas de aplicação (anti-overshooting)
+
+O Tanque recebe **5 nerfs** neste painel (B5, B6, B16, B18 + o ruído já aplicado em 2026-07-05) — aplicados de uma vez, o risco clássico é overshooting (Tanque vira o novo Médico). Sequência com re-teste entre ondas:
+
+1. **Onda 0 — justiça imediata (sem risco):** B1 · B17 · B2/B3 (alinhamento + label) · **B4** (antes de qualquer recalibrada futura — sem ele, B2/B3 voltam a mentir na primeira calibrada).
+2. **Onda 1 — orçamentos (.jsonc):** B5 · B8 · B9 · B10 · B11 · B18 — rodar `node scripts/class-balance-snapshot.mjs` antes/depois e conferir com a tabela projetada do §4.2.
+3. **Gate in-game** — raids coop de teste; sensação de TTK/progressão por classe.
+4. **Onda 2 — combate:** B6 · B16 · B7 · B15 (só se a Onda 1 não tiver corrigido a percepção sozinha).
+5. **Estruturais (qualquer momento):** B14 (host-side) · B12 (item 050) · B19 (com B4) · B13 (com RN-03, após B15).
 
 ---
 
 ## 3. Diagnóstico por classe
 
-### 🛡️ Tanque — *acima do orçamento em TUDO* → B5, B6, B13, B15, B16, B18
+### 🛡️ Tanque — *acima do orçamento em TUDO* → B5, B6, B13, B15, B16, B18 (em ondas!)
 
 | Camada | Situação | Veredito |
 |---|---|---|
@@ -67,7 +76,7 @@ Cada linha é UMA mudança atômica. Marque a coluna **Decisão** (⬜ pendente 
 | Perks vivos | dano recebido ×0.85 **incondicional** + carga +30% + pacote pesado completo; recuo pesado empilha com mastery (**×0.68 combinado** — Anexo C) e Tireless Arms é imunidade absoluta (×0) | ✗ pacote mais forte |
 | Drawbacks vivos | veloc ×0.9 · fome/sede ×1.3 · **ruído +30% (novo, 2026-07-05 — host-only vs bots, ver B14)** | ajuda, não fecha a conta |
 
-O ruído novo foi na direção certa (mas só morde a IA quando o Tanque é o host — B14). A B6 (Couraça só com colete pesado) segue sendo a proposta mais elegante: temática, counterável, e casa com o HeavyVests ×2 que a classe já treina.
+O ruído novo foi na direção certa (mas só morde a IA quando o Tanque é o host — B14). A B6 (Couraça só com colete pesado) segue sendo a proposta mais elegante: temática, counterável, e casa com o HeavyVests ×2 que a classe já treina. **Não aplicar B5/B6/B16/B18 de uma vez** — ver Ondas no §2.
 
 ### 🩺 Médico de Combate — *hoje é estritamente NEGATIVO* → B1, B8, B12, B17
 
@@ -76,7 +85,7 @@ O ruído novo foi na direção certa (mas só morde a IA quando o Tanque é o ho
 | Skills iniciais | custo 31.0 | ✓ |
 | XP | netMult **11.3 — o menor** (obs.: `Health ×2` e `FirstAid ×2.5` já existem; o gap real é `Vitality ×1`) | ✗ piso |
 | Perks vivos | **NENHUM** (os 3 são pendentes ⏳) — mas B17 entrega 1 perk vivo barato (fome/sede ×0.85, lever já existe) | ✗ |
-| Drawbacks vivos | recuo ×1.25 **ATIVO** | ✗ só o ônus roda |
+| Drawbacks vivos | recuo ×1.25 **ATIVO** (integral fora de SMG/LMG/GL mesmo no endgame — Anexo C) | ✗ só o ônus roda |
 
 Quem joga de Médico hoje só perde. B1 (1 linha) corrige a injustiça; B17 dá o primeiro perk vivo sem esperar a perna transpiler (B12).
 
@@ -86,10 +95,10 @@ Quem joga de Médico hoje só perde. B1 (1 linha) corrige a injustiça; B17 dá 
 |---|---|---|
 | Skills iniciais | custo 29.7 | ✓ |
 | XP | netMult 14.4 plausível, **mas 5 debuffs são "grátis"** (StressResistance, BearRawpower, UsecNegotiations, Vitality, Metabolism) | ⚠ custo inflado |
-| Perks vivos | ruído **×0.40 real** (card anuncia ×0.70 → B2 = 0.70 exato) · melee **×5** · +10% veloc c/ melee | ⚠ 2 outliers |
+| Perks vivos | ruído **×0.40 real** (card anuncia ×0.70 → B2 = 0.70 exato; label também mente — tiros ficam de fora) · melee **×5** · +10% veloc c/ melee | ⚠ 2 outliers |
 | Drawbacks vivos | aim punch ×1.5 | ✓ morde |
 
-O combo real é mais forte que o exibido: −60% de ruído (anunciado −30%) + kill garantido de ×5. B2 alinha exato; B7 tira o one-shot trivial. Coop: o ruído reduzido também é host-only vs bots (B14).
+O combo real é mais forte que o exibido: −60% de ruído (anunciado −30%) + kill garantido de ×5. B2 alinha exato; B7 tira o one-shot trivial (Onda 2 — são 2 nerfs na mesma classe). Coop: o ruído reduzido também é host-only vs bots (B14).
 
 ### 🔫 Fuzileiro — *ok em combate, XP gordo* → B10, B15
 
@@ -132,10 +141,21 @@ Sem skills iniciais nem multiplicadores (`noBaseline`) — o snapshot a exclui d
 
 ## 4. Temas transversais
 
-1. **Transparência = balance percebido (B2/B3/B4).** Dois cards mentem hoje. B2/B3 alinham nos valores EXATOS anunciados (0.70 / 0.667); B4 (cards lendo o F12 vivo) garante que qualquer calibragem futura continue verdadeira — B2/B3 sem B4 voltam a mentir na primeira recalibrada.
-2. **Amplitude do netMult: 7.9 → ≈4.2.** Hoje 11.3 (Médico) ↔ 19.2 (Tanque). Com B8 (Médico ≈12.8), B9 (Saqueador ≈13.0), B10 (Fuzileiro 16.13) e **B18** (Tanque ≈17.0 — o custo do B5 NÃO toca netMult, por isso a linha nova), todas ficam em ~12.8–17.0 (Caçador 14.45 e Furtivo 14.35 intocados). Rodar `node scripts/class-balance-snapshot.mjs` antes/depois de cada mexida.
-3. **Coop muda o veredito do som (B14).** Os 3 pipelines de som têm gate no player local e os bots vivem no host — pra um CLIENTE Fika, Ghost Step/Loud Operator/ruído do Tanque não afetam a IA. Enquanto não houver sync (rota 057 já carrega classe por nickname — caminho natural), tratar a identidade sonora como **host-only** nas avaliações.
-4. **Mastery (058) não é neutra (B13/B15).** A camada empilha multiplicativamente com os perks de recuo (Anexo C); o RN-03 (multiplicadores por classe) deve considerar o PRODUTO, não o fator isolado.
+1. **Transparência = balance percebido (B2/B3/B4/B19).** Dois cards mentem no número, um no rótulo (Ghost Step promete "todo o ruído"; tiros ficam de fora). B2/B3 alinham nos valores EXATOS anunciados (0.70 / 0.667); B4 (cards lendo o F12 vivo) é pré-requisito de verdade permanente — por isso está na **Onda 0**, antes de qualquer recalibrada.
+2. **Amplitude do netMult: 7.9 → ≈4.2.** Estado projetado com a Onda 1 aplicada:
+
+   | Classe | netMult hoje | → projetado | Mudança |
+   |---|---|---|---|
+   | Médico | 11.31 | **≈12.8** | B8 |
+   | Saqueador | 11.56 | **≈13.0** | B9 |
+   | Furtivo | 14.35 | 14.35 (≈14 c/ B11) | B11 neutro |
+   | Caçador | 14.45 | 14.45 | — |
+   | Fuzileiro | 18.63 | **16.13** | B10 |
+   | Tanque | 19.19 | **≈17.0** | B18 (custo: B5 → 31.1–31.5) |
+
+   Regenerar via `node scripts/class-balance-snapshot.mjs` após cada onda e conferir contra esta tabela.
+3. **Coop muda o veredito do som (B14).** Os 3 pipelines têm gate no player local e os bots vivem no host — pra um CLIENTE Fika, Ghost Step/Loud Operator/ruído do Tanque não afetam a IA. O fix é direto (host resolve a classe do remoto via mapa da rota 057 — sem protocolo novo); até lá, tratar identidade sonora como **host-only**.
+4. **Mastery (058) não é neutra (B13/B15).** A camada empilha multiplicativamente com os perks de recuo (Anexo C) **nas 3 categorias com maestria** (SMG/LMG/Lançador); o RN-03 deve considerar o PRODUTO, não o fator isolado. B15 decide-se antes de B13.
 
 ---
 
@@ -154,11 +174,12 @@ Sem skills iniciais nem multiplicadores (`noBaseline`) — o snapshot a exclui d
 netMult plausível: min 11.31 · máx 19.19 · média 14.92 · **amplitude 7.88**.
 Fórmula confirmada no script: `custo = Σ nível_inicial × peso(skill)` (linear) · `netMult = Σ (fator−1) × peso`.
 
-Divergências card × F12 (auditoria dos efeitos numéricos — só estas 2):
+Divergências card × F12 (auditoria dos efeitos numéricos — 2 números + 1 rótulo):
 
-| Efeito | Card (catálogo) | F12 real | Efeito prático | Fix |
+| Efeito | Card (catálogo) | F12/real | Efeito prático | Fix |
 |---|---|---|---|---|
 | Ghost Step (Furtivo) | ×0.70 (−30% ruído) | **0.40** | −60% ruído | B2: F12 → 0.70 |
+| Ghost Step (rótulo) | "todo o ruído do player" | pipelines cobrem movimento/passo/ações — **tiros ficam de fora** | promete mais do que faz | B2: label → "ruído de movimento/ações" |
 | Iron Lungs (Caçador) | +50% duração de fôlego | dreno **×0.50** | ≈ ×2 duração | B3: F12 → 0.667 |
 
 ## Anexo B — perks/drawbacks vivos por classe (referência rápida)
@@ -176,15 +197,20 @@ Divergências card × F12 (auditoria dos efeitos numéricos — só estas 2):
 
 ## Anexo C — stacking de recuo (por que B15 existe)
 
-Multiplicadores de recuo se COMBINAM por produto; a mastery (058) tem piso próprio (0.5), mas o produto não tem piso:
+Multiplicadores de recuo se COMBINAM por produto. A mastery (058) existe **só para SMG/LMG/Lançador**
+(`WeaponMastery.SkillForHeld`) e tem piso próprio 0.5 — que **nunca é atingido** no cap de nível 51
+(1 − 0.004×51 = 0.796; o piso exigiria nível 125). O PRODUTO com os perks não tem piso nenhum:
 
 | Cenário | Fatores | Produto |
 |---|---|---|
-| Tanque, LMG, mastery nível 51 | Bunker ×0.85 · mastery ×(1−0.004×51)≈0.80 | **×0.68** |
-| Fuzileiro, SMG, janela de Adrenalina, mastery 51 | Adrenalina ×0.70 · mastery ≈0.80 | **×0.56** |
-| Médico (drawback), qualquer arma | Shaky Hands ×1.25 · mastery ≈0.80 | ×1.00 (mastery ANULA o drawback no endgame) |
+| Tanque, LMG, maestria nível 51 | Bunker ×0.85 · mastery ×0.796 | **×0.68** |
+| Fuzileiro, SMG, janela de Adrenalina, maestria 51 | Adrenalina ×0.70 · mastery ×0.796 | **×0.56** |
+| Médico **com SMG**, maestria 51 | Shaky Hands ×1.25 · mastery ×0.796 | **×0.995** |
 
-Nota: a linha do Médico mostra um efeito colateral não-óbvio — a mastery endgame apaga o drawback de recuo. Mais um motivo pro B15 (piso combinado) considerar também o TETO de anulação de drawbacks.
+Nota (efeito colateral não-óbvio): com SMG/LMG/GL no endgame, a mastery **anula o drawback de recuo do
+Médico** — mas o Shaky Hands segue **integral (×1.25)** em AR/DMR/pistola/etc., que não têm maestria.
+O B15 (piso combinado) deve considerar tanto o CHÃO dos buffs quanto esse TETO de anulação de drawbacks
+nas 3 categorias.
 
 ## Histórico de Alterações
 
@@ -192,4 +218,5 @@ Nota: a linha do Médico mostra um efeito colateral não-óbvio — a mastery en
 |---|---|---|
 | 2026-07-05 | Guilherme/Claude | Análise criada. |
 | 2026-07-05 | Guilherme/Claude | Reorganizado (UX): painel de decisões rastreável, diagnóstico por classe, glossário, anexos. |
-| 2026-07-05 | Guilherme/Claude | Review /g-review-content endereçada: B8/B9 corrigidos (Health já ×2; pacotes p/ faixa 13–17), B5 = 31.11/31.53, B2/B3 exatos (0.70/0.667) + dependência de B4, novos B14 (som host-only em coop), B15 (piso de stacking — Anexo C), B16 (Tireless 0→0.2–0.25), B17 (perk vivo Médico), B18 (XP do Tanque ≈17.0), Peladão no Anexo A. |
+| 2026-07-05 | Guilherme/Claude | Review rodada 1 endereçada: B8/B9 corrigidos, B5 exato, B2/B3 exatos, novos B14–B18, Peladão no Anexo A. |
+| 2026-07-05 | Guilherme/Claude | Review rodada 2 endereçada: Anexo C corrigido (mastery só SMG/LMG/GL; piso 0.5 inalcançável; "anula drawback" qualificado), dependência circular B13↔B15 desfeita, **Ondas de aplicação** (B4 na Onda 0; nerfs do Tanque divididos c/ gate entre ondas), B14 reescrito como implementação host-side direta, tabela netMult antes→depois no §4.2, label do Ghost Step no B2, novo B19 (magnitude nos cards Flag). |
