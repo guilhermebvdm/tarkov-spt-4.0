@@ -81,7 +81,11 @@ function collectModItemIds(dir, into) {
 
 function loadDbs() {
   if (!fs.existsSync(ITEMS_DB)) { warn(`DB de itens não encontrada: ${ITEMS_DB}`); process.exit(1); }
-  VALID = new Set(Object.keys(JSON.parse(fs.readFileSync(ITEMS_DB, 'utf8'))));
+  // baseline-v2 (bug do belt do Caçador): items.json contém NODES (_type "Node" = categorias abstratas,
+  // ex.: 5b3f15d486f77432d0509248 "ArmBand") além de itens reais. Um node equipado passa em toda a cadeia
+  // e vira item-fantasma in-game (sem locale/ícone/modelo). VALID = só _type "Item".
+  const itemsDb = JSON.parse(fs.readFileSync(ITEMS_DB, 'utf8'));
+  VALID = new Set(Object.entries(itemsDb).filter(([, t]) => t?._type === 'Item').map(([k]) => k));
   const before = VALID.size;
   for (const d of (fs.existsSync(MODS_DIR) ? fs.readdirSync(MODS_DIR) : [])) {
     collectModItemIds(path.join(MODS_DIR, d, 'db'), VALID);
