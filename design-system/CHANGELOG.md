@@ -8,6 +8,8 @@ Primeira versão. Inclui o bloco **H. Game data** (primitivos de domínio Tarkov
 
 Filtros: `trl-multiselect` (dropdown de checkboxes com count no trigger, counts por opção, `__search` sticky p/ listas longas, Select all/Clear; painel persiste entre cliques) + `trl-filter-chip` (chips de filtros aplicados com remove) — receita "Barra de filtros" no PATTERNS.md. Dropdown e multiselect compartilham a casca (trigger/caret/painel/option) em seletores agrupados; diferenças intencionais são overrides explícitos comentados.
 
+Contexto multi-agente: `AGENTS.md` vira a fonte de verdade do diretório (conteúdo integral do antigo CLAUDE.md); `CLAUDE.md` e `GEMINI.md` são stubs que apontam para ele — mesmo padrão do repo raiz.
+
 Polimento de interação: garantia global de `cursor: pointer` em todo clicável (auditado por script — zero gaps); picker do `.trl-select` estilizado pelos tokens via `appearance: base-select` (fim do highlight azul do SO; fallback nativo documentado); painéis de dropdown/multiselect abrem com `trl-pop`; checkbox/radio marcam com pop (scale); botões sólidos com glow no hover; toasts deslizam da direita (`trl-slide-in`); thumb do slider com glow no hover e cursor grabbing.
 
 Iconografia oficial: Tabler Icons (MIT) requadrada para o hard-edges (caps butt/joins miter, stroke 1.75) — sprite curado `assets/icons.svg` (55 ícones UI + domínio: crosshair/target/shield/radar/swords/backpack…), componente `.trl-icon` (13/16/20px, currentColor), grade com click-copy no showcase, receita "Ícones" no PATTERNS; starter usa refresh/device-floppy nos botões do topbar.

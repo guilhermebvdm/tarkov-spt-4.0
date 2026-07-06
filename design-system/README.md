@@ -35,7 +35,7 @@ Editor novo? Copie [`templates/editor-starter.html`](./templates/editor-starter.
 | [`design-system.html`](./design-system.html) | Showcase premium navegável (cores, tipo, componentes, do's & don'ts) |
 | [`templates/editor-starter.html`](./templates/editor-starter.html) | Shell de editor funcional para copiar |
 | [`PATTERNS.md`](./PATTERNS.md) | Regras normativas (disciplina do vermelho, radius 0, AA) + receitas |
-| [`CLAUDE.md`](./CLAUDE.md) | Contexto de uso para agentes |
+| [`AGENTS.md`](./AGENTS.md) | Contexto de uso para agentes — fonte de verdade (CLAUDE.md/GEMINI.md são stubs que apontam p/ cá) |
 | [`fonts/`](./fonts/) | Bender woff2 + `@font-face` + nota de licença |
 | [`assets/`](./assets/) | Logo TRL (`trl-logo-dark` hero · `trl-logo-mark` topbar) + `bg-ambient.jpg` (key art p/ `.trl-app--photo`/hero) + `icons.svg` (sprite Tabler requadrada, 55 ícones) — PROVENANCE.txt |
 

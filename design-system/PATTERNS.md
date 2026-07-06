@@ -3,7 +3,7 @@
 > **Data:** 2026-07-03<br>
 > **Status:** 🟢 Vivo<br>
 > **Responsáveis:** Guilherme<br>
-> **Referências:** [CLAUDE.md](./CLAUDE.md)<br>
+> **Referências:** [AGENTS.md](./AGENTS.md)<br>
 
 ---
 
@@ -194,7 +194,7 @@ Biblioteca oficial: **Tabler Icons** (MIT), requadrada para o hard-edges do DS (
 
 - **Uso:** inline o conteúdo de `icons.svg` uma vez no topo do `<body>` (funciona em `file://`, HTML puro e Blazor; nada de `.js` — R9) e referencie `<svg class="trl-icon"><use href="#trl-i-search"/></svg>`. Tamanhos: `--sm` 13px · base 16px · `--lg` 20px. Cor herda (`currentColor`) — pinte pelo token do contexto, nunca hex.
 - **Botão só-ícone** exige `aria-label`; ícone decorativo ao lado de texto dispensa (o sprite já é `aria-hidden`).
-- **Adicionar ícone:** baixar de `github.com/tabler/tabler-icons/icons/outline/<nome>.svg`, aplicar o requadramento (round→butt/miter), embrulhar em `<symbol id="trl-i-<nome>" viewBox="0 0 24 24" …>` no sprite e **incluir na grade do showcase no mesmo commit** (regra 4 do CLAUDE.md).
+- **Adicionar ícone:** baixar de `github.com/tabler/tabler-icons/icons/outline/<nome>.svg`, aplicar o requadramento (round→butt/miter), embrulhar em `<symbol id="trl-i-<nome>" viewBox="0 0 24 24" …>` no sprite e **incluir na grade do showcase no mesmo commit** (regra 4 do AGENTS.md).
 - Nunca misturar bibliotecas nem usar emoji como ícone de UI (emoji só como placeholder de imagem de item em demos).
 
 ### Fundo ambiente & hero (key art)

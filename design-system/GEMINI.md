@@ -1,4 +1,4 @@
-# design-system/ — Claude Code
+# design-system/ — Gemini CLI
 
 Leia **[AGENTS.md](./AGENTS.md)** — ele é a fonte de verdade deste diretório para qualquer agente (regras de ouro, mapa de arquivos, ordem de consumo).
 

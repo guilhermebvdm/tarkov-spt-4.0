@@ -7,7 +7,7 @@ description: Valida telas/componentes contra o TRL Design System com 4 lentes �
 
 Contexto fixo: editores web **desktop, dark-only, offline** (servidos pelo SPT server), comunidade **PT-BR/EN**. Fora de escopo por decisão: tema claro, mobile/touch, RTL, framework de i18n (pluralização/ICU é do consumidor).
 
-Fonte de verdade dos tokens/regras: `design-system/` (ler `CLAUDE.md` + `PATTERNS.md` antes).
+Fonte de verdade dos tokens/regras: `design-system/` (ler `AGENTS.md` + `PATTERNS.md` antes).
 
 ## Lente 1 — Readability
 
