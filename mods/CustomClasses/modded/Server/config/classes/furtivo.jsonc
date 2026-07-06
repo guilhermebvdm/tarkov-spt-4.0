@@ -155,6 +155,10 @@
         "tpl": "5c165d832e2216398b5a7e36",
         "mods": []
       },
+      "Scabbard": {
+        "tpl": "69f3de69ac93bcc7b9e34f71",
+        "mods": []
+      },
       "SecuredContainer": {
         "tpl": "544a11ac4bdc2d470e8b456a"
       }
@@ -882,10 +886,40 @@
         "y": 20
       },
       {
+        "tpl": "69f3e17e6111bf6ae2e34f75",
+        "mods": [],
+        "x": 0,
+        "y": 21
+      },
+      {
         "tpl": "5fc64ea372b0dd78d51159dc",
         "mods": [],
         "x": 1,
         "y": 21
+      },
+      {
+        "tpl": "69f3e188ceadbcbed5e34f77",
+        "mods": [],
+        "x": 0,
+        "y": 22
+      },
+      {
+        "tpl": "69f3e19a4864616557e34f79",
+        "mods": [],
+        "x": 0,
+        "y": 23
+      },
+      {
+        "tpl": "69f4affac52af4c196e34f7b",
+        "mods": [],
+        "x": 0,
+        "y": 24
+      },
+      {
+        "tpl": "69f3e174af10d16d81e34f73",
+        "mods": [],
+        "x": 0,
+        "y": 25
       },
       {
         "tpl": "5449016a4bdc2d6f028b456f",
