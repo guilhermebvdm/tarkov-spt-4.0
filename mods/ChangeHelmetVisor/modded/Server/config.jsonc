@@ -1,0 +1,13 @@
+{
+    // Set to true if you want all face shields to have the same visor type. Set false to only use specific face shields.
+    "AllFaceShields": true,
+    // Type of visor that should be rendered on all face shields. Options are: Wide, Narrow, NoMask
+    "MaskType": "Wide",
+    // Provide id and type of visor wanted. Refer to above for the options, and below for examples. Only works with 'AllFaceShields' set to 'false'
+    "SpecificFaceShields": {
+        "5c0919b50db834001b7ce3b9": "Wide",
+        "5c0e842486f77443a74d2976": "Wide"
+    }
+    // You can find the id using this website: https://db.sp-tarkov.com/search
+    // Make sure that the parent ID matches '57bef4c42459772e8d35a53b' (ArmoredEquipment) or '5a341c4686f77469e155819e' (FaceCover) and that 'FaceShieldComponent' is 'true'.
+}

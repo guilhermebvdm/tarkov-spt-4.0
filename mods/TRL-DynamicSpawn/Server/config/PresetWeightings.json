@@ -1,0 +1,19 @@
+{
+  "live-like": 45,
+  "quiet-raids": 8,
+  "more-scavs": 5,
+  "more-pmcs": 4,
+  "more-scavs-and-pmcs": 3,
+  "delayed-scavs": 2,
+  "delayed-pmcs": 4,
+  "arrived-early": 4,
+  "rogue-invasion": 1,
+  "raider-invasion": 1,
+  "insanity": 1,
+  "minor-boss-invasion": 4,
+  "less-pmcs-less-scavs-boss-invasion": 3,
+  "low-pmcs-low-scavs-major-boss-invasion": 1,
+  "main-boss-guaranteed": 5,
+  "main-boss-guaranteed-roaming": 3,
+  "sniper-buddies": 5
+}

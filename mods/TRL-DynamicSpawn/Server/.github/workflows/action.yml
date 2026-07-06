@@ -1,0 +1,29 @@
+name: "tagged-release"
+
+on: push
+
+jobs:
+  tagged-release:
+    name: "Tagged Release"
+    runs-on: "ubuntu-latest"
+    permissions:
+      contents: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 2
+    - name: Print package.json version (before)
+      id: versionstep
+      run: |
+        echo "version=$(jq -r .version package.json)" >> $GITHUB_OUTPUT
+      working-directory: ${{ github.workspace }}
+    - uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: ${{ steps.versionstep.outputs.version }}
+        title: "MOAR ${{ steps.versionstep.outputs.version }}"
+        prerelease: false
+        files: |
+          ./dist/*.zip

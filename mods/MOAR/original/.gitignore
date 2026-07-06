@@ -1,0 +1,13 @@
+node_modules
+dist/Bepinex
+dist/user
+src/refDBS
+
+src/**/**/*.js
+src/**/*.js
+src/*.js
+src/**/**/*.js.map
+src/**/*.js.map
+src/*.js.map
+src/**/**.js.map
+src/**/**.js

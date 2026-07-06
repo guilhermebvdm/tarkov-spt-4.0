@@ -1,0 +1,46 @@
+﻿using System.Reflection;
+using BotPlacementSystemClient.Utils;
+using EFT;
+using HarmonyLib;
+using SPT.Reflection.Patching;
+
+namespace BotPlacementSystemClient.Patches;
+
+internal class BotOwnerCreationPatch : ModulePatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return AccessTools.Method(typeof(BotOwner), nameof(BotOwner.Create));
+    }
+
+    [PatchPostfix]
+    private static void PatchPostfix(Player player)
+    {
+        if (Utility.IsPlayerHeadless(player) || !player.IsAI)
+        {
+            Plugin.LogSource.LogInfo($"Player hitting botOwner.Create is a player or headless");
+            return;
+        }
+            
+        if (player.Profile.Side is EPlayerSide.Bear or EPlayerSide.Usec)
+        {
+            return;
+        }
+        if (player.Profile.Info.Settings.Role is WildSpawnType.assault or WildSpawnType.assaultGroup)
+        {
+            lock (Utility.SpawnPointLock)
+            {
+                Utility.CachedAssaultBots.Add(player);
+            }
+            return;
+        }
+        if (player.Profile.Info.Settings.IsBossOrFollower())
+        {
+            lock (Utility.SpawnPointLock)
+            {
+                Utility.CachedBosses.Add(player);
+            }
+            return;
+        }
+    }
+}

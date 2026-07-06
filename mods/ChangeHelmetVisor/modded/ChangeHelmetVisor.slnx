@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Client/ChangeHelmetVisorClient.csproj" />
+  <Project Path="Server/ChangeHelmetVisor.csproj" />
+</Solution>

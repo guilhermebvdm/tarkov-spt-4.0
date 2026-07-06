@@ -1,0 +1,454 @@
+@inherits LayoutComponentBase
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+
+<HeadContent>
+    <link href="@Assets["_content/MudBlazor/MudBlazor.min.css"]" rel="stylesheet" />
+    <link href="/TRL-DynamicSpawn-Server/css/app.css" rel="stylesheet" />
+    <meta name="robots" content="noindex, nofollow">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&amp;family=Roboto:ital,wght@0,100..900;1,100..900&amp;display=swap" rel="stylesheet">
+</HeadContent>
+<script src="@Assets["_content/MudBlazor/MudBlazor.min.js"]"></script>
+
+<MudThemeProvider Theme="@_abpsThemeAdjustments" IsDarkMode/>
+<MudPopoverProvider/>
+<MudSnackbarProvider />
+<MudDialogProvider />
+
+<div class="no-highlight @(DisableAnimations ? "disable-animations" : "")">
+    <MudLayout>
+        <MudAppBar Dense Elevation="1">
+            <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.MenuOpen" Color="Color.Inherit" OnClick="@((e) => DrawerToggle())">@Localization.T("Menu")</MudButton>
+            <MudSpacer/>
+            <MudSelect T="string" Value="Localization.CurrentLanguage" ValueChanged="OnLanguageChanged" Variant="@Variant.Text" Margin="@Margin.Dense" Class="mr-2" Style="width: max-content;">
+                @foreach (var lang in Localization.SupportedLanguages)
+                {
+                    <MudSelectItem Value="@lang.Key">@lang.Value</MudSelectItem>
+                }
+            </MudSelect>
+            @if (ShowUndoButton)
+            {
+                <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Undo" Color="Color.Warning" OnClick="@((e) => UndoChanges())" Disabled="pendingChanges.Count == 0 && !_unsavedChanges" Class="mr-2">Undo</MudButton>
+            }
+            @if (ShowDefaultButton)
+            {
+                <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.RestorePage" Color="Color.Error" OnClick="@((e) => ResetToDefaults())" Class="mr-2">Default</MudButton>
+            }
+            <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Refresh" Color="Color.Inherit" OnClick="@((e) => RefreshData())" Disabled="_isReloading" Class="mr-2">Reload Config</MudButton>
+            <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Inherit" OnClick="@((e) => SaveData())" Disabled="_isSaving">Save Config</MudButton>
+        </MudAppBar>
+        <MudDrawer @bind-Open="_drawerOpen" Elevation="2" ClipMode="DrawerClipMode.Always" Variant="@DrawerVariant.Temporary" Breakpoint="Breakpoint.None">
+            <MudDrawerHeader>
+                <MudText Typo="Typo.h5" Class="mt-1">SETTINGS</MudText>
+            </MudDrawerHeader>
+            <NavMenu/>
+        </MudDrawer>
+        <MudMainContent Class="pt-3">
+            <CascadingValue Value="this">
+                <div class="content">
+                    @Body
+                </div>
+            </CascadingValue>
+        </MudMainContent>
+        <MudAppBar Dense Elevation="1" Bottom Class="d-flex align-center">
+            <MudCheckBox @bind-Value="ShowUndoButton" Label="Show Undo Button" Color="Color.Primary" Size="Size.Small" Class="ml-4" />
+            <MudCheckBox @bind-Value="ShowDefaultButton" Label="Show Default Button" Color="Color.Primary" Size="Size.Small" Class="ml-4" />
+            <MudCheckBox @bind-Value="DisableAnimations" Label="Disable Animations" Color="Color.Primary" Size="Size.Small" Class="ml-4" />
+            <MudSpacer/>
+            @if (pendingChanges.Count > 0)
+            {
+                <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="ShowPendingChanges" Class="mr-4 ml-4">@pendingChanges.Count.ToString() Unsaved changes</MudButton>
+            }
+            @if (pendingChanges.Count == 0)
+            {
+                <MudButton Variant="Variant.Outlined" Color="Color.Inherit" Class="mr-4 ml-4">@pendingChanges.Count.ToString() Unsaved Changes</MudButton>
+            }
+        </MudAppBar>
+    </MudLayout>
+</div>
+
+<style>    
+    html body .mud-button-outlined-warning:hover {
+        box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.35), 0 4px 12px rgba(251, 191, 36, 0.12) !important;
+        background-color: rgba(251, 191, 36, 0.06) !important;
+    }
+
+    html body .mud-button-outlined-warning {
+        border-width: 1px !important;
+    }
+    
+    html body .mud-slider-value-label {
+        color: #0b0e14 !important;
+        -webkit-text-fill-color: #0b0e14 !important;
+        font-weight: 600 !important;
+        font-size: 0.75rem !important;
+    }
+    html body .mud-expand-panel-text {
+        font-size: 0.9rem !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.07em !important;
+        text-transform: uppercase !important;
+        color: #6366f1 !important;
+        -webkit-text-fill-color: #6366f1 !important;
+    }
+
+    html body .mud-expand-panel-header .mud-icon-button {
+        color: #9ca3af !important;
+    }
+
+    html body .mud-expand-panel-content {
+        padding: 8px 16px 16px 16px !important;
+    }
+
+    html body .mud-expand-panel.mud-expand-panel-expanded {
+        border-left: 2px solid #6366f1 !important;
+        transition: border-left 0.2s ease;
+    }
+
+    html body .mud-expand-panel:not(.mud-expand-panel-expanded) {
+        border-left: 2px solid transparent !important;
+        transition: border-left 0.2s ease;
+    }
+
+    html body .mud-expansion-panels-borders {
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+
+    html body .mud-appbar {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+        box-shadow: none !important;
+    }
+
+    html body .mud-appbar-bottom {
+        border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+        border-bottom: none !important;
+        box-shadow: none !important;
+    }
+
+    html body .mud-drawer {
+        border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
+        box-shadow: none !important;
+    }
+
+    html body .mud-button-filled-primary:hover {
+        box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.35), 0 4px 12px rgba(99, 102, 241, 0.15) !important;
+    }
+
+    html body .mud-nav-link.active {
+        border-left: 2px solid #6366f1 !important;
+        background-color: rgba(99, 102, 241, 0.08) !important;
+    }
+    .disable-animations * {
+        transition: none !important;
+        animation: none !important;
+    }
+</style>
+
+
+@code {
+    private void OnLanguageChanged(string lang)
+    {
+        if (Localization.CurrentLanguage != lang)
+        {
+            Localization.CurrentLanguage = lang;
+            NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await TRLDynamicSpawnServer.Globals.TRLConfigManager.LoadConfig();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("eval", "document.documentElement.setAttribute('translate', 'no'); if(!document.querySelector('meta[name=\"google\"]')) { var m = document.createElement('meta'); m.name='google'; m.content='notranslate'; document.head.appendChild(m); }");
+            }
+            catch {}
+        }
+    }
+    public static bool ShowUndoButton = true;
+    public static bool ShowDefaultButton = true;
+    public static bool DisableAnimations = false;
+
+    private async Task UndoChanges()
+    {
+        if (pendingChanges.Count == 0 && !_unsavedChanges) return;
+        
+        bool? result = await DialogService.ShowMessageBox(
+            "Undo Changes", 
+            "Are you sure you want to revert all unsaved changes?", 
+            yesText: "Undo", cancelText: "Cancel");
+
+        if (result == true)
+        {
+            await DiscardChangesAndReload();
+        }
+    }
+
+    private async Task ResetToDefaults()
+    {
+        bool? result = await DialogService.ShowMessageBox(
+            "Reset to Defaults", 
+            "Are you sure you want to reset all configurations to their default values? This will clear all your custom settings.", 
+            yesText: "Reset", cancelText: "Cancel");
+
+        if (result == true)
+        {
+            TRLDynamicSpawnServer.Routers.TRLRouters.CurrentConfig = new TRLDynamicSpawnServer.Models.TRLConfig();
+            EnableUnsavedChangesButton();
+            pendingChanges.Add("Reset all settings to default");
+            StateHasChanged();
+        }
+    }
+    bool _drawerOpen = false;
+    static bool _unsavedChanges = false;
+    
+    private static bool _isSaving = false;
+    private static bool _isReloading = false;
+
+    readonly MudTheme _abpsThemeAdjustments = new MudTheme()
+    {
+        PaletteDark = new PaletteDark()
+        {
+            Primary = "#6366f1",
+            PrimaryDarken = "#4338ca",
+            PrimaryLighten = "#a5b4fc",
+
+            Secondary = "#22d3ee",
+            SecondaryDarken = "#0e7490",
+            SecondaryLighten = "#67e8f9",
+
+            Tertiary = "#c084fc",
+            TertiaryDarken = "#9333ea",
+            TertiaryLighten = "#e9d5ff",
+
+            Background = "#0b0e14",
+            Surface = "#11151c",
+
+            ActionDisabled = "#4b5563",
+            ActionDisabledBackground = "#1e2330",
+
+            AppbarBackground = "#090b10",
+            DrawerBackground = "#090b10",
+
+            TextPrimary = "#f1f0ee",
+            TextSecondary = "#9ca3af",
+
+            ActionDefault = "#6b7280",
+            Divider = "#1e2330",
+            TableLines = "#1e2330",
+            LinesDefault = "#1e2330",
+
+            Info = "#0284c7",
+            Success = "#16a34a",
+            Warning = "#d97706",
+            Error = "#dc2626",
+
+            DrawerIcon = "#9ca3af",
+            DrawerText = "#d1d5db",
+        },
+        Typography = new Typography()
+        {
+            Default = new DefaultTypography()
+            {
+                FontFamily = new[] { "Open Sans", "Roboto", "sans-serif" }
+            }
+        }
+    };
+
+    public static List<string> pendingChanges = new List<string>();
+    private static MainLayout? _app;
+
+    public MainLayout()
+    {
+        _app = this;
+    }
+
+    public static void EnableUnsavedChangesButton()
+    {
+        _unsavedChanges = true;
+        _app?.StateHasChanged();
+    }
+
+    public static void TriggerUIRefresh()
+    {
+        _app?.StateHasChanged();
+    }
+
+    void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+
+    private async Task SaveData()
+    {
+        try
+        {
+            _isSaving = true;
+            StateHasChanged();
+
+            var result = await TRLConfigManager.SaveConfig();
+
+            StateHasChanged();
+            switch (result)
+            {
+                case ConfigOperationResult.Success:
+                    Snackbar.Add("Config saved successfully.", Severity.Info, config => { config.ShowCloseIcon = false; });
+                    pendingChanges.Clear();
+                    _unsavedChanges = false;
+                    break;
+                case ConfigOperationResult.ActiveProcess:
+                    Snackbar.Add("Another process is already running.", Severity.Warning, config => { config.ShowCloseIcon = false; });
+                    break;
+                case ConfigOperationResult.Failure:
+                default:
+                    Snackbar.Add("Config failed to save.", Severity.Error, config => { config.ShowCloseIcon = false; });
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Unexpected error: {ex.Message}", Severity.Error, config => { config.ShowCloseIcon = false; });
+        }
+        finally
+        {
+            _isSaving = false;
+            StateHasChanged();
+        }
+    }
+    
+    private async Task RefreshData()
+    {
+        if (_unsavedChanges || pendingChanges.Count > 0)
+        {
+            var changeCount = pendingChanges.Count switch
+            {
+                > 1 => $"{pendingChanges.Count} unsaved changes",
+                1 => "1 unsaved change",
+                _ => "unsaved changes"
+            };
+
+            // Using simple dialog replacement since RefreshWarningDialog might be missing
+            bool? result = await DialogService.ShowMessageBox(
+                "Warning", 
+                $"You have {changeCount}. Discard changes and reload?", 
+                yesText: "Reload Anyway", cancelText: "Cancel");
+
+            if (result == true)
+                await DiscardChangesAndReload();
+
+            return;
+        }
+
+        try
+        {
+            _isReloading = true;
+            StateHasChanged();
+
+            var result = await TRLConfigManager.LoadConfig();
+            StateHasChanged();
+
+            switch (result)
+            {
+                case ConfigOperationResult.Success:
+                    Snackbar.Add("Config reloaded successfully.", Severity.Info, cfg => cfg.ShowCloseIcon = false);
+                    _unsavedChanges = false;
+                    pendingChanges.Clear();
+                    break;
+                case ConfigOperationResult.ActiveProcess:
+                    Snackbar.Add("Another process is already running.", Severity.Warning, cfg => cfg.ShowCloseIcon = false);
+                    break;
+                case ConfigOperationResult.Failure:
+                default:
+                    Snackbar.Add("Config failed to reload.", Severity.Error, cfg => cfg.ShowCloseIcon = false);
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Unexpected error: {ex.Message}", Severity.Error, cfg => cfg.ShowCloseIcon = false);
+        }
+        finally
+        {
+            _isReloading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ShowPendingChanges()
+    {
+        var changeCount = pendingChanges.Count switch
+        {
+            > 1 => $"{pendingChanges.Count} changes",
+            1 => "1 change",
+            _ => "changes"
+        };
+        await DialogService.ShowMessageBox("Pending Changes", string.Join("\n", pendingChanges), yesText: "OK");
+    }
+
+    private async Task DiscardChangesAndReload()
+    {
+        var changeCount = pendingChanges.Count switch
+        {
+            > 1 => $"{pendingChanges.Count} changes",
+            1 => "1 change",
+            _ => "changes"
+        };
+
+        try
+        {
+            _isReloading = true;
+            StateHasChanged();
+
+            var result = await TRLConfigManager.LoadConfig();
+
+            switch (result)
+            {
+                case ConfigOperationResult.Success:
+                    Snackbar.Add($"{changeCount} discarded and config reloaded.", Severity.Warning, cfg => cfg.ShowCloseIcon = false);
+                    pendingChanges.Clear();
+                    _unsavedChanges = false;
+                    break;
+
+                case ConfigOperationResult.ActiveProcess:
+                    Snackbar.Add("Another process is already running.", Severity.Warning, cfg => cfg.ShowCloseIcon = false);
+                    break;
+
+                case ConfigOperationResult.Failure:
+                default:
+                    Snackbar.Add("Config failed to reload.", Severity.Error, cfg => cfg.ShowCloseIcon = false);
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Unexpected error: {ex.Message}", Severity.Error, cfg => cfg.ShowCloseIcon = false);
+        }
+        finally
+        {
+            _isReloading = false;
+            StateHasChanged();
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

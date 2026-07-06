@@ -1,0 +1,838 @@
+using System.Collections.Generic;
+using EFT.Interactive;
+using Orbit.Entities;
+using Orbit.Helpers;
+using Orbit.Looting;
+using Orbit.Navigation;
+using Orbit.Sain;
+using Orbit.Systems;
+using UnityEngine;
+
+namespace Orbit.Tasks.Actions;
+
+/// <summary>
+/// Dispatch-layer entry point for the loot pipeline. When the goto routine flips an agent into <see
+/// cref="ObjectiveStatus.Looting"/>, this task takes over: spins up a <see cref="BotLootState"/>, ticks the
+/// per-bot inventory engine, then on completion blacklists the POI for the squad, fires the extract trigger,
+/// and either chains into a scavenge sweep on a nearby item or hands back to the dispatcher.
+/// </summary>
+public class LootContainerAction(AgentData dataset, WaypointSystem waypointSystem, float hysteresis) : Task<Agent>(hysteresis)
+{
+    // Must beat GotoObjectiveAction's max (0.65) so the dispatcher keeps the agent in this task while the
+    // loot is in progress.
+    private const float UtilityScore = 0.75f;
+
+    // Watchdog for the gap between Status=Looting being set and this task actually picking the agent up. The
+    // dispatcher normally switches within a frame; without this watchdog an agent can sit silent for minutes
+    // if the brain layer's post-combat cooldown holds it inert. 25s = 15s cooldown + ~10s scheduling margin.
+    private const float LootingWatchdogSeconds = 25f;
+
+    private readonly Dictionary<int, BotLootState> _states = new();
+    private readonly Dictionary<int, float> _lootingStartTime = new();
+
+    public override void UpdateScore(int ordinal)
+    {
+        var agents = dataset.Entities.Values;
+        var now = Time.time;
+        for (var i = 0; i < agents.Count; i++)
+        {
+            var agent = agents[i];
+            var isLooting = agent.Objective.Status == ObjectiveStatus.Looting;
+            agent.TaskScores[ordinal] = isLooting ? UtilityScore : 0f;
+
+            if (!isLooting)
+            {
+                _lootingStartTime.Remove(agent.Id);
+                continue;
+            }
+
+            // Once we've started looting (BotLootState exists), the watchdog stands down — BotLootState
+            // manages its own completion/cancellation.
+            if (_states.ContainsKey(agent.Id))
+            {
+                _lootingStartTime.Remove(agent.Id);
+                continue;
+            }
+
+            if (!_lootingStartTime.TryGetValue(agent.Id, out var startedAt))
+            {
+                _lootingStartTime[agent.Id] = now;
+                continue;
+            }
+
+            if (now - startedAt >= LootingWatchdogSeconds)
+            {
+                Log.Warning($"{agent} stuck at Status=Looting on {agent.Objective.Location} for {now - startedAt:F1}s without LootContainerAction taking over — failing objective");
+                agent.Objective.Status = ObjectiveStatus.Failed;
+                _lootingStartTime.Remove(agent.Id);
+                agent.TaskScores[ordinal] = 0f;
+            }
+        }
+    }
+
+    public override void Update()
+    {
+        for (var i = 0; i < ActiveEntities.Count; i++)
+            UpdateAgent(ActiveEntities[i]);
+    }
+
+    private void UpdateAgent(Agent agent)
+    {
+        var objective = agent.Objective;
+        var location = objective.Location;
+
+        // Defensive: the dispatcher shouldn't put us in this task without a lootable Waypoint, but if
+        // something invalidated it, fail clean.
+        if (location == null || location.Target == null)
+        {
+            Log.Debug($"{agent} LootContainerAction: location/target null, failing");
+            objective.Status = ObjectiveStatus.Failed;
+            return;
+        }
+
+        if (!_states.TryGetValue(agent.Id, out var state))
+        {
+            Log.Debug($"{agent} LootContainerAction: starting loot on {location} (target={location.Target?.GetType().Name ?? "null"})");
+            state = new BotLootState(agent, location);
+            _states[agent.Id] = state;
+            state.Begin();
+        }
+
+        state.Tick();
+
+        if (!state.IsDone) return;
+
+        if (state.Success)
+        {
+            var stats = agent.Player?.gameObject?.GetComponent<OrbitLootHandler>()?.Stats;
+            switch (location.Category)
+            {
+                case WaypointCategory.LooseLoot:
+                    if (state.ItemsTaken)
+                    {
+                        // Item physically picked up — purge the waypoint so no other bot tries (the world
+                        // item is gone) and unblock squadmates already en-route.
+                        waypointSystem.RemoveWaypoint(location.Id);
+                        Log.Debug($"{agent} consumed LooseLoot {location}, waypoint removed globally");
+                        if (agent.Squad != null)
+                        {
+                            agent.Squad.Objective.Duration = 0;
+                            Log.Debug($"{agent.Squad} wait timer forced to expire for immediate redirect");
+                        }
+                    }
+                    else
+                    {
+                        ApplyValueSkipBlacklist(agent, location, stats);
+                    }
+                    break;
+                case WaypointCategory.ContainerLoot:
+                case WaypointCategory.Corpse:
+                    if (state.ItemsTaken)
+                    {
+                        // At least one item taken — squad has consumed what they came for. Squad-wide
+                        // blacklist.
+                        agent.Squad?.CompletedPoiIds.Add(location.Id);
+                        Log.Debug($"{agent} blacklisted {location} for {agent.Squad} (items taken, squad memory size={agent.Squad?.CompletedPoiIds.Count})");
+                    }
+                    else
+                    {
+                        ApplyValueSkipBlacklist(agent, location, stats);
+                    }
+                    break;
+            }
+
+            // Loot-value extract trigger: a single bot crossing the faction-dependent loot threshold flips
+            // the whole squad into ExtractRequested mode. From the next dispatch on, the strategy bypasses
+            // normal POI selection and routes straight to the nearest eligible exfil. One-way switch.
+            CheckExtractTrigger(agent);
+            CheckSoloLootExtract(agent);
+        }
+        else
+        {
+            // Failed loot — blacklist the POI for the squad anyway. The bot tried and couldn't complete
+            // (couldn't reach the item, animation aborted, target became invalid, combat interrupt,
+            // whatever). Without this blacklist the main-anchor priority pick keeps grabbing the same broken
+            // POI every strategy tick and the squad loops forever.
+            if (agent.Squad != null && !agent.Squad.CompletedPoiIds.Contains(location.Id))
+            {
+                agent.Squad.CompletedPoiIds.Add(location.Id);
+                Log.Debug($"{agent} blacklisted {location} for {agent.Squad} after FAILED loot (squad memory size={agent.Squad.CompletedPoiIds.Count})");
+            }
+
+            // Expire the wait timer so the next tick re-picks instead of guarding the now-blacklisted POI for
+            // 60-180s.
+            if (agent.Squad != null)
+            {
+                agent.Squad.Objective.Duration = 0;
+                Log.Debug($"{agent.Squad} wait timer forced to expire after FAILED loot — immediate re-pick");
+            }
+        }
+
+        // Scavenge sweep: if a LooseLoot/Corpse is sitting within ~10m of where the bot just finished, chain
+        // to it directly instead of releasing back to the dispatcher (which would pick a random faraway POI).
+        // Mirrors the way a player naturally picks up adjacent items before walking away.
+        if (state.Success && TryScavengeSweep(agent, location))
+        {
+            waypointSystem.ReleaseClaim(location.Id, agent.Id);
+            return;
+        }
+
+        waypointSystem.ReleaseClaim(location.Id, agent.Id);
+        _states.Remove(agent.Id);
+        objective.Status = state.Success ? ObjectiveStatus.Finished : ObjectiveStatus.Failed;
+        Log.Debug($"{agent} loot complete: success={state.Success}, location={location}, claim released, status={objective.Status}");
+
+        // Opportunistic-corpse interrupt resume. Only fires here (post- ReleaseClaim) so we're certain the
+        // loot animation has actually finished — triggering this from the strategy's first-Finished branch
+        // would swap the squad's objective away from the corpse mid-loot (followers claim-fail before the
+        // looter completes their BotLootState anim) and abort the loot.
+        //
+        // Runs on BOTH success and failure: on combat-interrupt failure the squad needs to point somewhere
+        // coherent post-combat, and leaving PreInterrupt set would also block all future opportunistic scans
+        // for this squad.
+        if (location.Category == WaypointCategory.Corpse
+            && agent.Squad?.PreInterruptObjectiveLocation != null)
+        {
+            var squad = agent.Squad;
+            var resume = squad.PreInterruptObjectiveLocation;
+            squad.PreInterruptObjectiveLocation = null;
+            squad.Objective.LocationPrevious = squad.Objective.Location;
+            squad.Objective.Location = resume;
+            // Status=Active (not Wait) so the strategy's wait-timer check doesn't fire AssignNewObjective and
+            // overwrite our restored Location. UpdateAgents next tick realigns members.
+            squad.Objective.Status = SquadObjectiveState.Active;
+            squad.Objective.StartTime = Time.time;
+            squad.Objective.Duration = 30f; // generous travel window
+            squad.Objective.DurationAdjusted = false;
+            Log.Info($"{agent} corpse interrupt {(state.Success ? "looted" : "aborted")} — {squad} resuming pre-interrupt objective {resume}");
+        }
+    }
+
+    // Max sweep candidates considered per chain. 5 keeps the loop bounded if every nearby item loses the
+    // coverage roll; at default 70% coverage gives ~99.5% chance the chain ends on a kept item when items are
+    // abundant.
+    private const int ScavengeSweepMaxCandidates = 5;
+
+    /// <summary>
+    /// Sum the per-bot Looted across every currently-alive member of the squad. Used by the extract trigger
+    /// so a 3-PMC squad with each member ~200k looted still extracts once the squad-total crosses the
+    /// threshold. Dead members are silently excluded — they're already removed from squad.Members by the
+    /// death pipeline.
+    /// </summary>
+    private static float SumSquadLootedAlive(Squad squad, out int aliveCount)
+    {
+        aliveCount = 0;
+        if (squad == null) return 0f;
+        var total = 0f;
+        for (var i = 0; i < squad.Members.Count; i++)
+        {
+            var m = squad.Members[i];
+            if (m == null) continue;
+            var go = m.Player?.gameObject;
+            if (go == null) continue;
+            var handler = go.GetComponent<OrbitLootHandler>();
+            var looted = handler?.Stats?.TotalGained ?? 0f;
+            total += looted;
+            aliveCount++;
+        }
+        return total;
+    }
+
+    /// <summary>
+    /// Re-evaluate the extract threshold for a squad even when no surviving member is currently looting.
+    /// Called from the death hook so the squad doesn't get stuck at "almost-extract" because the threshold
+    /// member died.
+    /// </summary>
+    public static void ReevaluateExtractForSquad(Squad squad)
+    {
+        if (squad == null || squad.ExtractRequested) return;
+        if (squad.Members.Count == 0) return;
+        CheckExtractTrigger(squad.Members[0]);
+    }
+
+    /// <summary>
+    /// Called after a member dies (and is removed from the squad). Re-eval applies ONLY to loot-threshold
+    /// extracts: if the squad triggered extract because their summed loot crossed the per-archetype
+    /// threshold, and the death dropped the survivors below the recomputed sum, undo the extract. The
+    /// other two extract triggers (all mains complete, raid time low) are explicitly NOT re-evaluated —
+    /// those reasons stand regardless of who's alive.
+    ///
+    /// Canonical loot-threshold case: 2-member squad triggered extract on member B's 4.5M Mona Lisa
+    /// pickup; B dies on the way to the exfil with the item; surviving member A has looted ~0₽, far
+    /// below their own threshold. Without this re-eval, A keeps walking to the exfil despite having no
+    /// real reason to. With it, ExtractRequested flips back to false → A goes back to roam / mains /
+    /// scavenge until they re-cross the threshold on their own.
+    /// </summary>
+    public static void ReevaluateExtractOnDeath(Squad squad, Agent deadAgent)
+    {
+        if (squad == null) return;
+        if (!squad.ExtractRequested) return;
+        if (squad.Members.Count == 0) return;
+        // Only loot-threshold extracts get re-evaluated. The "all mains done" / "raid time low" paths
+        // produce different reason strings and must stay armed regardless of the death.
+        var reason = squad.ExtractRequestedReason;
+        if (string.IsNullOrEmpty(reason) || !reason.StartsWith("loot ", System.StringComparison.Ordinal))
+            return;
+
+        var totalLooted = SumSquadLootedAlive(squad, out var aliveCount);
+        var sumThreshold = 0f;
+        var resolvedCount = 0;
+        for (var i = 0; i < squad.Members.Count; i++)
+        {
+            var m = squad.Members[i];
+            if (m?.Player?.gameObject == null) continue;
+            var memberThreshold = GetOrResolveAgentExtractThreshold(m);
+            if (memberThreshold <= 0f) continue;
+            sumThreshold += memberThreshold;
+            resolvedCount++;
+        }
+
+        if (resolvedCount == 0) return;       // nothing resolved → keep current state, can't decide
+        if (sumThreshold <= 0f) return;       // feature off
+        if (totalLooted >= sumThreshold) return; // survivors still cover the new threshold → stay committed
+
+        squad.ExtractRequested = false;
+        squad.ExtractRequestedReason = null;
+        squad.Objective.Duration = 0; // force immediate re-dispatch off the exfil
+        Log.Info($"{squad}: extract canceled after member death — surviving loot {totalLooted:N0}₽ < new threshold {sumThreshold:N0}₽ ({aliveCount} alive). Squad returns to roam / mains until threshold met again.");
+
+        // Recovery: if the dead member carried meaningful loot, prime the squad to bee-line to their
+        // corpse as soon as it registers (BSG's Player.CreateCorpse hook fires a few frames after this).
+        // Skip if the dead member had ~nothing (no point pulling survivors off their mains for empty
+        // kit recovery).
+        if (deadAgent?.Player == null) return;
+        var deadHandler = deadAgent.Player.gameObject?.GetComponent<OrbitLootHandler>();
+        var deadValue = deadHandler?.Stats?.TotalGained ?? 0f;
+        if (deadValue < 100_000f) return; // not worth the detour
+        var deadProfileId = deadAgent.Player.ProfileId;
+        if (string.IsNullOrEmpty(deadProfileId)) return;
+        squad.PendingDeadMemberRecoveryProfileId = deadProfileId;
+        squad.PendingDeadMemberRecoveryValue = deadValue;
+        Log.Info($"{squad}: arming dead-member loot recovery for {deadAgent.Bot?.Profile?.Nickname ?? "<unknown>"} ({deadValue:N0}₽) — will bee-line to corpse once it registers");
+    }
+
+    private static void CheckExtractTrigger(Agent agent)
+    {
+        var squad = agent.Squad;
+        if (squad == null || squad.ExtractRequested) return;
+
+        var totalLooted = SumSquadLootedAlive(squad, out var aliveCount);
+
+        Log.Debug($"CheckExtractTrigger: {agent} squad-total TotalGained={totalLooted:N0}₽ across {aliveCount} alive members");
+
+        var role = agent.Bot?.Profile?.Info?.Settings?.Role;
+        if (!role.HasValue) return;
+        // Don't even arm the loot-value extract trigger for factions that aren't allowed to extract at all.
+        // Same PlayerScav carve-out as SquadCanUseWaypoint: their role is WildSpawnType.assault, which the
+        // BotType resolver collapses onto the Scav flag, but ExtractFaction only exposes Pmc / PlayerScav.
+        // Without this special case, every PlayerScav fails the gate and the loot-value trigger never arms —
+        // even when they loot a 4.5M-rouble Mona Lisa.
+        var allowedFactions = LootConfig.ExtractAllowedFor?.Value ?? ExtractFaction.All;
+        var isPlayerScav = agent.Bot?.Profile != null && agent.Bot.Profile.WillBeAPlayerScav();
+        if (isPlayerScav)
+        {
+            if ((allowedFactions & ExtractFaction.PlayerScav) == 0) return;
+        }
+        else if (!allowedFactions.IsBotEnabled(role.Value)) return;
+
+        // Sum each alive member's OWN rolled threshold (per-brain archetype for PMC, faction-default for
+        // PlayerScav). A mixed Rat (200-500k) + Chad (1.5-2.5M) squad needs Rat-range + Chad-range total, not
+        // 2× one of them. Death of a member drops their contribution; survivors recalibrate.
+        var sumThreshold = 0f;
+        var resolvedCount = 0;
+        var unresolvedCount = 0;
+        var perMemberSummary = new System.Text.StringBuilder();
+        for (var i = 0; i < squad.Members.Count; i++)
+        {
+            var m = squad.Members[i];
+            if (m?.Player?.gameObject == null) continue;
+            var memberThreshold = GetOrResolveAgentExtractThreshold(m);
+            if (memberThreshold <= 0f)
+            {
+                unresolvedCount++;
+                continue;
+            }
+            sumThreshold += memberThreshold;
+            resolvedCount++;
+            if (perMemberSummary.Length > 0) perMemberSummary.Append(" + ");
+            perMemberSummary.Append($"{memberThreshold / 1000f:F0}k");
+        }
+        // Wait until at least one alive member has a resolved threshold. The next CheckExtractTrigger call
+        // (triggered by another loot, by the squad-loot reevaluate hook, or by a death) will retry.
+        if (resolvedCount == 0) return;
+        if (sumThreshold <= 0f) return; // feature fully disabled (everyone has 0)
+        if (totalLooted < sumThreshold) return;
+
+        squad.ExtractRequested = true;
+        squad.ExtractRequestedReason = $"loot ≥ {sumThreshold / 1000f:F0}k₽";
+        Log.Info($"{squad}: {agent} hit extract threshold ({totalLooted:N0}₽ >= {sumThreshold:N0}₽ = {perMemberSummary} from {resolvedCount} resolved + {unresolvedCount} pending members) — squad will bee-line to nearest eligible exfil");
+    }
+
+    /// <summary>
+    /// Per-member solo extract on the loot threshold: when this agent's own looted value crosses its own
+    /// threshold, roll once (exactly once per member, so repeated loots don't compound into a certainty); on a
+    /// win the member peels off to extract alone while the squad keeps playing.
+    /// </summary>
+    private static void CheckSoloLootExtract(Agent agent)
+    {
+        if (agent == null || agent.SoloExtractRequested || agent.SoloLootThresholdRolled) return;
+        if (agent.Squad == null || agent.Squad.ExtractRequested) return;
+
+        // Respect "Extract allowed for" — None (or a set excluding this bot) blocks the solo loot-threshold
+        // extract just like the squad triggers. PlayerScavs route to their own flag (shared WildSpawnType).
+        var role = agent.Bot?.Profile?.Info?.Settings?.Role;
+        if (!role.HasValue) return;
+        var allowed = LootConfig.ExtractAllowedFor?.Value ?? ExtractFaction.All;
+        var soloIsPlayerScav = agent.Bot?.Profile != null && agent.Bot.Profile.WillBeAPlayerScav();
+        if (!(soloIsPlayerScav ? (allowed & ExtractFaction.PlayerScav) != 0 : allowed.IsBotEnabled(role.Value))) return;
+
+        var chancePct = LootConfig.SoloLootExtractChancePct?.Value ?? 50;
+        if (chancePct <= 0) return;
+
+        var ownThreshold = GetOrResolveAgentExtractThreshold(agent);
+        if (ownThreshold <= 0f) return; // not resolved yet / feature disabled — retry on the next loot
+
+        var go = agent.Player?.gameObject;
+        var ownLooted = go != null ? (go.GetComponent<OrbitLootHandler>()?.Stats?.TotalGained ?? 0f) : 0f;
+        if (ownLooted < ownThreshold) return;
+
+        agent.SoloLootThresholdRolled = true;
+        if (UnityEngine.Random.Range(0, 100) < chancePct)
+        {
+            agent.SoloExtractRequested = true;
+            // Surfaces in the Raid Review "Extracting: <reason>" tooltip, so keep it short.
+            agent.SoloExtractReason = $"own loot ≥ {ownThreshold / 1000f:F0}k₽";
+            Log.Info($"{agent} hit its OWN extract threshold ({ownLooted:N0}₽ >= {ownThreshold:N0}₽) and won the {chancePct}% solo-extract roll — peeling off to extract alone");
+        }
+        else
+        {
+            Log.Info($"{agent} hit its OWN extract threshold ({ownLooted:N0}₽) but lost the {chancePct}% solo-extract roll — staying with the squad");
+        }
+    }
+
+    /// <summary>
+    /// Apply the appropriate blacklist after a no-take loot session. Bot scavs use squad-wide blacklist
+    /// (random-roll model, no threshold). Empty/errored sessions also squad-blacklist. Bypass-item-present
+    /// sessions blacklist only for the looter. Otherwise, smart per-member: squad members whose own threshold
+    /// exceeds the highest per-slot seen are added to their personal value-skip list; softer-gated members
+    /// remain dispatchable.
+    /// </summary>
+    private static void ApplyValueSkipBlacklist(Agent agent, Waypoint location, LootStats stats)
+    {
+        if (agent?.Squad == null) return;
+        if (IsBotScavProfile(agent))
+        {
+            agent.Squad.CompletedPoiIds.Add(location.Id);
+            Log.Debug($"{agent} scav no-take on {location} — direct squad blacklist (random-roll model, no threshold)");
+            return;
+        }
+        if (stats == null || (stats.LastMaxPerSlotSeen <= 0f && !stats.LastHadBypassItem))
+        {
+            agent.Squad.CompletedPoiIds.Add(location.Id);
+            Log.Debug($"{agent} blacklisted {location} for {agent.Squad} after empty / errored no-take (stats={(stats == null ? "null" : "no-items-seen")}, squad memory size={agent.Squad.CompletedPoiIds.Count})");
+            return;
+        }
+        if (stats.LastHadBypassItem)
+        {
+            agent.ValueSkippedPoiIds.Add(location.Id);
+            Log.Debug($"{agent} bypass-item present but no-take (likely inventory-full / TX error) — per-agent blacklist only on {location}");
+            return;
+        }
+        var maxPerSlot = stats.LastMaxPerSlotSeen;
+        var blacklistedNames = new System.Collections.Generic.List<string>();
+        var spareNames = new System.Collections.Generic.List<string>();
+        for (var i = 0; i < agent.Squad.Members.Count; i++)
+        {
+            var m = agent.Squad.Members[i];
+            if (m == null) continue;
+            var memberThreshold = GetOrResolveAgentMiniLootThreshold(m);
+            // The agent who actually ran the session always gets the POI on their personal skip list: they
+            // inspected every item and walked away with nothing, so re-dispatching them is wasted work
+            // (inventory-full, weapon-swap declined, etc.). Other members only get the entry if their
+            // threshold exceeds the highest per-slot seen — softer-gated teammates stay dispatchable.
+            if (m == agent || memberThreshold > maxPerSlot)
+            {
+                m.ValueSkippedPoiIds.Add(location.Id);
+                blacklistedNames.Add($"{m.Bot.Profile.Nickname}({memberThreshold:N0}₽){(m == agent ? "*self" : "")}");
+            }
+            else
+            {
+                spareNames.Add($"{m.Bot.Profile.Nickname}({memberThreshold:N0}₽)");
+            }
+        }
+        Log.Debug($"{agent} value-skip on {location} (maxPerSlot={maxPerSlot:N0}₽) — blacklisted for [{string.Join(",", blacklistedNames)}], left for [{string.Join(",", spareNames)}]");
+    }
+
+    /// <summary>
+    /// Lazily resolve the per-agent mini-loot threshold from SAIN brain → archetype. PMC + SAIN-enabled bots
+    /// get the archetype scalar; other cases fall through to <see cref="ResolveFallbackThreshold"/>. Result
+    /// is cached on the agent. Never returns 0.
+    /// </summary>
+    internal static float GetOrResolveAgentMiniLootThreshold(Agent agent)
+    {
+        if (agent.OwnMiniLootValueThreshold > 0f) return agent.OwnMiniLootValueThreshold;
+        var role = agent.Bot?.Profile?.Info?.Settings?.Role;
+        if (!role.HasValue) return ResolveFallbackThreshold(agent);
+
+        var isPmc = role.Value.IsPMC();
+        if (isPmc && (Plugin.SainPersonalityEnabled?.Value ?? false))
+        {
+            var brainName = SainPersonality.GetBrainName(agent.Bot);
+            if (string.IsNullOrEmpty(brainName)) return ResolveFallbackThreshold(agent);
+
+            var archetype = SainPersonality.MapBrainToArchetype(brainName);
+            agent.OwnMiniLootValueThreshold = PersonalityProfile.GetMiniLootThresholdFor(archetype);
+            Log.Info($"{agent} resolved own mini-loot threshold: brain='{brainName}' → {archetype} → {agent.OwnMiniLootValueThreshold:N0}₽");
+            return agent.OwnMiniLootValueThreshold;
+        }
+        return ResolveFallbackThreshold(agent);
+    }
+
+    private static float ResolveFallbackThreshold(Agent agent)
+    {
+        var squadThreshold = agent.Squad?.Personality?.MiniLootValueThreshold ?? 0f;
+        if (squadThreshold > 0f) return squadThreshold;
+        return OrbitLootHandler.DefaultMinPickupPrice;
+    }
+
+    private static bool IsBotScavProfile(Agent agent)
+    {
+        var profile = agent?.Bot?.Profile;
+        if (profile == null) return false;
+        if (profile.Side != EFT.EPlayerSide.Savage) return false;
+        return !profile.WillBeAPlayerScav();
+    }
+
+    /// <summary>
+    /// Lazily resolve the per-agent extract-loot threshold. Reads the agent's SAIN brain (PMC only, when SAIN
+    /// personality is enabled) and rolls the archetype's range once; falls back to the global PMC /
+    /// PlayerScav knob otherwise. Returns 0 when SAIN hasn't attached yet so the caller can retry on the next
+    /// loot — avoids a forever-zero threshold for a bot that joined before SAIN finished attaching its
+    /// BotComponent.
+    /// </summary>
+    private static float GetOrResolveAgentExtractThreshold(Agent agent)
+    {
+        if (agent.OwnExtractLootThreshold > 0f) return agent.OwnExtractLootThreshold;
+        var role = agent.Bot?.Profile?.Info?.Settings?.Role;
+        if (!role.HasValue) return 0f;
+
+        var isPmc = role.Value.IsPMC();
+        var isPlayerScav = agent.Bot.Profile != null && agent.Bot.Profile.WillBeAPlayerScav();
+
+        if (isPmc && (Plugin.SainPersonalityEnabled?.Value ?? false))
+        {
+            var brainName = SainPersonality.GetBrainName(agent.Bot);
+            if (!string.IsNullOrEmpty(brainName))
+            {
+                var archetype = SainPersonality.MapBrainToArchetype(brainName);
+                agent.OwnExtractLootThreshold = PersonalityProfile.RollExtractThresholdFor(archetype);
+                Log.Info($"{agent} resolved own extract threshold: brain='{brainName}' → {archetype} → {agent.OwnExtractLootThreshold:N0}₽");
+                return agent.OwnExtractLootThreshold;
+            }
+            // SAIN couldn't resolve this agent's brain. If the squad has already given up on SAIN resolution
+            // and locked to a fallback archetype (Average by default), use that — otherwise the agent's
+            // threshold stays at 0 forever and CheckExtractTrigger never fires for this bot. Without it:
+            // a bot loots a very high-value item and the squad has locked to a fallback archetype via SAIN
+            // timeout, but the per-agent threshold lookup stays unresolved, so no extract request fires
+            // despite the squad total dwarfing the threshold.
+            if (agent.Squad != null && !agent.Squad.SainResolutionPending)
+            {
+                agent.OwnExtractLootThreshold = PersonalityProfile.RollExtractThresholdFor(agent.Squad.Archetype);
+                Log.Info($"{agent} resolved own extract threshold via squad fallback: archetype='{agent.Squad.Archetype}' (SAIN brain lookup empty) → {agent.OwnExtractLootThreshold:N0}₽");
+                return agent.OwnExtractLootThreshold;
+            }
+            return 0f; // squad still polling SAIN — retry on next loot
+        }
+        if (isPmc)
+        {
+            agent.OwnExtractLootThreshold = LootConfig.ExtractAtLootValuePmc;
+            return agent.OwnExtractLootThreshold;
+        }
+        if (isPlayerScav)
+        {
+            agent.OwnExtractLootThreshold = LootConfig.ExtractAtLootValuePlayerScav?.Value ?? 0f;
+            return agent.OwnExtractLootThreshold;
+        }
+        return 0f; // non-PMC non-playerscav — extract feature off
+    }
+
+    private bool TryScavengeSweep(Agent agent, Waypoint justLooted)
+    {
+        // ExtractRequested override: once the squad has decided to leave (loot-value or time threshold hit,
+        // or all mains done), chaining to a nearby loot is wrong — the bot should immediately route to exfil
+        // via the next AssignNewObjective.
+        if (agent.Squad != null && agent.Squad.ExtractRequested)
+        {
+            Log.Debug($"{agent} scavenge sweep: skipping — squad has ExtractRequested set");
+            return false;
+        }
+
+        // Per-candidate coverage roll, retry-with-blacklist on miss. Each nearby sweep candidate gets a
+        // Plugin.LootCoveragePct roll — same dice as the main-loot cell-entry roll. A loser is permanently
+        // blacklisted for the squad (CompletedPoiIds) so the next FindNearbySweepTarget call sees it as
+        // already- consumed and returns the next closest item. Caps at a few retries to keep the loop
+        // bounded.
+        var coverage = Mathf.Clamp01(Orbit.Sain.PersonalityFallback.LootCoverage);
+        Waypoint next = null;
+        var coverageDisabled = coverage >= 0.9999f;
+        for (var attempt = 0; attempt < ScavengeSweepMaxCandidates; attempt++)
+        {
+            var sweepRadius = agent.Squad?.Personality != null
+                ? agent.Squad.Personality.ScavengeSweepRadius
+                : Orbit.Sain.PersonalityFallback.ScavengeSweepRadius;
+            var candidate = waypointSystem.FindNearbySweepTarget(agent.Position, agent, sweepRadius);
+            if (candidate == null) return false;
+            if (coverageDisabled || Random.value < coverage)
+            {
+                next = candidate;
+                break;
+            }
+            // Lost the roll — squad doesn't see this item. Permanent squad blacklist so the dispatcher (and
+            // the next sweep candidate lookup) skips it from now on.
+            agent.Squad?.CompletedPoiIds.Add(candidate.Id);
+            Log.Debug($"{agent} scavenge sweep coverage roll missed on {candidate} (coverage={coverage:P0}) — blacklisting and retrying");
+        }
+        if (next == null) return false;
+        if (!waypointSystem.TryClaim(next.Id, agent.Id)) return false;
+
+        // Hijack the squad objective so UpdateAgents doesn't snap the agent back to the old POI on the next
+        // strategy tick. Keep the wait timer long enough that the squad doesn't ask for a fresh objective
+        // while we're chaining (60s covers travel + a second loot animation).
+        if (agent.Squad != null)
+        {
+            agent.Squad.Objective.LocationPrevious = agent.Squad.Objective.Location;
+            agent.Squad.Objective.Location = next;
+            agent.Squad.Objective.Duration = 60f;
+            agent.Squad.Objective.StartTime = Time.time;
+        }
+        agent.Objective.Location = next;
+        // Status=None (NOT Looting). The old behaviour set Status=Looting and immediately spun up a new
+        // BotLootState at the bot's current position — so the loot animation played in place even when the
+        // next sweep target was 8-10m away, totally unrealistic. Setting Status=None makes
+        // GotoObjectiveAction.Update submit a normal MoveToByPath toward `next` on the next tick; the bot
+        // physically walks there, then the in-radius shortcircuit (or the normal arrival branch) flips
+        // Status=Looting and we take over again. For sweeps where the bot is already within the 1m arrival
+        // radius the in-radius shortcircuit is immediate.
+        agent.Objective.Status = ObjectiveStatus.None;
+        // Drop any prior BotLootState — the new loot pass will allocate its own once arrival fires.
+        _states.Remove(agent.Id);
+
+        var dist = Vector3.Distance(justLooted.Position, next.Position);
+        Log.Debug($"{agent} scavenge sweep: chaining {justLooted} → {next} ({dist:F1}m, walking there)");
+        return true;
+    }
+
+    protected override void Deactivate(Agent entity)
+    {
+        // Combat takeover or external task switch — abort the loot operation cleanly (close container if
+        // open, cancel pending async work).
+        if (_states.TryGetValue(entity.Id, out var state))
+        {
+            Log.Debug($"{entity} LootContainerAction.Deactivate: cancelling in-flight loot");
+            state.Cancel();
+            _states.Remove(entity.Id);
+        }
+
+        var location = entity.Objective.Location;
+        if (location != null)
+            waypointSystem.ReleaseClaim(location.Id, entity.Id);
+
+        // Reset to None so the bot can re-attempt later (or pick a new objective) if this task gets
+        // re-activated. Terminal statuses are left alone.
+        if (entity.Objective.Status == ObjectiveStatus.Looting)
+        {
+            Log.Debug($"{entity} LootContainerAction.Deactivate: resetting Looting → None");
+            entity.Objective.Status = ObjectiveStatus.None;
+        }
+    }
+}
+
+// ── Per-bot loot state ──────────────────────────────────────────────
+//
+// Wraps the MonoBehaviour loot handler attached to the bot's GameObject, sets up the target, kicks off the
+// async loot, and reports completion back to the dispatch-layer action.
+
+internal class BotLootState
+{
+    // Hard cap on how long we'll wait for loot handler.LootTaskRunning to clear. The brain has its own
+    // internal timeout (LootConfig.LootTimeout default 180s) backed by a CancellationTokenSource — but if
+    // something inside doesn't honour the cancel (a hung NavMesh callback, a coroutine waiting on a
+    // never-fired event), LootTaskRunning stays true forever and the bot is pinned mid-loot. Add 30s of
+    // buffer over the brain's own timeout and treat anything past that as a fatal cancel.
+    private static float StuckLootTimeoutSeconds => LootConfig.LootTimeout + 30f;
+
+    private readonly Agent _agent;
+    private readonly Waypoint _location;
+    private readonly ILootHandler _brain;
+    private float _lootedAtStart;
+    private float _beganAt;
+    private bool _started;
+
+    public bool IsDone { get; private set; }
+    public bool Success { get; private set; }
+
+    /// <summary>
+    /// True iff the bot actually took at least one item during this operation. Used by LootContainerAction to
+    /// distinguish "consumed the item" from "skipped because below value threshold" — the latter must leave
+    /// the world POI alone so other squads with different thresholds can still try.
+    /// </summary>
+    public bool ItemsTaken { get; private set; }
+
+    public BotLootState(Agent agent, Waypoint location)
+    {
+        _agent = agent;
+        _location = location;
+
+        var go = agent.Player.gameObject;
+        var handler = go.GetComponent<OrbitLootHandler>();
+        if (handler == null)
+        {
+            handler = go.AddComponent<OrbitLootHandler>();
+            handler.Init(agent.Bot);
+        }
+        _brain = handler;
+    }
+
+    public void Begin()
+    {
+        var lootKind = _location.Category switch
+        {
+            WaypointCategory.Corpse => LootKind.Corpse,
+            WaypointCategory.ContainerLoot => LootKind.Container,
+            WaypointCategory.LooseLoot => LootKind.Item,
+            _ => LootKind.None
+        };
+
+        // loot handler expects an InteractableObject — Exfil targets share a common MonoBehaviour base with
+        // lootables but aren't InteractableObject, so cast explicitly and bail if it fails.
+        var loot = _location.Target as InteractableObject;
+        if (lootKind == LootKind.None || loot == null)
+        {
+            Log.Debug($"{_agent} BotLootState.Begin: invalid lootKind ({lootKind}) or non-InteractableObject target");
+            IsDone = true;
+            Success = false;
+            return;
+        }
+
+        // Locked containers (key/keycard required, e.g. weapon cases inside locked resort rooms) can't be
+        // opened by a bot. The loot handler would sit on the open animation forever. Skip cleanly — POI gets
+        // squad-blacklisted upstream so we don't keep returning to it.
+        if (loot is LootableContainer container
+            && container.DoorState == EDoorState.Locked)
+        {
+            Log.Info($"{_agent} BotLootState.Begin: {container.name} is Locked, skipping (squad will blacklist)");
+            IsDone = true;
+            Success = false;
+            return;
+        }
+
+        _brain.CurrentTarget = loot;
+        _brain.CurrentTargetKind = lootKind;
+        _brain.ApproachPosition = _location.Position;
+        _brain.TargetWorldPosition = loot.transform.position;
+        _brain.ForceEnabled = true;
+
+        // Snapshot cumulative looted value so we can tell at the end whether the bot actually pocketed
+        // anything (vs. opening the container and skipping everything because items were below the value
+        // threshold).
+        _lootedAtStart = _brain.Stats != null ? _brain.Stats.TotalGained : 0f;
+
+        // Immersion: crouch and face the loot before kicking off the transaction. Wrapped defensively because
+        // some BotOwner specialisations (boss followers, event bots) don't expose every steering/mover hook.
+        try
+        {
+            _agent.Bot.SetPose(0.25f);
+            _agent.Bot.Steering.LookToPoint(loot.transform.position);
+            if (_agent.Bot.Mover != null) _agent.Bot.Mover.Sprint(false);
+        }
+        catch (System.Exception e)
+        {
+            Log.Debug($"{_agent} BotLootState.Begin: posture/look setup failed (non-fatal): {e.Message}");
+        }
+
+        _brain.StartLooting();
+        _started = true;
+        _beganAt = Time.time;
+        Log.Debug($"{_agent} BotLootState.Begin: StartLooting() invoked, kind={lootKind}, target={_location.Target.name}, lootedAtStart={_lootedAtStart:N0}₽");
+    }
+
+    public void Tick()
+    {
+        if (IsDone) return;
+        if (!_started) return;
+
+        // Target destroyed mid-loot — e.g. another player picked up the loose item, a corpse despawned, a
+        // container was disabled by a scripted event. Bail cleanly so we don't kneel forever at a ghost.
+        if (_location.Target == null)
+        {
+            Log.Info($"{_agent} BotLootState: target destroyed mid-loot — cancelling");
+            Cancel();
+            return;
+        }
+
+        // Brain-watchdog: loot handler's own CancellationTokenSource caps the async task at
+        // LootConfig.LootTimeout, but if a coroutine inside doesn't honour cancel (hung handbook lookup,
+        // vanished interaction hook), LootTaskRunning stays true and the bot is pinned. Force-cancel 30s past
+        // the brain's own timeout.
+        if (Time.time - _beganAt > StuckLootTimeoutSeconds)
+        {
+            Log.Warning($"{_agent} BotLootState: brain still running after {Time.time - _beganAt:F0}s (>{StuckLootTimeoutSeconds}s cap) — force-cancelling");
+            Cancel();
+            return;
+        }
+
+        // Defensive combat interrupt: if the bot's BSG memory becomes aware of an enemy mid-loot, bail
+        // immediately. The brain layer will also return !IsActive on the next tick and the layer change will
+        // route through Deactivate → Cancel anyway, but the layer-change path takes 1-2 frames during which
+        // the loot animation keeps the bot pinned in the open. Cancelling here closes the container right
+        // away so SAIN takes over a free agent, not a kneeling target.
+        var mem = _agent.Bot?.Memory;
+        if (mem != null && (mem.HaveEnemy || mem.IsUnderFire))
+        {
+            Log.Info($"{_agent} BotLootState: combat interrupt mid-loot (HaveEnemy={mem.HaveEnemy}, IsUnderFire={mem.IsUnderFire}) — cancelling");
+            Cancel();
+            return;
+        }
+
+        // loot handler clears LootTaskRunning when the async loot finishes (success OR timeout/cancellation).
+        // Compare Stats.TotalGained before and after to determine whether anything was actually taken.
+        if (!_brain.LootTaskRunning)
+        {
+            var lootedNow = _brain.Stats != null ? _brain.Stats.TotalGained : 0f;
+            ItemsTaken = lootedNow > _lootedAtStart;
+            Log.Debug($"{_agent} BotLootState.Tick: brain.LootTaskRunning=false → done, lootedDelta={(lootedNow - _lootedAtStart):N0}₽, ItemsTaken={ItemsTaken}");
+            IsDone = true;
+            Success = true;
+            CleanupBrainTarget();
+        }
+    }
+
+    public void Cancel()
+    {
+        // If combat or any other task is hijacking the bot mid-loot, the container we cracked open stays
+        // visually open forever — looks weird and confuses both players and the squad blacklist heuristic (a
+        // passing teammate would see "already opened, must be empty"). Close it explicitly before bailing.
+        if (_brain.CurrentTarget is LootableContainer container)
+        {
+            try
+            {
+                _agent.Bot?.LootOpener?.Interact(container, EFT.EInteractionType.Close);
+            }
+            catch (System.Exception e)
+            {
+                Log.Warning($"BotLootState.Cancel: failed to force-close container {container.name}: {e.Message}");
+            }
+        }
+        _brain.StopLooting();
+        CleanupBrainTarget();
+        IsDone = true;
+        Success = false;
+    }
+
+    private void CleanupBrainTarget()
+    {
+        _brain.CurrentTarget = null;
+        _brain.CurrentTargetKind = LootKind.None;
+        _brain.ForceEnabled = false;
+    }
+}

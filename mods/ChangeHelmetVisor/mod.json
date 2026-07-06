@@ -1,0 +1,11 @@
+{
+  "name": "ChangeHelmetVisor",
+  "upstream_url": "https://github.com/Trinagan/ChangeHelmetVisor",
+  "upstream_sha": "b8a27121a4a2b3c4eaa28a9654a9824f32467069",
+  "upstream_branch": "main",
+  "forge_url": "",
+  "license": "MIT",
+  "version_base": "$(AssemblyVersion)",
+  "spt_version": "",
+  "created_at": "2026-06-30T01:19:06Z"
+}

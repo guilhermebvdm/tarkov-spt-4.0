@@ -1,0 +1,142 @@
+@page "/trldynamicspawn/mapconfigs"
+@layout MainLayout
+
+@using TRLDynamicSpawnServer.Models
+
+<MudMainContent Class="pt-4">
+    <MudContainer MaxWidth="MaxWidth.Large" Class="mb-10 mt-4">
+        <MudText Typo="Typo.h4" Class="mb-4">@Localization.T("Map Configs")</MudText>
+        <MudText Typo="Typo.body2" Class="mb-6 text-muted">
+            @Localization.T("Configure specific settings for each map, such as Sniper Spawn Chances and Minimum Safe Distances.")
+        </MudText>
+        
+        <MudAlert Severity="Severity.Warning" Class="mb-6 mx-4 mx-sm-6">
+            <b>Bot Despawn:</b> When enabling bot despawn for a map, please ensure that you do not have any other despawning mods active (such as MOAR, ABPS, or FIKA's built-in despawner if applicable) to avoid ghost bots and NullReferenceException errors.
+        </MudAlert>
+
+        <!-- Global Anti-Overlap Setting -->
+        <MudPaper Class="pa-4 pa-sm-6 ma-4 ma-sm-6" Elevation="2">
+            <MudText Typo="Typo.h6" Class="mb-4">@Localization.T("Global Anti-Overlap Culling Distance")</MudText>
+            <MudText Typo="Typo.body2" Class="mb-4 text-muted">
+                @Localization.T("Prevents bots from spawning inside each other by deleting overlapping map spawn points. Default is 5.0 meters. A higher value reduces the amount of total spawn points on the map.")
+            </MudText>
+            
+            <MudGrid Class="align-center">
+                <MudItem xs="4" sm="2"><MudText>@Localization.T("Distance (m):")</MudText></MudItem>
+                <MudItem xs="2" sm="1"><MudButton Variant="Variant.Filled" Color="Color.Dark" Size="Size.Small">@Config.GlobalAntiOverlapDistance</MudButton></MudItem>
+                <MudItem xs="6" sm="9"><MudSlider @bind-Value="Config.GlobalAntiOverlapDistance" Min="0.0" Max="20.0" Step="0.5" Color="Color.Primary" Size="Size.Medium" ValueLabel="false" /></MudItem>
+            </MudGrid>
+        </MudPaper>
+
+        <!-- Map Specific Settings -->
+        @foreach(var map in MapList)
+        {
+            <MudPaper Class="pa-4 pa-sm-6 ma-4 ma-sm-6" Elevation="2">
+                <MudText Typo="Typo.h6" Color="Color.Primary" Class="mb-4">@map.Value @Localization.T("Settings")</MudText>
+                
+                <!-- Sniper Chance -->
+                <MudText Typo="Typo.subtitle1" Class="mt-2">@Localization.T("Sniper Spawn Chance (%)")</MudText>
+                <MudText Typo="Typo.body2" Class="mb-2 text-muted">@Localization.T("The chance for a Sniper to spawn in a valid Sniper zone during a wave.")</MudText>
+                <MudGrid Class="align-center mb-6">
+                    <MudItem xs="3" sm="1"><MudButton Variant="Variant.Filled" Color="Color.Dark" Size="Size.Small">@Config.MapConfigs[map.Key].SniperChance</MudButton></MudItem>
+                    <MudItem xs="9" sm="11"><MudSlider @bind-Value="Config.MapConfigs[map.Key].SniperChance" Min="0" Max="100" Color="Color.Primary" Size="Size.Medium" /></MudItem>
+                </MudGrid>
+
+                <!-- Safe Zone Distance -->
+                <MudText Typo="Typo.subtitle1" Class="mt-4">@Localization.T("Minimum Safe Distance (m)")</MudText>
+                <MudText Typo="Typo.body2" Class="mb-2 text-muted">@Localization.T("Bots will not be allowed to spawn closer than this distance to any human player.")</MudText>
+                <MudGrid Class="align-center mb-4">
+                    <MudItem xs="3" sm="1"><MudButton Variant="Variant.Filled" Color="Color.Dark" Size="Size.Small">@Config.MapConfigs[map.Key].SafeZoneDistance</MudButton></MudItem>
+                    <MudItem xs="9" sm="11"><MudSlider @bind-Value="Config.MapConfigs[map.Key].SafeZoneDistance" Min="0.0" Max="150.0" Step="5.0" Color="Color.Primary" Size="Size.Medium" /></MudItem>
+                </MudGrid>
+                
+                <MudDivider Class="my-4" />
+                
+                <MudText Typo="Typo.h6" Class="mb-2">@Localization.T("Bot Despawn")</MudText>
+                
+                <MudGrid Class="align-center mb-2">
+                    <MudItem xs="6" sm="4">
+                        <MudText Typo="Typo.body2">@Localization.T("Enable Despawn:")</MudText>
+                    </MudItem>
+                    <MudItem xs="6" sm="8">
+                        <MudSwitch @bind-Value="Config.MapConfigs[map.Key].EnableDespawn" Color="Color.Success">
+                            @((Config.MapConfigs[map.Key].EnableDespawn) ? "Enabled" : "Disabled")
+                        </MudSwitch>
+                    </MudItem>
+                </MudGrid>
+                
+                <MudGrid Class="align-center mb-2">
+                    <MudItem xs="6" sm="4">
+                        <MudText Typo="Typo.body2">@Localization.T("Include PMCs:")</MudText>
+                    </MudItem>
+                    <MudItem xs="6" sm="8">
+                        <MudSwitch @bind-Value="Config.MapConfigs[map.Key].DespawnPMCs" Color="Color.Warning" Disabled="!Config.MapConfigs[map.Key].EnableDespawn">
+                            @((Config.MapConfigs[map.Key].DespawnPMCs) ? "Yes" : "No")
+                        </MudSwitch>
+                    </MudItem>
+                </MudGrid>
+
+                <MudGrid Class="align-center mb-4">
+                    <MudItem xs="12" sm="12">
+                        <MudText Typo="Typo.body2" Class="mb-2 text-muted">@Localization.T("Despawn Distance (m) - Distance a bot must be from ALL players to despawn:")</MudText>
+                    </MudItem>
+                    <MudItem xs="3" sm="1"><MudButton Variant="Variant.Filled" Color="Color.Dark" Size="Size.Small" Disabled="!Config.MapConfigs[map.Key].EnableDespawn">@Config.MapConfigs[map.Key].DespawnDistance</MudButton></MudItem>
+                    <MudItem xs="9" sm="11"><MudSlider T="float" @bind-Value="Config.MapConfigs[map.Key].DespawnDistance" Min="50f" Max="1000f" Step="10f" Color="Color.Primary" Size="Size.Medium" Disabled="!Config.MapConfigs[map.Key].EnableDespawn" /></MudItem>
+                </MudGrid>
+
+                <MudGrid Class="align-center mb-4">
+                    <MudItem xs="12" sm="12">
+                        <MudText Typo="Typo.body2" Class="mb-2 text-muted">@Localization.T("Despawn Check Interval (seconds) - How often to check bot distances:")</MudText>
+                    </MudItem>
+                    <MudItem xs="3" sm="1"><MudButton Variant="Variant.Filled" Color="Color.Dark" Size="Size.Small" Disabled="!Config.MapConfigs[map.Key].EnableDespawn">@Config.MapConfigs[map.Key].DespawnInterval</MudButton></MudItem>
+                    <MudItem xs="9" sm="11"><MudSlider T="float" @bind-Value="Config.MapConfigs[map.Key].DespawnInterval" Min="5f" Max="300f" Step="5f" Color="Color.Secondary" Size="Size.Medium" Disabled="!Config.MapConfigs[map.Key].EnableDespawn" /></MudItem>
+                </MudGrid>
+            </MudPaper>
+        }
+
+    </MudContainer>
+</MudMainContent>
+
+@code {
+    public TRLConfig Config => TRLDynamicSpawnServer.Routers.TRLRouters.CurrentConfig;
+
+    private Dictionary<string, string> MapList = new()
+    {
+        { "customs", "Customs" },
+        { "factory4_day", "Factory (Day)" },
+        { "factory4_night", "Factory (Night)" },
+        { "interchange", "Interchange" },
+        { "laboratory", "The Lab" },
+        { "lighthouse", "Lighthouse" },
+        { "rezervbase", "Reserve" },
+        { "sandbox", "Ground Zero" },
+        { "sandbox_high", "Ground Zero (High)" },
+        { "shoreline", "Shoreline" },
+        { "tarkovstreets", "Streets of Tarkov" },
+        { "woods", "Woods" }
+    };
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        foreach (var map in MapList.Keys)
+        {
+            EnsureMapConfigExists(map);
+        }
+    }
+
+        private void EnsureMapConfigExists(string mapId)
+    {
+        if (!Config.MapConfigs.ContainsKey(mapId))
+        {
+            double defaultDist = (mapId == "factory4_day" || mapId == "factory4_night" || mapId == "sandbox" || mapId == "sandbox_high") ? 15.0 : 30.0;
+            Config.MapConfigs[mapId] = new MapSettings { SafeZoneDistance = defaultDist };
+        }
+    }
+}
+}
+
+
+
+
+

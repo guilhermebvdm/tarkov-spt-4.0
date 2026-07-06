@@ -1,0 +1,14 @@
+<Solution>
+    <Configurations>
+        <BuildType Name="3.10.0" />
+        <BuildType Name="3.8.0" />
+        <BuildType Name="3.9.0" />
+        <BuildType Name="Debug" />
+        <BuildType Name="Release" />
+    </Configurations>
+    <Folder Name="/Solution Items/">
+        <File Path=".editorconfig" />
+    </Folder>
+    <Project Path="SAIN/SAIN.csproj" />
+    <Project Path="SAINServerMod/SAINServerMod.csproj" />
+</Solution>

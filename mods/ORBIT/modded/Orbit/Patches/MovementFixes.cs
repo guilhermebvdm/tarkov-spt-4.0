@@ -1,0 +1,164 @@
+using System.Diagnostics;
+using System.Reflection;
+using Comfort.Common;
+using EFT;
+using HarmonyLib;
+using Orbit.Core;
+using SPT.Reflection.Patching;
+using UnityEngine;
+
+namespace Orbit.Patches;
+
+/// <summary>
+/// Logs the small "soft" rescue teleport BSG fires via BotMover.Teleport. Strictly for diagnosing pathing
+/// pathologies — only written when the Debug log level is enabled (F12 Log levels), off in the default config.
+/// </summary>
+public class SoftTeleportTracePatch : ModulePatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return typeof(BotMover).GetMethod(nameof(BotMover.Teleport));
+    }
+
+    [PatchPrefix]
+    public static void Patch(BotMover __instance, Vector3 rPosition)
+    {
+        // This prefix sits on BSG's per-frame mover path for every VANILLA-driven bot (bosses, followers,
+        // rogues — ORBIT bots skip ManualFixedUpdate). With Debug off (the default) it must cost nothing:
+        // building these strings + the StackTrace unconditionally was a major 1.2.0 perf regression once
+        // Log.Debug stopped being compile-stripped. And it must never throw — a throwing prefix aborts the
+        // very rescue teleport it is observing, keeping the bot stuck.
+        if (!Log.DebugEnabled) return;
+        try
+        {
+            if (__instance is GClass493) return;
+
+            var botPosition = __instance.BotOwner_0.GetPlayer.Position;
+            var sqrDist = (botPosition - rPosition).sqrMagnitude;
+            if (sqrDist < 4f) return;
+
+            var id = __instance.BotOwner_0.Id;
+            var role = __instance.BotOwner_0.GetPlayer.Profile?.Info?.Settings?.Role;
+            var nickName = __instance.BotOwner_0.GetPlayer.Profile?.Nickname;
+
+            Log.Debug($"BotMover.Teleport (soft) id={id} role={role} name={nickName} pos={botPosition} target={rPosition} dist={Mathf.Sqrt(sqrDist):F1}");
+            Log.Debug($"  CurTime={Time.time} LastGoodCastPointTime={__instance.LastGoodCastPointTime} PrevPosLinkedTime_1={__instance.PrevPosLinkedTime_1}");
+            Log.Debug($"  PositionOnWayInner={__instance.PositionOnWayInner} dist={Vector3.Distance(botPosition, __instance.PositionOnWayInner)}");
+            Log.Debug($"  PositionOnWayCasted={__instance.PositionOnWayCasted} dist={Vector3.Distance(botPosition, __instance.PositionOnWayCasted)}");
+            Log.Debug($"  PrevLinkPos={__instance.PrevLinkPos} dist={Vector3.Distance(botPosition, __instance.PrevLinkPos)}");
+            Log.Debug($"  PrevSuccessLinkedFrom_1={__instance.PrevSuccessLinkedFrom_1} dist={Vector3.Distance(botPosition, __instance.PrevSuccessLinkedFrom_1)}");
+            Log.Debug($"  LastGoodCastPoint={__instance.LastGoodCastPoint} dist={Vector3.Distance(botPosition, __instance.LastGoodCastPoint)}");
+            Log.Debug($"  trace:\n{new StackTrace(true)}");
+        }
+        catch (System.Exception e)
+        {
+            Log.Debug($"SoftTeleportTracePatch diagnostics threw (non-fatal): {e.Message}");
+        }
+    }
+}
+
+/// <summary>
+/// Logs the "hard" rescue teleport BSG fires via BotMover.method_10 — the large recovery snap fired when a
+/// bot is hopelessly stuck. Paired with
+/// <see cref="RescueInterceptPatch"/> which actually reacts to it.
+/// </summary>
+public class HardTeleportTracePatch : ModulePatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return typeof(BotMover).GetMethod(nameof(BotMover.method_10));
+    }
+
+    [PatchPrefix]
+    public static void Patch(BotMover __instance, Vector3 posiblePos)
+    {
+        // Same contract as SoftTeleportTracePatch: free with Debug off, and never throws into BSG's rescue.
+        if (!Log.DebugEnabled) return;
+        try
+        {
+            if (__instance is GClass493) return;
+
+            var botPosition = __instance.BotOwner_0.GetPlayer.Position;
+            var sqrDist = (botPosition - posiblePos).sqrMagnitude;
+            if (sqrDist < 4f) return;
+
+            var id = __instance.BotOwner_0.Id;
+            var role = __instance.BotOwner_0.GetPlayer.Profile?.Info?.Settings?.Role;
+            var nickName = __instance.BotOwner_0.GetPlayer.Profile?.Nickname;
+
+            Log.Debug($"BotMover.method_10 (hard) id={id} role={role} name={nickName} pos={botPosition} target={posiblePos} dist={Mathf.Sqrt(sqrDist):F1}");
+            Log.Debug($"  CurTime={Time.time} LastGoodCastPointTime={__instance.LastGoodCastPointTime} PrevPosLinkedTime_1={__instance.PrevPosLinkedTime_1}");
+            Log.Debug($"  PositionOnWayInner={__instance.PositionOnWayInner} dist={Vector3.Distance(botPosition, __instance.PositionOnWayInner)}");
+            Log.Debug($"  PositionOnWayCasted={__instance.PositionOnWayCasted} dist={Vector3.Distance(botPosition, __instance.PositionOnWayCasted)}");
+            Log.Debug($"  PrevLinkPos={__instance.PrevLinkPos} dist={Vector3.Distance(botPosition, __instance.PrevLinkPos)}");
+            Log.Debug($"  PrevSuccessLinkedFrom_1={__instance.PrevSuccessLinkedFrom_1} dist={Vector3.Distance(botPosition, __instance.PrevSuccessLinkedFrom_1)}");
+            Log.Debug($"  LastGoodCastPoint={__instance.LastGoodCastPoint} dist={Vector3.Distance(botPosition, __instance.LastGoodCastPoint)}");
+            Log.Debug($"  trace:\n{new StackTrace(true)}");
+        }
+        catch (System.Exception e)
+        {
+            Log.Debug($"HardTeleportTracePatch diagnostics threw (non-fatal): {e.Message}");
+        }
+    }
+}
+
+/// <summary>Forces MovementContext.IsAI to false for ORBIT bots so the human-control smoothing pipeline runs.</summary>
+public class MovementContextHumanizePatch : ModulePatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return AccessTools.PropertyGetter(typeof(MovementContext), nameof(MovementContext.IsAI));
+    }
+
+    [PatchPrefix]
+    public static bool Patch(Player ____player, ref bool __result)
+    {
+        var bot = ____player?.AIData?.BotOwner;
+        var roster = Singleton<BotRoster>.Instance;
+        if (bot == null || roster == null || !roster.IsOrbitActive(bot)) return true;
+        __result = false;
+        return false;
+    }
+}
+
+/// <summary>
+/// Skips BSG's BotMover.ManualFixedUpdate for ORBIT bots — the vanilla mover would fight our own movement
+/// system and cause jitter.
+/// </summary>
+public class ManualFixedUpdateSkipPatch : ModulePatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return typeof(BotMover).GetMethod(nameof(BotMover.ManualFixedUpdate));
+    }
+
+    [PatchPrefix]
+    public static bool PatchPrefix(BotMover __instance)
+    {
+        return Singleton<BotRoster>.Instance == null || !Singleton<BotRoster>.Instance.IsOrbitActive(__instance.BotOwner_0);
+    }
+}
+
+/// <summary>
+/// Enables the human vaulting component for bots so they can actually climb low obstacles instead of getting
+/// stuck on every windowsill. Skips bots running the simplified skeleton (offscreen LOD bots have no vaulting
+/// rig — the component would null-deref).
+/// </summary>
+public class BotVaultingPatch : ModulePatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return typeof(Player).GetMethod(nameof(Player.InitVaultingComponent));
+    }
+
+    [PatchPrefix]
+    public static void Patch(Player __instance, ref bool aiControlled)
+    {
+        if (__instance.UsedSimplifiedSkeleton)
+        {
+            return;
+        }
+
+        aiControlled = false;
+    }
+}
