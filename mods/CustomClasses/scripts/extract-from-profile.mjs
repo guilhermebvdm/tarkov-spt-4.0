@@ -17,9 +17,18 @@
  *
  * ROBUSTEZ (evita as quebras observadas ao criar classes):
  *  - Valida todo tpl contra items.json → pula itens phantom/órfãos (cache miss → boneco não renderiza).
- *  - NÃO pina x/y no stash → auto-pack do builder (pinning de uma stash grande estourava p/ sorting table).
+ *  - PINA x/y/rotated no NÍVEL DO STASH (baseline-v2 2026-07-06): o builder honra a coordenada e cai no
+ *    auto-pack se não couber (PlaceTree nunca dropa) — o medo antigo de "estourar p/ sorting table" era
+ *    de antes do fallback. DENTRO de rig/mochila (contents) segue auto-pack (multi-grade sem seletor).
  *  - Outfit por SUIT (reverse-lookup appearance→suit) com Side válido → entra no dropdown e persiste;
  *    roupa Savage/inválida é pulada preservando o lado existente.
+ *  POLÍTICAS baseline-v2 (decisões do usuário 2026-07-05):
+ *  - SecuredContainer = ALPHA para todas as classes (nunca copiado do perfil).
+ *  - Pockets: herdado da base, EXCETO overrides por classe (saqueador → Pockets 1x4 TUE / Unheard).
+ *  - Scabbard (faca): COPIADO do perfil (saiu do SKIP_SLOTS).
+ *  - Rublos NORMALIZADOS: stacks de RUB do perfil são descartados; a classe sempre nasce com
+ *    DEFAULT_RUBLES exatos (300k) — USD/EUR/GP seguem herdados com cap.
+ *  - DEFAULT_EXCLUDE: itens ignorados em qualquer posição (DSP transmitter) + extensível via --exclude.
  *  LIMITAÇÃO: items.json é a DB VANILLA — itens adicionados por MODS (WTT, etc.) não estão nela e serão
  *  pulados com aviso. Se precisar de gear modado, conferir o aviso e o mod correspondente.
  */
@@ -101,12 +110,23 @@ const CURRENCY = {
 };
 const CURRENCY_CAP = { RUB: 500000, USD: 5000, EUR: 5000, GP: 5000 };
 const RUB_TPL = '5449016a4bdc2d6f028b456f';
-const DEFAULT_RUBLES = 100000;   // rublos-padrão adicionados ao stash (--rubles N p/ mudar, 0 = nenhum)
+const DEFAULT_RUBLES = 300000;   // baseline-v2: rublos FIXOS da classe (--rubles N p/ mudar, 0 = nenhum)
+
+// baseline-v2: tpls SEMPRE ignorados (qualquer posição: equipado/stash/contents/mods) — extensível via --exclude.
+const DEFAULT_EXCLUDE = [
+  '62e910aaf957f2915e0a5e36',   // Digital secure DSP radio transmitter (decisão do usuário 2026-07-05)
+];
+
+// baseline-v2: políticas de slot emitidas pelo EXTRATOR (sobrevivem à re-extração; edits manuais no jsonc não).
+const ALPHA_CONTAINER_TPL = '544a11ac4bdc2d470e8b456a';   // Secure container Alpha — TODAS as classes
+const POCKETS_BY_CLASS = {
+  saqueador: '65e080be269cbd5c5005e529',   // Pockets 1x4 TUE (Unheard) — decisão do usuário 2026-07-05
+};
 
 // Kit básico de stash compartilhado por todas as classes exceto o Peladão (BASELINE do gerador
 // build-class-jsons.js). Com --with-baseline, é unido ao stash do profile (sem duplicar por tpl).
 const BASELINE_STASH = [
-  { tpl: '5449016a4bdc2d6f028b456f', count: 100000 }, // Roubles
+  { tpl: '5449016a4bdc2d6f028b456f', count: 300000 }, // Roubles (baseline-v2: 300k)
   { tpl: '544fb45d4bdc2dee738b4568', count: 1 },      // Salewa
   { tpl: '5751a25924597722c463c472', count: 2 },      // Army bandage
   { tpl: '5af0454c86f7746bf20992e8', count: 1 },      // Aluminum splint
@@ -117,13 +137,14 @@ const BASELINE_STASH = [
   { tpl: '5bffdc370db834001d23eca8', count: 1 },      // 6Kh5 Bayonet
 ];
 
-// Slots de equipamento válidos (EquipmentSlots do EFT). SKIP: gamma + bolso + bainha são fixos da edition.
+// Slots de equipamento válidos (EquipmentSlots do EFT). SKIP (baseline-v2): SecuredContainer/Pockets não
+// vêm do perfil — são POLÍTICA (Alpha p/ todos; pockets override por classe). Scabbard passou a ser copiado.
 const EQUIPMENT_SLOTS = new Set([
   'Headwear', 'Earpiece', 'FaceCover', 'ArmorVest', 'Eyewear', 'ArmBand',
   'TacticalVest', 'Pockets', 'Backpack', 'SecuredContainer',
   'FirstPrimaryWeapon', 'SecondPrimaryWeapon', 'Holster', 'Scabbard',
 ]);
-const SKIP_SLOTS = new Set(['SecuredContainer', 'Pockets', 'Scabbard']);
+const SKIP_SLOTS = new Set(['SecuredContainer', 'Pockets']);
 
 const warn = msg => process.stderr.write(`[extract] ${msg}\n`);
 
@@ -251,8 +272,19 @@ function buildItemSpec(item, idx) {
     const contents = idx.children(item._id).filter(c => c.location).map(c => buildItemSpec(c, idx)).filter(Boolean);
     if (contents.length) spec.contents = contents;
   }
-  // NB: NÃO emitir x/y/rotated — o auto-pack do builder posiciona. Pinning x/y de uma stash de origem
-  // (edição grande) estourava p/ o sorting table numa stash menor (problema observado). Auto-pack é robusto.
+  // NB: x/y/rotated NÃO são emitidos AQUI (contents de rig/mochila ficam no auto-pack — multi-grade sem
+  // seletor no schema). A pinagem do NÍVEL DO STASH é anexada pelo extractStash via attachStashPos.
+  return spec;
+}
+
+/** baseline-v2: pina a posição do STASH no spec (x/y/rotated) a partir do `location` do perfil.
+ *  O builder honra a coord (PlaceTree→TryPlaceAt) e cai no auto-pack se não couber — nunca dropa. */
+function attachStashPos(spec, it) {
+  const loc = it.location;
+  if (!spec || !loc || typeof loc.x !== 'number' || typeof loc.y !== 'number') return spec;
+  spec.x = loc.x;
+  spec.y = loc.y;
+  if (loc.r === 'Vertical' || loc.r === 1 || loc.rotation === true) spec.rotated = true;
   return spec;
 }
 
@@ -274,8 +306,8 @@ function extractEquipped(pmc, idx) {
 
 function extractStash(pmc, idx, { money }) {
   const out = [];
-  // Preserva a ORDEM que o usuário organizou: lê em ordem de leitura da grade (y, depois x).
-  // Itens sem location vão ao fim. (Não pinamos x/y — só usamos a posição p/ ordenar; ver buildItemSpec.)
+  // Ordem de leitura da grade (y, depois x) — mantém a lista legível; a POSIÇÃO real agora é pinada
+  // por item (attachStashPos). Itens sem location vão ao fim (auto-pack).
   const kids = [...idx.children(pmc.Inventory.stash)].sort((a, b) => {
     const ay = a.location?.y ?? 1e9, by = b.location?.y ?? 1e9;
     if (ay !== by) return ay - by;
@@ -284,16 +316,18 @@ function extractStash(pmc, idx, { money }) {
   for (const it of kids) {
     const code = CURRENCY[it._tpl];
     if (code) {
-      if (!money) continue;
+      // baseline-v2: RUB é NORMALIZADO — stacks do perfil são descartados; o main() injeta o valor
+      // fixo da classe (DEFAULT_RUBLES/--rubles). Demais moedas seguem herdadas com cap.
+      if (!money || it._tpl === RUB_TPL) continue;
       const raw = it.upd?.StackObjectsCount ?? 1;
       const cap = CURRENCY_CAP[code] ?? raw;
       const count = Math.min(raw, cap);
       if (count < raw) warn(`${code} ${raw} → capado em ${count}`);
-      out.push({ tpl: it._tpl, count });   // sem x/y — auto-pack
+      out.push(attachStashPos({ tpl: it._tpl, count }, it));
       continue;
     }
     const spec = buildItemSpec(it, idx);
-    if (spec) out.push(spec);   // itens fora da DB já avisados e pulados
+    if (spec) out.push(attachStashPos(spec, it));   // itens fora da DB já avisados e pulados
   }
   return out;
 }
@@ -362,7 +396,7 @@ function writeWithBackup(file, text, { backup }) {
 // ── main ─────────────────────────────────────────────────────────────────────
 function main() {
   const args = parseArgs(process.argv);
-  for (const t of args.exclude) EXCLUDE.add(t);
+  for (const t of [...DEFAULT_EXCLUDE, ...args.exclude]) EXCLUDE.add(t);   // baseline-v2: DSP sempre fora
   loadDbs();   // VALID (itens vanilla + mods) + índice de suits
   const pmc = loadProfile(args.profileId);
   const { def, from } = loadClassDef(args.classFile);
@@ -370,11 +404,21 @@ function main() {
 
   const outfit = args.outfit ? extractOutfit(pmc, def, args) : def.outfit;   // --no-outfit preserva
   const equipped = extractEquipped(pmc, idx);
+
+  // baseline-v2 (políticas de slot — vivem AQUI p/ sobreviver a re-extrações):
+  // SecuredContainer = Alpha p/ TODAS as classes; Pockets override por classe (demais herdam da base).
+  equipped.SecuredContainer = { tpl: ALPHA_CONTAINER_TPL };
+  const classKey = path.basename(args.classFile).replace(/\.jsonc?$/, '');
+  if (POCKETS_BY_CLASS[classKey]) {
+    equipped.Pockets = { tpl: POCKETS_BY_CLASS[classKey] };
+    warn(`política: Pockets override p/ '${classKey}' → ${POCKETS_BY_CLASS[classKey]}`);
+  }
+
   let stash = args.stash ? extractStash(pmc, idx, args) : null;
   if (args.withBaseline) stash = mergeBaseline(stash ?? []);   // garante o kit básico mesmo com --no-stash
-  if (args.rubles > 0) {                                       // rublos-padrão (--rubles, default 100k)
+  if (args.rubles > 0) {                                       // baseline-v2: RUB fixo da classe (default 300k)
     stash = stash ?? [];
-    if (!stash.some(s => s.tpl === RUB_TPL)) { stash.push({ tpl: RUB_TPL, count: args.rubles }); warn(`+${args.rubles} RUB (padrão) no stash`); }
+    if (!stash.some(s => s.tpl === RUB_TPL)) { stash.push({ tpl: RUB_TPL, count: args.rubles }); warn(`+${args.rubles} RUB (fixo) no stash`); }
   }
 
   const merged = mergeIntoDef(def, { outfit, equipped, stash });

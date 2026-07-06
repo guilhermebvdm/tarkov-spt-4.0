@@ -52,7 +52,7 @@ function slotOf(id) {
 
 // ── dados do RZ (skills/hideout/recipes) ─────────────────────────────────────
 const BASELINE = [
-  { id: 'ROUBLES', qty: 100000 }, { id: 'SALEWA', qty: 1 }, { id: 'ARMY_BANDAGE', qty: 2 },
+  { id: 'ROUBLES', qty: 300000 }, { id: 'SALEWA', qty: 1 }, { id: 'ARMY_BANDAGE', qty: 2 },
   { id: 'ALUMINUM_SPLINT', qty: 1 }, { id: 'ANALGIN', qty: 1 }, { id: 'MRE', qty: 1 },
   { id: 'CRACKERS', qty: 1 }, { id: 'AQUAMARI', qty: 1 }, { id: 'BAYONET', qty: 1 },
 ];

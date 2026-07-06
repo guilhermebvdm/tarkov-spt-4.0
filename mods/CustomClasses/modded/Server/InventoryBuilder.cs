@@ -484,6 +484,14 @@ public class InventoryBuilder(DatabaseService databaseService, ItemHelper itemHe
         if (spec.LoadedMag)
         {
             var mag = tree.FirstOrDefault(i => i.SlotId == "mod_magazine");
+            // (baseline-v2 2026-07-06) carregador AVULSO: a raiz da linha de stash/contents é o próprio
+            // magazine (não há 'mod_magazine' na árvore) — enche a raiz. Antes, mags soltos nasciam
+            // silenciosamente vazios (só o caminho arma→mod_magazine era coberto).
+            if (mag is null && root is not null && itemHelper.IsOfBaseclass(root.Template, BaseClasses.MAGAZINE))
+            {
+                mag = root;
+            }
+
             if (mag is null)
             {
                 logger.Warning($"[CustomClasses] '{className}': '{context}' sem 'mod_magazine' — carregador não carregado.");

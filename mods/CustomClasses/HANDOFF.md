@@ -69,6 +69,12 @@ Linhas Flag (`no ergo penalty`, `no arm fatigue`) agora têm chip **✓** (perk)
   `Class Detail — Loading panel scale` (0.5–1.0), lido **a cada hover** (live). Validar se cabe tudo (Tanque = pior caso).
 - `04-code-review-02`: **CR-02-03** (re-add do painel em mapa com **trânsito**, ex. Streets), **CR-02-04** (posição do painel 600×460 em 1280×720).
 
+### 4b. 🟡 062 — Baseline v2: loadouts dos perfis novos (pipeline PRONTO; aguarda mapeamento)
+Pipeline corrigido e compilado (2026-07-06): pinagem x/y do stash no extrator (builder já honrava),
+mags avulsos enchem (`LoadAmmo` raiz-carregador), rublos fixos 300k, Scabbard copiado, Alpha p/ todos,
+Pockets Unheard no Saqueador, DSP excluído. **BLOQUEADO: usuário informa o mapeamento perfil→classe** →
+re-extração das 6 classes → gate. Plano: `~/.claude/plans/fluffy-finding-stonebraker.md`.
+
 ### 5. 🟡 056 — calibrar F12 e fixar default
 Usuário ajusta `Weight Marker — X/Y offset` (F12 → `Perks — UI`) até posicionar bem (chute inicial X≈−70, Y≈+30) e passa os valores → fixar como **default** no `PerksConfig` (aí dispensa o F12).
 
