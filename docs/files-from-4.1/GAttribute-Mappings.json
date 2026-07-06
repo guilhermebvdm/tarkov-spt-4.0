@@ -1,0 +1,110 @@
+{
+  "GAttribute0": {
+    "NewName": "TOD_MinAttribute"
+  },
+  "GAttribute1": {
+    "NewName": "TOD_MaxAttribute"
+  },
+  "GAttribute2": {
+    "NewName": "TOD_RangeAttribute"
+  },
+  "GAttribute3": {
+    "NewName": "EditorButtonAttribute"
+  },
+  "GAttribute4": {
+    "NewName": "CommentAttribute"
+  },
+  "GAttribute5": {
+    "NewName": "EnumFlagsAttribute"
+  },
+  "GAttribute6": {
+    "NewName": "MinMaxVec2Attribute"
+  },
+  "GAttribute7": {
+    "NewName": "UberDrawAttribute"
+  },
+  "GAttribute8": {
+    "NewName": "ScriptOrder"
+  },
+  "GAttribute9": {
+    "NewName": "ClassStateStorageIgnoreAttribute"
+  },
+  "GAttribute10": {
+    "NewName": "EnumBitMaskAttribute"
+  },
+  "GAttribute11": {
+    "NewName": "HelpAttribute"
+  },
+  "GAttribute12": {
+    "NewName": "UniqueIdentifierAttribute"
+  },
+  "GAttribute13": {
+    "NewName": "MinValueAttribute"
+  },
+  "GAttribute15": {
+    "NewName": "HBAO_MinMaxSliderAttribute"
+  },
+  "GAttribute16": {
+    "NewName": "ReadOnlyInInspectorAttribute",
+    "NewNamespace": "EFTools"
+  },
+  "GAttribute17": {
+    "NewName": "ReverbPresetAttribute",
+    "NewNamespace": "Audio.AmbientSubsystem"
+  },
+  "GAttribute18": {
+    "NewName": "IgnoreInFastAnimationSystemAttribute",
+    "NewNamespace": "FastAnimatorSystem"
+  },
+  "GAttribute19": {
+    "NewName": "StateBehaviorConverterAttribute",
+    "NewNamespace": "FastAnimatorSystem"
+  },
+  "GAttribute20": {
+    "NewName": "LargeHeader",
+    "NewNamespace": "RootMotion"
+  },
+  "GAttribute21": {
+    "NewName": "CanvasAttribute",
+    "NewNamespace": "ChartAndGraph"
+  },
+  "GAttribute22": {
+    "NewName": "NonCanvasAttribute",
+    "NewNamespace": "ChartAndGraph"
+  },
+  "GAttribute23": {
+    "NewName": "SimpleAttribute",
+    "NewNamespace": "ChartAndGraph"
+  },
+  "GAttribute24": {
+    "NewName": "JsonEnumNameAttribute",
+    "NewNamespace": "EFT"
+  },
+  "GAttribute25": {
+    "NewName": "DiffableAttribute",
+    "NewNamespace": "EFT"
+  },
+  "GAttribute26": {
+    "NewName": "ComponentAttribute",
+    "NewNamespace": "EFT"
+  },
+  "GAttribute27": {
+    "NewName": "HideInInspectorButNotInDebugAttribute"
+  },
+  "GAttribute28": {
+    "NewName": "BinaryReaderCompatibleAttribute",
+    "NewNamespace": "EFT.BinarySerialization"
+  },
+  "GAttribute29": {
+    "NewName": "GenerateBinarySerializationAttribute",
+    "NewNamespace": "EFT.BinarySerialization"
+  },
+  "GAttribute30": {
+    "NewName": "NullableAttribute",
+    "NewNamespace": "EFT.BinarySerialization"
+  },
+  "GAttribute31": {
+    "NewName": "IgnoreBinarySerializationAttribute",
+    "NewNamespace": "EFT.BinarySerialization"
+  }
+}

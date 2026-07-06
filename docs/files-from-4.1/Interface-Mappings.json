@@ -1,0 +1,51 @@
+{
+  "Interface0": {
+    "NewName": "IDebugCoverSearchGraph"
+  },
+  "Interface1": {
+    "NewName": "IPatrolLook",
+  },
+  "Interface2": {
+    "NewName": "ISender"
+  },
+  "Interface5": {
+    "NewName": "IConditionExecutor",
+    "NewNamespace": "Diz.Jobs"
+  },
+  "Interface6": {
+    "NewName": "InternalItemEvents",
+	"NewNamespace": "ChartAndGraph"
+  },
+  "Interface7": {
+    "NewName": "IChartMesh",
+    "NewNamespace": "ChartAndGraph"
+  },
+  "Interface13": {
+    "NewName": "INetworkGame",
+    "NewNamespace": "EFT"
+  },
+  "Interface14": {
+    "NewName": "IImpostorsCameraContext",
+    "NewNamespace": "EFT.Impostors"
+  },
+  "Interface15": {
+    "NewName": "IImpostorsMainCameraContext",
+    "NewNamespace": "EFT.Impostors"
+  },
+  "Interface16": {
+    "NewName": "IImpostorsOpticCameraContext",
+    "NewNamespace": "EFT.Impostors"
+  },
+  "Interface18": {
+    "NewName": "IOperationHandler",
+    "NewNamespace": "EFT.InventoryLogic"
+  },
+  "Interface19": {
+    "NewName": "IMagazineLoadingProcess",
+    "NewNamespace": "EFT.InventoryLogic",
+  },
+  "Interface21": {
+    "NewName": "IRestrictableZone",
+    "NewNamespace": "EFT.Interactive"
+  }
+}

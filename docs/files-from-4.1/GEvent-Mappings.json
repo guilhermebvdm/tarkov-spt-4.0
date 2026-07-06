@@ -1,0 +1,77 @@
+{
+  "GEventArgs0": {
+    "NewName": "AudioTriggerAreaEventArgs"
+  },
+  "GEventArgs1": {
+    "NewName": "ItemEventArgs",
+    "NewNamespace": "EFT.InventoryLogic"
+  },
+  "GEventArgs2": {
+    "NewName": "AddItemEventArgs",
+    "NewNamespace": "EFT.InventoryLogic"
+  },
+  "GEventArgs3": {
+    "NewName": "RemoveItemEventArgs",
+    "NewNamespace": "EFT.InventoryLogic"
+  },
+  "GEventArgs4": {
+    "NewName": "FireOperationEventArgs",
+    "NewNamespace": "EFT.InventoryLogic"
+  },
+  "GEventArgs5": {
+    "NewName": "RepairMalfunctionEventArgs",
+    "NewNamespace": "EFT.InventoryLogic"
+  },
+  "GEventArgs6": {
+    "NewName": "ExamineItemEventArgs",
+    "NewNamespace": "EFT.InventoryLogic"
+  },
+  "GEventArgs7": {
+    "NewName": "LoadMagazineEventArgs",
+    "NewNamespace": "EFT.InventoryLogic"
+  },
+  "GEventArgs8": {
+    "NewName": "UnloadMagazineEventArgs",
+    "NewNamespace": "EFT.InventoryLogic"
+  },
+  "GEventArgs9": {
+    "NewName": "SetInHandsEventArgs",
+    "NewNamespace": "EFT.InventoryLogic"
+  },
+  "GEventArgs10": {
+    "NewName": "RemoveFromHandsEventArgs",
+    "NewNamespace": "EFT.InventoryLogic"
+  },
+  "GEventArgs11": {
+    "NewName": "BindItemEventArgs",
+    "NewNamespace": "EFT.InventoryLogic"
+  },
+  "GEventArgs12": {
+    "NewName": "UnbindItemEventArgs",
+    "NewNamespace": "EFT.InventoryLogic"
+  },
+  "GEventArgs13": {
+    "NewName": "DrainItemEventArgs",
+    "NewNamespace": "EFT.InventoryLogic"
+  },
+  "GEventArgs14": {
+    "NewName": "CreateMapMarkerEventArgs",
+    "NewNamespace": "EFT.InventoryLogic"
+  },
+  "GEventArgs15": {
+    "NewName": "EditMapMarkerEventArgs",
+    "NewNamespace": "EFT.InventoryLogic"
+  },
+  "GEventArgs16": {
+    "NewName": "DeleteMapMarkerEventArgs",
+    "NewNamespace": "EFT.InventoryLogic"
+  },
+  "GEventArgs17": {
+    "NewName": "InOutHandsProcessEventArgs",
+    "NewNamespace": "EFT.InventoryLogic"
+  },
+  "GEventArgs18": {
+    "NewName": "RefreshItemEventArgs",
+    "NewNamespace": "EFT.InventoryLogic"
+  }
+}

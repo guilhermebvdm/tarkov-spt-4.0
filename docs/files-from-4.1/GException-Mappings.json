@@ -1,0 +1,82 @@
+{
+    "GException0": {
+        "NewName": "BackendException",
+    },
+    "GException1": {
+        "NewName": "BackendWithCodeException",
+    },
+    "GException2": {
+        "NewName": "BackendServerSideException"
+    },
+    "GException3": {
+        "NewName": "HTTPTransportException"
+    },
+    "GException4": {
+        "NewName": "HTTPNetworkException"
+    },
+    "GException5": {
+        "NewName": "HTTPParsingResponseException"
+    },
+    "GException6": {
+        "NewName": "WSTransportException"
+    },
+    "GException7": {
+        "NewName": "WSTimeoutException"
+    },
+    "GException8": {
+        "NewName": "PerfectCullingException",
+        "NewNamespace": "Koenigz.PerfectCulling.EFT"
+    },
+    "GException10": {
+        "NewName": "InvalidMaxSizeException",
+        "NewNamespace": "BitPacking"
+    },
+    "GException11": {
+        "NewName": "InvalidPacketException",
+        "NewNamespace": "FlyingWormConsole3.LiteNetLib"
+    },
+    "GException12": {
+        "NewName": "TooBigPacketException",
+        "NewNamespace": "FlyingWormConsole3.LiteNetLib"
+    },
+    "GException13": {
+        "NewName": "InvalidTypeException",
+        "NewNamespace": "FlyingWormConsole3.LiteNetLib.Utils"
+    },
+    "GException14": {
+        "NewName": "ParseException",
+        "NewNamespace": "FlyingWormConsole3.LiteNetLib.Utils"
+    },
+    "GException15": {
+        "NewName": "JobCancelException",
+        "NewNamespace": "Diz.Jobs"
+    },
+    "GException16": {
+        "NewName": "InventoryException",
+        "NewNamespace": "EFT"
+    },
+    "GException17": {
+        "NewName": "OperationCanceledByTimeoutException",
+        "NewNamespace": "EFT"
+    },
+    "GException19": {
+        "NewName": "RestrictedOperationException",
+        "NewNamespace": "EFT.InventoryLogic.Operations"
+    },
+    "GException20": {
+        "NewName": "ServerOnlyOperationException",
+        "NewNamespace": "EFT.InventoryLogic.Operations"
+    },
+    "GException21": {
+        "NewName": "ClientOnlyOperationException",
+        "NewNamespace": "EFT.InventoryLogic.Operations"
+    },
+    "GException22": {
+        "NewName": "ClientBackendOnlyOperationException",
+        "NewNamespace": "EFT.InventoryLogic.Operations"
+    },
+    "GException23": {
+        "NewName": "ClientServerOnlyOperationException",
+        "NewNamespace": "EFT.InventoryLogic.Operations"
+    }
+}
