@@ -1,0 +1,152 @@
+# CustomClasses — Handoff (2026-07-03)
+
+> Contexto pra continuar o trabalho de UI/perks do mod em outra sessão. Foco da sessão: **059** (aba CLASS +
+> catálogo atômico), **055** (detalhe no loading FIKA), **056** (marcador de peso), specs do **058**.
+
+## Estado do repositório
+
+- **Branch:** `feat/053-perks-property-model` · **nada em push** (só commits locais).
+- **Commits da sessão:** `a57b48c` (baseline 053) → `76904b9` (HEAD). Sequência relevante:
+  `a1a24d5` 059 · `663a38a`+`529c433` 055 · `ef8b8d8`+`7f3db04` 056 · `6153adf` specs 058 · `76904b9` fixes pós-teste.
+- **Reverter tudo da sessão:** `git reset --hard a57b48c`.
+- **DLL client instalada:** `D:/SPT/BepInEx/plugins/CustomClasses/CustomClasses-Client.dll` (109056 bytes).
+- Servidor: **FIKA Coop PVE** (SPT 4.0.13 / EFT 0.16.9 / FIKA 2.3.3 / SAIN 4.4.3).
+
+## Como buildar / rodar
+
+- **Compilar+instalar:** `bash .agents/scripts/compile-mod.sh CustomClasses` (client → `BepInEx/plugins/`, server → `SPT/user/mods/`).
+- **F12 novos só aparecem após REINICIAR o EFT** (plugin BepInEx recarrega só no boot).
+- **Refs de UI do EFT:** o decompile curado (`references/eft-decompiled/`) **NÃO tem `EFT.UI`** → usar
+  `ilspycmd "D:/SPT/EscapeFromTarkov_Data/Managed/Assembly-CSharp.dll" -t <FQN>`. Ex.: `EFT.UI.Health.HealthParametersPanel`.
+- Validação in-game = **gate humano** (compilar ≠ funcionar, AP-06). Usuário testa no servidor (via AnyDesk).
+
+## O que foi entregue nesta sessão (validado in-game ✅)
+
+| Item | Estado | Notas |
+|---|---|---|
+| **059** aba CLASS + catálogo atômico (2 colunas) | ✅ funciona | perk/drawback + valor **derivados** do multiplicador+polaridade. `PerksCatalog` (PerkGroup/PerkLine). Painel extraído p/ `PerksPanelView` (reusado por 055). |
+| **055** detalhe da classe no loading FIKA | ✅ funciona | Só classe **local**. `76904b9` mudou p/ **hover-only** (era auto-visível, cobria o carrossel). Per-player = item 057. |
+| **056** marcador ▲ +30% no peso (Pack Mule) | ✅ funciona | Postfix em `HealthParametersPanel.method_0`; molde do `SkillPanelPatch`. `7f3db04` add F12 `Weight Marker — X/Y offset` (o marcador nasce mal posicionado — usuário calibra). |
+| **058** ativar masteries inertes | 📄 specs only | Recon: globals **não pega** → patch client. **Code-mod BLOQUEADO** por validação prévia (ver pendências). |
+
+## PENDÊNCIAS (priorizadas)
+
+### 1. 🟡 059 CLASS #3 — "1 card por efeito" (IMPLEMENTADO 2026-07-03, validar in-game)
+Implementado conforme a decisão do usuário + requisito novo: **ícone por efeito reusa os quadradinhos de buff da
+tela SKILLS** (`EFT.UI.BuffIcon.smethod_0` → `StaticIcons.BuffIdSprites[EBuffId]` — irmão do `SkillIdSprites`).
+- `PerksCatalog.PerkLine` ganhou `EBuffId Icon` (mapeado nas 18 entradas da Library) + `PerksCatalog.BuffSprite(line)`.
+- `PerksPanelView`: `BuildGroupCard` → **`BuildEffectCard`** (1 card por `PerkLine`): frame 40px com ícone do efeito
+  (fallback = ícone do grupo), nome do GRUPO esmaecido (UpperCase, cor do acento a 75%) + chip `ValueToken` +
+  `Label` em destaque; acento/bg por `line.IsPerk`/`line.Pending`; coluna continua por `group.IsPerk`.
+- **Validar in-game:** (a) os sprites de `BuffIdSprites` aparecem? (b) mapeamentos semânticos fazem sentido visual?
+  (ex.: flinch/aim punch → `AimMasterWiggle`, dano recebido → `HealthEliteAbsorbDamage`); (c) altura dos cards no
+  Tanque (6 cards na coluna de perks) cabe sem scroll.
+
+### 2. 🟡 059 CLASS #1 — aba CLASS v3 (rodada 3 de fixes in-game; re-validar)
+**Rodada 3 (feedback com prints):** (1) texto "CLASS" sumiu no estilo nativo → `DestroyImmediate` no
+LocalizedText + texto/enabled/alpha forçados + **log diagnóstico `[053-tabtext]`** (se ainda falhar, colar o log);
+(2) conteúdo do painel agora ALINHA com a borda esquerda da aba CLASS + margem espelhada à direita
+(`AlignPanelToTab`, live com o F12). Rodada 2 (posição/push/fonte nativa) mantida.
+Feedback do teste: aba desformatada mesmo com offset 185; fonte/hover destoando; sem espaço pros nativos.
+**Implementado na rodada 2:**
+- **Posição:** CLASS agora começa na **borda esquerda do conteúdo** (`_skillsScreen` convertido pro espaço da
+  barra — a "linha vermelha" do print) e **SKILLS/MASTERING são empurrados pra direita** (delta nativo
+  preservado; posições nativas capturadas 1× por instância). F12 `Class Tab — X offset` continua live pra ajuste fino.
+- **Fonte/hover:** overlay REMOVIDO — o rótulo "CLASS" agora é escrito nos **TMPs nativos** das versões
+  normal/selected do Tab → fonte, tamanho, prancha de seleção e hover idênticos a SKILLS/MASTERING. O ícone
+  nativo (herdado do clone) recebe o brasão da classe.
+- **MASTERING "vazio" NÃO é bug:** evidência `MasteringScreen.Show` (Assembly) — a lista vem de
+  `profile.Skills.Mastering` (só armas com progresso); perfil novo = "All types (0)". Atire com uma arma e reabra.
+
+### 3. 🟡 059 CLASS #2 — chip ✓/✗ nas flags (implementado `76904b9`, VERIFICAR)
+Linhas Flag (`no ergo penalty`, `no arm fatigue`) agora têm chip **✓** (perk) / **✗** (drawback) — `MultiplierFormat.ValueToken`.
+- **Verificar in-game:** o glyph ✓ (U+2713) / ✗ (U+2717) renderiza na fonte do EFT? Se aparecer **□**, trocar por `ON`/`OFF` ou `+`/`−` no `ValueToken` (Flag). **▲▼ sabidamente funcionam** (marcador de peso).
+
+### 4. 🟡 055 — validar hover-only + zoom-out + pendências do code-review 02
+- Confirmar in-game que o **hover** dispara na tela de deploy (EventSystem/GraphicRaycaster ativo?). Se não disparar, o popover não aparece.
+- **Zoom-out do popover (2026-07-03):** `LoadingClassHover.ApplyScale()` — escala default **0.75** com rect
+  compensado (÷ escala) → mesma pegada visual ~600×460, +33% de espaço interno pros cards por efeito. F12
+  `Class Detail — Loading panel scale` (0.5–1.0), lido **a cada hover** (live). Validar se cabe tudo (Tanque = pior caso).
+- `04-code-review-02`: **CR-02-03** (re-add do painel em mapa com **trânsito**, ex. Streets), **CR-02-04** (posição do painel 600×460 em 1280×720).
+
+### 4b. 🟡 062 — Baseline v2: loadouts dos perfis novos (pipeline PRONTO; aguarda mapeamento)
+Pipeline corrigido e compilado (2026-07-06): pinagem x/y do stash no extrator (builder já honrava),
+mags avulsos enchem (`LoadAmmo` raiz-carregador), rublos fixos 300k, Scabbard copiado, Alpha p/ todos,
+Pockets Unheard no Saqueador, DSP excluído. **Re-extração das 6 EXECUTADA (2026-07-06)** — checks estruturais ✓ (Alpha/TUE/300k/pinagem/mags/semDSP;
+snapshot de skills intacto). Pendências: faca do Furtivo (6 tpls `69f3…/69f4…` fora da DB local — mod do
+server oficial ausente aqui) · Saqueador sem faca equipada no perfil-fonte · Peladão sem container (`remove`).
+**Gate: restart SPT.Server → criar perfil de cada classe → conferir stash espelhado/mags/300k/faca/pockets.**
+Plano: `~/.claude/plans/fluffy-finding-stonebraker.md`.
+
+### 5. 🟡 056 — calibrar F12 e fixar default
+Usuário ajusta `Weight Marker — X/Y offset` (F12 → `Perks — UI`) até posicionar bem (chute inicial X≈−70, Y≈+30) e passa os valores → fixar como **default** no `PerksConfig` (aí dispensa o F12).
+
+### 6. 🟡 057 — identidade per-player no deploy (06-fix-04: host REAL = PartyPlayerItem; re-validar)
+**Code-review adversarial 2026-07-04 (CR-057F3-01, ALTA):** o host do 06-fix-03 (`RaidReadyPlayerPanel.Show`)
+é **código morto no SPT** — o branch `ERaidMode.Local` (forçado pelo SPT) fecha esse painel incondicionalmente
+(decompile `MatchMakerAcceptScreen:354-357`); a listagem superior-esquerda REAL é `PartyInfoPanel`/
+`PartyPlayerItem` (populada pelo FIKA). Consequência: a **escala do 015 (`DeployNameScale`) nunca tinha
+disparado** — default 3.0 era calibragem às cegas → **resetado p/ 1.2** (código + cfg instalado; recalibrar no F12).
+Re-host aplicado ([06-fix-04](backlog/057-class-identity-coop/057-class-identity-coop-06-fix-04.md)):
+`PartyPlayerItemPatch` (escala + popover no cursor + limpa tooltip redundante), identidade por linha (local E
+remoto) via `ChatSpecialIconPatch` (que antes REVERTIA remotos — CR-057F3-02), caches frescos por tela de
+deploy (`PartyInfoPanelPrefetchPatch` — CR-057F3-03) e popover: posição no rect do parent + câmera do evento +
+só exibe com posição válida (CR-057F3-05/06).
+**Direcionamento do usuário (2026-07-04):** lista inferior do FIKA = INTOCÁVEL (patch das rows DESREGISTRADO);
+host = listagem SUPERIOR-esquerda do jogo com **brasão+cor por player na linha** e **popover abrindo NO
+CURSOR** (clamp na tela).
+
+**Gate 2 falhou de novo nas linhas do FIKA** (hover nunca dispara lá — canvas sem raycast confiável). Pivô:
+o popover agora mora no **painel de grupo do deploy** (`RaidReadyPlayerPanel`, topo-esquerdo — onde tooltips já
+funcionam), resolvido por `player.Info.Nickname` → funciona pra QUALQUER membro do grupo. O caminho antigo
+(rows do LoadingScreenUI) continua instalado como redundância.
+**Gate 1 falhou:** popover não abria em NENHUMA linha — guard do CR-01-05 comparava `nickTmp.text`, mas o FIKA usa
+`TMP.SetText()` que **não atualiza `.text`** → falso-positivo universal. Fix: mapa `SeenNetIds` (netId→nickname)
+espelha o early-return do FIKA sem depender de TMP ([06-fix-01](backlog/057-class-identity-coop/057-class-identity-coop-06-fix-01.md)).
+Ciclo SDD completo (spec → reviews → code-mod → code-review) na pasta [backlog/057-class-identity-coop/](backlog/057-class-identity-coop/).
+Entregue: rota server `/customclasses/class-identities` (nickname→classe de TODOS os perfis; a Edition do perfil
+é a chave do `ClassVisualRegistry` — a hipótese `GameVersion`-no-client foi DESCARTADA: no loading o client só tem
+netId+nickname) + `ClassIdentities` client (refetch por tela de loading) + popover 055 per-player + tint do nickname.
+- **Validar in-game (coop, 2+ players, como CLIENTE):** classe correta por player · vanilla sem identidade ·
+  raid scav local = nada · fallback com server sem a rota (1 warn) · trânsito.
+- ⚠️ Rota nova só carrega com **restart do SPT.Server** (DLL já instalada).
+- Limitação documentada: scav REMOTO pode exibir a classe do PMC do dono (nickname é sempre o do PMC no FIKA).
+- Implementado no worktree `tarkov-spt-4.0-wt-057` (tree principal estava na branch da sessão do editor).
+
+### 7. 🟡 058 — IMPLEMENTADO 2026-07-04 (gate V rodado + code-mod completo; validar in-game)
+Gate V fechado com o usuário (perfil zerado): SMG/LMG/GL sobem VANILLA → anti-XP-duplo; **underbarrel = única
+morta** → XP POR DISPARO (Postfix em `FirearmController.method_57`, Player.cs:14231) × fator de classe + efeito
+por nível (recuo/ergo — Prefix/Postfix novos nos alvos do 050) pras categorias alcançáveis; **HMG deferida**
+(só existe estacionária). F12: seção `Weapon Mastery` (Enabled · XP 0.1/disparo · recuo 0.004/nível · ergo 0.002/nível).
+**Validar:** GP-25 sobe a barra de Underbarrel ao vivo → extract persiste (V3 mod-side!) → `Recoil str` no overlay
+052 cai com nível ≥1 → sem XP duplo nas 3 vanilla. Checklist completo no [05-asbuild](backlog/058-ativar-masteries-inertes/058-ativar-masteries-inertes-05-asbuild.md).
+
+### 8. 🟡 051 — IMPLEMENTADO 2026-07-04 (ciclo completo; validar in-game)
+Hook `ExternalHandsDrainMult` no Tick do stances (só no DRENO) + `StancesArmStaminaBridge` no CustomClasses
+(soft-detect; Hunter em ADS ×0.65 · Tank c/ arma pesada ×0). Review técnica 01: 0🔴 (premissa "delta<0=dreno"
+PROVADA nos 16 cenários). Cards Steady/Tireless Arms SEM "em breve". Deploy: stances manual em
+`RealisticMobility/` (17:08; duplicata do script removida). **Validar:** checklist no
+[05-asbuild](backlog/051-stances-zone-levers/051-stances-zone-levers-05-asbuild.md).
+
+## Arquitetura / arquivos-chave (client)
+
+- [`PerksCatalog.cs`](modded/Client/PerksCatalog.cs) — `PerkGroup`/`PerkLine`; `IsPerk`+`ValueToken` **derivados** de `Multiplier`+`Polarity`+`Format`. `Library` (18 grupos) + `ByClass`. `LocalGroups()`, `IconSprite()`, `BuildNotificationText()`.
+- [`PerksPanelView.cs`](modded/Client/PerksPanelView.cs) — painel reutilizável (header + 2 colunas + cards + `CardHover`/`FadeIn`). **Alvo da pendência #1.**
+- [`MultiplierFormat.cs`](modded/Client/MultiplierFormat.cs) — `Marker()` (▲/▼), `ValueToken()` (chips), `TooltipText()`, `CarryTooltip()` (056). i18n aqui.
+- [`Patches/SkillsClassTabPatch.cs`](modded/Client/Patches/SkillsClassTabPatch.cs) — só a **aba** (clone tab, toggle-group, overlay [ícone]CLASS, posição). **Pendência #2.**
+- [`Patches/ClassDetailLoadingPatch.cs`](modded/Client/Patches/ClassDetailLoadingPatch.cs) — 055; soft-detect FIKA (`TypeByName("LoadingScreenUI")`), `LoadingClassHover` (hover-only).
+- [`Patches/WeightMarkerPatch.cs`](modded/Client/Patches/WeightMarkerPatch.cs) — 056; molde do [`SkillPanelPatch.cs`](modded/Client/Patches/SkillPanelPatch.cs).
+- [`Patches/PackMulePatch.cs`](modded/Client/Patches/PackMulePatch.cs) — gate reusado: `SkillMultipliers.IsLocalClass("Scavenger"|"Tank")` + `PerksConfig.PackMuleEnabled`.
+
+## Constraints (invioláveis)
+
+- Commits locais **livres**; **push/PR/deploy exigem aprovação** (menu interativo).
+- **Não tocar `modded/Server`** sem coordenar (sessão paralela do editor web, server-side) — vale p/ 057.
+- Idioma: comunicação **pt-BR**, código/commits em **inglês**.
+- Padrão SDD do repo (`WORKFLOW.md`): backlog → spec → review-spec → spec-tech → review-tech → code-mod → asbuild → code-review → compile → **gate humano**. Artefatos em `backlog/NNN-<slug>/`.
+
+## Memória relevante (`~/.claude/projects/.../memory/`)
+
+- `feedback_coop_multiplayer_sync` — servidor é FIKA coop; sinalizar gaps de sync (solo mascara bugs de cliente).
+- `feedback_spt_validation` — escritas SPT precisam validação in-game, não só compile.
+- `reference_spt_localedb_per_call_cost`, `reference_spt_helper_cache_timing` — perf/timing de helpers SPT.

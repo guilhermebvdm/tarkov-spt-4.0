@@ -20,10 +20,16 @@ internal static class PerksConfig
     // UI — notificação de perks/drawbacks no início da raid
     internal static ConfigEntry<bool>? ShowRaidPerksNotification;
 
-    // UI (053) — painel de perks/drawbacks na tela de Skills
-    internal static ConfigEntry<bool>? PerksPanelEnabled;
-    internal static ConfigEntry<float>? PerksPanelPosX;
-    internal static ConfigEntry<float>? PerksPanelPosY;
+    // UI (059) — ajuste fino da posição X do botão da aba CLASS
+    internal static ConfigEntry<float>? ClassTabOffsetX;
+
+    // UI (055) — detalhe da classe na tela de carregamento da raid (FIKA)
+    internal static ConfigEntry<bool>? ClassDetailOnLoading;
+    internal static ConfigEntry<float>? LoadingPanelScale;   // zoom-out do popover (cabe os cards por efeito)
+
+    // UI (056) — offset X/Y do marcador "▲ +X%" no peso (aba Health)
+    internal static ConfigEntry<float>? WeightMarkerOffsetX;
+    internal static ConfigEntry<float>? WeightMarkerOffsetY;
 
     // 🔻 Heavy Frame (Tanque) — velocidade (050.1) + fome/sede (050.3)
     internal static ConfigEntry<bool>? HeavyFrameEnabled;
@@ -61,6 +67,18 @@ internal static class PerksConfig
     // 🔧 Iron Lungs (Caçador) — segura a respiração por mais tempo (050.4)
     internal static ConfigEntry<bool>? IronLungsEnabled;
     internal static ConfigEntry<float>? IronLungsBreathDrain;
+
+    // 🔧 Steady Arms (Caçador) + Tireless Arms (Tanque) — dreno de braço via hook do stances (051)
+    internal static ConfigEntry<bool>? SteadyArmsEnabled;
+    internal static ConfigEntry<float>? SteadyArmsDrain;
+    internal static ConfigEntry<bool>? TirelessArmsEnabled;
+    internal static ConfigEntry<float>? TirelessArmsDrain;
+
+    // 🎖️ Weapon Mastery (058) — maestrias inertes: XP do underbarrel + efeito por nível (SMG/LMG/Launcher/underbarrel)
+    internal static ConfigEntry<bool>? WeaponMasteryEnabled;
+    internal static ConfigEntry<float>? MasteryXpPerShot;
+    internal static ConfigEntry<float>? MasteryRecoilPerLevel;
+    internal static ConfigEntry<float>? MasteryErgoPerLevel;
 
     // 🔍 Diagnóstico (052) — overlay "super espião" das propriedades afetadas
     internal static ConfigEntry<bool>? DiagnosticsEnabled;
@@ -120,22 +138,6 @@ internal static class PerksConfig
         ShowRaidPerksNotification = config.Bind(
             "Perks — UI", "Raid-start perks notification", true,
             "Notificação no início da raid listando os perks (verde) e drawbacks (vermelho) da classe. / Raid-start notification listing the class's perks/drawbacks.");
-
-        PerksPanelEnabled = config.Bind(
-            "Perks — UI", "Skills-screen perks panel", true,
-            "Painel de perks/drawbacks da classe na tela de Skills. / Perks/drawbacks panel on the Skills screen.");
-        PerksPanelPosX = config.Bind(
-            "Perks — UI", "Perks panel — X offset", -24f,
-            new ConfigDescription(
-                "Deslocamento X do painel a partir da borda direita (mais negativo = mais pra esquerda). / Panel X offset from the right edge.",
-                new AcceptableValueRange<float>(-1800f, 0f)));
-        PerksPanelPosY = config.Bind(
-            "Perks — UI", "Perks panel — Y offset", -90f,
-            new ConfigDescription(
-                "Deslocamento Y do painel a partir do topo (mais negativo = mais pra baixo). / Panel Y offset from the top.",
-                new AcceptableValueRange<float>(-1000f, 0f)));
-        PerksPanelPosX.SettingChanged += (_, _) => SkillsPerksPanelPatch.Reposition();
-        PerksPanelPosY.SettingChanged += (_, _) => SkillsPerksPanelPatch.Reposition();
 
         HeavyFrameEnabled = config.Bind(
             "Drawbacks — Tank", "Heavy Frame — Enabled", true,
@@ -227,13 +229,15 @@ internal static class PerksConfig
                 "Multiplicador do raio de som de movimento do Stealth (0.40 = -60%). / Stealth movement-sound radius multiplier.",
                 new AcceptableValueRange<float>(0.1f, 1f)));
 
+        // (2026-07-05) Loud Operator agora é compartilhado Rifleman + Tank — a SEÇÃO do cfg fica "Drawbacks —
+        // Rifleman" por estabilidade (renomear seção BepInEx descarta o valor salvo do usuário).
         LoudOperatorEnabled = config.Bind(
             "Drawbacks — Rifleman", "Loud Operator — Enabled", true,
-            "Rifleman: aumenta o raio de audibilidade dos seus sons de movimento. / Rifleman: louder movement (bigger audibility radius).");
+            "Rifleman/Tank: aumenta o raio de audibilidade dos seus sons de movimento. / Rifleman/Tank: louder movement (bigger audibility radius).");
         LoudOperatorSoundRadius = config.Bind(
             "Drawbacks — Rifleman", "Loud Operator — Sound radius mult", 1.30f,
             new ConfigDescription(
-                "Multiplicador do raio de som de movimento do Rifleman (1.30 = +30%). / Rifleman movement-sound radius multiplier.",
+                "Multiplicador do raio de som de movimento do Rifleman/Tank (1.30 = +30%). / Rifleman/Tank movement-sound radius multiplier.",
                 new AcceptableValueRange<float>(1f, 2f)));
 
         SilentLooterEnabled = config.Bind(
@@ -306,8 +310,72 @@ internal static class PerksConfig
                 "Multiplicador do TEMPO de ADS na janela (0.80 = 20% mais rápido). / ADS time multiplier.",
                 new AcceptableValueRange<float>(0.3f, 1f)));
 
+        SteadyArmsEnabled = config.Bind(
+            "Perks — Hunter", "Steady Arms — Enabled", true,
+            "Hunter: braço cansa mais devagar ao mirar (compõe com o stances mod; sem ele, inativo). / Hunter: slower arm fatigue while aiming (requires the stances mod).");
+        SteadyArmsDrain = config.Bind(
+            "Perks — Hunter", "Steady Arms — ADS arm drain mult", 0.65f,
+            new ConfigDescription(
+                "Multiplicador do dreno de braço do Caçador em ADS (0.65 = 35% mais lento). Requer o stances mod. / Hunter ADS arm-drain multiplier.",
+                new AcceptableValueRange<float>(0.2f, 1f)));
+
+        TirelessArmsEnabled = config.Bind(
+            "Perks — Tank", "Tireless Arms — Enabled", true,
+            "Tank: braço não cansa segurando arma pesada (compõe com o stances mod; sem ele, inativo). / Tank: no arm fatigue holding heavy weapons (requires the stances mod).");
+        TirelessArmsDrain = config.Bind(
+            "Perks — Tank", "Tireless Arms — Heavy arm drain mult", 0f,
+            new ConfigDescription(
+                "Multiplicador do dreno de braço do Tanque com LMG/HMG/GL em mãos (0 = não drena). Requer o stances mod. / Tank heavy-weapon arm-drain multiplier.",
+                new AcceptableValueRange<float>(0f, 1f)));
+
+        WeaponMasteryEnabled = config.Bind(
+            "Weapon Mastery", "Weapon Mastery — Enabled", true,
+            "058: dá vida às maestrias inertes — XP por disparo do underbarrel (GP-25/M203) + bônus por nível de SMG/LMG/Launcher/Underbarrel. / Enables inert weapon masteries: underbarrel XP per shot + per-level recoil/ergo bonuses.");
+        MasteryXpPerShot = config.Bind(
+            "Weapon Mastery", "Underbarrel XP per shot", 0.5f,
+            new ConfigDescription(
+                "XP de Underbarrel Launchers por DISPARO do GP-25/M203. 0.5 = paridade de ESFORÇO com SMG (RN-01: granada é cara/rara — 0.1 'por ação' deixava nível 5 a 75-250 raids). / Underbarrel Launchers XP per shot fired.",
+                new AcceptableValueRange<float>(0f, 1f)));
+        MasteryRecoilPerLevel = config.Bind(
+            "Weapon Mastery", "Recoil bonus per level", 0.004f,
+            new ConfigDescription(
+                "Redução de recuo por nível da maestria da arma em mãos (0.004 = -0.4%/nível; paridade WeaponSkillRecoilBonusPerLevel). / Recoil reduction per mastery level.",
+                new AcceptableValueRange<float>(0f, 0.02f)));
+        MasteryErgoPerLevel = config.Bind(
+            "Weapon Mastery", "Ergo bonus per level", 0.002f,
+            new ConfigDescription(
+                "Aumento de ergonomia por nível da maestria da arma em mãos (0.002 = +0.2%/nível). / Ergonomics increase per mastery level.",
+                new AcceptableValueRange<float>(0f, 0.02f)));
+
         DiagnosticsEnabled = config.Bind(
             "Diagnostics", "Perk Diagnostics overlay", false,
             "Overlay ao vivo das propriedades afetadas pelos perks do seu player (validação). / Live overlay of perk-affected properties.");
+
+        ClassTabOffsetX = config.Bind(
+            "Perks — UI", "Class Tab — X offset", 0f,
+            new ConfigDescription(
+                "Ajuste fino da posição horizontal do botão da aba CLASS (px). Só use se a aba não alinhar. / Fine-tune the CLASS tab button X position (px).",
+                new AcceptableValueRange<float>(-400f, 400f)));
+
+        ClassDetailOnLoading = config.Bind(
+            "Perks — UI", "Class Detail on Loading Screen", true,
+            "Mostra o detalhe da sua classe (perks/drawbacks) no seu nome na tela de carregamento da raid (FIKA). / Show your class detail on the FIKA raid loading screen.");
+
+        LoadingPanelScale = config.Bind(
+            "Perks — UI", "Class Detail — Loading panel scale", 0.75f,
+            new ConfigDescription(
+                "Escala (zoom-out) do popover de classe no loading (0.75 = 75%). O painel ocupa a MESMA área na tela; o conteúdo fica menor → mais espaço pros cards. / Scale of the loading-screen class popover (same footprint, smaller content).",
+                new AcceptableValueRange<float>(0.5f, 1f)));
+
+        WeightMarkerOffsetX = config.Bind(
+            "Perks — UI", "Weight Marker — X offset", 0f,
+            new ConfigDescription(
+                "Ajuste horizontal (px) do marcador '▲ +X%' no peso (aba Health). Negativo = esquerda. / Horizontal offset of the weight '▲ +X%' marker.",
+                new AcceptableValueRange<float>(-600f, 600f)));
+        WeightMarkerOffsetY = config.Bind(
+            "Perks — UI", "Weight Marker — Y offset", 0f,
+            new ConfigDescription(
+                "Ajuste vertical (px) do marcador '▲ +X%' no peso (aba Health). Positivo = para cima (ex.: acima do '20.7 kg'). / Vertical offset of the weight '▲ +X%' marker (positive = up).",
+                new AcceptableValueRange<float>(-600f, 600f)));
     }
 }

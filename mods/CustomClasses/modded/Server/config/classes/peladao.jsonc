@@ -14,17 +14,24 @@
   "skills": {},
   "hideout": {},
   "outfit": {
+    // baseline-v2 gate (2026-07-06): skin definida pelo usuário — Tagilla's Chest (aparência direta, vem do
+    // AllTheClothes; mesmo body que o antigo fantasma.jsonc usava) + BEAR Vacation (suit 685d0967…, shorts).
     "usec": {
-      "upper": "6847e663f43abfdda205835a",
-      "lower": "66589cceb00aec5c0278573c"
+      "upper": "66a25a3af12f29d8a2599527",
+      "lower": "685d0967cb2cba9e8f02e7b3"
     },
     "bear": {
-      "upper": "6847e76f3f4cd20a97097a93",
-      "lower": "6658a1d54de4820934746dd4"
+      "upper": "66a25a3af12f29d8a2599527",
+      "lower": "685d0967cb2cba9e8f02e7b3"
     }
   },
   "loadout": {
-    "equipped": {},
+    "equipped": {
+      // baseline-v2 (2026-07-06, decisão do usuário): Peladão SEM secure container E SEM faca — a base
+      // edition ("SPT Zero to hero") dá Alpha + 6Kh5; `remove` tira o ocupante sem equipar nada.
+      "SecuredContainer": { "remove": true },
+      "Scabbard": { "remove": true }
+    },
     "stash": []
   }
 }

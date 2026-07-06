@@ -200,3 +200,13 @@ Continuação direta da entrada de madrugada deste dia (Sessão 4a). Delta regis
 - `modded/Patches/StanceStaminaRecoveryPatch.cs` — pré-existente do backlog 001; controla drain/recovery de HandsStamina por stance.
 - `PROPRIEDADES.md` — 90 props documentadas em pt-BR (era 79 antes do 002; 89 após CR-01-06 com Snap Stale Timeout).
 - `backlog/` — todos os artefatos do ciclo (01-spec, 02-spec-tech, 03-spec-tech-review-NN, 04-code-review-NN, 05-asbuild, 06-fix-NN).
+
+## 2026-07-04 — Sessão (CustomClasses/051): hook externo de dreno de braço
+
+**Entrada de COORDENAÇÃO (escrita pela sessão do CustomClasses, worktree wt-057, branch feat/053-perks-property-model):**
+o `StaminaController` ganhou um CONTRATO EXTERNO — `public static Func<float> ExternalHandsDrainMult` — composto
+no Tick **só no ramo de dreno** (`delta < 0`): `delta *= Clamp(hook(), 0, 2)`. O CustomClasses o preenche por
+reflection (Steady Arms do Caçador ×0.65 em ADS; Tireless Arms do Tanque ×0 com arma pesada). Null = comportamento
+idêntico ao anterior (regressão zero). ⚠️ NÃO renomear `CameraRotationMod.StaminaController.ExternalHandsDrainMult`
+sem coordenar. Artefatos: mods/CustomClasses/backlog/051-stances-zone-levers/ (spec + review técnica 01).
+

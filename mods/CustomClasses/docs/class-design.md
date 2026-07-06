@@ -49,7 +49,7 @@
 
 | Perk / Drawback | Tipo | Efeito | Obs / knob |
 |---|---|---|---|
-| **Sharpshooter** | 🔧 passivo | • **sacar/guardar a pistola**: tempo `×0.5` → **2× mais rápido**<br>• **tempo de ADS** (levantar a mira): sniper/DMR `×0.85` → **15% mais rápido**; fuzil de assalto (AR) `×1.15` → **15% mais lento** *(penalidade fora da especialidade)* | |
+| **Sharpshooter** | 🔧 passivo | • **tempo de ADS** (levantar a mira) `×0.85` → **15% mais rápido em TODAS as armas** *(2026-07-01: simplificado — o **saque de pistola ×0.5** e a **penalidade de AR ×1.15** do design original **não foram implementados**; ADS é flat em qualquer arma, sem downside. Decisão do usuário via CR-02-04)* | `AdsSpeedPatch` (client) |
 | **Iron Lungs** | 🔧 passivo | • **tempo segurando a respiração** (steady aim) `×1.5` → **+50%**<br>• **sway** (oscilação da mira parado) `×0.7` → **−30%**<br>• ⚠️ **dreno de stamina do braço ao mirar** `×0.65` → **−35% (cansa menos)** | ⚠️ = zona stances (item 051) |
 | **Rooted** | 🔻 drawback | • **velocidade de movimento enquanto em ADS `×0.85`** → **−15%** *(enraíza ao mirar; vulnerável a flanco/rush)* | move-while-ADS (client) |
 
@@ -305,6 +305,7 @@ Adicionar uma **aba nova "Perks/Drawback"** na tela de **SKILLS** (ao lado das c
 | 2026-06-21 | Guilherme | **Nomes EN** + 4 skills→perks (Mãos Rápidas/Passo Fantasma/Mula/Médico de Combate = head-start; redundantes com vanilla, confirmado no `SkillManager.cs`). |
 | 2026-06-21 | Guilherme | Reorganizado por classe; review anti-ambiguidade (convenção de leitura, cada efeito detalhado); achados: magnitude da Adrenaline (faltava) e fome/sede do Bunker (contraditório). |
 | 2026-06-21 | Guilherme | **Decisão: 100% perks.** As 4 skills restantes (Adrenaline, Iron Lungs, Bulwark, Execution) viram **perks flat** com valores medianos. **048 descopado · 049 funde no 050.** |
+| 2026-07-01 | Guilherme | **Sharpshooter simplificado** (CR-02-04, review de negócio 053): impl = ADS ×0.85 flat em todas as armas; saque de pistola ×0.5 e penalidade de AR ×1.15 **não implementados** (decisão: manter simples). Design alinhado à realidade. |
 | 2026-06-21 | Guilherme | **F ✅ confirmado.** Seção **Configuração no F12** (perks/drawbacks client-side; matriz server-side; nota de restart + requisito DoD de leitura ao vivo). |
 | 2026-06-21 | Guilherme | **Drawbacks definidos (1 por classe):** Médico=Shaky Hands (recuo ×1.25) · Fuzileiro=Loud Operator (som ×1.3) · Caçador=Rooted (vel. ADS ×0.85) · Fantasma=Rattled (aim-punch ×1.5) · Saqueador=Overladen (inércia por peso) · Tanque=Heavy Frame (vel. ×0.9 + fome/sede ×1.3). **I ✅ resolvido.** |
 | 2026-06-21 | Guilherme | **Classe Fantasma → Furtivo (Stealth).** Doc renomeado `class-custom-perks.md` → **`class-design.md`** e promovido a doc único: **consolidou** `class-overview.md` + `class-levers.md` (arquivados em `.archived/` com lápide) — absorveu **Matriz 🎯**, **Loadout/Hideout** e **Pontas soltas**. Rename na implementação (`.jsonc`/server) fica pendente (coordenar). |

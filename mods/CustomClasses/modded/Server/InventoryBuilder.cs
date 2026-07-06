@@ -46,6 +46,16 @@ public class InventoryBuilder(DatabaseService databaseService, ItemHelper itemHe
 
             var slotId = slot.ToString();   // nome do enum == slotId do EFT
 
+            // (baseline-v2 2026-07-06) `remove: true` → tira o ocupante da BASE edition (+ subárvore) e não
+            // equipa nada — ex.: Peladão SEM secure container (decisão do usuário; a base dá um Alpha).
+            if (spec.Remove)
+            {
+                RemoveSlotOccupant(inv.Items, equipmentId, slotId);
+                logger.Debug($"[CustomClasses] '{className}': slot '{slotName}' removido (spec.remove).");
+                added++;
+                continue;
+            }
+
             try   // CR-01-01: um item inválido (ex.: tpl mal formado) pula só este slot, não a classe inteira
             {
                 // Monta a árvore (preset/manual/tpl). tpl sem preset/mods → auto-completa com o preset
@@ -484,6 +494,14 @@ public class InventoryBuilder(DatabaseService databaseService, ItemHelper itemHe
         if (spec.LoadedMag)
         {
             var mag = tree.FirstOrDefault(i => i.SlotId == "mod_magazine");
+            // (baseline-v2 2026-07-06) carregador AVULSO: a raiz da linha de stash/contents é o próprio
+            // magazine (não há 'mod_magazine' na árvore) — enche a raiz. Antes, mags soltos nasciam
+            // silenciosamente vazios (só o caminho arma→mod_magazine era coberto).
+            if (mag is null && root is not null && itemHelper.IsOfBaseclass(root.Template, BaseClasses.MAGAZINE))
+            {
+                mag = root;
+            }
+
             if (mag is null)
             {
                 logger.Warning($"[CustomClasses] '{className}': '{context}' sem 'mod_magazine' — carregador não carregado.");

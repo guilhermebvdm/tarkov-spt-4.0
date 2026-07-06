@@ -18,6 +18,9 @@ namespace CustomClasses.Client;
 /// </summary>
 internal class RaidPerksNotificationPatch : ModulePatch
 {
+    /// <summary>Fix 2026-07-03 — texto da última notificação exibida; o <see cref="NotificationDurationPatch"/> casa por ele (10s).</summary>
+    internal static string? LastNotificationText;
+
     protected override MethodBase GetTargetMethod()
     {
         return AccessTools.Method(typeof(GameWorld), nameof(GameWorld.OnGameStarted));
@@ -31,6 +34,13 @@ internal class RaidPerksNotificationPatch : ModulePatch
             // (review fix) reseta a Adrenaline no início da raid — o cooldown não deve atravessar de uma raid
             // anterior (Time.time é monotônico no processo). Roda independente do toggle da notificação.
             AdrenalineState.Reset();
+            // (review CR-051-01) warm do cache AQUI (tela de load, hitch invisível): com as UIs de identidade
+            // desligadas no F12, o 1º consumidor seria o Factor() DENTRO do Tick de stamina do stances —
+            // HTTP síncrono no 1º ADS. EnsureLoaded é no-op se o deploy (PartyInfoPanelPrefetchPatch) já buscou.
+            SkillMultipliers.EnsureLoaded();
+            StancesArmStaminaBridge.TryAttach(finalAttempt: true);   // (051 PA-01-01) re-try do hook — aqui todos os plugins já carregaram
+            // (057 CR-057F3-03) o refetch do mapa nickname→classe migrou pro host real: Prefix de
+            // PartyInfoPanel.Show (PartyPlayerItemPatch.cs) — a tela de deploy abre ANTES do raid-start.
 
             if (PerksConfig.ShowRaidPerksNotification?.Value != true)
             {
@@ -69,7 +79,9 @@ internal class RaidPerksNotificationPatch : ModulePatch
 
         if (!string.IsNullOrEmpty(text))
         {
-            // Long ≈ 10s (≥5s pedido) — a notificação default sumia rápido demais.
+            // Fix 2026-07-03: 10s exatos via NotificationDurationPatch (casa pelo texto e promove p/ Infinite
+            // + hide agendado). O `Long` fica de FALLBACK caso o patch da view não case (≈2× o default).
+            LastNotificationText = text;
             NotificationManagerClass.DisplayMessageNotification(text, ENotificationDurationType.Long);
         }
     }

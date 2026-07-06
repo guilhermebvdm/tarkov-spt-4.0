@@ -129,16 +129,23 @@ internal static class PerkDiagnostics
     {
         try
         {
-            var entries = PerksCatalog.LocalEntries();
-            if (entries == null || entries.Length == 0)
+            var groups = PerksCatalog.LocalGroups();
+            if (groups == null || groups.Length == 0)
             {
                 return;
             }
 
             sb.AppendLine("<b><color=#7fd4ff>Class perks / drawbacks</color></b>");
-            foreach (var e in entries)
+            foreach (var g in groups)
             {
-                sb.AppendLine(e.IsPerk ? $"  <color=#7fff7f>+</color> {e.En}" : $"  <color=#ff7f7f>-</color> {e.En}");
+                sb.AppendLine($"<color=#c8c8c8>{g.NameEn}</color>");
+                foreach (var l in g.Lines)
+                {
+                    var mark = l.IsPerk ? "<color=#7fff7f>+</color>" : "<color=#ff7f7f>-</color>";
+                    var tok = l.ValueToken.Length > 0 ? l.ValueToken + " " : "";
+                    var soon = l.Pending ? " (soon)" : "";
+                    sb.AppendLine($"  {mark} {tok}{l.LabelEn}{soon}");
+                }
             }
         }
         catch (Exception ex)

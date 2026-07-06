@@ -1,6 +1,6 @@
 # 054 — Rename Ghost/Fantasma → Stealth/Furtivo · As-built
 
-**Mod:** CustomClasses · **Data:** 2026-06-22 · **Status:** 🔵 código feito, pendente validação in-game
+**Mod:** CustomClasses · **Data:** 2026-06-22 · **Status:** 🟡 código feito + **propagação pro install CONFIRMADA em 2026-07-04** (`D:/SPT/.../config/classes/furtivo.jsonc` com `name: Stealth`, displayName Stealth/Furtivo; `fantasma` só como .bak) — pendente APENAS validação in-game (launcher mostra Furtivo/Stealth; perfil novo cria a edição certa; gating do 050 na chave `Stealth`)
 **Ref:** [00-kickoff](./054-furtivo-rename-00-kickoff.md) · [class-design.md §Contrato de gating](../../docs/class-design.md)
 
 ## O que foi feito

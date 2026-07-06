@@ -21,7 +21,7 @@ const ITEMS_DB = path.join(SPT, 'SPT', 'SPT_Data', 'database', 'templates', 'ite
 
 // Mesmo BASELINE do gerador (build-class-jsons.js) e do extract-from-profile.mjs.
 const BASELINE = [
-  { tpl: '5449016a4bdc2d6f028b456f', count: 100000 }, // Roubles
+  { tpl: '5449016a4bdc2d6f028b456f', count: 300000 }, // Roubles (baseline-v2: 300k)
   { tpl: '544fb45d4bdc2dee738b4568', count: 1 },      // Salewa
   { tpl: '5751a25924597722c463c472', count: 2 },      // Army bandage
   { tpl: '5af0454c86f7746bf20992e8', count: 1 },      // Aluminum splint

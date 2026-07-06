@@ -8,7 +8,7 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 
 **Mod híbrido completo e maduro.** Itens **001–037 entregues** (🟢): 11 classes + identidade visual + **editor web Blazor completo** (018–029) + **épico UX (030–037) EXECUTADO** (autônomo via Workflow, 2026-06-11→12). Tudo **commitado** (15 commits do épico sobre baseline `3634548`); working tree limpo exceto frentes paralelas (`docs/migration/*`, `.claude/skills/*`, `.agents/resources.md`, `docs/technical/spt-antipatterns.md`, `mods/SPT-Menu-Overhaul/memory/`). **Branch ahead 22, SEM push** — aguarda revisão do usuário. Relatório: `.handoffs/handoff-2026-06-12-overnight-ux-030-037.md`.
 
-**Redesign 11→6 — épico 050 (perks/drawbacks) IMPLEMENTADO (Sessão 10, 2026-06-23).** Roster: **6 + Peladão** (Médico/Fuzileiro/Caçador/**Furtivo**/Saqueador/Tanque); arquitetura **"tudo-é-perk-flat"** (signatures = perks **flat client-side no F12**, não skills custom — pivot do antigo "tudo-é-skill-real"). **050.0–050.4 compilam** (~21 efeitos: Bulwark, Pack Mule, Heavy Frame, Overladen, Rooted, Execution, Shaky Hands, Rattled, **Adrenaline** state-machine, Cool Under Fire, Ghost Step, Loud Operator, Silent Looter, **Bunker** armas pesadas, Sharpshooter, Iron Lungs…) — **NADA validado in-game** (🔴 P-10.1; vários gates de runtime). Item 047 (matriz) entregue. Design vivo: [class-design.md](../docs/class-design.md) (overview+levers ⚫ arquivados); matriz `scripts/class-matrix.mjs`. **Restante no backlog:** 051 (zona stances), 052 (validação), 053/055/056 (UI), 054 (propagar rename Furtivo `--force-config`), 057 (identidade coop). **Deferidos:** Combat Medic (transpiler), Quick Hands (server-side), Iron Lungs sway. ⚠️ **Sessão paralela do editor** commitando — coordenar antes de salvar `modded/Server/` (este chat não commitou).
+**Redesign 11→6 — épico 050 (perks/drawbacks) IMPLEMENTADO (Sessão 10, 2026-06-23).** Roster: **6 + Peladão** (Médico/Fuzileiro/Caçador/**Furtivo**/Saqueador/Tanque); arquitetura **"tudo-é-perk-flat"** (signatures = perks **flat client-side no F12**, não skills custom — pivot do antigo "tudo-é-skill-real"). **050.0–050.4 compilam** (~21 efeitos: Bulwark, Pack Mule, Heavy Frame, Overladen, Rooted, Execution, Shaky Hands, Rattled, **Adrenaline** state-machine, Cool Under Fire, Ghost Step, Loud Operator, Silent Looter, **Bunker** armas pesadas, Sharpshooter, Iron Lungs…) — **NADA validado in-game** (🔴 P-10.1; vários gates de runtime). Item 047 (matriz) entregue. Design vivo: [class-design.md](../docs/class-design.md) (overview+levers ⚫ arquivados); matriz `scripts/class-matrix.mjs`. **Restante no backlog:** 052 (validação final) e 054 (rename `--force-config`); 053/055/056/059 e 057 ENTREGUES aguardando re-teste (P-11.1); 058 DESTRAVADO — gate V fechado (P-12.1); 051 speccado com decisão (a) (P-12.2). **Deferidos:** Combat Medic (transpiler), Quick Hands (server-side), Iron Lungs sway. ⚠️ Esta frente roda em **git worktree** `../tarkov-spt-4.0-wt-057` (tree principal ocupado pela sessão do editor); `modded/Server` ganhou a rota `class-identities` (liberação do usuário 2026-07-03).
 
 **Em andamento (item 038 — redesign workspace 3 painéis estilo EFT):** F0 ✅ (`82bc4a5`, grade 2D X/Y/R no schema+builder) e F1 ✅ (`2cc4274`, workspace read-only: silhueta + grade 2D). Faltam **F2** (edição in-place + skins dialog + DnD HTML5 `.mjs` + migrar `@code` do ClassEdit + refino da silhueta) e **F3** (polimento/docs/smoke in-game). Plano: `~/.claude/plans/monte-um-plano-para-goofy-otter.md`. Silhueta ainda rascunho. Sem push.
 
@@ -25,7 +25,10 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 
 - 🔴 [P-10.1] (aberta 2026-06-23) **Validação in-game 050.0–050.4** (~21 efeitos) + 047 — vários **gates de runtime** que o compile não pega (`method_67` som, `method_12` fôlego, injeção `_aimingSpeed`, getter `TotalErgonomics`, `IPlayerOwner.iPlayer`, weapClass vs DB). Regra `feedback_spt_validation`. (Supersede P-8.1.)
 - 🟡 [P-10.2] (aberta 2026-06-23) **Deferrals do 050:** Combat Medic (transpiler em `DoMedEffect` + lock de cirurgia runtime), Quick Hands (buff `SearchDouble` server-side), Iron Lungs sway (`BreathEffector`). Detalhe em 050…-05-asbuild.
-- 🟡 [P-10.3] (aberta 2026-06-23) **Redesign restante (backlog):** 051 (zona stances — coordenar stances mod), 057 (identidade coop — toca `modded/Server`), 053/055/056 (UI), 054 (propagar rename `--force-config`), 052 (validação final). (Supersede P-8.2.)
+- 🟡 [P-10.3] (aberta 2026-06-23, atualizada 2026-07-04) **Redesign restante (backlog):** 054 (propagar rename `--force-config`) e 052 (validação final). 051 e 058 têm pendência própria (P-12.2/P-12.1). (Supersede P-8.2.)
+- 🟡 [P-11.1] (aberta 2026-07-03, atualizada 2026-07-04) **Re-teste da leva de UI (rodada 4) + 057 coop** — VALIDADOS ✅ in-game: notificação por-efeito/10s (aprovada), chips ✓, títulos únicos por efeito, alinhamento do painel, ícones por efeito, zoom 0.75. RE-TESTAR: texto "CLASS" na aba (fix preferredWidth 817df0b) · cores dos nomes pós-fix cor² (5f0ada2) · popover no PAINEL DE GRUPO do deploy (06-fix-02) · **057 em coop 2+ COMO CLIENTE** (+ trânsito). Calibração: Weight Marker X=−107/Y=+50.7 vistos no print — user confirmar pra fixar default.
+- 🟡 [P-12.1] (aberta 2026-07-04, atualizada 14:52) **058 IMPLEMENTADO — aguardando gate in-game** — ciclo completo (spec §10 → code-mod e6f3816 → code review 7/7 aplicados 656ca97; compile 0/0, DLL instalada). Validar: GP-25 sobe a barra de Underbarrel AO VIVO (com CalculateExpOnFirstLevels a paridade é ~100 disparos p/ nível 1) → extract persiste (V3 mod-side!) → Recoil str no overlay 052 cai com nível ≥1 → sem XP duplo nas 3 vanilla → coop como cliente. Checklist no 05-asbuild.
+- 🟢 [P-12.2] (aberta 2026-07-04) **051 ciclo** — decisão (a) travada + 01-spec criada; próximo: review-spec → spec-tech → code-mod TOCA `mods/stancesAndCameraPositionSPT4.0.11` (hook no StaminaController) — coordenar com a sessão/handoff do stances.
 - 🟢 [P-8.3] (aberta 2026-06-21) **Badge "Not registered" no editor** — server registra a edition por `displayName.pt` mas o editor chaveia por `name` en. Cosmético; corrigir se incomodar.
 - 🟡 [P-8.4] (aberta 2026-06-21) **Gear + identidade visual de furtivo/tanque são placeholder** (loadout/`iconFile` clonados do furtivo/tático) — curar (ícones próprios, gear definitivo).
 - 🔴 [P-7.9] (aberta 2026-06-12) **PUSH dos 15 commits do épico** + QA visual no viewer (build-gate ≠ correção: matriz em células estreitas 032, dashboard em viewport estreito 033, comparação A×B 036).
@@ -331,4 +334,114 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 - Sourcing de presets de arma (globals `ItemPresets`) e de suits/customization (DB customization) — não estão no tarkov-itemdb.
 - Mapeamento pt-BR → `pt` + inclusão em `ServerSupportedLocales`.
 - Capacidade do stash (lição de overflow do RZ).
+
+
+### 2026-07-03 ~20:40 (GMT-3) — Sessão 11: UI perks (059/055/053) + 057 identidade per-player ponta a ponta (/g-autodev)
+
+Branch `feat/053-perks-property-model` (nada em push). Duas metades:
+
+**Metade 1 — fixes de UI direto (retomada do HANDOFF.md):**
+- 059 CLASS#3 (`2b42db9`): **1 card por efeito** (decisão do usuário) + descoberta-chave: os quadradinhos da tela
+  SKILLS são `EFT.UI.BuffIcon` com sprite POR EFEITO em `StaticIcons.BuffIdSprites[EBuffId]` (irmão do
+  `SkillIdSprites`) — `PerkLine` ganhou `EBuffId Icon` mapeado nas 18 entradas.
+- 055 (`b568343`): zoom-out do popover do loading — escala 0.75 com rect compensado (mesma pegada ~600×460,
+  +33% de espaço interno); F12 `Class Detail — Loading panel scale` lido A CADA hover (live).
+- 059 CLASS#1 (`7714159`): F12 `Class Tab — X offset` virou **live** (`RepositionClassTab` a cada Show +
+  `SettingChanged`) — elimina a dependência do log `[053-tabs]`; usuário calibra e passa o valor.
+
+**Metade 2 — item 057 completo via /g-autodev (spec→review→spec-tech→review-tech→code-mod→code-review→apply):**
+- Decisões do usuário (AskUserQuestion): escopo = **só o loading FIKA** (lobby/nametag/chat = futuro);
+  `modded/Server` liberado.
+- **Descoberta que mudou o design:** no loading o client só tem `netId+nickname` (perfis remotos indisponíveis)
+  → hipótese `GameVersion`-no-client do backlog DESCARTADA; mecanismo = rota server
+  `/customclasses/class-identities` (nickname→classe de todos os perfis; `ProfileInfo.Edition` é a chave direta
+  do `ClassVisualRegistry` → matching en/pt vira não-problema).
+- Reviews por agentes adversariais de contexto limpo: review técnica 11 pontos (1 🔴: **SCAV herda classe do
+  PMC** — FIKA usa sempre o nickname do PMC → gate local `FikaBackendUtils.IsScav` via reflection + limitação
+  remota documentada/emendada) · code review 9 achados (0 🔴; aplicados 8 — warn-once, HashSet estático
+  write-only removido do router, tint pulado sem `nameColor`, guard de row velha, etc.).
+- Código (`9c912a9` + `5538dab`): router+DTOs server (arquivos NOVOS, zero merge-risk), `ClassIdentities`
+  client (refetch por tela de loading), `PerksPanelView.Refresh(panel, Identity?)` parametrizado com
+  idempotência per-panel (`PanelState` substitui o static — N painéis no loading), patch generalizado
+  (tint do nickname + popover per-player, raycast do popover OFF pós-Refresh).
+- **Incidente de sessão:** o working tree principal foi trocado pra `feat/design-system-trl` pela sessão
+  paralela DURANTE o trabalho → 057 seguiu em **git worktree** `../tarkov-spt-4.0-wt-057` (mesma branch;
+  deps gitignored replicadas: `Client/References/`, `.spt-path`). Lição: worktree é a saída limpa pra
+  multi-sessão no mesmo repo.
+- Grafo regenerado 2× (`e3d1412` na main-tree; worktree pós-057). Backlog 057 ⚪→🟡; HANDOFF.md atualizado.
+
+**Lições:**
+- `StaticIcons.BuffIdSprites` (EBuffId→Sprite) é a fonte dos ícones por efeito da tela SKILLS — reusável em
+  qualquer UI de buff custom (`BuffIcon.smethod_0` é a ref).
+- Tela de loading FIKA: identidade de players remotos SÓ via server (nickname é a única chave que trafega);
+  o nickname é SEMPRE o do PMC (mesmo em raid scav) — `MatchmakerAcceptScreen_Show_Patch.cs:36`.
+- `ApplyGradient` sobrescreve a cor do TMP sem revert — nunca aplicar com `nameColor` null em UI de terceiro.
+- Static mutável em router SPT (Kestrel) = requests concorrentes; evitar ou lockar.
+
+**Pendências:** P-11.1 (validação in-game da leva + 057; restart do SPT.Server) · defaults dos F12 após
+calibração do usuário · próximo da fila: 058 (V1/V2/V4) ou 051 (decisão stances).
+
+### 2026-07-04 04:42 (GMT-3) — Sessão 12: Rodadas de gate in-game (2–4) + gate V do 058 fechado + fix cor² dos nomes
+
+**Tema central:** iteração rápida com o usuário testando in-game (prints) — 3 rodadas de fixes de UI/popover, protocolo V do 058 rodado em perfil zerado, e caça a 2 bugs visuais de raiz (rótulo da aba e cor dos nomes).
+
+**Decisões-chave:**
+- **057 06-fix-02 — popover pivotado pro `RaidReadyPlayerPanel`** (painel de grupo do deploy): 2 gates falharam nas rows do LoadingScreenUI do FIKA (hover nunca dispara — canvas sem raycast); o painel de grupo já tem tooltips funcionando e cobre qualquer membro (resolve por `player.Info.Nickname`). Rows antigas ficam como redundância. Ref: 06-fix-02, commit 852a51c.
+- **Notificação de raid APROVADA ✅** — uma linha por efeito (vocabulário da aba CLASS) + 10s exatos via Prefix em `BaseNotificationView.Init` (Infinite + hide agendado; `Long` de fallback). Ref: NotificationDurationPatch, d39cdc0.
+- **051 = opção (a)** (decisão do usuário): hook de composição no `StaminaController` do stances via soft-detect; 01-spec criada com a decisão fixada. Ref: a0d9e31, f95f001.
+- **058 — gate V FECHADO** (perfil zerado, protocolo estendido da review): SMG 2.46/LMG 2.76/GL-standalone 0.91 SOBEM VANILLA (fora da perna 1, anti-XP-duplo); **underbarrel = 0 (única morta)**; extract persiste (V2 ✅); user não acertou granada em cheio e nada creditou → design POR DISPARO selado. HMG intestável (NSV fixa de mapa) → best-effort. Refs: 34d59f8, 8308e2d.
+- **Títulos únicos por efeito** (`TitleEn/Pt` em cada PerkLine — Steady Mount, Grenadier, Tireless Arms…) + ícones ergo→Bipod / GL→ThrowDistance + pending nos 2 cards da zona stances (achado da análise 051). Ref: d39cdc0, 852a51c.
+
+**Lições / hipóteses descartadas:**
+- **TMP `SetText()` NÃO atualiza a property `.text`** — o guard do CR-01-05 comparava `.text` e matou tint+hover de TODAS as linhas (placeholder do prefab). Fix: espelhar o early-return do FIKA com mapa próprio `netId→nickname`. Ref: 06-fix-01.
+- **TMP multiplica o vertex gradient pela cor base** — `tmp.color = cor` + gradient na mesma cor renderizava **cor²** (cinza 0.55→0.30): a causa de TODOS os nomes de classe mais escuros que os brasões. Fix: cor só no gradiente, base branca. Ref: ClassIdentityView.ApplyGradient, 5f0ada2.
+- **Image sob layout sem `LayoutElement` usa preferredWidth = LARGURA EM PX do sprite** — brasão 512px desenhava pequeno (preserveAspect) mas ocupava rect gigante, expulsando o rótulo "CLASS" da aba. Fix: cap no tamanho do sprite nativo. Ref: 817df0b.
+- **Canvas do `LoadingScreenUI` (FIKA) não participa do raycast de UI** — hover em componentes ali é letra morta; host correto p/ interação no deploy é o `RaidReadyPlayerPanel` (matchmaker). 2 rodadas de fix no host errado antes do pivô.
+- **Premissa "Launcher/HMG/AttachedLauncher inequivocamente mortas" REFUTADA in-game** — Launcher standalone sobe vanilla (a review adversarial previu por `IsInstanceOfType`); e o acerto da explosão reporta a MUNIÇÃO (não o lançador) → underbarrel nunca credita. MASTERING "vazio" também não era bug (lista vem de `profile.Skills.Mastering`; perfil novo = 0 entradas).
+
+**Atividade cronológica:**
+1. Rodada 2 (feedback com prints): aba CLASS v2 (posição no conteúdo + push SKILLS/MASTERING; texto nos TMPs nativos), 06-fix-01, notificação 10s/por-efeito — d39cdc0.
+2. 058: review técnica adversarial 01 (11 achados; 1 🔴 Launcher-not-dead → protocolo V estendido) — d035c11. 051: análise de decisão no kickoff — a0d9e31.
+3. Rodada 3: DestroyImmediate no LocalizedText + diagnóstico [053-tabtext], AlignPanelToTab (margem espelhada), pivô do popover (06-fix-02), pendings Steady/Tireless — 852a51c.
+4. User rodou o protocolo V (perfil zerado) → resultados registrados na 01-spec; V2 confirmado — 34d59f8, 8308e2d. Recon do disparo do underbarrel despachado (background).
+5. 051(a) + spec funcional + gap do PROPRIEDADES (Loading panel scale) — f95f001. IDs de armas/moedas extraídos do DB pro loadout de teste.
+6. Rodada 4: causa do rótulo fora da aba (preferredWidth do sprite) — 817df0b; fix cor² dos nomes — 5f0ada2.
+
+**Pendências abertas nesta sessão:**
+- [P-12.1] 058 code-mod (gate fechado; aplicar review na spec-tech + implementar por-disparo + efeito por nível). 🟡
+- [P-12.2] 051 review-spec → spec-tech → code-mod (toca o stances mod — coordenar sessões). 🟢
+
+**Cross-refs:**
+- Atualiza [P-11.1] (validados ✅: notificação, chips, títulos, alinhamento; re-teste da rodada 4 pendente) e [P-10.3] (051/058 ganharam pendência própria).
+- Handoff vivo: `HANDOFF.md` (rodadas anotadas por item); artefatos 057 (06-fix-01/02) e 058 (03-review + resultados V na 01-spec).
+
+### 2026-07-04 14:52 (GMT-3) — Sessão 12b: 058 implementado ponta a ponta (/g-autodev autônomo)
+
+**Tema central:** fechamento do 058 (weapon mastery) 100% autônomo — spec §10 (redesenho pós-V), code-mod, review adversarial e apply, com o usuário dormindo.
+
+**Decisões-chave:**
+- **Perna 1 = XP POR DISPARO do underbarrel** via Postfix em `FirearmController.method_57(LauncherItemClass, AmmoItemClass)` (Player.cs:14231 — caller único no OnFireEvent do lançador; recon próprio, o agente da madrugada ficou órfão do restart). Gate AP-02 por `ReferenceEquals(controller, MainPlayer.HandsController)` (bots usam o mesmo controller). Fator de XP da classe aplicado (consistência com OnTriggerPatch).
+- **Perna 2 = efeito por nível** (recuo ×(1−0.004·lvl), ergo ×(1+0.002·lvl)) pela maestria da ARMA EM MÃOS (`smg`→SMG, `machinegun`→LMG, `grenadeLauncher`→Launcher) — Prefix/Postfix novos nos MESMOS alvos do 050, compondo com Shaky Hands/Adrenaline/Bunker. Bônus: escala do EXCESSO do coice do próprio underbarrel (`float_5`).
+- **HMG deferida** (só existe estacionária — outro controller, sem como validar); anti-XP-duplo nas 3 que sobem vanilla; F12 seção `Weapon Mastery` (0.1/disparo · 0.004 · 0.002).
+- **Review 01 (adversarial, 10 verificações): 0🔴/1🟠/3🟡/3🟢 — 7/7 aplicados**, destaque 🟠: `SetCurrent` cru pulava `CalculateExpOnFirstLevels` (nível 0→1 seria 10× mais lento que a paridade prometida) → corrigido chamando o método público em Level<9.
+
+**Lições / hipóteses descartadas:**
+- **XP de skill "cru" ≠ XP vanilla:** o funil `SkillClass.OnTrigger` amplifica o XP nos primeiros níveis (×10/(nível+1), Level<9) além de fadiga/BonusController — creditar direto via `SetCurrent` sem `CalculateExpOnFirstLevels` quebra a paridade onde ela mais importa (validação do nível 1). Ref: SkillClass.cs:228-241/108.
+- **Ordem de Prefixes Harmony é load-bearing quando um patch instrumenta o outro:** o PerkDiag captura baseline no Prefix do 050; a maestria precisa rodar ANTES pra aparecer no overlay — ordem via Enable() é frágil, `[HarmonyPriority]` explícito é a forma correta. Ref: CR-01-03.
+- **Shooting range do hideout não dá XP de weapon skill no vanilla** (`HideoutPlayer.ExecuteShotSkill` é override vazio) — hooks fora do funil `ExecuteShotSkill` precisam replicar esse gate manualmente.
+- **Fika confirmado por fonte:** `FikaClientFirearmController` herda `method_57` (patch pega no cliente); `ObservedFirearmController` replica tiro remoto SEM `method_57` (remoto nunca credita).
+- **Operacional:** script `update-graphs.sh` rodado sem `cd` executa no tree PRINCIPAL (cwd reseta) — em worktree, sempre `cd` antes; conferir `git status` do tree vizinho após o vacilo (desta vez sem estrago).
+
+**Atividade cronológica:**
+1. Spec-tech §10 (redesenho pós-V + 11 resoluções da review técnica incorporadas) — parte do commit e6f3816.
+2. Recon próprio do disparo (method_57/float_5/SkillManager.AttachedLauncher) — agente órfão descartado.
+3. Code-mod: `WeaponMastery.cs` + `WeaponMasteryPatches.cs` (3 patches) + F12 + Plugin + PROPRIEDADES + asbuild + backlog/handoff — e6f3816; compile 0/0 de primeira.
+4. Grafo regenerado (1580 nós · 2021 arestas) — b860ead.
+5. Review adversarial (10 verificações com evidência) → 7 achados → todos aplicados + recompile 0/0 — 656ca97.
+
+**Pendências abertas nesta sessão:** (P-12.1 atualizada no topo — 058 aguardando gate in-game.)
+
+**Cross-refs:**
+- Continua a Sessão 12 (mesmo chat); resolve o "falta" da P-12.1.
+- Config global do harness: `~/.claude/settings.json` ganhou `additionalDirectories: /c/Repos/spt` (worktrees sem prompt) — trabalho não-mod, registrado aqui só como contexto.
 

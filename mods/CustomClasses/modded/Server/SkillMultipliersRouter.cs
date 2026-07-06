@@ -1,6 +1,7 @@
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;                  // StaticRouter, RouteAction
 using SPTarkov.Server.Core.Models.Eft.Common;   // EmptyRequestData
+using SPTarkov.Server.Core.Models.Utils;        // ISptLogger (review CR-060-02)
 using SPTarkov.Server.Core.Servers;             // SaveServer
 using SPTarkov.Server.Core.Utils;               // JsonUtil
 
@@ -16,12 +17,14 @@ namespace CustomClasses;
 [Injectable]
 public class SkillMultipliersRouter : StaticRouter
 {
-    public SkillMultipliersRouter(JsonUtil jsonUtil, SkillMultiplierRegistry registry, ClassVisualRegistry visualRegistry, SaveServer saveServer)
-        : base(jsonUtil, GetRoutes(jsonUtil, registry, visualRegistry, saveServer))
+    public SkillMultipliersRouter(JsonUtil jsonUtil, SkillMultiplierRegistry registry, ClassVisualRegistry visualRegistry, SaveServer saveServer,
+        ISptLogger<SkillMultipliersRouter> logger)
+        : base(jsonUtil, GetRoutes(jsonUtil, registry, visualRegistry, saveServer, logger))
     {
     }
 
-    private static List<RouteAction> GetRoutes(JsonUtil jsonUtil, SkillMultiplierRegistry registry, ClassVisualRegistry visualRegistry, SaveServer saveServer)
+    private static List<RouteAction> GetRoutes(JsonUtil jsonUtil, SkillMultiplierRegistry registry, ClassVisualRegistry visualRegistry, SaveServer saveServer,
+        ISptLogger<SkillMultipliersRouter> logger)
     {
         return
         [
@@ -30,7 +33,26 @@ public class SkillMultipliersRouter : StaticRouter
                 (url, info, sessionId, output) =>
                 {
                     // ref: SaveServer.cs:118 (GetProfile(MongoId)); Edition usada em CreateProfileService.cs:44
-                    var profile = saveServer.GetProfile(sessionId);
+                    // (fix 2026-07-04) server reiniciado com o client ABERTO → sessionId vazio e GetProfile
+                    // lança ("did you restart the server while the game was running?") — cenário conhecido/
+                    // benigno, tratado EXPLÍCITO sem log. (review CR-060-02) qualquer OUTRA falha do GetProfile
+                    // (perfil corrompido, race de load) NÃO pode virar vanilla silencioso: loga Warning com o
+                    // sessionId antes de degradar (o client cacheia "{}" a sessão inteira).
+                    if (string.IsNullOrEmpty(sessionId))
+                    {
+                        return new ValueTask<string>("{}");
+                    }
+
+                    SPTarkov.Server.Core.Models.Eft.Profile.SptProfile? profile;
+                    try
+                    {
+                        profile = saveServer.GetProfile(sessionId);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Warning($"[CustomClasses] skill-multipliers: GetProfile('{sessionId}') falhou — payload vazio (client fica vanilla até reiniciar o EFT): {ex.Message}");
+                        return new ValueTask<string>("{}");
+                    }
                     var edition = profile?.ProfileInfo?.Edition ?? string.Empty;
                     var isClass = visualRegistry.Contains(edition);   // item 011: é classe do mod?
                     var visual = visualRegistry.Get(edition);

@@ -22,6 +22,18 @@ internal static class MultiplierFormat
     public static Color BorderColor(float factor) => factor > 1f ? Green : Red;
 
     /// <summary>
+    ///     Item 059 — token de valor de uma propriedade atômica: Percent "+30%"/"−10%" (sinal do mult, magnitude
+    ///     |mult−1|·100), Multiplier "×0.85"/"×5", Flag "" (qualitativa). Cor/seção vêm do <c>PerkLine.IsPerk</c>.
+    /// </summary>
+    public static string ValueToken(PerksCatalog.PerkLine l) => l.Format switch
+    {
+        ValueFormat.Percent => (l.Multiplier > 1f ? "+" : "−") + Mathf.RoundToInt(Mathf.Abs(l.Multiplier - 1f) * 100f) + "%",
+        ValueFormat.Multiplier => "×" + l.Multiplier.ToString("0.##"),
+        // 059: Flag qualitativa ganha chip destacado (mesmo negrito/cor dos números). ✓ = tem o benefício · ✗ = desvantagem.
+        _ => l.IsPerk ? "✓" : "✗",
+    };
+
+    /// <summary>
     ///     Marcador da linha: "▲ +50%" (verde) / "▼ -30%" (vermelho), rich text TMP.
     ///     PA-01-02: setas Unicode (U+25B2/U+25BC). Se a fonte TMP do EFT não tiver os glyphs
     ///     (aparecer "□"), trocar AQUI por só-texto (sem seta) ou ASCII — ponto único de mudança.
@@ -58,5 +70,24 @@ internal static class MultiplierFormat
         var amountEn = $"<color={hex}>{sign}{pct}% {word}</color>";
         var clsEn = string.IsNullOrWhiteSpace(className) ? "your Class" : $"Class <b>{className}</b>";
         return $"You have a {amountEn} on this skill from {clsEn}";
+    }
+
+    /// <summary>
+    ///     Item 056 — tooltip do marcador de PESO (Pack Mule) na aba Health. Atribui o +X% de limite de carga à classe.
+    ///     "piso/floor" porque o Pack Mule é aplicado como piso (não soma com a Strength).
+    /// </summary>
+    public static string CarryTooltip(float factor, string? className)
+    {
+        var pct = Percent(factor);
+        var sign = pct >= 0 ? "+" : string.Empty;
+        var amount = $"<color={GreenHex}>{sign}{pct}%</color>";
+        if (GameLocale.IsPortuguese)
+        {
+            var cls = string.IsNullOrWhiteSpace(className) ? "sua Classe" : $"Classe <b>{className}</b>";
+            return $"Limite de carga {amount} pela {cls} (Pack Mule, piso)";
+        }
+
+        var clsEn = string.IsNullOrWhiteSpace(className) ? "your Class" : $"Class <b>{className}</b>";
+        return $"Carry limit {amount} from {clsEn} (Pack Mule, floor)";
     }
 }

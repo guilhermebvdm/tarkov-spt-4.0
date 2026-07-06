@@ -12,7 +12,7 @@ namespace CustomClasses.Client;
 ///     Item 050.4 — som emitido pelo player.
 ///     <c>Player.method_67</c> = funil do RAIO de audibilidade de TODO som de movimento
 ///     (passos/gear/sprint/turn/prone) → multiplica o quão longe inimigos te ouvem. Gate: MainPlayer local.
-///     🔧 Ghost Step (Furtivo) ×0.4 (mais silencioso) · 🔻 Loud Operator (Fuzileiro) ×1.3 (mais alto).
+///     🔧 Ghost Step (Furtivo) ×0.4 (mais silencioso) · 🔻 Loud Operator (Fuzileiro + Tanque, 2026-07-05) ×1.3.
 /// </summary>
 internal class SoundRadiusPatch : ModulePatch
 {
@@ -41,8 +41,9 @@ internal class SoundRadiusPatch : ModulePatch
                 __result *= PerksConfig.GhostStepSoundRadius?.Value ?? 1f;
             }
 
-            // 🔻 Loud Operator (Fuzileiro): aumenta o raio de audibilidade.
-            if (PerksConfig.LoudOperatorEnabled?.Value == true && SkillMultipliers.IsLocalClass("Rifleman"))
+            // 🔻 Loud Operator (Fuzileiro + Tanque, 2026-07-05): aumenta o raio de audibilidade.
+            if (PerksConfig.LoudOperatorEnabled?.Value == true
+                && (SkillMultipliers.IsLocalClass("Rifleman") || SkillMultipliers.IsLocalClass("Tank")))
             {
                 __result *= PerksConfig.LoudOperatorSoundRadius?.Value ?? 1f;
             }
@@ -130,7 +131,8 @@ internal class AiSoundPatch : ModulePatch
                 power *= PerksConfig.GhostStepSoundRadius?.Value ?? 1f;
             }
 
-            if (PerksConfig.LoudOperatorEnabled?.Value == true && SkillMultipliers.IsLocalClass("Rifleman"))
+            if (PerksConfig.LoudOperatorEnabled?.Value == true
+                && (SkillMultipliers.IsLocalClass("Rifleman") || SkillMultipliers.IsLocalClass("Tank")))
             {
                 power *= PerksConfig.LoudOperatorSoundRadius?.Value ?? 1f;
             }
@@ -206,7 +208,8 @@ internal class SainSoundPatch : ModulePatch
                 __2 *= PerksConfig.GhostStepSoundRadius?.Value ?? 1f;   // reduz TODOS
             }
 
-            if (PerksConfig.LoudOperatorEnabled?.Value == true && SkillMultipliers.IsLocalClass("Rifleman"))
+            if (PerksConfig.LoudOperatorEnabled?.Value == true
+                && (SkillMultipliers.IsLocalClass("Rifleman") || SkillMultipliers.IsLocalClass("Tank")))
             {
                 __2 *= PerksConfig.LoudOperatorSoundRadius?.Value ?? 1f;   // aumenta TODOS
             }

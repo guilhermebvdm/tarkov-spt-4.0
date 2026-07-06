@@ -81,9 +81,17 @@ DTO: `ClassDefinition` (`modded/Server/ClassDefinition.cs`).
 ```jsonc
 "loadout": {
   "equipped": { "<EquipmentSlot>": <ItemSpec>, ... },   // 1 item por slot do personagem
-  "stash":    [ <ItemSpec>, ... ]                       // itens soltos no stash (lista PLANA, sem posição)
+  "stash":    [ <ItemSpec>, ... ]                       // itens soltos no stash (posição OPCIONAL via x/y/rotated)
 }
 ```
+
+> **Políticas baseline-v2 (2026-07-06, decisões do usuário):** o extrator (`scripts/extract-from-profile.mjs`)
+> emite `SecuredContainer` = **Alpha** para todas as classes extraídas e aplica overrides de `Pockets` por
+> classe (saqueador → Pockets 1x4 TUE/Unheard); `Scabbard` é **copiado do perfil-fonte**; rublos são
+> **normalizados** (stacks do perfil descartados; a classe nasce com o valor fixo — default **300k**); itens
+> `DEFAULT_EXCLUDE` (DSP transmitter) nunca são extraídos. Essas políticas vivem no extrator para sobreviver
+> a re-extrações. Exceção: **Peladão** não é extraído e usa `"SecuredContainer": { "remove": true }` —
+> nasce **SEM** secure container (a base daria um Alpha).
 
 Slots válidos em `equipped` (enum `EquipmentSlots`, case-insensitive): `Headwear`, `Earpiece`, `FaceCover`, `ArmorVest`, `Eyewear`, `ArmBand`, `TacticalVest`, `Pockets`, `Backpack`, `SecuredContainer`, `FirstPrimaryWeapon`, `SecondPrimaryWeapon`, `Holster`, `Scabbard`. Slot desconhecido → warning + ignorado (`InventoryBuilder.Apply`).
 
@@ -100,6 +108,9 @@ Slots válidos em `equipped` (enum `EquipmentSlots`, case-insensitive): `Headwea
 | `chambered` | bool | `false` | Põe 1 cartucho de `ammo` na câmara (slot real lido do template da arma — `patron_in_weapon`/variantes). |
 | `contents` | `ItemSpec[]` | — | Itens **dentro** do contêiner (rig/mochila — equipado OU no stash), empacotados nas grades dele; recursivo. |
 | `mods` | `ModSpec[]` | — | Árvore **manual** de mods (alternativa a `preset`). Exige `tpl` raiz. |
+| `x`, `y` | int? | — | (item 038) Posição EXPLÍCITA na grade do stash (célula superior-esquerda). Se não couber, cai no auto-pack (nunca dropa). Só no nível do `stash` — em `contents` é ignorado pelo fluxo atual. |
+| `rotated` | bool? | `false` | (item 038) Item rotacionado (vertical) na posição pinada. |
+| `remove` | bool | `false` | (baseline-v2) **Só em slot equipado:** REMOVE o ocupante herdado da base edition (+ subárvore) sem equipar nada — ex.: Peladão sem secure container. Demais campos são ignorados. |
 
 Precedência na montagem (`InventoryBuilder.BuildItemTree`): `preset` > `mods` > `tpl`. Sem nenhum dos três → slot pulado com warning.
 
@@ -192,13 +203,13 @@ Entrada sem `tpl` ou `slotId` → warning + ignorada (`InventoryBuilder.AddMods`
 - **Presets clonados e re-identificados:** os itens do preset são deep-clonados e recebem ids novos preservando os links pai-filho (`InventoryBuilder.ClonePresetTree`); a raiz é re-raizada no slot (`RebaseClonedPreset`).
 - **Resolução de preset** (`InventoryBuilder.ResolvePreset` / `ResolvePremiumPreset`): lê direto de `Globals.ItemPresets` (não usa `PresetHelper` — o cache dele ainda está vazio em `PostDBModLoader+1`). Default = preset com `Encyclopedia`; premium = mais itens, preferindo sem térmica/NV.
 - **Mira mínima** (`InventoryBuilder.EnsureMinimumOptic`): arma equipada (ou montada no stash) **sem óptica real** ganha uma mira simples (red dot > assault scope > resto; nunca térmica/NV) no 1º slot compatível — direta ou via mount (2 níveis), sempre validada pelo filter de `_props.Slots`. Sem slot compatível → mantém mira de ferro.
-- **Munição** (`InventoryBuilder.LoadAmmo`): `loadedMag` enche o `mod_magazine` da árvore (se o preset já trouxe cartuchos, não mexe); `chambered` cria 1 cartucho no slot de câmara declarado no template da arma. Arma sem `mod_magazine`/câmara → warning, segue sem.
+- **Munição** (`InventoryBuilder.LoadAmmo`): `loadedMag` enche o `mod_magazine` da árvore (se o preset já trouxe cartuchos, não mexe); **carregador AVULSO** (raiz da linha de stash/contents é o próprio magazine — baseline-v2 2026-07-06) também é enchido; `chambered` cria 1 cartucho no slot de câmara declarado no template da arma. Sem `mod_magazine`/câmara → warning, segue sem.
 - **Falha isolada por slot:** exceção ao montar um item (ex.: tpl malformado) pula **só aquele slot**, com warning — a classe e os demais slots seguem (`InventoryBuilder.Apply`).
 - Tudo é aplicado **nos dois lados** (USEC e BEAR), a partir do mesmo `loadout`.
 
 ### 4.2 `GridPacker` — stash e contents (posicionamento em runtime)
 
-- O JSON **não tem posição** (`x`/`y`/rotação): `stash` e `contents` são listas planas. O posicionamento acontece **em runtime**, no load do servidor (`InventoryBuilder.PackSpecsIntoGrids` + `GridPacker.Place`).
+- Posição é **opt-in por item** (`x`/`y`/`rotated`, item 038): specs com coordenada são colocados PRIMEIRO (`GridPacker.TryPlaceAt`) e caem no auto-pack se a célula não couber — nunca dropam. Sem coordenada, o posicionamento é 100% runtime (`InventoryBuilder.PackSpecsIntoGrids` + `GridPacker.Place`). Desde a baseline-v2 o extrator PINA a posição do nível do stash (espelho do perfil-fonte); `contents` seguem auto-pack.
 - Algoritmo: **first-fit com rotação** — varre as grades do contêiner na ordem, célula a célula; tenta o item sem rotação e depois rotacionado; primeira posição livre ganha. A dimensão usada é a **real do item montado** (`InventoryHelper.GetItemSize`, considera `ExtraSize` dos mods).
 - **Stack-aware:** item simples com `StackMaxSize > 1` (munição, dinheiro) é dividido em stacks de até o máximo; cada stack ocupa uma célula/posição.
 - Entradas de `stash`/`contents` honram a **mesma semântica dos slots equipados** (CR-EP-01): `preset` explícito (com `premium`), árvore manual (`mods`), `ammo`/`loadedMag`/`chambered` e `contents` **recursivo** (empacotado nas grades do item colocado). Sem `preset`/`mods`, o `tpl` auto-completa com o **stash-preset** (`InventoryBuilder.ResolveStashPreset` — prefere o **menor** preset que já tenha óptica real; senão o default) ou vira item simples; armas montadas também passam por `EnsureMinimumOptic`. `count > 1` em árvore composta = N árvores montadas.

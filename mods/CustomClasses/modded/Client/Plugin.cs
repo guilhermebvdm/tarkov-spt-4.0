@@ -75,7 +75,9 @@ public class Plugin : BaseUnityPlugin
         ClassIconRatio = Config.Bind("Class identity position", "ClassIconRatio", 1.35f,
             new ConfigDescription("Class icon size as a multiple of each screen's name font size (icon = nameFontSize × ratio). Keeps the icon:font proportion consistent across screens.",
                 new AcceptableValueRange<float>(0.8f, 2.5f)));
-        DeployNameScale = Config.Bind("Class identity position", "DeployNameScale", 3.0f,
+        // (review CR-057F3-01) default era 3.0 calibrado ÀS CEGAS (o host antigo nunca disparava — a escala
+        // nunca foi aplicada in-game). Agora que o host real (PartyPlayerItem) funciona, 1.2 = leve e seguro.
+        DeployNameScale = Config.Bind("Class identity position", "DeployNameScale", 1.2f,
             new ConfigDescription("Scale of the player icon+name on the raid loading (deploy) screen (1.0 = original). Icon and name grow together (same proportion).",
                 new AcceptableValueRange<float>(1.0f, 4.0f)));
         // Real-time reposition when the F12 value changes (same pattern as Menu-Overhaul: SettingChanged event).
@@ -90,8 +92,7 @@ public class Plugin : BaseUnityPlugin
         new SkillIconBorderPatch().Enable();    // (010) UI — borda colorida no ícone
         new MenuClassIdentityPatch().Enable();              // (015) identidade no nome do jogador no menu (Menu-Overhaul)
         new SkillsScreenIdentityPatch().Enable();           // (012) selo da classe no topo da tela de Skills
-        // (053) overlay DESATIVADO — substituído pela aba CLASS nativa (abaixo). Reativar se a aba falhar.
-        // new SkillsPerksPanelPatch().Enable();
+        // (059) o overlay legado (SkillsPerksPanelPatch) foi removido — substituído pela aba CLASS nativa (abaixo).
         try
         {
             new SkillsClassTabPatch().Enable();             // (053) sub-aba CLASS (CLASS | SKILLS | MASTERING)
@@ -100,14 +101,26 @@ public class Plugin : BaseUnityPlugin
         {
             Log.LogError($"[CustomClasses] (053) aba CLASS não aplicada: {ex.Message}");
         }
-        new ChatSpecialIconPatch().Enable();                // (015) identidade no nome — deploy/chat/grupo (ChatSpecialIcon)
+        // (057 06-fix-03) O patch das ROWS do FIKA (ClassDetailLoadingPatch) foi DESATIVADO por decisão do
+        // usuário: a lista inferior (progresso de carregamento do FIKA) não deve ser tocada. O host do
+        // popover/identidade no deploy é a listagem de grupo SUPERIOR-esquerda (PartyPlayerItemPatch —
+        // review CR-057F3-01: o RaidReadyPlayerPanel era código morto no SPT).
+        new ChatSpecialIconPatch().Enable();                // (015/057) identidade no nome — deploy/chat/grupo (local + remotos)
         new PlayerModelWithStatsIdentityPatch().Enable();   // (015) identidade no nome — tela de character (OVERALL)
         new PlayerNamePanelPatch().Enable();                // (015) identidade no nome — confirmation (PlayerNamePanel)
-        new RaidReadyPlayerPanelPatch().Enable();           // (015) aumenta ícone+nome na tela de deploy
+        new PartyPlayerItemPatch().Enable();                // (015/057) escala + popover no cursor — host REAL do deploy
+        new PartyInfoPanelPrefetchPatch().Enable();         // (057) caches frescos por tela de deploy (classe local + mapa)
         new SkillsNavButtonPatch().Enable();                // (013) botão SKILLS no menu → abre a aba Skills
         new BulwarkPatch().Enable();                        // (050.0) 🛡️ Tanque — dano recebido ×0.85
         new PackMulePatch().Enable();                       // (050.0) 🎒🛡️ Pack Mule — +30% limite de carga (piso, stash+raid)
+        new WeightMarkerPatch().Enable();                   // (056) marcador "▲ +X%" no peso (aba Health) — atribui ao Pack Mule
         new RaidPerksNotificationPatch().Enable();          // (050) notificação de perks/drawbacks no início da raid
+        new NotificationDurationPatch().Enable();           // (fix 2026-07-03) notificação de perks por 10s (Infinite + hide agendado)
+        StancesArmStaminaBridge.TryAttach();                // (051) hook de stamina de braço no stances (re-try no raid-start)
+        new UnderbarrelMasteryXpPatch().Enable();           // (058) XP de Underbarrel Launchers por disparo do GP-25/M203
+        new WeaponMasteryRecoilPatch().Enable();            // (058) recuo × (1 − rec/nível) — ANTES do ShootRecoilPatch (ordem intencional
+                                                            //       + HarmonyPriority.High: maestria entra no baseline do PerkDiag — CR-01-03)
+        new WeaponMasteryErgoPatch().Enable();              // (058) ergo × (1 + ergo/nível) pela maestria da arma em mãos
         // (050.1 fix 2026-06-24) MaxSpeedPatch/SprintSpeedPatch (getters) REMOVIDOS:
         //   - MaxSpeed é só TETO/denominador da razão RelativeSpeed = CharSpeed/MaxSpeed → aplicar no getter E no
         //     SetCharacterMovementSpeed CANCELAVA o efeito na razão. Agora só o driver real é patchado (abaixo).

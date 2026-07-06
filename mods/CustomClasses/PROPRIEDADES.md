@@ -32,8 +32,52 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 > - **Descrição da edition no launcher:** resolvida no **servidor** (locale do servidor), não pelo EFT — é uma limitação do launcher do SPT. Para vê-la em inglês, configure o **server locale = en** (config do SPT). Os **nomes das edições** na tela de criação são a chave (PT).
 > - Trocar o `.dll` do client exige **reiniciar o jogo** (plugin BepInEx).
 
+## Seção `Perks — UI`
+
+> Ajustes finos da UI de perks/drawbacks na tela de Skills (item 059).
+
+| Nome (EN) | Tradução pt-BR | Tipo | Padrão | Tooltip (pt-BR) |
+|---|---|---|---|---|
+| `Class Tab — X offset` | Aba CLASS — offset X | float | `0` | Ajuste fino da posição horizontal do botão da aba CLASS (px). Só use se a aba não alinhar. Faixa −400..400. (item 059) |
+| `Class Detail on Loading Screen` | Detalhe da classe no loading | bool | `true` | Mostra o detalhe da sua classe (perks/drawbacks) no seu nome na tela de carregamento da raid (FIKA). (item 055) |
+| `Weight Marker — X offset` | Marcador do peso — offset X | float | `0` | Ajuste horizontal (px) do marcador `▲ +X%` no peso (aba Health). Negativo = esquerda. Faixa −600..600. (item 056) |
+| `Weight Marker — Y offset` | Marcador do peso — offset Y | float | `0` | Ajuste vertical (px) do marcador `▲ +X%` no peso (aba Health). Positivo = para cima. Faixa −600..600. (item 056) |
+| `Class Detail — Loading panel scale` | Popover do loading — escala | float | `0.75` | Escala (zoom-out) do popover de classe no deploy/loading (0.75 = 75%). Mesma área na tela, conteúdo menor → mais espaço pros cards. Faixa 0.5..1.0. Lido a cada hover (live). (item 055) |
+
+## Seção `Perks — Hunter` / `Perks — Tank` — braço (item 051)
+
+> Dreno de stamina de braço por classe, **composto com o stances mod** via hook (`ExternalHandsDrainMult`).
+> Sem o stances instalado: inativo (1 aviso no log), sem crash.
+
+| Nome (EN) | Tradução pt-BR | Tipo | Padrão | Tooltip (pt-BR) |
+|---|---|---|---|---|
+| `Steady Arms — Enabled` | Braços Firmes — ativo | bool | `true` | Caçador: braço cansa mais devagar ao mirar (compõe com o stances mod). |
+| `Steady Arms — ADS arm drain mult` | Dreno de braço em ADS | float | `0.65` | Multiplicador do dreno de braço do Caçador em ADS (0.65 = 35% mais lento). Faixa 0.2..1. |
+| `Tireless Arms — Enabled` | Braços Incansáveis — ativo | bool | `true` | Tanque: braço não cansa segurando arma pesada (LMG/HMG/GL). |
+| `Tireless Arms — Heavy arm drain mult` | Dreno de braço c/ arma pesada | float | `0` | Multiplicador do dreno de braço do Tanque com arma pesada em mãos (0 = não drena). Faixa 0..1. |
+
+## Seção `Weapon Mastery` (item 058)
+
+> Dá vida às maestrias inertes da tela SKILLS. XP: só o **underbarrel** (SMG/LMG/Launcher sobem no vanilla —
+> anti-XP-duplo); efeito por nível vale pras categorias alcançáveis com a arma na mão (HMG deferida — só existe
+> estacionária de mapa).
+
+| Nome (EN) | Tradução pt-BR | Tipo | Padrão | Tooltip (pt-BR) |
+|---|---|---|---|---|
+| `Weapon Mastery — Enabled` | Maestria de armas — ativa | bool | `true` | Ativa XP por disparo do underbarrel (GP-25/M203) + bônus por nível de SMG/LMG/Launcher/Underbarrel. |
+| `Underbarrel XP per shot` | XP do underbarrel por disparo | float | `0.5` | XP de Underbarrel Launchers por DISPARO. 0.5 = paridade de ESFORÇO com SMG (granada é cara/rara; nível 1 ≈ 20 disparos). Faixa 0..1. |
+| `Recoil bonus per level` | Bônus de recuo por nível | float | `0.004` | Redução de recuo por nível da maestria da arma em mãos (−0.4%/nível; paridade `WeaponSkillRecoilBonusPerLevel`). Faixa 0..0.02. |
+| `Ergo bonus per level` | Bônus de ergo por nível | float | `0.002` | Aumento de ergonomia por nível da maestria da arma em mãos (+0.2%/nível). Faixa 0..0.02. |
+
 ## Histórico
 
 | Data | Alteração |
 |---|---|
 | 2026-06-07 | Criado (item 008). Documenta `EnableSkillMultipliers`, `ShowMultiplierOnSkills` (itens 005/010) e `Language` (008). |
+| 2026-07-02 | Item 059 — adicionada seção `Perks — UI` com `Class Tab — X offset` (ajuste da posição da aba CLASS). |
+| 2026-07-02 | Item 055 — `Class Detail on Loading Screen` (detalhe da classe no loading da raid, FIKA). |
+| 2026-07-03 | Item 056 — `Weight Marker — X/Y offset` (posicionar o marcador ▲ +X% do peso). |
+| 2026-07-03 | Item 055 — `Class Detail — Loading panel scale` (zoom-out do popover; faltava documentar — pego na varredura de pendências). |
+| 2026-07-04 | Item 058 — seção `Weapon Mastery` (XP do underbarrel por disparo + bônus por nível de recuo/ergo). |
+| 2026-07-04 | 058 review 2: default do XP 0.1→0.5 (RN-01, paridade de esforço). Nota RN-05: a maestria modded dá só recuo+ergo por nível (a vanilla tem também reload/swap/elite ×2) — escopo consciente. |
+| 2026-07-04 | Item 051 — Steady Arms (Hunter) + Tireless Arms (Tank): dreno de braço por classe via hook no stances mod. Cards saem do "em breve". |
