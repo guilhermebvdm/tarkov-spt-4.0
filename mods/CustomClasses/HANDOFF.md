@@ -72,8 +72,11 @@ Linhas Flag (`no ergo penalty`, `no arm fatigue`) agora têm chip **✓** (perk)
 ### 4b. 🟡 062 — Baseline v2: loadouts dos perfis novos (pipeline PRONTO; aguarda mapeamento)
 Pipeline corrigido e compilado (2026-07-06): pinagem x/y do stash no extrator (builder já honrava),
 mags avulsos enchem (`LoadAmmo` raiz-carregador), rublos fixos 300k, Scabbard copiado, Alpha p/ todos,
-Pockets Unheard no Saqueador, DSP excluído. **BLOQUEADO: usuário informa o mapeamento perfil→classe** →
-re-extração das 6 classes → gate. Plano: `~/.claude/plans/fluffy-finding-stonebraker.md`.
+Pockets Unheard no Saqueador, DSP excluído. **Re-extração das 6 EXECUTADA (2026-07-06)** — checks estruturais ✓ (Alpha/TUE/300k/pinagem/mags/semDSP;
+snapshot de skills intacto). Pendências: faca do Furtivo (6 tpls `69f3…/69f4…` fora da DB local — mod do
+server oficial ausente aqui) · Saqueador sem faca equipada no perfil-fonte · Peladão sem container (`remove`).
+**Gate: restart SPT.Server → criar perfil de cada classe → conferir stash espelhado/mags/300k/faca/pockets.**
+Plano: `~/.claude/plans/fluffy-finding-stonebraker.md`.
 
 ### 5. 🟡 056 — calibrar F12 e fixar default
 Usuário ajusta `Weight Marker — X/Y offset` (F12 → `Perks — UI`) até posicionar bem (chute inicial X≈−70, Y≈+30) e passa os valores → fixar como **default** no `PerksConfig` (aí dispensa o F12).
