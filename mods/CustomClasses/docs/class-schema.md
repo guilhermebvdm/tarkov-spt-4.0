@@ -86,10 +86,12 @@ DTO: `ClassDefinition` (`modded/Server/ClassDefinition.cs`).
 ```
 
 > **Políticas baseline-v2 (2026-07-06, decisões do usuário):** o extrator (`scripts/extract-from-profile.mjs`)
-> emite `SecuredContainer` = **Alpha** para todas as classes e aplica overrides de `Pockets` por classe
-> (saqueador → Pockets 1x4 TUE/Unheard); `Scabbard` é **copiado do perfil-fonte**; rublos são **normalizados**
-> (stacks do perfil descartados; a classe nasce com o valor fixo — default **300k**); itens `DEFAULT_EXCLUDE`
-> (DSP transmitter) nunca são extraídos. Essas políticas vivem no extrator para sobreviver a re-extrações.
+> emite `SecuredContainer` = **Alpha** para todas as classes extraídas e aplica overrides de `Pockets` por
+> classe (saqueador → Pockets 1x4 TUE/Unheard); `Scabbard` é **copiado do perfil-fonte**; rublos são
+> **normalizados** (stacks do perfil descartados; a classe nasce com o valor fixo — default **300k**); itens
+> `DEFAULT_EXCLUDE` (DSP transmitter) nunca são extraídos. Essas políticas vivem no extrator para sobreviver
+> a re-extrações. Exceção: **Peladão** não é extraído e usa `"SecuredContainer": { "remove": true }` —
+> nasce **SEM** secure container (a base daria um Alpha).
 
 Slots válidos em `equipped` (enum `EquipmentSlots`, case-insensitive): `Headwear`, `Earpiece`, `FaceCover`, `ArmorVest`, `Eyewear`, `ArmBand`, `TacticalVest`, `Pockets`, `Backpack`, `SecuredContainer`, `FirstPrimaryWeapon`, `SecondPrimaryWeapon`, `Holster`, `Scabbard`. Slot desconhecido → warning + ignorado (`InventoryBuilder.Apply`).
 
@@ -108,6 +110,7 @@ Slots válidos em `equipped` (enum `EquipmentSlots`, case-insensitive): `Headwea
 | `mods` | `ModSpec[]` | — | Árvore **manual** de mods (alternativa a `preset`). Exige `tpl` raiz. |
 | `x`, `y` | int? | — | (item 038) Posição EXPLÍCITA na grade do stash (célula superior-esquerda). Se não couber, cai no auto-pack (nunca dropa). Só no nível do `stash` — em `contents` é ignorado pelo fluxo atual. |
 | `rotated` | bool? | `false` | (item 038) Item rotacionado (vertical) na posição pinada. |
+| `remove` | bool | `false` | (baseline-v2) **Só em slot equipado:** REMOVE o ocupante herdado da base edition (+ subárvore) sem equipar nada — ex.: Peladão sem secure container. Demais campos são ignorados. |
 
 Precedência na montagem (`InventoryBuilder.BuildItemTree`): `preset` > `mods` > `tpl`. Sem nenhum dos três → slot pulado com warning.
 

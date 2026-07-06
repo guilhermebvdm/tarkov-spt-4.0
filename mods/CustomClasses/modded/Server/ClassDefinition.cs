@@ -122,6 +122,11 @@ public sealed record ItemSpec
 
     /// <summary>Explicit rotation for the pinned cell — true → ItemRotation.Vertical (item 038).</summary>
     [JsonPropertyName("rotated")] public bool? Rotated { get; init; }
+
+    /// <summary>(baseline-v2 2026-07-06) Equipped-slot only: REMOVE the base-edition occupant of this slot
+    /// (subtree included) without equipping anything — e.g. Naked class has NO secure container. All other
+    /// fields are ignored when true.</summary>
+    [JsonPropertyName("remove")] public bool Remove { get; init; }
 }
 
 /// <summary>A mod node in a manual item tree.</summary>

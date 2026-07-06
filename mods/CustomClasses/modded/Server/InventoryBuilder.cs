@@ -46,6 +46,16 @@ public class InventoryBuilder(DatabaseService databaseService, ItemHelper itemHe
 
             var slotId = slot.ToString();   // nome do enum == slotId do EFT
 
+            // (baseline-v2 2026-07-06) `remove: true` → tira o ocupante da BASE edition (+ subárvore) e não
+            // equipa nada — ex.: Peladão SEM secure container (decisão do usuário; a base dá um Alpha).
+            if (spec.Remove)
+            {
+                RemoveSlotOccupant(inv.Items, equipmentId, slotId);
+                logger.Debug($"[CustomClasses] '{className}': slot '{slotName}' removido (spec.remove).");
+                added++;
+                continue;
+            }
+
             try   // CR-01-01: um item inválido (ex.: tpl mal formado) pula só este slot, não a classe inteira
             {
                 // Monta a árvore (preset/manual/tpl). tpl sem preset/mods → auto-completa com o preset

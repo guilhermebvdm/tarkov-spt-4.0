@@ -24,7 +24,11 @@
     }
   },
   "loadout": {
-    "equipped": {},
+    "equipped": {
+      // baseline-v2 (2026-07-06, decisão do usuário): Peladão SEM secure container — a base edition
+      // ("SPT Zero to hero") dá um Alpha; `remove` tira o ocupante sem equipar nada.
+      "SecuredContainer": { "remove": true }
+    },
     "stash": []
   }
 }
