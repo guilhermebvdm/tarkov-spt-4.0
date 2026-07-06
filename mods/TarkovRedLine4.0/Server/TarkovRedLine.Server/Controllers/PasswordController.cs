@@ -17,12 +17,20 @@ public class ChangeRequestData
 }
 
 [ApiController]
-[Route("redline")]
+[Route(ModRouting.RoutePrefix + "redline")]
 public class PasswordController : ControllerBase
 {
     // Usar o diretório base do executável do SPT para evitar problemas com atalhos
     private static readonly string ProfilesPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "user", "profiles");
-    private static string VaultPath => Path.Combine(ProfilesPath, "redline_passwords.json");
+
+    // Nomes de arquivos PRÓPRIOS do mod, sufixados no build homolog (ModRouting.StateSuffix) para não
+    // colidir com os do build de produção rodando no mesmo processo. Const em tempo de compilação
+    // (concatenação de const string), reusados no VaultPath E nos EndsWith que auto-excluem o cofre do
+    // scan de profiles — assim o homolog exclui o SEU cofre, não o de prod.
+    private const string VaultFileName = "redline_passwords" + ModRouting.StateSuffix + ".json";
+    private const string DebugLogFileName = "password_debug_log" + ModRouting.StateSuffix + ".txt";
+
+    private static string VaultPath => Path.Combine(ProfilesPath, VaultFileName);
     private readonly SaveServer _saveServer;
 
     public PasswordController(SaveServer saveServer)
@@ -81,7 +89,7 @@ public class PasswordController : ControllerBase
         }
         catch { return; }
 
-        string debugLogPath = Path.Combine(Directory.GetCurrentDirectory(), "password_debug_log.txt");
+        string debugLogPath = Path.Combine(Directory.GetCurrentDirectory(), DebugLogFileName);
 
         // Conjunto de usernames vivos (canônicos), a partir dos arquivos de perfil.
         var liveUsers = new HashSet<string>(StringComparer.Ordinal);
@@ -91,7 +99,7 @@ public class PasswordController : ControllerBase
         {
             foreach (var file in Directory.GetFiles(ProfilesPath, "*.json"))
             {
-                if (file.EndsWith("redline_passwords.json")) continue;
+                if (file.EndsWith(VaultFileName)) continue;
 
                 try
                 {
@@ -205,7 +213,7 @@ public class PasswordController : ControllerBase
 
             try
             {
-                string debugLogPath = Path.Combine(Directory.GetCurrentDirectory(), "password_debug_log.txt");
+                string debugLogPath = Path.Combine(Directory.GetCurrentDirectory(), DebugLogFileName);
                 System.IO.File.AppendAllText(debugLogPath, $"--- New Change Password Request for {request.username} ---\n");
 
                 if (!Directory.Exists(ProfilesPath))
@@ -238,7 +246,7 @@ public class PasswordController : ControllerBase
                 foreach (var file in files)
                 {
                     // Ignorar nosso arquivo de senhas (não é profile)
-                    if (file.EndsWith("redline_passwords.json")) continue;
+                    if (file.EndsWith(VaultFileName)) continue;
 
                     try
                     {
@@ -342,7 +350,7 @@ public class PasswordController : ControllerBase
             }
             catch (Exception ex)
             {
-                string debugLogPath = Path.Combine(Directory.GetCurrentDirectory(), "password_debug_log.txt");
+                string debugLogPath = Path.Combine(Directory.GetCurrentDirectory(), DebugLogFileName);
                 System.IO.File.AppendAllText(debugLogPath, $"[CRITICAL ERROR] changing password: {ex.Message}\n{ex.StackTrace}\n");
             }
 
@@ -371,7 +379,7 @@ public class PasswordController : ControllerBase
         {
             try
             {
-                string debugLogPath = Path.Combine(Directory.GetCurrentDirectory(), "password_debug_log.txt");
+                string debugLogPath = Path.Combine(Directory.GetCurrentDirectory(), DebugLogFileName);
                 System.IO.File.AppendAllText(debugLogPath, $"[ERROR] deleting vault entry for {request.username}: {ex.Message}\n");
             }
             catch { }
@@ -392,7 +400,7 @@ public class PasswordController : ControllerBase
             foreach (var file in files)
             {
                 // Ignorar nosso arquivo de senhas
-                if (file.EndsWith("redline_passwords.json")) continue;
+                if (file.EndsWith(VaultFileName)) continue;
 
                 var content = System.IO.File.ReadAllText(file);
                 var json = JsonNode.Parse(content);

@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace TarkovRedLine.Server.Controllers;
 
 [ApiController]
-[Route("launcher/mods")]
+[Route(ModRouting.RoutePrefix + "launcher/mods")]
 public class ModUpdaterController : ControllerBase
 {
     private static string _manifestHash = string.Empty;
@@ -30,7 +30,7 @@ public class ModUpdaterController : ControllerBase
         // Procurar a pasta Launcher-Updater subindo até 4 níveis
         for (int i = 0; i < 4; i++)
         {
-            string testPath = Path.Combine(currentDir, "Launcher-Updater");
+            string testPath = Path.Combine(currentDir, ModRouting.UpdaterFolderName);
             if (Directory.Exists(testPath))
             {
                 return Path.GetFullPath(testPath);
@@ -42,7 +42,7 @@ public class ModUpdaterController : ControllerBase
         }
 
         // Fallback (o que estava antes) caso não exista ainda
-        return Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "Launcher-Updater"));
+        return Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", ModRouting.UpdaterFolderName));
     }
 
     private static string GetModsRepoPath() => Path.Combine(GetUpdaterBasePath(), "mods_repo");

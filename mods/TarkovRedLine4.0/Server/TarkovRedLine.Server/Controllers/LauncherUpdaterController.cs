@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace TarkovRedLine.Server.Controllers;
 
 [ApiController]
-[Route("redline/launcher")]
+[Route(ModRouting.RoutePrefix + "redline/launcher")]
 public class LauncherUpdaterController : ControllerBase
 {
     internal static string GetUpdaterBasePath()
@@ -16,7 +16,7 @@ public class LauncherUpdaterController : ControllerBase
         // Procurar a pasta Launcher-Updater subindo até 4 níveis
         for (int i = 0; i < 4; i++)
         {
-            string testPath = Path.Combine(currentDir, "Launcher-Updater");
+            string testPath = Path.Combine(currentDir, ModRouting.UpdaterFolderName);
             if (Directory.Exists(testPath))
             {
                 return Path.GetFullPath(testPath);
@@ -27,7 +27,7 @@ public class LauncherUpdaterController : ControllerBase
             currentDir = parent;
         }
 
-        return Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "Launcher-Updater"));
+        return Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", ModRouting.UpdaterFolderName));
     }
 
     private static string GetLauncherExePath()

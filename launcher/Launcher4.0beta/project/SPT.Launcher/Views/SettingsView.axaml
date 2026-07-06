@@ -192,6 +192,15 @@
                             <CheckBox Content="Bloquear atualizações (Desativar verificador)"
                                       IsChecked="{Binding Source={x:Static helpers:LauncherSettingsProvider.Instance}, Path=DisableUpdates}"/>
 
+                            <!-- Modo homolog: prefixa as rotas do mod com /homolog (bate no TarkovRedLine.Server.Homolog) -->
+                            <StackPanel Spacing="2">
+                                <CheckBox Content="Modo homolog (rotas do mod → /homolog)"
+                                          IsChecked="{Binding Source={x:Static helpers:LauncherSettingsProvider.Instance}, Path=HomologMode}"
+                                          ToolTip.Tip="Aponta as rotas do mod TarkovRedLine para o mod de homologação (TarkovRedLine.Server.Homolog) no mesmo server. Rotas do SPT core não mudam. Requer reconectar."/>
+                                <TextBlock Classes="trl-faint" FontSize="{DynamicResource TrlText2Xs}"
+                                           Text="Só para testar contra a homologação. Deixe DESLIGADO para produção."/>
+                            </StackPanel>
+
                             <Button x:Name="ofb" Command="{Binding OpenGameFolderCommand}" Cursor="Hand" HorizontalAlignment="Left">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <Path Data="{StaticResource TrlIconFolder}" Stroke="{DynamicResource TrlFgMutedBrush}" StrokeThickness="1.75" Fill="{x:Null}" Width="16" Height="16" Stretch="Uniform" StrokeLineCap="Flat" StrokeJoin="Miter" VerticalAlignment="Center"/>

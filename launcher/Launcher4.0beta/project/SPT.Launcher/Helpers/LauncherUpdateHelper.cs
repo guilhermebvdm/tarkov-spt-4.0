@@ -78,9 +78,10 @@ namespace SPT.Launcher.Helpers
                 using var client = new HttpClient(CreatePinnedHandler());
                 client.Timeout = TimeSpan.FromSeconds(10);
 
-                // O mod roda dentro do SPT Server, então usa a mesma URL e Porta
+                // O mod roda dentro do SPT Server, então usa a mesma URL e Porta.
+                // ModRoutePrefix: "/homolog" no Modo homolog (bate no mod TarkovRedLine.Server.Homolog), senão "".
                 string updateServerUrl = serverUrl.TrimEnd('/');
-                string versionUrl = $"{updateServerUrl}/redline/launcher/version";
+                string versionUrl = $"{updateServerUrl}{SPT.Launcher.RequestHandler.ModRoutePrefix}/redline/launcher/version";
 
                 var response = await client.GetAsync(versionUrl);
                 if (!response.IsSuccessStatusCode)
@@ -129,7 +130,7 @@ namespace SPT.Launcher.Helpers
             }
 
             // --- Phase 4: download → verify → promote ---
-            string downloadUrl = $"{serverUrl.TrimEnd('/')}/redline/launcher/download";
+            string downloadUrl = $"{serverUrl.TrimEnd('/')}{SPT.Launcher.RequestHandler.ModRoutePrefix}/redline/launcher/download";
             return await DownloadVerifyAndPatchAsync(downloadUrl, newVersion, signatureB64, progress);
         }
 

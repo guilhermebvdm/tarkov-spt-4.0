@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace TarkovRedLine.Server.Controllers;
 
 [ApiController]
-[Route("redline/server")]
+[Route(ModRouting.RoutePrefix + "redline/server")]
 public class ServerVersionController : ControllerBase
 {
     /// <summary>

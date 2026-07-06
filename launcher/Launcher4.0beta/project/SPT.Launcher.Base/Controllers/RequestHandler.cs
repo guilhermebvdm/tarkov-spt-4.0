@@ -23,6 +23,18 @@ namespace SPT.Launcher
             request.RemoteEndPoint = remoteEndPoint;
         }
 
+        /// <summary>
+        /// Prefixo aplicado APENAS às rotas do mod TarkovRedLine (não às do SPT core).
+        /// Quando "Modo homolog" está ligado, vira "/homolog" para bater no mod
+        /// TarkovRedLine.Server.Homolog (que roda no mesmo server, com rotas prefixadas).
+        /// "" = produção (rotas normais). Lido ao vivo do setting — toggle sem restart.
+        /// </summary>
+        public static string ModRoutePrefix =>
+            SPT.Launcher.Helpers.LauncherSettingsProvider.Instance.HomologMode ? "/homolog" : "";
+
+        /// <summary>Prefixa uma rota do mod com <see cref="ModRoutePrefix"/> (no-op em produção).</summary>
+        private static string M(string modPath) => ModRoutePrefix + modPath;
+
         public static void ChangeSession(string session)
         {
             request.Session = session;
@@ -50,7 +62,7 @@ namespace SPT.Launcher
 
         public static string RequestAccount(LoginRequestData data)
         {
-            return request.PostJson("/redline/profile/get", Json.Serialize(data), compress: false, decompressResponse: false);
+            return request.PostJson(M("/redline/profile/get"), Json.Serialize(data), compress: false, decompressResponse: false);
         }
 
         public static string RequestProfileInfo(LoginRequestData data)
@@ -70,7 +82,7 @@ namespace SPT.Launcher
 
         public static string RequestChangePassword(ChangeRequestData data)
         {
-            return request.PostJson("/redline/password/change", Json.Serialize(data), compress: false, decompressResponse: false);
+            return request.PostJson(M("/redline/password/change"), Json.Serialize(data), compress: false, decompressResponse: false);
         }
 
         /// <summary>
@@ -80,7 +92,7 @@ namespace SPT.Launcher
         /// </summary>
         public static string RequestDeleteVaultEntry(ChangeRequestData data)
         {
-            return request.PostJson("/redline/password/delete", Json.Serialize(data), compress: false, decompressResponse: false);
+            return request.PostJson(M("/redline/password/delete"), Json.Serialize(data), compress: false, decompressResponse: false);
         }
 
         public static string RequestWipe(RegisterRequestData data)
@@ -112,7 +124,7 @@ namespace SPT.Launcher
         /// </summary>
         public static string RequestTrlServerVersion()
         {
-            return request.GetJson("/redline/server/version", decompressResponse: false);
+            return request.GetJson(M("/redline/server/version"), decompressResponse: false);
         }
 
         public static string RequestCompatibleGameVersion()
@@ -135,7 +147,7 @@ namespace SPT.Launcher
         /// </summary>
         public static string RequestHwidRegister(HwidRegisterRequestData data)
         {
-            return PostToHwidManager("/launcher/hwid/register", JsonConvert.SerializeObject(data));
+            return PostToHwidManager(M("/launcher/hwid/register"), JsonConvert.SerializeObject(data));
         }
 
         /// <summary>
@@ -143,7 +155,7 @@ namespace SPT.Launcher
         /// </summary>
         public static string RequestHwidResetPassword(HwidResetPasswordRequestData data)
         {
-            return PostToHwidManager("/launcher/hwid/reset-password", JsonConvert.SerializeObject(data));
+            return PostToHwidManager(M("/launcher/hwid/reset-password"), JsonConvert.SerializeObject(data));
         }
 
         /// <summary>
@@ -151,7 +163,7 @@ namespace SPT.Launcher
         /// </summary>
         public static string RequestRedLineVersion()
         {
-            return GetFromHwidManager("/launcher/hwid/version");
+            return GetFromHwidManager(M("/launcher/hwid/version"));
         }
 
         /// <summary>
@@ -160,7 +172,7 @@ namespace SPT.Launcher
         public static string RequestRegisterPlayerIp(string username, string ip)
         {
             var data = new { username = username, ip = ip };
-            return PostToHwidManager("/redline/register-player-ip", JsonConvert.SerializeObject(data));
+            return PostToHwidManager(M("/redline/register-player-ip"), JsonConvert.SerializeObject(data));
         }
 
         /// <summary>
@@ -168,7 +180,7 @@ namespace SPT.Launcher
         /// </summary>
         public static string RequestModsVersion()
         {
-            return GetFromHwidManager("/launcher/mods/version");
+            return GetFromHwidManager(M("/launcher/mods/version"));
         }
 
         /// <summary>
@@ -176,7 +188,7 @@ namespace SPT.Launcher
         /// </summary>
         public static string RequestManifestHash()
         {
-            return GetFromHwidManager("/launcher/mods/manifest-hash");
+            return GetFromHwidManager(M("/launcher/mods/manifest-hash"));
         }
 
         /// <summary>
@@ -184,7 +196,7 @@ namespace SPT.Launcher
         /// </summary>
         public static string RequestModsManifest()
         {
-            return GetFromHwidManager("/launcher/mods/manifest");
+            return GetFromHwidManager(M("/launcher/mods/manifest"));
         }
 
         /// <summary>
@@ -194,7 +206,7 @@ namespace SPT.Launcher
         /// </summary>
         public static byte[] DownloadModFile(string filePath, int timeoutMs = 30000)
         {
-            return DownloadBinary($"{request.RemoteEndPoint}/launcher/mods/download?file={Uri.EscapeDataString(filePath)}", timeoutMs);
+            return DownloadBinary($"{request.RemoteEndPoint}{M("/launcher/mods/download")}?file={Uri.EscapeDataString(filePath)}", timeoutMs);
         }
 
         /// <summary>
@@ -206,7 +218,7 @@ namespace SPT.Launcher
         public static byte[] DownloadOptionalFile(string folder, string file, int timeoutMs = 300000)
         {
             return DownloadBinary(
-                $"{request.RemoteEndPoint}/launcher/mods/optional-download?folder={Uri.EscapeDataString(folder)}&file={Uri.EscapeDataString(file)}",
+                $"{request.RemoteEndPoint}{M("/launcher/mods/optional-download")}?folder={Uri.EscapeDataString(folder)}&file={Uri.EscapeDataString(file)}",
                 timeoutMs);
         }
 
@@ -217,7 +229,7 @@ namespace SPT.Launcher
         public static string RequestOptionalsManifest(string folder)
         {
             return GetString(
-                $"{request.RemoteEndPoint}/launcher/mods/optionals-manifest?folder={Uri.EscapeDataString(folder)}",
+                $"{request.RemoteEndPoint}{M("/launcher/mods/optionals-manifest")}?folder={Uri.EscapeDataString(folder)}",
                 10000);
         }
 
@@ -227,7 +239,7 @@ namespace SPT.Launcher
         /// </summary>
         public static byte[] DownloadPerformanceFile(string filePath)
         {
-            return DownloadBinary($"{request.RemoteEndPoint}/launcher/mods/performance-download?file={Uri.EscapeDataString(filePath)}");
+            return DownloadBinary($"{request.RemoteEndPoint}{M("/launcher/mods/performance-download")}?file={Uri.EscapeDataString(filePath)}");
         }
 
         /// <summary>
@@ -236,7 +248,7 @@ namespace SPT.Launcher
         /// </summary>
         public static string RequestOptionalsList()
         {
-            return GetFromHwidManager("/launcher/mods/optionals-list");
+            return GetFromHwidManager(M("/launcher/mods/optionals-list"));
         }
 
         private static byte[] DownloadBinary(string url, int timeoutMs = 30000)

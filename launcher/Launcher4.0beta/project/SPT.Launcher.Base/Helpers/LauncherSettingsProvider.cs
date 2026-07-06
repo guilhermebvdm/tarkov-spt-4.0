@@ -64,7 +64,7 @@ namespace SPT.Launcher.Helpers
             // Incrementar EXPECTED_CONFIG_VERSION a cada mudança estrutural no config.
             // Quando a versão salva < esperada, força re-save para limpar campos obsoletos
             // e gravar novos campos com defaults, sem perder dados do jogador.
-            const int EXPECTED_CONFIG_VERSION = 3; // v3: UsePerformanceConfigs (item 008)
+            const int EXPECTED_CONFIG_VERSION = 4; // v4: HomologMode (cenário homolog namespaced)
             if (settings.ConfigVersion < EXPECTED_CONFIG_VERSION)
             {
                 LogManager.Instance.Info($"[Settings] Config desatualizado (v{settings.ConfigVersion} → v{EXPECTED_CONFIG_VERSION}). Atualizando...");
@@ -334,6 +334,20 @@ namespace SPT.Launcher.Helpers
         {
             get => _usePerformanceConfigs;
             set => SetProperty(ref _usePerformanceConfigs, value);
+        }
+
+        /// <summary>
+        /// Modo homolog: quando ligado, as rotas do mod TarkovRedLine ganham o prefixo "/homolog"
+        /// (ver <see cref="RequestHandler.ModRoutePrefix"/>), batendo no mod TarkovRedLine.Server.Homolog
+        /// que roda no MESMO server de produção sem colidir com as rotas de produção. Rotas do SPT core
+        /// (login/register/connect/customclasses) NÃO são afetadas. Uso: testar mudanças do launcher
+        /// contra o ambiente real antes de subir pra produção. Default off (produção).
+        /// </summary>
+        private bool _homologMode;
+        public bool HomologMode
+        {
+            get => _homologMode;
+            set => SetProperty(ref _homologMode, value);
         }
 
         private string _gamePath;

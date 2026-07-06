@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace TarkovRedLine.Server.Controllers;
 
 [ApiController]
-[Route("redline")]
+[Route(ModRouting.RoutePrefix + "redline")]
 public class VoteManagerController : ControllerBase
 {
     private const long VOTE_TIME = 180000;    // 3 minutos
