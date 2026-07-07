@@ -38,13 +38,14 @@ Compila um mod (client BepInEx ou server TypeScript) e instala automaticamente e
 
 ### Resolução automática de referências (client-csharp)
 
-Antes de compilar, o script verifica se `modded/References/` tem os DLLs necessários. Se estiverem faltando, copia automaticamente até 13 DLLs do SPT install:
+Antes de compilar, o script verifica se `modded/References/` tem os DLLs necessários. Se estiverem faltando, copia automaticamente até 19 DLLs do SPT install:
 
 | DLL | Origem |
 |---|---|
 | `BepInEx.dll`, `0Harmony.dll` | `D:/SPT/BepInEx/core/` |
-| `Assembly-CSharp.dll`, `UnityEngine*.dll`, `Comfort.dll`, `Sirenix.Serialization.dll`, `AnimationSystem.Types.dll` | `D:/SPT/EscapeFromTarkov_Data/Managed/` |
-| `SPT.Reflection.dll`, `SPT.Common.dll` | `D:/SPT/BepInEx/plugins/spt/` |
+| `Assembly-CSharp.dll`, `UnityEngine*.dll`, `Comfort.dll`, `Comfort.Unity.dll`, `Sirenix.Serialization.dll`, `AnimationSystem.Types.dll`, `bsg.console.core.dll`, `DissonanceVoip.dll` | `D:/SPT/EscapeFromTarkov_Data/Managed/` |
+| `SPT.Reflection.dll`, `SPT.Common.dll` | `D:/SPT/BepInEx/plugins/spt/` (renomeadas a partir de `spt-reflection.dll`/`spt-common.dll`) |
+| `ConfigurationManager.dll` | `D:/SPT/BepInEx/plugins/spt/ConfigurationManager/` |
 
 Não sobrescreve DLLs que já existem em `References/`. Se o SPT install não existir, o passo é silenciosamente ignorado (o build vai falhar com erro de referência do MSBuild).
 

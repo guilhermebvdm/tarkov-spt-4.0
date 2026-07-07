@@ -123,6 +123,12 @@ resolve_references() {
     "UnityEngine.ImageConversionModule.dll|$spt/EscapeFromTarkov_Data/Managed/UnityEngine.ImageConversionModule.dll"
     "UnityEngine.IMGUIModule.dll|$spt/EscapeFromTarkov_Data/Managed/UnityEngine.IMGUIModule.dll"
     "Fika.Core.dll|$spt/BepInEx/plugins/Fika/Fika.Core.dll"
+    "Comfort.Unity.dll|$spt/EscapeFromTarkov_Data/Managed/Comfort.Unity.dll"
+    "UnityEngine.AssetBundleModule.dll|$spt/EscapeFromTarkov_Data/Managed/UnityEngine.AssetBundleModule.dll"
+    "UnityEngine.UnityWebRequestModule.dll|$spt/EscapeFromTarkov_Data/Managed/UnityEngine.UnityWebRequestModule.dll"
+    "bsg.console.core.dll|$spt/EscapeFromTarkov_Data/Managed/bsg.console.core.dll"
+    "DissonanceVoip.dll|$spt/EscapeFromTarkov_Data/Managed/DissonanceVoip.dll"
+    "ConfigurationManager.dll|$spt/BepInEx/plugins/spt/ConfigurationManager/ConfigurationManager.dll"
   )
 
   local copied=0
