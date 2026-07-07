@@ -4,7 +4,7 @@ Repositório de mods para SPT 4.0 (Single Player Tarkov). Lido por qualquer assi
 
 ## Workspace
 
-- **SPT Version:** 4.0.x — Tarkov [PREENCHER versão]
+- **SPT Version:** 4.0.13
 - **Game Version:** Escape From Tarkov 0.16.9
 - **Game install path:** por máquina, em `.spt-path` na raiz (gitignored; copie de `.spt-path.example`). Lido pelo `compile-mod.sh`. Default `D:/SPT`.
 - **Mod types:** Client e Server
@@ -16,13 +16,15 @@ Repositório de mods para SPT 4.0 (Single Player Tarkov). Lido por qualquer assi
 - `.agents/workspace.md` — detalhes técnicos do workspace
 - `.agents/conventions.md` — convenções do projeto
 - `.agents/resources.md` — onde buscar informação (wiki local, APIs, DBs, deepwiki)
-- `.agents/workflows/` — workflows reutilizáveis (manuais)
+- `.agents/workflows/` — workflows manuais reutilizáveis (placeholder; atualmente vazio — o fluxo ativo vive em `.claude/commands/`)
 - `.agents/hooks/` — scripts compartilhados (validação, pre-commit, sync da wiki)
 - `design-system/` — TRL Design System: padrão visual **obrigatório** para todo editor web de mod (tokens + componentes CSS; ler `design-system/CLAUDE.md` antes de estilizar qualquer editor)
 - `docs/` — documentação técnica e arquitetural
 - `references/` — fontes read-only de verdade (não editar): `eft-decompiled/` (Assembly EFT), `spt-source/` (código-fonte do servidor SPT) e repositórios do FIKA (conexão coop: `fika-server/`, `fika-plugin/` e `fika-headless/`)
 - `wiki/` — snapshot read-only de github.com/sp-tarkov/wiki (CC BY-NC-ND 4.0; sincronizado via `.agents/hooks/sync-wiki.sh` — não editar)
 - `.claude/settings.json` — config do Claude Code (referencia hooks em .agents/)
+- `.claude/commands/` — slash commands do ciclo de desenvolvimento (fluxo ativo; ver [WORKFLOW.md](WORKFLOW.md))
+- `.claude/skills/` — skills do repo carregadas pelos commands (ver [WORKFLOW.md](WORKFLOW.md) § Skills)
 
 ## Convenções
 

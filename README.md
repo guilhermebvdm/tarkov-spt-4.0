@@ -17,26 +17,14 @@ Dependência opcional (recomendada): `jq` para o pre-commit hook.
 
 ## Estrutura
 
-```
-.
-├── .agents/               # contexto compartilhado para AI assistants
-│   ├── hooks/             # scripts (validate, pre-commit, sync-wiki)
-│   ├── workflows/         # workflows reutilizáveis
-│   ├── conventions.md     # convenções do projeto
-│   ├── resources.md       # router de fontes (wiki local, APIs, deepwiki)
-│   ├── skills-backlog.md  # propostas de skills priorizadas
-│   └── workspace.md       # detalhes técnicos do workspace
-├── .claude/               # config do Claude Code (hooks, settings)
-├── docs/                  # docs técnicas e tracking da migração 3.x → 4.0
-│   └── migration/          # inventário de mods (ver migration/README.md)
-│       ├── README.md
-│       ├── mods-inventory.md   # fonte de verdade do inventário
-│       └── mods-inventory.html # viewer gerado (sync-mods-html.js)
-├── mods/                  # mods do projeto (client C#/BepInEx, server C#/SPTarkov.Server.Core)
-├── wiki/                  # snapshot read-only de github.com/sp-tarkov/wiki
-│                          # (CC BY-NC-ND 4.0; sync via .agents/hooks/sync-wiki.sh)
-├── AGENTS.md              # contrato completo dos agentes de IA
-└── README.md
-```
+- `.agents/` — contexto compartilhado para AI assistants (workspace, convenções, resources, hooks)
+- `.claude/` — config do Claude Code: `commands/` (slash commands), `skills/`, `settings.json`
+- `design-system/` — TRL Design System (padrão visual dos editores web de mod)
+- `docs/` — documentação técnica, de arquitetura e tracking da migração 3.x → 4.0
+- `launcher/` — launcher TRL (Avalonia) e versões legadas
+- `mods/` — mods do projeto (client C#/BepInEx, server C#/SPTarkov.Server.Core)
+- `references/` — fontes read-only de verdade (Assembly EFT, server SPT, FIKA, grafos)
+- `scripts/`, `tools/` — utilitários (setup de referências, inventário, gestão de itens TRL)
+- `wiki/` — snapshot read-only de github.com/sp-tarkov/wiki (CC BY-NC-ND 4.0)
 
-Ver [AGENTS.md](AGENTS.md) para o contrato completo dos agentes de IA.
+Ver [AGENTS.md](AGENTS.md) para o contrato completo dos agentes de IA e [WORKFLOW.md](WORKFLOW.md) para o ciclo de desenvolvimento.

@@ -32,53 +32,12 @@ Conteúdo licenciado sob **[CC BY-NC-ND 4.0](https://creativecommons.org/license
 
 ## Estrutura
 
-```
-wiki/spt/
-├── home.md                           # Página inicial (TOC global)
-├── Beginners_Guide.md                # Visão geral para iniciantes
-├── system-requirements.md            # Requisitos de sistema
-├── How_SPT_Works.md                  # Como o SPT funciona
-├── Installation_Guide.md             # Guia de instalação
-├── Manual-Install-Instructions.md    # Instalação manual
-├── Updating_SPT.md                   # Atualizar SPT
-├── Profiles.md                       # Profiles
-├── Mod_Types.md                      # Tipos de mod (client vs server)
-├── Installing_Mods.md                # Instalar mods
-├── Uninstalling_Mods.md              # Desinstalar mods
-├── Recommended_Mods_40.md            # Mods recomendados (4.0)
-├── Performance_Tuning.md             # Ajustes de performance
-├── FAQs_40.md                        # FAQ (4.0)
-├── Known_EFT_Issues_40.md            # Bugs conhecidos do EFT
-├── Known_SPT_Issues_40.md            # Bugs conhecidos do SPT
-├── Known_Mod_Issues_40.md            # Bugs conhecidos de mods
-├── 5050-method.md                    # Método 50/50 para isolar mod problemático
-├── Reporting_Issues.md               # Como reportar problemas
-├── Bot_Difficulties.md               # Dificuldade de bots
-├── SPT_and_Commando_Bots.md          # SPT & Commando bots
-├── Style_Guide.md                    # Style guide da wiki
-├── how_to_contribute.md              # Como contribuir
-│
-├── modding/                          # 👈 Foco do nosso trabalho
-│   ├── Modding_Resources.md          # Hub de recursos para modders
-│   ├── tutorials/
-│   │   ├── Client_Modding_Quick_Guide.md   # Quick start client (BepInEx/C#)
-│   │   ├── WTT_Vol1.md                     # Tutorial WTT Volume 1
-│   │   └── debug_dnSpy.md                  # Debugar com dnSpy
-│   └── references/
-│       ├── body-part-reference.md          # Referência de partes do corpo
-│       ├── bot-types.md                    # Tipos de bot
-│       ├── location-information.md         # IDs de mapas
-│       ├── quest-values.md                 # Valores de quests
-│       ├── skills-reference.md             # Referência de skills
-│       └── trader-information.md           # IDs e info de traders
-│
-├── SPT_311/                          # Conteúdo legado SPT 3.11
-│   ├── FAQs_311.md
-│   ├── Manual-Installation-Instructions_311.md
-│   └── Recommended_Mods_311.md
-│
-└── *.png, *.gif                      # Imagens referenciadas pelos .md
-```
+- **Raiz** — guias gerais: instalação/atualização, profiles, tipos de mod, performance, FAQ e bugs conhecidos (`*_40.md`), diagnóstico (`5050-method.md`).
+- **`modding/`** 👈 foco do nosso trabalho — hub de recursos, `tutorials/` (client BepInEx/C#, dnSpy) e `references/` (IDs de bots, traders, skills, mapas, quests).
+- **`SPT_311/`** — conteúdo legado do SPT 3.11.
+- Imagens (`*.png`, `*.gif`), `LICENSE` e páginas `.html` acompanham os `.md`.
+
+> A árvore completa muda a cada sync do upstream — use `ls`/busca para o inventário exato, não uma lista fixa aqui. Navegação por tarefa na tabela abaixo.
 
 ## Como sincronizar com upstream
 

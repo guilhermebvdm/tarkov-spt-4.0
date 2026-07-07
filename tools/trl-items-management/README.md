@@ -54,34 +54,14 @@ node scripts/normalize.js                       # → data/{items,categories,met
 
 ## Estrutura de arquivos
 
-```text
-tools/trl-items-management/
-├── scripts/
-│   ├── build.js                  orquestrador: chama os 4 em sequência
-│   ├── fetch-tarkov-dev.js       GraphQL tarkov.dev → cache/
-│   ├── fetch-tarkov-market.js    REST tarkov-market → cache/
-│   ├── load-spt.js               lê D:/SPT → cache/spt-raw.json
-│   └── normalize.js              merge das 3 fontes → data/
-├── cache/                        gitignored; regeneráveis
-│   ├── tarkov-dev-raw.json
-│   ├── tarkov-market-raw.json
-│   └── spt-raw.json
-├── data/                         versionado; source of truth
-│   ├── items.json                ~14 MB, 1 linha por Tpl, ordenado por Tpl
-│   ├── categories.json           árvore única (tarkov.dev + handbook SPT)
-│   ├── meta.json                 timestamps + estatísticas por fonte
-│   ├── traders.json              metadados dos traders (nome, avatar URL)
-│   └── handbook-prices-log.json  histórico de edições de preço via viewer
-├── viewer/
-│   ├── serve.js                  servidor HTTP + APIs de escrita (/api/price, /api/ban, /api/flea-min-level)
-│   ├── index.html                tabela principal
-│   └── components.css / tokens.css
-├── docs/
-│   └── spt-internals.md          internals do SPT relevantes ao pipeline
-└── logs/
-    ├── price-edits.jsonl         audit log de edições de preço (append-only)
-    └── ban-edits.jsonl           audit log de ban/unban (append-only)
-```
+Pipeline em estágios; cada pasta tem um papel fixo (o inventário exato de cada uma cresce — use `ls` em vez de manter uma lista aqui):
+
+- **`scripts/`** — o pipeline (`build.js` orquestra: `fetch-tarkov-dev.js` + `fetch-tarkov-market.js` + `load-spt.js` + `normalize.js`) mais utilitários de smoke-test, verificação de traders e release.
+- **`cache/`** — respostas cruas das fontes (gitignored; regeneráveis).
+- **`data/`** — saída versionada, *source of truth*: `items.json` (~14 MB, 1 linha por Tpl), `categories.json`, `meta.json`, `traders.json`, `hideout-crafts.json`.
+- **`viewer/`** — servidor HTTP + APIs de escrita (`serve.js`: `/api/price`, `/api/ban`, `/api/flea-min-level`) e a UI (`index.html`, `*.css`, assets).
+- **`docs/`** — internals do SPT e validações da fórmula/override de preço.
+- **`logs/`** — audit logs append-only (`price-edits.jsonl`, `ban-edits.jsonl`, `price-history.jsonl`).
 
 ---
 
