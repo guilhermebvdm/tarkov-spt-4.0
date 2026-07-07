@@ -6,7 +6,7 @@ Repositório de mods para SPT 4.0 (Single Player Tarkov). Lido por qualquer assi
 
 - **SPT Version:** 4.0.13
 - **Game Version:** Escape From Tarkov 0.16.9
-- **Game install path:** por máquina, em `.spt-path` na raiz (gitignored; copie de `.spt-path.example`). Lido pelo `compile-mod.sh`. Default `D:/SPT`.
+- **Game install path:** **sempre** resolvido a partir do arquivo `.spt-path` na raiz (gitignored, por máquina; criado copiando `.spt-path.example`) — **nunca** hardcode um caminho de instalação. Lido pelos comandos de build/sync (`/compile-mod`, `/sync-classes`). Precedência: `$SPT_PATH` / `--spt-path` > `.spt-path` > default `D:/SPT`.
 - **Mod types:** Client e Server
 - **Compatibilidade:** SPT 3.x e 4.0 são arquiteturalmente incompatíveis — nunca misturar padrões
 
