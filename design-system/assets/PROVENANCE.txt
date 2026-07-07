@@ -2,7 +2,7 @@ Assets — provenance
 ===================
 
 trl-logo-dark.png / trl-logo-mark.png
-  Logo da comunidade Tarkov Red Line (TRL). Fonte: TRL-black.png na raiz
+  Logo da comunidade Tarkov Red Line (TRL). Fonte: TRL-LOGO.png na raiz
   do repo (mark = cópia aparada). Uso interno da comunidade.
 
 bg-ambient.jpg
