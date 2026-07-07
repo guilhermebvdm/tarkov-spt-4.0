@@ -78,5 +78,5 @@ Implementa um item do backlog em `mods/<mod>/modded/`, seguindo a spec técnica 
 - **Não inventar APIs.** Se a spec técnica omite algo necessário, parar e pedir `/create-technical-spec` ou `/review-technical-spec` adicional.
 - Não criar arquivos fora do escopo declarado na spec técnica. Se aparecer necessidade nova, **registrar como ponto pendente** numa nova `/review-technical-spec` em vez de improvisar.
 - Versão alvo: SPT 4.0+ / EFT 0.16.x — código deve compilar contra os assemblies do jogo nessa versão.
-- Compilação efetiva (gerar .dll) **não** está no escopo deste comando; é responsabilidade do `/compile-mod`.
+- Compilação efetiva (gerar .dll) **não** está no escopo deste comando; é responsabilidade do `/compile-mod`. Isso inclui popular `modded/.../References/` — o `/compile-mod` resolve essas DLLs do jogo automaticamente via `.spt-path`; nunca copiá-las manualmente.
 - **`05-asbuild.md` é obrigatório.** Sem ele, `/code-review` cai num fallback heurístico para detectar se `/code-mod` foi executado.

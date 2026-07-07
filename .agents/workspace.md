@@ -4,14 +4,14 @@
 
 - **SPT:** 4.0.13
 - **Tarkov:** 0.16.9
-- **Game install path:** `D:\SPT\`
+- **Game install path:** **sempre** resolvido a partir de `.spt-path` (raiz do repo, gitignored) — nunca hardcode. Ver `AGENTS.md` § Workspace.
 
 ## Tipos de mod
 
 ### Client (C# / BepInEx)
 - **Local:** `mods/client/<NomeDoMod>/`
-- **Compilação:** `dotnet build` → DLL em `bin/Release/net471/`
-- **Deploy:** copiar DLL para `<game-path>/BepInEx/plugins/`
+- **Compilação:** `/compile-mod <mod>` — nunca `dotnet build` manual nem cópia manual de DLL de referência. O script resolve `BepInEx.dll`, `Assembly-CSharp.dll`, módulos do `UnityEngine` etc. automaticamente a partir de `.spt-path` para dentro de `modded/.../References/` (não versionado). Ver `.claude/commands/compile-mod.md`.
+- **Deploy:** feito pelo próprio `/compile-mod`, direto para `<game-path>/BepInEx/plugins/`
 
 ### Server (C# / SPTarkov.Server.Core)
 - **Local:** `mods/server/<NomeDoMod>/`

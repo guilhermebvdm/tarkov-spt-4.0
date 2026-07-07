@@ -95,4 +95,5 @@ Ordem canônica ao **citar evidência** (sempre com `arquivo.cs:linha`). **Paths
 
 ## ⚠️ Observações importantes
 
+- **Nunca copiar DLLs do jogo manualmente para `mods/<mod>/modded/.../References/`.** Para mods client C#/BepInEx, `/compile-mod` resolve essas referências automaticamente a partir do `.spt-path` (mesma regra de "nunca hardcode" acima). Ver `.claude/skills/csharp-mod-best-practices/SKILL.md` §9.
 - **Nunca editar `SPT_Data/database/` direto.** Esses arquivos fazem parte da distribuição do SPT — qualquer atualização do SPT os sobrescreve e a edição se perde. Além disso, alterar a database em disco invalida o `SPT_Data/checks.dat` (integridade) e gera arquivos pesados (`looseLoot.json` ~42 MB, `items.json` ~19 MB) difíceis de versionar/distribuir. O jeito correto é um **mod de servidor** que aplica os patches em memória no `postDBLoad` (modelo usado por SVM e pela maioria dos mods de servidor): sobrevive a updates, pesa quase nada e é diffável.

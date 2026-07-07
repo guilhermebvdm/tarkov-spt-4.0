@@ -97,6 +97,7 @@ This skill covers the **C# / runtime** concerns. Lifecycle, raid hooks and SPT-s
 
 - `LangVersion`: pin in the `.csproj`. Match what the Unity Mono / SPT server runtime supports (typically C# 9–11).
 - Reference EFT/SPT assemblies via `<Reference>` with `Private="false"` so the DLL isn't redistributed inside the mod.
+- **Never manually copy game DLLs into `modded/.../References/`.** `/compile-mod` resolves `BepInEx.dll`, `Assembly-CSharp.dll`, `UnityEngine*.dll` etc. automatically from the machine-local `.spt-path` (see `AGENTS.md` § Workspace). `References/` is gitignored on purpose — if it's missing files, run `/compile-mod`, don't hand-copy from a game install.
 - Output target: `BepInEx/plugins/<ModName>/` for client mods, `[game]/SPT/user/mods/<ModName>/` for server mods. Keep the final folder structure mirrored under `mods/<mod>/modded/` for review.
 - Nuget: minimize. Each added dependency multiplies version-clash risk with other mods (Unity's flat plugin folder).
 

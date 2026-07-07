@@ -48,6 +48,8 @@ Antes de compilar, o script verifica se `modded/References/` tem os DLLs necess�
 
 Não sobrescreve DLLs que já existem em `References/`. Se o SPT install não existir, o passo é silenciosamente ignorado (o build vai falhar com erro de referência do MSBuild).
 
+> ⚠️ **Nunca copiar essas DLLs manualmente.** Se `References/` estiver vazia/incompleta, a resposta é rodar `/compile-mod`, não copiar `.dll` do jogo à mão — o path do jogo é sempre resolvido via `.spt-path` (gitignored, por máquina), nunca hardcoded.
+
 ### Build
 
 - **client-csharp:**
