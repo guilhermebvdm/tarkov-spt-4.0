@@ -17,7 +17,7 @@ namespace CustomClasses;
 ///     Fatia 3: carregador/câmara (`ammo`). Fatia 4: contents em grade (GridPacker).
 ///     CR-EP-01: linhas de stash/contents honram a MESMA semântica dos slots equipados —
 ///     `preset` explícito/`mods`/`ammo`/`contents` recursivo (antes só `tpl`+`count`).
-///     Estrutura de item: ver docs/technical/inventario-itens-spt4.md.
+///     Estrutura de item: ver docs/technical/spt4-items-inventory-hideout.md.
 /// </summary>
 [Injectable]
 public class InventoryBuilder(DatabaseService databaseService, ItemHelper itemHelper, InventoryHelper inventoryHelper, ICloner cloner, ISptLogger<InventoryBuilder> logger)

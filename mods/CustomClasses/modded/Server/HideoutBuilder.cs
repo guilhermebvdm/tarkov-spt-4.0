@@ -7,7 +7,7 @@ namespace CustomClasses;
 
 /// <summary>
 ///     Sets a class's starting hideout station levels on a character.
-///     See docs/technical/inventario-itens-spt4.md §10. (Item 003)
+///     See docs/technical/spt4-items-inventory-hideout.md §10. (Item 003)
 /// </summary>
 [Injectable]
 public class HideoutBuilder(ISptLogger<HideoutBuilder> logger)

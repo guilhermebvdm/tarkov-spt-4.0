@@ -34,8 +34,8 @@ Ordem ao **responder dúvidas** sobre SPT/EFT:
 | Tipo de informação | Onde buscar primeiro | Fallback externo |
 |---|---|---|
 | Modding (entry point, links) | [wiki/spt/modding/Modding_Resources.md](../wiki/spt/modding/Modding_Resources.md) | SPT Discord #mods-development |
-| **Criar mod SPT 4.0 (server + client)** | **[docs/technical/criar-mod-spt4.md](../docs/technical/criar-mod-spt4.md)** | server-mod-examples · deepwiki |
-| **Migrar mod 3.x → 4.0** | **[docs/technical/atualizar-mod-spt3-para-spt4.md](../docs/technical/atualizar-mod-spt3-para-spt4.md)** | — |
+| **Criar mod SPT 4.0 (server + client)** | **[docs/technical/spt4-mod-creation.md](../docs/technical/spt4-mod-creation.md)** | server-mod-examples · deepwiki |
+| **Migrar mod 3.x → 4.0** | **[docs/technical/spt3-to-spt4-mod-migration.md](../docs/technical/spt3-to-spt4-mod-migration.md)** | — |
 | IDs de traders | [wiki/spt/modding/references/trader-information.md](../wiki/spt/modding/references/trader-information.md) | db.sp-tarkov.com |
 | Estrutura de quests | [wiki/spt/modding/references/quest-values.md](../wiki/spt/modding/references/quest-values.md) | tarkov.dev API |
 | IDs de mapas / locations | [wiki/spt/modding/references/location-information.md](../wiki/spt/modding/references/location-information.md) | tarkov.dev / Tarkynator |
@@ -84,7 +84,7 @@ Páginas da wiki que ensinam **como fazer** (não só tabelas de IDs). Leitura r
 | [wiki/spt/Style_Guide.md](../wiki/spt/Style_Guide.md) | Padrão de docs (markdown, paths, version disclaimer) |
 | [wiki/spt/Recommended_Mods_40.md](../wiki/spt/Recommended_Mods_40.md) | Curadoria oficial — referência ao decidir "vale criar do zero ou usar existente?" |
 
-> **Gap importante:** a wiki **não** tem tutorial de server mod 4.0 nem doc de `[Injectable]` / `IOnLoad` / `ConfigLoader<T>`. Guias internos preenchem isso: [docs/technical/criar-mod-spt4.md](../docs/technical/criar-mod-spt4.md) e [atualizar-mod-spt3-para-spt4.md](../docs/technical/atualizar-mod-spt3-para-spt4.md). Para detalhes além deles, use **deepwiki** + [github.com/sp-tarkov/server-mod-examples](https://github.com/sp-tarkov/server-mod-examples) + código real em [mods/RZ-SPTMods/](../mods/RZ-SPTMods/).
+> **Gap importante:** a wiki **não** tem tutorial de server mod 4.0 nem doc de `[Injectable]` / `IOnLoad` / `ConfigLoader<T>`. Guias internos preenchem isso: [docs/technical/spt4-mod-creation.md](../docs/technical/spt4-mod-creation.md) e [spt3-to-spt4-mod-migration.md](../docs/technical/spt3-to-spt4-mod-migration.md). Para detalhes além deles, use **deepwiki** + [github.com/sp-tarkov/server-mod-examples](https://github.com/sp-tarkov/server-mod-examples) + código real em [mods/RZ-SPTMods/](../mods/RZ-SPTMods/).
 
 ## Regras ao usar fontes externas
 

@@ -3,7 +3,7 @@
 > **Data:** 2026-06-09<br>
 > **Status:** 🟢 Vivo<br>
 > **Responsáveis:** Guilherme<br>
-> **Referências:** [exampleClass.jsonc](../modded/Server/config/classes/_docs/exampleClass.jsonc), [inventario-itens-spt4.md](../../../docs/technical/inventario-itens-spt4.md)<br>
+> **Referências:** [exampleClass.jsonc](../modded/Server/config/classes/_docs/exampleClass.jsonc), [spt4-items-inventory-hideout.md](../../../docs/technical/spt4-items-inventory-hideout.md)<br>
 
 ---
 

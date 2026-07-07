@@ -2,7 +2,7 @@ namespace CustomClasses;
 
 /// <summary>
 ///     Packer first-fit de uma única grade (rig/mochila/stash). Marca células ocupadas e acha a
-///     primeira posição livre para um item w×h, tentando rotação. Ver docs/technical/inventario-itens-spt4.md §4/§5.
+///     primeira posição livre para um item w×h, tentando rotação. Ver docs/technical/spt4-items-inventory-hideout.md §4/§5.
 /// </summary>
 internal sealed class GridPacker(int width, int height)
 {

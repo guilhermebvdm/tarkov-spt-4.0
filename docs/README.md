@@ -27,8 +27,8 @@ Ver `.agents/conventions.md` para detalhes.
 
 | Documento | Status | Última atualização |
 |---|---|---|
-| [technical/criar-mod-spt4.md](technical/criar-mod-spt4.md) | 🔵 Em andamento | 2026-06-04 |
-| [technical/atualizar-mod-spt3-para-spt4.md](technical/atualizar-mod-spt3-para-spt4.md) | 🔵 Em andamento | 2026-06-04 |
+| [technical/spt4-mod-creation.md](technical/spt4-mod-creation.md) | 🔵 Em andamento | 2026-06-04 |
+| [technical/spt3-to-spt4-mod-migration.md](technical/spt3-to-spt4-mod-migration.md) | 🔵 Em andamento | 2026-06-04 |
 | [discord-mods-topics/orbit/01-transcricao.md](discord-mods-topics/orbit/01-transcricao.md) | 🔵 Em andamento | 2026-06-04 |
 | [discord-mods-topics/orbit/02-analise.md](discord-mods-topics/orbit/02-analise.md) | 🔵 Em andamento | 2026-06-04 |
 | [discord-mods-topics/realism/01-transcricao.md](discord-mods-topics/realism/01-transcricao.md) | 🔵 Em andamento | 2026-06-05 |
