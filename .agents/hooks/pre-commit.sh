@@ -17,6 +17,18 @@ bash "$HOOK_DIR/check-delivered-validation.sh" || exit 1
 bash "$HOOK_DIR/check-graph-freshness.sh" || true
 # WARN: pendência de memória sem [P-N.M].
 bash "$HOOK_DIR/check-memory-ids.sh" || true
+# HARD: frontmatter obrigatório em docs/**/*.md staged. Mesma regra do hook do Claude Code
+# (.claude/settings.json), mas aqui vale para QUALQUER commit — inclusive fora do Claude Code.
+DOCS_HEADER_STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep -E '^docs/.+\.md$' | grep -v 'README\.md' || true)
+DOCS_HEADER_FAIL=0
+while IFS= read -r DOC; do
+  [ -n "$DOC" ] || continue
+  bash "$HOOK_DIR/validate-doc-header.sh" "$DOC" || DOCS_HEADER_FAIL=1
+done <<< "$DOCS_HEADER_STAGED"
+if [ "$DOCS_HEADER_FAIL" -ne 0 ]; then
+  echo "❌ Frontmatter inválido em doc(s) staged — commit abortado (ver acima)." >&2
+  exit 1
+fi
 
 # Valida o manifesto de referencias quando ele estiver staged (abortar commit se invalido)
 MANIFEST_STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep -E '^references/manifest\.json$' || true)
