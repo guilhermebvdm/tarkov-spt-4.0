@@ -10,23 +10,22 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Referências Vitais de Client Mod (BepInEx) baseadas na documentação do SPT 4.0 -->
-    <!-- Ajuste o caminho "C:\Seu\SPT" para a raiz da instalação real do seu SPT -->
-    
+    <!-- Referências resolvidas automaticamente por /compile-mod via .spt-path (nunca copiar manualmente) -->
+
     <Reference Include="BepInEx">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\BepInEx\core\BepInEx.dll</HintPath>
+      <HintPath>References\BepInEx.dll</HintPath>
     </Reference>
     <Reference Include="0Harmony">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\BepInEx\core\0Harmony.dll</HintPath>
+      <HintPath>References\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>References\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>References\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>References\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
   </ItemGroup>
 

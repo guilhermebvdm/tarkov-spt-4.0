@@ -34,25 +34,25 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>References\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>References\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="0Harmony">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\BepInEx\core\0Harmony.dll</HintPath>
+      <HintPath>References\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>References\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="BepInEx">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\BepInEx\core\BepInEx.dll</HintPath>
+      <HintPath>References\BepInEx.dll</HintPath>
     </Reference>
     <Reference Include="Comfort">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\Comfort.dll</HintPath>
+      <HintPath>References\Comfort.dll</HintPath>
     </Reference>
-    <Reference Include="spt-reflection">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\BepInEx\plugins\spt\spt-reflection.dll</HintPath>
+    <Reference Include="SPT.Reflection">
+      <HintPath>References\SPT.Reflection.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="0Harmony" />
@@ -64,10 +64,10 @@
       <HintPath>..\stancesAndCameraPositionSPT4.0.11\shwngFpsCameraStances4.dll</HintPath>
     </Reference>
   <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>References\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
   <Reference Include="AnimationSystem.Types">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\AnimationSystem.Types.dll</HintPath>
+      <HintPath>References\AnimationSystem.Types.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -118,10 +118,10 @@
     <Compile Include="Properties\Settings.cs" />
     <Compile Include="AssemblyInfo.cs" />
   <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>References\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
   <Reference Include="AnimationSystem.Types">
-      <HintPath>E:\TORRENT\Escape from Tarkov 4.0\EscapeFromTarkov_Data\Managed\AnimationSystem.Types.dll</HintPath>
+      <HintPath>References\AnimationSystem.Types.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -13,42 +13,42 @@
   <ItemGroup>
     <!-- BepInEx & Harmony -->
     <Reference Include="BepInEx">
-      <HintPath>E:\TORRENT\Escape from Tarkov\BepInEx\core\BepInEx.dll</HintPath>
+      <HintPath>References\BepInEx.dll</HintPath>
     </Reference>
     <Reference Include="0Harmony">
-      <HintPath>E:\TORRENT\Escape from Tarkov\BepInEx\core\0Harmony.dll</HintPath>
+      <HintPath>References\0Harmony.dll</HintPath>
     </Reference>
 
     <!-- Tarkov & Unity -->
     <Reference Include="Assembly-CSharp">
-      <HintPath>E:\TORRENT\Escape from Tarkov\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>References\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>E:\TORRENT\Escape from Tarkov\EscapeFromTarkov_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>References\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>E:\TORRENT\Escape from Tarkov\EscapeFromTarkov_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>References\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
 
     <!-- SPT & Utils -->
-    <Reference Include="spt-reflection">
-      <HintPath>E:\TORRENT\Escape from Tarkov\BepInEx\plugins\spt\spt-reflection.dll</HintPath>
+    <Reference Include="SPT.Reflection">
+      <HintPath>References\SPT.Reflection.dll</HintPath>
     </Reference>
     <Reference Include="Comfort">
-      <HintPath>E:\TORRENT\Escape from Tarkov\EscapeFromTarkov_Data\Managed\Comfort.dll</HintPath>
+      <HintPath>References\Comfort.dll</HintPath>
     </Reference>
     <Reference Include="Sirenix.Serialization">
-      <HintPath>E:\TORRENT\Escape from Tarkov\EscapeFromTarkov_Data\Managed\Sirenix.Serialization.dll</HintPath>
+      <HintPath>References\Sirenix.Serialization.dll</HintPath>
     </Reference>
-    
+
     <!-- Fika Plugin -->
     <Reference Include="Fika.Core">
-      <HintPath>E:\TORRENT\Escape from Tarkov\BepInEx\plugins\Fika\Fika.Core.dll</HintPath>
+      <HintPath>References\Fika.Core.dll</HintPath>
     </Reference>
-    
+
     <!-- Audio / VOIP -->
     <Reference Include="DissonanceVoip">
-      <HintPath>E:\TORRENT\Escape from Tarkov\EscapeFromTarkov_Data\Managed\DissonanceVoip.dll</HintPath>
+      <HintPath>References\DissonanceVoip.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>
