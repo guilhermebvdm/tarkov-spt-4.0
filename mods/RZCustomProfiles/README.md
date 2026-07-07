@@ -3,6 +3,8 @@
 **Versão:** 1.1.0 · **Compatível com:** SPT 4.0.13 · **Autor:** RemzDNB
 **Forge:** https://forge.sp-tarkov.com/mod/2614/rzcustomprofiles · **Licença:** MIT
 
+> ⚠️ **Aposentado (item 007).** Substituído pelo mod próprio [CustomClasses](../CustomClasses/README.md) — autossuficiente, sem a limitação de formato desta DLL black-box de terceiros. Mantido apenas como referência.
+
 ---
 
 ## O que é
@@ -16,7 +18,7 @@ Gerenciador de templates de perfil para SPT. Permite criar perfis de personagem 
 ### Estrutura de arquivos
 
 ```
-RZCustomProfiles/
+RZCustomProfiles/modded/         (sandbox de trabalho; original/ é intocável)
 ├── config/
 │   └── masterConfig.json       ← configurações globais do servidor
 └── profiles/

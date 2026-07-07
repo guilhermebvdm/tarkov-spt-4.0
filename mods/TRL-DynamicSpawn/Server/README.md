@@ -1,27 +1,9 @@
-# **[DewardianDevs's MOAR](https://hub.sp-tarkov.com/files/file/1059-moar-bagels-ultra-lite-spawn-mod/#overview) - The lite spawn mod**
+# TRL-DynamicSpawn — Server
 
-=== INSTALL STEPS ===
+Componente de servidor do **TRL-DynamicSpawn**, o mod de spawn dinâmico do TRL. O servidor hospeda o **painel de controle web** (Razor Pages, nativo no SPT) que define presets, timers, dificuldade e elites por mapa; o cliente baixa essas configurações no carregamento da raid e executa a lógica de spawn ao vivo (avaliação do mapa a cada 6 min, sem filas nem spawn instantâneo).
 
-1. Drag and drop this folder into your tarkov folder.
-2. Optionally change your configuration (see below configuration options).
+- **Arquitetura e regras de spawn (fonte de verdade):** [../TRL_DYNAMIC_SPAWN_DOCS.md](../TRL_DYNAMIC_SPAWN_DOCS.md)
+- **Cliente (BepInEx/C#):** [../Client/](../Client/)
+- **Ciclo de desenvolvimento:** [WORKFLOW.md](../../../WORKFLOW.md)
 
-3. ???????
-
-4. Profit!!!!
-
-Example order.json
-{
-"order": [
-"ServerValueModifier",
-"DewardianDev-MOAR-3.x.x",
-"Otherstuff"
-]
-}
-
-==== Configuration Options ====
-
-> Bepinex has all controls needed
-
-
-The "mapSettings" are basically just overrides, and allow for map specific settings.
-
+Config em `config/`; painel em `Web/` + `wwwroot/`. Build/instalação via `/compile-mod`.
