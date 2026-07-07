@@ -13,6 +13,18 @@
       "note": "Assembly C# do cliente EFT descompilado. Versionado no repo (vem junto, não é clonado). Build exato (SHA256 da DLL + data) em references/eft-decompiled/README.md."
     },
     {
+      "id": "spt-waypoints",
+      "path": "references/SPT-Waypoints-1.8.2",
+      "role": "client-mod-reference",
+      "tier": 2,
+      "fetch": false,
+      "tracked": true,
+      "modVersion": "1.8.2",
+      "upstream": "https://github.com/DrakiaXYZ/SPT-Waypoints",
+      "license": "MIT (© 2023 DrakiaXYZ)",
+      "note": "Código do mod DrakiaXYZ-Waypoints (plugin client BepInEx) vendorizado como referência de navegação/waypoints de bots. Versionado no repo (não clonado), snapshot da v1.8.2."
+    },
+    {
       "id": "spt-source",
       "path": "references/spt-source",
       "role": "server",
