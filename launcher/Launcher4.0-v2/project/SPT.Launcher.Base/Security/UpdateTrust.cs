@@ -12,7 +12,7 @@ namespace SPT.Launcher.Security
     ///  * <see cref="EmbeddedPublicKeyPem"/> below is a **DEV** key. PRODUCTION must generate its own
     ///    keypair, keep the PRIVATE key off the repo / off any synced path (Syncthing), embed the
     ///    matching PUBLIC key here, and sign the released exe with the private key. See
-    ///    `launcher/Launcher4.0beta/tools/README.md` and `tools/sign-launcher.ps1`.
+    ///    `launcher/Launcher4.0-v2/tools/README.md` and `tools/sign-launcher.ps1`.
     ///  * <see cref="SpkiPins"/> is EMPTY by default → transport pinning is inert (bootstrap). G-5:
     ///    fill it with the SPKI SHA-256 pin(s) of the production server certificate before relying on
     ///    the pinning layer. The signature layer already fail-closes the RCE regardless of pins.
