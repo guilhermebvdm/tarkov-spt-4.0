@@ -2329,15 +2329,34 @@ async function clearAllBuyOverrides() {
   }
 }
 
-// Re-render every buyback row in a given <table.buy-edit-table> from ITEMS/dev.sellFor.
+// Buy/buyback source rows: one per REGISTERED trader (vanilla + mod, e.g. Artem) — never sourced
+// from dev.sellFor alone (tarkov.dev only knows vanilla traders/items; a mod trader or a mod item
+// would otherwise never get a row at all, even though the backend is fully trader-agnostic). A
+// tarkov.dev reference price is merged in for display when one exists; renderBuyRow already shows
+// "—" and stays editable when it doesn't. Single source of truth for renderDetail's initial build,
+// rerenderBuyRowEl (single-row refresh) and rerenderBuyTable (bulk refresh) — all three used to
+// independently re-derive this from dev.sellFor, which is what dropped Artem's row on refresh.
+function buildBuySourceRows(item) {
+  const dev = item.tarkovDev && item.tarkovDev.pve;
+  const devSellByVendor = {};
+  if (dev && dev.sellFor) {
+    for (const s of dev.sellFor) {
+      if (s.vendor && s.vendor.normalizedName !== 'flea-market') devSellByVendor[s.vendor.name] = s;
+    }
+  }
+  return Object.keys(TRADERS)
+    .map(name => devSellByVendor[name] || { vendor: { name, normalizedName: name.toLowerCase() }, price: null, priceRUB: null, currency: null })
+    .sort((a,b) => (b.priceRUB||0) - (a.priceRUB||0));
+}
+
+// Re-render every buyback row in a given <table.buy-edit-table> from the trader registry.
 function rerenderBuyTable(table) {
   const tpl = table.dataset.buyTpl;
   const item = ITEMS[tpl];
   if (!item) return;
-  const dev = item.tarkovDev && item.tarkovDev.pve;
-  const sellFor = dev && dev.sellFor ? dev.sellFor.filter(s => s.vendor && s.vendor.normalizedName !== 'flea-market') : [];
-  if (sellFor.length === 0) return;
-  table.innerHTML = sellFor.map(s => renderBuyRow(item, s)).join('');
+  const rows = buildBuySourceRows(item);
+  if (rows.length === 0) return;
+  table.innerHTML = rows.map(s => renderBuyRow(item, s)).join('');
 }
 
 // Resolve the current override for a (trader, tpl) as { count, currency }, or null.
@@ -2735,9 +2754,7 @@ function rerenderBuyRowEl(row, focusBack) {
   const traderId = row.dataset.buyTraderId;
   const item = ITEMS[tpl];
   if (!item) return null;
-  const dev = item.tarkovDev && item.tarkovDev.pve;
-  const sellFor = dev && dev.sellFor ? dev.sellFor.filter(x => x.vendor && x.vendor.normalizedName !== 'flea-market') : [];
-  const s = sellFor.find(x => x.vendor && TRADERS[x.vendor.name] && TRADERS[x.vendor.name].id === traderId);
+  const s = buildBuySourceRows(item).find(x => x.vendor && TRADERS[x.vendor.name] && TRADERS[x.vendor.name].id === traderId);
   if (!s) return null;
   const tmp = document.createElement('tbody');
   tmp.innerHTML = renderBuyRow(item, s);
@@ -2913,10 +2930,7 @@ function renderDetail(it) {
   const mkt = it.tarkovMarket && it.tarkovMarket.pve;
   const spt = it.spt;
 
-  const traderSell = dev && dev.sellFor
-    ? dev.sellFor.filter(s => s.vendor.normalizedName !== 'flea-market')
-      .sort((a,b) => (b.priceRUB||0) - (a.priceRUB||0))
-    : [];
+  const traderSell = buildBuySourceRows(it);
 
   const sptTraders = spt && spt.traders ? spt.traders : [];
 
