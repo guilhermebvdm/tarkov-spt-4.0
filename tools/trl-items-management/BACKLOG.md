@@ -1,7 +1,7 @@
 # TRL Items Management — Backlog / roadmap
 
 > **Status:** 🟢 Vivo<br>
-> **Última revisão:** 2026-07-03<br>
+> **Última revisão:** 2026-07-07<br>
 > **Objetivo:** validar o escopo de features levantadas antes de agendar/implementar. Nada aqui está em execução até validação explícita.
 
 ---
@@ -54,6 +54,17 @@
 - **A validar:** item sem preço dev/market → pular + reportar quantos. Item acima do teto (mods/electronics) → aplicar `min(preço, ceiling)` e avisar. Restart-para-aplicar continua valendo.
 - **Depende de B-2** (é feature de UI → construir dentro do mod novo).
 
+### B-5 · Piso de flea configurável por item (abaixo do buyback teórico do trader)
+- **O quê:** hoje não dá pra colocar o preço de flea de um item abaixo de um **piso** que o próprio SPT impõe — mesmo com um override aditivo válido, a oferta final é re-elevada se o piso for maior. Pra alguns itens (rebalanceamento de economia) precisamos ir abaixo desse piso.
+- **Achado (pesquisa 2026-07-07):** o piso **não lê nenhum override nosso** — é recalculado do zero em `TraderHelper.GetHighestSellToTraderPrice` (`references/spt-source/.../TraderHelper.cs:485-515`): `handbook do item × coeficiente de buyback (loyalty 0)`, o maior entre todos os traders, cacheado. Aplicado em `RagfairPriceService.cs:316-323`, gatilhado por `ragfair.json:dynamic.useTraderPriceForOffersIfHigher` (default `true`). Editar o override de buyback ("B", já implementado) **não afeta esse cálculo** — ele ignora nossos overrides e recomputa via handbook+coeficiente sempre.
+- **Duas rotas identificadas, com raio de efeito bem diferente (verificado: `handbookHelper.GetTemplatePrice` é lido por ~10 sistemas — bot loot, Fence, geração de oferta do flea, recompensa de quest repetível, conversão de moeda, entre outros):**
+  - **(a) Editar `handbook.json` do item** — muda o valor "canônico" do item no jogo inteiro (loot de bot, Fence, quest, moeda — tudo que hoje lê handbook pra esse item). Sem patch novo, mas exige escrever em mais um arquivo do SPT_Data (checks.dat, atomicidade) e reconferir a fórmula de compensação/teto do flea (também handbook-derivada).
+  - **(b) Harmony novo em `TraderHelper.GetHighestSellToTraderPrice`** — override isolado, só pro piso do flea daquele item, sem tocar em mais nada. Patch que não existe hoje; nenhum precedente nesta sessão.
+- **Proposta de UX:** quando o valor desejado cair abaixo do piso calculado, em vez de só recusar com 422, mostrar as duas opções lado a lado (com o raio de efeito de cada uma) e deixar o operador escolher por item — a intenção real ("esse item vale menos" vs. "só quero ele mais barato no flea") só o operador sabe.
+- **Viabilidade:** 🟠 média — path (a) é config puro mas com blast radius grande; path (b) é patch novo, sem precedente. Nenhum dos dois tem spec ainda.
+- **A validar:** decidir a forma do override do path (b) (fixo por tpl, ou `min(vanilla, override)`?); confirmar que a UI consegue mostrar as duas opções sem confundir com o teto (B-1, mecanismo diferente); levantar a lista completa dos ~10 consumidores de handbook price pra path (a) documentar o aviso certo.
+- **Depende de B-2** (nasce dentro do mod novo, igual B-4).
+
 ---
 
 ## Decisões travadas (2026-07-04)
@@ -100,3 +111,4 @@ Ordem e paralelismo (pesquisa/spec/review via subagents independentes onde não 
 | Data | Autor | Alteração |
 |---|---|---|
 | 2026-07-03 | Guilherme | Criação — 4 itens (B-1 teto flea, B-2 virar mod, B-3 buy price, B-4 bulk copy) levantados para validação de escopo. |
+| 2026-07-07 | Guilherme | B-5 adicionado — piso de flea configurável por item (override abaixo do buyback teórico do trader), levantado durante o planejamento do B-2/unificação. Duas rotas identificadas (editar handbook vs. Harmony dedicado), nenhuma spec'd ainda. |
