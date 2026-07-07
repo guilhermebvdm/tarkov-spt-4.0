@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
@@ -55,6 +56,12 @@ internal static class StyleSensitiveJsonWriter
             Indented = true,
             IndentCharacter = indentChar,
             IndentSize = indentSize,
+            // Utf8JsonWriter's default encoder escapes every non-ASCII char (\uXXXX) — safe for a JSON
+            // parser either way, but bloats the file and rewrites bytes that didn't need to change vs
+            // the Node original (JSON.stringify never escapes non-ASCII). UnsafeRelaxedJsonEscaping only
+            // escapes what JSON itself requires (control chars, ", \); "unsafe" refers to HTML-injection
+            // contexts, irrelevant for a server-side config/database file.
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
         };
 
         using var stream = new MemoryStream();
