@@ -7,7 +7,7 @@ using EFT.InventoryLogic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace TRL_Immersive_Overlays
+namespace TRL_ImmersiveOverlays
 {
     public class OverlayController : MonoBehaviour
     {
@@ -24,7 +24,7 @@ namespace TRL_Immersive_Overlays
 
         private void Start()
         {
-            string imagePath = Path.Combine(Environment.CurrentDirectory, "BepInEx", "plugins", "TRL-Immersive-Overlays", "assets", "raybench.png");
+            string imagePath = Path.Combine(Environment.CurrentDirectory, "BepInEx", "plugins", "TRL-ImmersiveOverlays", "assets", "raybench.png");
             
             if (File.Exists(imagePath))
             {
@@ -33,13 +33,13 @@ namespace TRL_Immersive_Overlays
                     byte[] fileData = File.ReadAllBytes(imagePath);
                     overlayTexture = new Texture2D(2, 2);
                     ImageConversion.LoadImage(overlayTexture, fileData);
-                    Plugin.LogSource.LogInfo("TRL-Immersive-Overlays: Textura carregada com sucesso.");
+                    Plugin.LogSource.LogInfo("TRL-ImmersiveOverlays: Textura carregada com sucesso.");
 
                     SetupCanvas();
                 }
                 catch (Exception ex)
                 {
-                    Plugin.LogSource.LogError($"TRL-Immersive-Overlays: Erro ao carregar a imagem - {ex.Message}");
+                    Plugin.LogSource.LogError($"TRL-ImmersiveOverlays: Erro ao carregar a imagem - {ex.Message}");
                 }
             }
         }

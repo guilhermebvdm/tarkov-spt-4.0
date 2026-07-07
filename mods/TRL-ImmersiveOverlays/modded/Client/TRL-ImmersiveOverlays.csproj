@@ -7,8 +7,8 @@
     <ProjectGuid>{4B1A00B7-8F12-4C67-9154-1B1E0404C748}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TRL_Immersive_Overlays</RootNamespace>
-    <AssemblyName>TRL-Immersive-Overlays</AssemblyName>
+    <RootNamespace>TRL_ImmersiveOverlays</RootNamespace>
+    <AssemblyName>TRL-ImmersiveOverlays</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
