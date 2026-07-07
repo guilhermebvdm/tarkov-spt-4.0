@@ -1,6 +1,6 @@
 ---
 name: memory-curation
-description: Como manter memória cronológica de sessões de chat em `mods/<mod>/memory/sessions.md` e `memory/repo-sessions.md`. Aplicar durante `/update-memory` (escrita) E durante os commands de desenvolvimento (/create-spec, /review-spec, /create-technical-spec, /review-technical-spec, /code-mod, /code-review, /apply-code-review) no passo "Contexto de memória" (consumo — ver §14). Cobre: granularidade de timestamps GMT-3, detecção automática de pertinência por mod, regras de imutabilidade, snapshot "Estado atual" como delta (não acumulação), pendências classificadas com IDs P-N.M, lições/hipóteses descartadas, promoção de lições recorrentes, cross-references entre mods, e o que NÃO memorizar.
+description: Como manter memória cronológica de sessões de chat em `mods/<mod>/memory/sessions.md`. Aplicar durante `/update-memory` (escrita) E durante os commands de desenvolvimento (/create-spec, /review-spec, /create-technical-spec, /review-technical-spec, /code-mod, /code-review, /apply-code-review) no passo "Contexto de memória" (consumo — ver §14). Cobre: granularidade de timestamps GMT-3, detecção automática de pertinência por mod, regras de imutabilidade, snapshot "Estado atual" como delta (não acumulação), pendências classificadas com IDs P-N.M, lições/hipóteses descartadas, promoção de lições recorrentes, cross-references entre mods, e o que NÃO memorizar.
 ---
 
 # Memory Curation
@@ -11,18 +11,13 @@ Skill para manter a memória cronológica de sessões de chat do repo. O objetiv
 
 ## 1. Estrutura de arquivos
 
-Dois níveis:
+Um nível:
 
 | Caminho | Escopo | Quando entra aqui |
 | --- | --- | --- |
 | `mods/<mod>/memory/sessions.md` | Específico do mod | Trabalho em `mods/<mod>/modded/`, `mods/<mod>/backlog/`, ou decisões diretamente sobre esse mod. |
-| `memory/repo-sessions.md` (raiz) | Repo-wide | Mudanças em `.claude/`, `.agents/`, `scripts/`, ou em commands/skills/templates que afetam o fluxo de todos os mods. |
 
-Uma sessão real frequentemente toca **ambos** os níveis (ex.: criar `/code-review` é repo-wide, mas o mod-cobaia teve atividade própria). Nesses casos:
-
-- Trabalho repo-wide vai em `memory/repo-sessions.md`.
-- Trabalho mod-específico vai no `mods/<mod>/memory/sessions.md`.
-- **Não duplicar**: o mod-específico cita "ver `memory/repo-sessions.md` 2026-05-11 para infra que afetou este trabalho", e vice-versa.
+> Historicamente havia um segundo arquivo `memory/repo-sessions.md` para trabalho repo-wide (infra, commands, skills). Descontinuado em 2026-07-06 — virou memória concorrente com a pessoal do assistente e parou de ser atualizado. Trabalho meta-repo hoje **não tem destino dedicado no repo** (ver §3 ponto 4); `git log`/mensagens de commit são a fonte de verdade para histórico de infra.
 
 ## 2. Timestamps GMT-3 — HH:MM obrigatório
 
@@ -51,8 +46,7 @@ Quando `/update-memory` rodar sem argumento, classificar cada trecho da conversa
 1. **Path explícito (peso alto):** linhas/edits/reads/grep que mencionam `mods/<X>/...` → trecho pertence ao mod `<X>`.
 2. **Command direcionado (peso alto):** `/code-mod <X>`, `/compile-mod <X>`, `/add-backlog-item <X>`, `/code-review <X>`, etc. Define o "mod ativo" do momento até outro command direcionado mudar.
 3. **Menção textual (peso médio):** discussões que citam o nome do mod por extenso. Útil quando a conversa é teórica antes de aterrissar no código.
-4. **Trabalho meta-repo (peso alto):** edits em `.claude/`, `.agents/`, `scripts/`, ou criação/modificação de commands/skills/templates → vai para `memory/repo-sessions.md`, NÃO para nenhum mod. Em cada mod tocado na mesma sessão, deixar pointer "infra repo-wide nesta sessão — ver `memory/repo-sessions.md` 2026-05-11".
-5. **Ações não-mod, não-repo (peso baixo):** debug de plugin externo (não nosso), update de inventário, conversa solta. Descartar OU, se foi consequente, registrar em uma seção `## Notas relevantes (não-mod)` do mod em foco no momento.
+4. **Trabalho meta-repo ou não-mod (peso baixo):** edits em `.claude/`, `.agents/`, `scripts/`, commands/skills/templates, debug de plugin externo, update de inventário, conversa solta. **Sem destino dedicado no repo** — descartar, a menos que tenha impacto direto num mod tocado na mesma sessão; nesse caso, registrar em `## Notas relevantes (não-mod)` do mod em foco.
 
 **Quando ambíguo:** preferir o último mod com command direcionado (peso 2 winner). Se mesmo assim incerto, perguntar ao usuário em vez de chutar.
 
@@ -105,7 +99,6 @@ Template:
 
 **Cross-refs:**
 - Resolve pendências [P-X.Y] da sessão `<data>` (se aplicável).
-- Aponta para `memory/repo-sessions.md` Sessão K (se houve trabalho repo-wide).
 ```
 
 **Decisões-chave vem antes da cronologia.** O futuro leitor quer saber "o que mudou e por quê", não "em que ordem isso aconteceu". Cronologia é apoio.
@@ -246,7 +239,7 @@ Adições que valem como prática:
 
 3. **Cross-mod see-also vs duplicação.** Já coberto em §9, mas reforçar: a tentação de "copiar contexto" entre mods cria drift. Sempre cross-ref.
 
-4. **Repo-wide em arquivo próprio.** `memory/repo-sessions.md` evita poluir memórias mod-específicas com infra. Mod aponta; não absorve.
+4. ~~Repo-wide em arquivo próprio.~~ Descontinuado 2026-07-06 (ver §1) — trabalho meta-repo não tem mais destino dedicado.
 
 5. **Snapshot diff format (opcional para sessões longas).** Quando o "Estado atual" muda muito numa sessão, antes de reescrever os bullets, listar o delta:
    ```markdown
@@ -309,7 +302,7 @@ Memória é tracking efêmero; regra recorrente vira conhecimento institucional.
 - Pitfall de **linguagem C#/Unity** → skill `csharp-mod-best-practices`.
 - A memória mantém o narrativo e ganha link para o destino promovido — **não duplica** o conteúdo.
 
-Fluxo: o `/update-memory` **PROPÕE** a promoção (bloco `💡 Candidata a promoção` no relatório); o usuário aprova; a edição do doc/skill é trabalho repo-wide. **Loop fechado (confirmar os 3 após aprovação):** (a) seção `AP-NN` editada/criada em `spt-antipatterns.md` (sem prefixo `§` — os headers são `## AP-NN`); (b) entrada repo-wide em `memory/repo-sessions.md`; (c) bullet de origem na memória do mod substituído por link para `AP-NN` (não duplica o conteúdo).
+Fluxo: o `/update-memory` **PROPÕE** a promoção (bloco `💡 Candidata a promoção` no relatório); o usuário aprova; a edição do doc/skill é trabalho repo-wide (sem registro dedicado — ver §1). **Loop fechado (confirmar os 2 após aprovação):** (a) seção `AP-NN` editada/criada em `spt-antipatterns.md` (sem prefixo `§` — os headers são `## AP-NN`); (b) bullet de origem na memória do mod substituído por link para `AP-NN` (não duplica o conteúdo).
 
 ## Checklist final (usar antes de commit)
 
@@ -319,7 +312,7 @@ Ao escrever/atualizar uma entrada de memória:
 2. **Decisões-chave antes da cronologia:** 1-5 bullets com "o quê / por quê / ref".
 3. **Cronologia:** passos em ordem, com resultados.
 4. **Pendências:** categorizadas (🔴/🟡/🟢), com IDs locais.
-5. **Cross-refs:** se trabalho paralelo em outro mod, pointer. Se trabalho repo-wide, pointer para `memory/repo-sessions.md`.
+5. **Cross-refs:** se trabalho paralelo em outro mod, pointer.
 6. **Refs densos:** toda claim técnica tem `file:linha`.
 7. **Snapshot atualizado no topo:** "Estado atual" e "Pendências" refletem o FIM da sessão, não acumulam.
 8. **Pendências resolvidas:** removidas do topo, marcadas ✅ na sessão que resolveu.
@@ -329,6 +322,6 @@ Ao escrever/atualizar uma entrada de memória:
 12. **IDs de pendência:** todo bullet de pendência (no topo e nas entradas) com `[P-N.M]`; legados receberam ID retroativo (§7).
 13. **Tamanho do snapshot:** ≤10 bullets por bloco (alerta); >15 → parar e consolidar/promover antes de gravar (§6).
 14. **GC:** nenhuma pendência >30 dias sem decisão explícita (promover/descartar/manter justificado) (§7).
-15. **Promoção (se houve):** loop fechado — `AP-NN` editado, entrada em `repo-sessions.md`, bullet do mod vira link para o destino (§15).
+15. **Promoção (se houve):** loop fechado — `AP-NN` editado, bullet do mod vira link para o destino (§15).
 
 Se algum item falha, parar e corrigir antes de marcar a entrada como concluída.

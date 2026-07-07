@@ -65,10 +65,9 @@ Convenção de artefatos: `NNN-<slug>-MM-tipo[-NN].md` — ordem visual = ordem 
 | `memory-curation` | `/update-memory` (escrita) + passo "Contexto de memória" dos commands (consumo, §14) |
 | `graph-code-navigation` | spec técnica, reviews, code — grafo vs Grep, receitas de query, "grafo aponta, leitura prova" |
 
-### Memória (2 níveis)
+### Memória
 
 - `mods/<mod>/memory/sessions.md` — narrativa por mod: decisões com porquê, **lições/hipóteses descartadas**, pendências `[P-N.M]` (🔴/🟡/🟢), snapshot delta no topo.
-- `memory/repo-sessions.md` — trabalho repo-wide (`.claude/`, `.agents/`, `scripts/`).
 - **Consumo:** todo command de desenvolvimento lê o topo da memória do mod antes de trabalhar (pendência 🔴 → alerta). **Escrita:** `/update-memory`. Lições recorrentes (≥2 sessões) são promovidas para [docs/technical/spt-antipatterns.md](docs/technical/spt-antipatterns.md) ou skills.
 
 ### Grafos de código

@@ -1,19 +1,20 @@
 # /update-memory
 
-Atualiza a memória cronológica de sessão de chat em `mods/<mod>/memory/sessions.md` e/ou `memory/repo-sessions.md` (top-level). Detecta automaticamente quais mods foram tocados na sessão atual, pergunta confirmação antes de gravar, e insere cada entrada na ordem cronológica correta (suporta chats paralelos no mesmo dia).
+Atualiza a memória cronológica de sessão de chat em `mods/<mod>/memory/sessions.md`. Detecta automaticamente quais mods foram tocados na sessão atual, pergunta confirmação antes de gravar, e insere cada entrada na ordem cronológica correta (suporta chats paralelos no mesmo dia).
 
 > **Skill obrigatória:** carregar `memory-curation` antes de redigir as entradas. Toda regra de granularidade de timestamps, classificação de pendências, densidade de refs, snapshot delta e merge por posicionamento vem dela.
+
+> Trabalho meta-repo (infra, commands, skills) não tem mais destino dedicado — `memory/repo-sessions.md` foi descontinuado em 2026-07-06 (ver `.claude/skills/memory-curation/SKILL.md` §1). `git log` é a fonte de verdade para esse histórico.
 
 ## Uso
 
 ```bash
-/update-memory [<mod>] [--all] [--repo] [--dry]
+/update-memory [<mod>] [--all] [--dry]
 ```
 
 - `/update-memory` (sem args) — **auto-detect**: o command varre a conversa atual, classifica trechos por mod usando a hierarquia de §3 da skill, e propõe um plano de atualização para o usuário **confirmar** antes de gravar.
 - `/update-memory <mod>` — atualiza só `mods/<mod>/memory/sessions.md`, filtrando da conversa só o que é pertinente a esse mod.
-- `/update-memory --all` — atualiza todos os mods detectados E o `memory/repo-sessions.md` se houver trabalho repo-wide. Sem prompt de confirmação (modo batch).
-- `/update-memory --repo` — atualiza só `memory/repo-sessions.md` top-level.
+- `/update-memory --all` — atualiza todos os mods detectados. Sem prompt de confirmação (modo batch).
 - `/update-memory --dry` — mostra o que seria escrito (preview do delta) sem efetivar. Combinável com qualquer alvo.
 
 ## O que fazer
@@ -25,8 +26,7 @@ Aplicar a hierarquia de §3 da skill `memory-curation`:
 1. **Path explícito** (peso alto): edits/reads/grep que tocaram `mods/<X>/...` → trecho pertence a `<X>`.
 2. **Command direcionado** (peso alto): `/code-mod <X>`, `/compile-mod <X>`, `/add-backlog-item <X>`, etc. Define "mod ativo" até outro command direcionado mudar.
 3. **Menção textual** (peso médio).
-4. **Trabalho meta-repo** (peso alto): edits em `.claude/`, `.agents/`, `scripts/` → vai para `memory/repo-sessions.md`, NÃO para nenhum mod individual.
-5. **Ações não-mod, não-repo**: descartar OU registrar como "Notas relevantes (não-mod)" no mod em foco.
+4. **Trabalho meta-repo ou não-mod** (peso baixo): edits em `.claude/`, `.agents/`, `scripts/`, ou ações que não tocam nenhum mod. **Sem destino dedicado no repo** — descartar OU, se relevante, registrar como "Notas relevantes (não-mod)" no mod em foco.
 
 ### 2. Apresentar o plano de atualização
 
@@ -36,15 +36,11 @@ Se `/update-memory` foi chamado sem `--all`, **sempre perguntar antes de gravar*
 📋 Detectei trabalho nos seguintes escopos nesta sessão:
 
   - mods/stancesAndCameraPositionSPT4.0.11 (N ações relevantes, M decisões-chave)
-  - memory/repo-sessions.md (K ações repo-wide)
 
 Plano de atualização:
   1. mods/stancesAndCameraPositionSPT4.0.11/memory/sessions.md
      → Nova entrada "Sessão 4 (2026-05-11, 14h GMT-3) — <título>"
      → Inserida AO FINAL (timestamp > entradas existentes deste dia)
-  2. memory/repo-sessions.md
-     → Nova entrada "Sessão 2 (2026-05-11, 10h GMT-3) — <título>"
-     → Inserida AO FINAL
 
 Confirmar gravação? [y/N]
 ```
@@ -101,7 +97,6 @@ Seguir o template da skill §5:
 **Cross-refs:**
 - Resolve [P-X.Y] de YYYY-MM-DD (se aplicável).
 - Trabalho paralelo em outro mod: ver `mods/<outro>/memory/sessions.md` YYYY-MM-DD.
-- Infra repo-wide: ver `memory/repo-sessions.md` Sessão K.
 ```
 
 **A seção "Lições / hipóteses descartadas" é obrigatória** (skill §5). Antes de gravar, varrer a conversa por: bugs diagnosticados (com causa raiz), abordagens revertidas, premissas refutadas ("tentamos X, falhou porque Y"). Se nada qualifica, registrar a justificativa explícita: `Nenhuma lição nova — sessão de <tipo>.` Sessão que tocou código sem decisão "— porquê" nem lição é red flag — voltar à conversa e extrair o raciocínio.
@@ -161,7 +156,7 @@ Aplicar skill §15: se a mesma classe de erro/lição aparece em **≥2 sessões
    Aprovar?
 ```
 
-A edição do doc/skill só acontece com aprovação do usuário e é registrada como trabalho repo-wide em `memory/repo-sessions.md`. A memória do mod ganha link para o destino promovido — não duplica.
+A edição do doc/skill só acontece com aprovação do usuário (trabalho repo-wide, sem registro dedicado — ver skill §1). A memória do mod ganha link para o destino promovido — não duplica.
 
 ### 10. Confirmar e gravar
 
@@ -177,8 +172,6 @@ Após confirmação do usuário (ou com `--all` que skipa):
        → Snapshot "Estado atual" atualizado (3 bullets reescritos)
        → 2 pendências adicionadas (P-4b.1 🟡, P-4b.2 🟢)
        → 1 pendência resolvida: P-3.2 ✅ (criada em 2026-05-09 Sessão 3)
-     - memory/repo-sessions.md
-       → Adicionada Sessão 2 ao final (sem conflito de timestamp)
    Lições registradas: N (ou "ausência justificada")
    GC: K pendências >30d decididas
    Promoções propostas: M
@@ -192,7 +185,7 @@ Após confirmação do usuário (ou com `--all` que skipa):
 ## Regras
 
 - **Skill `memory-curation` é fonte única de verdade** para regras de redação. Este command é mecânica + workflow; conteúdo segue a skill.
-- **Sandbox de gravação:** apenas `mods/<X>/memory/sessions.md` e `memory/repo-sessions.md`. Nunca toca outros arquivos.
+- **Sandbox de gravação:** apenas `mods/<X>/memory/sessions.md`. Nunca toca outros arquivos.
 - **Append-only para entradas existentes.** Reposicionamento move o bloco inteiro; nunca edita texto antigo (anti-revisionismo, skill §8).
 - **Confirmação default ON.** Modo batch (`--all`) só por flag explícita, para uso em scripts.
 - **Auto-detect conservador.** Quando ambíguo entre 2 mods, perguntar em vez de chutar.
@@ -215,9 +208,6 @@ Após confirmação do usuário (ou com `--all` que skipa):
 # Preview do que seria escrito, sem gravar.
 /update-memory --dry
 
-# Batch: atualiza todos os mods + repo, sem prompt.
+# Batch: atualiza todos os mods detectados, sem prompt.
 /update-memory --all
-
-# Só repo-wide (após uma sessão de manutenção de infra).
-/update-memory --repo
 ```
