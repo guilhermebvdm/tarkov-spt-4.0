@@ -11,7 +11,7 @@ using EFT.UI;
 using EFT.AssetsManager;
 using System.Threading.Tasks;
 
-namespace ModoPVP.Components
+namespace TRL_PvpMode.Components
 {
     public static class RespawnHandler
     {
@@ -25,7 +25,7 @@ namespace ModoPVP.Components
         public static void SnapshotProfile(Profile profile)
         {
             _initialProfile = profile.Clone();
-            BepInEx.Logging.Logger.CreateLogSource("ModoPVP").LogInfo("Profile salvo em memória para restauração de loadout!");
+            BepInEx.Logging.Logger.CreateLogSource("TRL-PvpMode").LogInfo("Profile salvo em memória para restauração de loadout!");
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace ModoPVP.Components
 
         private static IEnumerator RespawnCoroutine(CoopGame gameInstance)
         {
-            var logger = BepInEx.Logging.Logger.CreateLogSource("ModoPVP");
+            var logger = BepInEx.Logging.Logger.CreateLogSource("TRL-PvpMode");
 
             // 1 & 2. Cooldown de respawn mantendo o DeathFade desativado para assistirmos a queda
             logger.LogInfo("Aguardando cooldown de respawn (10 segundos) e bloqueando DeathFade...");

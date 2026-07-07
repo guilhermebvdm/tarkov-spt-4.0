@@ -3,7 +3,7 @@ using Fika.Core.Main.FreeCamera;
 using SPT.Reflection.Patching;
 using EFT;
 
-namespace ModoPVP.Patches
+namespace TRL_PvpMode.Patches
 {
     public class DisableSpectatorPatch : ModulePatch
     {

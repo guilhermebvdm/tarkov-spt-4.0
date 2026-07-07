@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
-    <AssemblyName>ModoPVP</AssemblyName>
+    <AssemblyName>TRL-PvpMode</AssemblyName>
     <Description>Mod de Respawn e Modo PVP para o Fika</Description>
     <Version>1.0.0</Version>
     <Authors>Umbigo Preto</Authors>

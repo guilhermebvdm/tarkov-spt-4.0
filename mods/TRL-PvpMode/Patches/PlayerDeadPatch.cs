@@ -5,10 +5,10 @@ using SPT.Reflection.Patching;
 using BepInEx.Logging;
 using Comfort.Common;
 using Fika.Core.Main.GameMode;
-using ModoPVP.Components;
+using TRL_PvpMode.Components;
 using EFT.UI;
 
-namespace ModoPVP.Patches
+namespace TRL_PvpMode.Patches
 {
     public class PlayerDeadPatch : ModulePatch
     {

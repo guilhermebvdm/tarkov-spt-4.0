@@ -3,7 +3,7 @@ using Fika.Core.Main.Components;
 using SPT.Reflection.Patching;
 using BepInEx.Logging;
 
-namespace ModoPVP.Patches
+namespace TRL_PvpMode.Patches
 {
     public class DisableF8ExtractPatch : ModulePatch
     {
