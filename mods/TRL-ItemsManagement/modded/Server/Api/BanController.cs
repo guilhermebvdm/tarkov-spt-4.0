@@ -4,28 +4,33 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
+using SPTarkov.Server.Core.Models.Common;   // MongoId
+using SPTarkov.Server.Core.Services;        // DatabaseService
 
 namespace TRLItemsManagement.Api;
 
 public sealed record SetBanRequest(string? Tpl, bool? Banned);
 
 /// <summary>
-///     Flea ban/unban toggle. Rewrites <c>_props.CanSellOnRagfair</c> directly on SPT's own
-///     <c>SPT_Data/database/templates/items.json</c> (~19 MB) — NOT <c>ragfair.json</c>: SPT 4.0 dropped
-///     the per-tpl custom blacklist list from its config model (only <c>EnableBsgList</c>/
-///     <c>EnableQuestList</c>/<c>CustomItemCategoryList</c> survive there), so <c>CanSellOnRagfair</c> on
-///     the item template itself is the only mechanism SPT actually honors for a per-tpl ban. Ported from
-///     <c>serve.js</c>'s <c>handleBanToggle</c>.
+///     Flea ban/unban toggle — two paths, gated on whether the tpl exists in SPT's own
+///     <c>SPT_Data/database/templates/items.json</c> (~19 MB):
+///     <list type="bullet">
+///     <item>Vanilla item (present in that file): rewrite its <c>_props.CanSellOnRagfair</c> there —
+///     NOT <c>ragfair.json</c> (SPT 4.0 dropped the per-tpl custom blacklist from its config model; the
+///     item template itself is the only mechanism SPT honors). Ported from <c>serve.js</c>'s
+///     <c>handleBanToggle</c>.</item>
+///     <item>Mod item (absent from that file — mod items are injected into the live database during
+///     <c>PostDBModLoader</c>, AFTER this file is already loaded from disk, so they can NEVER be banned
+///     via a file rewrite): delegate to <see cref="ModItemBanService"/>, which persists to its own
+///     <c>config/mod-item-bans.json</c> and mutates the LIVE database immediately, so the ban applies to
+///     the current session too, not just after a restart.</item>
+///     </list>
 ///     <para>
-///     Precondition: <c>ragfair.json:dynamic.blacklist.enableBsgList</c> must be <c>true</c> (the
-///     default — missing/absent counts as enabled, only an explicit <c>false</c> disables it), or SPT
-///     ignores <c>CanSellOnRagfair</c> entirely and the toggle would silently no-op in-game. Checked and
-///     REFUSED (409), never applied as a silent no-op.
-///     </para>
-///     <para>
-///     This file uses CRLF + 2-space indent (confirmed on-disk, unlike <c>ragfair.json</c>'s tabs) —
-///     hardcoded here rather than run through <see cref="StyleSensitiveJsonWriter"/>'s sniffing, mirroring
-///     <c>serve.js</c>'s own hardcoded <c>.replace(/\n/g, '\r\n')</c> for this specific file.
+///     Precondition (vanilla path only — mod items have no <c>enableBsgList</c> concept to check against
+///     since <see cref="ModItemBanService"/> writes <c>CanSellOnRagfair</c> directly, same field): must be
+///     <c>true</c> (default — missing/absent counts as enabled, only an explicit <c>false</c> disables
+///     it), or SPT ignores <c>CanSellOnRagfair</c> entirely and the toggle would silently no-op in-game.
+///     Checked and REFUSED (409), never applied as a silent no-op.
 ///     </para>
 /// </summary>
 [ApiController]
@@ -33,7 +38,9 @@ public sealed record SetBanRequest(string? Tpl, bool? Banned);
 public sealed class BanController(
     SptDataPathsService sptPaths,
     WriteLockService writeLock,
-    SptChecksService checksService) : ControllerBase
+    SptChecksService checksService,
+    ModItemBanService modItemBanService,
+    DatabaseService databaseService) : ControllerBase
 {
     private static readonly Regex TplPattern = new("^[a-f0-9]{24}$", RegexOptions.IgnoreCase);
 
@@ -55,29 +62,48 @@ public sealed class BanController(
             {
                 return Task.FromResult<IActionResult>(Conflict(new
                 {
-                    error = "enableBsgList is false in ragfair.json — CanSellOnRagfair toggles would be ignored by SPT",
+                    error = "enableBsgList is false in ragfair.json - CanSellOnRagfair toggles would be ignored by SPT",
                 }));
             }
 
             var sptItemsRoot = JsonNode.Parse(System.IO.File.ReadAllText(sptPaths.ItemsJsonPath)) as JsonObject;
-            if (sptItemsRoot?[tpl] is not JsonObject sptEntry || sptEntry["_props"] is not JsonObject props)
+            if (sptItemsRoot?[tpl] is JsonObject sptEntry && sptEntry["_props"] is JsonObject props)
             {
-                return Task.FromResult<IActionResult>(NotFound(new { error = "tpl not in SPT items.json" }));
+                var wasBannedVanilla = props["CanSellOnRagfair"]?.GetValue<bool?>() == false;
+                props["CanSellOnRagfair"] = !banned;
+
+                WriteSptItemsJson(sptItemsRoot);
+                var checksResult = checksService.Update("database/templates/items.json");
+
+                return Task.FromResult<IActionResult>(Ok(new
+                {
+                    ok = true,
+                    tpl,
+                    banned,
+                    wasBanned = wasBannedVanilla,
+                    modItem = false,
+                    checks = new { ok = checksResult.Ok, updated = checksResult.Updated },
+                }));
             }
 
-            var wasBanned = props["CanSellOnRagfair"]?.GetValue<bool?>() == false;
-            props["CanSellOnRagfair"] = !banned;
+            // Not in the vanilla file — check the LIVE database (includes mod items, injected after
+            // this file was loaded). If it's not there either, the tpl is genuinely unknown.
+            if (!databaseService.GetItems().TryGetValue(new MongoId(tpl), out var liveTemplate) || liveTemplate.Properties is null)
+            {
+                return Task.FromResult<IActionResult>(NotFound(new { error = "tpl not found in SPT items.json nor in the live database" }));
+            }
 
-            WriteSptItemsJson(sptItemsRoot);
-            var checksResult = checksService.Update("database/templates/items.json");
+            var wasBannedMod = liveTemplate.Properties.CanSellOnRagfair == false;
+            modItemBanService.SetBanned(tpl, banned);
+            liveTemplate.Properties.CanSellOnRagfair = !banned; // apply to the CURRENT session immediately too
 
             return Task.FromResult<IActionResult>(Ok(new
             {
                 ok = true,
                 tpl,
                 banned,
-                wasBanned,
-                checks = new { ok = checksResult.Ok, updated = checksResult.Updated },
+                wasBanned = wasBannedMod,
+                modItem = true,
             }));
         });
     }
