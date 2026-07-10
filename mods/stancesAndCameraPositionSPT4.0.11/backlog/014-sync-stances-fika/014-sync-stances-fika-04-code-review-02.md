@@ -5,7 +5,7 @@
 **Spec técnica:** [014-sync-stances-fika-02-spec-tech.md](014-sync-stances-fika-02-spec-tech.md)
 **Asbuild:** [014-sync-stances-fika-05-asbuild.md](014-sync-stances-fika-05-asbuild.md)
 **Fixes:** [06-fix-01](014-sync-stances-fika-06-fix-01.md) (ProcessEffectors — não funcionou) · [06-fix-02](014-sync-stances-fika-06-fix-02.md) (ObservedVisualPass Postfix — alvo desta review)
-**Data:** 2026-06-23
+**Data:** 2026-07-09
 
 > Review **de validação por referências** (pedido do usuário: confirmar, sem teste in-game, se o código atual deve funcionar para os requisitos). Análise por **2 validadores independentes** (sub-agents de contexto limpo) sobre os 2 elos decisivos (hook/acúmulo e transform/render), + auditoria manual da cadeia de rede. Memória consultada: snapshot Sessão 5 (desatualizada — não cobre 011-014) · pendências que afetam: nenhuma registrada para o item 014.
 
@@ -53,7 +53,7 @@
 
 ## Pontos
 
-### CR-02-01 · B — Bug latente · 🟠 Forte · ✅ Aplicado em 2026-06-23
+### CR-02-01 · B — Bug latente · 🟠 Forte · ✅ Aplicado em 2026-07-09
 
 **O Postfix não respeita o early-return de `ObservedVisualPass`; quando o método retorna cedo mas o player é renderizado, o offset aditivo acumula sem o transform ser re-setado**
 
@@ -101,7 +101,7 @@ Alternativa robusta (independe de acessores): no `ApplyToWeaponRoot`, capturar `
 
 ---
 
-### CR-02-02 · C — Gap vs. spec · 🟡 Médio · ✅ Aplicado em 2026-06-23
+### CR-02-02 · C — Gap vs. spec · 🟡 Médio · ✅ Aplicado em 2026-07-09
 
 **`SendStance` só é disparado em `OnStanceChanged`; mirar/desmirar sem trocar de stance não reenvia o packet, e o `_isAiming` do observado fica desatualizado**
 
@@ -139,7 +139,7 @@ Alternativa robusta (independe de acessores): no `ApplyToWeaponRoot`, capturar `
 
 ---
 
-### CR-02-04 · E — Legibilidade/manutenção · 🟡 Médio · ✅ Aplicado em 2026-06-23
+### CR-02-04 · E — Legibilidade/manutenção · 🟡 Médio · ✅ Aplicado em 2026-07-09
 
 **`FikaNetworkSync.cs` é código morto, paralelo ao `Networking/FikaSyncManager.cs` em uso**
 
@@ -204,5 +204,5 @@ Alternativa robusta (independe de acessores): no `ApplyToWeaponRoot`, capturar `
 
 | Data | Evento |
 |---|---|
-| 2026-06-23 | Code review 02 (validação por referências, 2 validadores independentes + auditoria da rede) — 0 🔴, 1 🟠, 3 🟡, 2 🟢. Veredito: mecanismo central deve funcionar; CR-02-01 recomendado antes do teste. |
-| 2026-06-23 | Aplicados CR-02-01 (guarda anti-acúmulo no `ObservedStanceAnimator`), CR-02-02 (`TickAdsNetworkSync` reenvia stance ao mirar), CR-02-04 (removidos `FikaNetworkSync.cs` + `PlayerStanceController.cs` mortos). CR-02-03 deferido p/ calibração in-game; CR-02-05/06 deferidos (cache→leak / logs úteis no teste). |
+| 2026-07-09 | Code review 02 (validação por referências, 2 validadores independentes + auditoria da rede) — 0 🔴, 1 🟠, 3 🟡, 2 🟢. Veredito: mecanismo central deve funcionar; CR-02-01 recomendado antes do teste. |
+| 2026-07-09 | Aplicados CR-02-01 (guarda anti-acúmulo no `ObservedStanceAnimator`), CR-02-02 (`TickAdsNetworkSync` reenvia stance ao mirar), CR-02-04 (removidos `FikaNetworkSync.cs` + `PlayerStanceController.cs` mortos). CR-02-03 deferido p/ calibração in-game; CR-02-05/06 deferidos (cache→leak / logs úteis no teste). |
