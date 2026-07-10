@@ -83,33 +83,60 @@ namespace SPT.Launcher.Sync
 
                 var rule = _resolver.Resolve(normalized, out string matchedPrefix);
 
-                // Item 017: seed rule — copy SERVER config-server/<rel> to USER config/<rel> only
-                // when the target is ABSENT BY NAME. Handled before the missing/hash logic below
-                // because the SOURCE (config-server) is a server-only folder the user never has on
-                // disk — the normal path would wrongly plan a Download of config-server onto the user.
-                // No hash, no baseline: the seed is memory-less (a file the user deleted reappears).
-                if (rule == SyncFolderRule.SeedIfMissingByName)
+                // config-server sync (item 017 + seed-and-mirror). Handled before the missing/hash
+                // logic below because the SOURCE (config-server) is a server folder the user never
+                // has under 'config' — the normal path would wrongly plan a Download onto the user.
+                //  SEED: copy config-server/<rel> -> config/<rel> ONLY if absent by name (memory-less;
+                //        never overwrites/deletes the user-owned 'config').
+                //  MIRROR (seed-and-mirror only): keep config-server/<rel> itself a replica —
+                //        download the latest whenever missing or hash-divergent (overwrites user edits).
+                //        Extras are NOT deleted: SeedAndMirror is NOT a MirrorPrefix and is skipped in
+                //        ScanExtras (conservative, ref CR-01-03; delete stays opt-in).
+                if (rule == SyncFolderRule.SeedIfMissingByName || rule == SyncFolderRule.SeedAndMirror)
                 {
+                    // -- SEED into config/<rel> (both rules) --
                     string targetRel = SyncPathUtil.DeriveSeedTarget(file.path, matchedPrefix);
-                    if (targetRel == null)
+                    if (targetRel != null)
                     {
-                        continue; // no file remainder after the prefix — nothing to seed
+                        string targetLocal = SyncPathUtil.ToLocalPath(_options.GameRoot, targetRel);
+                        if (!File.Exists(targetLocal))
+                        {
+                            plan.Actions.Add(new SyncAction
+                            {
+                                RelativePath = file.path,       // download source (config-server/<rel>)
+                                SeedTargetRelative = targetRel, // write destination (config/<rel>)
+                                Kind = SyncActionKind.SeedCopy,
+                                Rule = rule,
+                                ServerHash = file.hash,
+                                Reason = "seed (target missing by name)",
+                            });
+                        }
+                        // target present (any content, any hash) -> no-op: seed never overwrites.
                     }
 
-                    string targetLocal = SyncPathUtil.ToLocalPath(_options.GameRoot, targetRel);
-                    if (!File.Exists(targetLocal))
+                    // -- MIRROR config-server/<rel> itself (seed-and-mirror only): sempre a última versão --
+                    if (rule == SyncFolderRule.SeedAndMirror)
                     {
-                        plan.Actions.Add(new SyncAction
+                        string mirrorLocal = SyncPathUtil.ToLocalPath(_options.GameRoot, file.path);
+                        if (!File.Exists(mirrorLocal))
                         {
-                            RelativePath = file.path,       // download source (config-server/<rel>)
-                            SeedTargetRelative = targetRel, // write destination (config/<rel>)
-                            Kind = SyncActionKind.SeedCopy,
-                            Rule = rule,
-                            ServerHash = file.hash,
-                            Reason = "seed (target missing by name)",
-                        });
+                            AddDownload(plan, file, rule, "mirror (config-server ausente)");
+                        }
+                        else
+                        {
+                            string mirrorHash = await Task.Run(() => SyncPathUtil.ComputeMd5(mirrorLocal), cancellationToken);
+                            if (string.Equals(mirrorHash, file.hash, StringComparison.OrdinalIgnoreCase))
+                            {
+                                plan.UpToDate.Add(new KeyValuePair<string, string>(normalized, mirrorHash));
+                            }
+                            else
+                            {
+                                // Réplica exata: sobrescreve SEMPRE (mesmo se o usuário editou o config-server).
+                                AddDownload(plan, file, rule, "mirror (config-server desatualizado)");
+                            }
+                        }
                     }
-                    // target present (any content, any hash) -> no-op: seed never overwrites.
+
                     continue;
                 }
 
@@ -228,10 +255,13 @@ namespace SPT.Launcher.Sync
 
                     var rule = _resolver.Resolve(normalized, out string matchedPrefix);
 
-                    if (rule == SyncFolderRule.PreserveDivergent || rule == SyncFolderRule.SeedIfMissingByName)
+                    if (rule == SyncFolderRule.PreserveDivergent
+                        || rule == SyncFolderRule.SeedIfMissingByName
+                        || rule == SyncFolderRule.SeedAndMirror)
                     {
-                        // Extras in config / config-server folders are never touched (neither is a
-                        // mirror). Item 017: seeded files live under 'config' (preserve-divergent) and
+                        // Extras in config / config-server folders are never touched (config-server
+                        // overwrites to latest but doesn't delete extras — conservative, ref CR-01-03).
+                        // Item 017: seeded files live under 'config' (preserve-divergent) and
                         // are never manifest entries, so they must survive any managedPaths overlap.
                         continue;
                     }
