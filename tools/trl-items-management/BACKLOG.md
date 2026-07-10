@@ -1,7 +1,7 @@
 # TRL Items Management — Backlog / roadmap
 
 > **Status:** 🟢 Vivo<br>
-> **Última revisão:** 2026-07-07<br>
+> **Última revisão:** 2026-07-08<br>
 > **Objetivo:** validar o escopo de features levantadas antes de agendar/implementar. Nada aqui está em execução até validação explícita.
 
 ---
@@ -65,6 +65,14 @@
 - **A validar:** decidir a forma do override do path (b) (fixo por tpl, ou `min(vanilla, override)`?); confirmar que a UI consegue mostrar as duas opções sem confundir com o teto (B-1, mecanismo diferente); levantar a lista completa dos ~10 consumidores de handbook price pra path (a) documentar o aviso certo.
 - **Depende de B-2** (nasce dentro do mod novo, igual B-4).
 
+### B-6 · Editar quantidade em estoque (`StackObjectsCount`) dos itens no assort dos traders
+- **O quê:** hoje o `TRL-ItemsManagement` só edita PREÇO (sell/buy); a quantidade disponível pro jogador comprar (estoque do assort) não é editável. Traders de mod costumam vir com estoque "infinito" — na prática um valor gigante — e às vezes queremos limitar isso (rebalanceamento) ou o oposto, aumentar o estoque de um item vanilla que vem curto.
+- **Achado (pesquisa 2026-07-08):** o campo é `Item.Upd.StackObjectsCount` (`double?`) dentro de `TraderAssort.Items[i].Upd` (`references/spt-source/.../Models/Eft/Common/Tables/Item.cs:133`) — mesmo objeto `Upd` que carrega `BuyRestrictionMax/Current` (limite de compra por refresh, conceito diferente, não confundir). "Estoque ilimitado" no SPT nativo é `UnlimitedCount:true` **combinado com** um `StackObjectsCount` gigante — o próprio código nativo usa `99999999` (`Generators/RagfairAssortGenerator.cs:73,137`), confirmando o palpite de "traders de mod habilitam ~99999". `Helpers/TradeHelper.cs:108,154,157,162` decrementa e checa `StackObjectsCount < buyCount` a cada compra sem um desvio óbvio por `UnlimitedCount` — ou seja, é o valor numérico gigante (não o bool sozinho) que evita esgotar o estoque na prática. **Não confirmado:** se existe algum ponto do fluxo de compra de trader (fora da geração de oferta do flea, que foi o único lugar verificado) que ignora o decremento quando `UnlimitedCount=true` sozinho — vale checar antes de especificar a UI/endpoint.
+- **Proposta:** endpoint por-item análogo ao de preço (`PATCH /api/trader-stock {tpl, traderId, count}`, reaproveitando a infra já compartilhada — `TraderOverrideConfigParser`, `WriteLockService`, mutação em boot via um `IOnLoad` no padrão do `TraderPriceOnLoad`) **mais** um mecanismo de edição em massa direto por config (ex.: `config/stock-overrides.json` com um modo "aplicar a todos os itens de um trader" — `{"traderId": {"default": 99999999}}` ou um flag `"unlimited"` — em vez de exigir editar item por item na UI quando o objetivo é só "esse trader de mod fica com estoque infinito em tudo", caso comum).
+- **Viabilidade:** 🟢 média — a infraestrutura de override (parser compartilhado, lock, mutação em boot) já existe no `TRL-ItemsManagement` e pode ser estendida; o ponto em aberto é só confirmar o comportamento de `UnlimitedCount` acima.
+- **A validar:** confirmar se `UnlimitedCount=true` sozinho (sem o valor gigante) já basta em algum ponto do fluxo de compra de trader normal que a pesquisa não cobriu; decidir a forma do "modo em massa" (`default` por trader vs. lista explícita de tpls); checar se estoque tem alguma interação com loyalty level (múltiplas entradas do mesmo tpl em tiers diferentes).
+- **Depende de:** nada bloqueante — o mod já está unificado (`mods/TRL-ItemsManagement/`, ex-B-2, Estágios 0-5 implementados) com a infra de override/lock pronta; esta feature é só mais um endpoint dentro do mod existente.
+
 ---
 
 ## Decisões travadas (2026-07-04)
@@ -112,3 +120,4 @@ Ordem e paralelismo (pesquisa/spec/review via subagents independentes onde não 
 |---|---|---|
 | 2026-07-03 | Guilherme | Criação — 4 itens (B-1 teto flea, B-2 virar mod, B-3 buy price, B-4 bulk copy) levantados para validação de escopo. |
 | 2026-07-07 | Guilherme | B-5 adicionado — piso de flea configurável por item (override abaixo do buyback teórico do trader), levantado durante o planejamento do B-2/unificação. Duas rotas identificadas (editar handbook vs. Harmony dedicado), nenhuma spec'd ainda. |
+| 2026-07-08 | Guilherme | B-6 adicionado — editar quantidade em estoque (`Item.Upd.StackObjectsCount`) do assort dos traders, com foco em traders de mod que habilitam estoque ~99999 (padrão nativo do SPT confirmado: `UnlimitedCount:true` + valor gigante, não um flag isolado), mais um modo de edição em massa via config. Nenhuma spec ainda. |

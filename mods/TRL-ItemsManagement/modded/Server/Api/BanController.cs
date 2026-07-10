@@ -26,11 +26,11 @@ public sealed record SetBanRequest(string? Tpl, bool? Banned);
 ///     the current session too, not just after a restart.</item>
 ///     </list>
 ///     <para>
-///     Precondition (vanilla path only — mod items have no <c>enableBsgList</c> concept to check against
-///     since <see cref="ModItemBanService"/> writes <c>CanSellOnRagfair</c> directly, same field): must be
-///     <c>true</c> (default — missing/absent counts as enabled, only an explicit <c>false</c> disables
-///     it), or SPT ignores <c>CanSellOnRagfair</c> entirely and the toggle would silently no-op in-game.
-///     Checked and REFUSED (409), never applied as a silent no-op.
+///     Precondition (checked UNCONDITIONALLY, before branching into vanilla vs. mod-item — applies to
+///     BOTH paths, since <c>enableBsgList:false</c> makes SPT ignore <c>CanSellOnRagfair</c> regardless of
+///     which item it lives on): must be <c>true</c> (default — missing/absent counts as enabled, only an
+///     explicit <c>false</c> disables it), or the toggle would silently no-op in-game. Checked and
+///     REFUSED (409) for either path, never applied as a silent no-op.
 ///     </para>
 /// </summary>
 [ApiController]
