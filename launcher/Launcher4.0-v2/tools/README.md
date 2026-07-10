@@ -10,7 +10,7 @@ a signature the client accepts).
 
 - **Algorithm:** `RSA-SHA256` — RSA-2048, PKCS#1 v1.5 over SHA-256 (what `openssl dgst -sha256 -sign`
   produces, and what `RSA.VerifyData(payload, sig, SHA256, Pkcs1)` verifies).
-- **`.sig` format:** raw signature bytes in a file `Tarkov Red Line.exe.sig` next to the exe. The server
+- **`.sig` format:** raw signature bytes in a file `TRL.Launcher.exe.sig` next to the exe. The server
   base64-encodes it into `GET /redline/launcher/version` (`signature` field); the client base64-decodes
   and verifies over the exact bytes it downloaded (authority = locally recomputed hash, no announced hash
   is trusted).
@@ -30,14 +30,14 @@ embed the new public key, and keep the private key in secure custody.
 
 ## Release flow (Gate G-2 / G-4)
 
-1. Build & publish `Tarkov Red Line.exe`.
+1. Build & publish → `Tarkov Red Line.exe` (AssemblyName), then **rename to `TRL.Launcher.exe`** (o nome que o mod procura no `Launcher-Updater/`).
 2. Sign it:
    ```powershell
-   pwsh ./sign-launcher.ps1 -ExePath "..\dist\Tarkov Red Line.exe"           # DEV key
+   pwsh ./sign-launcher.ps1 -ExePath "..\dist\TRL.Launcher.exe"           # DEV key
    pwsh ./sign-launcher.ps1 -ExePath "<exe>" -PrivateKeyPath "<prod-private.pem>"  # PROD
    ```
-   → produces `Tarkov Red Line.exe.sig` and self-verifies it against the public key.
-3. Put **both** the exe and the `.sig` in the server's `Launcher-Updater/` folder.
+   → produces `TRL.Launcher.exe.sig` and self-verifies it against the public key.
+3. Put **both** `TRL.Launcher.exe` and the `.sig` in the server's `Launcher-Updater/` folder.
 4. `GET /redline/launcher/version` now returns `version` + `signature` + `algorithm`.
    `GET /redline/launcher/download` serves the exe; `GET /redline/launcher/signature` serves the raw
    `.sig` (diagnostic).

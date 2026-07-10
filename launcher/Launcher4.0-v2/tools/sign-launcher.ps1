@@ -9,24 +9,24 @@
     machine. The .sig is RAW signature bytes; the server base64-encodes it into /redline/launcher/version.
 
     RELEASE FLOW (D-018.2 / Gate G-4):
-      1. Build/publish "Tarkov Red Line.exe".
+      1. Build/publish "Tarkov Red Line.exe" e renomeie para "TRL.Launcher.exe".
       2. Run this script with the PRODUCTION private key (kept OFF the repo, off any synced path).
-      3. Place the exe + the produced "Tarkov Red Line.exe.sig" together in the server's Launcher-Updater/.
+      3. Place "TRL.Launcher.exe" + the produced "TRL.Launcher.exe.sig" together in the server's Launcher-Updater/.
       4. Confirm the embedded PUBLIC key (UpdateTrust.EmbeddedPublicKeyPem) matches the private key used.
 
 .PARAMETER ExePath
-    Path to the exe to sign (e.g. the published "Tarkov Red Line.exe").
+    Path to the exe to sign (após o rename: "TRL.Launcher.exe").
 
 .PARAMETER PrivateKeyPath
     Path to the RSA private key PEM. DEV default: ..\.keys\launcher-update-dev-private.pem (gitignored).
     PRODUCTION: pass the real private key path; NEVER commit it.
 
 .EXAMPLE
-    pwsh ./sign-launcher.ps1 -ExePath "..\dist\Tarkov Red Line.exe"
-    # signs with the DEV key → "..\dist\Tarkov Red Line.exe.sig"
+    pwsh ./sign-launcher.ps1 -ExePath "..\dist\TRL.Launcher.exe"
+    # signs with the DEV key → "..\dist\TRL.Launcher.exe.sig"
 
 .EXAMPLE
-    pwsh ./sign-launcher.ps1 -ExePath "D:\release\Tarkov Red Line.exe" -PrivateKeyPath "E:\secrets\prod-private.pem"
+    pwsh ./sign-launcher.ps1 -ExePath "D:\release\TRL.Launcher.exe" -PrivateKeyPath "E:\secrets\prod-private.pem"
 #>
 [CmdletBinding()]
 param(

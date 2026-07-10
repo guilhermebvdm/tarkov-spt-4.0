@@ -58,8 +58,8 @@ O mod TS também serve o **cliente in-game** (plugin BepInEx) e um serviço de p
     config-performance/   # overlay 008
     config.json           # managedPaths, deleteFiles, ignoredFiles, optionalGroups, folderRules
     server-version.txt    # versão TRL (senão fallback "0.10.0-beta")
-    Tarkov Red Line.exe   # binário servido no self-update
-    Tarkov Red Line.exe.sig
+    TRL.Launcher.exe      # binário servido no self-update (renomeado do publish "Tarkov Red Line.exe")
+    TRL.Launcher.exe.sig
   ```
 - **Hash = MD5 nos dois** (arquivos e hash do manifesto). → **Compatível**, não força re-download geral. (SHA-256 do item 026 é futuro; **não** aplicar junto da migração — mudaria todos os hashes e baixaria tudo de novo.)
 - **Fontes de versão divergem no C#:** o manifesto crava `serverVersion`/`launcherVersion = "1.4.1"` **hardcoded** (`ModUpdater.cs:493-494`), mas o `/redline/server/version` lê `server-version.txt` e o self-update lê `ProductVersion` do exe. Unificar: manifesto deve ler das mesmas fontes.

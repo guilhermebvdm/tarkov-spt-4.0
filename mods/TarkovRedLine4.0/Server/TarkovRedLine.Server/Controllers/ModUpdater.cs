@@ -76,7 +76,7 @@ public class ModUpdaterController : ControllerBase
     {
         try
         {
-            var exe = Path.Combine(GetUpdaterBasePath(), "Tarkov Red Line.exe");
+            var exe = Path.Combine(GetUpdaterBasePath(), LauncherUpdaterController.LauncherExeFileName);
             if (System.IO.File.Exists(exe))
             {
                 var info = System.Diagnostics.FileVersionInfo.GetVersionInfo(exe);
