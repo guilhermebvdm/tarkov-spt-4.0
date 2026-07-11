@@ -39,7 +39,7 @@ Se `mods/<mod>/` não existir, listar os mods disponíveis e parar.
    - **LOC** (alocação): prop na seção temática errada (ex.: opção de ADS numa seção de movimento).
    - **NAM** (nome da prop): key que não reflete o efeito; **nome enganoso** (o rótulo diz um eixo mas o código aplica outro); rótulo **legado** desatualizado; idioma inconsistente.
    - **TYP** (tipo/edição): `float` com range → slider (bom) vs sem range → campo aberto (ruim quando o valor é limitado); `int` vs `float`; enum modelado como número/string; range incoerente (min>max, ou que não cobre casos úteis); keybind como texto.
-   - **TIP** (tooltip): ausente; não diz o efeito prático/unidade; idioma inconsistente com o resto (o repo usa **pt-BR** — `create-technical-spec`); jargão sem explicação.
+   - **TIP** (tooltip): ausente; não diz o efeito prático/unidade; jargão sem explicação; **não segue o padrão bilíngue** (ver Regras — inglês em cima, português embaixo, 1 linha em branco). Aproveitar dicas idiomáticas já presentes (ex.: sufixos pt nos keys, como `Pitch (Cano Sobe/Desce)`) para deixar AMBOS os idiomas intuitivos.
    - **DEAD** (morta): resultado do passo 5.
    - **ADV** (Advanced): prop comum escondida em Advanced (usuário não acha) → 🟠; prop técnica/perigosa (afeta perf, debug, quebra balance) **sem** Advanced → 🟡.
 
@@ -73,6 +73,7 @@ Ver a tabela de critérios e a escala de impacto no template. Códigos: **ORD ·
 - **Reviews são artefatos imutáveis** — cada execução cria um arquivo novo; achados ganham só anotações de resolução depois. Pontos já `✅ Aplicado` não voltam.
 - **Cada achado cita evidência** (`Plugin.cs:linha` do bind, ou o grep que prova a morte). Análise sem evidência não vai.
 - Não confundir "Advanced" (esconder no F12) com "avançado tecnicamente" — o critério é **exposição ao usuário comum**.
+- **Padrão de tooltip bilíngue (obrigatório):** todo `ConfigDescription` tem o texto em **inglês na primeira linha** e a **tradução em português na terceira**, separados por **uma linha em branco** — no C#: `"<English>\n\n<Português>"`. Ambos os idiomas devem estar intuitivos; aproveitar as dicas idiomáticas já presentes (sufixos pt nos keys) para melhorar o inglês. Tooltip só-EN ou só-pt = achado **TIP**.
 - Versão alvo: SPT 4.0+ / EFT 0.16.x.
 
 ## Aplicação (fora deste command)
