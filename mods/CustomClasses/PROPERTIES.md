@@ -38,8 +38,8 @@ Properties exposed in the configuration menu (F12 / ConfigurationManager). None 
 | `Class Tab — X offset` | float | `0` | −400..400 | Fine-tune the CLASS tab button horizontal position. |
 | `Class Detail on Loading Screen` | bool | `true` | — | Class detail (perks/drawbacks) on your name in the raid loading screen (FIKA). (item 055) |
 | `Class Detail — Loading panel scale` | float | `0.75` | 0.5..1.0 | Scale (zoom-out) of the loading-screen class popover (same footprint, smaller content). |
-| `Weight Marker — X offset` | float | `0` | −600..600 | Horizontal position of the `▲ +X%` weight marker (Health tab). (item 056) |
-| `Weight Marker — Y offset` | float | `0` | −600..600 | Vertical position of the `▲ +X%` weight marker (positive = up). (item 056) |
+| `Weight Marker — X offset` | float | `-107.0423` | −600..600 | Horizontal position of the `▲ +X%` weight marker (Health tab). Default calibrated in-game. (item 056) |
+| `Weight Marker — Y offset` | float | `50.70423` | −600..600 | Vertical position of the `▲ +X%` weight marker (positive = up). Default calibrated in-game. (item 056) |
 
 ## Section `2 · Combat Medic`
 

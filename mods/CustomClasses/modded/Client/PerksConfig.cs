@@ -126,13 +126,14 @@ internal static class PerksConfig
             new ConfigDescription(
                 "Escala (zoom-out) do popover de classe no loading (0.75 = 75%). Mesma área na tela, conteúdo menor. / Scale of the loading-screen class popover (same footprint, smaller content).",
                 new AcceptableValueRange<float>(0.5f, 1f)));
+        // P-13.3 (2026-07-11): defaults calibrados in-game pelo usuário (antes 0/0 = marcador fora de posição).
         WeightMarkerOffsetX = config.Bind(
-            SecInterface, "Weight Marker — X offset", 0f,
+            SecInterface, "Weight Marker — X offset", -107.0423f,
             new ConfigDescription(
                 "Ajuste horizontal (px) do marcador '▲ +X%' no peso (aba Health). Negativo = esquerda. / Horizontal offset (px) of the weight '▲ +X%' marker (Health tab).",
                 new AcceptableValueRange<float>(-600f, 600f)));
         WeightMarkerOffsetY = config.Bind(
-            SecInterface, "Weight Marker — Y offset", 0f,
+            SecInterface, "Weight Marker — Y offset", 50.70423f,
             new ConfigDescription(
                 "Ajuste vertical (px) do marcador '▲ +X%' no peso (aba Health). Positivo = para cima. / Vertical offset (px) of the weight '▲ +X%' marker (positive = up).",
                 new AcceptableValueRange<float>(-600f, 600f)));
