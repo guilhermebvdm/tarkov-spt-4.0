@@ -509,3 +509,17 @@ calibração do usuário · próximo da fila: 058 (V1/V2/V4) ou 051 (decisão st
 - **BepInEx não deixa 1 ConfigEntry aparecer em 2 seções** — perk compartilhado por 2 classes exige desdobrar em 2 entries (+ helper de resolução por classe + split do grupo no catálogo).
 
 **Pendência aberta:** P-14.2 (re-teste in-game do F12).
+
+#### Sessão 14 (cont. 2026-07-11) — Fix de ordem de load (server registra classes cedo demais)
+
+**Sintoma:** ao abrir o server, dezenas de `Could not add <tpl> to cache, it does not exist in the item database!` + `Padrão do item para 1x1` + `[CustomClasses] '<classe>': contêiner '...' sem grades — item(ns) pulado(s)` durante o registro das classes.
+
+**Causa-raiz (via `/g-diagnose`, confirmada empiricamente):** o `CustomClassesMod` registrava as editions e montava os loadouts em `[Injectable(PostDBModLoader + 1)]` (400001) — CEDO DEMAIS. Os itens dos loadouts (facas do `c11-tn-4`, belts do `WTT-PackNStrap`, ArmBands) são criados por esses mods **via clone** (`CustomItemService`: `itemTplToClone`/`overrideProperties`), num estágio que roda DEPOIS de 400001. No momento do registro os templates não existem no DB. **Prova:** o endpoint `verify-price` do TRL-ItemsManagement (`GET /TRLItemsManagement-Server/api/debug/verify-price?tpl=<id>`, lê o DB runtime via `databaseService.GetItems().TryGetValue`) retorna `bannedLive=False` (não `null`) para os 3 tpls que falham — ou seja, eles EXISTEM no DB depois de tudo carregar; só chegam após o registro.
+
+**Impacto:** ruído no log (benigno — o item resolve in-game) + **perda real**: itens dentro de contêineres de MOD (belt do Tanque) são PULADOS do loadout (`PackSpecsIntoGrids` retorna 0 quando o template do contêiner não tem `_props.Grids` no momento). NÃO era regressão do trabalho client-side (F12/balance); sempre esteve lá, apareceu no restart.
+
+**Fix (commit `26314ba`):** `TypePriority` `PostDBModLoader + 1` → `PostSptModLoader + 1` (400001 → 1100001) — roda por ÚLTIMO, depois de todos os mods de item. O `OnLoad` só registra editions + monta loadouts (nada exige o slot cedo; editions são consumidas na criação de perfil, muito depois do boot). Escolhido sobre `ModDependencies` (loadAfter lista de mods) por ser robusto sem manter lista. Comentário do `InventoryBuilder.ResolvePreset` atualizado (agora rodamos depois do `PresetController.Initialize`, mas o dict cru `ItemPresets` segue válido). `HiddenEditionsLoader` fica em 400001 (não depende de itens de mod).
+
+**Lição (reusável):** mod SPT server que **consome itens criados por outros mods** deve rodar o mais TARDE possível (`PostSptModLoader`), não em `PostDBModLoader` — mods de item que clonam (`CustomItemService`) injetam seus templates DEPOIS do PostDBModLoader base. Debug de "item não existe no DB" durante boot: usar o `verify-price` (lê o DB runtime) para separar "ID morto/desabilitado" de "ordem de load" (item existe no fim, só chega tarde).
+
+**Pendência aberta:** P-14.3 (verificar via log que os warnings sumiram após reiniciar o SPT.Server com o DLL novo).
