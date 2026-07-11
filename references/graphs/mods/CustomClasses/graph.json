@@ -350,7 +350,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "modulepatch",
-      "community": 50,
+      "community": 94,
       "norm_label": "modulepatch"
     },
     {
@@ -420,7 +420,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_bulwarkpatch",
-      "community": 80,
+      "community": 94,
       "norm_label": "bulwarkpatch.cs"
     },
     {
@@ -430,7 +430,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "patches_bulwarkpatch_bulwarkpatch",
-      "community": 80,
+      "community": 94,
       "norm_label": "bulwarkpatch"
     },
     {
@@ -440,7 +440,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "patches_bulwarkpatch_bulwarkpatch_gettargetmethod",
-      "community": 80,
+      "community": 94,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -450,7 +450,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "client_patches_bulwarkpatch_cs_methodbase",
-      "community": 80,
+      "community": 94,
       "norm_label": "methodbase"
     },
     {
@@ -1620,7 +1620,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_classweaponpatches",
-      "community": 50,
+      "community": 83,
       "norm_label": "classweaponpatches.cs"
     },
     {
@@ -1630,7 +1630,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "patches_classweaponpatches_shootrecoilpatch",
-      "community": 50,
+      "community": 83,
       "norm_label": "shootrecoilpatch"
     },
     {
@@ -1640,7 +1640,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "patches_classweaponpatches_shootrecoilpatch_gettargetmethod",
-      "community": 50,
+      "community": 83,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -1650,7 +1650,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_methodbase",
-      "community": 50,
+      "community": 83,
       "norm_label": "methodbase"
     },
     {
@@ -1690,7 +1690,7 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "patches_classweaponpatches_reloadspeedpatch",
-      "community": 50,
+      "community": 83,
       "norm_label": "reloadspeedpatch"
     },
     {
@@ -1700,7 +1700,7 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "patches_classweaponpatches_reloadspeedpatch_gettargetmethod",
-      "community": 50,
+      "community": 83,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -1740,7 +1740,7 @@
       "source_location": "L117",
       "_origin": "ast",
       "id": "patches_classweaponpatches_adsspeedpatch",
-      "community": 50,
+      "community": 83,
       "norm_label": "adsspeedpatch"
     },
     {
@@ -1750,7 +1750,7 @@
       "source_location": "L119",
       "_origin": "ast",
       "id": "patches_classweaponpatches_adsspeedpatch_gettargetmethod",
-      "community": 50,
+      "community": 83,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -1770,7 +1770,7 @@
       "source_location": "L167",
       "_origin": "ast",
       "id": "patches_classweaponpatches_heavyweaponergopatch",
-      "community": 50,
+      "community": 83,
       "norm_label": "heavyweaponergopatch"
     },
     {
@@ -1780,7 +1780,7 @@
       "source_location": "L169",
       "_origin": "ast",
       "id": "patches_classweaponpatches_heavyweaponergopatch_gettargetmethod",
-      "community": 50,
+      "community": 83,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -1850,7 +1850,7 @@
       "source_location": "L231",
       "_origin": "ast",
       "id": "patches_classweaponpatches_aimpunchpatch",
-      "community": 50,
+      "community": 83,
       "norm_label": "aimpunchpatch"
     },
     {
@@ -1860,7 +1860,7 @@
       "source_location": "L233",
       "_origin": "ast",
       "id": "patches_classweaponpatches_aimpunchpatch_gettargetmethod",
-      "community": 50,
+      "community": 83,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -1890,7 +1890,7 @@
       "source_location": "L282",
       "_origin": "ast",
       "id": "patches_classweaponpatches_localhittypepatch",
-      "community": 50,
+      "community": 83,
       "norm_label": "localhittypepatch"
     },
     {
@@ -1900,7 +1900,7 @@
       "source_location": "L287",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_float",
-      "community": 50,
+      "community": 83,
       "norm_label": "float"
     },
     {
@@ -1910,7 +1910,7 @@
       "source_location": "L289",
       "_origin": "ast",
       "id": "patches_classweaponpatches_localhittypepatch_gettargetmethod",
-      "community": 50,
+      "community": 83,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2800,7 +2800,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "patches_skilliconborderpatch_skilliconborderpatch_postfix",
-      "community": 107,
+      "community": 50,
       "norm_label": ".postfix()"
     },
     {
@@ -2810,7 +2810,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "client_patches_skilliconborderpatch_cs_skillclass",
-      "community": 107,
+      "community": 50,
       "norm_label": "skillclass"
     },
     {
@@ -2820,7 +2820,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "client_patches_skilliconborderpatch_cs_image",
-      "community": 107,
+      "community": 50,
       "norm_label": "image"
     },
     {
@@ -2830,7 +2830,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "client_patches_skilliconborderpatch_cs_patchpostfix",
-      "community": 107,
+      "community": 50,
       "norm_label": "patchpostfix"
     },
     {
@@ -3650,7 +3650,7 @@
       "source_location": "L116",
       "_origin": "ast",
       "id": "patches_weaponmasterypatches_weaponmasteryrecoilpatch_prefix",
-      "community": 94,
+      "community": 107,
       "norm_label": ".prefix()"
     },
     {
@@ -3660,7 +3660,7 @@
       "source_location": "L116",
       "_origin": "ast",
       "id": "client_patches_weaponmasterypatches_cs_proceduralweaponanimation",
-      "community": 94,
+      "community": 107,
       "norm_label": "proceduralweaponanimation"
     },
     {
@@ -3670,7 +3670,7 @@
       "source_location": "L116",
       "_origin": "ast",
       "id": "harmonypriority",
-      "community": 94,
+      "community": 107,
       "norm_label": "harmonypriority"
     },
     {
@@ -3680,7 +3680,7 @@
       "source_location": "L116",
       "_origin": "ast",
       "id": "client_patches_weaponmasterypatches_cs_patchprefix",
-      "community": 94,
+      "community": 107,
       "norm_label": "patchprefix"
     },
     {
@@ -7987,7 +7987,7 @@
       "label": "HiddenEditionsLoader",
       "file_type": "code",
       "source_file": "Server/HiddenEditionsLoader.cs",
-      "source_location": "L20",
+      "source_location": "L23",
       "_origin": "ast",
       "id": "server_hiddeneditionsloader_hiddeneditionsloader",
       "community": 43,
@@ -7997,7 +7997,7 @@
       "label": ".OnLoad()",
       "file_type": "code",
       "source_file": "Server/HiddenEditionsLoader.cs",
-      "source_location": "L28",
+      "source_location": "L31",
       "_origin": "ast",
       "id": "server_hiddeneditionsloader_hiddeneditionsloader_onload",
       "community": 43,
@@ -8007,7 +8007,7 @@
       "label": "Task",
       "file_type": "code",
       "source_file": "Server/HiddenEditionsLoader.cs",
-      "source_location": "L28",
+      "source_location": "L31",
       "_origin": "ast",
       "id": "server_hiddeneditionsloader_cs_task",
       "community": 43,
@@ -8354,10 +8354,20 @@
       "norm_label": "itemspec"
     },
     {
+      "label": ".PackContents()",
+      "file_type": "code",
+      "source_file": "Server/InventoryBuilder.cs",
+      "source_location": "L560",
+      "_origin": "ast",
+      "id": "server_inventorybuilder_inventorybuilder_packcontents",
+      "community": 5,
+      "norm_label": ".packcontents()"
+    },
+    {
       "label": ".PackSpecsIntoGrids()",
       "file_type": "code",
       "source_file": "Server/InventoryBuilder.cs",
-      "source_location": "L561",
+      "source_location": "L580",
       "_origin": "ast",
       "id": "server_inventorybuilder_inventorybuilder_packspecsintogrids",
       "community": 5,
@@ -8367,7 +8377,7 @@
       "label": "Grid",
       "file_type": "code",
       "source_file": "Server/InventoryBuilder.cs",
-      "source_location": "L561",
+      "source_location": "L580",
       "_origin": "ast",
       "id": "server_inventorybuilder_cs_grid",
       "community": 5,
@@ -8377,7 +8387,7 @@
       "label": ".PlaceSpecTrees()",
       "file_type": "code",
       "source_file": "Server/InventoryBuilder.cs",
-      "source_location": "L682",
+      "source_location": "L701",
       "_origin": "ast",
       "id": "server_inventorybuilder_inventorybuilder_placespectrees",
       "community": 5,
@@ -8387,7 +8397,7 @@
       "label": "GridPacker",
       "file_type": "code",
       "source_file": "Server/InventoryBuilder.cs",
-      "source_location": "L682",
+      "source_location": "L701",
       "_origin": "ast",
       "id": "server_inventorybuilder_cs_gridpacker",
       "community": 5,
@@ -8397,7 +8407,7 @@
       "label": "Packer",
       "file_type": "code",
       "source_file": "Server/InventoryBuilder.cs",
-      "source_location": "L682",
+      "source_location": "L701",
       "_origin": "ast",
       "id": "packer",
       "community": 5,
@@ -8407,7 +8417,7 @@
       "label": "Func",
       "file_type": "code",
       "source_file": "Server/InventoryBuilder.cs",
-      "source_location": "L682",
+      "source_location": "L701",
       "_origin": "ast",
       "id": "server_inventorybuilder_cs_func",
       "community": 5,
@@ -8417,7 +8427,7 @@
       "label": ".PlaceTree()",
       "file_type": "code",
       "source_file": "Server/InventoryBuilder.cs",
-      "source_location": "L725",
+      "source_location": "L744",
       "_origin": "ast",
       "id": "server_inventorybuilder_inventorybuilder_placetree",
       "community": 5,
@@ -8427,7 +8437,7 @@
       "label": ".GetGrids()",
       "file_type": "code",
       "source_file": "Server/InventoryBuilder.cs",
-      "source_location": "L776",
+      "source_location": "L795",
       "_origin": "ast",
       "id": "server_inventorybuilder_inventorybuilder_getgrids",
       "community": 5,
@@ -8437,7 +8447,7 @@
       "label": ".RemoveSlotOccupant()",
       "file_type": "code",
       "source_file": "Server/InventoryBuilder.cs",
-      "source_location": "L783",
+      "source_location": "L802",
       "_origin": "ast",
       "id": "server_inventorybuilder_inventorybuilder_removeslotoccupant",
       "community": 5,
@@ -8447,7 +8457,7 @@
       "label": ".RemoveItemAndChildren()",
       "file_type": "code",
       "source_file": "Server/InventoryBuilder.cs",
-      "source_location": "L793",
+      "source_location": "L812",
       "_origin": "ast",
       "id": "server_inventorybuilder_inventorybuilder_removeitemandchildren",
       "community": 5,
@@ -28946,6 +28956,16 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Server/InventoryBuilder.cs",
+      "source_location": "L560",
+      "weight": 1.0,
+      "source": "server_inventorybuilder_inventorybuilder",
+      "target": "server_inventorybuilder_inventorybuilder_packcontents",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/InventoryBuilder.cs",
       "source_location": "L542",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -29107,6 +29127,17 @@
       "confidence_score": 1.0,
       "source": "server_inventorybuilder_inventorybuilder_apply",
       "target": "server_inventorybuilder_inventorybuilder_loadammo"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/InventoryBuilder.cs",
+      "source_location": "L86",
+      "weight": 1.0,
+      "source": "server_inventorybuilder_inventorybuilder_apply",
+      "target": "server_inventorybuilder_inventorybuilder_packcontents",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -29277,6 +29308,17 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Server/InventoryBuilder.cs",
+      "source_location": "L560",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "server_inventorybuilder_inventorybuilder_packcontents",
+      "target": "server_inventorybuilder_cs_list",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/InventoryBuilder.cs",
       "source_location": "L542",
       "weight": 1.0,
       "context": "parameter_type",
@@ -29415,6 +29457,17 @@
       "confidence_score": 1.0,
       "source": "server_inventorybuilder_inventorybuilder_loadammo",
       "target": "server_inventorybuilder_cs_item"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/InventoryBuilder.cs",
+      "source_location": "L560",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "server_inventorybuilder_inventorybuilder_packcontents",
+      "target": "server_inventorybuilder_cs_item",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -29882,6 +29935,17 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Server/InventoryBuilder.cs",
+      "source_location": "L560",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "server_inventorybuilder_inventorybuilder_packcontents",
+      "target": "server_inventorybuilder_cs_itemspec",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/InventoryBuilder.cs",
       "source_location": "L542",
       "weight": 1.0,
       "context": "generic_arg",
@@ -29899,6 +29963,39 @@
       "confidence_score": 1.0,
       "source": "server_inventorybuilder_inventorybuilder_placespectrees",
       "target": "server_inventorybuilder_cs_itemspec"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/InventoryBuilder.cs",
+      "source_location": "L562",
+      "weight": 1.0,
+      "source": "server_inventorybuilder_inventorybuilder_packcontents",
+      "target": "server_inventorybuilder_inventorybuilder_getgrids",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/InventoryBuilder.cs",
+      "source_location": "L569",
+      "weight": 1.0,
+      "source": "server_inventorybuilder_inventorybuilder_packcontents",
+      "target": "server_inventorybuilder_inventorybuilder_packspecsintogrids",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/InventoryBuilder.cs",
+      "source_location": "L732",
+      "weight": 1.0,
+      "source": "server_inventorybuilder_inventorybuilder_placespectrees",
+      "target": "server_inventorybuilder_inventorybuilder_packcontents",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -37808,5 +37905,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "26314ba42542e72ba79c3da455c4ea8a1e0dc2b9"
+  "built_at_commit": "237631a68eb800008d50615a71fd7c67cd00e5a5"
 }
