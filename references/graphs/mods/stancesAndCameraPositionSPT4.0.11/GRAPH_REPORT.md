@@ -1,16 +1,16 @@
-# Graph Report - mods\stancesAndCameraPositionSPT4.0.11\modded  (2026-07-10)
+# Graph Report - mods\stancesAndCameraPositionSPT4.0.11\modded  (2026-07-11)
 
 ## Corpus Check
-- 37 files · ~67,396 words
+- 38 files · ~68,636 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 503 nodes · 680 edges · 34 communities (33 shown, 1 thin omitted)
+- 510 nodes · 687 edges · 35 communities (34 shown, 1 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `3c061f86`
+- Built from commit: `016f37f3`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -48,10 +48,11 @@
 - [[_COMMUNITY_Community 30|Community 30]]
 - [[_COMMUNITY_Community 31|Community 31]]
 - [[_COMMUNITY_Community 32|Community 32]]
+- [[_COMMUNITY_Community 34|Community 34]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `StanceManager` - 59 edges
-2. `ModulePatch` - 36 edges
+2. `ModulePatch` - 37 edges
 3. `Plugin` - 32 edges
 4. `ApplyComplexRotationPatch` - 15 edges
 5. `HoldBreathPatch` - 15 edges
@@ -68,15 +69,15 @@
   Patches/ApplyComplexRotationPatch.cs → Plugin.cs
 - `ApplySimpleRotationPatch` --inherits--> `ModulePatch`  [EXTRACTED]
   Patches/ApplySimpleRotationPatch.cs → Plugin.cs
+- `BlockActiveMountPatch` --inherits--> `ModulePatch`  [EXTRACTED]
+  Patches/BlockActiveMountPatch.cs → Plugin.cs
 - `FOVClampPatch` --inherits--> `ModulePatch`  [EXTRACTED]
   Patches/FOVClampPatch.cs → Plugin.cs
-- `FOVSliderPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Patches/FOVSliderPatch.cs → Plugin.cs
 
 ## Import Cycles
 - None detected.
 
-## Communities (34 total, 1 thin omitted)
+## Communities (35 total, 1 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.07
@@ -147,8 +148,8 @@ Cohesion: 0.20
 Nodes (9): ConfigEntryBase>, CustomHotkeyDrawerFunc, Func<object, string>, Func<string, object>, ConfigurationManagerAttributes, bool, int, object (+1 more)
 
 ### Community 17 - "Community 17"
-Cohesion: 0.20
-Nodes (7): EPointOfView, CameraRotationMod.Patches, bool, MethodBase, PatchPostfix, PlayerBones, ObservedStanceShiftPatch
+Cohesion: 0.22
+Nodes (6): EPointOfView, CameraRotationMod.Patches, MethodBase, PatchPostfix, PlayerBones, ObservedStanceShiftPatch
 
 ### Community 18 - "Community 18"
 Cohesion: 0.24
@@ -206,22 +207,26 @@ Nodes (3): CameraRotationMod, bool, StanceStaminaState
 Cohesion: 0.50
 Nodes (3): CameraRotationMod, ConfigEntry, StanceConfig
 
+### Community 34 - "Community 34"
+Cohesion: 0.25
+Nodes (5): BlockActiveMountPatch, CameraRotationMod.Patches, MethodBase, PatchPrefix, Player
+
 ## Knowledge Gaps
-- **178 isolated node(s):** `CameraRotationMod`, `netstandard2.1`, `Microsoft.NET.Sdk`, `CameraRotationMod`, `string` (+173 more)
+- **181 isolated node(s):** `CameraRotationMod`, `netstandard2.1`, `Microsoft.NET.Sdk`, `CameraRotationMod`, `string` (+176 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **1 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `ModulePatch` connect `Community 3` to `Community 2`, `Community 5`, `Community 6`, `Community 7`, `Community 8`, `Community 9`, `Community 11`, `Community 13`, `Community 14`, `Community 15`, `Community 17`, `Community 18`, `Community 19`, `Community 20`, `Community 21`, `Community 22`, `Community 25`?**
-  _High betweenness centrality (0.435) - this node is a cross-community bridge._
+- **Why does `ModulePatch` connect `Community 3` to `Community 34`, `Community 2`, `Community 5`, `Community 6`, `Community 7`, `Community 8`, `Community 9`, `Community 11`, `Community 13`, `Community 14`, `Community 15`, `Community 17`, `Community 18`, `Community 19`, `Community 20`, `Community 21`, `Community 22`, `Community 25`?**
+  _High betweenness centrality (0.442) - this node is a cross-community bridge._
 - **Why does `Plugin` connect `Community 1` to `Community 3`?**
   _High betweenness centrality (0.081) - this node is a cross-community bridge._
 - **Why does `ManualChamberingComponent` connect `Community 2` to `Community 4`?**
   _High betweenness centrality (0.077) - this node is a cross-community bridge._
 - **What connects `CameraRotationMod`, `netstandard2.1`, `Microsoft.NET.Sdk` to the rest of the system?**
-  _178 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _181 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.06526806526806526 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
