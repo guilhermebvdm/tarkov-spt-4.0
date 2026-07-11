@@ -83,7 +83,7 @@ public class InventoryBuilder(DatabaseService databaseService, ItemHelper itemHe
                     var containerRoot = tree.FirstOrDefault(i => i.SlotId == slotId);
                     if (containerRoot is not null)
                     {
-                        PackSpecsIntoGrids(tree, containerRoot.Id.ToString(), GetGrids(containerRoot.Template), spec.Contents, className);
+                        PackContents(tree, containerRoot, spec, className);
                     }
                 }
 
@@ -551,6 +551,25 @@ public class InventoryBuilder(DatabaseService databaseService, ItemHelper itemHe
     }
 
     /// <summary>
+    ///     Empacota o <c>contents</c> de um item nas grades DELE. Caso especial (benigno): um magazine/arma
+    ///     CARREGADO (<c>LoadedMag</c>/<c>Chambered</c>) que não tem grades — o <c>contents</c> é a munição,
+    ///     já colocada por <see cref="LoadAmmo"/> (o extrator da baseline 062 duplica: <c>loadedMag</c> +
+    ///     <c>contents</c>). Nesse caso pula silenciosamente, em vez de emitir o warning "sem grades". O
+    ///     warning fica reservado ao caso genuíno (item sem grades, sem munição, com <c>contents</c> = erro de dados).
+    /// </summary>
+    private void PackContents(List<Item> items, Item containerRoot, ItemSpec spec, string className)
+    {
+        var grids = GetGrids(containerRoot.Template);
+        if (grids.Count == 0 && (spec.LoadedMag || spec.Chambered))
+        {
+            logger.Debug($"[CustomClasses] '{className}': contents de '{spec.Tpl}' ignorado — magazine/arma já carregado via loadedMag.");
+            return;
+        }
+
+        PackSpecsIntoGrids(items, containerRoot.Id.ToString(), grids, spec.Contents, className);
+    }
+
+    /// <summary>
     ///     Empacota itens nas grades de um contêiner (stash/rig/mochila). CR-EP-01: linhas honram a MESMA
     ///     semântica dos slots equipados — `preset` explícito (premium opcional), árvore manual (`mods`),
     ///     `ammo` (loadedMag/chambered) e `contents` recursivo nas grades do item colocado. Sem
@@ -654,7 +673,7 @@ public class InventoryBuilder(DatabaseService databaseService, ItemHelper itemHe
                         // CR-EP-01 (5): contents também em contêiner simples (ex.: mochila sem preset).
                         if (spec.Contents is { Count: > 0 })
                         {
-                            PackSpecsIntoGrids(items, item.Id.ToString(), GetGrids(item.Template), spec.Contents, className);
+                            PackContents(items, item, spec, className);
                         }
                     }
                     else
@@ -710,7 +729,7 @@ public class InventoryBuilder(DatabaseService databaseService, ItemHelper itemHe
             // CR-EP-01 (5): contents recursivo — mesmo caminho que o slot equipado usa (Apply).
             if (spec.Contents is { Count: > 0 })
             {
-                PackSpecsIntoGrids(items, root.Id.ToString(), GetGrids(root.Template), spec.Contents, className);
+                PackContents(items, root, spec, className);
             }
         }
 
