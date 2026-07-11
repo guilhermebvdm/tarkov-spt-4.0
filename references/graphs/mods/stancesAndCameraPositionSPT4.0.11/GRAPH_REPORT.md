@@ -1,7 +1,7 @@
-# Graph Report - mods\stancesAndCameraPositionSPT4.0.11\modded  (2026-07-04)
+# Graph Report - mods\stancesAndCameraPositionSPT4.0.11\modded  (2026-07-10)
 
 ## Corpus Check
-- 37 files · ~67,320 words
+- 37 files · ~67,396 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `74a9f299`
+- Built from commit: `3c061f86`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -59,7 +59,7 @@
 7. `Stance` - 13 edges
 8. `PassiveMountUI` - 11 edges
 9. `StaminaController` - 11 edges
-10. `ObservedStanceAnimator` - 10 edges
+10. `ObservedStanceAnimator` - 9 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `BattleUIScreenPatch` --inherits--> `ModulePatch`  [EXTRACTED]
@@ -96,7 +96,7 @@ Nodes (20): Callback, GClass2015, GClass2050, MagazineItemClass, ActionStanceChe
 
 ### Community 4 - "Community 4"
 Cohesion: 0.07
-Nodes (19): CameraBobbingScript, CameraRotationMod, MonoBehaviour, CameraRotationMod.Networking, bool, int, ObservedPlayer, Quaternion (+11 more)
+Nodes (18): CameraBobbingScript, CameraRotationMod, MonoBehaviour, CameraRotationMod.Networking, bool, int, PlayerBones, Vector3 (+10 more)
 
 ### Community 5 - "Community 5"
 Cohesion: 0.15
@@ -147,20 +147,20 @@ Cohesion: 0.20
 Nodes (9): ConfigEntryBase>, CustomHotkeyDrawerFunc, Func<object, string>, Func<string, object>, ConfigurationManagerAttributes, bool, int, object (+1 more)
 
 ### Community 17 - "Community 17"
+Cohesion: 0.20
+Nodes (7): EPointOfView, CameraRotationMod.Patches, bool, MethodBase, PatchPostfix, PlayerBones, ObservedStanceShiftPatch
+
+### Community 18 - "Community 18"
 Cohesion: 0.24
 Nodes (5): CameraRotationMod.Patches, MethodBase, PatchPostfix, GameWorldOnDestroyPatch, GameWorldOnGameStartedPatch
 
-### Community 18 - "Community 18"
+### Community 19 - "Community 19"
 Cohesion: 0.22
 Nodes (6): GClass1085, NumberSlider, CameraRotationMod.Patches, MethodBase, PatchPostfix, FOVSliderPatch
 
-### Community 19 - "Community 19"
-Cohesion: 0.22
-Nodes (6): CameraRotationMod.Patches, bool, MethodBase, PatchPostfix, LocaleClassReloadPatch, Task
-
 ### Community 20 - "Community 20"
 Cohesion: 0.22
-Nodes (6): CameraRotationMod.Patches, bool, MethodBase, ObservedPlayer, PatchPostfix, ObservedStanceVisualPatch
+Nodes (6): CameraRotationMod.Patches, bool, MethodBase, PatchPostfix, LocaleClassReloadPatch, Task
 
 ### Community 21 - "Community 21"
 Cohesion: 0.22
@@ -219,7 +219,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `Plugin` connect `Community 1` to `Community 3`?**
   _High betweenness centrality (0.081) - this node is a cross-community bridge._
 - **Why does `ManualChamberingComponent` connect `Community 2` to `Community 4`?**
-  _High betweenness centrality (0.079) - this node is a cross-community bridge._
+  _High betweenness centrality (0.077) - this node is a cross-community bridge._
 - **What connects `CameraRotationMod`, `netstandard2.1`, `Microsoft.NET.Sdk` to the rest of the system?**
   _178 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**

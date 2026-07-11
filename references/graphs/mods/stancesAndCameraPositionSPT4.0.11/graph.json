@@ -309,7 +309,7 @@
       "source_file": "Networking/ObservedStanceAnimator.cs",
       "source_location": "L18",
       "_origin": "ast",
-      "id": "networking_observedstanceanimator_cs_observedplayer",
+      "id": "observedplayer",
       "community": 4,
       "norm_label": "observedplayer"
     },
@@ -344,20 +344,10 @@
       "norm_label": "vector3"
     },
     {
-      "label": "Quaternion",
-      "file_type": "code",
-      "source_file": "Networking/ObservedStanceAnimator.cs",
-      "source_location": "L24",
-      "_origin": "ast",
-      "id": "networking_observedstanceanimator_cs_quaternion",
-      "community": 4,
-      "norm_label": "quaternion"
-    },
-    {
       "label": ".Init()",
       "file_type": "code",
       "source_file": "Networking/ObservedStanceAnimator.cs",
-      "source_location": "L29",
+      "source_location": "L24",
       "_origin": "ast",
       "id": "networking_observedstanceanimator_observedstanceanimator_init",
       "community": 4,
@@ -367,7 +357,7 @@
       "label": ".SetStance()",
       "file_type": "code",
       "source_file": "Networking/ObservedStanceAnimator.cs",
-      "source_location": "L31",
+      "source_location": "L26",
       "_origin": "ast",
       "id": "networking_observedstanceanimator_observedstanceanimator_setstance",
       "community": 4,
@@ -377,7 +367,7 @@
       "label": ".ApplyToWeaponRoot()",
       "file_type": "code",
       "source_file": "Networking/ObservedStanceAnimator.cs",
-      "source_location": "L38",
+      "source_location": "L33",
       "_origin": "ast",
       "id": "networking_observedstanceanimator_observedstanceanimator_applytoweaponroot",
       "community": 4,
@@ -387,9 +377,9 @@
       "label": "PlayerBones",
       "file_type": "code",
       "source_file": "Networking/ObservedStanceAnimator.cs",
-      "source_location": "L38",
+      "source_location": "L33",
       "_origin": "ast",
-      "id": "playerbones",
+      "id": "networking_observedstanceanimator_cs_playerbones",
       "community": 4,
       "norm_label": "playerbones"
     },
@@ -1510,7 +1500,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_fovsliderpatch",
-      "community": 18,
+      "community": 19,
       "norm_label": "fovsliderpatch.cs"
     },
     {
@@ -1520,7 +1510,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "patches_fovsliderpatch_camerarotationmod_patches",
-      "community": 18,
+      "community": 19,
       "norm_label": "camerarotationmod.patches"
     },
     {
@@ -1530,7 +1520,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "patches_fovsliderpatch_fovsliderpatch",
-      "community": 18,
+      "community": 19,
       "norm_label": "fovsliderpatch"
     },
     {
@@ -1540,7 +1530,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "patches_fovsliderpatch_fovsliderpatch_gettargetmethod",
-      "community": 18,
+      "community": 19,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -1550,7 +1540,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "patches_fovsliderpatch_cs_methodbase",
-      "community": 18,
+      "community": 19,
       "norm_label": "methodbase"
     },
     {
@@ -1560,7 +1550,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "patches_fovsliderpatch_fovsliderpatch_patchpostfix",
-      "community": 18,
+      "community": 19,
       "norm_label": ".patchpostfix()"
     },
     {
@@ -1570,7 +1560,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "numberslider",
-      "community": 18,
+      "community": 19,
       "norm_label": "numberslider"
     },
     {
@@ -1580,7 +1570,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "gclass1085",
-      "community": 18,
+      "community": 19,
       "norm_label": "gclass1085"
     },
     {
@@ -1590,7 +1580,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "patches_fovsliderpatch_cs_patchpostfix",
-      "community": 18,
+      "community": 19,
       "norm_label": "patchpostfix"
     },
     {
@@ -1810,7 +1800,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_localeclassreloadpatch",
-      "community": 19,
+      "community": 20,
       "norm_label": "localeclassreloadpatch.cs"
     },
     {
@@ -1820,7 +1810,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "patches_localeclassreloadpatch_camerarotationmod_patches",
-      "community": 19,
+      "community": 20,
       "norm_label": "camerarotationmod.patches"
     },
     {
@@ -1830,7 +1820,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "patches_localeclassreloadpatch_localeclassreloadpatch",
-      "community": 19,
+      "community": 20,
       "norm_label": "localeclassreloadpatch"
     },
     {
@@ -1840,7 +1830,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "patches_localeclassreloadpatch_cs_bool",
-      "community": 19,
+      "community": 20,
       "norm_label": "bool"
     },
     {
@@ -1850,7 +1840,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "patches_localeclassreloadpatch_localeclassreloadpatch_gettargetmethod",
-      "community": 19,
+      "community": 20,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -1860,7 +1850,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "patches_localeclassreloadpatch_cs_methodbase",
-      "community": 19,
+      "community": 20,
       "norm_label": "methodbase"
     },
     {
@@ -1870,7 +1860,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "patches_localeclassreloadpatch_localeclassreloadpatch_postfix",
-      "community": 19,
+      "community": 20,
       "norm_label": ".postfix()"
     },
     {
@@ -1880,7 +1870,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "task",
-      "community": 19,
+      "community": 20,
       "norm_label": "task"
     },
     {
@@ -1890,7 +1880,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "patches_localeclassreloadpatch_cs_patchpostfix",
-      "community": 19,
+      "community": 20,
       "norm_label": "patchpostfix"
     },
     {
@@ -2444,93 +2434,103 @@
       "norm_label": "patchprefix"
     },
     {
-      "label": "ObservedStanceVisualPatch.cs",
+      "label": "ObservedStanceShiftPatch.cs",
       "file_type": "code",
-      "source_file": "Patches/ObservedStanceVisualPatch.cs",
+      "source_file": "Patches/ObservedStanceShiftPatch.cs",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "patches_observedstancevisualpatch",
-      "community": 20,
-      "norm_label": "observedstancevisualpatch.cs"
+      "id": "patches_observedstanceshiftpatch",
+      "community": 17,
+      "norm_label": "observedstanceshiftpatch.cs"
     },
     {
       "label": "CameraRotationMod.Patches",
       "file_type": "code",
-      "source_file": "Patches/ObservedStanceVisualPatch.cs",
-      "source_location": "L8",
+      "source_file": "Patches/ObservedStanceShiftPatch.cs",
+      "source_location": "L7",
       "_origin": "ast",
-      "id": "patches_observedstancevisualpatch_camerarotationmod_patches",
-      "community": 20,
+      "id": "patches_observedstanceshiftpatch_camerarotationmod_patches",
+      "community": 17,
       "norm_label": "camerarotationmod.patches"
     },
     {
-      "label": "ObservedStanceVisualPatch",
+      "label": "ObservedStanceShiftPatch",
       "file_type": "code",
-      "source_file": "Patches/ObservedStanceVisualPatch.cs",
-      "source_location": "L19",
+      "source_file": "Patches/ObservedStanceShiftPatch.cs",
+      "source_location": "L25",
       "_origin": "ast",
-      "id": "patches_observedstancevisualpatch_observedstancevisualpatch",
-      "community": 20,
-      "norm_label": "observedstancevisualpatch"
+      "id": "patches_observedstanceshiftpatch_observedstanceshiftpatch",
+      "community": 17,
+      "norm_label": "observedstanceshiftpatch"
     },
     {
       "label": "bool",
       "file_type": "code",
-      "source_file": "Patches/ObservedStanceVisualPatch.cs",
-      "source_location": "L21",
+      "source_file": "Patches/ObservedStanceShiftPatch.cs",
+      "source_location": "L27",
       "_origin": "ast",
-      "id": "patches_observedstancevisualpatch_cs_bool",
-      "community": 20,
+      "id": "patches_observedstanceshiftpatch_cs_bool",
+      "community": 17,
       "norm_label": "bool"
     },
     {
       "label": ".GetTargetMethod()",
       "file_type": "code",
-      "source_file": "Patches/ObservedStanceVisualPatch.cs",
-      "source_location": "L23",
+      "source_file": "Patches/ObservedStanceShiftPatch.cs",
+      "source_location": "L29",
       "_origin": "ast",
-      "id": "patches_observedstancevisualpatch_observedstancevisualpatch_gettargetmethod",
-      "community": 20,
+      "id": "patches_observedstanceshiftpatch_observedstanceshiftpatch_gettargetmethod",
+      "community": 17,
       "norm_label": ".gettargetmethod()"
     },
     {
       "label": "MethodBase",
       "file_type": "code",
-      "source_file": "Patches/ObservedStanceVisualPatch.cs",
-      "source_location": "L23",
+      "source_file": "Patches/ObservedStanceShiftPatch.cs",
+      "source_location": "L29",
       "_origin": "ast",
-      "id": "patches_observedstancevisualpatch_cs_methodbase",
-      "community": 20,
+      "id": "patches_observedstanceshiftpatch_cs_methodbase",
+      "community": 17,
       "norm_label": "methodbase"
     },
     {
       "label": ".Postfix()",
       "file_type": "code",
-      "source_file": "Patches/ObservedStanceVisualPatch.cs",
-      "source_location": "L26",
+      "source_file": "Patches/ObservedStanceShiftPatch.cs",
+      "source_location": "L32",
       "_origin": "ast",
-      "id": "patches_observedstancevisualpatch_observedstancevisualpatch_postfix",
-      "community": 20,
+      "id": "patches_observedstanceshiftpatch_observedstanceshiftpatch_postfix",
+      "community": 17,
       "norm_label": ".postfix()"
     },
     {
-      "label": "ObservedPlayer",
+      "label": "PlayerBones",
       "file_type": "code",
-      "source_file": "Patches/ObservedStanceVisualPatch.cs",
-      "source_location": "L26",
+      "source_file": "Patches/ObservedStanceShiftPatch.cs",
+      "source_location": "L32",
       "_origin": "ast",
-      "id": "patches_observedstancevisualpatch_cs_observedplayer",
-      "community": 20,
-      "norm_label": "observedplayer"
+      "id": "patches_observedstanceshiftpatch_cs_playerbones",
+      "community": 17,
+      "norm_label": "playerbones"
+    },
+    {
+      "label": "EPointOfView",
+      "file_type": "code",
+      "source_file": "Patches/ObservedStanceShiftPatch.cs",
+      "source_location": "L32",
+      "_origin": "ast",
+      "id": "epointofview",
+      "community": 17,
+      "norm_label": "epointofview"
     },
     {
       "label": "PatchPostfix",
       "file_type": "code",
-      "source_file": "Patches/ObservedStanceVisualPatch.cs",
-      "source_location": "L26",
+      "source_file": "Patches/ObservedStanceShiftPatch.cs",
+      "source_location": "L32",
       "_origin": "ast",
-      "id": "patches_observedstancevisualpatch_cs_patchpostfix",
-      "community": 20,
+      "id": "patches_observedstanceshiftpatch_cs_patchpostfix",
+      "community": 17,
       "norm_label": "patchpostfix"
     },
     {
@@ -2960,7 +2960,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_raidlifecyclepatches",
-      "community": 17,
+      "community": 18,
       "norm_label": "raidlifecyclepatches.cs"
     },
     {
@@ -2970,7 +2970,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "patches_raidlifecyclepatches_camerarotationmod_patches",
-      "community": 17,
+      "community": 18,
       "norm_label": "camerarotationmod.patches"
     },
     {
@@ -2980,7 +2980,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "patches_raidlifecyclepatches_gameworldongamestartedpatch",
-      "community": 17,
+      "community": 18,
       "norm_label": "gameworldongamestartedpatch"
     },
     {
@@ -2990,7 +2990,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "patches_raidlifecyclepatches_gameworldongamestartedpatch_gettargetmethod",
-      "community": 17,
+      "community": 18,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -3000,7 +3000,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "patches_raidlifecyclepatches_cs_methodbase",
-      "community": 17,
+      "community": 18,
       "norm_label": "methodbase"
     },
     {
@@ -3010,7 +3010,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "patches_raidlifecyclepatches_gameworldongamestartedpatch_postfix",
-      "community": 17,
+      "community": 18,
       "norm_label": ".postfix()"
     },
     {
@@ -3020,7 +3020,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "patches_raidlifecyclepatches_cs_patchpostfix",
-      "community": 17,
+      "community": 18,
       "norm_label": "patchpostfix"
     },
     {
@@ -3030,7 +3030,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "patches_raidlifecyclepatches_gameworldondestroypatch",
-      "community": 17,
+      "community": 18,
       "norm_label": "gameworldondestroypatch"
     },
     {
@@ -3040,7 +3040,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "patches_raidlifecyclepatches_gameworldondestroypatch_gettargetmethod",
-      "community": 17,
+      "community": 18,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -3050,7 +3050,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "patches_raidlifecyclepatches_gameworldondestroypatch_postfix",
-      "community": 17,
+      "community": 18,
       "norm_label": ".postfix()"
     },
     {
@@ -3977,7 +3977,7 @@
       "label": ".Resolve()",
       "file_type": "code",
       "source_file": "StaminaController.cs",
-      "source_location": "L109",
+      "source_location": "L115",
       "_origin": "ast",
       "id": "staminacontroller_staminacontroller_resolve",
       "community": 10,
@@ -3987,7 +3987,7 @@
       "label": "Player",
       "file_type": "code",
       "source_file": "StaminaController.cs",
-      "source_location": "L109",
+      "source_location": "L115",
       "_origin": "ast",
       "id": "staminacontroller_cs_player",
       "community": 10,
@@ -3997,7 +3997,7 @@
       "label": ".SetScenario()",
       "file_type": "code",
       "source_file": "StaminaController.cs",
-      "source_location": "L138",
+      "source_location": "L144",
       "_origin": "ast",
       "id": "staminacontroller_staminacontroller_setscenario",
       "community": 10,
@@ -4007,7 +4007,7 @@
       "label": ".Label()",
       "file_type": "code",
       "source_file": "StaminaController.cs",
-      "source_location": "L148",
+      "source_location": "L154",
       "_origin": "ast",
       "id": "staminacontroller_staminacontroller_label",
       "community": 10,
@@ -4017,7 +4017,7 @@
       "label": ".Reset()",
       "file_type": "code",
       "source_file": "StaminaController.cs",
-      "source_location": "L171",
+      "source_location": "L177",
       "_origin": "ast",
       "id": "staminacontroller_staminacontroller_reset",
       "community": 10,
@@ -5355,7 +5355,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Networking/ObservedStanceAnimator.cs",
-      "source_location": "L27",
+      "source_location": "L22",
       "weight": 1.0,
       "context": "field",
       "source": "networking_observedstanceanimator_observedstanceanimator",
@@ -5377,29 +5377,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Networking/ObservedStanceAnimator.cs",
-      "source_location": "L18",
-      "weight": 1.0,
-      "context": "field",
-      "source": "networking_observedstanceanimator_observedstanceanimator",
-      "target": "networking_observedstanceanimator_cs_observedplayer",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "Networking/ObservedStanceAnimator.cs",
-      "source_location": "L24",
-      "weight": 1.0,
-      "context": "field",
-      "source": "networking_observedstanceanimator_observedstanceanimator",
-      "target": "networking_observedstanceanimator_cs_quaternion",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "Networking/ObservedStanceAnimator.cs",
-      "source_location": "L25",
+      "source_location": "L21",
       "weight": 1.0,
       "context": "field",
       "source": "networking_observedstanceanimator_observedstanceanimator",
@@ -5410,7 +5388,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Networking/ObservedStanceAnimator.cs",
-      "source_location": "L38",
+      "source_location": "L33",
       "weight": 1.0,
       "source": "networking_observedstanceanimator_observedstanceanimator",
       "target": "networking_observedstanceanimator_observedstanceanimator_applytoweaponroot",
@@ -5420,7 +5398,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Networking/ObservedStanceAnimator.cs",
-      "source_location": "L29",
+      "source_location": "L24",
       "weight": 1.0,
       "source": "networking_observedstanceanimator_observedstanceanimator",
       "target": "networking_observedstanceanimator_observedstanceanimator_init",
@@ -5430,7 +5408,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Networking/ObservedStanceAnimator.cs",
-      "source_location": "L31",
+      "source_location": "L26",
       "weight": 1.0,
       "source": "networking_observedstanceanimator_observedstanceanimator",
       "target": "networking_observedstanceanimator_observedstanceanimator_setstance",
@@ -5440,22 +5418,33 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Networking/ObservedStanceAnimator.cs",
-      "source_location": "L29",
+      "source_location": "L18",
       "weight": 1.0,
-      "context": "parameter_type",
-      "source": "networking_observedstanceanimator_observedstanceanimator_init",
-      "target": "networking_observedstanceanimator_cs_observedplayer",
+      "context": "field",
+      "source": "networking_observedstanceanimator_observedstanceanimator",
+      "target": "observedplayer",
       "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Networking/ObservedStanceAnimator.cs",
-      "source_location": "L38",
+      "source_location": "L24",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "networking_observedstanceanimator_observedstanceanimator_init",
+      "target": "observedplayer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Networking/ObservedStanceAnimator.cs",
+      "source_location": "L33",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "networking_observedstanceanimator_observedstanceanimator_applytoweaponroot",
-      "target": "playerbones",
+      "target": "networking_observedstanceanimator_cs_playerbones",
       "confidence_score": 1.0
     },
     {
@@ -8413,95 +8402,106 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "Patches/ObservedStanceVisualPatch.cs",
-      "source_location": "L8",
+      "source_file": "Patches/ObservedStanceShiftPatch.cs",
+      "source_location": "L7",
       "weight": 1.0,
-      "source": "patches_observedstancevisualpatch",
-      "target": "patches_observedstancevisualpatch_camerarotationmod_patches",
+      "source": "patches_observedstanceshiftpatch",
+      "target": "patches_observedstanceshiftpatch_camerarotationmod_patches",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "Patches/ObservedStanceVisualPatch.cs",
-      "source_location": "L19",
+      "source_file": "Patches/ObservedStanceShiftPatch.cs",
+      "source_location": "L25",
       "weight": 1.0,
-      "source": "patches_observedstancevisualpatch",
-      "target": "patches_observedstancevisualpatch_observedstancevisualpatch",
+      "source": "patches_observedstanceshiftpatch",
+      "target": "patches_observedstanceshiftpatch_observedstanceshiftpatch",
       "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
-      "source_file": "Patches/ObservedStanceVisualPatch.cs",
-      "source_location": "L21",
+      "source_file": "Patches/ObservedStanceShiftPatch.cs",
+      "source_location": "L27",
       "weight": 1.0,
       "context": "field",
-      "source": "patches_observedstancevisualpatch_observedstancevisualpatch",
-      "target": "patches_observedstancevisualpatch_cs_bool",
+      "source": "patches_observedstanceshiftpatch_observedstanceshiftpatch",
+      "target": "patches_observedstanceshiftpatch_cs_bool",
       "confidence_score": 1.0
     },
     {
       "relation": "method",
       "confidence": "EXTRACTED",
-      "source_file": "Patches/ObservedStanceVisualPatch.cs",
-      "source_location": "L23",
+      "source_file": "Patches/ObservedStanceShiftPatch.cs",
+      "source_location": "L29",
       "weight": 1.0,
-      "source": "patches_observedstancevisualpatch_observedstancevisualpatch",
-      "target": "patches_observedstancevisualpatch_observedstancevisualpatch_gettargetmethod",
+      "source": "patches_observedstanceshiftpatch_observedstanceshiftpatch",
+      "target": "patches_observedstanceshiftpatch_observedstanceshiftpatch_gettargetmethod",
       "confidence_score": 1.0
     },
     {
       "relation": "method",
       "confidence": "EXTRACTED",
-      "source_file": "Patches/ObservedStanceVisualPatch.cs",
-      "source_location": "L26",
+      "source_file": "Patches/ObservedStanceShiftPatch.cs",
+      "source_location": "L32",
       "weight": 1.0,
-      "source": "patches_observedstancevisualpatch_observedstancevisualpatch",
-      "target": "patches_observedstancevisualpatch_observedstancevisualpatch_postfix",
+      "source": "patches_observedstanceshiftpatch_observedstanceshiftpatch",
+      "target": "patches_observedstanceshiftpatch_observedstanceshiftpatch_postfix",
       "confidence_score": 1.0
     },
     {
       "relation": "inherits",
       "confidence": "EXTRACTED",
-      "source_file": "Patches/ObservedStanceVisualPatch.cs",
-      "source_location": "L19",
+      "source_file": "Patches/ObservedStanceShiftPatch.cs",
+      "source_location": "L25",
       "weight": 1.0,
-      "source": "patches_observedstancevisualpatch_observedstancevisualpatch",
+      "source": "patches_observedstanceshiftpatch_observedstanceshiftpatch",
       "target": "plugin_cs_modulepatch",
       "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
-      "source_file": "Patches/ObservedStanceVisualPatch.cs",
-      "source_location": "L23",
+      "source_file": "Patches/ObservedStanceShiftPatch.cs",
+      "source_location": "L29",
       "weight": 1.0,
       "context": "return_type",
-      "source": "patches_observedstancevisualpatch_observedstancevisualpatch_gettargetmethod",
-      "target": "patches_observedstancevisualpatch_cs_methodbase",
+      "source": "patches_observedstanceshiftpatch_observedstanceshiftpatch_gettargetmethod",
+      "target": "patches_observedstanceshiftpatch_cs_methodbase",
       "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
-      "source_file": "Patches/ObservedStanceVisualPatch.cs",
-      "source_location": "L26",
+      "source_file": "Patches/ObservedStanceShiftPatch.cs",
+      "source_location": "L32",
       "weight": 1.0,
       "context": "parameter_type",
-      "source": "patches_observedstancevisualpatch_observedstancevisualpatch_postfix",
-      "target": "patches_observedstancevisualpatch_cs_observedplayer",
+      "source": "patches_observedstanceshiftpatch_observedstanceshiftpatch_postfix",
+      "target": "epointofview",
       "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
-      "source_file": "Patches/ObservedStanceVisualPatch.cs",
-      "source_location": "L26",
+      "source_file": "Patches/ObservedStanceShiftPatch.cs",
+      "source_location": "L32",
       "weight": 1.0,
       "context": "attribute",
-      "source": "patches_observedstancevisualpatch_observedstancevisualpatch_postfix",
-      "target": "patches_observedstancevisualpatch_cs_patchpostfix",
+      "source": "patches_observedstanceshiftpatch_observedstanceshiftpatch_postfix",
+      "target": "patches_observedstanceshiftpatch_cs_patchpostfix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/ObservedStanceShiftPatch.cs",
+      "source_location": "L32",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "patches_observedstanceshiftpatch_observedstanceshiftpatch_postfix",
+      "target": "patches_observedstanceshiftpatch_cs_playerbones",
       "confidence_score": 1.0
     },
     {
@@ -10279,7 +10279,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "StaminaController.cs",
-      "source_location": "L148",
+      "source_location": "L154",
       "weight": 1.0,
       "source": "staminacontroller_staminacontroller",
       "target": "staminacontroller_staminacontroller_label",
@@ -10289,7 +10289,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "StaminaController.cs",
-      "source_location": "L171",
+      "source_location": "L177",
       "weight": 1.0,
       "source": "staminacontroller_staminacontroller",
       "target": "staminacontroller_staminacontroller_reset",
@@ -10299,7 +10299,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "StaminaController.cs",
-      "source_location": "L109",
+      "source_location": "L115",
       "weight": 1.0,
       "source": "staminacontroller_staminacontroller",
       "target": "staminacontroller_staminacontroller_resolve",
@@ -10309,7 +10309,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "StaminaController.cs",
-      "source_location": "L138",
+      "source_location": "L144",
       "weight": 1.0,
       "source": "staminacontroller_staminacontroller",
       "target": "staminacontroller_staminacontroller_setscenario",
@@ -10340,7 +10340,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "StaminaController.cs",
-      "source_location": "L148",
+      "source_location": "L154",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "staminacontroller_staminacontroller_label",
@@ -10351,7 +10351,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "StaminaController.cs",
-      "source_location": "L109",
+      "source_location": "L115",
       "weight": 1.0,
       "context": "return_type",
       "source": "staminacontroller_staminacontroller_resolve",
@@ -10362,7 +10362,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "StaminaController.cs",
-      "source_location": "L138",
+      "source_location": "L144",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "staminacontroller_staminacontroller_setscenario",
@@ -10395,7 +10395,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "StaminaController.cs",
-      "source_location": "L109",
+      "source_location": "L115",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "staminacontroller_staminacontroller_resolve",
@@ -10407,7 +10407,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "StaminaController.cs",
-      "source_location": "L143",
+      "source_location": "L149",
       "weight": 1.0,
       "source": "staminacontroller_staminacontroller_setscenario",
       "target": "staminacontroller_staminacontroller_label",
@@ -12195,5 +12195,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "74a9f29975a9886b43afd434e965fda2f6967c31"
+  "built_at_commit": "3c061f86cfe3047b898d233d1c1510735d570c0d"
 }
