@@ -111,7 +111,7 @@ public class Plugin : BaseUnityPlugin
         new PartyPlayerItemPatch().Enable();                // (015/057) escala + popover no cursor — host REAL do deploy
         new PartyInfoPanelPrefetchPatch().Enable();         // (057) caches frescos por tela de deploy (classe local + mapa)
         new SkillsNavButtonPatch().Enable();                // (013) botão SKILLS no menu → abre a aba Skills
-        new BulwarkPatch().Enable();                        // (050.0) 🛡️ Tanque — dano recebido ×0.85
+        new BulwarkPatch().Enable();                        // (050.0/B6) 🛡️ Tanque — dano recebido ×0.85 SÓ com colete pesado
         new PackMulePatch().Enable();                       // (050.0) 🎒🛡️ Pack Mule — +30% limite de carga (piso, stash+raid)
         new QuickHandsPatch().Enable();                     // (061) 🎒 Saqueador — revista 2 contêineres (bônus elite da Search, antecipado)
         new WeightMarkerPatch().Enable();                   // (056) marcador "▲ +X%" no peso (aba Health) — atribui ao Pack Mule
@@ -168,7 +168,7 @@ public class Plugin : BaseUnityPlugin
         {
             Log.LogError($"[CustomClasses] (050.2) Adrenaline patches falharam ao aplicar: {ex.Message}");
         }
-        new ExecutionMeleePatch().Enable();                 // (050.3) 🔧 Furtivo — dano de melee ×5
+        new ExecutionMeleePatch().Enable();                 // (050.3) 🔧 Furtivo — dano de melee ×3.5 (B7)
         new MalfunctionChancePatch().Enable();              // (050.3) 🔧 Fuzileiro — anti-jam ×0.5 (Cool Under Fire)
         new InteractionSoundPatch().Enable();               // (050.4) 🔧 Saqueador — loot mais silencioso (Silent Looter)
         try

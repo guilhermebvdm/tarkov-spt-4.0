@@ -1,16 +1,16 @@
 # Graph Report - mods\CustomClasses\modded  (2026-07-11)
 
 ## Corpus Check
-- 110 files · ~97,905 words
+- 110 files · ~98,422 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1652 nodes · 2122 edges · 109 communities (100 shown, 9 thin omitted)
+- 1654 nodes · 2125 edges · 109 communities (99 shown, 10 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `5bb148e4`
+- Built from commit: `2aa9d067`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -129,21 +129,21 @@
 10. `Item` - 13 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `AdrenalineTriggerPatch` --inherits--> `ModulePatch`  [EXTRACTED]
+  Client/Patches/AdrenalineTriggerPatch.cs →   _Bridges community 97 → community 81_
 - `BulwarkPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/BulwarkPatch.cs →   _Bridges community 90 → community 80_
+  Client/Patches/BulwarkPatch.cs →   _Bridges community 81 → community 80_
 - `ChatSpecialIconPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/ChatSpecialIconPatch.cs →   _Bridges community 90 → community 40_
+  Client/Patches/ChatSpecialIconPatch.cs →   _Bridges community 81 → community 40_
 - `ChangeEnergyPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/ClassCombatHealthPatches.cs →   _Bridges community 90 → community 79_
-- `IronLungsPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/ClassCombatHealthPatches.cs →   _Bridges community 90 → community 108_
+  Client/Patches/ClassCombatHealthPatches.cs →   _Bridges community 81 → community 79_
 - `ClassDetailLoadingPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/ClassDetailLoadingPatch.cs →   _Bridges community 90 → community 101_
+  Client/Patches/ClassDetailLoadingPatch.cs →   _Bridges community 81 → community 101_
 
 ## Import Cycles
 - None detected.
 
-## Communities (109 total, 9 thin omitted)
+## Communities (109 total, 10 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.09
@@ -333,13 +333,9 @@ Nodes (8): CatalogService, ClassViewModSpec, ModSpec, MudIcon, MudStack, MudText
 Cohesion: 0.44
 Nodes (4): IJSRuntime, string, Task, UiPrefs
 
-### Community 47 - "Community 47"
-Cohesion: 0.29
-Nodes (4): MethodBase, PatchPostfix, SkillManager, QuickHandsPatch
-
 ### Community 48 - "Community 48"
-Cohesion: 0.15
-Nodes (10): DamageInfoStruct, PatchPostfix, Player, float, HarmonyPriority, MethodBase, PatchPrefix, ProceduralWeaponAnimation (+2 more)
+Cohesion: 0.23
+Nodes (7): float, HarmonyPriority, MethodBase, PatchPrefix, ProceduralWeaponAnimation, RecoilFloorApplyPatch, RecoilFloorCapturePatch
 
 ### Community 49 - "Community 49"
 Cohesion: 0.11
@@ -410,24 +406,24 @@ Cohesion: 0.20
 Nodes (9): CustomClasses.Web, DialogActions, DialogContent, ItemSpecEditor, MudButton, MudDialog, MudText, TitleContent (+1 more)
 
 ### Community 79 - "Community 79"
-Cohesion: 0.16
-Nodes (9): ActiveHealthController, DamageInfoStruct, MethodBase, PatchPrefix, ChangeEnergyPatch, ChangeHydrationPatch, ExecutionMeleePatch, HeavyFrameMetabolism (+1 more)
+Cohesion: 0.11
+Nodes (14): ActiveHealthController, DamageInfoStruct, FirearmController, float, MethodBase, PatchPostfix, PatchPrefix, ChangeEnergyPatch (+6 more)
 
 ### Community 80 - "Community 80"
-Cohesion: 0.24
-Nodes (6): DamageInfoStruct, List, MethodBase, PatchPrefix, Player, BulwarkPatch
+Cohesion: 0.21
+Nodes (7): DamageInfoStruct, Item, List, MethodBase, PatchPrefix, Player, BulwarkPatch
 
 ### Community 81 - "Community 81"
-Cohesion: 0.15
-Nodes (11): BasePhysicalClass, MethodBase, PatchPostfix, PatchPrefix, MovementContext, ClassMoveSpeed, MaxSpeedPatch, OverladenInertiaPatch (+3 more)
+Cohesion: 0.16
+Nodes (10): MethodBase, MethodBase, ModulePatch, ClassMoveSpeed, MaxSpeedPatch, OverladenInertiaPatch, SetCharacterMovementSpeedPatch, SprintAccelerationPatch (+2 more)
 
 ### Community 82 - "Community 82"
 Cohesion: 0.11
 Nodes (14): AISoundType, Func, int, MethodBase, PatchPostfix, PatchPrefix, Player, IPlayer (+6 more)
 
 ### Community 83 - "Community 83"
-Cohesion: 0.16
-Nodes (8): FirearmController, PatchPostfix, PatchPrefix, Player, ProceduralWeaponAnimation, Weapon, ForceEffector, HeavyWeapon
+Cohesion: 0.24
+Nodes (5): PatchPrefix, Player, Weapon, ForceEffector, HeavyWeapon
 
 ### Community 84 - "Community 84"
 Cohesion: 0.17
@@ -450,8 +446,8 @@ Cohesion: 0.33
 Nodes (4): ConfigEntry, string, PerksConfig, ConfigFile
 
 ### Community 90 - "Community 90"
-Cohesion: 0.15
-Nodes (11): MethodBase, float, MethodBase, ModulePatch, AdrenalineTriggerPatch, AdsSpeedPatch, AimPunchPatch, HeavyWeaponErgoPatch (+3 more)
+Cohesion: 0.13
+Nodes (11): FirearmController, float, MethodBase, PatchPostfix, ProceduralWeaponAnimation, AdsSpeedPatch, AimPunchPatch, HeavyWeaponErgoPatch (+3 more)
 
 ### Community 91 - "Community 91"
 Cohesion: 0.17
@@ -470,8 +466,8 @@ Cohesion: 0.29
 Nodes (7): GameObject, Identity, PerkLine, TMP_FontAsset, Transform, PerksPanelView, PerkGroup
 
 ### Community 97 - "Community 97"
-Cohesion: 0.17
-Nodes (8): FieldInfo, MethodBase, PatchPostfix, PatchPrefix, GroupPlayerViewModelClass, PartyPlayerItem, PartyInfoPanelPrefetchPatch, PartyPlayerItemPatch
+Cohesion: 0.10
+Nodes (13): DamageInfoStruct, MethodBase, PatchPostfix, Player, FieldInfo, MethodBase, PatchPostfix, PatchPrefix (+5 more)
 
 ### Community 98 - "Community 98"
 Cohesion: 0.17
@@ -507,24 +503,24 @@ Nodes (5): FieldInfo, MethodBase, PatchPostfix, PlayerNamePanelPatch, PlayerName
 
 ### Community 108 - "Community 108"
 Cohesion: 0.33
-Nodes (5): FirearmController, float, PatchPostfix, IronLungsPatch, PlayerPhysicalClass
+Nodes (4): BasePhysicalClass, PatchPostfix, PatchPrefix, MovementContext
 
 ## Knowledge Gaps
-- **925 isolated node(s):** `float`, `string`, `Dictionary`, `bool`, `Payload` (+920 more)
+- **926 isolated node(s):** `float`, `string`, `Dictionary`, `bool`, `Payload` (+921 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **9 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **10 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `ClassDetailLoadingPatch` connect `Community 101` to `Community 90`?**
-  _High betweenness centrality (0.018) - this node is a cross-community bridge._
+- **Why does `ClassDetailLoadingPatch` connect `Community 101` to `Community 81`?**
+  _High betweenness centrality (0.016) - this node is a cross-community bridge._
 - **Why does `LoadingClassHover` connect `Community 91` to `Community 101`, `Community 102`, `Community 103`?**
   _High betweenness centrality (0.013) - this node is a cross-community bridge._
-- **Why does `MenuClassIdentityPatch` connect `Community 20` to `Community 90`?**
-  _High betweenness centrality (0.010) - this node is a cross-community bridge._
+- **Why does `SkillsClassTabPatch` connect `Community 49` to `Community 81`?**
+  _High betweenness centrality (0.011) - this node is a cross-community bridge._
 - **What connects `float`, `string`, `Dictionary` to the rest of the system?**
-  _925 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _926 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.09090909090909091 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**

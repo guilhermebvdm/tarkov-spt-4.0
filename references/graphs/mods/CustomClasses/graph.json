@@ -330,7 +330,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_adrenalinetriggerpatch",
-      "community": 90,
+      "community": 97,
       "norm_label": "adrenalinetriggerpatch.cs"
     },
     {
@@ -340,7 +340,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "patches_adrenalinetriggerpatch_adrenalinetriggerpatch",
-      "community": 90,
+      "community": 97,
       "norm_label": "adrenalinetriggerpatch"
     },
     {
@@ -350,7 +350,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "modulepatch",
-      "community": 90,
+      "community": 81,
       "norm_label": "modulepatch"
     },
     {
@@ -360,7 +360,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "patches_adrenalinetriggerpatch_adrenalinetriggerpatch_gettargetmethod",
-      "community": 90,
+      "community": 97,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -370,7 +370,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "client_patches_adrenalinetriggerpatch_cs_methodbase",
-      "community": 90,
+      "community": 97,
       "norm_label": "methodbase"
     },
     {
@@ -380,7 +380,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "patches_adrenalinetriggerpatch_adrenalinetriggerpatch_postfix",
-      "community": 48,
+      "community": 97,
       "norm_label": ".postfix()"
     },
     {
@@ -390,7 +390,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "client_patches_adrenalinetriggerpatch_cs_player",
-      "community": 48,
+      "community": 97,
       "norm_label": "player"
     },
     {
@@ -400,7 +400,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "client_patches_adrenalinetriggerpatch_cs_damageinfostruct",
-      "community": 48,
+      "community": 97,
       "norm_label": "damageinfostruct"
     },
     {
@@ -410,7 +410,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "client_patches_adrenalinetriggerpatch_cs_patchpostfix",
-      "community": 48,
+      "community": 97,
       "norm_label": "patchpostfix"
     },
     {
@@ -507,11 +507,31 @@
       "label": ".HasHeavyArmor()",
       "file_type": "code",
       "source_file": "Client/Patches/BulwarkPatch.cs",
-      "source_location": "L81",
+      "source_location": "L96",
       "_origin": "ast",
       "id": "patches_bulwarkpatch_bulwarkpatch_hasheavyarmor",
       "community": 80,
       "norm_label": ".hasheavyarmor()"
+    },
+    {
+      "label": ".IsUnder()",
+      "file_type": "code",
+      "source_file": "Client/Patches/BulwarkPatch.cs",
+      "source_location": "L138",
+      "_origin": "ast",
+      "id": "patches_bulwarkpatch_bulwarkpatch_isunder",
+      "community": 80,
+      "norm_label": ".isunder()"
+    },
+    {
+      "label": "Item",
+      "file_type": "code",
+      "source_file": "Client/Patches/BulwarkPatch.cs",
+      "source_location": "L138",
+      "_origin": "ast",
+      "id": "client_patches_bulwarkpatch_cs_item",
+      "community": 80,
+      "norm_label": "item"
     },
     {
       "label": "ChatSpecialIconPatch.cs",
@@ -760,7 +780,7 @@
       "source_location": "L134",
       "_origin": "ast",
       "id": "patches_classcombathealthpatches_ironlungspatch",
-      "community": 108,
+      "community": 79,
       "norm_label": "ironlungspatch"
     },
     {
@@ -770,7 +790,7 @@
       "source_location": "L136",
       "_origin": "ast",
       "id": "playerphysicalclass",
-      "community": 108,
+      "community": 79,
       "norm_label": "playerphysicalclass"
     },
     {
@@ -780,7 +800,7 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "client_patches_classcombathealthpatches_cs_float",
-      "community": 108,
+      "community": 79,
       "norm_label": "float"
     },
     {
@@ -800,7 +820,7 @@
       "source_location": "L144",
       "_origin": "ast",
       "id": "patches_classcombathealthpatches_ironlungspatch_postfix",
-      "community": 108,
+      "community": 79,
       "norm_label": ".postfix()"
     },
     {
@@ -810,7 +830,7 @@
       "source_location": "L144",
       "_origin": "ast",
       "id": "client_patches_classcombathealthpatches_cs_patchpostfix",
-      "community": 108,
+      "community": 79,
       "norm_label": "patchpostfix"
     },
     {
@@ -840,7 +860,7 @@
       "source_location": "L185",
       "_origin": "ast",
       "id": "patches_classcombathealthpatches_malfunctionchancepatch_postfix",
-      "community": 108,
+      "community": 79,
       "norm_label": ".postfix()"
     },
     {
@@ -850,7 +870,7 @@
       "source_location": "L185",
       "_origin": "ast",
       "id": "client_patches_classcombathealthpatches_cs_firearmcontroller",
-      "community": 108,
+      "community": 79,
       "norm_label": "firearmcontroller"
     },
     {
@@ -1200,7 +1220,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "patches_classmovementpatches_classmovespeed_apply",
-      "community": 81,
+      "community": 108,
       "norm_label": ".apply()"
     },
     {
@@ -1210,7 +1230,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "movementcontext",
-      "community": 81,
+      "community": 108,
       "norm_label": "movementcontext"
     },
     {
@@ -1250,7 +1270,7 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "patches_classmovementpatches_maxspeedpatch_postfix",
-      "community": 81,
+      "community": 108,
       "norm_label": ".postfix()"
     },
     {
@@ -1260,7 +1280,7 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "client_patches_classmovementpatches_cs_patchpostfix",
-      "community": 81,
+      "community": 108,
       "norm_label": "patchpostfix"
     },
     {
@@ -1290,7 +1310,7 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "patches_classmovementpatches_sprintspeedpatch_postfix",
-      "community": 81,
+      "community": 108,
       "norm_label": ".postfix()"
     },
     {
@@ -1320,7 +1340,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "patches_classmovementpatches_overladeninertiapatch_postfix",
-      "community": 81,
+      "community": 108,
       "norm_label": ".postfix()"
     },
     {
@@ -1330,7 +1350,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "basephysicalclass",
-      "community": 81,
+      "community": 108,
       "norm_label": "basephysicalclass"
     },
     {
@@ -1360,7 +1380,7 @@
       "source_location": "L145",
       "_origin": "ast",
       "id": "patches_classmovementpatches_setcharactermovementspeedpatch_prefix",
-      "community": 81,
+      "community": 108,
       "norm_label": ".prefix()"
     },
     {
@@ -1370,7 +1390,7 @@
       "source_location": "L145",
       "_origin": "ast",
       "id": "client_patches_classmovementpatches_cs_patchprefix",
-      "community": 81,
+      "community": 108,
       "norm_label": "patchprefix"
     },
     {
@@ -1400,7 +1420,7 @@
       "source_location": "L165",
       "_origin": "ast",
       "id": "patches_classmovementpatches_sprintaccelerationpatch_postfix",
-      "community": 81,
+      "community": 108,
       "norm_label": ".postfix()"
     },
     {
@@ -1710,7 +1730,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_proceduralweaponanimation",
-      "community": 83,
+      "community": 90,
       "norm_label": "proceduralweaponanimation"
     },
     {
@@ -1750,7 +1770,7 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "patches_classweaponpatches_reloadspeedpatch_postfix",
-      "community": 83,
+      "community": 90,
       "norm_label": ".postfix()"
     },
     {
@@ -1760,7 +1780,7 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_firearmcontroller",
-      "community": 83,
+      "community": 90,
       "norm_label": "firearmcontroller"
     },
     {
@@ -1770,7 +1790,7 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_patchpostfix",
-      "community": 83,
+      "community": 90,
       "norm_label": "patchpostfix"
     },
     {
@@ -1800,7 +1820,7 @@
       "source_location": "L124",
       "_origin": "ast",
       "id": "patches_classweaponpatches_adsspeedpatch_postfix",
-      "community": 83,
+      "community": 90,
       "norm_label": ".postfix()"
     },
     {
@@ -1830,7 +1850,7 @@
       "source_location": "L174",
       "_origin": "ast",
       "id": "patches_classweaponpatches_heavyweaponergopatch_postfix",
-      "community": 83,
+      "community": 90,
       "norm_label": ".postfix()"
     },
     {
@@ -2700,7 +2720,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_quickhandspatch",
-      "community": 47,
+      "community": 81,
       "norm_label": "quickhandspatch.cs"
     },
     {
@@ -2710,7 +2730,7 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "patches_quickhandspatch_quickhandspatch",
-      "community": 47,
+      "community": 81,
       "norm_label": "quickhandspatch"
     },
     {
@@ -2720,7 +2740,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "patches_quickhandspatch_quickhandspatch_gettargetmethod",
-      "community": 47,
+      "community": 81,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2730,7 +2750,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "client_patches_quickhandspatch_cs_methodbase",
-      "community": 47,
+      "community": 81,
       "norm_label": "methodbase"
     },
     {
@@ -4247,7 +4267,7 @@
       "label": ".Line()",
       "file_type": "code",
       "source_file": "Client/PerkDiagnostics.cs",
-      "source_location": "L94",
+      "source_location": "L96",
       "_origin": "ast",
       "id": "client_perkdiagnostics_perkdiagnostics_line",
       "community": 31,
@@ -4257,7 +4277,7 @@
       "label": "StringBuilder",
       "file_type": "code",
       "source_file": "Client/PerkDiagnostics.cs",
-      "source_location": "L94",
+      "source_location": "L96",
       "_origin": "ast",
       "id": "stringbuilder",
       "community": 31,
@@ -4267,7 +4287,7 @@
       "label": "Func",
       "file_type": "code",
       "source_file": "Client/PerkDiagnostics.cs",
-      "source_location": "L94",
+      "source_location": "L96",
       "_origin": "ast",
       "id": "client_perkdiagnostics_cs_func",
       "community": 31,
@@ -4277,7 +4297,7 @@
       "label": ".Flag()",
       "file_type": "code",
       "source_file": "Client/PerkDiagnostics.cs",
-      "source_location": "L110",
+      "source_location": "L112",
       "_origin": "ast",
       "id": "client_perkdiagnostics_perkdiagnostics_flag",
       "community": 31,
@@ -4287,7 +4307,7 @@
       "label": ".FmtBA()",
       "file_type": "code",
       "source_file": "Client/PerkDiagnostics.cs",
-      "source_location": "L116",
+      "source_location": "L118",
       "_origin": "ast",
       "id": "client_perkdiagnostics_perkdiagnostics_fmtba",
       "community": 31,
@@ -4297,7 +4317,7 @@
       "label": ".AppendPerkList()",
       "file_type": "code",
       "source_file": "Client/PerkDiagnostics.cs",
-      "source_location": "L128",
+      "source_location": "L130",
       "_origin": "ast",
       "id": "client_perkdiagnostics_perkdiagnostics_appendperklist",
       "community": 31,
@@ -4307,7 +4327,7 @@
       "label": ".AdrenalineLabel()",
       "file_type": "code",
       "source_file": "Client/PerkDiagnostics.cs",
-      "source_location": "L157",
+      "source_location": "L159",
       "_origin": "ast",
       "id": "client_perkdiagnostics_perkdiagnostics_adrenalinelabel",
       "community": 31,
@@ -4477,7 +4497,7 @@
       "label": ".GroupsFor()",
       "file_type": "code",
       "source_file": "Client/PerksCatalog.cs",
-      "source_location": "L212",
+      "source_location": "L216",
       "_origin": "ast",
       "id": "client_perkscatalog_perkscatalog_groupsfor",
       "community": 84,
@@ -4487,7 +4507,7 @@
       "label": ".LocalGroups()",
       "file_type": "code",
       "source_file": "Client/PerksCatalog.cs",
-      "source_location": "L226",
+      "source_location": "L230",
       "_origin": "ast",
       "id": "client_perkscatalog_perkscatalog_localgroups",
       "community": 84,
@@ -4497,7 +4517,7 @@
       "label": ".IconSprite()",
       "file_type": "code",
       "source_file": "Client/PerksCatalog.cs",
-      "source_location": "L229",
+      "source_location": "L233",
       "_origin": "ast",
       "id": "client_perkscatalog_perkscatalog_iconsprite",
       "community": 84,
@@ -4507,7 +4527,7 @@
       "label": "Sprite",
       "file_type": "code",
       "source_file": "Client/PerksCatalog.cs",
-      "source_location": "L229",
+      "source_location": "L233",
       "_origin": "ast",
       "id": "client_perkscatalog_cs_sprite",
       "community": 84,
@@ -4517,7 +4537,7 @@
       "label": ".BuffSprite()",
       "file_type": "code",
       "source_file": "Client/PerksCatalog.cs",
-      "source_location": "L253",
+      "source_location": "L257",
       "_origin": "ast",
       "id": "client_perkscatalog_perkscatalog_buffsprite",
       "community": 84,
@@ -4527,7 +4547,7 @@
       "label": ".BuildNotificationText()",
       "file_type": "code",
       "source_file": "Client/PerksCatalog.cs",
-      "source_location": "L272",
+      "source_location": "L276",
       "_origin": "ast",
       "id": "client_perkscatalog_perkscatalog_buildnotificationtext",
       "community": 84,
@@ -4537,7 +4557,7 @@
       "label": ".ValidateOnce()",
       "file_type": "code",
       "source_file": "Client/PerksCatalog.cs",
-      "source_location": "L301",
+      "source_location": "L305",
       "_origin": "ast",
       "id": "client_perkscatalog_perkscatalog_validateonce",
       "community": 84,
@@ -5127,7 +5147,7 @@
       "label": "StancesArmStaminaBridge",
       "file_type": "code",
       "source_file": "Client/StancesArmStaminaBridge.cs",
-      "source_location": "L18",
+      "source_location": "L19",
       "_origin": "ast",
       "id": "client_stancesarmstaminabridge_stancesarmstaminabridge",
       "community": 104,
@@ -5137,7 +5157,7 @@
       "label": "bool",
       "file_type": "code",
       "source_file": "Client/StancesArmStaminaBridge.cs",
-      "source_location": "L20",
+      "source_location": "L21",
       "_origin": "ast",
       "id": "client_stancesarmstaminabridge_cs_bool",
       "community": 104,
@@ -5147,7 +5167,7 @@
       "label": ".TryAttach()",
       "file_type": "code",
       "source_file": "Client/StancesArmStaminaBridge.cs",
-      "source_location": "L30",
+      "source_location": "L31",
       "_origin": "ast",
       "id": "client_stancesarmstaminabridge_stancesarmstaminabridge_tryattach",
       "community": 104,
@@ -5157,7 +5177,7 @@
       "label": ".WarnUnavailable()",
       "file_type": "code",
       "source_file": "Client/StancesArmStaminaBridge.cs",
-      "source_location": "L58",
+      "source_location": "L59",
       "_origin": "ast",
       "id": "client_stancesarmstaminabridge_stancesarmstaminabridge_warnunavailable",
       "community": 104,
@@ -5167,7 +5187,7 @@
       "label": ".Factor()",
       "file_type": "code",
       "source_file": "Client/StancesArmStaminaBridge.cs",
-      "source_location": "L78",
+      "source_location": "L79",
       "_origin": "ast",
       "id": "client_stancesarmstaminabridge_stancesarmstaminabridge_factor",
       "community": 104,
@@ -5177,7 +5197,7 @@
       "label": ".Sane()",
       "file_type": "code",
       "source_file": "Client/StancesArmStaminaBridge.cs",
-      "source_location": "L118",
+      "source_location": "L119",
       "_origin": "ast",
       "id": "client_stancesarmstaminabridge_stancesarmstaminabridge_sane",
       "community": 104,
@@ -17285,9 +17305,9 @@
       "source_file": "Client/Patches/RecoilFloorPatch.cs",
       "source_location": "L61",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_recoilfloorpatch_recoilfloorapplypatch",
-      "target": "modulepatch",
-      "confidence_score": 1.0
+      "target": "modulepatch"
     },
     {
       "relation": "inherits",
@@ -17295,9 +17315,9 @@
       "source_file": "Client/Patches/RecoilFloorPatch.cs",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_recoilfloorpatch_recoilfloorcapturepatch",
-      "target": "modulepatch",
-      "confidence_score": 1.0
+      "target": "modulepatch"
     },
     {
       "relation": "inherits",
@@ -17470,9 +17490,9 @@
       "source_location": "L32",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "patches_bulwarkpatch_bulwarkpatch",
-      "target": "client_patches_bulwarkpatch_cs_list",
-      "confidence_score": 1.0
+      "target": "client_patches_bulwarkpatch_cs_list"
     },
     {
       "relation": "method",
@@ -17490,8 +17510,18 @@
       "source_file": "Client/Patches/BulwarkPatch.cs",
       "source_location": "L81",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_bulwarkpatch_bulwarkpatch",
-      "target": "patches_bulwarkpatch_bulwarkpatch_hasheavyarmor",
+      "target": "patches_bulwarkpatch_bulwarkpatch_hasheavyarmor"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/BulwarkPatch.cs",
+      "source_location": "L138",
+      "weight": 1.0,
+      "source": "patches_bulwarkpatch_bulwarkpatch",
+      "target": "patches_bulwarkpatch_bulwarkpatch_isunder",
       "confidence_score": 1.0
     },
     {
@@ -17555,9 +17585,9 @@
       "source_file": "Client/Patches/BulwarkPatch.cs",
       "source_location": "L67",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_bulwarkpatch_bulwarkpatch_prefix",
-      "target": "patches_bulwarkpatch_bulwarkpatch_hasheavyarmor",
-      "confidence_score": 1.0
+      "target": "patches_bulwarkpatch_bulwarkpatch_hasheavyarmor"
     },
     {
       "relation": "references",
@@ -17566,8 +17596,30 @@
       "source_location": "L81",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_bulwarkpatch_bulwarkpatch_hasheavyarmor",
-      "target": "client_patches_bulwarkpatch_cs_player",
+      "target": "client_patches_bulwarkpatch_cs_player"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/BulwarkPatch.cs",
+      "source_location": "L124",
+      "weight": 1.0,
+      "source": "patches_bulwarkpatch_bulwarkpatch_hasheavyarmor",
+      "target": "patches_bulwarkpatch_bulwarkpatch_isunder",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/BulwarkPatch.cs",
+      "source_location": "L138",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "patches_bulwarkpatch_bulwarkpatch_isunder",
+      "target": "client_patches_bulwarkpatch_cs_item",
       "confidence_score": 1.0
     },
     {
@@ -20707,9 +20759,9 @@
       "source_file": "Client/Patches/RecoilFloorPatch.cs",
       "source_location": "L61",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_recoilfloorpatch",
-      "target": "patches_recoilfloorpatch_recoilfloorapplypatch",
-      "confidence_score": 1.0
+      "target": "patches_recoilfloorpatch_recoilfloorapplypatch"
     },
     {
       "relation": "contains",
@@ -20717,9 +20769,9 @@
       "source_file": "Client/Patches/RecoilFloorPatch.cs",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_recoilfloorpatch",
-      "target": "patches_recoilfloorpatch_recoilfloorcapturepatch",
-      "confidence_score": 1.0
+      "target": "patches_recoilfloorpatch_recoilfloorcapturepatch"
     },
     {
       "relation": "references",
@@ -20728,9 +20780,9 @@
       "source_location": "L34",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "patches_recoilfloorpatch_recoilfloorcapturepatch",
-      "target": "client_patches_recoilfloorpatch_cs_float",
-      "confidence_score": 1.0
+      "target": "client_patches_recoilfloorpatch_cs_float"
     },
     {
       "relation": "method",
@@ -20738,9 +20790,9 @@
       "source_file": "Client/Patches/RecoilFloorPatch.cs",
       "source_location": "L36",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_recoilfloorpatch_recoilfloorcapturepatch",
-      "target": "patches_recoilfloorpatch_recoilfloorcapturepatch_gettargetmethod",
-      "confidence_score": 1.0
+      "target": "patches_recoilfloorpatch_recoilfloorcapturepatch_gettargetmethod"
     },
     {
       "relation": "method",
@@ -20748,9 +20800,9 @@
       "source_file": "Client/Patches/RecoilFloorPatch.cs",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_recoilfloorpatch_recoilfloorcapturepatch",
-      "target": "patches_recoilfloorpatch_recoilfloorcapturepatch_prefix",
-      "confidence_score": 1.0
+      "target": "patches_recoilfloorpatch_recoilfloorcapturepatch_prefix"
     },
     {
       "relation": "references",
@@ -20759,9 +20811,9 @@
       "source_location": "L36",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "patches_recoilfloorpatch_recoilfloorcapturepatch_gettargetmethod",
-      "target": "client_patches_recoilfloorpatch_cs_methodbase",
-      "confidence_score": 1.0
+      "target": "client_patches_recoilfloorpatch_cs_methodbase"
     },
     {
       "relation": "references",
@@ -20770,9 +20822,9 @@
       "source_location": "L63",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "patches_recoilfloorpatch_recoilfloorapplypatch_gettargetmethod",
-      "target": "client_patches_recoilfloorpatch_cs_methodbase",
-      "confidence_score": 1.0
+      "target": "client_patches_recoilfloorpatch_cs_methodbase"
     },
     {
       "relation": "references",
@@ -20781,9 +20833,9 @@
       "source_location": "L41",
       "weight": 1.0,
       "context": "attribute",
+      "confidence_score": 1.0,
       "source": "patches_recoilfloorpatch_recoilfloorcapturepatch_prefix",
-      "target": "client_patches_recoilfloorpatch_cs_harmonypriority",
-      "confidence_score": 1.0
+      "target": "client_patches_recoilfloorpatch_cs_harmonypriority"
     },
     {
       "relation": "references",
@@ -20792,9 +20844,9 @@
       "source_location": "L41",
       "weight": 1.0,
       "context": "attribute",
+      "confidence_score": 1.0,
       "source": "patches_recoilfloorpatch_recoilfloorcapturepatch_prefix",
-      "target": "client_patches_recoilfloorpatch_cs_patchprefix",
-      "confidence_score": 1.0
+      "target": "client_patches_recoilfloorpatch_cs_patchprefix"
     },
     {
       "relation": "references",
@@ -20803,9 +20855,9 @@
       "source_location": "L41",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_recoilfloorpatch_recoilfloorcapturepatch_prefix",
-      "target": "client_patches_recoilfloorpatch_cs_proceduralweaponanimation",
-      "confidence_score": 1.0
+      "target": "client_patches_recoilfloorpatch_cs_proceduralweaponanimation"
     },
     {
       "relation": "references",
@@ -20814,9 +20866,9 @@
       "source_location": "L68",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_recoilfloorpatch_recoilfloorapplypatch_prefix",
-      "target": "client_patches_recoilfloorpatch_cs_proceduralweaponanimation",
-      "confidence_score": 1.0
+      "target": "client_patches_recoilfloorpatch_cs_proceduralweaponanimation"
     },
     {
       "relation": "references",
@@ -20825,9 +20877,9 @@
       "source_location": "L68",
       "weight": 1.0,
       "context": "attribute",
+      "confidence_score": 1.0,
       "source": "patches_recoilfloorpatch_recoilfloorapplypatch_prefix",
-      "target": "client_patches_recoilfloorpatch_cs_harmonypriority",
-      "confidence_score": 1.0
+      "target": "client_patches_recoilfloorpatch_cs_harmonypriority"
     },
     {
       "relation": "references",
@@ -20836,9 +20888,9 @@
       "source_location": "L68",
       "weight": 1.0,
       "context": "attribute",
+      "confidence_score": 1.0,
       "source": "patches_recoilfloorpatch_recoilfloorapplypatch_prefix",
-      "target": "client_patches_recoilfloorpatch_cs_patchprefix",
-      "confidence_score": 1.0
+      "target": "client_patches_recoilfloorpatch_cs_patchprefix"
     },
     {
       "relation": "method",
@@ -20846,9 +20898,9 @@
       "source_file": "Client/Patches/RecoilFloorPatch.cs",
       "source_location": "L63",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_recoilfloorpatch_recoilfloorapplypatch",
-      "target": "patches_recoilfloorpatch_recoilfloorapplypatch_gettargetmethod",
-      "confidence_score": 1.0
+      "target": "patches_recoilfloorpatch_recoilfloorapplypatch_gettargetmethod"
     },
     {
       "relation": "method",
@@ -20856,9 +20908,9 @@
       "source_file": "Client/Patches/RecoilFloorPatch.cs",
       "source_location": "L68",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_recoilfloorpatch_recoilfloorapplypatch",
-      "target": "patches_recoilfloorpatch_recoilfloorapplypatch_prefix",
-      "confidence_score": 1.0
+      "target": "patches_recoilfloorpatch_recoilfloorapplypatch_prefix"
     },
     {
       "relation": "contains",
@@ -21995,9 +22047,9 @@
       "source_location": "L116",
       "weight": 1.0,
       "context": "attribute",
+      "confidence_score": 1.0,
       "source": "patches_weaponmasterypatches_weaponmasteryrecoilpatch_prefix",
-      "target": "client_patches_weaponmasterypatches_cs_harmonypriority",
-      "confidence_score": 1.0
+      "target": "client_patches_weaponmasterypatches_cs_harmonypriority"
     },
     {
       "relation": "references",
@@ -38450,5 +38502,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "5bb148e483f52536517c7d8bf619bc4d306f5bcf"
+  "built_at_commit": "2aa9d067883eaa052200d127d34028852e29ad9a"
 }

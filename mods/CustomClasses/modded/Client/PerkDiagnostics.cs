@@ -75,10 +75,12 @@ internal static class PerkDiagnostics
             : "(no firearm)");
         Line(sb, "Aim speed", () => $"{p.ProceduralWeaponAnimation.AimingSpeed:F3}");
         Line(sb, "Holding breath (Iron Lungs)", () => p.Physical.HoldingBreath ? "<color=#7fff7f>YES</color>" : "no");
-        Line(sb, "Cond: aim / melee / heavy-wpn", () =>
+        // B6 (2026-07-11): ARMOR = condição nova da Couraça (armadura de TRONCO classe >= o mínimo do F12).
+        Line(sb, "Cond: aim / melee / heavy-wpn / armor", () =>
             $"{Flag(p.HandsController is Player.FirearmController fa && fa.IsAiming, "AIM")}"
             + $" / {Flag(p.HandsController is Player.KnifeController, "MELEE")}"
-            + $" / {Flag(HeavyWeapon.InHand(p), "HEAVY")}");
+            + $" / {Flag(HeavyWeapon.InHand(p), "HEAVY")}"
+            + $" / {Flag(BulwarkPatch.HasHeavyArmor(p), "ARMOR")}");
         sb.AppendLine($"Adrenaline: <b>{AdrenalineLabel()}</b>");
         sb.AppendLine($"Recoil str (last shot): <b>{FmtBA(PerkDiag.RecoilBefore, PerkDiag.RecoilAfter, "F2")}</b>");
         sb.AppendLine($"Audio radius — you hear: <b>{FmtBA(PerkDiag.AudioBefore, PerkDiag.AudioAfter, "F1")}</b>");

@@ -9,7 +9,7 @@ using SPT.Reflection.Patching;
 namespace CustomClasses.Client;
 
 /// <summary>
-///     🔧 Execution (Furtivo) — dano de melee ×5 quando o ATACANTE é o player local.
+///     🔧 Execution (Furtivo) — dano de melee ×3.5 (B7; era ×5) quando o ATACANTE é o player local.
 ///     Prefix em <c>Player.ApplyDamageInfo</c> (mesma infra do Bulwark/Adrenaline): escala
 ///     <c>damageInfo.Damage</c> de entrada se for golpe de melee partindo do MainPlayer.
 ///     (O dano melee é construído em BaseKnifeController.vmethod_0 com DamageType=Melee.)

@@ -11,7 +11,8 @@ namespace CustomClasses.Client;
 ///     <c>CameraRotationMod.StaminaController.ExternalHandsDrainMult</c> (contrato externo) e este bridge o
 ///     preenche por soft-detect (reflection, zero tipos do stances no IL — padrão FIKA/SAIN). O fator retorna:
 ///     Caçador MIRANDO → Steady Arms (default ×0.65) · Tanque com ARMA PESADA em mãos → Tireless Arms (default
-///     ×0) · senão ×1. O stances aplica só no DRENO (delta&lt;0); recuperação nunca é tocada.
+///     ×0.20 desde o B16; era ×0 = imunidade absoluta) · senão ×1. O stances aplica só no DRENO (delta&lt;0);
+///     recuperação nunca é tocada.
 ///     PA-01-01: attach no Awake + re-try no raid-start (todos os plugins já carregados). PA-01-02: Player
 ///     resolvido aqui com null-guards; warn-once. PA-01-05: guard de NaN.
 /// </summary>
@@ -93,7 +94,7 @@ internal static class StancesArmStaminaBridge
                 return Sane(PerksConfig.SteadyArmsDrain?.Value ?? 1f);
             }
 
-            // 🔧 Tireless Arms (Tanque): braço não cansa com arma pesada EM MÃOS (mesmo gate do Bunker).
+            // 🔧 Tireless Arms (Tanque): braço cansa MUITO devagar com arma pesada EM MÃOS (B16: ×0.20; era ×0 = imune). Mesmo gate do Bunker.
             if (PerksConfig.TirelessArmsEnabled?.Value == true && SkillMultipliers.IsLocalClass("Tank")
                 && HeavyWeapon.InHand(p))
             {

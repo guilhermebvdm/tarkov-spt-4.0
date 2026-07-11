@@ -88,6 +88,17 @@ internal class RecoilFloorApplyPatch : ModulePatch
             {
                 str = min;   // o produto (maestria × perks) tentou passar do piso → clampa
             }
+
+            // (code-review 2026-07-11) O ShootRecoilPatch grava `PerkDiag.RecoilAfter` na prioridade Normal —
+            // ou seja, ANTES deste clamp. Sem isto, o overlay (052) mostraria o recuo PRÉ-piso e mentiria
+            // justamente no caso que o B15 existe p/ corrigir (ex.: janela de Adrenalina). Reescrevemos aqui,
+            // no fim da cadeia, usando o `before` REAL (o `RecoilBefore` do outro patch já vem multiplicado
+            // pela maestria — este é o original de verdade).
+            if (PerkDiag.Enabled)
+            {
+                PerkDiag.RecoilBefore = before;
+                PerkDiag.RecoilAfter = str;
+            }
         }
         catch (Exception ex)
         {

@@ -142,7 +142,7 @@ internal static class PerksCatalog
         }),
         ["execution"] = G("Execution", "Execução", ESkillId.Melee, new[]
         {
-            P("Execution", "Execução", "melee damage", "dano de melee", ValueFormat.Multiplier, 5f, Polarity.HigherBetter, EBuffId.StrengthBuffMeleePowerInc, live: () => PerksConfig.ExecutionMeleeDamage?.Value ?? 5f),
+            P("Execution", "Execução", "melee damage", "dano de melee", ValueFormat.Multiplier, 3.5f, Polarity.HigherBetter, EBuffId.StrengthBuffMeleePowerInc, live: () => PerksConfig.ExecutionMeleeDamage?.Value ?? 3.5f),
             P("Swift Blade", "Lâmina Veloz", "move speed with melee", "velocidade c/ melee na mão", ValueFormat.Percent, 1.1f, Polarity.HigherBetter, EBuffId.StrengthBuffSprintSpeedInc, live: () => PerksConfig.ExecutionMoveSpeed?.Value ?? 1.1f),
         }),
         ["rattled"] = G("Rattled", "Abalado", ESkillId.StressResistance, new[]
@@ -177,7 +177,9 @@ internal static class PerksCatalog
         }),
         ["bulwark"] = G("Bulwark", "Couraça", ESkillId.HeavyVests, new[]
         {
-            P("Bulwark", "Couraça", "damage taken", "dano recebido", ValueFormat.Percent, 0.85f, Polarity.LowerBetter, EBuffId.HealthEliteAbsorbDamage, live: () => PerksConfig.BulwarkDamageTaken?.Value ?? 0.85f),
+            // B6 (2026-07-11): a Couraça virou CONDICIONAL — o label conta a condição, senão o jogador não
+            // entende por que perdeu o perk ao tirar o colete.
+            P("Bulwark", "Couraça", "damage taken (with heavy armor)", "dano recebido (com colete pesado)", ValueFormat.Percent, 0.85f, Polarity.LowerBetter, EBuffId.HealthEliteAbsorbDamage, live: () => PerksConfig.BulwarkDamageTaken?.Value ?? 0.85f),
         }, iconAlt: ESkillId.Vitality),
         ["bunker"] = G("Bunker", "Bunker", ESkillId.LMG, new[]
         {
@@ -186,7 +188,9 @@ internal static class PerksCatalog
             P("Steady Mount", "Apoio Firme", "recoil (LMG/HMG/GL)", "recuo (LMG/HMG/GL)", ValueFormat.Multiplier, 0.85f, Polarity.LowerBetter, EBuffId.RecoilControlImprove, live: () => PerksConfig.BunkerHeavyRecoil?.Value ?? 0.85f),
             P("Heavy Handling", "Manejo Pesado", "ergonomics (LMG/HMG/GL)", "ergonomia (LMG/HMG/GL)", ValueFormat.Multiplier, 1.15f, Polarity.HigherBetter, EBuffId.BipodErgonomicsGainPerLevel, live: () => PerksConfig.BunkerHeavyErgo?.Value ?? 1.15f),
             Flag("Grenadier", "Granadeiro", "GL: no ergo penalty", "lança-granadas: sem penalidade de ergo", isPerk: true, EBuffId.StrengthBuffThrowDistanceInc),
-            Flag("Tireless Arms", "Braços Incansáveis", "no arm fatigue (heavy weapon)", "braço não cansa (arma pesada)", isPerk: true, EBuffId.EnduranceHands),   // 051 ENTREGUE (hook no stances)
+            // B16 (2026-07-11): deixou de ser imunidade ABSOLUTA (×0) → agora é ×0.20 (cansa 5× mais devagar).
+            // Por isso saiu de Flag ("braço não cansa" — passou a MENTIR) para linha com valor VIVO do F12.
+            P("Tireless Arms", "Braços Incansáveis", "arm fatigue (heavy weapon)", "fadiga de braço (arma pesada)", ValueFormat.Multiplier, 0.20f, Polarity.LowerBetter, EBuffId.EnduranceHands, live: () => PerksConfig.TirelessArmsDrain?.Value ?? 0.2f),   // 051 (hook no stances)
         }, iconAlt: ESkillId.RecoilControl),
         ["heavy_frame"] = G("Heavy Frame", "Estrutura Pesada", ESkillId.Endurance, new[]
         {
