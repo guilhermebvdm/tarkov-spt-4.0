@@ -409,7 +409,7 @@ public class Plugin : BaseUnityPlugin
             new ConfigDescription(
                 "When enabled, Stance 0 (Vanilla) is included in the stance cycle. " +
                 "Replaces the old `Use Only Stances` toggle (inverted logic, clearer naming). " +
-                "Always affects the V key cycle; affects mouse scroll only when Mouse Wheel Scroll Mode = Cycle.",
+                "Always affects the V key cycle; affects mouse scroll only when Mouse Wheel Scroll Mode = Cycle.\n\nQuando ativado, a Stance 0 (Vanilla) entra no ciclo de posturas. Substitui o antigo `Use Only Stances` (lógica invertida, nome mais claro). Sempre afeta o ciclo da tecla V; afeta o scroll do mouse apenas quando Mouse Wheel Scroll Mode = Cycle.",
                 null,
                 _attrIncludeStance0));
 
@@ -419,7 +419,7 @@ public class Plugin : BaseUnityPlugin
             Settings,
             "Enable Stance 1 - High Ready in Cycle",
             true,
-            new ConfigDescription("When enabled, Stance 1 is included in the stance cycle. When disabled, Stance 1 is skipped.",
+            new ConfigDescription("When enabled, Stance 1 is included in the stance cycle. When disabled, Stance 1 is skipped.\n\nQuando ativado, a Stance 1 entra no ciclo de posturas. Quando desativado, a Stance 1 é pulada.",
             null,
             _attrEnableStance1Cycle));
 
@@ -428,7 +428,7 @@ public class Plugin : BaseUnityPlugin
             Settings,
             "Enable Stance 2 - Low Ready in Cycle",
             true,
-            new ConfigDescription("When enabled, Stance 2 is included in the stance cycle. When disabled, Stance 2 is skipped.",
+            new ConfigDescription("When enabled, Stance 2 is included in the stance cycle. When disabled, Stance 2 is skipped.\n\nQuando ativado, a Stance 2 entra no ciclo de posturas. Quando desativado, a Stance 2 é pulada.",
             null,
             _attrEnableStance2Cycle));
 
@@ -437,7 +437,7 @@ public class Plugin : BaseUnityPlugin
             Settings,
             "Enable Stance 3 - Custom in Cycle",
             true,
-            new ConfigDescription("When enabled, Stance 3 is included in the stance cycle. When disabled, Stance 3 is skipped.",
+            new ConfigDescription("When enabled, Stance 3 is included in the stance cycle. When disabled, Stance 3 is skipped.\n\nQuando ativado, a Stance 3 entra no ciclo de posturas. Quando desativado, a Stance 3 é pulada.",
             null,
             _attrEnableStance3Cycle));
 
@@ -445,7 +445,7 @@ public class Plugin : BaseUnityPlugin
             Settings,
             "Stance Toggle Hotkey",
             KeyCode.V,
-            new ConfigDescription("Press this key to cycle through enabled stances: Default → Stance 1 → Stance 2 → Stance 3 → Default",
+            new ConfigDescription("Press this key to cycle through enabled stances: Default → Stance 1 → Stance 2 → Stance 3 → Default\n\nPressione esta tecla para percorrer as posturas ativas: Default → Stance 1 → Stance 2 → Stance 3 → Default",
             null,
             new ConfigurationManagerAttributes { Order = 61 }));
 
@@ -453,7 +453,7 @@ public class Plugin : BaseUnityPlugin
             Settings,
             "Enable Mouse Wheel Stance Cycle",
             false,
-            new ConfigDescription("When enabled, hold the modifier key and scroll mouse wheel to cycle stances",
+            new ConfigDescription("When enabled, hold the modifier key and scroll mouse wheel to cycle stances\n\nQuando ativado, segure a tecla modificadora e gire a roda do mouse para percorrer as posturas",
             null,
             new ConfigurationManagerAttributes { Order = 60 }));
 
@@ -461,7 +461,7 @@ public class Plugin : BaseUnityPlugin
             Settings,
             "Mouse Wheel Modifier Key",
             KeyCode.LeftAlt,
-            new ConfigDescription("Hold this key while scrolling mouse wheel to cycle stances (when mouse wheel cycling is enabled)",
+            new ConfigDescription("Hold this key while scrolling mouse wheel to cycle stances (when mouse wheel cycling is enabled)\n\nSegure esta tecla enquanto gira a roda do mouse para percorrer as posturas (quando o ciclo pela roda do mouse está ativado)",
             null,
             new ConfigurationManagerAttributes { Order = 59 }));
 
@@ -473,7 +473,7 @@ public class Plugin : BaseUnityPlugin
             ScrollMode.Linear,
             new ConfigDescription(
                 "Cycle = circular, respects per-stance cycle toggles. " +
-                "Linear = fixed axis: Stance 1 (top) ↔ Stance 0 (center) ↔ Stance 2 (bottom); Stance 3 is off-axis (only via dedicated hotkey).",
+                "Linear = fixed axis: Stance 1 (top) ↔ Stance 0 (center) ↔ Stance 2 (bottom); Stance 3 is off-axis (only via dedicated hotkey).\n\nCycle = circular, respeita os toggles de ciclo de cada postura. Linear = eixo fixo: Stance 1 (topo) ↔ Stance 0 (centro) ↔ Stance 2 (base); a Stance 3 fica fora do eixo (só pela hotkey dedicada).",
                 null,
                 new ConfigurationManagerAttributes { Order = 58 }));
 
@@ -485,7 +485,7 @@ public class Plugin : BaseUnityPlugin
             GeneralSection,
             "Stance Transition Speed",
             1.0f,
-            new ConfigDescription("Speed multiplier for transitioning between stances and default view",
+            new ConfigDescription("Speed multiplier for transitioning between stances and default view\n\nMultiplicador de velocidade da transição entre posturas e a visão padrão",
             new AcceptableValueRange<float>(0.1f, 5.0f),
             new ConfigurationManagerAttributes { Order = 98 }));
 
@@ -493,7 +493,7 @@ public class Plugin : BaseUnityPlugin
             GeneralSection,
             "Stance Kick Intensity (Contra o Peito)",
             -0.05f,
-            new ConfigDescription("How much the weapon kicks towards your chest when changing stances or ADS. Negative values pull it towards you.",
+            new ConfigDescription("How much the weapon kicks towards your chest when changing stances or ADS. Negative values pull it towards you.\n\nQuanto a arma recua em direção ao seu peito ao trocar de postura ou mirar (ADS). Valores negativos puxam a arma em sua direção.",
             new AcceptableValueRange<float>(-0.3f, 0.3f),
             new ConfigurationManagerAttributes { Order = 97 }));
 
@@ -501,7 +501,7 @@ public class Plugin : BaseUnityPlugin
             GeneralSection,
             "ADS Kick Delay (In)",
             0.15f,
-            new ConfigDescription("Delay in seconds before the kick is applied when entering ADS. Use this to sync the kick with the end of the ADS animation.",
+            new ConfigDescription("Delay in seconds before the kick is applied when entering ADS. Use this to sync the kick with the end of the ADS animation.\n\nAtraso em segundos antes de aplicar o kick ao entrar em ADS. Use para sincronizar o kick com o fim da animação de mira.",
             new AcceptableValueRange<float>(0f, 1f),
             new ConfigurationManagerAttributes { Order = 96 }));
 
@@ -509,7 +509,7 @@ public class Plugin : BaseUnityPlugin
             GeneralSection,
             "Stance Overshoot Damping (Menos gera Mais Quicada)",
             12.0f,
-            new ConfigDescription("Damping for the spring physics. Lower values mean more overshoot/bounce. Default is 12.",
+            new ConfigDescription("Damping for the spring physics. Lower values mean more overshoot/bounce. Default is 12.\n\nAmortecimento da física de mola. Valores menores geram mais overshoot/quicada. Padrão é 12.",
             new AcceptableValueRange<float>(1f, 30.0f),
             new ConfigurationManagerAttributes { Order = 95 }));
 
@@ -523,7 +523,7 @@ public class Plugin : BaseUnityPlugin
             new ConfigDescription(
                 "Dedicated key to return to Stance 0 - Vanilla. " +
                 "Pressing again while already in Stance 0 has no effect (no toggle target). " +
-                "Blocked during sprint and silently ignored while ADS.",
+                "Blocked during sprint and silently ignored while ADS.\n\nTecla dedicada para voltar à Stance 0 - Vanilla. Pressionar de novo já estando na Stance 0 não tem efeito (sem alvo de toggle). Bloqueada durante o sprint e ignorada silenciosamente enquanto mira (ADS).",
                 null,
                 new ConfigurationManagerAttributes { Order = 53 }));
 
@@ -534,7 +534,7 @@ public class Plugin : BaseUnityPlugin
             new ConfigDescription(
                 "Dedicated key to activate Stance 1 - High Ready. " +
                 "Toggle: pressing while already in Stance 1 returns to Stance 0. " +
-                "Blocked during sprint and silently ignored while ADS.",
+                "Blocked during sprint and silently ignored while ADS.\n\nTecla dedicada para ativar a Stance 1 - High Ready. Toggle: pressionar já estando na Stance 1 volta para a Stance 0. Bloqueada durante o sprint e ignorada silenciosamente enquanto mira (ADS).",
                 null,
                 new ConfigurationManagerAttributes { Order = 52 }));
 
@@ -547,7 +547,7 @@ public class Plugin : BaseUnityPlugin
             new ConfigDescription(
                 "Dedicated key to activate Stance 2 - Low Ready. " +
                 "Toggle: pressing while already in Stance 2 returns to Stance 0. " +
-                "Blocked during sprint and silently ignored while ADS.",
+                "Blocked during sprint and silently ignored while ADS.\n\nTecla dedicada para ativar a Stance 2 - Low Ready. Toggle: pressionar já estando na Stance 2 volta para a Stance 0. Bloqueada durante o sprint e ignorada silenciosamente enquanto mira (ADS).",
                 null,
                 new ConfigurationManagerAttributes { Order = 51 }));
 
@@ -559,7 +559,7 @@ public class Plugin : BaseUnityPlugin
             new ConfigDescription(
                 "Dedicated key to activate Stance 3 - Custom. " +
                 "Toggle: pressing while already in Stance 3 returns to Stance 0. " +
-                "Blocked during sprint and silently ignored while ADS.",
+                "Blocked during sprint and silently ignored while ADS.\n\nTecla dedicada para ativar a Stance 3 - Custom. Toggle: pressionar já estando na Stance 3 volta para a Stance 0. Bloqueada durante o sprint e ignorada silenciosamente enquanto mira (ADS).",
                 null,
                 new ConfigurationManagerAttributes { Order = 50 }));
 
@@ -571,7 +571,7 @@ public class Plugin : BaseUnityPlugin
             new ConfigDescription(
                 "Maximum press-to-release time (in milliseconds) classified as a single click. " +
                 "Single click = snap to Stance 0 without firing. " +
-                "Held longer = snap + 1 natural shot (semi-auto/burst) or short fullauto burst (~1 shot at 600 RPM).",
+                "Held longer = snap + 1 natural shot (semi-auto/burst) or short fullauto burst (~1 shot at 600 RPM).\n\nTempo máximo entre pressionar e soltar (em milissegundos) classificado como clique único. Clique único = snap para a Stance 0 sem disparar. Segurar mais = snap + 1 tiro natural (semi-auto/burst) ou rajada curta em fullauto (~1 tiro a 600 RPM).",
                 new AcceptableValueRange<int>(50, 1000),
                 new ConfigurationManagerAttributes { IsAdvanced = true, Order = 49 }));
 
@@ -582,7 +582,7 @@ public class Plugin : BaseUnityPlugin
             2f,
             new ConfigDescription(
                 "Maximum time (seconds) the snap intercept can stay active without a button-up before being auto-cleared. " +
-                "Lower values reduce risk of stale state in rare weapon-swap-during-hold edge cases. Default 2s is safe.",
+                "Lower values reduce risk of stale state in rare weapon-swap-during-hold edge cases. Default 2s is safe.\n\nTempo máximo (segundos) que o intercept do snap pode ficar ativo sem o soltar do botão antes de ser limpo automaticamente. Valores menores reduzem o risco de estado preso em casos raros de troca de arma durante o hold. O padrão de 2s é seguro.",
                 new AcceptableValueRange<float>(0.5f, 10f),
                 new ConfigurationManagerAttributes { IsAdvanced = true, Order = 47 }));
 
@@ -593,7 +593,7 @@ public class Plugin : BaseUnityPlugin
             true,
             new ConfigDescription(
                 "When enabled, the player starts every raid already in Stance 3 - Low Ready, " +
-                "with no transition animation (immediate set). Applies even if Stance 3 is excluded from the cycle.",
+                "with no transition animation (immediate set). Applies even if Stance 3 is excluded from the cycle.\n\nQuando ativado, o jogador começa toda raid já na Stance 3 - Low Ready, sem animação de transição (set imediato). Vale mesmo que a Stance 3 esteja fora do ciclo.",
                 null,
                 new ConfigurationManagerAttributes { Order = 48 }));
 
@@ -604,7 +604,7 @@ public class Plugin : BaseUnityPlugin
             ADSDefaults,
             "Reset Positions When Aiming",
             true,
-            new ConfigDescription("When enabled, smoothly transitions all positions to defaults when ADS",
+            new ConfigDescription("When enabled, smoothly transitions all positions to defaults when ADS\n\nQuando ativado, faz a transição suave de todas as posições para os padrões ao mirar (ADS)",
             null,
             new ConfigurationManagerAttributes { IsAdvanced = true, Order = 39 }));
 
@@ -612,7 +612,7 @@ public class Plugin : BaseUnityPlugin
             ADSDefaults,
             "ADS Pitch (Cano Sobe/Desce)",
             0f,
-            new ConfigDescription("Hands pitch rotation (X-axis) when ADS with 'Reset On ADS' enabled. 0 = default game position",
+            new ConfigDescription("Hands pitch rotation (X-axis) when ADS with 'Reset On ADS' enabled. 0 = default game position\n\nRotação de pitch das mãos (eixo X) ao mirar com 'Reset On ADS' ativado — inclina o cano p/ cima/baixo. 0 = posição padrão do jogo",
             new AcceptableValueRange<float>(-45f, 45f),
             new ConfigurationManagerAttributes { IsAdvanced = true, Order = 38 }));
 
@@ -620,7 +620,7 @@ public class Plugin : BaseUnityPlugin
             ADSDefaults,
             "ADS Yaw (Apontar Esq/Dir)",
             0f,
-            new ConfigDescription("Hands yaw rotation (Y-axis) when ADS with 'Reset On ADS' enabled. 0 = default game position",
+            new ConfigDescription("Hands yaw rotation (Y-axis) when ADS with 'Reset On ADS' enabled. 0 = default game position\n\nRotação de yaw das mãos (eixo Y) ao mirar com 'Reset On ADS' ativado — aponta p/ esquerda/direita. 0 = posição padrão do jogo",
             new AcceptableValueRange<float>(-45f, 45f),
             new ConfigurationManagerAttributes { IsAdvanced = true, Order = 37 }));
 
@@ -628,7 +628,7 @@ public class Plugin : BaseUnityPlugin
             ADSDefaults,
             "ADS Roll (Tombar Arma)",
             0f,
-            new ConfigDescription("Hands roll rotation (Z-axis) when ADS with 'Reset On ADS' enabled. 0 = default game position",
+            new ConfigDescription("Hands roll rotation (Z-axis) when ADS with 'Reset On ADS' enabled. 0 = default game position\n\nRotação de roll das mãos (eixo Z) ao mirar com 'Reset On ADS' ativado — tomba a arma. 0 = posição padrão do jogo",
             new AcceptableValueRange<float>(-45f, 45f),
             new ConfigurationManagerAttributes { IsAdvanced = true, Order = 36 }));
 
@@ -636,7 +636,7 @@ public class Plugin : BaseUnityPlugin
             ADSDefaults,
             "ADS Forward/Backward (Frente/Trás)",
             0f,
-            new ConfigDescription("Hands position forward/backward (Z-axis) when ADS. Default is 0.04",
+            new ConfigDescription("Hands position forward/backward (Z-axis) when ADS. Default is 0.04\n\nPosição das mãos para frente/trás (eixo Z) ao mirar. Padrão é 0.04",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { IsAdvanced = true, Order = 35 }));
 
@@ -644,7 +644,7 @@ public class Plugin : BaseUnityPlugin
             ADSDefaults,
             "ADS Up/Down (Coronha Sobe/Desce)",
             0f,
-            new ConfigDescription("Hands position up/down (Y-axis) when ADS. Default is 0.04",
+            new ConfigDescription("Hands position up/down (Y-axis) when ADS. Default is 0.04\n\nPosição das mãos para cima/baixo (eixo Y) ao mirar — coronha sobe/desce. Padrão é 0.04",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { IsAdvanced = true, Order = 34 }));
 
@@ -652,7 +652,7 @@ public class Plugin : BaseUnityPlugin
             ADSDefaults,
             "ADS Sideways (Coronha Esq/Dir)",
             0f,
-            new ConfigDescription("Hands position left/right (X-axis) when ADS. Default is 0.04",
+            new ConfigDescription("Hands position left/right (X-axis) when ADS. Default is 0.04\n\nPosição das mãos para esquerda/direita (eixo X) ao mirar — coronha esq/dir. Padrão é 0.04",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { IsAdvanced = true, Order = 33 }));
 
@@ -663,7 +663,7 @@ public class Plugin : BaseUnityPlugin
             DefaultHandsPositions,
             "Enable Default Hands/Arms Position",
             false,
-            new ConfigDescription("Enable or disable default hands/arms position offsets when NOT in stance",
+            new ConfigDescription("Enable or disable default hands/arms position offsets when NOT in stance\n\nLiga ou desliga os ajustes de posição padrão das mãos/braços quando NÃO está em postura",
             null,
             new ConfigurationManagerAttributes { IsAdvanced = true, Order = 32 }));
 
@@ -671,7 +671,7 @@ public class Plugin : BaseUnityPlugin
             DefaultHandsPositions,
             "Default Forward/Backward (Frente/Trás)",
             0f,
-            new ConfigDescription("Default hands/weapon position forward/backward (positive = forward). This is your normal hip-fire position.",
+            new ConfigDescription("Default hands/weapon position forward/backward (positive = forward). This is your normal hip-fire position.\n\nPosição padrão das mãos/arma para frente/trás (positivo = frente). Esta é sua posição normal de tiro no quadril (hip-fire).",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { IsAdvanced = true, Order = 31 }));
 
@@ -679,7 +679,7 @@ public class Plugin : BaseUnityPlugin
             DefaultHandsPositions,
             "Default Up/Down (Coronha Sobe/Desce)",
             0f,
-            new ConfigDescription("Default hands/weapon position up/down (positive = up). This is your normal hip-fire position.",
+            new ConfigDescription("Default hands/weapon position up/down (positive = up). This is your normal hip-fire position.\n\nPosição padrão das mãos/arma para cima/baixo (positivo = cima). Esta é sua posição normal de tiro no quadril (hip-fire).",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { IsAdvanced = true, Order = 30 }));
 
@@ -687,7 +687,7 @@ public class Plugin : BaseUnityPlugin
             DefaultHandsPositions,
             "Default Sideways (Coronha Esq/Dir)",
             0f,
-            new ConfigDescription("Default hands/weapon position left/right (positive = right). This is your normal hip-fire position.",
+            new ConfigDescription("Default hands/weapon position left/right (positive = right). This is your normal hip-fire position.\n\nPosição padrão das mãos/arma para esquerda/direita (positivo = direita). Esta é sua posição normal de tiro no quadril (hip-fire).",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { IsAdvanced = true, Order = 29 }));
 
@@ -711,7 +711,7 @@ public class Plugin : BaseUnityPlugin
             Stance1Section,
             "Enable Stance 1 Sprint Animation",
             true,
-            new ConfigDescription("When enabled, uses a compact sprint animation when sprinting in Stance 1 (tac sprint style)",
+            new ConfigDescription("When enabled, uses a compact sprint animation when sprinting in Stance 1 (tac sprint style)\n\nQuando ativado, usa uma animação de corrida compacta ao correr na Stance 1 (estilo tac sprint)",
             null,
             new ConfigurationManagerAttributes { Order = 28 }));
 
@@ -719,7 +719,7 @@ public class Plugin : BaseUnityPlugin
             Stance1Section,
             "Stance 1 Pitch (Cano Sobe/Desce)",
             -34.0f,
-            new ConfigDescription("Stance 1 hands/arms pitch rotation in degrees (up/down tilt)",
+            new ConfigDescription("Stance 1 hands/arms pitch rotation in degrees (up/down tilt)\n\nRotação de pitch das mãos/braços da Stance 1 em graus (inclina o cano p/ cima/baixo)",
             new AcceptableValueRange<float>(-45f, 45f),
             new ConfigurationManagerAttributes { Order = 27 }));
 
@@ -727,7 +727,7 @@ public class Plugin : BaseUnityPlugin
             Stance1Section,
             "Stance 1 Yaw (Apontar Esq/Dir)",
             0.0f,
-            new ConfigDescription("Stance 1 hands/arms yaw rotation in degrees (left/right turn)",
+            new ConfigDescription("Stance 1 hands/arms yaw rotation in degrees (left/right turn)\n\nRotação de yaw das mãos/braços da Stance 1 em graus (aponta p/ esquerda/direita)",
             new AcceptableValueRange<float>(-45f, 45f),
             new ConfigurationManagerAttributes { Order = 26 }));
 
@@ -735,7 +735,7 @@ public class Plugin : BaseUnityPlugin
             Stance1Section,
             "Stance 1 Roll (Tombar Arma)",
             0.0f,
-            new ConfigDescription("Stance 1 hands/arms roll rotation in degrees (weapon cant)",
+            new ConfigDescription("Stance 1 hands/arms roll rotation in degrees (weapon cant)\n\nRotação de roll das mãos/braços da Stance 1 em graus (tomba a arma)",
             new AcceptableValueRange<float>(-45f, 45f),
             new ConfigurationManagerAttributes { Order = 25 }));
 
@@ -743,7 +743,7 @@ public class Plugin : BaseUnityPlugin
             Stance1Section,
             "Stance 1 Forward/Backward (Frente/Trás)",
             0.02f,
-            new ConfigDescription("Stance 1 hands/weapon position forward/backward (positive = forward)",
+            new ConfigDescription("Stance 1 hands/weapon position forward/backward (positive = forward)\n\nPosição das mãos/arma da Stance 1 para frente/trás (positivo = frente)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { Order = 24 }));
 
@@ -751,7 +751,7 @@ public class Plugin : BaseUnityPlugin
             Stance1Section,
             "Stance 1 Up/Down (Coronha Sobe/Desce)",
             -0.01f,
-            new ConfigDescription("Stance 1 hands/weapon position up/down (positive = up)",
+            new ConfigDescription("Stance 1 hands/weapon position up/down (positive = up)\n\nPosição das mãos/arma da Stance 1 para cima/baixo (positivo = cima)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { Order = 23 }));
 
@@ -759,7 +759,7 @@ public class Plugin : BaseUnityPlugin
             Stance1Section,
             "Stance 1 Sideways (Coronha Esq/Dir)",
             0.02f,
-            new ConfigDescription("Stance 1 hands/weapon position left/right (positive = right)",
+            new ConfigDescription("Stance 1 hands/weapon position left/right (positive = right)\n\nPosição das mãos/arma da Stance 1 para esquerda/direita (positivo = direita)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { Order = 22 }));
 
@@ -770,7 +770,7 @@ public class Plugin : BaseUnityPlugin
             Stance2Section,
             "Enable Stance 2 Sprint Animation",
             false,
-            new ConfigDescription("When enabled, uses a compact sprint animation when sprinting in Stance 2 (tac sprint style)",
+            new ConfigDescription("When enabled, uses a compact sprint animation when sprinting in Stance 2 (tac sprint style)\n\nQuando ativado, usa uma animação de corrida compacta ao correr na Stance 2 (estilo tac sprint)",
             null,
             new ConfigurationManagerAttributes { Order = 21 }));
 
@@ -779,7 +779,7 @@ public class Plugin : BaseUnityPlugin
             Stance2Section,
             "Stance 2 Pitch (Cano Sobe/Desce)",
             25.0f,
-            new ConfigDescription("Stance 2 hands/arms pitch rotation in degrees (up/down tilt)",
+            new ConfigDescription("Stance 2 hands/arms pitch rotation in degrees (up/down tilt)\n\nRotação de pitch das mãos/braços da Stance 2 em graus (inclina o cano p/ cima/baixo)",
             new AcceptableValueRange<float>(-45f, 45f),
             new ConfigurationManagerAttributes { Order = 20 }));
 
@@ -787,7 +787,7 @@ public class Plugin : BaseUnityPlugin
             Stance2Section,
             "Stance 2 Yaw (Apontar Esq/Dir)",
             0.0f,
-            new ConfigDescription("Stance 2 hands/arms yaw rotation in degrees (left/right turn)",
+            new ConfigDescription("Stance 2 hands/arms yaw rotation in degrees (left/right turn)\n\nRotação de yaw das mãos/braços da Stance 2 em graus (aponta p/ esquerda/direita)",
             new AcceptableValueRange<float>(-45f, 45f),
             new ConfigurationManagerAttributes { Order = 19 }));
 
@@ -795,7 +795,7 @@ public class Plugin : BaseUnityPlugin
             Stance2Section,
             "Stance 2 Roll (Tombar Arma)",
             0.0f,
-            new ConfigDescription("Stance 2 hands/arms roll rotation in degrees (weapon cant)",
+            new ConfigDescription("Stance 2 hands/arms roll rotation in degrees (weapon cant)\n\nRotação de roll das mãos/braços da Stance 2 em graus (tomba a arma)",
             new AcceptableValueRange<float>(-45f, 45f),
             new ConfigurationManagerAttributes { Order = 18 }));
 
@@ -803,7 +803,7 @@ public class Plugin : BaseUnityPlugin
             Stance2Section,
             "Stance 2 Forward/Backward (Frente/Trás)",
             0.015f,
-            new ConfigDescription("Stance 2 hands/weapon position forward/backward (positive = forward)",
+            new ConfigDescription("Stance 2 hands/weapon position forward/backward (positive = forward)\n\nPosição das mãos/arma da Stance 2 para frente/trás (positivo = frente)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { Order = 17 }));
 
@@ -811,7 +811,7 @@ public class Plugin : BaseUnityPlugin
             Stance2Section,
             "Stance 2 Up/Down (Coronha Sobe/Desce)",
             -0.02f,
-            new ConfigDescription("Stance 2 hands/weapon position up/down (positive = up)",
+            new ConfigDescription("Stance 2 hands/weapon position up/down (positive = up)\n\nPosição das mãos/arma da Stance 2 para cima/baixo (positivo = cima)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { Order = 16 }));
 
@@ -822,7 +822,7 @@ public class Plugin : BaseUnityPlugin
             Stance3Section,
             "Enable Stance 3 Sprint Animation",
             false,
-            new ConfigDescription("When enabled, uses a compact sprint animation when sprinting in Stance 3 (tac sprint style)",
+            new ConfigDescription("When enabled, uses a compact sprint animation when sprinting in Stance 3 (tac sprint style)\n\nQuando ativado, usa uma animação de corrida compacta ao correr na Stance 3 (estilo tac sprint)",
             null,
             new ConfigurationManagerAttributes { Order = 14 }));
 
@@ -833,7 +833,7 @@ public class Plugin : BaseUnityPlugin
             ActiveMountSettings,
             "Block Active Mount In Stance",
             true,
-            new ConfigDescription("Impede apoiar a arma em superfícies (mount) enquanto estiver em Stance 1/2/3 sem mirar. Em Stance 0, mirando ou deitado (prone), o mount funciona normalmente.",
+            new ConfigDescription("Prevents mounting the weapon on surfaces while in Stance 1/2/3 without aiming. In Stance 0, while aiming, or while prone, mounting works normally.\n\nImpede apoiar a arma em superfícies (mount) enquanto estiver em Stance 1/2/3 sem mirar. Em Stance 0, mirando ou deitado (prone), o mount funciona normalmente.",
             null,
             new ConfigurationManagerAttributes { Order = 10 }));
 
@@ -844,7 +844,7 @@ public class Plugin : BaseUnityPlugin
             PassiveMountSettings,
             "Enable Passive Mount",
             true,
-            new ConfigDescription("Liga o apoio passivo: ao encostar a arma numa superfície (sem a tecla de mount) você ganha um benefício leve de estabilidade. Desligado = só o mount nativo do jogo.",
+            new ConfigDescription("Enables passive mounting: resting the weapon against a surface (without the mount key) grants a light stability benefit. Off = only the game's native mount.\n\nLiga o apoio passivo: ao encostar a arma numa superfície (sem a tecla de mount) você ganha um benefício leve de estabilidade. Desligado = só o mount nativo do jogo.",
             null,
             new ConfigurationManagerAttributes { Order = 10 }));
 
@@ -852,7 +852,7 @@ public class Plugin : BaseUnityPlugin
             PassiveMountSettings,
             "Passive Recoil Multiplier",
             0.7f,
-            new ConfigDescription("Multiplicador de recuo enquanto apoiado (passivo). 0.7 = 30% menos recuo. Deve ser MAIOR que o do mount ativo (vanilla) — o passivo é mais fraco.",
+            new ConfigDescription("Recoil multiplier while passively mounted. 0.7 = 30% less recoil. Must be HIGHER than the active (vanilla) mount — passive is weaker.\n\nMultiplicador de recuo enquanto apoiado (passivo). 0.7 = 30% menos recuo. Deve ser MAIOR que o do mount ativo (vanilla) — o passivo é mais fraco.",
             new AcceptableValueRange<float>(0.1f, 1f),
             new ConfigurationManagerAttributes { Order = 9 }));
 
@@ -860,7 +860,7 @@ public class Plugin : BaseUnityPlugin
             PassiveMountSettings,
             "Passive Sway Multiplier",
             0.65f,
-            new ConfigDescription("Multiplicador de sway (respiração) enquanto apoiado. 0.65 = 35% menos sway.",
+            new ConfigDescription("Sway (breathing) multiplier while passively mounted. 0.65 = 35% less sway.\n\nMultiplicador de sway (respiração) enquanto apoiado. 0.65 = 35% menos sway.",
             new AcceptableValueRange<float>(0f, 1f),
             new ConfigurationManagerAttributes { Order = 8 }));
 
@@ -868,7 +868,7 @@ public class Plugin : BaseUnityPlugin
             PassiveMountSettings,
             "Passive Stamina Save",
             true,
-            new ConfigDescription("Enquanto apoiado, pausa/reduz o drain de stamina de braço (mais fraco que o mount nativo).",
+            new ConfigDescription("While passively mounted, pauses/reduces arm stamina drain (weaker than the native mount).\n\nEnquanto apoiado, pausa/reduz o drain de stamina de braço (mais fraco que o mount nativo).",
             null,
             new ConfigurationManagerAttributes { Order = 7 }));
 
@@ -878,7 +878,7 @@ public class Plugin : BaseUnityPlugin
             PassiveMountSettings,
             "Show Mount Icon",
             true,
-            new ConfigDescription("Mostra o ícone direcional (esquerda/direita/baixo) no canto inferior direito quando o apoio passivo está ativo.",
+            new ConfigDescription("Shows the directional icon (left/right/down) in the bottom-right corner when passive mount is active.\n\nMostra o ícone direcional (esquerda/direita/baixo) no canto inferior direito quando o apoio passivo está ativo.",
             null,
             new ConfigurationManagerAttributes { Order = 6 }));
 
@@ -897,7 +897,7 @@ public class Plugin : BaseUnityPlugin
             HoldBreathSection,
             "Oxygen Drain / sec",
             5.0f,
-            new ConfigDescription("How much extra Oxygen is drained per second while holding breath.",
+            new ConfigDescription("How much extra Oxygen is drained per second while holding breath.\n\nQuanto de oxigênio extra é drenado por segundo enquanto segura a respiração.",
             new AcceptableValueRange<float>(0f, 50f),
             new ConfigurationManagerAttributes { Order = -11 }));
 
@@ -905,7 +905,7 @@ public class Plugin : BaseUnityPlugin
             HoldBreathSection,
             "Enable Custom Breath Audio",
             true,
-            new ConfigDescription("Plays custom breath_in.wav and breath_out.wav from the mod folder when holding breath.",
+            new ConfigDescription("Plays custom breath_in.wav and breath_out.wav from the mod folder when holding breath.\n\nToca os arquivos breath_in.wav e breath_out.wav personalizados da pasta do mod ao segurar a respiração.",
             null,
             new ConfigurationManagerAttributes { Order = -11 }));
 
@@ -913,7 +913,7 @@ public class Plugin : BaseUnityPlugin
             HoldBreathSection,
             "Breath In Volume",
             1.0f,
-            new ConfigDescription("Volume of the breath_in audio.",
+            new ConfigDescription("Volume of the breath_in audio.\n\nVolume do áudio de inspiração (breath_in).",
             new AcceptableValueRange<float>(0f, 2f),
             new ConfigurationManagerAttributes { Order = -12 }));
 
@@ -921,7 +921,7 @@ public class Plugin : BaseUnityPlugin
             HoldBreathSection,
             "Breath Out Volume",
             1.0f,
-            new ConfigDescription("Volume of the breath_out audio.",
+            new ConfigDescription("Volume of the breath_out audio.\n\nVolume do áudio de expiração (breath_out).",
             new AcceptableValueRange<float>(0f, 2f),
             new ConfigurationManagerAttributes { Order = -13 }));
 
@@ -929,7 +929,7 @@ public class Plugin : BaseUnityPlugin
             HoldBreathSection,
             "Heartbeat Volume",
             1.0f,
-            new ConfigDescription("Volume of the heartbeat loop audio.",
+            new ConfigDescription("Volume of the heartbeat loop audio.\n\nVolume do áudio em loop dos batimentos cardíacos.",
             new AcceptableValueRange<float>(0f, 2f),
             new ConfigurationManagerAttributes { Order = -14 }));
 
@@ -942,7 +942,7 @@ public class Plugin : BaseUnityPlugin
             OxygenUISection,
             "Enable Oxygen UI Bar",
             true,
-            new ConfigDescription("Displays a white bar above the hands stamina that drains while holding breath.",
+            new ConfigDescription("Displays a white bar above the hands stamina that drains while holding breath.\n\nExibe uma barra branca acima da stamina de braço que esvazia enquanto segura a respiração.",
             null,
             new ConfigurationManagerAttributes { Order = -1 }));
 
@@ -950,7 +950,7 @@ public class Plugin : BaseUnityPlugin
             OxygenUISection,
             "UI X Position",
             20f,
-            new ConfigDescription("Horizontal position of the oxygen bar (pixels from left).",
+            new ConfigDescription("Horizontal position of the oxygen bar (pixels from left).\n\nPosição horizontal da barra de oxigênio (pixels a partir da esquerda).",
             new AcceptableValueRange<float>(0f, 3000f),
             new ConfigurationManagerAttributes { Order = -2 }));
 
@@ -958,7 +958,7 @@ public class Plugin : BaseUnityPlugin
             OxygenUISection,
             "UI Y Position",
             120f,
-            new ConfigDescription("Vertical position of the oxygen bar (pixels from BOTTOM).",
+            new ConfigDescription("Vertical position of the oxygen bar (pixels from BOTTOM).\n\nPosição vertical da barra de oxigênio (pixels a partir da BASE).",
             new AcceptableValueRange<float>(0f, 2000f),
             new ConfigurationManagerAttributes { Order = -3 }));
 
@@ -966,7 +966,7 @@ public class Plugin : BaseUnityPlugin
             OxygenUISection,
             "UI Width",
             260f,
-            new ConfigDescription("Width of the oxygen bar.",
+            new ConfigDescription("Width of the oxygen bar.\n\nLargura da barra de oxigênio.",
             new AcceptableValueRange<float>(10f, 1000f),
             new ConfigurationManagerAttributes { Order = -4 }));
 
@@ -974,7 +974,7 @@ public class Plugin : BaseUnityPlugin
             OxygenUISection,
             "UI Height",
             4f,
-            new ConfigDescription("Height (thickness) of the oxygen bar.",
+            new ConfigDescription("Height (thickness) of the oxygen bar.\n\nAltura (espessura) da barra de oxigênio.",
             new AcceptableValueRange<float>(1f, 20f),
             new ConfigurationManagerAttributes { Order = -5 }));
 
@@ -985,7 +985,7 @@ public class Plugin : BaseUnityPlugin
             AnimationSettings,
             "Crouch Speed Multiplier",
             1.5f,
-            new ConfigDescription("Multiplier for crouch and prone animation speeds.",
+            new ConfigDescription("Multiplier for crouch and prone animation speeds.\n\nMultiplicador da velocidade das animações de agachar e deitar (prone).",
             new AcceptableValueRange<float>(1f, 5f),
             new ConfigurationManagerAttributes { Order = 2 }));
 
@@ -994,7 +994,7 @@ public class Plugin : BaseUnityPlugin
             MovementSection,
             "Inertia Multiplier",
             1.2f,
-            new ConfigDescription("Global multiplier for character inertia (weight feeling). 1.0 is default.",
+            new ConfigDescription("Global multiplier for character inertia (weight feeling). 1.0 is default.\n\nMultiplicador global da inércia do personagem (sensação de peso). 1.0 é o padrão.",
             new AcceptableValueRange<float>(0.1f, 3.0f),
             new ConfigurationManagerAttributes { Order = 3 }));
 
@@ -1002,7 +1002,7 @@ public class Plugin : BaseUnityPlugin
             MovementSection,
             "Walk Speed Multiplier",
             0.85f,
-            new ConfigDescription("Multiplier for maximum walking speed. 1.0 is default.",
+            new ConfigDescription("Multiplier for maximum walking speed. 1.0 is default.\n\nMultiplicador da velocidade máxima de caminhada. 1.0 é o padrão.",
             new AcceptableValueRange<float>(0.1f, 2.0f),
             new ConfigurationManagerAttributes { Order = 2 }));
 
@@ -1010,7 +1010,7 @@ public class Plugin : BaseUnityPlugin
             MovementSection,
             "Sprint Speed Multiplier",
             0.9f,
-            new ConfigDescription("Multiplier for maximum sprinting speed. 1.0 is default.",
+            new ConfigDescription("Multiplier for maximum sprinting speed. 1.0 is default.\n\nMultiplicador da velocidade máxima de corrida (sprint). 1.0 é o padrão.",
             new AcceptableValueRange<float>(0.1f, 2.0f),
             new ConfigurationManagerAttributes { Order = 1 }));
 
@@ -1019,7 +1019,7 @@ public class Plugin : BaseUnityPlugin
             ActionStanceSection,
             "Enable Action Stance Swap",
             true,
-            new ConfigDescription("Levanta a arma para a Stance 0 (Pronto) automaticamente ao recarregar, checar munição/câmara, examinar a arma, checar modo de fogo e ESVAZIAR A CÂMARA — e retorna à postura anterior ao fim. Tempo real.",
+            new ConfigDescription("Automatically raises the weapon to Stance 0 (Ready) when reloading, checking ammo/chamber, examining the weapon, checking fire mode and UNLOADING THE CHAMBER — and returns to the previous stance when done. Real time.\n\nLevanta a arma para a Stance 0 (Pronto) automaticamente ao recarregar, checar munição/câmara, examinar a arma, checar modo de fogo e ESVAZIAR A CÂMARA — e retorna à postura anterior ao fim. Tempo real.",
             null,
             new ConfigurationManagerAttributes { Order = 1 }));
 
@@ -1028,7 +1028,7 @@ public class Plugin : BaseUnityPlugin
             AnimationSettings,
             "Lean Speed Multiplier",
             1.5f,
-            new ConfigDescription("Multiplier for leaning (Q/E) speeds.",
+            new ConfigDescription("Multiplier for leaning (Q/E) speeds.\n\nMultiplicador da velocidade de inclinar o corpo (Q/E).",
             new AcceptableValueRange<float>(1f, 5f),
             new ConfigurationManagerAttributes { Order = 1 }));
 
@@ -1036,7 +1036,7 @@ public class Plugin : BaseUnityPlugin
             Stance2Section,
             "Stance 2 Sideways (Coronha Esq/Dir)",
             0.05f,
-            new ConfigDescription("Stance 2 hands/weapon position left/right (positive = right)",
+            new ConfigDescription("Stance 2 hands/weapon position left/right (positive = right)\n\nPosição das mãos/arma da Stance 2 para esquerda/direita (positivo = direita)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { Order = 15 }));
 
@@ -1050,7 +1050,7 @@ public class Plugin : BaseUnityPlugin
             Stance3Section,
             "Stance 3 Pitch (Cano Sobe/Desce)",
             0f,
-            new ConfigDescription("Stance 3 hands/arms pitch rotation in degrees (up/down tilt)",
+            new ConfigDescription("Stance 3 hands/arms pitch rotation in degrees (up/down tilt)\n\nRotação de pitch das mãos/braços da Stance 3 em graus (inclina o cano p/ cima/baixo)",
             new AcceptableValueRange<float>(-45f, 45f),
             new ConfigurationManagerAttributes { Order = 13 }));
 
@@ -1058,7 +1058,7 @@ public class Plugin : BaseUnityPlugin
             Stance3Section,
             "Stance 3 Yaw (Apontar Esq/Dir)",
             -30f,
-            new ConfigDescription("Stance 3 hands/arms yaw rotation in degrees (left/right turn)",
+            new ConfigDescription("Stance 3 hands/arms yaw rotation in degrees (left/right turn)\n\nRotação de yaw das mãos/braços da Stance 3 em graus (aponta p/ esquerda/direita)",
             new AcceptableValueRange<float>(-45f, 45f),
             new ConfigurationManagerAttributes { Order = 12 }));
 
@@ -1066,7 +1066,7 @@ public class Plugin : BaseUnityPlugin
             Stance3Section,
             "Stance 3 Roll (Tombar Arma)",
             0f,
-            new ConfigDescription("Stance 3 hands/arms roll rotation in degrees (weapon cant)",
+            new ConfigDescription("Stance 3 hands/arms roll rotation in degrees (weapon cant)\n\nRotação de roll das mãos/braços da Stance 3 em graus (tomba a arma)",
             new AcceptableValueRange<float>(-45f, 45f),
             new ConfigurationManagerAttributes { Order = 11 }));
 
@@ -1075,7 +1075,7 @@ public class Plugin : BaseUnityPlugin
             Stance3Section,
             "Stance 3 Forward/Backward (Frente/Trás)",
             0f,
-            new ConfigDescription("Stance 3 hands/weapon position forward/backward (positive = forward)",
+            new ConfigDescription("Stance 3 hands/weapon position forward/backward (positive = forward)\n\nPosição das mãos/arma da Stance 3 para frente/trás (positivo = frente)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { Order = 10 }));
 
@@ -1083,7 +1083,7 @@ public class Plugin : BaseUnityPlugin
             Stance3Section,
             "Stance 3 Up/Down (Coronha Sobe/Desce)",
             0f,
-            new ConfigDescription("Stance 3 hands/weapon position up/down (positive = up)",
+            new ConfigDescription("Stance 3 hands/weapon position up/down (positive = up)\n\nPosição das mãos/arma da Stance 3 para cima/baixo (positivo = cima)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { Order = 9 }));
 
@@ -1091,7 +1091,7 @@ public class Plugin : BaseUnityPlugin
             Stance3Section,
             "Stance 3 Sideways (Coronha Esq/Dir)",
             0f,
-            new ConfigDescription("Stance 3 hands/weapon position left/right (positive = right)",
+            new ConfigDescription("Stance 3 hands/weapon position left/right (positive = right)\n\nPosição das mãos/arma da Stance 3 para esquerda/direita (positivo = direita)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { Order = 8 }));
 
@@ -1102,7 +1102,7 @@ public class Plugin : BaseUnityPlugin
             TacSprintSettings,
             "Tac Sprint Weight Limit",
             5.1f,
-            new ConfigDescription("Maximum weapon weight (kg) to allow tac sprint animation. Default: 5.1kg",
+            new ConfigDescription("Maximum weapon weight (kg) to allow tac sprint animation. Default: 5.1kg\n\nPeso máximo da arma (kg) para permitir a animação de tac sprint. Padrão: 5.1kg",
             new AcceptableValueRange<float>(1f, 15f),
             new ConfigurationManagerAttributes { IsAdvanced = true, Order = 7 }));
 
@@ -1110,7 +1110,7 @@ public class Plugin : BaseUnityPlugin
             TacSprintSettings,
             "Tac Sprint Weight Limit (Bullpup)",
             5.75f,
-            new ConfigDescription("Maximum weapon weight (kg) for bullpup weapons to allow tac sprint. Bullpups get a higher limit. Default: 5.75kg",
+            new ConfigDescription("Maximum weapon weight (kg) for bullpup weapons to allow tac sprint. Bullpups get a higher limit. Default: 5.75kg\n\nPeso máximo da arma (kg) para armas bullpup permitirem tac sprint. Bullpups têm um limite maior. Padrão: 5.75kg",
             new AcceptableValueRange<float>(1f, 15f),
             new ConfigurationManagerAttributes { IsAdvanced = true, Order = 6 }));
 
@@ -1118,7 +1118,7 @@ public class Plugin : BaseUnityPlugin
             TacSprintSettings,
             "Tac Sprint Length Limit",
             6,
-            new ConfigDescription("Maximum weapon length (inventory cells) to allow tac sprint animation. Default: 6 cells",
+            new ConfigDescription("Maximum weapon length (inventory cells) to allow tac sprint animation. Default: 6 cells\n\nComprimento máximo da arma (células de inventário) para permitir a animação de tac sprint. Padrão: 6 células",
             new AcceptableValueRange<int>(1, 10),
             new ConfigurationManagerAttributes { IsAdvanced = true, Order = 5 }));
 
@@ -1126,7 +1126,7 @@ public class Plugin : BaseUnityPlugin
             TacSprintSettings,
             "Tac Sprint Ergo Limit",
             35f,
-            new ConfigDescription("Minimum weapon ergonomics to allow tac sprint animation. Default: 35",
+            new ConfigDescription("Minimum weapon ergonomics to allow tac sprint animation. Default: 35\n\nErgonomia mínima da arma para permitir a animação de tac sprint. Padrão: 35",
             new AcceptableValueRange<float>(0f, 100f),
             new ConfigurationManagerAttributes { IsAdvanced = true, Order = 4 }));
 
@@ -1134,7 +1134,7 @@ public class Plugin : BaseUnityPlugin
             TacSprintSettings,
             "Tac Sprint Reset Delay",
             0.35f,
-            new ConfigDescription("Delay (seconds) after sprint ends before weapon returns to normal size. 0 = instant. Prevents jarring snap-back.",
+            new ConfigDescription("Delay (seconds) after sprint ends before weapon returns to normal size. 0 = instant. Prevents jarring snap-back.\n\nAtraso (segundos) após o fim do sprint antes da arma voltar ao tamanho normal. 0 = instantâneo. Evita o snap-back brusco.",
             new AcceptableValueRange<float>(0f, 1f),
             new ConfigurationManagerAttributes { IsAdvanced = true, Order = 3 }));
 
@@ -1145,7 +1145,7 @@ public class Plugin : BaseUnityPlugin
             FOVSettings,
             "Enable Expanded FOV Range",
             false,
-            new ConfigDescription("Allows extending the FOV slider beyond the default 50-75 range",
+            new ConfigDescription("Allows extending the FOV slider beyond the default 50-75 range\n\nPermite estender o slider de FOV além do intervalo padrão de 50-75",
             null,
             new ConfigurationManagerAttributes { Order = 3 }));
 
@@ -1153,7 +1153,7 @@ public class Plugin : BaseUnityPlugin
             FOVSettings,
             "Minimum FOV",
             20,
-            new ConfigDescription("Minimum FOV value. Default game minimum is 50",
+            new ConfigDescription("Minimum FOV value. Default game minimum is 50\n\nValor mínimo de FOV. O mínimo padrão do jogo é 50",
             new AcceptableValueRange<int>(1, 50),
             new ConfigurationManagerAttributes { Order = 2 }));
 
@@ -1161,7 +1161,7 @@ public class Plugin : BaseUnityPlugin
             FOVSettings,
             "Maximum FOV",
             150,
-            new ConfigDescription("Maximum FOV value. Default game maximum is 75",
+            new ConfigDescription("Maximum FOV value. Default game maximum is 75\n\nValor máximo de FOV. O máximo padrão do jogo é 75",
             new AcceptableValueRange<int>(75, 170),
             new ConfigurationManagerAttributes { Order = 1 }));
 
@@ -1174,7 +1174,7 @@ public class Plugin : BaseUnityPlugin
             false,
             new ConfigDescription(
                 "Allows stamina/speed effects to run in the hideout (firing range). " +
-                "Useful for offline testing. DISABLE for normal gameplay — this feature is designed for raids only.",
+                "Useful for offline testing. DISABLE for normal gameplay — this feature is designed for raids only.\n\nPermite que os efeitos de stamina/velocidade rodem no hideout (estande de tiro). Útil para testes offline. DESATIVE para o jogo normal — este recurso é feito só para raids.",
                 null,
                 new ConfigurationManagerAttributes { IsAdvanced = true, Order = -1 }));
 
@@ -1438,17 +1438,17 @@ public class Plugin : BaseUnityPlugin
             // StaminaMultiplier migrou para o grupo "Stamina Management" (item 012, BindStaminaManagement).
             ModifiesMovementSpeed = Config.Bind(d.Section, $"Stance {n} Modifies Movement Speed", d.ModSpeed,
                 new ConfigDescription(
-                    "When enabled, this stance applies a movement speed cap.",
+                    "When enabled, this stance applies a movement speed cap.\n\nQuando ativado, esta postura aplica um limite de velocidade de movimento.",
                     null,
                     new ConfigurationManagerAttributes { Order = orderBase - 2 })),
             MovementSpeedMultiplier = Config.Bind(d.Section, $"Stance {n} Movement Speed Multiplier", d.Multiplier,
                 new ConfigDescription(
-                    "Speed cap in %. 50 = half speed, 75 = slightly slower, 100 = no reduction. Only reduction is supported (EFT speed limit system limitation).",
+                    "Speed cap in %. 50 = half speed, 75 = slightly slower, 100 = no reduction. Only reduction is supported (EFT speed limit system limitation).\n\nLimite de velocidade em %. 50 = metade da velocidade, 75 = um pouco mais lento, 100 = sem redução. Só reduções são suportadas (limitação do sistema de speed limit do EFT).",
                     new AcceptableValueRange<int>(50, 100),
                     new ConfigurationManagerAttributes { IsAdvanced = true, Order = orderBase - 3 })),
             ApplyWhenProne = Config.Bind(d.Section, $"Stance {n} Apply When Prone", d.ApplyProne,
                 new ConfigDescription(
-                    "Apply this stance effects (drain/recovery and speed cap) while prone. Disabled by default as it may conflict with EFT prone animations.",
+                    "Apply this stance effects (drain/recovery and speed cap) while prone. Disabled by default as it may conflict with EFT prone animations.\n\nAplica os efeitos desta postura (drain/recuperação e limite de velocidade) enquanto deitado (prone). Desativado por padrão pois pode conflitar com as animações de prone do EFT.",
                     null,
                     new ConfigurationManagerAttributes { IsAdvanced = true, Order = orderBase - 4 })),
             // backlog 002 F4 — Stance 0 NÃO recebe ConfigEntry (sentinel null). O guard
@@ -1460,7 +1460,7 @@ public class Plugin : BaseUnityPlugin
                     new ConfigDescription(
                         "When enabled, firing while in this stance snaps to Stance 0 - Vanilla. " +
                         "Single click (< Snap Fire Threshold) = no shot. Hold (>= threshold) = snap + 1 natural shot. " +
-                        "Does not trigger in ADS or with non-firearm items.",
+                        "Does not trigger in ADS or with non-firearm items.\n\nQuando ativado, disparar nesta postura faz o snap para a Stance 0 - Vanilla. Clique único (< Snap Fire Threshold) = sem tiro. Segurar (>= limiar) = snap + 1 tiro natural. Não dispara em ADS nem com itens que não sejam armas de fogo.",
                         null,
                         new ConfigurationManagerAttributes { Order = 0 })),
         };
@@ -1473,24 +1473,24 @@ public class Plugin : BaseUnityPlugin
         const string SEC = "Stamina Management";
         var M = StaminaController.Multipliers;
         int o = 80;
-        M[(int)StaminaScenario.StandStance0]      = BindMult(SEC, "Stance 0 Stamina Multiplier", _stanceDefaults[0].StaminaMultiplier, "Stand up sem mount, Stance 0 (hipfire).", ref o);
-        M[(int)StaminaScenario.StandStance1]      = BindMult(SEC, "Stance 1 Stamina Multiplier", _stanceDefaults[1].StaminaMultiplier, "Stand up sem mount, Stance 1.", ref o);
-        M[(int)StaminaScenario.StandStance2]      = BindMult(SEC, "Stance 2 Stamina Multiplier", _stanceDefaults[2].StaminaMultiplier, "Stand up sem mount, Stance 2.", ref o);
-        M[(int)StaminaScenario.StandStance3]      = BindMult(SEC, "Stance 3 Stamina Multiplier", _stanceDefaults[3].StaminaMultiplier, "Stand up sem mount, Stance 3.", ref o);
-        M[(int)StaminaScenario.StandAds]          = BindMult(SEC, "ADS - Stand up Multiplier", 0.7f, "Stand up sem mount, mirando (ADS).", ref o);
-        M[(int)StaminaScenario.StandHoldBreath]   = BindMult(SEC, "Hold Breath - Stand up Multiplier", 0.5f, "Stand up sem mount, segurando a respiração.", ref o);
-        M[(int)StaminaScenario.ProneHip]          = BindMult(SEC, "Prone Stamina Multiplier", 1.5f, "Deitado (prone) sem mount, hipfire.", ref o);
-        M[(int)StaminaScenario.ProneAds]          = BindMult(SEC, "ADS - Prone Multiplier", 0.9f, "Deitado, mirando.", ref o);
-        M[(int)StaminaScenario.ProneHoldBreath]   = BindMult(SEC, "Hold Breath - Prone Multiplier", 0.7f, "Deitado, segurando a respiração.", ref o);
-        M[(int)StaminaScenario.PassiveStance0]    = BindMult(SEC, "Passive Mount Multiplier", 1.5f, "Apoio passivo (encostado), Stance 0.", ref o);
-        M[(int)StaminaScenario.PassiveAds]        = BindMult(SEC, "ADS - Passive Mount Multiplier", 1.0f, "Apoio passivo, mirando (segura, não recupera).", ref o);
-        M[(int)StaminaScenario.PassiveHoldBreath] = BindMult(SEC, "Hold Breath - Passive Mount Multiplier", 0.9f, "Apoio passivo, segurando a respiração.", ref o);
-        M[(int)StaminaScenario.ActiveStance0]     = BindMult(SEC, "Active Mount Multiplier", 3.0f, "Mount nativo (montado), Stance 0.", ref o);
-        M[(int)StaminaScenario.ActiveAds]         = BindMult(SEC, "ADS - Active Mount Multiplier", 1.5f, "Mount nativo, mirando.", ref o);
-        M[(int)StaminaScenario.ActiveHoldBreath]  = BindMult(SEC, "Hold Breath - Active Mount Multiplier", 1.0f, "Mount nativo, segurando a respiração.", ref o);
+        M[(int)StaminaScenario.StandStance0]      = BindMult(SEC, "Stance 0 Stamina Multiplier", _stanceDefaults[0].StaminaMultiplier, "Standing, no mount, Stance 0 (hipfire). <1 drains, 1 holds, >1 recovers.\n\nEm pé sem mount, Stance 0 (hipfire).", ref o);
+        M[(int)StaminaScenario.StandStance1]      = BindMult(SEC, "Stance 1 Stamina Multiplier", _stanceDefaults[1].StaminaMultiplier, "Standing, no mount, Stance 1. <1 drains, 1 holds, >1 recovers.\n\nEm pé sem mount, Stance 1.", ref o);
+        M[(int)StaminaScenario.StandStance2]      = BindMult(SEC, "Stance 2 Stamina Multiplier", _stanceDefaults[2].StaminaMultiplier, "Standing, no mount, Stance 2. <1 drains, 1 holds, >1 recovers.\n\nEm pé sem mount, Stance 2.", ref o);
+        M[(int)StaminaScenario.StandStance3]      = BindMult(SEC, "Stance 3 Stamina Multiplier", _stanceDefaults[3].StaminaMultiplier, "Standing, no mount, Stance 3. <1 drains, 1 holds, >1 recovers.\n\nEm pé sem mount, Stance 3.", ref o);
+        M[(int)StaminaScenario.StandAds]          = BindMult(SEC, "ADS - Stand up Multiplier", 0.7f, "Standing, no mount, aiming (ADS). <1 drains, 1 holds, >1 recovers.\n\nEm pé sem mount, mirando (ADS).", ref o);
+        M[(int)StaminaScenario.StandHoldBreath]   = BindMult(SEC, "Hold Breath - Stand up Multiplier", 0.5f, "Standing, no mount, holding breath. <1 drains, 1 holds, >1 recovers.\n\nEm pé sem mount, segurando a respiração.", ref o);
+        M[(int)StaminaScenario.ProneHip]          = BindMult(SEC, "Prone Stamina Multiplier", 1.5f, "Prone, no mount, hipfire. <1 drains, 1 holds, >1 recovers.\n\nDeitado (prone) sem mount, hipfire.", ref o);
+        M[(int)StaminaScenario.ProneAds]          = BindMult(SEC, "ADS - Prone Multiplier", 0.9f, "Prone, aiming. <1 drains, 1 holds, >1 recovers.\n\nDeitado, mirando.", ref o);
+        M[(int)StaminaScenario.ProneHoldBreath]   = BindMult(SEC, "Hold Breath - Prone Multiplier", 0.7f, "Prone, holding breath. <1 drains, 1 holds, >1 recovers.\n\nDeitado, segurando a respiração.", ref o);
+        M[(int)StaminaScenario.PassiveStance0]    = BindMult(SEC, "Passive Mount Multiplier", 1.5f, "Passive mount (resting), Stance 0. <1 drains, 1 holds, >1 recovers.\n\nApoio passivo (encostado), Stance 0.", ref o);
+        M[(int)StaminaScenario.PassiveAds]        = BindMult(SEC, "ADS - Passive Mount Multiplier", 1.0f, "Passive mount, aiming (holds, does not recover). <1 drains, 1 holds, >1 recovers.\n\nApoio passivo, mirando (segura, não recupera).", ref o);
+        M[(int)StaminaScenario.PassiveHoldBreath] = BindMult(SEC, "Hold Breath - Passive Mount Multiplier", 0.9f, "Passive mount, holding breath. <1 drains, 1 holds, >1 recovers.\n\nApoio passivo, segurando a respiração.", ref o);
+        M[(int)StaminaScenario.ActiveStance0]     = BindMult(SEC, "Active Mount Multiplier", 3.0f, "Native mount (mounted), Stance 0. <1 drains, 1 holds, >1 recovers.\n\nMount nativo (montado), Stance 0.", ref o);
+        M[(int)StaminaScenario.ActiveAds]         = BindMult(SEC, "ADS - Active Mount Multiplier", 1.5f, "Native mount, aiming. <1 drains, 1 holds, >1 recovers.\n\nMount nativo, mirando.", ref o);
+        M[(int)StaminaScenario.ActiveHoldBreath]  = BindMult(SEC, "Hold Breath - Active Mount Multiplier", 1.0f, "Native mount, holding breath. <1 drains, 1 holds, >1 recovers.\n\nMount nativo, segurando a respiração.", ref o);
 
         _DebugStaminaState = Config.Bind(SEC, "Debug Stamina State", false,
-            new ConfigDescription("Mostra na tela + loga o cenário de stamina ativo (STAMINA STATE: ...).",
+            new ConfigDescription("Shows on screen + logs the active stamina scenario (STAMINA STATE: ...).\n\nMostra na tela + loga o cenário de stamina ativo (STAMINA STATE: ...).",
                 null, new ConfigurationManagerAttributes { Order = 1 }));
     }
 
