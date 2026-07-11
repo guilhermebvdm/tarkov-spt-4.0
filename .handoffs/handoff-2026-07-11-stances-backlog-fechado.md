@@ -21,11 +21,14 @@ por `(seção, chave)` literal, então **a config do usuário reseta para o defa
 
 ## Estado do repositório
 
-- **Branch:** `feat/trl-items-management-unify` (⚠️ **não é a `main`** — uma sessão paralela trocou a branch neste
-  checkout compartilhado no meio do trabalho; o usuário decidiu "pode deixar como está", então os commits do stances
-  caíram nela). **Antes de trabalhar, rodar `git status -sb`**: se a árvore estiver ocupada por outra sessão, criar
-  worktree (`git worktree add ../tarkov-spt-4.0-wt-<item> main -b <branch>`) em vez de trocar a branch alheia.
-- **Tudo commitado.** Nada pendente do stances na árvore. `git push` **não foi feito** (exige aprovação do usuário).
+- **Branch: `main`.** Os 14 commits do stances desta sessão estão **todos na `main`**. (Durante o trabalho o checkout
+  chegou a estar na `feat/trl-items-management-unify`, mas a sessão paralela mergeou essa branch de volta na `main` e
+  trocou o checkout — a branch está **encerrada**: zero commits exclusivos, aparece em `git branch --merged main`.)
+- ⚠️ **Checkout compartilhado com sessões paralelas.** **Antes de trabalhar, rodar `git status -sb`**: se a árvore
+  estiver ocupada por outra sessão, criar worktree (`git worktree add ../tarkov-spt-4.0-wt-<item> main -b <branch>`)
+  em vez de trocar a branch alheia. Commitar cedo — edição não commitada some se outra janela roda `pull`/`checkout`.
+- **Tudo commitado, NADA pushado.** A `main` local está **à frente do remote** (inclui commits de sessões paralelas:
+  launcher 2.2.1, CustomClasses). `git push` exige aprovação do usuário.
 - **DLL instalada** em `D:/SPT/BepInEx/plugins/RealisticMobility/shwngFpsCameraStances4.dll` — hash `c83ed42`,
   contém tudo (014 fix-03 + 015 + revisão do F12). A cópia no repo (`modded/shwngFpsCameraStances4.dll`) é a mesma.
 - **Grafo regenerado** e commitado (510 nós / 687 arestas).
