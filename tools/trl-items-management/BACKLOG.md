@@ -1,7 +1,7 @@
 # TRL Items Management — Backlog / roadmap
 
 > **Status:** 🟢 Vivo<br>
-> **Última revisão:** 2026-07-08<br>
+> **Última revisão:** 2026-07-11<br>
 > **Objetivo:** validar o escopo de features levantadas antes de agendar/implementar. Nada aqui está em execução até validação explícita.
 
 ---
@@ -73,6 +73,31 @@
 - **A validar:** confirmar se `UnlimitedCount=true` sozinho (sem o valor gigante) já basta em algum ponto do fluxo de compra de trader normal que a pesquisa não cobriu; decidir a forma do "modo em massa" (`default` por trader vs. lista explícita de tpls); checar se estoque tem alguma interação com loyalty level (múltiplas entradas do mesmo tpl em tiers diferentes).
 - **Depende de:** nada bloqueante — o mod já está unificado (`mods/TRL-ItemsManagement/`, ex-B-2, Estágios 0-5 implementados) com a infra de override/lock pronta; esta feature é só mais um endpoint dentro do mod existente.
 
+### B-7 · Portar o pipeline de dados (Node) inteiro pra C#, in-process no mod
+- **O quê:** eliminar de vez a dependência de Node.js/`.js` no servidor — portar `load-spt.js`, `normalize.js`, `fetch-tarkov-dev.js`, `fetch-tarkov-market.js` e `refresh-item.js` (`tools/trl-items-management/scripts/`) pra C#, rodando in-process dentro do próprio mod (sem `Process.Start`, sem pasta externa nenhuma). É o "Milestone 2" que já estava registrado como opcional/adiado na arquitetura do B-2 (ver seção abaixo) — este item o formaliza com o que aprendemos desde então.
+- **Achado que motivou revisitar isso agora (2026-07-11):** tentei aninhar o pipeline Node dentro de `user/mods/TRL-ItemsManagement/pipeline/` pra atender ao pedido "mod 100% dentro de BepInEx/plugins + SPT/user/mods" — o **SPT rejeitou o mod INTEIRO no boot**. Mensagem do `ModValidator` é enganosa ("feito para servidores pré-4.0.0"), mas a causa real foi confirmada por teste isolado (mover a pasta pra fora do install e reiniciar corrigiu): **qualquer arquivo `.js`/`.ts` em qualquer lugar da pasta instalada do mod trava o `ModValidator` inteiro** — o mesmo motivo, já descoberto na pesquisa original do B-2, por que o `wwwroot/index.html` do viewer já é 100% inline (nunca separado em `.js` próprio).
+- **Achado adicional que reforça a motivação (bug real, corrigido nesta sessão):** `load-spt.js` tem sua PRÓPRIA lógica de descoberta de trader (escaneia padrões de pasta `db/base.json`, `db/traders/<id>/base.json`) — **diferente e mais frágil** que a fonte de verdade que o resto do mod já usa (`DatabaseService.GetTraders()`, populado pelo próprio SPT). O trader "Trudy" (mod `c11-tn-4`/True North, pasta `db/trudy/`) não batia em nenhum dos 2 padrões conhecidos, ficando invisível no catálogo até o fix (commit `979562e`). Portar pra C# eliminaria essa categoria de bug inteira, lendo da MESMA fonte que já funciona pro resto do mod — não seria só um port mecânico, seria estruturalmente mais simples nesse ponto específico (sem re-parsear arquivo que o C# já tem tipado em memória).
+- **Escopo (arquivos a portar):**
+  - `load-spt.js` — o mais complexo: lê itens/traders(vanilla+mod)/ragfair(overrides+multiplicadores+blacklist)/handbook/quests do SPT, calcula bônus/piso/teto de flea por categoria, monta ofertas de trader com barter/quest-lock/dedup.
+  - `normalize.js` — reconcilia SPT × tarkov.dev × tarkov-market num catálogo só, com regra de prioridade (market > dev-avg24h > dev-lastLow > spt) que **já divergiu uma vez no passado** (aviso no próprio código-fonte sobre isso).
+  - `fetch-tarkov-dev.js` / `fetch-tarkov-market.js` — chamadas HTTP (GraphQL/REST) — port mais mecânico via `HttpClient`.
+  - `refresh-item.js` — refresh de 1 item, reusa as peças acima.
+- **Ganhos:** (a) resolve a trava do `ModValidator` — mod cabe 100% em `BepInEx/plugins` + `SPT/user/mods`; (b) elimina Node.js como dependência de runtime do servidor (não precisa mais documentar "instale Node LTS" no `DEPLOY.md`); (c) fonte de dado única, sem 2ª implementação de descoberta de trader/item; (d) simplifica MUITO o deploy tooling (sem `-ToolDir`, sem `config/pipeline.json`, sem sync separado em `package-release.sh`/`update-vm.ps1`).
+- **Custo/risco:** lógica de negócio genuína e não-trivial (fórmula de preço, montagem de oferta com barter/quest-lock/dedup, reconciliação com histórico de divergência); validação exige comparar o catálogo INTEIRO (milhares de itens) contra a saída atual do Node antes de aposentá-lo — não é um teste rápido. Esforço de múltiplas sessões, não uma tarde.
+- **Proposta de execução:** começar por `load-spt.js` (onde mora o bug de descoberta de trader — maior ganho imediato de correção), depois `normalize.js`, por último os scripts de fetch (mais mecânico, menor risco). Cada etapa validada bit-a-bit contra a saída do Node atual antes de decidir aposentar aquele script especificamente.
+- **Viabilidade:** 🟠 esforço médio-alto, ganho real (não só estético) — reduz risco operacional (bug de trader + dependência externa). Não é urgente/bloqueante hoje: a arquitetura atual (pipeline externo) já funciona em produção, só não fica 100% dentro das pastas padrão do SPT.
+- **Depende de:** nada bloqueante — pode começar a qualquer momento.
+- **Decisão pendente:** critério objetivo de "pronto pra aposentar o Node" (ex.: catálogo C# bate 100% com o catálogo Node atual, rodado lado a lado por N rescans sem divergência, antes de remover o script correspondente).
+
+### B-8 · Refatorar 100% do layout do viewer web pra usar os componentes/design system canônico do TRL
+- **O quê:** hoje `wwwroot/{index.html, components.css, tokens.css}` do `TRL-ItemsManagement` usa CSS/tokens ad-hoc, próprios desse mod (herdados do `serve.js` original) — não os componentes/tokens canônicos do **TRL Design System** (`design-system/`, v1.0.0, já entregue — ver [[project_trl_design_system]]). Substituir 100% do layout (topbar, filtros, tabela de itens, modais de edição, badges, toasts) pelos componentes/tokens do DS.
+- **Contexto:** o DS já tem "próxima fase = refatorar mods" declarada; `CustomClasses` é outro candidato na mesma fila (bridge `--mud-palette-*` → tokens). Este item formaliza o `TRL-ItemsManagement` como mais um alvo dessa fase.
+- **Restrição técnica que precisa ser respeitada (mesma trava do B-7, achado 2026-07-11):** nenhum arquivo `.js`/`.ts` pode existir em lugar nenhum da pasta instalada do mod (`ModValidator` rejeita o mod inteiro) — se o DS distribuir componentes como módulos/arquivos `.js` separados, eles precisam ser **inlined** no próprio `wwwroot/index.html` (mesma razão pela qual o `index.html` de hoje já é 100% inline). CSS/assets (fonte, ícones) como arquivo separado continuam seguros — só `.js`/`.ts` que não pode.
+- **Escopo a confirmar:** quais componentes do DS já existem prontos pra reuso direto (botão, input, dropdown, tabela, badge, toast, modal) vs. o que precisaria ser criado; se o DS já suporta light/dark e como isso se aplica a uma UI hoje single-theme; usar a skill `trl-ds-validation` (4 lentes: readability, a11y, i18n PT-BR/EN, dataviz) como critério de aceite.
+- **Viabilidade:** 🟡 a definir — depende do estado real atual dos componentes do DS (não verificado nesta sessão); esforço provavelmente comparável a uma reescrita de UI completa (índice de ~6 mil itens, filtros, tabela, modais de edição, toasts).
+- **Depende de:** nada bloqueante tecnicamente, mas faz sentido esperar o DS amadurecer via outro mod primeiro (ex. CustomClasses, já citado como próximo na fila) pra não ser o primeiro consumidor descobrindo gaps do DS.
+- **A validar:** inventário completo do que o DS já oferece vs. o que esse viewer precisa; decidir se faz sentido portar em fases (tokens primeiro, componentes depois) ou tudo de uma vez.
+
 ---
 
 ## Decisões travadas (2026-07-04)
@@ -121,3 +146,4 @@ Ordem e paralelismo (pesquisa/spec/review via subagents independentes onde não 
 | 2026-07-03 | Guilherme | Criação — 4 itens (B-1 teto flea, B-2 virar mod, B-3 buy price, B-4 bulk copy) levantados para validação de escopo. |
 | 2026-07-07 | Guilherme | B-5 adicionado — piso de flea configurável por item (override abaixo do buyback teórico do trader), levantado durante o planejamento do B-2/unificação. Duas rotas identificadas (editar handbook vs. Harmony dedicado), nenhuma spec'd ainda. |
 | 2026-07-08 | Guilherme | B-6 adicionado — editar quantidade em estoque (`Item.Upd.StackObjectsCount`) do assort dos traders, com foco em traders de mod que habilitam estoque ~99999 (padrão nativo do SPT confirmado: `UnlimitedCount:true` + valor gigante, não um flag isolado), mais um modo de edição em massa via config. Nenhuma spec ainda. |
+| 2026-07-11 | Guilherme | B-7 adicionado — portar o pipeline Node (`load-spt.js`/`normalize.js`/fetch scripts) pra C# in-process (era o "Milestone 2" do B-2, agora formalizado com o achado de que `.js` em qualquer lugar da pasta do mod trava o `ModValidator` inteiro, e o bug real da Trudy provando o risco de descoberta de trader divergente do Node). B-8 adicionado — refatorar 100% do viewer web pra usar o TRL Design System, com a mesma restrição de `.js` inline documentada. |
