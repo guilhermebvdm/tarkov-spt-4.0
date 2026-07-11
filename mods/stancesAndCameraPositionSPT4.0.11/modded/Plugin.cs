@@ -71,6 +71,7 @@ public class Plugin : BaseUnityPlugin
     private const string FOVSettings = "Field of View";
     private const string DebugSettings = "Debug (Advanced)";
     private const string PassiveMountSettings = "Weapon Mount (Passive)";
+    private const string ActiveMountSettings = "Weapon Mount (Active)";
     private const string AnimationSettings = "Animations & Transitions (Item 005)";
 
     // Positions
@@ -205,6 +206,9 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<int> _FOVMinRange;
     public static ConfigEntry<int> _FOVMaxRange;
 
+    // Weapon Mount (Active) — Item 015
+    public static ConfigEntry<bool> _BlockActiveMountInStance;
+
     // Weapon Mount (Passive) — Item 011
     public static ConfigEntry<bool> _EnablePassiveMount;
     public static ConfigEntry<float> _PassiveRecoilMultiplier;
@@ -330,6 +334,7 @@ public class Plugin : BaseUnityPlugin
         SafeEnable("PassiveMountDetectPatch", () => new Patches.PassiveMountDetectPatch());
         SafeEnable("PassiveRecoilPatch", () => new Patches.PassiveRecoilPatch());
         SafeEnable("PassiveSwayPatch", () => new Patches.PassiveSwayPatch());
+        SafeEnable("BlockActiveMountPatch", () => new Patches.BlockActiveMountPatch());   // item 015: mount ativo só em Stance 0/ADS/prone
         SafeEnable("ObservedStanceShiftPatch", () => new Patches.ObservedStanceShiftPatch());   // item 014 fix-03 (pré-IK)
         SafeEnable("BattleUIScreenPatch", () => new BattleUIScreenPatch());
 
@@ -893,6 +898,17 @@ public class Plugin : BaseUnityPlugin
             new ConfigDescription("When enabled, uses a compact sprint animation when sprinting in Stance 3 (tac sprint style)",
             null,
             new ConfigurationManagerAttributes { Order = 14 }));
+
+        // ========================================
+        // WEAPON MOUNT (ACTIVE) — Item 015
+        // ========================================
+        _BlockActiveMountInStance = Config.Bind(
+            ActiveMountSettings,
+            "Block Active Mount In Stance",
+            true,
+            new ConfigDescription("Impede apoiar a arma em superfícies (mount) enquanto estiver em Stance 1/2/3 sem mirar. Em Stance 0, mirando ou deitado (prone), o mount funciona normalmente.",
+            null,
+            new ConfigurationManagerAttributes { Order = 10 }));
 
         // ========================================
         // WEAPON MOUNT (PASSIVE) — Item 011

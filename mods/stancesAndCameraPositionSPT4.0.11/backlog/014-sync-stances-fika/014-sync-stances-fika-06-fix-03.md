@@ -48,10 +48,10 @@ No `LogOutput.log` do cliente que **observa** o outro (grep `StanceSync-014`):
 ## Checklist de validação (2 clientes Fika — **fechar e reabrir o EFT**)
 
 - [x] Compila via `dotnet build` sem erros; instalado em `RealisticMobility/` (hash `972f5f8389767082`)
-- [ ] Os 3 logs `[StanceSync-014]` aparecem no cliente observador
-- [ ] A **arma E o braço/mão** do outro player acompanham a stance **juntos** (sem descolamento)
-- [ ] Lean/troca de ombro coexistem; vanilla intacto
-- [ ] ADS remoto reflete a mira (CR-02-02); prone não aplica stance
+- [x] Os 3 logs `[StanceSync-014]` aparecem no cliente observador
+- [x] A **arma E o braço/mão** do outro player acompanham a stance **juntos** (sem descolamento)
+- [x] Lean/troca de ombro coexistem; vanilla intacto
+- [x] ADS remoto reflete a mira (CR-02-02); prone não aplica stance
 
 ## Risco residual
 
@@ -62,3 +62,4 @@ No `LogOutput.log` do cliente que **observa** o outro (grep `StanceSync-014`):
 | Data | Evento |
 |---|---|
 | 2026-07-09 | Investigação por 2 sub-agents; causa raiz = Postfix de ObservedVisualPass roda pós-IK (braço já solveado). Solução movida para Postfix de `PlayerBones.ShiftWeaponRoot` (janela pré-IK). Compila 0 erros; instalado. Aguarda validação in-game (2 clientes). |
+| 2026-07-09 | ✅ **Validado in-game (2 clientes Fika):** braço E arma acompanham a stance juntos. Item 014 fechado 🟢. |

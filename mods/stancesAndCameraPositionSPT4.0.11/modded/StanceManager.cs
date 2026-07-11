@@ -1316,6 +1316,11 @@ namespace CameraRotationMod
             catch (Exception ex) { Plugin.Logger.LogError($"[StanceManager.TickAdsNetworkSync] {ex}"); }
         }
 
+        // Item 015: NÃO há "desmontar ao entrar em stance" — o próprio StanceManager.Update (item 013) força
+        // Stance 0 enquanto montado (IsMountedState), então o jogador fica preso em Stance 0 montado e o input de
+        // troca de stance é ignorado. O 015 só precisa BLOQUEAR a ATIVAÇÃO em Stance 1/2/3 (BlockActiveMountPatch).
+        // Ver 04-code-review-01 CR-01-01.
+
         /// <summary>
         /// Controla delta de stamina das mãos por frame (drain e recovery).
         /// Multiplier &lt;1.0 = drain, 1.0 = vanilla (no-op), &gt;1.0 = recovery.

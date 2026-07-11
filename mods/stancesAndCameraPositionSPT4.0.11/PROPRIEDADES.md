@@ -188,6 +188,12 @@ Fonte: [modded/Plugin.cs](modded/Plugin.cs) (63 originais + 16 do backlog `001-s
 | Hold Breath - Active Mount Multiplier | Estamina — Ativo, Hold Breath | float | `1.0` | 0 a 10 | Mount nativo, segurando a respiração. |
 | Debug Stamina State | Debug do Estado de Stamina | bool | `false` | — | Mostra na tela + loga o cenário de stamina ativo (STAMINA STATE: ...). |
 
+## Apoio Ativo de Arma (`Weapon Mount (Active)`) — Item 015
+
+| Propriedade (EN) | Tradução | Tipo | Padrão | Faixa | Tooltip (pt-BR) |
+|---|---|---|---|---|---|
+| Block Active Mount In Stance | Bloquear Mount Ativo em Stance | bool | `true` | — | Impede apoiar a arma em superfícies (mount) enquanto estiver em Stance 1/2/3 sem mirar. Em Stance 0, mirando ou deitado (prone), o mount funciona normalmente. |
+
 ## Apoio Passivo de Arma (`Weapon Mount (Passive)`) — Item 011
 
 | Propriedade (EN) | Tradução | Tipo | Padrão | Faixa | Tooltip (pt-BR) |
