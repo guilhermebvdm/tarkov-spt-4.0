@@ -46,17 +46,30 @@ $bundle = $PSScriptRoot
 if (-not $GameRoot) { $GameRoot = Split-Path $SptPath -Parent }
 function Step($m) { Write-Host "`n== $m ==" -ForegroundColor Cyan }
 
+# O passo 1/6 (parar/remover serviço NSSM ou Scheduled Task do viewer antigo) engole erro de
+# permissão de propósito (-EA SilentlyContinue), pra um setup sem esses artefatos não travar a
+# run. Sem elevação, se o serviço/task antigo rodar como SYSTEM, a remoção falha CALADA — o
+# script segue achando que não tinha nada pra remover, e o processo antigo pode voltar sozinho
+# num reboot da VM. Só um aviso; não bloqueia (o resto da migração não precisa de admin).
+$isElevated = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if (-not $isElevated) {
+  Write-Host "AVISO: sessão não elevada (Run as Administrator). Se o viewer/serviço antigo rodar como SYSTEM, a limpeza do passo 1/6 pode falhar em silêncio — confira o log abaixo e, se o setup antigo usava serviço/task, rode de novo elevado se sobrar algo." -ForegroundColor Yellow
+}
+
 # --- sanity: bundle + alvos existem ---
 if (-not (Test-Path "$bundle\TRL-ItemsManagement\server\TRLItemsManagement-Server.dll")) { throw "bundle inválido: rode o update-vm.ps1 de DENTRO da pasta extraída do zip (falta TRL-ItemsManagement\server\)." }
 if (-not (Test-Path "$bundle\TRL-ItemsManagement\client\TRLItemsManagement-Client.dll")) { throw "bundle inválido: falta TRL-ItemsManagement\client\TRLItemsManagement-Client.dll." }
 if (-not (Test-Path $NodeExe))            { throw "node.exe não encontrado em '$NodeExe' (ajuste -NodeExe)." }
-if (-not (Test-Path "$SptPath\SPT_Data")) { throw "SPT_Data não encontrado em '$SptPath' (ajuste -SptPath p/ a raiz do SPT)." }
-if (-not (Test-Path "$GameRoot\BepInEx")) { throw "BepInEx não encontrado em '$GameRoot' (ajuste -GameRoot p/ a raiz do jogo)." }
+if (-not (Test-Path "$SptPath\SPT_Data")) { throw "SPT_Data não encontrado em '$SptPath' — -SptPath tem que ser a pasta que CONTÉM SPT_Data\ (o server root, ex. 'D:\SPT 4.0\SPT'), não a raiz do jogo." }
+if (-not (Test-Path "$GameRoot\BepInEx")) { throw "BepInEx não encontrado em '$GameRoot' — -GameRoot tem que ser a pasta que CONTÉM BepInEx\ (a raiz do jogo, ex. 'D:\SPT 4.0'). Default é o pai de -SptPath; ajuste -GameRoot direto se a instalação não seguir esse padrão." }
 
 $serverDir = Join-Path $SptPath "user\mods\TRL-ItemsManagement"
 $clientDir = Join-Path $GameRoot "BepInEx\plugins\TRL-ItemsManagement"
 $oldModDir = Join-Path $SptPath "user\mods\TRLTraderPrices"
 
+# Suposição: só 1 instalação de SPT.Server rodando nesta máquina. Mata por NOME (não dá pra
+# filtrar por -SptPath com segurança sem elevação — .Path de outro processo exige admin) — se
+# um dia essa VM rodar 2 instalações, isso mata a errada.
 Step "0/6 parando SPT server"
 Get-Process SPT.Server -EA SilentlyContinue | Stop-Process -Force
 Start-Sleep -Milliseconds 800
@@ -68,41 +81,42 @@ $migratedBuyOverrides = $null
 # 1a. viewer antigo: serviço NSSM e/ou Scheduled Task, se existirem — parar e remover
 $oldService = Get-Service -Name "TRLItemsManagement" -EA SilentlyContinue
 if ($oldService) {
-  Write-Host "  → removendo serviço antigo do viewer (NSSM): TRLItemsManagement"
+  Write-Host "  -> removendo serviço antigo do viewer (NSSM): TRLItemsManagement"
   Stop-Service -Name "TRLItemsManagement" -Force -EA SilentlyContinue
   sc.exe delete "TRLItemsManagement" | Out-Null
+  if ($LASTEXITCODE -ne 0) { Write-Host "  AVISO: 'sc.exe delete' falhou (código $LASTEXITCODE) — o serviço antigo pode ainda estar registrado. Confira com 'sc query TRLItemsManagement' e remova manualmente se precisar." -ForegroundColor Yellow }
 }
 $oldTask = Get-ScheduledTask -TaskName "TRLItemsManagement" -EA SilentlyContinue
 if ($oldTask) {
-  Write-Host "  → removendo Scheduled Task antiga do viewer: TRLItemsManagement"
+  Write-Host "  -> removendo Scheduled Task antiga do viewer: TRLItemsManagement"
   Stop-ScheduledTask -TaskName "TRLItemsManagement" -EA SilentlyContinue
   Unregister-ScheduledTask -TaskName "TRLItemsManagement" -Confirm:$false -EA SilentlyContinue
 }
 # viewer pode também ter sido rodado na mão (sem serviço/task) — mata o node servindo serve.js
 Get-CimInstance Win32_Process -Filter "Name='node.exe'" -EA SilentlyContinue |
   Where-Object { $_.CommandLine -match 'serve\.js' } |
-  ForEach-Object { Write-Host "  → matando node.exe (serve.js) pid $($_.ProcessId)"; Stop-Process -Id $_.ProcessId -Force -EA SilentlyContinue }
+  ForEach-Object { Write-Host "  -> matando node.exe (serve.js) pid $($_.ProcessId)"; Stop-Process -Id $_.ProcessId -Force -EA SilentlyContinue }
 
 # 1b. TRLTraderPrices (mod companion antigo): backup do config + MOVER pra fora de user\mods\
 #     (renomear no lugar não desabilita — SPT varre toda subpasta por conteúdo, não por nome)
 if (Test-Path $oldModDir) {
-  $backupDir = Join-Path $GameRoot "_backup-migration-items-management-$(Get-Date -Format 'yyMMdd-HHmm')"
+  $backupDir = Join-Path $GameRoot "_backup-migration-items-management-$(Get-Date -Format 'yyMMdd-HHmmss')"
   New-Item -ItemType Directory -Force $backupDir | Out-Null
   if (Test-Path "$oldModDir\config\overrides.json") {
     Copy-Item "$oldModDir\config\overrides.json" "$backupDir\overrides.json"
     $migratedOverrides = "$backupDir\overrides.json"
-    Write-Host "  → backup: config\overrides.json -> $backupDir"
+    Write-Host "  -> backup: config\overrides.json -> $backupDir"
   }
   if (Test-Path "$oldModDir\config\buy-overrides.json") {
     Copy-Item "$oldModDir\config\buy-overrides.json" "$backupDir\buy-overrides.json"
     $migratedBuyOverrides = "$backupDir\buy-overrides.json"
-    Write-Host "  → backup: config\buy-overrides.json -> $backupDir"
+    Write-Host "  -> backup: config\buy-overrides.json -> $backupDir"
   }
   $removedDir = Join-Path $GameRoot "_removed-mods\TRLTraderPrices"
   New-Item -ItemType Directory -Force (Join-Path $GameRoot "_removed-mods") | Out-Null
   if (Test-Path $removedDir) { Remove-Item $removedDir -Recurse -Force }
   Move-Item $oldModDir $removedDir
-  Write-Host "  → TRLTraderPrices movido pra fora de user\mods\: $removedDir"
+  Write-Host "  -> TRLTraderPrices movido pra fora de user\mods\: $removedDir"
 } else {
   Write-Host "  (TRLTraderPrices já não está em user\mods\ — nada a migrar aqui, run normal)"
 }
@@ -110,38 +124,43 @@ if (Test-Path $oldModDir) {
 Step "2/6 instalando o mod novo (server + client)"
 # server: wwwroot é código, sobrescreve sempre; config\ e data\ NUNCA vêm no bundle (ver
 # package-release.sh) e por isso nunca são tocados aqui — sobrevivem a qualquer update.
+# /R:5 /W:2 (nunca o default do robocopy, /R:1000000 /W:30) — se o processo não soltou o lock
+# da DLL a tempo (sleep de 800ms acima pode não bastar), falha em ~10s com erro claro em vez de
+# ficar preso tentando de novo por horas.
 New-Item -ItemType Directory -Force $serverDir | Out-Null
 if (Test-Path "$serverDir\wwwroot") { Remove-Item "$serverDir\wwwroot" -Recurse -Force }
-robocopy "$bundle\TRL-ItemsManagement\server" $serverDir /E /NFL /NDL /NJH /NJS /NP | Out-Null
-if ($LASTEXITCODE -ge 8) { throw "robocopy do server falhou (código $LASTEXITCODE)." }
+robocopy "$bundle\TRL-ItemsManagement\server" "$serverDir" /E /R:5 /W:2 /NFL /NDL /NJH /NJS /NP | Out-Null
+if ($LASTEXITCODE -ge 8) { throw "robocopy do server falhou (código $LASTEXITCODE) — confira se o SPT.Server realmente parou (lock de arquivo) e rode de novo." }
 
+# clobber simétrico ao wwwroot do server — evita DLL/pdb órfã se uma versão futura remover arquivo
 New-Item -ItemType Directory -Force $clientDir | Out-Null
-robocopy "$bundle\TRL-ItemsManagement\client" $clientDir /E /NFL /NDL /NJH /NJS /NP | Out-Null
-if ($LASTEXITCODE -ge 8) { throw "robocopy do client falhou (código $LASTEXITCODE)." }
+Get-ChildItem $clientDir -EA SilentlyContinue | Remove-Item -Recurse -Force
+robocopy "$bundle\TRL-ItemsManagement\client" "$clientDir" /E /R:5 /W:2 /NFL /NDL /NJH /NJS /NP | Out-Null
+if ($LASTEXITCODE -ge 8) { throw "robocopy do client falhou (código $LASTEXITCODE) — confira se o SPT.Server (ou o próprio jogo) realmente parou e rode de novo." }
 
 Step "3/6 config: migrando overrides antigos (só 1ª vez) + garantindo pipeline.json"
 New-Item -ItemType Directory -Force "$serverDir\config" | Out-Null
 if ($migratedOverrides -and -not (Test-Path "$serverDir\config\overrides.json")) {
   Copy-Item $migratedOverrides "$serverDir\config\overrides.json"
-  Write-Host "  → config\overrides.json restaurado do TRLTraderPrices antigo"
+  Write-Host "  -> config\overrides.json restaurado do TRLTraderPrices antigo"
 } elseif (Test-Path "$serverDir\config\overrides.json") {
   Write-Host "  (config\overrides.json já existe no mod novo — preservado, não sobrescrito)"
 }
 if ($migratedBuyOverrides -and -not (Test-Path "$serverDir\config\buy-overrides.json")) {
   Copy-Item $migratedBuyOverrides "$serverDir\config\buy-overrides.json"
-  Write-Host "  → config\buy-overrides.json restaurado do TRLTraderPrices antigo"
+  Write-Host "  -> config\buy-overrides.json restaurado do TRLTraderPrices antigo"
 }
 if (-not (Test-Path "$serverDir\config\pipeline.json")) {
   $pipelineJson = @{ toolPath = $ToolDir.Replace('\','/') } | ConvertTo-Json
   Set-Content -Path "$serverDir\config\pipeline.json" -Value $pipelineJson -Encoding utf8
-  Write-Host "  → config\pipeline.json criado (toolPath = $ToolDir)"
+  Write-Host "  -> config\pipeline.json criado (toolPath = $ToolDir)"
 } else {
   Write-Host "  (config\pipeline.json já existe — preservado)"
 }
 
 Step "4/6 atualizando o pipeline Node (preserva .env, cache\, logs\, data\items.json)"
 New-Item -ItemType Directory -Force $ToolDir | Out-Null
-robocopy "$bundle\trl-items-management-pipeline" $ToolDir /E /NFL /NDL /NJH /NJS /NP | Out-Null
+robocopy "$bundle\trl-items-management-pipeline" "$ToolDir" /E /R:5 /W:2 /NFL /NDL /NJH /NJS /NP | Out-Null
 if ($LASTEXITCODE -ge 8) { throw "robocopy do pipeline falhou (código $LASTEXITCODE)." }
 
 Step "5/6 regenerando o catálogo e sincronizando pro mod"

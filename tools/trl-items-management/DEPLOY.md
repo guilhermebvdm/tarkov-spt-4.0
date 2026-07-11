@@ -46,12 +46,16 @@ bash tools/trl-items-management/scripts/package-release.sh D:/SPT/_vm-deploy
 #   {TRL-ItemsManagement/{server,client}, trl-items-management-pipeline, update-vm.ps1}
 ```
 
-**Na VM** — copie o zip (AnyDesk), extraia e rode o updater de dentro da pasta extraída:
+**Na VM** — abra o PowerShell **como Administrador** (Run as Administrator), copie o zip
+(AnyDesk), extraia e rode o updater de dentro da pasta extraída:
 ```powershell
 Expand-Archive "D:\_deploy\trl-release-v1.0.0.zip" "D:\_deploy" -Force
 cd "D:\_deploy\trl-release-v1.0.0"
 powershell -ExecutionPolicy Bypass -File .\update-vm.ps1
 ```
+> Sem elevação o script ainda roda, mas se o setup antigo (serviço NSSM ou Scheduled Task do
+> viewer) tiver sido registrado como SYSTEM, a limpeza automática pode falhar em silêncio — o
+> script avisa no início se detectar que a sessão não está elevada.
 O `update-vm.ps1` faz tudo, **idempotente**: para o SPT (e o setup antigo, se ainda presente —
 ver abaixo) → instala DLL+wwwroot do server em `user\mods\TRL-ItemsManagement\` (preserva
 `config\` e `data\`) → instala a DLL do client em `BepInEx\plugins\TRL-ItemsManagement\` →
@@ -123,3 +127,4 @@ que uma edição de preço + restauração funcionam.
 | Data | Autor | Alteração |
 |---|---|---|
 | 2026-07-08 | Guilherme | Reescrito pra arquitetura pós-unificação (`mods/TRL-ItemsManagement/`, mod único servindo a própria UI dentro do SPT.Server) — versão anterior descrevia o viewer Node standalone (porta 8080, NSSM) + `TRLTraderPrices` companion, ambos aposentados. `update-vm.ps1`/`package-release.sh` reescritos junto, com migração automática do setup antigo. |
+| 2026-07-08 | Guilherme | Duas rodadas de revisão crítica em `update-vm.ps1`/`package-release.sh` (testadas ponta a ponta contra uma VM fake isolada, `SPT_Data` real montado por junction NTFS): robocopy com `/R:5 /W:2` (default do robocopy trava horas em vez de falhar rápido), aviso de elevação (limpeza do setup antigo pode falhar em silêncio sem admin), `sc.exe delete` agora checa exit code, parse de `.spt-path` tolerante a CRLF, checagem de `wwwroot/` antes de empacotar, clobber simétrico no install do client, mensagens de erro mais específicas pra `-SptPath`/`-GameRoot` trocados. Instrução de rodar o PowerShell elevado adicionada aqui. |

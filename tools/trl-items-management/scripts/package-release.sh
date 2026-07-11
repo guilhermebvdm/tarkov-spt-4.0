@@ -39,10 +39,13 @@ fi
 echo "→ compilando e instalando localmente (compile-mod.sh)..."
 bash "$ROOT/.agents/scripts/compile-mod.sh" TRL-ItemsManagement >/dev/null
 
-# resolve o mesmo SPT_PATH que o compile-mod.sh usou (env > .spt-path > default D:/SPT)
+# resolve o mesmo SPT_PATH que o compile-mod.sh usou (env > .spt-path > default D:/SPT).
+# .Trim()/tr -d '\r': o arquivo é LF hoje, mas se algum dia for salvo por uma ferramenta Windows
+# (Notepad etc.) e ganhar CRLF, um \r sobrando no path faz os checks de arquivo abaixo falharem
+# com a mensagem genérica de "build falhou", escondendo a causa real.
 SPT_INSTALL="${SPT_PATH:-}"
 if [[ -z "$SPT_INSTALL" && -f "$ROOT/.spt-path" ]]; then
-  SPT_INSTALL="$(grep -m1 '^SPT_PATH=' "$ROOT/.spt-path" | cut -d= -f2-)"
+  SPT_INSTALL="$(grep -m1 '^SPT_PATH=' "$ROOT/.spt-path" | cut -d= -f2- | tr -d '\r')"
 fi
 SPT_INSTALL="${SPT_INSTALL:-D:/SPT}"
 
@@ -50,6 +53,7 @@ SERVER_SRC="$SPT_INSTALL/SPT/user/mods/TRL-ItemsManagement"
 CLIENT_SRC="$SPT_INSTALL/BepInEx/plugins/TRL-ItemsManagement"
 [[ -f "$SERVER_SRC/TRLItemsManagement-Server.dll" ]] || { echo "ERRO: build/instalação local falhou (ausente: $SERVER_SRC/TRLItemsManagement-Server.dll)"; exit 1; }
 [[ -f "$CLIENT_SRC/TRLItemsManagement-Client.dll" ]] || { echo "ERRO: build/instalação local falhou (ausente: $CLIENT_SRC/TRLItemsManagement-Client.dll)"; exit 1; }
+[[ -d "$SERVER_SRC/wwwroot" ]] || echo "  AVISO: $SERVER_SRC/wwwroot ausente — o bundle vai sair SEM a UI do mod."
 
 # 2) staging do bundle
 STAGE="$OUTDIR/.stage-v$VER"
