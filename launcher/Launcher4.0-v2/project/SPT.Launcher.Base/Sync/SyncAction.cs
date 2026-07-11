@@ -41,7 +41,11 @@ namespace SPT.Launcher.Sync
         /// <summary>Server MD5 — set for <see cref="SyncActionKind.Download"/> (recorded in the baseline after apply).</summary>
         public string ServerHash { get; set; }
 
-        /// <summary>Relative destination — set for <see cref="SyncActionKind.MoveToDisabled"/>.</summary>
+        /// <summary>
+        /// Relative destination — set for <see cref="SyncActionKind.MoveToDisabled"/> e, no
+        /// <see cref="SyncActionKind.ForceCopy"/>, o BACKUP da config do jogador em "&lt;pasta&gt;-disabled/&lt;rel&gt;"
+        /// (null quando não há nada a preservar, ex.: o alvo não existia).
+        /// </summary>
         public string MoveTargetRelative { get; set; }
 
         /// <summary>

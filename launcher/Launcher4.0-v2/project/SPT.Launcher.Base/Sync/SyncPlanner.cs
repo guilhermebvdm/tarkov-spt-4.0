@@ -179,6 +179,12 @@ namespace SPT.Launcher.Sync
                     string forceTargetLocal = SyncPathUtil.ToLocalPath(_options.GameRoot, forceTargetRel);
                     string forceReason = null;
 
+                    // CR-01 (TOCTOU): o destino do backup é derivado SEMPRE, mesmo quando o alvo não
+                    // existe agora. Quem decide se há o que preservar é o ENGINE, no apply — o arquivo
+                    // pode SURGIR entre o plano e a escrita (BepInEx regenerando o default, o jogador
+                    // restaurando um backup) e, sem isso, seria sobrescrito sem backup nenhum.
+                    string forceBackupRel = SyncPathUtil.DeriveDisabledBackup(forceTargetRel, matchedPrefix);
+
                     if (!File.Exists(forceTargetLocal))
                     {
                         forceReason = "force (ausente no config)";
@@ -205,7 +211,9 @@ namespace SPT.Launcher.Sync
                                 continue;
                             }
 
-                            forceReason = "force (divergente — sobrescreve a customização)";
+                            // NÃO-DESTRUTIVO: a config do jogador é preservada em <pasta>-disabled/ antes
+                            // de ser trocada. Nada é excluído em silêncio — ele recupera de lá se quiser.
+                            forceReason = "force (divergente — a sua config vai p/ config-disabled e é substituída)";
                         }
                         // hash igual → o usuário já está com a config forçada → no-op
                     }
@@ -214,8 +222,9 @@ namespace SPT.Launcher.Sync
                     {
                         plan.Actions.Add(new SyncAction
                         {
-                            RelativePath = file.path,            // fonte do download (config-force/<rel>)
-                            SeedTargetRelative = forceTargetRel, // destino da escrita (config/<rel>)
+                            RelativePath = file.path,             // fonte do download (config-force/<rel>)
+                            SeedTargetRelative = forceTargetRel,  // destino da escrita (config/<rel>)
+                            MoveTargetRelative = forceBackupRel,  // backup do que existia (config-disabled/<rel>), ou null
                             Kind = SyncActionKind.ForceCopy,
                             Rule = rule,
                             ServerHash = file.hash,

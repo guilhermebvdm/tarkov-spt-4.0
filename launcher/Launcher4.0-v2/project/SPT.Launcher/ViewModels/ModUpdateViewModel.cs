@@ -470,8 +470,9 @@ namespace SPT.Launcher.ViewModels
             };
 
             if (plan.SeedCount > 0) parts.Add($"{plan.SeedCount} p/ semear");
-            // config-force: o usuário PERDE a customização desses arquivos — o preview tem que dizer.
-            if (plan.ForceCount > 0) parts.Add($"{plan.ForceCount} configs FORÇADAS (sobrescrevem a sua)");
+            // config-force: a config do usuário é SUBSTITUÍDA — mas preservada em -disabled. O preview
+            // tem que dizer as duas coisas (senão o backup existe e ninguém sabe).
+            if (plan.ForceCount > 0) parts.Add($"{plan.ForceCount} configs FORÇADAS (a sua vai p/ config-disabled)");
             if (plan.MoveCount > 0) parts.Add($"{plan.MoveCount} p/ mover p/ disabled");
             if (plan.DeleteCount > 0) parts.Add($"{plan.DeleteCount} p/ remover");
             if (plan.Warnings.Count > 0) parts.Add($"{plan.Warnings.Count} avisos Dev Mode");
@@ -523,6 +524,7 @@ namespace SPT.Launcher.ViewModels
             "moved-to-disabled" => "moved",
             "seeded" => "seeded",
             "seed-skipped" => "preserved",
+            "forced" => "forced",
             "preserved" => "preserved",
             "preserved-devmode" => "preserved",
             "error" => "error",

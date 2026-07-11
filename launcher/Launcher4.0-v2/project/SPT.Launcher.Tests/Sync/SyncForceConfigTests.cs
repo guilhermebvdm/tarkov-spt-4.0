@@ -115,6 +115,171 @@ namespace SPT.Launcher.Tests.Sync
             Assert.Equal("v1", fx.ReadLocal("BepInEx/config/sub/deep/a.cfg"));
         }
 
+        // === Não-destrutivo: NADA é excluído em silêncio ===
+
+        [Fact]
+        public async Task Force_backs_up_the_player_config_to_config_disabled_before_overwriting()
+        {
+            using var fx = new SyncTestFixture();
+            fx.WriteLocal("BepInEx/config/x.cfg", "a-config-do-jogador");
+            var manifest = new[] { fx.Entry("BepInEx/config-force/x.cfg", "forced") };
+
+            var (_, result, _) = await fx.PlanAndRunAsync(manifest);
+
+            Assert.Equal(1, result.Forced);
+            Assert.Equal("forced", fx.ReadLocal("BepInEx/config/x.cfg"));                        // substituída
+            Assert.Equal("a-config-do-jogador", fx.ReadLocal("BepInEx/config-disabled/x.cfg")); // e PRESERVADA
+        }
+
+        [Fact]
+        public async Task Force_preserves_subfolders_in_the_backup()
+        {
+            using var fx = new SyncTestFixture();
+            fx.WriteLocal("BepInEx/config/sub/deep/x.cfg", "minha");
+            var manifest = new[] { fx.Entry("BepInEx/config-force/sub/deep/x.cfg", "forced") };
+
+            var (_, result, _) = await fx.PlanAndRunAsync(manifest);
+
+            Assert.Equal(1, result.Forced);
+            Assert.Equal("minha", fx.ReadLocal("BepInEx/config-disabled/sub/deep/x.cfg"));
+        }
+
+        [Fact]
+        public async Task Force_does_not_create_a_backup_when_there_was_nothing_there()
+        {
+            using var fx = new SyncTestFixture();
+            var manifest = new[] { fx.Entry("BepInEx/config-force/x.cfg", "forced") };
+
+            var (_, result, _) = await fx.PlanAndRunAsync(manifest);
+
+            Assert.Equal(1, result.Forced);
+            Assert.False(fx.LocalExists("BepInEx/config-disabled/x.cfg")); // não havia o que preservar
+        }
+
+        [Fact]
+        public async Task Backup_survives_the_next_syncs_and_is_never_deleted()
+        {
+            // Pastas "-disabled" nunca são re-sincronizadas nem deletadas (R3.4) — o backup fica lá.
+            using var fx = new SyncTestFixture();
+            fx.WriteLocal("BepInEx/config/x.cfg", "minha-config");
+            var manifest = new[] { fx.Entry("BepInEx/config-force/x.cfg", "forced") };
+
+            var options = fx.Options();
+            options.ManagedPaths = new[] { "BepInEx" }; // varredura agressiva
+
+            await fx.PlanAndRunAsync(manifest, options);
+            Assert.Equal("minha-config", fx.ReadLocal("BepInEx/config-disabled/x.cfg"));
+
+            // 2º sync: nada muda (config já forçada) e o backup continua lá
+            var (plan2, result2, _) = await fx.PlanAndRunAsync(manifest, options);
+            Assert.Equal(0, result2.Forced);
+            Assert.Equal(0, result2.Deleted);
+            Assert.DoesNotContain(plan2.Actions, a => a.Kind == SyncActionKind.DeleteExtra);
+            Assert.Equal("minha-config", fx.ReadLocal("BepInEx/config-disabled/x.cfg"));
+        }
+
+        // === Achados do /code-review (CR-01..CR-05) — cenários que destruíam config em silêncio ===
+
+        [Fact]
+        public async Task CR01_TOCTOU_config_that_appears_between_plan_and_apply_is_still_backed_up()
+        {
+            // O planner viu o alvo AUSENTE; o arquivo SURGE antes do apply (BepInEx regerando o default,
+            // o jogador restaurando um backup). Antes do fix: sobrescrevia sem backup nenhum.
+            using var fx = new SyncTestFixture();
+            var manifest = new[] { fx.Entry("BepInEx/config-force/x.cfg", "forced") };
+
+            var baseline = fx.LoadBaseline();
+            var plan = await new SyncPlanner(new SyncRuleResolver(), baseline, fx.Options()).BuildPlanAsync(manifest);
+
+            // ...surge no meio do caminho
+            fx.WriteLocal("BepInEx/config/x.cfg", "apareceu-no-meio");
+
+            var result = await new SyncEngine(fx.Root, baseline, fx.Downloader).ExecuteAsync(plan, fx.ReportPath);
+
+            Assert.Equal(1, result.Forced);
+            Assert.Equal("forced", fx.ReadLocal("BepInEx/config/x.cfg"));
+            Assert.Equal("apareceu-no-meio", fx.ReadLocal("BepInEx/config-disabled/x.cfg")); // NÃO sumiu
+            Assert.Equal(1, result.ConfigsBackedUp);
+        }
+
+        [Fact]
+        public async Task CR02_fail_safe_never_overwrites_an_existing_config_without_a_backup_target()
+        {
+            // Sem destino de backup + alvo existente → ABORTA (erro visível), config intacta.
+            // Falhar alto > destruir em silêncio.
+            using var fx = new SyncTestFixture();
+            fx.WriteLocal("BepInEx/config/x.cfg", "a-config-do-jogador");
+            fx.Entry("BepInEx/config-force/x.cfg", "forced"); // registra o conteúdo no "server"
+
+            var baseline = fx.LoadBaseline();
+            var plan = new SyncPlan();
+            plan.Actions.Add(new SyncAction
+            {
+                RelativePath = "BepInEx/config-force/x.cfg",
+                SeedTargetRelative = "BepInEx/config/x.cfg",
+                MoveTargetRelative = null, // <-- sem backup derivável
+                Kind = SyncActionKind.ForceCopy,
+                Rule = SyncFolderRule.ForceToConfig,
+            });
+
+            var result = await new SyncEngine(fx.Root, baseline, fx.Downloader).ExecuteAsync(plan, fx.ReportPath);
+
+            Assert.Equal(1, result.Errors);
+            Assert.Equal(0, result.Forced);
+            Assert.Equal("a-config-do-jogador", fx.ReadLocal("BepInEx/config/x.cfg")); // INTACTA
+        }
+
+        [Fact]
+        public async Task CR03_second_force_does_not_clobber_the_first_backup()
+        {
+            // O jogador customiza, é forçado (backup v1), customiza DE NOVO, e o server publica outra
+            // versão. Antes do fix: o 2º backup sobrescrevia o 1º e a customização ORIGINAL sumia.
+            using var fx = new SyncTestFixture();
+            fx.WriteLocal("BepInEx/config/x.cfg", "CUSTOM-ORIGINAL");
+
+            var (_, first, _) = await fx.PlanAndRunAsync(new[] { fx.Entry("BepInEx/config-force/x.cfg", "server-v1") });
+            Assert.Equal(1, first.Forced);
+            Assert.Equal("CUSTOM-ORIGINAL", fx.ReadLocal("BepInEx/config-disabled/x.cfg"));
+
+            fx.WriteLocal("BepInEx/config/x.cfg", "custom-v2");                    // customiza de novo
+            var (_, second, _) = await fx.PlanAndRunAsync(new[] { fx.Entry("BepInEx/config-force/x.cfg", "server-v2") });
+
+            Assert.Equal(1, second.Forced);
+            Assert.Equal("server-v2", fx.ReadLocal("BepInEx/config/x.cfg"));
+            Assert.Equal("CUSTOM-ORIGINAL", fx.ReadLocal("BepInEx/config-disabled/x.cfg"));   // preservada!
+            Assert.Equal("custom-v2", fx.ReadLocal("BepInEx/config-disabled/x.cfg.1"));       // versionada
+        }
+
+        [Fact]
+        public async Task CR03_identical_backup_is_reused_and_not_duplicated()
+        {
+            // Re-forçar o MESMO arquivo (ex.: manifesto stale) não deve encher config-disabled de .1/.2.
+            using var fx = new SyncTestFixture();
+            fx.WriteLocal("BepInEx/config/x.cfg", "minha");
+            var manifest = new[] { fx.Entry("BepInEx/config-force/x.cfg", "forced") };
+
+            await fx.PlanAndRunAsync(manifest);
+            fx.WriteLocal("BepInEx/config/x.cfg", "minha"); // volta a divergir com o MESMO conteúdo
+            await fx.PlanAndRunAsync(manifest);
+
+            Assert.Equal("minha", fx.ReadLocal("BepInEx/config-disabled/x.cfg"));
+            Assert.False(fx.LocalExists("BepInEx/config-disabled/x.cfg.1")); // não duplicou
+        }
+
+        [Fact]
+        public async Task CR04_report_entry_says_where_the_backup_is()
+        {
+            using var fx = new SyncTestFixture();
+            fx.WriteLocal("BepInEx/config/x.cfg", "minha");
+            var manifest = new[] { fx.Entry("BepInEx/config-force/x.cfg", "forced") };
+
+            var (_, result, _) = await fx.PlanAndRunAsync(manifest);
+
+            var entry = Assert.Single(result.Entries, e => e.action == "forced");
+            Assert.Contains("config-disabled", entry.detail);        // o jogador sabe ONDE está
+            Assert.Contains("preservada", result.Summary);           // e o Summary (auto-apply) também diz
+        }
+
         // === Guardas do review adversarial ===
 
         [Fact]

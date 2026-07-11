@@ -203,12 +203,46 @@ namespace SPT.Launcher.Sync
                         case SyncActionKind.ForceCopy:
                             try
                             {
-                                // config-force → config: SOBRESCREVE sempre (o oposto do SeedCopy — sem
-                                // guard de ausência). O planner já decidiu por divergência de hash; aqui
-                                // apenas aplicamos, atomicamente, ignorando o que o usuário tinha.
+                                // config-force → config: SOBRESCREVE (o oposto do SeedCopy — sem guard de
+                                // ausência), mas NUNCA sem preservar antes o que o jogador tinha.
                                 string forceDestination = ResolveUnderRoot(action.SeedTargetRelative); // ref: CR-01-05
 
-                                byte[] forceData = await _downloader(action.RelativePath, cancellationToken); // baixa da FONTE (config-force)
+                                // ORDEM: baixa PRIMEIRO. Falha de rede → nada tocado, config intacta.
+                                byte[] forceData = await _downloader(action.RelativePath, cancellationToken); // FONTE (config-force)
+
+                                // CR-01 (TOCTOU): quem decide "existe?" é o APPLY, não o plano — o arquivo
+                                // pode ter surgido no meio (BepInEx regenerando o default, o jogador
+                                // restaurando um backup). O planner sempre deriva o destino do backup.
+                                bool forceTargetExists = File.Exists(forceDestination);
+
+                                // CR-02 — FAIL-SAFE: se há algo no disco e não temos onde preservá-lo, NÃO
+                                // sobrescrevemos. Falhar alto e visível > destruir em silêncio. A config do
+                                // jogador fica intacta e o force é re-tentado no próximo sync.
+                                if (forceTargetExists && string.IsNullOrEmpty(action.MoveTargetRelative))
+                                {
+                                    throw new InvalidOperationException(
+                                        $"force abortado: sem destino de backup para {action.SeedTargetRelative} — a config do jogador foi mantida intacta");
+                                }
+
+                                string forceBackupRel = null;
+                                if (forceTargetExists)
+                                {
+                                    // CR-04 — COPY, não move: em NENHUMA ordem de falha o config/ fica sem
+                                    // arquivo (falha na cópia → nada escrito; falha na escrita → config
+                                    // intacta E backup já feito). Estado final feliz é o mesmo do move.
+                                    // CR-03 — nunca clobbera um backup de conteúdo DIFERENTE (a customização
+                                    // do jogador não tem segunda cópia): versiona .1, .2, …
+                                    // Pastas "-disabled" nunca são re-sincronizadas nem deletadas (R3.4).
+                                    forceBackupRel = ResolveFreeBackupRelative(action.MoveTargetRelative, forceDestination);
+                                    string forceBackupAbs = ResolveUnderRoot(forceBackupRel); // ref: CR-01-05
+
+                                    string backupDir = Path.GetDirectoryName(forceBackupAbs);
+                                    if (!string.IsNullOrEmpty(backupDir)) Directory.CreateDirectory(backupDir);
+
+                                    File.Copy(forceDestination, forceBackupAbs, overwrite: true);
+                                    _log($"[Sync] Config do jogador preservada em {forceBackupRel} antes do force");
+                                }
+
                                 SyncFileOps.WriteAtomic(forceDestination, forceData);
 
                                 // Manifesto stale (arquivo mexido no mods_repo sem /refresh): os bytes baixados
@@ -222,8 +256,10 @@ namespace SPT.Launcher.Sync
                                 }
 
                                 result.Forced++;
+                                if (forceBackupRel != null) result.ConfigsBackedUp++;
                                 ioDone++;
-                                AddEntry(result, action.SeedTargetRelative, "forced", action.Reason);
+                                AddEntry(result, action.SeedTargetRelative, "forced",
+                                    forceBackupRel != null ? $"{action.Reason} · backup: {forceBackupRel}" : action.Reason);
                                 _log($"[Sync] Config forçada: {action.SeedTargetRelative} (de {action.RelativePath})");
                             }
                             catch (OperationCanceledException)
@@ -283,6 +319,41 @@ namespace SPT.Launcher.Sync
         /// </summary>
         private string ResolveUnderRoot(string relativePath) =>
             SyncPathUtil.ResolveUnderRoot(_gameRoot, relativePath);
+
+        /// <summary>
+        /// CR-03 — o backup do config-force NUNCA clobbera conteúdo DIFERENTE: a customização do jogador
+        /// não tem segunda cópia no mundo. Se já existe um backup com o MESMO conteúdo, reusa (idempotente);
+        /// se existe com conteúdo divergente (ele customizou de novo e estamos no 2º force), versiona
+        /// ".1", ".2", … preservando a customização ANTERIOR. Devolve o caminho RELATIVO efetivo — é ele
+        /// que vai pro relatório, senão o last-update.json apontaria pra um arquivo com outro conteúdo.
+        /// </summary>
+        private string ResolveFreeBackupRelative(string backupRelative, string sourceAbsolutePath)
+        {
+            string absolute = ResolveUnderRoot(backupRelative);
+            if (!File.Exists(absolute))
+            {
+                return backupRelative;
+            }
+
+            // Mesmo conteúdo → reaproveita (não duplica a cada sync que re-força o mesmo arquivo).
+            if (string.Equals(SyncPathUtil.ComputeMd5(absolute), SyncPathUtil.ComputeMd5(sourceAbsolutePath),
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return backupRelative;
+            }
+
+            for (int i = 1; i < 100; i++)
+            {
+                string candidate = $"{backupRelative}.{i}";
+                if (!File.Exists(ResolveUnderRoot(candidate)))
+                {
+                    return candidate;
+                }
+            }
+
+            // Escape hatch (100 backups divergentes do mesmo arquivo): timestamp, nunca clobber.
+            return $"{backupRelative}.{DateTime.UtcNow:yyyyMMddHHmmss}";
+        }
 
         /// <summary>R3.3: collision in the -disabled folder → the freshly moved file wins.</summary>
         private static void MoveWithOverwrite(string sourcePath, string destinationPath)

@@ -32,6 +32,13 @@ namespace SPT.Launcher.Sync
         /// <summary>config-force → config: configs sobrescritas à força (ignorando customização do usuário).</summary>
         public int Forced { get; set; }
 
+        /// <summary>
+        /// Configs do JOGADOR preservadas em "&lt;pasta&gt;-disabled/" antes de um force. É a prova visível de
+        /// que nada foi excluído em silêncio — aparece no Summary (que é o único texto que o caminho
+        /// auto-apply do ProfileView mostra).
+        /// </summary>
+        public int ConfigsBackedUp { get; set; }
+
         public int Errors { get; set; }
 
         /// <summary>Disk actions not attempted because the run was cancelled (C4).</summary>
@@ -53,6 +60,7 @@ namespace SPT.Launcher.Sync
 
                 if (Seeded > 0) sb.Append($" · {Seeded} semeados");
                 if (Forced > 0) sb.Append($" · {Forced} configs forçadas");
+                if (ConfigsBackedUp > 0) sb.Append($" · {ConfigsBackedUp} config(s) sua(s) preservada(s) em -disabled");
                 if (Deleted > 0) sb.Append($" · {Deleted} removidos");
                 if (Errors > 0) sb.Append($" · {Errors} erros");
                 if (PreservedDevMode > 0) sb.Append($" · {PreservedDevMode} preservados por Dev Mode");

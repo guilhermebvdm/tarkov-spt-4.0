@@ -108,6 +108,47 @@ namespace SPT.Launcher.Sync
             return targetPrefix + "/" + remainder;
         }
 
+        /// <summary>
+        /// Backup do arquivo que o config-force vai SOBRESCREVER: dado o ALVO ("BepInEx/config/a/x.cfg")
+        /// e o prefixo da FONTE ("bepinex/config-force"), devolve "BepInEx/config-disabled/a/x.cfg".
+        /// O force é não-destrutivo: a config do jogador é MOVIDA pra cá antes de ser trocada, e pastas
+        /// "-disabled" nunca são re-sincronizadas nem deletadas (R3.4) — então nada se perde.
+        /// Devolve null se não der pra derivar (aí o engine não faz backup).
+        /// </summary>
+        public static string DeriveDisabledBackup(string targetPath, string normalizedSourcePrefix)
+        {
+            if (string.IsNullOrEmpty(targetPath) || string.IsNullOrEmpty(normalizedSourcePrefix))
+            {
+                return null;
+            }
+
+            // Comprimento do prefixo do ALVO = o da FONTE menos o sufixo que o DeriveSeedTarget removeu.
+            int targetPrefixLength = normalizedSourcePrefix.Length;
+            foreach (var suffix in SourceFolderSuffixes)
+            {
+                if (normalizedSourcePrefix.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+                {
+                    targetPrefixLength -= suffix.Length;
+                    break;
+                }
+            }
+
+            string forward = targetPath.Replace('\\', '/').TrimStart('/');
+            if (targetPrefixLength <= 0 || targetPrefixLength >= forward.Length)
+            {
+                return null;
+            }
+
+            string prefix = forward.Substring(0, targetPrefixLength);
+            string remainder = forward.Substring(targetPrefixLength).TrimStart('/');
+            if (remainder.Length == 0)
+            {
+                return null;
+            }
+
+            return prefix + "-disabled/" + remainder;
+        }
+
         /// <summary>True when any segment of the path ends with "-disabled" (quarantine folders are never re-synced).</summary>
         public static bool ContainsDisabledSegment(string normalizedPath)
         {
