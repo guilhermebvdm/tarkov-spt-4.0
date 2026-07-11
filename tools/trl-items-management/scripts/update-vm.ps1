@@ -56,9 +56,10 @@ if (-not $isElevated) {
   Write-Host "AVISO: sessão não elevada (Run as Administrator). Se o viewer/serviço antigo rodar como SYSTEM, a limpeza do passo 1/6 pode falhar em silêncio — confira o log abaixo e, se o setup antigo usava serviço/task, rode de novo elevado se sobrar algo." -ForegroundColor Yellow
 }
 
-# --- sanity: bundle + alvos existem ---
-if (-not (Test-Path "$bundle\TRL-ItemsManagement\server\TRLItemsManagement-Server.dll")) { throw "bundle inválido: rode o update-vm.ps1 de DENTRO da pasta extraída do zip (falta TRL-ItemsManagement\server\)." }
-if (-not (Test-Path "$bundle\TRL-ItemsManagement\client\TRLItemsManagement-Client.dll")) { throw "bundle inválido: falta TRL-ItemsManagement\client\TRLItemsManagement-Client.dll." }
+# --- sanity: bundle + alvos existem (bundle espelha BepInEx\plugins\... e SPT\user\mods\...,
+# ver package-release.sh — dá pra mesclar essas 2 pastas direto na raiz do jogo na mão também) ---
+if (-not (Test-Path "$bundle\SPT\user\mods\TRL-ItemsManagement\TRLItemsManagement-Server.dll")) { throw "bundle inválido: rode o update-vm.ps1 de DENTRO da pasta extraída do zip (falta SPT\user\mods\TRL-ItemsManagement\)." }
+if (-not (Test-Path "$bundle\BepInEx\plugins\TRL-ItemsManagement\TRLItemsManagement-Client.dll")) { throw "bundle inválido: falta BepInEx\plugins\TRL-ItemsManagement\TRLItemsManagement-Client.dll." }
 if (-not (Test-Path $NodeExe))            { throw "node.exe não encontrado em '$NodeExe' (ajuste -NodeExe)." }
 if (-not (Test-Path "$SptPath\SPT_Data")) { throw "SPT_Data não encontrado em '$SptPath' — -SptPath tem que ser a pasta que CONTÉM SPT_Data\ (o server root, ex. 'D:\SPT 4.0\SPT'), não a raiz do jogo." }
 if (-not (Test-Path "$GameRoot\BepInEx")) { throw "BepInEx não encontrado em '$GameRoot' — -GameRoot tem que ser a pasta que CONTÉM BepInEx\ (a raiz do jogo, ex. 'D:\SPT 4.0'). Default é o pai de -SptPath; ajuste -GameRoot direto se a instalação não seguir esse padrão." }
@@ -129,13 +130,13 @@ Step "2/6 instalando o mod novo (server + client)"
 # ficar preso tentando de novo por horas.
 New-Item -ItemType Directory -Force $serverDir | Out-Null
 if (Test-Path "$serverDir\wwwroot") { Remove-Item "$serverDir\wwwroot" -Recurse -Force }
-robocopy "$bundle\TRL-ItemsManagement\server" "$serverDir" /E /R:5 /W:2 /NFL /NDL /NJH /NJS /NP | Out-Null
+robocopy "$bundle\SPT\user\mods\TRL-ItemsManagement" "$serverDir" /E /R:5 /W:2 /NFL /NDL /NJH /NJS /NP | Out-Null
 if ($LASTEXITCODE -ge 8) { throw "robocopy do server falhou (código $LASTEXITCODE) — confira se o SPT.Server realmente parou (lock de arquivo) e rode de novo." }
 
 # clobber simétrico ao wwwroot do server — evita DLL/pdb órfã se uma versão futura remover arquivo
 New-Item -ItemType Directory -Force $clientDir | Out-Null
 Get-ChildItem $clientDir -EA SilentlyContinue | Remove-Item -Recurse -Force
-robocopy "$bundle\TRL-ItemsManagement\client" "$clientDir" /E /R:5 /W:2 /NFL /NDL /NJH /NJS /NP | Out-Null
+robocopy "$bundle\BepInEx\plugins\TRL-ItemsManagement" "$clientDir" /E /R:5 /W:2 /NFL /NDL /NJH /NJS /NP | Out-Null
 if ($LASTEXITCODE -ge 8) { throw "robocopy do client falhou (código $LASTEXITCODE) — confira se o SPT.Server (ou o próprio jogo) realmente parou e rode de novo." }
 
 Step "3/6 config: migrando overrides antigos (só 1ª vez) + garantindo pipeline.json"

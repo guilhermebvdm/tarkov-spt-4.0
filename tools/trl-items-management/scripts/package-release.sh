@@ -1,12 +1,19 @@
 #!/usr/bin/env bash
 # package-release.sh — gera o bundle ÚNICO de release pra VM (dev box).
 #
-# Produz trl-release-v<versão>.zip contendo:
-#   TRL-ItemsManagement/server/   (DLL+pdb+wwwroot do mod, SEM config/ nem data/ — user-data)
-#   TRL-ItemsManagement/client/   (DLL+pdb do mod client)
-#   trl-items-management-pipeline/  (só os scripts Node que o mod chama via Process.Start em
-#                                    runtime — sem viewer/, sem items.json, sem testes/smoke)
-#   update-vm.ps1                   (o updater de 1 comando da VM)
+# Produz trl-release-v<versão>.zip contendo (espelhando a estrutura real de pastas do SPT,
+# relativa à raiz do jogo — não uma convenção própria "server/client"):
+#   BepInEx/plugins/TRL-ItemsManagement/   (DLL+pdb do mod client)
+#   SPT/user/mods/TRL-ItemsManagement/     (DLL+pdb+wwwroot do mod server, SEM config/ nem
+#                                           data/ — user-data)
+#   trl-items-management-pipeline/         (só os scripts Node que o mod chama via Process.Start
+#                                           em runtime — sem viewer/, sem items.json, sem testes)
+#   update-vm.ps1                          (o updater de 1 comando da VM)
+#
+# Os dois primeiros espelham exatamente <GameRoot>\BepInEx\plugins\... e <GameRoot>\SPT\user\
+# mods\... — dá pra, em último caso, mesclar essas duas pastas direto na raiz do jogo na mão,
+# sem depender do update-vm.ps1 (ele ainda é o jeito recomendado, por causa da migração e da
+# preservação de config/dados).
 #
 # A versão é lida do <Version> do csproj do server. O conteúdo do bundle vem do INSTALL LOCAL
 # (D:\SPT por padrão, via .spt-path) — reaproveita o compile-mod.sh pra filtrar só as DLLs
@@ -55,22 +62,23 @@ CLIENT_SRC="$SPT_INSTALL/BepInEx/plugins/TRL-ItemsManagement"
 [[ -f "$CLIENT_SRC/TRLItemsManagement-Client.dll" ]] || { echo "ERRO: build/instalação local falhou (ausente: $CLIENT_SRC/TRLItemsManagement-Client.dll)"; exit 1; }
 [[ -d "$SERVER_SRC/wwwroot" ]] || echo "  AVISO: $SERVER_SRC/wwwroot ausente — o bundle vai sair SEM a UI do mod."
 
-# 2) staging do bundle
+# 2) staging do bundle — espelha <GameRoot>\BepInEx\plugins\... e <GameRoot>\SPT\user\mods\...
 STAGE="$OUTDIR/.stage-v$VER"
 BUN="$STAGE/trl-release-v$VER"
 rm -rf "$STAGE"
-mkdir -p "$BUN/TRL-ItemsManagement/server" "$BUN/TRL-ItemsManagement/client" \
+mkdir -p "$BUN/BepInEx/plugins/TRL-ItemsManagement" \
+         "$BUN/SPT/user/mods/TRL-ItemsManagement" \
          "$BUN/trl-items-management-pipeline/scripts" "$BUN/trl-items-management-pipeline/data"
 
 # server: tudo MENOS config/, data/ (user-data — nunca vai no bundle) e *.bak (backup local
 # de uma DLL sobrescrita no install de dev, sem sentido no bundle)
-cp -r "$SERVER_SRC/." "$BUN/TRL-ItemsManagement/server/"
-rm -rf "$BUN/TRL-ItemsManagement/server/config" "$BUN/TRL-ItemsManagement/server/data"
-rm -f "$BUN/TRL-ItemsManagement/server/"*.bak
+cp -r "$SERVER_SRC/." "$BUN/SPT/user/mods/TRL-ItemsManagement/"
+rm -rf "$BUN/SPT/user/mods/TRL-ItemsManagement/config" "$BUN/SPT/user/mods/TRL-ItemsManagement/data"
+rm -f "$BUN/SPT/user/mods/TRL-ItemsManagement/"*.bak
 
 # client: DLL+pdb (sem user-data nesse lado; *.bak é backup local de um install anterior)
-cp -r "$CLIENT_SRC/." "$BUN/TRL-ItemsManagement/client/"
-rm -f "$BUN/TRL-ItemsManagement/client/"*.bak
+cp -r "$CLIENT_SRC/." "$BUN/BepInEx/plugins/TRL-ItemsManagement/"
+rm -f "$BUN/BepInEx/plugins/TRL-ItemsManagement/"*.bak
 
 # pipeline Node: só os scripts que o mod invoca via Process.Start em runtime (ItemRefreshController/
 # CatalogRebuildController) + dados-semente pro catálogo (sem items.json, regenerado na VM) — sem
@@ -93,6 +101,6 @@ rm -rf "$STAGE"
 
 SIZE="$(du -h "$OUT" | cut -f1)"
 echo "✓ bundle: $OUT ($SIZE)"
-echo "  conteúdo: trl-release-v$VER/{TRL-ItemsManagement/{server,client}, trl-items-management-pipeline, update-vm.ps1}"
+echo "  conteúdo: trl-release-v$VER/{BepInEx/plugins/TRL-ItemsManagement, SPT/user/mods/TRL-ItemsManagement, trl-items-management-pipeline, update-vm.ps1}"
 echo "  na VM: extraia e rode  .\\update-vm.ps1"
 echo "  1ª vez na VM (setup antigo ainda presente): o próprio update-vm.ps1 migra TRLTraderPrices + retira o viewer Node."

@@ -42,8 +42,9 @@ endpoint).
 vem do install local em `D:\SPT`/`.spt-path`, então rode com esse install já testado e limpo):
 ```bash
 bash tools/trl-items-management/scripts/package-release.sh D:/SPT/_vm-deploy
-# → D:/SPT/_vm-deploy/trl-release-v<versão>.zip
-#   {TRL-ItemsManagement/{server,client}, trl-items-management-pipeline, update-vm.ps1}
+# → D:/SPT/_vm-deploy/trl-release-v<versão>.zip — espelha a estrutura real de pastas do SPT:
+#   {BepInEx/plugins/TRL-ItemsManagement, SPT/user/mods/TRL-ItemsManagement,
+#    trl-items-management-pipeline, update-vm.ps1}
 ```
 
 **Na VM** — abra o PowerShell **como Administrador** (Run as Administrator), copie o zip

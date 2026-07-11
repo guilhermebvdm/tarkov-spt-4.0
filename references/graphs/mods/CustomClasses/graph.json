@@ -350,7 +350,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "modulepatch",
-      "community": 80,
+      "community": 50,
       "norm_label": "modulepatch"
     },
     {
@@ -740,7 +740,7 @@
       "source_location": "L134",
       "_origin": "ast",
       "id": "patches_classcombathealthpatches_ironlungspatch",
-      "community": 79,
+      "community": 86,
       "norm_label": "ironlungspatch"
     },
     {
@@ -750,7 +750,7 @@
       "source_location": "L136",
       "_origin": "ast",
       "id": "playerphysicalclass",
-      "community": 79,
+      "community": 86,
       "norm_label": "playerphysicalclass"
     },
     {
@@ -760,7 +760,7 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "client_patches_classcombathealthpatches_cs_float",
-      "community": 79,
+      "community": 86,
       "norm_label": "float"
     },
     {
@@ -780,7 +780,7 @@
       "source_location": "L144",
       "_origin": "ast",
       "id": "patches_classcombathealthpatches_ironlungspatch_postfix",
-      "community": 79,
+      "community": 86,
       "norm_label": ".postfix()"
     },
     {
@@ -790,7 +790,7 @@
       "source_location": "L144",
       "_origin": "ast",
       "id": "client_patches_classcombathealthpatches_cs_patchpostfix",
-      "community": 79,
+      "community": 86,
       "norm_label": "patchpostfix"
     },
     {
@@ -820,7 +820,7 @@
       "source_location": "L185",
       "_origin": "ast",
       "id": "patches_classcombathealthpatches_malfunctionchancepatch_postfix",
-      "community": 79,
+      "community": 86,
       "norm_label": ".postfix()"
     },
     {
@@ -830,7 +830,7 @@
       "source_location": "L185",
       "_origin": "ast",
       "id": "client_patches_classcombathealthpatches_cs_firearmcontroller",
-      "community": 79,
+      "community": 86,
       "norm_label": "firearmcontroller"
     },
     {
@@ -1394,10 +1394,30 @@
       "norm_label": "classsoundpatches.cs"
     },
     {
+      "label": "LoudOperator",
+      "file_type": "code",
+      "source_file": "Client/Patches/ClassSoundPatches.cs",
+      "source_location": "L16",
+      "_origin": "ast",
+      "id": "patches_classsoundpatches_loudoperator",
+      "community": 82,
+      "norm_label": "loudoperator"
+    },
+    {
+      "label": ".Mult()",
+      "file_type": "code",
+      "source_file": "Client/Patches/ClassSoundPatches.cs",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "patches_classsoundpatches_loudoperator_mult",
+      "community": 82,
+      "norm_label": ".mult()"
+    },
+    {
       "label": "SoundRadiusPatch",
       "file_type": "code",
       "source_file": "Client/Patches/ClassSoundPatches.cs",
-      "source_location": "L17",
+      "source_location": "L44",
       "_origin": "ast",
       "id": "patches_classsoundpatches_soundradiuspatch",
       "community": 82,
@@ -1407,7 +1427,7 @@
       "label": ".GetTargetMethod()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassSoundPatches.cs",
-      "source_location": "L19",
+      "source_location": "L46",
       "_origin": "ast",
       "id": "patches_classsoundpatches_soundradiuspatch_gettargetmethod",
       "community": 82,
@@ -1417,7 +1437,7 @@
       "label": "MethodBase",
       "file_type": "code",
       "source_file": "Client/Patches/ClassSoundPatches.cs",
-      "source_location": "L19",
+      "source_location": "L46",
       "_origin": "ast",
       "id": "client_patches_classsoundpatches_cs_methodbase",
       "community": 82,
@@ -1427,7 +1447,7 @@
       "label": ".Postfix()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassSoundPatches.cs",
-      "source_location": "L26",
+      "source_location": "L53",
       "_origin": "ast",
       "id": "patches_classsoundpatches_soundradiuspatch_postfix",
       "community": 82,
@@ -1437,7 +1457,7 @@
       "label": "Player",
       "file_type": "code",
       "source_file": "Client/Patches/ClassSoundPatches.cs",
-      "source_location": "L26",
+      "source_location": "L53",
       "_origin": "ast",
       "id": "client_patches_classsoundpatches_cs_player",
       "community": 82,
@@ -1447,7 +1467,7 @@
       "label": "PatchPostfix",
       "file_type": "code",
       "source_file": "Client/Patches/ClassSoundPatches.cs",
-      "source_location": "L26",
+      "source_location": "L53",
       "_origin": "ast",
       "id": "client_patches_classsoundpatches_cs_patchpostfix",
       "community": 82,
@@ -1457,7 +1477,7 @@
       "label": "InteractionSoundPatch",
       "file_type": "code",
       "source_file": "Client/Patches/ClassSoundPatches.cs",
-      "source_location": "L68",
+      "source_location": "L91",
       "_origin": "ast",
       "id": "patches_classsoundpatches_interactionsoundpatch",
       "community": 82,
@@ -1467,7 +1487,7 @@
       "label": ".GetTargetMethod()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassSoundPatches.cs",
-      "source_location": "L70",
+      "source_location": "L93",
       "_origin": "ast",
       "id": "patches_classsoundpatches_interactionsoundpatch_gettargetmethod",
       "community": 82,
@@ -1477,7 +1497,7 @@
       "label": ".Prefix()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassSoundPatches.cs",
-      "source_location": "L75",
+      "source_location": "L98",
       "_origin": "ast",
       "id": "patches_classsoundpatches_interactionsoundpatch_prefix",
       "community": 82,
@@ -1487,7 +1507,7 @@
       "label": "PatchPrefix",
       "file_type": "code",
       "source_file": "Client/Patches/ClassSoundPatches.cs",
-      "source_location": "L75",
+      "source_location": "L98",
       "_origin": "ast",
       "id": "client_patches_classsoundpatches_cs_patchprefix",
       "community": 82,
@@ -1497,7 +1517,7 @@
       "label": "AiSoundPatch",
       "file_type": "code",
       "source_file": "Client/Patches/ClassSoundPatches.cs",
-      "source_location": "L110",
+      "source_location": "L133",
       "_origin": "ast",
       "id": "patches_classsoundpatches_aisoundpatch",
       "community": 82,
@@ -1507,7 +1527,7 @@
       "label": ".GetTargetMethod()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassSoundPatches.cs",
-      "source_location": "L112",
+      "source_location": "L135",
       "_origin": "ast",
       "id": "patches_classsoundpatches_aisoundpatch_gettargetmethod",
       "community": 82,
@@ -1517,7 +1537,7 @@
       "label": ".Prefix()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassSoundPatches.cs",
-      "source_location": "L117",
+      "source_location": "L140",
       "_origin": "ast",
       "id": "patches_classsoundpatches_aisoundpatch_prefix",
       "community": 82,
@@ -1527,7 +1547,7 @@
       "label": "IPlayer",
       "file_type": "code",
       "source_file": "Client/Patches/ClassSoundPatches.cs",
-      "source_location": "L117",
+      "source_location": "L140",
       "_origin": "ast",
       "id": "iplayer",
       "community": 82,
@@ -1537,7 +1557,7 @@
       "label": "AISoundType",
       "file_type": "code",
       "source_file": "Client/Patches/ClassSoundPatches.cs",
-      "source_location": "L117",
+      "source_location": "L140",
       "_origin": "ast",
       "id": "aisoundtype",
       "community": 82,
@@ -1547,7 +1567,7 @@
       "label": "SainSoundPatch",
       "file_type": "code",
       "source_file": "Client/Patches/ClassSoundPatches.cs",
-      "source_location": "L162",
+      "source_location": "L181",
       "_origin": "ast",
       "id": "patches_classsoundpatches_sainsoundpatch",
       "community": 82,
@@ -1557,7 +1577,7 @@
       "label": "int",
       "file_type": "code",
       "source_file": "Client/Patches/ClassSoundPatches.cs",
-      "source_location": "L164",
+      "source_location": "L183",
       "_origin": "ast",
       "id": "client_patches_classsoundpatches_cs_int",
       "community": 82,
@@ -1567,7 +1587,7 @@
       "label": "Func",
       "file_type": "code",
       "source_file": "Client/Patches/ClassSoundPatches.cs",
-      "source_location": "L165",
+      "source_location": "L184",
       "_origin": "ast",
       "id": "client_patches_classsoundpatches_cs_func",
       "community": 82,
@@ -1577,7 +1597,7 @@
       "label": ".GetTargetMethod()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassSoundPatches.cs",
-      "source_location": "L167",
+      "source_location": "L186",
       "_origin": "ast",
       "id": "patches_classsoundpatches_sainsoundpatch_gettargetmethod",
       "community": 82,
@@ -1587,7 +1607,7 @@
       "label": ".Prefix()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassSoundPatches.cs",
-      "source_location": "L186",
+      "source_location": "L205",
       "_origin": "ast",
       "id": "patches_classsoundpatches_sainsoundpatch_prefix",
       "community": 82,
@@ -1600,7 +1620,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_classweaponpatches",
-      "community": 83,
+      "community": 50,
       "norm_label": "classweaponpatches.cs"
     },
     {
@@ -1610,7 +1630,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "patches_classweaponpatches_shootrecoilpatch",
-      "community": 83,
+      "community": 50,
       "norm_label": "shootrecoilpatch"
     },
     {
@@ -1620,7 +1640,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "patches_classweaponpatches_shootrecoilpatch_gettargetmethod",
-      "community": 83,
+      "community": 50,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -1630,7 +1650,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_methodbase",
-      "community": 83,
+      "community": 50,
       "norm_label": "methodbase"
     },
     {
@@ -1670,7 +1690,7 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "patches_classweaponpatches_reloadspeedpatch",
-      "community": 83,
+      "community": 50,
       "norm_label": "reloadspeedpatch"
     },
     {
@@ -1680,7 +1700,7 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "patches_classweaponpatches_reloadspeedpatch_gettargetmethod",
-      "community": 83,
+      "community": 50,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -1720,7 +1740,7 @@
       "source_location": "L117",
       "_origin": "ast",
       "id": "patches_classweaponpatches_adsspeedpatch",
-      "community": 83,
+      "community": 50,
       "norm_label": "adsspeedpatch"
     },
     {
@@ -1730,7 +1750,7 @@
       "source_location": "L119",
       "_origin": "ast",
       "id": "patches_classweaponpatches_adsspeedpatch_gettargetmethod",
-      "community": 83,
+      "community": 50,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -1750,7 +1770,7 @@
       "source_location": "L167",
       "_origin": "ast",
       "id": "patches_classweaponpatches_heavyweaponergopatch",
-      "community": 83,
+      "community": 50,
       "norm_label": "heavyweaponergopatch"
     },
     {
@@ -1760,7 +1780,7 @@
       "source_location": "L169",
       "_origin": "ast",
       "id": "patches_classweaponpatches_heavyweaponergopatch_gettargetmethod",
-      "community": 83,
+      "community": 50,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -1830,7 +1850,7 @@
       "source_location": "L231",
       "_origin": "ast",
       "id": "patches_classweaponpatches_aimpunchpatch",
-      "community": 83,
+      "community": 50,
       "norm_label": "aimpunchpatch"
     },
     {
@@ -1840,7 +1860,7 @@
       "source_location": "L233",
       "_origin": "ast",
       "id": "patches_classweaponpatches_aimpunchpatch_gettargetmethod",
-      "community": 83,
+      "community": 50,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -1870,7 +1890,7 @@
       "source_location": "L282",
       "_origin": "ast",
       "id": "patches_classweaponpatches_localhittypepatch",
-      "community": 83,
+      "community": 50,
       "norm_label": "localhittypepatch"
     },
     {
@@ -1880,7 +1900,7 @@
       "source_location": "L287",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_float",
-      "community": 83,
+      "community": 50,
       "norm_label": "float"
     },
     {
@@ -1890,7 +1910,7 @@
       "source_location": "L289",
       "_origin": "ast",
       "id": "patches_classweaponpatches_localhittypepatch_gettargetmethod",
-      "community": 83,
+      "community": 50,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2264,10 +2284,30 @@
       "norm_label": "packmulepatch.cs"
     },
     {
+      "label": "PackMule",
+      "file_type": "code",
+      "source_file": "Client/Patches/PackMulePatch.cs",
+      "source_location": "L15",
+      "_origin": "ast",
+      "id": "patches_packmulepatch_packmule",
+      "community": 87,
+      "norm_label": "packmule"
+    },
+    {
+      "label": ".LocalBonus()",
+      "file_type": "code",
+      "source_file": "Client/Patches/PackMulePatch.cs",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "patches_packmulepatch_packmule_localbonus",
+      "community": 87,
+      "norm_label": ".localbonus()"
+    },
+    {
       "label": "PackMulePatch",
       "file_type": "code",
       "source_file": "Client/Patches/PackMulePatch.cs",
-      "source_location": "L18",
+      "source_location": "L41",
       "_origin": "ast",
       "id": "patches_packmulepatch_packmulepatch",
       "community": 87,
@@ -2277,7 +2317,7 @@
       "label": ".GetTargetMethod()",
       "file_type": "code",
       "source_file": "Client/Patches/PackMulePatch.cs",
-      "source_location": "L20",
+      "source_location": "L43",
       "_origin": "ast",
       "id": "patches_packmulepatch_packmulepatch_gettargetmethod",
       "community": 87,
@@ -2287,7 +2327,7 @@
       "label": "MethodBase",
       "file_type": "code",
       "source_file": "Client/Patches/PackMulePatch.cs",
-      "source_location": "L20",
+      "source_location": "L43",
       "_origin": "ast",
       "id": "client_patches_packmulepatch_cs_methodbase",
       "community": 87,
@@ -2297,7 +2337,7 @@
       "label": ".Postfix()",
       "file_type": "code",
       "source_file": "Client/Patches/PackMulePatch.cs",
-      "source_location": "L25",
+      "source_location": "L48",
       "_origin": "ast",
       "id": "patches_packmulepatch_packmulepatch_postfix",
       "community": 87,
@@ -2307,7 +2347,7 @@
       "label": "SkillManager",
       "file_type": "code",
       "source_file": "Client/Patches/PackMulePatch.cs",
-      "source_location": "L25",
+      "source_location": "L48",
       "_origin": "ast",
       "id": "client_patches_packmulepatch_cs_skillmanager",
       "community": 87,
@@ -2317,7 +2357,7 @@
       "label": "PatchPostfix",
       "file_type": "code",
       "source_file": "Client/Patches/PackMulePatch.cs",
-      "source_location": "L25",
+      "source_location": "L48",
       "_origin": "ast",
       "id": "client_patches_packmulepatch_cs_patchpostfix",
       "community": 87,
@@ -2760,7 +2800,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "patches_skilliconborderpatch_skilliconborderpatch_postfix",
-      "community": 50,
+      "community": 107,
       "norm_label": ".postfix()"
     },
     {
@@ -2770,7 +2810,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "client_patches_skilliconborderpatch_cs_skillclass",
-      "community": 50,
+      "community": 107,
       "norm_label": "skillclass"
     },
     {
@@ -2780,7 +2820,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "client_patches_skilliconborderpatch_cs_image",
-      "community": 50,
+      "community": 107,
       "norm_label": "image"
     },
     {
@@ -2790,7 +2830,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "client_patches_skilliconborderpatch_cs_patchpostfix",
-      "community": 50,
+      "community": 107,
       "norm_label": "patchpostfix"
     },
     {
@@ -3777,7 +3817,7 @@
       "label": ".GetOrCreateMarker()",
       "file_type": "code",
       "source_file": "Client/Patches/WeightMarkerPatch.cs",
-      "source_location": "L89",
+      "source_location": "L84",
       "_origin": "ast",
       "id": "patches_weightmarkerpatch_weightmarkerpatch_getorcreatemarker",
       "community": 98,
@@ -3787,7 +3827,7 @@
       "label": "TMP_Text",
       "file_type": "code",
       "source_file": "Client/Patches/WeightMarkerPatch.cs",
-      "source_location": "L89",
+      "source_location": "L84",
       "_origin": "ast",
       "id": "tmp_text",
       "community": 98,
@@ -3797,7 +3837,7 @@
       "label": "GameObject",
       "file_type": "code",
       "source_file": "Client/Patches/WeightMarkerPatch.cs",
-      "source_location": "L89",
+      "source_location": "L84",
       "_origin": "ast",
       "id": "client_patches_weightmarkerpatch_cs_gameobject",
       "community": 98,
@@ -4207,7 +4247,7 @@
       "label": ".GroupsFor()",
       "file_type": "code",
       "source_file": "Client/PerksCatalog.cs",
-      "source_location": "L197",
+      "source_location": "L206",
       "_origin": "ast",
       "id": "client_perkscatalog_perkscatalog_groupsfor",
       "community": 84,
@@ -4217,7 +4257,7 @@
       "label": ".LocalGroups()",
       "file_type": "code",
       "source_file": "Client/PerksCatalog.cs",
-      "source_location": "L211",
+      "source_location": "L220",
       "_origin": "ast",
       "id": "client_perkscatalog_perkscatalog_localgroups",
       "community": 84,
@@ -4227,7 +4267,7 @@
       "label": ".IconSprite()",
       "file_type": "code",
       "source_file": "Client/PerksCatalog.cs",
-      "source_location": "L214",
+      "source_location": "L223",
       "_origin": "ast",
       "id": "client_perkscatalog_perkscatalog_iconsprite",
       "community": 84,
@@ -4237,7 +4277,7 @@
       "label": "Sprite",
       "file_type": "code",
       "source_file": "Client/PerksCatalog.cs",
-      "source_location": "L214",
+      "source_location": "L223",
       "_origin": "ast",
       "id": "client_perkscatalog_cs_sprite",
       "community": 84,
@@ -4247,7 +4287,7 @@
       "label": ".BuffSprite()",
       "file_type": "code",
       "source_file": "Client/PerksCatalog.cs",
-      "source_location": "L238",
+      "source_location": "L247",
       "_origin": "ast",
       "id": "client_perkscatalog_perkscatalog_buffsprite",
       "community": 84,
@@ -4257,7 +4297,7 @@
       "label": ".BuildNotificationText()",
       "file_type": "code",
       "source_file": "Client/PerksCatalog.cs",
-      "source_location": "L257",
+      "source_location": "L266",
       "_origin": "ast",
       "id": "client_perkscatalog_perkscatalog_buildnotificationtext",
       "community": 84,
@@ -4267,7 +4307,7 @@
       "label": ".ValidateOnce()",
       "file_type": "code",
       "source_file": "Client/PerksCatalog.cs",
-      "source_location": "L286",
+      "source_location": "L295",
       "_origin": "ast",
       "id": "client_perkscatalog_perkscatalog_validateonce",
       "community": 84,
@@ -4287,17 +4327,27 @@
       "label": "PerksConfig",
       "file_type": "code",
       "source_file": "Client/PerksConfig.cs",
-      "source_location": "L10",
+      "source_location": "L12",
       "_origin": "ast",
       "id": "client_perksconfig_perksconfig",
       "community": 88,
       "norm_label": "perksconfig"
     },
     {
+      "label": "string",
+      "file_type": "code",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L15",
+      "_origin": "ast",
+      "id": "client_perksconfig_cs_string",
+      "community": 88,
+      "norm_label": "string"
+    },
+    {
       "label": "ConfigEntry",
       "file_type": "code",
       "source_file": "Client/PerksConfig.cs",
-      "source_location": "L13",
+      "source_location": "L26",
       "_origin": "ast",
       "id": "client_perksconfig_cs_configentry",
       "community": 88,
@@ -4307,7 +4357,7 @@
       "label": ".Bind()",
       "file_type": "code",
       "source_file": "Client/PerksConfig.cs",
-      "source_location": "L122",
+      "source_location": "L105",
       "_origin": "ast",
       "id": "client_perksconfig_perksconfig_bind",
       "community": 88,
@@ -4317,7 +4367,7 @@
       "label": "ConfigFile",
       "file_type": "code",
       "source_file": "Client/PerksConfig.cs",
-      "source_location": "L122",
+      "source_location": "L105",
       "_origin": "ast",
       "id": "configfile",
       "community": 88,
@@ -18556,6 +18606,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "Client/Patches/ClassSoundPatches.cs",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "patches_classsoundpatches",
+      "target": "patches_classsoundpatches_loudoperator",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassSoundPatches.cs",
       "source_location": "L162",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -18571,6 +18631,49 @@
       "confidence_score": 1.0,
       "source": "patches_classsoundpatches",
       "target": "patches_classsoundpatches_soundradiuspatch"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassSoundPatches.cs",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "patches_classsoundpatches_loudoperator",
+      "target": "patches_classsoundpatches_loudoperator_mult",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassSoundPatches.cs",
+      "source_location": "L157",
+      "weight": 1.0,
+      "source": "patches_classsoundpatches_aisoundpatch_prefix",
+      "target": "patches_classsoundpatches_loudoperator_mult",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassSoundPatches.cs",
+      "source_location": "L230",
+      "weight": 1.0,
+      "source": "patches_classsoundpatches_sainsoundpatch_prefix",
+      "target": "patches_classsoundpatches_loudoperator_mult",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassSoundPatches.cs",
+      "source_location": "L72",
+      "weight": 1.0,
+      "source": "patches_classsoundpatches_soundradiuspatch_postfix",
+      "target": "patches_classsoundpatches_loudoperator_mult",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -19721,11 +19824,42 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "Client/Patches/PackMulePatch.cs",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "patches_packmulepatch",
+      "target": "patches_packmulepatch_packmule",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/PackMulePatch.cs",
       "source_location": "L18",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "patches_packmulepatch",
       "target": "patches_packmulepatch_packmulepatch"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/PackMulePatch.cs",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "patches_packmulepatch_packmule",
+      "target": "patches_packmulepatch_packmule_localbonus",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/PackMulePatch.cs",
+      "source_location": "L53",
+      "weight": 1.0,
+      "source": "patches_packmulepatch_packmulepatch_postfix",
+      "target": "patches_packmulepatch_packmule_localbonus",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -22013,9 +22147,9 @@
       "source_location": "L37",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "client_perkscatalog_perkline",
-      "target": "client_perkscatalog_cs_func",
-      "confidence_score": 1.0
+      "target": "client_perkscatalog_cs_func"
     },
     {
       "relation": "references",
@@ -22134,9 +22268,9 @@
       "source_location": "L67",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "client_perkscatalog_perkscatalog_p",
-      "target": "client_perkscatalog_cs_func",
-      "confidence_score": 1.0
+      "target": "client_perkscatalog_cs_func"
     },
     {
       "relation": "references",
@@ -22312,6 +22446,17 @@
       "confidence_score": 1.0,
       "source": "client_perksconfig_perksconfig",
       "target": "client_perksconfig_cs_configentry"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L23",
+      "weight": 1.0,
+      "context": "field",
+      "source": "client_perksconfig_perksconfig",
+      "target": "client_perksconfig_cs_string",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -37663,5 +37808,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "b0aad88f149d6861f8d6313868058dec339e4899"
+  "built_at_commit": "e46abf7dcc6eb4c47d5dc5b04ad57d5a26718480"
 }
