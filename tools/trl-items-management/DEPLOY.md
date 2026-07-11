@@ -50,8 +50,8 @@ bash tools/trl-items-management/scripts/package-release.sh D:/SPT/_vm-deploy
 **Na VM** — abra o PowerShell **como Administrador** (Run as Administrator), copie o zip
 (AnyDesk), extraia e rode o updater de dentro da pasta extraída:
 ```powershell
-Expand-Archive "D:\_deploy\trl-release-v1.0.0.zip" "D:\_deploy" -Force
-cd "D:\_deploy\trl-release-v1.0.0"
+Expand-Archive "D:\_deploy\trl-release-v1.0.1.zip" "D:\_deploy" -Force
+cd "D:\_deploy\trl-release-v1.0.1"
 powershell -ExecutionPolicy Bypass -File .\update-vm.ps1
 ```
 > Sem elevação o script ainda roda, mas se o setup antigo (serviço NSSM ou Scheduled Task do

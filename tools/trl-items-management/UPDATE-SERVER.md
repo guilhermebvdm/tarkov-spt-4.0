@@ -19,7 +19,7 @@ bash tools/trl-items-management/scripts/package-release.sh
 Espere terminar. No final ele mostra onde salvou o zip, algo como:
 
 ```
-✓ bundle: /c/Repos/spt/tarkov-spt-4.0/dist/trl-release-v1.0.0.zip (960K)
+✓ bundle: /c/Repos/spt/tarkov-spt-4.0/dist/trl-release-v1.0.1.zip (960K)
 ```
 
 Esse é o arquivo que você vai levar pro servidor.
@@ -35,8 +35,8 @@ a. Abra o **PowerShell como Administrador** (botão direito → "Executar como a
 
 b. Extraia o zip e entre na pasta extraída, por exemplo:
    ```powershell
-   Expand-Archive "D:\_deploy\trl-release-v1.0.0.zip" "D:\_deploy" -Force
-   cd "D:\_deploy\trl-release-v1.0.0"
+   Expand-Archive "D:\_deploy\trl-release-v1.0.1.zip" "D:\_deploy" -Force
+   cd "D:\_deploy\trl-release-v1.0.1"
    ```
 
 c. Rode o updater:
@@ -50,7 +50,7 @@ c. Rode o updater:
 
 d. Deixa rodar até o final. Vai aparecer uma linha verde assim:
    ```
-   [OK] Atualizado -> TRL-ItemsManagement 1.0.0.0
+   [OK] Atualizado -> TRL-ItemsManagement 1.0.1.0
    ```
 
 Pronto — o SPT já sobe sozinho no final (o script reinicia o servidor pra você).

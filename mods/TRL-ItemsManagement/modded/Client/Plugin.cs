@@ -9,7 +9,7 @@ namespace TRLItemsManagement.Client;
 ///     <c>buy-overrides.json</c> config the paired server mod's Harmony backstop applies at
 ///     <c>TradeHelper.SellItem</c> — exhibited price and credited money always agree.
 /// </summary>
-[BepInPlugin("trlitemsmanagement.trl.client", "TRL Items Management", "1.0.0")]
+[BepInPlugin("trlitemsmanagement.trl.client", "TRL Items Management", "1.0.1")]
 [BepInDependency("com.SPT.core", "4.0.0")]
 public class Plugin : BaseUnityPlugin
 {
