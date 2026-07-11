@@ -28,7 +28,15 @@ internal static class PerksCatalog
         public string TitleEn = "", TitlePt = "";   // fix in-game 2026-07-03: nome ÚNICO por efeito (card + notificação)
         public string LabelEn = "", LabelPt = "";
         public ValueFormat Format;
-        public float Multiplier = 1f;   // Percent/Multiplier (ignorado em Flag)
+        private float _multiplier = 1f;
+        /// <summary>
+        ///     B4 (balance 2026-07-10): resolve o multiplicador VIVO do F12 (lazy — relido a cada acesso, como o
+        ///     footer 060). Null = usa o valor do catálogo. Cada lambda embute o fallback (F12 não bindado) e a
+        ///     transformação quando o card ≠ F12 (ex.: Iron Lungs duração = 1/dreno; Pack Mule = 1 + bônus).
+        /// </summary>
+        public Func<float>? Live;
+        /// <summary>Percent/Multiplier (ignorado em Flag). B4: se <see cref="Live"/> != null, vem do F12 vivo.</summary>
+        public float Multiplier { get => Live?.Invoke() ?? _multiplier; set => _multiplier = value; }
         public Polarity Polarity;       // classifica (Percent/Multiplier)
         public bool FlagIsPerk;         // Flag qualitativa: perk/drawback explícito
         public bool Pending;            // efeito deferido → "em breve" só nesta linha
@@ -56,8 +64,8 @@ internal static class PerksCatalog
     }
 
     // Fábricas de linha. (tEn/tPt = título ÚNICO do efeito — fix in-game 2026-07-03)
-    private static PerkLine P(string tEn, string tPt, string en, string pt, ValueFormat fmt, float mult, Polarity pol, EBuffId icon = EBuffId.None, bool pending = false)
-        => new() { TitleEn = tEn, TitlePt = tPt, LabelEn = en, LabelPt = pt, Format = fmt, Multiplier = mult, Polarity = pol, Icon = icon, Pending = pending };
+    private static PerkLine P(string tEn, string tPt, string en, string pt, ValueFormat fmt, float mult, Polarity pol, EBuffId icon = EBuffId.None, bool pending = false, Func<float>? live = null)
+        => new() { TitleEn = tEn, TitlePt = tPt, LabelEn = en, LabelPt = pt, Format = fmt, Multiplier = mult, Polarity = pol, Icon = icon, Pending = pending, Live = live };
     private static PerkLine Flag(string tEn, string tPt, string en, string pt, bool isPerk, EBuffId icon = EBuffId.None, bool pending = false)
         => new() { TitleEn = tEn, TitlePt = tPt, LabelEn = en, LabelPt = pt, Format = ValueFormat.Flag, FlagIsPerk = isPerk, Icon = icon, Pending = pending };
     private static PerkGroup G(string nameEn, string namePt, ESkillId? icon, PerkLine[] lines, ESkillId? iconAlt = null)
@@ -73,57 +81,63 @@ internal static class PerksCatalog
             P("Swift Surgeon", "Cirurgião Ágil", "surgery time", "tempo de cirurgia", ValueFormat.Percent, 0.5f, Polarity.LowerBetter, EBuffId.SurgerySpeed, pending: true),
             Flag("Mobile Surgery", "Cirurgia em Movimento", "surgery on the move", "cirurgia em movimento", isPerk: true, EBuffId.SurgeryReducePenalty, pending: true),
         }),
+        ["efficient_metabolism"] = G("Efficient Metabolism", "Metabolismo Eficiente", ESkillId.Metabolism, new[]   // B17 (2026-07-10): 1º perk vivo do Médico
+        {
+            P("Efficient Metabolism", "Metabolismo Eficiente", "hunger/thirst drain", "fome/sede", ValueFormat.Percent, 0.85f, Polarity.LowerBetter, EBuffId.MetabolismEnergyExpenses, live: () => PerksConfig.EfficientMetabolismHungerThirst?.Value ?? 0.85f),
+        }),
         ["shaky_hands"] = G("Shaky Hands", "Mãos Trêmulas", ESkillId.RecoilControl, new[]
         {
-            P("Shaky Hands", "Mãos Trêmulas", "recoil", "recuo", ValueFormat.Multiplier, 1.25f, Polarity.LowerBetter, EBuffId.RecoilControlImprove),
+            P("Shaky Hands", "Mãos Trêmulas", "recoil", "recuo", ValueFormat.Multiplier, 1.25f, Polarity.LowerBetter, EBuffId.RecoilControlImprove, live: () => PerksConfig.ShakyHandsRecoil?.Value ?? 1.25f),
         }),
 
         // 🔫 Fuzileiro
         ["cool_under_fire"] = G("Cool Under Fire", "Sangue-frio", ESkillId.StressResistance, new[]
         {
-            P("Cool Under Fire", "Sangue-frio", "flinch when hit", "flinch ao levar dano", ValueFormat.Multiplier, 0.5f, Polarity.LowerBetter, EBuffId.AimMasterWiggle),
-            P("Anti-Jam", "Antitravamento", "weapon jam chance", "chance de travamento", ValueFormat.Multiplier, 0.5f, Polarity.LowerBetter, EBuffId.TroubleFixing),
+            P("Cool Under Fire", "Sangue-frio", "flinch when hit", "flinch ao levar dano", ValueFormat.Multiplier, 0.5f, Polarity.LowerBetter, EBuffId.AimMasterWiggle, live: () => PerksConfig.CoolUnderFireFlinch?.Value ?? 0.5f),
+            P("Anti-Jam", "Antitravamento", "weapon jam chance", "chance de travamento", ValueFormat.Multiplier, 0.5f, Polarity.LowerBetter, EBuffId.TroubleFixing, live: () => PerksConfig.CoolUnderFireMalfChance?.Value ?? 0.5f),
         }),
         ["adrenaline"] = G("Adrenaline", "Adrenalina", ESkillId.AimMaster, new[]
         {
-            P("Adrenaline Grip", "Pegada de Adrenalina", "recoil (combat window)", "recuo (janela de combate)", ValueFormat.Multiplier, 0.7f, Polarity.LowerBetter, EBuffId.RecoilControlImprove),
-            P("Adrenaline Reload", "Recarga de Adrenalina", "reload time (combat window)", "recarga (janela de combate)", ValueFormat.Multiplier, 0.8f, Polarity.LowerBetter, EBuffId.WeaponReloadBuff),
-            P("Adrenaline Focus", "Foco de Adrenalina", "ADS time (combat window)", "ADS (janela de combate)", ValueFormat.Multiplier, 0.8f, Polarity.LowerBetter, EBuffId.AimMasterSpeed),
+            P("Adrenaline Grip", "Pegada de Adrenalina", "recoil (combat window)", "recuo (janela de combate)", ValueFormat.Multiplier, 0.7f, Polarity.LowerBetter, EBuffId.RecoilControlImprove, live: () => PerksConfig.AdrenalineRecoil?.Value ?? 0.7f),
+            P("Adrenaline Reload", "Recarga de Adrenalina", "reload time (combat window)", "recarga (janela de combate)", ValueFormat.Multiplier, 0.8f, Polarity.LowerBetter, EBuffId.WeaponReloadBuff, live: () => PerksConfig.AdrenalineReloadTime?.Value ?? 0.8f),
+            P("Adrenaline Focus", "Foco de Adrenalina", "ADS time (combat window)", "ADS (janela de combate)", ValueFormat.Multiplier, 0.8f, Polarity.LowerBetter, EBuffId.AimMasterSpeed, live: () => PerksConfig.AdrenalineAdsTime?.Value ?? 0.8f),
         }),
         ["loud_operator"] = G("Loud Operator", "Barulhento", ESkillId.SilentOps, new[]   // compartilhado Fuzileiro + Tanque (2026-07-05)
         {
-            P("Loud Operator", "Barulhento", "noise", "ruído", ValueFormat.Percent, 1.3f, Polarity.LowerBetter, EBuffId.CovertMovementSoundVolume),
+            P("Loud Operator", "Barulhento", "noise", "ruído", ValueFormat.Percent, 1.3f, Polarity.LowerBetter, EBuffId.CovertMovementSoundVolume, live: () => PerksConfig.LoudOperatorSoundRadius?.Value ?? 1.3f),
         }),
 
         // 🎯 Caçador
         ["sharpshooter"] = G("Sharpshooter", "Atirador", ESkillId.DrawMaster, new[]
         {
-            P("Sharpshooter", "Atirador", "aim (ADS) time, all weapons", "mira (ADS), todas as armas", ValueFormat.Percent, 0.85f, Polarity.LowerBetter, EBuffId.AimMasterSpeed),
+            P("Sharpshooter", "Atirador", "aim (ADS) time, all weapons", "mira (ADS), todas as armas", ValueFormat.Percent, 0.85f, Polarity.LowerBetter, EBuffId.AimMasterSpeed, live: () => PerksConfig.SharpshooterAdsTime?.Value ?? 0.85f),
         }),
         ["iron_lungs"] = G("Iron Lungs", "Fôlego de Aço", ESkillId.Sniping, new[]
         {
-            P("Iron Lungs", "Fôlego de Aço", "breath hold duration", "duração da respiração", ValueFormat.Percent, 1.5f, Polarity.HigherBetter, EBuffId.EnduranceBuffBreathTimeInc),
-            P("Steady Arms", "Braços Firmes", "arm fatigue when aiming", "fadiga de braço ao mirar", ValueFormat.Percent, 0.65f, Polarity.LowerBetter, EBuffId.EnduranceHands),   // 051 ENTREGUE (hook no stances)
+            // B4: o card mostra a DURAÇÃO (+X%), mas o F12 é o DRENO (×). duração = 1/dreno → 1/0.667 ≈ 1.5 (+50%).
+            P("Iron Lungs", "Fôlego de Aço", "breath hold duration", "duração da respiração", ValueFormat.Percent, 1.5f, Polarity.HigherBetter, EBuffId.EnduranceBuffBreathTimeInc, live: () => 1f / (PerksConfig.IronLungsBreathDrain?.Value ?? 0.667f)),
+            P("Steady Arms", "Braços Firmes", "arm fatigue when aiming", "fadiga de braço ao mirar", ValueFormat.Percent, 0.65f, Polarity.LowerBetter, EBuffId.EnduranceHands, live: () => PerksConfig.SteadyArmsDrain?.Value ?? 0.65f),   // 051 ENTREGUE (hook no stances)
             P("Calm Sights", "Mira Serena", "sway", "oscilação (sway)", ValueFormat.Percent, 0.7f, Polarity.LowerBetter, EBuffId.AimMasterWiggle, pending: true),
         }),
         ["rooted"] = G("Rooted", "Enraizado", ESkillId.CovertMovement, new[]
         {
-            P("Rooted", "Enraizado", "move speed while aiming", "velocidade ao mirar", ValueFormat.Percent, 0.85f, Polarity.HigherBetter, EBuffId.CovertMovementSpeed),
+            P("Rooted", "Enraizado", "move speed while aiming", "velocidade ao mirar", ValueFormat.Percent, 0.85f, Polarity.HigherBetter, EBuffId.CovertMovementSpeed, live: () => PerksConfig.RootedAdsSpeed?.Value ?? 0.85f),
         }),
 
         // 👻 Furtivo
         ["ghost_step"] = G("Ghost Step", "Passo Fantasma", ESkillId.CovertMovement, new[]
         {
-            P("Ghost Step", "Passo Fantasma", "all player noise", "todo o ruído do player", ValueFormat.Percent, 0.7f, Polarity.LowerBetter, EBuffId.CovertMovementSoundVolume),
+            // B2 (2026-07-10): label corrigido — os 3 pipelines cobrem movimento/ações; TIROS ficam de fora (o rótulo antigo mentia).
+            P("Ghost Step", "Passo Fantasma", "movement/action noise", "ruído de movimento/ações", ValueFormat.Percent, 0.7f, Polarity.LowerBetter, EBuffId.CovertMovementSoundVolume, live: () => PerksConfig.GhostStepSoundRadius?.Value ?? 0.7f),
         }),
         ["execution"] = G("Execution", "Execução", ESkillId.Melee, new[]
         {
-            P("Execution", "Execução", "melee damage", "dano de melee", ValueFormat.Multiplier, 5f, Polarity.HigherBetter, EBuffId.StrengthBuffMeleePowerInc),
-            P("Swift Blade", "Lâmina Veloz", "move speed with melee", "velocidade c/ melee na mão", ValueFormat.Percent, 1.1f, Polarity.HigherBetter, EBuffId.StrengthBuffSprintSpeedInc),
+            P("Execution", "Execução", "melee damage", "dano de melee", ValueFormat.Multiplier, 5f, Polarity.HigherBetter, EBuffId.StrengthBuffMeleePowerInc, live: () => PerksConfig.ExecutionMeleeDamage?.Value ?? 5f),
+            P("Swift Blade", "Lâmina Veloz", "move speed with melee", "velocidade c/ melee na mão", ValueFormat.Percent, 1.1f, Polarity.HigherBetter, EBuffId.StrengthBuffSprintSpeedInc, live: () => PerksConfig.ExecutionMoveSpeed?.Value ?? 1.1f),
         }),
         ["rattled"] = G("Rattled", "Abalado", ESkillId.StressResistance, new[]
         {
-            P("Rattled", "Abalado", "aim punch when hit", "tranco na mira ao ser atingido", ValueFormat.Percent, 1.5f, Polarity.LowerBetter, EBuffId.AimMasterWiggle),
+            P("Rattled", "Abalado", "aim punch when hit", "tranco na mira ao ser atingido", ValueFormat.Percent, 1.5f, Polarity.LowerBetter, EBuffId.AimMasterWiggle, live: () => PerksConfig.RattledAimPunch?.Value ?? 1.5f),
         }),
 
         // 🎒 Saqueador
@@ -143,32 +157,33 @@ internal static class PerksCatalog
         // 🛡️ Tanque
         ["pack_mule"] = G("Pack Mule", "Mula de Carga", ESkillId.Strength, new[]   // compartilhado Saqueador + Tanque
         {
-            P("Pack Mule", "Mula de Carga", "carry limit", "limite de carga", ValueFormat.Percent, 1.3f, Polarity.HigherBetter, EBuffId.StrengthBuffLiftWeightInc),
+            // B4: o card mostra +X% (Percent), mas o F12 é o bônus cru (0.30). card = 1 + bônus.
+            P("Pack Mule", "Mula de Carga", "carry limit", "limite de carga", ValueFormat.Percent, 1.3f, Polarity.HigherBetter, EBuffId.StrengthBuffLiftWeightInc, live: () => 1f + (PerksConfig.PackMuleCarryBonus?.Value ?? 0.3f)),
         }),
         ["bulwark"] = G("Bulwark", "Couraça", ESkillId.HeavyVests, new[]
         {
-            P("Bulwark", "Couraça", "damage taken", "dano recebido", ValueFormat.Percent, 0.85f, Polarity.LowerBetter, EBuffId.HealthEliteAbsorbDamage),
+            P("Bulwark", "Couraça", "damage taken", "dano recebido", ValueFormat.Percent, 0.85f, Polarity.LowerBetter, EBuffId.HealthEliteAbsorbDamage, live: () => PerksConfig.BulwarkDamageTaken?.Value ?? 0.85f),
         }, iconAlt: ESkillId.Vitality),
         ["bunker"] = G("Bunker", "Bunker", ESkillId.LMG, new[]
         {
             // fix in-game 2026-07-03: ergo → ícone de bipé (mais legível que WeaponErgonomicsBuff) e
             // GL → ícone de arremesso/granada (StrengthBuffThrowDistanceInc); sem sprite → fallback do grupo.
-            P("Steady Mount", "Apoio Firme", "recoil (LMG/HMG/GL)", "recuo (LMG/HMG/GL)", ValueFormat.Multiplier, 0.85f, Polarity.LowerBetter, EBuffId.RecoilControlImprove),
-            P("Heavy Handling", "Manejo Pesado", "ergonomics (LMG/HMG/GL)", "ergonomia (LMG/HMG/GL)", ValueFormat.Multiplier, 1.15f, Polarity.HigherBetter, EBuffId.BipodErgonomicsGainPerLevel),
+            P("Steady Mount", "Apoio Firme", "recoil (LMG/HMG/GL)", "recuo (LMG/HMG/GL)", ValueFormat.Multiplier, 0.85f, Polarity.LowerBetter, EBuffId.RecoilControlImprove, live: () => PerksConfig.BunkerHeavyRecoil?.Value ?? 0.85f),
+            P("Heavy Handling", "Manejo Pesado", "ergonomics (LMG/HMG/GL)", "ergonomia (LMG/HMG/GL)", ValueFormat.Multiplier, 1.15f, Polarity.HigherBetter, EBuffId.BipodErgonomicsGainPerLevel, live: () => PerksConfig.BunkerHeavyErgo?.Value ?? 1.15f),
             Flag("Grenadier", "Granadeiro", "GL: no ergo penalty", "lança-granadas: sem penalidade de ergo", isPerk: true, EBuffId.StrengthBuffThrowDistanceInc),
             Flag("Tireless Arms", "Braços Incansáveis", "no arm fatigue (heavy weapon)", "braço não cansa (arma pesada)", isPerk: true, EBuffId.EnduranceHands),   // 051 ENTREGUE (hook no stances)
         }, iconAlt: ESkillId.RecoilControl),
         ["heavy_frame"] = G("Heavy Frame", "Estrutura Pesada", ESkillId.Endurance, new[]
         {
-            P("Heavy Frame", "Estrutura Pesada", "move speed", "velocidade", ValueFormat.Percent, 0.9f, Polarity.HigherBetter, EBuffId.StrengthBuffSprintSpeedInc),
-            P("Heavy Appetite", "Apetite Pesado", "hunger/thirst drain", "fome/sede", ValueFormat.Percent, 1.3f, Polarity.LowerBetter, EBuffId.MetabolismEnergyExpenses),
+            P("Heavy Frame", "Estrutura Pesada", "move speed", "velocidade", ValueFormat.Percent, 0.9f, Polarity.HigherBetter, EBuffId.StrengthBuffSprintSpeedInc, live: () => PerksConfig.HeavyFrameMoveSpeed?.Value ?? 0.9f),
+            P("Heavy Appetite", "Apetite Pesado", "hunger/thirst drain", "fome/sede", ValueFormat.Percent, 1.3f, Polarity.LowerBetter, EBuffId.MetabolismEnergyExpenses, live: () => PerksConfig.HeavyFrameHungerThirst?.Value ?? 1.3f),
         }),
     };
 
     // Composição por classe (chave EN estável = displayName.en). Ordem = ordem de exibição.
     private static readonly Dictionary<string, string[]> ByClass = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["Combat Medic"] = new[] { "combat_medic", "shaky_hands" },
+        ["Combat Medic"] = new[] { "combat_medic", "efficient_metabolism", "shaky_hands" },   // B17: perk vivo (Metabolismo)
         ["Rifleman"]     = new[] { "cool_under_fire", "adrenaline", "loud_operator" },
         ["Hunter"]       = new[] { "sharpshooter", "iron_lungs", "rooted" },
         ["Stealth"]      = new[] { "ghost_step", "execution", "rattled" },

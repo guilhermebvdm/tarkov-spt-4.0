@@ -99,6 +99,10 @@ internal static class PerksConfig
     internal static ConfigEntry<bool>? ShakyHandsEnabled;
     internal static ConfigEntry<float>? ShakyHandsRecoil;
 
+    // 🩺 Efficient Metabolism (Médico) — fome/sede drenam mais devagar (B17, balance 2026-07-10; lever do Heavy Frame)
+    internal static ConfigEntry<bool>? EfficientMetabolismEnabled;
+    internal static ConfigEntry<float>? EfficientMetabolismHungerThirst;
+
     // 🔻 Rattled (Furtivo) — aim-punch ao levar dano (050.2)
     internal static ConfigEntry<bool>? RattledEnabled;
     internal static ConfigEntry<float>? RattledAimPunch;
@@ -188,14 +192,27 @@ internal static class PerksConfig
                 "Multiplicador do dano de melee do Stealth (5.0 = 5×, execução). / Stealth melee damage multiplier.",
                 new AcceptableValueRange<float>(1f, 10f)));
 
+        // B1 (balance 2026-07-10): default OFF até os perks do Médico existirem — hoje o Shaky Hands é o ÚNICO
+        // efeito vivo da classe, tornando-a estritamente negativa. O usuário pode religar no F12 a qualquer momento.
         ShakyHandsEnabled = config.Bind(
-            "Drawbacks — Combat Medic", "Shaky Hands — Enabled", true,
+            "Drawbacks — Combat Medic", "Shaky Hands — Enabled", false,
             "Combat Medic: +recuo (mãos trêmulas). / Combat Medic: more recoil.");
         ShakyHandsRecoil = config.Bind(
             "Drawbacks — Combat Medic", "Shaky Hands — Recoil mult", 1.25f,
             new ConfigDescription(
                 "Multiplicador de recuo do Médico (1.25 = +25%). / Combat Medic recoil multiplier.",
                 new AcceptableValueRange<float>(1f, 2f)));
+
+        // B17 (balance 2026-07-10): primeiro perk VIVO do Médico — fome/sede ×0.85 reusando o lever do Heavy Frame
+        // (ClassCombatHealthPatches → HeavyFrameMetabolism.Apply, branch por classe).
+        EfficientMetabolismEnabled = config.Bind(
+            "Perks — Combat Medic", "Efficient Metabolism — Enabled", true,
+            "Combat Medic: fome/sede drenam mais devagar (metabolismo eficiente). / Combat Medic: slower hunger/thirst drain.");
+        EfficientMetabolismHungerThirst = config.Bind(
+            "Perks — Combat Medic", "Efficient Metabolism — Hunger/thirst drain", 0.85f,
+            new ConfigDescription(
+                "Multiplicador do dreno de fome/sede do Médico (0.85 = 15% mais devagar). / Combat Medic hunger/thirst drain multiplier.",
+                new AcceptableValueRange<float>(0.5f, 1f)));
 
         RattledEnabled = config.Bind(
             "Drawbacks — Stealth", "Rattled — Enabled", true,
@@ -223,10 +240,11 @@ internal static class PerksConfig
         GhostStepEnabled = config.Bind(
             "Perks — Stealth", "Ghost Step — Enabled", true,
             "Stealth: reduz o raio de audibilidade dos seus sons de movimento. / Stealth: quieter movement (smaller audibility radius).");
+        // B2 (balance 2026-07-10): 0.40 → 0.70 — exatamente o −30% que o card anuncia (antes o card mentia: −60% real).
         GhostStepSoundRadius = config.Bind(
-            "Perks — Stealth", "Ghost Step — Sound radius mult", 0.40f,
+            "Perks — Stealth", "Ghost Step — Sound radius mult", 0.70f,
             new ConfigDescription(
-                "Multiplicador do raio de som de movimento do Stealth (0.40 = -60%). / Stealth movement-sound radius multiplier.",
+                "Multiplicador do raio de som de movimento do Stealth (0.70 = -30%). / Stealth movement-sound radius multiplier.",
                 new AcceptableValueRange<float>(0.1f, 1f)));
 
         // (2026-07-05) Loud Operator agora é compartilhado Rifleman + Tank — a SEÇÃO do cfg fica "Drawbacks —
@@ -275,10 +293,11 @@ internal static class PerksConfig
         IronLungsEnabled = config.Bind(
             "Perks — Hunter", "Iron Lungs — Enabled", true,
             "Hunter: segura a respiração por mais tempo. / Hunter: holds breath longer.");
+        // B3 (balance 2026-07-10): 0.50 → 0.667 — dreno ×0.667 ⇒ duração ×1.5 (+50% exatos, o que o card anuncia).
         IronLungsBreathDrain = config.Bind(
-            "Perks — Hunter", "Iron Lungs — Breath drain mult", 0.50f,
+            "Perks — Hunter", "Iron Lungs — Breath drain mult", 0.667f,
             new ConfigDescription(
-                "Multiplicador do consumo de O₂ ao prender a respiração (0.50 = metade → ~2× o tempo). / Hold-breath O2 drain multiplier.",
+                "Multiplicador do consumo de O₂ ao prender a respiração (0.667 → +50% de duração). / Hold-breath O2 drain multiplier.",
                 new AcceptableValueRange<float>(0.2f, 1f)));
 
         AdrenalineEnabled = config.Bind(
