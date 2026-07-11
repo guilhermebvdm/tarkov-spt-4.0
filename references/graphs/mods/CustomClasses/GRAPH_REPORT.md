@@ -1,16 +1,16 @@
 # Graph Report - mods\CustomClasses\modded  (2026-07-10)
 
 ## Corpus Check
-- 108 files · ~94,750 words
+- 108 files · ~95,303 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1622 nodes · 2073 edges · 107 communities (98 shown, 9 thin omitted)
+- 1623 nodes · 2075 edges · 106 communities (97 shown, 9 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `3c061f86`
+- Built from commit: `b0aad88f`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -94,7 +94,6 @@
 - [[_COMMUNITY_Community 83|Community 83]]
 - [[_COMMUNITY_Community 84|Community 84]]
 - [[_COMMUNITY_Community 85|Community 85]]
-- [[_COMMUNITY_Community 86|Community 86]]
 - [[_COMMUNITY_Community 87|Community 87]]
 - [[_COMMUNITY_Community 88|Community 88]]
 - [[_COMMUNITY_Community 89|Community 89]]
@@ -123,25 +122,25 @@
 6. `MongoId` - 18 edges
 7. `SkillsClassTabPatch` - 15 edges
 8. `ClassIdentityView` - 14 edges
-9. `PerksCatalog` - 12 edges
-10. `PerkLine` - 12 edges
+9. `PerkLine` - 13 edges
+10. `PerksCatalog` - 12 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `AdrenalineTriggerPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/AdrenalineTriggerPatch.cs →   _Bridges community 90 → community 83_
+  Client/Patches/AdrenalineTriggerPatch.cs →   _Bridges community 90 → community 80_
 - `ChatSpecialIconPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/ChatSpecialIconPatch.cs →   _Bridges community 83 → community 40_
+  Client/Patches/ChatSpecialIconPatch.cs →   _Bridges community 80 → community 40_
 - `ChangeEnergyPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/ClassCombatHealthPatches.cs →   _Bridges community 83 → community 79_
+  Client/Patches/ClassCombatHealthPatches.cs →   _Bridges community 80 → community 79_
 - `ClassDetailLoadingPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/ClassDetailLoadingPatch.cs →   _Bridges community 83 → community 101_
+  Client/Patches/ClassDetailLoadingPatch.cs →   _Bridges community 80 → community 101_
 - `MaxSpeedPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/ClassMovementPatches.cs →   _Bridges community 83 → community 81_
+  Client/Patches/ClassMovementPatches.cs →   _Bridges community 80 → community 81_
 
 ## Import Cycles
 - None detected.
 
-## Communities (107 total, 9 thin omitted)
+## Communities (106 total, 9 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.09
@@ -412,8 +411,8 @@ Cohesion: 0.11
 Nodes (14): ActiveHealthController, DamageInfoStruct, FirearmController, float, MethodBase, PatchPostfix, PatchPrefix, ChangeEnergyPatch (+6 more)
 
 ### Community 80 - "Community 80"
-Cohesion: 0.50
-Nodes (3): DamageInfoStruct, PatchPrefix, Player
+Cohesion: 0.22
+Nodes (6): DamageInfoStruct, MethodBase, PatchPrefix, Player, ModulePatch, BulwarkPatch
 
 ### Community 81 - "Community 81"
 Cohesion: 0.15
@@ -424,20 +423,16 @@ Cohesion: 0.12
 Nodes (12): AISoundType, Func, int, MethodBase, PatchPostfix, PatchPrefix, Player, IPlayer (+4 more)
 
 ### Community 83 - "Community 83"
-Cohesion: 0.13
-Nodes (12): MethodBase, float, MethodBase, ForceEffector, ModulePatch, BulwarkPatch, AdsSpeedPatch, AimPunchPatch (+4 more)
+Cohesion: 0.10
+Nodes (16): FirearmController, float, MethodBase, PatchPostfix, PatchPrefix, Player, ProceduralWeaponAnimation, Weapon (+8 more)
 
 ### Community 84 - "Community 84"
-Cohesion: 0.18
-Nodes (12): bool, Dictionary, ESkillId, float, Sprite, string, PerkGroup, PerkLine (+4 more)
+Cohesion: 0.17
+Nodes (13): bool, Dictionary, ESkillId, float, Func, Sprite, string, PerkGroup (+5 more)
 
 ### Community 85 - "Community 85"
 Cohesion: 0.22
 Nodes (6): IEnumerator, MethodBase, PatchPostfix, string, GameWorld, RaidPerksNotificationPatch
-
-### Community 86 - "Community 86"
-Cohesion: 0.19
-Nodes (7): FirearmController, PatchPostfix, PatchPrefix, Player, ProceduralWeaponAnimation, Weapon, HeavyWeapon
 
 ### Community 87 - "Community 87"
 Cohesion: 0.29
@@ -507,11 +502,11 @@ Nodes (4): SkillManager, Weapon, WeaponMastery, WeaponSkillClass
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `ClassDetailLoadingPatch` connect `Community 101` to `Community 83`?**
+- **Why does `ClassDetailLoadingPatch` connect `Community 101` to `Community 80`?**
   _High betweenness centrality (0.023) - this node is a cross-community bridge._
 - **Why does `LoadingClassHover` connect `Community 91` to `Community 101`, `Community 102`, `Community 103`?**
   _High betweenness centrality (0.018) - this node is a cross-community bridge._
-- **Why does `SkillsNavButtonPatch` connect `Community 17` to `Community 83`?**
+- **Why does `SkillsNavButtonPatch` connect `Community 17` to `Community 80`?**
   _High betweenness centrality (0.010) - this node is a cross-community bridge._
 - **What connects `float`, `string`, `Dictionary` to the rest of the system?**
   _920 weakly-connected nodes found - possible documentation gaps or missing edges._
