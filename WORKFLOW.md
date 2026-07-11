@@ -52,6 +52,7 @@ Convenção de artefatos: `NNN-<slug>-MM-tipo[-NN].md` — ordem visual = ordem 
 | [/compile-mod](.claude/commands/compile-mod.md) | código pronto | `.dll`/`.js` instalado | path do SPT em `.spt-path` |
 | [/update-memory](.claude/commands/update-memory.md) | sessão com conteúdo | `sessions.md` (mod e/ou repo) | lições obrigatórias; GC >30d; propõe promoções e `/update-mod-graph` |
 | [/update-mod-graph](.claude/commands/update-mod-graph.md) | graphify instalado | `references/graphs/mods/<mod>/` | pós-grandes atualizações; commit junto com o código |
+| [/review-mod-properties](.claude/commands/review-mod-properties.md) | mod com `Config.Bind` | `PROPRIEDADES-review-NN.md` | **auxiliar** (fora do ciclo linear) — UX das opções F12: ordem/nomes de seções, alocação, nomes/tipos/tooltips, props mortas, `Advanced`. Aplicação no `Plugin.cs`; rename de seção/key = breaking |
 
 ## Camadas transversais
 
