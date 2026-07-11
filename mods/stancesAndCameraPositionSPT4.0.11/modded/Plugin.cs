@@ -55,7 +55,6 @@ public class Plugin : BaseUnityPlugin
     // Section constants (in display order - top to bottom)
     private const string Positions = "Positions";
     private const string Settings = "Settings";
-    private const string AdvancedADSSettings = "Advanced ADS Transitions";
     private const string ADSDefaults = "ADS Default Values (Advanced)";
     private const string DefaultHandsPositions = "Default Hands/Arms Positions (Advanced)";
     private const string Stance0Section = "Stance 0 - Vanilla";
@@ -91,7 +90,6 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<float> _StanceKickIntensity;
     public static ConfigEntry<float> _ADSKickDelay;
     public static ConfigEntry<float> _StanceOvershootDamping;
-    public static ConfigEntry<float> _ADSTransitionSpeed;
 
     // Hold Breath
     public static ConfigEntry<float> _HoldBreathOxygenDrain;
@@ -143,11 +141,6 @@ public class Plugin : BaseUnityPlugin
     // ANTES da virtual dispatch para overrides (que tipicamente não chamam base).
     // null = F4 desabilitado.
     public static MethodBase FirearmControllerSetTrigger { get; private set; }
-
-    // Advanced ADS Transitions
-    public static ConfigEntry<bool> _EnableAdvancedADSTransitions;
-    public static ConfigEntry<bool> _AffectStanceTransitionToo;
-    public static ConfigEntry<float> _StanceChangeSoundVolume;
 
     // ADS Default Values
     public static ConfigEntry<bool> _ResetOnADS;
@@ -228,43 +221,6 @@ public class Plugin : BaseUnityPlugin
 
     // Action Stance Settings (Item 008)
     public static ConfigEntry<bool> _EnableActionStanceSwap;
-
-    // Stance Cinematic Curves Settings (Item 009)
-    public static ConfigEntry<float> _CurveDuration;
-    public static ConfigEntry<float> _StanceCurvePitchMultiplier;
-    public static ConfigEntry<float> _StanceCurveYawMultiplier;
-    public static ConfigEntry<float> _StanceCurveRollMultiplier;
-    public static ConfigEntry<float> _StanceCurvePositionMultiplier;
-    // Stance 0 (Vanilla) ADS Multipliers
-    public static ConfigEntry<float> _Stance0ADSPitchMultiplier;
-    public static ConfigEntry<float> _Stance0ADSYawMultiplier;
-    public static ConfigEntry<float> _Stance0ADSRollMultiplier;
-    public static ConfigEntry<float> _Stance0ADSPosYMultiplier;
-    public static ConfigEntry<float> _Stance0ADSPosZMultiplier;
-    public static ConfigEntry<float> _Stance0ADSOvershootDamping;
-
-    // Stance 1 ADS Multipliers
-    public static ConfigEntry<float> _Stance1ADSPitchMultiplier;
-    public static ConfigEntry<float> _Stance1ADSYawMultiplier;
-    public static ConfigEntry<float> _Stance1ADSRollMultiplier;
-    public static ConfigEntry<float> _Stance1ADSPosYMultiplier;
-    public static ConfigEntry<float> _Stance1ADSPosZMultiplier;
-    public static ConfigEntry<float> _Stance1ADSOvershootDamping;
-
-    // Stance 2 ADS Multipliers
-    public static ConfigEntry<float> _Stance2ADSPitchMultiplier;
-    public static ConfigEntry<float> _Stance2ADSYawMultiplier;
-    public static ConfigEntry<float> _Stance2ADSRollMultiplier;
-    public static ConfigEntry<float> _Stance2ADSPosYMultiplier;
-    public static ConfigEntry<float> _Stance2ADSPosZMultiplier;
-    public static ConfigEntry<float> _Stance2ADSOvershootDamping;
-
-    public static ConfigEntry<float> _OvershootAmplitude;
-    public static ConfigEntry<float> _OvershootFrequency;
-    public static ConfigEntry<float> _CameraBobbingMultiplier;
-    public static ConfigEntry<float> _StanceTransitionDamping;
-
-    public static ConfigEntry<float> _MaxLeanLimit;
 
     // Manual Chambering (Item 010)
     public static ConfigEntry<bool> _EnableManualChambering;
@@ -557,22 +513,6 @@ public class Plugin : BaseUnityPlugin
             new AcceptableValueRange<float>(1f, 30.0f),
             new ConfigurationManagerAttributes { Order = 95 }));
 
-        _ADSTransitionSpeed = Config.Bind(
-            Settings,
-            "ADS Transition Speed",
-            1f,
-            new ConfigDescription("How quickly hands transition between stance and ADS positions. 1 = slow, 2 = normal, 3+ = fast/snappy.",
-            new AcceptableValueRange<float>(0.5f, 5f),
-            new ConfigurationManagerAttributes { Order = 56 }));
-
-        _StanceChangeSoundVolume = Config.Bind(
-            Settings,
-            "Stance Change Sound Volume",
-            1f,
-            new ConfigDescription("Volume multiplier for the aim rattle sound when switching stances. 0 = muted, 1 = normal, 2 = louder.",
-            new AcceptableValueRange<float>(0f, 2f),
-            new ConfigurationManagerAttributes { Order = 55 }));
-
         // ========================================
         // backlog 002 F3 — STANCE HOTKEYS DEDICADAS (Order 53 → 50)
         // ========================================
@@ -656,19 +596,6 @@ public class Plugin : BaseUnityPlugin
                 "with no transition animation (immediate set). Applies even if Stance 3 is excluded from the cycle.",
                 null,
                 new ConfigurationManagerAttributes { Order = 48 }));
-
-        // ========================================
-        // ADVANCED ADS TRANSITIONS (Order 55-40)
-        // ========================================
-        _EnableAdvancedADSTransitions = Config.Bind(
-            AdvancedADSSettings,
-            "Advanced ADS Transitions",
-            false,
-            new ConfigDescription("When enabled, weapon is thrown forward then pushed back when aiming to simulate shouldering",
-            null,
-            new ConfigurationManagerAttributes { Order = 55 }));
-
-
 
         // ========================================
         // ADS DEFAULT VALUES (Order 39-33)
@@ -1096,154 +1023,6 @@ public class Plugin : BaseUnityPlugin
             null,
             new ConfigurationManagerAttributes { Order = 1 }));
 
-        const string StanceWiggleSection = "8. Wiggle (Q/E) Dynamics (Stance Based)";
-        _CurveDuration = Config.Bind(
-            StanceWiggleSection,
-            "Animation Curve Duration",
-            0.35f,
-            new ConfigDescription("How long the cinematic stance transition takes to complete (seconds).",
-            new AcceptableValueRange<float>(0.1f, 10.0f),
-            new ConfigurationManagerAttributes { Order = 4 }));
-            
-        _StanceCurvePitchMultiplier = Config.Bind(
-            StanceWiggleSection,
-            "Stance Pitch Multiplier (Cano sobe/desce)",
-            1.0f,
-            new ConfigDescription("Multiplier for the X-axis (Pitch) sway curve during STANCE transitions.",
-            new AcceptableValueRange<float>(0.0f, 5.0f),
-            new ConfigurationManagerAttributes { Order = 3 }));
-
-        _StanceCurveYawMultiplier = Config.Bind(
-            StanceWiggleSection,
-            "Stance Yaw Multiplier (Apontar Esq/Dir)",
-            1.0f,
-            new ConfigDescription("Multiplier for the Yaw sway curve during STANCE transitions.",
-            new AcceptableValueRange<float>(0.0f, 5.0f),
-            new ConfigurationManagerAttributes { Order = 2 }));
-
-        _StanceCurveRollMultiplier = Config.Bind(
-            StanceWiggleSection,
-            "Stance Roll Multiplier (Tombar Arma)",
-            1.0f,
-            new ConfigDescription("Multiplier for the Roll sway curve during STANCE transitions.",
-            new AcceptableValueRange<float>(0.0f, 5.0f),
-            new ConfigurationManagerAttributes { Order = 1 }));
-
-        _StanceCurvePositionMultiplier = Config.Bind(
-            StanceWiggleSection,
-            "Stance Position Multiplier (Coronha no peito)",
-            1.0f,
-            new ConfigDescription("Multiplier for the positional sway curves during STANCE transitions.",
-            new AcceptableValueRange<float>(0.0f, 5.0f),
-            new ConfigurationManagerAttributes { Order = 0 }));
-
-        // --- Stance 0 (Vanilla) ADS Multipliers ---
-        _Stance0ADSPitchMultiplier = Config.Bind(
-            "Stance 0 - Vanilla",
-            "ADS Pitch Multiplier",
-            1.0f,
-            new ConfigDescription("Multiplier for the Pitch sway curve during ADS from Stance 0.",
-            new AcceptableValueRange<float>(0.0f, 5.0f)));
-
-        _Stance0ADSYawMultiplier = Config.Bind(
-            "Stance 0 - Vanilla",
-            "ADS Yaw Multiplier",
-            1.0f,
-            new ConfigDescription("Multiplier for the Yaw sway curve during ADS from Stance 0.",
-            new AcceptableValueRange<float>(0.0f, 5.0f)));
-
-        _Stance0ADSRollMultiplier = Config.Bind(
-            "Stance 0 - Vanilla",
-            "ADS Roll Multiplier",
-            1.0f,
-            new ConfigDescription("Multiplier for the Roll sway curve during ADS from Stance 0.",
-            new AcceptableValueRange<float>(0.0f, 5.0f)));
-
-        _Stance0ADSPosYMultiplier = Config.Bind(
-            "Stance 0 - Vanilla",
-            "ADS Pos Y Multiplier (Forward/Back)",
-            1.0f,
-            new ConfigDescription("Multiplier for the positional sway (Y axis) during ADS from Stance 0.",
-            new AcceptableValueRange<float>(-5.0f, 5.0f)));
-
-        _Stance0ADSPosZMultiplier = Config.Bind(
-            "Stance 0 - Vanilla",
-            "ADS Pos Z Multiplier (Up/Down)",
-            1.0f,
-            new ConfigDescription("Multiplier for the positional sway (Z axis) during ADS from Stance 0.",
-            new AcceptableValueRange<float>(-5.0f, 5.0f)));
-
-        // --- Stance 1 ADS Multipliers ---
-        _Stance1ADSPitchMultiplier = Config.Bind(
-            Stance1Section,
-            "ADS Pitch Multiplier",
-            1.0f,
-            new ConfigDescription("Multiplier for the Pitch sway curve during ADS from Stance 1.",
-            new AcceptableValueRange<float>(0.0f, 5.0f)));
-
-        _Stance1ADSYawMultiplier = Config.Bind(
-            Stance1Section,
-            "ADS Yaw Multiplier",
-            1.0f,
-            new ConfigDescription("Multiplier for the Yaw sway curve during ADS from Stance 1.",
-            new AcceptableValueRange<float>(0.0f, 5.0f)));
-
-        _Stance1ADSRollMultiplier = Config.Bind(
-            Stance1Section,
-            "ADS Roll Multiplier",
-            1.0f,
-            new ConfigDescription("Multiplier for the Roll sway curve during ADS from Stance 1.",
-            new AcceptableValueRange<float>(0.0f, 5.0f)));
-
-        _Stance1ADSPosYMultiplier = Config.Bind(
-            Stance1Section,
-            "ADS Pos Y Multiplier (Forward/Back)",
-            1.0f,
-            new ConfigDescription("Multiplier for the positional sway (Y axis) during ADS from Stance 1.",
-            new AcceptableValueRange<float>(-5.0f, 5.0f)));
-
-        _Stance1ADSPosZMultiplier = Config.Bind(
-            Stance1Section,
-            "ADS Pos Z Multiplier (Up/Down)",
-            1.0f,
-            new ConfigDescription("Multiplier for the positional sway (Z axis) during ADS from Stance 1.",
-            new AcceptableValueRange<float>(-5.0f, 5.0f)));
-
-        // --- Stance 2 ADS Multipliers ---
-        _Stance2ADSPitchMultiplier = Config.Bind(
-            Stance2Section,
-            "ADS Pitch Multiplier",
-            1.0f,
-            new ConfigDescription("Multiplier for the Pitch sway curve during ADS from Stance 2.",
-            new AcceptableValueRange<float>(0.0f, 5.0f)));
-
-        _Stance2ADSYawMultiplier = Config.Bind(
-            Stance2Section,
-            "ADS Yaw Multiplier",
-            1.0f,
-            new ConfigDescription("Multiplier for the Yaw sway curve during ADS from Stance 2.",
-            new AcceptableValueRange<float>(0.0f, 5.0f)));
-
-        _Stance2ADSRollMultiplier = Config.Bind(
-            Stance2Section,
-            "ADS Roll Multiplier",
-            1.0f,
-            new ConfigDescription("Multiplier for the Roll sway curve during ADS from Stance 2.",
-            new AcceptableValueRange<float>(0.0f, 5.0f)));
-
-        _Stance2ADSPosYMultiplier = Config.Bind(
-            Stance2Section,
-            "ADS Pos Y Multiplier (Forward/Back)",
-            1.0f,
-            new ConfigDescription("Multiplier for the positional sway (Y axis) during ADS from Stance 2.",
-            new AcceptableValueRange<float>(-5.0f, 5.0f)));
-
-        _Stance2ADSPosZMultiplier = Config.Bind(
-            Stance2Section,
-            "ADS Pos Z Multiplier (Up/Down)",
-            1.0f,
-            new ConfigDescription("Multiplier for the positional sway (Z axis) during ADS from Stance 2.",
-            new AcceptableValueRange<float>(-5.0f, 5.0f)));
 
         _LeanSpeedMultiplier = Config.Bind(
             AnimationSettings,

@@ -31,7 +31,7 @@
 
 | ID | Cat | Impacto | Título | Breaking? | Status |
 |---|---|---|---|---|---|
-| MP-01-01 | DEAD | 🔴 | 23 propriedades no F12 não fazem nada (mortas) | não | Pendente |
+| MP-01-01 | DEAD | 🔴 | 23 propriedades no F12 não fazem nada (mortas) | não | ✅ Aplicado |
 | MP-01-02 | NAM | 🟠 | Eixos "Roll"/"Yaw" trocados nos keys de Stance/ADS — induz o usuário a erro | ⚠️ | Pendente |
 | MP-01-03 | ORD | 🟠 | Ordem das seções não segue lógica; Manual Chambering (secundário) vem primeiro | ⚠️ | Pendente |
 | MP-01-04 | SEC | 🟠 | Prefixos numéricos "8./9./10." enganosos (não batem com a posição real) | ⚠️ | Pendente |
@@ -39,9 +39,9 @@
 | MP-01-06 | TIP | 🟡 | Idioma misto — tooltips e nomes em EN e pt-BR sem padrão | ⚠️(parcial) | Pendente |
 | MP-01-07 | NAM | 🟡 | Rótulos legados: "Stance 2 - Custom" / "Stance 3 - Low Ready" contradizem a realidade | ⚠️ | Pendente |
 | MP-01-08 | LOC | 🟡 | Velocidades de movimento espalhadas em 2 seções | ⚠️ | Pendente |
-| MP-01-09 | ADV | 🟡 | Offsets de ADS perderam o liga/desliga (o toggle era a prop morta `Advanced ADS Transitions`) | não | Pendente |
+| MP-01-09 | ADV | 🟡 | Offsets de ADS perderam o liga/desliga (o toggle era a prop morta `Advanced ADS Transitions`) | não | ✅ Aplicado (a — sem gate) |
 | MP-01-10 | SEC | 🟢 | Seções Stance 0/1/2 encolhem muito após remover as mortas — reavaliar agrupamento | — | Pendente |
-| MP-01-11 | DEAD | 🟢 | 9 campos dead-code puro (declarados, nunca bindados — nem aparecem no F12) | não | Pendente |
+| MP-01-11 | DEAD | 🟢 | 9 campos dead-code puro (declarados, nunca bindados — nem aparecem no F12) | não | ✅ Aplicado |
 | MP-01-12 | TYP | 🟢 | `Movement Speed Multiplier` é `int` (%) enquanto os demais multiplicadores são `float` | não | Pendente |
 
 ---
@@ -311,3 +311,4 @@ Após aplicar: **regenerar** o `PROPRIEDADES.md` e incrementar a versão do mod 
 | Data | Evento |
 |---|---|
 | 2026-07-09 | Review de propriedades 01 via `/review-mod-properties` — 1 🔴 (23 props mortas), 3 🟠, 6 🟡, 2 🟢. Detecção de mortas por varredura de `.Value` (sub-agent). |
+| 2026-07-09 | **Passo 1 aplicado:** MP-01-01 (23 mortas removidas: seção "8. Wiggle" inteira + 15 ADS multipliers de Stance 0/1/2 + `Advanced ADS Transitions`/`ADS Transition Speed`/`Stance Change Sound Volume`), MP-01-11 (9 dead-code + const órfã `AdvancedADSSettings`), MP-01-09 (opção a — ADS offsets ficam sem gate; default 0 = inócuo). Plugin.cs: 122→90 campos. Build 0 erros (hash `c2cba18c30bc`). PROPRIEDADES.md a regenerar. |
