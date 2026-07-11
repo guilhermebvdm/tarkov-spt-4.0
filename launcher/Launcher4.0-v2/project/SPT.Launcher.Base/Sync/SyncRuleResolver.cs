@@ -31,6 +31,10 @@ namespace SPT.Launcher.Sync
             ["BepInEx/config"] = "preserve-divergent",
             ["config-server"] = "seed-and-mirror",
             ["BepInEx/config-server"] = "seed-and-mirror",
+            // config-force: canal deliberado de "essa config vai pra TODO MUNDO" — sobrescreve o
+            // config/<rel> do usuário sempre que divergir (ignora customização). Ver SyncFolderRule.ForceToConfig.
+            ["config-force"] = "force-to-config",
+            ["BepInEx/config-force"] = "force-to-config",
             ["patchers"] = "mirror-move-disabled",
             ["BepInEx/patchers"] = "mirror-move-disabled",
             ["plugins"] = "mirror-move-disabled",

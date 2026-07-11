@@ -9,7 +9,7 @@ namespace SPT.Launcher.Sync
     {
         public string path { get; set; }
 
-        /// <summary>updated · preserved · preserved-devmode · deleted · moved-to-disabled · error</summary>
+        /// <summary>updated · preserved · preserved-devmode · deleted · moved-to-disabled · seeded · seed-skipped · forced · error</summary>
         public string action { get; set; }
 
         public string detail { get; set; }
@@ -28,6 +28,9 @@ namespace SPT.Launcher.Sync
 
         /// <summary>Item 017: default configs copied from config-server into config (target was absent by name).</summary>
         public int Seeded { get; set; }
+
+        /// <summary>config-force → config: configs sobrescritas à força (ignorando customização do usuário).</summary>
+        public int Forced { get; set; }
 
         public int Errors { get; set; }
 
@@ -49,6 +52,7 @@ namespace SPT.Launcher.Sync
                 sb.Append($"{Updated} atualizados · {Preserved + PreservedDevMode} preservados · {MovedToDisabled} movidos p/ disabled");
 
                 if (Seeded > 0) sb.Append($" · {Seeded} semeados");
+                if (Forced > 0) sb.Append($" · {Forced} configs forçadas");
                 if (Deleted > 0) sb.Append($" · {Deleted} removidos");
                 if (Errors > 0) sb.Append($" · {Errors} erros");
                 if (PreservedDevMode > 0) sb.Append($" · {PreservedDevMode} preservados por Dev Mode");

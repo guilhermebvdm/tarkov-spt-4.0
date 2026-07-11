@@ -66,6 +66,13 @@ namespace SPT.Launcher.Sync
                 .Where(f => !f.optional || _options.IsOptionalGroupEnabled(f.optionalGroup ?? string.Empty))
                 .ToList();
 
+            // Pre-pass: destinos do config-force. O operador tende a COPIAR a cfg para config-force/ e
+            // esquecer de removê-la de config/ — aí o mesmo alvo config/<rel> receberia DUAS ações
+            // (um Download da entrada config/ + o ForceCopy), com o vencedor decidido pela ORDEM do
+            // manifesto (arbitrária) e o baseline gravado com o hash da versão errada (o arquivo viraria
+            // "customizado" para sempre e nunca mais receberia update). O FORCE VENCE, explicitamente.
+            var forceTargets = BuildForceTargets(filesToCheck);
+
             int checkedCount = 0;
 
             foreach (var file in filesToCheck)
@@ -82,6 +89,14 @@ namespace SPT.Launcher.Sync
                 // silenciosamente os updates do SPT core (ignoredFiles default = "BepInEx/plugins/spt").
 
                 var rule = _resolver.Resolve(normalized, out string matchedPrefix);
+
+                // Colisão config/ × config-force/: esta entrada do manifesto grava no MESMO destino de
+                // um force. Ignorada — a versão forçada é a que vale (resultado independente da ordem).
+                if (rule != SyncFolderRule.ForceToConfig && forceTargets.Contains(normalized))
+                {
+                    plan.Warnings.Add($"{file.path} também está em config-force — a versão FORÇADA vence (entrada do manifesto ignorada)");
+                    continue;
+                }
 
                 // config-server sync (item 017 + seed-and-mirror). Handled before the missing/hash
                 // logic below because the SOURCE (config-server) is a server folder the user never
@@ -135,6 +150,77 @@ namespace SPT.Launcher.Sync
                                 AddDownload(plan, file, rule, "mirror (config-server desatualizado)");
                             }
                         }
+                    }
+
+                    continue;
+                }
+
+                // config-force → config: FORÇA. Sobrescreve config/<rel> do usuário SEMPRE que o conteúdo
+                // divergir (ou faltar) — ignora customização de propósito (é o canal "essa config vai pra
+                // todo mundo"). Comparação direta: hash local do ALVO vs hash do manifesto da FONTE (sem
+                // baseline). A pasta config-force NUNCA é materializada no cliente (só a fonte do download).
+                if (rule == SyncFolderRule.ForceToConfig)
+                {
+                    string forceTargetRel = SyncPathUtil.DeriveSeedTarget(file.path, matchedPrefix);
+                    if (forceTargetRel == null)
+                    {
+                        continue; // sem remainder após o prefixo — nada a forçar
+                    }
+
+                    // Guard de self-target: prefixo SEM o sufixo "-force" (misconfig do operador, ex.:
+                    // folderRules com "BepInEx/config": "force-to-config"). O alvo derivado seria o PRÓPRIO
+                    // arquivo → materializaria a pasta-fonte no cliente e quebraria a invariante. Pula e avisa.
+                    if (string.Equals(SyncPathUtil.Normalize(forceTargetRel), normalized, StringComparison.Ordinal))
+                    {
+                        plan.Warnings.Add($"force-to-config em '{matchedPrefix}' não tem o sufixo '-force' (alvo = fonte) — ignorado: {file.path}");
+                        continue;
+                    }
+
+                    string forceTargetLocal = SyncPathUtil.ToLocalPath(_options.GameRoot, forceTargetRel);
+                    string forceReason = null;
+
+                    if (!File.Exists(forceTargetLocal))
+                    {
+                        forceReason = "force (ausente no config)";
+                    }
+                    else
+                    {
+                        string targetHash = await Task.Run(() => SyncPathUtil.ComputeMd5(forceTargetLocal), cancellationToken);
+                        if (!string.Equals(targetHash, file.hash, StringComparison.OrdinalIgnoreCase))
+                        {
+                            // R5.1: Dev Mode é o escape hatch "não reverta minha edição local" — nem o
+                            // force sobrescreve (o jogador comum não tem Dev Mode; o dev tunando uma
+                            // config não pode perdê-la a cada sync). Só protege o que JÁ EXISTE local.
+                            if (_options.DevMode)
+                            {
+                                plan.Actions.Add(new SyncAction
+                                {
+                                    RelativePath = forceTargetRel,
+                                    Kind = SyncActionKind.PreserveDevMode,
+                                    Rule = rule,
+                                    ServerHash = file.hash,
+                                    Reason = "Dev Mode: config forçada preservada (difere do servidor)",
+                                });
+                                plan.Warnings.Add($"Dev Mode: config FORÇADA não aplicada em {forceTargetRel} (edição local preservada)");
+                                continue;
+                            }
+
+                            forceReason = "force (divergente — sobrescreve a customização)";
+                        }
+                        // hash igual → o usuário já está com a config forçada → no-op
+                    }
+
+                    if (forceReason != null)
+                    {
+                        plan.Actions.Add(new SyncAction
+                        {
+                            RelativePath = file.path,            // fonte do download (config-force/<rel>)
+                            SeedTargetRelative = forceTargetRel, // destino da escrita (config/<rel>)
+                            Kind = SyncActionKind.ForceCopy,
+                            Rule = rule,
+                            ServerHash = file.hash,
+                            Reason = forceReason,
+                        });
                     }
 
                     continue;
@@ -257,7 +343,8 @@ namespace SPT.Launcher.Sync
 
                     if (rule == SyncFolderRule.PreserveDivergent
                         || rule == SyncFolderRule.SeedIfMissingByName
-                        || rule == SyncFolderRule.SeedAndMirror)
+                        || rule == SyncFolderRule.SeedAndMirror
+                        || rule == SyncFolderRule.ForceToConfig)
                     {
                         // Extras in config / config-server folders are never touched (config-server
                         // overwrites to latest but doesn't delete extras — conservative, ref CR-01-03).
@@ -363,6 +450,37 @@ namespace SPT.Launcher.Sync
             string prefixOriginalCase = relative.Substring(0, matchedPrefix.Length);
             string remainder = relative.Substring(matchedPrefix.Length).TrimStart('/');
             return prefixOriginalCase + "-disabled/" + remainder;
+        }
+
+        /// <summary>
+        /// Destinos (normalizados) de todas as entradas config-force do manifesto. Usado para resolver a
+        /// colisão config/ × config-force/ de forma DETERMINÍSTICA (o force vence), em vez de deixar o
+        /// vencedor por conta da ordem do manifesto. Ignora o caso self-target (prefixo sem "-force"),
+        /// que o próprio bloco do force descarta com aviso.
+        /// </summary>
+        private HashSet<string> BuildForceTargets(IReadOnlyList<ManifestFile> files)
+        {
+            var targets = new HashSet<string>(StringComparer.Ordinal);
+
+            foreach (var file in files)
+            {
+                string normalized = SyncPathUtil.Normalize(file.path);
+
+                if (_resolver.Resolve(normalized, out string matchedPrefix) != SyncFolderRule.ForceToConfig)
+                {
+                    continue;
+                }
+
+                string targetRel = SyncPathUtil.DeriveSeedTarget(file.path, matchedPrefix);
+                if (string.IsNullOrEmpty(targetRel)) continue;
+
+                string normalizedTarget = SyncPathUtil.Normalize(targetRel);
+                if (string.Equals(normalizedTarget, normalized, StringComparison.Ordinal)) continue; // self-target
+
+                targets.Add(normalizedTarget);
+            }
+
+            return targets;
         }
 
         private void AddDownload(SyncPlan plan, ManifestFile file, SyncFolderRule rule, string reason)

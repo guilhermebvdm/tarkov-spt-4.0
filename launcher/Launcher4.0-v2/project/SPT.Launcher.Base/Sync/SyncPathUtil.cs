@@ -55,8 +55,14 @@ namespace SPT.Launcher.Sync
         }
 
         /// <summary>
-        /// Item 017: maps a SERVER seed-source path (e.g. "BepInEx/config-server/a/x.cfg") to the
-        /// USER target under the sibling folder without the "-server" suffix ("BepInEx/config/a/x.cfg").
+        /// Sufixos das pastas-FONTE do server que mapeiam para a pasta do usuário sem o sufixo:
+        /// "-server" (seed / seed-and-mirror) e "-force" (force-to-config). Ambos: "&lt;name&gt;-X/&lt;rel&gt;" → "&lt;name&gt;/&lt;rel&gt;".
+        /// </summary>
+        private static readonly string[] SourceFolderSuffixes = { "-server", "-force" };
+
+        /// <summary>
+        /// Maps a SERVER source path (e.g. "BepInEx/config-server/a/x.cfg" ou "BepInEx/config-force/a/x.cfg")
+        /// to the USER target under the sibling folder without the suffix ("BepInEx/config/a/x.cfg").
         /// "Same name" = relative path within the folder, so subfolders are preserved and keep their
         /// original casing. Returns null when there is no file remainder after the prefix, or when
         /// the inputs are empty.
@@ -85,10 +91,19 @@ namespace SPT.Launcher.Sync
                 return null;
             }
 
-            const string serverSuffix = "-server";
-            string targetPrefix = originalPrefix.EndsWith(serverSuffix, StringComparison.OrdinalIgnoreCase)
-                ? originalPrefix.Substring(0, originalPrefix.Length - serverSuffix.Length)
-                : originalPrefix; // non "-server" seed prefix (operator misconfig): seeds into itself
+            // Sufixos de pasta-FONTE do server que mapeiam para a pasta do USUÁRIO:
+            //   "<name>-server/<rel>" -> "<name>/<rel>"   (seed / seed-and-mirror)
+            //   "<name>-force/<rel>"  -> "<name>/<rel>"   (force-to-config)
+            // Prefixo sem sufixo conhecido (misconfig do operador): semeia em si mesmo.
+            string targetPrefix = originalPrefix;
+            foreach (var suffix in SourceFolderSuffixes)
+            {
+                if (originalPrefix.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+                {
+                    targetPrefix = originalPrefix.Substring(0, originalPrefix.Length - suffix.Length);
+                    break;
+                }
+            }
 
             return targetPrefix + "/" + remainder;
         }

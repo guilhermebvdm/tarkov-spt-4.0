@@ -199,6 +199,46 @@ namespace SPT.Launcher.Sync
                             }
 
                             break;
+
+                        case SyncActionKind.ForceCopy:
+                            try
+                            {
+                                // config-force → config: SOBRESCREVE sempre (o oposto do SeedCopy — sem
+                                // guard de ausência). O planner já decidiu por divergência de hash; aqui
+                                // apenas aplicamos, atomicamente, ignorando o que o usuário tinha.
+                                string forceDestination = ResolveUnderRoot(action.SeedTargetRelative); // ref: CR-01-05
+
+                                byte[] forceData = await _downloader(action.RelativePath, cancellationToken); // baixa da FONTE (config-force)
+                                SyncFileOps.WriteAtomic(forceDestination, forceData);
+
+                                // Manifesto stale (arquivo mexido no mods_repo sem /refresh): os bytes baixados
+                                // nunca vão bater com o hash do manifesto → o planner re-força TODO sync, para
+                                // sempre. Sem este aviso o loop seria silencioso (mesma guarda do Download).
+                                string forceAppliedHash = SyncPathUtil.ComputeMd5(forceData);
+                                if (!string.IsNullOrEmpty(action.ServerHash)
+                                    && !string.Equals(forceAppliedHash, action.ServerHash, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    _log($"[Sync] Aviso: bytes de {action.RelativePath} não batem com o hash do manifesto — manifesto desatualizado no server (chame /launcher/mods/refresh). A config forçada será reaplicada em todo sync até corrigir.");
+                                }
+
+                                result.Forced++;
+                                ioDone++;
+                                AddEntry(result, action.SeedTargetRelative, "forced", action.Reason);
+                                _log($"[Sync] Config forçada: {action.SeedTargetRelative} (de {action.RelativePath})");
+                            }
+                            catch (OperationCanceledException)
+                            {
+                                throw; // download em voo cancelado → nada aplicado, conta como pendente
+                            }
+                            catch (Exception ex)
+                            {
+                                result.Errors++;
+                                ioDone++;
+                                AddEntry(result, action.SeedTargetRelative, "error", ex.Message);
+                                _log($"[Sync] Falha ao forçar {action.SeedTargetRelative}: {ex.Message}");
+                            }
+
+                            break;
                     }
                 }
             }

@@ -509,6 +509,11 @@ public class ModUpdaterController : ControllerBase
                         // Servers existentes dependem do fallback built-in do client; este default só vale
                         // num config.json novo.
                         ["BepInEx/config-server"] = "seed-and-mirror",
+                        // config-force: canal "essa config vai pra TODO MUNDO". Arquivos em
+                        // mods_repo/BepInEx/config-force/ SOBRESCREVEM o BepInEx/config/ do usuário
+                        // sempre que divergirem — ignoram customização (ao contrário do config normal,
+                        // que é preserve-divergent). Usar para corrigir configs que quebram o coop.
+                        ["BepInEx/config-force"] = "force-to-config",
                         ["BepInEx/patchers"] = "mirror-move-disabled",
                         ["BepInEx/plugins"] = "mirror-move-disabled"
                     }

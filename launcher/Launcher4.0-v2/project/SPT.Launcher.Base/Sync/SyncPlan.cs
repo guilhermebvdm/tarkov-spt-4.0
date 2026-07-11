@@ -42,7 +42,10 @@ namespace SPT.Launcher.Sync
         /// <summary>Item 017: config-server → config seed copies (target absent by name).</summary>
         public int SeedCount => Actions.Count(a => a.Kind == SyncActionKind.SeedCopy);
 
-        /// <summary>Actions that actually touch the disk (downloads, deletes, moves, seeds).</summary>
-        public int IoActionCount => DownloadCount + DeleteCount + MoveCount + SeedCount;
+        /// <summary>config-force → config: sobrescritas forçadas (ignoram customização do usuário).</summary>
+        public int ForceCount => Actions.Count(a => a.Kind == SyncActionKind.ForceCopy);
+
+        /// <summary>Actions that actually touch the disk (downloads, deletes, moves, seeds, forces).</summary>
+        public int IoActionCount => DownloadCount + DeleteCount + MoveCount + SeedCount + ForceCount;
     }
 }

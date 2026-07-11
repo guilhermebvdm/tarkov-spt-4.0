@@ -37,6 +37,15 @@ namespace SPT.Launcher.Sync
         /// de onde o usuário copia manualmente ao atualizarmos a config de um mod existente.
         /// </summary>
         SeedAndMirror = 5,
+
+        /// <summary>
+        /// config-force → config FORÇADO. Cada arquivo do SERVER em "&lt;name&gt;-force/&lt;rel&gt;" sobrescreve o
+        /// "&lt;name&gt;/&lt;rel&gt;" do USUÁRIO SEMPRE que o conteúdo divergir (ou faltar) — **ignora customização**.
+        /// É o canal deliberado de "essa config vai pra todo mundo" (ex.: corrigir um valor que quebra o coop),
+        /// em contraste com o 'config' (preserve-divergent, respeita quem customizou) e o 'config-server'
+        /// (seed, só se faltar). Não deleta extras; a pasta config-force NUNCA é materializada no cliente.
+        /// </summary>
+        ForceToConfig = 6,
     }
 
     public static class SyncFolderRuleParser
@@ -66,6 +75,9 @@ namespace SPT.Launcher.Sync
                     return true;
                 case "seed-and-mirror":
                     rule = SyncFolderRule.SeedAndMirror;
+                    return true;
+                case "force-to-config":
+                    rule = SyncFolderRule.ForceToConfig;
                     return true;
                 default:
                     rule = SyncFolderRule.Default;

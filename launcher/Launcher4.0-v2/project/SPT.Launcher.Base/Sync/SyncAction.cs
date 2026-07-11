@@ -19,6 +19,13 @@ namespace SPT.Launcher.Sync
 
         /// <summary>Item 017: seed a default from config-server → config when the target is absent by name (never overwrites).</summary>
         SeedCopy,
+
+        /// <summary>
+        /// config-force → config: SOBRESCREVE o alvo em 'config' sempre que divergir (ou faltar).
+        /// Mesma mecânica do SeedCopy (baixa de <see cref="SyncAction.RelativePath"/>, grava em
+        /// <see cref="SyncAction.SeedTargetRelative"/>), mas SEM o guard de "só se ausente".
+        /// </summary>
+        ForceCopy,
     }
 
     /// <summary>One planned action produced by <see cref="SyncPlanner"/> and executed by <see cref="SyncEngine"/>.</summary>

@@ -470,6 +470,8 @@ namespace SPT.Launcher.ViewModels
             };
 
             if (plan.SeedCount > 0) parts.Add($"{plan.SeedCount} p/ semear");
+            // config-force: o usuário PERDE a customização desses arquivos — o preview tem que dizer.
+            if (plan.ForceCount > 0) parts.Add($"{plan.ForceCount} configs FORÇADAS (sobrescrevem a sua)");
             if (plan.MoveCount > 0) parts.Add($"{plan.MoveCount} p/ mover p/ disabled");
             if (plan.DeleteCount > 0) parts.Add($"{plan.DeleteCount} p/ remover");
             if (plan.Warnings.Count > 0) parts.Add($"{plan.Warnings.Count} avisos Dev Mode");
@@ -485,8 +487,11 @@ namespace SPT.Launcher.ViewModels
 
             var statuses = plan.Actions.Select(action => new ModFileStatus
             {
-                // Item 017: seed shows the USER target (config/<rel>) — that's what lands on disk.
-                FileName = action.Kind == SyncActionKind.SeedCopy ? action.SeedTargetRelative : action.RelativePath,
+                // Item 017 / config-force: seed E force mostram o alvo do USUÁRIO (config/<rel>) — é o que
+                // cai no disco. A FONTE (config-server/, config-force/) nunca existe na máquina dele.
+                FileName = action.Kind is SyncActionKind.SeedCopy or SyncActionKind.ForceCopy
+                    ? action.SeedTargetRelative
+                    : action.RelativePath,
                 Status = action.Kind switch
                 {
                     SyncActionKind.Download => "outdated",
@@ -495,6 +500,7 @@ namespace SPT.Launcher.ViewModels
                     SyncActionKind.DeleteExtra => "to-delete",
                     SyncActionKind.MoveToDisabled => "to-move",
                     SyncActionKind.SeedCopy => "to-seed",
+                    SyncActionKind.ForceCopy => "to-force",
                     _ => "outdated",
                 },
                 Size = sizeByPath.TryGetValue(action.RelativePath, out long size) ? size : 0,
@@ -573,6 +579,8 @@ namespace SPT.Launcher.ViewModels
             "moved" => "📁",
             "to-seed" => "🌱",
             "seeded" => "🌱",
+            "to-force" => "🔨",
+            "forced" => "🔨",
             "error" => "❌",
             _ => "⏳"
         };

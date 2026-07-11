@@ -44,7 +44,8 @@ Toda build oficial nova **incrementa** a versão do componente que mudou (memór
 
 | Data | Launcher (exe) | Mod server | Plugin RedLineRestart | O que deployar |
 |---|---|---|---|---|
-| 2026-07-09 | **2.1.0** ✅ (era 2.0.0) — msg de sucesso, remove velocidade, toggle homolog, **config-server seed-and-mirror**, exe→`TRL.Launcher.exe` | **4.0.0** ✅ mudou (paridade B1/B2/vote/versão, homolog namespaced, default `config-server`=seed-and-mirror, filename `TRL.Launcher.exe`) — **⚠️ possivelmente NUNCA deployado em prod** | 2.4.3 — sem mudança | **exe (1) + mod server (2)**. Plugin não. |
+| 2026-07-09 | **2.2.0** ✅ (era 2.1.0) — **canal `config-force`** (config que vai pra TODO MUNDO, sobrescreve customização) | **4.0.0** ✅ mudou (default `config-force`=force-to-config) | 2.4.3 — sem mudança | **exe (1) + mod server (2)**. Plugin não. |
+| 2026-07-09 | **2.1.0** ✅ (era 2.0.0) — msg de sucesso, remove velocidade, toggle homolog, **config-server seed-and-mirror**, exe→`TRL.Launcher.exe` | **4.0.0** ✅ (paridade B1/B2/vote/versão, homolog namespaced, default `config-server`=seed-and-mirror, filename `TRL.Launcher.exe`) — deployado em prod 2026-07-09 ✅ | 2.4.3 — sem mudança | exe + mod server |
 
 > ⚠️ **Atenção:** o mod server C# acumulou várias mudanças no repo que podem nunca ter ido pra máquina de produção. Rotas como `/launcher/mods/version` (B2), `/redline/register-player-ip` (B1), cofre de senha (020), `.sig` do self-update (018) e a versão do server só existem no **mod C#**. Se prod roda o mod **TS** antigo (ou um C# desatualizado), essas funções degradam/falham no launcher. Ver [Server/MIGRATION-parity-TS-vs-CSharp.md](Server/MIGRATION-parity-TS-vs-CSharp.md).
 
