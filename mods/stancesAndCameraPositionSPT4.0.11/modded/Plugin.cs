@@ -618,7 +618,7 @@ public class Plugin : BaseUnityPlugin
 
         _ADSHandsYawRotation = Config.Bind(
             ADSDefaults,
-            "ADS Roll (Tombar Arma)",
+            "ADS Yaw (Apontar Esq/Dir)",
             0f,
             new ConfigDescription("Hands yaw rotation (Y-axis) when ADS with 'Reset On ADS' enabled. 0 = default game position",
             new AcceptableValueRange<float>(-45f, 45f),
@@ -626,7 +626,7 @@ public class Plugin : BaseUnityPlugin
 
         _ADSHandsRollRotation = Config.Bind(
             ADSDefaults,
-            "ADS Yaw (Apontar Esq/Dir)",
+            "ADS Roll (Tombar Arma)",
             0f,
             new ConfigDescription("Hands roll rotation (Z-axis) when ADS with 'Reset On ADS' enabled. 0 = default game position",
             new AcceptableValueRange<float>(-45f, 45f),
@@ -725,7 +725,7 @@ public class Plugin : BaseUnityPlugin
 
         _Stance1HandsYawRotation = Config.Bind(
             Stance1Section,
-            "Stance 1 Roll (Tombar Arma)",
+            "Stance 1 Yaw (Apontar Esq/Dir)",
             0.0f,
             new ConfigDescription("Stance 1 hands/arms yaw rotation in degrees (left/right turn)",
             new AcceptableValueRange<float>(-45f, 45f),
@@ -733,7 +733,7 @@ public class Plugin : BaseUnityPlugin
 
         _Stance1HandsRollRotation = Config.Bind(
             Stance1Section,
-            "Stance 1 Yaw (Apontar Esq/Dir)",
+            "Stance 1 Roll (Tombar Arma)",
             0.0f,
             new ConfigDescription("Stance 1 hands/arms roll rotation in degrees (weapon cant)",
             new AcceptableValueRange<float>(-45f, 45f),
@@ -785,7 +785,7 @@ public class Plugin : BaseUnityPlugin
 
         _Stance2HandsYawRotation = Config.Bind(
             Stance2Section,
-            "Stance 2 Roll (Tombar Arma)",
+            "Stance 2 Yaw (Apontar Esq/Dir)",
             0.0f,
             new ConfigDescription("Stance 2 hands/arms yaw rotation in degrees (left/right turn)",
             new AcceptableValueRange<float>(-45f, 45f),
@@ -793,7 +793,7 @@ public class Plugin : BaseUnityPlugin
 
         _Stance2HandsRollRotation = Config.Bind(
             Stance2Section,
-            "Stance 2 Yaw (Apontar Esq/Dir)",
+            "Stance 2 Roll (Tombar Arma)",
             0.0f,
             new ConfigDescription("Stance 2 hands/arms roll rotation in degrees (weapon cant)",
             new AcceptableValueRange<float>(-45f, 45f),
@@ -1056,7 +1056,7 @@ public class Plugin : BaseUnityPlugin
 
         _Stance3HandsYawRotation = Config.Bind(
             Stance3Section,
-            "Stance 3 Roll (Tombar Arma)",
+            "Stance 3 Yaw (Apontar Esq/Dir)",
             -30f,
             new ConfigDescription("Stance 3 hands/arms yaw rotation in degrees (left/right turn)",
             new AcceptableValueRange<float>(-45f, 45f),
@@ -1064,7 +1064,7 @@ public class Plugin : BaseUnityPlugin
 
         _Stance3HandsRollRotation = Config.Bind(
             Stance3Section,
-            "Stance 3 Yaw (Apontar Esq/Dir)",
+            "Stance 3 Roll (Tombar Arma)",
             0f,
             new ConfigDescription("Stance 3 hands/arms roll rotation in degrees (weapon cant)",
             new AcceptableValueRange<float>(-45f, 45f),

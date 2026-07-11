@@ -32,7 +32,7 @@
 | ID | Cat | Impacto | Título | Breaking? | Status |
 |---|---|---|---|---|---|
 | MP-01-01 | DEAD | 🔴 | 23 propriedades no F12 não fazem nada (mortas) | não | ✅ Aplicado |
-| MP-01-02 | NAM | 🟠 | Eixos "Roll"/"Yaw" trocados nos keys de Stance/ADS — induz o usuário a erro | ⚠️ | Pendente |
+| MP-01-02 | NAM | 🟠 | Eixos "Roll"/"Yaw" trocados nos keys de Stance/ADS — induz o usuário a erro | ⚠️ | ✅ Aplicado (b — rename) |
 | MP-01-03 | ORD | 🟠 | Ordem das seções não segue lógica; Manual Chambering (secundário) vem primeiro | ⚠️ | Pendente |
 | MP-01-04 | SEC | 🟠 | Prefixos numéricos "8./9./10." enganosos (não batem com a posição real) | ⚠️ | Pendente |
 | MP-01-05 | SEC | 🟡 | Nomes de seção genéricos ("Settings", "General", "Positions") | ⚠️ | Pendente |
