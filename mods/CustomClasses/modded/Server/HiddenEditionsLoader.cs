@@ -17,6 +17,9 @@ namespace CustomClasses;
 ///     NÃO consulta a blacklist; esta ocultação vale para o launcher v1 (/launcher/server/connect),
 ///     que é o usado pelo launcher SPT atual.
 /// </summary>
+// Fica em PostDBModLoader+1 de propósito (≠ CustomClassesMod, movido p/ PostSptModLoader+1 em 2026-07-11):
+// só mexe na blacklist de editions vanilla via config próprio — não depende de itens de mod nem das editions
+// registradas pelo CustomClassesMod. A ordem entre os dois é irrelevante. NÃO alinhar sem esse motivo.
 [Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 1)]   // ref: OnLoadOrder.cs
 public class HiddenEditionsLoader(
     ModHelper modHelper,
