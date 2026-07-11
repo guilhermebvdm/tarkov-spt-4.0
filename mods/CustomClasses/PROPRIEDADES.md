@@ -56,6 +56,16 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 | `Tireless Arms — Enabled` | Braços Incansáveis — ativo | bool | `true` | Tanque: braço não cansa segurando arma pesada (LMG/HMG/GL). |
 | `Tireless Arms — Heavy arm drain mult` | Dreno de braço c/ arma pesada | float | `0` | Multiplicador do dreno de braço do Tanque com arma pesada em mãos (0 = não drena). Faixa 0..1. |
 
+## Seção `Perks — Combat Medic` (balance B17)
+
+> Perk vivo do Médico — fome/sede drenam mais devagar. Reusa o lever do Heavy Frame
+> (`HeavyFrameMetabolism.Apply`), só o player local, só o dreno (restauração por comida/bebida não é afetada).
+
+| Nome (EN) | Tradução pt-BR | Tipo | Padrão | Tooltip (pt-BR) |
+|---|---|---|---|---|
+| `Efficient Metabolism — Enabled` | Metabolismo Eficiente — ativo | bool | `true` | Médico: fome/sede drenam mais devagar (metabolismo eficiente). |
+| `Efficient Metabolism — Hunger/thirst drain` | Dreno de fome/sede | float | `0.85` | Multiplicador do dreno de fome/sede do Médico (0.85 = 15% mais devagar). Faixa 0.5..1. |
+
 ## Seção `Weapon Mastery` (item 058)
 
 > Dá vida às maestrias inertes da tela SKILLS. XP: só o **underbarrel** (SMG/LMG/Launcher sobem no vanilla —
@@ -81,3 +91,4 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 | 2026-07-04 | Item 058 — seção `Weapon Mastery` (XP do underbarrel por disparo + bônus por nível de recuo/ergo). |
 | 2026-07-04 | 058 review 2: default do XP 0.1→0.5 (RN-01, paridade de esforço). Nota RN-05: a maestria modded dá só recuo+ergo por nível (a vanilla tem também reload/swap/elite ×2) — escopo consciente. |
 | 2026-07-04 | Item 051 — Steady Arms (Hunter) + Tireless Arms (Tank): dreno de braço por classe via hook no stances mod. Cards saem do "em breve". |
+| 2026-07-10 | Balance B17 — seção `Perks — Combat Medic` (Metabolismo Eficiente: fome/sede ×0.85, 1º perk vivo do Médico). |
