@@ -113,6 +113,7 @@ public class Plugin : BaseUnityPlugin
         new SkillsNavButtonPatch().Enable();                // (013) botão SKILLS no menu → abre a aba Skills
         new BulwarkPatch().Enable();                        // (050.0) 🛡️ Tanque — dano recebido ×0.85
         new PackMulePatch().Enable();                       // (050.0) 🎒🛡️ Pack Mule — +30% limite de carga (piso, stash+raid)
+        new QuickHandsPatch().Enable();                     // (061) 🎒 Saqueador — revista 2 contêineres (bônus elite da Search, antecipado)
         new WeightMarkerPatch().Enable();                   // (056) marcador "▲ +X%" no peso (aba Health) — atribui ao Pack Mule
         new RaidPerksNotificationPatch().Enable();          // (050) notificação de perks/drawbacks no início da raid
         new NotificationDurationPatch().Enable();           // (fix 2026-07-03) notificação de perks por 10s (Infinite + hide agendado)

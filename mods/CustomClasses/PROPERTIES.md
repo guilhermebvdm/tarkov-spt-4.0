@@ -96,6 +96,7 @@ Properties exposed in the configuration menu (F12 / ConfigurationManager). None 
 
 | Property | Type | Default | Range | What it does |
 |---|---|---|---|---|
+| `Quick Hands — Enabled` | bool | `true` | — | Perk: search **two containers at once**, from the start. This is the Search skill's **elite** bonus (level 51) granted early — not a new mechanic. No double effect if Search reaches elite. (item 061) |
 | `Silent Looter — Enabled` | bool | `true` | — | Perk: quieter interaction/loot sounds. |
 | `Silent Looter — Volume mult` | float | `0.4` | 0.1..1 | Interaction/loot volume (0.4 = −60%). |
 | `Pack Mule — Enabled` | bool | `true` | — | Perk: +carry limit (floor, does not stack with Strength). |

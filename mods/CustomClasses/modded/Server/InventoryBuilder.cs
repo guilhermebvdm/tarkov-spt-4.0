@@ -559,6 +559,11 @@ public class InventoryBuilder(DatabaseService databaseService, ItemHelper itemHe
     /// </summary>
     private void PackContents(List<Item> items, Item containerRoot, ItemSpec spec, string className)
     {
+        if (spec.Contents is not { Count: > 0 })
+        {
+            return;   // defensivo: os call-sites já checam, mas isto prova a não-nulidade p/ o compilador (CS8604)
+        }
+
         var grids = GetGrids(containerRoot.Template);
         if (grids.Count == 0 && (spec.LoadedMag || spec.Chambered))
         {

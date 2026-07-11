@@ -73,6 +73,7 @@ internal static class PerksConfig
     internal static ConfigEntry<float>? RattledAimPunch;
 
     // 6 · Scavenger
+    internal static ConfigEntry<bool>? QuickHandsEnabled;   // 061: busca 2 contêineres (bônus elite da Search, antecipado)
     internal static ConfigEntry<bool>? SilentLooterEnabled;
     internal static ConfigEntry<float>? SilentLooterVolume;
     internal static ConfigEntry<bool>? PackMuleScavEnabled;       // desdobrado do compartilhado (2026-07-10)
@@ -280,6 +281,11 @@ internal static class PerksConfig
                 new AcceptableValueRange<float>(1f, 3f)));
 
         // ───────────────────────── 6 · Scavenger ─────────────────────────
+        // 061: antecipa o bônus ELITE vanilla da skill Search (buff SearchDouble, nível 51) — não é mecânica nova.
+        QuickHandsEnabled = config.Bind(
+            SecScavenger, "Quick Hands — Enabled", true,
+            "Saqueador: revista 2 contêineres ao mesmo tempo (bônus elite da skill Search, desde o início). / Scavenger: search two containers at once (the Search skill's elite bonus, from the start).");
+
         SilentLooterEnabled = config.Bind(
             SecScavenger, "Silent Looter — Enabled", true,
             "Saqueador: sons de interação/loot mais baixos. / Scavenger: quieter interaction/loot sounds.");

@@ -96,6 +96,7 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 
 | Propriedade (EN) | Tipo | Padrão | Faixa | O que faz |
 |---|---|---|---|---|
+| `Quick Hands — Enabled` | bool | `true` | — | Perk: revista **2 contêineres ao mesmo tempo**, desde o início. É o bônus **elite** da skill Search (nível 51) antecipado — não é mecânica nova. Sem efeito duplo se a Search chegar a elite. (item 061) |
 | `Silent Looter — Enabled` | bool | `true` | — | Perk: sons de interação/loot mais baixos. |
 | `Silent Looter — Volume mult` | float | `0.4` | 0.1..1 | Volume de interação/loot (0.4 = −60%). |
 | `Pack Mule — Enabled` | bool | `true` | — | Perk: +limite de carga (piso, não soma com a Strength). |

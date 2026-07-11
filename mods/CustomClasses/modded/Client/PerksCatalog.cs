@@ -148,7 +148,8 @@ internal static class PerksCatalog
         // 🎒 Saqueador
         ["quick_hands"] = G("Quick Hands", "Mãos Rápidas", ESkillId.Search, new[]
         {
-            Flag("Quick Hands", "Mãos Rápidas", "search 2 items at once", "revista 2 itens de uma vez", isPerk: true, EBuffId.SearchDouble, pending: true),
+            // 061 ENTREGUE (2026-07-11): antecipa o bônus elite da Search (buff SearchDouble) — sai do "em breve".
+            Flag("Quick Hands", "Mãos Rápidas", "search 2 containers at once", "revista 2 contêineres de uma vez", isPerk: true, EBuffId.SearchDouble),
         }),
         ["silent_looter"] = G("Silent Looter", "Saque Silencioso", ESkillId.SilentOps, new[]
         {

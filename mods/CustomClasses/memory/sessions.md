@@ -527,3 +527,24 @@ calibração do usuário · próximo da fila: 058 (V1/V2/V4) ou 051 (decisão st
 **Fix dos 2 `sem grades` do Tanque (commit `237631a`):** eram o tambor "Buben" (`6513f0a1…`, magazine com `loadedMag`+`contents` redundante) montado p/ USEC+BEAR = 2 warns. O extrator da baseline 062 emite `loadedMag` E `contents` (cartuchos) no mesmo magazine; o `LoadAmmo` já enche o mag (`FillMagazineWithCartridge`), mas o `contents` era roteado ao `PackSpecsIntoGrids` → magazine tem `_props.Cartridges`, não `Grids` → "sem grades". Benigno (mag cheio) mas ruidoso. Fix: helper `InventoryBuilder.PackContents` — item sem grades + `LoadedMag`/`Chambered` ⇒ contents = munição já colocada ⇒ pula silencioso (Debug). O warning "sem grades" fica só p/ erro real (sem grades, sem munição, com contents). Re-teste in-vivo: Tanque `sem grades` **2→0**, zero warns do InventoryBuilder. (Causa a montante: extrator 062 duplica loadedMag+contents — limpeza opcional na sessão do 062.)
 
 **Pendências abertas:** nenhuma do fix (P-14.3 fechada). Segue P-14.1 (card fantasma Shaky Hands), P-14.2 (re-teste F12 in-game).
+
+#### Sessão 14 (cont. 2026-07-11) — P-13.3, P-13.4 e **item 061 (Quick Hands) ENTREGUE**
+
+**Contexto de branch:** a sessão paralela mergeou tudo p/ `main` via **PR #5** e **pushou** — todo o trabalho (Onda 0, reorg F12, fix de ordem de load, fix do magazine) já está em `origin/main`. A árvore ficou em `main` (com WIP de TRL-ItemsManagement da paralela); por decisão do usuário sigo commitando **cirurgicamente em main** (só paths de `mods/CustomClasses/`).
+
+**Fechadas:** **P-13.3** — defaults do Weight Marker calibrados pelo usuário fixados no código (`X=-107.0423`, `Y=50.70423`; antes 0/0 = marcador fora de posição). **P-13.4** — branches `feat/053-perks-property-model` e `feat/trl-items-autodev` deletadas (100% merged).
+
+**Item 061 — Quick Hands (🎒 Saqueador): revista 2 contêineres ao mesmo tempo.** É o bônus **ELITE vanilla** da skill Search (nível 51) **antecipado** — não é mecânica nova (anotação do usuário).
+
+**Recon (corrigiu uma suposição errada da memória):** a nota antiga dizia *"Quick Hands é server-side (buff SearchDouble); o lever client pode ser re-validado pelo server"*. **ERRADO** — o decompilado mostra que é **inteiramente client**:
+- `SkillManager.cs:1843`: `public bool IsSearchDouble => SearchDouble.Value;` (buff `EBuffType.Elite`).
+- `GClass2235.cs:82`: `CanStartNewSearchOperation()` → `if (!Profile_0.SkillsInfo.IsSearchDouble) return count < 1; return count < 2;` — **ÚNICO consumidor** de `IsSearchDouble` em todo o EFT (grep: só a definição + este uso).
+- O SPT server **não tem lógica** de `SearchDouble` (só o texto do locale) → **não re-valida**.
+
+**Implementação (`QuickHandsPatch.cs`):** Postfix no **getter** `SkillManager.IsSearchDouble` forçando `true` p/ o Saqueador. Forçar o LEVER (não o fluxo de busca) reusa TODA a lógica vanilla, inclusive o teto de 2 operações. **No-op no elite natural** de graça (sai cedo se `__result` já é `true` → não vira 3). **Coop-safe**: gate = `SkillManager` do MainPlayer (padrão do `PackMulePatch`: na raid compara com MainPlayer; fora da raid — GameWorld null, stash/menu — gateia só pela classe, pois revistar no inventário acontece fora da raid). Bots não entram (usam `BotSearchControllerClass`). F12: `Quick Hands — Enabled` (seção `6 · Scavenger`). Card sai do "em breve" (resta 4 pending: 3 do Médico + Mira Serena).
+
+**Prova do gate:** `Player.Skills => Profile?.Skills` (Player.cs:25113) e `Profile.SkillsInfo => Skills` (Profile.cs:688) ⇒ o `SkillManager` que o `GClass2235` lê **é o mesmo objeto** que `MainPlayer.Skills`, então o `ReferenceEquals` casa. Getter é público (não impl. explícita de interface) ⇒ Harmony intercepta mesmo via interface.
+
+**Lição:** antes de deferir um perk como "server-side", **grep o consumidor real do lever no decompilado**. Aqui o buff parecia server-side (é um buff de skill), mas o único consumidor era um `if` client — 1 Postfix num getter resolveu, sem server mod. Padrão reusável: **patchar o LEVER (getter/flag) em vez do FLUXO** reaproveita a lógica vanilla inteira e ganha o no-op natural.
+
+**Build:** 0 erros / **0 avisos** (corrigi de passagem um `CS8604` que eu havia introduzido no `PackContents` — o guard de null estava só nos call-sites; movido p/ dentro do helper).
