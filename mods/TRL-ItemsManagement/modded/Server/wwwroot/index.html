@@ -1,0 +1,3033 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TRL Items Management</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="components.css">
+</head>
+
+<body>
+
+<div class="app">
+
+<header class="topbar">
+  <span class="brand">TRL Items Management</span><span class="app-version" title="Version">v1.0.1</span>
+
+  <div class="topbar-controls">
+    <div class="search">
+      <input type="search" id="q" placeholder="Search by name or id" autocomplete="off" autofocus>
+      <button type="button" id="q-clear" class="search__clear" data-tip="Clear search (Esc)" tabindex="-1" aria-label="Clear search">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+          <path d="M1.5 1.5 L8.5 8.5 M8.5 1.5 L1.5 8.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <span class="topbar-sep" aria-hidden="true"></span>
+
+    <div class="filter-zone">
+      <div id="group-filter"></div>
+      <div id="condition-filter"></div>
+      <div id="ban-filter"></div>
+      <div id="mod-filter"></div>
+      <div id="edited-filter"></div>
+      <div id="delta-filter"></div>
+    </div>
+
+    <span class="topbar-sep" aria-hidden="true"></span>
+
+    <div class="update-menu" id="update-menu">
+      <button type="button" class="bulk-btn update-menu__trigger" id="update-menu-trigger" data-tip="Rescan mods / bulk-update all prices" data-tip-pos="bottom" aria-haspopup="true" aria-expanded="false">⟳ Update <span class="chev"></span></button>
+    </div>
+  </div>
+
+  <span class="topbar-sep" aria-hidden="true"></span>
+
+  <div class="trader-cluster">
+    <button type="button" class="flea-level-widget" id="flea-level-widget" title="Edit minimum flea level (globals.json)">
+      Flea Lvl <span id="flea-level-num">15</span>+
+    </button>
+    <button type="button" class="flea-level-widget" id="flea-cap-toggle" data-tip="SPT flea ceiling on Weapon Mod (×6) / Electronics (×11). OFF = those can be priced above handbook×mult. Restart SPT to apply in-game; rebuild the catalog to lift the editor limit." data-tip-pos="bottom">
+      Flea cap <span id="flea-cap-state">…</span>
+    </button>
+    <span class="trader-pending-pill" id="trader-pending-pill" hidden data-tip="Trader sell-price overrides written via TRLTraderPrices. Restart SPT to apply." data-tip-pos="bottom"></span>
+    <button type="button" class="bulk-btn bulk-btn--danger" id="clear-trader-overrides" hidden data-tip="Remove every trader sell-price override (TRLTraderPrices)." data-tip-pos="bottom">Clear trader overrides</button>
+    <span class="trader-pending-pill" id="buy-pending-pill" hidden data-tip="Trader buyback-price overrides written via TRLTraderPrices. Restart SPT to apply." data-tip-pos="bottom"></span>
+    <button type="button" class="bulk-btn bulk-btn--danger" id="clear-buy-overrides" hidden data-tip="Remove every trader buyback-price override (TRLTraderPrices)." data-tip-pos="bottom">Clear buyback overrides</button>
+  </div>
+
+  <span class="topbar-sep" aria-hidden="true"></span>
+
+  <span class="stats" id="stats">loading…</span>
+</header>
+
+<aside class="sidebar" id="sidebar"></aside>
+
+<main class="main" id="main">
+  <div class="loading" id="loading">
+    <div class="loading__hint">Loading data/items.json (14 MB)…</div>
+    <div class="loading__rows" id="skel"></div>
+  </div>
+</main>
+
+</div>
+
+<div class="toast-container" id="toasts"></div>
+
+<script>
+'use strict';
+
+let ITEMS = null;       // raw object
+// Mount prefix for every server-side route this mod serves (SPTWeb mounts wwwroot/ AND the
+// ASP.NET controllers under /{AssemblyName}/ — see the .csproj comment). Every fetch() in this
+// file goes through API_BASE, never a bare relative/rooted path — required since this file is
+// served from inside the SPT server's own Kestrel, sharing origin with other mods' web UIs.
+const API_BASE = '/TRLItemsManagement-Server/api';
+
+let ITEM_LIST = [];     // array form
+let CATEGORIES = null;
+let CATEGORY_ICONS = {}; // category id → icon URL (also keyed by name as fallback)
+let TRADERS = {};       // nickname → { id, avatar }
+let TRADER_ID_TO_NAME = {}; // trader MongoId → nickname (built from TRADERS)
+let TRADER_OVERRIDES = {};  // traderId → { tpl → { count, currency } } (NATIVE amount; from GET /api/trader-overrides)
+let TRADER_MOD_INSTALLED = true;  // companion mod TRLTraderPrices present? (from GET /api/trader-overrides)
+let BUY_OVERRIDES = {};    // B-3: traderId → { tpl → { count, currency } } (buyback; from GET /api/trader-buy-overrides)
+let BUY_MOD_INSTALLED = true;  // companion mod TRLTraderPrices (buy-price half) present?
+let CURRENCY_RATES = { RUB: 1 };  // { RUB:1, USD, EUR, GP } rubles-per-native-unit (from meta.json)
+const FENCE_ID = '579dc571d53a0658a154fbec'; // Fence — dynamic assort, not editable
+let META = null;
+let CAT_COUNTS = {};    // categoryId -> count of items
+let activeCategoryId = null;
+const selectedGroups     = new Set();  // names selected in Group multiselect
+const selectedConditions = new Set();  // conditionType values selected
+const selectedBans       = new Set();  // ban filter values: 'ok' | 'bsg' | 'custom'
+const selectedEdited     = new Set();  // edited filter values: 'flea' | 'trader' | 'none'
+const selectedMods       = new Set();  // modSource names selected (custom items from mods)
+const DELTA_STORAGE_KEY  = 'trl-items-management.delta';
+let deltaSource = 'dev';   // 'dev' | 'market'
+let deltaMin    = null;    // number or null
+let deltaMax    = null;    // number or null
+
+// Reusable dropdown component (single or multi-select). Options shape:
+//   [{ value: string, label: string, icon?: string, count?: number }]
+// Returns { root, getValue, setValue, refresh } where value is an array.
+function createDropdown({ placeholder, options, multi = false, searchable = false, onChange }) {
+  const selected = new Set();
+  const root = document.createElement('div');
+  root.className = 'dropdown' + (multi ? ' dropdown--multi' : '');
+
+  const trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'dropdown__trigger';
+  trigger.innerHTML = '<span class="dropdown__label"></span><span class="dropdown__badge" style="display:none">0</span><span class="chev"></span>';
+  root.appendChild(trigger);
+
+  const panel = document.createElement('div');
+  panel.className = 'dropdown__panel';
+  root.appendChild(panel);
+
+  // Optional search input
+  let searchInput = null;
+  if (searchable) {
+    searchInput = document.createElement('input');
+    searchInput.type = 'text';
+    searchInput.className = 'dropdown__search';
+    searchInput.placeholder = 'Filter…';
+    panel.appendChild(searchInput);
+  }
+
+  // Action buttons (only for multi)
+  if (multi) {
+    const actions = document.createElement('div');
+    actions.className = 'dropdown__actions';
+    const clearBtn = document.createElement('button');
+    clearBtn.type = 'button'; clearBtn.className = 'dropdown__action'; clearBtn.textContent = 'Clear';
+    clearBtn.onclick = (e) => { e.stopPropagation(); selected.clear(); refresh(); emit(); };
+    const selectAllBtn = document.createElement('button');
+    selectAllBtn.type = 'button'; selectAllBtn.className = 'dropdown__action'; selectAllBtn.textContent = 'All';
+    selectAllBtn.onclick = (e) => { e.stopPropagation(); options.forEach(o => selected.add(o.value)); refresh(); emit(); };
+    actions.appendChild(clearBtn);
+    actions.appendChild(selectAllBtn);
+    panel.appendChild(actions);
+  }
+
+  const optionsList = document.createElement('div');
+  optionsList.className = 'dropdown__options';
+  panel.appendChild(optionsList);
+
+  function renderOptions() {
+    optionsList.innerHTML = '';
+    if (!options.length) {
+      const empty = document.createElement('div');
+      empty.className = 'dropdown__empty';
+      empty.textContent = 'No options';
+      optionsList.appendChild(empty);
+      return;
+    }
+    for (const opt of options) {
+      const item = document.createElement('div');
+      item.className = 'dropdown__option' + (selected.has(opt.value) ? ' is-selected' : '');
+      item.dataset.value = opt.value;
+      item.dataset.label = (opt.label || '').toLowerCase();
+      const check = multi ? '<span class="check"></span>' : '';
+      // Icon: prefer raw HTML (`iconHtml`) for inline SVG/symbols, fall back to URL (`icon`)
+      let icon = '';
+      if (opt.iconHtml)      icon = `<span class="icon">${opt.iconHtml}</span>`;
+      else if (opt.icon)     icon = `<span class="icon"><img src="${escapeAttr(opt.icon)}" alt="" loading="lazy"></span>`;
+      const count = opt.count != null ? `<span class="count">${opt.count}</span>` : '';
+      // Label: if opt.badge is set, render the table-style badge instead of plain text
+      const labelText = opt.label || opt.value;
+      const label = opt.badge
+        ? `<span class="label"><span class="badge badge--${escapeAttr(opt.badge)}">${escapeHtml(labelText)}</span></span>`
+        : `<span class="label">${escapeHtml(labelText)}</span>`;
+      item.innerHTML = check + icon + label + count;
+      item.onclick = (e) => {
+        e.stopPropagation();
+        if (multi) {
+          if (selected.has(opt.value)) selected.delete(opt.value);
+          else selected.add(opt.value);
+          item.classList.toggle('is-selected');
+        } else {
+          selected.clear();
+          selected.add(opt.value);
+          close();
+        }
+        refresh();
+        emit();
+      };
+      optionsList.appendChild(item);
+    }
+  }
+
+  function refresh() {
+    const label = root.querySelector('.dropdown__label');
+    const badge = root.querySelector('.dropdown__badge');
+    if (selected.size === 0) {
+      label.textContent = placeholder;
+      label.style.color = '';
+      badge.style.display = 'none';
+    } else if (multi) {
+      label.textContent = placeholder;
+      badge.textContent = selected.size;
+      badge.style.display = '';
+    } else {
+      const first = [...selected][0];
+      const opt = options.find(o => o.value === first);
+      label.textContent = opt ? (opt.label || opt.value) : first;
+      label.style.color = 'var(--fg-primary)';
+      badge.style.display = 'none';
+    }
+    // Update selected visual on existing option elements
+    for (const el of optionsList.querySelectorAll('.dropdown__option')) {
+      el.classList.toggle('is-selected', selected.has(el.dataset.value));
+    }
+  }
+
+  function emit() { if (onChange) onChange([...selected]); }
+
+  function open()  { root.classList.add('is-open'); if (searchInput) { searchInput.value=''; applySearch(''); setTimeout(() => searchInput.focus(), 0); } }
+  function close() { root.classList.remove('is-open'); }
+  function toggle() { root.classList.contains('is-open') ? close() : open(); }
+
+  function applySearch(q) {
+    q = q.toLowerCase();
+    for (const el of optionsList.querySelectorAll('.dropdown__option')) {
+      el.classList.toggle('is-hidden', q && !el.dataset.label.includes(q));
+    }
+  }
+
+  trigger.addEventListener('click', (e) => { e.stopPropagation(); toggle(); });
+  if (searchInput) searchInput.addEventListener('input', () => applySearch(searchInput.value));
+  document.addEventListener('click', (e) => { if (!root.contains(e.target)) close(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+
+  renderOptions();
+  refresh();
+
+  return {
+    root,
+    getValue: () => [...selected],
+    setValue: (vals) => { selected.clear(); (vals||[]).forEach(v => selected.add(v)); renderOptions(); refresh(); },
+    setOptions: (newOpts) => { options = newOpts; renderOptions(); refresh(); },
+  };
+}
+
+// Persisted sort (defaults: Trader sell descending). Restored on load.
+const SORT_STORAGE_KEY = 'trl-items-management.sort';
+function loadSortPref() {
+  try {
+    const raw = localStorage.getItem(SORT_STORAGE_KEY);
+    if (!raw) return null;
+    const p = JSON.parse(raw);
+    if (typeof p.key === 'string' && (p.dir === 1 || p.dir === -1)) return p;
+  } catch (e) { /* corrupt entry — ignore */ }
+  return null;
+}
+function saveSortPref() {
+  try { localStorage.setItem(SORT_STORAGE_KEY, JSON.stringify({ key: sortKey, dir: sortDir })); }
+  catch (e) { /* quota / private mode — fail silently */ }
+}
+const _initSort = loadSortPref() || { key: 'priceTraderSell', dir: -1 };
+let sortKey = _initSort.key;
+let sortDir = _initSort.dir; // -1 desc, 1 asc
+const RENDER_LIMIT = 1500;   // hard cap on rows ever rendered for one view
+const RENDER_BATCH = 200;    // rows per incremental window batch (rest load on scroll)
+// Windowing state (see renderNow / appendWindowBatch): keeps the live DOM to a few
+// hundred rows instead of up to 1500, without changing the table layout/visuals.
+let _winRows = [], _winCursor = 0, _winObserver = null;
+
+// Handbook tree (used now) has no synthetic intermediates, so the skip set is empty.
+// Kept as an empty Set so existing code paths remain valid.
+const SKIP_CATEGORIES = new Set();
+
+// Emoji fallback by category name — only used if a category has no `icon` path
+// (e.g. categories that come from tarkov.dev fallback for SPT-orphan items).
+const CAT_ICONS = {
+  'Weapon': '🔫', 'Assault rifle': '🔫', 'Assault carbine': '🔫',
+  'Handgun': '🔫', 'SMG': '🔫', 'Sniper rifle': '🎯', 'Marksman rifle': '🎯',
+  'Shotgun': '🔫', 'Machine gun': '🔫', 'Special weapon': '🔫',
+  'Weapon mod': '🔧', 'Functional mod': '🔧', 'Gear mod': '🔧',
+  'Muzzle device': '🔧', 'Sights': '🔭', 'Auxiliary mod': '🔧',
+  'Equipment': '🦺', 'Armor': '🦺', 'Body armor': '🦺', 'Armored equipment': '🦺',
+  'Headwear': '⛑️', 'Headphones': '🎧', 'Visors': '🕶️', 'FaceCover': '😷',
+  'Backpack': '🎒', 'Chest rig': '🎽',
+  'Container': '📦', 'Common container': '📦', 'Locking container': '🔒',
+  'Pockets': '👖',
+  'Stackable item': '📚', 'Ammo': '💥', 'Ammo container': '🗃️', 'Money': '💰', 'Currency': '💰',
+  'Magazine': '📦',
+  'Key': '🔑', 'Mechanical Key': '🔑', 'Keycard': '💳',
+  'Meds': '💊', 'Drug': '💊', 'Medikit': '🩹', 'Medical item': '🏥', 'Stimulator': '💉',
+  'Food and drink': '🍔', 'Food': '🍔', 'Drink': '🥤',
+  'Throwable weapon': '💣', 'Grenade': '💣',
+  'Knife': '🔪',
+  'Map': '🗺️',
+  'Info': 'ℹ️', 'Dialog Item': '💬',
+  'Flyer': '📄',
+  'Barter item': '🔄', 'Battery': '🔋', 'Building material': '🧱', 'Electronics': '🖥️',
+  'Tool': '🔧', 'Household material': '🧴', 'Energy element': '⚡',
+  'Other': '📎', 'Valuable': '💎', 'Lubricant': '🧴', 'Medical supplies': '🧪', 'Fuel': '⛽',
+  'Special item': '⭐', 'Compass': '🧭',
+  'Completable': '📋', 'Quest item': '📋', 'Notes': '📝', 'Tapes': '📼',
+  'Item': '📦',
+};
+const ICON_DEFAULT = '·';
+
+// "Forbidden" SVG mark for flea-banned items. Inline = crisp at any size and
+// inherits color via currentColor (matches --color-danger from tokens).
+const ICON_BANNED = '<svg class="icon-banned" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">'
+  + '<circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/>'
+  + '<line x1="2.75" y1="2.75" x2="11.25" y2="11.25" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>'
+  + '</svg>';
+
+// Green check SVG for the "allowed" state in the Banned filter.
+const ICON_OK = '<svg class="icon-ok" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">'
+  + '<path d="M2 7.5 L5.5 11 L12 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>'
+  + '</svg>';
+
+// Pencil/edit SVG shown on hover over editable cells.
+const ICON_EDIT = '<svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">'
+  + '<path d="M9.5 1.8 L12.2 4.5 L4.5 12.2 L1.5 12.5 L1.8 9.5 Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" fill="none"/>'
+  + '<path d="M8.5 2.8 L11.2 5.5" stroke="currentColor" stroke-width="1.3"/>'
+  + '</svg>';
+
+// Refresh / reload arrow used on the Flea Dev cell to re-pull from tarkov.dev
+const ICON_REFRESH = '<svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">'
+  + '<path d="M12 7 a5 5 0 1 1 -1.5 -3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" fill="none"/>'
+  + '<path d="M12 1.5 L12 4 L9.5 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'
+  + '</svg>';
+
+// ── Number formatting ───────────────────────────────────────────────────────
+const fmt    = (n) => n == null ? '—' : n.toLocaleString('pt-BR');
+const fmtRub = (n) => n == null ? '—' : n.toLocaleString('pt-BR') + ' <span class="currency currency--rub">₽</span>';
+
+// Relative time for "last updated" displays. Returns short label + ISO tooltip.
+function fmtRelTime(iso) {
+  if (!iso) return '—';
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return '—';
+  const diffMs = Date.now() - t;
+  const abs = Math.abs(diffMs);
+  const m = Math.round(abs / 60000);
+  const h = Math.round(abs / 3600000);
+  const d = Math.round(abs / 86400000);
+  let label;
+  if (abs < 60000) label = 'now';
+  else if (m < 60) label = `${m} min ago`;
+  else if (h < 24) label = `${h}h ago`;
+  else if (d < 30) label = `${d}d ago`;
+  else label = new Date(iso).toLocaleDateString('en-US');
+  return `<span title="${escapeAttr(iso)}">${label}</span>`;
+}
+
+// Percent vs SPT reference. Returns HTML span. Empty string when not computable.
+function pctVsSpt(value, sptValue) {
+  if (value == null || sptValue == null || sptValue === 0) return '';
+  const pct = ((value - sptValue) / sptValue) * 100;
+  if (Math.abs(pct) < 0.05) return '<span class="pct is-zero">= 0%</span>';
+  const cls = pct > 0 ? 'is-up' : 'is-down';
+  const arrow = pct > 0 ? '▲' : '▼';
+  const sign  = pct > 0 ? '+' : '';
+  return `<span class="pct ${cls}">${arrow} ${sign}${pct.toFixed(1)}%</span>`;
+}
+
+// External (dev/market) prices for cheap/niche mods are frequently polluted by
+// troll listings (e.g. a Glock rear sight at 2,000,000 on tarkov.dev and 99,656
+// on tarkov-market — both real API values, both garbage). These columns are
+// reference-only and never drive the SPT flea, so we don't alter the value — we
+// just flag one that towers over the SPT flea so it isn't trusted at face value.
+// Mirrors SPT's own unreasonableModPrices spirit (×6).
+const TROLL_FACTOR = 6;
+const TROLL_MIN_ABS = 50000;
+function trollFlag(value, sptValue) {
+  if (value == null || sptValue == null || sptValue <= 0) return '';
+  if (value < TROLL_MIN_ABS || value <= sptValue * TROLL_FACTOR) return '';
+  const x = Math.round(value / sptValue);
+  return ` <span class="troll-flag" data-tip="Probable troll listing: ${value.toLocaleString('en-US')} ₽ is ~${x}× the SPT flea (${sptValue.toLocaleString('en-US')} ₽). Real value from the external source, but not reliable as a reference.">⚠</span>`;
+}
+
+// ── Load ────────────────────────────────────────────────────────────────────
+// Render skeleton rows synchronously, before kicking off fetch — first paint
+// shows shimmer placeholders instead of blank/text.
+function renderSkeleton(count) {
+  const skel = document.getElementById('skel');
+  if (!skel) return;
+  const rows = [];
+  for (let i = 0; i < count; i++) {
+    rows.push(
+      '<div class="skel-row">' +
+        '<div class="skel-box skel-box--img"></div>' +
+        '<div><div class="skel-box" style="width:70%"></div><div class="skel-box" style="width:35%;height:9px;margin-top:4px"></div></div>' +
+        '<div class="skel-box" style="width:60%"></div>' +
+        '<div class="skel-box skel-box--tall" style="width:50%"></div>' +
+        '<div class="skel-box" style="width:80%"></div>' +
+        '<div class="skel-box" style="width:80%"></div>' +
+        '<div class="skel-box" style="width:80%"></div>' +
+        '<div class="skel-box" style="width:80%"></div>' +
+        '<div class="skel-box" style="width:80%"></div>' +
+      '</div>');
+  }
+  skel.innerHTML = rows.join('');
+}
+
+async function load() {
+  renderSkeleton(14);
+  try {
+    const [items, cats, meta, traders] = await Promise.all([
+      fetch(API_BASE + '/data/items.json').then(r => r.json()),
+      fetch(API_BASE + '/data/categories.json').then(r => r.json()),
+      fetch(API_BASE + '/data/meta.json').then(r => r.json()),
+      fetch(API_BASE + '/data/traders.json').then(r => r.json()).catch(() => ({})),
+    ]);
+    ITEMS = items;
+    CATEGORIES = cats;
+    META = meta;
+    TRADERS = traders || {};
+    // The catalog files (items/categories/traders.json, produced by the Node pipeline) embed
+    // /spt-images/... paths root-relative to the OLD standalone dev server. Rewrite every one, ONCE,
+    // right here at load — mutating the shared data objects in place — instead of chasing every
+    // render call site that reads it.category.icon / a CATEGORIES tree node's .icon / TRADERS[x].avatar.
+    const fixSptImagePath = (p) => (typeof p === 'string' && p.startsWith('/spt-images/')) ? API_BASE + p : p;
+    for (const it of Object.values(ITEMS)) {
+      if (it && it.category) it.category.icon = fixSptImagePath(it.category.icon);
+    }
+    (function fixCategoryIcons(node) {
+      if (!node) return;
+      node.icon = fixSptImagePath(node.icon);
+      if (node.children) node.children.forEach(fixCategoryIcons);
+    })(CATEGORIES);
+    for (const meta_ of Object.values(TRADERS)) {
+      if (meta_) meta_.avatar = fixSptImagePath(meta_.avatar);
+    }
+    // Currency conversion rates (rubles per unit) for the in-game native preview.
+    // RUB is implicit (=1). Missing currencies fall back to 1 (no conversion shown).
+    {
+      const rates = (META && META.sources && META.sources.spt && META.sources.spt.currencyRates) || {};
+      CURRENCY_RATES = { RUB: 1 };
+      for (const k of ['USD', 'EUR', 'GP']) {
+        if (rates[k] != null && rates[k] > 0) CURRENCY_RATES[k] = rates[k];
+      }
+    }
+    // Build reverse lookup (id → nickname) so detail rows can resolve a trader's
+    // display name / avatar from the traderId carried on each offer.
+    TRADER_ID_TO_NAME = {};
+    for (const [name, meta_] of Object.entries(TRADERS)) {
+      if (meta_ && meta_.id) TRADER_ID_TO_NAME[meta_.id] = name;
+    }
+    // Trader-price overrides (companion mod TRLTraderPrices). Tolerate failure —
+    // the section still renders base prices without override badges.
+    try {
+      const tr = await fetch(API_BASE + '/trader-overrides').then(r => r.json());
+      TRADER_OVERRIDES = (tr && tr.ok && tr.overrides) ? tr.overrides : {};
+      TRADER_MOD_INSTALLED = (tr && tr.ok) ? (tr.modInstalled !== false) : true;
+    } catch (_) { TRADER_OVERRIDES = {}; TRADER_MOD_INSTALLED = true; }
+
+    // B-3: buy-price (buyback) overrides — same companion mod, separate config file. Tolerate
+    // failure the same way (base tarkov.dev reference prices still render without OVR badges).
+    try {
+      const bo = await fetch(API_BASE + '/trader-buy-overrides').then(r => r.json());
+      BUY_OVERRIDES = (bo && bo.ok && bo.overrides) ? bo.overrides : {};
+      BUY_MOD_INSTALLED = (bo && bo.ok) ? (bo.modInstalled !== false) : true;
+    } catch (_) { BUY_OVERRIDES = {}; BUY_MOD_INSTALLED = true; }
+
+    // Walk category tree once and index icon URLs by both id and name so the
+    // table's Group column can find the right icon for any item. (Icons themselves were
+    // already rewritten to their API_BASE-prefixed form above, in the fixCategoryIcons pass.)
+    (function indexIcons(node) {
+      if (!node) return;
+      if (node.id && node.icon)   CATEGORY_ICONS[node.id] = node.icon;
+      if (node.name && node.icon) CATEGORY_ICONS[node.name] = node.icon;
+      if (node.children) node.children.forEach(indexIcons);
+    })(CATEGORIES);
+    ITEM_LIST = Object.values(items);
+    countCategories();
+    renderSidebar();
+    buildGroupFilter();
+    buildConditionFilter();
+    buildBanFilter();
+    buildModFilter();
+    buildEditedFilter();
+    buildDeltaFilter();
+    bindControls();
+    render();
+    document.getElementById('q').focus();
+  } catch (e) {
+    document.getElementById('main').innerHTML =
+      '<div class="empty">Failed to load JSONs.<br>Use <code>node viewer/serve.js</code> and open http://localhost:8080/viewer/<br><br>' + e.message + '</div>';
+  }
+}
+
+const GROUP_STORAGE_KEY     = 'trl-items-management.groups';
+const CONDITION_STORAGE_KEY = 'trl-items-management.conditions';
+const BAN_STORAGE_KEY       = 'trl-items-management.bans';
+const EDITED_STORAGE_KEY    = 'trl.editedFilter';
+const MOD_STORAGE_KEY       = 'trl-items-management.mods';
+let groupDropdown = null;
+let conditionDropdown = null;
+let banDropdown = null;
+let editedDropdown = null;
+let modDropdown = null;
+
+function buildDeltaFilter() {
+  // Restore persisted state
+  try {
+    const saved = JSON.parse(localStorage.getItem(DELTA_STORAGE_KEY) || 'null');
+    if (saved) {
+      if (saved.source === 'dev' || saved.source === 'market') deltaSource = saved.source;
+      if (typeof saved.min === 'number') deltaMin = saved.min;
+      if (typeof saved.max === 'number') deltaMax = saved.max;
+    }
+  } catch (e) {}
+
+  function saveDelta() {
+    try { localStorage.setItem(DELTA_STORAGE_KEY, JSON.stringify({ source: deltaSource, min: deltaMin, max: deltaMax })); } catch (e) {}
+  }
+
+  // Compact host: a toggle button + a popover holding the (unchanged) delta UI.
+  const host = document.createElement('div');
+  host.className = 'delta-pop';
+
+  const trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'bulk-btn delta-pop__trigger';
+  trigger.setAttribute('aria-haspopup', 'true');
+  trigger.setAttribute('aria-expanded', 'false');
+  trigger.setAttribute('data-tip', 'Filter by % delta of an external price vs the SPT flea');
+  trigger.setAttribute('data-tip-pos', 'bottom');
+  trigger.innerHTML = 'Δ% <span class="delta-pop__badge" hidden></span><span class="chev"></span>';
+  host.appendChild(trigger);
+
+  // The original delta UI, verbatim — only relocated inside the popover.
+  const root = document.createElement('div');
+  root.className = 'delta-filter delta-pop__panel';
+
+  root.innerHTML =
+    '<span class="delta-filter__label">Δ%</span>' +
+    '<button type="button" class="delta-filter__src" data-src="dev"  title="Compare vs tarkov.dev avg24h">Dev</button>' +
+    '<button type="button" class="delta-filter__src" data-src="market" title="Compare vs tarkov-market avg24h">Market</button>' +
+    '<span class="delta-filter__sep">·</span>' +
+    '<input class="delta-filter__input" id="delta-min" type="number" placeholder="min%" step="1" title="Min delta (e.g. -50)">' +
+    '<span class="delta-filter__range-sep">…</span>' +
+    '<input class="delta-filter__input" id="delta-max" type="number" placeholder="max%" step="1" title="Max delta (e.g. +200)">' +
+    '<button type="button" class="delta-filter__clear" id="delta-clear" title="Clear delta filter">×</button>';
+  host.appendChild(root);
+
+  const btnDev    = root.querySelector('[data-src="dev"]');
+  const btnMarket = root.querySelector('[data-src="market"]');
+  const inputMin  = root.querySelector('#delta-min');
+  const inputMax  = root.querySelector('#delta-max');
+  const btnClear  = root.querySelector('#delta-clear');
+
+  function updateSrcButtons() {
+    btnDev.classList.toggle('is-active',    deltaSource === 'dev');
+    btnMarket.classList.toggle('is-active', deltaSource === 'market');
+  }
+  function updateClearVisibility() {
+    btnClear.style.display = (deltaMin !== null || deltaMax !== null) ? '' : 'none';
+  }
+  // Active state on the compact trigger when a min/max bound is set.
+  function updateTriggerState() {
+    const active = (deltaMin !== null || deltaMax !== null);
+    trigger.classList.toggle('is-active', active);
+    const badge = trigger.querySelector('.delta-pop__badge');
+    if (badge) {
+      const lo = deltaMin !== null ? deltaMin + '%' : '';
+      const hi = deltaMax !== null ? deltaMax + '%' : '';
+      const txt = active ? (lo && hi ? `${lo}…${hi}` : (lo ? `≥${lo}` : `≤${hi}`)) : '';
+      badge.textContent = txt;
+      badge.hidden = !active;
+    }
+  }
+
+  // Restore inputs
+  if (deltaMin !== null) inputMin.value = deltaMin;
+  if (deltaMax !== null) inputMax.value = deltaMax;
+  updateSrcButtons();
+  updateClearVisibility();
+  updateTriggerState();
+
+  btnDev.addEventListener('click', () => {
+    deltaSource = 'dev'; updateSrcButtons(); saveDelta(); render();
+  });
+  btnMarket.addEventListener('click', () => {
+    deltaSource = 'market'; updateSrcButtons(); saveDelta(); render();
+  });
+
+  function onInputChange(inputEl, setter) {
+    const raw = inputEl.value.trim();
+    setter(raw === '' ? null : parseFloat(raw));
+    saveDelta();
+    updateClearVisibility();
+    updateTriggerState();
+    render();
+  }
+
+  inputMin.addEventListener('change', () => onInputChange(inputMin, v => { deltaMin = v; }));
+  inputMax.addEventListener('change', () => onInputChange(inputMax, v => { deltaMax = v; }));
+  inputMin.addEventListener('keydown', (e) => { if (e.key === 'Enter') inputMin.blur(); });
+  inputMax.addEventListener('keydown', (e) => { if (e.key === 'Enter') inputMax.blur(); });
+
+  btnClear.addEventListener('click', () => {
+    deltaMin = null; deltaMax = null;
+    inputMin.value = ''; inputMax.value = '';
+    saveDelta(); updateClearVisibility(); updateTriggerState(); render();
+  });
+
+  // Popover open/close (outside-click / Esc), matching the .dropdown behavior.
+  function open()  { host.classList.add('is-open'); trigger.setAttribute('aria-expanded', 'true'); }
+  function close() { host.classList.remove('is-open'); trigger.setAttribute('aria-expanded', 'false'); }
+  trigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    host.classList.contains('is-open') ? close() : open();
+  });
+  document.addEventListener('click', (e) => { if (!host.contains(e.target)) close(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+
+  document.getElementById('delta-filter').appendChild(host);
+}
+
+function buildBanFilter() {
+  // Count items by ban state so user sees distribution at-a-glance
+  let okCount = 0, bsgCount = 0, customCount = 0;
+  for (const it of ITEM_LIST) {
+    const banned  = it.spt && it.spt.fleaBanned;
+    const reasons = (it.spt && it.spt.fleaBanReasons) || [];
+    if (!banned) okCount++;
+    if (reasons.includes('bsg')) bsgCount++;
+    if (reasons.includes('custom')) customCount++;
+  }
+  const options = [
+    { value: 'ok',     label: 'Allowed',     iconHtml: '<span class="ban-ico ban-ico--ok">'+ICON_OK+'</span>',         count: okCount },
+    { value: 'bsg',    label: 'Banned (BSG)',  iconHtml: '<span class="ban-ico ban-ico--banned">'+ICON_BANNED+'</span>', count: bsgCount },
+    { value: 'custom', label: 'Banned (custom)', iconHtml: '<span class="ban-ico ban-ico--banned">'+ICON_BANNED+'</span>', count: customCount },
+  ];
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(BAN_STORAGE_KEY) || '[]');
+    if (Array.isArray(saved)) saved.forEach(v => selectedBans.add(v));
+  } catch (e) {}
+
+  banDropdown = createDropdown({
+    placeholder: 'Banned',
+    options,
+    multi: true,
+    onChange: (vals) => {
+      selectedBans.clear();
+      vals.forEach(v => selectedBans.add(v));
+      try { localStorage.setItem(BAN_STORAGE_KEY, JSON.stringify(vals)); } catch (e) {}
+      render();
+    },
+  });
+  banDropdown.setValue([...selectedBans]);
+  document.getElementById('ban-filter').appendChild(banDropdown.root);
+}
+
+// True if a vanilla/mod item has its flea price pinned via ragfair.json — either
+// an additive override (vanilla items) or an offer-multiplier (mod items).
+function itemIsFleaEdited(it) {
+  const s = it.spt;
+  return !!(s && (s.fleaOverride != null || s.fleaOfferMultiplier != null));
+}
+
+// True if ANY editable money offer of this item has a trader-price override
+// pinned at its (traderId, tpl). Shared by the filter + its counts.
+function itemHasTraderOverride(it) {
+  const traders = it.spt && it.spt.traders ? it.spt.traders : [];
+  for (const t of traders) {
+    const traderId = t.traderId || (t.name ? (TRADERS[t.name] && TRADERS[t.name].id) : null);
+    if (!traderId || traderId === FENCE_ID) continue;
+    const editable = (t.editable === true) || (TRADER_MONEY_CURRENCIES.has(t.currency) && t.currency !== 'BARTER');
+    if (!editable) continue;
+    if (traderOverrideFor(traderId, it.id) != null) return true;
+  }
+  return false;
+}
+
+// Merged "Edited" filter — one multi-select replacing the old Override +
+// Trader-edit chips. Conditions: flea-edited (ragfair override/multiplier),
+// trader-edited (TRLTraderPrices override), or not edited at all.
+function buildEditedFilter() {
+  let fleaCount = 0, traderCount = 0, noneCount = 0;
+  for (const it of ITEM_LIST) {
+    const flea   = itemIsFleaEdited(it);
+    const trader = itemHasTraderOverride(it);
+    if (flea)   fleaCount++;
+    if (trader) traderCount++;
+    if (!flea && !trader) noneCount++;
+  }
+  const options = [
+    { value: 'flea',   label: 'Flea-edited',   iconHtml: '<span class="badge badge--override">OVR</span>', count: fleaCount },
+    { value: 'trader', label: 'Trader-edited', iconHtml: '<span class="badge badge--override">OVR</span>', count: traderCount },
+    { value: 'none',   label: 'Not edited', count: noneCount },
+  ];
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(EDITED_STORAGE_KEY) || '[]');
+    if (Array.isArray(saved)) saved.forEach(v => selectedEdited.add(v));
+  } catch (e) {}
+
+  editedDropdown = createDropdown({
+    placeholder: 'Edited',
+    options,
+    multi: true,
+    onChange: (vals) => {
+      selectedEdited.clear();
+      vals.forEach(v => selectedEdited.add(v));
+      try { localStorage.setItem(EDITED_STORAGE_KEY, JSON.stringify(vals)); } catch (e) {}
+      render();
+    },
+  });
+  editedDropdown.setValue([...selectedEdited]);
+  document.getElementById('edited-filter').appendChild(editedDropdown.root);
+}
+
+// Recompute Edited-filter counts in place (after a flea/trader edit/restore/clear).
+// Preserves the current selection (selectedEdited keeps its values).
+function refreshEditedFilter() {
+  const host = document.getElementById('edited-filter');
+  if (host) host.innerHTML = '';
+  editedDropdown = null;
+  buildEditedFilter();
+}
+
+// Back-compat alias: trader save/restore/clear paths call this name.
+function refreshTraderOverrideFilter() { refreshEditedFilter(); }
+
+function buildModFilter() {
+  // Custom items added by server mods (modSource set in load-spt from
+  // user/mods/*/db/CustomItems/). No mod items → no filter rendered.
+  const counts = {};
+  for (const it of ITEM_LIST) { if (it.modSource) counts[it.modSource] = (counts[it.modSource] || 0) + 1; }
+  const names = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+  if (names.length === 0) return;
+  const options = names.map(n => ({ value: n, label: n, count: counts[n] }));
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(MOD_STORAGE_KEY) || '[]');
+    if (Array.isArray(saved)) saved.forEach(v => selectedMods.add(v));
+  } catch (e) {}
+
+  modDropdown = createDropdown({
+    placeholder: 'Mod',
+    options,
+    multi: true,
+    searchable: names.length > 12,
+    onChange: (vals) => {
+      selectedMods.clear();
+      vals.forEach(v => selectedMods.add(v));
+      try { localStorage.setItem(MOD_STORAGE_KEY, JSON.stringify(vals)); } catch (e) {}
+      render();
+    },
+  });
+  modDropdown.setValue([...selectedMods]);
+  document.getElementById('mod-filter').appendChild(modDropdown.root);
+}
+
+function buildConditionFilter() {
+  // Count items per condition type so user can see distribution
+  const counts = {};
+  for (const it of ITEM_LIST) {
+    const c = it.consolidated && it.consolidated.conditionType;
+    if (!c) continue;
+    counts[c] = (counts[c] || 0) + 1;
+  }
+  // Fixed order matching badge severity / table column visual hierarchy
+  const order = ['none', 'durability', 'resource', 'uses', 'unknown'];
+  const options = order.filter(c => counts[c] > 0).map(c => ({
+    value: c,
+    label: c.charAt(0).toUpperCase() + c.slice(1),
+    badge: c,
+    count: counts[c],
+  }));
+
+  // Restore persisted selection
+  try {
+    const saved = JSON.parse(localStorage.getItem(CONDITION_STORAGE_KEY) || '[]');
+    if (Array.isArray(saved)) saved.forEach(v => selectedConditions.add(v));
+  } catch (e) {}
+
+  conditionDropdown = createDropdown({
+    placeholder: 'Condition',
+    options,
+    multi: true,
+    onChange: (vals) => {
+      selectedConditions.clear();
+      vals.forEach(v => selectedConditions.add(v));
+      try { localStorage.setItem(CONDITION_STORAGE_KEY, JSON.stringify(vals)); } catch (e) {}
+      render();
+    },
+  });
+  conditionDropdown.setValue([...selectedConditions]);
+  document.getElementById('condition-filter').appendChild(conditionDropdown.root);
+}
+
+function buildGroupFilter() {
+  // Collect unique group names from items, with counts and icons.
+  const counts = {};
+  const icons = {};
+  for (const it of ITEM_LIST) {
+    const g = it.consolidated && it.consolidated.group;
+    if (!g) continue;
+    if (/^[a-f0-9]{24}$/i.test(g)) continue; // skip handbook entries without a locale name
+    counts[g] = (counts[g] || 0) + 1;
+    if (!icons[g] && it.category && it.category.icon) icons[g] = it.category.icon;
+  }
+  const options = Object.keys(counts).sort((a,b) => counts[b] - counts[a]).map(name => ({
+    value: name,
+    label: name,
+    icon: icons[name] || CATEGORY_ICONS[name] || null,
+    count: counts[name],
+  }));
+
+  // Restore persisted selection
+  try {
+    const saved = JSON.parse(localStorage.getItem(GROUP_STORAGE_KEY) || '[]');
+    if (Array.isArray(saved)) saved.forEach(v => selectedGroups.add(v));
+  } catch (e) { /* ignore */ }
+
+  groupDropdown = createDropdown({
+    placeholder: 'Group',
+    options,
+    multi: true,
+    searchable: true,
+    onChange: (vals) => {
+      selectedGroups.clear();
+      vals.forEach(v => selectedGroups.add(v));
+      try { localStorage.setItem(GROUP_STORAGE_KEY, JSON.stringify(vals)); } catch (e) {}
+      render();
+    },
+  });
+  groupDropdown.setValue([...selectedGroups]);
+  document.getElementById('group-filter').appendChild(groupDropdown.root);
+}
+
+function countCategories() {
+  for (const it of ITEM_LIST) {
+    if (!it.category) continue;
+    // count this category and all ancestors
+    let id = it.category.id;
+    while (id) {
+      CAT_COUNTS[id] = (CAT_COUNTS[id] || 0) + 1;
+      const node = findCatNode(CATEGORIES, id);
+      id = node && node.parentId ? node.parentId : null;
+      // categories.json doesn't store parentId on node, so walk via tree
+      break; // we count only the leaf; ancestors via tree walk in render
+    }
+  }
+  // walk tree to propagate counts upward
+  function walk(node) {
+    let total = CAT_COUNTS[node.id] || 0;
+    if (node.children) for (const c of node.children) total += walk(c);
+    CAT_COUNTS[node.id] = total;
+    return total;
+  }
+  walk(CATEGORIES);
+}
+
+function findCatNode(node, id) {
+  if (!node) return null;
+  if (node.id === id) return node;
+  if (node.children) for (const c of node.children) {
+    const r = findCatNode(c, id);
+    if (r) return r;
+  }
+  return null;
+}
+
+// ── Sidebar ─────────────────────────────────────────────────────────────────
+function renderSidebar() {
+  const sb = document.getElementById('sidebar');
+  sb.innerHTML = '';
+  const all = document.createElement('div');
+  all.className = 'tree-node tree-all' + (activeCategoryId === null ? ' is-active' : '');
+  all.innerHTML = '<span class="label">All items</span><span class="count">' + ITEM_LIST.length + '</span>';
+  all.onclick = () => { activeCategoryId = null; render(); refreshActiveCat(); };
+  sb.appendChild(all);
+
+  // Skip the synthetic root "Item" — render its children at depth 0
+  const rootChildren = CATEGORIES.children || [];
+  for (const c of rootChildren) renderCatNode(sb, c, 0);
+}
+
+// Flatten skipped intermediates: returns children with non-zero counts,
+// recursively promoting children of SKIP_CATEGORIES nodes.
+function effectiveChildren(node) {
+  if (!node || !node.children) return [];
+  const out = [];
+  for (const c of node.children) {
+    if (SKIP_CATEGORIES.has(c.name)) {
+      out.push(...effectiveChildren(c));
+    } else if ((CAT_COUNTS[c.id] || 0) > 0) {
+      out.push(c);
+    }
+  }
+  return out;
+}
+
+function renderCatNode(parent, node, depth) {
+  if (!node) return;
+  const count = CAT_COUNTS[node.id] || 0;
+  if (count === 0) return;
+
+  // Skip synthetic intermediates — render their (effective) children at this level.
+  if (SKIP_CATEGORIES.has(node.name)) {
+    for (const c of effectiveChildren(node)) renderCatNode(parent, c, depth);
+    return;
+  }
+
+  const visibleChildren = effectiveChildren(node);
+  const hasChildren = visibleChildren.length > 0;
+  const autoOpen = false; // tree starts fully collapsed; user expands on click
+
+  const el = document.createElement('div');
+  el.className = 'tree-node' + (hasChildren ? ' has-children' : '') + (autoOpen && hasChildren ? ' is-open' : '') + (activeCategoryId === node.id ? ' is-active' : '');
+  el.style.paddingLeft = (6 + depth * 12) + 'px';
+  el.dataset.catId = node.id;
+  const iconHtml = node.icon
+    ? '<img src="' + escapeAttr(node.icon) + '" alt="" loading="lazy">'
+    : (CAT_ICONS[node.name] || ICON_DEFAULT);
+  el.innerHTML =
+    '<span class="chev"></span>' +
+    '<span class="icon">' + iconHtml + '</span>' +
+    '<span class="label">' + escapeHtml(node.name || node.id) + '</span>' +
+    '<span class="count">' + count + '</span>';
+
+  let childrenWrap = null;
+  if (hasChildren) {
+    childrenWrap = document.createElement('div');
+    childrenWrap.className = 'tree-children' + (autoOpen ? '' : ' is-hidden');
+    for (const c of visibleChildren) renderCatNode(childrenWrap, c, depth + 1);
+  }
+
+  el.onclick = (e) => {
+    e.stopPropagation();
+    if (hasChildren) {
+      el.classList.toggle('is-open');
+      childrenWrap.classList.toggle('is-hidden');
+    }
+    activeCategoryId = node.id;
+    render();
+    refreshActiveCat();
+  };
+
+  parent.appendChild(el);
+  if (childrenWrap) parent.appendChild(childrenWrap);
+}
+
+function refreshActiveCat() {
+  document.querySelectorAll('.tree-node').forEach(el => el.classList.remove('is-active'));
+  if (activeCategoryId === null) {
+    const a = document.querySelector('.tree-node.tree-all'); if (a) a.classList.add('is-active');
+  } else {
+    const a = document.querySelector('.tree-node[data-cat-id="' + activeCategoryId + '"]'); if (a) a.classList.add('is-active');
+  }
+}
+
+// ── Controls ────────────────────────────────────────────────────────────────
+function bindControls() {
+  const q       = document.getElementById('q');
+  const qWrap   = q.closest('.search');
+  const qClear  = document.getElementById('q-clear');
+
+  function updateClearVisibility() {
+    qWrap.classList.toggle('has-value', q.value.length > 0);
+  }
+  updateClearVisibility(); // initial (in case browser restored input)
+
+  q.addEventListener('input', () => { updateClearVisibility(); });
+  q.addEventListener('input', debounce(render, 300));
+  q.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && q.value) {
+      q.value = '';
+      updateClearVisibility();
+      render();
+      e.preventDefault();
+    }
+  });
+  qClear.addEventListener('click', () => {
+    q.value = '';
+    updateClearVisibility();
+    q.focus();
+    render();
+  });
+
+  // Flea level widget in topbar
+  const fleaWidget = document.getElementById('flea-level-widget');
+  const fleaNumEl  = document.getElementById('flea-level-num');
+  if (fleaNumEl && META && META.sources && META.sources.spt) {
+    fleaNumEl.textContent = META.sources.spt.fleaMinUserLevel || 15;
+  }
+  fleaWidget.addEventListener('click', () => openFleaMinLevelEditor(fleaWidget));
+
+  // Flea cap (SPT unreasonableModPrices) on/off toggle in topbar — B-1.
+  (function initFleaCapToggle() {
+    const btn = document.getElementById('flea-cap-toggle');
+    const stateEl = document.getElementById('flea-cap-state');
+    if (!btn || !stateEl) return;
+    let enabled = null;
+    const notify = (m) => { try { if (typeof toast === 'function') toast(m); } catch (_) {} };
+    const render = () => {
+      stateEl.textContent = enabled == null ? '…' : (enabled ? 'on' : 'OFF');
+      btn.classList.toggle('is-cap-off', enabled === false);
+    };
+    (async () => {
+      try { const j = await (await fetch(API_BASE + '/flea-cap')).json(); enabled = !!j.enabled; }
+      catch (_) { enabled = null; stateEl.textContent = '?'; return; }
+      render();
+    })();
+    btn.addEventListener('click', async () => {
+      if (enabled == null) return;
+      const next = !enabled;
+      btn.disabled = true;
+      try {
+        const r = await fetch(API_BASE + '/flea-cap', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled: next }) });
+        const j = await r.json();
+        if (r.ok) { enabled = j.enabled; render(); notify(next ? 'Flea cap ON — restart SPT + rebuild catalog to apply' : 'Flea cap OFF — mods/electronics uncapped; restart SPT + rebuild catalog to apply'); }
+        else { notify('Flea cap failed: ' + (j.error || r.status)); }
+      } catch (e) { notify('Flea cap failed: ' + e.message); }
+      finally { btn.disabled = false; }
+    });
+  })();
+
+  // Bulk "⟳ Update" menu (rescan / update-all-dev / update-all-market).
+  bindUpdateMenu();
+
+  // Clear ALL trader sell-price overrides (TRLTraderPrices).
+  const clearTraderBtn = document.getElementById('clear-trader-overrides');
+  if (clearTraderBtn) clearTraderBtn.addEventListener('click', () => clearAllTraderOverrides());
+  updateTraderTopbar();
+
+  // CR-05: Clear ALL trader buyback-price overrides (B-3, TRLTraderPrices) — mirrors the sell button above.
+  const clearBuyBtn = document.getElementById('clear-buy-overrides');
+  if (clearBuyBtn) clearBuyBtn.addEventListener('click', () => clearAllBuyOverrides());
+  updateBuyTopbar();
+
+  // Condition / Group / Ban are handled by multi-select dropdowns
+  // (buildConditionFilter / buildGroupFilter / buildBanFilter).
+}
+
+function debounce(fn, ms) {
+  let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+}
+
+// ── Filter / sort ───────────────────────────────────────────────────────────
+function isInCategorySubtree(item, rootId) {
+  if (!rootId) return true;
+  if (!item.category) return false;
+  // Walk up category tree from item leaf
+  let current = item.category.id;
+  if (current === rootId) return true;
+  // Find node and check if rootId is an ancestor
+  // Build ancestors of item.category.id once per category? Cache.
+  if (!ANCESTOR_CACHE[current]) {
+    ANCESTOR_CACHE[current] = collectAncestors(CATEGORIES, current);
+  }
+  return ANCESTOR_CACHE[current].has(rootId);
+}
+const ANCESTOR_CACHE = {};
+function collectAncestors(node, target, path) {
+  path = path || [];
+  if (!node) return new Set();
+  if (node.id === target) return new Set([target, ...path]);
+  if (node.children) {
+    for (const c of node.children) {
+      const r = collectAncestors(c, target, [node.id, ...path]);
+      if (r.size) return r;
+    }
+  }
+  return new Set();
+}
+
+// Filter-result memoization: a pure sort change (same filters) reuses the last
+// filtered set instead of re-scanning all 5907 items. `_dataVersion` is bumped by
+// every single-row mutation (edit/ban/restore/refresh) so a data change forces a
+// recompute even when the filter inputs are unchanged.
+let _filterKey = null, _filterCache = null, _dataVersion = 0;
+function filterStateKey() {
+  return [
+    document.getElementById('q').value.trim().toLowerCase(),
+    [...selectedConditions].sort().join(','),
+    [...selectedGroups].sort().join(','),
+    [...selectedBans].sort().join(','),
+    [...selectedEdited].sort().join(','),
+    [...selectedMods].sort().join(','),
+    deltaMin, deltaMax, deltaSource, activeCategoryId, _dataVersion,
+  ].join('|');
+}
+
+function filterItems() {
+  const cacheKey = filterStateKey();
+  if (cacheKey === _filterKey && _filterCache) return _filterCache;
+  const q = document.getElementById('q').value.trim().toLowerCase();
+
+  const out = [];
+  for (const it of ITEM_LIST) {
+    if (q) {
+      const hay = ((it.name||'') + ' ' + (it.shortName||'') + ' ' + it.id).toLowerCase();
+      if (!hay.includes(q)) continue;
+    }
+    if (selectedConditions.size > 0) {
+      const c = it.consolidated && it.consolidated.conditionType;
+      if (!c || !selectedConditions.has(c)) continue;
+    }
+    if (selectedGroups.size > 0) {
+      const g = it.consolidated && it.consolidated.group;
+      if (!g || !selectedGroups.has(g)) continue;
+    }
+    if (selectedBans.size > 0) {
+      const banned = it.spt && it.spt.fleaBanned;
+      const reasons = (it.spt && it.spt.fleaBanReasons) || [];
+      let match = false;
+      if (selectedBans.has('ok')     && !banned) match = true;
+      if (selectedBans.has('bsg')    && reasons.includes('bsg')) match = true;
+      if (selectedBans.has('custom') && reasons.includes('custom')) match = true;
+      if (!match) continue;
+    }
+    if (selectedEdited.size > 0) {
+      const fleaEdited   = itemIsFleaEdited(it);
+      const traderEdited = itemHasTraderOverride(it);
+      let match = false;
+      if (selectedEdited.has('flea')   && fleaEdited)                  match = true;
+      if (selectedEdited.has('trader') && traderEdited)               match = true;
+      if (selectedEdited.has('none')   && !fleaEdited && !traderEdited) match = true;
+      if (!match) continue;
+    }
+    if (selectedMods.size > 0) {
+      if (!it.modSource || !selectedMods.has(it.modSource)) continue;
+    }
+    if (deltaMin !== null || deltaMax !== null) {
+      const c  = it.consolidated;
+      const spt   = c && c.priceFleaSpt;
+      const other = c && (deltaSource === 'dev' ? c.priceFleaDevAvg24h : c.priceFleaMarketAvg24h);
+      if (spt == null || spt === 0 || other == null) continue;
+      const pct = ((other - spt) / spt) * 100;
+      if (deltaMin !== null && pct < deltaMin) continue;
+      if (deltaMax !== null && pct > deltaMax) continue;
+    }
+    if (activeCategoryId && !isInCategorySubtree(it, activeCategoryId)) continue;
+    out.push(it);
+  }
+  _filterKey = cacheKey; _filterCache = out;
+  return out;
+}
+
+function sortItems(list) {
+  const dir = sortDir;
+  const key = sortKey;
+  // Schwartzian transform: compute each sort value ONCE (decorate), sort on the
+  // precomputed value, then write back in place. Avoids 2× getSortValue per
+  // comparison (O(n log n) calls → O(n)), incl. repeated toLowerCase/computeDelta.
+  // Mutates `list` in place so the filter cache keeps the same array reference.
+  const dec = list.map(it => ({ it, v: getSortValue(it, key) }));
+  dec.sort((a, b) => {
+    const va = a.v, vb = b.v;
+    if (va == null && vb == null) return 0;
+    if (va == null) return 1;  // nulls last
+    if (vb == null) return -1;
+    if (typeof va === 'string') return dir * va.localeCompare(vb);
+    return dir * (va - vb);
+  });
+  for (let i = 0; i < dec.length; i++) list[i] = dec[i].it;
+  return list;
+}
+
+function getSortValue(it, key) {
+  switch (key) {
+    case 'name':                  return (it.name || '').toLowerCase();
+    case 'group':                 return (it.consolidated.group || '').toLowerCase();
+    case 'priceTraderSell':       return it.consolidated.priceTraderSell ? it.consolidated.priceTraderSell.value : null;
+    case 'priceFleaSpt':          return it.consolidated.priceFleaSpt;
+    case 'priceFleaDevAvg24h':    return it.consolidated.priceFleaDevAvg24h;
+    case 'priceFleaMarketAvg24h': return it.consolidated.priceFleaMarketAvg24h;
+    case 'priceFleaCanonical':    return it.consolidated.priceFleaCanonical;
+    case 'deltaFleaDev':          return computeDelta(it, 'priceFleaDevAvg24h');
+    case 'deltaFleaMarket':       return computeDelta(it, 'priceFleaMarketAvg24h');
+    default:                      return null;
+  }
+}
+
+// Delta % vs SPT Flea — same formula as the visible ▲▼ indicator (pctVsSpt).
+function computeDelta(it, valueKey) {
+  const c = it.consolidated;
+  if (!c) return null;
+  const spt = c.priceFleaSpt;
+  const val = c[valueKey];
+  if (spt == null || spt === 0 || val == null) return null;
+  return ((val - spt) / spt) * 100;
+}
+
+// ── Render ──────────────────────────────────────────────────────────────────
+// Public render() coalesces bursts (a "Clear"/"All" filter action, or several
+// state changes in one tick) into a single rebuild per animation frame. Heavy
+// work lives in renderNow(). One-frame defer is imperceptible (skeleton/old rows
+// stay until the frame) and no caller reads the table DOM synchronously after render().
+let _renderScheduled = false;
+function render() {
+  if (_renderScheduled) return;
+  _renderScheduled = true;
+  requestAnimationFrame(() => { _renderScheduled = false; renderNow(); });
+}
+function renderNow() {
+  const filtered = sortItems(filterItems());
+  const total = ITEM_LIST.length;
+  document.getElementById('stats').textContent =
+    `${filtered.length.toLocaleString('pt-BR')} / ${total.toLocaleString('pt-BR')} items` +
+    (filtered.length > RENDER_LIMIT ? ` (showing ${RENDER_LIMIT})` : '');
+
+  // Tear down any previous window observer up-front so both the empty and the
+  // table path leave no orphan observer on a detached sentinel.
+  if (_winObserver) { _winObserver.disconnect(); _winObserver = null; }
+
+  const main = document.getElementById('main');
+  if (filtered.length === 0) {
+    main.innerHTML = '<div class="empty">No items match the filters.</div>';
+    return;
+  }
+
+  // Windowed render: build the shell + first batch, then append more batches as a
+  // sentinel scrolls near the viewport. Keeps the live DOM to a few hundred rows
+  // (was up to 1500) without touching layout/visuals.
+  _winRows = filtered.slice(0, RENDER_LIMIT);
+  _winCursor = 0;
+
+  const html = ['<table class="tbl"><thead><tr>',
+    '<th></th>',
+    th('name', 'Item'),
+    th('group', 'Group'),
+    '<th>Cond.</th>',
+    '<th class="col-reward">Reward</th>',
+    th('priceTraderSell', 'Trader', 'num'),
+    th('priceFleaSpt', 'Flea SPT', 'num col-flea-spt'),
+    thWithDelta('priceFleaDevAvg24h',    'deltaFleaDev',    'Flea tarkov.dev',    'num col-flea-dev'),
+    thWithDelta('priceFleaMarketAvg24h', 'deltaFleaMarket', 'Flea tarkov-market', 'num col-flea-market'),
+    // canonical column hidden — still computed/exposed in row detail
+    '</tr></thead><tbody></tbody></table>'];
+  main.innerHTML = html.join('');
+
+  const tbl   = main.querySelector('table');
+  const tbody = tbl.querySelector('tbody');
+  appendWindowBatch(tbody);   // first batch (adds a scroll sentinel if more remain)
+
+  // Click handlers (delegated)
+  tbl.addEventListener('click', onTableClick);
+  // T10: keyboard activation — Enter/Space on a focused trader cell opens edit.
+  tbl.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const cell = e.target.closest('td.trader-edit-cell');
+    if (!cell || cell.classList.contains('is-editing')) return;
+    e.preventDefault();
+    const row = cell.closest('tr.trader-row');
+    if (row) openTraderEdit(row);
+  });
+  bindRewardHover(tbl);
+  main.querySelectorAll('th').forEach(th => {
+    th.addEventListener('click', (ev) => {
+      // For multi-sort headers (thWithDelta), the data-sort lives on inner spans;
+      // for simple headers, it's on the <th> itself. closest() handles both.
+      const sortEl = ev.target.closest('[data-sort]');
+      if (!sortEl) return;
+      const k = sortEl.dataset.sort;
+      if (sortKey === k) sortDir = -sortDir;
+      else { sortKey = k; sortDir = (k === 'name' || k === 'group') ? 1 : -1; }
+      saveSortPref();
+      render();
+    });
+  });
+
+  // Incremental loading: append the next batch as the sentinel nears the viewport.
+  const sentinel = document.getElementById('win-sentinel');
+  if (sentinel) {
+    _winObserver = new IntersectionObserver((entries) => {
+      if (entries.some(e => e.isIntersecting)) appendWindowBatch(tbody);
+    }, { root: main, rootMargin: '800px 0px' });
+    _winObserver.observe(sentinel);
+  }
+}
+
+// Append the next RENDER_BATCH rows into <tbody>, moving the scroll sentinel.
+// Keeps the live DOM small; called first by renderNow and then by the observer.
+function appendWindowBatch(tbody) {
+  const end = Math.min(_winCursor + RENDER_BATCH, _winRows.length);
+  let html = '';
+  for (let i = _winCursor; i < end; i++) html += renderRow(_winRows[i]);
+  _winCursor = end;
+  const oldSentinel = document.getElementById('win-sentinel');
+  if (oldSentinel) oldSentinel.remove();
+  tbody.insertAdjacentHTML('beforeend', html);
+  if (_winCursor < _winRows.length) {
+    tbody.insertAdjacentHTML('beforeend',
+      '<tr id="win-sentinel" class="win-sentinel" aria-hidden="true"><td colspan="9"></td></tr>');
+    if (_winObserver) { _winObserver.disconnect(); _winObserver.observe(document.getElementById('win-sentinel')); }
+  } else if (_winObserver) {
+    _winObserver.disconnect();
+  }
+}
+
+function openFleaMinLevelEditor(trigger) {
+  if (trigger.classList.contains('is-editing')) return;
+  const numEl  = document.getElementById('flea-level-num');
+  const current = parseInt((numEl && numEl.textContent) || '15', 10);
+  trigger.classList.add('is-editing');
+  trigger.innerHTML =
+    `Flea Lvl <input class="flea-level-widget__input" type="number" min="1" max="99" value="${current}">+` +
+    `<button class="flea-level-widget__btn is-save"   type="button" title="Save">${ICON_OK}</button>` +
+    `<button class="flea-level-widget__btn is-cancel" type="button" title="Cancel">×</button>`;
+  const input = trigger.querySelector('input');
+  input.focus(); input.select();
+
+  const cancel = () => {
+    trigger.classList.remove('is-editing');
+    trigger.innerHTML = `Flea Lvl <span id="flea-level-num">${current}</span>+`;
+  };
+  const save = async () => {
+    const val = parseInt(input.value, 10);
+    if (!Number.isInteger(val) || val < 1 || val > 99) {
+      toast('Invalid level (1..99)', 'err');
+      return;
+    }
+    if (val === current) { cancel(); return; }
+    try {
+      const r = await fetch(API_BASE + '/flea-min-level', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ minUserLevel: val }),
+      });
+      const data = await r.json();
+      if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+      if (META && META.sources && META.sources.spt) META.sources.spt.fleaMinUserLevel = val;
+      trigger.classList.remove('is-editing');
+      trigger.innerHTML = `Flea Lvl <span id="flea-level-num">${val}</span>+`;
+      toast(`Flea unlock level: ${current} → ${val}`, 'ok');
+    } catch (err) {
+      toast('Failed: ' + err.message, 'err');
+      cancel();
+    }
+  };
+  trigger.querySelector('.is-save').onclick   = (ev) => { ev.stopPropagation(); save(); };
+  trigger.querySelector('.is-cancel').onclick = (ev) => { ev.stopPropagation(); cancel(); };
+  input.onkeydown = (ev) => {
+    if (ev.key === 'Enter') { ev.preventDefault(); save(); }
+    else if (ev.key === 'Escape') { ev.preventDefault(); cancel(); }
+    ev.stopPropagation();
+  };
+  input.onclick = (ev) => ev.stopPropagation();
+}
+
+// Group cell: icon + name. Resolves icon by category id first, then by name
+// (handbook tree feeds both keys). Falls back to no icon if not in tree.
+function renderGroupCell(item, groupName) {
+  if (!groupName) return '<span class="muted">—</span>';
+  const id  = item.category && item.category.id;
+  const url = (id && CATEGORY_ICONS[id]) || CATEGORY_ICONS[groupName] || null;
+  const icon = url
+    ? `<img class="group-icon" src="${escapeAttr(url)}" alt="" loading="lazy">`
+    : '<span class="group-icon group-icon--empty"></span>';
+  return `<span class="group">${icon}<span class="group__name">${escapeHtml(groupName)}</span></span>`;
+}
+
+function th(key, label, klass) {
+  const isSorted = sortKey === key;
+  const sortMark = isSorted ? (sortDir === 1 ? ' <span class="sort">▲</span>' : ' <span class="sort">▼</span>') : '';
+  const classes = [klass, isSorted ? 'is-sorted' : ''].filter(Boolean).join(' ');
+  return `<th data-sort="${key}"${classes ? ' class="'+classes+'"' : ''}>${label}${sortMark}</th>`;
+}
+
+// Header with two sort options: by value and by Δ% vs SPT Flea.
+// Both independently clickable; the arrow follows the active sort key.
+function thWithDelta(valueKey, deltaKey, label, klass) {
+  const isValueSorted = sortKey === valueKey;
+  const isDeltaSorted = sortKey === deltaKey;
+  const isSorted = isValueSorted || isDeltaSorted;
+  const arrow = sortDir === 1 ? '▲' : '▼';
+  const valueMark = isValueSorted ? ` <span class="sort">${arrow}</span>` : '';
+  const deltaMark = isDeltaSorted ? ` <span class="sort">${arrow}</span>` : '';
+  const classes = [klass, isSorted ? 'is-sorted' : ''].filter(Boolean).join(' ');
+  return `<th${classes ? ' class="'+classes+'"' : ''}>` +
+    `<span class="th-sort-key${isValueSorted?' is-active':''}" data-sort="${valueKey}" title="Sort by value">${label}${valueMark}</span>` +
+    `<span class="th-sort-key th-sort-key--delta${isDeltaSorted?' is-active':''}" data-sort="${deltaKey}" title="Sort by % change vs SPT Flea">Δ%${deltaMark}</span>` +
+  `</th>`;
+}
+
+function renderRow(it) {
+  const c = it.consolidated;
+  const img = (it.image && it.image.icon)
+    ? `<div class="img-wrap">` +
+        `<img src="${escapeAttr(it.image.icon)}" alt="" loading="lazy"${it.imageFromClone ? ' class="is-proxy"' : ''}>` +
+        (it.imageFromClone ? `<span class="img-proxy-mark" data-tip="Image of the cloned vanilla item (proxy) — the mod's custom icon only exists rendered in-game">≈</span>` : '') +
+      `</div>`
+    : '<div class="no-img">—</div>';
+  const cond = c.conditionType || 'unknown';
+  const condBadge = `<span class="badge badge--${cond}">${cond}</span>`;
+  const banned = it.spt && it.spt.fleaBanned;
+  const banReasons = (it.spt && it.spt.fleaBanReasons) || [];
+  const banIcon = banned
+    ? `<span class="banned-icon" data-tip="Banned from flea: ${banReasons.join(', ')}" tabindex="0">${ICON_BANNED}</span> `
+    : '';
+  // Trader cell — stacked SELL (player→trader, tarkov.dev) and BUY (trader→player, SPT assort)
+  const traderSellValue = c.priceTraderSell ? c.priceTraderSell.value : null;
+  const traderSellName  = c.priceTraderSell ? c.priceTraderSell.vendor : null;
+  // CR-04: reflect a buyback (B-3) override on the "B" line too, same as "S" already does for
+  // sell overrides — otherwise an edited buyback price is invisible outside the detail panel.
+  const traderSellTraderId = traderSellName && TRADERS[traderSellName] ? TRADERS[traderSellName].id : null;
+  const buyOvr = traderSellTraderId ? buyOverrideFor(traderSellTraderId, it.id) : null;
+  const buyOvrCount = buyOvr != null ? ((typeof buyOvr === 'object') ? buyOvr.count : buyOvr) : null;
+  const buyOvrCurrency = (buyOvr && typeof buyOvr === 'object' && buyOvr.currency) ? buyOvr.currency : 'RUB';
+  const buyOverridden = buyOvrCount != null;
+  const buyEffRUB = buyOverridden
+    ? Math.round(buyOvrCount * (CURRENCY_RATES[buyOvrCurrency] != null ? CURRENCY_RATES[buyOvrCurrency] : 1))
+    : traderSellValue;
+  // Best buy = cheapest non-BARTER trader offer in spt.traders[], with its loyaltyLevel.
+  // Trader OVERRIDES are applied here (effective price = override count × currency rate) so
+  // an edited trader price shows in the item row, not only in the detail panel.
+  let traderBuy = null;
+  if (it.spt && Array.isArray(it.spt.traders) && it.spt.traders.length) {
+    const candidates = it.spt.traders
+      .filter(t => t.currency !== 'BARTER' && t.priceRUB != null)
+      .map(t => {
+        const tid = t.traderId || (t.name && TRADERS[t.name] ? TRADERS[t.name].id : null);
+        const ov  = tid ? traderOverrideFor(tid, it.id) : null;
+        const ovCount = ov != null ? ((typeof ov === 'object') ? ov.count : ov) : null;
+        const rate = CURRENCY_RATES[t.currency] != null ? CURRENCY_RATES[t.currency] : 1;
+        const effPriceRUB = ovCount != null ? Math.round(ovCount * rate) : t.priceRUB;
+        return Object.assign({}, t, { effPriceRUB, overridden: ovCount != null });
+      });
+    if (candidates.length) {
+      candidates.sort((a, b) => a.effPriceRUB - b.effPriceRUB);
+      traderBuy = candidates[0];
+    }
+  }
+  function avatarFor(name) {
+    const meta = name ? TRADERS[name] : null;
+    if (meta && meta.avatar) return `<img class="trader-avatar trader-avatar--xs" src="${escapeAttr(meta.avatar)}" alt="${escapeAttr(name)}" title="${escapeAttr(name)}" loading="lazy">`;
+    if (name) return `<span class="trader-avatar trader-avatar--xs trader-avatar--placeholder" title="${escapeAttr(name)}">${escapeHtml(name.charAt(0))}</span>`;
+    return '';
+  }
+  // Reference = the TRADER (consistent with the expanded detail). Colored/labeled by
+  // SEMANTIC (not row position), so a sell-only mod item never mislabels:
+  //   S (red)  = trader SELLS this to you  → the SPT assort (the editable price you pay)
+  //   B (green)= trader BUYS this from you → tarkov.dev buyback (what the trader pays you)
+  const trader = (traderSellValue != null || traderBuy)
+    ? `<div class="cell-trader cell-trader--stacked">` +
+        (traderBuy
+          ? `<div class="cell-trader__line cell-trader__line--sell" data-tip="S = trader SELLS this to you — the assort price you pay (SPT)"><span class="cell-trader__tag cell-trader__tag--sell" aria-label="Trader sells to you">S</span>${avatarFor(traderBuy.name)}<span class="cell-trader__num${traderBuy.overridden?' is-overridden':''}">${fmtRub(traderBuy.effPriceRUB)}</span>${traderBuy.overridden?` <span class="badge badge--override cell-trader__ovr" data-tip="Trader sell-price override — restart SPT to apply">OVR</span>`:''}<small class="cell-trader__ll">LL${traderBuy.loyaltyLevel}${traderBuy.questLocked?` <span class="trader-lock" data-tip="Quest-locked — an override applies only after you unlock the quest">🔒</span>`:''}</small></div>`
+          : '') +
+        (traderSellValue != null
+          ? `<div class="cell-trader__line cell-trader__line--buy" data-tip="B = trader BUYS this from you — buyback (tarkov.dev${buyOverridden?' + override':''})"><span class="cell-trader__tag cell-trader__tag--buy" aria-label="Trader buys from you">B</span>${avatarFor(traderSellName)}<span class="cell-trader__num${buyOverridden?' is-overridden':''}">${fmtRub(buyEffRUB)}</span>${buyOverridden?` <span class="badge badge--override cell-trader__ovr" data-tip="Trader buyback-price override — restart SPT to apply">OVR</span>`:''}</div>`
+          : '') +
+      `</div>`
+    : '<span class="price is-null">—</span>';
+
+  // Reward cell — quest rewards that grant this item
+  const rewards = (it.spt && it.spt.questRewards) || [];
+  let rewardCell = '<span class="muted">—</span>';
+  if (rewards.length) {
+    const first = rewards[0];
+    const extra = rewards.length > 1 ? ` <small class="vendor">+${rewards.length - 1}</small>` : '';
+    const tipText = rewards.map(r => `${r.name} (${r.trader || '?'}) ×${r.count}`).join(' · ');
+    rewardCell = `<span class="reward-badge" data-tip="${escapeAttr(tipText)}" tabindex="0">🎁 <span class="reward-name">${escapeHtml(first.name)}</span>${first.count > 1 ? ` ×${first.count}` : ''}${extra}</span>`;
+  }
+  const sourceBadge = c.priceFleaSource
+    ? `<small><span class="badge badge--src-${c.priceFleaSource.replace(/\./g,'-')}">${c.priceFleaSource}</span></small>`
+    : '';
+
+  // "Edited" badge: vanilla items via additive override (OVR), mod items via
+  // offer-multiplier (×N — the override doesn't work for them).
+  const sptBlk = it.spt || {};
+  const hasOverride = sptBlk.fleaOverride != null;
+  const hasMult     = sptBlk.fleaOfferMultiplier != null;
+  let editBadge = '';
+  if (hasOverride) {
+    const overrideTip = `Override active in ragfair.json — flea pinned at ${c.priceFleaSpt != null ? c.priceFleaSpt.toLocaleString('en-US') + ' ₽' : '?'} (override=${sptBlk.fleaOverride.toLocaleString('en-US')}). Click the cell to edit / restore.`;
+    editBadge = ` <small><span class="badge badge--override" data-tip="${escapeAttr(overrideTip)}">OVR</span></small>`;
+  } else if (hasMult) {
+    const multStr = (+sptBlk.fleaOfferMultiplier.toFixed(4)).toString();
+    const multTip = `Mod item ${it.modSource || '?'} — price adjusted via ragfair.json:itemPriceMultiplier (×${multStr}). Flea ≈ ${c.priceFleaSpt != null ? c.priceFleaSpt.toLocaleString('en-US') + ' ₽' : '?'}. The override does not work on a mod item; the multiplier does. Click the cell to edit / restore.`;
+    editBadge = ` <small><span class="badge badge--mult" data-tip="${escapeAttr(multTip)}">×${escapeHtml(multStr)}</span></small>`;
+  }
+  const fleaSptCell = (banned
+    ? `<span class="price is-banned">${banIcon}${c.priceFleaSpt != null ? fmtRub(c.priceFleaSpt) : '—'}</span>`
+    : fmtRub(c.priceFleaSpt)) + editBadge;
+
+  return `<tr data-id="${it.id}" class="${banned?'is-banned':''}">
+    <td class="col-img">${img}</td>
+    <td class="col-name"><div class="name">${escapeHtml(it.name || it.id)}</div><div class="short">${escapeHtml(it.shortName || '')}</div></td>
+    <td class="col-group">${renderGroupCell(it, c.group)}</td>
+    <td>${condBadge}</td>
+    <td class="col-reward">${rewardCell}</td>
+    <td class="num">${trader}</td>
+    <td class="num cell-edit ${c.priceFleaSpt==null && !banned?'price is-null':'price'}" data-edit-tpl="${it.id}" data-tip="Click for actions (edit price / ban)" data-tip-pos="bottom"><div class="cell-num"><div class="cell-num__value">${fleaSptCell}</div></div><span class="cell-edit__icon" aria-hidden="true">${ICON_EDIT}</span></td>
+    <td class="num cell-refresh ${c.priceFleaDevAvg24h==null?'price is-null':'price'}" data-refresh-tpl="${it.id}" data-tip="Click to update price on tarkov.dev" data-tip-pos="bottom"><div class="cell-num"><div class="cell-num__value">${fmtRub(c.priceFleaDevAvg24h)}${trollFlag(c.priceFleaDevAvg24h, c.priceFleaSpt)}</div>${pctVsSpt(c.priceFleaDevAvg24h, c.priceFleaSpt)}</div><span class="cell-refresh__icon" aria-hidden="true">${ICON_REFRESH}</span><span class="cell-refresh__spinner" aria-hidden="true"></span></td>
+    <td class="num cell-refresh cell-refresh-market ${c.priceFleaMarketAvg24h==null?'price is-null':'price'}" data-refresh-tpl="${it.id}" data-tip="Click to update via tarkov-market" data-tip-pos="bottom"><div class="cell-num"><div class="cell-num__value">${fmtRub(c.priceFleaMarketAvg24h)}${trollFlag(c.priceFleaMarketAvg24h, c.priceFleaSpt)}</div>${pctVsSpt(c.priceFleaMarketAvg24h, c.priceFleaSpt)}</div><span class="cell-refresh__icon" aria-hidden="true">${ICON_REFRESH}</span><span class="cell-refresh__spinner" aria-hidden="true"></span></td>
+  </tr>`;
+}
+
+let _rewardOpenTimer  = null;
+let _rewardCloseTimer = null;
+
+function closeRewardPopover() {
+  clearTimeout(_rewardCloseTimer);
+  clearTimeout(_rewardOpenTimer);
+  const existing = document.querySelector('.reward-popover');
+  if (existing) existing.remove();
+}
+
+function openRewardPopover(badge, rewards) {
+  closeRewardPopover();
+  const pop = document.createElement('div');
+  pop.className = 'reward-popover';
+  const rows = rewards.map(r => {
+    const meta = r.trader ? TRADERS[r.trader] : null;
+    const avatar = meta && meta.avatar
+      ? `<img class="trader-avatar trader-avatar--xs" src="${escapeAttr(meta.avatar)}" alt="${escapeAttr(r.trader)}" title="${escapeAttr(r.trader)}" loading="lazy">`
+      : r.trader
+        ? `<span class="trader-avatar trader-avatar--xs trader-avatar--placeholder" title="${escapeAttr(r.trader)}">${escapeHtml(r.trader.charAt(0))}</span>`
+        : `<span class="trader-avatar trader-avatar--xs trader-avatar--placeholder">?</span>`;
+    return `<li class="reward-popover__item">
+      ${avatar}
+      <span class="reward-popover__name">${escapeHtml(r.name)}</span>
+      ${r.count > 1 ? `<span class="reward-popover__count">×${r.count}</span>` : ''}
+    </li>`;
+  }).join('');
+  pop.innerHTML =
+    `<div class="reward-popover__header">🎁 ${rewards.length} mission${rewards.length > 1 ? 's' : ''}</div>` +
+    `<ul class="reward-popover__list">${rows}</ul>`;
+  document.body.appendChild(pop);
+
+  // Position below the badge, flip if near viewport edge
+  const rect = badge.getBoundingClientRect();
+  const scrollY = window.scrollY || document.documentElement.scrollTop;
+  const scrollX = window.scrollX || document.documentElement.scrollLeft;
+  pop.style.top  = (rect.bottom + scrollY + 6) + 'px';
+  pop.style.left = (rect.left  + scrollX) + 'px';
+  requestAnimationFrame(() => {
+    const pr = pop.getBoundingClientRect();
+    if (pr.bottom > window.innerHeight - 8)
+      pop.style.top  = (rect.top  + scrollY - pr.height - 6) + 'px';
+    if (pr.right  > window.innerWidth  - 8)
+      pop.style.left = (window.innerWidth - pr.width - 8 + scrollX) + 'px';
+  });
+
+  // Keep popover open while mouse is over it; close on leave
+  pop.addEventListener('mouseenter', () => clearTimeout(_rewardCloseTimer));
+  pop.addEventListener('mouseleave', () => {
+    _rewardCloseTimer = setTimeout(closeRewardPopover, 80);
+  });
+}
+
+// Called by render() after the table is inserted into the DOM
+function bindRewardHover(tableEl) {
+  tableEl.addEventListener('mouseover', (e) => {
+    const badge = e.target.closest('.reward-badge');
+    if (!badge) return;
+    clearTimeout(_rewardCloseTimer);
+    // Already showing for this exact badge — do nothing
+    if (document.querySelector('.reward-popover') && badge._rewardActive) return;
+    clearTimeout(_rewardOpenTimer);
+    _rewardOpenTimer = setTimeout(() => {
+      const row = badge.closest('tr[data-id]');
+      const id  = row && row.dataset.id;
+      const rewards = id && ITEMS[id] && ITEMS[id].spt && ITEMS[id].spt.questRewards;
+      if (rewards && rewards.length) {
+        badge._rewardActive = true;
+        openRewardPopover(badge, rewards);
+      }
+    }, 300);
+  });
+  tableEl.addEventListener('mouseout', (e) => {
+    const badge = e.target.closest('.reward-badge');
+    if (!badge) return;
+    // Only start close timer if cursor left the badge area entirely
+    if (badge.contains(e.relatedTarget)) return;
+    badge._rewardActive = false;
+    clearTimeout(_rewardOpenTimer);
+    _rewardCloseTimer = setTimeout(closeRewardPopover, 80);
+  });
+}
+
+function onTableClick(e) {
+  // Inline restore ↺ on an overridden trader row → delete the override directly.
+  const traderRestoreBtn = e.target.closest('.trader-restore-btn');
+  if (traderRestoreBtn) {
+    e.stopPropagation();
+    const row = traderRestoreBtn.closest('tr.trader-row');
+    if (row) restoreTraderOverride(row);
+    return;
+  }
+  // Clicks inside an open trader-edit form: let the form's own handlers fire
+  // (don't let the click bubble up to toggle/close the detail row).
+  if (e.target.closest('.trader-edit-form')) { e.stopPropagation(); return; }
+  // Click anywhere on an editable trader cell (not just the pencil) → inline edit.
+  const traderCell = e.target.closest('td.trader-edit-cell');
+  if (traderCell) {
+    e.stopPropagation();
+    const row = traderCell.closest('tr.trader-row');
+    if (row) openTraderEdit(row);
+    return;
+  }
+
+  // B-3: inline restore ↺ on an overridden BUY (buyback) row → delete the override directly.
+  const buyRestoreBtn = e.target.closest('.buy-restore-btn');
+  if (buyRestoreBtn) {
+    e.stopPropagation();
+    const row = buyRestoreBtn.closest('tr.buy-row');
+    if (row) restoreBuyOverride(row);
+    return;
+  }
+  // Clicks inside an open buy-edit form: let the form's own handlers fire.
+  if (e.target.closest('.buy-edit-form')) { e.stopPropagation(); return; }
+  // Click anywhere on an editable BUY cell (not just the pencil) → inline edit.
+  const buyCell = e.target.closest('td.buy-edit-cell');
+  if (buyCell) {
+    e.stopPropagation();
+    const row = buyCell.closest('tr.buy-row');
+    if (row) openBuyEdit(row);
+    return;
+  }
+
+  // Click on reward badge → toggle reward popover
+  const rewardBadge = e.target.closest('.reward-badge');
+  if (rewardBadge) {
+    e.stopPropagation();
+    const row = rewardBadge.closest('tr[data-id]');
+    const id  = row && row.dataset.id;
+    const rewards = id && ITEMS[id] && ITEMS[id].spt && ITEMS[id].spt.questRewards;
+    if (rewards && rewards.length) {
+      if (document.querySelector('.reward-popover')) { closeRewardPopover(); return; }
+      openRewardPopover(rewardBadge, rewards);
+    }
+    return;
+  }
+
+  // Click on Flea Dev / Flea Market cell → refresh from the respective API
+  const refreshCell = e.target.closest('td.cell-refresh');
+  if (refreshCell) {
+    e.stopPropagation();
+    if (refreshCell.classList.contains('is-loading')) return; // already in-flight
+    if (refreshCell.classList.contains('cell-refresh-market')) refreshMarketCell(refreshCell);
+    else refreshDevCell(refreshCell);
+    return;
+  }
+
+  const sptCell = e.target.closest('td.cell-edit');
+  if (sptCell) {
+    e.stopPropagation();
+    if (sptCell.classList.contains('is-editing')) {
+      // Click inside the edit form — let its own handlers fire
+      if (e.target.closest('.edit-form')) return;
+      // Click on the cell outside the form → cancel the edit (same as Esc)
+      const cancelBtn = sptCell.querySelector('button.cancel');
+      if (cancelBtn) cancelBtn.click();
+      return;
+    }
+    if (sptCell.classList.contains('has-actions')) {
+      // Click on the action menu itself — let buttons handle it
+      if (e.target.closest('.cell-actions')) return;
+      // Click on the cell outside the menu → close menu
+      closeCellActions(sptCell);
+      return;
+    }
+    // Otherwise: open the action menu (which can launch edit or ban)
+    openCellActions(sptCell);
+    return;
+  }
+
+  const row = e.target.closest('tr[data-id]');
+  if (!row) return;
+  const id = row.dataset.id;
+  const existing = row.nextElementSibling;
+  if (existing && existing.classList.contains('detail')) {
+    existing.remove();
+    row.classList.remove('is-expanded');
+    return;
+  }
+  // Close any open detail
+  document.querySelectorAll('tr.detail').forEach(d => d.remove());
+  document.querySelectorAll('tr.is-expanded').forEach(t => t.classList.remove('is-expanded'));
+  // Open new
+  row.classList.add('is-expanded');
+  const detail = document.createElement('tr');
+  detail.className = 'detail';
+  detail.innerHTML = `<td colspan="9">${renderDetail(ITEMS[id])}</td>`;
+  row.parentNode.insertBefore(detail, row.nextSibling);
+}
+
+// ── Refresh single item from tarkov.dev (Flea Dev cell click) ───────────────
+async function refreshDevCell(cell) {
+  const tpl = cell.dataset.refreshTpl;
+  const item = ITEMS[tpl];
+  if (!item) return;
+  cell.classList.add('is-loading');
+  try {
+    const r = await fetch(API_BASE + '/refresh-dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tpl }),
+    });
+    const data = await r.json();
+    if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+
+    // Update in-memory item and re-render the row
+    item.tarkovDev = data.tarkovDev;
+    item.consolidated = data.consolidated;
+    _dataVersion++;  // data changed → invalidate filter-cache
+    const row = cell.closest('tr[data-id]');
+    if (row) {
+      const tmp = document.createElement('tbody');
+      tmp.innerHTML = renderRow(item);
+      row.replaceWith(tmp.firstElementChild);
+    }
+    const prev = data.previous && data.previous.avg24h;
+    const curr = data.tarkovDev && data.tarkovDev.pve && data.tarkovDev.pve.avg24h;
+    const deltaTxt = (prev != null && curr != null && prev !== curr)
+      ? ` (was ${prev.toLocaleString('pt-BR')} ₽ → ${curr.toLocaleString('pt-BR')} ₽)`
+      : '';
+    toast(`${item.shortName || tpl}: prices updated via tarkov.dev${deltaTxt}`, 'ok');
+  } catch (err) {
+    cell.classList.remove('is-loading');
+    toast('Failed to update via tarkov.dev: ' + err.message, 'err');
+  }
+}
+
+async function refreshMarketCell(cell) {
+  const tpl = cell.dataset.refreshTpl;
+  const item = ITEMS[tpl];
+  if (!item) return;
+  cell.classList.add('is-loading');
+  try {
+    const r = await fetch(API_BASE + '/refresh-market', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tpl }),
+    });
+    const data = await r.json();
+    if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+
+    item.tarkovMarket = data.tarkovMarket;
+    item.consolidated = data.consolidated;
+    _dataVersion++;  // data changed → invalidate filter-cache
+    const row = cell.closest('tr[data-id]');
+    if (row) {
+      const tmp = document.createElement('tbody');
+      tmp.innerHTML = renderRow(item);
+      row.replaceWith(tmp.firstElementChild);
+    }
+    const prev = data.previous && data.previous.avg24h;
+    const curr = data.tarkovMarket && data.tarkovMarket.pve && data.tarkovMarket.pve.avg24h;
+    const deltaTxt = (prev != null && curr != null && prev !== curr)
+      ? ` (was ${prev.toLocaleString('pt-BR')} ₽ → ${curr.toLocaleString('pt-BR')} ₽)`
+      : '';
+    toast(`${item.shortName || tpl}: prices updated via tarkov-market${deltaTxt}`, 'ok');
+  } catch (err) {
+    cell.classList.remove('is-loading');
+    toast('Failed to update via tarkov-market: ' + err.message, 'err');
+  }
+}
+
+// ── Cell action menu (Edit price / Ban / Unban) ─────────────────────────────
+// Click cell → 2 actions appear. Ban / Unban require an in-place confirmation
+// step. Inline edit launches from "Edit price".
+function openCellActions(cell) {
+  if (cell.querySelector('.cell-actions')) return;
+  const tpl = cell.dataset.editTpl;
+  const item = ITEMS[tpl];
+  if (!item) return;
+  const isBanned = !!(item.spt && item.spt.fleaBanned);
+  const banLabel = isBanned ? 'Unban item' : 'Ban item';
+  const banIcon  = isBanned ? ICON_OK : ICON_BANNED;
+  const banClass = isBanned ? 'is-unban' : 'is-ban';
+  const hasEdit = !!(item.spt && (item.spt.fleaOverride != null || item.spt.fleaOfferMultiplier != null));
+
+  cell.classList.add('has-actions');
+  const menu = document.createElement('div');
+  menu.className = 'cell-actions';
+  menu.innerHTML =
+    `<button class="cell-actions__item" data-action="edit" type="button">` +
+      `<span class="ico">${ICON_EDIT}</span><span>Edit price</span>` +
+    `</button>` +
+    (hasEdit ? `<button class="cell-actions__item is-restore" data-action="restore" type="button">` +
+      `<span class="ico">${ICON_REFRESH}</span><span>Restore default</span>` +
+    `</button>` : '') +
+    `<button class="cell-actions__item ${banClass}" data-action="ban" type="button">` +
+      `<span class="ico">${banIcon}</span><span>${banLabel}</span>` +
+    `</button>`;
+  cell.appendChild(menu);
+
+  function close() {
+    cell.classList.remove('has-actions');
+    menu.remove();
+    document.removeEventListener('mousedown', onDocClick, true);
+    document.removeEventListener('keydown', onKey);
+  }
+  function onDocClick(ev) { if (!cell.contains(ev.target)) close(); }
+  function onKey(ev) { if (ev.key === 'Escape') close(); }
+  setTimeout(() => document.addEventListener('mousedown', onDocClick, true), 0);
+  document.addEventListener('keydown', onKey);
+
+  menu.querySelector('[data-action="edit"]').onclick = (ev) => {
+    ev.stopPropagation();
+    close();
+    openInlineEdit(cell);
+  };
+  const restoreBtn = menu.querySelector('[data-action="restore"]');
+  if (restoreBtn) restoreBtn.onclick = async (ev) => {
+    ev.stopPropagation();
+    close();   // remove the menu + its capture-phase doc listener before the row is replaced
+    try {
+      await restoreOverride(cell);   // re-renders the row
+    } catch (err) {
+      toast('Failed to restore: ' + err.message, 'err');
+    }
+  };
+  menu.querySelector('[data-action="ban"]').onclick = (ev) => {
+    ev.stopPropagation();
+    confirmBanAction(cell, menu, !isBanned);
+  };
+}
+
+function closeCellActions(cell) {
+  const m = cell.querySelector('.cell-actions');
+  if (m) m.remove();
+  cell.classList.remove('has-actions');
+}
+
+// Remove the override for a tpl (DELETE /api/price) → restore vanilla flea price.
+// Shared by the cell action menu and the inline-edit ↺ button. Re-renders the row.
+async function restoreOverride(cell) {
+  const tpl = cell.dataset.editTpl;
+  const item = ITEMS[tpl];
+  if (!item) return;
+  const r = await fetch(API_BASE + '/price', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tpl }),
+  });
+  const data = await r.json();
+  if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+  if (item.spt) { item.spt.fleaOverride = null; item.spt.fleaOfferMultiplier = null; item.spt.effectiveFleaPrice = data.effectiveFleaPrice; }
+  item.consolidated = data.consolidated;
+  _dataVersion++;  // data changed → invalidate filter-cache
+  const row = cell.closest('tr[data-id]');
+  if (row) {
+    const tmp = document.createElement('tbody');
+    tmp.innerHTML = renderRow(item);
+    row.replaceWith(tmp.firstElementChild);
+  }
+  refreshEditedFilter();  // flea-edited state changed → refresh Edited filter counts
+  const what = data.mode === 'multiplier' ? 'multiplier removed' : 'override removed';
+  toast(`${item.shortName || tpl}: ${what} → default ${data.effectiveFleaPrice != null ? data.effectiveFleaPrice.toLocaleString('pt-BR') : '—'} ₽`, 'ok');
+}
+
+function confirmBanAction(cell, menu, banning) {
+  const tpl = cell.dataset.editTpl;
+  const item = ITEMS[tpl];
+  if (!item) return;
+  const verb = banning ? 'Ban' : 'Unban';
+  menu.classList.add('is-confirming');
+  menu.innerHTML =
+    `<div class="cell-actions__prompt">${escapeHtml(verb)} <b>${escapeHtml(item.shortName || item.name || tpl)}</b>?</div>` +
+    `<div class="cell-actions__confirm">` +
+      `<button class="cell-actions__btn cancel" type="button" title="Cancel">×</button>` +
+      `<button class="cell-actions__btn confirm ${banning?'is-danger':'is-success'}" type="button">${verb}</button>` +
+    `</div>`;
+  menu.querySelector('.cancel').onclick = (ev) => { ev.stopPropagation(); closeCellActions(cell); };
+  menu.querySelector('.confirm').onclick = async (ev) => {
+    ev.stopPropagation();
+    const btn = ev.currentTarget;
+    btn.disabled = true; btn.textContent = '…';
+    try {
+      const r = await fetch(API_BASE + '/ban', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tpl, banned: banning }),
+      });
+      const data = await r.json();
+      if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+      // Update in-memory state
+      if (!item.spt) item.spt = { basePrice: null, fleaPrice: null, fleaBanned: false, fleaBanReasons: [], traders: [] };
+      item.spt.fleaBanned = data.fleaBanned;
+      item.spt.fleaBanReasons = data.fleaBanReasons;
+      _dataVersion++;  // data changed → invalidate filter-cache
+      // Re-render this row
+      const row = cell.closest('tr[data-id]');
+      if (row) {
+        const tmp = document.createElement('tbody');
+        tmp.innerHTML = renderRow(item);
+        row.replaceWith(tmp.firstElementChild);
+      }
+      toast(`${item.shortName || tpl}: ${banning ? 'banned' : 'unbanned'}`, 'ok');
+    } catch (err) {
+      toast('Failed: ' + err.message, 'err');
+      closeCellActions(cell);
+    }
+  };
+}
+
+function openInlineEdit(cell) {
+  const tpl = cell.dataset.editTpl;
+  const item = ITEMS[tpl];
+  if (!item) return;
+  if (cell.querySelector('.edit-form')) return; // already editing
+  const spt = item.spt || {};
+  const isMod = !!item.modSource;
+  // Show the EFFECTIVE flea price (override/multiplier or default, floored) —
+  // that's what the cell displays and what the user is adjusting.
+  const current = spt.effectiveFleaPrice != null ? spt.effectiveFleaPrice : '';
+  const bonus = spt.fleaPrice;          // additive term (handbook × M); override = X − bonus (vanilla)
+  const base  = spt.fleaBaseRaw != null ? spt.fleaBaseRaw : (spt.effectiveFleaPrice != null ? spt.effectiveFleaPrice : null);  // multiplier base (mod) = X / base
+  const floor = spt.fleaFloor || 0;     // flea can't go below this
+  const ceiling = spt.fleaCeiling != null ? spt.fleaCeiling : null;  // flea can't go above this (mods/electronics)
+  const hasEdit = spt.fleaOverride != null || spt.fleaOfferMultiplier != null;
+
+  // Append the form as an absolute overlay so the cell keeps its original
+  // dimensions and surrounding rows don't reflow when we enter edit mode.
+  cell.classList.add('is-editing');
+  const form = document.createElement('form');
+  form.className = 'edit-form';
+  form.onsubmit = (e) => { e.preventDefault(); return false; };
+  const inputTip = isMod
+    ? `Desired flea price. Mod item ${item.modSource} — writes itemPriceMultiplier = price / ${base != null ? base.toLocaleString('en-US') : '?'} in ragfair.json (the override does not work on a mod item, the multiplier does). ` +
+      (ceiling != null ? `Max ${ceiling.toLocaleString('en-US')} ₽ (unreasonableModPrices ceiling).` : '')
+    : `Desired flea price. Writes override = price − ${bonus != null ? bonus.toLocaleString('en-US') : '?'} in ragfair.json:itemPriceOverrideRouble. ` +
+      (floor > 0 ? `Min ${floor.toLocaleString('en-US')} ₽ (floor = handbook × trader). ` : '') +
+      (ceiling != null ? `Max ${ceiling.toLocaleString('en-US')} ₽ (Electronics/Weapon Mod ceiling = handbook × multiplier).` : '');
+  const hintParts = [];
+  if (isMod && base != null) hintParts.push(`base ${base.toLocaleString('en-US')}`);
+  if (floor > 0)      hintParts.push(`min ${floor.toLocaleString('en-US')}`);
+  if (ceiling != null) hintParts.push(`max ${ceiling.toLocaleString('en-US')}`);
+  form.innerHTML =
+    `<input type="number" min="${floor || 0}"${ceiling != null ? ` max="${ceiling}"` : ''} step="1" value="${current}" autofocus data-tip="${escapeAttr(inputTip)}">` +
+    `<div class="edit-form__actions">` +
+      `<button class="save" type="button" title="Save (Enter)">Save</button>` +
+      (hasEdit ? `<button class="restore" type="button" title="Restore default price (undo edit)">↺</button>` : '') +
+      `<button class="cancel" type="button" title="Cancel (Esc)">×</button>` +
+    `</div>` +
+    (hintParts.length ? `<div class="edit-form__hint">${hintParts.join(' · ')}</div>` : '');
+  cell.appendChild(form);
+
+  const input   = form.querySelector('input');
+  const save    = form.querySelector('button.save');
+  const cancel  = form.querySelector('button.cancel');
+  const restore = form.querySelector('button.restore');
+  input.focus(); input.select();
+
+  let docClickHandler = null;
+  function closeForm() {
+    cell.classList.remove('is-editing');
+    form.remove();
+    if (docClickHandler) document.removeEventListener('mousedown', docClickHandler, true);
+  }
+  function rerenderRow() {
+    const row = cell.closest('tr[data-id]');
+    if (row) {
+      const tmp = document.createElement('tbody');
+      tmp.innerHTML = renderRow(item);
+      row.replaceWith(tmp.firstElementChild);
+    }
+  }
+
+  cancel.onclick = closeForm;
+  input.onkeydown = (ev) => {
+    if (ev.key === 'Escape') { closeForm(); }
+    if (ev.key === 'Enter')  { ev.preventDefault(); save.click(); }
+  };
+
+  // Click anywhere outside the cell cancels the edit. Capture phase so we
+  // get the event before any other handler. Deferred to next tick so the
+  // click that opened the form isn't caught.
+  docClickHandler = (ev) => {
+    if (!cell.contains(ev.target)) closeForm();
+  };
+  setTimeout(() => document.addEventListener('mousedown', docClickHandler, true), 0);
+
+  save.onclick = async () => {
+    const price = parseInt(input.value, 10);
+    if (!Number.isFinite(price) || price <= 0) {
+      toast('Invalid value', 'err');
+      input.focus();
+      return;
+    }
+    save.disabled = true; cancel.disabled = true; if (restore) restore.disabled = true;
+    try {
+      const r = await fetch(API_BASE + '/price', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tpl, price }),
+      });
+      const data = await r.json();
+      if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP '+r.status));
+
+      const prevEff = item.spt && item.spt.effectiveFleaPrice != null ? item.spt.effectiveFleaPrice : null;
+      if (!item.spt) item.spt = { basePrice: null, fleaPrice: null, fleaFloor: 0, fleaOverride: null, fleaOfferMultiplier: null, fleaBaseRaw: null, effectiveFleaPrice: null, fleaBanned: false, fleaBanReasons: [], traders: [] };
+      if (data.mode === 'multiplier') {
+        item.spt.fleaOfferMultiplier = data.multiplier;
+        if (data.base != null) item.spt.fleaBaseRaw = data.base;
+      } else {
+        item.spt.fleaOverride = data.override;
+      }
+      item.spt.effectiveFleaPrice = data.effectiveFleaPrice;
+      item.consolidated = data.consolidated;
+      _dataVersion++;  // data changed → invalidate filter-cache
+      closeForm();   // remove the form + its capture-phase doc listener before the row is replaced
+      rerenderRow();
+      refreshEditedFilter();  // flea-edited state changed → refresh Edited filter counts
+      const fromStr = (prevEff != null && prevEff !== data.effectiveFleaPrice) ? `${prevEff.toLocaleString('pt-BR')} → ` : '';
+      toast(`${item.shortName || tpl}: flea ${fromStr}${data.effectiveFleaPrice.toLocaleString('pt-BR')} ₽`, 'ok');
+    } catch (err) {
+      toast('Failed to save: ' + err.message, 'err');
+      save.disabled = false; cancel.disabled = false; if (restore) restore.disabled = false;
+    }
+  };
+
+  if (restore) restore.onclick = async () => {
+    closeForm();   // remove the form + its capture-phase doc listener before the row is replaced
+    try {
+      await restoreOverride(cell);   // re-renders the row
+    } catch (err) {
+      toast('Failed to restore: ' + err.message, 'err');
+    }
+  };
+}
+
+function toast(msg, kind) {
+  const c = document.getElementById('toasts');
+  const t = document.createElement('div');
+  t.className = 'toast' + (kind === 'err' ? ' is-error' : kind === 'warn' ? ' is-warn' : '');
+  const sigil = kind === 'err' ? '⚠ ' : kind === 'warn' ? '⚠ ' : '✓ ';
+  t.innerHTML = sigil + escapeHtml(msg);
+  c.appendChild(t);
+  requestAnimationFrame(() => t.classList.add('is-show'));
+  setTimeout(() => {
+    t.classList.remove('is-show');
+    setTimeout(() => t.remove(), 300);
+  }, (kind === 'err' || kind === 'warn') ? 5000 : 3000);
+}
+
+// Promise-based confirmation modal. Resolves true (confirm) / false (cancel/Esc).
+function confirmDialog({ title, body, confirmText = 'Confirm', cancelText = 'Cancel' }) {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML =
+      `<div class="modal" role="dialog" aria-modal="true">` +
+        `<div class="modal__title">${escapeHtml(title)}</div>` +
+        `<div class="modal__body">${escapeHtml(body)}</div>` +
+        `<div class="modal__actions">` +
+          `<button type="button" class="modal__btn modal__btn--cancel">${escapeHtml(cancelText)}</button>` +
+          `<button type="button" class="modal__btn modal__btn--confirm">${escapeHtml(confirmText)}</button>` +
+        `</div>` +
+      `</div>`;
+    document.body.appendChild(overlay);
+    const done = (val) => { overlay.remove(); document.removeEventListener('keydown', onKey); resolve(val); };
+    const onKey = (e) => { if (e.key === 'Escape') done(false); else if (e.key === 'Enter') done(true); };
+    overlay.querySelector('.modal__btn--cancel').onclick = () => done(false);
+    overlay.querySelector('.modal__btn--confirm').onclick = () => done(true);
+    overlay.addEventListener('mousedown', (e) => { if (e.target === overlay) done(false); });
+    document.addEventListener('keydown', onKey);
+    requestAnimationFrame(() => overlay.classList.add('is-show'));
+    setTimeout(() => overlay.querySelector('.modal__btn--confirm').focus(), 0);
+  });
+}
+
+function setBulkBusy(busy) {
+  const trigger = document.getElementById('update-menu-trigger');
+  if (trigger) { trigger.disabled = busy; trigger.classList.toggle('is-busy', busy); }
+  document.body.classList.toggle('is-bulk-busy', busy);
+}
+
+// ── "⟳ Update" menu (rescan / update-all dev / update-all market) ────────────
+// Popdown matching the .dropdown visual style. Reuses the existing handlers
+// (rescanMods / refreshAll) — no logic duplicated. Closes on outside-click/Esc/
+// item click.
+let _updateMenuCleanup = null;
+function bindUpdateMenu() {
+  const trigger = document.getElementById('update-menu-trigger');
+  if (trigger) trigger.addEventListener('click', (e) => { e.stopPropagation(); toggleUpdateMenu(); });
+}
+
+function toggleUpdateMenu() {
+  const host = document.getElementById('update-menu');
+  if (!host) return;
+  if (host.querySelector('.update-menu__panel')) closeUpdateMenu();
+  else openUpdateMenu();
+}
+
+function openUpdateMenu() {
+  const host = document.getElementById('update-menu');
+  const trigger = document.getElementById('update-menu-trigger');
+  if (!host || host.querySelector('.update-menu__panel')) return;
+
+  const items = [
+    { label: 'Rescan mods',                tip: 'Re-read the local SPT database (picks up items from newly-added mods). Does not fetch tarkov.dev/market.', run: () => rescanMods() },
+    { label: 'Update all · tarkov.dev',    tip: 'Update ALL prices via tarkov.dev',    run: () => refreshAll('dev') },
+    { label: 'Update all · tarkov-market', tip: 'Update ALL prices via tarkov-market', run: () => refreshAll('market') },
+  ];
+
+  const panel = document.createElement('div');
+  panel.className = 'update-menu__panel';
+  panel.setAttribute('role', 'menu');
+  for (const it of items) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'update-menu__item';
+    btn.setAttribute('role', 'menuitem');
+    btn.innerHTML = `<span class="update-menu__label">${escapeHtml(it.label)}</span>` +
+                    `<span class="update-menu__sub">${escapeHtml(it.tip)}</span>`;
+    btn.onclick = (e) => { e.stopPropagation(); closeUpdateMenu(); it.run(); };
+    panel.appendChild(btn);
+  }
+  host.appendChild(panel);
+  host.classList.add('is-open');
+  if (trigger) trigger.setAttribute('aria-expanded', 'true');
+
+  const onDocClick = (e) => { if (!host.contains(e.target)) closeUpdateMenu(); };
+  const onKey = (e) => { if (e.key === 'Escape') closeUpdateMenu(); };
+  setTimeout(() => document.addEventListener('click', onDocClick), 0);
+  document.addEventListener('keydown', onKey);
+  _updateMenuCleanup = () => {
+    document.removeEventListener('click', onDocClick);
+    document.removeEventListener('keydown', onKey);
+  };
+}
+
+function closeUpdateMenu() {
+  const host = document.getElementById('update-menu');
+  const trigger = document.getElementById('update-menu-trigger');
+  if (host) {
+    const panel = host.querySelector('.update-menu__panel');
+    if (panel) panel.remove();
+    host.classList.remove('is-open');
+  }
+  if (trigger) trigger.setAttribute('aria-expanded', 'false');
+  if (_updateMenuCleanup) { _updateMenuCleanup(); _updateMenuCleanup = null; }
+}
+
+// Rescan the local SPT DB (load-spt + normalize, no external fetch) → reload.
+// Picks up mod items added/removed since the last run. Fast; no confirm needed.
+async function rescanMods() {
+  setBulkBusy(true);
+  toast('Re-reading the SPT database (mods + prices)…', 'ok');
+  try {
+    const r = await fetch(API_BASE + '/rescan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    const data = await r.json();
+    if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+    const secs = data.durationMs != null ? ` in ${(data.durationMs / 1000).toFixed(1)}s` : '';
+    const mods = data.modCount != null ? ` (${data.modCount} from mods)` : '';
+    toast(`${(data.itemCount || 0).toLocaleString('pt-BR')} items${mods}${secs} — reloading…`, 'ok');
+    setTimeout(() => location.reload(), 800);
+  } catch (err) {
+    setBulkBusy(false);
+    toast(`Rescan failed: ${err.message}`, 'err');
+  }
+}
+
+// Bulk update all items from one source (dev | market): confirm → busy → POST
+// /api/refresh-all (server re-fetches the full dump + re-merges) → reload.
+async function refreshAll(source) {
+  const label = source === 'market' ? 'tarkov-market' : 'tarkov.dev';
+  const count = (typeof ITEM_LIST !== 'undefined' && ITEM_LIST) ? ITEM_LIST.length : 0;
+  const ok = await confirmDialog({
+    title: `Update ALL prices via ${label}?`,
+    body: `Re-downloads ~${count.toLocaleString('pt-BR')} items at once (usually a few seconds, ~5–15s). Price editing is locked while it runs; the page reloads when done.`,
+    confirmText: 'Update all',
+  });
+  if (!ok) return;
+  setBulkBusy(true);
+  toast(`Updating all via ${label}… (a few seconds)`, 'ok');
+  try {
+    const r = await fetch(API_BASE + '/refresh-all', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ source }),
+    });
+    const data = await r.json();
+    if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+    const secs = data.durationMs != null ? ` in ${(data.durationMs / 1000).toFixed(1)}s` : '';
+    toast(`${(data.itemCount || count).toLocaleString('pt-BR')} items updated via ${label}${secs} — reloading…`, 'ok');
+    setTimeout(() => location.reload(), 1000);
+  } catch (err) {
+    setBulkBusy(false);
+    toast(`Failed to update all via ${label}: ${err.message}`, 'err');
+  }
+}
+
+// ── Per-trader price editing (companion mod TRLTraderPrices) ─────────────────
+const TRADER_MONEY_CURRENCIES = new Set(['RUB', 'USD', 'EUR', 'GP']);
+const CURRENCY_SYMBOL = { RUB: '₽', USD: '$', EUR: '€', GP: 'GP' };
+const CURRENCY_PILL_CLASS = { USD: 'currency--usd', EUR: 'currency--eur', GP: 'currency--gp' };
+// Currencies that get a faint rouble-equivalent hint next to their native value.
+// GP is intentionally excluded (no meaningful ₽ conversion shown to the player).
+const CURRENCY_RUB_HINT = new Set(['USD', 'EUR']);
+
+// Native amount (integer) → rouble-equivalent via CURRENCY_RATES. RUB is identity.
+function rubFromNative(native, cur) {
+  if (native == null) return null;
+  const rate = CURRENCY_RATES[cur];
+  if (!rate || rate <= 0) return null;
+  return Math.round(native * rate);
+}
+
+// Total override count + how many traders carry at least one.
+function traderOverrideTotals() {
+  let total = 0; let traders = 0;
+  for (const tpls of Object.values(TRADER_OVERRIDES)) {
+    const n = tpls ? Object.keys(tpls).length : 0;
+    if (n > 0) { total += n; traders++; }
+  }
+  return { total, traders };
+}
+
+// Show/hide the topbar "clear trader overrides" button + pending pill.
+function updateTraderTopbar() {
+  const { total, traders } = traderOverrideTotals();
+  const btn  = document.getElementById('clear-trader-overrides');
+  const pill = document.getElementById('trader-pending-pill');
+  if (btn)  btn.hidden  = total === 0;
+  if (pill) {
+    pill.hidden = total === 0;
+    pill.textContent = total > 0 ? `${total} trader edit${total === 1 ? '' : 's'} pending` : '';
+  }
+}
+
+// Reset ALL trader sell-price overrides (DELETE /api/trader-price/all).
+async function clearAllTraderOverrides() {
+  const { total, traders } = traderOverrideTotals();
+  if (total === 0) return;
+  const ok = await confirmDialog({
+    title: 'Reset ALL trader sell-price overrides?',
+    body: `Removes ${total} override${total === 1 ? '' : 's'} across ${traders} trader${traders === 1 ? '' : 's'}. Cannot be undone.`,
+    confirmText: 'Reset all',
+  });
+  if (!ok) return;
+  const btn = document.getElementById('clear-trader-overrides');
+  if (btn) { btn.disabled = true; btn.classList.add('is-busy'); }
+  try {
+    const r = await fetch(API_BASE + '/trader-price/all', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    const data = await r.json();
+    if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+    TRADER_OVERRIDES = {};
+    // Re-render any open trader rows so OVR badges / struck-through bases clear.
+    document.querySelectorAll('tr.detail .trader-edit-table').forEach(rerenderTraderTable);
+    // Clear OVR markers from visible item rows in the main table too.
+    document.querySelectorAll('tr[data-id]').forEach(r => {
+      if (r.querySelector('.cell-trader__ovr')) rerenderMainRow(r.getAttribute('data-id'));
+    });
+    refreshTraderOverrideFilter();
+    updateTraderTopbar();
+    const n = data.removedCount != null ? data.removedCount : total;
+    toast(`${n} trader override${n === 1 ? '' : 's'} removed · restart SPT to apply${data.warning ? ` (${data.warning})` : ''}`, data.warning ? 'warn' : 'ok');
+  } catch (err) {
+    toast('Failed to reset trader overrides: ' + err.message, 'err');
+  } finally {
+    if (btn) { btn.disabled = false; btn.classList.remove('is-busy'); }
+  }
+}
+
+// Re-render every trader row in a given <table.trader-edit-table> from ITEMS.
+function rerenderTraderTable(table) {
+  const tpl = table.dataset.traderTpl;
+  const item = ITEMS[tpl];
+  if (!item) return;
+  const traders = item.spt && item.spt.traders ? item.spt.traders : [];
+  if (traders.length === 0) return;
+  table.innerHTML = traders.map(t => renderTraderRow(item, t)).join('');
+}
+
+// CR-05: buyback-override equivalents of traderOverrideTotals/updateTraderTopbar/
+// clearAllTraderOverrides/rerenderTraderTable above — same pattern, over BUY_OVERRIDES /
+// /api/trader-buy-price/all / .buy-edit-table (the endpoint already existed server-side but had
+// no UI wired to it).
+function buyOverrideTotals() {
+  let total = 0; let traders = 0;
+  for (const tpls of Object.values(BUY_OVERRIDES)) {
+    const n = tpls ? Object.keys(tpls).length : 0;
+    if (n > 0) { total += n; traders++; }
+  }
+  return { total, traders };
+}
+
+function updateBuyTopbar() {
+  const { total } = buyOverrideTotals();
+  const btn  = document.getElementById('clear-buy-overrides');
+  const pill = document.getElementById('buy-pending-pill');
+  if (btn)  btn.hidden  = total === 0;
+  if (pill) {
+    pill.hidden = total === 0;
+    pill.textContent = total > 0 ? `${total} buyback edit${total === 1 ? '' : 's'} pending` : '';
+  }
+}
+
+async function clearAllBuyOverrides() {
+  const { total, traders } = buyOverrideTotals();
+  if (total === 0) return;
+  const ok = await confirmDialog({
+    title: 'Reset ALL trader buyback-price overrides?',
+    body: `Removes ${total} override${total === 1 ? '' : 's'} across ${traders} trader${traders === 1 ? '' : 's'}. Cannot be undone.`,
+    confirmText: 'Reset all',
+  });
+  if (!ok) return;
+  const btn = document.getElementById('clear-buy-overrides');
+  if (btn) { btn.disabled = true; btn.classList.add('is-busy'); }
+  try {
+    const r = await fetch(API_BASE + '/trader-buy-price/all', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    const data = await r.json();
+    if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+    BUY_OVERRIDES = {};
+    document.querySelectorAll('tr.detail .buy-edit-table').forEach(rerenderBuyTable);
+    document.querySelectorAll('tr[data-id]').forEach(r => {
+      if (r.querySelector('.cell-trader__ovr')) rerenderMainRow(r.getAttribute('data-id'));
+    });
+    updateBuyTopbar();
+    const n = data.removedCount != null ? data.removedCount : total;
+    toast(`${n} buyback override${n === 1 ? '' : 's'} removed · restart SPT to apply${data.warning ? ` (${data.warning})` : ''}`, data.warning ? 'warn' : 'ok');
+  } catch (err) {
+    toast('Failed to reset buyback overrides: ' + err.message, 'err');
+  } finally {
+    if (btn) { btn.disabled = false; btn.classList.remove('is-busy'); }
+  }
+}
+
+// Buy/buyback source rows: one per REGISTERED trader (vanilla + mod, e.g. Artem) — never sourced
+// from dev.sellFor alone (tarkov.dev only knows vanilla traders/items; a mod trader or a mod item
+// would otherwise never get a row at all, even though the backend is fully trader-agnostic). A
+// tarkov.dev reference price is merged in for display when one exists; renderBuyRow already shows
+// "—" and stays editable when it doesn't. Single source of truth for renderDetail's initial build,
+// rerenderBuyRowEl (single-row refresh) and rerenderBuyTable (bulk refresh) — all three used to
+// independently re-derive this from dev.sellFor, which is what dropped Artem's row on refresh.
+function buildBuySourceRows(item) {
+  const dev = item.tarkovDev && item.tarkovDev.pve;
+  const devSellByVendor = {};
+  if (dev && dev.sellFor) {
+    for (const s of dev.sellFor) {
+      if (s.vendor && s.vendor.normalizedName !== 'flea-market') devSellByVendor[s.vendor.name] = s;
+    }
+  }
+  return Object.keys(TRADERS)
+    .map(name => devSellByVendor[name] || { vendor: { name, normalizedName: name.toLowerCase() }, price: null, priceRUB: null, currency: null })
+    .sort((a,b) => (b.priceRUB||0) - (a.priceRUB||0));
+}
+
+// Re-render every buyback row in a given <table.buy-edit-table> from the trader registry.
+function rerenderBuyTable(table) {
+  const tpl = table.dataset.buyTpl;
+  const item = ITEMS[tpl];
+  if (!item) return;
+  const rows = buildBuySourceRows(item);
+  if (rows.length === 0) return;
+  table.innerHTML = rows.map(s => renderBuyRow(item, s)).join('');
+}
+
+// Resolve the current override for a (trader, tpl) as { count, currency }, or null.
+// `count` is the NATIVE amount the game charges (not rouble-equivalent).
+function traderOverrideFor(traderId, tpl) {
+  if (!traderId) return null;
+  const byTrader = TRADER_OVERRIDES[traderId];
+  if (!byTrader || byTrader[tpl] == null) return null;
+  return byTrader[tpl];
+}
+
+// Override's native count, or null. Tolerates a legacy plain-number override.
+function traderOverrideCount(traderId, tpl) {
+  const ovr = traderOverrideFor(traderId, tpl);
+  if (ovr == null) return null;
+  return (typeof ovr === 'object') ? ovr.count : ovr;
+}
+
+// B-3: same lookups as traderOverrideFor/traderOverrideCount, over BUY_OVERRIDES (buyback).
+function buyOverrideFor(traderId, tpl) {
+  if (!traderId) return null;
+  const byTrader = BUY_OVERRIDES[traderId];
+  if (!byTrader || byTrader[tpl] == null) return null;
+  return byTrader[tpl];
+}
+function buyOverrideCount(traderId, tpl) {
+  const ovr = buyOverrideFor(traderId, tpl);
+  if (ovr == null) return null;
+  return (typeof ovr === 'object') ? ovr.count : ovr;
+}
+
+// PRIMARY native value markup — same pattern as RUB (fmtRub): plain number OUTSIDE the
+// badge, only the currency UNIT inside the tag. RUB → "18.397 ₽"; USD/EUR/GP → "417 $".
+function nativeValueMarkup(native, cur) {
+  if (native == null) return `<span class="trader-price-val is-null">—</span>`;
+  if (cur === 'RUB') return `<span class="trader-price-val">${fmtRub(native)}</span>`;
+  const cls = CURRENCY_PILL_CLASS[cur] || 'currency--usd';
+  const sym = CURRENCY_SYMBOL[cur] || cur;
+  const rate = CURRENCY_RATES[cur];
+  const tip = (rate && rate > 0)
+    ? escapeAttr('In-game native currency (@ ' + rate.toLocaleString('en-US') + ' ₽/' + sym + ')')
+    : 'In-game native currency';
+  return `<span class="trader-price-val">${native.toLocaleString('pt-BR')} <span class="currency ${cls}" data-tip="${tip}">${escapeHtml(sym)}</span></span>`;
+}
+
+// Faint rouble-equivalent hint "≈ X ₽" for USD/EUR only. '' otherwise (incl. GP/RUB).
+function rubHintMarkup(native, cur) {
+  if (!CURRENCY_RUB_HINT.has(cur)) return '';
+  const rub = rubFromNative(native, cur);
+  if (rub == null) return '';
+  return ` <span class="trader-rub-hint" data-tip="${escapeAttr('rouble-equivalent (@ ' + CURRENCY_RATES[cur].toLocaleString('en-US') + ' ₽/' + (CURRENCY_SYMBOL[cur] || cur) + ')')}">≈ ${rub.toLocaleString('en-US')} ₽</span>`;
+}
+
+// Render one offer row. Editable rows (money & not Fence) get an inline edit
+// affordance + OVR badge when overridden; barter / Fence rows are read-only.
+function renderTraderRow(it, t) {
+  const tpl = it.id;
+  const traderId = t.traderId || (t.name ? (TRADERS[t.name] && TRADERS[t.name].id) : null);
+  const isFence = traderId === FENCE_ID;
+  const isBarter = t.currency === 'BARTER';
+  const isMoney = TRADER_MONEY_CURRENCIES.has(t.currency);
+  // `editable` is precomputed upstream (money && not Fence); fall back defensively.
+  const editable = (t.editable === true) || (isMoney && !isFence && !isBarter && !!traderId);
+  const sym = CURRENCY_SYMBOL[t.currency] || t.currency || '';
+  const ovr = editable ? traderOverrideFor(traderId, tpl) : null;
+  const hasOvr = ovr != null;
+
+  // Quest-lock 🔒 gets its own tooltip so it isn't confused with Fence's marker.
+  const lockGlyph = t.questLocked ? ` · <span class="trader-lock" data-tip="Quest-locked — an override here applies only after you unlock the quest (until then the item sits in the trader's quest assort, not the live one)">🔒</span>` : '';
+  const meta = `<small class="vendor">${escapeHtml(t.currency || '?')} · L${t.loyaltyLevel}${lockGlyph}${t.unlimited?' · ∞':''}</small>`;
+  const nameCell = `<td class="k">${escapeHtml(t.name)} ${meta}</td>`;
+
+  // Muted em-dash for a missing effective price.
+  const nullCell = `<span class="trader-price-val is-null">—</span>`;
+
+  if (isBarter) {
+    return `<tr>${nameCell}<td class="v"><span class="vendor" data-tip="barter — not editable">barter</span></td></tr>`;
+  }
+  if (isFence) {
+    // Distinct Fence marker/label — not the quest-lock 🔒. Shows native value + ₽ hint.
+    const fencePrice = t.price != null
+      ? nativeValueMarkup(t.price, t.currency) + rubHintMarkup(t.price, t.currency)
+      : nullCell;
+    return `<tr>${nameCell}<td class="v">${fencePrice} <span class="vendor trader-fence-tag" data-tip="Fence — dynamic assort, not editable">Fence — not editable</span></td></tr>`;
+  }
+  if (!editable) {
+    const ro = t.price != null
+      ? nativeValueMarkup(t.price, t.currency) + rubHintMarkup(t.price, t.currency)
+      : nullCell;
+    return `<tr>${nameCell}<td class="v">${ro}</td></tr>`;
+  }
+
+  // Editable: NATIVE model. base = game's native amount; override.count overrides it.
+  const base = t.price;
+  const ovrCount = hasOvr ? ((typeof ovr === 'object') ? ovr.count : ovr) : null;
+  const eff = hasOvr && ovrCount != null ? ovrCount : base;
+  const rubHint = eff != null ? rubHintMarkup(eff, t.currency) : '';
+  // OVR tooltip in NATIVE units; ₽ equivalent only appended for USD/EUR.
+  const effRub = CURRENCY_RUB_HINT.has(t.currency) ? rubFromNative(eff, t.currency) : null;
+  const effRubTxt = effRub != null ? ` ≈ ${effRub.toLocaleString('en-US')} ₽` : '';
+  const badge = hasOvr
+    ? ` <span class="badge badge--override" data-tip="${escapeAttr('Override active — trader sell price pinned at ' + (eff!=null?eff.toLocaleString('en-US'):'?') + ' ' + sym + ' (base ' + (base!=null?base.toLocaleString('en-US'):'?') + ' ' + sym + ')' + effRubTxt + '. Edit / restore here.')}">OVR</span>`
+    : '';
+
+  // T6: when overridden, show the base struck-through then the override value (native).
+  let priceMarkup;
+  if (eff == null) {
+    priceMarkup = nullCell;
+  } else if (hasOvr) {
+    priceMarkup = (base != null ? `<s class="trader-price-base">${nativeValueMarkup(base, t.currency)}</s> → ` : '') +
+      `<span class="is-overridden">${nativeValueMarkup(eff, t.currency)}</span>${rubHint}`;
+  } else {
+    priceMarkup = `${nativeValueMarkup(eff, t.currency)}${rubHint}`;
+  }
+  // T7: inline restore ↺ for overridden rows (deletes without opening the editor).
+  const restoreBtn = hasOvr
+    ? `<button class="trader-restore-btn" type="button" data-tip="Restore default sell price" aria-label="Restore default sell price">↺</button>`
+    : '';
+  return `<tr class="trader-row is-editable${hasOvr?' is-overridden':''}" data-trader-id="${escapeAttr(traderId||'')}" data-trader-tpl="${escapeAttr(tpl)}" data-trader-base="${base!=null?base:''}" data-trader-cur="${escapeAttr(t.currency||'')}">` +
+    nameCell +
+    `<td class="v trader-edit-cell" data-tip="Click to edit the trader's sell price" tabindex="0" role="button" aria-label="Edit trader sell price">` +
+      priceMarkup + badge + restoreBtn +
+      `<button class="trader-edit-btn" type="button" title="Edit trader sell price" tabindex="-1">${ICON_EDIT}</button>` +
+    `</td>` +
+  `</tr>`;
+}
+
+// Re-render a single trader row from ITEMS, returning a fresh <tr>. Optionally
+// moves focus back to the row's edit cell (keyboard return after an action).
+function rerenderTraderRowEl(row, focusBack) {
+  const tpl = row.dataset.traderTpl;
+  const traderId = row.dataset.traderId;
+  const item = ITEMS[tpl];
+  if (!item) return null;
+  const t = (item.spt && item.spt.traders ? item.spt.traders : []).find(x =>
+    (x.traderId || (x.name && TRADERS[x.name] && TRADERS[x.name].id)) === traderId);
+  if (!t) return null;
+  const tmp = document.createElement('tbody');
+  tmp.innerHTML = renderTraderRow(item, t);
+  const fresh = tmp.firstElementChild;
+  row.replaceWith(fresh);
+  if (focusBack) {
+    const cell = fresh.querySelector('.trader-edit-cell');
+    if (cell) cell.focus();
+  }
+  return fresh;
+}
+
+// Re-render the MAIN table row for a tpl (preserving its expanded state + open detail
+// sibling) so a trader-override edit reflects in the item row's TRADER column, not just
+// the detail panel. No-op if the row is currently windowed out (correct on next render).
+function rerenderMainRow(tpl) {
+  const item = ITEMS[tpl];
+  if (!item) return;
+  const sel = (window.CSS && CSS.escape) ? CSS.escape(tpl) : tpl;
+  const mainRow = document.querySelector('tr[data-id="' + sel + '"]');
+  if (!mainRow) return;
+  const wasExpanded = mainRow.classList.contains('is-expanded');
+  const tmp = document.createElement('tbody');
+  tmp.innerHTML = renderRow(item);
+  const fresh = tmp.firstElementChild;
+  if (wasExpanded && fresh) fresh.classList.add('is-expanded');
+  mainRow.replaceWith(fresh);
+}
+
+// T7: inline restore (↺ on the row, no editor). DELETEs the override directly.
+async function restoreTraderOverride(row) {
+  const tpl = row.dataset.traderTpl;
+  const traderId = row.dataset.traderId;
+  const btn = row.querySelector('.trader-restore-btn');
+  if (btn) btn.disabled = true;
+  try {
+    const r = await fetch(API_BASE + '/trader-price', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tpl, traderId }),
+    });
+    const data = await r.json();
+    if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+    if (TRADER_OVERRIDES[traderId]) {
+      delete TRADER_OVERRIDES[traderId][tpl];
+      if (Object.keys(TRADER_OVERRIDES[traderId]).length === 0) delete TRADER_OVERRIDES[traderId];
+    }
+    rerenderTraderRowEl(row, true);
+    rerenderMainRow(tpl);
+    refreshTraderOverrideFilter();
+    updateTraderTopbar();
+    const item = ITEMS[tpl];
+    toast(`${(item && (item.shortName || item.name)) || tpl}: trader override removed → default · restart SPT to apply${data.warning ? ` (${data.warning})` : ''}`, data.warning ? 'warn' : 'ok');
+  } catch (err) {
+    if (btn) btn.disabled = false;
+    toast('Failed to restore: ' + err.message, 'err');
+  }
+}
+
+// Open the inline editor on a trader row. Mirrors the flea inline edit.
+function openTraderEdit(row) {
+  if (row.querySelector('.trader-edit-form')) return; // already editing
+  const tpl = row.dataset.traderTpl;
+  const traderId = row.dataset.traderId;
+  const cur = row.dataset.traderCur;
+  const sym = CURRENCY_SYMBOL[cur] || cur || '';
+  const base = row.dataset.traderBase !== '' ? Number(row.dataset.traderBase) : null;
+  const ovrCount = traderOverrideCount(traderId, tpl);
+  // Input is the NATIVE amount; default to the current effective native value.
+  const current = ovrCount != null ? ovrCount : (base != null ? base : '');
+  const hasOvr = ovrCount != null;
+
+  const isRub = cur === 'RUB';
+  const rate = CURRENCY_RATES[cur];
+  const showRubPreview = CURRENCY_RUB_HINT.has(cur) && rate && rate > 0;
+
+  const cell = row.querySelector('.trader-edit-cell');
+  cell.classList.add('is-editing');
+  const form = document.createElement('form');
+  form.className = 'trader-edit-form';
+  form.onsubmit = (e) => { e.preventDefault(); return false; };
+  form.innerHTML =
+    // NATIVE integer input — step 1, no rate snapping. No data-tip here: it would pop on
+    // autofocus and collide with the preview/hint below (which already explain the field).
+    `<input type="number" min="1" step="1" value="${current}" autofocus aria-label="Trader sell price in ${escapeAttr(cur)}">` +
+    `<div class="trader-edit-form__preview" aria-live="polite"></div>` +
+    `<div class="trader-edit-form__actions">` +
+      `<button class="save" type="button" title="Save (Enter)">Save</button>` +
+      (hasOvr ? `<button class="restore" type="button" title="Restore default price (undo edit)">↺</button>` : '') +
+      `<button class="cancel" type="button" title="Cancel (Esc)">×</button>` +
+    `</div>` +
+    `<div class="trader-edit-form__hint">edit in ${escapeHtml(cur)} · applies to all loyalty levels · restart SPT to apply</div>`;
+  cell.appendChild(form);
+
+  const input   = form.querySelector('input');
+  const preview = form.querySelector('.trader-edit-form__preview');
+  const save    = form.querySelector('button.save');
+  const cancel  = form.querySelector('button.cancel');
+  const restore = form.querySelector('button.restore');
+  input.focus(); input.select();
+
+  // Live preview. USD/EUR → rouble-equivalent; GP → "= N GP"; RUB → "= N ₽".
+  function updatePreview() {
+    const v = parseInt(input.value, 10);
+    if (!Number.isFinite(v) || v <= 0) { preview.textContent = ''; return; }
+    if (showRubPreview) {
+      const rub = Math.round(v * rate);
+      preview.textContent = `≈ ${rub.toLocaleString('en-US')} ₽ (@ ${rate.toLocaleString('en-US')} ₽/${sym})`;
+    } else if (isRub) {
+      preview.textContent = `= ${v.toLocaleString('en-US')} ₽`;
+    } else {
+      preview.textContent = `= ${v.toLocaleString('en-US')} ${sym}`;
+    }
+  }
+  input.addEventListener('input', updatePreview);
+  updatePreview();
+
+  let docClickHandler = null;
+  function closeForm() {
+    cell.classList.remove('is-editing');
+    form.remove();
+    if (docClickHandler) document.removeEventListener('mousedown', docClickHandler, true);
+  }
+  function rerenderRow() { return rerenderTraderRowEl(row, true); }
+
+  cancel.onclick = () => { closeForm(); const cell2 = row.querySelector('.trader-edit-cell'); if (cell2) cell2.focus(); };
+  input.onkeydown = (ev) => {
+    if (ev.key === 'Escape') closeForm();
+    if (ev.key === 'Enter')  { ev.preventDefault(); save.click(); }
+  };
+  docClickHandler = (ev) => { if (!row.contains(ev.target)) closeForm(); };
+  setTimeout(() => document.addEventListener('mousedown', docClickHandler, true), 0);
+
+  save.onclick = async () => {
+    const count = parseInt(input.value, 10);
+    if (!Number.isFinite(count) || count <= 0) { toast('Invalid value', 'err'); input.focus(); return; }
+    save.disabled = true; cancel.disabled = true; if (restore) restore.disabled = true;
+    try {
+      const r = await fetch(API_BASE + '/trader-price', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tpl, traderId, count, currency: cur }),
+      });
+      const data = await r.json();
+      if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+      // Optimistically reflect the new override (NATIVE { count, currency }).
+      if (!TRADER_OVERRIDES[traderId]) TRADER_OVERRIDES[traderId] = {};
+      TRADER_OVERRIDES[traderId][tpl] = { count, currency: cur };
+      closeForm();
+      rerenderRow();
+      rerenderMainRow(tpl);
+      refreshTraderOverrideFilter();
+      updateTraderTopbar();
+      const item = ITEMS[tpl];
+      const prevCount = data.previousCount != null ? data.previousCount : data.previousPrice;
+      const prev = prevCount != null ? `${prevCount.toLocaleString('en-US')} → ` : '';
+      let msg = `${(item && (item.shortName || item.name)) || tpl}: trader sell ${prev}${count.toLocaleString('en-US')} ${sym} · restart SPT to apply`;
+      // B2: a successful save with a warning (e.g. mod not installed) is amber, not red.
+      if (data.warning) msg += ` (${data.warning})`;
+      toast(msg, data.warning ? 'warn' : 'ok');
+    } catch (err) {
+      toast('Failed to save: ' + err.message, 'err');
+      save.disabled = false; cancel.disabled = false; if (restore) restore.disabled = false;
+    }
+  };
+
+  if (restore) restore.onclick = async () => {
+    restore.disabled = true; save.disabled = true; cancel.disabled = true;
+    try {
+      const r = await fetch(API_BASE + '/trader-price', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tpl, traderId }),
+      });
+      const data = await r.json();
+      if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+      if (TRADER_OVERRIDES[traderId]) {
+        delete TRADER_OVERRIDES[traderId][tpl];
+        if (Object.keys(TRADER_OVERRIDES[traderId]).length === 0) delete TRADER_OVERRIDES[traderId];
+      }
+      closeForm();
+      rerenderRow();
+      rerenderMainRow(tpl);
+      refreshTraderOverrideFilter();
+      updateTraderTopbar();
+      const item = ITEMS[tpl];
+      toast(`${(item && (item.shortName || item.name)) || tpl}: trader override removed → default · restart SPT to apply${data.warning ? ` (${data.warning})` : ''}`, data.warning ? 'warn' : 'ok');
+    } catch (err) {
+      toast('Failed to restore: ' + err.message, 'err');
+      restore.disabled = false; save.disabled = false; cancel.disabled = false;
+    }
+  };
+}
+
+// ── B-3: trader BUY price (buyback, tarkov.dev reference — now editable) ────────────────────
+// Mirrors renderTraderRow/openTraderEdit/restoreTraderOverride (sell side) exactly, over
+// BUY_OVERRIDES + /api/trader-buy-price instead of TRADER_OVERRIDES + /api/trader-price. The
+// reference "base" price here is tarkov.dev's sellFor (not SPT's live assort — there is no
+// buyback assort to read from; see BACKLOG.md B-3).
+
+// Render one tarkov.dev sellFor row. Editable when the vendor resolves to a known traderId
+// (not Fence, money currency) — same editability rule as the sell table.
+function renderBuyRow(it, s) {
+  const tpl = it.id;
+  const vendorName = s.vendor && s.vendor.name;
+  const traderId = vendorName && TRADERS[vendorName] ? TRADERS[vendorName].id : null;
+  const isFence = traderId === FENCE_ID;
+  const cur = s.currency || 'RUB';
+  const isMoney = TRADER_MONEY_CURRENCIES.has(cur);
+  const editable = !!traderId && !isFence && isMoney;
+  const nameCell = `<td class="k">${escapeHtml(vendorName || '?')}</td>`;
+  const readOnlyMarkup = `${fmt(s.priceRUB)} ₽${cur !== 'RUB' ? ` <small class="vendor">(${s.price} ${cur})</small>` : ''}`;
+
+  if (isFence) {
+    return `<tr>${nameCell}<td class="v">${readOnlyMarkup} <span class="vendor trader-fence-tag" data-tip="Fence — dynamic assort, not editable">Fence — not editable</span></td></tr>`;
+  }
+  if (!editable) {
+    return `<tr>${nameCell}<td class="v">${readOnlyMarkup}</td></tr>`;
+  }
+
+  const ovr = buyOverrideFor(traderId, tpl);
+  const hasOvr = ovr != null;
+  const ovrCount = hasOvr ? ((typeof ovr === 'object') ? ovr.count : ovr) : null;
+  const base = s.price; // native amount (tarkov.dev reference)
+  const eff = hasOvr && ovrCount != null ? ovrCount : base;
+  const rubHint = eff != null ? rubHintMarkup(eff, cur) : '';
+  const sym = CURRENCY_SYMBOL[cur] || cur;
+  const badge = hasOvr
+    ? ` <span class="badge badge--override" data-tip="${escapeAttr('Buyback override active — trader pays you ' + (eff != null ? eff.toLocaleString('en-US') : '?') + ' ' + sym + ' (tarkov.dev ref ' + (base != null ? base.toLocaleString('en-US') : '?') + ' ' + sym + '). Edit / restore here.')}">OVR</span>`
+    : '';
+
+  const nullCell = `<span class="trader-price-val is-null">—</span>`;
+  let priceMarkup;
+  if (eff == null) {
+    priceMarkup = nullCell;
+  } else if (hasOvr) {
+    priceMarkup = (base != null ? `<s class="trader-price-base">${nativeValueMarkup(base, cur)}</s> → ` : '') +
+      `<span class="is-overridden">${nativeValueMarkup(eff, cur)}</span>${rubHint}`;
+  } else {
+    priceMarkup = `${nativeValueMarkup(eff, cur)}${rubHint}`;
+  }
+
+  const restoreBtn = hasOvr
+    ? `<button class="buy-restore-btn" type="button" data-tip="Restore reference buyback price" aria-label="Restore reference buyback price">↺</button>`
+    : '';
+
+  return `<tr class="buy-row is-editable${hasOvr ? ' is-overridden' : ''}" data-buy-trader-id="${escapeAttr(traderId)}" data-buy-tpl="${escapeAttr(tpl)}" data-buy-base="${base != null ? base : ''}" data-buy-cur="${escapeAttr(cur)}">` +
+    nameCell +
+    `<td class="v buy-edit-cell" data-tip="Click to edit what this trader pays you (buyback)" tabindex="0" role="button" aria-label="Edit trader buy price">` +
+      priceMarkup + badge + restoreBtn +
+      `<button class="buy-edit-btn" type="button" title="Edit trader buy price" tabindex="-1">${ICON_EDIT}</button>` +
+    `</td>` +
+  `</tr>`;
+}
+
+// Re-render a single BUY row from ITEMS/dev.sellFor, returning a fresh <tr>.
+function rerenderBuyRowEl(row, focusBack) {
+  const tpl = row.dataset.buyTpl;
+  const traderId = row.dataset.buyTraderId;
+  const item = ITEMS[tpl];
+  if (!item) return null;
+  const s = buildBuySourceRows(item).find(x => x.vendor && TRADERS[x.vendor.name] && TRADERS[x.vendor.name].id === traderId);
+  if (!s) return null;
+  const tmp = document.createElement('tbody');
+  tmp.innerHTML = renderBuyRow(item, s);
+  const fresh = tmp.firstElementChild;
+  row.replaceWith(fresh);
+  if (focusBack) {
+    const cell = fresh.querySelector('.buy-edit-cell');
+    if (cell) cell.focus();
+  }
+  return fresh;
+}
+
+// Inline restore (↺ on the row, no editor). DELETEs the buyback override directly.
+async function restoreBuyOverride(row) {
+  const tpl = row.dataset.buyTpl;
+  const traderId = row.dataset.buyTraderId;
+  const btn = row.querySelector('.buy-restore-btn');
+  if (btn) btn.disabled = true;
+  try {
+    const r = await fetch(API_BASE + '/trader-buy-price', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tpl, traderId }),
+    });
+    const data = await r.json();
+    if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+    if (BUY_OVERRIDES[traderId]) {
+      delete BUY_OVERRIDES[traderId][tpl];
+      if (Object.keys(BUY_OVERRIDES[traderId]).length === 0) delete BUY_OVERRIDES[traderId];
+    }
+    rerenderBuyRowEl(row, true);
+    rerenderMainRow(tpl); // CR-04: keep the main-list "B" cell in sync
+    updateBuyTopbar(); // CR-05: keep the "N buyback edits pending" pill in sync
+    const item = ITEMS[tpl];
+    toast(`${(item && (item.shortName || item.name)) || tpl}: buyback override removed → reference · restart SPT to apply${data.warning ? ` (${data.warning})` : ''}`, data.warning ? 'warn' : 'ok');
+  } catch (err) {
+    if (btn) btn.disabled = false;
+    toast('Failed to restore: ' + err.message, 'err');
+  }
+}
+
+// Open the inline editor on a BUY row. Mirrors openTraderEdit (sell side).
+function openBuyEdit(row) {
+  if (row.querySelector('.buy-edit-form')) return; // already editing
+  const tpl = row.dataset.buyTpl;
+  const traderId = row.dataset.buyTraderId;
+  const cur = row.dataset.buyCur;
+  const sym = CURRENCY_SYMBOL[cur] || cur || '';
+  const base = row.dataset.buyBase !== '' ? Number(row.dataset.buyBase) : null;
+  const ovrCount = buyOverrideCount(traderId, tpl);
+  const current = ovrCount != null ? ovrCount : (base != null ? base : '');
+  const hasOvr = ovrCount != null;
+
+  const isRub = cur === 'RUB';
+  const rate = CURRENCY_RATES[cur];
+  const showRubPreview = CURRENCY_RUB_HINT.has(cur) && rate && rate > 0;
+
+  const cell = row.querySelector('.buy-edit-cell');
+  cell.classList.add('is-editing');
+  const form = document.createElement('form');
+  form.className = 'buy-edit-form trader-edit-form'; // reuses the sell editor's CSS
+  form.onsubmit = (e) => { e.preventDefault(); return false; };
+  form.innerHTML =
+    `<input type="number" min="1" step="1" value="${current}" autofocus aria-label="Trader buy price in ${escapeAttr(cur)}">` +
+    `<div class="trader-edit-form__preview" aria-live="polite"></div>` +
+    `<div class="trader-edit-form__actions">` +
+      `<button class="save" type="button" title="Save (Enter)">Save</button>` +
+      (hasOvr ? `<button class="restore" type="button" title="Restore reference buy price (undo edit)">↺</button>` : '') +
+      `<button class="cancel" type="button" title="Cancel (Esc)">×</button>` +
+    `</div>` +
+    `<div class="trader-edit-form__hint">edit in ${escapeHtml(cur)} · what this trader pays you · restart SPT to apply</div>`;
+  cell.appendChild(form);
+
+  const input   = form.querySelector('input');
+  const preview = form.querySelector('.trader-edit-form__preview');
+  const save    = form.querySelector('button.save');
+  const cancel  = form.querySelector('button.cancel');
+  const restore = form.querySelector('button.restore');
+  input.focus(); input.select();
+
+  function updatePreview() {
+    const v = parseInt(input.value, 10);
+    if (!Number.isFinite(v) || v <= 0) { preview.textContent = ''; return; }
+    if (showRubPreview) {
+      const rub = Math.round(v * rate);
+      preview.textContent = `≈ ${rub.toLocaleString('en-US')} ₽ (@ ${rate.toLocaleString('en-US')} ₽/${sym})`;
+    } else if (isRub) {
+      preview.textContent = `= ${v.toLocaleString('en-US')} ₽`;
+    } else {
+      preview.textContent = `= ${v.toLocaleString('en-US')} ${sym}`;
+    }
+  }
+  input.addEventListener('input', updatePreview);
+  updatePreview();
+
+  let docClickHandler = null;
+  function closeForm() {
+    cell.classList.remove('is-editing');
+    form.remove();
+    if (docClickHandler) document.removeEventListener('mousedown', docClickHandler, true);
+  }
+  function rerenderRow() { return rerenderBuyRowEl(row, true); }
+
+  cancel.onclick = () => { closeForm(); const cell2 = row.querySelector('.buy-edit-cell'); if (cell2) cell2.focus(); };
+  input.onkeydown = (ev) => {
+    if (ev.key === 'Escape') closeForm();
+    if (ev.key === 'Enter')  { ev.preventDefault(); save.click(); }
+  };
+  docClickHandler = (ev) => { if (!row.contains(ev.target)) closeForm(); };
+  setTimeout(() => document.addEventListener('mousedown', docClickHandler, true), 0);
+
+  save.onclick = async () => {
+    const count = parseInt(input.value, 10);
+    if (!Number.isFinite(count) || count <= 0) { toast('Invalid value', 'err'); input.focus(); return; }
+    save.disabled = true; cancel.disabled = true; if (restore) restore.disabled = true;
+    try {
+      const r = await fetch(API_BASE + '/trader-buy-price', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tpl, traderId, count, currency: cur }),
+      });
+      const data = await r.json();
+      if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+      if (!BUY_OVERRIDES[traderId]) BUY_OVERRIDES[traderId] = {};
+      BUY_OVERRIDES[traderId][tpl] = { count, currency: cur };
+      closeForm();
+      rerenderRow();
+      rerenderMainRow(tpl); // CR-04: keep the main-list "B" cell in sync
+      updateBuyTopbar(); // CR-05: keep the "N buyback edits pending" pill in sync
+      const item = ITEMS[tpl];
+      const prevCount = data.previousCount != null ? data.previousCount : data.previousPrice;
+      const prev = prevCount != null ? `${prevCount.toLocaleString('en-US')} → ` : '';
+      let msg = `${(item && (item.shortName || item.name)) || tpl}: trader buy ${prev}${count.toLocaleString('en-US')} ${sym} · restart SPT to apply`;
+      if (data.warning) msg += ` (${data.warning})`;
+      toast(msg, data.warning ? 'warn' : 'ok');
+    } catch (err) {
+      toast('Failed to save: ' + err.message, 'err');
+      save.disabled = false; cancel.disabled = false; if (restore) restore.disabled = false;
+    }
+  };
+
+  if (restore) restore.onclick = async () => {
+    restore.disabled = true; save.disabled = true; cancel.disabled = true;
+    try {
+      const r = await fetch(API_BASE + '/trader-buy-price', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tpl, traderId }),
+      });
+      const data = await r.json();
+      if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+      if (BUY_OVERRIDES[traderId]) {
+        delete BUY_OVERRIDES[traderId][tpl];
+        if (Object.keys(BUY_OVERRIDES[traderId]).length === 0) delete BUY_OVERRIDES[traderId];
+      }
+      closeForm();
+      rerenderRow();
+      rerenderMainRow(tpl); // CR-04: keep the main-list "B" cell in sync
+      updateBuyTopbar(); // CR-05: keep the "N buyback edits pending" pill in sync
+      const item = ITEMS[tpl];
+      toast(`${(item && (item.shortName || item.name)) || tpl}: buyback override removed → reference · restart SPT to apply${data.warning ? ` (${data.warning})` : ''}`, data.warning ? 'warn' : 'ok');
+    } catch (err) {
+      toast('Failed to restore: ' + err.message, 'err');
+      restore.disabled = false; save.disabled = false; cancel.disabled = false;
+    }
+  };
+}
+
+function renderDetail(it) {
+  const c = it.consolidated;
+  const dev = it.tarkovDev && it.tarkovDev.pve;
+  const reg = it.tarkovDev && it.tarkovDev.regular;
+  const mkt = it.tarkovMarket && it.tarkovMarket.pve;
+  const spt = it.spt;
+
+  const traderSell = buildBuySourceRows(it);
+
+  const sptTraders = spt && spt.traders ? spt.traders : [];
+
+  return `<div class="detail-grid">
+    <div class="detail-img">
+      ${it.image && it.image.large ? `<img src="${escapeAttr(it.image.large)}" alt="">` : '<div class="no-img" style="width:200px;height:200px">no image</div>'}
+      <div class="meta-line">
+        <b>${escapeHtml(it.name || '')}</b><br>
+        <span class="types">${(it.types||[]).join(', ')}</span><br>
+        ${it.wikiLink ? `<a href="${escapeAttr(it.wikiLink)}" target="_blank">Wiki ↗</a> · ` : ''}
+        ${mkt && mkt.link ? `<a href="${escapeAttr(mkt.link)}" target="_blank">Market ↗</a>` : `<a href="https://tarkov-market.com/?search=${escapeAttr(it.id)}" target="_blank">Market ↗</a>`} ·
+        <a href="${it.normalizedName ? 'https://tarkov.dev/item/'+escapeAttr(it.normalizedName) : 'https://tarkov.dev/?search='+escapeAttr(it.id)}" target="_blank">tarkov.dev ↗</a>
+      </div>
+      <div class="meta-line">
+        ID: <code>${escapeHtml(it.id)}</code><br>
+        Dims: ${it.dims ? `${it.dims.weight}kg · ${it.dims.width}×${it.dims.height}` : '—'}
+        ${it.grids && it.grids.length ? '<br>Grid: ' + it.grids.map(g =>
+          `${g.cellsH}×${g.cellsV}` + (g.name && it.grids.length > 1 ? ` (${escapeHtml(g.name)})` : '')
+        ).join(' · ') + ` <span class="vendor">= ${it.grids.reduce((sum,g) => sum + g.cellsH*g.cellsV, 0)} slots</span>` : ''}
+      </div>
+    </div>
+    <div class="detail-sections">
+
+      <div class="detail-section">
+        <h3>SPT base / handbook</h3>
+        <table>
+          <tr><td class="k">basePrice</td><td class="v">${fmt(spt && spt.basePrice)} ₽</td></tr>
+          <tr><td class="k">condition</td><td class="v">${c.conditionType}</td></tr>
+          <tr><td class="k">group</td><td class="v">${escapeHtml(c.group||'—')}</td></tr>
+          <tr><td class="k">path</td><td class="v">${(it.category && it.category.path || []).join(' › ')}</td></tr>
+          <tr><td class="k">flea ban</td><td class="v">${spt && spt.fleaBanned ? '<span class="banned-icon">'+ICON_BANNED+'</span> banned ('+spt.fleaBanReasons.join(', ')+')' : '✓ allowed'}</td></tr>
+        </table>
+      </div>
+
+      <div class="detail-section source-card source-card--spt">
+        <h3>SPT <small class="source-card__when">${fmtRelTime(META && META.sources && META.sources.spt && META.sources.spt.fleaPricesMtime)}</small></h3>
+        <table>
+          <tr><td class="k">fleaPrice</td><td class="v">${fmt(c.priceFleaSpt)} ₽</td></tr>
+          <tr><td class="k">source</td><td class="v">${META && META.sources && META.sources.spt && escapeHtml(META.sources.spt.fleaPricesSource || '—')}</td></tr>
+        </table>
+      </div>
+
+      <div class="detail-section source-card source-card--dev">
+        <h3>tarkov.dev <small class="source-card__when">${fmtRelTime(dev && dev.updated)}</small></h3>
+        <table>
+          <tr><td class="k">avg 24h</td><td class="v">${fmt(c.priceFleaDevAvg24h)} ₽</td></tr>
+          <tr><td class="k">lastLow</td><td class="v">${fmt(c.priceFleaDevLastLow)} ₽</td></tr>
+          <tr><td class="k">low 24h</td><td class="v">${fmt(dev && dev.low24h)} ₽</td></tr>
+          <tr><td class="k">high 24h</td><td class="v">${fmt(dev && dev.high24h)} ₽</td></tr>
+          <tr><td class="k">change 48h</td><td class="v">${dev && dev.change48h != null ? (dev.change48h>0?'+':'') + fmt(dev.change48h) + ' ₽ ' + (dev.change48hPct != null ? `<small class="vendor">(${(dev.change48hPct>0?'+':'')+dev.change48hPct.toFixed(1)}%)</small>` : '') : '—'}</td></tr>
+        </table>
+      </div>
+
+      <div class="detail-section source-card source-card--market">
+        <h3>tarkov-market <small class="source-card__when">${fmtRelTime(mkt && mkt.updated)}</small></h3>
+        <table>
+          <tr><td class="k">avg 24h</td><td class="v">${fmt(c.priceFleaMarketAvg24h)} ₽</td></tr>
+          <tr><td class="k">avg 7d</td><td class="v">${fmt(mkt && mkt.avg7days)} ₽</td></tr>
+          <tr><td class="k">price (last)</td><td class="v">${fmt(mkt && mkt.price)} ₽</td></tr>
+          <tr><td class="k">trader (best)</td><td class="v">${mkt && mkt.traderName ? escapeHtml(mkt.traderName) + ' · ' + fmt(mkt.traderPrice) + ' ₽' : '—'}</td></tr>
+        </table>
+      </div>
+
+      <div class="detail-section detail-section--full">
+        <h3>Trader buy (tarkov.dev ref) — best: <span class="price is-canonical" data-tip="What the trader pays you (buyback)">${c.priceTraderSell ? fmt(c.priceTraderSell.value)+' ₽ ('+escapeHtml(c.priceTraderSell.vendor)+')' : '—'}</span>${BUY_MOD_INSTALLED ? '' : ' <span class="trader-mod-warn" data-tip="Install TRLTraderPrices (client + server) for edits to take effect in-game.">⚠ mod not installed</span>'}</h3>
+        <table class="buy-edit-table" data-buy-tpl="${escapeAttr(it.id)}">
+          ${traderSell.length === 0 ? '<tr><td>—</td></tr>' :
+            traderSell.map(s => renderBuyRow(it, s)).join('')}
+        </table>
+        <div class="trader-edit-note${BUY_MOD_INSTALLED ? '' : ' is-warn'}">${BUY_MOD_INSTALLED
+          ? 'Edit in the trader\'s native currency — what the trader pays YOU (buyback). Requires the client-side patch too (Rota B); restart SPT to apply.'
+          : 'TRLTraderPrices not installed — edits are saved but inert. Install both mod halves (client + server), then restart SPT to apply.'}</div>
+      </div>
+
+      <div class="detail-section detail-section--full">
+        <h3>Trader sell (SPT assort) <span class="vendor" style="text-transform:none;font-weight:400" data-tip="The price the trader sells this for — what you pay. This is the editable price.">— what you pay</span>${TRADER_MOD_INSTALLED ? '' : ' <span class="trader-mod-warn" data-tip="Install TRLTraderPrices for edits to take effect in-game.">⚠ mod not installed</span>'}</h3>
+        <table class="trader-edit-table" data-trader-tpl="${escapeAttr(it.id)}">
+          ${sptTraders.length === 0 ? '<tr><td>—</td></tr>' :
+            sptTraders.map(t => renderTraderRow(it, t)).join('')}
+        </table>
+        <div class="trader-edit-note${TRADER_MOD_INSTALLED ? '' : ' is-warn'}">${TRADER_MOD_INSTALLED
+          ? 'Edit in the trader\'s native currency (the amount the game charges). Applies to all loyalty levels. Restart SPT to apply.'
+          : 'TRLTraderPrices not installed — edits are saved but inert. Install the mod, then restart SPT to apply.'}</div>
+      </div>
+
+    </div>
+  </div>`;
+}
+
+// ── Utilities ───────────────────────────────────────────────────────────────
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s) { return escapeHtml(s); }
+
+load();
+</script>
+</body>
+</html>

@@ -57,9 +57,10 @@ internal class ExecutionMeleePatch : ModulePatch
 }
 
 /// <summary>
-///     🔻 Heavy Frame (Tanque) — fome/sede drenam mais rápido (×1.3). Helper compartilhado entre
-///     <c>ActiveHealthController.ChangeEnergy</c> e <c>ChangeHydration</c>. Só amplifica o DRAIN
-///     (value &lt; 0); restauração por comida/bebida (value &gt; 0) não é afetada.
+///     Lever de metabolismo (fome/sede) por classe. Helper compartilhado entre <c>ActiveHealthController.ChangeEnergy</c>
+///     e <c>ChangeHydration</c>. Só toca o DRAIN (value &lt; 0); restauração por comida/bebida (value &gt; 0) fica intocada.
+///     Branch por classe (mutuamente exclusivas): 🔻 Heavy Frame (Tanque) drena mais rápido (×1.3) ·
+///     🩺 Efficient Metabolism (Médico, B17) drena mais devagar (×0.85).
 /// </summary>
 internal static class HeavyFrameMetabolism
 {
@@ -67,9 +68,9 @@ internal static class HeavyFrameMetabolism
     {
         try
         {
-            if (PerksConfig.HeavyFrameEnabled?.Value != true || value >= 0f)
+            if (value >= 0f)
             {
-                return;
+                return;   // só o DRAIN
             }
 
             if (!ReferenceEquals(instance.Player, Singleton<GameWorld>.Instance?.MainPlayer))
@@ -77,14 +78,18 @@ internal static class HeavyFrameMetabolism
                 return;   // só o player local
             }
 
-            if (SkillMultipliers.IsLocalClass("Tank"))
+            if (PerksConfig.HeavyFrameEnabled?.Value == true && SkillMultipliers.IsLocalClass("Tank"))
             {
                 value *= PerksConfig.HeavyFrameHungerThirst?.Value ?? 1f;
+            }
+            else if (PerksConfig.EfficientMetabolismEnabled?.Value == true && SkillMultipliers.IsLocalClass("Combat Medic"))
+            {
+                value *= PerksConfig.EfficientMetabolismHungerThirst?.Value ?? 1f;   // B17
             }
         }
         catch (Exception ex)
         {
-            Plugin.Log?.LogError($"[CustomClasses] heavy frame metabolism falhou: {ex.Message}");
+            Plugin.Log?.LogError($"[CustomClasses] metabolism drain falhou: {ex.Message}");
         }
     }
 }

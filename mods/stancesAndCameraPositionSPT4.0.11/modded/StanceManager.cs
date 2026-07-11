@@ -40,10 +40,6 @@ namespace CameraRotationMod
 
         public static void SetStance(Stance newStance)
         {
-            if (CurrentStance != newStance)
-            {
-                Plugin.Logger.LogInfo($"[Spy] SetStance called: {CurrentStance} -> {newStance}");
-            }
             CurrentStance = newStance;
         }
 
@@ -341,8 +337,7 @@ namespace CameraRotationMod
             var gw = GetCachedGameWorld();
             if (gw?.MainPlayer?.IsSprintEnabled == true) return;
             if (gw?.MainPlayer?.ProceduralWeaponAnimation?.IsMountedState == true) return; // Não levanta a arma se montado (vanilla)
-            
-            Plugin.Logger.LogInfo($"[Spy] StartActionStance called. CurrentStance: {CurrentStance}");
+
             if (CurrentStance != Stance.Default)
             {
                 _preActionStance = CurrentStance;
@@ -362,7 +357,6 @@ namespace CameraRotationMod
         {
             if (!_isActionStanceActive) return;
 
-            Plugin.Logger.LogInfo($"[Spy] EndActionStance called. forceCancel={forceCancel}, Time delta={Time.time - _actionStanceStartTime}");
             // Debounce: ignorar OnIdleStartEvent disparados nos primeiros 0.3s (podem ser idle
             // events do próprio início da operação antes da animação realmente começar).
             if (!forceCancel && (Time.time - _actionStanceStartTime < 0.3f)) return;
@@ -1315,6 +1309,11 @@ namespace CameraRotationMod
             }
             catch (Exception ex) { Plugin.Logger.LogError($"[StanceManager.TickAdsNetworkSync] {ex}"); }
         }
+
+        // Item 015: NÃO há "desmontar ao entrar em stance" — o próprio StanceManager.Update (item 013) força
+        // Stance 0 enquanto montado (IsMountedState), então o jogador fica preso em Stance 0 montado e o input de
+        // troca de stance é ignorado. O 015 só precisa BLOQUEAR a ATIVAÇÃO em Stance 1/2/3 (BlockActiveMountPatch).
+        // Ver 04-code-review-01 CR-01-01.
 
         /// <summary>
         /// Controla delta de stamina das mãos por frame (drain e recovery).

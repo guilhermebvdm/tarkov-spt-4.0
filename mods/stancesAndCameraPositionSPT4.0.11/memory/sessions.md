@@ -6,23 +6,28 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados quan
 
 ## Estado atual (snapshot ao fim da última sessão)
 
-- **Linha ativa = fork `modded`** (do dev rocket, trazido no pull `e8f706b`): refactor das animações de stance (Realism como ref) + features novas (hold-breath/oxigênio, FIKA stance sync, FOV). Buildado via **`dotnet build` direto** no `CameraRotationMod.csproj` — o `compile-mod.sh` só conhece `modded/` (ver P-5.4).
-- **Bugs do refactor corrigidos e validados in-game (2026-06-20):** câmera invertida (gimbal flip nos patches de rotação) e som de hold-breath (não tocava). Ver Sessão 5.
-- **DLL instalada em `D:/SPT/BepInEx/plugins/RealisticMobility/`** (subfolder, ~139 KB) — não mais flat. Assets de áudio agora são `.ogg` (mono) na raiz dessa pasta.
-- **Itens antigos (`modded/`):** 001/002/003 🟢; 004/008/009 com `06-fix-01`; 010 🟡 — pushados (HEAD `57e54c4`), mas **004/008/009/010 ainda não validados in-game** (ver P-4.1).
-- **Stance layout:** Stance 0 - Vanilla, 1 - High Ready (Pitch -15), 2 - Low Ready (Pitch +30), 3 - Custom (Yaw -30). Mount (004) = sistema próprio `EMountState {None,Passive,Active}`.
+- **Fork ativo = `modded` (CANÔNICO desde 2026-07-09).** Reorg: `git mv modded-beta → modded` e antigo `modded → modded-bak` (backup, não editar). Build **self-contained** (`/compile-mod` OU `dotnet build`; csproj puxa `Fika.Core` da raiz `references/`, sem `mods/references/` temp). **Deploy manual** do DLL em `D:/SPT/BepInEx/plugins/RealisticMobility/` (assets `.ogg`/`.png` ao lado; `/compile-mod` instala em `plugins/<AssemblyName>/`, então copiar à mão). DLL atual: hash `972f5f8` (014 fix-03). Ver memória global `reference_stances_canonical_build`.
+- **Itens 011-014** entregues via ciclo SDD em sessões intermediárias **não registradas aqui** (ver `backlog/`). Status (`mod-backlog.md`): **011/010/013/014 🟡**; **012 🟢** (validado in-game "ficou muito bom"); **004 🔴** (mount próprio cancelado → substituído pelo 011). O 014 substitui o 006; o 011 substitui o 004.
+- **014 (sync Fika)** — aguardando validação: **fix-03** aplica o offset num **Postfix de `PlayerBones.ShiftWeaponRoot`** (janela pré-IK) → **braço E arma** acompanham juntos. Antes: fix-02 (Postfix de `ObservedVisualPass`) rodava pós-IK e movia **só a arma**. Code-review 02 aplicado (CR-02-01/02/04).
+- **Stance layout:** 0 Vanilla · 1 High Ready (Pitch -15) · 2 Low Ready (Pitch +30) · 3 Custom (Yaw -30).
 
 ## Pendências / próximos passos conhecidos
 
-- **[P-4.1 / P-4.9] (aberta 2026-06-11) 🔴 Validar in-game itens antigos 004/008/009/010** (`modded/`) — nada testado; 010 segue 🟡 (risco de softlock; testar reload/troca de arma/morte). Logs `[Mount]/[Wiggle]/[ActionStance]/[ManualChamber]` ajudam.
-- **[P-4.4 / P-4.5] (aberta 2026-06-11) 🟡 Validar in-game F4 (snap-on-fire) e F1 (Stance 0 no ciclo)** do item 002 — se F4 falhar, diagnosticar via logs `[F4] Resolved ...`.
-- **[P-4.2 / P-4.3] (aberta 2026-06-11) 🟡 Infra de build (`modded/`):** commitar Fase 0 do `compile-mod.sh` (misturada com CustomClasses); replicar `.spt-path` no notebook (guimello) se for buildar lá.
-- **[P-4.6] (aberta 2026-06-11) 🟡 Migração de `.cfg` antigo** — seções órfãs pós-swap (`Stance 2 - Custom`, `Stance 3 - Low Ready`); migração manual documentada no PROPRIEDADES.md.
-- **[P-5.1] (aberta 2026-06-21) 🟡 Commit pendente:** fix câmera (`ApplyComplex/SimpleRotationPatch` + `code-review-camera-flip-fix-01.md`) e fix áudio (`HoldBreathPatch`, `RaidLifecyclePatches`, `Plugin.cs`, 3 `.ogg`, remoção dos 3 `.wav`, DLL versionada). PNGs `mountingleft/right` (swap do usuário) ficam de fora.
-- **[P-5.2] (aberta 2026-06-21) 🔴 Item 2 — mount automático + ícones nunca funcionou** (passivo/ativo em superfícies). Próximo alvo via `/g-diagnose`; checar `[enable] FAIL` no log (suspeita: patch `method_11` não resolve em 0.16).
-- **[P-5.3] (aberta 2026-06-21) 🟡 Refatoração pós-features:** unificar interpolação em `SpringMath.SpringDamp` (CR-01-02), matar reflection por frame nos patches de rotação, reset de estado estático, `try/catch` nos Postfix, audit F12 × PROPRIEDADES.md. Ver `code-review-camera-flip-fix-01.md`.
-- **[P-5.4] (aberta 2026-06-21) 🟡 Build do `modded` fora do pipeline:** `compile-mod.sh` hardcoded em `modded/`; `csproj` com HintPaths de Fika a 2 níveis (contornado via `mods/references` temporário); decidir destino do fork (promover p/ `modded/` ou ensinar o script). (CR-01-06)
-- **[P-5.5] (aberta 2026-06-21) 🟢 Logs de diagnóstico temporários** (`v3-raidload`, `[STANCE-CLAMP]`) — limpar na refatoração (P-5.3).
+- **[P-6.1] (aberta 2026-07-09) 🔴 Validar 014 in-game (2 clientes Fika):** os 3 logs `[StanceSync-014]` (`ShiftWeaponRoot Postfix RODOU` inclusive) + **braço E arma** acompanham a stance juntos (fix-03). Ver `06-fix-03.md`.
+- **[P-6.2] (aberta 2026-07-09) 🟡 CR-02-03 — calibração de eixo** 1ª↔3ª pessoa do `Weapon_Root_Anim`; só decidível **após** o teste do 014 (se a pose ficar exagerada/invertida num eixo).
+- **[P-6.3] (aberta 2026-07-09) 🟡 Validar 011/013 in-game:** 011 (ícones de mount ao encostar + buffs passivos recoil/sway); 013 (Stance 3 abaixo de Stance 2 no F12; arma montada → Mount Active + força Stance 0; sprint de 1/2/3 sem piscar Stance 0). Sprint do 013 já ✓.
+- **[P-6.4] (aberta 2026-07-09) 🟢 Limpeza pós-014:** CR-02-05 (cachear `GetComponent`), CR-02-06 (gate dos logs `[StanceSync-014]` por toggle debug).
+- **[P-4.1] (aberta 2026-06-11) 🟡 Validar 008/010 in-game** (no canônico; 004 saiu → 011). 010 tem risco de softlock (reload/troca de arma/morte).
+- **[P-4.4] (aberta 2026-06-11) 🟡 Validar F4 (snap-on-fire) e F1 (Stance 0 no ciclo)** do 002 — `SnapFireTriggerPatch` está no canônico.
+- **[P-5.3] (aberta 2026-06-21) 🟡 Refatoração pós-features:** unificar interpolação em `SpringMath.SpringDamp`, matar reflection por frame, reset de estado estático, `try/catch` nos Postfix, audit F12 × PROPRIEDADES.md.
+- **[P-5.5] (aberta 2026-06-21) 🟢 Limpar logs de diagnóstico temporários** (`v3-raidload`, `[STANCE-CLAMP]`, `[StanceSync-014]`).
+
+### Pendências legadas (fork `modded-bak` / pré-011 — provavelmente resolvidas/obsoletas; confirmar se voltarem a importar)
+
+- **[P-4.2 / P-4.3] (aberta 2026-06-11)** infra de build (Fase 0 `compile-mod.sh` + `.spt-path`) — **superada** pela reorg + csproj self-contained.
+- **[P-4.6] (aberta 2026-06-11)** migração `.cfg` órfão pós-swap Stance 2/3 — layout mudou no fork canônico; provável obsoleta.
+- **[P-5.1] (aberta 2026-06-21)** commit do fix câmera/áudio (Sessão 5) — código no canônico e pushado; provável resolvida.
+- **[P-5.2] (aberta 2026-06-21)** mount automático "nunca funcionou" — substituído pelo item **011** (PassiveMount).
 
 ## 2026-05-09 ~16:00 (GMT-3) — Sessão 1: item 002 backlog (criação + reviews)
 
@@ -188,6 +193,36 @@ Continuação direta da entrada de madrugada deste dia (Sessão 4a). Delta regis
 - Code-review: `modded/code-review-camera-flip-fix-01.md`.
 - Memória: `reference_spt_mod_audio_loading` (pipeline de áudio), `feedback_server_launcher_sync_builds` (reversão de build pelo launcher).
 - **Revisão de fato anterior:** as Sessões 1–4 tratavam o trabalho em `modded/`; a linha ativa agora é o fork `modded` (do rocket), buildado fora do `compile-mod.sh`. Histórico preservado.
+
+## 2026-07-09 22:57 (GMT-3) — Sessão 6: code-review 02 do 014 + reorg de forks (modded canônico) + fix-03 (braço acompanha)
+
+**Tema central:** validar/fechar o item 014 (sync visual de stances no Fika) sem poder testar de imediato, o que levou a: code-review por referências, reorganização dos forks para acabar com a confusão de build, e — após o teste do usuário — o diagnóstico e correção definitiva do braço que não acompanhava a arma.
+
+**Decisões-chave:**
+- **Code-review 02 do 014 por validação de referências** (2 sub-agents independentes confirmaram cada elo contra Assembly/Fika): hook roda todo frame, transform certo, coexistência aditiva. Veredito "deve funcionar". Aplicados **CR-02-01** (guard anti-acúmulo), **CR-02-02** (`TickAdsNetworkSync` reenvia stance ao mirar) e **CR-02-04** (remoção de `FikaNetworkSync.cs` + `PlayerStanceController.cs` mortos). CR-02-03/05/06 deferidos. Ref: [`04-code-review-02.md`](../backlog/014-sync-stances-fika/014-sync-stances-fika-04-code-review-02.md).
+- **Reorganização dos forks:** `git mv modded-beta → modded` (canônico) e `modded → modded-bak`. Motivo: o `/compile-mod` resolvia `modded/` (antigo) e instalou um DLL errado por cima do bom; `modded-beta` já era o fork oficial. 128 refs `modded-beta`→`modded` nos docs. **csproj ajustado** para puxar `Fika.Core` da raiz `references/` → build **self-contained** (sem `mods/references/` temp). Ref: memória global `reference_stances_canonical_build`.
+- **014 fix-03 — a correção que faltava:** aplicar o offset num **Postfix de `PlayerBones.ShiftWeaponRoot`** (janela **pré-IK**, linha ~1876), NÃO num Postfix de `ObservedVisualPass` (pós-IK). Como os markers de IK da arma são filhos do `Weapon_Root_Anim`, mover o root antes da IK faz o **braço** seguir (LimbIK) e o `Kinematics` cola a **arma** na mão. Ref: [`06-fix-03.md`](../backlog/014-sync-stances-fika/014-sync-stances-fika-06-fix-03.md), `modded/Patches/ObservedStanceShiftPatch.cs`.
+
+**Lições / hipóteses descartadas:**
+- **Armadilha de build:** `/compile-mod` compilava `modded/` (fork antigo, com `_wasSprinting`) em vez de `modded-beta` (ativo) → instalou DLL errado. Sintoma de detecção = warning `_wasSprinting`. Resolvido pela reorg (modded = canônico) + csproj self-contained.
+- **014 — timing é tudo:** o fix-02 (Postfix de `ObservedVisualPass`) movia a arma mas **não o braço**, porque roda **depois** da IK das mãos (`method_19`, 1886) e do `Kinematics` (1889) — o braço já fora solveado na pose sem offset. Todas as tentativas anteriores erraram a **janela**, não o transform. A janela correta é **entre `ShiftWeaponRoot` (1876) e o alvo da IK `method_20` (1884)**. Confirmado por 2 sub-agents com refs primárias. Chave: a IK das mãos mira nos markers `weapon_L/R_IK_marker`, **filhos do `Weapon_Root_Anim`**.
+- **Merge com auto-commit remoto:** o push falhou (remoto à frente com "Auto-commit" de `rockettechnology-dev` — launcher/TarkovIRL/Fika + refator no `modded` antigo do stances). Conflito porque o git casa por path (renomeei a pasta). Resolvido mantendo a reorg do stances (`git checkout HEAD -- stances/`) e integrando o resto. Refator do outro PC no fork aposentado fica só no histórico (`deb779e`).
+- **Data:** o relógio do ambiente reportou `2026-06-23` no início da sessão (errado); a data real é **2026-07-09**. Artefatos criados com 06-23 foram corrigidos via sed. Não estimar data — reconferir o relógio.
+
+**Atividade cronológica:**
+1. `/code-review 014` (validação por referências, 2 sub-agents) → `04-code-review-02.md` (0🔴, 1🟠, 3🟡, 2🟢).
+2. Aplicação CR-02-01/02/04; `/compile-mod` revelou a armadilha do fork errado; build manual do `modded-beta` correto reinstalado.
+3. Reorg: `git mv` das pastas + sed 128 refs + csproj self-contained; build self-contained validado; commit `a29e241`.
+4. Push falhou → merge `afffc77` com o auto-commit remoto (mantida a reorg do stances); push OK.
+5. Usuário testou o 014: **arma move, braço não**. 2 sub-agents mapearam a cadeia → causa = hook pós-IK.
+6. fix-03: novo `ObservedStanceShiftPatch` (Postfix de `ShiftWeaponRoot`), removido o `ObservedStanceVisualPatch`, animator simplificado. Build 0 erros; instalado (hash `972f5f8`).
+
+**Pendências abertas nesta sessão:** P-6.1 (🔴 validar 014), P-6.2 (🟡 calibração eixo), P-6.3 (🟡 validar 011/013), P-6.4 (🟢 limpeza 014). Ver topo.
+
+**Cross-refs:**
+- ✅ **Resolve [P-5.4]** (2026-06-21, build do fork fora do pipeline) — reorg + csproj self-contained fazem o `/compile-mod` resolver o canônico.
+- Pendências legadas P-4.2/4.3, P-4.6, P-5.1, P-5.2 movidas para a seção "legadas" do topo (provavelmente resolvidas/obsoletas após 011-014).
+- Memória global nova: `reference_stances_canonical_build` (substituiu `reference_stances_build_modded_beta`).
 
 ## Arquivos-chave do mod (referência rápida)
 

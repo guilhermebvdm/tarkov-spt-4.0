@@ -104,6 +104,8 @@ namespace CameraRotationMod.Patches
         [PatchPrefix]
         private static bool Prefix(ChamberWeaponClass __instance, Action onWeaponAppear)
         {
+            try
+            {
             if (!Plugin._EnableManualChambering.Value) return true;
 
             var fc = __instance.FirearmController_0;
@@ -204,6 +206,8 @@ namespace CameraRotationMod.Patches
             }
 
             return false;
+            }
+            catch (Exception ex) { Plugin.Logger.LogError($"[ManualChamber] StartEquip {ex.Message}"); return true; }
         }
     }
 
@@ -220,6 +224,8 @@ namespace CameraRotationMod.Patches
         [PatchPrefix]
         private static void Prefix(ReloadWeaponClass __instance)
         {
+            try
+            {
             if (!Plugin._EnableManualChambering.Value) return;
 
             var fc = __instance.FirearmController_0;
@@ -231,6 +237,8 @@ namespace CameraRotationMod.Patches
             ManualChamberingState.CanLoadChamber = true;
             ManualChamberingState.BlockChambering = false;
             Plugin.Logger.LogDebug("[ManualChamber] Reload start: flags resetadas (CanLoad=true, Block=false)");
+            }
+            catch (Exception ex) { Plugin.Logger.LogError($"[ManualChamber] StartReloadReset {ex.Message}"); }
         }
     }
 
@@ -242,6 +250,8 @@ namespace CameraRotationMod.Patches
         [PatchPrefix]
         private static void Prefix(FirearmsAnimator __instance, ref bool compatible)
         {
+            try
+            {
             if (!Plugin._EnableManualChambering.Value) return;
             if (ManualChamberingState.CanLoadChamber) return;
 
@@ -252,6 +262,8 @@ namespace CameraRotationMod.Patches
             if (fc == null || fc.FirearmsAnimator != __instance) return;
 
             compatible = false;
+            }
+            catch (Exception ex) { Plugin.Logger.LogError($"[ManualChamber] SetAmmoCompatible {ex.Message}"); }
         }
     }
 
@@ -263,6 +275,8 @@ namespace CameraRotationMod.Patches
         [PatchPrefix]
         private static bool Prefix(FirearmsAnimator __instance)
         {
+            try
+            {
             if (!Plugin._EnableManualChambering.Value) return true;
 
             var mainPlayer = Comfort.Common.Singleton<GameWorld>.Instance?.MainPlayer;
@@ -277,6 +291,8 @@ namespace CameraRotationMod.Patches
                 return false;
             }
             return true;
+            }
+            catch (Exception ex) { Plugin.Logger.LogError($"[ManualChamber] SetAmmoOnMag {ex.Message}"); return true; }
         }
     }
 
@@ -290,6 +306,8 @@ namespace CameraRotationMod.Patches
         [PatchPrefix]
         private static void Prefix(Player.FirearmController __instance)
         {
+            try
+            {
             if (!Plugin._EnableManualChambering.Value) return;
             if (!Plugin._ManualChamberingOnReload.Value) return;
 
@@ -301,6 +319,8 @@ namespace CameraRotationMod.Patches
                 ManualChamberingState.BlockChambering = true;
                 Plugin.Logger.LogDebug("[ManualChamber] method_18 (auto-chamber): BlockChambering=true");
             }
+            }
+            catch (Exception ex) { Plugin.Logger.LogError($"[ManualChamber] PreChamberLoad {ex.Message}"); }
         }
     }
 
@@ -344,6 +364,8 @@ namespace CameraRotationMod.Patches
         [PatchPrefix]
         private static bool Prefix(GamePlayerOwner __instance, ECommand command)
         {
+            try
+            {
             if (!Plugin._EnableManualChambering.Value) return true;
 
             if (command == ECommand.UnloadMagazine)
@@ -393,6 +415,8 @@ namespace CameraRotationMod.Patches
                 }
             }
             return true;
+            }
+            catch (Exception ex) { Plugin.Logger.LogError($"[ManualChamber] ChamberInput {ex.Message}"); return true; }
         }
     }
 }

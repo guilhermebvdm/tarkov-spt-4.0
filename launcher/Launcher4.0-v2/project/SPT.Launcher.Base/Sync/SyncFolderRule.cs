@@ -25,6 +25,18 @@ namespace SPT.Launcher.Sync
         /// Never deletes, never overwrites, never consults hash/baseline (memory-less seed).
         /// </summary>
         SeedIfMissingByName = 4,
+
+        /// <summary>
+        /// config-server DUAL sync (server → cliente, dois destinos ao mesmo tempo):
+        ///  1. SEED em "config/&lt;rel&gt;" — copia só se o arquivo NÃO existir (idêntico ao SeedIfMissingByName:
+        ///     nunca sobrescreve/deleta o 'config' do usuário).
+        ///  2. MIRROR em "config-server/&lt;rel&gt;" — réplica: baixa a última versão sempre que faltar ou
+        ///     o hash divergir (sobrescreve edições do usuário), mas NÃO deleta extras (conservador,
+        ///     ref CR-01-03; delete fica opt-in — não é MirrorPrefix, é pulado no ScanExtras).
+        /// Uso: 'config' = configs vivas do usuário (seed único); 'config-server' = referência sempre atual
+        /// de onde o usuário copia manualmente ao atualizarmos a config de um mod existente.
+        /// </summary>
+        SeedAndMirror = 5,
     }
 
     public static class SyncFolderRuleParser
@@ -51,6 +63,9 @@ namespace SPT.Launcher.Sync
                     return true;
                 case "seed-if-missing":
                     rule = SyncFolderRule.SeedIfMissingByName;
+                    return true;
+                case "seed-and-mirror":
+                    rule = SyncFolderRule.SeedAndMirror;
                     return true;
                 default:
                     rule = SyncFolderRule.Default;

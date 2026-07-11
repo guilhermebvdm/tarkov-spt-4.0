@@ -9,10 +9,10 @@ namespace SPT.Launcher.Tests.Sync
         [Theory]
         [InlineData("config/foo.cfg", SyncFolderRule.PreserveDivergent)]
         [InlineData("BepInEx/config/foo.cfg", SyncFolderRule.PreserveDivergent)]
-        // ref: CR-01-03 — mirror-delete NÃO é default. Item 017 — config-server passa a SEED
-        // (não-destrutivo) no fallback: config-server sem folderRules do server = SeedIfMissingByName.
-        [InlineData("config-server/db/items.json", SyncFolderRule.SeedIfMissingByName)]
-        [InlineData("BepInEx/config-server/graphics.cfg", SyncFolderRule.SeedIfMissingByName)]
+        // ref: CR-01-03 — mirror-delete NÃO é default. config-server no fallback = SeedAndMirror
+        // (seed em config se ausente + mirror overwrite em config-server; NÃO deleta extras).
+        [InlineData("config-server/db/items.json", SyncFolderRule.SeedAndMirror)]
+        [InlineData("BepInEx/config-server/graphics.cfg", SyncFolderRule.SeedAndMirror)]
         [InlineData("patchers/x.dll", SyncFolderRule.MirrorMoveDisabled)]
         [InlineData("BepInEx/patchers/x.dll", SyncFolderRule.MirrorMoveDisabled)]
         [InlineData("plugins/mod/mod.dll", SyncFolderRule.MirrorMoveDisabled)]
@@ -30,10 +30,12 @@ namespace SPT.Launcher.Tests.Sync
         public void Mirror_delete_requires_explicit_server_rule()
         {
             // ref: CR-01-03 — a regra mais destrutiva só ativa via folderRules explícito do server.
-            // Item 017: sem regra do server, config-server é SEED (não-destrutivo), NUNCA mirror-delete.
+            // Sem regra do server, config-server é SeedAndMirror (não-destrutivo: sobrescreve mas
+            // NÃO deleta extras), NUNCA mirror-delete. Também não entra em MirrorPrefixes (sem varredura/delete).
             var withoutRule = new SyncRuleResolver();
-            Assert.Equal(SyncFolderRule.SeedIfMissingByName, withoutRule.Resolve("config-server/db/items.json"));
+            Assert.Equal(SyncFolderRule.SeedAndMirror, withoutRule.Resolve("config-server/db/items.json"));
             Assert.DoesNotContain(withoutRule.MirrorPrefixes, p => p.Value == SyncFolderRule.MirrorDelete);
+            Assert.DoesNotContain(withoutRule.MirrorPrefixes, p => p.Value == SyncFolderRule.SeedAndMirror);
 
             var withRule = new SyncRuleResolver(new Dictionary<string, string>
             {

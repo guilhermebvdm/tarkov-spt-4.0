@@ -8,6 +8,29 @@ using SPT.Reflection.Patching;
 namespace CustomClasses.Client;
 
 /// <summary>
+///     🎒 Saqueador + 🛡️ Tanque — Pack Mule. Desdobrado por classe (2026-07-10): cada uma tem config própria
+///     (Enabled + bônus). Retorna o bônus de limite de carga da classe LOCAL (se habilitado); null se não aplica.
+///     Compartilhado pelo <see cref="PackMulePatch"/> (piso do modifier) e pelo <see cref="WeightMarkerPatch"/> (marcador de UI).
+/// </summary>
+internal static class PackMule
+{
+    internal static float? LocalBonus()
+    {
+        if (PerksConfig.PackMuleScavEnabled?.Value == true && SkillMultipliers.IsLocalClass("Scavenger"))
+        {
+            return PerksConfig.PackMuleScavCarryBonus?.Value ?? 0f;
+        }
+
+        if (PerksConfig.PackMuleTankEnabled?.Value == true && SkillMultipliers.IsLocalClass("Tank"))
+        {
+            return PerksConfig.PackMuleTankCarryBonus?.Value ?? 0f;
+        }
+
+        return null;
+    }
+}
+
+/// <summary>
 ///     Item 050.0 — Pack Mule (🎒 Saqueador + 🛡️ Tanque): +30% no limite de carga, como PISO.
 ///     Postfix no getter <c>SkillManager.CarryingWeightRelativeModifier</c> (= 1 + StrengthBuffLiftWeightInc):
 ///     garante o bônus máximo de carga desde o início SEM somar com o ganho da Strength
@@ -27,9 +50,10 @@ internal class PackMulePatch : ModulePatch
     {
         try
         {
-            if (PerksConfig.PackMuleEnabled?.Value != true)
+            var bonus = PackMule.LocalBonus();
+            if (bonus == null)
             {
-                return;
+                return;   // classe sem Pack Mule (ou desabilitado)
             }
 
             // Na raid: só o SkillManager do MainPlayer local (não bufar bots).
@@ -41,12 +65,7 @@ internal class PackMulePatch : ModulePatch
                 return;
             }
 
-            if (!SkillMultipliers.IsLocalClass("Scavenger") && !SkillMultipliers.IsLocalClass("Tank"))
-            {
-                return;
-            }
-
-            var floor = 1f + (PerksConfig.PackMuleCarryBonus?.Value ?? 0f);
+            var floor = 1f + bonus.Value;
             if (__result < floor)
             {
                 __result = floor;   // piso (não soma)

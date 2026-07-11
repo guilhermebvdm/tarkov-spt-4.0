@@ -37,7 +37,7 @@
 
 A arquitetura migrou após a validação in-game (ver fixes): `ApplyComplexRotation`/`ProcessEffectors` não chegavam à render do observado — o `Kinematics` (ObservedPlayer.cs:1889) sobrescrevia o `Weapon_Root_Anim`. Solução atual em [06-fix-02](014-sync-stances-fika-06-fix-02.md): **Postfix de `ObservedPlayer.ObservedVisualPass`** (`ObservedStanceVisualPatch`) escrevendo no transform FINAL `PlayerBones.Weapon_Root_Anim`.
 
-Code review 02 ([04-code-review-02.md](014-sync-stances-fika-04-code-review-02.md)) aplicado em 2026-06-23:
+Code review 02 ([04-code-review-02.md](014-sync-stances-fika-04-code-review-02.md)) aplicado em 2026-07-09:
 
 | Ação | Arquivo | Resumo |
 |---|---|---|
@@ -47,7 +47,7 @@ Code review 02 ([04-code-review-02.md](014-sync-stances-fika-04-code-review-02.m
 | REMOVIDO | `modded/FikaNetworkSync.cs` | CR-02-04: sistema de sync legado morto (2º `StanceSyncPacket` conflitante; `Init` nunca chamado). |
 | REMOVIDO | `modded/PlayerStanceController.cs` | CR-02-04: experimento abandonado, só referenciado pelo `FikaNetworkSync` morto. |
 
-> **Build (após reorganização 2026-06-23):** `modded/` é o fork **canônico** (a versão antiga foi para `modded-bak/`). `/compile-mod` agora resolve `modded/` corretamente, e o csproj puxa `Fika.Core` da raiz `references/` (build self-contained, sem `mods/references/` temporário). **Deploy:** o DLL roda de `D:/SPT/BepInEx/plugins/RealisticMobility/` (junto dos assets `.ogg`/`.png`) — cópia manual, pois o `/compile-mod` instala em `plugins/<AssemblyName>/`. DLL atual: hash `08cde2584d6e`, 138752 B.
+> **Build (após reorganização 2026-07-09):** `modded/` é o fork **canônico** (a versão antiga foi para `modded-bak/`). `/compile-mod` agora resolve `modded/` corretamente, e o csproj puxa `Fika.Core` da raiz `references/` (build self-contained, sem `mods/references/` temporário). **Deploy:** o DLL roda de `D:/SPT/BepInEx/plugins/RealisticMobility/` (junto dos assets `.ogg`/`.png`) — cópia manual, pois o `/compile-mod` instala em `plugins/<AssemblyName>/`. DLL atual: hash `08cde2584d6e`, 138752 B.
 
 ## Histórico
 
@@ -55,4 +55,4 @@ Code review 02 ([04-code-review-02.md](014-sync-stances-fika-04-code-review-02.m
 |---|---|
 | 2026-06-22 | Build concluído via `/code-mod` — compila 0 erros; status 🟡 (aguarda validação in-game) |
 | 2026-06-22 | Code review 01 (2 revisores independentes) + aplicação: clamp do stance de rede (CR-01-01). Recompila 0 erros. |
-| 2026-06-23 | Code review 02 (validação por referências) + aplicação: CR-02-01 (anti-acúmulo), CR-02-02 (sync ADS), CR-02-04 (remoção de código morto). CR-02-03/05/06 deferidos. Build manual do `modded` 0 erros; instalado em `RealisticMobility/` (hash `08cde2584d6e`). Aguarda validação in-game (2 clientes Fika). |
+| 2026-07-09 | Code review 02 (validação por referências) + aplicação: CR-02-01 (anti-acúmulo), CR-02-02 (sync ADS), CR-02-04 (remoção de código morto). CR-02-03/05/06 deferidos. Build manual do `modded` 0 erros; instalado em `RealisticMobility/` (hash `08cde2584d6e`). Aguarda validação in-game (2 clientes Fika). |

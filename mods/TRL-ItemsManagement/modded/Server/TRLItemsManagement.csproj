@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!-- Sdk.Web defaults to Exe; a mod loaded by the SPT host must be a Library.
+       AssemblyName is the STATIC-FILE URL PREFIX: files in wwwroot/ are served at
+       /TRLItemsManagement-Server/... (SPTWeb.cs, confirmed with the B-2 spike). -->
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <AssemblyName>TRLItemsManagement-Server</AssemblyName>
+    <RootNamespace>TRLItemsManagement</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <Version>1.0.1</Version>
+    <Authors>trl</Authors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SPTarkov.Server.Core" Version="4.0.2" />
+    <PackageReference Include="SPTarkov.Server.Web" Version="4.0.2" />
+    <PackageReference Include="SPTarkov.DI" Version="4.0.2" />
+    <PackageReference Include="SPTarkov.Common" Version="4.0.2" />
+    <!-- Harmony: compila contra o 0Harmony (2.15.0) do servidor SPT; Private=false -> usa o do
+         servidor em runtime, não redistribui. Necessário p/ o backstop de buy price (SellItemPatch). -->
+    <Reference Include="0Harmony">
+      <HintPath>References\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+<!--
+    NOTE: config/{overrides.json,buy-overrides.json} e data/*.json são USER DATA, escritos pelo
+    próprio mod (viewer web embutido) em user/mods/TRL-ItemsManagement/{config,data}/ em runtime.
+    Intencionalmente NÃO shipados/copiados aqui — ver .agents/scripts/compile-mod.sh (guard anti-clobber
+    de config/; wwwroot/ é código e é sobrescrito sempre, data/ não é tocado pelo script).
+  -->
+
+</Project>

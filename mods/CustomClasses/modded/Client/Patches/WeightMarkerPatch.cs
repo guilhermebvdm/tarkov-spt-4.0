@@ -44,16 +44,11 @@ internal class WeightMarkerPatch : ModulePatch
                 return;   // painel sem sub-painel de peso
             }
 
-            // gate = mesmo do Pack Mule (classe local + F12), + indicador de UI ligado, + fator ≠ 1.
-            var factor = 1f + (PerksConfig.PackMuleCarryBonus?.Value ?? 0f);
-            var show = Plugin.ShowOnUi
-                       && PerksConfig.PackMuleEnabled?.Value == true
-                       && MultiplierFormat.IsActive(factor);
-            if (show)
-            {
-                SkillMultipliers.EnsureLoaded();
-                show = SkillMultipliers.IsLocalClass("Scavenger") || SkillMultipliers.IsLocalClass("Tank");
-            }
+            // gate = mesmo do Pack Mule (classe local + F12, desdobrado por classe), + indicador de UI ligado, + fator ≠ 1.
+            SkillMultipliers.EnsureLoaded();
+            var bonus = PackMule.LocalBonus();
+            var factor = 1f + (bonus ?? 0f);
+            var show = Plugin.ShowOnUi && bonus != null && MultiplierFormat.IsActive(factor);
 
             // marcador reusável (idempotente) — sempre reescrito/escondido.
             var marker = GetOrCreateMarker(maxTmp);

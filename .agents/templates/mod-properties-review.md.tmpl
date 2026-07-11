@@ -1,0 +1,78 @@
+# {{MOD}} — Review de Propriedades F12 · {{REVIEW_NN}}
+
+**Mod:** {{MOD}}
+**Fonte de verdade:** `modded/Plugin.cs` (chamadas `Config.Bind`) · **Doc espelho:** `PROPRIEDADES.md`
+**Data:** {{CREATED_AT}}
+
+> Revisão de **UX e organização** das propriedades do menu F12 (BepInEx ConfigurationManager). Cada achado recebe um ID `MP-{{REVIEW_NN}}-MM` **permanente**. A aplicação acontece no **`Plugin.cs`** (as `Config.Bind`), não no `PROPRIEDADES.md` — este é regenerado depois.
+>
+> ⚠️ **Breaking change:** renomear uma **seção** ou **key** recria a `ConfigEntry` (BepInEx casa por `(seção, key)` literal) e **descarta o valor salvo** do usuário, voltando ao default. Todo achado que renomeia está marcado `⚠️ BREAKING` com estratégia de migração.
+
+## Resumo
+
+> 🔴 Bloqueadores: 0 · 🟠 Fortes: 0 · 🟡 Médios: 0 · 🟢 Menores: 0 · Total: 0
+> Props analisadas: 0 · Seções: 0 · Props mortas: 0 · Breaking changes propostos: 0
+
+## Critérios avaliados
+
+| # | Critério | Categoria |
+|---|---|---|
+| 1 | A ordem das seções no F12 faz sentido? Seções relacionadas ficam próximas? | **ORD** |
+| 2 | As seções estão bem distribuídas (nem gigantes nem minúsculas)? Os nomes são intuitivos e consistentes? | **SEC** |
+| 3 | Cada propriedade está na seção temática certa? | **LOC** |
+| 4 | O nome (key) representa bem o que a propriedade faz? (sem nomes enganosos/legados) | **NAM** |
+| 5 | O tipo/faixa dá boa experiência de edição? (slider vs campo aberto, enum, keybind, range coerente) | **TYP** |
+| 6 | O tooltip explica de forma clara e intuitiva? (o quê + efeito prático + unidade; idioma consistente) | **TIP** |
+| 7 | A propriedade **faz algo**? (a `ConfigEntry` é lida em algum lugar, ou está morta?) | **DEAD** |
+| 8 | A marcação **"Advanced"** é apropriada? (nem esconde o comum, nem expõe o perigoso) | **ADV** |
+
+## Impacto
+
+- 🔴 **Bloqueador** — prop morta (não faz nada), range inválido/quebrado, ou nome que induz o usuário a configurar errado.
+- 🟠 **Forte** — organização/alocação que atrapalha encontrar; tooltip ausente/confuso em prop importante; tipo com UX ruim.
+- 🟡 **Médio** — nome subótimo, "Advanced" inadequado, tooltip em idioma inconsistente, seção com nome pouco claro.
+- 🟢 **Menor** — polimento (capitalização, unidade no tooltip, ordem interna).
+
+## Panorama (preencher)
+
+- **Seções na ordem do F12 (descoberta):** [lista]
+- **Contagem por seção:** [seção → nº de props]
+- **Props mortas encontradas:** [lista ou "nenhuma"]
+- **Divergências código × `PROPRIEDADES.md`:** [lista ou "doc sincronizado"]
+
+## Índice
+
+| ID | Cat | Impacto | Título | Breaking? | Status |
+|---|---|---|---|---|---|
+
+---
+
+## Achados
+
+### MP-{{REVIEW_NN}}-01 · Cat — Tipo · Impacto
+
+**[Título resumido]**
+
+**Local:** seção `<Seção>` · key `<Key>` · [`Plugin.cs:<linha>`](../../modded/Plugin.cs#L<linha>)
+
+**Problema:** [descrição precisa — o que está ruim na perspectiva de quem edita no F12]
+
+**Por que importa (UX):** [consequência concreta para o usuário — não acha a opção, seta errado, não entende o efeito, etc.]
+
+**Sugestão:** [proposta acionável — novo nome/seção/tipo/tooltip/range, com o valor exato. Se renomeia seção/key, marcar ⚠️ BREAKING e descrever a migração (aceitar reset ao default, ou nota no changelog).]
+
+**Decisão:**
+- `[ ]` Pendente
+- `[ ]` Aceitar sugestão
+- `[ ]` Aceitar com modificação: _________________
+- `[ ]` Rejeitar (deferir / aceitar como dívida): _________________
+
+<!-- Após aplicar no Plugin.cs: marcar a opção, trocar título para ✅ Aplicado em YYYY-MM-DD, e adicionar **Resolução:** + **Aplicação:** (Plugin.cs:linha) -->
+
+---
+
+## Histórico
+
+| Data | Evento |
+|---|---|
+| {{CREATED_AT}} | Review de propriedades {{REVIEW_NN}} criada via `/review-mod-properties` |

@@ -91,6 +91,19 @@ namespace SPT.Launcher.Tests.Sync
         public static SyncRuleResolver ResolverWithConfigServerMirror() =>
             new SyncRuleResolver(new Dictionary<string, string> { ["config-server"] = "mirror-delete" });
 
+        /// <summary>
+        /// config-server como SEED puro (item 017), sem o mirror do default atual (seed-and-mirror).
+        /// Usado pelos testes que pinam a regra de seed em isolamento.
+        /// </summary>
+        public static SyncRuleResolver ResolverWithConfigServerSeed() =>
+            new SyncRuleResolver(new Dictionary<string, string>
+            {
+                // ambas as chaves: o match é por prefixo mais longo; os testes usam BepInEx/config-server,
+                // que sem isto cairia no fallback bepinex/config-server → seed-and-mirror.
+                ["config-server"] = "seed-if-missing",
+                ["BepInEx/config-server"] = "seed-if-missing",
+            });
+
         public SyncPlannerOptions Options(bool devMode = false) => new()
         {
             GameRoot = Root,

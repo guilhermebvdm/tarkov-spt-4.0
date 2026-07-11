@@ -9,6 +9,33 @@ using SPT.Reflection.Patching;
 namespace CustomClasses.Client;
 
 /// <summary>
+///     🔻 Loud Operator (Fuzileiro + Tanque) — raio de audibilidade dos sons de movimento. Desdobrado por classe
+///     (2026-07-10): cada classe tem config própria no F12. Retorna o multiplicador da classe LOCAL (1 = sem efeito).
+///     Usado pelos 3 pipelines de som (rolloff do player, IA base, SAIN).
+/// </summary>
+internal static class LoudOperator
+{
+    internal static float Mult()
+    {
+        if (SkillMultipliers.IsLocalClass("Rifleman"))
+        {
+            return PerksConfig.LoudOperatorRiflemanEnabled?.Value == true
+                ? (PerksConfig.LoudOperatorRiflemanSoundRadius?.Value ?? 1f)
+                : 1f;
+        }
+
+        if (SkillMultipliers.IsLocalClass("Tank"))
+        {
+            return PerksConfig.LoudOperatorTankEnabled?.Value == true
+                ? (PerksConfig.LoudOperatorTankSoundRadius?.Value ?? 1f)
+                : 1f;
+        }
+
+        return 1f;
+    }
+}
+
+/// <summary>
 ///     Item 050.4 — som emitido pelo player.
 ///     <c>Player.method_67</c> = funil do RAIO de audibilidade de TODO som de movimento
 ///     (passos/gear/sprint/turn/prone) → multiplica o quão longe inimigos te ouvem. Gate: MainPlayer local.
@@ -41,12 +68,8 @@ internal class SoundRadiusPatch : ModulePatch
                 __result *= PerksConfig.GhostStepSoundRadius?.Value ?? 1f;
             }
 
-            // 🔻 Loud Operator (Fuzileiro + Tanque, 2026-07-05): aumenta o raio de audibilidade.
-            if (PerksConfig.LoudOperatorEnabled?.Value == true
-                && (SkillMultipliers.IsLocalClass("Rifleman") || SkillMultipliers.IsLocalClass("Tank")))
-            {
-                __result *= PerksConfig.LoudOperatorSoundRadius?.Value ?? 1f;
-            }
+            // 🔻 Loud Operator (Fuzileiro + Tanque, desdobrado por classe): aumenta o raio de audibilidade.
+            __result *= LoudOperator.Mult();
 
             if (PerkDiag.Enabled)
             {
@@ -131,11 +154,7 @@ internal class AiSoundPatch : ModulePatch
                 power *= PerksConfig.GhostStepSoundRadius?.Value ?? 1f;
             }
 
-            if (PerksConfig.LoudOperatorEnabled?.Value == true
-                && (SkillMultipliers.IsLocalClass("Rifleman") || SkillMultipliers.IsLocalClass("Tank")))
-            {
-                power *= PerksConfig.LoudOperatorSoundRadius?.Value ?? 1f;
-            }
+            power *= LoudOperator.Mult();
 
             if (PerkDiag.Enabled)
             {
@@ -208,11 +227,7 @@ internal class SainSoundPatch : ModulePatch
                 __2 *= PerksConfig.GhostStepSoundRadius?.Value ?? 1f;   // reduz TODOS
             }
 
-            if (PerksConfig.LoudOperatorEnabled?.Value == true
-                && (SkillMultipliers.IsLocalClass("Rifleman") || SkillMultipliers.IsLocalClass("Tank")))
-            {
-                __2 *= PerksConfig.LoudOperatorSoundRadius?.Value ?? 1f;   // aumenta TODOS
-            }
+            __2 *= LoudOperator.Mult();   // aumenta TODOS
 
             if (soundType == SainSoundTypeLooting
                 && PerksConfig.SilentLooterEnabled?.Value == true && SkillMultipliers.IsLocalClass("Scavenger"))

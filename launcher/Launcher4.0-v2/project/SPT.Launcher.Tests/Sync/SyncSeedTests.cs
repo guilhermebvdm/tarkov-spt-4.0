@@ -41,7 +41,7 @@ namespace SPT.Launcher.Tests.Sync
 
             var manifest = new[] { fx.Entry("BepInEx/config-server/graphics.cfg", "server-default") };
 
-            var (plan, result, _) = await fx.PlanAndRunAsync(manifest);
+            var (plan, result, _) = await fx.PlanAndRunAsync(manifest, resolver: SyncTestFixture.ResolverWithConfigServerSeed());
 
             var action = Assert.Single(plan.Actions);
             Assert.Equal(SyncActionKind.SeedCopy, action.Kind);
@@ -62,7 +62,7 @@ namespace SPT.Launcher.Tests.Sync
 
             var manifest = new[] { fx.Entry("BepInEx/config-server/graphics.cfg", "server-default") };
 
-            var (plan, result, _) = await fx.PlanAndRunAsync(manifest);
+            var (plan, result, _) = await fx.PlanAndRunAsync(manifest, resolver: SyncTestFixture.ResolverWithConfigServerSeed());
 
             Assert.Empty(plan.Actions);   // present by name → no-op (content/metadata irrelevant)
             Assert.Equal(0, result.Seeded);
@@ -81,7 +81,7 @@ namespace SPT.Launcher.Tests.Sync
                 fx.Entry("BepInEx/config-server/sub/deep/b.cfg", "b"),
             };
 
-            var (_, result, _) = await fx.PlanAndRunAsync(manifest);
+            var (_, result, _) = await fx.PlanAndRunAsync(manifest, resolver: SyncTestFixture.ResolverWithConfigServerSeed());
 
             Assert.Equal(2, result.Seeded);
             Assert.Equal("a", fx.ReadLocal("BepInEx/config/sub/a.cfg"));
@@ -100,7 +100,7 @@ namespace SPT.Launcher.Tests.Sync
                 fx.Entry("BepInEx/config-server/sub/b.cfg", "server-b"),
             };
 
-            var (_, result, _) = await fx.PlanAndRunAsync(manifest);
+            var (_, result, _) = await fx.PlanAndRunAsync(manifest, resolver: SyncTestFixture.ResolverWithConfigServerSeed());
 
             Assert.Equal(1, result.Seeded);
             Assert.Equal("mine", fx.ReadLocal("BepInEx/config/sub/a.cfg"));    // preserved
@@ -115,7 +115,7 @@ namespace SPT.Launcher.Tests.Sync
 
             var manifest = new[] { fx.Entry("user/mods/some/mod.js", "x") };
 
-            var (plan, result, _) = await fx.PlanAndRunAsync(manifest);
+            var (plan, result, _) = await fx.PlanAndRunAsync(manifest, resolver: SyncTestFixture.ResolverWithConfigServerSeed());
 
             Assert.Equal(0, result.Seeded);
             Assert.DoesNotContain(plan.Actions, a => a.Kind == SyncActionKind.SeedCopy);
@@ -128,13 +128,13 @@ namespace SPT.Launcher.Tests.Sync
             using var fx = new SyncTestFixture();
             var manifest = new[] { fx.Entry("BepInEx/config-server/x.cfg", "default") };
 
-            var (_, first, _) = await fx.PlanAndRunAsync(manifest);
+            var (_, first, _) = await fx.PlanAndRunAsync(manifest, resolver: SyncTestFixture.ResolverWithConfigServerSeed());
             Assert.Equal(1, first.Seeded);
 
             File.Delete(fx.LocalPath("BepInEx/config/x.cfg")); // user removes the default on purpose
             Assert.False(fx.LocalExists("BepInEx/config/x.cfg"));
 
-            var (_, second, _) = await fx.PlanAndRunAsync(manifest);
+            var (_, second, _) = await fx.PlanAndRunAsync(manifest, resolver: SyncTestFixture.ResolverWithConfigServerSeed());
             Assert.Equal(1, second.Seeded); // no memory of a previous seed → it comes back
             Assert.Equal("default", fx.ReadLocal("BepInEx/config/x.cfg"));
         }
@@ -154,7 +154,7 @@ namespace SPT.Launcher.Tests.Sync
             options.ManagedPaths = new[] { "BepInEx" }; // extras under BepInEx would normally be deleted
 
             var baseline = fx.LoadBaseline();
-            var plan = await new SyncPlanner(new SyncRuleResolver(), baseline, options).BuildPlanAsync(manifest);
+            var plan = await new SyncPlanner(SyncTestFixture.ResolverWithConfigServerSeed(), baseline, options).BuildPlanAsync(manifest);
             var result = await new SyncEngine(fx.Root, baseline, fx.Downloader).ExecuteAsync(plan, fx.ReportPath);
 
             Assert.Equal(1, result.Seeded);
@@ -163,7 +163,7 @@ namespace SPT.Launcher.Tests.Sync
 
             // 2nd run: seeded file (a config extra, never a manifest entry) is neither deleted nor re-seeded
             var baseline2 = fx.LoadBaseline();
-            var plan2 = await new SyncPlanner(new SyncRuleResolver(), baseline2, options).BuildPlanAsync(manifest);
+            var plan2 = await new SyncPlanner(SyncTestFixture.ResolverWithConfigServerSeed(), baseline2, options).BuildPlanAsync(manifest);
             Assert.DoesNotContain(plan2.Actions, a => a.Kind == SyncActionKind.DeleteExtra);
             Assert.DoesNotContain(plan2.Actions, a => a.Kind == SyncActionKind.SeedCopy);
 
@@ -180,7 +180,7 @@ namespace SPT.Launcher.Tests.Sync
             var manifest = new[] { fx.Entry("BepInEx/config-server/x.cfg", "default") };
 
             var baseline = fx.LoadBaseline();
-            var plan = await new SyncPlanner(new SyncRuleResolver(), baseline, fx.Options()).BuildPlanAsync(manifest);
+            var plan = await new SyncPlanner(SyncTestFixture.ResolverWithConfigServerSeed(), baseline, fx.Options()).BuildPlanAsync(manifest);
             Assert.Equal(1, plan.SeedCount);
 
             fx.WriteLocal("BepInEx/config/x.cfg", "appeared-meanwhile");
@@ -200,7 +200,7 @@ namespace SPT.Launcher.Tests.Sync
             using var fx = new SyncTestFixture();
             var manifest = new[] { fx.Entry("BepInEx/config-server/x.cfg", "default") };
 
-            var (_, result, _) = await fx.PlanAndRunAsync(manifest);
+            var (_, result, _) = await fx.PlanAndRunAsync(manifest, resolver: SyncTestFixture.ResolverWithConfigServerSeed());
             Assert.Equal(1, result.Seeded);
 
             var reloaded = fx.LoadBaseline();

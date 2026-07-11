@@ -19,16 +19,18 @@ namespace SPT.Launcher.Sync
         /// de config-server no mods_repo real nunca foi verificado (A2), então config-server só
         /// vira espelho-com-delete via folderRules EXPLÍCITO do server. Default seguro até P-007.2.
         /// ref: item 017 — config-server passa a ser SEED (config-server → config, cópia só-se-ausente,
-        /// nunca deleta/sobrescreve). Por ser NÃO-destrutiva (o oposto do mirror-delete), a regra de
-        /// seed É segura no fallback: mesmo sem folderRules do server, o client semeia os defaults.
-        /// Substitui o antigo config-server→mirror-delete (que era opt-in e nunca ativado pelo operador).
+        /// nunca deleta/sobrescreve o 'config' do usuário).
+        /// ref: config-server DUAL (seed-and-mirror) — além do seed em 'config', o launcher mantém a
+        /// pasta 'config-server' do CLIENTE como réplica do servidor (baixa a última versão sempre; NÃO
+        /// deleta extras — conservador, ref CR-01-03). Seguro no fallback: só toca 'config-server' (referência nossa, que o
+        /// usuário não edita); o 'config' (vivas) continua protegido pelo seed/preserve.
         /// </summary>
         public static readonly IReadOnlyDictionary<string, string> FallbackRules = new Dictionary<string, string>
         {
             ["config"] = "preserve-divergent",
             ["BepInEx/config"] = "preserve-divergent",
-            ["config-server"] = "seed-if-missing",
-            ["BepInEx/config-server"] = "seed-if-missing",
+            ["config-server"] = "seed-and-mirror",
+            ["BepInEx/config-server"] = "seed-and-mirror",
             ["patchers"] = "mirror-move-disabled",
             ["BepInEx/patchers"] = "mirror-move-disabled",
             ["plugins"] = "mirror-move-disabled",
@@ -68,7 +70,11 @@ namespace SPT.Launcher.Sync
                 .ToList();
         }
 
-        /// <summary>All prefixes whose rule is a mirror variant — these folders are scanned for local extras.</summary>
+        /// <summary>
+        /// All prefixes whose rule is a mirror variant — these folders are scanned for local extras.
+        /// SeedAndMirror is intentionally NOT here: its 'config-server' replica overwrites files to the
+        /// latest but does NOT delete extras (conservative — ref CR-01-03). Delete-extras stays opt-in.
+        /// </summary>
         public IEnumerable<KeyValuePair<string, SyncFolderRule>> MirrorPrefixes =>
             _rules.Where(r => r.Value == SyncFolderRule.MirrorDelete || r.Value == SyncFolderRule.MirrorMoveDisabled);
 

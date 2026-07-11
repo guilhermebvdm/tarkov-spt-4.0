@@ -182,7 +182,7 @@ namespace CameraRotationMod.Patches
                 clip.SetData(data, 0);
                 clip.hideFlags = HideFlags.HideAndDontSave;
                 assign(clip);
-                Plugin.Logger.LogInfo($"[HoldBreath] Loaded {clipName} v3-raidload (length {clip.length:F2}s, samples {clip.samples}, ch {clip.channels}, freq {clip.frequency})");
+                Plugin.Logger.LogInfo($"[HoldBreath] Loaded {clipName} (length {clip.length:F2}s, ch {clip.channels}, freq {clip.frequency})");
             }
         }
 

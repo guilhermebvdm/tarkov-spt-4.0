@@ -30,13 +30,18 @@ public class LauncherUpdaterController : ControllerBase
         return Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", ModRouting.UpdaterFolderName));
     }
 
+    // Nome do exe do launcher NA PASTA Launcher-Updater (o operador coloca o exe com este nome).
+    // = nome do exe instalado no cliente (TRL.Launcher.exe). O self-update do cliente grava no
+    // próprio binário (Process.MainModule), então este nome é só o do arquivo servido/lido no server.
+    internal const string LauncherExeFileName = "TRL.Launcher.exe";
+
     private static string GetLauncherExePath()
     {
-        return Path.Combine(GetUpdaterBasePath(), "Tarkov Red Line.exe");
+        return Path.Combine(GetUpdaterBasePath(), LauncherExeFileName);
     }
 
     // Item 018 (auto-update-security): assinatura detached publicada AO LADO do exe. O release assina
-    // "Tarkov Red Line.exe" com a chave privada (ver tools/sign-launcher.ps1) gerando este .sig.
+    // o TRL.Launcher.exe com a chave privada (ver tools/sign-launcher.ps1) gerando este .sig.
     private static string GetLauncherSignaturePath()
     {
         return GetLauncherExePath() + ".sig";
@@ -93,7 +98,7 @@ public class LauncherUpdaterController : ControllerBase
         string exePath = GetLauncherExePath();
         if (System.IO.File.Exists(exePath))
         {
-            return PhysicalFile(exePath, "application/octet-stream", "Tarkov Red Line.exe");
+            return PhysicalFile(exePath, "application/octet-stream", LauncherExeFileName);
         }
 
         return NotFound(new { error = "Launcher executable not found on server" });
@@ -107,7 +112,7 @@ public class LauncherUpdaterController : ControllerBase
         string sigPath = GetLauncherSignaturePath();
         if (System.IO.File.Exists(sigPath))
         {
-            return PhysicalFile(sigPath, "application/octet-stream", "Tarkov Red Line.exe.sig");
+            return PhysicalFile(sigPath, "application/octet-stream", LauncherExeFileName + ".sig");
         }
 
         return NotFound(new { error = "Launcher signature not found on server" });
