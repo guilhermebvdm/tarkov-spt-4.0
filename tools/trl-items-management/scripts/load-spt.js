@@ -600,6 +600,26 @@ function main() {
           }
         }
       }
+      // (c) <mod>/db/<anyFolder>/base.json — some mods (e.g. c11-tn-4/True North's Trudy)
+      // name the folder after the trader's nickname instead of nesting under "traders/".
+      // Safe to scan every db/ subfolder: tryRegisterModTrader's own content check
+      // (nickname + _id + sell_category) is what actually decides "this is a trader",
+      // not the folder name — a CustomQuests/CustomItems/etc. subfolder just won't match.
+      const modDbDir = path.join(modDir, 'db');
+      if (fs.existsSync(modDbDir)) {
+        for (const sub of fs.readdirSync(modDbDir)) {
+          if (sub === 'traders') continue; // already handled by (b)
+          const subDir = path.join(modDbDir, sub);
+          let sst; try { sst = fs.statSync(subDir); } catch (_) { continue; }
+          if (!sst.isDirectory()) continue;
+          const bP = path.join(subDir, 'base.json');
+          if (!fs.existsSync(bP)) continue;
+          let base; try { base = readJson(bP); } catch (_) { base = null; }
+          if (base && tryRegisterModTrader(modName, base, subDir)) {
+            console.error(`  mod trader: ${base.nickname} (${modName}/db/${sub})`);
+          }
+        }
+      }
     }
   }
   console.error(`Trader registry: ${Object.keys(traders).length} traders (${vanillaTraderIds.length} vanilla, ${modTraderSources.length} mod)`);

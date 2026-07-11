@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-08T02:48:18.241Z",
+  "generatedAt": "2026-07-11T02:02:17.102Z",
   "sources": {
     "tarkovDev": {
       "fetchedAt": "2026-07-08T02:48:17.652Z",
@@ -12,15 +12,15 @@
       "count": 4396
     },
     "spt": {
-      "loadedAt": "2026-07-08T02:48:17.862Z",
+      "loadedAt": "2026-07-11T02:02:16.702Z",
       "fleaPricesMtime": "2026-06-07T05:35:40.763Z",
       "fleaPricesSource": "handbook",
       "fleaMinUserLevel": 1,
       "path": "D:\\SPT\\SPT\\SPT_Data",
       "itemCount": 4994,
       "priceCount": 4216,
-      "traderCount": 13,
-      "offerCount": 3134,
+      "traderCount": 14,
+      "offerCount": 3144,
       "currencyRates": {
         "source": "trader-exchange",
         "USD": 136,
