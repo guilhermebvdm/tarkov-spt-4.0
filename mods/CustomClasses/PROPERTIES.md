@@ -24,6 +24,8 @@ Properties exposed in the configuration menu (F12 / ConfigurationManager). None 
 | `ShowLevelUpFlavor` | bool | `true` | Level-up notification `EASILY` (buff) / `FINALLY` (debuff) on skills with a multiplier. (item 014) |
 | `Raid-start perks notification` | bool | `true` | Raid-start notification listing the class's perks (green) and drawbacks (red). |
 | `Perk Diagnostics overlay` | bool | `false` | Live overlay of the properties affected by your player's perks (validation). |
+| `Recoil floor — Enabled` | bool | `true` | **Floor for the COMBINED recoil multiplier** (mastery × perks). They stack multiplicatively and the product had no floor. (balance B15) |
+| `Recoil floor — Min combined mult` | float | `0.60` | Minimum recoil as a fraction of the original (0.60 = never below −40% combined). Range 0.3..1. (balance B15) |
 
 ## Section `1 · Interface & Position`
 
@@ -88,7 +90,7 @@ Properties exposed in the configuration menu (F12 / ConfigurationManager). None 
 | `Execution — Melee move speed Enabled` | bool | `true` | — | Perk: +move speed with the melee in hand. |
 | `Execution — Melee move speed` | float | `1.1` | 1..1.5 | Move speed with melee in hand (1.1 = +10%). |
 | `Execution — Melee damage Enabled` | bool | `true` | — | Perk: multiplies knife melee damage. |
-| `Execution — Melee damage mult` | float | `5` | 1..10 | Melee damage (5.0 = 5×, execution). |
+| `Execution — Melee damage mult` | float | `3.5` | 1..10 | Melee damage (3.5x, execution). Was `5` (trivial one-shot). (balance B7) |
 | `Ghost Step — Enabled` | bool | `true` | — | Perk: reduces the audibility radius of your movement sounds. |
 | `Ghost Step — Sound radius mult` | float | `0.7` | 0.1..1 | Movement-sound radius (0.7 = −30%). |
 | `Rattled — Enabled` | bool | `true` | — | Drawback: stronger aim-punch when hit. |
@@ -112,11 +114,13 @@ Properties exposed in the configuration menu (F12 / ConfigurationManager). None 
 |---|---|---|---|---|
 | `Bulwark — Enabled` | bool | `true` | — | Perk: reduces incoming health damage. |
 | `Bulwark — Damage taken` | float | `0.85` | 0.5..1 | Incoming damage (0.85 = −15%). |
+| `Bulwark — Require heavy armor` | bool | `true` | — | **CONDITIONAL Bulwark**: only applies while wearing heavy armor (it used to be unconditional — it applied even naked). (balance B6) |
+| `Bulwark — Min armor class` | int | `4` | 1..6 | Minimum equipped armor class for Bulwark to apply. (balance B6) |
 | `Bunker — Enabled` | bool | `true` | — | Perk: with a heavy weapon (LMG/HMG/GL), less recoil and more ergonomics. |
 | `Bunker — Heavy weapon recoil mult` | float | `0.85` | 0.5..1 | Heavy-weapon recoil (0.85 = −15%). |
 | `Bunker — Heavy weapon ergo mult` | float | `1.15` | 1..1.5 | Heavy-weapon ergonomics (1.15 = +15%). |
 | `Tireless Arms — Enabled` | bool | `true` | — | Perk: no arm fatigue with a heavy weapon (**requires the stances mod**). |
-| `Tireless Arms — Heavy arm drain mult` | float | `0` | 0..1 | Heavy-weapon arm drain (0 = no drain). |
+| `Tireless Arms — Heavy arm drain mult` | float | `0.20` | 0..1 | Heavy-weapon arm drain (0.20 = 5x slower). Was `0` (absolute immunity). (balance B16) |
 | `Heavy Frame — Enabled` | bool | `true` | — | Drawback: slower movement (heavy frame). |
 | `Heavy Frame — Move speed` | float | `0.9` | 0.5..1 | Move speed (0.9 = −10%). |
 | `Heavy Frame — Hunger/thirst drain` | float | `1.3` | 1..2 | Hunger/thirst drain (1.3 = +30% faster). |

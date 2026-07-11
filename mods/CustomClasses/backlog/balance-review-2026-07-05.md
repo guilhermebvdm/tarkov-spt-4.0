@@ -1,7 +1,7 @@
 # Balance Review — CustomClasses
 
 > **Data:** 2026-07-05<br>
-> **Status:** 🟡 Onda 0 APLICADA (B1·B2·B3·B4·B17, 2026-07-10) — ondas 1/2 e estruturais pendentes; decisões marcadas no §2<br>
+> **Status:** 🟢 Ondas 0, 1 e 2 APLICADAS (2026-07-10/11) — restam só as ESTRUTURAIS (B12·B13·B14·B19); decisões marcadas no §2<br>
 > **Pedido:** "o que adicionar/remover/editar para deixar tudo mais equilibrado?"<br>
 > **Revisões:** /g-review-content ×2 (2026-07-05) — rodada 1: 9 itens (B14–B18, números validados); rodada 2: 8 itens (ondas de aplicação, B14 concreto, antes→depois, Anexo C corrigido, B19)<br>
 
@@ -37,20 +37,20 @@ Cada linha é UMA mudança atômica. Marque a coluna **Decisão** (⬜ pendente 
 | B2 | 🔴 | Furtivo | Ghost Step: F12 `0.40 → 0.70` — **exatamente** o que o card anuncia (−30%) · no mesmo commit: corrigir o **label** do card "todo o ruído do player" → "ruído de movimento/ações" (**tiros ficam de fora** dos 3 pipelines — rótulo atual mente) | 2 linhas | ideal c/ B4 | ✅ | ✅ 2026-07-10 |
 | B3 | 🔴 | Caçador | Iron Lungs: F12 `0.50 → 0.667` — dreno ×0.667 = **+50% de duração exatos** (o card) | 1 linha | ideal c/ B4 | ✅ | ✅ 2026-07-10 |
 | B4 | 🔴 | (UI) | Cards do painel CLASS lerem o **valor vivo do F12** (precedente: footer 060) — pré-requisito de VERDADE para qualquer recalibrada futura; por isso entra na Onda 0 | médio | — | ✅ | ✅ 2026-07-10 |
-| B5 | 🟠 | Tanque | Custo inicial (35.28 → alvo): **opção A** `HeavyVests 3→2` (−3.75 → **31.53**, 1 mexida; a classe treina HeavyVests ×2, recupera rápido) · opção B `Shotgun 5→4` + `Vitality 5→4` (−4.17 → **31.11**) | jsonc | — | ⬜ | ⬜ |
-| B6 | 🟠 | Tanque | **Couraça condicional**: dano ×0.85 só com colete pesado (classe 4+) equipado; sem colete ×1.0. Alternativa simples: `0.85 → 0.88`. Viável: `BulwarkPatch` é Prefix em `Player.ApplyDamageInfo` com acesso ao `__instance` (equipment). **Onda 2** (ver ondas abaixo) | patch | Onda 1 testada | ⬜ | ⬜ |
-| B7 | 🟠 | Furtivo | Melee `×5 → ×3.5` (1 linha no default) · variante: manter ×5 só em golpe por trás (checar ângulo do `damageInfo` — médio). **Onda 2** | 1 linha / médio | Onda 1 testada | ⬜ | ⬜ |
-| B8 | 🟡 | Médico | Subir XP (⚠ **Health já é ×2 — não tocar**): `Vitality ×1→×1.5` (+0.84) + `FirstAid ×2.5→×3` (+0.47) + `Charisma ×1→×1.5` (+0.20) → netMult 11.31 → **≈12.8** (borda da faixa) | jsonc | — | ⬜ | ⬜ |
-| B9 | 🟡 | Saqueador | Subir XP (pacote — `Search ×3` sozinho rende só +0.43): `Search ×2→×3` (+0.43) + `Endurance ×1.5→×2` (+0.50) + `Attention ×1.5→×2` (+0.30) + `Charisma ×1.5→×2` (+0.20) → 11.56 → **≈13.0**; sinergia c/ 061 | jsonc | — | ⬜ | ⬜ |
-| B10 | 🟡 | Fuzileiro | Cortar buffs derived `BearRawpower ×1.5` + `UsecNegotiations ×1.5` (−2.50) → 18.63 → **16.13** | jsonc | — | ⬜ | ⬜ |
-| B11 | 🟡 | Furtivo | Trocar os 5 debuffs "grátis" por debuffs que mordem (ex.: `Endurance ×0.8`, `Throwing ×0.8`) mantendo netMult ≈14 | jsonc | — | ⬜ | ⬜ |
+| B5 | 🟠 | Tanque | Custo inicial (35.28 → alvo): **opção A** `HeavyVests 3→2` (−3.75 → **31.53**, 1 mexida; a classe treina HeavyVests ×2, recupera rápido) · opção B `Shotgun 5→4` + `Vitality 5→4` (−4.17 → **31.11**) | jsonc | — | ✅ | ✅ 2026-07-11 |
+| B6 | 🟠 | Tanque | **Couraça condicional**: dano ×0.85 só com colete pesado (classe 4+) equipado; sem colete ×1.0. Alternativa simples: `0.85 → 0.88`. Viável: `BulwarkPatch` é Prefix em `Player.ApplyDamageInfo` com acesso ao `__instance` (equipment). **Onda 2** (ver ondas abaixo) | patch | Onda 1 testada | ✅ | ✅ 2026-07-11 |
+| B7 | 🟠 | Furtivo | Melee `×5 → ×3.5` (1 linha no default) · variante: manter ×5 só em golpe por trás (checar ângulo do `damageInfo` — médio). **Onda 2** | 1 linha / médio | Onda 1 testada | ✅ | ✅ 2026-07-11 |
+| B8 | 🟡 | Médico | Subir XP (⚠ **Health já é ×2 — não tocar**): `Vitality ×1→×1.5` (+0.84) + `FirstAid ×2.5→×3` (+0.47) + `Charisma ×1→×1.5` (+0.20) → netMult 11.31 → **≈12.8** (borda da faixa) | jsonc | — | ✅ | ✅ 2026-07-11 |
+| B9 | 🟡 | Saqueador | Subir XP (pacote — `Search ×3` sozinho rende só +0.43): `Search ×2→×3` (+0.43) + `Endurance ×1.5→×2` (+0.50) + `Attention ×1.5→×2` (+0.30) + `Charisma ×1.5→×2` (+0.20) → 11.56 → **≈13.0**; sinergia c/ 061 | jsonc | — | ✅ | ✅ 2026-07-11 |
+| B10 | 🟡 | Fuzileiro | Cortar buffs derived `BearRawpower ×1.5` + `UsecNegotiations ×1.5` (−2.50) → 18.63 → **16.13** | jsonc | — | ✅ | ✅ 2026-07-11 |
+| B11 | 🟡 | Furtivo | Trocar os 5 debuffs "grátis" por debuffs que mordem (ex.: `Endurance ×0.8`, `Throwing ×0.8`) mantendo netMult ≈14 | jsonc | — | ✅ | ✅ 2026-07-11 |
 | B12 | 🟡 | Médico | Implementar os perks (050 — perna transpiler: Rapid Care/Swift Surgeon) | item 050 | — | ⬜ | ⬜ |
 | B13 | ℹ️ | Tanque | RN-03 (mastery por classe): Tanque **×1.5, não ×2** — não amplificar quem já está no teto | decisão | B15 | ⬜ | ⬜ |
 | B14 | 🟠 | (coop) | **Som host-side para remotos** — implementação DIRETA, sem protocolo novo: bots ouvem no HOST e o host já tem o mapa nickname→classe (rota 057) → `AiSoundPatch`/`SainSoundPatch` resolvem a classe do player REMOTO (`ClassIdentities.TryResolve(Profile.Nickname)`) e aplicam o multiplicador DELE. Única parte que exigiria sync real: o rolloff audível (`method_67`) para OUTROS humanos — fica de fora. Enquanto não aplicado: som = host-only nas avaliações | pequeno/médio | rota 057 (já existe) | ⬜ | ⬜ |
-| B15 | 🟡 | Tanque/Fuzileiro | **Piso COMBINADO de recuo**: Bunker ×0.85 × mastery 51 ≈ **×0.68**; Adrenalina ×0.7 × mastery ≈ **×0.56** na janela. Mastery tem piso próprio (0.5 — inalcançável no cap 51), o PRODUTO não tem → definir piso combinado (ex.: 0.6, que só morde a janela de Adrenalina). Decidir ANTES do B13 | pequeno | — | ⬜ | ⬜ |
-| B16 | 🟡 | Tanque | Tireless Arms `0 → 0.2–0.25`: imunidade ABSOLUTA é outlier — o especialista em mira (Caçador) tem ×0.65; fadiga 4–5× mais lenta preserva a fantasia sem imunidade. **Onda 2** | trivial | decidir c/ B6 | ⬜ | ⬜ |
+| B15 | 🟡 | Tanque/Fuzileiro | **Piso COMBINADO de recuo**: Bunker ×0.85 × mastery 51 ≈ **×0.68**; Adrenalina ×0.7 × mastery ≈ **×0.56** na janela. Mastery tem piso próprio (0.5 — inalcançável no cap 51), o PRODUTO não tem → definir piso combinado (ex.: 0.6, que só morde a janela de Adrenalina). Decidir ANTES do B13 | pequeno | — | ✅ | ✅ 2026-07-11 |
+| B16 | 🟡 | Tanque | Tireless Arms `0 → 0.2–0.25`: imunidade ABSOLUTA é outlier — o especialista em mira (Caçador) tem ×0.65; fadiga 4–5× mais lenta preserva a fantasia sem imunidade. **Onda 2** | trivial | decidir c/ B6 | ✅ | ✅ 2026-07-11 |
 | B17 | 🟡 | Médico | **Perk vivo hoje**: "Metabolismo Eficiente" — fome/sede `×0.85` reutilizando o lever do Heavy Frame (`ClassCombatHealthPatches` branch por classe) + card no catálogo | pequeno | — | ✅ | ✅ 2026-07-10 |
-| B18 | 🟡 | Tanque | Baixar XP (§4.2 não tocava o netMult do Tanque): `Shotgun ×3→×2.5` (−1.25) + `LightVests ×2→×1.75` (−0.94) → 19.19 → **≈17.0** (teto da faixa) | jsonc | — | ⬜ | ⬜ |
+| B18 | 🟡 | Tanque | Baixar XP (§4.2 não tocava o netMult do Tanque): `Shotgun ×3→×2.5` (−1.25) + `LightVests ×2→×1.75` (−0.94) → 19.19 → **≈17.0** (teto da faixa) | jsonc | — | ✅ | ✅ 2026-07-11 |
 | B19 | 🔵 | (UI) | Cards **Flag** exibirem a magnitude quando houver F12 numérico: Silent Looter (real ×0.4) e Overladen (real ×1.5) hoje não mostram número — coerência com a transparência do B4 | pequeno | B4 | ⬜ | ⬜ |
 
 ### Ondas de aplicação (anti-overshooting)

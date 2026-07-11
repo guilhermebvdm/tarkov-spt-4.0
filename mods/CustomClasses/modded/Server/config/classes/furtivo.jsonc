@@ -32,15 +32,22 @@
     "ProneMovement": 2,
     "Lockpicking": 2,
     "Assault": 0.6,
-    "StressResistance": 0.7,
+    // B11: StressResistance (Ph — categoria que o Furtivo não treina) era o 5º debuff GRÁTIS. Removido.
     "Shotgun": 0.7,
     "Throwing": 2,
     "Shadowconnections": 2,
-    "BearRawpower": 0.75,
-    "UsecNegotiations": 0.75,
     "Memory": 2,
-    "Vitality": 0.8,
-    "Metabolism": 0.75
+    // B11 (balance 2026-07-11): o Furtivo tinha 5 debuffs "GRÁTIS" — penalidades em skills que ele nem treina
+    // (StressResistance, Vitality, Metabolism = categoria Ph; BearRawpower, UsecNegotiations = categoria S).
+    // Pareciam custo, não custavam nada: netMult cru 12.43 vs plausível 14.35. REMOVIDOS.
+    // No lugar, debuffs que MORDEM de verdade — em categorias que ele TREINA (C/M/P) e temáticos (ele é leve,
+    // não é atirador de rifle pesado):
+    //   HeavyVests ×0.9 (peso 3.75 → −0.375) · RecoilControl ×0.9 (peso 1.0 → −0.10).
+    // Resultado: netMult ≈13.9 (alvo do board ≈14), agora HONESTO (cru == plausível, zero debuff grátis).
+    // ⚠️ O board sugeria `Endurance ×0.8` como exemplo — mas Endurance é Ph, categoria que ele NÃO treina:
+    // seria mais um debuff grátis. Por isso a troca por HeavyVests/RecoilControl.
+    "HeavyVests": 0.9,
+    "RecoilControl": 0.9
   },
   "hideout": {
     "WaterCloset": 1

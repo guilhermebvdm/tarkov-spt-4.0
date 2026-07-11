@@ -13,7 +13,9 @@
   "iconFile": "tanque.png",
   "nameColor": "#6b7280",
   "skills": {
-    "HeavyVests": 3,
+    // B5 (balance 2026-07-11): 3 → 2. Custo inicial estava em 35.28, fora do alvo 28–32 (única classe fora).
+    // A classe treina HeavyVests ×2, então recupera o nível rápido. Novo custo ≈ 31.53.
+    "HeavyVests": 2,
     "Health": 0,
     "Vitality": 5,
     "Strength": 5,
@@ -25,14 +27,16 @@
     "HeavyVests": 2,
     "Vitality": 2,
     "Strength": 2.5,
-    "Shotgun": 3,
+    // B18 (balance 2026-07-11): ×3 → ×2.5 (−1.25 no netMult). O Tanque tinha o MAIOR netMult do mod (19.19).
+    "Shotgun": 2.5,
     "Throwing": 2,
     "Melee": 2,
     "Metabolism": 0.5,
     "CovertMovement": 0.5,
     "AimDrills": 0.7,
     "DMR": 0.7,
-    "LightVests": 2,
+    // B18 (balance 2026-07-11): ×2 → ×1.75 (−0.94). Junto com o Shotgun: netMult 19.19 → ≈17.0 (teto da faixa).
+    "LightVests": 1.75,
     "Immunity": 2,
     "Endurance": 2,
     "Perception": 0.7,

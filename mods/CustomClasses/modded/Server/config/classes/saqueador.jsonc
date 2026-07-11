@@ -27,15 +27,18 @@
     "Lockpicking": 3,
     "Strength": 2,
     "ShadowConnections": 2.5,
-    "Attention": 1.5,
+    // B9 (balance 2026-07-11): Saqueador era o 2º menor netMult (11.56). É um PACOTE — o board mostrou que
+    // `Search ×3` sozinho rende só +0.43 (peso baixo). Attention ×1.5→×2 (+0.30) · Search ×2→×3 (+0.43)
+    // · Charisma ×1.5→×2 (+0.20) · Endurance ×1.5→×2 (+0.50). Total +1.43 → ≈13.0. Sinergia com o 061 (Quick Hands).
+    "Attention": 2,
     "Perception": 1.5,
-    "Search": 2,
+    "Search": 3,
     "HideoutManagement": 2,
     "Intellect": 1.5,
-    "Charisma": 1.5,
+    "Charisma": 2,
     "Assault": 0.8,
     "StressResistance": 0.7,
-    "Endurance": 1.5,
+    "Endurance": 2,
     "Memory": 1.5,
     "MagDrills": 1.5,
     "WeaponTreatment": 1.5,

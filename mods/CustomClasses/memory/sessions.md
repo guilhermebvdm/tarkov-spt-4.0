@@ -556,4 +556,29 @@ calibração do usuário · próximo da fila: 058 (V1/V2/V4) ou 051 (decisão st
 **Implementação:** novo helper `QuietStep.Mult()` em `ClassSoundPatches.cs` (espelha o `LoudOperator.Mult()`, que é o oposto): resolve o multiplicador de ruído REDUZIDO da classe local (Stealth→`GhostStepSoundRadius`, Hunter→`StalkerSoundRadius`, senão 1). Os **3 pipelines de som** (rolloff `method_67`, IA base `BotEventHandler.PlaySound`, SAIN `PlayAISound`) passaram a chamar `QuietStep.Mult()` no lugar do `if (GhostStep…)` duplicado — mesma refatoração que já fiz no Loud Operator. F12: `Stalker — Enabled` + `Stalker — Sound radius mult` (seção `4 · Hunter`). Card `stalker` no catálogo (com `live:` lendo o F12) + `ByClass["Hunter"]`. Docs PT/EN.
 
 ⚠️ **Impacto no BALANCE (não avaliado ainda):** o board de 2026-07-05 classificava o Caçador como **"equilibrado — classe de referência"** (custo 31.4 ✓, netMult 14.5 ✓) com 3 perks vivos. Este perk **ADICIONA poder** ao Caçador sem contrapartida. O Anexo B do board (perks vivos por classe) está desatualizado para o Caçador. Se/quando as Ondas 1–2 forem aplicadas, reavaliar se o Caçador precisa de um custo (o board sugeria "se ficar forte demais quando a Mira Serena nascer, endurecer o Rooted para 0.75" — a mesma alavanca serve aqui).
-⚠️ **Coop:** som é **host-only vs bots** (B14) — como CLIENTE Fika, o Stalker (assim como o Ghost Step) não afeta a percepção da IA (bots vivem no host).
+⚠️ **Coop:** som é **host-only vs bots** (B14) — como CLIENTE Fika, o Stalker (assim como o Ghost Step) não afeta a percepção da IA (bots vivem no host). Registrado como **item 064** no backlog.
+
+#### Ondas 1 e 2 do balance APLICADAS (2026-07-11) — B1–B18 fechados
+
+O usuário mandou executar as DUAS ondas de uma vez (o board previa um gate in-game entre elas, porque o Tanque leva 5 nerfs — risco de overshooting). Executadas com snapshot antes/depois.
+
+**Onda 1 — orçamentos (`.jsonc`), 6 mudanças.** Resultado bateu com a projeção do board:
+
+| Classe | custo antes→depois | netMult antes→depois | B |
+|---|---|---|---|
+| Tanque | **35.28 → 31.53** (entrou no alvo 28–32) | **19.19 → 17.01** | B5 (HeavyVests 3→2) · B18 (Shotgun ×3→2.5, LightVests ×2→1.75) |
+| Fuzileiro | 30.51 | **18.63 → 16.13** | B10 (cortou BearRawpower/UsecNegotiations ×1.5) |
+| Médico | 30.95 | **11.31 → 12.81** | B8 (FirstAid ×2.5→3, +Vitality ×1.5, +Charisma ×1.5; Health ×2 NÃO tocado) |
+| Saqueador | 30.45 | **11.56 → 12.99** | B9 (pacote: Attention/Endurance/Charisma ×2, Search ×3) |
+| Furtivo | 29.74 | **14.35 → 13.88** | B11 |
+| **Amplitude** | — | **7.88 → 4.20** (o board projetava ≈4.2 ✓) | |
+
+**⚠️ Correção de um ERRO do board (B11):** ele sugeria `Endurance ×0.8` como debuff "que morde" para o Furtivo — mas **Endurance é categoria `Ph`, que o Furtivo NÃO treina** → seria mais um debuff GRÁTIS. Critério real do `class-balance-snapshot.mjs`: `isPlausible(s) = skills[s]>0 || mults[s]>1 || plausibleCats.has(CATEGORIES[s])`. O Furtivo treina só `C`/`M`/`P`. Troquei pelos que de fato mordem e são temáticos: **HeavyVests ×0.9** (peso 3.75 → −0.375; ele é leve) + **RecoilControl ×0.9** (−0.10). Removi os 5 grátis (StressResistance, Vitality, Metabolism = Ph; BearRawpower, UsecNegotiations = S). Furtivo agora **honesto**: cru == plausível == 13.88, zero debuffs grátis.
+
+**Onda 2 — combate (patches), 4 mudanças:**
+- **B16** — `TirelessArmsDrain` 0 → **0.20** (imunidade ABSOLUTA de fadiga de braço era outlier; agora cansa 5× mais devagar).
+- **B7** — `ExecutionMeleeDamage` ×5 → **×3.5** (tira o one-shot trivial da faca do Furtivo).
+- **B6** — **Couraça CONDICIONAL** (`BulwarkPatch`): o −15% de dano era INCONDICIONAL (valia até pelado). Agora exige armadura equipada com classe ≥ 4 (`Bulwark — Require heavy armor` + `Min armor class`). Detecção pelo método **canônico** do EFT: `Inventory.GetPutOnArmorsNonAlloc(buffer)` + `ArmorComponent.ArmorClass` (ref: `Player.cs:30037` e `PlayerAIDataClass.method_9`). Buffer estático reusado — o `ApplyDamageInfo` roda a cada dano, não se aloca por hit.
+- **B15** — **PISO COMBINADO de recuo** (`RecoilFloorPatch.cs`, NOVO). Os multiplicadores de recuo empilham por **produto** sobre o mesmo `ref float str` de `ProceduralWeaponAnimation.Shoot`: maestria (058, `Priority.High`) × perks (050: Shaky/Adrenalina/Bunker). A maestria tem piso próprio (0.5, inalcançável no cap 51) mas o PRODUTO não tinha: Tanque+LMG+maestria ≈ ×0.68; Fuzileiro na janela de Adrenalina ≈ ×0.56. **Padrão novo e reusável: CERCAR a cadeia com 2 Prefixes no mesmo alvo** — `RecoilFloorCapturePatch` (`Priority.First`) guarda o `str` ORIGINAL (ou `NaN` se não for a arma do MainPlayer); `RecoilFloorApplyPatch` (`Priority.Last`) roda depois de TODOS e clampa `str >= original × piso` (0.60). Nenhum patch da cadeia conhecia o `str` verdadeiramente original (a maestria roda antes), por isso o clamp não podia morar dentro deles.
+
+**Board:** B1–B18 todos ✅ (status → 🟢). Restam só as **estruturais**: B12 (perks do Médico — transpiler), B13 (RN-03 mastery por classe), B14 (som host-side p/ remotos), B19 (magnitude nos cards Flag). Sobraram 2 debuffs grátis fora do escopo do board (`Shadowconnections` no Fuzileiro e no Tanque) — candidatos a um "B20".

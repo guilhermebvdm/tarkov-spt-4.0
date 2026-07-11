@@ -150,6 +150,11 @@ public class Plugin : BaseUnityPlugin
                 Log.LogError($"[CustomClasses] (050.4 SAIN) SainSoundPatch falhou ao aplicar: {ex.Message}");
             }
         }
+        // B15 — piso COMBINADO de recuo: os 2 patches CERCAM a cadeia (Capture = Priority.First, ANTES da
+        // maestria; Apply = Priority.Last, DEPOIS de todos os multiplicadores). A ordem real é imposta pelos
+        // [HarmonyPriority], não pela ordem destes Enable().
+        new RecoilFloorCapturePatch().Enable();             // (B15) guarda o `str` original do tiro
+        new RecoilFloorApplyPatch().Enable();               // (B15) clampa o produto maestria × perks no piso
         new ShootRecoilPatch().Enable();                    // (050.2) 🔻 Médico — recuo ×1.25 (Shaky Hands) + Adrenaline ×0.7
         new AimPunchPatch().Enable();                       // (050.2) 🔻 Furtivo — aim-punch ×1.5 (Rattled)
         new LocalHitTypePatch().Enable();                   // (review) captura tipo do dano local (barra aim-punch em queda)

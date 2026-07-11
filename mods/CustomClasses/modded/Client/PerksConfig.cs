@@ -22,9 +22,11 @@ internal static class PerksConfig
     internal const string SecTank = "7 · Tank";
     internal const string SecVanillaFixes = "8 · Vanilla Skill Fixes";
 
-    // 0 · General — notificação + diagnóstico
+    // 0 · General — notificação + diagnóstico + piso global de recuo (B15)
     internal static ConfigEntry<bool>? ShowRaidPerksNotification;
     internal static ConfigEntry<bool>? DiagnosticsEnabled;
+    internal static ConfigEntry<bool>? RecoilFloorEnabled;
+    internal static ConfigEntry<float>? RecoilFloor;
 
     // 1 · Interface & Position
     internal static ConfigEntry<float>? ClassTabOffsetX;
@@ -86,6 +88,8 @@ internal static class PerksConfig
     // 7 · Tank
     internal static ConfigEntry<bool>? BulwarkEnabled;
     internal static ConfigEntry<float>? BulwarkDamageTaken;
+    internal static ConfigEntry<bool>? BulwarkRequireHeavyArmor;   // B6: só com armadura pesada equipada
+    internal static ConfigEntry<int>? BulwarkMinArmorClass;
     internal static ConfigEntry<bool>? BunkerEnabled;
     internal static ConfigEntry<float>? BunkerHeavyRecoil;
     internal static ConfigEntry<float>? BunkerHeavyErgo;
@@ -114,6 +118,19 @@ internal static class PerksConfig
         DiagnosticsEnabled = config.Bind(
             SecGeneral, "Perk Diagnostics overlay", false,
             "Overlay ao vivo das propriedades afetadas pelos perks do seu player (validação). / Live overlay of the properties affected by your player's perks.");
+
+        // B15 (balance 2026-07-11): os multiplicadores de recuo empilham por PRODUTO (maestria × Bunker/
+        // Adrenalina). A maestria tem piso próprio (0.5, inalcançável no cap 51), mas o PRODUTO não tinha
+        // piso nenhum: Tanque+LMG+maestria 51 ≈ ×0.68 · Fuzileiro na janela de Adrenalina ≈ ×0.56. Piso 0.60
+        // morde essencialmente a janela de Adrenalina — o resto passa incólume.
+        RecoilFloorEnabled = config.Bind(
+            SecGeneral, "Recoil floor — Enabled", true,
+            "Piso do recuo COMBINADO (maestria × perks). Impede que o produto dos multiplicadores derrube o recuo demais. / Floor for the COMBINED recoil multiplier (mastery × perks).");
+        RecoilFloor = config.Bind(
+            SecGeneral, "Recoil floor — Min combined mult", 0.60f,
+            new ConfigDescription(
+                "Recuo mínimo como fração do original (0.60 = nunca abaixo de −40% no total). / Minimum recoil as a fraction of the original (0.60 = never below -40% combined).",
+                new AcceptableValueRange<float>(0.3f, 1f)));
 
         // ─────────────────── 1 · Interface & Position ───────────────────
         ClassTabOffsetX = config.Bind(
@@ -270,10 +287,12 @@ internal static class PerksConfig
         ExecutionMeleeEnabled = config.Bind(
             SecStealth, "Execution — Melee damage Enabled", true,
             "Furtivo: multiplica o dano de golpe de faca. / Stealth: multiplies knife melee damage.");
+        // B7 (balance 2026-07-11): ×5 → ×3.5. O ×5 era one-shot trivial (kill garantido); ×3.5 mantém a
+        // faca como arma real de execução, mas exige posicionamento — sem o kill automático.
         ExecutionMeleeDamage = config.Bind(
-            SecStealth, "Execution — Melee damage mult", 5.0f,
+            SecStealth, "Execution — Melee damage mult", 3.5f,
             new ConfigDescription(
-                "Multiplicador do dano de melee do Furtivo (5.0 = 5×, execução). / Stealth melee damage multiplier (5.0 = 5×, execution).",
+                "Multiplicador do dano de melee do Furtivo (3.5 = 3.5×, execução). / Stealth melee damage multiplier (3.5 = 3.5×, execution).",
                 new AcceptableValueRange<float>(1f, 10f)));
         GhostStepEnabled = config.Bind(
             SecStealth, "Ghost Step — Enabled", true,
@@ -333,6 +352,17 @@ internal static class PerksConfig
             new ConfigDescription(
                 "Multiplicador do dano recebido (0.85 = −15%). / Incoming damage multiplier (0.85 = −15%).",
                 new AcceptableValueRange<float>(0.5f, 1f)));
+        // B6 (balance 2026-07-11): a Couraça era INCONDICIONAL (o Tanque levava −15% até pelado). Agora exige
+        // estar de fato BLINDADO: armadura equipada de classe >= X. Temático, counterável, e casa com o
+        // HeavyVests ×2 que a classe treina. Desligue o toggle p/ voltar ao comportamento incondicional.
+        BulwarkRequireHeavyArmor = config.Bind(
+            SecTank, "Bulwark — Require heavy armor", true,
+            "Tanque: a Couraça só vale com armadura pesada equipada (sem ela, dano normal). / Tank: Bulwark only applies while wearing heavy armor.");
+        BulwarkMinArmorClass = config.Bind(
+            SecTank, "Bulwark — Min armor class", 4,
+            new ConfigDescription(
+                "Classe mínima da armadura equipada para a Couraça valer (4 = colete pesado). / Minimum equipped armor class for Bulwark to apply.",
+                new AcceptableValueRange<int>(1, 6)));
         BunkerEnabled = config.Bind(
             SecTank, "Bunker — Enabled", true,
             "Tanque: com arma pesada (LMG/HMG/GL) na mão, menos recuo e mais ergonomia. / Tank: heavy weapons (LMG/HMG/GL) handle better.");
@@ -348,11 +378,13 @@ internal static class PerksConfig
                 new AcceptableValueRange<float>(1f, 1.5f)));
         TirelessArmsEnabled = config.Bind(
             SecTank, "Tireless Arms — Enabled", true,
-            "Tanque: braço não cansa segurando arma pesada (compõe com o stances mod; sem ele, inativo). / Tank: no arm fatigue holding heavy weapons (requires the stances mod).");
+            "Tanque: braço cansa MUITO devagar segurando arma pesada (compõe com o stances mod; sem ele, inativo). / Tank: very slow arm fatigue holding heavy weapons (requires the stances mod).");
+        // B16 (balance 2026-07-11): 0 → 0.2. Imunidade ABSOLUTA (×0) era outlier — o especialista em mira
+        // (Caçador) tem ×0.65. Com 0.2 o braço cansa 5× mais devagar: preserva a fantasia sem imunidade.
         TirelessArmsDrain = config.Bind(
-            SecTank, "Tireless Arms — Heavy arm drain mult", 0f,
+            SecTank, "Tireless Arms — Heavy arm drain mult", 0.20f,
             new ConfigDescription(
-                "Multiplicador do dreno de braço do Tanque com arma pesada (0 = não drena). Requer o stances mod. / Tank heavy-weapon arm-drain multiplier (0 = no drain). Requires the stances mod.",
+                "Multiplicador do dreno de braço do Tanque com arma pesada (0.20 = 5× mais lento; 0 = não drena). Requer o stances mod. / Tank heavy-weapon arm-drain multiplier (0.20 = 5x slower). Requires the stances mod.",
                 new AcceptableValueRange<float>(0f, 1f)));
         HeavyFrameEnabled = config.Bind(
             SecTank, "Heavy Frame — Enabled", true,

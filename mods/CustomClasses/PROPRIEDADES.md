@@ -24,6 +24,8 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 | `ShowLevelUpFlavor` | bool | `true` | Notificação de level-up `EASILY` (buff) / `FINALLY` (debuff) nas skills com multiplicador. (item 014) |
 | `Raid-start perks notification` | bool | `true` | Notificação no início da raid listando os perks (verde) e drawbacks (vermelho) da classe. |
 | `Perk Diagnostics overlay` | bool | `false` | Overlay ao vivo das propriedades afetadas pelos perks do seu player (validação). |
+| `Recoil floor — Enabled` | bool | `true` | **Piso do recuo COMBINADO** (maestria × perks). Os multiplicadores empilham por produto e o produto não tinha piso. (balance B15) |
+| `Recoil floor — Min combined mult` | float | `0.60` | Recuo mínimo como fração do original (0.60 = nunca abaixo de −40% no total). Faixa 0.3..1. (balance B15) |
 
 ## Seção `1 · Interface & Position`
 
@@ -88,7 +90,7 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 | `Execution — Melee move speed Enabled` | bool | `true` | — | Perk: +velocidade com a melee na mão. |
 | `Execution — Melee move speed` | float | `1.1` | 1..1.5 | Velocidade com melee na mão (1.1 = +10%). |
 | `Execution — Melee damage Enabled` | bool | `true` | — | Perk: multiplica o dano de golpe de faca. |
-| `Execution — Melee damage mult` | float | `5` | 1..10 | Dano de melee (5.0 = 5×, execução). |
+| `Execution — Melee damage mult` | float | `3.5` | 1..10 | Dano de melee (3.5×, execução). Era `5` (one-shot trivial). (balance B7) |
 | `Ghost Step — Enabled` | bool | `true` | — | Perk: −raio de audibilidade dos sons de movimento. |
 | `Ghost Step — Sound radius mult` | float | `0.7` | 0.1..1 | Raio de som de movimento (0.7 = −30%). |
 | `Rattled — Enabled` | bool | `true` | — | Drawback: +tranco de câmera ao levar dano. |
@@ -112,11 +114,13 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 |---|---|---|---|---|
 | `Bulwark — Enabled` | bool | `true` | — | Perk: reduz o dano recebido na vida. |
 | `Bulwark — Damage taken` | float | `0.85` | 0.5..1 | Dano recebido (0.85 = −15%). |
+| `Bulwark — Require heavy armor` | bool | `true` | — | **Couraça CONDICIONAL**: só vale com armadura pesada equipada (antes era incondicional — valia até pelado). (balance B6) |
+| `Bulwark — Min armor class` | int | `4` | 1..6 | Classe mínima da armadura equipada para a Couraça valer. (balance B6) |
 | `Bunker — Enabled` | bool | `true` | — | Perk: com arma pesada (LMG/HMG/GL), menos recuo e mais ergonomia. |
 | `Bunker — Heavy weapon recoil mult` | float | `0.85` | 0.5..1 | Recuo com arma pesada (0.85 = −15%). |
 | `Bunker — Heavy weapon ergo mult` | float | `1.15` | 1..1.5 | Ergonomia com arma pesada (1.15 = +15%). |
 | `Tireless Arms — Enabled` | bool | `true` | — | Perk: braço não cansa com arma pesada (**requer o stances mod**). |
-| `Tireless Arms — Heavy arm drain mult` | float | `0` | 0..1 | Dreno de braço com arma pesada (0 = não drena). |
+| `Tireless Arms — Heavy arm drain mult` | float | `0.20` | 0..1 | Dreno de braço com arma pesada (0.20 = 5× mais lento). Era `0` (imunidade absoluta). (balance B16) |
 | `Heavy Frame — Enabled` | bool | `true` | — | Drawback: −velocidade de movimento (estrutura pesada). |
 | `Heavy Frame — Move speed` | float | `0.9` | 0.5..1 | Velocidade (0.9 = −10%). |
 | `Heavy Frame — Hunger/thirst drain` | float | `1.3` | 1..2 | Dreno de fome/sede (1.3 = +30% mais rápido). |

@@ -44,8 +44,8 @@
     "HeavyVests": 1.5,
     "WeaponTreatment": 1.5,
     "FirstAid": 1.5,
-    "UsecNegotiations": 1.5,
-    "BearRawpower": 1.5,
+    // B10 (balance 2026-07-11): buffs DERIVED cortados (×1.5 → ×1, o neutro = removidos). O Fuzileiro tinha o
+    // 2º maior netMult (18.63); sem estes dois: −2.50 → ≈16.13. Não são identidade da classe (são derivadas de facção).
     "SilentOps": 0.65,
     "ProneMovement": 0.65,
     "Lockpicking": 0.65,
