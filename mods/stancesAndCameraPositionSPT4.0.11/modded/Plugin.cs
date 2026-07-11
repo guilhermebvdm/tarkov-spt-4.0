@@ -337,7 +337,7 @@ public class Plugin : BaseUnityPlugin
             "Manual Chambering",
             "Enable Manual Chambering",
             true,
-            new ConfigDescription("Master toggle do Manual Chambering. Desligado = comportamento vanilla em TODOS os cenários (kill-switch seguro). Puxe o ferrolho com a tecla nativa 'Chamber/Unload' (ECommand.ChamberUnload) quando a câmara estiver vazia e houver munição no carregador.",
+            new ConfigDescription("Master toggle for Manual Chambering. Off = vanilla behavior in ALL scenarios (safe kill-switch). Rack the bolt with the native 'Chamber/Unload' key when the chamber is empty and there is ammo in the magazine.\n\nInterruptor mestre do Manual Chambering. Desligado = comportamento vanilla em TODOS os cenários (kill-switch seguro). Puxe o ferrolho com a tecla nativa 'Chamber/Unload' quando a câmara estiver vazia e houver munição no carregador.",
             null,
             new ConfigurationManagerAttributes { Order = 70 }));
 
@@ -346,7 +346,7 @@ public class Plugin : BaseUnityPlugin
             "Manual Chambering On Raid Start",
             true,
             new ConfigDescription(
-                "Quando ativado, a arma que inicia a raid com a câmara vazia NÃO carrega a primeira bala automaticamente no spawn — puxe o ferrolho manualmente. Desligado = vanilla no início da raid. Efetivo na PRÓXIMA RAID.",
+                "When enabled, a weapon that starts the raid with an empty chamber does NOT auto-load the first round on spawn — rack the bolt manually. Off = vanilla at raid start. Takes effect NEXT RAID.\n\nQuando ativado, a arma que inicia a raid com a câmara vazia NÃO carrega a primeira bala automaticamente no spawn — puxe o ferrolho manualmente. Desligado = vanilla no início da raid. Efetivo na PRÓXIMA RAID.",
                 null,
                 new ConfigurationManagerAttributes { Order = 69 }));
 
@@ -355,7 +355,7 @@ public class Plugin : BaseUnityPlugin
             "Manual Chambering On Reload",
             true,
             new ConfigDescription(
-                "Quando ativado, recarregar com a câmara vazia NÃO carrega automaticamente a primeira bala após inserir o carregador — puxe o ferrolho manualmente. Desligado = vanilla no reload. Tempo real.",
+                "When enabled, reloading with an empty chamber does NOT auto-load the first round after inserting the magazine — rack the bolt manually. Off = vanilla on reload. Real time.\n\nQuando ativado, recarregar com a câmara vazia NÃO carrega automaticamente a primeira bala após inserir o carregador — puxe o ferrolho manualmente. Desligado = vanilla no reload. Tempo real.",
                 null,
                 new ConfigurationManagerAttributes { Order = 68 }));
 
@@ -367,7 +367,7 @@ public class Plugin : BaseUnityPlugin
             Positions,
             "Enable Camera Position",
             true,
-            new ConfigDescription("Enable or disable camera position offsets",
+            new ConfigDescription("Enable or disable camera position offsets.\n\nLiga ou desliga os ajustes de posição da câmera.",
             null,
             new ConfigurationManagerAttributes { Order = 68 }));
 
@@ -375,7 +375,7 @@ public class Plugin : BaseUnityPlugin
             Positions,
             "Forward/Backward Offset",
             0f,
-            new ConfigDescription("Camera position forward/backward (positive = forward)",
+            new ConfigDescription("Camera position forward/backward (positive = forward).\n\nPosição da câmera para frente/trás (positivo = frente).",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { Order = 67 }));
 
@@ -383,7 +383,7 @@ public class Plugin : BaseUnityPlugin
             Positions,
             "Up/Down Offset",
             0.02f,
-            new ConfigDescription("Camera position up/down (positive = up)",
+            new ConfigDescription("Camera position up/down (positive = up).\n\nPosição da câmera para cima/baixo (positivo = cima).",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { Order = 66 }));
 
@@ -391,7 +391,7 @@ public class Plugin : BaseUnityPlugin
             Positions,
             "Sideways Offset",
             0f,
-            new ConfigDescription("Camera position left/right (positive = right)",
+            new ConfigDescription("Camera position left/right (positive = right).\n\nPosição da câmera para os lados (positivo = direita).",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { Order = 65 }));
 

@@ -33,10 +33,10 @@
 |---|---|---|---|---|---|
 | MP-01-01 | DEAD | 🔴 | 23 propriedades no F12 não fazem nada (mortas) | não | ✅ Aplicado |
 | MP-01-02 | NAM | 🟠 | Eixos "Roll"/"Yaw" trocados nos keys de Stance/ADS — induz o usuário a erro | ⚠️ | ✅ Aplicado (b — rename) |
-| MP-01-03 | ORD | 🟠 | Ordem das seções não segue lógica; Manual Chambering (secundário) vem primeiro | ⚠️ | Pendente |
-| MP-01-04 | SEC | 🟠 | Prefixos numéricos "8./9./10." enganosos (não batem com a posição real) | ⚠️ | Pendente |
-| MP-01-05 | SEC | 🟡 | Nomes de seção genéricos ("Settings", "General", "Positions") | ⚠️ | Pendente |
-| MP-01-06 | TIP | 🟡 | Idioma misto — tooltips e nomes em EN e pt-BR sem padrão | ⚠️(parcial) | Pendente |
+| MP-01-03 | ORD | 🟠 | Ordem das seções não segue lógica; Manual Chambering (secundário) vem primeiro | ⚠️ | ⏭️ Deferido (dívida — binds fragmentados, alto risco) |
+| MP-01-04 | SEC | 🟠 | Prefixos numéricos "8./9./10." enganosos (não batem com a posição real) | ⚠️ | ✅ Aplicado |
+| MP-01-05 | SEC | 🟡 | Nomes de seção genéricos ("Settings", "General", "Positions") | ⚠️ | ✅ Aplicado |
+| MP-01-06 | TIP | 🟡 | Idioma misto → adotado padrão bilíngue (EN em cima, pt embaixo) | não | 🔄 Em progresso |
 | MP-01-07 | NAM | 🟡 | Rótulos legados: "Stance 2 - Custom" / "Stance 3 - Low Ready" contradizem a realidade | ⚠️ | ✅ Aplicado |
 | MP-01-08 | LOC | 🟡 | Velocidades de movimento espalhadas em 2 seções | ⚠️ | Pendente |
 | MP-01-09 | ADV | 🟡 | Offsets de ADS perderam o liga/desliga (o toggle era a prop morta `Advanced ADS Transitions`) | não | ✅ Aplicado (a — sem gate) |
