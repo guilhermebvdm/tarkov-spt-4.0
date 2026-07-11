@@ -53,8 +53,8 @@ public class Plugin : BaseUnityPlugin
     };
 
     // Section constants (in display order - top to bottom)
-    private const string Positions = "Positions";
-    private const string Settings = "Settings";
+    private const string Positions = "Camera Position";
+    private const string Settings = "Stance Cycle & Hotkeys";
     private const string ADSDefaults = "ADS Default Values (Advanced)";
     private const string DefaultHandsPositions = "Default Hands/Arms Positions (Advanced)";
     private const string Stance0Section = "Stance 0 - Vanilla";
@@ -71,7 +71,7 @@ public class Plugin : BaseUnityPlugin
     private const string DebugSettings = "Debug (Advanced)";
     private const string PassiveMountSettings = "Weapon Mount (Passive)";
     private const string ActiveMountSettings = "Weapon Mount (Active)";
-    private const string AnimationSettings = "Animations & Transitions (Item 005)";
+    private const string AnimationSettings = "Animation Speed";
 
     // Positions
     public static ConfigEntry<bool> _PositionEnabled;
@@ -334,7 +334,7 @@ public class Plugin : BaseUnityPlugin
         // MANUAL CHAMBERING
         // ========================================
         _EnableManualChambering = Config.Bind(
-            "Manual Chambering Settings (Item 010)",
+            "Manual Chambering",
             "Enable Manual Chambering",
             true,
             new ConfigDescription("Master toggle do Manual Chambering. Desligado = comportamento vanilla em TODOS os cenários (kill-switch seguro). Puxe o ferrolho com a tecla nativa 'Chamber/Unload' (ECommand.ChamberUnload) quando a câmara estiver vazia e houver munição no carregador.",
@@ -342,7 +342,7 @@ public class Plugin : BaseUnityPlugin
             new ConfigurationManagerAttributes { Order = 70 }));
 
         _ManualChamberingOnRaidStart = Config.Bind(
-            "Manual Chambering Settings (Item 010)",
+            "Manual Chambering",
             "Manual Chambering On Raid Start",
             true,
             new ConfigDescription(
@@ -351,7 +351,7 @@ public class Plugin : BaseUnityPlugin
                 new ConfigurationManagerAttributes { Order = 69 }));
 
         _ManualChamberingOnReload = Config.Bind(
-            "Manual Chambering Settings (Item 010)",
+            "Manual Chambering",
             "Manual Chambering On Reload",
             true,
             new ConfigDescription(
@@ -398,7 +398,7 @@ public class Plugin : BaseUnityPlugin
         // ========================================
         // SETTINGS (Order 65 → 48)
         // ========================================
-        const string GeneralSection = "General";
+        const string GeneralSection = "Stance Transition & Kick";
 
         // backlog 002 F1 — substitui `Use Only Stances` (lógica invertida).
         _attrIncludeStance0 = new ConfigurationManagerAttributes { Order = 65 };
@@ -886,7 +886,7 @@ public class Plugin : BaseUnityPlugin
         // de descoberta; se no F12 não ficar acima de "9. Respiração", prefixar o nome — ver 02-spec-tech §7).
         BindStaminaManagement();
 
-        const string HoldBreathSection = "9. Respiração (Hold Breath)";
+        const string HoldBreathSection = "Hold Breath";
 
         // ========================================
         // HOLD BREATH SETTINGS (Order -10)
@@ -936,7 +936,7 @@ public class Plugin : BaseUnityPlugin
         // ========================================
         // OXYGEN UI SETTINGS (Order -13)
         // ========================================
-        const string OxygenUISection = "10. Barra de Oxigênio (UI)";
+        const string OxygenUISection = "Oxygen Bar (UI)";
         
         _EnableOxygenUI = Config.Bind(
             OxygenUISection,
