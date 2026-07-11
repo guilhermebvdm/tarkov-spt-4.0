@@ -9,13 +9,17 @@ namespace CustomClasses;
 
 /// <summary>
 ///     Registers character "classes" as selectable launcher editions by loading one JSON file
-///     per class from <c>config/classes/</c> and injecting each into the profiles database after
-///     it is loaded (PostDBModLoader). Adding a class = dropping a <c>.json</c>/<c>.jsonc</c> file
-///     (no recompile). Invalid files are skipped with a clear log; the others still load.
+///     per class from <c>config/classes/</c> and injecting each into the profiles database.
+///     Adding a class = dropping a <c>.json</c>/<c>.jsonc</c> file (no recompile). Invalid files are
+///     skipped with a clear log; the others still load.
 ///     Item 021: the per-class validate/build/commit logic lives in <see cref="ClassRegistrar"/> —
 ///     the SAME pipeline the web editor uses, so boot and editor share validation by construction.
+///     Load order (2026-07-11): runs at <c>PostSptModLoader + 1</c> — LAST, after every item mod has
+///     created its custom templates (c11-tn-4, WTT-PackNStrap, clothing mods, …). At the previous
+///     <c>PostDBModLoader + 1</c> those templates didn't exist yet, so loadout tpls hit "not in item
+///     database", packed at 1x1, and items inside mod containers (no grids yet) were dropped.
 /// </summary>
-[Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 1)]   // ref: OnLoadOrder.cs:9
+[Injectable(TypePriority = OnLoadOrder.PostSptModLoader + 1)]   // ref: OnLoadOrder.cs:16 (run after all item mods)
 public class CustomClassesMod(
     ModHelper modHelper,
     FileUtil fileUtil,

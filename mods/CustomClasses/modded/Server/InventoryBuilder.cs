@@ -205,9 +205,10 @@ public class InventoryBuilder(DatabaseService databaseService, ItemHelper itemHe
 
     /// <summary>
     ///     Resolve um preset de <c>databaseService.GetGlobals().ItemPresets</c> (id de preset OU tpl de arma).
-    ///     NÃO usa <c>PresetHelper</c>: o cache dele (<c>PresetCache</c>) só é hidratado por
-    ///     <c>PresetController.Initialize</c>, que roda DEPOIS do nosso <c>PostDBModLoader+1</c> — no nosso
-    ///     momento o cache está vazio. O dict <c>ItemPresets</c> já existe desde o DB load.
+    ///     Usa o dict cru <c>ItemPresets</c> (existe desde o DB load) — robusto independente do estágio de
+    ///     load. (Histórico: no antigo <c>PostDBModLoader+1</c> o <c>PresetCache</c> do <c>PresetHelper</c>
+    ///     ainda estava vazio, pois <c>PresetController.Initialize</c> roda depois; desde 2026-07-11 rodamos
+    ///     em <c>PostSptModLoader+1</c>, já depois dele, mas o dict cru segue igualmente válido.)
     /// </summary>
     private Preset? ResolvePreset(MongoId key)
     {
