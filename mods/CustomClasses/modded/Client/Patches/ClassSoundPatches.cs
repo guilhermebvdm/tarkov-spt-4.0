@@ -9,6 +9,36 @@ using SPT.Reflection.Patching;
 namespace CustomClasses.Client;
 
 /// <summary>
+///     🔧 Ruído de movimento REDUZIDO por classe — 👻 Ghost Step (Furtivo, ×0.70 = −30%) e
+///     🎯 Stalker (Caçador, ×0.80 = −20%; 2026-07-11). O Furtivo segue sendo o dono da furtividade;
+///     o Caçador ganha uma versão mais fraca (espreitar a presa). Retorna o multiplicador da classe LOCAL
+///     (1 = sem efeito). Usado pelos 3 pipelines de som (rolloff do player, IA base, SAIN) — mesma forma do
+///     <see cref="LoudOperator"/>, que é o oposto (aumenta o raio).
+///     ⚠️ Coop: som é host-only vs bots (B14) — um CLIENTE Fika não afeta a percepção da IA (ela vive no host).
+/// </summary>
+internal static class QuietStep
+{
+    internal static float Mult()
+    {
+        if (SkillMultipliers.IsLocalClass("Stealth"))
+        {
+            return PerksConfig.GhostStepEnabled?.Value == true
+                ? (PerksConfig.GhostStepSoundRadius?.Value ?? 1f)
+                : 1f;
+        }
+
+        if (SkillMultipliers.IsLocalClass("Hunter"))
+        {
+            return PerksConfig.StalkerEnabled?.Value == true
+                ? (PerksConfig.StalkerSoundRadius?.Value ?? 1f)
+                : 1f;
+        }
+
+        return 1f;
+    }
+}
+
+/// <summary>
 ///     🔻 Loud Operator (Fuzileiro + Tanque) — raio de audibilidade dos sons de movimento. Desdobrado por classe
 ///     (2026-07-10): cada classe tem config própria no F12. Retorna o multiplicador da classe LOCAL (1 = sem efeito).
 ///     Usado pelos 3 pipelines de som (rolloff do player, IA base, SAIN).
@@ -62,11 +92,8 @@ internal class SoundRadiusPatch : ModulePatch
 
             var r0 = __result;   // (052) baseline p/ o diagnóstico
 
-            // 🔧 Ghost Step (Furtivo): reduz o raio de audibilidade.
-            if (PerksConfig.GhostStepEnabled?.Value == true && SkillMultipliers.IsLocalClass("Stealth"))
-            {
-                __result *= PerksConfig.GhostStepSoundRadius?.Value ?? 1f;
-            }
+            // 🔧 Ghost Step (Furtivo −30%) / Stalker (Caçador −20%): reduz o raio de audibilidade.
+            __result *= QuietStep.Mult();
 
             // 🔻 Loud Operator (Fuzileiro + Tanque, desdobrado por classe): aumenta o raio de audibilidade.
             __result *= LoudOperator.Mult();
@@ -149,11 +176,7 @@ internal class AiSoundPatch : ModulePatch
 
             var p0 = power;
 
-            if (PerksConfig.GhostStepEnabled?.Value == true && SkillMultipliers.IsLocalClass("Stealth"))
-            {
-                power *= PerksConfig.GhostStepSoundRadius?.Value ?? 1f;
-            }
-
+            power *= QuietStep.Mult();
             power *= LoudOperator.Mult();
 
             if (PerkDiag.Enabled)
@@ -222,11 +245,7 @@ internal class SainSoundPatch : ModulePatch
             var before = __2;
             var soundType = Convert.ToInt32(__0);
 
-            if (PerksConfig.GhostStepEnabled?.Value == true && SkillMultipliers.IsLocalClass("Stealth"))
-            {
-                __2 *= PerksConfig.GhostStepSoundRadius?.Value ?? 1f;   // reduz TODOS
-            }
-
+            __2 *= QuietStep.Mult();      // reduz TODOS (Ghost Step / Stalker)
             __2 *= LoudOperator.Mult();   // aumenta TODOS
 
             if (soundType == SainSoundTypeLooting

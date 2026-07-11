@@ -548,3 +548,12 @@ calibração do usuário · próximo da fila: 058 (V1/V2/V4) ou 051 (decisão st
 **Lição:** antes de deferir um perk como "server-side", **grep o consumidor real do lever no decompilado**. Aqui o buff parecia server-side (é um buff de skill), mas o único consumidor era um `if` client — 1 Postfix num getter resolveu, sem server mod. Padrão reusável: **patchar o LEVER (getter/flag) em vez do FLUXO** reaproveita a lógica vanilla inteira e ganha o no-op natural.
 
 **Build:** 0 erros / **0 avisos** (corrigi de passagem um `CS8604` que eu havia introduzido no `PackContents` — o guard de null estava só nos call-sites; movido p/ dentro do helper).
+
+#### Perk NOVO — 🎯 Stalker / Espreita (Caçador): ruído de movimento −20% (2026-07-11)
+
+**Pedido do usuário:** "um perk igual ao do Furtivo no Caçador, o de produzir menos barulho, mas com 20% a menos". Implementado como **irmão mais fraco do Ghost Step** (Furtivo −30% / `0.70`; Caçador **−20% / `0.80`**) — o Furtivo continua sendo o dono da furtividade.
+
+**Implementação:** novo helper `QuietStep.Mult()` em `ClassSoundPatches.cs` (espelha o `LoudOperator.Mult()`, que é o oposto): resolve o multiplicador de ruído REDUZIDO da classe local (Stealth→`GhostStepSoundRadius`, Hunter→`StalkerSoundRadius`, senão 1). Os **3 pipelines de som** (rolloff `method_67`, IA base `BotEventHandler.PlaySound`, SAIN `PlayAISound`) passaram a chamar `QuietStep.Mult()` no lugar do `if (GhostStep…)` duplicado — mesma refatoração que já fiz no Loud Operator. F12: `Stalker — Enabled` + `Stalker — Sound radius mult` (seção `4 · Hunter`). Card `stalker` no catálogo (com `live:` lendo o F12) + `ByClass["Hunter"]`. Docs PT/EN.
+
+⚠️ **Impacto no BALANCE (não avaliado ainda):** o board de 2026-07-05 classificava o Caçador como **"equilibrado — classe de referência"** (custo 31.4 ✓, netMult 14.5 ✓) com 3 perks vivos. Este perk **ADICIONA poder** ao Caçador sem contrapartida. O Anexo B do board (perks vivos por classe) está desatualizado para o Caçador. Se/quando as Ondas 1–2 forem aplicadas, reavaliar se o Caçador precisa de um custo (o board sugeria "se ficar forte demais quando a Mira Serena nascer, endurecer o Rooted para 0.75" — a mesma alavanca serve aqui).
+⚠️ **Coop:** som é **host-only vs bots** (B14) — como CLIENTE Fika, o Stalker (assim como o Ghost Step) não afeta a percepção da IA (bots vivem no host).

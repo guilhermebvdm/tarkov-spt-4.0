@@ -70,6 +70,8 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 
 | Propriedade (EN) | Tipo | Padrão | Faixa | O que faz |
 |---|---|---|---|---|
+| `Stalker — Enabled` | bool | `true` | — | Perk: −raio de audibilidade dos sons de movimento (espreita). Irmão mais fraco do Ghost Step do Furtivo. |
+| `Stalker — Sound radius mult` | float | `0.8` | 0.1..1 | Raio de som de movimento (0.80 = **−20%**; o Furtivo tem −30%). |
 | `Sharpshooter — Enabled` | bool | `true` | — | Perk: mira (ADS) mais rápido. |
 | `Sharpshooter — ADS time mult` | float | `0.85` | 0.5..1 | Tempo de ADS (0.85 = 15% mais rápido). |
 | `Iron Lungs — Enabled` | bool | `true` | — | Perk: segura a respiração por mais tempo. |

@@ -53,6 +53,8 @@ internal static class PerksConfig
     internal static ConfigEntry<float>? LoudOperatorRiflemanSoundRadius;
 
     // 4 · Hunter
+    internal static ConfigEntry<bool>? StalkerEnabled;        // ruído de movimento (irmão do Ghost Step do Furtivo)
+    internal static ConfigEntry<float>? StalkerSoundRadius;
     internal static ConfigEntry<bool>? SharpshooterEnabled;
     internal static ConfigEntry<float>? SharpshooterAdsTime;
     internal static ConfigEntry<bool>? IronLungsEnabled;
@@ -211,6 +213,17 @@ internal static class PerksConfig
                 new AcceptableValueRange<float>(1f, 2f)));
 
         // ───────────────────────── 4 · Hunter ─────────────────────────
+        // Stalker (2026-07-11): irmão do Ghost Step do Furtivo, porém mais fraco (−20% vs −30%) — o Furtivo
+        // continua sendo o dono da furtividade. Mesmos 3 pipelines de som (rolloff, IA base, SAIN).
+        StalkerEnabled = config.Bind(
+            SecHunter, "Stalker — Enabled", true,
+            "Caçador: reduz o raio de audibilidade dos seus sons de movimento (espreita). / Hunter: quieter movement (smaller audibility radius).");
+        StalkerSoundRadius = config.Bind(
+            SecHunter, "Stalker — Sound radius mult", 0.80f,
+            new ConfigDescription(
+                "Multiplicador do raio de som de movimento do Caçador (0.80 = −20%). / Hunter movement-sound radius multiplier (0.80 = −20%).",
+                new AcceptableValueRange<float>(0.1f, 1f)));
+
         SharpshooterEnabled = config.Bind(
             SecHunter, "Sharpshooter — Enabled", true,
             "Caçador: mira (ADS) mais rápido. / Hunter: faster ADS.");

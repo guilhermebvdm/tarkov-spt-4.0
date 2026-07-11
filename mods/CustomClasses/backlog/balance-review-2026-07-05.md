@@ -188,7 +188,7 @@ Divergências card × F12 (auditoria dos efeitos numéricos — 2 números + 1 r
 |---|---|---|---|
 | Tanque | carga +30% · dano ×0.85 · recuo pesado ×0.85 · ergo pesado ×1.15 · GL sem penalidade · braço não cansa (×0) | — | veloc ×0.9 · fome/sede ×1.3 · ruído +30%¹ |
 | Fuzileiro | flinch ×0.5 · anti-jam ×0.5 · Adrenalina (recuo ×0.7 · recarga ×0.8 · ADS ×0.8, janela) | — | ruído +30%¹ |
-| Caçador | ADS −15% · fôlego dreno ×0.5 · braço mirando ×0.65 | Mira Serena | veloc mirando −15% |
+| Caçador | ADS −15% · fôlego dreno ×0.667 · braço mirando ×0.65 · **ruído ×0.80 (Stalker — NOVO 2026-07-11)**¹ | Mira Serena | veloc mirando −15% |
 | Furtivo | ruído ×0.40¹ · melee ×5 · +10% veloc c/ melee | — | aim punch ×1.5 |
 | Saqueador | saque silencioso ×0.4¹ · carga +30% | Quick Hands (061) | inércia ∝ peso |
 | Médico | — (B17 propõe fome/sede ×0.85 vivo) | Cuidado Rápido · Cirurgião Ágil · Cirurgia em Movimento | recuo ×1.25 |
@@ -221,3 +221,4 @@ nas 3 categorias.
 | 2026-07-05 | Guilherme/Claude | Review rodada 1 endereçada: B8/B9 corrigidos, B5 exato, B2/B3 exatos, novos B14–B18, Peladão no Anexo A. |
 | 2026-07-05 | Guilherme/Claude | Review rodada 2 endereçada: Anexo C corrigido (mastery só SMG/LMG/GL; piso 0.5 inalcançável; "anula drawback" qualificado), dependência circular B13↔B15 desfeita, **Ondas de aplicação** (B4 na Onda 0; nerfs do Tanque divididos c/ gate entre ondas), B14 reescrito como implementação host-side direta, tabela netMult antes→depois no §4.2, label do Ghost Step no B2, novo B19 (magnitude nos cards Flag). |
 | 2026-07-10 | Guilherme/Claude | **Onda 0 aplicada** (aprovada pelo usuário): B1 (Shaky Hands default OFF), B2 (Ghost Step F12 0.40→0.70 + label "ruído de movimento/ações"), B3 (Iron Lungs F12 0.50→0.667), B4 (cards do painel CLASS lendo o F12 vivo via `PerkLine.Live` — 22 linhas fiadas, Iron Lungs=1/dreno e Pack Mule=1+bônus transformados), B17 (Metabolismo Eficiente — 1º perk vivo do Médico, fome/sede ×0.85 no lever do Heavy Frame). Build limpo + review adversarial dos mapeamentos (0 problemas). |
+| 2026-07-11 | Guilherme/Claude | ⚠️ **Conteúdo novo FORA do board** (pedido do usuário): perk **Stalker/Espreita** no Caçador — ruído de movimento ×0.80 (−20%), irmão mais fraco do Ghost Step (−30%). Anexo B atualizado, mas **a análise deste board — que classificava o Caçador como "equilibrado, classe de referência" — NÃO considerou este perk**: ele ganhou poder sem contrapartida. Reavaliar o Caçador antes/depois das Ondas 1–2 (alavanca de custo já sugerida no §3: endurecer o Rooted p/ 0.75). Idem item 061 (Quick Hands) — perk que era ⏳ e virou vivo no Saqueador. |

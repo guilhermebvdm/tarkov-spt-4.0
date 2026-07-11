@@ -124,6 +124,11 @@ internal static class PerksCatalog
             P("Steady Arms", "Braços Firmes", "arm fatigue when aiming", "fadiga de braço ao mirar", ValueFormat.Percent, 0.65f, Polarity.LowerBetter, EBuffId.EnduranceHands, live: () => PerksConfig.SteadyArmsDrain?.Value ?? 0.65f),   // 051 ENTREGUE (hook no stances)
             P("Calm Sights", "Mira Serena", "sway", "oscilação (sway)", ValueFormat.Percent, 0.7f, Polarity.LowerBetter, EBuffId.AimMasterWiggle, pending: true),
         }),
+        // Stalker (2026-07-11): irmão mais fraco do Ghost Step (−20% vs −30%) — o Furtivo segue dono da furtividade.
+        ["stalker"] = G("Stalker", "Espreita", ESkillId.CovertMovement, new[]
+        {
+            P("Stalker", "Espreita", "movement/action noise", "ruído de movimento/ações", ValueFormat.Percent, 0.8f, Polarity.LowerBetter, EBuffId.CovertMovementSoundVolume, live: () => PerksConfig.StalkerSoundRadius?.Value ?? 0.8f),
+        }),
         ["rooted"] = G("Rooted", "Enraizado", ESkillId.CovertMovement, new[]
         {
             P("Rooted", "Enraizado", "move speed while aiming", "velocidade ao mirar", ValueFormat.Percent, 0.85f, Polarity.HigherBetter, EBuffId.CovertMovementSpeed, live: () => PerksConfig.RootedAdsSpeed?.Value ?? 0.85f),
@@ -195,7 +200,7 @@ internal static class PerksCatalog
     {
         ["Combat Medic"] = new[] { "combat_medic", "efficient_metabolism", "shaky_hands" },   // B17: perk vivo (Metabolismo)
         ["Rifleman"]     = new[] { "cool_under_fire", "adrenaline", "loud_operator_rifleman" },
-        ["Hunter"]       = new[] { "sharpshooter", "iron_lungs", "rooted" },
+        ["Hunter"]       = new[] { "sharpshooter", "iron_lungs", "stalker", "rooted" },   // stalker: ruído −20% (2026-07-11)
         ["Stealth"]      = new[] { "ghost_step", "execution", "rattled" },
         ["Scavenger"]    = new[] { "quick_hands", "silent_looter", "pack_mule_scav", "overladen" },
         ["Tank"]         = new[] { "pack_mule_tank", "bulwark", "bunker", "heavy_frame", "loud_operator_tank" },   // Pack Mule + Loud Operator próprios (desdobrados 2026-07-10)

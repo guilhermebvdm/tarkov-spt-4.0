@@ -70,6 +70,8 @@ Properties exposed in the configuration menu (F12 / ConfigurationManager). None 
 
 | Property | Type | Default | Range | What it does |
 |---|---|---|---|---|
+| `Stalker — Enabled` | bool | `true` | — | Perk: reduces the audibility radius of your movement sounds (stalking). Weaker sibling of the Stealth's Ghost Step. |
+| `Stalker — Sound radius mult` | float | `0.8` | 0.1..1 | Movement-sound radius (0.80 = **−20%**; the Stealth gets −30%). |
 | `Sharpshooter — Enabled` | bool | `true` | — | Perk: faster ADS. |
 | `Sharpshooter — ADS time mult` | float | `0.85` | 0.5..1 | ADS time (0.85 = 15% faster). |
 | `Iron Lungs — Enabled` | bool | `true` | — | Perk: holds breath longer. |

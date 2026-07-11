@@ -1,16 +1,16 @@
 # Graph Report - mods\CustomClasses\modded  (2026-07-11)
 
 ## Corpus Check
-- 109 files · ~96,384 words
+- 109 files · ~96,784 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1636 nodes · 2099 edges · 106 communities (97 shown, 9 thin omitted)
+- 1638 nodes · 2101 edges · 108 communities (99 shown, 9 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `3a9c0a25`
+- Built from commit: `6aab19a6`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -94,6 +94,7 @@
 - [[_COMMUNITY_Community 83|Community 83]]
 - [[_COMMUNITY_Community 84|Community 84]]
 - [[_COMMUNITY_Community 85|Community 85]]
+- [[_COMMUNITY_Community 86|Community 86]]
 - [[_COMMUNITY_Community 87|Community 87]]
 - [[_COMMUNITY_Community 88|Community 88]]
 - [[_COMMUNITY_Community 89|Community 89]]
@@ -112,6 +113,7 @@
 - [[_COMMUNITY_Community 103|Community 103]]
 - [[_COMMUNITY_Community 104|Community 104]]
 - [[_COMMUNITY_Community 105|Community 105]]
+- [[_COMMUNITY_Community 107|Community 107]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `CatalogService` - 55 edges
@@ -140,7 +142,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (106 total, 9 thin omitted)
+## Communities (108 total, 9 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.09
@@ -419,8 +421,8 @@ Cohesion: 0.15
 Nodes (11): BasePhysicalClass, MethodBase, PatchPostfix, PatchPrefix, MovementContext, ClassMoveSpeed, MaxSpeedPatch, OverladenInertiaPatch (+3 more)
 
 ### Community 82 - "Community 82"
-Cohesion: 0.12
-Nodes (13): AISoundType, Func, int, MethodBase, PatchPostfix, PatchPrefix, Player, IPlayer (+5 more)
+Cohesion: 0.11
+Nodes (14): AISoundType, Func, int, MethodBase, PatchPostfix, PatchPrefix, Player, IPlayer (+6 more)
 
 ### Community 83 - "Community 83"
 Cohesion: 0.16
@@ -433,6 +435,10 @@ Nodes (13): bool, Dictionary, ESkillId, float, Func, Sprite, string, PerkGroup (
 ### Community 85 - "Community 85"
 Cohesion: 0.22
 Nodes (6): IEnumerator, MethodBase, PatchPostfix, string, GameWorld, RaidPerksNotificationPatch
+
+### Community 86 - "Community 86"
+Cohesion: 0.25
+Nodes (5): ChatSpecialIcon, MethodBase, PatchPostfix, TextMeshProUGUI, PlayerModelWithStatsIdentityPatch
 
 ### Community 87 - "Community 87"
 Cohesion: 0.25
@@ -463,8 +469,8 @@ Cohesion: 0.29
 Nodes (7): GameObject, Identity, PerkLine, TMP_FontAsset, Transform, PerksPanelView, PerkGroup
 
 ### Community 97 - "Community 97"
-Cohesion: 0.07
-Nodes (18): FieldInfo, MethodBase, PatchPostfix, PatchPrefix, ChatSpecialIcon, MethodBase, PatchPostfix, TextMeshProUGUI (+10 more)
+Cohesion: 0.17
+Nodes (8): FieldInfo, MethodBase, PatchPostfix, PatchPrefix, GroupPlayerViewModelClass, PartyPlayerItem, PartyInfoPanelPrefetchPatch, PartyPlayerItemPatch
 
 ### Community 98 - "Community 98"
 Cohesion: 0.17
@@ -494,6 +500,10 @@ Nodes (6): CardHover, Color, Image, PointerEventData, IPointerEnterHandler, IPoi
 Cohesion: 0.33
 Nodes (4): SkillManager, Weapon, WeaponMastery, WeaponSkillClass
 
+### Community 107 - "Community 107"
+Cohesion: 0.25
+Nodes (5): FieldInfo, MethodBase, PatchPostfix, PlayerNamePanelPatch, PlayerNamePanel
+
 ## Knowledge Gaps
 - **924 isolated node(s):** `float`, `string`, `Dictionary`, `bool`, `Payload` (+919 more)
   These have ≤1 connection - possible missing edges or undocumented components.
@@ -507,7 +517,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `LoadingClassHover` connect `Community 91` to `Community 101`, `Community 102`, `Community 103`?**
   _High betweenness centrality (0.019) - this node is a cross-community bridge._
 - **Why does `SkillsClassTabPatch` connect `Community 49` to `Community 90`?**
-  _High betweenness centrality (0.011) - this node is a cross-community bridge._
+  _High betweenness centrality (0.014) - this node is a cross-community bridge._
 - **What connects `float`, `string`, `Dictionary` to the rest of the system?**
   _924 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
