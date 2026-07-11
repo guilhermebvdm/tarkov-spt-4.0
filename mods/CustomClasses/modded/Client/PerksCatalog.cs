@@ -102,9 +102,14 @@ internal static class PerksCatalog
             P("Adrenaline Reload", "Recarga de Adrenalina", "reload time (combat window)", "recarga (janela de combate)", ValueFormat.Multiplier, 0.8f, Polarity.LowerBetter, EBuffId.WeaponReloadBuff, live: () => PerksConfig.AdrenalineReloadTime?.Value ?? 0.8f),
             P("Adrenaline Focus", "Foco de Adrenalina", "ADS time (combat window)", "ADS (janela de combate)", ValueFormat.Multiplier, 0.8f, Polarity.LowerBetter, EBuffId.AimMasterSpeed, live: () => PerksConfig.AdrenalineAdsTime?.Value ?? 0.8f),
         }),
-        ["loud_operator"] = G("Loud Operator", "Barulhento", ESkillId.SilentOps, new[]   // compartilhado Fuzileiro + Tanque (2026-07-05)
+        // Loud Operator desdobrado por classe (2026-07-10): cada card lê a config DA SUA classe.
+        ["loud_operator_rifleman"] = G("Loud Operator", "Barulhento", ESkillId.SilentOps, new[]
         {
-            P("Loud Operator", "Barulhento", "noise", "ruído", ValueFormat.Percent, 1.3f, Polarity.LowerBetter, EBuffId.CovertMovementSoundVolume, live: () => PerksConfig.LoudOperatorSoundRadius?.Value ?? 1.3f),
+            P("Loud Operator", "Barulhento", "noise", "ruído", ValueFormat.Percent, 1.3f, Polarity.LowerBetter, EBuffId.CovertMovementSoundVolume, live: () => PerksConfig.LoudOperatorRiflemanSoundRadius?.Value ?? 1.3f),
+        }),
+        ["loud_operator_tank"] = G("Loud Operator", "Barulhento", ESkillId.SilentOps, new[]
+        {
+            P("Loud Operator", "Barulhento", "noise", "ruído", ValueFormat.Percent, 1.3f, Polarity.LowerBetter, EBuffId.CovertMovementSoundVolume, live: () => PerksConfig.LoudOperatorTankSoundRadius?.Value ?? 1.3f),
         }),
 
         // 🎯 Caçador
@@ -155,10 +160,14 @@ internal static class PerksCatalog
         }),
 
         // 🛡️ Tanque
-        ["pack_mule"] = G("Pack Mule", "Mula de Carga", ESkillId.Strength, new[]   // compartilhado Saqueador + Tanque
+        // Pack Mule desdobrado por classe (2026-07-10): cada card lê a config DA SUA classe (B4: o F12 é o bônus cru → card = 1 + bônus).
+        ["pack_mule_scav"] = G("Pack Mule", "Mula de Carga", ESkillId.Strength, new[]
         {
-            // B4: o card mostra +X% (Percent), mas o F12 é o bônus cru (0.30). card = 1 + bônus.
-            P("Pack Mule", "Mula de Carga", "carry limit", "limite de carga", ValueFormat.Percent, 1.3f, Polarity.HigherBetter, EBuffId.StrengthBuffLiftWeightInc, live: () => 1f + (PerksConfig.PackMuleCarryBonus?.Value ?? 0.3f)),
+            P("Pack Mule", "Mula de Carga", "carry limit", "limite de carga", ValueFormat.Percent, 1.3f, Polarity.HigherBetter, EBuffId.StrengthBuffLiftWeightInc, live: () => 1f + (PerksConfig.PackMuleScavCarryBonus?.Value ?? 0.3f)),
+        }),
+        ["pack_mule_tank"] = G("Pack Mule", "Mula de Carga", ESkillId.Strength, new[]
+        {
+            P("Pack Mule", "Mula de Carga", "carry limit", "limite de carga", ValueFormat.Percent, 1.3f, Polarity.HigherBetter, EBuffId.StrengthBuffLiftWeightInc, live: () => 1f + (PerksConfig.PackMuleTankCarryBonus?.Value ?? 0.3f)),
         }),
         ["bulwark"] = G("Bulwark", "Couraça", ESkillId.HeavyVests, new[]
         {
@@ -184,11 +193,11 @@ internal static class PerksCatalog
     private static readonly Dictionary<string, string[]> ByClass = new(StringComparer.OrdinalIgnoreCase)
     {
         ["Combat Medic"] = new[] { "combat_medic", "efficient_metabolism", "shaky_hands" },   // B17: perk vivo (Metabolismo)
-        ["Rifleman"]     = new[] { "cool_under_fire", "adrenaline", "loud_operator" },
+        ["Rifleman"]     = new[] { "cool_under_fire", "adrenaline", "loud_operator_rifleman" },
         ["Hunter"]       = new[] { "sharpshooter", "iron_lungs", "rooted" },
         ["Stealth"]      = new[] { "ghost_step", "execution", "rattled" },
-        ["Scavenger"]    = new[] { "quick_hands", "silent_looter", "pack_mule", "overladen" },
-        ["Tank"]         = new[] { "pack_mule", "bulwark", "bunker", "heavy_frame", "loud_operator" },   // loud_operator: +ruído (2026-07-05, decisão do usuário)
+        ["Scavenger"]    = new[] { "quick_hands", "silent_looter", "pack_mule_scav", "overladen" },
+        ["Tank"]         = new[] { "pack_mule_tank", "bulwark", "bunker", "heavy_frame", "loud_operator_tank" },   // Pack Mule + Loud Operator próprios (desdobrados 2026-07-10)
     };
 
     private static bool _validated;

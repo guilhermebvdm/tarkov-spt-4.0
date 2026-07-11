@@ -34,51 +34,51 @@ public class Plugin : BaseUnityPlugin
         Log = Logger;
         Instance = this;   // item 012: para hospedar coroutines de UI do menu
         Enabled = Config.Bind(
-            "General",
+            PerksConfig.SecGeneral,
             "EnableSkillMultipliers",
             true,
-            "Liga/desliga a escala de ganho de XP de skill por classe (CustomClasses).").Value;
+            "Liga/desliga a escala de ganho de XP de skill por classe. / Enable per-class skill XP-gain scaling.").Value;
         ShowOnUi = Config.Bind(
-            "General",
+            PerksConfig.SecGeneral,
             "ShowMultiplierOnSkills",
             true,
-            "Mostra o destaque do multiplicador nas skills (borda colorida no ícone + seta ±X% ao lado do nome + tooltip da classe).").Value;
+            "Mostra o destaque do multiplicador nas skills (borda colorida + seta ±X% + tooltip da classe). / Show the multiplier highlight on skills (colored border + ±X% arrow + class tooltip).").Value;
         ShowClassOnPlayerName = Config.Bind(
-            "General",
+            PerksConfig.SecGeneral,
             "ShowClassOnPlayerName",
             true,
             "Aplica ícone + nome da classe no nome do jogador (deploy, character, lista online). / Apply class icon + name on the player's name.").Value;
         ShowClassIdentity = Config.Bind(
-            "General",
+            PerksConfig.SecGeneral,
             "ShowClassIdentity",
             false,
             "Selo separado da classe no menu e no topo da tela de Skills (off por padrão — o nome do jogador já mostra). / Separate class seal in the menu and Skills screen (off by default).").Value;
         ShowSkillsButton = Config.Bind(
-            "General",
+            PerksConfig.SecGeneral,
             "ShowSkillsButton",
             true,
             "Adiciona um botão SKILLS no menu (abaixo de CHARACTER) que abre a tela de Skills. / Add a SKILLS button to the menu.").Value;
         ShowLevelUpFlavor = Config.Bind(
-            "General",
+            PerksConfig.SecGeneral,
             "ShowLevelUpFlavor",
             true,
             "Customiza a notificação de level-up (EASILY/FINALLY) das skills com multiplicador da classe. / Customize the skill level-up notification.").Value;
         // AcceptableValueRange → o ConfigurationManager (F12) renderiza como SLIDER (barra de arrastar), não input numérico.
-        SkillsClassPosX = Config.Bind("Class identity position", "SkillsClassPosX", 0f,
-            new ConfigDescription("Skills screen class seal — horizontal offset (px) from center. 0 = centered.",
+        SkillsClassPosX = Config.Bind(PerksConfig.SecInterface, "SkillsClassPosX", 0f,
+            new ConfigDescription("Selo da classe na tela de Skills — offset horizontal (px) do centro. 0 = centrado. / Skills screen class seal — horizontal offset (px) from center. 0 = centered.",
                 new AcceptableValueRange<float>(-1000f, 1000f)));
-        SkillsClassPosY = Config.Bind("Class identity position", "SkillsClassPosY", -20f,
-            new ConfigDescription("Skills screen class seal — vertical offset (px) from top. Negative = down.",
+        SkillsClassPosY = Config.Bind(PerksConfig.SecInterface, "SkillsClassPosY", -20f,
+            new ConfigDescription("Selo da classe na tela de Skills — offset vertical (px) do topo. Negativo = para baixo. / Skills screen class seal — vertical offset (px) from top. Negative = down.",
                 new AcceptableValueRange<float>(-1000f, 1000f)));
         // 006-fix (calibragem): tamanho do ícone = fontSize do nome de CADA tela × ratio → proporção ícone:fonte
         // idêntica em todas as telas (menu, OVERALL, deploy, confirmation), independente do tamanho da fonte.
-        ClassIconRatio = Config.Bind("Class identity position", "ClassIconRatio", 1.35f,
-            new ConfigDescription("Class icon size as a multiple of each screen's name font size (icon = nameFontSize × ratio). Keeps the icon:font proportion consistent across screens.",
+        ClassIconRatio = Config.Bind(PerksConfig.SecInterface, "ClassIconRatio", 1.35f,
+            new ConfigDescription("Tamanho do ícone da classe como múltiplo da fonte do nome de cada tela (mantém a proporção ícone:fonte). / Class icon size as a multiple of each screen's name font size (keeps the icon:font proportion consistent).",
                 new AcceptableValueRange<float>(0.8f, 2.5f)));
         // (review CR-057F3-01) default era 3.0 calibrado ÀS CEGAS (o host antigo nunca disparava — a escala
         // nunca foi aplicada in-game). Agora que o host real (PartyPlayerItem) funciona, 1.2 = leve e seguro.
-        DeployNameScale = Config.Bind("Class identity position", "DeployNameScale", 1.2f,
-            new ConfigDescription("Scale of the player icon+name on the raid loading (deploy) screen (1.0 = original). Icon and name grow together (same proportion).",
+        DeployNameScale = Config.Bind(PerksConfig.SecInterface, "DeployNameScale", 1.2f,
+            new ConfigDescription("Escala do ícone+nome do jogador na tela de deploy/loading (1.0 = original; ícone e nome crescem juntos). / Scale of the player icon+name on the raid loading (deploy) screen (1.0 = original).",
                 new AcceptableValueRange<float>(1.0f, 4.0f)));
         // Real-time reposition when the F12 value changes (same pattern as Menu-Overhaul: SettingChanged event).
         SkillsClassPosX.SettingChanged += (_, _) => RepositionSeals();

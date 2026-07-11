@@ -1,94 +1,154 @@
 # PROPRIEDADES.md — CustomClasses (client F12 / BepInEx)
 
-Plugin: `customclasses.mdj.client` ("CustomClasses") — ver [modded/Client/Plugin.cs](modded/Client/Plugin.cs).
+Plugin: `customclasses.mdj.client` ("CustomClasses") — ver [modded/Client/Plugin.cs](modded/Client/Plugin.cs) e [modded/Client/PerksConfig.cs](modded/Client/PerksConfig.cs). Versão EN: [PROPERTIES.md](PROPERTIES.md).
 
 Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Nenhuma é **(Avançado)**.
 
-## Seção `General`
+> **Organização (reorg 2026-07-10):** uma **seção por classe** (perks + drawbacks juntos). O prefixo numérico (`0 ·`, `1 ·`…) força a ordem no F12 — o ConfigurationManager ordena as seções alfabeticamente. Ordem: sistema (`0`/`1`), depois as 6 classes na ordem do roster (`2`–`7`), e por fim os fixes globais (`8`).
+>
+> **Idioma:** o F12 é do **BepInEx, não do EFT** — não segue o idioma do jogo (as strings são fixadas no `Awake`, antes de o EFT carregar o locale). Por isso os **nomes de seção/propriedade ficam em inglês** e as **descrições (tooltips) são bilíngues `PT / EN`** na mesma linha. Este arquivo (PT) e o [PROPERTIES.md](PROPERTIES.md) (EN) documentam por idioma.
+>
+> **Compartilhados desdobrados:** Pack Mule (Saqueador + Tanque) e Loud Operator (Fuzileiro + Tanque) têm **config própria por classe** — cada seção mostra os seus, com valores independentes.
 
-| Nome (EN) | Tradução pt-BR | Tipo | Padrão | Faixa | Tooltip (pt-BR) |
-|---|---|---|---|---|---|
-| `EnableSkillMultipliers` | Ativar multiplicadores de skill | bool | `true` | true/false | Liga/desliga a escala de ganho de XP de skill por classe (CustomClasses). |
-| `ShowMultiplierOnSkills` | Mostrar multiplicador nas skills | bool | `true` | true/false | Mostra o destaque do multiplicador nas skills (borda colorida no ícone + seta ±X% ao lado do nome + tooltip da classe). |
-| `ShowClassOnPlayerName` | Classe no nome do jogador | bool | `true` | true/false | Aplica o **gradiente** da cor da classe no nome + ícone da classe (tingido) + **tooltip** "This player is \<classe\>" (menu, character, deploy, confirmation). No **menu** mostra o nome da classe numa 2ª linha e usa a cor da classe no EXP/blur/detalhes (via AccentColor do Menu-Overhaul). (item 015) |
-| `ShowClassIdentity` | Selo separado (Skills) | bool | `false` | true/false | Selo separado da classe (ícone+nome) no topo da **tela de Skills**. **Off por padrão**. (item 012) |
-| `ShowSkillsButton` | Botão SKILLS no menu | bool | `true` | true/false | Adiciona um botão SKILLS no menu (abaixo de CHARACTER) que abre direto a aba Skills. (item 013) |
-| `ShowLevelUpFlavor` | Mensagem de level-up | bool | `true` | true/false | Customiza a notificação "skill leveled up" com `EASILY` (buff, verde) / `FINALLY` (debuff, vermelho) nas skills com multiplicador da classe. (item 014) |
+---
 
-## Seção `Class identity position`
+## Seção `0 · General`
 
-> Offsets (em px) do "selo" da classe na **tela de Skills** (só aparece com `ShowClassIdentity` ligado). **Sliders** (barra de arrastar, faixa −1000..1000) que aplicam **em tempo real** (com a tela aberta, arrastar move o selo na hora). *(O menu não usa selo separado — a identidade vai no próprio nome do jogador via `ShowClassOnPlayerName`.)*
+| Propriedade (EN) | Tipo | Padrão | O que faz |
+|---|---|---|---|
+| `EnableSkillMultipliers` | bool | `true` | Liga/desliga a escala de ganho de XP de skill por classe. |
+| `ShowMultiplierOnSkills` | bool | `true` | Destaque do multiplicador nas skills (borda colorida + seta ±X% + tooltip da classe). |
+| `ShowClassOnPlayerName` | bool | `true` | Ícone + nome (gradiente) da classe no nome do jogador (deploy, character, lista online). (item 015) |
+| `ShowClassIdentity` | bool | `false` | Selo separado da classe no menu e no topo da tela de Skills. (item 012) |
+| `ShowSkillsButton` | bool | `true` | Botão SKILLS no menu (abaixo de CHARACTER) que abre a tela de Skills. (item 013) |
+| `ShowLevelUpFlavor` | bool | `true` | Notificação de level-up `EASILY` (buff) / `FINALLY` (debuff) nas skills com multiplicador. (item 014) |
+| `Raid-start perks notification` | bool | `true` | Notificação no início da raid listando os perks (verde) e drawbacks (vermelho) da classe. |
+| `Perk Diagnostics overlay` | bool | `false` | Overlay ao vivo das propriedades afetadas pelos perks do seu player (validação). |
 
-| Nome (EN) | Tradução pt-BR | Tipo | Padrão | Tooltip (pt-BR) |
+## Seção `1 · Interface & Position`
+
+> Offsets (px) da UI da identidade da classe. `SkillsClassPos*` são **sliders** que aplicam em tempo real (com a tela de Skills aberta).
+
+| Propriedade (EN) | Tipo | Padrão | Faixa | O que faz |
 |---|---|---|---|---|
-| `SkillsClassPosX` | Skills — X | float | `0` | Selo na tela de Skills — offset horizontal a partir do centro (px). 0 = centralizado. |
-| `SkillsClassPosY` | Skills — Y | float | `-20` | Selo na tela de Skills — offset vertical a partir do topo (px). Negativo = baixo. |
-| `ClassIconRatio` | Proporção do ícone | float | `1.35` | Tamanho do ícone da classe como **múltiplo da fonte do nome de cada tela** (ícone = fonte × ratio). Mantém a proporção ícone:fonte **idêntica em todas as telas** (menu, character, deploy, confirmation), independente do tamanho da fonte. Faixa 0.8..2.5. (item 015 · 06-fix) |
-| `DeployNameScale` | Escala no deploy | float | `3.0` | Tamanho do ícone+nome na tela de carregamento da raid (deploy) — **ícone e nome crescem juntos** (mesma proporção). 1.0 = original. Faixa 1.0..4.0. (item 015 · 06-fix-02) |
+| `SkillsClassPosX` | float | `0` | −1000..1000 | Selo da classe (tela de Skills) — offset horizontal do centro. |
+| `SkillsClassPosY` | float | `-20` | −1000..1000 | Selo da classe (tela de Skills) — offset vertical do topo. |
+| `ClassIconRatio` | float | `1.35` | 0.8..2.5 | Tamanho do ícone = fonte do nome × ratio (mantém a proporção ícone:fonte em todas as telas). |
+| `DeployNameScale` | float | `1.2` | 1.0..4.0 | Escala do ícone+nome do jogador na tela de deploy/loading (ícone e nome crescem juntos). |
+| `Class Tab — X offset` | float | `0` | −400..400 | Ajuste fino da posição horizontal do botão da aba CLASS. |
+| `Class Detail on Loading Screen` | bool | `true` | — | Detalhe da classe (perks/drawbacks) no seu nome na tela de loading da raid (FIKA). (item 055) |
+| `Class Detail — Loading panel scale` | float | `0.75` | 0.5..1.0 | Escala (zoom-out) do popover de classe no loading (mesma área, conteúdo menor). |
+| `Weight Marker — X offset` | float | `0` | −600..600 | Posição horizontal do marcador `▲ +X%` no peso (aba Health). (item 056) |
+| `Weight Marker — Y offset` | float | `0` | −600..600 | Posição vertical do marcador `▲ +X%` no peso (positivo = para cima). (item 056) |
 
-> Notas (i18n — item 008, revisado no 015·06-fix):
-> - **Idioma automático:** os textos do mod in-game (nome da classe, tooltips, botão SKILLS) seguem o **idioma do EFT** (Settings → Language). `"po"` (Português) → pt; qualquer outro → inglês (fallback). O seletor `Language` (F12) foi **removido** — não é mais necessário.
-> - **Nome da classe in-game:** vem do campo `displayName { en, pt }` no JSON da classe (menu/tooltip). O `name` (chave da edition) continua em PT.
-> - **Descrição da edition no launcher:** resolvida no **servidor** (locale do servidor), não pelo EFT — é uma limitação do launcher do SPT. Para vê-la em inglês, configure o **server locale = en** (config do SPT). Os **nomes das edições** na tela de criação são a chave (PT).
-> - Trocar o `.dll` do client exige **reiniciar o jogo** (plugin BepInEx).
+## Seção `2 · Combat Medic`
 
-## Seção `Perks — UI`
-
-> Ajustes finos da UI de perks/drawbacks na tela de Skills (item 059).
-
-| Nome (EN) | Tradução pt-BR | Tipo | Padrão | Tooltip (pt-BR) |
+| Propriedade (EN) | Tipo | Padrão | Faixa | O que faz |
 |---|---|---|---|---|
-| `Class Tab — X offset` | Aba CLASS — offset X | float | `0` | Ajuste fino da posição horizontal do botão da aba CLASS (px). Só use se a aba não alinhar. Faixa −400..400. (item 059) |
-| `Class Detail on Loading Screen` | Detalhe da classe no loading | bool | `true` | Mostra o detalhe da sua classe (perks/drawbacks) no seu nome na tela de carregamento da raid (FIKA). (item 055) |
-| `Weight Marker — X offset` | Marcador do peso — offset X | float | `0` | Ajuste horizontal (px) do marcador `▲ +X%` no peso (aba Health). Negativo = esquerda. Faixa −600..600. (item 056) |
-| `Weight Marker — Y offset` | Marcador do peso — offset Y | float | `0` | Ajuste vertical (px) do marcador `▲ +X%` no peso (aba Health). Positivo = para cima. Faixa −600..600. (item 056) |
-| `Class Detail — Loading panel scale` | Popover do loading — escala | float | `0.75` | Escala (zoom-out) do popover de classe no deploy/loading (0.75 = 75%). Mesma área na tela, conteúdo menor → mais espaço pros cards. Faixa 0.5..1.0. Lido a cada hover (live). (item 055) |
+| `Efficient Metabolism — Enabled` | bool | `true` | — | Perk: fome/sede drenam mais devagar. |
+| `Efficient Metabolism — Hunger/thirst drain` | float | `0.85` | 0.5..1 | Dreno de fome/sede (0.85 = 15% mais devagar). |
+| `Shaky Hands — Enabled` | bool | `false` | — | Drawback: +recuo (mãos trêmulas). **Off por padrão** (balance B1). |
+| `Shaky Hands — Recoil mult` | float | `1.25` | 1..2 | Recuo (1.25 = +25%). |
 
-## Seção `Perks — Hunter` / `Perks — Tank` — braço (item 051)
+## Seção `3 · Rifleman`
 
-> Dreno de stamina de braço por classe, **composto com o stances mod** via hook (`ExternalHandsDrainMult`).
-> Sem o stances instalado: inativo (1 aviso no log), sem crash.
-
-| Nome (EN) | Tradução pt-BR | Tipo | Padrão | Tooltip (pt-BR) |
+| Propriedade (EN) | Tipo | Padrão | Faixa | O que faz |
 |---|---|---|---|---|
-| `Steady Arms — Enabled` | Braços Firmes — ativo | bool | `true` | Caçador: braço cansa mais devagar ao mirar (compõe com o stances mod). |
-| `Steady Arms — ADS arm drain mult` | Dreno de braço em ADS | float | `0.65` | Multiplicador do dreno de braço do Caçador em ADS (0.65 = 35% mais lento). Faixa 0.2..1. |
-| `Tireless Arms — Enabled` | Braços Incansáveis — ativo | bool | `true` | Tanque: braço não cansa segurando arma pesada (LMG/HMG/GL). |
-| `Tireless Arms — Heavy arm drain mult` | Dreno de braço c/ arma pesada | float | `0` | Multiplicador do dreno de braço do Tanque com arma pesada em mãos (0 = não drena). Faixa 0..1. |
+| `Cool Under Fire — Enabled` | bool | `true` | — | Perk: menos flinch ao levar dano. |
+| `Cool Under Fire — Flinch mult` | float | `0.5` | 0..1 | Tranco de câmera ao levar dano (0.5 = −50%). |
+| `Cool Under Fire — Malfunction chance mult` | float | `0.5` | 0..1 | Chance de travamento da arma (0.5 = −50%, anti-jam). |
+| `Adrenaline — Enabled` | bool | `true` | — | Perk: causar/receber dano abre uma janela com recuo/recarga/ADS melhores. |
+| `Adrenaline — Window (s)` | float | `25` | 5..120 | Duração da janela (renovável a cada novo dano). |
+| `Adrenaline — Cooldown (s)` | float | `120` | 0..600 | Cooldown após a janela antes de reativar. |
+| `Adrenaline — Recoil mult` | float | `0.7` | 0.3..1 | Recuo na janela (0.7 = −30%). |
+| `Adrenaline — Reload time mult` | float | `0.8` | 0.3..1 | Recarga na janela (0.8 = 20% mais rápido). |
+| `Adrenaline — ADS time mult` | float | `0.8` | 0.3..1 | ADS na janela (0.8 = 20% mais rápido). |
+| `Loud Operator — Enabled` | bool | `true` | — | Drawback: +raio de audibilidade dos sons de movimento. |
+| `Loud Operator — Sound radius mult` | float | `1.3` | 1..2 | Raio de som de movimento (1.3 = +30%). |
 
-## Seção `Perks — Combat Medic` (balance B17)
+## Seção `4 · Hunter`
 
-> Perk vivo do Médico — fome/sede drenam mais devagar. Reusa o lever do Heavy Frame
-> (`HeavyFrameMetabolism.Apply`), só o player local, só o dreno (restauração por comida/bebida não é afetada).
-
-| Nome (EN) | Tradução pt-BR | Tipo | Padrão | Tooltip (pt-BR) |
+| Propriedade (EN) | Tipo | Padrão | Faixa | O que faz |
 |---|---|---|---|---|
-| `Efficient Metabolism — Enabled` | Metabolismo Eficiente — ativo | bool | `true` | Médico: fome/sede drenam mais devagar (metabolismo eficiente). |
-| `Efficient Metabolism — Hunger/thirst drain` | Dreno de fome/sede | float | `0.85` | Multiplicador do dreno de fome/sede do Médico (0.85 = 15% mais devagar). Faixa 0.5..1. |
+| `Sharpshooter — Enabled` | bool | `true` | — | Perk: mira (ADS) mais rápido. |
+| `Sharpshooter — ADS time mult` | float | `0.85` | 0.5..1 | Tempo de ADS (0.85 = 15% mais rápido). |
+| `Iron Lungs — Enabled` | bool | `true` | — | Perk: segura a respiração por mais tempo. |
+| `Iron Lungs — Breath drain mult` | float | `0.667` | 0.2..1 | Dreno de O₂ ao prender a respiração (0.667 → +50% de duração). |
+| `Steady Arms — Enabled` | bool | `true` | — | Perk: braço cansa mais devagar ao mirar (**requer o stances mod**). |
+| `Steady Arms — ADS arm drain mult` | float | `0.65` | 0.2..1 | Dreno de braço em ADS (0.65 = 35% mais lento). |
+| `Rooted — Enabled` | bool | `true` | — | Drawback: −velocidade enquanto mira. |
+| `Rooted — ADS move speed` | float | `0.85` | 0.5..1 | Velocidade ao mirar (0.85 = −15%). |
 
-## Seção `Weapon Mastery` (item 058)
+## Seção `5 · Stealth`
 
-> Dá vida às maestrias inertes da tela SKILLS. XP: só o **underbarrel** (SMG/LMG/Launcher sobem no vanilla —
-> anti-XP-duplo); efeito por nível vale pras categorias alcançáveis com a arma na mão (HMG deferida — só existe
-> estacionária de mapa).
-
-| Nome (EN) | Tradução pt-BR | Tipo | Padrão | Tooltip (pt-BR) |
+| Propriedade (EN) | Tipo | Padrão | Faixa | O que faz |
 |---|---|---|---|---|
-| `Weapon Mastery — Enabled` | Maestria de armas — ativa | bool | `true` | Ativa XP por disparo do underbarrel (GP-25/M203) + bônus por nível de SMG/LMG/Launcher/Underbarrel. |
-| `Underbarrel XP per shot` | XP do underbarrel por disparo | float | `0.5` | XP de Underbarrel Launchers por DISPARO. 0.5 = paridade de ESFORÇO com SMG (granada é cara/rara; nível 1 ≈ 20 disparos). Faixa 0..1. |
-| `Recoil bonus per level` | Bônus de recuo por nível | float | `0.004` | Redução de recuo por nível da maestria da arma em mãos (−0.4%/nível; paridade `WeaponSkillRecoilBonusPerLevel`). Faixa 0..0.02. |
-| `Ergo bonus per level` | Bônus de ergo por nível | float | `0.002` | Aumento de ergonomia por nível da maestria da arma em mãos (+0.2%/nível). Faixa 0..0.02. |
+| `Execution — Melee move speed Enabled` | bool | `true` | — | Perk: +velocidade com a melee na mão. |
+| `Execution — Melee move speed` | float | `1.1` | 1..1.5 | Velocidade com melee na mão (1.1 = +10%). |
+| `Execution — Melee damage Enabled` | bool | `true` | — | Perk: multiplica o dano de golpe de faca. |
+| `Execution — Melee damage mult` | float | `5` | 1..10 | Dano de melee (5.0 = 5×, execução). |
+| `Ghost Step — Enabled` | bool | `true` | — | Perk: −raio de audibilidade dos sons de movimento. |
+| `Ghost Step — Sound radius mult` | float | `0.7` | 0.1..1 | Raio de som de movimento (0.7 = −30%). |
+| `Rattled — Enabled` | bool | `true` | — | Drawback: +tranco de câmera ao levar dano. |
+| `Rattled — Aim-punch mult` | float | `1.5` | 1..3 | Tranco ao levar dano (1.5 = +50%). |
+
+## Seção `6 · Scavenger`
+
+| Propriedade (EN) | Tipo | Padrão | Faixa | O que faz |
+|---|---|---|---|---|
+| `Silent Looter — Enabled` | bool | `true` | — | Perk: sons de interação/loot mais baixos. |
+| `Silent Looter — Volume mult` | float | `0.4` | 0.1..1 | Volume de interação/loot (0.4 = −60%). |
+| `Pack Mule — Enabled` | bool | `true` | — | Perk: +limite de carga (piso, não soma com a Strength). |
+| `Pack Mule — Carry limit bonus` | float | `0.3` | 0..1 | Bônus de limite de carga (0.3 = +30%). |
+| `Overladen — Enabled` | bool | `true` | — | Drawback: inércia escala mais com o peso. |
+| `Overladen — Inertia mult` | float | `1.5` | 1..3 | Inércia (1.5 = +50% sobre a já escalada pelo peso). |
+
+## Seção `7 · Tank`
+
+| Propriedade (EN) | Tipo | Padrão | Faixa | O que faz |
+|---|---|---|---|---|
+| `Bulwark — Enabled` | bool | `true` | — | Perk: reduz o dano recebido na vida. |
+| `Bulwark — Damage taken` | float | `0.85` | 0.5..1 | Dano recebido (0.85 = −15%). |
+| `Bunker — Enabled` | bool | `true` | — | Perk: com arma pesada (LMG/HMG/GL), menos recuo e mais ergonomia. |
+| `Bunker — Heavy weapon recoil mult` | float | `0.85` | 0.5..1 | Recuo com arma pesada (0.85 = −15%). |
+| `Bunker — Heavy weapon ergo mult` | float | `1.15` | 1..1.5 | Ergonomia com arma pesada (1.15 = +15%). |
+| `Tireless Arms — Enabled` | bool | `true` | — | Perk: braço não cansa com arma pesada (**requer o stances mod**). |
+| `Tireless Arms — Heavy arm drain mult` | float | `0` | 0..1 | Dreno de braço com arma pesada (0 = não drena). |
+| `Heavy Frame — Enabled` | bool | `true` | — | Drawback: −velocidade de movimento (estrutura pesada). |
+| `Heavy Frame — Move speed` | float | `0.9` | 0.5..1 | Velocidade (0.9 = −10%). |
+| `Heavy Frame — Hunger/thirst drain` | float | `1.3` | 1..2 | Dreno de fome/sede (1.3 = +30% mais rápido). |
+| `Pack Mule — Enabled` | bool | `true` | — | Perk: +limite de carga (piso, não soma com a Strength). |
+| `Pack Mule — Carry limit bonus` | float | `0.3` | 0..1 | Bônus de limite de carga (0.3 = +30%). |
+| `Loud Operator — Enabled` | bool | `true` | — | Drawback: +raio de audibilidade dos sons de movimento. |
+| `Loud Operator — Sound radius mult` | float | `1.3` | 1..2 | Raio de som de movimento (1.3 = +30%). |
+
+## Seção `8 · Vanilla Skill Fixes`
+
+> Correções/ativações de mecânicas de skill vanilla que ficam inertes no EFT. Hoje: Weapon Mastery (item 058).
+
+| Propriedade (EN) | Tipo | Padrão | Faixa | O que faz |
+|---|---|---|---|---|
+| `Weapon Mastery — Enabled` | bool | `true` | — | Ativa as maestrias inertes: XP por disparo do underbarrel + bônus por nível (SMG/LMG/Launcher/Underbarrel). |
+| `Underbarrel XP per shot` | float | `0.5` | 0..1 | XP de Underbarrel Launchers por disparo do GP-25/M203 (0.5 = paridade de esforço com SMG). |
+| `Recoil bonus per level` | float | `0.004` | 0..0.02 | Redução de recuo por nível da maestria da arma na mão (0.004 = −0.4%/nível). |
+| `Ergo bonus per level` | float | `0.002` | 0..0.02 | Aumento de ergonomia por nível da maestria (0.002 = +0.2%/nível). |
+
+---
+
+> Notas (i18n — item 008):
+> - Os textos **in-game** (nome da classe, tooltips, botão SKILLS, cards de perk) seguem o **idioma do EFT** (`"po"` = Português → pt; senão inglês). O **F12** é a exceção — não segue (ver nota no topo).
+> - Trocar o `.dll` do client exige **reiniciar o jogo** (plugin BepInEx). Trocar um valor **default** no código NÃO altera um `.cfg` já existente — o BepInEx só grava o default quando a entry é criada pela 1ª vez.
 
 ## Histórico
 
 | Data | Alteração |
 |---|---|
 | 2026-06-07 | Criado (item 008). Documenta `EnableSkillMultipliers`, `ShowMultiplierOnSkills` (itens 005/010) e `Language` (008). |
-| 2026-07-02 | Item 059 — adicionada seção `Perks — UI` com `Class Tab — X offset` (ajuste da posição da aba CLASS). |
-| 2026-07-02 | Item 055 — `Class Detail on Loading Screen` (detalhe da classe no loading da raid, FIKA). |
-| 2026-07-03 | Item 056 — `Weight Marker — X/Y offset` (posicionar o marcador ▲ +X% do peso). |
-| 2026-07-03 | Item 055 — `Class Detail — Loading panel scale` (zoom-out do popover; faltava documentar — pego na varredura de pendências). |
-| 2026-07-04 | Item 058 — seção `Weapon Mastery` (XP do underbarrel por disparo + bônus por nível de recuo/ergo). |
-| 2026-07-04 | 058 review 2: default do XP 0.1→0.5 (RN-01, paridade de esforço). Nota RN-05: a maestria modded dá só recuo+ergo por nível (a vanilla tem também reload/swap/elite ×2) — escopo consciente. |
-| 2026-07-04 | Item 051 — Steady Arms (Hunter) + Tireless Arms (Tank): dreno de braço por classe via hook no stances mod. Cards saem do "em breve". |
-| 2026-07-10 | Balance B17 — seção `Perks — Combat Medic` (Metabolismo Eficiente: fome/sede ×0.85, 1º perk vivo do Médico). |
+| 2026-07-02 | Item 059 — seção `Perks — UI` com `Class Tab — X offset`. |
+| 2026-07-02 | Item 055 — `Class Detail on Loading Screen`. |
+| 2026-07-03 | Item 056 — `Weight Marker — X/Y offset`. |
+| 2026-07-03 | Item 055 — `Class Detail — Loading panel scale`. |
+| 2026-07-04 | Item 058 — seção `Weapon Mastery`. |
+| 2026-07-04 | Item 051 — Steady Arms (Hunter) + Tireless Arms (Tank). |
+| 2026-07-10 | Balance B17 — Metabolismo Eficiente (Médico). |
+| 2026-07-10 | **Reorg completa do F12**: 9 seções (uma por classe, prefixo numérico EN), Pack Mule/Loud Operator desdobrados por classe, descrições padronizadas bilíngues `PT / EN`, 7 entries órfãs removidas. Doc espelhada em inglês: [PROPERTIES.md](PROPERTIES.md). |
