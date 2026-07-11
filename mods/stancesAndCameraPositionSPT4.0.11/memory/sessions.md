@@ -6,28 +6,18 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados quan
 
 ## Estado atual (snapshot ao fim da última sessão)
 
-- **Fork ativo = `modded` (CANÔNICO desde 2026-07-09).** Reorg: `git mv modded-beta → modded` e antigo `modded → modded-bak` (backup, não editar). Build **self-contained** (`/compile-mod` OU `dotnet build`; csproj puxa `Fika.Core` da raiz `references/`, sem `mods/references/` temp). **Deploy manual** do DLL em `D:/SPT/BepInEx/plugins/RealisticMobility/` (assets `.ogg`/`.png` ao lado; `/compile-mod` instala em `plugins/<AssemblyName>/`, então copiar à mão). DLL atual: hash `972f5f8` (014 fix-03). Ver memória global `reference_stances_canonical_build`.
-- **Itens 011-014** entregues via ciclo SDD em sessões intermediárias **não registradas aqui** (ver `backlog/`). Status (`mod-backlog.md`): **011/010/013/014 🟡**; **012 🟢** (validado in-game "ficou muito bom"); **004 🔴** (mount próprio cancelado → substituído pelo 011). O 014 substitui o 006; o 011 substitui o 004.
-- **014 (sync Fika)** — aguardando validação: **fix-03** aplica o offset num **Postfix de `PlayerBones.ShiftWeaponRoot`** (janela pré-IK) → **braço E arma** acompanham juntos. Antes: fix-02 (Postfix de `ObservedVisualPass`) rodava pós-IK e movia **só a arma**. Code-review 02 aplicado (CR-02-01/02/04).
+- **Fork ativo = `modded` (CANÔNICO desde 2026-07-09).** Reorg: `git mv modded-beta → modded` e antigo `modded → modded-bak` (backup, não editar). Build **self-contained** (`/compile-mod` OU `dotnet build`; csproj puxa `Fika.Core` da raiz `references/`, sem `mods/references/` temp). **Deploy manual** do DLL em `D:/SPT/BepInEx/plugins/RealisticMobility/` (assets `.ogg`/`.png` ao lado; `/compile-mod` instala em `plugins/<AssemblyName>/`, então copiar à mão). DLL atual: hash `c83ed42` (014 fix-03 + 015 + review de propriedades). Ver memória global `reference_stances_canonical_build`.
+- **BACKLOG INTEIRO VALIDADO IN-GAME (2026-07-11).** Todos os itens 🟢 no `mod-backlog.md` — 001/002/003/005/006/007/008/009/010/011/012/013/014/015. Único 🔴: **004** (mount próprio cancelado → substituído pelo 011). O 014 substitui o 006; o 011 substitui o 004.
+- **014 (sync Fika) — VALIDADO:** o **fix-03** aplica o offset num **Postfix de `PlayerBones.ShiftWeaponRoot`** (janela **pré-IK**) → **braço E arma** acompanham juntos. Antes: fix-02 (Postfix de `ObservedVisualPass`) rodava **pós-IK** e movia **só a arma**.
+- **015 (bloqueio de mount ativo) — VALIDADO:** `BlockActiveMountPatch` (Prefix de `Player.TryMountWeapon`) **impede** o mount vanilla em Stance 1/2/3; permitido em Stance 0, ADS e prone. **Bipé não é afetado** (usa `IsBipodUsed`, não `IsMountedState`). **Desmontar** ao trocar de stance seria **código morto** — o 013 já força Stance 0 enquanto montado (`StanceManager.Update` L169-180).
+- **F12 reorganizado (2026-07-11):** **21 seções · 120 props** (eram 23 seções / 143 props — **23 propriedades mortas removidas**). Nomes de seção em inglês; **tooltips bilíngues** (inglês em cima, português embaixo, 1 linha em branco entre eles — `"<EN>\n\n<pt>"`); eixos Roll/Yaw (rótulos estavam trocados) corrigidos. **Renomes = breaking change**: a config salva do usuário reseta ao default. Relatório: `PROPRIEDADES-review-01.md`.
 - **Stance layout:** 0 Vanilla · 1 High Ready (Pitch -15) · 2 Low Ready (Pitch +30) · 3 Custom (Yaw -30).
 
 ## Pendências / próximos passos conhecidos
 
-- **[P-6.1] (aberta 2026-07-09) 🔴 Validar 014 in-game (2 clientes Fika):** os 3 logs `[StanceSync-014]` (`ShiftWeaponRoot Postfix RODOU` inclusive) + **braço E arma** acompanham a stance juntos (fix-03). Ver `06-fix-03.md`.
-- **[P-6.2] (aberta 2026-07-09) 🟡 CR-02-03 — calibração de eixo** 1ª↔3ª pessoa do `Weapon_Root_Anim`; só decidível **após** o teste do 014 (se a pose ficar exagerada/invertida num eixo).
-- **[P-6.3] (aberta 2026-07-09) 🟡 Validar 011/013 in-game:** 011 (ícones de mount ao encostar + buffs passivos recoil/sway); 013 (Stance 3 abaixo de Stance 2 no F12; arma montada → Mount Active + força Stance 0; sprint de 1/2/3 sem piscar Stance 0). Sprint do 013 já ✓.
-- **[P-6.4] (aberta 2026-07-09) 🟢 Limpeza pós-014:** CR-02-05 (cachear `GetComponent`), CR-02-06 (gate dos logs `[StanceSync-014]` por toggle debug).
-- **[P-4.1] (aberta 2026-06-11) 🟡 Validar 008/010 in-game** (no canônico; 004 saiu → 011). 010 tem risco de softlock (reload/troca de arma/morte).
-- **[P-4.4] (aberta 2026-06-11) 🟡 Validar F4 (snap-on-fire) e F1 (Stance 0 no ciclo)** do 002 — `SnapFireTriggerPatch` está no canônico.
-- **[P-5.3] (aberta 2026-06-21) 🟡 Refatoração pós-features:** unificar interpolação em `SpringMath.SpringDamp`, matar reflection por frame, reset de estado estático, `try/catch` nos Postfix, audit F12 × PROPRIEDADES.md.
-- **[P-5.5] (aberta 2026-06-21) 🟢 Limpar logs de diagnóstico temporários** (`v3-raidload`, `[STANCE-CLAMP]`, `[StanceSync-014]`).
-
-### Pendências legadas (fork `modded-bak` / pré-011 — provavelmente resolvidas/obsoletas; confirmar se voltarem a importar)
-
-- **[P-4.2 / P-4.3] (aberta 2026-06-11)** infra de build (Fase 0 `compile-mod.sh` + `.spt-path`) — **superada** pela reorg + csproj self-contained.
-- **[P-4.6] (aberta 2026-06-11)** migração `.cfg` órfão pós-swap Stance 2/3 — layout mudou no fork canônico; provável obsoleta.
-- **[P-5.1] (aberta 2026-06-21)** commit do fix câmera/áudio (Sessão 5) — código no canônico e pushado; provável resolvida.
-- **[P-5.2] (aberta 2026-06-21)** mount automático "nunca funcionou" — substituído pelo item **011** (PassiveMount).
+- **[P-7.1] (aberta 2026-07-11) 🟡 Conferir o F12 in-game após a reorganização** (seções/nomes/tooltips novos aparecem certos) e **subir a versão do mod** no próximo release — os renomes de seção/key **resetam a config salva** do usuário (comunicar no changelog). Ver `feedback_version_increment_on_release`.
+- **[P-7.2] (aberta 2026-07-11) 🟢 Dívida técnica** (herda a antiga P-5.3): unificar a interpolação em `SpringMath.SpringDamp`, eliminar a reflection que roda a cada frame, `try/catch` nos ~19 patches restantes (só os 6 do Manual Chambering têm), auditar o reset de estado estático entre raids. Adiada porque mexe em código de câmera **já validado** — risco > valor até surgir bug real.
+- **[P-7.3] (aberta 2026-07-11) 🟢 Dívida da revisão do F12** (achados adiados do `PROPRIEDADES-review-01.md`): reordenar as seções (**MP-01-03** — os binds de uma mesma seção estão espalhados pelo `Awake`, ex.: Stance 2 em L766 **e** L1184; reordenar arriscaria quebrar um arquivo de 1700 linhas já validado), rever onde ficam as opções de velocidade (**MP-01-08**) e se a seção da Stance 0 se justifica (**MP-01-10**).
 
 ## 2026-05-09 ~16:00 (GMT-3) — Sessão 1: item 002 backlog (criação + reviews)
 
@@ -244,4 +234,51 @@ no Tick **só no ramo de dreno** (`delta < 0`): `delta *= Clamp(hook(), 0, 2)`. 
 reflection (Steady Arms do Caçador ×0.65 em ADS; Tireless Arms do Tanque ×0 com arma pesada). Null = comportamento
 idêntico ao anterior (regressão zero). ⚠️ NÃO renomear `CameraRotationMod.StaminaController.ExternalHandsDrainMult`
 sem coordenar. Artefatos: mods/CustomClasses/backlog/051-stances-zone-levers/ (spec + review técnica 01).
+
+## 2026-07-11 00:50 (GMT-3) — Sessão 7: backlog fechado (validação in-game de tudo), item 015 + reorganização das propriedades F12
+
+**Tema central:** validar in-game o que estava pendente (013/014 e depois 008/010/011/002/015), entregar o item 015 (bloquear o mount ativo nas stances), pagar o débito seguro e reorganizar as ~143 propriedades do F12.
+
+**Decisões-chave:**
+
+- **Item 015 — "travar em Stance 0" em vez de "desmontar".** A ideia inicial era: se o jogador montar a arma numa superfície e trocar de postura, desmontar sozinho. O code-review provou que esse tick seria **código morto**: o item 013 já força a Stance 0 enquanto a arma está montada (`StanceManager.Update` L169-180 — retorna cedo quando `isNativeMounting`), então a condição "montado E em Stance 1/2/3" nunca ocorre. Sobrou só o **bloqueio na entrada**: Prefix em `Player.TryMountWeapon` ([Player.cs:26218](../../../references/eft-decompiled/Assembly-CSharp/Player.cs#L26218)) que retorna `false` quando em Stance 1/2/3 fora da mira. O tick foi **removido** do `StanceManager`. Ref: `backlog/015-bloquear-mount-ativo-stances/…-04-code-review-01.md` (achado CR-01-01), decisão do usuário.
+- **Bipé é exceção por construção.** O bloqueio testa `pwa.IsMountedState` (mount em superfície); o bipé usa outro estado (`IsBipodUsed`), então continua funcionando em qualquer postura. Não precisou de guard extra.
+- **Débito técnico: só o seguro.** Aplicado `try/catch` nos **6 Prefixes** do Manual Chambering (item 010) — é o código com risco de **softlock** (arma travada sem munição na câmara): uma exceção num Prefix que retorna `bool` deixaria o jogador sem poder atirar. Prefix `bool` → `return true` (deixa o vanilla rodar); `void` → só loga. **Adiado:** unificar as molas (`SpringMath`) e matar a reflection por frame — mexem em código de câmera **já validado in-game**; risco > valor sem bug real motivando.
+- **Padrão de tooltip bilíngue adotado** (decisão do usuário, virou regra do repo): inglês na 1ª linha, **linha em branco**, português na 3ª — no C#: `"<English>\n\n<Português>"`. Os dois idiomas precisam ficar intuitivos; as dicas que já existiam em português nos nomes das chaves (ex.: `Pitch (Cano Sobe/Desce)`) foram usadas para **melhorar o inglês**, não só traduzidas.
+- **F12 de 143 → 120 propriedades.** **23 eram mortas** (bindadas, nunca lidas): a seção *Wiggle* inteira (animação orgânica removida numa refatoração anterior), 15 multiplicadores de ADS das Stances 0/1/2, o *shoulder-throw* e 2 opções de transição de ADS. Provado por grep de `_Xxx.Value` em `modded/`. Ref: `PROPRIEDADES-review-01.md`.
+- **Novo command `/review-mod-properties`** (meta-repo): revisão de UX das propriedades F12 em 8 categorias — ordem/nome das seções, alocação, nome/tipo/tooltip das opções, propriedades mortas e uso do "Advanced". Registrado no `WORKFLOW.md` como comando **auxiliar** (fora do ciclo linear).
+
+**Lições / hipóteses descartadas:**
+
+- **"Desmontar ao trocar de postura" (item 015) era código morto** — não porque a lógica estivesse errada, mas porque **outro item entregue antes (013) já tornava o estado inalcançável**. Lição: antes de escrever um tick reativo, checar se um item anterior já **fecha o estado** que ele reagiria. O code-review pegou; a spec técnica não. Ref: item 015, achado CR-01-01.
+- **Rótulo pode mentir sobre o eixo.** Em 8 propriedades (mira + Stances 1/2/3) as chaves `…HandsYawRotation` e `…HandsRollRotation` estavam **trocadas** em relação ao que o código aplica no `Vector3(pitch, yaw, roll)` — quem calibrasse pelo nome estaria mexendo no eixo errado o tempo todo. Mesmo tipo de erro no rótulo de "Start In Low Ready On Raid Begin", que dizia *Stance 3* mas o código aplica `Stance.Stance2` ([RaidLifecyclePatches.cs:37](../modded/Patches/RaidLifecyclePatches.cs#L37)). Lição: **o nome/tooltip é código também** — revisar contra o que o método faz, não contra o que a seção sugere.
+- **Reordenar as seções do F12 com segurança é inviável hoje.** A ordem no ConfigurationManager é por **ordem de descoberta** (primeiro `Config.Bind` de cada seção) — mas os binds de uma mesma seção estão **fragmentados** no `Awake` (Stance 2 aparece em L766 **e** L1184). Mover blocos arriscaria quebrar um arquivo de 1700 linhas já validado. Adiado como dívida (P-7.3), não por preguiça — por risco.
+- **Edição em massa por agente exige validação estrutural.** Os 102 tooltips restantes foram convertidos para bilíngue por um sub-agent; validei comparando as contagens estruturais entre `HEAD` e o work tree (`Config.Bind`=94, `AcceptableValueRange`=60, `ConfigurationManagerAttributes`=100, `Order`=96 — idênticas) e conferindo que o diff tocava **só** linhas de tooltip. Sem esse gate, um agente pode "arrumar" o código junto com o texto sem ninguém notar.
+
+**Atividade cronológica:**
+
+1. **Validação in-game** do 014 (sync das stances no Fika) e do 013 (refino das transições) → ambos ✅. O braço **e** a arma acompanham a postura no cliente remoto (era o sintoma do fix-03).
+2. **Item 015** — ciclo SDD completo (backlog → spec → review → spec técnica → review técnica → código → code-review → aplicar). Entregue: `Patches/BlockActiveMountPatch.cs`; removido o tick morto do `StanceManager`.
+3. **Débito técnico:** `try/catch` nos 6 Prefixes do Manual Chambering; limpeza dos logs de diagnóstico temporários (`[Spy]`, `[StanceSync-014]`, flags `_loggedApply`/`_loggedHook`).
+4. **Criado `/review-mod-properties`** + template `.agents/templates/mod-properties-review.md.tmpl` + registro no `WORKFLOW.md`.
+5. **Revisão do F12** (`PROPRIEDADES-review-01.md`, 12 achados). Aplicados: 23 props mortas + 9 campos órfãos removidos; eixos Roll/Yaw corrigidos; rótulos legados (Stance 2/3 e "Start In Low Ready"); nomes de seção em inglês; **109 tooltips bilíngues**. `PROPRIEDADES.md` regenerado (21 seções, 120 props, índice temático).
+6. **Validação in-game final:** 008 (troca de postura ao recarregar), 010 (Manual Chambering), 011 (mount passivo), 015 (bloqueio do mount ativo) e as 2 funções do 002 (snap ao atirar + postura normal no ciclo do scroll) → **todos ✅**. **Backlog inteiro entregue.**
+
+**Pendências abertas nesta sessão:**
+
+- **[P-7.1]** (aberta 2026-07-11) Conferir o F12 in-game após a reorganização e **subir a versão do mod** no release (os renomes resetam a config salva). Categoria: 🟡 débito.
+- **[P-7.2]** (aberta 2026-07-11) Dívida técnica adiada (molas, reflection por frame, `try/catch` nos patches restantes, reset estático). Categoria: 🟢 ideia. **Herda a P-5.3.**
+- **[P-7.3]** (aberta 2026-07-11) Dívida da revisão do F12 (reordenar seções, alocação das opções de velocidade, seção da Stance 0). Categoria: 🟢 ideia.
+
+**Cross-refs — pendências fechadas (todas ✅ em 2026-07-11):**
+
+- **[P-6.1]** validar o 014 in-game → ✅ **passou** (fix-03).
+- **[P-6.2]** calibração de eixo do `Weapon_Root_Anim` (1ª↔3ª pessoa) → ✅ **não foi necessária** — a pose ficou correta sem ajuste.
+- **[P-6.3]** validar 011/013 → ✅ ambos passaram.
+- **[P-6.4]** limpeza pós-014 (logs) → ✅ feita no passo 3.
+- **[P-5.5]** limpar logs de diagnóstico temporários → ✅ feita no passo 3.
+- **[P-4.1]** validar 008/010 → ✅ ambos passaram.
+- **[P-4.4]** validar o snap ao atirar (F4) e a postura normal no ciclo (F1) do item 002 → ✅ ambos passaram.
+- **Legadas descartadas por obsolescência** (P-4.2/P-4.3 infra de build, P-4.6 migração de `.cfg`, P-5.1 commit do fix de câmera, P-5.2 mount automático): superadas pela reorganização dos forks e pelo item 011. Removidas do topo.
+- **Trabalho meta-repo nesta sessão** (`/review-mod-properties`, template, `WORKFLOW.md`): sem destino dedicado desde 2026-07-06 — `git log` é a fonte de verdade.
 
