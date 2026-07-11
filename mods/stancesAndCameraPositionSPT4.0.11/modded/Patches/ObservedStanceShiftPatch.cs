@@ -24,8 +24,6 @@ namespace CameraRotationMod.Patches
     /// </summary>
     public class ObservedStanceShiftPatch : ModulePatch
     {
-        private static bool _loggedHook;
-
         protected override MethodBase GetTargetMethod()
             => AccessTools.Method(typeof(PlayerBones), "ShiftWeaponRoot");
 
@@ -44,11 +42,6 @@ namespace CameraRotationMod.Patches
                 var animator = p.gameObject.GetComponent<Networking.ObservedStanceAnimator>();
                 if (animator == null) return;
 
-                if (!_loggedHook)
-                {
-                    _loggedHook = true;
-                    Plugin.Logger.LogInfo("[StanceSync-014] ShiftWeaponRoot Postfix RODOU para observado (pré-IK).");
-                }
                 animator.ApplyToWeaponRoot(__instance);
             }
             catch (Exception ex) { Plugin.Logger.LogError($"[StanceSync-014] ShiftPatch {ex.Message}"); }

@@ -40,10 +40,6 @@ namespace CameraRotationMod
 
         public static void SetStance(Stance newStance)
         {
-            if (CurrentStance != newStance)
-            {
-                Plugin.Logger.LogInfo($"[Spy] SetStance called: {CurrentStance} -> {newStance}");
-            }
             CurrentStance = newStance;
         }
 
@@ -341,8 +337,7 @@ namespace CameraRotationMod
             var gw = GetCachedGameWorld();
             if (gw?.MainPlayer?.IsSprintEnabled == true) return;
             if (gw?.MainPlayer?.ProceduralWeaponAnimation?.IsMountedState == true) return; // Não levanta a arma se montado (vanilla)
-            
-            Plugin.Logger.LogInfo($"[Spy] StartActionStance called. CurrentStance: {CurrentStance}");
+
             if (CurrentStance != Stance.Default)
             {
                 _preActionStance = CurrentStance;
@@ -362,7 +357,6 @@ namespace CameraRotationMod
         {
             if (!_isActionStanceActive) return;
 
-            Plugin.Logger.LogInfo($"[Spy] EndActionStance called. forceCancel={forceCancel}, Time delta={Time.time - _actionStanceStartTime}");
             // Debounce: ignorar OnIdleStartEvent disparados nos primeiros 0.3s (podem ser idle
             // events do próprio início da operação antes da animação realmente começar).
             if (!forceCancel && (Time.time - _actionStanceStartTime < 0.3f)) return;

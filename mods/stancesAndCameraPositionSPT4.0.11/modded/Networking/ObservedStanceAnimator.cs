@@ -19,7 +19,6 @@ namespace CameraRotationMod.Networking
         private int _stance;
         private bool _isAiming;
         private Vector3 _euler, _pos, _rotVel, _posVel;
-        private static bool _loggedApply;
 
         public void Init(ObservedPlayer p) => _observedPlayer = p;
 
@@ -51,12 +50,6 @@ namespace CameraRotationMod.Networking
             // ShiftWeaponRoot re-seta o transform (valor absoluto) todo frame antes daqui, então SOMAR não acumula.
             wra.localRotation = wra.localRotation * Quaternion.Euler(_euler);
             wra.localPosition = wra.localPosition + _pos;
-
-            if (!_loggedApply && _stance > 0)
-            {
-                _loggedApply = true;
-                Plugin.Logger.LogInfo($"[StanceSync-014] aplicando stance={_stance} euler={targetEuler} no Weapon_Root_Anim (pré-IK).");
-            }
         }
     }
 }
