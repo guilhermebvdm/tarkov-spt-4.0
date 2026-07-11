@@ -37,7 +37,7 @@
 | MP-01-04 | SEC | 🟠 | Prefixos numéricos "8./9./10." enganosos (não batem com a posição real) | ⚠️ | Pendente |
 | MP-01-05 | SEC | 🟡 | Nomes de seção genéricos ("Settings", "General", "Positions") | ⚠️ | Pendente |
 | MP-01-06 | TIP | 🟡 | Idioma misto — tooltips e nomes em EN e pt-BR sem padrão | ⚠️(parcial) | Pendente |
-| MP-01-07 | NAM | 🟡 | Rótulos legados: "Stance 2 - Custom" / "Stance 3 - Low Ready" contradizem a realidade | ⚠️ | Pendente |
+| MP-01-07 | NAM | 🟡 | Rótulos legados: "Stance 2 - Custom" / "Stance 3 - Low Ready" contradizem a realidade | ⚠️ | ✅ Aplicado |
 | MP-01-08 | LOC | 🟡 | Velocidades de movimento espalhadas em 2 seções | ⚠️ | Pendente |
 | MP-01-09 | ADV | 🟡 | Offsets de ADS perderam o liga/desliga (o toggle era a prop morta `Advanced ADS Transitions`) | não | ✅ Aplicado (a — sem gate) |
 | MP-01-10 | SEC | 🟢 | Seções Stance 0/1/2 encolhem muito após remover as mortas — reavaliar agrupamento | — | Pendente |

@@ -426,7 +426,7 @@ public class Plugin : BaseUnityPlugin
         _attrEnableStance2Cycle = new ConfigurationManagerAttributes { Order = 63 };
         _EnableStance2 = Config.Bind(
             Settings,
-            "Enable Stance 2 - Custom in Cycle",
+            "Enable Stance 2 - Low Ready in Cycle",
             true,
             new ConfigDescription("When enabled, Stance 2 is included in the stance cycle. When disabled, Stance 2 is skipped.",
             null,
@@ -435,7 +435,7 @@ public class Plugin : BaseUnityPlugin
         _attrEnableStance3Cycle = new ConfigurationManagerAttributes { Order = 62 };
         _EnableStance3 = Config.Bind(
             Settings,
-            "Enable Stance 3 - Low Ready in Cycle",
+            "Enable Stance 3 - Custom in Cycle",
             true,
             new ConfigDescription("When enabled, Stance 3 is included in the stance cycle. When disabled, Stance 3 is skipped.",
             null,
