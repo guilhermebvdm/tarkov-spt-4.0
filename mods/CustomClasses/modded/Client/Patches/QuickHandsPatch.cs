@@ -28,11 +28,21 @@ namespace CustomClasses.Client;
 ///     </para>
 ///     <para>
 ///     <b>No-op no elite natural:</b> se a Search já chegou a Elite, <c>__result</c> já é <c>true</c> →
-///     saímos cedo, sem "dobrar" (o teto de 2 é o mesmo).
-///     <b>Coop-safe:</b> efeito local. Gate igual ao <see cref="PackMulePatch"/> (mesmo alvo
-///     <c>SkillManager</c>, mesmo dilema): na raid compara com o <c>MainPlayer</c> p/ não bufar bots;
-///     FORA da raid (stash/menu — <c>GameWorld</c> null, sem bots) gateia só pela classe, porque revistar
-///     itens no inventário também acontece fora da raid.
+///     saímos cedo, sem "dobrar" (o teto vanilla é um <c>bool</c>, não um contador — nunca vira 3).
+///     </para>
+///     <para>
+///     <b>Coop-safe / bots:</b> efeito local, e há proteção DUPLA. (1) Gate igual ao
+///     <see cref="PackMulePatch"/> (mesmo alvo <c>SkillManager</c>): na raid compara <c>__instance</c> com
+///     <c>MainPlayer.Skills</c> — barra peers Fika (<c>ObservedPlayer</c>) e qualquer SkillManager alheio;
+///     <c>MainPlayer</c> null (loading/headless) cai no <c>ReferenceEquals(x, null) == false</c> → sem buff.
+///     (2) A IA nem chega aqui: <c>AISearchControllerClass</c> sobrescreve <c>CanStartNewSearchOperation()</c>
+///     para <c>false</c> e passa <c>Profile_0 = null</c> — o branch que lê <c>IsSearchDouble</c> nunca roda p/ bot.
+///     </para>
+///     <para>
+///     <b>Fora da raid</b> (<c>GameWorld</c> null): o gate cai para "só pela classe" — defensivo, seguindo o
+///     <see cref="PackMulePatch"/>. Não está confirmado que o fluxo de busca do menu/stash instancie este
+///     controller (o ctor exige um <c>Player.PlayerInventoryController</c>, e não há <c>Player</c> no menu);
+///     se não instanciar, o patch é simplesmente INERTE lá — inofensivo, pois fora da raid só existe o perfil local.
 ///     </para>
 /// </summary>
 internal class QuickHandsPatch : ModulePatch
