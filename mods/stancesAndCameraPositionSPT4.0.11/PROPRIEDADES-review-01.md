@@ -36,9 +36,9 @@
 | MP-01-03 | ORD | 🟠 | Ordem das seções não segue lógica; Manual Chambering (secundário) vem primeiro | ⚠️ | ⏭️ Deferido (dívida — binds fragmentados, alto risco) |
 | MP-01-04 | SEC | 🟠 | Prefixos numéricos "8./9./10." enganosos (não batem com a posição real) | ⚠️ | ✅ Aplicado |
 | MP-01-05 | SEC | 🟡 | Nomes de seção genéricos ("Settings", "General", "Positions") | ⚠️ | ✅ Aplicado |
-| MP-01-06 | TIP | 🟡 | Idioma misto → adotado padrão bilíngue (EN em cima, pt embaixo) | não | 🔄 Em progresso |
+| MP-01-06 | TIP | 🟡 | Idioma misto → adotado padrão bilíngue (EN em cima, pt embaixo) | não | ✅ Aplicado (109 tooltips) |
 | MP-01-07 | NAM | 🟡 | Rótulos legados: "Stance 2 - Custom" / "Stance 3 - Low Ready" contradizem a realidade | ⚠️ | ✅ Aplicado |
-| MP-01-08 | LOC | 🟡 | Velocidades de movimento espalhadas em 2 seções | ⚠️ | Pendente |
+| MP-01-08 | LOC | 🟡 | Velocidades de movimento espalhadas em 2 seções | ⚠️ | ⏭️ Deferido (nomes "Animation Speed" vs "Movement & Inertia" já distinguem ação × deslocamento) |
 | MP-01-09 | ADV | 🟡 | Offsets de ADS perderam o liga/desliga (o toggle era a prop morta `Advanced ADS Transitions`) | não | ✅ Aplicado (a — sem gate) |
 | MP-01-10 | SEC | 🟢 | Seções Stance 0/1/2 encolhem muito após remover as mortas — reavaliar agrupamento | — | Pendente |
 | MP-01-11 | DEAD | 🟢 | 9 campos dead-code puro (declarados, nunca bindados — nem aparecem no F12) | não | ✅ Aplicado |
@@ -312,3 +312,4 @@ Após aplicar: **regenerar** o `PROPRIEDADES.md` e incrementar a versão do mod 
 |---|---|
 | 2026-07-09 | Review de propriedades 01 via `/review-mod-properties` — 1 🔴 (23 props mortas), 3 🟠, 6 🟡, 2 🟢. Detecção de mortas por varredura de `.Value` (sub-agent). |
 | 2026-07-09 | **Passo 1 aplicado:** MP-01-01 (23 mortas removidas: seção "8. Wiggle" inteira + 15 ADS multipliers de Stance 0/1/2 + `Advanced ADS Transitions`/`ADS Transition Speed`/`Stance Change Sound Volume`), MP-01-11 (9 dead-code + const órfã `AdvancedADSSettings`), MP-01-09 (opção a — ADS offsets ficam sem gate; default 0 = inócuo). Plugin.cs: 122→90 campos. Build 0 erros (hash `c2cba18c30bc`). PROPRIEDADES.md a regenerar. |
+| 2026-07-11 | **Sequência concluída:** MP-01-02 (eixos Roll/Yaw), MP-01-07 (legados Stance 2/3 cycle), MP-01-04/05 (nomes de seção EN intuitivos), MP-01-06 (109 tooltips bilíngues EN/pt via agent — validado: 0 mudança estrutural). MP-01-03 (reordenar) e MP-01-08 (alocação) deferidos como dívida. **Extra (MP-01-13):** tooltip "Start In Low Ready On Raid Begin" citava "Stance 3 - Low Ready" (legado; código aplica `Stance.Stance2`) → corrigido p/ "Stance 2 - Low Ready". `PROPRIEDADES.md` regenerado (21 seções · 120 props). |

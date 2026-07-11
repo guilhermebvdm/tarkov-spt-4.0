@@ -118,7 +118,7 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<int> _SnapFireThreshold;
     // ref: CR-01-06 — timeout (s) do stale guard do snap intercept (cobre weapon swap durante hold).
     public static ConfigEntry<float> _SnapStaleTimeoutSec;
-    // backlog 002 F5 — iniciar raid em Stance 3 - Low Ready (set imediato sem animação).
+    // backlog 002 F5 — iniciar raid em Stance 2 - Low Ready (set imediato sem animação).
     public static ConfigEntry<bool> _StartInLowReadyOnRaidBegin;
 
     // backlog 002 F2 — refs aos `ConfigurationManagerAttributes` para mutar `Browsable` em runtime
@@ -586,14 +586,14 @@ public class Plugin : BaseUnityPlugin
                 new AcceptableValueRange<float>(0.5f, 10f),
                 new ConfigurationManagerAttributes { IsAdvanced = true, Order = 47 }));
 
-        // backlog 002 F5 — iniciar raid em Stance 3 - Low Ready.
+        // backlog 002 F5 — iniciar raid em Stance 2 - Low Ready.
         _StartInLowReadyOnRaidBegin = Config.Bind(
             Settings,
             "Start In Low Ready On Raid Begin",
             true,
             new ConfigDescription(
-                "When enabled, the player starts every raid already in Stance 3 - Low Ready, " +
-                "with no transition animation (immediate set). Applies even if Stance 3 is excluded from the cycle.\n\nQuando ativado, o jogador começa toda raid já na Stance 3 - Low Ready, sem animação de transição (set imediato). Vale mesmo que a Stance 3 esteja fora do ciclo.",
+                "When enabled, the player starts every raid already in Stance 2 - Low Ready, " +
+                "with no transition animation (immediate set). Applies even if Stance 2 is excluded from the cycle.\n\nQuando ativado, o jogador começa toda raid já na Stance 2 - Low Ready, sem animação de transição (set imediato). Vale mesmo que a Stance 2 esteja fora do ciclo.",
                 null,
                 new ConfigurationManagerAttributes { Order = 48 }));
 
