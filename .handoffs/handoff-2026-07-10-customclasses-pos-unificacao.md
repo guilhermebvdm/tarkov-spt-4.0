@@ -19,7 +19,10 @@ usuário marcar ✅ nas linhas B1–B19 de
   As 2 branches de feature ainda existem como refs locais 100% merged (P-13.4: deletar quando o usuário autorizar).
 - **Instalado em `D:/SPT`**: DLLs client+server e configs sincronizados com o repo (build da árvore principal,
   2026-07-06). Server precisa de **restart** para o que ainda não foi testado.
-- Trabalho em qualquer arquivo: direto na árvore principal `C:/Repos/spt/tarkov-spt-4.0` (não existe mais worktree).
+- ⚠️ **A árvore principal voltou a ser OCUPADA por sessão paralela** (2026-07-10: branch
+  `feat/trl-items-management-unify`, com WIP não commitado). **Antes de trabalhar, rodar `git status -sb`**: se a
+  árvore não estiver em `main`, criar worktree (`git worktree add ../tarkov-spt-4.0-wt-<item> main -b <branch>`)
+  em vez de trocar a branch de sessão alheia — foi exatamente esse acidente que criou o wt-057.
 
 ## Fonte de verdade para contexto (ler nesta ordem)
 
