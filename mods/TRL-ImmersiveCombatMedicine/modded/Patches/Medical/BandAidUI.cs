@@ -216,19 +216,20 @@ namespace Band_Aid
         {
             if (_typesCached) return;
 
-            var ahcType = typeof(ActiveHealthController);
-            var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public;
-            _heavyBleedType = ahcType.GetNestedType("HeavyBleeding", flags);
-            _lightBleedType = ahcType.GetNestedType("LightBleeding", flags);
-            _fractureType = ahcType.GetNestedType("Fracture", flags);
-            _contusionType = ahcType.GetNestedType("Contusion", flags);
-            _tremorType = ahcType.GetNestedType("Tremor", flags);
-
-            // === EFEITOS NÃƒO SINCRONIZADOS (sÃ³ existem no ActiveHC) ===
-            // Pain e Intoxication nÃ£o existem no NetworkHealthControllerAbstractClass.
-            // Para jogadores remotos, esses Ã­cones nÃ£o aparecerÃ£o (limitaÃ§Ã£o do Fika).
-            _painType = ahcType.GetNestedType("Pain", flags);
-            _intoxicationType = ahcType.GetNestedType("Intoxication", flags);
+            // ref: G-2 (coop-heal-matrix) — detecção por INTERFACE de marcador, não por
+            // tipo concreto: os tipos nested do ActiveHC nunca casam com os efeitos do
+            // NetworkHealthController (players remotos), deixando o médico "cego" a
+            // bleeds/fraturas do paciente. FindActiveEffect<GInterfaceNNN>() funciona
+            // nas DUAS famílias — mesmo padrão do vanilla, que consulta fratura em HC
+            // de rede com FindActiveEffect<GInterface342> (NetworkHealthControllerAbstractClass).
+            // Mapa (idêntico em ActiveHC e NetworkHC, conferido no DLL real):
+            _heavyBleedType = typeof(GInterface340);   // HeavyBleeding
+            _lightBleedType = typeof(GInterface339);   // LightBleeding
+            _fractureType = typeof(GInterface342);     // Fracture
+            _contusionType = typeof(GInterface352);    // Contusion
+            _tremorType = typeof(GInterface361);       // Tremor
+            _painType = typeof(GInterface357);         // Pain (existe no NetworkHC também)
+            _intoxicationType = typeof(GInterface346); // Intoxication
 
             // FindActiveEffect<T> estÃ¡ na INTERFACE IHealthController â€” funciona em qualquer HC
             var ihcType = typeof(IHealthController);
@@ -804,9 +805,14 @@ namespace Band_Aid
             }
         }
 
+        // ref: CR-01-12 — buffer reutilizado: alocar Color32[12600] (~50KB) POR FRAME
+        // com a HUD aberta gerava pressão de GC contínua.
+        private Color32[] _ecgPixels;
+
         private void RenderEcgTexture()
         {
-            Color32[] pixels = new Color32[ECG_WIDTH * ECG_HEIGHT];
+            if (_ecgPixels == null) _ecgPixels = new Color32[ECG_WIDTH * ECG_HEIGHT];
+            Color32[] pixels = _ecgPixels;
             Color32 bg = _ecgBgColor;
 
             Color lineColor = GetBarColor(_ecgHpRatio, _ecgHpRatio <= 0f);
