@@ -6,6 +6,12 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <AssemblyName>shwngFpsCameraStances4</AssemblyName>
     <RootNamespace>CameraRotationMod</RootNamespace>
+
+    <!-- Manter em sincronia com a versão do [BepInPlugin] em Plugin.cs — é ela que o
+         BepInEx mostra no F12 e nos logs. -->
+    <Version>2.0.0</Version>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
   </PropertyGroup>
 
   <!--

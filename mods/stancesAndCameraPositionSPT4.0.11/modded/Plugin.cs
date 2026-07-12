@@ -20,7 +20,7 @@ public enum ScrollMode
     Linear,
 }
 
-[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "1.3.1")]
+[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "2.0.0")]
 public class Plugin : BaseUnityPlugin
 {
     public static Plugin Instance { get; private set; }
