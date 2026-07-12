@@ -39,7 +39,17 @@ internal static class SkillMultipliers
     public static bool IsLocalClass(string nameEn)
     {
         EnsureLoaded();
-        return _classNameEn != null && string.Equals(_classNameEn, nameEn, StringComparison.OrdinalIgnoreCase);
+        return IsClass(_classNameEn, nameEn);
+    }
+
+    /// <summary>
+    ///     B14 (coop): compara DUAS classes pelo nome EN estável (case-insensitive), sem assumir que uma delas é
+    ///     a local. Necessário porque o HOST precisa avaliar a classe de um peer Fika (resolvida via
+    ///     <see cref="ClassIdentities.ClassNameEnOf"/>), não só a sua. Null = vanilla/desconhecida → false.
+    /// </summary>
+    public static bool IsClass(string? classNameEn, string nameEn)
+    {
+        return classNameEn != null && string.Equals(classNameEn, nameEn, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>Item 015: nickname do perfil local (p/ casar o ChatSpecialIcon do jogador local).</summary>

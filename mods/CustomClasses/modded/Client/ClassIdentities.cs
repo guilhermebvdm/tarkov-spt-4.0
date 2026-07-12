@@ -34,6 +34,52 @@ internal static class ClassIdentities
     }
 
     /// <summary>
+    ///     <b>B14 (coop 2026-07-11)</b> — nome EN da classe de QUALQUER player, local ou remoto. Null = vanilla/desconhecido.
+    ///     <para>
+    ///     É a peça que destrava os perks de som em coop: os BOTS vivem no processo do HOST, então quem decide
+    ///     o que a IA ouve é o host — inclusive para o barulho de um peer Fika. Os patches de som gateavam em
+    ///     "player local", o que tornava Ghost Step/Stalker/Loud Operator um PLACEBO contra a IA para quem joga
+    ///     como CLIENTE. Com isto, o host resolve a classe de QUEM EMITIU o som e aplica o multiplicador dela.
+    ///     </para>
+    ///     <para>
+    ///     Player local → <see cref="SkillMultipliers"/> (a fonte autoritativa da própria classe).
+    ///     Peer remoto → mapa nickname→classe da rota 057 (já existente; sem protocolo novo).
+    ///     ⚠️ O VALOR do multiplicador vem do F12 de QUEM ESTÁ RODANDO ISTO (o host). Ou seja, o host é a
+    ///     autoridade da percepção da IA — coerente, já que a IA é dele. Sem sync de config entre peers.
+    ///     </para>
+    /// </summary>
+    /// <summary>
+    ///     B14 — força o carregamento do mapa AGORA (idempotente). Chamado no <c>GameWorld.OnGameStarted</c>.
+    ///     <para>
+    ///     Necessário porque o <see cref="EnsureLoaded"/> faz um GET **SÍNCRONO**: sem isto, a 1ª resolução de
+    ///     um peer aconteceria dentro do <c>BotEventHandler.PlaySound</c> (a cada passo!) e o fetch causaria um
+    ///     hitch NO MEIO DA RAID. O prefetch da tela de deploy (<c>PartyPlayerItemPatch</c>) normalmente já
+    ///     aqueceu o mapa, mas não é garantido (ex.: solo, ou o painel de grupo não renderizou).
+    ///     </para>
+    /// </summary>
+    public static void Prefetch() => EnsureLoaded();
+
+    public static string? ClassNameEnOf(EFT.Player? player)
+    {
+        // ⚠️ BOTS FORA — gate crítico, não é defensivo à toa: bots também emitem passo por
+        // `BotEventHandler.PlaySound` (MovementContext.cs:1629 passa o Player do bot como `person`), e o EFT
+        // gera nome de bot a partir de uma LISTA DE NICKNAMES REAIS. Sem este gate, um bot cujo nickname
+        // COLIDISSE com o de um jogador no mapa herdaria a classe dele e teria o próprio som alterado.
+        if (player is null || player.IsAI)   // ref: Player.cs:25135
+        {
+            return null;
+        }
+
+        if (player.IsYourPlayer)
+        {
+            SkillMultipliers.EnsureLoaded();
+            return SkillMultipliers.ClassNameEn;
+        }
+
+        return TryResolve(player.Profile?.Nickname, out var identity) ? identity.NameEn : null;
+    }
+
+    /// <summary>
     ///     PA-01-07/08 — identidade do player LOCAL via <see cref="SkillMultipliers"/> (fallback quando a rota
     ///     está ausente + caminho dos call-sites locais 053/059). Null se a classe local é vanilla.
     /// </summary>

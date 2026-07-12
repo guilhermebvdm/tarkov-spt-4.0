@@ -18,16 +18,23 @@ namespace CustomClasses.Client;
 /// </summary>
 internal static class QuietStep
 {
-    internal static float Mult()
+    /// <summary>Multiplicador do player LOCAL (atalho — pipelines que só valem para você, ex.: o rolloff que você ouve).</summary>
+    internal static float Mult() => MultFor(SkillMultipliers.ClassNameEn);
+
+    /// <summary>
+    ///     B14 — multiplicador de UMA classe (por nome EN). Permite ao HOST aplicar o perk de som de um peer
+    ///     Fika (a IA vive no host), em vez de só o do player local. Classe desconhecida/vanilla → 1 (sem efeito).
+    /// </summary>
+    internal static float MultFor(string? classNameEn)
     {
-        if (SkillMultipliers.IsLocalClass("Stealth"))
+        if (SkillMultipliers.IsClass(classNameEn, "Stealth"))
         {
             return PerksConfig.GhostStepEnabled?.Value == true
                 ? (PerksConfig.GhostStepSoundRadius?.Value ?? 1f)
                 : 1f;
         }
 
-        if (SkillMultipliers.IsLocalClass("Hunter"))
+        if (SkillMultipliers.IsClass(classNameEn, "Hunter"))
         {
             return PerksConfig.StalkerEnabled?.Value == true
                 ? (PerksConfig.StalkerSoundRadius?.Value ?? 1f)
@@ -39,22 +46,41 @@ internal static class QuietStep
 }
 
 /// <summary>
+///     🔧 Silent Looter (Saqueador) — som de interação/loot. B14: resolvido POR CLASSE, para o host poder aplicar
+///     o perk de um Saqueador remoto no pipeline de percepção do SAIN (o de interação local segue no
+///     <see cref="InteractionSoundPatch"/>, que é 1ª pessoa e portanto sempre local).
+/// </summary>
+internal static class SilentLooter
+{
+    internal static float MultFor(string? classNameEn)
+    {
+        return SkillMultipliers.IsClass(classNameEn, "Scavenger") && PerksConfig.SilentLooterEnabled?.Value == true
+            ? (PerksConfig.SilentLooterVolume?.Value ?? 1f)
+            : 1f;
+    }
+}
+
+/// <summary>
 ///     🔻 Loud Operator (Fuzileiro + Tanque) — raio de audibilidade dos sons de movimento. Desdobrado por classe
 ///     (2026-07-10): cada classe tem config própria no F12. Retorna o multiplicador da classe LOCAL (1 = sem efeito).
 ///     Usado pelos 3 pipelines de som (rolloff do player, IA base, SAIN).
 /// </summary>
 internal static class LoudOperator
 {
-    internal static float Mult()
+    /// <summary>Multiplicador do player LOCAL (atalho).</summary>
+    internal static float Mult() => MultFor(SkillMultipliers.ClassNameEn);
+
+    /// <summary>B14 — multiplicador de UMA classe (por nome EN), para o host aplicar o de um peer Fika.</summary>
+    internal static float MultFor(string? classNameEn)
     {
-        if (SkillMultipliers.IsLocalClass("Rifleman"))
+        if (SkillMultipliers.IsClass(classNameEn, "Rifleman"))
         {
             return PerksConfig.LoudOperatorRiflemanEnabled?.Value == true
                 ? (PerksConfig.LoudOperatorRiflemanSoundRadius?.Value ?? 1f)
                 : 1f;
         }
 
-        if (SkillMultipliers.IsLocalClass("Tank"))
+        if (SkillMultipliers.IsClass(classNameEn, "Tank"))
         {
             return PerksConfig.LoudOperatorTankEnabled?.Value == true
                 ? (PerksConfig.LoudOperatorTankSoundRadius?.Value ?? 1f)
@@ -153,9 +179,17 @@ internal class InteractionSoundPatch : ModulePatch
 ///     Item 050.4 (fix 2026-06-24) — audibilidade do player PARA A IA (bots).
 ///     O <c>SoundRadiusPatch</c> (method_67) só mexe no rolloff de ÁUDIO que VOCÊ ouve; a percepção do bot
 ///     vem de outro pipeline: <c>MovementContext</c> dispara <c>BotEventHandler.PlaySound(person, pos, power, step)</c>
-///     e o <c>power</c> escala o raio de detecção do <c>BotHearingSensor</c>. Aqui multiplicamos o power do
-///     passo/pulo do MainPlayer local (mesmos F12 do Ghost Step / Loud Operator).
-///     ⚠️ Coop: só cobre o player LOCAL (host/IsYourPlayer). Passo de peer remoto precisa de sync — gap registrado.
+///     e o <c>power</c> escala o raio de detecção do <c>BotHearingSensor</c>.
+///     <para>
+///     <b>B14 (coop 2026-07-11) — som host-side para REMOTOS.</b> Antes gateávamos em <c>IsYourPlayer</c>, o que
+///     tornava os perks de som um PLACEBO contra a IA para quem joga como CLIENTE Fika: os bots vivem no processo
+///     do HOST, então é o host quem calcula o que eles ouvem — inclusive do barulho de um peer. Agora resolvemos
+///     a classe de QUEM EMITIU o som (<see cref="ClassIdentities.ClassNameEnOf"/>: local via SkillMultipliers,
+///     peer via o mapa nickname→classe da rota 057) e aplicamos o multiplicador DELA. Sem protocolo novo.
+///     ⚠️ O VALOR sai do F12 de quem roda isto (o host) — ele é a autoridade da percepção da IA, que é dele.
+///     ⚠️ Fica de fora o rolloff audível (<see cref="SoundRadiusPatch"/>, method_67): o som que VOCÊ ouve de um
+///     peer exigiria sync real. Aqui só corrigimos a percepção da IA, que é o que muda o gameplay.
+///     </para>
 /// </summary>
 internal class AiSoundPatch : ModulePatch
 {
@@ -169,17 +203,24 @@ internal class AiSoundPatch : ModulePatch
     {
         try
         {
-            if (type != AISoundType.step || !(person is Player p) || !p.IsYourPlayer)
+            if (type != AISoundType.step || person is not Player p)
             {
-                return;
+                return;   // só passo/pulo de PLAYER (bots não têm classe do mod)
+            }
+
+            // B14: a classe do EMISSOR (não a local) — é isto que faz o perk do peer valer contra a IA no host.
+            var emitterClass = ClassIdentities.ClassNameEnOf(p);
+            if (emitterClass is null)
+            {
+                return;   // vanilla/desconhecido → sem efeito
             }
 
             var p0 = power;
 
-            power *= QuietStep.Mult();
-            power *= LoudOperator.Mult();
+            power *= QuietStep.MultFor(emitterClass);
+            power *= LoudOperator.MultFor(emitterClass);
 
-            if (PerkDiag.Enabled)
+            if (PerkDiag.Enabled && p.IsYourPlayer)   // o overlay (052) só descreve o SEU player
             {
                 PerkDiag.AiPowerBefore = p0;
                 PerkDiag.AiPowerAfter = power;
@@ -198,8 +239,13 @@ internal class AiSoundPatch : ModulePatch
 ///     + AÇÕES (recarregar, curar, comer, lootar, porta, gear…). Prefix em
 ///     <c>PlayerComponent.PlayAISound(SAINSoundType, Vector3, InRange, InVolume, …)</c> multiplica o <c>InRange</c>
 ///     (alcance que o bot ouve). Via REFLECTION (SAIN não é ref de compile-time → no-op se ausente).
-///     Ghost Step reduz TODOS os tipos · Loud Operator aumenta TODOS · Silent Looter reduz só Looting(=5).
-///     ⚠️ Coop: gate por ProfileId (só você); peer remoto emite o próprio som no host mas o gate barra (gap 057).
+///     Ghost Step/Stalker reduzem TODOS os tipos · Loud Operator aumenta TODOS · Silent Looter reduz só Looting(=5).
+///     <para>
+///     <b>B14 (coop 2026-07-11):</b> antes o gate por ProfileId barrava peers — o peer emitia o som no host, mas
+///     o perk dele era ignorado. Agora resolvemos o player pelo ProfileId (<c>GameWorld.GetAlivePlayerByProfileID</c>)
+///     e aplicamos o multiplicador da classe DELE. Mesma lógica do <see cref="AiSoundPatch"/> (a IA do SAIN
+///     também vive no host).
+///     </para>
 /// </summary>
 internal class SainSoundPatch : ModulePatch
 {
@@ -230,31 +276,33 @@ internal class SainSoundPatch : ModulePatch
     {
         try
         {
-            var mp = Singleton<GameWorld>.Instance?.MainPlayer;
-            if (mp == null || _getProfileId == null)
+            var gameWorld = Singleton<GameWorld>.Instance;
+            if (gameWorld == null || _getProfileId == null)
             {
                 return;
             }
 
-            // gate: só o player local (ProfileId) — não afeta peers coop nem bots. Getter compilado (sem reflection).
-            if (_getProfileId(__instance) != mp.ProfileId)
+            // B14: o EMISSOR pode ser o player local OU um peer Fika (o SAIN roda no host, junto com os bots).
+            // Getter compilado (sem reflection no hot-path).
+            var emitter = gameWorld.GetAlivePlayerByProfileID(_getProfileId(__instance));   // ref: GameWorld.cs:1238
+            var emitterClass = ClassIdentities.ClassNameEnOf(emitter);
+            if (emitterClass is null)
             {
-                return;
+                return;   // bot, vanilla ou desconhecido → sem efeito
             }
 
             var before = __2;
             var soundType = Convert.ToInt32(__0);
 
-            __2 *= QuietStep.Mult();      // reduz TODOS (Ghost Step / Stalker)
-            __2 *= LoudOperator.Mult();   // aumenta TODOS
+            __2 *= QuietStep.MultFor(emitterClass);      // reduz TODOS (Ghost Step / Stalker)
+            __2 *= LoudOperator.MultFor(emitterClass);   // aumenta TODOS
 
-            if (soundType == SainSoundTypeLooting
-                && PerksConfig.SilentLooterEnabled?.Value == true && SkillMultipliers.IsLocalClass("Scavenger"))
+            if (soundType == SainSoundTypeLooting)
             {
-                __2 *= PerksConfig.SilentLooterVolume?.Value ?? 1f;   // anti-detecção: reduz só o Looting
+                __2 *= SilentLooter.MultFor(emitterClass);   // anti-detecção: reduz só o Looting (Saqueador)
             }
 
-            if (PerkDiag.Enabled)
+            if (PerkDiag.Enabled && emitter is not null && emitter.IsYourPlayer)   // o overlay só descreve o SEU player
             {
                 PerkDiag.SainBefore = before;
                 PerkDiag.SainAfter = __2;

@@ -38,6 +38,12 @@ internal class RaidPerksNotificationPatch : ModulePatch
             // desligadas no F12, o 1º consumidor seria o Factor() DENTRO do Tick de stamina do stances —
             // HTTP síncrono no 1º ADS. EnsureLoaded é no-op se o deploy (PartyInfoPanelPrefetchPatch) já buscou.
             SkillMultipliers.EnsureLoaded();
+            // (B14, 2026-07-11) MESMO motivo do warm acima, agora para o mapa nickname→classe: desde o B14 o
+            // AiSoundPatch/SainSoundPatch resolvem a classe de QUALQUER emissor (peers Fika inclusive). Sem este
+            // warm, a 1ª resolução de um peer cairia dentro do BotEventHandler.PlaySound (a cada passo) e o GET
+            // SÍNCRONO daria hitch no meio da raid. No-op se o deploy (PartyInfoPanelPrefetchPatch) já buscou —
+            // mas o deploy não é garantido (solo / painel de grupo não renderizado).
+            ClassIdentities.Prefetch();
             StancesArmStaminaBridge.TryAttach(finalAttempt: true);   // (051 PA-01-01) re-try do hook — aqui todos os plugins já carregaram
             // (057 CR-057F3-03) o refetch do mapa nickname→classe migrou pro host real: Prefix de
             // PartyInfoPanel.Show (PartyPlayerItemPatch.cs) — a tela de deploy abre ANTES do raid-start.
