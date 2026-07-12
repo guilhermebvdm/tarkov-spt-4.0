@@ -85,8 +85,14 @@ internal static class ClassIdentities
     ///     <para>
     ///     Player local → <see cref="SkillMultipliers"/> (fonte autoritativa da própria classe).
     ///     Peer remoto → mapa nickname→classe da rota 057 (já existente; sem protocolo novo).
-    ///     ⚠️ O VALOR do multiplicador vem do F12 de QUEM ESTÁ RODANDO ISTO. Não há sync de config entre peers:
-    ///     o host é a autoridade da percepção da IA (a IA é dele), e cada cliente é a autoridade do que ELE ouve.
+    ///     </para>
+    ///     <para>
+    ///     ⚠️ <b>O VALOR do multiplicador vem do F12 de QUEM ESTÁ RODANDO ISTO</b>, e NÃO há sync de config entre
+    ///     peers: o host é a autoridade da percepção da IA (a IA é dele) e cada cliente é a autoridade do que ELE
+    ///     ouve. Logo, um peer com F12 divergente percebe o som de forma divergente — o perk não "vaza" errado, mas
+    ///     também não é imposto. <b>Decisão do projeto (2026-07-12): a config é distribuída IDÊNTICA para todos</b>,
+    ///     o que torna o sync desnecessário. Se um dia essa premissa cair (config por jogador), aí sim seria preciso
+    ///     um protocolo — o server teria de ser a fonte dos valores, não o F12.
     ///     </para>
     /// </summary>
     public static string? ClassNameEnOf(EFT.Player? player)

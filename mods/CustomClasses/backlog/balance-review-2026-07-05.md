@@ -65,6 +65,8 @@ O Tanque recebe **5 nerfs** neste painel (B5, B6, B16, B18 + o ruído já aplica
 4. **Onda 2 — combate:** B6 · B16 · B7 · B15 (só se a Onda 1 não tiver corrigido a percepção sozinha).
 5. **Estruturais (qualquer momento):** ~~B14 (host-side)~~ ✅ · ~~B20 (rolloff de peer)~~ ✅ · B12 (item 050) · B19 (com B4) · B13 (com RN-03, após B15).
 
+> **Decisão (2026-07-12) — config idêntica, sem sync.** Os valores dos perks de som saem do **F12 de quem faz a conta** (host → o que a IA ouve; cada cliente → o que ELE ouve). Isso significa que F12 divergente = percepção divergente. **Decidido manter assim**: a config do mod é distribuída **idêntica para todos os jogadores**, o que dispensa protocolo. ⚠️ Se um dia a config passar a ser livre por jogador, os valores precisarão vir do **server** (não do F12) — aí, e só aí, entra sync.
+
 > **Retratação (2026-07-11).** Este board afirmava, no B14, que o rolloff audível para outros humanos "exigiria sync real". **Era falso** — e a consequência do erro era grande: aceito, o Ghost Step nunca deixaria o Furtivo mais silencioso para os **ouvidos dos colegas**, só para os bots. O decompile mostra que o `method_67` de um `ObservedPlayer` roda no cliente de quem OUVE (ele até sobrescreve `ProtagonistHearing` para usar o `BetterAudio` local), então o mapa nickname→classe — que existe em todo cliente, não só no host — já bastava. Lição: antes de declarar "precisa de protocolo", confirmar **em qual processo** o código roda.
 
 ---
