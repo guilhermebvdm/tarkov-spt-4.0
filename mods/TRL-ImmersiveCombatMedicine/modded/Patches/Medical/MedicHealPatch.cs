@@ -116,6 +116,15 @@ namespace Band_Aid
             }
         }
 
+        /// <summary>
+        /// true se a instância é a operação de meds que ESTE redirect está acompanhando.
+        /// Usado pelo AnimCleanupPatch para ignorar method_9 de operações de bots/peers.
+        /// </summary>
+        public static bool IsCurrentInstance(object instance)
+        {
+            return instance != null && ReferenceEquals(instance, _currentObservedMedsControllerClass);
+        }
+
         public static void CleanupPatientSubscription()
         {
             if (_subscribedPatientHc != null)
@@ -148,15 +157,45 @@ namespace Band_Aid
             BandAidHealActive = false;
         }
 
+        /// <summary>
+        /// Resolve o Player dono da operação de meds (via MedsController_0._player).
+        /// null se não conseguir resolver.
+        /// </summary>
+        private static Player ResolveOperationOwner(object __instance)
+        {
+            try
+            {
+                EnsureFieldCache(__instance.GetType());
+                if (_fiMedsController == null) return null;
+                var medsController = _fiMedsController.GetValue(__instance);
+                if (medsController == null) return null;
+                var playerField = AccessTools.Field(typeof(Player.ItemHandsController), "_player");
+                return playerField?.GetValue(medsController) as Player;
+            }
+            catch { return null; }
+        }
+
         static bool Prefix(object __instance)
         {
+            // ref: fix mão travada 2026-07-12 — bots (e peers) usam o MESMO
+            // ObservedMedsControllerClass para os meds DELES. Interceptar operação
+            // alheia sobrescrevia _currentObservedMedsControllerClass com a instância
+            // do bot → ForceFinishAnimation finalizava a operação errada e a do médico
+            // ficava órfã (mão presa até o HANB). Só interceptamos o MainPlayer.
+            Player operationOwner = ResolveOperationOwner(__instance);
+            var localMainPlayer = Comfort.Common.Singleton<GameWorld>.Instance?.MainPlayer;
+            bool isDoctorOperation = operationOwner != null && localMainPlayer != null && operationOwner == localMainPlayer;
+
             // === DIAGNÓSTICO: SEMPRE loga quando method_5 é chamado ===
             float timeSinceRedirect = UnityEngine.Time.time - RedirectStartTime;
-            Logger.LogWarning($"🔍 method_5 CHAMADO | IsRedirecting={IsRedirectingHeal} | BandAidActive={BandAidHealActive} | Patient={CurrentPatient?.Profile?.Nickname ?? "null"} | T+{timeSinceRedirect:F1}s desde redirect");
+            Logger.LogWarning($"🔍 method_5 CHAMADO | owner={operationOwner?.Profile?.Nickname ?? "?"} | doutorOp={isDoctorOperation} | IsRedirecting={IsRedirectingHeal} | BandAidActive={BandAidHealActive} | Patient={CurrentPatient?.Profile?.Nickname ?? "null"} | T+{timeSinceRedirect:F1}s desde redirect");
+
+            if (!isDoctorOperation)
+                return true; // meds de bot/peer: nunca interceptar nem bloquear
 
             if (!IsRedirectingHeal || CurrentPatient == null)
             {
-                // G5: Se BandAidHealActive=true, bloquear self-heal vanilla
+                // G5: Se BandAidHealActive=true, bloquear self-heal vanilla DO MÉDICO
                 // para evitar que _currentObservedMedsControllerClass seja sobrescrito por outra instância
                 if (BandAidHealActive)
                 {
@@ -169,14 +208,10 @@ namespace Band_Aid
             try
             {
                 // ref: fix Salewa 2026-07-12 — nomes eram camelCase e não existem (case-sensitive)
-                EnsureFieldCache(__instance.GetType());
-
                 if (_fiMedsController == null) { Logger.LogWarning("Campo MedsController não encontrado (nome nem tipo)"); return true; }
                 var medsController = _fiMedsController.GetValue(__instance);
 
-                var playerField = AccessTools.Field(typeof(Player.ItemHandsController), "_player");
-                if (playerField == null) { Logger.LogWarning("_player não encontrado"); return true; }
-                var doctor = (Player)playerField.GetValue(medsController);
+                var doctor = operationOwner;
 
                 var item = ((Player.AbstractHandsController)medsController).Item;
                 if (item == null) { Logger.LogWarning("Item é null"); return true; }
@@ -339,13 +374,21 @@ namespace Band_Aid
         }
 
         [HarmonyPostfix]
-        static void Postfix()
+        static void Postfix(object __instance)
         {
             float timeSinceRedirect = UnityEngine.Time.time - MedicHealPatch.RedirectStartTime;
 
             if (!MedicHealPatch.IsRedirectingHeal)
             {
                 // G4: Não é nosso redirect — early return para evitar triplo reset
+                return;
+            }
+
+            // ref: fix mão travada 2026-07-12 — method_9 de operação de BOT/peer
+            // terminando durante o redirect não pode resetar o estado do médico.
+            if (!MedicHealPatch.IsCurrentInstance(__instance))
+            {
+                Logger.LogInfo("AnimCleanupPatch: method_9 de outra instância (bot/peer) durante redirect — ignorado.");
                 return;
             }
 

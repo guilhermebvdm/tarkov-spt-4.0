@@ -1,16 +1,16 @@
 # Graph Report - mods\TRL-ImmersiveCombatMedicine\modded  (2026-07-12)
 
 ## Corpus Check
-- 27 files · ~20,320 words
+- 27 files · ~20,563 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 421 nodes · 640 edges · 27 communities
+- 423 nodes · 646 edges · 27 communities
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `e46c9a7d`
+- Built from commit: `25051151`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -46,7 +46,7 @@
 1. `BandAidUI` - 51 edges
 2. `BandAidController` - 42 edges
 3. `BandAidNetworkHandler` - 20 edges
-4. `MedicHealPatch` - 18 edges
+4. `MedicHealPatch` - 20 edges
 5. `MedicalLogic` - 16 edges
 6. `TourniquetManager` - 16 edges
 7. `TRLImmersiveCombatMedicinePlugin` - 15 edges
@@ -172,20 +172,20 @@ Cohesion: 0.21
 Nodes (6): ConfigFile, bool, ConfigEntry, float, DebugBotInvisibility, TRLImmersiveCombatMedicine
 
 ## Knowledge Gaps
-- **140 isolated node(s):** `TRLImmersiveCombatMedicine`, `ConfigEntry`, `bool`, `float`, `ConfigFile` (+135 more)
+- **139 isolated node(s):** `TRLImmersiveCombatMedicine`, `ConfigEntry`, `bool`, `float`, `ConfigFile` (+134 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `BandAidUI` connect `Community 0` to `Community 15`?**
-  _High betweenness centrality (0.063) - this node is a cross-community bridge._
+  _High betweenness centrality (0.062) - this node is a cross-community bridge._
 - **Why does `BandAidController` connect `Community 1` to `Community 0`, `Community 15`?**
   _High betweenness centrality (0.054) - this node is a cross-community bridge._
 - **Why does `TourniquetManager` connect `Community 5` to `Community 15`?**
   _High betweenness centrality (0.027) - this node is a cross-community bridge._
 - **What connects `TRLImmersiveCombatMedicine`, `ConfigEntry`, `bool` to the rest of the system?**
-  _140 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _139 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.07486338797814207 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
