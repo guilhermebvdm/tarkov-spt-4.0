@@ -14,12 +14,21 @@ namespace CustomClasses.Client;
 ///     o Caçador ganha uma versão mais fraca (espreitar a presa). Retorna o multiplicador da classe LOCAL
 ///     (1 = sem efeito). Usado pelos 3 pipelines de som (rolloff do player, IA base, SAIN) — mesma forma do
 ///     <see cref="LoudOperator"/>, que é o oposto (aumenta o raio).
-///     ⚠️ Coop: som é host-only vs bots (B14) — um CLIENTE Fika não afeta a percepção da IA (ela vive no host).
+///     ✅ Coop: DESDE O B14 (2026-07-11) o host aplica o perk de som de um peer Fika contra a IA (via
+///     <see cref="ClassIdentities.ClassNameEnOf"/>) — deixou de ser host-only. Ver <see cref="AiSoundPatch"/>.
 /// </summary>
 internal static class QuietStep
 {
-    /// <summary>Multiplicador do player LOCAL (atalho — pipelines que só valem para você, ex.: o rolloff que você ouve).</summary>
-    internal static float Mult() => MultFor(SkillMultipliers.ClassNameEn);
+    /// <summary>
+    ///     Multiplicador do player LOCAL (atalho — pipelines que só valem para você, ex.: o rolloff que você ouve).
+    ///     O <c>EnsureLoaded()</c> é explícito: antes do B14 este caminho passava por <c>IsLocalClass()</c>, que já
+    ///     o chamava por dentro. Lendo <c>ClassNameEn</c> cru, um cache frio devolveria 1 (sem efeito) EM SILÊNCIO.
+    /// </summary>
+    internal static float Mult()
+    {
+        SkillMultipliers.EnsureLoaded();
+        return MultFor(SkillMultipliers.ClassNameEn);
+    }
 
     /// <summary>
     ///     B14 — multiplicador de UMA classe (por nome EN). Permite ao HOST aplicar o perk de som de um peer
@@ -67,8 +76,12 @@ internal static class SilentLooter
 /// </summary>
 internal static class LoudOperator
 {
-    /// <summary>Multiplicador do player LOCAL (atalho).</summary>
-    internal static float Mult() => MultFor(SkillMultipliers.ClassNameEn);
+    /// <summary>Multiplicador do player LOCAL (atalho). EnsureLoaded explícito — ver <see cref="QuietStep.Mult"/>.</summary>
+    internal static float Mult()
+    {
+        SkillMultipliers.EnsureLoaded();
+        return MultFor(SkillMultipliers.ClassNameEn);
+    }
 
     /// <summary>B14 — multiplicador de UMA classe (por nome EN), para o host aplicar o de um peer Fika.</summary>
     internal static float MultFor(string? classNameEn)
@@ -95,7 +108,9 @@ internal static class LoudOperator
 ///     Item 050.4 — som emitido pelo player.
 ///     <c>Player.method_67</c> = funil do RAIO de audibilidade de TODO som de movimento
 ///     (passos/gear/sprint/turn/prone) → multiplica o quão longe inimigos te ouvem. Gate: MainPlayer local.
-///     🔧 Ghost Step (Furtivo) ×0.4 (mais silencioso) · 🔻 Loud Operator (Fuzileiro + Tanque, 2026-07-05) ×1.3.
+///     🔧 Ghost Step (Furtivo ×0.70) / Stalker (Caçador ×0.80) · 🔻 Loud Operator (Fuzileiro + Tanque ×1.30).
+///     Este é o rolloff que VOCÊ ouve → segue LOCAL de propósito: sincronizá-lo p/ peers humanos exigiria
+///     protocolo real (fora do escopo do B14, que corrigiu só a percepção da IA).
 /// </summary>
 internal class SoundRadiusPatch : ModulePatch
 {

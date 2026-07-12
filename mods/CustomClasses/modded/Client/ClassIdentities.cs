@@ -49,15 +49,26 @@ internal static class ClassIdentities
     ///     </para>
     /// </summary>
     /// <summary>
-    ///     B14 — força o carregamento do mapa AGORA (idempotente). Chamado no <c>GameWorld.OnGameStarted</c>.
+    ///     B14 — REFETCH forçado do mapa. Chamado no <c>GameWorld.OnGameStarted</c> (ainda na tela de loading,
+    ///     então o GET síncrono é um hitch invisível).
     ///     <para>
-    ///     Necessário porque o <see cref="EnsureLoaded"/> faz um GET **SÍNCRONO**: sem isto, a 1ª resolução de
-    ///     um peer aconteceria dentro do <c>BotEventHandler.PlaySound</c> (a cada passo!) e o fetch causaria um
-    ///     hitch NO MEIO DA RAID. O prefetch da tela de deploy (<c>PartyPlayerItemPatch</c>) normalmente já
-    ///     aqueceu o mapa, mas não é garantido (ex.: solo, ou o painel de grupo não renderizou).
+    ///     É <c>Reset()</c> + <c>EnsureLoaded()</c>, e NÃO só um <c>EnsureLoaded()</c>, por dois motivos
+    ///     (code-review 2026-07-11): (1) <c>_loaded</c> é marcado ANTES do GET e não há retry — se o PRIMEIRO
+    ///     fetch da sessão falhar (server subindo, rota 404), o mapa fica VAZIO e marcado como carregado, e todo
+    ///     perk de som de peer morre pela sessão inteira, em silêncio. (2) Os únicos outros pontos que invalidam
+    ///     o mapa são de UI de MENU (<c>PartyPlayerItemPatch</c>, <c>ClassDetailLoadingPatch</c>) — num host
+    ///     HEADLESS eles nunca rodam, e uma troca de classe no editor web nunca refletiria.
+    ///     </para>
+    ///     <para>
+    ///     Também garante que a 1ª resolução de um peer NÃO caia dentro do <c>BotEventHandler.PlaySound</c>
+    ///     (a cada passo!), onde o GET síncrono viraria hitch no meio da raid.
     ///     </para>
     /// </summary>
-    public static void Prefetch() => EnsureLoaded();
+    public static void Prefetch()
+    {
+        Reset();
+        EnsureLoaded();
+    }
 
     public static string? ClassNameEnOf(EFT.Player? player)
     {
