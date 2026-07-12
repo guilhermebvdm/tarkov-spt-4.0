@@ -675,12 +675,14 @@ namespace Band_Aid
                 var mainPlayer = Comfort.Common.Singleton<GameWorld>.Instance?.MainPlayer;
                 if (mainPlayer != null && _targetPlayer != null)
                 {
-                    // Player.Position = posiÃ§Ã£o dos pÃ©s. Dois jogadores lado a lado ~1.5m.
-                    // SphereCast usa cÃ¢mera (olhos) â€” detecÃ§Ã£o Ã© diferente de auto-close.
+                    // ref: CR-01-01 — regra ÚNICA de distância (config + 1 m de margem
+                    // feet-to-feet, igual ao BandAidController). O valor antigo (1,0 m)
+                    // fechava o HUD imediatamente: lado a lado já são ~1,5 m.
+                    float maxDist = TRLImmersiveCombatMedicinePlugin.MedicInteractDistance.Value + 1f;
                     float dist = Vector3.Distance(mainPlayer.Position, _targetPlayer.Position);
-                    if (dist > 1.0f)
+                    if (dist > maxDist)
                     {
-                        Logger.LogInfo($"Paciente distante ({dist:F1}m > 1.0m), fechando HUD.");
+                        Logger.LogInfo($"Paciente distante ({dist:F1}m > {maxDist:F1}m), fechando HUD.");
                         HideUI();
                         // Notificar BandAidPlugin para desativar modo mÃ©dico
                         BandAidController.Instance.DeactivateMedicModeExternal();
