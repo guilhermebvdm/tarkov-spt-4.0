@@ -29,8 +29,12 @@ por `(seção, chave)` literal, então **a config do usuário reseta para o defa
   em vez de trocar a branch alheia. Commitar cedo — edição não commitada some se outra janela roda `pull`/`checkout`.
 - **Tudo commitado, NADA pushado.** A `main` local está **à frente do remote** (inclui commits de sessões paralelas:
   launcher 2.2.1, CustomClasses). `git push` exige aprovação do usuário.
-- **DLL instalada** em `D:/SPT/BepInEx/plugins/RealisticMobility/shwngFpsCameraStances4.dll` — hash `c83ed42`,
-  contém tudo (014 fix-03 + 015 + revisão do F12). A cópia no repo (`modded/shwngFpsCameraStances4.dll`) é a mesma.
+- ~~**DLL instalada** em `D:/SPT/BepInEx/plugins/RealisticMobility/shwngFpsCameraStances4.dll` — hash `c83ed42`,
+  contém tudo (014 fix-03 + 015 + revisão do F12). A cópia no repo (`modded/shwngFpsCameraStances4.dll`) é a mesma.~~
+  > ⚠️ **CORRIGIDO em 2026-07-11 (sessão seguinte): isto estava errado.** A DLL instalada era a `972f5f8`
+  > (11/07 00:53), **não** a `c83ed42` (11/07 03:38) — ou seja, era **anterior à reorganização do F12**, que
+  > portanto **nunca tinha rodado in-game**. Hoje a instalada é a **`f7752b6` (v2.0.0)**, que contém tudo.
+  > Lição: conferir o **hash** da DLL instalada contra a do repo; handoff/memória registram a *intenção* do deploy.
 - **Grafo regenerado** e commitado (510 nós / 687 arestas).
 
 ## Fonte de verdade para contexto (ler nesta ordem)

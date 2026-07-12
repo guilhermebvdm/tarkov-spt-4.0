@@ -6,7 +6,9 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados quan
 
 ## Estado atual (snapshot ao fim da última sessão)
 
-- **Fork ativo = `modded` (CANÔNICO desde 2026-07-09).** Reorg: `git mv modded-beta → modded` e antigo `modded → modded-bak` (backup, não editar). Build **self-contained** (`/compile-mod` OU `dotnet build`; csproj puxa `Fika.Core` da raiz `references/`, sem `mods/references/` temp). **Deploy manual** do DLL em `D:/SPT/BepInEx/plugins/RealisticMobility/` (assets `.ogg`/`.png` ao lado; `/compile-mod` instala em `plugins/<AssemblyName>/`, então copiar à mão). DLL atual: hash `c83ed42` (014 fix-03 + 015 + review de propriedades). Ver memória global `reference_stances_canonical_build`.
+- **Fork ativo = `modded` (CANÔNICO desde 2026-07-09).** Reorg: `git mv modded-beta → modded` e antigo `modded → modded-bak` (backup, não editar). Build **self-contained** (`/compile-mod` OU `dotnet build`; csproj puxa `Fika.Core` da raiz `references/`, sem `mods/references/` temp). **Deploy manual** do DLL em `D:/SPT/BepInEx/plugins/RealisticMobility/` (assets `.ogg`/`.png` ao lado; `/compile-mod` instala em `plugins/<AssemblyName>/`, então copiar à mão). DLL atual: **v2.0.0, hash `f7752b6`** (014 fix-03 + 015 + reorg do F12). Ver memória global `reference_stances_canonical_build`.
+- **VERSÃO 2.0.0 (2026-07-11, commit `39e7a56`).** Bump `1.3.1 → 2.0.0` em `Plugin.cs` (`BepInPlugin`) **e** `.csproj` (`Version`/`AssemblyVersion`/`FileVersion` — antes a DLL saía como `1.0.0.0`, independente da versão do BepInEx). Changelog do fork em **`modded/CHANGELOG.md`** (o `CHANGELOG_SIMPLIFIED.md` é do upstream e para na 1.1.4). Major porque a config salva do usuário **reseta**.
+- ⚠️ **A DLL instalada estava DEFASADA até 2026-07-11.** A instalada era de 11/07 00:53 (pré-reorg do F12); a build com a reorg é de 03:38. **Ou seja: a validação in-game da Sessão 7 rodou sobre código SEM a reorg do F12** — os 23 props mortos e 9 campos órfãos removidos **nunca rodaram no jogo**. O handoff de 2026-07-11 afirmava (errado) que a instalada era a `c83ed42`. Lição: **conferir o hash da DLL instalada contra a do repo**, não confiar no que a memória/handoff diz estar instalado.
 - **BACKLOG INTEIRO VALIDADO IN-GAME (2026-07-11).** Todos os itens 🟢 no `mod-backlog.md` — 001/002/003/005/006/007/008/009/010/011/012/013/014/015. Único 🔴: **004** (mount próprio cancelado → substituído pelo 011). O 014 substitui o 006; o 011 substitui o 004.
 - **014 (sync Fika) — VALIDADO:** o **fix-03** aplica o offset num **Postfix de `PlayerBones.ShiftWeaponRoot`** (janela **pré-IK**) → **braço E arma** acompanham juntos. Antes: fix-02 (Postfix de `ObservedVisualPass`) rodava **pós-IK** e movia **só a arma**.
 - **015 (bloqueio de mount ativo) — VALIDADO:** `BlockActiveMountPatch` (Prefix de `Player.TryMountWeapon`) **impede** o mount vanilla em Stance 1/2/3; permitido em Stance 0, ADS e prone. **Bipé não é afetado** (usa `IsBipodUsed`, não `IsMountedState`). **Desmontar** ao trocar de stance seria **código morto** — o 013 já força Stance 0 enquanto montado (`StanceManager.Update` L169-180).
@@ -15,7 +17,7 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados quan
 
 ## Pendências / próximos passos conhecidos
 
-- **[P-7.1] (aberta 2026-07-11) 🟡 Conferir o F12 in-game após a reorganização** (seções/nomes/tooltips novos aparecem certos) e **subir a versão do mod** no próximo release — os renomes de seção/key **resetam a config salva** do usuário (comunicar no changelog). Ver `feedback_version_increment_on_release`.
+- **[P-7.1] (aberta 2026-07-11, PARCIAL em 2026-07-11) 🟡 Validar in-game a build 2.0.0.** A parte de **release** está ✅ feita (versão 2.0.0 + changelog + rebuild + deploy — Sessão 8). **Falta o gate humano:** rodar o jogo com a `f7752b6` e conferir (a) as 21 seções / 120 opções do F12 com nomes e tooltips certos e (b) que os itens validados na Sessão 7 **continuam funcionando** — a reorg removeu 23 props e 9 campos que **nunca rodaram in-game**, então não é só conferência cosmética. Ver `feedback_version_increment_on_release` e `feedback_spt_validation`.
 - **[P-7.2] (aberta 2026-07-11) 🟢 Dívida técnica** (herda a antiga P-5.3): unificar a interpolação em `SpringMath.SpringDamp`, eliminar a reflection que roda a cada frame, `try/catch` nos ~19 patches restantes (só os 6 do Manual Chambering têm), auditar o reset de estado estático entre raids. Adiada porque mexe em código de câmera **já validado** — risco > valor até surgir bug real.
 - **[P-7.3] (aberta 2026-07-11) 🟢 Dívida da revisão do F12** (achados adiados do `PROPRIEDADES-review-01.md`): reordenar as seções (**MP-01-03** — os binds de uma mesma seção estão espalhados pelo `Awake`, ex.: Stance 2 em L766 **e** L1184; reordenar arriscaria quebrar um arquivo de 1700 linhas já validado), rever onde ficam as opções de velocidade (**MP-01-08**) e se a seção da Stance 0 se justifica (**MP-01-10**).
 
@@ -282,3 +284,42 @@ sem coordenar. Artefatos: mods/CustomClasses/backlog/051-stances-zone-levers/ (s
 - **Legadas descartadas por obsolescência** (P-4.2/P-4.3 infra de build, P-4.6 migração de `.cfg`, P-5.1 commit do fix de câmera, P-5.2 mount automático): superadas pela reorganização dos forks e pelo item 011. Removidas do topo.
 - **Trabalho meta-repo nesta sessão** (`/review-mod-properties`, template, `WORKFLOW.md`): sem destino dedicado desde 2026-07-06 — `git log` é a fonte de verdade.
 
+
+## 2026-07-11 ~21:30 (GMT-3) — Sessão 8: release 2.0.0 (versão + changelog + rebuild) e a DLL defasada
+
+Sessão curta, aberta a partir do handoff `handoff-2026-07-11-stances-backlog-fechado.md` para fechar o lado
+"release" da **P-7.1**. Nada de código funcional mudou.
+
+1. **Bump `1.3.1 → 2.0.0`.** A 1.3.1 tinha sido escrita **uma única vez** (commit `a29e241`, 2026-06-23, promoção do
+   `modded-beta`) e nunca mais subiu — os itens 014 fix-03 e 015, o `try/catch` do Manual Chambering e a reorg
+   inteira do F12 entraram por cima dela. **Major** (não minor) porque a config salva do usuário **reseta**:
+   o BepInEx casa cada entrada pelo par `(seção, chave)` literal e a reorg renomeou ambos.
+2. **A versão agora vive em dois lugares** — `Plugin.cs` (`BepInPlugin`, que é o que o BepInEx mostra) **e** o
+   `.csproj` (`Version`/`AssemblyVersion`/`FileVersion`). Antes o `.csproj` não tinha versão nenhuma: a DLL saía
+   como `1.0.0.0` enquanto se anunciava 1.3.1. Manter os dois em sincronia.
+3. **Changelog do fork em `modded/CHANGELOG.md`** (novo). O `CHANGELOG_SIMPLIFIED.md` é do **upstream** e para na
+   v1.1.4 — foi deixado intacto como histórico. A entrada da 2.0.0 abre com o aviso de perda de config e explica
+   que vale reconfigurar do zero (8 opções tinham Roll/Yaw trocados no rótulo, então quem calibrou pelo nome
+   mexeu no eixo errado).
+4. **Rebuild + deploy.** Build limpa (só o warning pré-existente `CS0618` no `FOVSliderPatch`). DLL **`f7752b6`**
+   (v2.0.0) copiada para `D:/SPT/BepInEx/plugins/RealisticMobility/`, para o repo (`modded/`) e para `builds/`
+   (que é **gitignored** — histórico local, não entra em commit).
+5. **Commit `39e7a56`**, cirúrgico: só os 4 arquivos do stances. A árvore tinha trabalho não commitado de uma
+   sessão paralela (TRL-ItemsManagement) e ele foi preservado.
+
+**🔍 Achado que corrige o handoff — a DLL instalada estava defasada.**
+O handoff afirmava que a DLL em `D:/SPT` era a `c83ed42` e "continha tudo". **Não continha.** Os hashes divergiam:
+instalada `972f5f8` (11/07 **00:53**, 135,5 KB) × repo `c83ed42` (11/07 **03:38**, 151 KB). A build com a reorg do
+F12 é a das 03:38 — **quase 3h depois** da que estava rodando. Consequência real: a **validação in-game da Sessão 7
+rodou sobre código sem a reorg**, então os **23 props mortos e 9 campos órfãos removidos nunca rodaram no jogo**.
+Por isso o teste que falta **não é cosmético** — é reconfirmar que os itens seguem funcionando sobre a 2.0.0.
+
+**Lição:** conferir o **hash da DLL instalada contra a do repo** antes de confiar que "está deployado". Handoff e
+memória registram a *intenção* do deploy; só o hash prova. (Reforça `feedback_spt_validation`: escrita em arquivo
+SPT ≠ validação.)
+
+**Pendências:**
+
+- **[P-7.1]** → **parcial**. Lado release ✅ (2.0.0 + changelog + rebuild + deploy). **Falta o gate humano:** rodar
+  o jogo com a `f7752b6`, conferir as 21 seções / 120 opções do F12 **e** reconfirmar os itens da Sessão 7.
+- **[P-7.2]** e **[P-7.3]** — inalteradas.
