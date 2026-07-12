@@ -32,6 +32,41 @@ namespace Band_Aid
         private static object _currentObservedMedsControllerClass = null;
         private static IHealthController _subscribedPatientHc = null;
 
+        // Fix Salewa (sessão 2026-07-12): quando o DoMedEffect redirecionado ao paciente
+        // retorna não-null, o MedEffect NATIVO já cura HP ao longo do tempo, remove
+        // bleeds/fraturas no Residue() e consome HpResource do item. O HealRoutine
+        // consulta esta flag para NÃO aplicar MedicalLogic.ApplyTreatment em dobro.
+        public static bool NativeMedEffectApplied = false;
+
+        // Cache de reflection (csharp-best-practices §3): resolvido 1x por tipo.
+        // Nomes reais no SPT 4.0 são PascalCase (públicos: MedsController_0/Queue_0/Float_0,
+        // Player.cs:19444/19453/19456); camelCase mantido como fallback + resolução por
+        // TIPO como rede final (rename-proof entre builds do EFT).
+        private static Type _fieldsOwnerType;
+        private static FieldInfo _fiMedsController, _fiQueue, _fiFloat;
+
+        private static void EnsureFieldCache(Type owner)
+        {
+            if (_fieldsOwnerType == owner) return;
+            _fieldsOwnerType = owner;
+            _fiMedsController = ResolveField(owner, "MedsController_0", "medsController_0", typeof(Player.MedsController));
+            _fiQueue = ResolveField(owner, "Queue_0", "queue_0", typeof(System.Collections.Generic.Queue<EBodyPart>));
+            _fiFloat = ResolveField(owner, "Float_0", "float_0", typeof(float));
+        }
+
+        private static FieldInfo ResolveField(Type owner, string pascalName, string camelName, Type fieldType)
+        {
+            var fi = AccessTools.Field(owner, pascalName) ?? AccessTools.Field(owner, camelName);
+            if (fi == null)
+            {
+                foreach (var f in owner.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
+                {
+                    if (f.FieldType == fieldType) { fi = f; break; }
+                }
+            }
+            return fi;
+        }
+
         private static readonly EBodyPart[] AllBodyParts = new EBodyPart[]
         {
             EBodyPart.Head, EBodyPart.Chest, EBodyPart.Stomach,
@@ -133,9 +168,11 @@ namespace Band_Aid
 
             try
             {
-                var medsControllerField = AccessTools.Field(__instance.GetType(), "medsController_0");
-                if (medsControllerField == null) { Logger.LogWarning("medsController_0 não encontrado"); return true; }
-                var medsController = medsControllerField.GetValue(__instance);
+                // ref: fix Salewa 2026-07-12 — nomes eram camelCase e não existem (case-sensitive)
+                EnsureFieldCache(__instance.GetType());
+
+                if (_fiMedsController == null) { Logger.LogWarning("Campo MedsController não encontrado (nome nem tipo)"); return true; }
+                var medsController = _fiMedsController.GetValue(__instance);
 
                 var playerField = AccessTools.Field(typeof(Player.ItemHandsController), "_player");
                 if (playerField == null) { Logger.LogWarning("_player não encontrado"); return true; }
@@ -144,14 +181,15 @@ namespace Band_Aid
                 var item = ((Player.AbstractHandsController)medsController).Item;
                 if (item == null) { Logger.LogWarning("Item é null"); return true; }
 
-                var queueField = AccessTools.Field(__instance.GetType(), "queue_0");
-                var queue = (System.Collections.Generic.Queue<EBodyPart>)queueField.GetValue(__instance);
+                var queue = _fiQueue != null
+                    ? (System.Collections.Generic.Queue<EBodyPart>)_fiQueue.GetValue(__instance)
+                    : null;
                 EBodyPart bodyPart1 = EBodyPart.Common;
                 if (queue != null && queue.Count > 0)
                     bodyPart1 = queue.Peek();
 
-                var amountField = AccessTools.Field(__instance.GetType(), "float_0");
-                float amount = (float)amountField.GetValue(__instance);
+                // Sem o campo de amount, passar null deixa o jogo decidir pelo item
+                float? amount = _fiFloat != null ? (float?)(float)_fiFloat.GetValue(__instance) : null;
 
                 var patientHc = CurrentPatient.ActiveHealthController;
 
@@ -181,16 +219,16 @@ namespace Band_Aid
                     return false;
                 }
 
-                Logger.LogInfo($"method_5: DoMedEffect no paciente {CurrentPatient.Profile.Nickname} | bodyPart={bodyPart1} | amount={amount:F1} | item={item.ShortName.Localized()}");
+                Logger.LogInfo($"method_5: DoMedEffect no paciente {CurrentPatient.Profile.Nickname} | bodyPart={bodyPart1} | amount={(amount.HasValue ? amount.Value.ToString("F1") : "auto")} | item={item.ShortName.Localized()}");
 
-                IEffect result = patientHc.DoMedEffect(item, bodyPart1, new float?(amount));
+                IEffect result = patientHc.DoMedEffect(item, bodyPart1, amount);
 
                 if (result == null)
                 {
                     Logger.LogWarning($"DoMedEffect retornou NULL para bodyPart={bodyPart1} — tentando fallback...");
                     foreach (var bp in AllBodyParts)
                     {
-                        result = patientHc.DoMedEffect(item, bp, new float?(amount));
+                        result = patientHc.DoMedEffect(item, bp, amount);
                         if (result != null)
                         {
                             Logger.LogInfo($"✅ Cura redirecionada para {CurrentPatient.Profile.Nickname} em {bp} (fallback)");
@@ -231,6 +269,10 @@ namespace Band_Aid
                     Logger.LogInfo("✅ Animação mantida (sem MedEffect) — ForceFinishAnimation será chamado após UseTime");
                     return false;
                 }
+
+                // MedEffect nativo criado no paciente → HealRoutine NÃO deve duplicar
+                // via MedicalLogic.ApplyTreatment (cura + consumo aconteceriam 2x).
+                NativeMedEffectApplied = true;
 
                 // Bridge: subscrever EffectRemovedEvent do paciente
                 CleanupPatientSubscription();

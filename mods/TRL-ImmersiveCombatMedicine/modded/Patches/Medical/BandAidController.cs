@@ -524,6 +524,7 @@ namespace TRLImmersiveCombatMedicine
             MedicHealPatch.IsRedirectingHeal = true;
             MedicHealPatch.CurrentPatient = patient;
             MedicHealPatch.RedirectStartTime = UnityEngine.Time.time;
+            MedicHealPatch.NativeMedEffectApplied = false;
 
             TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning($"ðŸ” HealRoutine: REDIRECT ATIVADO | item={itemUsed.ShortName.Localized()} | UseTime={stats.UseTime}s | patient={patient.Profile.Nickname}");
 
@@ -580,8 +581,16 @@ namespace TRLImmersiveCombatMedicine
             // G10: Desregistrar morte do paciente
             try { patient.OnPlayerDeadOrUnspawn -= OnPatientDiedDuringHeal; } catch { }
 
+            // ref: fix Salewa 2026-07-12 — se o redirect criou MedEffect NATIVO no paciente,
+            // o próprio jogo cura HP, remove bleeds/fraturas (Residue) e consome HpResource;
+            // chamar ApplyTreatment aqui dobraria cura e consumo.
+            if (MedicHealPatch.NativeMedEffectApplied)
+            {
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("HealRoutine: MedEffect nativo aplicado no paciente — ApplyTreatment programático pulado.");
+                NotificationManagerClass.DisplayMessageNotification("Tratamento Completo.", ENotificationDurationType.Long, ENotificationIconType.Quest);
+            }
             // N3: Verificar se o item e o paciente ainda existem apÃ³s o UseTime
-            if (patient != null && patient.HealthController.IsAlive && itemUsed != null)
+            else if (patient != null && patient.HealthController.IsAlive && itemUsed != null)
             {
                 try
                 {
