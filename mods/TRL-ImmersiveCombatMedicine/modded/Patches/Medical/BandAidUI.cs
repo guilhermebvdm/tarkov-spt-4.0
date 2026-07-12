@@ -320,6 +320,13 @@ namespace Band_Aid
             MakeLine(panel.transform, new Vector2(0, 248), new Vector2(420, 1),
                 new Color(COL_BORDER.r, COL_BORDER.g, COL_BORDER.b, 0.20f));
 
+            // === STATUS DO TRATAMENTO (membro-alvo) ===
+            _treatmentText = MakeText(panel.transform, "TreatmentStatus",
+                new Vector2(0, 236), new Vector2(460, 14),
+                "", 11, TextAnchor.MiddleCenter,
+                COL_TREAT, FontStyle.Bold);
+            _treatmentText.gameObject.SetActive(false);
+
             // === BARRA GLOBAL HP (vertical, à esquerda) ===
             CreateGlobalHpBarVertical(panel.transform);
 
@@ -645,7 +652,79 @@ namespace Band_Aid
         public void HideUI()
         {
             _targetPlayer = null;
+            ClearTreatment();
             if (_canvasObj != null) _canvasObj.SetActive(false);
+        }
+
+        // =====================================
+        //   FEEDBACK DO MEMBRO EM TRATAMENTO
+        // =====================================
+        private Text _treatmentText;
+        private bool _treatmentActive = false;
+        private EBodyPart _treatmentPart = EBodyPart.Common;
+        private Color _treatmentOutlineOriginal;
+        private static readonly Color COL_TREAT = new Color(0.95f, 0.75f, 0.20f, 1f); // âmbar
+
+        private static readonly Dictionary<EBodyPart, string> PartLabelPt = new Dictionary<EBodyPart, string>
+        {
+            { EBodyPart.Head, "CABEÇA" }, { EBodyPart.Chest, "TÓRAX" }, { EBodyPart.Stomach, "ESTÔMAGO" },
+            { EBodyPart.LeftArm, "BRAÇO ESQ." }, { EBodyPart.RightArm, "BRAÇO DIR." },
+            { EBodyPart.LeftLeg, "PERNA ESQ." }, { EBodyPart.RightLeg, "PERNA DIR." },
+        };
+
+        /// <summary>
+        /// Mostra qual membro está recebendo o tratamento (destaque pulsante no bloco
+        /// do membro + linha de status). part=Common → só o status, sem destaque
+        /// (alvo ainda não resolvido — ex.: paciente remoto aguardando report).
+        /// </summary>
+        public void ShowTreatment(EBodyPart part, string itemName)
+        {
+            if (_treatmentText == null) return;
+
+            string label = PartLabelPt.TryGetValue(part, out var l) ? l : "...";
+            _treatmentText.text = string.IsNullOrEmpty(itemName)
+                ? $"► TRATANDO: {label}"
+                : $"► {itemName.ToUpper()} → {label}";
+            _treatmentText.gameObject.SetActive(true);
+
+            // Restaurar o destaque anterior antes de trocar de membro
+            if (_treatmentActive && _treatmentPart != part) RestoreLimbOutline();
+
+            if (part != EBodyPart.Common && _limbViews.TryGetValue(part, out var limb) && limb.BarOutline != null)
+            {
+                if (!_treatmentActive || _treatmentPart != part)
+                    _treatmentOutlineOriginal = limb.BarOutline.effectColor;
+                _treatmentPart = part;
+                _treatmentActive = true;
+            }
+        }
+
+        public void ClearTreatment()
+        {
+            if (_treatmentText != null)
+            {
+                _treatmentText.text = "";
+                _treatmentText.gameObject.SetActive(false);
+            }
+            RestoreLimbOutline();
+            _treatmentActive = false;
+            _treatmentPart = EBodyPart.Common;
+        }
+
+        private void RestoreLimbOutline()
+        {
+            if (_treatmentActive && _limbViews.TryGetValue(_treatmentPart, out var limb) && limb.BarOutline != null)
+                limb.BarOutline.effectColor = _treatmentOutlineOriginal;
+        }
+
+        private void UpdateTreatmentHighlight()
+        {
+            if (!_treatmentActive) return;
+            if (!_limbViews.TryGetValue(_treatmentPart, out var limb) || limb.BarOutline == null) return;
+
+            // Pulso âmbar no outline da barra do membro em tratamento
+            float t = Mathf.PingPong(Time.time * 2.2f, 1f);
+            limb.BarOutline.effectColor = Color.Lerp(_treatmentOutlineOriginal, COL_TREAT, 0.35f + 0.65f * t);
         }
 
         // =====================================
@@ -659,6 +738,7 @@ namespace Band_Aid
             if (_targetPlayer == null || _canvasObj == null || !_canvasObj.activeSelf) return;
 
             UpdateEcg();
+            UpdateTreatmentHighlight();
 
             if (Time.time - _lastUpdateTime < UPDATE_INTERVAL) return;
             _lastUpdateTime = Time.time;

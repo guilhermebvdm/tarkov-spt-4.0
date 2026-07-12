@@ -60,8 +60,9 @@ namespace Band_Aid
                 netManager.RegisterPacket<BandAidHealCheckPacket>(OnHealCheckReceived);
                 netManager.RegisterPacket<BandAidHealCheckResponsePacket>(OnHealCheckResponseReceived);
                 netManager.RegisterPacket<TraumaFaintPacket>(OnTraumaFaintReceived); // ref: CR-01-02
+                netManager.RegisterPacket<BandAidTreatmentReportPacket>(OnTreatmentReportReceived); // feedback membro-alvo
                 _initialized = true;
-                Logger.LogInfo("Fika Network Packets registrados (Heal + ShoulderTap + HealCheck + TraumaFaint)!");
+                Logger.LogInfo("Fika Network Packets registrados (Heal + ShoulderTap + HealCheck + TraumaFaint + TreatmentReport)!");
             }
         }
 
@@ -313,8 +314,10 @@ namespace Band_Aid
             // Cirurgia
             if (stats.IsSurgery)
             {
-                ApplySurgeryFromNetwork(hc, GetBlackedPart(hc), UnityEngine.Random.Range(stats.SurgeryPenaltyMin, stats.SurgeryPenaltyMax));
-                Logger.LogInfo("Cirurgia aplicada pelo paciente (via rede).");
+                EBodyPart surgeryPart = GetBlackedPart(hc);
+                ApplySurgeryFromNetwork(hc, surgeryPart, UnityEngine.Random.Range(stats.SurgeryPenaltyMin, stats.SurgeryPenaltyMax));
+                Logger.LogInfo($"Cirurgia aplicada pelo paciente em {surgeryPart} (via rede).");
+                SendTreatmentReport(packet, surgeryPart, 0f); // feedback membro-alvo ao médico
                 return;
             }
 
@@ -347,6 +350,7 @@ namespace Band_Aid
                 RemoveEffectNative(hc, target, _fractureConcreteType, "Fracture");
 
             // HP
+            float healedTotal = 0f;
             if (stats.HealAmount > 0)
             {
                 var bodyHp = hc.GetBodyPartHealth(target);
@@ -355,9 +359,13 @@ namespace Band_Aid
                 if (heal > 0)
                 {
                     activeHc.ChangeHealth(target, heal, default(DamageInfoStruct));
+                    healedTotal = heal;
                     Logger.LogInfo($"HP +{heal:F1} em {target} pelo paciente (via rede).");
                 }
             }
+
+            // Feedback membro-alvo ao médico (parte real escolhida pelo smart-target)
+            SendTreatmentReport(packet, target, healedTotal);
 
             // ref: CR-02 — a notificação é do PACIENTE humano; quando o host aplica em
             // nome de um BOT (CR-01-01), o toast não pode aparecer para o host.
@@ -656,6 +664,50 @@ namespace Band_Aid
                 Singleton<FikaServer>.Instance.SendData(ref response, DeliveryMethod.ReliableOrdered, true);
             else if (Singleton<FikaClient>.Instantiated)
                 Singleton<FikaClient>.Instance.SendData(ref response, DeliveryMethod.ReliableOrdered);
+        }
+
+        // ============================================================
+        // Feedback membro-alvo (report PACIENTE → MÉDICO)
+        // ============================================================
+
+        /// <summary>Paciente (ou dono do bot) reporta ao médico o membro tratado.</summary>
+        private static void SendTreatmentReport(BandAidHealPacket source, EBodyPart part, float healed)
+        {
+            if (!_initialized) return;
+            var report = new BandAidTreatmentReportPacket
+            {
+                DoctorProfileId = source.DoctorProfileId,
+                PatientProfileId = source.PatientProfileId,
+                ItemTemplateId = source.ItemTemplateId,
+                BodyPart = (byte)part,
+                HealedAmount = healed
+            };
+            if (Singleton<FikaServer>.Instantiated)
+                Singleton<FikaServer>.Instance.SendData(ref report, DeliveryMethod.ReliableOrdered, true);
+            else if (Singleton<FikaClient>.Instantiated)
+                Singleton<FikaClient>.Instance.SendData(ref report, DeliveryMethod.ReliableOrdered);
+        }
+
+        private static void OnTreatmentReportReceived(BandAidTreatmentReportPacket packet)
+        {
+            // Host relayeia reports que não são para ele (mesmo padrão dos demais)
+            if (Singleton<FikaServer>.Instantiated)
+            {
+                var hostPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
+                string myId = hostPlayer?.ProfileId ?? "";
+                if (packet.DoctorProfileId != myId)
+                {
+                    var relay = packet;
+                    Singleton<FikaServer>.Instance.SendData(ref relay, DeliveryMethod.ReliableOrdered, true);
+                }
+            }
+
+            var mainPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
+            if (mainPlayer == null || packet.DoctorProfileId != mainPlayer.ProfileId) return;
+
+            var part = (EBodyPart)packet.BodyPart;
+            Logger.LogInfo($"[Report] Tratamento remoto aplicado em {part} (+{packet.HealedAmount:F0} HP).");
+            BandAidUI.Instance?.ShowTreatment(part, ItemDatabase.GetStats(packet.ItemTemplateId)?.Name);
         }
 
         /// <summary>

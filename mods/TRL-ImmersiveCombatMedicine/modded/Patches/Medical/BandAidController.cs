@@ -466,6 +466,7 @@ namespace TRLImmersiveCombatMedicine
             string itemName = savedItem?.ShortName?.Localized() ?? "?";
 
             MedicHealPatch.CancelNativePatientEffect(); // ref: CR-02
+            BandAidUI.Instance?.ClearTreatment();
             // Limpar flags do redirect
             MedicHealPatch.IsRedirectingHeal = false;
             MedicHealPatch.CurrentPatient = null;
@@ -552,6 +553,9 @@ namespace TRLImmersiveCombatMedicine
             doctor.MovementContext.SetPhysicalCondition(EPhysicalCondition.UsingMeds, true);
 
             NotificationManagerClass.DisplayMessageNotification($"Aplicando {itemUsed.ShortName.Localized()}...", ENotificationDurationType.Default, ENotificationIconType.Quest);
+
+            // Feedback do membro-alvo: Common = "..." até o redirect/report resolver a parte
+            BandAidUI.Instance?.ShowTreatment(EBodyPart.Common, itemUsed.ShortName?.Localized());
 
             // === ATIVAR REDIRECT ===
             MedicHealPatch.IsRedirectingHeal = true;
@@ -652,6 +656,7 @@ namespace TRLImmersiveCombatMedicine
         private void CleanupHealState(Player patient)
         {
             MedicHealPatch.CancelNativePatientEffect(); // ref: CR-02
+            BandAidUI.Instance?.ClearTreatment();
             MedicHealPatch.IsRedirectingHeal = false;
             MedicHealPatch.CurrentPatient = null;
             MedicHealPatch.CleanupPatientSubscription();
@@ -678,6 +683,7 @@ namespace TRLImmersiveCombatMedicine
             }
 
             MedicHealPatch.CancelNativePatientEffect(); // ref: CR-02
+            BandAidUI.Instance?.ClearTreatment();
             // Limpar redirect e flags
             MedicHealPatch.IsRedirectingHeal = false;
             MedicHealPatch.CurrentPatient = null;
@@ -874,6 +880,7 @@ namespace TRLImmersiveCombatMedicine
                 _isHealingInProgress = false;
                 _itemBeingUsed = null;
                 MedicHealPatch.CancelNativePatientEffect(); // ref: CR-02
+            BandAidUI.Instance?.ClearTreatment();
                 MedicHealPatch.IsRedirectingHeal = false;
                 MedicHealPatch.CurrentPatient = null;
                 MedicHealPatch.CleanupPatientSubscription();
@@ -918,6 +925,7 @@ namespace TRLImmersiveCombatMedicine
             _targetPatient = null;
 
             MedicHealPatch.CancelNativePatientEffect(); // ref: CR-02
+            BandAidUI.Instance?.ClearTreatment();
             MedicHealPatch.IsRedirectingHeal = false;
             MedicHealPatch.CurrentPatient = null;
             MedicHealPatch.BandAidHealActive = false;

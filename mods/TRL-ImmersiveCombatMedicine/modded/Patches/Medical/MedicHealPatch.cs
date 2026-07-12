@@ -290,6 +290,7 @@ namespace Band_Aid
 
                 Logger.LogInfo($"method_5: DoMedEffect no paciente {CurrentPatient.Profile.Nickname} | bodyPart={bodyPart1} | amount={(amount.HasValue ? amount.Value.ToString("F1") : "auto")} | item={item.ShortName.Localized()}");
 
+                EBodyPart appliedPart = bodyPart1;
                 IEffect result = patientHc.DoMedEffect(item, bodyPart1, amount);
 
                 if (result == null)
@@ -300,6 +301,7 @@ namespace Band_Aid
                         result = patientHc.DoMedEffect(item, bp, amount);
                         if (result != null)
                         {
+                            appliedPart = bp;
                             Logger.LogInfo($"✅ Cura redirecionada para {CurrentPatient.Profile.Nickname} em {bp} (fallback)");
                             break;
                         }
@@ -342,6 +344,19 @@ namespace Band_Aid
                 // MedEffect nativo criado no paciente → HealRoutine NÃO deve duplicar
                 // via MedicalLogic.ApplyTreatment (cura + consumo aconteceriam 2x).
                 NativeMedEffectApplied = true;
+
+                // Feedback do membro-alvo no HUD: se aplicou em Common, o jogo escolheu
+                // a parte internamente — tentar ler do próprio efeito (1× por cura).
+                if (appliedPart == EBodyPart.Common && result != null)
+                {
+                    try
+                    {
+                        var bpProp = result.GetType().GetProperty("BodyPart");
+                        if (bpProp != null) appliedPart = (EBodyPart)bpProp.GetValue(result);
+                    }
+                    catch { }
+                }
+                BandAidUI.Instance?.ShowTreatment(appliedPart, item.ShortName?.Localized());
 
                 // Bridge: subscrever EffectRemovedEvent do paciente
                 CleanupPatientSubscription();
