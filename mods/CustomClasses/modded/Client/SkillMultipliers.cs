@@ -72,8 +72,21 @@ internal static class SkillMultipliers
     /// </summary>
     public static void Prefetch()
     {
-        Reset();
-        EnsureLoaded();
+        // ⚠️ NÃO é Reset() + EnsureLoaded() (code-review B20, F1). Aquela forma zerava a classe e os fatores de XP
+        // ANTES do GET, sem rollback: um GET falho no raid-start deixaria _classNameEn=null + Factors vazio
+        // marcados como carregados pela raid inteira → perks de som E multiplicadores de XP mortos, em silêncio.
+        // Busca primeiro, troca só em sucesso; em falha, preserva o que já estava carregado.
+        if (TryFetch(out var payload))
+        {
+            Apply(payload);
+            _loaded = true;
+            return;
+        }
+
+        if (_classNameEn == null && _classNamePt == null && Factors.Count == 0)
+        {
+            _loaded = false;   // nada bom a preservar → destrava o retry lazy
+        }
     }
 
     /// <summary>Reseta o cache (ex.: troca de perfil) — força novo fetch.</summary>
@@ -97,48 +110,65 @@ internal static class SkillMultipliers
 
         _loaded = true;   // marca antes: se falhar, não retenta em loop a cada ganho de XP
 
+        if (TryFetch(out var payload))
+        {
+            Apply(payload);
+        }
+    }
+
+    /// <summary>
+    ///     Baixa o payload sem tocar no estado vigente — é o que torna o <see cref="Prefetch"/> não-destrutivo
+    ///     (code-review B20, F1). False = rota fora do ar, JSON vazio ou payload nulo.
+    /// </summary>
+    private static bool TryFetch(out Payload payload)
+    {
+        payload = null!;
+
         try
         {
             var json = RequestHandler.GetJson("/customclasses/skill-multipliers");
             if (string.IsNullOrWhiteSpace(json))
             {
-                return;
+                return false;
             }
 
             // Item 010/011: payload é { className, iconFile, nameColor, multipliers }.
-            var payload = JsonConvert.DeserializeObject<Payload>(json);
-            if (payload is null)
-            {
-                return;
-            }
-
-            // Item 011: identidade setada mesmo sem multiplicadores (classe do mod sem skillMultipliers).
-            // Item 008 (i18n): guarda en/pt; o getter ClassName resolve pelo idioma do EFT. Fallback ao className legado.
-            _classNameEn = payload.ClassNameEn ?? payload.ClassName;
-            _classNamePt = payload.ClassNamePt ?? payload.ClassName;
-            Nickname = payload.Nickname;
-            IconFile = payload.IconFile;
-            NameColor = payload.NameColor;
-
-            foreach (var kv in payload.Multipliers ?? new Dictionary<string, double>())
-            {
-                // Casa ESkillId (client) com o nome do JSON (SkillTypes server), case-insensitive.
-                if (Enum.TryParse<ESkillId>(kv.Key, ignoreCase: true, out var id) && Enum.IsDefined(typeof(ESkillId), id))
-                {
-                    Factors[id] = (float)kv.Value;
-                }
-                else
-                {
-                    Plugin.Log?.LogWarning($"[CustomClasses] multiplicador p/ skill desconhecida '{kv.Key}' — ignorado.");
-                }
-            }
-
-            Plugin.Log?.LogInfo($"[CustomClasses] {Factors.Count} multiplicador(es) de skill carregado(s) (classe '{ClassName ?? "—"}').");
+            payload = JsonConvert.DeserializeObject<Payload>(json)!;
+            return payload is not null;
         }
         catch (Exception ex)
         {
             Plugin.Log?.LogError($"[CustomClasses] falha ao buscar multiplicadores de skill: {ex.Message}");
+            return false;
         }
+    }
+
+    private static void Apply(Payload payload)
+    {
+        Factors.Clear();   // troca atômica: o estado antigo só cai agora, com o novo em mãos
+
+        // Item 011: identidade setada mesmo sem multiplicadores (classe do mod sem skillMultipliers).
+        // Item 008 (i18n): guarda en/pt; o getter ClassName resolve pelo idioma do EFT. Fallback ao className legado.
+        _classNameEn = payload.ClassNameEn ?? payload.ClassName;
+        _classNamePt = payload.ClassNamePt ?? payload.ClassName;
+        Nickname = payload.Nickname;
+        IconFile = payload.IconFile;
+        NameColor = payload.NameColor;
+
+        foreach (var kv in payload.Multipliers ?? new Dictionary<string, double>())
+        {
+            // Casa ESkillId (client) com o nome do JSON (SkillTypes server), case-insensitive.
+            if (Enum.TryParse<ESkillId>(kv.Key, ignoreCase: true, out var id) && Enum.IsDefined(typeof(ESkillId), id))
+            {
+                Factors[id] = (float)kv.Value;
+            }
+            else
+            {
+                Plugin.Log?.LogWarning($"[CustomClasses] multiplicador p/ skill desconhecida '{kv.Key}' — ignorado.");
+            }
+        }
+
+        Plugin.Log?.LogInfo($"[CustomClasses] {Factors.Count} multiplicador(es) de skill carregado(s) (classe '{ClassName ?? "—"}').");
     }
 
     public static bool TryGet(ESkillId id, out float factor) => Factors.TryGetValue(id, out factor);

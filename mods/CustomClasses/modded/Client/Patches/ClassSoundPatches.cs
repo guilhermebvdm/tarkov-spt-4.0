@@ -172,8 +172,9 @@ internal class SoundRadiusPatch : ModulePatch
             __result *= LoudOperator.MultFor(emitterClass);
 
             // Espelha no cache p/ o VOLUME não divergir do alcance (ver doc de RolloffCache). Mult == 1 (classe sem
-            // perk de som) → não escreve: preserva o caminho vanilla byte a byte.
-            if (Math.Abs(__result - r0) > float.Epsilon)
+            // perk de som) → não escreve: preserva o caminho vanilla byte a byte. Comparação EXATA de propósito
+            // (não é tolerância): o único caso a pular é o multiplicador neutro, que devolve o valor idêntico.
+            if (__result != r0)
             {
                 var cache = RolloffCache?.Invoke(__instance);
                 if (cache != null)
@@ -246,8 +247,9 @@ internal class InteractionSoundPatch : ModulePatch
 ///     a classe de QUEM EMITIU o som (<see cref="ClassIdentities.ClassNameEnOf"/>: local via SkillMultipliers,
 ///     peer via o mapa nickname→classe da rota 057) e aplicamos o multiplicador DELA. Sem protocolo novo.
 ///     ⚠️ O VALOR sai do F12 de quem roda isto (o host) — ele é a autoridade da percepção da IA, que é dele.
-///     ⚠️ Fica de fora o rolloff audível (<see cref="SoundRadiusPatch"/>, method_67): o som que VOCÊ ouve de um
-///     peer exigiria sync real. Aqui só corrigimos a percepção da IA, que é o que muda o gameplay.
+///     Este patch cobre o canal da <b>IA</b>; o canal do <b>áudio que humanos ouvem</b> é o
+///     <see cref="SoundRadiusPatch"/> (B20). São independentes — o <c>power</c> daqui NÃO deriva do
+///     <c>method_67</c> nem do <c>Physical.SoundRadius</c> (MovementContext.cs:1753), então não há efeito dobrado.
 ///     </para>
 /// </summary>
 internal class AiSoundPatch : ModulePatch

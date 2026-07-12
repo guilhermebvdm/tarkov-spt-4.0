@@ -51,8 +51,24 @@ internal static class ClassIdentities
     /// </summary>
     public static void Prefetch()
     {
-        Reset();
-        EnsureLoaded();
+        // ⚠️ NÃO é Reset() + EnsureLoaded() (code-review B20, F1 — regressão pega antes de rodar).
+        // Aquela forma DESTRUÍA o mapa bom antes de tentar buscar o novo, sem rollback: um único GET falho no
+        // raid-start (server remoto ocupado gerando a raid, hiccup de rede) deixava o mapa VAZIO e marcado como
+        // carregado, PELA RAID INTEIRA — e como o hot path não busca mais sozinho, não havia retry. Todo perk de
+        // som morreria em silêncio (o 2º aviso em diante é LogDebug). Agora: busca primeiro, troca só em sucesso.
+        if (TryFetch(out var fresh))
+        {
+            Commit(fresh);
+            _loaded = true;
+            return;
+        }
+
+        // Falhou. Se havia mapa da sessão anterior, PRESERVA (stale > morto — nicknames e classes mudam pouco).
+        // Se não havia nada a preservar, deixa destravado para o próximo consumidor LAZY (fora do hot path) tentar.
+        if (ByNickname.Count == 0)
+        {
+            _loaded = false;
+        }
     }
 
     /// <summary>
@@ -133,15 +149,29 @@ internal static class ClassIdentities
 
         _loaded = true;   // marca antes: falha não retenta em loop (molde SkillMultipliers.cs:70)
 
+        if (TryFetch(out var fresh))
+        {
+            Commit(fresh);
+        }
+    }
+
+    /// <summary>
+    ///     Baixa o mapa para um dict NOVO. Não toca no estado vigente — é o que permite ao <see cref="Prefetch"/>
+    ///     ser não-destrutivo (code-review B20, F1). False = rota ausente/erro de rede.
+    /// </summary>
+    private static bool TryFetch(out Dictionary<string, Identity> fresh)
+    {
+        fresh = new Dictionary<string, Identity>(StringComparer.Ordinal);
+
         try
         {
             var json = RequestHandler.GetJson("/customclasses/class-identities");
             var payload = JsonConvert.DeserializeObject<Payload>(json);
             foreach (var p in payload?.Players ?? new List<PlayerEntry>())
             {
-                if (!string.IsNullOrEmpty(p.Nickname) && !ByNickname.ContainsKey(p.Nickname!))
+                if (!string.IsNullOrEmpty(p.Nickname) && !fresh.ContainsKey(p.Nickname!))
                 {
-                    ByNickname[p.Nickname!] = new Identity
+                    fresh[p.Nickname!] = new Identity
                     {
                         NameEn = p.ClassNameEn,
                         NamePt = p.ClassNamePt,
@@ -151,12 +181,12 @@ internal static class ClassIdentities
                 }
             }
 
-            Plugin.Log?.LogInfo($"[CustomClasses] (057) {ByNickname.Count} identidade(s) de classe carregada(s).");
+            return true;
         }
         catch (Exception ex)
         {
             // rota ausente (mod server antigo) ou erro de rede → degrada p/ identidade só do local (critério da 01-spec).
-            // ref: CR-01-01 — o Reset() por raid re-dispara o fetch; o WARNING sai 1× por sessão (resto em Debug).
+            // ref: CR-01-01 — o WARNING sai 1× por sessão (resto em Debug).
             if (!_warnedUnavailable)
             {
                 _warnedUnavailable = true;
@@ -166,7 +196,20 @@ internal static class ClassIdentities
             {
                 Plugin.Log?.LogDebug($"[CustomClasses] (057) class-identities ainda indisponível: {ex.Message}");
             }
+
+            return false;
         }
+    }
+
+    private static void Commit(Dictionary<string, Identity> fresh)
+    {
+        ByNickname.Clear();
+        foreach (var kv in fresh)
+        {
+            ByNickname[kv.Key] = kv.Value;
+        }
+
+        Plugin.Log?.LogInfo($"[CustomClasses] (057) {ByNickname.Count} identidade(s) de classe carregada(s).");
     }
 
     /// <summary>Espelho do payload server (ClassIdentitiesResponse) — props p/ o Newtonsoft preencher sem CS0649.</summary>

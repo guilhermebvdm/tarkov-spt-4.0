@@ -1,6 +1,7 @@
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;                  // StaticRouter, RouteAction
-using SPTarkov.Server.Core.Models.Eft.Common;   // EmptyRequestData
+using SPTarkov.Server.Core.Models.Eft.Common;    // EmptyRequestData
+using SPTarkov.Server.Core.Models.Eft.Profile;   // SptProfile (B20/F2 — tipo do helper Add)
 using SPTarkov.Server.Core.Servers;             // SaveServer
 using SPTarkov.Server.Core.Utils;               // JsonUtil
 
@@ -30,52 +31,60 @@ public class ClassIdentitiesRouter : StaticRouter
                 {
                     var response = new ClassIdentitiesResponse();
                     var seen = new HashSet<string>(StringComparer.Ordinal);
+
                     // PA-01-10: ordena pela chave → dedup de nickname determinístico entre restarts do server.
-                    foreach (var kv in saveServer.GetProfiles().OrderBy(kv => kv.Key.ToString(), StringComparer.Ordinal))   // ref: spt-source SaveServer.cs:147
+                    // ref: spt-source SaveServer.cs:147
+                    var profiles = saveServer.GetProfiles()
+                        .OrderBy(kv => kv.Key.ToString(), StringComparer.Ordinal)
+                        .Select(kv => kv.Value)
+                        .Where(p => !string.IsNullOrEmpty(p?.ProfileInfo?.Edition)
+                                    && !string.IsNullOrEmpty(p?.CharacterData?.PmcData?.Info?.Nickname))   // sem PMC = perfil recém-criado/corrompido
+                        .Select(p => (Profile: p, Visual: visualRegistry.Get(p!.ProfileInfo!.Edition!)))   // ref: ClassVisualRegistry.cs:29
+                        // ref: CR-01-02/03 — edition vanilla ou órfã → sem identidade, SEM log (o server não
+                        // distingue as duas; comportamento seguro; corner da 01-spec emendado nesta decisão).
+                        .Where(x => x.Visual != null)
+                        .ToList();
+
+                    // ⚠️ DOIS PASSES, e a ordem importa (code-review B20, F2). O nickname de SCAV vem do pool de
+                    // nomes REAIS do EFT, então o scav do perfil A pode colidir com o PMC do perfil B. Num passe só
+                    // (PMC+scav intercalados por perfil), o scav de A — que ordena antes — roubaria a entrada do PMC
+                    // de B, e um jogador real passaria a resolver para a CLASSE ERRADA. Pior: o nickname de scav é
+                    // regerado a cada raid de scav, então o sintoma apareceria e sumiria sozinho (heisenbug).
+                    // PMC é identidade estável e sempre ganha; scav só entra no que sobrou.
+                    foreach (var (profile, visual) in profiles)
                     {
-                        var profile = kv.Value;
-                        var edition = profile?.ProfileInfo?.Edition;   // ref: spt-source SptProfile.cs:100; mesmo caminho da SkillMultipliersRouter.cs:34
-                        var pmcNickname = profile?.CharacterData?.PmcData?.Info?.Nickname;
-                        if (string.IsNullOrEmpty(edition) || string.IsNullOrEmpty(pmcNickname))
-                        {
-                            continue;   // perfil recém-criado/corrompido (sem PMC) → pulado
-                        }
+                        Add(profile!.CharacterData!.PmcData!.Info!.Nickname, profile, visual!);
+                    }
 
-                        var visual = visualRegistry.Get(edition!);   // ref: ClassVisualRegistry.cs:29
-                        if (visual == null)
-                        {
-                            // ref: CR-01-02/03 — edition vanilla ou órfã → sem identidade, SEM log (server não
-                            // distingue as duas; comportamento seguro; corner da 01-spec emendado nesta decisão).
-                            continue;
-                        }
-
-                        // B14/B20 (code-review, achado 5): o mapa é consultado pelo `Profile.Nickname` do player
-                        // RENDERIZADO no client. Quem entra de SCAV carrega o nickname do SCAV, não o do PMC — com
-                        // só o PMC aqui, o peer scav não resolvia e os perks de som dele viravam placebo (o player
-                        // LOCAL escapava por curto-circuito em IsYourPlayer, o que mascarava o furo em solo).
-                        // ⚠️ O nickname de scav vem do MESMO pool de nomes dos bots-scav → colisão com bot é
-                        // esperada; quem protege é o gate `IsAI` do ClassIdentities.ClassNameEnOf (bot nunca resolve).
-                        var scavNickname = profile?.CharacterData?.ScavData?.Info?.Nickname;
-
-                        foreach (var nickname in new[] { pmcNickname, scavNickname })
-                        {
-                            if (string.IsNullOrEmpty(nickname) || !seen.Add(nickname!))
-                            {
-                                continue;   // vazio, ou nickname duplicado — 1ª ocorrência (ordem estável) vence (corner da 01-spec)
-                            }
-
-                            response.Players.Add(new PlayerClassIdentity
-                            {
-                                Nickname = nickname,
-                                ClassNameEn = visual.DisplayNameEn ?? edition,
-                                ClassNamePt = visual.DisplayNamePt ?? edition,
-                                IconFile = visual.IconFile,
-                                NameColor = visual.NameColor,
-                            });
-                        }
+                    // B14/B20 (achado 5): quem entra de SCAV carrega o nickname do SCAV no `Profile.Nickname` que o
+                    // client consulta — sem isto, o peer scav não resolvia e os perks de som dele viravam placebo
+                    // (o player LOCAL escapava por curto-circuito em IsYourPlayer, o que mascarava o furo em solo).
+                    // Colisão scav↔bot-scav é esperada (mesmo pool) e inofensiva: o gate `IsAI` do
+                    // ClassIdentities.ClassNameEnOf nunca deixa um bot resolver.
+                    foreach (var (profile, visual) in profiles)
+                    {
+                        Add(profile?.CharacterData?.ScavData?.Info?.Nickname, profile!, visual!);
                     }
 
                     return new ValueTask<string>(jsonUtil.Serialize(response) ?? "{}");
+
+                    void Add(string? nickname, SptProfile profile, ClassVisualRegistry.Visual visual)
+                    {
+                        if (string.IsNullOrEmpty(nickname) || !seen.Add(nickname!))
+                        {
+                            return;   // vazio, ou já mapeado — 1ª ocorrência (ordem estável) vence (corner da 01-spec)
+                        }
+
+                        var edition = profile.ProfileInfo!.Edition;
+                        response.Players.Add(new PlayerClassIdentity
+                        {
+                            Nickname = nickname,
+                            ClassNameEn = visual.DisplayNameEn ?? edition,
+                            ClassNamePt = visual.DisplayNamePt ?? edition,
+                            IconFile = visual.IconFile,
+                            NameColor = visual.NameColor,
+                        });
+                    }
                 }),
         ];
     }
