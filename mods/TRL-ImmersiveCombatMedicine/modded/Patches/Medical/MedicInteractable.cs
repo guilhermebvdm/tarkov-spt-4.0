@@ -15,12 +15,14 @@ namespace TRLImmersiveCombatMedicine
     {
         public Player Target { get; private set; }
 
-        public static void Ensure(Player target)
+        /// <returns>true se anexou um componente novo neste chamado.</returns>
+        public static bool Ensure(Player target)
         {
-            if (target == null || target.gameObject == null) return;
-            if (target.gameObject.GetComponent<MedicInteractable>() != null) return;
+            if (target == null || target.gameObject == null) return false;
+            if (target.gameObject.GetComponent<MedicInteractable>() != null) return false;
             var comp = target.gameObject.AddComponent<MedicInteractable>();
             comp.Target = target;
+            return true;
         }
 
         public ActionsReturnClass GetActions(GamePlayerOwner owner)

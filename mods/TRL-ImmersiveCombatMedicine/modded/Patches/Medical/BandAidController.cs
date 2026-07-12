@@ -666,13 +666,19 @@ namespace TRLImmersiveCombatMedicine
             var gameWorld = Singleton<GameWorld>.Instance;
             var mainPlayer = gameWorld.MainPlayer;
             var players = gameWorld.AllAlivePlayersList;
+            int attached = 0;
             for (int i = 0; i < players.Count; i++)
             {
                 Player p = players[i];
                 if (p == null || p == mainPlayer) continue;
                 if (p.HealthController == null || !p.HealthController.IsAlive) continue;
-                MedicInteractable.Ensure(p);
+                if (MedicInteractable.Ensure(p)) attached++;
             }
+
+            // [DEBUG-ICM] remover após diagnóstico
+            if (attached > 0)
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning(
+                    $"[DEBUG-ICM] sweep: +{attached} MedicInteractable (vivos na lista: {players.Count})");
         }
 
         /// <summary>

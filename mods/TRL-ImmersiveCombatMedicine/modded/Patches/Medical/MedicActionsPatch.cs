@@ -22,15 +22,31 @@ namespace TRLImmersiveCombatMedicine
                     && x.GetParameters()[0].ParameterType == typeof(GamePlayerOwner));
         }
 
-        [HarmonyPostfix]
-        public static void Postfix(GamePlayerOwner owner, GInterface177 interactive, ref ActionsReturnClass __result)
+        // [DEBUG-ICM] última chamada logada — remover após diagnóstico
+        private static float _dbgNextLog = 0f;
+
+        // PREFIX (não postfix), espelhando o Fika: para tipo desconhecido o vanilla
+        // pode devolver ActionsReturnClass não-nulo/vazio ou lançar — bypass total
+        // quando o alvo é nosso componente; qualquer outro tipo segue intocado.
+        [HarmonyPrefix]
+        public static bool Prefix(GamePlayerOwner owner, GInterface177 interactive, ref ActionsReturnClass __result)
         {
-            // Só age quando o vanilla não produziu ações e o alvo é nosso componente
-            // — nunca sobrescreve loot/portas/Fika revive.
-            if (__result == null && interactive is MedicInteractable medic)
+            // [DEBUG-ICM] o que o pipeline nativo está entregando ao painel (1 log/2s)
+            if (interactive != null && UnityEngine.Time.time >= _dbgNextLog)
+            {
+                _dbgNextLog = UnityEngine.Time.time + 2f;
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning(
+                    $"[DEBUG-ICM] GetAvailableActions: interactive={interactive.GetType().Name}");
+            }
+
+            if (interactive is MedicInteractable medic)
             {
                 __result = medic.GetActions(owner);
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning(
+                    $"[DEBUG-ICM] MedicInteractable interceptado → ações={__result?.Actions?.Count ?? 0}");
+                return false;
             }
+            return true;
         }
     }
 }
