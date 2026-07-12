@@ -240,7 +240,7 @@ namespace TRLImmersiveCombatMedicine
             }
         }
 
-        // Mapeamento EGameKey.Slot â†’ EBoundItem
+        // Mapeamento EGameKey.Slot → EBoundItem
         private static readonly Dictionary<EFT.InputSystem.EGameKey, EBoundItem> _slotMapping = new Dictionary<EFT.InputSystem.EGameKey, EBoundItem>
         {
             { EFT.InputSystem.EGameKey.Slot4, EBoundItem.Item4 },
@@ -381,8 +381,8 @@ namespace TRLImmersiveCombatMedicine
             if (key == KeyCode.None) return false;
 
             // Smart modifier check:
-            // - COM modifiers configurados (ex: Shift+F) â†’ usar shortcut.IsDown() que verifica modifiers
-            // - SEM modifiers (ex: F sozinho) â†’ usar Input.GetKeyDown que ignora modifiers
+            // - COM modifiers configurados (ex: Shift+F) → usar shortcut.IsDown() que verifica modifiers
+            // - SEM modifiers (ex: F sozinho) → usar Input.GetKeyDown que ignora modifiers
             //   (necessário para funcionar enquanto corre com Shift, agachado com Ctrl, etc.)
             bool hasModifiers = shortcut.Modifiers.Any();
 
@@ -435,7 +435,7 @@ namespace TRLImmersiveCombatMedicine
 
             // Notificação local
             NotificationManagerClass.DisplayMessageNotification(
-                $"Toque no ombro â†’ {target.Profile.Nickname}", 
+                $"Toque no ombro → {target.Profile.Nickname}", 
                 ENotificationDurationType.Default, ENotificationIconType.Quest);
 
             // Tocar gesto de mão "There" (apontar com a mão)
@@ -465,6 +465,7 @@ namespace TRLImmersiveCombatMedicine
             Item savedItem = _itemBeingUsed;
             string itemName = savedItem?.ShortName?.Localized() ?? "?";
 
+            MedicHealPatch.CancelNativePatientEffect(); // ref: CR-02
             // Limpar flags do redirect
             MedicHealPatch.IsRedirectingHeal = false;
             MedicHealPatch.CurrentPatient = null;
@@ -601,7 +602,7 @@ namespace TRLImmersiveCombatMedicine
             MedicHealPatch.CleanupPatientSubscription();
 
             // G3: Removido RemoveMedEffect no médico (efeito está no paciente, não no médico)
-            // ForceFinishAnimation chama method_9 diretamente â†’ cleanup â†’ callback â†’ jogo transiciona
+            // ForceFinishAnimation chama method_9 diretamente → cleanup → callback → jogo transiciona
             MedicHealPatch.ForceFinishAnimation();
 
             // Liberar movimento do médico
@@ -650,6 +651,7 @@ namespace TRLImmersiveCombatMedicine
         /// </summary>
         private void CleanupHealState(Player patient)
         {
+            MedicHealPatch.CancelNativePatientEffect(); // ref: CR-02
             MedicHealPatch.IsRedirectingHeal = false;
             MedicHealPatch.CurrentPatient = null;
             MedicHealPatch.CleanupPatientSubscription();
@@ -675,6 +677,7 @@ namespace TRLImmersiveCombatMedicine
                 _activeHealCoroutine = null;
             }
 
+            MedicHealPatch.CancelNativePatientEffect(); // ref: CR-02
             // Limpar redirect e flags
             MedicHealPatch.IsRedirectingHeal = false;
             MedicHealPatch.CurrentPatient = null;
@@ -870,6 +873,7 @@ namespace TRLImmersiveCombatMedicine
 
                 _isHealingInProgress = false;
                 _itemBeingUsed = null;
+                MedicHealPatch.CancelNativePatientEffect(); // ref: CR-02
                 MedicHealPatch.IsRedirectingHeal = false;
                 MedicHealPatch.CurrentPatient = null;
                 MedicHealPatch.CleanupPatientSubscription();
@@ -913,6 +917,7 @@ namespace TRLImmersiveCombatMedicine
             _itemBeingUsed = null;
             _targetPatient = null;
 
+            MedicHealPatch.CancelNativePatientEffect(); // ref: CR-02
             MedicHealPatch.IsRedirectingHeal = false;
             MedicHealPatch.CurrentPatient = null;
             MedicHealPatch.BandAidHealActive = false;

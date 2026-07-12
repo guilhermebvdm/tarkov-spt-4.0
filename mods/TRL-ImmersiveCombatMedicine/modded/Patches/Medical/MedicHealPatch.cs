@@ -120,6 +120,27 @@ namespace Band_Aid
         }
 
         /// <summary>
+        /// ref: CR-02 — cancela o MedEffect NATIVO criado no PACIENTE pelo redirect.
+        /// Os aborts cancelavam só o controller do MÉDICO (vazio no redirect) — o
+        /// paciente continuava curando e o item sendo consumido DEPOIS do "Abortado!".
+        /// Paciente local apenas (remoto não tem MedEffect nativo).
+        /// </summary>
+        public static void CancelNativePatientEffect()
+        {
+            if (!NativeMedEffectApplied) return;
+            try
+            {
+                CurrentPatient?.ActiveHealthController?.CancelApplyingItem();
+                Logger.LogInfo("CancelNativePatientEffect: MedEffect do paciente cancelado (abort).");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogWarning($"CancelNativePatientEffect: {ex.Message}");
+            }
+            NativeMedEffectApplied = false;
+        }
+
+        /// <summary>
         /// true se a instância é a operação de meds que ESTE redirect está acompanhando.
         /// Usado pelo AnimCleanupPatch para ignorar method_9 de operações de bots/peers.
         /// </summary>
@@ -188,6 +209,16 @@ namespace Band_Aid
             Player operationOwner = ResolveOperationOwner(__instance);
             var localMainPlayer = Comfort.Common.Singleton<GameWorld>.Instance?.MainPlayer;
             bool isDoctorOperation = operationOwner != null && localMainPlayer != null && operationOwner == localMainPlayer;
+
+            // ref: CR-02 — FAIL-CLOSED durante redirect: se os campos foram renomeados
+            // (update do EFT) e o owner não resolve, devolver ao original durante um
+            // redirect ativo executaria DoMedEffect no MÉDICO + dupla aplicação no
+            // wake do HealRoutine. Bloquear e logar é o modo de falha seguro.
+            if (operationOwner == null && (IsRedirectingHeal || BandAidHealActive))
+            {
+                Logger.LogError("method_5: ownership guard DEGRADADO (owner não resolvido — campos renomeados?) durante redirect — bloqueando operação por segurança.");
+                return false;
+            }
 
             // === DIAGNÓSTICO: SEMPRE loga quando method_5 é chamado ===
             float timeSinceRedirect = UnityEngine.Time.time - RedirectStartTime;

@@ -75,9 +75,11 @@ namespace TrueTrauma
 
                         // ref: CR-01-19 — bot não tem grace period (o branch de grace é
                         // !IsAI): sem esta remoção, todo bot que desmaiou uma vez ficava
-                        // PERMANENTEMENTE em FaintedPlayerIds — invisível aos outros bots
-                        // até o fim da raid.
-                        TraumaState.FaintedPlayerIds.Remove(id);
+                        // PERMANENTEMENTE em FaintedPlayerIds — invisível aos outros bots.
+                        // ref: CR-02 — via SyncFaintStatus(false) para TAMBÉM avisar os
+                        // peers (o true do desmaio do bot é broadcast; sem o false, os
+                        // clients ficavam com espelho órfão e o bot permanentemente mudo).
+                        FikaBridge.SyncFaintStatus(__instance, false);
                         TraumaState.GraceTimers.Remove(id);
 
                         if (__instance.Physical != null) __instance.Physical.Stamina.Current = __instance.Physical.Stamina.TotalCapacity;

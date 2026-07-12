@@ -85,7 +85,7 @@ namespace Band_Aid
             0.52f, 0.55f, 0.59f, 0.62f, 0.63f, 0.62f, 0.59f, 0.55f, 0.52f, 0.50f
         };
 
-        // === Mapeamento EBodyPart â†’ prefixo de imagem ===
+        // === Mapeamento EBodyPart → prefixo de imagem ===
         private static readonly Dictionary<EBodyPart, string> BodyPartImagePrefix = new Dictionary<EBodyPart, string>
         {
             { EBodyPart.Head, "cabeca" },
@@ -163,7 +163,7 @@ namespace Band_Aid
             Logger.LogInfo("BandAidUI V7 inicializado.");
         }
 
-        // === FONTE (prioridade: Tarkov â†’ condensadas â†’ Arial) ===
+        // === FONTE (prioridade: Tarkov → condensadas → Arial) ===
         private void LoadFont()
         {
             try
@@ -304,13 +304,13 @@ namespace Band_Aid
             GameObject panel = MakePanel(_canvasObj.transform, "MainPanel",
                 new Vector2(420, 0), new Vector2(480, 600), COL_BG_PANEL);
 
-            // === TÃTULO ===
+            // === TÍTULO ===
             _titleText = MakeText(panel.transform, "Title",
                 new Vector2(0, 275), new Vector2(460, 20),
                 "SITUAÇÃO DO OPERADOR", 14, TextAnchor.MiddleCenter,
                 COL_TITLE, FontStyle.Bold);
 
-            // === SUBTÃTULO (nome do operador, mais brilhante) ===
+            // === SUBTÍTULO (nome do operador, mais brilhante) ===
             _subtitleText = MakeText(panel.transform, "Subtitle",
                 new Vector2(0, 258), new Vector2(460, 16),
                 "", 11, TextAnchor.MiddleCenter,
@@ -327,7 +327,7 @@ namespace Band_Aid
             if (_hasCustomImages)
                 CreateSilhouetteImages(panel.transform);
 
-            // === CONTAINER DE LINHAS (criado ANTES dos blocos â†’ renderiza ATRÃS) ===
+            // === CONTAINER DE LINHAS (criado ANTES dos blocos → renderiza ATRÁS) ===
             GameObject linesContainer = new GameObject("ConnectionLines");
             linesContainer.transform.SetParent(panel.transform, false);
             RectTransform linesRect = linesContainer.AddComponent<RectTransform>();
@@ -335,7 +335,7 @@ namespace Band_Aid
             linesRect.sizeDelta = Vector2.zero;
             linesRect.anchoredPosition = Vector2.zero;
 
-            // === BLOCOS DE MEMBROS (criados DEPOIS â†’ renderizam NA FRENTE) ===
+            // === BLOCOS DE MEMBROS (criados DEPOIS → renderizam NA FRENTE) ===
             CreateLimbBlock(panel.transform, EBodyPart.Head,     "CABEÇA",     new Vector2(115, 162));
             CreateLimbBlock(panel.transform, EBodyPart.Chest,    "TÓRAX",      new Vector2(0,    88));
             CreateLimbBlock(panel.transform, EBodyPart.LeftArm,  "BRAÇO ESQ.", new Vector2(120,   50));
@@ -602,7 +602,7 @@ namespace Band_Aid
             // "X" destruído (alinhado à direita da barra)
             limb.DestroyedX = MakeText(barBg.transform, "DestroyedX",
                 new Vector2(BAR_WIDTH / 2 - 7, 0), new Vector2(12, BAR_HEIGHT),
-                "âœ•", 9, TextAnchor.MiddleCenter, COL_DESTROYED, FontStyle.Normal);
+                "✕", 9, TextAnchor.MiddleCenter, COL_DESTROYED, FontStyle.Normal);
             var xOutline = limb.DestroyedX.gameObject.AddComponent<Outline>();
             xOutline.effectColor = new Color(0, 0, 0, 0.7f);
             xOutline.effectDistance = new Vector2(0.5f, -0.5f);
@@ -669,7 +669,7 @@ namespace Band_Aid
                 var profile = _targetPlayer.Profile;
 
                 if (hc == null || profile == null)
-                { _subtitleText.text = "INDISPONÃVEL"; return; }
+                { _subtitleText.text = "INDISPONÍVEL"; return; }
 
                 // === AUTO-CLOSE: fechar HUD se médico se afastou do paciente ===
                 var mainPlayer = Comfort.Common.Singleton<GameWorld>.Instance?.MainPlayer;
@@ -873,7 +873,7 @@ namespace Band_Aid
                     {
                         // Gradiente: esquerda = totalmente transparente, direita = 20% opacidade
                         float t = (float)(x - sweepLeft) / Mathf.Max(1, sweepRight - sweepLeft);
-                        float alpha = t * 0.80f; // 0% â†’ 80%
+                        float alpha = t * 0.80f; // 0% → 80%
 
                         for (int y = 0; y < ECG_HEIGHT; y++)
                         {

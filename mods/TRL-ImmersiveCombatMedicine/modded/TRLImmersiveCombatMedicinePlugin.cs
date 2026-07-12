@@ -61,6 +61,11 @@ namespace TRLImmersiveCombatMedicine
                 new ConfigDescription("Distancia (m) do prompt E do acionamento do modo medico (mesma regra). Valor alto para testes; reduzir no pacote final.",
                     new AcceptableValueRange<float>(1f, 15f)));
 
+            // ref: CR-02 — o reparo de encoding (CR-01-06) corrigiu a KEY
+            // 'Sistema de Braços' (era mojibake); BepInEx casa por bytes, então o
+            // valor salvo do usuário virou órfão. Migração one-time do valor antigo.
+            MigrateOrphanedConfigKeys();
+
             // Feature de debug: invisibilidade para bots (host-only)
             DebugBotInvisibility.Init(Config);
 
@@ -89,7 +94,9 @@ namespace TRLImmersiveCombatMedicine
             // não-determinística). Processar POR CLASSE isola falhas e loga qual
             // patch quebrou, sem derrubar o resto do Awake.
             _harmony = new Harmony("com.trl.immersivecombatmedicine");
-            foreach (var patchType in Assembly.GetExecutingAssembly().GetTypes())
+            // ref: CR-02 — GetTypesFromAssembly tolera ReflectionTypeLoadException
+            // (tipos não-carregáveis, ex.: Fika ausente) devolvendo os que carregaram.
+            foreach (var patchType in AccessTools.GetTypesFromAssembly(Assembly.GetExecutingAssembly()))
             {
                 try
                 {
@@ -140,6 +147,40 @@ namespace TRLImmersiveCombatMedicine
         private void OnHealCheckResponseHandler(BandAidHealCheckResponsePacket response)
         {
             // O tratamento disso ficará na classe dedicada ou adaptaremos o código de BandAidPlugin aqui.
+        }
+
+        /// <summary>
+        /// ref: CR-02 — copia o valor da key antiga com bytes quebrados
+        /// ("Sistema de BraÃ§os") para a key corrigida, uma única vez.
+        /// OrphanedEntries é internal no BepInEx → reflection.
+        /// </summary>
+        private void MigrateOrphanedConfigKeys()
+        {
+            try
+            {
+                var orphansProp = AccessTools.Property(typeof(ConfigFile), "OrphanedEntries");
+                if (!(orphansProp?.GetValue(Config) is System.Collections.IDictionary orphans)) return;
+
+                string oldKey = "Sistema de BraÃ§os"; // mojibake literal da key antiga
+                foreach (System.Collections.DictionaryEntry entry in orphans)
+                {
+                    var def = entry.Key;
+                    string section = AccessTools.Property(def.GetType(), "Section")?.GetValue(def) as string;
+                    string key = AccessTools.Property(def.GetType(), "Key")?.GetValue(def) as string;
+                    if (section == "2. Mecanicas (Trauma)" && key == oldKey &&
+                        bool.TryParse(entry.Value as string, out bool oldValue))
+                    {
+                        ConfigArmsEnabled.Value = oldValue;
+                        Config.Save();
+                        ModLogger.LogWarning($"[Config] Valor órfão migrado: 'Sistema de Braços' = {oldValue} (key antiga com encoding quebrado).");
+                        break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ModLogger.LogWarning($"MigrateOrphanedConfigKeys: {ex.Message}");
+            }
         }
 
         public static void OnRaidStartCleanup()

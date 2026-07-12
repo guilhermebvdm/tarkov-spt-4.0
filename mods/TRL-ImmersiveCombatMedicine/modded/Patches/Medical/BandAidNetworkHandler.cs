@@ -72,12 +72,18 @@ namespace Band_Aid
         // ref: CR-01-02 — SYNC DE DESMAIO (migrado do TrueTrauma 3.11)
         // ============================================================
 
-        /// <summary>Envia o estado de desmaio do player LOCAL para os peers.</summary>
-        public static void SendTraumaFaintPacket(string profileId, bool isFainted)
+        /// <summary>Envia o estado de desmaio de um player DESTE processo para os peers.</summary>
+        public static void SendTraumaFaintPacket(string profileId, bool isFainted, float durationSeconds, float graceSeconds)
         {
             if (!_initialized) return; // solo/sem Fika: estado local basta
 
-            var packet = new TraumaFaintPacket { ProfileId = profileId, IsFainted = isFainted };
+            var packet = new TraumaFaintPacket
+            {
+                ProfileId = profileId,
+                IsFainted = isFainted,
+                DurationSeconds = durationSeconds,
+                GraceSeconds = graceSeconds
+            };
 
             if (Singleton<FikaServer>.Instantiated)
             {
@@ -113,18 +119,21 @@ namespace Band_Aid
                 var mainPlayer = gameWorld.MainPlayer;
                 if (mainPlayer != null && packet.ProfileId == mainPlayer.ProfileId) return; // eco do próprio estado
 
-                Logger.LogInfo($"[Faint] Recebido: {packet.ProfileId} = {packet.IsFainted}");
+                Logger.LogInfo($"[Faint] Recebido: {packet.ProfileId} = {packet.IsFainted} (dur={packet.DurationSeconds:F0}s)");
                 TrueTrauma.FikaBridge.UpdateFaintedList(packet.ProfileId, packet.IsFainted);
 
-                // Espelhar os timers para o MainLoopPatch/BotPatches deste processo
-                // tratarem o desmaiado remoto (neutralização contínua de aggro no host)
+                // ref: CR-02 — espelho serve a consultas por ContainsKey (BotPatches/
+                // SilenceVoice); a REMOÇÃO é dirigida pelo pacote false do DONO (o
+                // MainLoopPatch não roda para ObservedPlayer — CR-01-28). Duração vem
+                // do PACOTE (config do dono), nunca da config local deste processo.
                 if (packet.IsFainted)
                 {
-                    float duration = TRLImmersiveCombatMedicine.TRLImmersiveCombatMedicinePlugin.ConfigBlackoutDuration.Value;
+                    float duration = packet.DurationSeconds > 0f ? packet.DurationSeconds : 20f;
+                    float grace = packet.GraceSeconds > 0f ? packet.GraceSeconds : duration + 5f;
                     float now = UnityEngine.Time.time;
                     TrueTrauma.TraumaState.BlackoutTimers[packet.ProfileId] = now + duration;
                     TrueTrauma.TraumaState.BlackoutStartTimes[packet.ProfileId] = now;
-                    TrueTrauma.TraumaState.GraceTimers[packet.ProfileId] = now + duration + 5f;
+                    TrueTrauma.TraumaState.GraceTimers[packet.ProfileId] = now + grace;
                 }
                 else
                 {
@@ -350,8 +359,17 @@ namespace Band_Aid
                 }
             }
 
-            NotificationManagerClass.DisplayMessageNotification(
-                "Você foi tratado por um aliado.", ENotificationDurationType.Default, ENotificationIconType.Quest);
+            // ref: CR-02 — a notificação é do PACIENTE humano; quando o host aplica em
+            // nome de um BOT (CR-01-01), o toast não pode aparecer para o host.
+            if (patient == Singleton<GameWorld>.Instance?.MainPlayer)
+            {
+                NotificationManagerClass.DisplayMessageNotification(
+                    "Você foi tratado por um aliado.", ENotificationDurationType.Default, ENotificationIconType.Quest);
+            }
+            else
+            {
+                Logger.LogInfo($"FullTreatment aplicado no bot {patient?.Profile?.Nickname} (sem toast local).");
+            }
         }
 
         private static EBodyPart FindSmartTarget(ActiveHealthController activeHc, ItemStats stats)
