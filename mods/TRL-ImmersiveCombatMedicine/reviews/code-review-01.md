@@ -15,25 +15,25 @@
 
 ## Índice
 
-- CR-01-01 · 🔴 A — Curar BOT como médico CLIENTE é impossível: handshake nunca respondido e ApplyFullTreatment restrito
-- CR-01-02 · 🔴 C — Desmaio não é sincronizado com o host — FikaPacketManager/TraumaFaintPacket do 3.11 não foi migrado 
+- CR-01-01 ✅ · 🔴 A — Curar BOT como médico CLIENTE é impossível: handshake nunca respondido e ApplyFullTreatment restrito
+- CR-01-02 ✅ · 🔴 C — Desmaio não é sincronizado com o host — FikaPacketManager/TraumaFaintPacket do 3.11 não foi migrado 
 - CR-01-03 · 🔴 A — Auto-close de 1.0m na BandAidUI mata o modo médico ativado pelo prompt nativo (2.5m) e aborta curas  ✅
-- CR-01-04 · 🔴 A — Consumo do desfibrilador via reflection com assinatura errada — exceção certa dentro do Prefix quebr
-- CR-01-05 · 🟠 B — csproj mistura NuGet UnityEngine.Modules 2019.4.39 (era SPT 3.11/Unity 2019) com DLLs 2022.3 do jogo
-- CR-01-06 · 🟠 C — Mojibake UTF-8 duplo-encodado em 3 arquivos (86 ocorrências) — vaza para strings visíveis ao jogador
-- CR-01-07 · 🟠 C — PROPRIEDADES.md não existe — 13 ConfigEntries (incluindo a seção nova '5. Debug') sem documentação o
-- CR-01-08 · 🟠 B — Bridge EffectRemoved filtra a interface errada: GInterface350 em vez de GInterface376 (marcador real
-- CR-01-09 · 🟠 B — Estado de desmaio vaza no fim da raid: menu com áudio mudo e prone forçado no primeiro frame da raid
+- CR-01-04 ✅ · 🔴 A — Consumo do desfibrilador via reflection com assinatura errada — exceção certa dentro do Prefix quebr
+- CR-01-05 ✅ · 🟠 B — csproj mistura NuGet UnityEngine.Modules 2019.4.39 (era SPT 3.11/Unity 2019) com DLLs 2022.3 do jogo
+- CR-01-06 ✅ · 🟠 C — Mojibake UTF-8 duplo-encodado em 3 arquivos (86 ocorrências) — vaza para strings visíveis ao jogador
+- CR-01-07 ✅ · 🟠 C — PROPRIEDADES.md não existe — 13 ConfigEntries (incluindo a seção nova '5. Debug') sem documentação o
+- CR-01-08 ✅ · 🟠 B — Bridge EffectRemoved filtra a interface errada: GInterface350 em vez de GInterface376 (marcador real
+- CR-01-09 ✅ · 🟠 B — Estado de desmaio vaza no fim da raid: menu com áudio mudo e prone forçado no primeiro frame da raid
 - CR-01-10 ✅ · 🟠 B — Handshake pendente (_pendingHeal*) não é limpo em DeactivateMedicMode/ResetAllState → resposta tardi
-- CR-01-11 · 🟠 B — Abort por distância >3.5m zera _isHealingInProgress ANTES de DeactivateMedicMode → StopCoroutine nun
-- CR-01-12 · 🟠 B — RenderEcgTexture aloca ~50KB (Color32[12600]) por frame com a HUD médica aberta
-- CR-01-13 · 🟠 B — Sem hook de fim de raid: AudioListener.volume fica ~0.05 no menu quando a raid termina durante black
-- CR-01-14 · 🟠 B — PatchAll sem try/catch no Awake + TargetMethod que retorna null → Awake morre e o patching fica parc
-- CR-01-15 · 🟡 C — ShoulderTapKey/ShoulderTapMode são configs mortas e a descrição de MedicInteractKey ficou obsoleta a
+- CR-01-11 ✅ · 🟠 B — Abort por distância >3.5m zera _isHealingInProgress ANTES de DeactivateMedicMode → StopCoroutine nun
+- CR-01-12 ✅ · 🟠 B — RenderEcgTexture aloca ~50KB (Color32[12600]) por frame com a HUD médica aberta
+- CR-01-13 ✅ · 🟠 B — Sem hook de fim de raid: AudioListener.volume fica ~0.05 no menu quando a raid termina durante black
+- CR-01-14 ✅ · 🟠 B — PatchAll sem try/catch no Awake + TargetMethod que retorna null → Awake morre e o patching fica parc
+- CR-01-15 ✅ · 🟡 C — ShoulderTapKey/ShoulderTapMode são configs mortas e a descrição de MedicInteractKey ficou obsoleta a
 - CR-01-16 · 🟡 C — Três keybinds default na MESMA tecla F que também é a interação nativa do jogo — apertar F durante c
 - CR-01-17 · 🟡 E — Três namespaces no mesmo assembly (Band_Aid ×11, TrueTrauma ×8, TRLImmersiveCombatMedicine ×5) + enu
 - CR-01-18 · 🟡 E — FaintController é classe morta (nunca anexada) com a mesma lógica duplicada inline no Plugin.Update
-- CR-01-19 · 🟡 B — Bot que desmaia entra em FaintedPlayerIds e nunca sai — fica permanentemente 'invisível' para os out
+- CR-01-19 ✅ · 🟡 B — Bot que desmaia entra em FaintedPlayerIds e nunca sai — fica permanentemente 'invisível' para os out
 - CR-01-20 · 🟡 B — Dupla aplicação e duplo consumo quando o paciente é local (host→bot): DoMedEffect redirecionado + Ap
 - CR-01-21 · 🟡 C — Peer com desfibrilador pode 'reviver' um jogador apenas desmaiado — estados divergem entre dono e pe
 - CR-01-22 · 🟡 C — Fallback do ItemDatabase transforma qualquer item desconhecido em 'medkit de 50HP'
@@ -41,7 +41,7 @@
 - CR-01-24 · 🟡 C — HealRoutine ignora o resultado de SetInHands: se falhar, a cura 'telepática' completa sem item nas m
 - CR-01-25 · 🟡 B — BotUpdateManualPatch aloca List<IPlayer> por bot por tick enquanto houver qualquer desmaiado
 - CR-01-26 · 🟡 F — MainLoopPatch faz 4-8 consultas de saúde + ~6 lookups de dicionário por player/bot por frame, mesmo 
-- CR-01-27 · 🟡 B — DoContusion(1f,1f) re-disparado TODO frame durante o blackout (vanilla usa por evento)
+- CR-01-27 ✅ · 🟡 B — DoContusion(1f,1f) re-disparado TODO frame durante o blackout (vanilla usa por evento)
 - CR-01-28 · 🟡 C — MainLoopPatch nunca roda para players remotos: ObservedPlayer.LateUpdate não chama base (AP-03)
 - CR-01-29 · 🟡 F — BandAidUI.HasEffect faz MakeGenericMethod + Invoke + new object[] ~49×/250ms com a HUD aberta
 - CR-01-30 · 🟡 B — MedicHealPatch._currentObservedMedsControllerClass sobrevive ao fim da raid — pina o meds controller
@@ -91,10 +91,9 @@ if (mainPlayer == null || packet.PatientProfileId != mainPlayer.ProfileId) retur
 **Duplicatas consolidadas:** correctness: Cliente Fika não consegue curar bots: handshake exige que o paciente responda e 
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão
+
+**Resolução:** ✅ Aplicado em 2026-07-12 (sessão autônoma /g-autodev). Host/headless agora respondem o handshake E aplicam FullTreatment em nome de bots locais (TryAnswerForLocalBot/TryApplyFullTreatmentOnLocalBot). Validação in-game pendente.
 
 ---
 
@@ -124,10 +123,9 @@ public static void SyncFaintStatus(Player player, bool isFainted)
 **Duplicatas consolidadas:** patches: Faint nunca chega ao host em coop: SyncFaintStatus é local-only e ObservedPlayer
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão
+
+**Resolução:** ✅ Aplicado em 2026-07-12 (sessão autônoma /g-autodev). TraumaFaintPacket migrado do 3.11 e ligado ao stack de rede do mod (CheckInit + relay + espelhamento de timers + NeutralizeAggro no dono dos bots). Validação in-game pendente.
 
 ---
 
@@ -188,10 +186,9 @@ if (method != null)
 **Duplicatas consolidadas:** correctness: FikaRevivePlayerPatch: Invoke de TryRunNetworkTransaction com 1 argumento (métod; patches: FikaRevivePlayerPatch: prefix sem try/catch com reflection por chamada — exceção
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão
+
+**Resolução:** ✅ Aplicado em 2026-07-12 (sessão autônoma /g-autodev). Consumo do desfibrilador por chamada tipada TryRunNetworkTransaction(discardResult) + prefix inteiro em try/catch (revive nunca morre por nossa conta). Validação in-game pendente.
 
 ---
 
@@ -217,10 +214,9 @@ if (method != null)
 **Ajuste do verificador adversarial:** Impacto mantido em strong. Ajuste na sugestão de fix: além de remover a PackageReference UnityEngine.Modules 2019.4.39 e declarar cada módulo usado como <Reference Private="false"> apontando para References\, é preciso garantir que /compile-mod também popule UnityEngine.AudioModule.dll (usado por AudioListener.volume no Plugin:164/232) — esse módulo NÃO está na pasta References\ hoje (diferente de InputLegacyModule, PhysicsModule, ImageConversionModule e TextRenderingModule, que já estão). Padrão de referência: mods/TRL-ImmersiveScopes/TRL-ImmersiveScopes.csproj (na raiz do mod). Recompilar e 
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão
+
+**Resolução:** ✅ Aplicado em 2026-07-12 (sessão autônoma /g-autodev). Nuget UnityEngine.Modules 2019.4.39 e mscorlib removidos; módulos Unity 2022.3 reais referenciados de References\ (resolvidos de D:\SPT). Validação in-game pendente.
 
 ---
 
@@ -244,10 +240,9 @@ ConfigArmsEnabled = Config.Bind("2. Mecanicas (Trauma)", "Sistema de BraÃ§os",
 **Ajuste do verificador adversarial:** Ajuste na SUGESTÃO de fix, não no impacto: os 3 arquivos são MISTOS — contêm mojibake (texto antigo) E UTF-8 correto lado a lado (Plugin.cs:68 "PRÓPRIO"/"destrói", BandAidController.cs:66 "INÍCIO", comentários [DEBUG-ICM] recentes com "após"/"diagnóstico" corretos). Um iconv reverso no arquivo INTEIRO corromperia as strings já corretas (um "Ó" correto vira byte 0xD3 isolado em latin1 → UTF-8 inválido na re-decodificação). Fix seguro: `python -m ftfy` (repara só as sequências quebradas, preserva o resto) ou substituição direcionada por regex das sequências mojibake (Ã£→ã, Ã§→ç, Ã­→í, Ã³→ó, Ã‡→Ç
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão
+
+**Resolução:** ✅ Aplicado em 2026-07-12 (sessão autônoma /g-autodev). 92 linhas duplo-encodadas reparadas (roundtrip cp1252→utf-8 por linha); zero mojibake restante. Validação in-game pendente.
 
 ---
 
@@ -269,10 +264,9 @@ ConfigBlackoutEnabled = Config.Bind("2. Mecanicas (Trauma)", "Sistema de Desmaio
 **Sugestão:** Criar mods/TRL-ImmersiveCombatMedicine/PROPRIEDADES.md com a tabela padrão do repo (Nome EN, Tradução pt-BR, Tipo, Padrão, Faixa, Tooltip pt-BR) cobrindo as 13 entries, seguindo o modelo de AutoGym/PROPRIEDADES.md. Marcar 'Invisivel para Bots' explicitamente como DEBUG host-only. O /review-mod-properties pode validar depois.
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão
+
+**Resolução:** ✅ Aplicado em 2026-07-12 (sessão autônoma /g-autodev). PROPRIEDADES.md criado (12 entries, 5 seções, ledger de removidas). Validação in-game pendente.
 
 ---
 
@@ -302,10 +296,9 @@ private static void OnPatientEffectRemoved(IEffect effect)
 **Duplicatas consolidadas:** patches: Bridge do EffectRemovedEvent filtra GInterface350, mas o MedEffect real é GInter
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão
+
+**Resolução:** ✅ Aplicado em 2026-07-12 (sessão autônoma /g-autodev). Filtro do bridge trocado para GInterface376 (marcador real de MedEffect; Player.cs:19617). Validação in-game pendente.
 
 ---
 
@@ -333,10 +326,9 @@ if (gameWorld == null || gameWorld.MainPlayer == null) return;
 **Duplicatas consolidadas:** lifecycle: TraumaState.IsFainted nunca é resetado entre raids → próxima raid começa com Tog; patches: OnRaidStartCleanup não limpa LegPenaltyTimers nem IsFainted — estado de trauma v
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão
+
+**Resolução:** ✅ Aplicado em 2026-07-12 (sessão autônoma /g-autodev). TraumaState.ResetAll() cobre todos os campos (incl. IsFainted/LegPenaltyTimers) e roda no início E no fim de raid (polling de GameWorld no controller). Validação in-game pendente.
 
 ---
 
@@ -393,10 +385,9 @@ DeactivateMedicMode();
 **Sugestão:** Inverter a ordem: chamar DeactivateMedicMode() (que já faz StopCoroutine + cleanup completo quando _isHealingInProgress==true) e remover o reset manual das flags deste bloco, mantendo só a notificação 'Abortado!'.
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão
+
+**Resolução:** ✅ Aplicado em 2026-07-12 (sessão autônoma /g-autodev). Abort por distância não zera mais _isHealingInProgress antes do DeactivateMedicMode — cleanup gated volta a executar. Validação in-game pendente.
 
 ---
 
@@ -419,10 +410,9 @@ private void RenderEcgTexture()
 **Sugestão:** Alocar o buffer uma única vez em CreateEcg (campo _ecgPixels reutilizado; ClearEcgTexture já pode preenchê-lo) e reutilizar em RenderEcgTexture. Opcional: limitar o re-render a ~30Hz (acumular steps) e chamar Apply só quando houver mudança. Adicionar OnDestroy destruindo _ecgTexture.
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão
+
+**Resolução:** ✅ Aplicado em 2026-07-12 (sessão autônoma /g-autodev). RenderEcgTexture reusa buffer Color32 (fim dos ~50KB/frame). Validação in-game pendente.
 
 ---
 
@@ -448,10 +438,9 @@ if (gameWorld == null || gameWorld.MainPlayer == null) return;
 **Ajuste do verificador adversarial:** [B/strong] Sem hook de fim de raid: AudioListener.volume fica ~0.05 no menu quando a raid termina durante blackout. Cenário corrigido: jogador desmaia (volume→~0.05 via linha 232) e morre durante o blackout por tipo de dano NÃO bloqueado pelo escudo de HealthPatches.cs:21-25 (sangramento DoT, melee de bot, fogo — o escudo só cobre Bullet/Explosion/GrenadeFragment/Landmine/Sniper); a raid encerra antes do blackout de 20s expirar → GameWorld destruído → Update retorna cedo (linha 169) para sempre → menu/matchmaking com áudio a 5% até a próxima raid (OnRaidStartCleanup). Nota: alt-F4 NÃO reproduz
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão
+
+**Resolução:** ✅ Aplicado em 2026-07-12 (sessão autônoma /g-autodev). AudioListener.volume=1 restaurado no fim de raid (ResetAllState) e no início (OnRaidStartCleanup). Validação in-game pendente.
 
 ---
 
@@ -473,10 +462,9 @@ _harmony.PatchAll();
 **Sugestão:** Substituir o PatchAll único por um loop de `new PatchClassProcessor(_harmony, type).Patch()` com try/catch+LogError por classe (ou no mínimo envolver PatchAll em try/catch e mover o registro Fika/handler para antes dele). Para os patches Fika, condicionar o processamento à presença do plugin (`Chainloader.PluginInfos.ContainsKey("com.fika.core")`) em vez de retornar null do TargetMethod. Adicionar null-guard no TargetMethod do AnimCleanupPatch.
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão
+
+**Resolução:** ✅ Aplicado em 2026-07-12 (sessão autônoma /g-autodev). PatchAll substituído por PatchClassProcessor por classe com try/catch+log — falha isolada não aborta os demais patches. Validação in-game pendente.
 
 ---
 
@@ -493,10 +481,9 @@ _harmony.PatchAll();
 **Sugestão:** Remover os binds ShoulderTapKey/ShoulderTapMode (ou reconectá-los se a intenção era manter atalho direto além do painel) e reescrever a descrição de MedicInteractKey/Mode para 'fecha o modo médico aberto pelo painel de interação'. Registrar no PROPRIEDADES.md novo. Atenção: remover entries de Config.Bind não quebra configs salvas (BepInEx só ignora), mas documente no changelog.
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir): _________________
+- [x] Aceitar sugestão
+
+**Resolução:** ✅ Aplicado em 2026-07-12 (sessão autônoma /g-autodev). ShoulderTap Key/Mode removidas + tooltip do MedicInteractKey atualizado; registradas no PROPRIEDADES.md. Validação in-game pendente.
 
 ---
 
@@ -567,10 +554,9 @@ _harmony.PatchAll();
 **Sugestão:** No branch de wake do bot (MovementPatches.cs:63-67), adicionar `TraumaState.FaintedPlayerIds.Remove(id)` e `GraceTimers.Remove(id)` (bots não precisam de grace); ou gate o SyncFaintStatus(true) em HealthPatches para `!__instance.IsAI` se o escudo de visão for intencional só para humanos.
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir): _________________
+- [x] Aceitar sugestão
+
+**Resolução:** ✅ Aplicado em 2026-07-12 (sessão autônoma /g-autodev). Wake de bot remove FaintedPlayerIds e GraceTimers. Validação in-game pendente.
 
 ---
 
@@ -713,10 +699,9 @@ _harmony.PatchAll();
 **Sugestão:** Aplicar DoContusion 1× ao entrar no blackout (junto do DoStun em HealthPatches.cs:69) e renová-lo por intervalo (ex.: a cada 2s com timestamp), ou usar duração = tempo restante do blackout numa única chamada. Remover a chamada per-frame.
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir): _________________
+- [x] Aceitar sugestão
+
+**Resolução:** ✅ Aplicado em 2026-07-12 (sessão autônoma /g-autodev). DoContusion renovado a cada 2s (ContusionRenewTimers) em vez de por frame. Validação in-game pendente.
 
 ---
 
