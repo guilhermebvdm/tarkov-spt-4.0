@@ -54,8 +54,9 @@
       "branch": "main",
       "lfs": false,
       "stripGit": false,
-      "vendoredAt": "2026-06-04",
-      "note": "Lado servidor da conexão cooperativa (Fika). Pinado por commit para citações arquivo.cs:linha reprodutíveis entre máquinas."
+      "fikaVersion": "2.3.4",
+      "vendoredAt": "2026-07-12",
+      "note": "Lado servidor da conexão cooperativa (Fika). Pinado por commit para citações arquivo.cs:linha reprodutíveis entre máquinas. Pin df69e69 = tag v2.3.4 (checkout local rematerializado em 2026-07-12; antes estava em 4a78c133, atrás do pin)."
     },
     {
       "id": "fika-plugin",
@@ -69,8 +70,9 @@
       "branch": "main",
       "lfs": false,
       "stripGit": false,
-      "vendoredAt": "2026-06-04",
-      "note": "Lado cliente da coop; contém a pasta Fika.Core (verdade para classes/métodos/variáveis de coop). Pinado por commit para reprodutibilidade."
+      "fikaVersion": "2.3.4",
+      "vendoredAt": "2026-07-12",
+      "note": "Lado cliente da coop; contém a pasta Fika.Core (verdade para classes/métodos/variáveis de coop). Pinado por commit para reprodutibilidade. Pin 6ccdd2b = tag v2.3.4, igual ao Fika.Core.dll 2.3.4.0 instalado em D:\\SPT (checkout local rematerializado em 2026-07-12; antes estava em 02c0de7a, era 2.2.6)."
     },
     {
       "id": "fika-headless",

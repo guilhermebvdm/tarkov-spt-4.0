@@ -1,16 +1,16 @@
-# Graph Report - references\fika-server  (2026-06-12)
+# Graph Report - references\fika-server  (2026-07-12)
 
 ## Corpus Check
-- 368 files · ~239,230 words
+- 368 files · ~241,292 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 3372 nodes · 4395 edges · 373 communities (344 shown, 29 thin omitted)
+- 3379 nodes · 4408 edges · 376 communities (346 shown, 30 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 53 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `c3e8df24`
+- Built from commit: `d4b07ea2`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -287,10 +287,13 @@
 - [[_COMMUNITY_Community 270|Community 270]]
 - [[_COMMUNITY_Community 271|Community 271]]
 - [[_COMMUNITY_Community 272|Community 272]]
+- [[_COMMUNITY_Community 373|Community 373]]
+- [[_COMMUNITY_Community 374|Community 374]]
+- [[_COMMUNITY_Community 375|Community 375]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `T` - 89 edges
-2. `net10.0` - 73 edges
+2. `net10.0` - 74 edges
 3. `NetDataWriter` - 54 edges
 4. `NetDataReader` - 53 edges
 5. `LiteNetPeer` - 52 edges
@@ -315,7 +318,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (373 total, 29 thin omitted)
+## Communities (376 total, 30 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.05
@@ -323,7 +326,7 @@ Nodes (14): ConnectionRequest, DeliveryMethod, DisconnectInfo, IPEndPoint, LiteN
 
 ### Community 1 - "Community 1"
 Cohesion: 0.07
-Nodes (13): NetDataWriter, T, BoolSerializer, ByteSerializer, DoubleSerializer, FloatSerializer, IntSerializer, LongSerializer (+5 more)
+Nodes (13): NetDataReader, T, BoolSerializer, ByteSerializer, DoubleSerializer, FloatSerializer, IntSerializer, LongSerializer (+5 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.05
@@ -342,12 +345,12 @@ Cohesion: 0.08
 Nodes (22): ConcurrentDictionary, HttpContext, Task, WebSocket, WebSocketMessageType, ConcurrentDictionary, HttpContext, T (+14 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.13
-Nodes (10): Guid, List, TClass, TProperty, FastCallClass, FastCallSpecific, FastCallSpecificAuto, FastCallStatic (+2 more)
+Cohesion: 0.18
+Nodes (8): Action, Func, TClass, TProperty, FastCallClass, FastCallSpecific, FastCallStatic, FastCallStruct
 
 ### Community 7 - "Community 7"
-Cohesion: 0.07
-Nodes (38): Humanizer.Core, Microsoft.Build.Framework, Microsoft.CodeAnalysis.Analyzers, Microsoft.CodeAnalysis.Common, Microsoft.CodeAnalysis.CSharp, Microsoft.CodeAnalysis.CSharp.Workspaces, Microsoft.CodeAnalysis.Workspaces.Common, Microsoft.CodeAnalysis.Workspaces.MSBuild (+30 more)
+Cohesion: 0.08
+Nodes (34): Humanizer.Core, Microsoft.Build.Framework, Microsoft.CodeAnalysis.Analyzers, Microsoft.CodeAnalysis.Common, Microsoft.CodeAnalysis.CSharp, Microsoft.CodeAnalysis.CSharp.Workspaces, Microsoft.CodeAnalysis.Workspaces.Common, Microsoft.CodeAnalysis.Workspaces.MSBuild (+26 more)
 
 ### Community 8 - "Community 8"
 Cohesion: 0.08
@@ -371,7 +374,7 @@ Nodes (13): Array, bool, byte, DateTime, Guid, int, IPEndPoint, MethodImpl (+5 m
 
 ### Community 13 - "Community 13"
 Cohesion: 0.07
-Nodes (29): dependencies, net10.0, type, contentHash, resolved, type, contentHash, resolved (+21 more)
+Nodes (29): contentHash, resolved, type, dependencies, net10.0, type, BuildBundlerMinifier, fikashared (+21 more)
 
 ### Community 14 - "Community 14"
 Cohesion: 0.12
@@ -383,7 +386,7 @@ Nodes (28): ApplicationUser, DataAnnotationsValidator, EditForm, FikaWebApp.Data
 
 ### Community 16 - "Community 16"
 Cohesion: 0.10
-Nodes (12): CallType, Exception, Action, Func, MethodInfo, CharSerializer, CustomType, CustomTypeClass (+4 more)
+Nodes (13): CallType, Exception, Dictionary, int, MethodInfo, ClassInfo, CustomType, CustomTypeClass (+5 more)
 
 ### Community 17 - "Community 17"
 Cohesion: 0.13
@@ -391,7 +394,7 @@ Nodes (13): FikaDialogueController, AcceptFriendRequestData, bool, Dictionary, G
 
 ### Community 18 - "Community 18"
 Cohesion: 0.08
-Nodes (24): net9.0, Microsoft.NET.Sdk.Web, net9.0, Microsoft.NET.Sdk.Web, net10.0, Blazor-ApexCharts (6.1.0), Brism (1.0.1), CodeBeam.MudBlazor.Extensions (9.0.3) (+16 more)
+Nodes (24): net9.0, Microsoft.NET.Sdk.Web, net9.0, Microsoft.NET.Sdk.Web, net10.0, Blazor-ApexCharts (6.1.0), Brism (1.0.1), CodeBeam.MudBlazor.Extensions (8.3.0) (+16 more)
 
 ### Community 19 - "Community 19"
 Cohesion: 0.11
@@ -402,8 +405,8 @@ Cohesion: 0.07
 Nodes (27): ApplicationUser, DataAnnotationsValidator, EditForm, FikaWebApp.Components.Account, FikaWebApp.Components.Account.Shared, FikaWebApp.Data, IdentityRedirectManager, Microsoft.AspNetCore.Identity (+19 more)
 
 ### Community 21 - "Community 21"
-Cohesion: 0.12
-Nodes (13): AbstractPatch, AcceptAllFriendRequestsOverride, AcceptFriendRequestOverride, CancelFriendRequestOverride, DeleteFriendOverride, IgnoreFriendOverride, ListInboxOverride, ListOutboxOverride (+5 more)
+Cohesion: 0.16
+Nodes (8): AcceptFriendRequestOverride, CancelFriendRequestOverride, DeleteFriendOverride, IgnoreFriendOverride, SendFriendRequestOverride, UnIgnoreFriendOverride, MethodBase, UIDRequestData
 
 ### Community 22 - "Community 22"
 Cohesion: 0.10
@@ -411,7 +414,7 @@ Nodes (18): ApexChart, ApexCharts, ApexPointSeries, Brism, FikaShared.Responses,
 
 ### Community 23 - "Community 23"
 Cohesion: 0.15
-Nodes (10): EFikaMatchEndSessionMessage, EFikaMatchStatus, FikaMatch, FikaPlayer, ConcurrentDictionary, FikaRaidCreateRequestData, MongoId, Task (+2 more)
+Nodes (10): EFikaMatchEndSessionMessage, FikaMatch, FikaPlayer, ConcurrentDictionary, EFikaMatchStatus, FikaRaidCreateRequestData, MongoId, Task (+2 more)
 
 ### Community 24 - "Community 24"
 Cohesion: 0.08
@@ -490,8 +493,8 @@ Cohesion: 0.19
 Nodes (11): int, NetPacket, object, PacketProperty, IPEndPoint, NetDataWriter, NetPacket, HandleSimulateOutboundLatency() (+3 more)
 
 ### Community 43 - "Community 43"
-Cohesion: 0.17
-Nodes (11): DeclineFriendRequestOverride, UnIgnoreFriendOverride, CancelFriendRequestData, DeclineFriendRequestData, DeleteFriendRequest, AcceptFriendRequestData, MongoId, PatchPrefix (+3 more)
+Cohesion: 0.16
+Nodes (11): AcceptAllFriendRequestsOverride, ListInboxOverride, ListOutboxOverride, CancelFriendRequestData, DeleteFriendRequest, AcceptFriendRequestData, EmptyRequestData, MongoId (+3 more)
 
 ### Community 44 - "Community 44"
 Cohesion: 0.13
@@ -554,12 +557,12 @@ Cohesion: 0.16
 Nodes (11): bool, byte, int, LiteNetPeer, long, NetDataReader, NetPacket, ReadOnlySpan (+3 more)
 
 ### Community 59 - "Community 59"
-Cohesion: 0.16
-Nodes (9): BaseChannel, ConcurrentQueue, DeliveryMethod, NetDataWriter, NetPacket, PooledPacket, ReadOnlySpan, NetPeer (+1 more)
+Cohesion: 0.24
+Nodes (5): BaseChannel, ConcurrentQueue, NetPacket, NetPeer, LiteNetPeer
 
 ### Community 60 - "Community 60"
-Cohesion: 0.19
-Nodes (5): NetDataReader, PropertyInfo, Type, EnumByteSerializer, EnumIntSerializer
+Cohesion: 0.17
+Nodes (6): List, NetDataWriter, PropertyInfo, Type, EnumByteSerializer, EnumIntSerializer
 
 ### Community 61 - "Community 61"
 Cohesion: 0.11
@@ -570,8 +573,8 @@ Cohesion: 0.21
 Nodes (9): RaidCallbacks, FikaRaidCreateRequestData, FikaRaidJoinRequestData, FikaRaidLeaveRequestData, FikaRaidServerIdRequestData, MongoId, RegisterPlayerRequestData, StartHeadlessRequest (+1 more)
 
 ### Community 63 - "Community 63"
-Cohesion: 0.12
-Nodes (17): FastCloner, HarmonyX, SPTarkov.Common, SPTarkov.DI, System.IO.Hashing, SPTarkov.Reflection, SPTarkov.Server.Core, contentHash (+9 more)
+Cohesion: 0.22
+Nodes (9): FastCloner, SPTarkov.Common, System.IO.Hashing, SPTarkov.Server.Core, contentHash, dependencies, requested, resolved (+1 more)
 
 ### Community 64 - "Community 64"
 Cohesion: 0.12
@@ -698,8 +701,8 @@ Cohesion: 0.15
 Nodes (13): contentHash, dependencies, resolved, type, Microsoft.Bcl.AsyncInterfaces, System.ClientModel, System.Memory.Data, Azure.Core (+5 more)
 
 ### Community 96 - "Community 96"
-Cohesion: 0.15
-Nodes (13): contentHash, dependencies, requested, resolved, type, MudBlazor, contentHash, dependencies (+5 more)
+Cohesion: 0.14
+Nodes (14): contentHash, dependencies, requested, resolved, type, BuildBundlerMinifier, MudBlazor, contentHash (+6 more)
 
 ### Community 97 - "Community 97"
 Cohesion: 0.17
@@ -725,17 +728,13 @@ Nodes (8): IdentityRevalidatingAuthenticationStateProvider, AuthenticationState,
 Cohesion: 0.38
 Nodes (5): ClientCallbacks, FikaCheckModRequestData, IRequestData, MongoId, ValueTask
 
-### Community 104 - "Community 104"
-Cohesion: 0.22
-Nodes (5): Dictionary, int, ClassInfo, NetSerializer, StringSerializer
-
 ### Community 105 - "Community 105"
 Cohesion: 0.25
 Nodes (4): MongoId, StartHeadlessRequest, Task, HeadlessService
 
 ### Community 106 - "Community 106"
-Cohesion: 0.20
-Nodes (5): ConcurrentDictionary, EndLocalRaidRequestData, List, MongoId, InsuranceService
+Cohesion: 0.31
+Nodes (4): ConcurrentDictionary, EndLocalRaidRequestData, MongoId, InsuranceService
 
 ### Community 107 - "Community 107"
 Cohesion: 0.24
@@ -794,7 +793,7 @@ Cohesion: 0.20
 Nodes (9): Cancel, Confirm, DialogActions, DialogContent, MudButton, MudDialog, MudStack, MudText (+1 more)
 
 ### Community 121 - "Community 121"
-Cohesion: 0.31
+Cohesion: 0.29
 Nodes (5): FikaModMetadata, string, Task, FikaSPTServerConfig, ConfigService
 
 ### Community 122 - "Community 122"
@@ -802,8 +801,8 @@ Cohesion: 0.24
 Nodes (5): EFikaLocation, PmcData, SptProfile, ExtensionMethods, FriendData
 
 ### Community 123 - "Community 123"
-Cohesion: 0.27
-Nodes (5): ConcurrentDictionary, FikaPlayerPresence, FikaSetPresence, MongoId, PresenceService
+Cohesion: 0.23
+Nodes (6): ConcurrentDictionary, EFikaMatchStatus, FikaPlayerPresence, FikaSetPresence, MongoId, PresenceService
 
 ### Community 124 - "Community 124"
 Cohesion: 0.24
@@ -831,7 +830,7 @@ Nodes (5): PresenceCallbacks, FikaSetPresence, IRequestData, MongoId, ValueTask
 
 ### Community 130 - "Community 130"
 Cohesion: 0.22
-Nodes (6): SendItemController, Dictionary, ItemEventRouterResponse, PmcData, SendItemRequestData, ValueTask
+Nodes (6): SendItemController, Dictionary, ItemEventRouterResponse, MongoId, SendItemRequestData, ValueTask
 
 ### Community 131 - "Community 131"
 Cohesion: 0.22
@@ -875,7 +874,7 @@ Nodes (4): HeadlessCallbacks, EmptyRequestData, MongoId, ValueTask
 
 ### Community 141 - "Community 141"
 Cohesion: 0.29
-Nodes (5): SendItemCallbacks, ItemEventRouterResponse, PmcData, SendItemRequestData, ValueTask
+Nodes (5): SendItemCallbacks, ItemEventRouterResponse, MongoId, SendItemRequestData, ValueTask
 
 ### Community 142 - "Community 142"
 Cohesion: 0.25
@@ -890,8 +889,8 @@ Cohesion: 0.25
 Nodes (6): ViewQueuedSendItemsDialog, KeyValuePair, SendItemRequest, SendItemToAllRequest, Task, Timer
 
 ### Community 146 - "Community 146"
-Cohesion: 0.43
-Nodes (3): DeliveryMethod, NetDataWriter, ReadOnlySpan
+Cohesion: 0.21
+Nodes (7): DeliveryMethod, NetDataWriter, ReadOnlySpan, DeliveryMethod, NetDataWriter, PooledPacket, ReadOnlySpan
 
 ### Community 147 - "Community 147"
 Cohesion: 0.25
@@ -950,8 +949,8 @@ Cohesion: 0.29
 Nodes (5): float, int, IPEndPoint, Socket, NtpRequest
 
 ### Community 162 - "Community 162"
-Cohesion: 0.29
-Nodes (7): JetBrains.Annotations, SPTarkov.DI, contentHash, dependencies, requested, resolved, type
+Cohesion: 0.13
+Nodes (15): HarmonyX, JetBrains.Annotations, SPTarkov.DI, SPTarkov.DI, SPTarkov.Reflection, contentHash, dependencies, requested (+7 more)
 
 ### Community 163 - "Community 163"
 Cohesion: 0.29
@@ -1161,9 +1160,13 @@ Nodes (3): DynamicallyAccessedMemberTypes, LiteNetLib, Trimming
 Cohesion: 0.50
 Nodes (3): byte, int, IncomingFragments
 
+### Community 219 - "Community 219"
+Cohesion: 0.16
+Nodes (6): Guid, IPEndPoint, CharSerializer, FastCallSpecificAuto, GuidSerializer, IPEndPointSerializer
+
 ### Community 220 - "Community 220"
-Cohesion: 0.50
-Nodes (3): ValueTask, HttpRequest, PatchPostfix
+Cohesion: 0.22
+Nodes (6): AbstractPatch, MethodBase, ValueTask, HttpRequest, PatchPostfix, GetResponseOverride
 
 ### Community 221 - "Community 221"
 Cohesion: 0.50
@@ -1261,17 +1264,13 @@ Nodes (4): contentHash, resolved, type, Microsoft.VisualStudio.SolutionPersisten
 Cohesion: 0.50
 Nodes (4): Serilog, contentHash, resolved, type
 
-### Community 246 - "Community 246"
-Cohesion: 0.50
-Nodes (4): SQLitePCLRaw.core, contentHash, resolved, type
-
 ### Community 247 - "Community 247"
 Cohesion: 0.50
 Nodes (4): SQLitePCLRaw.lib.e_sqlite3, contentHash, resolved, type
 
 ### Community 248 - "Community 248"
 Cohesion: 0.50
-Nodes (4): System.CodeDom, contentHash, resolved, type
+Nodes (4): contentHash, resolved, type, Microsoft.CodeAnalysis.CSharp
 
 ### Community 249 - "Community 249"
 Cohesion: 0.50
@@ -1279,32 +1278,44 @@ Nodes (4): System.Composition.AttributedModel, contentHash, resolved, type
 
 ### Community 250 - "Community 250"
 Cohesion: 0.50
-Nodes (4): System.Memory.Data, contentHash, resolved, type
+Nodes (4): contentHash, resolved, type, Microsoft.Data.SqlClient.SNI.runtime
 
 ### Community 251 - "Community 251"
 Cohesion: 0.50
-Nodes (4): System.Security.Cryptography.ProtectedData, contentHash, resolved, type
+Nodes (4): contentHash, resolved, type, Microsoft.EntityFrameworkCore.Analyzers
 
 ### Community 252 - "Community 252"
 Cohesion: 0.50
 Nodes (3): AI-Generated Code Policy, Contributing & Fika Code Formatting, Ownership of Contributions
 
+### Community 373 - "Community 373"
+Cohesion: 0.50
+Nodes (4): contentHash, resolved, type, Microsoft.Extensions.DependencyModel
+
+### Community 374 - "Community 374"
+Cohesion: 0.50
+Nodes (4): Newtonsoft.Json, contentHash, resolved, type
+
+### Community 375 - "Community 375"
+Cohesion: 0.50
+Nodes (4): System.Security.Cryptography.Pkcs, contentHash, resolved, type
+
 ## Knowledge Gaps
-- **1485 isolated node(s):** `AddFleaBanRequest`, `HttpPost`, `ProfileIdRequest`, `HttpDelete`, `HashSet` (+1480 more)
+- **1488 isolated node(s):** `AddFleaBanRequest`, `HttpPost`, `ProfileIdRequest`, `HttpDelete`, `HashSet` (+1483 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **29 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **30 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `net10.0` connect `Community 13` to `Community 4`, `Community 7`, `Community 9`, `Community 11`, `Community 30`, `Community 170`, `Community 171`, `Community 172`, `Community 173`, `Community 46`, `Community 189`, `Community 190`, `Community 191`, `Community 207`, `Community 208`, `Community 209`, `Community 210`, `Community 247`, `Community 95`, `Community 96`, `Community 98`, `Community 235`, `Community 236`, `Community 237`, `Community 238`, `Community 239`, `Community 240`, `Community 241`, `Community 108`, `Community 242`, `Community 243`, `Community 244`, `Community 245`, `Community 246`, `Community 248`, `Community 249`, `Community 250`, `Community 251`?**
+- **Why does `net10.0` connect `Community 13` to `Community 4`, `Community 7`, `Community 9`, `Community 11`, `Community 30`, `Community 170`, `Community 171`, `Community 172`, `Community 173`, `Community 46`, `Community 189`, `Community 190`, `Community 191`, `Community 207`, `Community 208`, `Community 209`, `Community 210`, `Community 247`, `Community 95`, `Community 96`, `Community 375`, `Community 98`, `Community 249`, `Community 235`, `Community 236`, `Community 237`, `Community 238`, `Community 239`, `Community 240`, `Community 241`, `Community 108`, `Community 242`, `Community 243`, `Community 373`, `Community 244`, `Community 374`, `Community 248`, `Community 245`, `Community 250`, `Community 251`?**
   _High betweenness centrality (0.013) - this node is a cross-community bridge._
 - **Why does `Microsoft.EntityFrameworkCore.Sqlite` connect `Community 11` to `Community 13`?**
-  _High betweenness centrality (0.002) - this node is a cross-community bridge._
-- **Why does `Azure.Core` connect `Community 95` to `Community 13`?**
+  _High betweenness centrality (0.003) - this node is a cross-community bridge._
+- **Why does `net9.0` connect `Community 33` to `Community 148`, `Community 149`, `Community 27`, `Community 162`, `Community 163`, `Community 164`, `Community 44`, `Community 63`, `Community 64`, `Community 203`, `Community 80`, `Community 81`, `Community 221`, `Community 222`, `Community 223`, `Community 224`, `Community 225`, `Community 226`, `Community 227`, `Community 228`, `Community 229`, `Community 230`?**
   _High betweenness centrality (0.002) - this node is a cross-community bridge._
 - **What connects `AddFleaBanRequest`, `HttpPost`, `ProfileIdRequest` to the rest of the system?**
-  _1485 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _1488 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.05046948356807512 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**

@@ -12,7 +12,7 @@
 - [P-2.2] (aberta 2026-07-11) Após validar, remover/gatear os LogInfo por frame do ScanForPatient (flood de log em raid) e o bloco OverlapSphere duplicado (BandAidController.cs ~751-791).
 - [P-2.3] (aberta 2026-07-11) Coop-sync: FikaBridge.SyncFaintStatus só atualiza lista local — o FikaPacketManager.cs do TrueTrauma 3.11 não foi migrado; desmaio não é propagado aos peers.
 - [P-2.4] (aberta 2026-07-11) (Opcional) Alinhar o scan ao padrão canônico (origem PlayerBones.LootRaycastOrigin; WeaponRoot+LookDirection diverge da câmera em freelook).
-- [P-2.5] (aberta 2026-07-11) Pin de references/fika-plugin (manifest 6ccdd2b = Fika 2.2.6) está atrás do instalado (2.3.4, que tem ToggleDowned/ReviveInteractable) — atualizar pin + regenerar grafo fika-plugin.
+- [P-2.5] (aberta 2026-07-11, fechada 2026-07-12) RESOLVIDA com correção de diagnóstico: o pin do manifest (6ccdd2b) JÁ ERA a v2.3.4 — o que estava velho era o CHECKOUT LOCAL (02c0de7a, era 2.2.6) e os grafos gerados dele. Rematerializado fika-plugin e fika-server nos pins (= tag v2.3.4 = Fika instalado), grafos regenerados, manifest com fikaVersion+vendoredAt. Referência p/ P-2.4: Fika 2.3.4 pluga o prompt de revive via patch em GetActionsClass.GetAvailableActions (Fika.Core/Main/Patches/Revival/GetActionsClass_GetAvailableActions_Patch.cs) — padrão canônico a imitar no prompt F.
 
 ---
 
