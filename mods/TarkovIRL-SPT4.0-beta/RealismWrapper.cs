@@ -7,14 +7,26 @@
 using UnityEngine;
 using EFT;
 using Comfort.Common;
-using System.Reflection;
+using System.Runtime.CompilerServices;
 
 #nullable disable
 namespace TarkovIRL;
 
 internal class RealismWrapper
 {
-  private static FieldInfo _isTacSprintActiveField;
+  private static bool? _isUnderFireLoaded;
+
+  public static bool IsUnderFireLoaded
+  {
+    get
+    {
+      if (_isUnderFireLoaded == null)
+      {
+        _isUnderFireLoaded = BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.rpmwpm.UnderFire");
+      }
+      return _isUnderFireLoaded.Value;
+    }
+  }
 
   public static float GetRealismReloadSpeed()
   {
@@ -38,7 +50,11 @@ internal class RealismWrapper
   {
     get
     {
-      return UnderFire.Plugin.isAdrenalineActive;
+      if (IsUnderFireLoaded)
+      {
+        return UnderFireSoftWrapper.GetAdrenaline();
+      }
+      return false;
     }
   }
 
@@ -47,25 +63,14 @@ internal class RealismWrapper
     get => 1.0f; // Simplified native balance
   }
 
-  public static bool IsTacSprint
-  {
-    get
-    {
-      if (_isTacSprintActiveField == null)
-      {
-          var type = System.Type.GetType("CameraRotationMod.StanceManager, shwngFpsCameraStances4");
-          if (type != null)
-          {
-              _isTacSprintActiveField = type.GetField("_isTacSprintActive", BindingFlags.NonPublic | BindingFlags.Static);
-          }
-      }
-      if (_isTacSprintActiveField != null)
-      {
-          return (bool)_isTacSprintActiveField.GetValue(null);
-      }
-      return false;
-    }
-  }
-
   public static bool IsOverdose => false;
+}
+
+internal static class UnderFireSoftWrapper
+{
+  [MethodImpl(MethodImplOptions.NoInlining)]
+  public static bool GetAdrenaline()
+  {
+    return UnderFire.Plugin.isAdrenalineActive;
+  }
 }

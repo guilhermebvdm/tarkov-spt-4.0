@@ -23,8 +23,7 @@ internal class HeadRotController
   {
     Vector3 vector3 = headRotThisFrame;
     HeadRotController._headRotLerpTarget = !ThrowController.IsThrowing ? new Vector3(0.0f, 0.0f, PlayerMotionController.LeanNormal * PrimeMover.LeanCounterRotateMod.Value) : ThrowController.GetThrowOffset;
-    Vector3 reloadHeadOffset = AugmentedReloadController.GetAugmentedReloadHeadOffset();
-    HeadRotController._headRotLerpTarget = (HeadRotController._headRotLerpTarget + reloadHeadOffset);
+
     if (PrimeMover.IsHeadTiltADS.Value)
     {
       float Y;

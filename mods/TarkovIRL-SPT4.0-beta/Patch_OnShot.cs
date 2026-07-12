@@ -22,7 +22,7 @@ public class Patch_OnShot : ModulePatch
   [SPT.Reflection.Patching.PatchPostfix]
   private static void PatchPostfix(Player __instance)
   {
-    if (!__instance != null || !__instance.IsYourPlayer)
+    if (__instance == null || !__instance.IsYourPlayer)
       return;
     Player.FirearmController handsController = __instance.HandsController as Player.FirearmController;
     WeaponController.UpdateWpnStats(handsController);

@@ -22,7 +22,11 @@ internal class NewDeadzoneController
     NewDeadzoneController._rotDeltaHistory += num1;
     NewDeadzoneController._rotDeltaHistory -= NewDeadzoneController._rotDeltaSmoothed;
     NewDeadzoneController._rotDeltaSmoothed = (float) ((double) NewDeadzoneController._rotDeltaHistory * (double) fdt * 9.0);
-    float num2 = PrimeMover.WeaponDeadzoneMulti.Value * WeaponController.GetWeaponMulti(false);
+    float fakeWeight = PrimeMover.Instance.WeightAttenuationCurve.Evaluate(PrimeMover.DeadzoneCustomWeight.Value);
+    float fakeErgo = PrimeMover.Instance.ErgoAttenuationCurve.Evaluate(PrimeMover.DeadzoneCustomErgo.Value);
+    float fixedWeaponMulti = fakeWeight * (1f - fakeErgo);
+    if (fixedWeaponMulti < PrimeMover.MinimumWeaponSway.Value) fixedWeaponMulti = PrimeMover.MinimumWeaponSway.Value;
+    float num2 = PrimeMover.WeaponDeadzoneMulti.Value * fixedWeaponMulti;
     if (WeaponController.HasCheekWeld() && PlayerMotionController.IsAiming)
     {
       num2 *= PrimeMover.DeadzoneInADS.Value;
