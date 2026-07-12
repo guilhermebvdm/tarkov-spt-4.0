@@ -29,6 +29,10 @@
       <HintPath>References\Comfort.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Sirenix.Serialization">
+      <HintPath>References\Sirenix.Serialization.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="ItemComponent.Types">
       <HintPath>References\ItemComponent.Types.dll</HintPath>
       <Private>False</Private>

@@ -58,6 +58,9 @@ namespace TRLImmersiveCombatMedicine
             EmergencyDropMode = Config.Bind("4. Keybinds (Medic)", "Emergency Drop Mode", EBandAidPressMode.Press, "Modo de ativaÃ§Ã£o do drop emergencial.");
             ShoulderTapMode = Config.Bind("4. Keybinds (Medic)", "Shoulder Tap Mode", EBandAidPressMode.DoubleTap, "Modo de ativaÃ§Ã£o do toque no ombro.");
 
+            // Feature de debug: invisibilidade para bots (host-only)
+            DebugBotInvisibility.Init(Config);
+
             // Carregador de imagens (Band-Aid)
             string pluginPath = System.IO.Path.GetDirectoryName(Info.Location);
             ImageLoader.Init(pluginPath);

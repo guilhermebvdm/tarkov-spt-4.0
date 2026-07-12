@@ -49,4 +49,34 @@ namespace TRLImmersiveCombatMedicine
             return true;
         }
     }
+
+    /// <summary>
+    /// Estende o alcance do prompt médico para a detecção NATIVA de players
+    /// (PLAYER_RAYCAST_DISTANCE = 2,5 m): entre ~1,3 m (limite de InteractableObject
+    /// genérico no InteractionRaycast) e 2,5 m o vanilla seta Player.InteractablePlayer
+    /// mas não gera ações — este postfix preenche o painel a partir do
+    /// MedicInteractable do alvo. Assim "se o prompt aparece, examinar funciona".
+    /// </summary>
+    [HarmonyPatch(typeof(GamePlayerOwner), nameof(GamePlayerOwner.InteractionsChangedHandler))]
+    public static class MedicPlayerRangePatch
+    {
+        [HarmonyPostfix]
+        public static void Postfix(GamePlayerOwner __instance)
+        {
+            // Algo já produziu ações (loot/porta/Fika revive/nosso prefix) → não tocar.
+            if (__instance.AvailableInteractionState.Value != null) return;
+
+            var target = __instance.Player != null ? __instance.Player.InteractablePlayer : null;
+            if (target == null) return;
+
+            var medic = target.GetComponent<MedicInteractable>();
+            if (medic == null) return;
+
+            var actions = medic.GetActions(__instance);
+            if (actions == null) return;
+
+            actions.InitSelected();
+            __instance.AvailableInteractionState.Value = actions;
+        }
+    }
 }

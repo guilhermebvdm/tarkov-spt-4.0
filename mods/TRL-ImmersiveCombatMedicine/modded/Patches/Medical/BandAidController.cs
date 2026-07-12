@@ -163,6 +163,9 @@ namespace TRLImmersiveCombatMedicine
             // player/bot vivo; o prompt aparece no ActionPanel do jogo (como loot).
             EnsureMedicInteractables();
 
+            // Debug: reconcilia o toggle "Invisível para Bots" (rate-limit interno)
+            DebugBotInvisibility.Tick();
+
             // === EMERGENCY DROP ===
             if (_isHealingInProgress && CheckPressMode(_emergencyDropKey.Value, _emergencyDropMode.Value,
                 ref _emergencyHoldTimer, ref _emergencyHoldTriggered, ref _emergencyLastTapTime))
@@ -188,7 +191,10 @@ namespace TRLImmersiveCombatMedicine
 
             if (_isMedicModeActive && _targetPatient != null)
             {
-                if (Vector3.Distance(Singleton<GameWorld>.Instance.MainPlayer.Position, _targetPatient.Position) > 2.5f)
+                // 3,5 m: margem sobre o alcance do prompt nativo (ray ~2,5 m do olho +
+                // offset feet-to-feet) — regra única: se o prompt apareceu, examinar funciona
+                // e o modo não fecha sozinho no mesmo lugar.
+                if (Vector3.Distance(Singleton<GameWorld>.Instance.MainPlayer.Position, _targetPatient.Position) > 3.5f)
                 {
                     if (_isHealingInProgress)
                     {
@@ -770,6 +776,7 @@ namespace TRLImmersiveCombatMedicine
             MedicHealPatch.CleanupPatientSubscription();
 
             BandAidUI.Instance?.HideUI();
+            DebugBotInvisibility.OnRaidEnded();
             TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("ResetAllState: flags resetadas (mudanÃ§a de raid).");
         }
 
