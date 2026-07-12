@@ -111,6 +111,7 @@ resolve_references() {
     "UnityEngine.PhysicsModule.dll|$spt/EscapeFromTarkov_Data/Managed/UnityEngine.PhysicsModule.dll"
     "UnityEngine.AnimationModule.dll|$spt/EscapeFromTarkov_Data/Managed/UnityEngine.AnimationModule.dll"
     "Comfort.dll|$spt/EscapeFromTarkov_Data/Managed/Comfort.dll"
+    "ItemComponent.Types.dll|$spt/EscapeFromTarkov_Data/Managed/ItemComponent.Types.dll"
     "Sirenix.Serialization.dll|$spt/EscapeFromTarkov_Data/Managed/Sirenix.Serialization.dll"
     "AnimationSystem.Types.dll|$spt/EscapeFromTarkov_Data/Managed/AnimationSystem.Types.dll"
     "SPT.Reflection.dll|$spt/BepInEx/plugins/spt/spt-reflection.dll"

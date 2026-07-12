@@ -1,16 +1,43 @@
 ﻿# Memória de Sessões — TRL-ImmersiveCombatMedicine
 
 ## Estado atual
-- HUD médico implementado (BandAidUI) e configurado para ignorar checagem de "IsAlive" no raycast para habilitar ECG plano em cadáveres.
-- A aplicação de medicina trava (CheckManualInputs) se o paciente estiver morto.
-- O consumo de recursos no MedicalLogic usa um sistema DiscardItemNetworked pré-verificando se o uso será total para não dessincronizar o HP da resource com o FIKA (evitando o slot fantasma).
-- A verificação de paciente pelo laser (ScanForPatient) foi corrigida para SPT 4.0: usa Physics.AllLayers para suportar FikaObservedPlayer, o fallback GetComponentInParent<Player>() se GetPlayerByCollider falhar, e calcula a direção pelo cano da arma em vez do Camera.main que ficou instável no 4.0.
-- O BotRagdollSimulator forçado em bots foi descartado por instabilidade/bug e eles agora apenas entram em prone quando desmaiam.
+- CAUSA-RAIZ do "prompt F nunca aparece" encontrada (2026-07-11): o DLL implantado em D:\SPT era uma build ANTIGA (pré-commits, ainda com `Camera.main` + early-return silencioso) — nenhum fix das rodadas anteriores chegou ao jogo. A fonte não compilava do repo (csproj referenciava `References\*.dll` inexistente) e o mod usava `client/` em vez de `modded/`, ficando fora do tooling (compile-mod.sh e update-graphs.sh).
+- Estrutura alinhada à convenção do repo: `client/` → `modded/` (git mv). Build+install via `bash .agents/scripts/compile-mod.sh TRL-ImmersiveCombatMedicine` funciona (References auto-resolvidas de D:\SPT; `ItemComponent.Types.dll` adicionado ao mapa do script). DLL novo implantado e verificado por forense binária (contém SphereCastAll/WeaponRoot/LookDirection, sem Camera.main).
+- Validação estática (workflow 12 agentes, verificação adversarial): TODAS as APIs do scan existem e são válidas no EFT 0.16.x — LookDirection nunca é zero; WeaponRoot é campo serializado válido; GetPlayerByCollider só registra a cápsula do CharacterController (BodyPartColliders resolvem via fallback GetComponentInParent<Player>, que funciona pois hitboxes são filhas do GO do Player e, sob Fika, todo player/bot de rede é subclasse de Player).
+- Padrão canônico de interação do vanilla (referência p/ melhoria futura): GamePlayerOwner.LateUpdate → Player.InteractionRaycast (origem PlayerBones.LootRaycastOrigin, dist ~2.8, mask Interactive|Deadbody|Player|Loot) → GameWorld.FindInteractable → ActionPanel.
+- HUD médico implementado (BandAidUI) com ECG plano em cadáveres; aplicação de medicina trava (CheckManualInputs) se o paciente estiver morto; consumo usa DiscardItemNetworked pré-verificado (anti slot fantasma); bots desmaiados entram em prone (BotRagdollSimulator descartado).
 
 ## Pendências
-- Nenhuma pendência em aberto.
+- P-2.1: Validar em raid (HITL): aproximar de bot → prompt F deve aparecer; conferir spam `ScanForPatient: SphereCastAll hits:` no LogOutput.log. ATENÇÃO: launcher com Dev Mode OFF pode reverter o DLL local no sync (ver memória global feedback_server_launcher_sync_builds).
+- P-2.2: Após validar, remover/gatear os LogInfo por frame do ScanForPatient (flood de log em raid) e o bloco OverlapSphere duplicado (BandAidController.cs ~751-791).
+- P-2.3: Coop-sync: FikaBridge.SyncFaintStatus só atualiza lista local — o FikaPacketManager.cs do TrueTrauma 3.11 não foi migrado; desmaio não é propagado aos peers.
+- P-2.4: (Opcional) Alinhar o scan ao padrão canônico (origem PlayerBones.LootRaycastOrigin; WeaponRoot+LookDirection diverge da câmera em freelook).
+- P-2.5: Pin de references/fika-plugin (manifest 6ccdd2b = Fika 2.2.6) está atrás do instalado (2.3.4, que tem ToggleDowned/ReviveInteractable) — atualizar pin + regenerar grafo fika-plugin.
 
 ---
+
+## 2026-07-11 23:55 (GMT-3) — Sessão 2: Diagnóstico do prompt F ausente — build velha implantada (não era código)
+
+**Tema central:** Descobrir por que o prompt F nunca aparecia apesar das rodadas de fix no ScanForPatient.
+
+**Decisões-chave:**
+- Diagnóstico por eliminação com validação estática massiva (workflow: vanilla decompilado, diff 3.11, Fika, lifecycle/JIT) já que o BepInEx sobrescreve LogOutput.log a cada boot (sem log de raid das rodadas anteriores).
+- Forense binária no DLL implantado (strings ASCII/UTF-16) provou que era build pré-fix: continha `Camera.main`+`SphereCast` simples+máscara `HighPolyCollider`, sem `WeaponRoot`/`SphereCastAll`.
+- Reestruturação `client/`→`modded/` em vez de build manual: entra no tooling canônico do repo (compile, graphs) e evita recorrência.
+
+**Lições / hipóteses descartadas:**
+- LIÇÃO PRINCIPAL: antes de debugar comportamento de mod client, confirmar que o DLL implantado corresponde à fonte (data + forense de strings). As rodadas da Sessão 1 debugaram um fantasma.
+- Descartada: "Update morre por exceção/JIT por frame em raid" — todos os membros externos do caminho quente existem no decompilado (verificado adversarialmente).
+- Descartada: "APIs do scan inválidas no 4.0" — LookDirection/WeaponRoot/GetPlayerByCollider/layers todos válidos; o scan atual detectaria bots.
+- Descartada: "mismatch Fika compile×runtime" — DLL referencia Fika.Core 2.3.4.0, idêntico ao instalado.
+- Unity do EFT 0.16.x é 2022.3.43f1; `Resources.GetBuiltinResource<Font>("Arial.ttf")` NÃO lança no player runtime desta build (verificado no Player.log da sessão de boot).
+
+**Atividade cronológica:**
+1. Leitura da memória da Sessão 1 + código do BandAidController (cadeia Update→ScanForPatient→_potentialTarget→LateUpdate).
+2. LogOutput.log do boot: plugin carrega limpo; nenhuma linha de raid; sem spam de exceção em menu.
+3. Grafo do mod gerado via graphify (377 nós) — cadeia F→prompt mapeada.
+4. Workflow de validação (12 agentes, 4 frentes + verificação adversarial): causa-raiz no lifecycle-jit finder (build velha), confirmada por verificador independente.
+5. `git mv client modded`, `ItemComponent.Types.dll` no mapa do compile-mod.sh, build OK (0 erros), install em D:\SPT, forense binária confirma código novo, grafo regenerado pelo script canônico.
 
 ## 2026-07-11 21:00 (GMT-3) — Sessão 1: Correções de UI Médica, Consumo e Compatibilidade com FIKA/SPT 4.0
 
