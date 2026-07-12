@@ -59,13 +59,93 @@ namespace Band_Aid
                 netManager.RegisterPacket<BandAidShoulderTapPacket>(OnShoulderTapReceived);
                 netManager.RegisterPacket<BandAidHealCheckPacket>(OnHealCheckReceived);
                 netManager.RegisterPacket<BandAidHealCheckResponsePacket>(OnHealCheckResponseReceived);
+                netManager.RegisterPacket<TraumaFaintPacket>(OnTraumaFaintReceived); // ref: CR-01-02
                 _initialized = true;
-                Logger.LogInfo("Fika Network Packets registrados (Heal + ShoulderTap + HealCheck)!");
+                Logger.LogInfo("Fika Network Packets registrados (Heal + ShoulderTap + HealCheck + TraumaFaint)!");
             }
         }
 
         // === Callback para quando médico recebe resposta do check ===
         public static event System.Action<BandAidHealCheckResponsePacket> OnHealCheckResponse;
+
+        // ============================================================
+        // ref: CR-01-02 — SYNC DE DESMAIO (migrado do TrueTrauma 3.11)
+        // ============================================================
+
+        /// <summary>Envia o estado de desmaio do player LOCAL para os peers.</summary>
+        public static void SendTraumaFaintPacket(string profileId, bool isFainted)
+        {
+            if (!_initialized) return; // solo/sem Fika: estado local basta
+
+            var packet = new TraumaFaintPacket { ProfileId = profileId, IsFainted = isFainted };
+
+            if (Singleton<FikaServer>.Instantiated)
+            {
+                Singleton<FikaServer>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                Logger.LogInfo($"[Faint] Host enviou estado de desmaio: {profileId} = {isFainted}");
+            }
+            else if (Singleton<FikaClient>.Instantiated)
+            {
+                Singleton<FikaClient>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+                Logger.LogInfo($"[Faint] Client enviou estado de desmaio: {profileId} = {isFainted}");
+            }
+        }
+
+        private static void OnTraumaFaintReceived(TraumaFaintPacket packet)
+        {
+            // Host/headless retransmite (mesmo padrão de relay dos pacotes de heal)
+            if (Singleton<FikaServer>.Instantiated)
+            {
+                var hostPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
+                string myId = hostPlayer?.ProfileId ?? "";
+                if (packet.ProfileId != myId)
+                {
+                    var relay = packet;
+                    Singleton<FikaServer>.Instance.SendData(ref relay, DeliveryMethod.ReliableOrdered, true);
+                }
+            }
+
+            try
+            {
+                var gameWorld = Singleton<GameWorld>.Instance;
+                if (gameWorld == null) return;
+
+                var mainPlayer = gameWorld.MainPlayer;
+                if (mainPlayer != null && packet.ProfileId == mainPlayer.ProfileId) return; // eco do próprio estado
+
+                Logger.LogInfo($"[Faint] Recebido: {packet.ProfileId} = {packet.IsFainted}");
+                TrueTrauma.FikaBridge.UpdateFaintedList(packet.ProfileId, packet.IsFainted);
+
+                // Espelhar os timers para o MainLoopPatch/BotPatches deste processo
+                // tratarem o desmaiado remoto (neutralização contínua de aggro no host)
+                if (packet.IsFainted)
+                {
+                    float duration = TRLImmersiveCombatMedicine.TRLImmersiveCombatMedicinePlugin.ConfigBlackoutDuration.Value;
+                    float now = UnityEngine.Time.time;
+                    TrueTrauma.TraumaState.BlackoutTimers[packet.ProfileId] = now + duration;
+                    TrueTrauma.TraumaState.BlackoutStartTimes[packet.ProfileId] = now;
+                    TrueTrauma.TraumaState.GraceTimers[packet.ProfileId] = now + duration + 5f;
+                }
+                else
+                {
+                    TrueTrauma.TraumaState.BlackoutTimers.Remove(packet.ProfileId);
+                    TrueTrauma.TraumaState.BlackoutStartTimes.Remove(packet.ProfileId);
+                    TrueTrauma.TraumaState.GraceTimers.Remove(packet.ProfileId);
+                }
+
+                // Aggro: bots são locais no host/headless — agir onde eles existem
+                var victim = gameWorld.GetAlivePlayerByProfileID(packet.ProfileId);
+                if (victim != null)
+                {
+                    if (packet.IsFainted) TrueTrauma.AggroHelper.NeutralizeAggro(victim);
+                    else TrueTrauma.AggroHelper.RestoreAggro(victim);
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Logger.LogWarning($"OnTraumaFaintReceived: {ex.Message}");
+            }
+        }
 
         public static void SendHealPacket(Player doctor, Player patient, string templateId, EBodyPart bodyPart,
             float healAmount, bool isSurgery, float surgeryPenalty = 0f,

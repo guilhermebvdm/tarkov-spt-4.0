@@ -15,6 +15,11 @@ namespace TrueTrauma
 
             // Atualiza localmente
             UpdateFaintedList(player.ProfileId, isFainted);
+
+            // ref: CR-01-02 — propaga aos peers (host espelha timers e controla o
+            // aggro dos bots). Antes era local-only: bots continuavam atirando no
+            // client desmaiado porque o host nunca sabia do desmaio.
+            Band_Aid.BandAidNetworkHandler.SendTraumaFaintPacket(player.ProfileId, isFainted);
         }
 
         // Método auxiliar para gerenciar a lista
