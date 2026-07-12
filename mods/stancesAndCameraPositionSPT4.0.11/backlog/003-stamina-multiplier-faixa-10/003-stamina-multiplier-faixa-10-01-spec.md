@@ -1,5 +1,12 @@
 # 003 — Stamina Multiplier: faixa até 10
 
+> **Status de validação:** 🟢 **Entregue e validado in-game** (2026-07-11).
+> A validação foi **funcional, por feature** — não critério a critério. Os checkboxes deste documento
+> são **checklist de referência**, não registro de execução: o fato de estarem desmarcados **não** significa
+> que o item não foi testado. A evidência do teste vive em [`memory/sessions.md`](../../memory/sessions.md).<br>
+> ⚠️ Essa validação rodou sobre a build **anterior** à reorganização do F12. A revalidação sobre a **v2.0.0**
+> é a pendência **P-7.1** (ver a memória).
+
 **Mod:** stancesAndCameraPositionSPT4.0.11
 **Status:** Entregue
 **Criado:** 2026-05-10

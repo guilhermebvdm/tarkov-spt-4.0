@@ -1,5 +1,12 @@
 # Spec Funcional: Item 007 - Inércia e Velocidade Máxima
 
+> **Status de validação:** 🟢 **Entregue e validado in-game** (2026-07-11).
+> A validação foi **funcional, por feature** — não critério a critério. Os checkboxes deste documento
+> são **checklist de referência**, não registro de execução: o fato de estarem desmarcados **não** significa
+> que o item não foi testado. A evidência do teste vive em [`memory/sessions.md`](../../memory/sessions.md).<br>
+> ⚠️ Essa validação rodou sobre a build **anterior** à reorganização do F12. A revalidação sobre a **v2.0.0**
+> é a pendência **P-7.1** (ver a memória).
+
 ## Objetivo
 O mod precisa ajustar o peso/inércia global do jogador, bem como diminuir a velocidade máxima de movimentação (caminhar e correr) para aumentar a cadência e simular um movimento mais cadenciado (semelhante a propostas de outros mods voltados ao realismo). Tudo precisa ser ajustável no F12 via BepInEx.
 

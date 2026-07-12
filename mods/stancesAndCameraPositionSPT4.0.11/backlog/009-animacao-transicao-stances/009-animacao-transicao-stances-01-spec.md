@@ -1,5 +1,12 @@
 # Spec: Animação Orgânica ao Trocar Stances (Wiggle)
 
+> **Status de validação:** 🟢 **Entregue e validado in-game** (2026-07-11).
+> A validação foi **funcional, por feature** — não critério a critério. Os checkboxes deste documento
+> são **checklist de referência**, não registro de execução: o fato de estarem desmarcados **não** significa
+> que o item não foi testado. A evidência do teste vive em [`memory/sessions.md`](../../memory/sessions.md).<br>
+> ⚠️ Essa validação rodou sobre a build **anterior** à reorganização do F12. A revalidação sobre a **v2.0.0**
+> é a pendência **P-7.1** (ver a memória).
+
 ## 1. Visão Geral
 Atualmente as transições de postura da arma (Stances) são puramente lineares, subindo ou descendo reto, o que pode parecer robótico. Este item adiciona um efeito orgânico (Wiggle) simulando o personagem trazendo a arma para perto do corpo e jogando-a ligeiramente à frente durante a transição.
 

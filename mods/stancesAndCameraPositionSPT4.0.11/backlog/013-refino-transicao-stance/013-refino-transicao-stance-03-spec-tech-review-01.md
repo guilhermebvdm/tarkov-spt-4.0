@@ -16,8 +16,8 @@ Memória: snapshot Sessão 5 (2026-06-21) · sem pendência que afete. Refs conf
 
 | ID | Cat | Impacto | Título | Status |
 |---|---|---|---|---|
-| PA-01-01 | B | 🟡 | Ajuste 3 (snap no sprint) é visual — validar/calibrar in-game | Pendente |
-| PA-01-02 | A | 🟢 | Ordem `Plugin.Update` × `ApplyComplexRotationPatch` no frame | Pendente |
+| PA-01-01 | B | 🟡 | Ajuste 3 (snap no sprint) é visual — validar/calibrar in-game | ✅ Aceito · implementado e **validado in-game** (2026-07-11) — sem resíduo visual, calibração não foi necessária |
+| PA-01-02 | A | 🟢 | Ordem `Plugin.Update` × `ApplyComplexRotationPatch` no frame | ✅ Aceito · sem ação (o defasamento de ≤1 frame é imperceptível; reavaliar só se o PA-01-01 pedisse — não pediu) |
 
 ---
 
@@ -54,3 +54,4 @@ Memória: snapshot Sessão 5 (2026-06-21) · sem pendência que afete. Refs conf
 | Data | Evento |
 |---|---|
 | 2026-06-21 | Review 01 criada via `/review-technical-spec` — 0 🔴, 1 🟡, 1 🟢. Refs (campos static, IsInStance) confirmadas. |
+| 2026-07-11 | Índice fechado: PA-01-01 e PA-01-02 estavam como "Pendente" mesmo já tendo sido **aceitos** (ver a linha `Decisão` de cada um). O PA-01-01 foi implementado e validado in-game em 2026-07-11 (item 013 ✅, memória Sessão 7); o PA-01-02 não pedia ação. Nenhum trabalho ficou em aberto — era só o índice desatualizado. |

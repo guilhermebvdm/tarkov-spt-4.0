@@ -1,5 +1,12 @@
 # Spec: Apoiar Arma em Superfícies (Weapon Mounting)
 
+> **Status:** 🔴 **CANCELADO — não implementar a partir deste documento.**
+> A abordagem descrita aqui (mount **próprio**, suprimindo o mount nativo do EFT) nunca funcionou na 0.16 e foi
+> descartada. Foi **substituída pelo item [011 — Mount passivo sobre o vanilla](../011-mount-passivo-vanilla/)**,
+> que reconstrói o recurso **sobre** o mount nativo em vez de competir com ele. O bloqueio do mount ativo nas
+> posturas ficou no item [015](../015-bloquear-mount-ativo-stances/).
+> Este documento é mantido só como registro histórico da decisão.
+
 ## 1. Visão Geral
 Adicionar a capacidade do jogador apoiar (montar) sua arma em superfícies próximas, como barricadas, muros, caixas e janelas. Isso deve proporcionar uma vantagem tática, sacrificando mobilidade por precisão e estabilidade.
 

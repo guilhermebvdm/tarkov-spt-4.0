@@ -1,5 +1,12 @@
 # Spec: Stance para Recarga e Checagem
 
+> **Status de validação:** 🟢 **Entregue e validado in-game** (2026-07-11).
+> A validação foi **funcional, por feature** — não critério a critério. Os checkboxes deste documento
+> são **checklist de referência**, não registro de execução: o fato de estarem desmarcados **não** significa
+> que o item não foi testado. A evidência do teste vive em [`memory/sessions.md`](../../memory/sessions.md).<br>
+> ⚠️ Essa validação rodou sobre a build **anterior** à reorganização do F12. A revalidação sobre a **v2.0.0**
+> é a pendência **P-7.1** (ver a memória).
+
 ## 1. Visão Geral
 Tornar as animações de recarga e checagem de arma (verificar munição e câmara) mais estilosas e realistas, forçando o personagem a levantar a arma (mudar para a stance "Pronto Alto" / High Ready) automaticamente quando a ação é iniciada. Após o término da ação, a arma deve retornar para a postura original que o jogador estava usando.
 
