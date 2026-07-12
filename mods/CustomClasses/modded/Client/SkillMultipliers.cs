@@ -61,6 +61,21 @@ internal static class SkillMultipliers
     /// <summary>Item 011: cor do nome da classe (hex #RRGGBB; null = cor default).</summary>
     public static string? NameColor { get; private set; }
 
+    /// <summary>
+    ///     REFETCH forçado da classe local (code-review B14, achado 2). Simétrico ao
+    ///     <see cref="ClassIdentities.Prefetch"/>, e pelo MESMO motivo: o mapa nickname→classe passou a vir fresco
+    ///     todo raid-start, mas o único caller de <see cref="Reset"/> aqui é a tela de DEPLOY
+    ///     (<c>PartyInfoPanelPrefetchPatch</c>) — que não roda em host headless nem quando o painel de grupo não é
+    ///     renderizado. Sem isto, trocar de classe no editor web entre raids deixava o mapa com a classe NOVA e o
+    ///     player local com a ANTIGA: perks locais errados a raid inteira, e incoerentes com o que o host aplica
+    ///     aos peers. Chamado no <c>GameWorld.OnGameStarted</c> (tela de loading → GET síncrono é hitch invisível).
+    /// </summary>
+    public static void Prefetch()
+    {
+        Reset();
+        EnsureLoaded();
+    }
+
     /// <summary>Reseta o cache (ex.: troca de perfil) — força novo fetch.</summary>
     public static void Reset()
     {

@@ -34,21 +34,6 @@ internal static class ClassIdentities
     }
 
     /// <summary>
-    ///     <b>B14 (coop 2026-07-11)</b> — nome EN da classe de QUALQUER player, local ou remoto. Null = vanilla/desconhecido.
-    ///     <para>
-    ///     É a peça que destrava os perks de som em coop: os BOTS vivem no processo do HOST, então quem decide
-    ///     o que a IA ouve é o host — inclusive para o barulho de um peer Fika. Os patches de som gateavam em
-    ///     "player local", o que tornava Ghost Step/Stalker/Loud Operator um PLACEBO contra a IA para quem joga
-    ///     como CLIENTE. Com isto, o host resolve a classe de QUEM EMITIU o som e aplica o multiplicador dela.
-    ///     </para>
-    ///     <para>
-    ///     Player local → <see cref="SkillMultipliers"/> (a fonte autoritativa da própria classe).
-    ///     Peer remoto → mapa nickname→classe da rota 057 (já existente; sem protocolo novo).
-    ///     ⚠️ O VALOR do multiplicador vem do F12 de QUEM ESTÁ RODANDO ISTO (o host). Ou seja, o host é a
-    ///     autoridade da percepção da IA — coerente, já que a IA é dele. Sem sync de config entre peers.
-    ///     </para>
-    /// </summary>
-    /// <summary>
     ///     B14 — REFETCH forçado do mapa. Chamado no <c>GameWorld.OnGameStarted</c> (ainda na tela de loading,
     ///     então o GET síncrono é um hitch invisível).
     ///     <para>
@@ -70,12 +55,31 @@ internal static class ClassIdentities
         EnsureLoaded();
     }
 
+    /// <summary>
+    ///     <b>B14 (coop) + B20 (rolloff)</b> — nome EN da classe de QUALQUER player, local ou remoto.
+    ///     Null = vanilla/bot/desconhecido.
+    ///     <para>
+    ///     É a peça que destrava os perks de som em coop, em DOIS canais distintos:
+    ///     (1) <b>percepção da IA</b> — os bots vivem no processo do HOST, então quem decide o que eles ouvem é o
+    ///     host, inclusive para o barulho de um peer Fika; (2) <b>áudio que um humano ouve</b> — o
+    ///     <c>Player.method_67</c> de um peer roda NO CLIENTE DE QUEM OUVE. Os patches de som gateavam em "player
+    ///     local", o que tornava Ghost Step/Stalker/Loud Operator um PLACEBO nos dois canais. Com isto, cada
+    ///     pipeline resolve a classe de QUEM EMITIU o som e aplica o multiplicador DELA.
+    ///     </para>
+    ///     <para>
+    ///     Player local → <see cref="SkillMultipliers"/> (fonte autoritativa da própria classe).
+    ///     Peer remoto → mapa nickname→classe da rota 057 (já existente; sem protocolo novo).
+    ///     ⚠️ O VALOR do multiplicador vem do F12 de QUEM ESTÁ RODANDO ISTO. Não há sync de config entre peers:
+    ///     o host é a autoridade da percepção da IA (a IA é dele), e cada cliente é a autoridade do que ELE ouve.
+    ///     </para>
+    /// </summary>
     public static string? ClassNameEnOf(EFT.Player? player)
     {
         // ⚠️ BOTS FORA — gate crítico, não é defensivo à toa: bots também emitem passo por
         // `BotEventHandler.PlaySound` (MovementContext.cs:1629 passa o Player do bot como `person`), e o EFT
         // gera nome de bot a partir de uma LISTA DE NICKNAMES REAIS. Sem este gate, um bot cujo nickname
         // COLIDISSE com o de um jogador no mapa herdaria a classe dele e teria o próprio som alterado.
+        // (É também o gate mais barato: bot é a MAIORIA das chamadas deste hot path → sai na 1ª linha.)
         if (player is null || player.IsAI)   // ref: Player.cs:25135
         {
             return null;
@@ -83,11 +87,16 @@ internal static class ClassIdentities
 
         if (player.IsYourPlayer)
         {
-            SkillMultipliers.EnsureLoaded();
             return SkillMultipliers.ClassNameEn;
         }
 
-        return TryResolve(player.Profile?.Nickname, out var identity) ? identity.NameEn : null;
+        // ⚠️ HOT PATH — lookup CRU no dict, sem EnsureLoaded (code-review B14, achado 4). Este método roda a cada
+        // passo de CADA player (BotEventHandler.PlaySound) e, desde o B20, também no rolloff. Passar pelo
+        // TryResolve() faria um `RequestHandler.GetJson` SÍNCRONO na main thread se o mapa estivesse frio —
+        // freeze no meio da raid. Quem garante o mapa quente é o Prefetch() do raid-start; frio aqui = sem perk
+        // (degradação silenciosa), nunca um hitch.
+        var nickname = player.Profile?.Nickname;
+        return nickname != null && ByNickname.TryGetValue(nickname, out var identity) ? identity.NameEn : null;
     }
 
     /// <summary>

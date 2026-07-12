@@ -34,27 +34,29 @@ internal class RaidPerksNotificationPatch : ModulePatch
             // (review fix) reseta a Adrenaline no início da raid — o cooldown não deve atravessar de uma raid
             // anterior (Time.time é monotônico no processo). Roda independente do toggle da notificação.
             AdrenalineState.Reset();
-            // (review CR-051-01) warm do cache AQUI (tela de load, hitch invisível): com as UIs de identidade
-            // desligadas no F12, o 1º consumidor seria o Factor() DENTRO do Tick de stamina do stances —
-            // HTTP síncrono no 1º ADS. EnsureLoaded é no-op se o deploy (PartyInfoPanelPrefetchPatch) já buscou.
-            SkillMultipliers.EnsureLoaded();
-            // (B14, 2026-07-11) MESMO motivo do warm acima, agora para o mapa nickname→classe: desde o B14 o
-            // AiSoundPatch/SainSoundPatch resolvem a classe de QUALQUER emissor (peers Fika inclusive). Sem este
-            // warm, a 1ª resolução de um peer cairia dentro do BotEventHandler.PlaySound (a cada passo) e o GET
-            // SÍNCRONO daria hitch no meio da raid. No-op se o deploy (PartyInfoPanelPrefetchPatch) já buscou —
-            // mas o deploy não é garantido (solo / painel de grupo não renderizado).
-            ClassIdentities.Prefetch();
             StancesArmStaminaBridge.TryAttach(finalAttempt: true);   // (051 PA-01-01) re-try do hook — aqui todos os plugins já carregaram
-            // (057 CR-057F3-03) o refetch do mapa nickname→classe migrou pro host real: Prefix de
-            // PartyInfoPanel.Show (PartyPlayerItemPatch.cs) — a tela de deploy abre ANTES do raid-start.
 
-            if (PerksConfig.ShowRaidPerksNotification?.Value != true)
+            // ⚠️ ORDEM (code-review B14, achado 3): o guard de hideout vem ANTES dos prefetches — senão TODA entrada
+            // no hideout dispara 2 GETs síncronos inúteis. E vem DEPOIS do Adrenaline/Stances (que não dependem de
+            // rede), e ANTES do toggle da notificação — os prefetches NÃO podem ficar reféns de um toggle de UI:
+            // eles é que sustentam os perks de som (B14/B20).
+            if (__instance == null || __instance.GetType().Name.IndexOf("Hideout", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 return;
             }
 
-            // Só raid real — não hideout/academia (que também passam por um GameWorld).
-            if (__instance == null || __instance.GetType().Name.IndexOf("Hideout", StringComparison.OrdinalIgnoreCase) >= 0)
+            // (review CR-051-01 + B14 achado 2) REFETCH da classe LOCAL. Era só EnsureLoaded(), o que criava uma
+            // assimetria: o mapa de peers vinha fresco todo raid e a classe local não (o único Reset() é a tela de
+            // deploy, que não roda em headless / sem painel de grupo). Trocar de classe no editor web entre raids
+            // deixava você com a classe ANTIGA e os peers com a NOVA. Aqui (tela de load) o GET é hitch invisível.
+            SkillMultipliers.Prefetch();
+            // (B14/B20, 2026-07-11) MESMO motivo, agora para o mapa nickname→classe: os patches de som resolvem a
+            // classe de QUALQUER emissor (peers Fika inclusive). Sem este warm, a 1ª resolução de um peer cairia
+            // dentro do BotEventHandler.PlaySound (a cada passo!) e o GET SÍNCRONO daria hitch no meio da raid —
+            // e desde o achado 4 o hot path NÃO busca mais sozinho: mapa frio aqui = perk de som morto na raid.
+            ClassIdentities.Prefetch();
+
+            if (PerksConfig.ShowRaidPerksNotification?.Value != true)
             {
                 return;
             }

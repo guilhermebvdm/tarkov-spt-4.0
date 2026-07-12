@@ -1,7 +1,7 @@
 # Balance Review — CustomClasses
 
 > **Data:** 2026-07-05<br>
-> **Status:** 🟢 Ondas 0, 1 e 2 APLICADAS (2026-07-10/11) — restam só as ESTRUTURAIS (B12·B13·B14·B19); decisões marcadas no §2<br>
+> **Status:** 🟢 Ondas 0, 1 e 2 APLICADAS (2026-07-10/11) · coop de som FECHADO (B14 + B20) — restam as ESTRUTURAIS (B12·B13·B19); decisões marcadas no §2<br>
 > **Pedido:** "o que adicionar/remover/editar para deixar tudo mais equilibrado?"<br>
 > **Revisões:** /g-review-content ×2 (2026-07-05) — rodada 1: 9 itens (B14–B18, números validados); rodada 2: 8 itens (ondas de aplicação, B14 concreto, antes→depois, Anexo C corrigido, B19)<br>
 
@@ -22,6 +22,7 @@ Vocabulário:
 - **debuff "grátis"** = penalidade de XP numa skill que a classe **nem treina** → parece custo, não custa nada.
 - **card × F12** = o card do painel CLASS mostra um valor fixo do catálogo; o efeito real usa o default do F12 — quando divergem, o jogador é enganado.
 - **host-only** = efeito com gate no player local; em coop FIKA, **não afeta a percepção dos bots quando quem joga é um CLIENTE** (bots vivem no processo do host) — ver B14.
+  > ⚠️ **Obsoleto para SOM desde 2026-07-11.** B14 (percepção da IA) + B20 (rolloff que humanos ouvem) fecharam os dois canais: hoje todo pipeline de som resolve a classe de **quem emitiu**, não a do player local. As marcas "host-only vs bots — B14" nas análises abaixo são **históricas** (o veredito de balance daquela data) e ficam como registro; o comportamento atual é o descrito em B14/B20.
 
 Fontes: `scripts/class-balance-snapshot.mjs` (fórmula confirmada: `custo = Σ nível×peso`, linear) · `PerksCatalog.cs` · `PerksConfig.cs` · 058 (mastery). Números crus no **Anexo A**; stacking no **Anexo C**.
 
@@ -46,12 +47,13 @@ Cada linha é UMA mudança atômica. Marque a coluna **Decisão** (⬜ pendente 
 | B11 | 🟡 | Furtivo | Trocar os 5 debuffs "grátis" por debuffs que mordem (ex.: `Endurance ×0.8`, `Throwing ×0.8`) mantendo netMult ≈14 | jsonc | — | ✅ | ✅ 2026-07-11 |
 | B12 | 🟡 | Médico | Implementar os perks (050 — perna transpiler: Rapid Care/Swift Surgeon) | item 050 | — | ⬜ | ⬜ |
 | B13 | ℹ️ | Tanque | RN-03 (mastery por classe): Tanque **×1.5, não ×2** — não amplificar quem já está no teto | decisão | B15 | ⬜ | ⬜ |
-| B14 | 🟠 | (coop) | **Som host-side para remotos** — implementação DIRETA, sem protocolo novo: bots ouvem no HOST e o host já tem o mapa nickname→classe (rota 057) → `AiSoundPatch`/`SainSoundPatch` resolvem a classe do player REMOTO (`ClassIdentities.TryResolve(Profile.Nickname)`) e aplicam o multiplicador DELE. Única parte que exigiria sync real: o rolloff audível (`method_67`) para OUTROS humanos — fica de fora. Enquanto não aplicado: som = host-only nas avaliações | pequeno/médio | rota 057 (já existe) | ✅ | ✅ 2026-07-11 |
+| B14 | 🟠 | (coop) | **Som host-side para remotos** — implementação DIRETA, sem protocolo novo: bots ouvem no HOST e o host já tem o mapa nickname→classe (rota 057) → `AiSoundPatch`/`SainSoundPatch` resolvem a classe do player REMOTO (`ClassIdentities.ClassNameEnOf`) e aplicam o multiplicador DELE. ~~Única parte que exigiria sync real: o rolloff audível (`method_67`) para outros humanos~~ → **RETRATADO pelo B20** (era falso; ver abaixo). Enquanto não aplicado: som = host-only nas avaliações | pequeno/médio | rota 057 (já existe) | ✅ | ✅ 2026-07-11 |
 | B15 | 🟡 | Tanque/Fuzileiro | **Piso COMBINADO de recuo**: Bunker ×0.85 × mastery 51 ≈ **×0.68**; Adrenalina ×0.7 × mastery ≈ **×0.56** na janela. Mastery tem piso próprio (0.5 — inalcançável no cap 51), o PRODUTO não tem → definir piso combinado (ex.: 0.6, que só morde a janela de Adrenalina). Decidir ANTES do B13 | pequeno | — | ✅ | ✅ 2026-07-11 |
 | B16 | 🟡 | Tanque | Tireless Arms `0 → 0.2–0.25`: imunidade ABSOLUTA é outlier — o especialista em mira (Caçador) tem ×0.65; fadiga 4–5× mais lenta preserva a fantasia sem imunidade. **Onda 2** | trivial | decidir c/ B6 | ✅ | ✅ 2026-07-11 |
 | B17 | 🟡 | Médico | **Perk vivo hoje**: "Metabolismo Eficiente" — fome/sede `×0.85` reutilizando o lever do Heavy Frame (`ClassCombatHealthPatches` branch por classe) + card no catálogo | pequeno | — | ✅ | ✅ 2026-07-10 |
 | B18 | 🟡 | Tanque | Baixar XP (§4.2 não tocava o netMult do Tanque): `Shotgun ×3→×2.5` (−1.25) + `LightVests ×2→×1.75` (−0.94) → 19.19 → **≈17.0** (teto da faixa) | jsonc | — | ✅ | ✅ 2026-07-11 |
 | B19 | 🔵 | (UI) | Cards **Flag** exibirem a magnitude quando houver F12 numérico: Silent Looter (real ×0.4) e Overladen (real ×1.5) hoje não mostram número — coerência com a transparência do B4 | pequeno | B4 | ⬜ | ⬜ |
+| B20 | 🟠 | (coop) | **Rolloff de peer** — o som que VOCÊ ouve de um peer respeita os perks DELE. Retrata o B14: **não exige protocolo**. `ObservedPlayer : FikaPlayer : LocalPlayer : Player` e `ObservedPlayer.ProtagonistHearing => Max(1, BetterAudio.ProtagonistHearing + 1)` (ObservedPlayer.cs:137) ⇒ o `method_67` do peer roda **no cliente de quem ouve**, com a audição de quem ouve; o passo sai por `PlayStepSound` (público, sem gate de local). Basta trocar o gate MainPlayer por `ClassNameEnOf(__instance)` — mesma peça do B14. **Bônus:** o patch antigo mexia só no ALCANCE — o **VOLUME** vem de `method_64 → method_69 → _cachedMovementRolloff`, cache que `method_67` grava ANTES do Postfix. Espelhar o valor no cache alinha os 2 canais (é o que o `Physical.SoundRadius` do vanilla faz) | pequeno | B14 | ✅ | ✅ 2026-07-11 |
 
 ### Ondas de aplicação (anti-overshooting)
 
@@ -61,7 +63,9 @@ O Tanque recebe **5 nerfs** neste painel (B5, B6, B16, B18 + o ruído já aplica
 2. **Onda 1 — orçamentos (.jsonc):** B5 · B8 · B9 · B10 · B11 · B18 — rodar `node scripts/class-balance-snapshot.mjs` antes/depois e conferir com a tabela projetada do §4.2.
 3. **Gate in-game** — raids coop de teste; sensação de TTK/progressão por classe.
 4. **Onda 2 — combate:** B6 · B16 · B7 · B15 (só se a Onda 1 não tiver corrigido a percepção sozinha).
-5. **Estruturais (qualquer momento):** B14 (host-side) · B12 (item 050) · B19 (com B4) · B13 (com RN-03, após B15).
+5. **Estruturais (qualquer momento):** ~~B14 (host-side)~~ ✅ · ~~B20 (rolloff de peer)~~ ✅ · B12 (item 050) · B19 (com B4) · B13 (com RN-03, após B15).
+
+> **Retratação (2026-07-11).** Este board afirmava, no B14, que o rolloff audível para outros humanos "exigiria sync real". **Era falso** — e a consequência do erro era grande: aceito, o Ghost Step nunca deixaria o Furtivo mais silencioso para os **ouvidos dos colegas**, só para os bots. O decompile mostra que o `method_67` de um `ObservedPlayer` roda no cliente de quem OUVE (ele até sobrescreve `ProtagonistHearing` para usar o `BetterAudio` local), então o mapa nickname→classe — que existe em todo cliente, não só no host — já bastava. Lição: antes de declarar "precisa de protocolo", confirmar **em qual processo** o código roda.
 
 ---
 

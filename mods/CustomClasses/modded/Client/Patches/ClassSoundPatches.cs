@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;   // B20 — Dictionary do _cachedMovementRolloff
 using System.Linq.Expressions;
 using System.Reflection;
 using Comfort.Common;
 using EFT;
 using HarmonyLib;
 using SPT.Reflection.Patching;
+using EAudioMovementState = CommonAssets.Scripts.Audio.EAudioMovementState;
 
 namespace CustomClasses.Client;
 
@@ -20,19 +22,12 @@ namespace CustomClasses.Client;
 internal static class QuietStep
 {
     /// <summary>
-    ///     Multiplicador do player LOCAL (atalho — pipelines que só valem para você, ex.: o rolloff que você ouve).
-    ///     O <c>EnsureLoaded()</c> é explícito: antes do B14 este caminho passava por <c>IsLocalClass()</c>, que já
-    ///     o chamava por dentro. Lendo <c>ClassNameEn</c> cru, um cache frio devolveria 1 (sem efeito) EM SILÊNCIO.
-    /// </summary>
-    internal static float Mult()
-    {
-        SkillMultipliers.EnsureLoaded();
-        return MultFor(SkillMultipliers.ClassNameEn);
-    }
-
-    /// <summary>
-    ///     B14 — multiplicador de UMA classe (por nome EN). Permite ao HOST aplicar o perk de som de um peer
-    ///     Fika (a IA vive no host), em vez de só o do player local. Classe desconhecida/vanilla → 1 (sem efeito).
+    ///     Multiplicador de UMA classe (por nome EN). Classe desconhecida/vanilla → 1 (sem efeito).
+    ///     <para>
+    ///     B14 destravou a percepção da IA (o host aplica o perk do peer que EMITIU o som); B20 fez o mesmo com o
+    ///     rolloff que você OUVE. Com isso <b>todos</b> os call-sites passaram a resolver a classe do emissor, e o
+    ///     antigo atalho <c>Mult()</c> (classe local) ficou sem consumidor — removido em 2026-07-11.
+    ///     </para>
     /// </summary>
     internal static float MultFor(string? classNameEn)
     {
@@ -76,14 +71,7 @@ internal static class SilentLooter
 /// </summary>
 internal static class LoudOperator
 {
-    /// <summary>Multiplicador do player LOCAL (atalho). EnsureLoaded explícito — ver <see cref="QuietStep.Mult"/>.</summary>
-    internal static float Mult()
-    {
-        SkillMultipliers.EnsureLoaded();
-        return MultFor(SkillMultipliers.ClassNameEn);
-    }
-
-    /// <summary>B14 — multiplicador de UMA classe (por nome EN), para o host aplicar o de um peer Fika.</summary>
+    /// <summary>Multiplicador de UMA classe (por nome EN) — ver <see cref="QuietStep.MultFor"/>. Vanilla → 1.</summary>
     internal static float MultFor(string? classNameEn)
     {
         if (SkillMultipliers.IsClass(classNameEn, "Rifleman"))
@@ -105,41 +93,97 @@ internal static class LoudOperator
 }
 
 /// <summary>
-///     Item 050.4 — som emitido pelo player.
-///     <c>Player.method_67</c> = funil do RAIO de audibilidade de TODO som de movimento
-///     (passos/gear/sprint/turn/prone) → multiplica o quão longe inimigos te ouvem. Gate: MainPlayer local.
+///     Item 050.4 + <b>B20 — rolloff de PEER (coop, 2026-07-11)</b>.
+///     <para>
+///     <c>Player.method_67</c> (Player.cs:28226) é o funil do RAIO de audibilidade de TODO som de movimento
+///     (passo/gear/sprint/turn/prone): <c>rolloff = base × ProtagonistHearing × Physical.SoundRadius × multByMovement</c>.
 ///     🔧 Ghost Step (Furtivo ×0.70) / Stalker (Caçador ×0.80) · 🔻 Loud Operator (Fuzileiro + Tanque ×1.30).
-///     Este é o rolloff que VOCÊ ouve → segue LOCAL de propósito: sincronizá-lo p/ peers humanos exigiria
-///     protocolo real (fora do escopo do B14, que corrigiu só a percepção da IA).
+///     </para>
+///     <para>
+///     <b>Era MainPlayer-only; agora vale para QUALQUER player</b> — e sem protocolo novo. O board dizia que o
+///     rolloff de peer "exigiria sync real"; está ERRADO. Prova (fika-plugin):
+///     <c>ObservedPlayer : FikaPlayer : LocalPlayer : Player</c> e
+///     <c>ObservedPlayer.ProtagonistHearing => Max(1, BetterAudio.Instance.ProtagonistHearing + 1)</c>
+///     (ObservedPlayer.cs:137) — ou seja, o <c>method_67</c> de um peer roda NO SEU CLIENTE, com a SUA audição.
+///     O passo do peer sai por <c>Player.PlayStepSound</c> (público, SEM gate de local) → <c>method_66</c> →
+///     <c>method_68(NestedStepSoundSource, method_67(...))</c>. Basta resolver a classe do EMISSOR
+///     (<see cref="ClassIdentities.ClassNameEnOf"/>, que já barra bots) — mesma peça do B14.
+///     ⚠️ O VALOR sai do F12 de quem ouve; sem sync de config entre peers (idem B14).
+///     </para>
 /// </summary>
 internal class SoundRadiusPatch : ModulePatch
 {
+    /// <summary>
+    ///     <b>O buraco que fazia o perk valer pela METADE</b> (achado no recon do B20). O <c>method_67</c> grava
+    ///     <c>_cachedMovementRolloff[state]</c> ANTES de qualquer Postfix rodar (Player.cs:28233), e é ESSE CACHE —
+    ///     não o retorno — que alimenta o <b>VOLUME</b> do passo:
+    ///     <c>method_64 = method_69(state) / base × Single_1</c> e <c>method_69</c> lê o cache (Player.cs:28243).
+    ///     Em <c>PlayStepSound</c> o <c>method_64</c> (volume) roda ANTES do <c>method_66</c> (rolloff).
+    ///     <para>
+    ///     Resultado do patch antigo (só <c>__result</c>): mexia no ALCANCE e não no VOLUME. O vanilla prova que
+    ///     isso é meio-caminho — <c>Physical.SoundRadius</c> (sobrepeso) entra no MESMO <c>num3</c> e portanto afeta
+    ///     os DOIS canais. Espelhar o valor no cache é fidelidade ao vanilla, não um efeito extra (não é "dobrar":
+    ///     volume e distância são canais distintos, cada um multiplicado UMA vez).
+    ///     </para>
+    ///     <para>FieldRef cacheado (csharp-mod-best-practices §3). Campo ausente (build futura do EFT) → null →
+    ///     degrada pro comportamento antigo (alcance só) com 1 aviso, em vez de derrubar o patch.</para>
+    /// </summary>
+    private static readonly AccessTools.FieldRef<Player, Dictionary<EAudioMovementState, float>>? RolloffCache =
+        ResolveRolloffCache();
+
+    private static AccessTools.FieldRef<Player, Dictionary<EAudioMovementState, float>>? ResolveRolloffCache()
+    {
+        try
+        {
+            return AccessTools.FieldRefAccess<Player, Dictionary<EAudioMovementState, float>>("_cachedMovementRolloff");
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log?.LogWarning($"[CustomClasses] _cachedMovementRolloff não resolvido — volume do passo fica vanilla: {ex.Message}");
+            return null;
+        }
+    }
+
     protected override MethodBase GetTargetMethod()
     {
         // Desambigua o overload (fix review): existe method_67() sem-args de outra classe; queremos o de áudio.
         return AccessTools.Method(typeof(Player), "method_67",
-            new[] { typeof(CommonAssets.Scripts.Audio.EAudioMovementState), typeof(bool) });
+            new[] { typeof(EAudioMovementState), typeof(bool) });
     }
 
     [PatchPostfix]
-    private static void Postfix(Player __instance, ref float __result)
+    private static void Postfix(Player __instance, EAudioMovementState movementState, ref float __result)
     {
         try
         {
-            if (!ReferenceEquals(__instance, Singleton<GameWorld>.Instance?.MainPlayer))
+            // B20: classe do EMISSOR (você OU um peer Fika). Bots ficam de fora dentro do ClassNameEnOf.
+            var emitterClass = ClassIdentities.ClassNameEnOf(__instance);
+            if (emitterClass is null)
             {
-                return;
+                return;   // vanilla/bot/desconhecido → não toca no som
             }
 
             var r0 = __result;   // (052) baseline p/ o diagnóstico
 
             // 🔧 Ghost Step (Furtivo −30%) / Stalker (Caçador −20%): reduz o raio de audibilidade.
-            __result *= QuietStep.Mult();
+            __result *= QuietStep.MultFor(emitterClass);
 
             // 🔻 Loud Operator (Fuzileiro + Tanque, desdobrado por classe): aumenta o raio de audibilidade.
-            __result *= LoudOperator.Mult();
+            __result *= LoudOperator.MultFor(emitterClass);
 
-            if (PerkDiag.Enabled)
+            // Espelha no cache p/ o VOLUME não divergir do alcance (ver doc de RolloffCache). Mult == 1 (classe sem
+            // perk de som) → não escreve: preserva o caminho vanilla byte a byte.
+            if (Math.Abs(__result - r0) > float.Epsilon)
+            {
+                var cache = RolloffCache?.Invoke(__instance);
+                if (cache != null)
+                {
+                    cache[movementState] = __result;
+                }
+            }
+
+            // Diag = painel do SEU personagem; um peer barulhento não pode sobrescrever os seus números.
+            if (PerkDiag.Enabled && __instance.IsYourPlayer)
             {
                 PerkDiag.AudioBefore = r0;
                 PerkDiag.AudioAfter = __result;

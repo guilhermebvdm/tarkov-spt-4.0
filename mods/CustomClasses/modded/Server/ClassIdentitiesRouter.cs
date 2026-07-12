@@ -35,8 +35,8 @@ public class ClassIdentitiesRouter : StaticRouter
                     {
                         var profile = kv.Value;
                         var edition = profile?.ProfileInfo?.Edition;   // ref: spt-source SptProfile.cs:100; mesmo caminho da SkillMultipliersRouter.cs:34
-                        var nickname = profile?.CharacterData?.PmcData?.Info?.Nickname;
-                        if (string.IsNullOrEmpty(edition) || string.IsNullOrEmpty(nickname))
+                        var pmcNickname = profile?.CharacterData?.PmcData?.Info?.Nickname;
+                        if (string.IsNullOrEmpty(edition) || string.IsNullOrEmpty(pmcNickname))
                         {
                             continue;   // perfil recém-criado/corrompido (sem PMC) → pulado
                         }
@@ -49,19 +49,30 @@ public class ClassIdentitiesRouter : StaticRouter
                             continue;
                         }
 
-                        if (!seen.Add(nickname!))
-                        {
-                            continue;   // nickname duplicado — primeira ocorrência (ordem estável) vence (corner da 01-spec)
-                        }
+                        // B14/B20 (code-review, achado 5): o mapa é consultado pelo `Profile.Nickname` do player
+                        // RENDERIZADO no client. Quem entra de SCAV carrega o nickname do SCAV, não o do PMC — com
+                        // só o PMC aqui, o peer scav não resolvia e os perks de som dele viravam placebo (o player
+                        // LOCAL escapava por curto-circuito em IsYourPlayer, o que mascarava o furo em solo).
+                        // ⚠️ O nickname de scav vem do MESMO pool de nomes dos bots-scav → colisão com bot é
+                        // esperada; quem protege é o gate `IsAI` do ClassIdentities.ClassNameEnOf (bot nunca resolve).
+                        var scavNickname = profile?.CharacterData?.ScavData?.Info?.Nickname;
 
-                        response.Players.Add(new PlayerClassIdentity
+                        foreach (var nickname in new[] { pmcNickname, scavNickname })
                         {
-                            Nickname = nickname,
-                            ClassNameEn = visual.DisplayNameEn ?? edition,
-                            ClassNamePt = visual.DisplayNamePt ?? edition,
-                            IconFile = visual.IconFile,
-                            NameColor = visual.NameColor,
-                        });
+                            if (string.IsNullOrEmpty(nickname) || !seen.Add(nickname!))
+                            {
+                                continue;   // vazio, ou nickname duplicado — 1ª ocorrência (ordem estável) vence (corner da 01-spec)
+                            }
+
+                            response.Players.Add(new PlayerClassIdentity
+                            {
+                                Nickname = nickname,
+                                ClassNameEn = visual.DisplayNameEn ?? edition,
+                                ClassNamePt = visual.DisplayNamePt ?? edition,
+                                IconFile = visual.IconFile,
+                                NameColor = visual.NameColor,
+                            });
+                        }
                     }
 
                     return new ValueTask<string>(jsonUtil.Serialize(response) ?? "{}");
