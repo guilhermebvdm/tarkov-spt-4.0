@@ -162,19 +162,30 @@ namespace TRLImmersiveCombatMedicine
                 if (!(orphansProp?.GetValue(Config) is System.Collections.IDictionary orphans)) return;
 
                 string oldKey = "Sistema de BraÃ§os"; // mojibake literal da key antiga
+                object orphanDef = null;
+                bool oldValue = false;
                 foreach (System.Collections.DictionaryEntry entry in orphans)
                 {
                     var def = entry.Key;
                     string section = AccessTools.Property(def.GetType(), "Section")?.GetValue(def) as string;
                     string key = AccessTools.Property(def.GetType(), "Key")?.GetValue(def) as string;
                     if (section == "2. Mecanicas (Trauma)" && key == oldKey &&
-                        bool.TryParse(entry.Value as string, out bool oldValue))
+                        bool.TryParse(entry.Value as string, out oldValue))
                     {
-                        ConfigArmsEnabled.Value = oldValue;
-                        Config.Save();
-                        ModLogger.LogWarning($"[Config] Valor órfão migrado: 'Sistema de Braços' = {oldValue} (key antiga com encoding quebrado).");
+                        orphanDef = def;
                         break;
                     }
+                }
+                if (orphanDef != null)
+                {
+                    // ref: CR-03-01 — REMOVER o órfão antes do Save: o BepInEx persiste
+                    // OrphanedEntries no .cfg e as repopula no Reload — sem o Remove, a
+                    // "migração" rodaria TODO boot, re-clobberando a escolha do usuário
+                    // feita via F12 com o valor antigo.
+                    ConfigArmsEnabled.Value = oldValue;
+                    orphans.Remove(orphanDef);
+                    Config.Save();
+                    ModLogger.LogWarning($"[Config] Valor órfão migrado (one-time): 'Sistema de Braços' = {oldValue}; key antiga removida do .cfg.");
                 }
             }
             catch (Exception ex)

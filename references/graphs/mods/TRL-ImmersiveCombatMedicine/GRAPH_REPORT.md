@@ -1,16 +1,16 @@
 # Graph Report - mods\TRL-ImmersiveCombatMedicine\modded  (2026-07-12)
 
 ## Corpus Check
-- 29 files · ~23,385 words
+- 29 files · ~23,912 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 448 nodes · 685 edges · 29 communities
+- 450 nodes · 691 edges · 29 communities
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `82e77999`
+- Built from commit: `a6fb9939`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -45,10 +45,10 @@
 - [[_COMMUNITY_Community 28|Community 28]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `BandAidUI` - 56 edges
+1. `BandAidUI` - 58 edges
 2. `BandAidController` - 41 edges
 3. `BandAidNetworkHandler` - 26 edges
-4. `MedicHealPatch` - 21 edges
+4. `MedicHealPatch` - 22 edges
 5. `MedicalLogic` - 16 edges
 6. `TourniquetManager` - 16 edges
 7. `TRLImmersiveCombatMedicinePlugin` - 16 edges
@@ -71,7 +71,7 @@
 
 ### Community 0 - "Community 0"
 Cohesion: 0.07
-Nodes (29): Color, Color32, Font, FontStyle, Image, int, TRLImmersiveCombatMedicine, Band_Aid (+21 more)
+Nodes (30): Color, Color32, Font, FontStyle, Image, int, TRLImmersiveCombatMedicine, Band_Aid (+22 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.08
@@ -86,7 +86,7 @@ Cohesion: 0.25
 Nodes (10): Band_Aid, MedicalLogic, bool, EBodyPart, IHealthController, Item, ItemStats, ManualLogSource (+2 more)
 
 ### Community 4 - "Community 4"
-Cohesion: 0.10
+Cohesion: 0.11
 Nodes (16): IEffect, AnimCleanupPatch, Band_Aid, MedicHealPatch, object, bool, EBodyPart, FieldInfo (+8 more)
 
 ### Community 5 - "Community 5"
@@ -189,15 +189,15 @@ Nodes (5): Band_Aid, Deserialize(), Serialize(), NetDataReader, NetDataWriter
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `BandAidUI` connect `Community 0` to `Community 15`?**
-  _High betweenness centrality (0.060) - this node is a cross-community bridge._
+  _High betweenness centrality (0.062) - this node is a cross-community bridge._
 - **Why does `BandAidController` connect `Community 1` to `Community 0`, `Community 15`?**
-  _High betweenness centrality (0.048) - this node is a cross-community bridge._
+  _High betweenness centrality (0.049) - this node is a cross-community bridge._
 - **Why does `TourniquetManager` connect `Community 5` to `Community 15`?**
   _High betweenness centrality (0.025) - this node is a cross-community bridge._
 - **What connects `TRLImmersiveCombatMedicine`, `ConfigEntry`, `bool` to the rest of the system?**
   _144 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.07067307692307692 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06874717322478517 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.08084163898117387 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**

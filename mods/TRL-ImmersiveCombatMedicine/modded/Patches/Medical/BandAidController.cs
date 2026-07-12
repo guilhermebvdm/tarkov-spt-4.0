@@ -624,7 +624,11 @@ namespace TRLImmersiveCombatMedicine
             if (MedicHealPatch.NativeMedEffectApplied)
             {
                 TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("HealRoutine: MedEffect nativo aplicado no paciente — ApplyTreatment programático pulado.");
-                NotificationManagerClass.DisplayMessageNotification("Tratamento Completo.", ENotificationDurationType.Long, ENotificationIconType.Quest);
+                // ref: CR-03 — expor a parte tratada na notificação (a feature do
+                // membro-alvo já resolve essa informação)
+                string partSuffix = MedicHealPatch.LastAppliedPart != EBodyPart.Common
+                    ? $" ({BandAidUI.PartLabel(MedicHealPatch.LastAppliedPart)})" : "";
+                NotificationManagerClass.DisplayMessageNotification($"Tratamento Completo{partSuffix}.", ENotificationDurationType.Long, ENotificationIconType.Quest);
             }
             // N3: Verificar se o item e o paciente ainda existem após o UseTime
             else if (patient != null && patient.HealthController.IsAlive && itemUsed != null)
@@ -880,7 +884,7 @@ namespace TRLImmersiveCombatMedicine
                 _isHealingInProgress = false;
                 _itemBeingUsed = null;
                 MedicHealPatch.CancelNativePatientEffect(); // ref: CR-02
-            BandAidUI.Instance?.ClearTreatment();
+                BandAidUI.Instance?.ClearTreatment();
                 MedicHealPatch.IsRedirectingHeal = false;
                 MedicHealPatch.CurrentPatient = null;
                 MedicHealPatch.CleanupPatientSubscription();
@@ -900,6 +904,12 @@ namespace TRLImmersiveCombatMedicine
             _pendingHealStats = null;
             _pendingHealPatient = null;
         }
+
+        /// <summary>
+        /// ProfileId do paciente atualmente examinado (null fora do modo médico).
+        /// ref: CR-03 — usado pela identidade do TreatmentReport.
+        /// </summary>
+        public string ActivePatientProfileId => _isMedicModeActive ? _targetPatient?.ProfileId : null;
 
         /// <summary>
         /// Chamado externamente pela UI quando o paciente sai de range.

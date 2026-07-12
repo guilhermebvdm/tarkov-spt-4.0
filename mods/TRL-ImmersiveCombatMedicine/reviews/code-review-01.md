@@ -34,7 +34,7 @@
 - CR-01-17 · 🟡 E — Três namespaces no mesmo assembly (Band_Aid ×11, TrueTrauma ×8, TRLImmersiveCombatMedicine ×5) + enu
 - CR-01-18 · 🟡 E — FaintController é classe morta (nunca anexada) com a mesma lógica duplicada inline no Plugin.Update
 - CR-01-19 ✅ · 🟡 B — Bot que desmaia entra em FaintedPlayerIds e nunca sai — fica permanentemente 'invisível' para os out
-- CR-01-20 · 🟡 B — Dupla aplicação e duplo consumo quando o paciente é local (host→bot): DoMedEffect redirecionado + Ap
+- CR-01-20 ✅ · 🟡 B — Dupla aplicação e duplo consumo quando o paciente é local (host→bot): DoMedEffect redirecionado + Ap
 - CR-01-21 · 🟡 C — Peer com desfibrilador pode 'reviver' um jogador apenas desmaiado — estados divergem entre dono e pe
 - CR-01-22 · 🟡 C — Fallback do ItemDatabase transforma qualquer item desconhecido em 'medkit de 50HP'
 - CR-01-23 · 🟡 C — Consumo parcial de HpResource/Resource é mutação local sem transação de rede — server e peers não sa
@@ -571,10 +571,9 @@ _harmony.PatchAll();
 **Sugestão:** Definir fonte única de verdade: quando o Prefix conseguir DoMedEffect no paciente (result != null), setar uma flag (ex.: MedicHealPatch.NativeEffectApplied) e o HealRoutine pular ApplyTreatment/consumo; manter ApplyTreatment apenas para os caminhos sem MedEffect (paciente remoto e DoMedEffect null).
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir): _________________
+- [x] Aceitar sugestão
+
+**Resolução:** ✅ CR-01-20 resolvido fora do fluxo automatizado (fix do Salewa, commit 25be6540: flag NativeMedEffectApplied evita dupla aplicação/consumo) — fechado na rodada 03.
 
 ---
 

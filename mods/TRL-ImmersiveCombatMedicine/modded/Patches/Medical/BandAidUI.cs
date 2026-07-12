@@ -343,13 +343,15 @@ namespace Band_Aid
             linesRect.anchoredPosition = Vector2.zero;
 
             // === BLOCOS DE MEMBROS (criados DEPOIS → renderizam NA FRENTE) ===
-            CreateLimbBlock(panel.transform, EBodyPart.Head,     "CABEÇA",     new Vector2(115, 162));
-            CreateLimbBlock(panel.transform, EBodyPart.Chest,    "TÓRAX",      new Vector2(0,    88));
-            CreateLimbBlock(panel.transform, EBodyPart.LeftArm,  "BRAÇO ESQ.", new Vector2(120,   50));
-            CreateLimbBlock(panel.transform, EBodyPart.RightArm, "BRAÇO DIR.", new Vector2(-120,  50));
-            CreateLimbBlock(panel.transform, EBodyPart.Stomach,  "ESTÔMAGO",   new Vector2(0,    -10));
-            CreateLimbBlock(panel.transform, EBodyPart.LeftLeg,  "PERNA ESQ.", new Vector2(110,  -130));
-            CreateLimbBlock(panel.transform, EBodyPart.RightLeg, "PERNA DIR.", new Vector2(-110, -130));
+            // ref: CR-03 — labels vêm do PartLabelPt (fonte única, compartilhada com o
+            // status de tratamento)
+            CreateLimbBlock(panel.transform, EBodyPart.Head,     PartLabel(EBodyPart.Head),     new Vector2(115, 162));
+            CreateLimbBlock(panel.transform, EBodyPart.Chest,    PartLabel(EBodyPart.Chest),    new Vector2(0,    88));
+            CreateLimbBlock(panel.transform, EBodyPart.LeftArm,  PartLabel(EBodyPart.LeftArm),  new Vector2(120,   50));
+            CreateLimbBlock(panel.transform, EBodyPart.RightArm, PartLabel(EBodyPart.RightArm), new Vector2(-120,  50));
+            CreateLimbBlock(panel.transform, EBodyPart.Stomach,  PartLabel(EBodyPart.Stomach),  new Vector2(0,    -10));
+            CreateLimbBlock(panel.transform, EBodyPart.LeftLeg,  PartLabel(EBodyPart.LeftLeg),  new Vector2(110,  -130));
+            CreateLimbBlock(panel.transform, EBodyPart.RightLeg, PartLabel(EBodyPart.RightLeg), new Vector2(-110, -130));
 
             // === LINHAS DE CONEXÃO removidas (feitas manualmente via base.png) ===
 
@@ -644,6 +646,15 @@ namespace Band_Aid
             CacheSprites();
             if (_canvasObj != null)
             {
+                // ref: CR-03 — footer reflete a keybind/modo REAIS configurados
+                // (era hardcoded "[Pressione F]", contradizendo o default Hold)
+                if (_footerText != null)
+                {
+                    var key = TRLImmersiveCombatMedicinePlugin.MedicInteractKey.Value.MainKey;
+                    var mode = TRLImmersiveCombatMedicinePlugin.MedicInteractMode.Value;
+                    string verbo = mode == EBandAidPressMode.Hold ? "Segure" : (mode == EBandAidPressMode.DoubleTap ? "Duplo" : "Pressione");
+                    _footerText.text = $"Utilize as suas teclas de atalhos para curar\n[{verbo} {key}] Fechar Examinador";
+                }
                 _canvasObj.SetActive(true);
                 _lastUpdateTime = 0f;
             }
@@ -677,20 +688,40 @@ namespace Band_Aid
         /// do membro + linha de status). part=Common → só o status, sem destaque
         /// (alvo ainda não resolvido — ex.: paciente remoto aguardando report).
         /// </summary>
+        private string _treatmentItemName;
+
+        /// <summary>Label PT do membro (fonte única — usada também nos blocos do HUD).</summary>
+        public static string PartLabel(EBodyPart part)
+        {
+            return PartLabelPt.TryGetValue(part, out var l) ? l : "...";
+        }
+
         public void ShowTreatment(EBodyPart part, string itemName)
         {
             if (_treatmentText == null) return;
 
-            string label = PartLabelPt.TryGetValue(part, out var l) ? l : "...";
-            _treatmentText.text = string.IsNullOrEmpty(itemName)
+            // ref: CR-03 — itemName null/vazio (ex.: report remoto) preserva o nome
+            // mostrado no início da cura, evitando o texto trocar no meio.
+            if (!string.IsNullOrEmpty(itemName)) _treatmentItemName = itemName;
+
+            string label = PartLabel(part);
+            _treatmentText.text = string.IsNullOrEmpty(_treatmentItemName)
                 ? $"► TRATANDO: {label}"
-                : $"► {itemName.ToUpper()} → {label}";
+                : $"► {_treatmentItemName.ToUpper()} → {label}";
             _treatmentText.gameObject.SetActive(true);
 
-            // Restaurar o destaque anterior antes de trocar de membro
+            // Restaurar o destaque anterior antes de trocar de membro (inclusive
+            // quando o novo alvo é Common — ref: CR-03, pulso órfão)
             if (_treatmentActive && _treatmentPart != part) RestoreLimbOutline();
 
-            if (part != EBodyPart.Common && _limbViews.TryGetValue(part, out var limb) && limb.BarOutline != null)
+            if (part == EBodyPart.Common)
+            {
+                _treatmentActive = false;
+                _treatmentPart = EBodyPart.Common;
+                return;
+            }
+
+            if (_limbViews.TryGetValue(part, out var limb) && limb.BarOutline != null)
             {
                 if (!_treatmentActive || _treatmentPart != part)
                     _treatmentOutlineOriginal = limb.BarOutline.effectColor;
@@ -709,6 +740,7 @@ namespace Band_Aid
             RestoreLimbOutline();
             _treatmentActive = false;
             _treatmentPart = EBodyPart.Common;
+            _treatmentItemName = null;
         }
 
         private void RestoreLimbOutline()
@@ -1049,7 +1081,13 @@ namespace Band_Aid
             limb.BarFill.color = GetBarColor(ratio, destroyed);
 
             // Contorno vermelho quando 0HP
-            limb.BarOutline.effectColor = destroyed ? COL_DESTROYED : Color.clear;
+            // ref: CR-03 — não sobrescrever o pulso âmbar do membro em tratamento
+            // (o refresh de 4 Hz brigava com o highlight); manter a cor-base
+            // atualizada para a restauração ao fim do tratamento.
+            if (_treatmentActive && part == _treatmentPart)
+                _treatmentOutlineOriginal = destroyed ? COL_DESTROYED : Color.clear;
+            else
+                limb.BarOutline.effectColor = destroyed ? COL_DESTROYED : Color.clear;
 
             limb.NameText.color = destroyed ? COL_DESTROYED : COL_LABEL;
 

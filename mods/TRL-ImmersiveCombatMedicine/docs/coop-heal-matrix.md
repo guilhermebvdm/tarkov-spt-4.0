@@ -22,15 +22,15 @@ Rastreamento **estático** (código do mod + Fika 2.3.4 de referência + EFT dec
 | (a) Prompt/detecção | ✅ | ✅ | ✅ | ✅ |
 | (b) Handshake (check→resposta) | ✅ | ✅ | ✅ relay ok | ✅ relay ok (MainPlayer null tratado) |
 | (c) Animação/redirect | ✅ (branch remoto, sem MedEffect) | ✅ (idêntico; nunca testado in-game de client) | ✅ | ✅ |
-| (d) Aplicação no paciente | ✅ (paciente aplica no próprio ActiveHC; sync volta) | ✅ | ⚠️ funciona, mas **host-player sofre fallthrough de cirurgia** (G-1) | ✅ (headless retorna antes de aplicar) |
+| (d) Aplicação no paciente | ✅ (paciente aplica no próprio ActiveHC; sync volta) | ✅ | ✅ (G-1 aplicado 2026-07-12: FullTreatment é exclusivo do paciente) | ✅ (headless retorna antes de aplicar; bots locais tratados via CR-01-01) |
 | (e) Consumo do item no médico | ⚠️ total=networked ✅ · parcial=local-only (CR-01-23) | ⚠️ idem | ⚠️ idem | ⚠️ idem |
-| (f) UI do médico (HUD) | ⚠️ HP/ECG ✅ · ícones de bleed/fratura ❌ (G-2) | ⚠️ idem | ⚠️ idem | ⚠️ idem |
+| (f) UI do médico (HUD) | ✅ HP/ECG + ícones por interface (G-2 aplicado) + membro-alvo via TreatmentReport | ✅ idem | ✅ idem | ✅ idem |
 
 **Leitura executiva:** o caminho feliz 2-player fecha ponta-a-ponta nos 4 cenários. Nenhum bloqueador novo no fluxo player→player — os riscos são de **borda** (3º participante, consumo parcial, UI cega a efeitos) e de **deploy**.
 
 ## ❗ Requisito de deploy (o achado mais importante)
 
-**O mod PRECISA estar instalado em TODAS as máquinas, incluindo o host-player (cenário 3) e o headless (cenário 4).**
+**O mod PRECISA estar instalado em TODAS as máquinas, incluindo o host-player (cenário 3) e o headless (cenário 4) — e na MESMA BUILD.** (CR-03: o wire-format do `TraumaFaintPacket` mudou e o `BandAidTreatmentReportPacket` foi adicionado sem versionamento de pacote — DLLs mistas geram `ParseException` no receptor e perda dos demais eventos de rede do frame. Atualizar todos os peers juntos, sempre.)
 
 - Sem o mod no host: não há relay (o transporte Fika não retransmite `broadcast=false`) → handshake sempre expira em 3 s; e pior: o host sem o pacote registrado lança `ParseException` **que descarta o resto do batch de eventos de rede daquele frame** — dano colateral a pacotes de outros mods/sistemas.
 - O backend SPT não precisa de nada (mod é 100% client-side).
@@ -46,7 +46,7 @@ Rastreamento **estático** (código do mod + Fika 2.3.4 de referência + EFT dec
 | G-5 ✅ (2026-07-12) | 🟢 | Resposta do handshake não confere `ItemTemplateId` com o item pendente — resposta atrasada pode aprovar item errado | 1 if antes do `HealRoutine` |
 | G-6 | ℹ️ | Relay manual ecoa pacote de volta ao originador (filtrado por checks, mas custo/ruído) | usar overload `SendData(..., NetPeer peerToIgnore)` do Fika |
 
-Relacionados já registrados no CR-01: **CR-01-10** (handshake pendente vaza — afeta os 4 cenários), **CR-01-23** (consumo parcial local-only), **CR-01-01** (curar **bot** de client nunca funciona — só da máquina do host), **CR-01-02/04** (desmaio/defib).
+Relacionados do CR-01 (estado 2026-07-12): **CR-01-10/01/02/04 APLICADOS** (handshake endurecido; client cura bot via autoridade do host; desmaio sincronizado com duração no pacote; defib com chamada tipada). Permanece: **CR-01-23** (consumo parcial local-only — junto de G-3/G-4).
 
 ## Protocolo de teste in-game (ordem de custo)
 
@@ -62,3 +62,4 @@ Relacionados já registrados no CR-01: **CR-01-10** (handshake pendente vaza —
 | 2026-07-12 | Guilherme | Criação — rastreamento estático dos 4 cenários (2 agentes, evidência arquivo:linha). |
 | 2026-07-12 | Guilherme | G-1 e G-5 aplicados (+ CR-01-10); G-2/G-3/G-4/G-6 pendentes. |
 | 2026-07-12 | Guilherme | Sessão autônoma: G-2 aplicado (efeitos por interface) + CR-01-01/02 (bloqueadores coop) — matriz de riscos reduzida; G-3/G-4/G-6 seguem pendentes. |
+| 2026-07-12 | Guilherme | CR-03: células (d)/(f) e relacionados atualizados ao código; requisito de deploy ganhou MESMA BUILD (wire-format dos pacotes mudou). Nota: alcance do prompt agora é config (default 5 m), não os 2,5 m nativos citados no rastreamento original. |

@@ -38,6 +38,9 @@ namespace Band_Aid
         // consulta esta flag para NÃO aplicar MedicalLogic.ApplyTreatment em dobro.
         public static bool NativeMedEffectApplied = false;
 
+        // ref: CR-03 — última parte aplicada pelo redirect (p/ toast de conclusão)
+        public static EBodyPart LastAppliedPart = EBodyPart.Common;
+
         // Cache de reflection (csharp-best-practices §3): resolvido 1x por tipo.
         // Nomes reais no SPT 4.0 são PascalCase (públicos: MedsController_0/Queue_0/Float_0,
         // Player.cs:19444/19453/19456); camelCase mantido como fallback + resolução por
@@ -125,18 +128,37 @@ namespace Band_Aid
         /// paciente continuava curando e o item sendo consumido DEPOIS do "Abortado!".
         /// Paciente local apenas (remoto não tem MedEffect nativo).
         /// </summary>
+        // ref: CR-03-02 — referência do efeito criado PELO redirect, para cancel
+        // direcionado (CancelApplyingItem é blanket: força-residua TODOS os MedEffects
+        // do paciente em Common — inclusive a automedicação do próprio bot e efeitos
+        // remanescentes de heals anteriores bem-sucedidos).
+        private static IEffect _currentPatientEffect;
+        private static MethodInfo _forceResidueCached;
+
         public static void CancelNativePatientEffect()
         {
             if (!NativeMedEffectApplied) return;
             try
             {
-                CurrentPatient?.ActiveHealthController?.CancelApplyingItem();
-                Logger.LogInfo("CancelNativePatientEffect: MedEffect do paciente cancelado (abort).");
+                if (_currentPatientEffect != null)
+                {
+                    if (_forceResidueCached == null)
+                        _forceResidueCached = AccessTools.Method(_currentPatientEffect.GetType(), "ForceResidue");
+                    _forceResidueCached.Invoke(_currentPatientEffect, null);
+                    Logger.LogInfo("CancelNativePatientEffect: MedEffect DO redirect força-residuado (cancel direcionado).");
+                }
+                else
+                {
+                    // Fallback: referência perdida — cancel blanket (comportamento antigo)
+                    CurrentPatient?.ActiveHealthController?.CancelApplyingItem();
+                    Logger.LogWarning("CancelNativePatientEffect: sem referência do efeito — CancelApplyingItem blanket usado como fallback.");
+                }
             }
             catch (Exception ex)
             {
                 Logger.LogWarning($"CancelNativePatientEffect: {ex.Message}");
             }
+            _currentPatientEffect = null;
             NativeMedEffectApplied = false;
         }
 
@@ -344,18 +366,16 @@ namespace Band_Aid
                 // MedEffect nativo criado no paciente → HealRoutine NÃO deve duplicar
                 // via MedicalLogic.ApplyTreatment (cura + consumo aconteceriam 2x).
                 NativeMedEffectApplied = true;
+                _currentPatientEffect = result; // ref: CR-03-02 — p/ cancel direcionado
 
                 // Feedback do membro-alvo no HUD: se aplicou em Common, o jogo escolheu
-                // a parte internamente — tentar ler do próprio efeito (1× por cura).
+                // a parte internamente — IEffect expõe BodyPart tipado (ref: CR-03,
+                // reflection era desnecessária).
                 if (appliedPart == EBodyPart.Common && result != null)
                 {
-                    try
-                    {
-                        var bpProp = result.GetType().GetProperty("BodyPart");
-                        if (bpProp != null) appliedPart = (EBodyPart)bpProp.GetValue(result);
-                    }
-                    catch { }
+                    try { appliedPart = result.BodyPart; } catch { }
                 }
+                LastAppliedPart = appliedPart;
                 BandAidUI.Instance?.ShowTreatment(appliedPart, item.ShortName?.Localized());
 
                 // Bridge: subscrever EffectRemovedEvent do paciente

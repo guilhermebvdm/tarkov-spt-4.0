@@ -707,7 +707,19 @@ namespace Band_Aid
 
             var part = (EBodyPart)packet.BodyPart;
             Logger.LogInfo($"[Report] Tratamento remoto aplicado em {part} (+{packet.HealedAmount:F0} HP).");
-            BandAidUI.Instance?.ShowTreatment(part, ItemDatabase.GetStats(packet.ItemTemplateId)?.Name);
+
+            // ref: CR-03 — identidade do report (mesmo padrão do G-5): só pintar o HUD
+            // se o report é do PACIENTE atualmente examinado; report atrasado de outro
+            // paciente (ou pós-HideUI) não polui a UI da cura corrente.
+            string activePatient = TRLImmersiveCombatMedicine.BandAidController.Instance?.ActivePatientProfileId;
+            if (string.IsNullOrEmpty(activePatient) || activePatient != packet.PatientProfileId)
+            {
+                Logger.LogInfo("[Report] descartado para a UI (paciente do report não é o examinado atual).");
+                return;
+            }
+
+            // itemName null → preserva o nome exibido desde o início da cura (CR-03)
+            BandAidUI.Instance?.ShowTreatment(part, null);
         }
 
         /// <summary>
