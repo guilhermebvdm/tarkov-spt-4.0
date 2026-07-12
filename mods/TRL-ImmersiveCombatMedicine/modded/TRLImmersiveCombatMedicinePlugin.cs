@@ -88,9 +88,22 @@ namespace TRLImmersiveCombatMedicine
             // Setup reflection para TrueTrauma
             TraumaState.PlayerField = typeof(EFT.MovementContext).GetField("_player", BindingFlags.NonPublic | BindingFlags.Instance);
 
-            // Harmony Patch (Aplica todos os patches no assembly)
+            // ref: CR-01-14 — PatchAll único aborta TODAS as classes ainda não
+            // processadas se um TargetMethod falhar (ordem de GetTypes() é
+            // não-determinística). Processar POR CLASSE isola falhas e loga qual
+            // patch quebrou, sem derrubar o resto do Awake.
             _harmony = new Harmony("com.trl.immersivecombatmedicine");
-            _harmony.PatchAll();
+            foreach (var patchType in Assembly.GetExecutingAssembly().GetTypes())
+            {
+                try
+                {
+                    _harmony.CreateClassProcessor(patchType).Patch(); // no-op sem [HarmonyPatch]
+                }
+                catch (Exception ex)
+                {
+                    ModLogger.LogError($"[Patch] Falha ao aplicar {patchType.Name}: {ex.Message}");
+                }
+            }
 
             // Patch manual de limpeza de raid
             try

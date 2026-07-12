@@ -218,14 +218,13 @@ namespace TRLImmersiveCombatMedicine
                 if (Vector3.Distance(Singleton<GameWorld>.Instance.MainPlayer.Position, _targetPatient.Position) >
                     TRLImmersiveCombatMedicinePlugin.MedicInteractDistance.Value + 1f)
                 {
+                    // ref: CR-01-11 — NÃO zerar _isHealingInProgress aqui: o cleanup
+                    // completo do DeactivateMedicMode (StopCoroutine, CancelApplyingItem,
+                    // ForceFinishAnimation, UsingMeds=false) é gated por essa flag.
+                    // Zerá-la antes deixava a HealRoutine viva aplicando o tratamento
+                    // a qualquer distância depois do "Abortado!".
                     if (_isHealingInProgress)
-                    {
-                        _isHealingInProgress = false;
-                        _itemBeingUsed = null;
-                        MedicHealPatch.IsRedirectingHeal = false;
-                        MedicHealPatch.CurrentPatient = null;
                         NotificationManagerClass.DisplayMessageNotification("Abortado!", ENotificationDurationType.Default, ENotificationIconType.Alert);
-                    }
                     DeactivateMedicMode();
                     return;
                 }

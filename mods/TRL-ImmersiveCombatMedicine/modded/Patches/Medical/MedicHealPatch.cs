@@ -93,7 +93,10 @@ namespace Band_Aid
 
         private static void OnPatientEffectRemoved(IEffect effect)
         {
-            if (!(effect is GInterface350))
+            // ref: CR-01-08 — o method_8 vanilla reage a GInterface376 (marcador do
+            // MedEffect em progresso, Player.cs:19617); GInterface350 é marcador de
+            // efeito tipo painkiller (só Berserk implementa) e mantinha o bridge inerte.
+            if (!(effect is GInterface376))
                 return;
 
             try

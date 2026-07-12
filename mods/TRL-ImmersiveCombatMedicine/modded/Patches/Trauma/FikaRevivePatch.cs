@@ -56,15 +56,25 @@ namespace Band_Aid
         [HarmonyPrefix]
         private static void Prefix(bool success, object __instance)
         {
-            if (!success) return;
+            // ref: CR-01-04 — este prefix roda DENTRO do callback de Plant do Fika
+            // (ReviveInteractable.RevivePlayer): uma exceção aqui cancela o revive
+            // inteiro. Nunca deixar escapar.
+            try
+            {
+                if (!success) return;
 
-            var type = AccessTools.TypeByName("Fika.Core.Main.Components.ReviveInteractable");
-            var localPlayerField = AccessTools.Field(type, "_localPlayer");
-            var player = localPlayerField.GetValue(__instance) as Player;
+                var type = AccessTools.TypeByName("Fika.Core.Main.Components.ReviveInteractable");
+                var localPlayerField = AccessTools.Field(type, "_localPlayer");
+                var player = localPlayerField.GetValue(__instance) as Player;
 
-            if (player == null) return;
+                if (player == null) return;
 
-            ConsumeDefibrillator(player);
+                ConsumeDefibrillator(player);
+            }
+            catch (Exception ex)
+            {
+                TrueTrauma.TraumaState.Logger?.LogError($"FikaRevivePlayerPatch: {ex.Message} — revive segue sem consumo do desfibrilador.");
+            }
         }
 
         private static void ConsumeDefibrillator(Player player)
@@ -75,20 +85,20 @@ namespace Band_Aid
             if (items != null && items.Any())
             {
                 var defib = items.First();
-                
+
                 var inventoryController = player.InventoryController as EFT.InventoryLogic.InventoryController;
                 if (inventoryController != null)
                 {
                     if (TrueTrauma.TraumaState.Logger != null) TrueTrauma.TraumaState.Logger.LogInfo("Consumindo Desfibrilador para reviver aliado!");
-                    
+
+                    // ref: CR-01-04 — a reflection antiga (Invoke com 1 arg num método de 2,
+                    // passando discardResult.Value em vez do GStruct) lançava
+                    // TargetParameterCountException. Chamada tipada, igual ao
+                    // MedicalLogic.DiscardItemNetworked, propaga a transação à rede.
                     var discardResult = InteractionsHandlerClass.Discard(defib, inventoryController);
                     if (discardResult.Succeeded)
                     {
-                        var method = inventoryController.GetType().GetMethod("TryRunNetworkTransaction", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                        if (method != null)
-                        {
-                            method.Invoke(inventoryController, new object[] { discardResult.Value });
-                        }
+                        _ = inventoryController.TryRunNetworkTransaction(discardResult);
                     }
                 }
             }
