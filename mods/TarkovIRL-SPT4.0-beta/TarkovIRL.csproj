@@ -73,7 +73,6 @@
   <ItemGroup>
     <Compile Include="StanceController.cs" />
     <Compile Include="Patch_LateUpdate_UpdateWpnStats.cs" />
-    <Compile Include="AugmentedReloadController.cs" />
     <Compile Include="DirectionalSwayController.cs" />
     <Compile Include="EfficiencyController.cs" />
     <Compile Include="FootstepController.cs" />
@@ -81,11 +80,9 @@
     <Compile Include="NewDeadzoneController.cs" />
     <Compile Include="NewSwayController.cs" />
     <Compile Include="ParallaxAdsController.cs" />
-    <Compile Include="DeadzoneController.cs" />
     <Compile Include="HandPoseController.cs" />
     <Compile Include="HandShakeController.cs" />
     <Compile Include="HandBreathController.cs" />
-    <Compile Include="Patch_ProcessRotation.cs" />
     <Compile Include="Patch_CalculateCameraPosition_HandLayers.cs" />
     <Compile Include="HandMovWithRotController.cs" />
     <Compile Include="Patch_Look.cs" />
@@ -93,14 +90,8 @@
     <Compile Include="AnimStateController.cs" />
     <Compile Include="Patch_OnShot.cs" />
     <Compile Include="ParallaxController.cs" />
-    <Compile Include="Patch_ProcessUpperbodyRotation.cs" />
-    <Compile Include="Patch_QuickReloadMag.cs" />
-    <Compile Include="Patch_ReloadMag.cs" />
     <Compile Include="Patch_SetHeadRotation.cs" />
-    <Compile Include="Patch_CheckAmmo.cs" />
-    <Compile Include="Patch_SetSprint.cs" />
     <Compile Include="StaminaRegenRatePatch.cs" />
-    <Compile Include="Patch_ThrowGrenade.cs" />
     <Compile Include="Patch_TranslateCommand.cs" />
     <Compile Include="PlayerMotionController.cs" />
     <Compile Include="Patch_PlayStepSound.cs" />
@@ -115,6 +106,7 @@
     <Compile Include="Patch_UpdateSwayFactors.cs" />
     <Compile Include="PrimeMover.cs" />
     <Compile Include="WeaponSelectionController.cs" />
+    <Compile Include="TarkovIRLCurves.cs" />
     <Compile Include="Properties\Settings.cs" />
     <Compile Include="AssemblyInfo.cs" />
   <Reference Include="UnityEngine.IMGUIModule">

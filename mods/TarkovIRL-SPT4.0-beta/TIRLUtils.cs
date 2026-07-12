@@ -15,7 +15,7 @@ public static class TIRLUtils
   public static ManualLogSource Logger;
   private static float _dt = 0.0f;
   private static float _spamTimer = 0.0f;
-  private static float _spamTimeResolution = 2f;
+
 
   public static void LogError(string toPrint) => TIRLUtils.Logger.LogError((object) toPrint);
 

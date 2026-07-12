@@ -16,7 +16,6 @@ namespace TarkovIRL;
 
 internal class Patch_TranslateCommand : ModulePatch
 {
-  private static FieldInfo _playerField;
 
     protected override MethodBase GetTargetMethod()
     {
@@ -30,8 +29,7 @@ internal class Patch_TranslateCommand : ModulePatch
         if (player == null || !player.IsYourPlayer)
             return;
             
-        if (command == (ECommand)16 /*0x10*/)
-            AugmentedReloadController.ToggleAugmentedMode();
+
         if (command == (ECommand)40 || command == (ECommand)41 || command == (ECommand)43 || command == (ECommand)42)
             WeaponSelectionController.Process(command, player);
         if (command == (ECommand)25)

@@ -126,7 +126,7 @@ internal class RunningFadeController
     new Keyframe(0.9899994f, 0.000382483f),
     new Keyframe(1f, 0.0f)
   });
-  private static bool _fadeActive = false;
+
 
   public static void UpdateRunningFadeOffsets(float dt)
   {
@@ -134,8 +134,7 @@ internal class RunningFadeController
     if (!(!RunningFadeController._runningLastFrame & isRunning) && RunningFadeController._runningLastFrame && !isRunning)
       RunningFadeController.FadeOutOfRun();
     RunningFadeController._runningLastFrame = isRunning;
-    if (RunningFadeController._fadeActive)
-      ;
+
     if ((double) RunningFadeController._fadeTimer1 < (double) RunningFadeController._FirstCurveTime)
     {
       RunningFadeController._fadeTimer1 += dt * PrimeMover.RunFadeDTMulti.Value;
@@ -145,8 +144,7 @@ internal class RunningFadeController
       float num = float.IsInfinity(EfficiencyController.EfficiencyModifierInverse) ? 1f : EfficiencyController.EfficiencyModifierInverse;
       RunningFadeController._fadeTimer2 += dt * num;
     }
-    if ((double) RunningFadeController._fadeTimer2 > 1.0)
-      RunningFadeController._fadeActive = false;
+
     float num1 = (double) RunningFadeController._fadeTimer1 < (double) RunningFadeController._FirstCurveTime ? RunningFadeController._fadeTimer1 : RunningFadeController._fadeTimer2;
     RunningFadeController._fadeSmoothed = Mathf.Lerp(RunningFadeController._fadeSmoothed, num1, dt * 10f);
   }
@@ -162,7 +160,6 @@ internal class RunningFadeController
       new Keyframe(0.0f, 0.0f),
       new Keyframe(RunningFadeController._FirstCurveTime, 1f)
     });
-    RunningFadeController._fadeActive = true;
     RunningFadeController._fadeTimer1 = 0.0f;
     RunningFadeController._fadeTimer2 = 0.0f;
     RunningFadeController._offsetPos = RunningFadeController._lowerFromRunPos;
