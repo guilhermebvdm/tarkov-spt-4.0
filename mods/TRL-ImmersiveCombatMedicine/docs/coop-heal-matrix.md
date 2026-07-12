@@ -39,11 +39,11 @@ Rastreamento **estático** (código do mod + Fika 2.3.4 de referência + EFT dec
 
 | ID | Sev | Gap | Fix |
 |---|---|---|---|
-| G-1 | 🟡 | Receptor que não é o paciente (host-player no cenário 3; qualquer 3º client em lobby maior) processa `ApplyFullTreatment` pelo branch de "tratamento específico" e tenta cirurgia via reflection no boneco observado do paciente | 1 linha em `OnBandAidHealPacketReceived`: `if (packet.ApplyFullTreatment && PatientProfileId != meu) return;` |
+| G-1 ✅ (2026-07-12) | 🟡 | Receptor que não é o paciente (host-player no cenário 3; qualquer 3º client em lobby maior) processa `ApplyFullTreatment` pelo branch de "tratamento específico" e tenta cirurgia via reflection no boneco observado do paciente | 1 linha em `OnBandAidHealPacketReceived`: `if (packet.ApplyFullTreatment && PatientProfileId != meu) return;` |
 | G-2 | 🟡 | Médico "cego": ícones de bleed/fratura nunca renderizam para paciente remoto (`HasEffect` compara tipos nested do ActiveHC; efeitos do ObservedHC são `NetworkBodyEffectsAbstractClass`) | `HasEffect` por interface de efeito (padrão que o Fika usa no `ObservedHealthController.Store`) |
 | G-3 | 🟢 | Débito do medkit calculado com HP observado (stale) no médico; cura real capada no paciente → débito divergente | ACK do paciente com HP efetivamente curado; médico debita depois |
 | G-4 | 🟢 | Sem revalidação entre approve e apply (~3-8 s): ferimento pode sumir → no-op com item já debitado | mesmo ACK/NACK do G-3 |
-| G-5 | 🟢 | Resposta do handshake não confere `ItemTemplateId` com o item pendente — resposta atrasada pode aprovar item errado | 1 if antes do `HealRoutine` |
+| G-5 ✅ (2026-07-12) | 🟢 | Resposta do handshake não confere `ItemTemplateId` com o item pendente — resposta atrasada pode aprovar item errado | 1 if antes do `HealRoutine` |
 | G-6 | ℹ️ | Relay manual ecoa pacote de volta ao originador (filtrado por checks, mas custo/ruído) | usar overload `SendData(..., NetPeer peerToIgnore)` do Fika |
 
 Relacionados já registrados no CR-01: **CR-01-10** (handshake pendente vaza — afeta os 4 cenários), **CR-01-23** (consumo parcial local-only), **CR-01-01** (curar **bot** de client nunca funciona — só da máquina do host), **CR-01-02/04** (desmaio/defib).
@@ -60,3 +60,4 @@ Relacionados já registrados no CR-01: **CR-01-10** (handshake pendente vaza —
 | Data | Autor | Alteração |
 |---|---|---|
 | 2026-07-12 | Guilherme | Criação — rastreamento estático dos 4 cenários (2 agentes, evidência arquivo:linha). |
+| 2026-07-12 | Guilherme | G-1 e G-5 aplicados (+ CR-01-10); G-2/G-3/G-4/G-6 pendentes. |

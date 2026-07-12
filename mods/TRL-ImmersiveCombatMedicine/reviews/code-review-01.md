@@ -24,7 +24,7 @@
 - CR-01-07 · 🟠 C — PROPRIEDADES.md não existe — 13 ConfigEntries (incluindo a seção nova '5. Debug') sem documentação o
 - CR-01-08 · 🟠 B — Bridge EffectRemoved filtra a interface errada: GInterface350 em vez de GInterface376 (marcador real
 - CR-01-09 · 🟠 B — Estado de desmaio vaza no fim da raid: menu com áudio mudo e prone forçado no primeiro frame da raid
-- CR-01-10 · 🟠 B — Handshake pendente (_pendingHeal*) não é limpo em DeactivateMedicMode/ResetAllState → resposta tardi
+- CR-01-10 ✅ · 🟠 B — Handshake pendente (_pendingHeal*) não é limpo em DeactivateMedicMode/ResetAllState → resposta tardi
 - CR-01-11 · 🟠 B — Abort por distância >3.5m zera _isHealingInProgress ANTES de DeactivateMedicMode → StopCoroutine nun
 - CR-01-12 · 🟠 B — RenderEcgTexture aloca ~50KB (Color32[12600]) por frame com a HUD médica aberta
 - CR-01-13 · 🟠 B — Sem hook de fim de raid: AudioListener.volume fica ~0.05 no menu quando a raid termina durante black
@@ -362,10 +362,9 @@ if (_pendingHealTimeout < 0 || _pendingHealItem == null || _pendingHealPatient =
 **Duplicatas consolidadas:** coop: Handshake pendente sobrevive ao fechamento do modo médico — resposta atrasada in; lifecycle: Estado pendente do handshake (_pendingHeal*) não é limpo no ResetAllState → Play
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão
+
+**Resolução:** ✅ Aplicado em 2026-07-12 (junto com G-1/G-5 da coop-heal-matrix): timeout do handshake movido para o nível do Update (avaliado sempre), e `_pendingHeal*` limpo em `DeactivateMedicMode` e `ResetAllState`. Validação in-game pendente (protocolo da matriz coop).
 
 ---
 

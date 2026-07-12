@@ -86,6 +86,23 @@ namespace TRLImmersiveCombatMedicine
             // Verificar se temos um check pendente
             if (_pendingHealTimeout < 0 || _pendingHealItem == null || _pendingHealPatient == null) return;
 
+            // ref: G-5 (coop-heal-matrix) — resposta stale de um check anterior não
+            // pode aprovar item/paciente errados: conferir com o estado pendente.
+            if (!string.IsNullOrEmpty(response.ItemTemplateId) &&
+                response.ItemTemplateId != _pendingHealItem.TemplateId.ToString())
+            {
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning(
+                    $"Handshake: resposta para item {response.ItemTemplateId} ≠ pendente {_pendingHealItem.TemplateId} — ignorada.");
+                return;
+            }
+            if (!string.IsNullOrEmpty(response.PatientProfileId) &&
+                response.PatientProfileId != _pendingHealPatient.ProfileId)
+            {
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning(
+                    $"Handshake: resposta de paciente {response.PatientProfileId} ≠ pendente {_pendingHealPatient.ProfileId} — ignorada.");
+                return;
+            }
+
             // Limpar timeout
             _pendingHealTimeout = -1f;
 
@@ -214,17 +231,19 @@ namespace TRLImmersiveCombatMedicine
                 }
 
                 if (!_isHealingInProgress) CheckManualInputs();
+            }
 
-                // Timeout do handshake
-                if (_pendingHealTimeout > 0 && Time.time > _pendingHealTimeout)
-                {
-                    _pendingHealTimeout = -1f;
-                    _pendingHealItem = null;
-                    _pendingHealStats = null;
-                    _pendingHealPatient = null;
-                    NotificationManagerClass.DisplayMessageNotification(
-                        "Sem resposta do paciente (timeout).", ENotificationDurationType.Default, ENotificationIconType.Alert);
-                }
+            // ref: CR-01-10 — timeout do handshake avaliado SEMPRE (fora do gate do
+            // modo médico): fechar o modo com check pendente não pode deixar o estado
+            // vivo para uma resposta tardia iniciar cura fora de contexto.
+            if (_pendingHealTimeout > 0 && Time.time > _pendingHealTimeout)
+            {
+                _pendingHealTimeout = -1f;
+                _pendingHealItem = null;
+                _pendingHealStats = null;
+                _pendingHealPatient = null;
+                NotificationManagerClass.DisplayMessageNotification(
+                    "Sem resposta do paciente (timeout).", ENotificationDurationType.Default, ENotificationIconType.Alert);
             }
         }
 
@@ -867,9 +886,15 @@ namespace TRLImmersiveCombatMedicine
                 // G10: Desregistrar evento de morte do paciente
                 try { if (_targetPatient != null) _targetPatient.OnPlayerDeadOrUnspawn -= OnPatientDiedDuringHeal; } catch { }
             }
-            _isMedicModeActive = false; 
-            _targetPatient = null; 
+            _isMedicModeActive = false;
+            _targetPatient = null;
             BandAidUI.Instance?.HideUI();
+
+            // ref: CR-01-10 — fechar o modo médico invalida qualquer check pendente
+            _pendingHealTimeout = -1f;
+            _pendingHealItem = null;
+            _pendingHealStats = null;
+            _pendingHealPatient = null;
         }
 
         /// <summary>
@@ -907,6 +932,13 @@ namespace TRLImmersiveCombatMedicine
             _gamePlayerOwner = null;
             _ourPromptActions = null;
             _promptTarget = null;
+
+            // ref: CR-01-10 — handshake pendente não sobrevive à raid (senão pina o
+            // Player destruído e uma resposta stale poderia iniciar cura órfã)
+            _pendingHealTimeout = -1f;
+            _pendingHealItem = null;
+            _pendingHealStats = null;
+            _pendingHealPatient = null;
             TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("ResetAllState: flags resetadas (mudanÃ§a de raid).");
         }
 

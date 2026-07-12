@@ -152,6 +152,16 @@ namespace Band_Aid
                 return;
             }
 
+            // ref: G-1 (coop-heal-matrix) — pacote FullTreatment é EXCLUSIVO do paciente.
+            // Receptor terceiro (host-player no C1→C2, ou 3º client no lobby) não pode
+            // cair no branch de tratamento específico abaixo: com IsSurgery=true ele
+            // tentaria cirurgia via reflection no boneco OBSERVADO do paciente.
+            if (packet.ApplyFullTreatment)
+            {
+                Logger.LogInfo("FullTreatment para outro paciente — nada a fazer localmente.");
+                return;
+            }
+
             // === TRATAMENTO ESPECÍFICO (ações pontuais, com dados no pacote) ===
             Player patient = FindPatient(packet.PatientProfileId, localPlayer);
             if (patient == null) return;
