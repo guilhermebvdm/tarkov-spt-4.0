@@ -27,10 +27,8 @@ namespace TRLImmersiveCombatMedicine
         // --- Band-Aid Configs ---
         public static ConfigEntry<KeyboardShortcut> MedicInteractKey;
         public static ConfigEntry<KeyboardShortcut> EmergencyDropKey;
-        public static ConfigEntry<KeyboardShortcut> ShoulderTapKey;
         public static ConfigEntry<EBandAidPressMode> MedicInteractMode;
         public static ConfigEntry<EBandAidPressMode> EmergencyDropMode;
-        public static ConfigEntry<EBandAidPressMode> ShoulderTapMode;
         public static ConfigEntry<float> MedicInteractDistance;
 
         private void Awake()
@@ -39,25 +37,23 @@ namespace TRLImmersiveCombatMedicine
             ModLogger = base.Logger;
             ModLogger.LogInfo("TRL-ImmersiveCombatMedicine Plugin v1.0.0 carregado.");
 
-            // InicializaÃ§Ãµes combinadas
+            // Inicializações combinadas
             ItemDatabase.Initialize();
 
             // Configs TrueTrauma
             TraumaState.Logger = Logger;
             ConfigMasterEnabled = Config.Bind("1. Geral (Trauma)", "Ativar Mod", true, "Liga ou desliga todo o funcionamento do mod.");
             ConfigBlackoutEnabled = Config.Bind("2. Mecanicas (Trauma)", "Sistema de Desmaio", true, "Ativa o desmaio ao receber muito dano massivo.");
-            ConfigLegsEnabled = Config.Bind("2. Mecanicas (Trauma)", "Sistema de Pernas", true, "Cair no chÃ£o ao perder as pernas.");
-            ConfigArmsEnabled = Config.Bind("2. Mecanicas (Trauma)", "Sistema de BraÃ§os", true, "Perder a mira ao perder os braÃ§os.");
-            ConfigStomachEnabled = Config.Bind("2. Mecanicas (Trauma)", "Sistema de Estomago", true, "Ficar sem ar ao tomar tiro no estÃ´mago.");
+            ConfigLegsEnabled = Config.Bind("2. Mecanicas (Trauma)", "Sistema de Pernas", true, "Cair no chão ao perder as pernas.");
+            ConfigArmsEnabled = Config.Bind("2. Mecanicas (Trauma)", "Sistema de Braços", true, "Perder a mira ao perder os braços.");
+            ConfigStomachEnabled = Config.Bind("2. Mecanicas (Trauma)", "Sistema de Estomago", true, "Ficar sem ar ao tomar tiro no estômago.");
             ConfigBlackoutDuration = Config.Bind("3. Balanceamento (Trauma)", "Duracao do Desmaio", 20f, "Quanto tempo (segundos) o jogador fica desmaiado.");
 
             // Configs Band-Aid
-            MedicInteractKey = Config.Bind("4. Keybinds (Medic)", "Medic Interact Key", new KeyboardShortcut(KeyCode.F), "Tecla para interagir com paciente.");
-            EmergencyDropKey = Config.Bind("4. Keybinds (Medic)", "Emergency Drop Key", new KeyboardShortcut(KeyCode.F), "Tecla para drop emergencial do item durante animaÃ§Ã£o de cura.");
-            ShoulderTapKey = Config.Bind("4. Keybinds (Medic)", "Shoulder Tap Key", new KeyboardShortcut(KeyCode.F), "Tecla para toque no ombro (aviso CQB ao aliado prÃ³ximo).");
-            MedicInteractMode = Config.Bind("4. Keybinds (Medic)", "Medic Interact Mode", EBandAidPressMode.Hold, "Modo de ativaÃ§Ã£o: Press (aperta e solta), Hold (segura), DoubleTap (aperta 2x).");
-            EmergencyDropMode = Config.Bind("4. Keybinds (Medic)", "Emergency Drop Mode", EBandAidPressMode.Press, "Modo de ativaÃ§Ã£o do drop emergencial.");
-            ShoulderTapMode = Config.Bind("4. Keybinds (Medic)", "Shoulder Tap Mode", EBandAidPressMode.DoubleTap, "Modo de ativaÃ§Ã£o do toque no ombro.");
+            MedicInteractKey = Config.Bind("4. Keybinds (Medic)", "Medic Interact Key", new KeyboardShortcut(KeyCode.F), "Tecla para FECHAR o modo medico (a abertura e pelo painel nativo de interacao, tecla F do jogo).");
+            EmergencyDropKey = Config.Bind("4. Keybinds (Medic)", "Emergency Drop Key", new KeyboardShortcut(KeyCode.F), "Tecla para drop emergencial do item durante animação de cura.");
+            MedicInteractMode = Config.Bind("4. Keybinds (Medic)", "Medic Interact Mode", EBandAidPressMode.Hold, "Modo de ativação: Press (aperta e solta), Hold (segura), DoubleTap (aperta 2x).");
+            EmergencyDropMode = Config.Bind("4. Keybinds (Medic)", "Emergency Drop Mode", EBandAidPressMode.Press, "Modo de ativação do drop emergencial.");
             // Regra ÚNICA de distância: o prompt e o acionamento usam este valor (o
             // controller dirige o ActionPanel nativo por scan próprio — os caps do
             // vanilla, 1,3m/2,5m, não se aplicam). Reduzir ao empacotar para o server.
@@ -143,7 +139,7 @@ namespace TRLImmersiveCombatMedicine
 
         private void OnHealCheckResponseHandler(BandAidHealCheckResponsePacket response)
         {
-            // O tratamento disso ficarÃ¡ na classe dedicada ou adaptaremos o cÃ³digo de BandAidPlugin aqui.
+            // O tratamento disso ficará na classe dedicada ou adaptaremos o código de BandAidPlugin aqui.
         }
 
         public static void OnRaidStartCleanup()
@@ -172,7 +168,7 @@ namespace TRLImmersiveCombatMedicine
                 ModLogger.LogWarning($"[DEBUG-ICM] beat | host={host} | ctrl={ctrl} | world={(gw != null)} | mainPlayer={(gw?.MainPlayer != null)}");
             }
 
-            // LÃ³gica unificada de Update aqui
+            // Lógica unificada de Update aqui
             if (!ConfigMasterEnabled.Value || !ConfigBlackoutEnabled.Value)
             {
                 TraumaState.EffectIntensity = 0f;

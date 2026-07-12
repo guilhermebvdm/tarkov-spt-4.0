@@ -27,38 +27,32 @@ namespace TRLImmersiveCombatMedicine
         private bool _isMedicModeActive = false;
         private Player _targetPatient = null;
 
-        // Controle da AnimaÃ§Ã£o
+        // Controle da Animação
         private bool _isHealingInProgress = false;
         private Item _itemBeingUsed = null;
         private Coroutine _activeHealCoroutine = null;
 
-        // N1: Detectar mudanÃ§a de raid para resetar flags estÃ¡ticas
+        // N1: Detectar mudança de raid para resetar flags estáticas
         private GameWorld _lastGameWorld = null;
 
         // Harmony
-        private Harmony _harmony;
 
         // Config (agora lidas do plugin principal)
         public static ConfigEntry<KeyboardShortcut> _medicInteractKey => TRLImmersiveCombatMedicinePlugin.MedicInteractKey;
         public static ConfigEntry<KeyboardShortcut> _emergencyDropKey => TRLImmersiveCombatMedicinePlugin.EmergencyDropKey;
-        public static ConfigEntry<KeyboardShortcut> _shoulderTapKey => TRLImmersiveCombatMedicinePlugin.ShoulderTapKey;
         public static ConfigEntry<EBandAidPressMode> _medicInteractMode => TRLImmersiveCombatMedicinePlugin.MedicInteractMode;
         public static ConfigEntry<EBandAidPressMode> _emergencyDropMode => TRLImmersiveCombatMedicinePlugin.EmergencyDropMode;
-        public static ConfigEntry<EBandAidPressMode> _shoulderTapMode => TRLImmersiveCombatMedicinePlugin.ShoulderTapMode;
 
-        // DetecÃ§Ã£o de Hold
+        // Detecção de Hold
         private float _medicHoldTimer = 0f;
         private bool _medicHoldTriggered = false;
         private float _emergencyHoldTimer = 0f;
         private bool _emergencyHoldTriggered = false;
-        private float _shoulderHoldTimer = 0f;
-        private bool _shoulderHoldTriggered = false;
         private const float HOLD_THRESHOLD = 0.4f; // segundos para Hold
 
-        // DetecÃ§Ã£o de DoubleTap
+        // Detecção de DoubleTap
         private float _medicLastTapTime = -1f;
         private float _emergencyLastTapTime = -1f;
-        private float _shoulderLastTapTime = -1f;
         private const float DOUBLE_TAP_WINDOW = 0.35f; // janela para double tap
 
         private void Awake()
@@ -143,7 +137,7 @@ namespace TRLImmersiveCombatMedicine
             }
 
             // O registro de pacotes deve ocorrer independentemente de haver um jogador local.
-            // Em servidores dedicados (Headless), o MainPlayer Ã© null. Se pularmos, os pacotes nunca sÃ£o registrados.
+            // Em servidores dedicados (Headless), o MainPlayer é null. Se pularmos, os pacotes nunca são registrados.
             try { BandAidNetworkHandler.CheckInit(); }
             catch (Exception ex)
             {
@@ -153,7 +147,7 @@ namespace TRLImmersiveCombatMedicine
 
             if (Singleton<GameWorld>.Instance == null || Singleton<GameWorld>.Instance.MainPlayer == null)
             {
-                // N1: Se GameWorld foi destruÃ­do, resetar tudo
+                // N1: Se GameWorld foi destruído, resetar tudo
                 if (_lastGameWorld != null)
                 {
                     ResetAllState();
@@ -162,7 +156,7 @@ namespace TRLImmersiveCombatMedicine
                 return;
             }
 
-            // N1: Detectar mudanÃ§a de raid (novo GameWorld)
+            // N1: Detectar mudança de raid (novo GameWorld)
             if (_lastGameWorld != Singleton<GameWorld>.Instance)
             {
                 ResetAllState();
@@ -196,10 +190,10 @@ namespace TRLImmersiveCombatMedicine
                 return;
             }
 
-            // Item 7: BotÃ£o esquerdo do mouse cancela cura em andamento (sem dropar item)
+            // Item 7: Botão esquerdo do mouse cancela cura em andamento (sem dropar item)
             if (_isHealingInProgress && Input.GetMouseButtonDown(0))
             {
-                TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning("Mouse0 pressionado durante cura â€” cancelando tratamento (sem drop).");
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning("Mouse0 pressionado durante cura — cancelando tratamento (sem drop).");
                 CancelHealInProgress();
                 return;
             }
@@ -358,11 +352,11 @@ namespace TRLImmersiveCombatMedicine
                 }
                 else
                 {
-                    // === PACIENTE LOCAL (bot/self): ValidaÃ§Ã£o imediata ===
+                    // === PACIENTE LOCAL (bot/self): Validação imediata ===
                     if (!MedicalLogic.CanUseItem(_targetPatient, stats))
                     {
                         NotificationManagerClass.DisplayMessageNotification(
-                            $"{stats.Name}: Sem ferimento compatÃ­vel.", ENotificationDurationType.Default, ENotificationIconType.Alert);
+                            $"{stats.Name}: Sem ferimento compatível.", ENotificationDurationType.Default, ENotificationIconType.Alert);
                         return;
                     }
                     _activeHealCoroutine = StartCoroutine(HealRoutine(mainPlayer, _targetPatient, item, stats));
@@ -389,7 +383,7 @@ namespace TRLImmersiveCombatMedicine
             // Smart modifier check:
             // - COM modifiers configurados (ex: Shift+F) â†’ usar shortcut.IsDown() que verifica modifiers
             // - SEM modifiers (ex: F sozinho) â†’ usar Input.GetKeyDown que ignora modifiers
-            //   (necessÃ¡rio para funcionar enquanto corre com Shift, agachado com Ctrl, etc.)
+            //   (necessário para funcionar enquanto corre com Shift, agachado com Ctrl, etc.)
             bool hasModifiers = shortcut.Modifiers.Any();
 
             switch (mode)
@@ -433,18 +427,18 @@ namespace TRLImmersiveCombatMedicine
         }
 
         /// <summary>
-        /// Envia um "toque no ombro" ao aliado prÃ³ximo (aviso CQB).
+        /// Envia um "toque no ombro" ao aliado próximo (aviso CQB).
         /// </summary>
         private void SendShoulderTap(Player target)
         {
             if (target == null) return;
 
-            // NotificaÃ§Ã£o local
+            // Notificação local
             NotificationManagerClass.DisplayMessageNotification(
                 $"Toque no ombro â†’ {target.Profile.Nickname}", 
                 ENotificationDurationType.Default, ENotificationIconType.Quest);
 
-            // Tocar gesto de mÃ£o "There" (apontar com a mÃ£o)
+            // Tocar gesto de mão "There" (apontar com a mão)
             var doctor = Singleton<GameWorld>.Instance?.MainPlayer;
             doctor?.MovementContext.SetInteractInHands(EInteraction.ThereGesture);
 
@@ -454,7 +448,7 @@ namespace TRLImmersiveCombatMedicine
         }
 
         /// <summary>
-        /// Drop emergencial: mata animaÃ§Ã£o â†’ limpa mÃ£os â†’ dropa item.
+        /// Drop emergencial: mata animação → limpa mãos → dropa item.
         /// </summary>
         private void EmergencyDrop()
         {
@@ -467,7 +461,7 @@ namespace TRLImmersiveCombatMedicine
                 _activeHealCoroutine = null;
             }
 
-            // === PASSO 1: SALVAR ITEM NA MEMÃ“RIA ===
+            // === PASSO 1: SALVAR ITEM NA MEMÓRIA ===
             Item savedItem = _itemBeingUsed;
             string itemName = savedItem?.ShortName?.Localized() ?? "?";
 
@@ -481,20 +475,20 @@ namespace TRLImmersiveCombatMedicine
             // G10: Desregistrar evento de morte do paciente
             try { if (_targetPatient != null) _targetPatient.OnPlayerDeadOrUnspawn -= OnPatientDiedDuringHeal; } catch { }
 
-            // === PASSO 2: MATAR ANIMAÃ‡ÃƒO IMEDIATAMENTE ===
+            // === PASSO 2: MATAR ANIMAÇÃO IMEDIATAMENTE ===
             try
             {
-                // CancelApplyingItem interrompe qualquer animaÃ§Ã£o de cura em andamento
+                // CancelApplyingItem interrompe qualquer animação de cura em andamento
                 doctor.ActiveHealthController?.CancelApplyingItem();
                 // ForceFinishAnimation (method_9) mata o callback visual restante
                 MedicHealPatch.ForceFinishAnimation();
             }
             catch (Exception ex)
             {
-                TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning($"EmergencyDrop MatarAnimaÃ§Ã£o: {ex.Message}");
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning($"EmergencyDrop MatarAnimação: {ex.Message}");
             }
 
-            // === PASSO 3: LIMPAR AS MÃƒOS (agora sem animaÃ§Ã£o de fechar kit) ===
+            // === PASSO 3: LIMPAR AS MÃOS (agora sem animação de fechar kit) ===
             try
             {
                 var spawnController = doctor.GetType().GetMethod("SpawnController",
@@ -503,11 +497,11 @@ namespace TRLImmersiveCombatMedicine
                     spawnController.Invoke(doctor, null);
 
                 doctor.TrySetLastEquippedWeapon(true);
-                TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("EmergencyDrop: MÃ£os limpas (HANB)");
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("EmergencyDrop: Mãos limpas (HANB)");
             }
             catch (Exception ex)
             {
-                TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning($"EmergencyDrop Limpar MÃ£os: {ex.Message}");
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning($"EmergencyDrop Limpar Mãos: {ex.Message}");
             }
 
             // === PASSO 4: DROPAR ITEM SALVO ===
@@ -524,7 +518,7 @@ namespace TRLImmersiveCombatMedicine
                 }
             }
 
-            // === LIMPEZA DE MEMÃ“RIA ===
+            // === LIMPEZA DE MEMÓRIA ===
             savedItem = null;
             itemName = null;
 
@@ -553,7 +547,7 @@ namespace TRLImmersiveCombatMedicine
             try { patient.OnPlayerDeadOrUnspawn += OnPatientDiedDuringHeal; }
             catch { }
 
-            // Imobilizar o mÃ©dico
+            // Imobilizar o médico
             doctor.MovementContext.SetPhysicalCondition(EPhysicalCondition.UsingMeds, true);
 
             NotificationManagerClass.DisplayMessageNotification($"Aplicando {itemUsed.ShortName.Localized()}...", ENotificationDurationType.Default, ENotificationIconType.Quest);
@@ -564,9 +558,9 @@ namespace TRLImmersiveCombatMedicine
             MedicHealPatch.RedirectStartTime = UnityEngine.Time.time;
             MedicHealPatch.NativeMedEffectApplied = false;
 
-            TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning($"ðŸ” HealRoutine: REDIRECT ATIVADO | item={itemUsed.ShortName.Localized()} | UseTime={stats.UseTime}s | patient={patient.Profile.Nickname}");
+            TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning($"HealRoutine: REDIRECT ATIVADO | item={itemUsed.ShortName.Localized()} | UseTime={stats.UseTime}s | patient={patient.Profile.Nickname}");
 
-            // Colocar o item mÃ©dico nas mÃ£os (aciona a animaÃ§Ã£o visual)
+            // Colocar o item médico nas mãos (aciona a animação visual)
             try
             {
                 doctor.SetInHands(itemUsed, (result) => { });
@@ -576,14 +570,14 @@ namespace TRLImmersiveCombatMedicine
                 TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning($"SetInHands NullRef ignorado: {ex.Message}");
             }
 
-            // Espera o tempo de uso do item (+2s para animaÃ§Ã£o completar visualmente)
+            // Espera o tempo de uso do item (+2s para animação completar visualmente)
             float totalUseTime = stats.UseTime + 2f;
             yield return new WaitForSeconds(totalUseTime);
 
-            // G2: Guard â€” mÃ©dico morreu durante wait?
+            // G2: Guard — médico morreu durante wait?
             if (doctor == null || !doctor.HealthController.IsAlive)
             {
-                TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning("HealRoutine: MÃ©dico morreu durante cura, abortando.");
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning("HealRoutine: Médico morreu durante cura, abortando.");
                 CleanupHealState(patient);
                 yield break;
             }
@@ -593,24 +587,24 @@ namespace TRLImmersiveCombatMedicine
             {
                 TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning("HealRoutine: Paciente morreu durante cura, abortando.");
                 CleanupHealState(patient);
-                // Resetar mÃ£os do mÃ©dico que ainda estÃ¡ vivo
+                // Resetar mãos do médico que ainda está vivo
                 try { doctor.MovementContext.SetPhysicalCondition(EPhysicalCondition.UsingMeds, false); } catch { }
                 MedicHealPatch.ForceFinishAnimation();
                 yield break;
             }
 
-            TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning($"ðŸ” HealRoutine: UseTime TERMINOU | IsRedirecting={MedicHealPatch.IsRedirectingHeal} | T+{stats.UseTime}s");
+            TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning($"HealRoutine: UseTime TERMINOU | IsRedirecting={MedicHealPatch.IsRedirectingHeal} | T+{stats.UseTime}s");
 
             // === LIMPEZA DO REDIRECT ===
             MedicHealPatch.IsRedirectingHeal = false;
             MedicHealPatch.CurrentPatient = null;
             MedicHealPatch.CleanupPatientSubscription();
 
-            // G3: Removido RemoveMedEffect no mÃ©dico (efeito estÃ¡ no paciente, nÃ£o no mÃ©dico)
+            // G3: Removido RemoveMedEffect no médico (efeito está no paciente, não no médico)
             // ForceFinishAnimation chama method_9 diretamente â†’ cleanup â†’ callback â†’ jogo transiciona
             MedicHealPatch.ForceFinishAnimation();
 
-            // Liberar movimento do mÃ©dico
+            // Liberar movimento do médico
             doctor.MovementContext.SetPhysicalCondition(EPhysicalCondition.UsingMeds, false);
 
             _isHealingInProgress = false;
@@ -627,32 +621,32 @@ namespace TRLImmersiveCombatMedicine
                 TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("HealRoutine: MedEffect nativo aplicado no paciente — ApplyTreatment programático pulado.");
                 NotificationManagerClass.DisplayMessageNotification("Tratamento Completo.", ENotificationDurationType.Long, ENotificationIconType.Quest);
             }
-            // N3: Verificar se o item e o paciente ainda existem apÃ³s o UseTime
+            // N3: Verificar se o item e o paciente ainda existem após o UseTime
             else if (patient != null && patient.HealthController.IsAlive && itemUsed != null)
             {
                 try
                 {
-                    // Verificar se o item ainda Ã© vÃ¡lido (nÃ£o foi destruÃ­do/lootado)
+                    // Verificar se o item ainda é válido (não foi destruído/lootado)
                     var _ = itemUsed.TemplateId;
                     MedicalLogic.ApplyTreatment(doctor, patient, itemUsed, stats);
                     NotificationManagerClass.DisplayMessageNotification("Tratamento Completo.", ENotificationDurationType.Long, ENotificationIconType.Quest);
                 }
                 catch (Exception ex)
                 {
-                    TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning($"HealRoutine: Item destruÃ­do durante cura â€” {ex.Message}");
+                    TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning($"HealRoutine: Item destruído durante cura — {ex.Message}");
                     NotificationManagerClass.DisplayMessageNotification("Item perdido durante tratamento.", ENotificationDurationType.Default, ENotificationIconType.Alert);
                 }
             }
             else
             {
-                TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning("HealRoutine: Paciente null/morto ou item null, tratamento nÃ£o aplicado.");
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning("HealRoutine: Paciente null/morto ou item null, tratamento não aplicado.");
             }
 
-            // === RESET DAS MÃƒOS (sem forÃ§ar puxada de arma â€” o jogo jÃ¡ faz automaticamente) ===
+            // === RESET DAS MÃOS (sem forçar puxada de arma — o jogo já faz automaticamente) ===
         }
 
         /// <summary>
-        /// Limpa estado de cura (usado quando mÃ©dico ou paciente morre durante HealRoutine).
+        /// Limpa estado de cura (usado quando médico ou paciente morre durante HealRoutine).
         /// </summary>
         private void CleanupHealState(Player patient)
         {
@@ -692,10 +686,10 @@ namespace TRLImmersiveCombatMedicine
             // G10: Desregistrar morte do paciente
             try { if (_targetPatient != null) _targetPatient.OnPlayerDeadOrUnspawn -= OnPatientDiedDuringHeal; } catch { }
 
-            // Cancelar efeito mÃ©dico nativo (como vanilla)
+            // Cancelar efeito médico nativo (como vanilla)
             try { doctor.ActiveHealthController?.CancelApplyingItem(); } catch { }
 
-            // Finalizar animaÃ§Ã£o
+            // Finalizar animação
             MedicHealPatch.ForceFinishAnimation();
 
             // Liberar movimento
@@ -852,12 +846,12 @@ namespace TRLImmersiveCombatMedicine
             _isMedicModeActive = true; 
             _targetPatient = p; 
             BandAidUI.Instance?.ShowUI(p);
-            NotificationManagerClass.DisplayMessageNotification($"MÃ‰DICO: {p.Profile.Nickname}", ENotificationDurationType.Default, ENotificationIconType.Quest); 
+            NotificationManagerClass.DisplayMessageNotification($"MÉDICO: {p.Profile.Nickname}", ENotificationDurationType.Default, ENotificationIconType.Quest); 
         }
 
         private void DeactivateMedicMode() 
         { 
-            // SeguranÃ§a: liberar UsingMeds se o modo mÃ©dico for interrompido durante cura
+            // Segurança: liberar UsingMeds se o modo médico for interrompido durante cura
             if (_isHealingInProgress)
             {
                 // N6: Parar coroutine ativa
@@ -880,7 +874,7 @@ namespace TRLImmersiveCombatMedicine
                 MedicHealPatch.CurrentPatient = null;
                 MedicHealPatch.CleanupPatientSubscription();
 
-                // N6: Finalizar animaÃ§Ã£o para evitar travamento
+                // N6: Finalizar animação para evitar travamento
                 MedicHealPatch.ForceFinishAnimation();
                 // G10: Desregistrar evento de morte do paciente
                 try { if (_targetPatient != null) _targetPatient.OnPlayerDeadOrUnspawn -= OnPatientDiedDuringHeal; } catch { }
@@ -905,7 +899,7 @@ namespace TRLImmersiveCombatMedicine
         }
 
         /// <summary>
-        /// N1: Reseta todas as flags estÃ¡ticas entre raids.
+        /// N1: Reseta todas as flags estáticas entre raids.
         /// </summary>
         private void ResetAllState()
         {
@@ -945,7 +939,7 @@ namespace TRLImmersiveCombatMedicine
             _pendingHealItem = null;
             _pendingHealStats = null;
             _pendingHealPatient = null;
-            TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("ResetAllState: flags resetadas (mudanÃ§a de raid).");
+            TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("ResetAllState: flags resetadas (mudança de raid).");
         }
 
     }

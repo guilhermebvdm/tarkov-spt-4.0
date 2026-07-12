@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using TRLImmersiveCombatMedicine;
-using TRLImmersiveCombatMedicine;
 using UnityEngine.UI;
 using EFT;
 using EFT.HealthSystem;
@@ -65,9 +64,9 @@ namespace Band_Aid
         private float _radarTimer = 0f;
         private const float RADAR_SWEEP_DURATION = 3f;  // 3s para percorrer
         private const float RADAR_DELAY = 1f;           // 1s de pausa
-        private const int RADAR_WIDTH = 160;             // Largura do retÃ¢ngulo
+        private const int RADAR_WIDTH = 160;             // Largura do retângulo
 
-        // PadrÃ£o PQRST (onda cardÃ­aca normalizada 0-1, apenas o complexo)
+        // Padrão PQRST (onda cardíaca normalizada 0-1, apenas o complexo)
         private static readonly float[] ECG_WAVE = new float[]
         {
             // P wave (onda atrial)
@@ -82,7 +81,7 @@ namespace Band_Aid
             0.38f, 0.28f, 0.32f, 0.40f,
             // ST segment
             0.47f, 0.49f, 0.50f, 0.50f,
-            // T wave (repolarizaÃ§Ã£o)
+            // T wave (repolarização)
             0.52f, 0.55f, 0.59f, 0.62f, 0.63f, 0.62f, 0.59f, 0.55f, 0.52f, 0.50f
         };
 
@@ -98,7 +97,7 @@ namespace Band_Aid
             { EBodyPart.RightLeg, "pernad" }
         };
 
-        // === Ã‚ncoras da silhueta (para linhas de conexÃ£o) ===
+        // === Âncoras da silhueta (para linhas de conexão) ===
         private static readonly Dictionary<EBodyPart, Vector2> SilhouetteAnchor = new Dictionary<EBodyPart, Vector2>
         {
             { EBodyPart.Head,     new Vector2(0, 175) },
@@ -122,7 +121,7 @@ namespace Band_Aid
             public Image[] EffectSlots;
         }
 
-        // === DIMENSÃ•ES ===
+        // === DIMENSÕES ===
         private const float BAR_WIDTH = 95f;
         private const float BAR_HEIGHT = 12f;
         private const float ICON_SIZE = 18f;    // Aumentado de 13 para 18
@@ -231,7 +230,7 @@ namespace Band_Aid
             _painType = typeof(GInterface357);         // Pain (existe no NetworkHC também)
             _intoxicationType = typeof(GInterface346); // Intoxication
 
-            // FindActiveEffect<T> estÃ¡ na INTERFACE IHealthController â€” funciona em qualquer HC
+            // FindActiveEffect<T> está na INTERFACE IHealthController — funciona em qualquer HC
             var ihcType = typeof(IHealthController);
             var methods = ihcType.GetMethods(BindingFlags.Instance | BindingFlags.Public);
             foreach (var m in methods)
@@ -277,7 +276,7 @@ namespace Band_Aid
             if (effectType == null || _findEffectMethod == null || hc == null) return false;
             try
             {
-                // FindActiveEffect<T> estÃ¡ na interface IHealthController â€” funciona em qualquer HC
+                // FindActiveEffect<T> está na interface IHealthController — funciona em qualquer HC
                 var genericFind = _findEffectMethod.MakeGenericMethod(effectType);
                 return genericFind.Invoke(hc, new object[] { bodyPart }) != null;
             }
@@ -286,7 +285,7 @@ namespace Band_Aid
         }
 
         // =====================================
-        //         CRIAÃ‡ÃƒO DO CANVAS V7
+        //         CRIAÇÃO DO CANVAS V7
         // =====================================
         private void CreateCanvas()
         {
@@ -308,7 +307,7 @@ namespace Band_Aid
             // === TÃTULO ===
             _titleText = MakeText(panel.transform, "Title",
                 new Vector2(0, 275), new Vector2(460, 20),
-                "SITUAÃ‡ÃƒO DO OPERADOR", 14, TextAnchor.MiddleCenter,
+                "SITUAÇÃO DO OPERADOR", 14, TextAnchor.MiddleCenter,
                 COL_TITLE, FontStyle.Bold);
 
             // === SUBTÃTULO (nome do operador, mais brilhante) ===
@@ -321,7 +320,7 @@ namespace Band_Aid
             MakeLine(panel.transform, new Vector2(0, 248), new Vector2(420, 1),
                 new Color(COL_BORDER.r, COL_BORDER.g, COL_BORDER.b, 0.20f));
 
-            // === BARRA GLOBAL HP (vertical, Ã  esquerda) ===
+            // === BARRA GLOBAL HP (vertical, à esquerda) ===
             CreateGlobalHpBarVertical(panel.transform);
 
             // === SILHUETA ===
@@ -337,15 +336,15 @@ namespace Band_Aid
             linesRect.anchoredPosition = Vector2.zero;
 
             // === BLOCOS DE MEMBROS (criados DEPOIS â†’ renderizam NA FRENTE) ===
-            CreateLimbBlock(panel.transform, EBodyPart.Head,     "CABEÃ‡A",     new Vector2(115, 162));
-            CreateLimbBlock(panel.transform, EBodyPart.Chest,    "TÃ“RAX",      new Vector2(0,    88));
-            CreateLimbBlock(panel.transform, EBodyPart.LeftArm,  "BRAÃ‡O ESQ.", new Vector2(120,   50));
-            CreateLimbBlock(panel.transform, EBodyPart.RightArm, "BRAÃ‡O DIR.", new Vector2(-120,  50));
-            CreateLimbBlock(panel.transform, EBodyPart.Stomach,  "ESTÃ”MAGO",   new Vector2(0,    -10));
+            CreateLimbBlock(panel.transform, EBodyPart.Head,     "CABEÇA",     new Vector2(115, 162));
+            CreateLimbBlock(panel.transform, EBodyPart.Chest,    "TÓRAX",      new Vector2(0,    88));
+            CreateLimbBlock(panel.transform, EBodyPart.LeftArm,  "BRAÇO ESQ.", new Vector2(120,   50));
+            CreateLimbBlock(panel.transform, EBodyPart.RightArm, "BRAÇO DIR.", new Vector2(-120,  50));
+            CreateLimbBlock(panel.transform, EBodyPart.Stomach,  "ESTÔMAGO",   new Vector2(0,    -10));
             CreateLimbBlock(panel.transform, EBodyPart.LeftLeg,  "PERNA ESQ.", new Vector2(110,  -130));
             CreateLimbBlock(panel.transform, EBodyPart.RightLeg, "PERNA DIR.", new Vector2(-110, -130));
 
-            // === LINHAS DE CONEXÃƒO removidas (feitas manualmente via base.png) ===
+            // === LINHAS DE CONEXÃO removidas (feitas manualmente via base.png) ===
 
             // Linha separadora inferior
             MakeLine(panel.transform, new Vector2(0, -195), new Vector2(420, 1),
@@ -354,7 +353,7 @@ namespace Band_Aid
             // === ECG (abaixo do operador, largo) ===
             CreateEcg(panel.transform);
 
-            // === RODAPÃ‰ ===
+            // === RODAPÉ ===
             _footerText = MakeText(panel.transform, "Footer",
                 new Vector2(0, -268), new Vector2(440, 32),
                 "Utilize as suas teclas de atalhos para curar\n[Pressione F] Fechar Examinador", 12, TextAnchor.MiddleCenter,
@@ -366,7 +365,7 @@ namespace Band_Aid
         // === BARRA GLOBAL HP VERTICAL ===
         private void CreateGlobalHpBarVertical(Transform parent)
         {
-            // Container posicionado Ã  esquerda do boneco
+            // Container posicionado à esquerda do boneco
             GameObject container = new GameObject("GlobalBarContainer");
             container.transform.SetParent(parent, false);
             RectTransform contRect = container.AddComponent<RectTransform>();
@@ -393,7 +392,7 @@ namespace Band_Aid
             fillRect.anchorMax = new Vector2(1, 1);       // Cima (ajustado no update)
             fillRect.offsetMin = new Vector2(1, 1);
             fillRect.offsetMax = new Vector2(-1, -1);
-            fillRect.pivot = new Vector2(0.5f, 0);        // PivÃ´ em baixo
+            fillRect.pivot = new Vector2(0.5f, 0);        // Pivô em baixo
 
             // Texto HP
             _globalHpText = MakeText(container.transform, "GlobalHpText",
@@ -502,7 +501,7 @@ namespace Band_Aid
             }
         }
 
-        // === LINHAS DE CONEXÃƒO ===
+        // === LINHAS DE CONEXÃO ===
         private void CreateConnectionLines(Transform parent)
         {
             foreach (var kvp in _limbViews)
@@ -600,7 +599,7 @@ namespace Band_Aid
             hpOutline.effectColor = new Color(0, 0, 0, 0.85f);
             hpOutline.effectDistance = new Vector2(0.5f, -0.5f);
 
-            // "X" destruÃ­do (alinhado Ã  direita da barra)
+            // "X" destruído (alinhado à direita da barra)
             limb.DestroyedX = MakeText(barBg.transform, "DestroyedX",
                 new Vector2(BAR_WIDTH / 2 - 7, 0), new Vector2(12, BAR_HEIGHT),
                 "âœ•", 9, TextAnchor.MiddleCenter, COL_DESTROYED, FontStyle.Normal);
@@ -609,7 +608,7 @@ namespace Band_Aid
             xOutline.effectDistance = new Vector2(0.5f, -0.5f);
             limb.DestroyedX.gameObject.SetActive(false);
 
-            // Slots de Ã­cones de efeitos (tamanho aumentado)
+            // Slots de ícones de efeitos (tamanho aumentado)
             limb.EffectSlots = new Image[MAX_EFFECTS];
             for (int i = 0; i < MAX_EFFECTS; i++)
             {
@@ -672,7 +671,7 @@ namespace Band_Aid
                 if (hc == null || profile == null)
                 { _subtitleText.text = "INDISPONÃVEL"; return; }
 
-                // === AUTO-CLOSE: fechar HUD se mÃ©dico se afastou do paciente ===
+                // === AUTO-CLOSE: fechar HUD se médico se afastou do paciente ===
                 var mainPlayer = Comfort.Common.Singleton<GameWorld>.Instance?.MainPlayer;
                 if (mainPlayer != null && _targetPlayer != null)
                 {
@@ -685,7 +684,7 @@ namespace Band_Aid
                     {
                         Logger.LogInfo($"Paciente distante ({dist:F1}m > {maxDist:F1}m), fechando HUD.");
                         HideUI();
-                        // Notificar BandAidPlugin para desativar modo mÃ©dico
+                        // Notificar BandAidPlugin para desativar modo médico
                         BandAidController.Instance.DeactivateMedicModeExternal();
                         return;
                     }
@@ -718,7 +717,7 @@ namespace Band_Aid
                 _globalHpText.text = $"{Mathf.Round(totalCur)}";
                 _ecgHpRatio = totalRatio;
 
-                // Item 2: Cor do HP no tÃ­tulo e no nome do paciente
+                // Item 2: Cor do HP no título e no nome do paciente
                 _titleText.color = hpColor;
                 _subtitleText.color = hpColor;
             }
@@ -728,7 +727,7 @@ namespace Band_Aid
             }
         }
 
-        // === ECG UPDATE (pulsos contÃ­nuos, ritmo baseado no BPM/HP) ===
+        // === ECG UPDATE (pulsos contínuos, ritmo baseado no BPM/HP) ===
         private int _ecgWavePos = 0;
         private float _ecgBeatTimer = 0f;
         private bool _ecgPulseActive = false;
@@ -740,12 +739,12 @@ namespace Band_Aid
             // Radar sweep timer
             _radarTimer += Time.deltaTime;
 
-            // BPM dinÃ¢mico: HP alto = 65bpm (calmo), HP baixo = 140bpm (taquicardia)
+            // BPM dinâmico: HP alto = 65bpm (calmo), HP baixo = 140bpm (taquicardia)
             float bpm = Mathf.Lerp(200f, 100f, _ecgHpRatio);
             float beatInterval = 60f / bpm;
 
             // Velocidade de scroll proporcional ao BPM
-            // BPM alto = scroll mais rÃ¡pido para manter proporÃ§Ã£o visual correta
+            // BPM alto = scroll mais rápido para manter proporção visual correta
             float basePixelsPerSec = ECG_WIDTH / 4f;
             float bpmFactor = bpm / 80f; // Normalizado para 80bpm
             float pixelsPerSec = basePixelsPerSec * Mathf.Lerp(0.8f, 1.4f, (bpmFactor - 0.8f) / 0.95f);
@@ -769,7 +768,7 @@ namespace Band_Aid
                     {
                         _ecgWavePos = 0;
                         _ecgPulseActive = false;
-                        _ecgBeatTimer = 0f; // Reset timer para prÃ³ximo batimento
+                        _ecgBeatTimer = 0f; // Reset timer para próximo batimento
                     }
                 }
                 else
@@ -777,7 +776,7 @@ namespace Band_Aid
                     // Baseline plana entre batimentos
                     _ecgBuffer[_ecgWritePos] = 0.5f;
 
-                    // Inicia novo pulso quando intervalo BPM Ã© atingido
+                    // Inicia novo pulso quando intervalo BPM é atingido
                     if (_ecgBeatTimer >= beatInterval && _ecgHpRatio > 0f)
                     {
                         _ecgPulseActive = true;
@@ -789,19 +788,19 @@ namespace Band_Aid
 
             RenderEcgTexture();
 
-            // === PULSAR O CORAÃ‡ÃƒO sincronizado com o ECG ===
+            // === PULSAR O CORAÇÃO sincronizado com o ECG ===
             if (_ecgLabel != null)
             {
                 int lastIdx = (_ecgWritePos + ECG_WIDTH - 1) % ECG_WIDTH;
                 float currentVal = _ecgBuffer[lastIdx];
-                // Desvio da baseline (0.5) â€” quanto maior, mais o coraÃ§Ã£o pulsa
+                // Desvio da baseline (0.5) — quanto maior, mais o coração pulsa
                 float deviation = Mathf.Abs(currentVal - 0.5f) * 2f; // 0.0 a ~1.0
-                // Escala: 1.0 (baseline) atÃ© 2.0 (pico R)
+                // Escala: 1.0 (baseline) até 2.0 (pico R)
                 float scale = 1f + deviation * 1.5f;
                 _ecgLabel.transform.localScale = Vector3.Lerp(
                     _ecgLabel.transform.localScale,
                     new Vector3(scale, scale, 1f),
-                    Time.deltaTime * 15f); // Suaviza a transiÃ§Ã£o
+                    Time.deltaTime * 15f); // Suaviza a transição
             }
         }
 
@@ -889,7 +888,7 @@ namespace Band_Aid
                         }
                     }
 
-                    // Borda sÃ³lida no lado direito (2px de largura)
+                    // Borda sólida no lado direito (2px de largura)
                     for (int bx = sweepRight; bx >= Mathf.Max(0, sweepRight - 1); bx--)
                     {
                         for (int y = 0; y < ECG_HEIGHT; y++)
@@ -901,7 +900,7 @@ namespace Band_Aid
             }
 
             // === BOLINHA BRILHANTE no final direito do ECG ===
-            // PosiÃ§Ã£o Y = Ãºltimo valor do buffer (ponta da linha)
+            // Posição Y = último valor do buffer (ponta da linha)
             {
                 int lastBufIdx = (_ecgWritePos + ECG_WIDTH - 1) % ECG_WIDTH;
                 float lastVal = _ecgBuffer[lastBufIdx];
@@ -924,7 +923,7 @@ namespace Band_Aid
 
                         if (dist <= coreRadius)
                         {
-                            // NÃºcleo branco puro
+                            // Núcleo branco puro
                             pixels[py * ECG_WIDTH + px] = new Color32(255, 255, 255, 255);
                         }
                         else if (dist <= glowRadius)
@@ -1009,7 +1008,7 @@ namespace Band_Aid
         private void UpdateEffects(IHealthController hc, EBodyPart part, LimbUI limb)
         {
             int idx = 0;
-            // TORNIQUETE DESATIVADO â€” manter vanilla por enquanto
+            // TORNIQUETE DESATIVADO — manter vanilla por enquanto
             // if (TourniquetManager.HasTourniquet(part))
             //     TryShowEffectDirect(_sprTourniquet, COL_ORANGE, limb, ref idx);
 

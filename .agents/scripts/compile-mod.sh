@@ -110,6 +110,7 @@ resolve_references() {
     "UnityEngine.InputLegacyModule.dll|$spt/EscapeFromTarkov_Data/Managed/UnityEngine.InputLegacyModule.dll"
     "UnityEngine.PhysicsModule.dll|$spt/EscapeFromTarkov_Data/Managed/UnityEngine.PhysicsModule.dll"
     "UnityEngine.AnimationModule.dll|$spt/EscapeFromTarkov_Data/Managed/UnityEngine.AnimationModule.dll"
+    "UnityEngine.AudioModule.dll|$spt/EscapeFromTarkov_Data/Managed/UnityEngine.AudioModule.dll"
     "Comfort.dll|$spt/EscapeFromTarkov_Data/Managed/Comfort.dll"
     "ItemComponent.Types.dll|$spt/EscapeFromTarkov_Data/Managed/ItemComponent.Types.dll"
     "Sirenix.Serialization.dll|$spt/EscapeFromTarkov_Data/Managed/Sirenix.Serialization.dll"
