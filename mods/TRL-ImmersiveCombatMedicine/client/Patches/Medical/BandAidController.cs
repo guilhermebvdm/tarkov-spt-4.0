@@ -712,24 +712,31 @@ namespace TRLImmersiveCombatMedicine
 
                         private void ScanForPatient()
         {
-            if (_isMedicModeActive) return;
-            var camera = Camera.main;
-            if (camera == null) return;
+                                    if (_isMedicModeActive) return;
             var mainPlayer = Singleton<GameWorld>.Instance.MainPlayer;
             if (mainPlayer == null) return;
+            
+            // Usar LookDirection do jogador ao invés do Camera.main que pode ser null no SPT 4.0
+            Vector3 origin = mainPlayer.PlayerBones.WeaponRoot.position;
+            Vector3 direction = mainPlayer.LookDirection;
 
-            // Incluimos Deadbody para quando o amigo estiver no ragdoll
-            LayerMask mask = LayerMask.GetMask("Player", "HighPolyCollider", "HitCollider", "Deadbody");
-            Ray ray = new Ray(camera.transform.position, camera.transform.forward);
+                                    // Detectar todas as camadas; o Unity rejeita lixo (paredes/chão) através do GetComponentInParent<Player>
+            LayerMask mask = Physics.AllLayers;
+            Ray ray = new Ray(origin, direction);
             
             Player closest = null;
             float closestDist = float.MaxValue;
 
             // Usar RaycastAll para evitar que o corpo do prÃ³prio MainPlayer bloqueie o tiro
             var hits = Physics.SphereCastAll(ray, 0.4f, 2.5f, mask);
+            TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"ScanForPatient: SphereCastAll hits: {hits.Length}");
             foreach (var hit in hits)
             {
                 Player p = Singleton<GameWorld>.Instance.GetPlayerByCollider(hit.collider);
+                if (p == null) p = hit.collider.GetComponentInParent<Player>();
+                
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($" Hit: {hit.collider.name} (Layer: {LayerMask.LayerToName(hit.collider.gameObject.layer)}) -> Player: {p?.Profile?.Nickname ?? "null"}");
+
                 if (p != null && p != mainPlayer)
                 {
                     float dist = Vector3.Distance(mainPlayer.Position, p.Position);
@@ -744,7 +751,30 @@ namespace TRLImmersiveCombatMedicine
             // Fallback para perto (OverlapSphere)
             if (closest == null)
             {
-                Collider[] nearby = Physics.OverlapSphere(camera.transform.position, 1.5f, mask);
+                Collider[] nearby = Physics.OverlapSphere(origin, 1.5f, mask);
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"ScanForPatient: OverlapSphere hits: {nearby.Length}");
+                foreach (var col in nearby)
+                {
+                    Player p = Singleton<GameWorld>.Instance.GetPlayerByCollider(col);
+                    if (p == null) p = col.GetComponentInParent<Player>();
+                    
+                    if (p != null && p != mainPlayer)
+                    {
+                        TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($" Nearby Hit: {col.name} -> Player: {p.Profile?.Nickname}");
+                        float dist = Vector3.Distance(mainPlayer.Position, p.Position);
+                        if (dist < closestDist)
+                        {
+                            closestDist = dist;
+                            closest = p;
+                        }
+                    }
+                }
+            }
+
+            // Fallback para perto (OverlapSphere)
+            if (closest == null)
+            {
+                Collider[] nearby = Physics.OverlapSphere(origin, 1.5f, mask);
                 foreach (var col in nearby)
                 {
                     Player p = Singleton<GameWorld>.Instance.GetPlayerByCollider(col);
@@ -868,6 +898,11 @@ namespace TRLImmersiveCombatMedicine
         }
     }
 }
+
+
+
+
+
 
 
 
