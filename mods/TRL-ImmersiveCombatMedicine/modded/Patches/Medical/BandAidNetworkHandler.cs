@@ -124,9 +124,11 @@ namespace Band_Aid
                     Logger.LogInfo("Host retransmitiu pacote de cura para clients.");
                 }
 
-                // Se headless (sem MainPlayer), apenas retransmitir — não aplicar nada local
+                // Se headless (sem MainPlayer): retransmitir e, se o paciente for um
+                // BOT local (ref: CR-01-01 — headless é o dono dos bots), aplicar nele.
                 if (mainPlayer == null)
                 {
+                    if (packet.ApplyFullTreatment && TryApplyFullTreatmentOnLocalBot(packet)) return;
                     Logger.LogInfo("Headless: pacote retransmitido, sem ação local.");
                     return;
                 }
@@ -151,6 +153,10 @@ namespace Band_Aid
                 ApplyFullTreatmentLocally(localPlayer, packet);
                 return;
             }
+
+            // ref: CR-01-01 — paciente pode ser um BOT local deste processo (host-player
+            // é o dono dos bots): aplicar em nome dele.
+            if (packet.ApplyFullTreatment && TryApplyFullTreatmentOnLocalBot(packet)) return;
 
             // ref: G-1 (coop-heal-matrix) — pacote FullTreatment é EXCLUSIVO do paciente.
             // Receptor terceiro (host-player no C1→C2, ou 3º client no lobby) não pode
@@ -508,6 +514,15 @@ namespace Band_Aid
                     var relay = packet;
                     Singleton<FikaServer>.Instance.SendData(ref relay, DeliveryMethod.ReliableOrdered, true);
                 }
+
+                // ref: CR-01-01 — BOTS nunca são MainPlayer de ninguém: o DONO deles
+                // (host/headless, onde têm ActiveHealthController) valida e responde
+                // o handshake em nome do bot — sem isso, client mirando bot = timeout.
+                if (mainPlayer == null || packet.PatientProfileId != mainPlayer.ProfileId)
+                {
+                    if (TryAnswerForLocalBot(packet)) return;
+                }
+
                 if (mainPlayer == null) return;
             }
 
@@ -543,6 +558,82 @@ namespace Band_Aid
                 Singleton<FikaServer>.Instance.SendData(ref response, DeliveryMethod.ReliableOrdered, true);
             else if (Singleton<FikaClient>.Instantiated)
                 Singleton<FikaClient>.Instance.SendData(ref response, DeliveryMethod.ReliableOrdered);
+        }
+
+        /// <summary>
+        /// ref: CR-01-01 — no host/headless, aplica o FullTreatment em nome de um BOT
+        /// local (paciente com ActiveHealthController que não é o MainPlayer).
+        /// Retorna false se o paciente não é um bot local deste processo.
+        /// </summary>
+        private static bool TryApplyFullTreatmentOnLocalBot(BandAidHealPacket packet)
+        {
+            try
+            {
+                var gameWorld = Singleton<GameWorld>.Instance;
+                if (gameWorld == null) return false;
+
+                var players = gameWorld.AllAlivePlayersList;
+                for (int i = 0; i < players.Count; i++)
+                {
+                    var p = players[i];
+                    if (p == null || p.ProfileId != packet.PatientProfileId) continue;
+                    if (!(p.HealthController is ActiveHealthController)) return false; // observado — não sou o dono
+                    Logger.LogInfo($"Aplicando FullTreatment EM NOME do bot local {p.Profile?.Nickname}.");
+                    ApplyFullTreatmentLocally(p, packet);
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogWarning($"TryApplyFullTreatmentOnLocalBot: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// ref: CR-01-01 — no host/headless, valida e responde o HealCheck em nome de
+        /// um BOT local (paciente com ActiveHealthController que não é MainPlayer).
+        /// Retorna false se o paciente não é um bot local deste processo.
+        /// </summary>
+        private static bool TryAnswerForLocalBot(BandAidHealCheckPacket packet)
+        {
+            try
+            {
+                var gameWorld = Singleton<GameWorld>.Instance;
+                if (gameWorld == null || !Singleton<FikaServer>.Instantiated) return false;
+
+                Player bot = null;
+                var players = gameWorld.AllAlivePlayersList;
+                for (int i = 0; i < players.Count; i++)
+                {
+                    var p = players[i];
+                    if (p != null && p.ProfileId == packet.PatientProfileId) { bot = p; break; }
+                }
+                if (bot == null || !(bot.HealthController is ActiveHealthController)) return false;
+
+                CacheTypes();
+                var stats = ItemDatabase.GetStats(packet.ItemTemplateId);
+                bool approved = stats != null && MedicalLogic.CanUseItem(bot, stats);
+                string denyReason = approved ? "" : (stats == null ? "Item desconhecido." : $"{stats.Name}: Sem ferimento compatível.");
+
+                var response = new BandAidHealCheckResponsePacket
+                {
+                    DoctorProfileId = packet.DoctorProfileId,
+                    PatientProfileId = packet.PatientProfileId,
+                    ItemTemplateId = packet.ItemTemplateId,
+                    Approved = approved,
+                    DenyReason = denyReason
+                };
+                Singleton<FikaServer>.Instance.SendData(ref response, DeliveryMethod.ReliableOrdered, true);
+                Logger.LogInfo($"HealCheck respondido EM NOME do bot {bot.Profile?.Nickname} | Approved={approved}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogWarning($"TryAnswerForLocalBot: {ex.Message}");
+                return false;
+            }
         }
 
         /// <summary>
