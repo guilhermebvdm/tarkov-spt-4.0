@@ -62,15 +62,18 @@ namespace TRLImmersiveCombatMedicine
             string pluginPath = System.IO.Path.GetDirectoryName(Info.Location);
             ImageLoader.Init(pluginPath);
 
-            var uiHost = new GameObject("BandAidUI_Host");
-            DontDestroyOnLoad(uiHost);
-            uiHost.AddComponent<BandAidUI>();
-            uiHost.AddComponent<BandAidController>();
+            // Componentes no GameObject do PRÓPRIO plugin (BepInEx manager): o boot do
+            // EFT destrói GameObjects órfãos criados durante o chainloader (provado por
+            // [DEBUG-ICM] OnDestroy logo após "Chainloader startup complete") — o manager
+            // do BepInEx sobrevive a sessão inteira. DontDestroyOnLoad NÃO protege de
+            // destruição explícita.
+            gameObject.AddComponent<BandAidUI>();
+            gameObject.AddComponent<BandAidController>();
 
             // [DEBUG-ICM] sondas de lifecycle — remover após diagnóstico do prompt F
-            _debugHost = uiHost;
-            _debugCtrl = uiHost.GetComponent<BandAidController>();
-            ModLogger.LogWarning($"[DEBUG-ICM] uiHost criado | active={uiHost.activeInHierarchy} | ctrl!=null={_debugCtrl != null} | ctrl.enabled={(_debugCtrl != null ? _debugCtrl.enabled.ToString() : "n/a")}");
+            _debugHost = gameObject;
+            _debugCtrl = gameObject.GetComponent<BandAidController>();
+            ModLogger.LogWarning($"[DEBUG-ICM] componentes no plugin GO | active={gameObject.activeInHierarchy} | ctrl!=null={_debugCtrl != null} | ctrl.enabled={(_debugCtrl != null ? _debugCtrl.enabled.ToString() : "n/a")}");
 
             // Setup reflection para TrueTrauma
             TraumaState.PlayerField = typeof(EFT.MovementContext).GetField("_player", BindingFlags.NonPublic | BindingFlags.Instance);

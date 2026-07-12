@@ -599,8 +599,8 @@
       "source_file": "Patches/Medical/BandAidController.cs",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_medical_bandaidcontroller_cs",
-      "community": 1,
+      "id": "medical_bandaidcontroller",
+      "community": 0,
       "norm_label": "bandaidcontroller.cs"
     },
     {
@@ -610,7 +610,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "medical_bandaidcontroller_trlimmersivecombatmedicine",
-      "community": 1,
+      "community": 0,
       "norm_label": "trlimmersivecombatmedicine"
     },
     {
@@ -654,40 +654,10 @@
       "norm_label": "player"
     },
     {
-      "label": "GameObject",
-      "file_type": "code",
-      "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L32",
-      "_origin": "ast",
-      "id": "patches_medical_bandaidcontroller_cs_gameobject",
-      "community": 1,
-      "norm_label": "gameobject"
-    },
-    {
-      "label": "Text",
-      "file_type": "code",
-      "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L33",
-      "_origin": "ast",
-      "id": "patches_medical_bandaidcontroller_cs_text",
-      "community": 1,
-      "norm_label": "text"
-    },
-    {
-      "label": "Image",
-      "file_type": "code",
-      "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L34",
-      "_origin": "ast",
-      "id": "patches_medical_bandaidcontroller_cs_image",
-      "community": 1,
-      "norm_label": "image"
-    },
-    {
       "label": "Item",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L38",
+      "source_location": "L32",
       "_origin": "ast",
       "id": "patches_medical_bandaidcontroller_cs_item",
       "community": 1,
@@ -697,7 +667,7 @@
       "label": "Coroutine",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L39",
+      "source_location": "L33",
       "_origin": "ast",
       "id": "coroutine",
       "community": 1,
@@ -707,7 +677,7 @@
       "label": "GameWorld",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L42",
+      "source_location": "L36",
       "_origin": "ast",
       "id": "gameworld",
       "community": 1,
@@ -717,7 +687,7 @@
       "label": "Harmony",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L45",
+      "source_location": "L39",
       "_origin": "ast",
       "id": "patches_medical_bandaidcontroller_cs_harmony",
       "community": 1,
@@ -727,7 +697,7 @@
       "label": "float",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L56",
+      "source_location": "L50",
       "_origin": "ast",
       "id": "patches_medical_bandaidcontroller_cs_float",
       "community": 1,
@@ -737,17 +707,37 @@
       "label": ".Awake()",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L70",
+      "source_location": "L64",
       "_origin": "ast",
       "id": "medical_bandaidcontroller_bandaidcontroller_awake",
       "community": 1,
       "norm_label": ".awake()"
     },
     {
+      "label": ".OnEnable()",
+      "file_type": "code",
+      "source_file": "Patches/Medical/BandAidController.cs",
+      "source_location": "L75",
+      "_origin": "ast",
+      "id": "medical_bandaidcontroller_bandaidcontroller_onenable",
+      "community": 1,
+      "norm_label": ".onenable()"
+    },
+    {
+      "label": ".OnDisable()",
+      "file_type": "code",
+      "source_file": "Patches/Medical/BandAidController.cs",
+      "source_location": "L76",
+      "_origin": "ast",
+      "id": "medical_bandaidcontroller_bandaidcontroller_ondisable",
+      "community": 1,
+      "norm_label": ".ondisable()"
+    },
+    {
       "label": ".OnDestroy()",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L80",
+      "source_location": "L78",
       "_origin": "ast",
       "id": "medical_bandaidcontroller_bandaidcontroller_ondestroy",
       "community": 1,
@@ -757,7 +747,7 @@
       "label": ".OnHealCheckResponseHandler()",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L85",
+      "source_location": "L84",
       "_origin": "ast",
       "id": "medical_bandaidcontroller_bandaidcontroller_onhealcheckresponsehandler",
       "community": 1,
@@ -767,37 +757,17 @@
       "label": "BandAidHealCheckResponsePacket",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L85",
+      "source_location": "L84",
       "_origin": "ast",
       "id": "patches_medical_bandaidcontroller_cs_bandaidhealcheckresponsepacket",
       "community": 1,
       "norm_label": "bandaidhealcheckresponsepacket"
     },
     {
-      "label": ".CreateInteractHUD()",
-      "file_type": "code",
-      "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L117",
-      "_origin": "ast",
-      "id": "medical_bandaidcontroller_bandaidcontroller_createinteracthud",
-      "community": 1,
-      "norm_label": ".createinteracthud()"
-    },
-    {
-      "label": ".UpdateInteractFont()",
-      "file_type": "code",
-      "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L176",
-      "_origin": "ast",
-      "id": "medical_bandaidcontroller_bandaidcontroller_updateinteractfont",
-      "community": 1,
-      "norm_label": ".updateinteractfont()"
-    },
-    {
       "label": ".Update()",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L189",
+      "source_location": "L119",
       "_origin": "ast",
       "id": "medical_bandaidcontroller_bandaidcontroller_update",
       "community": 1,
@@ -807,7 +777,7 @@
       "label": "Dictionary",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L279",
+      "source_location": "L221",
       "_origin": "ast",
       "id": "patches_medical_bandaidcontroller_cs_dictionary",
       "community": 1,
@@ -817,7 +787,7 @@
       "label": ".CheckManualInputs()",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L290",
+      "source_location": "L232",
       "_origin": "ast",
       "id": "medical_bandaidcontroller_bandaidcontroller_checkmanualinputs",
       "community": 1,
@@ -827,7 +797,7 @@
       "label": ".IsSlotKeyTriggered()",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L319",
+      "source_location": "L261",
       "_origin": "ast",
       "id": "medical_bandaidcontroller_bandaidcontroller_isslotkeytriggered",
       "community": 1,
@@ -837,7 +807,7 @@
       "label": "KeyGroup",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L319",
+      "source_location": "L261",
       "_origin": "ast",
       "id": "keygroup",
       "community": 1,
@@ -847,7 +817,7 @@
       "label": ".ProcessHeal()",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L350",
+      "source_location": "L292",
       "_origin": "ast",
       "id": "medical_bandaidcontroller_bandaidcontroller_processheal",
       "community": 1,
@@ -857,7 +827,7 @@
       "label": "EBoundItem",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L350",
+      "source_location": "L292",
       "_origin": "ast",
       "id": "ebounditem",
       "community": 1,
@@ -867,7 +837,7 @@
       "label": "ItemStats",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L390",
+      "source_location": "L332",
       "_origin": "ast",
       "id": "patches_medical_bandaidcontroller_cs_itemstats",
       "community": 1,
@@ -877,7 +847,7 @@
       "label": ".CheckPressMode()",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L397",
+      "source_location": "L339",
       "_origin": "ast",
       "id": "medical_bandaidcontroller_bandaidcontroller_checkpressmode",
       "community": 1,
@@ -887,7 +857,7 @@
       "label": "KeyboardShortcut",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L397",
+      "source_location": "L339",
       "_origin": "ast",
       "id": "keyboardshortcut",
       "community": 1,
@@ -897,7 +867,7 @@
       "label": "EBandAidPressMode",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L397",
+      "source_location": "L339",
       "_origin": "ast",
       "id": "ebandaidpressmode",
       "community": 1,
@@ -907,7 +877,7 @@
       "label": ".SendShoulderTap()",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L452",
+      "source_location": "L394",
       "_origin": "ast",
       "id": "medical_bandaidcontroller_bandaidcontroller_sendshouldertap",
       "community": 1,
@@ -917,7 +887,7 @@
       "label": ".EmergencyDrop()",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L473",
+      "source_location": "L415",
       "_origin": "ast",
       "id": "medical_bandaidcontroller_bandaidcontroller_emergencydrop",
       "community": 1,
@@ -927,7 +897,7 @@
       "label": ".OnPatientDiedDuringHeal()",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L553",
+      "source_location": "L495",
       "_origin": "ast",
       "id": "medical_bandaidcontroller_bandaidcontroller_onpatientdiedduringheal",
       "community": 1,
@@ -937,7 +907,7 @@
       "label": ".HealRoutine()",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L559",
+      "source_location": "L501",
       "_origin": "ast",
       "id": "medical_bandaidcontroller_bandaidcontroller_healroutine",
       "community": 1,
@@ -947,7 +917,7 @@
       "label": "IEnumerator",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L559",
+      "source_location": "L501",
       "_origin": "ast",
       "id": "ienumerator",
       "community": 1,
@@ -957,7 +927,7 @@
       "label": ".CleanupHealState()",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L662",
+      "source_location": "L604",
       "_origin": "ast",
       "id": "medical_bandaidcontroller_bandaidcontroller_cleanuphealstate",
       "community": 1,
@@ -967,27 +937,47 @@
       "label": ".CancelHealInProgress()",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L677",
+      "source_location": "L619",
       "_origin": "ast",
       "id": "medical_bandaidcontroller_bandaidcontroller_cancelhealinprogress",
       "community": 1,
       "norm_label": ".cancelhealinprogress()"
     },
     {
-      "label": ".ScanForPatient()",
+      "label": ".EnsureMedicInteractables()",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L713",
+      "source_location": "L661",
       "_origin": "ast",
-      "id": "medical_bandaidcontroller_bandaidcontroller_scanforpatient",
+      "id": "medical_bandaidcontroller_bandaidcontroller_ensuremedicinteractables",
       "community": 1,
-      "norm_label": ".scanforpatient()"
+      "norm_label": ".ensuremedicinteractables()"
+    },
+    {
+      "label": ".ActivateMedicModeExternal()",
+      "file_type": "code",
+      "source_file": "Patches/Medical/BandAidController.cs",
+      "source_location": "L681",
+      "_origin": "ast",
+      "id": "medical_bandaidcontroller_bandaidcontroller_activatemedicmodeexternal",
+      "community": 1,
+      "norm_label": ".activatemedicmodeexternal()"
+    },
+    {
+      "label": ".SendShoulderTapExternal()",
+      "file_type": "code",
+      "source_file": "Patches/Medical/BandAidController.cs",
+      "source_location": "L690",
+      "_origin": "ast",
+      "id": "medical_bandaidcontroller_bandaidcontroller_sendshouldertapexternal",
+      "community": 1,
+      "norm_label": ".sendshouldertapexternal()"
     },
     {
       "label": ".ActivateMedicMode()",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L796",
+      "source_location": "L695",
       "_origin": "ast",
       "id": "medical_bandaidcontroller_bandaidcontroller_activatemedicmode",
       "community": 1,
@@ -997,7 +987,7 @@
       "label": ".DeactivateMedicMode()",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L804",
+      "source_location": "L703",
       "_origin": "ast",
       "id": "medical_bandaidcontroller_bandaidcontroller_deactivatemedicmode",
       "community": 1,
@@ -1007,7 +997,7 @@
       "label": ".DeactivateMedicModeExternal()",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L842",
+      "source_location": "L741",
       "_origin": "ast",
       "id": "medical_bandaidcontroller_bandaidcontroller_deactivatemedicmodeexternal",
       "community": 1,
@@ -1017,21 +1007,11 @@
       "label": ".ResetAllState()",
       "file_type": "code",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L850",
+      "source_location": "L749",
       "_origin": "ast",
       "id": "medical_bandaidcontroller_bandaidcontroller_resetallstate",
       "community": 1,
       "norm_label": ".resetallstate()"
-    },
-    {
-      "label": ".LateUpdate()",
-      "file_type": "code",
-      "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L874",
-      "_origin": "ast",
-      "id": "medical_bandaidcontroller_bandaidcontroller_lateupdate",
-      "community": 1,
-      "norm_label": ".lateupdate()"
     },
     {
       "label": "BandAidHealCheckPacket.cs",
@@ -1649,7 +1629,7 @@
       "source_file": "Patches/Medical/BandAidUI.cs",
       "source_location": "L45",
       "_origin": "ast",
-      "id": "patches_medical_bandaidui_cs_text",
+      "id": "text",
       "community": 0,
       "norm_label": "text"
     },
@@ -1659,7 +1639,7 @@
       "source_file": "Patches/Medical/BandAidUI.cs",
       "source_location": "L46",
       "_origin": "ast",
-      "id": "patches_medical_bandaidui_cs_image",
+      "id": "image",
       "community": 0,
       "norm_label": "image"
     },
@@ -2124,6 +2104,106 @@
       "norm_label": "ebandaidpressmode.cs"
     },
     {
+      "label": "MedicActionsPatch.cs",
+      "file_type": "code",
+      "source_file": "Patches/Medical/MedicActionsPatch.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "medical_medicactionspatch",
+      "community": 25,
+      "norm_label": "medicactionspatch.cs"
+    },
+    {
+      "label": "TRLImmersiveCombatMedicine",
+      "file_type": "code",
+      "source_file": "Patches/Medical/MedicActionsPatch.cs",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "medical_medicactionspatch_trlimmersivecombatmedicine",
+      "community": 25,
+      "norm_label": "trlimmersivecombatmedicine"
+    },
+    {
+      "label": "MedicActionsPatch",
+      "file_type": "code",
+      "source_file": "Patches/Medical/MedicActionsPatch.cs",
+      "source_location": "L14",
+      "_origin": "ast",
+      "id": "medical_medicactionspatch_medicactionspatch",
+      "community": 25,
+      "norm_label": "medicactionspatch"
+    },
+    {
+      "label": ".TargetMethod()",
+      "file_type": "code",
+      "source_file": "Patches/Medical/MedicActionsPatch.cs",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "medical_medicactionspatch_medicactionspatch_targetmethod",
+      "community": 25,
+      "norm_label": ".targetmethod()"
+    },
+    {
+      "label": "MethodBase",
+      "file_type": "code",
+      "source_file": "Patches/Medical/MedicActionsPatch.cs",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "patches_medical_medicactionspatch_cs_methodbase",
+      "community": 25,
+      "norm_label": "methodbase"
+    },
+    {
+      "label": ".Postfix()",
+      "file_type": "code",
+      "source_file": "Patches/Medical/MedicActionsPatch.cs",
+      "source_location": "L25",
+      "_origin": "ast",
+      "id": "medical_medicactionspatch_medicactionspatch_postfix",
+      "community": 25,
+      "norm_label": ".postfix()"
+    },
+    {
+      "label": "GamePlayerOwner",
+      "file_type": "code",
+      "source_file": "Patches/Medical/MedicActionsPatch.cs",
+      "source_location": "L25",
+      "_origin": "ast",
+      "id": "patches_medical_medicactionspatch_cs_gameplayerowner",
+      "community": 25,
+      "norm_label": "gameplayerowner"
+    },
+    {
+      "label": "GInterface177",
+      "file_type": "code",
+      "source_file": "Patches/Medical/MedicActionsPatch.cs",
+      "source_location": "L25",
+      "_origin": "ast",
+      "id": "ginterface177",
+      "community": 25,
+      "norm_label": "ginterface177"
+    },
+    {
+      "label": "ActionsReturnClass",
+      "file_type": "code",
+      "source_file": "Patches/Medical/MedicActionsPatch.cs",
+      "source_location": "L25",
+      "_origin": "ast",
+      "id": "patches_medical_medicactionspatch_cs_actionsreturnclass",
+      "community": 25,
+      "norm_label": "actionsreturnclass"
+    },
+    {
+      "label": "HarmonyPostfix",
+      "file_type": "code",
+      "source_file": "Patches/Medical/MedicActionsPatch.cs",
+      "source_location": "L25",
+      "_origin": "ast",
+      "id": "patches_medical_medicactionspatch_cs_harmonypostfix",
+      "community": 25,
+      "norm_label": "harmonypostfix"
+    },
+    {
       "label": "MedicHealPatch.cs",
       "file_type": "code",
       "source_file": "Patches/Medical/MedicHealPatch.cs",
@@ -2342,6 +2422,116 @@
       "id": "patches_medical_medichealpatch_cs_harmonypostfix",
       "community": 4,
       "norm_label": "harmonypostfix"
+    },
+    {
+      "label": "MedicInteractable.cs",
+      "file_type": "code",
+      "source_file": "Patches/Medical/MedicInteractable.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "medical_medicinteractable",
+      "community": 24,
+      "norm_label": "medicinteractable.cs"
+    },
+    {
+      "label": "TRLImmersiveCombatMedicine",
+      "file_type": "code",
+      "source_file": "Patches/Medical/MedicInteractable.cs",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "medical_medicinteractable_trlimmersivecombatmedicine",
+      "community": 24,
+      "norm_label": "trlimmersivecombatmedicine"
+    },
+    {
+      "label": "MedicInteractable",
+      "file_type": "code",
+      "source_file": "Patches/Medical/MedicInteractable.cs",
+      "source_location": "L14",
+      "_origin": "ast",
+      "id": "medical_medicinteractable_medicinteractable",
+      "community": 24,
+      "norm_label": "medicinteractable"
+    },
+    {
+      "label": "InteractableObject",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "interactableobject",
+      "community": 24,
+      "norm_label": "interactableobject"
+    },
+    {
+      "label": ".Ensure()",
+      "file_type": "code",
+      "source_file": "Patches/Medical/MedicInteractable.cs",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "medical_medicinteractable_medicinteractable_ensure",
+      "community": 24,
+      "norm_label": ".ensure()"
+    },
+    {
+      "label": "Player",
+      "file_type": "code",
+      "source_file": "Patches/Medical/MedicInteractable.cs",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "patches_medical_medicinteractable_cs_player",
+      "community": 24,
+      "norm_label": "player"
+    },
+    {
+      "label": ".GetActions()",
+      "file_type": "code",
+      "source_file": "Patches/Medical/MedicInteractable.cs",
+      "source_location": "L26",
+      "_origin": "ast",
+      "id": "medical_medicinteractable_medicinteractable_getactions",
+      "community": 24,
+      "norm_label": ".getactions()"
+    },
+    {
+      "label": "GamePlayerOwner",
+      "file_type": "code",
+      "source_file": "Patches/Medical/MedicInteractable.cs",
+      "source_location": "L26",
+      "_origin": "ast",
+      "id": "patches_medical_medicinteractable_cs_gameplayerowner",
+      "community": 24,
+      "norm_label": "gameplayerowner"
+    },
+    {
+      "label": "ActionsReturnClass",
+      "file_type": "code",
+      "source_file": "Patches/Medical/MedicInteractable.cs",
+      "source_location": "L26",
+      "_origin": "ast",
+      "id": "patches_medical_medicinteractable_cs_actionsreturnclass",
+      "community": 24,
+      "norm_label": "actionsreturnclass"
+    },
+    {
+      "label": ".Examine()",
+      "file_type": "code",
+      "source_file": "Patches/Medical/MedicInteractable.cs",
+      "source_location": "L53",
+      "_origin": "ast",
+      "id": "medical_medicinteractable_medicinteractable_examine",
+      "community": 24,
+      "norm_label": ".examine()"
+    },
+    {
+      "label": ".ShoulderTap()",
+      "file_type": "code",
+      "source_file": "Patches/Medical/MedicInteractable.cs",
+      "source_location": "L58",
+      "_origin": "ast",
+      "id": "medical_medicinteractable_medicinteractable_shouldertap",
+      "community": 24,
+      "norm_label": ".shouldertap()"
     },
     {
       "label": "MedicalLogic.cs",
@@ -3139,7 +3329,7 @@
       "source_file": "Patches/Trauma/FikaRevivePatch.cs",
       "source_location": "L24",
       "_origin": "ast",
-      "id": "actionsreturnclass",
+      "id": "patches_trauma_fikarevivepatch_cs_actionsreturnclass",
       "community": 8,
       "norm_label": "actionsreturnclass"
     },
@@ -3649,7 +3839,7 @@
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_trlimmersivecombatmedicineplugin_cs",
+      "id": "trlimmersivecombatmedicineplugin",
       "community": 9,
       "norm_label": "trlimmersivecombatmedicineplugin.cs"
     },
@@ -3659,7 +3849,7 @@
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
       "source_location": "L10",
       "_origin": "ast",
-      "id": "client_trlimmersivecombatmedicineplugin_trlimmersivecombatmedicine",
+      "id": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicine",
       "community": 9,
       "norm_label": "trlimmersivecombatmedicine"
     },
@@ -3669,7 +3859,7 @@
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
       "source_location": "L12",
       "_origin": "ast",
-      "id": "client_trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
+      "id": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
       "community": 9,
       "norm_label": "trlimmersivecombatmedicineplugin"
     },
@@ -3719,7 +3909,7 @@
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
       "source_location": "L35",
       "_origin": "ast",
-      "id": "client_trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_awake",
+      "id": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_awake",
       "community": 9,
       "norm_label": ".awake()"
     },
@@ -3727,9 +3917,9 @@
       "label": ".OnDestroy()",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L108",
+      "source_location": "L116",
       "_origin": "ast",
-      "id": "client_trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_ondestroy",
+      "id": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_ondestroy",
       "community": 9,
       "norm_label": ".ondestroy()"
     },
@@ -3737,9 +3927,9 @@
       "label": ".OnHealCheckResponseHandler()",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L113",
+      "source_location": "L121",
       "_origin": "ast",
-      "id": "client_trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_onhealcheckresponsehandler",
+      "id": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_onhealcheckresponsehandler",
       "community": 9,
       "norm_label": ".onhealcheckresponsehandler()"
     },
@@ -3747,7 +3937,7 @@
       "label": "BandAidHealCheckResponsePacket",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L113",
+      "source_location": "L121",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_cs_bandaidhealcheckresponsepacket",
       "community": 9,
@@ -3757,19 +3947,49 @@
       "label": ".OnRaidStartCleanup()",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L118",
+      "source_location": "L126",
       "_origin": "ast",
-      "id": "client_trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_onraidstartcleanup",
+      "id": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_onraidstartcleanup",
       "community": 9,
       "norm_label": ".onraidstartcleanup()"
+    },
+    {
+      "label": "GameObject",
+      "file_type": "code",
+      "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
+      "source_location": "L141",
+      "_origin": "ast",
+      "id": "trlimmersivecombatmedicineplugin_cs_gameobject",
+      "community": 9,
+      "norm_label": "gameobject"
+    },
+    {
+      "label": "BandAidController",
+      "file_type": "code",
+      "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
+      "source_location": "L142",
+      "_origin": "ast",
+      "id": "bandaidcontroller",
+      "community": 9,
+      "norm_label": "bandaidcontroller"
+    },
+    {
+      "label": "float",
+      "file_type": "code",
+      "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
+      "source_location": "L143",
+      "_origin": "ast",
+      "id": "trlimmersivecombatmedicineplugin_cs_float",
+      "community": 9,
+      "norm_label": "float"
     },
     {
       "label": ".Update()",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L132",
+      "source_location": "L145",
       "_origin": "ast",
-      "id": "client_trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_update",
+      "id": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_update",
       "community": 9,
       "norm_label": ".update()"
     }
@@ -3781,9 +4001,9 @@
       "source_file": "Fika/FikaBridge.cs",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_fika_fikabridge_cs",
-      "target": "fika_fikabridge_fikabridge",
-      "confidence_score": 1.0
+      "target": "fika_fikabridge_fikabridge"
     },
     {
       "relation": "contains",
@@ -3791,9 +4011,9 @@
       "source_file": "Fika/FikaBridge.cs",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_fika_fikabridge_cs",
-      "target": "fika_fikabridge_truetrauma",
-      "confidence_score": 1.0
+      "target": "fika_fikabridge_truetrauma"
     },
     {
       "relation": "method",
@@ -3843,9 +4063,9 @@
       "source_file": "Helpers/AggroHelper.cs",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_helpers_aggrohelper_cs",
-      "target": "helpers_aggrohelper_aggrohelper",
-      "confidence_score": 1.0
+      "target": "helpers_aggrohelper_aggrohelper"
     },
     {
       "relation": "contains",
@@ -3853,9 +4073,9 @@
       "source_file": "Helpers/AggroHelper.cs",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_helpers_aggrohelper_cs",
-      "target": "helpers_aggrohelper_truetrauma",
-      "confidence_score": 1.0
+      "target": "helpers_aggrohelper_truetrauma"
     },
     {
       "relation": "method",
@@ -4141,9 +4361,9 @@
       "source_file": "Helpers/ImageLoader.cs",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_helpers_imageloader_cs",
-      "target": "helpers_imageloader_band_aid",
-      "confidence_score": 1.0
+      "target": "helpers_imageloader_band_aid"
     },
     {
       "relation": "contains",
@@ -4151,9 +4371,9 @@
       "source_file": "Helpers/ImageLoader.cs",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_helpers_imageloader_cs",
-      "target": "helpers_imageloader_imageloader",
-      "confidence_score": 1.0
+      "target": "helpers_imageloader_imageloader"
     },
     {
       "relation": "references",
@@ -4278,9 +4498,9 @@
       "source_file": "Helpers/ItemDatabase.cs",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_helpers_itemdatabase_cs",
-      "target": "helpers_itemdatabase_band_aid",
-      "confidence_score": 1.0
+      "target": "helpers_itemdatabase_band_aid"
     },
     {
       "relation": "contains",
@@ -4288,9 +4508,9 @@
       "source_file": "Helpers/ItemDatabase.cs",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_helpers_itemdatabase_cs",
-      "target": "helpers_itemdatabase_itemdatabase",
-      "confidence_score": 1.0
+      "target": "helpers_itemdatabase_itemdatabase"
     },
     {
       "relation": "contains",
@@ -4298,9 +4518,9 @@
       "source_file": "Helpers/ItemDatabase.cs",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_helpers_itemdatabase_cs",
-      "target": "helpers_itemdatabase_itemstats",
-      "confidence_score": 1.0
+      "target": "helpers_itemdatabase_itemstats"
     },
     {
       "relation": "references",
@@ -4383,9 +4603,9 @@
       "source_file": "Helpers/VoiceAndHealthUtils.cs",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_helpers_voiceandhealthutils_cs",
-      "target": "helpers_voiceandhealthutils_healthutils",
-      "confidence_score": 1.0
+      "target": "helpers_voiceandhealthutils_healthutils"
     },
     {
       "relation": "contains",
@@ -4393,9 +4613,9 @@
       "source_file": "Helpers/VoiceAndHealthUtils.cs",
       "source_location": "L63",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_helpers_voiceandhealthutils_cs",
-      "target": "helpers_voiceandhealthutils_silencevoicepatch",
-      "confidence_score": 1.0
+      "target": "helpers_voiceandhealthutils_silencevoicepatch"
     },
     {
       "relation": "contains",
@@ -4403,9 +4623,9 @@
       "source_file": "Helpers/VoiceAndHealthUtils.cs",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_helpers_voiceandhealthutils_cs",
-      "target": "helpers_voiceandhealthutils_truetrauma",
-      "confidence_score": 1.0
+      "target": "helpers_voiceandhealthutils_truetrauma"
     },
     {
       "relation": "contains",
@@ -4413,9 +4633,9 @@
       "source_file": "Helpers/VoiceAndHealthUtils.cs",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_helpers_voiceandhealthutils_cs",
-      "target": "helpers_voiceandhealthutils_voicehelper",
-      "confidence_score": 1.0
+      "target": "helpers_voiceandhealthutils_voicehelper"
     },
     {
       "relation": "method",
@@ -4540,7 +4760,7 @@
       "source_file": "Patches/Medical/BandAidController.cs",
       "source_location": "L24",
       "weight": 1.0,
-      "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_medical_bandaidcontroller_cs",
+      "source": "medical_bandaidcontroller",
       "target": "medical_bandaidcontroller_bandaidcontroller",
       "confidence_score": 1.0
     },
@@ -4550,7 +4770,7 @@
       "source_file": "Patches/Medical/BandAidController.cs",
       "source_location": "L22",
       "weight": 1.0,
-      "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_medical_bandaidcontroller_cs",
+      "source": "medical_bandaidcontroller",
       "target": "medical_bandaidcontroller_trlimmersivecombatmedicine",
       "confidence_score": 1.0
     },
@@ -4561,8 +4781,8 @@
       "source_file": "Patches/Medical/BandAidController.cs",
       "source_location": "L15",
       "weight": 1.0,
-      "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_medical_bandaidcontroller_cs",
-      "target": "patches_medical_bandaidcontroller_cs_text",
+      "source": "medical_bandaidcontroller",
+      "target": "text",
       "confidence_score": 1.0
     },
     {
@@ -4623,6 +4843,16 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Patches/Medical/BandAidController.cs",
+      "source_location": "L681",
+      "weight": 1.0,
+      "source": "medical_bandaidcontroller_bandaidcontroller",
+      "target": "medical_bandaidcontroller_bandaidcontroller_activatemedicmodeexternal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/BandAidController.cs",
       "source_location": "L70",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -4673,16 +4903,6 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L117",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "medical_bandaidcontroller_bandaidcontroller",
-      "target": "medical_bandaidcontroller_bandaidcontroller_createinteracthud"
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/Medical/BandAidController.cs",
       "source_location": "L804",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -4713,6 +4933,16 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Patches/Medical/BandAidController.cs",
+      "source_location": "L661",
+      "weight": 1.0,
+      "source": "medical_bandaidcontroller_bandaidcontroller",
+      "target": "medical_bandaidcontroller_bandaidcontroller_ensuremedicinteractables",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/BandAidController.cs",
       "source_location": "L559",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -4733,21 +4963,31 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L874",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "medical_bandaidcontroller_bandaidcontroller",
-      "target": "medical_bandaidcontroller_bandaidcontroller_lateupdate"
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/Medical/BandAidController.cs",
       "source_location": "L80",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "medical_bandaidcontroller_bandaidcontroller",
       "target": "medical_bandaidcontroller_bandaidcontroller_ondestroy"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/BandAidController.cs",
+      "source_location": "L76",
+      "weight": 1.0,
+      "source": "medical_bandaidcontroller_bandaidcontroller",
+      "target": "medical_bandaidcontroller_bandaidcontroller_ondisable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/BandAidController.cs",
+      "source_location": "L75",
+      "weight": 1.0,
+      "source": "medical_bandaidcontroller_bandaidcontroller",
+      "target": "medical_bandaidcontroller_bandaidcontroller_onenable",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -4793,16 +5033,6 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L713",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "medical_bandaidcontroller_bandaidcontroller",
-      "target": "medical_bandaidcontroller_bandaidcontroller_scanforpatient"
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/Medical/BandAidController.cs",
       "source_location": "L452",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -4813,21 +5043,21 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L189",
+      "source_location": "L690",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "medical_bandaidcontroller_bandaidcontroller",
-      "target": "medical_bandaidcontroller_bandaidcontroller_update"
+      "target": "medical_bandaidcontroller_bandaidcontroller_sendshouldertapexternal",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L176",
+      "source_location": "L189",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "medical_bandaidcontroller_bandaidcontroller",
-      "target": "medical_bandaidcontroller_bandaidcontroller_updateinteractfont"
+      "target": "medical_bandaidcontroller_bandaidcontroller_update"
     },
     {
       "relation": "inherits",
@@ -4876,34 +5106,12 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L32",
-      "weight": 1.0,
-      "context": "field",
-      "confidence_score": 1.0,
-      "source": "medical_bandaidcontroller_bandaidcontroller",
-      "target": "patches_medical_bandaidcontroller_cs_gameobject"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/Medical/BandAidController.cs",
       "source_location": "L45",
       "weight": 1.0,
       "context": "field",
       "confidence_score": 1.0,
       "source": "medical_bandaidcontroller_bandaidcontroller",
       "target": "patches_medical_bandaidcontroller_cs_harmony"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L34",
-      "weight": 1.0,
-      "context": "field",
-      "confidence_score": 1.0,
-      "source": "medical_bandaidcontroller_bandaidcontroller",
-      "target": "patches_medical_bandaidcontroller_cs_image"
     },
     {
       "relation": "references",
@@ -4937,17 +5145,6 @@
       "confidence_score": 1.0,
       "source": "medical_bandaidcontroller_bandaidcontroller",
       "target": "patches_medical_bandaidcontroller_cs_player"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L33",
-      "weight": 1.0,
-      "context": "field",
-      "confidence_score": 1.0,
-      "source": "medical_bandaidcontroller_bandaidcontroller",
-      "target": "patches_medical_bandaidcontroller_cs_text"
     },
     {
       "relation": "inherits",
@@ -4989,6 +5186,17 @@
       "confidence_score": 1.0,
       "source": "medical_bandaidcontroller_bandaidcontroller_activatemedicmode",
       "target": "patches_medical_bandaidcontroller_cs_player"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/BandAidController.cs",
+      "source_location": "L681",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "medical_bandaidcontroller_bandaidcontroller_activatemedicmodeexternal",
+      "target": "patches_medical_bandaidcontroller_cs_player",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -5038,23 +5246,23 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Patches/Medical/BandAidController.cs",
+      "source_location": "L690",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "medical_bandaidcontroller_bandaidcontroller_sendshouldertapexternal",
+      "target": "patches_medical_bandaidcontroller_cs_player",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/BandAidController.cs",
       "source_location": "L559",
       "weight": 1.0,
       "context": "parameter_type",
       "confidence_score": 1.0,
       "source": "medical_bandaidcontroller_bandaidcontroller_healroutine",
       "target": "patches_medical_bandaidcontroller_cs_item"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L74",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "medical_bandaidcontroller_bandaidcontroller_awake",
-      "target": "medical_bandaidcontroller_bandaidcontroller_createinteracthud"
     },
     {
       "relation": "calls",
@@ -5077,17 +5285,6 @@
       "confidence_score": 1.0,
       "source": "medical_bandaidcontroller_bandaidcontroller_onhealcheckresponsehandler",
       "target": "patches_medical_bandaidcontroller_cs_bandaidhealcheckresponsepacket"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L885",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "medical_bandaidcontroller_bandaidcontroller_lateupdate",
-      "target": "medical_bandaidcontroller_bandaidcontroller_updateinteractfont"
     },
     {
       "relation": "calls",
@@ -5160,22 +5357,22 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L200",
+      "source_location": "L164",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "medical_bandaidcontroller_bandaidcontroller_update",
-      "target": "medical_bandaidcontroller_bandaidcontroller_resetallstate"
+      "target": "medical_bandaidcontroller_bandaidcontroller_ensuremedicinteractables",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "Patches/Medical/BandAidController.cs",
-      "source_location": "L213",
+      "source_location": "L200",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "medical_bandaidcontroller_bandaidcontroller_update",
-      "target": "medical_bandaidcontroller_bandaidcontroller_scanforpatient"
+      "target": "medical_bandaidcontroller_bandaidcontroller_resetallstate"
     },
     {
       "relation": "calls",
@@ -5277,6 +5474,17 @@
       "target": "keyboardshortcut"
     },
     {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/BandAidController.cs",
+      "source_location": "L692",
+      "weight": 1.0,
+      "source": "medical_bandaidcontroller_bandaidcontroller_sendshouldertapexternal",
+      "target": "medical_bandaidcontroller_bandaidcontroller_sendshouldertap",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Patches/Medical/BandAidController.cs",
@@ -5303,6 +5511,17 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "Patches/Medical/BandAidController.cs",
+      "source_location": "L684",
+      "weight": 1.0,
+      "source": "medical_bandaidcontroller_bandaidcontroller_activatemedicmodeexternal",
+      "target": "medical_bandaidcontroller_bandaidcontroller_activatemedicmode",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/BandAidController.cs",
       "source_location": "L844",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -5315,9 +5534,9 @@
       "source_file": "Patches/Medical/BandAidHealCheckPacket.cs",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_medical_bandaidhealcheckpacket_cs",
-      "target": "medical_bandaidhealcheckpacket_band_aid",
-      "confidence_score": 1.0
+      "target": "medical_bandaidhealcheckpacket_band_aid"
     },
     {
       "relation": "contains",
@@ -5325,9 +5544,9 @@
       "source_file": "Patches/Medical/BandAidHealCheckPacket.cs",
       "source_location": "L52",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_medical_bandaidhealcheckpacket_cs",
-      "target": "medical_bandaidhealcheckpacket_deserialize",
-      "confidence_score": 1.0
+      "target": "medical_bandaidhealcheckpacket_deserialize"
     },
     {
       "relation": "contains",
@@ -5335,9 +5554,9 @@
       "source_file": "Patches/Medical/BandAidHealCheckPacket.cs",
       "source_location": "L43",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_medical_bandaidhealcheckpacket_cs",
-      "target": "medical_bandaidhealcheckpacket_serialize",
-      "confidence_score": 1.0
+      "target": "medical_bandaidhealcheckpacket_serialize"
     },
     {
       "relation": "references",
@@ -5367,9 +5586,9 @@
       "source_file": "Patches/Medical/BandAidHealPacket.cs",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_medical_bandaidhealpacket_cs",
-      "target": "medical_bandaidhealpacket_band_aid",
-      "confidence_score": 1.0
+      "target": "medical_bandaidhealpacket_band_aid"
     },
     {
       "relation": "contains",
@@ -5377,9 +5596,9 @@
       "source_file": "Patches/Medical/BandAidHealPacket.cs",
       "source_location": "L38",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_medical_bandaidhealpacket_cs",
-      "target": "medical_bandaidhealpacket_deserialize",
-      "confidence_score": 1.0
+      "target": "medical_bandaidhealpacket_deserialize"
     },
     {
       "relation": "contains",
@@ -5387,9 +5606,9 @@
       "source_file": "Patches/Medical/BandAidHealPacket.cs",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_medical_bandaidhealpacket_cs",
-      "target": "medical_bandaidhealpacket_serialize",
-      "confidence_score": 1.0
+      "target": "medical_bandaidhealpacket_serialize"
     },
     {
       "relation": "references",
@@ -5419,9 +5638,9 @@
       "source_file": "Patches/Medical/BandAidNetworkHandler.cs",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_medical_bandaidnetworkhandler_cs",
-      "target": "medical_bandaidnetworkhandler_band_aid",
-      "confidence_score": 1.0
+      "target": "medical_bandaidnetworkhandler_band_aid"
     },
     {
       "relation": "contains",
@@ -5429,9 +5648,9 @@
       "source_file": "Patches/Medical/BandAidNetworkHandler.cs",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_medical_bandaidnetworkhandler_cs",
-      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler",
-      "confidence_score": 1.0
+      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler"
     },
     {
       "relation": "method",
@@ -6028,9 +6247,9 @@
       "source_file": "Patches/Medical/BandAidShoulderTapPacket.cs",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_medical_bandaidshouldertappacket_cs",
-      "target": "medical_bandaidshouldertappacket_band_aid",
-      "confidence_score": 1.0
+      "target": "medical_bandaidshouldertappacket_band_aid"
     },
     {
       "relation": "contains",
@@ -6038,9 +6257,9 @@
       "source_file": "Patches/Medical/BandAidShoulderTapPacket.cs",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_medical_bandaidshouldertappacket_cs",
-      "target": "medical_bandaidshouldertappacket_deserialize",
-      "confidence_score": 1.0
+      "target": "medical_bandaidshouldertappacket_deserialize"
     },
     {
       "relation": "contains",
@@ -6048,9 +6267,9 @@
       "source_file": "Patches/Medical/BandAidShoulderTapPacket.cs",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_medical_bandaidshouldertappacket_cs",
-      "target": "medical_bandaidshouldertappacket_serialize",
-      "confidence_score": 1.0
+      "target": "medical_bandaidshouldertappacket_serialize"
     },
     {
       "relation": "references",
@@ -6080,9 +6299,9 @@
       "source_file": "Patches/Medical/BandAidUI.cs",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_medical_bandaidui_cs",
-      "target": "medical_bandaidui_band_aid",
-      "confidence_score": 1.0
+      "target": "medical_bandaidui_band_aid"
     },
     {
       "relation": "contains",
@@ -6090,9 +6309,9 @@
       "source_file": "Patches/Medical/BandAidUI.cs",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_medical_bandaidui_cs",
-      "target": "medical_bandaidui_bandaidui",
-      "confidence_score": 1.0
+      "target": "medical_bandaidui_bandaidui"
     },
     {
       "relation": "contains",
@@ -6100,9 +6319,9 @@
       "source_file": "Patches/Medical/BandAidUI.cs",
       "source_location": "L113",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_medical_bandaidui_cs",
-      "target": "medical_bandaidui_limbui",
-      "confidence_score": 1.0
+      "target": "medical_bandaidui_limbui"
     },
     {
       "relation": "references",
@@ -6136,6 +6355,17 @@
       "confidence_score": 1.0,
       "source": "medical_bandaidui_bandaidui",
       "target": "font"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/BandAidUI.cs",
+      "source_location": "L47",
+      "weight": 1.0,
+      "context": "field",
+      "source": "medical_bandaidui_bandaidui",
+      "target": "image",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -6507,17 +6737,6 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Patches/Medical/BandAidUI.cs",
-      "source_location": "L47",
-      "weight": 1.0,
-      "context": "field",
-      "confidence_score": 1.0,
-      "source": "medical_bandaidui_bandaidui",
-      "target": "patches_medical_bandaidui_cs_image"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/Medical/BandAidUI.cs",
       "source_location": "L17",
       "weight": 1.0,
       "context": "field",
@@ -6562,17 +6781,6 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Patches/Medical/BandAidUI.cs",
-      "source_location": "L55",
-      "weight": 1.0,
-      "context": "field",
-      "confidence_score": 1.0,
-      "source": "medical_bandaidui_bandaidui",
-      "target": "patches_medical_bandaidui_cs_text"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/Medical/BandAidUI.cs",
       "source_location": "L24",
       "weight": 1.0,
       "context": "field",
@@ -6590,6 +6798,17 @@
       "confidence_score": 1.0,
       "source": "medical_bandaidui_bandaidui",
       "target": "rawimage"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/BandAidUI.cs",
+      "source_location": "L55",
+      "weight": 1.0,
+      "context": "field",
+      "source": "medical_bandaidui_bandaidui",
+      "target": "text",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -6697,9 +6916,9 @@
       "source_location": "L1061",
       "weight": 1.0,
       "context": "return_type",
-      "confidence_score": 1.0,
       "source": "medical_bandaidui_bandaidui_maketext",
-      "target": "patches_medical_bandaidui_cs_text"
+      "target": "text",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -6708,9 +6927,9 @@
       "source_location": "L121",
       "weight": 1.0,
       "context": "field",
-      "confidence_score": 1.0,
       "source": "medical_bandaidui_limbui",
-      "target": "patches_medical_bandaidui_cs_text"
+      "target": "text",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -6719,9 +6938,9 @@
       "source_location": "L1081",
       "weight": 1.0,
       "context": "return_type",
-      "confidence_score": 1.0,
       "source": "medical_bandaidui_bandaidui_makeimage",
-      "target": "patches_medical_bandaidui_cs_image"
+      "target": "image",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -6730,9 +6949,9 @@
       "source_location": "L122",
       "weight": 1.0,
       "context": "field",
-      "confidence_score": 1.0,
       "source": "medical_bandaidui_limbui",
-      "target": "patches_medical_bandaidui_cs_image"
+      "target": "image",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -7529,12 +7748,107 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/MedicActionsPatch.cs",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "medical_medicactionspatch",
+      "target": "medical_medicactionspatch_medicactionspatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/MedicActionsPatch.cs",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "medical_medicactionspatch",
+      "target": "medical_medicactionspatch_trlimmersivecombatmedicine",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/MedicActionsPatch.cs",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "medical_medicactionspatch_medicactionspatch",
+      "target": "medical_medicactionspatch_medicactionspatch_postfix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/MedicActionsPatch.cs",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "medical_medicactionspatch_medicactionspatch",
+      "target": "medical_medicactionspatch_medicactionspatch_targetmethod",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/MedicActionsPatch.cs",
+      "source_location": "L17",
+      "weight": 1.0,
+      "context": "return_type",
+      "source": "medical_medicactionspatch_medicactionspatch_targetmethod",
+      "target": "patches_medical_medicactionspatch_cs_methodbase",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/MedicActionsPatch.cs",
+      "source_location": "L25",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "medical_medicactionspatch_medicactionspatch_postfix",
+      "target": "ginterface177",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/MedicActionsPatch.cs",
+      "source_location": "L25",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "medical_medicactionspatch_medicactionspatch_postfix",
+      "target": "patches_medical_medicactionspatch_cs_actionsreturnclass",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/MedicActionsPatch.cs",
+      "source_location": "L25",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "medical_medicactionspatch_medicactionspatch_postfix",
+      "target": "patches_medical_medicactionspatch_cs_gameplayerowner",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/MedicActionsPatch.cs",
+      "source_location": "L25",
+      "weight": 1.0,
+      "context": "attribute",
+      "source": "medical_medicactionspatch_medicactionspatch_postfix",
+      "target": "patches_medical_medicactionspatch_cs_harmonypostfix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "Patches/Medical/MedicHealPatch.cs",
       "source_location": "L285",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_medical_medichealpatch_cs",
-      "target": "medical_medichealpatch_animcleanuppatch",
-      "confidence_score": 1.0
+      "target": "medical_medichealpatch_animcleanuppatch"
     },
     {
       "relation": "contains",
@@ -7542,9 +7856,9 @@
       "source_file": "Patches/Medical/MedicHealPatch.cs",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_medical_medichealpatch_cs",
-      "target": "medical_medichealpatch_band_aid",
-      "confidence_score": 1.0
+      "target": "medical_medichealpatch_band_aid"
     },
     {
       "relation": "contains",
@@ -7552,9 +7866,9 @@
       "source_file": "Patches/Medical/MedicHealPatch.cs",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_medical_medichealpatch_cs",
-      "target": "medical_medichealpatch_medichealpatch",
-      "confidence_score": 1.0
+      "target": "medical_medichealpatch_medichealpatch"
     },
     {
       "relation": "method",
@@ -7805,12 +8119,115 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/MedicInteractable.cs",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "medical_medicinteractable",
+      "target": "medical_medicinteractable_medicinteractable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/MedicInteractable.cs",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "medical_medicinteractable",
+      "target": "medical_medicinteractable_trlimmersivecombatmedicine",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/MedicInteractable.cs",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "medical_medicinteractable_medicinteractable",
+      "target": "interactableobject",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/MedicInteractable.cs",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "medical_medicinteractable_medicinteractable",
+      "target": "medical_medicinteractable_medicinteractable_ensure",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/MedicInteractable.cs",
+      "source_location": "L53",
+      "weight": 1.0,
+      "source": "medical_medicinteractable_medicinteractable",
+      "target": "medical_medicinteractable_medicinteractable_examine",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/MedicInteractable.cs",
+      "source_location": "L26",
+      "weight": 1.0,
+      "source": "medical_medicinteractable_medicinteractable",
+      "target": "medical_medicinteractable_medicinteractable_getactions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/MedicInteractable.cs",
+      "source_location": "L58",
+      "weight": 1.0,
+      "source": "medical_medicinteractable_medicinteractable",
+      "target": "medical_medicinteractable_medicinteractable_shouldertap",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/MedicInteractable.cs",
+      "source_location": "L18",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "medical_medicinteractable_medicinteractable_ensure",
+      "target": "patches_medical_medicinteractable_cs_player",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/MedicInteractable.cs",
+      "source_location": "L26",
+      "weight": 1.0,
+      "context": "return_type",
+      "source": "medical_medicinteractable_medicinteractable_getactions",
+      "target": "patches_medical_medicinteractable_cs_actionsreturnclass",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/MedicInteractable.cs",
+      "source_location": "L26",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "medical_medicinteractable_medicinteractable_getactions",
+      "target": "patches_medical_medicinteractable_cs_gameplayerowner",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "Patches/Medical/MedicalLogic.cs",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_medical_medicallogic_cs",
-      "target": "medical_medicallogic_band_aid",
-      "confidence_score": 1.0
+      "target": "medical_medicallogic_band_aid"
     },
     {
       "relation": "contains",
@@ -7818,9 +8235,9 @@
       "source_file": "Patches/Medical/MedicalLogic.cs",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_medical_medicallogic_cs",
-      "target": "medical_medicallogic_medicallogic",
-      "confidence_score": 1.0
+      "target": "medical_medicallogic_medicallogic"
     },
     {
       "relation": "method",
@@ -8498,9 +8915,9 @@
       "source_file": "Patches/Medical/TourniquetManager.cs",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_medical_tourniquetmanager_cs",
-      "target": "medical_tourniquetmanager_band_aid",
-      "confidence_score": 1.0
+      "target": "medical_tourniquetmanager_band_aid"
     },
     {
       "relation": "contains",
@@ -8508,9 +8925,9 @@
       "source_file": "Patches/Medical/TourniquetManager.cs",
       "source_location": "L36",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_medical_tourniquetmanager_cs",
-      "target": "medical_tourniquetmanager_tourniquetdata",
-      "confidence_score": 1.0
+      "target": "medical_tourniquetmanager_tourniquetdata"
     },
     {
       "relation": "contains",
@@ -8518,9 +8935,9 @@
       "source_file": "Patches/Medical/TourniquetManager.cs",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_medical_tourniquetmanager_cs",
-      "target": "medical_tourniquetmanager_tourniquetmanager",
-      "confidence_score": 1.0
+      "target": "medical_tourniquetmanager_tourniquetmanager"
     },
     {
       "relation": "references",
@@ -8860,9 +9277,9 @@
       "source_file": "Patches/Trauma/BotPatches.cs",
       "source_location": "L69",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_trauma_botpatches_cs",
-      "target": "trauma_botpatches_botaddenemypatch",
-      "confidence_score": 1.0
+      "target": "trauma_botpatches_botaddenemypatch"
     },
     {
       "relation": "contains",
@@ -8870,9 +9287,9 @@
       "source_file": "Patches/Trauma/BotPatches.cs",
       "source_location": "L108",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_trauma_botpatches_cs",
-      "target": "trauma_botpatches_botcalcgoalpatch",
-      "confidence_score": 1.0
+      "target": "trauma_botpatches_botcalcgoalpatch"
     },
     {
       "relation": "contains",
@@ -8880,9 +9297,9 @@
       "source_file": "Patches/Trauma/BotPatches.cs",
       "source_location": "L49",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_trauma_botpatches_cs",
-      "target": "trauma_botpatches_botcheckandaddenemypatch",
-      "confidence_score": 1.0
+      "target": "trauma_botpatches_botcheckandaddenemypatch"
     },
     {
       "relation": "contains",
@@ -8890,9 +9307,9 @@
       "source_file": "Patches/Trauma/BotPatches.cs",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_trauma_botpatches_cs",
-      "target": "trauma_botpatches_botisenemypatch",
-      "confidence_score": 1.0
+      "target": "trauma_botpatches_botisenemypatch"
     },
     {
       "relation": "contains",
@@ -8900,9 +9317,9 @@
       "source_file": "Patches/Trauma/BotPatches.cs",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_trauma_botpatches_cs",
-      "target": "trauma_botpatches_botisplayerenemypatch",
-      "confidence_score": 1.0
+      "target": "trauma_botpatches_botisplayerenemypatch"
     },
     {
       "relation": "contains",
@@ -8910,9 +9327,9 @@
       "source_file": "Patches/Trauma/BotPatches.cs",
       "source_location": "L89",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_trauma_botpatches_cs",
-      "target": "trauma_botpatches_botmemoryaddenemypatch",
-      "confidence_score": 1.0
+      "target": "trauma_botpatches_botmemoryaddenemypatch"
     },
     {
       "relation": "contains",
@@ -8920,9 +9337,9 @@
       "source_file": "Patches/Trauma/BotPatches.cs",
       "source_location": "L128",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_trauma_botpatches_cs",
-      "target": "trauma_botpatches_botupdatemanualpatch",
-      "confidence_score": 1.0
+      "target": "trauma_botpatches_botupdatemanualpatch"
     },
     {
       "relation": "contains",
@@ -8930,9 +9347,9 @@
       "source_file": "Patches/Trauma/BotPatches.cs",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_trauma_botpatches_cs",
-      "target": "trauma_botpatches_truetrauma",
-      "confidence_score": 1.0
+      "target": "trauma_botpatches_truetrauma"
     },
     {
       "relation": "method",
@@ -9164,9 +9581,9 @@
       "source_file": "Patches/Trauma/FaintController.cs",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_trauma_faintcontroller_cs",
-      "target": "trauma_faintcontroller_faintcontroller",
-      "confidence_score": 1.0
+      "target": "trauma_faintcontroller_faintcontroller"
     },
     {
       "relation": "contains",
@@ -9174,9 +9591,9 @@
       "source_file": "Patches/Trauma/FaintController.cs",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_trauma_faintcontroller_cs",
-      "target": "trauma_faintcontroller_truetrauma",
-      "confidence_score": 1.0
+      "target": "trauma_faintcontroller_truetrauma"
     },
     {
       "relation": "references",
@@ -9248,9 +9665,9 @@
       "source_file": "Patches/Trauma/FikaRevivePatch.cs",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_trauma_fikarevivepatch_cs",
-      "target": "trauma_fikarevivepatch_band_aid",
-      "confidence_score": 1.0
+      "target": "trauma_fikarevivepatch_band_aid"
     },
     {
       "relation": "contains",
@@ -9258,9 +9675,9 @@
       "source_file": "Patches/Trauma/FikaRevivePatch.cs",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_trauma_fikarevivepatch_cs",
-      "target": "trauma_fikarevivepatch_fikarevivegetactionspatch",
-      "confidence_score": 1.0
+      "target": "trauma_fikarevivepatch_fikarevivegetactionspatch"
     },
     {
       "relation": "contains",
@@ -9268,9 +9685,9 @@
       "source_file": "Patches/Trauma/FikaRevivePatch.cs",
       "source_location": "L46",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_trauma_fikarevivepatch_cs",
-      "target": "trauma_fikarevivepatch_fikareviveplayerpatch",
-      "confidence_score": 1.0
+      "target": "trauma_fikarevivepatch_fikareviveplayerpatch"
     },
     {
       "relation": "method",
@@ -9331,9 +9748,9 @@
       "source_location": "L24",
       "weight": 1.0,
       "context": "parameter_type",
-      "confidence_score": 1.0,
       "source": "trauma_fikarevivepatch_fikarevivegetactionspatch_postfix",
-      "target": "actionsreturnclass"
+      "target": "patches_trauma_fikarevivepatch_cs_actionsreturnclass",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -9448,9 +9865,9 @@
       "source_file": "Patches/Trauma/HealthPatches.cs",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_trauma_healthpatches_cs",
-      "target": "trauma_healthpatches_damagetriggerpatch",
-      "confidence_score": 1.0
+      "target": "trauma_healthpatches_damagetriggerpatch"
     },
     {
       "relation": "contains",
@@ -9458,9 +9875,9 @@
       "source_file": "Patches/Trauma/HealthPatches.cs",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_trauma_healthpatches_cs",
-      "target": "trauma_healthpatches_truetrauma",
-      "confidence_score": 1.0
+      "target": "trauma_healthpatches_truetrauma"
     },
     {
       "relation": "method",
@@ -9565,9 +9982,9 @@
       "source_file": "Patches/Trauma/InputPatches.cs",
       "source_location": "L38",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_trauma_inputpatches_cs",
-      "target": "trauma_inputpatches_cantstanduppatch",
-      "confidence_score": 1.0
+      "target": "trauma_inputpatches_cantstanduppatch"
     },
     {
       "relation": "contains",
@@ -9575,9 +9992,9 @@
       "source_file": "Patches/Trauma/InputPatches.cs",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_trauma_inputpatches_cs",
-      "target": "trauma_inputpatches_freezeaxespatch",
-      "confidence_score": 1.0
+      "target": "trauma_inputpatches_freezeaxespatch"
     },
     {
       "relation": "contains",
@@ -9585,9 +10002,9 @@
       "source_file": "Patches/Trauma/InputPatches.cs",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_trauma_inputpatches_cs",
-      "target": "trauma_inputpatches_freezecommandpatch",
-      "confidence_score": 1.0
+      "target": "trauma_inputpatches_freezecommandpatch"
     },
     {
       "relation": "contains",
@@ -9595,9 +10012,9 @@
       "source_file": "Patches/Trauma/InputPatches.cs",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_trauma_inputpatches_cs",
-      "target": "trauma_inputpatches_truetrauma",
-      "confidence_score": 1.0
+      "target": "trauma_inputpatches_truetrauma"
     },
     {
       "relation": "method",
@@ -9690,9 +10107,9 @@
       "source_file": "Patches/Trauma/MovementPatches.cs",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_trauma_movementpatches_cs",
-      "target": "trauma_movementpatches_mainlooppatch",
-      "confidence_score": 1.0
+      "target": "trauma_movementpatches_mainlooppatch"
     },
     {
       "relation": "contains",
@@ -9700,9 +10117,9 @@
       "source_file": "Patches/Trauma/MovementPatches.cs",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_trauma_movementpatches_cs",
-      "target": "trauma_movementpatches_truetrauma",
-      "confidence_score": 1.0
+      "target": "trauma_movementpatches_truetrauma"
     },
     {
       "relation": "method",
@@ -9731,9 +10148,9 @@
       "source_file": "Patches/Trauma/TraumaState.cs",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_trauma_traumastate_cs",
-      "target": "trauma_traumastate_traumastate",
-      "confidence_score": 1.0
+      "target": "trauma_traumastate_traumastate"
     },
     {
       "relation": "contains",
@@ -9741,9 +10158,9 @@
       "source_file": "Patches/Trauma/TraumaState.cs",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_patches_trauma_traumastate_cs",
-      "target": "trauma_traumastate_truetrauma",
-      "confidence_score": 1.0
+      "target": "trauma_traumastate_truetrauma"
     },
     {
       "relation": "references",
@@ -9816,54 +10233,54 @@
       "confidence": "EXTRACTED",
       "source_file": "TRL-ImmersiveCombatMedicine.csproj",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_trl_immersivecombatmedicine_csproj",
-      "target": "framework_netstandard2_1",
-      "confidence_score": 1.0
+      "target": "framework_netstandard2_1"
     },
     {
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "TRL-ImmersiveCombatMedicine.csproj",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_trl_immersivecombatmedicine_csproj",
-      "target": "nuget_bepinex_analyzers",
-      "confidence_score": 1.0
+      "target": "nuget_bepinex_analyzers"
     },
     {
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "TRL-ImmersiveCombatMedicine.csproj",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_trl_immersivecombatmedicine_csproj",
-      "target": "nuget_bepinex_core",
-      "confidence_score": 1.0
+      "target": "nuget_bepinex_core"
     },
     {
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "TRL-ImmersiveCombatMedicine.csproj",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_trl_immersivecombatmedicine_csproj",
-      "target": "nuget_bepinex_plugininfoprops",
-      "confidence_score": 1.0
+      "target": "nuget_bepinex_plugininfoprops"
     },
     {
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "TRL-ImmersiveCombatMedicine.csproj",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_trl_immersivecombatmedicine_csproj",
-      "target": "nuget_unityengine_modules",
-      "confidence_score": 1.0
+      "target": "nuget_unityengine_modules"
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "TRL-ImmersiveCombatMedicine.csproj",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_trl_immersivecombatmedicine_csproj",
-      "target": "sdk_microsoft_net_sdk",
-      "confidence_score": 1.0
+      "target": "sdk_microsoft_net_sdk"
     },
     {
       "relation": "contains",
@@ -9871,8 +10288,8 @@
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
       "source_location": "L10",
       "weight": 1.0,
-      "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_trlimmersivecombatmedicineplugin_cs",
-      "target": "client_trlimmersivecombatmedicineplugin_trlimmersivecombatmedicine",
+      "source": "trlimmersivecombatmedicineplugin",
+      "target": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicine",
       "confidence_score": 1.0
     },
     {
@@ -9881,8 +10298,19 @@
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
       "source_location": "L12",
       "weight": 1.0,
-      "source": "c_repos_spt_tarkov_spt_4_0_mods_trl_immersivecombatmedicine_client_trlimmersivecombatmedicineplugin_cs",
-      "target": "client_trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
+      "source": "trlimmersivecombatmedicineplugin",
+      "target": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
+      "source_location": "L142",
+      "weight": 1.0,
+      "context": "field",
+      "source": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
+      "target": "bandaidcontroller",
       "confidence_score": 1.0
     },
     {
@@ -9891,69 +10319,8 @@
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
       "source_location": "L12",
       "weight": 1.0,
-      "source": "client_trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
+      "source": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
       "target": "baseunityplugin",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L15",
-      "weight": 1.0,
-      "context": "field",
-      "source": "client_trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
-      "target": "client_trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L35",
-      "weight": 1.0,
-      "source": "client_trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
-      "target": "client_trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_awake",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L108",
-      "weight": 1.0,
-      "source": "client_trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
-      "target": "client_trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_ondestroy",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L113",
-      "weight": 1.0,
-      "source": "client_trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
-      "target": "client_trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_onhealcheckresponsehandler",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L118",
-      "weight": 1.0,
-      "source": "client_trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
-      "target": "client_trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_onraidstartcleanup",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L132",
-      "weight": 1.0,
-      "source": "client_trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
-      "target": "client_trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_update",
       "confidence_score": 1.0
     },
     {
@@ -9963,8 +10330,30 @@
       "source_location": "L33",
       "weight": 1.0,
       "context": "field",
-      "source": "client_trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
+      "source": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
       "target": "configentry",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
+      "source_location": "L143",
+      "weight": 1.0,
+      "context": "field",
+      "source": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
+      "target": "trlimmersivecombatmedicineplugin_cs_float",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
+      "source_location": "L141",
+      "weight": 1.0,
+      "context": "field",
+      "source": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
+      "target": "trlimmersivecombatmedicineplugin_cs_gameobject",
       "confidence_score": 1.0
     },
     {
@@ -9974,7 +10363,7 @@
       "source_location": "L17",
       "weight": 1.0,
       "context": "field",
-      "source": "client_trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
+      "source": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
       "target": "trlimmersivecombatmedicineplugin_cs_harmony",
       "confidence_score": 1.0
     },
@@ -9985,7 +10374,7 @@
       "source_location": "L16",
       "weight": 1.0,
       "context": "field",
-      "source": "client_trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
+      "source": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
       "target": "trlimmersivecombatmedicineplugin_cs_manuallogsource",
       "confidence_score": 1.0
     },
@@ -9993,14 +10382,75 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L113",
+      "source_location": "L15",
+      "weight": 1.0,
+      "context": "field",
+      "source": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
+      "target": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
+      "target": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_awake",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
+      "source_location": "L116",
+      "weight": 1.0,
+      "source": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
+      "target": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_ondestroy",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
+      "source_location": "L121",
+      "weight": 1.0,
+      "source": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
+      "target": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_onhealcheckresponsehandler",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
+      "source_location": "L126",
+      "weight": 1.0,
+      "source": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
+      "target": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_onraidstartcleanup",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
+      "source_location": "L145",
+      "weight": 1.0,
+      "source": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin",
+      "target": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_update",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
+      "source_location": "L121",
       "weight": 1.0,
       "context": "parameter_type",
-      "source": "client_trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_onhealcheckresponsehandler",
+      "source": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_onhealcheckresponsehandler",
       "target": "trlimmersivecombatmedicineplugin_cs_bandaidhealcheckresponsepacket",
       "confidence_score": 1.0
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "5f4c6f7f87eb5588c9e30932f625a1fe63fd1c9d"
+  "built_at_commit": "a181786d38c1ed4f74af57ac9746710886dd725f"
 }

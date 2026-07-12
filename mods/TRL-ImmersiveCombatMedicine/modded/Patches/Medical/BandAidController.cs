@@ -26,12 +26,6 @@ namespace TRLImmersiveCombatMedicine
         public static BandAidController Instance;
         private bool _isMedicModeActive = false;
         private Player _targetPatient = null;
-        private Player _potentialTarget = null;
-
-        // HUD de interaÃ§Ã£o (Canvas UI)
-        private GameObject _interactCanvasObj;
-        private Text _interactText;
-        private Image _interactBg;
 
         // Controle da AnimaÃ§Ã£o
         private bool _isHealingInProgress = false;
@@ -72,11 +66,9 @@ namespace TRLImmersiveCombatMedicine
             TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning("[DEBUG-ICM] Controller.Awake INÍCIO");
             Instance = this;
 
-            CreateInteractHUD();
-
             // Registrar handler de resposta do handshake
             BandAidNetworkHandler.OnHealCheckResponse += OnHealCheckResponseHandler;
-            TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning("[DEBUG-ICM] Controller.Awake FIM (HUD criado, handler registrado)");
+            TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning("[DEBUG-ICM] Controller.Awake FIM (handler registrado; prompt via ActionPanel nativo)");
         }
 
         // [DEBUG-ICM] sondas de lifecycle — remover após diagnóstico do prompt F
@@ -118,79 +110,6 @@ namespace TRLImmersiveCombatMedicine
             _pendingHealItem = null;
             _pendingHealStats = null;
             _pendingHealPatient = null;
-        }
-
-        // === HUD DE INTERAÃ‡ÃƒO (Canvas UI) ===
-        private void CreateInteractHUD()
-        {
-            _interactCanvasObj = new GameObject("BandAid_InteractCanvas");
-            DontDestroyOnLoad(_interactCanvasObj);
-
-            Canvas canvas = _interactCanvasObj.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 90;
-
-            CanvasScaler scaler = _interactCanvasObj.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920, 1080);
-
-            // Background
-            GameObject bgObj = new GameObject("InteractBg");
-            bgObj.transform.SetParent(_interactCanvasObj.transform, false);
-            _interactBg = bgObj.AddComponent<Image>();
-            _interactBg.color = new Color(0.01f, 0.02f, 0.04f, 0.55f);
-            _interactBg.raycastTarget = false;
-            RectTransform bgRect = bgObj.GetComponent<RectTransform>();
-            bgRect.anchorMin = new Vector2(1f, 0f);
-            bgRect.anchorMax = new Vector2(1f, 0f);
-            bgRect.pivot = new Vector2(1f, 0f);
-            bgRect.anchoredPosition = new Vector2(-30, 120);
-
-            var layout = bgObj.AddComponent<VerticalLayoutGroup>();
-            layout.padding = new RectOffset(16, 16, 8, 8);
-            layout.childAlignment = TextAnchor.MiddleLeft;
-            layout.childForceExpandWidth = true;
-            layout.childForceExpandHeight = false;
-            layout.spacing = 2f;
-            var fitter = bgObj.AddComponent<ContentSizeFitter>();
-            fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
-            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-            // Borda sutil
-            var outline = bgObj.AddComponent<Outline>();
-            outline.effectColor = new Color(0.12f, 0.25f, 0.30f, 0.30f);
-            outline.effectDistance = new Vector2(0.5f, -0.5f);
-
-            // Texto
-            GameObject textObj = new GameObject("InteractText");
-            textObj.transform.SetParent(bgObj.transform, false);
-            _interactText = textObj.AddComponent<Text>();
-            _interactText.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
-            _interactText.fontSize = 16;
-            _interactText.fontStyle = FontStyle.Normal;
-            _interactText.color = Color.white;
-            _interactText.alignment = TextAnchor.MiddleLeft;
-            _interactText.supportRichText = true;
-            _interactText.horizontalOverflow = HorizontalWrapMode.Wrap;
-            _interactText.verticalOverflow = VerticalWrapMode.Overflow;
-            var textOutline = textObj.AddComponent<Outline>();
-            textOutline.effectColor = new Color(0, 0, 0, 0.7f);
-            textOutline.effectDistance = new Vector2(0.5f, -0.5f);
-
-            _interactCanvasObj.SetActive(false);
-        }
-
-        private void UpdateInteractFont()
-        {
-            if (_interactText != null && BandAidUI.Instance != null)
-            {
-                try
-                {
-                    Font f = BandAidUI.Instance.GetFont();
-                    if (f != null) _interactText.font = f;
-                }
-                catch { }
-            }
         }
 
         // [DEBUG-ICM] flags log-once — remover após diagnóstico do prompt F
@@ -237,10 +156,12 @@ namespace TRLImmersiveCombatMedicine
             if (!_dbgInRaid)
             {
                 _dbgInRaid = true;
-                TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning("[DEBUG-ICM] Controller.Update EM RAID (GameWorld+MainPlayer ok) — ScanForPatient vai rodar");
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning("[DEBUG-ICM] Controller.Update EM RAID (GameWorld+MainPlayer ok) — sweep de MedicInteractable ativo");
             }
 
-            ScanForPatient();
+            // Interação via pipeline NATIVO: garante um MedicInteractable em cada
+            // player/bot vivo; o prompt aparece no ActionPanel do jogo (como loot).
+            EnsureMedicInteractables();
 
             // === EMERGENCY DROP ===
             if (_isHealingInProgress && CheckPressMode(_emergencyDropKey.Value, _emergencyDropMode.Value,
@@ -258,20 +179,11 @@ namespace TRLImmersiveCombatMedicine
                 return;
             }
 
-            // === TOQUE NO OMBRO (CQB) ===
-            if (!_isHealingInProgress && _potentialTarget != null && !_isMedicModeActive &&
-                CheckPressMode(_shoulderTapKey.Value, _shoulderTapMode.Value,
-                ref _shoulderHoldTimer, ref _shoulderHoldTriggered, ref _shoulderLastTapTime))
-            {
-                SendShoulderTap(_potentialTarget);
-            }
-
-            // === MEDIC INTERACT ===
-            if (CheckPressMode(_medicInteractKey.Value, _medicInteractMode.Value,
+            // === MEDIC INTERACT (só FECHAR — a abertura vem do ActionPanel nativo) ===
+            if (_isMedicModeActive && CheckPressMode(_medicInteractKey.Value, _medicInteractMode.Value,
                 ref _medicHoldTimer, ref _medicHoldTriggered, ref _medicLastTapTime))
             {
-                if (_isMedicModeActive) DeactivateMedicMode();
-                else if (_potentialTarget != null) ActivateMedicMode(_potentialTarget);
+                DeactivateMedicMode();
             }
 
             if (_isMedicModeActive && _targetPatient != null)
@@ -740,87 +652,44 @@ namespace TRLImmersiveCombatMedicine
             TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("CancelHealInProgress: cura cancelada (Mouse0).");
         }
 
-                        private void ScanForPatient()
+        // === INTERAÇÃO NATIVA ===
+        // O prompt não é mais desenhado por canvas próprio nem detectado por SphereCast:
+        // cada player/bot vivo ganha um MedicInteractable (InteractableObject), que o
+        // raycast de interação vanilla encontra e o ActionPanel nativo exibe (como loot).
+        private float _nextInteractableSweep = 0f;
+
+        private void EnsureMedicInteractables()
         {
-                                    if (_isMedicModeActive) return;
-            var mainPlayer = Singleton<GameWorld>.Instance.MainPlayer;
-            if (mainPlayer == null) return;
-            
-            // Usar LookDirection do jogador ao invés do Camera.main que pode ser null no SPT 4.0
-            Vector3 origin = mainPlayer.PlayerBones.WeaponRoot.position;
-            Vector3 direction = mainPlayer.LookDirection;
+            if (Time.time < _nextInteractableSweep) return;
+            _nextInteractableSweep = Time.time + 2f;
 
-                                    // Detectar todas as camadas; o Unity rejeita lixo (paredes/chão) através do GetComponentInParent<Player>
-            LayerMask mask = Physics.AllLayers;
-            Ray ray = new Ray(origin, direction);
-            
-            Player closest = null;
-            float closestDist = float.MaxValue;
-
-            // Usar RaycastAll para evitar que o corpo do prÃ³prio MainPlayer bloqueie o tiro
-            var hits = Physics.SphereCastAll(ray, 0.4f, 2.5f, mask);
-            TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"ScanForPatient: SphereCastAll hits: {hits.Length}");
-            foreach (var hit in hits)
+            var gameWorld = Singleton<GameWorld>.Instance;
+            var mainPlayer = gameWorld.MainPlayer;
+            var players = gameWorld.AllAlivePlayersList;
+            for (int i = 0; i < players.Count; i++)
             {
-                Player p = Singleton<GameWorld>.Instance.GetPlayerByCollider(hit.collider);
-                if (p == null) p = hit.collider.GetComponentInParent<Player>();
-                
-                TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($" Hit: {hit.collider.name} (Layer: {LayerMask.LayerToName(hit.collider.gameObject.layer)}) -> Player: {p?.Profile?.Nickname ?? "null"}");
-
-                if (p != null && p != mainPlayer)
-                {
-                    float dist = Vector3.Distance(mainPlayer.Position, p.Position);
-                    if (dist < closestDist)
-                    {
-                        closestDist = dist;
-                        closest = p;
-                    }
-                }
+                Player p = players[i];
+                if (p == null || p == mainPlayer) continue;
+                if (p.HealthController == null || !p.HealthController.IsAlive) continue;
+                MedicInteractable.Ensure(p);
             }
+        }
 
-            // Fallback para perto (OverlapSphere)
-            if (closest == null)
-            {
-                Collider[] nearby = Physics.OverlapSphere(origin, 1.5f, mask);
-                TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"ScanForPatient: OverlapSphere hits: {nearby.Length}");
-                foreach (var col in nearby)
-                {
-                    Player p = Singleton<GameWorld>.Instance.GetPlayerByCollider(col);
-                    if (p == null) p = col.GetComponentInParent<Player>();
-                    
-                    if (p != null && p != mainPlayer)
-                    {
-                        TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($" Nearby Hit: {col.name} -> Player: {p.Profile?.Nickname}");
-                        float dist = Vector3.Distance(mainPlayer.Position, p.Position);
-                        if (dist < closestDist)
-                        {
-                            closestDist = dist;
-                            closest = p;
-                        }
-                    }
-                }
-            }
+        /// <summary>
+        /// Chamado pela ação "Examinar (Médico)" do ActionPanel nativo (MedicInteractable).
+        /// </summary>
+        public void ActivateMedicModeExternal(Player patient)
+        {
+            if (patient == null || _isMedicModeActive) return;
+            ActivateMedicMode(patient);
+        }
 
-            // Fallback para perto (OverlapSphere)
-            if (closest == null)
-            {
-                Collider[] nearby = Physics.OverlapSphere(origin, 1.5f, mask);
-                foreach (var col in nearby)
-                {
-                    Player p = Singleton<GameWorld>.Instance.GetPlayerByCollider(col);
-                    if (p != null && p != mainPlayer)
-                    {
-                        float dist = Vector3.Distance(mainPlayer.Position, p.Position);
-                        if (dist < closestDist)
-                        {
-                            closestDist = dist;
-                            closest = p;
-                        }
-                    }
-                }
-            }
-
-            _potentialTarget = closest;
+        /// <summary>
+        /// Chamado pela ação "Tocar no ombro" do ActionPanel nativo (MedicInteractable).
+        /// </summary>
+        public void SendShoulderTapExternal(Player target)
+        {
+            SendShoulderTap(target);
         }
 
         private void ActivateMedicMode(Player p) 
@@ -888,7 +757,6 @@ namespace TRLImmersiveCombatMedicine
             _isMedicModeActive = false;
             _itemBeingUsed = null;
             _targetPatient = null;
-            _potentialTarget = null;
 
             MedicHealPatch.IsRedirectingHeal = false;
             MedicHealPatch.CurrentPatient = null;
@@ -899,33 +767,6 @@ namespace TRLImmersiveCombatMedicine
             TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("ResetAllState: flags resetadas (mudanÃ§a de raid).");
         }
 
-        private bool _interactFontSet = false;
-
-        private void LateUpdate()
-        {
-            if (Singleton<GameWorld>.Instance == null)
-            {
-                if (_interactCanvasObj != null) _interactCanvasObj.SetActive(false);
-                return;
-            }
-
-            // Tenta definir a fonte uma vez
-            if (!_interactFontSet && BandAidUI.Instance != null)
-            {
-                UpdateInteractFont();
-                _interactFontSet = true;
-            }
-
-            if (!_isMedicModeActive && _potentialTarget != null)
-            {
-                _interactText.text = $"Operador: {_potentialTarget.Profile.Nickname}\n<color=#AABBCC>[Pressione F] Examinar</color>\n<color=#889999>[Duplo F] Tocar no ombro</color>";
-                _interactCanvasObj.SetActive(true);
-            }
-            else
-            {
-                if (_interactCanvasObj != null) _interactCanvasObj.SetActive(false);
-            }
-        }
     }
 }
 
