@@ -148,15 +148,10 @@ namespace TRLImmersiveCombatMedicine
 
         public static void OnRaidStartCleanup()
         {
-            TraumaState.BlackoutTimers.Clear();
-            TraumaState.BlackoutStartTimes.Clear();
-            TraumaState.GraceTimers.Clear();
-            TraumaState.FaintedPlayerIds.Clear();
-            TraumaState.ImpactTimers.Clear();
-            TraumaState.AimingFatigueTimers.Clear();
-            TraumaState.VoiceCooldowns.Clear();
-            TraumaState.BotLegsBrokenStartTimes.Clear();
-            TraumaState.EffectIntensity = 0f;
+            // ref: CR-01-09 — ResetAll cobre TODOS os campos (a lista manual antiga
+            // esquecia IsFainted e LegPenaltyTimers → prone/wake fantasma na raid seguinte)
+            TraumaState.ResetAll();
+            AudioListener.volume = 1f; // ref: CR-01-13 — cinto-e-suspensório no início
             TraumaState.Logger.LogInfo("TRL-ImmersiveCombatMedicine: Estado limpo para nova raid.");
         }
 

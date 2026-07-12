@@ -927,6 +927,13 @@ namespace TRLImmersiveCombatMedicine
             BandAidUI.Instance?.HideUI();
             DebugBotInvisibility.OnRaidEnded();
 
+            // ref: CR-01-09/13 — este método roda quando o GameWorld morre (polling em
+            // Update), cobrindo morte/extract/alt-F4 SEM depender de patch em
+            // OnDestroy (que overrides do Fika poderiam pular): estado de trauma e o
+            // AudioListener.volume (estático global do Unity!) não vazam para o menu.
+            TrueTrauma.TraumaState.ResetAll();
+            AudioListener.volume = 1f;
+
             // Estado do prompt dirigido (GamePlayerOwner morre com a raid)
             _gamePlayerOwner = null;
             _ourPromptActions = null;

@@ -39,7 +39,14 @@ namespace TrueTrauma
                     }
 
                     // 2. Mantém o efeito visual de tontura (Blur)
-                    __instance.ActiveHealthController?.DoContusion(1f, 1f);
+                    // ref: CR-01-27 — vanilla dispara DoContusion por EVENTO; por frame
+                    // eram ~1200 passagens pelo pipeline de efeitos em 20s de blackout.
+                    // Renovação por intervalo de 2s mantém o visual com ~10 chamadas.
+                    if (!TraumaState.ContusionRenewTimers.TryGetValue(id, out float nextContusion) || now >= nextContusion)
+                    {
+                        TraumaState.ContusionRenewTimers[id] = now + 2f;
+                        __instance.ActiveHealthController?.DoContusion(1f, 1f);
+                    }
 
                     // 3. Força arma baixada e sem stamina visual
                     if (__instance.HandsController is IFirearmHandsController firearm) firearm.SetAim(false);
@@ -59,11 +66,20 @@ namespace TrueTrauma
                     TraumaState.BlackoutTimers.Remove(id);
                     TraumaState.BlackoutStartTimes.Remove(id);
 
+                    TraumaState.ContusionRenewTimers.Remove(id);
+
                     // Lógica de recuperação (Levantar ou ficar deitado)
                     if (__instance.IsAI && __instance.AIData?.BotOwner != null)
                     {
                         AggroHelper.UnpauseBot(__instance);
-                        
+
+                        // ref: CR-01-19 — bot não tem grace period (o branch de grace é
+                        // !IsAI): sem esta remoção, todo bot que desmaiou uma vez ficava
+                        // PERMANENTEMENTE em FaintedPlayerIds — invisível aos outros bots
+                        // até o fim da raid.
+                        TraumaState.FaintedPlayerIds.Remove(id);
+                        TraumaState.GraceTimers.Remove(id);
+
                         if (__instance.Physical != null) __instance.Physical.Stamina.Current = __instance.Physical.Stamina.TotalCapacity;
                     }
                     else
