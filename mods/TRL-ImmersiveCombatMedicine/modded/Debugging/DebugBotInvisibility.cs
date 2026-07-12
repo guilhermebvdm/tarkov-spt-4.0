@@ -46,7 +46,40 @@ namespace TRLImmersiveCombatMedicine
         {
             if (_botsIgnoreMe == null || Time.time < _nextTick) return;
             _nextTick = Time.time + 2f;
-            if (_botsIgnoreMe.Value != _applied) Apply(_botsIgnoreMe.Value);
+            if (_botsIgnoreMe.Value != _applied)
+            {
+                Apply(_botsIgnoreMe.Value);
+                return;
+            }
+
+            // Re-agro por dano (handlers de hit/kill re-adicionam o player como enemy
+            // SEM consultar AllPlayers) desfaz a invisibilidade e a flag _applied não
+            // detecta. Enquanto ON, re-varrer a cada tick limita o re-agro a ≤2 s —
+            // DeletePlayer é idempotente (List.Remove no-op quando já removido).
+            if (_botsIgnoreMe.Value && _applied) Rewipe();
+        }
+
+        private static void Rewipe()
+        {
+            try
+            {
+                if (!Singleton<GameWorld>.Instantiated || !Singleton<IBotGame>.Instantiated) return;
+                Player player = Singleton<GameWorld>.Instance.MainPlayer;
+                var botsController = Singleton<IBotGame>.Instance.BotsController;
+                if (player == null || botsController == null || botsController.BotSpawner == null) return;
+
+                botsController.BotSpawner.DeletePlayer(player);
+                try
+                {
+                    foreach (var bot in botsController.Bots.BotOwners)
+                        bot?.Memory?.DeleteInfoAboutEnemy(player);
+                }
+                catch { }
+            }
+            catch (Exception ex)
+            {
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning($"DebugBotInvisibility.Rewipe: {ex.Message}");
+            }
         }
 
         /// <summary>Chamar quando o GameWorld do raid morre (ResetAllState).</summary>

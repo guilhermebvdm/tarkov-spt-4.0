@@ -1,16 +1,16 @@
 # Graph Report - mods\TRL-ImmersiveCombatMedicine\modded  (2026-07-12)
 
 ## Corpus Check
-- 27 files · ~19,660 words
+- 27 files · ~20,320 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 418 nodes · 634 edges · 27 communities
+- 421 nodes · 640 edges · 27 communities
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `5cbe831d`
+- Built from commit: `e46c9a7d`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -44,15 +44,15 @@
 
 ## God Nodes (most connected - your core abstractions)
 1. `BandAidUI` - 51 edges
-2. `BandAidController` - 37 edges
+2. `BandAidController` - 42 edges
 3. `BandAidNetworkHandler` - 20 edges
 4. `MedicHealPatch` - 18 edges
 5. `MedicalLogic` - 16 edges
 6. `TourniquetManager` - 16 edges
 7. `TRLImmersiveCombatMedicinePlugin` - 15 edges
 8. `AggroHelper` - 14 edges
-9. `ImageLoader` - 9 edges
-10. `LimbUI` - 9 edges
+9. `DebugBotInvisibility` - 9 edges
+10. `ImageLoader` - 9 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `BandAidController` --inherits--> `MonoBehaviour`  [EXTRACTED]
@@ -72,8 +72,8 @@ Cohesion: 0.07
 Nodes (29): Color, Color32, Font, FontStyle, Image, int, TRLImmersiveCombatMedicine, Band_Aid (+21 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.09
-Nodes (16): Coroutine, EBandAidPressMode, EBoundItem, GameWorld, IEnumerator, KeyboardShortcut, KeyGroup, BandAidController (+8 more)
+Cohesion: 0.08
+Nodes (19): Coroutine, EBandAidPressMode, EBoundItem, GameWorld, IEnumerator, KeyboardShortcut, KeyGroup, BandAidController (+11 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.12
@@ -164,31 +164,31 @@ Cohesion: 0.18
 Nodes (6): InteractableObject, MedicInteractable, TRLImmersiveCombatMedicine, ActionsReturnClass, GamePlayerOwner, Player
 
 ### Community 25 - "Community 25"
-Cohesion: 0.15
-Nodes (10): GInterface177, MedicActionsPatch, MedicPlayerRangePatch, TRLImmersiveCombatMedicine, ActionsReturnClass, float, GamePlayerOwner, HarmonyPostfix (+2 more)
+Cohesion: 0.18
+Nodes (8): GInterface177, MedicActionsPatch, TRLImmersiveCombatMedicine, ActionsReturnClass, float, GamePlayerOwner, HarmonyPrefix, MethodBase
 
 ### Community 26 - "Community 26"
-Cohesion: 0.22
+Cohesion: 0.21
 Nodes (6): ConfigFile, bool, ConfigEntry, float, DebugBotInvisibility, TRLImmersiveCombatMedicine
 
 ## Knowledge Gaps
-- **137 isolated node(s):** `TRLImmersiveCombatMedicine`, `ConfigEntry`, `bool`, `float`, `ConfigFile` (+132 more)
+- **140 isolated node(s):** `TRLImmersiveCombatMedicine`, `ConfigEntry`, `bool`, `float`, `ConfigFile` (+135 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `BandAidUI` connect `Community 0` to `Community 15`?**
-  _High betweenness centrality (0.060) - this node is a cross-community bridge._
+  _High betweenness centrality (0.063) - this node is a cross-community bridge._
 - **Why does `BandAidController` connect `Community 1` to `Community 0`, `Community 15`?**
-  _High betweenness centrality (0.048) - this node is a cross-community bridge._
+  _High betweenness centrality (0.054) - this node is a cross-community bridge._
 - **Why does `TourniquetManager` connect `Community 5` to `Community 15`?**
-  _High betweenness centrality (0.026) - this node is a cross-community bridge._
+  _High betweenness centrality (0.027) - this node is a cross-community bridge._
 - **What connects `TRLImmersiveCombatMedicine`, `ConfigEntry`, `bool` to the rest of the system?**
-  _137 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _140 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.07486338797814207 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.08906882591093117 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07822410147991543 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.12258064516129032 - nodes in this community are weakly interconnected._

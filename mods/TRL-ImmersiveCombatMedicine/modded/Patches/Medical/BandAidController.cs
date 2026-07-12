@@ -163,6 +163,11 @@ namespace TRLImmersiveCombatMedicine
             // player/bot vivo; o prompt aparece no ActionPanel do jogo (como loot).
             EnsureMedicInteractables();
 
+            // Regra ÚNICA de distância (config): o controller dirige o ActionPanel
+            // nativo com scan próprio — prompt e F usam a mesma detecção, sem os caps
+            // do raycast vanilla (1,3m/2,5m) e sem flicker de evento.
+            UpdateNativePrompt();
+
             // Debug: reconcilia o toggle "Invisível para Bots" (rate-limit interno)
             DebugBotInvisibility.Tick();
 
@@ -191,10 +196,10 @@ namespace TRLImmersiveCombatMedicine
 
             if (_isMedicModeActive && _targetPatient != null)
             {
-                // 3,5 m: margem sobre o alcance do prompt nativo (ray ~2,5 m do olho +
-                // offset feet-to-feet) — regra única: se o prompt apareceu, examinar funciona
-                // e o modo não fecha sozinho no mesmo lugar.
-                if (Vector3.Distance(Singleton<GameWorld>.Instance.MainPlayer.Position, _targetPatient.Position) > 3.5f)
+                // Regra única: mesma distância do prompt (config) + 1 m de margem
+                // feet-to-feet — o modo não fecha sozinho onde o prompt ainda aparece.
+                if (Vector3.Distance(Singleton<GameWorld>.Instance.MainPlayer.Position, _targetPatient.Position) >
+                    TRLImmersiveCombatMedicinePlugin.MedicInteractDistance.Value + 1f)
                 {
                     if (_isHealingInProgress)
                     {
@@ -246,17 +251,28 @@ namespace TRLImmersiveCombatMedicine
                 var keyBindings = settings.UserKeyBindings?.Value;
                 if (keyBindings == null) return;
 
+                // Match-mais-longo entre TODOS os slots: com "Mouse4" num slot e
+                // "Shift+Mouse4" em outro, pressionar Shift+Mouse4 dispara os dois
+                // testes — vence o combo com MAIS teclas (o mais específico).
+                // (Problema herdado do 3.11: o primeiro match vencia e o slot de
+                // Mouse4 puro "roubava" o Shift+Mouse4.)
+                EBoundItem bestSlot = default;
+                int bestKeyCount = 0;
+
                 foreach (var keyGroup in keyBindings)
                 {
                     if (!_slotMapping.ContainsKey(keyGroup.keyName)) continue;
 
-                    // Verificar se a tecla foi ativada conforme o PressType configurado
-                    if (IsSlotKeyTriggered(keyGroup))
+                    int keyCount = TriggeredVariantKeyCount(keyGroup);
+                    if (keyCount > bestKeyCount)
                     {
-                        ProcessHeal(_slotMapping[keyGroup.keyName]);
-                        return; // SÃ³ processa um slot por frame
+                        bestKeyCount = keyCount;
+                        bestSlot = _slotMapping[keyGroup.keyName];
                     }
                 }
+
+                if (bestKeyCount > 0)
+                    ProcessHeal(bestSlot);
             }
             catch (Exception ex)
             {
@@ -264,15 +280,19 @@ namespace TRLImmersiveCombatMedicine
             }
         }
 
-        private bool IsSlotKeyTriggered(EFT.InputSystem.KeyGroup keyGroup)
+        /// <summary>
+        /// Retorna o tamanho (nº de teclas) do maior variant do grupo acionado neste
+        /// frame — 0 se nenhum. Variant acionado = TODAS as teclas seguradas (GetKey)
+        /// e pelo menos UMA pressionada NESTE frame (GetKeyDown).
+        /// </summary>
+        private int TriggeredVariantKeyCount(EFT.InputSystem.KeyGroup keyGroup)
         {
+            int best = 0;
             foreach (var variant in keyGroup.variants)
             {
                 if (variant.keyCode == null || variant.keyCode.Count == 0) continue;
+                if (variant.keyCode.Count <= best) continue;
 
-                // Para combos (ex: [LeftShift, Mouse3]):
-                // TODAS as teclas devem estar pressionadas (GetKey),
-                // e pelo menos UMA deve ter sido acionada NESTE frame (GetKeyDown).
                 bool allHeld = true;
                 bool anyJustPressed = false;
 
@@ -290,9 +310,9 @@ namespace TRLImmersiveCombatMedicine
                 }
 
                 if (allHeld && anyJustPressed)
-                    return true;
+                    best = variant.keyCode.Count;
             }
-            return false;
+            return best;
         }
 
         private void ProcessHeal(EBoundItem slot)
@@ -696,6 +716,102 @@ namespace TRLImmersiveCombatMedicine
                     $"[DEBUG-ICM] sweep: +{attached} MedicInteractable (vivos na lista: {players.Count})");
         }
 
+        // === PROMPT DIRIGIDO PELO CONTROLLER (regra única de distância) ===
+        // O ActionPanel nativo executa SelectedAction.Action() no F sem revalidar
+        // distância (EFT.UI.ActionPanel.TranslateCommand, ECommand.BeginInteracting —
+        // decompilado do DLL real). Logo, quem controla AvailableInteractionState
+        // controla prompt E acionamento com a MESMA regra.
+        private GamePlayerOwner _gamePlayerOwner;
+        private ActionsReturnClass _ourPromptActions;   // só limpamos o que NÓS setamos
+        private Player _promptTarget;
+        private float _nextPromptScan = 0f;
+        private static readonly RaycastHit[] _scanHits = new RaycastHit[24];
+
+        private void UpdateNativePrompt()
+        {
+            if (Time.time < _nextPromptScan) return;
+            _nextPromptScan = Time.time + 0.1f; // 10 Hz: responsivo sem custo por frame
+
+            var mainPlayer = Singleton<GameWorld>.Instance.MainPlayer;
+
+            if (_gamePlayerOwner == null)
+                _gamePlayerOwner = mainPlayer.gameObject.GetComponent<GamePlayerOwner>();
+            if (_gamePlayerOwner == null) return; // sem owner (ex.: headless) — patches cobrem ≤1,3m
+
+            Player target = _isMedicModeActive ? null : ScanForMedicTarget(mainPlayer);
+            var current = _gamePlayerOwner.AvailableInteractionState.Value;
+
+            if (target != null)
+            {
+                // Vanilla tem prompt próprio (porta/loot/revive)? Não interferir.
+                if (current != null && current != _ourPromptActions) return;
+
+                if (current == null || _promptTarget != target)
+                {
+                    MedicInteractable.Ensure(target);
+                    var medic = target.GetComponent<MedicInteractable>();
+                    var actions = medic != null ? medic.GetActions(_gamePlayerOwner) : null;
+                    if (actions == null) return;
+                    actions.InitSelected();
+                    _ourPromptActions = actions;
+                    _promptTarget = target;
+                    _gamePlayerOwner.AvailableInteractionState.Value = actions;
+                }
+                // mesmo alvo e prompt já é nosso: não reescrever (preserva scroll/seleção)
+            }
+            else if (current != null && current == _ourPromptActions)
+            {
+                _gamePlayerOwner.ClearInteractionState();
+                _ourPromptActions = null;
+                _promptTarget = null;
+            }
+        }
+
+        /// <summary>
+        /// Scan por alvo médico: SphereCast da origem de interação do jogador na direção
+        /// do olhar, distância = config MedicInteractDistance, respeitando oclusão
+        /// (parede entre médico e alvo bloqueia; corpos/triggers não bloqueiam).
+        /// </summary>
+        private Player ScanForMedicTarget(Player mainPlayer)
+        {
+            float maxDist = TRLImmersiveCombatMedicinePlugin.MedicInteractDistance.Value;
+            Vector3 origin;
+            try { origin = mainPlayer.PlayerBones.LootRaycastOrigin.position; }
+            catch { origin = mainPlayer.PlayerBones.WeaponRoot.position; }
+            Vector3 direction = mainPlayer.LookDirection;
+
+            var gameWorld = Singleton<GameWorld>.Instance;
+            int count = Physics.SphereCastNonAlloc(new Ray(origin, direction), 0.25f, _scanHits, maxDist,
+                Physics.AllLayers, QueryTriggerInteraction.Ignore);
+
+            // Ordenar por distância (insertion sort no buffer — sem alocação)
+            for (int i = 1; i < count; i++)
+            {
+                var key = _scanHits[i];
+                int j = i - 1;
+                while (j >= 0 && _scanHits[j].distance > key.distance) { _scanHits[j + 1] = _scanHits[j]; j--; }
+                _scanHits[j + 1] = key;
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                var col = _scanHits[i].collider;
+                Player p = gameWorld.GetPlayerByCollider(col);
+                if (p == null) p = col.GetComponentInParent<Player>();
+
+                if (p != null)
+                {
+                    if (p == mainPlayer) continue;                      // próprio corpo
+                    if (p.HealthController == null || !p.HealthController.IsAlive) continue; // cadáver não bloqueia
+                    return p;                                           // alvo válido mais próximo
+                }
+
+                // Sólido que não é player antes do alvo = oclusão (parede/obstáculo)
+                return null;
+            }
+            return null;
+        }
+
         /// <summary>
         /// Chamado pela ação "Examinar (Médico)" do ActionPanel nativo (MedicInteractable).
         /// </summary>
@@ -786,6 +902,11 @@ namespace TRLImmersiveCombatMedicine
 
             BandAidUI.Instance?.HideUI();
             DebugBotInvisibility.OnRaidEnded();
+
+            // Estado do prompt dirigido (GamePlayerOwner morre com a raid)
+            _gamePlayerOwner = null;
+            _ourPromptActions = null;
+            _promptTarget = null;
             TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("ResetAllState: flags resetadas (mudanÃ§a de raid).");
         }
 

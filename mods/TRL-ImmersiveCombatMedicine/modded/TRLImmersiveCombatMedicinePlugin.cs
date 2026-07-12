@@ -31,6 +31,7 @@ namespace TRLImmersiveCombatMedicine
         public static ConfigEntry<EBandAidPressMode> MedicInteractMode;
         public static ConfigEntry<EBandAidPressMode> EmergencyDropMode;
         public static ConfigEntry<EBandAidPressMode> ShoulderTapMode;
+        public static ConfigEntry<float> MedicInteractDistance;
 
         private void Awake()
         {
@@ -57,6 +58,12 @@ namespace TRLImmersiveCombatMedicine
             MedicInteractMode = Config.Bind("4. Keybinds (Medic)", "Medic Interact Mode", EBandAidPressMode.Hold, "Modo de ativaÃ§Ã£o: Press (aperta e solta), Hold (segura), DoubleTap (aperta 2x).");
             EmergencyDropMode = Config.Bind("4. Keybinds (Medic)", "Emergency Drop Mode", EBandAidPressMode.Press, "Modo de ativaÃ§Ã£o do drop emergencial.");
             ShoulderTapMode = Config.Bind("4. Keybinds (Medic)", "Shoulder Tap Mode", EBandAidPressMode.DoubleTap, "Modo de ativaÃ§Ã£o do toque no ombro.");
+            // Regra ÚNICA de distância: o prompt e o acionamento usam este valor (o
+            // controller dirige o ActionPanel nativo por scan próprio — os caps do
+            // vanilla, 1,3m/2,5m, não se aplicam). Reduzir ao empacotar para o server.
+            MedicInteractDistance = Config.Bind("4. Keybinds (Medic)", "Medic Interact Distance", 5f,
+                new ConfigDescription("Distancia (m) do prompt E do acionamento do modo medico (mesma regra). Valor alto para testes; reduzir no pacote final.",
+                    new AcceptableValueRange<float>(1f, 15f)));
 
             // Feature de debug: invisibilidade para bots (host-only)
             DebugBotInvisibility.Init(Config);
