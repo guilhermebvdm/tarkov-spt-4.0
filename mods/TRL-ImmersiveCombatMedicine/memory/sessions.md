@@ -8,11 +8,11 @@
 - HUD médico implementado (BandAidUI) com ECG plano em cadáveres; aplicação de medicina trava (CheckManualInputs) se o paciente estiver morto; consumo usa DiscardItemNetworked pré-verificado (anti slot fantasma); bots desmaiados entram em prone (BotRagdollSimulator descartado).
 
 ## Pendências
-- P-2.1: Validar em raid (HITL): aproximar de bot → prompt F deve aparecer; conferir spam `ScanForPatient: SphereCastAll hits:` no LogOutput.log. ATENÇÃO: launcher com Dev Mode OFF pode reverter o DLL local no sync (ver memória global feedback_server_launcher_sync_builds).
-- P-2.2: Após validar, remover/gatear os LogInfo por frame do ScanForPatient (flood de log em raid) e o bloco OverlapSphere duplicado (BandAidController.cs ~751-791).
-- P-2.3: Coop-sync: FikaBridge.SyncFaintStatus só atualiza lista local — o FikaPacketManager.cs do TrueTrauma 3.11 não foi migrado; desmaio não é propagado aos peers.
-- P-2.4: (Opcional) Alinhar o scan ao padrão canônico (origem PlayerBones.LootRaycastOrigin; WeaponRoot+LookDirection diverge da câmera em freelook).
-- P-2.5: Pin de references/fika-plugin (manifest 6ccdd2b = Fika 2.2.6) está atrás do instalado (2.3.4, que tem ToggleDowned/ReviveInteractable) — atualizar pin + regenerar grafo fika-plugin.
+- [P-2.1] (aberta 2026-07-11) Validar em raid (HITL): aproximar de bot → prompt F deve aparecer; conferir spam `ScanForPatient: SphereCastAll hits:` no LogOutput.log. ATENÇÃO: launcher com Dev Mode OFF pode reverter o DLL local no sync (ver memória global feedback_server_launcher_sync_builds).
+- [P-2.2] (aberta 2026-07-11) Após validar, remover/gatear os LogInfo por frame do ScanForPatient (flood de log em raid) e o bloco OverlapSphere duplicado (BandAidController.cs ~751-791).
+- [P-2.3] (aberta 2026-07-11) Coop-sync: FikaBridge.SyncFaintStatus só atualiza lista local — o FikaPacketManager.cs do TrueTrauma 3.11 não foi migrado; desmaio não é propagado aos peers.
+- [P-2.4] (aberta 2026-07-11) (Opcional) Alinhar o scan ao padrão canônico (origem PlayerBones.LootRaycastOrigin; WeaponRoot+LookDirection diverge da câmera em freelook).
+- [P-2.5] (aberta 2026-07-11) Pin de references/fika-plugin (manifest 6ccdd2b = Fika 2.2.6) está atrás do instalado (2.3.4, que tem ToggleDowned/ReviveInteractable) — atualizar pin + regenerar grafo fika-plugin.
 
 ---
 
