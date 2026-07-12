@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <AssemblyName>TRL-Fixes</AssemblyName>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp"><HintPath>References\Assembly-CSharp.dll</HintPath></Reference>
+    <Reference Include="BepInEx"><HintPath>References\BepInEx.dll</HintPath></Reference>
+    <Reference Include="0Harmony"><HintPath>References\0Harmony.dll</HintPath></Reference>
+    <Reference Include="UnityEngine"><HintPath>References\UnityEngine.dll</HintPath></Reference>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>References\UnityEngine.CoreModule.dll</HintPath></Reference>
+    <Reference Include="UnityEngine.PhysicsModule"><HintPath>References\UnityEngine.PhysicsModule.dll</HintPath></Reference>
+    <Reference Include="Comfort"><HintPath>References\Comfort.dll</HintPath></Reference>
+  </ItemGroup>
+</Project>
