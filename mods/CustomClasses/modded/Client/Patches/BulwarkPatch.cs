@@ -131,9 +131,23 @@ internal class BulwarkPatch : ModulePatch
     }
 
     /// <summary>
-    ///     O item é <paramref name="root"/> ou descende dele? Sobe a hierarquia por
-    ///     <c>Parent.Container.ParentItem</c> (ref: GClass2181.cs:130). Limite de profundidade = guarda contra
-    ///     hierarquia cíclica/corrompida.
+    ///     O item é <paramref name="root"/> ou descende dele? Sobe a hierarquia do inventário.
+    ///     <para>
+    ///     Basta 1 salto na prática (code-review 2026-07-11, verificado no decompilado): colete MONOLÍTICO →
+    ///     o <c>ArmorComponent</c> vive no PRÓPRIO item do slot ⇒ bate na iteração 0. PLATE CARRIER → as placas
+    ///     entram no buffer (os slots de placa têm <c>_mergeSlotWithChildren: true</c>) e
+    ///     <c>placa.CurrentAddress.Container(Slot).ParentItem == colete</c> ⇒ bate na iteração 1.
+    ///     </para>
+    ///     <para>
+    ///     ⚠️ Usa <c>CurrentAddress</c>, NÃO <c>Item.Parent</c>: o getter <c>Parent</c> é
+    ///     <c>CurrentAddress ?? throw new Exception(...)</c> — ele LANÇA em vez de devolver null, e a exceção
+    ///     derrubaria a Couraça naquele hit + spam de LogError a cada tick de dano.
+    ///     </para>
+    ///     <para>
+    ///     A saída por AUTO-REFERÊNCIA é obrigatória: a raiz do inventário (<c>Equipment</c>) aponta para si
+    ///     mesma (<c>InventoryController.ParentItem =&gt; RootItem == Equipment</c>). Sem ela, um capacete
+    ///     (que nunca alcança o colete) ficaria girando até estourar o limite de profundidade.
+    ///     </para>
     /// </summary>
     private static bool IsUnder(Item item, Item? root)
     {
@@ -150,7 +164,13 @@ internal class BulwarkPatch : ModulePatch
                 return true;
             }
 
-            current = current.Parent?.Container?.ParentItem;
+            var next = current.CurrentAddress?.Container?.ParentItem;
+            if (next is null || ReferenceEquals(next, current))
+            {
+                return false;   // topo do inventário (Equipment é auto-referente) → não descende do root
+            }
+
+            current = next;
         }
 
         return false;

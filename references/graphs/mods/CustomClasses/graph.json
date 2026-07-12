@@ -350,7 +350,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "modulepatch",
-      "community": 81,
+      "community": 40,
       "norm_label": "modulepatch"
     },
     {
@@ -517,7 +517,7 @@
       "label": ".IsUnder()",
       "file_type": "code",
       "source_file": "Client/Patches/BulwarkPatch.cs",
-      "source_location": "L138",
+      "source_location": "L152",
       "_origin": "ast",
       "id": "patches_bulwarkpatch_bulwarkpatch_isunder",
       "community": 80,
@@ -527,7 +527,7 @@
       "label": "Item",
       "file_type": "code",
       "source_file": "Client/Patches/BulwarkPatch.cs",
-      "source_location": "L138",
+      "source_location": "L152",
       "_origin": "ast",
       "id": "client_patches_bulwarkpatch_cs_item",
       "community": 80,
@@ -1220,7 +1220,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "patches_classmovementpatches_classmovespeed_apply",
-      "community": 108,
+      "community": 81,
       "norm_label": ".apply()"
     },
     {
@@ -1230,7 +1230,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "movementcontext",
-      "community": 108,
+      "community": 81,
       "norm_label": "movementcontext"
     },
     {
@@ -1270,7 +1270,7 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "patches_classmovementpatches_maxspeedpatch_postfix",
-      "community": 108,
+      "community": 81,
       "norm_label": ".postfix()"
     },
     {
@@ -1280,7 +1280,7 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "client_patches_classmovementpatches_cs_patchpostfix",
-      "community": 108,
+      "community": 81,
       "norm_label": "patchpostfix"
     },
     {
@@ -1310,7 +1310,7 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "patches_classmovementpatches_sprintspeedpatch_postfix",
-      "community": 108,
+      "community": 81,
       "norm_label": ".postfix()"
     },
     {
@@ -1340,7 +1340,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "patches_classmovementpatches_overladeninertiapatch_postfix",
-      "community": 108,
+      "community": 81,
       "norm_label": ".postfix()"
     },
     {
@@ -1350,7 +1350,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "basephysicalclass",
-      "community": 108,
+      "community": 81,
       "norm_label": "basephysicalclass"
     },
     {
@@ -1380,7 +1380,7 @@
       "source_location": "L145",
       "_origin": "ast",
       "id": "patches_classmovementpatches_setcharactermovementspeedpatch_prefix",
-      "community": 108,
+      "community": 81,
       "norm_label": ".prefix()"
     },
     {
@@ -1390,7 +1390,7 @@
       "source_location": "L145",
       "_origin": "ast",
       "id": "client_patches_classmovementpatches_cs_patchprefix",
-      "community": 108,
+      "community": 81,
       "norm_label": "patchprefix"
     },
     {
@@ -1420,7 +1420,7 @@
       "source_location": "L165",
       "_origin": "ast",
       "id": "patches_classmovementpatches_sprintaccelerationpatch_postfix",
-      "community": 108,
+      "community": 81,
       "norm_label": ".postfix()"
     },
     {
@@ -1720,7 +1720,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "patches_classweaponpatches_shootrecoilpatch_prefix",
-      "community": 83,
+      "community": 90,
       "norm_label": ".prefix()"
     },
     {
@@ -1740,7 +1740,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_patchprefix",
-      "community": 83,
+      "community": 90,
       "norm_label": "patchprefix"
     },
     {
@@ -1860,7 +1860,7 @@
       "source_location": "L202",
       "_origin": "ast",
       "id": "patches_classweaponpatches_heavyweapon",
-      "community": 83,
+      "community": 90,
       "norm_label": "heavyweapon"
     },
     {
@@ -1870,7 +1870,7 @@
       "source_location": "L204",
       "_origin": "ast",
       "id": "patches_classweaponpatches_heavyweapon_isheavy",
-      "community": 83,
+      "community": 90,
       "norm_label": ".isheavy()"
     },
     {
@@ -1880,7 +1880,7 @@
       "source_location": "L204",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_weapon",
-      "community": 83,
+      "community": 90,
       "norm_label": "weapon"
     },
     {
@@ -1890,7 +1890,7 @@
       "source_location": "L217",
       "_origin": "ast",
       "id": "patches_classweaponpatches_heavyweapon_inhand",
-      "community": 83,
+      "community": 90,
       "norm_label": ".inhand()"
     },
     {
@@ -1900,7 +1900,7 @@
       "source_location": "L217",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_player",
-      "community": 83,
+      "community": 90,
       "norm_label": "player"
     },
     {
@@ -1930,7 +1930,7 @@
       "source_location": "L240",
       "_origin": "ast",
       "id": "patches_classweaponpatches_aimpunchpatch_prefix",
-      "community": 83,
+      "community": 90,
       "norm_label": ".prefix()"
     },
     {
@@ -1940,7 +1940,7 @@
       "source_location": "L240",
       "_origin": "ast",
       "id": "forceeffector",
-      "community": 83,
+      "community": 90,
       "norm_label": "forceeffector"
     },
     {
@@ -1980,7 +1980,7 @@
       "source_location": "L294",
       "_origin": "ast",
       "id": "patches_classweaponpatches_localhittypepatch_prefix",
-      "community": 83,
+      "community": 90,
       "norm_label": ".prefix()"
     },
     {
@@ -2720,7 +2720,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_quickhandspatch",
-      "community": 81,
+      "community": 47,
       "norm_label": "quickhandspatch.cs"
     },
     {
@@ -2730,7 +2730,7 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "patches_quickhandspatch_quickhandspatch",
-      "community": 81,
+      "community": 47,
       "norm_label": "quickhandspatch"
     },
     {
@@ -2740,7 +2740,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "patches_quickhandspatch_quickhandspatch_gettargetmethod",
-      "community": 81,
+      "community": 47,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2750,7 +2750,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "client_patches_quickhandspatch_cs_methodbase",
-      "community": 81,
+      "community": 47,
       "norm_label": "methodbase"
     },
     {
@@ -17520,9 +17520,9 @@
       "source_file": "Client/Patches/BulwarkPatch.cs",
       "source_location": "L138",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_bulwarkpatch_bulwarkpatch",
-      "target": "patches_bulwarkpatch_bulwarkpatch_isunder",
-      "confidence_score": 1.0
+      "target": "patches_bulwarkpatch_bulwarkpatch_isunder"
     },
     {
       "relation": "method",
@@ -17607,9 +17607,9 @@
       "source_file": "Client/Patches/BulwarkPatch.cs",
       "source_location": "L124",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_bulwarkpatch_bulwarkpatch_hasheavyarmor",
-      "target": "patches_bulwarkpatch_bulwarkpatch_isunder",
-      "confidence_score": 1.0
+      "target": "patches_bulwarkpatch_bulwarkpatch_isunder"
     },
     {
       "relation": "references",
@@ -17618,9 +17618,9 @@
       "source_location": "L138",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_bulwarkpatch_bulwarkpatch_isunder",
-      "target": "client_patches_bulwarkpatch_cs_item",
-      "confidence_score": 1.0
+      "target": "client_patches_bulwarkpatch_cs_item"
     },
     {
       "relation": "contains",
@@ -38502,5 +38502,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "2aa9d067883eaa052200d127d34028852e29ad9a"
+  "built_at_commit": "297a130ea5e98cf452225ef017ae5072f70d0ccf"
 }

@@ -71,29 +71,28 @@ internal class RecoilFloorApplyPatch : ModulePatch
     {
         try
         {
-            if (PerksConfig.RecoilFloorEnabled?.Value != true)
-            {
-                return;
-            }
-
             var before = RecoilFloorCapturePatch.StrBefore;
             if (float.IsNaN(before))
             {
                 return;   // não era a arma do player local nesta invocação
             }
 
-            var floor = PerksConfig.RecoilFloor?.Value ?? 0.6f;
-            var min = before * floor;
-            if (str < min)
+            // O clamp em si é opcional (toggle do F12)...
+            if (PerksConfig.RecoilFloorEnabled?.Value == true)
             {
-                str = min;   // o produto (maestria × perks) tentou passar do piso → clampa
+                var floor = PerksConfig.RecoilFloor?.Value ?? 0.6f;
+                var min = before * floor;
+                if (str < min)
+                {
+                    str = min;   // o produto (maestria × perks) tentou passar do piso → clampa
+                }
             }
 
-            // (code-review 2026-07-11) O ShootRecoilPatch grava `PerkDiag.RecoilAfter` na prioridade Normal —
-            // ou seja, ANTES deste clamp. Sem isto, o overlay (052) mostraria o recuo PRÉ-piso e mentiria
-            // justamente no caso que o B15 existe p/ corrigir (ex.: janela de Adrenalina). Reescrevemos aqui,
-            // no fim da cadeia, usando o `before` REAL (o `RecoilBefore` do outro patch já vem multiplicado
-            // pela maestria — este é o original de verdade).
+            // ...mas a escrita do diagnóstico NÃO é (code-review 2026-07-11, 2ª rodada): o ShootRecoilPatch
+            // grava `PerkDiag.RecoilAfter` na prioridade Normal — ANTES deste patch. Se saíssemos cedo quando
+            // o piso está DESLIGADO, o overlay (052) voltaria ao baseline pós-maestria e mentiria de novo.
+            // Aqui, no FIM da cadeia, ele sempre reflete o valor real — e o `before` é o `str` original de
+            // verdade (o `RecoilBefore` do outro patch já vem multiplicado pela maestria).
             if (PerkDiag.Enabled)
             {
                 PerkDiag.RecoilBefore = before;

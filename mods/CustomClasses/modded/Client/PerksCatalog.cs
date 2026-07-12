@@ -319,7 +319,10 @@ internal static class PerksCatalog
                 Plugin.Log?.LogWarning($"[CustomClasses][059] grupo '{key}' NÃO é homogêneo (perk/drawback misturados na coluna).");
             }
 
-            foreach (var l in g.Lines.Where(l => l.Format != ValueFormat.Flag && Mathf.Approximately(l.Multiplier, 1f)))
+            // `l.Live is null` (code-review 2026-07-11): esta invariante vale para os valores HARDCODED do
+            // catálogo. Linhas com `Live` resolvem o F12 do USUÁRIO — e neutralizar um perk lá (ex.: Tireless
+            // Arms em 1.0, dentro do range válido) é escolha legítima dele, não erro de catálogo.
+            foreach (var l in g.Lines.Where(l => l.Format != ValueFormat.Flag && l.Live is null && Mathf.Approximately(l.Multiplier, 1f)))
             {
                 Plugin.Log?.LogWarning($"[CustomClasses][059] linha '{l.LabelEn}' em '{key}' tem Multiplier==1 (sem efeito → classificação inválida).");
             }
