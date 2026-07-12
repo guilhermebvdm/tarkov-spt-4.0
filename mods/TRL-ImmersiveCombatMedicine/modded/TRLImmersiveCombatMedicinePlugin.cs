@@ -67,6 +67,11 @@ namespace TRLImmersiveCombatMedicine
             uiHost.AddComponent<BandAidUI>();
             uiHost.AddComponent<BandAidController>();
 
+            // [DEBUG-ICM] sondas de lifecycle — remover após diagnóstico do prompt F
+            _debugHost = uiHost;
+            _debugCtrl = uiHost.GetComponent<BandAidController>();
+            ModLogger.LogWarning($"[DEBUG-ICM] uiHost criado | active={uiHost.activeInHierarchy} | ctrl!=null={_debugCtrl != null} | ctrl.enabled={(_debugCtrl != null ? _debugCtrl.enabled.ToString() : "n/a")}");
+
             // Setup reflection para TrueTrauma
             TraumaState.PlayerField = typeof(EFT.MovementContext).GetField("_player", BindingFlags.NonPublic | BindingFlags.Instance);
 
@@ -129,8 +134,23 @@ namespace TRLImmersiveCombatMedicine
             TraumaState.Logger.LogInfo("TRL-ImmersiveCombatMedicine: Estado limpo para nova raid.");
         }
 
+        // [DEBUG-ICM] heartbeat — remover após diagnóstico do prompt F
+        private static GameObject _debugHost;
+        private static BandAidController _debugCtrl;
+        private float _debugNextBeat = 0f;
+
         private void Update()
         {
+            // [DEBUG-ICM] roda ANTES de qualquer early-return: Plugin.Update comprovadamente vive em raid
+            if (Time.time >= _debugNextBeat)
+            {
+                _debugNextBeat = Time.time + 10f;
+                var gw = Comfort.Common.Singleton<EFT.GameWorld>.Instance;
+                string host = _debugHost == null ? "DESTRUÍDO" : (_debugHost.activeInHierarchy ? "ativo" : "INATIVO");
+                string ctrl = _debugCtrl == null ? "DESTRUÍDO" : (_debugCtrl.enabled ? "enabled" : "DISABLED");
+                ModLogger.LogWarning($"[DEBUG-ICM] beat | host={host} | ctrl={ctrl} | world={(gw != null)} | mainPlayer={(gw?.MainPlayer != null)}");
+            }
+
             // LÃ³gica unificada de Update aqui
             if (!ConfigMasterEnabled.Value || !ConfigBlackoutEnabled.Value)
             {

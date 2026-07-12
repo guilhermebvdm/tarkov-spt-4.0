@@ -69,16 +69,23 @@ namespace TRLImmersiveCombatMedicine
 
         private void Awake()
         {
+            TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning("[DEBUG-ICM] Controller.Awake INÍCIO");
             Instance = this;
-            
+
             CreateInteractHUD();
 
             // Registrar handler de resposta do handshake
             BandAidNetworkHandler.OnHealCheckResponse += OnHealCheckResponseHandler;
+            TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning("[DEBUG-ICM] Controller.Awake FIM (HUD criado, handler registrado)");
         }
+
+        // [DEBUG-ICM] sondas de lifecycle — remover após diagnóstico do prompt F
+        private void OnEnable()  { TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning("[DEBUG-ICM] Controller.OnEnable"); }
+        private void OnDisable() { TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning("[DEBUG-ICM] Controller.OnDisable"); }
 
         private void OnDestroy()
         {
+            TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning("[DEBUG-ICM] Controller.OnDestroy");
             BandAidNetworkHandler.OnHealCheckResponse -= OnHealCheckResponseHandler;
         }
 
@@ -186,11 +193,27 @@ namespace TRLImmersiveCombatMedicine
             }
         }
 
+        // [DEBUG-ICM] flags log-once — remover após diagnóstico do prompt F
+        private bool _dbgUpdateAlive = false;
+        private bool _dbgInRaid = false;
+
         private void Update()
         {
+            // [DEBUG-ICM]
+            if (!_dbgUpdateAlive)
+            {
+                _dbgUpdateAlive = true;
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning("[DEBUG-ICM] Controller.Update PRIMEIRO frame");
+            }
+
             // O registro de pacotes deve ocorrer independentemente de haver um jogador local.
             // Em servidores dedicados (Headless), o MainPlayer Ã© null. Se pularmos, os pacotes nunca sÃ£o registrados.
-            BandAidNetworkHandler.CheckInit();
+            try { BandAidNetworkHandler.CheckInit(); }
+            catch (Exception ex)
+            {
+                // [DEBUG-ICM] CheckInit era chamado sem guarda ANTES do scan — uma exceção aqui mataria o Update todo frame
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogError($"[DEBUG-ICM] CheckInit exception: {ex}");
+            }
 
             if (Singleton<GameWorld>.Instance == null || Singleton<GameWorld>.Instance.MainPlayer == null)
             {
@@ -208,6 +231,13 @@ namespace TRLImmersiveCombatMedicine
             {
                 ResetAllState();
                 _lastGameWorld = Singleton<GameWorld>.Instance;
+            }
+
+            // [DEBUG-ICM]
+            if (!_dbgInRaid)
+            {
+                _dbgInRaid = true;
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning("[DEBUG-ICM] Controller.Update EM RAID (GameWorld+MainPlayer ok) — ScanForPatient vai rodar");
             }
 
             ScanForPatient();
