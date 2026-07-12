@@ -1,0 +1,329 @@
+using HarmonyLib;
+using EFT;
+using EFT.HealthSystem;
+using EFT.InventoryLogic;
+using BepInEx.Logging;
+using System;
+using System.Reflection;
+
+namespace Band_Aid
+{
+    /// <summary>
+    /// Harmony Prefix em Player.MedsController.Class1172.method_5
+    /// Redireciona DoMedEffect para o paciente e faz bridge do EffectRemovedEvent.
+    /// </summary>
+    [HarmonyPatch]
+    public static class MedicHealPatch
+    {
+        private static ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("BandAid_Patch");
+
+        public static bool IsRedirectingHeal = false;
+        public static Player CurrentPatient = null;
+
+        // Timestamp para diagnóstico de timing
+        public static float RedirectStartTime = 0f;
+
+        // Flag para bloquear method_5 "fantasma" após cleanup
+        // Fica true durante toda a operação de cura, incluindo a transição
+        public static bool BandAidHealActive = false;
+
+        private static MethodInfo _method8Cached = null;
+        private static MethodInfo _method9Cached = null;
+        private static object _currentClass1172 = null;
+        private static IHealthController _subscribedPatientHc = null;
+
+        private static readonly EBodyPart[] AllBodyParts = new EBodyPart[]
+        {
+            EBodyPart.Head, EBodyPart.Chest, EBodyPart.Stomach,
+            EBodyPart.LeftArm, EBodyPart.RightArm,
+            EBodyPart.LeftLeg, EBodyPart.RightLeg
+        };
+
+        static MethodBase TargetMethod()
+        {
+            Type class1172 = AccessTools.Inner(
+                AccessTools.Inner(typeof(Player), "MedsController"),
+                "Class1172"
+            );
+            if (class1172 == null) { Logger.LogError("Não encontrou Class1172!"); return null; }
+
+            var method = AccessTools.Method(class1172, "method_5");
+            if (method == null) { Logger.LogError("Não encontrou method_5!"); return null; }
+
+            _method8Cached = AccessTools.Method(class1172, "method_8");
+            _method9Cached = AccessTools.Method(class1172, "method_9");
+            Logger.LogInfo($"MedicHealPatch alvo: {method.DeclaringType.FullName}.{method.Name}");
+            return method;
+        }
+
+        private static void OnPatientEffectRemoved(IEffect effect)
+        {
+            if (!(effect is GInterface350))
+                return;
+
+            try
+            {
+                CleanupPatientSubscription();
+                if (_currentClass1172 != null && _method8Cached != null)
+                {
+                    // G9: Bridge só executa se temos instância válida
+                    Logger.LogInfo("Bridge: MedEffect do paciente terminou → notificando method_8");
+                    _method8Cached.Invoke(_currentClass1172, new object[] { effect });
+                }
+                else
+                {
+                    Logger.LogWarning("Bridge: EffectRemoved mas _currentClass1172 ou _method8Cached é null — ignorando");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Erro no bridge EffectRemoved: {ex.Message}");
+            }
+        }
+
+        public static void CleanupPatientSubscription()
+        {
+            if (_subscribedPatientHc != null)
+            {
+                _subscribedPatientHc.EffectRemovedEvent -= OnPatientEffectRemoved;
+                _subscribedPatientHc = null;
+            }
+            // NÃO limpar _currentClass1172 aqui — pode ser necessário para ForceFinishAnimation
+        }
+
+        /// <summary>
+        /// Força finalização da animação chamando method_9 diretamente.
+        /// Usado pelo HealRoutine quando não há MedEffect ativo (DoMedEffect retornou null).
+        /// </summary>
+        public static void ForceFinishAnimation()
+        {
+            if (_currentClass1172 != null && _method9Cached != null)
+            {
+                try
+                {
+                    Logger.LogInfo("ForceFinishAnimation: chamando method_9 diretamente");
+                    _method9Cached.Invoke(_currentClass1172, null);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogWarning($"ForceFinishAnimation erro: {ex.Message}");
+                }
+            }
+            _currentClass1172 = null;
+            BandAidHealActive = false;
+        }
+
+        static bool Prefix(object __instance)
+        {
+            // === DIAGNÓSTICO: SEMPRE loga quando method_5 é chamado ===
+            float timeSinceRedirect = UnityEngine.Time.time - RedirectStartTime;
+            Logger.LogWarning($"🔍 method_5 CHAMADO | IsRedirecting={IsRedirectingHeal} | BandAidActive={BandAidHealActive} | Patient={CurrentPatient?.Profile?.Nickname ?? "null"} | T+{timeSinceRedirect:F1}s desde redirect");
+
+            if (!IsRedirectingHeal || CurrentPatient == null)
+            {
+                // G5: Se BandAidHealActive=true, bloquear self-heal vanilla
+                // para evitar que _currentClass1172 seja sobrescrito por outra instância
+                if (BandAidHealActive)
+                {
+                    Logger.LogWarning("⚠️ method_5: BLOQUEADO (BandAidHealActive — protegendo _currentClass1172)");
+                    return false;
+                }
+                return true;
+            }
+
+            try
+            {
+                var medsControllerField = AccessTools.Field(__instance.GetType(), "medsController_0");
+                if (medsControllerField == null) { Logger.LogWarning("medsController_0 não encontrado"); return true; }
+                var medsController = medsControllerField.GetValue(__instance);
+
+                var playerField = AccessTools.Field(typeof(Player.ItemHandsController), "_player");
+                if (playerField == null) { Logger.LogWarning("_player não encontrado"); return true; }
+                var doctor = (Player)playerField.GetValue(medsController);
+
+                var item = ((Player.AbstractHandsController)medsController).Item;
+                if (item == null) { Logger.LogWarning("Item é null"); return true; }
+
+                var queueField = AccessTools.Field(__instance.GetType(), "queue_0");
+                var queue = (System.Collections.Generic.Queue<EBodyPart>)queueField.GetValue(__instance);
+                EBodyPart bodyPart1 = EBodyPart.Common;
+                if (queue != null && queue.Count > 0)
+                    bodyPart1 = queue.Peek();
+
+                var amountField = AccessTools.Field(__instance.GetType(), "float_0");
+                float amount = (float)amountField.GetValue(__instance);
+
+                var patientHc = CurrentPatient.ActiveHealthController;
+
+                // === PACIENTE REMOTO: sem ActiveHealthController ===
+                // ObservedCoopPlayer não tem ActiveHC → DoMedEffect impossível.
+                // A animação roda normalmente, e ApplyTreatment no final envia via rede.
+                if (patientHc == null)
+                {
+                    Logger.LogInfo($"Paciente remoto ({CurrentPatient.Profile?.Nickname}) — sem ActiveHC. Animação sem MedEffect.");
+                    _currentClass1172 = __instance;
+
+                    var animField = AccessTools.Field(medsController.GetType(), "firearmsAnimator_0");
+                    if (animField != null)
+                    {
+                        var anim = animField.GetValue(medsController);
+                        if (anim != null)
+                        {
+                            var setMult = AccessTools.Method(anim.GetType(), "SetUseTimeMultiplier");
+                            setMult?.Invoke(anim, new object[] { 1f });
+                        }
+                    }
+
+                    var method6Remote = AccessTools.Method(__instance.GetType(), "method_6");
+                    method6Remote?.Invoke(__instance, null);
+
+                    Logger.LogInfo("✅ Animação para paciente remoto — ForceFinishAnimation será chamado após UseTime");
+                    return false;
+                }
+
+                Logger.LogInfo($"method_5: DoMedEffect no paciente {CurrentPatient.Profile.Nickname} | bodyPart={bodyPart1} | amount={amount:F1} | item={item.ShortName.Localized()}");
+
+                IEffect result = patientHc.DoMedEffect(item, bodyPart1, new float?(amount));
+
+                if (result == null)
+                {
+                    Logger.LogWarning($"DoMedEffect retornou NULL para bodyPart={bodyPart1} — tentando fallback...");
+                    foreach (var bp in AllBodyParts)
+                    {
+                        result = patientHc.DoMedEffect(item, bp, new float?(amount));
+                        if (result != null)
+                        {
+                            Logger.LogInfo($"✅ Cura redirecionada para {CurrentPatient.Profile.Nickname} em {bp} (fallback)");
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    Logger.LogInfo($"✅ Cura redirecionada para {CurrentPatient.Profile.Nickname} em {bodyPart1}");
+                }
+
+                if (result == null)
+                {
+                    // DoMedEffect falhou em todas as body parts.
+                    // NÃO retornar true (original rodaria → DoMedEffect no médico → null → animação cancela!)
+                    // Em vez disso, manter a animação tocando sem MedEffect.
+                    // O tratamento real será aplicado por MedicalLogic.ApplyTreatment no final do HealRoutine.
+                    Logger.LogWarning("⚠️ DoMedEffect NULL em todas body parts — mantendo animação sem MedEffect");
+                    
+                    // Armazenar instância para ForceFinishAnimation poder chamar method_9 depois
+                    _currentClass1172 = __instance;
+
+                    var animatorField2 = AccessTools.Field(medsController.GetType(), "firearmsAnimator_0");
+                    if (animatorField2 != null)
+                    {
+                        var animator2 = animatorField2.GetValue(medsController);
+                        if (animator2 != null)
+                        {
+                            var setMultMethod2 = AccessTools.Method(animator2.GetType(), "SetUseTimeMultiplier");
+                            setMultMethod2?.Invoke(animator2, new object[] { 1f });
+                        }
+                    }
+
+                    var method6Alt = AccessTools.Method(__instance.GetType(), "method_6");
+                    method6Alt?.Invoke(__instance, null);
+
+                    Logger.LogInfo("✅ Animação mantida (sem MedEffect) — ForceFinishAnimation será chamado após UseTime");
+                    return false;
+                }
+
+                // Bridge: subscrever EffectRemovedEvent do paciente
+                CleanupPatientSubscription();
+                _currentClass1172 = __instance;
+                _subscribedPatientHc = CurrentPatient.HealthController;
+                _subscribedPatientHc.EffectRemovedEvent += OnPatientEffectRemoved;
+
+                // Replicar "else" do method_5 original
+                float num = doctor.Skills.SurgerySpeed.Value / 100f;
+                EBodyPart checkPart = bodyPart1;
+                if (bodyPart1 == EBodyPart.Common && queue != null && queue.Count > 0)
+                    checkPart = queue.Peek();
+
+                try
+                {
+                    ValueStruct bodyPartHealth = CurrentPatient.HealthController.GetBodyPartHealth(checkPart);
+                    if ((double)bodyPartHealth.Maximum - (double)bodyPartHealth.Current < 10.0)
+                        num += 0.2f;
+                }
+                catch { }
+
+                var animatorField = AccessTools.Field(medsController.GetType(), "firearmsAnimator_0");
+                if (animatorField != null)
+                {
+                    var animator = animatorField.GetValue(medsController);
+                    if (animator != null)
+                    {
+                        var setMultMethod = AccessTools.Method(animator.GetType(), "SetUseTimeMultiplier");
+                        setMultMethod?.Invoke(animator, new object[] { 1f + num });
+                    }
+                }
+
+                var method6 = AccessTools.Method(__instance.GetType(), "method_6");
+                method6?.Invoke(__instance, null);
+
+                Logger.LogInfo("✅ method_5 redirecionado com sucesso — animação continua");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Erro no MedicHealPatch: {ex}");
+                return true;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Postfix em Class1172.method_9 (cleanup/finalização).
+    /// Reseta IsRedirectingHeal quando method_9 executa durante redirect.
+    /// Também loga stack trace para diagnóstico.
+    /// </summary>
+    [HarmonyPatch]
+    public static class AnimCleanupPatch
+    {
+        private static ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("BandAid_SPY");
+
+        static MethodBase TargetMethod()
+        {
+            Type class1172 = AccessTools.Inner(
+                AccessTools.Inner(typeof(Player), "MedsController"),
+                "Class1172"
+            );
+            return AccessTools.Method(class1172, "method_9");
+        }
+
+        [HarmonyPostfix]
+        static void Postfix()
+        {
+            float timeSinceRedirect = UnityEngine.Time.time - MedicHealPatch.RedirectStartTime;
+
+            if (!MedicHealPatch.IsRedirectingHeal)
+            {
+                // G4: Não é nosso redirect — early return para evitar triplo reset
+                return;
+            }
+
+            // Capturar quem chamou method_9
+            var stackTrace = new System.Diagnostics.StackTrace(true);
+            Logger.LogWarning($"=== 🔍 method_9 (CLEANUP) durante redirect | T+{timeSinceRedirect:F1}s ===");
+            for (int i = 0; i < Math.Min(stackTrace.FrameCount, 10); i++)
+            {
+                var frame = stackTrace.GetFrame(i);
+                var method = frame.GetMethod();
+                if (method != null)
+                    Logger.LogWarning($"  [{i}] {method.DeclaringType?.FullName}.{method.Name}");
+            }
+            Logger.LogWarning($"=== FIM ===");
+
+            // Limpar estado do redirect
+            Logger.LogInfo("AnimCleanupPatch: method_9 executou → IsRedirectingHeal = false");
+            MedicHealPatch.IsRedirectingHeal = false;
+            MedicHealPatch.CurrentPatient = null;
+            MedicHealPatch.CleanupPatientSubscription();
+        }
+    }
+}

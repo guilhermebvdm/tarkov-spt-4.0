@@ -1,0 +1,94 @@
+using HarmonyLib;
+using EFT;
+using EFT.InputSystem;
+using UnityEngine;
+
+namespace TrueTrauma
+{
+    [HarmonyPatch(typeof(EFT.GamePlayerOwner), "TranslateAxes")]
+    class FreezeAxesPatch
+    {
+        static void Prefix(EFT.GamePlayerOwner __instance, ref float[] axes)
+        {
+            if (!TrueTraumaPlugin.ConfigMasterEnabled.Value || !TrueTraumaPlugin.ConfigBlackoutEnabled.Value) return;
+
+            if (__instance.Player != null && TraumaState.BlackoutTimers.ContainsKey(__instance.Player.ProfileId))
+                if (axes != null) for (int i = 0; i < axes.Length; i++) axes[i] = 0f;
+        }
+    }
+
+    [HarmonyPatch(typeof(EFT.GamePlayerOwner), "TranslateCommand")]
+    class FreezeCommandPatch
+    {
+        static bool Prefix(EFT.GamePlayerOwner __instance, ECommand command, ref InputNode.ETranslateResult __result)
+        {
+            if (!TrueTraumaPlugin.ConfigMasterEnabled.Value || !TrueTraumaPlugin.ConfigBlackoutEnabled.Value) return true;
+
+            if (__instance.Player != null && TraumaState.BlackoutTimers.ContainsKey(__instance.Player.ProfileId))
+            {
+                if (command == ECommand.Escape) return true;
+                __result = InputNode.ETranslateResult.BlockAll;
+                return false;
+            }
+            return true;
+        }
+    }
+
+    [HarmonyPatch(typeof(MovementContext), "CanStandAt")]
+    class CantStandUpPatch
+    {
+        static bool Prefix(MovementContext __instance, ref bool __result)
+        {
+            if (!TrueTraumaPlugin.ConfigMasterEnabled.Value) return true;
+            if (TraumaState.PlayerField == null) return true;
+
+            try
+            {
+                Player player = TraumaState.PlayerField.GetValue(__instance) as Player;
+
+                if (player != null && player.HealthController.IsAlive)
+                {
+                    string id = player.ProfileId;
+                    float now = Time.time;
+
+                    if (TrueTraumaPlugin.ConfigBlackoutEnabled.Value && TraumaState.BlackoutTimers.ContainsKey(id))
+                    {
+                        __result = false;
+                        return false;
+                    }
+
+                    bool isImpact = false;
+                    if (TraumaState.ImpactTimers.TryGetValue(id, out float exp))
+                    {
+                        if (now < exp) isImpact = true;
+                        else TraumaState.ImpactTimers.Remove(id);
+                    }
+                    if (isImpact)
+                    {
+                        __result = false;
+                        return false;
+                    }
+
+                    bool legsBroken = TrueTraumaPlugin.ConfigLegsEnabled.Value &&
+                                      HealthUtils.IsPartDestroyed(player, EBodyPart.LeftLeg) &&
+                                      HealthUtils.IsPartDestroyed(player, EBodyPart.RightLeg);
+
+                    if (legsBroken)
+                    {
+                        if (player.IsAI)
+                        {
+                            if (TraumaState.BotLegsBrokenStartTimes.TryGetValue(id, out float startTime))
+                            {
+                                if ((now - startTime) >= 90f) return true;
+                            }
+                        }
+                        __result = false;
+                        return false;
+                    }
+                }
+            }
+            catch { }
+            return true;
+        }
+    }
+}
