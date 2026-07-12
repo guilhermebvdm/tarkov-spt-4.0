@@ -1,0 +1,25 @@
+using HarmonyLib;
+using EFT;
+
+namespace TrueTrauma
+{
+    // Patch na IA para ignorar IDs específicos
+    [HarmonyPatch(typeof(BotsGroup), "IsEnemy")]
+    public static class BotVisionPatch
+    {
+        [HarmonyPrefix]
+        public static bool Prefix(IPlayer person, ref bool __result)
+        {
+            if (person == null) return true;
+
+            // Se o ID do alvo estiver na lista de desmaiados
+            if (TraumaState.FaintedPlayerIds.Contains(person.ProfileId))
+            {
+                __result = false; // "Não é inimigo"
+                return false;     // Pula o código original do jogo
+            }
+
+            return true; // Segue normal
+        }
+    }
+}

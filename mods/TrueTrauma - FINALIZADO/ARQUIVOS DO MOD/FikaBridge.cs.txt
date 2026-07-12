@@ -1,0 +1,66 @@
+using System;
+using EFT;
+using HarmonyLib;
+using Comfort.Common;
+using UnityEngine;
+
+namespace TrueTrauma
+{
+    public static class FikaBridge
+    {
+        // Chama isso quando desmaiar/acordar
+        public static void SyncFaintStatus(Player player, bool isFainted)
+        {
+            if (player == null) return;
+
+            // Atualiza localmente primeiro (para Single Player funcionar igual)
+            UpdateFaintedList(player.ProfileId, isFainted);
+
+            // Se for Multiplayer (Fika), envia o sinal pela rede
+            // Usamos triggers de voz raros como código
+            // OnYourOwn = Desmaiei | OnBreath = Acordei
+            if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.fika.core"))
+            {
+                EPhraseTrigger signal = isFainted ? EPhraseTrigger.OnYourOwn : EPhraseTrigger.OnBreath;
+                player.Say(signal, true, 0f, (ETagStatus)0, 100, false);
+            }
+        }
+
+        // Método auxiliar para gerenciar a lista
+        public static void UpdateFaintedList(string profileId, bool isFainted)
+        {
+            if (isFainted)
+            {
+                if (!TraumaState.FaintedPlayerIds.Contains(profileId))
+                    TraumaState.FaintedPlayerIds.Add(profileId);
+            }
+            else
+            {
+                if (TraumaState.FaintedPlayerIds.Contains(profileId))
+                    TraumaState.FaintedPlayerIds.Remove(profileId);
+            }
+        }
+    }
+
+    // Patch para o Host "escutar" os sinais dos Clientes
+    [HarmonyPatch(typeof(Player), "Say")]
+    public static class NetworkObserverPatch
+    {
+        static void Postfix(Player __instance, EPhraseTrigger trigger)
+        {
+            if (__instance == null) return;
+
+            // O Host intercepta o comando e atualiza a lista de IDs
+            if (trigger == EPhraseTrigger.OnYourOwn) // Sinal: Desmaiei
+            {
+                FikaBridge.UpdateFaintedList(__instance.ProfileId, true);
+                AggroHelper.NeutralizeAggro(__instance); // Força parada imediata
+            }
+            else if (trigger == EPhraseTrigger.OnBreath) // Sinal: Acordei
+            {
+                FikaBridge.UpdateFaintedList(__instance.ProfileId, false);
+                AggroHelper.RestoreAggro(__instance);
+            }
+        }
+    }
+}
