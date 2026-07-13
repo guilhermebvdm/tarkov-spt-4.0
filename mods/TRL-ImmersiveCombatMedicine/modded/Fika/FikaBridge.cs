@@ -23,8 +23,13 @@ namespace TrueTrauma
             if (!player.IsYourPlayer && !player.IsAI) return;
 
             // ref: CR-01-02 — propaga aos peers (host espelha timers e controla o
-            // aggro dos bots). A duração viaja no pacote (config do DONO — CR-02).
+            // aggro dos bots). A duração viaja no pacote.
+            // ref: RANGE-READY — a duração vem do DEADLINE gravado na entrada (não da
+            // config): quando a duração virar aleatória por desmaio (min-max futuro),
+            // o pacote carrega automaticamente o valor ROLADO daquele desmaio.
             float duration = TRLImmersiveCombatMedicine.TRLImmersiveCombatMedicinePlugin.ConfigBlackoutDuration.Value;
+            if (isFainted && TraumaState.BlackoutTimers.TryGetValue(player.ProfileId, out float deadline))
+                duration = UnityEngine.Mathf.Max(1f, deadline - UnityEngine.Time.time);
             Band_Aid.BandAidNetworkHandler.SendTraumaFaintPacket(player.ProfileId, isFainted, duration, duration + 5f);
         }
 

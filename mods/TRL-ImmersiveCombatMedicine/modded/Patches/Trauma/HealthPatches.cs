@@ -64,6 +64,10 @@ namespace TrueTrauma
                         // Configura Timers
                         // ref: CR-04 — GraceTimers NÃO nasce aqui: o grace de 5s é
                         // ancorado no WAKE (Plugin.WakeLocalPlayer / MainLoopPatch).
+                        // ref: RANGE-READY — PONTO ÚNICO do roll futuro de duração
+                        // aleatória (min-max): rolar AQUI e todo o resto (wake, rampa
+                        // visual, contusion, pacote de sync, espelhos) deriva do
+                        // deadline gravado em BlackoutTimers — nada mais lê a config.
                         float duration = TRLImmersiveCombatMedicinePlugin.ConfigBlackoutDuration.Value;
                         TraumaState.BlackoutTimers[id] = now + duration;
                         TraumaState.BlackoutStartTimes[id] = now;
