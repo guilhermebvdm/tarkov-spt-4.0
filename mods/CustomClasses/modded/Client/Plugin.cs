@@ -10,7 +10,7 @@ namespace CustomClasses.Client;
 ///     Busca os fatores do server (rota /customclasses/skill-multipliers) e faz Prefix em
 ///     AbstractSkillClass.OnTrigger. UI (linha+tooltip) vem na Fatia 2.
 /// </summary>
-[BepInPlugin("customclasses.mdj.client", "CustomClasses", "0.1.0")]
+[BepInPlugin("customclasses.mdj.client", "CustomClasses", "0.2.0")]
 [BepInDependency("com.SPT.core", "4.0.0")]
 [BepInDependency("me.sol.sain", BepInDependency.DependencyFlags.SoftDependency)]   // (050.4 SAIN) carrega após o SAIN se presente
 public class Plugin : BaseUnityPlugin
@@ -188,6 +188,21 @@ public class Plugin : BaseUnityPlugin
         catch (System.Exception ex)
         {
             Log.LogError($"[CustomClasses] (050.4b) Bunker ergo / Iron Lungs falharam ao aplicar: {ex.Message}");
+        }
+        // (072) Perks deferidos no 050 — try/catch PRÓPRIO: os alvos do Médico moram em tipos aninhados/obfuscados
+        // (Player.MedsController.ObservedMedsControllerClass) e em EFT.HealthSystem; se um deles sumir numa build
+        // futura do EFT, o mod perde SÓ estes perks, em vez de derrubar toda a cadeia de patches.
+        try
+        {
+            new CalmSightsPatch().Enable();                 // (072) 🔧 Caçador — sway ×0.7 (UpdateSwayFactors)
+            new MedsOperationScopePatch().Enable();         // (072) 🩺 arma o escopo do método de meds do SEU player
+            new MedUseTimePatch().Enable();                 // (072) 🔧 Médico — Rapid Care / Swift Surgeon (EFEITO)
+            new MedAnimSpeedPatch().Enable();               // (072) 🔧 Médico — casa a ANIMAÇÃO com o efeito
+            new MobileSurgeryPatch().Enable();              // (072) 🔧 Médico — cirurgia andando (HealingLegs off)
+        }
+        catch (System.Exception ex)
+        {
+            Log.LogError($"[CustomClasses] (072) perks do Médico / Calm Sights falharam ao aplicar: {ex.Message}");
         }
         try
         {

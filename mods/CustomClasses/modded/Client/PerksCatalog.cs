@@ -77,9 +77,10 @@ internal static class PerksCatalog
         // 🩺 Médico
         ["combat_medic"] = G("Combat Medic", "Médico de Combate", ESkillId.Surgery, new[]
         {
-            P("Rapid Care", "Cuidado Rápido", "heal/stab use time", "tempo de cura/estabilização", ValueFormat.Percent, 0.7f, Polarity.LowerBetter, EBuffId.VitalityBuffRegeneration, pending: true),
-            P("Swift Surgeon", "Cirurgião Ágil", "surgery time", "tempo de cirurgia", ValueFormat.Percent, 0.5f, Polarity.LowerBetter, EBuffId.SurgerySpeed, pending: true),
-            Flag("Mobile Surgery", "Cirurgia em Movimento", "surgery on the move", "cirurgia em movimento", isPerk: true, EBuffId.SurgeryReducePenalty, pending: true),
+            // 072 (2026-07-13): os 3 saíram do "em breve" — efeito E animação casados (ver ClassMedicPatches).
+            P("Rapid Care", "Cuidado Rápido", "heal/stab use time", "tempo de cura/estabilização", ValueFormat.Percent, 0.7f, Polarity.LowerBetter, EBuffId.VitalityBuffRegeneration, live: () => PerksConfig.RapidCareUseTime?.Value ?? 0.7f),
+            P("Swift Surgeon", "Cirurgião Ágil", "surgery time", "tempo de cirurgia", ValueFormat.Percent, 0.5f, Polarity.LowerBetter, EBuffId.SurgerySpeed, live: () => PerksConfig.SwiftSurgeonTime?.Value ?? 0.5f),
+            Flag("Mobile Surgery", "Cirurgia em Movimento", "walk during surgery", "andar durante a cirurgia", isPerk: true, EBuffId.SurgeryReducePenalty),
         }),
         ["efficient_metabolism"] = G("Efficient Metabolism", "Metabolismo Eficiente", ESkillId.Metabolism, new[]   // B17 (2026-07-10): 1º perk vivo do Médico
         {
@@ -122,7 +123,9 @@ internal static class PerksCatalog
             // B4: o card mostra a DURAÇÃO (+X%), mas o F12 é o DRENO (×). duração = 1/dreno → 1/0.667 ≈ 1.5 (+50%).
             P("Iron Lungs", "Fôlego de Aço", "breath hold duration", "duração da respiração", ValueFormat.Percent, 1.5f, Polarity.HigherBetter, EBuffId.EnduranceBuffBreathTimeInc, live: () => 1f / (PerksConfig.IronLungsBreathDrain?.Value ?? 0.667f)),
             P("Steady Arms", "Braços Firmes", "arm fatigue when aiming", "fadiga de braço ao mirar", ValueFormat.Percent, 0.65f, Polarity.LowerBetter, EBuffId.EnduranceHands, live: () => PerksConfig.SteadyArmsDrain?.Value ?? 0.65f),   // 051 ENTREGUE (hook no stances)
-            P("Calm Sights", "Mira Serena", "sway", "oscilação (sway)", ValueFormat.Percent, 0.7f, Polarity.LowerBetter, EBuffId.AimMasterWiggle, pending: true),
+            // 072: label diz "mira/movimento" DE PROPÓSITO — o SwayFactors não cobre o sway de RESPIRAÇÃO (outro
+            // effector). O card mentiria se dissesse só "sway"; a respiração do Caçador é o Iron Lungs, logo acima.
+            P("Calm Sights", "Mira Serena", "aim/movement sway", "oscilação de mira/movimento", ValueFormat.Percent, 0.7f, Polarity.LowerBetter, EBuffId.AimMasterWiggle, live: () => PerksConfig.CalmSightsSway?.Value ?? 0.7f),
         }),
         // Stalker (2026-07-11): irmão mais fraco do Ghost Step (−20% vs −30%) — o Furtivo segue dono da furtividade.
         ["stalker"] = G("Stalker", "Espreita", ESkillId.CovertMovement, new[]

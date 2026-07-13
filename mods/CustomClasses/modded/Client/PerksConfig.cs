@@ -38,6 +38,11 @@ internal static class PerksConfig
     // 2 · Combat Medic
     internal static ConfigEntry<bool>? EfficientMetabolismEnabled;
     internal static ConfigEntry<float>? EfficientMetabolismHungerThirst;
+    internal static ConfigEntry<bool>? RapidCareEnabled;          // 072
+    internal static ConfigEntry<float>? RapidCareUseTime;         // 072
+    internal static ConfigEntry<bool>? SwiftSurgeonEnabled;       // 072
+    internal static ConfigEntry<float>? SwiftSurgeonTime;         // 072
+    internal static ConfigEntry<bool>? MobileSurgeryEnabled;      // 072
     internal static ConfigEntry<bool>? ShakyHandsEnabled;
     internal static ConfigEntry<float>? ShakyHandsRecoil;
 
@@ -63,6 +68,8 @@ internal static class PerksConfig
     internal static ConfigEntry<float>? IronLungsBreathDrain;
     internal static ConfigEntry<bool>? SteadyArmsEnabled;
     internal static ConfigEntry<float>? SteadyArmsDrain;
+    internal static ConfigEntry<bool>? CalmSightsEnabled;         // 072
+    internal static ConfigEntry<float>? CalmSightsSway;           // 072
     internal static ConfigEntry<bool>? RootedEnabled;
     internal static ConfigEntry<float>? RootedAdsSpeed;
 
@@ -169,6 +176,26 @@ internal static class PerksConfig
             new ConfigDescription(
                 "Multiplicador do dreno de fome/sede do Médico (0.85 = 15% mais devagar). / Combat Medic hunger/thirst drain multiplier (0.85 = 15% slower).",
                 new AcceptableValueRange<float>(0.5f, 1f)));
+        // 072 — os 3 perks de assinatura do Médico, deferidos no 050 e agora implementados.
+        RapidCareEnabled = config.Bind(
+            SecMedic, "Rapid Care — Enabled", true,
+            "Médico: curativos e estabilizações são mais rápidos (efeito E animação). / Combat Medic: faster heals and stabilizations (both effect and animation).");
+        RapidCareUseTime = config.Bind(
+            SecMedic, "Rapid Care — Use time mult", 0.7f,
+            new ConfigDescription(
+                "Multiplicador do tempo de uso de itens médicos (0.7 = 30% mais rápido). Não vale para o kit de cirurgia (veja Swift Surgeon). / Medical item use-time multiplier (0.7 = 30% faster). Does not apply to the surgery kit (see Swift Surgeon).",
+                new AcceptableValueRange<float>(0.3f, 1f)));
+        SwiftSurgeonEnabled = config.Bind(
+            SecMedic, "Swift Surgeon — Enabled", true,
+            "Médico: cirurgia (CMS/Surv12) muito mais rápida. / Combat Medic: much faster surgery (CMS/Surv12).");
+        SwiftSurgeonTime = config.Bind(
+            SecMedic, "Swift Surgeon — Surgery time mult", 0.5f,
+            new ConfigDescription(
+                "Multiplicador do tempo de cirurgia (0.5 = metade do tempo). A skill Surgery do jogador segue valendo por cima. / Surgery time multiplier (0.5 = half the time). The player's Surgery skill still stacks on top.",
+                new AcceptableValueRange<float>(0.3f, 1f)));
+        MobileSurgeryEnabled = config.Bind(
+            SecMedic, "Mobile Surgery — Enabled", true,
+            "Médico: pode ANDAR durante a cirurgia (continua sem correr/pular). / Combat Medic: can WALK during surgery (still no sprint/jump).");
         // B1: default OFF até os perks do Médico existirem (hoje o Metabolismo já cobre — mas o recuo fica desligado por padrão).
         ShakyHandsEnabled = config.Bind(
             SecMedic, "Shaky Hands — Enabled", false,
@@ -267,6 +294,15 @@ internal static class PerksConfig
             new ConfigDescription(
                 "Multiplicador do dreno de braço do Caçador em ADS (0.65 = 35% mais lento). Requer o stances mod. / Hunter ADS arm-drain multiplier (0.65 = 35% slower). Requires the stances mod.",
                 new AcceptableValueRange<float>(0.2f, 1f)));
+        // 072 — Calm Sights. ⚠️ Afeta o sway de MIRA/MOVIMENTO (mouse), não o de RESPIRAÇÃO (outro effector).
+        CalmSightsEnabled = config.Bind(
+            SecHunter, "Calm Sights — Enabled", true,
+            "Caçador: a arma oscila menos (sway de mira/movimento). Não afeta o sway da respiração — para isso, veja Iron Lungs. / Hunter: less weapon sway (aim/movement sway). Does not affect breathing sway — see Iron Lungs for that.");
+        CalmSightsSway = config.Bind(
+            SecHunter, "Calm Sights — Sway mult", 0.7f,
+            new ConfigDescription(
+                "Multiplicador da oscilação (sway) da arma (0.7 = 30% menos). / Weapon sway multiplier (0.7 = 30% less).",
+                new AcceptableValueRange<float>(0.3f, 1f)));
         RootedEnabled = config.Bind(
             SecHunter, "Rooted — Enabled", true,
             "Caçador: −velocidade de movimento enquanto mira (ADS). / Hunter: slower movement while aiming (ADS).");
