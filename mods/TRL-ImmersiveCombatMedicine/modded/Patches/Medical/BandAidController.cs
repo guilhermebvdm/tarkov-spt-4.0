@@ -172,6 +172,9 @@ namespace TRLImmersiveCombatMedicine
                 TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning("[DEBUG-ICM] Controller.Update EM RAID (GameWorld+MainPlayer ok) — sweep de MedicInteractable ativo");
             }
 
+            // ref: CR-05 — consumo pendente sem report dentro do timeout → fallback
+            MedicalLogic.TickPendingConsumes();
+
             // Interação via pipeline NATIVO: garante um MedicInteractable em cada
             // player/bot vivo; o prompt aparece no ActionPanel do jogo (como loot).
             EnsureMedicInteractables();
@@ -919,6 +922,42 @@ namespace TRLImmersiveCombatMedicine
         public string ActivePatientProfileId => _isMedicModeActive ? _targetPatient?.ProfileId : null;
 
         /// <summary>
+        /// ref: CR-05 — descarte networked DIFERIDO: no fim forçado da animação o
+        /// item ainda está nas mãos e a RemoveOperation falha em CanExecute (100%
+        /// dos descartes no log 2-PCs — itens de 1 uso nunca sumiam, kits zerados
+        /// nunca desapareciam). Espera as mãos liberarem (MedsController sair) e
+        /// tenta com retry espaçado.
+        /// </summary>
+        public void ScheduleNetworkedDiscard(Player doctor, Item item)
+        {
+            StartCoroutine(DeferredDiscardRoutine(doctor, item));
+        }
+
+        private IEnumerator DeferredDiscardRoutine(Player doctor, Item item)
+        {
+            // 1) Esperar as mãos liberarem (timeout 6s — depois tenta mesmo assim)
+            float handsDeadline = Time.time + 6f;
+            while (Time.time < handsDeadline && doctor != null &&
+                   doctor.HandsController is Player.MedsController)
+            {
+                yield return new WaitForSeconds(0.25f);
+            }
+            yield return new WaitForSeconds(0.2f); // folga p/ o pipeline fechar eventos
+
+            // 2) Até 4 tentativas espaçadas
+            for (int attempt = 1; attempt <= 4; attempt++)
+            {
+                if (doctor == null) yield break;
+                if (MedicalLogic.TryDiscardOnce(doctor, item)) yield break;
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning(
+                    $"Descarte diferido: tentativa {attempt}/4 falhou — nova em 0.75s.");
+                yield return new WaitForSeconds(0.75f);
+            }
+            TRLImmersiveCombatMedicinePlugin.ModLogger.LogError(
+                "Descarte diferido: TODAS as tentativas falharam — item zerado permanece no inventário (reportar).");
+        }
+
+        /// <summary>
         /// Chamado externamente pela UI quando o paciente sai de range.
         /// </summary>
         public void DeactivateMedicModeExternal()
@@ -941,6 +980,7 @@ namespace TRLImmersiveCombatMedicine
             _itemBeingUsed = null;
             _targetPatient = null;
 
+            MedicalLogic.ClearPendingConsumes(); // ref: CR-05 — sem débito entre raids
             MedicHealPatch.CancelNativePatientEffect(); // ref: CR-02
             BandAidUI.Instance?.ClearTreatment();
             MedicHealPatch.IsRedirectingHeal = false;

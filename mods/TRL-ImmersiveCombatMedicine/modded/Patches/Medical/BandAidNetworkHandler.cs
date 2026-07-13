@@ -317,7 +317,7 @@ namespace Band_Aid
                 EBodyPart surgeryPart = GetBlackedPart(hc);
                 ApplySurgeryFromNetwork(hc, surgeryPart, UnityEngine.Random.Range(stats.SurgeryPenaltyMin, stats.SurgeryPenaltyMax));
                 Logger.LogInfo($"Cirurgia aplicada pelo paciente em {surgeryPart} (via rede).");
-                SendTreatmentReport(packet, surgeryPart, 0f); // feedback membro-alvo ao médico
+                SendTreatmentReport(packet, surgeryPart, 0f, 1f); // cirurgia consome 1 uso
                 return;
             }
 
@@ -342,12 +342,29 @@ namespace Band_Aid
             // Efeitos (sangramento, fratura)
             EBodyPart target = FindSmartTarget(activeHc, stats);
 
-            if (stats.StopsHeavyBleed || stats.StopsAllBleeds)
+            // ref: CR-05 — registrar o que foi DE FATO removido para cobrar o custo
+            // real por efeito (tabela vanilla do ItemDatabase: Salewa HeavyBleed=175,
+            // IFAK=210, Grizzly Fracture=50 etc.) no item do MÉDICO via report.
+            bool hadHeavy = HasEffect(activeHc, target, _heavyBleedType);
+            bool hadLight = HasEffect(activeHc, target, _lightBleedType);
+            bool hadFracture = HasEffect(activeHc, target, _fractureType);
+            float effectCost = 0f;
+
+            if ((stats.StopsHeavyBleed || stats.StopsAllBleeds) && hadHeavy)
+            {
                 RemoveEffectNative(hc, target, _heavyBleedConcreteType, "HeavyBleeding");
-            if (stats.StopsLightBleed || stats.StopsAllBleeds)
+                effectCost += stats.HeavyBleedCost;
+            }
+            if ((stats.StopsLightBleed || stats.StopsAllBleeds) && hadLight)
+            {
                 RemoveEffectNative(hc, target, _lightBleedConcreteType, "LightBleeding");
-            if (stats.FixesFracture)
+                effectCost += stats.LightBleedCost;
+            }
+            if (stats.FixesFracture && hadFracture)
+            {
                 RemoveEffectNative(hc, target, _fractureConcreteType, "Fracture");
+                effectCost += stats.FractureCost;
+            }
 
             // HP
             float healedTotal = 0f;
@@ -364,8 +381,15 @@ namespace Band_Aid
                 }
             }
 
-            // Feedback membro-alvo ao médico (parte real escolhida pelo smart-target)
-            SendTreatmentReport(packet, target, healedTotal);
+            // Custo real p/ o médico: kits (HealAmount>0) pagam HP curado + efeitos;
+            // itens de uso (bandagem/tala/torniquete/CALOK) pagam 1 uso fixo.
+            float totalCost = stats.HealAmount > 0
+                ? UnityEngine.Mathf.Max(1f, healedTotal + effectCost)
+                : 1f;
+            Logger.LogInfo($"[CR-05] Custo real do tratamento: {totalCost:F1} (HP {healedTotal:F1} + efeitos {effectCost:F0}).");
+
+            // Report ao médico: membro real + HP curado + custo autoritativo
+            SendTreatmentReport(packet, target, healedTotal, totalCost);
 
             // ref: CR-02 — a notificação é do PACIENTE humano; quando o host aplica em
             // nome de um BOT (CR-01-01), o toast não pode aparecer para o host.
@@ -679,8 +703,8 @@ namespace Band_Aid
         // Feedback membro-alvo (report PACIENTE → MÉDICO)
         // ============================================================
 
-        /// <summary>Paciente (ou dono do bot) reporta ao médico o membro tratado.</summary>
-        private static void SendTreatmentReport(BandAidHealPacket source, EBodyPart part, float healed)
+        /// <summary>Paciente (ou dono do bot) reporta ao médico o membro tratado e o custo real.</summary>
+        private static void SendTreatmentReport(BandAidHealPacket source, EBodyPart part, float healed, float cost)
         {
             if (!_initialized) return;
             var report = new BandAidTreatmentReportPacket
@@ -689,7 +713,8 @@ namespace Band_Aid
                 PatientProfileId = source.PatientProfileId,
                 ItemTemplateId = source.ItemTemplateId,
                 BodyPart = (byte)part,
-                HealedAmount = healed
+                HealedAmount = healed,
+                CostAmount = cost
             };
             if (Singleton<FikaServer>.Instantiated)
                 Singleton<FikaServer>.Instance.SendData(ref report, DeliveryMethod.ReliableOrdered, true);
@@ -715,7 +740,12 @@ namespace Band_Aid
             if (mainPlayer == null || packet.DoctorProfileId != mainPlayer.ProfileId) return;
 
             var part = (EBodyPart)packet.BodyPart;
-            Logger.LogInfo($"[Report] Tratamento remoto aplicado em {part} (+{packet.HealedAmount:F0} HP).");
+            Logger.LogInfo($"[Report] Tratamento remoto aplicado em {part} (+{packet.HealedAmount:F0} HP, custo {packet.CostAmount:F1}).");
+
+            // ref: CR-05 — CONSUMO AUTORITATIVO: debitar o item do médico com o custo
+            // real reportado pelo paciente. Roda ANTES do gate de HUD (o consumo vale
+            // mesmo com o examinador fechado).
+            MedicalLogic.ResolvePendingConsumeFromReport(packet.PatientProfileId, packet.ItemTemplateId, packet.CostAmount);
 
             // ref: CR-03 — identidade do report (mesmo padrão do G-5): só pintar o HUD
             // se o report é do PACIENTE atualmente examinado; report atrasado de outro

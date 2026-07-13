@@ -392,6 +392,70 @@ namespace Band_Aid
             }
         }
 
+        // === CONSUMO PENDENTE (CR-05: autoritativo pelo report do paciente) ===
+        // O médico NÃO estima mais o custo pela saúde observada (defasada) — registra
+        // um pendente e debita quando o TreatmentReport chega com o custo REAL (HP
+        // curado + custos por efeito removido). Fallback: timeout → estimativa local.
+        private class PendingConsume
+        {
+            public Player Doctor;
+            public Item Item;
+            public string PatientId;
+            public string TemplateId;
+            public float FallbackCost;
+            public float Deadline;
+        }
+
+        private static readonly List<PendingConsume> _pendingConsumes = new List<PendingConsume>();
+        private const float PENDING_CONSUME_TIMEOUT = 4f;
+
+        private static void RegisterPendingConsume(Player doctor, Item item, string patientId, float fallbackCost)
+        {
+            _pendingConsumes.Add(new PendingConsume
+            {
+                Doctor = doctor,
+                Item = item,
+                PatientId = patientId,
+                TemplateId = item.TemplateId.ToString(),
+                FallbackCost = fallbackCost,
+                Deadline = Time.time + PENDING_CONSUME_TIMEOUT
+            });
+        }
+
+        /// <summary>Chamado pelo handler do TreatmentReport (custo autoritativo do paciente).</summary>
+        public static void ResolvePendingConsumeFromReport(string patientId, string templateId, float cost)
+        {
+            for (int i = 0; i < _pendingConsumes.Count; i++)
+            {
+                var p = _pendingConsumes[i];
+                if (p.PatientId == patientId && p.TemplateId == templateId)
+                {
+                    _pendingConsumes.RemoveAt(i);
+                    Logger.LogInfo($"[CR-05] Consumo pelo report: custo real {cost:F1} (fallback seria {p.FallbackCost:F1}).");
+                    ConsumeSafe(p.Doctor, p.Item, UnityEngine.Mathf.Max(0f, cost), isRemotePatient: true);
+                    return;
+                }
+            }
+            Logger.LogInfo("[CR-05] Report sem consumo pendente correspondente (já resolvido por timeout?).");
+        }
+
+        /// <summary>Tick do BandAidController: pendentes expirados consomem o fallback.</summary>
+        public static void TickPendingConsumes()
+        {
+            for (int i = _pendingConsumes.Count - 1; i >= 0; i--)
+            {
+                var p = _pendingConsumes[i];
+                if (Time.time >= p.Deadline)
+                {
+                    _pendingConsumes.RemoveAt(i);
+                    Logger.LogWarning($"[CR-05] Report não chegou em {PENDING_CONSUME_TIMEOUT:F0}s — consumindo fallback {p.FallbackCost:F1}.");
+                    ConsumeSafe(p.Doctor, p.Item, p.FallbackCost, isRemotePatient: true);
+                }
+            }
+        }
+
+        public static void ClearPendingConsumes() => _pendingConsumes.Clear();
+
         // === CONSUMO DO ITEM ===
         // ref: CR-04 (feedback 2-PCs) — o consumo PARCIAL local (mutar HpResource no
         // componente) é o MESMO que o MedEffect vanilla faz e é benigno para a
@@ -408,37 +472,27 @@ namespace Band_Aid
                 var medKit = item.GetItemComponent<MedKitComponent>();
                 if (medKit != null)
                 {
-                    // ref: CR-04 — descartar-em-esgotamento vale para remoto E local
-                    // (o caminho local programático deixava o kit em 0/uso eterno)
-                    if (medKit.HpResource <= calculatedCost)
-                    {
-                        Logger.LogInfo($"MedKit esgotado. HP atual: {medKit.HpResource}, Custo: {calculatedCost}. Descartando (networked).");
+                    // ref: CR-05 — SEMPRE subtrair primeiro (no teste 2-PCs o descarte
+                    // falhava com o item ainda nas mãos e o kit ficava com recurso
+                    // INTACTO — AI-2/Salewa "eternos"). Descarte-em-zero é ADIADO até
+                    // as mãos liberarem (DiscardItemNetworked deferred).
+                    float charge = UnityEngine.Mathf.Min(calculatedCost, medKit.HpResource);
+                    medKit.HpResource = UnityEngine.Mathf.Max(0f, medKit.HpResource - charge);
+                    item.RaiseRefreshEvent();
+                    Logger.LogInfo($"MedKit: -{charge:F1} HP. Restante: {medKit.HpResource:F1}");
+                    if (medKit.HpResource <= 0.005f)
                         DiscardItemNetworked(doctor, item);
-                    }
-                    else
-                    {
-                        // Consumo parcial: mutação local do componente (como o vanilla)
-                        medKit.HpResource = UnityEngine.Mathf.Max(0f, medKit.HpResource - calculatedCost);
-                        Logger.LogInfo($"MedKit: -{calculatedCost} HP. Restante: {medKit.HpResource}");
-                        item.RaiseRefreshEvent();
-                    }
                     return;
                 }
 
                 var resource = item.GetItemComponent<ResourceComponent>();
                 if (resource != null)
                 {
-                    if (resource.Value <= 1.0f)
-                    {
-                        Logger.LogInfo($"Recurso esgotado. Valor: {resource.Value}. Descartando (networked).");
+                    resource.Value = UnityEngine.Mathf.Max(0f, resource.Value - 1.0f);
+                    item.RaiseRefreshEvent();
+                    Logger.LogInfo($"Recurso: -1 Uso. Restante: {resource.Value}");
+                    if (resource.Value <= 0.005f)
                         DiscardItemNetworked(doctor, item);
-                    }
-                    else
-                    {
-                        resource.Value = UnityEngine.Mathf.Max(0f, resource.Value - 1.0f);
-                        Logger.LogInfo($"Recurso: -1 Uso. Restante: {resource.Value}");
-                        item.RaiseRefreshEvent();
-                    }
                     return;
                 }
 
@@ -460,44 +514,67 @@ namespace Band_Aid
         /// ref: CR-04 — Discard com simulate:TRUE: a mutação real roda DENTRO da
         /// RemoveOperationClass no pipeline de rede (host executa+propaga; client
         /// espera validação do host e executa no Started) — padrão vanilla
-        /// (PlayerInventoryController.SetupItem). O simulate:false antigo destacava o
-        /// item NA HORA sem evento/rede, e a RemoveOperation seguinte lançava em
-        /// Item.Parent (getter lança para item sem endereço) → espelho fantasma no
-        /// host + slot morto no client + mão travada (evento Begin órfão).
+        /// (PlayerInventoryController.SetupItem).
+        /// ref: CR-05 — o descarte é DIFERIDO: no fim forçado da animação o item
+        /// ainda está NAS MÃOS e a operação falha em CanExecute ("Can't execute
+        /// 'operationResult.Value.CanExecute()'", 100% dos casos no log do client).
+        /// A coroutine do BandAidController espera as mãos liberarem e tenta com
+        /// retry; sem controller disponível, tenta imediato (melhor esforço).
         /// </summary>
         private static void DiscardItemNetworked(Player doctor, Item item)
+        {
+            var controller = TRLImmersiveCombatMedicine.BandAidController.Instance;
+            if (controller != null)
+            {
+                Logger.LogInfo($"Descarte agendado (aguarda mãos livres): {item.ShortName.Localized()}");
+                controller.ScheduleNetworkedDiscard(doctor, item);
+            }
+            else
+            {
+                TryDiscardOnce(doctor, item);
+            }
+        }
+
+        /// <summary>Uma tentativa de descarte networked. true = enviada/encerrada; false = vale retry.</summary>
+        public static bool TryDiscardOnce(Player doctor, Item item)
         {
             try
             {
                 // Guard: item já removido/sem endereço — nunca tocar em item.Parent
                 // (o getter LANÇA); CurrentAddress é o accessor seguro.
-                if (item.CurrentAddress == null)
+                if (item == null || item.CurrentAddress == null)
                 {
-                    Logger.LogWarning($"DiscardItemNetworked: {item.ShortName.Localized()} sem endereço (já removido) — ignorado.");
-                    return;
+                    Logger.LogInfo("TryDiscardOnce: item sem endereço (já removido) — nada a fazer.");
+                    return true;
                 }
 
                 var controller = doctor.InventoryController;
-                Logger.LogInfo($"DiscardItemNetworked: Item={item.ShortName.Localized()}, Controller={controller.GetType().Name}");
-
                 var discardResult = InteractionsHandlerClass.Discard(item, controller, simulate: true);
-                if (discardResult.Succeeded)
+                if (!discardResult.Succeeded)
                 {
-                    controller.TryRunNetworkTransaction(discardResult, result =>
+                    Logger.LogWarning($"TryDiscardOnce: simulação falhou ({discardResult.Error}) — retry.");
+                    return false;
+                }
+
+                bool rejected = false;
+                controller.TryRunNetworkTransaction(discardResult, result =>
+                {
+                    // ClientInventoryController valida CanExecute SINCRONAMENTE antes
+                    // de enviar ao host — item nas mãos cai aqui.
+                    if (result?.Failed == true)
                     {
-                        if (result?.Failed == true)
-                            Logger.LogWarning($"Discard rejeitado pelo host: {result.Error}");
-                    });
-                    Logger.LogInfo("Discard enviado ao pipeline de rede (mutação dentro da operação).");
-                }
-                else
-                {
-                    Logger.LogWarning($"Discard simulado falhou: {discardResult.Error}");
-                }
+                        rejected = true;
+                        Logger.LogWarning($"TryDiscardOnce: operação rejeitada ({result.Error}).");
+                    }
+                });
+                if (!rejected)
+                    Logger.LogInfo($"Descarte de {item.ShortName.Localized()} enviado ao pipeline de rede.");
+                return !rejected;
             }
             catch (Exception ex)
             {
-                Logger.LogError($"DiscardItemNetworked erro: {ex.Message}\n{ex.StackTrace}");
+                Logger.LogError($"TryDiscardOnce erro: {ex.Message}");
+                return false;
             }
         }
 
