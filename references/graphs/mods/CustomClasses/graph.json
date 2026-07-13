@@ -400,7 +400,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "modulepatch",
-      "community": 53,
+      "community": 83,
       "norm_label": "modulepatch"
     },
     {
@@ -1334,10 +1334,20 @@
       "norm_label": "medictiming"
     },
     {
+      "label": "int",
+      "file_type": "code",
+      "source_file": "Client/Patches/ClassMedicPatches.cs",
+      "source_location": "L33",
+      "_origin": "ast",
+      "id": "client_patches_classmedicpatches_cs_int",
+      "community": 86,
+      "norm_label": "int"
+    },
+    {
       "label": "float",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L27",
+      "source_location": "L36",
       "_origin": "ast",
       "id": "client_patches_classmedicpatches_cs_float",
       "community": 86,
@@ -1347,17 +1357,47 @@
       "label": "bool",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L30",
+      "source_location": "L39",
       "_origin": "ast",
       "id": "client_patches_classmedicpatches_cs_bool",
       "community": 86,
       "norm_label": "bool"
     },
     {
+      "label": ".Arm()",
+      "file_type": "code",
+      "source_file": "Client/Patches/ClassMedicPatches.cs",
+      "source_location": "L47",
+      "_origin": "ast",
+      "id": "patches_classmedicpatches_medictiming_arm",
+      "community": 86,
+      "norm_label": ".arm()"
+    },
+    {
+      "label": ".Release()",
+      "file_type": "code",
+      "source_file": "Client/Patches/ClassMedicPatches.cs",
+      "source_location": "L61",
+      "_origin": "ast",
+      "id": "patches_classmedicpatches_medictiming_release",
+      "community": 86,
+      "norm_label": ".release()"
+    },
+    {
+      "label": ".Reset()",
+      "file_type": "code",
+      "source_file": "Client/Patches/ClassMedicPatches.cs",
+      "source_location": "L74",
+      "_origin": "ast",
+      "id": "patches_classmedicpatches_medictiming_reset",
+      "community": 86,
+      "norm_label": ".reset()"
+    },
+    {
       "label": ".IsSurgery()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L37",
+      "source_location": "L86",
       "_origin": "ast",
       "id": "patches_classmedicpatches_medictiming_issurgery",
       "community": 86,
@@ -1367,57 +1407,67 @@
       "label": "Item",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L37",
+      "source_location": "L86",
       "_origin": "ast",
       "id": "client_patches_classmedicpatches_cs_item",
       "community": 86,
       "norm_label": "item"
     },
     {
+      "label": ".ForceDisable()",
+      "file_type": "code",
+      "source_file": "Client/Patches/ClassMedicPatches.cs",
+      "source_location": "L99",
+      "_origin": "ast",
+      "id": "patches_classmedicpatches_medictiming_forcedisable",
+      "community": 86,
+      "norm_label": ".forcedisable()"
+    },
+    {
       "label": ".FactorFor()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L45",
+      "source_location": "L107",
       "_origin": "ast",
       "id": "patches_classmedicpatches_medictiming_factorfor",
       "community": 86,
       "norm_label": ".factorfor()"
     },
     {
-      "label": ".Disarm()",
-      "file_type": "code",
-      "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L59",
-      "_origin": "ast",
-      "id": "patches_classmedicpatches_medictiming_disarm",
-      "community": 86,
-      "norm_label": ".disarm()"
-    },
-    {
-      "label": "MedsOperationScopePatch",
-      "file_type": "code",
-      "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L80",
-      "_origin": "ast",
-      "id": "patches_classmedicpatches_medsoperationscopepatch",
-      "community": 86,
-      "norm_label": "medsoperationscopepatch"
-    },
-    {
       "label": "FieldInfo",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L83",
+      "source_location": "L138",
       "_origin": "ast",
       "id": "client_patches_classmedicpatches_cs_fieldinfo",
       "community": 86,
       "norm_label": "fieldinfo"
     },
     {
+      "label": ".BandAidIsRedirecting()",
+      "file_type": "code",
+      "source_file": "Client/Patches/ClassMedicPatches.cs",
+      "source_location": "L141",
+      "_origin": "ast",
+      "id": "patches_classmedicpatches_medictiming_bandaidisredirecting",
+      "community": 86,
+      "norm_label": ".bandaidisredirecting()"
+    },
+    {
+      "label": "MedsOperationScopePatch",
+      "file_type": "code",
+      "source_file": "Client/Patches/ClassMedicPatches.cs",
+      "source_location": "L168",
+      "_origin": "ast",
+      "id": "patches_classmedicpatches_medsoperationscopepatch",
+      "community": 86,
+      "norm_label": "medsoperationscopepatch"
+    },
+    {
       "label": ".GetTargetMethod()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L85",
+      "source_location": "L173",
       "_origin": "ast",
       "id": "patches_classmedicpatches_medsoperationscopepatch_gettargetmethod",
       "community": 86,
@@ -1427,7 +1477,7 @@
       "label": "MethodBase",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L85",
+      "source_location": "L173",
       "_origin": "ast",
       "id": "client_patches_classmedicpatches_cs_methodbase",
       "community": 86,
@@ -1437,7 +1487,7 @@
       "label": ".Prefix()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L90",
+      "source_location": "L178",
       "_origin": "ast",
       "id": "patches_classmedicpatches_medsoperationscopepatch_prefix",
       "community": 86,
@@ -1447,7 +1497,7 @@
       "label": "ObservedMedsControllerClass",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L90",
+      "source_location": "L178",
       "_origin": "ast",
       "id": "observedmedscontrollerclass",
       "community": 86,
@@ -1457,7 +1507,7 @@
       "label": "PatchPrefix",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L90",
+      "source_location": "L178",
       "_origin": "ast",
       "id": "client_patches_classmedicpatches_cs_patchprefix",
       "community": 86,
@@ -1467,37 +1517,37 @@
       "label": "HarmonyPriority",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L90",
+      "source_location": "L178",
       "_origin": "ast",
       "id": "client_patches_classmedicpatches_cs_harmonypriority",
       "community": 86,
       "norm_label": "harmonypriority"
     },
     {
-      "label": ".Postfix()",
+      "label": ".Finalizer()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L125",
+      "source_location": "L228",
       "_origin": "ast",
-      "id": "patches_classmedicpatches_medsoperationscopepatch_postfix",
+      "id": "patches_classmedicpatches_medsoperationscopepatch_finalizer",
       "community": 86,
-      "norm_label": ".postfix()"
+      "norm_label": ".finalizer()"
     },
     {
-      "label": "PatchPostfix",
+      "label": "PatchFinalizer",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L125",
+      "source_location": "L228",
       "_origin": "ast",
-      "id": "client_patches_classmedicpatches_cs_patchpostfix",
+      "id": "patchfinalizer",
       "community": 86,
-      "norm_label": "patchpostfix"
+      "norm_label": "patchfinalizer"
     },
     {
       "label": "MedUseTimePatch",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L145",
+      "source_location": "L254",
       "_origin": "ast",
       "id": "patches_classmedicpatches_medusetimepatch",
       "community": 86,
@@ -1507,7 +1557,7 @@
       "label": ".GetTargetMethod()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L147",
+      "source_location": "L256",
       "_origin": "ast",
       "id": "patches_classmedicpatches_medusetimepatch_gettargetmethod",
       "community": 86,
@@ -1517,17 +1567,27 @@
       "label": ".Postfix()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L153",
+      "source_location": "L262",
       "_origin": "ast",
       "id": "patches_classmedicpatches_medusetimepatch_postfix",
       "community": 86,
       "norm_label": ".postfix()"
     },
     {
+      "label": "PatchPostfix",
+      "file_type": "code",
+      "source_file": "Client/Patches/ClassMedicPatches.cs",
+      "source_location": "L262",
+      "_origin": "ast",
+      "id": "client_patches_classmedicpatches_cs_patchpostfix",
+      "community": 86,
+      "norm_label": "patchpostfix"
+    },
+    {
       "label": "MedAnimSpeedPatch",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L181",
+      "source_location": "L298",
       "_origin": "ast",
       "id": "patches_classmedicpatches_medanimspeedpatch",
       "community": 86,
@@ -1537,7 +1597,7 @@
       "label": ".GetTargetMethod()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L183",
+      "source_location": "L300",
       "_origin": "ast",
       "id": "patches_classmedicpatches_medanimspeedpatch_gettargetmethod",
       "community": 86,
@@ -1547,7 +1607,7 @@
       "label": ".Prefix()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L188",
+      "source_location": "L305",
       "_origin": "ast",
       "id": "patches_classmedicpatches_medanimspeedpatch_prefix",
       "community": 86,
@@ -1557,7 +1617,7 @@
       "label": "MobileSurgeryPatch",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L236",
+      "source_location": "L362",
       "_origin": "ast",
       "id": "patches_classmedicpatches_mobilesurgerypatch",
       "community": 86,
@@ -1567,7 +1627,7 @@
       "label": ".GetTargetMethod()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L238",
+      "source_location": "L364",
       "_origin": "ast",
       "id": "patches_classmedicpatches_mobilesurgerypatch_gettargetmethod",
       "community": 86,
@@ -1577,7 +1637,7 @@
       "label": ".Postfix()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L243",
+      "source_location": "L369",
       "_origin": "ast",
       "id": "patches_classmedicpatches_mobilesurgerypatch_postfix",
       "community": 86,
@@ -1587,7 +1647,7 @@
       "label": "Player",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L243",
+      "source_location": "L369",
       "_origin": "ast",
       "id": "client_patches_classmedicpatches_cs_player",
       "community": 86,
@@ -1597,7 +1657,7 @@
       "label": "IEffect",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L243",
+      "source_location": "L369",
       "_origin": "ast",
       "id": "ieffect",
       "community": 86,
@@ -3020,7 +3080,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_playermodelwithstatsidentitypatch",
-      "community": 41,
+      "community": 109,
       "norm_label": "playermodelwithstatsidentitypatch.cs"
     },
     {
@@ -3030,7 +3090,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "patches_playermodelwithstatsidentitypatch_playermodelwithstatsidentitypatch",
-      "community": 41,
+      "community": 109,
       "norm_label": "playermodelwithstatsidentitypatch"
     },
     {
@@ -3040,7 +3100,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "patches_playermodelwithstatsidentitypatch_playermodelwithstatsidentitypatch_gettargetmethod",
-      "community": 41,
+      "community": 109,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -3050,7 +3110,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "client_patches_playermodelwithstatsidentitypatch_cs_methodbase",
-      "community": 41,
+      "community": 109,
       "norm_label": "methodbase"
     },
     {
@@ -3060,7 +3120,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "patches_playermodelwithstatsidentitypatch_playermodelwithstatsidentitypatch_postfix",
-      "community": 41,
+      "community": 109,
       "norm_label": ".postfix()"
     },
     {
@@ -3070,7 +3130,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "client_patches_playermodelwithstatsidentitypatch_cs_textmeshprougui",
-      "community": 41,
+      "community": 109,
       "norm_label": "textmeshprougui"
     },
     {
@@ -3080,7 +3140,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "client_patches_playermodelwithstatsidentitypatch_cs_chatspecialicon",
-      "community": 41,
+      "community": 109,
       "norm_label": "chatspecialicon"
     },
     {
@@ -3090,7 +3150,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "client_patches_playermodelwithstatsidentitypatch_cs_patchpostfix",
-      "community": 41,
+      "community": 109,
       "norm_label": "patchpostfix"
     },
     {
@@ -5487,7 +5547,7 @@
       "label": ".OnGUI()",
       "file_type": "code",
       "source_file": "Client/Plugin.cs",
-      "source_location": "L227",
+      "source_location": "L246",
       "_origin": "ast",
       "id": "client_plugin_plugin_ongui",
       "community": 39,
@@ -5497,7 +5557,7 @@
       "label": ".OnDestroy()",
       "file_type": "code",
       "source_file": "Client/Plugin.cs",
-      "source_location": "L232",
+      "source_location": "L251",
       "_origin": "ast",
       "id": "client_plugin_plugin_ondestroy",
       "community": 39,
@@ -5507,7 +5567,7 @@
       "label": ".RepositionSeals()",
       "file_type": "code",
       "source_file": "Client/Plugin.cs",
-      "source_location": "L242",
+      "source_location": "L261",
       "_origin": "ast",
       "id": "client_plugin_plugin_repositionseals",
       "community": 39,
@@ -17708,9 +17768,9 @@
       "source_file": "Client/Patches/CalmSightsPatch.cs",
       "source_location": "L33",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_calmsightspatch_calmsightspatch",
-      "target": "modulepatch",
-      "confidence_score": 1.0
+      "target": "modulepatch"
     },
     {
       "relation": "inherits",
@@ -17788,9 +17848,9 @@
       "source_file": "Client/Patches/ClassMedicPatches.cs",
       "source_location": "L181",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_medanimspeedpatch",
-      "target": "modulepatch",
-      "confidence_score": 1.0
+      "target": "modulepatch"
     },
     {
       "relation": "inherits",
@@ -17798,9 +17858,9 @@
       "source_file": "Client/Patches/ClassMedicPatches.cs",
       "source_location": "L80",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_medsoperationscopepatch",
-      "target": "modulepatch",
-      "confidence_score": 1.0
+      "target": "modulepatch"
     },
     {
       "relation": "inherits",
@@ -17808,9 +17868,9 @@
       "source_file": "Client/Patches/ClassMedicPatches.cs",
       "source_location": "L145",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_medusetimepatch",
-      "target": "modulepatch",
-      "confidence_score": 1.0
+      "target": "modulepatch"
     },
     {
       "relation": "inherits",
@@ -17818,9 +17878,9 @@
       "source_file": "Client/Patches/ClassMedicPatches.cs",
       "source_location": "L236",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_mobilesurgerypatch",
-      "target": "modulepatch",
-      "confidence_score": 1.0
+      "target": "modulepatch"
     },
     {
       "relation": "inherits",
@@ -18401,9 +18461,9 @@
       "source_file": "Client/Patches/CalmSightsPatch.cs",
       "source_location": "L33",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_calmsightspatch",
-      "target": "patches_calmsightspatch_calmsightspatch",
-      "confidence_score": 1.0
+      "target": "patches_calmsightspatch_calmsightspatch"
     },
     {
       "relation": "method",
@@ -18411,9 +18471,9 @@
       "source_file": "Client/Patches/CalmSightsPatch.cs",
       "source_location": "L35",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_calmsightspatch_calmsightspatch",
-      "target": "patches_calmsightspatch_calmsightspatch_gettargetmethod",
-      "confidence_score": 1.0
+      "target": "patches_calmsightspatch_calmsightspatch_gettargetmethod"
     },
     {
       "relation": "method",
@@ -18421,9 +18481,9 @@
       "source_file": "Client/Patches/CalmSightsPatch.cs",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_calmsightspatch_calmsightspatch",
-      "target": "patches_calmsightspatch_calmsightspatch_postfix",
-      "confidence_score": 1.0
+      "target": "patches_calmsightspatch_calmsightspatch_postfix"
     },
     {
       "relation": "references",
@@ -18432,9 +18492,9 @@
       "source_location": "L35",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "patches_calmsightspatch_calmsightspatch_gettargetmethod",
-      "target": "client_patches_calmsightspatch_cs_methodbase",
-      "confidence_score": 1.0
+      "target": "client_patches_calmsightspatch_cs_methodbase"
     },
     {
       "relation": "references",
@@ -18443,9 +18503,9 @@
       "source_location": "L41",
       "weight": 1.0,
       "context": "attribute",
+      "confidence_score": 1.0,
       "source": "patches_calmsightspatch_calmsightspatch_postfix",
-      "target": "client_patches_calmsightspatch_cs_patchpostfix",
-      "confidence_score": 1.0
+      "target": "client_patches_calmsightspatch_cs_patchpostfix"
     },
     {
       "relation": "references",
@@ -18454,9 +18514,9 @@
       "source_location": "L41",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_calmsightspatch_calmsightspatch_postfix",
-      "target": "client_patches_calmsightspatch_cs_proceduralweaponanimation",
-      "confidence_score": 1.0
+      "target": "client_patches_calmsightspatch_cs_proceduralweaponanimation"
     },
     {
       "relation": "contains",
@@ -19399,9 +19459,9 @@
       "source_file": "Client/Patches/ClassMedicPatches.cs",
       "source_location": "L181",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches",
-      "target": "patches_classmedicpatches_medanimspeedpatch",
-      "confidence_score": 1.0
+      "target": "patches_classmedicpatches_medanimspeedpatch"
     },
     {
       "relation": "contains",
@@ -19409,9 +19469,9 @@
       "source_file": "Client/Patches/ClassMedicPatches.cs",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches",
-      "target": "patches_classmedicpatches_medictiming",
-      "confidence_score": 1.0
+      "target": "patches_classmedicpatches_medictiming"
     },
     {
       "relation": "contains",
@@ -19419,9 +19479,9 @@
       "source_file": "Client/Patches/ClassMedicPatches.cs",
       "source_location": "L80",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches",
-      "target": "patches_classmedicpatches_medsoperationscopepatch",
-      "confidence_score": 1.0
+      "target": "patches_classmedicpatches_medsoperationscopepatch"
     },
     {
       "relation": "contains",
@@ -19429,9 +19489,9 @@
       "source_file": "Client/Patches/ClassMedicPatches.cs",
       "source_location": "L145",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches",
-      "target": "patches_classmedicpatches_medusetimepatch",
-      "confidence_score": 1.0
+      "target": "patches_classmedicpatches_medusetimepatch"
     },
     {
       "relation": "contains",
@@ -19439,9 +19499,9 @@
       "source_file": "Client/Patches/ClassMedicPatches.cs",
       "source_location": "L236",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches",
-      "target": "patches_classmedicpatches_mobilesurgerypatch",
-      "confidence_score": 1.0
+      "target": "patches_classmedicpatches_mobilesurgerypatch"
     },
     {
       "relation": "references",
@@ -19450,8 +19510,19 @@
       "source_location": "L30",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_medictiming",
-      "target": "client_patches_classmedicpatches_cs_bool",
+      "target": "client_patches_classmedicpatches_cs_bool"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMedicPatches.cs",
+      "source_location": "L138",
+      "weight": 1.0,
+      "context": "field",
+      "source": "patches_classmedicpatches_medictiming",
+      "target": "client_patches_classmedicpatches_cs_fieldinfo",
       "confidence_score": 1.0
     },
     {
@@ -19461,18 +19532,39 @@
       "source_location": "L27",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_medictiming",
-      "target": "client_patches_classmedicpatches_cs_float",
+      "target": "client_patches_classmedicpatches_cs_float"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMedicPatches.cs",
+      "source_location": "L33",
+      "weight": 1.0,
+      "context": "field",
+      "source": "patches_classmedicpatches_medictiming",
+      "target": "client_patches_classmedicpatches_cs_int",
       "confidence_score": 1.0
     },
     {
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L59",
+      "source_location": "L47",
       "weight": 1.0,
       "source": "patches_classmedicpatches_medictiming",
-      "target": "patches_classmedicpatches_medictiming_disarm",
+      "target": "patches_classmedicpatches_medictiming_arm",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMedicPatches.cs",
+      "source_location": "L141",
+      "weight": 1.0,
+      "source": "patches_classmedicpatches_medictiming",
+      "target": "patches_classmedicpatches_medictiming_bandaidisredirecting",
       "confidence_score": 1.0
     },
     {
@@ -19481,8 +19573,18 @@
       "source_file": "Client/Patches/ClassMedicPatches.cs",
       "source_location": "L45",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_medictiming",
-      "target": "patches_classmedicpatches_medictiming_factorfor",
+      "target": "patches_classmedicpatches_medictiming_factorfor"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMedicPatches.cs",
+      "source_location": "L99",
+      "weight": 1.0,
+      "source": "patches_classmedicpatches_medictiming",
+      "target": "patches_classmedicpatches_medictiming_forcedisable",
       "confidence_score": 1.0
     },
     {
@@ -19491,8 +19593,72 @@
       "source_file": "Client/Patches/ClassMedicPatches.cs",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_medictiming",
-      "target": "patches_classmedicpatches_medictiming_issurgery",
+      "target": "patches_classmedicpatches_medictiming_issurgery"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMedicPatches.cs",
+      "source_location": "L61",
+      "weight": 1.0,
+      "source": "patches_classmedicpatches_medictiming",
+      "target": "patches_classmedicpatches_medictiming_release",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMedicPatches.cs",
+      "source_location": "L74",
+      "weight": 1.0,
+      "source": "patches_classmedicpatches_medictiming",
+      "target": "patches_classmedicpatches_medictiming_reset",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMedicPatches.cs",
+      "source_location": "L213",
+      "weight": 1.0,
+      "source": "patches_classmedicpatches_medsoperationscopepatch_prefix",
+      "target": "patches_classmedicpatches_medictiming_arm",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMedicPatches.cs",
+      "source_location": "L70",
+      "weight": 1.0,
+      "source": "patches_classmedicpatches_medictiming_release",
+      "target": "patches_classmedicpatches_medictiming_reset",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMedicPatches.cs",
+      "source_location": "L233",
+      "weight": 1.0,
+      "source": "patches_classmedicpatches_medsoperationscopepatch_finalizer",
+      "target": "patches_classmedicpatches_medictiming_release",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMedicPatches.cs",
+      "source_location": "L103",
+      "weight": 1.0,
+      "source": "patches_classmedicpatches_medictiming_forcedisable",
+      "target": "patches_classmedicpatches_medictiming_reset",
       "confidence_score": 1.0
     },
     {
@@ -19502,9 +19668,9 @@
       "source_file": "Client/Patches/ClassMedicPatches.cs",
       "source_location": "L47",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_medictiming_factorfor",
-      "target": "patches_classmedicpatches_medictiming_issurgery",
-      "confidence_score": 1.0
+      "target": "patches_classmedicpatches_medictiming_issurgery"
     },
     {
       "relation": "references",
@@ -19513,8 +19679,19 @@
       "source_location": "L37",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_medictiming_issurgery",
-      "target": "client_patches_classmedicpatches_cs_item",
+      "target": "client_patches_classmedicpatches_cs_item"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMedicPatches.cs",
+      "source_location": "L213",
+      "weight": 1.0,
+      "source": "patches_classmedicpatches_medsoperationscopepatch_prefix",
+      "target": "patches_classmedicpatches_medictiming_issurgery",
       "confidence_score": 1.0
     },
     {
@@ -19524,9 +19701,9 @@
       "source_file": "Client/Patches/ClassMedicPatches.cs",
       "source_location": "L262",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_mobilesurgerypatch_postfix",
-      "target": "patches_classmedicpatches_medictiming_issurgery",
-      "confidence_score": 1.0
+      "target": "patches_classmedicpatches_medictiming_issurgery"
     },
     {
       "relation": "references",
@@ -19535,9 +19712,9 @@
       "source_location": "L45",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_medictiming_factorfor",
-      "target": "client_patches_classmedicpatches_cs_item",
-      "confidence_score": 1.0
+      "target": "client_patches_classmedicpatches_cs_item"
     },
     {
       "relation": "calls",
@@ -19546,31 +19723,9 @@
       "source_file": "Client/Patches/ClassMedicPatches.cs",
       "source_location": "L109",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_medsoperationscopepatch_prefix",
-      "target": "patches_classmedicpatches_medictiming_factorfor",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L126",
-      "weight": 1.0,
-      "source": "patches_classmedicpatches_medsoperationscopepatch_postfix",
-      "target": "patches_classmedicpatches_medictiming_disarm",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L96",
-      "weight": 1.0,
-      "source": "patches_classmedicpatches_medsoperationscopepatch_prefix",
-      "target": "patches_classmedicpatches_medictiming_disarm",
-      "confidence_score": 1.0
+      "target": "patches_classmedicpatches_medictiming_factorfor"
     },
     {
       "relation": "references",
@@ -19579,8 +19734,29 @@
       "source_location": "L83",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_medsoperationscopepatch",
-      "target": "client_patches_classmedicpatches_cs_fieldinfo",
+      "target": "client_patches_classmedicpatches_cs_fieldinfo"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMedicPatches.cs",
+      "source_location": "L193",
+      "weight": 1.0,
+      "source": "patches_classmedicpatches_medsoperationscopepatch_prefix",
+      "target": "patches_classmedicpatches_medictiming_bandaidisredirecting",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMedicPatches.cs",
+      "source_location": "L228",
+      "weight": 1.0,
+      "source": "patches_classmedicpatches_medsoperationscopepatch",
+      "target": "patches_classmedicpatches_medsoperationscopepatch_finalizer",
       "confidence_score": 1.0
     },
     {
@@ -19589,19 +19765,9 @@
       "source_file": "Client/Patches/ClassMedicPatches.cs",
       "source_location": "L85",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_medsoperationscopepatch",
-      "target": "patches_classmedicpatches_medsoperationscopepatch_gettargetmethod",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L125",
-      "weight": 1.0,
-      "source": "patches_classmedicpatches_medsoperationscopepatch",
-      "target": "patches_classmedicpatches_medsoperationscopepatch_postfix",
-      "confidence_score": 1.0
+      "target": "patches_classmedicpatches_medsoperationscopepatch_gettargetmethod"
     },
     {
       "relation": "method",
@@ -19609,9 +19775,9 @@
       "source_file": "Client/Patches/ClassMedicPatches.cs",
       "source_location": "L90",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_medsoperationscopepatch",
-      "target": "patches_classmedicpatches_medsoperationscopepatch_prefix",
-      "confidence_score": 1.0
+      "target": "patches_classmedicpatches_medsoperationscopepatch_prefix"
     },
     {
       "relation": "references",
@@ -19620,9 +19786,9 @@
       "source_location": "L85",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_medsoperationscopepatch_gettargetmethod",
-      "target": "client_patches_classmedicpatches_cs_methodbase",
-      "confidence_score": 1.0
+      "target": "client_patches_classmedicpatches_cs_methodbase"
     },
     {
       "relation": "references",
@@ -19631,9 +19797,9 @@
       "source_location": "L183",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_medanimspeedpatch_gettargetmethod",
-      "target": "client_patches_classmedicpatches_cs_methodbase",
-      "confidence_score": 1.0
+      "target": "client_patches_classmedicpatches_cs_methodbase"
     },
     {
       "relation": "references",
@@ -19642,9 +19808,9 @@
       "source_location": "L147",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_medusetimepatch_gettargetmethod",
-      "target": "client_patches_classmedicpatches_cs_methodbase",
-      "confidence_score": 1.0
+      "target": "client_patches_classmedicpatches_cs_methodbase"
     },
     {
       "relation": "references",
@@ -19653,9 +19819,9 @@
       "source_location": "L238",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_mobilesurgerypatch_gettargetmethod",
-      "target": "client_patches_classmedicpatches_cs_methodbase",
-      "confidence_score": 1.0
+      "target": "client_patches_classmedicpatches_cs_methodbase"
     },
     {
       "relation": "references",
@@ -19664,9 +19830,9 @@
       "source_location": "L90",
       "weight": 1.0,
       "context": "attribute",
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_medsoperationscopepatch_prefix",
-      "target": "client_patches_classmedicpatches_cs_harmonypriority",
-      "confidence_score": 1.0
+      "target": "client_patches_classmedicpatches_cs_harmonypriority"
     },
     {
       "relation": "references",
@@ -19675,9 +19841,9 @@
       "source_location": "L90",
       "weight": 1.0,
       "context": "attribute",
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_medsoperationscopepatch_prefix",
-      "target": "client_patches_classmedicpatches_cs_patchprefix",
-      "confidence_score": 1.0
+      "target": "client_patches_classmedicpatches_cs_patchprefix"
     },
     {
       "relation": "references",
@@ -19686,9 +19852,9 @@
       "source_location": "L90",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_medsoperationscopepatch_prefix",
-      "target": "observedmedscontrollerclass",
-      "confidence_score": 1.0
+      "target": "observedmedscontrollerclass"
     },
     {
       "relation": "references",
@@ -19697,41 +19863,19 @@
       "source_location": "L188",
       "weight": 1.0,
       "context": "attribute",
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_medanimspeedpatch_prefix",
-      "target": "client_patches_classmedicpatches_cs_patchprefix",
-      "confidence_score": 1.0
+      "target": "client_patches_classmedicpatches_cs_patchprefix"
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L125",
+      "source_location": "L228",
       "weight": 1.0,
       "context": "attribute",
-      "source": "patches_classmedicpatches_medsoperationscopepatch_postfix",
-      "target": "client_patches_classmedicpatches_cs_patchpostfix",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L153",
-      "weight": 1.0,
-      "context": "attribute",
-      "source": "patches_classmedicpatches_medusetimepatch_postfix",
-      "target": "client_patches_classmedicpatches_cs_patchpostfix",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "Client/Patches/ClassMedicPatches.cs",
-      "source_location": "L243",
-      "weight": 1.0,
-      "context": "attribute",
-      "source": "patches_classmedicpatches_mobilesurgerypatch_postfix",
-      "target": "client_patches_classmedicpatches_cs_patchpostfix",
+      "source": "patches_classmedicpatches_medsoperationscopepatch_finalizer",
+      "target": "patchfinalizer",
       "confidence_score": 1.0
     },
     {
@@ -19740,9 +19884,9 @@
       "source_file": "Client/Patches/ClassMedicPatches.cs",
       "source_location": "L147",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_medusetimepatch",
-      "target": "patches_classmedicpatches_medusetimepatch_gettargetmethod",
-      "confidence_score": 1.0
+      "target": "patches_classmedicpatches_medusetimepatch_gettargetmethod"
     },
     {
       "relation": "method",
@@ -19750,9 +19894,31 @@
       "source_file": "Client/Patches/ClassMedicPatches.cs",
       "source_location": "L153",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_medusetimepatch",
-      "target": "patches_classmedicpatches_medusetimepatch_postfix",
-      "confidence_score": 1.0
+      "target": "patches_classmedicpatches_medusetimepatch_postfix"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMedicPatches.cs",
+      "source_location": "L153",
+      "weight": 1.0,
+      "context": "attribute",
+      "confidence_score": 1.0,
+      "source": "patches_classmedicpatches_medusetimepatch_postfix",
+      "target": "client_patches_classmedicpatches_cs_patchpostfix"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMedicPatches.cs",
+      "source_location": "L243",
+      "weight": 1.0,
+      "context": "attribute",
+      "confidence_score": 1.0,
+      "source": "patches_classmedicpatches_mobilesurgerypatch_postfix",
+      "target": "client_patches_classmedicpatches_cs_patchpostfix"
     },
     {
       "relation": "method",
@@ -19760,9 +19926,9 @@
       "source_file": "Client/Patches/ClassMedicPatches.cs",
       "source_location": "L183",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_medanimspeedpatch",
-      "target": "patches_classmedicpatches_medanimspeedpatch_gettargetmethod",
-      "confidence_score": 1.0
+      "target": "patches_classmedicpatches_medanimspeedpatch_gettargetmethod"
     },
     {
       "relation": "method",
@@ -19770,9 +19936,9 @@
       "source_file": "Client/Patches/ClassMedicPatches.cs",
       "source_location": "L188",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_medanimspeedpatch",
-      "target": "patches_classmedicpatches_medanimspeedpatch_prefix",
-      "confidence_score": 1.0
+      "target": "patches_classmedicpatches_medanimspeedpatch_prefix"
     },
     {
       "relation": "method",
@@ -19780,9 +19946,9 @@
       "source_file": "Client/Patches/ClassMedicPatches.cs",
       "source_location": "L238",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_mobilesurgerypatch",
-      "target": "patches_classmedicpatches_mobilesurgerypatch_gettargetmethod",
-      "confidence_score": 1.0
+      "target": "patches_classmedicpatches_mobilesurgerypatch_gettargetmethod"
     },
     {
       "relation": "method",
@@ -19790,9 +19956,9 @@
       "source_file": "Client/Patches/ClassMedicPatches.cs",
       "source_location": "L243",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_mobilesurgerypatch",
-      "target": "patches_classmedicpatches_mobilesurgerypatch_postfix",
-      "confidence_score": 1.0
+      "target": "patches_classmedicpatches_mobilesurgerypatch_postfix"
     },
     {
       "relation": "references",
@@ -19801,9 +19967,9 @@
       "source_location": "L243",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_mobilesurgerypatch_postfix",
-      "target": "client_patches_classmedicpatches_cs_player",
-      "confidence_score": 1.0
+      "target": "client_patches_classmedicpatches_cs_player"
     },
     {
       "relation": "references",
@@ -19812,9 +19978,9 @@
       "source_location": "L243",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_classmedicpatches_mobilesurgerypatch_postfix",
-      "target": "ieffect",
-      "confidence_score": 1.0
+      "target": "ieffect"
     },
     {
       "relation": "contains",
@@ -40005,5 +40171,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "50eed09eb76e3b1e149237731d5d30aa9eee8ade"
+  "built_at_commit": "d039a7bb7a72e1bf789f62e1cd6e56b2badc147e"
 }
