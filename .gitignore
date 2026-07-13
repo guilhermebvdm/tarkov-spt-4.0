@@ -10,6 +10,8 @@ bin-homolog/
 # Mod build output — fully reproducible via /compile-mod (keep the folder, drop the artifacts).
 mods/**/builds/*
 !mods/**/builds/.gitkeep
+# Version-gate state (last compiled version per assembly) — per-machine, written by compile-mod.sh.
+mods/**/.last-compile-versions
 # Engine/reference DLLs copied from the SPT/EFT install — not source, large and licensed.
 mods/**/References/*.dll
 

@@ -5,28 +5,54 @@ Compila um mod (client BepInEx ou server TypeScript) e instala automaticamente e
 ## Uso
 
 ```
-/compile-mod <ref> [--spt-path <path>] [--flat] [--clean]
+/compile-mod <ref> [--spt-path <path>] [--flat] [--clean] [--allow-same-version] [--check-version]
 ```
 
 - `<ref>` — nome da pasta em `mods/`, path da pasta do mod, ou path de qualquer arquivo dentro.
 - `--spt-path <path>` — sobrescreve o path do SPT (default: `D:/SPT`, ou env var `SPT_PATH`).
 - `--flat` — (somente client) instala o `.dll` direto em `BepInEx/plugins/` sem subfolder.
 - `--clean` — apaga `mods/<mod>/builds/` antes de compilar, forçando rebuild completo (útil quando o cache do MSBuild gera artefatos stale).
+- `--allow-same-version` — bypassa o gate de versão (recompilar deliberadamente sem bump — ex.: rebuild idêntico para re-deploy). Nunca usar como atalho para não bumpar.
+- `--check-version` — só resolve e imprime as versões atuais do mod; não compila nem instala.
 
 ## O que fazer
 
 1. **Resolver `<ref>`** → `<mod>` (nome da pasta em `mods/`).
-2. **Repassar para o script:**
+2. **Bump de versão — OBRIGATÓRIO, antes de compilar.** Toda compilação evolui a versão semver `x.y.z` do mod (é a versão que o painel F12 do BepInEx exibe). Critério:
+
+   | Parte | Quando bumpar | Efeito |
+   |---|---|---|
+   | `z` (patch) | **default** — fix, ajuste, iteração de desenvolvimento | `1.0.2 → 1.0.3` |
+   | `y` (minor) | feature nova visível | zera `z`: `1.0.3 → 1.1.0` |
+   | `x` (major) | breaking change — config/save/API incompatível | zera `y` e `z`: `1.1.0 → 2.0.0` |
+
+   **Fontes que DEVEM ficar em sincronia** (a canônica é a que o F12 mostra):
+
+   | Fonte | Onde | Vale para |
+   |---|---|---|
+   | 3º argumento de `[BepInPlugin(guid, name, "x.y.z")]` | `Plugin.cs` (às vezes via constante) | client — **é exatamente o que o F12 exibe** |
+   | `<Version>` | `.csproj` | client + server C# |
+   | metadata (ex.: `SemanticVersioning.Version`) | `*Metadata.cs` | server C# |
+   | `"version"` | `package.json` | server TS |
+
+   O script **falha antes do build** se a versão não evoluiu desde o último compile (estado por mod em `mods/<mod>/.last-compile-versions`, não versionado). Se falhar, a resposta é bumpar a versão — não usar `--allow-same-version`.
+3. **Repassar para o script:**
    ```bash
    bash .agents/scripts/compile-mod.sh <mod> [flags]
    ```
-3. Se o script falhar, mostrar o erro e parar.
-4. Em sucesso, confirmar ao usuário:
+4. Se o script falhar, mostrar o erro e parar.
+5. Em sucesso, confirmar ao usuário — **sempre com a versão em primeiro lugar, nunca omitir**:
+   - **Versão do mod: `<antiga> → <nova>`** + critério usado (patch/minor/major e por quê). É a versão que aparecerá no painel F12 (Plugin/mod settings) após reiniciar o cliente — o bloco `── VERSÃO DO MOD ──` no output do script confirma o valor extraído da fonte real.
+   - Se o script avisar `⚠ VERSÃO NÃO DETECTADA` ou `BepInPlugin ≠ csproj`, resolver/sincronizar e reportar explicitamente.
    - Tipo detectado (client-csharp / server-typescript / server-csharp)
    - Path do build local (`mods/<mod>/builds/`)
    - Path de instalação no SPT (`BepInEx/plugins/<assembly>/` ou `SPT/user/mods/<mod>/`)
 
 ## O que o script faz
+
+### Gate de versão
+
+Antes de qualquer build, o script extrai a versão de cada projeto (client: 3º arg de `[BepInPlugin]`, resolvendo constantes; server C#: `<Version>` do csproj; server TS: `package.json`) e compara com `mods/<mod>/.last-compile-versions`. Versão igual à do último compile → **exit 1 sem compilar**. Em sucesso, imprime o bloco `── VERSÃO DO MOD (painel F12 / BepInEx) ──` com `antiga → nova` e a fonte, e atualiza o estado. Também avisa quando `BepInPlugin` e `<Version>` do csproj divergem.
 
 ### Detecção do tipo
 

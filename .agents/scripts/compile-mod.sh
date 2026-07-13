@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # compile-mod.sh — compila um mod (client BepInEx, server C#, server TypeScript, ou híbrido) e instala em D:\SPT.
-# Uso: compile-mod.sh <mod-name> [--spt-path <path>] [--flat] [--clean] [--force-config]
+# Uso: compile-mod.sh <mod-name> [--spt-path <path>] [--flat] [--clean] [--force-config] [--allow-same-version] [--check-version]
 #   --force-config: overwrite install config/ even when it diverges from the repo (guard rail, item 019)
+#   --allow-same-version: bypass do gate de versão (recompilar deliberadamente sem bump)
+#   --check-version: só resolve e imprime as versões do mod (sem compilar nem instalar)
 
 set -euo pipefail
 
@@ -12,6 +14,8 @@ FLAT_INSTALL=0
 CLEAN_BUILD=0
 FORCE_CONFIG=0
 CONFIG_SKIPPED=0
+ALLOW_SAME_VERSION=0
+CHECK_VERSION_ONLY=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -19,8 +23,10 @@ while [[ $# -gt 0 ]]; do
     --flat)         FLAT_INSTALL=1; shift ;;
     --clean)        CLEAN_BUILD=1; shift ;;
     --force-config) FORCE_CONFIG=1; shift ;;
+    --allow-same-version) ALLOW_SAME_VERSION=1; shift ;;
+    --check-version)      CHECK_VERSION_ONLY=1; shift ;;
     -h|--help)
-      sed -n '2,4p' "$0" | sed 's|^# \{0,1\}||'
+      sed -n '2,6p' "$0" | sed 's|^# \{0,1\}||'
       exit 0 ;;
     -*) echo "Erro: flag desconhecida: $1" >&2; exit 1 ;;
     *)
@@ -65,6 +71,133 @@ csproj_kind() {  # $1 = caminho do csproj → client | server | lib
   fi
 }
 
+# ---------- helpers: versão do mod (gate de bump + report F12) ----------
+# A versão que o painel F12 do BepInEx exibe é o 3º argumento de [BepInPlugin(guid, name, version)].
+# Regra do repo: TODA compilação deve evoluir a versão semver x.y.z (critério em
+# .claude/commands/compile-mod.md). O gate abaixo falha ANTES do build se a versão
+# não mudou desde o último compile (estado em mods/<mod>/.last-compile-versions).
+
+VERSIONS_FILE="$MOD_DIR/.last-compile-versions"
+declare -A NEW_VERSIONS=()   # key (assembly/label) → versão resolvida neste compile
+declare -A OLD_VERSIONS=()   # key → versão registrada no último compile
+declare -A VERSION_SOURCE=() # key → fonte da versão (BepInPlugin / csproj / package.json)
+
+load_last_versions() {
+  [[ -f "$VERSIONS_FILE" ]] || return 0
+  local line
+  while IFS= read -r line; do
+    line="${line%$'\r'}"
+    [[ "$line" == *=* ]] || continue
+    OLD_VERSIONS["${line%%=*}"]="${line#*=}"
+  done < "$VERSIONS_FILE"
+}
+
+save_versions() {
+  local key merged=()
+  # Preserva entradas antigas de projetos que este run não resolveu (ex.: extração falhou).
+  for key in ${OLD_VERSIONS[@]+"${!OLD_VERSIONS[@]}"}; do
+    [[ -n "${NEW_VERSIONS[$key]+x}" ]] || merged+=("$key=${OLD_VERSIONS[$key]}")
+  done
+  for key in ${NEW_VERSIONS[@]+"${!NEW_VERSIONS[@]}"}; do
+    merged+=("$key=${NEW_VERSIONS[$key]}")
+  done
+  [[ ${#merged[@]} -gt 0 ]] || return 0
+  printf '%s\n' "${merged[@]}" | sort > "$VERSIONS_FILE"
+}
+
+find_cs_files() {  # $1 = dir
+  find "$1" -name '*.cs' -not -path '*/obj/*' -not -path '*/bin/*' -not -path '*/References/*' 2>/dev/null
+}
+
+strip_cs_comments_join() {  # $1 = arquivo .cs → conteúdo em 1 linha, sem comentários // e /* */
+  sed -e 's|//.*||' "$1" | tr '\n\r' '  ' | sed -E 's:/\*([^*]|\*+[^*/])*\*+/: :g'
+}
+
+resolve_ident_version() {  # $1 = dir de busca, $2 = identificador → versão "x.y.z" da const, ou vazio
+  local f m rx="(^|[^A-Za-z0-9_])$2[[:space:]]*(=>|=)[[:space:]]*\"[0-9]+(\.[0-9]+)+[^\"]*\""
+  while IFS= read -r f; do
+    m="$(strip_cs_comments_join "$f" | grep -oE "$rx" | head -1 || true)"
+    if [[ -n "$m" ]]; then
+      grep -oE '"[^"]*"' <<<"$m" | head -1 | tr -d '"'
+      return 0
+    fi
+  done < <(find_cs_files "$1")
+  return 0
+}
+
+extract_bepin_version() {  # $1 = dir do projeto client → versão do 3º arg de [BepInPlugin] (o que o F12 mostra)
+  local f joined attr args arg3 ident v
+  while IFS= read -r f; do
+    grep -q 'BepInPlugin' "$f" 2>/dev/null || continue
+    joined="$(strip_cs_comments_join "$f")"
+    attr="$(grep -oE 'BepInPlugin[[:space:]]*\([^)]*\)' <<<"$joined" | head -1 || true)"
+    [[ -n "$attr" ]] || continue
+    args="${attr#*(}"; args="${args%)}"
+    arg3="$(awk -F',' '{print $3}' <<<"$args" | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')"
+    [[ -n "$arg3" ]] || continue
+    if [[ "$arg3" =~ ^\"([^\"]+)\"$ ]]; then
+      echo "${BASH_REMATCH[1]}"; return 0
+    fi
+    ident="${arg3##*.}"; ident="${ident//[^A-Za-z0-9_]/}"
+    [[ -n "$ident" ]] || continue
+    v="$(resolve_ident_version "$(dirname "$f")" "$ident")"
+    [[ -z "$v" ]] && v="$(resolve_ident_version "$MODDED" "$ident")"
+    [[ -n "$v" ]] && { echo "$v"; return 0; }
+  done < <(find_cs_files "$1")
+  return 0
+}
+
+csproj_version() {  # $1 = csproj → <Version> literal (ignora refs MSBuild tipo $(Version)), ou vazio
+  local v
+  v="$(grep -oE '<Version>[^<$]+</Version>' "$1" | head -1 | sed -E 's|</?Version>||g' | tr -d '\r ' || true)"
+  [[ -z "$v" ]] && v="$(grep -oE '<AssemblyVersion>[^<$]+</AssemblyVersion>' "$1" | head -1 | sed -E 's|</?AssemblyVersion>||g' | tr -d '\r ' || true)"
+  echo "$v"
+}
+
+version_gate() {  # $1 = key, $2 = versão atual (pode ser vazia), $3 = fonte
+  local key="$1" cur="$2" src="$3" old="${OLD_VERSIONS[$1]:-}"
+  if [[ -z "$cur" ]]; then
+    echo "  ⚠ VERSÃO NÃO DETECTADA para $key ($src) — bump e report manuais obrigatórios" >&2
+    return 0
+  fi
+  NEW_VERSIONS["$key"]="$cur"
+  VERSION_SOURCE["$key"]="$src"
+  [[ "$CHECK_VERSION_ONLY" == "1" ]] && return 0
+  if [[ -n "$old" && "$old" == "$cur" && "$ALLOW_SAME_VERSION" != "1" ]]; then
+    cat >&2 <<EOF
+
+✗ GATE DE VERSÃO: $key ainda está em $cur — mesma versão do último compile.
+  Toda compilação deve EVOLUIR a versão semver x.y.z exibida no painel F12 do BepInEx:
+    z (patch): fix / iteração de desenvolvimento (default)
+    y (minor): feature nova (zera z)
+    x (major): breaking change — config/save/API incompatível (zera y e z)
+  Onde bumpar (manter TODAS as fontes em sincronia):
+    - 3º argumento de [BepInPlugin(...)] no Plugin.cs (client — é o que o F12 exibe)
+    - <Version> no .csproj
+    - metadata do server (ex.: SemanticVersioning.Version) quando existir
+  Recompilar deliberadamente SEM bump: --allow-same-version
+EOF
+    exit 1
+  fi
+}
+
+print_version_report() {
+  [[ ${#NEW_VERSIONS[@]} -gt 0 ]] || return 0
+  local key old
+  echo
+  echo "── VERSÃO DO MOD (painel F12 / BepInEx) ─────────────────"
+  for key in $(printf '%s\n' "${!NEW_VERSIONS[@]}" | sort); do
+    old="${OLD_VERSIONS[$key]:-}"
+    if [[ -z "$old" ]]; then
+      echo "  ★ $key: ${NEW_VERSIONS[$key]} (primeira medição — fonte: ${VERSION_SOURCE[$key]})"
+    elif [[ "$old" == "${NEW_VERSIONS[$key]}" ]]; then
+      echo "  ⚠ $key: ${NEW_VERSIONS[$key]} (NÃO evoluiu)"
+    else
+      echo "  ★ $key: $old → ${NEW_VERSIONS[$key]} (fonte: ${VERSION_SOURCE[$key]})"
+    fi
+  done
+}
+
 # ---------- detect mod type ----------
 mapfile -t CSPROJS < <(find "$MODDED" -maxdepth 3 -name '*.csproj' 2>/dev/null \
   | grep -vE '/(obj|bin)/' | sort)
@@ -91,6 +224,41 @@ echo "→ Mod: $MOD"
 echo "→ Tipo: $MOD_TYPE"
 echo "→ SPT path: $SPT_PATH"
 [[ "$MOD_TYPE" == "csharp" ]] && echo "→ Projetos: ${#CSPROJS[@]} (assemblies próprios: ${OWN_ASSEMBLIES[*]})"
+
+# ---------- gate de versão (roda ANTES de qualquer build — fail fast) ----------
+load_last_versions
+
+if [[ "$MOD_TYPE" == "csharp" ]]; then
+  for CSPROJ in "${CSPROJS[@]}"; do
+    KIND="$(csproj_kind "$CSPROJ")"
+    [[ "$KIND" == "lib" ]] && continue
+    ASM="$(csproj_assembly_name "$CSPROJ")"
+    CSPROJ_VER="$(csproj_version "$CSPROJ")"
+    if [[ "$KIND" == "client" ]]; then
+      BEPIN_VER="$(extract_bepin_version "$(dirname "$CSPROJ")")"
+      if [[ -n "$BEPIN_VER" && -n "$CSPROJ_VER" && "$BEPIN_VER" != "$CSPROJ_VER" ]]; then
+        echo "  ⚠ $ASM: BepInPlugin ($BEPIN_VER) ≠ csproj <Version> ($CSPROJ_VER) — sincronizar as duas fontes" >&2
+      fi
+      if [[ -n "$BEPIN_VER" ]]; then
+        version_gate "$ASM" "$BEPIN_VER" "BepInPlugin (F12)"
+      else
+        version_gate "$ASM" "$CSPROJ_VER" "csproj <Version> (BepInPlugin não extraível)"
+      fi
+    else
+      version_gate "$ASM" "$CSPROJ_VER" "csproj <Version>"
+    fi
+  done
+else
+  PKG_VER="$(grep -oE '"version"[[:space:]]*:[[:space:]]*"[^"]+"' "$PACKAGE_JSON" | head -1 | grep -oE '"[^"]+"$' | tr -d '"' || true)"
+  version_gate "package.json" "$PKG_VER" "package.json \"version\""
+fi
+
+if [[ "$CHECK_VERSION_ONLY" == "1" ]]; then
+  print_version_report
+  echo
+  echo "✓ --check-version: nada foi compilado nem instalado (estado de gate: $VERSIONS_FILE)"
+  exit 0
+fi
 
 # ---------- helper: resolver DLLs de referência do client a partir do SPT install ----------
 resolve_references() {
@@ -309,6 +477,8 @@ if [[ "$MOD_TYPE" == "server-typescript" ]]; then
 
   echo; echo "✓ Compilação concluída — $MOD ($MOD_TYPE)"; echo "  Build local: $BUILDS"
   [[ -d "$SPT_PATH" ]] && echo "  Instalado em: ${DEST_DIR:-?}"
+  save_versions
+  print_version_report
   exit 0
 fi
 
@@ -392,4 +562,6 @@ EOF
 if [[ "$CONFIG_SKIPPED" == "1" ]]; then
   echo "  ⚠ config/ NOT copied to the install (diverges from repo) — use /sync-classes or --force-config"
 fi
+save_versions
+print_version_report
 exit 0
