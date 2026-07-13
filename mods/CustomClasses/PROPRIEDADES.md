@@ -49,6 +49,11 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 |---|---|---|---|---|
 | `Efficient Metabolism — Enabled` | bool | `true` | — | Perk: fome/sede drenam mais devagar. |
 | `Efficient Metabolism — Hunger/thirst drain` | float | `0.85` | 0.5..1 | Dreno de fome/sede (0.85 = 15% mais devagar). |
+| `Rapid Care — Enabled` | bool | `true` | — | Perk (**072**): curativos/estabilizações mais rápidos — **efeito E animação** juntos. |
+| `Rapid Care — Use time mult` | float | `0.7` | 0.3..1 | Tempo de uso de itens médicos (0.7 = 30% mais rápido). **Não** vale para o kit de cirurgia (ver Swift Surgeon). |
+| `Swift Surgeon — Enabled` | bool | `true` | — | Perk (**072**): cirurgia (CMS/Surv12) muito mais rápida. |
+| `Swift Surgeon — Surgery time mult` | float | `0.5` | 0.3..1 | Tempo de cirurgia (0.5 = metade). A skill Surgery do jogador **continua** valendo por cima. |
+| `Mobile Surgery — Enabled` | bool | `true` | — | Perk (**072**): pode **ANDAR** durante a cirurgia (segue sem correr/pular/deitar). |
 | `Shaky Hands — Enabled` | bool | `false` | — | Drawback: +recuo (mãos trêmulas). **Off por padrão** (balance B1). |
 | `Shaky Hands — Recoil mult` | float | `1.25` | 1..2 | Recuo (1.25 = +25%). |
 
@@ -80,6 +85,8 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 | `Iron Lungs — Breath drain mult` | float | `0.667` | 0.2..1 | Dreno de O₂ ao prender a respiração (0.667 → +50% de duração). |
 | `Steady Arms — Enabled` | bool | `true` | — | Perk: braço cansa mais devagar ao mirar (**requer o stances mod**). |
 | `Steady Arms — ADS arm drain mult` | float | `0.65` | 0.2..1 | Dreno de braço em ADS (0.65 = 35% mais lento). |
+| `Calm Sights — Enabled` | bool | `true` | — | Perk (**072**): a arma oscila menos. ⚠️ Afeta o sway de **mira/movimento**; o sway da **respiração** é outro sistema (esse é o Iron Lungs). |
+| `Calm Sights — Sway mult` | float | `0.7` | 0.3..1 | Oscilação (sway) da arma (0.7 = 30% menos). |
 | `Rooted — Enabled` | bool | `true` | — | Drawback: −velocidade enquanto mira. |
 | `Rooted — ADS move speed` | float | `0.85` | 0.5..1 | Velocidade ao mirar (0.85 = −15%). |
 

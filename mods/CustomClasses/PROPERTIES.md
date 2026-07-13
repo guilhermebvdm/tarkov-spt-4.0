@@ -49,6 +49,11 @@ Properties exposed in the configuration menu (F12 / ConfigurationManager). None 
 |---|---|---|---|---|
 | `Efficient Metabolism — Enabled` | bool | `true` | — | Perk: slower hunger/thirst drain. |
 | `Efficient Metabolism — Hunger/thirst drain` | float | `0.85` | 0.5..1 | Hunger/thirst drain (0.85 = 15% slower). |
+| `Rapid Care — Enabled` | bool | `true` | — | Perk (**072**): faster heals/stabilizations — **effect AND animation** together. |
+| `Rapid Care — Use time mult` | float | `0.7` | 0.3..1 | Medical item use time (0.7 = 30% faster). Does **not** apply to the surgery kit (see Swift Surgeon). |
+| `Swift Surgeon — Enabled` | bool | `true` | — | Perk (**072**): much faster surgery (CMS/Surv12). |
+| `Swift Surgeon — Surgery time mult` | float | `0.5` | 0.3..1 | Surgery time (0.5 = half). The player's Surgery skill **still** stacks on top. |
+| `Mobile Surgery — Enabled` | bool | `true` | — | Perk (**072**): can **WALK** during surgery (still no sprint/jump/prone). |
 | `Shaky Hands — Enabled` | bool | `false` | — | Drawback: more recoil (shaky hands). **Off by default** (balance B1). |
 | `Shaky Hands — Recoil mult` | float | `1.25` | 1..2 | Recoil (1.25 = +25%). |
 
@@ -80,6 +85,8 @@ Properties exposed in the configuration menu (F12 / ConfigurationManager). None 
 | `Iron Lungs — Breath drain mult` | float | `0.667` | 0.2..1 | Hold-breath O2 drain (0.667 → +50% duration). |
 | `Steady Arms — Enabled` | bool | `true` | — | Perk: slower arm fatigue while aiming (**requires the stances mod**). |
 | `Steady Arms — ADS arm drain mult` | float | `0.65` | 0.2..1 | ADS arm drain (0.65 = 35% slower). |
+| `Calm Sights — Enabled` | bool | `true` | — | Perk (**072**): less weapon sway. ⚠️ Affects **aim/movement** sway; **breathing** sway is a different system (that one is Iron Lungs). |
+| `Calm Sights — Sway mult` | float | `0.7` | 0.3..1 | Weapon sway (0.7 = 30% less). |
 | `Rooted — Enabled` | bool | `true` | — | Drawback: slower movement while aiming. |
 | `Rooted — ADS move speed` | float | `0.85` | 0.5..1 | Move speed while aiming (0.85 = −15%). |
 
