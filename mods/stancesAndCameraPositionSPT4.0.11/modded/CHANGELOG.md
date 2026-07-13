@@ -39,7 +39,7 @@ mas estavam em português. Foram **traduzidas**, não removidas:
 | `Sideways (Coronha Esq/Dir)` | `Sideways (Stock Left/Right)` |
 | `Forward/Backward (Frente/Trás)` | `Forward/Backward` |
 | `Stance Kick Intensity (Contra o Peito)` | `Stance Kick Intensity (Toward the Chest)` |
-| `Stance Overshoot Damping (Menos gera Mais Quicada)` | `Stance Overshoot Damping (Lower = More Bounce)` |
+| `Stance Overshoot Damping (Menos gera Mais Quicada)` | `Stance Overshoot Damping (Lower Means More Bounce)` |
 
 As **descrições (tooltips) seguem bilíngues** — inglês em cima, português abaixo.
 

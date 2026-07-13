@@ -20,7 +20,7 @@ public enum ScrollMode
     Linear,
 }
 
-[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "2.2.0")]
+[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "2.2.1")]
 public class Plugin : BaseUnityPlugin
 {
     public static Plugin Instance { get; private set; }
@@ -506,7 +506,7 @@ public class Plugin : BaseUnityPlugin
 
         _StanceOvershootDamping = Config.Bind(
             GeneralSection,
-            "Stance Overshoot Damping (Lower = More Bounce)",
+            "Stance Overshoot Damping (Lower Means More Bounce)",
             12.0f,
             new ConfigDescription("Damping for the spring physics. Lower values mean more overshoot/bounce. Default is 12.\n\nAmortecimento da física de mola. Valores menores geram mais overshoot/quicada. Padrão é 12.",
             new AcceptableValueRange<float>(1f, 30.0f),

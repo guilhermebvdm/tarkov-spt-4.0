@@ -51,7 +51,7 @@
 | Stance Transition Speed | float | `1.0` | 0.1 – 5.0 | Multiplicador de velocidade da transição entre posturas e a visão padrão. |
 | Stance Kick Intensity (Toward the Chest) | float | `-0.05` | -0.3 – 0.3 | Quanto a arma recua contra o peito ao trocar de postura ou mirar (ADS). Negativo puxa a arma em sua direção. |
 | ADS Kick Delay (In) | float | `0.15` | 0 – 1 | Atraso (s) antes de aplicar o kick ao entrar em ADS. Sincroniza o kick com o fim da animação de mira. |
-| Stance Overshoot Damping (Lower = More Bounce) | float | `12.0` | 1 – 30.0 | Amortecimento da física de mola. Menor = mais overshoot/quicada. Padrão 12. |
+| Stance Overshoot Damping (Lower Means More Bounce) | float | `12.0` | 1 – 30.0 | Amortecimento da física de mola. Menor = mais overshoot/quicada. Padrão 12. |
 
 ### Camera Position
 
