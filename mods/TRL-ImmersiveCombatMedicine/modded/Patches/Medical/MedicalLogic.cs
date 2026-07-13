@@ -393,14 +393,14 @@ namespace Band_Aid
         }
 
         // === CONSUMO DO ITEM ===
-        // REGRA FUNDAMENTAL para Fika clients:
-        // NÃO modificar HpResource ANTES de descartar (DiscardItemNetworked).
-        // O server valida operações com base no estado que ELE conhece.
-        // Se o client modifica HpResource localmente, o estado fica dessincronizado
-        // e o server rejeita a operação → slot fantasma.
-        //
-        // Para pacientes LOCAIS: vanilla DoMedEffect (L3215) remove o item.
-        // Para pacientes REMOTOS: DiscardItemNetworked com item em estado original.
+        // ref: CR-04 (feedback 2-PCs) — o consumo PARCIAL local (mutar HpResource no
+        // componente) é o MESMO que o MedEffect vanilla faz e é benigno para a
+        // validação de layout do host (que valida endereços, não resource). O que
+        // quebrava tudo era o DESCARTE: Discard(simulate:false) destacava o item na
+        // hora, silenciosamente, e a RemoveOperation seguinte lançava em Item.Parent
+        // → host com espelho fantasma, client com slot morto, mão travada. O descarte
+        // correto (padrão vanilla SetupItem) é simulate:true + mutação DENTRO da
+        // operação de rede — ver DiscardItemNetworked.
         private static void ConsumeSafe(Player doctor, Item item, float calculatedCost, bool isRemotePatient = false)
         {
             try
@@ -408,17 +408,17 @@ namespace Band_Aid
                 var medKit = item.GetItemComponent<MedKitComponent>();
                 if (medKit != null)
                 {
-                    if (isRemotePatient && medKit.HpResource <= calculatedCost)
+                    // ref: CR-04 — descartar-em-esgotamento vale para remoto E local
+                    // (o caminho local programático deixava o kit em 0/uso eterno)
+                    if (medKit.HpResource <= calculatedCost)
                     {
-                        // Consumo total: descartar SEM modificar HpResource primeiro
-                        // O server vê o item com HP original → aceita o discard
-                        Logger.LogInfo($"MedKit esgotado (remoto). HP atual: {medKit.HpResource}, Custo: {calculatedCost}. Descartando.");
+                        Logger.LogInfo($"MedKit esgotado. HP atual: {medKit.HpResource}, Custo: {calculatedCost}. Descartando (networked).");
                         DiscardItemNetworked(doctor, item);
                     }
                     else
                     {
-                        // Consumo parcial: apenas modificar HpResource localmente
-                        medKit.HpResource -= calculatedCost;
+                        // Consumo parcial: mutação local do componente (como o vanilla)
+                        medKit.HpResource = UnityEngine.Mathf.Max(0f, medKit.HpResource - calculatedCost);
                         Logger.LogInfo($"MedKit: -{calculatedCost} HP. Restante: {medKit.HpResource}");
                         item.RaiseRefreshEvent();
                     }
@@ -428,14 +428,14 @@ namespace Band_Aid
                 var resource = item.GetItemComponent<ResourceComponent>();
                 if (resource != null)
                 {
-                    if (isRemotePatient && resource.Value <= 1.0f)
+                    if (resource.Value <= 1.0f)
                     {
-                        Logger.LogInfo($"Recurso esgotado (remoto). Valor: {resource.Value}. Descartando.");
+                        Logger.LogInfo($"Recurso esgotado. Valor: {resource.Value}. Descartando (networked).");
                         DiscardItemNetworked(doctor, item);
                     }
                     else
                     {
-                        resource.Value -= 1.0f;
+                        resource.Value = UnityEngine.Mathf.Max(0f, resource.Value - 1.0f);
                         Logger.LogInfo($"Recurso: -1 Uso. Restante: {resource.Value}");
                         item.RaiseRefreshEvent();
                     }
@@ -457,25 +457,42 @@ namespace Band_Aid
 
         /// <summary>
         /// Remove item via TryRunNetworkTransaction (Fika-aware).
-        /// Gera InventoryPacket que o server valida e propaga para clients.
-        /// IMPORTANTE: Nunca modificar o item (HpResource) antes de chamar este método.
+        /// ref: CR-04 — Discard com simulate:TRUE: a mutação real roda DENTRO da
+        /// RemoveOperationClass no pipeline de rede (host executa+propaga; client
+        /// espera validação do host e executa no Started) — padrão vanilla
+        /// (PlayerInventoryController.SetupItem). O simulate:false antigo destacava o
+        /// item NA HORA sem evento/rede, e a RemoveOperation seguinte lançava em
+        /// Item.Parent (getter lança para item sem endereço) → espelho fantasma no
+        /// host + slot morto no client + mão travada (evento Begin órfão).
         /// </summary>
         private static void DiscardItemNetworked(Player doctor, Item item)
         {
             try
             {
+                // Guard: item já removido/sem endereço — nunca tocar em item.Parent
+                // (o getter LANÇA); CurrentAddress é o accessor seguro.
+                if (item.CurrentAddress == null)
+                {
+                    Logger.LogWarning($"DiscardItemNetworked: {item.ShortName.Localized()} sem endereço (já removido) — ignorado.");
+                    return;
+                }
+
                 var controller = doctor.InventoryController;
                 Logger.LogInfo($"DiscardItemNetworked: Item={item.ShortName.Localized()}, Controller={controller.GetType().Name}");
 
-                var discardResult = InteractionsHandlerClass.Discard(item, controller);
+                var discardResult = InteractionsHandlerClass.Discard(item, controller, simulate: true);
                 if (discardResult.Succeeded)
                 {
-                    _ = controller.TryRunNetworkTransaction(discardResult);
-                    Logger.LogInfo("Item removido via TryRunNetworkTransaction (Fika sync).");
+                    controller.TryRunNetworkTransaction(discardResult, result =>
+                    {
+                        if (result?.Failed == true)
+                            Logger.LogWarning($"Discard rejeitado pelo host: {result.Error}");
+                    });
+                    Logger.LogInfo("Discard enviado ao pipeline de rede (mutação dentro da operação).");
                 }
                 else
                 {
-                    Logger.LogWarning($"Discard falhou: {discardResult.Error}");
+                    Logger.LogWarning($"Discard simulado falhou: {discardResult.Error}");
                 }
             }
             catch (Exception ex)
