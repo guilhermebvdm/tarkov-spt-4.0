@@ -291,6 +291,23 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados). Ca
 - Sessão paralela do editor commitando — memória global `project_customclasses_session_split`.
 - `/update-mod-graph CustomClasses` rodado ao fim desta sessão (5 arquivos de patches novos).
 
+### 2026-07-13 — Sessão autônoma (noturna): os 4 perks que o 050 dera como impossíveis (item 072, v0.2.0)
+
+Execução autônoma via `/g-autodev` (usuário dormindo; plano em `.handoffs/plan-2026-07-13-customclasses-perks-pendentes.md`).
+
+**A lição da sessão — o repo estava mentindo.** O as-build do 050 deferiu os perks do Médico com dois vereditos: *"a duração é var local → precisa transpiler"* e *"cirurgia sem lock de movimento **não foi localizável no estático**"*. **Os dois eram falsos-negativos** de uma referência quebrada: `references/eft-decompiled/` tem **102 diretórios de namespace VAZIOS** — `EFT.HealthSystem`, `EFT.Animations` e `EFT.InventoryLogic` entre eles. Um sub-agente chegou a escrever que `UseTimeFor` era *"API alegada, nunca verificada"* — o método é **público e existe**. Descompilando a DLL real (`ilspycmd -t <FQN>`), os 4 perks se mostraram alcançáveis, **nenhum precisou de transpiler**.
+
+**Causa do buraco (diagnosticada):** o `ilspycmd -p` **aborta** ao topar num método indecompilável (`BackendAbstractClass.GetTemplates` → `ArgumentNullException: 'annotation'`) e deixa namespaces inteiros vazios. Reproduzido em **10.0.1 e 10.1.0** — atualizar não resolve. Workaround (`-t <FQN>`) documentado no `references/README.md` e na memória global [[reference_eft_decompile_incomplete]].
+
+**Entregue (v0.2.0, commit `d49a5d27`):**
+- 🔧 **Calm Sights** (Caçador, sway ×0.7) — Postfix em `ProceduralWeaponAnimation.UpdateSwayFactors`, que **atribui** o vetor do zero (`MotionReact.SwayFactors = new Vector3(...)`) → multiplicar num Postfix **não acumula** (era o risco central). ⚠️ Cobre o sway de **mira/movimento**; o de **respiração** é outro effector — o card foi corrigido para não mentir.
+- 🔧 **Rapid Care** (×0.7) e **Swift Surgeon** (×0.5) — o tempo vem de `HealthEffectsComponent.UseTimeFor`, um componente **DO ITEM**, que não sabe quem o usa. Patchar direto vazaria o perk para a cura de um **peer Fika** processada no seu cliente. Solução: **escopo armado** no `MedsController.ObservedMedsControllerClass.method_5` (que tem o `_player`); dentro dele o vanilla chama `DoMedEffect` (efeito) e depois `SetUseTimeMultiplier` (animação) — **os dois leem o mesmo fator**, que era exatamente a dessincronia temida pelo 050.
+- 🔧 **Mobile Surgery** — `Player.OnHealthEffectAdded` liga `EPhysicalCondition.HealingLegs` quando o efeito reporta `NoMove`; `HealingLegs` é o **único** motivo de `CanWalk == false`. O perk desliga só ela e **mantém** `UsingMeds` → anda durante a cirurgia, mas segue sem correr/pular.
+
+**Estado:** build 0 warnings/0 erros, deployado em `D:\SPT`, **nada validado in-game** (agente não joga). Painel não mostra mais **"soon"** em perk nenhum.
+
+**Cross-refs:** item 072 · board **B12** ✅ · relatório `.handoffs/report-2026-07-13-customclasses-perks-pendentes.md`.
+
 ## Arquivo — blocos de topo pré-curadoria (2026-06-07 → 2026-06-10)
 
 > Movidos verbatim do topo em 2026-06-11 22:49 (Sessão 7) ao aplicar a regra de snapshot-delta (`memory-curation` §6/§8). Conteúdo histórico — o estado vigente está no topo do arquivo.
