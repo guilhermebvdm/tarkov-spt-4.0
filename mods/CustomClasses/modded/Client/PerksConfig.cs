@@ -117,7 +117,8 @@ internal static class PerksConfig
             "Notificação no início da raid listando os perks (verde) e drawbacks (vermelho) da classe. / Raid-start notification listing the class's perks and drawbacks.");
         DiagnosticsEnabled = config.Bind(
             SecGeneral, "Perk Diagnostics overlay", false,
-            "Overlay ao vivo das propriedades afetadas pelos perks do seu player (validação). / Live overlay of the properties affected by your player's perks.");
+            "Overlay ao vivo das propriedades afetadas pelos perks do SEU player + log dos perks de SOM aplicados aos PEERS (coop; sai no LogOutput.log). Só para validação. / "
+            + "Live overlay of the properties affected by YOUR player's perks + a log of the SOUND perks applied to PEERS (coop; written to LogOutput.log). Validation only.");
 
         // B15 (balance 2026-07-11): os multiplicadores de recuo empilham por PRODUTO (maestria × Bunker/
         // Adrenalina). A maestria tem piso próprio (0.5, inalcançável no cap 51), mas o PRODUTO não tinha
