@@ -20,10 +20,15 @@ public enum ScrollMode
     Linear,
 }
 
-[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "2.2.1")]
+[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "2.3.0")]
 public class Plugin : BaseUnityPlugin
 {
     public static Plugin Instance { get; private set; }
+
+    // CR-01 — false enquanto a config não estiver 100% bindada. Os MonoBehaviours do mod (Plugin.Update,
+    // PassiveMountUI.Update) continuam sendo chamados pelo Unity mesmo se o Awake abortar, então TODOS
+    // eles têm que checar isto antes de tocar em qualquer ConfigEntry.
+    public static bool ConfigReady { get; private set; }
 
     // ⚠️ MANTER o `public static new` — shadow estático do BaseUnityPlugin.Logger.
     // Sem o `new`, vira shadowing implícito (CS0108) e os helpers static deste mod quebram.
@@ -235,100 +240,35 @@ public class Plugin : BaseUnityPlugin
         // bypassa Harmony quando override não chama base — só 1 de 14 overrides chama).
         ResolveFirearmControllerSetTrigger();
 
-        // Enable patches — CADA UM isolado em try/catch (SafeEnable). Se um target Harmony não resolver
-        // em algum build 0.16 (GClass volátil, method_NN renomeado), ele falha SOZINHO com log
-        // `[enable] FAIL <nome>` em vez de derrubar todos os patches seguintes do Awake.
-        SafeEnable("PlayerSpringPatch", () => new PlayerSpringPatch());        // camera position
-        SafeEnable("ApplySimpleRotationPatch", () => new ApplySimpleRotationPatch());  // stance interpolation
-        new CameraRotationMod.Patches.ApplyComplexRotationPatch().Enable();
-        new CameraRotationMod.Patches.HoldBreathPatch().Enable();
-        // Áudio NÃO é carregado aqui (cena de menu): a transição p/ o jogo descarrega os clips
-        // (length vira 0). Carregamento é disparado em GameWorld.OnGameStarted via HoldBreathPatch.OnRaidStart().
-        SafeEnable("FOVSliderPatch", () => new FOVSliderPatch());
-        // MP-02-03 — REGRESSÃO CORRIGIDA. O FOVSliderPatch só alarga o slider da UI; quem remove o
-        // clamp interno (50-75) é o FOVClampPatch. O `.Enable()` dele existia no commit inicial e foi
-        // apagado por arrasto no commit 9816946 (que implementava mounting), deixando as 3 props de
-        // Field of View inertes. O patch é gated internamente por _FOVExpandEnabled (default false),
-        // e o SafeEnable degrada com log se o alvo (GClass1085.Class1841.method_0) sumir no EFT.
-        SafeEnable("FOVClampPatch", () => new FOVClampPatch());
-
-        // Fika Multiplayer Sync Integration (Soft Dependency)
-        if (Chainloader.PluginInfos.ContainsKey("com.fika.core"))
+        // CR-01 — ORDEM CRÍTICA: bindar a config ANTES de ativar qualquer patch.
+        // Incidente de 2026-07-12: um Config.Bind com '=' no nome da key (proibido pelo BepInEx)
+        // lançou no MEIO do Awake. Como os patches eram ativados ANTES dos binds, os ~35 patches
+        // ficaram vivos com toda ConfigEntry posterior em null → NullReferenceException por frame,
+        // em loop, dentro da raid. Com esta ordem, um bind que falhe deixa o mod INERTE (nenhum
+        // patch aplicado) e o jogo roda vanilla — um erro no log em vez de um dilúvio.
+        try
         {
-            try
-            {
-                InitFikaSync();
-            }
-            catch (System.Exception ex)
-            {
-                Logger.LogError($"[CameraRotationMod] Erro ao tentar inicializar integração com Fika: {ex.Message}");
-            }
+            BindAllConfig();
+            ConfigReady = true;
         }
-        else
+        catch (System.Exception ex)
         {
-            Logger.LogInfo("[CameraRotationMod] Fika multiplayer not found. Running in offline/standard mode.");
+            ConfigReady = false;
+            enabled = false; // impede Plugin.Update de rodar com config pela metade
+            Logger.LogError($"[BOOT] Config.Bind falhou — o mod está DESATIVADO neste boot e NENHUM " +
+                            $"patch foi aplicado (o jogo roda vanilla). Corrija a config e reinicie. {ex}");
+            return;
         }
 
-        // UI
-        gameObject.AddComponent<UI.OxygenUI>();
+        EnableEverything();
+    }
 
-        // Stamina de braço — item 012: StaminaController (Plugin.Update) + neutralização do vanilla
-        SafeEnable("HandsStaminaNeutralizePatch", () => new Patches.HandsStaminaNeutralizePatch());
-        SafeEnable("HandsConsumeNeutralizePatch", () => new Patches.HandsConsumeNeutralizePatch());
-        SafeEnable("GameWorldOnGameStartedPatch", () => new GameWorldOnGameStartedPatch());
-        SafeEnable("GameWorldOnDestroyPatch", () => new GameWorldOnDestroyPatch());
-
-        // backlog 002 F4 — registro condicional do snap fire patch.
-        if (FirearmControllerSetTrigger != null)
-            SafeEnable("SnapFireTriggerPatch", () => new SnapFireTriggerPatch());
-        else
-            Logger.LogWarning("[F4] SnapFireTriggerPatch NOT enabled — Player.FirearmController.SetTriggerPressed " +
-                              "não foi resolvida. F1/F2/F3/F5 funcionam normalmente; snap-on-fire desabilitado este boot.");
-
-        // Item 011: Mount passivo sobre o vanilla (detecção + buffs + UI). Ativo = 100% vanilla.
-        SafeEnable("PassiveMountDetectPatch", () => new Patches.PassiveMountDetectPatch());
-        SafeEnable("PassiveRecoilPatch", () => new Patches.PassiveRecoilPatch());
-        SafeEnable("PassiveSwayPatch", () => new Patches.PassiveSwayPatch());
-        SafeEnable("BlockActiveMountPatch", () => new Patches.BlockActiveMountPatch());   // item 015: mount ativo só em Stance 0/ADS/prone
-        SafeEnable("ObservedStanceShiftPatch", () => new Patches.ObservedStanceShiftPatch());   // item 014 fix-03 (pré-IK)
-        SafeEnable("BattleUIScreenPatch", () => new BattleUIScreenPatch());
-
-        // Item 007: Movement & Inertia
-        SafeEnable("MovementContextSpeedPatch", () => new Patches.MovementContextSpeedPatch());
-        SafeEnable("MovementContextSprintSpeedPatch", () => new Patches.MovementContextSprintSpeedPatch());
-        SafeEnable("PlayerChangeSpeedPatch", () => new Patches.PlayerChangeSpeedPatch());
-        SafeEnable("PhysicalInertiaPatch", () => new Patches.PhysicalInertiaPatch());
-
-        // Item 008: Action Stance Swap (Reload, Check Ammo, etc)
-        SafeEnable("LocaleClassReloadPatch", () => new Patches.LocaleClassReloadPatch());
-        SafeEnable("ActionStancePatch", () => new Patches.ActionStancePatch());
-        SafeEnable("ActionStanceCheckChamberPatch", () => new Patches.ActionStanceCheckChamberPatch());
-        SafeEnable("ActionStanceExamineWeaponPatch", () => new Patches.ActionStanceExamineWeaponPatch());
-        SafeEnable("ActionStanceReloadPatch", () => new Patches.ActionStanceReloadPatch());
-        SafeEnable("ActionStanceUnloadMagPatch", () => new Patches.ActionStanceUnloadMagPatch());
-        SafeEnable("ActionStanceUnloadChamberPatch", () => new Patches.ActionStanceUnloadChamberPatch()); // GClass2046 (esvaziar câmara)
-        SafeEnable("ActionStanceOnIdlePatch", () => new Patches.ActionStanceOnIdlePatch());
-        SafeEnable("ActionStanceCheckFireModePatch", () => new Patches.ActionStanceCheckFireModePatch());
-
-        // Item 010: Manual Chambering
-        SafeEnable("StartEquipWeapPatch", () => new Patches.StartEquipWeapPatch());
-        SafeEnable("StartReloadResetPatch", () => new Patches.StartReloadResetPatch());
-        SafeEnable("SetAmmoCompatiblePatch", () => new Patches.SetAmmoCompatiblePatch());
-        SafeEnable("SetAmmoOnMagPatch", () => new Patches.SetAmmoOnMagPatch());
-        SafeEnable("PreChamberLoadPatch", () => new Patches.PreChamberLoadPatch());
-        SafeEnable("ManualChamberingInputPatch", () => new Patches.ManualChamberingInputPatch());
-
-        // Carrega sprites do ícone de mount (reusados pelo novo item de mount; carregamento mantido).
-        LoadedSprites["mounting.png"] = LoadEmbeddedSprite("mounting.png");
-        LoadedSprites["mountingleft.png"] = LoadEmbeddedSprite("mountingleft.png");
-        LoadedSprites["mountingright.png"] = LoadEmbeddedSprite("mountingright.png");
-
-        // Item 011: UI do mount passivo no GameObject PERSISTENTE do plugin (mesmo padrão do OxygenUI).
-        gameObject.AddComponent<PassiveMountUI>();
-
-        // Item 012: overlay de debug do cenário de stamina (toggle no F12).
-        gameObject.AddComponent<StaminaDebugUI>();
-
+    /// <summary>
+    /// Todas as Config.Bind. A ORDEM INTERNA é significativa: o ConfigurationManager ordena as seções
+    /// do F12 por ordem de descoberta (primeira Config.Bind de cada seção) — não reordenar os binds.
+    /// </summary>
+    private void BindAllConfig()
+    {
         // ========================================
         // MANUAL CHAMBERING
         // ========================================
@@ -1234,6 +1174,110 @@ public class Plugin : BaseUnityPlugin
         RefreshScrollModeVisibility();
     }
 
+    /// <summary>
+    /// Ativa os patches Harmony e cria os MonoBehaviours/sprites. Chamado SÓ depois de BindAllConfig()
+    /// ter tido sucesso (CR-01) — nenhum patch deve rodar com ConfigEntry nula.
+    /// </summary>
+    private void EnableEverything()
+    {
+        // Enable patches — CADA UM isolado em try/catch (SafeEnable). Se um target Harmony não resolver
+        // em algum build 0.16 (GClass volátil, method_NN renomeado), ele falha SOZINHO com log
+        // `[enable] FAIL <nome>` em vez de derrubar todos os patches seguintes do Awake.
+        SafeEnable("PlayerSpringPatch", () => new PlayerSpringPatch());        // camera position
+        SafeEnable("ApplySimpleRotationPatch", () => new ApplySimpleRotationPatch());  // stance interpolation
+        // CR-03 — estes dois eram `.Enable()` cru, fora do SafeEnable, contrariando o comentário acima.
+        // O ApplyComplexRotationPatch é o patch CENTRAL do mod (aplica a rotação da stance): se o alvo
+        // sumir num update do EFT, queremos `[enable] FAIL` no log — não uma exceção que derruba o resto.
+        SafeEnable("ApplyComplexRotationPatch", () => new Patches.ApplyComplexRotationPatch());
+        SafeEnable("HoldBreathPatch", () => new Patches.HoldBreathPatch());
+        // Áudio NÃO é carregado aqui (cena de menu): a transição p/ o jogo descarrega os clips
+        // (length vira 0). Carregamento é disparado em GameWorld.OnGameStarted via HoldBreathPatch.OnRaidStart().
+        SafeEnable("FOVSliderPatch", () => new FOVSliderPatch());
+        // MP-02-03 — REGRESSÃO CORRIGIDA. O FOVSliderPatch só alarga o slider da UI; quem remove o
+        // clamp interno (50-75) é o FOVClampPatch. O `.Enable()` dele existia no commit inicial e foi
+        // apagado por arrasto no commit 9816946 (que implementava mounting), deixando as 3 props de
+        // Field of View inertes. O patch é gated internamente por _FOVExpandEnabled (default false),
+        // e o SafeEnable degrada com log se o alvo (GClass1085.Class1841.method_0) sumir no EFT.
+        SafeEnable("FOVClampPatch", () => new FOVClampPatch());
+
+        // Fika Multiplayer Sync Integration (Soft Dependency)
+        if (Chainloader.PluginInfos.ContainsKey("com.fika.core"))
+        {
+            try
+            {
+                InitFikaSync();
+            }
+            catch (System.Exception ex)
+            {
+                Logger.LogError($"[CameraRotationMod] Erro ao tentar inicializar integração com Fika: {ex.Message}");
+            }
+        }
+        else
+        {
+            Logger.LogInfo("[CameraRotationMod] Fika multiplayer not found. Running in offline/standard mode.");
+        }
+
+        // UI
+        gameObject.AddComponent<UI.OxygenUI>();
+
+        // Stamina de braço — item 012: StaminaController (Plugin.Update) + neutralização do vanilla
+        SafeEnable("HandsStaminaNeutralizePatch", () => new Patches.HandsStaminaNeutralizePatch());
+        SafeEnable("HandsConsumeNeutralizePatch", () => new Patches.HandsConsumeNeutralizePatch());
+        SafeEnable("GameWorldOnGameStartedPatch", () => new GameWorldOnGameStartedPatch());
+        SafeEnable("GameWorldOnDestroyPatch", () => new GameWorldOnDestroyPatch());
+
+        // backlog 002 F4 — registro condicional do snap fire patch.
+        if (FirearmControllerSetTrigger != null)
+            SafeEnable("SnapFireTriggerPatch", () => new SnapFireTriggerPatch());
+        else
+            Logger.LogWarning("[F4] SnapFireTriggerPatch NOT enabled — Player.FirearmController.SetTriggerPressed " +
+                              "não foi resolvida. F1/F2/F3/F5 funcionam normalmente; snap-on-fire desabilitado este boot.");
+
+        // Item 011: Mount passivo sobre o vanilla (detecção + buffs + UI). Ativo = 100% vanilla.
+        SafeEnable("PassiveMountDetectPatch", () => new Patches.PassiveMountDetectPatch());
+        SafeEnable("PassiveRecoilPatch", () => new Patches.PassiveRecoilPatch());
+        SafeEnable("PassiveSwayPatch", () => new Patches.PassiveSwayPatch());
+        SafeEnable("BlockActiveMountPatch", () => new Patches.BlockActiveMountPatch());   // item 015: mount ativo só em Stance 0/ADS/prone
+        SafeEnable("ObservedStanceShiftPatch", () => new Patches.ObservedStanceShiftPatch());   // item 014 fix-03 (pré-IK)
+        SafeEnable("BattleUIScreenPatch", () => new BattleUIScreenPatch());
+
+        // Item 007: Movement & Inertia
+        SafeEnable("MovementContextSpeedPatch", () => new Patches.MovementContextSpeedPatch());
+        SafeEnable("MovementContextSprintSpeedPatch", () => new Patches.MovementContextSprintSpeedPatch());
+        SafeEnable("PlayerChangeSpeedPatch", () => new Patches.PlayerChangeSpeedPatch());
+        SafeEnable("PhysicalInertiaPatch", () => new Patches.PhysicalInertiaPatch());
+
+        // Item 008: Action Stance Swap (Reload, Check Ammo, etc)
+        SafeEnable("LocaleClassReloadPatch", () => new Patches.LocaleClassReloadPatch());
+        SafeEnable("ActionStancePatch", () => new Patches.ActionStancePatch());
+        SafeEnable("ActionStanceCheckChamberPatch", () => new Patches.ActionStanceCheckChamberPatch());
+        SafeEnable("ActionStanceExamineWeaponPatch", () => new Patches.ActionStanceExamineWeaponPatch());
+        SafeEnable("ActionStanceReloadPatch", () => new Patches.ActionStanceReloadPatch());
+        SafeEnable("ActionStanceUnloadMagPatch", () => new Patches.ActionStanceUnloadMagPatch());
+        SafeEnable("ActionStanceUnloadChamberPatch", () => new Patches.ActionStanceUnloadChamberPatch()); // GClass2046 (esvaziar câmara)
+        SafeEnable("ActionStanceOnIdlePatch", () => new Patches.ActionStanceOnIdlePatch());
+        SafeEnable("ActionStanceCheckFireModePatch", () => new Patches.ActionStanceCheckFireModePatch());
+
+        // Item 010: Manual Chambering
+        SafeEnable("StartEquipWeapPatch", () => new Patches.StartEquipWeapPatch());
+        SafeEnable("StartReloadResetPatch", () => new Patches.StartReloadResetPatch());
+        SafeEnable("SetAmmoCompatiblePatch", () => new Patches.SetAmmoCompatiblePatch());
+        SafeEnable("SetAmmoOnMagPatch", () => new Patches.SetAmmoOnMagPatch());
+        SafeEnable("PreChamberLoadPatch", () => new Patches.PreChamberLoadPatch());
+        SafeEnable("ManualChamberingInputPatch", () => new Patches.ManualChamberingInputPatch());
+
+        // Carrega sprites do ícone de mount (reusados pelo novo item de mount; carregamento mantido).
+        LoadedSprites["mounting.png"] = LoadEmbeddedSprite("mounting.png");
+        LoadedSprites["mountingleft.png"] = LoadEmbeddedSprite("mountingleft.png");
+        LoadedSprites["mountingright.png"] = LoadEmbeddedSprite("mountingright.png");
+
+        // Item 011: UI do mount passivo no GameObject PERSISTENTE do plugin (mesmo padrão do OxygenUI).
+        gameObject.AddComponent<PassiveMountUI>();
+
+        // Item 012: overlay de debug do cenário de stamina (toggle no F12).
+        gameObject.AddComponent<StaminaDebugUI>();
+    }
+
     [MethodImpl(MethodImplOptions.NoInlining)]
     private void InitFikaSync()
     {
@@ -1379,8 +1423,10 @@ public class Plugin : BaseUnityPlugin
     // Update is called every frame by Unity
     public void Update()
     {
-        // Validação antiga de cache removida
-        
+        // CR-01 — o Unity chama Update() mesmo se o Awake abortar. Sem este guard, StanceManager.Update
+        // lê _stanceToggleKeyConfig.Value (null) e cospe NullReferenceException a cada frame, para sempre.
+        if (!ConfigReady) return;
+
         StanceManager.Update();
         StanceManager.UpdateTacSprint();
         StanceManager.TickAdsNetworkSync();             // CR-02-02: reenvia stance ao mirar/desmirar (Fika)

@@ -44,6 +44,11 @@ namespace CameraRotationMod
 
         public void Update()
         {
+            // CR-01 — este MonoBehaviour continua rodando mesmo se o Awake do Plugin abortar, e a linha
+            // abaixo lê Plugin._EnablePassiveMount.Value sem rede de proteção. Foi um dos 3 pontos que
+            // inundaram o log com NullReferenceException no incidente de 2026-07-12.
+            if (!Plugin.ConfigReady) return;
+
             // PA-01-03: se o detector (method_11) parou de rodar — arma guardada / inventário — solta o estado.
             if (PassiveMountState.IsBracing && Time.time - PassiveMountState.LastDetectTick > DetectTimeout)
                 PassiveMountState.ClearBracing();

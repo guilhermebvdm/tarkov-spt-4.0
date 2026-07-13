@@ -20,11 +20,12 @@ namespace CameraRotationMod.Patches
         [PatchPostfix]
         private static void PatchPostfix(int x, ref int __result)
         {
-            if (!Plugin._FOVExpandEnabled.Value)
+            // CR-04 — null-guard: o patch pode estar ativo antes/sem os binds (ver CR-01).
+            if (!(Plugin._FOVExpandEnabled?.Value ?? false))
                 return;
 
             // Override the clamping with extended range
-            __result = Mathf.Clamp(x, Plugin._FOVMinRange.Value, Plugin._FOVMaxRange.Value);
+            __result = Mathf.Clamp(x, Plugin._FOVMinRange?.Value ?? 50, Plugin._FOVMaxRange?.Value ?? 75);
         }
     }
 }

@@ -414,7 +414,7 @@ lendo como o `Vector3` é consumido. Virou o achado **MP-02-11**.
 não removidos — eles existem porque `Pitch`/`Yaw`/`Roll` é jargão: `(Cano Sobe/Desce)` → `(Muzzle Up/Down)`,
 `(Apontar Esq/Dir)` → `(Point Left/Right)`, `(Tombar Arma)` → `(Cant Weapon)`, `(Coronha Sobe/Desce)` →
 `(Stock Up/Down)`, `(Coronha Esq/Dir)` → `(Stock Left/Right)`, `(Contra o Peito)` → `(Toward the Chest)`,
-`(Menos gera Mais Quicada)` → `(Lower = More Bounce)`. `(Frente/Trás)` foi removido (redundante com
+`(Menos gera Mais Quicada)` → `(Lower Means More Bounce)` ⚠️ (a 1ª tentativa usou `(Lower = More Bounce)` e o **`=` derrubou o Awake** — o BepInEx proíbe `=` em nome de key; ver Sessão 10). `(Frente/Trás)` foi removido (redundante com
 `Forward/Backward`). **Tooltips seguem bilíngues** (91 `ConfigDescription`, todos com `\n\n`).
 
 **Config do usuário MIGRADA, não resetada.** O rename de key é breaking (o BepInEx casa por `(seção, chave)`), o que

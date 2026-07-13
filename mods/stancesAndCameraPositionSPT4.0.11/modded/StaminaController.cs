@@ -38,7 +38,10 @@ namespace CameraRotationMod
         public static Func<float> ExternalHandsDrainMult;
 
         // Índice = (int)StaminaScenario; preenchido por Plugin.BindStaminaManagement().
-        public static ConfigEntry<float>[] Multipliers = new ConfigEntry<float>[16];
+        // CR-06 — dimensionado pelo enum, não por um 16 mágico: um 17º cenário estouraria
+        // IndexOutOfRange DENTRO do Awake, que é a classe de incidente do bug do '=' (CR-01).
+        public static ConfigEntry<float>[] Multipliers =
+            new ConfigEntry<float>[System.Enum.GetValues(typeof(StaminaScenario)).Length];
 
         // Backing fields dos eventos do GClass774 (re-disparados ao escrever Current para preservar tremor/barra).
         // ref: Assembly-CSharp/GClass774.cs:47 (action_1=OnThresholdPass), :53 (action_3=OnValueChanged)

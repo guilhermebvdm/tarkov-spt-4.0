@@ -7,6 +7,38 @@ Versões mais recentes primeiro.
 
 ---
 
+## v2.3.0 (2026-07-13)
+
+### Corrigido — uma opção mal escrita derrubava o mod inteiro dentro da raid
+
+Na v2.2.0 uma das opções foi renomeada para um nome que continha o caractere **`=`** — que é justamente o
+separador usado no arquivo de configuração. O BepInEx recusa esse nome e **interrompe a inicialização do mod na
+metade**. Como os patches do jogo já haviam sido ligados **antes** disso, eles continuavam rodando enquanto todas
+as opções seguintes ficavam vazias — o resultado era uma **enxurrada de erros a cada quadro dentro da raid**
+(corrigido na v2.2.1).
+
+Esta versão ataca a **causa**, não o sintoma: a inicialização foi reordenada para **ler todas as opções primeiro e
+só então ligar os patches**. Agora, se alguma opção estiver mal definida, o mod se **desliga sozinho** e registra
+**um** erro claro no log — o jogo roda normalmente, sem o mod, em vez de ser inundado de mensagens.
+
+### Interno
+
+- Os dois patches que ainda eram ligados sem proteção (incluindo o principal, que aplica a rotação das posturas)
+  passaram a ter o mesmo isolamento dos outros: se um alvo sumir num update do jogo, ele falha sozinho e avisa no
+  log, sem derrubar o resto.
+- O patch de FOV e a lista de multiplicadores de stamina ganharam proteção contra as mesmas classes de falha.
+- O amortecimento (`Stance Overshoot Damping`) passou a valer também no caminho de rotação alternativo, onde antes
+  era um valor fixo no código.
+
+---
+
+## v2.2.1 (2026-07-12)
+
+Correção emergencial: veja acima. A opção `Stance Overshoot Damping` teve o nome corrigido para
+`(Lower Means More Bounce)` — sem o `=` que quebrava a inicialização.
+
+---
+
 ## v2.2.0 (2026-07-12)
 
 ### Corrigido — os eixos **Yaw** e **Roll** estavam trocados (todas as posturas e o ADS)
@@ -20,10 +52,18 @@ vertical é que **aponta** (isso é *yaw*). O código montava a rotação na ord
 (pitch, yaw, roll), o que colocava cada um no eixo do outro. Corrigido na origem: agora o valor de *roll* vai
 para o eixo que tomba e o de *yaw* para o eixo que aponta.
 
-> **Sua calibração foi preservada.** Se você já tinha ajustado as posturas, os valores foram **migrados
-> automaticamente** (o que estava em `Yaw` foi para `Roll` e vice-versa), de modo que **as poses continuam
-> exatamente como estavam** — a diferença é que agora cada opção faz o que o nome promete. Um backup do
-> arquivo antigo ficou como `com.shwng.fpscamerastances.cfg.bak-pre-v220`.
+> ### ⚠️ Sobre a sua calibração das posturas
+>
+> **O mod NÃO migra o seu `.cfg` sozinho** — esta versão renomeia as chaves, então o BepInEx recria as opções
+> com os **valores padrão** e a sua calibração de rotação/posição é **perdida**.
+>
+> **No servidor Tarkov Red Line isso não te afeta:** o arquivo de configuração já vem calibrado e é distribuído
+> pelo launcher — você não precisa fazer nada.
+>
+> **Se você configurou as posturas por conta própria**, anote os valores antes de atualizar e reponha-os depois,
+> **trocando Yaw por Roll**: o número que estava em `Yaw` agora vai no campo **`Roll`**, e o que estava em `Roll`
+> vai no **`Yaw`**. (Era justamente essa a inversão — os dois campos faziam a coisa um do outro.) Pitch e as
+> posições não mudam de lugar.
 
 ### Alterado — nomes das opções agora são só em inglês
 

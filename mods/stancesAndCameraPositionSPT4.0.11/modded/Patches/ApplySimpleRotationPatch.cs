@@ -177,7 +177,9 @@ namespace CameraRotationMod.Patches
             // Spring Interpolation (Overshoot / Quicada)
             float speedMult = Plugin._StanceTransitionSpeed?.Value ?? 1f;
             float stiffness = 150f * speedMult;
-            float damping = 12f; // Low damping = more quicada (overshoot)
+            // CR-08 — era hardcoded 12f, ignorando o slider `Stance Overshoot Damping` (que o
+            // ApplyComplexRotationPatch respeita). Se este caminho voltar a rodar, o slider vale.
+            float damping = Plugin._StanceOvershootDamping?.Value ?? 12f; // Low damping = more quicada (overshoot)
             
             CurrentEuler = SpringLerpAngle(CurrentEuler, targetEuler, ref _rotVelocity, stiffness, damping, dt);
             CurrentPosition = SpringLerp(CurrentPosition, targetPosition, ref _posVelocity, stiffness, damping, dt);
