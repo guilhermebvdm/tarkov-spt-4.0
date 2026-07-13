@@ -7,6 +7,44 @@ Versões mais recentes primeiro.
 
 ---
 
+## v2.2.0 (2026-07-12)
+
+### Corrigido — os eixos **Yaw** e **Roll** estavam trocados (todas as posturas e o ADS)
+
+O que o menu chamava de **Yaw** (apontar para os lados) na verdade **tombava** a arma, e o que chamava de
+**Roll** (tombar) na verdade **apontava** para os lados. Valia para as Stances 1, 2, 3 e para o ADS.
+
+A causa: a rotação é aplicada nos **eixos locais da arma**, e não nos eixos do mundo. Nesse espaço, o eixo Y é
+o **eixo do cano** — girar em torno dele **tomba** a arma (isso é *roll*), enquanto girar em torno do eixo
+vertical é que **aponta** (isso é *yaw*). O código montava a rotação na ordem convencional do Unity
+(pitch, yaw, roll), o que colocava cada um no eixo do outro. Corrigido na origem: agora o valor de *roll* vai
+para o eixo que tomba e o de *yaw* para o eixo que aponta.
+
+> **Sua calibração foi preservada.** Se você já tinha ajustado as posturas, os valores foram **migrados
+> automaticamente** (o que estava em `Yaw` foi para `Roll` e vice-versa), de modo que **as poses continuam
+> exatamente como estavam** — a diferença é que agora cada opção faz o que o nome promete. Um backup do
+> arquivo antigo ficou como `com.shwng.fpscamerastances.cfg.bak-pre-v220`.
+
+### Alterado — nomes das opções agora são só em inglês
+
+As dicas entre parênteses existiam para tornar o eixo óbvio (os nomes técnicos `Pitch`/`Yaw`/`Roll` não são),
+mas estavam em português. Foram **traduzidas**, não removidas:
+
+| Antes | Agora |
+|---|---|
+| `Pitch (Cano Sobe/Desce)` | `Pitch (Muzzle Up/Down)` |
+| `Yaw (Apontar Esq/Dir)` | `Yaw (Point Left/Right)` |
+| `Roll (Tombar Arma)` | `Roll (Cant Weapon)` |
+| `Up/Down (Coronha Sobe/Desce)` | `Up/Down (Stock Up/Down)` |
+| `Sideways (Coronha Esq/Dir)` | `Sideways (Stock Left/Right)` |
+| `Forward/Backward (Frente/Trás)` | `Forward/Backward` |
+| `Stance Kick Intensity (Contra o Peito)` | `Stance Kick Intensity (Toward the Chest)` |
+| `Stance Overshoot Damping (Menos gera Mais Quicada)` | `Stance Overshoot Damping (Lower = More Bounce)` |
+
+As **descrições (tooltips) seguem bilíngues** — inglês em cima, português abaixo.
+
+---
+
 ## v2.1.0 (2026-07-12)
 
 Faxina de opções que **não faziam nada** e o resgate de uma feature que havia quebrado sem ninguém notar.

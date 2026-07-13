@@ -1,7 +1,9 @@
 # Propriedades F12 — stancesAndCameraPositionSPT4.0.11
 
 > Todas as opções do menu **F12** (BepInEx ConfigurationManager). **20 seções · 113 opções.**
-> Regenerado de `modded/Plugin.cs` em **2026-07-12** (fonte de verdade), para a **v2.1.0**. Os tooltips do jogo são bilíngues (EN + PT); aqui a coluna **Descrição** traz a versão em português resumida.
+> Regenerado de `modded/Plugin.cs` em **2026-07-12** (fonte de verdade), para a **v2.2.0**. Os tooltips do jogo são bilíngues (EN + PT); aqui a coluna **Descrição** traz a versão em português resumida.
+>
+> **v2.2.0 corrigiu os eixos Yaw/Roll** (estavam trocados em todas as stances e no ADS — a rotação é aplicada nos eixos LOCAIS da arma, onde Y = cano/roll e Z = vertical/yaw) e **traduziu os nomes para inglês**. Tooltips seguem bilíngues.
 >
 > **v2.1.0 removeu 7 opções que não faziam efeito** (de 120 → 113; de 21 → 20 seções): a seção `Default Hands/Arms Positions` inteira (4) e `Stance 1/2/3 Apply When Prone` (3). Ver [review 02](./PROPRIEDADES-review-02.md) (`MP-02-01`, `MP-02-02`).
 >
@@ -47,9 +49,9 @@
 | Propriedade (EN) | Tipo | Padrão | Faixa | Descrição |
 |---|---|---|---|---|
 | Stance Transition Speed | float | `1.0` | 0.1 – 5.0 | Multiplicador de velocidade da transição entre posturas e a visão padrão. |
-| Stance Kick Intensity (Contra o Peito) | float | `-0.05` | -0.3 – 0.3 | Quanto a arma recua contra o peito ao trocar de postura ou mirar (ADS). Negativo puxa a arma em sua direção. |
+| Stance Kick Intensity (Toward the Chest) | float | `-0.05` | -0.3 – 0.3 | Quanto a arma recua contra o peito ao trocar de postura ou mirar (ADS). Negativo puxa a arma em sua direção. |
 | ADS Kick Delay (In) | float | `0.15` | 0 – 1 | Atraso (s) antes de aplicar o kick ao entrar em ADS. Sincroniza o kick com o fim da animação de mira. |
-| Stance Overshoot Damping (Menos gera Mais Quicada) | float | `12.0` | 1 – 30.0 | Amortecimento da física de mola. Menor = mais overshoot/quicada. Padrão 12. |
+| Stance Overshoot Damping (Lower = More Bounce) | float | `12.0` | 1 – 30.0 | Amortecimento da física de mola. Menor = mais overshoot/quicada. Padrão 12. |
 
 ### Camera Position
 
@@ -87,12 +89,12 @@ Cada stance é **uma seção única** no F12, agregando: animação de sprint, r
 | Propriedade (EN) | Tipo | Padrão | Faixa | Descrição |
 |---|---|---|---|---|
 | Enable Stance 1 Sprint Animation | bool | `true` | — | Usa uma animação compacta de sprint (tac sprint) ao correr na Stance 1. |
-| Stance 1 Pitch (Cano Sobe/Desce) | float | `-34.0` | -45 – 45 | Rotação de pitch das mãos/braços (graus) — inclina o cano p/ cima/baixo. |
-| Stance 1 Yaw (Apontar Esq/Dir) | float | `0.0` | -45 – 45 | Rotação de yaw das mãos/braços (graus) — aponta p/ esquerda/direita. |
-| Stance 1 Roll (Tombar Arma) | float | `0.0` | -45 – 45 | Rotação de roll das mãos/braços (graus) — tomba a arma. |
-| Stance 1 Forward/Backward (Frente/Trás) | float | `0.02` | -0.5 – 0.5 | Posição frente/trás (positivo = frente). |
-| Stance 1 Up/Down (Coronha Sobe/Desce) | float | `-0.01` | -0.5 – 0.5 | Posição cima/baixo (positivo = cima). |
-| Stance 1 Sideways (Coronha Esq/Dir) | float | `0.02` | -0.5 – 0.5 | Posição lateral (positivo = direita). |
+| Stance 1 Pitch (Muzzle Up/Down) | float | `-34.0` | -45 – 45 | Rotação de pitch das mãos/braços (graus) — inclina o cano p/ cima/baixo. |
+| Stance 1 Yaw (Point Left/Right) | float | `0.0` | -45 – 45 | Rotação de yaw das mãos/braços (graus) — aponta p/ esquerda/direita. |
+| Stance 1 Roll (Cant Weapon) | float | `0.0` | -45 – 45 | Rotação de roll das mãos/braços (graus) — tomba a arma. |
+| Stance 1 Forward/Backward | float | `0.02` | -0.5 – 0.5 | Posição frente/trás (positivo = frente). |
+| Stance 1 Up/Down (Stock Up/Down) | float | `-0.01` | -0.5 – 0.5 | Posição cima/baixo (positivo = cima). |
+| Stance 1 Sideways (Stock Left/Right) | float | `0.02` | -0.5 – 0.5 | Posição lateral (positivo = direita). |
 | Stance 1 Modifies Movement Speed | bool | `true` | — | Aplica teto de velocidade nesta postura. |
 | Stance 1 Movement Speed Multiplier | int | `95` | 50 – 100 | Teto de velocidade em % (só redução). |
 | Stance 1 Snap to Stance 0 on Fire | bool | `true` | — | Atirar nesta postura faz snap p/ Stance 0. Clique < limiar = sem tiro; segurar = snap + 1 tiro natural. Não dispara em ADS nem com item não-arma. |
@@ -102,12 +104,12 @@ Cada stance é **uma seção única** no F12, agregando: animação de sprint, r
 | Propriedade (EN) | Tipo | Padrão | Faixa | Descrição |
 |---|---|---|---|---|
 | Enable Stance 2 Sprint Animation | bool | `false` | — | Animação compacta de sprint (tac sprint) ao correr na Stance 2. |
-| Stance 2 Pitch (Cano Sobe/Desce) | float | `25.0` | -45 – 45 | Rotação de pitch (graus) — inclina o cano p/ cima/baixo. |
-| Stance 2 Yaw (Apontar Esq/Dir) | float | `0.0` | -45 – 45 | Rotação de yaw (graus) — aponta p/ esquerda/direita. |
-| Stance 2 Roll (Tombar Arma) | float | `0.0` | -45 – 45 | Rotação de roll (graus) — tomba a arma. |
-| Stance 2 Forward/Backward (Frente/Trás) | float | `0.015` | -0.5 – 0.5 | Posição frente/trás (positivo = frente). |
-| Stance 2 Up/Down (Coronha Sobe/Desce) | float | `-0.02` | -0.5 – 0.5 | Posição cima/baixo (positivo = cima). |
-| Stance 2 Sideways (Coronha Esq/Dir) | float | `0.05` | -0.5 – 0.5 | Posição lateral (positivo = direita). |
+| Stance 2 Pitch (Muzzle Up/Down) | float | `25.0` | -45 – 45 | Rotação de pitch (graus) — inclina o cano p/ cima/baixo. |
+| Stance 2 Yaw (Point Left/Right) | float | `0.0` | -45 – 45 | Rotação de yaw (graus) — aponta p/ esquerda/direita. |
+| Stance 2 Roll (Cant Weapon) | float | `0.0` | -45 – 45 | Rotação de roll (graus) — tomba a arma. |
+| Stance 2 Forward/Backward | float | `0.015` | -0.5 – 0.5 | Posição frente/trás (positivo = frente). |
+| Stance 2 Up/Down (Stock Up/Down) | float | `-0.02` | -0.5 – 0.5 | Posição cima/baixo (positivo = cima). |
+| Stance 2 Sideways (Stock Left/Right) | float | `0.05` | -0.5 – 0.5 | Posição lateral (positivo = direita). |
 | Stance 2 Modifies Movement Speed | bool | `true` | — | Aplica teto de velocidade nesta postura. |
 | Stance 2 Movement Speed Multiplier | int | `90` | 50 – 100 | Teto de velocidade em % (só redução). |
 | Stance 2 Snap to Stance 0 on Fire | bool | `false` | — | Snap p/ Stance 0 ao atirar (desligado por padrão nesta postura). |
@@ -117,12 +119,12 @@ Cada stance é **uma seção única** no F12, agregando: animação de sprint, r
 | Propriedade (EN) | Tipo | Padrão | Faixa | Descrição |
 |---|---|---|---|---|
 | Enable Stance 3 Sprint Animation | bool | `false` | — | Animação compacta de sprint (tac sprint) ao correr na Stance 3. |
-| Stance 3 Pitch (Cano Sobe/Desce) | float | `0` | -45 – 45 | Rotação de pitch (graus) — inclina o cano p/ cima/baixo. |
-| Stance 3 Yaw (Apontar Esq/Dir) | float | `-30` | -45 – 45 | Rotação de yaw (graus) — aponta p/ esquerda/direita. |
-| Stance 3 Roll (Tombar Arma) | float | `0` | -45 – 45 | Rotação de roll (graus) — tomba a arma. |
-| Stance 3 Forward/Backward (Frente/Trás) | float | `0` | -0.5 – 0.5 | Posição frente/trás (positivo = frente). |
-| Stance 3 Up/Down (Coronha Sobe/Desce) | float | `0` | -0.5 – 0.5 | Posição cima/baixo (positivo = cima). |
-| Stance 3 Sideways (Coronha Esq/Dir) | float | `0` | -0.5 – 0.5 | Posição lateral (positivo = direita). |
+| Stance 3 Pitch (Muzzle Up/Down) | float | `0` | -45 – 45 | Rotação de pitch (graus) — inclina o cano p/ cima/baixo. |
+| Stance 3 Yaw (Point Left/Right) | float | `-30` | -45 – 45 | Rotação de yaw (graus) — aponta p/ esquerda/direita. |
+| Stance 3 Roll (Cant Weapon) | float | `0` | -45 – 45 | Rotação de roll (graus) — tomba a arma. |
+| Stance 3 Forward/Backward | float | `0` | -0.5 – 0.5 | Posição frente/trás (positivo = frente). |
+| Stance 3 Up/Down (Stock Up/Down) | float | `0` | -0.5 – 0.5 | Posição cima/baixo (positivo = cima). |
+| Stance 3 Sideways (Stock Left/Right) | float | `0` | -0.5 – 0.5 | Posição lateral (positivo = direita). |
 | Stance 3 Modifies Movement Speed | bool | `true` | — | Aplica teto de velocidade nesta postura. |
 | Stance 3 Movement Speed Multiplier | int | `100` | 50 – 100 | Teto de velocidade em % (100 = sem redução). |
 | Stance 3 Snap to Stance 0 on Fire | bool | `true` | — | Snap p/ Stance 0 ao atirar. Clique < limiar = sem tiro; segurar = snap + 1 tiro. Não dispara em ADS nem com item não-arma. |
@@ -132,12 +134,12 @@ Cada stance é **uma seção única** no F12, agregando: animação de sprint, r
 | Propriedade (EN) | Tipo | Padrão | Faixa | Descrição |
 |---|---|---|---|---|
 | Reset Positions When Aiming | bool | `true` | — | Faz a transição suave de todas as posições para os padrões ao mirar (ADS). |
-| ADS Pitch (Cano Sobe/Desce) | float | `0` | -45 – 45 | Pitch das mãos ao mirar com 'Reset On ADS' ligado — inclina o cano p/ cima/baixo. 0 = padrão do jogo. |
-| ADS Yaw (Apontar Esq/Dir) | float | `0` | -45 – 45 | Yaw das mãos ao mirar — aponta p/ esquerda/direita. 0 = padrão do jogo. |
-| ADS Roll (Tombar Arma) | float | `0` | -45 – 45 | Roll das mãos ao mirar — tomba a arma. 0 = padrão do jogo. |
-| ADS Forward/Backward (Frente/Trás) | float | `0` | -0.5 – 0.5 | Posição das mãos frente/trás ao mirar. |
-| ADS Up/Down (Coronha Sobe/Desce) | float | `0` | -0.5 – 0.5 | Posição das mãos cima/baixo ao mirar — coronha sobe/desce. |
-| ADS Sideways (Coronha Esq/Dir) | float | `0` | -0.5 – 0.5 | Posição das mãos esquerda/direita ao mirar — coronha esq/dir. |
+| ADS Pitch (Muzzle Up/Down) | float | `0` | -45 – 45 | Pitch das mãos ao mirar com 'Reset On ADS' ligado — inclina o cano p/ cima/baixo. 0 = padrão do jogo. |
+| ADS Yaw (Point Left/Right) | float | `0` | -45 – 45 | Yaw das mãos ao mirar — aponta p/ esquerda/direita. 0 = padrão do jogo. |
+| ADS Roll (Cant Weapon) | float | `0` | -45 – 45 | Roll das mãos ao mirar — tomba a arma. 0 = padrão do jogo. |
+| ADS Forward/Backward | float | `0` | -0.5 – 0.5 | Posição das mãos frente/trás ao mirar. |
+| ADS Up/Down (Stock Up/Down) | float | `0` | -0.5 – 0.5 | Posição das mãos cima/baixo ao mirar — coronha sobe/desce. |
+| ADS Sideways (Stock Left/Right) | float | `0` | -0.5 – 0.5 | Posição das mãos esquerda/direita ao mirar — coronha esq/dir. |
 
 ### ~~Default Hands/Arms Positions (Advanced)~~ — REMOVIDA na v2.1.0
 

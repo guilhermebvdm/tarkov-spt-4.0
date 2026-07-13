@@ -717,10 +717,18 @@ namespace CameraRotationMod
             if (!_stanceValuesDirty)
                 return;
                 
+            // ⚠️ EIXOS LOCAIS DA ARMA (não são os do Unity). A rotação é aplicada como
+            // `weapRotation * Quaternion.Euler(euler)` (ApplyComplexRotationPatch:280), ou seja no
+            // espaço LOCAL da arma, onde — como os comentários de posição já registravam:
+            //     X = lateral · Y = LONGITUDINAL (o cano) · Z = vertical
+            // Portanto: girar em torno de Y = TOMBAR (roll) · girar em torno de Z = APONTAR (yaw).
+            // O componente Y recebe o ROLL e o Z recebe o YAW — NÃO é a ordem (pitch,yaw,roll) do Unity.
+            // A review 01 (MP-01-02) presumiu a convenção do Unity e trocou os RÓTULOS, invertendo os
+            // dois eixos para o usuário. Corrigido aqui na origem (v2.2.0).
             _cachedADSRotation = new Vector3(
-                Plugin._ADSHandsPitchRotation?.Value ?? 0f,
-                Plugin._ADSHandsYawRotation?.Value ?? 0f,
-                Plugin._ADSHandsRollRotation?.Value ?? 0f
+                Plugin._ADSHandsPitchRotation?.Value ?? 0f, // X — pitch (cano sobe/desce)
+                Plugin._ADSHandsRollRotation?.Value ?? 0f,  // Y — roll  (tomba a arma)
+                Plugin._ADSHandsYawRotation?.Value ?? 0f    // Z — yaw   (aponta esq/dir)
             );
             
             _cachedADSPosition = new Vector3(
@@ -729,10 +737,11 @@ namespace CameraRotationMod
                 Plugin._ADSHandsUpDownOffset?.Value ?? 0f           // Z (Local Z = Up/Down in Tarkov)
             );
             
+            // Eixos locais da arma — ver o comentário em _cachedADSRotation. Y = roll, Z = yaw.
             _cachedStance1Rotation = new Vector3(
-                Plugin._Stance1HandsPitchRotation?.Value ?? 0f,
-                Plugin._Stance1HandsYawRotation?.Value ?? 0f,
-                Plugin._Stance1HandsRollRotation?.Value ?? 0f
+                Plugin._Stance1HandsPitchRotation?.Value ?? 0f, // X — pitch
+                Plugin._Stance1HandsRollRotation?.Value ?? 0f,  // Y — roll (tomba)
+                Plugin._Stance1HandsYawRotation?.Value ?? 0f    // Z — yaw  (aponta)
             );
             
             _cachedStance1Position = new Vector3(
@@ -741,10 +750,11 @@ namespace CameraRotationMod
                 Plugin._Stance1HandsUpDownOffset?.Value ?? 0f           // Z (Local Z = Up/Down in Tarkov)
             );
             
+            // Eixos locais da arma — ver o comentário em _cachedADSRotation. Y = roll, Z = yaw.
             _cachedStance2Rotation = new Vector3(
-                Plugin._Stance2HandsPitchRotation?.Value ?? 0f,
-                Plugin._Stance2HandsYawRotation?.Value ?? 0f,
-                Plugin._Stance2HandsRollRotation?.Value ?? 0f
+                Plugin._Stance2HandsPitchRotation?.Value ?? 0f, // X — pitch
+                Plugin._Stance2HandsRollRotation?.Value ?? 0f,  // Y — roll (tomba)
+                Plugin._Stance2HandsYawRotation?.Value ?? 0f    // Z — yaw  (aponta)
             );
             
             _cachedStance2Position = new Vector3(
@@ -753,10 +763,11 @@ namespace CameraRotationMod
                 Plugin._Stance2HandsUpDownOffset?.Value ?? 0f           // Z (Local Z = Up/Down in Tarkov)
             );
             
+            // Eixos locais da arma — ver o comentário em _cachedADSRotation. Y = roll, Z = yaw.
             _cachedStance3Rotation = new Vector3(
-                Plugin._Stance3HandsPitchRotation?.Value ?? 0f,
-                Plugin._Stance3HandsYawRotation?.Value ?? 0f,
-                Plugin._Stance3HandsRollRotation?.Value ?? 0f
+                Plugin._Stance3HandsPitchRotation?.Value ?? 0f, // X — pitch
+                Plugin._Stance3HandsRollRotation?.Value ?? 0f,  // Y — roll (tomba)
+                Plugin._Stance3HandsYawRotation?.Value ?? 0f    // Z — yaw  (aponta)
             );
             
             _cachedStance3Position = new Vector3(

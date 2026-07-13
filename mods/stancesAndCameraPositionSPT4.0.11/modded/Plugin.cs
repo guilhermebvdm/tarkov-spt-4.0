@@ -20,7 +20,7 @@ public enum ScrollMode
     Linear,
 }
 
-[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "2.1.0")]
+[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "2.2.0")]
 public class Plugin : BaseUnityPlugin
 {
     public static Plugin Instance { get; private set; }
@@ -490,7 +490,7 @@ public class Plugin : BaseUnityPlugin
 
         _StanceKickIntensity = Config.Bind(
             GeneralSection,
-            "Stance Kick Intensity (Contra o Peito)",
+            "Stance Kick Intensity (Toward the Chest)",
             -0.05f,
             new ConfigDescription("How much the weapon kicks towards your chest when changing stances or ADS. Negative values pull it towards you.\n\nQuanto a arma recua em direção ao seu peito ao trocar de postura ou mirar (ADS). Valores negativos puxam a arma em sua direção.",
             new AcceptableValueRange<float>(-0.3f, 0.3f),
@@ -506,7 +506,7 @@ public class Plugin : BaseUnityPlugin
 
         _StanceOvershootDamping = Config.Bind(
             GeneralSection,
-            "Stance Overshoot Damping (Menos gera Mais Quicada)",
+            "Stance Overshoot Damping (Lower = More Bounce)",
             12.0f,
             new ConfigDescription("Damping for the spring physics. Lower values mean more overshoot/bounce. Default is 12.\n\nAmortecimento da física de mola. Valores menores geram mais overshoot/quicada. Padrão é 12.",
             new AcceptableValueRange<float>(1f, 30.0f),
@@ -609,7 +609,7 @@ public class Plugin : BaseUnityPlugin
 
         _ADSHandsPitchRotation = Config.Bind(
             ADSDefaults,
-            "ADS Pitch (Cano Sobe/Desce)",
+            "ADS Pitch (Muzzle Up/Down)",
             0f,
             new ConfigDescription("Hands pitch rotation (X-axis) when ADS with 'Reset On ADS' enabled. 0 = default game position\n\nRotação de pitch das mãos (eixo X) ao mirar com 'Reset On ADS' ativado — inclina o cano p/ cima/baixo. 0 = posição padrão do jogo",
             new AcceptableValueRange<float>(-45f, 45f),
@@ -617,7 +617,7 @@ public class Plugin : BaseUnityPlugin
 
         _ADSHandsYawRotation = Config.Bind(
             ADSDefaults,
-            "ADS Yaw (Apontar Esq/Dir)",
+            "ADS Yaw (Point Left/Right)",
             0f,
             new ConfigDescription("Hands yaw rotation (Y-axis) when ADS with 'Reset On ADS' enabled. 0 = default game position\n\nRotação de yaw das mãos (eixo Y) ao mirar com 'Reset On ADS' ativado — aponta p/ esquerda/direita. 0 = posição padrão do jogo",
             new AcceptableValueRange<float>(-45f, 45f),
@@ -625,7 +625,7 @@ public class Plugin : BaseUnityPlugin
 
         _ADSHandsRollRotation = Config.Bind(
             ADSDefaults,
-            "ADS Roll (Tombar Arma)",
+            "ADS Roll (Cant Weapon)",
             0f,
             new ConfigDescription("Hands roll rotation (Z-axis) when ADS with 'Reset On ADS' enabled. 0 = default game position\n\nRotação de roll das mãos (eixo Z) ao mirar com 'Reset On ADS' ativado — tomba a arma. 0 = posição padrão do jogo",
             new AcceptableValueRange<float>(-45f, 45f),
@@ -633,7 +633,7 @@ public class Plugin : BaseUnityPlugin
 
         _ADSHandsForwardBackwardOffset = Config.Bind(
             ADSDefaults,
-            "ADS Forward/Backward (Frente/Trás)",
+            "ADS Forward/Backward",
             0f,
             new ConfigDescription("Hands position forward/backward (Z-axis) when ADS. Default is 0.04\n\nPosição das mãos para frente/trás (eixo Z) ao mirar. Padrão é 0.04",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
@@ -641,7 +641,7 @@ public class Plugin : BaseUnityPlugin
 
         _ADSHandsUpDownOffset = Config.Bind(
             ADSDefaults,
-            "ADS Up/Down (Coronha Sobe/Desce)",
+            "ADS Up/Down (Stock Up/Down)",
             0f,
             new ConfigDescription("Hands position up/down (Y-axis) when ADS. Default is 0.04\n\nPosição das mãos para cima/baixo (eixo Y) ao mirar — coronha sobe/desce. Padrão é 0.04",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
@@ -649,7 +649,7 @@ public class Plugin : BaseUnityPlugin
 
         _ADSHandsSidewaysOffset = Config.Bind(
             ADSDefaults,
-            "ADS Sideways (Coronha Esq/Dir)",
+            "ADS Sideways (Stock Left/Right)",
             0f,
             new ConfigDescription("Hands position left/right (X-axis) when ADS. Default is 0.04\n\nPosição das mãos para esquerda/direita (eixo X) ao mirar — coronha esq/dir. Padrão é 0.04",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
@@ -688,7 +688,7 @@ public class Plugin : BaseUnityPlugin
 
         _Stance1HandsPitchRotation = Config.Bind(
             Stance1Section,
-            "Stance 1 Pitch (Cano Sobe/Desce)",
+            "Stance 1 Pitch (Muzzle Up/Down)",
             -34.0f,
             new ConfigDescription("Stance 1 hands/arms pitch rotation in degrees (up/down tilt)\n\nRotação de pitch das mãos/braços da Stance 1 em graus (inclina o cano p/ cima/baixo)",
             new AcceptableValueRange<float>(-45f, 45f),
@@ -696,7 +696,7 @@ public class Plugin : BaseUnityPlugin
 
         _Stance1HandsYawRotation = Config.Bind(
             Stance1Section,
-            "Stance 1 Yaw (Apontar Esq/Dir)",
+            "Stance 1 Yaw (Point Left/Right)",
             0.0f,
             new ConfigDescription("Stance 1 hands/arms yaw rotation in degrees (left/right turn)\n\nRotação de yaw das mãos/braços da Stance 1 em graus (aponta p/ esquerda/direita)",
             new AcceptableValueRange<float>(-45f, 45f),
@@ -704,7 +704,7 @@ public class Plugin : BaseUnityPlugin
 
         _Stance1HandsRollRotation = Config.Bind(
             Stance1Section,
-            "Stance 1 Roll (Tombar Arma)",
+            "Stance 1 Roll (Cant Weapon)",
             0.0f,
             new ConfigDescription("Stance 1 hands/arms roll rotation in degrees (weapon cant)\n\nRotação de roll das mãos/braços da Stance 1 em graus (tomba a arma)",
             new AcceptableValueRange<float>(-45f, 45f),
@@ -712,7 +712,7 @@ public class Plugin : BaseUnityPlugin
 
         _Stance1HandsForwardBackwardOffset = Config.Bind(
             Stance1Section,
-            "Stance 1 Forward/Backward (Frente/Trás)",
+            "Stance 1 Forward/Backward",
             0.02f,
             new ConfigDescription("Stance 1 hands/weapon position forward/backward (positive = forward)\n\nPosição das mãos/arma da Stance 1 para frente/trás (positivo = frente)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
@@ -720,7 +720,7 @@ public class Plugin : BaseUnityPlugin
 
         _Stance1HandsUpDownOffset = Config.Bind(
             Stance1Section,
-            "Stance 1 Up/Down (Coronha Sobe/Desce)",
+            "Stance 1 Up/Down (Stock Up/Down)",
             -0.01f,
             new ConfigDescription("Stance 1 hands/weapon position up/down (positive = up)\n\nPosição das mãos/arma da Stance 1 para cima/baixo (positivo = cima)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
@@ -728,7 +728,7 @@ public class Plugin : BaseUnityPlugin
 
         _Stance1HandsSidewaysOffset = Config.Bind(
             Stance1Section,
-            "Stance 1 Sideways (Coronha Esq/Dir)",
+            "Stance 1 Sideways (Stock Left/Right)",
             0.02f,
             new ConfigDescription("Stance 1 hands/weapon position left/right (positive = right)\n\nPosição das mãos/arma da Stance 1 para esquerda/direita (positivo = direita)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
@@ -748,7 +748,7 @@ public class Plugin : BaseUnityPlugin
         // 06-fix-01: Stance 2 é agora Low Ready — Pitch +30° (cano desce), Yaw 0.
         _Stance2HandsPitchRotation = Config.Bind(
             Stance2Section,
-            "Stance 2 Pitch (Cano Sobe/Desce)",
+            "Stance 2 Pitch (Muzzle Up/Down)",
             25.0f,
             new ConfigDescription("Stance 2 hands/arms pitch rotation in degrees (up/down tilt)\n\nRotação de pitch das mãos/braços da Stance 2 em graus (inclina o cano p/ cima/baixo)",
             new AcceptableValueRange<float>(-45f, 45f),
@@ -756,7 +756,7 @@ public class Plugin : BaseUnityPlugin
 
         _Stance2HandsYawRotation = Config.Bind(
             Stance2Section,
-            "Stance 2 Yaw (Apontar Esq/Dir)",
+            "Stance 2 Yaw (Point Left/Right)",
             0.0f,
             new ConfigDescription("Stance 2 hands/arms yaw rotation in degrees (left/right turn)\n\nRotação de yaw das mãos/braços da Stance 2 em graus (aponta p/ esquerda/direita)",
             new AcceptableValueRange<float>(-45f, 45f),
@@ -764,7 +764,7 @@ public class Plugin : BaseUnityPlugin
 
         _Stance2HandsRollRotation = Config.Bind(
             Stance2Section,
-            "Stance 2 Roll (Tombar Arma)",
+            "Stance 2 Roll (Cant Weapon)",
             0.0f,
             new ConfigDescription("Stance 2 hands/arms roll rotation in degrees (weapon cant)\n\nRotação de roll das mãos/braços da Stance 2 em graus (tomba a arma)",
             new AcceptableValueRange<float>(-45f, 45f),
@@ -772,7 +772,7 @@ public class Plugin : BaseUnityPlugin
 
         _Stance2HandsForwardBackwardOffset = Config.Bind(
             Stance2Section,
-            "Stance 2 Forward/Backward (Frente/Trás)",
+            "Stance 2 Forward/Backward",
             0.015f,
             new ConfigDescription("Stance 2 hands/weapon position forward/backward (positive = forward)\n\nPosição das mãos/arma da Stance 2 para frente/trás (positivo = frente)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
@@ -780,7 +780,7 @@ public class Plugin : BaseUnityPlugin
 
         _Stance2HandsUpDownOffset = Config.Bind(
             Stance2Section,
-            "Stance 2 Up/Down (Coronha Sobe/Desce)",
+            "Stance 2 Up/Down (Stock Up/Down)",
             -0.02f,
             new ConfigDescription("Stance 2 hands/weapon position up/down (positive = up)\n\nPosição das mãos/arma da Stance 2 para cima/baixo (positivo = cima)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
@@ -1005,7 +1005,7 @@ public class Plugin : BaseUnityPlugin
 
         _Stance2HandsSidewaysOffset = Config.Bind(
             Stance2Section,
-            "Stance 2 Sideways (Coronha Esq/Dir)",
+            "Stance 2 Sideways (Stock Left/Right)",
             0.05f,
             new ConfigDescription("Stance 2 hands/weapon position left/right (positive = right)\n\nPosição das mãos/arma da Stance 2 para esquerda/direita (positivo = direita)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
@@ -1019,7 +1019,7 @@ public class Plugin : BaseUnityPlugin
         // 06-fix-01: Stance 3 é agora Custom — Pitch 0, Yaw -30° (lateral).
         _Stance3HandsPitchRotation = Config.Bind(
             Stance3Section,
-            "Stance 3 Pitch (Cano Sobe/Desce)",
+            "Stance 3 Pitch (Muzzle Up/Down)",
             0f,
             new ConfigDescription("Stance 3 hands/arms pitch rotation in degrees (up/down tilt)\n\nRotação de pitch das mãos/braços da Stance 3 em graus (inclina o cano p/ cima/baixo)",
             new AcceptableValueRange<float>(-45f, 45f),
@@ -1027,7 +1027,7 @@ public class Plugin : BaseUnityPlugin
 
         _Stance3HandsYawRotation = Config.Bind(
             Stance3Section,
-            "Stance 3 Yaw (Apontar Esq/Dir)",
+            "Stance 3 Yaw (Point Left/Right)",
             -30f,
             new ConfigDescription("Stance 3 hands/arms yaw rotation in degrees (left/right turn)\n\nRotação de yaw das mãos/braços da Stance 3 em graus (aponta p/ esquerda/direita)",
             new AcceptableValueRange<float>(-45f, 45f),
@@ -1035,7 +1035,7 @@ public class Plugin : BaseUnityPlugin
 
         _Stance3HandsRollRotation = Config.Bind(
             Stance3Section,
-            "Stance 3 Roll (Tombar Arma)",
+            "Stance 3 Roll (Cant Weapon)",
             0f,
             new ConfigDescription("Stance 3 hands/arms roll rotation in degrees (weapon cant)\n\nRotação de roll das mãos/braços da Stance 3 em graus (tomba a arma)",
             new AcceptableValueRange<float>(-45f, 45f),
@@ -1044,7 +1044,7 @@ public class Plugin : BaseUnityPlugin
         // 06-fix-01: Custom não tem push forward (lateral pura).
         _Stance3HandsForwardBackwardOffset = Config.Bind(
             Stance3Section,
-            "Stance 3 Forward/Backward (Frente/Trás)",
+            "Stance 3 Forward/Backward",
             0f,
             new ConfigDescription("Stance 3 hands/weapon position forward/backward (positive = forward)\n\nPosição das mãos/arma da Stance 3 para frente/trás (positivo = frente)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
@@ -1052,7 +1052,7 @@ public class Plugin : BaseUnityPlugin
 
         _Stance3HandsUpDownOffset = Config.Bind(
             Stance3Section,
-            "Stance 3 Up/Down (Coronha Sobe/Desce)",
+            "Stance 3 Up/Down (Stock Up/Down)",
             0f,
             new ConfigDescription("Stance 3 hands/weapon position up/down (positive = up)\n\nPosição das mãos/arma da Stance 3 para cima/baixo (positivo = cima)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
@@ -1060,7 +1060,7 @@ public class Plugin : BaseUnityPlugin
 
         _Stance3HandsSidewaysOffset = Config.Bind(
             Stance3Section,
-            "Stance 3 Sideways (Coronha Esq/Dir)",
+            "Stance 3 Sideways (Stock Left/Right)",
             0f,
             new ConfigDescription("Stance 3 hands/weapon position left/right (positive = right)\n\nPosição das mãos/arma da Stance 3 para esquerda/direita (positivo = direita)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
