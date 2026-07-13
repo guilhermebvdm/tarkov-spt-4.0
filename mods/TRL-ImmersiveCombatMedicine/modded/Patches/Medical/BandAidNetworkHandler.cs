@@ -650,6 +650,14 @@ namespace Band_Aid
 
             Logger.LogInfo($"HealCheck recebido | Item: {packet.ItemTemplateId} | Approved: {approved} | Reason: {denyReason}");
 
+            // Membro-alvo esperado (mesma lógica da aplicação) — médico vê ANTES da animação
+            EBodyPart expectedPart = EBodyPart.Common;
+            if (approved && stats != null && mainPlayer.HealthController is ActiveHealthController patientAhc)
+            {
+                try { expectedPart = stats.IsSurgery ? GetBlackedPart(patientAhc) : FindSmartTarget(patientAhc, stats); }
+                catch { }
+            }
+
             // Enviar resposta
             var response = new BandAidHealCheckResponsePacket
             {
@@ -657,7 +665,8 @@ namespace Band_Aid
                 PatientProfileId = packet.PatientProfileId,
                 ItemTemplateId = packet.ItemTemplateId,
                 Approved = approved,
-                DenyReason = denyReason
+                DenyReason = denyReason,
+                ExpectedBodyPart = (byte)expectedPart
             };
 
             if (Singleton<FikaServer>.Instantiated)
@@ -779,13 +788,22 @@ namespace Band_Aid
                 bool approved = stats != null && MedicalLogic.CanUseItem(bot, stats);
                 string denyReason = approved ? "" : (stats == null ? "Item desconhecido." : $"{stats.Name}: Sem ferimento compatível.");
 
+                // Membro-alvo esperado do bot (médico vê antes da animação)
+                EBodyPart expectedPart = EBodyPart.Common;
+                if (approved && bot.HealthController is ActiveHealthController botAhc)
+                {
+                    try { expectedPart = stats.IsSurgery ? GetBlackedPart(botAhc) : FindSmartTarget(botAhc, stats); }
+                    catch { }
+                }
+
                 var response = new BandAidHealCheckResponsePacket
                 {
                     DoctorProfileId = packet.DoctorProfileId,
                     PatientProfileId = packet.PatientProfileId,
                     ItemTemplateId = packet.ItemTemplateId,
                     Approved = approved,
-                    DenyReason = denyReason
+                    DenyReason = denyReason,
+                    ExpectedBodyPart = (byte)expectedPart
                 };
                 Singleton<FikaServer>.Instance.SendData(ref response, DeliveryMethod.ReliableOrdered, true);
                 Logger.LogInfo($"HealCheck respondido EM NOME do bot {bot.Profile?.Nickname} | Approved={approved}");

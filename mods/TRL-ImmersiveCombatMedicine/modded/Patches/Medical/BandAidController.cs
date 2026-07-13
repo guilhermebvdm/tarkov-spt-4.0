@@ -103,6 +103,8 @@ namespace TRLImmersiveCombatMedicine
             if (response.Approved)
             {
                 TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"Handshake aprovado! Iniciando cura com {_pendingHealStats?.Name}.");
+                // Membro-alvo esperado calculado pelo paciente — mostrado ANTES da animação
+                _expectedTreatmentPart = (EBodyPart)response.ExpectedBodyPart;
                 var mainPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
                 if (mainPlayer != null && _pendingHealItem != null && _pendingHealStats != null)
                 {
@@ -365,6 +367,8 @@ namespace TRLImmersiveCombatMedicine
         }
 
         // === Estado pendente do handshake ===
+        // Membro-alvo esperado, vindo da resposta do handshake (mostrado pré-animação)
+        private EBodyPart _expectedTreatmentPart = EBodyPart.Common;
         private EBoundItem _pendingHealSlot;
         private Item _pendingHealItem;
         private ItemStats _pendingHealStats;
@@ -554,8 +558,11 @@ namespace TRLImmersiveCombatMedicine
 
             NotificationManagerClass.DisplayMessageNotification($"Aplicando {itemUsed.ShortName.Localized()}...", ENotificationDurationType.Default, ENotificationIconType.Quest);
 
-            // Feedback do membro-alvo: Common = "..." até o redirect/report resolver a parte
-            BandAidUI.Instance?.ShowTreatment(EBodyPart.Common, itemUsed.ShortName?.Localized());
+            // Feedback do membro-alvo: paciente remoto já informou o alvo esperado na
+            // resposta do handshake (visível ANTES da animação); Common = "..." quando
+            // desconhecido (o redirect local ou o report final refinam).
+            BandAidUI.Instance?.ShowTreatment(_expectedTreatmentPart, itemUsed.ShortName?.Localized());
+            _expectedTreatmentPart = EBodyPart.Common;
 
             // === ATIVAR REDIRECT ===
             MedicHealPatch.IsRedirectingHeal = true;

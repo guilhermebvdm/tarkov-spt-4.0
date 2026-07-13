@@ -39,6 +39,9 @@ namespace Band_Aid
         public string ItemTemplateId;
         public bool Approved;
         public string DenyReason; // Motivo da recusa (ex: "Sem sangramento")
+        // Membro que o smart-target do paciente PRETENDE tratar (mesma lógica da
+        // aplicação) — permite ao médico ver o alvo ANTES da animação começar.
+        public byte ExpectedBodyPart;
 
         public void Serialize(NetDataWriter writer)
         {
@@ -47,6 +50,7 @@ namespace Band_Aid
             writer.Put(ItemTemplateId);
             writer.Put(Approved);
             writer.Put(DenyReason ?? "");
+            writer.Put(ExpectedBodyPart);
         }
 
         public void Deserialize(NetDataReader reader)
@@ -56,6 +60,7 @@ namespace Band_Aid
             ItemTemplateId = reader.GetString();
             Approved = reader.GetBool();
             DenyReason = reader.GetString();
+            ExpectedBodyPart = reader.GetByte();
         }
     }
 }
