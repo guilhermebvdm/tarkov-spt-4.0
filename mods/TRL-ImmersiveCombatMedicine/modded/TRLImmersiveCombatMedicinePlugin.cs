@@ -47,7 +47,10 @@ namespace TRLImmersiveCombatMedicine
             ConfigLegsEnabled = Config.Bind("2. Mecanicas (Trauma)", "Sistema de Pernas", true, "Cair no chão ao perder as pernas.");
             ConfigArmsEnabled = Config.Bind("2. Mecanicas (Trauma)", "Sistema de Braços", true, "Perder a mira ao perder os braços.");
             ConfigStomachEnabled = Config.Bind("2. Mecanicas (Trauma)", "Sistema de Estomago", true, "Ficar sem ar ao tomar tiro no estômago.");
-            ConfigBlackoutDuration = Config.Bind("3. Balanceamento (Trauma)", "Duracao do Desmaio", 20f, "Quanto tempo (segundos) o jogador fica desmaiado.");
+            // ref: CR-04 — piso de 5s: duração baixa (~3-5s no teste) colapsava blackout+grace
+            // num flap instantâneo (andar "desmaiado", timers sumindo antes do visual).
+            ConfigBlackoutDuration = Config.Bind("3. Balanceamento (Trauma)", "Duracao do Desmaio", 20f,
+                new ConfigDescription("Quanto tempo (segundos) o jogador fica desmaiado. ALINHAR ENTRE TODOS OS PEERS.", new AcceptableValueRange<float>(5f, 120f)));
 
             // Configs Band-Aid
             MedicInteractKey = Config.Bind("4. Keybinds (Medic)", "Medic Interact Key", new KeyboardShortcut(KeyCode.F), "Tecla para FECHAR o modo medico (a abertura e pelo painel nativo de interacao, tecla F do jogo).");
@@ -234,19 +237,28 @@ namespace TRLImmersiveCombatMedicine
             string localId = gameWorld.MainPlayer.ProfileId;
             float targetIntensity = 0f;
 
-            if (TraumaState.BlackoutStartTimes.TryGetValue(localId, out float startTime))
+            // ref: CR-04 (auditoria do desmaio) — RELÓGIO ÚNICO: o wake é dirigido pelo
+            // deadline ABSOLUTO gravado na entrada (BlackoutTimers), o mesmo que o
+            // MainLoopPatch usa. StartTimes serve só à rampa visual. Antes, este bloco
+            // recalculava com ConfigBlackoutDuration AO VIVO — mudar a config no F12
+            // durante o desmaio deslocava o wake e divergia dos outros leitores.
+            if (TraumaState.BlackoutTimers.TryGetValue(localId, out float wakeDeadline))
             {
                 float duration = ConfigBlackoutDuration.Value;
+                if (TraumaState.BlackoutStartTimes.TryGetValue(localId, out float startTime))
+                    duration = Mathf.Max(0.1f, wakeDeadline - startTime);
+                else
+                    startTime = wakeDeadline - duration;
                 float timeElapsed = Time.time - startTime;
 
-                if (timeElapsed <= duration)
+                if (Time.time < wakeDeadline)
                 {
                     if (!TraumaState.IsFainted)
                     {
                         TraumaState.IsFainted = true;
-                        if (TraumaState.Logger != null) TraumaState.Logger.LogInfo("TRL-ICM: Jogador entrou em Coma/Desmaio (Fika Ragdoll)!");
+                        if (TraumaState.Logger != null) TraumaState.Logger.LogInfo($"TRL-ICM: Jogador entrou em Coma/Desmaio (Fika Ragdoll)! dur={duration:F0}s");
                         var fikaPlayer = gameWorld.MainPlayer as Fika.Core.Main.Players.FikaPlayer;
-                        if (fikaPlayer != null) 
+                        if (fikaPlayer != null)
                         {
                             fikaPlayer.ToggleDowned(true);
                             var bleedout = fikaPlayer.gameObject.GetComponent("Bleedout");
@@ -260,39 +272,42 @@ namespace TRLImmersiveCombatMedicine
                 }
                 else
                 {
-                    if (TraumaState.IsFainted)
-                    {
-                        TraumaState.IsFainted = false;
-                        if (TraumaState.Logger != null) TraumaState.Logger.LogInfo("TRL-ICM: Jogador acordou do Desmaio.");
-                        
-                        var fikaPlayer = gameWorld.MainPlayer as Fika.Core.Main.Players.FikaPlayer;
-                        if (fikaPlayer != null) 
-                        {
-                            fikaPlayer.ToggleDowned(false);
-                            gameWorld.MainPlayer.MovementContext.IsInPronePose = true;
-                        }
-
-                        TraumaState.BlackoutStartTimes.Remove(localId);
-                        TraumaState.BlackoutTimers.Remove(localId);
-                    }
+                    WakeLocalPlayer(gameWorld, localId);
                 }
             }
-            else
+            else if (TraumaState.IsFainted)
             {
-                if (TraumaState.IsFainted)
-                {
-                    TraumaState.IsFainted = false;
-                    var fikaPlayer = gameWorld.MainPlayer as Fika.Core.Main.Players.FikaPlayer;
-                    if (fikaPlayer != null) 
-                    {
-                        fikaPlayer.ToggleDowned(false);
-                        gameWorld.MainPlayer.MovementContext.IsInPronePose = true;
-                    }
-                }
+                // Deadline sumiu por outro caminho (ex.: revive/reset) — acordar limpo
+                WakeLocalPlayer(gameWorld, localId);
             }
 
             TraumaState.EffectIntensity = Mathf.Lerp(TraumaState.EffectIntensity, targetIntensity, Time.deltaTime * 5f);
             AudioListener.volume = Mathf.Lerp(1f, 0.05f, TraumaState.EffectIntensity);
+        }
+
+        /// <summary>
+        /// ref: CR-04 — WAKE COMPLETO: ao acordar o jogador vê e controla (sem prone
+        /// forçado pós-wake, requisito do usuário) e o grace anti-IA de 5s começa
+        /// AGORA (não na entrada do desmaio). FaintedPlayerIds mantém o escudo até o
+        /// fim do grace (o MainLoopPatch remove + envia False + RestoreAggro).
+        /// </summary>
+        private void WakeLocalPlayer(EFT.GameWorld gameWorld, string localId)
+        {
+            if (!TraumaState.IsFainted) return;
+            TraumaState.IsFainted = false;
+            if (TraumaState.Logger != null) TraumaState.Logger.LogInfo("TRL-ICM: Jogador acordou do Desmaio (grace de 5s iniciando AGORA).");
+
+            var fikaPlayer = gameWorld.MainPlayer as Fika.Core.Main.Players.FikaPlayer;
+            if (fikaPlayer != null)
+            {
+                fikaPlayer.ToggleDowned(false);
+                // ref: CR-04 — NÃO re-forçar IsInPronePose: acordar = controlar
+            }
+
+            TraumaState.BlackoutStartTimes.Remove(localId);
+            TraumaState.BlackoutTimers.Remove(localId);
+            // Grace ancorado no WAKE (requisito): 5s de proteção com o jogador consciente
+            TraumaState.GraceTimers[localId] = Time.time + 5f;
         }
     }
 }

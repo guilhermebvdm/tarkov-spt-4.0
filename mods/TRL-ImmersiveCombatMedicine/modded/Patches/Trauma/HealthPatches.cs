@@ -49,7 +49,10 @@ namespace TrueTrauma
             // 1. LÓGICA DE DESMAIO
             if (TRLImmersiveCombatMedicinePlugin.ConfigBlackoutEnabled.Value)
             {
-                if (TraumaState.BlackoutTimers.ContainsKey(id)) return;
+                // ref: CR-04 — guard de re-entrada cobre blackout ATIVO e GRACE:
+                // sem o FaintedPlayerIds aqui, cada hit forte pós-wake re-desmaiava
+                // (loop que mantinha o alvo em ragdoll/Deadbody — "não acerto mais").
+                if (TraumaState.BlackoutTimers.ContainsKey(id) || TraumaState.FaintedPlayerIds.Contains(id)) return;
 
                 if (isValidTraumaType)
                 {
@@ -59,14 +62,18 @@ namespace TrueTrauma
                     if (isChestTrauma || isHeadTrauma)
                     {
                         // Configura Timers
+                        // ref: CR-04 — GraceTimers NÃO nasce aqui: o grace de 5s é
+                        // ancorado no WAKE (Plugin.WakeLocalPlayer / MainLoopPatch).
                         float duration = TRLImmersiveCombatMedicinePlugin.ConfigBlackoutDuration.Value;
                         TraumaState.BlackoutTimers[id] = now + duration;
                         TraumaState.BlackoutStartTimes[id] = now;
-                        TraumaState.GraceTimers[id] = now + duration + 5f;
 
                         // Efeitos Locais
+                        // ref: CR-04 — stun CURTO de impacto (era 60s: o Fika pausa
+                        // efeitos durante o downed e RETOMA no wake — o jogador
+                        // acordava com ~60s de stun pela frente, "tela suja").
                         if (__instance.Physical != null) __instance.Physical.Stamina.Current = 0f;
-                        __instance.ActiveHealthController?.DoStun(60f, 1f); // Flashbang
+                        __instance.ActiveHealthController?.DoStun(2f, 1f);
                         __instance.MovementContext.IsInPronePose = true;
                         if (__instance.HandsController is IFirearmHandsController firearm) firearm.SetAim(false);
 

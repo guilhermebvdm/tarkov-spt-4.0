@@ -89,12 +89,12 @@ namespace Band_Aid
             if (Singleton<FikaServer>.Instantiated)
             {
                 Singleton<FikaServer>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
-                Logger.LogInfo($"[Faint] Host enviou estado de desmaio: {profileId} = {isFainted}");
+                Logger.LogInfo($"[Faint] Host enviou estado de desmaio: {profileId} = {isFainted} (dur={durationSeconds:F0}s)");
             }
             else if (Singleton<FikaClient>.Instantiated)
             {
                 Singleton<FikaClient>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
-                Logger.LogInfo($"[Faint] Client enviou estado de desmaio: {profileId} = {isFainted}");
+                Logger.LogInfo($"[Faint] Client enviou estado de desmaio: {profileId} = {isFainted} (dur={durationSeconds:F0}s)");
             }
         }
 

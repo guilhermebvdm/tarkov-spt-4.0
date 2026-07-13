@@ -41,8 +41,11 @@ namespace TrueTrauma
                     // 2. Mantém o efeito visual de tontura (Blur)
                     // ref: CR-01-27 — vanilla dispara DoContusion por EVENTO; por frame
                     // eram ~1200 passagens pelo pipeline de efeitos em 20s de blackout.
-                    // Renovação por intervalo de 2s mantém o visual com ~10 chamadas.
-                    if (!TraumaState.ContusionRenewTimers.TryGetValue(id, out float nextContusion) || now >= nextContusion)
+                    // ref: CR-04 — última renovação para 2s ANTES do wake: o Fika pausa
+                    // efeitos no downed e retoma no wake — sem o cap, o jogador acordava
+                    // com contusion residual ("tela suja" pós-consciência).
+                    if ((!TraumaState.ContusionRenewTimers.TryGetValue(id, out float nextContusion) || now >= nextContusion)
+                        && now + 2f <= TraumaState.BlackoutTimers[id])
                     {
                         TraumaState.ContusionRenewTimers[id] = now + 2f;
                         __instance.ActiveHealthController?.DoContusion(1f, 1f);
@@ -88,6 +91,11 @@ namespace TrueTrauma
                     {
                         // Jogador humano acorda, mas sem stamina
                         if (__instance.Physical != null) __instance.Physical.Stamina.Current = 0f;
+
+                        // ref: CR-04 — grace de 5s ancorado no WAKE (idempotente com o
+                        // WakeLocalPlayer do Plugin; requisito: proteção começa com o
+                        // jogador já consciente e controlando)
+                        TraumaState.GraceTimers[id] = now + 5f;
                     }
                 }
             }
