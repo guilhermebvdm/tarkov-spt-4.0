@@ -28,17 +28,17 @@ Fonte única de verdade das `ConfigEntry` expostas no menu F12 (regra do repo: t
 
 | Nome (key) | Tipo | Padrão | Faixa | Tooltip |
 |---|---|---|---|---|
-| Duracao do Desmaio | float | `20` | — | Quanto tempo (segundos) o jogador fica desmaiado. |
+| Duracao do Desmaio | float | `20` | 5–120 | Quanto tempo (segundos) o jogador fica desmaiado. ALINHAR ENTRE TODOS OS PEERS. |
 
 ## Seção 4. Keybinds (Medic)
 
 | Nome (key) | Tipo | Padrão | Faixa | Tooltip |
 |---|---|---|---|---|
-| Medic Interact Key | KeyboardShortcut | `F` | — | Tecla para FECHAR o modo médico (a abertura é pelo painel nativo de interação, tecla F do jogo). |
+| Medic Interact Key | KeyboardShortcut | `F` | — | Tecla para FECHAR o modo medico (a abertura e pelo painel nativo de interacao, tecla F do jogo). |
 | Medic Interact Mode | EBandAidPressMode | `Hold` | Press·Hold·DoubleTap | Modo de ativação: Press (aperta e solta), Hold (segura), DoubleTap (aperta 2x). |
 | Emergency Drop Key | KeyboardShortcut | `F` | — | Tecla para drop emergencial do item durante animação de cura. |
 | Emergency Drop Mode | EBandAidPressMode | `Press` | Press·Hold·DoubleTap | Modo de ativação do drop emergencial. |
-| Medic Interact Distance | float | `5` | 1–15 | Distância (m) do prompt E do acionamento do modo médico (regra única). Valor alto para testes; **reduzir no pacote final**. |
+| Medic Interact Distance | float | `5` | 1–15 | Distancia (m) do prompt E do acionamento do modo medico (mesma regra). Valor alto para testes; **reduzir no pacote final**. |
 
 ## Seção 5. Debug
 
@@ -64,3 +64,4 @@ Fonte única de verdade das `ConfigEntry` expostas no menu F12 (regra do repo: t
 |---|---|---|
 | 2026-07-12 | Guilherme | Criação (CR-01-07) — 12 entries em 5 seções; registro das ShoulderTap removidas. |
 | 2026-07-12 | Guilherme | CR-03: seção Renomeadas (migração da key Sistema de Braços). |
+| 2026-07-13 | Guilherme | CR-04 (rodada 04): faixa 5–120 e tooltip novo em Duracao do Desmaio; micro-textos da seção 4 sincronizados literalmente com os Config.Bind (fecha o resíduo do CR-03-16). |

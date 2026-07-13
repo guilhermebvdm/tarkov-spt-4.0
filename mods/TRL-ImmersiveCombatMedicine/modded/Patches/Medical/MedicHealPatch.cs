@@ -135,6 +135,17 @@ namespace Band_Aid
         private static IEffect _currentPatientEffect;
         private static MethodInfo _forceResidueCached;
 
+        /// <summary>
+        /// ref: CR-04-14 — limpeza do rastreamento no SUCESSO da cura: sem isso a
+        /// referência estática ao MedEffect (e ao AHC do paciente) atravessava raids
+        /// e um abort futuro poderia força-residuar efeito de cura ANTIGA já concluída.
+        /// </summary>
+        public static void ClearNativeEffectTracking()
+        {
+            _currentPatientEffect = null;
+            NativeMedEffectApplied = false;
+        }
+
         public static void CancelNativePatientEffect()
         {
             if (!NativeMedEffectApplied) return;

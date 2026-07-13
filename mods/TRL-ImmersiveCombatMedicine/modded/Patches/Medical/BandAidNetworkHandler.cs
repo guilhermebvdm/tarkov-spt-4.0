@@ -350,21 +350,16 @@ namespace Band_Aid
             bool hadFracture = HasEffect(activeHc, target, _fractureType);
             float effectCost = 0f;
 
-            if ((stats.StopsHeavyBleed || stats.StopsAllBleeds) && hadHeavy)
-            {
-                RemoveEffectNative(hc, target, _heavyBleedConcreteType, "HeavyBleeding");
+            // ref: CR-04-20 — custo só quando a remoção de fato executou
+            if ((stats.StopsHeavyBleed || stats.StopsAllBleeds) && hadHeavy &&
+                RemoveEffectNative(hc, target, _heavyBleedConcreteType, "HeavyBleeding"))
                 effectCost += stats.HeavyBleedCost;
-            }
-            if ((stats.StopsLightBleed || stats.StopsAllBleeds) && hadLight)
-            {
-                RemoveEffectNative(hc, target, _lightBleedConcreteType, "LightBleeding");
+            if ((stats.StopsLightBleed || stats.StopsAllBleeds) && hadLight &&
+                RemoveEffectNative(hc, target, _lightBleedConcreteType, "LightBleeding"))
                 effectCost += stats.LightBleedCost;
-            }
-            if (stats.FixesFracture && hadFracture)
-            {
-                RemoveEffectNative(hc, target, _fractureConcreteType, "Fracture");
+            if (stats.FixesFracture && hadFracture &&
+                RemoveEffectNative(hc, target, _fractureConcreteType, "Fracture"))
                 effectCost += stats.FractureCost;
-            }
 
             // HP
             float healedTotal = 0f;
@@ -494,9 +489,11 @@ namespace Band_Aid
             return patient;
         }
 
-        private static void RemoveEffectNative(IHealthController hc, EBodyPart bodyPart, Type effectType, string effectName)
+        // ref: CR-04-20 — retorna se a remoção de fato executou (o custo por efeito
+        // só é cobrado do médico quando true).
+        private static bool RemoveEffectNative(IHealthController hc, EBodyPart bodyPart, Type effectType, string effectName)
         {
-            if (effectType == null) return;
+            if (effectType == null) return false;
 
             try
             {
@@ -509,7 +506,7 @@ namespace Band_Aid
                         var genericMethod = method15.MakeGenericMethod(effectType);
                         var result = genericMethod.Invoke(activeHc, new object[] { bodyPart });
                         Logger.LogInfo($"[Rede] method_15<{effectName}>({bodyPart}) = {(result != null ? "OK" : "sem efeito")}");
-                        return;
+                        return result != null;
                     }
                 }
 
@@ -526,12 +523,15 @@ namespace Band_Aid
                             BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
                         forceResidue?.Invoke(effect, null);
                         Logger.LogInfo($"[Rede] ForceResidue<{effectName}>({bodyPart}) OK (fallback).");
+                        return true;
                     }
                 }
+                return false;
             }
             catch (Exception ex)
             {
                 Logger.LogError($"[Rede] Erro ao remover {effectName}: {ex.Message}");
+                return false;
             }
         }
 

@@ -543,6 +543,8 @@ _harmony.PatchAll();
 
 ---
 
+**Resolução (2026-07-13):** ✅ resolvido de fato pelo CR-04 (04ed4b26) — FaintController.cs deletado (dead code com relógio divergente). Fechado na rodada 04.
+
 ### CR-01-19 · B — Bug latente · 🟡 Médio
 
 **Bot que desmaia entra em FaintedPlayerIds e nunca sai — fica permanentemente 'invisível' para os outros bots**

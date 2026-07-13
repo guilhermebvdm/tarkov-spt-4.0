@@ -25,7 +25,8 @@ namespace TrueTrauma
         public static float EffectIntensity = 0f;
 
         // ref: CR-01-27 — renovação de DoContusion por intervalo (não por frame)
-        public static readonly Dictionary<string, float> ContusionRenewTimers = new Dictionary<string, float>();
+        // ref: CR-04-13 — cooldown de re-desmaio de bots (humanos usam o grace)
+        public static readonly Dictionary<string, float> BotFaintCooldowns = new Dictionary<string, float>();
 
         // Faint State Trackers
         public static bool IsFainted = false;
@@ -45,7 +46,7 @@ namespace TrueTrauma
             VoiceCooldowns.Clear();
             BotLegsBrokenStartTimes.Clear();
             LegPenaltyTimers.Clear();
-            ContusionRenewTimers.Clear();
+            BotFaintCooldowns.Clear();
             EffectIntensity = 0f;
             IsFainted = false;
         }

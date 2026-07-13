@@ -46,7 +46,7 @@ Rastreamento **estático** (código do mod + Fika 2.3.4 de referência + EFT dec
 | G-5 ✅ (2026-07-12) | 🟢 | Resposta do handshake não confere `ItemTemplateId` com o item pendente — resposta atrasada pode aprovar item errado | 1 if antes do `HealRoutine` |
 | G-6 | ℹ️ | Relay manual ecoa pacote de volta ao originador (filtrado por checks, mas custo/ruído) | usar overload `SendData(..., NetPeer peerToIgnore)` do Fika |
 
-Relacionados do CR-01 (estado 2026-07-12): **CR-01-10/01/02/04 APLICADOS** (handshake endurecido; client cura bot via autoridade do host; desmaio sincronizado com duração no pacote; defib com chamada tipada). Permanece: **CR-01-23** (consumo parcial local-only — junto de G-3/G-4).
+Relacionados do CR-01 (estado 2026-07-12): **CR-01-10/01/02/04 APLICADOS** (handshake endurecido; client cura bot via autoridade do host; desmaio sincronizado com duração no pacote; defib com chamada tipada). ~~Permanece: **CR-01-23** (consumo parcial local-only — junto de G-3/G-4).~~ **G-3/G-4/CR-01-23 ENTREGUES pelo CR-05 (2026-07-13, build 1.1.0+):** o paciente aplica e reporta o CUSTO REAL (HP + efeitos removidos) no TreatmentReport; o médico debita pelo report (fallback estimado após 4s) e o descarte é diferido/networked com retry. Nota de UI: o membro mostrado ANTES da animação (ExpectedBodyPart do handshake) é dica best-effort — o report final é a verdade.
 
 ## Protocolo de teste in-game (ordem de custo)
 

@@ -16,27 +16,27 @@
 | Prio | # | Achado | Dim | Esforço | Status |
 |---|---|---|---|---|---|
 | 🔴 | CR-04-01 | CR-05 consumo autoritativo é código morto: RegisterPendingConsume nunca é chamado — médico continua  | consumo | trivial | ✅ resolvido na criação |
-| 🟠 | CR-04-02 | TryDiscardOnce assume rejeição síncrona, mas no Fika 2.3.4 só o guard CanExecute do vanilla é síncro | consumo | medio | [ ] pendente |
-| 🟠 | CR-04-03 | Item simples no caminho LOCAL continua sem descarte (gate isRemotePatient) — bandagem/tala/esmarch/C | consumo | trivial | [ ] pendente |
-| 🟡 | CR-04-04 | DeferredDiscardRoutine sobrevive ao fim da raid (GO do plugin, sessão inteira) — ResetAllState não a | consumo | pequeno | [ ] pendente |
-| 🟡 | CR-04-05 | Desligar 'Sistema de Desmaio' no F12 durante um desmaio deixa o jogador preso em Downed (imóvel, inv | desmaio | pequeno | [ ] pendente |
-| 🟡 | CR-04-06 | DoStun(2f,1f) do entry é pausado pelo ToggleDowned(true) e RETOMA no wake — ~2-4s de 'tela suja' pós | desmaio | trivial | [ ] pendente |
-| 🟡 | CR-04-07 | Conclusão normal da cura não limpa _currentPatientEffect nem NativeMedEffectApplied — referência est | correcao | trivial | [ ] pendente |
-| 🟡 | CR-04-08 | coop-heal-matrix não reflete nada do delta: G-3/G-4 sem anotação pós-CR-05, célula (e) obsoleta, not | consistencia | pequeno | [ ] pendente |
-| 🟡 | CR-04-09 | PROPRIEDADES.md: 'Duracao do Desmaio' sem a faixa 5-120 e sem o tooltip novo do CR-04 | consistencia | trivial | [ ] pendente |
-| 🟡 | CR-04-10 | sessions.md P-2.13(a) valida o comportamento de cura do CR-04 que o CR-05 provou quebrado e substitu | consistencia | trivial | [ ] pendente |
-| 🟢 | CR-04-11 | Matching de PendingConsume por (PatientId, TemplateId) FIFO sem nonce: report perdido faz a cura seg | consumo | pequeno | [ ] pendente |
-| 🟢 | CR-04-12 | effectCost é cobrado mesmo quando RemoveEffectNative falha silenciosamente (método void, exceção eng | consumo | trivial | [ ] pendente |
-| 🟢 | CR-04-13 | ScheduleNetworkedDiscard sem dedup por item: dois agendamentos do mesmo item podem enviar RemoveOper | consumo | pequeno | [ ] pendente |
-| 🟢 | CR-04-14 | Loop de renovação DoContusion é no-op para o jogador local desmaiado (DamageCoeff=0 durante o downed | desmaio | pequeno | [ ] pendente |
-| 🟢 | CR-04-15 | Bot acorda sem nenhum cooldown de re-desmaio — o flap/juggling que o guard CR-04 eliminou para human | desmaio | pequeno | [ ] pendente |
-| 🟢 | CR-04-16 | _expectedTreatmentPart setado antes dos guards da resposta e nunca resetado fora do HealRoutine — hi | correcao | trivial | [ ] pendente |
-| 🟢 | CR-04-17 | NOTA: highlight pré-animação pode divergir do membro realmente tratado durante o UseTime (3-16s) — f | correcao | trivial | [ ] pendente |
-| 🟢 | CR-04-18 | Footer dinâmico mostra só MainKey — modifiers configurados (ex.: Shift+F) ficam fora da dica de fech | correcao | trivial | [ ] pendente |
-| 🟢 | CR-04-19 | code-review-03: deferidos CR-03-19 (revalidação approve→apply) e CR-03-20 (versionamento de pacotes) | consistencia | trivial | [ ] pendente |
-| 🟢 | CR-04-20 | CR-01-18 resolvido de fato pelo CR-04 (FaintController.cs deletado) mas segue '[ ] Pendente' no code | consistencia | trivial | [ ] pendente |
-| 🟢 | CR-04-21 | sessions.md 'Estado atual' descreve o consumo pré-CR-04 ('DiscardItemNetworked pré-verificado') — pa | consistencia | trivial | [ ] pendente |
-| 🟢 | CR-04-22 | Resolução do CR-03-16 ('micro-textos alinhados') não corresponde ao estado atual — tooltips doc↔códi | consistencia | trivial | [ ] pendente |
+| 🟠 | CR-04-02 | TryDiscardOnce assume rejeição síncrona, mas no Fika 2.3.4 só o guard CanExecute do vanilla é síncro | consumo | medio | ✅ aplicado (2026-07-13, autorização "tudo") |
+| 🟠 | CR-04-03 | Item simples no caminho LOCAL continua sem descarte (gate isRemotePatient) — bandagem/tala/esmarch/C | consumo | trivial | ✅ aplicado (2026-07-13, autorização "tudo") |
+| 🟡 | CR-04-04 | DeferredDiscardRoutine sobrevive ao fim da raid (GO do plugin, sessão inteira) — ResetAllState não a | consumo | pequeno | ✅ aplicado (2026-07-13, autorização "tudo") |
+| 🟡 | CR-04-05 | Desligar 'Sistema de Desmaio' no F12 durante um desmaio deixa o jogador preso em Downed (imóvel, inv | desmaio | pequeno | ✅ aplicado (2026-07-13, autorização "tudo") |
+| 🟡 | CR-04-06 | DoStun(2f,1f) do entry é pausado pelo ToggleDowned(true) e RETOMA no wake — ~2-4s de 'tela suja' pós | desmaio | trivial | ✅ aplicado (2026-07-13, autorização "tudo") |
+| 🟡 | CR-04-07 | Conclusão normal da cura não limpa _currentPatientEffect nem NativeMedEffectApplied — referência est | correcao | trivial | ✅ aplicado (2026-07-13, autorização "tudo") |
+| 🟡 | CR-04-08 | coop-heal-matrix não reflete nada do delta: G-3/G-4 sem anotação pós-CR-05, célula (e) obsoleta, not | consistencia | pequeno | ✅ aplicado (2026-07-13, autorização "tudo") |
+| 🟡 | CR-04-09 | PROPRIEDADES.md: 'Duracao do Desmaio' sem a faixa 5-120 e sem o tooltip novo do CR-04 | consistencia | trivial | ✅ aplicado (2026-07-13, autorização "tudo") |
+| 🟡 | CR-04-10 | sessions.md P-2.13(a) valida o comportamento de cura do CR-04 que o CR-05 provou quebrado e substitu | consistencia | trivial | ✅ aplicado (2026-07-13, autorização "tudo") |
+| 🟢 | CR-04-11 | Matching de PendingConsume por (PatientId, TemplateId) FIFO sem nonce: report perdido faz a cura seg | consumo | pequeno | ✅ aplicado (2026-07-13, autorização "tudo") |
+| 🟢 | CR-04-12 | effectCost é cobrado mesmo quando RemoveEffectNative falha silenciosamente (método void, exceção eng | consumo | trivial | ✅ aplicado (2026-07-13, autorização "tudo") |
+| 🟢 | CR-04-13 | ScheduleNetworkedDiscard sem dedup por item: dois agendamentos do mesmo item podem enviar RemoveOper | consumo | pequeno | ✅ aplicado (2026-07-13, autorização "tudo") |
+| 🟢 | CR-04-14 | Loop de renovação DoContusion é no-op para o jogador local desmaiado (DamageCoeff=0 durante o downed | desmaio | pequeno | ✅ aplicado (2026-07-13, autorização "tudo") |
+| 🟢 | CR-04-15 | Bot acorda sem nenhum cooldown de re-desmaio — o flap/juggling que o guard CR-04 eliminou para human | desmaio | pequeno | ✅ aplicado (2026-07-13, autorização "tudo") |
+| 🟢 | CR-04-16 | _expectedTreatmentPart setado antes dos guards da resposta e nunca resetado fora do HealRoutine — hi | correcao | trivial | ✅ aplicado (2026-07-13, autorização "tudo") |
+| 🟢 | CR-04-17 | NOTA: highlight pré-animação pode divergir do membro realmente tratado durante o UseTime (3-16s) — f | correcao | trivial | ✅ aplicado (2026-07-13, autorização "tudo") |
+| 🟢 | CR-04-18 | Footer dinâmico mostra só MainKey — modifiers configurados (ex.: Shift+F) ficam fora da dica de fech | correcao | trivial | ✅ aplicado (2026-07-13, autorização "tudo") |
+| 🟢 | CR-04-19 | code-review-03: deferidos CR-03-19 (revalidação approve→apply) e CR-03-20 (versionamento de pacotes) | consistencia | trivial | ✅ aplicado (2026-07-13, autorização "tudo") |
+| 🟢 | CR-04-20 | CR-01-18 resolvido de fato pelo CR-04 (FaintController.cs deletado) mas segue '[ ] Pendente' no code | consistencia | trivial | ✅ aplicado (2026-07-13, autorização "tudo") |
+| 🟢 | CR-04-21 | sessions.md 'Estado atual' descreve o consumo pré-CR-04 ('DiscardItemNetworked pré-verificado') — pa | consistencia | trivial | ✅ aplicado (2026-07-13, autorização "tudo") |
+| 🟢 | CR-04-22 | Resolução do CR-03-16 ('micro-textos alinhados') não corresponde ao estado atual — tooltips doc↔códi | consistencia | trivial | ✅ aplicado (2026-07-13, autorização "tudo") |
 
 ## Achados
 
@@ -74,10 +74,9 @@ _Achado independentemente por 2 dimensões (consumo + consistência) — fundido
 **Sugestão:** Usar o Task<IResult> retornado em vez da flag: guardar a Task e, na coroutine, aguardar task.IsCompleted (com cap de ~1s) e tratar task falha OU callback Failed como retry. Alternativa mínima: aguardar 2-3 frames após TryRunNetworkTransaction antes de decidir, capturando o resultado do callback num holder.
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão (autorização global "tudo")
+
+**Resolução:** ✅ Aplicado em 2026-07-13 (build 1.1.1). Detalhes no commit da rodada 04.
 
 ---
 
@@ -94,10 +93,9 @@ _Achado independentemente por 2 dimensões (consumo + consistência) — fundido
 **Sugestão:** Remover o gate: descartar incondicionalmente no branch de item simples (o descarte agora é diferido/networked e seguro no host — HostInventoryController executa e propaga). Ajustar o log para não mencionar 'remoto'.
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão (autorização global "tudo")
+
+**Resolução:** ✅ Aplicado em 2026-07-13 (build 1.1.1). Detalhes no commit da rodada 04.
 
 ---
 
@@ -114,10 +112,9 @@ _Achado independentemente por 2 dimensões (consumo + consistência) — fundido
 **Sugestão:** Capturar Singleton<GameWorld>.Instance no agendamento e abortar (yield break) se Instance mudou ou é null antes de cada tentativa; adicionalmente, guardar as Coroutines agendadas numa lista e StopCoroutine nelas em ResetAllState (mesmo padrão do _activeHealCoroutine).
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão (autorização global "tudo")
+
+**Resolução:** ✅ Aplicado em 2026-07-13 (build 1.1.1). Detalhes no commit da rodada 04.
 
 ---
 
@@ -134,10 +131,9 @@ _Achado independentemente por 2 dimensões (consumo + consistência) — fundido
 **Sugestão:** Mover a checagem de wake para antes do early-return: no início do Update (após obter gameWorld/MainPlayer), se TraumaState.IsFainted && (!ConfigBlackoutEnabled.Value || !ConfigMasterEnabled.Value) → WakeLocalPlayer(gameWorld, localId) e então return. Alternativa equivalente: fazer o branch de limpeza do MainLoopPatch (MovementPatches.cs:103-107) também tratar o humano local via um flag que o Plugin.Update consuma.
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão (autorização global "tudo")
+
+**Resolução:** ✅ Aplicado em 2026-07-13 (build 1.1.1). Detalhes no commit da rodada 04.
 
 ---
 
@@ -154,10 +150,9 @@ _Achado independentemente por 2 dimensões (consumo + consistência) — fundido
 **Sugestão:** Remover o DoStun do entry (feedback de impacto é imperceptível: no frame seguinte o ToggleDowned corta para DeathFade/FastBlur.Die e o AudioListener cai a 5% — o stun não adiciona nada durante o blackout). Se quiser grogginess deliberada, aplicar o stun em WakeLocalPlayer APÓS ToggleDowned(false) (DamageCoeff já voltou a 1, o guard 'DamageCoeff > 0f' passa) com duração curta configurável — aí ele roda de fato no pós-wake por escolha, não por acidente do pause/unpause. Idem para a 1ª contusion: n
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão (autorização global "tudo")
+
+**Resolução:** ✅ Aplicado em 2026-07-13 (build 1.1.1). Detalhes no commit da rodada 04.
 
 ---
 
@@ -174,10 +169,9 @@ _Achado independentemente por 2 dimensões (consumo + consistência) — fundido
 **Sugestão:** No caminho de sucesso do HealRoutine (branch NativeMedEffectApplied, BandAidController.cs:634-642) zerar `MedicHealPatch.NativeMedEffectApplied = false` e limpar a referência (expor um `MedicHealPatch.ClearCurrentPatientEffect()` ou mover `_currentPatientEffect = null` para antes do early-return na linha 140, executando a limpeza mesmo quando a flag já está false). Alternativa mínima: limpar ambos em CleanupPatientSubscription, que já roda em todos os fins de cura.
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão (autorização global "tudo")
+
+**Resolução:** ✅ Aplicado em 2026-07-13 (build 1.1.1). Detalhes no commit da rodada 04.
 
 ---
 
@@ -194,10 +188,9 @@ _Achado independentemente por 2 dimensões (consumo + consistência) — fundido
 **Sugestão:** Atualizar células (b)/(e)/(f); anotar G-3/G-4 com o estado real pós-CR-05 (mecanismo entregue via BandAidTreatmentReportPacket.CostAmount; débito no médico pendente do fix da fiação); reescrever a nota de deploy enumerando as mudanças de wire mais recentes (HealCheckResponse/TreatmentReport, 2026-07-13); linhas novas no Histórico.
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão (autorização global "tudo")
+
+**Resolução:** ✅ Aplicado em 2026-07-13 (build 1.1.1). Detalhes no commit da rodada 04.
 
 ---
 
@@ -214,10 +207,9 @@ _Achado independentemente por 2 dimensões (consumo + consistência) — fundido
 **Sugestão:** Faixa `5–120`, tooltip novo verbatim, e linha no Histórico de Alterações (CR-04: piso anti-flap + alinhamento entre peers).
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão (autorização global "tudo")
+
+**Resolução:** ✅ Aplicado em 2026-07-13 (build 1.1.1). Detalhes no commit da rodada 04.
 
 ---
 
@@ -234,10 +226,9 @@ _Achado independentemente por 2 dimensões (consumo + consistência) — fundido
 **Sugestão:** Anotar P-2.13: "(a) SUBSTITUÍDA por P-2.14/CR-05 (a mecânica de descarte/consumo do CR-04 nunca funcionou — validar cura SÓ pela P-2.14); (b) desmaio segue válido".
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão (autorização global "tudo")
+
+**Resolução:** ✅ Aplicado em 2026-07-13 (build 1.1.1). Detalhes no commit da rodada 04.
 
 ---
 
@@ -254,10 +245,9 @@ _Achado independentemente por 2 dimensões (consumo + consistência) — fundido
 **Sugestão:** Adicionar um OpId (ushort incremental) em BandAidHealPacket e ecoá-lo no BandAidTreatmentReportPacket; casar pending por OpId (wire change — regra MESMA BUILD já aceita no projeto). Alternativa sem wire: casar também por referência de Item e expirar pendentes órfãos mais cedo.
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão (autorização global "tudo")
+
+**Resolução:** ✅ Aplicado em 2026-07-13 (build 1.1.1). Detalhes no commit da rodada 04.
 
 ---
 
@@ -274,10 +264,9 @@ _Achado independentemente por 2 dimensões (consumo + consistência) — fundido
 **Sugestão:** RemoveEffectNative retornar bool (method_15 result != null / ForceResidue executado) e condicionar o effectCost += ao retorno true — espelha o padrão já usado no RemoveEffect do caminho local (MedicalLogic.cs:124-165, que só cobra dentro do if).
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão (autorização global "tudo")
+
+**Resolução:** ✅ Aplicado em 2026-07-13 (build 1.1.1). Detalhes no commit da rodada 04.
 
 ---
 
@@ -294,10 +283,9 @@ _Achado independentemente por 2 dimensões (consumo + consistência) — fundido
 **Sugestão:** Manter um HashSet<string> (item.Id) de descartes em voo no BandAidController: ScheduleNetworkedDiscard ignora se já contém; remover do set quando a rotina termina (sucesso, esgota tentativas ou aborta).
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão (autorização global "tudo")
+
+**Resolução:** ✅ Aplicado em 2026-07-13 (build 1.1.1). Detalhes no commit da rodada 04.
 
 ---
 
@@ -314,10 +302,9 @@ _Achado independentemente por 2 dimensões (consumo + consistência) — fundido
 **Sugestão:** Remover o bloco de renovação DoContusion e o dict ContusionRenewTimers (ou, mínimo: pular DoContusion quando '__instance.IsYourPlayer' — cobrindo também a 1ª chamada pré-downed do frame de entrada, complemento do achado do stun). Se remover o dict, tirar também do ResetAll e do CASO 2.
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão (autorização global "tudo")
+
+**Resolução:** ✅ Aplicado em 2026-07-13 (build 1.1.1). Detalhes no commit da rodada 04.
 
 ---
 
@@ -334,10 +321,9 @@ _Achado independentemente por 2 dimensões (consumo + consistência) — fundido
 **Sugestão:** Decidir e registrar: se supressão encadeada de bot é feature, documentar no PROPRIEDADES.md/sessions.md; senão, dar cooldown curto de re-desmaio a bots (ex.: dict BotFaintCooldown[id]=now+8f setado no wake do CASO 2 IsAI e checado no guard do HealthPatches junto com FaintedPlayerIds).
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão (autorização global "tudo")
+
+**Resolução:** ✅ Aplicado em 2026-07-13 (build 1.1.1). Detalhes no commit da rodada 04.
 
 ---
 
@@ -354,10 +340,9 @@ _Achado independentemente por 2 dimensões (consumo + consistência) — fundido
 **Sugestão:** Mover a atribuição de `_expectedTreatmentPart` para DENTRO do bloco `if (mainPlayer != null && ...)` que inicia a HealRoutine (ela só tem consumidor ali), e adicionar `_expectedTreatmentPart = EBodyPart.Common;` no ResetAllState junto do reset dos _pendingHeal*.
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão (autorização global "tudo")
+
+**Resolução:** ✅ Aplicado em 2026-07-13 (build 1.1.1). Detalhes no commit da rodada 04.
 
 ---
 
@@ -374,10 +359,9 @@ _Achado independentemente por 2 dimensões (consumo + consistência) — fundido
 **Sugestão:** Nenhuma ação de código. Registrar a aceitação (comentário curto no call site ou linha no coop-heal-matrix: 'expected part é dica de UI, best-effort; report final é a verdade') para ancorar a decisão.
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão (autorização global "tudo")
+
+**Resolução:** ✅ Aplicado em 2026-07-13 (build 1.1.1). Detalhes no commit da rodada 04.
 
 ---
 
@@ -394,10 +378,9 @@ _Achado independentemente por 2 dimensões (consumo + consistência) — fundido
 **Sugestão:** Compor a string com os modifiers: `string keyLabel = shortcut.Modifiers.Any() ? string.Join("+", shortcut.Modifiers) + "+" + shortcut.MainKey : shortcut.MainKey.ToString();` (mesma semântica do CheckPressMode).
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão (autorização global "tudo")
+
+**Resolução:** ✅ Aplicado em 2026-07-13 (build 1.1.1). Detalhes no commit da rodada 04.
 
 ---
 
@@ -414,10 +397,9 @@ _Achado independentemente por 2 dimensões (consumo + consistência) — fundido
 **Sugestão:** Nota datada nos dois achados: em CR-03-19, registrar a entrega parcial via CR-05 (+ dependência do fix da fiação do débito); em CR-03-20, registrar as 2 mudanças de wire pós-deferimento e apontar a atualização da nota MESMA BUILD na matriz.
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão (autorização global "tudo")
+
+**Resolução:** ✅ Aplicado em 2026-07-13 (build 1.1.1). Detalhes no commit da rodada 04.
 
 ---
 
@@ -434,10 +416,9 @@ _Achado independentemente por 2 dimensões (consumo + consistência) — fundido
 **Sugestão:** Marcar CR-01-18 ✅ 'resolvido fora do fluxo (CR-04/04ed4b26: FaintController.cs deletado)' + nota do residual (blocos comentados) + ✅ na linha 35 do índice.
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão (autorização global "tudo")
+
+**Resolução:** ✅ Aplicado em 2026-07-13 (build 1.1.1). Detalhes no commit da rodada 04.
 
 ---
 
@@ -454,10 +435,9 @@ _Achado independentemente por 2 dimensões (consumo + consistência) — fundido
 **Sugestão:** Atualizar a linha para o estado CR-05 (ConsumeSafe sempre subtrai; descarte diferido via coroutine networked; consumo por report do paciente quando a fiação for ligada) — ou remover a menção e deixar as pendências P-2.13/P-2.14 contarem a história.
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão (autorização global "tudo")
+
+**Resolução:** ✅ Aplicado em 2026-07-13 (build 1.1.1). Detalhes no commit da rodada 04.
 
 ---
 
@@ -474,10 +454,9 @@ _Achado independentemente por 2 dimensões (consumo + consistência) — fundido
 **Sugestão:** Ou alinhar verbatim (aproveitando a edição do achado da Duracao do Desmaio), ou anotar no cabeçalho do PROPRIEDADES.md qual lado é canônico e corrigir a nota de resolução do CR-03-16 para refletir a decisão real.
 
 **Decisão:**
-- [ ] Pendente
-- [ ] Aceitar sugestão
-- [ ] Aceitar com modificação: _________________
-- [ ] Rejeitar (deferir / aceitar como dívida): _________________
+- [x] Aceitar sugestão (autorização global "tudo")
+
+**Resolução:** ✅ Aplicado em 2026-07-13 (build 1.1.1). Detalhes no commit da rodada 04.
 
 ---
 
@@ -485,4 +464,5 @@ _Achado independentemente por 2 dimensões (consumo + consistência) — fundido
 
 | Data | Autor | Alteração |
 |---|---|---|
-| 2026-07-13 | Guilherme | Criação (rodada 04). Bloqueador CR-04-01 resolvido na criação (build 1.1.0). Demais achados aguardam decisão. |
+| 2026-07-13 | Guilherme | Criação (rodada 04). Bloqueador CR-04-01 resolvido na criação (build 1.1.0). |
+| 2026-07-13 | Guilherme | Aplicação integral autorizada ("tudo") — 21 achados aplicados (nonce do consumo pendente aceito COM MODIFICAÇÃO: flush-on-register por (paciente,template), sem mudar wire; NOTA do membro pré-anim registrada na matriz sem mudança de código; cooldown de re-desmaio de bot = 8s). Build 1.1.1. |

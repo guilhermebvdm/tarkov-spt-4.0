@@ -38,18 +38,10 @@ namespace TrueTrauma
                         __instance.MovementContext.IsInPronePose = true;
                     }
 
-                    // 2. Mantém o efeito visual de tontura (Blur)
-                    // ref: CR-01-27 — vanilla dispara DoContusion por EVENTO; por frame
-                    // eram ~1200 passagens pelo pipeline de efeitos em 20s de blackout.
-                    // ref: CR-04 — última renovação para 2s ANTES do wake: o Fika pausa
-                    // efeitos no downed e retoma no wake — sem o cap, o jogador acordava
-                    // com contusion residual ("tela suja" pós-consciência).
-                    if ((!TraumaState.ContusionRenewTimers.TryGetValue(id, out float nextContusion) || now >= nextContusion)
-                        && now + 2f <= TraumaState.BlackoutTimers[id])
-                    {
-                        TraumaState.ContusionRenewTimers[id] = now + 2f;
-                        __instance.ActiveHealthController?.DoContusion(1f, 1f);
-                    }
+                    // ref: CR-04-19 — renovação de DoContusion REMOVIDA: era no-op para
+                    // o humano local downed (Fika seta DamageCoeff=0 e o DoContusion
+                    // guarda em DamageCoeff>0) e invisível para bots — o visual do
+                    // blackout vem do DeathFade/FastBlur do Fika.
 
                     // 3. Força arma baixada e sem stamina visual
                     if (__instance.HandsController is IFirearmHandsController firearm) firearm.SetAim(false);
@@ -69,8 +61,6 @@ namespace TrueTrauma
                     TraumaState.BlackoutTimers.Remove(id);
                     TraumaState.BlackoutStartTimes.Remove(id);
 
-                    TraumaState.ContusionRenewTimers.Remove(id);
-
                     // Lógica de recuperação (Levantar ou ficar deitado)
                     if (__instance.IsAI && __instance.AIData?.BotOwner != null)
                     {
@@ -84,6 +74,9 @@ namespace TrueTrauma
                         // clients ficavam com espelho órfão e o bot permanentemente mudo).
                         FikaBridge.SyncFaintStatus(__instance, false);
                         TraumaState.GraceTimers.Remove(id);
+                        // ref: CR-04-13 — cooldown de re-desmaio do bot (sem grace,
+                        // um hit forte no frame do wake re-derrubava em loop)
+                        TraumaState.BotFaintCooldowns[id] = now + 8f;
 
                         if (__instance.Physical != null) __instance.Physical.Stamina.Current = __instance.Physical.Stamina.TotalCapacity;
                     }

@@ -469,3 +469,4 @@
 | Data | Autor | Alteração |
 |---|---|---|
 | 2026-07-12 | Guilherme | Criação + aplicação integral autorizada ("tudo"): 23 aplicados, 2 deferidos. |
+| 2026-07-13 | Guilherme | Anotação (rodada 04): os 2 deferidos ganharam mitigação parcial pelo CR-05 — a revalidação approve→apply agora tem o CONSUMO pós-aplicação (resta só a faceta visual do membro pré-anim, aceita); o versionamento de pacotes segue dívida (mitigado por MESMA BUILD na matriz). |

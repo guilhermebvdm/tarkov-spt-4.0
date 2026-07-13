@@ -103,11 +103,12 @@ namespace TRLImmersiveCombatMedicine
             if (response.Approved)
             {
                 TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"Handshake aprovado! Iniciando cura com {_pendingHealStats?.Name}.");
-                // Membro-alvo esperado calculado pelo paciente — mostrado ANTES da animação
-                _expectedTreatmentPart = (EBodyPart)response.ExpectedBodyPart;
                 var mainPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
                 if (mainPlayer != null && _pendingHealItem != null && _pendingHealStats != null)
                 {
+                    // ref: CR-04-15 — só setar quando a HealRoutine de fato inicia
+                    // (setado fora do guard ficava stale para a cura seguinte)
+                    _expectedTreatmentPart = (EBodyPart)response.ExpectedBodyPart;
                     _activeHealCoroutine = StartCoroutine(
                         HealRoutine(mainPlayer, _pendingHealPatient, _pendingHealItem, _pendingHealStats));
                 }
@@ -639,6 +640,9 @@ namespace TRLImmersiveCombatMedicine
                 string partSuffix = MedicHealPatch.LastAppliedPart != EBodyPart.Common
                     ? $" ({BandAidUI.PartLabel(MedicHealPatch.LastAppliedPart)})" : "";
                 NotificationManagerClass.DisplayMessageNotification($"Tratamento Completo{partSuffix}.", ENotificationDurationType.Long, ENotificationIconType.Quest);
+                // ref: CR-04-14 — sucesso também limpa o rastreamento (referência
+                // estática ao MedEffect não atravessa curas/raids)
+                MedicHealPatch.ClearNativeEffectTracking();
             }
             // N3: Verificar se o item e o paciente ainda existem após o UseTime
             else if (patient != null && patient.HealthController.IsAlive && itemUsed != null)
@@ -928,33 +932,87 @@ namespace TRLImmersiveCombatMedicine
         /// nunca desapareciam). Espera as mãos liberarem (MedsController sair) e
         /// tenta com retry espaçado.
         /// </summary>
+        // ref: CR-04-16/18 — dedup por item + tracking p/ parar no fim da raid
+        private readonly HashSet<string> _activeDiscardIds = new HashSet<string>();
+        private readonly List<Coroutine> _discardCoroutines = new List<Coroutine>();
+
         public void ScheduleNetworkedDiscard(Player doctor, Item item)
         {
-            StartCoroutine(DeferredDiscardRoutine(doctor, item));
+            string itemId = item?.Id;
+            if (itemId == null) return;
+            if (!_activeDiscardIds.Add(itemId))
+            {
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo(
+                    "Descarte já agendado para este item — ignorando duplicata (CR-04-18).");
+                return;
+            }
+            _discardCoroutines.Add(StartCoroutine(DeferredDiscardRoutine(doctor, item, itemId)));
         }
 
-        private IEnumerator DeferredDiscardRoutine(Player doctor, Item item)
+        public void StopAllDeferredDiscards()
         {
-            // 1) Esperar as mãos liberarem (timeout 6s — depois tenta mesmo assim)
-            float handsDeadline = Time.time + 6f;
-            while (Time.time < handsDeadline && doctor != null &&
-                   doctor.HandsController is Player.MedsController)
-            {
-                yield return new WaitForSeconds(0.25f);
-            }
-            yield return new WaitForSeconds(0.2f); // folga p/ o pipeline fechar eventos
+            foreach (var c in _discardCoroutines)
+                if (c != null) StopCoroutine(c);
+            _discardCoroutines.Clear();
+            _activeDiscardIds.Clear();
+        }
 
-            // 2) Até 4 tentativas espaçadas
-            for (int attempt = 1; attempt <= 4; attempt++)
+        private IEnumerator DeferredDiscardRoutine(Player doctor, Item item, string itemId)
+        {
+            // ref: CR-04-16 — a coroutine vive no GO do plugin (sessão inteira):
+            // amarrar ao GameWorld da raid em que nasceu; se a raid trocar/acabar,
+            // abortar (item/controller daquela raid estão mortos).
+            var bornWorld = Singleton<GameWorld>.Instance;
+            try
             {
-                if (doctor == null) yield break;
-                if (MedicalLogic.TryDiscardOnce(doctor, item)) yield break;
-                TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning(
-                    $"Descarte diferido: tentativa {attempt}/4 falhou — nova em 0.75s.");
-                yield return new WaitForSeconds(0.75f);
+                // 1) Esperar as mãos liberarem (timeout 6s — depois tenta mesmo assim)
+                float handsDeadline = Time.time + 6f;
+                while (Time.time < handsDeadline && doctor != null &&
+                       doctor.HandsController is Player.MedsController)
+                {
+                    yield return new WaitForSeconds(0.25f);
+                }
+                yield return new WaitForSeconds(0.2f); // folga p/ o pipeline fechar eventos
+
+                // 2) Até 4 tentativas espaçadas
+                for (int attempt = 1; attempt <= 4; attempt++)
+                {
+                    if (doctor == null || Singleton<GameWorld>.Instance != bornWorld) yield break;
+
+                    var watch = new MedicalLogic.DiscardWatch();
+                    int r = MedicalLogic.StartDiscardAttempt(doctor, item, watch);
+                    if (r == MedicalLogic.DISCARD_DONE) yield break;
+
+                    if (r == MedicalLogic.DISCARD_SENT)
+                    {
+                        // ref: CR-04-02 — o Fika valida em async (Task.Yield): esperar
+                        // o callback disparar (cap 1.2s) antes de decidir.
+                        float cbDeadline = Time.time + 1.2f;
+                        while (!watch.CallbackFired && Time.time < cbDeadline)
+                            yield return null;
+
+                        if (watch.CallbackFired && !watch.Failed)
+                        {
+                            TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo(
+                                "Descarte confirmado pelo pipeline (CR-04-02).");
+                            yield break;
+                        }
+                        // Failed ou timeout sem callback (ex.: player morto — callback
+                        // nunca dispara): retry; o guard de CurrentAddress da próxima
+                        // tentativa evita double-discard se a operação executou tarde.
+                    }
+
+                    TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning(
+                        $"Descarte diferido: tentativa {attempt}/4 sem confirmação — nova em 0.75s.");
+                    yield return new WaitForSeconds(0.75f);
+                }
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogError(
+                    "Descarte diferido: TODAS as tentativas falharam — item zerado permanece no inventário (reportar).");
             }
-            TRLImmersiveCombatMedicinePlugin.ModLogger.LogError(
-                "Descarte diferido: TODAS as tentativas falharam — item zerado permanece no inventário (reportar).");
+            finally
+            {
+                _activeDiscardIds.Remove(itemId);
+            }
         }
 
         /// <summary>
@@ -981,7 +1039,10 @@ namespace TRLImmersiveCombatMedicine
             _targetPatient = null;
 
             MedicalLogic.ClearPendingConsumes(); // ref: CR-05 — sem débito entre raids
+            StopAllDeferredDiscards();           // ref: CR-04-16 — coroutines não atravessam raids
+            _expectedTreatmentPart = EBodyPart.Common; // ref: CR-04-15
             MedicHealPatch.CancelNativePatientEffect(); // ref: CR-02
+            MedicHealPatch.ClearNativeEffectTracking(); // ref: CR-04-14
             BandAidUI.Instance?.ClearTreatment();
             MedicHealPatch.IsRedirectingHeal = false;
             MedicHealPatch.CurrentPatient = null;

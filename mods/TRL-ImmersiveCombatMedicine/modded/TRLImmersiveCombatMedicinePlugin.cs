@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace TRLImmersiveCombatMedicine
 {
-    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.1.0")]
+    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.1.1")]
     public class TRLImmersiveCombatMedicinePlugin : BaseUnityPlugin
     {
         public static TRLImmersiveCombatMedicinePlugin Instance;
@@ -35,7 +35,7 @@ namespace TRLImmersiveCombatMedicine
         {
             Instance = this;
             ModLogger = base.Logger;
-            ModLogger.LogInfo("TRL-ImmersiveCombatMedicine Plugin v1.1.0 carregado.");
+            ModLogger.LogInfo("TRL-ImmersiveCombatMedicine Plugin v1.1.1 carregado.");
 
             // Inicializações combinadas
             ItemDatabase.Initialize();
@@ -228,6 +228,16 @@ namespace TRLImmersiveCombatMedicine
             {
                 TraumaState.EffectIntensity = 0f;
                 if (AudioListener.volume != 1f) AudioListener.volume = 1f;
+
+                // ref: CR-04-11 — desligar o desmaio no F12 DURANTE um desmaio deixava
+                // o jogador preso em Downed (o MainLoopPatch limpa os timers sem
+                // acordar, e este early-return impedia o WakeLocalPlayer de rodar).
+                if (TraumaState.IsFainted)
+                {
+                    var gwOff = Comfort.Common.Singleton<EFT.GameWorld>.Instance;
+                    if (gwOff?.MainPlayer != null)
+                        WakeLocalPlayer(gwOff, gwOff.MainPlayer.ProfileId);
+                }
                 return;
             }
 

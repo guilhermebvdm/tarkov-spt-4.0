@@ -650,10 +650,14 @@ namespace Band_Aid
                 // (era hardcoded "[Pressione F]", contradizendo o default Hold)
                 if (_footerText != null)
                 {
-                    var key = TRLImmersiveCombatMedicinePlugin.MedicInteractKey.Value.MainKey;
+                    var shortcut = TRLImmersiveCombatMedicinePlugin.MedicInteractKey.Value;
                     var mode = TRLImmersiveCombatMedicinePlugin.MedicInteractMode.Value;
                     string verbo = mode == EBandAidPressMode.Hold ? "Segure" : (mode == EBandAidPressMode.DoubleTap ? "Duplo" : "Pressione");
-                    _footerText.text = $"Utilize as suas teclas de atalhos para curar\n[{verbo} {key}] Fechar Examinador";
+                    // ref: CR-04-21 — incluir modifiers (Shift+F etc.), mesma semântica
+                    // do CheckPressMode (que EXIGE o modifier quando configurado)
+                    string keyLabel = shortcut.MainKey.ToString();
+                    foreach (var m in shortcut.Modifiers) keyLabel = m + "+" + keyLabel;
+                    _footerText.text = $"Utilize as suas teclas de atalhos para curar\n[{verbo} {keyLabel}] Fechar Examinador";
                 }
                 _canvasObj.SetActive(true);
                 _lastUpdateTime = 0f;

@@ -416,12 +416,30 @@ namespace Band_Aid
 
         private static void RegisterPendingConsume(Player doctor, Item item, string patientId, float fallbackCost)
         {
+            string templateId = item.TemplateId.ToString();
+
+            // ref: CR-04-17 — máximo 1 pendente por (paciente, template): se um report
+            // se perdeu e a cura seguinte usa o mesmo item no mesmo paciente, o
+            // pendente antigo é liquidado com o fallback AGORA (em vez de o report da
+            // cura nova casar com o pendente velho e cruzar os custos).
+            for (int i = 0; i < _pendingConsumes.Count; i++)
+            {
+                var old = _pendingConsumes[i];
+                if (old.PatientId == patientId && old.TemplateId == templateId)
+                {
+                    _pendingConsumes.RemoveAt(i);
+                    Logger.LogWarning($"[CR-05] Pendente antigo do mesmo item/paciente liquidado com fallback {old.FallbackCost:F1} antes do novo registro.");
+                    ConsumeSafe(old.Doctor, old.Item, old.FallbackCost, isRemotePatient: true);
+                    break;
+                }
+            }
+
             _pendingConsumes.Add(new PendingConsume
             {
                 Doctor = doctor,
                 Item = item,
                 PatientId = patientId,
-                TemplateId = item.TemplateId.ToString(),
+                TemplateId = templateId,
                 FallbackCost = fallbackCost,
                 Deadline = Time.time + PENDING_CONSUME_TIMEOUT
             });
@@ -501,12 +519,12 @@ namespace Band_Aid
                     return;
                 }
 
-                // Item simples (esmarch, bandagem, etc.) — sempre descarta
-                if (isRemotePatient)
-                {
-                    Logger.LogInfo("Item simples (remoto). Descartando.");
-                    DiscardItemNetworked(doctor, item);
-                }
+                // Item simples (esmarch, bandagem, tala, injetor) — sempre descarta.
+                // ref: CR-04-03 — o gate isRemotePatient deixava o caminho LOCAL
+                // (host→bot, solo) com itens de 1 uso INFINITOS (sem MedKitComponent,
+                // MaxHpResource=0 no template — nunca caíam nos branches acima).
+                Logger.LogInfo("Item simples de 1 uso. Descartando (networked).");
+                DiscardItemNetworked(doctor, item);
             }
             catch (Exception ex)
             {
@@ -536,50 +554,63 @@ namespace Band_Aid
             }
             else
             {
-                TryDiscardOnce(doctor, item);
+                // Sem controller p/ coroutine: melhor esforço em tentativa única
+                StartDiscardAttempt(doctor, item, new DiscardWatch());
             }
         }
 
-        /// <summary>Uma tentativa de descarte networked. true = enviada/encerrada; false = vale retry.</summary>
-        public static bool TryDiscardOnce(Player doctor, Item item)
+        /// <summary>
+        /// ref: CR-04-02 — resultado observável de uma tentativa de descarte. O
+        /// callback do Fika NÃO é síncrono no caso geral (Client/HostInventoryController
+        /// fazem await Task.Yield() antes de validar): a coroutine espera o callback
+        /// disparar (ou timeout) antes de decidir sucesso/retry.
+        /// </summary>
+        public class DiscardWatch
+        {
+            public volatile bool CallbackFired;
+            public volatile bool Failed;
+        }
+
+        public const int DISCARD_DONE = 2;    // item já sem endereço — nada a fazer
+        public const int DISCARD_SENT = 1;    // operação enviada — aguardar o watch
+        public const int DISCARD_RETRY = 0;   // simulação/exceção — vale retry
+
+        /// <summary>Inicia UMA tentativa de descarte networked (decisão fica na coroutine).</summary>
+        public static int StartDiscardAttempt(Player doctor, Item item, DiscardWatch watch)
         {
             try
             {
                 // Guard: item já removido/sem endereço — nunca tocar em item.Parent
-                // (o getter LANÇA); CurrentAddress é o accessor seguro.
+                // (o getter LANÇA); CurrentAddress é o accessor seguro. Também é o
+                // que torna o retry pós-timeout seguro contra double-discard: se a
+                // tentativa anterior executou tarde, o item já destacou e caímos aqui.
                 if (item == null || item.CurrentAddress == null)
                 {
-                    Logger.LogInfo("TryDiscardOnce: item sem endereço (já removido) — nada a fazer.");
-                    return true;
+                    Logger.LogInfo("Descarte: item sem endereço (já removido) — nada a fazer.");
+                    return DISCARD_DONE;
                 }
 
                 var controller = doctor.InventoryController;
                 var discardResult = InteractionsHandlerClass.Discard(item, controller, simulate: true);
                 if (!discardResult.Succeeded)
                 {
-                    Logger.LogWarning($"TryDiscardOnce: simulação falhou ({discardResult.Error}) — retry.");
-                    return false;
+                    Logger.LogWarning($"Descarte: simulação falhou ({discardResult.Error}) — retry.");
+                    return DISCARD_RETRY;
                 }
 
-                bool rejected = false;
                 controller.TryRunNetworkTransaction(discardResult, result =>
                 {
-                    // ClientInventoryController valida CanExecute SINCRONAMENTE antes
-                    // de enviar ao host — item nas mãos cai aqui.
-                    if (result?.Failed == true)
-                    {
-                        rejected = true;
-                        Logger.LogWarning($"TryDiscardOnce: operação rejeitada ({result.Error}).");
-                    }
+                    watch.Failed = result?.Failed == true;
+                    watch.CallbackFired = true;
+                    if (watch.Failed)
+                        Logger.LogWarning($"Descarte: operação rejeitada ({result.Error}).");
                 });
-                if (!rejected)
-                    Logger.LogInfo($"Descarte de {item.ShortName.Localized()} enviado ao pipeline de rede.");
-                return !rejected;
+                return DISCARD_SENT;
             }
             catch (Exception ex)
             {
-                Logger.LogError($"TryDiscardOnce erro: {ex.Message}");
-                return false;
+                Logger.LogError($"StartDiscardAttempt erro: {ex.Message}");
+                return DISCARD_RETRY;
             }
         }
 

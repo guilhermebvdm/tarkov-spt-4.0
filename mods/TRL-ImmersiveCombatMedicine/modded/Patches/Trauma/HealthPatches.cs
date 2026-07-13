@@ -52,7 +52,9 @@ namespace TrueTrauma
                 // ref: CR-04 — guard de re-entrada cobre blackout ATIVO e GRACE:
                 // sem o FaintedPlayerIds aqui, cada hit forte pós-wake re-desmaiava
                 // (loop que mantinha o alvo em ragdoll/Deadbody — "não acerto mais").
+                // ref: CR-04-13 — bots ganham cooldown próprio (não têm grace).
                 if (TraumaState.BlackoutTimers.ContainsKey(id) || TraumaState.FaintedPlayerIds.Contains(id)) return;
+                if (TraumaState.BotFaintCooldowns.TryGetValue(id, out float cdUntil) && now < cdUntil) return;
 
                 if (isValidTraumaType)
                 {
@@ -73,11 +75,11 @@ namespace TrueTrauma
                         TraumaState.BlackoutStartTimes[id] = now;
 
                         // Efeitos Locais
-                        // ref: CR-04 — stun CURTO de impacto (era 60s: o Fika pausa
-                        // efeitos durante o downed e RETOMA no wake — o jogador
-                        // acordava com ~60s de stun pela frente, "tela suja").
+                        // ref: CR-04-12 — SEM DoStun no entry: o ToggleDowned do frame
+                        // seguinte pausava o efeito e o RETOMAVA no wake (~2-4s de
+                        // "tela suja" pós-consciência). O impacto visual do blackout
+                        // já vem do DeathFade/FastBlur do Fika.
                         if (__instance.Physical != null) __instance.Physical.Stamina.Current = 0f;
-                        __instance.ActiveHealthController?.DoStun(2f, 1f);
                         __instance.MovementContext.IsInPronePose = true;
                         if (__instance.HandsController is IFirearmHandsController firearm) firearm.SetAim(false);
 
