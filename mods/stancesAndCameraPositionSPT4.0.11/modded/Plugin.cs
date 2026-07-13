@@ -20,7 +20,7 @@ public enum ScrollMode
     Linear,
 }
 
-[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "2.0.0")]
+[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "2.1.0")]
 public class Plugin : BaseUnityPlugin
 {
     public static Plugin Instance { get; private set; }
@@ -56,7 +56,6 @@ public class Plugin : BaseUnityPlugin
     private const string Positions = "Camera Position";
     private const string Settings = "Stance Cycle & Hotkeys";
     private const string ADSDefaults = "ADS Default Values (Advanced)";
-    private const string DefaultHandsPositions = "Default Hands/Arms Positions (Advanced)";
     private const string Stance0Section = "Stance 0 - Vanilla";
     // backlog 002 — section renames: nomes refletem os eixos reais de Pitch/Yaw configurados.
     // ⚠️ BREAKING: usuários com .cfg antigo (Ready Up/Ready Down/Custom) terão entries recriadas
@@ -150,12 +149,6 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<float> _ADSHandsForwardBackwardOffset;
     public static ConfigEntry<float> _ADSHandsUpDownOffset;
     public static ConfigEntry<float> _ADSHandsSidewaysOffset;
-
-    // Default Hands/Arms Positions
-    public static ConfigEntry<bool> _DefaultHandsPositionEnabled;
-    public static ConfigEntry<float> _DefaultHandsForwardBackwardOffset;
-    public static ConfigEntry<float> _DefaultHandsUpDownOffset;
-    public static ConfigEntry<float> _DefaultHandsSidewaysOffset;
 
     // Stance 1
     public static ConfigEntry<bool> _Stance1SprintAnimationEnabled;
@@ -252,6 +245,12 @@ public class Plugin : BaseUnityPlugin
         // Áudio NÃO é carregado aqui (cena de menu): a transição p/ o jogo descarrega os clips
         // (length vira 0). Carregamento é disparado em GameWorld.OnGameStarted via HoldBreathPatch.OnRaidStart().
         SafeEnable("FOVSliderPatch", () => new FOVSliderPatch());
+        // MP-02-03 — REGRESSÃO CORRIGIDA. O FOVSliderPatch só alarga o slider da UI; quem remove o
+        // clamp interno (50-75) é o FOVClampPatch. O `.Enable()` dele existia no commit inicial e foi
+        // apagado por arrasto no commit 9816946 (que implementava mounting), deixando as 3 props de
+        // Field of View inertes. O patch é gated internamente por _FOVExpandEnabled (default false),
+        // e o SafeEnable degrada com log se o alvo (GClass1085.Class1841.method_0) sumir no EFT.
+        SafeEnable("FOVClampPatch", () => new FOVClampPatch());
 
         // Fika Multiplayer Sync Integration (Soft Dependency)
         if (Chainloader.PluginInfos.ContainsKey("com.fika.core"))
@@ -656,40 +655,12 @@ public class Plugin : BaseUnityPlugin
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { IsAdvanced = true, Order = 33 }));
 
-        // ========================================
-        // DEFAULT HANDS/ARMS POSITIONS (Order 32-29)
-        // ========================================
-        _DefaultHandsPositionEnabled = Config.Bind(
-            DefaultHandsPositions,
-            "Enable Default Hands/Arms Position",
-            false,
-            new ConfigDescription("Enable or disable default hands/arms position offsets when NOT in stance\n\nLiga ou desliga os ajustes de posição padrão das mãos/braços quando NÃO está em postura",
-            null,
-            new ConfigurationManagerAttributes { IsAdvanced = true, Order = 32 }));
-
-        _DefaultHandsForwardBackwardOffset = Config.Bind(
-            DefaultHandsPositions,
-            "Default Forward/Backward (Frente/Trás)",
-            0f,
-            new ConfigDescription("Default hands/weapon position forward/backward (positive = forward). This is your normal hip-fire position.\n\nPosição padrão das mãos/arma para frente/trás (positivo = frente). Esta é sua posição normal de tiro no quadril (hip-fire).",
-            new AcceptableValueRange<float>(-0.5f, 0.5f),
-            new ConfigurationManagerAttributes { IsAdvanced = true, Order = 31 }));
-
-        _DefaultHandsUpDownOffset = Config.Bind(
-            DefaultHandsPositions,
-            "Default Up/Down (Coronha Sobe/Desce)",
-            0f,
-            new ConfigDescription("Default hands/weapon position up/down (positive = up). This is your normal hip-fire position.\n\nPosição padrão das mãos/arma para cima/baixo (positivo = cima). Esta é sua posição normal de tiro no quadril (hip-fire).",
-            new AcceptableValueRange<float>(-0.5f, 0.5f),
-            new ConfigurationManagerAttributes { IsAdvanced = true, Order = 30 }));
-
-        _DefaultHandsSidewaysOffset = Config.Bind(
-            DefaultHandsPositions,
-            "Default Sideways (Coronha Esq/Dir)",
-            0f,
-            new ConfigDescription("Default hands/weapon position left/right (positive = right). This is your normal hip-fire position.\n\nPosição padrão das mãos/arma para esquerda/direita (positivo = direita). Esta é sua posição normal de tiro no quadril (hip-fire).",
-            new AcceptableValueRange<float>(-0.5f, 0.5f),
-            new ConfigurationManagerAttributes { IsAdvanced = true, Order = 29 }));
+        // MP-02-01 — a seção "Default Hands/Arms Positions" foi REMOVIDA (review 02).
+        // As 4 props alimentavam _cachedDefaultPosition, lido só no branch `_ =>` de
+        // GetTargetPosition — que exige stance == Default. Mas os 3 call-sites de
+        // GetTargetPosition são gated em `isInStance` (⇔ CurrentStance != Default), então
+        // o branch nunca era alcançado: as opções não faziam nada. Ajuste fora de stance
+        // continua disponível na seção "Camera Position".
 
         // ========================================
         // STANCE 0 - VANILLA (06-fix-03: descoberta cedo)
@@ -1193,7 +1164,9 @@ public class Plugin : BaseUnityPlugin
         {
             cfg.ModifiesMovementSpeed.SettingChanged   += OnStanceConfigChanged;
             cfg.MovementSpeedMultiplier.SettingChanged += OnStanceConfigChanged;
-            cfg.ApplyWhenProne.SettingChanged          += OnStanceConfigChanged;
+            // MP-02-02: ApplyWhenProne é null nas Stances 1/2/3 (sentinel) — `?.` obrigatório.
+            if (cfg.ApplyWhenProne != null)
+                cfg.ApplyWhenProne.SettingChanged      += OnStanceConfigChanged;
         }
 
         // Validar reflection — se BSG renomear backing fields de events em update do EFT,
@@ -1218,16 +1191,12 @@ public class Plugin : BaseUnityPlugin
         
         // Subscribe to config changes for stance cached values
         _ResetOnADS.SettingChanged += (_, __) => StanceManager.MarkStanceValuesDirty();
-        _DefaultHandsPositionEnabled.SettingChanged += (_, __) => StanceManager.MarkStanceValuesDirty();
         _ADSHandsPitchRotation.SettingChanged += (_, __) => StanceManager.MarkStanceValuesDirty();
         _ADSHandsYawRotation.SettingChanged += (_, __) => StanceManager.MarkStanceValuesDirty();
         _ADSHandsRollRotation.SettingChanged += (_, __) => StanceManager.MarkStanceValuesDirty();
         _ADSHandsForwardBackwardOffset.SettingChanged += (_, __) => StanceManager.MarkStanceValuesDirty();
         _ADSHandsUpDownOffset.SettingChanged += (_, __) => StanceManager.MarkStanceValuesDirty();
         _ADSHandsSidewaysOffset.SettingChanged += (_, __) => StanceManager.MarkStanceValuesDirty();
-        _DefaultHandsForwardBackwardOffset.SettingChanged += (_, __) => StanceManager.MarkStanceValuesDirty();
-        _DefaultHandsUpDownOffset.SettingChanged += (_, __) => StanceManager.MarkStanceValuesDirty();
-        _DefaultHandsSidewaysOffset.SettingChanged += (_, __) => StanceManager.MarkStanceValuesDirty();
         _Stance1HandsPitchRotation.SettingChanged += (_, __) => StanceManager.MarkStanceValuesDirty();
         _Stance1HandsYawRotation.SettingChanged += (_, __) => StanceManager.MarkStanceValuesDirty();
         _Stance1HandsRollRotation.SettingChanged += (_, __) => StanceManager.MarkStanceValuesDirty();
@@ -1287,14 +1256,15 @@ public class Plugin : BaseUnityPlugin
     /// </summary>
     private static void RefreshScrollModeVisibility()
     {
-        bool wheelEnabled = _EnableMouseWheelCycle?.Value ?? false;
-        bool isCycle = wheelEnabled && _MouseWheelScrollMode?.Value == ScrollMode.Cycle;
-
-        // Em modo Linear (ou wheel desabilitado), os toggles de ciclo ficam ocultos.
-        if (_attrIncludeStance0 != null)     _attrIncludeStance0.Browsable = isCycle;
-        if (_attrEnableStance1Cycle != null) _attrEnableStance1Cycle.Browsable = isCycle;
-        if (_attrEnableStance2Cycle != null) _attrEnableStance2Cycle.Browsable = isCycle;
-        if (_attrEnableStance3Cycle != null) _attrEnableStance3Cycle.Browsable = isCycle;
+        // MP-02-04 — os 4 toggles de ciclo agora ficam SEMPRE visíveis.
+        // Antes: `Browsable = wheelEnabled && mode == Cycle`, o que os escondia na config padrão
+        // (wheel off / modo Linear). Mas eles governam também o ciclo da tecla V (IsStanceEnabled →
+        // GetNextStance) em QUALQUER modo — como o próprio tooltip diz. Escondê-los deixava o
+        // usuário sem como editar, pela UI, quais posturas o V percorre.
+        if (_attrIncludeStance0 != null)     _attrIncludeStance0.Browsable = true;
+        if (_attrEnableStance1Cycle != null) _attrEnableStance1Cycle.Browsable = true;
+        if (_attrEnableStance2Cycle != null) _attrEnableStance2Cycle.Browsable = true;
+        if (_attrEnableStance3Cycle != null) _attrEnableStance3Cycle.Browsable = true;
 
         // Forçar redesenho do CM em tempo real — só se cache disponível (degradação graciosa).
         if (!_cmRefreshAvailable) return;
@@ -1446,11 +1416,18 @@ public class Plugin : BaseUnityPlugin
                     "Speed cap in %. 50 = half speed, 75 = slightly slower, 100 = no reduction. Only reduction is supported (EFT speed limit system limitation).\n\nLimite de velocidade em %. 50 = metade da velocidade, 75 = um pouco mais lento, 100 = sem redução. Só reduções são suportadas (limitação do sistema de speed limit do EFT).",
                     new AcceptableValueRange<int>(50, 100),
                     new ConfigurationManagerAttributes { IsAdvanced = true, Order = orderBase - 3 })),
-            ApplyWhenProne = Config.Bind(d.Section, $"Stance {n} Apply When Prone", d.ApplyProne,
-                new ConfigDescription(
-                    "Apply this stance effects (drain/recovery and speed cap) while prone. Disabled by default as it may conflict with EFT prone animations.\n\nAplica os efeitos desta postura (drain/recuperação e limite de velocidade) enquanto deitado (prone). Desativado por padrão pois pode conflitar com as animações de prone do EFT.",
-                    null,
-                    new ConfigurationManagerAttributes { IsAdvanced = true, Order = orderBase - 4 })),
+            // MP-02-02 — só a Stance 0 recebe ConfigEntry (sentinel null nas demais, como o
+            // SnapToStance0OnFire faz ao contrário). Motivo: ao deitar, StanceManager.Update força
+            // SetStance(Default) ANTES das leituras (StanceManager.cs:165-176), então a cfg
+            // consultada em prone é SEMPRE a da Stance 0 — as entries das Stances 1/2/3 eram lidas
+            // num caminho inalcançável e não faziam nada. Leitores usam `?.Value ?? false`.
+            ApplyWhenProne = (d.Stance != Stance.Default)
+                ? null
+                : Config.Bind(d.Section, $"Stance {n} Apply When Prone", d.ApplyProne,
+                    new ConfigDescription(
+                        "Keep the movement speed cap active while prone. Disabled by default, as it may conflict with EFT prone animations. Applies to every state without a stance — which is most of the match.\n\nMantém o limite de velocidade ativo enquanto deitado (prone). Desativado por padrão pois pode conflitar com as animações de prone do EFT. Vale para todo estado sem postura — ou seja, a maior parte da partida.",
+                        null,
+                        new ConfigurationManagerAttributes { IsAdvanced = true, Order = orderBase - 4 })),
             // backlog 002 F4 — Stance 0 NÃO recebe ConfigEntry (sentinel null). O guard
             // `if (CurrentStance == Stance.Default) return false;` em StanceManager.TryInterceptTriggerDown
             // já cobre. Isto evita exibir uma entry inútil na seção `Stance 0 - Vanilla` do F12.

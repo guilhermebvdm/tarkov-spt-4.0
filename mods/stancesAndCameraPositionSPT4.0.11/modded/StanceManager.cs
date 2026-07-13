@@ -102,8 +102,7 @@ namespace CameraRotationMod
         private static Vector3 _cachedStance2Position;
         private static Vector3 _cachedStance3Rotation;
         private static Vector3 _cachedStance3Position;
-        private static Vector3 _cachedDefaultPosition;
-        
+
         // Cached sprint enabled flag - rebuilt when config changes
         private static bool _sprintEnabledDirty = true;
         private static bool _cachedAnySprintEnabled = false;
@@ -766,14 +765,9 @@ namespace CameraRotationMod
                 Plugin._Stance3HandsUpDownOffset?.Value ?? 0f           // Z (Local Z = Up/Down in Tarkov)
             );
             
-            _cachedDefaultPosition = (Plugin._DefaultHandsPositionEnabled?.Value ?? false)
-                ? new Vector3(
-                    Plugin._DefaultHandsSidewaysOffset?.Value ?? 0f,        // X (Sideways)
-                    Plugin._DefaultHandsForwardBackwardOffset?.Value ?? 0f, // Y (Local Y = Forward/Backward in Tarkov)
-                    Plugin._DefaultHandsUpDownOffset?.Value ?? 0f           // Z (Local Z = Up/Down in Tarkov)
-                )
-                : Vector3.zero;
-            
+            // MP-02-01: _cachedDefaultPosition removido junto com a seção "Default Hands/Arms
+            // Positions" — só era lido no branch `_ =>` de GetTargetPosition, inalcançável.
+
             _stanceValuesDirty = false;
         }
 
@@ -822,12 +816,14 @@ namespace CameraRotationMod
             }
 
             // Return cached position based on the given stance
+            // MP-02-01: o branch `_ =>` (stance Default) devolve zero — todos os call-sites já
+            // são gated em `isInStance`, então ele nunca é alcançado na prática.
             return stance switch
             {
                 Stance.Stance1 => _cachedStance1Position,
                 Stance.Stance2 => _cachedStance2Position,
                 Stance.Stance3 => _cachedStance3Position,
-                _ => _cachedDefaultPosition
+                _ => Vector3.zero
             };
         }
 
@@ -1245,7 +1241,10 @@ namespace CameraRotationMod
 
             // item 012: o multiplicador de stamina migrou para o StaminaController; aqui sobra só o speed-limit.
             bool inProne = Singleton<GameWorld>.Instance.MainPlayer.IsInPronePose;
-            StanceStaminaState.IsSuspendedByProne = inProne && !cfg.ApplyWhenProne.Value;
+            // MP-02-02: ApplyWhenProne é null nas Stances 1/2/3 (só a Stance 0 tem a entry) —
+            // ao deitar, a stance ativa já foi forçada para Default, então na prática lê-se sempre
+            // a da Stance 0. O `?? false` preserva o comportamento anterior se isto for alcançado.
+            StanceStaminaState.IsSuspendedByProne = inProne && !(cfg.ApplyWhenProne?.Value ?? false);
 
             if (cfg.ModifiesMovementSpeed.Value && !StanceStaminaState.IsSuspendedByProne)
             {
@@ -1342,7 +1341,8 @@ namespace CameraRotationMod
 
                 var player = Singleton<GameWorld>.Instance.MainPlayer;
                 bool wasSuspended = StanceStaminaState.IsSuspendedByProne;
-                bool isSuspended = player.IsInPronePose && !cfg.ApplyWhenProne.Value;
+                // MP-02-02: idem ApplyStaminaStance — null nas Stances 1/2/3.
+                bool isSuspended = player.IsInPronePose && !(cfg.ApplyWhenProne?.Value ?? false);
 
                 if (wasSuspended != isSuspended)
                 {

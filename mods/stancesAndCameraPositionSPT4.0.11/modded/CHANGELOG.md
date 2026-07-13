@@ -7,6 +7,43 @@ Versões mais recentes primeiro.
 
 ---
 
+## v2.1.0 (2026-07-12)
+
+Faxina de opções que **não faziam nada** e o resgate de uma feature que havia quebrado sem ninguém notar.
+O menu F12 foi de 120 para **113 opções** e de 21 para **20 seções**.
+
+### Corrigido
+
+- **O FOV expandido voltou a funcionar.** A opção `Enable Expanded FOV Range` estava inerte: o patch que
+  remove o limite interno de 50–75 do jogo existia, mas **deixou de ser ativado** em algum momento — o
+  código foi removido por acidente, junto com uma mudança que não tinha relação. O que sobrava só alargava
+  o slider da tela, enquanto o jogo continuava limitando o valor de volta. O patch foi reativado.
+- **As opções que definem quais posturas a tecla de troca percorre voltaram a aparecer no F12.**
+  `Include Stance 0 in Cycle` e `Enable Stance 1/2/3 in Cycle` ficavam **escondidas** a menos que a roda do
+  mouse estivesse em modo `Cycle` — mas elas sempre governaram também o ciclo da tecla (`V` por padrão).
+  Quem usa a tecla não tinha como editá-las pela interface, apesar de elas estarem ativas.
+
+### Removido (7 opções que não faziam efeito nenhum)
+
+- **Seção `Default Hands/Arms Positions` inteira** (4 opções). Elas prometiam ajustar a posição das
+  mãos/arma **fora** de postura, mas o código que as lia só rodava **dentro** de uma postura — nunca
+  surtiam efeito. Para ajuste fora de postura, use a seção **`Camera Position`**.
+- **`Stance 1/2/3 Apply When Prone`** (3 opções). Ao deitar, o mod já volta para a Stance 0 **antes** de
+  consultar essa configuração — então só a da Stance 0 era lida. As três eram decorativas.
+  **`Stance 0 Apply When Prone` continua e é a que realmente funciona:** é ela que decide se o limite de
+  velocidade continua valendo quando você está deitado.
+
+> As opções removidas ficam órfãs no seu `.cfg` e são simplesmente ignoradas — nada a fazer.
+
+### Nota sobre a Stance 0
+
+A seção `Stance 0 - Vanilla` **não é decorativa**, ao contrário do que o código sugeria: com os valores
+padrão, ela aplica um **limite de 90% na velocidade de movimento sempre que você não está em nenhuma
+postura** — ou seja, na maior parte da partida — e isso **se combina** com o `Walk Speed Multiplier`
+(padrão 0,85). Se o personagem parece mais lento do que deveria, é aí que se mexe.
+
+---
+
 ## v2.0.0 (2026-07-11)
 
 > ### ⚠️ Leia antes de atualizar: suas configurações serão perdidas

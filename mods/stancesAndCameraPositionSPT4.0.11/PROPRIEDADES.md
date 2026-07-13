@@ -1,7 +1,9 @@
 # Propriedades F12 — stancesAndCameraPositionSPT4.0.11
 
-> Todas as opções do menu **F12** (BepInEx ConfigurationManager). **21 seções · 120 opções.**
-> Regenerado de `modded/Plugin.cs` em 2026-07-11 (fonte de verdade). Os tooltips do jogo são bilíngues (EN + PT); aqui a coluna **Descrição** traz a versão em português resumida.
+> Todas as opções do menu **F12** (BepInEx ConfigurationManager). **20 seções · 113 opções.**
+> Regenerado de `modded/Plugin.cs` em **2026-07-12** (fonte de verdade), para a **v2.1.0**. Os tooltips do jogo são bilíngues (EN + PT); aqui a coluna **Descrição** traz a versão em português resumida.
+>
+> **v2.1.0 removeu 7 opções que não faziam efeito** (de 120 → 113; de 21 → 20 seções): a seção `Default Hands/Arms Positions` inteira (4) e `Stance 1/2/3 Apply When Prone` (3). Ver [review 02](./PROPRIEDADES-review-02.md) (`MP-02-01`, `MP-02-02`).
 >
 > **Ordem no menu F12:** o ConfigurationManager ordena as seções por **ordem de descoberta** (primeira `Config.Bind`), não por nome. Aqui elas estão agrupadas **por tema** para leitura; a ordem real no jogo está na tabela ["Ordem no F12"](#ordem-no-menu-f12) ao fim.
 
@@ -10,7 +12,7 @@
 | Tema | Seções |
 |---|---|
 | [A. Troca de stances e câmera](#a--troca-de-stances-e-câmera) | Stance Cycle & Hotkeys · Stance Transition & Kick · Camera Position · Field of View |
-| [B. Poses e mira (ADS)](#b--poses-e-mira-ads) | Stance 0/1/2/3 · ADS Default Values · Default Hands/Arms Positions |
+| [B. Poses e mira (ADS)](#b--poses-e-mira-ads) | Stance 0/1/2/3 · ADS Default Values |
 | [C. Mount e stamina](#c--mount-e-stamina) | Weapon Mount (Active) · Weapon Mount (Passive) · Stamina Management |
 | [D. Movimento](#d--movimento) | Movement & Inertia · Tac Sprint · Animation Speed |
 | [E. Mecânicas de arma](#e--mecânicas-de-arma) | Manual Chambering · Action Stances |
@@ -93,7 +95,6 @@ Cada stance é **uma seção única** no F12, agregando: animação de sprint, r
 | Stance 1 Sideways (Coronha Esq/Dir) | float | `0.02` | -0.5 – 0.5 | Posição lateral (positivo = direita). |
 | Stance 1 Modifies Movement Speed | bool | `true` | — | Aplica teto de velocidade nesta postura. |
 | Stance 1 Movement Speed Multiplier | int | `95` | 50 – 100 | Teto de velocidade em % (só redução). |
-| Stance 1 Apply When Prone | bool | `false` | — | Aplica os efeitos em prone (desligado por padrão). |
 | Stance 1 Snap to Stance 0 on Fire | bool | `true` | — | Atirar nesta postura faz snap p/ Stance 0. Clique < limiar = sem tiro; segurar = snap + 1 tiro natural. Não dispara em ADS nem com item não-arma. |
 
 ### Stance 2 - Low Ready
@@ -109,7 +110,6 @@ Cada stance é **uma seção única** no F12, agregando: animação de sprint, r
 | Stance 2 Sideways (Coronha Esq/Dir) | float | `0.05` | -0.5 – 0.5 | Posição lateral (positivo = direita). |
 | Stance 2 Modifies Movement Speed | bool | `true` | — | Aplica teto de velocidade nesta postura. |
 | Stance 2 Movement Speed Multiplier | int | `90` | 50 – 100 | Teto de velocidade em % (só redução). |
-| Stance 2 Apply When Prone | bool | `false` | — | Aplica os efeitos em prone (desligado por padrão). |
 | Stance 2 Snap to Stance 0 on Fire | bool | `false` | — | Snap p/ Stance 0 ao atirar (desligado por padrão nesta postura). |
 
 ### Stance 3 - Custom
@@ -125,7 +125,6 @@ Cada stance é **uma seção única** no F12, agregando: animação de sprint, r
 | Stance 3 Sideways (Coronha Esq/Dir) | float | `0` | -0.5 – 0.5 | Posição lateral (positivo = direita). |
 | Stance 3 Modifies Movement Speed | bool | `true` | — | Aplica teto de velocidade nesta postura. |
 | Stance 3 Movement Speed Multiplier | int | `100` | 50 – 100 | Teto de velocidade em % (100 = sem redução). |
-| Stance 3 Apply When Prone | bool | `false` | — | Aplica os efeitos em prone (desligado por padrão). |
 | Stance 3 Snap to Stance 0 on Fire | bool | `true` | — | Snap p/ Stance 0 ao atirar. Clique < limiar = sem tiro; segurar = snap + 1 tiro. Não dispara em ADS nem com item não-arma. |
 
 ### ADS Default Values (Advanced)
@@ -140,14 +139,12 @@ Cada stance é **uma seção única** no F12, agregando: animação de sprint, r
 | ADS Up/Down (Coronha Sobe/Desce) | float | `0` | -0.5 – 0.5 | Posição das mãos cima/baixo ao mirar — coronha sobe/desce. |
 | ADS Sideways (Coronha Esq/Dir) | float | `0` | -0.5 – 0.5 | Posição das mãos esquerda/direita ao mirar — coronha esq/dir. |
 
-### Default Hands/Arms Positions (Advanced)
+### ~~Default Hands/Arms Positions (Advanced)~~ — REMOVIDA na v2.1.0
 
-| Propriedade (EN) | Tipo | Padrão | Faixa | Descrição |
-|---|---|---|---|---|
-| Enable Default Hands/Arms Position | bool | `false` | — | Liga os offsets de posição padrão das mãos/braços quando NÃO está em postura. |
-| Default Forward/Backward (Frente/Trás) | float | `0` | -0.5 – 0.5 | Posição hip-fire padrão frente/trás (positivo = frente). |
-| Default Up/Down (Coronha Sobe/Desce) | float | `0` | -0.5 – 0.5 | Posição hip-fire padrão cima/baixo (positivo = cima). |
-| Default Sideways (Coronha Esq/Dir) | float | `0` | -0.5 – 0.5 | Posição hip-fire padrão lateral (positivo = direita). |
+As 4 opções desta seção **não faziam nada** e foram removidas (`MP-02-01`, [review 02](./PROPRIEDADES-review-02.md)):
+alimentavam o branch `_ =>` de `GetTargetPosition` (stance = Default), mas todos os call-sites desse método são
+gated em `isInStance` — o branch era inalcançável. Para ajuste de posição **fora** de postura, use
+[`Camera Position`](#camera-position).
 
 ---
 
@@ -275,7 +272,7 @@ Multiplicador de stamina de braço por cenário. Semântica: **< 1 drena · 1 ma
 
 A ordem real das seções no ConfigurationManager (por ordem de descoberta no `Plugin.cs`):
 
-1. Manual Chambering · 2. Camera Position · 3. Stance Cycle & Hotkeys · 4. Stance Transition & Kick · 5. ADS Default Values (Advanced) · 6. Default Hands/Arms Positions (Advanced) · 7. Stance 0 - Vanilla · 8. Stance 1 - High Ready · 9. Stance 2 - Low Ready · 10. Stance 3 - Custom · 11. Weapon Mount (Active) · 12. Weapon Mount (Passive) · 13. Stamina Management · 14. Hold Breath · 15. Oxygen Bar (UI) · 16. Animation Speed · 17. Movement & Inertia · 18. Action Stances · 19. Tac Sprint Settings (Advanced) · 20. Field of View · 21. Debug (Advanced)
+1. Manual Chambering · 2. Camera Position · 3. Stance Cycle & Hotkeys · 4. Stance Transition & Kick · 5. ADS Default Values (Advanced) · 6. Stance 0 - Vanilla · 7. Stance 1 - High Ready · 8. Stance 2 - Low Ready · 9. Stance 3 - Custom · 10. Weapon Mount (Active) · 11. Weapon Mount (Passive) · 12. Stamina Management · 13. Hold Breath · 14. Oxygen Bar (UI) · 15. Animation Speed · 16. Movement & Inertia · 17. Action Stances · 18. Tac Sprint Settings (Advanced) · 19. Field of View · 20. Debug (Advanced)
 
 ## Histórico de Alterações
 
