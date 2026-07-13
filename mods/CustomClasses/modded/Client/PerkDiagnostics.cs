@@ -21,6 +21,39 @@ internal static class PerkDiag
     internal static float AiPowerBefore, AiPowerAfter;
     internal static float SainBefore, SainAfter;
     internal static float MalfChance = -1f;
+
+    /// <summary>
+    ///     <b>B20 — observabilidade de PEER.</b> O overlay 052 descreve só o SEU player (todos os writes acima são
+    ///     gateados em <c>IsYourPlayer</c>), então os efeitos de som EM PEERS (B14: o que a IA ouve deles; B20: o que
+    ///     VOCÊ ouve deles) não tinham COMO ser verificados — o teste viraria "achei que soou mais baixo", que não é
+    ///     evidência. Isto emite um log por emissor remoto, com a classe resolvida e o antes→depois.
+    ///     <para>
+    ///     Só roda com <c>Diagnostics</c> LIGADO no F12 (default off) → custo zero no jogo normal. Throttle por
+    ///     (canal + nickname) para não inundar o log: 1 linha a cada <see cref="ThrottleSeconds"/>, e só quando o
+    ///     multiplicador de fato mudou o valor. Como o mult é constante por classe, uma linha já prova o efeito.
+    ///     </para>
+    /// </summary>
+    private const float ThrottleSeconds = 3f;
+    private static readonly System.Collections.Generic.Dictionary<string, float> LastLog = new(StringComparer.Ordinal);
+
+    internal static void LogPeer(string channel, string nickname, string classNameEn, float before, float after)
+    {
+        var key = channel + "" + nickname;
+        var now = Time.time;
+
+        if (LastLog.TryGetValue(key, out var last) && now - last < ThrottleSeconds)
+        {
+            return;
+        }
+
+        LastLog[key] = now;
+        var mult = before > 0f ? after / before : 0f;
+        Plugin.Log?.LogInfo(
+            $"[CustomClasses][diag/peer] {channel}: '{nickname}' [{classNameEn}] {before:F1} → {after:F1} (×{mult:F2})");
+    }
+
+    /// <summary>Limpa o throttle entre raids (Time.time é monotônico no processo, mas o roster muda).</summary>
+    internal static void ResetPeerLog() => LastLog.Clear();
 }
 
 /// <summary>

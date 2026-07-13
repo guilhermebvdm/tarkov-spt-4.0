@@ -34,6 +34,7 @@ internal class RaidPerksNotificationPatch : ModulePatch
             // (review fix) reseta a Adrenaline no início da raid — o cooldown não deve atravessar de uma raid
             // anterior (Time.time é monotônico no processo). Roda independente do toggle da notificação.
             AdrenalineState.Reset();
+            PerkDiag.ResetPeerLog();   // B20: throttle do diag de peer é por raid (o roster muda)
             StancesArmStaminaBridge.TryAttach(finalAttempt: true);   // (051 PA-01-01) re-try do hook — aqui todos os plugins já carregaram
 
             // ⚠️ ORDEM (code-review B14, achado 3): o guard de hideout vem ANTES dos prefetches — senão TODA entrada

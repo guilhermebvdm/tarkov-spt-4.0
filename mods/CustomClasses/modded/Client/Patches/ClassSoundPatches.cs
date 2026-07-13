@@ -183,11 +183,20 @@ internal class SoundRadiusPatch : ModulePatch
                 }
             }
 
-            // Diag = painel do SEU personagem; um peer barulhento não pode sobrescrever os seus números.
-            if (PerkDiag.Enabled && __instance.IsYourPlayer)
+            if (PerkDiag.Enabled)
             {
-                PerkDiag.AudioBefore = r0;
-                PerkDiag.AudioAfter = __result;
+                if (__instance.IsYourPlayer)
+                {
+                    // Overlay 052 = painel do SEU personagem; um peer barulhento não pode sobrescrever seus números.
+                    PerkDiag.AudioBefore = r0;
+                    PerkDiag.AudioAfter = __result;
+                }
+                else if (__result != r0)
+                {
+                    // B20: única prova objetiva de que o perk de um PEER está valendo no SEU áudio (o overlay não
+                    // alcança peers). Throttled; só com Diagnostics ligado no F12.
+                    PerkDiag.LogPeer("rolloff (you hear)", __instance.Profile?.Nickname ?? "?", emitterClass, r0, __result);
+                }
             }
         }
         catch (Exception ex)
@@ -281,10 +290,19 @@ internal class AiSoundPatch : ModulePatch
             power *= QuietStep.MultFor(emitterClass);
             power *= LoudOperator.MultFor(emitterClass);
 
-            if (PerkDiag.Enabled && p.IsYourPlayer)   // o overlay (052) só descreve o SEU player
+            if (PerkDiag.Enabled)
             {
-                PerkDiag.AiPowerBefore = p0;
-                PerkDiag.AiPowerAfter = power;
+                if (p.IsYourPlayer)   // o overlay (052) só descreve o SEU player
+                {
+                    PerkDiag.AiPowerBefore = p0;
+                    PerkDiag.AiPowerAfter = power;
+                }
+                else if (power != p0)
+                {
+                    // B14: prova de que o HOST está aplicando o perk de som de um PEER contra a IA — o cenário que
+                    // era placebo antes e que não dá para verificar de ouvido (é a percepção do BOT que muda).
+                    PerkDiag.LogPeer("AI hear power", p.Profile?.Nickname ?? "?", emitterClass, p0, power);
+                }
             }
         }
         catch (Exception ex)
