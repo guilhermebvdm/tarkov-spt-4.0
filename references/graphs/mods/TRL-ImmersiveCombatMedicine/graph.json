@@ -3117,7 +3117,7 @@
       "label": ".RemoveEffect()",
       "file_type": "code",
       "source_file": "Patches/Medical/MedicalLogic.cs",
-      "source_location": "L226",
+      "source_location": "L231",
       "_origin": "ast",
       "id": "medical_medicallogic_medicallogic_removeeffect",
       "community": 3,
@@ -3127,7 +3127,7 @@
       "label": "IHealthController",
       "file_type": "code",
       "source_file": "Patches/Medical/MedicalLogic.cs",
-      "source_location": "L226",
+      "source_location": "L231",
       "_origin": "ast",
       "id": "patches_medical_medicallogic_cs_ihealthcontroller",
       "community": 3,
@@ -3137,7 +3137,7 @@
       "label": "EBodyPart",
       "file_type": "code",
       "source_file": "Patches/Medical/MedicalLogic.cs",
-      "source_location": "L226",
+      "source_location": "L231",
       "_origin": "ast",
       "id": "patches_medical_medicallogic_cs_ebodypart",
       "community": 3,
@@ -3147,7 +3147,7 @@
       "label": ".HasEffect()",
       "file_type": "code",
       "source_file": "Patches/Medical/MedicalLogic.cs",
-      "source_location": "L287",
+      "source_location": "L292",
       "_origin": "ast",
       "id": "medical_medicallogic_medicallogic_haseffect",
       "community": 3,
@@ -3157,7 +3157,7 @@
       "label": ".ApplyTourniquet()",
       "file_type": "code",
       "source_file": "Patches/Medical/MedicalLogic.cs",
-      "source_location": "L308",
+      "source_location": "L313",
       "_origin": "ast",
       "id": "medical_medicallogic_medicallogic_applytourniquet",
       "community": 3,
@@ -3167,7 +3167,7 @@
       "label": ".ApplySurgery()",
       "file_type": "code",
       "source_file": "Patches/Medical/MedicalLogic.cs",
-      "source_location": "L356",
+      "source_location": "L361",
       "_origin": "ast",
       "id": "medical_medicallogic_medicallogic_applysurgery",
       "community": 3,
@@ -3177,7 +3177,7 @@
       "label": "PendingConsume",
       "file_type": "code",
       "source_file": "Patches/Medical/MedicalLogic.cs",
-      "source_location": "L399",
+      "source_location": "L404",
       "_origin": "ast",
       "id": "medical_medicallogic_pendingconsume",
       "community": 3,
@@ -3187,7 +3187,7 @@
       "label": "string",
       "file_type": "code",
       "source_file": "Patches/Medical/MedicalLogic.cs",
-      "source_location": "L403",
+      "source_location": "L408",
       "_origin": "ast",
       "id": "patches_medical_medicallogic_cs_string",
       "community": 3,
@@ -3197,7 +3197,7 @@
       "label": "float",
       "file_type": "code",
       "source_file": "Patches/Medical/MedicalLogic.cs",
-      "source_location": "L405",
+      "source_location": "L410",
       "_origin": "ast",
       "id": "patches_medical_medicallogic_cs_float",
       "community": 3,
@@ -3207,7 +3207,7 @@
       "label": "List",
       "file_type": "code",
       "source_file": "Patches/Medical/MedicalLogic.cs",
-      "source_location": "L409",
+      "source_location": "L414",
       "_origin": "ast",
       "id": "patches_medical_medicallogic_cs_list",
       "community": 3,
@@ -3217,7 +3217,7 @@
       "label": ".RegisterPendingConsume()",
       "file_type": "code",
       "source_file": "Patches/Medical/MedicalLogic.cs",
-      "source_location": "L412",
+      "source_location": "L417",
       "_origin": "ast",
       "id": "medical_medicallogic_medicallogic_registerpendingconsume",
       "community": 3,
@@ -3227,7 +3227,7 @@
       "label": ".ResolvePendingConsumeFromReport()",
       "file_type": "code",
       "source_file": "Patches/Medical/MedicalLogic.cs",
-      "source_location": "L426",
+      "source_location": "L431",
       "_origin": "ast",
       "id": "medical_medicallogic_medicallogic_resolvependingconsumefromreport",
       "community": 3,
@@ -3237,7 +3237,7 @@
       "label": ".TickPendingConsumes()",
       "file_type": "code",
       "source_file": "Patches/Medical/MedicalLogic.cs",
-      "source_location": "L443",
+      "source_location": "L448",
       "_origin": "ast",
       "id": "medical_medicallogic_medicallogic_tickpendingconsumes",
       "community": 3,
@@ -3247,7 +3247,7 @@
       "label": ".ClearPendingConsumes()",
       "file_type": "code",
       "source_file": "Patches/Medical/MedicalLogic.cs",
-      "source_location": "L457",
+      "source_location": "L462",
       "_origin": "ast",
       "id": "medical_medicallogic_medicallogic_clearpendingconsumes",
       "community": 3,
@@ -3257,7 +3257,7 @@
       "label": ".ConsumeSafe()",
       "file_type": "code",
       "source_file": "Patches/Medical/MedicalLogic.cs",
-      "source_location": "L468",
+      "source_location": "L473",
       "_origin": "ast",
       "id": "medical_medicallogic_medicallogic_consumesafe",
       "community": 3,
@@ -3267,7 +3267,7 @@
       "label": ".DiscardItemNetworked()",
       "file_type": "code",
       "source_file": "Patches/Medical/MedicalLogic.cs",
-      "source_location": "L524",
+      "source_location": "L529",
       "_origin": "ast",
       "id": "medical_medicallogic_medicallogic_discarditemnetworked",
       "community": 3,
@@ -3277,7 +3277,7 @@
       "label": ".TryDiscardOnce()",
       "file_type": "code",
       "source_file": "Patches/Medical/MedicalLogic.cs",
-      "source_location": "L539",
+      "source_location": "L544",
       "_origin": "ast",
       "id": "medical_medicallogic_medicallogic_trydiscardonce",
       "community": 3,
@@ -3287,7 +3287,7 @@
       "label": ".CanAfford()",
       "file_type": "code",
       "source_file": "Patches/Medical/MedicalLogic.cs",
-      "source_location": "L581",
+      "source_location": "L586",
       "_origin": "ast",
       "id": "medical_medicallogic_medicallogic_canafford",
       "community": 3,
@@ -3297,7 +3297,7 @@
       "label": ".GetSmartTarget()",
       "file_type": "code",
       "source_file": "Patches/Medical/MedicalLogic.cs",
-      "source_location": "L590",
+      "source_location": "L595",
       "_origin": "ast",
       "id": "medical_medicallogic_medicallogic_getsmarttarget",
       "community": 3,
@@ -3307,7 +3307,7 @@
       "label": ".GetBlackedPart()",
       "file_type": "code",
       "source_file": "Patches/Medical/MedicalLogic.cs",
-      "source_location": "L645",
+      "source_location": "L650",
       "_origin": "ast",
       "id": "medical_medicallogic_medicallogic_getblackedpart",
       "community": 3,
@@ -3317,7 +3317,7 @@
       "label": ".CanUseItem()",
       "file_type": "code",
       "source_file": "Patches/Medical/MedicalLogic.cs",
-      "source_location": "L660",
+      "source_location": "L665",
       "_origin": "ast",
       "id": "medical_medicallogic_medicallogic_canuseitem",
       "community": 3,
@@ -5631,9 +5631,9 @@
       "source_file": "Patches/Medical/BandAidController.cs",
       "source_location": "L936",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidcontroller_bandaidcontroller",
-      "target": "medical_bandaidcontroller_bandaidcontroller_deferreddiscardroutine",
-      "confidence_score": 1.0
+      "target": "medical_bandaidcontroller_bandaidcontroller_deferreddiscardroutine"
     },
     {
       "relation": "method",
@@ -5751,9 +5751,9 @@
       "source_file": "Patches/Medical/BandAidController.cs",
       "source_location": "L931",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidcontroller_bandaidcontroller",
-      "target": "medical_bandaidcontroller_bandaidcontroller_schedulenetworkeddiscard",
-      "confidence_score": 1.0
+      "target": "medical_bandaidcontroller_bandaidcontroller_schedulenetworkeddiscard"
     },
     {
       "relation": "method",
@@ -5996,9 +5996,9 @@
       "source_location": "L936",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "medical_bandaidcontroller_bandaidcontroller_deferreddiscardroutine",
-      "target": "patches_medical_bandaidcontroller_cs_player",
-      "confidence_score": 1.0
+      "target": "patches_medical_bandaidcontroller_cs_player"
     },
     {
       "relation": "references",
@@ -6040,9 +6040,9 @@
       "source_location": "L931",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "medical_bandaidcontroller_bandaidcontroller_schedulenetworkeddiscard",
-      "target": "patches_medical_bandaidcontroller_cs_player",
-      "confidence_score": 1.0
+      "target": "patches_medical_bandaidcontroller_cs_player"
     },
     {
       "relation": "references",
@@ -6073,9 +6073,9 @@
       "source_location": "L936",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "medical_bandaidcontroller_bandaidcontroller_deferreddiscardroutine",
-      "target": "patches_medical_bandaidcontroller_cs_item",
-      "confidence_score": 1.0
+      "target": "patches_medical_bandaidcontroller_cs_item"
     },
     {
       "relation": "references",
@@ -6095,9 +6095,9 @@
       "source_location": "L931",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "medical_bandaidcontroller_bandaidcontroller_schedulenetworkeddiscard",
-      "target": "patches_medical_bandaidcontroller_cs_item",
-      "confidence_score": 1.0
+      "target": "patches_medical_bandaidcontroller_cs_item"
     },
     {
       "relation": "calls",
@@ -6359,9 +6359,9 @@
       "source_location": "L936",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "medical_bandaidcontroller_bandaidcontroller_deferreddiscardroutine",
-      "target": "ienumerator",
-      "confidence_score": 1.0
+      "target": "ienumerator"
     },
     {
       "relation": "calls",
@@ -6403,9 +6403,9 @@
       "source_file": "Patches/Medical/BandAidController.cs",
       "source_location": "L933",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidcontroller_bandaidcontroller_schedulenetworkeddiscard",
-      "target": "medical_bandaidcontroller_bandaidcontroller_deferreddiscardroutine",
-      "confidence_score": 1.0
+      "target": "medical_bandaidcontroller_bandaidcontroller_deferreddiscardroutine"
     },
     {
       "relation": "contains",
@@ -7132,9 +7132,9 @@
       "source_file": "Patches/Medical/BandAidNetworkHandler.cs",
       "source_location": "L348",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_bandaidnetworkhandler_bandaidnetworkhandler_applyfulltreatmentlocally",
-      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_haseffect",
-      "confidence_score": 1.0
+      "target": "medical_bandaidnetworkhandler_bandaidnetworkhandler_haseffect"
     },
     {
       "relation": "calls",
@@ -9765,9 +9765,9 @@
       "source_file": "Patches/Medical/MedicalLogic.cs",
       "source_location": "L399",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_medicallogic",
-      "target": "medical_medicallogic_pendingconsume",
-      "confidence_score": 1.0
+      "target": "medical_medicallogic_pendingconsume"
     },
     {
       "relation": "method",
@@ -9835,9 +9835,9 @@
       "source_file": "Patches/Medical/MedicalLogic.cs",
       "source_location": "L457",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_medicallogic_medicallogic",
-      "target": "medical_medicallogic_medicallogic_clearpendingconsumes",
-      "confidence_score": 1.0
+      "target": "medical_medicallogic_medicallogic_clearpendingconsumes"
     },
     {
       "relation": "method",
@@ -9895,9 +9895,9 @@
       "source_file": "Patches/Medical/MedicalLogic.cs",
       "source_location": "L412",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_medicallogic_medicallogic",
-      "target": "medical_medicallogic_medicallogic_registerpendingconsume",
-      "confidence_score": 1.0
+      "target": "medical_medicallogic_medicallogic_registerpendingconsume"
     },
     {
       "relation": "method",
@@ -9915,9 +9915,9 @@
       "source_file": "Patches/Medical/MedicalLogic.cs",
       "source_location": "L426",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_medicallogic_medicallogic",
-      "target": "medical_medicallogic_medicallogic_resolvependingconsumefromreport",
-      "confidence_score": 1.0
+      "target": "medical_medicallogic_medicallogic_resolvependingconsumefromreport"
     },
     {
       "relation": "method",
@@ -9925,9 +9925,9 @@
       "source_file": "Patches/Medical/MedicalLogic.cs",
       "source_location": "L443",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_medicallogic_medicallogic",
-      "target": "medical_medicallogic_medicallogic_tickpendingconsumes",
-      "confidence_score": 1.0
+      "target": "medical_medicallogic_medicallogic_tickpendingconsumes"
     },
     {
       "relation": "method",
@@ -9935,9 +9935,9 @@
       "source_file": "Patches/Medical/MedicalLogic.cs",
       "source_location": "L539",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_medicallogic_medicallogic",
-      "target": "medical_medicallogic_medicallogic_trydiscardonce",
-      "confidence_score": 1.0
+      "target": "medical_medicallogic_medicallogic_trydiscardonce"
     },
     {
       "relation": "references",
@@ -9957,9 +9957,9 @@
       "source_location": "L410",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "medical_medicallogic_medicallogic",
-      "target": "patches_medical_medicallogic_cs_float",
-      "confidence_score": 1.0
+      "target": "patches_medical_medicallogic_cs_float"
     },
     {
       "relation": "references",
@@ -9968,9 +9968,9 @@
       "source_location": "L409",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "medical_medicallogic_medicallogic",
-      "target": "patches_medical_medicallogic_cs_list",
-      "confidence_score": 1.0
+      "target": "patches_medical_medicallogic_cs_list"
     },
     {
       "relation": "references",
@@ -10109,6 +10109,17 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "Patches/Medical/MedicalLogic.cs",
+      "source_location": "L83",
+      "weight": 1.0,
+      "source": "medical_medicallogic_medicallogic_applytreatment",
+      "target": "medical_medicallogic_medicallogic_registerpendingconsume",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Medical/MedicalLogic.cs",
       "source_location": "L124",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -10210,9 +10221,9 @@
       "source_location": "L412",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "medical_medicallogic_medicallogic_registerpendingconsume",
-      "target": "patches_medical_medicallogic_cs_player",
-      "confidence_score": 1.0
+      "target": "patches_medical_medicallogic_cs_player"
     },
     {
       "relation": "references",
@@ -10221,9 +10232,9 @@
       "source_location": "L539",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "medical_medicallogic_medicallogic_trydiscardonce",
-      "target": "patches_medical_medicallogic_cs_player",
-      "confidence_score": 1.0
+      "target": "patches_medical_medicallogic_cs_player"
     },
     {
       "relation": "references",
@@ -10232,9 +10243,9 @@
       "source_location": "L401",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "medical_medicallogic_pendingconsume",
-      "target": "patches_medical_medicallogic_cs_player",
-      "confidence_score": 1.0
+      "target": "patches_medical_medicallogic_cs_player"
     },
     {
       "relation": "references",
@@ -10298,9 +10309,9 @@
       "source_location": "L412",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "medical_medicallogic_medicallogic_registerpendingconsume",
-      "target": "patches_medical_medicallogic_cs_item",
-      "confidence_score": 1.0
+      "target": "patches_medical_medicallogic_cs_item"
     },
     {
       "relation": "references",
@@ -10309,9 +10320,9 @@
       "source_location": "L539",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "medical_medicallogic_medicallogic_trydiscardonce",
-      "target": "patches_medical_medicallogic_cs_item",
-      "confidence_score": 1.0
+      "target": "patches_medical_medicallogic_cs_item"
     },
     {
       "relation": "references",
@@ -10320,9 +10331,9 @@
       "source_location": "L402",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "medical_medicallogic_pendingconsume",
-      "target": "patches_medical_medicallogic_cs_item",
-      "confidence_score": 1.0
+      "target": "patches_medical_medicallogic_cs_item"
     },
     {
       "relation": "references",
@@ -10562,9 +10573,9 @@
       "source_location": "L406",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "medical_medicallogic_pendingconsume",
-      "target": "patches_medical_medicallogic_cs_float",
-      "confidence_score": 1.0
+      "target": "patches_medical_medicallogic_cs_float"
     },
     {
       "relation": "references",
@@ -10573,9 +10584,9 @@
       "source_location": "L404",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "medical_medicallogic_pendingconsume",
-      "target": "patches_medical_medicallogic_cs_string",
-      "confidence_score": 1.0
+      "target": "patches_medical_medicallogic_cs_string"
     },
     {
       "relation": "calls",
@@ -10584,9 +10595,9 @@
       "source_file": "Patches/Medical/MedicalLogic.cs",
       "source_location": "L435",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_medicallogic_medicallogic_resolvependingconsumefromreport",
-      "target": "medical_medicallogic_medicallogic_consumesafe",
-      "confidence_score": 1.0
+      "target": "medical_medicallogic_medicallogic_consumesafe"
     },
     {
       "relation": "calls",
@@ -10595,9 +10606,9 @@
       "source_file": "Patches/Medical/MedicalLogic.cs",
       "source_location": "L452",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_medicallogic_medicallogic_tickpendingconsumes",
-      "target": "medical_medicallogic_medicallogic_consumesafe",
-      "confidence_score": 1.0
+      "target": "medical_medicallogic_medicallogic_consumesafe"
     },
     {
       "relation": "calls",
@@ -10617,9 +10628,9 @@
       "source_file": "Patches/Medical/MedicalLogic.cs",
       "source_location": "L534",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "medical_medicallogic_medicallogic_discarditemnetworked",
-      "target": "medical_medicallogic_medicallogic_trydiscardonce",
-      "confidence_score": 1.0
+      "target": "medical_medicallogic_medicallogic_trydiscardonce"
     },
     {
       "relation": "calls",
@@ -10990,9 +11001,9 @@
       "source_location": "L197",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "medical_tourniquetmanager_tourniquetmanager_gettourniquetparts",
-      "target": "patches_medical_tourniquetmanager_cs_list",
-      "confidence_score": 1.0
+      "target": "patches_medical_tourniquetmanager_cs_list"
     },
     {
       "relation": "contains",
@@ -12197,5 +12208,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "4936e8f256f46add55b500f8ede9ce5cf3118fa4"
+  "built_at_commit": "f15f3df98d5c41d4fbd8d150d1c4e83299104248"
 }

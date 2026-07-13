@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace TRLImmersiveCombatMedicine
 {
-    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.0.0")]
+    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.1.0")]
     public class TRLImmersiveCombatMedicinePlugin : BaseUnityPlugin
     {
         public static TRLImmersiveCombatMedicinePlugin Instance;
@@ -35,7 +35,7 @@ namespace TRLImmersiveCombatMedicine
         {
             Instance = this;
             ModLogger = base.Logger;
-            ModLogger.LogInfo("TRL-ImmersiveCombatMedicine Plugin v1.0.0 carregado.");
+            ModLogger.LogInfo("TRL-ImmersiveCombatMedicine Plugin v1.1.0 carregado.");
 
             // Inicializações combinadas
             ItemDatabase.Initialize();

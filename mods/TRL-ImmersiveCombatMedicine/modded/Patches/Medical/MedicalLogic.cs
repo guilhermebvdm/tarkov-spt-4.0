@@ -75,13 +75,18 @@ namespace Band_Aid
                     consumeCost = 1.0f; // Use item (bandage, splint, etc.)
                 }
 
-                ConsumeSafe(doctor, item, consumeCost, isRemotePatient: true);
+                // ref: CR-05 (religado no CR-04-01 da rodada 04) — CONSUMO
+                // AUTORITATIVO: NÃO debitar aqui. O paciente aplica o tratamento
+                // real e reporta o custo exato (HP curado + custos por efeito) no
+                // TreatmentReport; o débito acontece em ResolvePendingConsumeFromReport.
+                // A estimativa acima vira só FALLBACK do timeout de 4s.
+                RegisterPendingConsume(doctor, item, patient.ProfileId, consumeCost);
 
                 // Enviar pacote para o paciente aplicar em si mesmo
                 BandAidNetworkHandler.SendHealPacket(doctor, patient, item.TemplateId.ToString(),
                     EBodyPart.Common, 0f, stats.IsSurgery, 0f, false, false, false, true);
 
-                Logger.LogInfo($"Pacote de tratamento remoto enviado. Item consumido: {consumeCost:F1}");
+                Logger.LogInfo($"Pacote de tratamento remoto enviado. Consumo aguarda report do paciente (fallback: {consumeCost:F1}).");
                 return;
             }
 
