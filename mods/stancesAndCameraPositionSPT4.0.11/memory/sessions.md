@@ -6,8 +6,9 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados quan
 
 ## Estado atual (snapshot ao fim da última sessão)
 
-- **Fork ativo = `modded` (CANÔNICO desde 2026-07-09).** Reorg: `git mv modded-beta → modded` e antigo `modded → modded-bak` (backup, não editar). Build **self-contained** (`/compile-mod` OU `dotnet build`; csproj puxa `Fika.Core` da raiz `references/`, sem `mods/references/` temp). **Deploy manual** do DLL em `D:/SPT/BepInEx/plugins/RealisticMobility/` (assets `.ogg`/`.png` ao lado; `/compile-mod` instala em `plugins/<AssemblyName>/`, então copiar à mão). DLL atual: **v2.1.0, hash `0e622ba`** (014 fix-03 + 015 + reorg do F12 + limpeza da review 02). Ver memória global `reference_stances_canonical_build`.
-- **VERSÃO 2.1.0 (2026-07-12, commit `ca9f868`) — DLL `0e622ba`.** Antes: 2.0.0 (commit `39e7a56`, bump `1.3.1 → 2.0.0`). A versão vive em **dois** lugares que precisam bater: `Plugin.cs` (`BepInPlugin` — é o que o F12 mostra) e `.csproj` (`Version`/`AssemblyVersion`/`FileVersion` — antes ausente, a DLL saía como `1.0.0.0`). Changelog do fork em **`modded/CHANGELOG.md`** (o `CHANGELOG_SIMPLIFIED.md` é do upstream e para na 1.1.4).
+- **Fork ativo = `modded` (CANÔNICO desde 2026-07-09).** Reorg: `git mv modded-beta → modded` e antigo `modded → modded-bak` (backup, não editar). Build **self-contained** (`/compile-mod` OU `dotnet build`; csproj puxa `Fika.Core` da raiz `references/`, sem `mods/references/` temp). **Deploy manual** do DLL em `D:/SPT/BepInEx/plugins/RealisticMobility/` (assets `.ogg`/`.png` ao lado; `/compile-mod` instala em `plugins/<AssemblyName>/`, então copiar à mão). DLL atual: **v2.2.0, hash `a22d368`** (014 fix-03 + 015 + reorg do F12 + limpeza da review 02 + fix dos eixos Yaw/Roll). Ver memória global `reference_stances_canonical_build`.
+- ⚠️⚠️ **EIXOS DA ARMA SÃO LOCAIS, NÃO OS DO UNITY** (fix v2.2.0, commit `d9069fb`). A rotação é aplicada como `weapRotation * Quaternion.Euler(euler)` (`ApplyComplexRotationPatch:280`) → **espaço local da arma**: `X = lateral · Y = LONGITUDINAL (o cano) · Z = vertical`. Portanto **girar em torno de Y = TOMBAR (roll)** e **em torno de Z = APONTAR (yaw)** — o **contrário** da ordem canônica do Unity `(pitch, yaw, roll)`. A montagem correta é `new Vector3(pitch, roll, yaw)`. **Nunca presumir a convenção do Unity aqui.**
+- **VERSÃO 2.2.0 (2026-07-12, commit `d9069fb`) — DLL `a22d368`.** Antes: 2.1.0 (`ca9f868`, DLL `0e622ba`) e 2.0.0 (`39e7a56`). Antes: 2.0.0 (commit `39e7a56`, bump `1.3.1 → 2.0.0`). A versão vive em **dois** lugares que precisam bater: `Plugin.cs` (`BepInPlugin` — é o que o F12 mostra) e `.csproj` (`Version`/`AssemblyVersion`/`FileVersion` — antes ausente, a DLL saía como `1.0.0.0`). Changelog do fork em **`modded/CHANGELOG.md`** (o `CHANGELOG_SIMPLIFIED.md` é do upstream e para na 1.1.4).
 - **F12 hoje: 20 seções · 113 opções** (2.1.0). Era 21 · 120 na 2.0.0 — a review 02 achou e removeu **7 props fantasmas**.
 - ⚠️ **A 2.0.0 reseta a config salva do usuário** (renome de seção/key na reorg do F12 — o BepInEx casa por `(seção, chave)` literal). A 2.1.0 **não** renomeia nada; só remove props (as entries removidas ficam órfãs no `.cfg` e são ignoradas).
 - ⚠️ **A DLL instalada estava DEFASADA até 2026-07-11.** A instalada era de 11/07 00:53 (pré-reorg do F12); a build com a reorg é de 03:38. **Ou seja: a validação in-game da Sessão 7 rodou sobre código SEM a reorg do F12** — os 23 props mortos e 9 campos órfãos removidos **nunca rodaram no jogo**. O handoff de 2026-07-11 afirmava (errado) que a instalada era a `c83ed42`. Lição: **conferir o hash da DLL instalada contra a do repo**, não confiar no que a memória/handoff diz estar instalado.
@@ -22,7 +23,8 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados quan
 - **[P-7.1] (aberta 2026-07-11, PARCIAL em 2026-07-12) 🟡 Validar in-game — agora a build 2.1.0 (`0e622ba`).** ✅ Feito: release 2.0.0/2.1.0 (versão + changelog + rebuild + deploy) e **conferência do F12 na 2.0.0** (usuário confirmou seções, ordem e tooltips corretos, com prints). **Falta:** rodar em **raid** e reconfirmar os itens da Sessão 7 (008 recarga, 010 chambering, 011 mount passivo, 015 bloqueio de mount, 002 snap ao atirar) — **nunca rodaram** com a reorg do F12 nem com a limpeza da 2.1.0. Ver `feedback_spt_validation`.
 - **[P-8.1] (aberta 2026-07-12) 🟡 Validar os 4 fixes da 2.1.0 in-game:** (a) FOV expandido volta a funcionar (ligar `Enable Expanded FOV Range` e passar de 75 — se `GClass1085.Class1841.method_0` não existir mais na 0.16.x, o `SafeEnable` loga a falha e a decisão vira *remover* as 3 props); (b) as 4 props de ciclo aparecem no F12 mesmo em modo `Linear`; (c) prone e teto de velocidade seguem corretos após o sentinel null em `ApplyWhenProne`; (d) nada regrediu com a remoção da seção `Default Hands/Arms`.
 - **[P-8.2] (aberta 2026-07-12) 🟠 Achados da review 02 NÃO aplicados** (`PROPRIEDADES-review-02.md`): **MP-02-05** (`Camera Position` — `_cameraOffsetDirty` nunca volta a `true` no raid start; suspeita de o offset parar de valer da 2ª raid em diante — o fix é 1 linha, mas depende de saber se o `PlayerSpringPatch` já cobre); **MP-02-06** (2 props em **segundos** com range 0–1 são exibidas como **%** pelo ConfigurationManager — alargar para 0–2); **MP-02-07** (29 keys misturam EN+PT no nome — decisão: manter, é didático); **MP-02-08** (7 headers do `PROPRIEDADES.md` com sufixo `— Item NNN` inexistente no F12); **MP-02-09** (código morto: `CameraBobbingScript` nunca instanciado, `PlayerSpringPatch._cameraOffsetField`, `FixedUpdate` vazio, `ApplySimpleRotationPatch` hardcoda `damping=12f` ignorando a prop); **MP-02-10** (comentário `// Stance 0: irrelevante` é FALSO — ver abaixo).
-- **[P-8.3] (aberta 2026-07-12) 🔴 DECISÃO DE BALANCE pendente: a Stance 0 aplica um cap de 90% de velocidade o tempo todo.** Descoberto na review 02 (`MP-02-10`). Com os defaults (`Stance 0 Modifies Movement Speed = true`, `Multiplier = 90`), o mod limita a velocidade **sempre que o jogador não está em postura** — a maior parte da partida — e isso **compõe** com `Walk Speed Multiplier` (0.85). O comentário do código (`Plugin.cs:47`, `// Stance 0: irrelevante`) diz o contrário e enganou revisões anteriores. **Confirmar com o usuário se essa lentidão é intencional.**
+- **[P-8.3] ✅ RESOLVIDA (2026-07-12) — o cap de velocidade da Stance 0 é INTENCIONAL.** O usuário confirmou: *"tudo bem para a multiplicação de tudo do walk e das stances speed"*. A Stance 0 aplica cap de 90% fora de postura e **compõe** com o `Walk Speed Multiplier` (0.85) — é o comportamento desejado, não um bug. ⚠️ **Não "otimizar" isso.** (O comentário `// Stance 0: irrelevante` em `Plugin.cs:47` continua **falso** e ainda deve ser corrigido — parte do `MP-02-10`.)
+- **[P-8.4] (aberta 2026-07-12) 🟡 Validar in-game a v2.2.0 (`a22d368`) — fix dos eixos:** `Yaw` deve **APONTAR** esq/dir e `Roll` deve **TOMBAR** a arma, nas 3 stances **e no ADS** (antes faziam o contrário). Conferir também que **as poses ficaram iguais às de antes** — o `.cfg` foi migrado (valores `Yaw`↔`Roll` trocados) justamente para preservar o visual; se alguma stance parecer diferente, a migração errou. Backup: `cfg.bak-pre-v220`.
 - **[P-7.2] (aberta 2026-07-11) 🟢 Dívida técnica** (herda a antiga P-5.3): unificar a interpolação em `SpringMath.SpringDamp`, eliminar a reflection que roda a cada frame, `try/catch` nos ~19 patches restantes (só os 6 do Manual Chambering têm), auditar o reset de estado estático entre raids. Adiada porque mexe em código de câmera **já validado** — risco > valor até surgir bug real.
 - **[P-7.3] (aberta 2026-07-11) 🟢 Dívida da revisão do F12** (achados adiados do `PROPRIEDADES-review-01.md`): reordenar as seções (**MP-01-03** — os binds de uma mesma seção estão espalhados pelo `Awake`, ex.: Stance 2 em L766 **e** L1184; reordenar arriscaria quebrar um arquivo de 1700 linhas já validado), rever onde ficam as opções de velocidade (**MP-01-08**) e se a seção da Stance 0 se justifica (**MP-01-10**).
 
@@ -385,3 +387,53 @@ o MP-01-10 ("a seção Stance 0 se justifica?"): **sim, e é a mais impactante d
 **Pendências:** **P-7.1** (validar em raid os itens da Sessão 7 sobre a build nova) · **P-8.1** (validar os 4 fixes
 da 2.1.0, sobretudo o FOV) · **P-8.2** (6 achados da review 02 não aplicados) · **P-8.3** (decisão de balance da
 Stance 0). P-7.2 e P-7.3 inalteradas.
+
+## 2026-07-12 ~02:00 (GMT-3) — Sessão 9 (cont.): Yaw e Roll estavam trocados (v2.2.0)
+
+**Bug reportado pelo usuário jogando** (não por review): *"o Yaw está tombando a arma e o Roll está movendo para
+esq/dir — em todas as stances"*. Confirmado nas 3 stances **e no ADS**.
+
+**Causa raiz — a lição que vale para o mod inteiro.** A rotação é aplicada como
+`weapRotation * Quaternion.Euler(euler)` (`ApplyComplexRotationPatch:280`), ou seja **no espaço local da arma**.
+Nesse espaço — como os comentários de **posição** já registravam há tempos! — `Y = eixo LONGITUDINAL (o cano)` e
+`Z = vertical`. Logo **girar em torno de Y tomba (roll)** e **em torno de Z aponta (yaw)**. O código montava
+`new Vector3(pitch, yaw, roll)`, a ordem canônica do **Unity**, jogando cada valor no eixo do outro. Correto é
+**`new Vector3(pitch, roll, yaw)`**. Corrigido nos **4** pontos de montagem (ADS + Stances 1/2/3) —
+`ObservedStanceAnimator` (Fika) e `ApplySimpleRotationPatch` consomem `GetTargetRotation` e herdaram o fix.
+
+**🔥 Era uma REGRESSÃO NOSSA.** O commit `261c069` (**MP-01-02**, review 01) presumiu a convenção do Unity, concluiu
+que os rótulos estavam errados e **trocou os rótulos**. Os rótulos estavam **certos**; o **mapeamento** é que estava
+errado. A troca inverteu os dois eixos para o usuário e mascarou a causa real por mais um ciclo — e o usuário chegou
+a **compensar na mão** no `.cfg` (pôs o `-30` da Stance 3 no campo "Roll", que era o que de fato apontava).
+
+**Por que nenhuma das 2 reviews de propriedades pegou:** ambas compararam **rótulo × nome do campo** — e esses
+batiam (`_Stance1HandsYawRotation` ↔ key "Yaw"). O que não batia era **campo × eixo físico**, que só se enxerga
+lendo como o `Vector3` é consumido. Virou o achado **MP-02-11**.
+
+**Também aplicado (MP-02-07, decisão do usuário):** os sufixos didáticos das keys foram **traduzidos** para inglês,
+não removidos — eles existem porque `Pitch`/`Yaw`/`Roll` é jargão: `(Cano Sobe/Desce)` → `(Muzzle Up/Down)`,
+`(Apontar Esq/Dir)` → `(Point Left/Right)`, `(Tombar Arma)` → `(Cant Weapon)`, `(Coronha Sobe/Desce)` →
+`(Stock Up/Down)`, `(Coronha Esq/Dir)` → `(Stock Left/Right)`, `(Contra o Peito)` → `(Toward the Chest)`,
+`(Menos gera Mais Quicada)` → `(Lower = More Bounce)`. `(Frente/Trás)` foi removido (redundante com
+`Forward/Backward`). **Tooltips seguem bilíngues** (91 `ConfigDescription`, todos com `\n\n`).
+
+**Config do usuário MIGRADA, não resetada.** O rename de key é breaking (o BepInEx casa por `(seção, chave)`), o que
+apagaria a calibração dele. Em vez disso o `.cfg` foi reescrito: valores de `Yaw`↔`Roll` **trocados** + keys
+renomeadas → **as poses ficam idênticas in-game**, mas cada nome passa a dizer a verdade. Backup em
+`D:/SPT/BepInEx/config/com.shwng.fpscamerastances.cfg.bak-pre-v220`. Valores migrados:
+Stance 1 (Yaw -5 / Roll 7) → (Yaw 7 / Roll -5) · Stance 2 (0 / -8) → (-8 / 0) · Stance 3 (0 / -30) → (-30 / 0).
+
+**Lições:**
+
+- **Propriedade de rotação valida-se contra o EIXO FÍSICO, nunca contra a convenção da engine.** Em espaço local de
+  osso/arma os eixos não são os do mundo — e aqui a pista estava escrita no próprio arquivo, nos comentários de
+  posição (`Y = Forward/Backward in Tarkov`). Ninguém ligou os pontos.
+- **Quando o rótulo e o efeito divergem, suspeitar do MAPEAMENTO antes de renomear o rótulo.** Renomear é o conserto
+  que parece mais barato — e é o que esconde o bug. Foi assim que a review 01 transformou um bug em regressão.
+- **O usuário jogando acha o que 2 reviews não acharam.** Segunda vez nesta sessão (a 1ª foi a intuição das "configs
+  fantasmas", que rendeu 7 props mortas).
+
+**Pendências:** **P-8.4 (nova)** — validar in-game a v2.2.0: `Yaw` deve APONTAR e `Roll` deve TOMBAR, nas 3 stances
+e no ADS; e conferir que as poses continuam como antes (a migração do `.cfg` deve ter deixado tudo igual).
+P-7.1 · P-8.1 · P-8.2 (restam MP-02-05/06/08/09/10) · P-8.3 (balance da Stance 0 — **resolvida: o usuário confirmou
+que a multiplicação de Walk × Stance é intencional**) — ver abaixo.

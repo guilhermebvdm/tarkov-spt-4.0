@@ -44,13 +44,13 @@
 
 | ID | Cat | Impacto | Título | Breaking? | Status |
 |---|---|---|---|---|---|
-| MP-02-01 | DEAD | 🔴 | `Default Hands/Arms Positions` (4 props): o único branch que as lê é inalcançável | — | Pendente |
-| MP-02-02 | DEAD | 🔴 | `Stance 1/2/3 Apply When Prone` (3 props): deitar já força a Stance 0 antes da leitura | — | Pendente |
-| MP-02-03 | DEAD | 🔴 | `Field of View` (3 props): o `FOVClampPatch` virou órfão — regressão apagada por arrasto | — | Pendente |
-| MP-02-04 | ADV | 🟠 | Fantasma **inverso**: 4 props do ciclo funcionam mas **somem do F12** por padrão | — | Pendente |
+| MP-02-01 | DEAD | 🔴 | `Default Hands/Arms Positions` (4 props): o único branch que as lê é inalcançável | — | ✅ Aplicado v2.1.0 |
+| MP-02-02 | DEAD | 🔴 | `Stance 1/2/3 Apply When Prone` (3 props): deitar já força a Stance 0 antes da leitura | — | ✅ Aplicado v2.1.0 |
+| MP-02-03 | DEAD | 🔴 | `Field of View` (3 props): o `FOVClampPatch` virou órfão — regressão apagada por arrasto | — | ✅ Aplicado v2.1.0 |
+| MP-02-04 | ADV | 🟠 | Fantasma **inverso**: 4 props do ciclo funcionam mas **somem do F12** por padrão | — | ✅ Aplicado v2.1.0 |
 | MP-02-05 | DEAD | 🟠 | `Camera Position` (4 props): cache stale — pode parar de valer da 2ª raid em diante | — | Pendente |
 | MP-02-06 | TYP | 🟡 | Dois valores em **segundos** exibidos como **porcentagem** (range 0–1) | — | Pendente |
-| MP-02-07 | NAM | 🟡 | 29 keys misturam inglês e português no nome — e a família `Camera Position` não | ⚠️ | Pendente |
+| MP-02-07 | NAM | 🟡 | 29 keys misturam inglês e português no nome — e a família `Camera Position` não | ⚠️ | ✅ Aplicado v2.2.0 (traduzido) |
 | MP-02-08 | SEC | 🟢 | `PROPRIEDADES.md`: 7 headers com sufixo `— Item NNN` que não existe no F12 | — | Pendente |
 | MP-02-09 | DEAD | 🟢 | Código morto colateral (não gera prop fantasma, mas confunde) | — | Pendente |
 | MP-02-10 | NAM | 🟡 | Comentário do código afirma que a Stance 0 é "irrelevante" — ela aplica um cap permanente | — | Pendente |
@@ -220,10 +220,16 @@ Consequência: na 2ª raid da sessão, o `HandsContainer` é novo (nasce com o d
 **Sugestão:** **manter como está** e tratar como decisão consciente, **documentando a exceção** no `PROPRIEDADES.md` ("keys de eixo levam a dica em português entre parênteses; demais keys em inglês"). Padronizar custaria um rename de 29 keys — **breaking**, resetando a calibração fina de todas as stances — em troca de pureza estética. **Não recomendo.** Se for padronizar, o caminho barato é o oposto: *acrescentar* o sufixo pt às 3 keys de `Camera Position`, que aí ficam iguais às outras 29 (breaking de apenas 3 keys, de valor tipicamente default).
 
 **Decisão:**
-- `[ ]` Pendente
-- `[ ]` Aceitar sugestão (manter + documentar a exceção)
-- `[ ]` Aceitar com modificação (uniformizar `Camera Position` — 3 renames): _________________
-- `[ ]` Rejeitar (padronizar tudo em inglês — 29 renames): _________________
+- `[x]` **Aceitar com modificação — TRADUZIR os sufixos para inglês** (decisão do usuário, 2026-07-12).
+  Nem "manter em PT" (sugestão original) nem "remover": os sufixos **existem para tornar o eixo óbvio**, já que
+  `Pitch`/`Yaw`/`Roll` são jargão — o valor deles é didático, e some se forem removidos. Foram traduzidos:
+  `(Cano Sobe/Desce)` → `(Muzzle Up/Down)` · `(Apontar Esq/Dir)` → `(Point Left/Right)` ·
+  `(Tombar Arma)` → `(Cant Weapon)` · `(Coronha Sobe/Desce)` → `(Stock Up/Down)` ·
+  `(Coronha Esq/Dir)` → `(Stock Left/Right)` · `(Contra o Peito)` → `(Toward the Chest)` ·
+  `(Menos gera Mais Quicada)` → `(Lower = More Bounce)`. `(Frente/Trás)` foi removido (o nome em inglês,
+  `Forward/Backward`, já dizia o mesmo). Config migrada em vez de resetada — ver `MP-02-11`.
+
+**Aplicação:** `Plugin.cs` (keys) + `PROPRIEDADES.md` · v2.2.0, commit `d9069fb`.
 
 ---
 
@@ -289,8 +295,41 @@ Consequência: na 2ª raid da sessão, o `HandsContainer` é novo (nasce com o d
 
 ---
 
+### MP-02-11 · NAM — Eixo enganoso · 🔴 Bloqueador · ✅ Aplicado em 2026-07-12 (v2.2.0)
+
+**`Yaw` e `Roll` faziam a coisa um do outro — em todas as stances e no ADS**
+
+**Local:** `Stance 1/2/3` e `ADS Default Values` · keys `... Yaw` e `... Roll` · montagem: [`StanceManager.cs:720-760`](../../modded/StanceManager.cs#L720)
+
+**Como apareceu:** **reportado pelo usuário jogando** (2026-07-12) — "o Yaw está tombando a arma e o Roll está
+movendo para esq/dir". Nenhuma das duas reviews de propriedades pegou: ambas conferiram **rótulo × nome do campo**,
+e esses batiam. O que não batia era o **campo × eixo físico**.
+
+**Causa raiz:** a rotação é aplicada como `weapRotation * Quaternion.Euler(euler)`
+([`ApplyComplexRotationPatch.cs:280`](../../modded/Patches/ApplyComplexRotationPatch.cs#L280)) — ou seja, no espaço
+**local da arma**, não no do mundo. Nesse espaço (como os próprios comentários de *posição* já registravam):
+`X = lateral · Y = LONGITUDINAL (o cano) · Z = vertical`. Portanto girar em torno de **Y tomba** (roll) e em torno
+de **Z aponta** (yaw). O código montava `new Vector3(pitch, yaw, roll)` — a ordem canônica do **Unity** —, que joga
+o yaw no eixo do cano e o roll no eixo vertical.
+
+**Agravante — é uma regressão nossa.** O commit `261c069` (**MP-01-02**, review 01) presumiu a convenção do Unity e
+"corrigiu" trocando os **rótulos**. Os rótulos estavam certos; o **mapeamento** é que estava errado. A troca de
+rótulos inverteu os dois eixos para o usuário e mascarou a causa real por mais um ciclo.
+
+**Correção:** consertado na origem — `Y` recebe o **roll** e `Z` o **yaw**, nos 4 pontos de montagem. Rótulo, nome
+de campo e efeito físico passam a concordar. A config do usuário foi **migrada** (valores de `Yaw`↔`Roll` trocados)
+para que as poses continuem idênticas in-game; backup em `cfg.bak-pre-v220`.
+
+**Lição:** validar propriedade de rotação **contra o eixo físico**, nunca contra a convenção da engine — em espaço
+local de osso/arma os eixos não são os do mundo. E: **quando o rótulo e o efeito divergem, suspeitar do mapeamento
+antes de renomear o rótulo.** Renomear é o conserto que parece mais barato e é o que esconde o bug.
+
+---
+
 ## Histórico
 
 | Data | Evento |
 |---|---|
+| 2026-07-12 | **v2.1.0** (`ca9f868`): aplicados MP-02-01 (4 props mortas), MP-02-02 (3 props mortas), MP-02-03 (FOVClampPatch reabilitado), MP-02-04 (toggles de ciclo sempre visíveis). F12: 120 → 113 props. |
+| 2026-07-12 | **v2.2.0** (`d9069fb`): aplicado MP-02-07 — sufixos das keys **traduzidos** para inglês (não removidos). Junto, corrigido o **`MP-02-11`** (abaixo), reportado pelo usuário in-game. |
 | 2026-07-12 | Review de propriedades 02 criada via `/review-mod-properties`, após a validação in-game da v2.0.0. 10 achados: 3 🔴 (7 props mortas + 3 inertes por regressão), 2 🟠, 3 🟡, 2 🟢. Confirmado que ordem das seções e tooltips (95/95 bilíngues) estão corretos, e que o `PROPRIEDADES.md` está sincronizado com o código. |
