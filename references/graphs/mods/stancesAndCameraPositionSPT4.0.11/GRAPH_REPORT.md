@@ -1,7 +1,7 @@
-# Graph Report - mods\stancesAndCameraPositionSPT4.0.11\modded  (2026-07-11)
+# Graph Report - mods\stancesAndCameraPositionSPT4.0.11\modded  (2026-07-12)
 
 ## Corpus Check
-- 38 files · ~68,636 words
+- 38 files · ~68,765 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `016f37f3`
+- Built from commit: `ca9f8680`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 

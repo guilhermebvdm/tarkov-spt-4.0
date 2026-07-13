@@ -6,8 +6,10 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados quan
 
 ## Estado atual (snapshot ao fim da última sessão)
 
-- **Fork ativo = `modded` (CANÔNICO desde 2026-07-09).** Reorg: `git mv modded-beta → modded` e antigo `modded → modded-bak` (backup, não editar). Build **self-contained** (`/compile-mod` OU `dotnet build`; csproj puxa `Fika.Core` da raiz `references/`, sem `mods/references/` temp). **Deploy manual** do DLL em `D:/SPT/BepInEx/plugins/RealisticMobility/` (assets `.ogg`/`.png` ao lado; `/compile-mod` instala em `plugins/<AssemblyName>/`, então copiar à mão). DLL atual: **v2.0.0, hash `f7752b6`** (014 fix-03 + 015 + reorg do F12). Ver memória global `reference_stances_canonical_build`.
-- **VERSÃO 2.0.0 (2026-07-11, commit `39e7a56`).** Bump `1.3.1 → 2.0.0` em `Plugin.cs` (`BepInPlugin`) **e** `.csproj` (`Version`/`AssemblyVersion`/`FileVersion` — antes a DLL saía como `1.0.0.0`, independente da versão do BepInEx). Changelog do fork em **`modded/CHANGELOG.md`** (o `CHANGELOG_SIMPLIFIED.md` é do upstream e para na 1.1.4). Major porque a config salva do usuário **reseta**.
+- **Fork ativo = `modded` (CANÔNICO desde 2026-07-09).** Reorg: `git mv modded-beta → modded` e antigo `modded → modded-bak` (backup, não editar). Build **self-contained** (`/compile-mod` OU `dotnet build`; csproj puxa `Fika.Core` da raiz `references/`, sem `mods/references/` temp). **Deploy manual** do DLL em `D:/SPT/BepInEx/plugins/RealisticMobility/` (assets `.ogg`/`.png` ao lado; `/compile-mod` instala em `plugins/<AssemblyName>/`, então copiar à mão). DLL atual: **v2.1.0, hash `0e622ba`** (014 fix-03 + 015 + reorg do F12 + limpeza da review 02). Ver memória global `reference_stances_canonical_build`.
+- **VERSÃO 2.1.0 (2026-07-12, commit `ca9f868`) — DLL `0e622ba`.** Antes: 2.0.0 (commit `39e7a56`, bump `1.3.1 → 2.0.0`). A versão vive em **dois** lugares que precisam bater: `Plugin.cs` (`BepInPlugin` — é o que o F12 mostra) e `.csproj` (`Version`/`AssemblyVersion`/`FileVersion` — antes ausente, a DLL saía como `1.0.0.0`). Changelog do fork em **`modded/CHANGELOG.md`** (o `CHANGELOG_SIMPLIFIED.md` é do upstream e para na 1.1.4).
+- **F12 hoje: 20 seções · 113 opções** (2.1.0). Era 21 · 120 na 2.0.0 — a review 02 achou e removeu **7 props fantasmas**.
+- ⚠️ **A 2.0.0 reseta a config salva do usuário** (renome de seção/key na reorg do F12 — o BepInEx casa por `(seção, chave)` literal). A 2.1.0 **não** renomeia nada; só remove props (as entries removidas ficam órfãs no `.cfg` e são ignoradas).
 - ⚠️ **A DLL instalada estava DEFASADA até 2026-07-11.** A instalada era de 11/07 00:53 (pré-reorg do F12); a build com a reorg é de 03:38. **Ou seja: a validação in-game da Sessão 7 rodou sobre código SEM a reorg do F12** — os 23 props mortos e 9 campos órfãos removidos **nunca rodaram no jogo**. O handoff de 2026-07-11 afirmava (errado) que a instalada era a `c83ed42`. Lição: **conferir o hash da DLL instalada contra a do repo**, não confiar no que a memória/handoff diz estar instalado.
 - **BACKLOG INTEIRO VALIDADO IN-GAME (2026-07-11).** Todos os itens 🟢 no `mod-backlog.md` — 001/002/003/005/006/007/008/009/010/011/012/013/014/015. Único 🔴: **004** (mount próprio cancelado → substituído pelo 011). O 014 substitui o 006; o 011 substitui o 004.
 - **014 (sync Fika) — VALIDADO:** o **fix-03** aplica o offset num **Postfix de `PlayerBones.ShiftWeaponRoot`** (janela **pré-IK**) → **braço E arma** acompanham juntos. Antes: fix-02 (Postfix de `ObservedVisualPass`) rodava **pós-IK** e movia **só a arma**.
@@ -17,7 +19,10 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados quan
 
 ## Pendências / próximos passos conhecidos
 
-- **[P-7.1] (aberta 2026-07-11, PARCIAL em 2026-07-11) 🟡 Validar in-game a build 2.0.0.** A parte de **release** está ✅ feita (versão 2.0.0 + changelog + rebuild + deploy — Sessão 8). **Falta o gate humano:** rodar o jogo com a `f7752b6` e conferir (a) as 21 seções / 120 opções do F12 com nomes e tooltips certos e (b) que os itens validados na Sessão 7 **continuam funcionando** — a reorg removeu 23 props e 9 campos que **nunca rodaram in-game**, então não é só conferência cosmética. Ver `feedback_version_increment_on_release` e `feedback_spt_validation`.
+- **[P-7.1] (aberta 2026-07-11, PARCIAL em 2026-07-12) 🟡 Validar in-game — agora a build 2.1.0 (`0e622ba`).** ✅ Feito: release 2.0.0/2.1.0 (versão + changelog + rebuild + deploy) e **conferência do F12 na 2.0.0** (usuário confirmou seções, ordem e tooltips corretos, com prints). **Falta:** rodar em **raid** e reconfirmar os itens da Sessão 7 (008 recarga, 010 chambering, 011 mount passivo, 015 bloqueio de mount, 002 snap ao atirar) — **nunca rodaram** com a reorg do F12 nem com a limpeza da 2.1.0. Ver `feedback_spt_validation`.
+- **[P-8.1] (aberta 2026-07-12) 🟡 Validar os 4 fixes da 2.1.0 in-game:** (a) FOV expandido volta a funcionar (ligar `Enable Expanded FOV Range` e passar de 75 — se `GClass1085.Class1841.method_0` não existir mais na 0.16.x, o `SafeEnable` loga a falha e a decisão vira *remover* as 3 props); (b) as 4 props de ciclo aparecem no F12 mesmo em modo `Linear`; (c) prone e teto de velocidade seguem corretos após o sentinel null em `ApplyWhenProne`; (d) nada regrediu com a remoção da seção `Default Hands/Arms`.
+- **[P-8.2] (aberta 2026-07-12) 🟠 Achados da review 02 NÃO aplicados** (`PROPRIEDADES-review-02.md`): **MP-02-05** (`Camera Position` — `_cameraOffsetDirty` nunca volta a `true` no raid start; suspeita de o offset parar de valer da 2ª raid em diante — o fix é 1 linha, mas depende de saber se o `PlayerSpringPatch` já cobre); **MP-02-06** (2 props em **segundos** com range 0–1 são exibidas como **%** pelo ConfigurationManager — alargar para 0–2); **MP-02-07** (29 keys misturam EN+PT no nome — decisão: manter, é didático); **MP-02-08** (7 headers do `PROPRIEDADES.md` com sufixo `— Item NNN` inexistente no F12); **MP-02-09** (código morto: `CameraBobbingScript` nunca instanciado, `PlayerSpringPatch._cameraOffsetField`, `FixedUpdate` vazio, `ApplySimpleRotationPatch` hardcoda `damping=12f` ignorando a prop); **MP-02-10** (comentário `// Stance 0: irrelevante` é FALSO — ver abaixo).
+- **[P-8.3] (aberta 2026-07-12) 🔴 DECISÃO DE BALANCE pendente: a Stance 0 aplica um cap de 90% de velocidade o tempo todo.** Descoberto na review 02 (`MP-02-10`). Com os defaults (`Stance 0 Modifies Movement Speed = true`, `Multiplier = 90`), o mod limita a velocidade **sempre que o jogador não está em postura** — a maior parte da partida — e isso **compõe** com `Walk Speed Multiplier` (0.85). O comentário do código (`Plugin.cs:47`, `// Stance 0: irrelevante`) diz o contrário e enganou revisões anteriores. **Confirmar com o usuário se essa lentidão é intencional.**
 - **[P-7.2] (aberta 2026-07-11) 🟢 Dívida técnica** (herda a antiga P-5.3): unificar a interpolação em `SpringMath.SpringDamp`, eliminar a reflection que roda a cada frame, `try/catch` nos ~19 patches restantes (só os 6 do Manual Chambering têm), auditar o reset de estado estático entre raids. Adiada porque mexe em código de câmera **já validado** — risco > valor até surgir bug real.
 - **[P-7.3] (aberta 2026-07-11) 🟢 Dívida da revisão do F12** (achados adiados do `PROPRIEDADES-review-01.md`): reordenar as seções (**MP-01-03** — os binds de uma mesma seção estão espalhados pelo `Awake`, ex.: Stance 2 em L766 **e** L1184; reordenar arriscaria quebrar um arquivo de 1700 linhas já validado), rever onde ficam as opções de velocidade (**MP-01-08**) e se a seção da Stance 0 se justifica (**MP-01-10**).
 
@@ -323,3 +328,60 @@ SPT ≠ validação.)
 - **[P-7.1]** → **parcial**. Lado release ✅ (2.0.0 + changelog + rebuild + deploy). **Falta o gate humano:** rodar
   o jogo com a `f7752b6`, conferir as 21 seções / 120 opções do F12 **e** reconfirmar os itens da Sessão 7.
 - **[P-7.2]** e **[P-7.3]** — inalteradas.
+
+## 2026-07-12 ~00:30 (GMT-3) — Sessão 9: review 02 de propriedades → 7 props fantasmas + regressão do FOV (v2.1.0)
+
+Sessão disparada por uma **intuição do usuário**, depois de ele abrir o F12 da 2.0.0 in-game: *"a ordenação e os
+tooltips deram certo, mas tenho impressão que continuamos com algumas ou várias configs fantasmas"*. **Ele estava
+certo.** Rodado `/review-mod-properties` (round 02) → `PROPRIEDADES-review-02.md` (10 achados).
+
+**Confirmado como CORRETO na 2.0.0** (o que os prints provaram): título `2.0.0` (deploy funcionou, o launcher não
+reverteu), **21 seções na ordem certa**, e **95/95 tooltips** no padrão bilíngue. `PROPRIEDADES.md` estava
+**sincronizado** com o código — zero divergência de key/default/faixa/seção.
+
+**Por que a review 01 não pegou os fantasmas (a lição central):** ela caçava props **bindadas e nunca lidas** — e
+removeu 23. **Todas as 120 sobreviventes SÃO lidas**, então `grep`/auditoria por leitura diz "está limpo". Os
+fantasmas restantes são de outro tipo: **a prop é lida, mas o caminho onde ela é lida nunca executa.** Isso só sai
+rastreando a cadeia do `.Value` até o efeito no jogo.
+
+**Aplicado na v2.1.0 (commit `ca9f868`, DLL `0e622ba`) — F12: 120 → 113 props, 21 → 20 seções:**
+
+1. **MP-02-01 — seção `Default Hands/Arms Positions` inteira REMOVIDA (4 props).** Alimentavam
+   `_cachedDefaultPosition`, lido **só** no branch `_ =>` de `GetTargetPosition` (stance == Default). Mas os **3**
+   call-sites são gated em `isInStance` (⇔ `CurrentStance != Default`) → **branch inalcançável**. Contradição
+   estrutural: a prop dizia "posição quando NÃO está em postura" e só seria lida **estando** em postura.
+2. **MP-02-02 — `Apply When Prone` agora só existe na Stance 0 (3 props removidas).** Ao deitar,
+   `StanceManager.Update` força `SetStance(Default)` **antes** das leituras (`:165-176`) → a cfg consultada em prone
+   é **sempre a da Stance 0**. As das Stances 1/2/3 eram lidas num caminho inalcançável. Implementado com **sentinel
+   null** (espelhando o `SnapToStance0OnFire`, que faz o inverso); os 2 leitores usam `?.Value ?? false` e a
+   assinatura do `SettingChanged` ganhou null-guard — **sem esse guard seria NRE no Awake**.
+3. **MP-02-03 — REGRESSÃO: `FOVClampPatch` era órfão.** A classe existe e seu docstring diz servir "to allow FOV
+   values outside the default 50-75 range", mas o **`.Enable()` nunca era chamado** — dos 35 patches, o único fora do
+   `Awake`. `git log -S` prova: existia no commit inicial (`c078925`) e foi **apagado por arrasto** no `9816946`
+   (commit de *mounting*, sem relação com FOV). Sobrava só o `FOVSliderPatch`, que alarga o **slider da UI** — o jogo
+   re-clampava o valor. Reabilitado via `SafeEnable` (o patch já se auto-gateia em `_FOVExpandEnabled`).
+4. **MP-02-04 — fantasma INVERSO: 4 props que funcionam e não apareciam.** `Include Stance 0 in Cycle` e
+   `Enable Stance 1/2/3 in Cycle` tinham `Browsable = wheelEnabled && mode == Cycle` → **sumiam do F12** na config
+   padrão (wheel off / modo `Linear` — exatamente o caso do usuário, visível nos prints). Mas elas governam **também
+   o ciclo da tecla V**, em qualquer modo. Agora são **sempre visíveis**.
+
+**🔴 Achado de maior impacto no jogo, que ninguém procurava (MP-02-10):** o comentário `// Stance 0: irrelevante`
+(`Plugin.cs:47`) é **FALSO**. Com os defaults, a Stance 0 aplica um **cap de 90% na velocidade sempre que o jogador
+está fora de postura** — a maior parte da partida — e isso **compõe** com o `Walk Speed Multiplier` (0.85). Responde
+o MP-01-10 ("a seção Stance 0 se justifica?"): **sim, e é a mais impactante das quatro.** Virou a pendência **P-8.3**
+(decisão de balance do usuário).
+
+**Lições:**
+
+- **"Prop é lida" ≠ "prop faz algo".** Auditoria de config precisa rastrear a cadeia `.Value → efeito no jogo`, não
+  só a existência de uma leitura. As 3 categorias que apareceram: branch inalcançável, gate que muda o estado antes
+  da leitura, e patch que não é habilitado.
+- **Confiar na intuição do usuário sobre o que ele vê no jogo.** Duas auditorias anteriores disseram "limpo"; ele
+  olhou o F12 e disse "tem fantasma". Tinha 7.
+- **Patch órfão é invisível:** a classe compila, o arquivo existe, o code-review lê o patch e o dá por bom — mas ele
+  nunca é habilitado. Vale um teste de sanidade: *todo `ModulePatch` do mod está em algum `Enable()`/`SafeEnable`?*
+- **Contagem de props do F12 é um bom canário.** 120 → 113 sem perder função nenhuma.
+
+**Pendências:** **P-7.1** (validar em raid os itens da Sessão 7 sobre a build nova) · **P-8.1** (validar os 4 fixes
+da 2.1.0, sobretudo o FOV) · **P-8.2** (6 achados da review 02 não aplicados) · **P-8.3** (decisão de balance da
+Stance 0). P-7.2 e P-7.3 inalteradas.
