@@ -23,11 +23,60 @@ namespace CustomClasses.Client;
 /// </summary>
 internal static class MedicTiming
 {
-    /// <summary>Fator de tempo da operação em curso (1 = sem efeito). Válido só entre o prefix e o postfix do method_5.</summary>
+    /// <summary>
+    ///     CR-F3 — profundidade, NÃO um bool. O <c>method_5</c> pode ser re-entrado (fila de body parts via
+    ///     <c>method_8</c>; o Band_Aid o re-invoca por reflexão). Com um bool, o Postfix do nível INTERNO desarmaria
+    ///     enquanto o externo ainda não chamou <c>SetUseTimeMultiplier</c> → efeito encurtado + animação em
+    ///     velocidade vanilla: exatamente a dessincronia que este design existe para impedir. Com contador, é
+    ///     estruturalmente impossível.
+    /// </summary>
+    private static int _depth;
+
+    /// <summary>Fator de tempo da operação em curso (1 = sem efeito). Válido só dentro do escopo armado.</summary>
     internal static float PendingFactor = 1f;
 
+    /// <summary>CR-F4 — a operação em curso é cirurgia? (o vanilla só divide o EFEITO por (1+SurgerySpeed) na cirurgia)</summary>
+    internal static bool PendingIsSurgery;
+
+    /// <summary>CR-F4 — <c>Skills.SurgerySpeed.Value</c> do dono da operação, capturado no arm.</summary>
+    internal static float PendingSurgerySpeed;
+
     /// <summary>True enquanto o <c>method_5</c> do SEU player (Médico) está em execução.</summary>
-    internal static bool Armed;
+    internal static bool Armed => _depth > 0;
+
+    internal static void Arm(float factor, bool isSurgery, float surgerySpeed)
+    {
+        if (_depth == 0)
+        {
+            PendingFactor = factor;
+            PendingIsSurgery = isSurgery;
+            PendingSurgerySpeed = surgerySpeed;
+        }
+
+        _depth++;
+    }
+
+    /// <summary>Fecha UM nível do escopo. Chamado pelo <c>[PatchFinalizer]</c> — que roda mesmo se o original LANÇAR
+    ///     (CR-F2: o Postfix não roda numa exceção, e o <c>DoMedEffect</c> lança <c>ArgumentException</c> de verdade).</summary>
+    internal static void Release()
+    {
+        if (_depth > 0)
+        {
+            _depth--;
+        }
+
+        if (_depth == 0)
+        {
+            Reset();
+        }
+    }
+
+    private static void Reset()
+    {
+        PendingFactor = 1f;
+        PendingIsSurgery = false;
+        PendingSurgerySpeed = 0f;
+    }
 
     /// <summary>
     ///     Cirurgia vs. curativo — o discriminador é do ITEM, não do body part: o kit de cirurgia (CMS/Surv12)
@@ -41,9 +90,27 @@ internal static class MedicTiming
                && meds.HealthEffectsComponent.AffectsAny(EDamageEffectType.DestroyedPart);
     }
 
+    /// <summary>
+    ///     CR-F6 — trava de segurança: se QUALQUER um dos 3 patches de tempo falhar ao aplicar, o perk inteiro é
+    ///     desligado. Meio-perk (efeito curto + animação vanilla, ou o inverso) é pior que perk nenhum.
+    /// </summary>
+    private static bool _disabled;
+
+    internal static void ForceDisable()
+    {
+        _disabled = true;
+        _depth = 0;
+        Reset();
+    }
+
     /// <summary>Fator do item em uso: 🔧 Swift Surgeon (cirurgia) ou 🔧 Rapid Care (demais meds). 1 = perk off.</summary>
     internal static float FactorFor(Item? item)
     {
+        if (_disabled)
+        {
+            return 1f;
+        }
+
         if (IsSurgery(item))
         {
             return PerksConfig.SwiftSurgeonEnabled?.Value == true
@@ -56,10 +123,31 @@ internal static class MedicTiming
             : 1f;
     }
 
-    internal static void Disarm()
+    /// <summary>
+    ///     <b>CR-F1 — soft-reference ao TRL-ImmersiveCombatMedicine (Band_Aid).</b> Aquele mod REDIRECIONA a cura para
+    ///     um ALIADO: o prefix dele chama <c>DoMedEffect</c> no HealthController do PACIENTE, de dentro do nosso
+    ///     escopo armado. Sem este guard, o perk do Médico encurtaria o efeito aplicado <b>no corpo do outro</b> — e
+    ///     pior, o Band_Aid espera um tempo FIXO (<c>UseTime + 2f</c>, tabela própria) sem ler o efeito encurtado, e
+    ///     para paciente REMOTO nem existe MedEffect → a animação correria 1.43× contra uma espera fixa e o gesto
+    ///     terminaria visivelmente antes da hora.
+    ///     <para>
+    ///     Resolvido por REFLEXÃO (nunca por referência dura): o CustomClasses não pode depender do outro mod.
+    ///     Ausente → <c>false</c> → comportamento normal.
+    ///     </para>
+    /// </summary>
+    private static readonly FieldInfo? BandAidRedirectFlag =
+        AccessTools.Field(AccessTools.TypeByName("Band_Aid.MedicHealPatch"), "IsRedirectingHeal");
+
+    internal static bool BandAidIsRedirecting()
     {
-        Armed = false;
-        PendingFactor = 1f;
+        try
+        {
+            return BandAidRedirectFlag?.GetValue(null) is true;
+        }
+        catch
+        {
+            return false;   // mod ausente / assinatura mudou → segue o fluxo normal
+        }
     }
 }
 
@@ -88,14 +176,21 @@ internal class MedsOperationScopePatch : ModulePatch
     }
 
     [PatchPrefix]
-    [HarmonyPriority(Priority.First)]   // abre o escopo ANTES de qualquer outro prefix (inclusive o do TRL)
-    private static void Prefix(Player.MedsController.ObservedMedsControllerClass __instance)
+    [HarmonyPriority(Priority.First)]   // abre o escopo ANTES de qualquer outro prefix (inclusive o do Band_Aid)
+    private static void Prefix(Player.MedsController.ObservedMedsControllerClass __instance, out bool __state)
     {
+        __state = false;   // "eu armei?" — é o que o Finalizer usa para fechar exatamente os níveis que abri
+
         try
         {
-            MedicTiming.Disarm();   // estado limpo a cada operação (defesa contra um postfix perdido)
-
             if (!SkillMultipliers.IsLocalClass("Combat Medic"))
+            {
+                return;
+            }
+
+            // CR-F1: o Band_Aid redireciona a cura para um ALIADO de dentro deste escopo. O perk é SEU, não do
+            // corpo do outro — e o tempo de espera dele é fixo, então encurtar só quebraria a animação.
+            if (MedicTiming.BandAidIsRedirecting())
             {
                 return;
             }
@@ -106,24 +201,38 @@ internal class MedsOperationScopePatch : ModulePatch
                 return;   // ⚠️ bots e peers Fika passam por aqui — é exatamente o vazamento que este gate evita
             }
 
-            var factor = MedicTiming.FactorFor(controller.Item);
+            var item = controller.Item;
+            var factor = MedicTiming.FactorFor(item);
             if (factor >= 1f)
             {
                 return;   // perk desligado no F12 → caminho vanilla intacto
             }
 
-            MedicTiming.Armed = true;
-            MedicTiming.PendingFactor = factor;
+            // CR-F4: capturamos a skill Surgery do dono p/ corrigir a animação da cirurgia (ver MedAnimSpeedPatch).
+            var surgerySpeed = player.Skills?.SurgerySpeed?.Value ?? 0f;
+            MedicTiming.Arm(factor, MedicTiming.IsSurgery(item), surgerySpeed);
+            __state = true;
         }
         catch (Exception ex)
         {
-            MedicTiming.Disarm();
             Plugin.Log?.LogError($"[CustomClasses] (072) med scope (prefix) falhou: {ex.Message}");
         }
     }
 
-    [PatchPostfix]
-    private static void Postfix() => MedicTiming.Disarm();
+    /// <summary>
+    ///     CR-F2 — <b>Finalizer</b>, não Postfix. O HarmonyX emite os postfixes no fim do corpo: se o ORIGINAL lançar,
+    ///     eles NÃO rodam. E o <c>DoMedEffect</c> lança de verdade (<c>ArgumentException("Item is neither Meds nor
+    ///     Food.")</c>). Com um Postfix, o escopo ficaria armado até a próxima operação de qualquer um — e o perk
+    ///     vazaria para o <c>UseTimeFor</c> seguinte, inclusive o de um peer. O Finalizer roda mesmo com exceção.
+    /// </summary>
+    [PatchFinalizer]
+    private static void Finalizer(bool __state)
+    {
+        if (__state)
+        {
+            MedicTiming.Release();
+        }
+    }
 }
 
 /// <summary>
@@ -177,6 +286,14 @@ internal class MedUseTimePatch : ModulePatch
 ///     Efeito ×0.7 ⇒ animação precisa correr 1/0.7 ≈ 1.43× mais rápido. Como o vanilla chama isto DEPOIS do
 ///     <c>DoMedEffect</c> dentro do mesmo <c>method_5</c>, o fator armado ainda está de pé — os dois lados batem.
 ///     </para>
+///     <para>
+///     <b>CR-F4 — corrigimos, DENTRO do escopo do perk, um bug de fábrica da BSG.</b> Na cirurgia o vanilla divide o
+///     EFEITO por <c>(1 + SurgerySpeed)</c> (AHC:4300) mas multiplica a ANIMAÇÃO por <c>(1 + SurgerySpeed/100)</c>
+///     (Player.cs:19562+19568) — <b>um fator 100 de discrepância</b>. Com a skill Surgery treinada, a operação já
+///     termina no vanilla com parte da animação por tocar; o Swift Surgeon só herdaria o defeito e o deixaria mais
+///     visível. Aqui trocamos o termo bugado (<c>S/100</c>) pelo termo real (<c>S</c>) — <b>só</b> quando o perk está
+///     armado, então o comportamento vanilla de quem não é Médico fica intocado.
+///     </para>
 /// </summary>
 internal class MedAnimSpeedPatch : ModulePatch
 {
@@ -193,6 +310,15 @@ internal class MedAnimSpeedPatch : ModulePatch
             if (!MedicTiming.Armed || MedicTiming.PendingFactor <= 0f)
             {
                 return;
+            }
+
+            // CR-F4: o `speed` que chega é `1 + S/100 (+0.2 se HP quase cheio)`. O `+0.2` já casa com o efeito
+            // (o `num2` do DoMedEffect); o que NÃO casa é a skill. Substituímos S/100 por S — e só na cirurgia,
+            // que é o único ramo em que o efeito de fato divide por (1 + S).
+            if (MedicTiming.PendingIsSurgery)
+            {
+                var s = MedicTiming.PendingSurgerySpeed;
+                speed += s - (s / 100f);
             }
 
             speed /= MedicTiming.PendingFactor;   // ×0.7 no efeito → ÷0.7 na animação

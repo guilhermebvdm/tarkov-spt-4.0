@@ -43,15 +43,21 @@ internal class CalmSightsPatch : ModulePatch
     {
         try
         {
-            if (PerksConfig.CalmSightsEnabled?.Value != true || !SkillMultipliers.IsLocalClass("Hunter"))
+            if (PerksConfig.CalmSightsEnabled?.Value != true)
             {
                 return;
             }
 
-            // Gate de player local: não há backreference pública PWA→Player, então comparamos com o PWA do
-            // MainPlayer. Sem isto, o perk cairia em CADA ProceduralWeaponAnimation da cena (bots, peers Fika).
+            // ⚠️ CR-F5 — ORDEM DOS GATES IMPORTA. Este Postfix roda para CADA ProceduralWeaponAnimation da cena
+            // (bots, peers Fika), e o IsLocalClass() cai num EnsureLoaded() que, com cache frio, faz um GET HTTP
+            // SÍNCRONO. Identidade primeiro (ReferenceEquals, barato); só o PWA do SEU player chega na classe.
             var mainPwa = Singleton<GameWorld>.Instance?.MainPlayer?.ProceduralWeaponAnimation;
             if (mainPwa == null || !ReferenceEquals(__instance, mainPwa))
+            {
+                return;
+            }
+
+            if (!SkillMultipliers.IsLocalClass("Hunter"))
             {
                 return;
             }

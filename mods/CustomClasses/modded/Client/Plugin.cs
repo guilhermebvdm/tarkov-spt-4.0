@@ -10,7 +10,7 @@ namespace CustomClasses.Client;
 ///     Busca os fatores do server (rota /customclasses/skill-multipliers) e faz Prefix em
 ///     AbstractSkillClass.OnTrigger. UI (linha+tooltip) vem na Fatia 2.
 /// </summary>
-[BepInPlugin("customclasses.mdj.client", "CustomClasses", "0.2.0")]
+[BepInPlugin("customclasses.mdj.client", "CustomClasses", "0.2.1")]
 [BepInDependency("com.SPT.core", "4.0.0")]
 [BepInDependency("me.sol.sain", BepInDependency.DependencyFlags.SoftDependency)]   // (050.4 SAIN) carrega após o SAIN se presente
 public class Plugin : BaseUnityPlugin
@@ -195,14 +195,33 @@ public class Plugin : BaseUnityPlugin
         try
         {
             new CalmSightsPatch().Enable();                 // (072) 🔧 Caçador — sway ×0.7 (UpdateSwayFactors)
-            new MedsOperationScopePatch().Enable();         // (072) 🩺 arma o escopo do método de meds do SEU player
-            new MedUseTimePatch().Enable();                 // (072) 🔧 Médico — Rapid Care / Swift Surgeon (EFEITO)
-            new MedAnimSpeedPatch().Enable();               // (072) 🔧 Médico — casa a ANIMAÇÃO com o efeito
+        }
+        catch (System.Exception ex)
+        {
+            Log.LogError($"[CustomClasses] (072) Calm Sights não aplicado: {ex.Message}");
+        }
+        // ⚠️ CR-F6 — o TRIO de tempo do Médico (escopo + efeito + animação) vive ou morre JUNTO. Num try/catch
+        // compartilhado com os outros, se o MedUseTimePatch entrasse e o MedAnimSpeedPatch falhasse, o jogador
+        // ficaria com o efeito encurtado e a animação em velocidade vanilla — o pior dos dois mundos. Aqui, se
+        // qualquer um dos três falhar, DESLIGAMOS o perk inteiro (o escopo nunca arma → caminho vanilla intacto).
+        try
+        {
+            new MedsOperationScopePatch().Enable();         // (072) 🩺 arma o escopo do method_5 do SEU player
+            new MedUseTimePatch().Enable();                 // (072) 🔧 Rapid Care / Swift Surgeon — o EFEITO
+            new MedAnimSpeedPatch().Enable();               // (072) 🔧 ...e a ANIMAÇÃO, casada com ele
+        }
+        catch (System.Exception ex)
+        {
+            MedicTiming.ForceDisable();                     // efeito sem animação (ou vice-versa) é pior que nada
+            Log.LogError($"[CustomClasses] (072) Rapid Care / Swift Surgeon DESLIGADOS (patch incompleto): {ex.Message}");
+        }
+        try
+        {
             new MobileSurgeryPatch().Enable();              // (072) 🔧 Médico — cirurgia andando (HealingLegs off)
         }
         catch (System.Exception ex)
         {
-            Log.LogError($"[CustomClasses] (072) perks do Médico / Calm Sights falharam ao aplicar: {ex.Message}");
+            Log.LogError($"[CustomClasses] (072) Mobile Surgery não aplicado: {ex.Message}");
         }
         try
         {
