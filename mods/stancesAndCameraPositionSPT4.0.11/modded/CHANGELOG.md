@@ -7,6 +7,29 @@ Versões mais recentes primeiro.
 
 ---
 
+## v2.5.0 (2026-07-14)
+
+### Removido — a seção `Field of View` inteira (3 opções)
+
+Apesar do nome, ela **não** mexia no campo de visão do jogo: era um FOV de **viewmodel** — mudava a perspectiva
+**só dos braços e da arma**, deixando o mundo intacto. O resultado prático é ver os braços fora de escala,
+esticados na tela.
+
+Pior, ela deixava o jogo num estado do qual **não dava para sair pelo menu**: o valor ficava gravado nas
+configurações do jogo, e **desligar a opção não desfazia**. Um travamento no meio do ajuste bastava para o
+personagem ficar com os braços deformados permanentemente.
+
+Sem valor real e com uma armadilha dessas, a funcionalidade foi **removida inteira** — as 3 opções e os dois
+patches por trás delas. O jogo volta a limitar o FOV na faixa nativa (50–75).
+
+> **Se o seu personagem ficou com os braços deformados:** atualize para esta versão e abra o jogo. Sem os
+> patches, o limite nativo volta a valer e a visão normaliza sozinha. Se ainda estranhar, confira o FOV em
+> *Configurações → Jogo*.
+
+O menu F12 foi de 114 para **111 opções**, e de 20 para **19 seções**.
+
+---
+
 ## v2.4.0 (2026-07-13)
 
 ### Novidade — a velocidade da mira agora é separada da velocidade das posturas

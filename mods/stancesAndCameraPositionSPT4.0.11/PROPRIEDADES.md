@@ -1,7 +1,7 @@
 # Propriedades F12 — stancesAndCameraPositionSPT4.0.11
 
-> Todas as opções do menu **F12** (BepInEx ConfigurationManager). **20 seções · 114 opções.**
-> Regenerado de `modded/Plugin.cs` em **2026-07-12** (fonte de verdade), para a **v2.4.0**. Os tooltips do jogo são bilíngues (EN + PT); aqui a coluna **Descrição** traz a versão em português resumida.
+> Todas as opções do menu **F12** (BepInEx ConfigurationManager). **19 seções · 111 opções.**
+> Regenerado de `modded/Plugin.cs` em **2026-07-12** (fonte de verdade), para a **v2.5.0**. Os tooltips do jogo são bilíngues (EN + PT); aqui a coluna **Descrição** traz a versão em português resumida.
 >
 > **v2.2.0 corrigiu os eixos Yaw/Roll** (estavam trocados em todas as stances e no ADS — a rotação é aplicada nos eixos LOCAIS da arma, onde Y = cano/roll e Z = vertical/yaw) e **traduziu os nomes para inglês**. Tooltips seguem bilíngues.
 >
@@ -13,7 +13,7 @@
 
 | Tema | Seções |
 |---|---|
-| [A. Troca de stances e câmera](#a--troca-de-stances-e-câmera) | Stance Cycle & Hotkeys · Stance Transition & Kick · Camera Position · Field of View |
+| [A. Troca de stances e câmera](#a--troca-de-stances-e-câmera) | Stance Cycle & Hotkeys · Stance Transition & Kick · Camera Position |
 | [B. Poses e mira (ADS)](#b--poses-e-mira-ads) | Stance 0/1/2/3 · ADS Default Values |
 | [C. Mount e stamina](#c--mount-e-stamina) | Weapon Mount (Active) · Weapon Mount (Passive) · Stamina Management |
 | [D. Movimento](#d--movimento) | Movement & Inertia · Tac Sprint · Animation Speed |
@@ -63,13 +63,11 @@
 | Up/Down Offset | float | `0.02` | -0.5 – 0.5 | Posição da câmera para cima/baixo (positivo = cima). |
 | Sideways Offset | float | `0` | -0.5 – 0.5 | Posição da câmera para os lados (positivo = direita). |
 
-### Field of View
+### ~~Field of View~~ — REMOVIDA na v2.5.0
 
-| Propriedade (EN) | Tipo | Padrão | Faixa | Descrição |
-|---|---|---|---|---|
-| Enable Expanded FOV Range | bool | `false` | — | Permite estender o slider de FOV além do intervalo padrão de 50-75. |
-| Minimum FOV | int | `20` | 1 – 50 | Valor mínimo de FOV. O mínimo padrão do jogo é 50. |
-| Maximum FOV | int | `150` | 75 – 170 | Valor máximo de FOV. O máximo padrão do jogo é 75. |
+Era um FOV de **viewmodel** (perspectiva só dos braços/arma, não do mundo): deformava os braços e o valor ficava
+gravado nas configurações do jogo, sem desfazer ao desligar a opção. Removida inteira — o jogo volta a limitar o
+FOV em 50-75.
 
 ---
 
@@ -275,7 +273,7 @@ Multiplicador de stamina de braço por cenário. Semântica: **< 1 drena · 1 ma
 
 A ordem real das seções no ConfigurationManager (por ordem de descoberta no `Plugin.cs`):
 
-1. Manual Chambering · 2. Camera Position · 3. Stance Cycle & Hotkeys · 4. Stance Transition & Kick · 5. ADS Default Values (Advanced) · 6. Stance 0 - Vanilla · 7. Stance 1 - High Ready · 8. Stance 2 - Low Ready · 9. Stance 3 - Custom · 10. Weapon Mount (Active) · 11. Weapon Mount (Passive) · 12. Stamina Management · 13. Hold Breath · 14. Oxygen Bar (UI) · 15. Animation Speed · 16. Movement & Inertia · 17. Action Stances · 18. Tac Sprint Settings (Advanced) · 19. Field of View · 20. Debug (Advanced)
+1. Manual Chambering · 2. Camera Position · 3. Stance Cycle & Hotkeys · 4. Stance Transition & Kick · 5. ADS Default Values (Advanced) · 6. Stance 0 - Vanilla · 7. Stance 1 - High Ready · 8. Stance 2 - Low Ready · 9. Stance 3 - Custom · 10. Weapon Mount (Active) · 11. Weapon Mount (Passive) · 12. Stamina Management · 13. Hold Breath · 14. Oxygen Bar (UI) · 15. Animation Speed · 16. Movement & Inertia · 17. Action Stances · 18. Tac Sprint Settings (Advanced) · 20. Debug (Advanced)
 
 ## Histórico de Alterações
 

@@ -20,7 +20,7 @@ public enum ScrollMode
     Linear,
 }
 
-[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "2.4.0")]
+[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "2.5.0")]
 public class Plugin : BaseUnityPlugin
 {
     public static Plugin Instance { get; private set; }
@@ -71,7 +71,6 @@ public class Plugin : BaseUnityPlugin
     private const string Stance2Section = "Stance 2 - Low Ready";
     private const string Stance3Section = "Stance 3 - Custom";
     private const string TacSprintSettings = "Tac Sprint Settings (Advanced)";
-    private const string FOVSettings = "Field of View";
     private const string DebugSettings = "Debug (Advanced)";
     private const string PassiveMountSettings = "Weapon Mount (Passive)";
     private const string ActiveMountSettings = "Weapon Mount (Active)";
@@ -194,9 +193,6 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<bool> _DebugApplyInHideout;
 
     // FOV Settings
-    public static ConfigEntry<bool> _FOVExpandEnabled;
-    public static ConfigEntry<int> _FOVMinRange;
-    public static ConfigEntry<int> _FOVMaxRange;
 
     // Weapon Mount (Active) — Item 015
     public static ConfigEntry<bool> _BlockActiveMountInStance;
@@ -1058,32 +1054,11 @@ public class Plugin : BaseUnityPlugin
             new AcceptableValueRange<float>(0f, 1f),
             new ConfigurationManagerAttributes { IsAdvanced = true, Order = 3 }));
 
-        // ========================================
-        // FIELD OF VIEW (Order 3-1)
-        // ========================================
-        _FOVExpandEnabled = Config.Bind(
-            FOVSettings,
-            "Enable Expanded FOV Range",
-            false,
-            new ConfigDescription("Allows extending the FOV slider beyond the default 50-75 range\n\nPermite estender o slider de FOV além do intervalo padrão de 50-75",
-            null,
-            new ConfigurationManagerAttributes { Order = 3 }));
-
-        _FOVMinRange = Config.Bind(
-            FOVSettings,
-            "Minimum FOV",
-            20,
-            new ConfigDescription("Minimum FOV value. Default game minimum is 50\n\nValor mínimo de FOV. O mínimo padrão do jogo é 50",
-            new AcceptableValueRange<int>(1, 50),
-            new ConfigurationManagerAttributes { Order = 2 }));
-
-        _FOVMaxRange = Config.Bind(
-            FOVSettings,
-            "Maximum FOV",
-            150,
-            new ConfigDescription("Maximum FOV value. Default game maximum is 75\n\nValor máximo de FOV. O máximo padrão do jogo é 75",
-            new AcceptableValueRange<int>(75, 170),
-            new ConfigurationManagerAttributes { Order = 1 }));
+        // FIELD OF VIEW — REMOVIDO na v2.5.0 (decisão do usuário).
+        // Era um FOV de VIEWMODEL (campo de visão só do braço/arma, não do mundo). Ao mexer nele, os
+        // braços saem de escala; um crash do jogo no meio do ajuste deixou o valor gravado nesse estado,
+        // e desligar a opção não desfazia. Sem valor de jogo e com armadilha real → feature removida
+        // inteira (3 props + FOVClampPatch + FOVSliderPatch). O jogo volta a limitar o FOV em 50-75.
 
         // ========================================
         // DEBUG (Order -1)
@@ -1201,13 +1176,6 @@ public class Plugin : BaseUnityPlugin
         SafeEnable("HoldBreathPatch", () => new Patches.HoldBreathPatch());
         // Áudio NÃO é carregado aqui (cena de menu): a transição p/ o jogo descarrega os clips
         // (length vira 0). Carregamento é disparado em GameWorld.OnGameStarted via HoldBreathPatch.OnRaidStart().
-        SafeEnable("FOVSliderPatch", () => new FOVSliderPatch());
-        // MP-02-03 — REGRESSÃO CORRIGIDA. O FOVSliderPatch só alarga o slider da UI; quem remove o
-        // clamp interno (50-75) é o FOVClampPatch. O `.Enable()` dele existia no commit inicial e foi
-        // apagado por arrasto no commit 9816946 (que implementava mounting), deixando as 3 props de
-        // Field of View inertes. O patch é gated internamente por _FOVExpandEnabled (default false),
-        // e o SafeEnable degrada com log se o alvo (GClass1085.Class1841.method_0) sumir no EFT.
-        SafeEnable("FOVClampPatch", () => new FOVClampPatch());
 
         // Fika Multiplayer Sync Integration (Soft Dependency)
         if (Chainloader.PluginInfos.ContainsKey("com.fika.core"))
