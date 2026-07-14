@@ -3,8 +3,8 @@
 Este é o `.cfg` **calibrado do servidor Tarkov Red Line**, que acompanha a DLL do mod. Ele existe aqui para
 rastreabilidade: qual configuração corresponde a qual versão do mod.
 
-> **Versão do mod:** v2.4.0 · **Gerado em:** 2026-07-14 (pelo próprio jogo, não à mão)
-> **Conteúdo:** 20 seções · 114 opções · sem chaves órfãs
+> **Versão do mod:** v2.5.0 · **Gerado em:** 2026-07-14 (pelo próprio jogo, não à mão)
+> **Conteúdo:** 19 seções · 111 opções · sem chaves órfãs
 
 ## Por que ele precisa ser distribuído junto com a DLL
 
