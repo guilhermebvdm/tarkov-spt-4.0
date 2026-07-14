@@ -6,9 +6,14 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados quan
 
 ## Estado atual (snapshot ao fim da última sessão)
 
-- **Fork ativo = `modded` (CANÔNICO desde 2026-07-09).** Reorg: `git mv modded-beta → modded` e antigo `modded → modded-bak` (backup, não editar). Build **self-contained** (`/compile-mod` OU `dotnet build`; csproj puxa `Fika.Core` da raiz `references/`, sem `mods/references/` temp). **Deploy manual** do DLL em `D:/SPT/BepInEx/plugins/RealisticMobility/` (assets `.ogg`/`.png` ao lado; `/compile-mod` instala em `plugins/<AssemblyName>/`, então copiar à mão). DLL atual: **v2.2.0, hash `a22d368`** (014 fix-03 + 015 + reorg do F12 + limpeza da review 02 + fix dos eixos Yaw/Roll). Ver memória global `reference_stances_canonical_build`.
+- **Fork ativo = `modded` (CANÔNICO desde 2026-07-09).** Reorg: `git mv modded-beta → modded` e antigo `modded → modded-bak` (backup, não editar). Build **self-contained** (`/compile-mod` OU `dotnet build`; csproj puxa `Fika.Core` da raiz `references/`, sem `mods/references/` temp). **Deploy manual** do DLL em `D:/SPT/BepInEx/plugins/RealisticMobility/` (assets `.ogg`/`.png` ao lado; `/compile-mod` instala em `plugins/<AssemblyName>/`, então copiar à mão). DLL atual: **v2.5.0, hash `397b3c3`** (014 fix-03 + 015 + reorg do F12 + limpeza da review 02 + fix dos eixos + Awake saneado + ADS speed + FOV removido). Ver memória global `reference_stances_canonical_build`.
 - ⚠️⚠️ **EIXOS DA ARMA SÃO LOCAIS, NÃO OS DO UNITY** (fix v2.2.0, commit `d9069fb`). A rotação é aplicada como `weapRotation * Quaternion.Euler(euler)` (`ApplyComplexRotationPatch:280`) → **espaço local da arma**: `X = lateral · Y = LONGITUDINAL (o cano) · Z = vertical`. Portanto **girar em torno de Y = TOMBAR (roll)** e **em torno de Z = APONTAR (yaw)** — o **contrário** da ordem canônica do Unity `(pitch, yaw, roll)`. A montagem correta é `new Vector3(pitch, roll, yaw)`. **Nunca presumir a convenção do Unity aqui.**
-- **VERSÃO 2.2.0 (2026-07-12, commit `d9069fb`) — DLL `a22d368`.** Antes: 2.1.0 (`ca9f868`, DLL `0e622ba`) e 2.0.0 (`39e7a56`). Antes: 2.0.0 (commit `39e7a56`, bump `1.3.1 → 2.0.0`). A versão vive em **dois** lugares que precisam bater: `Plugin.cs` (`BepInPlugin` — é o que o F12 mostra) e `.csproj` (`Version`/`AssemblyVersion`/`FileVersion` — antes ausente, a DLL saía como `1.0.0.0`). Changelog do fork em **`modded/CHANGELOG.md`** (o `CHANGELOG_SIMPLIFIED.md` é do upstream e para na 1.1.4).
+- **VERSÃO 2.5.0 (2026-07-14, commit `17f9d02`) — DLL `397b3c3`.** Trilha da sessão: 2.0.0 (`39e7a56`) → 2.1.0 (`ca9f868`) → 2.2.0 (`d9069fb`) → **2.2.1 hotfix** (`4936e8f`) → 2.3.0 (`b477c21`) → 2.4.0 (`8fc8f8e`) → 2.5.0 (`17f9d02`).
+- ⚠️⚠️ **O BepInEx PROÍBE `=` no nome de uma key** (é o separador do `.cfg`) — `Config.Bind` **lança** e **aborta o `Awake`**. Também proibidos: `[ ] " ' \ tab`. Isto derrubou a v2.2.0 (ver Sessão 10).
+- ⚠️ **ORDEM DO `Awake` (v2.3.0):** `BindAllConfig()` **ANTES** de `EnableEverything()`. Antes era o contrário e um bind que lançasse deixava os ~35 patches VIVOS com `ConfigEntry` null → NRE por frame na raid. Hoje um bind ruim → 1 log `[BOOT]`, `ConfigReady=false`, **nenhum** patch aplicado (jogo roda vanilla). `Plugin.Update` e `PassiveMountUI.Update` checam `ConfigReady` (o Unity chama MonoBehaviour mesmo com Awake abortado).
+- **A ORDEM dos `Config.Bind` entre si é a ordem das SEÇÕES no F12** (o ConfigurationManager usa ordem de descoberta). Não reordenar sem querer. A Stance 0 é bindada cedo de propósito (`Plugin.cs:616`, antes da Stance 1).
+- **F12 hoje: 19 seções · 111 opções.**
+- **`assets/config/com.shwng.fpscamerastances.cfg`** = a config CALIBRADA do servidor, versionada. **DLL e `.cfg` são um PAR** — desde a 2.0.0 as keys foram renomeadas, então DLL nova + cfg velho = o BepInEx não casa nada e reseta tudo. Distribuir via **`config-server`** do launcher (espelho, sobrescreve), **nunca** `config` (seed-if-missing: quem já tem o cfg antigo não receberia nada). Antes: 2.0.0 (commit `39e7a56`, bump `1.3.1 → 2.0.0`). A versão vive em **dois** lugares que precisam bater: `Plugin.cs` (`BepInPlugin` — é o que o F12 mostra) e `.csproj` (`Version`/`AssemblyVersion`/`FileVersion` — antes ausente, a DLL saía como `1.0.0.0`). Changelog do fork em **`modded/CHANGELOG.md`** (o `CHANGELOG_SIMPLIFIED.md` é do upstream e para na 1.1.4).
 - **F12 hoje: 20 seções · 113 opções** (2.1.0). Era 21 · 120 na 2.0.0 — a review 02 achou e removeu **7 props fantasmas**.
 - ⚠️ **A 2.0.0 reseta a config salva do usuário** (renome de seção/key na reorg do F12 — o BepInEx casa por `(seção, chave)` literal). A 2.1.0 **não** renomeia nada; só remove props (as entries removidas ficam órfãs no `.cfg` e são ignoradas).
 - ⚠️ **A DLL instalada estava DEFASADA até 2026-07-11.** A instalada era de 11/07 00:53 (pré-reorg do F12); a build com a reorg é de 03:38. **Ou seja: a validação in-game da Sessão 7 rodou sobre código SEM a reorg do F12** — os 23 props mortos e 9 campos órfãos removidos **nunca rodaram no jogo**. O handoff de 2026-07-11 afirmava (errado) que a instalada era a `c83ed42`. Lição: **conferir o hash da DLL instalada contra a do repo**, não confiar no que a memória/handoff diz estar instalado.
@@ -24,7 +29,10 @@ Memória cronológica de sessões de chat (timestamps em GMT-3, aproximados quan
 - **[P-8.1] (aberta 2026-07-12) 🟡 Validar os 4 fixes da 2.1.0 in-game:** (a) FOV expandido volta a funcionar (ligar `Enable Expanded FOV Range` e passar de 75 — se `GClass1085.Class1841.method_0` não existir mais na 0.16.x, o `SafeEnable` loga a falha e a decisão vira *remover* as 3 props); (b) as 4 props de ciclo aparecem no F12 mesmo em modo `Linear`; (c) prone e teto de velocidade seguem corretos após o sentinel null em `ApplyWhenProne`; (d) nada regrediu com a remoção da seção `Default Hands/Arms`.
 - **[P-8.2] (aberta 2026-07-12) 🟠 Achados da review 02 NÃO aplicados** (`PROPRIEDADES-review-02.md`): **MP-02-05** (`Camera Position` — `_cameraOffsetDirty` nunca volta a `true` no raid start; suspeita de o offset parar de valer da 2ª raid em diante — o fix é 1 linha, mas depende de saber se o `PlayerSpringPatch` já cobre); **MP-02-06** (2 props em **segundos** com range 0–1 são exibidas como **%** pelo ConfigurationManager — alargar para 0–2); **MP-02-07** (29 keys misturam EN+PT no nome — decisão: manter, é didático); **MP-02-08** (7 headers do `PROPRIEDADES.md` com sufixo `— Item NNN` inexistente no F12); **MP-02-09** (código morto: `CameraBobbingScript` nunca instanciado, `PlayerSpringPatch._cameraOffsetField`, `FixedUpdate` vazio, `ApplySimpleRotationPatch` hardcoda `damping=12f` ignorando a prop); **MP-02-10** (comentário `// Stance 0: irrelevante` é FALSO — ver abaixo).
 - **[P-8.3] ✅ RESOLVIDA (2026-07-12) — o cap de velocidade da Stance 0 é INTENCIONAL.** O usuário confirmou: *"tudo bem para a multiplicação de tudo do walk e das stances speed"*. A Stance 0 aplica cap de 90% fora de postura e **compõe** com o `Walk Speed Multiplier` (0.85) — é o comportamento desejado, não um bug. ⚠️ **Não "otimizar" isso.** (O comentário `// Stance 0: irrelevante` em `Plugin.cs:47` continua **falso** e ainda deve ser corrigido — parte do `MP-02-10`.)
-- **[P-8.4] (aberta 2026-07-12) 🟡 Validar in-game a v2.2.0 (`a22d368`) — fix dos eixos:** `Yaw` deve **APONTAR** esq/dir e `Roll` deve **TOMBAR** a arma, nas 3 stances **e no ADS** (antes faziam o contrário). Conferir também que **as poses ficaram iguais às de antes** — o `.cfg` foi migrado (valores `Yaw`↔`Roll` trocados) justamente para preservar o visual; se alguma stance parecer diferente, a migração errou. Backup: `cfg.bak-pre-v220`.
+- **[P-8.4] ✅ RESOLVIDA (2026-07-14) — eixos validados in-game.** `Yaw` aponta, `Roll` tomba, poses preservadas pela migração do `.cfg`. (Texto original abaixo.)
+- **[P-10.1] (aberta 2026-07-14) 🟢 Achados do code-review NÃO aplicados** (`CODE-REVIEW-v2.2.1.md`): **CR-05** (o aparato de `Browsable`/ConfigurationManager virou no-op mas ainda força rebuild do F12 a cada mudança do scroll mode) e **CR-07** (`Plugin.Update` sem try/catch — uma exceção derruba o resto do tick, todo frame; se aplicar, com log **rate-limited**).
+- **[P-10.2] (aberta 2026-07-14) 🟡 Achados da review 02 que sobraram:** **MP-02-05** (`Camera Position` — `_cameraOffsetDirty` nunca volta a `true` no raid start; suspeita de o offset parar de valer da 2ª raid em diante), **MP-02-06** (2 props em segundos com range 0–1 são exibidas como % pelo ConfigurationManager), **MP-02-08**, **MP-02-09**, **MP-02-10** (o comentário `// Stance 0: irrelevante` ainda é falso).
+- ~~**[P-8.4]** (aberta 2026-07-12) Validar in-game a v2.2.0 (`a22d368`) — fix dos eixos:~~ `Yaw` deve **APONTAR** esq/dir e `Roll` deve **TOMBAR** a arma, nas 3 stances **e no ADS** (antes faziam o contrário). Conferir também que **as poses ficaram iguais às de antes** — o `.cfg` foi migrado (valores `Yaw`↔`Roll` trocados) justamente para preservar o visual; se alguma stance parecer diferente, a migração errou. Backup: `cfg.bak-pre-v220`.
 - **[P-7.2] (aberta 2026-07-11) 🟢 Dívida técnica** (herda a antiga P-5.3): unificar a interpolação em `SpringMath.SpringDamp`, eliminar a reflection que roda a cada frame, `try/catch` nos ~19 patches restantes (só os 6 do Manual Chambering têm), auditar o reset de estado estático entre raids. Adiada porque mexe em código de câmera **já validado** — risco > valor até surgir bug real.
 - **[P-7.3] (aberta 2026-07-11) 🟢 Dívida da revisão do F12** (achados adiados do `PROPRIEDADES-review-01.md`): reordenar as seções (**MP-01-03** — os binds de uma mesma seção estão espalhados pelo `Awake`, ex.: Stance 2 em L766 **e** L1184; reordenar arriscaria quebrar um arquivo de 1700 linhas já validado), rever onde ficam as opções de velocidade (**MP-01-08**) e se a seção da Stance 0 se justifica (**MP-01-10**).
 
@@ -437,3 +445,89 @@ Stance 1 (Yaw -5 / Roll 7) → (Yaw 7 / Roll -5) · Stance 2 (0 / -8) → (-8 / 
 e no ADS; e conferir que as poses continuam como antes (a migração do `.cfg` deve ter deixado tudo igual).
 P-7.1 · P-8.1 · P-8.2 (restam MP-02-05/06/08/09/10) · P-8.3 (balance da Stance 0 — **resolvida: o usuário confirmou
 que a multiplicação de Walk × Stance é intencional**) — ver abaixo.
+
+## 2026-07-14 ~01:00 (GMT-3) — Sessão 10: o `=` que derrubou o mod, o `Awake` saneado, ADS speed e o FOV removido (2.2.1 → 2.5.0)
+
+Continuação direta da Sessão 9. O usuário validou os eixos in-game (**P-8.4 ✅**) e a sessão virou uma sequência de
+incidente → diagnóstico → correção estrutural.
+
+### 🔥 O incidente: um caractere derrubou o mod inteiro dentro da raid
+
+Ao traduzir os sufixos das keys (Sessão 9), criei `Stance Overshoot Damping (Lower = More Bounce)`. **O BepInEx
+proíbe `=` em nome de key** — é o separador do `.cfg` — e `Config.Bind` **lançou**, **abortando o `Awake`** na
+linha ~508 de ~860.
+
+**Por que virou catástrofe e não um erro silencioso:** os patches eram habilitados **ANTES** dos binds. Os ~35
+patches ficaram **vivos** enquanto toda `ConfigEntry` posterior à key ruim era `null`. Em raid,
+`PassiveMountDetect`, `PassiveSway` e `PassiveMountUI.Update` leem `Plugin._EnablePassiveMount.Value` como primeira
+instrução → **NullReferenceException a cada frame, infinito**. O usuário teve de mover o mod para
+`plugins-disabled` no meio da sessão de jogo.
+
+**A ferramenta forense que fechou o caso: o próprio `.cfg`.** O BepInEx escreve o bloco `# Setting type:` **apenas**
+para entries que realmente bindou, e **preserva órfãs sem ele**. `[Stance Transition & Kick]` tinha **3 de 4**
+(faltando exatamente a key ruim) e **toda seção posterior estava vazia** → isso aponta a linha do abort. Antes disso
+eu tinha me enganado duas vezes: (a) achei que os logs `is loaded`/`[F2]`/`[F4]` provavam que o `Awake` completara —
+**todos são emitidos nas primeiras ~30 linhas do `Awake`**; (b) achei que a presença das keys no `.cfg` provava o
+bind — **não prova**, órfãs são preservadas.
+
+### v2.3.0 — a causa estrutural, não o sintoma (code-review a pedido do usuário)
+
+`/code-review` do diff da sessão → `CODE-REVIEW-v2.2.1.md` (9 achados, 2 🔴). Aplicados 6:
+
+- **CR-01 (🔴):** `Awake` reordenado → resolver reflection → **`BindAllConfig()`** → **`EnableEverything()`**. Um bind
+  que falhe agora deixa o mod **inerte** (1 log `[BOOT]`, `ConfigReady=false`, **nenhum** patch) e o jogo roda
+  vanilla. Havia **53 leituras `Plugin._X.Value` sem `?.` em 18 arquivos** de patch esperando a próxima falha.
+  A **ordem interna dos binds foi preservada** (é ela que ordena as seções do F12). Guards de `ConfigReady` em
+  `Plugin.Update` e `PassiveMountUI.Update` — o Unity chama MonoBehaviour mesmo com o `Awake` abortado.
+- **CR-02 (🔴, docs):** o CHANGELOG **prometia migração automática do `.cfg` que não existe no código** — a migração
+  foi um script manual, uma vez, na máquina do dev. Para qualquer outro jogador do Fika, resetaria a calibração em
+  silêncio enquanto o texto garantia o contrário. Reescrito para a verdade.
+- **CR-03/04/06/08/09:** 2 patches com `.Enable()` cru fora do `SafeEnable` (incluindo o **central**, o
+  `ApplyComplexRotationPatch`); null-guard no FOVClampPatch; array `[16]` mágico → `Enum.GetValues(...).Length`;
+  damping hardcoded; e a **memória registrava o nome de key envenenado** (quem reaplicasse dali reintroduziria o
+  crash).
+
+### v2.4.0 — velocidade de ADS separada da velocidade de postura (pedido do usuário)
+
+`Stance Transition Speed` governava **as duas** transições. Motivo: **a mola é uma só** — ela interpola até um
+alvo, e o alvo muda tanto na troca de postura quanto ao mirar; a mola não sabe o *porquê*. Solução:
+`TransitionSpeedTracker` observa **o que mudou** (`isAiming` → ADS; stance → postura) e **mantém o modo até a
+próxima mudança** — é isso que faz a velocidade de mira valer também na **saída** dela. **Uma instância por corpo
+animado**: local (estático) e **cada** jogador observado no Fika (por instância — dois remotos podem estar em
+transições diferentes). Reset no `StanceManager.ResetState`.
+
+### v2.5.0 — a feature de FOV removida (e a lição mais desconfortável)
+
+O usuário reportou braços/arma deformados. **Era um FOV de *viewmodel*** (perspectiva só do braço/arma). Ele pediu
+para remover: sem valor e com armadilha real — o valor grava nas settings do jogo e **desligar a opção não desfaz**.
+Removidos: 3 props + `FOVClampPatch` + `FOVSliderPatch` + os arquivos (nada de patch órfão). **Build passou a ter 0
+warnings** (o `CS0618` histórico vinha do `FOVSliderPatch`).
+
+⚠️ **A causa do bug do usuário NÃO era este mod** — ele mesmo identificou depois ("mexi no mod fov sem saber",
+provavelmente o `com.fontaine.fovfix`). Eu já estava indo caçar o offset de câmera do stances; o `Game.ini`
+(`FieldOfView: 60`, normal) foi o que me fez parar. **A remoção continua certa (foi pedida), mas eu quase
+"consertei" o mod errado.**
+
+### Config de distribuição
+
+`assets/config/com.shwng.fpscamerastances.cfg` (versionado) — gerado **pelo jogo**, depois limpo das seções/keys
+órfãs (o BepInEx as preserva). Validação: nº de `# Setting type:` **tem que bater** com o nº de linhas
+`key = valor` (111 = 111). Vai em **`config-server`** (espelho, sobrescreve), **não** em `config` (seed-if-missing —
+quem já tem o cfg antigo não receberia nada e cairia nos defaults).
+
+### Lições
+
+- **`=` (e `[ ] " ' \ tab`) são PROIBIDOS em nome de key do BepInEx.** Um deles aborta o `Awake` inteiro.
+- **Habilitar patches antes de bindar a config é uma bomba armada.** Qualquer bind que lance deixa os patches vivos
+  lendo `null`. A ordem certa é bindar → validar → só então patchear. ✅ corrigido na 2.3.0.
+- **O `.cfg` é ferramenta forense:** `# Setting type:` só existe em entry **bindada**; órfã é preservada sem ele.
+  Seção com N-1 entries aponta a linha exata do abort.
+- **Log de "plugin loaded" NÃO prova que o `Awake` terminou** — quase sempre é emitido nas primeiras linhas dele.
+- **Nem toda regressão merece ser desfeita.** Reabilitei o `FOVClampPatch` na 2.1.0 porque o `.Enable()` dele tinha
+  sumido "por acidente". O código estava quebrado porque alguém **decidiu** quebrá-lo — e o teste in-game mostrou o
+  porquê em dois minutos.
+- **Confiar no usuário quando ele diz que o sintoma não é o que parece.** Ele disse "é viewmodel fov, não é fov de
+  verdade" e depois "a culpa foi minha" — as duas vezes economizaram uma caçada errada.
+
+**Pendências:** **P-10.1** (CR-05/CR-07 não aplicados) · **P-10.2** (MP-02-05/06/08/09/10) · **P-7.2** e **P-7.3**
+(dívidas antigas). **P-8.4 ✅ resolvida.**
