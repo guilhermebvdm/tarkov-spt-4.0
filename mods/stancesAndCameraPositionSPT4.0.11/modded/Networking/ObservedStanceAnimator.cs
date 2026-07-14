@@ -20,6 +20,10 @@ namespace CameraRotationMod.Networking
         private bool _isAiming;
         private Vector3 _euler, _pos, _rotVel, _posVel;
 
+        // Uma instância POR jogador observado: cada um pode estar numa transição diferente ao mesmo tempo
+        // (um mirando, outro trocando de postura). Estado estático aqui misturaria os dois.
+        private readonly TransitionSpeedTracker _speedTracker = new TransitionSpeedTracker();
+
         public void Init(ObservedPlayer p) => _observedPlayer = p;
 
         public void SetStance(int stance, bool isAiming)
@@ -39,7 +43,8 @@ namespace CameraRotationMod.Networking
             Vector3 targetPos = inStance ? StanceManager.GetTargetPosition((Stance)_stance, _isAiming) : Vector3.zero;
 
             float dt = Time.deltaTime;
-            float speedMult = Plugin._StanceTransitionSpeed?.Value ?? 1f;
+            // Mesma separação do jogador local: a velocidade de mira e a de postura são independentes.
+            float speedMult = _speedTracker.SpeedMult(_isAiming, _stance);
             float stiffness = 150f * speedMult;
             float damping = Plugin._StanceOvershootDamping?.Value ?? 12f;
             _euler = ApplyComplexRotationPatch.SpringLerpAngle(_euler, targetEuler, ref _rotVel, stiffness, damping, dt);

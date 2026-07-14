@@ -7,6 +7,30 @@ Versões mais recentes primeiro.
 
 ---
 
+## v2.4.0 (2026-07-13)
+
+### Novidade — a velocidade da mira agora é separada da velocidade das posturas
+
+Até aqui, o `Stance Transition Speed` controlava **duas coisas ao mesmo tempo**: a rapidez com que você troca de
+postura **e** a rapidez com que a arma sobe e desce ao mirar. Não dava para deixar a troca de postura lenta e a
+mira ágil (ou o contrário).
+
+Agora são duas opções independentes, na mesma seção `Stance Transition & Kick`:
+
+| Opção | Controla |
+|---|---|
+| `Stance Transition Speed` | Trocar **entre posturas** (e voltar para a visão padrão) |
+| `ADS Transition Speed` *(nova)* | **Levantar e baixar a mira** — vale tanto para entrar quanto para sair |
+
+> ⚠️ **Se você tinha ajustado o `Stance Transition Speed`**, ele deixou de valer para a mira. A opção nova nasce
+> em `1.0` (velocidade padrão). Para manter exatamente o comportamento que você tinha, coloque o
+> `ADS Transition Speed` no **mesmo valor** que estiver no `Stance Transition Speed`.
+
+Vale também para os outros jogadores no coop: cada um que você vê em partida usa as duas velocidades de forma
+independente, como deve ser.
+
+---
+
 ## v2.3.0 (2026-07-13)
 
 ### Corrigido — uma opção mal escrita derrubava o mod inteiro dentro da raid

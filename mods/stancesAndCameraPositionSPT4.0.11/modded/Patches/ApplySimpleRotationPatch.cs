@@ -22,6 +22,9 @@ namespace CameraRotationMod.Patches
         private static Vector3 _rotVelocity;
         private static Vector3 _posVelocity;
 
+        // Postura × mira têm velocidades independentes — ver TransitionSpeedTracker.
+        private static readonly TransitionSpeedTracker _speedTracker = new TransitionSpeedTracker();
+
         // Limites de sanidade da interpolação por mola. O alvo legítimo nunca passa de ±45° (range de
         // config); a mola Euler explícita, porém, DIVERGE com frame time ruim (dt grande / FPS baixo /
         // stutter) e o Euler resultante cruza o gimbal (~90-180°), virando a câmera de cabeça pra baixo
@@ -175,7 +178,9 @@ namespace CameraRotationMod.Patches
             Vector3 targetPosition = isAiming && !isInStance ? Vector3.zero : isInStance ? StanceManager.GetTargetPosition(isAiming) : Vector3.zero;
 
             // Spring Interpolation (Overshoot / Quicada)
-            float speedMult = Plugin._StanceTransitionSpeed?.Value ?? 1f;
+            // Mesma separação postura × mira do ApplyComplexRotationPatch (tracker próprio: este caminho tem
+            // sua própria mola e seu próprio estado).
+            float speedMult = _speedTracker.SpeedMult(isAiming, (int)StanceManager.CurrentStance);
             float stiffness = 150f * speedMult;
             // CR-08 — era hardcoded 12f, ignorando o slider `Stance Overshoot Damping` (que o
             // ApplyComplexRotationPatch respeita). Se este caminho voltar a rodar, o slider vale.

@@ -1,7 +1,7 @@
 # Propriedades F12 — stancesAndCameraPositionSPT4.0.11
 
-> Todas as opções do menu **F12** (BepInEx ConfigurationManager). **20 seções · 113 opções.**
-> Regenerado de `modded/Plugin.cs` em **2026-07-12** (fonte de verdade), para a **v2.2.0**. Os tooltips do jogo são bilíngues (EN + PT); aqui a coluna **Descrição** traz a versão em português resumida.
+> Todas as opções do menu **F12** (BepInEx ConfigurationManager). **20 seções · 114 opções.**
+> Regenerado de `modded/Plugin.cs` em **2026-07-12** (fonte de verdade), para a **v2.4.0**. Os tooltips do jogo são bilíngues (EN + PT); aqui a coluna **Descrição** traz a versão em português resumida.
 >
 > **v2.2.0 corrigiu os eixos Yaw/Roll** (estavam trocados em todas as stances e no ADS — a rotação é aplicada nos eixos LOCAIS da arma, onde Y = cano/roll e Z = vertical/yaw) e **traduziu os nomes para inglês**. Tooltips seguem bilíngues.
 >
@@ -48,7 +48,8 @@
 
 | Propriedade (EN) | Tipo | Padrão | Faixa | Descrição |
 |---|---|---|---|---|
-| Stance Transition Speed | float | `1.0` | 0.1 – 5.0 | Multiplicador de velocidade da transição entre posturas e a visão padrão. |
+| Stance Transition Speed | float | `1.0` | 0.1 – 5.0 | Velocidade da troca **entre posturas** (e volta à visão padrão). **Não** afeta a mira. |
+| ADS Transition Speed | float | `1.0` | 0.1 – 5.0 | Velocidade de **levantar/baixar a mira** (entrar e sair do ADS). Separada do Stance Transition Speed na v2.4.0. |
 | Stance Kick Intensity (Toward the Chest) | float | `-0.05` | -0.3 – 0.3 | Quanto a arma recua contra o peito ao trocar de postura ou mirar (ADS). Negativo puxa a arma em sua direção. |
 | ADS Kick Delay (In) | float | `0.15` | 0 – 1 | Atraso (s) antes de aplicar o kick ao entrar em ADS. Sincroniza o kick com o fim da animação de mira. |
 | Stance Overshoot Damping (Lower Means More Bounce) | float | `12.0` | 1 – 30.0 | Amortecimento da física de mola. Menor = mais overshoot/quicada. Padrão 12. |

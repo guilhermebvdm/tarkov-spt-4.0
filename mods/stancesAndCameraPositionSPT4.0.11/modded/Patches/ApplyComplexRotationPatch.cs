@@ -36,6 +36,14 @@ namespace CameraRotationMod.Patches
         private static Vector3 _rotVelocity;
         private static Vector3 _posVelocity;
 
+        // Decide, a cada frame, se a mola está numa transição de POSTURA ou de MIRA (ADS) — cada uma tem sua
+        // própria velocidade no F12. Jogador local: uma instância estática basta.
+        private static readonly TransitionSpeedTracker _speedTracker = new TransitionSpeedTracker();
+
+        /// <summary>Chamado no reset de raid (StanceManager.ResetState) — o estado estático sobrevive à troca
+        /// de raid e faria o 1º frame da raid nova comparar com o da anterior.</summary>
+        public static void ResetSpeedTracker() => _speedTracker.Reset();
+
         // Limites de sanidade da interpolação por mola. O alvo legítimo nunca passa de ±45° (range de
         // config); a mola Euler explícita, porém, DIVERGE com frame time ruim (dt grande / FPS baixo /
         // stutter) e o Euler resultante cruza o gimbal (~90-180°), virando a câmera de cabeça pra baixo
@@ -257,7 +265,10 @@ namespace CameraRotationMod.Patches
             Vector3 targetPosition = isAiming && !isInStance ? Vector3.zero : isInStance ? StanceManager.GetTargetPosition(isAiming) : Vector3.zero;
 
             // Spring Interpolation (Overshoot / Quicada)
-            float speedMult = Plugin._StanceTransitionSpeed?.Value ?? 1f;
+            // A mola é uma só e serve às duas transições (postura e mira) — o tracker decide qual velocidade
+            // aplicar, olhando o que mudou (isAiming vs stance). Antes, `Stance Transition Speed` governava
+            // as duas de uma vez.
+            float speedMult = _speedTracker.SpeedMult(isAiming, (int)StanceManager.CurrentStance);
             float stiffness = 150f * speedMult;
             float damping = Plugin._StanceOvershootDamping?.Value ?? 12f; // Low damping = more quicada (overshoot)
             
