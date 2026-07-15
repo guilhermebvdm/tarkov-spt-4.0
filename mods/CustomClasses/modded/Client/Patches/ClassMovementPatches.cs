@@ -9,11 +9,31 @@ namespace CustomClasses.Client;
 
 /// <summary>
 ///     Item 050.1 — modificadores de velocidade/inércia de movimento por classe.
-///     Postfix nos getters de <c>MovementContext.MaxSpeed</c>/<c>SprintSpeed</c> e em
-///     <c>BasePhysicalClass.OnWeightUpdated</c> → multiplicam (compõem com o stances mod, que também faz postfix-mult).
-///     Gating: só o player LOCAL (MainPlayer) + classe. Lê o F12 no apply-time.
-///     Cobre agora: 🔻 Heavy Frame (Tanque −10% vel) · 🔻 Overladen (Saqueador inércia↑ por peso).
-///     (Execution +vel c/ melee na mão e Rooted −vel em ADS entram aqui quando a detecção de melee/mira for confirmada.)
+///     Cobre: 🔻 Heavy Frame (Tanque −10% vel) · 🔻 Rooted (Caçador −15% em ADS) · 🔧 Execution (Furtivo +vel c/ melee)
+///     · 🔻 Overladen (Saqueador inércia↑ por peso). Gating: só o player LOCAL (MainPlayer) + classe; lê o F12 no apply-time.
+///
+///     <para>
+///     ⚠️⚠️ <b>BUG CORRIGIDO 2026-07-15 — velocidade decaía a cada movimento até quase parar</b> (report do usuário:
+///     "diminui cada vez que move WASD, ia diminuindo sempre"). A versão de 2026-06-24 patchava os <b>drivers</b>
+///     (<c>SetCharacterMovementSpeed</c>, <c>SprintAcceleration</c>), achando que os getters eram "só teto". Errado, e
+///     o oposto: esses drivers gravam em <b>campos que o próprio EFT relê e regrava a cada frame</b> — um multiplicador
+///     ali <b>COMPÕE</b> geometricamente (×0.9, ×0.81, ×0.729…) até o piso.
+///     </para>
+///     <para>
+///     Prova (decompile da DLL real): <c>UpdateCharacterControllerSpeedLimit()</c> roda por frame e faz
+///     <c>SetCharacterMovementSpeed(RelativeSpeed * MaxSpeed)</c> (MovementContext.cs:4181); como
+///     <c>RelativeSpeed = CharacterMovementSpeed / MaxSpeed</c> (:2377), isso é <c>SetCMS(CMS)</c> — um no-op de
+///     manutenção. Um Prefix ×0.9 no input o transforma em <c>CMS *= 0.9</c> a cada frame, e o campo persiste →
+///     decaimento infinito. O sprint tinha o mesmo vício: <c>SprintSpeed</c> é um campo de estado
+///     (<c>SprintSpeed_1 = 1f</c>) que <c>SprintAcceleration()</c> lê e regrava todo frame (:2550).
+///     </para>
+///     <para>
+///     <b>Correção:</b> reduzir a velocidade SÓ nos getters <b>sem estado</b> (computados puros, recalculam do zero,
+///     não acumulam): <c>MaxSpeed => Evaluate(WalkSpeed, Strength/60)</c> (:910, o walk) e
+///     <c>SprintingSpeed => Evaluate(...)</c> (:912, o sprint). Reduzir <c>MaxSpeed</c> é a forma CANÔNICA de deixar o
+///     personagem mais lento — é o mesmo eixo que a skill Strength move. Velocidade real = <c>RelativeSpeed × MaxSpeed</c>,
+///     então o efeito é real e ESTÁVEL (o RelativeSpeed é o comando do jogador, satura em 1). Sem loop.
+///     </para>
 /// </summary>
 internal static class ClassMoveSpeed
 {
@@ -54,6 +74,7 @@ internal static class ClassMoveSpeed
     }
 }
 
+/// <summary>🚶 Velocidade de ANDAR. <c>MaxSpeed</c> é computado puro (sem campo) → Postfix-mult é estável, não acumula.</summary>
 internal class MaxSpeedPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
@@ -68,11 +89,18 @@ internal class MaxSpeedPatch : ModulePatch
     }
 }
 
-internal class SprintSpeedPatch : ModulePatch
+/// <summary>
+///     🏃 Velocidade de CORRER. <c>SprintingSpeed</c> (:912) é computado puro — o análogo do <c>MaxSpeed</c> para o
+///     sprint (alimenta o alvo <c>num2</c> de <c>SprintAcceleration</c>, :2547). Postfix-mult aqui é estável.
+///     ⚠️ NÃO patchar <c>SprintSpeed</c> (o campo de estado <c>SprintSpeed_1</c>) — foi a fonte do loop antigo.
+///     Nota: o <c>+1f</c> na fórmula do alvo torna a redução do sprint sublinear (×0.9 no getter ≈ −5% na velocidade
+///     efetiva, não −10%); é uma aproximação aceitável para o drawback, e ESTÁVEL, que é o que importa.
+/// </summary>
+internal class SprintingSpeedPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return AccessTools.PropertyGetter(typeof(MovementContext), nameof(MovementContext.SprintSpeed));
+        return AccessTools.PropertyGetter(typeof(MovementContext), nameof(MovementContext.SprintingSpeed));
     }
 
     [PatchPostfix]
@@ -126,58 +154,13 @@ internal class OverladenInertiaPatch : ModulePatch
     }
 }
 
-/// <summary>
-///     Item 050.1 (fix 2026-06-24) — DRIVER REAL da velocidade de movimento.
-///     Os getters <c>MaxSpeed</c>/<c>SprintSpeed</c> (patches acima) são só TETO de clamp / denominador de razão —
-///     NÃO movem o boneco (a locomoção do EFT é root-motion + cap físico). O valor real passa por
-///     <c>MovementContext.SetCharacterMovementSpeed(speed)</c>. Aqui aplicamos os MESMOS multiplicadores de classe
-///     ao <c>speed</c> real (via <c>ClassMoveSpeed.Apply</c>); os getters acima ficam como TETO — necessário pro
-///     buff do Execution não ser clampado. <c>__0</c> = 1º parâmetro (o speed), robusto ao nome.
-///     ⚠️ Coop: só o player LOCAL; peers veem via MovementInfoPacket — gap de coop-sync a validar.
-/// </summary>
-internal class SetCharacterMovementSpeedPatch : ModulePatch
-{
-    protected override MethodBase GetTargetMethod()
-    {
-        return AccessTools.Method(typeof(MovementContext), "SetCharacterMovementSpeed");
-    }
-
-    [PatchPrefix]
-    private static void Prefix(MovementContext __instance, ref float __0)
-    {
-        ClassMoveSpeed.Apply(__instance, ref __0);
-    }
-}
-
-/// <summary>
-///     Item 050.1 (fix 2026-06-24) — velocidade de CORRIDA (sprint). Sprint é caminho separado do walk:
-///     o driver é <c>MovementContext.SprintAcceleration</c> → campo <c>SprintSpeed</c> (root-motion). Postfix
-///     reaplica os mesmos multiplicadores de classe ao <c>SprintSpeed</c> pós-clamp (Rooted é no-op — não se
-///     mira correndo). ⚠️ validar in-game: o buff (+10%) pode ser re-clampado no frame seguinte.
-/// </summary>
-internal class SprintAccelerationPatch : ModulePatch
-{
-    protected override MethodBase GetTargetMethod()
-    {
-        return AccessTools.Method(typeof(MovementContext), "SprintAcceleration");
-    }
-
-    [PatchPostfix]
-    private static void Postfix(MovementContext __instance)
-    {
-        try
-        {
-            var s = __instance.SprintSpeed;
-            var s0 = s;
-            ClassMoveSpeed.Apply(__instance, ref s);   // gateia internamente (só MainPlayer local + classe)
-            if (s != s0)
-            {
-                __instance.SprintSpeed = s;
-            }
-        }
-        catch (Exception ex)
-        {
-            Plugin.Log?.LogError($"[CustomClasses] sprint falhou: {ex.Message}");
-        }
-    }
-}
+// ──────────────────────────────────────────────────────────────────────────────────────────────
+// REMOVIDOS 2026-07-15 (bug de decaimento de velocidade):
+//   • SetCharacterMovementSpeedPatch (Prefix em SetCharacterMovementSpeed) — o input realimentado
+//     (UpdateCharacterControllerSpeedLimit → SetCMS(RelativeSpeed×MaxSpeed) = SetCMS(CMS)) fazia o ×0.9
+//     COMPOR a cada frame → CMS decaía a ~0.
+//   • SprintAccelerationPatch (Postfix em SprintAcceleration) — lia o campo de estado SprintSpeed já
+//     reduzido e o regravava reduzido de novo → mesmo decaimento no sprint.
+// A redução de velocidade voltou aos getters SEM ESTADO (MaxSpeedPatch / SprintingSpeedPatch, acima),
+// que era a abordagem correta desde o início. Ver o doc de ClassMoveSpeed.
+// ──────────────────────────────────────────────────────────────────────────────────────────────

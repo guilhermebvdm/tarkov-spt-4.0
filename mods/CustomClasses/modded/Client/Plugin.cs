@@ -10,7 +10,7 @@ namespace CustomClasses.Client;
 ///     Busca os fatores do server (rota /customclasses/skill-multipliers) e faz Prefix em
 ///     AbstractSkillClass.OnTrigger. UI (linha+tooltip) vem na Fatia 2.
 /// </summary>
-[BepInPlugin("customclasses.mdj.client", "CustomClasses", "0.2.1")]
+[BepInPlugin("customclasses.mdj.client", "CustomClasses", "0.2.2")]
 [BepInDependency("com.SPT.core", "4.0.0")]
 [BepInDependency("me.sol.sain", BepInDependency.DependencyFlags.SoftDependency)]   // (050.4 SAIN) carrega após o SAIN se presente
 public class Plugin : BaseUnityPlugin
@@ -122,15 +122,14 @@ public class Plugin : BaseUnityPlugin
         new WeaponMasteryRecoilPatch().Enable();            // (058) recuo × (1 − rec/nível) — ANTES do ShootRecoilPatch (ordem intencional
                                                             //       + HarmonyPriority.High: maestria entra no baseline do PerkDiag — CR-01-03)
         new WeaponMasteryErgoPatch().Enable();              // (058) ergo × (1 + ergo/nível) pela maestria da arma em mãos
-        // (050.1 fix 2026-06-24) MaxSpeedPatch/SprintSpeedPatch (getters) REMOVIDOS:
-        //   - MaxSpeed é só TETO/denominador da razão RelativeSpeed = CharSpeed/MaxSpeed → aplicar no getter E no
-        //     SetCharacterMovementSpeed CANCELAVA o efeito na razão. Agora só o driver real é patchado (abaixo).
-        //   - SprintSpeed getter é DEAD (sprint usa StateSprintSpeedLimit/Physical.SprintSpeed, caminho separado).
+        // (050.1 fix 2026-07-15) A velocidade voltou aos getters SEM ESTADO (MaxSpeed/SprintingSpeed). Os patches
+        // nos DRIVERS (SetCharacterMovementSpeed/SprintAcceleration) do fix de 2026-06-24 CAUSAVAM decaimento
+        // geométrico da velocidade a cada frame de movimento (campos relidos+regravados) → removidos. Ver ClassMoveSpeed.
         new OverladenInertiaPatch().Enable();               // (050.1) 🔻 Saqueador — inércia ∝ peso
         try
         {
-            new SetCharacterMovementSpeedPatch().Enable();  // (050.1 fix) driver REAL da velocidade de ANDAR
-            new SprintAccelerationPatch().Enable();         // (050.1 fix) driver da velocidade de CORRER (sprint)
+            new MaxSpeedPatch().Enable();                   // (050.1 fix) 🚶 ANDAR — MaxSpeed (computado puro, estável)
+            new SprintingSpeedPatch().Enable();             // (050.1 fix) 🏃 CORRER — SprintingSpeed (computado puro, estável)
             new AiSoundPatch().Enable();                    // (050.4 fix) audibilidade PARA A IA (BotEventHandler.PlaySound)
         }
         catch (System.Exception ex)
