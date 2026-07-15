@@ -430,7 +430,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "patches_adrenalinetriggerpatch_adrenalinetriggerpatch_postfix",
-      "community": 83,
+      "community": 110,
       "norm_label": ".postfix()"
     },
     {
@@ -440,7 +440,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "client_patches_adrenalinetriggerpatch_cs_player",
-      "community": 83,
+      "community": 110,
       "norm_label": "player"
     },
     {
@@ -450,7 +450,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "client_patches_adrenalinetriggerpatch_cs_damageinfostruct",
-      "community": 83,
+      "community": 110,
       "norm_label": "damageinfostruct"
     },
     {
@@ -460,7 +460,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "client_patches_adrenalinetriggerpatch_cs_patchpostfix",
-      "community": 83,
+      "community": 110,
       "norm_label": "patchpostfix"
     },
     {
@@ -1707,7 +1707,7 @@
       "label": "MaxSpeedPatch",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMovementPatches.cs",
-      "source_location": "L78",
+      "source_location": "L86",
       "_origin": "ast",
       "id": "patches_classmovementpatches_maxspeedpatch",
       "community": 81,
@@ -1717,7 +1717,7 @@
       "label": ".GetTargetMethod()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMovementPatches.cs",
-      "source_location": "L80",
+      "source_location": "L88",
       "_origin": "ast",
       "id": "patches_classmovementpatches_maxspeedpatch_gettargetmethod",
       "community": 81,
@@ -1727,7 +1727,7 @@
       "label": "MethodBase",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMovementPatches.cs",
-      "source_location": "L80",
+      "source_location": "L88",
       "_origin": "ast",
       "id": "client_patches_classmovementpatches_cs_methodbase",
       "community": 81,
@@ -1737,7 +1737,7 @@
       "label": ".Postfix()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMovementPatches.cs",
-      "source_location": "L85",
+      "source_location": "L93",
       "_origin": "ast",
       "id": "patches_classmovementpatches_maxspeedpatch_postfix",
       "community": 81,
@@ -1747,7 +1747,7 @@
       "label": "PatchPostfix",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMovementPatches.cs",
-      "source_location": "L85",
+      "source_location": "L93",
       "_origin": "ast",
       "id": "client_patches_classmovementpatches_cs_patchpostfix",
       "community": 81,
@@ -1757,7 +1757,7 @@
       "label": "SprintingSpeedPatch",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMovementPatches.cs",
-      "source_location": "L99",
+      "source_location": "L107",
       "_origin": "ast",
       "id": "patches_classmovementpatches_sprintingspeedpatch",
       "community": 81,
@@ -1767,7 +1767,7 @@
       "label": ".GetTargetMethod()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMovementPatches.cs",
-      "source_location": "L101",
+      "source_location": "L109",
       "_origin": "ast",
       "id": "patches_classmovementpatches_sprintingspeedpatch_gettargetmethod",
       "community": 81,
@@ -1777,7 +1777,7 @@
       "label": ".Postfix()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMovementPatches.cs",
-      "source_location": "L106",
+      "source_location": "L114",
       "_origin": "ast",
       "id": "patches_classmovementpatches_sprintingspeedpatch_postfix",
       "community": 81,
@@ -1787,7 +1787,7 @@
       "label": "OverladenInertiaPatch",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMovementPatches.cs",
-      "source_location": "L114",
+      "source_location": "L122",
       "_origin": "ast",
       "id": "patches_classmovementpatches_overladeninertiapatch",
       "community": 81,
@@ -1797,7 +1797,7 @@
       "label": ".GetTargetMethod()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMovementPatches.cs",
-      "source_location": "L116",
+      "source_location": "L124",
       "_origin": "ast",
       "id": "patches_classmovementpatches_overladeninertiapatch_gettargetmethod",
       "community": 81,
@@ -1807,7 +1807,7 @@
       "label": ".Postfix()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMovementPatches.cs",
-      "source_location": "L121",
+      "source_location": "L129",
       "_origin": "ast",
       "id": "patches_classmovementpatches_overladeninertiapatch_postfix",
       "community": 81,
@@ -1817,7 +1817,7 @@
       "label": "BasePhysicalClass",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMovementPatches.cs",
-      "source_location": "L121",
+      "source_location": "L129",
       "_origin": "ast",
       "id": "basephysicalclass",
       "community": 81,
@@ -2130,7 +2130,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_classweaponpatches",
-      "community": 90,
+      "community": 83,
       "norm_label": "classweaponpatches.cs"
     },
     {
@@ -2140,7 +2140,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "patches_classweaponpatches_shootrecoilpatch",
-      "community": 90,
+      "community": 83,
       "norm_label": "shootrecoilpatch"
     },
     {
@@ -2150,7 +2150,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "patches_classweaponpatches_shootrecoilpatch_gettargetmethod",
-      "community": 90,
+      "community": 83,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2160,7 +2160,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_methodbase",
-      "community": 90,
+      "community": 83,
       "norm_label": "methodbase"
     },
     {
@@ -2200,7 +2200,7 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "patches_classweaponpatches_reloadspeedpatch",
-      "community": 90,
+      "community": 83,
       "norm_label": "reloadspeedpatch"
     },
     {
@@ -2210,7 +2210,7 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "patches_classweaponpatches_reloadspeedpatch_gettargetmethod",
-      "community": 90,
+      "community": 83,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2250,7 +2250,7 @@
       "source_location": "L117",
       "_origin": "ast",
       "id": "patches_classweaponpatches_adsspeedpatch",
-      "community": 90,
+      "community": 83,
       "norm_label": "adsspeedpatch"
     },
     {
@@ -2260,7 +2260,7 @@
       "source_location": "L119",
       "_origin": "ast",
       "id": "patches_classweaponpatches_adsspeedpatch_gettargetmethod",
-      "community": 90,
+      "community": 83,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2280,7 +2280,7 @@
       "source_location": "L167",
       "_origin": "ast",
       "id": "patches_classweaponpatches_heavyweaponergopatch",
-      "community": 90,
+      "community": 83,
       "norm_label": "heavyweaponergopatch"
     },
     {
@@ -2290,7 +2290,7 @@
       "source_location": "L169",
       "_origin": "ast",
       "id": "patches_classweaponpatches_heavyweaponergopatch_gettargetmethod",
-      "community": 90,
+      "community": 83,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2360,7 +2360,7 @@
       "source_location": "L231",
       "_origin": "ast",
       "id": "patches_classweaponpatches_aimpunchpatch",
-      "community": 90,
+      "community": 83,
       "norm_label": "aimpunchpatch"
     },
     {
@@ -2370,7 +2370,7 @@
       "source_location": "L233",
       "_origin": "ast",
       "id": "patches_classweaponpatches_aimpunchpatch_gettargetmethod",
-      "community": 90,
+      "community": 83,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2400,7 +2400,7 @@
       "source_location": "L282",
       "_origin": "ast",
       "id": "patches_classweaponpatches_localhittypepatch",
-      "community": 90,
+      "community": 83,
       "norm_label": "localhittypepatch"
     },
     {
@@ -2410,7 +2410,7 @@
       "source_location": "L287",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_float",
-      "community": 90,
+      "community": 83,
       "norm_label": "float"
     },
     {
@@ -2420,7 +2420,7 @@
       "source_location": "L289",
       "_origin": "ast",
       "id": "patches_classweaponpatches_localhittypepatch_gettargetmethod",
-      "community": 90,
+      "community": 83,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -3317,7 +3317,7 @@
       "label": ".ShowAfterLoad()",
       "file_type": "code",
       "source_file": "Client/Patches/RaidPerksNotificationPatch.cs",
-      "source_location": "L73",
+      "source_location": "L90",
       "_origin": "ast",
       "id": "patches_raidperksnotificationpatch_raidperksnotificationpatch_showafterload",
       "community": 85,
@@ -3327,7 +3327,7 @@
       "label": "IEnumerator",
       "file_type": "code",
       "source_file": "Client/Patches/RaidPerksNotificationPatch.cs",
-      "source_location": "L73",
+      "source_location": "L90",
       "_origin": "ast",
       "id": "client_patches_raidperksnotificationpatch_cs_ienumerator",
       "community": 85,
@@ -4747,7 +4747,7 @@
       "label": ".Line()",
       "file_type": "code",
       "source_file": "Client/PerkDiagnostics.cs",
-      "source_location": "L129",
+      "source_location": "L134",
       "_origin": "ast",
       "id": "client_perkdiagnostics_perkdiagnostics_line",
       "community": 31,
@@ -4757,7 +4757,7 @@
       "label": "StringBuilder",
       "file_type": "code",
       "source_file": "Client/PerkDiagnostics.cs",
-      "source_location": "L129",
+      "source_location": "L134",
       "_origin": "ast",
       "id": "stringbuilder",
       "community": 31,
@@ -4767,7 +4767,7 @@
       "label": "Func",
       "file_type": "code",
       "source_file": "Client/PerkDiagnostics.cs",
-      "source_location": "L129",
+      "source_location": "L134",
       "_origin": "ast",
       "id": "client_perkdiagnostics_cs_func",
       "community": 31,
@@ -4777,7 +4777,7 @@
       "label": ".Flag()",
       "file_type": "code",
       "source_file": "Client/PerkDiagnostics.cs",
-      "source_location": "L145",
+      "source_location": "L150",
       "_origin": "ast",
       "id": "client_perkdiagnostics_perkdiagnostics_flag",
       "community": 31,
@@ -4787,7 +4787,7 @@
       "label": ".FmtBA()",
       "file_type": "code",
       "source_file": "Client/PerkDiagnostics.cs",
-      "source_location": "L151",
+      "source_location": "L156",
       "_origin": "ast",
       "id": "client_perkdiagnostics_perkdiagnostics_fmtba",
       "community": 31,
@@ -4797,7 +4797,7 @@
       "label": ".AppendPerkList()",
       "file_type": "code",
       "source_file": "Client/PerkDiagnostics.cs",
-      "source_location": "L163",
+      "source_location": "L168",
       "_origin": "ast",
       "id": "client_perkdiagnostics_perkdiagnostics_appendperklist",
       "community": 31,
@@ -4807,7 +4807,7 @@
       "label": ".AdrenalineLabel()",
       "file_type": "code",
       "source_file": "Client/PerkDiagnostics.cs",
-      "source_location": "L192",
+      "source_location": "L197",
       "_origin": "ast",
       "id": "client_perkdiagnostics_perkdiagnostics_adrenalinelabel",
       "community": 31,
@@ -17838,9 +17838,9 @@
       "source_file": "Client/Patches/ClassMovementPatches.cs",
       "source_location": "L99",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classmovementpatches_sprintingspeedpatch",
-      "target": "modulepatch",
-      "confidence_score": 1.0
+      "target": "modulepatch"
     },
     {
       "relation": "inherits",
@@ -19928,9 +19928,9 @@
       "source_file": "Client/Patches/ClassMovementPatches.cs",
       "source_location": "L99",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classmovementpatches",
-      "target": "patches_classmovementpatches_sprintingspeedpatch",
-      "confidence_score": 1.0
+      "target": "patches_classmovementpatches_sprintingspeedpatch"
     },
     {
       "relation": "method",
@@ -19971,9 +19971,9 @@
       "source_file": "Client/Patches/ClassMovementPatches.cs",
       "source_location": "L109",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classmovementpatches_sprintingspeedpatch_postfix",
-      "target": "patches_classmovementpatches_classmovespeed_apply",
-      "confidence_score": 1.0
+      "target": "patches_classmovementpatches_classmovespeed_apply"
     },
     {
       "relation": "references",
@@ -19993,9 +19993,9 @@
       "source_location": "L106",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_classmovementpatches_sprintingspeedpatch_postfix",
-      "target": "movementcontext",
-      "confidence_score": 1.0
+      "target": "movementcontext"
     },
     {
       "relation": "method",
@@ -20046,9 +20046,9 @@
       "source_location": "L101",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "patches_classmovementpatches_sprintingspeedpatch_gettargetmethod",
-      "target": "client_patches_classmovementpatches_cs_methodbase",
-      "confidence_score": 1.0
+      "target": "client_patches_classmovementpatches_cs_methodbase"
     },
     {
       "relation": "references",
@@ -20079,9 +20079,9 @@
       "source_location": "L106",
       "weight": 1.0,
       "context": "attribute",
+      "confidence_score": 1.0,
       "source": "patches_classmovementpatches_sprintingspeedpatch_postfix",
-      "target": "client_patches_classmovementpatches_cs_patchpostfix",
-      "confidence_score": 1.0
+      "target": "client_patches_classmovementpatches_cs_patchpostfix"
     },
     {
       "relation": "method",
@@ -20089,9 +20089,9 @@
       "source_file": "Client/Patches/ClassMovementPatches.cs",
       "source_location": "L101",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classmovementpatches_sprintingspeedpatch",
-      "target": "patches_classmovementpatches_sprintingspeedpatch_gettargetmethod",
-      "confidence_score": 1.0
+      "target": "patches_classmovementpatches_sprintingspeedpatch_gettargetmethod"
     },
     {
       "relation": "method",
@@ -20099,9 +20099,9 @@
       "source_file": "Client/Patches/ClassMovementPatches.cs",
       "source_location": "L106",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_classmovementpatches_sprintingspeedpatch",
-      "target": "patches_classmovementpatches_sprintingspeedpatch_postfix",
-      "confidence_score": 1.0
+      "target": "patches_classmovementpatches_sprintingspeedpatch_postfix"
     },
     {
       "relation": "method",
@@ -39933,5 +39933,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "05fafd11f164ae099ca4831dcc350a82d6996ef5"
+  "built_at_commit": "f35b2768be87d8c52fd269ad722640eb15e713ea"
 }
