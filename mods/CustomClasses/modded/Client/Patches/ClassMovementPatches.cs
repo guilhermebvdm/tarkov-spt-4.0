@@ -47,13 +47,18 @@ internal static class ClassMoveSpeed
                 return;   // só o player local (não bots/remotos)
             }
 
-            // 🔻 Heavy Frame (Tanque): −10% de velocidade (sempre).
+            // 🔻 Heavy Frame (Tanque): −10% de velocidade (sempre). ✅ FUNCIONA: reduzir MaxSpeed abaixo do
+            // cap absoluto do SpeedLimiter (Run 4.6 m/s) de fato desacelera o boneco (0.9×0.717≈0.645 → ~4.14 m/s).
             if (PerksConfig.HeavyFrameEnabled?.Value == true && SkillMultipliers.IsLocalClass("Tank"))
             {
                 result *= PerksConfig.HeavyFrameMoveSpeed?.Value ?? 1f;
             }
 
             // 🔻 Rooted (Caçador): −15% de velocidade enquanto MIRA (ADS).
+            // ⚠️ INERTE por este lever (code-review 2026-07-15, F1 — item de backlog 074): a velocidade em ADS é
+            // governada pelo TETO DE MIRA (ClampSpeed via StateSpeedLimit ≈ 0.33–0.50, MovementContext.cs:1843 +
+            // Player.cs:12155), que já é MENOR que o MaxSpeed reduzido pelo Rooted (0.85×0.717≈0.61) → o min() nunca
+            // pega o Rooted. Para morder, o lever certo é o AimMovementSpeed / StateSpeedLimit de mira, não o MaxSpeed.
             if (PerksConfig.RootedEnabled?.Value == true && SkillMultipliers.IsLocalClass("Hunter")
                 && p.HandsController is Player.FirearmController fc && fc.IsAiming)
             {
@@ -61,6 +66,9 @@ internal static class ClassMoveSpeed
             }
 
             // 🔧 Execution (Furtivo): +velocidade com a MELEE na mão.
+            // ⚠️ CLAMPADO por este lever (code-review 2026-07-15, F2 — item de backlog 074): a velocidade real tem
+            // um TETO ABSOLUTO no SpeedLimiter/CharacterController (GClass2175, Run 4.6 m/s) que NÃO lê MaxSpeed →
+            // subir o getter acima do vanilla é cortado de volta. O getter é lever válido pra BAIXO, não pra CIMA.
             if (PerksConfig.ExecutionSpeedEnabled?.Value == true && SkillMultipliers.IsLocalClass("Stealth")
                 && p.HandsController is Player.KnifeController)
             {
