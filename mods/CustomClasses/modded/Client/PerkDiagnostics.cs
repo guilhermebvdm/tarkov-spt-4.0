@@ -103,6 +103,11 @@ internal static class PerkDiagnostics
         Line(sb, "MaxSpeed (base ceiling — NOT the driver)", () => $"{p.MovementContext.MaxSpeed:F2}");
         Line(sb, "Inertia", () => $"{p.Physical.Inertia:F3}");
         Line(sb, "Carry mod", () => $"{p.Skills.CarryingWeightRelativeModifier:F3}");
+        // (fix 2026-07-15) prova do bug de timing do Pack Mule: 'Carry mod' lê o getter LIVE (já +30%), mas o
+        // limiar de dreno ao andar vem dos limites CACHEADOS. Com Pack Mule +30%, corrigido → ≈ 45×1.30 = 58.5;
+        // bug (cache vanilla) → ~45. Compare com o peso que o inventário do jogo mostra: se você drena ao andar
+        // com peso ABAIXO deste limite, algo está errado.
+        Line(sb, "Walk overweight limit (kg)", () => $"{p.Physical.WalkOverweightLimits.x:F1}");
         Line(sb, "Ergo (weapon)", () => p.HandsController is Player.FirearmController fc && fc.Item is Weapon w
             ? $"{fc.TotalErgonomics:F1}  [{w.WeapClass}]"
             : "(no firearm)");

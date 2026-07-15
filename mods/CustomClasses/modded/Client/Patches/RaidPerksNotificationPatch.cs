@@ -57,6 +57,23 @@ internal class RaidPerksNotificationPatch : ModulePatch
             // e desde o achado 4 o hot path NÃO busca mais sozinho: mapa frio aqui = perk de som morto na raid.
             ClassIdentities.Prefetch();
 
+            // (fix 2026-07-15) Pack Mule — dreno de stamina do Tank ao ANDAR com pouco peso. BUG DE TIMING:
+            // BasePhysicalClass.UpdateWeightLimits() roda em Physical.Init(), ANTES de MainPlayer estar setado, então
+            // o gate do PackMulePatch falha (gw!=null mas MainPlayer==null → não aplica o piso +30%) e os LIMITES de
+            // overweight ficam cacheados no valor vanilla. Como UpdateWeightLimits() quase nunca é rechamado na raid,
+            // o Tank fica WalkOverweight>0 em ~45 kg em vez de ~58.5 (45×1.30) → drena stamina ao andar. O HUD mostra
+            // "+30%" porque o marcador lê o getter LIVE (já floorado) — é a discrepância, não a causa.
+            // AQUI o estado já estabilizou (MainPlayer setado, Prefetch resolveu a classe), então forçar o recálculo
+            // re-cacheia os limites JÁ com o piso. OnWeightLimitsUpdated() = UpdateWeightLimits() + OnWeightUpdated().
+            try
+            {
+                __instance.MainPlayer?.Physical?.OnWeightLimitsUpdated();
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log?.LogError($"[CustomClasses] recálculo de limites de peso (Pack Mule) falhou: {ex.Message}");
+            }
+
             if (PerksConfig.ShowRaidPerksNotification?.Value != true)
             {
                 return;
