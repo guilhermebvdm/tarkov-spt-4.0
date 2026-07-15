@@ -1,16 +1,16 @@
-# Graph Report - mods\CustomClasses\modded  (2026-07-13)
+# Graph Report - mods\CustomClasses\modded  (2026-07-15)
 
 ## Corpus Check
-- 112 files · ~104,729 words
+- 112 files · ~104,883 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1714 nodes · 2226 edges · 110 communities (101 shown, 9 thin omitted)
+- 1707 nodes · 2210 edges · 110 communities (101 shown, 9 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `d039a7bb`
+- Built from commit: `05fafd11`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -419,8 +419,8 @@ Cohesion: 0.21
 Nodes (7): DamageInfoStruct, Item, List, MethodBase, PatchPrefix, Player, BulwarkPatch
 
 ### Community 81 - "Community 81"
-Cohesion: 0.15
-Nodes (11): BasePhysicalClass, MethodBase, PatchPostfix, PatchPrefix, MovementContext, ClassMoveSpeed, MaxSpeedPatch, OverladenInertiaPatch (+3 more)
+Cohesion: 0.19
+Nodes (8): BasePhysicalClass, MethodBase, PatchPostfix, MovementContext, ClassMoveSpeed, MaxSpeedPatch, OverladenInertiaPatch, SprintingSpeedPatch
 
 ### Community 82 - "Community 82"
 Cohesion: 0.09
@@ -515,7 +515,7 @@ Cohesion: 0.25
 Nodes (5): ChatSpecialIcon, MethodBase, PatchPostfix, TextMeshProUGUI, PlayerModelWithStatsIdentityPatch
 
 ## Knowledge Gaps
-- **938 isolated node(s):** `float`, `string`, `bool`, `Player`, `Payload` (+933 more)
+- **937 isolated node(s):** `float`, `string`, `bool`, `Player`, `Payload` (+932 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **9 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -523,13 +523,13 @@ Nodes (5): ChatSpecialIcon, MethodBase, PatchPostfix, TextMeshProUGUI, PlayerMod
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `ClassDetailLoadingPatch` connect `Community 101` to `Community 83`?**
-  _High betweenness centrality (0.016) - this node is a cross-community bridge._
+  _High betweenness centrality (0.011) - this node is a cross-community bridge._
 - **Why does `LoadingClassHover` connect `Community 91` to `Community 101`, `Community 102`, `Community 103`?**
-  _High betweenness centrality (0.014) - this node is a cross-community bridge._
+  _High betweenness centrality (0.009) - this node is a cross-community bridge._
 - **Why does `MedsOperationScopePatch` connect `Community 86` to `Community 83`?**
   _High betweenness centrality (0.008) - this node is a cross-community bridge._
 - **What connects `float`, `string`, `bool` to the rest of the system?**
-  _938 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _937 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.09090909090909091 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
