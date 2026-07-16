@@ -55,14 +55,8 @@ internal class Patch_CalculateCameraPosition_HandLayers : ModulePatch
       Patch_CalculateCameraPosition_HandLayers._lastWeaponRoot = weaponRoot;
     Patch_CalculateCameraPosition_HandLayers._originalLocalPosition = weaponRoot.localPosition;
     Patch_CalculateCameraPosition_HandLayers._originalLocalRotation = weaponRoot.localRotation;
-    if (AnimStateController.IsBlindfire || WeaponController.IsUsingMounted || !PrimeMover.EnableMod.Value)
-    {
-      Patch_CalculateCameraPosition_HandLayers._originalLocalPosition = Vector3.zero;
-      Patch_CalculateCameraPosition_HandLayers._originalLocalRotation = Quaternion.identity;
-    }
-    else
-    {
-      EfficiencyController.UpdateEfficiency(player);
+    
+    EfficiencyController.UpdateEfficiency(player);
       bool flag1 = PrimeMover.IsBreathingEffect.Value;
       bool flag2 = PrimeMover.IsPoseEffect.Value;
       bool flag3 = PrimeMover.IsPoseChangeEffect.Value;
@@ -73,7 +67,9 @@ internal class Patch_CalculateCameraPosition_HandLayers : ModulePatch
       bool flag8 = PrimeMover.IsWeaponSway.Value;
 
       bool isLeftShoulder = StanceController.IsLeftShoulder;
-      if (isLeftShoulder)
+      bool isModDisabled = !PrimeMover.EnableMod.Value || AnimStateController.IsBlindfire || WeaponController.IsUsingMounted;
+      
+      if (isLeftShoulder || isModDisabled)
       {
         _wasLeftShoulder = true;
         _shoulderFadeMultiplier = Mathf.Max(0f, _shoulderFadeMultiplier - Time.deltaTime * 10f);
@@ -151,7 +147,6 @@ internal class Patch_CalculateCameraPosition_HandLayers : ModulePatch
       transform1.localPosition = (transform1.localPosition + vector3_5);
       Transform transform2 = weaponRoot;
       transform2.localRotation = (transform2.localRotation * quaternion5);
-    }
   }
 }
 
