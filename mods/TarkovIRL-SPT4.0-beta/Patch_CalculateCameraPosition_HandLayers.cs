@@ -19,6 +19,7 @@ internal class Patch_CalculateCameraPosition_HandLayers : ModulePatch
   private static Quaternion _originalLocalRotation = Quaternion.identity;
   private static float _rightShoulderTimer = 0f;
   private static bool _wasLeftShoulder = false;
+  private static float _shoulderFadeMultiplier = 1f;
 
   protected override MethodBase GetTargetMethod()
   {
@@ -75,24 +76,20 @@ internal class Patch_CalculateCameraPosition_HandLayers : ModulePatch
       if (isLeftShoulder)
       {
         _wasLeftShoulder = true;
+        _shoulderFadeMultiplier = Mathf.Max(0f, _shoulderFadeMultiplier - Time.deltaTime * 10f);
       }
-      else if (_wasLeftShoulder)
+      else
       {
-        _wasLeftShoulder = false;
-        _rightShoulderTimer = Time.time + 0.5f;
-      }
-      bool blockSwayAndFreeAim = isLeftShoulder || (Time.time < _rightShoulderTimer);
-
-      if (blockSwayAndFreeAim)
-      {
-        flag1 = false;
-        flag2 = false;
-        flag3 = false;
-        flag4 = false;
-        flag5 = false;
-        flag6 = false;
-        flag7 = false;
-        flag8 = false;
+        if (_wasLeftShoulder)
+        {
+          _wasLeftShoulder = false;
+          _rightShoulderTimer = Time.time + 0.5f;
+        }
+        
+        if (Time.time >= _rightShoulderTimer)
+        {
+          _shoulderFadeMultiplier = Mathf.Min(1f, _shoulderFadeMultiplier + Time.deltaTime * 3f);
+        }
       }
 
       Vector3 vector3_1 = Vector3.zero;
@@ -130,10 +127,7 @@ internal class Patch_CalculateCameraPosition_HandLayers : ModulePatch
       }
       Vector3 position = Vector3.zero;
       Quaternion rotation = Quaternion.identity;
-      if (!blockSwayAndFreeAim)
-      {
-        DirectionalSwayController.GetDirectionalSway(out position, out rotation);
-      }
+      DirectionalSwayController.GetDirectionalSway(out position, out rotation);
       Vector3 vector3_2 = (vector3_1 + position);
       Quaternion quaternion2 = (quaternion1 * rotation);
       Vector3 pos;
@@ -145,12 +139,14 @@ internal class Patch_CalculateCameraPosition_HandLayers : ModulePatch
       Quaternion quaternion4 = (quaternion3 * Quaternion.Euler(PrimeMover.DebugRotX.Value, PrimeMover.DebugRotY.Value, PrimeMover.DebugRotZ.Value));
       Vector3 posOffset = Vector3.zero;
       Quaternion rotOffset = Quaternion.identity;
-      if (!blockSwayAndFreeAim)
-      {
-        FreeAimController.GetOffsets(out posOffset, out rotOffset);
-      }
+      FreeAimController.GetOffsets(out posOffset, out rotOffset);
+      
       Vector3 vector3_5 = (vector3_4 + posOffset);
       Quaternion quaternion5 = (quaternion4 * rotOffset);
+      
+      vector3_5 = Vector3.Lerp(Vector3.zero, vector3_5, _shoulderFadeMultiplier);
+      quaternion5 = Quaternion.Slerp(Quaternion.identity, quaternion5, _shoulderFadeMultiplier);
+
       Transform transform1 = weaponRoot;
       transform1.localPosition = (transform1.localPosition + vector3_5);
       Transform transform2 = weaponRoot;
