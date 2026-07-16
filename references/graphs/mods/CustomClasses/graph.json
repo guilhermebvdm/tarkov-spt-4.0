@@ -380,7 +380,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_adrenalinetriggerpatch",
-      "community": 83,
+      "community": 110,
       "norm_label": "adrenalinetriggerpatch.cs"
     },
     {
@@ -390,7 +390,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "patches_adrenalinetriggerpatch_adrenalinetriggerpatch",
-      "community": 83,
+      "community": 110,
       "norm_label": "adrenalinetriggerpatch"
     },
     {
@@ -410,7 +410,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "patches_adrenalinetriggerpatch_adrenalinetriggerpatch_gettargetmethod",
-      "community": 83,
+      "community": 110,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -420,7 +420,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "client_patches_adrenalinetriggerpatch_cs_methodbase",
-      "community": 83,
+      "community": 110,
       "norm_label": "methodbase"
     },
     {
@@ -900,7 +900,7 @@
       "source_location": "L134",
       "_origin": "ast",
       "id": "patches_classcombathealthpatches_ironlungspatch",
-      "community": 79,
+      "community": 41,
       "norm_label": "ironlungspatch"
     },
     {
@@ -910,7 +910,7 @@
       "source_location": "L136",
       "_origin": "ast",
       "id": "playerphysicalclass",
-      "community": 79,
+      "community": 41,
       "norm_label": "playerphysicalclass"
     },
     {
@@ -920,7 +920,7 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "client_patches_classcombathealthpatches_cs_float",
-      "community": 79,
+      "community": 41,
       "norm_label": "float"
     },
     {
@@ -940,7 +940,7 @@
       "source_location": "L144",
       "_origin": "ast",
       "id": "patches_classcombathealthpatches_ironlungspatch_postfix",
-      "community": 79,
+      "community": 41,
       "norm_label": ".postfix()"
     },
     {
@@ -950,7 +950,7 @@
       "source_location": "L144",
       "_origin": "ast",
       "id": "client_patches_classcombathealthpatches_cs_patchpostfix",
-      "community": 79,
+      "community": 41,
       "norm_label": "patchpostfix"
     },
     {
@@ -980,7 +980,7 @@
       "source_location": "L185",
       "_origin": "ast",
       "id": "patches_classcombathealthpatches_malfunctionchancepatch_postfix",
-      "community": 79,
+      "community": 41,
       "norm_label": ".postfix()"
     },
     {
@@ -990,7 +990,7 @@
       "source_location": "L185",
       "_origin": "ast",
       "id": "client_patches_classcombathealthpatches_cs_firearmcontroller",
-      "community": 79,
+      "community": 41,
       "norm_label": "firearmcontroller"
     },
     {
@@ -2720,7 +2720,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_ontriggerpatch",
-      "community": 53,
+      "community": 83,
       "norm_label": "ontriggerpatch.cs"
     },
     {
@@ -2730,7 +2730,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "patches_ontriggerpatch_ontriggerpatch",
-      "community": 53,
+      "community": 83,
       "norm_label": "ontriggerpatch"
     },
     {
@@ -2740,7 +2740,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "patches_ontriggerpatch_ontriggerpatch_gettargetmethod",
-      "community": 53,
+      "community": 83,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2750,7 +2750,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "client_patches_ontriggerpatch_cs_methodbase",
-      "community": 53,
+      "community": 83,
       "norm_label": "methodbase"
     },
     {
@@ -3540,7 +3540,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_skilllevelupnotificationpatch",
-      "community": 41,
+      "community": 29,
       "norm_label": "skilllevelupnotificationpatch.cs"
     },
     {
@@ -3550,7 +3550,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "patches_skilllevelupnotificationpatch_skilllevelupnotificationpatch",
-      "community": 41,
+      "community": 29,
       "norm_label": "skilllevelupnotificationpatch"
     },
     {
@@ -3560,7 +3560,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "client_patches_skilllevelupnotificationpatch_cs_type",
-      "community": 41,
+      "community": 29,
       "norm_label": "type"
     },
     {
@@ -3570,7 +3570,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "client_patches_skilllevelupnotificationpatch_cs_fieldinfo",
-      "community": 41,
+      "community": 29,
       "norm_label": "fieldinfo"
     },
     {
@@ -3580,7 +3580,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "patches_skilllevelupnotificationpatch_skilllevelupnotificationpatch_gettargetmethod",
-      "community": 41,
+      "community": 29,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -3590,7 +3590,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "client_patches_skilllevelupnotificationpatch_cs_methodbase",
-      "community": 41,
+      "community": 29,
       "norm_label": "methodbase"
     },
     {
@@ -3600,7 +3600,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "patches_skilllevelupnotificationpatch_skilllevelupnotificationpatch_postfix",
-      "community": 41,
+      "community": 29,
       "norm_label": ".postfix()"
     },
     {
@@ -3610,7 +3610,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "client_patches_skilllevelupnotificationpatch_cs_abstractskillclass",
-      "community": 41,
+      "community": 29,
       "norm_label": "abstractskillclass"
     },
     {
@@ -3620,7 +3620,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "client_patches_skilllevelupnotificationpatch_cs_patchpostfix",
-      "community": 41,
+      "community": 29,
       "norm_label": "patchpostfix"
     },
     {
@@ -3817,7 +3817,7 @@
       "label": "SkillsClassTabPatch",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L57",
+      "source_location": "L60",
       "_origin": "ast",
       "id": "patches_skillsclasstabpatch_skillsclasstabpatch",
       "community": 49,
@@ -3827,7 +3827,7 @@
       "label": "string",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L59",
+      "source_location": "L62",
       "_origin": "ast",
       "id": "client_patches_skillsclasstabpatch_cs_string",
       "community": 49,
@@ -3837,7 +3837,7 @@
       "label": "bool",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L61",
+      "source_location": "L64",
       "_origin": "ast",
       "id": "client_patches_skillsclasstabpatch_cs_bool",
       "community": 49,
@@ -3847,7 +3847,7 @@
       "label": "SkillsAndMasteringScreen",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L65",
+      "source_location": "L68",
       "_origin": "ast",
       "id": "client_patches_skillsclasstabpatch_cs_skillsandmasteringscreen",
       "community": 49,
@@ -3857,7 +3857,7 @@
       "label": "Tab",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L66",
+      "source_location": "L69",
       "_origin": "ast",
       "id": "tab",
       "community": 49,
@@ -3867,7 +3867,7 @@
       "label": "object",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L71",
+      "source_location": "L74",
       "_origin": "ast",
       "id": "client_patches_skillsclasstabpatch_cs_object",
       "community": 49,
@@ -3877,7 +3877,7 @@
       "label": "float",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L72",
+      "source_location": "L75",
       "_origin": "ast",
       "id": "client_patches_skillsclasstabpatch_cs_float",
       "community": 49,
@@ -3887,7 +3887,7 @@
       "label": ".GetTargetMethod()",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L75",
+      "source_location": "L78",
       "_origin": "ast",
       "id": "patches_skillsclasstabpatch_skillsclasstabpatch_gettargetmethod",
       "community": 49,
@@ -3897,7 +3897,7 @@
       "label": "MethodBase",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L75",
+      "source_location": "L78",
       "_origin": "ast",
       "id": "client_patches_skillsclasstabpatch_cs_methodbase",
       "community": 49,
@@ -3907,7 +3907,7 @@
       "label": ".Postfix()",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L81",
+      "source_location": "L84",
       "_origin": "ast",
       "id": "patches_skillsclasstabpatch_skillsclasstabpatch_postfix",
       "community": 49,
@@ -3917,7 +3917,7 @@
       "label": "PatchPostfix",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L81",
+      "source_location": "L84",
       "_origin": "ast",
       "id": "client_patches_skillsclasstabpatch_cs_patchpostfix",
       "community": 49,
@@ -3927,7 +3927,7 @@
       "label": ".RepositionClassTab()",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L207",
+      "source_location": "L228",
       "_origin": "ast",
       "id": "patches_skillsclasstabpatch_skillsclasstabpatch_repositionclasstab",
       "community": 49,
@@ -3937,7 +3937,7 @@
       "label": ".AlignPanelToTab()",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L276",
+      "source_location": "L297",
       "_origin": "ast",
       "id": "patches_skillsclasstabpatch_skillsclasstabpatch_alignpaneltotab",
       "community": 49,
@@ -3947,7 +3947,7 @@
       "label": "UIElement",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L276",
+      "source_location": "L297",
       "_origin": "ast",
       "id": "uielement",
       "community": 49,
@@ -3957,7 +3957,7 @@
       "label": "RectTransform",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L276",
+      "source_location": "L297",
       "_origin": "ast",
       "id": "recttransform",
       "community": 49,
@@ -3967,7 +3967,7 @@
       "label": ".EnsureSettingHook()",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L298",
+      "source_location": "L319",
       "_origin": "ast",
       "id": "patches_skillsclasstabpatch_skillsclasstabpatch_ensuresettinghook",
       "community": 49,
@@ -3977,17 +3977,27 @@
       "label": ".StyleClassTab()",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L323",
+      "source_location": "L344",
       "_origin": "ast",
       "id": "patches_skillsclasstabpatch_skillsclasstabpatch_styleclasstab",
       "community": 49,
       "norm_label": ".styleclasstab()"
     },
     {
+      "label": ".DumpNativeTexts()",
+      "file_type": "code",
+      "source_file": "Client/Patches/SkillsClassTabPatch.cs",
+      "source_location": "L444",
+      "_origin": "ast",
+      "id": "patches_skillsclasstabpatch_skillsclasstabpatch_dumpnativetexts",
+      "community": 49,
+      "norm_label": ".dumpnativetexts()"
+    },
+    {
       "label": ".TabPath()",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L415",
+      "source_location": "L475",
       "_origin": "ast",
       "id": "patches_skillsclasstabpatch_skillsclasstabpatch_tabpath",
       "community": 49,
@@ -3997,7 +4007,7 @@
       "label": "Transform",
       "file_type": "code",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
-      "source_location": "L415",
+      "source_location": "L475",
       "_origin": "ast",
       "id": "client_patches_skillsclasstabpatch_cs_transform",
       "community": 49,
@@ -22612,6 +22622,16 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
+      "source_location": "L444",
+      "weight": 1.0,
+      "source": "patches_skillsclasstabpatch_skillsclasstabpatch",
+      "target": "patches_skillsclasstabpatch_skillsclasstabpatch_dumpnativetexts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/SkillsClassTabPatch.cs",
       "source_location": "L298",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -22683,6 +22703,17 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
+      "source_location": "L444",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "patches_skillsclasstabpatch_skillsclasstabpatch_dumpnativetexts",
+      "target": "client_patches_skillsclasstabpatch_cs_skillsandmasteringscreen",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/SkillsClassTabPatch.cs",
       "source_location": "L81",
       "weight": 1.0,
       "context": "parameter_type",
@@ -22744,6 +22775,17 @@
       "confidence_score": 1.0,
       "source": "patches_skillsclasstabpatch_skillsclasstabpatch_postfix",
       "target": "client_patches_skillsclasstabpatch_cs_patchpostfix"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/SkillsClassTabPatch.cs",
+      "source_location": "L111",
+      "weight": 1.0,
+      "source": "patches_skillsclasstabpatch_skillsclasstabpatch_postfix",
+      "target": "patches_skillsclasstabpatch_skillsclasstabpatch_dumpnativetexts",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -22832,6 +22874,17 @@
       "confidence_score": 1.0,
       "source": "patches_skillsclasstabpatch_skillsclasstabpatch_styleclasstab",
       "target": "patches_skillsclasstabpatch_skillsclasstabpatch_tabpath"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/SkillsClassTabPatch.cs",
+      "source_location": "L464",
+      "weight": 1.0,
+      "source": "patches_skillsclasstabpatch_skillsclasstabpatch_dumpnativetexts",
+      "target": "patches_skillsclasstabpatch_skillsclasstabpatch_tabpath",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -39933,5 +39986,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "f35b2768be87d8c52fd269ad722640eb15e713ea"
+  "built_at_commit": "676dc37af2c96ca6842ce12ba889559996e90931"
 }

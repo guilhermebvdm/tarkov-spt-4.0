@@ -51,6 +51,9 @@ internal class ClassTabController : GInterface486
 ///       <item>Posicionamento (fix in-game 2026-07-03): CLASS no INÍCIO DO CONTEÚDO (borda esquerda do
 ///       `_skillsScreen`) e SKILLS/MASTERING empurrados pra DIREITA (delta nativo preservado). Posições nativas
 ///       capturadas 1× por instância da tela (reaplicação idempotente).</item>
+///       <item>071: esconde AMBAS as sub-telas nativas quando CLASS é o default (não só `_skillsScreen` — também
+///       `_masteringScreen`, que nunca era aberta e cujo texto estático de weapon mastery vazava atrás do painel).
+///       O toggle-group re-exibe cada uma ao clicar sua aba. Diagnóstico gated no F12 em <see cref="DumpNativeTexts"/>.</item>
 ///     </list>
 ///     Via reflection (campos estáveis; tipos GClassNNNN obfuscados só no <c>ClassTabController : GInterface486</c>, ref de compile).
 /// </summary>
@@ -105,6 +108,7 @@ internal class SkillsClassTabPatch : ModulePatch
                 // (review CR-UI5-05) re-estiliza também na reabertura: troca de classe in-session deixava o
                 // brasão/tint da classe ANTIGA na aba até o 1º clique (StyleClassTab é idempotente).
                 StyleClassTab(existingTab, GameLocale.IsPortuguese ? "CLASSE" : "CLASS");
+                DumpNativeTexts(__instance);   // 071 (gated no F12): inspeciona resíduos nativos na reabertura
                 return;
             }
 
@@ -112,6 +116,7 @@ internal class SkillsClassTabPatch : ModulePatch
             var skillsTab = AccessTools.Field(t, "_skillsTab")?.GetValue(__instance) as Tab;
             var masteringTab = AccessTools.Field(t, "_masteringTab")?.GetValue(__instance) as Tab;
             var skillsScreen = AccessTools.Field(t, "_skillsScreen")?.GetValue(__instance) as UIElement;
+            var masteringScreen = AccessTools.Field(t, "_masteringScreen")?.GetValue(__instance) as UIElement;   // 071
             var groupField = AccessTools.Field(t, "gclass3808_0");
             var oldGroup = groupField?.GetValue(__instance);
 
@@ -176,6 +181,21 @@ internal class SkillsClassTabPatch : ModulePatch
             skillsTab.UpdateVisual(false);
             masteringTab.UpdateVisual(false);
             skillsScreen.Close();   // esconde a lista de skills (CLASS é o default agora)
+            // 071: a tela de MASTERING (weapon mastery) nunca é aberta ao abrir Skills — o toggle-group nativo só
+            // SELECIONA a aba default (SKILLS), nunca a MASTERING (SelectTab não deseleciona as outras). Logo o mod
+            // nunca a escondia, e o texto estático do prefab de mastering vazava atrás do painel da CLASS. Simétrico
+            // ao skillsScreen.Close() acima; o grupo já cuida de re-exibi-la quando a aba MASTERING é clicada
+            // (GClass3807.Show → MasteringScreen.Show → ShowGameObject). HideGameObject (SetActive false) basta: a
+            // tela nunca foi Show()n, então não há nada a descartar — evita o churn de dispose/CTS de um Close()
+            // desnecessário (o UI/CTS do UIElement é campo POR-INSTÂNCIA; um Close() aqui nem tocaria a tela pai).
+            if (masteringScreen == null)
+            {
+                // farol barato: se um build futuro do EFT renomear o campo, o fix vira no-op silencioso e o
+                // texto de weapon mastery volta a vazar — sem isto, só o diagnóstico F12 acusaria a regressão.
+                Plugin.Log?.LogWarning("[CustomClasses] (071) _masteringScreen não resolvido — resíduo de weapon mastery pode reaparecer.");
+            }
+
+            masteringScreen?.HideGameObject();
             StyleClassTab(classTab, tabLabel);   // reaplica com a versão SELECTED já ativa (garante o texto no estado ativo)
 
             // as abas têm posição FIXA (não é layout group). Fix in-game 2026-07-03: CLASS no início do
@@ -190,6 +210,7 @@ internal class SkillsClassTabPatch : ModulePatch
             RepositionClassTab(__instance, classTab);
 
             Plugin.Log?.LogInfo($"[CustomClasses][053-tabs] barLG={bar.GetComponent<LayoutGroup>()?.GetType().Name ?? "none"} | CLASS={((RectTransform)classTab.transform).anchoredPosition} w={((RectTransform)classTab.transform).rect.width:F0} | SKILLS={((RectTransform)skillsTab.transform).anchoredPosition} | MASTER={mRt.anchoredPosition}");
+            DumpNativeTexts(__instance);   // 071 (gated no F12): confirma que nenhum TMP nativo (weapon mastery) sobrou
         }
         catch (Exception ex)
         {
@@ -408,6 +429,45 @@ internal class SkillsClassTabPatch : ModulePatch
         catch (Exception ex)
         {
             Plugin.Log?.LogError($"[CustomClasses] (059) style tab: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    ///     071 — diagnóstico (gated no F12 <c>Perk Diagnostics</c>, default off → custo zero no jogo normal).
+    ///     Dumpa TODOS os TMPs ATIVOS (renderizados) da <c>SkillsAndMasteringScreen</c> — caminho, alpha, tamanho
+    ///     e texto — para identificar in-game QUAL elemento nativo vaza atrás do painel da CLASS (suspeita:
+    ///     descrição/cabeçalho de weapon mastery). Rodado no fim do build (após o fix esconder o mastering) e na
+    ///     reabertura. O texto é a âncora: basta procurar "mastery"/"weapon" na lista e reportar o caminho para,
+    ///     se o fix simétrico não bastar, esconder aquele nó específico. Inclui os TMPs do próprio painel (paths
+    ///     <c>CC_*</c>/PerksPanel) — ruído esperado, distinguível pelo caminho.
+    /// </summary>
+    private static void DumpNativeTexts(SkillsAndMasteringScreen screen)
+    {
+        if (!PerkDiag.Enabled || screen == null)
+        {
+            return;
+        }
+
+        try
+        {
+            var tmps = screen.GetComponentsInChildren<TextMeshProUGUI>(false);   // false = só GameObjects ATIVOS
+            Plugin.Log?.LogInfo($"[CustomClasses][071-screentext] {tmps.Length} TMP(s) ativos na tela de Skills:");
+            foreach (var tmp in tmps)
+            {
+                var text = (tmp.text ?? string.Empty).Replace("\n", " ").Replace("\r", " ");
+                if (text.Length > 48)
+                {
+                    text = text.Substring(0, 48) + "…";
+                }
+
+                Plugin.Log?.LogInfo(
+                    $"[CustomClasses][071-screentext]   '{TabPath(tmp.transform, screen.transform)}' " +
+                    $"alpha={tmp.color.a:F2} size={tmp.fontSize:F0} text='{text}'");
+            }
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log?.LogError($"[CustomClasses] (071) dump screen texts: {ex.Message}");
         }
     }
 
