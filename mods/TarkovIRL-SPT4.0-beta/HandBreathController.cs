@@ -1,10 +1,4 @@
-// Decompiled with JetBrains decompiler
-// Type: TarkovIRL.HandBreathController
-// Assembly: TarkovIRL, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MVID: C42939BD-7BF0-4586-ABE5-9D2EFC361A0B
-// Assembly location: D:\Drive\Google Drive\Users\Erick Saraiva\Downloads\TarkovIRL_WeaponsHandlingMod_1.0.0\BepInEx\plugins\TarkovIRL.dll
-
-using EFT;
+﻿using EFT;
 using UnityEngine;
 
 #nullable disable
@@ -19,7 +13,7 @@ internal class HandBreathController
   public static Vector3 GetModifiedHandPosForBreath(Player player)
   {
     AnimationCurve breathCurve = PrimeMover.Instance.BreathCurve;
-    float num1 = Mathf.Clamp(1f - player.Physical.Stamina.Current / 104f, 0.15f, 1f);
+    float num1 = Mathf.Clamp((float) (1.0 - (double) player.Physical.Stamina.Current / 104.0), 0.15f, 1f);
     float num2 = RealismWrapper.IsAdrenaline ? 1.25f : 1f;
     float num3 = (float) (1.0 + (double) num1 * (double) num2);
     int num4 = (double) HandBreathController._breathUpdateTimer >= 0.550000011920929 || (double) HandBreathController._breathUpdateTimer <= 0.25999999046325684 ? 0 : (PlayerMotionController.IsHoldingBreath ? 1 : 0);
@@ -34,3 +28,4 @@ internal class HandBreathController
     return new Vector3(0.0f, num7 * HandBreathController._BreathVerticalOffsetModifier * num8 * PrimeMover.BreathingEffectMulti.Value, 0.0f);
   }
 }
+

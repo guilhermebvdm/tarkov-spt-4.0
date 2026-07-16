@@ -1,11 +1,4 @@
-// Decompiled with JetBrains decompiler
-// Type: TarkovIRL.NewSwayController
-// Assembly: TarkovIRL, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MVID: C42939BD-7BF0-4586-ABE5-9D2EFC361A0B
-// Assembly location: D:\Drive\Google Drive\Users\Erick Saraiva\Downloads\TarkovIRL_WeaponsHandlingMod_1.0.0\BepInEx\plugins\TarkovIRL.dll
-
-
-using UnityEngine;
+﻿using UnityEngine;
 
 #nullable disable
 namespace TarkovIRL;
@@ -33,58 +26,98 @@ internal class NewSwayController
   private static Vector3 _finalPosSmoothed = Vector3.zero;
   private static Vector3 _finalRot = Vector3.zero;
   private static Vector3 _finalRotSmoothed = Vector3.zero;
+  private static bool _wasAimingLastFrame = false;
+  private static float _attenFactorLerp = 1f;
 
   public static void UpdateLerp(float deltaTime)
   {
-    bool flag = WeaponController.HasCheekWeld();
-    float num1 = PlayerMotionController.HorizontalRotationDelta * PrimeMover.WeaponSwayMulti.Value;
-    if (PrimeMover.InvertSwayVanilla.Value && StanceController.CurrentStance == EStance.None && !PlayerMotionController.IsAiming)
+    bool isAiming = PlayerMotionController.IsAiming;
+    bool isSprinting = PlayerMotionController.IsSprinting;
+    if (isAiming != NewSwayController._wasAimingLastFrame)
     {
-        num1 *= -1f;
+      NewSwayController._lerpPosHorizontal = 0.0f;
+      NewSwayController._lerpPosVertical = 0.0f;
+      NewSwayController._lerpRot = 0.0f;
+      NewSwayController._posSmoothed = Vector3.zero;
+      NewSwayController._rotSmoothed = Vector3.zero;
+      NewSwayController._lagginPosSmoothed = Vector3.zero;
+      NewSwayController._lagginRotSmoothed = Vector3.zero;
+      for (int index = 0; index < NewSwayController._lagginSwaySetSize; ++index)
+      {
+        NewSwayController._laggingSwayPoses[index] = Vector3.zero;
+        NewSwayController._laggingSwayRots[index] = Vector3.zero;
+      }
     }
-    float num2 = PrimeMover.NewSwayRotDeltaClamp.Value;
-    float num3 = Mathf.Clamp(num1, 0.0f - num2, num2);
-    float num4 = flag ? -1f : 0.5f;
-    float num5 = !flag || !PlayerMotionController.IsAiming ? 1f : 0.0f;
-    float num6 = flag || WeaponController.IsPistol || !PlayerMotionController.IsAiming ? 1f : 0.7f;
-    float num7 = !flag || PlayerMotionController.IsAiming ? 1f : 0.7f;
-    float num8 = flag || !PlayerMotionController.IsAiming ? 1f : 1.25f;
-    float num9 = !flag || !PlayerMotionController.IsAiming ? 1f : -0.25f;
-    float num10 = !flag || !PlayerMotionController.IsAiming ? 1f : 2f;
-    float num11 = !flag ? 0.5f : 1f;
-    float num12 = WeaponController.GetWeaponMulti(true) * EfficiencyController.EfficiencyModifierInverse;
-    float num13 = !flag ? -1f : 0.0f;
-    float num14 = PlayerMotionController.IsAiming ? 0.5f : 1f;
-    float num15 = WeaponController.IsPistol ? 2f : 1f;
-    float num16 = num3 * num4 * num5 * num6 * WeaponController.GetWeaponMulti(false) * EfficiencyController.EfficiencyModifier;
-    float num17 = Mathf.Abs(num3) * num13 * num14 * num15;
-    float num18 = PrimeMover.NewSwayPositionDTMulti.Value;
-    float num19 = PrimeMover.NewSwayRotationDTMulti.Value;
-    NewSwayController._lerpPosHorizontal = Mathf.Lerp(NewSwayController._lerpPosHorizontal, num16, deltaTime * num12 * num7 * num8 * num18);
-    NewSwayController._lerpPosVertical = Mathf.Lerp(NewSwayController._lerpPosVertical, num17, deltaTime * num12 * PrimeMover.NewSwayWpnUnstockedDropSpeed.Value);
-    float num20 = num3 * num9 * WeaponController.GetWeaponMulti(false) * EfficiencyController.EfficiencyModifier;
-    float num21 = PlayerMotionController.IsAiming ? PrimeMover.NewSwayADSRotClamp.Value * num2 : 1f;
-    float num22 = Mathf.Clamp(num20, 0.0f - num21, num21);
-    NewSwayController._lerpRot = Mathf.Lerp(NewSwayController._lerpRot, num22, deltaTime * num12 * num10 * num11 * num19);
-    float num23 = PrimeMover.NewSwayRotFinalClamp.Value;
-    NewSwayController._lerpRot = Mathf.Clamp(NewSwayController._lerpRot, 0.0f - num23, num23);
-    float num24 = PlayerMotionController.IsAiming ? 0.0f : PrimeMover.WeaponCantValue.Value * 0.1f;
-    NewSwayController._weaponTiltLerp = Mathf.Lerp(NewSwayController._weaponTiltLerp, num24, deltaTime * 20f);
-    float num25 = (PlayerMotionController.IsAiming ? 0.0f : PlayerMotionController.LeanNormal * PrimeMover.LeanExtraVerticalMulti.Value * WeaponController.GetWeaponMulti(false)) * -1f;
-    if (AnimStateController.IsLeftShoulder)
-      num25 *= -1f;
-    NewSwayController._leanVerticalLerp = Mathf.Lerp(NewSwayController._leanVerticalLerp, num25, deltaTime * 10f * EfficiencyController.EfficiencyModifierInverse);
-    float num26 = !WeaponController.IsStocked || !PlayerMotionController.IsAiming ? 1f : 0.2f;
-    float num27 = PlayerMotionController.RotationDelta * PrimeMover.NewSwayWpnDropFromRotMulti.Value * WeaponController.GetWeaponMulti(false) * EfficiencyController.EfficiencyModifier * num26;
-    NewSwayController._vertDropFromRotLerp = Mathf.Lerp(NewSwayController._vertDropFromRotLerp, num27, deltaTime * PrimeMover.NewSwayWpnUnstockedDropSpeed.Value);
-    float verticalRotationDelta = PlayerMotionController.VerticalRotationDelta;
-    float num28 = (double) verticalRotationDelta < 0.0 ? -1f : 1f;
-    float num29 = PlayerMotionController.IsAiming ? 0.0f : verticalRotationDelta * num28 * PrimeMover.HyperVerticalMulti.Value * WeaponController.GetWeaponMulti(false) * EfficiencyController.EfficiencyModifier;
-    float num30 = PrimeMover.HyperVerticalClamp.Value;
-    float num31 = Mathf.Clamp(num29, 0.0f - num30, num30);
-    float num32 = PrimeMover.HyperVerticalDT.Value * RealismWrapper.WeaponBalanceMulti;
-    NewSwayController._hyperVerticalLerp = Mathf.Lerp(NewSwayController._hyperVerticalLerp, num31, deltaTime * num32);
-    NewSwayController.ProcessLagginSway();
+    NewSwayController._wasAimingLastFrame = isAiming;
+    if (isSprinting | isAiming)
+    {
+      NewSwayController._lerpPosHorizontal = 0.0f;
+      NewSwayController._lerpPosVertical = 0.0f;
+      NewSwayController._lerpRot = 0.0f;
+      NewSwayController._weaponTiltLerp = 0.0f;
+      NewSwayController._leanVerticalLerp = 0.0f;
+      NewSwayController._vertDropFromRotLerp = 0.0f;
+      NewSwayController._hyperVerticalLerp = 0.0f;
+      NewSwayController.ProcessLagginSway();
+    }
+    else
+    {
+      float num1 = 1f;
+      bool flag = WeaponController.HasCheekWeld();
+      float num2 = PlayerMotionController.HorizontalRotationDelta * PrimeMover.WeaponSwayMulti.Value;
+      float rawHorizontalSpeed = PlayerMotionController.RawHorizontalSpeed;
+      float num3 = 1f;
+      if ((double) rawHorizontalSpeed > (double) PrimeMover.FastTurnThreshold.Value && (double) PrimeMover.FastTurnAttenuation.Value > 0.0)
+        num3 = Mathf.Clamp01((float) (1.0 - (double) (rawHorizontalSpeed - PrimeMover.FastTurnThreshold.Value) * (double) PrimeMover.FastTurnAttenuation.Value * 0.004999999888241291));
+      NewSwayController._attenFactorLerp = (double) num3 >= (double) NewSwayController._attenFactorLerp ? Mathf.Lerp(NewSwayController._attenFactorLerp, num3, deltaTime * 10f) : num3;
+      if (PrimeMover.InvertSwayVanilla.Value && StanceController.CurrentStance == EStance.None && !PlayerMotionController.IsAiming)
+        num2 *= -1f;
+      float num4 = PrimeMover.NewSwayRotDeltaClamp.Value;
+      float num5 = Mathf.Clamp(num2, 0.0f - num4, num4) * NewSwayController._attenFactorLerp;
+      float num6 = flag ? -1f : 0.5f;
+      float num7 = !flag || !PlayerMotionController.IsAiming ? 1f : 0.0f;
+      float num8 = flag || WeaponController.IsPistol || !PlayerMotionController.IsAiming ? 1f : 0.7f;
+      float num9 = !flag || PlayerMotionController.IsAiming ? 1f : 0.7f;
+      float num10 = flag || !PlayerMotionController.IsAiming ? 1f : 1.25f;
+      float num11 = !flag || !PlayerMotionController.IsAiming ? 1f : -0.25f;
+      float num12 = !flag || !PlayerMotionController.IsAiming ? 1f : 2f;
+      float num13 = !flag ? 0.5f : 1f;
+      float num14 = WeaponController.GetWeaponMulti(true) * EfficiencyController.EfficiencyModifierInverse;
+      float num15 = !flag ? -1f : 0.0f;
+      float num16 = PlayerMotionController.IsAiming ? 0.5f : 1f;
+      float num17 = WeaponController.IsPistol ? 2f : 1f;
+      float num18 = (float) ((double) num5 * (double) num6 * (double) num7 * (double) num8 * (double) WeaponController.GetWeaponMulti(false) * (double) EfficiencyController.EfficiencyModifier * (WeaponController.IsPistol ? (double) PrimeMover.PistolSwayMulti.Value : 1.0)) * PrimeMover.NewSwaySlideMulti.Value;
+      float num19 = Mathf.Abs(num5) * num15 * num16 * num17;
+      float num20 = PrimeMover.NewSwayPositionDTMulti.Value;
+      float num21 = PrimeMover.NewSwayRotationDTMulti.Value;
+      NewSwayController._lerpPosHorizontal = Mathf.Lerp(NewSwayController._lerpPosHorizontal, num18, deltaTime * num14 * num9 * num10 * num20 * num1);
+      NewSwayController._lerpPosVertical = Mathf.Lerp(NewSwayController._lerpPosVertical, num19, deltaTime * num14 * PrimeMover.NewSwayWpnUnstockedDropSpeed.Value);
+      float num22 = WeaponController.IsPistol ? PrimeMover.PistolSwayMulti.Value : 1f;
+      float num23 = num5 * num11 * WeaponController.GetWeaponMulti(false) * EfficiencyController.EfficiencyModifier * num22;
+      float num24 = PlayerMotionController.IsAiming ? PrimeMover.NewSwayADSRotClamp.Value * num4 : 1f;
+      float num25 = Mathf.Clamp(num23, 0.0f - num24, num24);
+      NewSwayController._lerpRot = Mathf.Lerp(NewSwayController._lerpRot, num25, deltaTime * num14 * num12 * num13 * num21 * num1);
+      float num26 = PrimeMover.NewSwayRotFinalClampPos.Value;
+      float num27 = PrimeMover.NewSwayRotFinalClampNeg.Value;
+      NewSwayController._lerpRot = Mathf.Clamp(NewSwayController._lerpRot, -num27, num26);
+      float num28 = PlayerMotionController.IsAiming ? 0.0f : PrimeMover.WeaponCantValue.Value * 0.1f;
+      NewSwayController._weaponTiltLerp = Mathf.Lerp(NewSwayController._weaponTiltLerp, num28, deltaTime * 20f);
+      float num29 = (float) ((PlayerMotionController.IsAiming ? 0.0 : (double) PlayerMotionController.LeanNormal * (double) PrimeMover.LeanExtraVerticalMulti.Value * (double) WeaponController.GetWeaponMulti(false)) * -1.0);
+      if (AnimStateController.IsLeftShoulder)
+        num29 *= -1f;
+      NewSwayController._leanVerticalLerp = Mathf.Lerp(NewSwayController._leanVerticalLerp, num29, deltaTime * 10f * EfficiencyController.EfficiencyModifierInverse);
+      float num30 = !WeaponController.IsStocked || !PlayerMotionController.IsAiming ? 1f : 0.2f;
+      float num31 = PlayerMotionController.RotationDelta * PrimeMover.NewSwayWpnDropFromRotMulti.Value * WeaponController.GetWeaponMulti(false) * EfficiencyController.EfficiencyModifier * num30;
+      NewSwayController._vertDropFromRotLerp = Mathf.Lerp(NewSwayController._vertDropFromRotLerp, num31, deltaTime * PrimeMover.NewSwayWpnUnstockedDropSpeed.Value);
+      float verticalRotationDelta = PlayerMotionController.VerticalRotationDelta;
+      float num32 = (double) verticalRotationDelta < 0.0 ? -1f : 1f;
+      float num33 = PlayerMotionController.IsAiming ? 0.0f : verticalRotationDelta * num32 * PrimeMover.HyperVerticalMulti.Value * WeaponController.GetWeaponMulti(false) * EfficiencyController.EfficiencyModifier;
+      float num34 = PrimeMover.HyperVerticalClamp.Value;
+      float num35 = Mathf.Clamp(num33, 0.0f - num34, num34);
+      float num36 = PrimeMover.HyperVerticalDT.Value * RealismWrapper.WeaponBalanceMulti;
+      NewSwayController._hyperVerticalLerp = Mathf.Lerp(NewSwayController._hyperVerticalLerp, num35, deltaTime * num36);
+      NewSwayController.ProcessLagginSway();
+    }
   }
 
   private static void ProcessLagginSway()
@@ -95,7 +128,7 @@ internal class NewSwayController
     if (NewSwayController._laggingSwayIterator > 29)
       NewSwayController._laggingSwayIterator = 0;
     float num1 = Mathf.Clamp(EfficiencyController.EfficiencyModifier, 1f, 10f);
-    float num2 = Mathf.Clamp(WeaponController.GetWeaponMulti(false) * RealismWrapper.WeaponBalanceMulti * num1 * PrimeMover.LaggingSwayMulti.Value * (StanceController.CurrentStance == EStance.HighReady ? 0.5f : 1f), 1f, PrimeMover.LaggingSwayClamp.Value);
+    float num2 = Mathf.Clamp((float) ((double) WeaponController.GetWeaponMulti(false) * (double) RealismWrapper.WeaponBalanceMulti * (double) num1 * (double) PrimeMover.LaggingSwayMulti.Value * (StanceController.CurrentStance == EStance.HighReady ? 0.5 : 1.0)), 1f, PrimeMover.LaggingSwayClamp.Value);
     int index = NewSwayController._laggingSwayIterator - Mathf.RoundToInt(num2);
     if (index < 0)
       index = NewSwayController._lagginSwaySetSize + index;
@@ -105,37 +138,36 @@ internal class NewSwayController
 
   public static Vector3 GetNewSwayPosition()
   {
-    float num = 18f;
-    Vector3 vector3 = new Vector3(NewSwayController._lerpPosHorizontal, NewSwayController._lerpPosVertical, 0.0f);
-    NewSwayController._posSmoothed = Vector3.Lerp(NewSwayController._posSmoothed, vector3, PrimeMover.Instance.DeltaTime * num);
-    NewSwayController._lagginPosSmoothed = Vector3.Lerp(NewSwayController._lagginPosSmoothed, NewSwayController._lagginPos, PrimeMover.Instance.DeltaTime * num);
+    float num1 = PlayerMotionController.IsAiming ? 8f : 1f;
+    float num2 = 18f;
+    Vector3 vector3;
+    vector3 = new Vector3(NewSwayController._lerpPosHorizontal, NewSwayController._lerpPosVertical, 0.0f);
+    NewSwayController._posSmoothed = Vector3.Lerp(NewSwayController._posSmoothed, vector3, PrimeMover.Instance.DeltaTime * num2 * num1);
+    NewSwayController._lagginPosSmoothed = Vector3.Lerp(NewSwayController._lagginPosSmoothed, NewSwayController._lagginPos, PrimeMover.Instance.DeltaTime * num2 * num1);
     NewSwayController._finalPos = Vector3.Lerp(NewSwayController._posSmoothed, NewSwayController._lagginPosSmoothed, PrimeMover.LaggingSwayNorm.Value);
-    NewSwayController._finalPosSmoothed = Vector3.Lerp(NewSwayController._finalPosSmoothed, NewSwayController._finalPos, PrimeMover.Instance.DeltaTime * PrimeMover.NewSwayFinalLerpSpeed.Value);
+    NewSwayController._finalPosSmoothed = Vector3.Lerp(NewSwayController._finalPosSmoothed, NewSwayController._finalPos, PrimeMover.Instance.DeltaTime * PrimeMover.NewSwayFinalLerpSpeed.Value * num1);
     if (!PrimeMover.IsWeaponSway.Value || AnimStateController.IsBlindfire)
       return Vector3.zero;
     Vector3 zero = Vector3.zero;
-    zero.x = NewSwayController._finalPosSmoothed.x * PrimeMover.NewSwayPositionMulti.Value * WeaponController.GetWeaponMulti(false);
+    zero.x = Mathf.Clamp(NewSwayController._finalPosSmoothed.x * PrimeMover.NewSwayPositionMulti.Value * WeaponController.GetWeaponMulti(false), -PrimeMover.NewSwayPositionHardClampNeg.Value, PrimeMover.NewSwayPositionHardClampPos.Value);
     zero.y = NewSwayController._finalPosSmoothed.y * PrimeMover.NewSwayWpnUnstockedDropValue.Value * WeaponController.GetWeaponMulti(false);
     return zero;
   }
 
   public static Quaternion GetNewSwayRotation()
   {
-    float num = 18f;
-    Vector3 vector3 = new Vector3(NewSwayController._lerpPosHorizontal, NewSwayController._lerpPosVertical, 0.0f);
+    float num1 = PlayerMotionController.IsAiming ? 8f : 1f;
+    float num2 = 18f;
+    Vector3 vector3;
+    vector3 = new Vector3(NewSwayController._lerpPosHorizontal, NewSwayController._lerpPosVertical, 0.0f);
     vector3.x = NewSwayController._leanVerticalLerp + NewSwayController._vertDropFromRotLerp + NewSwayController._hyperVerticalLerp;
     vector3.y = NewSwayController._weaponTiltLerp;
     vector3.z = NewSwayController._lerpRot;
-    NewSwayController._rotSmoothed = Vector3.Lerp(NewSwayController._rotSmoothed, vector3, PrimeMover.Instance.DeltaTime * num);
-    NewSwayController._lagginRotSmoothed = Vector3.Lerp(NewSwayController._lagginRotSmoothed, NewSwayController._lagginRot, PrimeMover.Instance.DeltaTime * num);
+    NewSwayController._rotSmoothed = Vector3.Lerp(NewSwayController._rotSmoothed, vector3, PrimeMover.Instance.DeltaTime * num2 * num1);
+    NewSwayController._lagginRotSmoothed = Vector3.Lerp(NewSwayController._lagginRotSmoothed, NewSwayController._lagginRot, PrimeMover.Instance.DeltaTime * num2 * num1);
     NewSwayController._finalRot = Vector3.Lerp(NewSwayController._rotSmoothed, NewSwayController._lagginRotSmoothed, PrimeMover.LaggingSwayNorm.Value);
-    NewSwayController._finalRotSmoothed = Vector3.Lerp(NewSwayController._finalRotSmoothed, NewSwayController._finalRot, PrimeMover.Instance.DeltaTime * PrimeMover.NewSwayFinalLerpSpeed.Value);
-    if (!PrimeMover.IsWeaponSway.Value || AnimStateController.IsBlindfire)
-      return Quaternion.identity;
-    return Quaternion.Euler(
-      NewSwayController._finalRotSmoothed.x,
-      NewSwayController._finalRotSmoothed.y,
-      NewSwayController._finalRotSmoothed.z * PrimeMover.NewSwayRotationMulti.Value * WeaponController.GetWeaponMulti(false)
-    );
+    NewSwayController._finalRotSmoothed = Vector3.Lerp(NewSwayController._finalRotSmoothed, NewSwayController._finalRot, PrimeMover.Instance.DeltaTime * PrimeMover.NewSwayFinalLerpSpeed.Value * num1);
+    return !PrimeMover.IsWeaponSway.Value || AnimStateController.IsBlindfire ? Quaternion.identity : Quaternion.Euler(NewSwayController._finalRotSmoothed.x, NewSwayController._finalRotSmoothed.y, NewSwayController._finalRotSmoothed.z * PrimeMover.NewSwayRotationMulti.Value * WeaponController.GetWeaponMulti(false));
   }
 }
+

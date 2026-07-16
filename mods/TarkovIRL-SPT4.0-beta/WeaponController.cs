@@ -1,10 +1,4 @@
-// Decompiled with JetBrains decompiler
-// Type: TarkovIRL.WeaponController
-// Assembly: TarkovIRL, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MVID: C42939BD-7BF0-4586-ABE5-9D2EFC361A0B
-// Assembly location: D:\Drive\Google Drive\Users\Erick Saraiva\Downloads\TarkovIRL_WeaponsHandlingMod_1.0.0\BepInEx\plugins\TarkovIRL.dll
-
-using EFT;
+﻿using EFT;
 using EFT.InventoryLogic;
 using UnityEngine;
 
@@ -26,10 +20,14 @@ public static class WeaponController
 
   public static void UpdateWpnStats(Player.FirearmController fc)
   {
-    if (fc != null)
+    if ((fc != null))
     {
-      WeaponController.CurrentWeaponWeight = PrimeMover.Instance.WeightAttenuationCurve.Evaluate(((Item) fc.Weapon).TotalWeight);
-      WeaponController.CurrentWeaponErgoNorm = PrimeMover.Instance.ErgoAttenuationCurve.Evaluate(fc.TotalErgonomics / 100f);
+      float num1 = PrimeMover.SwayCustomWeight.Value;
+      float num2 = PrimeMover.SwayCustomErgo.Value;
+      float num3 = (double) num1 > 0.0 ? num1 : ((Item) fc.Weapon).TotalWeight;
+      float num4 = (double) num1 > 0.0 ? num2 : fc.TotalErgonomics / 100f;
+      WeaponController.CurrentWeaponWeight = PrimeMover.Instance.WeightAttenuationCurve.Evaluate(num3);
+      WeaponController.CurrentWeaponErgoNorm = PrimeMover.Instance.ErgoAttenuationCurve.Evaluate(num4);
       WeaponController.IsStocked = WeaponController.CheckForStock(fc.Weapon);
     }
     else
@@ -63,7 +61,8 @@ public static class WeaponController
   public static float GetWeaponMulti(bool getInverse)
   {
     float num = WeaponController.CurrentWeaponWeight * (1f - WeaponController.CurrentWeaponErgoNorm);
-    if (num < PrimeMover.MinimumWeaponSway.Value) num = PrimeMover.MinimumWeaponSway.Value;
+    if ((double) num < (double) PrimeMover.MinimumWeaponSway.Value)
+      num = PrimeMover.MinimumWeaponSway.Value;
     return getInverse ? 1f / num : num;
   }
 
@@ -76,3 +75,4 @@ public static class WeaponController
 
   public static bool HasCheekWeld() => RealismWrapper.IsShoulderContact();
 }
+

@@ -1,11 +1,4 @@
-// Decompiled with JetBrains decompiler
-// Type: TarkovIRL.RunningFadeController
-// Assembly: TarkovIRL, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MVID: C42939BD-7BF0-4586-ABE5-9D2EFC361A0B
-// Assembly location: D:\Drive\Google Drive\Users\Erick Saraiva\Downloads\TarkovIRL_WeaponsHandlingMod_1.0.0\BepInEx\plugins\TarkovIRL.dll
-
-
-using UnityEngine;
+﻿using UnityEngine;
 
 #nullable disable
 namespace TarkovIRL;
@@ -127,14 +120,12 @@ internal class RunningFadeController
     new Keyframe(1f, 0.0f)
   });
 
-
   public static void UpdateRunningFadeOffsets(float dt)
   {
     bool isRunning = AnimStateController.IsRunning;
     if (!(!RunningFadeController._runningLastFrame & isRunning) && RunningFadeController._runningLastFrame && !isRunning)
       RunningFadeController.FadeOutOfRun();
     RunningFadeController._runningLastFrame = isRunning;
-
     if ((double) RunningFadeController._fadeTimer1 < (double) RunningFadeController._FirstCurveTime)
     {
       RunningFadeController._fadeTimer1 += dt * PrimeMover.RunFadeDTMulti.Value;
@@ -144,7 +135,6 @@ internal class RunningFadeController
       float num = float.IsInfinity(EfficiencyController.EfficiencyModifierInverse) ? 1f : EfficiencyController.EfficiencyModifierInverse;
       RunningFadeController._fadeTimer2 += dt * num;
     }
-
     float num1 = (double) RunningFadeController._fadeTimer1 < (double) RunningFadeController._FirstCurveTime ? RunningFadeController._fadeTimer1 : RunningFadeController._fadeTimer2;
     RunningFadeController._fadeSmoothed = Mathf.Lerp(RunningFadeController._fadeSmoothed, num1, dt * 10f);
   }
@@ -175,3 +165,4 @@ internal class RunningFadeController
     rot = TIRLUtils.GetQuatFromV3(Vector3.Lerp(Vector3.zero, offsetRot, num));
   }
 }
+

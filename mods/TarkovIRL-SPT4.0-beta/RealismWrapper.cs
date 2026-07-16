@@ -1,13 +1,7 @@
-// Decompiled with JetBrains decompiler
-// Type: TarkovIRL.RealismWrapper
-// Assembly: TarkovIRL, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MVID: C42939BD-7BF0-4586-ABE5-9D2EFC361A0B
-// Assembly location: D:\Drive\Google Drive\Users\Erick Saraiva\Downloads\TarkovIRL_WeaponsHandlingMod_1.0.0\BepInEx\plugins\TarkovIRL.dll
-
-using UnityEngine;
-using EFT;
+﻿using BepInEx.Bootstrap;
 using Comfort.Common;
-using System.Runtime.CompilerServices;
+using EFT;
+using UnityEngine;
 
 #nullable disable
 namespace TarkovIRL;
@@ -20,23 +14,18 @@ internal class RealismWrapper
   {
     get
     {
-      if (_isUnderFireLoaded == null)
-      {
-        _isUnderFireLoaded = BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.rpmwpm.UnderFire");
-      }
-      return _isUnderFireLoaded.Value;
+      if (!RealismWrapper._isUnderFireLoaded.HasValue)
+        RealismWrapper._isUnderFireLoaded = new bool?(Chainloader.PluginInfos.ContainsKey("com.rpmwpm.UnderFire"));
+      return RealismWrapper._isUnderFireLoaded.Value;
     }
   }
 
   public static float GetRealismReloadSpeed()
   {
-    // Use native EFT Player ReloadSpeed skill multiplier
-    float reloadMulti = 1f;
-    if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance.MainPlayer != null)
-    {
-        reloadMulti = 1f; // TODO: Fetch from EFT skills
-    }
-    return Mathf.Clamp(EfficiencyController.EfficiencyModifierInverse * reloadMulti, 0.65f, 1.35f);
+    float num = 1f;
+    if (Singleton<GameWorld>.Instantiated && (Singleton<GameWorld>.Instance.MainPlayer != null))
+      num = 1f;
+    return Mathf.Clamp(EfficiencyController.EfficiencyModifierInverse * num, 0.65f, 1.35f);
   }
 
   public static float GetRealismCheckMagSpeed()
@@ -48,29 +37,11 @@ internal class RealismWrapper
 
   public static bool IsAdrenaline
   {
-    get
-    {
-      if (IsUnderFireLoaded)
-      {
-        return UnderFireSoftWrapper.GetAdrenaline();
-      }
-      return false;
-    }
+    get => RealismWrapper.IsUnderFireLoaded && UnderFireSoftWrapper.GetAdrenaline();
   }
 
-  public static float WeaponBalanceMulti
-  {
-    get => 1.0f; // Simplified native balance
-  }
+  public static float WeaponBalanceMulti => 1f;
 
   public static bool IsOverdose => false;
 }
 
-internal static class UnderFireSoftWrapper
-{
-  [MethodImpl(MethodImplOptions.NoInlining)]
-  public static bool GetAdrenaline()
-  {
-    return UnderFire.Plugin.isAdrenalineActive;
-  }
-}

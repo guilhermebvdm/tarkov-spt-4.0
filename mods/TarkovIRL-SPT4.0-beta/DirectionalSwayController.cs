@@ -1,10 +1,4 @@
-// Decompiled with JetBrains decompiler
-// Type: TarkovIRL.DirectionalSwayController
-// Assembly: TarkovIRL, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MVID: C42939BD-7BF0-4586-ABE5-9D2EFC361A0B
-// Assembly location: D:\Drive\Google Drive\Users\Erick Saraiva\Downloads\TarkovIRL_WeaponsHandlingMod_1.0.0\BepInEx\plugins\TarkovIRL.dll
-
-using UnityEngine;
+﻿using UnityEngine;
 
 #nullable disable
 namespace TarkovIRL;
@@ -61,13 +55,6 @@ internal class DirectionalSwayController
     float num12 = num2 * num9 * PrimeMover.DirectionalSwayMulti.Value;
     float num13 = num3 * num9 * PrimeMover.DirectionalSwayMulti.Value;
     float num14 = num4 * num10 * PrimeMover.DirectionalSwayMulti.Value;
-    if (!WeaponController.HasCheekWeld())
-    {
-      num11 = 0.0f;
-      num13 = 0.0f;
-      num12 = 0.0f;
-      num14 = 0.0f;
-    }
     float num15 = Mathf.Clamp(PlayerMotionController.GetNormalSpeed(), 0.5f, 1f);
     float num16 = dt * PrimeMover.DirectionalSwayLerpSpeed.Value * num15;
     DirectionalSwayController._lateralPosLerp = Mathf.Lerp(DirectionalSwayController._lateralPosLerp, num11, num16);
@@ -88,7 +75,8 @@ internal class DirectionalSwayController
       position = Vector3.zero;
       position.x = DirectionalSwayController._lateralPosLerp;
       position.z = DirectionalSwayController._projectedPosLerp;
-      rotation = Quaternion.Euler(DirectionalSwayController._verticalRotLerp, 0f, DirectionalSwayController._lateralRotLerp);
+      rotation = Quaternion.Euler(DirectionalSwayController._verticalRotLerp, 0.0f, DirectionalSwayController._lateralRotLerp);
     }
   }
 }
+

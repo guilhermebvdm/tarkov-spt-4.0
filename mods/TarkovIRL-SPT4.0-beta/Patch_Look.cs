@@ -1,9 +1,3 @@
-// Decompiled with JetBrains decompiler
-// Type: TarkovIRL.Patch_Look
-// Assembly: TarkovIRL, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MVID: C42939BD-7BF0-4586-ABE5-9D2EFC361A0B
-// Assembly location: D:\Drive\Google Drive\Users\Erick Saraiva\Downloads\TarkovIRL_WeaponsHandlingMod_1.0.0\BepInEx\plugins\TarkovIRL.dll
-
 using EFT;
 using SPT.Reflection.Patching;
 using System.Reflection;
@@ -22,10 +16,13 @@ internal class Patch_Look : ModulePatch
   [PatchPostfix]
   private static void Postfix(Player __instance)
   {
-    if (__instance == null || !__instance.IsYourPlayer || (int)__instance.MovementContext.CurrentState.Name == 21 || !PrimeMover.IsSmallMovementsEffect.Value)
+    if ((__instance == null) || !__instance.IsYourPlayer || (int)__instance.MovementContext.CurrentState.Name == 21 || !PrimeMover.IsSmallMovementsEffect.Value || !PrimeMover.EnableMod.Value)
       return;
     Vector3 headRotThisFrame = HeadRotController.GetHeadRotThisFrame(__instance.HeadRotation);
     __instance.HeadRotation = headRotThisFrame;
     __instance.ProceduralWeaponAnimation.SetHeadRotation(__instance.HeadRotation);
   }
 }
+
+
+

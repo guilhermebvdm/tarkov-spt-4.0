@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <!--Project was exported from assembly: D:\Drive\Google Drive\Users\Erick Saraiva\Downloads\TarkovIRL_WeaponsHandlingMod_1.0.0\BepInEx\plugins\TarkovIRL.dll-->
   <PropertyGroup>
@@ -33,6 +33,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="UnderFireSoftWrapper.cs" />
+    <Compile Include="NewDeadzoneController.cs" />
+    <Compile Include="EStance.cs" />
+    <Compile Include="FreeAimController.cs" />
+    <Compile Include="Patch_PlayerRotate.cs" />
+    
+    
     <Reference Include="UnityEngine">
       <HintPath>References\UnityEngine.dll</HintPath>
     </Reference>
@@ -71,13 +78,20 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="UnderFireSoftWrapper.cs" />
+    <Compile Include="NewDeadzoneController.cs" />
+    <Compile Include="EStance.cs" />
+    <Compile Include="FreeAimController.cs" />
+    <Compile Include="Patch_PlayerRotate.cs" />
+    
+    
     <Compile Include="StanceController.cs" />
     <Compile Include="Patch_LateUpdate_UpdateWpnStats.cs" />
     <Compile Include="DirectionalSwayController.cs" />
     <Compile Include="EfficiencyController.cs" />
     <Compile Include="FootstepController.cs" />
     <Compile Include="HeadRotController.cs" />
-    <Compile Include="NewDeadzoneController.cs" />
+    
     <Compile Include="NewSwayController.cs" />
     <Compile Include="ParallaxAdsController.cs" />
     <Compile Include="HandPoseController.cs" />
@@ -118,3 +132,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
+
+
+
+
+
+

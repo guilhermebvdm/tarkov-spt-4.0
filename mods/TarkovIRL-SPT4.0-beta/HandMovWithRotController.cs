@@ -1,10 +1,4 @@
-// Decompiled with JetBrains decompiler
-// Type: TarkovIRL.HandMovWithRotController
-// Assembly: TarkovIRL, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MVID: C42939BD-7BF0-4586-ABE5-9D2EFC361A0B
-// Assembly location: D:\Drive\Google Drive\Users\Erick Saraiva\Downloads\TarkovIRL_WeaponsHandlingMod_1.0.0\BepInEx\plugins\TarkovIRL.dll
-
-using EFT;
+﻿using EFT;
 using UnityEngine;
 
 #nullable disable
@@ -36,7 +30,7 @@ public static class HandMovWithRotController
       HandMovWithRotController._rotPullInTarget = (WeaponController.HasCheekWeld() ? HandMovWithRotController._RotPullInValue * 0.75f : HandMovWithRotController._RotPullInValue) * num;
     }
     HandMovWithRotController._rotPullInLerp = Mathf.Lerp(HandMovWithRotController._rotPullInLerp, HandMovWithRotController._rotPullInTarget, deltaTime * 0.5f);
-    return new Vector3(0.0f, 0.0f, -(PrimeMover.Instance.SmoothEdgesCurve.Evaluate(HandMovWithRotController._rotPullInLerp / HandMovWithRotController._RotPullInValue) * HandMovWithRotController._RotPullInValue));
+    return new Vector3(0.0f, 0.0f, (float) -((double) PrimeMover.Instance.SmoothEdgesCurve.Evaluate(HandMovWithRotController._rotPullInLerp / HandMovWithRotController._RotPullInValue) * (double) HandMovWithRotController._RotPullInValue));
   }
 
   public static Vector3 GetModifiedHandPosForLoweredWeapon(Player player)
@@ -48,3 +42,4 @@ public static class HandMovWithRotController
     return new Vector3(0.0f, -HandMovWithRotController._stockedMovementAddedPosSmoothed, 0.0f);
   }
 }
+

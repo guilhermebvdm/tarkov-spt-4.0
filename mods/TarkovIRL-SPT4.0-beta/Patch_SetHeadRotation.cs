@@ -1,14 +1,9 @@
-// Decompiled with JetBrains decompiler
-// Type: TarkovIRL.Patch_SetHeadRotation
-// Assembly: TarkovIRL, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MVID: C42939BD-7BF0-4586-ABE5-9D2EFC361A0B
-// Assembly location: D:\Drive\Google Drive\Users\Erick Saraiva\Downloads\TarkovIRL_WeaponsHandlingMod_1.0.0\BepInEx\plugins\TarkovIRL.dll
-
 using EFT;
 using EFT.Animations;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 #nullable disable
@@ -19,7 +14,7 @@ public class Patch_SetHeadRotation : ModulePatch
   private static FieldInfo _playerField;
   private static FieldInfo _fcField;
   private static FieldInfo _headRotVecField;
-  private static System.Runtime.CompilerServices.ConditionalWeakTable<ProceduralWeaponAnimation, Player> _playerCache = new System.Runtime.CompilerServices.ConditionalWeakTable<ProceduralWeaponAnimation, Player>();
+  private static ConditionalWeakTable<ProceduralWeaponAnimation, Player> _playerCache = new ConditionalWeakTable<ProceduralWeaponAnimation, Player>();
   private static Vector3 _dzLerp = Vector3.zero;
   private static Vector3 _dzLerpTarget = Vector3.zero;
 
@@ -34,41 +29,37 @@ public class Patch_SetHeadRotation : ModulePatch
   [PatchPrefix]
   private static bool Prefix(ProceduralWeaponAnimation __instance, Vector3 headRot)
   {
-    if (__instance == null)
+    if ((__instance == null))
       return true;
-
     Player player;
     if (!Patch_SetHeadRotation._playerCache.TryGetValue(__instance, out player))
     {
       Player.FirearmController firearmController = (Player.FirearmController) Patch_SetHeadRotation._fcField.GetValue((object) __instance);
-      if (firearmController != null)
+      if ((firearmController != null))
       {
         player = (Player) Patch_SetHeadRotation._playerField.GetValue((object) firearmController);
-        if (player != null)
-        {
+        if ((player != null))
           Patch_SetHeadRotation._playerCache.Add(__instance, player);
-        }
       }
     }
-
-    if (player == null)
+    if ((player == null))
     {
       Patch_SetHeadRotation._dzLerpTarget = headRot;
       return true;
     }
-
-    if (!player.IsYourPlayer || (int)player.MovementContext.CurrentState.Name == 21)
+    if (!player.IsYourPlayer || (int)player.MovementContext.CurrentState.Name == 21 || !PrimeMover.EnableMod.Value)
       return true;
-
     Vector3 headRotInitial = headRot;
     if (PrimeMover.IsWeaponDeadzone.Value)
       headRotInitial = NewDeadzoneController.GetHeadRotWithDeadzone(headRotInitial);
     headRotInitial.y *= 1.5f;
     player.HeadRotation = headRotInitial;
-    
-    if (Patch_SetHeadRotation._headRotVecField != null)
+    if (Patch_SetHeadRotation._headRotVecField != (FieldInfo) null)
       Patch_SetHeadRotation._headRotVecField.SetValue((object) __instance, (object) headRotInitial);
-
     return false;
   }
 }
+
+
+
+
