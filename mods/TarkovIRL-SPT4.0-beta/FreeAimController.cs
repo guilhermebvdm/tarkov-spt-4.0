@@ -15,7 +15,7 @@ public static class FreeAimController
   public static void ApplyInput(ref Vector2 deltaRotation)
   {
     bool isAiming = PlayerMotionController.IsAiming;
-    if (!PrimeMover.EnableMod.Value || !isAiming && StanceController.CurrentStance != EStance.None || PlayerMotionController.IsSprinting)
+    if (!PrimeMover.EnableMod.Value || !isAiming && StanceController.CurrentStance != EStance.None || PlayerMotionController.IsSprinting || Patch_CalculateCameraPosition_HandLayers.IsLeftShoulderOrDelay)
       FreeAimController.Offset = Vector2.Lerp(FreeAimController.Offset, Vector2.zero, Time.deltaTime * PrimeMover.FreeAimReturnSpeed.Value);
     else if (!isAiming && !PrimeMover.EnableFreeAim.Value || isAiming && !PrimeMover.EnableFreeAimADS.Value)
     {

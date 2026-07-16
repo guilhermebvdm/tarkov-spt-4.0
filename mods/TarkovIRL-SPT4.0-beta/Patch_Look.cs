@@ -16,7 +16,7 @@ internal class Patch_Look : ModulePatch
   [PatchPostfix]
   private static void Postfix(Player __instance)
   {
-    if ((__instance == null) || !__instance.IsYourPlayer || (int)__instance.MovementContext.CurrentState.Name == 21 || !PrimeMover.IsSmallMovementsEffect.Value || !PrimeMover.EnableMod.Value)
+    if ((__instance == null) || !__instance.IsYourPlayer || (int)__instance.MovementContext.CurrentState.Name == 21 || !PrimeMover.IsSmallMovementsEffect.Value || !PrimeMover.EnableMod.Value || Patch_CalculateCameraPosition_HandLayers.IsLeftShoulderOrDelay)
       return;
     Vector3 headRotThisFrame = HeadRotController.GetHeadRotThisFrame(__instance.HeadRotation);
     __instance.HeadRotation = headRotThisFrame;

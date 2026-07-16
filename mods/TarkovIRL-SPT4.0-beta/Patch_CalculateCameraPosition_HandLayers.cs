@@ -21,6 +21,8 @@ internal class Patch_CalculateCameraPosition_HandLayers : ModulePatch
   private static bool _wasLeftShoulder = false;
   private static float _shoulderFadeMultiplier = 1f;
 
+  public static bool IsLeftShoulderOrDelay => _shoulderFadeMultiplier < 1f;
+
   protected override MethodBase GetTargetMethod()
   {
     Patch_CalculateCameraPosition_HandLayers.playerField = AccessTools.Field(typeof (Player.FirearmController), "_player");
