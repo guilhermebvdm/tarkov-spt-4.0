@@ -1,0 +1,49 @@
+# Memória de sessões — TRL-ItemsManagement
+
+## Estado atual (snapshot ao fim da última sessão)
+
+- Bug de produção (preço de flea editado não refletia no viewer após reload) foi root-caused e corrigido: `data/items.json` (cache JSON próprio do mod, lido pelo browser) nunca era resincronizado pelos endpoints de escrita — só um "rescan" manual atualizava. Fix via `ItemCatalogPatcher.WriteBack()` (helper compartilhado) + mutação direta do bloco `spt` em cada controller.
+- Mesma classe de bug corrigida em `BanController.cs` (achada por análise sistemática, não reportada pelo usuário). `FleaCapController` tem o mesmo sintoma mas é fix bulk/categórico — decisão consciente de **não** corrigir (ver P-1.2).
+- Audit log redesenhado por completo: de tabela técnica pra feed de atividade legível (ícones, deltas de preço coloridos, nomes de trader, tempo relativo em PT-BR, resumo colapsável de baseline, busca por nome) + botão de "Desfazer" que reusa os mesmos endpoints de escrita da UI principal (undo vira nova entrada no log, nada é apagado).
+- v1.0.2 (cache-patch fix, sem o redesign do audit log) já está em produção (100.106.152.7), validado com backfill de 737 entradas de baseline.
+- O redesign do audit log + undo (esta sessão) está implementado e testado localmente (`D:\SPT`, via Chrome DevTools MCP), mas **não commitado nem deployado em produção** — ver P-1.1.
+
+## Pendências / próximos passos conhecidos
+
+- [P-1.1] (aberta 2026-07-15) Redesign do audit log + botão de desfazer (feed de atividade, `AuditLogController.cs`, 4 fixes do code-review final) implementado e validado só localmente — falta commit, bump de versão (fica em 1.0.2, mesma da última produção, apesar do código novo) e deploy em produção. Categoria: 🟡 débito.
+- [P-1.2] (aberta 2026-07-15) `FleaCapController` não resincroniza `data/items.json` após um toggle de teto (mesmo "known interim gap" que existia pro flea-price/ban) — decisão consciente de não corrigir porque é um fix bulk/categórico (afeta categorias inteiras — Weapon Mod/Electronics — não um tpl isolado), documentado no próprio campo `note` da resposta do endpoint. Revisitar se virar reclamação recorrente de usuário. Categoria: 🟢 ideia.
+
+---
+
+## 2026-07-15 22:25 (GMT-3) — Sessão 1: bug de cache stale no flea-price/ban + redesign do audit log com undo
+
+**Tema central:** Diagnosticar e corrigir o bug de produção onde edições de preço de flea não refletiam no viewer após reload, estender o fix para todos os endpoints de escrita relevantes, e redesenhar a UX do audit log (feed legível + botão de desfazer).
+
+**Decisões-chave:**
+- Root cause do bug reportado: `data/items.json` (cache do mod, não o `ragfair.json` que o jogo lê) nunca era resincronizado pelas escritas — a escrita real (game-facing) sempre esteve correta, só o cache do viewer ficava stale. Fix: [`ItemCatalogPatcher.cs`](../modded/Server/ItemCatalogPatcher.cs) (write-back atômico compartilhado) chamado a partir de `FleaPriceController.SetVanillaItemPrice`/`SetModItemPrice`/`DeletePrice` ([FleaPriceController.cs:239](../modded/Server/Api/FleaPriceController.cs#L239) `PatchCatalogFleaReset`, [:317](../modded/Server/Api/FleaPriceController.cs#L317)/[:403](../modded/Server/Api/FleaPriceController.cs#L403) mutação direta do `sptBlock`).
+- A pedido explícito do usuário ("análise minuciosa antes de implementar"), a mesma classe de bug foi buscada em todos os 7 endpoints de escrita — achada também em `BanController.cs` (fix: [`PatchCatalogBan`](../modded/Server/Api/BanController.cs#L129)). `FleaCapController` tem o mesmo sintoma mas afeta categorias inteiras (Weapon Mod ×6/Electronics ×11), não um tpl — decisão de **não** corrigir agora, documentada no `note` da resposta ([FleaCapController.cs:106](../modded/Server/Api/FleaCapController.cs#L106)) e registrada como P-1.2.
+- Undo do audit log reusa os MESMOS endpoints de escrita que a UI principal (nunca um endpoint de "revert" dedicado) — a própria ação de desfazer vira uma nova entrada no log, preservando o histórico completo. Ver `describeAuditEntry()` em [index.html:2266](../modded/Server/wwwroot/index.html#L2266).
+- Regra já estabelecida em rodadas anteriores desta mesma sessão ("só toca disco em mutação real") foi violada pelo primeiro rascunho do cache-patch de `DeletePrice` (escrevia mesmo em no-op) — corrigida separando `ComputeDefaultEffectiveFleaPrice` (puro, [FleaPriceController.cs:194](../modded/Server/Api/FleaPriceController.cs#L194)) de `PatchCatalogFleaReset` (escreve, só chamado no branch de remoção real, [FleaPriceController.cs:150](../modded/Server/Api/FleaPriceController.cs#L150)).
+
+**Lições / hipóteses descartadas:**
+- UI otimista via mock em `localStorage` (proposta do usuário) foi avaliada e descartada a favor do fix server-side (cache-patch): um mock local não resolve a causa raiz pra outros usuários/abas vendo o mesmo dado stale, e não sobrevive a troca de dispositivo/navegador.
+- `?? new JsonObject()` como fallback pra `item["spt"]` ausente em `BanController.PatchCatalogBan` foi descartado durante o code-review — apagaria silenciosamente todos os outros campos `spt.*` cacheados do item (fleaPrice, fleaFloor, etc.) na próxima serialização; trocado por bail-out explícito (`return`) quando o bloco `spt` não existe ([BanController.cs:144](../modded/Server/Api/BanController.cs#L144)).
+- Guard do botão "Desfazer" de `flea-price/set` checava `b.value == null` pra decidir entre DELETE (restaurar padrão) e POST (re-setar preço anterior), mas o branch POST precisa de `b.effectiveFleaPrice`, não `b.value` — campo errado checado, risco de mandar `Math.round(undefined)` = `NaN` pro servidor num edge case raro (item nunca teve preço cacheado antes do edit sendo desfeito). Corrigido em [index.html:2277-2282](../modded/Server/wwwroot/index.html#L2277).
+
+**Atividade cronológica:**
+1. Usuário reportou (com screenshots de produção v1.0.2) que editar o preço de flea de "TerraGroup storage room keycard" mostrava sucesso + entrada no audit log, mas o preço no viewer nunca atualizava mesmo com hard-reload (F5/Ctrl+F5/Ctrl+Shift+R) — diagnosticado o root cause do cache `data/items.json`.
+2. Avaliada e descartada a ideia de UI otimista via mock local, a favor do fix server-side.
+3. A pedido do usuário, feita análise sistemática de todos os 7 endpoints de escrita — achado o mesmo bug em `BanController`; `FleaCapController` identificado como caso bulk e deixado documentado, não corrigido.
+4. Implementado `ItemCatalogPatcher.cs` + cache-patch em `FleaPriceController.cs` e `BanController.cs`; code-review dessa primeira leva achou e corrigiu 3 problemas (no-op write no `DeletePrice`, fallback perigoso no `BanController`, um one-liner de filtro no `AuditLogController` que não compilaria).
+5. Pedido pelo usuário: code-review do cache-patch + redesign de UX do audit log (menos técnico, "premium" pra jogadores, mostrar antes/depois com clareza) + sugestões extras — usuário aprovou tudo, incluindo a ideia de um botão de desfazer.
+6. Implementado o redesign completo: [`AuditLogController.cs`](../modded/Server/Api/AuditLogController.cs) (novo — `GET /audit-log`, filtro `tpl` agora aceita lista separada por vírgula), feed de atividade em `wwwroot/index.html`/`components.css` com ícones por feature, deltas de preço coloridos (`--color-up`/`--color-down`), nomes de trader resolvidos, tempo relativo em PT-BR (`auditRelTime`, deliberadamente separado do `fmtRelTime` em inglês usado no resto da UI), resumo colapsável de entradas `baseline-unknown-date`, busca por nome de item, e botão de "Desfazer" (`describeAuditEntry()` + `undoApplyFlea`/`undoApplyBan`/`undoApplyTrader`).
+7. Bugs achados e corrigidos ao vivo via Chrome DevTools durante a implementação: pluralização "açãoões" (contagem de baseline), tempo relativo em inglês vazando numa UI em português.
+8. Code-review final pedido pelo usuário ("implemente o code-review") — achados e corrigidos 4 bugs novos, todos testados ao vivo contra o servidor local (`D:\SPT`, rebuild via `compile-mod.sh`) com Chrome DevTools MCP:
+   - Guard errado no undo de `flea-price/set` (ver Lições).
+   - `renderBaselineSummary()` reconstruía o `innerHTML` do zero a cada chamada, o que zerava uma lista já expandida (ficava "aberta" mas vazia) — acontecia sempre que um `loadPage(true)` disparava com o resumo aberto (ex.: logo após um undo). Fix: repopula a lista imediatamente se já estava expandida ([index.html:2518](../modded/Server/wwwroot/index.html#L2518)).
+   - `resolveTplFilter()` retornava `''` tanto pra "campo vazio" quanto pra "busca sem nenhum item correspondente", e o chamador tratava os dois como "sem filtro" — buscar um nome inexistente mostrava o feed inteiro sem filtro, não "nenhum resultado". Fix: retorna `{filter, noMatch}`, `loadPage` mostra o estado vazio direto sem nem chamar o backend ([index.html:2549-2594](../modded/Server/wwwroot/index.html#L2549)).
+   - Toggle "Flea cap on/OFF" do topbar guarda estado numa closure privada (`initFleaCapToggle`); o undo de `flea-cap/set` chamava a API direto, sem avisar esse componente — depois de desfazer, o indicador do topbar ficava mostrando o valor pré-undo até o próximo clique manual (que aí computava o próximo estado errado, partindo do valor stale). Fix: hook `fleaCapSync` exposto pelo toggle, chamado pelo undo ([index.html:103-106](../modded/Server/wwwroot/index.html#L103), [:1057](../modded/Server/wwwroot/index.html#L1057), [:2355-2363](../modded/Server/wwwroot/index.html#L2355)).
+
+**Pendências abertas nesta sessão:**
+- [P-1.1] (aberta 2026-07-15) Redesign do audit log + undo implementado e validado só localmente — falta commit, bump de versão e deploy em produção. Categoria: 🟡 débito.
+- [P-1.2] (aberta 2026-07-15) `FleaCapController` não resincroniza `data/items.json` após toggle — decisão consciente, revisitar se virar reclamação recorrente. Categoria: 🟢 ideia.
