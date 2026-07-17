@@ -28,7 +28,7 @@ public sealed record DeleteTraderPriceRequest(string? Tpl, string? TraderId);
 /// </summary>
 [ApiController]
 [Route("TRLItemsManagement-Server/api")]
-public sealed class TraderPriceController(ModPathsService modPaths, WriteLockService writeLock) : ControllerBase
+public sealed class TraderPriceController(ModPathsService modPaths, WriteLockService writeLock, AuditLogService auditLog) : ControllerBase
 {
     private static readonly Regex TplPattern = new("^[a-f0-9]{24}$", RegexOptions.IgnoreCase);
     private static readonly HashSet<string> ValidCurrencies = new(StringComparer.OrdinalIgnoreCase) { "RUB", "USD", "EUR", "GP" };
@@ -43,24 +43,24 @@ public sealed class TraderPriceController(ModPathsService modPaths, WriteLockSer
     public IActionResult GetTraderBuyOverrides() => Ok(new { ok = true, overrides = ReadRawOverridesForResponse(BuyConfigPath) });
 
     [HttpPatch("trader-price")]
-    public Task<IActionResult> PatchTraderPrice([FromBody] PatchTraderPriceRequest body) => PatchPrice(SellConfigPath, body);
+    public Task<IActionResult> PatchTraderPrice([FromBody] PatchTraderPriceRequest body) => PatchPrice(SellConfigPath, "trader-sell-price", body);
 
     [HttpDelete("trader-price/all")]
-    public Task<IActionResult> DeleteAllTraderPrices() => DeleteAll(SellConfigPath);
+    public Task<IActionResult> DeleteAllTraderPrices() => DeleteAll(SellConfigPath, "trader-sell-price");
 
     [HttpDelete("trader-price")]
-    public Task<IActionResult> DeleteTraderPrice([FromBody] DeleteTraderPriceRequest body) => DeleteOne(SellConfigPath, body);
+    public Task<IActionResult> DeleteTraderPrice([FromBody] DeleteTraderPriceRequest body) => DeleteOne(SellConfigPath, "trader-sell-price", body);
 
     [HttpPatch("trader-buy-price")]
-    public Task<IActionResult> PatchTraderBuyPrice([FromBody] PatchTraderPriceRequest body) => PatchPrice(BuyConfigPath, body);
+    public Task<IActionResult> PatchTraderBuyPrice([FromBody] PatchTraderPriceRequest body) => PatchPrice(BuyConfigPath, "trader-buy-price", body);
 
     [HttpDelete("trader-buy-price/all")]
-    public Task<IActionResult> DeleteAllTraderBuyPrices() => DeleteAll(BuyConfigPath);
+    public Task<IActionResult> DeleteAllTraderBuyPrices() => DeleteAll(BuyConfigPath, "trader-buy-price");
 
     [HttpDelete("trader-buy-price")]
-    public Task<IActionResult> DeleteTraderBuyPrice([FromBody] DeleteTraderPriceRequest body) => DeleteOne(BuyConfigPath, body);
+    public Task<IActionResult> DeleteTraderBuyPrice([FromBody] DeleteTraderPriceRequest body) => DeleteOne(BuyConfigPath, "trader-buy-price", body);
 
-    private Task<IActionResult> PatchPrice(string configPath, PatchTraderPriceRequest body)
+    private Task<IActionResult> PatchPrice(string configPath, string feature, PatchTraderPriceRequest body)
     {
         if (body.Tpl is not { } tpl || !TplPattern.IsMatch(tpl))
         {
@@ -92,9 +92,18 @@ public sealed class TraderPriceController(ModPathsService modPaths, WriteLockSer
             }
 
             var previousCount = tplMap[tpl]?["count"]?.GetValue<double?>();
+            var previousCurrency = tplMap[tpl]?["currency"]?.GetValue<string?>();
             tplMap[tpl] = new JsonObject { ["count"] = count, ["currency"] = currency };
 
             WriteRawOverrides(configPath, overrides);
+
+            auditLog.Append(
+                feature,
+                "set",
+                tpl,
+                before: new { count = previousCount, currency = previousCurrency },
+                after: new { count, currency },
+                extra: new { traderId });
 
             return Task.FromResult<IActionResult>(Ok(new
             {
@@ -108,7 +117,7 @@ public sealed class TraderPriceController(ModPathsService modPaths, WriteLockSer
         });
     }
 
-    private Task<IActionResult> DeleteOne(string configPath, DeleteTraderPriceRequest body)
+    private Task<IActionResult> DeleteOne(string configPath, string feature, DeleteTraderPriceRequest body)
     {
         if (body.Tpl is not { } tpl || !TplPattern.IsMatch(tpl))
         {
@@ -124,8 +133,12 @@ public sealed class TraderPriceController(ModPathsService modPaths, WriteLockSer
         {
             var overrides = ReadRawOverridesForWrite(configPath);
             var removed = false;
+            double? previousCount = null;
+            string? previousCurrency = null;
             if (overrides[traderId] is JsonObject tplMap)
             {
+                previousCount = tplMap[tpl]?["count"]?.GetValue<double?>();
+                previousCurrency = tplMap[tpl]?["currency"]?.GetValue<string?>();
                 removed = tplMap.Remove(tpl);
                 if (tplMap.Count == 0)
                 {
@@ -136,17 +149,24 @@ public sealed class TraderPriceController(ModPathsService modPaths, WriteLockSer
             if (removed)
             {
                 WriteRawOverrides(configPath, overrides);
+                auditLog.Append(feature, "delete", tpl, before: new { count = previousCount, currency = previousCurrency }, extra: new { traderId });
             }
 
             return Task.FromResult<IActionResult>(Ok(new { ok = true, tpl, traderId, removed }));
         });
     }
 
-    private Task<IActionResult> DeleteAll(string configPath)
+    private Task<IActionResult> DeleteAll(string configPath, string feature)
     {
         return writeLock.RunAsync(() =>
         {
+            var before = ReadRawOverridesForWrite(configPath);
             WriteRawOverrides(configPath, new JsonObject());
+            if (before.Count > 0)
+            {
+                auditLog.Append(feature, "delete-all", null, before: before);
+            }
+
             return Task.FromResult<IActionResult>(Ok(new { ok = true, cleared = true }));
         });
     }

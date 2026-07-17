@@ -17,7 +17,8 @@ public sealed record SetFleaCapRequest(bool? Enabled);
 public sealed class FleaCapController(
     SptDataPathsService sptPaths,
     WriteLockService writeLock,
-    SptChecksService checksService) : ControllerBase
+    SptChecksService checksService,
+    AuditLogService auditLog) : ControllerBase
 {
     [HttpGet("flea-cap")]
     public IActionResult GetFleaCap()
@@ -86,6 +87,15 @@ public sealed class FleaCapController(
 
             StyleSensitiveJsonWriter.Write(sptPaths.RagfairConfigPath, ragfairRoot);
             var checksResult = checksService.Update("configs/ragfair.json");
+
+            if (changed > 0)
+            {
+                // before = the opposite of what we just set — this toggle is a simple boolean flip
+                // applied uniformly to every category, so there's no per-category "previous" worth
+                // logging individually; !enabled is exactly what "changed" categories held a moment
+                // ago. Needed for the viewer's undo button (toggle back to before.enabled).
+                auditLog.Append("flea-cap", "set", null, before: new { enabled = !enabled }, after: new { enabled }, extra: new { changed });
+            }
 
             return Task.FromResult<IActionResult>(Ok(new
             {

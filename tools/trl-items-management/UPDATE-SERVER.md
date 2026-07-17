@@ -19,7 +19,7 @@ bash tools/trl-items-management/scripts/package-release.sh
 Espere terminar. No final ele mostra onde salvou o zip, algo como:
 
 ```
-✓ bundle: /c/Repos/spt/tarkov-spt-4.0/dist/trl-release-v1.0.1.zip (960K)
+✓ bundle: /c/Repos/spt/tarkov-spt-4.0/dist/trl-release-v1.0.2.zip (960K)
 ```
 
 Esse é o arquivo que você vai levar pro servidor.
@@ -35,8 +35,8 @@ a. Abra o **PowerShell como Administrador** (botão direito → "Executar como a
 
 b. Extraia o zip e entre na pasta extraída, por exemplo:
    ```powershell
-   Expand-Archive "D:\_deploy\trl-release-v1.0.1.zip" "D:\_deploy" -Force
-   cd "D:\_deploy\trl-release-v1.0.1"
+   Expand-Archive "D:\_deploy\trl-release-v1.0.2.zip" "D:\_deploy" -Force
+   cd "D:\_deploy\trl-release-v1.0.2"
    ```
 
 c. Rode o updater:
@@ -50,7 +50,7 @@ c. Rode o updater:
 
 d. Deixa rodar até o final. Vai aparecer uma linha verde assim:
    ```
-   [OK] Atualizado -> TRL-ItemsManagement 1.0.1.0
+   [OK] Atualizado -> TRL-ItemsManagement 1.0.2.0
    ```
 
 Pronto — o SPT já sobe sozinho no final (o script reinicia o servidor pra você).
@@ -71,6 +71,24 @@ https://127.0.0.1:6969/TRLItemsManagement-Server/index.html
 
 (o navegador vai reclamar do certificado — é o do próprio SPT, pode aceitar/prosseguir mesmo
 assim). Se a lista de itens carregar, deu certo.
+
+## 5. Só na v1.0.2 (audit log novo): seed do histórico
+
+A partir dessa versão o mod registra um log de auditoria (`user\mods\TRL-ItemsManagement\logs\
+audit.jsonl`) — mas só a partir de agora pra frente. Overrides/bans que já existiam antes dessa
+versão (flea, trader sell/buy, bans) não têm data real conhecida. Rode este passo **uma única
+vez**, logo depois do passo 3 (antes de qualquer edição pela UI nova):
+
+```powershell
+cd "D:\_deploy\trl-release-v1.0.2\trl-items-management-pipeline"
+node scripts/backfill-audit-log.js --spt-data "<caminho\SPT_Data>" --mod-dir "<caminho\user\mods\TRL-ItemsManagement>"
+```
+
+Isso é um **dry-run** (não grava nada, só mostra quantas entradas seriam criadas). Confira o
+resumo e, se fizer sentido, rode de novo com `--apply` pra gravar. É seguro rodar mais de uma vez
+— o script só cria uma entrada de baseline (`origin: "baseline-unknown-date"`) pra cada
+(tpl, feature) que ainda não tem NENHUMA entrada no log, então não duplica nada mesmo se rodado
+de novo depois de já ter editado alguma coisa pela UI.
 
 ## Deu algo errado?
 

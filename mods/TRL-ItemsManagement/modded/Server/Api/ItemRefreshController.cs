@@ -25,7 +25,8 @@ public sealed record RefreshItemRequest(string? Tpl);
 public sealed class ItemRefreshController(
     PipelineConfigService pipelineConfig,
     ModPathsService modPaths,
-    WriteLockService writeLock) : ControllerBase
+    WriteLockService writeLock,
+    AuditLogService auditLog) : ControllerBase
 {
     private static readonly Regex TplPattern = new("^[a-f0-9]{24}$", RegexOptions.IgnoreCase);
 
@@ -80,6 +81,8 @@ public sealed class ItemRefreshController(
             {
                 return NotFound(new { error = "tpl not found in data/items.json after refresh" });
             }
+
+            auditLog.Append("item-refresh", $"refresh-{source}", tpl, before: previous, after: afterItem[sourceField]);
 
             var response = new JsonObject
             {

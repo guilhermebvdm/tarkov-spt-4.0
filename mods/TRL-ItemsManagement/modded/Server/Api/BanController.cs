@@ -37,10 +37,12 @@ public sealed record SetBanRequest(string? Tpl, bool? Banned);
 [Route("TRLItemsManagement-Server/api")]
 public sealed class BanController(
     SptDataPathsService sptPaths,
+    ModPathsService modPaths,
     WriteLockService writeLock,
     SptChecksService checksService,
     ModItemBanService modItemBanService,
-    DatabaseService databaseService) : ControllerBase
+    DatabaseService databaseService,
+    AuditLogService auditLog) : ControllerBase
 {
     private static readonly Regex TplPattern = new("^[a-f0-9]{24}$", RegexOptions.IgnoreCase);
 
@@ -75,6 +77,9 @@ public sealed class BanController(
                 WriteSptItemsJson(sptItemsRoot);
                 var checksResult = checksService.Update("database/templates/items.json");
 
+                PatchCatalogBan(tpl, banned, modItem: false);
+                auditLog.Append("ban", "set", tpl, before: new { banned = wasBannedVanilla }, after: new { banned }, extra: new { modItem = false });
+
                 return Task.FromResult<IActionResult>(Ok(new
                 {
                     ok = true,
@@ -97,6 +102,9 @@ public sealed class BanController(
             modItemBanService.SetBanned(tpl, banned);
             liveTemplate.Properties.CanSellOnRagfair = !banned; // apply to the CURRENT session immediately too
 
+            PatchCatalogBan(tpl, banned, modItem: true);
+            auditLog.Append("ban", "set", tpl, before: new { banned = wasBannedMod }, after: new { banned }, extra: new { modItem = true });
+
             return Task.FromResult<IActionResult>(Ok(new
             {
                 ok = true,
@@ -106,6 +114,53 @@ public sealed class BanController(
                 modItem = true,
             }));
         });
+    }
+
+    /// <summary>
+    ///     Keeps the mod's own <c>data/items.json</c> cache (<c>spt.fleaBanned</c>/<c>fleaBanReasons</c>,
+    ///     read by the viewer's ban icon/filter) in sync with the ban just applied above — otherwise the
+    ///     viewer shows a stale (not-banned) state for this tpl until the next manual rescan, the same
+    ///     "known interim gap" <see cref="FleaPriceController"/> had for price edits. Reasons mirror
+    ///     <c>load-spt.js</c>'s derivation: a vanilla ban flips <c>CanSellOnRagfair</c> → <c>'bsg'</c>; a
+    ///     mod-item ban goes through <see cref="ModItemBanService"/>'s custom-ban list → <c>'custom'</c>.
+    ///     Best-effort (try/catch): a cache-write failure here must never turn the already-successful ban
+    ///     write above into an error response.
+    /// </summary>
+    private void PatchCatalogBan(string tpl, bool banned, bool modItem)
+    {
+        try
+        {
+            var itemsCatalogPath = Path.Combine(modPaths.DataDir, "items.json");
+            if (!System.IO.File.Exists(itemsCatalogPath))
+            {
+                return;
+            }
+
+            var itemsRoot = JsonNode.Parse(System.IO.File.ReadAllText(itemsCatalogPath)) as JsonObject;
+            // Not "?? new JsonObject()" — a genuinely missing spt block would be a catalog anomaly
+            // (every real item has one), and fabricating an empty one here would silently wipe every
+            // OTHER cached spt.* field (fleaPrice, fleaFloor, basePrice, ...) the next time this gets
+            // serialized. Bail out instead, same as "tpl not in the catalog at all".
+            if (itemsRoot?[tpl] is not JsonObject item || item["spt"] is not JsonObject sptBlock)
+            {
+                return;
+            }
+
+            sptBlock["fleaBanned"] = banned;
+            var reasons = new JsonArray();
+            if (banned)
+            {
+                reasons.Add(modItem ? "custom" : "bsg");
+            }
+
+            sptBlock["fleaBanReasons"] = reasons;
+
+            ItemCatalogPatcher.WriteBack(itemsCatalogPath, itemsRoot);
+        }
+        catch
+        {
+            // best-effort — see ItemCatalogPatcher's class doc
+        }
     }
 
     /// <summary>Atomic (tmp+rename) write, forcing CRLF + 2-space indent — see class doc.</summary>

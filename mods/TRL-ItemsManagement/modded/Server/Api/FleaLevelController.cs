@@ -17,7 +17,8 @@ public sealed class FleaLevelController(
     SptDataPathsService sptPaths,
     ModPathsService modPaths,
     WriteLockService writeLock,
-    SptChecksService checksService) : ControllerBase
+    SptChecksService checksService,
+    AuditLogService auditLog) : ControllerBase
 {
     [HttpPost("flea-min-level")]
     public Task<IActionResult> SetFleaMinLevel([FromBody] SetFleaMinLevelRequest body)
@@ -42,6 +43,8 @@ public sealed class FleaLevelController(
             var checksResult = checksService.Update("database/globals.json");
 
             MirrorIntoMeta(lvl);
+
+            auditLog.Append("flea-min-level", "set", null, before: new { minUserLevel = previous }, after: new { minUserLevel = lvl });
 
             return Task.FromResult<IActionResult>(Ok(new
             {

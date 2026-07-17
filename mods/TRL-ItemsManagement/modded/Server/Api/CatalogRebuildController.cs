@@ -18,7 +18,8 @@ public sealed record RefreshAllRequest(string? Source);
 public sealed class CatalogRebuildController(
     PipelineConfigService pipelineConfig,
     ModPathsService modPaths,
-    WriteLockService writeLock) : ControllerBase
+    WriteLockService writeLock,
+    AuditLogService auditLog) : ControllerBase
 {
     [HttpPost("refresh-all")]
     public Task<IActionResult> RefreshAll([FromBody] RefreshAllRequest body)
@@ -67,6 +68,8 @@ public sealed class CatalogRebuildController(
             var itemCount = CountTopLevelKeys(Path.Combine(modPaths.DataDir, "items.json"));
             var durationMs = (int)(DateTime.UtcNow - t0).TotalMilliseconds;
 
+            auditLog.Append("catalog-rebuild", "refresh-all", null, after: new { itemCount }, extra: new { source, durationMs });
+
             return Ok(new { ok = true, source, itemCount, durationMs });
         });
     }
@@ -105,6 +108,8 @@ public sealed class CatalogRebuildController(
             var itemCount = CountTopLevelKeys(itemsPath);
             var modCount = CountModItems(itemsPath);
             var durationMs = (int)(DateTime.UtcNow - t0).TotalMilliseconds;
+
+            auditLog.Append("catalog-rebuild", "rescan", null, after: new { itemCount, modCount }, extra: new { durationMs });
 
             return Ok(new { ok = true, itemCount, modCount, durationMs });
         });
