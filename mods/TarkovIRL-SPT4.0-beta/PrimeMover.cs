@@ -120,6 +120,7 @@ public class PrimeMover : BaseUnityPlugin
   public static ConfigEntry<float> CameraAutoCenterSpeed;
   public static ConfigEntry<bool> EnableCameraAutoCenterADS;
   public static ConfigEntry<float> CameraAutoCenterSpeedADS;
+  public static ConfigEntry<float> FreeAimAutoCenterADSComp;
   public static ConfigEntry<float> DebugPosX;
   public static ConfigEntry<float> DebugPosY;
   public static ConfigEntry<float> DebugPosZ;
@@ -232,6 +233,7 @@ public class PrimeMover : BaseUnityPlugin
     this.TryLoadPatch((ModulePatch) new StaminaRegenRatePatch());
     this.TryLoadPatch((ModulePatch) new Patch_SetHeadRotation());
     this.TryLoadPatch((ModulePatch) new Patch_Look());
+    this.TryLoadPatch((ModulePatch) new Patch_GameWorldOnDestroy());
   }
 
   private void LoadConfigValues()
@@ -283,6 +285,7 @@ public class PrimeMover : BaseUnityPlugin
     PrimeMover.FreeAimSensitivityADS = this.ConstructFloatConfig(0.1f, "z - Free Aim ADS", "Sensitivity", "Multiplier for mouse input.", 0.01f, 5f);
     PrimeMover.EnableCameraAutoCenterADS = this.ConstructBoolConfig(false, "z - Free Aim ADS", "Enable Camera Auto-Center (ADS)", "The camera will automatically rotate to catch up with the weapon's free aim offset during ADS.");
     PrimeMover.CameraAutoCenterSpeedADS = this.ConstructFloatConfig(1f, "z - Free Aim ADS", "Camera Auto-Center Speed", "Speed at which the camera catches up to the weapon during ADS.", 0.1f, 10f);
+    PrimeMover.FreeAimAutoCenterADSComp = this.ConstructFloatConfig(0.35f, "z - Free Aim ADS", "Camera Auto-Center Sensitivity Compensation", "Adjust this value so that when you stop moving the mouse in ADS, the crosshair stays perfectly static in the world. Increase it if the crosshair drifts forward, decrease if it drifts backward.", 0.01f, 2f);
     PrimeMover.EnableFreeAim = this.ConstructBoolConfig(true, "z - Free Aim", "Enable True Free Aim", "Deadzone style free aim.");
     PrimeMover.FreeAimBoundsX = this.ConstructFloatConfig(15f, "z - Free Aim", "Bounds Horizontal", "Max horizontal degrees.", 0.0f, 25f);
     PrimeMover.FreeAimBoundsY = this.ConstructFloatConfig(10f, "z - Free Aim", "Bounds Vertical", "Max vertical degrees.", 0.0f, 25f);

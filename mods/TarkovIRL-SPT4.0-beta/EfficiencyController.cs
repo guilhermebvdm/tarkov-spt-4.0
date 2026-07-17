@@ -1,4 +1,4 @@
-﻿using EFT;
+using EFT;
 using EFT.HealthSystem;
 using System;
 using System.Collections.Generic;
@@ -44,6 +44,8 @@ internal static class EfficiencyController
   private static int _lightBleedCountLastFrame = 0;
   private static int _boneBreakCountLastFrame = 0;
   private static Dictionary<Type, int> _typeHashes = new Dictionary<Type, int>();
+  private static System.Reflection.PropertyInfo _hydrationProp = null;
+  private static System.Reflection.PropertyInfo _energyProp = null;
 
   private static int GetEffectHash(IEffect effect)
   {
@@ -135,10 +137,26 @@ internal static class EfficiencyController
 
   public static void UpdateEfficiency(Player player)
   {
-    ValueStruct hydration = ((GInterface381) player.HealthController).Hydration;
-    float normalized1 = hydration.Normalized;
-    ValueStruct energy = ((GInterface381) player.HealthController).Energy;
-    float normalized2 = energy.Normalized;
+    if (player.HealthController == null)
+      return;
+    if (_hydrationProp == null || _energyProp == null)
+    {
+      System.Type type = player.HealthController.GetType();
+      _hydrationProp = type.GetProperty("Hydration");
+      _energyProp = type.GetProperty("Energy");
+    }
+    float normalized1 = 1f;
+    float normalized2 = 1f;
+    if (_hydrationProp != null)
+    {
+      ValueStruct hydration = (ValueStruct) _hydrationProp.GetValue(player.HealthController);
+      normalized1 = hydration.Normalized;
+    }
+    if (_energyProp != null)
+    {
+      ValueStruct energy = (ValueStruct) _energyProp.GetValue(player.HealthController);
+      normalized2 = energy.Normalized;
+    }
     float num1 = 1f - Mathf.Clamp01(player.Physical.Overweight);
     int multipleInstances1 = 0;
     int heavyBleedCount = 0;
@@ -211,7 +229,7 @@ internal static class EfficiencyController
 
   public static float EfficiencyModifier => EfficiencyController._efficiencyLerp;
 
-  public static float EfficiencyModifierInverse => 1f / EfficiencyController._efficiencyLerp;
+  public static float EfficiencyModifierInverse => 1f / Mathf.Max(EfficiencyController._efficiencyLerp, 0.0001f);
 
   private static float GetInjuryImpact(float value, float impactWeightPercent)
   {
@@ -238,6 +256,19 @@ internal static class EfficiencyController
         return true;
     }
     return false;
+  }
+
+  public static void Reset()
+  {
+    EfficiencyController._injuryTimes.Clear();
+    EfficiencyController._efficiencyLerpTarget = 0.0f;
+    EfficiencyController._efficiencyLerpTargetWithoutWeight = 0.0f;
+    EfficiencyController._efficiencyLerp = 0.0f;
+    EfficiencyController._efficiencyLastFrame = 0.0f;
+    EfficiencyController.debugTimer = 0.0f;
+    EfficiencyController._heavyBleedCountLastFrame = 0;
+    EfficiencyController._lightBleedCountLastFrame = 0;
+    EfficiencyController._boneBreakCountLastFrame = 0;
   }
 }
 

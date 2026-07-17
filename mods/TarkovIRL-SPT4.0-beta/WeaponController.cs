@@ -1,4 +1,4 @@
-﻿using EFT;
+using EFT;
 using EFT.InventoryLogic;
 using UnityEngine;
 
@@ -61,9 +61,10 @@ public static class WeaponController
   public static float GetWeaponMulti(bool getInverse)
   {
     float num = WeaponController.CurrentWeaponWeight * (1f - WeaponController.CurrentWeaponErgoNorm);
-    if ((double) num < (double) PrimeMover.MinimumWeaponSway.Value)
-      num = PrimeMover.MinimumWeaponSway.Value;
-    return getInverse ? 1f / num : num;
+    float minSway = Mathf.Max(PrimeMover.MinimumWeaponSway.Value, 0.0001f);
+    if ((double) num < (double) minSway)
+      num = minSway;
+    return getInverse ? 1f / Mathf.Max(num, 0.0001f) : num;
   }
 
   public static void SetCurrentWeaponHash(int weaponHash)

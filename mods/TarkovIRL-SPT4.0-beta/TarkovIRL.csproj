@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <!--Project was exported from assembly: D:\Drive\Google Drive\Users\Erick Saraiva\Downloads\TarkovIRL_WeaponsHandlingMod_1.0.0\BepInEx\plugins\TarkovIRL.dll-->
   <PropertyGroup>
@@ -33,11 +33,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="UnderFireSoftWrapper.cs" />
-    <Compile Include="NewDeadzoneController.cs" />
-    <Compile Include="EStance.cs" />
-    <Compile Include="FreeAimController.cs" />
-    <Compile Include="Patch_PlayerRotate.cs" />
     
     
     <Reference Include="UnityEngine">
@@ -102,6 +97,7 @@
     <Compile Include="Patch_Look.cs" />
     <Compile Include="Patch_LerpCamera_ForceUpdateSway.cs" />
     <Compile Include="AnimStateController.cs" />
+    <Compile Include="Patch_GameWorldOnDestroy.cs" />
     <Compile Include="Patch_OnShot.cs" />
     <Compile Include="ParallaxController.cs" />
     <Compile Include="Patch_SetHeadRotation.cs" />

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 #nullable disable
 namespace TarkovIRL;
@@ -44,5 +44,12 @@ internal static class ThrowController
   public static bool IsThrowing => ThrowController._isThrowing;
 
   public static float ThrowProgress => ThrowController._throwLerp;
+
+  public static void Reset()
+  {
+    ThrowController._throwLerp = 1f;
+    ThrowController._isThrowing = false;
+    ThrowController._isUnderhand = false;
+  }
 }
 

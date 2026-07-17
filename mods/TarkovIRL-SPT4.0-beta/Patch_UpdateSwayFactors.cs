@@ -36,7 +36,7 @@ internal class Patch_UpdateSwayFactors : ModulePatch
       if ((player != null))
         Patch_UpdateSwayFactors._playerCache.Add(__instance, player);
     }
-    if ((player == null) || !player.IsYourPlayer || (int)player.MovementContext.CurrentState.Name == 21)
+    if ((player == null) || !player.IsYourPlayer || player.MovementContext.CurrentState.Name == EPlayerState.Stationary)
       return;
     Vector3 newSway = SwayController.GetNewSway(__instance.MotionReact.SwayFactors, __instance.IsAiming);
     __instance.MotionReact.SwayFactors = newSway;

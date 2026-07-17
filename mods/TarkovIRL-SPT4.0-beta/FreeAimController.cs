@@ -26,7 +26,7 @@ public static class FreeAimController
     {
       float num1 = (isAiming ? PrimeMover.FreeAimSensitivityADS.Value : PrimeMover.FreeAimSensitivity.Value) * PrimeMover.MasterSensitivityMultiplier.Value;
       FreeAimController._currentSensitivity = Mathf.Lerp(FreeAimController._currentSensitivity, num1, Time.deltaTime * 8f);
-      float currentSensitivity = FreeAimController._currentSensitivity;
+      float currentSensitivity = Mathf.Max(FreeAimController._currentSensitivity, 0.0001f);
       float num2 = isAiming ? PrimeMover.FreeAimBoundsXADS.Value : PrimeMover.FreeAimBoundsX.Value;
       float num3 = isAiming ? PrimeMover.FreeAimBoundsYADS.Value : PrimeMover.FreeAimBoundsY.Value;
       float num4 = isAiming ? 6f : 15f;
@@ -57,8 +57,16 @@ public static class FreeAimController
       FreeAimController._currentAutoCenterSpeed = Mathf.Lerp(FreeAimController._currentAutoCenterSpeed, num6, Time.deltaTime * 6f);
       float currentAutoCenterSpeed = FreeAimController._currentAutoCenterSpeed;
       Vector2 vector2_5 = (FreeAimController.Offset * Time.deltaTime * currentAutoCenterSpeed);
-      deltaRotation = (deltaRotation + (vector2_5 / currentSensitivity));
-      FreeAimController.Offset = (FreeAimController.Offset - vector2_5);
+      if (isAiming)
+      {
+        deltaRotation = (deltaRotation + (vector2_5 / PrimeMover.FreeAimAutoCenterADSComp.Value));
+        FreeAimController.Offset = (FreeAimController.Offset - vector2_5);
+      }
+      else
+      {
+        deltaRotation = (deltaRotation + (vector2_5 / currentSensitivity));
+        FreeAimController.Offset = (FreeAimController.Offset - vector2_5);
+      }
     }
   }
 
@@ -74,6 +82,16 @@ public static class FreeAimController
       posOffset = Vector3.zero;
       rotOffset = Quaternion.Euler(FreeAimController.Offset.y, 0.0f, FreeAimController.Offset.x);
     }
+  }
+
+  public static void Reset()
+  {
+    FreeAimController.Offset = Vector2.zero;
+    FreeAimController._attenFactorLerp = 1f;
+    FreeAimController._currentSensitivity = 1f;
+    FreeAimController._currentAutoCenterSpeed = 0.0f;
+    FreeAimController._currentBoundsX = 10f;
+    FreeAimController._currentBoundsY = 10f;
   }
 }
 

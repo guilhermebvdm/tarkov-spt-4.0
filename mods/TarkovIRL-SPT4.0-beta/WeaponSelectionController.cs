@@ -1,4 +1,4 @@
-﻿using Comfort.Common;
+using Comfort.Common;
 using EFT;
 using EFT.InputSystem;
 using EFT.InventoryLogic;
@@ -296,6 +296,19 @@ internal class WeaponSelectionController
     if ((player == null))
       return;
     player.HandsAnimator.SetAnimationSpeed(speed);
+  }
+
+  public static void Reset()
+  {
+    WeaponSelectionController._player = null;
+    WeaponSelectionController._posLerp = Vector3.zero;
+    WeaponSelectionController._rotLerp = Vector3.zero;
+    WeaponSelectionController._posLerpHistory = Vector3.zero;
+    WeaponSelectionController._rotLerpHistory = Vector3.zero;
+    WeaponSelectionController._posLerpSmoothed = Vector3.zero;
+    WeaponSelectionController._rotLerpSmoothed = Vector3.zero;
+    WeaponSelectionController._transitionWindowOpen = false;
+    WeaponSelectionController._transitionFirstFrame = false;
   }
 
   public enum EWeaponSelection

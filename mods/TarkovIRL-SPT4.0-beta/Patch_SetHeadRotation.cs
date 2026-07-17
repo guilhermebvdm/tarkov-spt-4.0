@@ -47,7 +47,7 @@ public class Patch_SetHeadRotation : ModulePatch
       Patch_SetHeadRotation._dzLerpTarget = headRot;
       return true;
     }
-    if (!player.IsYourPlayer || (int)player.MovementContext.CurrentState.Name == 21 || !PrimeMover.EnableMod.Value || Patch_CalculateCameraPosition_HandLayers.IsLeftShoulderOrDelay)
+    if (!player.IsYourPlayer || player.MovementContext.CurrentState.Name == EPlayerState.Stationary || !PrimeMover.EnableMod.Value || Patch_CalculateCameraPosition_HandLayers.IsLeftShoulderOrDelay)
       return true;
     Vector3 headRotInitial = headRot;
     if (PrimeMover.IsWeaponDeadzone.Value)
