@@ -1,4 +1,4 @@
-﻿using BepInEx;
+using BepInEx;
 using BepInEx.Configuration;
 using Comfort.Common;
 using EFT;
@@ -53,6 +53,7 @@ public class PrimeMover : BaseUnityPlugin
   private const string DEV_SECTION = "0 - Only for dev/testing";
   public static ConfigEntry<bool> EnableMod;
   public static ConfigEntry<KeyboardShortcut> EnableModKey;
+  public static ConfigEntry<float> MasterSensitivityMultiplier;
   public static ConfigEntry<bool> IsWeaponDeadzone;
   public static ConfigEntry<bool> IsWeaponSway;
   public static ConfigEntry<bool> IsBreathingEffect;
@@ -237,6 +238,7 @@ public class PrimeMover : BaseUnityPlugin
   {
     PrimeMover.EnableMod = this.ConstructBoolConfig(true, "a - Mod Status", "Enable Mod", "Master toggle for all features.");
     PrimeMover.EnableModKey = this.Config.Bind<KeyboardShortcut>("a - Mod Status", "Toggle Mod Key", new KeyboardShortcut((KeyCode) 285, Array.Empty<KeyCode>()), new ConfigDescription("Press to toggle the mod on/off", (AcceptableValueBase) null, Array.Empty<object>()));
+    PrimeMover.MasterSensitivityMultiplier = this.ConstructFloatConfig(1f, "a - Mod Status", "Master Sensitivity Multiplier", "Scale sensitivity of all mouse-driven effects (Free Aim, Sway) at once. Useful for adjusting to different mouse DPIs.", 0.1f, 5f);
     PrimeMover.IsWeaponDeadzone = this.ConstructBoolConfig(true, "a - Toggle base features", "Enable weapon deadzone", "Aiming deadzone, like in other games but better.");
     PrimeMover.IsEfficiencyIndicator = this.ConstructBoolConfig(true, "a - Toggle base features", "Enable efficiency indicator", "When this toggle is enabled, you see two dots at the bottom of your screen whose distance apart indicates how efficient your character currently is (or isn't). Closer is better.");
     PrimeMover.IsWeaponSway = this.ConstructBoolConfig(true, "a - Toggle base features", "Enable custom weapon sway", "Completely scratch-built weapon sway. Generally leads aimpoint instead of lagging behind it.");

@@ -1,4 +1,4 @@
-﻿using EFT;
+using EFT;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using System.Reflection;
@@ -17,6 +17,8 @@ public class Patch_PlayerRotate : ModulePatch
   [PatchPrefix]
   private static bool Prefix(Player __instance, ref Vector2 deltaRotation, bool ignoreClamp)
   {
+    if (__instance == null || !__instance.IsYourPlayer)
+      return true;
     FreeAimController.ApplyInput(ref deltaRotation);
     return true;
   }

@@ -24,7 +24,7 @@ public static class FreeAimController
     }
     else
     {
-      float num1 = isAiming ? PrimeMover.FreeAimSensitivityADS.Value : PrimeMover.FreeAimSensitivity.Value;
+      float num1 = (isAiming ? PrimeMover.FreeAimSensitivityADS.Value : PrimeMover.FreeAimSensitivity.Value) * PrimeMover.MasterSensitivityMultiplier.Value;
       FreeAimController._currentSensitivity = Mathf.Lerp(FreeAimController._currentSensitivity, num1, Time.deltaTime * 8f);
       float currentSensitivity = FreeAimController._currentSensitivity;
       float num2 = isAiming ? PrimeMover.FreeAimBoundsXADS.Value : PrimeMover.FreeAimBoundsX.Value;
@@ -37,6 +37,13 @@ public static class FreeAimController
       if ((double) rawHorizontalSpeed > (double) PrimeMover.FastTurnThreshold.Value)
         num5 = Mathf.Clamp01((float) (1.0 - (double) (rawHorizontalSpeed - PrimeMover.FastTurnThreshold.Value) * (double) PrimeMover.FastTurnAttenuation.Value * 0.004999999888241291));
       FreeAimController._attenFactorLerp = (double) num5 >= (double) FreeAimController._attenFactorLerp ? Mathf.Lerp(FreeAimController._attenFactorLerp, num5, Time.deltaTime * 10f) : num5;
+      
+      if (FreeAimController._attenFactorLerp < 1f)
+      {
+        float springForce = (1f - (float)FreeAimController._attenFactorLerp) * 15f;
+        FreeAimController.Offset = Vector2.Lerp(FreeAimController.Offset, Vector2.zero, Time.deltaTime * springForce);
+      }
+
       Vector2 vector2_1 = deltaRotation * currentSensitivity * (float)FreeAimController._attenFactorLerp;
       Vector2 vector2_2 = (FreeAimController.Offset + vector2_1);
       Vector2 vector2_3;

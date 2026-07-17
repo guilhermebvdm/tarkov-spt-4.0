@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 #nullable disable
 namespace TarkovIRL;
@@ -64,7 +64,7 @@ internal class NewSwayController
     {
       float num1 = 1f;
       bool flag = WeaponController.HasCheekWeld();
-      float num2 = PlayerMotionController.HorizontalRotationDelta * PrimeMover.WeaponSwayMulti.Value;
+      float num2 = PlayerMotionController.HorizontalRotationDelta * PrimeMover.WeaponSwayMulti.Value * PrimeMover.MasterSensitivityMultiplier.Value;
       float rawHorizontalSpeed = PlayerMotionController.RawHorizontalSpeed;
       float num3 = 1f;
       if ((double) rawHorizontalSpeed > (double) PrimeMover.FastTurnThreshold.Value && (double) PrimeMover.FastTurnAttenuation.Value > 0.0)
@@ -107,11 +107,11 @@ internal class NewSwayController
         num29 *= -1f;
       NewSwayController._leanVerticalLerp = Mathf.Lerp(NewSwayController._leanVerticalLerp, num29, deltaTime * 10f * EfficiencyController.EfficiencyModifierInverse);
       float num30 = !WeaponController.IsStocked || !PlayerMotionController.IsAiming ? 1f : 0.2f;
-      float num31 = PlayerMotionController.RotationDelta * PrimeMover.NewSwayWpnDropFromRotMulti.Value * WeaponController.GetWeaponMulti(false) * EfficiencyController.EfficiencyModifier * num30;
+      float num31 = PlayerMotionController.RotationDelta * PrimeMover.NewSwayWpnDropFromRotMulti.Value * PrimeMover.MasterSensitivityMultiplier.Value * WeaponController.GetWeaponMulti(false) * EfficiencyController.EfficiencyModifier * num30;
       NewSwayController._vertDropFromRotLerp = Mathf.Lerp(NewSwayController._vertDropFromRotLerp, num31, deltaTime * PrimeMover.NewSwayWpnUnstockedDropSpeed.Value);
       float verticalRotationDelta = PlayerMotionController.VerticalRotationDelta;
       float num32 = (double) verticalRotationDelta < 0.0 ? -1f : 1f;
-      float num33 = PlayerMotionController.IsAiming ? 0.0f : verticalRotationDelta * num32 * PrimeMover.HyperVerticalMulti.Value * WeaponController.GetWeaponMulti(false) * EfficiencyController.EfficiencyModifier;
+      float num33 = PlayerMotionController.IsAiming ? 0.0f : verticalRotationDelta * num32 * PrimeMover.HyperVerticalMulti.Value * PrimeMover.MasterSensitivityMultiplier.Value * WeaponController.GetWeaponMulti(false) * EfficiencyController.EfficiencyModifier;
       float num34 = PrimeMover.HyperVerticalClamp.Value;
       float num35 = Mathf.Clamp(num33, 0.0f - num34, num34);
       float num36 = PrimeMover.HyperVerticalDT.Value * RealismWrapper.WeaponBalanceMulti;
