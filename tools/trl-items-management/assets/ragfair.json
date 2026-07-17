@@ -1,0 +1,547 @@
+{
+  "dynamic": {
+    "armor": {
+      "plateSlotIdToRemovePool": [
+        "front_plate",
+        "back_plate"
+      ],
+      "removeRemovablePlateChance": 40
+    },
+    "barter": {
+      "chancePercent": 20,
+      "itemCountMax": 3,
+      "itemCountMin": 1,
+      "itemTypeBlacklist": [
+        "55802f4a4bdc2ddb688b4569",
+        "55802f3e4bdc2de7118b4584",
+        "543be5cb4bdc2deb348b4568",
+        "55818ac54bdc2d5b648b456e",
+        "5a74651486f7744e73386dd1"
+      ],
+      "makeSingleStackOnly": true,
+      "minRoubleCostToBecomeBarter": 20000,
+      "priceRangeVariancePercent": 15
+    },
+    "blacklist": {
+      "armorPlate": {
+        "ignoreSlots": [
+          "right_side_plate",
+          "left_side_plate"
+        ],
+        "maxProtectionLevel": 4
+      },
+      "custom": [
+        "5737292724597765e5728562",
+        "57372ac324597767001bc261",
+        "560d75f54bdc2da74d8b4573",
+        "65702610cfc010a0f5006a41",
+        "5737250c2459776125652acc",
+        "657023a9126cc4a57d0e17a6",
+        "5c1127d0d174af29be75cf68",
+        "5af056f186f7746da511291f"
+      ],
+      "customItemCategoryList": [],
+      "damagedAmmoPacks": true,
+      "enableBsgList": true,
+      "enableCustomItemCategoryList": false,
+      "enableQuestList": true,
+      "traderItems": false
+    },
+    "condition": {
+      "5422acb9af1c889c16000029": {
+        "_name": "WEAPON",
+        "conditionChance": 0.2,
+        "current": {
+          "max": 1,
+          "min": 0
+        },
+        "max": {
+          "max": 1,
+          "min": 0.6
+        }
+      },
+      "543be5664bdc2dd4348b4569": {
+        "_name": "MEDS",
+        "conditionChance": 0.2,
+        "current": {
+          "max": 1,
+          "min": 0
+        },
+        "max": {
+          "max": 1,
+          "min": 0.6
+        }
+      },
+      "543be5e94bdc2df1348b4568": {
+        "_name": "KEY",
+        "conditionChance": 0.04,
+        "current": {
+          "max": 1,
+          "min": 0
+        },
+        "max": {
+          "max": 1,
+          "min": 0.96
+        }
+      },
+      "543be6674bdc2df1348b4569": {
+        "_name": "FOOD_DRINK",
+        "conditionChance": 0.05,
+        "current": {
+          "max": 1,
+          "min": 1
+        },
+        "max": {
+          "max": 1,
+          "min": 0.05
+        }
+      },
+      "5447e0e74bdc2d3c308b4567": {
+        "_name": "SPEC_ITEM",
+        "conditionChance": 0.3,
+        "current": {
+          "max": 1,
+          "min": 0
+        },
+        "max": {
+          "max": 1,
+          "min": 0.02
+        }
+      },
+      "5448e5284bdc2dcb718b4567": {
+        "_name": "VEST",
+        "conditionChance": 0.2,
+        "current": {
+          "max": 1,
+          "min": 0
+        },
+        "max": {
+          "max": 1,
+          "min": 0.45
+        }
+      },
+      "5448e54d4bdc2dcc718b4568": {
+        "_name": "ARMOR",
+        "conditionChance": 0.2,
+        "current": {
+          "max": 1,
+          "min": 0
+        },
+        "max": {
+          "max": 1,
+          "min": 0.45
+        }
+      },
+      "5448e5724bdc2ddf718b4568": {
+        "_name": "VISORS",
+        "conditionChance": 0.32,
+        "current": {
+          "max": 1,
+          "min": 0
+        },
+        "max": {
+          "max": 1,
+          "min": 0.7
+        }
+      },
+      "57bef4c42459772e8d35a53b": {
+        "_name": "ARMORED_EQUIPMENT",
+        "conditionChance": 0.25,
+        "current": {
+          "max": 1,
+          "min": 0
+        },
+        "max": {
+          "max": 1,
+          "min": 0.05
+        }
+      },
+      "5a341c4086f77401f2541505": {
+        "_name": "HELMETS",
+        "conditionChance": 0.32,
+        "current": {
+          "max": 1,
+          "min": 0
+        },
+        "max": {
+          "max": 1,
+          "min": 0.45
+        }
+      },
+      "5a341c4686f77469e155819e": {
+        "_name": "FACECOVER",
+        "conditionChance": 0.32,
+        "current": {
+          "max": 1,
+          "min": 0
+        },
+        "max": {
+          "max": 1,
+          "min": 0.6
+        }
+      },
+      "5c164d2286f774194c5e69fa": {
+        "_name": "KEYCARD",
+        "conditionChance": 0.04,
+        "current": {
+          "max": 1,
+          "min": 0
+        },
+        "max": {
+          "max": 1,
+          "min": 0.25
+        }
+      },
+      "5d650c3e815116009f6201d2": {
+        "_name": "FUEL",
+        "conditionChance": 0.23,
+        "current": {
+          "max": 1,
+          "min": 1
+        },
+        "max": {
+          "max": 1,
+          "min": 0.1
+        }
+      },
+      "644120aa86ffbe10ee032b6f": {
+        "_name": "ARMOR_PLATE",
+        "conditionChance": 0.45,
+        "current": {
+          "max": 1,
+          "min": 0
+        },
+        "max": {
+          "max": 1,
+          "min": 0.7
+        }
+      },
+      "65649eb40bf0ed77b8044453": {
+        "_name": "BUILT_IN_INSERTS",
+        "conditionChance": 0.3,
+        "current": {
+          "max": 1,
+          "min": 0
+        },
+        "max": {
+          "max": 1,
+          "min": 0.3
+        }
+      }
+    },
+    "offerCurrencyChancePercent": {
+      "5449016a4bdc2d6f028b456f": 78,
+      "5696686a4bdc2da3298b456a": 14,
+      "569668774bdc2da2298b4568": 8
+    },
+    "endTimeSeconds": {
+      "max": 3600,
+      "min": 360
+    },
+    "expiredOfferThreshold": 1400,
+    "ignoreQualityPriceVarianceBlacklist": [
+      "59e3577886f774176a362503",
+      "5d02797c86f774203f38e30a",
+      "5ab8e79e86f7742d8b372e78"
+    ],
+    "itemPriceMultiplier": {
+      "57372ac324597767001bc261": 5,
+      "5c110624d174af029e69734c": 1.2,
+      "6761b213607f9a6f79017af1": 3.333323,
+      "6761b213607f9a6f79017af2": 3.694581,
+      "6761b213607f9a6f79017af4": 3.675889,
+      "6761b213607f9a6f79017af5": 3.186275,
+      "6761b213607f9a6f79017af6": 3.186275,
+      "6761b213607f9a6f79017af7": 3.255274,
+      "6761b213607f9a6f79017afa": 3.382664,
+      "6761b213607f9a6f79017afb": 3.21238,
+      "6761b213607f9a6f79017af9": 3.351878,
+      "6761b213607f9a6f79017afc": 3.208556,
+      "6761b213607f9a6f79017afd": 3.448071,
+      "6761b213607f9a6f79017afe": 3.524622,
+      "6761b213607f9a6f79017aff": 3.727532,
+      "6807e54dc5a45c5443154a29": 2.943479,
+      "68084891d93e159932d7e326": 3.100178,
+      "680e8d81e16a7caa3dd10730": 3.224098,
+      "68170b2cb595bf820b60571a": 3.120138,
+      "681baec29eb1732a417bd7dd": 3.486239,
+      "681bb00c7fecf6d490b2fb3c": 3.364486,
+      "69352d5c409abe93d29321e4": 3.476294,
+      "69364a368a4b47eeaf9ba4a3": 3.016095,
+      "6761b213607f9a6f79017af3": 9.724974,
+      "66326bfd46817c660d01512c": 0.307692,
+      "681bcd300480896883303f71": 2.771479
+    },
+    "itemPriceOverrideRouble": {
+      "63a8970d7108f713591149f5": 50000,
+      "63a897c6b1ff6e29734fcc95": 200000,
+      "63a898a328e385334e0640a5": 100000,
+      "66bc98a01a47be227a5e956e": 500000,
+      "674d91ce6e862d5a95059ed6": 250000,
+      "674d90b55704568fe60bc8f5": 1957940,
+      "6759af0f9c8a538dd70bfae6": 487442,
+      "572b7fa124597762b472f9d2": 6395,
+      "5ea05cf85ad9772e6624305d": 40735,
+      "5c1d0dc586f7744baf2e7b79": -2550000,
+      "5c1d0efb86f7744baf2e7b7b": -2475000,
+      "679b992329acd1f2f60985a5": -375000,
+      "59fafd4b86f7745ca07e1232": -374227,
+      "6389c8c5dbfd5e4b95197e6b": -975000,
+      "5e2af55f86f7746d4159f07c": -255000,
+      "67d3ed3271c17ff82e0a5b0b": -248000,
+      "6761a6ccd9bbb27ad703c48a": 189889,
+      "619cbf7d23893217ec30b689": -207500,
+      "5c12613b86f7743bbe2c3f76": 148264,
+      "5d80c6c586f77440351beef1": 256221,
+      "5c127c4486f7745625356c13": -242885,
+      "5c1d0d6d86f7744bb2683e1f": -805000,
+      "5c05300686f7746dce784e5d": -89100,
+      "5aafbde786f774389d0cbc0f": -13541,
+      "5df25d3bfd6b4e6e2276dc9a": 29250,
+      "61713a8fd92c473c770214a4": 36000,
+      "5df35ddddfc58d14537c2036": 14175,
+      "5c093e3486f77430cb02e593": -155000,
+      "6241c2c2117ad530666a5108": 14008,
+      "5a0ec6d286f7742c0b518fb5": 37024,
+      "5a13f24186f77410e57c5626": 19803,
+      "5a0eee1486f77402aa773226": 165053,
+      "62987c658081af308d7558c6": -130000,
+      "5a0eb6ac86f7743124037a28": 57117,
+      "5a0ee34586f774023b6ee092": 59022,
+      "62a0a16d0b9d3c46de5b6e97": 25291,
+      "5a13f35286f77413ef1436b0": 69613,
+      "5a13ef7e86f7741290491063": -43315,
+      "6711039f9e648049e50b3307": -208217,
+      "5d9f1fa686f774726974a992": 2729,
+      "5ed51652f6c34d2cc26336a1": 84975,
+      "5c94bbff86f7747ee735c08f": -203313,
+      "5aa66be6e5b5b0214e506e97": -38934,
+      "5780cf722459777a5108b9a1": 200000,
+      "57347c93245977448d35f6e3": 47171,
+      "5addaffe86f77470b455f900": -82839,
+      "590c595c86f7747884343ad7": 77896,
+      "59e3639286f7741777737013": 12598,
+      "5e340dcdcb6d5863cc5e5efb": 59251,
+      "590c60fc86f77412b13fddcf": -80697,
+      "63a39f08cd6db0635c197600": 141753,
+      "60363c0c92ec1c31037959f5": 79640,
+      "59e35cbb86f7741778269d83": 108714,
+      "5c1e2d1f86f77431e9280bee": 3091,
+      "590c392f86f77444754deb29": -104000,
+      "590c37d286f77443be3d7827": -118600,
+      "61bf83814088ec1a363d7097": 12600,
+      "576a581d2459771e7b1bc4f1": 23503
+    },
+    "nonStackableCount": {
+      "max": 10,
+      "min": 1
+    },
+    "offerAdjustment": {
+      "adjustPriceWhenBelowHandbookPrice": false,
+      "handbookPriceMultiplier": 1.1,
+      "maxPriceDifferenceBelowHandbookPercent": 64,
+      "priceThresholdRub": 20000
+    },
+    "offerItemCount": {
+      "default": {
+        "max": 30,
+        "min": 7
+      },
+      "543be5cb4bdc2deb348b4568": {
+        "max": 3,
+        "min": 0
+      }
+    },
+    "pack": {
+      "chancePercent": 0.5,
+      "itemCountMax": 17,
+      "itemCountMin": 4,
+      "itemTypeWhitelist": [
+        "5448eb774bdc2d0a728b4567",
+        "5448e8d64bdc2dce718b4568",
+        "5448f3ac4bdc2dce718b4569",
+        "543be6674bdc2df1348b4569",
+        "57864a3d24597754843f8721",
+        "57864a66245977548f04a81f",
+        "57864ada245977548638de91",
+        "5d650c3e815116009f6201d2"
+      ]
+    },
+    "priceRanges": {
+      "default": {
+        "max": 1.2,
+        "min": 0.8
+      },
+      "pack": {
+        "max": 0.96,
+        "min": 0.75
+      },
+      "preset": {
+        "max": 1.05,
+        "min": 0.95
+      }
+    },
+    "purchasesAreFoundInRaid": false,
+    "rating": {
+      "max": 20,
+      "min": -2
+    },
+    "removeSeasonalItemsWhenNotInEvent": true,
+    "showAsSingleStack": [
+      "5422acb9af1c889c16000029",
+      "5448e54d4bdc2dcc718b4568",
+      "5795f317245977243854e041",
+      "5448e53e4bdc2d60728b4567",
+      "5448bf274bdc2dfc2f8b456a",
+      "543be5e94bdc2df1348b4568",
+      "5448f39d4bdc2d0a728b4568",
+      "62e910aaf957f2915e0a5e36",
+      "5447e1d04bdc2dff2f8b4567",
+      "57bef4c42459772e8d35a53b",
+      "55802f4a4bdc2ddb688b4569",
+      "616eb7aea207f41933308f46",
+      "543be5cb4bdc2deb348b4568",
+      "5d650c3e815116009f6201d2"
+    ],
+    "showDefaultPresetsOnly": true,
+    "stackablePercent": {
+      "max": 600,
+      "min": 10
+    },
+    "unreasonableModPrices": {
+      "5448fe124bdc2da5018b4567": {
+        "enabled": false,
+        "handbookPriceOverMultiplier": 6,
+        "itemType": "Weapon Mod",
+        "newPriceHandbookMultiplier": 6
+      },
+      "57864a66245977548f04a81f": {
+        "enabled": false,
+        "handbookPriceOverMultiplier": 11,
+        "itemType": "Electronics",
+        "newPriceHandbookMultiplier": 11
+      }
+    },
+    "useTraderPriceForOffersIfHigher": true,
+    "generateBaseFleaPrices": {
+      "useHandbookPrice": true,
+      "generatePresetPriceByChildren": true,
+      "priceMultiplier": 1.5,
+      "itemTplMultiplierOverride": {
+        "5780cf7f2459777de4559322": 1.8
+      },
+      "itemTypeMultiplierOverride": {
+        "5c164d2286f774194c5e69fa": 2.5
+      },
+      "preventPriceBeingBelowTraderBuyPrice": true,
+      "useHideoutCraftMultiplier": true,
+      "hideoutCraftMultiplier": 0.8
+    }
+  },
+  "runIntervalSeconds": 8,
+  "runIntervalValues": {
+    "inRaid": 60,
+    "outOfRaid": 8
+  },
+  "sell": {
+    "chance": {
+      "base": 50,
+      "maxSellChancePercent": 100,
+      "minSellChancePercent": 0,
+      "sellMultiplier": 1.24
+    },
+    "expireSeconds": 71,
+    "fees": true,
+    "time": {
+      "max": 1,
+      "min": 0
+    }
+  },
+  "tieredFlea": {
+    "ammoTiersEnabled": true,
+    "ammoTplUnlocks": {
+      "5656d7c34bdc2d9d198b4587": 35,
+      "56dff061d2720bb5668b4567": 45,
+      "56dff2ced2720bb4668b4567": 40,
+      "5887431f2459777e1612938f": 30,
+      "59e77a2386f7742ee578960a": 35,
+      "5d6e6911a4b9361bd5780d52": 35,
+      "5e023e53d4353e3302577c4c": 25,
+      "5e85aa1a988a8701445df1f5": 35,
+      "5efb0cabfb3e451d70735af5": 35,
+      "5fc382c1016cce60e8341b20": 50,
+      "60194943740c5d77f6705eea": 35,
+      "619636be6db0f2477964e710": 50,
+      "64b7af434b75259c590fa893": 45,
+      "64b8ee384b75259c590fa89b": 35,
+      "6576f93989f0062e741ba952": 25
+    },
+    "enabled": false,
+    "unlocksTpl": {
+      "545cdae64bdc2d39198b4568": 30,
+      "57347ca924597744596b4e71": 35,
+      "57347cd0245977445a2d6ff1": 30,
+      "590a3b0486f7743954552bdb": 30,
+      "590c2e1186f77425357b6124": 30,
+      "590c5bbd86f774785762df04": 30,
+      "59e3577886f774176a362503": 35,
+      "59e36c6f86f774176c10a2a7": 30,
+      "5af04b6486f774195a3ebb49": 30,
+      "5b44c6ae86f7742d1627baea": 30,
+      "5c0530ee86f774697952d952": 25,
+      "5c06779c86f77426e00dd782": 30,
+      "5c06782b86f77426df5407d2": 30,
+      "5c0e6a1586f77404597b4965": 26,
+      "5c94bbff86f7747ee735c08f": 30,
+      "5d1b2fa286f77425227d1674": 30,
+      "5d1b36a186f7742523398433": 35,
+      "5d1b371186f774253763a656": 35,
+      "5d1b385e86f774252167b98a": 30,
+      "5d1b3a5d86f774252167ba22": 35,
+      "5d5d940f86f7742797262046": 32,
+      "5df8a42886f77412640e2e75": 25,
+      "5e2af29386f7746d4159f077": 35,
+      "5e42c81886f7742a01529f57": 40,
+      "5f5e467b0bc58666c37e7821": 30,
+      "628e1ffc83ec92260c0f437f": 30,
+      "62a0a124de7ac81993580542": 40,
+      "63a0b208f444d32d6f03ea1e": 25
+    },
+    "unlocksType": {
+      "543be5cb4bdc2deb348b4568": 50,
+      "5447b5cf4bdc2d65278b4567": 5,
+      "5447b5e04bdc2d62278b4567": 20,
+      "5447b5f14bdc2d61278b4567": 35,
+      "5447b6094bdc2dc3278b4567": 15,
+      "5447b6194bdc2d67278b4567": 35,
+      "5447b6254bdc2dc3278b4568": 35,
+      "5447bed64bdc2d97278b4568": 40,
+      "5447bedf4bdc2d87278b4568": 50,
+      "5447bee84bdc2dc3278b4569": 15,
+      "55818acf4bdc2dde698b456b": 20,
+      "55818ad54bdc2ddc698b4569": 23,
+      "55818add4bdc2d5b648b456f": 25,
+      "55818ae44bdc2dde698b456c": 30,
+      "55818aeb4bdc2ddc698b456a": 45,
+      "57864a3d24597754843f8721": 35,
+      "57864a66245977548f04a81f": 20,
+      "57864ada245977548638de91": 20,
+      "590c745b86f7743cc433c5f2": 20,
+      "5c164d2286f774194c5e69fa": 40,
+      "5c99f98d86f7745c314214b3": 35,
+      "617f1ef5e8b54b0998387733": 10
+    }
+  },
+  "traders": {
+    "54cb50c76803fa8b248b4571": true,
+    "54cb57776803fa99248b456e": true,
+    "579dc571d53a0658a154fbec": false,
+    "58330581ace78e27b8b10cee": true,
+    "5935c25fb3acc3127c3d8cd9": true,
+    "5a7c2eca46aef81a7ca2145d": true,
+    "5ac3b934156ae10c4430e83c": true,
+    "5c0647fdd443bc2504c2d371": true,
+    "6617beeaa9cfa777ca915b7c": true
+  },
+  "offerListingTaxMultiplier": -1
+}
