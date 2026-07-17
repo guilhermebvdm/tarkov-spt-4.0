@@ -45,8 +45,25 @@ internal static class NodeScriptRunner
             return new RunResult(0, string.Empty);
         }
 
-        var lines = stderr.Trim().Split('\n');
-        var tail = string.Join(" | ", lines.Length > 3 ? lines[^3..] : lines);
-        return new RunResult(process.ExitCode, tail.Length > 400 ? tail[..400] : tail);
+        var trimmed = stderr.Trim();
+        if (trimmed.Length == 0)
+        {
+            return new RunResult(process.ExitCode, "(no stderr output)");
+        }
+
+        // A Node uncaught-exception crash dump puts the actual "ErrorType: message" line near the
+        // TOP (right after the source snippet + "^" caret) — not the bottom, where only generic
+        // bootstrap frames and, on modern Node, a trailing "Node.js vX.Y.Z" footer live. Taking the
+        // last 3 lines (the old approach) reliably threw away the one useful line.
+        const int MaxLines = 20;
+        const int MaxChars = 1500;
+
+        var allLines = trimmed.Split('\n');
+        var head = allLines.Length > MaxLines
+            ? string.Join(" | ", allLines[..MaxLines]) + " | …(truncated)"
+            : string.Join(" | ", allLines);
+
+        var result = head.Length > MaxChars ? head[..MaxChars] + "…" : head;
+        return new RunResult(process.ExitCode, result);
     }
 }

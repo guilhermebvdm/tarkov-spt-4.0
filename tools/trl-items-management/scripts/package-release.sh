@@ -70,10 +70,12 @@ mkdir -p "$BUN/BepInEx/plugins/TRL-ItemsManagement" \
          "$BUN/SPT/user/mods/TRL-ItemsManagement" \
          "$BUN/trl-items-management-pipeline/scripts" "$BUN/trl-items-management-pipeline/data"
 
-# server: tudo MENOS config/, data/ (user-data — nunca vai no bundle) e *.bak (backup local
-# de uma DLL sobrescrita no install de dev, sem sentido no bundle)
+# server: tudo MENOS config/, data/, logs/ (user-data — nunca vai no bundle; logs/ em
+# particular é o audit.jsonl gerado em runtime pelo AuditLogService — bundlar o do install de
+# DEV contaminaria a produção com entradas de teste) e *.bak (backup local de uma DLL
+# sobrescrita no install de dev, sem sentido no bundle)
 cp -r "$SERVER_SRC/." "$BUN/SPT/user/mods/TRL-ItemsManagement/"
-rm -rf "$BUN/SPT/user/mods/TRL-ItemsManagement/config" "$BUN/SPT/user/mods/TRL-ItemsManagement/data"
+rm -rf "$BUN/SPT/user/mods/TRL-ItemsManagement/config" "$BUN/SPT/user/mods/TRL-ItemsManagement/data" "$BUN/SPT/user/mods/TRL-ItemsManagement/logs"
 rm -f "$BUN/SPT/user/mods/TRL-ItemsManagement/"*.bak
 
 # client: DLL+pdb (sem user-data nesse lado; *.bak é backup local de um install anterior)
