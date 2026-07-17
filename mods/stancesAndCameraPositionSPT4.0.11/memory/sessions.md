@@ -533,3 +533,50 @@ quem já tem o cfg antigo não receberia nada e cairia nos defaults).
 
 **Pendências:** **P-10.1** (CR-05/CR-07 não aplicados) · **P-10.2** (MP-02-05/06/08/09/10) · **P-7.2** e **P-7.3**
 (dívidas antigas). **P-8.4 ✅ resolvida.**
+
+## 2026-07-17 ~01:30 (GMT-3) — Sessão 11: item 016 aberto — fork realism (curvas + gate de aim-speed), F0 entregue até o gate
+
+**Tema central:** portar a experiência de transição do **Fontaine-StanceOverhaul** (vendorizado em
+`mods/Stance-Overhaul-test-1/`, zip recebido **com permissão do autor**) para as nossas 4 stances, num fork
+`modded-realism/` que pode virar canônico. Plano aprovado em plan-mode (com revisão de gaps pedida pelo usuário);
+execução via **/g-autodev** com gates humanos por fase.
+
+**Decisões-chave (congeladas no plano):**
+- **Pose = sliders, shaping = curvas**: transição vira `LerpUnclamped(from, alvo_do_slider, s(t))` determinístico
+  (progresso 0..1; `from` recapturado em voo) + camada aditiva por eixo (F3). A config calibrada do servidor fica
+  intocada.
+- **Modelo ADS = SÓ o gate de aim-speed** (trava `_aimingSpeed` do PWA até a pose sair) — NÃO portar o
+  "cancela stance + restaura" do Fontaine (nosso `CurrentStance` alimenta snap-on-fire/stamina/Fika/mount).
+- **Ponto de aplicação inalterado** (`WeaponRootAnim`, pré-IK, validado no 014). Kick → canal `SpringDamp` ζ=1.
+- **Rollback embutido**: F12 `Transition Engine = [Spring (legacy) | Curves]`.
+- Escopo negativo explícito: P-11.1 fora; deformação ESTÁTICA da G36 fora (diagnóstico na F0 decide).
+- **O que o Fontaine tem de morto** (não portar): Melee, Mounting, AimPIDHandler ("PID" é só proporcional,
+  comentado), SpringAnimators — tudo stub/comentado. Estudo completo:
+  `mods/Stance-Overhaul-test-1/assets/analise-porte-item-016.md`.
+
+**Entregue (F0, commits `c0cdece` → `8a82a6f`):**
+1. Fork `modded-realism/` (cópia limpa @ 2.5.0), **v3.0.0**, banner `[REALISM FORK]`, `DIVERGENCE.md` (ledger de
+   sync canônico→fork; canônico em regime **só-hotfix**), build 0/0.
+2. SDD: item 016 no backlog + spec funcional (F0–F4, ACs mensuráveis, gates humanos) + tech-spec F0 — ambas com
+   review adversarial de sub-agent aplicado (9+9 achados; 2 🔴 na spec: un-gate suave quando mount/ActionStance
+   força Stance 0 em pleno ADS gateado; origem por corpo nas métricas p/ paridade Fika).
+3. **`TransitionMetrics.cs`** — a régua: 1 linha por transição concluída (`[METRICS] origem | rota | posPeak cm
+   lateral/longitudinal/vertical | rotPeak deg pitch/roll/yaw | cross | settle | avgDt`). Code-review: 0 🔴,
+   6 achados aplicados (token S0 fora de stance; priming ao ligar a flag; promoção de canal excluído; regra única
+   de cross; compensação do debounce).
+4. Artefato: `builds/shwngFpsCameraStances4-v3.0.0-realism.dll` — **NÃO instalado, NÃO distribuído**.
+
+**Lições:**
+- **Rótulo abreviado de eixo é armadilha recorrente**: o log ia sair "P Y R" e reintroduzia o bug MP-01-02 pela
+  3ª via (a convenção LOCAL da arma é pitch=.x, **roll=.y**, yaw=.z). Regra: colunas de rotação SEMPRE por extenso.
+- **Métrica por contagem de frames não é comparável entre FPS** — assentamento por TEMPO acumulado.
+- **Instrumentação também precisa de SDD**: 15 achados de review em cima de uma "simples régua" (amostra falsa ao
+  ligar a flag, rota mentirosa ao sair de stance mirando, cross com ruído de amostragem...). Régua ruim = baseline
+  ruim = critérios de aceite sem valor.
+
+**Pendências:**
+- **[P-11.3] (aberta 2026-07-17) 🟡 GATE F0 do item 016 — medições do usuário:** (a) instalar a DLL `-realism`
+  (Dev Mod ON!), ligar `Debug Transition Metrics` e coletar o **baseline legacy**: MP5 + 1 pistola, rotas
+  S1→ADS, S2→ADS, S3→ADS e S0↔S2, ≥5 amostras/rota; (b) **diagnóstico G36**: {G36, rifle longo, arma curta} ×
+  {S1/S2/S3} × {parado, transição→ADS} — a deformação é estática, de transição ou ambas? Sem isso a F1 não começa.
+- P-11.1 / P-11.2 (bugs registrados) e P-10.x inalteradas.
