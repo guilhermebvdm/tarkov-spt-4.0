@@ -110,5 +110,7 @@
   /* ── Z-index scale ───────────────────────────────────────────────────────── */
   --z-sticky:   10;
   --z-overlay:  100;
-  --z-toast:    200;
+  --z-modal:    1000;  /* .modal-overlay (confirmDialog, audit log) */
+  --z-toast:    1100;  /* above --z-modal — a toast fired while a modal is open (e.g. "copied tpl")
+                          must stay visible, not render behind the modal's backdrop */
 }

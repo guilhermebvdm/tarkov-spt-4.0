@@ -15,7 +15,7 @@
 <div class="app">
 
 <header class="topbar">
-  <span class="brand">TRL Items Management</span><span class="app-version" title="Version">v1.0.1</span>
+  <span class="brand">TRL Items Management</span><span class="app-version" title="Version">v1.0.2</span>
 
   <div class="topbar-controls">
     <div class="search">
@@ -43,6 +43,7 @@
     <div class="update-menu" id="update-menu">
       <button type="button" class="bulk-btn update-menu__trigger" id="update-menu-trigger" data-tip="Rescan mods / bulk-update all prices" data-tip-pos="bottom" aria-haspopup="true" aria-expanded="false">⟳ Update <span class="chev"></span></button>
     </div>
+    <button type="button" class="bulk-btn" id="audit-log-trigger" data-tip="History of every price/ban/refresh action" data-tip-pos="bottom">📜 Log</button>
   </div>
 
   <span class="topbar-sep" aria-hidden="true"></span>
@@ -100,6 +101,10 @@ let BUY_MOD_INSTALLED = true;  // companion mod TRLTraderPrices (buy-price half)
 let CURRENCY_RATES = { RUB: 1 };  // { RUB:1, USD, EUR, GP } rubles-per-native-unit (from meta.json)
 const FENCE_ID = '579dc571d53a0658a154fbec'; // Fence — dynamic assort, not editable
 let META = null;
+// Set by initFleaCapToggle() below — lets the audit-log undo path (which calls POST /flea-cap
+// directly, bypassing the toggle button's own click handler) resync the topbar indicator instead
+// of leaving it showing the pre-undo state until the next manual click.
+let fleaCapSync = null;
 let CAT_COUNTS = {};    // categoryId -> count of items
 let activeCategoryId = null;
 const selectedGroups     = new Set();  // names selected in Group multiselect
@@ -111,6 +116,28 @@ const DELTA_STORAGE_KEY  = 'trl-items-management.delta';
 let deltaSource = 'dev';   // 'dev' | 'market'
 let deltaMin    = null;    // number or null
 let deltaMax    = null;    // number or null
+
+// Shareable/bookmarkable view state. Read side: a snapshot taken once at script load,
+// consulted by each buildXFilter()/buildDeltaFilter()/bindControls()/load() to seed
+// initial state (URL wins over localStorage when present). Write side: syncUrlFromState()
+// (near render()) mirrors current state back into the URL via replaceState on every
+// render, so it never pollutes browser back-history.
+const URL_INITIAL = new URLSearchParams(location.search);
+function urlListOverride(paramKey, storageKey, targetSet) {
+  if (URL_INITIAL.has(paramKey)) {
+    URL_INITIAL.get(paramKey).split(',').filter(Boolean).forEach(v => targetSet.add(v));
+    // Consume it: buildEditedFilter() (and any future buildXFilter()) gets rebuilt after
+    // every edit via refreshEditedFilter() to refresh its counts — without deleting the
+    // key here, that rebuild would re-add this frozen page-load snapshot on top of
+    // whatever the user has since picked, silently reintroducing a deselected value.
+    URL_INITIAL.delete(paramKey);
+    return;
+  }
+  try {
+    const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    if (Array.isArray(saved)) saved.forEach(v => targetSet.add(v));
+  } catch (e) { /* ignore */ }
+}
 
 // Reusable dropdown component (single or multi-select). Options shape:
 //   [{ value: string, label: string, icon?: string, count?: number }]
@@ -259,6 +286,10 @@ function createDropdown({ placeholder, options, multi = false, searchable = fals
 // Persisted sort (defaults: Trader sell descending). Restored on load.
 const SORT_STORAGE_KEY = 'trl-items-management.sort';
 function loadSortPref() {
+  if (URL_INITIAL.has('sort')) {
+    const key = URL_INITIAL.get('sort');
+    if (key) return { key, dir: URL_INITIAL.get('dir') === 'asc' ? 1 : -1 };
+  }
   try {
     const raw = localStorage.getItem(SORT_STORAGE_KEY);
     if (!raw) return null;
@@ -484,7 +515,14 @@ async function load() {
     })(CATEGORIES);
     ITEM_LIST = Object.values(items);
     countCategories();
+    // URL-shareable category selection — restored before the sidebar renders so the
+    // active node is highlighted immediately (see syncUrlFromState() for the write side).
+    if (URL_INITIAL.has('cat')) {
+      const wantedCat = URL_INITIAL.get('cat');
+      if (findCatNode(CATEGORIES, wantedCat)) activeCategoryId = wantedCat;
+    }
     renderSidebar();
+    if (activeCategoryId != null) expandAncestorsInSidebar(activeCategoryId);
     buildGroupFilter();
     buildConditionFilter();
     buildBanFilter();
@@ -512,15 +550,27 @@ let editedDropdown = null;
 let modDropdown = null;
 
 function buildDeltaFilter() {
-  // Restore persisted state
-  try {
-    const saved = JSON.parse(localStorage.getItem(DELTA_STORAGE_KEY) || 'null');
-    if (saved) {
-      if (saved.source === 'dev' || saved.source === 'market') deltaSource = saved.source;
-      if (typeof saved.min === 'number') deltaMin = saved.min;
-      if (typeof saved.max === 'number') deltaMax = saved.max;
-    }
-  } catch (e) {}
+  // Restore persisted state (URL query params win over localStorage).
+  if (URL_INITIAL.has('deltaSrc') || URL_INITIAL.has('deltaMin') || URL_INITIAL.has('deltaMax')) {
+    const src = URL_INITIAL.get('deltaSrc');
+    if (src === 'dev' || src === 'market') deltaSource = src;
+    const minRaw = URL_INITIAL.get('deltaMin');
+    if (minRaw) { const n = parseFloat(minRaw); if (Number.isFinite(n)) deltaMin = n; }
+    const maxRaw = URL_INITIAL.get('deltaMax');
+    if (maxRaw) { const n = parseFloat(maxRaw); if (Number.isFinite(n)) deltaMax = n; }
+    // Consume — see urlListOverride()'s comment: nothing rebuilds this filter today, but
+    // this keeps the same "apply once, then defer to localStorage" contract if one ever does.
+    URL_INITIAL.delete('deltaSrc'); URL_INITIAL.delete('deltaMin'); URL_INITIAL.delete('deltaMax');
+  } else {
+    try {
+      const saved = JSON.parse(localStorage.getItem(DELTA_STORAGE_KEY) || 'null');
+      if (saved) {
+        if (saved.source === 'dev' || saved.source === 'market') deltaSource = saved.source;
+        if (typeof saved.min === 'number') deltaMin = saved.min;
+        if (typeof saved.max === 'number') deltaMax = saved.max;
+      }
+    } catch (e) {}
+  }
 
   function saveDelta() {
     try { localStorage.setItem(DELTA_STORAGE_KEY, JSON.stringify({ source: deltaSource, min: deltaMin, max: deltaMax })); } catch (e) {}
@@ -645,10 +695,7 @@ function buildBanFilter() {
     { value: 'custom', label: 'Banned (custom)', iconHtml: '<span class="ban-ico ban-ico--banned">'+ICON_BANNED+'</span>', count: customCount },
   ];
 
-  try {
-    const saved = JSON.parse(localStorage.getItem(BAN_STORAGE_KEY) || '[]');
-    if (Array.isArray(saved)) saved.forEach(v => selectedBans.add(v));
-  } catch (e) {}
+  urlListOverride('ban', BAN_STORAGE_KEY, selectedBans);
 
   banDropdown = createDropdown({
     placeholder: 'Banned',
@@ -704,10 +751,7 @@ function buildEditedFilter() {
     { value: 'none',   label: 'Not edited', count: noneCount },
   ];
 
-  try {
-    const saved = JSON.parse(localStorage.getItem(EDITED_STORAGE_KEY) || '[]');
-    if (Array.isArray(saved)) saved.forEach(v => selectedEdited.add(v));
-  } catch (e) {}
+  urlListOverride('edited', EDITED_STORAGE_KEY, selectedEdited);
 
   editedDropdown = createDropdown({
     placeholder: 'Edited',
@@ -745,10 +789,7 @@ function buildModFilter() {
   if (names.length === 0) return;
   const options = names.map(n => ({ value: n, label: n, count: counts[n] }));
 
-  try {
-    const saved = JSON.parse(localStorage.getItem(MOD_STORAGE_KEY) || '[]');
-    if (Array.isArray(saved)) saved.forEach(v => selectedMods.add(v));
-  } catch (e) {}
+  urlListOverride('mod', MOD_STORAGE_KEY, selectedMods);
 
   modDropdown = createDropdown({
     placeholder: 'Mod',
@@ -783,11 +824,8 @@ function buildConditionFilter() {
     count: counts[c],
   }));
 
-  // Restore persisted selection
-  try {
-    const saved = JSON.parse(localStorage.getItem(CONDITION_STORAGE_KEY) || '[]');
-    if (Array.isArray(saved)) saved.forEach(v => selectedConditions.add(v));
-  } catch (e) {}
+  // Restore persisted selection (URL query params win over localStorage).
+  urlListOverride('cond', CONDITION_STORAGE_KEY, selectedConditions);
 
   conditionDropdown = createDropdown({
     placeholder: 'Condition',
@@ -822,11 +860,8 @@ function buildGroupFilter() {
     count: counts[name],
   }));
 
-  // Restore persisted selection
-  try {
-    const saved = JSON.parse(localStorage.getItem(GROUP_STORAGE_KEY) || '[]');
-    if (Array.isArray(saved)) saved.forEach(v => selectedGroups.add(v));
-  } catch (e) { /* ignore */ }
+  // Restore persisted selection (URL query params win over localStorage).
+  urlListOverride('group', GROUP_STORAGE_KEY, selectedGroups);
 
   groupDropdown = createDropdown({
     placeholder: 'Group',
@@ -957,6 +992,20 @@ function renderCatNode(parent, node, depth) {
   if (childrenWrap) parent.appendChild(childrenWrap);
 }
 
+// When a category restored from a shared URL is nested deep in the tree, auto-expand
+// its ancestor chain so the highlighted node is visible without manually drilling down.
+function expandAncestorsInSidebar(catId) {
+  if (!ANCESTOR_CACHE[catId]) ANCESTOR_CACHE[catId] = collectAncestors(CATEGORIES, catId);
+  for (const ancestorId of ANCESTOR_CACHE[catId]) {
+    if (ancestorId === catId) continue;
+    const el = document.querySelector('.tree-node[data-cat-id="' + ancestorId + '"]');
+    if (!el) continue;
+    el.classList.add('is-open');
+    const wrap = el.nextElementSibling;
+    if (wrap && wrap.classList.contains('tree-children')) wrap.classList.remove('is-hidden');
+  }
+}
+
 function refreshActiveCat() {
   document.querySelectorAll('.tree-node').forEach(el => el.classList.remove('is-active'));
   if (activeCategoryId === null) {
@@ -971,6 +1020,8 @@ function bindControls() {
   const q       = document.getElementById('q');
   const qWrap   = q.closest('.search');
   const qClear  = document.getElementById('q-clear');
+
+  if (URL_INITIAL.has('q')) q.value = URL_INITIAL.get('q');
 
   function updateClearVisibility() {
     qWrap.classList.toggle('has-value', q.value.length > 0);
@@ -1013,6 +1064,7 @@ function bindControls() {
       stateEl.textContent = enabled == null ? '…' : (enabled ? 'on' : 'OFF');
       btn.classList.toggle('is-cap-off', enabled === false);
     };
+    fleaCapSync = (next) => { enabled = next; render(); };
     (async () => {
       try { const j = await (await fetch(API_BASE + '/flea-cap')).json(); enabled = !!j.enabled; }
       catch (_) { enabled = null; stateEl.textContent = '?'; return; }
@@ -1034,6 +1086,10 @@ function bindControls() {
 
   // Bulk "⟳ Update" menu (rescan / update-all-dev / update-all-market).
   bindUpdateMenu();
+
+  // Audit log modal.
+  const auditLogTrigger = document.getElementById('audit-log-trigger');
+  if (auditLogTrigger) auditLogTrigger.addEventListener('click', openAuditLogModal);
 
   // Clear ALL trader sell-price overrides (TRLTraderPrices).
   const clearTraderBtn = document.getElementById('clear-trader-overrides');
@@ -1210,9 +1266,39 @@ function render() {
   _renderScheduled = true;
   requestAnimationFrame(() => { _renderScheduled = false; renderNow(); });
 }
+
+// Mirrors all active filters + search + sort into the URL query string (replaceState —
+// never pushState, so typing/filtering never pollutes browser back-history). Makes the
+// current view copy-pasteable/bookmarkable. Read side: URL_INITIAL + urlListOverride(),
+// consulted once at load — see buildXFilter()s, buildDeltaFilter(), bindControls() and
+// the `cat` hydration in load().
+function syncUrlFromState() {
+  const p = new URLSearchParams();
+  const q = document.getElementById('q').value.trim();
+  if (q) p.set('q', q);
+  if (activeCategoryId != null) p.set('cat', activeCategoryId);
+  if (selectedGroups.size) p.set('group', [...selectedGroups].join(','));
+  if (selectedConditions.size) p.set('cond', [...selectedConditions].join(','));
+  if (selectedBans.size) p.set('ban', [...selectedBans].join(','));
+  if (selectedEdited.size) p.set('edited', [...selectedEdited].join(','));
+  if (selectedMods.size) p.set('mod', [...selectedMods].join(','));
+  if (deltaMin !== null || deltaMax !== null) {
+    p.set('deltaSrc', deltaSource);
+    if (deltaMin !== null) p.set('deltaMin', deltaMin);
+    if (deltaMax !== null) p.set('deltaMax', deltaMax);
+  }
+  if (!(sortKey === 'priceTraderSell' && sortDir === -1)) {
+    p.set('sort', sortKey);
+    p.set('dir', sortDir === 1 ? 'asc' : 'desc');
+  }
+  const qs = p.toString();
+  history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
+}
+
 function renderNow() {
   const filtered = sortItems(filterItems());
   const total = ITEM_LIST.length;
+  syncUrlFromState();
   document.getElementById('stats').textContent =
     `${filtered.length.toLocaleString('pt-BR')} / ${total.toLocaleString('pt-BR')} items` +
     (filtered.length > RENDER_LIMIT ? ` (showing ${RENDER_LIMIT})` : '');
@@ -1491,9 +1577,13 @@ function renderRow(it) {
     ? `<span class="price is-banned">${banIcon}${c.priceFleaSpt != null ? fmtRub(c.priceFleaSpt) : '—'}</span>`
     : fmtRub(c.priceFleaSpt)) + editBadge;
 
+  const modBadge = it.modSource
+    ? ` <span class="badge badge--mod" data-tip="${escapeAttr('Custom item added by mod: ' + it.modSource)}">MOD</span>`
+    : '';
+
   return `<tr data-id="${it.id}" class="${banned?'is-banned':''}">
     <td class="col-img">${img}</td>
-    <td class="col-name"><div class="name">${escapeHtml(it.name || it.id)}</div><div class="short">${escapeHtml(it.shortName || '')}</div></td>
+    <td class="col-name"><div class="name-row"><div class="name">${escapeHtml(it.name || it.id)}</div>${modBadge}</div><div class="short">${escapeHtml(it.shortName || '')}</div></td>
     <td class="col-group">${renderGroupCell(it, c.group)}</td>
     <td>${condBadge}</td>
     <td class="col-reward">${rewardCell}</td>
@@ -1847,7 +1937,8 @@ async function restoreOverride(cell) {
   const data = await r.json();
   if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
   if (item.spt) { item.spt.fleaOverride = null; item.spt.fleaOfferMultiplier = null; item.spt.effectiveFleaPrice = data.effectiveFleaPrice; }
-  item.consolidated = data.consolidated;
+  // NOTE: DELETE /api/price doesn't return `consolidated` either (same interim gap as the
+  // save path above) — do not overwrite item.consolidated with undefined here.
   _dataVersion++;  // data changed → invalidate filter-cache
   const row = cell.closest('tr[data-id]');
   if (row) {
@@ -1885,10 +1976,14 @@ function confirmBanAction(cell, menu, banning) {
       });
       const data = await r.json();
       if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
-      // Update in-memory state
+      // Update in-memory state. The response has `banned`/`modItem` (not `fleaBanned`/
+      // `fleaBanReasons` — those are catalog-derived field names from load-spt.js, this
+      // endpoint doesn't recompute the full catalog). Derive the reason the same way
+      // load-spt.js does: vanilla ban flips CanSellOnRagfair → 'bsg', mod-item ban goes
+      // through ModItemBanService's custom-ban list → 'custom'.
       if (!item.spt) item.spt = { basePrice: null, fleaPrice: null, fleaBanned: false, fleaBanReasons: [], traders: [] };
-      item.spt.fleaBanned = data.fleaBanned;
-      item.spt.fleaBanReasons = data.fleaBanReasons;
+      item.spt.fleaBanned = data.banned;
+      item.spt.fleaBanReasons = data.banned ? [data.modItem ? 'custom' : 'bsg'] : [];
       _dataVersion++;  // data changed → invalidate filter-cache
       // Re-render this row
       const row = cell.closest('tr[data-id]');
@@ -2008,7 +2103,11 @@ function openInlineEdit(cell) {
         item.spt.fleaOverride = data.override;
       }
       item.spt.effectiveFleaPrice = data.effectiveFleaPrice;
-      item.consolidated = data.consolidated;
+      // NOTE: /api/price does not return `consolidated` (FleaPriceController's documented
+      // interim gap — the cached consolidated.priceFleaSpt view goes stale until the next
+      // rescan). Do NOT assign item.consolidated = data.consolidated here — data.consolidated
+      // is always undefined, which used to wipe the row's real consolidated object and crash
+      // renderRow() on c.conditionType.
       _dataVersion++;  // data changed → invalidate filter-cache
       closeForm();   // remove the form + its capture-phase doc listener before the row is replaced
       rerenderRow();
@@ -2069,6 +2168,459 @@ function confirmDialog({ title, body, confirmText = 'Confirm', cancelText = 'Can
     requestAnimationFrame(() => overlay.classList.add('is-show'));
     setTimeout(() => overlay.querySelector('.modal__btn--confirm').focus(), 0);
   });
+}
+
+// ── Audit log modal (GET /api/audit-log) ────────────────────────────────────
+// Player-facing activity feed: every entry gets a plain-language description (no raw field
+// names/JSON by default — that's tucked behind a "details" disclosure), an icon, relative time,
+// and — for live entries whose previous value is known — an Undo button that just re-calls the
+// same write endpoint the main table already uses, so the result is optimistically reflected in
+// the main list exactly like a normal edit (and the undo itself becomes a new, visible log entry
+// — nothing is silently erased from the trail).
+const AUDIT_FEATURES = ['flea-price', 'ban', 'trader-sell-price', 'trader-buy-price', 'flea-cap', 'flea-min-level', 'catalog-rebuild', 'item-refresh'];
+const AUDIT_FEATURE_META = {
+  'flea-price':       { icon: '💰', label: 'Preço de flea' },
+  'ban':              { icon: '🚫', label: 'Banimento' },
+  'trader-sell-price':{ icon: '🤝', label: 'Preço de venda (trader)' },
+  'trader-buy-price': { icon: '🤝', label: 'Preço de recompra (trader)' },
+  'flea-cap':         { icon: '📈', label: 'Teto de preço' },
+  'flea-min-level':   { icon: '🔓', label: 'Nível mínimo de flea' },
+  'catalog-rebuild':  { icon: '🔄', label: 'Atualização de catálogo' },
+  'item-refresh':     { icon: '🌐', label: 'Atualização de referência' },
+};
+
+function auditPriceSpan(value) {
+  return value != null ? fmtRub(value) : '<span class="audit-null">—</span>';
+}
+function auditPriceDelta(before, after) {
+  let cls = '';
+  if (before != null && after != null && before !== after) cls = after > before ? 'is-up' : 'is-down';
+  return `<span class="audit-delta">${auditPriceSpan(before)}</span> <span class="audit-arrow">→</span> <span class="audit-delta ${cls}">${auditPriceSpan(after)}</span>`;
+}
+function auditTraderName(traderId) {
+  return (traderId && TRADER_ID_TO_NAME[traderId]) || 'trader desconhecido';
+}
+// Portuguese relative time, scoped to this feature — NOT a change to the shared fmtRelTime()
+// (English), which is used throughout the rest of the (English-language) main table/detail UI.
+function auditRelTime(iso) {
+  if (!iso) return '—';
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return '—';
+  const diffMs = Date.now() - t;
+  const abs = Math.abs(diffMs);
+  const m = Math.round(abs / 60000);
+  const h = Math.round(abs / 3600000);
+  const d = Math.round(abs / 86400000);
+  let label;
+  if (abs < 60000) label = 'agora';
+  else if (m < 60) label = `há ${m} min`;
+  else if (h < 24) label = `há ${h}h`;
+  else if (d < 30) label = `há ${d}d`;
+  else label = new Date(iso).toLocaleDateString('pt-BR');
+  return `<span title="${escapeAttr(new Date(iso).toLocaleString('pt-BR'))}">${label}</span>`;
+}
+async function auditApiCall(method, path, body) {
+  const r = await fetch(API_BASE + path, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const data = await r.json();
+  if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+  return data;
+}
+
+// Optimistic-update appliers — mirror the exact ITEMS.spt.* assignments openInlineEdit()/
+// confirmBanAction()/openTraderEdit() already do for a live edit, so an undo reflects in the main
+// table the same way a normal edit does, no full reload needed.
+function undoApplyFlea(tpl, data) {
+  const item = ITEMS[tpl];
+  if (!item) return;
+  if (!item.spt) item.spt = {};
+  item.spt.fleaOverride = data.mode === 'override' ? data.override : null;
+  item.spt.fleaOfferMultiplier = data.mode === 'multiplier' ? data.multiplier : null;
+  item.spt.effectiveFleaPrice = data.effectiveFleaPrice;
+  _dataVersion++;
+  rerenderMainRow(tpl);
+  refreshEditedFilter();
+}
+function undoApplyBan(tpl, data) {
+  const item = ITEMS[tpl];
+  if (!item) return;
+  if (!item.spt) item.spt = { fleaBanned: false, fleaBanReasons: [] };
+  item.spt.fleaBanned = data.banned;
+  item.spt.fleaBanReasons = data.banned ? [data.modItem ? 'custom' : 'bsg'] : [];
+  _dataVersion++;
+  rerenderMainRow(tpl);
+}
+function undoApplyTrader(isBuy, tpl, traderId, count, currency) {
+  const store = isBuy ? BUY_OVERRIDES : TRADER_OVERRIDES;
+  if (count == null) {
+    if (store[traderId]) {
+      delete store[traderId][tpl];
+      if (Object.keys(store[traderId]).length === 0) delete store[traderId];
+    }
+  } else {
+    if (!store[traderId]) store[traderId] = {};
+    store[traderId][tpl] = { count, currency };
+  }
+  rerenderMainRow(tpl);
+  if (isBuy) updateBuyTopbar(); else { updateTraderTopbar(); refreshTraderOverrideFilter(); }
+}
+
+// One entry → { desc: htmlString (player-facing, no raw field names), undo: null | { label, run } }.
+// `run` throws on failure (caught by the caller) and applies the matching optimistic update above
+// on success. Undo is never offered for a `baseline-unknown-date` entry (see the call site) — you
+// can't undo a change whose starting state is genuinely unknown.
+function describeAuditEntry(e) {
+  const b = e.before || {}, a = e.after || {}, x = e.extra || {};
+  const key = e.feature + '/' + e.action;
+
+  switch (key) {
+    case 'flea-price/set': {
+      const desc = `Preço de flea alterado: ${auditPriceDelta(b.effectiveFleaPrice, a.effectiveFleaPrice)}`;
+      // b.value == null → there was no override before, undo = restore to default (DELETE, doesn't
+      // need b.effectiveFleaPrice at all). Otherwise undo = re-set the exact previous price — but
+      // that DOES need b.effectiveFleaPrice; if it's missing (item never had a cached price before
+      // this edit), disable undo rather than sending Math.round(undefined) = NaN as the price.
+      let undo = null;
+      if (b.value == null) {
+        undo = { label: 'Desfazer', run: async () => { const data = await auditApiCall('DELETE', '/price', { tpl: e.tpl }); undoApplyFlea(e.tpl, data); } };
+      } else if (b.effectiveFleaPrice != null) {
+        undo = { label: 'Desfazer', run: async () => { const data = await auditApiCall('POST', '/price', { tpl: e.tpl, price: Math.round(b.effectiveFleaPrice) }); undoApplyFlea(e.tpl, data); } };
+      }
+      return { desc, undo };
+    }
+    case 'flea-price/delete':
+      if (b.effectiveFleaPrice == null) return { desc: `Preço de flea restaurado ao padrão: ${auditPriceDelta(null, a.effectiveFleaPrice)}`, undo: null };
+      return {
+        desc: `Preço de flea restaurado ao padrão: ${auditPriceDelta(b.effectiveFleaPrice, a.effectiveFleaPrice)}`,
+        undo: {
+          label: 'Desfazer', run: async () => {
+            const data = await auditApiCall('POST', '/price', { tpl: e.tpl, price: Math.round(b.effectiveFleaPrice) });
+            undoApplyFlea(e.tpl, data);
+          },
+        },
+      };
+    case 'ban/set': {
+      const reasonLabel = x.modItem ? 'manual, item de mod' : 'lista padrão do jogo';
+      const desc = a.banned ? `Item banido da pulga <span class="audit-meta">(${escapeHtml(reasonLabel)})</span>` : 'Banimento removido — item liberado na pulga';
+      return {
+        desc,
+        undo: b.banned == null ? null : {
+          label: 'Desfazer', run: async () => {
+            const data = await auditApiCall('POST', '/ban', { tpl: e.tpl, banned: b.banned });
+            undoApplyBan(e.tpl, data);
+          },
+        },
+      };
+    }
+    case 'trader-sell-price/set':
+    case 'trader-buy-price/set': {
+      const isBuy = e.feature === 'trader-buy-price';
+      const path = isBuy ? '/trader-buy-price' : '/trader-price';
+      const label = isBuy ? 'Preço de recompra' : 'Preço de venda';
+      const traderName = escapeHtml(auditTraderName(x.traderId));
+      const beforeTxt = b.count != null ? `${b.count.toLocaleString('pt-BR')} ${escapeHtml(b.currency || '')}` : '—';
+      const afterTxt = `${a.count.toLocaleString('pt-BR')} ${escapeHtml(a.currency || '')}`;
+      return {
+        desc: `${label} pro <b>${traderName}</b> alterado: ${beforeTxt} → ${afterTxt}`,
+        undo: {
+          label: 'Desfazer', run: async () => {
+            const data = b.count == null
+              ? await auditApiCall('DELETE', path, { tpl: e.tpl, traderId: x.traderId })
+              : await auditApiCall('PATCH', path, { tpl: e.tpl, traderId: x.traderId, count: b.count, currency: b.currency });
+            undoApplyTrader(isBuy, e.tpl, x.traderId, b.count ?? null, b.currency ?? null);
+            return data;
+          },
+        },
+      };
+    }
+    case 'trader-sell-price/delete':
+    case 'trader-buy-price/delete': {
+      const isBuy = e.feature === 'trader-buy-price';
+      const path = isBuy ? '/trader-buy-price' : '/trader-price';
+      const label = isBuy ? 'Preço de recompra' : 'Preço de venda';
+      const traderName = escapeHtml(auditTraderName(x.traderId));
+      return {
+        desc: `${label} pro <b>${traderName}</b> restaurado pra referência`,
+        undo: b.count == null ? null : {
+          label: 'Desfazer', run: async () => {
+            const data = await auditApiCall('PATCH', path, { tpl: e.tpl, traderId: x.traderId, count: b.count, currency: b.currency });
+            undoApplyTrader(isBuy, e.tpl, x.traderId, b.count, b.currency);
+            return data;
+          },
+        },
+      };
+    }
+    case 'trader-sell-price/delete-all':
+    case 'trader-buy-price/delete-all': {
+      const isBuy = e.feature === 'trader-buy-price';
+      const label = isBuy ? 'recompra' : 'venda';
+      let count = 0;
+      if (b && typeof b === 'object') for (const tplMap of Object.values(b)) count += Object.keys(tplMap || {}).length;
+      return { desc: `Todos os overrides de ${label} removidos (${count} item${count === 1 ? '' : 's'})`, undo: null };
+    }
+    case 'flea-cap/set':
+      return {
+        desc: `Teto de preço (mods/eletrônicos) ${a.enabled ? 'ativado' : 'desativado'} <span class="audit-meta">(${x.changed || 0} categorias)</span>`,
+        undo: b.enabled == null ? null : {
+          label: 'Desfazer', run: async () => {
+            const data = await auditApiCall('POST', '/flea-cap', { enabled: b.enabled });
+            if (fleaCapSync) fleaCapSync(data.enabled);
+          },
+        },
+      };
+    case 'flea-min-level/set':
+      return {
+        desc: `Nível mínimo de flea alterado: ${b.minUserLevel ?? '—'} → ${a.minUserLevel}`,
+        undo: b.minUserLevel == null ? null : {
+          label: 'Desfazer', run: async () => {
+            const data = await auditApiCall('POST', '/flea-min-level', { minUserLevel: b.minUserLevel });
+            const el = document.getElementById('flea-level-num');
+            if (el) el.textContent = data.minUserLevel;
+          },
+        },
+      };
+    case 'catalog-rebuild/refresh-all':
+      return { desc: `Catálogo inteiro atualizado via ${escapeHtml(x.source || '?')} — ${(a.itemCount || 0).toLocaleString('pt-BR')} itens`, undo: null };
+    case 'catalog-rebuild/rescan':
+      return { desc: `Catálogo re-escaneado — ${(a.itemCount || 0).toLocaleString('pt-BR')} itens (${a.modCount || 0} de mods)`, undo: null };
+    case 'item-refresh/refresh-dev':
+    case 'item-refresh/refresh-market':
+      return { desc: `Preço de referência atualizado (${e.action === 'refresh-dev' ? 'tarkov.dev' : 'tarkov-market'})`, undo: null };
+    default:
+      return { desc: `${escapeHtml(e.feature)} / ${escapeHtml(e.action)}`, undo: null };
+  }
+}
+
+function openAuditLogModal() {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML =
+    `<div class="modal modal--wide" role="dialog" aria-modal="true">` +
+      `<div class="modal__title">Histórico de alterações</div>` +
+      `<div class="audit-log__filters">` +
+        `<select id="audit-log-feature"><option value="">Todas as categorias</option>` +
+          AUDIT_FEATURES.map(f => `<option value="${escapeAttr(f)}">${escapeHtml((AUDIT_FEATURE_META[f]||{}).label || f)}</option>`).join('') +
+        `</select>` +
+        `<input type="text" id="audit-log-tpl" placeholder="Buscar por nome do item…">` +
+        `<button type="button" class="modal__btn modal__btn--cancel" id="audit-log-close">Fechar</button>` +
+      `</div>` +
+      `<div class="audit-log__feed-wrap">` +
+        `<div id="audit-log-baseline-summary" class="audit-baseline-summary" hidden></div>` +
+        `<div id="audit-log-feed" class="audit-feed"></div>` +
+      `</div>` +
+      `<div class="modal__actions">` +
+        `<button type="button" class="modal__btn" id="audit-log-more">Carregar mais</button>` +
+      `</div>` +
+    `</div>`;
+  document.body.appendChild(overlay);
+
+  let offset = 0;
+  let total = 0;
+  const LIMIT = 50;
+  const baselineEntries = []; // accumulated across pages, rendered as one collapsible summary
+
+  const feed          = overlay.querySelector('#audit-log-feed');
+  const baselineBox   = overlay.querySelector('#audit-log-baseline-summary');
+  const featureSel    = overlay.querySelector('#audit-log-feature');
+  const tplInput      = overlay.querySelector('#audit-log-tpl');
+  const moreBtn       = overlay.querySelector('#audit-log-more');
+
+  function close() {
+    overlay.remove();
+    document.removeEventListener('keydown', onKey);
+  }
+  function onKey(e) { if (e.key === 'Escape') close(); }
+  overlay.querySelector('#audit-log-close').onclick = close;
+  overlay.addEventListener('mousedown', (e) => { if (e.target === overlay) close(); });
+  document.addEventListener('keydown', onKey);
+
+  // Item chip: thumbnail + short name, hover/focus popover with the item's key info, click
+  // copies the tpl (toast confirms). Degrades gracefully when the tpl isn't in the currently-
+  // loaded catalog: still copyable, just no image/name to show.
+  function renderItemChip(tpl) {
+    if (!tpl) return '<span class="audit-feed-item__target-label">Sistema</span>';
+    const item = ITEMS[tpl];
+    const thumb = item && item.image && item.image.icon
+      ? `<img class="audit-log__item-thumb" src="${escapeAttr(item.image.icon)}" alt="" loading="lazy">`
+      : '<span class="audit-log__item-thumb--empty">—</span>';
+    const label = escapeHtml((item && (item.shortName || item.name)) || tpl);
+    const popoverImg = item && item.image && item.image.icon ? `<img src="${escapeAttr(item.image.icon)}" alt="">` : '';
+    const popoverName = item ? `<div class="name">${escapeHtml(item.name || item.shortName || tpl)}</div>` : '';
+    const popoverShort = item && item.shortName ? `<div class="short">${escapeHtml(item.shortName)}${item.modSource ? ' · ' + escapeHtml(item.modSource) : ''}</div>` : '';
+    return (
+      `<span class="audit-log__item" data-tpl="${escapeAttr(tpl)}" tabindex="0">` +
+        thumb +
+        `<span class="audit-log__item-label">${label}</span>` +
+        `<span class="audit-log__item-popover">${popoverImg}${popoverName}${popoverShort}` +
+          `<div class="tpl">${escapeHtml(tpl)}</div>` +
+          `<div class="hint">Clique pra copiar</div>` +
+        `</span>` +
+      `</span>`
+    );
+  }
+
+  function wireItemChipCopy(root) {
+    const itemEl = root.querySelector('.audit-log__item');
+    if (!itemEl) return;
+    itemEl.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(itemEl.dataset.tpl);
+        toast(`tpl copiado: ${itemEl.dataset.tpl}`, 'ok');
+      } catch (err) {
+        toast('Falha ao copiar tpl: ' + err.message, 'err');
+      }
+    });
+  }
+
+  function renderEntryCard(e) {
+    const meta = AUDIT_FEATURE_META[e.feature] || { icon: '•', label: e.feature };
+    const { desc, undo } = describeAuditEntry(e);
+    const isBaseline = e.origin === 'baseline-unknown-date';
+    const originBadge = isBaseline
+      ? `<span class="badge badge--baseline" data-tip="Data exata desconhecida — já existia antes deste registro">antes do log</span>`
+      : '';
+
+    const card = document.createElement('div');
+    card.className = 'audit-feed-item';
+    card.innerHTML =
+      `<div class="audit-feed-item__icon">${meta.icon}</div>` +
+      `<div class="audit-feed-item__body">` +
+        `<div class="audit-feed-item__top">` +
+          `<span class="audit-feed-item__target">${renderItemChip(e.tpl)}</span>` +
+          `<span class="audit-feed-item__time">${auditRelTime(e.ts)}</span>` +
+        `</div>` +
+        `<div class="audit-feed-item__desc">${desc}</div>` +
+      `</div>` +
+      `<div class="audit-feed-item__actions">` +
+        (!isBaseline && undo ? `<button type="button" class="audit-feed-item__undo">${escapeHtml(undo.label)}</button>` : '') +
+        `<button type="button" class="audit-feed-item__details-toggle" data-tip="Ver detalhes técnicos" aria-label="Ver detalhes técnicos">⋯</button>` +
+      `</div>` +
+      `${originBadge ? `<div class="audit-feed-item__origin">${originBadge}</div>` : ''}` +
+      `<pre class="audit-feed-item__raw" hidden>${escapeHtml(JSON.stringify({ before: e.before, after: e.after, extra: e.extra }, null, 2))}</pre>`;
+
+    wireItemChipCopy(card);
+
+    const detailsBtn = card.querySelector('.audit-feed-item__details-toggle');
+    const raw = card.querySelector('.audit-feed-item__raw');
+    detailsBtn.onclick = () => { raw.hidden = !raw.hidden; };
+
+    const undoBtn = card.querySelector('.audit-feed-item__undo');
+    if (undoBtn && undo) {
+      undoBtn.onclick = async () => {
+        undoBtn.disabled = true;
+        undoBtn.textContent = '…';
+        try {
+          await undo.run();
+          toast('Desfeito com sucesso', 'ok');
+          card.classList.add('is-undone');
+          undoBtn.remove();
+          loadPage(true); // refresh the feed — the undo itself is now a new entry at the top
+        } catch (err) {
+          toast('Falha ao desfazer: ' + err.message, 'err');
+          undoBtn.disabled = false;
+          undoBtn.textContent = undo.label;
+        }
+      };
+    }
+
+    return card;
+  }
+
+  function renderBaselineSummary() {
+    if (baselineEntries.length === 0) { baselineBox.hidden = true; return; }
+    baselineBox.hidden = false;
+    // innerHTML is rebuilt from scratch every call (the count can grow via "load more"), which
+    // would otherwise blank out an already-expanded list — its populated .list div (and the
+    // dataset.filled flag marking it as such) gets thrown away along with the old markup. If it
+    // was open, immediately re-fill the fresh list so an expanded summary never renders empty
+    // (e.g. right after an undo triggers loadPage(true) while the user has it expanded).
+    const expanded = baselineBox.classList.contains('is-open');
+    baselineBox.innerHTML =
+      `<button type="button" class="audit-baseline-summary__toggle">` +
+        `📦 ${baselineEntries.length} ${baselineEntries.length === 1 ? 'ação anterior' : 'ações anteriores'} ao início do histórico` +
+        `<span class="chev"></span>` +
+      `</button>` +
+      `<div class="audit-baseline-summary__list"${expanded ? '' : ' hidden'}></div>`;
+    const list = baselineBox.querySelector('.audit-baseline-summary__list');
+    if (expanded) {
+      for (const e of baselineEntries) list.appendChild(renderEntryCard(e));
+      list.dataset.filled = '1';
+    }
+    baselineBox.querySelector('.audit-baseline-summary__toggle').onclick = () => {
+      const nowOpen = list.hidden;
+      list.hidden = !nowOpen;
+      baselineBox.classList.toggle('is-open', nowOpen);
+      if (nowOpen && !list.dataset.filled) {
+        list.dataset.filled = '1';
+        for (const e of baselineEntries) list.appendChild(renderEntryCard(e));
+      }
+    };
+  }
+
+  async function loadPage(reset) {
+    if (reset) { offset = 0; feed.innerHTML = ''; baselineEntries.length = 0; }
+    const { filter: tplFilter, noMatch } = resolveTplFilter();
+    if (noMatch) {
+      // A non-empty search that resolved to zero tpls — bail out before hitting the
+      // backend. An empty tpl param is indistinguishable from "no filter" there
+      // (AuditLogController's split+RemoveEmptyEntries yields an empty set either way),
+      // so without this the feed would silently show the FULL unfiltered history instead
+      // of "nothing found" for the exact query the user typed.
+      total = 0;
+      moreBtn.hidden = true;
+      feed.innerHTML = '<div class="audit-log__empty">Nenhuma ação encontrada com esses filtros.</div>';
+      return;
+    }
+    const params = new URLSearchParams({ limit: LIMIT, offset });
+    if (featureSel.value) params.set('feature', featureSel.value);
+    if (tplFilter) params.set('tpl', tplFilter);
+    try {
+      const r = await fetch(API_BASE + '/audit-log?' + params.toString());
+      const data = await r.json();
+      total = data.total || 0;
+      const entries = data.entries || [];
+      if (reset && entries.length === 0) {
+        feed.innerHTML = '<div class="audit-log__empty">Nenhuma ação encontrada com esses filtros.</div>';
+      } else {
+        for (const e of entries) {
+          if (e.origin === 'baseline-unknown-date') baselineEntries.push(e);
+          else feed.appendChild(renderEntryCard(e));
+        }
+        renderBaselineSummary();
+      }
+      offset += entries.length;
+      moreBtn.hidden = offset >= total;
+    } catch (err) {
+      feed.innerHTML = `<div class="audit-log__empty">Falha ao carregar: ${escapeHtml(err.message)}</div>`;
+    }
+  }
+
+  // Name-based search: an exact 24-char hex tpl is used directly; anything else resolves
+  // (client-side) to every currently-loaded item whose name/shortName contains the query, sent
+  // as a comma-separated list (same convention as the main table's URL filters) — nobody
+  // browsing this feed thinks in raw tpls. Capped so a very generic query can't build an
+  // unreasonably long query string.
+  function resolveTplFilter() {
+    const raw = tplInput.value.trim();
+    if (!raw) return { filter: '', noMatch: false };
+    if (/^[a-f0-9]{24}$/i.test(raw)) return { filter: raw, noMatch: false };
+    const q = raw.toLowerCase();
+    const matches = [];
+    for (const [t, it] of Object.entries(ITEMS)) {
+      if ((it.name || '').toLowerCase().includes(q) || (it.shortName || '').toLowerCase().includes(q)) {
+        matches.push(t);
+        if (matches.length >= 200) break;
+      }
+    }
+    return { filter: matches.join(','), noMatch: matches.length === 0 };
+  }
+
+  featureSel.onchange = () => loadPage(true);
+  let tplDebounceTimer;
+  tplInput.oninput = () => { clearTimeout(tplDebounceTimer); tplDebounceTimer = setTimeout(() => loadPage(true), 300); };
+  moreBtn.onclick = () => loadPage(false);
+
+  requestAnimationFrame(() => overlay.classList.add('is-show'));
+  loadPage(true);
 }
 
 function setBulkBusy(busy) {
