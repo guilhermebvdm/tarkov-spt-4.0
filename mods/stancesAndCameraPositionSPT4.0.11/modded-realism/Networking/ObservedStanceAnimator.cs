@@ -52,6 +52,7 @@ namespace CameraRotationMod.Networking
             Vector3 targetPos = inStance ? StanceManager.GetTargetPosition((Stance)_stance, _isAiming) : Vector3.zero;
 
             float dt = Time.deltaTime;
+            if (dt <= 0f) return; // CR2-5: paridade com o guard do caminho local
             // Mesma separação do jogador local: a velocidade de mira e a de postura são independentes.
             float speedMult = _speedTracker.SpeedMult(_isAiming, _stance);
             float stiffness = 150f * speedMult;

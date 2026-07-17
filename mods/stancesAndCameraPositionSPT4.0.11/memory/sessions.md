@@ -580,3 +580,29 @@ execução via **/g-autodev** com gates humanos por fase.
   S1→ADS, S2→ADS, S3→ADS e S0↔S2, ≥5 amostras/rota; (b) **diagnóstico G36**: {G36, rifle longo, arma curta} ×
   {S1/S2/S3} × {parado, transição→ADS} — a deformação é estática, de transição ou ambas? Sem isso a F1 não começa.
 - P-11.1 / P-11.2 (bugs registrados) e P-10.x inalteradas.
+
+## 2026-07-17 ~03:00 (GMT-3) — Sessão 11 (cont.): code-review 01 da F0 + grafo paralelo do fork
+
+Rodada autônoma pedida pelo usuário: `/code-review` da F0 com máximo de corners + **grafo paralelo do
+`modded-realism`** como fonte forense.
+
+**Grafo como ferramenta de review (funcionou):** o `update-graphs.sh` só cobre `mods/*/modded` — o grafo do fork
+foi gerado direto (`graphify update` fresh) e publicado em
+`references/graphs/mods/stancesAndCameraPositionSPT4.0.11-realism/` (528 nós/720 arestas). O **diff estrutural**
+fork×canônico provou: +21 nós/+35 arestas = exatamente o `TransitionMetrics`; **zero perdas**. E revelou de
+brinde: **o grafo do CANÔNICO tinha 8 arestas fantasma** (`awake→bindstance` etc., pré-reestruturação da 2.3.0)
+— cache incremental do graphify nunca removeu. Regenerado com `graphify-out/` limpo → 507/685.
+⚠️ **Lição: após refatoração estrutural, regenerar grafo com cache LIMPO** — o update incremental preserva
+arestas de código morto.
+
+**Code-review 01 da F0** (`016-...-04-code-review-01.md`): 2 lentes adversariais (runtime · paridade).
+Paridade fork×canônico **100%** (8 diffs, todos do contrato). Runtime: 1 🔴 + 3 🟡 aplicados —
+**CR2-1 🔴**: desligar/religar a flag no meio de uma medição deixava `_measuring` órfão → linha falsa
+indistinguível de amostra legítima (off agora = `Reset()`); **CR2-2**: kick contamina pico/settle → amostras
+marcadas `(kick)` + regra: **baseline com `Stance Kick Intensity = 0`**; **CR2-3**: amostra pós-interrupção
+marcada `(chained)` (partiu do meio do caminho); **CR2-4**: debounce cegava a medição em voo → `Sample()` roda
+antes do tratamento de alvo. Confirmado sem problema: hideout FUNCIONA para o baseline; morte/extract resetam;
+timeout não spamma. Build 0/0; artefato `-realism` atualizado.
+
+**Regras novas para o gate F0 (P-11.3):** medir com kick = 0 (ou filtrar `(kick)`); linhas
+`(interrupted)/(chained)/(timeout)` fora das medianas; hideout OK como ambiente.

@@ -25,6 +25,7 @@ todo hotfix aplicado lá entra na tabela abaixo e é replicado aqui **no fechame
 |---|---|
 | F0 | Versão 3.0.0 + banner REALISM FORK no Awake + este arquivo |
 | F0 | `TransitionMetrics.cs` (régua de transição) + Feed no `ApplyComplexRotationPatch` e no `ObservedStanceAnimator` + reset no `StanceManager.ResetState` + bind `Debug Transition Metrics` |
+| F0 | Code-review 01 aplicado: flag-off fecha medição órfã (CR2-1 🔴), marcadores `(kick)`/`(chained)` nas amostras contaminadas, amostragem contínua durante debounce, `KickActive` exposto no patch, guard dt≤0 no observado |
 
 ## Como comparar
 

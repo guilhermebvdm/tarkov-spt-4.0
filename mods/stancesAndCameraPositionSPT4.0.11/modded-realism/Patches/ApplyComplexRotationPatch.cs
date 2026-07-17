@@ -50,6 +50,10 @@ namespace CameraRotationMod.Patches
         /// <summary>Reset de raid — mesmo motivo do ResetSpeedTracker acima.</summary>
         public static void ResetMetrics() => _metrics.Reset();
 
+        // CR2-2 (code-review 02) — o kick injeta velocidade na mola; amostras medidas com kick ativo saem
+        // marcadas "(kick)" no [METRICS] (pico/settle contaminados pela perturbação; filtráveis no baseline).
+        public static bool KickActive => _kickSustainTimer > 0f || _waitingForAdsKick;
+
         // Limites de sanidade da interpolação por mola. O alvo legítimo nunca passa de ±45° (range de
         // config); a mola Euler explícita, porém, DIVERGE com frame time ruim (dt grande / FPS baixo /
         // stutter) e o Euler resultante cruza o gimbal (~90-180°), virando a câmera de cabeça pra baixo

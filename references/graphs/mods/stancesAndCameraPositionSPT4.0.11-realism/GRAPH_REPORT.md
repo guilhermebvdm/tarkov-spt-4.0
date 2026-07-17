@@ -1,11 +1,11 @@
-# Graph Report - mods\stancesAndCameraPositionSPT4.0.11\modded  (2026-07-17)
+# Graph Report - mods\stancesAndCameraPositionSPT4.0.11\modded-realism  (2026-07-17)
 
 ## Corpus Check
-- 37 files · ~69,793 words
+- 38 files · ~71,558 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 507 nodes · 685 edges · 34 communities (33 shown, 1 thin omitted)
+- 528 nodes · 720 edges · 35 communities (34 shown, 1 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
@@ -48,18 +48,19 @@
 - [[_COMMUNITY_Community 30|Community 30]]
 - [[_COMMUNITY_Community 31|Community 31]]
 - [[_COMMUNITY_Community 32|Community 32]]
+- [[_COMMUNITY_Community 33|Community 33]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `StanceManager` - 59 edges
 2. `ModulePatch` - 35 edges
 3. `Plugin` - 34 edges
-4. `ApplyComplexRotationPatch` - 17 edges
+4. `ApplyComplexRotationPatch` - 19 edges
 5. `HoldBreathPatch` - 15 edges
-6. `ApplySimpleRotationPatch` - 14 edges
-7. `Stance` - 13 edges
-8. `PassiveMountUI` - 11 edges
-9. `StaminaController` - 11 edges
-10. `ObservedStanceAnimator` - 10 edges
+6. `TransitionMetrics` - 15 edges
+7. `ApplySimpleRotationPatch` - 14 edges
+8. `Stance` - 13 edges
+9. `ObservedStanceAnimator` - 11 edges
+10. `PassiveMountUI` - 11 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `BattleUIScreenPatch` --inherits--> `ModulePatch`  [EXTRACTED]
@@ -76,7 +77,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (34 total, 1 thin omitted)
+## Communities (35 total, 1 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.07
@@ -95,133 +96,137 @@ Cohesion: 0.09
 Nodes (20): Callback, GClass2015, GClass2050, MagazineItemClass, ActionStanceCheckChamberPatch, ActionStanceCheckFireModePatch, ActionStanceExamineWeaponPatch, ActionStanceOnIdlePatch (+12 more)
 
 ### Community 4 - "Community 4"
-Cohesion: 0.07
-Nodes (19): CameraBobbingScript, CameraRotationMod, MonoBehaviour, CameraRotationMod.Networking, bool, int, PlayerBones, TransitionSpeedTracker (+11 more)
+Cohesion: 0.06
+Nodes (20): CameraBobbingScript, CameraRotationMod, MonoBehaviour, CameraRotationMod.Networking, bool, int, PlayerBones, TransitionMetrics (+12 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.15
-Nodes (10): AudioClip, AudioSource, IEnumerator, CameraRotationMod.Patches, Action, bool, MethodBase, PatchPostfix (+2 more)
+Cohesion: 0.11
+Nodes (14): ApplyComplexRotationPatch, CameraRotationMod.Patches, bool, FieldInfo, float, int, MethodBase, PatchPostfix (+6 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.13
-Nodes (13): ApplyComplexRotationPatch, CameraRotationMod.Patches, bool, FieldInfo, float, int, MethodBase, PatchPostfix (+5 more)
+Cohesion: 0.15
+Nodes (10): AudioClip, AudioSource, IEnumerator, CameraRotationMod.Patches, Action, bool, MethodBase, PatchPostfix (+2 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.12
 Nodes (12): EftBattleUIScreen, GameObject, Image, BattleUIScreenPatch, CameraRotationMod, float, MethodBase, PatchPostfix (+4 more)
 
 ### Community 8 - "Community 8"
+Cohesion: 0.21
+Nodes (9): Channel, CameraRotationMod, bool, float, int, Stance, string, Vector3 (+1 more)
+
+### Community 9 - "Community 9"
 Cohesion: 0.15
 Nodes (12): ApplySimpleRotationPatch, CameraRotationMod.Patches, bool, FieldInfo, float, int, MethodBase, PatchPostfix (+4 more)
 
-### Community 9 - "Community 9"
+### Community 10 - "Community 10"
 Cohesion: 0.16
 Nodes (8): CameraRotationMod.Patches, MethodBase, PatchPostfix, PatchPrefix, Player, MovementContextSpeedPatch, MovementContextSprintSpeedPatch, PlayerChangeSpeedPatch
 
-### Community 10 - "Community 10"
+### Community 11 - "Community 11"
 Cohesion: 0.21
 Nodes (8): CameraRotationMod, bool, ConfigEntry, FieldInfo, Func, Player, StaminaController, StaminaScenario
 
-### Community 11 - "Community 11"
+### Community 12 - "Community 12"
 Cohesion: 0.19
 Nodes (9): CameraRotationMod.Patches, EBracingDir, FieldInfo, FirearmController, float, MethodBase, PatchPostfix, Vector3 (+1 more)
 
-### Community 12 - "Community 12"
+### Community 13 - "Community 13"
 Cohesion: 0.18
 Nodes (7): FikaNetworkManagerCreatedEvent, IFikaNetworkManager, CameraRotationMod.Networking, bool, ManualLogSource, FikaSyncManager, StanceSyncPacket
 
-### Community 13 - "Community 13"
+### Community 14 - "Community 14"
 Cohesion: 0.18
 Nodes (7): CameraRotationMod.Patches, MethodBase, PatchPostfix, PatchPrefix, ProceduralWeaponAnimation, PassiveRecoilPatch, PassiveSwayPatch
 
-### Community 14 - "Community 14"
+### Community 15 - "Community 15"
 Cohesion: 0.22
 Nodes (7): CameraRotationMod.Patches, bool, FirearmController, MethodBase, object, PatchPrefix, SnapFireTriggerPatch
 
-### Community 15 - "Community 15"
+### Community 16 - "Community 16"
 Cohesion: 0.24
 Nodes (6): CameraRotationMod.Patches, GClass774, MethodBase, PatchPrefix, HandsConsumeNeutralizePatch, HandsStaminaNeutralizePatch
 
-### Community 16 - "Community 16"
+### Community 17 - "Community 17"
 Cohesion: 0.20
 Nodes (9): ConfigEntryBase>, CustomHotkeyDrawerFunc, Func<object, string>, Func<string, object>, ConfigurationManagerAttributes, bool, int, object (+1 more)
 
-### Community 17 - "Community 17"
+### Community 18 - "Community 18"
 Cohesion: 0.24
 Nodes (5): CameraRotationMod.Patches, MethodBase, PatchPostfix, GameWorldOnDestroyPatch, GameWorldOnGameStartedPatch
 
-### Community 18 - "Community 18"
+### Community 19 - "Community 19"
 Cohesion: 0.22
 Nodes (6): EPointOfView, CameraRotationMod.Patches, MethodBase, PatchPostfix, PlayerBones, ObservedStanceShiftPatch
 
-### Community 19 - "Community 19"
+### Community 20 - "Community 20"
 Cohesion: 0.22
 Nodes (6): CameraRotationMod.Patches, bool, MethodBase, PatchPostfix, LocaleClassReloadPatch, Task
 
-### Community 20 - "Community 20"
+### Community 21 - "Community 21"
 Cohesion: 0.22
 Nodes (6): CameraRotationMod.Patches, FieldInfo, MethodBase, PatchPostfix, PlayerSpringPatch, PlayerSpring
 
-### Community 21 - "Community 21"
+### Community 22 - "Community 22"
 Cohesion: 0.25
 Nodes (5): BasePhysicalClass, CameraRotationMod.Patches, MethodBase, PatchPostfix, PhysicalInertiaPatch
 
-### Community 22 - "Community 22"
+### Community 23 - "Community 23"
 Cohesion: 0.25
 Nodes (4): CameraRotationMod, EBracingDir, float, PassiveMountState
 
-### Community 23 - "Community 23"
+### Community 24 - "Community 24"
 Cohesion: 0.25
 Nodes (5): BlockActiveMountPatch, CameraRotationMod.Patches, MethodBase, PatchPrefix, Player
 
-### Community 24 - "Community 24"
+### Community 25 - "Community 25"
 Cohesion: 0.29
 Nodes (4): CameraRotationMod, Dictionary, string, LocaleUtils
 
-### Community 25 - "Community 25"
+### Community 26 - "Community 26"
 Cohesion: 0.29
 Nodes (4): CameraRotationMod, bool, int, TransitionSpeedTracker
 
-### Community 26 - "Community 26"
+### Community 27 - "Community 27"
 Cohesion: 0.33
 Nodes (4): GInterface424, GStruct154, Player, TestCompile
 
-### Community 27 - "Community 27"
+### Community 28 - "Community 28"
 Cohesion: 0.33
 Nodes (5): NetDataReader, NetDataWriter, CameraRotationMod.Networking, Deserialize(), Serialize()
 
-### Community 28 - "Community 28"
+### Community 29 - "Community 29"
 Cohesion: 0.33
 Nodes (3): CameraRotationMod, Vector3, SpringMath
 
-### Community 29 - "Community 29"
+### Community 30 - "Community 30"
 Cohesion: 0.40
 Nodes (3): ConfigFile, CameraRotationMod, TranslationUpdater
 
-### Community 30 - "Community 30"
+### Community 31 - "Community 31"
 Cohesion: 0.40
 Nodes (3): CameraRotationMod, bool, StanceStaminaState
 
-### Community 31 - "Community 31"
+### Community 32 - "Community 32"
 Cohesion: 0.50
 Nodes (3): CameraRotationMod, ConfigEntry, StanceConfig
 
 ## Knowledge Gaps
-- **179 isolated node(s):** `CameraRotationMod`, `netstandard2.1`, `Microsoft.NET.Sdk`, `CameraRotationMod`, `string` (+174 more)
+- **187 isolated node(s):** `CameraRotationMod`, `netstandard2.1`, `Microsoft.NET.Sdk`, `CameraRotationMod`, `string` (+182 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **1 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `ModulePatch` connect `Community 3` to `Community 2`, `Community 5`, `Community 6`, `Community 7`, `Community 8`, `Community 9`, `Community 11`, `Community 13`, `Community 14`, `Community 15`, `Community 17`, `Community 18`, `Community 19`, `Community 20`, `Community 21`, `Community 23`?**
-  _High betweenness centrality (0.419) - this node is a cross-community bridge._
+- **Why does `ModulePatch` connect `Community 3` to `Community 2`, `Community 5`, `Community 6`, `Community 7`, `Community 9`, `Community 10`, `Community 12`, `Community 14`, `Community 15`, `Community 16`, `Community 18`, `Community 19`, `Community 20`, `Community 21`, `Community 22`, `Community 24`?**
+  _High betweenness centrality (0.393) - this node is a cross-community bridge._
 - **Why does `Plugin` connect `Community 1` to `Community 3`?**
-  _High betweenness centrality (0.100) - this node is a cross-community bridge._
+  _High betweenness centrality (0.093) - this node is a cross-community bridge._
 - **Why does `ManualChamberingComponent` connect `Community 2` to `Community 4`?**
-  _High betweenness centrality (0.077) - this node is a cross-community bridge._
+  _High betweenness centrality (0.074) - this node is a cross-community bridge._
 - **What connects `CameraRotationMod`, `netstandard2.1`, `Microsoft.NET.Sdk` to the rest of the system?**
-  _179 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _187 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.06526806526806526 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**

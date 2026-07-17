@@ -44,6 +44,7 @@ namespace CameraRotationMod
         }
 
         private readonly string _origin;
+        private readonly bool _isLocal;
         private readonly Channel[] _ch = new Channel[6]; // 0..2 pos XYZ · 3..5 rot pitch(x)/roll(y)/yaw(z)
 
         private bool _measuring;
@@ -55,17 +56,21 @@ namespace CameraRotationMod
         private string _route = "";
         private string _lastToken = "S0";
 
-        public TransitionMetrics(string origin) { _origin = origin; }
+        public TransitionMetrics(string origin) { _origin = origin; _isLocal = origin == "local"; }
 
         // CR-2 do code-review 01: primeiro Feed após ligar a flag (ou reset) só ADOTA o alvo/token vigentes,
         // sem abrir medição — senão ligar a flag já em stance loga uma amostra falsa "S0->S2 settle 0.00s".
         private bool _primed;
+        private bool _chainNext;   // CR2-3: a amostra seguinte a um (interrupted) parte do MEIO do caminho
+        private bool _kickSeen;    // CR2-2: houve kick durante a medição (contamina pico/settle — filtrável)
 
         /// <summary>Chamar todo frame do corpo instrumentado, APÓS a pose do frame ser calculada.</summary>
         public void Feed(Vector3 tgtPos, Vector3 tgtEuler, Vector3 curPos, Vector3 curEuler, float dt,
                          Stance stance, bool isAiming, bool inStance)
         {
-            if (!(Plugin._DebugTransitionMetrics?.Value ?? false)) { _primed = false; return; }
+            // CR2-1 (🔴 code-review 02): desligar a flag no MEIO de uma medição deixava _measuring órfão —
+            // ao religar, a medição retomava contra alvos velhos e cuspia uma linha falsa. Off = Reset total.
+            if (!(Plugin._DebugTransitionMetrics?.Value ?? false)) { if (_primed) Reset(); return; }
 
             if (!_primed)
             {
@@ -74,6 +79,10 @@ namespace CameraRotationMod
                 _lastToken = Token(stance, isAiming, inStance);
                 return;
             }
+
+            // CR2-4: amostra o frame ANTES de tratar mudança de alvo — durante o debounce/dither a mola
+            // continua andando; cegar a medição em voo perdia pico e congelava o relógio.
+            if (_measuring) Sample(curPos, curEuler, dt);
 
             bool targetChanged = Differs(tgtPos, _activeTargetPos, TargetEpsPos)
                               || DiffersAngular(tgtEuler, _activeTargetEuler, TargetEpsRot);
@@ -94,8 +103,12 @@ namespace CameraRotationMod
                 return;
             }
             _pendingStableFrames = 0;
+        }
 
-            if (!_measuring) return;
+        /// <summary>Um frame de amostragem da medição em voo (CR2-4: roda mesmo durante o debounce).</summary>
+        private void Sample(Vector3 curPos, Vector3 curEuler, float dt)
+        {
+            if (_isLocal && Patches.ApplyComplexRotationPatch.KickActive) _kickSeen = true; // CR2-2
 
             _elapsed += dt; _frames++;
             if (_elapsed >= TimeoutSeconds) { Finish("(timeout)"); return; }
@@ -188,7 +201,11 @@ namespace CameraRotationMod
         private void Finish(string suffix)
         {
             _measuring = false;
+            bool chained = _chainNext; _chainNext = suffix.Contains("interrupted");
+            bool kicked = _kickSeen; _kickSeen = false;
             if (_frames == 0) return;
+            if (kicked) suffix = (suffix + " (kick)").TrimStart();     // CR2-2: pico/settle incluem o kick
+            if (chained) suffix = (suffix + " (chained)").TrimStart(); // CR2-3: partiu do meio do caminho
 
             int cross = 0;
             for (int i = 0; i < 6; i++) if (!_ch[i].Excluded) cross += _ch[i].Crossings;
@@ -208,7 +225,7 @@ namespace CameraRotationMod
         /// <summary>Troca de raid: esquece medição em andamento e o token de rota anterior.</summary>
         public void Reset()
         {
-            _measuring = false; _pendingStableFrames = 0; _primed = false;
+            _measuring = false; _pendingStableFrames = 0; _primed = false; _chainNext = false; _kickSeen = false;
             _activeTargetPos = _activeTargetEuler = Vector3.zero;
             _lastToken = "S0";
         }
