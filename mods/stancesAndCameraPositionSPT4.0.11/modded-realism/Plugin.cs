@@ -191,6 +191,7 @@ public class Plugin : BaseUnityPlugin
 
     // Debug
     public static ConfigEntry<bool> _DebugApplyInHideout;
+    public static ConfigEntry<bool> _DebugTransitionMetrics; // item 016 (F0)
 
     // FOV Settings
 
@@ -1077,6 +1078,22 @@ public class Plugin : BaseUnityPlugin
                 "Useful for offline testing. DISABLE for normal gameplay — this feature is designed for raids only.\n\nPermite que os efeitos de stamina/velocidade rodem no hideout (estande de tiro). Útil para testes offline. DESATIVE para o jogo normal — este recurso é feito só para raids.",
                 null,
                 new ConfigurationManagerAttributes { IsAdvanced = true, Order = -1 }));
+
+        // Item 016 (F0) — régua das transições (baseline e critérios de aceite do fork realism).
+        _DebugTransitionMetrics = Config.Bind(
+            DebugSettings,
+            "Debug Transition Metrics",
+            false,
+            new ConfigDescription(
+                "Logs ONE line per finished pose transition: [METRICS] origin | route | posPeak (cm, beyond the " +
+                "target, per LOCAL axis: lateral/longitudinal/vertical) | rotPeak (deg: pitch/roll/yaw) | cross " +
+                "(sum of error sign flips across the 6 channels since departure) | settle time | " +
+                "avg frame dt. Near-zero cost when off.\n\nRegistra UMA linha por transição de pose concluída: " +
+                "[METRICS] origem | rota | pico de posição (cm, ALÉM do alvo, por eixo LOCAL: lateral/longitudinal/" +
+                "vertical) | pico de rotação (graus: pitch/roll/yaw) | cross (soma das inversões de sinal do erro " +
+                "nos 6 canais após alcançar o alvo) | tempo de assentamento | dt médio. Custo ~zero desligado.",
+                null,
+                new ConfigurationManagerAttributes { IsAdvanced = true, Order = -2 }));
 
         // ========================================
         // STANCE STAMINA + VELOCIDADE (backlog 001) — 5 props × 4 stances

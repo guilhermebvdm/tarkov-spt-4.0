@@ -44,6 +44,12 @@ namespace CameraRotationMod.Patches
         /// de raid e faria o 1º frame da raid nova comparar com o da anterior.</summary>
         public static void ResetSpeedTracker() => _speedTracker.Reset();
 
+        // Item 016 (F0) — régua do baseline e dos critérios de aceite do fork. Corpo LOCAL.
+        private static readonly TransitionMetrics _metrics = new TransitionMetrics("local");
+
+        /// <summary>Reset de raid — mesmo motivo do ResetSpeedTracker acima.</summary>
+        public static void ResetMetrics() => _metrics.Reset();
+
         // Limites de sanidade da interpolação por mola. O alvo legítimo nunca passa de ±45° (range de
         // config); a mola Euler explícita, porém, DIVERGE com frame time ruim (dt grande / FPS baixo /
         // stutter) e o Euler resultante cruza o gimbal (~90-180°), virando a câmera de cabeça pra baixo
@@ -274,6 +280,11 @@ namespace CameraRotationMod.Patches
             
             CurrentEuler = SpringLerpAngle(CurrentEuler, targetEuler, ref _rotVelocity, stiffness, damping, dt);
             CurrentPosition = SpringLerp(CurrentPosition, targetPosition, ref _posVelocity, stiffness, damping, dt);
+
+            // Item 016 (F0) — mede a transição APÓS a pose do frame ser calculada. Leitura pura: nunca
+            // escreve no estado da mola. Custo com a flag off = 1 branch dentro do Feed.
+            _metrics.Feed(targetPosition, targetEuler, CurrentPosition, CurrentEuler, dt,
+                          StanceManager.CurrentStance, isAiming, isInStance);
             
             CurrentRotation = Quaternion.Euler(CurrentEuler);
 

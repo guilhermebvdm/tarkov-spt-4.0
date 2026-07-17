@@ -24,6 +24,7 @@ todo hotfix aplicado lá entra na tabela abaixo e é replicado aqui **no fechame
 | Fase | O quê |
 |---|---|
 | F0 | Versão 3.0.0 + banner REALISM FORK no Awake + este arquivo |
+| F0 | `TransitionMetrics.cs` (régua de transição) + Feed no `ApplyComplexRotationPatch` e no `ObservedStanceAnimator` + reset no `StanceManager.ResetState` + bind `Debug Transition Metrics` |
 
 ## Como comparar
 

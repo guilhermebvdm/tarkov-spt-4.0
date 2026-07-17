@@ -19,6 +19,7 @@
 | 013 | Refinamentos de transição de stance | Arma montada (stationary) reconhecida como Mount Active + força Stance 0 ao entrar; corrida a partir de Stance 1/2/3 não "pisca" pela Stance 0. | [013-refino-transicao-stance/](./013-refino-transicao-stance/) | 🟢 |
 | 014 | Corrigir sync visual de stances no Fika | Aplicação remota mexia no Spine3 (só torso) → arma ficava imóvel. Corrige para aplicar o offset no WeaponRootAnim (braço+arma juntos), de forma aditiva, coexistindo com lean/troca de ombro. Substitui a implementação do 006. | [014-sync-stances-fika/](./014-sync-stances-fika/) | 🟢 |
 | 015 | Bloquear mount ativo em Stance 1/2/3 | Impede o mount vanilla (apoiar a arma em superfícies) quando o jogador está em Stance 1/2/3 — só permite em Stance 0 ou ADS. Fase 2 do corner-case do 012, via patch em `TryMountWeapon`. | [015-bloquear-mount-ativo-stances/](./015-bloquear-mount-ativo-stances/) | 🟢 |
+| 016 | Fork realism: transições por curvas + gate de aim-speed | Fork experimental `modded-realism/` que troca a mola sub-amortecida por transições determinísticas por curvas e adiciona gate de aim-speed (portados do Fontaine-StanceOverhaul, com permissão). Mira os bugs de overshoot Low Ready→mira (~5cm) e braço deformado na transição de ADS (P-11.2). Fases F0–F4 com gate humano por fase; pode virar canônico (GO/NO-GO na F4). | [016-transicao-realism-fork/](./016-transicao-realism-fork/) | 🟡 |
 
 ## Legenda
 
