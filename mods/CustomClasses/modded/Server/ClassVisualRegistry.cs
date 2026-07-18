@@ -12,14 +12,17 @@ namespace CustomClasses;
 public class ClassVisualRegistry
 {
     // item 008 (i18n): nome localizado da classe (en/pt) — exposto ao client, que resolve pelo idioma do EFT.
-    public sealed record Visual(string? IconFile, string? NameColor, string? DisplayNameEn, string? DisplayNamePt);
+    // item 068: description (en/pt) do .jsonc passa a viajar junto — o client mostra na aba CLASS + tooltip.
+    public sealed record Visual(string? IconFile, string? NameColor, string? DisplayNameEn, string? DisplayNamePt,
+        string? DescriptionEn = null, string? DescriptionPt = null);
 
     private readonly Dictionary<string, Visual> _byEdition = new(StringComparer.Ordinal);
 
     /// <summary>Grava (ou substitui) a identidade visual de uma classe/edition.</summary>
-    public void Set(string edition, string? iconFile, string? nameColor, string? displayNameEn = null, string? displayNamePt = null)
+    public void Set(string edition, string? iconFile, string? nameColor, string? displayNameEn = null, string? displayNamePt = null,
+        string? descriptionEn = null, string? descriptionPt = null)
     {
-        _byEdition[edition] = new Visual(iconFile, nameColor, displayNameEn, displayNamePt);
+        _byEdition[edition] = new Visual(iconFile, nameColor, displayNameEn, displayNamePt, descriptionEn, descriptionPt);
     }
 
     /// <summary>True se a edition é uma classe registrada pelo mod.</summary>

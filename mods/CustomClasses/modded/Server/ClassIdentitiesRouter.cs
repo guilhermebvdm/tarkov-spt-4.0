@@ -83,6 +83,8 @@ public class ClassIdentitiesRouter : StaticRouter
                             ClassNamePt = visual.DisplayNamePt ?? edition,
                             IconFile = visual.IconFile,
                             NameColor = visual.NameColor,
+                            DescriptionEn = visual.DescriptionEn,   // item 068
+                            DescriptionPt = visual.DescriptionPt,   // item 068
                         });
                     }
                 }),

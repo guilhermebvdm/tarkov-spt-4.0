@@ -35,6 +35,16 @@ internal static class SkillMultipliers
     /// <summary>Item 057 (PA-01-08): nome PT da classe local — p/ o fallback <c>ClassIdentities.Local()</c> não degradar pt→EN.</summary>
     public static string? ClassNamePt => _classNamePt;
 
+    /// <summary>Item 068: description localizada da classe (en/pt), resolvida pelo idioma do EFT. Null se ausente.</summary>
+    public static string? Description => _descriptionEn == null && _descriptionPt == null
+        ? null
+        : (GameLocale.IsPortuguese ? (_descriptionPt ?? _descriptionEn) : (_descriptionEn ?? _descriptionPt));
+
+    /// <summary>Item 068: description CRUA en/pt — p/ <c>ClassIdentities.Local()</c> propagar sem degradar idioma.</summary>
+    public static string? DescriptionEn => _descriptionEn;
+    public static string? DescriptionPt => _descriptionPt;
+    private static string? _descriptionEn, _descriptionPt;
+
     /// <summary>Item 050: true se a classe do perfil local é <paramref name="nameEn"/> (compara o nome EN estável, case-insensitive).</summary>
     public static bool IsLocalClass(string nameEn)
     {
@@ -105,6 +115,8 @@ internal static class SkillMultipliers
         Nickname = null;
         IconFile = null;
         _serverNameColor = null;   // 067: cor crua do server (o override vive no F12, não é resetado aqui)
+        _descriptionEn = null;   // item 068
+        _descriptionPt = null;   // item 068
         _loaded = false;
     }
 
@@ -161,6 +173,8 @@ internal static class SkillMultipliers
         Nickname = payload.Nickname;
         IconFile = payload.IconFile;
         _serverNameColor = payload.NameColor;   // 067: guarda o valor CRU; NameColor resolve o override do F12
+        _descriptionEn = payload.DescriptionEn;   // item 068
+        _descriptionPt = payload.DescriptionPt;   // item 068
 
         foreach (var kv in payload.Multipliers ?? new Dictionary<string, double>())
         {
@@ -192,6 +206,8 @@ internal static class SkillMultipliers
         [JsonProperty("nickname")] public string? Nickname { get; set; }
         [JsonProperty("iconFile")] public string? IconFile { get; set; }
         [JsonProperty("nameColor")] public string? NameColor { get; set; }
+        [JsonProperty("descriptionEn")] public string? DescriptionEn { get; set; }   // item 068
+        [JsonProperty("descriptionPt")] public string? DescriptionPt { get; set; }   // item 068
         [JsonProperty("multipliers")] public Dictionary<string, double>? Multipliers { get; set; }
     }
 }

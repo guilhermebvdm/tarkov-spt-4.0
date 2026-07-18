@@ -289,7 +289,9 @@ public class ClassRegistrar(
         // junto de templates[name] = sides — assim o router só expõe identidade de classes realmente registradas.
         // Item 008 (i18n): nome localizado en/pt (fallback ao próprio name) p/ o client resolver pelo idioma do EFT.
         var def = plan.Definition;
-        classVisualRegistry.Set(plan.Name, def.IconFile, def.NameColor, def.DisplayName?.En, def.DisplayName?.Pt);
+        // Item 068: a description en/pt viaja junto p/ o client mostrar na aba CLASS + tooltip (não só no launcher).
+        classVisualRegistry.Set(plan.Name, def.IconFile, def.NameColor, def.DisplayName?.En, def.DisplayName?.Pt,
+            def.Description?.En, def.Description?.Pt);
 
         // Item 058: grava a chave EFETIVA registrada a partir deste arquivo (com language=pt/en o boot
         // re-chaveia p/ displayName[lang]) — consumida pelo ClassListRouter (editionKey do contrato SP0).

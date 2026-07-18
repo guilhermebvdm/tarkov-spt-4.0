@@ -20,6 +20,12 @@ internal static class ClassIdentities
         public string? NameEn, NamePt, IconFile;
         public string? DisplayName => GameLocale.IsPortuguese ? (NamePt ?? NameEn) : (NameEn ?? NamePt);
 
+        // item 068: description localizada (en/pt), resolvida pelo idioma do EFT — aba CLASS + tooltip.
+        public string? DescriptionEn, DescriptionPt;
+        public string? Description => DescriptionEn == null && DescriptionPt == null
+            ? null
+            : (GameLocale.IsPortuguese ? (DescriptionPt ?? DescriptionEn) : (DescriptionEn ?? DescriptionPt));
+
         // 067: NameColor resolve o override do F12 (por classe, keyed no NameEn) → fallback da cor CRUA do
         // server (o setter grava _serverNameColor). Assim todo consumidor de Identity.NameColor pega o override
         // sem tocar em patch nenhum. O getter é lazy (relido a cada acesso) — mudança no F12 vale na hora.
@@ -148,6 +154,8 @@ internal static class ClassIdentities
                 // 067: cor CRUA do server (não a já resolvida) → o getter da Identity resolve o override 1× por
                 // cima, sem dupla resolução nem risco de fixar um hex de override obsoleto no fallback.
                 NameColor = SkillMultipliers.ServerNameColor,
+                DescriptionEn = SkillMultipliers.DescriptionEn,   // item 068
+                DescriptionPt = SkillMultipliers.DescriptionPt,   // item 068
             };
     }
 
@@ -195,6 +203,8 @@ internal static class ClassIdentities
                         NamePt = p.ClassNamePt,
                         IconFile = p.IconFile,
                         NameColor = p.NameColor,
+                        DescriptionEn = p.DescriptionEn,   // item 068
+                        DescriptionPt = p.DescriptionPt,   // item 068
                     };
                 }
             }
@@ -243,5 +253,7 @@ internal static class ClassIdentities
         [JsonProperty("classNamePt")] public string? ClassNamePt { get; set; }
         [JsonProperty("iconFile")]    public string? IconFile { get; set; }
         [JsonProperty("nameColor")]   public string? NameColor { get; set; }
+        [JsonProperty("descriptionEn")] public string? DescriptionEn { get; set; }   // item 068
+        [JsonProperty("descriptionPt")] public string? DescriptionPt { get; set; }   // item 068
     }
 }

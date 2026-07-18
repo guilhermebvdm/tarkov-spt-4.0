@@ -105,6 +105,25 @@ internal static class PerksPanelView
         htmp.alignment = TextAlignmentOptions.Left;
         htmp.raycastTarget = false;
 
+        // 068: linha de descrição/mérito da classe (flavor), abaixo do header e acima das colunas. Texto vem do
+        // .jsonc via a rota (identity.Description), setado no Refresh; começa oculta (só aparece se houver texto).
+        var flavorGo = new GameObject("FlavorText", typeof(RectTransform), typeof(TextMeshProUGUI), typeof(LayoutElement));
+        flavorGo.transform.SetParent(go.transform, false);
+        var flavorTmp = flavorGo.GetComponent<TextMeshProUGUI>();
+        if (font != null)
+        {
+            flavorTmp.font = font;
+        }
+
+        flavorTmp.fontSize = 15f;
+        flavorTmp.richText = true;
+        flavorTmp.raycastTarget = false;
+        flavorTmp.enableWordWrapping = true;
+        flavorTmp.fontStyle = FontStyles.Italic;
+        flavorTmp.alignment = TextAlignmentOptions.TopLeft;
+        flavorTmp.color = new Color(0.62f, 0.64f, 0.67f, 1f);
+        flavorGo.SetActive(false);
+
         // 059: Columns — 2 colunas lado a lado. PerksCol (esquerda) / DrawbacksCol (direita).
         var columns = new GameObject("Columns", typeof(RectTransform), typeof(HorizontalLayoutGroup));
         columns.transform.SetParent(go.transform, false);
@@ -235,6 +254,21 @@ internal static class PerksPanelView
                 ? sub
                 : $"<b><color={classHex}>{name!.ToUpperInvariant()}</color></b>   <size=55%><color=#7a7a7a><i>{sub}</i></color></size>";
 
+            // 068: descrição/mérito da classe (do .jsonc). Aparece pra qualquer classe com description; para o
+            // Peladão (sem perks) é o conteúdo principal da aba, em vez de "classe sem perks".
+            var flavorTmp = panel.transform.Find("FlavorText")?.GetComponent<TextMeshProUGUI>();
+            if (flavorTmp != null)
+            {
+                var desc = identity?.Description;
+                var hasDesc = !string.IsNullOrWhiteSpace(desc);
+                flavorTmp.gameObject.SetActive(hasDesc);
+                if (hasDesc)
+                {
+                    // <noparse>: description é prosa autorada — evita que um '<'/'>'/'&' vire tag/entidade TMP.
+                    flavorTmp.text = $"<noparse>{desc}</noparse>";
+                }
+            }
+
             // limpa as duas colunas e reconstrói.
             ClearChildren(perksCol);
             ClearChildren(drawbacksCol);
@@ -242,10 +276,21 @@ internal static class PerksPanelView
             var groups = PerksCatalog.GroupsFor(identity?.NameEn);
             if (groups == null || groups.Length == 0)
             {
-                // vanilla (edge raro — classe não-mod): mensagem na coluna esquerda.
-                BuildMessageCard(perksCol, font, GameLocale.IsPortuguese
-                    ? "Classe vanilla — sem perks/drawbacks."
-                    : "Vanilla class — no perks/drawbacks.");
+                // 068: distingue classe do MOD sem perks (Peladão — identidade raiz deliberada) de classe VANILLA
+                // real (identity null). Se a classe do mod já tem descrição (mérito na FlavorText), NÃO repete um
+                // card "sem perks" (redundante); só mostra a nota funcional quando não há descrição pra cobrir.
+                if (identity == null)
+                {
+                    BuildMessageCard(perksCol, font, GameLocale.IsPortuguese
+                        ? "Classe vanilla — sem perks/drawbacks."
+                        : "Vanilla class — no perks/drawbacks.");
+                }
+                else if (string.IsNullOrWhiteSpace(identity.Description))
+                {
+                    BuildMessageCard(perksCol, font, GameLocale.IsPortuguese
+                        ? "Sem perks nem drawbacks — e é essa a graça."
+                        : "No perks, no drawbacks — that's the point.");
+                }
             }
             else
             {

@@ -27,6 +27,13 @@ public sealed record SkillMultipliersResponse
     [JsonPropertyName("nameColor")]
     public string? NameColor { get; init; }   // item 011: cor do nome da classe (hex #RRGGBB)
 
+    // item 068: description localizada en/pt (do .jsonc) — client resolve pelo idioma do EFT (aba CLASS + tooltip).
+    [JsonPropertyName("descriptionEn")]
+    public string? DescriptionEn { get; init; }
+
+    [JsonPropertyName("descriptionPt")]
+    public string? DescriptionPt { get; init; }
+
     [JsonPropertyName("multipliers")]
     public Dictionary<string, double>? Multipliers { get; init; }
 }

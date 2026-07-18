@@ -67,6 +67,8 @@ public class SkillMultipliersRouter : StaticRouter
                         Nickname = profile?.CharacterData?.PmcData?.Info?.Nickname,
                         IconFile = visual?.IconFile,
                         NameColor = visual?.NameColor,
+                        DescriptionEn = isClass ? visual?.DescriptionEn : null,   // item 068
+                        DescriptionPt = isClass ? visual?.DescriptionPt : null,   // item 068
                         Multipliers = registry.Get(edition),
                     };
                     var json = jsonUtil.Serialize(dto) ?? "{}";

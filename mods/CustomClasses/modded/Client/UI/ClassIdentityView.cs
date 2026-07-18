@@ -195,12 +195,21 @@ internal static class ClassIdentityView
         return Mathf.Clamp(fontSize * ratio, MinIconPx, MaxIconPx);
     }
 
-    /// <summary>(015) Texto do tooltip "This player is &lt;classe&gt;" (i18n EN/PT) com o nome da classe colorido.</summary>
-    public static string BuildTooltip(string className, string? nameColor, Color fallback)
+    /// <summary>(015) Texto do tooltip "This player is &lt;classe&gt;" (i18n EN/PT) com o nome da classe colorido.
+    /// 068: se houver <paramref name="description"/> (do .jsonc, resolvida por idioma), anexa numa 2ª linha esmaecida.</summary>
+    public static string BuildTooltip(string className, string? nameColor, Color fallback, string? description = null)
     {
         var hex = "#" + ColorUtility.ToHtmlStringRGB(ResolveColor(nameColor, fallback));
         var prefix = GameLocale.IsPortuguese ? "Este jogador é " : "This player is ";   // item 008: segue o idioma do EFT
-        return $"{prefix}<color={hex}>{className}</color>";
+        var line = $"{prefix}<color={hex}>{className}</color>";
+        if (!string.IsNullOrWhiteSpace(description))
+        {
+            // <noparse>: description é prosa autorada — um '<'/'>'/'&' (ex.: "HP < 50%") viraria tag/entidade e
+            // quebraria o render TMP. noparse a trata como literal, sem desabilitar o <i>/<color> de fora.
+            line += $"\n<size=85%><color=#9a9a9a><i><noparse>{description}</noparse></i></color></size>";
+        }
+
+        return line;
     }
 
     /// <summary>Cria (1x) ou atualiza o selo como filho de <paramref name="parent"/>. Retorna o GameObject do container.</summary>

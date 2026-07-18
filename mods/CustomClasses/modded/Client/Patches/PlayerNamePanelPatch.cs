@@ -63,7 +63,7 @@ internal class PlayerNamePanelPatch : ModulePatch
                 }
 
                 ClassTooltip.Attach(label.gameObject,
-                    ClassIdentityView.BuildTooltip(SkillMultipliers.ClassName!, SkillMultipliers.NameColor, Color.white));
+                    ClassIdentityView.BuildTooltip(SkillMultipliers.ClassName!, SkillMultipliers.NameColor, Color.white, SkillMultipliers.Description));   // 068
             }
 
             // Ícone da classe (tint silhueta) — o _icon é um ChatSpecialIcon (playerName null aqui).

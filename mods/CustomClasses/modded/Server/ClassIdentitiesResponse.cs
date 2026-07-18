@@ -30,4 +30,11 @@ public sealed record PlayerClassIdentity
 
     [JsonPropertyName("nameColor")]
     public string? NameColor { get; init; }   // hex #RRGGBB
+
+    // item 068: description localizada en/pt — usada no tooltip por-player (popover do deploy/loading).
+    [JsonPropertyName("descriptionEn")]
+    public string? DescriptionEn { get; init; }
+
+    [JsonPropertyName("descriptionPt")]
+    public string? DescriptionPt { get; init; }
 }

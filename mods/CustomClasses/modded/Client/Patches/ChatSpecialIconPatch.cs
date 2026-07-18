@@ -96,7 +96,7 @@ internal class ChatSpecialIconPatch : ModulePatch
             if (!string.IsNullOrEmpty(display))
             {
                 ClassTooltip.Attach(____specialLabel.gameObject,
-                    ClassIdentityView.BuildTooltip(display!, id.NameColor, Color.white));
+                    ClassIdentityView.BuildTooltip(display!, id.NameColor, Color.white, id.Description));   // 068
             }
         }
         catch (Exception ex)
