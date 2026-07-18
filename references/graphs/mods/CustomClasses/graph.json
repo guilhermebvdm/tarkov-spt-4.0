@@ -620,7 +620,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_calmsightspatch",
-      "community": 108,
+      "community": 90,
       "norm_label": "calmsightspatch.cs"
     },
     {
@@ -630,7 +630,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "patches_calmsightspatch_calmsightspatch",
-      "community": 108,
+      "community": 90,
       "norm_label": "calmsightspatch"
     },
     {
@@ -640,7 +640,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "patches_calmsightspatch_calmsightspatch_gettargetmethod",
-      "community": 108,
+      "community": 90,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -650,7 +650,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "client_patches_calmsightspatch_cs_methodbase",
-      "community": 108,
+      "community": 90,
       "norm_label": "methodbase"
     },
     {
@@ -930,7 +930,7 @@
       "source_location": "L134",
       "_origin": "ast",
       "id": "patches_classcombathealthpatches_ironlungspatch",
-      "community": 112,
+      "community": 79,
       "norm_label": "ironlungspatch"
     },
     {
@@ -940,7 +940,7 @@
       "source_location": "L136",
       "_origin": "ast",
       "id": "playerphysicalclass",
-      "community": 112,
+      "community": 79,
       "norm_label": "playerphysicalclass"
     },
     {
@@ -950,7 +950,7 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "client_patches_classcombathealthpatches_cs_float",
-      "community": 112,
+      "community": 79,
       "norm_label": "float"
     },
     {
@@ -970,7 +970,7 @@
       "source_location": "L144",
       "_origin": "ast",
       "id": "patches_classcombathealthpatches_ironlungspatch_postfix",
-      "community": 112,
+      "community": 79,
       "norm_label": ".postfix()"
     },
     {
@@ -980,7 +980,7 @@
       "source_location": "L144",
       "_origin": "ast",
       "id": "client_patches_classcombathealthpatches_cs_patchpostfix",
-      "community": 112,
+      "community": 79,
       "norm_label": "patchpostfix"
     },
     {
@@ -1010,7 +1010,7 @@
       "source_location": "L185",
       "_origin": "ast",
       "id": "patches_classcombathealthpatches_malfunctionchancepatch_postfix",
-      "community": 112,
+      "community": 79,
       "norm_label": ".postfix()"
     },
     {
@@ -1020,7 +1020,7 @@
       "source_location": "L185",
       "_origin": "ast",
       "id": "client_patches_classcombathealthpatches_cs_firearmcontroller",
-      "community": 112,
+      "community": 79,
       "norm_label": "firearmcontroller"
     },
     {
@@ -1737,7 +1737,7 @@
       "label": "MaxSpeedPatch",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMovementPatches.cs",
-      "source_location": "L86",
+      "source_location": "L97",
       "_origin": "ast",
       "id": "patches_classmovementpatches_maxspeedpatch",
       "community": 81,
@@ -1747,7 +1747,7 @@
       "label": ".GetTargetMethod()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMovementPatches.cs",
-      "source_location": "L88",
+      "source_location": "L99",
       "_origin": "ast",
       "id": "patches_classmovementpatches_maxspeedpatch_gettargetmethod",
       "community": 81,
@@ -1757,7 +1757,7 @@
       "label": "MethodBase",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMovementPatches.cs",
-      "source_location": "L88",
+      "source_location": "L99",
       "_origin": "ast",
       "id": "client_patches_classmovementpatches_cs_methodbase",
       "community": 81,
@@ -1767,7 +1767,7 @@
       "label": ".Postfix()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMovementPatches.cs",
-      "source_location": "L93",
+      "source_location": "L104",
       "_origin": "ast",
       "id": "patches_classmovementpatches_maxspeedpatch_postfix",
       "community": 81,
@@ -1777,7 +1777,7 @@
       "label": "PatchPostfix",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMovementPatches.cs",
-      "source_location": "L93",
+      "source_location": "L104",
       "_origin": "ast",
       "id": "client_patches_classmovementpatches_cs_patchpostfix",
       "community": 81,
@@ -1787,7 +1787,7 @@
       "label": "SprintingSpeedPatch",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMovementPatches.cs",
-      "source_location": "L107",
+      "source_location": "L122",
       "_origin": "ast",
       "id": "patches_classmovementpatches_sprintingspeedpatch",
       "community": 81,
@@ -1797,7 +1797,7 @@
       "label": ".GetTargetMethod()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMovementPatches.cs",
-      "source_location": "L109",
+      "source_location": "L124",
       "_origin": "ast",
       "id": "patches_classmovementpatches_sprintingspeedpatch_gettargetmethod",
       "community": 81,
@@ -1807,7 +1807,7 @@
       "label": ".Postfix()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMovementPatches.cs",
-      "source_location": "L114",
+      "source_location": "L129",
       "_origin": "ast",
       "id": "patches_classmovementpatches_sprintingspeedpatch_postfix",
       "community": 81,
@@ -1817,7 +1817,7 @@
       "label": "OverladenInertiaPatch",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMovementPatches.cs",
-      "source_location": "L122",
+      "source_location": "L137",
       "_origin": "ast",
       "id": "patches_classmovementpatches_overladeninertiapatch",
       "community": 81,
@@ -1827,7 +1827,7 @@
       "label": ".GetTargetMethod()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMovementPatches.cs",
-      "source_location": "L124",
+      "source_location": "L139",
       "_origin": "ast",
       "id": "patches_classmovementpatches_overladeninertiapatch_gettargetmethod",
       "community": 81,
@@ -1837,7 +1837,7 @@
       "label": ".Postfix()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMovementPatches.cs",
-      "source_location": "L129",
+      "source_location": "L148",
       "_origin": "ast",
       "id": "patches_classmovementpatches_overladeninertiapatch_postfix",
       "community": 81,
@@ -1847,11 +1847,91 @@
       "label": "BasePhysicalClass",
       "file_type": "code",
       "source_file": "Client/Patches/ClassMovementPatches.cs",
-      "source_location": "L129",
+      "source_location": "L148",
       "_origin": "ast",
       "id": "basephysicalclass",
       "community": 81,
       "norm_label": "basephysicalclass"
+    },
+    {
+      "label": "RootedAimSlowdownPatch",
+      "file_type": "code",
+      "source_file": "Client/Patches/ClassMovementPatches.cs",
+      "source_location": "L201",
+      "_origin": "ast",
+      "id": "patches_classmovementpatches_rootedaimslowdownpatch",
+      "community": 81,
+      "norm_label": "rootedaimslowdownpatch"
+    },
+    {
+      "label": ".GetTargetMethod()",
+      "file_type": "code",
+      "source_file": "Client/Patches/ClassMovementPatches.cs",
+      "source_location": "L203",
+      "_origin": "ast",
+      "id": "patches_classmovementpatches_rootedaimslowdownpatch_gettargetmethod",
+      "community": 81,
+      "norm_label": ".gettargetmethod()"
+    },
+    {
+      "label": ".Prefix()",
+      "file_type": "code",
+      "source_file": "Client/Patches/ClassMovementPatches.cs",
+      "source_location": "L208",
+      "_origin": "ast",
+      "id": "patches_classmovementpatches_rootedaimslowdownpatch_prefix",
+      "community": 81,
+      "norm_label": ".prefix()"
+    },
+    {
+      "label": "PatchPrefix",
+      "file_type": "code",
+      "source_file": "Client/Patches/ClassMovementPatches.cs",
+      "source_location": "L208",
+      "_origin": "ast",
+      "id": "client_patches_classmovementpatches_cs_patchprefix",
+      "community": 81,
+      "norm_label": "patchprefix"
+    },
+    {
+      "label": "ExecutionSpeedCapPatch",
+      "file_type": "code",
+      "source_file": "Client/Patches/ClassMovementPatches.cs",
+      "source_location": "L251",
+      "_origin": "ast",
+      "id": "patches_classmovementpatches_executionspeedcappatch",
+      "community": 81,
+      "norm_label": "executionspeedcappatch"
+    },
+    {
+      "label": ".GetTargetMethod()",
+      "file_type": "code",
+      "source_file": "Client/Patches/ClassMovementPatches.cs",
+      "source_location": "L253",
+      "_origin": "ast",
+      "id": "patches_classmovementpatches_executionspeedcappatch_gettargetmethod",
+      "community": 81,
+      "norm_label": ".gettargetmethod()"
+    },
+    {
+      "label": ".Postfix()",
+      "file_type": "code",
+      "source_file": "Client/Patches/ClassMovementPatches.cs",
+      "source_location": "L258",
+      "_origin": "ast",
+      "id": "patches_classmovementpatches_executionspeedcappatch_postfix",
+      "community": 81,
+      "norm_label": ".postfix()"
+    },
+    {
+      "label": "GClass2175",
+      "file_type": "code",
+      "source_file": "Client/Patches/ClassMovementPatches.cs",
+      "source_location": "L258",
+      "_origin": "ast",
+      "id": "gclass2175",
+      "community": 81,
+      "norm_label": "gclass2175"
     },
     {
       "label": "ClassSoundPatches.cs",
@@ -2410,7 +2490,7 @@
       "source_location": "L240",
       "_origin": "ast",
       "id": "patches_classweaponpatches_aimpunchpatch_prefix",
-      "community": 90,
+      "community": 111,
       "norm_label": ".prefix()"
     },
     {
@@ -2420,14 +2500,14 @@
       "source_location": "L240",
       "_origin": "ast",
       "id": "forceeffector",
-      "community": 90,
+      "community": 111,
       "norm_label": "forceeffector"
     },
     {
       "label": "LocalHitTypePatch",
       "file_type": "code",
       "source_file": "Client/Patches/ClassWeaponPatches.cs",
-      "source_location": "L282",
+      "source_location": "L289",
       "_origin": "ast",
       "id": "patches_classweaponpatches_localhittypepatch",
       "community": 90,
@@ -2437,7 +2517,7 @@
       "label": "float",
       "file_type": "code",
       "source_file": "Client/Patches/ClassWeaponPatches.cs",
-      "source_location": "L287",
+      "source_location": "L294",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_float",
       "community": 90,
@@ -2447,7 +2527,7 @@
       "label": ".GetTargetMethod()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassWeaponPatches.cs",
-      "source_location": "L289",
+      "source_location": "L296",
       "_origin": "ast",
       "id": "patches_classweaponpatches_localhittypepatch_gettargetmethod",
       "community": 90,
@@ -2457,7 +2537,7 @@
       "label": ".Prefix()",
       "file_type": "code",
       "source_file": "Client/Patches/ClassWeaponPatches.cs",
-      "source_location": "L294",
+      "source_location": "L301",
       "_origin": "ast",
       "id": "patches_classweaponpatches_localhittypepatch_prefix",
       "community": 111,
@@ -2770,7 +2850,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_ontriggerpatch",
-      "community": 90,
+      "community": 83,
       "norm_label": "ontriggerpatch.cs"
     },
     {
@@ -2780,7 +2860,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "patches_ontriggerpatch_ontriggerpatch",
-      "community": 90,
+      "community": 83,
       "norm_label": "ontriggerpatch"
     },
     {
@@ -2790,7 +2870,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "patches_ontriggerpatch_ontriggerpatch_gettargetmethod",
-      "community": 90,
+      "community": 83,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2800,7 +2880,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "client_patches_ontriggerpatch_cs_methodbase",
-      "community": 90,
+      "community": 83,
       "norm_label": "methodbase"
     },
     {
@@ -3367,7 +3447,7 @@
       "label": ".ShowAfterLoad()",
       "file_type": "code",
       "source_file": "Client/Patches/RaidPerksNotificationPatch.cs",
-      "source_location": "L90",
+      "source_location": "L94",
       "_origin": "ast",
       "id": "patches_raidperksnotificationpatch_raidperksnotificationpatch_showafterload",
       "community": 85,
@@ -3377,7 +3457,7 @@
       "label": "IEnumerator",
       "file_type": "code",
       "source_file": "Client/Patches/RaidPerksNotificationPatch.cs",
-      "source_location": "L90",
+      "source_location": "L94",
       "_origin": "ast",
       "id": "client_patches_raidperksnotificationpatch_cs_ienumerator",
       "community": 85,
@@ -5597,7 +5677,7 @@
       "label": ".OnGUI()",
       "file_type": "code",
       "source_file": "Client/Plugin.cs",
-      "source_location": "L246",
+      "source_location": "L256",
       "_origin": "ast",
       "id": "client_plugin_plugin_ongui",
       "community": 39,
@@ -5607,7 +5687,7 @@
       "label": ".OnDestroy()",
       "file_type": "code",
       "source_file": "Client/Plugin.cs",
-      "source_location": "L251",
+      "source_location": "L261",
       "_origin": "ast",
       "id": "client_plugin_plugin_ondestroy",
       "community": 39,
@@ -5617,7 +5697,7 @@
       "label": ".RepositionSeals()",
       "file_type": "code",
       "source_file": "Client/Plugin.cs",
-      "source_location": "L261",
+      "source_location": "L271",
       "_origin": "ast",
       "id": "client_plugin_plugin_repositionseals",
       "community": 39,
@@ -8024,10 +8104,40 @@
       "norm_label": "routeaction"
     },
     {
+      "label": ".BuildEffects()",
+      "file_type": "code",
+      "source_file": "Server/ClassListRouter.cs",
+      "source_location": "L127",
+      "_origin": "ast",
+      "id": "server_classlistrouter_classlistrouter_buildeffects",
+      "community": 37,
+      "norm_label": ".buildeffects()"
+    },
+    {
+      "label": "IReadOnlyList",
+      "file_type": "code",
+      "source_file": "Server/ClassListRouter.cs",
+      "source_location": "L127",
+      "_origin": "ast",
+      "id": "server_classlistrouter_cs_ireadonlylist",
+      "community": 37,
+      "norm_label": "ireadonlylist"
+    },
+    {
+      "label": "ClassEffect",
+      "file_type": "code",
+      "source_file": "Server/ClassListRouter.cs",
+      "source_location": "L127",
+      "_origin": "ast",
+      "id": "classeffect",
+      "community": 37,
+      "norm_label": "classeffect"
+    },
+    {
       "label": ".NormalizeSkills()",
       "file_type": "code",
       "source_file": "Server/ClassListRouter.cs",
-      "source_location": "L122",
+      "source_location": "L155",
       "_origin": "ast",
       "id": "server_classlistrouter_classlistrouter_normalizeskills",
       "community": 37,
@@ -8037,7 +8147,7 @@
       "label": "Dictionary",
       "file_type": "code",
       "source_file": "Server/ClassListRouter.cs",
-      "source_location": "L122",
+      "source_location": "L155",
       "_origin": "ast",
       "id": "server_classlistrouter_cs_dictionary",
       "community": 37,
@@ -9632,6 +9742,106 @@
       "id": "customization",
       "community": 36,
       "norm_label": "customization"
+    },
+    {
+      "label": "PerksCatalogData.cs",
+      "file_type": "code",
+      "source_file": "Server/PerksCatalogData.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "server_perkscatalogdata",
+      "community": 112,
+      "norm_label": "perkscatalogdata.cs"
+    },
+    {
+      "label": "PerksCatalogData",
+      "file_type": "code",
+      "source_file": "Server/PerksCatalogData.cs",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "server_perkscatalogdata_perkscatalogdata",
+      "community": 112,
+      "norm_label": "perkscatalogdata"
+    },
+    {
+      "label": ".P()",
+      "file_type": "code",
+      "source_file": "Server/PerksCatalogData.cs",
+      "source_location": "L29",
+      "_origin": "ast",
+      "id": "server_perkscatalogdata_perkscatalogdata_p",
+      "community": 112,
+      "norm_label": ".p()"
+    },
+    {
+      "label": "Fmt",
+      "file_type": "code",
+      "source_file": "Server/PerksCatalogData.cs",
+      "source_location": "L29",
+      "_origin": "ast",
+      "id": "fmt",
+      "community": 112,
+      "norm_label": "fmt"
+    },
+    {
+      "label": "Pol",
+      "file_type": "code",
+      "source_file": "Server/PerksCatalogData.cs",
+      "source_location": "L29",
+      "_origin": "ast",
+      "id": "pol",
+      "community": 112,
+      "norm_label": "pol"
+    },
+    {
+      "label": "Line",
+      "file_type": "code",
+      "source_file": "Server/PerksCatalogData.cs",
+      "source_location": "L29",
+      "_origin": "ast",
+      "id": "line",
+      "community": 112,
+      "norm_label": "line"
+    },
+    {
+      "label": ".Fl()",
+      "file_type": "code",
+      "source_file": "Server/PerksCatalogData.cs",
+      "source_location": "L32",
+      "_origin": "ast",
+      "id": "server_perkscatalogdata_perkscatalogdata_fl",
+      "community": 112,
+      "norm_label": ".fl()"
+    },
+    {
+      "label": "Dictionary",
+      "file_type": "code",
+      "source_file": "Server/PerksCatalogData.cs",
+      "source_location": "L40",
+      "_origin": "ast",
+      "id": "server_perkscatalogdata_cs_dictionary",
+      "community": 112,
+      "norm_label": "dictionary"
+    },
+    {
+      "label": ".IsPerk()",
+      "file_type": "code",
+      "source_file": "Server/PerksCatalogData.cs",
+      "source_location": "L97",
+      "_origin": "ast",
+      "id": "server_perkscatalogdata_perkscatalogdata_isperk",
+      "community": 112,
+      "norm_label": ".isperk()"
+    },
+    {
+      "label": ".ValueToken()",
+      "file_type": "code",
+      "source_file": "Server/PerksCatalogData.cs",
+      "source_location": "L105",
+      "_origin": "ast",
+      "id": "server_perkscatalogdata_perkscatalogdata_valuetoken",
+      "community": 112,
+      "norm_label": ".valuetoken()"
     },
     {
       "label": "SkillMaster.cs",
@@ -17956,6 +18166,16 @@
       "relation": "inherits",
       "confidence": "EXTRACTED",
       "source_file": "Client/Patches/ClassMovementPatches.cs",
+      "source_location": "L251",
+      "weight": 1.0,
+      "source": "patches_classmovementpatches_executionspeedcappatch",
+      "target": "modulepatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMovementPatches.cs",
       "source_location": "L57",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -17971,6 +18191,16 @@
       "confidence_score": 1.0,
       "source": "patches_classmovementpatches_overladeninertiapatch",
       "target": "modulepatch"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMovementPatches.cs",
+      "source_location": "L201",
+      "weight": 1.0,
+      "source": "patches_classmovementpatches_rootedaimslowdownpatch",
+      "target": "modulepatch",
+      "confidence_score": 1.0
     },
     {
       "relation": "inherits",
@@ -20046,6 +20276,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "Client/Patches/ClassMovementPatches.cs",
+      "source_location": "L251",
+      "weight": 1.0,
+      "source": "patches_classmovementpatches",
+      "target": "patches_classmovementpatches_executionspeedcappatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMovementPatches.cs",
       "source_location": "L57",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -20061,6 +20301,16 @@
       "confidence_score": 1.0,
       "source": "patches_classmovementpatches",
       "target": "patches_classmovementpatches_overladeninertiapatch"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMovementPatches.cs",
+      "source_location": "L201",
+      "weight": 1.0,
+      "source": "patches_classmovementpatches",
+      "target": "patches_classmovementpatches_rootedaimslowdownpatch",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -20130,6 +20380,17 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Client/Patches/ClassMovementPatches.cs",
+      "source_location": "L208",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "patches_classmovementpatches_rootedaimslowdownpatch_prefix",
+      "target": "movementcontext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMovementPatches.cs",
       "source_location": "L106",
       "weight": 1.0,
       "context": "parameter_type",
@@ -20172,12 +20433,34 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Client/Patches/ClassMovementPatches.cs",
+      "source_location": "L253",
+      "weight": 1.0,
+      "context": "return_type",
+      "source": "patches_classmovementpatches_executionspeedcappatch_gettargetmethod",
+      "target": "client_patches_classmovementpatches_cs_methodbase",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMovementPatches.cs",
       "source_location": "L88",
       "weight": 1.0,
       "context": "return_type",
       "confidence_score": 1.0,
       "source": "patches_classmovementpatches_overladeninertiapatch_gettargetmethod",
       "target": "client_patches_classmovementpatches_cs_methodbase"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMovementPatches.cs",
+      "source_location": "L203",
+      "weight": 1.0,
+      "context": "return_type",
+      "source": "patches_classmovementpatches_rootedaimslowdownpatch_gettargetmethod",
+      "target": "client_patches_classmovementpatches_cs_methodbase",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -20200,6 +20483,17 @@
       "confidence_score": 1.0,
       "source": "patches_classmovementpatches_maxspeedpatch_postfix",
       "target": "client_patches_classmovementpatches_cs_patchpostfix"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMovementPatches.cs",
+      "source_location": "L258",
+      "weight": 1.0,
+      "context": "attribute",
+      "source": "patches_classmovementpatches_executionspeedcappatch_postfix",
+      "target": "client_patches_classmovementpatches_cs_patchpostfix",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -20273,6 +20567,68 @@
       "confidence_score": 1.0,
       "source": "patches_classmovementpatches_overladeninertiapatch_postfix",
       "target": "basephysicalclass"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMovementPatches.cs",
+      "source_location": "L203",
+      "weight": 1.0,
+      "source": "patches_classmovementpatches_rootedaimslowdownpatch",
+      "target": "patches_classmovementpatches_rootedaimslowdownpatch_gettargetmethod",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMovementPatches.cs",
+      "source_location": "L208",
+      "weight": 1.0,
+      "source": "patches_classmovementpatches_rootedaimslowdownpatch",
+      "target": "patches_classmovementpatches_rootedaimslowdownpatch_prefix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMovementPatches.cs",
+      "source_location": "L208",
+      "weight": 1.0,
+      "context": "attribute",
+      "source": "patches_classmovementpatches_rootedaimslowdownpatch_prefix",
+      "target": "client_patches_classmovementpatches_cs_patchprefix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMovementPatches.cs",
+      "source_location": "L253",
+      "weight": 1.0,
+      "source": "patches_classmovementpatches_executionspeedcappatch",
+      "target": "patches_classmovementpatches_executionspeedcappatch_gettargetmethod",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMovementPatches.cs",
+      "source_location": "L258",
+      "weight": 1.0,
+      "source": "patches_classmovementpatches_executionspeedcappatch",
+      "target": "patches_classmovementpatches_executionspeedcappatch_postfix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/ClassMovementPatches.cs",
+      "source_location": "L258",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "patches_classmovementpatches_executionspeedcappatch_postfix",
+      "target": "gclass2175",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -29522,6 +29878,16 @@
       "target": "server_classlistrouter_classlistrouter"
     },
     {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/ClassListRouter.cs",
+      "source_location": "L127",
+      "weight": 1.0,
+      "source": "server_classlistrouter_classlistrouter",
+      "target": "server_classlistrouter_classlistrouter_buildeffects",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Server/ClassListRouter.cs",
@@ -29552,6 +29918,17 @@
       "confidence_score": 1.0,
       "source": "server_classlistrouter_classlistrouter_getroutes",
       "target": "classeditionkeyregistry"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/ClassListRouter.cs",
+      "source_location": "L111",
+      "weight": 1.0,
+      "source": "server_classlistrouter_classlistrouter_getroutes",
+      "target": "server_classlistrouter_classlistrouter_buildeffects",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -29640,6 +30017,28 @@
       "confidence_score": 1.0,
       "source": "server_classlistrouter_classlistrouter_getroutes",
       "target": "server_classlistrouter_cs_skillmultiplierregistry"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/ClassListRouter.cs",
+      "source_location": "L127",
+      "weight": 1.0,
+      "context": "generic_arg",
+      "source": "server_classlistrouter_classlistrouter_buildeffects",
+      "target": "classeffect",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/ClassListRouter.cs",
+      "source_location": "L127",
+      "weight": 1.0,
+      "context": "return_type",
+      "source": "server_classlistrouter_classlistrouter_buildeffects",
+      "target": "server_classlistrouter_cs_ireadonlylist",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -32850,6 +33249,144 @@
       "confidence_score": 1.0,
       "source": "server_outfitbuilder_outfitbuilder_applypiece",
       "target": "server_outfitbuilder_cs_mongoid"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/PerksCatalogData.cs",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "server_perkscatalogdata",
+      "target": "server_perkscatalogdata_perkscatalogdata",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/PerksCatalogData.cs",
+      "source_location": "L40",
+      "weight": 1.0,
+      "context": "field",
+      "source": "server_perkscatalogdata_perkscatalogdata",
+      "target": "server_perkscatalogdata_cs_dictionary",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/PerksCatalogData.cs",
+      "source_location": "L32",
+      "weight": 1.0,
+      "source": "server_perkscatalogdata_perkscatalogdata",
+      "target": "server_perkscatalogdata_perkscatalogdata_fl",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/PerksCatalogData.cs",
+      "source_location": "L97",
+      "weight": 1.0,
+      "source": "server_perkscatalogdata_perkscatalogdata",
+      "target": "server_perkscatalogdata_perkscatalogdata_isperk",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/PerksCatalogData.cs",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "server_perkscatalogdata_perkscatalogdata",
+      "target": "server_perkscatalogdata_perkscatalogdata_p",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/PerksCatalogData.cs",
+      "source_location": "L105",
+      "weight": 1.0,
+      "source": "server_perkscatalogdata_perkscatalogdata",
+      "target": "server_perkscatalogdata_perkscatalogdata_valuetoken",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/PerksCatalogData.cs",
+      "source_location": "L29",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "server_perkscatalogdata_perkscatalogdata_p",
+      "target": "fmt",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/PerksCatalogData.cs",
+      "source_location": "L29",
+      "weight": 1.0,
+      "context": "return_type",
+      "source": "server_perkscatalogdata_perkscatalogdata_p",
+      "target": "line",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/PerksCatalogData.cs",
+      "source_location": "L29",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "server_perkscatalogdata_perkscatalogdata_p",
+      "target": "pol",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/PerksCatalogData.cs",
+      "source_location": "L32",
+      "weight": 1.0,
+      "context": "return_type",
+      "source": "server_perkscatalogdata_perkscatalogdata_fl",
+      "target": "line",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/PerksCatalogData.cs",
+      "source_location": "L97",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "server_perkscatalogdata_perkscatalogdata_isperk",
+      "target": "line",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/PerksCatalogData.cs",
+      "source_location": "L105",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "server_perkscatalogdata_perkscatalogdata_valuetoken",
+      "target": "line",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Server/PerksCatalogData.cs",
+      "source_location": "L110",
+      "weight": 1.0,
+      "source": "server_perkscatalogdata_perkscatalogdata_valuetoken",
+      "target": "server_perkscatalogdata_perkscatalogdata_isperk",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -40276,5 +40813,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "22d4f36d9cd6df068763a9e7e0af32abb2a3adab"
+  "built_at_commit": "9cf10fbc9c6a82559fb69c7475081761ae8bb802"
 }
