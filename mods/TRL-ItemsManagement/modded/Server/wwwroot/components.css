@@ -1927,7 +1927,7 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
 body.is-bulk-busy .main { opacity: .55; pointer-events: none; transition: opacity .15s; }
 
 /* ── Audit log modal ────────────────────────────────────────────────────────── */
-.modal--wide { width: 96vw; height: 92vh; max-height: 92vh; display: flex; flex-direction: column; }
+.modal--wide { width: min(880px, 94vw); height: 92vh; max-height: 92vh; display: flex; flex-direction: column; }
 .audit-log__filters { display: flex; gap: 8px; margin-bottom: 10px; flex: none; }
 .audit-log__filters select, .audit-log__filters input {
   height: 30px; padding: 0 8px; border-radius: var(--radius-sm);
