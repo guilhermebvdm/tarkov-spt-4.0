@@ -1,83 +1,132 @@
 # 017 — Transição Low/High Ready → ADS cirúrgica
 
 **Mod:** stancesAndCameraPositionSPT4.0.11
-**Status:** Backlog (⚪ — spec inicial, ainda não refinada)
+**Status:** Em progresso (spec refinada com a investigação técnica)
 **Criado:** 2026-07-17
 **Sandbox:** `modded/` canônico (o fork do realism foi descartado — ver [016](../016-transicao-realism-fork/)).
+**Investigação técnica:** [00-investigacao-tecnica.md](017-transicao-ads-cirurgica-00-investigacao-tecnica.md)
+(fatos confirmados via `ilspycmd` na DLL real).
 
 ## Visão geral
 
-Ataca os **2 bugs reais de transição** que motivavam o item 016, mas **sem** as curvas do Fontaine (o usuário
-testou o Fontaine standalone e não gostou). A abordagem aqui é **cirúrgica e própria**, desenhada pelo usuário
-(2026-07-17), operando sobre a mola existente em vez de trocar o motor.
+Ataca os **2 bugs reais de transição** que motivavam o item 016, com **abordagem própria** (o usuário testou o
+Fontaine standalone e não gostou; portar as curvas dele herdaria o rejeitado). Aqui **não se troca o motor** —
+opera-se sobre a mola existente, de forma cirúrgica. Os dois problemas são **independentes** e viram **fases
+separadas** (F1, F2) sob um passo 0 de instrumentação.
 
-Os dois problemas são **independentes** (podem virar sub-itens/fases separadas) e a régua de medição
-(`TransitionMetrics`, feita e descartada no 016) deve ser o **primeiro ataque** — reinstrumentar para medir
-antes de mexer.
+## F0 — Régua de medição (reinstrumentar)
 
-## Problema A — overshoot ao entrar em ADS (a mira "sobe demais" antes de assentar)
+A régua `TransitionMetrics` (feita e descartada com o fork do realism) volta como **`Debug Transition Metrics`**
+no `modded/` canônico. Sem número, "sobe demais" e "+30% do baseline" não são auditáveis.
 
-**Sintoma (usuário):**
-- **Low Ready → ADS:** a mira **sobe demais antes de descer** para posicionar no ponto correto do ADS.
-  **Pior em armas menores / mais leves.**
-- **High Ready → ADS:** problema análogo, mas invertido — faz uma **"onda" de cima para baixo** até assentar na
-  mira.
+- [ ] Portar a régua (versão já endurecida pelo code-review do 016: marcadores `(kick)`/`(chained)`/`(interrupted)`,
+      assentamento por tempo, origem por corpo).
+- [ ] **GATE (usuário): baseline do 2.5.0** — com `Debug Transition Metrics` on e `Stance Kick Intensity = 0`:
+      pico vertical (Z local) em **Stance2→ADS** e **Stance1→ADS**, arma leve (ex.: MP5/pistola) e arma longa;
+      ≥5 amostras/rota. Os "~5 cm" viram número. É contra ESTE baseline que a F1 é medida.
 
-**Causa (já diagnosticada no 016):** ao mirar, o alvo troca **na mesma mola** com **velocidade acumulada**; a mola
-é sub-amortecida (ζ≈0,49) e passa do alvo antes de assentar. A pose de Ready (cano baixo/alto) vai **direto** para
-o alvo de ADS (≈ zero), então o primeiro lóbulo da oscilação cruza a linha de mira.
+## F1 — Problema A: overshoot ao mirar (waypoint por Stance 0)
 
-**Ideia do usuário — waypoint por Stance 0:** em vez de ir **direto** Ready → ADS, fazer uma transição **rápida e
-smooth** para a **Stance 0 (Vanilla)** primeiro, e **depois** Ready→Stance 0→ADS. A passagem por Stance 0 (pose
-neutra, perto de zero) **assenta a velocidade** da mola antes do trecho final, então o trecho Stance 0 → ADS parte
-"do repouso", sem velocidade herdada que cause overshoot. Mesma solução vale para High Ready.
+**Sintoma:** Low Ready → ADS: a mira **sobe demais antes de descer** (pior em armas leves). High Ready → ADS:
+**"onda" de cima para baixo** até assentar.
+**Causa:** o alvo salta em 1 frame da pose de Ready para a de ADS na mesma mola sub-amortecida, com velocidade
+acumulada (ver investigação).
+**Solução:** ao entrar em ADS vindo de stance, **assentar a velocidade da mola** para o alvo de ADS ser
+alcançado sem overshoot. Implementado por corpo, **sem tocar `CurrentStance`**.
 
-**Notas de implementação (a refinar na tech-spec):**
-- O mod **já** tem precedente de forçar Stance 0: o item 013 (prone/mount) e o snap-on-fire. O waypoint reusa esse
-  conceito, mas como estágio de **transição**, não como troca de estado permanente — o `CurrentStance` não pode
-  virar Default (senão mexe em snap-on-fire/stamina/Fika/mount).
-- Provável forma: um alvo intermediário no pipeline de pose (o alvo vira Stance 0 por T ms, depois ADS), sem
-  tocar `CurrentStance`. Ou um 2º estágio na própria mola.
-- ⚠️ Verificar que não conflita com o `TransitionSpeedTracker` (stance vs ADS) nem com o kick de ADS-in.
+> ⚠️ **DESCOBERTA do review + config real (2026-07-17):** com a config do usuário (e o default de fábrica), **todos
+> os offsets de ADS = 0** → o alvo de ADS é `Vector3.zero`, que é **o mesmo** alvo da Stance 0. Ou seja: "passar por
+> Stance 0 antes do ADS" e "ir direto ao ADS" têm o **mesmo alvo** — um waypoint de *alvo* seria no-op. O que de
+> fato mata o overshoot é **zerar/amortecer `_rotVelocity`/`_posVelocity` ao entrar em ADS** (a mola vem da pose de
+> Ready com velocidade acumulada e passa do zero). Então a ideia do usuário ("waypoint por Stance 0") traduz-se
+> tecnicamente em **amortecer a velocidade no início do ADS** — e isso é *melhor* do que um waypoint literal: não
+> adiciona latência nem uma 2ª perna de trajetória. **Só quando o usuário configurar offsets de ADS ≠ 0** é que a
+> distinção "Stance 0 vs ADS" volta a existir e um waypoint de alvo teria efeito próprio (tratar como caso extra).
 
-## Problema B — braço esquerdo "quebra" em Low Ready → Stance 0 (armas longas)
+**Critérios de aceite:**
+- [ ] **Amortecer a velocidade no início do ADS é REQUISITO, não opcional** (achado do review): funciona mesmo com
+      os offsets de ADS no default `0f`, medido pela régua no baseline default E com ADS custom.
+- [ ] Vindo de Stance 1/2/3, mirar produz **desvio máximo vertical em relação à pose final de ADS ao longo de TODA
+      a trajetória ≤ 0,5 cm** (baseline F0 ~5 cm) — não só "além do alvo"; **≤ 1 cruzamento de sinal** na trajetória
+      inteira; tempo de assentamento **≤ +30%** do baseline.
+- [ ] **Responsividade não piora**: tempo até a mira atingir ≥ 90% do deslocamento rumo ao alvo de ADS **não pode
+      aumentar** vs. o baseline sem amortecimento (matar o overshoot não pode trocar por uma mira "mole"/em 2 tempos).
+- [ ] Sem a "onda" perceptível na High Ready → ADS (validação visual).
+- [ ] **Não toca `CurrentStance`**: snap-on-fire, stamina, speed-caps, mount e o pacote Fika inalterados (o
+      waypoint é trajetória visual, no molde do timer de ADS-kick — nunca `SetStance`).
+- [ ] **Só ativo com `_ResetOnADS = true`** (com `false` a pose continua em ADS, sem salto — waypoint desligado) e
+      **fora de prone**.
+- [ ] **Paridade Fika:** o observado passa pelo mesmo waypoint (helper compartilhado, armado na borda de mira do
+      pacote) — 1ª e 3ª pessoa não divergem. Pacote de rede **inalterado**.
+- [ ] Coexiste com o kick de ADS-in (0,15s) sem que um anule o outro (coordenar T × delay do kick / zeramento de
+      velocidade — decisão na tech-spec).
+- [ ] Toggle F12 `ADS Waypoint` (bool, default true) + `ADS Waypoint Time` (o T, faixa a definir). Nomes sem `=`.
 
-**Sintoma (usuário):** **apenas** de Low Ready → Stance 0 (não é o ADS), com **armas longas**. Ao mover para
-Stance 0, a arma **desloca um pouco para frente**; em arma longa, o braço esquerdo (que já está estendido na
-empunhadura dianteira) **hiperestende e "quebra"** a animação.
+## F2 — Problema B: braço esquerdo quebra (atenuar offset por comprimento)
 
-**Ideia do usuário — atenuar o offset longitudinal por comprimento de arma:** existem **pontos de fixação** do
-player na arma (os IK markers da mão no EFT). Se soubermos a **distância desses pontos** em relação ao boneco (ou
-em relação ao **tamanho da arma**), dá para fazer o movimento Low Ready → Stance 0 **não empurrar a arma para
-frente** tanto — atenuando o offset longitudinal em armas longas, evitando a hiperextensão.
+**Sintoma:** **só** de Low Ready → Stance 0, **armas longas**: o braço esquerdo **hiperestende e "quebra"**.
 
-**Notas de implementação (a refinar na tech-spec):**
-- Investigar no Assembly real: `HandsContainer.LeftHandIkMarker`/`RightHandIkMarker` (ou equivalente 0.16.x),
-  `Weapon.length`/comprimento efetivo, e como o EFT calcula o alcance do braço. O offset de posição da transição
-  é aplicado no `Weapon_Root_Anim` (validado no item 014) — o eixo "para frente" é o **Y local (longitudinal, o
-  cano)**.
-- Fórmula provável: escalar o componente longitudinal do offset da transição por um fator que cai com o
-  comprimento da arma (arma curta = offset cheio; arma longa = offset reduzido). Calibrar o ponto de corte
-  in-game.
-- **Distinguir de P-11.2** (braço deformado em **High Ready + G36 ao MIRAR**): aquele é na entrada de ADV; este
-  é Low Ready → Stance 0. Podem ter causa comum (offset longitudinal × alcance do braço em arma longa) — a
-  tech-spec deve verificar se um fix resolve os dois.
+> ⚠️ **CAUSA NÃO CONFIRMADA (achado do review + config real):** o usuário descreveu "a arma desloca para frente".
+> Mas a config real mostra Low Ready (Stance 2) com **Forward/Backward = +0.015** (positivo = frente) → ir para
+> Stance 0 (=0) move a arma **para TRÁS**, não para frente. E a Stance 2 tem **Up/Down = +0.07** e **Pitch = 25°** —
+> ao ir para Stance 0 a arma **desce 7 cm e roda 25° de pitch**. Portanto o "empurrão" percebido pode ser da
+> **rotação de pitch** ou do **Up/Down**, não do Forward/Backward. **A F2 começa com um diagnóstico (gate humano):
+> com a régua, medir QUAL eixo tem a maior excursão em Low Ready → Stance 0 com arma longa** — só então a atenuação
+> ataca o eixo certo. (Isto pode invalidar "atenuar Y local" e redirecionar para pitch/Up-Down.)
+**Solução:** ler `FirearmController.WeaponLn` (o comprimento que o EFT já calcula) e **escalar a componente
+longitudinal do offset da transição** por um fator que cai com o comprimento (arma longa = menos empurrão para
+frente). ⚠️ **Só LER o `WeaponLn`, nunca reescrever** (ele define a origem do projétil — erro que o Fontaine
+cometeu e reverteu).
+
+**Critérios de aceite:**
+- [ ] **GATE (usuário): diagnóstico do eixo** — régua on, arma longa, Low Ready → Stance 0: qual eixo (pitch /
+      Up-Down / Forward-Backward) tem a maior excursão? A atenuação ataca ESSE eixo, não "Y local" por suposição.
+- [ ] Low Ready → Stance 0 com arma longa (ex.: rifle full-length / DMR): o braço esquerdo **não hiperestende**
+      (validação visual, vídeo antes/depois).
+- [ ] Armas curtas (pistola/PDW) **inalteradas** — o fator só atenua acima de um limiar de comprimento.
+- [ ] A **pose final** (t=1) da transição continua a do slider — a atenuação afeta só a **trajetória**, não o
+      destino. (Régua confirma delta residual ≈ 0.)
+- [ ] `WeaponLn` lido por reflection **cacheada** (na troca de arma, não por frame); **nunca escrito**.
+- [ ] **Verificar parentesco com P-11.2** (braço G36 em High Ready ao mirar): se a mesma atenuação cobrir o G36,
+      fecha a P-11.2 junto; se não, P-11.2 segue como item separado.
+- [ ] Toggle F12 `Attenuate Push By Weapon Length` (bool, default true) + limiares de comprimento (faixa a definir).
+- [ ] Determinístico em Fika (por-arma local) — sem depender de estado de IK sincronizado.
+
+## Corner cases
+
+- [ ] **Trocar de arma no meio da transição** (curta↔longa): o fator de atenuação segue o `WeaponLn` cacheado da
+      arma atual; sem salto brusco.
+- [ ] **Waypoint interrompido** (soltar o ADS no meio do T; snap-on-fire durante o waypoint; trocar de stance
+      mirando): recaptura limpa, sem estado preso — a régua marca `(interrupted)`.
+- [ ] **Reset de raid / morte / extração:** o estado do waypoint e o cache de `WeaponLn` zeram (via
+      `StanceManager.ResetState`).
+- [ ] **Interação F1 × F2 (achado do review):** se a F1 assentar velocidade mas o alvo de ADS for custom (≠0) e
+      a arma for longa, a atenuação da F2 deve valer também para o trecho do ADS — senão a F1 pode reintroduzir a
+      hiperextensão da F2 por outro caminho. Verificar quando as duas fases estiverem juntas.
+- [ ] **`ApplySimpleRotationPatch`:** confirmar na tech-spec se o caminho "simples" é alcançável na prática (qual
+      arma/mira roteia p/ lá); se sim, os dois fixes valem lá também — **critério**, não corner opcional.
+- [ ] **Mira telescópica de alto zoom** (FOV reduzido muda a percepção do pico), **troca de ombro (lean) durante o
+      amortecimento**, **`ADS Transition Speed` nos extremos** (muito alto/baixo) — cobrir na validação.
 
 ## Fora de escopo
 
-- As curvas / o modelo de ADS do Fontaine (descartados no 016).
-- P-11.1 (velocidade presa devagar — speed limit stale): bug ortogonal, item próprio.
+- Curvas / modelo de ADS do Fontaine (descartados no 016).
+- **P-11.1** (velocidade presa devagar — speed limit stale): bug ortogonal, item próprio.
+- Reescrever `WeaponLn` ou a origem do projétil.
+- O refino do Problema B pela "folga real do braço" (`_limbs[0]`) — só se o `WeaponLn` sozinho não resolver
+  (fica como possível F3/dívida).
 
 ## Referências
 
+- [00 — Investigação técnica](017-transicao-ads-cirurgica-00-investigacao-tecnica.md) — os fatos e refs do Assembly.
 - [016 (cancelado)](../016-transicao-realism-fork/016-transicao-realism-fork-01-spec.md) — diagnóstico da causa do
-  overshoot (mola sub-amortecida + velocidade herdada) que o Problema A ataca, e o estudo do Fontaine.
-- [014 — Sync stances Fika](../014-sync-stances-fika/014-sync-stances-fika-01-spec.md) — o ponto de aplicação
-  pré-IK (`Weapon_Root_Anim`) onde o offset de posição do Problema B é aplicado.
-- Memória: P-11.2 (braço G36 High Ready) e o overshoot — bugs de gameplay reportados.
+  overshoot; a régua `TransitionMetrics` a reaproveitar.
+- [014 — Sync stances Fika](../014-sync-stances-fika/014-sync-stances-fika-01-spec.md) — ponto de aplicação pré-IK.
 
 ## Histórico
 
 | Data | Evento |
 |---|---|
-| 2026-07-17 | Spec inicial criada ao cancelar o 016. Captura os 2 problemas + as 2 ideias do usuário. Ainda ⚪ backlog — falta `/create-spec` refinar critérios de aceite e a tech-spec investigar os IK markers / weapon length. |
+| 2026-07-17 | Spec inicial ao cancelar o 016. |
+| 2026-07-17 | Refinada com a investigação técnica (waypoint plugável sem tocar `CurrentStance`; `WeaponLn` como sinal confirmado). Fases F0/F1/F2 + critérios mensuráveis. |
+| 2026-07-17 | Review adversarial (sub-agent) + conferência da config REAL do usuário: **2 achados 🔴 confirmados pelos dados**. (1) offsets de ADS = 0 → o "waypoint por Stance 0" é, na verdade, **amortecer a velocidade da mola** (o alvo já é zero); zerar velocidade virou requisito. (2) a causa da F2 **não bate** com "empurra p/ frente" (Low Ready tem F/B +0.015, vai p/ TRÁS ao ir a Stance 0; o forte é Up/Down +0.07 e Pitch 25°) → a F2 abre com diagnóstico do eixo. + interação F1×F2, responsividade, métrica de trajetória inteira. |
