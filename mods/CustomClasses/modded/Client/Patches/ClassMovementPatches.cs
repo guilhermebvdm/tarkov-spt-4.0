@@ -58,10 +58,11 @@ internal static class ClassMoveSpeed
             // no MaxSpeed, era INERTE — o teto de mira (StateSpeedLimit ≈0.33) é menor que o MaxSpeed reduzido e o
             // min() ignorava o Rooted. O lever certo é escalar o `slow` de MovementContext.SetAimingSlowdown.
 
-            // 🔧 Execution (Furtivo): +velocidade com a MELEE na mão.
-            // ⚠️ CLAMPADO por este lever (code-review 2026-07-15, F2 — item de backlog 074): a velocidade real tem
-            // um TETO ABSOLUTO no SpeedLimiter/CharacterController (GClass2175, Run 4.6 m/s) que NÃO lê MaxSpeed →
-            // subir o getter acima do vanilla é cortado de volta. O getter é lever válido pra BAIXO, não pra CIMA.
+            // 🔧 Execution (Furtivo): +10% com a MELEE na mão. Velocidade observável = min(velocidade baseada em
+            // MaxSpeed/SprintingSpeed, cap absoluto do SpeedLimiter GClass2175). Os dois ficam calibrados ~próximos,
+            // então o min() só sobe se AMBOS subirem: este lever escala o MaxSpeed/SprintingSpeed; o
+            // ExecutionSpeedCapPatch (074/F2) escala o cap. Co-escalados pelo MESMO fator → min(a×1.1, b×1.1) = ×1.1
+            // (não compõe). O lever antigo SOZINHO era inerte porque o cap segurava o min (auditoria 074/F2).
             if (PerksConfig.ExecutionSpeedEnabled?.Value == true && SkillMultipliers.IsLocalClass("Stealth")
                 && p.HandsController is Player.KnifeController)
             {
@@ -208,6 +209,56 @@ internal class RootedAimSlowdownPatch : ModulePatch
         catch (Exception ex)
         {
             Plugin.Log?.LogError($"[CustomClasses] rooted falhou: {ex.Message}");
+        }
+    }
+}
+
+/// <summary>
+///     🔧 Execution (Furtivo) — +10% de velocidade com a MELEE na mão, na CORRIDA/SPRINT. 074/F2 (2026-07-18,
+///     auditoria de eficácia): o lever antigo (Postfix no MaxSpeed, em ClassMoveSpeed.Apply) era CLAMPADO — a
+///     corrida satura o TETO ABSOLUTO do SpeedLimiter (<c>GClass2175</c>, ~4.6 m/s Run) que NÃO lê MaxSpeed.
+///     Aqui subimos o próprio cap: Postfix em <c>GClass2175.method_1</c> (retorna o cap em m/s, lido por
+///     <c>Update → Speed → OnSpeedChanged → CharacterController.SpeedLimit</c>) — multiplica o cap ×1.10. O ANDAR
+///     segue no branch do MaxSpeed (que morde abaixo do cap); os dois cobrem andar+correr sem compor no sprint.
+///     Gate: o SpeedLimiter do MainPlayer (cada player/bot tem o seu → gate de INSTÂNCIA, regra 075) + Furtivo + faca.
+///     <para>⚠️ FRÁGIL / version-specific: <c>GClass2175</c>/<c>method_1</c> são nomes OBFUSCADOS. Se um update do
+///     EFT renomear, <c>AccessTools.Method</c> devolve null e o <c>Enable</c> (try/catch no Plugin) degrada
+///     gracioso — Execution-sprint volta a inerte, SEM crash (o andar segue funcionando). Re-achar: o campo
+///     <c>MovementContext.SpeedLimiter</c> e o método que retorna o cap em m/s
+///     (<c>Lerp(MinSpeed, MaxSpeed, str/max) × Lerp(sprintLower, 1, walk)</c>).</para>
+/// </summary>
+internal class ExecutionSpeedCapPatch : ModulePatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return AccessTools.Method(typeof(GClass2175), nameof(GClass2175.method_1));
+    }
+
+    [PatchPostfix]
+    private static void Postfix(GClass2175 __instance, ref float __result)
+    {
+        try
+        {
+            if (PerksConfig.ExecutionSpeedEnabled?.Value != true)
+            {
+                return;
+            }
+
+            // 075: cada player/bot tem o SEU SpeedLimiter (campo de MovementContext) → gate de INSTÂNCIA obrigatório.
+            var p = Singleton<GameWorld>.Instance?.MainPlayer;
+            if (p == null || !ReferenceEquals(__instance, p.MovementContext?.SpeedLimiter))
+            {
+                return;
+            }
+
+            if (SkillMultipliers.IsLocalClass("Stealth") && p.HandsController is Player.KnifeController)
+            {
+                __result *= PerksConfig.ExecutionMoveSpeed?.Value ?? 1f;   // +10% no cap absoluto (m/s)
+            }
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log?.LogError($"[CustomClasses] execution speed cap falhou: {ex.Message}");
         }
     }
 }

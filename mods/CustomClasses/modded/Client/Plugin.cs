@@ -130,6 +130,15 @@ public class Plugin : BaseUnityPlugin
         new RootedAimSlowdownPatch().Enable();              // (074-F1) 🔻 Caçador — −15% vel em ADS (teto de mira)
         try
         {
+            new ExecutionSpeedCapPatch().Enable();          // (074-F2) 🔧 Furtivo — +10% vel c/ melee na CORRIDA (cap do SpeedLimiter; GClass2175 obfuscado)
+        }
+        catch (System.Exception ex)
+        {
+            Log.LogWarning($"[CustomClasses] (074-F2) Execution speed cap NÃO aplicado (GClass2175/method_1 pode ter renomeado no EFT): {ex.Message}");
+        }
+
+        try
+        {
             new MaxSpeedPatch().Enable();                   // (050.1 fix) 🚶 ANDAR — MaxSpeed (computado puro, estável)
             new SprintingSpeedPatch().Enable();             // (050.1 fix) 🏃 CORRER — SprintingSpeed (computado puro, estável)
             new AiSoundPatch().Enable();                    // (050.4 fix) audibilidade PARA A IA (BotEventHandler.PlaySound)
