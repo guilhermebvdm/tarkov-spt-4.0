@@ -391,7 +391,7 @@ function fmtRelTime(iso) {
   else if (h < 24) label = `${h}h ago`;
   else if (d < 30) label = `${d}d ago`;
   else label = new Date(iso).toLocaleDateString('en-US');
-  return `<span title="${escapeAttr(iso)}">${label}</span>`;
+  return `<span title="${escapeAttr(new Date(iso).toLocaleString('en-US'))}">${label}</span>`;
 }
 
 // Percent vs SPT reference. Returns HTML span. Empty string when not computable.
@@ -1961,8 +1961,10 @@ async function restoreOverride(cell) {
   const data = await r.json();
   if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
   if (item.spt) { item.spt.fleaOverride = null; item.spt.fleaOfferMultiplier = null; item.spt.effectiveFleaPrice = data.effectiveFleaPrice; }
-  // NOTE: DELETE /api/price doesn't return `consolidated` either (same interim gap as the
-  // save path above) — do not overwrite item.consolidated with undefined here.
+  // Sync the cached SPT-flea field so the FLEA SPT cell auto-refreshes to the restored default.
+  // DELETE /api/price doesn't return `consolidated` — update the FIELD only, never assign
+  // item.consolidated = data.consolidated (undefined; would wipe the object and crash renderRow).
+  if (item.consolidated) item.consolidated.priceFleaSpt = data.effectiveFleaPrice;
   _dataVersion++;  // data changed → invalidate filter-cache
   const row = cell.closest('tr[data-id]');
   if (row) {
@@ -2048,9 +2050,12 @@ async function applyFleaPrice(tpl, rawPrice, { source = null, undoable = false, 
     if (!item.spt) item.spt = { basePrice: null, fleaPrice: null, fleaFloor: 0, fleaOverride: null, fleaOfferMultiplier: null, fleaBaseRaw: null, effectiveFleaPrice: null, fleaBanned: false, fleaBanReasons: [], traders: [] };
     if (data.mode === 'multiplier') { item.spt.fleaOfferMultiplier = data.multiplier; if (data.base != null) item.spt.fleaBaseRaw = data.base; }
     else { item.spt.fleaOverride = data.override; }
-    // NOTE: /api/price does not return `consolidated` (documented interim gap) — do NOT assign it
-    // or it wipes the row's real consolidated object and crashes renderRow.
     item.spt.effectiveFleaPrice = data.effectiveFleaPrice;
+    // Keep the row's cached SPT-flea view in sync so the FLEA SPT cell (which renders
+    // consolidated.priceFleaSpt) auto-refreshes to the new value immediately, instead of staying
+    // stale until the next rescan. Update the FIELD only — never assign item.consolidated =
+    // data.consolidated (it's undefined here and would wipe the object, crashing renderRow).
+    if (item.consolidated) item.consolidated.priceFleaSpt = data.effectiveFleaPrice;
     _dataVersion++;
     if (beforeRerender) beforeRerender();
     rerenderMainRow(tpl);
@@ -2291,6 +2296,7 @@ function undoApplyFlea(tpl, data) {
   item.spt.fleaOverride = data.mode === 'override' ? data.override : null;
   item.spt.fleaOfferMultiplier = data.mode === 'multiplier' ? data.multiplier : null;
   item.spt.effectiveFleaPrice = data.effectiveFleaPrice;
+  if (item.consolidated) item.consolidated.priceFleaSpt = data.effectiveFleaPrice; // auto-refresh the FLEA SPT cell
   _dataVersion++;
   rerenderMainRow(tpl);
   refreshEditedFilter();
@@ -2486,8 +2492,10 @@ function openAuditLogModal() {
   function onKey(e) {
     if (e.key === 'Escape') { close(); return; }
     if (e.key !== 'Tab') return;
-    // Focus trap — keep Tab / Shift-Tab inside the dialog.
-    const f = overlay.querySelectorAll('button, select, input, [tabindex]:not([tabindex="-1"])');
+    // Focus trap — keep Tab / Shift-Tab inside the dialog. Filter to visible nodes so a hidden
+    // "Load more" (once pagination is exhausted) isn't picked as the wrap target (.focus() no-ops
+    // on it, stranding Shift-Tab).
+    const f = [...overlay.querySelectorAll('button, select, input, [tabindex]:not([tabindex="-1"])')].filter(el => el.offsetParent !== null);
     if (!f.length) return;
     const first = f[0], last = f[f.length - 1];
     if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
@@ -2550,6 +2558,7 @@ function openAuditLogModal() {
 
     const card = document.createElement('div');
     card.className = 'audit-feed-item';
+    card.dataset.ts = e.ts || ''; // lets prependLatestEntry() detect a duplicate top card
     card.innerHTML =
       `<div class="audit-feed-item__icon">${meta.icon}</div>` +
       `<div class="audit-feed-item__body">` +
@@ -2613,7 +2622,14 @@ function openAuditLogModal() {
       total = data.total || total;
       if (!e) return;
       if (e.origin === 'baseline-unknown-date') { baselineEntries.unshift(e); renderBaselineSummary(); }
-      else { feed.insertBefore(renderEntryCard(e), feed.firstChild); offset++; }
+      else {
+        // A no-op undo (CR-02 guards write no new line when restoring an already-current value)
+        // leaves the newest matching entry as the one already at the top — don't insert a
+        // duplicate card or bump offset.
+        if (feed.firstElementChild && feed.firstElementChild.dataset.ts === e.ts) return;
+        feed.insertBefore(renderEntryCard(e), feed.firstChild);
+        offset++;
+      }
       moreBtn.hidden = offset >= total;
     } catch { /* non-fatal — see comment above */ }
   }
@@ -2663,6 +2679,7 @@ function openAuditLogModal() {
       // of "nothing found" for the exact query the user typed.
       total = 0;
       moreBtn.hidden = true;
+      baselineBox.hidden = true; // no match → don't leave a stale baseline summary above the empty state
       feed.innerHTML = '<div class="audit-log__empty">No actions match these filters.</div>';
       return;
     }
@@ -2678,6 +2695,7 @@ function openAuditLogModal() {
       const entries = data.entries || [];
       if (reset) feed.innerHTML = '';
       if (reset && entries.length === 0) {
+        baselineBox.hidden = true; // no results → hide any stale baseline summary
         feed.innerHTML = '<div class="audit-log__empty">No actions match these filters.</div>';
       } else {
         // Build all cards into a fragment and append once — one layout pass instead of up to
