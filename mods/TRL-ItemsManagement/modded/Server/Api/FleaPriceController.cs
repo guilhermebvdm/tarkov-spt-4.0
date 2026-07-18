@@ -307,6 +307,28 @@ public sealed class FleaPriceController(
         var overrideMap = dynamicNode["itemPriceOverrideRouble"] as JsonObject ?? new JsonObject();
         var previousOverride = overrideMap[tpl]?.GetValue<double?>();
         var previousEffectiveFleaPrice = sptBlock?["effectiveFleaPrice"]?.GetValue<double?>();
+        if (previousOverride == overrideVal && previousEffectiveFleaPrice == price)
+        {
+            // Already at this exact override AND the cache already reflects it — genuine no-op.
+            // Don't rewrite ragfair.json + ~17 MB cache + checks.dat, and don't log a spurious
+            // "X → X" entry. The cache clause matters: if the override matched but the cache were
+            // stale, we must NOT short-circuit — the write below is what re-syncs it (the very bug
+            // this session fixed). "Only touch disk on a real mutation."
+            return Ok(new
+            {
+                ok = true,
+                tpl,
+                mode = "override",
+                @override = overrideVal,
+                previousOverride,
+                effectiveFleaPrice = price,
+                bonus = bonus.Value,
+                floor,
+                ceiling,
+                changed = false,
+            });
+        }
+
         overrideMap[tpl] = overrideVal;
         dynamicNode["itemPriceOverrideRouble"] = overrideMap;
 
@@ -378,22 +400,46 @@ public sealed class FleaPriceController(
         var multiplierMap = dynamicNode["itemPriceMultiplier"] as JsonObject ?? new JsonObject();
         var previousMultiplier = multiplierMap[tpl]?.GetValue<double?>();
         var previousEffectiveFleaPrice = sptBlock?["effectiveFleaPrice"]?.GetValue<double?>();
-        multiplierMap[tpl] = multiplier;
-        dynamicNode["itemPriceMultiplier"] = multiplierMap;
 
-        StyleSensitiveJsonWriter.Write(sptPaths.RagfairConfigPath, ragfairRoot);
-        var checksResult = checksService.Update("configs/ragfair.json");
-
+        // Compute the clamped effective price up front so the no-op guard can compare it against
+        // the cache before touching any file.
         var eff = Math.Round(baseValNonNull * multiplier);
         if (eff < floor)
         {
             eff = floor;
         }
 
-        if (ceiling is { } ceilingVal2 && eff > ceilingVal2)
+        if (ceiling is { } ceilingClamp && eff > ceilingClamp)
         {
-            eff = ceilingVal2;
+            eff = ceilingClamp;
         }
+
+        if (previousMultiplier == multiplier && previousEffectiveFleaPrice == eff)
+        {
+            // Already at this exact multiplier AND the cache already reflects it — genuine no-op.
+            // Don't rewrite ragfair.json + ~17 MB cache + checks.dat, and don't log a spurious
+            // "X → X" entry. The cache clause matters: a stale cache with a matching multiplier
+            // must still fall through to the write below, which re-syncs it (the bug this session
+            // fixed). "Only touch disk on a real mutation."
+            return Ok(new
+            {
+                ok = true,
+                tpl,
+                mode = "multiplier",
+                multiplier,
+                previousMultiplier,
+                @base = baseValNonNull,
+                effectiveFleaPrice = eff,
+                ceiling,
+                changed = false,
+            });
+        }
+
+        multiplierMap[tpl] = multiplier;
+        dynamicNode["itemPriceMultiplier"] = multiplierMap;
+
+        StyleSensitiveJsonWriter.Write(sptPaths.RagfairConfigPath, ragfairRoot);
+        var checksResult = checksService.Update("configs/ragfair.json");
 
         try
         {

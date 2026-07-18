@@ -37,6 +37,16 @@ public sealed class FleaLevelController(
             }
 
             var previous = ragFair["minUserLevel"]?.GetValue<int?>();
+            if (previous == lvl)
+            {
+                // Already at this level — no-op. Don't rewrite globals.json, recompute checks.dat,
+                // mirror meta, or log. "Only touch disk on a real mutation."
+                return Task.FromResult<IActionResult>(Ok(new
+                {
+                    ok = true, minUserLevel = lvl, previous, changed = false,
+                }));
+            }
+
             ragFair["minUserLevel"] = lvl;
 
             StyleSensitiveJsonWriter.Write(sptPaths.GlobalsPath, globalsRoot);

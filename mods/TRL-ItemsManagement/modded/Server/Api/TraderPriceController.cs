@@ -93,6 +93,16 @@ public sealed class TraderPriceController(ModPathsService modPaths, WriteLockSer
 
             var previousCount = tplMap[tpl]?["count"]?.GetValue<double?>();
             var previousCurrency = tplMap[tpl]?["currency"]?.GetValue<string?>();
+            if (previousCount == count && string.Equals(previousCurrency, currency, StringComparison.OrdinalIgnoreCase))
+            {
+                // Already at this exact override — no-op. Don't rewrite the config or log a
+                // spurious "X → X" entry. "Only touch disk on a real mutation."
+                return Task.FromResult<IActionResult>(Ok(new
+                {
+                    ok = true, tpl, traderId, count, currency, previousPrice = previousCount, changed = false,
+                }));
+            }
+
             tplMap[tpl] = new JsonObject { ["count"] = count, ["currency"] = currency };
 
             WriteRawOverrides(configPath, overrides);

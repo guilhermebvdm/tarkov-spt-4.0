@@ -72,6 +72,17 @@ public sealed class BanController(
             if (sptItemsRoot?[tpl] is JsonObject sptEntry && sptEntry["_props"] is JsonObject props)
             {
                 var wasBannedVanilla = props["CanSellOnRagfair"]?.GetValue<bool?>() == false;
+                if (wasBannedVanilla == banned)
+                {
+                    // Already in the requested state — no-op. Don't rewrite the ~19 MB items.json
+                    // + ~17 MB cache + checks.dat, and don't log a spurious "banned: X→X" entry
+                    // carrying a live Undo button. "Only touch disk on a real mutation."
+                    return Task.FromResult<IActionResult>(Ok(new
+                    {
+                        ok = true, tpl, banned, wasBanned = wasBannedVanilla, modItem = false, changed = false,
+                    }));
+                }
+
                 props["CanSellOnRagfair"] = !banned;
 
                 WriteSptItemsJson(sptItemsRoot);
@@ -99,6 +110,15 @@ public sealed class BanController(
             }
 
             var wasBannedMod = liveTemplate.Properties.CanSellOnRagfair == false;
+            if (wasBannedMod == banned)
+            {
+                // Already in the requested state — no-op (see the vanilla branch above).
+                return Task.FromResult<IActionResult>(Ok(new
+                {
+                    ok = true, tpl, banned, wasBanned = wasBannedMod, modItem = true, changed = false,
+                }));
+            }
+
             modItemBanService.SetBanned(tpl, banned);
             liveTemplate.Properties.CanSellOnRagfair = !banned; // apply to the CURRENT session immediately too
 

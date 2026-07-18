@@ -85,17 +85,28 @@ public sealed class FleaCapController(
                 }
             }
 
+            if (changed == 0)
+            {
+                // Every category is already in the requested state — no-op. Don't rewrite
+                // ragfair.json or recompute checks.dat, and don't log. "Only touch disk on a real
+                // mutation." (The write + checks + audit below all assumed changed > 0 anyway.)
+                return Task.FromResult<IActionResult>(Ok(new
+                {
+                    ok = true,
+                    enabled,
+                    changed = 0,
+                    note = "already in the requested state — nothing changed.",
+                }));
+            }
+
             StyleSensitiveJsonWriter.Write(sptPaths.RagfairConfigPath, ragfairRoot);
             var checksResult = checksService.Update("configs/ragfair.json");
 
-            if (changed > 0)
-            {
-                // before = the opposite of what we just set — this toggle is a simple boolean flip
-                // applied uniformly to every category, so there's no per-category "previous" worth
-                // logging individually; !enabled is exactly what "changed" categories held a moment
-                // ago. Needed for the viewer's undo button (toggle back to before.enabled).
-                auditLog.Append("flea-cap", "set", null, before: new { enabled = !enabled }, after: new { enabled }, extra: new { changed });
-            }
+            // before = the opposite of what we just set — this toggle is a simple boolean flip
+            // applied uniformly to every category, so there's no per-category "previous" worth
+            // logging individually; !enabled is exactly what "changed" categories held a moment
+            // ago. Needed for the viewer's undo button (toggle back to before.enabled).
+            auditLog.Append("flea-cap", "set", null, before: new { enabled = !enabled }, after: new { enabled }, extra: new { changed });
 
             return Task.FromResult<IActionResult>(Ok(new
             {
