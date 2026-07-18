@@ -43,6 +43,7 @@ Fonte de verdade desta ordem: [.agents/resources.md](../../.agents/resources.md)
    - Ler o trecho relevante e capturar `arquivo:linha` exatos.
    - Anotar fórmula, constantes, dependências.
    - Investigar callers e callees até ter um fluxo de dados completo.
+   - **Decodificar nomes ofuscados.** Ao citar um tipo ofuscado (`GClassNNNN`/`GStructNNNN`/`GInterfaceNNNN`/`ClassNNN`), resolver o conceito em [docs/files-from-4.1/consolidated-mappings.txt](../../docs/files-from-4.1/consolidated-mappings.txt) (`grep '^GClass680 -> '`) e usar o conceito na prosa (ex.: "`GClass680` (ABotProfileCreator)"). O alias **aponta**; a assinatura ainda se **prova** no `arquivo.cs:linha`. Sem entrada ≠ não existe; cobre só **tipos**; o nome à direita é 4.1 (rótulo — não pinar, AP-09).
 
 6. **Renderizar `.agents/templates/technical-spec.md.tmpl`** preenchendo:
    - `{{NUM}}`, `{{TITLE}}`, `{{SLUG}}`, `{{MOD}}`, `{{CREATED_AT}}`.
@@ -53,7 +54,7 @@ Fonte de verdade desta ordem: [.agents/resources.md](../../.agents/resources.md)
    2. **Pontos de patch** — tabela com link clicável `[arquivo.cs:L###](../../../../references/eft-decompiled/Assembly-CSharp/arquivo.cs#L###)`.
    3. **Novas propriedades F12** — só se aplicável; usar mesmo formato de `PROPRIEDADES.md`.
    4. **Arquivos do mod** — tabela com `MODIFICAR` / `CRIAR` + resumo.
-   5. **Stubs de código** — blocos C# **compiláveis** (assinatura completa, namespaces, atributos Harmony, corpo mínimo plausível). Cada referência ao código do EFT comentada com `// ref: Assembly-CSharp/<arquivo>:<linha>`.
+   5. **Stubs de código** — blocos C# **compiláveis** (assinatura completa, namespaces, atributos Harmony, corpo mínimo plausível). Cada referência ao código do EFT comentada com `// ref: Assembly-CSharp/<arquivo>:<linha>`; para alvo ofuscado, anexar o conceito (ex.: `// ref: ...:288 — GClass680 = ABotProfileCreator (nome 4.1 projetado; resolver na tabela, não pinar — AP-09)`).
    6. **Fluxo de dados** — diagrama A→B→C com linhas de ref do Assembly e do mod.
    7. **Riscos e dependências** — patches existentes em `modded/`, mods externos relacionados, ordem de inicialização.
    8. **Checklist de implementação** — tarefas atômicas em ordem (cada uma rodável e verificável).

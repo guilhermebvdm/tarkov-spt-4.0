@@ -28,6 +28,7 @@ Análise crítica da spec técnica. **Cria** um arquivo novo `NNN-<slug>-03-spec
    - Os arquivos do Assembly citados na spec técnica — confirmar que as linhas batem com o que a spec afirma.
    - A seção **9. Conformidade com skills** da spec técnica — conferir cada evidência citada. Check marcado ✅ sem evidência verificável = ponto **Categoria C — 🔴 Bloqueador**; check N/A com razão frágil = ponto Categoria A. **Em especial:** um `N/A` no check 2 (MainPlayer/Fika) quando há patch que reage a ação de player, ou no check 5 (estado entre raids) quando há estado estático/raid-scoped, é Categoria A — confrontar o `N/A` contra os alvos de patch reais da §2, não aceitar de cara.
    - **Grafo de código** (skill `graph-code-navigation`): `get_neighbors` no alvo de patch para verificar se a spec auditou todos os overrides/callers (evidência negativa barata — auditoria ausente em alvo virtual = ponto Categoria C, AP-03).
+   - **Tabela de deofuscação** — se a spec anexou um conceito a um tipo ofuscado (ex.: "`GClass680` (ABotProfileCreator)"), conferir que bate com [docs/files-from-4.1/consolidated-mappings.txt](../../docs/files-from-4.1/consolidated-mappings.txt). Rótulo trocado = Categoria C. Ausência de entrada **não** é erro (sem entrada ≠ não existe); o nome à direita é 4.1 — não exigir que a spec o trate como pinado (AP-09).
    - `mods/<mod>/modded/` — checar conflitos com patches existentes.
 
 5. **Análise crítica em 3 categorias × 3 impactos:**

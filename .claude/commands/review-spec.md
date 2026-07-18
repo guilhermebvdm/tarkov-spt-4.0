@@ -51,5 +51,5 @@ Revisão crítica e **edição inline** da spec funcional. Não cria arquivo nov
 
 - **Editar inline** preservando o que estava correto. Não recriar do zero.
 - Se a spec estiver vazia ou só com placeholders: avisar que `/create-spec` precisa rodar antes.
-- Não inferir conteúdo técnico (assinatura de método, classe do EFT) — isso é trabalho do `/create-technical-spec`.
+- Não inferir conteúdo técnico (assinatura de método, classe do EFT — incluindo nomes vindos da tabela de deofuscação) — isso é trabalho do `/create-technical-spec`.
 - Quando precisar de decisão humana, **marcar com `<!-- review: ... -->`** e listar no resumo. Não inventar respostas.

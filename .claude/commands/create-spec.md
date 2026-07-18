@@ -57,6 +57,6 @@ Cria a **spec funcional** de um item do backlog (sem código — foca em intenç
 
 ## Regras
 
-- Spec funcional **não contém código nem nomes de classe do EFT**. Isso é problema do `/create-technical-spec`.
+- Spec funcional **não contém código nem nomes de classe do EFT** — nem decodificados via tabela de deofuscação (`docs/files-from-4.1/consolidated-mappings.txt`); nome de EFT, ofuscado ou não, é do estágio técnico. Isso é problema do `/create-technical-spec`.
 - Critérios de aceite no infinitivo, mensuráveis (ex: "Drain de stamina em postura 1 cessa quando o jogador troca para Padrão" — não "stamina deve funcionar bem").
 - Se faltar info essencial pra escrever o comportamento desejado, perguntar antes em vez de chutar.
