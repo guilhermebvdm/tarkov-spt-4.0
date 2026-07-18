@@ -37,7 +37,7 @@ Spike de pesquisa — esta spec técnica é o **plano de investigação**: para 
 - **Formato:** predicado + hook com assinaturas.
 
 ### P4 — Agachar/derrubar involuntário (consome: 003/004/006)
-- **Âncoras:** `MovementContext.SetPoseLevel`, `IsInPronePose`, `Player.ToggleProne`; guards: `EPlayerState` (ladder/vault/BTR); **dano de queda — cadeia real:** `MovementContext.OnGrounded` += `Player.method_5` (Player.cs:27296) → `method_5(fallHeight, jumpHeight)` (25733) → `LandingAdjustments` (25739; gate `Inertia.FallThreshold`); dano de andar/sprint com perna zerada: `Player.InflictSelfDamage` (~31140, 2f/tick com `PhysicalConditionIs(LegDamaged)` — o dano da janela de 3 s do D18).
+- **Âncoras:** `MovementContext.SetPoseLevel`, `IsInPronePose`, `Player.ToggleProne` (Player.cs:26054); guards em 3 eixos (rodada B): (a) vault = `EPlayerState.ClimbOver/ClimbUp/Vaulting*` via `MovementContext.CurrentState.Name` (MovementContext.cs:2141); (b) BTR = `Player.BtrState` (`EPlayerBtrState`, Player.cs:25413) + `OnBtrStateChanged` (25540); (c) escada/corda = PESQUISA ABERTA — nenhum tipo `*Ladder*` no Assembly-CSharp (verificado por listagem completa de 11.474 classes): investigar se escada interativa/corda existe no 0.16.x ou concluir N/A com evidência; **dano de queda — cadeia real:** `MovementContext.OnGrounded` += `Player.method_5` (Player.cs:27296) → `method_5(fallHeight, jumpHeight)` (25733) → `LandingAdjustments` (25739; gate `Inertia.FallThreshold`); dano de andar/sprint com perna zerada: `Player.InflictSelfDamage` (~31140, 2f/tick com `PhysicalConditionIs(LegDamaged)` — o dano da janela de 3 s do D18).
 - **Investigar:** agachar one-shot sem lock (decisão 5); prone forçado limpo; guards; provar que pose forçada NÃO dispara OnGrounded com fallHeight relevante (D18); **timer de extração roda em prone forçado?** (evidência no código de extração ou teste pontual).
 - **Formato:** chamadas exatas + guards + provas de não-dano/extração.
 
@@ -79,7 +79,7 @@ Workflow dinâmico: 10 pesquisadores paralelos (1 por P), retorno estruturado co
 
 - Doc responde P1–P10 com evidência verificada (2 rodadas adversariais).
 - Cada primitiva declara comportamento no **headless** (seguro/no-op/exige guard — fika-headless quando aplicável).
-- Cada recomendação nomeia o item consumidor e o risco residual; correções de premissa da matriz (ex.: redação do D12) listadas para retrofit.
+- Cada recomendação nomeia o item consumidor e o risco residual; correções de premissa da matriz (ex.: redação do D12; assertiva do D13 sobre SetPlayerAiming — hipótese até o P9 provar) listadas para retrofit.
 - Nenhuma mudança fora de `docs/` e `backlog/`.
 
 ## Histórico
@@ -87,4 +87,5 @@ Workflow dinâmico: 10 pesquisadores paralelos (1 por P), retorno estruturado co
 | Data | Evento |
 |---|---|
 | 2026-07-18 | Spec técnica (plano de investigação) criada via `/create-technical-spec` |
+| 2026-07-18 | Review rodada B (revisor fresco): rodada A confirmada (round_a_ok); guards do P4 desdobrados em 3 eixos (vault=EPlayerState; BTR=Player.BtrState; escada/corda=pesquisa aberta — sem tipo *Ladder* no assembly); D13 anotado como hipótese p/ retrofit |
 | 2026-07-18 | Review rodada A (2 revisores adversariais): +P9 (cancela-ADS/lockout — bloqueador) e +P10 (observação de estado — forte); âncoras corrigidas com verificação no assembly (EPhysicalCondition como primitiva real do mancar POR LADO com sync via ActorDataStruct; AddEffect<Tremor> em vez de DoTremor; cadeia real de fall damage; interfaces Pain=357/PainKiller=358/Stimulator=377; BrainManager é do BigBrain, OrbitBrainLayer como exemplo; PhraseSpeakerClass/BotTalk como throttle real; LocaleManagerClass; fontes SAIN/ORBIT/SkillsExtended/Realism NO REPO + mismatch ORBIT 1.1.0×1.2.1; fika-headless nas fontes) |

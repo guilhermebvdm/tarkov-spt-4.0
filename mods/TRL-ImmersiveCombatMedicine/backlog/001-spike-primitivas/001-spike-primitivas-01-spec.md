@@ -14,7 +14,7 @@ O mod hoje implementa versões simples das mecânicas que serão substituídas: 
 
 ## Comportamento desejado
 
-Existir um documento `docs/trauma-primitives.md` (novo) que responda, com evidência decompilada e teste in-game pontual quando necessário, as sete perguntas de pesquisa abaixo — cada uma com: API/campo/efeito exato (arquivo:linha do assembly ou do mod de terceiro), limitações encontradas, e recomendação de uso (ou fallback) para os itens 002–007. Nenhum código de produção é entregue neste item (protótipos descartáveis são permitidos para provar uma API).
+Existir um documento `docs/trauma-primitives.md` (novo) que responda, com evidência decompilada e teste in-game pontual quando necessário, as dez perguntas de pesquisa abaixo — cada uma com: API/campo/efeito exato (arquivo:linha do assembly ou do mod de terceiro), limitações encontradas, e recomendação de uso (ou fallback) para os itens 002–007. Nenhum código de produção é entregue neste item (protótipos descartáveis são permitidos para provar uma API).
 
 **Perguntas de pesquisa (P1–P10):**
 
@@ -33,7 +33,7 @@ Existir um documento `docs/trauma-primitives.md` (novo) que responda, com evidê
 
 - [ ] Cada pergunta P1–P10 respondida em `docs/trauma-primitives.md` com evidência `arquivo:linha` (assembly real via ilspycmd quando o dump estiver incompleto — lição da memória: 102 namespaces vazios geram falso-negativo) e recomendação explícita de implementação para o item consumidor (002–007).
 - [ ] O diff do item contém APENAS documentação — nenhuma mudança em `modded/` (protótipos descartáveis não entram no repo).
-- [ ] P1 entrega o inventário das penalidades vanilla de perna com valores (base da calibração N1/N2 da decisão 18) e veredito sobre mancar por lado (nota do rodapé da matriz) — com fallback recomendado se negativo.
+- [ ] P1 entrega o inventário das penalidades vanilla de perna com valores (base da calibração N1/N2 da decisão 18) e veredito sobre mancar por lado (decisão 4 da matriz) — com fallback recomendado se negativo.
 - [ ] P6 entrega o contrato de interferência bot (sequência exata de chamadas para derrubar/devolver controle) validado contra o código real do SAIN 4.4.3 e ORBIT presentes na load order.
 - [ ] Toda API recomendada foi provada compilável/invocável (protótipo descartável ou assinatura confirmada no assembly) — nenhuma recomendação "por inferência de nome". Provas por protótipo registram no doc o trecho mínimo compilado/invocado e o resultado observado (auditável sem o protótipo no repo).
 - [ ] **Fika/multiplayer:** para cada primitiva, o doc registra ONDE ela roda (dono/espelho) e se o efeito é visível aos peers via sync nativo (pose/velocidade/voz) — insumo do D16; `N/A` não se aplica (o mod é coop-first).

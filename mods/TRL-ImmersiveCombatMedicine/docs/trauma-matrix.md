@@ -73,7 +73,7 @@ Fonte de verdade do redesign do sistema de trauma (pernas/braços/estômago/desm
 - **D9. Bots**: tremor aplicado (cosmético); cancela-ADS não se aplica a bots.
 - **D11. Tremor com dono próprio**: o mod gerencia o lifecycle do efeito Tremor (aplicar/renovar/remover) — sem depender do tremor-por-dor vanilla (que o analgésico apaga).
 - **D12. Pipeline de velocidade**: composição multiplicativa; teste de compat com CustomClasses (patches reais: MaxSpeedPatch/SprintingSpeedPatch — postfix nos getters de MovementContext; corrigido na rodada A do item 001) e Skills Extended (MovementContextSetSpeedLimitPatch).
-- **D13. Cancela-ADS pelo caminho vanilla** + teste de compat com SPTRecoilRework e Fontaine-FOVFix (ambos patcheiam SetPlayerAiming).
+- **D13. Cancela-ADS pelo caminho vanilla** + teste de compat com SPTRecoilRework e Fontaine-FOVFix (hipótese: ambos patcheiam o set de aim vanilla — alvo exato a confirmar no spike 001/P9).
 - **D14. Spike 001 mapeia SAIN 4.4.3 + ORBIT**: pontos seguros de interferência (mover/pose/camadas BigBrain) com prova decompilada; pausar/retomar sempre deixa a camada RE-DECIDIR (nunca matar camada).
 - **D15. UNTAR** segue as mesmas regras de trauma (são bots).
 - **D16. Autoridade**: o motor avalia SÓ no dono (humano local; bots no host/headless) — mesmo padrão do desmaio (lição CR-01-28); espelhos nunca aplicam efeito.
