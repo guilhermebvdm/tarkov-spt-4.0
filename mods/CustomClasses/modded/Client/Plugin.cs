@@ -10,7 +10,7 @@ namespace CustomClasses.Client;
 ///     Busca os fatores do server (rota /customclasses/skill-multipliers) e faz Prefix em
 ///     AbstractSkillClass.OnTrigger. UI (linha+tooltip) vem na Fatia 2.
 /// </summary>
-[BepInPlugin("customclasses.mdj.client", "CustomClasses", "0.2.5")]
+[BepInPlugin("customclasses.mdj.client", "CustomClasses", "0.3.0")]
 [BepInDependency("com.SPT.core", "4.0.0")]
 [BepInDependency("me.sol.sain", BepInDependency.DependencyFlags.SoftDependency)]   // (050.4 SAIN) carrega após o SAIN se presente
 public class Plugin : BaseUnityPlugin
@@ -85,6 +85,7 @@ public class Plugin : BaseUnityPlugin
         SkillsClassPosY.SettingChanged += (_, _) => RepositionSeals();
 
         PerksConfig.Bind(Config);   // item 050: F12 dos perks/drawbacks (fatia 050.0: Bulwark + Pack Mule)
+        PerksConfig.ClassColorsChanged += MenuClassIdentityPatch.RefreshColors;   // 067: cor do F12 → menu ao vivo
 
         new OnTriggerPatch().Enable();
         new WorkoutBehaviourPatch().Enable();   // (a) gym

@@ -1,4 +1,7 @@
+using System;
+using System.Collections.Generic;
 using BepInEx.Configuration;
+using UnityEngine;
 
 namespace CustomClasses.Client;
 
@@ -20,7 +23,35 @@ internal static class PerksConfig
     internal const string SecStealth = "5 · Stealth";
     internal const string SecScavenger = "6 · Scavenger";
     internal const string SecTank = "7 · Tank";
-    internal const string SecVanillaFixes = "8 · Vanilla Skill Fixes";
+    internal const string SecNaked = "8 · Naked";                         // 067 — seção própria do Peladão (cor; futuro 068)
+    internal const string SecVanillaFixes = "9 · Vanilla Skill Fixes";    // 067 — era "8 ·"; renomear a seção RESETA as 4 props (BREAKING)
+
+    // 067 — override de COR por classe (F12). ClassColors: NameEn EN ("Combat Medic"…"Tank"/"Naked") →
+    // (toggle 'Override color' + ConfigEntry<Color> com o color picker nativo do ConfigurationManager).
+    // Populado no Bind por BindClassColor; lido por ClassColorOverride.Resolve. Default do toggle = OFF → a cor
+    // do server (ClassVisualRegistry) segue sendo a fonte de verdade; ligar sobrescreve SÓ aquela classe.
+    internal sealed class ClassColorEntry
+    {
+        internal readonly ConfigEntry<bool> Override;
+        internal readonly ConfigEntry<Color> Color;
+
+        internal ClassColorEntry(ConfigEntry<bool> ovr, ConfigEntry<Color> color)
+        {
+            Override = ovr;
+            Color = color;
+        }
+    }
+
+    // OrdinalIgnoreCase: alinha com o ClassNameEnOf/IsClass (case-insensitive no resto do mod) e tolera drift de
+    // caixa. ⚠️ Limitação: as 7 chaves são os nomes EN SHIPPED — se o usuário RENOMEAR displayName.en de uma
+    // classe pelo editor web, a chave deixa de casar e o override daquela classe vira no-op (a cor cai no server,
+    // que já reflete o rename → o nome segue colorido, só o lever do F12 desconecta). Cobrir rename exigiria
+    // derivar as seções do registry (fora do escopo do 067).
+    internal static readonly Dictionary<string, ClassColorEntry> ClassColors = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>067 — disparado quando qualquer toggle/cor de classe muda no F12 (usado p/ re-aplicar a cor no
+    /// menu ao vivo; as outras superfícies resolvem no próximo render). Ver <see cref="ClassColorOverride"/>.</summary>
+    internal static event Action? ClassColorsChanged;
 
     // 0 · General — notificação + diagnóstico + piso global de recuo (B15)
     internal static ConfigEntry<bool>? ShowRaidPerksNotification;
@@ -110,7 +141,7 @@ internal static class PerksConfig
     internal static ConfigEntry<bool>? LoudOperatorTankEnabled;   // desdobrado do compartilhado (2026-07-10)
     internal static ConfigEntry<float>? LoudOperatorTankSoundRadius;
 
-    // 8 · Vanilla Skill Fixes — Weapon Mastery (058)
+    // 9 · Vanilla Skill Fixes — Weapon Mastery (058; renumerado 8→9 no 067)
     internal static ConfigEntry<bool>? WeaponMasteryEnabled;
     internal static ConfigEntry<float>? MasteryXpPerShot;
     internal static ConfigEntry<float>? MasteryRecoilPerLevel;
@@ -118,6 +149,8 @@ internal static class PerksConfig
 
     internal static void Bind(ConfigFile config)
     {
+        EnsureColorConverter();   // 067: serialização de Color no .cfg (antes de qualquer BindClassColor)
+
         // ───────────────────────── 0 · General ─────────────────────────
         ShowRaidPerksNotification = config.Bind(
             SecGeneral, "Raid-start perks notification", true,
@@ -205,6 +238,7 @@ internal static class PerksConfig
             new ConfigDescription(
                 "Multiplicador de recuo do Médico (1.25 = +25%). / Combat Medic recoil multiplier (1.25 = +25%).",
                 new AcceptableValueRange<float>(1f, 2f)));
+        BindClassColor(config, SecMedic, "Combat Medic", "#6f9455");   // 067
 
         // ───────────────────────── 3 · Rifleman ─────────────────────────
         CoolUnderFireEnabled = config.Bind(
@@ -256,6 +290,7 @@ internal static class PerksConfig
             new ConfigDescription(
                 "Multiplicador do raio de som de movimento do Fuzileiro (1.30 = +30%). / Rifleman movement-sound radius multiplier (1.30 = +30%).",
                 new AcceptableValueRange<float>(1f, 2f)));
+        BindClassColor(config, SecRifleman, "Rifleman", "#b0573a");   // 067
 
         // ───────────────────────── 4 · Hunter ─────────────────────────
         // Stalker (2026-07-11): irmão do Ghost Step do Furtivo, porém mais fraco (−20% vs −30%) — o Furtivo
@@ -311,6 +346,7 @@ internal static class PerksConfig
             new ConfigDescription(
                 "Velocidade do Caçador enquanto mira (0.85 = −15%). / Hunter move speed while aiming (0.85 = −15%).",
                 new AcceptableValueRange<float>(0.5f, 1f)));
+        BindClassColor(config, SecHunter, "Hunter", "#c2973f");   // 067
 
         // ───────────────────────── 5 · Stealth ─────────────────────────
         ExecutionSpeedEnabled = config.Bind(
@@ -348,6 +384,7 @@ internal static class PerksConfig
             new ConfigDescription(
                 "Multiplicador do tranco ao levar dano (1.50 = +50%). / Aim-punch multiplier when hit (1.50 = +50%).",
                 new AcceptableValueRange<float>(1f, 3f)));
+        BindClassColor(config, SecStealth, "Stealth", "#8b8fa3");   // 067
 
         // ───────────────────────── 6 · Scavenger ─────────────────────────
         // 061: antecipa o bônus ELITE vanilla da skill Search (buff SearchDouble, nível 51) — não é mecânica nova.
@@ -379,6 +416,7 @@ internal static class PerksConfig
             new ConfigDescription(
                 "Multiplicador de inércia do Saqueador (1.50 = +50% sobre a inércia já escalada pelo peso). / Scavenger inertia multiplier (1.50).",
                 new AcceptableValueRange<float>(1f, 3f)));
+        BindClassColor(config, SecScavenger, "Scavenger", "#c4ad45");   // 067
 
         // ───────────────────────── 7 · Tank ─────────────────────────
         BulwarkEnabled = config.Bind(
@@ -452,8 +490,14 @@ internal static class PerksConfig
             new ConfigDescription(
                 "Multiplicador do raio de som de movimento do Tanque (1.30 = +30%). / Tank movement-sound radius multiplier (1.30 = +30%).",
                 new AcceptableValueRange<float>(1f, 2f)));
+        BindClassColor(config, SecTank, "Tank", "#6b7280");   // 067
 
-        // ───────────────────── 8 · Vanilla Skill Fixes ─────────────────────
+        // ───────────────────────── 8 · Naked ─────────────────────────
+        // 067: o Peladão não tem perks (classe raiz, sem buff), mas ganha seção própria para a COR — e, no
+        // futuro, o texto de mérito (068). Sem isto ele não teria onde configurar a cor no F12.
+        BindClassColor(config, SecNaked, "Naked", "#c28a60");   // 067
+
+        // ───────────────────── 9 · Vanilla Skill Fixes ─────────────────────
         WeaponMasteryEnabled = config.Bind(
             SecVanillaFixes, "Weapon Mastery — Enabled", true,
             "Ativa as maestrias inertes: XP por disparo do underbarrel (GP-25/M203) + bônus por nível de SMG/LMG/Launcher/Underbarrel. / Enables inert weapon masteries: underbarrel XP per shot + per-level recoil/ergo bonuses.");
@@ -472,5 +516,52 @@ internal static class PerksConfig
             new ConfigDescription(
                 "Aumento de ergonomia por nível da maestria da arma na mão (0.002 = +0.2%/nível). / Ergonomics increase per mastery level of the held weapon (0.002 = +0.2%/level).",
                 new AcceptableValueRange<float>(0f, 0.02f)));
+    }
+
+    /// <summary>
+    ///     067 — binda o par de cor de uma classe (toggle 'Override color' + color picker) na seção dela e
+    ///     registra em <see cref="ClassColors"/> pela chave <paramref name="classNameEn"/> (NameEn EN). O default
+    ///     do picker = a cor ATUAL do server (<paramref name="serverHex"/>), então ligar o toggle preserva o
+    ///     visual até o usuário mexer. Qualquer mudança dispara <see cref="ClassColorsChanged"/> (live no menu).
+    /// </summary>
+    private static void BindClassColor(ConfigFile config, string section, string classNameEn, string serverHex)
+    {
+        var ovr = config.Bind(
+            section, "Override color", false,
+            "Sobrescreve a cor do nome/ícone desta classe pela 'Class color' abaixo. Desligado (default) = usa a cor do server. / Override this class's name/icon color with 'Class color' below. Off (default) = use the server color.");
+        var col = config.Bind(
+            section, "Class color", Hex(serverHex),
+            "Cor do nome/ícone da classe — só vale com 'Override color' ligado. O alpha é ignorado (a cor do nome é sempre opaca). / Class name/icon color — only applies when 'Override color' is on. Alpha is ignored (name color is always opaque).");
+
+        ClassColors[classNameEn] = new ClassColorEntry(ovr, col);
+        ovr.SettingChanged += (_, _) => ClassColorsChanged?.Invoke();
+        col.SettingChanged += (_, _) => ClassColorsChanged?.Invoke();
+    }
+
+    /// <summary>067 — hex "#RRGGBB" → Color (fallback branco se malformado). Usado só p/ o DEFAULT do picker.</summary>
+    private static Color Hex(string hex)
+    {
+        return ColorUtility.TryParseHtmlString(hex, out var c) ? c : Color.white;
+    }
+
+    /// <summary>
+    ///     067 — o BepInEx NÃO registra um TomlTypeConverter para <see cref="Color"/> por default (só primitivos/
+    ///     enums/string), então sem isto o Bind de um <c>ConfigEntry&lt;Color&gt;</c> lançaria ao serializar no
+    ///     .cfg. Registra um converter #RRGGBBAA idempotente (guarda <c>CanConvert</c>: se o ConfigurationManager
+    ///     ou outro mod já registrou, não duplica). O color picker nativo do CM vem do DRAWER (por tipo),
+    ///     independente deste converter de disco.
+    /// </summary>
+    private static void EnsureColorConverter()
+    {
+        if (TomlTypeConverter.CanConvert(typeof(Color)))
+        {
+            return;
+        }
+
+        TomlTypeConverter.AddConverter(typeof(Color), new TypeConverter
+        {
+            ConvertToString = (obj, _) => "#" + ColorUtility.ToHtmlStringRGBA((Color)obj),
+            ConvertToObject = (str, _) => ColorUtility.TryParseHtmlString(str, out var c) ? c : Color.white,
+        });
     }
 }

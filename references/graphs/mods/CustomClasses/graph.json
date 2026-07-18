@@ -54,6 +54,36 @@
       "norm_label": ".reset()"
     },
     {
+      "label": "ClassColorOverride.cs",
+      "file_type": "code",
+      "source_file": "Client/ClassColorOverride.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "client_classcoloroverride",
+      "community": 53,
+      "norm_label": "classcoloroverride.cs"
+    },
+    {
+      "label": "ClassColorOverride",
+      "file_type": "code",
+      "source_file": "Client/ClassColorOverride.cs",
+      "source_location": "L22",
+      "_origin": "ast",
+      "id": "client_classcoloroverride_classcoloroverride",
+      "community": 53,
+      "norm_label": "classcoloroverride"
+    },
+    {
+      "label": ".Resolve()",
+      "file_type": "code",
+      "source_file": "Client/ClassColorOverride.cs",
+      "source_location": "L28",
+      "_origin": "ast",
+      "id": "client_classcoloroverride_classcoloroverride_resolve",
+      "community": 53,
+      "norm_label": ".resolve()"
+    },
+    {
       "label": "ClassIdentities.cs",
       "file_type": "code",
       "source_file": "Client/ClassIdentities.cs",
@@ -97,7 +127,7 @@
       "label": "Dictionary",
       "file_type": "code",
       "source_file": "Client/ClassIdentities.cs",
-      "source_location": "L24",
+      "source_location": "L34",
       "_origin": "ast",
       "id": "client_classidentities_cs_dictionary",
       "community": 99,
@@ -107,7 +137,7 @@
       "label": "bool",
       "file_type": "code",
       "source_file": "Client/ClassIdentities.cs",
-      "source_location": "L25",
+      "source_location": "L35",
       "_origin": "ast",
       "id": "client_classidentities_cs_bool",
       "community": 99,
@@ -117,7 +147,7 @@
       "label": ".TryResolve()",
       "file_type": "code",
       "source_file": "Client/ClassIdentities.cs",
-      "source_location": "L29",
+      "source_location": "L39",
       "_origin": "ast",
       "id": "client_classidentities_classidentities_tryresolve",
       "community": 99,
@@ -127,7 +157,7 @@
       "label": ".Prefetch()",
       "file_type": "code",
       "source_file": "Client/ClassIdentities.cs",
-      "source_location": "L52",
+      "source_location": "L62",
       "_origin": "ast",
       "id": "client_classidentities_classidentities_prefetch",
       "community": 99,
@@ -137,7 +167,7 @@
       "label": ".ClassNameEnOf()",
       "file_type": "code",
       "source_file": "Client/ClassIdentities.cs",
-      "source_location": "L98",
+      "source_location": "L108",
       "_origin": "ast",
       "id": "client_classidentities_classidentities_classnameenof",
       "community": 99,
@@ -147,7 +177,7 @@
       "label": "Player",
       "file_type": "code",
       "source_file": "Client/ClassIdentities.cs",
-      "source_location": "L98",
+      "source_location": "L108",
       "_origin": "ast",
       "id": "client_classidentities_cs_player",
       "community": 99,
@@ -157,7 +187,7 @@
       "label": ".Local()",
       "file_type": "code",
       "source_file": "Client/ClassIdentities.cs",
-      "source_location": "L128",
+      "source_location": "L138",
       "_origin": "ast",
       "id": "client_classidentities_classidentities_local",
       "community": 99,
@@ -167,7 +197,7 @@
       "label": ".Reset()",
       "file_type": "code",
       "source_file": "Client/ClassIdentities.cs",
-      "source_location": "L143",
+      "source_location": "L155",
       "_origin": "ast",
       "id": "client_classidentities_classidentities_reset",
       "community": 99,
@@ -177,7 +207,7 @@
       "label": ".EnsureLoaded()",
       "file_type": "code",
       "source_file": "Client/ClassIdentities.cs",
-      "source_location": "L149",
+      "source_location": "L161",
       "_origin": "ast",
       "id": "client_classidentities_classidentities_ensureloaded",
       "community": 99,
@@ -187,7 +217,7 @@
       "label": ".TryFetch()",
       "file_type": "code",
       "source_file": "Client/ClassIdentities.cs",
-      "source_location": "L168",
+      "source_location": "L180",
       "_origin": "ast",
       "id": "client_classidentities_classidentities_tryfetch",
       "community": 99,
@@ -197,7 +227,7 @@
       "label": ".Commit()",
       "file_type": "code",
       "source_file": "Client/ClassIdentities.cs",
-      "source_location": "L210",
+      "source_location": "L222",
       "_origin": "ast",
       "id": "client_classidentities_classidentities_commit",
       "community": 99,
@@ -207,7 +237,7 @@
       "label": "Payload",
       "file_type": "code",
       "source_file": "Client/ClassIdentities.cs",
-      "source_location": "L222",
+      "source_location": "L234",
       "_origin": "ast",
       "id": "client_classidentities_payload",
       "community": 99,
@@ -217,7 +247,7 @@
       "label": "PlayerEntry",
       "file_type": "code",
       "source_file": "Client/ClassIdentities.cs",
-      "source_location": "L227",
+      "source_location": "L239",
       "_origin": "ast",
       "id": "client_classidentities_playerentry",
       "community": 99,
@@ -400,7 +430,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "modulepatch",
-      "community": 83,
+      "community": 108,
       "norm_label": "modulepatch"
     },
     {
@@ -900,7 +930,7 @@
       "source_location": "L134",
       "_origin": "ast",
       "id": "patches_classcombathealthpatches_ironlungspatch",
-      "community": 41,
+      "community": 79,
       "norm_label": "ironlungspatch"
     },
     {
@@ -910,7 +940,7 @@
       "source_location": "L136",
       "_origin": "ast",
       "id": "playerphysicalclass",
-      "community": 41,
+      "community": 79,
       "norm_label": "playerphysicalclass"
     },
     {
@@ -920,7 +950,7 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "client_patches_classcombathealthpatches_cs_float",
-      "community": 41,
+      "community": 79,
       "norm_label": "float"
     },
     {
@@ -940,7 +970,7 @@
       "source_location": "L144",
       "_origin": "ast",
       "id": "patches_classcombathealthpatches_ironlungspatch_postfix",
-      "community": 41,
+      "community": 79,
       "norm_label": ".postfix()"
     },
     {
@@ -950,7 +980,7 @@
       "source_location": "L144",
       "_origin": "ast",
       "id": "client_patches_classcombathealthpatches_cs_patchpostfix",
-      "community": 41,
+      "community": 79,
       "norm_label": "patchpostfix"
     },
     {
@@ -980,7 +1010,7 @@
       "source_location": "L185",
       "_origin": "ast",
       "id": "patches_classcombathealthpatches_malfunctionchancepatch_postfix",
-      "community": 41,
+      "community": 79,
       "norm_label": ".postfix()"
     },
     {
@@ -990,7 +1020,7 @@
       "source_location": "L185",
       "_origin": "ast",
       "id": "client_patches_classcombathealthpatches_cs_firearmcontroller",
-      "community": 41,
+      "community": 79,
       "norm_label": "firearmcontroller"
     },
     {
@@ -2130,7 +2160,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_classweaponpatches",
-      "community": 83,
+      "community": 90,
       "norm_label": "classweaponpatches.cs"
     },
     {
@@ -2140,7 +2170,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "patches_classweaponpatches_shootrecoilpatch",
-      "community": 83,
+      "community": 90,
       "norm_label": "shootrecoilpatch"
     },
     {
@@ -2150,7 +2180,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "patches_classweaponpatches_shootrecoilpatch_gettargetmethod",
-      "community": 83,
+      "community": 90,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2160,7 +2190,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_methodbase",
-      "community": 83,
+      "community": 90,
       "norm_label": "methodbase"
     },
     {
@@ -2200,7 +2230,7 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "patches_classweaponpatches_reloadspeedpatch",
-      "community": 83,
+      "community": 90,
       "norm_label": "reloadspeedpatch"
     },
     {
@@ -2210,7 +2240,7 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "patches_classweaponpatches_reloadspeedpatch_gettargetmethod",
-      "community": 83,
+      "community": 90,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2250,7 +2280,7 @@
       "source_location": "L117",
       "_origin": "ast",
       "id": "patches_classweaponpatches_adsspeedpatch",
-      "community": 83,
+      "community": 90,
       "norm_label": "adsspeedpatch"
     },
     {
@@ -2260,7 +2290,7 @@
       "source_location": "L119",
       "_origin": "ast",
       "id": "patches_classweaponpatches_adsspeedpatch_gettargetmethod",
-      "community": 83,
+      "community": 90,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2280,7 +2310,7 @@
       "source_location": "L167",
       "_origin": "ast",
       "id": "patches_classweaponpatches_heavyweaponergopatch",
-      "community": 83,
+      "community": 90,
       "norm_label": "heavyweaponergopatch"
     },
     {
@@ -2290,7 +2320,7 @@
       "source_location": "L169",
       "_origin": "ast",
       "id": "patches_classweaponpatches_heavyweaponergopatch_gettargetmethod",
-      "community": 83,
+      "community": 90,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2360,7 +2390,7 @@
       "source_location": "L231",
       "_origin": "ast",
       "id": "patches_classweaponpatches_aimpunchpatch",
-      "community": 83,
+      "community": 90,
       "norm_label": "aimpunchpatch"
     },
     {
@@ -2370,7 +2400,7 @@
       "source_location": "L233",
       "_origin": "ast",
       "id": "patches_classweaponpatches_aimpunchpatch_gettargetmethod",
-      "community": 83,
+      "community": 90,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2400,7 +2430,7 @@
       "source_location": "L282",
       "_origin": "ast",
       "id": "patches_classweaponpatches_localhittypepatch",
-      "community": 83,
+      "community": 90,
       "norm_label": "localhittypepatch"
     },
     {
@@ -2410,7 +2440,7 @@
       "source_location": "L287",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_float",
-      "community": 83,
+      "community": 90,
       "norm_label": "float"
     },
     {
@@ -2420,7 +2450,7 @@
       "source_location": "L289",
       "_origin": "ast",
       "id": "patches_classweaponpatches_localhittypepatch_gettargetmethod",
-      "community": 83,
+      "community": 90,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2464,10 +2494,30 @@
       "norm_label": "string"
     },
     {
+      "label": "MenuScreen",
+      "file_type": "code",
+      "source_file": "Client/Patches/MenuClassIdentityPatch.cs",
+      "source_location": "L29",
+      "_origin": "ast",
+      "id": "client_patches_menuclassidentitypatch_cs_menuscreen",
+      "community": 20,
+      "norm_label": "menuscreen"
+    },
+    {
+      "label": "Coroutine",
+      "file_type": "code",
+      "source_file": "Client/Patches/MenuClassIdentityPatch.cs",
+      "source_location": "L30",
+      "_origin": "ast",
+      "id": "coroutine",
+      "community": 20,
+      "norm_label": "coroutine"
+    },
+    {
       "label": ".GetTargetMethod()",
       "file_type": "code",
       "source_file": "Client/Patches/MenuClassIdentityPatch.cs",
-      "source_location": "L27",
+      "source_location": "L32",
       "_origin": "ast",
       "id": "patches_menuclassidentitypatch_menuclassidentitypatch_gettargetmethod",
       "community": 20,
@@ -2477,7 +2527,7 @@
       "label": "MethodBase",
       "file_type": "code",
       "source_file": "Client/Patches/MenuClassIdentityPatch.cs",
-      "source_location": "L27",
+      "source_location": "L32",
       "_origin": "ast",
       "id": "client_patches_menuclassidentitypatch_cs_methodbase",
       "community": 20,
@@ -2487,37 +2537,37 @@
       "label": ".Postfix()",
       "file_type": "code",
       "source_file": "Client/Patches/MenuClassIdentityPatch.cs",
-      "source_location": "L33",
+      "source_location": "L38",
       "_origin": "ast",
       "id": "patches_menuclassidentitypatch_menuclassidentitypatch_postfix",
       "community": 20,
       "norm_label": ".postfix()"
     },
     {
-      "label": "MenuScreen",
-      "file_type": "code",
-      "source_file": "Client/Patches/MenuClassIdentityPatch.cs",
-      "source_location": "L33",
-      "_origin": "ast",
-      "id": "client_patches_menuclassidentitypatch_cs_menuscreen",
-      "community": 20,
-      "norm_label": "menuscreen"
-    },
-    {
       "label": "PatchPostfix",
       "file_type": "code",
       "source_file": "Client/Patches/MenuClassIdentityPatch.cs",
-      "source_location": "L33",
+      "source_location": "L38",
       "_origin": "ast",
       "id": "client_patches_menuclassidentitypatch_cs_patchpostfix",
       "community": 20,
       "norm_label": "patchpostfix"
     },
     {
+      "label": ".RefreshColors()",
+      "file_type": "code",
+      "source_file": "Client/Patches/MenuClassIdentityPatch.cs",
+      "source_location": "L77",
+      "_origin": "ast",
+      "id": "patches_menuclassidentitypatch_menuclassidentitypatch_refreshcolors",
+      "community": 20,
+      "norm_label": ".refreshcolors()"
+    },
+    {
       "label": ".ApplyToMenu()",
       "file_type": "code",
       "source_file": "Client/Patches/MenuClassIdentityPatch.cs",
-      "source_location": "L59",
+      "source_location": "L99",
       "_origin": "ast",
       "id": "patches_menuclassidentitypatch_menuclassidentitypatch_applytomenu",
       "community": 20,
@@ -2527,7 +2577,7 @@
       "label": "IEnumerator",
       "file_type": "code",
       "source_file": "Client/Patches/MenuClassIdentityPatch.cs",
-      "source_location": "L59",
+      "source_location": "L99",
       "_origin": "ast",
       "id": "client_patches_menuclassidentitypatch_cs_ienumerator",
       "community": 20,
@@ -2537,7 +2587,7 @@
       "label": ".FixTopGlow()",
       "file_type": "code",
       "source_file": "Client/Patches/MenuClassIdentityPatch.cs",
-      "source_location": "L129",
+      "source_location": "L169",
       "_origin": "ast",
       "id": "patches_menuclassidentitypatch_menuclassidentitypatch_fixtopglow",
       "community": 20,
@@ -2547,7 +2597,7 @@
       "label": "Color",
       "file_type": "code",
       "source_file": "Client/Patches/MenuClassIdentityPatch.cs",
-      "source_location": "L129",
+      "source_location": "L169",
       "_origin": "ast",
       "id": "client_patches_menuclassidentitypatch_cs_color",
       "community": 20,
@@ -2557,7 +2607,7 @@
       "label": ".GetOrCreateMenuIcon()",
       "file_type": "code",
       "source_file": "Client/Patches/MenuClassIdentityPatch.cs",
-      "source_location": "L155",
+      "source_location": "L195",
       "_origin": "ast",
       "id": "patches_menuclassidentitypatch_menuclassidentitypatch_getorcreatemenuicon",
       "community": 20,
@@ -2567,7 +2617,7 @@
       "label": "Transform",
       "file_type": "code",
       "source_file": "Client/Patches/MenuClassIdentityPatch.cs",
-      "source_location": "L155",
+      "source_location": "L195",
       "_origin": "ast",
       "id": "client_patches_menuclassidentitypatch_cs_transform",
       "community": 20,
@@ -2577,7 +2627,7 @@
       "label": "Image",
       "file_type": "code",
       "source_file": "Client/Patches/MenuClassIdentityPatch.cs",
-      "source_location": "L155",
+      "source_location": "L195",
       "_origin": "ast",
       "id": "client_patches_menuclassidentitypatch_cs_image",
       "community": 20,
@@ -2587,7 +2637,7 @@
       "label": ".GetOrCreateClassLine()",
       "file_type": "code",
       "source_file": "Client/Patches/MenuClassIdentityPatch.cs",
-      "source_location": "L176",
+      "source_location": "L216",
       "_origin": "ast",
       "id": "patches_menuclassidentitypatch_menuclassidentitypatch_getorcreateclassline",
       "community": 20,
@@ -2597,7 +2647,7 @@
       "label": "TextMeshProUGUI",
       "file_type": "code",
       "source_file": "Client/Patches/MenuClassIdentityPatch.cs",
-      "source_location": "L176",
+      "source_location": "L216",
       "_origin": "ast",
       "id": "client_patches_menuclassidentitypatch_cs_textmeshprougui",
       "community": 20,
@@ -2760,7 +2810,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "patches_ontriggerpatch_ontriggerpatch_prefix",
-      "community": 53,
+      "community": 83,
       "norm_label": ".prefix()"
     },
     {
@@ -2770,7 +2820,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "client_patches_ontriggerpatch_cs_abstractskillclass",
-      "community": 53,
+      "community": 83,
       "norm_label": "abstractskillclass"
     },
     {
@@ -2780,7 +2830,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "client_patches_ontriggerpatch_cs_patchprefix",
-      "community": 53,
+      "community": 83,
       "norm_label": "patchprefix"
     },
     {
@@ -3540,7 +3590,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_skilllevelupnotificationpatch",
-      "community": 29,
+      "community": 41,
       "norm_label": "skilllevelupnotificationpatch.cs"
     },
     {
@@ -3550,7 +3600,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "patches_skilllevelupnotificationpatch_skilllevelupnotificationpatch",
-      "community": 29,
+      "community": 41,
       "norm_label": "skilllevelupnotificationpatch"
     },
     {
@@ -3560,7 +3610,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "client_patches_skilllevelupnotificationpatch_cs_type",
-      "community": 29,
+      "community": 41,
       "norm_label": "type"
     },
     {
@@ -3570,7 +3620,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "client_patches_skilllevelupnotificationpatch_cs_fieldinfo",
-      "community": 29,
+      "community": 41,
       "norm_label": "fieldinfo"
     },
     {
@@ -3580,7 +3630,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "patches_skilllevelupnotificationpatch_skilllevelupnotificationpatch_gettargetmethod",
-      "community": 29,
+      "community": 41,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -3590,7 +3640,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "client_patches_skilllevelupnotificationpatch_cs_methodbase",
-      "community": 29,
+      "community": 41,
       "norm_label": "methodbase"
     },
     {
@@ -3600,7 +3650,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "patches_skilllevelupnotificationpatch_skilllevelupnotificationpatch_postfix",
-      "community": 29,
+      "community": 41,
       "norm_label": ".postfix()"
     },
     {
@@ -3610,7 +3660,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "client_patches_skilllevelupnotificationpatch_cs_abstractskillclass",
-      "community": 29,
+      "community": 41,
       "norm_label": "abstractskillclass"
     },
     {
@@ -3620,7 +3670,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "client_patches_skilllevelupnotificationpatch_cs_patchpostfix",
-      "community": 29,
+      "community": 41,
       "norm_label": "patchpostfix"
     },
     {
@@ -5067,7 +5117,7 @@
       "label": "PerksConfig",
       "file_type": "code",
       "source_file": "Client/PerksConfig.cs",
-      "source_location": "L12",
+      "source_location": "L15",
       "_origin": "ast",
       "id": "client_perksconfig_perksconfig",
       "community": 88,
@@ -5077,27 +5127,47 @@
       "label": "string",
       "file_type": "code",
       "source_file": "Client/PerksConfig.cs",
-      "source_location": "L15",
+      "source_location": "L18",
       "_origin": "ast",
       "id": "client_perksconfig_cs_string",
       "community": 88,
       "norm_label": "string"
     },
     {
+      "label": "ClassColorEntry",
+      "file_type": "code",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L33",
+      "_origin": "ast",
+      "id": "client_perksconfig_classcolorentry",
+      "community": 88,
+      "norm_label": "classcolorentry"
+    },
+    {
       "label": "ConfigEntry",
       "file_type": "code",
       "source_file": "Client/PerksConfig.cs",
-      "source_location": "L26",
+      "source_location": "L35",
       "_origin": "ast",
       "id": "client_perksconfig_cs_configentry",
       "community": 88,
       "norm_label": "configentry"
     },
     {
+      "label": "Dictionary",
+      "file_type": "code",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L50",
+      "_origin": "ast",
+      "id": "client_perksconfig_cs_dictionary",
+      "community": 88,
+      "norm_label": "dictionary"
+    },
+    {
       "label": ".Bind()",
       "file_type": "code",
       "source_file": "Client/PerksConfig.cs",
-      "source_location": "L119",
+      "source_location": "L150",
       "_origin": "ast",
       "id": "client_perksconfig_perksconfig_bind",
       "community": 88,
@@ -5107,11 +5177,51 @@
       "label": "ConfigFile",
       "file_type": "code",
       "source_file": "Client/PerksConfig.cs",
-      "source_location": "L119",
+      "source_location": "L150",
       "_origin": "ast",
       "id": "configfile",
       "community": 88,
       "norm_label": "configfile"
+    },
+    {
+      "label": ".BindClassColor()",
+      "file_type": "code",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L527",
+      "_origin": "ast",
+      "id": "client_perksconfig_perksconfig_bindclasscolor",
+      "community": 88,
+      "norm_label": ".bindclasscolor()"
+    },
+    {
+      "label": ".Hex()",
+      "file_type": "code",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L542",
+      "_origin": "ast",
+      "id": "client_perksconfig_perksconfig_hex",
+      "community": 88,
+      "norm_label": ".hex()"
+    },
+    {
+      "label": "Color",
+      "file_type": "code",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L542",
+      "_origin": "ast",
+      "id": "client_perksconfig_cs_color",
+      "community": 88,
+      "norm_label": "color"
+    },
+    {
+      "label": ".EnsureColorConverter()",
+      "file_type": "code",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L554",
+      "_origin": "ast",
+      "id": "client_perksconfig_perksconfig_ensurecolorconverter",
+      "community": 88,
+      "norm_label": ".ensurecolorconverter()"
     },
     {
       "label": "PerksPanelView.cs",
@@ -5487,7 +5597,7 @@
       "label": ".OnGUI()",
       "file_type": "code",
       "source_file": "Client/Plugin.cs",
-      "source_location": "L245",
+      "source_location": "L246",
       "_origin": "ast",
       "id": "client_plugin_plugin_ongui",
       "community": 39,
@@ -5497,7 +5607,7 @@
       "label": ".OnDestroy()",
       "file_type": "code",
       "source_file": "Client/Plugin.cs",
-      "source_location": "L250",
+      "source_location": "L251",
       "_origin": "ast",
       "id": "client_plugin_plugin_ondestroy",
       "community": 39,
@@ -5507,7 +5617,7 @@
       "label": ".RepositionSeals()",
       "file_type": "code",
       "source_file": "Client/Plugin.cs",
-      "source_location": "L260",
+      "source_location": "L261",
       "_origin": "ast",
       "id": "client_plugin_plugin_repositionseals",
       "community": 39,
@@ -5587,7 +5697,7 @@
       "label": ".Prefetch()",
       "file_type": "code",
       "source_file": "Client/SkillMultipliers.cs",
-      "source_location": "L73",
+      "source_location": "L80",
       "_origin": "ast",
       "id": "client_skillmultipliers_skillmultipliers_prefetch",
       "community": 34,
@@ -5597,7 +5707,7 @@
       "label": ".Reset()",
       "file_type": "code",
       "source_file": "Client/SkillMultipliers.cs",
-      "source_location": "L93",
+      "source_location": "L100",
       "_origin": "ast",
       "id": "client_skillmultipliers_skillmultipliers_reset",
       "community": 34,
@@ -5607,7 +5717,7 @@
       "label": ".EnsureLoaded()",
       "file_type": "code",
       "source_file": "Client/SkillMultipliers.cs",
-      "source_location": "L104",
+      "source_location": "L111",
       "_origin": "ast",
       "id": "client_skillmultipliers_skillmultipliers_ensureloaded",
       "community": 34,
@@ -5617,7 +5727,7 @@
       "label": ".TryFetch()",
       "file_type": "code",
       "source_file": "Client/SkillMultipliers.cs",
-      "source_location": "L123",
+      "source_location": "L130",
       "_origin": "ast",
       "id": "client_skillmultipliers_skillmultipliers_tryfetch",
       "community": 34,
@@ -5627,7 +5737,7 @@
       "label": "Payload",
       "file_type": "code",
       "source_file": "Client/SkillMultipliers.cs",
-      "source_location": "L123",
+      "source_location": "L130",
       "_origin": "ast",
       "id": "payload",
       "community": 34,
@@ -5637,7 +5747,7 @@
       "label": ".Apply()",
       "file_type": "code",
       "source_file": "Client/SkillMultipliers.cs",
-      "source_location": "L146",
+      "source_location": "L153",
       "_origin": "ast",
       "id": "client_skillmultipliers_skillmultipliers_apply",
       "community": 34,
@@ -5647,7 +5757,7 @@
       "label": ".TryGet()",
       "file_type": "code",
       "source_file": "Client/SkillMultipliers.cs",
-      "source_location": "L174",
+      "source_location": "L181",
       "_origin": "ast",
       "id": "client_skillmultipliers_skillmultipliers_tryget",
       "community": 34,
@@ -5657,7 +5767,7 @@
       "label": "ESkillId",
       "file_type": "code",
       "source_file": "Client/SkillMultipliers.cs",
-      "source_location": "L174",
+      "source_location": "L181",
       "_origin": "ast",
       "id": "client_skillmultipliers_cs_eskillid",
       "community": 34,
@@ -5667,7 +5777,7 @@
       "label": "Payload",
       "file_type": "code",
       "source_file": "Client/SkillMultipliers.cs",
-      "source_location": "L180",
+      "source_location": "L187",
       "_origin": "ast",
       "id": "client_skillmultipliers_payload",
       "community": 34,
@@ -17129,6 +17239,26 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "Client/ClassColorOverride.cs",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "client_classcoloroverride",
+      "target": "client_classcoloroverride_classcoloroverride",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/ClassColorOverride.cs",
+      "source_location": "L28",
+      "weight": 1.0,
+      "source": "client_classcoloroverride_classcoloroverride",
+      "target": "client_classcoloroverride_classcoloroverride_resolve",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "Client/ClassIdentities.cs",
       "source_location": "L15",
       "weight": 1.0,
@@ -21053,12 +21183,34 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Client/Patches/MenuClassIdentityPatch.cs",
+      "source_location": "L29",
+      "weight": 1.0,
+      "context": "field",
+      "source": "patches_menuclassidentitypatch_menuclassidentitypatch",
+      "target": "client_patches_menuclassidentitypatch_cs_menuscreen",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/MenuClassIdentityPatch.cs",
       "source_location": "L25",
       "weight": 1.0,
       "context": "field",
       "confidence_score": 1.0,
       "source": "patches_menuclassidentitypatch_menuclassidentitypatch",
       "target": "client_patches_menuclassidentitypatch_cs_string"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/MenuClassIdentityPatch.cs",
+      "source_location": "L30",
+      "weight": 1.0,
+      "context": "field",
+      "source": "patches_menuclassidentitypatch_menuclassidentitypatch",
+      "target": "coroutine",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -21121,15 +21273,25 @@
       "target": "patches_menuclassidentitypatch_menuclassidentitypatch_postfix"
     },
     {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/MenuClassIdentityPatch.cs",
+      "source_location": "L77",
+      "weight": 1.0,
+      "source": "patches_menuclassidentitypatch_menuclassidentitypatch",
+      "target": "patches_menuclassidentitypatch_menuclassidentitypatch_refreshcolors",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Client/Patches/MenuClassIdentityPatch.cs",
-      "source_location": "L27",
+      "source_location": "L59",
       "weight": 1.0,
-      "context": "return_type",
+      "context": "parameter_type",
       "confidence_score": 1.0,
-      "source": "patches_menuclassidentitypatch_menuclassidentitypatch_gettargetmethod",
-      "target": "client_patches_menuclassidentitypatch_cs_methodbase"
+      "source": "patches_menuclassidentitypatch_menuclassidentitypatch_applytomenu",
+      "target": "client_patches_menuclassidentitypatch_cs_menuscreen"
     },
     {
       "relation": "references",
@@ -21141,6 +21303,17 @@
       "confidence_score": 1.0,
       "source": "patches_menuclassidentitypatch_menuclassidentitypatch_postfix",
       "target": "client_patches_menuclassidentitypatch_cs_menuscreen"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/Patches/MenuClassIdentityPatch.cs",
+      "source_location": "L27",
+      "weight": 1.0,
+      "context": "return_type",
+      "confidence_score": 1.0,
+      "source": "patches_menuclassidentitypatch_menuclassidentitypatch_gettargetmethod",
+      "target": "client_patches_menuclassidentitypatch_cs_methodbase"
     },
     {
       "relation": "references",
@@ -21165,15 +21338,15 @@
       "target": "patches_menuclassidentitypatch_menuclassidentitypatch_applytomenu"
     },
     {
-      "relation": "references",
+      "relation": "calls",
+      "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "Client/Patches/MenuClassIdentityPatch.cs",
-      "source_location": "L59",
+      "source_location": "L96",
       "weight": 1.0,
-      "context": "parameter_type",
-      "confidence_score": 1.0,
-      "source": "patches_menuclassidentitypatch_menuclassidentitypatch_applytomenu",
-      "target": "client_patches_menuclassidentitypatch_cs_menuscreen"
+      "source": "patches_menuclassidentitypatch_menuclassidentitypatch_refreshcolors",
+      "target": "patches_menuclassidentitypatch_menuclassidentitypatch_applytomenu",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -22624,9 +22797,9 @@
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
       "source_location": "L444",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_skillsclasstabpatch_skillsclasstabpatch",
-      "target": "patches_skillsclasstabpatch_skillsclasstabpatch_dumpnativetexts",
-      "confidence_score": 1.0
+      "target": "patches_skillsclasstabpatch_skillsclasstabpatch_dumpnativetexts"
     },
     {
       "relation": "method",
@@ -22706,9 +22879,9 @@
       "source_location": "L444",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_skillsclasstabpatch_skillsclasstabpatch_dumpnativetexts",
-      "target": "client_patches_skillsclasstabpatch_cs_skillsandmasteringscreen",
-      "confidence_score": 1.0
+      "target": "client_patches_skillsclasstabpatch_cs_skillsandmasteringscreen"
     },
     {
       "relation": "references",
@@ -22783,9 +22956,9 @@
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
       "source_location": "L111",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_skillsclasstabpatch_skillsclasstabpatch_postfix",
-      "target": "patches_skillsclasstabpatch_skillsclasstabpatch_dumpnativetexts",
-      "confidence_score": 1.0
+      "target": "patches_skillsclasstabpatch_skillsclasstabpatch_dumpnativetexts"
     },
     {
       "relation": "calls",
@@ -22882,9 +23055,9 @@
       "source_file": "Client/Patches/SkillsClassTabPatch.cs",
       "source_location": "L464",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_skillsclasstabpatch_skillsclasstabpatch_dumpnativetexts",
-      "target": "patches_skillsclasstabpatch_skillsclasstabpatch_tabpath",
-      "confidence_score": 1.0
+      "target": "patches_skillsclasstabpatch_skillsclasstabpatch_tabpath"
     },
     {
       "relation": "references",
@@ -24382,6 +24555,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "Client/PerksConfig.cs",
+      "source_location": "L33",
+      "weight": 1.0,
+      "source": "client_perksconfig",
+      "target": "client_perksconfig_classcolorentry",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/PerksConfig.cs",
       "source_location": "L10",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -24398,6 +24581,17 @@
       "confidence_score": 1.0,
       "source": "client_perksconfig_perksconfig",
       "target": "client_perksconfig_cs_configentry"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L50",
+      "weight": 1.0,
+      "context": "field",
+      "source": "client_perksconfig_perksconfig",
+      "target": "client_perksconfig_cs_dictionary",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -24421,6 +24615,69 @@
       "target": "client_perksconfig_perksconfig_bind"
     },
     {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L527",
+      "weight": 1.0,
+      "source": "client_perksconfig_perksconfig",
+      "target": "client_perksconfig_perksconfig_bindclasscolor",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L554",
+      "weight": 1.0,
+      "source": "client_perksconfig_perksconfig",
+      "target": "client_perksconfig_perksconfig_ensurecolorconverter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L542",
+      "weight": 1.0,
+      "source": "client_perksconfig_perksconfig",
+      "target": "client_perksconfig_perksconfig_hex",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L36",
+      "weight": 1.0,
+      "context": "field",
+      "source": "client_perksconfig_classcolorentry",
+      "target": "client_perksconfig_cs_configentry",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L241",
+      "weight": 1.0,
+      "source": "client_perksconfig_perksconfig_bind",
+      "target": "client_perksconfig_perksconfig_bindclasscolor",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L152",
+      "weight": 1.0,
+      "source": "client_perksconfig_perksconfig_bind",
+      "target": "client_perksconfig_perksconfig_ensurecolorconverter",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Client/PerksConfig.cs",
@@ -24430,6 +24687,39 @@
       "confidence_score": 1.0,
       "source": "client_perksconfig_perksconfig_bind",
       "target": "configfile"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L527",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "client_perksconfig_perksconfig_bindclasscolor",
+      "target": "configfile",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L533",
+      "weight": 1.0,
+      "source": "client_perksconfig_perksconfig_bindclasscolor",
+      "target": "client_perksconfig_perksconfig_hex",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Client/PerksConfig.cs",
+      "source_location": "L542",
+      "weight": 1.0,
+      "context": "return_type",
+      "source": "client_perksconfig_perksconfig_hex",
+      "target": "client_perksconfig_cs_color",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -39986,5 +40276,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "676dc37af2c96ca6842ce12ba889559996e90931"
+  "built_at_commit": "98c1fe9b214f5221b509a32bb1fd59bb01a688c7"
 }

@@ -4,7 +4,7 @@ Plugin: `customclasses.mdj.client` ("CustomClasses") — see [modded/Client/Plug
 
 Properties exposed in the configuration menu (F12 / ConfigurationManager). None is **(Advanced)**.
 
-> **Layout (reorg 2026-07-10):** one **section per class** (perks + drawbacks together). The numeric prefix (`0 ·`, `1 ·`…) forces the F12 order — ConfigurationManager sorts sections alphabetically. Order: system (`0`/`1`), then the 6 classes in roster order (`2`–`7`), then global fixes (`8`).
+> **Layout (reorg 2026-07-10):** one **section per class** (perks + drawbacks together). The numeric prefix (`0 ·`, `1 ·`…) forces the F12 order — ConfigurationManager sorts sections alphabetically. Order: system (`0`/`1`), then the 6 classes in roster order (`2`–`7`), then **Naked** (`8`), then global fixes (`9`).
 >
 > **Language:** the F12 is a **BepInEx** plugin, not part of EFT — it does **not** follow the game language (strings are fixed at `Awake`, before EFT loads its locale). So **section/property names stay in English** and the **descriptions (tooltips) are bilingual `PT / EN`** on the same line. This file (EN) and [PROPRIEDADES.md](PROPRIEDADES.md) (PT) document per language.
 >
@@ -56,6 +56,8 @@ Properties exposed in the configuration menu (F12 / ConfigurationManager). None 
 | `Mobile Surgery — Enabled` | bool | `true` | — | Perk (**072**): can **WALK** during surgery (still no sprint/jump/prone). |
 | `Shaky Hands — Enabled` | bool | `false` | — | Drawback: more recoil (shaky hands). **Off by default** (balance B1). |
 | `Shaky Hands — Recoil mult` | float | `1.25` | 1..2 | Recoil (1.25 = +25%). |
+| `Override color` | bool | `false` | — | Override this class's name/icon color with 'Class color' (off = server color). (item 067) |
+| `Class color` | Color | `#6f9455` | — | Class name/icon color — only when 'Override color' is on; alpha ignored (always opaque). (item 067) |
 
 ## Section `3 · Rifleman`
 
@@ -72,6 +74,8 @@ Properties exposed in the configuration menu (F12 / ConfigurationManager). None 
 | `Adrenaline — ADS time mult` | float | `0.8` | 0.3..1 | ADS during the window (0.8 = 20% faster). |
 | `Loud Operator — Enabled` | bool | `true` | — | Drawback: increases the audibility radius of your movement sounds. |
 | `Loud Operator — Sound radius mult` | float | `1.3` | 1..2 | Movement-sound radius (1.3 = +30%). |
+| `Override color` | bool | `false` | — | Override this class's name/icon color with 'Class color' (off = server color). (item 067) |
+| `Class color` | Color | `#b0573a` | — | Class name/icon color — only when 'Override color' is on; alpha ignored (always opaque). (item 067) |
 
 ## Section `4 · Hunter`
 
@@ -89,6 +93,8 @@ Properties exposed in the configuration menu (F12 / ConfigurationManager). None 
 | `Calm Sights — Sway mult` | float | `0.7` | 0.3..1 | Weapon sway (0.7 = 30% less). |
 | `Rooted — Enabled` | bool | `true` | — | Drawback: slower movement while aiming. |
 | `Rooted — ADS move speed` | float | `0.85` | 0.5..1 | Move speed while aiming (0.85 = −15%). |
+| `Override color` | bool | `false` | — | Override this class's name/icon color with 'Class color' (off = server color). (item 067) |
+| `Class color` | Color | `#c2973f` | — | Class name/icon color — only when 'Override color' is on; alpha ignored (always opaque). (item 067) |
 
 ## Section `5 · Stealth`
 
@@ -102,6 +108,8 @@ Properties exposed in the configuration menu (F12 / ConfigurationManager). None 
 | `Ghost Step — Sound radius mult` | float | `0.7` | 0.1..1 | Movement-sound radius (0.7 = −30%). |
 | `Rattled — Enabled` | bool | `true` | — | Drawback: stronger aim-punch when hit. |
 | `Rattled — Aim-punch mult` | float | `1.5` | 1..3 | Aim-punch when hit (1.5 = +50%). |
+| `Override color` | bool | `false` | — | Override this class's name/icon color with 'Class color' (off = server color). (item 067) |
+| `Class color` | Color | `#8b8fa3` | — | Class name/icon color — only when 'Override color' is on; alpha ignored (always opaque). (item 067) |
 
 ## Section `6 · Scavenger`
 
@@ -114,6 +122,8 @@ Properties exposed in the configuration menu (F12 / ConfigurationManager). None 
 | `Pack Mule — Carry limit bonus` | float | `0.3` | 0..1 | Carry-limit bonus (0.3 = +30%). |
 | `Overladen — Enabled` | bool | `true` | — | Drawback: inertia scales more with weight. |
 | `Overladen — Inertia mult` | float | `1.5` | 1..3 | Inertia (1.5 = +50% over the weight-scaled inertia). |
+| `Override color` | bool | `false` | — | Override this class's name/icon color with 'Class color' (off = server color). (item 067) |
+| `Class color` | Color | `#c4ad45` | — | Class name/icon color — only when 'Override color' is on; alpha ignored (always opaque). (item 067) |
 
 ## Section `7 · Tank`
 
@@ -135,8 +145,19 @@ Properties exposed in the configuration menu (F12 / ConfigurationManager). None 
 | `Pack Mule — Carry limit bonus` | float | `0.3` | 0..1 | Carry-limit bonus (0.3 = +30%). |
 | `Loud Operator — Enabled` | bool | `true` | — | Drawback: increases the audibility radius of your movement sounds. |
 | `Loud Operator — Sound radius mult` | float | `1.3` | 1..2 | Movement-sound radius (1.3 = +30%). |
+| `Override color` | bool | `false` | — | Override this class's name/icon color with 'Class color' (off = server color). (item 067) |
+| `Class color` | Color | `#6b7280` | — | Class name/icon color — only when 'Override color' is on; alpha ignored (always opaque). (item 067) |
 
-## Section `8 · Vanilla Skill Fixes`
+## Section `8 · Naked`
+
+> The Naked (Peladão) has no perks — this section exists for its color (item 067) and, later, its merit text (item 068).
+
+| Property | Type | Default | Range | What it does |
+|---|---|---|---|---|
+| `Override color` | bool | `false` | — | Override this class's name/icon color with 'Class color' (off = server color). (item 067) |
+| `Class color` | Color | `#c28a60` | — | Class name/icon color — only when 'Override color' is on; alpha ignored (always opaque). (item 067) |
+
+## Section `9 · Vanilla Skill Fixes`
 
 > Fixes/activations for vanilla skill mechanics that are inert in EFT. Today: Weapon Mastery (item 058).
 
@@ -158,3 +179,4 @@ Properties exposed in the configuration menu (F12 / ConfigurationManager). None 
 | Date | Change |
 |---|---|
 | 2026-07-10 | Created (EN mirror of PROPRIEDADES.md) alongside the full F12 reorg: 9 sections (one per class, numeric-prefixed, EN), Pack Mule/Loud Operator split per class, bilingual `PT / EN` descriptions, 7 orphan entries removed. |
+| 2026-07-17 | Item 067 — per-class `Override color` + `Class color` (F12) on the 6 classes; new `8 · Naked` section (color only); Vanilla Skill Fixes renumbered `8`→`9`. |

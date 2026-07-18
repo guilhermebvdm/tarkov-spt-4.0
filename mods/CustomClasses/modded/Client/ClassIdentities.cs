@@ -17,8 +17,18 @@ internal static class ClassIdentities
     /// <summary>Identidade de exibição de UMA classe (nome en/pt + ícone + cor). DisplayName segue o idioma do EFT.</summary>
     internal sealed class Identity
     {
-        public string? NameEn, NamePt, IconFile, NameColor;
+        public string? NameEn, NamePt, IconFile;
         public string? DisplayName => GameLocale.IsPortuguese ? (NamePt ?? NameEn) : (NameEn ?? NamePt);
+
+        // 067: NameColor resolve o override do F12 (por classe, keyed no NameEn) → fallback da cor CRUA do
+        // server (o setter grava _serverNameColor). Assim todo consumidor de Identity.NameColor pega o override
+        // sem tocar em patch nenhum. O getter é lazy (relido a cada acesso) — mudança no F12 vale na hora.
+        private string? _serverNameColor;
+        public string? NameColor
+        {
+            get => ClassColorOverride.Resolve(NameEn) ?? _serverNameColor;
+            set => _serverNameColor = value;
+        }
     }
 
     private static readonly Dictionary<string, Identity> ByNickname = new(StringComparer.Ordinal);
@@ -135,7 +145,9 @@ internal static class ClassIdentities
                 NameEn = SkillMultipliers.ClassNameEn,
                 NamePt = SkillMultipliers.ClassNamePt,
                 IconFile = SkillMultipliers.IconFile,
-                NameColor = SkillMultipliers.NameColor,
+                // 067: cor CRUA do server (não a já resolvida) → o getter da Identity resolve o override 1× por
+                // cima, sem dupla resolução nem risco de fixar um hex de override obsoleto no fallback.
+                NameColor = SkillMultipliers.ServerNameColor,
             };
     }
 

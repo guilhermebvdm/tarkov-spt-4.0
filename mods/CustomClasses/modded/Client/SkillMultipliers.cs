@@ -59,7 +59,14 @@ internal static class SkillMultipliers
     public static string? IconFile { get; private set; }
 
     /// <summary>Item 011: cor do nome da classe (hex #RRGGBB; null = cor default).</summary>
-    public static string? NameColor { get; private set; }
+    /// <remarks>067: resolve o override do F12 (por classe) → fallback da cor do server. Todos os consumidores
+    /// leem isto, então pegam o override de graça. Para o valor CRU do server, use <see cref="ServerNameColor"/>.</remarks>
+    public static string? NameColor => ClassColorOverride.Resolve(_classNameEn) ?? _serverNameColor;
+
+    /// <summary>067: cor CRUA do server (sem o override do F12). Usada pela <c>ClassIdentities.Local()</c> como
+    /// fallback, para o resolver da Identity não re-resolver por cima de um valor já resolvido.</summary>
+    internal static string? ServerNameColor => _serverNameColor;
+    private static string? _serverNameColor;
 
     /// <summary>
     ///     REFETCH forçado da classe local (code-review B14, achado 2). Simétrico ao
@@ -97,7 +104,7 @@ internal static class SkillMultipliers
         _classNamePt = null;
         Nickname = null;
         IconFile = null;
-        NameColor = null;
+        _serverNameColor = null;   // 067: cor crua do server (o override vive no F12, não é resetado aqui)
         _loaded = false;
     }
 
@@ -153,7 +160,7 @@ internal static class SkillMultipliers
         _classNamePt = payload.ClassNamePt ?? payload.ClassName;
         Nickname = payload.Nickname;
         IconFile = payload.IconFile;
-        NameColor = payload.NameColor;
+        _serverNameColor = payload.NameColor;   // 067: guarda o valor CRU; NameColor resolve o override do F12
 
         foreach (var kv in payload.Multipliers ?? new Dictionary<string, double>())
         {

@@ -4,7 +4,7 @@ Plugin: `customclasses.mdj.client` ("CustomClasses") — ver [modded/Client/Plug
 
 Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Nenhuma é **(Avançado)**.
 
-> **Organização (reorg 2026-07-10):** uma **seção por classe** (perks + drawbacks juntos). O prefixo numérico (`0 ·`, `1 ·`…) força a ordem no F12 — o ConfigurationManager ordena as seções alfabeticamente. Ordem: sistema (`0`/`1`), depois as 6 classes na ordem do roster (`2`–`7`), e por fim os fixes globais (`8`).
+> **Organização (reorg 2026-07-10):** uma **seção por classe** (perks + drawbacks juntos). O prefixo numérico (`0 ·`, `1 ·`…) força a ordem no F12 — o ConfigurationManager ordena as seções alfabeticamente. Ordem: sistema (`0`/`1`), depois as 6 classes na ordem do roster (`2`–`7`), depois o **Peladão** (`8`), e por fim os fixes globais (`9`).
 >
 > **Idioma:** o F12 é do **BepInEx, não do EFT** — não segue o idioma do jogo (as strings são fixadas no `Awake`, antes de o EFT carregar o locale). Por isso os **nomes de seção/propriedade ficam em inglês** e as **descrições (tooltips) são bilíngues `PT / EN`** na mesma linha. Este arquivo (PT) e o [PROPERTIES.md](PROPERTIES.md) (EN) documentam por idioma.
 >
@@ -56,6 +56,8 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 | `Mobile Surgery — Enabled` | bool | `true` | — | Perk (**072**): pode **ANDAR** durante a cirurgia (segue sem correr/pular/deitar). |
 | `Shaky Hands — Enabled` | bool | `false` | — | Drawback: +recuo (mãos trêmulas). **Off por padrão** (balance B1). |
 | `Shaky Hands — Recoil mult` | float | `1.25` | 1..2 | Recuo (1.25 = +25%). |
+| `Override color` | bool | `false` | — | Sobrescreve a cor do nome/ícone desta classe pela 'Class color' (desligado = cor do server). (item 067) |
+| `Class color` | Color | `#6f9455` | — | Cor do nome/ícone da classe — só vale com 'Override color' ligado; alpha ignorado (sempre opaca). (item 067) |
 
 ## Seção `3 · Rifleman`
 
@@ -72,6 +74,8 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 | `Adrenaline — ADS time mult` | float | `0.8` | 0.3..1 | ADS na janela (0.8 = 20% mais rápido). |
 | `Loud Operator — Enabled` | bool | `true` | — | Drawback: +raio de audibilidade dos sons de movimento. |
 | `Loud Operator — Sound radius mult` | float | `1.3` | 1..2 | Raio de som de movimento (1.3 = +30%). |
+| `Override color` | bool | `false` | — | Sobrescreve a cor do nome/ícone desta classe pela 'Class color' (desligado = cor do server). (item 067) |
+| `Class color` | Color | `#b0573a` | — | Cor do nome/ícone da classe — só vale com 'Override color' ligado; alpha ignorado (sempre opaca). (item 067) |
 
 ## Seção `4 · Hunter`
 
@@ -89,6 +93,8 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 | `Calm Sights — Sway mult` | float | `0.7` | 0.3..1 | Oscilação (sway) da arma (0.7 = 30% menos). |
 | `Rooted — Enabled` | bool | `true` | — | Drawback: −velocidade enquanto mira. |
 | `Rooted — ADS move speed` | float | `0.85` | 0.5..1 | Velocidade ao mirar (0.85 = −15%). |
+| `Override color` | bool | `false` | — | Sobrescreve a cor do nome/ícone desta classe pela 'Class color' (desligado = cor do server). (item 067) |
+| `Class color` | Color | `#c2973f` | — | Cor do nome/ícone da classe — só vale com 'Override color' ligado; alpha ignorado (sempre opaca). (item 067) |
 
 ## Seção `5 · Stealth`
 
@@ -102,6 +108,8 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 | `Ghost Step — Sound radius mult` | float | `0.7` | 0.1..1 | Raio de som de movimento (0.7 = −30%). |
 | `Rattled — Enabled` | bool | `true` | — | Drawback: +tranco de câmera ao levar dano. |
 | `Rattled — Aim-punch mult` | float | `1.5` | 1..3 | Tranco ao levar dano (1.5 = +50%). |
+| `Override color` | bool | `false` | — | Sobrescreve a cor do nome/ícone desta classe pela 'Class color' (desligado = cor do server). (item 067) |
+| `Class color` | Color | `#8b8fa3` | — | Cor do nome/ícone da classe — só vale com 'Override color' ligado; alpha ignorado (sempre opaca). (item 067) |
 
 ## Seção `6 · Scavenger`
 
@@ -114,6 +122,8 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 | `Pack Mule — Carry limit bonus` | float | `0.3` | 0..1 | Bônus de limite de carga (0.3 = +30%). |
 | `Overladen — Enabled` | bool | `true` | — | Drawback: inércia escala mais com o peso. |
 | `Overladen — Inertia mult` | float | `1.5` | 1..3 | Inércia (1.5 = +50% sobre a já escalada pelo peso). |
+| `Override color` | bool | `false` | — | Sobrescreve a cor do nome/ícone desta classe pela 'Class color' (desligado = cor do server). (item 067) |
+| `Class color` | Color | `#c4ad45` | — | Cor do nome/ícone da classe — só vale com 'Override color' ligado; alpha ignorado (sempre opaca). (item 067) |
 
 ## Seção `7 · Tank`
 
@@ -135,8 +145,19 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 | `Pack Mule — Carry limit bonus` | float | `0.3` | 0..1 | Bônus de limite de carga (0.3 = +30%). |
 | `Loud Operator — Enabled` | bool | `true` | — | Drawback: +raio de audibilidade dos sons de movimento. |
 | `Loud Operator — Sound radius mult` | float | `1.3` | 1..2 | Raio de som de movimento (1.3 = +30%). |
+| `Override color` | bool | `false` | — | Sobrescreve a cor do nome/ícone desta classe pela 'Class color' (desligado = cor do server). (item 067) |
+| `Class color` | Color | `#6b7280` | — | Cor do nome/ícone da classe — só vale com 'Override color' ligado; alpha ignorado (sempre opaca). (item 067) |
 
-## Seção `8 · Vanilla Skill Fixes`
+## Seção `8 · Naked`
+
+> O Peladão (Naked) não tem perks — esta seção existe para a sua cor (item 067) e, mais tarde, o seu texto de mérito (item 068).
+
+| Propriedade (EN) | Tipo | Padrão | Faixa | O que faz |
+|---|---|---|---|---|
+| `Override color` | bool | `false` | — | Sobrescreve a cor do nome/ícone desta classe pela 'Class color' (desligado = cor do server). (item 067) |
+| `Class color` | Color | `#c28a60` | — | Cor do nome/ícone da classe — só vale com 'Override color' ligado; alpha ignorado (sempre opaca). (item 067) |
+
+## Seção `9 · Vanilla Skill Fixes`
 
 > Correções/ativações de mecânicas de skill vanilla que ficam inertes no EFT. Hoje: Weapon Mastery (item 058).
 
@@ -166,3 +187,4 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 | 2026-07-04 | Item 051 — Steady Arms (Hunter) + Tireless Arms (Tank). |
 | 2026-07-10 | Balance B17 — Metabolismo Eficiente (Médico). |
 | 2026-07-10 | **Reorg completa do F12**: 9 seções (uma por classe, prefixo numérico EN), Pack Mule/Loud Operator desdobrados por classe, descrições padronizadas bilíngues `PT / EN`, 7 entries órfãs removidas. Doc espelhada em inglês: [PROPERTIES.md](PROPERTIES.md). |
+| 2026-07-17 | Item 067 — `Override color` + `Class color` por classe (F12) nas 6 classes; nova seção `8 · Naked` (só cor); Vanilla Skill Fixes renumerado `8`→`9`. |

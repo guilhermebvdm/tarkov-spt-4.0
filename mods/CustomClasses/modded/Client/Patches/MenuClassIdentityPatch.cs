@@ -24,6 +24,11 @@ internal class MenuClassIdentityPatch : ModulePatch
     private const string ClassLineName = "CC_ClassLine";
     private const string MenuIconName = "CC_MenuIcon";
 
+    // 067: última MenuScreen montada + a coroutine de aplicação em curso, p/ re-aplicar a cor AO VIVO quando o
+    // usuário troca a cor no F12 (RefreshColors). O == do Unity detecta a instância destruída (troca de cena).
+    private static MenuScreen? _lastMenu;
+    private static Coroutine? _applyCo;
+
     protected override MethodBase GetTargetMethod()
     {
         return AccessTools.GetDeclaredMethods(typeof(MenuScreen))
@@ -33,6 +38,8 @@ internal class MenuClassIdentityPatch : ModulePatch
     [PatchPostfix]
     private static void Postfix(MenuScreen __instance)
     {
+        _lastMenu = __instance;   // 067: cacheia p/ o RefreshColors reinvocar ao vivo (mesmo com o toggle off)
+
         if (!Plugin.ShowClassOnPlayerName)
         {
             MenuOverhaulBridge.RestoreAccent();   // desligado → cor original do Menu-Overhaul
@@ -48,12 +55,45 @@ internal class MenuClassIdentityPatch : ModulePatch
                 return;
             }
 
-            Plugin.Instance?.StartCoroutine(ApplyToMenu(__instance));
+            if (_applyCo != null)
+            {
+                Plugin.Instance?.StopCoroutine(_applyCo);   // 067: encerra um apply órfão de uma abertura anterior
+            }
+
+            _applyCo = Plugin.Instance?.StartCoroutine(ApplyToMenu(__instance));   // 067: track p/ o refresh cancelar
         }
         catch (Exception ex)
         {
             Plugin.Log?.LogError($"[CustomClasses] menu identity falhou: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    ///     067 — re-aplica a identidade/cor no menu quando o usuário troca a cor de uma classe no F12 (assinado a
+    ///     <c>PerksConfig.ClassColorsChanged</c> no Plugin). Como o F12 abre POR CIMA do menu, é aqui que a mudança
+    ///     é vista na hora: reexecuta o <see cref="ApplyToMenu"/>, que relê <c>SkillMultipliers.NameColor</c> (já
+    ///     resolvido com o override) e re-empurra pro AccentColor do Menu-Overhaul. No-op fora do menu.
+    /// </summary>
+    internal static void RefreshColors()
+    {
+        // == do Unity: menu destruído (em raid / outra cena) → null. activeInHierarchy: menu oculto → não re-roda.
+        if (!Plugin.ShowClassOnPlayerName || _lastMenu == null || !_lastMenu.gameObject.activeInHierarchy)
+        {
+            return;
+        }
+
+        var runner = Plugin.Instance;
+        if (runner == null)
+        {
+            return;
+        }
+
+        if (_applyCo != null)
+        {
+            runner.StopCoroutine(_applyCo);   // cancela um apply em curso (evita coroutines sobrepostas ao arrastar o picker)
+        }
+
+        _applyCo = runner.StartCoroutine(ApplyToMenu(_lastMenu));
     }
 
     private static IEnumerator ApplyToMenu(MenuScreen menu)
