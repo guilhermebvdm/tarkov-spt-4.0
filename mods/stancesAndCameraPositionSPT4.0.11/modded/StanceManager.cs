@@ -848,6 +848,7 @@ namespace CameraRotationMod
             // O tracker de velocidade de transição é estático e sobrevive à troca de raid — sem isto, o 1º
             // frame da raid nova compara com o estado da anterior e pode escolher a velocidade errada.
             Patches.ApplyComplexRotationPatch.ResetSpeedTracker();
+            Patches.ApplyComplexRotationPatch.ResetMetrics(); // item 017 (F0) — régua de transição
 
             _isTacSprintActive = false;
             _wasAiming = false;

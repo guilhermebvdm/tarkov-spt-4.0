@@ -24,7 +24,15 @@ namespace CameraRotationMod.Networking
         // (um mirando, outro trocando de postura). Estado estático aqui misturaria os dois.
         private readonly TransitionSpeedTracker _speedTracker = new TransitionSpeedTracker();
 
-        public void Init(ObservedPlayer p) => _observedPlayer = p;
+        // Item 017 (F0) — métricas POR OBSERVADO, com a origem no rótulo (paridade Fika). Criada no Init,
+        // não em inicializador de campo: Init roda depois do AddComponent e só ali o ProfileId existe.
+        private TransitionMetrics _metrics;
+
+        public void Init(ObservedPlayer p)
+        {
+            _observedPlayer = p;
+            _metrics = new TransitionMetrics("observed:" + (p?.ProfileId ?? "?"));
+        }
 
         public void SetStance(int stance, bool isAiming)
         {
@@ -43,12 +51,16 @@ namespace CameraRotationMod.Networking
             Vector3 targetPos = inStance ? StanceManager.GetTargetPosition((Stance)_stance, _isAiming) : Vector3.zero;
 
             float dt = Time.deltaTime;
+            if (dt <= 0f) return; // paridade com o guard do caminho local
             // Mesma separação do jogador local: a velocidade de mira e a de postura são independentes.
             float speedMult = _speedTracker.SpeedMult(_isAiming, _stance);
             float stiffness = 150f * speedMult;
             float damping = Plugin._StanceOvershootDamping?.Value ?? 12f;
             _euler = ApplyComplexRotationPatch.SpringLerpAngle(_euler, targetEuler, ref _rotVel, stiffness, damping, dt);
             _pos = ApplyComplexRotationPatch.SpringLerp(_pos, targetPos, ref _posVel, stiffness, damping, dt);
+
+            // Item 017 (F0) — métrica do corpo observado (rota derivada do estado do pacote).
+            _metrics?.Feed(targetPos, targetEuler, _pos, _euler, dt, (Stance)_stance, _isAiming, inStance);
 
             // Janela PRÉ-IK (Postfix de ShiftWeaponRoot): mover o Weapon_Root_Anim desloca os markers de IK da
             // arma (filhos dele) → a LimbIK leva o braço até a stance e o Kinematics cola a arma na mão. O

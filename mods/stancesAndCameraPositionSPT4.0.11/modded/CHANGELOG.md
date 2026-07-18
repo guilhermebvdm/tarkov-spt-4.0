@@ -7,6 +7,20 @@ Versões mais recentes primeiro.
 
 ---
 
+## v2.6.0 (2026-07-17)
+
+### Novidade (ferramenta de debug) — `Debug Transition Metrics`
+
+Nova opção no F12 (seção `Debug (Advanced)`, desligada por padrão). Quando ligada, registra **uma linha no log por
+transição de pose concluída** — rota, pico de movimento além do alvo (por eixo), oscilações e tempo até assentar.
+É a régua para medir e atacar, com número, os problemas de transição para a mira (a arma "subir demais" antes de
+assentar). **Custo praticamente zero quando desligada** — não muda nada no comportamento do mod.
+
+Primeiro passo (F0) do item 017 (ataque cirúrgico ao overshoot de transição). Nenhuma mudança de jogabilidade
+nesta versão.
+
+---
+
 ## v2.5.0 (2026-07-14)
 
 ### Removido — a seção `Field of View` inteira (3 opções)
