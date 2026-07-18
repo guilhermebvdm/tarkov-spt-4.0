@@ -54,16 +54,9 @@ internal static class ClassMoveSpeed
                 result *= PerksConfig.HeavyFrameMoveSpeed?.Value ?? 1f;
             }
 
-            // 🔻 Rooted (Caçador): −15% de velocidade enquanto MIRA (ADS).
-            // ⚠️ INERTE por este lever (code-review 2026-07-15, F1 — item de backlog 074): a velocidade em ADS é
-            // governada pelo TETO DE MIRA (ClampSpeed via StateSpeedLimit ≈ 0.33–0.50, MovementContext.cs:1843 +
-            // Player.cs:12155), que já é MENOR que o MaxSpeed reduzido pelo Rooted (0.85×0.717≈0.61) → o min() nunca
-            // pega o Rooted. Para morder, o lever certo é o AimMovementSpeed / StateSpeedLimit de mira, não o MaxSpeed.
-            if (PerksConfig.RootedEnabled?.Value == true && SkillMultipliers.IsLocalClass("Hunter")
-                && p.HandsController is Player.FirearmController fc && fc.IsAiming)
-            {
-                result *= PerksConfig.RootedAdsSpeed?.Value ?? 1f;
-            }
+            // 🔻 Rooted (Caçador, −15% vel ADS): MOVIDO para RootedAimSlowdownPatch (074/F1, 2026-07-18). Aqui,
+            // no MaxSpeed, era INERTE — o teto de mira (StateSpeedLimit ≈0.33) é menor que o MaxSpeed reduzido e o
+            // min() ignorava o Rooted. O lever certo é escalar o `slow` de MovementContext.SetAimingSlowdown.
 
             // 🔧 Execution (Furtivo): +velocidade com a MELEE na mão.
             // ⚠️ CLAMPADO por este lever (code-review 2026-07-15, F2 — item de backlog 074): a velocidade real tem
@@ -123,7 +116,11 @@ internal class OverladenInertiaPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return AccessTools.Method(typeof(BasePhysicalClass), nameof(BasePhysicalClass.OnWeightUpdated));
+        // 074/F5 (2026-07-18, auditoria de eficácia): o patch mirava BasePhysicalClass.OnWeightUpdated, mas
+        // PlayerPhysicalClass SOBRESCREVE o método (corpo próprio) e NÃO chama base, e o player local usa
+        // new PlayerPhysicalClass() (Player.CreatePhysical) → o patch na BASE NUNCA rodava pro player (AP-03,
+        // override de alvo virtual). Mira a OVERRIDE de PlayerPhysicalClass (mesmo tipo que o IronLungsPatch usa).
+        return AccessTools.Method(typeof(PlayerPhysicalClass), nameof(PlayerPhysicalClass.OnWeightUpdated));
     }
 
     [PatchPostfix]
@@ -147,17 +144,70 @@ internal class OverladenInertiaPatch : ModulePatch
                 return;
             }
 
-            // Overladen (fix review 2026-06-24): OnWeightUpdated já DERIVOU os campos de inércia reais a partir de
-            // Inertia — multiplicar só o Inertia cru (pós-derivação) quase não muda o "clunky". Multiplicamos também
-            // os derivados que de fato movem (lateral/diagonal).
+            // 074/F5: com o alvo corrigido (PlayerPhysicalClass), o Postfix roda pro player. Multiplica o Inertia
+            // LIVE — relido por MovementContext.Inertia → coef de ré (Single_0), tilt (Single_2), tilt de arma
+            // (TiltInertia). É recomputado fresco a cada OnWeightUpdated → o `*=` NÃO empilha (aplica sobre valor
+            // novo por chamada).
+            // ⚠️ LIMITAÇÃO CONHECIDA (validar in-game): SprintAcceleration/PreSprintAcceleration e o
+            // MovementAccelerationRange são DERIVADOS de Inertia DENTRO do override, ANTES deste Postfix — então o
+            // momentum/aceleração NÃO reflete o boost. Re-derivá-los exigiria duplicar a fórmula BSG com tipos
+            // obfuscados (GClass2298/InertiaSettings) — deferido; só se o feel ficar fraco (074, Lote 1).
             var m = PerksConfig.OverladenInertia?.Value ?? 1f;
             __instance.Inertia *= m;
-            __instance.MoveSideInertia *= m;
+            __instance.MoveSideInertia *= m;        // (audit: getters sem consumidor vivo hoje — harmless/forward-safe)
             __instance.MoveDiagonalInertia *= m;
         }
         catch (Exception ex)
         {
             Plugin.Log?.LogError($"[CustomClasses] overladen falhou: {ex.Message}");
+        }
+    }
+}
+
+/// <summary>
+///     🔻 Rooted (Caçador) — −15% de velocidade enquanto MIRA (ADS). 074/F1 (2026-07-18, auditoria de eficácia):
+///     o lever ANTIGO (Postfix no MaxSpeed) era INERTE — em mira a velocidade é governada pelo TETO DE MIRA
+///     (<c>StateSpeedLimit</c>, o MIN dos <c>SpeedLimits</c>), que já é menor que o MaxSpeed reduzido → o
+///     <c>min()</c> nunca pegava o Rooted. Lever CERTO: o <c>FirearmController</c> chama
+///     <c>MovementContext.SetAimingSlowdown(isAiming, slow=0.33+AimMovementSpeed)</c> (FirearmController:12155),
+///     que registra <c>slow</c> como o limite <c>ESpeedLimit.Aiming</c> — o teto que MANDA em ADS. Prefix escala
+///     <c>slow ×0.85</c> ANTES do <c>AddStateSpeedLimit</c> → teto de mira 15% menor = −15% de velocidade em ADS.
+///     Gate: MovementContext do MainPlayer (bots têm o seu → gate de instância obrigatório, regra 075) + Caçador.
+///     <para>Idempotente: <c>AddStateSpeedLimit</c> só grava se a chave <c>Aiming</c> ainda não existe (MovementContext:1674)
+///     → o Prefix escala 1× por aim-in, sem empilhar entre frames.</para>
+/// </summary>
+internal class RootedAimSlowdownPatch : ModulePatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return AccessTools.Method(typeof(MovementContext), nameof(MovementContext.SetAimingSlowdown));
+    }
+
+    [PatchPrefix]
+    private static void Prefix(MovementContext __instance, bool isAiming, ref float slow)
+    {
+        try
+        {
+            if (!isAiming || PerksConfig.RootedEnabled?.Value != true)
+            {
+                return;
+            }
+
+            // 075: SÓ o MovementContext do player local — bots também miram e chamam SetAimingSlowdown no SEU
+            // MovementContext, então o gate de INSTÂNCIA é obrigatório (senão o Caçador-host afetaria todo bot mirando).
+            if (!ReferenceEquals(__instance, Singleton<GameWorld>.Instance?.MainPlayer?.MovementContext))
+            {
+                return;
+            }
+
+            if (SkillMultipliers.IsLocalClass("Hunter"))
+            {
+                slow *= PerksConfig.RootedAdsSpeed?.Value ?? 1f;   // 0.85 → teto de mira 15% menor
+            }
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log?.LogError($"[CustomClasses] rooted falhou: {ex.Message}");
         }
     }
 }

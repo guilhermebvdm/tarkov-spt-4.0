@@ -126,7 +126,8 @@ public class Plugin : BaseUnityPlugin
         // (050.1 fix 2026-07-15) A velocidade voltou aos getters SEM ESTADO (MaxSpeed/SprintingSpeed). Os patches
         // nos DRIVERS (SetCharacterMovementSpeed/SprintAcceleration) do fix de 2026-06-24 CAUSAVAM decaimento
         // geométrico da velocidade a cada frame de movimento (campos relidos+regravados) → removidos. Ver ClassMoveSpeed.
-        new OverladenInertiaPatch().Enable();               // (050.1) 🔻 Saqueador — inércia ∝ peso
+        new OverladenInertiaPatch().Enable();               // (050.1/074-F5) 🔻 Saqueador — inércia ∝ peso (retarget PlayerPhysicalClass)
+        new RootedAimSlowdownPatch().Enable();              // (074-F1) 🔻 Caçador — −15% vel em ADS (teto de mira)
         try
         {
             new MaxSpeedPatch().Enable();                   // (050.1 fix) 🚶 ANDAR — MaxSpeed (computado puro, estável)
