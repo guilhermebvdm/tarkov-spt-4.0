@@ -48,7 +48,7 @@ As checagens hoje são espalhadas e por-sistema: o loop de movimento lê "parte 
 - [ ] Reconexão Fika de um peer: o dono re-avalia do zero; nenhum estado herdado de espelho.
 - [ ] Idioma indisponível no boot (race de locale): fallback EN sem crash.
 - [ ] Headless: motor roda para BOTS sem jogador local; feedback é no-op silencioso; sem dependência de câmera/render.
-- [ ] Dois one-shots de TIPOS diferentes no mesmo instante: cooldown por tipo; arbitragem de pose (D2 — prone vence agachar) vive na primitiva compartilhada de pose entregue no 003 e reusada por 004/006.
+- [ ] Dois one-shots de TIPOS diferentes no mesmo instante: cooldown por tipo; arbitragem de pose (D2 — prone vence agachar) vive nas primitivas compartilhadas — agachar entregue no 003 (reusado pelo 006), derrubar + arbitragem D2 entregues no 004 (primeiro consumidor real — sync da rodada 2 do 003).
 - [ ] Orçamento: evento + polling ≤4 Hz por jogador rastreado; nunca varredura por frame; sem alocações por frame no caminho quente.
 
 ## Fora de escopo
