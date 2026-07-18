@@ -75,6 +75,10 @@ namespace SPT.Launcher.ViewModels
 
         public bool HasMultipliers => MultiplierRows != null && MultiplierRows.Count > 0;
 
+        /// <summary>Metades da lista (column-major) para renderizar os multiplicadores em 2 colunas, mantendo a ordem.</summary>
+        public List<SkillMultiplierRow> MultiplierRowsLeft { get; set; } = new List<SkillMultiplierRow>();
+        public List<SkillMultiplierRow> MultiplierRowsRight { get; set; } = new List<SkillMultiplierRow>();
+
         /// <summary>Perks (isPerk=true) da classe — coluna esquerda dos cards. Item 029.</summary>
         public List<PerkEffectRow> Perks { get; set; } = new List<PerkEffectRow>();
 
@@ -321,6 +325,7 @@ namespace SPT.Launcher.ViewModels
 
                     profile.ClassImage = ResolveClassImage(profile.Name); // arte full-body no painel de detalhe
 
+                    SplitMultiplierColumns(profile);    // 2 colunas de multiplicadores (column-major)
                     MaybeInjectPreviewEffects(profile); // item 029: só em Dev Mode, enquanto a rota não existe
                 }
 
@@ -486,18 +491,39 @@ namespace SPT.Launcher.ViewModels
                 });
             }
 
-            // Maior desvio de 1.0 primeiro (efeitos mais fortes no topo).
+            // Ordena pelo valor COM SINAL, desc: buffs (positivos) primeiro em ordem decrescente, depois
+            // os debuffs (negativos). Ex.: +50, +40, +20, −30 (não +50, +40, −30, +20).
             return rows
                 .OrderByDescending(r => ParseSignedPercent(r.Token))
                 .ToList();
         }
 
-        /// <summary>"−20%"/"+50%" → magnitude inteira para ordenação (U+2212 e '-' tratados como negativo).</summary>
+        /// <summary>"−20%"/"+50%" → inteiro COM SINAL para ordenação (U+2212 e '-' contam como negativo).</summary>
         private static int ParseSignedPercent(string token)
         {
             if (string.IsNullOrEmpty(token)) return 0;
             string digits = new string(token.Where(char.IsDigit).ToArray());
-            return int.TryParse(digits, out int value) ? value : 0;
+            if (!int.TryParse(digits, out int value)) return 0;
+            bool negative = token.Contains('−') || token.Contains('-'); // U+2212 (menu do token) ou hífen ASCII
+            return negative ? -value : value;
+        }
+
+        /// <summary>Divide MultiplierRows (já ordenado) em 2 colunas column-major: esquerda leva a 1ª metade
+        /// (com o extra quando ímpar), direita a 2ª — a leitura de cima→baixo da esquerda segue na direita.</summary>
+        private static void SplitMultiplierColumns(ClassProfile profile)
+        {
+            profile.MultiplierRowsLeft.Clear();
+            profile.MultiplierRowsRight.Clear();
+
+            var rows = profile.MultiplierRows;
+            if (rows == null || rows.Count == 0) return;
+
+            int half = (rows.Count + 1) / 2;
+            for (int i = 0; i < rows.Count; i++)
+            {
+                if (i < half) profile.MultiplierRowsLeft.Add(rows[i]);
+                else profile.MultiplierRowsRight.Add(rows[i]);
+            }
         }
 
         /// <summary>Nome de skill PascalCase → legível ("StressResistance" → "Stress Resistance").</summary>
