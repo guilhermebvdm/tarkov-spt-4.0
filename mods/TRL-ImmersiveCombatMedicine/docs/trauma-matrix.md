@@ -72,7 +72,7 @@ Fonte de verdade do redesign do sistema de trauma (pernas/braços/estômago/desm
 - **D8. Roll do estômago** usa o analgésico do instante da zerada (sem re-roll por mudança posterior).
 - **D9. Bots**: tremor aplicado (cosmético); cancela-ADS não se aplica a bots.
 - **D11. Tremor com dono próprio**: o mod gerencia o lifecycle do efeito Tremor (aplicar/renovar/remover) — sem depender do tremor-por-dor vanilla (que o analgésico apaga).
-- **D12. Pipeline de velocidade**: composição multiplicativa; teste de compat com CustomClasses (classe Tank patcheia SetCharacterMovementSpeed) e Skills Extended (SetSpeedLimit).
+- **D12. Pipeline de velocidade**: composição multiplicativa; teste de compat com CustomClasses (patches reais: MaxSpeedPatch/SprintingSpeedPatch — postfix nos getters de MovementContext; corrigido na rodada A do item 001) e Skills Extended (MovementContextSetSpeedLimitPatch).
 - **D13. Cancela-ADS pelo caminho vanilla** + teste de compat com SPTRecoilRework e Fontaine-FOVFix (ambos patcheiam SetPlayerAiming).
 - **D14. Spike 001 mapeia SAIN 4.4.3 + ORBIT**: pontos seguros de interferência (mover/pose/camadas BigBrain) com prova decompilada; pausar/retomar sempre deixa a camada RE-DECIDIR (nunca matar camada).
 - **D15. UNTAR** segue as mesmas regras de trauma (são bots).
@@ -99,4 +99,5 @@ Fonte de verdade do redesign do sistema de trauma (pernas/braços/estômago/desm
 |---|---|---|
 | 2026-07-18 | Guilherme | Criação — matriz aprovada + 13 decisões da sessão de requisitos. |
 | 2026-07-18 | Guilherme | Validação de backlog: decisões 14–17 (analgésico reavalia na hora; pisos 25/10 no desmaio; bots cirúrgico+SAIN com X configurável; lockout de re-ADS) + defaults D1–D10. |
+| 2026-07-18 | Guilherme | Rodada A do item 001 corrigiu a redação do D12 (patches reais do CustomClasses verificados no fonte). |
 | 2026-07-18 | Guilherme | Validação FMEA (rodada 3): decisões 18–22 (N1/N2=total; anti-thrash; feedback diegético+toast; injeção legacy aposentada; i18n EN default + PT) + defaults D11–D20. |
