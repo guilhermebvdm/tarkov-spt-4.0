@@ -1,5 +1,18 @@
 # 016 — Fork realism: transições por curvas + gate de aim-speed
 
+> **Status:** 🔴 **CANCELADO na F0 (NO-GO, 2026-07-17).** O usuário testou o **Fontaine-StanceOverhaul
+> standalone** e não achou a experiência melhor que a nossa — portar a sensação dele para o nosso mod
+> herdaria justamente o que foi rejeitado, então o fork foi cortado ainda na F0 (só instrumentação, nenhuma
+> mudança de comportamento entregue). A pasta `modded-realism/` e o grafo dela foram removidos; o mod
+> Fontaine vendorizado (`mods/Stance-Overhaul-test-1/`) foi **mantido como referência**.
+>
+> ⚠️ **Os 2 bugs que motivavam este item continuam ABERTOS** e serão atacados por abordagem própria (waypoint
+> por Stance 0 + atenuação de offset por comprimento de arma) no **item [017](../017-transicao-ads-cirurgica/)**.
+> Este documento fica como registro histórico da abordagem descartada.
+
+---
+
+
 **Mod:** stancesAndCameraPositionSPT4.0.11
 **Status:** Em progresso (F0)
 **Criado:** 2026-07-17

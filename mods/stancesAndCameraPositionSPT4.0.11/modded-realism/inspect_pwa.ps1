@@ -1,1 +1,0 @@
-$assembly = [System.Reflection.Assembly]::LoadFile('d:\Projetos\GITHUB TARKOV\tarkov-spt-4.0\mods\stancesAndCameraPositionSPT4.0.11\modded\References\Assembly-CSharp.dll'); $types = $assembly.GetTypes() | Where-Object { $_.Name -match 'ProceduralWeaponAnimation' }; $types | Select-Object FullName

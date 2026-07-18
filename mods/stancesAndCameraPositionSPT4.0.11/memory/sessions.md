@@ -575,7 +575,7 @@ execução via **/g-autodev** com gates humanos por fase.
   ruim = critérios de aceite sem valor.
 
 **Pendências:**
-- **[P-11.3] (aberta 2026-07-17) 🟡 GATE F0 do item 016 — medições do usuário:** (a) instalar a DLL `-realism`
+- ~~**[P-11.3]** (aberta 2026-07-17) GATE F0 do item 016~~ **✅ RESOLVIDA por cancelamento (2026-07-17)** — item 016 NO-GO (Fontaine standalone não convenceu). Ver Sessão 11 (cont. 2). O que segue: — medições do usuário:** (a) instalar a DLL `-realism`
   (Dev Mod ON!), ligar `Debug Transition Metrics` e coletar o **baseline legacy**: MP5 + 1 pistola, rotas
   S1→ADS, S2→ADS, S3→ADS e S0↔S2, ≥5 amostras/rota; (b) **diagnóstico G36**: {G36, rifle longo, arma curta} ×
   {S1/S2/S3} × {parado, transição→ADS} — a deformação é estática, de transição ou ambas? Sem isso a F1 não começa.
@@ -606,3 +606,45 @@ timeout não spamma. Build 0/0; artefato `-realism` atualizado.
 
 **Regras novas para o gate F0 (P-11.3):** medir com kick = 0 (ou filtrar `(kick)`); linhas
 `(interrupted)/(chained)/(timeout)` fora das medianas; hideout OK como ambiente.
+
+## 2026-07-17 ~04:00 (GMT-3) — Sessão 11 (cont. 2): item 016 CANCELADO (NO-GO) + novo direcionamento (item 017)
+
+**Decisão do usuário:** testou o **Fontaine-StanceOverhaul standalone** (sem o nosso mod) e **não achou melhor** →
+**NO-GO no item 016** na F0. Portar a sensação dele herdaria o que foi rejeitado. **Cortado ainda na F0** (só
+instrumentação entregue, zero mudança de comportamento — o gate F0 nem chegou a ser medido).
+
+**Limpeza executada:**
+- `modded-realism/` (o fork) e `references/graphs/mods/...-realism/` **removidos** (git rm). Artefato local
+  `builds/...-v3.0.0-realism.dll` apagado.
+- **`mods/Stance-Overhaul-test-1/` (Fontaine vendorizado) MANTIDO** como referência (decisão do usuário) — com o
+  estudo `assets/analise-porte-item-016.md` e o grafo.
+- Item 016 → 🔴 no `mod-backlog.md`; spec 016 selada com banner de cancelamento (padrão do item 004).
+- DLL instalada no jogo já era a **2.5.0 canônica** (o usuário testou o Fontaine à parte) — nada a reinstalar.
+
+**⚠️ A régua `TransitionMetrics` foi descartada junto com o fork** — mas o TEMA que ela media é o **próximo
+ataque**. Reinstrumentar é o passo 1 do item 017.
+
+**Novo direcionamento — item 017 (⚪), abordagem PRÓPRIA do usuário (não as curvas do Fontaine):** ataca os 2 bugs
+reais de transição que o 016 mirava, operando sobre a mola existente:
+
+- **Problema A — overshoot ao mirar.** Low Ready → ADS: a mira **sobe demais antes de descer** (pior em armas
+  leves). High Ready → ADS: **"onda" de cima p/ baixo**. **Ideia:** transição **rápida e smooth para a Stance 0
+  ANTES do ADS** (Ready → Stance 0 → ADS) — a passagem pela pose neutra assenta a velocidade da mola, e o trecho
+  final parte do repouso (sem overshoot herdado). ⚠️ Sem tocar `CurrentStance` (alimenta snap/stamina/Fika/mount)
+  — é um waypoint de *transição*, não troca de estado.
+- **Problema B — braço esquerdo quebra.** SÓ de Low Ready → Stance 0, **armas longas**: a arma **desloca p/
+  frente** e o braço esquerdo hiperestende. **Ideia:** os **IK markers de mão** (pontos de fixação) têm distância
+  função do **comprimento da arma** — atenuar o **offset longitudinal (Y local)** da transição em armas longas
+  para não empurrar a arma p/ frente. Possível causa comum com **P-11.2** (G36 High Ready ao mirar) — a tech-spec
+  verifica se um fix cobre os dois.
+
+**Lições:**
+- **Testar o mod de referência ANTES de portar** economiza fases: o NO-GO veio de o usuário jogar o Fontaine
+  standalone, não de implementar F1–F4 e só então perceber. A F0 (instrumentação + fork barato) foi o custo
+  mínimo para chegar à decisão — valeu como gate.
+- **Cancelar ≠ perder**: o diagnóstico da causa do overshoot (mola sub-amortecida + velocidade herdada) e o estudo
+  do Fontaine ficam; o item 017 nasce com a causa-raiz já mapeada.
+
+**Pendências vivas:** **P-11.1** (velocidade presa) · **P-11.2** (braço G36 High Ready — provável parente do
+Problema B do 017) · **item 017** (⚪ — falta `/create-spec` refinar + tech-spec investigar IK markers/weapon
+length) · **P-10.1/P-10.2** (achados de review antigos não aplicados) · subir a v2.5.0 (DLL+cfg) ao servidor.
