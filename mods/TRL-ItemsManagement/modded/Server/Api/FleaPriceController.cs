@@ -3,10 +3,13 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using SPTarkov.Server.Core.Models.Spt.Config;   // RagfairConfig
 using SPTarkov.Server.Core.Utils;               // JsonUtil
+using TRLItemsManagement.Pricing;               // FleaFloorOverrideStore (B-5)
 
 namespace TRLItemsManagement.Api;
 
-public sealed record SetFleaPriceRequest(string? Tpl, double? Price);
+// AllowBelowFloor (B-5): when true, a price under the item's SPT trader-price floor is accepted instead
+// of 422'd — the tpl is whitelisted in flea-floor-overrides.json and the Harmony patch lowers its floor.
+public sealed record SetFleaPriceRequest(string? Tpl, double? Price, bool? AllowBelowFloor);
 
 public sealed record DeleteFleaPriceRequest(string? Tpl);
 
@@ -110,7 +113,7 @@ public sealed class FleaPriceController(
                 return Task.FromResult(SetModItemPrice(tpl, price, item, sptBlock, ragfairRoot!, dynamicNode, itemsRoot!, itemsCatalogPath));
             }
 
-            return Task.FromResult(SetVanillaItemPrice(tpl, price, sptBlock, ragfairRoot!, dynamicNode, itemsRoot!, itemsCatalogPath));
+            return Task.FromResult(SetVanillaItemPrice(tpl, price, body.AllowBelowFloor == true, sptBlock, ragfairRoot!, dynamicNode, itemsRoot!, itemsCatalogPath));
         });
     }
 
@@ -143,6 +146,10 @@ public sealed class FleaPriceController(
             {
                 return Task.FromResult<IActionResult>(Ok(new { ok = true, tpl, removed = false, effectiveFleaPrice }));
             }
+
+            // B-5: resetting the override also drops any below-floor whitelist entry for this tpl, so it
+            // returns to its vanilla trader-price floor. Remove() writes nothing when absent.
+            FleaFloorOverrideStore.Remove(modPaths.ConfigDir, jsonUtil, tpl);
 
             StyleSensitiveJsonWriter.Write(sptPaths.RagfairConfigPath, ragfairRoot!);
             var checksResult = checksService.Update("configs/ragfair.json");
@@ -274,7 +281,7 @@ public sealed class FleaPriceController(
     ///     <c>desiredPrice</c> — see <c>Pricing/SellPriceApplier.cs</c>'s doc-comment sibling note and
     ///     <c>docs/flea-formula-validation.md</c> in the Node tool for the source-level derivation.
     /// </summary>
-    private IActionResult SetVanillaItemPrice(string tpl, double price, JsonObject? sptBlock, JsonObject ragfairRoot, JsonObject dynamicNode, JsonObject itemsRoot, string itemsCatalogPath)
+    private IActionResult SetVanillaItemPrice(string tpl, double price, bool allowBelowFloor, JsonObject? sptBlock, JsonObject ragfairRoot, JsonObject dynamicNode, JsonObject itemsRoot, string itemsCatalogPath)
     {
         var bonus = sptBlock?["fleaPrice"]?.GetValue<double?>();
         if (bonus is null)
@@ -287,11 +294,28 @@ public sealed class FleaPriceController(
 
         if (price < floor)
         {
-            return UnprocessableEntity(new
+            if (!allowBelowFloor)
             {
-                error = $"price {price} is below the flea floor {floor} (= handbook × trader buyback). The flea cannot go below this for this item.",
-                floor,
-            });
+                // belowFloor:true lets the viewer offer "allow below the floor" and re-POST with
+                // AllowBelowFloor, instead of just erroring out.
+                return UnprocessableEntity(new
+                {
+                    error = $"price {price} is below the flea floor {floor} (= handbook × trader buyback). The flea cannot go below this for this item.",
+                    floor,
+                    belowFloor = true,
+                });
+            }
+
+            // B-5: operator explicitly allowed a sub-floor price. Whitelist this tpl so
+            // FleaFloorOverridePatch lowers its SPT trader-price floor to `price` (Math.Min — only ever
+            // LOWERS). Restart SPT / refresh the flea for the below-floor offer to regenerate in-game.
+            FleaFloorOverrideStore.Set(modPaths.ConfigDir, jsonUtil, tpl, price);
+        }
+        else
+        {
+            // At/above the vanilla floor → no floor override needed; drop any prior whitelist entry so
+            // the item snaps back to its real floor. Remove() writes nothing when absent.
+            FleaFloorOverrideStore.Remove(modPaths.ConfigDir, jsonUtil, tpl);
         }
 
         if (ceiling is { } ceilingVal && price > ceilingVal)

@@ -92,6 +92,20 @@ public class TraderPriceOnLoad(
             BuyOverrides = new Dictionary<MongoId, Dictionary<MongoId, TraderOverride>>();
         }
 
+        // B-5: per-tpl flea-floor overrides, read by the Harmony patch FleaFloorOverridePatch (which
+        // PatchAll above already registered). Own try/catch so a bad floor config can't take down the
+        // buy/sell logic (or vice versa).
+        try
+        {
+            var floorConfigPath = Path.Combine(modPaths.ConfigDir, FleaFloorOverrideStore.FileName);
+            FleaFloorOverrideStore.Load(floorConfigPath, jsonUtil, logger);
+        }
+        catch (Exception ex)
+        {
+            logger.Error("[TRLItemsManagement] failed to load " + FleaFloorOverrideStore.FileName + ": " + ex.Message);
+            FleaFloorOverrideStore.Map = new Dictionary<MongoId, double>();
+        }
+
         return Task.CompletedTask;
     }
 }

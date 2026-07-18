@@ -2032,7 +2032,7 @@ function confirmBanAction(cell, menu, banning) {
 // state (DELETE if there was no prior override, else re-POST the previous price). `beforeRerender`
 // runs right before the row is replaced (the editor tears down its form + capture listener there).
 // Returns true on success.
-async function applyFleaPrice(tpl, rawPrice, { source = null, undoable = false, beforeRerender = null } = {}) {
+async function applyFleaPrice(tpl, rawPrice, { source = null, undoable = false, beforeRerender = null, allowBelowFloor = false } = {}) {
   const item = ITEMS[tpl];
   if (!item) return false;
   const spt = item.spt || {};
@@ -2042,11 +2042,30 @@ async function applyFleaPrice(tpl, rawPrice, { source = null, undoable = false, 
   const prevEff = spt.effectiveFleaPrice != null ? spt.effectiveFleaPrice : null;
   let price = Math.round(rawPrice);
   if (!Number.isFinite(price) || price <= 0) { toast('Invalid value', 'err'); return false; }
+  // Ceiling still clamps DOWN (mods/electronics cap). The FLOOR is no longer clamped here — the
+  // backend 422s with { belowFloor:true }, and we offer to release THIS item from the floor (B-5).
   let capNote = '';
-  if (floor > 0 && price < floor)         { price = floor;   capNote = ` (raised to floor ${floor.toLocaleString('en-US')} ₽)`; }
   if (ceiling != null && price > ceiling) { price = ceiling; capNote = ` (capped at ceiling ${ceiling.toLocaleString('en-US')} ₽)`; }
   try {
-    const data = await auditApiCall('POST', '/price', { tpl, price });
+    const r = await fetch(API_BASE + '/price', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tpl, price, allowBelowFloor: allowBelowFloor || undefined }),
+    });
+    const data = await r.json();
+    if (!r.ok || !data.ok) {
+      // B-5: sub-floor price rejected — offer to release this specific item from the SPT floor,
+      // then re-apply with the flag, instead of just failing.
+      if (data.belowFloor && !allowBelowFloor) {
+        const ok = await confirmDialog({
+          title: 'Below the SPT floor',
+          body: `${price.toLocaleString('en-US')} ₽ is below this item's SPT floor of ${(data.floor || 0).toLocaleString('en-US')} ₽ (handbook × trader buyback). Allow this item to be priced below the floor? Restart SPT to apply in-game.`,
+          confirmText: 'Allow & apply', cancelText: 'Cancel',
+        });
+        if (ok) return applyFleaPrice(tpl, rawPrice, { source, undoable, beforeRerender, allowBelowFloor: true });
+        return false;
+      }
+      throw new Error(data.error || ('HTTP ' + r.status));
+    }
     if (!item.spt) item.spt = { basePrice: null, fleaPrice: null, fleaFloor: 0, fleaOverride: null, fleaOfferMultiplier: null, fleaBaseRaw: null, effectiveFleaPrice: null, fleaBanned: false, fleaBanReasons: [], traders: [] };
     if (data.mode === 'multiplier') { item.spt.fleaOfferMultiplier = data.multiplier; if (data.base != null) item.spt.fleaBaseRaw = data.base; }
     else { item.spt.fleaOverride = data.override; }
@@ -2062,14 +2081,16 @@ async function applyFleaPrice(tpl, rawPrice, { source = null, undoable = false, 
     refreshEditedFilter();
     const fromStr = (prevEff != null && prevEff !== data.effectiveFleaPrice) ? `${prevEff.toLocaleString('en-US')} → ` : '';
     const srcStr = source ? ` from ${source}` : '';
+    const belowNote = (allowBelowFloor && floor > 0 && price < floor) ? ' (below floor — restart SPT to apply)' : '';
     const undo = undoable ? { label: 'Undo', run: async () => {
+      // Restore the exact prior state; if that state was itself below the floor, keep it below.
       const d = (!hasEdit || prevEff == null)
         ? await auditApiCall('DELETE', '/price', { tpl })
-        : await auditApiCall('POST', '/price', { tpl, price: Math.round(prevEff) });
+        : await auditApiCall('POST', '/price', { tpl, price: Math.round(prevEff), allowBelowFloor: (prevEff < floor) || undefined });
       undoApplyFlea(tpl, d);
       toast(`${item.shortName || tpl}: reverted`, 'ok');
     } } : null;
-    toast(`${item.shortName || tpl}: flea ${fromStr}${data.effectiveFleaPrice.toLocaleString('en-US')} ₽${srcStr}${capNote}`, 'ok', undo);
+    toast(`${item.shortName || tpl}: flea ${fromStr}${data.effectiveFleaPrice.toLocaleString('en-US')} ₽${srcStr}${capNote}${belowNote}`, 'ok', undo);
     return true;
   } catch (err) {
     toast((source ? `Failed to copy from ${source}: ` : 'Failed to save: ') + err.message, 'err');
@@ -2092,6 +2113,10 @@ function openInlineEdit(cell) {
   const floor = spt.fleaFloor || 0;     // flea can't go below this
   const ceiling = spt.fleaCeiling != null ? spt.fleaCeiling : null;  // flea can't go above this (mods/electronics)
   const hasEdit = spt.fleaOverride != null || spt.fleaOfferMultiplier != null;
+  // B-5: an item already priced below its vanilla floor has been "released" from it — don't re-impose
+  // the floor as the input min (it would flag the current value invalid) nor nag "min X".
+  const releasedBelowFloor = current !== '' && floor > 0 && current < floor;
+  const inputMin = releasedBelowFloor ? 0 : floor;
 
   // Append the form as an absolute overlay so the cell keeps its original
   // dimensions and surrounding rows don't reflow when we enter edit mode.
@@ -2107,10 +2132,11 @@ function openInlineEdit(cell) {
       (ceiling != null ? `Max ${ceiling.toLocaleString('en-US')} ₽ (Electronics/Weapon Mod ceiling = handbook × multiplier).` : '');
   const hintParts = [];
   if (isMod && base != null) hintParts.push(`base ${base.toLocaleString('en-US')}`);
-  if (floor > 0)      hintParts.push(`min ${floor.toLocaleString('en-US')}`);
+  if (releasedBelowFloor) hintParts.push('below floor');
+  else if (floor > 0)     hintParts.push(`min ${floor.toLocaleString('en-US')}`);
   if (ceiling != null) hintParts.push(`max ${ceiling.toLocaleString('en-US')}`);
   form.innerHTML =
-    `<input type="number" min="${floor || 0}"${ceiling != null ? ` max="${ceiling}"` : ''} step="1" value="${current}" autofocus data-tip="${escapeAttr(inputTip)}">` +
+    `<input type="number" min="${inputMin || 0}"${ceiling != null ? ` max="${ceiling}"` : ''} step="1" value="${current}" autofocus data-tip="${escapeAttr(inputTip)}">` +
     `<div class="edit-form__actions">` +
       `<button class="save" type="button" title="Save (Enter)">Save</button>` +
       (hasEdit ? `<button class="restore" type="button" title="Restore default price (undo edit)">↺</button>` : '') +
