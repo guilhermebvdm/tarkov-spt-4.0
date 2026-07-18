@@ -1936,7 +1936,7 @@ body.is-bulk-busy .main { opacity: .55; pointer-events: none; transition: opacit
 }
 .audit-log__filters input { flex: 1; }
 .audit-log__feed-wrap { overflow-y: auto; overflow-x: hidden; flex: 1; min-height: 0; margin-bottom: 12px; }
-.audit-log__empty { padding: 24px; text-align: center; color: var(--fg-faint); }
+.audit-log__empty { padding: 24px; text-align: center; color: var(--fg-secondary); }
 .badge--baseline { background: #3a3a2c; color: var(--fg-faint); }
 
 /* ── Activity feed (player-facing, no raw JSON by default) ───────────────────── */
@@ -1953,7 +1953,7 @@ body.is-bulk-busy .main { opacity: .55; pointer-events: none; transition: opacit
 .audit-feed-item__top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 3px; }
 .audit-feed-item__target { min-width: 0; flex: 1; }
 .audit-feed-item__target-label { color: var(--fg-secondary); font-size: var(--fs-sm); font-style: italic; }
-.audit-feed-item__time { flex: none; font-size: var(--fs-xs); color: var(--fg-faint); white-space: nowrap; }
+.audit-feed-item__time { flex: none; font-size: var(--fs-xs); color: var(--fg-secondary); white-space: nowrap; }
 .audit-feed-item__desc { font-size: var(--fs-sm); color: var(--fg-primary); line-height: 1.4; }
 .audit-feed-item__desc b { color: var(--fg-primary); }
 .audit-meta { color: var(--fg-faint); font-size: var(--fs-xs); }
@@ -1962,6 +1962,8 @@ body.is-bulk-busy .main { opacity: .55; pointer-events: none; transition: opacit
 .audit-delta.is-down { color: var(--color-down); font-weight: 600; }
 .audit-null { color: var(--fg-faint); }
 .audit-arrow { color: var(--fg-faint); }
+.audit-arrow.is-up   { color: var(--color-up); }
+.audit-arrow.is-down { color: var(--color-down); }
 .audit-feed-item__actions { flex: none; display: flex; align-items: center; gap: 6px; }
 .audit-feed-item__undo {
   height: 26px; padding: 0 10px; border-radius: var(--radius-sm);
@@ -1979,7 +1981,7 @@ body.is-bulk-busy .main { opacity: .55; pointer-events: none; transition: opacit
 .audit-feed-item__details-toggle:hover { color: var(--fg-primary); background: var(--bg-hover); }
 .audit-feed-item__origin { position: absolute; top: 10px; right: 44px; }
 .audit-feed-item__raw {
-  grid-column: 1 / -1; margin: 8px 0 0; padding: 8px 10px; border-radius: var(--radius-sm);
+  margin: 8px 0 0; padding: 8px 10px; border-radius: var(--radius-sm);
   background: var(--bg-input); border: 1px solid var(--border-subtle);
   font-family: var(--font-mono, monospace); font-size: var(--fs-xs); color: var(--fg-secondary);
   white-space: pre-wrap; word-break: break-word; width: 100%; flex-basis: 100%;
@@ -2000,6 +2002,26 @@ body.is-bulk-busy .main { opacity: .55; pointer-events: none; transition: opacit
 }
 .audit-baseline-summary.is-open .audit-baseline-summary__toggle .chev { transform: rotate(-135deg); }
 .audit-baseline-summary__list { display: flex; flex-direction: column; gap: 6px; padding: 0 8px 8px; }
+
+/* Loading skeleton for the feed — avoids an empty flash misread as "no history". */
+.audit-skel {
+  height: 54px; border-radius: var(--radius-md); margin-bottom: 6px;
+  background: var(--bg-panel); border: 1px solid var(--border-subtle);
+  animation: audit-skel-pulse 1.2s ease-in-out infinite;
+}
+@keyframes audit-skel-pulse { 0%, 100% { opacity: .45; } 50% { opacity: .8; } }
+
+/* Keyboard focus visibility for the modal controls (the main table already has focus rings;
+   these were missing, so keyboard focus was invisible inside the dialogs). */
+.modal__btn:focus-visible,
+.audit-log__filters select:focus-visible,
+.audit-log__filters input:focus-visible,
+.audit-log__item:focus-visible,
+.audit-feed-item__undo:focus-visible,
+.audit-feed-item__details-toggle:focus-visible,
+.audit-baseline-summary__toggle:focus-visible {
+  outline: 2px solid var(--accent-bright); outline-offset: 1px;
+}
 
 /* Item cell: thumbnail + name, hover/focus popover with the item's key info. Click copies the tpl. */
 .audit-log__item { position: relative; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; max-width: 100%; }

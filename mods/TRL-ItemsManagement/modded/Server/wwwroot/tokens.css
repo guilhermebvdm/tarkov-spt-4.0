@@ -54,9 +54,10 @@
   --color-danger:       #a04a3a;
   --color-danger-bright:#bd5a48;
 
-  /* Price-trend colors (used by ▲ ▼ indicators) */
-  --color-up:           #6e9a3f;
-  --color-down:         #a04a3a;
+  /* Price-trend colors (used by ▲ ▼ indicators) — aliases of the semantic success/danger so
+     the two names can't drift apart. */
+  --color-up:           var(--color-success);
+  --color-down:         var(--color-danger);
 
   /* ── Spacing (4px grid) ──────────────────────────────────────────────────── */
   --space-0: 0;
