@@ -45,6 +45,26 @@ Fonte de verdade do redesign do sistema de trauma (pernas/braços/estômago/desm
 12. **Analgésico** = qualquer efeito Painkiller **nativo** ativo (analgin, morfina, stims com painkiller, etc.).
 13. **Configurabilidade:** todas as probabilidades e timers expostos no F12.
 
+## Decisões da validação de backlog (sessão 2026-07-18, rodada 2)
+
+14. **Expiração do analgésico = reavaliação IMEDIATA e completa** — a dor volta na hora: inclusive one-shots (cair/agachar) disparam no instante da expiração se a condição os exigir. Tomar analgésico de-escala na hora (counterplay).
+15. **Piso de dano absoluto no desmaio percentual**: tórax ≥ **25** de dano E ≥50% da vida atual; cabeça ≥ **10** de dano E ≥25% da vida atual (pisos configuráveis). Sem agregação de pellets — comparação por hit.
+16. **Bots no ciclo de queda — interferência CIRÚRGICA**: hoje a regra existente deixa a IA levantar após X s e ela **nunca mais cai** (limitação conhecida). Novo desenho: interferir no mínimo, **devolver o controle ao SAIN após cada interferência**; ao levantar, se a condição persistir (2 pernas quebradas), a reavaliação derruba de novo — o bot entra no mesmo ciclo cair→esperar X s→levantar. **X configurável** (separado do timer humano 15s/3s).
+17. **Re-ADS pós-cancelamento: lockout curto** de 1–1,5 s (configurável) com som de dor — evita "solta e re-mira" anular a penalidade.
+
+## Defaults de spec (validação de backlog — aplicar como critérios de aceite)
+
+- **D1. Ranking de severidade** para combos mistos: `Cair+ciclo > Agachar+N2 > Mancar N2 > Mancar N1 > Nada`.
+- **D2. Regiões coexistem**; conflito de POSE resolve pelo mais severo (prone > agachar).
+- **D3. Desmaio tem precedência** — pausa o ciclo de queda; retoma no wake.
+- **D4. Zerar+Quebrar no mesmo membro** conta como Z1+Q1 (contagem por condição).
+- **D5. Dano do desmaio = efetivo aplicado** (pós-armadura) vs vida atual pré-tiro.
+- **D6. Tipos de dano do desmaio** mantidos (Bullet/Explosion/Sniper/Landmine/GrenadeFragment).
+- **D7. Guards de contexto**: agachar/cair não disparam em escada/corda/BTR/vault (adiam).
+- **D8. Roll do estômago** usa o analgésico do instante da zerada (sem re-roll por mudança posterior).
+- **D9. Bots**: tremor aplicado (cosmético); cancela-ADS não se aplica a bots.
+- **D10. Substituição incremental**: cada item desliga o sistema antigo na SUA entrega; migração de configs do usuário no 010. Spike 001 entrega fallback (caps de velocidade) se não houver mancar vanilla por lado/nível.
+
 ## Substituições vs sistema atual
 
 | Sistema atual (v1.1.1) | Destino |
@@ -60,3 +80,4 @@ Fonte de verdade do redesign do sistema de trauma (pernas/braços/estômago/desm
 | Data | Autor | Alteração |
 |---|---|---|
 | 2026-07-18 | Guilherme | Criação — matriz aprovada + 13 decisões da sessão de requisitos. |
+| 2026-07-18 | Guilherme | Validação de backlog: decisões 14–17 (analgésico reavalia na hora; pisos 25/10 no desmaio; bots cirúrgico+SAIN com X configurável; lockout de re-ADS) + defaults D1–D10. |
