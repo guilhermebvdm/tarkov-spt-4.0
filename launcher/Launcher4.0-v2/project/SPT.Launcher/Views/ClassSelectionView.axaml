@@ -130,7 +130,20 @@
                                      Title="{Binding SelectedClass.NameUpper}"
                                      Meta="CLASSE"/>
 
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <!-- 2 zonas: arte da classe (esquerda, fundo removido, colada na base) + info (direita).
+                         Sem arte (classe sem PNG) → coluna esquerda colapsa e a info ocupa tudo. -->
+                    <Grid ColumnDefinitions="Auto,*">
+                        <Border Grid.Column="0" Width="300"
+                                IsVisible="{Binding SelectedClass.HasClassImage}"
+                                VerticalAlignment="Stretch">
+                            <Image Source="{Binding SelectedClass.ClassImage}"
+                                   Stretch="Uniform"
+                                   VerticalAlignment="Bottom" HorizontalAlignment="Center"
+                                   Margin="12,8,0,0"
+                                   RenderOptions.BitmapInterpolationMode="HighQuality"/>
+                        </Border>
+
+                    <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
                         <StackPanel Margin="20,16" Spacing="18">
                             <StackPanel Spacing="12">
                                 <TextBlock Text="DESCRIÇÃO DA CLASSE" Classes="trl-label"/>
@@ -186,6 +199,7 @@
                             </StackPanel>
                         </StackPanel>
                     </ScrollViewer>
+                    </Grid>
                 </DockPanel>
             </cc:TrlPanel>
         </Grid>

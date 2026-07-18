@@ -54,6 +54,11 @@ namespace SPT.Launcher.ViewModels
 
         public bool HasFallbackIcon => FallbackIcon != null;
 
+        /// <summary>Full-body class art (Assets/ClassImages, fundo removido) resolvida por nome. Null sem match.</summary>
+        public Bitmap ClassImage { get; set; }
+
+        public bool HasClassImage => ClassImage != null;
+
         /// <summary>Parsed nameColor brush; null when absent/invalid (trl-nav default foreground applies).</summary>
         public IBrush NameBrush { get; set; }
 
@@ -313,6 +318,8 @@ namespace SPT.Launcher.ViewModels
                     {
                         profile.FallbackIcon = ResolveBundledIcon(profile.Name);
                     }
+
+                    profile.ClassImage = ResolveClassImage(profile.Name); // arte full-body no painel de detalhe
 
                     MaybeInjectPreviewEffects(profile); // item 029: só em Dev Mode, enquanto a rota não existe
                 }
@@ -665,6 +672,64 @@ namespace SPT.Launcher.ViewModels
             lock (BundledIconLock)
             {
                 BundledIconCache[file] = bitmap;
+                return bitmap;
+            }
+        }
+
+        // === Arte full-body da classe (Assets/ClassImages, fundo removido): resolvida por keyword ===
+        // Um subconjunto de classes tem arte; sem match → painel sem imagem (info ocupa a largura toda).
+        private static readonly (string Keyword, string File)[] ClassImageNameMap =
+        {
+            ("cacador", "cacador.png"),
+            ("furtivo", "furtivo.png"),
+            ("fuzileiro", "fuzileiro.png"),
+            ("medico", "medico.png"),
+            ("peladao", "peladao.png"),
+            ("saqueador", "saqueador.png"),
+            ("tanque", "tanque.png"),
+        };
+
+        private static readonly object ClassImageLock = new object();
+        private static readonly Dictionary<string, Bitmap> ClassImageCache = new Dictionary<string, Bitmap>(StringComparer.Ordinal);
+
+        /// <summary>Resolve a arte full-body da classe pelo nome (keyword). Null quando não há match.</summary>
+        private static Bitmap ResolveClassImage(string name)
+        {
+            string normalized = NormalizeName(name);
+            if (string.IsNullOrEmpty(normalized)) return null;
+
+            foreach ((string keyword, string file) in ClassImageNameMap)
+            {
+                if (normalized.Contains(keyword)) return LoadClassImage(file);
+            }
+
+            return null;
+        }
+
+        /// <summary>Carrega (e memoiza) uma arte de Assets/ClassImages. Cacheia null na falha também.</summary>
+        private static Bitmap LoadClassImage(string file)
+        {
+            lock (ClassImageLock)
+            {
+                if (ClassImageCache.TryGetValue(file, out Bitmap cached)) return cached;
+            }
+
+            Bitmap bitmap = null;
+
+            try
+            {
+                string assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
+                using Stream stream = AssetLoader.Open(new Uri($"avares://{assemblyName}/Assets/ClassImages/{file}"));
+                bitmap = new Bitmap(stream);
+            }
+            catch (Exception ex)
+            {
+                LogManager.Instance.Warning($"[ClassSelection] Falha ao carregar arte de classe '{file}': {ex.Message}");
+            }
+
+            lock (ClassImageLock)
+            {
+                ClassImageCache[file] = bitmap;
                 return bitmap;
             }
         }
