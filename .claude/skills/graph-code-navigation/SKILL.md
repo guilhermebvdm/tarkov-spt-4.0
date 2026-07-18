@@ -11,6 +11,8 @@ Os grafos de código (graphify, AST/tree-sitter) vivem em `references/graphs/<es
 
 **O grafo APONTA, a leitura do `arquivo.cs:linha` PROVA.** Nenhum nó/aresta do grafo entra em spec, review ou código sem reconferir o arquivo real. A hierarquia de evidência de `.agents/resources.md` permanece intacta — o grafo é camada de **navegação**, não fonte.
 
+**A tabela de deofuscação tem o MESMO status.** [docs/files-from-4.1/consolidated-mappings.txt](../../../docs/files-from-4.1/consolidated-mappings.txt) traduz o nome ofuscado 4.0 → conceito/nome 4.1 (`GClass680 -> ABotProfileCreator`). O alias **aponta** o conceito; a assinatura/fórmula ainda se **prova** no `arquivo.cs:linha`. Regras: a **esquerda** (nome 4.0) é verificável no decompile/grafo hoje; a **direita** (nome 4.1) é rótulo — pode citar namespace ausente do dump (AP-09; confirmar via `ilspycmd -t <FQN>` na DLL real); **sem entrada ≠ não existe** (`GClass898`/`GClass3008` usados no repo não estão no mapa); cobre **tipos**, não membros (`method_5`, `_player`).
+
 ## 2. Quando usar grafo vs Grep
 
 | Pergunta | Ferramenta |
@@ -22,6 +24,7 @@ Os grafos de código (graphify, AST/tree-sitter) vivem em `references/graphs/<es
 | "Visão geral de um módulo/sistema" | `GRAPH_REPORT.md` do escopo (`get_community`, `god_nodes`) |
 | String literal, nome de config, mensagem de log, valor de constante | **Grep direto** (grafo não indexa conteúdo de linha) |
 | Confirmar assinatura/fórmula/linha exata | **Read no arquivo** (sempre, após o grafo apontar) |
+| "O que é este `GClassNNNN`/`GStructNNNN`?" (nome ofuscado → conceito) | **tabela de deofuscação** (`docs/files-from-4.1/consolidated-mappings.txt`, grep `^GClass680 -> `) — aid, cobre só tipos |
 
 ## 3. Como consultar
 
@@ -70,6 +73,16 @@ Sem esse passo, o patch "não dispara" silenciosamente (ver `docs/technical/spt-
 ### Impacto de um diff (no /code-review)
 
 `graphify affected "<classe/método tocado>"` no grafo do mod → callers afetados além do arquivo do diff.
+
+### Resolver nome ofuscado → conceito (deofuscação 4.0→4.1)
+
+O grafo e o decompile rotulam nós com o nome ofuscado (`GClass680`, `GStruct80`). Ao **reportar** esses nós em spec/review, traduzir pelo conceito antes de escrever — o texto fica legível e já semeia a migração 4.1:
+
+```bash
+grep '^GClass680 -> ' docs/files-from-4.1/consolidated-mappings.txt   # → ABotProfileCreator
+```
+
+Regra: o alias **aponta** o conceito, a assinatura ainda se **prova** no `arquivo.cs:linha`. Cobre só **tipos** (não `method_5`/`_player`); **sem entrada ≠ não existe**; a direita (nome 4.1) é rótulo — confirmar via `ilspycmd -t <FQN>` na DLL real (AP-09).
 
 ## 5. Manutenção
 

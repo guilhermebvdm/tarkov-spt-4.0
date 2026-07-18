@@ -29,6 +29,11 @@ Ordem ao **responder dúvidas** sobre SPT/EFT:
 
 > 🧭 **Navegação estrutural:** os grafos de código do graphify ([references/graphs/](../references/graphs/), skill `graph-code-navigation`) aceleram achar callers, overrides e cadeias input→efeito — mas **NÃO são fonte de evidência**: todo achado do grafo é confirmado lendo o `arquivo.cs:linha`.
 
+> 🗺️ **Deofuscação de nomes (SPT 4.0→4.1):** [docs/files-from-4.1/consolidated-mappings.txt](../docs/files-from-4.1/consolidated-mappings.txt) traduz o nome ofuscado do decompile para o conceito legível — 1 linha por tipo, `LEFT -> RIGHT` (ex.: `grep '^GClass680 -> '` → `ABotProfileCreator`). É **aid de compreensão, não evidência** — mesmo status do grafo ("aponta, não prova"). Três regras ao usar:
+> 1. **Esquerda = nome 4.0** (verificável hoje no decompile/grafo, é o que decodifica) · **direita = nome 4.1** (rótulo; o namespace pode ser um dos vazios do dump — confirmar com `ilspycmd -t <FQN>` na DLL real antes de cravar).
+> 2. **Sem entrada ≠ não existe** (ex.: `GClass898`/`GClass3008`, usados no repo, não estão no mapa). Não concluir "não existe" a partir de uma ausência.
+> 3. Cobre **tipos**, não **membros** (`method_5`, `_player`, `float_3`) nem inner ofuscado. Contexto/proveniência/ressalvas: [spt4-vs-spt41-gclass-deobfuscation.md](../docs/technical/spt4-vs-spt41-gclass-deobfuscation.md).
+
 ## Mapa rápido por tipo de dúvida
 
 | Tipo de informação | Onde buscar primeiro | Fallback externo |
@@ -53,6 +58,7 @@ Ordem ao **responder dúvidas** sobre SPT/EFT:
 | **Código-fonte do servidor SPT** | **[references/spt-source/](../references/spt-source/)** (vendorizado, read-only) | deepwiki.com/sp-tarkov/server-csharp |
 | **Erros recorrentes deste repo (antipatterns)** | **[docs/technical/spt-antipatterns.md](../docs/technical/spt-antipatterns.md)** | — |
 | **Quem chama X / overrides de Y / cadeia A→B** | **MCP graphify + [references/graphs/](../references/graphs/)** (skill `graph-code-navigation`) | Grep manual com a mesma disciplina |
+| **O que é este `GClassNNNN` / nome 4.1 de um tipo EFT** | **[docs/files-from-4.1/consolidated-mappings.txt](../docs/files-from-4.1/consolidated-mappings.txt)** (grep `^GClass680 -> `) — aid, não evidência | `ilspycmd -t <FQN>` na DLL real |
 | **Mods publicados / instalador** | — | **forge.sp-tarkov.com** |
 
 ## Fontes externas — quando usar cada uma

@@ -54,6 +54,8 @@ Os 10 arquivos JSON(C) em `docs/files-from-4.1/` mapeiam identificador ofuscado 
 
 Contagem de entradas de topo por arquivo. Somando também os tipos aninhados (`NestedTypes`) dentro de cada entrada, o total de identificadores renomeados passa de **5.800**.
 
+> 🔎 **Vista consolidada, grep-friendly:** [`consolidated-mappings.txt`](../files-from-4.1/consolidated-mappings.txt) achata as 10 categorias numa lista `nome-4.0 -> Namespace.Tipo-4.1` (1 linha por tipo, aninhados com `+`; 5.961 linhas). É a superfície de **consulta** do harness — `grep '^GClass680 -> '` resolve num passo, sem carregar 338 KB. **É um índice de conveniência, não um substituto dos JSONs:** um diff (2026-07-18) confirmou que ela **não é superset estrito** — ao menos 22 chaves dos JSONs (`Class1051`, `Class1124`, `Interface1`, …) não aparecem no flat, e os JSONs guardam os campos tipados (`kind`/`namespace`/`NestedTypes`) que o flat descarta. Tratar o flat como resolvedor rápido e os JSONs como a visão categorizada — não aposentar um pelo outro sem reconciliar. Uso e ressalvas para agentes: [.agents/resources.md](../../.agents/resources.md) → nota "Deofuscação de nomes" + skill `graph-code-navigation`.
+
 ## 3. Exemplos reais no nosso código
 
 Cruzando `GClass\d+` usados nos mods deste repo com as tabelas, seis referências batem exatamente:
@@ -89,7 +91,8 @@ A deofuscação **não elimina** o AP-03 — patches ainda vão precisar validar
 ## Ver também
 
 - [`spt4-vs-spt41-gclass-deobfuscation.html`](spt4-vs-spt41-gclass-deobfuscation.html) — versão visual deste documento (diagrama de fluxo + tabelas), mesma análise, formato para compartilhar
-- [`docs/files-from-4.1/`](../files-from-4.1/) — dados brutos (os 10 arquivos JSON)
+- [`docs/files-from-4.1/consolidated-mappings.txt`](../files-from-4.1/consolidated-mappings.txt) — vista consolidada flat `nome-4.0 -> FQN-4.1` (superfície de grep do harness)
+- [`docs/files-from-4.1/`](../files-from-4.1/) — dados brutos (os 10 arquivos JSON, por categoria)
 - [`spt-antipatterns.md`](spt-antipatterns.md) — AP-03 e a seção de decompile parcial
 - Skill `graph-code-navigation` — como localizar overrides/callers antes de repatchear
 
@@ -100,3 +103,5 @@ A deofuscação **não elimina** o AP-03 — patches ainda vão precisar validar
 | 2026-07-06 | Guilherme + agente | Criação — análise dos arquivos de mapeamento de deofuscação enviados por modder do WTT (FireFly), cruzados com `GClass\d+` usados nos mods deste repo. |
 | 2026-07-06 | Guilherme | Merge branch 'feat/053-perks-property-model' |
 | 2026-07-06 | Guilherme | chore(launcher): remove empty placeholder diff.txt |
+| 2026-07-18 | Guilherme + agente | Consolidação flat (`consolidated-mappings.txt`, 5.961 linhas `nome-4.0 -> FQN-4.1`) movida do `.txt` solto para `docs/files-from-4.1/`; registrada como superfície de grep do harness (§2 + resources.md + skill `graph-code-navigation`). Diff confirmou que **não** é superset dos JSONs. |
+| 2026-07-18 | Guilherme | spec(TRL-ImmersiveCombatMedicine): 001 review round A applied — P9+P10, assembly-verified anchors |
