@@ -238,14 +238,14 @@ internal class AimPunchPatch : ModulePatch
     }
 
     [PatchPrefix]
-    private static void Prefix(ForceEffector __instance, ref float strength)
+    private static void Prefix(ForceEffector __instance, ref float hands, ref float camera)
     {
         try
         {
             var fr = Singleton<GameWorld>.Instance?.MainPlayer?.ProceduralWeaponAnimation?.ForceReact;
             if (fr == null || !ReferenceEquals(__instance, fr))
             {
-                return;   // só o tranco do player local
+                return;   // só o tranco do player local (075: gate de instância — ForceReact do MainPlayer)
             }
 
             // (review fix 2026-06-24) só aplica se houve dano de COMBATE recente (ApplyDamageInfo). Dano de QUEDA
@@ -255,17 +255,24 @@ internal class AimPunchPatch : ModulePatch
                 return;
             }
 
-            // 🔻 Rattled (Furtivo): +50% no tranco de câmera ao levar dano.
+            // 074/F6 (2026-07-18, auditoria de eficácia): o multiplicador vai em HANDS/CAMERA, NÃO no STRENGTH.
+            // A aceleração do tranco = direction × camera × WiggleMagnitude × Clamp01(strength) (ForceEffector.
+            // AddForce): o Clamp01 SÓ morde o strength, então o ×1.5 do Rattled nele SATURAVA em hits fortes
+            // (parcialmente inerte). hands/camera (0.05–1.3 por body-part, EffectsController:1465-1481) NÃO são
+            // clampados → escalá-los entrega o ±% CHEIO em todo hit (e o Cool Under Fire passa a reduzir o flinch
+            // até em hits enormes, que antes já saturavam). Rattled/Cool Under Fire são classes mutuamente exclusivas.
+            var factor = 1f;
             if (PerksConfig.RattledEnabled?.Value == true && SkillMultipliers.IsLocalClass("Stealth"))
             {
-                strength *= PerksConfig.RattledAimPunch?.Value ?? 1f;
+                factor = PerksConfig.RattledAimPunch?.Value ?? 1f;          // 🔻 Furtivo: +50% tranco
+            }
+            else if (PerksConfig.CoolUnderFireEnabled?.Value == true && SkillMultipliers.IsLocalClass("Rifleman"))
+            {
+                factor = PerksConfig.CoolUnderFireFlinch?.Value ?? 1f;      // 🔧 Fuzileiro: −50% tranco
             }
 
-            // 🔧 Cool Under Fire (Fuzileiro): −50% no tranco ao levar dano (firme sob fogo).
-            if (PerksConfig.CoolUnderFireEnabled?.Value == true && SkillMultipliers.IsLocalClass("Rifleman"))
-            {
-                strength *= PerksConfig.CoolUnderFireFlinch?.Value ?? 1f;
-            }
+            hands *= factor;
+            camera *= factor;
         }
         catch (Exception ex)
         {
