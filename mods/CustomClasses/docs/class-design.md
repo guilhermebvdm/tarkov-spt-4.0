@@ -157,6 +157,20 @@
 
 > ⚠️ **O Furtivo ainda é `Ghost`/"Fantasma" no runtime** — o rename só ocorreu nos docs. **Pré-requisito do 050.0:** fazer o **rename de implementação antes** (`name` `Ghost`→`Stealth`, `displayName`→{en `Stealth`, pt `Furtivo`}), senão Ghost Step/Execution/Rattled gateiam na chave errada. *(As seções `[Médico]`/`[Furtivo]`/… na árvore F12 abaixo são rótulos de display; o gating real usa a chave estável.)*
 
+### ⚠️ Regra de gating de INSTÂNCIA (anti-leak para bots/peers) — auditoria item 075
+
+**`SkillMultipliers.IsLocalClass("X")` responde "a classe do PLAYER LOCAL é X?" — NÃO responde "o `__instance` deste patch é o player local?".** São coisas diferentes. Em Fika coop os **bots rodam no processo do HOST**, e métodos de `Player` / `Player.FirearmController` / `ProceduralWeaponAnimation` / `ActiveHealthController` / `SkillManager` / `MovementContext` / `PlayerPhysicalClass` executam para **TODA instância** — inclusive bots e peers. Logo:
+
+> **Todo patch de EFEITO que muta `__result` / um `ref` / um campo de `__instance` DEVE confirmar a IDENTIDADE da instância ANTES de aplicar — o toggle de config + `IsLocalClass` NÃO bastam.** Um Postfix que aplica o efeito só com `IsLocalClass("Tank")`, sem checar a instância, buffaria/debuffaria **todo bot** enquanto o host for Tank (clássico leak).
+
+Gates de instância ACEITOS (um destes, sempre antes de mutar):
+- `ReferenceEquals(__instance, Singleton<GameWorld>.Instance?.MainPlayer)` — ou o **subobjeto** do player local: `.HandsController`, `.Physical`, `.MovementContext`, `.ProceduralWeaponAnimation`, `.ProceduralWeaponAnimation.ForceReact`, `.Skills`.
+- `__instance.IsYourPlayer` (equivalente por instância).
+- Dano por ATACANTE: `damageInfo.Player?.iPlayer?.ProfileId == MainPlayer.ProfileId`.
+- Som/percepção com classe do EMISSOR (perks 065/066): `ClassIdentities.ClassNameEnOf(player)` — retorna **`null` para `player.IsAI`** (ClassIdentities.cs), então o som **de** um bot nunca é alterado; o patch só modula como bots/áudio local percebem o passo de um **player**. É o design de coop, não leak.
+
+**Resultado da auditoria 075 (2026-07-17):** varredura de TODOS os patches de efeito — **0 leaks para bot do host**. Cada um confirma a instância (ou barra `IsAI` via `ClassNameEnOf`) antes de aplicar. O relato "scav tankando tiro" **não vem** de perk do mod em bot; sobra o caso scav-**player** (fora de escopo por decisão do usuário) ou armadura/RNG vanilla. Ao adicionar um perk novo, **replicar o gate de instância** — é o item mais fácil de esquecer num Postfix de getter quente.
+
 **Patch-points por efeito** (C/S = client/server; conf. ✅ confirmado · 🟡 verificar · ⚠️ zona stances):
 
 | Efeito | Alvo do patch | C/S | Conf. |
@@ -314,3 +328,4 @@ Adicionar uma **aba nova "Perks/Drawback"** na tela de **SKILLS** (ao lado das c
 | 2026-06-21 | Guilherme | **Review 2 endereçado:** Adrenaline confiança split (gatilho "causar dano" 🟡); ressalva F12 (Heavy Frame fome/sede client a confirmar); caveat de confiança do recon (re-confirmar alvo por fatia); **DoD por efeito** + aceite por efeito no fatiamento; 053 ganha pendência do dicionário de strings EN/pt-br. |
 | 2026-06-21 | Guilherme | **Review 3 endereçado:** **Contrato de gating** pinado (`GameVersion`=`displayName[lang]`; chave estável=`name`; tabela por classe) + **Furtivo=`Ghost` no runtime** → rename de implementação vira **pré-requisito do 050.0**. Doc fechado pra `/g-autodev`. |
 | 2026-06-22 | Guilherme | **Matriz re-sincronizada ao editor (novo baseline).** `sync-classes` (install→repo) + rename 054 re-aplicado (`furtivo.jsonc`) + `class-matrix.mjs` reescrito aos valores do editor. netMult subiu p/ ~+11–19 (vs +6/+4) e budgets estouraram (Tanque custo 35.28>32; Médico/Furtivo/Saqueador >6 skills c/ nível) → **pendência de balance**. `Shadowconnections` sem peso (preliminar). 050.0 (Bulwark/Pack Mule) compila ✅, pendente in-game. |
+| 2026-07-17 | Guilherme | **Regra de gating de INSTÂNCIA (anti-leak p/ bots/peers)** documentada na seção Implementação — auditoria do **item 075** (relato "scav tankando tiro"). Varredura de todos os patches de efeito: **0 leaks p/ bot do host** (todos confirmam `ReferenceEquals(__instance, MainPlayer…)`/`IsYourPlayer`/`ProfileId`, ou barram `IsAI` via `ClassNameEnOf`). `IsLocalClass` sozinho ≠ gate de instância. |
