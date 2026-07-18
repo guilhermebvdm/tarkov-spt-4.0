@@ -36,6 +36,24 @@ VER="$(grep -oE '<Version>[0-9][0-9.]*</Version>' "$MOD/modded/Server/TRLItemsMa
 [[ -n "$VER" ]] || { echo "ERRO: não achei <Version> no csproj do server"; exit 1; }
 echo "→ versão (csproj): $VER"
 
+# gate de versão da UI — o número exibido no header do viewer (<span class="app-version">) é
+# hardcoded no index.html, independente do <Version> do csproj, e por isso fácil de esquecer no
+# bump (aconteceu na v1.0.2→v1.0.3: o csproj subiu, o header ficou pra trás). Sem esta trava um
+# release sai mostrando a versão anterior na UI. Bloqueia a publicação enquanto as duas divergirem.
+INDEX_HTML="$MOD/modded/Server/wwwroot/index.html"
+if [[ -f "$INDEX_HTML" ]]; then
+  UI_VER="$(grep -oE 'class="app-version"[^>]*>v?[0-9]+\.[0-9]+\.[0-9]+' "$INDEX_HTML" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)"
+  if [[ -z "$UI_VER" ]]; then
+    echo "  AVISO: não achei o app-version no header de $INDEX_HTML — pulei a checagem de versão da UI." >&2
+  elif [[ "$UI_VER" != "$VER" ]]; then
+    echo "ERRO: versão da UI (index.html app-version = v$UI_VER) ≠ versão do release (csproj = v$VER)." >&2
+    echo "      Atualize o <span class=\"app-version\"> em modded/Server/wwwroot/index.html para v$VER e rode de novo." >&2
+    exit 1
+  else
+    echo "→ versão (UI header): v$UI_VER ✓"
+  fi
+fi
+
 # avisa se há mudanças não commitadas no mod/pipeline (o bundle reflete o working tree, não HEAD)
 if ! git -C "$ROOT" diff --quiet -- "$MOD" "$TOOL/scripts" "$TOOL/data" || ! git -C "$ROOT" diff --cached --quiet -- "$MOD" "$TOOL/scripts" "$TOOL/data"; then
   echo "  AVISO: há mudanças não commitadas no mod ou no pipeline — o bundle reflete o working tree atual, não HEAD."
