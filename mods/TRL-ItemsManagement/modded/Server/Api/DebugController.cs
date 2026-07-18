@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using SPTarkov.Server.Core.Models.Common;    // MongoId
 using SPTarkov.Server.Core.Models.Enums;     // CurrencyType, Money
+using SPTarkov.Server.Core.Helpers;          // TraderHelper (B-5 live floor)
 using SPTarkov.Server.Core.Services;         // DatabaseService
 using TRLItemsManagement.Pricing;            // TraderPriceOnLoad.BuyOverrides
 
@@ -28,7 +29,8 @@ namespace TRLItemsManagement.Api;
 public sealed class DebugController(
     DatabaseService databaseService,
     ModPathsService modPaths,
-    SptDataPathsService sptPaths) : ControllerBase
+    SptDataPathsService sptPaths,
+    TraderHelper traderHelper) : ControllerBase
 {
     private static readonly Regex TplPattern = new("^[a-f0-9]{24}$", RegexOptions.IgnoreCase);
 
@@ -96,15 +98,22 @@ public sealed class DebugController(
         var livePrices = databaseService.GetPrices();
         double? liveBase = livePrices.TryGetValue(tplId, out var p) ? p : null;
 
-        var floor = catalogSpt?["fleaFloor"]?.GetValue<double?>();
+        // floorVanilla = the pipeline-cached floor (handbook × trader buyback). floorLive = the SAME
+        // TraderHelper.GetHighestSellToTraderPrice SPT calls at offer time — which passes through B-5's
+        // FleaFloorOverridePatch, so a whitelisted tpl comes back LOWERED here. Comparing the two proves
+        // the flea-floor override is live WITHOUT launching the game client.
+        var floorVanilla = catalogSpt?["fleaFloor"]?.GetValue<double?>();
+        var floorLive = traderHelper.GetHighestSellToTraderPrice(tplId);
+        var floorOverrideActive = floorVanilla is { } fv && floorLive < fv;
         var ceiling = catalogSpt?["fleaCeiling"]?.GetValue<double?>();
 
+        // Clamp with the LIVE (post-patch) floor so this approximates the real offer price under B-5.
         var liveClamped = liveBase;
         if (liveClamped is { } lc)
         {
-            if (floor is { } f && lc < f)
+            if (lc < floorLive)
             {
-                liveClamped = f;
+                liveClamped = floorLive;
             }
 
             if (ceiling is { } c && liveClamped > c)
@@ -119,11 +128,13 @@ public sealed class DebugController(
         {
             livePricesBase = liveBase,
             liveClampedApprox = liveClamped,
-            floor,
+            floorVanilla,
+            floorLive,
+            floorOverrideActive,
             ceiling,
             expectedEffectivePrice,
             match = liveClamped != null && expectedEffectivePrice != null && Math.Abs(liveClamped.Value - expectedEffectivePrice.Value) < 1,
-            note = "liveClampedApprox approximates the real flea offer price - SPT still applies +/-20% random variance on top of this at offer-generation time, so exact equality isn't expected, only closeness.",
+            note = "liveClampedApprox approximates the real flea offer price - SPT still applies +/-20% random variance at offer-generation time. floorLive passes through B-5's Harmony patch; floorOverrideActive=true means this tpl is now priced below its vanilla floor.",
         };
     }
 
