@@ -160,7 +160,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "networking_fikasyncmanager",
-      "community": 12,
+      "community": 13,
       "norm_label": "fikasyncmanager.cs"
     },
     {
@@ -170,7 +170,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "networking_fikasyncmanager_camerarotationmod_networking",
-      "community": 12,
+      "community": 13,
       "norm_label": "camerarotationmod.networking"
     },
     {
@@ -180,7 +180,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "networking_fikasyncmanager_fikasyncmanager",
-      "community": 12,
+      "community": 13,
       "norm_label": "fikasyncmanager"
     },
     {
@@ -190,7 +190,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "networking_fikasyncmanager_cs_manuallogsource",
-      "community": 12,
+      "community": 13,
       "norm_label": "manuallogsource"
     },
     {
@@ -200,7 +200,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "networking_fikasyncmanager_cs_bool",
-      "community": 12,
+      "community": 13,
       "norm_label": "bool"
     },
     {
@@ -210,7 +210,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "ifikanetworkmanager",
-      "community": 12,
+      "community": 13,
       "norm_label": "ifikanetworkmanager"
     },
     {
@@ -220,7 +220,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "networking_fikasyncmanager_fikasyncmanager_initialize",
-      "community": 12,
+      "community": 13,
       "norm_label": ".initialize()"
     },
     {
@@ -230,7 +230,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "networking_fikasyncmanager_fikasyncmanager_onnetworkmanagercreated",
-      "community": 12,
+      "community": 13,
       "norm_label": ".onnetworkmanagercreated()"
     },
     {
@@ -240,7 +240,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "fikanetworkmanagercreatedevent",
-      "community": 12,
+      "community": 13,
       "norm_label": "fikanetworkmanagercreatedevent"
     },
     {
@@ -250,7 +250,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "networking_fikasyncmanager_fikasyncmanager_sendstance",
-      "community": 12,
+      "community": 13,
       "norm_label": ".sendstance()"
     },
     {
@@ -260,7 +260,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "networking_fikasyncmanager_fikasyncmanager_onstancesyncpacketreceived",
-      "community": 12,
+      "community": 13,
       "norm_label": ".onstancesyncpacketreceived()"
     },
     {
@@ -270,7 +270,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "stancesyncpacket",
-      "community": 12,
+      "community": 13,
       "norm_label": "stancesyncpacket"
     },
     {
@@ -354,10 +354,20 @@
       "norm_label": "transitionspeedtracker"
     },
     {
+      "label": "TransitionMetrics",
+      "file_type": "code",
+      "source_file": "Networking/ObservedStanceAnimator.cs",
+      "source_location": "L29",
+      "_origin": "ast",
+      "id": "networking_observedstanceanimator_cs_transitionmetrics",
+      "community": 4,
+      "norm_label": "transitionmetrics"
+    },
+    {
       "label": ".Init()",
       "file_type": "code",
       "source_file": "Networking/ObservedStanceAnimator.cs",
-      "source_location": "L27",
+      "source_location": "L31",
       "_origin": "ast",
       "id": "networking_observedstanceanimator_observedstanceanimator_init",
       "community": 4,
@@ -367,7 +377,7 @@
       "label": ".SetStance()",
       "file_type": "code",
       "source_file": "Networking/ObservedStanceAnimator.cs",
-      "source_location": "L29",
+      "source_location": "L37",
       "_origin": "ast",
       "id": "networking_observedstanceanimator_observedstanceanimator_setstance",
       "community": 4,
@@ -377,7 +387,7 @@
       "label": ".ApplyToWeaponRoot()",
       "file_type": "code",
       "source_file": "Networking/ObservedStanceAnimator.cs",
-      "source_location": "L36",
+      "source_location": "L44",
       "_origin": "ast",
       "id": "networking_observedstanceanimator_observedstanceanimator_applytoweaponroot",
       "community": 4,
@@ -387,7 +397,7 @@
       "label": "PlayerBones",
       "file_type": "code",
       "source_file": "Networking/ObservedStanceAnimator.cs",
-      "source_location": "L36",
+      "source_location": "L44",
       "_origin": "ast",
       "id": "networking_observedstanceanimator_cs_playerbones",
       "community": 4,
@@ -540,7 +550,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "passivemountui",
-      "community": 7,
+      "community": 8,
       "norm_label": "passivemountui.cs"
     },
     {
@@ -550,7 +560,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "passivemountui_camerarotationmod",
-      "community": 7,
+      "community": 8,
       "norm_label": "camerarotationmod"
     },
     {
@@ -560,7 +570,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "passivemountui_passivemountui",
-      "community": 7,
+      "community": 8,
       "norm_label": "passivemountui"
     },
     {
@@ -570,7 +580,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "gameobject",
-      "community": 7,
+      "community": 8,
       "norm_label": "gameobject"
     },
     {
@@ -580,7 +590,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "image",
-      "community": 7,
+      "community": 8,
       "norm_label": "image"
     },
     {
@@ -590,7 +600,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "recttransform",
-      "community": 7,
+      "community": 8,
       "norm_label": "recttransform"
     },
     {
@@ -600,7 +610,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "vector2",
-      "community": 7,
+      "community": 8,
       "norm_label": "vector2"
     },
     {
@@ -610,7 +620,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "passivemountui_cs_float",
-      "community": 7,
+      "community": 8,
       "norm_label": "float"
     },
     {
@@ -620,7 +630,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "passivemountui_passivemountui_awake",
-      "community": 7,
+      "community": 8,
       "norm_label": ".awake()"
     },
     {
@@ -630,7 +640,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "passivemountui_passivemountui_destroyicon",
-      "community": 7,
+      "community": 8,
       "norm_label": ".destroyicon()"
     },
     {
@@ -640,7 +650,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "passivemountui_passivemountui_createicon",
-      "community": 7,
+      "community": 8,
       "norm_label": ".createicon()"
     },
     {
@@ -650,7 +660,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "transform",
-      "community": 7,
+      "community": 8,
       "norm_label": "transform"
     },
     {
@@ -660,7 +670,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "passivemountui_passivemountui_update",
-      "community": 7,
+      "community": 8,
       "norm_label": ".update()"
     },
     {
@@ -670,7 +680,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "passivemountui_battleuiscreenpatch",
-      "community": 7,
+      "community": 8,
       "norm_label": "battleuiscreenpatch"
     },
     {
@@ -680,7 +690,7 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "passivemountui_battleuiscreenpatch_gettargetmethod",
-      "community": 7,
+      "community": 8,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -690,7 +700,7 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "passivemountui_cs_methodbase",
-      "community": 7,
+      "community": 8,
       "norm_label": "methodbase"
     },
     {
@@ -700,7 +710,7 @@
       "source_location": "L86",
       "_origin": "ast",
       "id": "passivemountui_battleuiscreenpatch_postfix",
-      "community": 7,
+      "community": 8,
       "norm_label": ".postfix()"
     },
     {
@@ -710,7 +720,7 @@
       "source_location": "L86",
       "_origin": "ast",
       "id": "eftbattleuiscreen",
-      "community": 7,
+      "community": 8,
       "norm_label": "eftbattleuiscreen"
     },
     {
@@ -720,7 +730,7 @@
       "source_location": "L86",
       "_origin": "ast",
       "id": "passivemountui_cs_patchpostfix",
-      "community": 7,
+      "community": 8,
       "norm_label": "patchpostfix"
     },
     {
@@ -730,7 +740,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_actionstancepatches",
-      "community": 3,
+      "community": 1,
       "norm_label": "actionstancepatches.cs"
     },
     {
@@ -740,7 +750,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "patches_actionstancepatches_camerarotationmod_patches",
-      "community": 3,
+      "community": 1,
       "norm_label": "camerarotationmod.patches"
     },
     {
@@ -750,7 +760,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "patches_actionstancepatches_actionstancepatch",
-      "community": 3,
+      "community": 1,
       "norm_label": "actionstancepatch"
     },
     {
@@ -760,7 +770,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "patches_actionstancepatches_actionstancepatch_gettargetmethod",
-      "community": 3,
+      "community": 1,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -770,7 +780,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "patches_actionstancepatches_cs_methodbase",
-      "community": 3,
+      "community": 1,
       "norm_label": "methodbase"
     },
     {
@@ -780,7 +790,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "patches_actionstancepatches_actionstancepatch_prefix",
-      "community": 3,
+      "community": 1,
       "norm_label": ".prefix()"
     },
     {
@@ -790,7 +800,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "patches_actionstancepatches_cs_firearmcontroller",
-      "community": 3,
+      "community": 1,
       "norm_label": "firearmcontroller"
     },
     {
@@ -800,7 +810,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "patches_actionstancepatches_cs_patchprefix",
-      "community": 3,
+      "community": 1,
       "norm_label": "patchprefix"
     },
     {
@@ -810,7 +820,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "patches_actionstancepatches_actionstancecheckchamberpatch",
-      "community": 3,
+      "community": 1,
       "norm_label": "actionstancecheckchamberpatch"
     },
     {
@@ -820,7 +830,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "patches_actionstancepatches_actionstancecheckchamberpatch_gettargetmethod",
-      "community": 3,
+      "community": 1,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -830,7 +840,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "patches_actionstancepatches_actionstancecheckchamberpatch_prefix",
-      "community": 3,
+      "community": 1,
       "norm_label": ".prefix()"
     },
     {
@@ -840,7 +850,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "patches_actionstancepatches_actionstanceexamineweaponpatch",
-      "community": 3,
+      "community": 1,
       "norm_label": "actionstanceexamineweaponpatch"
     },
     {
@@ -850,7 +860,7 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "patches_actionstancepatches_actionstanceexamineweaponpatch_gettargetmethod",
-      "community": 3,
+      "community": 1,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -860,7 +870,7 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "patches_actionstancepatches_actionstanceexamineweaponpatch_prefix",
-      "community": 3,
+      "community": 1,
       "norm_label": ".prefix()"
     },
     {
@@ -870,7 +880,7 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "patches_actionstancepatches_actionstancereloadpatch",
-      "community": 3,
+      "community": 1,
       "norm_label": "actionstancereloadpatch"
     },
     {
@@ -880,7 +890,7 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "patches_actionstancepatches_actionstancereloadpatch_gettargetmethod",
-      "community": 3,
+      "community": 1,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -890,7 +900,7 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "patches_actionstancepatches_actionstancereloadpatch_prefix",
-      "community": 3,
+      "community": 1,
       "norm_label": ".prefix()"
     },
     {
@@ -900,7 +910,7 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "gclass2015",
-      "community": 3,
+      "community": 1,
       "norm_label": "gclass2015"
     },
     {
@@ -910,7 +920,7 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "callback",
-      "community": 3,
+      "community": 1,
       "norm_label": "callback"
     },
     {
@@ -920,7 +930,7 @@
       "source_location": "L105",
       "_origin": "ast",
       "id": "patches_actionstancepatches_actionstancecheckfiremodepatch",
-      "community": 3,
+      "community": 1,
       "norm_label": "actionstancecheckfiremodepatch"
     },
     {
@@ -930,7 +940,7 @@
       "source_location": "L107",
       "_origin": "ast",
       "id": "patches_actionstancepatches_actionstancecheckfiremodepatch_gettargetmethod",
-      "community": 3,
+      "community": 1,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -940,7 +950,7 @@
       "source_location": "L112",
       "_origin": "ast",
       "id": "patches_actionstancepatches_actionstancecheckfiremodepatch_prefix",
-      "community": 3,
+      "community": 1,
       "norm_label": ".prefix()"
     },
     {
@@ -950,7 +960,7 @@
       "source_location": "L125",
       "_origin": "ast",
       "id": "patches_actionstancepatches_actionstanceonidlepatch",
-      "community": 3,
+      "community": 1,
       "norm_label": "actionstanceonidlepatch"
     },
     {
@@ -960,7 +970,7 @@
       "source_location": "L127",
       "_origin": "ast",
       "id": "patches_actionstancepatches_actionstanceonidlepatch_gettargetmethod",
-      "community": 3,
+      "community": 1,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -970,7 +980,7 @@
       "source_location": "L132",
       "_origin": "ast",
       "id": "patches_actionstancepatches_actionstanceonidlepatch_postfix",
-      "community": 3,
+      "community": 1,
       "norm_label": ".postfix()"
     },
     {
@@ -980,7 +990,7 @@
       "source_location": "L132",
       "_origin": "ast",
       "id": "patches_actionstancepatches_cs_patchpostfix",
-      "community": 3,
+      "community": 1,
       "norm_label": "patchpostfix"
     },
     {
@@ -990,7 +1000,7 @@
       "source_location": "L145",
       "_origin": "ast",
       "id": "patches_actionstancepatches_actionstanceunloadmagpatch",
-      "community": 3,
+      "community": 1,
       "norm_label": "actionstanceunloadmagpatch"
     },
     {
@@ -1000,7 +1010,7 @@
       "source_location": "L147",
       "_origin": "ast",
       "id": "patches_actionstancepatches_actionstanceunloadmagpatch_gettargetmethod",
-      "community": 3,
+      "community": 1,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -1010,7 +1020,7 @@
       "source_location": "L160",
       "_origin": "ast",
       "id": "patches_actionstancepatches_actionstanceunloadmagpatch_prefix",
-      "community": 3,
+      "community": 1,
       "norm_label": ".prefix()"
     },
     {
@@ -1020,7 +1030,7 @@
       "source_location": "L160",
       "_origin": "ast",
       "id": "gclass2050",
-      "community": 3,
+      "community": 1,
       "norm_label": "gclass2050"
     },
     {
@@ -1030,7 +1040,7 @@
       "source_location": "L160",
       "_origin": "ast",
       "id": "magazineitemclass",
-      "community": 3,
+      "community": 1,
       "norm_label": "magazineitemclass"
     },
     {
@@ -1040,7 +1050,7 @@
       "source_location": "L160",
       "_origin": "ast",
       "id": "slot",
-      "community": 3,
+      "community": 1,
       "norm_label": "slot"
     },
     {
@@ -1050,7 +1060,7 @@
       "source_location": "L189",
       "_origin": "ast",
       "id": "patches_actionstancepatches_actionstanceunloadchamberpatch",
-      "community": 3,
+      "community": 1,
       "norm_label": "actionstanceunloadchamberpatch"
     },
     {
@@ -1060,7 +1070,7 @@
       "source_location": "L191",
       "_origin": "ast",
       "id": "patches_actionstancepatches_actionstanceunloadchamberpatch_gettargetmethod",
-      "community": 3,
+      "community": 1,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -1070,7 +1080,7 @@
       "source_location": "L196",
       "_origin": "ast",
       "id": "patches_actionstancepatches_actionstanceunloadchamberpatch_prefix",
-      "community": 3,
+      "community": 1,
       "norm_label": ".prefix()"
     },
     {
@@ -1080,7 +1090,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_applycomplexrotationpatch",
-      "community": 6,
+      "community": 5,
       "norm_label": "applycomplexrotationpatch.cs"
     },
     {
@@ -1090,7 +1100,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "patches_applycomplexrotationpatch_camerarotationmod_patches",
-      "community": 6,
+      "community": 5,
       "norm_label": "camerarotationmod.patches"
     },
     {
@@ -1100,7 +1110,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "patches_applycomplexrotationpatch_applycomplexrotationpatch",
-      "community": 6,
+      "community": 5,
       "norm_label": "applycomplexrotationpatch"
     },
     {
@@ -1110,7 +1120,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "patches_applycomplexrotationpatch_cs_fieldinfo",
-      "community": 6,
+      "community": 5,
       "norm_label": "fieldinfo"
     },
     {
@@ -1120,7 +1130,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "patches_applycomplexrotationpatch_cs_bool",
-      "community": 6,
+      "community": 5,
       "norm_label": "bool"
     },
     {
@@ -1130,7 +1140,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "patches_applycomplexrotationpatch_cs_stance",
-      "community": 6,
+      "community": 5,
       "norm_label": "stance"
     },
     {
@@ -1140,7 +1150,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "patches_applycomplexrotationpatch_cs_float",
-      "community": 6,
+      "community": 5,
       "norm_label": "float"
     },
     {
@@ -1150,7 +1160,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "patches_applycomplexrotationpatch_applycomplexrotationpatch_applykick",
-      "community": 6,
+      "community": 5,
       "norm_label": ".applykick()"
     },
     {
@@ -1160,7 +1170,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "patches_applycomplexrotationpatch_cs_quaternion",
-      "community": 6,
+      "community": 5,
       "norm_label": "quaternion"
     },
     {
@@ -1170,7 +1180,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "patches_applycomplexrotationpatch_cs_vector3",
-      "community": 6,
+      "community": 5,
       "norm_label": "vector3"
     },
     {
@@ -1180,7 +1190,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "patches_applycomplexrotationpatch_cs_transitionspeedtracker",
-      "community": 6,
+      "community": 5,
       "norm_label": "transitionspeedtracker"
     },
     {
@@ -1190,97 +1200,117 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "patches_applycomplexrotationpatch_applycomplexrotationpatch_resetspeedtracker",
-      "community": 6,
+      "community": 5,
       "norm_label": ".resetspeedtracker()"
+    },
+    {
+      "label": "TransitionMetrics",
+      "file_type": "code",
+      "source_file": "Patches/ApplyComplexRotationPatch.cs",
+      "source_location": "L48",
+      "_origin": "ast",
+      "id": "patches_applycomplexrotationpatch_cs_transitionmetrics",
+      "community": 5,
+      "norm_label": "transitionmetrics"
+    },
+    {
+      "label": ".ResetMetrics()",
+      "file_type": "code",
+      "source_file": "Patches/ApplyComplexRotationPatch.cs",
+      "source_location": "L51",
+      "_origin": "ast",
+      "id": "patches_applycomplexrotationpatch_applycomplexrotationpatch_resetmetrics",
+      "community": 5,
+      "norm_label": ".resetmetrics()"
     },
     {
       "label": "int",
       "file_type": "code",
       "source_file": "Patches/ApplyComplexRotationPatch.cs",
-      "source_location": "L54",
+      "source_location": "L64",
       "_origin": "ast",
       "id": "patches_applycomplexrotationpatch_cs_int",
-      "community": 6,
+      "community": 5,
       "norm_label": "int"
     },
     {
       "label": ".ClampAngles()",
       "file_type": "code",
       "source_file": "Patches/ApplyComplexRotationPatch.cs",
-      "source_location": "L61",
+      "source_location": "L71",
       "_origin": "ast",
       "id": "patches_applycomplexrotationpatch_applycomplexrotationpatch_clampangles",
-      "community": 6,
+      "community": 5,
       "norm_label": ".clampangles()"
     },
     {
       "label": ".SpringLerpAngle()",
       "file_type": "code",
       "source_file": "Patches/ApplyComplexRotationPatch.cs",
-      "source_location": "L78",
+      "source_location": "L88",
       "_origin": "ast",
       "id": "patches_applycomplexrotationpatch_applycomplexrotationpatch_springlerpangle",
-      "community": 6,
+      "community": 5,
       "norm_label": ".springlerpangle()"
     },
     {
       "label": ".SpringLerp()",
       "file_type": "code",
       "source_file": "Patches/ApplyComplexRotationPatch.cs",
-      "source_location": "L109",
+      "source_location": "L119",
       "_origin": "ast",
       "id": "patches_applycomplexrotationpatch_applycomplexrotationpatch_springlerp",
-      "community": 6,
+      "community": 5,
       "norm_label": ".springlerp()"
     },
     {
       "label": ".GetTargetMethod()",
       "file_type": "code",
       "source_file": "Patches/ApplyComplexRotationPatch.cs",
-      "source_location": "L133",
+      "source_location": "L143",
       "_origin": "ast",
       "id": "patches_applycomplexrotationpatch_applycomplexrotationpatch_gettargetmethod",
-      "community": 6,
+      "community": 5,
       "norm_label": ".gettargetmethod()"
     },
     {
       "label": "MethodBase",
       "file_type": "code",
       "source_file": "Patches/ApplyComplexRotationPatch.cs",
-      "source_location": "L133",
+      "source_location": "L143",
       "_origin": "ast",
       "id": "patches_applycomplexrotationpatch_cs_methodbase",
-      "community": 6,
+      "community": 5,
       "norm_label": "methodbase"
     },
     {
       "label": ".Postfix()",
       "file_type": "code",
       "source_file": "Patches/ApplyComplexRotationPatch.cs",
-      "source_location": "L145",
+      "source_location": "L155",
       "_origin": "ast",
       "id": "patches_applycomplexrotationpatch_applycomplexrotationpatch_postfix",
-      "community": 6,
+      "community": 5,
       "norm_label": ".postfix()"
     },
     {
       "label": "ProceduralWeaponAnimation",
       "file_type": "code",
       "source_file": "Patches/ApplyComplexRotationPatch.cs",
-      "source_location": "L145",
+      "source_location": "L155",
       "_origin": "ast",
       "id": "patches_applycomplexrotationpatch_cs_proceduralweaponanimation",
-      "community": 6,
+      "community": 5,
       "norm_label": "proceduralweaponanimation"
     },
     {
       "label": "PatchPostfix",
       "file_type": "code",
       "source_file": "Patches/ApplyComplexRotationPatch.cs",
-      "source_location": "L145",
+      "source_location": "L155",
       "_origin": "ast",
       "id": "patches_applycomplexrotationpatch_cs_patchpostfix",
-      "community": 6,
+      "community": 5,
       "norm_label": "patchpostfix"
     },
     {
@@ -1290,7 +1320,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_applysimplerotationpatch",
-      "community": 8,
+      "community": 9,
       "norm_label": "applysimplerotationpatch.cs"
     },
     {
@@ -1300,7 +1330,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "patches_applysimplerotationpatch_camerarotationmod_patches",
-      "community": 8,
+      "community": 9,
       "norm_label": "camerarotationmod.patches"
     },
     {
@@ -1310,7 +1340,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "patches_applysimplerotationpatch_applysimplerotationpatch",
-      "community": 8,
+      "community": 9,
       "norm_label": "applysimplerotationpatch"
     },
     {
@@ -1320,7 +1350,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "patches_applysimplerotationpatch_cs_fieldinfo",
-      "community": 8,
+      "community": 9,
       "norm_label": "fieldinfo"
     },
     {
@@ -1330,7 +1360,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "patches_applysimplerotationpatch_cs_quaternion",
-      "community": 8,
+      "community": 9,
       "norm_label": "quaternion"
     },
     {
@@ -1340,7 +1370,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "patches_applysimplerotationpatch_cs_vector3",
-      "community": 8,
+      "community": 9,
       "norm_label": "vector3"
     },
     {
@@ -1350,7 +1380,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "patches_applysimplerotationpatch_cs_bool",
-      "community": 8,
+      "community": 9,
       "norm_label": "bool"
     },
     {
@@ -1360,7 +1390,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "patches_applysimplerotationpatch_cs_transitionspeedtracker",
-      "community": 8,
+      "community": 9,
       "norm_label": "transitionspeedtracker"
     },
     {
@@ -1370,7 +1400,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "patches_applysimplerotationpatch_cs_float",
-      "community": 8,
+      "community": 9,
       "norm_label": "float"
     },
     {
@@ -1380,7 +1410,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "patches_applysimplerotationpatch_cs_int",
-      "community": 8,
+      "community": 9,
       "norm_label": "int"
     },
     {
@@ -1390,7 +1420,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "patches_applysimplerotationpatch_applysimplerotationpatch_clampangles",
-      "community": 8,
+      "community": 9,
       "norm_label": ".clampangles()"
     },
     {
@@ -1400,7 +1430,7 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "patches_applysimplerotationpatch_applysimplerotationpatch_springlerpangle",
-      "community": 8,
+      "community": 9,
       "norm_label": ".springlerpangle()"
     },
     {
@@ -1410,7 +1440,7 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "patches_applysimplerotationpatch_applysimplerotationpatch_springlerp",
-      "community": 8,
+      "community": 9,
       "norm_label": ".springlerp()"
     },
     {
@@ -1420,7 +1450,7 @@
       "source_location": "L114",
       "_origin": "ast",
       "id": "patches_applysimplerotationpatch_applysimplerotationpatch_gettargetmethod",
-      "community": 8,
+      "community": 9,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -1430,7 +1460,7 @@
       "source_location": "L114",
       "_origin": "ast",
       "id": "patches_applysimplerotationpatch_cs_methodbase",
-      "community": 8,
+      "community": 9,
       "norm_label": "methodbase"
     },
     {
@@ -1440,7 +1470,7 @@
       "source_location": "L126",
       "_origin": "ast",
       "id": "patches_applysimplerotationpatch_applysimplerotationpatch_postfix",
-      "community": 8,
+      "community": 9,
       "norm_label": ".postfix()"
     },
     {
@@ -1450,7 +1480,7 @@
       "source_location": "L126",
       "_origin": "ast",
       "id": "patches_applysimplerotationpatch_cs_proceduralweaponanimation",
-      "community": 8,
+      "community": 9,
       "norm_label": "proceduralweaponanimation"
     },
     {
@@ -1460,7 +1490,7 @@
       "source_location": "L126",
       "_origin": "ast",
       "id": "patches_applysimplerotationpatch_cs_patchpostfix",
-      "community": 8,
+      "community": 9,
       "norm_label": "patchpostfix"
     },
     {
@@ -1550,7 +1580,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_holdbreathpatch",
-      "community": 5,
+      "community": 6,
       "norm_label": "holdbreathpatch.cs"
     },
     {
@@ -1560,7 +1590,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "patches_holdbreathpatch_camerarotationmod_patches",
-      "community": 5,
+      "community": 6,
       "norm_label": "camerarotationmod.patches"
     },
     {
@@ -1570,7 +1600,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "patches_holdbreathpatch_holdbreathpatch",
-      "community": 5,
+      "community": 6,
       "norm_label": "holdbreathpatch"
     },
     {
@@ -1580,7 +1610,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "audioclip",
-      "community": 5,
+      "community": 6,
       "norm_label": "audioclip"
     },
     {
@@ -1590,7 +1620,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "audiosource",
-      "community": 5,
+      "community": 6,
       "norm_label": "audiosource"
     },
     {
@@ -1600,7 +1630,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "patches_holdbreathpatch_cs_bool",
-      "community": 5,
+      "community": 6,
       "norm_label": "bool"
     },
     {
@@ -1610,7 +1640,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "patches_holdbreathpatch_holdbreathpatch_gettargetmethod",
-      "community": 5,
+      "community": 6,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -1620,7 +1650,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "patches_holdbreathpatch_cs_methodbase",
-      "community": 5,
+      "community": 6,
       "norm_label": "methodbase"
     },
     {
@@ -1630,7 +1660,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "patches_holdbreathpatch_holdbreathpatch_postfix",
-      "community": 5,
+      "community": 6,
       "norm_label": ".postfix()"
     },
     {
@@ -1640,7 +1670,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "playerphysicalclass",
-      "community": 5,
+      "community": 6,
       "norm_label": "playerphysicalclass"
     },
     {
@@ -1650,7 +1680,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "patches_holdbreathpatch_cs_patchpostfix",
-      "community": 5,
+      "community": 6,
       "norm_label": "patchpostfix"
     },
     {
@@ -1660,7 +1690,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "patches_holdbreathpatch_holdbreathpatch_playbreathaudio",
-      "community": 5,
+      "community": 6,
       "norm_label": ".playbreathaudio()"
     },
     {
@@ -1670,7 +1700,7 @@
       "source_location": "L117",
       "_origin": "ast",
       "id": "patches_holdbreathpatch_holdbreathpatch_loadaudioclips",
-      "community": 5,
+      "community": 6,
       "norm_label": ".loadaudioclips()"
     },
     {
@@ -1680,7 +1710,7 @@
       "source_location": "L129",
       "_origin": "ast",
       "id": "patches_holdbreathpatch_holdbreathpatch_loadaudioroutine",
-      "community": 5,
+      "community": 6,
       "norm_label": ".loadaudioroutine()"
     },
     {
@@ -1690,7 +1720,7 @@
       "source_location": "L129",
       "_origin": "ast",
       "id": "ienumerator",
-      "community": 5,
+      "community": 6,
       "norm_label": "ienumerator"
     },
     {
@@ -1700,7 +1730,7 @@
       "source_location": "L142",
       "_origin": "ast",
       "id": "patches_holdbreathpatch_holdbreathpatch_loadclip",
-      "community": 5,
+      "community": 6,
       "norm_label": ".loadclip()"
     },
     {
@@ -1710,7 +1740,7 @@
       "source_location": "L142",
       "_origin": "ast",
       "id": "patches_holdbreathpatch_cs_action",
-      "community": 5,
+      "community": 6,
       "norm_label": "action"
     },
     {
@@ -1720,7 +1750,7 @@
       "source_location": "L190",
       "_origin": "ast",
       "id": "patches_holdbreathpatch_holdbreathpatch_clipsvalid",
-      "community": 5,
+      "community": 6,
       "norm_label": ".clipsvalid()"
     },
     {
@@ -1730,7 +1760,7 @@
       "source_location": "L197",
       "_origin": "ast",
       "id": "patches_holdbreathpatch_holdbreathpatch_stopheartbeat",
-      "community": 5,
+      "community": 6,
       "norm_label": ".stopheartbeat()"
     },
     {
@@ -1740,7 +1770,7 @@
       "source_location": "L208",
       "_origin": "ast",
       "id": "patches_holdbreathpatch_holdbreathpatch_onraidstart",
-      "community": 5,
+      "community": 6,
       "norm_label": ".onraidstart()"
     },
     {
@@ -1750,7 +1780,7 @@
       "source_location": "L220",
       "_origin": "ast",
       "id": "patches_holdbreathpatch_holdbreathpatch_onraidend",
-      "community": 5,
+      "community": 6,
       "norm_label": ".onraidend()"
     },
     {
@@ -1850,7 +1880,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches",
-      "community": 2,
+      "community": 3,
       "norm_label": "manualchamberingpatches.cs"
     },
     {
@@ -1860,7 +1890,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_camerarotationmod_patches",
-      "community": 2,
+      "community": 3,
       "norm_label": "camerarotationmod.patches"
     },
     {
@@ -1870,7 +1900,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_manualchamberingstate",
-      "community": 2,
+      "community": 3,
       "norm_label": "manualchamberingstate"
     },
     {
@@ -1880,7 +1910,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_cs_bool",
-      "community": 2,
+      "community": 3,
       "norm_label": "bool"
     },
     {
@@ -1890,7 +1920,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_manualchamberingstate_reset",
-      "community": 2,
+      "community": 3,
       "norm_label": ".reset()"
     },
     {
@@ -1900,7 +1930,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_manualchamberingcomponent",
-      "community": 2,
+      "community": 3,
       "norm_label": "manualchamberingcomponent"
     },
     {
@@ -1910,7 +1940,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_cs_firearmcontroller",
-      "community": 2,
+      "community": 3,
       "norm_label": "firearmcontroller"
     },
     {
@@ -1920,7 +1950,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "weaponmanagerclass",
-      "community": 2,
+      "community": 3,
       "norm_label": "weaponmanagerclass"
     },
     {
@@ -1930,7 +1960,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "ammoitemclass",
-      "community": 2,
+      "community": 3,
       "norm_label": "ammoitemclass"
     },
     {
@@ -1940,7 +1970,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "gameplayerowner",
-      "community": 2,
+      "community": 3,
       "norm_label": "gameplayerowner"
     },
     {
@@ -1950,7 +1980,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_cs_float",
-      "community": 2,
+      "community": 3,
       "norm_label": "float"
     },
     {
@@ -1960,7 +1990,7 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_cs_int",
-      "community": 2,
+      "community": 3,
       "norm_label": "int"
     },
     {
@@ -1970,7 +2000,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_manualchamberingcomponent_update",
-      "community": 2,
+      "community": 3,
       "norm_label": ".update()"
     },
     {
@@ -1980,7 +2010,7 @@
       "source_location": "L95",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_startequipweappatch",
-      "community": 2,
+      "community": 3,
       "norm_label": "startequipweappatch"
     },
     {
@@ -1990,7 +2020,7 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_startequipweappatch_gettargetmethod",
-      "community": 2,
+      "community": 3,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2000,7 +2030,7 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_cs_methodbase",
-      "community": 2,
+      "community": 3,
       "norm_label": "methodbase"
     },
     {
@@ -2010,7 +2040,7 @@
       "source_location": "L104",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_startequipweappatch_prefix",
-      "community": 2,
+      "community": 3,
       "norm_label": ".prefix()"
     },
     {
@@ -2020,7 +2050,7 @@
       "source_location": "L104",
       "_origin": "ast",
       "id": "chamberweaponclass",
-      "community": 2,
+      "community": 3,
       "norm_label": "chamberweaponclass"
     },
     {
@@ -2030,7 +2060,7 @@
       "source_location": "L104",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_cs_action",
-      "community": 2,
+      "community": 3,
       "norm_label": "action"
     },
     {
@@ -2040,7 +2070,7 @@
       "source_location": "L104",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_cs_patchprefix",
-      "community": 2,
+      "community": 3,
       "norm_label": "patchprefix"
     },
     {
@@ -2050,7 +2080,7 @@
       "source_location": "L214",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_startreloadresetpatch",
-      "community": 2,
+      "community": 3,
       "norm_label": "startreloadresetpatch"
     },
     {
@@ -2060,7 +2090,7 @@
       "source_location": "L216",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_startreloadresetpatch_gettargetmethod",
-      "community": 2,
+      "community": 3,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2070,7 +2100,7 @@
       "source_location": "L224",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_startreloadresetpatch_prefix",
-      "community": 2,
+      "community": 3,
       "norm_label": ".prefix()"
     },
     {
@@ -2080,7 +2110,7 @@
       "source_location": "L224",
       "_origin": "ast",
       "id": "reloadweaponclass",
-      "community": 2,
+      "community": 3,
       "norm_label": "reloadweaponclass"
     },
     {
@@ -2090,7 +2120,7 @@
       "source_location": "L245",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_setammocompatiblepatch",
-      "community": 2,
+      "community": 3,
       "norm_label": "setammocompatiblepatch"
     },
     {
@@ -2100,7 +2130,7 @@
       "source_location": "L247",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_setammocompatiblepatch_gettargetmethod",
-      "community": 2,
+      "community": 3,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2110,7 +2140,7 @@
       "source_location": "L250",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_setammocompatiblepatch_prefix",
-      "community": 2,
+      "community": 3,
       "norm_label": ".prefix()"
     },
     {
@@ -2120,7 +2150,7 @@
       "source_location": "L250",
       "_origin": "ast",
       "id": "firearmsanimator",
-      "community": 2,
+      "community": 3,
       "norm_label": "firearmsanimator"
     },
     {
@@ -2130,7 +2160,7 @@
       "source_location": "L270",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_setammoonmagpatch",
-      "community": 2,
+      "community": 3,
       "norm_label": "setammoonmagpatch"
     },
     {
@@ -2140,7 +2170,7 @@
       "source_location": "L272",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_setammoonmagpatch_gettargetmethod",
-      "community": 2,
+      "community": 3,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2150,7 +2180,7 @@
       "source_location": "L275",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_setammoonmagpatch_prefix",
-      "community": 2,
+      "community": 3,
       "norm_label": ".prefix()"
     },
     {
@@ -2160,7 +2190,7 @@
       "source_location": "L299",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_prechamberloadpatch",
-      "community": 2,
+      "community": 3,
       "norm_label": "prechamberloadpatch"
     },
     {
@@ -2170,7 +2200,7 @@
       "source_location": "L301",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_prechamberloadpatch_gettargetmethod",
-      "community": 2,
+      "community": 3,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2180,7 +2210,7 @@
       "source_location": "L306",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_prechamberloadpatch_prefix",
-      "community": 2,
+      "community": 3,
       "norm_label": ".prefix()"
     },
     {
@@ -2190,7 +2220,7 @@
       "source_location": "L327",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_manualchamberinginputpatch",
-      "community": 2,
+      "community": 3,
       "norm_label": "manualchamberinginputpatch"
     },
     {
@@ -2200,7 +2230,7 @@
       "source_location": "L329",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_manualchamberinginputpatch_gettargetmethod",
-      "community": 2,
+      "community": 3,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2210,7 +2240,7 @@
       "source_location": "L334",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_manualchamberinginputpatch_rechamberround",
-      "community": 2,
+      "community": 3,
       "norm_label": ".rechamberround()"
     },
     {
@@ -2220,7 +2250,7 @@
       "source_location": "L334",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_cs_player",
-      "community": 2,
+      "community": 3,
       "norm_label": "player"
     },
     {
@@ -2230,7 +2260,7 @@
       "source_location": "L364",
       "_origin": "ast",
       "id": "patches_manualchamberingpatches_manualchamberinginputpatch_prefix",
-      "community": 2,
+      "community": 3,
       "norm_label": ".prefix()"
     },
     {
@@ -2240,7 +2270,7 @@
       "source_location": "L364",
       "_origin": "ast",
       "id": "ecommand",
-      "community": 2,
+      "community": 3,
       "norm_label": "ecommand"
     },
     {
@@ -2250,7 +2280,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_movementcontextspeedpatch",
-      "community": 9,
+      "community": 10,
       "norm_label": "movementcontextspeedpatch.cs"
     },
     {
@@ -2260,7 +2290,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "patches_movementcontextspeedpatch_camerarotationmod_patches",
-      "community": 9,
+      "community": 10,
       "norm_label": "camerarotationmod.patches"
     },
     {
@@ -2270,7 +2300,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "patches_movementcontextspeedpatch_movementcontextspeedpatch",
-      "community": 9,
+      "community": 10,
       "norm_label": "movementcontextspeedpatch"
     },
     {
@@ -2280,7 +2310,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "patches_movementcontextspeedpatch_movementcontextspeedpatch_gettargetmethod",
-      "community": 9,
+      "community": 10,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2290,7 +2320,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "patches_movementcontextspeedpatch_cs_methodbase",
-      "community": 9,
+      "community": 10,
       "norm_label": "methodbase"
     },
     {
@@ -2300,7 +2330,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "patches_movementcontextspeedpatch_movementcontextspeedpatch_postfix",
-      "community": 9,
+      "community": 10,
       "norm_label": ".postfix()"
     },
     {
@@ -2310,7 +2340,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "patches_movementcontextspeedpatch_cs_patchpostfix",
-      "community": 9,
+      "community": 10,
       "norm_label": "patchpostfix"
     },
     {
@@ -2320,7 +2350,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "patches_movementcontextspeedpatch_movementcontextsprintspeedpatch",
-      "community": 9,
+      "community": 10,
       "norm_label": "movementcontextsprintspeedpatch"
     },
     {
@@ -2330,7 +2360,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "patches_movementcontextspeedpatch_movementcontextsprintspeedpatch_gettargetmethod",
-      "community": 9,
+      "community": 10,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2340,7 +2370,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "patches_movementcontextspeedpatch_movementcontextsprintspeedpatch_postfix",
-      "community": 9,
+      "community": 10,
       "norm_label": ".postfix()"
     },
     {
@@ -2350,7 +2380,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "patches_movementcontextspeedpatch_playerchangespeedpatch",
-      "community": 9,
+      "community": 10,
       "norm_label": "playerchangespeedpatch"
     },
     {
@@ -2360,7 +2390,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "patches_movementcontextspeedpatch_playerchangespeedpatch_gettargetmethod",
-      "community": 9,
+      "community": 10,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2370,7 +2400,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "patches_movementcontextspeedpatch_playerchangespeedpatch_prefix",
-      "community": 9,
+      "community": 10,
       "norm_label": ".prefix()"
     },
     {
@@ -2380,7 +2410,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "patches_movementcontextspeedpatch_cs_player",
-      "community": 9,
+      "community": 10,
       "norm_label": "player"
     },
     {
@@ -2390,7 +2420,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "patches_movementcontextspeedpatch_cs_patchprefix",
-      "community": 9,
+      "community": 10,
       "norm_label": "patchprefix"
     },
     {
@@ -2490,7 +2520,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_passivemountbuffpatches",
-      "community": 13,
+      "community": 14,
       "norm_label": "passivemountbuffpatches.cs"
     },
     {
@@ -2500,7 +2530,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "patches_passivemountbuffpatches_camerarotationmod_patches",
-      "community": 13,
+      "community": 14,
       "norm_label": "camerarotationmod.patches"
     },
     {
@@ -2510,7 +2540,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "patches_passivemountbuffpatches_passiverecoilpatch",
-      "community": 13,
+      "community": 14,
       "norm_label": "passiverecoilpatch"
     },
     {
@@ -2520,7 +2550,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "patches_passivemountbuffpatches_passiverecoilpatch_gettargetmethod",
-      "community": 13,
+      "community": 14,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2530,7 +2560,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "patches_passivemountbuffpatches_cs_methodbase",
-      "community": 13,
+      "community": 14,
       "norm_label": "methodbase"
     },
     {
@@ -2540,7 +2570,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "patches_passivemountbuffpatches_passiverecoilpatch_prefix",
-      "community": 13,
+      "community": 14,
       "norm_label": ".prefix()"
     },
     {
@@ -2550,7 +2580,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "patches_passivemountbuffpatches_cs_patchprefix",
-      "community": 13,
+      "community": 14,
       "norm_label": "patchprefix"
     },
     {
@@ -2560,7 +2590,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "patches_passivemountbuffpatches_passiveswaypatch",
-      "community": 13,
+      "community": 14,
       "norm_label": "passiveswaypatch"
     },
     {
@@ -2570,7 +2600,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "patches_passivemountbuffpatches_passiveswaypatch_gettargetmethod",
-      "community": 13,
+      "community": 14,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2580,7 +2610,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "patches_passivemountbuffpatches_passiveswaypatch_postfix",
-      "community": 13,
+      "community": 14,
       "norm_label": ".postfix()"
     },
     {
@@ -2590,7 +2620,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "patches_passivemountbuffpatches_cs_proceduralweaponanimation",
-      "community": 13,
+      "community": 14,
       "norm_label": "proceduralweaponanimation"
     },
     {
@@ -2600,7 +2630,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "patches_passivemountbuffpatches_cs_patchpostfix",
-      "community": 13,
+      "community": 14,
       "norm_label": "patchpostfix"
     },
     {
@@ -2610,7 +2640,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_passivemountdetectpatch",
-      "community": 11,
+      "community": 12,
       "norm_label": "passivemountdetectpatch.cs"
     },
     {
@@ -2620,7 +2650,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "patches_passivemountdetectpatch_camerarotationmod_patches",
-      "community": 11,
+      "community": 12,
       "norm_label": "camerarotationmod.patches"
     },
     {
@@ -2630,7 +2660,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "patches_passivemountdetectpatch_passivemountdetectpatch",
-      "community": 11,
+      "community": 12,
       "norm_label": "passivemountdetectpatch"
     },
     {
@@ -2640,7 +2670,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "patches_passivemountdetectpatch_cs_fieldinfo",
-      "community": 11,
+      "community": 12,
       "norm_label": "fieldinfo"
     },
     {
@@ -2650,7 +2680,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "patches_passivemountdetectpatch_cs_float",
-      "community": 11,
+      "community": 12,
       "norm_label": "float"
     },
     {
@@ -2660,7 +2690,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "patches_passivemountdetectpatch_cs_vector3",
-      "community": 11,
+      "community": 12,
       "norm_label": "vector3"
     },
     {
@@ -2670,7 +2700,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "patches_passivemountdetectpatch_passivemountdetectpatch_gettargetmethod",
-      "community": 11,
+      "community": 12,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2680,7 +2710,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "patches_passivemountdetectpatch_cs_methodbase",
-      "community": 11,
+      "community": 12,
       "norm_label": "methodbase"
     },
     {
@@ -2690,7 +2720,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "patches_passivemountdetectpatch_passivemountdetectpatch_postfix",
-      "community": 11,
+      "community": 12,
       "norm_label": ".postfix()"
     },
     {
@@ -2700,7 +2730,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "patches_passivemountdetectpatch_cs_firearmcontroller",
-      "community": 11,
+      "community": 12,
       "norm_label": "firearmcontroller"
     },
     {
@@ -2710,7 +2740,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "patches_passivemountdetectpatch_cs_patchpostfix",
-      "community": 11,
+      "community": 12,
       "norm_label": "patchpostfix"
     },
     {
@@ -2720,7 +2750,7 @@
       "source_location": "L100",
       "_origin": "ast",
       "id": "patches_passivemountdetectpatch_passivemountdetectpatch_cast",
-      "community": 11,
+      "community": 12,
       "norm_label": ".cast()"
     },
     {
@@ -2730,7 +2760,7 @@
       "source_location": "L100",
       "_origin": "ast",
       "id": "patches_passivemountdetectpatch_cs_ebracingdir",
-      "community": 11,
+      "community": 12,
       "norm_label": "ebracingdir"
     },
     {
@@ -2910,7 +2940,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_raidlifecyclepatches",
-      "community": 17,
+      "community": 1,
       "norm_label": "raidlifecyclepatches.cs"
     },
     {
@@ -2920,7 +2950,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "patches_raidlifecyclepatches_camerarotationmod_patches",
-      "community": 17,
+      "community": 1,
       "norm_label": "camerarotationmod.patches"
     },
     {
@@ -2930,7 +2960,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "patches_raidlifecyclepatches_gameworldongamestartedpatch",
-      "community": 17,
+      "community": 1,
       "norm_label": "gameworldongamestartedpatch"
     },
     {
@@ -2940,7 +2970,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "patches_raidlifecyclepatches_gameworldongamestartedpatch_gettargetmethod",
-      "community": 17,
+      "community": 1,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2950,7 +2980,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "patches_raidlifecyclepatches_cs_methodbase",
-      "community": 17,
+      "community": 1,
       "norm_label": "methodbase"
     },
     {
@@ -2960,7 +2990,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "patches_raidlifecyclepatches_gameworldongamestartedpatch_postfix",
-      "community": 17,
+      "community": 1,
       "norm_label": ".postfix()"
     },
     {
@@ -2970,7 +3000,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "patches_raidlifecyclepatches_cs_patchpostfix",
-      "community": 17,
+      "community": 1,
       "norm_label": "patchpostfix"
     },
     {
@@ -2980,7 +3010,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "patches_raidlifecyclepatches_gameworldondestroypatch",
-      "community": 17,
+      "community": 1,
       "norm_label": "gameworldondestroypatch"
     },
     {
@@ -2990,7 +3020,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "patches_raidlifecyclepatches_gameworldondestroypatch_gettargetmethod",
-      "community": 17,
+      "community": 1,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -3000,7 +3030,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "patches_raidlifecyclepatches_gameworldondestroypatch_postfix",
-      "community": 17,
+      "community": 1,
       "norm_label": ".postfix()"
     },
     {
@@ -3010,7 +3040,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_snapfiretriggerpatch",
-      "community": 14,
+      "community": 15,
       "norm_label": "snapfiretriggerpatch.cs"
     },
     {
@@ -3020,7 +3050,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "patches_snapfiretriggerpatch_camerarotationmod_patches",
-      "community": 14,
+      "community": 15,
       "norm_label": "camerarotationmod.patches"
     },
     {
@@ -3030,7 +3060,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "patches_snapfiretriggerpatch_snapfiretriggerpatch",
-      "community": 14,
+      "community": 15,
       "norm_label": "snapfiretriggerpatch"
     },
     {
@@ -3040,7 +3070,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "patches_snapfiretriggerpatch_cs_bool",
-      "community": 14,
+      "community": 15,
       "norm_label": "bool"
     },
     {
@@ -3050,7 +3080,7 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "patches_snapfiretriggerpatch_cs_object",
-      "community": 14,
+      "community": 15,
       "norm_label": "object"
     },
     {
@@ -3060,7 +3090,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "patches_snapfiretriggerpatch_cs_methodbase",
-      "community": 14,
+      "community": 15,
       "norm_label": "methodbase"
     },
     {
@@ -3070,7 +3100,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "patches_snapfiretriggerpatch_snapfiretriggerpatch_gettargetmethod",
-      "community": 14,
+      "community": 15,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -3080,7 +3110,7 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "patches_snapfiretriggerpatch_snapfiretriggerpatch_raisesynthetictrigger",
-      "community": 14,
+      "community": 15,
       "norm_label": ".raisesynthetictrigger()"
     },
     {
@@ -3090,7 +3120,7 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "patches_snapfiretriggerpatch_cs_firearmcontroller",
-      "community": 14,
+      "community": 15,
       "norm_label": "firearmcontroller"
     },
     {
@@ -3100,7 +3130,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "patches_snapfiretriggerpatch_snapfiretriggerpatch_prefix",
-      "community": 14,
+      "community": 15,
       "norm_label": ".prefix()"
     },
     {
@@ -3110,7 +3140,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "patches_snapfiretriggerpatch_cs_patchprefix",
-      "community": 14,
+      "community": 15,
       "norm_label": "patchprefix"
     },
     {
@@ -3120,7 +3150,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_stancestaminarecoverypatch",
-      "community": 15,
+      "community": 16,
       "norm_label": "stancestaminarecoverypatch.cs"
     },
     {
@@ -3130,7 +3160,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "patches_stancestaminarecoverypatch_camerarotationmod_patches",
-      "community": 15,
+      "community": 16,
       "norm_label": "camerarotationmod.patches"
     },
     {
@@ -3140,7 +3170,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "patches_stancestaminarecoverypatch_handsstaminaneutralizepatch",
-      "community": 15,
+      "community": 16,
       "norm_label": "handsstaminaneutralizepatch"
     },
     {
@@ -3150,7 +3180,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "patches_stancestaminarecoverypatch_handsstaminaneutralizepatch_gettargetmethod",
-      "community": 15,
+      "community": 16,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -3160,7 +3190,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "patches_stancestaminarecoverypatch_cs_methodbase",
-      "community": 15,
+      "community": 16,
       "norm_label": "methodbase"
     },
     {
@@ -3170,7 +3200,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "patches_stancestaminarecoverypatch_handsstaminaneutralizepatch_prefix",
-      "community": 15,
+      "community": 16,
       "norm_label": ".prefix()"
     },
     {
@@ -3180,7 +3210,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "patches_stancestaminarecoverypatch_cs_gclass774",
-      "community": 15,
+      "community": 16,
       "norm_label": "gclass774"
     },
     {
@@ -3190,7 +3220,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "patches_stancestaminarecoverypatch_cs_patchprefix",
-      "community": 15,
+      "community": 16,
       "norm_label": "patchprefix"
     },
     {
@@ -3200,7 +3230,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "patches_stancestaminarecoverypatch_handsconsumeneutralizepatch",
-      "community": 15,
+      "community": 16,
       "norm_label": "handsconsumeneutralizepatch"
     },
     {
@@ -3210,7 +3240,7 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "patches_stancestaminarecoverypatch_handsconsumeneutralizepatch_gettargetmethod",
-      "community": 15,
+      "community": 16,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -3220,7 +3250,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "patches_stancestaminarecoverypatch_handsconsumeneutralizepatch_prefix",
-      "community": 15,
+      "community": 16,
       "norm_label": ".prefix()"
     },
     {
@@ -3230,7 +3260,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "plugin",
-      "community": 1,
+      "community": 2,
       "norm_label": "plugin.cs"
     },
     {
@@ -3240,7 +3270,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "plugin_plugin",
-      "community": 1,
+      "community": 2,
       "norm_label": "plugin"
     },
     {
@@ -3250,7 +3280,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "baseunityplugin",
-      "community": 1,
+      "community": 2,
       "norm_label": "baseunityplugin"
     },
     {
@@ -3260,7 +3290,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "plugin_cs_manuallogsource",
-      "community": 1,
+      "community": 2,
       "norm_label": "manuallogsource"
     },
     {
@@ -3270,7 +3300,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "plugin_cs_int",
-      "community": 1,
+      "community": 2,
       "norm_label": "int"
     },
     {
@@ -3280,7 +3310,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "plugin_cs_dictionary",
-      "community": 1,
+      "community": 2,
       "norm_label": "dictionary"
     },
     {
@@ -3290,7 +3320,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "plugin_cs_stance",
-      "community": 1,
+      "community": 2,
       "norm_label": "stance"
     },
     {
@@ -3300,7 +3330,7 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "plugin_cs_string",
-      "community": 1,
+      "community": 2,
       "norm_label": "string"
     },
     {
@@ -3310,7 +3340,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "plugin_cs_configentry",
-      "community": 1,
+      "community": 2,
       "norm_label": "configentry"
     },
     {
@@ -3320,7 +3350,7 @@
       "source_location": "L130",
       "_origin": "ast",
       "id": "configurationmanagerattributes",
-      "community": 1,
+      "community": 2,
       "norm_label": "configurationmanagerattributes"
     },
     {
@@ -3330,7 +3360,7 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "methodinfo",
-      "community": 1,
+      "community": 2,
       "norm_label": "methodinfo"
     },
     {
@@ -3340,7 +3370,7 @@
       "source_location": "L138",
       "_origin": "ast",
       "id": "plugin_cs_object",
-      "community": 1,
+      "community": 2,
       "norm_label": "object"
     },
     {
@@ -3350,347 +3380,347 @@
       "source_location": "L139",
       "_origin": "ast",
       "id": "plugin_cs_bool",
-      "community": 1,
+      "community": 2,
       "norm_label": "bool"
     },
     {
       "label": ".Awake()",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L225",
+      "source_location": "L226",
       "_origin": "ast",
       "id": "plugin_plugin_awake",
-      "community": 1,
+      "community": 2,
       "norm_label": ".awake()"
     },
     {
       "label": ".BindAllConfig()",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L267",
+      "source_location": "L268",
       "_origin": "ast",
       "id": "plugin_plugin_bindallconfig",
-      "community": 1,
+      "community": 2,
       "norm_label": ".bindallconfig()"
     },
     {
       "label": ".EnableEverything()",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1165",
+      "source_location": "L1182",
       "_origin": "ast",
       "id": "plugin_plugin_enableeverything",
-      "community": 1,
+      "community": 2,
       "norm_label": ".enableeverything()"
     },
     {
       "label": ".InitFikaSync()",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1258",
+      "source_location": "L1275",
       "_origin": "ast",
       "id": "plugin_plugin_initfikasync",
-      "community": 1,
+      "community": 2,
       "norm_label": ".initfikasync()"
     },
     {
       "label": "MethodImpl",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1258",
+      "source_location": "L1275",
       "_origin": "ast",
       "id": "methodimpl",
-      "community": 1,
+      "community": 2,
       "norm_label": "methodimpl"
     },
     {
       "label": ".OnScrollModeSettingChanged()",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1271",
+      "source_location": "L1288",
       "_origin": "ast",
       "id": "plugin_plugin_onscrollmodesettingchanged",
-      "community": 1,
+      "community": 2,
       "norm_label": ".onscrollmodesettingchanged()"
     },
     {
       "label": "EventArgs",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1271",
+      "source_location": "L1288",
       "_origin": "ast",
       "id": "eventargs",
-      "community": 1,
+      "community": 2,
       "norm_label": "eventargs"
     },
     {
       "label": ".RefreshScrollModeVisibility()",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1278",
+      "source_location": "L1295",
       "_origin": "ast",
       "id": "plugin_plugin_refreshscrollmodevisibility",
-      "community": 1,
+      "community": 2,
       "norm_label": ".refreshscrollmodevisibility()"
     },
     {
       "label": ".TryResolveConfigurationManager()",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1300",
+      "source_location": "L1317",
       "_origin": "ast",
       "id": "plugin_plugin_tryresolveconfigurationmanager",
-      "community": 1,
+      "community": 2,
       "norm_label": ".tryresolveconfigurationmanager()"
     },
     {
       "label": ".ResolveFirearmControllerSetTrigger()",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1333",
+      "source_location": "L1350",
       "_origin": "ast",
       "id": "plugin_plugin_resolvefirearmcontrollersettrigger",
-      "community": 1,
+      "community": 2,
       "norm_label": ".resolvefirearmcontrollersettrigger()"
     },
     {
       "label": ".SafeEnable()",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1360",
+      "source_location": "L1377",
       "_origin": "ast",
       "id": "plugin_plugin_safeenable",
-      "community": 3,
+      "community": 1,
       "norm_label": ".safeenable()"
     },
     {
       "label": "Func",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1360",
+      "source_location": "L1377",
       "_origin": "ast",
       "id": "plugin_cs_func",
-      "community": 3,
+      "community": 1,
       "norm_label": "func"
     },
     {
       "label": "ModulePatch",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1360",
+      "source_location": "L1377",
       "_origin": "ast",
       "id": "plugin_cs_modulepatch",
-      "community": 3,
+      "community": 1,
       "norm_label": "modulepatch"
     },
     {
       "label": ".ApplyMovementSpeeds()",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1369",
+      "source_location": "L1386",
       "_origin": "ast",
       "id": "plugin_plugin_applymovementspeeds",
-      "community": 1,
+      "community": 2,
       "norm_label": ".applymovementspeeds()"
     },
     {
       "label": ".OnDestroy()",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1379",
+      "source_location": "L1396",
       "_origin": "ast",
       "id": "plugin_plugin_ondestroy",
-      "community": 1,
+      "community": 2,
       "norm_label": ".ondestroy()"
     },
     {
       "label": ".FixedUpdate()",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1385",
+      "source_location": "L1402",
       "_origin": "ast",
       "id": "plugin_plugin_fixedupdate",
-      "community": 1,
+      "community": 2,
       "norm_label": ".fixedupdate()"
     },
     {
       "label": "Vector3",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1391",
+      "source_location": "L1408",
       "_origin": "ast",
       "id": "plugin_cs_vector3",
-      "community": 1,
+      "community": 2,
       "norm_label": "vector3"
     },
     {
       "label": ".MarkCameraOffsetDirty()",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1398",
+      "source_location": "L1415",
       "_origin": "ast",
       "id": "plugin_plugin_markcameraoffsetdirty",
-      "community": 1,
+      "community": 2,
       "norm_label": ".markcameraoffsetdirty()"
     },
     {
       "label": ".Update()",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1401",
+      "source_location": "L1418",
       "_origin": "ast",
       "id": "plugin_plugin_update",
-      "community": 1,
+      "community": 2,
       "norm_label": ".update()"
     },
     {
       "label": ".BindStance()",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1416",
+      "source_location": "L1433",
       "_origin": "ast",
       "id": "plugin_plugin_bindstance",
-      "community": 1,
+      "community": 2,
       "norm_label": ".bindstance()"
     },
     {
       "label": "Section",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1416",
+      "source_location": "L1433",
       "_origin": "ast",
       "id": "section",
-      "community": 1,
+      "community": 2,
       "norm_label": "section"
     },
     {
       "label": "StaminaMultiplier",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1416",
+      "source_location": "L1433",
       "_origin": "ast",
       "id": "staminamultiplier",
-      "community": 1,
+      "community": 2,
       "norm_label": "staminamultiplier"
     },
     {
       "label": "ModSpeed",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1416",
+      "source_location": "L1433",
       "_origin": "ast",
       "id": "modspeed",
-      "community": 1,
+      "community": 2,
       "norm_label": "modspeed"
     },
     {
       "label": "Multiplier",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1416",
+      "source_location": "L1433",
       "_origin": "ast",
       "id": "multiplier",
-      "community": 1,
+      "community": 2,
       "norm_label": "multiplier"
     },
     {
       "label": "ApplyProne",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1416",
+      "source_location": "L1433",
       "_origin": "ast",
       "id": "applyprone",
-      "community": 1,
+      "community": 2,
       "norm_label": "applyprone"
     },
     {
       "label": "SnapOnFire",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1416",
+      "source_location": "L1433",
       "_origin": "ast",
       "id": "snaponfire",
-      "community": 1,
+      "community": 2,
       "norm_label": "snaponfire"
     },
     {
       "label": "StanceConfig",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1416",
+      "source_location": "L1433",
       "_origin": "ast",
       "id": "plugin_cs_stanceconfig",
-      "community": 1,
+      "community": 2,
       "norm_label": "stanceconfig"
     },
     {
       "label": ".BindStaminaManagement()",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1471",
+      "source_location": "L1488",
       "_origin": "ast",
       "id": "plugin_plugin_bindstaminamanagement",
-      "community": 1,
+      "community": 2,
       "norm_label": ".bindstaminamanagement()"
     },
     {
       "label": ".BindMult()",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1497",
+      "source_location": "L1514",
       "_origin": "ast",
       "id": "plugin_plugin_bindmult",
-      "community": 1,
+      "community": 2,
       "norm_label": ".bindmult()"
     },
     {
       "label": ".Start()",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1507",
+      "source_location": "L1524",
       "_origin": "ast",
       "id": "plugin_plugin_start",
-      "community": 1,
+      "community": 2,
       "norm_label": ".start()"
     },
     {
       "label": ".OnStanceConfigChanged()",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1514",
+      "source_location": "L1531",
       "_origin": "ast",
       "id": "plugin_plugin_onstanceconfigchanged",
-      "community": 1,
+      "community": 2,
       "norm_label": ".onstanceconfigchanged()"
     },
     {
       "label": ".UpdateCameraOffset()",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1519",
+      "source_location": "L1536",
       "_origin": "ast",
       "id": "plugin_plugin_updatecameraoffset",
-      "community": 1,
+      "community": 2,
       "norm_label": ".updatecameraoffset()"
     },
     {
       "label": ".LoadEmbeddedSprite()",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1549",
+      "source_location": "L1566",
       "_origin": "ast",
       "id": "plugin_plugin_loadembeddedsprite",
-      "community": 1,
+      "community": 2,
       "norm_label": ".loadembeddedsprite()"
     },
     {
       "label": "Sprite",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L1549",
+      "source_location": "L1566",
       "_origin": "ast",
       "id": "sprite",
-      "community": 1,
+      "community": 2,
       "norm_label": "sprite"
     },
     {
@@ -3700,7 +3730,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "references_configurationmanagerattributes",
-      "community": 16,
+      "community": 17,
       "norm_label": "configurationmanagerattributes.cs"
     },
     {
@@ -3710,7 +3740,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "references_configurationmanagerattributes_configurationmanagerattributes",
-      "community": 16,
+      "community": 17,
       "norm_label": "configurationmanagerattributes"
     },
     {
@@ -3720,7 +3750,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "references_configurationmanagerattributes_cs_bool",
-      "community": 16,
+      "community": 17,
       "norm_label": "bool"
     },
     {
@@ -3730,7 +3760,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "configentrybase",
-      "community": 16,
+      "community": 17,
       "norm_label": "configentrybase>"
     },
     {
@@ -3740,7 +3770,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "customhotkeydrawerfunc",
-      "community": 16,
+      "community": 17,
       "norm_label": "customhotkeydrawerfunc"
     },
     {
@@ -3750,7 +3780,7 @@
       "source_location": "L95",
       "_origin": "ast",
       "id": "references_configurationmanagerattributes_cs_string",
-      "community": 16,
+      "community": 17,
       "norm_label": "string"
     },
     {
@@ -3760,7 +3790,7 @@
       "source_location": "L100",
       "_origin": "ast",
       "id": "references_configurationmanagerattributes_cs_object",
-      "community": 16,
+      "community": 17,
       "norm_label": "object"
     },
     {
@@ -3770,7 +3800,7 @@
       "source_location": "L128",
       "_origin": "ast",
       "id": "references_configurationmanagerattributes_cs_int",
-      "community": 16,
+      "community": 17,
       "norm_label": "int"
     },
     {
@@ -3780,7 +3810,7 @@
       "source_location": "L143",
       "_origin": "ast",
       "id": "func_object_string",
-      "community": 16,
+      "community": 17,
       "norm_label": "func<object, string>"
     },
     {
@@ -3790,7 +3820,7 @@
       "source_location": "L148",
       "_origin": "ast",
       "id": "func_string_object",
-      "community": 16,
+      "community": 17,
       "norm_label": "func<string, object>"
     },
     {
@@ -3860,7 +3890,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "staminacontroller",
-      "community": 10,
+      "community": 11,
       "norm_label": "staminacontroller.cs"
     },
     {
@@ -3870,7 +3900,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "staminacontroller_camerarotationmod",
-      "community": 10,
+      "community": 11,
       "norm_label": "camerarotationmod"
     },
     {
@@ -3880,7 +3910,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "staminacontroller_staminacontroller",
-      "community": 10,
+      "community": 11,
       "norm_label": "staminacontroller"
     },
     {
@@ -3890,7 +3920,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "staminascenario",
-      "community": 10,
+      "community": 11,
       "norm_label": "staminascenario"
     },
     {
@@ -3900,7 +3930,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "staminacontroller_cs_func",
-      "community": 10,
+      "community": 11,
       "norm_label": "func"
     },
     {
@@ -3910,7 +3940,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "staminacontroller_cs_configentry",
-      "community": 10,
+      "community": 11,
       "norm_label": "configentry"
     },
     {
@@ -3920,7 +3950,7 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "staminacontroller_cs_fieldinfo",
-      "community": 10,
+      "community": 11,
       "norm_label": "fieldinfo"
     },
     {
@@ -3930,7 +3960,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "staminacontroller_cs_bool",
-      "community": 10,
+      "community": 11,
       "norm_label": "bool"
     },
     {
@@ -3940,7 +3970,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "staminacontroller_staminacontroller_tick",
-      "community": 10,
+      "community": 11,
       "norm_label": ".tick()"
     },
     {
@@ -3950,7 +3980,7 @@
       "source_location": "L118",
       "_origin": "ast",
       "id": "staminacontroller_staminacontroller_resolve",
-      "community": 10,
+      "community": 11,
       "norm_label": ".resolve()"
     },
     {
@@ -3960,7 +3990,7 @@
       "source_location": "L118",
       "_origin": "ast",
       "id": "staminacontroller_cs_player",
-      "community": 10,
+      "community": 11,
       "norm_label": "player"
     },
     {
@@ -3970,7 +4000,7 @@
       "source_location": "L147",
       "_origin": "ast",
       "id": "staminacontroller_staminacontroller_setscenario",
-      "community": 10,
+      "community": 11,
       "norm_label": ".setscenario()"
     },
     {
@@ -3980,7 +4010,7 @@
       "source_location": "L157",
       "_origin": "ast",
       "id": "staminacontroller_staminacontroller_label",
-      "community": 10,
+      "community": 11,
       "norm_label": ".label()"
     },
     {
@@ -3990,7 +4020,7 @@
       "source_location": "L180",
       "_origin": "ast",
       "id": "staminacontroller_staminacontroller_reset",
-      "community": 10,
+      "community": 11,
       "norm_label": ".reset()"
     },
     {
@@ -4497,7 +4527,7 @@
       "label": ".RebuildCachedSprintEnabled()",
       "file_type": "code",
       "source_file": "StanceManager.cs",
-      "source_location": "L883",
+      "source_location": "L884",
       "_origin": "ast",
       "id": "stancemanager_stancemanager_rebuildcachedsprintenabled",
       "community": 0,
@@ -4507,7 +4537,7 @@
       "label": ".UpdateTacSprint()",
       "file_type": "code",
       "source_file": "StanceManager.cs",
-      "source_location": "L898",
+      "source_location": "L899",
       "_origin": "ast",
       "id": "stancemanager_stancemanager_updatetacsprint",
       "community": 0,
@@ -4517,7 +4547,7 @@
       "label": ".EnableTacSprint()",
       "file_type": "code",
       "source_file": "StanceManager.cs",
-      "source_location": "L1020",
+      "source_location": "L1021",
       "_origin": "ast",
       "id": "stancemanager_stancemanager_enabletacsprint",
       "community": 0,
@@ -4527,7 +4557,7 @@
       "label": "Player",
       "file_type": "code",
       "source_file": "StanceManager.cs",
-      "source_location": "L1020",
+      "source_location": "L1021",
       "_origin": "ast",
       "id": "stancemanager_cs_player",
       "community": 0,
@@ -4537,7 +4567,7 @@
       "label": ".StartTacSprintReset()",
       "file_type": "code",
       "source_file": "StanceManager.cs",
-      "source_location": "L1032",
+      "source_location": "L1033",
       "_origin": "ast",
       "id": "stancemanager_stancemanager_starttacsprintreset",
       "community": 0,
@@ -4547,7 +4577,7 @@
       "label": ".DisableTacSprintImmediate()",
       "file_type": "code",
       "source_file": "StanceManager.cs",
-      "source_location": "L1053",
+      "source_location": "L1054",
       "_origin": "ast",
       "id": "stancemanager_stancemanager_disabletacsprintimmediate",
       "community": 0,
@@ -4557,7 +4587,7 @@
       "label": ".RebuildCachedWeaponProperties()",
       "file_type": "code",
       "source_file": "StanceManager.cs",
-      "source_location": "L1080",
+      "source_location": "L1081",
       "_origin": "ast",
       "id": "stancemanager_stancemanager_rebuildcachedweaponproperties",
       "community": 0,
@@ -4567,7 +4597,7 @@
       "label": ".CanDoTacSprint()",
       "file_type": "code",
       "source_file": "StanceManager.cs",
-      "source_location": "L1101",
+      "source_location": "L1102",
       "_origin": "ast",
       "id": "stancemanager_stancemanager_candotacsprint",
       "community": 0,
@@ -4577,7 +4607,7 @@
       "label": ".GetActiveStaminaStance()",
       "file_type": "code",
       "source_file": "StanceManager.cs",
-      "source_location": "L1136",
+      "source_location": "L1137",
       "_origin": "ast",
       "id": "stancemanager_stancemanager_getactivestaminastance",
       "community": 0,
@@ -4587,7 +4617,7 @@
       "label": ".MarkStaminaConfigDirty()",
       "file_type": "code",
       "source_file": "StanceManager.cs",
-      "source_location": "L1141",
+      "source_location": "L1142",
       "_origin": "ast",
       "id": "stancemanager_stancemanager_markstaminaconfigdirty",
       "community": 0,
@@ -4597,7 +4627,7 @@
       "label": "FieldInfo",
       "file_type": "code",
       "source_file": "StanceManager.cs",
-      "source_location": "L1148",
+      "source_location": "L1149",
       "_origin": "ast",
       "id": "stancemanager_cs_fieldinfo",
       "community": 0,
@@ -4607,7 +4637,7 @@
       "label": ".ResolveBackingFieldByCandidates()",
       "file_type": "code",
       "source_file": "StanceManager.cs",
-      "source_location": "L1161",
+      "source_location": "L1162",
       "_origin": "ast",
       "id": "stancemanager_stancemanager_resolvebackingfieldbycandidates",
       "community": 0,
@@ -4617,7 +4647,7 @@
       "label": "Type",
       "file_type": "code",
       "source_file": "StanceManager.cs",
-      "source_location": "L1161",
+      "source_location": "L1162",
       "_origin": "ast",
       "id": "type",
       "community": 0,
@@ -4627,7 +4657,7 @@
       "label": ".HasMissingReflection()",
       "file_type": "code",
       "source_file": "StanceManager.cs",
-      "source_location": "L1172",
+      "source_location": "L1173",
       "_origin": "ast",
       "id": "stancemanager_stancemanager_hasmissingreflection",
       "community": 0,
@@ -4637,7 +4667,7 @@
       "label": "List",
       "file_type": "code",
       "source_file": "StanceManager.cs",
-      "source_location": "L1172",
+      "source_location": "L1173",
       "_origin": "ast",
       "id": "list",
       "community": 0,
@@ -4647,7 +4677,7 @@
       "label": ".NotifyHandsStaminaChanged()",
       "file_type": "code",
       "source_file": "StanceManager.cs",
-      "source_location": "L1180",
+      "source_location": "L1181",
       "_origin": "ast",
       "id": "stancemanager_stancemanager_notifyhandsstaminachanged",
       "community": 0,
@@ -4657,7 +4687,7 @@
       "label": "GClass774",
       "file_type": "code",
       "source_file": "StanceManager.cs",
-      "source_location": "L1180",
+      "source_location": "L1181",
       "_origin": "ast",
       "id": "stancemanager_cs_gclass774",
       "community": 0,
@@ -4667,7 +4697,7 @@
       "label": ".IsActiveContext()",
       "file_type": "code",
       "source_file": "StanceManager.cs",
-      "source_location": "L1196",
+      "source_location": "L1197",
       "_origin": "ast",
       "id": "stancemanager_stancemanager_isactivecontext",
       "community": 0,
@@ -4677,7 +4707,7 @@
       "label": ".OnRaidStart()",
       "file_type": "code",
       "source_file": "StanceManager.cs",
-      "source_location": "L1205",
+      "source_location": "L1206",
       "_origin": "ast",
       "id": "stancemanager_stancemanager_onraidstart",
       "community": 0,
@@ -4687,7 +4717,7 @@
       "label": ".OnRaidEnd()",
       "file_type": "code",
       "source_file": "StanceManager.cs",
-      "source_location": "L1226",
+      "source_location": "L1227",
       "_origin": "ast",
       "id": "stancemanager_stancemanager_onraidend",
       "community": 0,
@@ -4697,7 +4727,7 @@
       "label": ".ApplyStaminaStance()",
       "file_type": "code",
       "source_file": "StanceManager.cs",
-      "source_location": "L1247",
+      "source_location": "L1248",
       "_origin": "ast",
       "id": "stancemanager_stancemanager_applystaminastance",
       "community": 0,
@@ -4707,7 +4737,7 @@
       "label": ".OnStanceChanged()",
       "file_type": "code",
       "source_file": "StanceManager.cs",
-      "source_location": "L1280",
+      "source_location": "L1281",
       "_origin": "ast",
       "id": "stancemanager_stancemanager_onstancechanged",
       "community": 0,
@@ -4717,7 +4747,7 @@
       "label": ".TickAdsNetworkSync()",
       "file_type": "code",
       "source_file": "StanceManager.cs",
-      "source_location": "L1308",
+      "source_location": "L1309",
       "_origin": "ast",
       "id": "stancemanager_stancemanager_tickadsnetworksync",
       "community": 0,
@@ -4727,7 +4757,7 @@
       "label": ".TickStanceStamina()",
       "file_type": "code",
       "source_file": "StanceManager.cs",
-      "source_location": "L1338",
+      "source_location": "L1339",
       "_origin": "ast",
       "id": "stancemanager_stancemanager_tickstancestamina",
       "community": 0,
@@ -4737,7 +4767,7 @@
       "label": ".EvaluateProneSuspensionTick()",
       "file_type": "code",
       "source_file": "StanceManager.cs",
-      "source_location": "L1350",
+      "source_location": "L1351",
       "_origin": "ast",
       "id": "stancemanager_stancemanager_evaluatepronesuspensiontick",
       "community": 0,
@@ -4792,6 +4822,196 @@
       "id": "stancestaminastate_stancestaminastate_reset",
       "community": 30,
       "norm_label": ".reset()"
+    },
+    {
+      "label": "TransitionMetrics.cs",
+      "file_type": "code",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "transitionmetrics_cs_transitionmetrics",
+      "community": 7,
+      "norm_label": "transitionmetrics.cs"
+    },
+    {
+      "label": "CameraRotationMod",
+      "file_type": "code",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "transitionmetrics_camerarotationmod",
+      "community": 7,
+      "norm_label": "camerarotationmod"
+    },
+    {
+      "label": "TransitionMetrics",
+      "file_type": "code",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L25",
+      "_origin": "ast",
+      "id": "transitionmetrics_transitionmetrics",
+      "community": 7,
+      "norm_label": "transitionmetrics"
+    },
+    {
+      "label": "float",
+      "file_type": "code",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L27",
+      "_origin": "ast",
+      "id": "transitionmetrics_cs_float",
+      "community": 7,
+      "norm_label": "float"
+    },
+    {
+      "label": "int",
+      "file_type": "code",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L33",
+      "_origin": "ast",
+      "id": "transitionmetrics_cs_int",
+      "community": 7,
+      "norm_label": "int"
+    },
+    {
+      "label": "string",
+      "file_type": "code",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L46",
+      "_origin": "ast",
+      "id": "transitionmetrics_cs_string",
+      "community": 7,
+      "norm_label": "string"
+    },
+    {
+      "label": "bool",
+      "file_type": "code",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L47",
+      "_origin": "ast",
+      "id": "transitionmetrics_cs_bool",
+      "community": 7,
+      "norm_label": "bool"
+    },
+    {
+      "label": "Channel",
+      "file_type": "code",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L48",
+      "_origin": "ast",
+      "id": "channel",
+      "community": 7,
+      "norm_label": "channel"
+    },
+    {
+      "label": "Vector3",
+      "file_type": "code",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L51",
+      "_origin": "ast",
+      "id": "transitionmetrics_cs_vector3",
+      "community": 7,
+      "norm_label": "vector3"
+    },
+    {
+      "label": ".Feed()",
+      "file_type": "code",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L68",
+      "_origin": "ast",
+      "id": "transitionmetrics_transitionmetrics_feed",
+      "community": 7,
+      "norm_label": ".feed()"
+    },
+    {
+      "label": "Stance",
+      "file_type": "code",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L68",
+      "_origin": "ast",
+      "id": "transitionmetrics_cs_stance",
+      "community": 7,
+      "norm_label": "stance"
+    },
+    {
+      "label": ".Sample()",
+      "file_type": "code",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L109",
+      "_origin": "ast",
+      "id": "transitionmetrics_transitionmetrics_sample",
+      "community": 7,
+      "norm_label": ".sample()"
+    },
+    {
+      "label": ".Open()",
+      "file_type": "code",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L161",
+      "_origin": "ast",
+      "id": "transitionmetrics_transitionmetrics_open",
+      "community": 7,
+      "norm_label": ".open()"
+    },
+    {
+      "label": ".Token()",
+      "file_type": "code",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L194",
+      "_origin": "ast",
+      "id": "transitionmetrics_transitionmetrics_token",
+      "community": 7,
+      "norm_label": ".token()"
+    },
+    {
+      "label": ".Finish()",
+      "file_type": "code",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L201",
+      "_origin": "ast",
+      "id": "transitionmetrics_transitionmetrics_finish",
+      "community": 7,
+      "norm_label": ".finish()"
+    },
+    {
+      "label": ".Reset()",
+      "file_type": "code",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L226",
+      "_origin": "ast",
+      "id": "transitionmetrics_transitionmetrics_reset",
+      "community": 7,
+      "norm_label": ".reset()"
+    },
+    {
+      "label": ".Axis()",
+      "file_type": "code",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L233",
+      "_origin": "ast",
+      "id": "transitionmetrics_transitionmetrics_axis",
+      "community": 7,
+      "norm_label": ".axis()"
+    },
+    {
+      "label": ".Differs()",
+      "file_type": "code",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L235",
+      "_origin": "ast",
+      "id": "transitionmetrics_transitionmetrics_differs",
+      "community": 7,
+      "norm_label": ".differs()"
+    },
+    {
+      "label": ".DiffersAngular()",
+      "file_type": "code",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L238",
+      "_origin": "ast",
+      "id": "transitionmetrics_transitionmetrics_differsangular",
+      "community": 7,
+      "norm_label": ".differsangular()"
     },
     {
       "label": "TransitionSpeedTracker.cs",
@@ -5417,6 +5637,17 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Networking/ObservedStanceAnimator.cs",
+      "source_location": "L29",
+      "weight": 1.0,
+      "context": "field",
+      "source": "networking_observedstanceanimator_observedstanceanimator",
+      "target": "networking_observedstanceanimator_cs_transitionmetrics",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Networking/ObservedStanceAnimator.cs",
       "source_location": "L25",
       "weight": 1.0,
       "context": "field",
@@ -5439,7 +5670,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Networking/ObservedStanceAnimator.cs",
-      "source_location": "L36",
+      "source_location": "L44",
       "weight": 1.0,
       "source": "networking_observedstanceanimator_observedstanceanimator",
       "target": "networking_observedstanceanimator_observedstanceanimator_applytoweaponroot",
@@ -5449,7 +5680,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Networking/ObservedStanceAnimator.cs",
-      "source_location": "L27",
+      "source_location": "L31",
       "weight": 1.0,
       "source": "networking_observedstanceanimator_observedstanceanimator",
       "target": "networking_observedstanceanimator_observedstanceanimator_init",
@@ -5459,7 +5690,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Networking/ObservedStanceAnimator.cs",
-      "source_location": "L29",
+      "source_location": "L37",
       "weight": 1.0,
       "source": "networking_observedstanceanimator_observedstanceanimator",
       "target": "networking_observedstanceanimator_observedstanceanimator_setstance",
@@ -5480,7 +5711,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Networking/ObservedStanceAnimator.cs",
-      "source_location": "L27",
+      "source_location": "L31",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "networking_observedstanceanimator_observedstanceanimator_init",
@@ -5491,7 +5722,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Networking/ObservedStanceAnimator.cs",
-      "source_location": "L36",
+      "source_location": "L44",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "networking_observedstanceanimator_observedstanceanimator_applytoweaponroot",
@@ -6504,7 +6735,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Patches/ApplyComplexRotationPatch.cs",
-      "source_location": "L61",
+      "source_location": "L71",
       "weight": 1.0,
       "source": "patches_applycomplexrotationpatch_applycomplexrotationpatch",
       "target": "patches_applycomplexrotationpatch_applycomplexrotationpatch_clampangles",
@@ -6514,7 +6745,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Patches/ApplyComplexRotationPatch.cs",
-      "source_location": "L133",
+      "source_location": "L143",
       "weight": 1.0,
       "source": "patches_applycomplexrotationpatch_applycomplexrotationpatch",
       "target": "patches_applycomplexrotationpatch_applycomplexrotationpatch_gettargetmethod",
@@ -6524,10 +6755,20 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Patches/ApplyComplexRotationPatch.cs",
-      "source_location": "L145",
+      "source_location": "L155",
       "weight": 1.0,
       "source": "patches_applycomplexrotationpatch_applycomplexrotationpatch",
       "target": "patches_applycomplexrotationpatch_applycomplexrotationpatch_postfix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/ApplyComplexRotationPatch.cs",
+      "source_location": "L51",
+      "weight": 1.0,
+      "source": "patches_applycomplexrotationpatch_applycomplexrotationpatch",
+      "target": "patches_applycomplexrotationpatch_applycomplexrotationpatch_resetmetrics",
       "confidence_score": 1.0
     },
     {
@@ -6544,7 +6785,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Patches/ApplyComplexRotationPatch.cs",
-      "source_location": "L109",
+      "source_location": "L119",
       "weight": 1.0,
       "source": "patches_applycomplexrotationpatch_applycomplexrotationpatch",
       "target": "patches_applycomplexrotationpatch_applycomplexrotationpatch_springlerp",
@@ -6554,7 +6795,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Patches/ApplyComplexRotationPatch.cs",
-      "source_location": "L78",
+      "source_location": "L88",
       "weight": 1.0,
       "source": "patches_applycomplexrotationpatch_applycomplexrotationpatch",
       "target": "patches_applycomplexrotationpatch_applycomplexrotationpatch_springlerpangle",
@@ -6586,7 +6827,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Patches/ApplyComplexRotationPatch.cs",
-      "source_location": "L58",
+      "source_location": "L68",
       "weight": 1.0,
       "context": "field",
       "source": "patches_applycomplexrotationpatch_applycomplexrotationpatch",
@@ -6597,7 +6838,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Patches/ApplyComplexRotationPatch.cs",
-      "source_location": "L59",
+      "source_location": "L69",
       "weight": 1.0,
       "context": "field",
       "source": "patches_applycomplexrotationpatch_applycomplexrotationpatch",
@@ -6624,6 +6865,17 @@
       "context": "field",
       "source": "patches_applycomplexrotationpatch_applycomplexrotationpatch",
       "target": "patches_applycomplexrotationpatch_cs_stance",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/ApplyComplexRotationPatch.cs",
+      "source_location": "L48",
+      "weight": 1.0,
+      "context": "field",
+      "source": "patches_applycomplexrotationpatch_applycomplexrotationpatch",
+      "target": "patches_applycomplexrotationpatch_cs_transitionmetrics",
       "confidence_score": 1.0
     },
     {
@@ -6663,7 +6915,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "Patches/ApplyComplexRotationPatch.cs",
-      "source_location": "L223",
+      "source_location": "L233",
       "weight": 1.0,
       "source": "patches_applycomplexrotationpatch_applycomplexrotationpatch_postfix",
       "target": "patches_applycomplexrotationpatch_applycomplexrotationpatch_applykick",
@@ -6673,7 +6925,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Patches/ApplyComplexRotationPatch.cs",
-      "source_location": "L61",
+      "source_location": "L71",
       "weight": 1.0,
       "context": "return_type",
       "source": "patches_applycomplexrotationpatch_applycomplexrotationpatch_clampangles",
@@ -6684,7 +6936,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Patches/ApplyComplexRotationPatch.cs",
-      "source_location": "L109",
+      "source_location": "L119",
       "weight": 1.0,
       "context": "return_type",
       "source": "patches_applycomplexrotationpatch_applycomplexrotationpatch_springlerp",
@@ -6695,7 +6947,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Patches/ApplyComplexRotationPatch.cs",
-      "source_location": "L78",
+      "source_location": "L88",
       "weight": 1.0,
       "context": "return_type",
       "source": "patches_applycomplexrotationpatch_applycomplexrotationpatch_springlerpangle",
@@ -6707,7 +6959,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "Patches/ApplyComplexRotationPatch.cs",
-      "source_location": "L103",
+      "source_location": "L113",
       "weight": 1.0,
       "source": "patches_applycomplexrotationpatch_applycomplexrotationpatch_springlerpangle",
       "target": "patches_applycomplexrotationpatch_applycomplexrotationpatch_clampangles",
@@ -6718,7 +6970,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "Patches/ApplyComplexRotationPatch.cs",
-      "source_location": "L275",
+      "source_location": "L285",
       "weight": 1.0,
       "source": "patches_applycomplexrotationpatch_applycomplexrotationpatch_postfix",
       "target": "patches_applycomplexrotationpatch_applycomplexrotationpatch_springlerpangle",
@@ -6729,7 +6981,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "Patches/ApplyComplexRotationPatch.cs",
-      "source_location": "L276",
+      "source_location": "L286",
       "weight": 1.0,
       "source": "patches_applycomplexrotationpatch_applycomplexrotationpatch_postfix",
       "target": "patches_applycomplexrotationpatch_applycomplexrotationpatch_springlerp",
@@ -6739,7 +6991,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Patches/ApplyComplexRotationPatch.cs",
-      "source_location": "L133",
+      "source_location": "L143",
       "weight": 1.0,
       "context": "return_type",
       "source": "patches_applycomplexrotationpatch_applycomplexrotationpatch_gettargetmethod",
@@ -6750,7 +7002,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Patches/ApplyComplexRotationPatch.cs",
-      "source_location": "L145",
+      "source_location": "L155",
       "weight": 1.0,
       "context": "attribute",
       "source": "patches_applycomplexrotationpatch_applycomplexrotationpatch_postfix",
@@ -6761,7 +7013,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Patches/ApplyComplexRotationPatch.cs",
-      "source_location": "L145",
+      "source_location": "L155",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "patches_applycomplexrotationpatch_applycomplexrotationpatch_postfix",
@@ -9458,7 +9710,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1392",
+      "source_location": "L1409",
       "weight": 1.0,
       "context": "field",
       "source": "plugin_plugin",
@@ -9469,7 +9721,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L223",
+      "source_location": "L224",
       "weight": 1.0,
       "context": "field",
       "source": "plugin_plugin",
@@ -9546,7 +9798,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1393",
+      "source_location": "L1410",
       "weight": 1.0,
       "context": "field",
       "source": "plugin_plugin",
@@ -9557,7 +9809,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1369",
+      "source_location": "L1386",
       "weight": 1.0,
       "source": "plugin_plugin",
       "target": "plugin_plugin_applymovementspeeds",
@@ -9567,7 +9819,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L225",
+      "source_location": "L226",
       "weight": 1.0,
       "source": "plugin_plugin",
       "target": "plugin_plugin_awake",
@@ -9577,7 +9829,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L267",
+      "source_location": "L268",
       "weight": 1.0,
       "source": "plugin_plugin",
       "target": "plugin_plugin_bindallconfig",
@@ -9587,7 +9839,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1497",
+      "source_location": "L1514",
       "weight": 1.0,
       "source": "plugin_plugin",
       "target": "plugin_plugin_bindmult",
@@ -9597,7 +9849,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1471",
+      "source_location": "L1488",
       "weight": 1.0,
       "source": "plugin_plugin",
       "target": "plugin_plugin_bindstaminamanagement",
@@ -9607,7 +9859,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1416",
+      "source_location": "L1433",
       "weight": 1.0,
       "source": "plugin_plugin",
       "target": "plugin_plugin_bindstance",
@@ -9617,7 +9869,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1165",
+      "source_location": "L1182",
       "weight": 1.0,
       "source": "plugin_plugin",
       "target": "plugin_plugin_enableeverything",
@@ -9627,7 +9879,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1385",
+      "source_location": "L1402",
       "weight": 1.0,
       "source": "plugin_plugin",
       "target": "plugin_plugin_fixedupdate",
@@ -9637,7 +9889,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1258",
+      "source_location": "L1275",
       "weight": 1.0,
       "source": "plugin_plugin",
       "target": "plugin_plugin_initfikasync",
@@ -9647,7 +9899,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1549",
+      "source_location": "L1566",
       "weight": 1.0,
       "source": "plugin_plugin",
       "target": "plugin_plugin_loadembeddedsprite",
@@ -9657,7 +9909,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1398",
+      "source_location": "L1415",
       "weight": 1.0,
       "source": "plugin_plugin",
       "target": "plugin_plugin_markcameraoffsetdirty",
@@ -9667,7 +9919,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1379",
+      "source_location": "L1396",
       "weight": 1.0,
       "source": "plugin_plugin",
       "target": "plugin_plugin_ondestroy",
@@ -9677,7 +9929,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1271",
+      "source_location": "L1288",
       "weight": 1.0,
       "source": "plugin_plugin",
       "target": "plugin_plugin_onscrollmodesettingchanged",
@@ -9687,7 +9939,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1514",
+      "source_location": "L1531",
       "weight": 1.0,
       "source": "plugin_plugin",
       "target": "plugin_plugin_onstanceconfigchanged",
@@ -9697,7 +9949,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1278",
+      "source_location": "L1295",
       "weight": 1.0,
       "source": "plugin_plugin",
       "target": "plugin_plugin_refreshscrollmodevisibility",
@@ -9707,7 +9959,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1333",
+      "source_location": "L1350",
       "weight": 1.0,
       "source": "plugin_plugin",
       "target": "plugin_plugin_resolvefirearmcontrollersettrigger",
@@ -9717,7 +9969,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1360",
+      "source_location": "L1377",
       "weight": 1.0,
       "source": "plugin_plugin",
       "target": "plugin_plugin_safeenable",
@@ -9727,7 +9979,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1507",
+      "source_location": "L1524",
       "weight": 1.0,
       "source": "plugin_plugin",
       "target": "plugin_plugin_start",
@@ -9737,7 +9989,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1300",
+      "source_location": "L1317",
       "weight": 1.0,
       "source": "plugin_plugin",
       "target": "plugin_plugin_tryresolveconfigurationmanager",
@@ -9747,7 +9999,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1401",
+      "source_location": "L1418",
       "weight": 1.0,
       "source": "plugin_plugin",
       "target": "plugin_plugin_update",
@@ -9757,7 +10009,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1519",
+      "source_location": "L1536",
       "weight": 1.0,
       "source": "plugin_plugin",
       "target": "plugin_plugin_updatecameraoffset",
@@ -9767,7 +10019,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1416",
+      "source_location": "L1433",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "plugin_plugin_bindstance",
@@ -9778,7 +10030,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1497",
+      "source_location": "L1514",
       "weight": 1.0,
       "context": "return_type",
       "source": "plugin_plugin_bindmult",
@@ -9790,7 +10042,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L248",
+      "source_location": "L249",
       "weight": 1.0,
       "source": "plugin_plugin_awake",
       "target": "plugin_plugin_bindallconfig",
@@ -9801,7 +10053,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L260",
+      "source_location": "L261",
       "weight": 1.0,
       "source": "plugin_plugin_awake",
       "target": "plugin_plugin_enableeverything",
@@ -9812,7 +10064,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L238",
+      "source_location": "L239",
       "weight": 1.0,
       "source": "plugin_plugin_awake",
       "target": "plugin_plugin_resolvefirearmcontrollersettrigger",
@@ -9823,7 +10075,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L233",
+      "source_location": "L234",
       "weight": 1.0,
       "source": "plugin_plugin_awake",
       "target": "plugin_plugin_tryresolveconfigurationmanager",
@@ -9834,7 +10086,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1148",
+      "source_location": "L1165",
       "weight": 1.0,
       "source": "plugin_plugin_bindallconfig",
       "target": "plugin_plugin_applymovementspeeds",
@@ -9845,7 +10097,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L803",
+      "source_location": "L804",
       "weight": 1.0,
       "source": "plugin_plugin_bindallconfig",
       "target": "plugin_plugin_bindstaminamanagement",
@@ -9856,7 +10108,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L621",
+      "source_location": "L622",
       "weight": 1.0,
       "source": "plugin_plugin_bindallconfig",
       "target": "plugin_plugin_bindstance",
@@ -9867,7 +10119,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1111",
+      "source_location": "L1128",
       "weight": 1.0,
       "source": "plugin_plugin_bindallconfig",
       "target": "plugin_plugin_markcameraoffsetdirty",
@@ -9878,7 +10130,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1158",
+      "source_location": "L1175",
       "weight": 1.0,
       "source": "plugin_plugin_bindallconfig",
       "target": "plugin_plugin_refreshscrollmodevisibility",
@@ -9889,7 +10141,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1185",
+      "source_location": "L1202",
       "weight": 1.0,
       "source": "plugin_plugin_enableeverything",
       "target": "plugin_plugin_initfikasync",
@@ -9900,7 +10152,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1247",
+      "source_location": "L1264",
       "weight": 1.0,
       "source": "plugin_plugin_enableeverything",
       "target": "plugin_plugin_loadembeddedsprite",
@@ -9911,7 +10163,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1170",
+      "source_location": "L1187",
       "weight": 1.0,
       "source": "plugin_plugin_enableeverything",
       "target": "plugin_plugin_safeenable",
@@ -9921,7 +10173,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1258",
+      "source_location": "L1275",
       "weight": 1.0,
       "context": "attribute",
       "source": "plugin_plugin_initfikasync",
@@ -9932,7 +10184,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1271",
+      "source_location": "L1288",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "plugin_plugin_onscrollmodesettingchanged",
@@ -9944,7 +10196,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1272",
+      "source_location": "L1289",
       "weight": 1.0,
       "source": "plugin_plugin_onscrollmodesettingchanged",
       "target": "plugin_plugin_refreshscrollmodevisibility",
@@ -9954,7 +10206,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1514",
+      "source_location": "L1531",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "plugin_plugin_onstanceconfigchanged",
@@ -9965,7 +10217,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1360",
+      "source_location": "L1377",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "plugin_plugin_safeenable",
@@ -9976,7 +10228,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1360",
+      "source_location": "L1377",
       "weight": 1.0,
       "context": "generic_arg",
       "source": "plugin_plugin_safeenable",
@@ -9988,7 +10240,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1413",
+      "source_location": "L1430",
       "weight": 1.0,
       "source": "plugin_plugin_update",
       "target": "plugin_plugin_updatecameraoffset",
@@ -9998,7 +10250,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1416",
+      "source_location": "L1433",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "plugin_plugin_bindstance",
@@ -10009,7 +10261,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1416",
+      "source_location": "L1433",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "plugin_plugin_bindstance",
@@ -10020,7 +10272,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1416",
+      "source_location": "L1433",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "plugin_plugin_bindstance",
@@ -10031,7 +10283,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1416",
+      "source_location": "L1433",
       "weight": 1.0,
       "context": "return_type",
       "source": "plugin_plugin_bindstance",
@@ -10042,7 +10294,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1416",
+      "source_location": "L1433",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "plugin_plugin_bindstance",
@@ -10053,7 +10305,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1416",
+      "source_location": "L1433",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "plugin_plugin_bindstance",
@@ -10064,7 +10316,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1416",
+      "source_location": "L1433",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "plugin_plugin_bindstance",
@@ -10076,7 +10328,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1476",
+      "source_location": "L1493",
       "weight": 1.0,
       "source": "plugin_plugin_bindstaminamanagement",
       "target": "plugin_plugin_bindmult",
@@ -10086,7 +10338,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Plugin.cs",
-      "source_location": "L1549",
+      "source_location": "L1566",
       "weight": 1.0,
       "context": "return_type",
       "source": "plugin_plugin_loadembeddedsprite",
@@ -10551,7 +10803,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1278",
+      "source_location": "L1279",
       "weight": 1.0,
       "context": "field",
       "source": "stancemanager_stancemanager",
@@ -10573,7 +10825,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1150",
+      "source_location": "L1151",
       "weight": 1.0,
       "context": "field",
       "source": "stancemanager_stancemanager",
@@ -10595,7 +10847,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1133",
+      "source_location": "L1134",
       "weight": 1.0,
       "context": "field",
       "source": "stancemanager_stancemanager",
@@ -10628,7 +10880,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1130",
+      "source_location": "L1131",
       "weight": 1.0,
       "context": "field",
       "source": "stancemanager_stancemanager",
@@ -10650,7 +10902,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1247",
+      "source_location": "L1248",
       "weight": 1.0,
       "source": "stancemanager_stancemanager",
       "target": "stancemanager_stancemanager_applystaminastance",
@@ -10670,7 +10922,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1101",
+      "source_location": "L1102",
       "weight": 1.0,
       "source": "stancemanager_stancemanager",
       "target": "stancemanager_stancemanager_candotacsprint",
@@ -10680,7 +10932,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1053",
+      "source_location": "L1054",
       "weight": 1.0,
       "source": "stancemanager_stancemanager",
       "target": "stancemanager_stancemanager_disabletacsprintimmediate",
@@ -10690,7 +10942,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1020",
+      "source_location": "L1021",
       "weight": 1.0,
       "source": "stancemanager_stancemanager",
       "target": "stancemanager_stancemanager_enabletacsprint",
@@ -10710,7 +10962,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1350",
+      "source_location": "L1351",
       "weight": 1.0,
       "source": "stancemanager_stancemanager",
       "target": "stancemanager_stancemanager_evaluatepronesuspensiontick",
@@ -10730,7 +10982,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1136",
+      "source_location": "L1137",
       "weight": 1.0,
       "source": "stancemanager_stancemanager",
       "target": "stancemanager_stancemanager_getactivestaminastance",
@@ -10810,7 +11062,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1172",
+      "source_location": "L1173",
       "weight": 1.0,
       "source": "stancemanager_stancemanager",
       "target": "stancemanager_stancemanager_hasmissingreflection",
@@ -10830,7 +11082,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1196",
+      "source_location": "L1197",
       "weight": 1.0,
       "source": "stancemanager_stancemanager",
       "target": "stancemanager_stancemanager_isactivecontext",
@@ -10890,7 +11142,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1141",
+      "source_location": "L1142",
       "weight": 1.0,
       "source": "stancemanager_stancemanager",
       "target": "stancemanager_stancemanager_markstaminaconfigdirty",
@@ -10910,7 +11162,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1180",
+      "source_location": "L1181",
       "weight": 1.0,
       "source": "stancemanager_stancemanager",
       "target": "stancemanager_stancemanager_notifyhandsstaminachanged",
@@ -10920,7 +11172,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1226",
+      "source_location": "L1227",
       "weight": 1.0,
       "source": "stancemanager_stancemanager",
       "target": "stancemanager_stancemanager_onraidend",
@@ -10930,7 +11182,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1205",
+      "source_location": "L1206",
       "weight": 1.0,
       "source": "stancemanager_stancemanager",
       "target": "stancemanager_stancemanager_onraidstart",
@@ -10940,7 +11192,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1280",
+      "source_location": "L1281",
       "weight": 1.0,
       "source": "stancemanager_stancemanager",
       "target": "stancemanager_stancemanager_onstancechanged",
@@ -10970,7 +11222,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L883",
+      "source_location": "L884",
       "weight": 1.0,
       "source": "stancemanager_stancemanager",
       "target": "stancemanager_stancemanager_rebuildcachedsprintenabled",
@@ -10990,7 +11242,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1080",
+      "source_location": "L1081",
       "weight": 1.0,
       "source": "stancemanager_stancemanager",
       "target": "stancemanager_stancemanager_rebuildcachedweaponproperties",
@@ -11010,7 +11262,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1161",
+      "source_location": "L1162",
       "weight": 1.0,
       "source": "stancemanager_stancemanager",
       "target": "stancemanager_stancemanager_resolvebackingfieldbycandidates",
@@ -11040,7 +11292,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1032",
+      "source_location": "L1033",
       "weight": 1.0,
       "source": "stancemanager_stancemanager",
       "target": "stancemanager_stancemanager_starttacsprintreset",
@@ -11050,7 +11302,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1308",
+      "source_location": "L1309",
       "weight": 1.0,
       "source": "stancemanager_stancemanager",
       "target": "stancemanager_stancemanager_tickadsnetworksync",
@@ -11060,7 +11312,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1338",
+      "source_location": "L1339",
       "weight": 1.0,
       "source": "stancemanager_stancemanager",
       "target": "stancemanager_stancemanager_tickstancestamina",
@@ -11120,7 +11372,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L898",
+      "source_location": "L899",
       "weight": 1.0,
       "source": "stancemanager_stancemanager",
       "target": "stancemanager_stancemanager_updatetacsprint",
@@ -11130,7 +11382,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1247",
+      "source_location": "L1248",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "stancemanager_stancemanager_applystaminastance",
@@ -11152,7 +11404,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1136",
+      "source_location": "L1137",
       "weight": 1.0,
       "context": "return_type",
       "source": "stancemanager_stancemanager_getactivestaminastance",
@@ -11218,7 +11470,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1280",
+      "source_location": "L1281",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "stancemanager_stancemanager_onstancechanged",
@@ -11394,7 +11646,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1080",
+      "source_location": "L1081",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "stancemanager_stancemanager_rebuildcachedweaponproperties",
@@ -11703,7 +11955,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L936",
+      "source_location": "L937",
       "weight": 1.0,
       "source": "stancemanager_stancemanager_updatetacsprint",
       "target": "stancemanager_stancemanager_isholdingfirearm",
@@ -11714,7 +11966,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1284",
+      "source_location": "L1285",
       "weight": 1.0,
       "source": "stancemanager_stancemanager_onstancechanged",
       "target": "stancemanager_stancemanager_getcachedgameworld",
@@ -11725,7 +11977,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1315",
+      "source_location": "L1316",
       "weight": 1.0,
       "source": "stancemanager_stancemanager_tickadsnetworksync",
       "target": "stancemanager_stancemanager_getcachedgameworld",
@@ -11736,7 +11988,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L909",
+      "source_location": "L910",
       "weight": 1.0,
       "source": "stancemanager_stancemanager_updatetacsprint",
       "target": "stancemanager_stancemanager_getcachedgameworld",
@@ -11769,7 +12021,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1240",
+      "source_location": "L1241",
       "weight": 1.0,
       "source": "stancemanager_stancemanager_onraidend",
       "target": "stancemanager_stancemanager_resetstate",
@@ -11780,7 +12032,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L913",
+      "source_location": "L914",
       "weight": 1.0,
       "source": "stancemanager_stancemanager_updatetacsprint",
       "target": "stancemanager_stancemanager_resetstate",
@@ -11791,7 +12043,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L904",
+      "source_location": "L905",
       "weight": 1.0,
       "source": "stancemanager_stancemanager_updatetacsprint",
       "target": "stancemanager_stancemanager_rebuildcachedsprintenabled",
@@ -11802,7 +12054,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L936",
+      "source_location": "L937",
       "weight": 1.0,
       "source": "stancemanager_stancemanager_updatetacsprint",
       "target": "stancemanager_stancemanager_candotacsprint",
@@ -11813,7 +12065,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L947",
+      "source_location": "L948",
       "weight": 1.0,
       "source": "stancemanager_stancemanager_updatetacsprint",
       "target": "stancemanager_stancemanager_disabletacsprintimmediate",
@@ -11824,7 +12076,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1008",
+      "source_location": "L1009",
       "weight": 1.0,
       "source": "stancemanager_stancemanager_updatetacsprint",
       "target": "stancemanager_stancemanager_enabletacsprint",
@@ -11835,7 +12087,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1013",
+      "source_location": "L1014",
       "weight": 1.0,
       "source": "stancemanager_stancemanager_updatetacsprint",
       "target": "stancemanager_stancemanager_starttacsprintreset",
@@ -11845,7 +12097,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1020",
+      "source_location": "L1021",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "stancemanager_stancemanager_enabletacsprint",
@@ -11856,7 +12108,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1101",
+      "source_location": "L1102",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "stancemanager_stancemanager_candotacsprint",
@@ -11867,7 +12119,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1053",
+      "source_location": "L1054",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "stancemanager_stancemanager_disabletacsprintimmediate",
@@ -11878,7 +12130,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1032",
+      "source_location": "L1033",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "stancemanager_stancemanager_starttacsprintreset",
@@ -11890,7 +12142,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1039",
+      "source_location": "L1040",
       "weight": 1.0,
       "source": "stancemanager_stancemanager_starttacsprintreset",
       "target": "stancemanager_stancemanager_disabletacsprintimmediate",
@@ -11901,7 +12153,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1111",
+      "source_location": "L1112",
       "weight": 1.0,
       "source": "stancemanager_stancemanager_candotacsprint",
       "target": "stancemanager_stancemanager_rebuildcachedweaponproperties",
@@ -11911,7 +12163,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1161",
+      "source_location": "L1162",
       "weight": 1.0,
       "context": "return_type",
       "source": "stancemanager_stancemanager_resolvebackingfieldbycandidates",
@@ -11922,7 +12174,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1161",
+      "source_location": "L1162",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "stancemanager_stancemanager_resolvebackingfieldbycandidates",
@@ -11933,7 +12185,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1172",
+      "source_location": "L1173",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "stancemanager_stancemanager_hasmissingreflection",
@@ -11944,7 +12196,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1180",
+      "source_location": "L1181",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "stancemanager_stancemanager_notifyhandsstaminachanged",
@@ -11956,7 +12208,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1249",
+      "source_location": "L1250",
       "weight": 1.0,
       "source": "stancemanager_stancemanager_applystaminastance",
       "target": "stancemanager_stancemanager_isactivecontext",
@@ -11967,7 +12219,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1354",
+      "source_location": "L1355",
       "weight": 1.0,
       "source": "stancemanager_stancemanager_evaluatepronesuspensiontick",
       "target": "stancemanager_stancemanager_isactivecontext",
@@ -11978,7 +12230,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1220",
+      "source_location": "L1221",
       "weight": 1.0,
       "source": "stancemanager_stancemanager_onraidstart",
       "target": "stancemanager_stancemanager_applystaminastance",
@@ -11989,7 +12241,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1297",
+      "source_location": "L1298",
       "weight": 1.0,
       "source": "stancemanager_stancemanager_onstancechanged",
       "target": "stancemanager_stancemanager_applystaminastance",
@@ -12000,7 +12252,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "StanceManager.cs",
-      "source_location": "L1344",
+      "source_location": "L1345",
       "weight": 1.0,
       "source": "stancemanager_stancemanager_tickstancestamina",
       "target": "stancemanager_stancemanager_applystaminastance",
@@ -12045,6 +12297,402 @@
       "weight": 1.0,
       "source": "stancestaminastate_stancestaminastate",
       "target": "stancestaminastate_stancestaminastate_reset",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "transitionmetrics_cs_transitionmetrics",
+      "target": "transitionmetrics_camerarotationmod",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "transitionmetrics_cs_transitionmetrics",
+      "target": "transitionmetrics_transitionmetrics",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L48",
+      "weight": 1.0,
+      "context": "field",
+      "source": "transitionmetrics_transitionmetrics",
+      "target": "channel",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L65",
+      "weight": 1.0,
+      "context": "field",
+      "source": "transitionmetrics_transitionmetrics",
+      "target": "transitionmetrics_cs_bool",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L54",
+      "weight": 1.0,
+      "context": "field",
+      "source": "transitionmetrics_transitionmetrics",
+      "target": "transitionmetrics_cs_float",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L55",
+      "weight": 1.0,
+      "context": "field",
+      "source": "transitionmetrics_transitionmetrics",
+      "target": "transitionmetrics_cs_int",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L57",
+      "weight": 1.0,
+      "context": "field",
+      "source": "transitionmetrics_transitionmetrics",
+      "target": "transitionmetrics_cs_string",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L52",
+      "weight": 1.0,
+      "context": "field",
+      "source": "transitionmetrics_transitionmetrics",
+      "target": "transitionmetrics_cs_vector3",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L233",
+      "weight": 1.0,
+      "source": "transitionmetrics_transitionmetrics",
+      "target": "transitionmetrics_transitionmetrics_axis",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L235",
+      "weight": 1.0,
+      "source": "transitionmetrics_transitionmetrics",
+      "target": "transitionmetrics_transitionmetrics_differs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L238",
+      "weight": 1.0,
+      "source": "transitionmetrics_transitionmetrics",
+      "target": "transitionmetrics_transitionmetrics_differsangular",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L68",
+      "weight": 1.0,
+      "source": "transitionmetrics_transitionmetrics",
+      "target": "transitionmetrics_transitionmetrics_feed",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L201",
+      "weight": 1.0,
+      "source": "transitionmetrics_transitionmetrics",
+      "target": "transitionmetrics_transitionmetrics_finish",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L161",
+      "weight": 1.0,
+      "source": "transitionmetrics_transitionmetrics",
+      "target": "transitionmetrics_transitionmetrics_open",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L226",
+      "weight": 1.0,
+      "source": "transitionmetrics_transitionmetrics",
+      "target": "transitionmetrics_transitionmetrics_reset",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L109",
+      "weight": 1.0,
+      "source": "transitionmetrics_transitionmetrics",
+      "target": "transitionmetrics_transitionmetrics_sample",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L194",
+      "weight": 1.0,
+      "source": "transitionmetrics_transitionmetrics",
+      "target": "transitionmetrics_transitionmetrics_token",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L233",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "transitionmetrics_transitionmetrics_axis",
+      "target": "transitionmetrics_cs_vector3",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L235",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "transitionmetrics_transitionmetrics_differs",
+      "target": "transitionmetrics_cs_vector3",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L238",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "transitionmetrics_transitionmetrics_differsangular",
+      "target": "transitionmetrics_cs_vector3",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L68",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "transitionmetrics_transitionmetrics_feed",
+      "target": "transitionmetrics_cs_vector3",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L161",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "transitionmetrics_transitionmetrics_open",
+      "target": "transitionmetrics_cs_vector3",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L109",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "transitionmetrics_transitionmetrics_sample",
+      "target": "transitionmetrics_cs_vector3",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L68",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "transitionmetrics_transitionmetrics_feed",
+      "target": "transitionmetrics_cs_stance",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L87",
+      "weight": 1.0,
+      "source": "transitionmetrics_transitionmetrics_feed",
+      "target": "transitionmetrics_transitionmetrics_differs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L88",
+      "weight": 1.0,
+      "source": "transitionmetrics_transitionmetrics_feed",
+      "target": "transitionmetrics_transitionmetrics_differsangular",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L101",
+      "weight": 1.0,
+      "source": "transitionmetrics_transitionmetrics_feed",
+      "target": "transitionmetrics_transitionmetrics_finish",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L102",
+      "weight": 1.0,
+      "source": "transitionmetrics_transitionmetrics_feed",
+      "target": "transitionmetrics_transitionmetrics_open",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L73",
+      "weight": 1.0,
+      "source": "transitionmetrics_transitionmetrics_feed",
+      "target": "transitionmetrics_transitionmetrics_reset",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L85",
+      "weight": 1.0,
+      "source": "transitionmetrics_transitionmetrics_feed",
+      "target": "transitionmetrics_transitionmetrics_sample",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L79",
+      "weight": 1.0,
+      "source": "transitionmetrics_transitionmetrics_feed",
+      "target": "transitionmetrics_transitionmetrics_token",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L161",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "transitionmetrics_transitionmetrics_open",
+      "target": "transitionmetrics_cs_stance",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L194",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "transitionmetrics_transitionmetrics_token",
+      "target": "transitionmetrics_cs_stance",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L120",
+      "weight": 1.0,
+      "source": "transitionmetrics_transitionmetrics_sample",
+      "target": "transitionmetrics_transitionmetrics_axis",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L114",
+      "weight": 1.0,
+      "source": "transitionmetrics_transitionmetrics_sample",
+      "target": "transitionmetrics_transitionmetrics_finish",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L171",
+      "weight": 1.0,
+      "source": "transitionmetrics_transitionmetrics_open",
+      "target": "transitionmetrics_transitionmetrics_axis",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "TransitionMetrics.cs",
+      "source_location": "L187",
+      "weight": 1.0,
+      "source": "transitionmetrics_transitionmetrics_open",
+      "target": "transitionmetrics_transitionmetrics_token",
       "confidence_score": 1.0
     },
     {
@@ -12288,5 +12936,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "e568c60c813442ac1f47e1ae47d291feacd4cfde"
+  "built_at_commit": "1d53ee166e2a0ccc3a298bbb92e0c31f229a2871"
 }

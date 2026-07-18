@@ -648,3 +648,37 @@ reais de transição que o 016 mirava, operando sobre a mola existente:
 **Pendências vivas:** **P-11.1** (velocidade presa) · **P-11.2** (braço G36 High Ready — provável parente do
 Problema B do 017) · **item 017** (⚪ — falta `/create-spec` refinar + tech-spec investigar IK markers/weapon
 length) · **P-10.1/P-10.2** (achados de review antigos não aplicados) · subir a v2.5.0 (DLL+cfg) ao servidor.
+
+## 2026-07-17 ~05:00 (GMT-3) — Sessão 11 (cont. 3): item 017 arranca — régua no canônico (v2.6.0)
+
+Após o NO-GO do 016, o usuário **redefiniu o ataque** (abordagem própria, não as curvas do Fontaine) e mandou
+"comece". Investigação técnica + spec + review, e a régua já portada.
+
+**Investigação (2 sub-agents read-only) — fatos confirmados via `ilspycmd` na DLL real** (não o decompilado):
+- **Problema A (waypoint):** ponto de plugue limpo existe, no molde do timer de ADS-kick (perturbação por timer,
+  **sem tocar `CurrentStance`**). MAS o review + a config real derrubaram a premissa: **os offsets de ADS do
+  usuário são todos 0** → alvo de ADS == alvo de Stance 0 == zero. Um "waypoint de alvo" é no-op. **O que mata o
+  overshoot é AMORTECER a velocidade da mola ao entrar em ADS** (ela vem da pose de Ready com velocidade
+  acumulada e passa do zero). **Decisão do usuário: seguir por amortecer velocidade** (mesma intenção, sem
+  latência extra). Só com offsets de ADS ≠ 0 é que um waypoint literal teria efeito próprio.
+- **Problema B (braço quebra):** a causa NÃO bate com "empurra p/ frente". Config real: Low Ready (Stance 2) tem
+  Forward/Backward **+0.015** (já à frente → ir a Stance 0 puxa p/ TRÁS), e os movers grandes são **Up/Down +0.07**
+  e **Pitch 25°**. → a F2 abre com **diagnóstico do eixo** (gate humano) antes de atenuar. Sinal p/ atenuação
+  confirmado: **`FirearmController.WeaponLn`** — ⚠️ **só LER, nunca reescrever** (define a origem do projétil; o
+  Fontaine tentou reescrever e reverteu). IK markers ficam em `Player._limbs[0]` (não no PWA).
+
+**Entregue (v2.6.0, commit `1d53ee1`, DLL `8017941` — instalada no jogo):**
+- `TransitionMetrics.cs` **recuperado do git** (fork commit `dbeb89c`, versão pós-2-code-reviews) e integrado ao
+  **canônico** `modded/`, SEM o banner/versão do fork. Integração conferida por code-review (0 ref órfã, paridade
+  100%). Só a régua (`Debug Transition Metrics`, default off, custo ~zero) — **nenhuma mudança de comportamento**.
+- Item 017 no backlog (🟡); 00-investigacao-tecnica.md + 01-spec.md (refinada com os 2 achados 🔴).
+
+**Lição:** conferir a **config REAL do usuário** (não os defaults do código) antes de a spec assumir a causa — os
+dois achados 🔴 (waypoint no-op, causa da F2) vieram de olhar o `.cfg`, não o `Plugin.cs`. Barato, e reorientou
+as duas fases.
+
+**Pendências (P-11.4, nova — gate do 017):** o usuário liga `Debug Transition Metrics` (kick=0) e mede: (a)
+**baseline** do overshoot — Stance1→ADS e Stance2→ADS, arma leve + longa, ≥5 amostras; (b) **diagnóstico do eixo
+da F2** — Low Ready → Stance 0 com arma longa, qual eixo (pitch/Up-Down/F-B) tem a maior excursão. Com os números,
+escrevo a tech-spec da F1 (amortecer) e da F2 (atenuar o eixo certo). Demais: P-11.1, P-11.2, P-10.x, subir 2.5.x
+ao servidor (agora 2.6.0).
