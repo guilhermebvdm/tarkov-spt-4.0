@@ -37,37 +37,54 @@ namespace CustomClasses.Client;
 /// </summary>
 internal static class ClassMoveSpeed
 {
-    internal static void Apply(MovementContext ctx, ref float result)
+    internal static void Apply(MovementContext ctx, ref float result, bool isSprint)
     {
         try
         {
             var p = Singleton<GameWorld>.Instance?.MainPlayer;
             if (p == null || !ReferenceEquals(ctx, p.MovementContext))
             {
-                return;   // só o player local (não bots/remotos)
+                return;   // 075: só o player local (não bots/remotos)
             }
 
-            // 🔻 Heavy Frame (Tanque): −10% de velocidade (sempre). ✅ FUNCIONA: reduzir MaxSpeed abaixo do
-            // cap absoluto do SpeedLimiter (Run 4.6 m/s) de fato desacelera o boneco (0.9×0.717≈0.645 → ~4.14 m/s).
+            var m = 1f;
+
+            // 🔻 Heavy Frame (Tanque): −10% de velocidade (andar E correr).
             if (PerksConfig.HeavyFrameEnabled?.Value == true && SkillMultipliers.IsLocalClass("Tank"))
             {
-                result *= PerksConfig.HeavyFrameMoveSpeed?.Value ?? 1f;
+                m *= PerksConfig.HeavyFrameMoveSpeed?.Value ?? 1f;
             }
 
-            // 🔻 Rooted (Caçador, −15% vel ADS): MOVIDO para RootedAimSlowdownPatch (074/F1, 2026-07-18). Aqui,
-            // no MaxSpeed, era INERTE — o teto de mira (StateSpeedLimit ≈0.33) é menor que o MaxSpeed reduzido e o
-            // min() ignorava o Rooted. O lever certo é escalar o `slow` de MovementContext.SetAimingSlowdown.
+            // 🔻 Rooted (Caçador, −15% vel ADS): MOVIDO para RootedAimSlowdownPatch (074/F1). Aqui, no MaxSpeed, era
+            // INERTE — o teto de mira (StateSpeedLimit ≈0.33) é menor e o min() ignorava. Lever certo = SetAimingSlowdown.
 
-            // 🔧 Execution (Furtivo): +10% com a MELEE na mão. Velocidade observável = min(velocidade baseada em
-            // MaxSpeed/SprintingSpeed, cap absoluto do SpeedLimiter GClass2175). Os dois ficam calibrados ~próximos,
-            // então o min() só sobe se AMBOS subirem: este lever escala o MaxSpeed/SprintingSpeed; o
-            // ExecutionSpeedCapPatch (074/F2) escala o cap. Co-escalados pelo MESMO fator → min(a×1.1, b×1.1) = ×1.1
-            // (não compõe). O lever antigo SOZINHO era inerte porque o cap segurava o min (auditoria 074/F2).
+            // 🔧 Execution (Furtivo): +10% com a MELEE na mão. No ANDAR o MaxSpeed morde; na CORRIDA o cap do
+            // SpeedLimiter (ExecutionSpeedCapPatch, 074/F2) é o teto — a compensação do +1f (abaixo) garante que o
+            // num2 do sprint suba o MESMO fator, senão o num2 diluído prenderia o min() ABAIXO do cap boostado.
             if (PerksConfig.ExecutionSpeedEnabled?.Value == true && SkillMultipliers.IsLocalClass("Stealth")
                 && p.HandsController is Player.KnifeController)
             {
-                result *= PerksConfig.ExecutionMoveSpeed?.Value ?? 1f;
+                m *= PerksConfig.ExecutionMoveSpeed?.Value ?? 1f;
             }
+
+            if (m == 1f)
+            {
+                return;   // nenhum lever ativo (classes Tank/Stealth são mutuamente exclusivas → 1 multiplicador)
+            }
+
+            if (!isSprint)
+            {
+                result *= m;   // 🚶 ANDAR: MaxSpeed é linear (walk = RelativeSpeed × MaxSpeed) → ×m exato.
+                return;
+            }
+
+            // 🏃 CORRER — 074/F3 (2026-07-18): o getter SprintingSpeed entra em num2 = (Physical.SprintSpeed ×
+            // SprintingSpeed + 1) × limit (MovementContext:2547); o +1f DILUI um ×m cru (ex.: ×0.90 vira ~−8%, e
+            // varia com peso/stamina via Physical.SprintSpeed). Compensa p/ num2 receber m EXATO:
+            //   (S × patched + 1) = m × (S × V + 1)  →  patched = m·V + (m−1)/S,  S = Physical.SprintSpeed (live).
+            // Seguro: SprintingSpeed tem UM ÚNICO consumidor (o num2 do sprint) → a compensação não vaza.
+            var s = p.Physical.SprintSpeed;
+            result = s > 0.0001f ? m * result + (m - 1f) / s : result * m;
         }
         catch (Exception ex)
         {
@@ -87,7 +104,7 @@ internal class MaxSpeedPatch : ModulePatch
     [PatchPostfix]
     private static void Postfix(MovementContext __instance, ref float __result)
     {
-        ClassMoveSpeed.Apply(__instance, ref __result);
+        ClassMoveSpeed.Apply(__instance, ref __result, isSprint: false);
     }
 }
 
@@ -95,8 +112,12 @@ internal class MaxSpeedPatch : ModulePatch
 ///     🏃 Velocidade de CORRER. <c>SprintingSpeed</c> (:912) é computado puro — o análogo do <c>MaxSpeed</c> para o
 ///     sprint (alimenta o alvo <c>num2</c> de <c>SprintAcceleration</c>, :2547). Postfix-mult aqui é estável.
 ///     ⚠️ NÃO patchar <c>SprintSpeed</c> (o campo de estado <c>SprintSpeed_1</c>) — foi a fonte do loop antigo.
-///     Nota: o <c>+1f</c> na fórmula do alvo torna a redução do sprint sublinear (×0.9 no getter ≈ −5% na velocidade
-///     efetiva, não −10%); é uma aproximação aceitável para o drawback, e ESTÁVEL, que é o que importa.
+///     074/F3: o <c>+1f</c> na fórmula do alvo diluiria um ×m cru (×0.9 ≈ −8% em vez de −10%); <see cref="ClassMoveSpeed"/>
+///     compensa (<c>isSprint: true</c>) para a redução/aumento efetivo bater o fator configurado.
+///     ⚠️ A compensação faz este getter retornar um valor PRÉ-DISTORCIDO, válido SÓ dentro da fórmula do num2
+///     (<c>S·x+1</c>). Ela depende do invariante "SprintingSpeed tem 1 único consumidor" — se um update do EFT
+///     adicionar um 2º leitor que use o valor direto, ele receberia lixo. Re-verificar a cada bump de versão do EFT
+///     (junto da auditoria de eficácia 074).
 /// </summary>
 internal class SprintingSpeedPatch : ModulePatch
 {
@@ -108,7 +129,7 @@ internal class SprintingSpeedPatch : ModulePatch
     [PatchPostfix]
     private static void Postfix(MovementContext __instance, ref float __result)
     {
-        ClassMoveSpeed.Apply(__instance, ref __result);
+        ClassMoveSpeed.Apply(__instance, ref __result, isSprint: true);
     }
 }
 
