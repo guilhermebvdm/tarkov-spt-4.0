@@ -105,6 +105,10 @@ public class ClassListRouter : StaticRouter
                             NameColor = def.NameColor,
                             Skills = NormalizeSkills(def.Skills),
                             SkillMultipliers = multiplierRegistry.Get(editionKey),
+                            // Item 029: perks/drawbacks (snapshot nominal). Join por DisplayName.En (chave do
+                            // ByClass), NÃO por editionKey (ref: handoff 029-01 §3). null quando a classe não
+                            // tem entrada no catálogo (ex.: Peladão) — WhenWritingNull omite do JSON.
+                            Effects = BuildEffects(def.DisplayName?.En ?? name),
                         });
                     }
 
@@ -112,6 +116,35 @@ public class ClassListRouter : StaticRouter
                     return new ValueTask<string>(json);
                 }),
         ];
+    }
+
+    /// <summary>
+    ///     Item 029: monta os <c>effects</c> da classe a partir do <see cref="PerksCatalogData"/> (snapshot
+    ///     nominal), achatando os efeitos na ordem de exibição. null quando a classe não está no catálogo
+    ///     (sem perks) — o WhenWritingNull omite o campo. O token/isPerk são derivados aqui (mesma lógica do
+    ///     MultiplierFormat/PerkLine do client).
+    /// </summary>
+    private static IReadOnlyList<ClassEffect>? BuildEffects(string? classNameEn)
+    {
+        if (classNameEn is null || !PerksCatalogData.ByClass.TryGetValue(classNameEn, out var lines) || lines.Length == 0)
+        {
+            return null;
+        }
+
+        var effects = new List<ClassEffect>(lines.Length);
+        foreach (var line in lines)
+        {
+            effects.Add(new ClassEffect
+            {
+                IsPerk = PerksCatalogData.IsPerk(line),
+                Pending = line.Pending,
+                Title = new LocalizedPair { En = line.TitleEn, Pt = line.TitlePt },
+                Label = new LocalizedPair { En = line.LabelEn, Pt = line.LabelPt },
+                ValueToken = PerksCatalogData.ValueToken(line),
+            });
+        }
+
+        return effects;
     }
 
     /// <summary>

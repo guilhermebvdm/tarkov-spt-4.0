@@ -39,6 +39,37 @@ public sealed record ClassListItem
     /// <summary>Skill → fator de XP EM VIGOR (normalizado enum-cased + clamp ≥ 0 pelo registrar; {} sem fatores).</summary>
     [JsonPropertyName("skillMultipliers")]
     public required Dictionary<string, double> SkillMultipliers { get; init; }
+
+    /// <summary>
+    ///     Item 029: perks/drawbacks da classe (snapshot nominal de <see cref="PerksCatalogData"/>). OPCIONAL —
+    ///     null/omitido (WhenWritingNull) = classe sem perks. Já vem com o token pré-formatado; o launcher só renderiza.
+    /// </summary>
+    [JsonPropertyName("effects")]
+    public IReadOnlyList<ClassEffect>? Effects { get; init; }
+}
+
+/// <summary>Item 029: um perk (isPerk=true) ou drawback (isPerk=false) servido em <c>effects</c>.</summary>
+public sealed record ClassEffect
+{
+    /// <summary>true = perk (verde, coluna esquerda) · false = drawback (vermelho, direita).</summary>
+    [JsonPropertyName("isPerk")]
+    public required bool IsPerk { get; init; }
+
+    /// <summary>true = efeito definido mas ainda não ativo in-game ("em breve", âmbar).</summary>
+    [JsonPropertyName("pending")]
+    public bool Pending { get; init; }
+
+    /// <summary>Título único do efeito (ex.: Sharpshooter / Atirador).</summary>
+    [JsonPropertyName("title")]
+    public required LocalizedPair Title { get; init; }
+
+    /// <summary>Descrição curta do efeito (ex.: "aim (ADS) time" / "mira (ADS)").</summary>
+    [JsonPropertyName("label")]
+    public required LocalizedPair Label { get; init; }
+
+    /// <summary>Token pré-formatado: "+30%" / "−15%" / "×0.85" / "✓" / "✗".</summary>
+    [JsonPropertyName("valueToken")]
+    public required string ValueToken { get; init; }
 }
 
 /// <summary>
