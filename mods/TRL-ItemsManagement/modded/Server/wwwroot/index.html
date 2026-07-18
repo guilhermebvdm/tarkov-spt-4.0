@@ -2032,6 +2032,23 @@ function openInlineEdit(cell) {
   if (isMod && base != null) hintParts.push(`base ${base.toLocaleString('en-US')}`);
   if (floor > 0)      hintParts.push(`min ${floor.toLocaleString('en-US')}`);
   if (ceiling != null) hintParts.push(`max ${ceiling.toLocaleString('en-US')}`);
+
+  // "Copy from" reference sources — the same avg24h values the Flea tarkov.dev / tarkov-market
+  // columns display. A source with no cached price for this item renders disabled.
+  const cons = item.consolidated || {};
+  const refSources = [
+    { label: 'Tarkov.dev',    price: cons.priceFleaDevAvg24h },
+    { label: 'Tarkov-Market', price: cons.priceFleaMarketAvg24h },
+  ];
+  const copyRow =
+    `<div class="edit-form__copy">` +
+      `<span class="edit-form__copy-label">Copy from</span>` +
+      refSources.map(s => s.price != null
+        ? `<button type="button" class="copy-src" data-label="${escapeAttr(s.label)}" data-price="${s.price}" title="Set the flea to the Tarkov ${escapeAttr(s.label)} price (${Math.round(s.price).toLocaleString('en-US')} ₽)">${escapeHtml(s.label)} <span class="copy-src__val">${fmtRub(Math.round(s.price))}</span></button>`
+        : `<button type="button" class="copy-src" disabled title="No Tarkov ${escapeAttr(s.label)} price cached for this item">${escapeHtml(s.label)} <span class="copy-src__val">—</span></button>`
+      ).join('') +
+    `</div>`;
+
   form.innerHTML =
     `<input type="number" min="${floor || 0}"${ceiling != null ? ` max="${ceiling}"` : ''} step="1" value="${current}" autofocus data-tip="${escapeAttr(inputTip)}">` +
     `<div class="edit-form__actions">` +
@@ -2039,6 +2056,7 @@ function openInlineEdit(cell) {
       (hasEdit ? `<button class="restore" type="button" title="Restore default price (undo edit)">↺</button>` : '') +
       `<button class="cancel" type="button" title="Cancel (Esc)">×</button>` +
     `</div>` +
+    copyRow +
     (hintParts.length ? `<div class="edit-form__hint">${hintParts.join(' · ')}</div>` : '');
   cell.appendChild(form);
 
@@ -2077,24 +2095,24 @@ function openInlineEdit(cell) {
   };
   setTimeout(() => document.addEventListener('mousedown', docClickHandler, true), 0);
 
-  save.onclick = async () => {
-    const price = parseInt(input.value, 10);
-    if (!Number.isFinite(price) || price <= 0) {
-      toast('Invalid value', 'err');
-      input.focus();
-      return;
-    }
-    save.disabled = true; cancel.disabled = true; if (restore) restore.disabled = true;
-    try {
-      const r = await fetch(API_BASE + '/price', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tpl, price }),
-      });
-      const data = await r.json();
-      if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP '+r.status));
+  // Snapshot the state at open time so an Undo (from the Copy buttons) can restore it exactly.
+  const prevEffSnapshot = spt.effectiveFleaPrice != null ? spt.effectiveFleaPrice : null;
 
-      const prevEff = item.spt && item.spt.effectiveFleaPrice != null ? item.spt.effectiveFleaPrice : null;
+  // Shared commit path for the manual Save and the "Copy from" buttons: clamp to [floor, ceiling]
+  // (with a note), POST, apply the optimistic update, close the form, toast. offerUndo (the Copy
+  // buttons — a single accidental click applies a price) adds an Undo that restores the pre-edit
+  // state — DELETE when there was no prior override, otherwise re-POST the previous price.
+  async function commitPrice(rawPrice, { source = null, offerUndo = false } = {}) {
+    let price = Math.round(rawPrice);
+    if (!Number.isFinite(price) || price <= 0) { toast('Invalid value', 'err'); input.focus(); return; }
+    let capNote = '';
+    if (floor > 0 && price < floor)         { price = floor;   capNote = ` (raised to floor ${floor.toLocaleString('en-US')} ₽)`; }
+    if (ceiling != null && price > ceiling) { price = ceiling; capNote = ` (capped at ceiling ${ceiling.toLocaleString('en-US')} ₽)`; }
+
+    save.disabled = true; cancel.disabled = true; if (restore) restore.disabled = true;
+    form.querySelectorAll('.copy-src').forEach(b => b.disabled = true);
+    try {
+      const data = await auditApiCall('POST', '/price', { tpl, price });
       if (!item.spt) item.spt = { basePrice: null, fleaPrice: null, fleaFloor: 0, fleaOverride: null, fleaOfferMultiplier: null, fleaBaseRaw: null, effectiveFleaPrice: null, fleaBanned: false, fleaBanReasons: [], traders: [] };
       if (data.mode === 'multiplier') {
         item.spt.fleaOfferMultiplier = data.multiplier;
@@ -2102,23 +2120,36 @@ function openInlineEdit(cell) {
       } else {
         item.spt.fleaOverride = data.override;
       }
+      // NOTE: /api/price does not return `consolidated` (documented interim gap) — do NOT assign
+      // item.consolidated here or it wipes the row's real consolidated object and crashes renderRow.
       item.spt.effectiveFleaPrice = data.effectiveFleaPrice;
-      // NOTE: /api/price does not return `consolidated` (FleaPriceController's documented
-      // interim gap — the cached consolidated.priceFleaSpt view goes stale until the next
-      // rescan). Do NOT assign item.consolidated = data.consolidated here — data.consolidated
-      // is always undefined, which used to wipe the row's real consolidated object and crash
-      // renderRow() on c.conditionType.
       _dataVersion++;  // data changed → invalidate filter-cache
       closeForm();   // remove the form + its capture-phase doc listener before the row is replaced
       rerenderRow();
       refreshEditedFilter();  // flea-edited state changed → refresh Edited filter counts
-      const fromStr = (prevEff != null && prevEff !== data.effectiveFleaPrice) ? `${prevEff.toLocaleString('en-US')} → ` : '';
-      toast(`${item.shortName || tpl}: flea ${fromStr}${data.effectiveFleaPrice.toLocaleString('en-US')} ₽`, 'ok');
+      const fromStr = (prevEffSnapshot != null && prevEffSnapshot !== data.effectiveFleaPrice) ? `${prevEffSnapshot.toLocaleString('en-US')} → ` : '';
+      const srcStr = source ? ` from ${source}` : '';
+      const undo = offerUndo ? { label: 'Undo', run: async () => {
+        const d = (!hasEdit || prevEffSnapshot == null)
+          ? await auditApiCall('DELETE', '/price', { tpl })
+          : await auditApiCall('POST', '/price', { tpl, price: Math.round(prevEffSnapshot) });
+        undoApplyFlea(tpl, d);
+        toast(`${item.shortName || tpl}: reverted`, 'ok');
+      } } : null;
+      toast(`${item.shortName || tpl}: flea ${fromStr}${data.effectiveFleaPrice.toLocaleString('en-US')} ₽${srcStr}${capNote}`, 'ok', undo);
     } catch (err) {
       toast('Failed to save: ' + err.message, 'err');
       save.disabled = false; cancel.disabled = false; if (restore) restore.disabled = false;
+      form.querySelectorAll('.copy-src').forEach(b => b.disabled = false);
     }
-  };
+  }
+
+  save.onclick = () => commitPrice(parseInt(input.value, 10));
+
+  // "Copy from Tarkov.dev / Tarkov-Market" — apply the reference price straight away; offer Undo.
+  form.querySelectorAll('.copy-src[data-price]').forEach((btn) => {
+    btn.onclick = () => commitPrice(parseFloat(btn.dataset.price), { source: btn.dataset.label, offerUndo: true });
+  });
 
   if (restore) restore.onclick = async () => {
     closeForm();   // remove the form + its capture-phase doc listener before the row is replaced
@@ -2130,18 +2161,44 @@ function openInlineEdit(cell) {
   };
 }
 
-function toast(msg, kind) {
+// action (optional) = { label, run } — renders a button (e.g. Undo) inside the toast; clicking it
+// runs `run` (which shows its own follow-up toast) and dismisses this one. A toast with an action
+// lingers longer so there's time to reach for it.
+function toast(msg, kind, action) {
   const c = document.getElementById('toasts');
   const t = document.createElement('div');
   t.className = 'toast' + (kind === 'err' ? ' is-error' : kind === 'warn' ? ' is-warn' : '');
   const sigil = kind === 'err' ? '⚠ ' : kind === 'warn' ? '⚠ ' : '✓ ';
-  t.innerHTML = sigil + escapeHtml(msg);
-  c.appendChild(t);
-  requestAnimationFrame(() => t.classList.add('is-show'));
-  setTimeout(() => {
+  const span = document.createElement('span');
+  span.className = 'toast__msg';
+  span.textContent = sigil + msg;
+  t.appendChild(span);
+
+  let timer;
+  const dismiss = () => {
+    clearTimeout(timer);
     t.classList.remove('is-show');
     setTimeout(() => t.remove(), 300);
-  }, (kind === 'err' || kind === 'warn') ? 5000 : 3000);
+  };
+
+  let ttl = (kind === 'err' || kind === 'warn') ? 5000 : 3000;
+  if (action) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'toast__action';
+    btn.textContent = action.label;
+    btn.onclick = async () => {
+      btn.disabled = true;
+      try { await action.run(); } catch (err) { toast('Undo failed: ' + err.message, 'err'); }
+      dismiss();
+    };
+    t.appendChild(btn);
+    ttl = 7000; // longer window to click Undo
+  }
+
+  c.appendChild(t);
+  requestAnimationFrame(() => t.classList.add('is-show'));
+  timer = setTimeout(dismiss, ttl);
 }
 
 // Promise-based confirmation modal. Resolves true (confirm) / false (cancel/Esc).
