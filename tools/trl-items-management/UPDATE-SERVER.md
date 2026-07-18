@@ -19,7 +19,7 @@ bash tools/trl-items-management/scripts/package-release.sh
 Espere terminar. No final ele mostra onde salvou o zip, algo como:
 
 ```
-✓ bundle: /c/Repos/spt/tarkov-spt-4.0/dist/trl-release-v1.0.2.zip (960K)
+✓ bundle: /c/Repos/spt/tarkov-spt-4.0/dist/trl-release-v1.0.4.zip (960K)
 ```
 
 Esse é o arquivo que você vai levar pro servidor.
@@ -35,8 +35,8 @@ a. Abra o **PowerShell como Administrador** (botão direito → "Executar como a
 
 b. Extraia o zip e entre na pasta extraída, por exemplo:
    ```powershell
-   Expand-Archive "D:\_deploy\trl-release-v1.0.2.zip" "D:\_deploy" -Force
-   cd "D:\_deploy\trl-release-v1.0.2"
+   Expand-Archive "D:\_deploy\trl-release-v1.0.4.zip" "D:\_deploy" -Force
+   cd "D:\_deploy\trl-release-v1.0.4"
    ```
 
 c. Rode o updater:
@@ -50,7 +50,7 @@ c. Rode o updater:
 
 d. Deixa rodar até o final. Vai aparecer uma linha verde assim:
    ```
-   [OK] Atualizado -> TRL-ItemsManagement 1.0.2.0
+   [OK] Atualizado -> TRL-ItemsManagement 1.0.4.0
    ```
 
 Pronto — o SPT já sobe sozinho no final (o script reinicia o servidor pra você).
@@ -72,15 +72,16 @@ https://127.0.0.1:6969/TRLItemsManagement-Server/index.html
 (o navegador vai reclamar do certificado — é o do próprio SPT, pode aceitar/prosseguir mesmo
 assim). Se a lista de itens carregar, deu certo.
 
-## 5. Só na v1.0.2 (audit log novo): seed do histórico
+## 5. Seed do histórico do audit log — SÓ na 1ª instalação (pule se já rodou)
 
-A partir dessa versão o mod registra um log de auditoria (`user\mods\TRL-ItemsManagement\logs\
-audit.jsonl`) — mas só a partir de agora pra frente. Overrides/bans que já existiam antes dessa
-versão (flea, trader sell/buy, bans) não têm data real conhecida. Rode este passo **uma única
-vez**, logo depois do passo 3 (antes de qualquer edição pela UI nova):
+Este passo já foi feito na v1.0.2 (quando o audit log foi introduzido). **Se este servidor já
+tem `user\mods\TRL-ItemsManagement\logs\audit.jsonl`, pule esta seção inteira.** Ela existe só
+pra semear o histórico na primeiríssima instalação do audit log: overrides/bans que já existiam
+antes não têm data real conhecida. Rode **uma única vez**, logo depois do passo 3 (antes de
+qualquer edição pela UI):
 
 ```powershell
-cd "D:\_deploy\trl-release-v1.0.2\trl-items-management-pipeline"
+cd "D:\_deploy\trl-release-v1.0.4\trl-items-management-pipeline"
 node scripts/backfill-audit-log.js --spt-data "<caminho\SPT_Data>" --mod-dir "<caminho\user\mods\TRL-ItemsManagement>"
 ```
 
