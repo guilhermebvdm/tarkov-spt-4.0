@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reflection;
@@ -61,8 +62,56 @@ namespace SPT.Launcher.ViewModels
         /// <summary>Kept for future use (kickoff 004: no render yet).</summary>
         public Dictionary<string, int> Skills { get; set; }
 
-        /// <summary>Kept for future use (kickoff 004: no render yet).</summary>
+        /// <summary>Raw skill → XP factor (as served). Kept for reference; the UI binds <see cref="MultiplierRows"/>.</summary>
         public Dictionary<string, double> SkillMultipliers { get; set; }
+
+        /// <summary>Skill XP multipliers formatted for display (name + colored token). Empty when none in effect.</summary>
+        public List<SkillMultiplierRow> MultiplierRows { get; set; } = new List<SkillMultiplierRow>();
+
+        public bool HasMultipliers => MultiplierRows != null && MultiplierRows.Count > 0;
+
+        /// <summary>Perks (isPerk=true) da classe — coluna esquerda dos cards. Item 029.</summary>
+        public List<PerkEffectRow> Perks { get; set; } = new List<PerkEffectRow>();
+
+        /// <summary>Drawbacks (isPerk=false) — coluna direita dos cards. Item 029.</summary>
+        public List<PerkEffectRow> Drawbacks { get; set; } = new List<PerkEffectRow>();
+
+        public bool HasPerks => Perks != null && Perks.Count > 0;
+        public bool HasDrawbacks => Drawbacks != null && Drawbacks.Count > 0;
+        public bool HasAnyEffects => HasPerks || HasDrawbacks;
+    }
+
+    /// <summary>
+    /// UI de um card de perk/drawback (item 029), espelhando o painel in-game (PerksPanelView): barra de
+    /// acento colorida + título esmaecido + chip de valor + label. Cores = MultiplierFormat do mod.
+    /// </summary>
+    public class PerkEffectRow
+    {
+        public string Title { get; set; }
+        public string Label { get; set; }
+        public string ValueToken { get; set; }
+        public bool HasToken => !string.IsNullOrEmpty(ValueToken);
+        public bool Pending { get; set; }
+
+        /// <summary>Cor do acento/token: verde (perk) · vermelho (drawback) · âmbar (pending).</summary>
+        public IBrush AccentBrush { get; set; }
+
+        /// <summary>Fundo escuro tingido do card (mesma tinta do painel in-game).</summary>
+        public IBrush BgBrush { get; set; }
+    }
+
+    /// <summary>One XP-multiplier line: humanized skill name + signed token ("+50%" / "−20%"), colored buff/debuff.
+    /// Mirrors the in-game CustomClasses color language (verde #9ad27a / vermelho #d27a7a) for visual continuity
+    /// with the future perks/drawbacks cards.</summary>
+    public class SkillMultiplierRow
+    {
+        public string Name { get; set; }
+
+        /// <summary>Signed percent token relative to vanilla (factor 1.5 → "+50%", 0.8 → "−20%").</summary>
+        public string Token { get; set; }
+
+        /// <summary>Green when the multiplier is a buff (&gt; 1), red when a debuff (&lt; 1).</summary>
+        public IBrush Brush { get; set; }
     }
 
     [RequireServerConnected]
@@ -264,6 +313,8 @@ namespace SPT.Launcher.ViewModels
                     {
                         profile.FallbackIcon = ResolveBundledIcon(profile.Name);
                     }
+
+                    MaybeInjectPreviewEffects(profile); // item 029: só em Dev Mode, enquanto a rota não existe
                 }
 
                 Dispatcher.UIThread.Post(() =>
@@ -322,9 +373,11 @@ namespace SPT.Launcher.ViewModels
                     Description = description ?? string.Empty,
                     NameBrush = ParseNameColor(info.NameColor),
                     Skills = info.Skills,
-                    SkillMultipliers = info.SkillMultipliers
+                    SkillMultipliers = info.SkillMultipliers,
+                    MultiplierRows = BuildMultiplierRows(info.SkillMultipliers)
                 };
 
+                PopulateEffects(profile, info.Effects);
                 result.Add(profile);
 
                 // ref: CR-01-03 — ícones em PARALELO (Task.WhenAll): pior caso colapsa de ~7×15 s em
@@ -392,6 +445,136 @@ namespace SPT.Launcher.ViewModels
                 return null;
             }
         }
+
+        // Mesma linguagem de cor do mod in-game (MultiplierFormat.cs): verde = buff, vermelho = debuff.
+        // Immutable: criados em thread de fundo, lidos pelo binding na UI thread.
+        private static readonly IBrush BuffBrush = new ImmutableSolidColorBrush(Color.Parse("#9ad27a"));
+        private static readonly IBrush DebuffBrush = new ImmutableSolidColorBrush(Color.Parse("#d27a7a"));
+
+        /// <summary>
+        /// Formata os multiplicadores de XP crus ({skill → fator}) em linhas exibíveis. Fatores == 1 (sem
+        /// efeito) são omitidos. Token = variação percentual assinada vs vanilla (1.5 → "+50%", 0.8 → "−20%"),
+        /// na cor de buff/debuff. Ordenado por magnitude do efeito (maior desvio primeiro).
+        /// </summary>
+        private static List<SkillMultiplierRow> BuildMultiplierRows(Dictionary<string, double> multipliers)
+        {
+            var rows = new List<SkillMultiplierRow>();
+            if (multipliers == null || multipliers.Count == 0) return rows;
+
+            foreach (var pair in multipliers)
+            {
+                double factor = pair.Value;
+                if (double.IsNaN(factor) || Math.Abs(factor - 1.0) < 1e-4) continue; // sem efeito → não exibe
+
+                int percent = (int)Math.Round((factor - 1.0) * 100.0);
+                if (percent == 0) continue; // arredonda p/ 0 (ex.: ×1.004) → não vira linha "+0%"
+                bool buff = factor > 1.0;
+                string token = (buff ? "+" : "−") + Math.Abs(percent) + "%"; // −: U+2212 (minus), igual ao mod
+
+                rows.Add(new SkillMultiplierRow
+                {
+                    Name = HumanizeSkillName(pair.Key),
+                    Token = token,
+                    Brush = buff ? BuffBrush : DebuffBrush,
+                });
+            }
+
+            // Maior desvio de 1.0 primeiro (efeitos mais fortes no topo).
+            return rows
+                .OrderByDescending(r => ParseSignedPercent(r.Token))
+                .ToList();
+        }
+
+        /// <summary>"−20%"/"+50%" → magnitude inteira para ordenação (U+2212 e '-' tratados como negativo).</summary>
+        private static int ParseSignedPercent(string token)
+        {
+            if (string.IsNullOrEmpty(token)) return 0;
+            string digits = new string(token.Where(char.IsDigit).ToArray());
+            return int.TryParse(digits, out int value) ? value : 0;
+        }
+
+        /// <summary>Nome de skill PascalCase → legível ("StressResistance" → "Stress Resistance").</summary>
+        private static string HumanizeSkillName(string skill)
+        {
+            if (string.IsNullOrWhiteSpace(skill)) return skill ?? string.Empty;
+
+            var builder = new StringBuilder(skill.Length + 4);
+            for (int i = 0; i < skill.Length; i++)
+            {
+                char c = skill[i];
+                if (i > 0 && char.IsUpper(c) && !char.IsUpper(skill[i - 1])) builder.Append(' ');
+                builder.Append(c);
+            }
+
+            return builder.ToString();
+        }
+
+        // === Perks/drawbacks (item 029): cores dos cards espelhando o painel in-game (PerksPanelView) ===
+        // Acentos = MultiplierFormat (verde perk / vermelho drawback / âmbar pending).
+        private static readonly IBrush PerkAccent = new ImmutableSolidColorBrush(Color.Parse("#9ad27a"));
+        private static readonly IBrush DrawbackAccent = new ImmutableSolidColorBrush(Color.Parse("#d27a7a"));
+        private static readonly IBrush PendingAccent = new ImmutableSolidColorBrush(Color.Parse("#cc9a3e"));
+        // Fundos escuros tingidos (AARRGGBB) — mesmas tintas do card in-game (~0.55 alpha).
+        private static readonly IBrush PerkBg = new ImmutableSolidColorBrush(Color.Parse("#8C121A14"));
+        private static readonly IBrush DrawbackBg = new ImmutableSolidColorBrush(Color.Parse("#8C1C1313"));
+        private static readonly IBrush PendingBg = new ImmutableSolidColorBrush(Color.Parse("#8C1A170E"));
+
+        /// <summary>Separa os efeitos servidos em perks (esquerda) e drawbacks (direita), preservando a ordem.</summary>
+        private static void PopulateEffects(ClassProfile profile, List<ClassEffect> effects)
+        {
+            if (effects == null) return;
+
+            foreach (ClassEffect effect in effects)
+            {
+                if (effect == null) continue;
+
+                PerkEffectRow row = BuildEffectRow(effect);
+                if (effect.IsPerk) profile.Perks.Add(row);
+                else profile.Drawbacks.Add(row);
+            }
+        }
+
+        /// <summary>Monta um card a partir de um efeito do contrato. pt → en no title/label; token vem pronto.</summary>
+        private static PerkEffectRow BuildEffectRow(ClassEffect effect)
+        {
+            bool pending = effect.Pending;
+            IBrush accent = pending ? PendingAccent : (effect.IsPerk ? PerkAccent : DrawbackAccent);
+            IBrush bg = pending ? PendingBg : (effect.IsPerk ? PerkBg : DrawbackBg);
+
+            return new PerkEffectRow
+            {
+                Title = FirstNonEmpty(effect.Title?.Pt, effect.Title?.En) ?? string.Empty,
+                Label = FirstNonEmpty(effect.Label?.Pt, effect.Label?.En) ?? string.Empty,
+                ValueToken = effect.ValueToken ?? string.Empty,
+                Pending = pending,
+                AccentBrush = accent,
+                BgBrush = bg,
+            };
+        }
+
+        /// <summary>
+        /// Andaime de PREVIEW (item 029): enquanto o server não serve `effects`, injeta um conjunto realista
+        /// SÓ em Dev Mode, pra dar pra visualizar o layout dos cards. Removível quando a rota existir — não
+        /// afeta o jogador comum (Dev Mode off). Idempotente: só injeta se a classe não tem efeitos reais.
+        /// </summary>
+        private static void MaybeInjectPreviewEffects(ClassProfile profile)
+        {
+            if (profile == null || profile.HasAnyEffects) return;
+            if (!LauncherSettingsProvider.Instance.IsDevMode) return;
+
+            var sample = new List<ClassEffect>
+            {
+                new ClassEffect { IsPerk = true, Title = Pair("Sharpshooter", "Atirador"), Label = Pair("aim (ADS) time, all weapons", "mira (ADS), todas as armas"), ValueToken = "−15%" },
+                new ClassEffect { IsPerk = true, Title = Pair("Iron Lungs", "Fôlego de Aço"), Label = Pair("breath hold duration", "duração da respiração"), ValueToken = "+50%" },
+                new ClassEffect { IsPerk = true, Pending = true, Title = Pair("Steady Arms", "Braços Firmes"), Label = Pair("arm fatigue when aiming", "fadiga de braço ao mirar"), ValueToken = "−35%" },
+                new ClassEffect { IsPerk = false, Title = Pair("Loud Operator", "Barulhento"), Label = Pair("noise", "ruído"), ValueToken = "+30%" },
+                new ClassEffect { IsPerk = false, Title = Pair("Shaky Hands", "Mãos Trêmulas"), Label = Pair("recoil", "recuo"), ValueToken = "×1.25" },
+            };
+
+            PopulateEffects(profile, sample);
+        }
+
+        private static LocalizedPair Pair(string en, string pt) => new LocalizedPair { En = en, Pt = pt };
 
         private static IBrush ParseNameColor(string nameColor)
         {

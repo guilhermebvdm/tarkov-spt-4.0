@@ -45,8 +45,40 @@ namespace SPT.Launcher.Models.TRL
         [JsonProperty("skills")]
         public Dictionary<string, int> Skills { get; set; }
 
-        /// <summary>Skill XP multipliers in effect. Not rendered yet — kept for future use (kickoff 004).</summary>
+        /// <summary>Skill XP multipliers in effect. Rendered as the "MULTIPLICADORES DE XP" section.</summary>
         [JsonProperty("skillMultipliers")]
         public Dictionary<string, double> SkillMultipliers { get; set; }
+
+        /// <summary>
+        /// Perks/drawbacks da classe (contrato estendido, item 029). Array OPCIONAL — ausente/omitido =
+        /// classe sem perks. Cada efeito já vem com o token de valor PRÉ-FORMATADO pelo server (o launcher
+        /// não reimplementa a derivação). Servido com os valores NOMINAIS do catálogo (não o F12 do cliente).
+        /// </summary>
+        [JsonProperty("effects")]
+        public List<ClassEffect> Effects { get; set; }
+    }
+
+    /// <summary>Um perk (isPerk=true) ou drawback (isPerk=false) da classe, no contrato do item 029.</summary>
+    public class ClassEffect
+    {
+        /// <summary>true = perk (verde, coluna esquerda) · false = drawback (vermelho, direita).</summary>
+        [JsonProperty("isPerk")]
+        public bool IsPerk { get; set; }
+
+        /// <summary>true = efeito definido mas ainda não ativo in-game ("em breve", âmbar).</summary>
+        [JsonProperty("pending")]
+        public bool Pending { get; set; }
+
+        /// <summary>Título único do efeito (ex.: Sharpshooter / Atirador).</summary>
+        [JsonProperty("title")]
+        public LocalizedPair Title { get; set; }
+
+        /// <summary>Descrição curta do efeito (ex.: "aim (ADS) time" / "mira (ADS)").</summary>
+        [JsonProperty("label")]
+        public LocalizedPair Label { get; set; }
+
+        /// <summary>Token pré-formatado: "+30%" / "−15%" / "×0.85" / "✓" / "✗" / "" (vazio = sem número).</summary>
+        [JsonProperty("valueToken")]
+        public string ValueToken { get; set; }
     }
 }

@@ -11,6 +11,32 @@
 
     <UserControl.Resources>
         <cvt:ImageSourceConverter x:Key="imageSourceCvt"/>
+
+        <!-- Card de perk/drawback (item 029): barra de acento à esquerda + título esmaecido +
+             chip de valor colorido + label. Espelha o PerksPanelView in-game. -->
+        <DataTemplate x:Key="perkCardTemplate">
+            <Border Background="{Binding BgBrush}"
+                    BorderBrush="{Binding AccentBrush}" BorderThickness="3,0,0,0"
+                    CornerRadius="2" Padding="12,8" Margin="0,0,0,6">
+                <StackPanel Spacing="3">
+                    <TextBlock Text="{Binding Title}" FontWeight="Bold"
+                               FontSize="{DynamicResource TrlText2Xs}"
+                               Foreground="{Binding AccentBrush}" Opacity="0.85"
+                               TextTrimming="CharacterEllipsis"/>
+                    <Grid ColumnDefinitions="Auto,*">
+                        <TextBlock Grid.Column="0" Text="{Binding ValueToken}" FontWeight="Bold"
+                                   Foreground="{Binding AccentBrush}" Margin="0,0,6,0"
+                                   IsVisible="{Binding HasToken}"/>
+                        <TextBlock Grid.Column="1" Text="{Binding Label}" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource TrlFgBrush}"/>
+                    </Grid>
+                    <TextBlock Text="· em breve" FontStyle="Italic"
+                               FontSize="{DynamicResource TrlText2Xs}"
+                               Foreground="{Binding AccentBrush}"
+                               IsVisible="{Binding Pending}"/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
     </UserControl.Resources>
 
     <UserControl.Styles>
@@ -105,13 +131,59 @@
                                      Meta="CLASSE"/>
 
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <StackPanel Margin="20,16" Spacing="12">
-                            <TextBlock Text="DESCRIÇÃO DA CLASSE" Classes="trl-label"/>
-                            <TextBlock Text="{Binding SelectedClass.Description}"
-                                       TextWrapping="Wrap"
-                                       FontSize="{DynamicResource TrlTextMd}"
-                                       LineHeight="22"
-                                       Foreground="{DynamicResource TrlFgMutedBrush}"/>
+                        <StackPanel Margin="20,16" Spacing="18">
+                            <StackPanel Spacing="12">
+                                <TextBlock Text="DESCRIÇÃO DA CLASSE" Classes="trl-label"/>
+                                <TextBlock Text="{Binding SelectedClass.Description}"
+                                           TextWrapping="Wrap"
+                                           FontSize="{DynamicResource TrlTextMd}"
+                                           LineHeight="22"
+                                           Foreground="{DynamicResource TrlFgMutedBrush}"/>
+                            </StackPanel>
+
+                            <!-- Multiplicadores de XP (Fase 1): já vêm do server em /customclasses/classes.
+                                 Cor verde/vermelha = mesma linguagem do painel de perks in-game. -->
+                            <StackPanel Spacing="8" IsVisible="{Binding SelectedClass.HasMultipliers}">
+                                <TextBlock Text="MULTIPLICADORES DE XP" Classes="trl-label"/>
+                                <ItemsControl ItemsSource="{Binding SelectedClass.MultiplierRows}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid ColumnDefinitions="72,*" Margin="0,2">
+                                                <TextBlock Grid.Column="0" Text="{Binding Token}"
+                                                           Foreground="{Binding Brush}" FontWeight="Bold"
+                                                           FontSize="{DynamicResource TrlTextMd}"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding Name}"
+                                                           VerticalAlignment="Center"
+                                                           FontSize="{DynamicResource TrlTextMd}"
+                                                           Foreground="{DynamicResource TrlFgMutedBrush}"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+
+                            <!-- Perks & Drawbacks (item 029): 2 colunas espelhando o painel in-game.
+                                 Visível só quando a classe tem efeitos (server serve `effects`, ou
+                                 preview de Dev Mode). Colunas independentes por HasPerks/HasDrawbacks. -->
+                            <StackPanel Spacing="10" IsVisible="{Binding SelectedClass.HasAnyEffects}">
+                                <TextBlock Text="PERKS E DRAWBACKS" Classes="trl-label"/>
+                                <Grid ColumnDefinitions="*,*">
+                                    <StackPanel Grid.Column="0" Margin="0,0,10,0" Spacing="6"
+                                                IsVisible="{Binding SelectedClass.HasPerks}">
+                                        <TextBlock Text="PERKS" Classes="trl-label"
+                                                   Foreground="#9ad27a" Opacity="0.9"/>
+                                        <ItemsControl ItemsSource="{Binding SelectedClass.Perks}"
+                                                      ItemTemplate="{StaticResource perkCardTemplate}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Margin="10,0,0,0" Spacing="6"
+                                                IsVisible="{Binding SelectedClass.HasDrawbacks}">
+                                        <TextBlock Text="DRAWBACKS" Classes="trl-label"
+                                                   Foreground="#d27a7a" Opacity="0.9"/>
+                                        <ItemsControl ItemsSource="{Binding SelectedClass.Drawbacks}"
+                                                      ItemTemplate="{StaticResource perkCardTemplate}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
                         </StackPanel>
                     </ScrollViewer>
                 </DockPanel>
