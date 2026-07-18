@@ -372,8 +372,8 @@ const ICON_REFRESH = '<svg width="12" height="12" viewBox="0 0 14 14" fill="none
   + '</svg>';
 
 // ── Number formatting ───────────────────────────────────────────────────────
-const fmt    = (n) => n == null ? '—' : n.toLocaleString('pt-BR');
-const fmtRub = (n) => n == null ? '—' : n.toLocaleString('pt-BR') + ' <span class="currency currency--rub">₽</span>';
+const fmt    = (n) => n == null ? '—' : n.toLocaleString('en-US');
+const fmtRub = (n) => n == null ? '—' : n.toLocaleString('en-US') + ' <span class="currency currency--rub">₽</span>';
 
 // Relative time for "last updated" displays. Returns short label + ISO tooltip.
 function fmtRelTime(iso) {
@@ -1300,7 +1300,7 @@ function renderNow() {
   const total = ITEM_LIST.length;
   syncUrlFromState();
   document.getElementById('stats').textContent =
-    `${filtered.length.toLocaleString('pt-BR')} / ${total.toLocaleString('pt-BR')} items` +
+    `${filtered.length.toLocaleString('en-US')} / ${total.toLocaleString('en-US')} items` +
     (filtered.length > RENDER_LIMIT ? ` (showing ${RENDER_LIMIT})` : '');
 
   // Tear down any previous window observer up-front so both the empty and the
@@ -1812,7 +1812,7 @@ async function refreshDevCell(cell) {
     const prev = data.previous && data.previous.avg24h;
     const curr = data.tarkovDev && data.tarkovDev.pve && data.tarkovDev.pve.avg24h;
     const deltaTxt = (prev != null && curr != null && prev !== curr)
-      ? ` (was ${prev.toLocaleString('pt-BR')} ₽ → ${curr.toLocaleString('pt-BR')} ₽)`
+      ? ` (was ${prev.toLocaleString('en-US')} ₽ → ${curr.toLocaleString('en-US')} ₽)`
       : '';
     toast(`${item.shortName || tpl}: prices updated via tarkov.dev${deltaTxt}`, 'ok');
   } catch (err) {
@@ -1847,7 +1847,7 @@ async function refreshMarketCell(cell) {
     const prev = data.previous && data.previous.avg24h;
     const curr = data.tarkovMarket && data.tarkovMarket.pve && data.tarkovMarket.pve.avg24h;
     const deltaTxt = (prev != null && curr != null && prev !== curr)
-      ? ` (was ${prev.toLocaleString('pt-BR')} ₽ → ${curr.toLocaleString('pt-BR')} ₽)`
+      ? ` (was ${prev.toLocaleString('en-US')} ₽ → ${curr.toLocaleString('en-US')} ₽)`
       : '';
     toast(`${item.shortName || tpl}: prices updated via tarkov-market${deltaTxt}`, 'ok');
   } catch (err) {
@@ -1948,7 +1948,7 @@ async function restoreOverride(cell) {
   }
   refreshEditedFilter();  // flea-edited state changed → refresh Edited filter counts
   const what = data.mode === 'multiplier' ? 'multiplier removed' : 'override removed';
-  toast(`${item.shortName || tpl}: ${what} → default ${data.effectiveFleaPrice != null ? data.effectiveFleaPrice.toLocaleString('pt-BR') : '—'} ₽`, 'ok');
+  toast(`${item.shortName || tpl}: ${what} → default ${data.effectiveFleaPrice != null ? data.effectiveFleaPrice.toLocaleString('en-US') : '—'} ₽`, 'ok');
 }
 
 function confirmBanAction(cell, menu, banning) {
@@ -2112,8 +2112,8 @@ function openInlineEdit(cell) {
       closeForm();   // remove the form + its capture-phase doc listener before the row is replaced
       rerenderRow();
       refreshEditedFilter();  // flea-edited state changed → refresh Edited filter counts
-      const fromStr = (prevEff != null && prevEff !== data.effectiveFleaPrice) ? `${prevEff.toLocaleString('pt-BR')} → ` : '';
-      toast(`${item.shortName || tpl}: flea ${fromStr}${data.effectiveFleaPrice.toLocaleString('pt-BR')} ₽`, 'ok');
+      const fromStr = (prevEff != null && prevEff !== data.effectiveFleaPrice) ? `${prevEff.toLocaleString('en-US')} → ` : '';
+      toast(`${item.shortName || tpl}: flea ${fromStr}${data.effectiveFleaPrice.toLocaleString('en-US')} ₽`, 'ok');
     } catch (err) {
       toast('Failed to save: ' + err.message, 'err');
       save.disabled = false; cancel.disabled = false; if (restore) restore.disabled = false;
@@ -2150,8 +2150,8 @@ function confirmDialog({ title, body, confirmText = 'Confirm', cancelText = 'Can
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay';
     overlay.innerHTML =
-      `<div class="modal" role="dialog" aria-modal="true">` +
-        `<div class="modal__title">${escapeHtml(title)}</div>` +
+      `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirm-dialog-title">` +
+        `<div class="modal__title" id="confirm-dialog-title">${escapeHtml(title)}</div>` +
         `<div class="modal__body">${escapeHtml(body)}</div>` +
         `<div class="modal__actions">` +
           `<button type="button" class="modal__btn modal__btn--cancel">${escapeHtml(cancelText)}</button>` +
@@ -2160,7 +2160,16 @@ function confirmDialog({ title, body, confirmText = 'Confirm', cancelText = 'Can
       `</div>`;
     document.body.appendChild(overlay);
     const done = (val) => { overlay.remove(); document.removeEventListener('keydown', onKey); resolve(val); };
-    const onKey = (e) => { if (e.key === 'Escape') done(false); else if (e.key === 'Enter') done(true); };
+    const onKey = (e) => {
+      if (e.key === 'Escape') { done(false); return; }
+      if (e.key === 'Enter') { done(true); return; }
+      if (e.key !== 'Tab') return;
+      // Focus trap — only two buttons, keep Tab / Shift-Tab between them.
+      const f = overlay.querySelectorAll('button');
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
     overlay.querySelector('.modal__btn--cancel').onclick = () => done(false);
     overlay.querySelector('.modal__btn--confirm').onclick = () => done(true);
     overlay.addEventListener('mousedown', (e) => { if (e.target === overlay) done(false); });
@@ -2179,46 +2188,35 @@ function confirmDialog({ title, body, confirmText = 'Confirm', cancelText = 'Can
 // — nothing is silently erased from the trail).
 const AUDIT_FEATURES = ['flea-price', 'ban', 'trader-sell-price', 'trader-buy-price', 'flea-cap', 'flea-min-level', 'catalog-rebuild', 'item-refresh'];
 const AUDIT_FEATURE_META = {
-  'flea-price':       { icon: '💰', label: 'Preço de flea' },
-  'ban':              { icon: '🚫', label: 'Banimento' },
-  'trader-sell-price':{ icon: '🤝', label: 'Preço de venda (trader)' },
-  'trader-buy-price': { icon: '🤝', label: 'Preço de recompra (trader)' },
-  'flea-cap':         { icon: '📈', label: 'Teto de preço' },
-  'flea-min-level':   { icon: '🔓', label: 'Nível mínimo de flea' },
-  'catalog-rebuild':  { icon: '🔄', label: 'Atualização de catálogo' },
-  'item-refresh':     { icon: '🌐', label: 'Atualização de referência' },
+  'flea-price':       { icon: '💰', label: 'Flea price' },
+  'ban':              { icon: '🚫', label: 'Ban' },
+  'trader-sell-price':{ icon: '🏷️', label: 'Trader sell price' },
+  'trader-buy-price': { icon: '💵', label: 'Trader buy price' },
+  'flea-cap':         { icon: '📈', label: 'Price ceiling' },
+  'flea-min-level':   { icon: '🔓', label: 'Flea min level' },
+  'catalog-rebuild':  { icon: '🔄', label: 'Catalog update' },
+  'item-refresh':     { icon: '🌐', label: 'Reference update' },
 };
 
 function auditPriceSpan(value) {
   return value != null ? fmtRub(value) : '<span class="audit-null">—</span>';
 }
 function auditPriceDelta(before, after) {
-  let cls = '';
-  if (before != null && after != null && before !== after) cls = after > before ? 'is-up' : 'is-down';
-  return `<span class="audit-delta">${auditPriceSpan(before)}</span> <span class="audit-arrow">→</span> <span class="audit-delta ${cls}">${auditPriceSpan(after)}</span>`;
+  // Direction carried by a ▲/▼ glyph as well as colour, not colour alone — matches the main
+  // table's pctVsSpt() and stays legible for colour-blind users.
+  let cls = '', arrow = '→';
+  if (before != null && after != null && before !== after) {
+    const up = after > before;
+    cls = up ? 'is-up' : 'is-down';
+    arrow = up ? '▲' : '▼';
+  }
+  return `<span class="audit-delta">${auditPriceSpan(before)}</span> <span class="audit-arrow ${cls}">${arrow}</span> <span class="audit-delta ${cls}">${auditPriceSpan(after)}</span>`;
 }
 function auditTraderName(traderId) {
-  return (traderId && TRADER_ID_TO_NAME[traderId]) || 'trader desconhecido';
+  return (traderId && TRADER_ID_TO_NAME[traderId]) || 'unknown trader';
 }
-// Portuguese relative time, scoped to this feature — NOT a change to the shared fmtRelTime()
-// (English), which is used throughout the rest of the (English-language) main table/detail UI.
-function auditRelTime(iso) {
-  if (!iso) return '—';
-  const t = new Date(iso).getTime();
-  if (Number.isNaN(t)) return '—';
-  const diffMs = Date.now() - t;
-  const abs = Math.abs(diffMs);
-  const m = Math.round(abs / 60000);
-  const h = Math.round(abs / 3600000);
-  const d = Math.round(abs / 86400000);
-  let label;
-  if (abs < 60000) label = 'agora';
-  else if (m < 60) label = `há ${m} min`;
-  else if (h < 24) label = `há ${h}h`;
-  else if (d < 30) label = `há ${d}d`;
-  else label = new Date(iso).toLocaleDateString('pt-BR');
-  return `<span title="${escapeAttr(new Date(iso).toLocaleString('pt-BR'))}">${label}</span>`;
-}
+// Relative time reuses the shared fmtRelTime() (English) — the whole UI is English now, so there
+// is no longer a reason for a feature-scoped clone.
 async function auditApiCall(method, path, body) {
   const r = await fetch(API_BASE + path, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   const data = await r.json();
@@ -2274,37 +2272,37 @@ function describeAuditEntry(e) {
 
   switch (key) {
     case 'flea-price/set': {
-      const desc = `Preço de flea alterado: ${auditPriceDelta(b.effectiveFleaPrice, a.effectiveFleaPrice)}`;
+      const desc = `Flea price changed: ${auditPriceDelta(b.effectiveFleaPrice, a.effectiveFleaPrice)}`;
       // b.value == null → there was no override before, undo = restore to default (DELETE, doesn't
       // need b.effectiveFleaPrice at all). Otherwise undo = re-set the exact previous price — but
       // that DOES need b.effectiveFleaPrice; if it's missing (item never had a cached price before
       // this edit), disable undo rather than sending Math.round(undefined) = NaN as the price.
       let undo = null;
       if (b.value == null) {
-        undo = { label: 'Desfazer', run: async () => { const data = await auditApiCall('DELETE', '/price', { tpl: e.tpl }); undoApplyFlea(e.tpl, data); } };
+        undo = { label: 'Undo', run: async () => { const data = await auditApiCall('DELETE', '/price', { tpl: e.tpl }); undoApplyFlea(e.tpl, data); } };
       } else if (b.effectiveFleaPrice != null) {
-        undo = { label: 'Desfazer', run: async () => { const data = await auditApiCall('POST', '/price', { tpl: e.tpl, price: Math.round(b.effectiveFleaPrice) }); undoApplyFlea(e.tpl, data); } };
+        undo = { label: 'Undo', run: async () => { const data = await auditApiCall('POST', '/price', { tpl: e.tpl, price: Math.round(b.effectiveFleaPrice) }); undoApplyFlea(e.tpl, data); } };
       }
       return { desc, undo };
     }
     case 'flea-price/delete':
-      if (b.effectiveFleaPrice == null) return { desc: `Preço de flea restaurado ao padrão: ${auditPriceDelta(null, a.effectiveFleaPrice)}`, undo: null };
+      if (b.effectiveFleaPrice == null) return { desc: `Flea price reset to default: ${auditPriceDelta(null, a.effectiveFleaPrice)}`, undo: null };
       return {
-        desc: `Preço de flea restaurado ao padrão: ${auditPriceDelta(b.effectiveFleaPrice, a.effectiveFleaPrice)}`,
+        desc: `Flea price reset to default: ${auditPriceDelta(b.effectiveFleaPrice, a.effectiveFleaPrice)}`,
         undo: {
-          label: 'Desfazer', run: async () => {
+          label: 'Undo', run: async () => {
             const data = await auditApiCall('POST', '/price', { tpl: e.tpl, price: Math.round(b.effectiveFleaPrice) });
             undoApplyFlea(e.tpl, data);
           },
         },
       };
     case 'ban/set': {
-      const reasonLabel = x.modItem ? 'manual, item de mod' : 'lista padrão do jogo';
-      const desc = a.banned ? `Item banido da pulga <span class="audit-meta">(${escapeHtml(reasonLabel)})</span>` : 'Banimento removido — item liberado na pulga';
+      const reasonLabel = x.modItem ? 'manual, mod item' : 'game default list';
+      const desc = a.banned ? `Item banned from the flea <span class="audit-meta">(${escapeHtml(reasonLabel)})</span>` : 'Ban removed — item allowed on the flea again';
       return {
         desc,
         undo: b.banned == null ? null : {
-          label: 'Desfazer', run: async () => {
+          label: 'Undo', run: async () => {
             const data = await auditApiCall('POST', '/ban', { tpl: e.tpl, banned: b.banned });
             undoApplyBan(e.tpl, data);
           },
@@ -2315,14 +2313,14 @@ function describeAuditEntry(e) {
     case 'trader-buy-price/set': {
       const isBuy = e.feature === 'trader-buy-price';
       const path = isBuy ? '/trader-buy-price' : '/trader-price';
-      const label = isBuy ? 'Preço de recompra' : 'Preço de venda';
+      const label = isBuy ? 'Buy price' : 'Sell price';
       const traderName = escapeHtml(auditTraderName(x.traderId));
-      const beforeTxt = b.count != null ? `${b.count.toLocaleString('pt-BR')} ${escapeHtml(b.currency || '')}` : '—';
-      const afterTxt = `${a.count.toLocaleString('pt-BR')} ${escapeHtml(a.currency || '')}`;
+      const beforeTxt = b.count != null ? `${b.count.toLocaleString('en-US')} ${escapeHtml(b.currency || '')}` : '—';
+      const afterTxt = `${a.count.toLocaleString('en-US')} ${escapeHtml(a.currency || '')}`;
       return {
-        desc: `${label} pro <b>${traderName}</b> alterado: ${beforeTxt} → ${afterTxt}`,
+        desc: `${label} for <b>${traderName}</b> changed: ${beforeTxt} → ${afterTxt}`,
         undo: {
-          label: 'Desfazer', run: async () => {
+          label: 'Undo', run: async () => {
             const data = b.count == null
               ? await auditApiCall('DELETE', path, { tpl: e.tpl, traderId: x.traderId })
               : await auditApiCall('PATCH', path, { tpl: e.tpl, traderId: x.traderId, count: b.count, currency: b.currency });
@@ -2336,12 +2334,12 @@ function describeAuditEntry(e) {
     case 'trader-buy-price/delete': {
       const isBuy = e.feature === 'trader-buy-price';
       const path = isBuy ? '/trader-buy-price' : '/trader-price';
-      const label = isBuy ? 'Preço de recompra' : 'Preço de venda';
+      const label = isBuy ? 'Buy price' : 'Sell price';
       const traderName = escapeHtml(auditTraderName(x.traderId));
       return {
-        desc: `${label} pro <b>${traderName}</b> restaurado pra referência`,
+        desc: `${label} for <b>${traderName}</b> reset to reference`,
         undo: b.count == null ? null : {
-          label: 'Desfazer', run: async () => {
+          label: 'Undo', run: async () => {
             const data = await auditApiCall('PATCH', path, { tpl: e.tpl, traderId: x.traderId, count: b.count, currency: b.currency });
             undoApplyTrader(isBuy, e.tpl, x.traderId, b.count, b.currency);
             return data;
@@ -2352,16 +2350,16 @@ function describeAuditEntry(e) {
     case 'trader-sell-price/delete-all':
     case 'trader-buy-price/delete-all': {
       const isBuy = e.feature === 'trader-buy-price';
-      const label = isBuy ? 'recompra' : 'venda';
+      const label = isBuy ? 'buy' : 'sell';
       let count = 0;
       if (b && typeof b === 'object') for (const tplMap of Object.values(b)) count += Object.keys(tplMap || {}).length;
-      return { desc: `Todos os overrides de ${label} removidos (${count} item${count === 1 ? '' : 's'})`, undo: null };
+      return { desc: `All ${label}-price overrides removed (${count} item${count === 1 ? '' : 's'})`, undo: null };
     }
     case 'flea-cap/set':
       return {
-        desc: `Teto de preço (mods/eletrônicos) ${a.enabled ? 'ativado' : 'desativado'} <span class="audit-meta">(${x.changed || 0} categorias)</span>`,
+        desc: `Price ceiling (mods/electronics) ${a.enabled ? 'enabled' : 'disabled'} <span class="audit-meta">(${x.changed || 0} categories)</span>`,
         undo: b.enabled == null ? null : {
-          label: 'Desfazer', run: async () => {
+          label: 'Undo', run: async () => {
             const data = await auditApiCall('POST', '/flea-cap', { enabled: b.enabled });
             if (fleaCapSync) fleaCapSync(data.enabled);
           },
@@ -2369,9 +2367,9 @@ function describeAuditEntry(e) {
       };
     case 'flea-min-level/set':
       return {
-        desc: `Nível mínimo de flea alterado: ${b.minUserLevel ?? '—'} → ${a.minUserLevel}`,
+        desc: `Flea min level changed: ${b.minUserLevel ?? '—'} → ${a.minUserLevel}`,
         undo: b.minUserLevel == null ? null : {
-          label: 'Desfazer', run: async () => {
+          label: 'Undo', run: async () => {
             const data = await auditApiCall('POST', '/flea-min-level', { minUserLevel: b.minUserLevel });
             const el = document.getElementById('flea-level-num');
             if (el) el.textContent = data.minUserLevel;
@@ -2379,12 +2377,12 @@ function describeAuditEntry(e) {
         },
       };
     case 'catalog-rebuild/refresh-all':
-      return { desc: `Catálogo inteiro atualizado via ${escapeHtml(x.source || '?')} — ${(a.itemCount || 0).toLocaleString('pt-BR')} itens`, undo: null };
+      return { desc: `Whole catalog updated via ${escapeHtml(x.source || '?')} — ${(a.itemCount || 0).toLocaleString('en-US')} items`, undo: null };
     case 'catalog-rebuild/rescan':
-      return { desc: `Catálogo re-escaneado — ${(a.itemCount || 0).toLocaleString('pt-BR')} itens (${a.modCount || 0} de mods)`, undo: null };
+      return { desc: `Catalog rescanned — ${(a.itemCount || 0).toLocaleString('en-US')} items (${a.modCount || 0} from mods)`, undo: null };
     case 'item-refresh/refresh-dev':
     case 'item-refresh/refresh-market':
-      return { desc: `Preço de referência atualizado (${e.action === 'refresh-dev' ? 'tarkov.dev' : 'tarkov-market'})`, undo: null };
+      return { desc: `Reference price updated (${e.action === 'refresh-dev' ? 'tarkov.dev' : 'tarkov-market'})`, undo: null };
     default:
       return { desc: `${escapeHtml(e.feature)} / ${escapeHtml(e.action)}`, undo: null };
   }
@@ -2394,21 +2392,21 @@ function openAuditLogModal() {
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay';
   overlay.innerHTML =
-    `<div class="modal modal--wide" role="dialog" aria-modal="true">` +
-      `<div class="modal__title">Histórico de alterações</div>` +
+    `<div class="modal modal--wide" role="dialog" aria-modal="true" aria-labelledby="audit-log-title">` +
+      `<div class="modal__title" id="audit-log-title">Change history</div>` +
       `<div class="audit-log__filters">` +
-        `<select id="audit-log-feature"><option value="">Todas as categorias</option>` +
+        `<select id="audit-log-feature" aria-label="Filter by category"><option value="">All categories</option>` +
           AUDIT_FEATURES.map(f => `<option value="${escapeAttr(f)}">${escapeHtml((AUDIT_FEATURE_META[f]||{}).label || f)}</option>`).join('') +
         `</select>` +
-        `<input type="text" id="audit-log-tpl" placeholder="Buscar por nome do item…">` +
-        `<button type="button" class="modal__btn modal__btn--cancel" id="audit-log-close">Fechar</button>` +
+        `<input type="text" id="audit-log-tpl" aria-label="Search by item name" placeholder="Search by item name…">` +
+        `<button type="button" class="modal__btn modal__btn--cancel" id="audit-log-close">Close</button>` +
       `</div>` +
       `<div class="audit-log__feed-wrap">` +
         `<div id="audit-log-baseline-summary" class="audit-baseline-summary" hidden></div>` +
         `<div id="audit-log-feed" class="audit-feed"></div>` +
       `</div>` +
       `<div class="modal__actions">` +
-        `<button type="button" class="modal__btn" id="audit-log-more">Carregar mais</button>` +
+        `<button type="button" class="modal__btn" id="audit-log-more">Load more</button>` +
       `</div>` +
     `</div>`;
   document.body.appendChild(overlay);
@@ -2428,7 +2426,16 @@ function openAuditLogModal() {
     overlay.remove();
     document.removeEventListener('keydown', onKey);
   }
-  function onKey(e) { if (e.key === 'Escape') close(); }
+  function onKey(e) {
+    if (e.key === 'Escape') { close(); return; }
+    if (e.key !== 'Tab') return;
+    // Focus trap — keep Tab / Shift-Tab inside the dialog.
+    const f = overlay.querySelectorAll('button, select, input, [tabindex]:not([tabindex="-1"])');
+    if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
   overlay.querySelector('#audit-log-close').onclick = close;
   overlay.addEventListener('mousedown', (e) => { if (e.target === overlay) close(); });
   document.addEventListener('keydown', onKey);
@@ -2437,7 +2444,7 @@ function openAuditLogModal() {
   // copies the tpl (toast confirms). Degrades gracefully when the tpl isn't in the currently-
   // loaded catalog: still copyable, just no image/name to show.
   function renderItemChip(tpl) {
-    if (!tpl) return '<span class="audit-feed-item__target-label">Sistema</span>';
+    if (!tpl) return '<span class="audit-feed-item__target-label">System</span>';
     const item = ITEMS[tpl];
     const thumb = item && item.image && item.image.icon
       ? `<img class="audit-log__item-thumb" src="${escapeAttr(item.image.icon)}" alt="" loading="lazy">`
@@ -2447,12 +2454,12 @@ function openAuditLogModal() {
     const popoverName = item ? `<div class="name">${escapeHtml(item.name || item.shortName || tpl)}</div>` : '';
     const popoverShort = item && item.shortName ? `<div class="short">${escapeHtml(item.shortName)}${item.modSource ? ' · ' + escapeHtml(item.modSource) : ''}</div>` : '';
     return (
-      `<span class="audit-log__item" data-tpl="${escapeAttr(tpl)}" tabindex="0">` +
+      `<span class="audit-log__item" data-tpl="${escapeAttr(tpl)}" tabindex="0" role="button" aria-label="Copy tpl ${escapeAttr(tpl)}">` +
         thumb +
         `<span class="audit-log__item-label">${label}</span>` +
         `<span class="audit-log__item-popover">${popoverImg}${popoverName}${popoverShort}` +
           `<div class="tpl">${escapeHtml(tpl)}</div>` +
-          `<div class="hint">Clique pra copiar</div>` +
+          `<div class="hint">Click to copy</div>` +
         `</span>` +
       `</span>`
     );
@@ -2461,13 +2468,18 @@ function openAuditLogModal() {
   function wireItemChipCopy(root) {
     const itemEl = root.querySelector('.audit-log__item');
     if (!itemEl) return;
-    itemEl.addEventListener('click', async () => {
+    const copy = async () => {
       try {
         await navigator.clipboard.writeText(itemEl.dataset.tpl);
-        toast(`tpl copiado: ${itemEl.dataset.tpl}`, 'ok');
+        toast(`tpl copied: ${itemEl.dataset.tpl}`, 'ok');
       } catch (err) {
-        toast('Falha ao copiar tpl: ' + err.message, 'err');
+        toast('Failed to copy tpl: ' + err.message, 'err');
       }
+    };
+    itemEl.addEventListener('click', copy);
+    // The chip advertises tabindex/role=button — make Enter/Space actually operate it.
+    itemEl.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); copy(); }
     });
   }
 
@@ -2476,7 +2488,7 @@ function openAuditLogModal() {
     const { desc, undo } = describeAuditEntry(e);
     const isBaseline = e.origin === 'baseline-unknown-date';
     const originBadge = isBaseline
-      ? `<span class="badge badge--baseline" data-tip="Data exata desconhecida — já existia antes deste registro">antes do log</span>`
+      ? `<span class="badge badge--baseline" data-tip="Exact date unknown — already existed before this log started">before log</span>`
       : '';
 
     const card = document.createElement('div');
@@ -2486,13 +2498,13 @@ function openAuditLogModal() {
       `<div class="audit-feed-item__body">` +
         `<div class="audit-feed-item__top">` +
           `<span class="audit-feed-item__target">${renderItemChip(e.tpl)}</span>` +
-          `<span class="audit-feed-item__time">${auditRelTime(e.ts)}</span>` +
+          `<span class="audit-feed-item__time">${fmtRelTime(e.ts)}</span>` +
         `</div>` +
         `<div class="audit-feed-item__desc">${desc}</div>` +
       `</div>` +
       `<div class="audit-feed-item__actions">` +
         (!isBaseline && undo ? `<button type="button" class="audit-feed-item__undo">${escapeHtml(undo.label)}</button>` : '') +
-        `<button type="button" class="audit-feed-item__details-toggle" data-tip="Ver detalhes técnicos" aria-label="Ver detalhes técnicos">⋯</button>` +
+        `<button type="button" class="audit-feed-item__details-toggle" data-tip="Technical details" aria-label="Technical details">⋯</button>` +
       `</div>` +
       `${originBadge ? `<div class="audit-feed-item__origin">${originBadge}</div>` : ''}` +
       `<pre class="audit-feed-item__raw" hidden>${escapeHtml(JSON.stringify({ before: e.before, after: e.after, extra: e.extra }, null, 2))}</pre>`;
@@ -2510,12 +2522,15 @@ function openAuditLogModal() {
         undoBtn.textContent = '…';
         try {
           await undo.run();
-          toast('Desfeito com sucesso', 'ok');
+          toast('Undone', 'ok');
+          // Fade this card in place and prepend the NEW entry the undo just created, instead of
+          // rebuilding the whole feed (which reset scroll, collapsed pagination, and wiped this
+          // very .is-undone fade). The entry is in the log regardless — prepend is best-effort.
           card.classList.add('is-undone');
           undoBtn.remove();
-          loadPage(true); // refresh the feed — the undo itself is now a new entry at the top
+          await prependLatestEntry();
         } catch (err) {
-          toast('Falha ao desfazer: ' + err.message, 'err');
+          toast('Undo failed: ' + err.message, 'err');
           undoBtn.disabled = false;
           undoBtn.textContent = undo.label;
         }
@@ -2525,18 +2540,40 @@ function openAuditLogModal() {
     return card;
   }
 
+  // After an undo, fetch just the single newest entry (respecting the active filters) and insert
+  // it at the top — no full reload, so scroll and pagination stay put. Best-effort: if it fails,
+  // the entry is still in the log and shows on the next open/refresh.
+  async function prependLatestEntry() {
+    const { filter: tplFilter, noMatch } = resolveTplFilter();
+    if (noMatch) return;
+    const params = new URLSearchParams({ limit: 1, offset: 0 });
+    if (featureSel.value) params.set('feature', featureSel.value);
+    if (tplFilter) params.set('tpl', tplFilter);
+    try {
+      const r = await fetch(API_BASE + '/audit-log?' + params.toString());
+      const data = await r.json();
+      const e = (data.entries || [])[0];
+      total = data.total || total;
+      if (!e) return;
+      if (e.origin === 'baseline-unknown-date') { baselineEntries.unshift(e); renderBaselineSummary(); }
+      else { feed.insertBefore(renderEntryCard(e), feed.firstChild); offset++; }
+      moreBtn.hidden = offset >= total;
+    } catch { /* non-fatal — see comment above */ }
+  }
+
   function renderBaselineSummary() {
-    if (baselineEntries.length === 0) { baselineBox.hidden = true; return; }
+    if (baselineEntries.length === 0) { baselineBox.hidden = true; baselineBox.dataset.renderedCount = '0'; return; }
+    // Rebuild only when the baseline set actually grew (via "load more"/undo). Re-running the full
+    // innerHTML rebuild on every page load that brought only live entries is wasted work — and it
+    // would blank out an already-expanded list. When it does grow and was open, immediately re-fill
+    // the fresh list so an expanded summary never renders empty.
+    if (String(baselineEntries.length) === baselineBox.dataset.renderedCount) return;
+    baselineBox.dataset.renderedCount = String(baselineEntries.length);
     baselineBox.hidden = false;
-    // innerHTML is rebuilt from scratch every call (the count can grow via "load more"), which
-    // would otherwise blank out an already-expanded list — its populated .list div (and the
-    // dataset.filled flag marking it as such) gets thrown away along with the old markup. If it
-    // was open, immediately re-fill the fresh list so an expanded summary never renders empty
-    // (e.g. right after an undo triggers loadPage(true) while the user has it expanded).
     const expanded = baselineBox.classList.contains('is-open');
     baselineBox.innerHTML =
       `<button type="button" class="audit-baseline-summary__toggle">` +
-        `📦 ${baselineEntries.length} ${baselineEntries.length === 1 ? 'ação anterior' : 'ações anteriores'} ao início do histórico` +
+        `📦 ${baselineEntries.length} ${baselineEntries.length === 1 ? 'action' : 'actions'} before the log started` +
         `<span class="chev"></span>` +
       `</button>` +
       `<div class="audit-baseline-summary__list"${expanded ? '' : ' hidden'}></div>`;
@@ -2556,8 +2593,10 @@ function openAuditLogModal() {
     };
   }
 
+  const SKELETON_HTML = '<div class="audit-skel"></div>'.repeat(4);
+
   async function loadPage(reset) {
-    if (reset) { offset = 0; feed.innerHTML = ''; baselineEntries.length = 0; }
+    if (reset) { offset = 0; feed.innerHTML = ''; baselineEntries.length = 0; baselineBox.dataset.renderedCount = ''; }
     const { filter: tplFilter, noMatch } = resolveTplFilter();
     if (noMatch) {
       // A non-empty search that resolved to zero tpls — bail out before hitting the
@@ -2567,30 +2606,39 @@ function openAuditLogModal() {
       // of "nothing found" for the exact query the user typed.
       total = 0;
       moreBtn.hidden = true;
-      feed.innerHTML = '<div class="audit-log__empty">Nenhuma ação encontrada com esses filtros.</div>';
+      feed.innerHTML = '<div class="audit-log__empty">No actions match these filters.</div>';
       return;
     }
     const params = new URLSearchParams({ limit: LIMIT, offset });
     if (featureSel.value) params.set('feature', featureSel.value);
     if (tplFilter) params.set('tpl', tplFilter);
+    if (reset) feed.innerHTML = SKELETON_HTML; // loading state — avoids an empty flash misread as "no history"
+    moreBtn.disabled = true;
     try {
       const r = await fetch(API_BASE + '/audit-log?' + params.toString());
       const data = await r.json();
       total = data.total || 0;
       const entries = data.entries || [];
+      if (reset) feed.innerHTML = '';
       if (reset && entries.length === 0) {
-        feed.innerHTML = '<div class="audit-log__empty">Nenhuma ação encontrada com esses filtros.</div>';
+        feed.innerHTML = '<div class="audit-log__empty">No actions match these filters.</div>';
       } else {
+        // Build all cards into a fragment and append once — one layout pass instead of up to
+        // LIMIT separate insertions per page.
+        const frag = document.createDocumentFragment();
         for (const e of entries) {
           if (e.origin === 'baseline-unknown-date') baselineEntries.push(e);
-          else feed.appendChild(renderEntryCard(e));
+          else frag.appendChild(renderEntryCard(e));
         }
+        feed.appendChild(frag);
         renderBaselineSummary();
       }
       offset += entries.length;
       moreBtn.hidden = offset >= total;
     } catch (err) {
-      feed.innerHTML = `<div class="audit-log__empty">Falha ao carregar: ${escapeHtml(err.message)}</div>`;
+      feed.innerHTML = `<div class="audit-log__empty">Failed to load: ${escapeHtml(err.message)}</div>`;
+    } finally {
+      moreBtn.disabled = false;
     }
   }
 
@@ -2620,6 +2668,7 @@ function openAuditLogModal() {
   moreBtn.onclick = () => loadPage(false);
 
   requestAnimationFrame(() => overlay.classList.add('is-show'));
+  setTimeout(() => tplInput.focus(), 0); // land focus inside the dialog (search is the likely first action)
   loadPage(true);
 }
 
@@ -2707,7 +2756,7 @@ async function rescanMods() {
     if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
     const secs = data.durationMs != null ? ` in ${(data.durationMs / 1000).toFixed(1)}s` : '';
     const mods = data.modCount != null ? ` (${data.modCount} from mods)` : '';
-    toast(`${(data.itemCount || 0).toLocaleString('pt-BR')} items${mods}${secs} — reloading…`, 'ok');
+    toast(`${(data.itemCount || 0).toLocaleString('en-US')} items${mods}${secs} — reloading…`, 'ok');
     setTimeout(() => location.reload(), 800);
   } catch (err) {
     setBulkBusy(false);
@@ -2722,7 +2771,7 @@ async function refreshAll(source) {
   const count = (typeof ITEM_LIST !== 'undefined' && ITEM_LIST) ? ITEM_LIST.length : 0;
   const ok = await confirmDialog({
     title: `Update ALL prices via ${label}?`,
-    body: `Re-downloads ~${count.toLocaleString('pt-BR')} items at once (usually a few seconds, ~5–15s). Price editing is locked while it runs; the page reloads when done.`,
+    body: `Re-downloads ~${count.toLocaleString('en-US')} items at once (usually a few seconds, ~5–15s). Price editing is locked while it runs; the page reloads when done.`,
     confirmText: 'Update all',
   });
   if (!ok) return;
@@ -2737,7 +2786,7 @@ async function refreshAll(source) {
     const data = await r.json();
     if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
     const secs = data.durationMs != null ? ` in ${(data.durationMs / 1000).toFixed(1)}s` : '';
-    toast(`${(data.itemCount || count).toLocaleString('pt-BR')} items updated via ${label}${secs} — reloading…`, 'ok');
+    toast(`${(data.itemCount || count).toLocaleString('en-US')} items updated via ${label}${secs} — reloading…`, 'ok');
     setTimeout(() => location.reload(), 1000);
   } catch (err) {
     setBulkBusy(false);
@@ -2951,7 +3000,7 @@ function nativeValueMarkup(native, cur) {
   const tip = (rate && rate > 0)
     ? escapeAttr('In-game native currency (@ ' + rate.toLocaleString('en-US') + ' ₽/' + sym + ')')
     : 'In-game native currency';
-  return `<span class="trader-price-val">${native.toLocaleString('pt-BR')} <span class="currency ${cls}" data-tip="${tip}">${escapeHtml(sym)}</span></span>`;
+  return `<span class="trader-price-val">${native.toLocaleString('en-US')} <span class="currency ${cls}" data-tip="${tip}">${escapeHtml(sym)}</span></span>`;
 }
 
 // Faint rouble-equivalent hint "≈ X ₽" for USD/EUR only. '' otherwise (incl. GP/RUB).
