@@ -41,7 +41,14 @@ public sealed class AuditLogController(ModPathsService modPaths) : ControllerBas
         }
 
         var matches = new List<JsonNode>();
-        foreach (var line in System.IO.File.ReadLines(logPath))
+        // FileShare.ReadWrite so this read never collides with a concurrent AuditLogService.Append
+        // (now opened with ReadWrite too). File.ReadLines defaults to FileShare.Read, mutually
+        // exclusive on Windows with the writer — a collision would throw IOException here, outside
+        // the per-line try/catch below, and 500 the whole request.
+        using var stream = new System.IO.FileStream(logPath, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite);
+        using var reader = new System.IO.StreamReader(stream);
+        string? line;
+        while ((line = reader.ReadLine()) is not null)
         {
             if (string.IsNullOrWhiteSpace(line))
             {

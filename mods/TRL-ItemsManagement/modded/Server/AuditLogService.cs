@@ -48,7 +48,16 @@ public class AuditLogService(ModPathsService modPaths)
             };
 
             Directory.CreateDirectory(modPaths.LogsDir);
-            File.AppendAllText(LogPath, entry.ToJsonString() + "\n", new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+
+            // FileShare.ReadWrite so a concurrent GET /audit-log reader never makes this append
+            // fail (and get swallowed by the catch below): File.AppendAllText defaults to
+            // FileShare.Read, which on Windows is mutually exclusive with a reader that opened
+            // first — the append would throw and the entry would be silently lost. Writing the
+            // whole line in a single Write keeps a concurrent reader from seeing a torn line (and
+            // the reader's JSON parse skips the trailing partial line anyway).
+            var bytes = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetBytes(entry.ToJsonString() + "\n");
+            using var fs = new FileStream(LogPath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+            fs.Write(bytes, 0, bytes.Length);
         }
         catch
         {
