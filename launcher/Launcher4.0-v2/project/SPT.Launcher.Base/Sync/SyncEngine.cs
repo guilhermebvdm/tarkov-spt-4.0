@@ -106,7 +106,11 @@ namespace SPT.Launcher.Sync
                                 _baseline.SetHash(action.RelativePath, appliedHash);
                                 result.Updated++;
                                 ioDone++;
-                                AddEntry(result, action.RelativePath, "updated", action.Reason);
+                                // MirrorReference (biblioteca config-server) reusa Download, mas no relatório
+                                // recebe label próprio: separa "a SUA config mudou" de "a referência mudou".
+                                AddEntry(result, action.RelativePath,
+                                    action.Rule == SyncFolderRule.MirrorReference ? "reference-updated" : "updated",
+                                    action.Reason);
                             }
                             catch (OperationCanceledException)
                             {

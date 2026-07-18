@@ -98,18 +98,40 @@ namespace SPT.Launcher.Sync
                     continue;
                 }
 
-                // config-server sync (item 017 + seed-and-mirror). Handled before the missing/hash
-                // logic below because the SOURCE (config-server) is a server folder the user never
-                // has under 'config' — the normal path would wrongly plan a Download onto the user.
-                //  SEED: copy config-server/<rel> -> config/<rel> ONLY if absent by name (memory-less;
-                //        never overwrites/deletes the user-owned 'config').
-                //  MIRROR (seed-and-mirror only): keep config-server/<rel> itself a replica —
-                //        download the latest whenever missing or hash-divergent (overwrites user edits).
-                //        Extras are NOT deleted: SeedAndMirror is NOT a MirrorPrefix and is skipped in
-                //        ScanExtras (conservative, ref CR-01-03; delete stays opt-in).
-                if (rule == SyncFolderRule.SeedIfMissingByName || rule == SyncFolderRule.SeedAndMirror)
+                // config-server = MIRROR-REFERENCE (biblioteca de referência). Espelha config-server/<rel>
+                // na pasta config-server/ do cliente: baixa a última versão se faltar OU o hash divergir
+                // (restaura sempre — a pasta é pristina, o usuário não edita, só consulta/copia pra config/).
+                // NUNCA escreve em config/. NÃO deleta extras (fora de MirrorPrefixes + pulado no ScanExtras).
+                // Branch DEDICADO (com continue) de propósito: não herdar a preservação de Dev Mode/baseline
+                // do caminho normal — a referência sempre restaura pra versão do server.
+                if (rule == SyncFolderRule.MirrorReference)
                 {
-                    // -- SEED into config/<rel> (both rules) --
+                    string mirrorLocal = SyncPathUtil.ToLocalPath(_options.GameRoot, file.path);
+                    if (!File.Exists(mirrorLocal))
+                    {
+                        AddDownload(plan, file, rule, "referência ausente");
+                    }
+                    else
+                    {
+                        string mirrorHash = await Task.Run(() => SyncPathUtil.ComputeMd5(mirrorLocal), cancellationToken);
+                        if (string.Equals(mirrorHash, file.hash, StringComparison.OrdinalIgnoreCase))
+                        {
+                            plan.UpToDate.Add(new KeyValuePair<string, string>(normalized, mirrorHash));
+                        }
+                        else
+                        {
+                            AddDownload(plan, file, rule, "referência desatualizada — restaura a versão do server");
+                        }
+                    }
+
+                    continue;
+                }
+
+                // config-server SEED opt-in (item 017, SeedIfMissingByName — NÃO é mais o default do
+                // config-server; só via folderRules explícito). Copia config-server/<rel> -> config/<rel>
+                // SÓ se faltar por nome (memory-less; nunca sobrescreve/deleta o 'config' do usuário).
+                if (rule == SyncFolderRule.SeedIfMissingByName)
+                {
                     string targetRel = SyncPathUtil.DeriveSeedTarget(file.path, matchedPrefix);
                     if (targetRel != null)
                     {
@@ -127,29 +149,6 @@ namespace SPT.Launcher.Sync
                             });
                         }
                         // target present (any content, any hash) -> no-op: seed never overwrites.
-                    }
-
-                    // -- MIRROR config-server/<rel> itself (seed-and-mirror only): sempre a última versão --
-                    if (rule == SyncFolderRule.SeedAndMirror)
-                    {
-                        string mirrorLocal = SyncPathUtil.ToLocalPath(_options.GameRoot, file.path);
-                        if (!File.Exists(mirrorLocal))
-                        {
-                            AddDownload(plan, file, rule, "mirror (config-server ausente)");
-                        }
-                        else
-                        {
-                            string mirrorHash = await Task.Run(() => SyncPathUtil.ComputeMd5(mirrorLocal), cancellationToken);
-                            if (string.Equals(mirrorHash, file.hash, StringComparison.OrdinalIgnoreCase))
-                            {
-                                plan.UpToDate.Add(new KeyValuePair<string, string>(normalized, mirrorHash));
-                            }
-                            else
-                            {
-                                // Réplica exata: sobrescreve SEMPRE (mesmo se o usuário editou o config-server).
-                                AddDownload(plan, file, rule, "mirror (config-server desatualizado)");
-                            }
-                        }
                     }
 
                     continue;
@@ -352,7 +351,7 @@ namespace SPT.Launcher.Sync
 
                     if (rule == SyncFolderRule.PreserveDivergent
                         || rule == SyncFolderRule.SeedIfMissingByName
-                        || rule == SyncFolderRule.SeedAndMirror
+                        || rule == SyncFolderRule.MirrorReference
                         || rule == SyncFolderRule.ForceToConfig)
                     {
                         // Extras in config / config-server folders are never touched (config-server

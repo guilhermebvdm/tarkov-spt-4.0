@@ -92,14 +92,14 @@ namespace SPT.Launcher.Tests.Sync
             new SyncRuleResolver(new Dictionary<string, string> { ["config-server"] = "mirror-delete" });
 
         /// <summary>
-        /// config-server como SEED puro (item 017), sem o mirror do default atual (seed-and-mirror).
+        /// config-server como SEED puro (item 017, opt-in), sem o mirror do default (mirror-reference).
         /// Usado pelos testes que pinam a regra de seed em isolamento.
         /// </summary>
         public static SyncRuleResolver ResolverWithConfigServerSeed() =>
             new SyncRuleResolver(new Dictionary<string, string>
             {
                 // ambas as chaves: o match é por prefixo mais longo; os testes usam BepInEx/config-server,
-                // que sem isto cairia no fallback bepinex/config-server → seed-and-mirror.
+                // que sem isto cairia no fallback bepinex/config-server → mirror-reference.
                 ["config-server"] = "seed-if-missing",
                 ["BepInEx/config-server"] = "seed-if-missing",
             });

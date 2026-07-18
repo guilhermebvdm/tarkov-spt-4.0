@@ -85,5 +85,30 @@ namespace SPT.Launcher.Tests.Sync
 
             Assert.Equal(viaForward, viaBack);
         }
+
+        // --- Guard de quarentena (R3.4): o loop deleteFiles do ProfileViewModel pula qualquer path
+        // com segmento "-disabled" via ContainsDisabledSegment(Normalize(...)) — protege o backup do
+        // config-force (config-disabled/) e toda quarentena de ser apagada por um manifesto. ---
+
+        [Theory]
+        [InlineData("config-disabled/graphics.cfg")]          // backup do config-force
+        [InlineData("BepInEx/config-disabled/graphics.cfg")]  // idem, layout BepInEx
+        [InlineData("BepInEx/plugins-disabled/mod.dll")]      // quarentena de plugin
+        [InlineData("CONFIG-DISABLED/x.cfg")]                 // casing normalizado
+        [InlineData("config\\config-disabled\\x.cfg")]        // backslash normalizado
+        public void Disabled_segments_are_flagged_for_the_deleteFiles_guard(string deleteFile)
+        {
+            Assert.True(SyncPathUtil.ContainsDisabledSegment(SyncPathUtil.Normalize(deleteFile)));
+        }
+
+        [Theory]
+        [InlineData("config/graphics.cfg")]           // config viva — deletável
+        [InlineData("config-server/reference.cfg")]   // referência — não é -disabled
+        [InlineData("disabled/x.cfg")]                // "disabled" sozinho NÃO termina em "-disabled"
+        [InlineData("BepInEx/plugins/mod.dll")]
+        public void Non_disabled_segments_are_not_flagged(string deleteFile)
+        {
+            Assert.False(SyncPathUtil.ContainsDisabledSegment(SyncPathUtil.Normalize(deleteFile)));
+        }
     }
 }

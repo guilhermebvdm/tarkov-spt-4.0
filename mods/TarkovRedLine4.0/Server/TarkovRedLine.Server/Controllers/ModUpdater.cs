@@ -502,13 +502,14 @@ public class ModUpdaterController : ControllerBase
                     folderRules = new Dictionary<string, string>
                     {
                         ["BepInEx/config"] = "preserve-divergent",
-                        // config-server DUAL (seed-and-mirror): os arquivos em mods_repo/BepInEx/config-server/
-                        //  1) SEED em BepInEx/config/ só se ausente (nunca deleta/sobrescreve as vivas);
-                        //  2) MIRROR em BepInEx/config-server/ (última versão sempre; NÃO deleta extras),
-                        //     de onde o usuário copia manualmente ao atualizarmos a config de um mod.
+                        // config-server = MIRROR-REFERENCE (biblioteca de referência). Os arquivos em
+                        // mods_repo/BepInEx/config-server/ só são espelhados em BepInEx/config-server/ do
+                        // cliente (última versão sempre; NÃO deleta extras; NUNCA toca BepInEx/config/).
+                        // Quem distribui defaults é o canal 'config' (preserve-divergent). O usuário copia
+                        // manualmente de config-server/ ao atualizarmos a config de um mod.
                         // Servers existentes dependem do fallback built-in do client; este default só vale
-                        // num config.json novo.
-                        ["BepInEx/config-server"] = "seed-and-mirror",
+                        // num config.json novo (sem efeito nesta release — só higiene p/ redeploy futuro).
+                        ["BepInEx/config-server"] = "mirror-reference",
                         // config-force: canal "essa config vai pra TODO MUNDO". Arquivos em
                         // mods_repo/BepInEx/config-force/ SOBRESCREVEM o BepInEx/config/ do usuário
                         // sempre que divergirem — ignoram customização (ao contrário do config normal,

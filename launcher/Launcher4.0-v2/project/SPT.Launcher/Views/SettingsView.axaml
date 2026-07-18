@@ -174,6 +174,13 @@
                                         VerticalAlignment="Center"
                                         ToolTip.Tip="{Binding DevModeStatusText}"/>
                             </StackPanel>
+
+                            <!-- Descrição intuitiva do Dev Mode: pra quem CRIA mods, não jogador comum.
+                                 Reflete o comportamento pós-regras config-*: preserva arquivos/builds locais
+                                 (não reverte) + pula a verificação automática no login. -->
+                            <TextBlock Classes="trl-muted" FontSize="{DynamicResource TrlTextXs}" TextWrapping="Wrap"
+                                       MaxWidth="460" HorizontalAlignment="Left"
+                                       Text="Modo desenvolvedor (pra quem cria mods): protege seus arquivos e builds locais do sync — não reverte — e pula a verificação automática de mods/configs ao entrar. Jogador comum não precisa ligar."/>
                         </StackPanel>
                     </cc:TrlPanel>
 
@@ -189,8 +196,14 @@
                                          MaxWidth="300" HorizontalAlignment="Left"/>
                             </StackPanel>
 
-                            <CheckBox Content="Bloquear atualizações (Desativar verificador)"
-                                      IsChecked="{Binding Source={x:Static helpers:LauncherSettingsProvider.Instance}, Path=DisableUpdates}"/>
+                            <StackPanel Spacing="2">
+                                <CheckBox Content="Bloquear atualização de launcher"
+                                          IsChecked="{Binding Source={x:Static helpers:LauncherSettingsProvider.Instance}, Path=DisableUpdates}"
+                                          ToolTip.Tip="Impede o launcher de baixar e instalar uma versão mais nova de SI MESMO (o TRL.Launcher.exe), mesmo que exista uma no servidor. NÃO afeta o sync de mods/configs. Ativo só enquanto o Dev Mode estiver ligado — ao desligar o Dev Mode, este bloqueio é resetado."/>
+                                <TextBlock Classes="trl-faint" FontSize="{DynamicResource TrlText2Xs}" TextWrapping="Wrap"
+                                           MaxWidth="460" HorizontalAlignment="Left"
+                                           Text="Bloqueia só o auto-update do próprio launcher (o .exe). Não mexe no sync de mods/configs. Resetado ao desligar o Dev Mode."/>
+                            </StackPanel>
 
                             <!-- Modo homolog: prefixa as rotas do mod com /homolog (bate no TarkovRedLine.Server.Homolog) -->
                             <StackPanel Spacing="2">

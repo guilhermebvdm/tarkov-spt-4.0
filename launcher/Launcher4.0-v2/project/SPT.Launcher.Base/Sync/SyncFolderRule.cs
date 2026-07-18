@@ -27,16 +27,14 @@ namespace SPT.Launcher.Sync
         SeedIfMissingByName = 4,
 
         /// <summary>
-        /// config-server DUAL sync (server → cliente, dois destinos ao mesmo tempo):
-        ///  1. SEED em "config/&lt;rel&gt;" — copia só se o arquivo NÃO existir (idêntico ao SeedIfMissingByName:
-        ///     nunca sobrescreve/deleta o 'config' do usuário).
-        ///  2. MIRROR em "config-server/&lt;rel&gt;" — réplica: baixa a última versão sempre que faltar ou
-        ///     o hash divergir (sobrescreve edições do usuário), mas NÃO deleta extras (conservador,
-        ///     ref CR-01-03; delete fica opt-in — não é MirrorPrefix, é pulado no ScanExtras).
-        /// Uso: 'config' = configs vivas do usuário (seed único); 'config-server' = referência sempre atual
-        /// de onde o usuário copia manualmente ao atualizarmos a config de um mod existente.
+        /// config-server → biblioteca de REFERÊNCIA (mirror-only). Espelha a pasta do server na pasta
+        /// "config-server/" do cliente: baixa a última versão sempre que faltar ou o hash divergir
+        /// (restaura — a pasta é pristina, o usuário não edita, só consulta e copia manualmente pra "config/").
+        /// NUNCA semeia/escreve em "config/". NUNCA deleta extras (fica fora de MirrorPrefixes, pulado no ScanExtras).
+        /// Substitui o antigo SeedAndMirror (que também semeava em config/) — o papel de distribuir defaults
+        /// passou pro canal "config" (preserve-divergent). Reusa SyncActionKind.Download (via AddDownload).
         /// </summary>
-        SeedAndMirror = 5,
+        MirrorReference = 5,
 
         /// <summary>
         /// config-force → config FORÇADO. Cada arquivo do SERVER em "&lt;name&gt;-force/&lt;rel&gt;" sobrescreve o
@@ -73,8 +71,8 @@ namespace SPT.Launcher.Sync
                 case "seed-if-missing":
                     rule = SyncFolderRule.SeedIfMissingByName;
                     return true;
-                case "seed-and-mirror":
-                    rule = SyncFolderRule.SeedAndMirror;
+                case "mirror-reference":
+                    rule = SyncFolderRule.MirrorReference;
                     return true;
                 case "force-to-config":
                     rule = SyncFolderRule.ForceToConfig;

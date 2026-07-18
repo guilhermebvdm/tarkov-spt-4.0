@@ -56,7 +56,9 @@ namespace SPT.Launcher.Sync
 
         /// <summary>
         /// Sufixos das pastas-FONTE do server que mapeiam para a pasta do usuário sem o sufixo:
-        /// "-server" (seed / seed-and-mirror) e "-force" (force-to-config). Ambos: "&lt;name&gt;-X/&lt;rel&gt;" → "&lt;name&gt;/&lt;rel&gt;".
+        /// "-server" (SeedIfMissingByName, opt-in) e "-force" (force-to-config). Ambos: "&lt;name&gt;-X/&lt;rel&gt;" → "&lt;name&gt;/&lt;rel&gt;".
+        /// NB: o default do config-server (MirrorReference) NÃO usa isto — espelha "config-server/&lt;rel&gt;"
+        /// direto, sem derivar alvo em "config/". Hoje só o config-force (e o seed opt-in) derivam alvo.
         /// </summary>
         private static readonly string[] SourceFolderSuffixes = { "-server", "-force" };
 
@@ -92,7 +94,7 @@ namespace SPT.Launcher.Sync
             }
 
             // Sufixos de pasta-FONTE do server que mapeiam para a pasta do USUÁRIO:
-            //   "<name>-server/<rel>" -> "<name>/<rel>"   (seed / seed-and-mirror)
+            //   "<name>-server/<rel>" -> "<name>/<rel>"   (SeedIfMissingByName opt-in — não o default MirrorReference)
             //   "<name>-force/<rel>"  -> "<name>/<rel>"   (force-to-config)
             // Prefixo sem sufixo conhecido (misconfig do operador): semeia em si mesmo.
             string targetPrefix = originalPrefix;

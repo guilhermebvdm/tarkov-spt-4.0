@@ -15,6 +15,44 @@ namespace SPT.Launcher.Sync
     {
         public const string DefaultFileName = "last-update.json";
 
+        /// <summary>
+        /// Prioridade de ordenação das entries no relatório — menor = mais importante (topo).
+        /// "updated" fica no topo (é o que mais interessa ao usuário); "error" por último (o
+        /// counts.errors + warnings já dão visibilidade). Ação fora do mapa → <see cref="int.MaxValue"/>
+        /// (vai pro fim), NUNCA exceção: nenhuma ação nova pode crashar o sort.
+        /// </summary>
+        private static readonly IReadOnlyDictionary<string, int> ActionPriority = new Dictionary<string, int>(StringComparer.Ordinal)
+        {
+            ["updated"] = 1,
+            ["forced"] = 2,
+            ["reference-updated"] = 3,
+            ["seeded"] = 4,
+            ["seed-skipped"] = 5,
+            ["preserved"] = 6,
+            ["preserved-devmode"] = 7,
+            ["moved-to-disabled"] = 8,
+            ["deleted"] = 9,
+            ["error"] = 10,
+        };
+
+        /// <summary>
+        /// Frase humana (PT) por ação — o campo "descricao" do relatório. "detail" continua cru (pra
+        /// máquina). Ação sem frase mapeada → cai no "detail" cru (nunca fica vazio).
+        /// </summary>
+        private static readonly IReadOnlyDictionary<string, string> ActionDescricao = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["updated"] = "baixada do servidor (estava desatualizada ou faltando)",
+            ["forced"] = "config obrigatória do servidor — se você tinha uma, ela foi preservada em uma pasta -disabled/",
+            ["reference-updated"] = "biblioteca de referência atualizada (pasta config-server; não altera a sua config)",
+            ["seeded"] = "config padrão copiada (não existia)",
+            ["seed-skipped"] = "config padrão já existia — não foi sobrescrita",
+            ["preserved"] = "você personalizou — sua versão foi mantida",
+            ["preserved-devmode"] = "mantida pelo Modo desenvolvedor (não revertida)",
+            ["moved-to-disabled"] = "movida para quarentena (pasta -disabled)",
+            ["deleted"] = "removida (extra fora do manifesto)",
+            ["error"] = "falha — ver detalhe",
+        };
+
         public static void Write(string filePath, SyncResult result)
         {
             string directory = Path.GetDirectoryName(filePath);
@@ -23,23 +61,52 @@ namespace SPT.Launcher.Sync
                 Directory.CreateDirectory(directory);
             }
 
+            // Ordena por prioridade de ação (updated no topo), com desempate ESTÁVEL pela ordem de
+            // execução (índice original). Enriquece cada linha com "descricao" (PT) — "detail" fica cru.
+            var orderedEntries = (result.Entries ?? new List<SyncReportEntry>())
+                .Select((entry, index) => new { entry, index })
+                .OrderBy(x => ActionPriority.TryGetValue(x.entry.action ?? string.Empty, out int p) ? p : int.MaxValue)
+                .ThenBy(x => x.index)
+                .Select(x => new
+                {
+                    x.entry.path,
+                    x.entry.action,
+                    descricao = ActionDescricao.TryGetValue(x.entry.action ?? string.Empty, out string frase)
+                        ? frase
+                        : x.entry.detail,
+                    x.entry.detail,
+                    x.entry.timestamp,
+                })
+                .ToList();
+
+            // O mirror do config-server reusa Download → incrementa result.Updated, mas no relatório
+            // sai com label próprio ("reference-updated"). Sem descontar, counts.updated ficaria MAIOR
+            // que o nº de linhas "updated" (confuso). Deriva o nº de referências das entries (fonte de
+            // verdade do relatório) e separa: updated = só a config do usuário; referenceUpdated = a
+            // biblioteca. A subtração é sempre >= 0 (toda "reference-updated" incrementou Updated).
+            int referenceUpdated = (result.Entries ?? new List<SyncReportEntry>())
+                .Count(e => e.action == "reference-updated");
+
             var model = new
             {
                 generatedAt = DateTime.UtcNow,
                 cancelled = result.Cancelled,
                 counts = new
                 {
-                    updated = result.Updated,
+                    updated = result.Updated - referenceUpdated,
+                    referenceUpdated = referenceUpdated,
+                    forced = result.Forced,
                     preserved = result.Preserved,
                     preservedDevMode = result.PreservedDevMode,
-                    deleted = result.Deleted,
-                    movedToDisabled = result.MovedToDisabled,
                     seeded = result.Seeded,
+                    configsBackedUp = result.ConfigsBackedUp,
+                    movedToDisabled = result.MovedToDisabled,
+                    deleted = result.Deleted,
                     errors = result.Errors,
                     pending = result.Pending,
                 },
                 warnings = result.Warnings,
-                entries = result.Entries,
+                entries = orderedEntries,
             };
 
             // ref: CR-01-04 — escrita atômica (temp + move), como o baseline e os applies.

@@ -108,6 +108,18 @@ namespace SPT.Launcher.ViewModels
             {
                 // Desativar — sem senha necessária
                 LauncherSettingsProvider.Instance.IsDevMode = false;
+
+                // Item 028: "Bloquear atualização de launcher" é ferramenta ESCOPADA ao Dev Mode.
+                // Ao desligar o Dev Mode, resetar DisableUpdates → o bloqueio não fica preso/invisível
+                // com o Dev Mode off (era o trap: usuário sem acesso ao painel dev não conseguia
+                // reativar o auto-update). Só previne casos NOVOS — quem já está preso precisa editar
+                // o config.json manualmente (não alcançável remotamente).
+                if (LauncherSettingsProvider.Instance.DisableUpdates)
+                {
+                    LauncherSettingsProvider.Instance.DisableUpdates = false;
+                    LogManager.Instance.Info("[Settings] DisableUpdates resetado ao desligar Dev Mode (item 028)");
+                }
+
                 LauncherSettingsProvider.Instance.SaveSettings();
                 SendNotification("", "🔒 Modo desenvolvedor desativado", NotificationType.Information);
                 LogManager.Instance.Info("[Settings] Dev Mode desativado");

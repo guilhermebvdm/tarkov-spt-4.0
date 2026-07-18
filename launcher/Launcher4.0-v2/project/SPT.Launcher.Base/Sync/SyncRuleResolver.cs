@@ -18,19 +18,17 @@ namespace SPT.Launcher.Sync
         /// ref: CR-01-03 — mirror-delete (a regra mais destrutiva) NÃO entra no fallback: o layout
         /// de config-server no mods_repo real nunca foi verificado (A2), então config-server só
         /// vira espelho-com-delete via folderRules EXPLÍCITO do server. Default seguro até P-007.2.
-        /// ref: item 017 — config-server passa a ser SEED (config-server → config, cópia só-se-ausente,
-        /// nunca deleta/sobrescreve o 'config' do usuário).
-        /// ref: config-server DUAL (seed-and-mirror) — além do seed em 'config', o launcher mantém a
-        /// pasta 'config-server' do CLIENTE como réplica do servidor (baixa a última versão sempre; NÃO
-        /// deleta extras — conservador, ref CR-01-03). Seguro no fallback: só toca 'config-server' (referência nossa, que o
-        /// usuário não edita); o 'config' (vivas) continua protegido pelo seed/preserve.
+        /// ref: config-server = mirror-reference (biblioteca de referência). Espelha a pasta do server
+        /// na 'config-server/' do cliente (baixa a última versão; NÃO deleta extras; NUNCA toca 'config/').
+        /// Quem distribui defaults é o canal 'config' (preserve-divergent). Seguro no fallback: só toca a
+        /// pasta 'config-server' (referência nossa, que o usuário não edita, só consulta/copia).
         /// </summary>
         public static readonly IReadOnlyDictionary<string, string> FallbackRules = new Dictionary<string, string>
         {
             ["config"] = "preserve-divergent",
             ["BepInEx/config"] = "preserve-divergent",
-            ["config-server"] = "seed-and-mirror",
-            ["BepInEx/config-server"] = "seed-and-mirror",
+            ["config-server"] = "mirror-reference",
+            ["BepInEx/config-server"] = "mirror-reference",
             // config-force: canal deliberado de "essa config vai pra TODO MUNDO" — sobrescreve o
             // config/<rel> do usuário sempre que divergir (ignora customização). Ver SyncFolderRule.ForceToConfig.
             ["config-force"] = "force-to-config",
@@ -76,8 +74,8 @@ namespace SPT.Launcher.Sync
 
         /// <summary>
         /// All prefixes whose rule is a mirror variant — these folders are scanned for local extras.
-        /// SeedAndMirror is intentionally NOT here: its 'config-server' replica overwrites files to the
-        /// latest but does NOT delete extras (conservative — ref CR-01-03). Delete-extras stays opt-in.
+        /// MirrorReference is intentionally NOT here: sua pasta 'config-server' sobrescreve pra última
+        /// versão mas NÃO deleta extras (é referência nossa; delete-extras fica fora de escopo).
         /// </summary>
         public IEnumerable<KeyValuePair<string, SyncFolderRule>> MirrorPrefixes =>
             _rules.Where(r => r.Value == SyncFolderRule.MirrorDelete || r.Value == SyncFolderRule.MirrorMoveDisabled);

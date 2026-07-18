@@ -9,7 +9,11 @@ namespace SPT.Launcher.Sync
     {
         public string path { get; set; }
 
-        /// <summary>updated · preserved · preserved-devmode · deleted · moved-to-disabled · seeded · seed-skipped · forced · error</summary>
+        /// <summary>
+        /// updated · reference-updated · forced · preserved · preserved-devmode · deleted ·
+        /// moved-to-disabled · seeded · seed-skipped · error.
+        /// O relatório (SyncReport.Write) ordena por essa ação e injeta uma "descricao" PT por linha.
+        /// </summary>
         public string action { get; set; }
 
         public string detail { get; set; }

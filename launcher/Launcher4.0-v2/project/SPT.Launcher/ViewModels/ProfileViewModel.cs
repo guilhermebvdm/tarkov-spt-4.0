@@ -709,6 +709,17 @@ namespace SPT.Launcher.ViewModels
                 {
                     try
                     {
+                        // R3.4: pastas "-disabled" são quarentena/backup intocável (inclui o backup do
+                        // config-force em config-disabled/). deleteFiles roda FORA do motor, então
+                        // precisa do MESMO guard do ScanExtras — senão um manifesto poderia apagar o
+                        // backup e furar a garantia "nada excluído misteriosamente". Limpeza de
+                        // quarentena é manual, por design.
+                        if (SyncPathUtil.ContainsDisabledSegment(SyncPathUtil.Normalize(deleteFile)))
+                        {
+                            LogManager.Instance.Warning($"[Profile] deleteFiles ignorado (pasta -disabled, quarentena protegida): {deleteFile}");
+                            continue;
+                        }
+
                         string localPath = SyncPathUtil.ResolveUnderRoot(gamePath, deleteFile);
                         if (File.Exists(localPath))
                         {
