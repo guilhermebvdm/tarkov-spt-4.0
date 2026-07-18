@@ -326,7 +326,6 @@ namespace SPT.Launcher.ViewModels
                     profile.ClassImage = ResolveClassImage(profile.Name); // arte full-body no painel de detalhe
 
                     SplitMultiplierColumns(profile);    // 2 colunas de multiplicadores (column-major)
-                    MaybeInjectPreviewEffects(profile); // item 029: só em Dev Mode, enquanto a rota não existe
                 }
 
                 Dispatcher.UIThread.Post(() =>
@@ -584,30 +583,6 @@ namespace SPT.Launcher.ViewModels
                 BgBrush = bg,
             };
         }
-
-        /// <summary>
-        /// Andaime de PREVIEW (item 029): enquanto o server não serve `effects`, injeta um conjunto realista
-        /// SÓ em Dev Mode, pra dar pra visualizar o layout dos cards. Removível quando a rota existir — não
-        /// afeta o jogador comum (Dev Mode off). Idempotente: só injeta se a classe não tem efeitos reais.
-        /// </summary>
-        private static void MaybeInjectPreviewEffects(ClassProfile profile)
-        {
-            if (profile == null || profile.HasAnyEffects) return;
-            if (!LauncherSettingsProvider.Instance.IsDevMode) return;
-
-            var sample = new List<ClassEffect>
-            {
-                new ClassEffect { IsPerk = true, Title = Pair("Sharpshooter", "Atirador"), Label = Pair("aim (ADS) time, all weapons", "mira (ADS), todas as armas"), ValueToken = "−15%" },
-                new ClassEffect { IsPerk = true, Title = Pair("Iron Lungs", "Fôlego de Aço"), Label = Pair("breath hold duration", "duração da respiração"), ValueToken = "+50%" },
-                new ClassEffect { IsPerk = true, Pending = true, Title = Pair("Steady Arms", "Braços Firmes"), Label = Pair("arm fatigue when aiming", "fadiga de braço ao mirar"), ValueToken = "−35%" },
-                new ClassEffect { IsPerk = false, Title = Pair("Loud Operator", "Barulhento"), Label = Pair("noise", "ruído"), ValueToken = "+30%" },
-                new ClassEffect { IsPerk = false, Title = Pair("Shaky Hands", "Mãos Trêmulas"), Label = Pair("recoil", "recuo"), ValueToken = "×1.25" },
-            };
-
-            PopulateEffects(profile, sample);
-        }
-
-        private static LocalizedPair Pair(string en, string pt) => new LocalizedPair { En = en, Pt = pt };
 
         private static IBrush ParseNameColor(string nameColor)
         {
