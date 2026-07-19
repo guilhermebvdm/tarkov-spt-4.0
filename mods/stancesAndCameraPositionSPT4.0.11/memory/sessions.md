@@ -727,3 +727,38 @@ tem só 8 arquivos):**
 testar troca de arma no meio do ADS-in, granada/med ao mirar, scope de alto zoom, paridade Fika 1ª/3ª pessoa. ·
 **P-11.4** (baseline/diagnóstico F2 — ainda útil para a F2). · F2 (atenuar o eixo) segue pendente. · P-11.1,
 P-11.2, P-10.x, subir 2.7.0 ao servidor.
+
+## 2026-07-19 ~ (GMT-3) — Sessão 11 (cont. 5): F1 refinada (waypoint por stance) + F3 (compressão de ADS-speed) — v2.7.1/2.8.0
+
+Feedback do usuário após testar a F1 (deu bom). 3 pedidos:
+
+1. **Waypoint por stance (v2.7.1, `01bb044`).** As opções globais `ADS Waypoint`/`Time` viraram **por stance**
+   (`Stance N ADS Waypoint` + `Stance N ADS Waypoint Time (ms)` em cada seção 1/2/3, via `BindStance` — null em
+   Stance 0). `AdsWaypoint.Update` recebe a stance de origem e lê a config dela. Motivo: Low Ready pede tempo
+   diferente da High Ready.
+2. **`Stance N Movement Speed Multiplier` fora de Advanced** (v2.7.1).
+3. **Compressão de ADS-speed (v2.8.0, `0a36993`).** Armas leves miram rápido demais → comprimir a faixa em torno
+   de um pivô, em **log-space** (natural p/ velocidade): `aimSpeed = pivot * (native/pivot)^(1-comp)`. comp=0 sem
+   efeito, comp=100% tudo no pivô. Aplicado num **Postfix de `ProceduralWeaponAnimation.UpdateWeaponVariables`**
+   (público, escreve `_aimingSpeed` na linha 1209 — confirmado ilspycmd). Persiste por arma; `SettingChanged`
+   reaplica ao vivo (calibra sem re-sacar). Coordena com o gate da F1 via `OnBaseAimSpeedChanged`.
+   F12: `ADS Speed Compression (%)` (0–100, default 0) + `ADS Speed Pivot` (0.3–4.0, default 1.5).
+
+**Decisões de design (confirmadas com o usuário):** pivô FIXO calibrável (não auto por peso); intensidade = slider
+0–100% (mapeia no expoente k=1-comp); começar já.
+
+**Code-review F3 (adversarial):** 0 🔴, 2 🟡 hardening aplicados — (a) guard "só comprimir com arma em mãos"
+(`UpdateWeaponVariables` também dispara em troca de colete/mochila SEM arma, onde o EFT não recalcula o nativo →
+dupla-compressão de campo dormente; sem sintoma, mas corrigido replicando o guard nativo); (b) `Reset()` no
+`StanceManager.ResetState` (consistência com os resets irmãos). Pow finito (ranges clampados + guard native/pivot).
+
+**Lições:**
+- **`UpdateWeaponVariables` NÃO implica "tem arma"** — roda em troca de rig/colete com mãos vazias, e aí o EFT não
+  recalcula o `_aimingSpeed`. Postfix que reescreve campo do EFT tem que replicar o guard nativo, senão compõe
+  sobre valor stale.
+- **Compressão em log-space (`^k`) é a forma certa p/ uniformizar velocidades** — o usuário perguntou "log faz
+  sentido?" e sim: velocidade é multiplicativa, comprimir a razão via expoente puxa os extremos simetricamente.
+
+**Pendências:** **[P-11.5] 🟡 GATE F1+F3:** calibrar in-game o `ADS Waypoint Time` por stance + o
+`Compression`/`Pivot`; testar troca de arma no ADS-in, scope, Fika. · P-11.4 (baseline/diagnóstico F2). · **F2**
+(braço G36 — atenuar o eixo, após o diagnóstico). · P-11.1, P-11.2, P-10.x, subir 2.8.0 ao servidor.
