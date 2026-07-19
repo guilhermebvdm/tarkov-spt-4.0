@@ -1,16 +1,16 @@
 # Graph Report - mods\stancesAndCameraPositionSPT4.0.11\modded  (2026-07-19)
 
 ## Corpus Check
-- 40 files · ~73,998 words
+- 41 files · ~74,584 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 558 nodes · 762 edges · 37 communities (36 shown, 1 thin omitted)
+- 567 nodes · 771 edges · 38 communities (37 shown, 1 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `8c9ae609`
+- Built from commit: `ed9cf500`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -51,10 +51,11 @@
 - [[_COMMUNITY_Community 33|Community 33]]
 - [[_COMMUNITY_Community 34|Community 34]]
 - [[_COMMUNITY_Community 35|Community 35]]
+- [[_COMMUNITY_Community 37|Community 37]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `StanceManager` - 59 edges
-2. `ModulePatch` - 36 edges
+2. `ModulePatch` - 37 edges
 3. `Plugin` - 34 edges
 4. `ApplyComplexRotationPatch` - 25 edges
 5. `TransitionMetrics` - 16 edges
@@ -79,7 +80,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (37 total, 1 thin omitted)
+## Communities (38 total, 1 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.07
@@ -221,22 +222,26 @@ Nodes (3): CameraRotationMod, bool, StanceStaminaState
 Cohesion: 0.50
 Nodes (3): CameraRotationMod, ConfigEntry, StanceConfig
 
+### Community 37 - "Community 37"
+Cohesion: 0.22
+Nodes (6): CameraRotationMod.Patches, ChamberCheckAmmoPatch, bool, FirearmController, MethodBase, PatchPostfix
+
 ## Knowledge Gaps
-- **199 isolated node(s):** `CameraRotationMod`, `bool`, `float`, `Stance`, `CameraRotationMod` (+194 more)
+- **204 isolated node(s):** `CameraRotationMod`, `bool`, `float`, `Stance`, `CameraRotationMod` (+199 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **1 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `ModulePatch` connect `Community 3` to `Community 2`, `Community 5`, `Community 6`, `Community 8`, `Community 9`, `Community 10`, `Community 11`, `Community 13`, `Community 15`, `Community 16`, `Community 17`, `Community 19`, `Community 20`, `Community 21`, `Community 22`, `Community 24`, `Community 26`?**
-  _High betweenness centrality (0.398) - this node is a cross-community bridge._
+- **Why does `ModulePatch` connect `Community 3` to `Community 2`, `Community 5`, `Community 37`, `Community 6`, `Community 8`, `Community 9`, `Community 10`, `Community 11`, `Community 13`, `Community 15`, `Community 16`, `Community 17`, `Community 19`, `Community 20`, `Community 21`, `Community 22`, `Community 24`, `Community 26`?**
+  _High betweenness centrality (0.406) - this node is a cross-community bridge._
 - **Why does `Plugin` connect `Community 1` to `Community 3`?**
-  _High betweenness centrality (0.091) - this node is a cross-community bridge._
+  _High betweenness centrality (0.090) - this node is a cross-community bridge._
 - **Why does `ManualChamberingComponent` connect `Community 2` to `Community 4`?**
-  _High betweenness centrality (0.072) - this node is a cross-community bridge._
+  _High betweenness centrality (0.071) - this node is a cross-community bridge._
 - **What connects `CameraRotationMod`, `bool`, `float` to the rest of the system?**
-  _199 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _204 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.06526806526806526 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
