@@ -135,6 +135,9 @@ namespace TRLDynamicSpawn.Components
                     _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.pmcUSEC, 30);
                     _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.pmcBEAR, 30);
                 }
+
+                // Ajusta as waves de boss originais do vanilla baseado nas configurações recebidas do servidor
+                AdjustVanillaBossWaves();
             }
             catch (Exception ex)
             {
@@ -204,174 +207,10 @@ namespace TRLDynamicSpawn.Components
             List<Tuple<SpawnGroupData, BotZone>> spawnList = new List<Tuple<SpawnGroupData, BotZone>>();
 
             // ======================================
-            // PROCESS ELITES / BOSSES
+            // PROCESS ELITES / BOSSES (Handled by vanilla now, skipping manual queue)
             // ======================================
             var mapName = _gameWorld.MainPlayer.Location.ToLower();
             var eliteConfig = _serverConfig?.EliteConfig;
-            
-            List<Tuple<BossLocationSpawn, BotZone>> bossQueue = new List<Tuple<BossLocationSpawn, BotZone>>();
-
-            if (isFirstWave && eliteConfig != null)
-            {
-                var bossesToProcess = new Dictionary<WildSpawnType, EliteLocationInfo>
-                {
-                    { WildSpawnType.bossKnight, eliteConfig.BossKnight },
-                    { WildSpawnType.bossTagilla, eliteConfig.BossTagilla },
-                    { WildSpawnType.bossKilla, eliteConfig.BossKilla },
-                    { WildSpawnType.bossZryachiy, eliteConfig.BossZryachiy },
-                    { WildSpawnType.bossGluhar, eliteConfig.BossGluhar },
-                    { WildSpawnType.bossSanitar, eliteConfig.BossSanitar },
-                    { WildSpawnType.bossKolontay, eliteConfig.BossKolontay },
-                    { WildSpawnType.bossBully, eliteConfig.BossReshala },
-                    { WildSpawnType.bossBoar, eliteConfig.BossKaban },
-                    { WildSpawnType.bossPartisan, eliteConfig.BossPartisan },
-                    { WildSpawnType.bossKojaniy, eliteConfig.BossShturman },
-                    { WildSpawnType.pmcBot, eliteConfig.Raiders },
-                    { WildSpawnType.exUsec, eliteConfig.Rogues },
-                    { WildSpawnType.arenaFighterEvent, eliteConfig.Bloodhounds },
-                    { WildSpawnType.sectantPriest, eliteConfig.Cultists }
-                };
-
-                bool IsNonBoss(WildSpawnType type) => type == WildSpawnType.pmcBot || type == WildSpawnType.exUsec || type == WildSpawnType.arenaFighterEvent || type == WildSpawnType.sectantPriest;
-
-                string invadedMap = "";
-                List<WildSpawnType> invadedBosses = new List<WildSpawnType>();
-
-                if (eliteConfig.BossInvasion != null && eliteConfig.BossInvasion.Enable)
-                {
-                    if (UnityEngine.Random.Range(1, 101) <= eliteConfig.BossInvasion.InvasionChance)
-                    {
-                        if (eliteConfig.BossInvasion.SelectedMaps.Contains("Random"))
-                            invadedMap = mapName; // Simplified: Invasion hits your current map if Random rolled successfully
-                        else if (eliteConfig.BossInvasion.SelectedMaps.Contains("All") || eliteConfig.BossInvasion.SelectedMaps.Contains(mapName))
-                            invadedMap = mapName;
-
-                        if (invadedMap == mapName)
-                        {
-                            if (eliteConfig.BossInvasion.SelectedBosses.Contains("Random"))
-                            {
-                                var bossKeys = bossesToProcess.Keys.Where(k => !IsNonBoss(k)).ToList();
-                                invadedBosses.Add(bossKeys[UnityEngine.Random.Range(0, bossKeys.Count)]);
-                            }
-                            else if (eliteConfig.BossInvasion.SelectedBosses.Contains("All"))
-                            {
-                                invadedBosses.AddRange(bossesToProcess.Keys.Where(k => !IsNonBoss(k)));
-                            }
-                            else
-                            {
-                                foreach (var bStr in eliteConfig.BossInvasion.SelectedBosses)
-                                {
-                                    if (Enum.TryParse(bStr, out WildSpawnType bType)) invadedBosses.Add(bType);
-                                }
-                            }
-                            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] BOSS INVASION TRIGGERED! Bosses: {string.Join(",", invadedBosses)} on {mapName}");
-                        }
-                    }
-                }
-
-                foreach (var kvp in bossesToProcess)
-                {
-                    var bossType = kvp.Key;
-                    var info = kvp.Value;
-
-                    if (info == null || !info.Enable) continue;
-                    
-                    bool isInvading = invadedBosses.Contains(bossType);
-                    if (eliteConfig.DisableBosses && !IsNonBoss(bossType) && !isInvading) continue; // Skip if disabled unless invading
- 
-                    int spawnChance = isInvading ? 100 : GetChanceForMap(info, mapName);
-                    if (spawnChance <= 0) continue;
-
-                    int roll = UnityEngine.Random.Range(1, 101);
-                    if (roll <= spawnChance)
-                    {
-                        BotZone bz = null;
-                        var allZones = LocationScene.GetAllObjects<BotZone>();
-                        if (allZones != null && allZones.Any())
-                        {
-                            if (eliteConfig.BossOpenZones || isInvading)
-                            {
-                                var allZonesArr = allZones.ToArray(); bz = allZonesArr[UnityEngine.Random.Range(0, allZonesArr.Length)];
-                            }
-                            else
-                            {
-                                string zonesString = GetZonesForMap(info, mapName);
-                                if (!string.IsNullOrEmpty(zonesString))
-                                {
-                                    string[] possibleZones = zonesString.Split(',').Select(z => z.Trim()).Where(z => !string.IsNullOrEmpty(z)).ToArray();
-                                    if (possibleZones.Length > 0)
-                                    {
-                                        string selectedZoneName = possibleZones[UnityEngine.Random.Range(0, possibleZones.Length)];
-                                        bz = allZones.FirstOrDefault(z => z.NameZone == selectedZoneName);
-                                    }
-                                }
-                            }
-                        }
-
-                        if (bz != null)
-                        {
-                            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Rolled SUCCESS ({roll} <= {spawnChance}) for {bossType} in {bz.NameZone} on {mapName}!");
-                            
-                            BossLocationSpawn newBossWave = null;
-
-                            if (!info.DisableFollowers && Singleton<IBotGame>.Instantiated)
-                            {
-                                var game = Singleton<IBotGame>.Instance;
-                                if (game.BossSpawnScenario != null && game.BossSpawnScenario.BossSpawnWaves != null)
-                                {
-                                    var origWave = game.BossSpawnScenario.BossSpawnWaves.FirstOrDefault(w => w.BossName.ToLower() == bossType.ToString().ToLower());
-                                    if (origWave != null)
-                                    {
-                                        newBossWave = new BossLocationSpawn()
-                                        {
-                                            BossName = origWave.BossName,
-                                            BossChance = 100f,
-                                            BossZone = bz.NameZone,
-                                            BossPlayer = false,
-                                            BossDifficult = origWave.BossDifficult,
-                                            BossEscortType = origWave.BossEscortType,
-                                            BossEscortDifficult = origWave.BossEscortDifficult,
-                                            BossEscortAmount = origWave.BossEscortAmount,
-                                            Time = -1f,
-                                            Supports = origWave.Supports,
-                                            ForceSpawn = true,
-                                            Delay = 0f
-                                        };
-                                    }
-                                }
-                            }
-
-                            if (newBossWave == null)
-                            {
-                                // Fallback for simple boss spawn if no origWave found or followers disabled
-                                newBossWave = new BossLocationSpawn()
-                                {
-                                    BossName = bossType.ToString(),
-                                    BossChance = 100f,
-                                    BossZone = bz.NameZone,
-                                    BossPlayer = false,
-                                    BossDifficult = BotDifficulty.normal.ToString(),
-                                    BossEscortType = bossType.ToString(),
-                                    BossEscortDifficult = BotDifficulty.normal.ToString(),
-                                    BossEscortAmount = "0",
-                                    Time = -1f,
-                                    ForceSpawn = true,
-                                    Delay = 0f
-                                };
-                            }
-
-                            bossQueue.Add(new Tuple<BossLocationSpawn, BotZone>(newBossWave, bz));
-                            
-                            int count = 1;
-                            if (int.TryParse(newBossWave.BossEscortAmount, out int escortCount) && escortCount > 0)
-                            {
-                                count += escortCount;
-                            }
-                            availableSlots -= count;
-                        }
-                    }
-                }
-            }
 
             // Group Splitting Local Function
             void GenerateAndEnqueueGroups(WildSpawnType role, BotDifficulty diff, int totalSlots, EliteLocationInfo info)
@@ -805,6 +644,106 @@ namespace TRLDynamicSpawn.Components
                     Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] FAILED: Could not find a safe zone for replacement bot. Dropping spawn.");
                 }
             }
+        }
+
+        private void AdjustVanillaBossWaves()
+        {
+            try
+            {
+                var game = Singleton<IBotGame>.Instance;
+                if (game == null || game.BossSpawnScenario == null || game.BossSpawnScenario.BossSpawnWaves == null)
+                {
+                    Plugin.LogSource.LogWarning("[TRL-DynamicSpawn] BossSpawnScenario or BossSpawnWaves is null. Cannot adjust vanilla boss waves.");
+                    return;
+                }
+
+                string mapName = _gameWorld?.MainPlayer?.Location?.ToLower() ?? "";
+                if (string.IsNullOrEmpty(mapName)) return;
+
+                var waves = game.BossSpawnScenario.BossSpawnWaves;
+                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Adjusting {waves.Length} vanilla boss waves using server configurations...");
+
+                foreach (var wave in waves)
+                {
+                    if (wave == null || wave.BossName == null) continue;
+
+                    string bossNameLower = wave.BossName.ToLower();
+
+                    EliteLocationInfo bossInfo = null;
+
+                    if (bossNameLower == "bossknight") bossInfo = _serverConfig?.EliteConfig?.BossKnight;
+                    else if (bossNameLower == "bosstagilla") bossInfo = _serverConfig?.EliteConfig?.BossTagilla;
+                    else if (bossNameLower == "bosskilla") bossInfo = _serverConfig?.EliteConfig?.BossKilla;
+                    else if (bossNameLower == "bosszryachiy") bossInfo = _serverConfig?.EliteConfig?.BossZryachiy;
+                    else if (bossNameLower == "bossgluhar") bossInfo = _serverConfig?.EliteConfig?.BossGluhar;
+                    else if (bossNameLower == "bosssanitar") bossInfo = _serverConfig?.EliteConfig?.BossSanitar;
+                    else if (bossNameLower == "bosskolontay") bossInfo = _serverConfig?.EliteConfig?.BossKolontay;
+                    else if (bossNameLower == "bossreshala") bossInfo = _serverConfig?.EliteConfig?.BossReshala;
+                    else if (bossNameLower == "bosskaban") bossInfo = _serverConfig?.EliteConfig?.BossKaban;
+                    else if (bossNameLower == "bossshturman") bossInfo = _serverConfig?.EliteConfig?.BossShturman;
+                    else if (bossNameLower == "bosspartisan") bossInfo = _serverConfig?.EliteConfig?.BossPartisan;
+                    else if (bossNameLower == "pmcbot") bossInfo = _serverConfig?.EliteConfig?.Raiders;
+                    else if (bossNameLower == "arenafighterevent") bossInfo = _serverConfig?.EliteConfig?.Bloodhounds;
+                    else if (bossNameLower == "sectantpriest") bossInfo = _serverConfig?.EliteConfig?.Cultists;
+                    else if (bossNameLower == "gifter") bossInfo = _serverConfig?.EliteConfig?.BossGifter;
+
+                    if (bossInfo != null)
+                    {
+                        int spawnChance = GetBossChanceForMap(bossInfo.SpawnChance, mapName);
+                        string spawnZones = GetBossZoneForMap(bossInfo.BossZone, mapName);
+
+                        wave.BossChance = (float)spawnChance;
+                        if (!string.IsNullOrEmpty(spawnZones))
+                        {
+                            wave.BossZone = spawnZones;
+                        }
+
+                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Configured vanilla boss wave {wave.BossName}: Chance={wave.BossChance}%, Zones='{wave.BossZone}'");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.LogSource.LogError($"[TRL-DynamicSpawn] Error adjusting vanilla boss waves: {ex.Message}\n{ex.StackTrace}");
+            }
+        }
+
+        private int GetBossChanceForMap(ValidLocationInt chance, string mapName)
+        {
+            if (chance == null) return 0;
+            string name = mapName.ToLower();
+            if (name.Contains("factory4_day")) return chance.Factory4Day;
+            if (name.Contains("factory4_night")) return chance.Factory4Night;
+            if (name.Contains("bigmap") || name.Contains("customs")) return chance.Customs;
+            if (name.Contains("woods")) return chance.Woods;
+            if (name.Contains("shoreline")) return chance.Shoreline;
+            if (name.Contains("interchange")) return chance.Interchange;
+            if (name.Contains("rezerv")) return chance.Reserve;
+            if (name.Contains("lighthouse")) return chance.Lighthouse;
+            if (name.Contains("tarkovstreets")) return chance.TarkovStreets;
+            if (name.Contains("sandbox_high")) return chance.GroundZeroHigh;
+            if (name.Contains("sandbox")) return chance.GroundZero;
+            if (name.Contains("laboratory")) return chance.Laboratory;
+            return 0;
+        }
+
+        private string GetBossZoneForMap(ValidLocationString zone, string mapName)
+        {
+            if (zone == null) return "";
+            string name = mapName.ToLower();
+            if (name.Contains("factory4_day")) return zone.Factory4Day;
+            if (name.Contains("factory4_night")) return zone.Factory4Night;
+            if (name.Contains("bigmap") || name.Contains("customs")) return zone.Customs;
+            if (name.Contains("woods")) return zone.Woods;
+            if (name.Contains("shoreline")) return zone.Shoreline;
+            if (name.Contains("interchange")) return zone.Interchange;
+            if (name.Contains("rezerv")) return zone.Reserve;
+            if (name.Contains("lighthouse")) return zone.Lighthouse;
+            if (name.Contains("tarkovstreets")) return zone.TarkovStreets;
+            if (name.Contains("sandbox_high")) return zone.GroundZeroHigh;
+            if (name.Contains("sandbox")) return zone.GroundZero;
+            if (name.Contains("laboratory")) return zone.Laboratory;
+            return "";
         }
 
         private bool _showDebugUI = true;

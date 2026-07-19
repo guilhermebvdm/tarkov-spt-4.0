@@ -474,22 +474,7 @@ namespace TRLDynamicSpawn.Patches
         [PatchPrefix]
         private static bool PatchPrefix(BossLocationSpawn wave)
         {
-            if (TRLDynamicSpawn.Components.DynamicSpawnManager.IsWarmupActive) return true; // Let vanilla run during warmup!
-            if (TRLDynamicSpawn.Components.DynamicSpawnManager.IsGeneratingDynamicWave) return true; // Let our boss wave run!
-            if (wave != null && wave.BossName != null)
-            {
-                string name = wave.BossName.ToLower();
-                if (name == "pmcbear" || name == "pmcusec" || name == "sptbear" || name == "sptusec")
-                {
-                    return true; // Let SPT PMCs spawn via Boss Location Waves!
-                }
-            }
-
-            if (TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value)
-            {
-                Plugin.LogSource.LogInfo($"[TRLDynamicSpawn] Blocked Vanilla Boss Wave ({wave?.BossName}) to give 100% control to DynamicSpawn.");
-            }
-            return false;
+            return true; // Let vanilla always handle boss waves!
         }
     }
 
