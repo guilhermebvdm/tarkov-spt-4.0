@@ -1,10 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using UnityEngine;
 using Comfort.Common;
 using EFT;
 using EFT.AssetsManager;
-using UnityEngine;
 using SPT.Common.Http;
 using Newtonsoft.Json;
 using TRLDynamicSpawn.Models;
@@ -163,7 +164,10 @@ namespace TRLDynamicSpawn.Components
 
                         if (canDespawn)
                         {
-                            StartCoroutine(AttemptToDespawnBotCoroutine(botsController, bot));
+                            if (!AttemptToTeleportBot(bot))
+                            {
+                                StartCoroutine(AttemptToDespawnBotCoroutine(botsController, bot));
+                            }
                         }
                     }
                 }
@@ -328,6 +332,118 @@ namespace TRLDynamicSpawn.Components
             {
                 Plugin.LogSource.LogError($"[TRL] Error attempting to despawn bot: {ex.Message}");
             }
+        }
+
+        private static void WipeMemoryResidue(BotMemoryClass memory)
+        {
+            if (memory == null) return;
+            try
+            {
+                var field = typeof(BotMemoryClass).GetField("LastEnemy", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+                           ?? typeof(BotMemoryClass).GetField("_lastEnemy", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                field?.SetValue(memory, null);
+            }
+            catch { }
+        }
+
+        private static void ForceBackToPatrol(BotOwner bot)
+        {
+            if (bot.PatrollingData == null) return;
+            try
+            {
+                bot.PatrollingData.Unpause();
+                var comeToPatrolMethod = bot.PatrollingData.GetType().GetMethod("ComeToPatrol", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+                if (comeToPatrolMethod != null)
+                {
+                    var parameters = comeToPatrolMethod.GetParameters();
+                    if (parameters.Length == 2) comeToPatrolMethod.Invoke(bot.PatrollingData, new object[] { true, true });
+                    else if (parameters.Length == 1) comeToPatrolMethod.Invoke(bot.PatrollingData, new object[] { true });
+                    else comeToPatrolMethod.Invoke(bot.PatrollingData, null);
+                }
+            }
+            catch { }
+        }
+
+        private bool AttemptToTeleportBot(BotOwner bot)
+        {
+            try
+            {
+                var gameWorld = Singleton<GameWorld>.Instance;
+                if (gameWorld == null || DynamicSpawnManager.Instance == null) return false;
+
+                string mapName = gameWorld.MainPlayer?.Location?.ToLower() ?? "";
+                var role = bot.Profile.Info.Settings.Role;
+
+                // 1. Encontra uma zona válida (perto de algum jogador, respeitando a bolha e LoS)
+                BotZone selectedZone = null;
+                bool zoneValid = false;
+                int retries = 10;
+
+                while (retries > 0)
+                {
+                    selectedZone = TRLDynamicSpawn.Helpers.Methods.GetRandomZone(bot.BotsController.BotSpawner);
+                    if (selectedZone != null && DynamicSpawnManager.Instance.IsValidSpawnZone(selectedZone, mapName, role))
+                    {
+                        zoneValid = true;
+                        break;
+                    }
+                    retries--;
+                }
+
+                if (!zoneValid || selectedZone == null || selectedZone.SpawnPoints == null || selectedZone.SpawnPoints.Length == 0)
+                {
+                    Plugin.LogSource.LogWarning($"[TRL] Teleport failed: could not find a valid target zone for {bot.GetPlayer.Profile.Nickname}.");
+                    return false;
+                }
+
+                // Seleciona um ponto de spawn aleatório na zona
+                var spawnPoint = selectedZone.SpawnPoints[UnityEngine.Random.Range(0, selectedZone.SpawnPoints.Length)];
+                Vector3 targetPos = spawnPoint.Position;
+
+                Plugin.LogSource.LogInfo($"[TRL] Teleporting bot {bot.GetPlayer.Profile.Nickname} ({role}) from {bot.Position} to {selectedZone.NameZone} ({targetPos})...");
+
+                // 2. Limpar de forma ultra segura toda a memória de combate e aggro (ICM + SAIN)
+                if (bot.Memory != null)
+                {
+                    bot.Memory.GoalEnemy = null;
+                    WipeMemoryResidue(bot.Memory);
+
+                    if (bot.BotsGroup != null && bot.BotsGroup.Enemies != null)
+                    {
+                        var enemyList = bot.BotsGroup.Enemies.Keys.ToList();
+                        foreach (var enemy in enemyList)
+                        {
+                            if (enemy != null)
+                            {
+                                bot.BotsGroup.RemoveEnemy(enemy);
+                                bot.Memory.DeleteInfoAboutEnemy(enemy);
+                            }
+                        }
+                    }
+                    bot.Memory.LastTimeHit = -1000f;
+                }
+
+                // Para disparos e alvos
+                bot.ShootData?.EndShoot();
+                if (bot.AimingManager?.CurrentAiming != null)
+                {
+                    bot.AimingManager.CurrentAiming.LoseTarget();
+                }
+
+                // 3. Teleporta fisicamente usando a API nativa do EFT que lida com o NavMesh/Solo automaticamente
+                bot.GetPlayer.Teleport(targetPos, true);
+
+                // 4. Força a retomar a patrulha no novo local
+                ForceBackToPatrol(bot);
+
+                return true;
+            }
+            catch (System.Exception ex)
+            {
+                Plugin.LogSource.LogError($"[TRL] Error during bot teleport: {ex.Message}\n{ex.StackTrace}");
+            }
+            return false;
         }
     }
 }

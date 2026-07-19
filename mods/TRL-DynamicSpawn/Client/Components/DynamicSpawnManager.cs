@@ -605,7 +605,7 @@ namespace TRLDynamicSpawn.Components
             return false;
         }
 
-        private bool IsValidSpawnZone(BotZone zone, string mapName, WildSpawnType? role = null, Vector3? overridePosition = null)
+        public bool IsValidSpawnZone(BotZone zone, string mapName, WildSpawnType? role = null, Vector3? overridePosition = null)
         {
             if (zone == null && overridePosition == null) return false;
 
