@@ -30,6 +30,39 @@
 
 
 
+		<!-- Settings (engrenagem) — à esquerda do minimizar (paridade com o launcher vanilla). Só visível
+		     quando AllowSettings (login / erro de conexão / profile idle); some durante conexão e no jogo. -->
+		<Button Grid.Column="2"
+				Command="{Binding SettingsButtonCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+				IsVisible="{Binding Source={x:Static helpers:LauncherSettingsProvider.Instance}, Path=AllowSettings}"
+				Foreground="{Binding ButtonForeground, RelativeSource={RelativeSource AncestorType=UserControl}}"
+				Background="Transparent"
+				BorderThickness="0"
+				HorizontalContentAlignment="Center"
+				VerticalContentAlignment="Center"
+				VerticalAlignment="Stretch"
+				CornerRadius="0"
+				Width="38"
+				ToolTip.Tip="Configurações">
+			<Viewbox Width="15" Height="15">
+				<Path Data="{StaticResource TrlIconSettings}"
+					  Stroke="{Binding $parent[Button].Foreground}"
+					  StrokeThickness="1.75" Fill="{x:Null}"
+					  Width="15" Height="15" Stretch="Uniform"
+					  StrokeLineCap="Flat" StrokeJoin="Miter"/>
+			</Viewbox>
+			<Button.Styles>
+				<Style Selector="Button:pointerover /template/ ContentPresenter">
+					<Setter Property="Background" Value="{DynamicResource TrlBgHoverBrush}"/>
+					<Setter Property="BorderThickness" Value="0"/>
+				</Style>
+				<Style Selector="Button:pressed /template/ ContentPresenter">
+					<Setter Property="Background" Value="{DynamicResource TrlBgActiveBrush}"/>
+					<Setter Property="BorderThickness" Value="0"/>
+				</Style>
+			</Button.Styles>
+		</Button>
+
 		<!-- Minimize (-) Button -->
 		<Button Grid.Column="4"
 				Foreground="{Binding ButtonForeground, RelativeSource={

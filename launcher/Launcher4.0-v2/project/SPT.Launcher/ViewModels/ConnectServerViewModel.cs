@@ -55,7 +55,8 @@ namespace SPT.Launcher.ViewModels
                 LogManager.Instance.Info("[Connect] Iniciando conexão ao servidor...");
 
                 // 1. Obtém a URL oficial do servidor via Pastebin (precisa ser antes da VPN para sabermos para onde mandar o registro)
-                if (!LauncherSettingsProvider.Instance.IsDevMode)
+                // UseLocalServer (checkbox dev) pula o Gist e mantém a URL local já setada em Server.Url.
+                if (!LauncherSettingsProvider.Instance.IsDevMode && !LauncherSettingsProvider.Instance.UseLocalServer)
                 {
                     OnUi(() => connectModel.InfoText = "Obtendo URL do servidor...");
                     try
@@ -242,6 +243,16 @@ namespace SPT.Launcher.ViewModels
             {
                 await ConnectServer();
             });
+        }
+
+        /// <summary>
+        /// Abre Configurações no MODO ENXUTO (sem menu lateral) a partir do erro de conexão. Ao voltar/salvar
+        /// (GoBackCommand → NavigateBack), esta tela re-ativa e o ConnectServer roda de novo (reconecta).
+        /// </summary>
+        public void OpenSettingsCommand()
+        {
+            LauncherSettingsProvider.Instance.AllowSettings = false;
+            NavigateTo(new SettingsViewModel(HostScreen, slim: true));
         }
     }
 }

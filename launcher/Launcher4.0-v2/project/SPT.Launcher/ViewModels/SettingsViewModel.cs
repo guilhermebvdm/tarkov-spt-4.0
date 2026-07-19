@@ -70,8 +70,58 @@ namespace SPT.Launcher.ViewModels
             }
         }
 
-        public SettingsViewModel(IScreen Host) : base(Host)
+        private const string LocalServerUrl = "https://127.0.0.1:6969";
+
+        /// <summary>
+        /// Checkbox "Usar servidor local": liga → guarda a URL atual em SavedServerUrl e troca Server.Url
+        /// pro local (127.0.0.1); desliga → restaura a URL guardada. Não destrói a URL de produção.
+        /// Ferramenta de Dev Mode; efeito na próxima conexão (ao sair de Configurações o launcher reconecta).
+        /// </summary>
+        public bool UseLocalServer
         {
+            get => LauncherSettingsProvider.Instance.UseLocalServer;
+            set
+            {
+                if (LauncherSettingsProvider.Instance.UseLocalServer == value) return;
+
+                if (value)
+                {
+                    // Guarda a URL atual (a menos que já seja o local — evita perder a de produção).
+                    string current = LauncherSettingsProvider.Instance.Server.Url;
+                    if (!string.Equals(current, LocalServerUrl, StringComparison.OrdinalIgnoreCase))
+                    {
+                        LauncherSettingsProvider.Instance.SavedServerUrl = current;
+                    }
+                    LauncherSettingsProvider.Instance.Server.Url = LocalServerUrl;
+                }
+                else
+                {
+                    string saved = LauncherSettingsProvider.Instance.SavedServerUrl;
+                    if (!string.IsNullOrEmpty(saved))
+                    {
+                        LauncherSettingsProvider.Instance.Server.Url = saved;
+                    }
+                }
+
+                LauncherSettingsProvider.Instance.UseLocalServer = value;
+                LauncherSettingsProvider.Instance.SaveSettings();
+                this.RaisePropertyChanged(nameof(UseLocalServer));
+                LogManager.Instance.Info($"[Settings] Servidor local {(value ? "LIGADO (127.0.0.1)" : "desligado")} — URL efetiva: {LauncherSettingsProvider.Instance.Server.Url}");
+            }
+        }
+
+        /// <summary>
+        /// Modo enxuto (aberto a partir de um erro de conexão): esconde o menu lateral e mostra só um
+        /// botão "salvar e voltar". Ao voltar (GoBackCommand → NavigateBack), a tela anterior
+        /// (ConnectServer) re-ativa e reconecta. Default false = tela normal com sidebar.
+        /// </summary>
+        public bool SlimMode { get; }
+        public bool ShowSidebar => !SlimMode;
+
+        public SettingsViewModel(IScreen Host, bool slim = false) : base(Host)
+        {
+            SlimMode = slim;
+
             if(Application.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
             {
                 desktop.MainWindow.Closing += MainWindow_Closing;

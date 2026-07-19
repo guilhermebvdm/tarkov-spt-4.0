@@ -18,6 +18,10 @@ namespace SPT.Launcher
         {
             try
             {
+                // i18n: garante os locales oficiais completos no runtime ANTES de qualquer acesso ao
+                // LocalizationProvider (senão o Instance estático carregaria de um arquivo incompleto).
+                Helpers.LocaleBootstrap.EnsureInstalled();
+
                 BuildAvaloniaApp()
                 .StartWithClassicDesktopLifetime(args);
             }

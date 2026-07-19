@@ -32,13 +32,15 @@
                  IsVisible="{Binding connectModel.IsDownloading}"
                  />
 
-    <Button Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=retry}"
-            Grid.Row="3"
-            Margin="10,16"
-            HorizontalAlignment="Center"
-            IsVisible="{Binding connectModel.ConnectionFailed}"
-            Command="{Binding RetryCommand}"
-            />
+    <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="10"
+                Margin="10,16" HorizontalAlignment="Center"
+                IsVisible="{Binding connectModel.ConnectionFailed}">
+      <Button Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=retry}"
+              Command="{Binding RetryCommand}"/>
+      <!-- Acesso a Configurações no erro (ex.: trocar URL do servidor). Abre modo enxuto; ao voltar, reconecta. -->
+      <Button Content="CONFIGURAÇÕES" Classes="ghost" Cursor="Hand"
+              Command="{Binding OpenSettingsCommand}"/>
+    </StackPanel>
 
   </Grid>
 

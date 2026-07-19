@@ -350,6 +350,27 @@ namespace SPT.Launcher.Helpers
             set => SetProperty(ref _homologMode, value);
         }
 
+        /// <summary>
+        /// Ferramenta de dev: quando ligado, o launcher usa o servidor LOCAL (127.0.0.1) em vez da URL
+        /// configurada, PRESERVANDO a URL anterior em <see cref="SavedServerUrl"/>. Ao desligar, restaura
+        /// a URL guardada. Só faz sentido em Dev Mode (o painel dev exige Dev Mode; e o fetch do Gist é
+        /// pulado quando isto está ligado).
+        /// </summary>
+        private bool _useLocalServer;
+        public bool UseLocalServer
+        {
+            get => _useLocalServer;
+            set => SetProperty(ref _useLocalServer, value);
+        }
+
+        /// <summary>URL do servidor guardada antes de trocar pro local (para restaurar ao desligar UseLocalServer).</summary>
+        private string _savedServerUrl;
+        public string SavedServerUrl
+        {
+            get => _savedServerUrl;
+            set => SetProperty(ref _savedServerUrl, value);
+        }
+
         private string _gamePath;
         public string GamePath
         {

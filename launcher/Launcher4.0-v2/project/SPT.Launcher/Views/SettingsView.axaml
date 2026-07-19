@@ -29,8 +29,9 @@
 
     <Grid ColumnDefinitions="Auto, *">
 
-        <!-- 1. SIDEBAR (TrlSidebarNav — mesmo chrome da ProfileView) -->
-        <cc:TrlSidebarNav Grid.Column="0">
+        <!-- 1. SIDEBAR (TrlSidebarNav — mesmo chrome da ProfileView). Escondida no modo enxuto
+             (aberto a partir de um erro de conexão) — aí a coluna Auto colapsa e o painel ocupa tudo. -->
+        <cc:TrlSidebarNav Grid.Column="0" IsVisible="{Binding ShowSidebar}">
             <Grid RowDefinitions="Auto, *, Auto">
 
                 <!-- Logo Topo (item 006: desce um pouco + respiro antes do menu; paridade com ProfileView) -->
@@ -79,6 +80,12 @@
             <!-- Conteúdo Scrolável (item 007: top 34px da top bar + 30 de respiro → título não encosta) -->
             <ScrollViewer Margin="30,64,30,30" VerticalScrollBarVisibility="Hidden">
                 <StackPanel Spacing="20">
+
+                    <!-- Modo enxuto (sem sidebar): botão de voltar. GoBackCommand salva as configs e
+                         volta pra tela anterior (ConnectServer re-ativa e reconecta). -->
+                    <Button Content="◀  SALVAR E VOLTAR" Classes="ghost" HorizontalAlignment="Left"
+                            Cursor="Hand" IsVisible="{Binding SlimMode}"
+                            Command="{Binding GoBackCommand}"/>
 
                     <TextBlock Classes="trl-h1" Text="CONFIGURAÇÕES" Margin="0,0,0,10"/>
 
@@ -194,6 +201,16 @@
                                 <TextBox Watermark="Ex: http://127.0.0.1:6969"
                                          Text="{Binding Source={x:Static helpers:LauncherSettingsProvider.Instance}, Path=Server.Url, Mode=TwoWay}"
                                          MaxWidth="300" HorizontalAlignment="Left"/>
+                            </StackPanel>
+
+                            <!-- Atalho: usar servidor local (guarda a URL atual, restaura ao desmarcar) -->
+                            <StackPanel Spacing="2">
+                                <CheckBox Content="Usar servidor local (127.0.0.1)"
+                                          IsChecked="{Binding UseLocalServer}"
+                                          ToolTip.Tip="Aponta o launcher para o servidor LOCAL (127.0.0.1:6969) em vez da URL acima, guardando a URL anterior. Ao desmarcar, volta para a URL que estava. Requer reconectar."/>
+                                <TextBlock Classes="trl-faint" FontSize="{DynamicResource TrlText2Xs}" TextWrapping="Wrap"
+                                           MaxWidth="460" HorizontalAlignment="Left"
+                                           Text="Marca → usa 127.0.0.1 e guarda a URL atual. Desmarca → restaura a URL guardada."/>
                             </StackPanel>
 
                             <StackPanel Spacing="2">

@@ -9,10 +9,10 @@
     <NoWin32Manifest>true</NoWin32Manifest>
     <AssemblyName>Tarkov Red Line</AssemblyName>
     <Product>Tarkov Red Line</Product>
-    <Version>2.5.3</Version>
-    <AssemblyVersion>2.5.3.0</AssemblyVersion>
-    <FileVersion>2.5.3.0</FileVersion>
-    <InformationalVersion>2.5.3</InformationalVersion>
+    <Version>2.6.0</Version>
+    <AssemblyVersion>2.6.0.0</AssemblyVersion>
+    <FileVersion>2.6.0.0</FileVersion>
+    <InformationalVersion>2.6.0</InformationalVersion>
     <!-- Server lê ProductVersion (=InformationalVersion) do exe p/ auto-update:
          sem o sufixo +sha, senão IsNewerVersion/Version.TryParse falha (item 014). -->
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
@@ -20,6 +20,16 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\tailscale-setup-1.98.4-amd64.msi">
       <LogicalName>TailscaleInstaller</LogicalName>
+    </EmbeddedResource>
+    <!-- i18n (TRL): locales OFICIAIS completos embutidos no exe. O LocaleBootstrap os escreve na pasta
+         de runtime no boot se faltarem/divergirem (a do SPT server é vanilla, sem as chaves do TRL). -->
+    <None Remove="SPT_Data\Launcher\Locales\English.json" />
+    <None Remove="SPT_Data\Launcher\Locales\Portuguese.json" />
+    <EmbeddedResource Include="SPT_Data\Launcher\Locales\English.json">
+      <LogicalName>locale.English.json</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SPT_Data\Launcher\Locales\Portuguese.json">
+      <LogicalName>locale.Portuguese.json</LogicalName>
     </EmbeddedResource>
     <AvaloniaResource Include="Assets\**" />
     <AvaloniaXaml Remove="Properties\**" />
