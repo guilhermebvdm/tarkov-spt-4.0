@@ -534,6 +534,7 @@ namespace TRLImmersiveCombatMedicine
 
             // Liberar movimento
             doctor.MovementContext.SetPhysicalCondition(EPhysicalCondition.UsingMeds, false);
+            ReleaseSurgeryImmobilize(doctor);   // 077 — solta HealingLegs + reseta anim mult
 
             NotificationManagerClass.DisplayMessageNotification("Item dropado!", ENotificationDurationType.Default, ENotificationIconType.Alert);
         }
@@ -559,6 +560,18 @@ namespace TRLImmersiveCombatMedicine
 
             // Imobilizar o médico
             doctor.MovementContext.SetPhysicalCondition(EPhysicalCondition.UsingMeds, true);
+
+            // 077 — perks de TEMPO/MOVIMENTO do Médico na cura de ALIADO (via CustomClasses; no-op se ausente).
+            // O operador é o MainPlayer local, então o gate (classe) é resolvido localmente pela bridge (sem 057/packet).
+            float allyTimeMult = CustomClassesBridge.AllyHealTimeMult(stats.IsSurgery);   // 1 se não-Médico/sem CC
+            // Imobiliza o operador na CIRURGIA de aliado (HealingLegs = não anda), EXCETO Médico com Mobile Surgery.
+            // Curativo NÃO enraíza (só UsingMeds, que permite andar — CanWalk só checa HealingLegs). Fail-safe: sem
+            // CustomClasses, AllyMobileSurgeon()=false → ninguém anda (comportamento seguro do ICM standalone).
+            if (stats.IsSurgery && !CustomClassesBridge.AllyMobileSurgeon())
+                doctor.MovementContext.SetPhysicalCondition(EPhysicalCondition.HealingLegs, true); // ref: MovementContext.cs:1578/1296
+            // Animação acompanha o UseTime encurtado. Setado ANTES do SetInHands, no início de CADA HealRoutine
+            // (invariante do review PA-01-03 — não depende do reset do cleanup anterior).
+            MedicHealPatch.AllyAnimSpeedMult = allyTimeMult > 0f ? 1f / allyTimeMult : 1f;
 
             NotificationManagerClass.DisplayMessageNotification($"Aplicando {itemUsed.ShortName.Localized()}...", ENotificationDurationType.Default, ENotificationIconType.Quest);
 
@@ -587,7 +600,8 @@ namespace TRLImmersiveCombatMedicine
             }
 
             // Espera o tempo de uso do item (+2s para animação completar visualmente)
-            float totalUseTime = stats.UseTime + 2f;
+            // 077 — Swift Surgeon (cirurgia) / Rapid Care (demais) encurtam o procedimento de aliado p/ o Médico.
+            float totalUseTime = stats.UseTime * allyTimeMult + 2f;
             yield return new WaitForSeconds(totalUseTime);
 
             // G2: Guard — médico morreu durante wait?
@@ -605,6 +619,7 @@ namespace TRLImmersiveCombatMedicine
                 CleanupHealState(patient);
                 // Resetar mãos do médico que ainda está vivo
                 try { doctor.MovementContext.SetPhysicalCondition(EPhysicalCondition.UsingMeds, false); } catch { }
+                ReleaseSurgeryImmobilize(doctor);   // 077 — solta HealingLegs + reseta anim mult
                 MedicHealPatch.ForceFinishAnimation();
                 yield break;
             }
@@ -622,6 +637,7 @@ namespace TRLImmersiveCombatMedicine
 
             // Liberar movimento do médico
             doctor.MovementContext.SetPhysicalCondition(EPhysicalCondition.UsingMeds, false);
+            ReleaseSurgeryImmobilize(doctor);   // 077 — solta HealingLegs + reseta anim mult
 
             _isHealingInProgress = false;
             _itemBeingUsed = null;
@@ -679,9 +695,22 @@ namespace TRLImmersiveCombatMedicine
             MedicHealPatch.CurrentPatient = null;
             MedicHealPatch.CleanupPatientSubscription();
             MedicHealPatch.BandAidHealActive = false;
+            MedicHealPatch.AllyAnimSpeedMult = 1f;   // 077 — reset da velocidade extra (médico morto não passa pelo release)
             _isHealingInProgress = false;
             _itemBeingUsed = null;
             try { patient.OnPlayerDeadOrUnspawn -= OnPatientDiedDuringHeal; } catch { }
+        }
+
+        /// <summary>
+        /// 077 — libera a imobilização da cirurgia de aliado (<c>HealingLegs</c>) e reseta a velocidade extra da
+        /// animação. Pareado com CADA ponto que solta <c>UsingMeds</c> (fim/drop/cancel/deactivate/paciente-morto)
+        /// + <c>ResetAllState</c>. Reset incondicional é seguro (desligar já-desligado = no-op); nunca desliga um
+        /// <c>HealingLegs</c> de AUTO-cirurgia (aquele contexto não passa pelo HealRoutine).
+        /// </summary>
+        private void ReleaseSurgeryImmobilize(Player doctor)
+        {
+            try { if (doctor != null) doctor.MovementContext.SetPhysicalCondition(EPhysicalCondition.HealingLegs, false); } catch { }
+            MedicHealPatch.AllyAnimSpeedMult = 1f;
         }
 
         /// <summary>
@@ -721,6 +750,7 @@ namespace TRLImmersiveCombatMedicine
 
             // Liberar movimento
             try { doctor.MovementContext.SetPhysicalCondition(EPhysicalCondition.UsingMeds, false); } catch { }
+            ReleaseSurgeryImmobilize(doctor);   // 077 — solta HealingLegs + reseta anim mult
 
             NotificationManagerClass.DisplayMessageNotification("Tratamento cancelado.", ENotificationDurationType.Default, ENotificationIconType.Alert);
             TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("CancelHealInProgress: cura cancelada (Mouse0).");
@@ -892,6 +922,7 @@ namespace TRLImmersiveCombatMedicine
                 if (mainPlayer != null)
                 {
                     mainPlayer.MovementContext.SetPhysicalCondition(EPhysicalCondition.UsingMeds, false);
+                    ReleaseSurgeryImmobilize(mainPlayer);   // 077 — solta HealingLegs + reseta anim mult
                     try { mainPlayer.ActiveHealthController?.CancelApplyingItem(); } catch { }
                 }
 
@@ -1048,6 +1079,7 @@ namespace TRLImmersiveCombatMedicine
             MedicHealPatch.CurrentPatient = null;
             MedicHealPatch.BandAidHealActive = false;
             MedicHealPatch.CleanupPatientSubscription();
+            MedicHealPatch.AllyAnimSpeedMult = 1f;   // 077 — velocidade extra de animação não atravessa raids
 
             BandAidUI.Instance?.HideUI();
             DebugBotInvisibility.OnRaidEnded();

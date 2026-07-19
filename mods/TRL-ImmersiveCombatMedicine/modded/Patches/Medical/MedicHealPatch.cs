@@ -27,6 +27,11 @@ namespace Band_Aid
         // Fica true durante toda a operação de cura, incluindo a transição
         public static bool BandAidHealActive = false;
 
+        // 077 — velocidade EXTRA da animação de cura de ALIADO (setada pelo HealRoutine antes de SetInHands;
+        // 1 = sem efeito). É 1/timeMult: se o operador é Médico com Swift Surgeon (efeito ×0.5), a animação corre
+        // ~2× mais rápido, casando com o UseTime encurtado do ICM. Multiplica o valor-base de SetUseTimeMultiplier.
+        public static float AllyAnimSpeedMult = 1f;
+
         private static MethodInfo _method8Cached = null;
         private static MethodInfo _method9Cached = null;
         private static object _currentObservedMedsControllerClass = null;
@@ -310,7 +315,7 @@ namespace Band_Aid
                         if (anim != null)
                         {
                             var setMult = AccessTools.Method(anim.GetType(), "SetUseTimeMultiplier");
-                            setMult?.Invoke(anim, new object[] { 1f });
+                            setMult?.Invoke(anim, new object[] { 1f * AllyAnimSpeedMult });   // 077 — acelera se Médico
                         }
                     }
 
@@ -363,7 +368,7 @@ namespace Band_Aid
                         if (animator2 != null)
                         {
                             var setMultMethod2 = AccessTools.Method(animator2.GetType(), "SetUseTimeMultiplier");
-                            setMultMethod2?.Invoke(animator2, new object[] { 1f });
+                            setMultMethod2?.Invoke(animator2, new object[] { 1f * AllyAnimSpeedMult });   // 077
                         }
                     }
 
@@ -416,7 +421,7 @@ namespace Band_Aid
                     if (animator != null)
                     {
                         var setMultMethod = AccessTools.Method(animator.GetType(), "SetUseTimeMultiplier");
-                        setMultMethod?.Invoke(animator, new object[] { 1f + num });
+                        setMultMethod?.Invoke(animator, new object[] { (1f + num) * AllyAnimSpeedMult });   // 077
                     }
                 }
 

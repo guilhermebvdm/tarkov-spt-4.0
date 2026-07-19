@@ -104,14 +104,21 @@ internal static class MedicTiming
     }
 
     /// <summary>Fator do item em uso: 🔧 Swift Surgeon (cirurgia) ou 🔧 Rapid Care (demais meds). 1 = perk off.</summary>
-    internal static float FactorFor(Item? item)
+    internal static float FactorFor(Item? item) => FactorFor(IsSurgery(item));
+
+    /// <summary>
+    ///     077 — overload por bool. O ICM (cura de ALIADO) já conhece <c>ItemStats.IsSurgery</c>, então consulta
+    ///     este overload pela fachada <see cref="CombatMedicAllyPerks"/>. Fonte ÚNICA da lógica de tempo do 072
+    ///     (respeita <see cref="_disabled"/> — se o trio de patches do 072 falhou ao aplicar, o perk fica off aqui também).
+    /// </summary>
+    internal static float FactorFor(bool isSurgery)
     {
         if (_disabled)
         {
             return 1f;
         }
 
-        if (IsSurgery(item))
+        if (isSurgery)
         {
             return PerksConfig.SwiftSurgeonEnabled?.Value == true
                 ? (PerksConfig.SwiftSurgeonTime?.Value ?? 0.5f)
