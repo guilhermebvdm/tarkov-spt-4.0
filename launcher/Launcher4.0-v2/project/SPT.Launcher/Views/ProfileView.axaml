@@ -12,6 +12,7 @@
         <cvt:ImageSourceConverter x:Key="imageSourceCvt"/>
         <!-- item 012: separador de milhar PT-BR no contador de XP -->
         <cvt:ThousandSeparatorConverter x:Key="thousandsCvt"/>
+        <cvt:LocalizedFormatConverter x:Key="locFmtCvt"/>
     </UserControl.Resources>
 
     <!-- Dots do carrossel de fundo: quadradinho (radius 0), inativo faint / ativo accent, cursor hand -->
@@ -229,21 +230,63 @@
 
                         <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock Text="{Binding ProfileInfo.Level, StringFormat='Nível: {0}'}" Classes="trl-accent" FontWeight="Bold" FontSize="{DynamicResource TrlTextSm}"/>
+                                <TextBlock Classes="trl-accent" FontWeight="Bold" FontSize="{DynamicResource TrlTextSm}">
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource locFmtCvt}">
+                                            <Binding Source="{x:Static helpers:LocalizationProvider.Instance}" Path="profile_level"/>
+                                            <Binding Path="ProfileInfo.Level"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
                                 <!-- XP barra expandida (ProgressBar do tema) -->
                                 <ProgressBar Value="{Binding ProfileInfo.XPLevelProgress}" Maximum="100" VerticalAlignment="Center" HorizontalAlignment="Stretch" MinWidth="150"/>
-                                <TextBlock Text="{Binding ProfileInfo.RemainingExp, Converter={StaticResource thousandsCvt}, ConverterParameter='Faltam: {0:N0} xp'}" Classes="trl-muted" FontSize="{DynamicResource TrlTextXs}" VerticalAlignment="Center"/>
+                                <TextBlock Classes="trl-muted" FontSize="{DynamicResource TrlTextXs}" VerticalAlignment="Center">
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource locFmtCvt}">
+                                            <Binding Source="{x:Static helpers:LocalizationProvider.Instance}" Path="profile_remaining_exp"/>
+                                            <Binding Path="ProfileInfo.RemainingExp"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
                             </StackPanel>
 
-                            <TextBlock Text="{Binding ProfileInfo.Nickname, StringFormat='Operador: {0}'}" Foreground="{DynamicResource TrlFgBrush}" FontWeight="Bold" FontSize="{DynamicResource TrlTextSm}"/>
+                            <TextBlock Foreground="{DynamicResource TrlFgBrush}" FontWeight="Bold" FontSize="{DynamicResource TrlTextSm}">
+                                <TextBlock.Text>
+                                    <MultiBinding Converter="{StaticResource locFmtCvt}">
+                                        <Binding Source="{x:Static helpers:LocalizationProvider.Instance}" Path="profile_operator"/>
+                                        <Binding Path="ProfileInfo.Nickname"/>
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
                             <!-- item 013: classe do operador (edição do CustomClasses) -->
-                            <TextBlock Text="{Binding CurrentEdition, StringFormat='Classe: {0}'}" Classes="trl-muted" FontSize="{DynamicResource TrlTextXs}"
-                                       IsVisible="{Binding CurrentEdition, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
-                            <TextBlock Text="{Binding CurrentId, StringFormat='Id: {0}'}" Classes="trl-faint" FontSize="{DynamicResource TrlText2Xs}" Cursor="Hand"
+                            <TextBlock Classes="trl-muted" FontSize="{DynamicResource TrlTextXs}"
+                                       IsVisible="{Binding CurrentEdition, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                <TextBlock.Text>
+                                    <MultiBinding Converter="{StaticResource locFmtCvt}">
+                                        <Binding Source="{x:Static helpers:LocalizationProvider.Instance}" Path="profile_class"/>
+                                        <Binding Path="CurrentEdition"/>
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                            <TextBlock Classes="trl-faint" FontSize="{DynamicResource TrlText2Xs}" Cursor="Hand"
                                        ToolTip.Tip="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=profile_id_copy_tooltip}"
                                        PointerPressed="CopyIdToClipboard"
-                                       TextDecorations="Underline"/>
-                            <TextBlock Text="{Binding ProfileInfo.Side, StringFormat='Facção: {0}'}" Classes="trl-accent" FontSize="{DynamicResource TrlTextXs}"/>
+                                       TextDecorations="Underline">
+                                <TextBlock.Text>
+                                    <MultiBinding Converter="{StaticResource locFmtCvt}">
+                                        <Binding Source="{x:Static helpers:LocalizationProvider.Instance}" Path="profile_id"/>
+                                        <Binding Path="CurrentId"/>
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                            <TextBlock Classes="trl-accent" FontSize="{DynamicResource TrlTextXs}">
+                                <TextBlock.Text>
+                                    <MultiBinding Converter="{StaticResource locFmtCvt}">
+                                        <Binding Source="{x:Static helpers:LocalizationProvider.Instance}" Path="profile_faction"/>
+                                        <Binding Path="ProfileInfo.Side"/>
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
                         </StackPanel>
 
                         <!-- Ações (Direita) -->

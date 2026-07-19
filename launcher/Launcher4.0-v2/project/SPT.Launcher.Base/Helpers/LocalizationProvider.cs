@@ -319,6 +319,20 @@ namespace SPT.Launcher.Helpers
             get => _change_server_confirm;
             set => SetProperty(ref _change_server_confirm, value);
         }
+
+        // Painel de perfil (templates com placeholder — usados via LocalizedFormatConverter/MultiBinding).
+        private string _profile_operator;
+        public string profile_operator { get => _profile_operator; set => SetProperty(ref _profile_operator, value); }
+        private string _profile_level;
+        public string profile_level { get => _profile_level; set => SetProperty(ref _profile_level, value); }
+        private string _profile_remaining_exp;
+        public string profile_remaining_exp { get => _profile_remaining_exp; set => SetProperty(ref _profile_remaining_exp, value); }
+        private string _profile_class;
+        public string profile_class { get => _profile_class; set => SetProperty(ref _profile_class, value); }
+        private string _profile_id;
+        public string profile_id { get => _profile_id; set => SetProperty(ref _profile_id, value); }
+        private string _profile_faction;
+        public string profile_faction { get => _profile_faction; set => SetProperty(ref _profile_faction, value); }
         #endregion
         
         #region dev_mode
