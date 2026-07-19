@@ -235,11 +235,11 @@ internal static class PerksConfig
         // (caminho nativo) E p/ aliados operados via ICM (TRL-ImmersiveCombatMedicine), gateado pela classe do OPERADOR.
         RestorativeSurgeryEnabled = config.Bind(
             SecMedic, "Restorative Surgery — Enabled", true,
-            "Médico: a cirurgia restaura o membro a ~90% do HP MÁXIMO (configurável abaixo), em vez da cicatriz grande do vanilla (CMS mantém só 25–45%, Surv12 60–72%). Vale para a cirurgia no próprio Médico e nos aliados que ele opera (via ICM). / Combat Medic: surgery restores the limb to ~90% of MAX HP (configurable below) instead of vanilla's big scar (CMS keeps only 25–45%, Surv12 60–72%). Applies to the medic's own surgery and to allies they operate on (via ICM).");
+            "Médico: a cirurgia restaura o membro a ~80% do HP MÁXIMO (configurável abaixo), em vez da cicatriz grande do vanilla (CMS mantém só 25–45%, Surv12 60–72%). Vale para a cirurgia no próprio Médico e nos aliados que ele opera (via ICM). / Combat Medic: surgery restores the limb to ~80% of MAX HP (configurable below) instead of vanilla's big scar (CMS keeps only 25–45%, Surv12 60–72%). Applies to the medic's own surgery and to allies they operate on (via ICM).");
         RestorativeSurgeryRetention = config.Bind(
-            SecMedic, "Restorative Surgery — Restored max HP", 0.90f,
+            SecMedic, "Restorative Surgery — Restored max HP", 0.80f,
             new ConfigDescription(
-                "Fração MÍNIMA do HP máximo que o membro operado retém (0.90 = volta com 90%). É um PISO: nunca pior que o vanilla, e a skill Surgery do jogador pode melhorar ALÉM disto. / Minimum fraction of the limb's max HP retained after surgery (0.90 = comes back at 90%). It's a FLOOR: never worse than vanilla, and the player's Surgery skill can push beyond it.",
+                "Fração MÍNIMA do HP máximo que o membro operado retém (0.80 = volta com 80%). É um PISO: nunca pior que o vanilla, e a skill Surgery do jogador pode melhorar ALÉM disto. / Minimum fraction of the limb's max HP retained after surgery (0.80 = comes back at 80%). It's a FLOOR: never worse than vanilla, and the player's Surgery skill can push beyond it.",
                 new AcceptableValueRange<float>(0f, 1f)));
         // B1: default OFF até os perks do Médico existirem (hoje o Metabolismo já cobre — mas o recuo fica desligado por padrão).
         ShakyHandsEnabled = config.Bind(

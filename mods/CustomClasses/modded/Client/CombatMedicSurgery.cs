@@ -40,7 +40,7 @@ public static class CombatMedicSurgery
 
     /// <summary>
     ///     Penalty ajustado da cirurgia: se o perk está ligado e o <paramref name="doctor"/> é <b>Combat Medic</b>,
-    ///     eleva a fração de HP máximo retida ao PISO do F12 (default 0.90 = o membro volta com 90%), sem nunca
+    ///     eleva a fração de HP máximo retida ao PISO do F12 (default 0.80 = o membro volta com 80%), sem nunca
     ///     piorar o vanilla; senão devolve intacto. <b>PÚBLICO</b> — o ICM chama por reflection no seu ApplySurgery.
     /// </summary>
     public static float Adjust(Player? doctor, float penalty)
@@ -63,10 +63,10 @@ public static class CombatMedicSurgery
             // ⚠️ SEMÂNTICA (review 076): o `penalty`/`healthPenalty` é a FRAÇÃO de HP MÁXIMO RETIDA
             // (Maximum × healthPenalty, ActiveHealthController:3903), NÃO a penalidade — 1.0 = sem cicatriz,
             // 0.0 = membro volta com 1 de máximo. O vanilla retém pouco: CMS 0.25–0.45, Surv12 0.60–0.72.
-            // Restorative Surgery eleva a retenção a um PISO configurável (F12, default 0.90 = 90%): Max(vanilla, piso)
+            // Restorative Surgery eleva a retenção a um PISO configurável (F12, default 0.80 = 80%): Max(vanilla, piso)
             //   → nunca pior que o piso, nunca pior que o vanilla. A skill Surgery vanilla ainda empurra ALÉM do piso
-            //   (linha 3902, aplicada DEPOIS deste Prefix) → 90% é o MÍNIMO garantido, não o teto (decisão do usuário).
-            var retention = PerksConfig.RestorativeSurgeryRetention?.Value ?? 0.90f;
+            //   (linha 3902, aplicada DEPOIS deste Prefix) → 80% é o MÍNIMO garantido, não o teto (decisão do usuário).
+            var retention = PerksConfig.RestorativeSurgeryRetention?.Value ?? 0.80f;
             return Math.Max(penalty, retention);
         }
         catch (Exception ex)
@@ -82,7 +82,7 @@ public static class CombatMedicSurgery
 ///     é chamado pela cirurgia (MedEffect DestroyedPart, ActiveHealthController:1907) — o caso do perk — e também
 ///     por uma REGENERAÇÃO periódica de membro destruído (ActiveHealthController:2256, com <c>healthPenalty = 1f</c>).
 ///     Como <c>Adjust</c> devolve <c>Max(penalty, piso)</c> e o piso ≤ 1, um <c>healthPenalty = 1f</c> fica intacto
-///     (<c>Max(1, 0.90) = 1</c>) → a regeneração não é afetada. Roda no health controller do PACIENTE. Na
+///     (<c>Max(1, 0.80) = 1</c>) → a regeneração não é afetada. Roda no health controller do PACIENTE. Na
 ///     auto-cirurgia o operador = paciente = dono deste <c>ActiveHealthController</c> → o gate lê a classe dele.
 ///     No caso de ALIADO (o ICM aplica o packet no ActiveHC do paciente), o <c>SetExternalHandling(true)</c> do ICM
 ///     faz este patch PULAR — o penalty já veio ajustado pela classe do OPERADOR no envio (#2).
