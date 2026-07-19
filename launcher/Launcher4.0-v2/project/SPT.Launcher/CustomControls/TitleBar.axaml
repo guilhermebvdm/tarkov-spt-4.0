@@ -9,9 +9,9 @@
 
 	<!-- TRL military chrome: 34px screen-bar height, GroundDeep background (via
 	     cc|TitleBar theme style), global brand laser divider at the bottom (R1: the one laser). -->
-	<Grid ColumnDefinitions="AUTO,*,AUTO,10,AUTO,AUTO" Height="34" Background="Transparent">
+	<Grid ColumnDefinitions="AUTO,*,AUTO,AUTO,AUTO" Height="34" Background="Transparent">
 
-		<Rectangle Grid.ColumnSpan="6" IsHitTestVisible="False"
+		<Rectangle Grid.ColumnSpan="5" IsHitTestVisible="False"
 				   Fill="{Binding Background, RelativeSource={
                       RelativeSource AncestorType=UserControl}}"
                  />
@@ -64,7 +64,7 @@
 		</Button>
 
 		<!-- Minimize (-) Button -->
-		<Button Grid.Column="4"
+		<Button Grid.Column="3"
 				Foreground="{Binding ButtonForeground, RelativeSource={
 												 RelativeSource AncestorType=UserControl}}"
 				Command="{Binding MinButtonCommand, RelativeSource={
@@ -96,7 +96,7 @@
 		</Button>
 
 		<!-- Close (X) Button -->
-		<Button Grid.Column="5"
+		<Button Grid.Column="4"
 				Foreground="{Binding ButtonForeground, RelativeSource={
 				             RelativeSource AncestorType=UserControl}}"
 				Command="{Binding XButtonCommand, RelativeSource={
@@ -134,7 +134,7 @@
 
 		<!-- Global brand laser divider (the ONE red moment per view - R1).
 		     LaserMargin recua o laser p/ só o painel nas telas de auth (item 001). -->
-		<cc:TrlLaserDivider Grid.ColumnSpan="6" VerticalAlignment="Bottom"
+		<cc:TrlLaserDivider Grid.ColumnSpan="5" VerticalAlignment="Bottom"
 		                    Margin="{Binding LaserMargin, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
 
 	</Grid>
