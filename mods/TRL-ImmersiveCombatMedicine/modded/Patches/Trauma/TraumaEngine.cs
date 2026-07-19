@@ -32,12 +32,16 @@ namespace TRLImmersiveCombatMedicine.Trauma
         private readonly TraumaLine[] _newLines = new TraumaLine[3];
 
         private GameWorld _trackedWorld;      // padrão N1 do repo (BandAidController): null-detect de GameWorld
+        private bool _raidStarted;            // fronteira de ativação: SÓ OnRaidStarted arma; zerado no reset (review 1, achado 2)
         private bool _personAddSubscribed;    // rastreamento ativo (subscribe OnPersonAdd + records vivos)
         private float _pollAccumulator;
         private bool _debugConsumerSubscribed; // stub AC6: SubscribeWithSnapshot tardio 1x na 1ª ativação do Debug Test Consumer
 
         private static readonly TraumaRegion[] DebugTestRegions =
             { TraumaRegion.Legs, TraumaRegion.Arms, TraumaRegion.Stomach };
+
+        private static readonly TraumaOneShotKind[] OneShotKinds =
+            (TraumaOneShotKind[])Enum.GetValues(typeof(TraumaOneShotKind)); // review 1, achado 4 — sem hardcode dos kinds
 
         // ---- Consultas públicas ----
 
@@ -134,6 +138,8 @@ namespace TRLImmersiveCombatMedicine.Trauma
             if (inst == null) return;
             inst.ResetForNewRaidInternal(); // 1. reset idempotente (AC8)
             GameWorld gw = Singleton<GameWorld>.Instance;
+            if (gw is HideoutGameWorld) return; // hideout não é raid (review 1, achado 2) — motor fica desarmado
+            inst._raidStarted = true; // ÚNICA fonte que arma a fronteira de ativação (review 1, achado 2)
             if (gw == null) return; // Update adota o mundo quando o singleton aparecer (defesa N1)
             inst._trackedWorld = gw;
             if (inst.IsEngineEnabled())
@@ -153,6 +159,7 @@ namespace TRLImmersiveCombatMedicine.Trauma
             TraumaObservability.ResetSeen();
             _pollAccumulator = 0f;
             _trackedWorld = null;
+            _raidStarted = false; // desarma a fronteira — só o próximo OnRaidStarted re-arma (review 1, achado 2)
             TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("[Trauma2] ResetForNewRaid");
         }
 
@@ -162,14 +169,27 @@ namespace TRLImmersiveCombatMedicine.Trauma
             GameWorld gw = Singleton<GameWorld>.Instance;
             if (gw == null)
             {
-                if (_trackedWorld != null || _records.Count > 0) ResetForNewRaidInternal();
+                if (_raidStarted || _trackedWorld != null || _records.Count > 0) ResetForNewRaidInternal();
                 return;
             }
+            // Cinto-e-suspensório (review 1, achado 2): o hideout instancia HideoutGameWorld : ClientLocalGameWorld —
+            // nunca é raid; sem este guard, uma adoção indevida ativaria o motor no esconderijo.
+            if (gw is HideoutGameWorld) return;
+            // Fronteira de ativação (review 1, achado 2): SÓ o prefix de GameWorld.OnGameStarted (OnRaidStarted)
+            // arma _raidStarted — Update nunca auto-ativa no load/countdown só porque o singleton já existe.
+            if (!_raidStarted) return;
             if (!ReferenceEquals(gw, _trackedWorld))
             {
-                // Mundo novo detectado sem passar pelo prefix (defesa; transit normal passa pelo prefix) — reset + adotar
-                ResetForNewRaidInternal();
-                _trackedWorld = gw;
+                if (_trackedWorld == null)
+                {
+                    _trackedWorld = gw; // adoção adiada: prefix rodou antes do singleton (defesa N1)
+                }
+                else
+                {
+                    // Mundo trocou sem novo OnGameStarted — reset e aguardar o próximo prefix (transit normal re-dispara)
+                    ResetForNewRaidInternal();
+                    return;
+                }
             }
 
             // (a) master legado + master Trauma 2.0 (abertura 5 ratificada: exige os DOIS on):
@@ -271,9 +291,11 @@ namespace TRLImmersiveCombatMedicine.Trauma
                 _evalScratch.Clear();
             }
 
-            while (_records.Count > 0)
+            // for decrescente + UntrackRecord direto: imune a Player DESTRUÍDO (fake-null da Unity) —
+            // o drain via UntrackPlayer(Player) girava sem remover o record → freeze (review 1, achado 1)
+            for (int i = _records.Count - 1; i >= 0; i--)
             {
-                UntrackPlayer(_records[_records.Count - 1].Player);
+                UntrackRecord(_records[i]);
             }
 
             if (_personAddSubscribed)
@@ -331,8 +353,18 @@ namespace TRLImmersiveCombatMedicine.Trauma
 
         private void UntrackPlayer(Player p)
         {
-            // Limpeza SEM transições espúrias (comportamento 1): unsubscribe simétrico + remove record + limpa cooldowns. Sem StateChanged.
-            if (p == null || !_recordsByPlayer.TryGetValue(p, out PlayerTraumaRecord rec)) return;
+            // `p is null` = null GERENCIADO (ReferenceEquals): o operador == da Unity devolve true p/
+            // Player DESTRUÍDO, o que engolia o untrack sem remover o record (review 1, achado 1).
+            if (p is null || !_recordsByPlayer.TryGetValue(p, out PlayerTraumaRecord rec)) return;
+            UntrackRecord(rec);
+        }
+
+        private void UntrackRecord(PlayerTraumaRecord rec)
+        {
+            // Limpeza SEM transições espúrias (comportamento 1): unsubscribe simétrico + remove record + limpa
+            // cooldowns. Sem StateChanged. Membros GERENCIADOS (eventos/dicts/ProfileId) são seguros mesmo com
+            // o UnityEngine.Object destruído (review 1, achado 1).
+            if (rec == null) return;
 
             IHealthController hc = rec.Hc;
             if (hc != null)
@@ -344,17 +376,22 @@ namespace TRLImmersiveCombatMedicine.Trauma
                 hc.EffectRemovedEvent -= rec.OnEffectHandler;
                 hc.ApplyDamageEvent -= rec.OnApplyDamageHandler;
             }
-            p.OnPlayerDeadOrUnspawn -= UntrackPlayer;
 
-            _recordsByPlayer.Remove(p);
-            _records.Remove(rec);
-
-            string id = p.ProfileId;
-            if (id != null)
+            Player p = rec.Player;
+            if (!(p is null))
             {
-                _cooldownUntil.Remove((id, TraumaOneShotKind.InvoluntaryCrouch));
-                _cooldownUntil.Remove((id, TraumaOneShotKind.InvoluntaryFall));
+                p.OnPlayerDeadOrUnspawn -= UntrackPlayer;
+                _recordsByPlayer.Remove(p);
+                string id = p.ProfileId;
+                if (id != null)
+                {
+                    for (int i = 0; i < OneShotKinds.Length; i++)
+                    {
+                        _cooldownUntil.Remove((id, OneShotKinds[i])); // review 1, achado 4 — itera o enum cacheado
+                    }
+                }
             }
+            _records.Remove(rec);
         }
 
         // ---- Handlers de evento (só marcam dirty) ----
@@ -554,6 +591,13 @@ namespace TRLImmersiveCombatMedicine.Trauma
                 if (p == null || hc == null || !_recordsByPlayer.ContainsKey(p) || !hc.IsAlive) continue;
 
                 bool pk = IsUnderPainkiller(p);
+                // review 1, achado 3: flip de analgésico SEM evento (ex.: toggle Include Adrenaline mid-raid)
+                // chega aqui como divergência — soma PainkillerGained/Lost à máscara (bit mais alto vence a
+                // Reconciliation → vira o motivo primário). Estômago fica fora (latch D8 — pk nunca é causa).
+                TraumaChangeReason pkFlip = TraumaChangeReason.None;
+                if (pk != rec.LastPainkiller)
+                    pkFlip = pk ? TraumaChangeReason.PainkillerGained : TraumaChangeReason.PainkillerLost;
+
                 int zeroedLegs = (hc.IsBodyPartDestroyed(EBodyPart.LeftLeg) ? 1 : 0) + (hc.IsBodyPartDestroyed(EBodyPart.RightLeg) ? 1 : 0);
                 int brokenLegs = (hc.IsBodyPartBroken(EBodyPart.LeftLeg) ? 1 : 0) + (hc.IsBodyPartBroken(EBodyPart.RightLeg) ? 1 : 0);
                 int zeroedArms = (hc.IsBodyPartDestroyed(EBodyPart.LeftArm) ? 1 : 0) + (hc.IsBodyPartDestroyed(EBodyPart.RightArm) ? 1 : 0);
@@ -563,12 +607,12 @@ namespace TRLImmersiveCombatMedicine.Trauma
                 bool divergent = false;
                 if (TraumaMatrixResolver.ResolveLegs(zeroedLegs, brokenLegs, pk) != rec.Lines[(int)TraumaRegion.Legs])
                 {
-                    MarkDirty(rec, TraumaRegion.Legs, TraumaChangeReason.Reconciliation);
+                    MarkDirty(rec, TraumaRegion.Legs, TraumaChangeReason.Reconciliation | pkFlip);
                     divergent = true;
                 }
                 if (TraumaMatrixResolver.ResolveArms(zeroedArms, brokenArms, pk) != rec.Lines[(int)TraumaRegion.Arms])
                 {
-                    MarkDirty(rec, TraumaRegion.Arms, TraumaChangeReason.Reconciliation);
+                    MarkDirty(rec, TraumaRegion.Arms, TraumaChangeReason.Reconciliation | pkFlip);
                     divergent = true;
                 }
                 if ((stomachZeroed ? TraumaLine.StomachZeroed : TraumaLine.None) != rec.Lines[(int)TraumaRegion.Stomach])
@@ -576,7 +620,8 @@ namespace TRLImmersiveCombatMedicine.Trauma
                     MarkDirty(rec, TraumaRegion.Stomach, TraumaChangeReason.Reconciliation);
                     divergent = true;
                 }
-                if (divergent) EvaluatePlayer(rec, establishing: false);
+                if (divergent) EvaluatePlayer(rec, establishing: false); // atualiza LastPainkiller no caminho divergente
+                else rec.LastPainkiller = pk; // baseline fresco mesmo sem diff — evita mis-atribuição futura
             }
             _evalScratch.Clear();
         }

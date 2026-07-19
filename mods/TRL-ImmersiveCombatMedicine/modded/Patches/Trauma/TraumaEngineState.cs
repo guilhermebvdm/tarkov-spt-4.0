@@ -92,7 +92,10 @@ namespace TRLImmersiveCombatMedicine.Trauma
         internal IHealthController Hc;                       // sempre ActiveHealthController-derived (IsOwnedHere)
         internal readonly TraumaLine[] Lines = new TraumaLine[3]; // indexado por TraumaRegion
         internal bool StomachPainkillerAtEntry;              // latch D8
-        internal bool LastPainkiller;                        // p/ derivar Gained/Lost no diff consolidado
+        /// <summary>Baseline do predicado de analgésico. Consumido no Reconcile: flip SEM evento (ex.: toggle
+        /// Include Adrenaline mid-raid) classifica a divergência como PainkillerGained/Lost em vez de só
+        /// Reconciliation (review 1, achado 3). Atualizado a cada EvaluatePlayer e a cada sweep sem diff.</summary>
+        internal bool LastPainkiller;
         /// <summary>Bitmask de motivos ACUMULADA por região desde a última consolidação (review 1, achado 2).
         /// Dirty ≡ PendingReasons[região] != None — um campo só; zerada após publicar.</summary>
         internal readonly TraumaChangeReason[] PendingReasons = new TraumaChangeReason[3];
