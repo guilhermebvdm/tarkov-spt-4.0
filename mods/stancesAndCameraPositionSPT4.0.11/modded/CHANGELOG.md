@@ -7,6 +7,17 @@ Versões mais recentes primeiro.
 
 ---
 
+## v2.8.2 (2026-07-19)
+
+### Correção (apresentação no F12)
+
+As opções `ADS Waypoint` / `...Time` de cada postura agora aparecem no **rodapé** da seção (abaixo de
+`Snap to Stance 0 on Fire`), no mesmo lugar nas três — pedido do usuário: as posições ficam na ordem natural em
+cima e os pares experimentais/calibráveis do waypoint no fim. (A v2.8.1 os tinha posto no topo; este layout é o
+preferido.) Sem mudança de comportamento.
+
+---
+
 ## v2.8.1 (2026-07-19)
 
 ### Correção (apresentação no F12)

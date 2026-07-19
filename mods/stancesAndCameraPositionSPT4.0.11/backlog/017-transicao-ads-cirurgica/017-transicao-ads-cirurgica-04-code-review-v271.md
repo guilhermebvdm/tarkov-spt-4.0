@@ -23,8 +23,13 @@ diferente em cada seção e **colide exatamente na Stance 2**: `Stance 2 ADS Way
 `Stance 2 Forward/Backward` (17), e o Time (16) com `Stance 2 Up/Down` (16). No F12 os toggles apareciam
 intercalados com os sliders de posição na Low Ready, e em posição inconsistente entre as stances.
 
-**Correção:** Order **fixo 30/29**, acima do teto de qualquer seção de stance (Stance 1 Sprint = 28) → o waypoint
-aparece no **topo** das três seções, consistente e sem empate.
+**Correção (v2.8.1):** Order **fixo 30/29**, acima do teto de qualquer seção de stance (Stance 1 Sprint = 28) → o
+waypoint aparece no **topo** das três seções, consistente e sem empate.
+
+**Revisão de layout (v2.8.2):** por pedido do usuário, o par foi movido para o **rodapé** de cada seção — Order
+**-1/-2**, abaixo da entry mais baixa (`Snap to Stance 0 on Fire` = 0). As posições ficam na ordem natural em cima;
+os pares experimentais/calibráveis do waypoint no fim, consistentes nas três. Continua fixo (nenhuma posição usa
+Order negativo) → sem empate.
 
 ### CR-2 · 🟢 → ✅ Corrigido (v2.8.1) — fallback do time
 
