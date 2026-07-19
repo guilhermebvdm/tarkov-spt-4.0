@@ -7,8 +7,8 @@
   "enabled": true,
   "baseEdition": "SPT Zero to hero",
   "description": {
-    "en": "Sniper. Patient and precise. Owns elevated positions, minimises movement and eliminates before being spotted.",
-    "pt": "Sniper. Paciente e preciso. Domina posições elevadas, minimiza movimento e elimina antes de ser detectado."
+    "en": "Hunter. Spends the whole raid lying in a bush and calls it tactics. One shot, one less problem, zero remorse. If you heard the shot, tough luck.",
+    "pt": "Caçador. Passa a raid deitado no mato e chama isso de tática. Um tiro, um problema a menos, nenhum remorso. Se você ouviu o disparo, azar o seu."
   },
   "iconFile": "cacador.png",
   "nameColor": "#c2973f",

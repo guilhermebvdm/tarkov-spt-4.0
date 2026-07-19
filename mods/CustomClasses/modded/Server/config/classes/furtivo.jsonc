@@ -7,8 +7,8 @@
   "enabled": true,
   "baseEdition": "SPT Zero to hero",
   "description": {
-    "en": "Stealth. Furtive killer — moves unheard, strikes from the dark. Devastating melee execution and a suppressed sidearm.",
-    "pt": "Furtivo. Assassino furtivo — move-se sem ser ouvido e ataca do escuro. Execução melee devastadora e pistola silenciada."
+    "en": "Stealth. Won't waste a bullet on anyone he can knife. Appears from the dark, settles it with the blade and vanishes before anyone works out what happened. He calls cowardice 'efficiency'.",
+    "pt": "Furtivo. Não desperdiça bala com quem dá pra esfaquear. Aparece do escuro, resolve na lâmina e some antes de alguém entender o que houve. Covardia ele chama de eficiência."
   },
   "iconFile": "operadorFurtivo.png",
   "nameColor": "#8b8fa3",

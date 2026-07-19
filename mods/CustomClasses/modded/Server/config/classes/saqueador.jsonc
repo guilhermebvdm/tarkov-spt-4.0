@@ -7,8 +7,8 @@
   "enabled": true,
   "baseEdition": "SPT Zero to hero",
   "description": {
-    "en": "Scavenger. Empties containers in seconds, detects loot at range and instantly identifies valuable items.",
-    "pt": "Saqueador. Esvazia containers em segundos, detecta loot à distância e identifica itens valiosos instantaneamente."
+    "en": "Scavenger. While you trade shots, he's already cleaned out the next room. Sniffs loot from afar, cracks two containers at once and disappears before the bill arrives. Greed, professionally licensed.",
+    "pt": "Saqueador. Enquanto você troca tiro, ele já limpou a sala ao lado. Fareja loot de longe, abre dois contêineres de uma vez e some antes da conta chegar. Ganância com CNPJ."
   },
   "iconFile": "saqueador.png",
   "nameColor": "#c4ad45",

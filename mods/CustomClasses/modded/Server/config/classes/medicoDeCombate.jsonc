@@ -7,8 +7,8 @@
   "enabled": true,
   "baseEdition": "SPT Zero to hero",
   "description": {
-    "en": "Combat Medic. Survives wounds that would kill others. Treats severe damage fast and stays operational after taking hits.",
-    "pt": "Médico de combate. Sobrevive a ferimentos que matariam outros. Trata dano severo rápido e continua operacional após levar dano."
+    "en": "Combat Medic. Takes hits that would kill normal people and patches himself up complaining the whole time. Back in the firefight before the bandage is done, because stopping to heal is for amateurs.",
+    "pt": "Médico de Combate. Leva tiro que mataria gente normal e ainda se trata reclamando. Volta pro tiroteio antes de acabar o curativo, porque parar pra sarar é coisa de amador."
   },
   "iconFile": "medicoDeCombate.png",
   "nameColor": "#6f9455",

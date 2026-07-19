@@ -7,8 +7,8 @@
   "enabled": true,
   "baseEdition": "SPT Zero to hero",
   "description": {
-    "en": "Assault Rifleman. Aggressive. Closes the distance, sustains fire and pushes positions with fast reloads and recoil control.",
-    "pt": "Fuzileiro de assalto. Agressivo. Entra em contato, sustenta fogo e empurra posições com recargas rápidas e controle de recuo."
+    "en": "Rifleman. The tactical plan is to go forward and shoot everything. Burns ammo like it's free, reloads fast because he has to, and pushes positions treating armor as a minor detail.",
+    "pt": "Fuzileiro. O plano tático é ir pra frente e atirar em tudo. Gasta munição como se fosse de graça, recarrega rápido porque precisa, e empurra posição achando colete um detalhe."
   },
   "iconFile": "fuzileiro.png",
   "nameColor": "#b0573a",

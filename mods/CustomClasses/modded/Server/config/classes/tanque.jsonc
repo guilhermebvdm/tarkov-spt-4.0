@@ -7,8 +7,8 @@
   "enabled": true,
   "baseEdition": "SPT Zero to hero",
   "description": {
-    "en": "Tank. Walking fortress — soaks damage that drops others, hauls heavy gear and keeps pushing. Trades speed for armor.",
-    "pt": "Tanque. Fortaleza ambulante — absorve dano que derruba os outros, carrega equipamento pesado e continua avançando. Troca velocidade por blindagem."
+    "en": "Tank. Slow, heavy and proud of it. Soaks the damage that drops everyone else and hauls half the shop on his back. Speed is overrated when you simply don't die.",
+    "pt": "Tanque. Lento, pesado e orgulhoso disso. Aguenta o dano que derruba os outros e carrega meia loja nas costas. Velocidade é superestimada quando você simplesmente não morre."
   },
   "iconFile": "tanque.png",
   "nameColor": "#6b7280",
