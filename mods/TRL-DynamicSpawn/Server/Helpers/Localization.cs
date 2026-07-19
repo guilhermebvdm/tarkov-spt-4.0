@@ -64,13 +64,8 @@ namespace TRLDynamicSpawnServer.Helpers
                     { "No event active", "Nenhum evento ativo" },
                     { "Random Event", "Evento Aleatório" },
                     { "Menu", "Menu" },
-                    { "Settings", "Configurações" },
-                    { "Bot Teleportation", "Teletransporte de Bots" },
-                    { "Enable Teleportation (Despawn):", "Ativar Teletransporte (Despawn):" },
-                    { "Teleport PMCs:", "Teleportar PMCs:" },
-                    { "Teleport Trigger Distance (m) - Distance a bot must be from ALL players to be teleported:", "Distância de Ativação do Teletransporte (m) - Distância que o bot deve estar de TODOS os jogadores para ser teleportado:" },
-                    { "Teleport Check Interval (seconds) - How often to check bot distances for teleportation:", "Intervalo de Verificação de Teleporte (segundos) - Frequência de checagem da distância do bot para o teletransporte:" },
-                    { "Teleport Minimum Safe Distance (m) - Minimum distance from player to receive a teleported bot:", "Distância Mínima Segura de Teletransporte (m) - Distância mínima do jogador para receber um bot teleportado:" }
+                    { "Select an item...", "Selecione um item..." },
+                    { "Settings", "Configurações" }
                 }
             },
             {
