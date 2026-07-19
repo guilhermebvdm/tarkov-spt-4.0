@@ -1783,7 +1783,13 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
   border-radius: var(--radius-sm);
   font-size: var(--fs-xs);
   font-weight: 400;
-  white-space: nowrap;
+  /* Short tips stay on one line (max-content); long ones wrap instead of stretching into one huge
+   * single line — capped at a readable column. */
+  white-space: normal;
+  width: max-content;
+  max-width: 280px;
+  line-height: 1.4;
+  text-align: left;
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
