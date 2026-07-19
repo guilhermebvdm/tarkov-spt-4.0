@@ -65,7 +65,16 @@ namespace TRLDynamicSpawnServer.Helpers
                     { "Random Event", "Evento Aleatório" },
                     { "Menu", "Menu" },
                     { "Select an item...", "Selecione um item..." },
-                    { "Settings", "Configurações" }
+                    { "Settings", "Configurações" },
+                    { "Spawn Radius", "Raio de Spawn" },
+                    { "Min (only spawn above min) - Distance from players to allow spawns:", "Mínimo (somente spawn acima de min) - Distância do jogador para permitir spawns:" },
+                    { "Max (only spawn below max):", "Máximo (somente spawn abaixo de max):" },
+                    { "Max Spawn/Despawn Limit Distance (m):", "Distância Limite de Spawn/Despawn Máxima (m):" },
+                    { "Teleport Bots", "Teletransporte de Bots" },
+                    { "Teleport bots?:", "Teleportar bots?:" },
+                    { "Teleport Minimum Distance (m) - Safe distance from players for teleport target:", "Distância Mínima de Teletransporte (m) - Distância segura do jogador para o destino do teleporte:" },
+                    { "Check Interval (seconds) - How often to scan bot distances:", "Intervalo de Verificação (segundos) - Frequência de checagem da distância do bot:" },
+                    { "Include PMCs:", "Incluir PMCs:" }
                 }
             },
             {

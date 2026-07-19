@@ -523,11 +523,29 @@ namespace TRLDynamicSpawn.Components
                 // Line of Sight Culling Check
                 if (enableLos && dist <= losDist)
                 {
-                    Vector3 directionToZone = (zonePos - player.Position).normalized;
-                    float dot = Vector3.Dot(player.LookDirection, directionToZone);
-                    
-                    // If in front of the player (FOV approx 90 degrees -> Dot > 0.5)
-                    if (dot > 0.5f)
+                    bool isVisible = false;
+
+                    if (player.IsYourPlayer && Camera.main != null)
+                    {
+                        // Teste de Frustum da Câmera principal (baseado no FOV real e miras do jogador)
+                        Vector3 screenPoint = Camera.main.WorldToViewportPoint(zonePos + Vector3.up * 1f);
+                        if (screenPoint.z > 0 && screenPoint.x >= 0 && screenPoint.x <= 1 && screenPoint.y >= 0 && screenPoint.y <= 1)
+                        {
+                            isVisible = true;
+                        }
+                    }
+                    else
+                    {
+                        // Fallback de dot product clássico para outros jogadores humanos na raid
+                        Vector3 directionToZone = (zonePos - player.Position).normalized;
+                        float dot = Vector3.Dot(player.LookDirection, directionToZone);
+                        if (dot > 0.5f)
+                        {
+                            isVisible = true;
+                        }
+                    }
+
+                    if (isVisible)
                     {
                         // Raycast to check if there is a wall. If it doesn't hit a wall, the spawn is visible!
                         Vector3 headPos = player.MainParts.ContainsKey(BodyPartType.head) ? player.MainParts[BodyPartType.head].Position : player.Position + Vector3.up * 1.5f;
