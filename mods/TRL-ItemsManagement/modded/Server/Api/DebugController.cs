@@ -171,6 +171,11 @@ public sealed class DebugController(
                     traderName = trader.Base?.Nickname,
                     nativePrice = bs.Count,
                     currency = MoneyTplToLabel(bs.Template),
+                    // B-6: live assort stock knobs — reflect StockApplier's boot mutation, so this is how a
+                    // stock / buy-limit override is confirmed to have taken effect without launching the game.
+                    stock = item.Upd?.StackObjectsCount,
+                    buyLimit = item.Upd?.BuyRestrictionMax,
+                    unlimited = item.Upd?.UnlimitedCount,
                 });
             }
         }

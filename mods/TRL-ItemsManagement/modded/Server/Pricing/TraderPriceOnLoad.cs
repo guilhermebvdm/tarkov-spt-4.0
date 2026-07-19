@@ -106,6 +106,18 @@ public class TraderPriceOnLoad(
             FleaFloorOverrideStore.Map = new Dictionary<MongoId, double>();
         }
 
+        // B-6: trader stock / per-cycle buy-limit overrides — boot mutation of the live assort (survives
+        // trader refresh, see StockApplier). Own try/catch so a bad stock config can't take down the rest.
+        try
+        {
+            var stockConfigPath = Path.Combine(modPaths.ConfigDir, "stock-overrides.json");
+            StockApplier.Apply(stockConfigPath, jsonUtil, databaseService, logger);
+        }
+        catch (Exception ex)
+        {
+            logger.Error("[TRLItemsManagement] failed to load/apply stock-overrides.json: " + ex);
+        }
+
         return Task.CompletedTask;
     }
 }
