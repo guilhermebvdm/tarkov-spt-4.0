@@ -20,7 +20,7 @@ public enum ScrollMode
     Linear,
 }
 
-[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "2.8.0")]
+[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "2.8.1")]
 public class Plugin : BaseUnityPlugin
 {
     public static Plugin Instance { get; private set; }
@@ -1485,20 +1485,24 @@ public class Plugin : BaseUnityPlugin
                     new AcceptableValueRange<int>(50, 100),
                     new ConfigurationManagerAttributes { Order = orderBase - 3 })), // fora de Advanced (pedido do usuário)
             // Item 017 (F1) — waypoint por Stance 0 ao mirar, por stance (Default = null: sem loop a suavizar).
+            // ⚠️ Order 30/29 = FIXO acima do teto de qualquer seção de stance (Stance 1 Sprint = 28). As entries
+            // de rotação/posição usam Orders ABSOLUTOS distintos por stance (S1 ~22-28, S2 ~15-21, S3 ~8-14), então
+            // um Order relativo baixo cairia em posição diferente em cada seção e COLIDIRIA na Stance 2 (code-review
+            // v2.7.1 #1). 30/29 põe o waypoint no topo de TODAS as seções, consistente e sem empate.
             AdsWaypoint = (d.Stance == Stance.Default)
                 ? null
                 : Config.Bind(d.Section, $"Stance {n} ADS Waypoint", true,
                     new ConfigDescription(
                         "When aiming from this stance, briefly settle the weapon to neutral (Stance 0) and hold the sights before raising them — kills the vertical loop into ADS. Requires 'Reset Positions When Aiming'.\n\nAo mirar a partir desta postura, assenta a arma no neutro (Stance 0) e segura a mira por um instante antes de levantá-la — mata o loop vertical ao entrar em ADS. Requer 'Reset Positions When Aiming'.",
                         null,
-                        new ConfigurationManagerAttributes { Order = orderBase + 12 })),
+                        new ConfigurationManagerAttributes { Order = 30 })),
             AdsWaypointTime = (d.Stance == Stance.Default)
                 ? null
                 : Config.Bind(d.Section, $"Stance {n} ADS Waypoint Time (ms)", 120,
                     new ConfigDescription(
                         "How long (ms) the sights are held while the weapon settles to neutral, before raising to ADS. Calibrate per stance: too short still loops, too long feels sluggish.\n\nPor quanto tempo (ms) a mira fica segurada enquanto a arma assenta no neutro, antes de subir para o ADS. Calibre por postura: curto demais ainda dá loop, longo demais fica lento.",
                         new AcceptableValueRange<int>(0, 400),
-                        new ConfigurationManagerAttributes { Order = orderBase + 11 })),
+                        new ConfigurationManagerAttributes { Order = 29 })),
             // MP-02-02 — só a Stance 0 recebe ConfigEntry (sentinel null nas demais, como o
             // SnapToStance0OnFire faz ao contrário). Motivo: ao deitar, StanceManager.Update força
             // SetStance(Default) ANTES das leituras (StanceManager.cs:165-176), então a cfg

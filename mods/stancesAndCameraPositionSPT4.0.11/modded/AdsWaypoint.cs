@@ -37,7 +37,7 @@ namespace CameraRotationMod
                 && Plugin._stanceConfigs.TryGetValue(stance, out var cfg)
                 && (cfg.AdsWaypoint?.Value ?? false))
             {
-                _msRemaining = Mathf.Max(0f, cfg.AdsWaypointTime?.Value ?? 0);
+                _msRemaining = Mathf.Max(0f, cfg.AdsWaypointTime?.Value ?? 120); // 120 = simetria com o default (defesa)
                 _active = _msRemaining > 0f;
             }
             _wasAiming = isAiming;

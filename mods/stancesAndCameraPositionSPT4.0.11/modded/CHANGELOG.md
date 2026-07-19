@@ -7,6 +7,16 @@ Versões mais recentes primeiro.
 
 ---
 
+## v2.8.1 (2026-07-19)
+
+### Correção (apresentação no F12)
+
+As opções `Stance 2 ADS Waypoint` / `...Time` apareciam **intercaladas** com os sliders de posição da Low Ready
+(empate de ordenação). Agora as opções de ADS Waypoint aparecem no **topo** da seção de cada postura, no mesmo
+lugar nas três. Sem mudança de comportamento.
+
+---
+
 ## v2.8.0 (2026-07-19)
 
 ### Novidade — compressão da velocidade de ADS (uniformizar leves × pesadas)
