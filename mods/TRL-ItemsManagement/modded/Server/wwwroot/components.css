@@ -1510,6 +1510,41 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
 .trader-edit-form button:disabled { opacity: .5; cursor: wait; }
 .trader-edit-form__hint { font-size: 8px; line-height: 1.2; color: var(--fg-faint); text-align: right; }
 
+/* ── B-6: trader Availability (stock / per-cycle buy-limit) — extends the sell editor ─────── */
+.trader-edit-form--full { width: 232px; gap: 6px; }
+.trader-edit-form--full .tef-section { display: flex; flex-direction: column; gap: 3px; }
+.trader-edit-form--full .tef-section--avail {
+  border-top: 1px solid rgba(160, 133, 67, 0.22); padding-top: 5px;
+}
+.tef-label {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 6px;
+  font-size: 8px; letter-spacing: .5px; text-transform: uppercase;
+  color: var(--fg-secondary); font-weight: 700;
+}
+.tef-label .tef-unit { font-weight: 500; letter-spacing: .2px; text-transform: none; color: var(--fg-faint); }
+.tef-grid { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 3px 6px; }
+.tef-grid .tef-field { font-size: 9px; color: var(--fg-secondary); white-space: nowrap; }
+.tef-avail-note { font-size: 8px; line-height: 1.25; color: var(--fg-faint); text-align: right; }
+.tef-avail-note.is-warn { color: #d9a441; }
+.tef-avail-note:empty { display: none; }
+.restore-link {
+  align-self: flex-end;
+  background: transparent; border: none; cursor: pointer;
+  color: var(--accent-bright); font: inherit; font-size: 8px; font-weight: 600;
+  padding: 1px 2px; border-radius: var(--radius-sm);
+}
+.restore-link:hover { text-decoration: underline; filter: brightness(1.15); }
+.restore-link:disabled { opacity: .5; cursor: wait; }
+
+/* Stock chip in the trader name-cell meta — clickable shortcut into the Availability section. */
+.trader-stock { cursor: pointer; border-radius: var(--radius-sm); padding: 0 2px; }
+.trader-stock:hover { color: var(--accent-bright); background: rgba(160, 133, 67, 0.12); }
+.trader-stock.is-capped { color: var(--accent-bright); font-weight: 600; }
+.trader-stock-cap {
+  margin-left: 3px; font-size: 7px; letter-spacing: .4px; text-transform: uppercase;
+  color: var(--fg-on-accent); background: var(--accent); padding: 0 3px; border-radius: 6px; vertical-align: 1px;
+}
+
 /* ── Per-trader BUY-price (buyback) editing — B-3, mirrors the sell block above ──────────── */
 /* .trader-edit-form / .trader-price-val / .badge--override / .trader-rub-hint / .trader-price-base /
  * .trader-fence-tag / .trader-edit-note / .trader-mod-warn are REUSED as-is (same markup helpers). */
