@@ -14,14 +14,13 @@ namespace TrueTrauma
         public static HashSet<string> FaintedPlayerIds = new HashSet<string>();
 
         // Timers normais
+        // ref: spec 003 §4 (D10) — ImpactTimers/LegPenaltyTimers/BotLegsBrokenStartTimes removidos junto com o
+        // sistema legado de pernas (escritores e consumidores saíram em MovementPatches/HealthPatches/InputPatches)
         public static readonly Dictionary<string, float> BlackoutTimers = new Dictionary<string, float>();
         public static readonly Dictionary<string, float> BlackoutStartTimes = new Dictionary<string, float>();
         public static readonly Dictionary<string, float> GraceTimers = new Dictionary<string, float>();
-        public static readonly Dictionary<string, float> ImpactTimers = new Dictionary<string, float>();
         public static readonly Dictionary<string, float> AimingFatigueTimers = new Dictionary<string, float>();
         public static readonly Dictionary<string, float> VoiceCooldowns = new Dictionary<string, float>();
-        public static Dictionary<string, float> BotLegsBrokenStartTimes = new Dictionary<string, float>();
-        public static readonly Dictionary<string, float> LegPenaltyTimers = new Dictionary<string, float>();
         public static float EffectIntensity = 0f;
 
         // ref: CR-01-27 — renovação de DoContusion por intervalo (não por frame)
@@ -41,11 +40,8 @@ namespace TrueTrauma
             BlackoutTimers.Clear();
             BlackoutStartTimes.Clear();
             GraceTimers.Clear();
-            ImpactTimers.Clear();
             AimingFatigueTimers.Clear();
             VoiceCooldowns.Clear();
-            BotLegsBrokenStartTimes.Clear();
-            LegPenaltyTimers.Clear();
             BotFaintCooldowns.Clear();
             EffectIntensity = 0f;
             IsFainted = false;

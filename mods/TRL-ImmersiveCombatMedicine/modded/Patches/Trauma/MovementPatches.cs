@@ -138,66 +138,10 @@ namespace TrueTrauma
                 }
             }
 
-            // Pernas Quebradas (Lógica para punição de Humanos)
-            if (!__instance.IsAI && TRLImmersiveCombatMedicinePlugin.ConfigLegsEnabled.Value)
-            {
-                bool leftLegDestroyed = HealthUtils.IsPartDestroyed(__instance, EBodyPart.LeftLeg);
-                bool rightLegDestroyed = HealthUtils.IsPartDestroyed(__instance, EBodyPart.RightLeg);
-
-                if (leftLegDestroyed && rightLegDestroyed)
-                {
-                    if (!__instance.MovementContext.IsInPronePose)
-                    {
-                        // ref: spec 002 §4 (decisão 21) — injeção legacy APOSENTADA: saíram o roll de 30%
-                        // de fratura (DoFracture) e os 15 de dano (ApplyDamage) ao tentar levantar com as
-                        // 2 pernas zeradas; o motor Trauma 2.0 é puramente reativo. Re-forçar prone + voz +
-                        // LegPenaltyTimers permanecem — o resto do sistema legado sai nos itens 003/004.
-                        __instance.MovementContext.SetPoseLevel(0f, true);
-                        __instance.MovementContext.IsInPronePose = true;
-
-                        VoiceHelper.TriggerTraumaVoice(__instance, "Leg");
-                        TraumaState.LegPenaltyTimers[id] = now;
-                    }
-                }
-                else
-                {
-                    if (TraumaState.LegPenaltyTimers.ContainsKey(id)) TraumaState.LegPenaltyTimers.Remove(id);
-                }
-            }
-
-            // Pernas Quebradas (Lógica para Bots caírem)
-            if (__instance.IsAI && __instance.AIData?.BotOwner != null)
-            {
-                float hpLeft = __instance.HealthController.GetBodyPartHealth(EBodyPart.LeftLeg).Current;
-                float hpRight = __instance.HealthController.GetBodyPartHealth(EBodyPart.RightLeg).Current;
-                bool legsGone = (hpLeft < 1f && hpRight < 1f);
-
-                if (legsGone)
-                {
-                    if (!TraumaState.BotLegsBrokenStartTimes.ContainsKey(id)) TraumaState.BotLegsBrokenStartTimes.Add(id, now);
-                    float tempoQuebrado = now - TraumaState.BotLegsBrokenStartTimes[id];
-
-                    if (tempoQuebrado >= 90f)
-                    {
-                        if (__instance.MovementContext.IsInPronePose)
-                        {
-                            __instance.MovementContext.IsInPronePose = false;
-                            __instance.MovementContext.SetPoseLevel(1f, true);
-                            if (__instance.AIData.BotOwner.WeaponManager?.Selector != null)
-                            {
-                                var sel = __instance.AIData.BotOwner.WeaponManager.Selector;
-                                if (sel.EquipmentSlot != EquipmentSlot.FirstPrimaryWeapon && !sel.IsChanging) sel.TakeMainWeapon();
-                            }
-                            __instance.AIData.BotOwner.Steering?.LookToMovingDirection();
-                            if (__instance.Physical != null) __instance.Physical.Stamina.Current = __instance.Physical.Stamina.TotalCapacity;
-                        }
-                    }
-                }
-                else
-                {
-                    if (TraumaState.BotLegsBrokenStartTimes.ContainsKey(id)) TraumaState.BotLegsBrokenStartTimes.Remove(id);
-                }
-            }
+            // ref: spec 003 §4 (D10) — sistema legado de PERNAS aposentado: saíram o bloco humano
+            // (prone forçado + voz + LegPenaltyTimers) e o bloco de bots 90 s (clamp de pé permanente —
+            // causa-raiz P6 do "levanta e nunca mais cai"). Mancar é do Trauma 2.0 (motor 002 +
+            // consumidor 003); a queda real chega no item 004.
         }
     }
 }

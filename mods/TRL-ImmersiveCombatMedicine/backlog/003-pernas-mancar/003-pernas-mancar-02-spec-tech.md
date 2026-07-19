@@ -9,7 +9,7 @@
 
 ## 1. Estratégia
 
-**Primeiro consumidor real do motor 002 — evento-first, 1 patch Harmony novo (sprint), zero polling próprio.**
+**Primeiro consumidor real do motor 002 — evento-first, 2 patches Harmony novos (gate de sprint + re-log de calibração), zero polling próprio.**
 
 1. **Consumidor `TraumaLegsConsumer`** (MonoBehaviour no GO do plugin, padrão do repo): assina o motor via `TraumaEngine.SubscribeWithSnapshot` (replay `Establishing=true` cobre assinatura tardia e religar do toggle) + `TraumaEngine.OneShotPublished` ([TraumaEngine.cs:21-22,72](../../modded/Patches/Trauma/TraumaEngine.cs)). Dono-only (D16) é herdado: o motor só rastreia/publica donos (`IsOwnedHere`, [TraumaEngine.cs:110](../../modded/Patches/Trauma/TraumaEngine.cs)). Registra-se no `TraumaConsumerRegistry` para `Legs` — o que destrava o toast de 1ª ocorrência do motor (decisão 20; [TraumaEngineState.cs:132,137](../../modded/Patches/Trauma/TraumaEngineState.cs)).
 2. **Cap de velocidade por causa PRÓPRIA** (P1): `MovementContext.AddStateSpeedLimit(cap, (Player.ESpeedLimit)1000)` / `RemoveStateSpeedLimit` — composição vanilla é por **MÍNIMO** do dicionário `SpeedLimits` (público, :384; D12 corrigido; [MovementContext.cs:1672](../../../../references/eft-decompiled/Assembly-CSharp/EFT/MovementContext.cs#L1672), :1790, :1798-1824). **Re-write de cap (N1↔N2 e rebaixamento por analgésico): `RemoveStateSpeedLimit(causa)` + `AddStateSpeedLimit(novoCap, causa)`** — `AddStateSpeedLimit` é **NO-OP quando a causa já existe** (:1672-1679: só adiciona com `!ContainsKey`; review 1, bloqueador); o par Remove+Add NÃO abre janela sem cap: ambos apenas marcam `SpeedLimitIsDirty` (method_5) e o recompute é único, no `ProcessSpeedLimits` (:2553-2558). **Derivação em runtime (decisão 18):** `cap = alvo% × MovementContext.MaxSpeed` — `MaxSpeed` é getter puro que já compõe Strength e os multiplicadores do CustomClasses (baseline composto, D12; [MovementContext.cs:910](../../../../references/eft-decompiled/Assembly-CSharp/EFT/MovementContext.cs#L910)). **Delta nunca negativo por construção:** min() só desacelera e o mod NUNCA remove a causa vanilla `HealthCondition` — quando a penalidade vanilla (0.3/0.2) for mais dura que o alvo, o total experienciado é o vanilla e o caso é logado como CLAMP (excluído da medição ±5 p.p. — AC4). `StateSpeedLimit` (:639) fica STALE até o recompute (dirty-flag) — o log de aplicação computa o esperado LOCALMENTE (min sobre `SpeedLimits` + cap novo); a classificação CLAMP oficial do AC4 sai do re-log do postfix (§2).
@@ -48,13 +48,13 @@ Seção nova `7. Trauma 2.0 (Pernas)` + 2 edições na seção 6/2. `PROPRIEDADE
 | Seção | Nome (EN) | Tipo | Padrão | Faixa | Avançado | Tooltip (pt-BR) |
 |---|---|---|---|---|---|---|
 | `7. Trauma 2.0 (Pernas)` | `N1 Target Total Speed Percent` | float | `80` | 50 a 95 | — | Velocidade TOTAL experienciada no Mancar N1, em % do baseline (composto com classe/skill). Se a penalidade vanilla for mais dura que o alvo, vale o vanilla (clamp logado — nunca acelera o jogador). |
-| `7. Trauma 2.0 (Pernas)` | `N2 Target Total Speed Percent` | float | `55` | 30 a 90 | — | Velocidade TOTAL experienciada no Mancar N2, em % do baseline. Mesma regra de clamp do N1. |
+| `7. Trauma 2.0 (Pernas)` | `N2 Target Total Speed Percent` | float | `55` | 30 a 90 | — | Velocidade TOTAL experienciada no Mancar N2, em % do baseline. Mesma regra de clamp do N1. Se configurado ACIMA do N1, vale o efetivo min(N2, N1) — N2 nunca é mais leve que N1 (warn no log, 1×). |
 | `7. Trauma 2.0 (Pernas)` | `Block Sprint On N2` | bool | `true` | — | — | Em Mancar N2 o sprint fica bloqueado, inclusive sob analgésico (o vanilla libera sprint com analgésico; este toggle mantém o bloqueio do mod). N1 segue a regra vanilla. |
 | `7. Trauma 2.0 (Pernas)` | `Bot Crouch Dip Seconds` | float | `0.7` | 0.3 a 1.5 | Sim | Duração do dip de agachar de bot FORA de combate antes de devolver a pose (em combate o SAIN restaura sozinho). |
 | `6. Trauma 2.0 (Consumidores)` | `Legs Effects (item 003)` | bool | **`true`** (era `false`) | — | — | Mancar N1/N2 + agachar involuntário (item 003). Governado pelo master Trauma 2.0; desligar mid-raid desfaz caps e cancela agachares pendentes. |
 | `2. Mecanicas (Trauma)` | `Sistema de Pernas` | bool | `true` | — | — | (INERTE desde a v1.3.0 — substituído pelo Trauma 2.0 / Legs Effects. Remoção da key no item 010.) |
 
-Estado neutro: toggle 003 off = zero efeito de pernas do mod (só vanilla + logs do motor). Configs lidas por `.Value` a cada uso (sem cache).
+Estado neutro: toggle 003 off = zero efeito de pernas do mod (só vanilla + logs do motor). Configs lidas por `.Value` a cada uso (sem cache). **Sanidade N1/N2 (review 2, achado 4):** o efetivo do N2 é `min(N2, N1)` — configuração invertida não deixa N2 mais leve que N1; warn logado 1× por sessão quando o clamp atua (nota replicada no PROPRIEDADES).
 
 ## 4. Arquivos do mod
 
@@ -132,14 +132,15 @@ namespace TRLImmersiveCombatMedicine.Trauma
 
         private void ApplyCap(Player p, TraumaLine line)
         {
-            var mc = p.MovementContext;
-            float pct = LineTargetPercent(line) / 100f;              // N1→config N1 | N2-tier→config N2
+            var mc = p?.MovementContext;
+            if (mc == null) { _applied.Remove(p); return; }           // review 2, achado 3 — morto/destruído; mc LOCAL usado em tudo abaixo
+            float pct = LineTargetPercent(line) / 100f;              // N1→config N1 | N2-tier→config min(N2, N1) com warn 1× (review 2, achado 4)
             float baseline = mc.MaxSpeed;                             // ref: MovementContext.cs:910 — baseline composto (Strength + CustomClasses postfix, D12)
             float cap = Mathf.Clamp01(pct) * baseline;
             // Re-write da MESMA causa exige Remove+Add (review 1, BLOQUEADOR — Add é no-op com causa existente :1672-1679);
             // sem flicker: ambos só marcam SpeedLimitIsDirty (method_5) e o recompute é único no ProcessSpeedLimits (:2553-2558)
-            p.RemoveStateSpeedLimit(TraumaCause);                     // ref: Player.cs:25835 → MovementContext.cs:1790
-            p.AddStateSpeedLimit(cap, TraumaCause);                   // ref: Player.cs:25820 → MovementContext.cs:1672 (min-composição :1798-1824)
+            mc.RemoveStateSpeedLimit(TraumaCause);                    // ref: MovementContext.cs:1790
+            mc.AddStateSpeedLimit(cap, TraumaCause);                  // ref: MovementContext.cs:1672 (min-composição :1798-1824)
             // review 1, achado 3: StateSpeedLimit fica STALE até o recompute (dirty-flag) — esperado computado LOCALMENTE:
             // float expected = cap; foreach (var kv in mc.SpeedLimits) expected = Mathf.Min(expected, kv.Value); // ref: dict público MovementContext.cs:384
             // bool clampedExpected = expected < cap - 0.001f; // classificação CLAMP OFICIAL do AC4 sai do re-log do postfix (§2)
@@ -150,7 +151,10 @@ namespace TRLImmersiveCombatMedicine.Trauma
 
         private void RemoveCap(Player p)
         {
-            p.RemoveStateSpeedLimit(TraumaCause);                     // ref: Player.cs:25835 → MovementContext.cs:1790
+            // review 2, achado 3: Player.RemoveStateSpeedLimit NÃO null-propaga (:25835-25837 usa MovementContext. sem `?.`)
+            // — morto/destruído explode. Guard obrigatório aqui E no sweep do toggle-off:
+            // if (p == null || p.MovementContext == null) { _applied.Remove(p); return; }
+            p.MovementContext.RemoveStateSpeedLimit(TraumaCause);     // ref: MovementContext.cs:1790 (mc direto, consistente com ApplyCap)
             p.UpdateSpeedLimitByHealth();                             // AP-04: devolve sprint/caps ao estado canônico vanilla (recompute oficial — Player.cs:29068)
             // log: "[Trauma2] legs cap OFF <profileId>"
         }
@@ -181,9 +185,10 @@ namespace TRLImmersiveCombatMedicine.Trauma
     internal static class TraumaPose
     {
         private static Type _ladderType; // tarkin-ladders soft-dep — ref: P4 rec. (3c); resolver 1x, warn se falhar com o mod presente
-        /// <summary>Fila de adiados com DEDUP por (player, kind) — enqueue de par já presente é no-op (review 1, achado 6).
-        /// PublishDeadline = stamp de cooldown capturado no enqueue via TraumaEngine.TryGetOneShotDeadline —
-        /// o cancel só devolve cooldown se o stamp corrente ainda for esse (re-ancorado não é apagado).</summary>
+        /// <summary>Fila de adiados com DEDUP por (player, kind). No HIT de dedup a entrada existente é ATUALIZADA
+        /// (PublishDeadline re-capturado via TryGetOneShotDeadline + RequiredLine re-lida) — NÃO é no-op: senão o
+        /// cancel não devolve o cooldown do RE-publish (review 2, achado 2). O cancel só devolve cooldown se o
+        /// stamp corrente ainda for o PublishDeadline guardado (re-ancorado não é apagado — review 1, achado 6).</summary>
         private static readonly List<DeferredCrouch> _deferred = new List<DeferredCrouch>();
 
         private struct DeferredCrouch
@@ -367,3 +372,4 @@ Exemplo AC2 (zerar 2 pernas): motor publica `Legs: LegsLimpN1 -> LegsCrouchPlusL
 |---|---|
 | 2026-07-19 | Spec técnica criada via `/create-technical-spec` (baseada no motor 002 implementado v1.2.1 + trauma-primitives P1/P4/P6 corrigidos) |
 | 2026-07-19 | Review técnica rodada 1 aplicada — 7 achados; bloqueador do re-write de cap (`AddStateSpeedLimit` é no-op com causa existente :1672-1679 → padrão Remove+Add, recompute único no ProcessSpeedLimits :2553-2558); strong do sprint (gate em `CanSprint` virtual, desvio da rec. P1 registrado); log de calibração com expected local + CLAMP oficial no postfix; fork bot→BotCrouchDip fire-and-forget com ReportOneShotExecuted; `_applied` keyed por Player + religar via RegisteredPlayers/IsOwnedHere; cancel com publishDeadline + dedup da fila; +2 casos de smoke e decisão SEM voz no 003 |
+| 2026-07-19 | Review 2 aplicada — 4 menores (headline 2 patches; dedup da fila ATUALIZA PublishDeadline/RequiredLine no hit; guard de morto/destruído no RemoveCap/sweep + `mc` local no ApplyCap — Player.RemoveStateSpeedLimit não null-propaga :25835; efetivo N2 = min(N2, N1) com warn 1×); gate 2×2 fechado |

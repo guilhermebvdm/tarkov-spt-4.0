@@ -121,6 +121,27 @@ namespace TRLImmersiveCombatMedicine.Trauma
             inst._cooldownUntil[(player.ProfileId, kind)] = Time.time + OneShotCooldownSeconds();
         }
 
+        /// <summary>Cancelamento de one-shot ADIADO (D7 + corner do cancelamento — spec 003): devolve o cooldown
+        /// stampado no publish (o efeito nunca executou). Remove SÓ se o stamp corrente ainda for o do publish:
+        /// cooldown re-ancorado por ReportOneShotExecuted NÃO é apagado (review 1 do 003, achado 6).</summary>
+        public static void ReportOneShotCanceled(Player player, TraumaOneShotKind kind, float publishDeadline)
+        {
+            TraumaEngine inst = _instance;
+            if (player is null || inst == null) return; // null GERENCIADO — padrão fake-null do motor
+            var key = (player.ProfileId, kind);
+            if (inst._cooldownUntil.TryGetValue(key, out float deadline) && Mathf.Approximately(deadline, publishDeadline))
+                inst._cooldownUntil.Remove(key);
+        }
+
+        /// <summary>Consulta interna p/ a fila de adiados capturar o deadline do publish no enqueue (spec 003).</summary>
+        internal static bool TryGetOneShotDeadline(Player player, TraumaOneShotKind kind, out float deadline)
+        {
+            deadline = 0f;
+            TraumaEngine inst = _instance;
+            if (player is null || inst == null) return false;
+            return inst._cooldownUntil.TryGetValue((player.ProfileId, kind), out deadline);
+        }
+
         // ---- Lifecycle (AP-01) ----
 
         private void Awake()

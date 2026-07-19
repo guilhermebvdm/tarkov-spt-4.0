@@ -1,0 +1,203 @@
+using System.Collections.Generic;
+using Comfort.Common;
+using EFT;
+using UnityEngine;
+
+namespace TRLImmersiveCombatMedicine.Trauma
+{
+    /// <summary>Consumidor de PERNAS (spec 003): mancar N1/N2 contínuo + agachar involuntário one-shot.
+    /// Primeiro consumidor real do motor 002 — evento-first, zero polling próprio. Dono-only herdado
+    /// (o motor só publica donos — D16). INTERIM (comportamento 6 da funcional): LegsFallCycle → efeito N2
+    /// e InvoluntaryFall IGNORADO até o item 004 entregar a queda real.</summary>
+    public sealed class TraumaLegsConsumer : MonoBehaviour
+    {
+        /// <summary>Causa PRÓPRIA no dicionário SpeedLimits — fora do enum (Player.cs:1584-1595 tem 9 valores);
+        /// dict aceita chave fora do range (P1, inferência marcada — smoke test loga o efetivo).</summary>
+        internal const Player.ESpeedLimit TraumaCause = (Player.ESpeedLimit)1000;
+
+        private static TraumaLegsConsumer _instance;
+        private static bool _n2ClampWarned; // warn 1×/sessão do min(N2, N1) — review 2 do 003, achado 4
+
+        /// <summary>Efeito aplicado por DONO. Keyed por Player (review 1, achado 5): a referência é necessária
+        /// p/ desfazer (RemoveCap) e re-estabelecer no religar; limpeza no null-detect do Update.</summary>
+        private readonly Dictionary<Player, TraumaLine> _applied = new Dictionary<Player, TraumaLine>();
+        private readonly List<Player> _sweepScratch = new List<Player>(); // reusada — sem alocação no caminho quente
+        private bool _wasActive;
+
+        private static readonly TraumaRegion[] LegsRegions = { TraumaRegion.Legs };
+
+        private void Awake()
+        {
+            _instance = this;
+            // Registro no registry destrava o toast de 1ª ocorrência das linhas de perna (decisão 20)
+            TraumaConsumerRegistry.Register(TraumaConsumerId.LegsEffects, LegsRegions, IsActive);
+            TraumaEngine.SubscribeWithSnapshot(OnTransition);   // replay establishing cobre assinatura tardia
+            TraumaEngine.OneShotPublished += OnOneShot;         // já cooldown-gated pelo motor (decisão 19)
+        }
+
+        /// <summary>Master legado + master Trauma 2.0 + toggle próprio (comportamento 9 do 002).</summary>
+        internal static bool IsActive()
+        {
+            return TRLImmersiveCombatMedicinePlugin.ConfigMasterEnabled.Value
+                && TRLImmersiveCombatMedicinePlugin.ConfigTrauma2Enabled.Value
+                && TRLImmersiveCombatMedicinePlugin.ConfigConsumerLegsEffects.Value;
+        }
+
+        /// <summary>Consulta p/ os patches (§2 da spec): linha de perna atualmente APLICADA a este jogador.</summary>
+        internal static bool TryGetApplied(Player p, out TraumaLine line)
+        {
+            line = TraumaLine.None;
+            TraumaLegsConsumer inst = _instance;
+            return inst != null && !(p is null) && inst._applied.TryGetValue(p, out line);
+        }
+
+        /// <summary>Linhas que recebem o efeito N2 (interim inclui FallCycle — comportamento 6 da funcional).</summary>
+        internal static bool IsN2Tier(TraumaLine line)
+        {
+            return line == TraumaLine.LegsLimpN2
+                || line == TraumaLine.LegsCrouchPlusLimpN2
+                || line == TraumaLine.LegsFallCycle;
+        }
+
+        /// <summary>Alvo em % do baseline por linha. Efetivo do N2 = min(N2, N1) — configuração invertida não deixa
+        /// N2 mais leve que N1 (warn 1×; review 2 do 003, achado 4).</summary>
+        internal static float LineTargetPercent(TraumaLine line)
+        {
+            float n1 = TRLImmersiveCombatMedicinePlugin.ConfigLegsN1TargetPercent.Value;
+            if (line == TraumaLine.LegsLimpN1) return n1;
+            float n2 = TRLImmersiveCombatMedicinePlugin.ConfigLegsN2TargetPercent.Value;
+            if (n2 > n1)
+            {
+                if (!_n2ClampWarned)
+                {
+                    _n2ClampWarned = true;
+                    TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning(
+                        $"[Trauma2] config N2 Target ({n2:0.#}%) > N1 Target ({n1:0.#}%) — usando min(N2, N1) = {n1:0.#}%");
+                }
+                n2 = n1;
+            }
+            return n2;
+        }
+
+        private void OnTransition(TraumaTransition t)
+        {
+            if (t.Region != TraumaRegion.Legs) return;
+            if (!IsActive()) return; // toggle off = ignora (motor segue publicando — comportamento 9 do 002)
+            Player p = t.Player;
+            if (p is null) return;
+            if (t.To == TraumaLine.None)
+            {
+                if (_applied.Remove(p)) RemoveCapGuarded(p);
+                return;
+            }
+            // Mapa linha→efeito: LimpN1→cap N1 | LimpN2/CrouchPlusLimpN2/FallCycle→cap N2 (INTERIM).
+            // Establishing aplica cap SEM one-shot (o motor nem publica one-shot em establishing — 002).
+            // N1↔N2/rebaixamento: sempre via ApplyCap (Remove+Add — Add é no-op com causa existente,
+            // MovementContext.cs:1672-1679; recompute único no ProcessSpeedLimits :2553-2558 → sem flicker).
+            ApplyCap(p, t.To);
+        }
+
+        private void OnOneShot(Player p, TraumaOneShotKind kind, TraumaLine line)
+        {
+            if (!IsActive() || kind != TraumaOneShotKind.InvoluntaryCrouch) return; // InvoluntaryFall = item 004 (interim)
+            if (p is null) return;
+            if (p.IsAI)
+            {
+                TraumaPose.BotCrouchDip(p); // fire-and-forget, fora da fila de adiados (review 1, achado 4)
+                return;
+            }
+            TraumaPose.TryInvoluntaryCrouch(p, TraumaRegion.Legs, kind); // executa | adia | no-op só-para-baixo
+        }
+
+        private void ApplyCap(Player p, TraumaLine line)
+        {
+            MovementContext mc = p != null ? p.MovementContext : null; // fake-null da Unity coberto pelo operador ==
+            if (mc == null) { _applied.Remove(p); return; }            // review 2, achado 3 — morto/destruído
+            float pct = LineTargetPercent(line);
+            float baseline = mc.MaxSpeed;                              // ref: MovementContext.cs:910 — baseline composto (Strength + CustomClasses, D12)
+            float cap = Mathf.Clamp01(pct / 100f) * baseline;
+            // Re-write da MESMA causa exige Remove+Add (Add é no-op com causa existente :1672-1679 — bloqueador da
+            // review 1); sem janela sem cap: ambos só marcam SpeedLimitIsDirty, recompute único (:2553-2558)
+            mc.RemoveStateSpeedLimit(TraumaCause);                     // ref: MovementContext.cs:1790
+            mc.AddStateSpeedLimit(cap, TraumaCause);                   // ref: MovementContext.cs:1672 (min-composição :1798-1824)
+            _applied[p] = line;
+            // StateSpeedLimit fica STALE até o recompute (dirty-flag) — esperado computado LOCALMENTE
+            // (review 1, achado 3); a classificação CLAMP oficial do AC4 sai do re-log RECOMPUTE do postfix
+            float expected = cap;
+            foreach (KeyValuePair<Player.ESpeedLimit, float> kv in mc.SpeedLimits) // ref: dict público MovementContext.cs:384
+                expected = Mathf.Min(expected, kv.Value);
+            bool clamped = expected < cap - 0.001f; // vanilla 0.3/0.2 mais duro que o alvo (delta nunca negativo por construção)
+            if (IsN2Tier(line) && TRLImmersiveCombatMedicinePlugin.ConfigBlockSprintOnN2.Value)
+                mc.EnableSprint(false); // corta sprint EM CURSO (ref: :2783); quem SEGURA é o gate CanSprint (SpeedLimitPatches)
+            TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo(
+                $"[Trauma2] legs cap {p.ProfileId} line={line} target={pct:0.#} cap={cap:0.###} baseline={baseline:0.###} expected={expected:0.###} clamped={(clamped ? "true" : "false")}");
+        }
+
+        private void RemoveCapGuarded(Player p)
+        {
+            // review 2, achado 3: Player.RemoveStateSpeedLimit NÃO null-propaga (:25835-25837) — guard obrigatório
+            if (p == null || p.MovementContext == null) return;
+            p.MovementContext.RemoveStateSpeedLimit(TraumaCause);
+            p.UpdateSpeedLimitByHealth(); // AP-04: recompute oficial devolve sprint/caps ao estado canônico vanilla (Player.cs:29068)
+            TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] legs cap OFF {p.ProfileId}");
+        }
+
+        private void Update()
+        {
+            GameWorld gw = Singleton<GameWorld>.Instance;
+            if (gw == null)
+            {
+                // padrão N1: mundo morreu — caps morrem com os MovementContexts; só limpar bookkeeping
+                if (_applied.Count > 0) _applied.Clear();
+                TraumaPose.CancelAll("raid-end");
+                TraumaPose.ClearBotRestores();
+                _wasActive = IsActive();
+                return;
+            }
+
+            bool active = IsActive();
+            if (_wasActive && !active)
+            {
+                // Desligar mid-raid: desfaz os próprios efeitos NA HORA (corner da funcional)
+                _sweepScratch.Clear();
+                foreach (KeyValuePair<Player, TraumaLine> kv in _applied) _sweepScratch.Add(kv.Key);
+                _applied.Clear();
+                for (int i = 0; i < _sweepScratch.Count; i++)
+                {
+                    Player p = _sweepScratch[i];
+                    if (p == null || p.MovementContext == null) continue; // review 2, achado 3 — guard no sweep
+                    RemoveCapGuarded(p);
+                }
+                _sweepScratch.Clear();
+                TraumaPose.CancelAll("toggle-off");
+                TraumaPose.FlushBotRestores();
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("[Trauma2] legs consumer OFF — caps desfeitos");
+            }
+            else if (!_wasActive && active)
+            {
+                // Religar mid-raid: estabelecer do snapshot SEM one-shot e SEM toast (corner religar — paridade
+                // com avaliação inicial). Dependência internal registrada: TraumaEngine.IsOwnedHere (mesmo assembly).
+                var players = gw.RegisteredPlayers;
+                int established = 0;
+                for (int i = 0; i < players.Count; i++)
+                {
+                    var p = players[i] as Player;
+                    if (!TraumaEngine.IsOwnedHere(p)) continue;
+                    TraumaLine line = TraumaEngine.GetLine(p, TraumaRegion.Legs);
+                    if (line == TraumaLine.None) continue;
+                    ApplyCap(p, line);
+                    established++;
+                }
+                if (established > 0)
+                    TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] legs consumer ON — {established} estado(s) estabelecido(s) do snapshot");
+            }
+            _wasActive = active;
+
+            if (active)
+            {
+                TraumaPose.PumpDeferred();   // adiados D7: re-checa guards, re-valida snapshot, executa/cancela
+                TraumaPose.PumpBotRestores(); // devolução do dip de bot fora de combate
+            }
+        }
+    }
+}

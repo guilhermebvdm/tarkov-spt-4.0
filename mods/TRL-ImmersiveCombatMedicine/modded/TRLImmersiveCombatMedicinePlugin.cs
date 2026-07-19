@@ -10,7 +10,7 @@ using TRLImmersiveCombatMedicine.Trauma;
 
 namespace TRLImmersiveCombatMedicine
 {
-    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.2.3")]
+    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.3.0")]
     public class TRLImmersiveCombatMedicinePlugin : BaseUnityPlugin
     {
         public static TRLImmersiveCombatMedicinePlugin Instance;
@@ -45,11 +45,17 @@ namespace TRLImmersiveCombatMedicine
         public static ConfigEntry<bool> ConfigConsumerBlackout2;
         public static ConfigEntry<bool> ConfigDebugTestConsumer;
 
+        // --- Trauma 2.0 — Pernas (spec 003 §3) ---
+        public static ConfigEntry<float> ConfigLegsN1TargetPercent;
+        public static ConfigEntry<float> ConfigLegsN2TargetPercent;
+        public static ConfigEntry<bool> ConfigBlockSprintOnN2;
+        public static ConfigEntry<float> ConfigBotCrouchDipSeconds;
+
         private void Awake()
         {
             Instance = this;
             ModLogger = base.Logger;
-            ModLogger.LogInfo("TRL-ImmersiveCombatMedicine Plugin v1.2.2 carregado.");
+            ModLogger.LogInfo("TRL-ImmersiveCombatMedicine Plugin v1.3.0 carregado.");
 
             // Inicializações combinadas
             ItemDatabase.Initialize();
@@ -58,7 +64,8 @@ namespace TRLImmersiveCombatMedicine
             TraumaState.Logger = Logger;
             ConfigMasterEnabled = Config.Bind("1. Geral (Trauma)", "Ativar Mod", true, "Liga ou desliga todo o funcionamento do mod.");
             ConfigBlackoutEnabled = Config.Bind("2. Mecanicas (Trauma)", "Sistema de Desmaio", true, "Ativa o desmaio ao receber muito dano massivo.");
-            ConfigLegsEnabled = Config.Bind("2. Mecanicas (Trauma)", "Sistema de Pernas", true, "Cair no chão ao perder as pernas.");
+            // ref: spec 003 §3 — legado de pernas aposentado (D10); key mantida p/ não órfanar o .cfg (remoção no item 010)
+            ConfigLegsEnabled = Config.Bind("2. Mecanicas (Trauma)", "Sistema de Pernas", true, "(INERTE desde a v1.3.0 — substituído pelo Trauma 2.0 / Legs Effects. Remoção da key no item 010.)");
             ConfigArmsEnabled = Config.Bind("2. Mecanicas (Trauma)", "Sistema de Braços", true, "Perder a mira ao perder os braços.");
             ConfigStomachEnabled = Config.Bind("2. Mecanicas (Trauma)", "Sistema de Estomago", true, "Ficar sem ar ao tomar tiro no estômago.");
             // ref: CR-04 — piso de 5s: duração baixa (~3-5s no teste) colapsava blackout+grace
@@ -95,8 +102,9 @@ namespace TRLImmersiveCombatMedicine
             ConfigVerboseEngineLog = Config.Bind("5. Trauma 2.0 (Motor)", "Verbose Engine Log", false,
                 new ConfigDescription("Loga detalhes de avaliação/polling. Transições de estado e supressões são SEMPRE logadas, independente desta opção.",
                     null, advanced));
-            ConfigConsumerLegsEffects = Config.Bind("6. Trauma 2.0 (Consumidores)", "Legs Effects (item 003)", false,
-                "Placeholder — efeitos de mancar N1/N2. Sem função até o item 003.");
+            // ref: spec 003 — toggle nasce ON na entrega (decisão da funcional); .cfg pré-existente com false salvo prevalece
+            ConfigConsumerLegsEffects = Config.Bind("6. Trauma 2.0 (Consumidores)", "Legs Effects (item 003)", true,
+                "Mancar N1/N2 + agachar involuntário (item 003). Governado pelo master Trauma 2.0; desligar mid-raid desfaz caps e cancela agachares pendentes.");
             ConfigConsumerFallCycle = Config.Bind("6. Trauma 2.0 (Consumidores)", "Fall Cycle (item 004)", false,
                 "Placeholder — cair + ciclo de levantar. Sem função até o item 004.");
             ConfigConsumerArmsEffects = Config.Bind("6. Trauma 2.0 (Consumidores)", "Arms Effects (item 005)", false,
@@ -108,6 +116,19 @@ namespace TRLImmersiveCombatMedicine
             ConfigDebugTestConsumer = Config.Bind("6. Trauma 2.0 (Consumidores)", "Debug Test Consumer", false,
                 new ConfigDescription("Consumidor de teste SEM efeito de gameplay: registra-se ATIVO para as TRÊS regiões (pernas/braços/estômago), destravando o toast/i18n para validação (AC5 da spec funcional).",
                     null, advanced));
+
+            // Configs Trauma 2.0 — Pernas (spec 003 §3)
+            ConfigLegsN1TargetPercent = Config.Bind("7. Trauma 2.0 (Pernas)", "N1 Target Total Speed Percent", 80f,
+                new ConfigDescription("Velocidade TOTAL experienciada no Mancar N1, em % do baseline (composto com classe/skill). Se a penalidade vanilla for mais dura que o alvo, vale o vanilla (clamp logado — nunca acelera o jogador).",
+                    new AcceptableValueRange<float>(50f, 95f)));
+            ConfigLegsN2TargetPercent = Config.Bind("7. Trauma 2.0 (Pernas)", "N2 Target Total Speed Percent", 55f,
+                new ConfigDescription("Velocidade TOTAL experienciada no Mancar N2, em % do baseline. Mesma regra de clamp do N1. Se configurado ACIMA do N1, vale o efetivo min(N2, N1) — N2 nunca é mais leve que N1 (warn no log, 1x).",
+                    new AcceptableValueRange<float>(30f, 90f)));
+            ConfigBlockSprintOnN2 = Config.Bind("7. Trauma 2.0 (Pernas)", "Block Sprint On N2", true,
+                "Em Mancar N2 o sprint fica bloqueado, inclusive sob analgésico (o vanilla libera sprint com analgésico; este toggle mantém o bloqueio do mod). N1 segue a regra vanilla.");
+            ConfigBotCrouchDipSeconds = Config.Bind("7. Trauma 2.0 (Pernas)", "Bot Crouch Dip Seconds", 0.7f,
+                new ConfigDescription("Duração do dip de agachar de bot FORA de combate antes de devolver a pose (em combate o SAIN restaura sozinho).",
+                    new AcceptableValueRange<float>(0.3f, 1.5f), advanced));
 
             // ref: CR-02 — o reparo de encoding (CR-01-06) corrigiu a KEY
             // 'Sistema de Braços' (era mojibake); BepInEx casa por bytes, então o
@@ -129,6 +150,7 @@ namespace TRLImmersiveCombatMedicine
             gameObject.AddComponent<BandAidUI>();
             gameObject.AddComponent<BandAidController>();
             gameObject.AddComponent<TraumaEngine>(); // motor Trauma 2.0 (spec 002) — inerte até OnRaidStarted()
+            gameObject.AddComponent<TraumaLegsConsumer>(); // consumidor de pernas (spec 003) — efeitos gateados pelo toggle
 
             // [DEBUG-ICM] sondas de lifecycle — remover após diagnóstico do prompt F
             _debugHost = gameObject;

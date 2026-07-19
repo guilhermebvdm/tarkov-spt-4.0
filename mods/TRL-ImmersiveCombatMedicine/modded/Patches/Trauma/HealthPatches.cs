@@ -107,27 +107,9 @@ namespace TrueTrauma
                     VoiceHelper.TriggerTraumaVoice(__instance, "Gut");
                 }
             }
-            if (TRLImmersiveCombatMedicinePlugin.ConfigLegsEnabled.Value && (bodyPartType == EBodyPart.LeftLeg || bodyPartType == EBodyPart.RightLeg))
-            {
-                if (HealthUtils.IsPartDestroyed(__instance, bodyPartType))
-                {
-                    TraumaState.ImpactTimers[id] = now + 1.0f;
-                    
-                    bool leftLegDestroyed = HealthUtils.IsPartDestroyed(__instance, EBodyPart.LeftLeg);
-                    bool rightLegDestroyed = HealthUtils.IsPartDestroyed(__instance, EBodyPart.RightLeg);
-                    if (leftLegDestroyed && rightLegDestroyed)
-                    {
-                        if (!TraumaState.LegPenaltyTimers.ContainsKey(id))
-                            TraumaState.LegPenaltyTimers[id] = now;
-                    }
-
-                    if (!__instance.MovementContext.IsInPronePose)
-                    {
-                        __instance.MovementContext.IsInPronePose = true;
-                    }
-                    VoiceHelper.TriggerTraumaVoice(__instance, "Leg");
-                }
-            }
+            // ref: spec 003 §4 (D10) — sub-bloco legado de PERNAS removido (seed de ImpactTimers/LegPenaltyTimers,
+            // prone em hit e voz): a reação de pernas agora é do Trauma 2.0 (motor 002 + consumidor 003).
+            // Desmaio (acima), estômago e braços seguem legados até os itens 007/006/005.
             if (TRLImmersiveCombatMedicinePlugin.ConfigArmsEnabled.Value && (bodyPartType == EBodyPart.LeftArm || bodyPartType == EBodyPart.RightArm))
             {
                 if (HealthUtils.IsPartDestroyed(__instance, bodyPartType))

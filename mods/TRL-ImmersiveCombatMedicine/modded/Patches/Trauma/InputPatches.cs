@@ -50,7 +50,6 @@ namespace TrueTrauma
                 if (player != null && player.HealthController.IsAlive)
                 {
                     string id = player.ProfileId;
-                    float now = Time.time;
 
                     if (TRLImmersiveCombatMedicinePlugin.ConfigBlackoutEnabled.Value && TraumaState.BlackoutTimers.ContainsKey(id))
                     {
@@ -58,41 +57,9 @@ namespace TrueTrauma
                         return false;
                     }
 
-                    bool isImpact = false;
-                    if (TraumaState.ImpactTimers.TryGetValue(id, out float exp))
-                    {
-                        if (now < exp) isImpact = true;
-                        else TraumaState.ImpactTimers.Remove(id);
-                    }
-                    if (isImpact)
-                    {
-                        __result = false;
-                        return false;
-                    }
-
-                    bool legsBroken = TRLImmersiveCombatMedicinePlugin.ConfigLegsEnabled.Value &&
-                                      HealthUtils.IsPartDestroyed(player, EBodyPart.LeftLeg) &&
-                                      HealthUtils.IsPartDestroyed(player, EBodyPart.RightLeg);
-
-                    if (legsBroken)
-                    {
-                        if (player.IsAI)
-                        {
-                            if (TraumaState.BotLegsBrokenStartTimes.TryGetValue(id, out float startTime))
-                            {
-                                if ((now - startTime) >= 90f) return true;
-                            }
-                        }
-                        else
-                        {
-                            if (TraumaState.LegPenaltyTimers.TryGetValue(id, out float penaltyTime))
-                            {
-                                if ((now - penaltyTime) >= 10f) return true;
-                            }
-                        }
-                        __result = false;
-                        return false;
-                    }
+                    // ref: spec 003 §4 (D10) — branches legados de pernas removidos (ImpactTimers 1 s;
+                    // bloqueio de levantar 10 s humano / 90 s bot com 2 pernas zeradas): levantar não é mais
+                    // travado pelo sistema legado — o ciclo de queda real chega no item 004 via Trauma 2.0.
                 }
             }
             catch { }
