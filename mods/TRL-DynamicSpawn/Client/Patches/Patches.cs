@@ -473,6 +473,7 @@ namespace TRLDynamicSpawn.Patches
         [PatchPrefix]
         private static bool PatchPrefix(BossLocationSpawn wave)
         {
+            if (TRLDynamicSpawn.Components.DynamicSpawnManager.IsGeneratingDynamicWave) return true; // Let our boss wave run!
             if (wave != null && wave.BossName != null)
             {
                 string name = wave.BossName.ToLower();
