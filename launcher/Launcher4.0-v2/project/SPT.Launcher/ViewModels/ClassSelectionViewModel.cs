@@ -686,15 +686,17 @@ namespace SPT.Launcher.ViewModels
 
         // === Arte full-body da classe (Assets/ClassImages, fundo removido): resolvida por keyword ===
         // Um subconjunto de classes tem arte; sem match → painel sem imagem (info ocupa a largura toda).
+        // Keywords em PT e EN (o nome exibido segue o idioma da UI) → mesmo arquivo. Sem isso, a arte
+        // sumia em inglês (o nome virava "Scavenger"/"Hunter" e não casava com as keywords só-PT).
         private static readonly (string Keyword, string File)[] ClassImageNameMap =
         {
-            ("cacador", "cacador.png"),
-            ("furtivo", "furtivo.png"),
-            ("fuzileiro", "fuzileiro.png"),
-            ("medico", "medico.png"),
-            ("peladao", "peladao.png"),
-            ("saqueador", "saqueador.png"),
-            ("tanque", "tanque.png"),
+            ("cacador", "cacador.png"),   ("hunter", "cacador.png"),
+            ("furtivo", "furtivo.png"),   ("stealth", "furtivo.png"),
+            ("fuzileiro", "fuzileiro.png"), ("rifleman", "fuzileiro.png"),
+            ("medico", "medico.png"),     ("medic", "medico.png"),
+            ("peladao", "peladao.png"),   ("naked", "peladao.png"),
+            ("saqueador", "saqueador.png"), ("scavenger", "saqueador.png"),
+            ("tanque", "tanque.png"),     ("tank", "tanque.png"),
         };
 
         private static readonly object ClassImageLock = new object();
