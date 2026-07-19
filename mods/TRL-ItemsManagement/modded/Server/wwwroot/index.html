@@ -33,6 +33,7 @@
       <div id="group-filter"></div>
       <div id="condition-filter"></div>
       <div id="ban-filter"></div>
+      <div id="trader-filter"></div>
       <div id="mod-filter"></div>
       <div id="edited-filter"></div>
       <div id="delta-filter"></div>
@@ -113,6 +114,7 @@ const selectedConditions = new Set();  // conditionType values selected
 const selectedBans       = new Set();  // ban filter values: 'ok' | 'bsg' | 'custom'
 const selectedEdited     = new Set();  // edited filter values: 'flea' | 'trader' | 'none'
 const selectedMods       = new Set();  // modSource names selected (custom items from mods)
+const selectedTraders    = new Set();  // trader filter values: 'S:<name>' (sells) | 'B:<name>' (buys)
 const DELTA_STORAGE_KEY  = 'trl-items-management.delta';
 let deltaSource = 'dev';   // 'dev' | 'market'
 let deltaMin    = null;    // number or null
@@ -534,6 +536,7 @@ async function load() {
     buildGroupFilter();
     buildConditionFilter();
     buildBanFilter();
+    buildTraderFilter();
     buildModFilter();
     buildEditedFilter();
     buildDeltaFilter();
@@ -551,7 +554,9 @@ const CONDITION_STORAGE_KEY = 'trl-items-management.conditions';
 const BAN_STORAGE_KEY       = 'trl-items-management.bans';
 const EDITED_STORAGE_KEY    = 'trl.editedFilter';
 const MOD_STORAGE_KEY       = 'trl-items-management.mods';
+const TRADER_STORAGE_KEY    = 'trl-items-management.traders';
 let groupDropdown = null;
+let traderDropdown = null;
 let conditionDropdown = null;
 let banDropdown = null;
 let editedDropdown = null;
@@ -748,6 +753,84 @@ function itemHasTraderConflict(it) {
   return !!(it.spt && it.spt.fleaBanned) && regularMoneySellers(it).length > 0;
 }
 
+// S side — traders that SELL the item to you (SPT assort). Money only (not barter), sell-override
+// applied, disabled sellers excluded, sorted cheapest-first (best = cheapest, the one you'd buy from).
+// Shared by the row's group-avatar, the trader popover and the Trader filter.
+function sellSideRows(it) {
+  if (!it.spt || !Array.isArray(it.spt.traders)) return [];
+  return it.spt.traders
+    .filter(t => t.currency !== 'BARTER' && t.priceRUB != null)
+    .map(t => {
+      const tid = t.traderId || (t.name && TRADERS[t.name] ? TRADERS[t.name].id : null);
+      const so = tid ? stockOverrideFor(tid, it.id) : null;
+      if (so && so.disabled) return null; // sale disabled → not sold, drop the avatar
+      const ov = tid ? traderOverrideFor(tid, it.id) : null;
+      const ovCount = ov != null ? ((typeof ov === 'object') ? ov.count : ov) : null;
+      const rate = CURRENCY_RATES[t.currency] != null ? CURRENCY_RATES[t.currency] : 1;
+      const effPriceRUB = ovCount != null ? Math.round(ovCount * rate) : t.priceRUB;
+      return { name: t.name, traderId: tid, effPriceRUB, loyaltyLevel: t.loyaltyLevel, questLocked: !!t.questLocked, overridden: ovCount != null };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.effPriceRUB - b.effPriceRUB);
+}
+
+// B side — traders that BUY the item from you (tarkov.dev buyback). Buy-override applied, sorted
+// highest-first (best = pays the most).
+function buySideRows(it) {
+  return buildBuySourceRows(it)
+    .filter(s => s.priceRUB != null)
+    .map(s => {
+      const name = s.vendor && s.vendor.name;
+      const tid = name && TRADERS[name] ? TRADERS[name].id : null;
+      const bo = tid ? buyOverrideFor(tid, it.id) : null;
+      const boCount = bo != null ? ((typeof bo === 'object') ? bo.count : bo) : null;
+      const boCur = (bo && typeof bo === 'object' && bo.currency) ? bo.currency : 'RUB';
+      const effPriceRUB = boCount != null ? Math.round(boCount * (CURRENCY_RATES[boCur] != null ? CURRENCY_RATES[boCur] : 1)) : s.priceRUB;
+      return { name, traderId: tid, effPriceRUB, overridden: boCount != null };
+    })
+    .sort((a, b) => b.effPriceRUB - a.effPriceRUB);
+}
+
+const TRADER_AVATARS_MAX = 5; // avatars shown in a row's group before collapsing into "+N"
+
+// One circular trader avatar (image or letter placeholder). extraCls e.g. 'trader-avatar--best'.
+function traderAvatarImg(name, extraCls) {
+  const meta = name ? TRADERS[name] : null;
+  const cls = 'trader-avatar trader-avatar--xs' + (extraCls ? ' ' + extraCls : '');
+  if (meta && meta.avatar) return `<img class="${cls}" src="${escapeAttr(meta.avatar)}" alt="${escapeAttr(name)}" title="${escapeAttr(name)}" loading="lazy">`;
+  return `<span class="${cls} trader-avatar--placeholder" title="${escapeAttr(name || '?')}">${escapeHtml((name || '?').charAt(0))}</span>`;
+}
+
+// One trader line (S or B) as a group-avatar: best on the right (next to the value), up to MAX-1 other
+// avatars overlapping to its left, and a "+N" chip for the rest. `rows` is sorted best-first.
+function traderLineMarkup(rows, side) {
+  if (!rows.length) return '';
+  const best = rows[0];
+  const others = rows.slice(1);
+  const shownOthers = others.slice(0, TRADER_AVATARS_MAX - 1);
+  const hidden = others.length - shownOthers.length;
+  const tag = side === 'sell' ? 'S' : 'B';
+  const tagCls = side === 'sell' ? 'cell-trader__tag--sell' : 'cell-trader__tag--buy';
+  const tip = side === 'sell'
+    ? 'S = traders that SELL this to you (cheapest highlighted) — hover for all prices'
+    : 'B = traders that BUY this from you (pays most highlighted) — hover for all prices';
+  // worst→best, left→right, so the best sits rightmost next to the value (no extra highlight needed —
+  // its position + the adjacent value already make it obvious).
+  const ordered = shownOthers.slice().reverse().concat([best]);
+  const avatars = ordered.map(r => traderAvatarImg(r.name, '')).join('');
+  const moreChip = hidden > 0 ? `<span class="trader-avatars__more" title="${hidden} more">+${hidden}</span>` : '';
+  const ll = (side === 'sell' && best.loyaltyLevel != null)
+    ? `<small class="cell-trader__ll">LL${best.loyaltyLevel}${best.questLocked ? ` <span class="trader-lock" data-tip="Quest-locked — an override applies only after you unlock the quest">🔒</span>` : ''}</small>`
+    : '';
+  return `<div class="cell-trader__line cell-trader__line--${side}" data-tip="${escapeAttr(tip)}">` +
+    `<span class="cell-trader__tag ${tagCls}">${tag}</span>` +
+    `<span class="trader-avatars">${moreChip}${avatars}</span>` +
+    `<span class="cell-trader__num${best.overridden ? ' is-overridden' : ''}">${fmtRub(best.effPriceRUB)}</span>` +
+    (best.overridden ? ` <span class="badge badge--override cell-trader__ovr" data-tip="Override active — restart SPT to apply">OVR</span>` : '') +
+    ll +
+  `</div>`;
+}
+
 // True if ANY editable money offer of this item has a trader-price override
 // pinned at its (traderId, tpl). Shared by the filter + its counts.
 function itemHasTraderOverride(it) {
@@ -817,11 +900,14 @@ function refreshBanFilter() {
   banDropdown = null;
   buildBanFilter();
 }
-// After a disable-sale change: refresh the conflict count, and re-filter the list if the conflict
-// filter is active (the item that just changed may need to enter/leave the view).
+// After a disable-sale change: refresh the Banned "conflict" count and the Trader-filter S counts
+// (a disabled seller drops out of both), and re-filter the list if a filter that depends on the
+// disable state is active.
 function refreshConflictFilter() {
+  _dataVersion++; // invalidate the filter cache — sellSideRows()/conflict now see the new disable state
   refreshBanFilter();
-  if (selectedBans.has('conflict')) render();
+  refreshTraderFilter();
+  if (selectedBans.has('conflict') || selectedTraders.size) render();
 }
 
 function buildModFilter() {
@@ -849,6 +935,50 @@ function buildModFilter() {
   });
   modDropdown.setValue([...selectedMods]);
   document.getElementById('mod-filter').appendChild(modDropdown.root);
+}
+
+function buildTraderFilter() {
+  // Count how many items each trader SELLS to you (S) and BUYS from you (B). Uses the same sell/buy
+  // resolution as the row/popover, so counts match exactly (disabled sellers excluded).
+  const sellCount = {}, buyCount = {};
+  for (const it of ITEM_LIST) {
+    for (const r of sellSideRows(it)) if (r.name) sellCount[r.name] = (sellCount[r.name] || 0) + 1;
+    for (const r of buySideRows(it))  if (r.name) buyCount[r.name]  = (buyCount[r.name]  || 0) + 1;
+  }
+  // Each active trader as [B] then [S] — same layout/order as the trader cell.
+  const names = Object.keys(TRADERS).filter(n => sellCount[n] || buyCount[n]).sort();
+  if (!names.length) return;
+  const options = [];
+  for (const name of names) {
+    const av = traderAvatarImg(name, '');
+    if (buyCount[name])  options.push({ value: 'B:' + name, label: name, count: buyCount[name],  iconHtml: `<span class="cell-trader__tag cell-trader__tag--buy">B</span>${av}` });
+    if (sellCount[name]) options.push({ value: 'S:' + name, label: name, count: sellCount[name], iconHtml: `<span class="cell-trader__tag cell-trader__tag--sell">S</span>${av}` });
+  }
+
+  urlListOverride('trader', TRADER_STORAGE_KEY, selectedTraders);
+
+  traderDropdown = createDropdown({
+    placeholder: 'Trader',
+    options,
+    multi: true,
+    searchable: true,
+    onChange: (vals) => {
+      selectedTraders.clear();
+      vals.forEach(v => selectedTraders.add(v));
+      try { localStorage.setItem(TRADER_STORAGE_KEY, JSON.stringify(vals)); } catch (e) {}
+      render();
+    },
+  });
+  traderDropdown.setValue([...selectedTraders]);
+  document.getElementById('trader-filter').appendChild(traderDropdown.root);
+}
+
+// Rebuild the Trader filter in place — its S/B counts depend on disable-sale overrides. Keeps selection.
+function refreshTraderFilter() {
+  const host = document.getElementById('trader-filter');
+  if (host) host.innerHTML = '';
+  traderDropdown = null;
+  buildTraderFilter();
 }
 
 function buildConditionFilter() {
@@ -1194,6 +1324,7 @@ function filterStateKey() {
     [...selectedBans].sort().join(','),
     [...selectedEdited].sort().join(','),
     [...selectedMods].sort().join(','),
+    [...selectedTraders].sort().join(','),
     deltaMin, deltaMax, deltaSource, activeCategoryId, _dataVersion,
   ].join('|');
 }
@@ -1238,6 +1369,18 @@ function filterItems() {
     }
     if (selectedMods.size > 0) {
       if (!it.modSource || !selectedMods.has(it.modSource)) continue;
+    }
+    if (selectedTraders.size > 0) {
+      // OR within the filter: item passes if it matches ANY selected [S]/[B]:trader. Sell/buy sets use
+      // the same resolution as the row (disabled sellers excluded, so a disabled trader filters out).
+      const sellers = new Set(sellSideRows(it).map(r => r.name));
+      const buyers  = new Set(buySideRows(it).map(r => r.name));
+      let match = false;
+      for (const sel of selectedTraders) {
+        const name = sel.slice(2);
+        if ((sel[0] === 'S' && sellers.has(name)) || (sel[0] === 'B' && buyers.has(name))) { match = true; break; }
+      }
+      if (!match) continue;
     }
     if (deltaMin !== null || deltaMax !== null) {
       const c  = it.consolidated;
@@ -1307,6 +1450,7 @@ function computeDelta(it, valueKey) {
 // stay until the frame) and no caller reads the table DOM synchronously after render().
 let _renderScheduled = false;
 function render() {
+  closeTraderPopover(); // avoid an orphaned popover pointing at a row that's about to re-render
   if (_renderScheduled) return;
   _renderScheduled = true;
   requestAnimationFrame(() => { _renderScheduled = false; renderNow(); });
@@ -1327,6 +1471,7 @@ function syncUrlFromState() {
   if (selectedBans.size) p.set('ban', [...selectedBans].join(','));
   if (selectedEdited.size) p.set('edited', [...selectedEdited].join(','));
   if (selectedMods.size) p.set('mod', [...selectedMods].join(','));
+  if (selectedTraders.size) p.set('trader', [...selectedTraders].join(','));
   if (deltaMin !== null || deltaMax !== null) {
     p.set('deltaSrc', deltaSource);
     if (deltaMin !== null) p.set('deltaMin', deltaMin);
@@ -1394,6 +1539,7 @@ function renderNow() {
     if (row) openTraderEdit(row);
   });
   bindRewardHover(tbl);
+  bindTraderHover(tbl);
   main.querySelectorAll('th').forEach(th => {
     th.addEventListener('click', (ev) => {
       // For multi-sort headers (thWithDelta), the data-sort lives on inner spans;
@@ -1547,58 +1693,16 @@ function renderRow(it) {
   const conflictBadge = fleaTraderConflict
     ? ` <span class="conflict-flag" data-tip="${escapeAttr('Inconsistent: flea-banned but still sold by a trader' + (allQuestLocked ? ' (quest-locked — only appears after the quest)' : '') + '. Click to fix: disable the trader sale, or lift the flea ban.')}" tabindex="0" role="button">⚠</span>`
     : '';
-  // Trader cell — stacked SELL (player→trader, tarkov.dev) and BUY (trader→player, SPT assort)
-  const traderSellValue = c.priceTraderSell ? c.priceTraderSell.value : null;
-  const traderSellName  = c.priceTraderSell ? c.priceTraderSell.vendor : null;
-  // CR-04: reflect a buyback (B-3) override on the "B" line too, same as "S" already does for
-  // sell overrides — otherwise an edited buyback price is invisible outside the detail panel.
-  const traderSellTraderId = traderSellName && TRADERS[traderSellName] ? TRADERS[traderSellName].id : null;
-  const buyOvr = traderSellTraderId ? buyOverrideFor(traderSellTraderId, it.id) : null;
-  const buyOvrCount = buyOvr != null ? ((typeof buyOvr === 'object') ? buyOvr.count : buyOvr) : null;
-  const buyOvrCurrency = (buyOvr && typeof buyOvr === 'object' && buyOvr.currency) ? buyOvr.currency : 'RUB';
-  const buyOverridden = buyOvrCount != null;
-  const buyEffRUB = buyOverridden
-    ? Math.round(buyOvrCount * (CURRENCY_RATES[buyOvrCurrency] != null ? CURRENCY_RATES[buyOvrCurrency] : 1))
-    : traderSellValue;
-  // Best buy = cheapest non-BARTER trader offer in spt.traders[], with its loyaltyLevel.
-  // Trader OVERRIDES are applied here (effective price = override count × currency rate) so
-  // an edited trader price shows in the item row, not only in the detail panel.
-  let traderBuy = null;
-  if (it.spt && Array.isArray(it.spt.traders) && it.spt.traders.length) {
-    const candidates = it.spt.traders
-      .filter(t => t.currency !== 'BARTER' && t.priceRUB != null)
-      .map(t => {
-        const tid = t.traderId || (t.name && TRADERS[t.name] ? TRADERS[t.name].id : null);
-        const ov  = tid ? traderOverrideFor(tid, it.id) : null;
-        const ovCount = ov != null ? ((typeof ov === 'object') ? ov.count : ov) : null;
-        const rate = CURRENCY_RATES[t.currency] != null ? CURRENCY_RATES[t.currency] : 1;
-        const effPriceRUB = ovCount != null ? Math.round(ovCount * rate) : t.priceRUB;
-        return Object.assign({}, t, { effPriceRUB, overridden: ovCount != null });
-      });
-    if (candidates.length) {
-      candidates.sort((a, b) => a.effPriceRUB - b.effPriceRUB);
-      traderBuy = candidates[0];
-    }
-  }
-  function avatarFor(name) {
-    const meta = name ? TRADERS[name] : null;
-    if (meta && meta.avatar) return `<img class="trader-avatar trader-avatar--xs" src="${escapeAttr(meta.avatar)}" alt="${escapeAttr(name)}" title="${escapeAttr(name)}" loading="lazy">`;
-    if (name) return `<span class="trader-avatar trader-avatar--xs trader-avatar--placeholder" title="${escapeAttr(name)}">${escapeHtml(name.charAt(0))}</span>`;
-    return '';
-  }
-  // Reference = the TRADER (consistent with the expanded detail). Colored/labeled by
-  // SEMANTIC (not row position), so a sell-only mod item never mislabels:
-  //   S (red)  = trader SELLS this to you  → the SPT assort (the editable price you pay)
-  //   B (green)= trader BUYS this from you → tarkov.dev buyback (what the trader pays you)
-  const trader = (traderSellValue != null || traderBuy)
-    ? `<div class="cell-trader cell-trader--stacked">` +
-        (traderBuy
-          ? `<div class="cell-trader__line cell-trader__line--sell" data-tip="S = trader SELLS this to you — the assort price you pay (SPT)"><span class="cell-trader__tag cell-trader__tag--sell" aria-label="Trader sells to you">S</span>${avatarFor(traderBuy.name)}<span class="cell-trader__num${traderBuy.overridden?' is-overridden':''}">${fmtRub(traderBuy.effPriceRUB)}</span>${traderBuy.overridden?` <span class="badge badge--override cell-trader__ovr" data-tip="Trader sell-price override — restart SPT to apply">OVR</span>`:''}<small class="cell-trader__ll">LL${traderBuy.loyaltyLevel}${traderBuy.questLocked?` <span class="trader-lock" data-tip="Quest-locked — an override applies only after you unlock the quest">🔒</span>`:''}</small></div>`
-          : '') +
-        (traderSellValue != null
-          ? `<div class="cell-trader__line cell-trader__line--buy" data-tip="B = trader BUYS this from you — buyback (tarkov.dev${buyOverridden?' + override':''})"><span class="cell-trader__tag cell-trader__tag--buy" aria-label="Trader buys from you">B</span>${avatarFor(traderSellName)}<span class="cell-trader__num${buyOverridden?' is-overridden':''}">${fmtRub(buyEffRUB)}</span>${buyOverridden?` <span class="badge badge--override cell-trader__ovr" data-tip="Trader buyback-price override — restart SPT to apply">OVR</span>`:''}</div>`
-          : '') +
-      `</div>`
+  // Trader cell — two group-avatar lines. S (red) = traders that SELL this to you (SPT assort, cheapest
+  // best); B (green) = traders that BUY this from you (tarkov.dev buyback, pays-most best). Best avatar
+  // sits at the right with the value; the rest overlap to its left; "+N" caps the group. Overrides and
+  // disabled sellers are already resolved inside sellSideRows/buySideRows. Full list → hover popover.
+  const sRows = sellSideRows(it);
+  const bRows = buySideRows(it);
+  const sLine = traderLineMarkup(sRows, 'sell');
+  const bLine = traderLineMarkup(bRows, 'buy');
+  const trader = (sLine || bLine)
+    ? `<div class="cell-trader cell-trader--stacked" data-trader-col="1">${sLine}${bLine}</div>`
     : '<span class="price is-null">—</span>';
 
   // Reward cell — quest rewards that grant this item
@@ -1729,6 +1833,74 @@ function bindRewardHover(tableEl) {
     badge._rewardActive = false;
     clearTimeout(_rewardOpenTimer);
     _rewardCloseTimer = setTimeout(closeRewardPopover, 80);
+  });
+}
+
+// ── Trader popover: full S/B list with prices on hover over the TRADER cell (mirrors reward popover) ──
+let _traderOpenTimer = null, _traderCloseTimer = null;
+
+function closeTraderPopover() {
+  clearTimeout(_traderCloseTimer);
+  clearTimeout(_traderOpenTimer);
+  const existing = document.querySelector('.trader-popover');
+  if (existing) existing.remove();
+}
+
+function openTraderPopover(anchor, it) {
+  closeTraderPopover();
+  const sRows = sellSideRows(it), bRows = buySideRows(it);
+  if (!sRows.length && !bRows.length) return;
+  const line = (r, best, side) => {
+    const ll = (side === 'sell' && r.loyaltyLevel != null)
+      ? `<span class="trader-pop__ll">LL${r.loyaltyLevel}${r.questLocked ? ' 🔒' : ''}</span>` : '';
+    return `<li class="trader-pop__item${r === best ? ' is-best' : ''}">` +
+      traderAvatarImg(r.name, '') +
+      `<span class="trader-pop__name">${escapeHtml(r.name || '?')}</span>${ll}` +
+      `<span class="trader-pop__price${r.overridden ? ' is-overridden' : ''}">${fmtRub(r.effPriceRUB)}</span>` +
+    `</li>`;
+  };
+  let html = '';
+  if (sRows.length) html += `<div class="trader-pop__section"><div class="trader-pop__head trader-pop__head--sell"><span class="cell-trader__tag cell-trader__tag--sell">S</span> sells to you · cheapest first</div><ul class="trader-pop__list">${sRows.map(r => line(r, sRows[0], 'sell')).join('')}</ul></div>`;
+  if (bRows.length) html += `<div class="trader-pop__section"><div class="trader-pop__head trader-pop__head--buy"><span class="cell-trader__tag cell-trader__tag--buy">B</span> buys from you · pays most first</div><ul class="trader-pop__list">${bRows.map(r => line(r, bRows[0], 'buy')).join('')}</ul></div>`;
+  const pop = document.createElement('div');
+  pop.className = 'trader-popover';
+  pop.innerHTML = html;
+  document.body.appendChild(pop);
+
+  const rect = anchor.getBoundingClientRect();
+  const scrollY = window.scrollY || document.documentElement.scrollTop;
+  const scrollX = window.scrollX || document.documentElement.scrollLeft;
+  pop.style.top  = (rect.bottom + scrollY + 6) + 'px';
+  pop.style.left = (rect.left + scrollX) + 'px';
+  requestAnimationFrame(() => {
+    const pr = pop.getBoundingClientRect();
+    if (pr.bottom > window.innerHeight - 8) pop.style.top  = (rect.top + scrollY - pr.height - 6) + 'px';
+    if (pr.right  > window.innerWidth  - 8) pop.style.left = (window.innerWidth - pr.width - 8 + scrollX) + 'px';
+  });
+  pop.addEventListener('mouseenter', () => clearTimeout(_traderCloseTimer));
+  pop.addEventListener('mouseleave', () => { _traderCloseTimer = setTimeout(closeTraderPopover, 80); });
+}
+
+function bindTraderHover(tableEl) {
+  tableEl.addEventListener('mouseover', (e) => {
+    const cell = e.target.closest('.cell-trader[data-trader-col]');
+    if (!cell) return;
+    clearTimeout(_traderCloseTimer);
+    if (document.querySelector('.trader-popover') && cell._traderActive) return;
+    clearTimeout(_traderOpenTimer);
+    _traderOpenTimer = setTimeout(() => {
+      const row = cell.closest('tr[data-id]');
+      const id  = row && row.dataset.id;
+      if (id && ITEMS[id]) { cell._traderActive = true; openTraderPopover(cell, ITEMS[id]); }
+    }, 300);
+  });
+  tableEl.addEventListener('mouseout', (e) => {
+    const cell = e.target.closest('.cell-trader[data-trader-col]');
+    if (!cell) return;
+    if (cell.contains(e.relatedTarget)) return;
+    cell._traderActive = false;
+    clearTimeout(_traderOpenTimer);
+    _traderCloseTimer = setTimeout(closeTraderPopover, 80);
   });
 }
 
