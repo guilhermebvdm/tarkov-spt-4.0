@@ -107,7 +107,7 @@ namespace TRLDynamicSpawn.Components
                     for (int i = 0; i < gameWorld.AllAlivePlayersList.Count; i++)
                     {
                         var p = gameWorld.AllAlivePlayersList[i];
-                        if (p != null && (p.IsYourPlayer || (p.Profile != null && p.Profile.Side != EPlayerSide.Savage)))
+                        if (p != null && (p.IsYourPlayer || !p.IsAI))
                         {
                             alivePlayers.Add(p);
                         }
@@ -142,20 +142,26 @@ namespace TRLDynamicSpawn.Components
                         if (isPmc && !despawnPmcs)
                             continue;
 
-                        // Check distance against ALL human players
-                        bool farEnoughFromEveryone = true;
+                        // Check distance and Line of Sight against ALL human players
+                        bool canDespawn = true;
                         foreach (var human in alivePlayers)
                         {
                             if (human == null) continue;
                             float dist = Vector3.Distance(bot.Position, human.Position);
                             if (dist < despawnDist)
                             {
-                                farEnoughFromEveryone = false;
+                                canDespawn = false;
+                                break;
+                            }
+
+                            if (IsBotVisibleToPlayer(human, bot))
+                            {
+                                canDespawn = false;
                                 break;
                             }
                         }
 
-                        if (farEnoughFromEveryone)
+                        if (canDespawn)
                         {
                             StartCoroutine(AttemptToDespawnBotCoroutine(botsController, bot));
                         }
@@ -166,6 +172,33 @@ namespace TRLDynamicSpawn.Components
                     Plugin.LogSource.LogError($"[TRL-DynamicSpawn] Error in DespawnLoop: {ex.Message}");
                 }
             }
+        }
+
+        private bool IsBotVisibleToPlayer(Player player, BotOwner bot)
+        {
+            if (player == null || bot == null || bot.GetPlayer == null) return false;
+            
+            Vector3 botPos = bot.Position;
+            Vector3 playerPos = player.Position;
+            
+            if (!TRLDynamicSpawn.Helpers.Settings.enableLoSCulling.Value)
+                return false;
+
+            Vector3 directionToBot = (botPos - playerPos).normalized;
+            float dot = Vector3.Dot(player.LookDirection, directionToBot);
+            
+            if (dot > 0.5f)
+            {
+                Vector3 headPos = player.MainParts.ContainsKey(BodyPartType.head) ? player.MainParts[BodyPartType.head].Position : playerPos + Vector3.up * 1.5f;
+                Vector3 botTargetPos = bot.MainParts.ContainsKey(BodyPartType.head) ? bot.MainParts[BodyPartType.head].Position : botPos + Vector3.up * 1f;
+                
+                if (!Physics.Linecast(headPos, botTargetPos, LayerMaskClass.HighPolyWithTerrainMask))
+                {
+                    return true;
+                }
+            }
+            
+            return false;
         }
 
         private bool IsHostOrSolo()
@@ -195,7 +228,7 @@ namespace TRLDynamicSpawn.Components
             var role = bot.Profile.Info.Settings.Role;
             // Only allow normal Scavs (Assault) and PMCs (Usec/Bear) to despawn.
             // pmcBot = 39, exUsec = 40 (Rogue), arenaFighter = 41, etc. Just check enums.
-            if (role == WildSpawnType.assault || role == WildSpawnType.pmcBot || role == (WildSpawnType)41 || role == (WildSpawnType)42)
+            if (role == WildSpawnType.assault || role == WildSpawnType.cursedAssault || role == WildSpawnType.pmcBot || role == (WildSpawnType)41 || role == (WildSpawnType)42 || role == WildSpawnType.pmcUSEC || role == WildSpawnType.pmcBEAR)
             {
                 return false;
             }
