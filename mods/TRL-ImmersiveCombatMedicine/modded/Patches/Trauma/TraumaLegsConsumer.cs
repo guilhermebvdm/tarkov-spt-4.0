@@ -19,10 +19,14 @@ namespace TRLImmersiveCombatMedicine.Trauma
         private static bool _n2ClampWarned; // warn 1×/sessão do min(N2, N1) — review 2 do 003, achado 4
 
         /// <summary>Efeito aplicado por DONO. Keyed por Player (review 1, achado 5): a referência é necessária
-        /// p/ desfazer (RemoveCap) e re-estabelecer no religar; limpeza no null-detect do Update.</summary>
+        /// p/ desfazer (RemoveCap) e re-estabelecer no religar. Entradas podem ficar STALE (morte não publica
+        /// transição — comportamento 1 do motor; toggle-off durante a saída): saneadas nos sweeps — morto sai
+        /// SEM log "cap OFF", GetLine==None é podado oportunisticamente com undo do cap, e null/world-swap de
+        /// GameWorld limpa tudo (code-review 1 do 003, achado 2).</summary>
         private readonly Dictionary<Player, TraumaLine> _applied = new Dictionary<Player, TraumaLine>();
         private readonly List<Player> _sweepScratch = new List<Player>(); // reusada — sem alocação no caminho quente
         private bool _wasActive;
+        private GameWorld _trackedWorld; // espelha a detecção de world-swap do motor (transit — code-review 1, achado 2)
 
         private static readonly TraumaRegion[] LegsRegions = { TraumaRegion.Legs };
 
@@ -135,8 +139,11 @@ namespace TRLImmersiveCombatMedicine.Trauma
 
         private void RemoveCapGuarded(Player p)
         {
-            // review 2, achado 3: Player.RemoveStateSpeedLimit NÃO null-propaga (:25835-25837) — guard obrigatório
+            // review 2, achado 3: Player.RemoveStateSpeedLimit NÃO null-propaga (:25835-25837) — guard obrigatório.
+            // code-review 1, achado 2: morto/destruído sai SÓ do bookkeeping (sem undo nem log "cap OFF" —
+            // o MovementContext morre com o Player; recompute em cadáver é ruído).
             if (p == null || p.MovementContext == null) return;
+            if (p.HealthController == null || !p.HealthController.IsAlive) return;
             p.MovementContext.RemoveStateSpeedLimit(TraumaCause);
             p.UpdateSpeedLimitByHealth(); // AP-04: recompute oficial devolve sprint/caps ao estado canônico vanilla (Player.cs:29068)
             TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] legs cap OFF {p.ProfileId}");
@@ -151,23 +158,29 @@ namespace TRLImmersiveCombatMedicine.Trauma
                 if (_applied.Count > 0) _applied.Clear();
                 TraumaPose.CancelAll("raid-end");
                 TraumaPose.ClearBotRestores();
+                _trackedWorld = null;
                 _wasActive = IsActive();
                 return;
+            }
+            if (!ReferenceEquals(gw, _trackedWorld))
+            {
+                // World-swap sem passar por null (transit) — espelha a detecção do motor (code-review 1, achado 2):
+                // caps/players do mundo antigo morreram; só limpar bookkeeping e adotar o mundo novo
+                if (_applied.Count > 0) _applied.Clear();
+                TraumaPose.CancelAll("raid-end");
+                TraumaPose.ClearBotRestores();
+                _trackedWorld = gw;
             }
 
             bool active = IsActive();
             if (_wasActive && !active)
             {
-                // Desligar mid-raid: desfaz os próprios efeitos NA HORA (corner da funcional)
+                // Desligar mid-raid: desfaz os próprios efeitos NA HORA (corner da funcional).
+                // RemoveCapGuarded pula mortos/destruídos sem log (code-review 1, achado 2).
                 _sweepScratch.Clear();
                 foreach (KeyValuePair<Player, TraumaLine> kv in _applied) _sweepScratch.Add(kv.Key);
                 _applied.Clear();
-                for (int i = 0; i < _sweepScratch.Count; i++)
-                {
-                    Player p = _sweepScratch[i];
-                    if (p == null || p.MovementContext == null) continue; // review 2, achado 3 — guard no sweep
-                    RemoveCapGuarded(p);
-                }
+                for (int i = 0; i < _sweepScratch.Count; i++) RemoveCapGuarded(_sweepScratch[i]);
                 _sweepScratch.Clear();
                 TraumaPose.CancelAll("toggle-off");
                 TraumaPose.FlushBotRestores();
@@ -195,6 +208,20 @@ namespace TRLImmersiveCombatMedicine.Trauma
 
             if (active)
             {
+                // Poda oportunista (code-review 1, achado 2): entrada cujo motor já diz None é stale
+                // (ex.: saída publicada com o toggle off) — desfaz o cap vazado e limpa o bookkeeping
+                _sweepScratch.Clear();
+                foreach (KeyValuePair<Player, TraumaLine> kv in _applied)
+                {
+                    if (TraumaEngine.GetLine(kv.Key, TraumaRegion.Legs) == TraumaLine.None) _sweepScratch.Add(kv.Key);
+                }
+                for (int i = 0; i < _sweepScratch.Count; i++)
+                {
+                    _applied.Remove(_sweepScratch[i]);
+                    RemoveCapGuarded(_sweepScratch[i]);
+                }
+                _sweepScratch.Clear();
+
                 TraumaPose.PumpDeferred();   // adiados D7: re-checa guards, re-valida snapshot, executa/cancela
                 TraumaPose.PumpBotRestores(); // devolução do dip de bot fora de combate
             }

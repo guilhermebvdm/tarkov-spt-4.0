@@ -76,7 +76,14 @@ namespace TRLImmersiveCombatMedicine.Trauma
         /// (funcional §3 — "sem consumir cooldown"); guard falhou → ADIA; ok → SetPoseLevel(0f) sem force.</summary>
         internal static void TryInvoluntaryCrouch(Player p, TraumaRegion region, TraumaOneShotKind kind)
         {
-            if (p == null || p.MovementContext == null) return;
+            if (p == null || p.MovementContext == null)
+            {
+                // code-review 1 do 003, achado 4: contexto morto = one-shot nunca executará — refundar o
+                // cooldown do publish (mesmo padrão do NOOP) antes de sair
+                if (!(p is null) && TraumaEngine.TryGetOneShotDeadline(p, kind, out float dNull))
+                    TraumaEngine.ReportOneShotCanceled(p, kind, dNull);
+                return;
+            }
             var mc = p.MovementContext;
             if (mc.IsInPronePose || mc.PoseLevel <= 0.05f) // ref: MovementContext.cs:1016 — 0=agachado, 1=de pé
             {
@@ -174,6 +181,16 @@ namespace TRLImmersiveCombatMedicine.Trauma
             if (botPlayer == null || botPlayer.MovementContext == null) return;
             BotOwner bo = botPlayer.AIData?.BotOwner;
             if (bo == null) return;
+            var mcBot = botPlayer.MovementContext;
+            if (mcBot.IsInPronePose || mcBot.PoseLevel <= 0.05f)
+            {
+                // code-review 1 do 003, achado 3: só-para-baixo vale p/ bot também — pose já baixa é NOOP,
+                // devolve o cooldown do publish e NÃO agenda restore (não há dip a desfazer)
+                if (TraumaEngine.TryGetOneShotDeadline(botPlayer, TraumaOneShotKind.InvoluntaryCrouch, out float d0))
+                    TraumaEngine.ReportOneShotCanceled(botPlayer, TraumaOneShotKind.InvoluntaryCrouch, d0);
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] bot dip NOOP (pose already low) {botPlayer.ProfileId}");
+                return;
+            }
             bool sain = TrySainSetTargetPose(botPlayer, 0f);      // em combate o SAIN dirige a pose — target via reflection
             bo.SetPose(0f);                                        // ref: BotOwner.cs:1120 — target de pose da IA vanilla
             botPlayer.MovementContext.SetPoseLevel(0f, true);      // dip imediato no dono (host/headless)
@@ -222,12 +239,13 @@ namespace TRLImmersiveCombatMedicine.Trauma
             _ladderResolved = true;
             _ladderType = Type.GetType("tarkin.ladders.bep.PlayerLadderController, tarkin.ladders.bep"); // ref: P4 rec. (3c)
             if (_ladderType != null) return;
-            // P4 risco 3: warn quando o mod está na load order e a string de tipo quebrou (update do tarkin-ladders)
+            // P4 risco 3: warn quando o mod está na load order e a string de tipo quebrou (update do tarkin-ladders).
+            // code-review 1 do 003, achado 5: match restrito a "ladders" no GUID — o OR "tarkin" dava
+            // falso-positivo com outros mods do mesmo autor.
             foreach (var kv in BepInEx.Bootstrap.Chainloader.PluginInfos)
             {
                 string key = kv.Key ?? string.Empty;
-                if (key.IndexOf("ladder", StringComparison.OrdinalIgnoreCase) >= 0
-                    || key.IndexOf("tarkin", StringComparison.OrdinalIgnoreCase) >= 0)
+                if (key.IndexOf("ladders", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     TRLImmersiveCombatMedicinePlugin.ModLogger.LogWarning(
                         "[Trauma2] tarkin-ladders presente mas PlayerLadderController não resolveu — guard de escada INATIVO");

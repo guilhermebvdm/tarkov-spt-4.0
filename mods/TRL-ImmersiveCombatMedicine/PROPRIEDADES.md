@@ -64,7 +64,7 @@ Toggle POR consumidor (comportamento 9 da spec funcional 002): cada consumidor s
 
 | Nome (key) | Tipo | Padrão | Faixa | Avançado | Tooltip |
 |---|---|---|---|---|---|
-| Legs Effects (item 003) | bool | `true` | — | — | Mancar N1/N2 + agachar involuntário (item 003). Governado pelo master Trauma 2.0; desligar mid-raid desfaz caps e cancela agachares pendentes. Nota: .cfg gravado nas v1.2.x mantém o `false` salvo (o default novo só vale para cfg sem a key). |
+| Legs Effects | bool | `true` | — | — | Mancar N1/N2 + agachar involuntário (item 003). Governado pelo master Trauma 2.0; desligar mid-raid desfaz caps e cancela agachares pendentes. (Key renomeada na entrega do 003 — ver tabela Renomeadas.) |
 | Fall Cycle (item 004) | bool | `false` | — | — | Placeholder — cair + ciclo de levantar. Sem função até o item 004. |
 | Arms Effects (item 005) | bool | `false` | — | — | Placeholder — tremor + cancela-ADS. Sem função até o item 005. |
 | Stomach Effects (item 006) | bool | `false` | — | — | Placeholder — agachar involuntário do estômago. Sem função até o item 006. |
@@ -82,6 +82,7 @@ Toggle POR consumidor (comportamento 9 da spec funcional 002): cada consumidor s
 | Key | Mudança | Migração |
 |---|---|---|
 | Sistema de Braços | 2026-07-12 (CR-02-04): a key gravada tinha bytes de encoding quebrado (`Sistema de BraÃ§os`) e foi corrigida — identidade mudou | `MigrateOrphanedConfigKeys()` no Awake copia o valor órfão 1× e REMOVE a key antiga do .cfg (CR-03-01: sem o remove, a migração re-rodava todo boot e clobberava mudanças do usuário) |
+| Legs Effects (item 003) → Legs Effects | 2026-07-19 (code-review 1 do 003): **rename-at-delivery** — a key nova nasce ON para todos; o `false` do placeholder das v1.2.x não era escolha do usuário | `MigrateOrphanedConfigKeys()` DELETA a entry órfã SEM copiar o valor + `Config.Save` (lição CR-03-01: sem o delete, o BepInEx re-persiste a key morta). **Padrão a repetir** nos placeholders `Fall Cycle (item 004)` / `Arms Effects (item 005)` / `Stomach Effects (item 006)` / `Blackout 2.0 (item 007)` na entrega de cada item. |
 
 ## Seção 7. Trauma 2.0 (Pernas)
 
@@ -102,4 +103,5 @@ Consumidor de pernas (item 003). Alvos em % da velocidade **baseline composta** 
 | 2026-07-12 | Guilherme | CR-03: seção Renomeadas (migração da key Sistema de Braços). |
 | 2026-07-13 | Guilherme | CR-04 (rodada 04): faixa 5–120 e tooltip novo em Duracao do Desmaio; micro-textos da seção 4 sincronizados literalmente com os Config.Bind (fecha o resíduo do CR-03-16). |
 | 2026-07-18 | Guilherme | Item 002 (motor Trauma 2.0, v1.2.0): seções novas `5. Trauma 2.0 (Motor)` (5 entries) e `6. Trauma 2.0 (Consumidores)` (6 entries, todas OFF). Nota: a key de seção `5. Trauma 2.0 (Motor)` coexiste com `5. Debug` (strings distintas no .cfg; ordenação do F12 intercala). |
-| 2026-07-19 | Guilherme | Item 003 (pernas Trauma 2.0, v1.3.0): seção nova `7. Trauma 2.0 (Pernas)` (4 entries); `Legs Effects (item 003)` passa a default ON com tooltip real (cfg 1.2.x com false salvo prevalece); `Sistema de Pernas` (seção 2) marcado INERTE — legado de pernas aposentado (D10), remoção da key no item 010. |
+| 2026-07-19 | Guilherme | Item 003 (pernas Trauma 2.0, v1.3.0): seção nova `7. Trauma 2.0 (Pernas)` (4 entries); `Legs Effects (item 003)` passa a default ON com tooltip real; `Sistema de Pernas` (seção 2) marcado INERTE — legado de pernas aposentado (D10), remoção da key no item 010. |
+| 2026-07-19 | Guilherme | Code-review 1 do 003 (v1.3.1): RENAME `Legs Effects (item 003)` → `Legs Effects` (default ON efetivo p/ todos; órfã deletada sem copiar valor) + padrão rename-at-delivery registrado p/ os placeholders 004/005/006/007. |

@@ -10,7 +10,7 @@ using TRLImmersiveCombatMedicine.Trauma;
 
 namespace TRLImmersiveCombatMedicine
 {
-    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.3.0")]
+    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.3.1")]
     public class TRLImmersiveCombatMedicinePlugin : BaseUnityPlugin
     {
         public static TRLImmersiveCombatMedicinePlugin Instance;
@@ -55,7 +55,7 @@ namespace TRLImmersiveCombatMedicine
         {
             Instance = this;
             ModLogger = base.Logger;
-            ModLogger.LogInfo("TRL-ImmersiveCombatMedicine Plugin v1.3.0 carregado.");
+            ModLogger.LogInfo("TRL-ImmersiveCombatMedicine Plugin v1.3.1 carregado.");
 
             // Inicializações combinadas
             ItemDatabase.Initialize();
@@ -102,8 +102,11 @@ namespace TRLImmersiveCombatMedicine
             ConfigVerboseEngineLog = Config.Bind("5. Trauma 2.0 (Motor)", "Verbose Engine Log", false,
                 new ConfigDescription("Loga detalhes de avaliação/polling. Transições de estado e supressões são SEMPRE logadas, independente desta opção.",
                     null, advanced));
-            // ref: spec 003 — toggle nasce ON na entrega (decisão da funcional); .cfg pré-existente com false salvo prevalece
-            ConfigConsumerLegsEffects = Config.Bind("6. Trauma 2.0 (Consumidores)", "Legs Effects (item 003)", true,
+            // ref: code-review 1 do 003 — RENAME-AT-DELIVERY: "Legs Effects (item 003)" → "Legs Effects".
+            // A key nova nasce ON p/ TODOS (a órfã do placeholder é DELETADA em MigrateOrphanedConfigKeys sem
+            // copiar o valor — o false de placeholder não é escolha do usuário). Mesmo padrão vale p/ os
+            // placeholders 004/005/006/007 nas entregas deles.
+            ConfigConsumerLegsEffects = Config.Bind("6. Trauma 2.0 (Consumidores)", "Legs Effects", true,
                 "Mancar N1/N2 + agachar involuntário (item 003). Governado pelo master Trauma 2.0; desligar mid-raid desfaz caps e cancela agachares pendentes.");
             ConfigConsumerFallCycle = Config.Bind("6. Trauma 2.0 (Consumidores)", "Fall Cycle (item 004)", false,
                 "Placeholder — cair + ciclo de levantar. Sem função até o item 004.");
@@ -257,6 +260,30 @@ namespace TRLImmersiveCombatMedicine
                     orphans.Remove(orphanDef);
                     Config.Save();
                     ModLogger.LogWarning($"[Config] Valor órfão migrado (one-time): 'Sistema de Braços' = {oldValue}; key antiga removida do .cfg.");
+                }
+
+                // ref: code-review 1 do 003 — RENAME-AT-DELIVERY: deletar a key órfã do placeholder
+                // "Legs Effects (item 003)" SEM copiar o valor (o false de placeholder não é escolha do
+                // usuário — a key nova "Legs Effects" nasce ON). Lição CR-03-01: sem o delete + Save, o
+                // BepInEx re-persiste a key morta a cada boot. Repetir o padrão nos placeholders
+                // 004/005/006/007 quando cada item entregar.
+                object legacyLegsDef = null;
+                foreach (System.Collections.DictionaryEntry entry in orphans)
+                {
+                    var def = entry.Key;
+                    string section = AccessTools.Property(def.GetType(), "Section")?.GetValue(def) as string;
+                    string key = AccessTools.Property(def.GetType(), "Key")?.GetValue(def) as string;
+                    if (section == "6. Trauma 2.0 (Consumidores)" && key == "Legs Effects (item 003)")
+                    {
+                        legacyLegsDef = def;
+                        break;
+                    }
+                }
+                if (legacyLegsDef != null)
+                {
+                    orphans.Remove(legacyLegsDef);
+                    Config.Save();
+                    ModLogger.LogWarning("[Config] Key placeholder órfã DELETADA (rename-at-delivery, sem copiar valor): 'Legs Effects (item 003)' → 'Legs Effects'.");
                 }
             }
             catch (Exception ex)
