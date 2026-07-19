@@ -1,7 +1,7 @@
 # 004 — Pernas: Cair + ciclo levantar 3s/15s
 
 **Mod:** TRL-ImmersiveCombatMedicine
-**Status:** Backlog
+**Status:** Entregue
 **Criado:** 2026-07-19
 
 ## Visão geral

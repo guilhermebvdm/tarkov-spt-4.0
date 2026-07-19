@@ -61,6 +61,16 @@ namespace TRLImmersiveCombatMedicine.Trauma
             return inst != null && ReferenceEquals(p, inst._local) && inst._phase == FallPhase.Blocked;
         }
 
+        /// <summary>CR-02-02: fonte ÚNICA do predicado de pausa (D3 blackout legado + DOWNED Fika via !IsAlive
+        /// com record vivo) — consumida pelo TickHumanCycle e pelo cinto do OnFallExecuted (CR-01-02). O subset
+        /// D3 do OnOneShotCore fica FORA de propósito (é menor: o motor não publica p/ !IsAlive —
+        /// TraumaEngine.cs:511-513).</summary>
+        private static bool IsPauseCondition(Player p)
+        {
+            return TraumaState.BlackoutTimers.ContainsKey(p.ProfileId) || TraumaState.IsFainted
+                || p.HealthController == null || !p.HealthController.IsAlive;
+        }
+
         private void OnTransition(TraumaTransition t)
         {
             // CR-01-04: exceção de consumidor não pode subir p/ o StateChanged?.Invoke do motor (barramento de
@@ -138,15 +148,12 @@ namespace TRLImmersiveCombatMedicine.Trauma
         {
             // Chamado pelo TraumaPose na execução (imediata ou do pump). fellProne=false = fallback agachado
             // (PronePending re-tenta no pump; bloqueio vale p/ a pose corrente — funcional §1).
-            // Cinto PA-02-03 + CR-01-02: além da fase Paused, checa o predicado de desmaio/downed DIRETO (mesma
-            // fonte do TickHumanCycle) — no frame de ENTRADA do blackout o pump do 003 roda ANTES do tick do 004
-            // (ordem de AddComponent) e a queda adiada executaria como already-prone com a FSM ainda em
-            // FallPending → EnterBlocked + OnAgony de um inconsciente (replicado aos peers). Sem fase, sem voz —
-            // o wake conduz (já prone).
-            if (_phase == FallPhase.Paused
-                || TraumaState.BlackoutTimers.ContainsKey(p.ProfileId) || TraumaState.IsFainted
-                || p.HealthController == null || !p.HealthController.IsAlive)
-                return;
+            // Cinto PA-02-03 + CR-01-02: além da fase Paused, checa o predicado de desmaio/downed DIRETO (helper
+            // único IsPauseCondition — CR-02-02) — no frame de ENTRADA do blackout o pump do 003 roda ANTES do
+            // tick do 004 (ordem de AddComponent) e a queda adiada executaria como already-prone com a FSM ainda
+            // em FallPending → EnterBlocked + OnAgony de um inconsciente (replicado aos peers). Sem fase, sem
+            // voz — o wake conduz (já prone).
+            if (_phase == FallPhase.Paused || IsPauseCondition(p)) return;
             _local = p;
             EnterBlocked("fall-executed");
             TraumaVoice.PlayStrong(p); // OnAgony importance:100 — ref: PhraseSpeakerClass.cs:175
@@ -259,9 +266,9 @@ namespace TRLImmersiveCombatMedicine.Trauma
             if (p is null || p.MovementContext == null || TraumaEngine.GetLine(p, TraumaRegion.Legs) != TraumaLine.LegsFallCycle)
             { Disengage("stale"); return; }
 
-            // D3/DOWNED: blackout legado OU downed Fika (!IsAlive com record vivo — contrato downed-safe do 003)
-            bool paused = TraumaState.BlackoutTimers.ContainsKey(p.ProfileId) || TraumaState.IsFainted
-                || p.HealthController == null || !p.HealthController.IsAlive;
+            // D3/DOWNED: blackout legado OU downed Fika (!IsAlive com record vivo — contrato downed-safe do 003);
+            // fonte única do predicado no helper IsPauseCondition (CR-02-02)
+            bool paused = IsPauseCondition(p);
             if (paused)
             {
                 if (_phase != FallPhase.Paused)

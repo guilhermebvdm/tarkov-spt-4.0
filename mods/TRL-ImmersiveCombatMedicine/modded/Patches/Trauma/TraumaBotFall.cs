@@ -38,6 +38,18 @@ namespace TRLImmersiveCombatMedicine.Trauma
         private static readonly HashSet<string> LayerBrainSet = new HashSet<string>(LayerBrains);
         private static bool _layerRegistered; // setado SÓ no fim de RegisterLayerCore (BigBrain presente e registro ok)
 
+        /// <summary>CR-02-01: transição chegou com Brain.BaseBrain ainda NÃO vinculado (bot adotado ferido na
+        /// janela de spawn — o attach do BigBrain acontece no prefix de BaseBrain.Activate, no mesmo call stack
+        /// da vinculação). Entrada PENDENTE re-checada no Pump com backoff curto até o BaseBrain vincular (aí
+        /// decide hold/no-layer) ou o episódio sair da linha Cair.</summary>
+        private sealed class BrainPending { internal Player Player; internal float NextCheckAt; }
+        private static readonly Dictionary<string, BrainPending> _brainPending = new Dictionary<string, BrainPending>();
+        private const float BrainPendingBackoff = 0.5f;
+
+        /// <summary>Resultado da sondagem de camada: NoLayer = definitivo (sem BigBrain / brain fora da lista);
+        /// Pending = BaseBrain ainda não vinculou (re-sondar); Ready = camada existe p/ o bot.</summary>
+        private enum LayerProbe { NoLayer, Pending, Ready }
+
         // SAIN interop (ActiveLayer=None no Start do hold) — soft-dep por reflection (padrão TrySainSetTargetPose)
         private static bool _sainResolved;
         private static System.Type _sainBotComponentType;
@@ -79,15 +91,26 @@ namespace TRLImmersiveCombatMedicine.Trauma
             TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("[Trauma2] bot fall layer registered (BigBrain prio 90)");
         }
 
-        /// <summary>CR-01-01: a camada existe DE FATO p/ este bot? Mesmo critério que o BigBrain usa para anexar
-        /// (brainNames.Contains(Brain.BaseBrain.ShortName()) — bigbrain ExcludeLayerHelpers.IsAffectedBySettings;
-        /// roles = AllWildSpawnTypes no nosso registro, só o brain decide). Sem camada (BigBrain ausente OU brain
-        /// fora da lista — boss/follower/Marksman): sem hold — degrada p/ o comportamento sem-hold logado.</summary>
-        private static bool HasLayerFor(Player bot)
+        /// <summary>CR-01-01 + CR-02-01: a camada existe DE FATO p/ este bot? Mesmo critério que o BigBrain usa
+        /// para anexar (brainNames.Contains(Brain.BaseBrain.ShortName()) — bigbrain ExcludeLayerHelpers.
+        /// IsAffectedBySettings; roles = AllWildSpawnTypes no nosso registro, só o brain decide). BaseBrain ainda
+        /// null (brain não ativou — janela de spawn/adoção) é caso DISTINTO de "fora da lista": Pending, não
+        /// NoLayer (CR-02-01 — o attach do BigBrain vem no prefix de BaseBrain.Activate, ms depois).</summary>
+        private static LayerProbe ProbeLayer(Player bot)
         {
-            if (!_layerRegistered) return false;
-            BaseBrain brain = bot.AIData?.BotOwner?.Brain?.BaseBrain; // ref: StandartBotBrain.cs:11; BaseBrain.cs:78
-            return brain != null && LayerBrainSet.Contains(brain.ShortName());
+            if (!_layerRegistered) return LayerProbe.NoLayer;
+            BotOwner bo = bot.AIData?.BotOwner;
+            if (bo == null) return LayerProbe.NoLayer;
+            BaseBrain brain = bo.Brain?.BaseBrain; // ref: StandartBotBrain.cs:11; BaseBrain.cs:78
+            if (brain == null) return LayerProbe.Pending;
+            return LayerBrainSet.Contains(brain.ShortName()) ? LayerProbe.Ready : LayerProbe.NoLayer;
+        }
+
+        private static void CreateHold(Player bot, string id)
+        {
+            float x = X();
+            _holds[id] = new Hold { Player = bot, ReleaseAt = Time.time + x }; // camada IsActive no próximo tick de IA
+            TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] bot fall HOLD {id} x={x:0.#}");
         }
 
         internal static bool IsHeld(string profileId) =>
@@ -122,20 +145,30 @@ namespace TRLImmersiveCombatMedicine.Trauma
                 if (IsHeld(id)) return; // no-op (idempotente)
                 // Guards: BotOwner/MovementContext nulos → no-op SEM refund (não há publish atrelado à transição)
                 if (bot.MovementContext == null || bot.AIData?.BotOwner == null) return;
-                // CR-01-01: sem camada p/ este bot (BigBrain ausente / brain fora da lista) → SEM hold — ninguém
-                // deitaria o bot; hold fantasma distorceria IsCycleEngaged (D2) e geraria churn RELEASE/RE-HOLD.
-                // O publish do one-shot é refundado pelo OnFallOneShot não-held.
-                if (!HasLayerFor(bot))
+                switch (ProbeLayer(bot))
                 {
-                    TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] bot fall no-layer {id}");
-                    return;
+                    case LayerProbe.Pending:
+                        // CR-02-01: BaseBrain ainda não vinculou — entrada PENDENTE re-checada no Pump com
+                        // backoff curto até vincular (decide hold/no-layer) ou o episódio sair da linha.
+                        if (!_brainPending.ContainsKey(id))
+                        {
+                            _brainPending[id] = new BrainPending { Player = bot, NextCheckAt = Time.time + BrainPendingBackoff };
+                            TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] bot fall brain-pending {id}");
+                        }
+                        return;
+                    case LayerProbe.NoLayer:
+                        // CR-01-01: sem camada p/ este bot (BigBrain ausente / brain fora da lista) → SEM hold —
+                        // ninguém deitaria o bot; hold fantasma distorceria IsCycleEngaged (D2) e geraria churn
+                        // RELEASE/RE-HOLD. O publish do one-shot é refundado pelo OnFallOneShot não-held.
+                        TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] bot fall no-layer {id}");
+                        return;
                 }
-                float x = X();
-                _holds[id] = new Hold { Player = bot, ReleaseAt = Time.time + x }; // camada IsActive no próximo tick de IA
-                TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] bot fall HOLD {id} x={x:0.#}");
+                _brainPending.Remove(id); // pendência antiga (se houver) resolvida por esta transição
+                CreateHold(bot, id);
             }
             else
             {
+                _brainPending.Remove(id); // CR-02-01: episódio saiu da linha — pendência morre
                 // Cura/analgésico/None → MARCA release SEM re-hold ("a IA levanta sem re-derrubada" — PA-01-08);
                 // a REMOÇÃO é do Stop()/sweep (PA-02-02).
                 if (_holds.TryGetValue(id, out Hold h))
@@ -178,6 +211,7 @@ namespace TRLImmersiveCombatMedicine.Trauma
 
         internal static void Pump()
         {
+            PumpBrainPending(); // CR-02-01: pendências resolvem mesmo sem hold algum vivo
             if (_holds.Count == 0) return;
             _scratch.Clear();
             foreach (KeyValuePair<string, Hold> kv in _holds) _scratch.Add(kv.Key);
@@ -232,6 +266,43 @@ namespace TRLImmersiveCombatMedicine.Trauma
             _scratch.Clear();
         }
 
+        /// <summary>CR-02-01: re-checa entradas brain-pending com backoff — BaseBrain vinculou → decide
+        /// hold/no-layer (mesmo log/refund do caminho degradado definitivo); episódio saiu da linha ou bot
+        /// morreu/despawnou → pendência morre.</summary>
+        private static void PumpBrainPending()
+        {
+            if (_brainPending.Count == 0) return;
+            _scratch.Clear();
+            foreach (KeyValuePair<string, BrainPending> kv in _brainPending) _scratch.Add(kv.Key);
+            for (int i = 0; i < _scratch.Count; i++)
+            {
+                string id = _scratch[i];
+                if (!_brainPending.TryGetValue(id, out BrainPending pend)) continue;
+                Player p = pend.Player;
+                if (p is null || p == null || TraumaEngine.GetLine(p, TraumaRegion.Legs) != TraumaLine.LegsFallCycle)
+                {
+                    _brainPending.Remove(id); // morto/despawn/linha saiu — episódio encerrado
+                    continue;
+                }
+                if (Time.time < pend.NextCheckAt) continue;
+                switch (ProbeLayer(p))
+                {
+                    case LayerProbe.Pending:
+                        pend.NextCheckAt = Time.time + BrainPendingBackoff; // segue aguardando o Activate
+                        break;
+                    case LayerProbe.NoLayer:
+                        _brainPending.Remove(id); // definitivo — mesmo caminho degradado logado do OnLine
+                        TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] bot fall no-layer {id}");
+                        break;
+                    case LayerProbe.Ready:
+                        _brainPending.Remove(id);
+                        if (!IsHeld(id)) CreateHold(p, id); // hold atrasado (shape estabelecedor — sem one-shot, PA-02-06)
+                        break;
+                }
+            }
+            _scratch.Clear();
+        }
+
         /// <summary>Toggle-off (PA-02-02): entradas com camada possivelmente ATIVA → MARCA Released+ForceGetUp
         /// (o Stop() assíncrono do árbitro consome via ConsumeRelease no tick de IA seguinte e ELE remove —
         /// remover aqui faria o GetUp(false) nunca rodar, corner da funcional). Entradas JÁ Released e JÁ paradas
@@ -254,10 +325,15 @@ namespace TRLImmersiveCombatMedicine.Trauma
                 h.ForceGetUp = true;
             }
             _scratch.Clear();
+            _brainPending.Clear(); // CR-02-01: toggle-off mata pendências (religar re-estabelece do snapshot)
             TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] bot fall RELEASE-ALL ({reason})");
         }
 
-        internal static void ClearAll() => _holds.Clear(); // mundo morto — objetos destruídos, só bookkeeping (sem Stop())
+        internal static void ClearAll() // mundo morto — objetos destruídos, só bookkeeping (sem Stop())
+        {
+            _holds.Clear();
+            _brainPending.Clear(); // CR-02-01
+        }
 
         internal static float X() => Mathf.Clamp(TRLImmersiveCombatMedicinePlugin.ConfigBotFallHoldSeconds.Value, 5f, 120f); // internal: Start() da camada usa (PA-02-07)
 

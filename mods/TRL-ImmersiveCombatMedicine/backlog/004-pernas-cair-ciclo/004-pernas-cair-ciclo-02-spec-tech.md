@@ -1,7 +1,7 @@
 # 004 — Pernas: Cair + ciclo levantar 3s/15s · Spec Técnica
 
 **Mod:** TRL-ImmersiveCombatMedicine
-**Status:** Pronto para /code-mod (0 pendências)
+**Status:** Entregue
 **Spec funcional:** [004-pernas-cair-ciclo-01-spec.md](004-pernas-cair-ciclo-01-spec.md)
 **Criado:** 2026-07-19
 
