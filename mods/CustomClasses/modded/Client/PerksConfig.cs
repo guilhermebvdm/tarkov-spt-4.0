@@ -74,8 +74,8 @@ internal static class PerksConfig
     internal static ConfigEntry<bool>? SwiftSurgeonEnabled;       // 072
     internal static ConfigEntry<float>? SwiftSurgeonTime;         // 072
     internal static ConfigEntry<bool>? MobileSurgeryEnabled;      // 072
-    internal static ConfigEntry<bool>? RestorativeSurgeryEnabled;   // 076
-    internal static ConfigEntry<float>? RestorativeSurgeryPenalty;  // 076
+    internal static ConfigEntry<bool>? RestorativeSurgeryEnabled;    // 076
+    internal static ConfigEntry<float>? RestorativeSurgeryRetention; // 076 (v0.6.1: piso de HP máx retido, era "penalty mult")
     internal static ConfigEntry<bool>? ShakyHandsEnabled;
     internal static ConfigEntry<float>? ShakyHandsRecoil;
 
@@ -235,11 +235,11 @@ internal static class PerksConfig
         // (caminho nativo) E p/ aliados operados via ICM (TRL-ImmersiveCombatMedicine), gateado pela classe do OPERADOR.
         RestorativeSurgeryEnabled = config.Bind(
             SecMedic, "Restorative Surgery — Enabled", true,
-            "Médico: a cirurgia NÃO reduz o HP MÁXIMO do membro curado (o vanilla deixa uma cicatriz permanente na raid). Vale para a cirurgia no próprio Médico e nos aliados que ele opera (via ICM). / Combat Medic: surgery does not reduce the healed limb's MAX HP (vanilla leaves a permanent scar). Applies to the medic's own surgery and to allies they operate on (via ICM).");
-        RestorativeSurgeryPenalty = config.Bind(
-            SecMedic, "Restorative Surgery — Max HP penalty mult", 0f,
+            "Médico: a cirurgia restaura o membro a ~90% do HP MÁXIMO (configurável abaixo), em vez da cicatriz grande do vanilla (CMS mantém só 25–45%, Surv12 60–72%). Vale para a cirurgia no próprio Médico e nos aliados que ele opera (via ICM). / Combat Medic: surgery restores the limb to ~90% of MAX HP (configurable below) instead of vanilla's big scar (CMS keeps only 25–45%, Surv12 60–72%). Applies to the medic's own surgery and to allies they operate on (via ICM).");
+        RestorativeSurgeryRetention = config.Bind(
+            SecMedic, "Restorative Surgery — Restored max HP", 0.90f,
             new ConfigDescription(
-                "Multiplicador da penalidade de HP máximo da cirurgia do Médico (0 = sem penalidade; 1 = penalidade vanilla). / Multiplier for the Combat Medic surgery's max-HP penalty (0 = none; 1 = vanilla).",
+                "Fração MÍNIMA do HP máximo que o membro operado retém (0.90 = volta com 90%). É um PISO: nunca pior que o vanilla, e a skill Surgery do jogador pode melhorar ALÉM disto. / Minimum fraction of the limb's max HP retained after surgery (0.90 = comes back at 90%). It's a FLOOR: never worse than vanilla, and the player's Surgery skill can push beyond it.",
                 new AcceptableValueRange<float>(0f, 1f)));
         // B1: default OFF até os perks do Médico existirem (hoje o Metabolismo já cobre — mas o recuo fica desligado por padrão).
         ShakyHandsEnabled = config.Bind(

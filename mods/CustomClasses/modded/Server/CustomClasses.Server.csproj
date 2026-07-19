@@ -7,7 +7,7 @@
     <RootNamespace>CustomClasses</RootNamespace>
     <AssemblyName>CustomClasses-Server</AssemblyName>
     <Authors>mdj</Authors>
-    <Version>0.6.0</Version>
+    <Version>0.6.1</Version>
     <LangVersion>latest</LangVersion>
     <!-- Sdk.Web defaults to Exe; this is a mod assembly loaded by the SPT server host (item 020, same as Skills-Extended). -->
     <OutputType>Library</OutputType>

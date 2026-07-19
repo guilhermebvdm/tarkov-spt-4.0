@@ -54,6 +54,8 @@ Propriedades expostas no menu de configuração (F12 / ConfigurationManager). Ne
 | `Swift Surgeon — Enabled` | bool | `true` | — | Perk (**072**): cirurgia (CMS/Surv12) muito mais rápida. |
 | `Swift Surgeon — Surgery time mult` | float | `0.5` | 0.3..1 | Tempo de cirurgia (0.5 = metade). A skill Surgery do jogador **continua** valendo por cima. |
 | `Mobile Surgery — Enabled` | bool | `true` | — | Perk (**072**): pode **ANDAR** durante a cirurgia (segue sem correr/pular/deitar). |
+| `Restorative Surgery — Enabled` | bool | `true` | — | Perk (**076**): a cirurgia restaura o membro a ~90% do HP máx (vanilla: CMS 25–45%, Surv12 60–72%). Vale na auto-cirurgia + aliado via ICM. |
+| `Restorative Surgery — Restored max HP` | float | `0.90` | 0..1 | **Piso** da fração de HP máx retida (0.90 = 90%). Nunca pior que o vanilla; a skill Surgery empurra **além** deste piso. |
 | `Shaky Hands — Enabled` | bool | `false` | — | Drawback: +recuo (mãos trêmulas). **Off por padrão** (balance B1). |
 | `Shaky Hands — Recoil mult` | float | `1.25` | 1..2 | Recuo (1.25 = +25%). |
 | `Override color` | bool | `false` | — | Sobrescreve a cor do nome/ícone desta classe pela 'Class color' (desligado = cor do server). (item 067) |
