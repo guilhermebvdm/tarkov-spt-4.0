@@ -121,23 +121,25 @@ public enum TraumaLine
 /// <summary>
 /// BITMASK: múltiplas causas podem coincidir na mesma consolidação (rajada zera perna E quebra braço;
 /// analgésico + dano no mesmo frame). O motor acumula a máscara por região no record; a transição publica
-/// o motivo PRIMÁRIO (flag de maior precedência) + a máscara completa (vai no log — §8).
-/// Precedência (maior→menor): EngineDisabled > InitialEvaluation > PainkillerGained/PainkillerLost >
-/// BodyPartRestored/FractureHealed > Damage/FractureGained > Reconciliation.
+/// o motivo PRIMÁRIO + a máscara completa (vai no log — §8).
+/// Os bits estão NUMERADOS EM ORDEM DE PRECEDÊNCIA (review 2): o BIT MAIS ALTO setado da máscara É o
+/// motivo primário (highest-set-bit — sem tabela paralela).
+/// Precedência (maior→menor): EngineDisabled > InitialEvaluation > PainkillerLost/PainkillerGained >
+/// BodyPartRestored/FractureHealed > FractureGained/Damage > Reconciliation.
 /// </summary>
 [Flags]
 public enum TraumaChangeReason
 {
     None             = 0,
-    Damage           = 1 << 0,
-    FractureGained   = 1 << 1,
-    FractureHealed   = 1 << 2,
-    BodyPartRestored = 1 << 3,
-    PainkillerGained = 1 << 4,
-    PainkillerLost   = 1 << 5,
-    InitialEvaluation = 1 << 6, // avaliação estabelecedora (boot/transit/religar master) — Establishing=true; não combina
-    Reconciliation   = 1 << 7,  // detectado pelo polling (caminho sem evento)
-    EngineDisabled   = 1 << 8   // master off mid-raid → saída de todos os estados; não combina
+    Reconciliation   = 1 << 0,  // detectado pelo polling (caminho sem evento) — menor precedência
+    Damage           = 1 << 1,
+    FractureGained   = 1 << 2,
+    FractureHealed   = 1 << 3,
+    BodyPartRestored = 1 << 4,
+    PainkillerGained = 1 << 5,
+    PainkillerLost   = 1 << 6,
+    InitialEvaluation = 1 << 7, // avaliação estabelecedora (boot/transit/religar master) — Establishing=true; não combina
+    EngineDisabled   = 1 << 8   // master off mid-raid → saída de todos os estados; não combina — maior precedência
 }
 
 /// <summary>One-shots PUBLICADOS pelo motor no 002 (p=100% embutidos em linha de pernas).
@@ -182,7 +184,9 @@ internal sealed class PlayerTraumaRecord
     /// <summary>Bitmask de motivos ACUMULADA por região desde a última consolidação (review 1, achado 2).
     /// Dirty ≡ PendingReasons[região] != None — um campo só; zerada após publicar.</summary>
     internal readonly TraumaChangeReason[] PendingReasons = new TraumaChangeReason[3];
-    // delegates guardados p/ -=: Action<EBodyPart,EDamageType>, Action<EBodyPart,ValueStruct>, Action<IEffect> ×3, Action<EBodyPart,float,DamageInfoStruct>
+    // delegates guardados p/ -= simétrico: Action<EBodyPart,EDamageType>, Action<EBodyPart,ValueStruct>,
+    // Action<IEffect> (UMA closure por-record `e => OnEffectEvent(rec, e)`, assinada nos 3 eventos de efeito — review 2),
+    // Action<EBodyPart,float,DamageInfoStruct>
 }
 
 /// <summary>Registry de consumidores (comportamento 9): motor publica sempre; toast é gateado por consumidor ativo (decisão 20).</summary>
@@ -262,7 +266,7 @@ public sealed class TraumaEngine : MonoBehaviour
         // (b) null-detect de GameWorld (padrão N1 do BandAidController.cs:151-166): GameWorld sumiu → ResetForNewRaid()
         // (c) dirty-set: consolidar 1×/frame em ordem determinística (players por inserção; regiões na ordem do enum)
         // (d) polling: _pollAccumulator += Time.deltaTime; se >= 1/ConfigPollingHz → Reconcile() (re-deriva contagens de TODOS os rastreados; nunca por frame)
-        // Orçamento: sem alocação no caminho quente — dirty como bool[3] no record; listas pré-alocadas reusadas.
+        // Orçamento: sem alocação no caminho quente — dirty implícito em PendingReasons (TraumaChangeReason[3] no record); listas pré-alocadas reusadas.
     }
 
     // ---- Rastreamento ----
@@ -280,16 +284,17 @@ public sealed class TraumaEngine : MonoBehaviour
         IHealthController hc = p.HealthController;
         // hc.BodyPartDestroyedEvent += (EBodyPart part, EDamageType type) => MarkDirty(rec, part, TraumaChangeReason.Damage);           // Zerar — ref: AHC DestroyBodyPart :3867-3877 (P10 evid. :519)
         // hc.BodyPartRestoredEvent  += (EBodyPart part, ValueStruct before) => MarkDirty(rec, part, TraumaChangeReason.BodyPartRestored); // des-Zerar — ref: AHC RestoreBodyPart :3891-3910 (P10 evid. :523)
-        // hc.EffectStartedEvent     += OnEffectEvent;   // Quebrar / analgésico começa
-        // hc.EffectResidualEvent    += OnEffectEvent;   // des-Quebrar / analgésico EXPIRA — ref: P3 correção (NÃO EffectRemovedEvent — Removed = FadeOut +5..50s)
-        // hc.EffectRemovedEvent     += OnEffectEvent;   // cinto de segurança
+        // Action<IEffect> onFx = e => OnEffectEvent(rec, e); // closure POR RECORD (IEffect NÃO expõe o dono — review 2); guardada em rec p/ o -= simétrico
+        // hc.EffectStartedEvent     += onFx;   // Quebrar / analgésico começa
+        // hc.EffectResidualEvent    += onFx;   // des-Quebrar / analgésico EXPIRA — ref: P3 correção (NÃO EffectRemovedEvent — Removed = FadeOut +5..50s)
+        // hc.EffectRemovedEvent     += onFx;   // cinto de segurança
         // hc.ApplyDamageEvent       += (EBodyPart part, float damage, DamageInfoStruct info) => { /* só contexto de motivo */ }; // ref: AHC ~3411 (âncora P7)
         // p.OnPlayerDeadOrUnspawn   += UntrackPlayer;   // ref: Player.cs:25510 (GDelegate71 = void(Player) — GDelegate71.cs:3); Invoke em OnDead :30554 e Dispose :31415
         // Estado inicial pelo QUERY, não por evento (Player.Init já rodou PropagateAllEffects — P3 Recomendação (3)):
         // EvaluatePlayer(rec, establishing) → linhas iniciais; establishing NÃO publica one-shot nem toast (só log "estabelecido").
     }
 
-    private void OnEffectEvent(IEffect e)
+    private void OnEffectEvent(PlayerTraumaRecord rec, IEffect e) // rec via closure por-record — IEffect não identifica o jogador (review 2)
     {
         // Filtro por INTERFACE, nunca nested type concreto (P10 Recomendação (5)):
         // e is GInterface342 (fratura — ref: GClass3009.cs:960-963 via P10 evid. :517) → MarkDirty(rec, RegionOf(e.BodyPart), FractureGained|FractureHealed conforme Started/Residual)
@@ -518,3 +523,4 @@ Passo a passo (exemplo AC2 — zerar e curar perna): tiro zera `LeftLeg` no dono
 |---|---|
 | 2026-07-18 | Spec técnica criada via `/create-technical-spec` (baseada em trauma-primitives.md P1/P3/P8/P10 + Rodada 2) |
 | 2026-07-18 | Review técnica rodada 1 aplicada — 6 achados (2 médios: registry multi-região p/ AC5, bitmask de motivos com precedência; 4 menores: ≤1 frame, semântica do _seen, assinatura do toast confirmada, escritor legacy HealthPatches.cs:114-121) + 4 aberturas ratificadas/fechadas |
+| 2026-07-18 | Review técnica rodada 2 aplicada — 3 achados (médio: closure por-record em OnEffectEvent — IEffect não expõe o dono; menores: comentário dirty→PendingReasons, bits do enum renumerados em ordem de precedência p/ highest-set-bit = primário); gate 2×2 fechado |
