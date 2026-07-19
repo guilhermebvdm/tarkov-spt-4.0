@@ -25,6 +25,16 @@ namespace SPT.Launcher.Helpers
     {
         public static string DefaultLocaleFolderPath = Path.Join(SPT.Launcher.Base.Helpers.SptPathHelper.SptRootPath, "SPT_Data", "Launcher", "Locales");
 
+        /// <summary>
+        /// i18n (TRL): idiomas OFICIALMENTE suportados, por ietf_tag. Só estes aparecem no dropdown.
+        /// Os outros 11 locales upstream (de/fr/it/es/pl/ru/tr/ja/ko/zh-hans/zh-hant) estão faltando as
+        /// 23 chaves novas do TRL e o loader é tudo-ou-nada (rejeita o locale inteiro se faltar chave) —
+        /// selecioná-los era um no-op silencioso. Não oferecer o que não funciona. Para promover um
+        /// idioma no futuro: completar as 23 chaves nele e adicionar o ietf_tag aqui.
+        /// NB: precisa vir ANTES de LocaleNameDictionary (init estático em ordem textual).
+        /// </summary>
+        public static readonly HashSet<string> SupportedIetfTags = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "en", "pt" };
+
         public static Dictionary<string, string> LocaleNameDictionary = GetLocaleDictionary("native_name");
 
         public static event EventHandler LocaleChanged = delegate { };
@@ -235,6 +245,14 @@ namespace SPT.Launcher.Helpers
 
             foreach (FileInfo file in localeFiles)
             {
+                // i18n (TRL): só expõe os locales suportados (completos). Filtra pelo ietf_tag do arquivo —
+                // os demais não carregam de verdade (faltam as 23 chaves do TRL), então nem entram na lista.
+                string ietfTag = Json.GetPropertyByName<string>(file.FullName, "ietf_tag");
+                if (string.IsNullOrEmpty(ietfTag) || !SupportedIetfTags.Contains(ietfTag))
+                {
+                    continue;
+                }
+
                 localeDictionary.Add(file.Name.Replace(".json", ""), Json.GetPropertyByName<string>(file.FullName, property));
             }
 
