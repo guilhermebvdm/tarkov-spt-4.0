@@ -483,51 +483,83 @@ namespace TRLDynamicSpawn.Components
 
                 if (wave == null || zone == null) continue;
 
-                // Tenta resolver a role do Boss com ignoreCase = true
-                if (!Enum.TryParse(wave.BossName, true, out WildSpawnType bossRole))
+                WildSpawnType bossRole = WildSpawnType.assault;
+                BotDifficulty bossDiff = BotDifficulty.normal;
+                WildSpawnType escortRole = WildSpawnType.assault;
+                BotDifficulty escortDiff = BotDifficulty.normal;
+                int escortCount = 0;
+                bool decodeSuccess = false;
+
+                try
                 {
-                    // Fallback se o nome estiver ligeiramente diferente
-                    if (wave.BossName.ToLower() == "bossreshala" || wave.BossName.ToLower() == "bully")
-                        bossRole = WildSpawnType.bossBully;
-                    else if (wave.BossName.ToLower() == "shturman" || wave.BossName.ToLower() == "bosskojaniy")
-                        bossRole = WildSpawnType.bossKojaniy;
-                    else if (wave.BossName.ToLower() == "kaban")
-                        bossRole = WildSpawnType.bossBoar;
-                    else
-                        continue; // Ignora se não conseguir resolver
+                    string bossNameStr = wave.BossName ?? "";
+                    string bossDifficultStr = wave.BossDifficult ?? "normal";
+                    string escortTypeStr = wave.BossEscortType ?? "";
+                    string escortDifficultStr = wave.BossEscortDifficult ?? "normal";
+                    string escortAmountStr = wave.BossEscortAmount ?? "0";
+
+                    // Tenta resolver a role do Boss com ignoreCase = true
+                    if (Enum.TryParse(bossNameStr, true, out bossRole) ||
+                        bossNameStr.ToLower() == "bossreshala" || bossNameStr.ToLower() == "bully" ||
+                        bossNameStr.ToLower() == "shturman" || bossNameStr.ToLower() == "bosskojaniy" ||
+                        bossNameStr.ToLower() == "kaban")
+                    {
+                        if (bossRole == WildSpawnType.assault) // Se o parse falhou mas entrou no fallback
+                        {
+                            string lowerBoss = bossNameStr.ToLower();
+                            if (lowerBoss == "bossreshala" || lowerBoss == "bully")
+                                bossRole = WildSpawnType.bossBully;
+                            else if (lowerBoss == "shturman" || lowerBoss == "bosskojaniy")
+                                bossRole = WildSpawnType.bossKojaniy;
+                            else if (lowerBoss == "kaban")
+                                bossRole = WildSpawnType.bossBoar;
+                        }
+
+                        Enum.TryParse(bossDifficultStr, true, out bossDiff);
+                        int.TryParse(escortAmountStr, out escortCount);
+
+                        if (escortCount > 0)
+                        {
+                            if (!Enum.TryParse(escortTypeStr, true, out escortRole))
+                            {
+                                // Fallback inteligente baseado no boss principal caso falhe o parse
+                                if (bossRole == WildSpawnType.bossKojaniy)
+                                    escortRole = WildSpawnType.followerKojaniy;
+                                else if (bossRole == WildSpawnType.bossBully)
+                                    escortRole = WildSpawnType.followerBully;
+                                else if (bossRole == WildSpawnType.bossBoar)
+                                    escortRole = WildSpawnType.followerBoar;
+                                else if (bossRole == WildSpawnType.bossSanitar)
+                                    escortRole = WildSpawnType.followerSanitar;
+                                else if (bossRole == WildSpawnType.bossGluhar)
+                                    escortRole = WildSpawnType.followerGluharAssault;
+                                else
+                                    escortRole = WildSpawnType.assault;
+                            }
+                            Enum.TryParse(escortDifficultStr, true, out escortDiff);
+                        }
+
+                        decodeSuccess = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Plugin.LogSource.LogError($"[TRL-DynamicSpawn] Error decoding boss wave config: {ex.Message}\n{ex.StackTrace}");
                 }
 
-                BotDifficulty bossDiff = BotDifficulty.normal;
-                Enum.TryParse(wave.BossDifficult, true, out bossDiff);
+                if (!decodeSuccess)
+                {
+                    Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] Failed to decode boss wave. Skipping.");
+                    continue;
+                }
 
+                // Agora, fora do bloco try-catch, podemos rodar as instruções yield return com segurança sintática!
                 Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Spawning BOSS ({bossRole}) directly in {zone.NameZone}...");
                 var bossSpawnTask = DirectSpawnBots(bossRole, bossDiff, 1, zone);
                 yield return new WaitUntil(() => bossSpawnTask.IsCompleted);
 
-                // Spawna os seguidores (escort) se houver
-                if (int.TryParse(wave.BossEscortAmount, out int escortCount) && escortCount > 0)
+                if (escortCount > 0)
                 {
-                    // Tenta converter com ignoreCase = true
-                    if (!Enum.TryParse(wave.BossEscortType, true, out WildSpawnType escortRole))
-                    {
-                        // Fallback inteligente baseado no boss principal caso falhe o parse
-                        if (bossRole == WildSpawnType.bossKojaniy)
-                            escortRole = WildSpawnType.followerKojaniy;
-                        else if (bossRole == WildSpawnType.bossBully)
-                            escortRole = WildSpawnType.followerBully;
-                        else if (bossRole == WildSpawnType.bossBoar)
-                            escortRole = WildSpawnType.followerBoar;
-                        else if (bossRole == WildSpawnType.bossSanitar)
-                            escortRole = WildSpawnType.followerSanitar;
-                        else if (bossRole == WildSpawnType.bossGluhar)
-                            escortRole = WildSpawnType.followerGluharAssault;
-                        else
-                            escortRole = WildSpawnType.assault; // Fallback genérico Scav
-                    }
-
-                    BotDifficulty escortDiff = BotDifficulty.normal;
-                    Enum.TryParse(wave.BossEscortDifficult, true, out escortDiff);
-
                     Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Spawning boss followers ({escortRole}, Count: {escortCount}) directly in {zone.NameZone}...");
                     var escortSpawnTask = DirectSpawnBots(escortRole, escortDiff, escortCount, zone);
                     yield return new WaitUntil(() => escortSpawnTask.IsCompleted);
@@ -535,7 +567,7 @@ namespace TRLDynamicSpawn.Components
 
                 if (TRLDynamicSpawn.Helpers.Settings.enableSmoothSpawning.Value)
                 {
-                    yield return new WaitForSeconds(TRLDynamicSpawn.Helpers.Settings.smoothSpawningDelay.Value * 2f); // Wait a bit longer for bosses
+                    yield return new WaitForSeconds(TRLDynamicSpawn.Helpers.Settings.smoothSpawningDelay.Value * 2f);
                 }
             }
 
