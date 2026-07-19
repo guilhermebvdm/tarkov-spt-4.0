@@ -164,10 +164,7 @@ namespace TRLDynamicSpawn.Components
 
                         if (canDespawn)
                         {
-                            if (!AttemptToTeleportBot(bot))
-                            {
-                                StartCoroutine(AttemptToDespawnBotCoroutine(botsController, bot));
-                            }
+                            AttemptToTeleportBot(bot);
                         }
                     }
                 }
