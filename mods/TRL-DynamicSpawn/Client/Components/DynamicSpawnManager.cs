@@ -18,6 +18,7 @@ namespace TRLDynamicSpawn.Components
     {
         public static DynamicSpawnManager Instance { get; private set; }
         public static bool IsGeneratingDynamicWave = false;
+        public static bool IsWarmupActive = true;
         
         private bool _isSpawningWave = false;
         private int _delayBeforeFirstWave = 60;
@@ -148,7 +149,9 @@ namespace TRLDynamicSpawn.Components
         {
             Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Waiting {_delayBeforeFirstWave}s for initial warmup...");
             _nextWaveTime = Time.time + _delayBeforeFirstWave;
+            IsWarmupActive = true;
             yield return new WaitForSeconds(_delayBeforeFirstWave);
+            IsWarmupActive = false;
 
             bool isFirstWave = true;
             while (true)
@@ -475,101 +478,7 @@ namespace TRLDynamicSpawn.Components
 
             Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Profiles generated. Starting smooth injection...");
 
-            // First, inject Bosses in their designated zones
-            foreach (var bq in bossQueue)
-            {
-                BossLocationSpawn wave = bq.Item1;
-                BotZone zone = bq.Item2;
 
-                if (wave == null || zone == null) continue;
-
-                WildSpawnType bossRole = WildSpawnType.assault;
-                BotDifficulty bossDiff = BotDifficulty.normal;
-                WildSpawnType escortRole = WildSpawnType.assault;
-                BotDifficulty escortDiff = BotDifficulty.normal;
-                int escortCount = 0;
-                bool decodeSuccess = false;
-
-                try
-                {
-                    string bossNameStr = wave.BossName ?? "";
-                    string bossDifficultStr = wave.BossDifficult ?? "normal";
-                    string escortTypeStr = wave.BossEscortType ?? "";
-                    string escortDifficultStr = wave.BossEscortDifficult ?? "normal";
-                    string escortAmountStr = wave.BossEscortAmount ?? "0";
-
-                    // Tenta resolver a role do Boss com ignoreCase = true
-                    if (Enum.TryParse(bossNameStr, true, out bossRole) ||
-                        bossNameStr.ToLower() == "bossreshala" || bossNameStr.ToLower() == "bully" ||
-                        bossNameStr.ToLower() == "shturman" || bossNameStr.ToLower() == "bosskojaniy" ||
-                        bossNameStr.ToLower() == "kaban")
-                    {
-                        if (bossRole == WildSpawnType.assault) // Se o parse falhou mas entrou no fallback
-                        {
-                            string lowerBoss = bossNameStr.ToLower();
-                            if (lowerBoss == "bossreshala" || lowerBoss == "bully")
-                                bossRole = WildSpawnType.bossBully;
-                            else if (lowerBoss == "shturman" || lowerBoss == "bosskojaniy")
-                                bossRole = WildSpawnType.bossKojaniy;
-                            else if (lowerBoss == "kaban")
-                                bossRole = WildSpawnType.bossBoar;
-                        }
-
-                        Enum.TryParse(bossDifficultStr, true, out bossDiff);
-                        int.TryParse(escortAmountStr, out escortCount);
-
-                        if (escortCount > 0)
-                        {
-                            if (!Enum.TryParse(escortTypeStr, true, out escortRole))
-                            {
-                                // Fallback inteligente baseado no boss principal caso falhe o parse
-                                if (bossRole == WildSpawnType.bossKojaniy)
-                                    escortRole = WildSpawnType.followerKojaniy;
-                                else if (bossRole == WildSpawnType.bossBully)
-                                    escortRole = WildSpawnType.followerBully;
-                                else if (bossRole == WildSpawnType.bossBoar)
-                                    escortRole = WildSpawnType.followerBoar;
-                                else if (bossRole == WildSpawnType.bossSanitar)
-                                    escortRole = WildSpawnType.followerSanitar;
-                                else if (bossRole == WildSpawnType.bossGluhar)
-                                    escortRole = WildSpawnType.followerGluharAssault;
-                                else
-                                    escortRole = WildSpawnType.assault;
-                            }
-                            Enum.TryParse(escortDifficultStr, true, out escortDiff);
-                        }
-
-                        decodeSuccess = true;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Plugin.LogSource.LogError($"[TRL-DynamicSpawn] Error decoding boss wave config: {ex.Message}\n{ex.StackTrace}");
-                }
-
-                if (!decodeSuccess)
-                {
-                    Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] Failed to decode boss wave. Skipping.");
-                    continue;
-                }
-
-                // Agora, fora do bloco try-catch, podemos rodar as instruções yield return com segurança sintática!
-                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Spawning BOSS ({bossRole}) directly in {zone.NameZone}...");
-                var bossSpawnTask = DirectSpawnBots(bossRole, bossDiff, 1, zone);
-                yield return new WaitUntil(() => bossSpawnTask.IsCompleted);
-
-                if (escortCount > 0)
-                {
-                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Spawning boss followers ({escortRole}, Count: {escortCount}) directly in {zone.NameZone}...");
-                    var escortSpawnTask = DirectSpawnBots(escortRole, escortDiff, escortCount, zone);
-                    yield return new WaitUntil(() => escortSpawnTask.IsCompleted);
-                }
-
-                if (TRLDynamicSpawn.Helpers.Settings.enableSmoothSpawning.Value)
-                {
-                    yield return new WaitForSeconds(TRLDynamicSpawn.Helpers.Settings.smoothSpawningDelay.Value * 2f);
-                }
-            }
 
             // Embaralha a lista de spawn para misturar grupos de forma balanceada (alternando Scavs/PMCs/Snipers)
             var rng = new System.Random();

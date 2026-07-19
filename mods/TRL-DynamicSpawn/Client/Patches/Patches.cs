@@ -447,6 +447,7 @@ namespace TRLDynamicSpawn.Patches
         [PatchPrefix]
         private static bool PatchPrefix(BotWaveDataClass wave, ref System.Threading.Tasks.Task __result)
         {
+            if (TRLDynamicSpawn.Components.DynamicSpawnManager.IsWarmupActive) return true; // Let vanilla run during warmup!
             if (TRLDynamicSpawn.Components.DynamicSpawnManager.IsGeneratingDynamicWave) return true; // Let our wave run!
             
             if (wave != null && (wave.WildSpawnType == WildSpawnType.pmcUSEC || wave.WildSpawnType == WildSpawnType.pmcBEAR))
@@ -473,6 +474,7 @@ namespace TRLDynamicSpawn.Patches
         [PatchPrefix]
         private static bool PatchPrefix(BossLocationSpawn wave)
         {
+            if (TRLDynamicSpawn.Components.DynamicSpawnManager.IsWarmupActive) return true; // Let vanilla run during warmup!
             if (TRLDynamicSpawn.Components.DynamicSpawnManager.IsGeneratingDynamicWave) return true; // Let our boss wave run!
             if (wave != null && wave.BossName != null)
             {
