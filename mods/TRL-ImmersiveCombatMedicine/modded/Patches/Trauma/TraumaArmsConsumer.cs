@@ -3,7 +3,6 @@ using Comfort.Common;
 using EFT;
 using EFT.HealthSystem;
 using Fika.Core.Main.Utils; // FikaBackendUtils.IsHeadless (gate P9 rec. (b) — PA-01-07)
-using TrueTrauma;           // TraumaState (guard de incapacidade da voz — PA-02-05)
 using UnityEngine;
 
 namespace TRLImmersiveCombatMedicine.Trauma
@@ -35,6 +34,7 @@ namespace TRLImmersiveCombatMedicine.Trauma
         private bool _lockoutVoicePlayed;         // throttle: 1 voz por janela (funcional 4)
         private float _nextVoiceTryAt;            // piso de 0,3s entre Plays engolidos (PA-02-06 — hold-por-frame sob Blocker)
         private bool _lockoutVoiceSkipLogged;     // log voice=skipped no máx 1x/janela (PA-02-06)
+        private bool _lockoutIncapacitatedLogged; // log voice=suppressed(incapacitated) no máx 1x/janela (CR-01-02)
         private bool _wasActive;
         private GameWorld _trackedWorld;          // world-swap sem null (transit) — lição CR-02 do 003
 
@@ -262,6 +262,7 @@ namespace TRLImmersiveCombatMedicine.Trauma
             _lockoutVoicePlayed = false;
             _nextVoiceTryAt = 0f;
             _lockoutVoiceSkipLogged = false;
+            _lockoutIncapacitatedLogged = false;
         }
 
         private void ExecuteCancel(Player p)
@@ -276,6 +277,7 @@ namespace TRLImmersiveCombatMedicine.Trauma
             _lockoutVoicePlayed = false;      // throttle re-armado por janela (funcional 4)
             _nextVoiceTryAt = 0f;             // PA-02-06: piso/skip-log zerados por janela
             _lockoutVoiceSkipLogged = false;
+            _lockoutIncapacitatedLogged = false;
             _aimAnchor = -1f;
             TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo(
                 $"[Trauma2] ads CANCEL {p.ProfileId} line={_localLine} n={LineCancelSeconds(_localLine):0.##} lockout={lockout:0.##}");
@@ -291,11 +293,11 @@ namespace TRLImmersiveCombatMedicine.Trauma
             if (!string.Equals(inst._lockoutProfileId, p.ProfileId, StringComparison.Ordinal)) return false;
             if (!inst._lockoutVoicePlayed && Time.time >= inst._nextVoiceTryAt) // PA-02-06: piso de re-tentativa
             {
-                // Guard de INCAPACIDADE (PA-02-05 — espelho declarado do predicado canônico do 004,
-                // TraumaFallCycleConsumer.IsPauseCondition): sem voz durante blackout legado, janela de wake
-                // (IsFainted ainda true) e downed Fika (!IsAlive); o BLOQUEIO do re-ADS em si CONTINUA.
-                bool incapacitated = TraumaState.BlackoutTimers.ContainsKey(p.ProfileId) || TraumaState.IsFainted
-                    || p.HealthController == null || !p.HealthController.IsAlive;
+                // Guard de INCAPACIDADE (PA-02-05 — reusa a fonte ÚNICA do predicado do 004,
+                // TraumaFallCycleConsumer.IsPauseCondition, tornada internal pelo CR-01-01 do 005 code-review):
+                // sem voz durante blackout legado, janela de wake (IsFainted ainda true) e downed Fika (!IsAlive);
+                // o BLOQUEIO do re-ADS em si CONTINUA.
+                bool incapacitated = TraumaFallCycleConsumer.IsPauseCondition(p);
                 if (!incapacitated)
                 {
                     // Decisão PA-02-03: extensão accept-gated do utilitário do 004 — OnAgony, Combat|Dying,
@@ -325,6 +327,14 @@ namespace TRLImmersiveCombatMedicine.Trauma
                                 $"[Trauma2] ads LOCKOUT BLOCK {p.ProfileId} remaining={inst._lockoutUntil - Time.time:0.##} voice=skipped(busy|blocked)");
                         }
                     }
+                }
+                else if (!inst._lockoutIncapacitatedLogged)
+                {
+                    // CR-01-02: sem esta linha, a tentativa bloqueada durante incapacidade não deixava rastro
+                    // no log — impossível distinguir de "o jogador nem tentou re-ADS" ao validar o corner do §8.
+                    inst._lockoutIncapacitatedLogged = true;
+                    TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo(
+                        $"[Trauma2] ads LOCKOUT BLOCK {p.ProfileId} remaining={inst._lockoutUntil - Time.time:0.##} voice=suppressed(incapacitated)");
                 }
             }
             return true; // prefix skipa o original: IsAiming não muda, AimingInterruptedByOverlap false → sem pacote (P9 corrigido)

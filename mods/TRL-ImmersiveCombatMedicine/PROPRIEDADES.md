@@ -22,7 +22,7 @@ Fonte única de verdade das `ConfigEntry` expostas no menu F12 (regra do repo: t
 | Sistema de Desmaio | bool | `true` | — | Ativa o desmaio ao receber muito dano massivo. |
 | Sistema de Pernas | bool | `true` | — | (INERTE desde a v1.3.0 — substituído pelo Trauma 2.0 / Legs Effects. Remoção da key no item 010.) |
 | Sistema de Braços | bool | `true` | — | (INERTE desde a v1.6.0 — substituído pelo Trauma 2.0 / Arms Effects. Remoção da key no item 010.) |
-| Sistema de Estomago | bool | `true` | — | Ficar sem ar ao tomar tiro no estômago. |
+| Sistema de Estomago | bool | `true` | — | (INERTE desde a v1.7.0 — substituído pelo Trauma 2.0 / Stomach Effects. Remoção da key no item 010.) |
 
 ## Seção 3. Balanceamento (Trauma)
 
@@ -67,7 +67,7 @@ Toggle POR consumidor (comportamento 9 da spec funcional 002): cada consumidor s
 | Legs Effects | bool | `true` | — | — | Mancar N1/N2 + agachar involuntário (item 003). Governado pelo master Trauma 2.0; desligar mid-raid desfaz caps e cancela agachares pendentes. (Key renomeada na entrega do 003 — ver tabela Renomeadas.) |
 | Fall Cycle | bool | `true` | — | — | Cair + ciclo de levantar (item 004). Governado pelo master Trauma 2.0; desligar mid-raid destrava o levantar na hora, cancela quedas pendentes e libera bots (o mancar interim do 003 NÃO volta). OFF com Legs Effects ON: o aviso (toast) da 1ª ocorrência da linha Cair ainda aparece — registry de consumidores é por região (PA-01-14). (Key renomeada na entrega do 004 — ver tabela Renomeadas.) |
 | Arms Effects | bool | `true` | — | — | Tremor contínuo + cancelamento de ADS escalonado (item 005). Governado pelo master Trauma 2.0; desligar mid-raid remove o tremor e cancela o lockout. (Key renomeada na entrega do 005 — ver tabela Renomeadas.) |
-| Stomach Effects (item 006) | bool | `false` | — | — | Placeholder — agachar involuntário do estômago. Sem função até o item 006. |
+| Stomach Effects | bool | `true` | — | — | Agachar involuntário probabilístico ao zerar o estômago (item 006). Governado pelo master Trauma 2.0; desligar mid-raid cancela agachares pendentes DO ESTÔMAGO (não toca os de pernas); o "sem ar" legado NÃO volta. (Key renomeada na entrega do 006 — ver tabela Renomeadas.) |
 | Blackout 2.0 (item 007) | bool | `false` | — | — | Placeholder — desmaio percentual. Sem função até o item 007 (o desmaio ATUAL segue no toggle antigo "Sistema de Desmaio"). |
 | Debug Test Consumer | bool | `false` | — | Sim | Consumidor de teste SEM efeito de gameplay: registra-se ATIVO para as TRÊS regiões (pernas/braços/estômago), destravando o toast/i18n para validação (AC5 da spec funcional). |
 
@@ -85,6 +85,7 @@ Toggle POR consumidor (comportamento 9 da spec funcional 002): cada consumidor s
 | Legs Effects (item 003) → Legs Effects | 2026-07-19 (code-review 1 do 003): **rename-at-delivery** — a key nova nasce ON para todos; o `false` do placeholder das v1.2.x não era escolha do usuário | `MigrateOrphanedConfigKeys()` DELETA a entry órfã SEM copiar o valor + `Config.Save` (lição CR-03-01: sem o delete, o BepInEx re-persiste a key morta). **Padrão a repetir** nos placeholders `Arms Effects (item 005)` / `Stomach Effects (item 006)` / `Blackout 2.0 (item 007)` na entrega de cada item. |
 | Fall Cycle (item 004) → Fall Cycle | 2026-07-19 (item 004, v1.5.0): **rename-at-delivery** — a key nova nasce ON para todos; o `false` do placeholder não era escolha do usuário | `MigrateOrphanedConfigKeys()` DELETA a entry órfã SEM copiar o valor + `Config.Save` (mesmo padrão do 003). |
 | Arms Effects (item 005) → Arms Effects | 2026-07-19 (item 005, v1.6.0): **rename-at-delivery** — a key nova nasce ON para todos; o `false` do placeholder não era escolha do usuário | `MigrateOrphanedConfigKeys()` DELETA a entry órfã SEM copiar o valor + `Config.Save` (mesmo padrão do 003/004). |
+| Stomach Effects (item 006) → Stomach Effects | 2026-07-19 (item 006, v1.7.0): **rename-at-delivery** — a key nova nasce ON para todos; o `false` do placeholder não era escolha do usuário | `MigrateOrphanedConfigKeys()` DELETA a entry órfã SEM copiar o valor + `Config.Save` (mesmo padrão do 003/004/005). |
 
 ## Seção 7. Trauma 2.0 (Pernas)
 
@@ -118,6 +119,15 @@ Consumidor de braços (item 005, spec 005 §3). Timers lidos por `.Value` a cada
 | ADS Cancel Seconds (Zeroed + Fractured x2) | float | `2` | 1–10 | — | Segundos com 2 braços zerados E 2 fraturados. Efetivo = min dos três timers — a linha mais severa nunca fica mais lenta que as outras (warn no log, 1x). |
 | Re-ADS Lockout Seconds | float | `1.5` | 1.0–1.5 | — | Bloqueio de re-mirar após o cancelamento (persiste à troca de arma). Tentativa durante o bloqueio dispara voz de dor (1 por janela). Faixa fixada pela decisão 17 (1–1,5 s). |
 
+## Seção 10. Trauma 2.0 (Estômago)
+
+Consumidor de estômago (item 006, spec 006 §3). Roll p=75%/25% (sem/com analgésico) na transição REAL de entrada da linha `StomachZeroed`, usando o analgésico LATCHED do instante da zerada (D8 — nunca re-consultado). Re-rola a cada zerada nova; estômago que permanece zerado não re-rola. Sliders lidos por `.Value` a cada roll (sem cache) e **independentes entre si — sem clamp** (diferente do `min(N2, N1)` do 003: aqui não há invariante de severidade a proteger; inverter é permitido, premissa para o item 011). Agachar reusa a primitiva do 003 (`TraumaPose.TryInvoluntaryCrouch`/`BotCrouchDip`) por chamada DIRETA, sem publicar no barramento de one-shot do motor — o cooldown anti-thrash (seção 5) é compartilhado com o agachar de pernas (dois agachares na mesma janela de 3-5s colapsam em um). Bots inclusos (mesmo roll, mesmo log). Sem voz dedicada (paridade com o agachar silencioso do 003).
+
+| Nome (key) | Tipo | Padrão | Faixa | Avançado | Tooltip |
+|---|---|---|---|---|---|
+| Stomach Crouch Chance Percent | float | `75` | 0–100 | — | Chance (%) de agachar involuntário ao ZERAR o estômago SEM analgésico ativo. Rolada 1× por zerada (curar e zerar de novo rola de novo; estômago que permanece zerado não re-rola). 0 = nunca agacha (rolls seguem logados); 100 = sempre. |
+| Stomach Crouch Chance Under Painkiller Percent | float | `25` | 0–100 | — | Chance (%) com analgésico ativo NO INSTANTE da zerada (valor congelado nessa hora — tomar/expirar analgésico depois não muda nada até a próxima zerada). Independente do slider sem analgésico — sem trava entre eles; inverter é permitido. |
+
 ## Histórico de Alterações
 
 | Data | Autor | Alteração |
@@ -130,3 +140,4 @@ Consumidor de braços (item 005, spec 005 §3). Timers lidos por `.Value` a cada
 | 2026-07-19 | Guilherme | Code-review 1 do 003 (v1.3.1): RENAME `Legs Effects (item 003)` → `Legs Effects` (default ON efetivo p/ todos; órfã deletada sem copiar valor) + padrão rename-at-delivery registrado p/ os placeholders 004/005/006/007. |
 | 2026-07-19 | Guilherme | Item 004 (ciclo de queda, v1.5.0): seção nova `8. Trauma 2.0 (Queda)` (3 entries); RENAME `Fall Cycle (item 004)` → `Fall Cycle` (default ON; órfã deletada sem copiar valor — tabela Renomeadas); nota do interim do 003 removido na seção 7 (linha Cair sem cap N2 do 003; `Fall Cycle` OFF = linha Cair sem efeito do mod). |
 | 2026-07-19 | Guilherme | Item 005 (braços Trauma 2.0, v1.6.0): seção nova `9. Trauma 2.0 (Braços)` (4 entries — 3 timers de cancela-ADS + lockout); RENAME `Arms Effects (item 005)` → `Arms Effects` (default ON; órfã deletada sem copiar valor — tabela Renomeadas); `Sistema de Braços` (seção 2) marcado INERTE — legado de braços aposentado (D10: fadiga de mira + voz "Arm"), remoção da key no item 010. |
+| 2026-07-19 | Guilherme | Item 006 (estômago Trauma 2.0, v1.7.0): seção nova `10. Trauma 2.0 (Estômago)` (2 entries — chance de agachar sem/com analgésico, sliders independentes sem clamp); RENAME `Stomach Effects (item 006)` → `Stomach Effects` (default ON; órfã deletada sem copiar valor — tabela Renomeadas); `Sistema de Estomago` (seção 2) marcado INERTE — legado "sem ar" aposentado (D10), remoção da key no item 010. |

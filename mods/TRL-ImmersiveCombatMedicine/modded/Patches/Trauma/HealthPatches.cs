@@ -94,38 +94,20 @@ namespace TrueTrauma
                 }
             }
 
-            // (MANTENHA O RESTANTE DO CÓDIGO DE ESTÔMAGO, PERNAS E BRAÇOS IGUAL AO SEU)
-            if (TRLImmersiveCombatMedicinePlugin.ConfigStomachEnabled.Value)
-            {
-                bool isValidStomachDmg = damageInfo.DamageType == EDamageType.Bullet ||
-                                         damageInfo.DamageType == EDamageType.Explosion ||
-                                         damageInfo.DamageType == EDamageType.Sniper;
-
-                if (isValidStomachDmg && bodyPartType == EBodyPart.Stomach && damageInfo.Damage >= 35f && !__instance.MovementContext.IsInPronePose)
-                {
-                    // ref: spec 004 §1.8(e) (PA-01-09) — o agachar LEGADO de estômago é escritor de pose FORA do
-                    // motor (nenhum one-shot de estômago existe antes do 006) e NÃO passa pela absorção D2 do
-                    // TraumaPose: guard próprio — ciclo de queda engajado suprime (sem ele, agacharia o jogador
-                    // na JANELA/Rising por fora do TraumaPose).
-                    if (TraumaFallCycleConsumer.IsCycleEngaged(__instance))
-                    {
-                        TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo(
-                            $"[Trauma2] stomach legacy suppressed (fall-cycle) {id}");
-                    }
-                    else
-                    {
-                        if (__instance.Physical != null) __instance.Physical.Stamina.Current = 0f;
-                        __instance.MovementContext.SetPoseLevel(0f, true);
-                        VoiceHelper.TriggerTraumaVoice(__instance, "Gut");
-                    }
-                }
-            }
             // ref: spec 003 §4 (D10) — sub-bloco legado de PERNAS removido (seed de ImpactTimers/LegPenaltyTimers,
             // prone em hit e voz): a reação de pernas agora é do Trauma 2.0 (motor 002 + consumidor 003).
             // ref: spec 005 §1.7 (D10 — PA-02-04) — sub-bloco legado de BRAÇOS removido (voz "Arm" em hit de
             // braço zerado, gateado pela key inerte ConfigArmsEnabled): o feedback de entrada agora é o toast
             // de 1ª ocorrência + tremor visível do Trauma 2.0 (TraumaArmsConsumer) — paridade com o 003, que
-            // removeu também a voz de hit de perna. Desmaio (acima) e estômago seguem legados até os itens 007/006.
+            // removeu também a voz de hit de perna.
+            // ref: spec 006 §1.9 (D10) — bloco legado de ESTÔMAGO removido por inteiro ("sem ar" por hit ≥35 fora
+            // de prone: stamina zerada + SetPoseLevel(0f, true) + voz "Gut", INCLUSIVE bots — o Postfix não
+            // filtrava IA). A reação de estômago agora é do Trauma 2.0 (motor 002 publica a zerada;
+            // TraumaStomachConsumer rola p=75/25 pelo analgésico LATCHED da transição e agacha via TraumaPose,
+            // chamada DIRETA sem publish). O guard próprio IsCycleEngaged (PA-01-09 do 004) morre junto — a
+            // arbitragem D2 do estômago passa a ser a absorção padrão da primitiva (TraumaPose.AbsorbIfCycleEngaged,
+            // já chamada no topo de TryInvoluntaryCrouch/BotCrouchDip). A key "Sistema de Estomago" fica INERTE
+            // (remoção no item 010). Desmaio (acima) segue legado até o item 007.
         }
     }
 }

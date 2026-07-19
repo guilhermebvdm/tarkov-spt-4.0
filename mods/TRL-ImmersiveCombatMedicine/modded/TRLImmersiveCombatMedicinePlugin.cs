@@ -14,7 +14,7 @@ namespace TRLImmersiveCombatMedicine
     // TraumaBotFall.RegisterLayer (sem o atributo, a ordem de load do BepInEx 5 pode falso-negativar
     // PluginInfos com BigBrain instalado). GUID confirmado: bigbrain_full/BigBrainPlugin.cs:10.
     [BepInDependency("xyz.drakia.bigbrain", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.6.0")]
+    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.7.0")]
     public class TRLImmersiveCombatMedicinePlugin : BaseUnityPlugin
     {
         public static TRLImmersiveCombatMedicinePlugin Instance;
@@ -66,11 +66,15 @@ namespace TRLImmersiveCombatMedicine
         public static ConfigEntry<float> ConfigArmsAdsCancelZ2Q2Seconds;
         public static ConfigEntry<float> ConfigArmsReAdsLockoutSeconds;
 
+        // --- Trauma 2.0 — Estômago (spec 006 §3) ---
+        public static ConfigEntry<float> ConfigStomachCrouchChancePercent;
+        public static ConfigEntry<float> ConfigStomachCrouchChancePkPercent;
+
         private void Awake()
         {
             Instance = this;
             ModLogger = base.Logger;
-            ModLogger.LogInfo("TRL-ImmersiveCombatMedicine Plugin v1.6.0 carregado.");
+            ModLogger.LogInfo("TRL-ImmersiveCombatMedicine Plugin v1.7.0 carregado.");
 
             // Inicializações combinadas
             ItemDatabase.Initialize();
@@ -83,7 +87,8 @@ namespace TRLImmersiveCombatMedicine
             ConfigLegsEnabled = Config.Bind("2. Mecanicas (Trauma)", "Sistema de Pernas", true, "(INERTE desde a v1.3.0 — substituído pelo Trauma 2.0 / Legs Effects. Remoção da key no item 010.)");
             // ref: spec 005 §1.7 — legado de braços aposentado (D10); key mantida p/ não órfanar o .cfg (remoção no item 010)
             ConfigArmsEnabled = Config.Bind("2. Mecanicas (Trauma)", "Sistema de Braços", true, "(INERTE desde a v1.6.0 — substituído pelo Trauma 2.0 / Arms Effects. Remoção da key no item 010.)");
-            ConfigStomachEnabled = Config.Bind("2. Mecanicas (Trauma)", "Sistema de Estomago", true, "Ficar sem ar ao tomar tiro no estômago.");
+            // ref: spec 006 §1.9 — legado de estômago aposentado (D10); key mantida p/ não órfanar o .cfg (remoção no item 010)
+            ConfigStomachEnabled = Config.Bind("2. Mecanicas (Trauma)", "Sistema de Estomago", true, "(INERTE desde a v1.7.0 — substituído pelo Trauma 2.0 / Stomach Effects. Remoção da key no item 010.)");
             // ref: CR-04 — piso de 5s: duração baixa (~3-5s no teste) colapsava blackout+grace
             // num flap instantâneo (andar "desmaiado", timers sumindo antes do visual).
             ConfigBlackoutDuration = Config.Bind("3. Balanceamento (Trauma)", "Duracao do Desmaio", 20f,
@@ -132,8 +137,13 @@ namespace TRLImmersiveCombatMedicine
             // (órfã do placeholder DELETADA sem copiar valor em MigrateOrphanedConfigKeys — padrão do 003/004).
             ConfigConsumerArmsEffects = Config.Bind("6. Trauma 2.0 (Consumidores)", "Arms Effects", true,
                 "Tremor contínuo + cancelamento de ADS escalonado (item 005). Governado pelo master Trauma 2.0; desligar mid-raid remove o tremor e cancela o lockout.");
-            ConfigConsumerStomachEffects = Config.Bind("6. Trauma 2.0 (Consumidores)", "Stomach Effects (item 006)", false,
-                "Placeholder — agachar involuntário do estômago. Sem função até o item 006.");
+            // ref: spec 006 §3 — RENAME-AT-DELIVERY do placeholder de estômago: deletar a key órfã
+            // "Stomach Effects (item 006)" SEM copiar o valor (a key nova "Stomach Effects" nasce ON — o false de
+            // placeholder não é escolha do usuário). Mesmo padrão do 003/004/005 (lição CR-03-01: sem o
+            // delete + Save, o BepInEx re-persiste a key morta a cada boot).
+            ConfigConsumerStomachEffects = Config.Bind("6. Trauma 2.0 (Consumidores)", "Stomach Effects", true,
+                "Agachar involuntário probabilístico ao zerar o estômago (item 006). Governado pelo master Trauma 2.0; " +
+                "desligar mid-raid cancela agachares pendentes DO ESTÔMAGO (não toca os de pernas); o \"sem ar\" legado NÃO volta.");
             ConfigConsumerBlackout2 = Config.Bind("6. Trauma 2.0 (Consumidores)", "Blackout 2.0 (item 007)", false,
                 "Placeholder — desmaio percentual. Sem função até o item 007 (o desmaio ATUAL segue no toggle antigo \"Sistema de Desmaio\").");
             ConfigDebugTestConsumer = Config.Bind("6. Trauma 2.0 (Consumidores)", "Debug Test Consumer", false,
@@ -180,6 +190,18 @@ namespace TRLImmersiveCombatMedicine
                 new ConfigDescription("Bloqueio de re-mirar após o cancelamento (persiste à troca de arma). Tentativa durante o bloqueio dispara voz de dor (1 por janela). Faixa fixada pela decisão 17 (1–1,5 s).",
                     new AcceptableValueRange<float>(1f, 1.5f)));
 
+            // Configs Trauma 2.0 — Estômago (spec 006 §3). Sliders INDEPENDENTES entre si — sem clamp (diferente
+            // do min(N2,N1) do 003, que protege invariante de severidade; aqui não há invariante — inverter é
+            // permitido, premissa p/ o item 011). Lidos por .Value a cada roll (sem cache).
+            ConfigStomachCrouchChancePercent = Config.Bind("10. Trauma 2.0 (Estômago)", "Stomach Crouch Chance Percent", 75f,
+                new ConfigDescription("Chance (%) de agachar involuntário ao ZERAR o estômago SEM analgésico ativo. Rolada 1× por zerada " +
+                    "(curar e zerar de novo rola de novo; estômago que permanece zerado não re-rola). 0 = nunca agacha (rolls seguem logados); 100 = sempre.",
+                    new AcceptableValueRange<float>(0f, 100f)));
+            ConfigStomachCrouchChancePkPercent = Config.Bind("10. Trauma 2.0 (Estômago)", "Stomach Crouch Chance Under Painkiller Percent", 25f,
+                new ConfigDescription("Chance (%) com analgésico ativo NO INSTANTE da zerada (valor congelado nessa hora — tomar/expirar analgésico " +
+                    "depois não muda nada até a próxima zerada). Independente do slider sem analgésico — sem trava entre eles; inverter é permitido.",
+                    new AcceptableValueRange<float>(0f, 100f)));
+
             // ref: CR-02 — o reparo de encoding (CR-01-06) corrigiu a KEY
             // 'Sistema de Braços' (era mojibake); BepInEx casa por bytes, então o
             // valor salvo do usuário virou órfão. Migração one-time do valor antigo.
@@ -203,6 +225,7 @@ namespace TRLImmersiveCombatMedicine
             gameObject.AddComponent<TraumaLegsConsumer>(); // consumidor de pernas (spec 003) — efeitos gateados pelo toggle
             gameObject.AddComponent<TraumaFallCycleConsumer>(); // ciclo de queda (spec 004) — DEPOIS do TraumaEngine (ordem do 003)
             gameObject.AddComponent<TraumaArmsConsumer>(); // consumidor de braços (spec 005) — DEPOIS do TraumaEngine (replay vazio inofensivo — padrão 003)
+            gameObject.AddComponent<TraumaStomachConsumer>(); // consumidor de estômago (spec 006) — DEPOIS do TraumaEngine (ordem do 003; replay vazio inofensivo)
             TraumaBotFall.RegisterLayer(); // camada BigBrain do hold de bot — gateada por Chainloader ("xyz.drakia.bigbrain")
 
             // [DEBUG-ICM] sondas de lifecycle — remover após diagnóstico do prompt F
@@ -379,6 +402,29 @@ namespace TRLImmersiveCombatMedicine
                     orphans.Remove(legacyArmsDef);
                     Config.Save();
                     ModLogger.LogWarning("[Config] Key placeholder órfã DELETADA (rename-at-delivery, sem copiar valor): 'Arms Effects (item 005)' → 'Arms Effects'.");
+                }
+
+                // ref: spec 006 §3 — RENAME-AT-DELIVERY do placeholder de estômago: deletar a key órfã
+                // "Stomach Effects (item 006)" SEM copiar o valor (a key nova "Stomach Effects" nasce ON — o
+                // false de placeholder não é escolha do usuário). Mesmo padrão do 003/004/005 (lição CR-03-01:
+                // sem o delete + Save, o BepInEx re-persiste a key morta a cada boot).
+                object legacyStomachDef = null;
+                foreach (System.Collections.DictionaryEntry entry in orphans)
+                {
+                    var def = entry.Key;
+                    string section = AccessTools.Property(def.GetType(), "Section")?.GetValue(def) as string;
+                    string key = AccessTools.Property(def.GetType(), "Key")?.GetValue(def) as string;
+                    if (section == "6. Trauma 2.0 (Consumidores)" && key == "Stomach Effects (item 006)")
+                    {
+                        legacyStomachDef = def;
+                        break;
+                    }
+                }
+                if (legacyStomachDef != null)
+                {
+                    orphans.Remove(legacyStomachDef);
+                    Config.Save();
+                    ModLogger.LogWarning("[Config] Key placeholder órfã DELETADA (rename-at-delivery, sem copiar valor): 'Stomach Effects (item 006)' → 'Stomach Effects'.");
                 }
             }
             catch (Exception ex)

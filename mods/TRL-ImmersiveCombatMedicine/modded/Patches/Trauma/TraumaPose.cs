@@ -58,8 +58,12 @@ namespace TRLImmersiveCombatMedicine.Trauma
         private static PropertyInfo _sainPoseProp;
         private static MethodInfo _sainSetTargetPose;
 
-        private static string KindWord(TraumaOneShotKind kind) =>
-            kind == TraumaOneShotKind.InvoluntaryFall ? "fall" : "crouch";
+        // ref: spec 006 §1.10 — ganha a região p/ distinguir o agachar do estômago ("stomach-crouch") do de
+        // pernas ("crouch") nos logs da fila/primitiva, sem alterar um byte dos formatos de pernas/queda
+        // (region=Legs devolve exatamente os mesmos tokens de antes — diff de log vazio p/ kind=fall e Legs).
+        private static string KindWord(TraumaOneShotKind kind, TraumaRegion region) =>
+            kind == TraumaOneShotKind.InvoluntaryFall ? "fall"
+                : region == TraumaRegion.Stomach ? "stomach-crouch" : "crouch";
 
         /// <summary>Guards D7 (3 eixos, TODOS adiam — nunca executam em contexto inválido).</summary>
         internal static bool CanForcePose(Player p, out string blockedBy)
@@ -89,14 +93,14 @@ namespace TRLImmersiveCombatMedicine.Trauma
         }
 
         /// <summary>Absorção D2 (spec 004 §1.8(a)) — chamada NO TOPO de TryInvoluntaryCrouch e BotCrouchDip (cobre
-        /// 003 hoje e 006 depois): ciclo engajado (humano em qualquer fase OU bot em hold) → NÃO executa; refund
-        /// do publish + log ABSORB — nunca descarte silencioso (funcional §4).</summary>
-        private static bool AbsorbIfCycleEngaged(Player p, TraumaOneShotKind kind)
+        /// 003/006 hoje): ciclo engajado (humano em qualquer fase OU bot em hold) → NÃO executa; refund
+        /// do publish + log ABSORB — nunca descarte silencioso (funcional §4). Região SÓ p/ o log word (spec 006 §1.5).</summary>
+        private static bool AbsorbIfCycleEngaged(Player p, TraumaOneShotKind kind, TraumaRegion region)
         {
             if (!TraumaFallCycleConsumer.IsCycleEngaged(p)) return false;
             if (TraumaEngine.TryGetOneShotDeadline(p, kind, out float d))
                 TraumaEngine.ReportOneShotCanceled(p, kind, d);
-            TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] crouch ABSORB (fall-cycle) {p.ProfileId}");
+            TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] {KindWord(kind, region)} ABSORB (fall-cycle) {p.ProfileId}");
             return true;
         }
 
@@ -112,13 +116,13 @@ namespace TRLImmersiveCombatMedicine.Trauma
                     TraumaEngine.ReportOneShotCanceled(p, kind, dNull);
                 return;
             }
-            if (AbsorbIfCycleEngaged(p, kind)) return; // D2: ciclo de queda engajado absorve o agachar (spec 004 §1.8)
+            if (AbsorbIfCycleEngaged(p, kind, region)) return; // D2: ciclo de queda engajado absorve o agachar (spec 004 §1.8)
             var mc = p.MovementContext;
             if (mc.IsInPronePose || mc.PoseLevel <= 0.05f) // ref: MovementContext.cs:1016 — 0=agachado, 1=de pé
             {
                 if (TraumaEngine.TryGetOneShotDeadline(p, kind, out float d0))
                     TraumaEngine.ReportOneShotCanceled(p, kind, d0);
-                TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] crouch NOOP (pose already low) {p.ProfileId}");
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] {KindWord(kind, region)} NOOP (pose already low) {p.ProfileId}");
                 return;
             }
             if (!CanForcePose(p, out string blockedBy))
@@ -132,7 +136,7 @@ namespace TRLImmersiveCombatMedicine.Trauma
                 return;
             }
             TraumaEngine.ReportOneShotExecuted(p, kind); // D7 — cooldown conta da EXECUÇÃO
-            TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] crouch EXECUTED {p.ProfileId}");
+            TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] {KindWord(kind, region)} EXECUTED {p.ProfileId}");
         }
 
         /// <summary>Derrubar forçado do ciclo 004 (P4 rec. (2)): guards D7 → prone com readback → fallback agachado.
@@ -195,26 +199,30 @@ namespace TRLImmersiveCombatMedicine.Trauma
             for (int i = 0; i < _deferred.Count; i++)
             {
                 DeferredCrouch e = _deferred[i];
-                if (ReferenceEquals(e.Player, p) && e.Kind == kind)
+                // spec 006 §1.5: e.Region == region entra na chave de dedup — fecha o corner da funcional §4
+                // (um adiado de PERNAS que recebia por cima a intenção do ESTÔMAGO virava UMA entrada
+                // re-alvejada; agora as duas coexistem, cada uma re-validando a PRÓPRIA linha no pump).
+                if (ReferenceEquals(e.Player, p) && e.Kind == kind && e.Region == region)
                 {
                     // PA-01-03: enqueue INTERNO recusado com entrada NÃO-interna pendente — a pendente já
                     // entrega a queda; sobrescrever mataria o refund do publish original
                     if (internalEntry && !e.Internal)
                     {
                         TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo(
-                            $"[Trauma2] {KindWord(kind)} DEFER-SKIP (non-internal pending) {p.ProfileId}");
+                            $"[Trauma2] {KindWord(kind, region)} DEFER-SKIP (non-internal pending) {p.ProfileId}");
                         return;
                     }
                     // review 2, achado 2: hit de dedup ATUALIZA a entrada (re-publish traz stamp/linha novos)
-                    // code-review 2, achado 3: Region também — re-publish de OUTRA região (006 reusa o kind)
-                    // com Region stale re-validaria a linha errada no pump
+                    // code-review 2, achado 3 / spec 006 §1.5: e.Region = region agora é NO-OP inofensivo (a
+                    // região já é parte da chave de match) — mantido p/ o caso re-publish da MESMA região
+                    // atualizar PublishDeadline/RequiredLine junto.
                     e.PublishDeadline = deadline;
                     e.Region = region;
                     e.RequiredLine = required;
                     e.Internal = internalEntry;
                     e.OnExecuted = onExecuted ?? e.OnExecuted;
                     _deferred[i] = e;
-                    TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] {KindWord(kind)} DEFERRED ({reason}) {p.ProfileId}");
+                    TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] {KindWord(kind, region)} DEFERRED ({reason}) {p.ProfileId}");
                     return;
                 }
             }
@@ -223,7 +231,7 @@ namespace TRLImmersiveCombatMedicine.Trauma
                 Player = p, Kind = kind, Region = region, RequiredLine = required,
                 PublishDeadline = deadline, Internal = internalEntry, OnExecuted = onExecuted
             });
-            TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] {KindWord(kind)} DEFERRED ({reason}) {p.ProfileId}");
+            TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] {KindWord(kind, region)} DEFERRED ({reason}) {p.ProfileId}");
         }
 
         /// <summary>Pump 1×/frame — IDEMPOTENTE por frame e agnóstico ao chamador (003 e 004 chamam — PA-01-12).
@@ -245,7 +253,7 @@ namespace TRLImmersiveCombatMedicine.Trauma
                     _deferred.RemoveAt(i);
                     if (!e.Internal && !(p is null)) TraumaEngine.ReportOneShotCanceled(p, e.Kind, e.PublishDeadline);
                     TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo(
-                        $"[Trauma2] {KindWord(e.Kind)} CANCELED (state-changed) {(p is null ? "?" : p.ProfileId)}");
+                        $"[Trauma2] {KindWord(e.Kind, e.Region)} CANCELED (state-changed) {(p is null ? "?" : p.ProfileId)}");
                     continue;
                 }
                 var mc = p.MovementContext;
@@ -261,14 +269,14 @@ namespace TRLImmersiveCombatMedicine.Trauma
                     // agachou/deitou por conta própria enquanto adiado — intent satisfeita sem forçar (só-para-baixo)
                     _deferred.RemoveAt(i);
                     TraumaEngine.ReportOneShotCanceled(p, e.Kind, e.PublishDeadline);
-                    TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] crouch NOOP (pose already low) {p.ProfileId}");
+                    TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] {KindWord(e.Kind, e.Region)} NOOP (pose already low) {p.ProfileId}");
                     continue;
                 }
                 if (!CanForcePose(p, out _)) continue;   // segue adiado
                 if (!mc.SetPoseLevel(0f)) continue;      // guard interno ainda recusa — segue adiado
                 _deferred.RemoveAt(i);
                 TraumaEngine.ReportOneShotExecuted(p, e.Kind); // cooldown conta da execução (D7)
-                TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] crouch EXECUTED {p.ProfileId}");
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] {KindWord(e.Kind, e.Region)} EXECUTED {p.ProfileId}");
             }
 
             PumpPronePending();
@@ -331,24 +339,25 @@ namespace TRLImmersiveCombatMedicine.Trauma
                 DeferredCrouch e = _deferred[i];
                 if (!e.Internal && !(e.Player is null)) TraumaEngine.ReportOneShotCanceled(e.Player, e.Kind, e.PublishDeadline);
                 TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo(
-                    $"[Trauma2] {KindWord(e.Kind)} CANCELED ({reason}) {(e.Player is null ? "?" : e.Player.ProfileId)}");
+                    $"[Trauma2] {KindWord(e.Kind, e.Region)} CANCELED ({reason}) {(e.Player is null ? "?" : e.Player.ProfileId)}");
             }
             _deferred.Clear();
             _pronePending.Clear();
         }
 
-        /// <summary>PA-01-04: cancela SÓ o kind — o toggle-off do 003 usa CancelKind(InvoluntaryCrouch) e NUNCA
-        /// varre quedas do 004 (e vice-versa). Refund só de entradas não-internas.</summary>
-        internal static void CancelKind(TraumaOneShotKind kind, string reason)
+        /// <summary>PA-01-04 (estendido no 006 — spec 006 §2): cancela SÓ (kind, região) — toggle-off do 003 usa
+        /// CancelKind(InvoluntaryCrouch, Legs) e do 006 usa CancelKind(InvoluntaryCrouch, Stomach); nenhum varre
+        /// o outro nem as quedas do 004 (InvoluntaryFall, Legs). Refund só de entradas não-internas.</summary>
+        internal static void CancelKind(TraumaOneShotKind kind, TraumaRegion region, string reason)
         {
             for (int i = _deferred.Count - 1; i >= 0; i--)
             {
                 DeferredCrouch e = _deferred[i];
-                if (e.Kind != kind) continue;
+                if (e.Kind != kind || e.Region != region) continue;
                 _deferred.RemoveAt(i);
                 if (!e.Internal && !(e.Player is null)) TraumaEngine.ReportOneShotCanceled(e.Player, e.Kind, e.PublishDeadline);
                 TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo(
-                    $"[Trauma2] {KindWord(e.Kind)} CANCELED ({reason}) {(e.Player is null ? "?" : e.Player.ProfileId)}");
+                    $"[Trauma2] {KindWord(e.Kind, e.Region)} CANCELED ({reason}) {(e.Player is null ? "?" : e.Player.ProfileId)}");
             }
         }
 
@@ -368,8 +377,10 @@ namespace TRLImmersiveCombatMedicine.Trauma
         }
 
         /// <summary>Dip de BOT (P6 rec. (7)) — FIRE-AND-FORGET, nunca entra na fila de adiados (review 1, achado 4):
-        /// devolução imediata de controle (decisão 16) com restauração própria fora de combate.</summary>
-        internal static void BotCrouchDip(Player botPlayer)
+        /// devolução imediata de controle (decisão 16) com restauração própria fora de combate. `region` é NOVO e
+        /// opcional (spec 006 §2 — default Legs mantém o call site do 003 intocado); usado só p/ o log word ABSORB
+        /// (logs "bot dip ..." ficam com formato inalterado — spec 006 §1.10 abertura 4).</summary>
+        internal static void BotCrouchDip(Player botPlayer, TraumaRegion region = TraumaRegion.Legs)
         {
             if (botPlayer == null || botPlayer.MovementContext == null)
             {
@@ -379,7 +390,7 @@ namespace TRLImmersiveCombatMedicine.Trauma
                     TraumaEngine.ReportOneShotCanceled(botPlayer, TraumaOneShotKind.InvoluntaryCrouch, dNull);
                 return;
             }
-            if (AbsorbIfCycleEngaged(botPlayer, TraumaOneShotKind.InvoluntaryCrouch)) return; // D2: bot em hold do ciclo (spec 004 §1.8)
+            if (AbsorbIfCycleEngaged(botPlayer, TraumaOneShotKind.InvoluntaryCrouch, region)) return; // D2: bot em hold do ciclo (spec 004 §1.8)
             BotOwner bo = botPlayer.AIData?.BotOwner;
             if (bo == null)
             {

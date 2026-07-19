@@ -1,16 +1,16 @@
 # Graph Report - mods\TRL-ImmersiveCombatMedicine\modded  (2026-07-19)
 
 ## Corpus Check
-- 42 files · ~44,584 words
+- 46 files · ~50,298 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 749 nodes · 1238 edges · 42 communities (41 shown, 1 thin omitted)
+- 827 nodes · 1370 edges · 46 communities (45 shown, 1 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `9ce85810`
+- Built from commit: `f4db7a9c`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -56,35 +56,39 @@
 - [[_COMMUNITY_Community 39|Community 39]]
 - [[_COMMUNITY_Community 40|Community 40]]
 - [[_COMMUNITY_Community 41|Community 41]]
+- [[_COMMUNITY_Community 42|Community 42]]
+- [[_COMMUNITY_Community 43|Community 43]]
+- [[_COMMUNITY_Community 44|Community 44]]
+- [[_COMMUNITY_Community 45|Community 45]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `BandAidUI` - 58 edges
 2. `BandAidController` - 48 edges
 3. `TraumaEngine` - 44 edges
-4. `TraumaPose` - 30 edges
-5. `TraumaFallCycleConsumer` - 28 edges
-6. `BandAidNetworkHandler` - 26 edges
-7. `MedicalLogic` - 24 edges
-8. `MedicHealPatch` - 23 edges
-9. `TraumaBotFall` - 23 edges
-10. `TraumaLegsConsumer` - 22 edges
+4. `TraumaArmsConsumer` - 37 edges
+5. `TraumaPose` - 30 edges
+6. `TraumaFallCycleConsumer` - 28 edges
+7. `BandAidNetworkHandler` - 26 edges
+8. `MedicalLogic` - 24 edges
+9. `MedicHealPatch` - 23 edges
+10. `TraumaBotFall` - 23 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `BandAidController` --inherits--> `MonoBehaviour`  [EXTRACTED]
-  Patches/Medical/BandAidController.cs →   _Bridges community 1 → community 36_
+  Patches/Medical/BandAidController.cs →   _Bridges community 1 → community 45_
 - `BandAidUI` --inherits--> `MonoBehaviour`  [EXTRACTED]
-  Patches/Medical/BandAidUI.cs →   _Bridges community 36 → community 0_
+  Patches/Medical/BandAidUI.cs →   _Bridges community 45 → community 0_
 - `TourniquetManager` --inherits--> `MonoBehaviour`  [EXTRACTED]
-  Patches/Medical/TourniquetManager.cs →   _Bridges community 36 → community 5_
+  Patches/Medical/TourniquetManager.cs →   _Bridges community 45 → community 5_
+- `TraumaArmsConsumer` --inherits--> `MonoBehaviour`  [EXTRACTED]
+  Patches/Trauma/TraumaArmsConsumer.cs →   _Bridges community 45 → community 42_
 - `TraumaEngine` --inherits--> `MonoBehaviour`  [EXTRACTED]
-  Patches/Trauma/TraumaEngine.cs →   _Bridges community 36 → community 15_
-- `TraumaFallCycleConsumer` --inherits--> `MonoBehaviour`  [EXTRACTED]
-  Patches/Trauma/TraumaFallCycleConsumer.cs →   _Bridges community 36 → community 39_
+  Patches/Trauma/TraumaEngine.cs →   _Bridges community 45 → community 15_
 
 ## Import Cycles
 - None detected.
 
-## Communities (42 total, 1 thin omitted)
+## Communities (46 total, 1 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.07
@@ -219,12 +223,12 @@ Cohesion: 0.23
 Nodes (6): Band_Aid, CustomClassesBridge, bool, MethodInfo, Player, string
 
 ### Community 35 - "Community 35"
-Cohesion: 0.12
+Cohesion: 0.13
 Nodes (13): Action, bool, Dictionary, int, List, MethodInfo, Player, PropertyInfo (+5 more)
 
 ### Community 36 - "Community 36"
-Cohesion: 0.16
-Nodes (13): MonoBehaviour, bool, Dictionary, ESpeedLimit, GameWorld, List, Player, TraumaLine (+5 more)
+Cohesion: 0.17
+Nodes (12): bool, Dictionary, ESpeedLimit, GameWorld, List, Player, TraumaLine, TraumaOneShotKind (+4 more)
 
 ### Community 37 - "Community 37"
 Cohesion: 0.25
@@ -243,25 +247,41 @@ Cohesion: 0.24
 Nodes (5): ESpeedLimit, HashSet, Player, TraumaSpeedCap, TRLImmersiveCombatMedicine.Trauma
 
 ### Community 41 - "Community 41"
-Cohesion: 0.29
+Cohesion: 0.27
 Nodes (5): Dictionary, float, Player, TraumaVoice, TRLImmersiveCombatMedicine.Trauma
 
+### Community 42 - "Community 42"
+Cohesion: 0.10
+Nodes (17): IHandsController, Action, bool, EBodyPart, FirearmController, float, GameWorld, IEffect (+9 more)
+
+### Community 43 - "Community 43"
+Cohesion: 0.19
+Nodes (8): GClass3008, bool, EBodyPart, IEffect, MethodInfo, Player, TraumaTremor, TRLImmersiveCombatMedicine.Trauma
+
+### Community 44 - "Community 44"
+Cohesion: 0.20
+Nodes (7): FieldInfo, FirearmController, MethodBase, ProceduralWeaponAnimation, SetAimLockoutPatch, TremorVisualReassertPatch, TRLImmersiveCombatMedicine.Trauma
+
+### Community 45 - "Community 45"
+Cohesion: 0.22
+Nodes (7): MonoBehaviour, bool, GameWorld, TraumaRegion, TraumaTransition, TraumaStomachConsumer, TRLImmersiveCombatMedicine.Trauma
+
 ## Knowledge Gaps
-- **223 isolated node(s):** `bool`, `TRLImmersiveCombatMedicine`, `ConfigEntry`, `bool`, `float` (+218 more)
+- **248 isolated node(s):** `bool`, `TRLImmersiveCombatMedicine`, `ConfigEntry`, `bool`, `float` (+243 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **1 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `BandAidUI` connect `Community 0` to `Community 36`?**
-  _High betweenness centrality (0.047) - this node is a cross-community bridge._
-- **Why does `TraumaEngine` connect `Community 15` to `Community 36`?**
-  _High betweenness centrality (0.039) - this node is a cross-community bridge._
-- **Why does `BandAidController` connect `Community 1` to `Community 0`, `Community 36`?**
-  _High betweenness centrality (0.039) - this node is a cross-community bridge._
+- **Why does `BandAidUI` connect `Community 0` to `Community 45`?**
+  _High betweenness centrality (0.048) - this node is a cross-community bridge._
+- **Why does `TraumaEngine` connect `Community 15` to `Community 45`?**
+  _High betweenness centrality (0.040) - this node is a cross-community bridge._
+- **Why does `BandAidController` connect `Community 1` to `Community 0`, `Community 45`?**
+  _High betweenness centrality (0.040) - this node is a cross-community bridge._
 - **What connects `bool`, `TRLImmersiveCombatMedicine`, `ConfigEntry` to the rest of the system?**
-  _223 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _248 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.06874717322478517 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**

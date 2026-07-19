@@ -64,8 +64,9 @@ namespace TRLImmersiveCombatMedicine.Trauma
         /// <summary>CR-02-02: fonte ÚNICA do predicado de pausa (D3 blackout legado + DOWNED Fika via !IsAlive
         /// com record vivo) — consumida pelo TickHumanCycle e pelo cinto do OnFallExecuted (CR-01-02). O subset
         /// D3 do OnOneShotCore fica FORA de propósito (é menor: o motor não publica p/ !IsAlive —
-        /// TraumaEngine.cs:511-513).</summary>
-        private static bool IsPauseCondition(Player p)
+        /// TraumaEngine.cs:511-513). internal (CR-01-01 do 005): reusado por TraumaArmsConsumer.TryBlockReAds
+        /// para o guard de incapacidade da voz do lockout — evita uma 3ª cópia do mesmo predicado.</summary>
+        internal static bool IsPauseCondition(Player p)
         {
             return TraumaState.BlackoutTimers.ContainsKey(p.ProfileId) || TraumaState.IsFainted
                 || p.HealthController == null || !p.HealthController.IsAlive;

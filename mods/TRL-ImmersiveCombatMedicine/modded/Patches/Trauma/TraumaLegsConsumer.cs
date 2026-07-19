@@ -208,8 +208,9 @@ namespace TRLImmersiveCombatMedicine.Trauma
                 _applied.Clear();
                 for (int i = 0; i < _sweepScratch.Count; i++) RemoveCapGuarded(_sweepScratch[i]);
                 _sweepScratch.Clear();
-                // PA-01-04: toggle-off do 003 cancela SÓ o próprio kind — nunca varre as quedas do 004
-                TraumaPose.CancelKind(TraumaOneShotKind.InvoluntaryCrouch, "toggle-off");
+                // PA-01-04 (estendido no 006): toggle-off do 003 cancela SÓ (kind, região=Legs) — nunca varre
+                // as quedas do 004 nem os adiados de ESTÔMAGO do 006 (spec 006 §1.5, TraumaPose.cs:212).
+                TraumaPose.CancelKind(TraumaOneShotKind.InvoluntaryCrouch, TraumaRegion.Legs, "toggle-off");
                 TraumaPose.FlushBotRestores();
                 TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("[Trauma2] legs consumer OFF — caps desfeitos");
             }
