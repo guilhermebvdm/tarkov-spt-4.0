@@ -63,6 +63,17 @@ namespace TRLImmersiveCombatMedicine.Trauma
 
         private void OnTransition(TraumaTransition t)
         {
+            // CR-01-04: exceção de consumidor não pode subir p/ o StateChanged?.Invoke do motor (barramento de
+            // TODOS os consumidores — mataria a publicação das regiões/records restantes do frame).
+            try { OnTransitionCore(t); }
+            catch (System.Exception ex)
+            {
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogError($"[Trauma2] FallCycle.OnTransition: {ex.Message}");
+            }
+        }
+
+        private void OnTransitionCore(TraumaTransition t)
+        {
             if (t.Region != TraumaRegion.Legs || !IsActive()) return;
             Player p = t.Player;
             if (p is null) return;
@@ -93,6 +104,16 @@ namespace TRLImmersiveCombatMedicine.Trauma
 
         private void OnOneShot(Player p, TraumaOneShotKind kind, TraumaLine line)
         {
+            // CR-01-04: mesmo isolamento do OnTransition (OneShotPublished?.Invoke vive no EvaluatePlayer do motor)
+            try { OnOneShotCore(p, kind, line); }
+            catch (System.Exception ex)
+            {
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogError($"[Trauma2] FallCycle.OnOneShot: {ex.Message}");
+            }
+        }
+
+        private void OnOneShotCore(Player p, TraumaOneShotKind kind, TraumaLine line)
+        {
             if (!IsActive() || kind != TraumaOneShotKind.InvoluntaryFall) return;
             if (p is null) return;
             if (p.IsAI) { TraumaBotFall.OnFallOneShot(p); return; } // held → só re-ancora cooldown (PA-02-06)
@@ -117,8 +138,15 @@ namespace TRLImmersiveCombatMedicine.Trauma
         {
             // Chamado pelo TraumaPose na execução (imediata ou do pump). fellProne=false = fallback agachado
             // (PronePending re-tenta no pump; bloqueio vale p/ a pose corrente — funcional §1).
-            if (_phase == FallPhase.Paused) return; // cinto PA-02-03: entradas são canceladas na ENTRADA da pausa;
-                                                   //   se algo executar mesmo assim: sem fase, sem voz (wake conduz — já prone)
+            // Cinto PA-02-03 + CR-01-02: além da fase Paused, checa o predicado de desmaio/downed DIRETO (mesma
+            // fonte do TickHumanCycle) — no frame de ENTRADA do blackout o pump do 003 roda ANTES do tick do 004
+            // (ordem de AddComponent) e a queda adiada executaria como already-prone com a FSM ainda em
+            // FallPending → EnterBlocked + OnAgony de um inconsciente (replicado aos peers). Sem fase, sem voz —
+            // o wake conduz (já prone).
+            if (_phase == FallPhase.Paused
+                || TraumaState.BlackoutTimers.ContainsKey(p.ProfileId) || TraumaState.IsFainted
+                || p.HealthController == null || !p.HealthController.IsAlive)
+                return;
             _local = p;
             EnterBlocked("fall-executed");
             TraumaVoice.PlayStrong(p); // OnAgony importance:100 — ref: PhraseSpeakerClass.cs:175

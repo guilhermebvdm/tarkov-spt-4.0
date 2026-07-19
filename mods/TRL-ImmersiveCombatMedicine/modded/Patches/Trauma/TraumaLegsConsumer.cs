@@ -85,6 +85,17 @@ namespace TRLImmersiveCombatMedicine.Trauma
 
         private void OnTransition(TraumaTransition t)
         {
+            // ref: code-review 1 do 004 (CR-01-04) — exceção de consumidor não pode subir p/ o
+            // StateChanged?.Invoke do motor (mataria a publicação das regiões/records restantes do frame)
+            try { OnTransitionCore(t); }
+            catch (System.Exception ex)
+            {
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogError($"[Trauma2] LegsConsumer.OnTransition: {ex.Message}");
+            }
+        }
+
+        private void OnTransitionCore(TraumaTransition t)
+        {
             if (t.Region != TraumaRegion.Legs) return;
             if (!IsActive()) return; // toggle off = ignora (motor segue publicando — comportamento 9 do 002)
             Player p = t.Player;
@@ -105,6 +116,16 @@ namespace TRLImmersiveCombatMedicine.Trauma
         }
 
         private void OnOneShot(Player p, TraumaOneShotKind kind, TraumaLine line)
+        {
+            // ref: CR-01-04 do 004 — mesmo isolamento do OnTransition (OneShotPublished?.Invoke vive no motor)
+            try { OnOneShotCore(p, kind, line); }
+            catch (System.Exception ex)
+            {
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogError($"[Trauma2] LegsConsumer.OnOneShot: {ex.Message}");
+            }
+        }
+
+        private void OnOneShotCore(Player p, TraumaOneShotKind kind, TraumaLine line)
         {
             if (!IsActive() || kind != TraumaOneShotKind.InvoluntaryCrouch) return; // InvoluntaryFall = TraumaFallCycleConsumer (004)
             if (p is null) return;

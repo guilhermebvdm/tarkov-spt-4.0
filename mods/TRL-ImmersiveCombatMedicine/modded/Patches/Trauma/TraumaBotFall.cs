@@ -30,6 +30,14 @@ namespace TRLImmersiveCombatMedicine.Trauma
         private static readonly Dictionary<string, Hold> _holds = new Dictionary<string, Hold>(); // por profileId
         private static readonly List<string> _scratch = new List<string>(); // reusada — sem alocação no caminho quente
 
+        // CR-01-01: hold só nasce se a camada BigBrain EXISTE p/ o bot — lista única compartilhada com o
+        // AddCustomLayer (RegisterLayerCore) + flag de registro; sem camada = sem hold (sem IsCycleEngaged
+        // fantasma na arbitragem D2, sem churn RELEASE/RE-HOLD a cada X s).
+        private static readonly List<string> LayerBrains = new List<string>
+            { "PmcBear", "PmcUsec", "PMC", "Assault", "CursAssault", "ExUsec", "ArenaFighter", "Obdolbs" };
+        private static readonly HashSet<string> LayerBrainSet = new HashSet<string>(LayerBrains);
+        private static bool _layerRegistered; // setado SÓ no fim de RegisterLayerCore (BigBrain presente e registro ok)
+
         // SAIN interop (ActiveLayer=None no Start do hold) — soft-dep por reflection (padrão TrySainSetTargetPose)
         private static bool _sainResolved;
         private static System.Type _sainBotComponentType;
@@ -64,11 +72,22 @@ namespace TRLImmersiveCombatMedicine.Trauma
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void RegisterLayerCore()
         {
-            BrainManager.AddCustomLayer(typeof(TraumaDownedLayer),
-                new List<string> { "PmcBear", "PmcUsec", "PMC", "Assault", "CursAssault", "ExUsec", "ArenaFighter", "Obdolbs" },
+            BrainManager.AddCustomLayer(typeof(TraumaDownedLayer), LayerBrains,
                 90); // ref: scratchpad bigbrain_BrainManager.cs:147-165; prioridades P6 (SAIN≤80, ORBIT 19, UNTAR 4/5, Exfil 79);
                      //   bosses/followers FORA no 004 (animações especiais — premissa p/ item 011, abertura 4)
+            _layerRegistered = true; // CR-01-01: gate de nascimento de hold
             TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("[Trauma2] bot fall layer registered (BigBrain prio 90)");
+        }
+
+        /// <summary>CR-01-01: a camada existe DE FATO p/ este bot? Mesmo critério que o BigBrain usa para anexar
+        /// (brainNames.Contains(Brain.BaseBrain.ShortName()) — bigbrain ExcludeLayerHelpers.IsAffectedBySettings;
+        /// roles = AllWildSpawnTypes no nosso registro, só o brain decide). Sem camada (BigBrain ausente OU brain
+        /// fora da lista — boss/follower/Marksman): sem hold — degrada p/ o comportamento sem-hold logado.</summary>
+        private static bool HasLayerFor(Player bot)
+        {
+            if (!_layerRegistered) return false;
+            BaseBrain brain = bot.AIData?.BotOwner?.Brain?.BaseBrain; // ref: StandartBotBrain.cs:11; BaseBrain.cs:78
+            return brain != null && LayerBrainSet.Contains(brain.ShortName());
         }
 
         internal static bool IsHeld(string profileId) =>
@@ -103,6 +122,14 @@ namespace TRLImmersiveCombatMedicine.Trauma
                 if (IsHeld(id)) return; // no-op (idempotente)
                 // Guards: BotOwner/MovementContext nulos → no-op SEM refund (não há publish atrelado à transição)
                 if (bot.MovementContext == null || bot.AIData?.BotOwner == null) return;
+                // CR-01-01: sem camada p/ este bot (BigBrain ausente / brain fora da lista) → SEM hold — ninguém
+                // deitaria o bot; hold fantasma distorceria IsCycleEngaged (D2) e geraria churn RELEASE/RE-HOLD.
+                // O publish do one-shot é refundado pelo OnFallOneShot não-held.
+                if (!HasLayerFor(bot))
+                {
+                    TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] bot fall no-layer {id}");
+                    return;
+                }
                 float x = X();
                 _holds[id] = new Hold { Player = bot, ReleaseAt = Time.time + x }; // camada IsActive no próximo tick de IA
                 TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] bot fall HOLD {id} x={x:0.#}");
@@ -138,7 +165,7 @@ namespace TRLImmersiveCombatMedicine.Trauma
         /// caminho idempotente do OnLine — PA-02-06).</summary>
         internal static void EstablishFromSnapshot(GameWorld gw)
         {
-            if (gw == null) return;
+            if (gw == null || !_layerRegistered) return; // CR-01-01: sem camada registrada, nenhum hold nasce
             var players = gw.RegisteredPlayers;
             for (int i = 0; i < players.Count; i++)
             {
