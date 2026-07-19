@@ -91,6 +91,14 @@
                     <MudItem xs="3" sm="1"><MudButton Variant="Variant.Filled" Color="Color.Dark" Size="Size.Small" Disabled="!Config.MapConfigs[map.Key].EnableDespawn">@Config.MapConfigs[map.Key].DespawnInterval</MudButton></MudItem>
                     <MudItem xs="9" sm="11"><MudSlider T="float" @bind-Value="Config.MapConfigs[map.Key].DespawnInterval" Min="5f" Max="300f" Step="5f" Color="Color.Secondary" Size="Size.Medium" Disabled="!Config.MapConfigs[map.Key].EnableDespawn" /></MudItem>
                 </MudGrid>
+
+                <MudGrid Class="align-center mb-4">
+                    <MudItem xs="12" sm="12">
+                        <MudText Typo="Typo.body2" Class="mb-2 text-muted">@Localization.T("Spawn Bubble Distance (m) - Max distance from players a common bot can spawn:")</MudText>
+                    </MudItem>
+                    <MudItem xs="3" sm="1"><MudButton Variant="Variant.Filled" Color="Color.Dark" Size="Size.Small">@Config.MapConfigs[map.Key].SpawnBubbleDistance</MudButton></MudItem>
+                    <MudItem xs="9" sm="11"><MudSlider T="float" @bind-Value="Config.MapConfigs[map.Key].SpawnBubbleDistance" Min="50f" Max="1000f" Step="10f" Color="Color.Info" Size="Size.Medium" /></MudItem>
+                </MudGrid>
             </MudPaper>
         }
 
@@ -125,12 +133,19 @@
         }
     }
 
-        private void EnsureMapConfigExists(string mapId)
+    private void EnsureMapConfigExists(string mapId)
     {
         if (!Config.MapConfigs.ContainsKey(mapId))
         {
             double defaultDist = (mapId == "factory4_day" || mapId == "factory4_night" || mapId == "sandbox" || mapId == "sandbox_high") ? 15.0 : 30.0;
-            Config.MapConfigs[mapId] = new MapSettings { SafeZoneDistance = defaultDist };
+            Config.MapConfigs[mapId] = new MapSettings { SafeZoneDistance = defaultDist, SpawnBubbleDistance = 300f };
+        }
+        else
+        {
+            if (Config.MapConfigs[mapId].SpawnBubbleDistance <= 0f)
+            {
+                Config.MapConfigs[mapId].SpawnBubbleDistance = 300f;
+            }
         }
     }
 }

@@ -675,7 +675,7 @@ namespace TRLDynamicSpawn.Components
                     float maxDist = 300f;
                     if (_serverConfig?.MapConfigs?.TryGetValue(mapName, out var mapSettings) == true)
                     {
-                        maxDist = mapSettings.DespawnDistance;
+                        maxDist = mapSettings.SpawnBubbleDistance;
                     }
 
                     bool closeEnoughToAnyPlayer = false;

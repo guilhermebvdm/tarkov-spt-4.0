@@ -548,7 +548,7 @@ namespace TRLDynamicSpawn.Patches
                                 var cfg = TRLDynamicSpawn.Components.DynamicSpawnManager.Instance.ServerConfig;
                                 if (cfg.MapConfigs?.TryGetValue(mapName, out var mapSettings) == true)
                                 {
-                                    maxDist = mapSettings.DespawnDistance;
+                                    maxDist = mapSettings.SpawnBubbleDistance;
                                 }
                             }
 

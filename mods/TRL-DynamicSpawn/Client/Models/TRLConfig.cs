@@ -203,6 +203,7 @@ public class MapSettings
     [JsonProperty("despawnPMCs")] public bool DespawnPMCs { get; set; } = false;
     [JsonProperty("despawnDistance")] public float DespawnDistance { get; set; } = 300f;
     [JsonProperty("despawnInterval")] public float DespawnInterval { get; set; } = 20f;
+    [JsonProperty("spawnBubbleDistance")] public float SpawnBubbleDistance { get; set; } = 300f;
 }
 
 public class Vector3Model
