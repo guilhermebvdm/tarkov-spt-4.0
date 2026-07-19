@@ -762,7 +762,7 @@ namespace TRLDynamicSpawn.Components
         private IEnumerator SpawnReplacementBotCoroutine(EPlayerSide side, WildSpawnType role, BotDifficulty difficulty)
         {
             BotSpawnParams spawnParams = new BotSpawnParams();
-            BotProfileDataClass profileData = new BotProfileDataClass(EPlayerSide.Savage, role, difficulty, 0f, spawnParams);
+            BotProfileDataClass profileData = new BotProfileDataClass(side, role, difficulty, 0f, spawnParams);
             
             var t = BotCreationDataClass.Create(profileData, _botCreator, 1, _botsController.BotSpawner);
             while (!t.IsCompleted) yield return null;
