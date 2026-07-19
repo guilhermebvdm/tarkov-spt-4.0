@@ -122,14 +122,10 @@ namespace TrueTrauma
             }
             // ref: spec 003 §4 (D10) — sub-bloco legado de PERNAS removido (seed de ImpactTimers/LegPenaltyTimers,
             // prone em hit e voz): a reação de pernas agora é do Trauma 2.0 (motor 002 + consumidor 003).
-            // Desmaio (acima), estômago e braços seguem legados até os itens 007/006/005.
-            if (TRLImmersiveCombatMedicinePlugin.ConfigArmsEnabled.Value && (bodyPartType == EBodyPart.LeftArm || bodyPartType == EBodyPart.RightArm))
-            {
-                if (HealthUtils.IsPartDestroyed(__instance, bodyPartType))
-                {
-                    VoiceHelper.TriggerTraumaVoice(__instance, "Arm");
-                }
-            }
+            // ref: spec 005 §1.7 (D10 — PA-02-04) — sub-bloco legado de BRAÇOS removido (voz "Arm" em hit de
+            // braço zerado, gateado pela key inerte ConfigArmsEnabled): o feedback de entrada agora é o toast
+            // de 1ª ocorrência + tremor visível do Trauma 2.0 (TraumaArmsConsumer) — paridade com o 003, que
+            // removeu também a voz de hit de perna. Desmaio (acima) e estômago seguem legados até os itens 007/006.
         }
     }
 }

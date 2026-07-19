@@ -99,7 +99,7 @@ namespace TrueTrauma
                 TraumaState.BlackoutStartTimes.Remove(id);
             }
 
-            // --- OUTRAS MECÂNICAS (BRAÇOS, PERNAS, ETC) ---
+            // --- OUTRAS MECÂNICAS ---
 
             // Grace Period (Tempo de graça pós-acordar)
             if (!__instance.IsAI && TraumaState.GraceTimers.ContainsKey(id))
@@ -116,27 +116,10 @@ namespace TrueTrauma
                 }
             }
 
-            // Braços Quebrados (Fadiga ao mirar)
-            if (TRLImmersiveCombatMedicinePlugin.ConfigArmsEnabled.Value)
-            {
-                bool bothArmsDestroyed = HealthUtils.IsPartDestroyed(__instance, EBodyPart.LeftArm) && HealthUtils.IsPartDestroyed(__instance, EBodyPart.RightArm);
-                bool isAiming = __instance.ProceduralWeaponAnimation != null && __instance.ProceduralWeaponAnimation.IsAiming;
-
-                if (bothArmsDestroyed && isAiming)
-                {
-                    if (!TraumaState.AimingFatigueTimers.ContainsKey(id)) TraumaState.AimingFatigueTimers[id] = now;
-                    else if (now > TraumaState.AimingFatigueTimers[id] + 1f)
-                    {
-                        if (__instance.HandsController is IFirearmHandsController f) f.SetAim(false);
-                        VoiceHelper.TriggerTraumaVoice(__instance, "TryAim");
-                        TraumaState.AimingFatigueTimers.Remove(id);
-                    }
-                }
-                else
-                {
-                    if (TraumaState.AimingFatigueTimers.ContainsKey(id)) TraumaState.AimingFatigueTimers.Remove(id);
-                }
-            }
+            // ref: spec 005 §1.7 (D10) — fadiga de mira legada de BRAÇOS aposentada: saiu o polling de
+            // ProceduralWeaponAnimation.IsAiming + SetAim(false) após 1 s + voz "TryAim" (AimingFatigueTimers
+            // removido do TraumaState). O cancela-ADS agora é do Trauma 2.0 (motor 002 + TraumaArmsConsumer,
+            // detecção por EVENTO + lockout); a key "Sistema de Braços" ficou INERTE (remoção no item 010).
 
             // ref: spec 003 §4 (D10) — sistema legado de PERNAS aposentado: saíram o bloco humano
             // (prone forçado + voz + LegPenaltyTimers) e o bloco de bots 90 s (clamp de pé permanente —

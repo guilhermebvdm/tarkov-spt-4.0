@@ -21,7 +21,7 @@ Fonte única de verdade das `ConfigEntry` expostas no menu F12 (regra do repo: t
 |---|---|---|---|---|
 | Sistema de Desmaio | bool | `true` | — | Ativa o desmaio ao receber muito dano massivo. |
 | Sistema de Pernas | bool | `true` | — | (INERTE desde a v1.3.0 — substituído pelo Trauma 2.0 / Legs Effects. Remoção da key no item 010.) |
-| Sistema de Braços | bool | `true` | — | Perder a mira ao perder os braços. |
+| Sistema de Braços | bool | `true` | — | (INERTE desde a v1.6.0 — substituído pelo Trauma 2.0 / Arms Effects. Remoção da key no item 010.) |
 | Sistema de Estomago | bool | `true` | — | Ficar sem ar ao tomar tiro no estômago. |
 
 ## Seção 3. Balanceamento (Trauma)
@@ -66,7 +66,7 @@ Toggle POR consumidor (comportamento 9 da spec funcional 002): cada consumidor s
 |---|---|---|---|---|---|
 | Legs Effects | bool | `true` | — | — | Mancar N1/N2 + agachar involuntário (item 003). Governado pelo master Trauma 2.0; desligar mid-raid desfaz caps e cancela agachares pendentes. (Key renomeada na entrega do 003 — ver tabela Renomeadas.) |
 | Fall Cycle | bool | `true` | — | — | Cair + ciclo de levantar (item 004). Governado pelo master Trauma 2.0; desligar mid-raid destrava o levantar na hora, cancela quedas pendentes e libera bots (o mancar interim do 003 NÃO volta). OFF com Legs Effects ON: o aviso (toast) da 1ª ocorrência da linha Cair ainda aparece — registry de consumidores é por região (PA-01-14). (Key renomeada na entrega do 004 — ver tabela Renomeadas.) |
-| Arms Effects (item 005) | bool | `false` | — | — | Placeholder — tremor + cancela-ADS. Sem função até o item 005. |
+| Arms Effects | bool | `true` | — | — | Tremor contínuo + cancelamento de ADS escalonado (item 005). Governado pelo master Trauma 2.0; desligar mid-raid remove o tremor e cancela o lockout. (Key renomeada na entrega do 005 — ver tabela Renomeadas.) |
 | Stomach Effects (item 006) | bool | `false` | — | — | Placeholder — agachar involuntário do estômago. Sem função até o item 006. |
 | Blackout 2.0 (item 007) | bool | `false` | — | — | Placeholder — desmaio percentual. Sem função até o item 007 (o desmaio ATUAL segue no toggle antigo "Sistema de Desmaio"). |
 | Debug Test Consumer | bool | `false` | — | Sim | Consumidor de teste SEM efeito de gameplay: registra-se ATIVO para as TRÊS regiões (pernas/braços/estômago), destravando o toast/i18n para validação (AC5 da spec funcional). |
@@ -84,6 +84,7 @@ Toggle POR consumidor (comportamento 9 da spec funcional 002): cada consumidor s
 | Sistema de Braços | 2026-07-12 (CR-02-04): a key gravada tinha bytes de encoding quebrado (`Sistema de BraÃ§os`) e foi corrigida — identidade mudou | `MigrateOrphanedConfigKeys()` no Awake copia o valor órfão 1× e REMOVE a key antiga do .cfg (CR-03-01: sem o remove, a migração re-rodava todo boot e clobberava mudanças do usuário) |
 | Legs Effects (item 003) → Legs Effects | 2026-07-19 (code-review 1 do 003): **rename-at-delivery** — a key nova nasce ON para todos; o `false` do placeholder das v1.2.x não era escolha do usuário | `MigrateOrphanedConfigKeys()` DELETA a entry órfã SEM copiar o valor + `Config.Save` (lição CR-03-01: sem o delete, o BepInEx re-persiste a key morta). **Padrão a repetir** nos placeholders `Arms Effects (item 005)` / `Stomach Effects (item 006)` / `Blackout 2.0 (item 007)` na entrega de cada item. |
 | Fall Cycle (item 004) → Fall Cycle | 2026-07-19 (item 004, v1.5.0): **rename-at-delivery** — a key nova nasce ON para todos; o `false` do placeholder não era escolha do usuário | `MigrateOrphanedConfigKeys()` DELETA a entry órfã SEM copiar o valor + `Config.Save` (mesmo padrão do 003). |
+| Arms Effects (item 005) → Arms Effects | 2026-07-19 (item 005, v1.6.0): **rename-at-delivery** — a key nova nasce ON para todos; o `false` do placeholder não era escolha do usuário | `MigrateOrphanedConfigKeys()` DELETA a entry órfã SEM copiar o valor + `Config.Save` (mesmo padrão do 003/004). |
 
 ## Seção 7. Trauma 2.0 (Pernas)
 
@@ -106,6 +107,17 @@ Consumidor do ciclo de queda (item 004, spec 004 §3). Timers lidos por `.Value`
 | Fall Block Seconds | float | `15` | 5–60 | — | BLOQUEIO: tempo no chão sem poder levantar após cada queda (tentar dá som de dor e nada acontece; rastejar é livre). Mudanças valem a partir do PRÓXIMO bloqueio iniciado. Piso 5s intencional (0 anularia o ciclo, conflitando com o anti-thrash do motor). |
 | Bot Fall Hold Seconds | float | `15` | 5–120 | — | Tempo MÍNIMO que um bot com linha Cair fica no chão SEM combater antes de a IA poder levantar (ao levantar, é re-derrubado enquanto a condição durar). Separado dos timers humanos. |
 
+## Seção 9. Trauma 2.0 (Braços)
+
+Consumidor de braços (item 005, spec 005 §3). Timers lidos por `.Value` a cada uso (sem cache). Efetivo da linha Z2+Q2 = `min` dos três timers — a linha mais severa nunca fica mais lenta que as menos severas (warn no log, 1×); Z2 vs Q2 entre si é livre (decisão 3 é default, não invariante). Estado neutro: `Arms Effects` off = zero efeito de braços do mod (só rastreamento/log do motor). Bots são EXCLUÍDOS de tremor e cancela-ADS (funcional 5 — log de exclusão).
+
+| Nome (key) | Tipo | Padrão | Faixa | Avançado | Tooltip |
+|---|---|---|---|---|---|
+| ADS Cancel Seconds (Zeroed x2) | float | `4` | 1–10 | — | Segundos de mira sustentada com 2 braços ZERADOS até o cancelamento do ADS. Soltar a mira reseta o timer. |
+| ADS Cancel Seconds (Fractured x2) | float | `3` | 1–10 | — | Segundos com 2 braços FRATURADOS até o cancelamento (fratura pior que zerado por design — decisão 3). |
+| ADS Cancel Seconds (Zeroed + Fractured x2) | float | `2` | 1–10 | — | Segundos com 2 braços zerados E 2 fraturados. Efetivo = min dos três timers — a linha mais severa nunca fica mais lenta que as outras (warn no log, 1x). |
+| Re-ADS Lockout Seconds | float | `1.5` | 1.0–1.5 | — | Bloqueio de re-mirar após o cancelamento (persiste à troca de arma). Tentativa durante o bloqueio dispara voz de dor (1 por janela). Faixa fixada pela decisão 17 (1–1,5 s). |
+
 ## Histórico de Alterações
 
 | Data | Autor | Alteração |
@@ -117,3 +129,4 @@ Consumidor do ciclo de queda (item 004, spec 004 §3). Timers lidos por `.Value`
 | 2026-07-19 | Guilherme | Item 003 (pernas Trauma 2.0, v1.3.0): seção nova `7. Trauma 2.0 (Pernas)` (4 entries); `Legs Effects (item 003)` passa a default ON com tooltip real; `Sistema de Pernas` (seção 2) marcado INERTE — legado de pernas aposentado (D10), remoção da key no item 010. |
 | 2026-07-19 | Guilherme | Code-review 1 do 003 (v1.3.1): RENAME `Legs Effects (item 003)` → `Legs Effects` (default ON efetivo p/ todos; órfã deletada sem copiar valor) + padrão rename-at-delivery registrado p/ os placeholders 004/005/006/007. |
 | 2026-07-19 | Guilherme | Item 004 (ciclo de queda, v1.5.0): seção nova `8. Trauma 2.0 (Queda)` (3 entries); RENAME `Fall Cycle (item 004)` → `Fall Cycle` (default ON; órfã deletada sem copiar valor — tabela Renomeadas); nota do interim do 003 removido na seção 7 (linha Cair sem cap N2 do 003; `Fall Cycle` OFF = linha Cair sem efeito do mod). |
+| 2026-07-19 | Guilherme | Item 005 (braços Trauma 2.0, v1.6.0): seção nova `9. Trauma 2.0 (Braços)` (4 entries — 3 timers de cancela-ADS + lockout); RENAME `Arms Effects (item 005)` → `Arms Effects` (default ON; órfã deletada sem copiar valor — tabela Renomeadas); `Sistema de Braços` (seção 2) marcado INERTE — legado de braços aposentado (D10: fadiga de mira + voz "Arm"), remoção da key no item 010. |

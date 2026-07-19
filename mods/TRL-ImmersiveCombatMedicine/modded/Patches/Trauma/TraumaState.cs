@@ -16,10 +16,11 @@ namespace TrueTrauma
         // Timers normais
         // ref: spec 003 §4 (D10) — ImpactTimers/LegPenaltyTimers/BotLegsBrokenStartTimes removidos junto com o
         // sistema legado de pernas (escritores e consumidores saíram em MovementPatches/HealthPatches/InputPatches)
+        // ref: spec 005 §1.7 (D10) — AimingFatigueTimers removido junto com a fadiga de mira legada de braços
+        // (escritor único saiu do MovementPatches; o cancela-ADS é do TraumaArmsConsumer, timer por evento)
         public static readonly Dictionary<string, float> BlackoutTimers = new Dictionary<string, float>();
         public static readonly Dictionary<string, float> BlackoutStartTimes = new Dictionary<string, float>();
         public static readonly Dictionary<string, float> GraceTimers = new Dictionary<string, float>();
-        public static readonly Dictionary<string, float> AimingFatigueTimers = new Dictionary<string, float>();
         public static readonly Dictionary<string, float> VoiceCooldowns = new Dictionary<string, float>();
         public static float EffectIntensity = 0f;
 
@@ -40,7 +41,6 @@ namespace TrueTrauma
             BlackoutTimers.Clear();
             BlackoutStartTimes.Clear();
             GraceTimers.Clear();
-            AimingFatigueTimers.Clear();
             VoiceCooldowns.Clear();
             BotFaintCooldowns.Clear();
             EffectIntensity = 0f;

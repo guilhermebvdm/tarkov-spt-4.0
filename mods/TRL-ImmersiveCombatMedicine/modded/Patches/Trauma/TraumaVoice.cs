@@ -21,6 +21,16 @@ namespace TRLImmersiveCombatMedicine.Trauma
             p.Speaker?.Play(EPhraseTrigger.OnAgony, ETagStatus.Combat | ETagStatus.Dying, demand: true, importance: 100);
         }
 
+        /// <summary>FORTE accept-gated (item 005 — lockout de re-ADS): mesmo trigger/tags do PlayStrong, SEM o
+        /// anti-spam interno (o throttle por janela + piso 0,3s vivem no TraumaArmsConsumer — canal separado por
+        /// consumidor, comportamento do 004 preservado). Retorno true = o Speaker ACEITOU (TagBank != null) —
+        /// contrato da PA-01-02 (janela só consumida se tocou). ref: PhraseSpeakerClass.cs:206-227.</summary>
+        internal static bool TryPlayStrong(Player p)
+        {
+            if (p is null) return false;
+            return p.Speaker?.Play(EPhraseTrigger.OnAgony, ETagStatus.Combat | ETagStatus.Dying, demand: true, importance: 100) != null;
+        }
+
         /// <summary>LEVE (liberação): OnBeingHurt demand:true — humano local tem OnDemandOnly=true no inicializador
         /// do new PhraseSpeakerClass (Player.cs:28670; Init é chamada separada :28672 — PA-01-13).
         /// ref: Player.cs:28799-28829; EPhraseTrigger.cs:12.</summary>
