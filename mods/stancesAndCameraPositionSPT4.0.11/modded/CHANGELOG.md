@@ -7,6 +7,30 @@ Versões mais recentes primeiro.
 
 ---
 
+## v2.9.0 (2026-07-19)
+
+### Defaults promovidos da config calibrada do servidor
+
+Os valores de fábrica do mod passam a ser a **config calibrada in-game** do servidor — instalações limpas (ou
+chaves ausentes no `.cfg`) já nascem com o tuning correto, sem precisar importar `.cfg`. Afeta **só quem não tem a
+chave gravada**; `.cfg` existentes mantêm seus valores.
+
+**Promovido (30 chaves):** poses das Stances 1/2 (Yaw, Roll, Up/Down), speed multipliers por stance (S0=80, S1=90,
+S2/S3=100), stamina (S1=3, S2=4, ADS stand=0.1, hold-breath stand=0.6, prone=2, hold-breath prone=0.8),
+inércia=3 / walk=0.9 / sprint=0.8, transition speed=0.8, kick=-0.025, overshoot damping=15, snap-on-fire por
+stance (S2 on, S3 off), `Stance 2 ADS Waypoint=off` (Low Ready dispensa o waypoint), mouse-wheel cycle on,
+hotkeys de teclado (Toggle, Stance 3) desligadas, volumes de respiração/batimento ≈ mudos (0.01), barra de
+oxigênio off.
+
+**Mantido no default histórico (não promovido, decisão de produto):**
+- `Debug Transition Metrics = false` — é a régua de diagnóstico (F0); não deve nascer ligada para o player.
+- `Mouse Wheel Modifier = LeftAlt` — evita conflito com o agachar (Ctrl) do EFT.
+
+Detalhe técnico: `Stance 2 ADS Waypoint` default divergia por stance, então o tuple `_stanceDefaults` ganhou o
+campo `AdsWaypoint` (S1/S3 = true, S2 = false).
+
+---
+
 ## v2.8.2 (2026-07-19)
 
 ### Correção (apresentação no F12)

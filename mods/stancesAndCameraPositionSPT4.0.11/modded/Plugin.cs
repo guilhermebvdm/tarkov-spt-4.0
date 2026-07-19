@@ -20,7 +20,7 @@ public enum ScrollMode
     Linear,
 }
 
-[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "2.8.2")]
+[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "2.9.0")]
 public class Plugin : BaseUnityPlugin
 {
     public static Plugin Instance { get; private set; }
@@ -46,15 +46,15 @@ public class Plugin : BaseUnityPlugin
 
     // StaminaMultiplier: <1.0 = drain, 1.0 = vanilla, >1.0 = recovery. ref: fix-01.
     // SnapOnFire (backlog 002 F4): defaults divergem por stance. Stance 0 = false (sentinel).
-    private static readonly (Stance Stance, string Section, float StaminaMultiplier, bool ModSpeed, int Multiplier, bool ApplyProne, bool SnapOnFire)[]
+    // AdsWaypoint (item 017 F1): default por stance (Stance 0 irrelevante — o bind é null).
+    // v2.9.0: defaults promovidos da config calibrada do servidor (2026-07-19). Stance 0 é irrelevante (sem pose).
+    private static readonly (Stance Stance, string Section, float StaminaMultiplier, bool ModSpeed, int Multiplier, bool ApplyProne, bool SnapOnFire, bool AdsWaypoint)[]
         _stanceDefaults =
     {
-        (Stance.Default, Stance0Section, 0.5f,  true,  90,  false, false),  // Stance 0: irrelevante
-        (Stance.Stance1, Stance1Section, 1.5f,  true,  95,  false, true),
-        // 06-fix-01: Stance 2 e Stance 3 trocaram. Stance 2 (Low Ready) é relaxada — stamina 1.0,
-        // speed 90, snap off (pré-mira). Stance 3 (Custom) mantém defaults antigos da Stance 2.
-        (Stance.Stance2, Stance2Section, 1.0f,  true,  90,  false, false),  // Low Ready (cano desce)
-        (Stance.Stance3, Stance3Section, 2.0f,  true,  100, false, true),   // Custom (lateral)
+        (Stance.Default, Stance0Section, 0.5f,  true,  80,  false, false, true),  // Stance 0: irrelevante
+        (Stance.Stance1, Stance1Section, 3.0f,  true,  90,  false, true,  true),  // High Ready
+        (Stance.Stance2, Stance2Section, 4.0f,  true,  100, false, true,  false), // Low Ready (waypoint off — pré-mira)
+        (Stance.Stance3, Stance3Section, 2.0f,  true,  100, false, false, true),  // Custom (lateral)
     };
 
     // Section constants (in display order - top to bottom)
@@ -384,7 +384,7 @@ public class Plugin : BaseUnityPlugin
         _StanceToggleKey = Config.Bind(
             Settings,
             "Stance Toggle Hotkey",
-            KeyCode.V,
+            KeyCode.None,
             new ConfigDescription("Press this key to cycle through enabled stances: Default → Stance 1 → Stance 2 → Stance 3 → Default\n\nPressione esta tecla para percorrer as posturas ativas: Default → Stance 1 → Stance 2 → Stance 3 → Default",
             null,
             new ConfigurationManagerAttributes { Order = 61 }));
@@ -392,7 +392,7 @@ public class Plugin : BaseUnityPlugin
         _EnableMouseWheelCycle = Config.Bind(
             Settings,
             "Enable Mouse Wheel Stance Cycle",
-            false,
+            true,
             new ConfigDescription("When enabled, hold the modifier key and scroll mouse wheel to cycle stances\n\nQuando ativado, segure a tecla modificadora e gire a roda do mouse para percorrer as posturas",
             null,
             new ConfigurationManagerAttributes { Order = 60 }));
@@ -424,7 +424,7 @@ public class Plugin : BaseUnityPlugin
         _StanceTransitionSpeed = Config.Bind(
             GeneralSection,
             "Stance Transition Speed",
-            1.0f,
+            0.8f,
             new ConfigDescription("Speed multiplier for switching BETWEEN STANCES (including back to the default view). Does not affect aiming — see ADS Transition Speed.\n\nMultiplicador de velocidade da troca ENTRE POSTURAS (incluindo a volta para a visão padrão). Não afeta a mira — veja ADS Transition Speed.",
             new AcceptableValueRange<float>(0.1f, 5.0f),
             new ConfigurationManagerAttributes { Order = 98 }));
@@ -440,7 +440,7 @@ public class Plugin : BaseUnityPlugin
         _StanceKickIntensity = Config.Bind(
             GeneralSection,
             "Stance Kick Intensity (Toward the Chest)",
-            -0.05f,
+            -0.025f,
             new ConfigDescription("How much the weapon kicks towards your chest when changing stances or ADS. Negative values pull it towards you.\n\nQuanto a arma recua em direção ao seu peito ao trocar de postura ou mirar (ADS). Valores negativos puxam a arma em sua direção.",
             new AcceptableValueRange<float>(-0.3f, 0.3f),
             new ConfigurationManagerAttributes { Order = 97 }));
@@ -456,8 +456,8 @@ public class Plugin : BaseUnityPlugin
         _StanceOvershootDamping = Config.Bind(
             GeneralSection,
             "Stance Overshoot Damping (Lower Means More Bounce)",
-            12.0f,
-            new ConfigDescription("Damping for the spring physics. Lower values mean more overshoot/bounce. Default is 12.\n\nAmortecimento da física de mola. Valores menores geram mais overshoot/quicada. Padrão é 12.",
+            15.0f,
+            new ConfigDescription("Damping for the spring physics. Lower values mean more overshoot/bounce. Default is 15.\n\nAmortecimento da física de mola. Valores menores geram mais overshoot/quicada. Padrão é 15.",
             new AcceptableValueRange<float>(1f, 30.0f),
             new ConfigurationManagerAttributes { Order = 95 }));
 
@@ -527,7 +527,7 @@ public class Plugin : BaseUnityPlugin
         _Stance3Hotkey = Config.Bind(
             Settings,
             "Stance 3 - Custom Hotkey",
-            KeyCode.O,
+            KeyCode.None,
             new ConfigDescription(
                 "Dedicated key to activate Stance 3 - Custom. " +
                 "Toggle: pressing while already in Stance 3 returns to Stance 0. " +
@@ -670,7 +670,7 @@ public class Plugin : BaseUnityPlugin
         _Stance1HandsYawRotation = Config.Bind(
             Stance1Section,
             "Stance 1 Yaw (Point Left/Right)",
-            0.0f,
+            10.0f,
             new ConfigDescription("Stance 1 hands/arms yaw rotation in degrees (left/right turn)\n\nRotação de yaw das mãos/braços da Stance 1 em graus (aponta p/ esquerda/direita)",
             new AcceptableValueRange<float>(-45f, 45f),
             new ConfigurationManagerAttributes { Order = 26 }));
@@ -678,7 +678,7 @@ public class Plugin : BaseUnityPlugin
         _Stance1HandsRollRotation = Config.Bind(
             Stance1Section,
             "Stance 1 Roll (Cant Weapon)",
-            0.0f,
+            -5.0f,
             new ConfigDescription("Stance 1 hands/arms roll rotation in degrees (weapon cant)\n\nRotação de roll das mãos/braços da Stance 1 em graus (tomba a arma)",
             new AcceptableValueRange<float>(-45f, 45f),
             new ConfigurationManagerAttributes { Order = 25 }));
@@ -694,7 +694,7 @@ public class Plugin : BaseUnityPlugin
         _Stance1HandsUpDownOffset = Config.Bind(
             Stance1Section,
             "Stance 1 Up/Down (Stock Up/Down)",
-            -0.01f,
+            -0.22f,
             new ConfigDescription("Stance 1 hands/weapon position up/down (positive = up)\n\nPosição das mãos/arma da Stance 1 para cima/baixo (positivo = cima)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { Order = 23 }));
@@ -730,7 +730,7 @@ public class Plugin : BaseUnityPlugin
         _Stance2HandsYawRotation = Config.Bind(
             Stance2Section,
             "Stance 2 Yaw (Point Left/Right)",
-            0.0f,
+            -8.0f,
             new ConfigDescription("Stance 2 hands/arms yaw rotation in degrees (left/right turn)\n\nRotação de yaw das mãos/braços da Stance 2 em graus (aponta p/ esquerda/direita)",
             new AcceptableValueRange<float>(-45f, 45f),
             new ConfigurationManagerAttributes { Order = 19 }));
@@ -754,7 +754,7 @@ public class Plugin : BaseUnityPlugin
         _Stance2HandsUpDownOffset = Config.Bind(
             Stance2Section,
             "Stance 2 Up/Down (Stock Up/Down)",
-            -0.02f,
+            0.07f,
             new ConfigDescription("Stance 2 hands/weapon position up/down (positive = up)\n\nPosição das mãos/arma da Stance 2 para cima/baixo (positivo = cima)",
             new AcceptableValueRange<float>(-0.5f, 0.5f),
             new ConfigurationManagerAttributes { Order = 16 }));
@@ -856,7 +856,7 @@ public class Plugin : BaseUnityPlugin
         _BreathInVolume = Config.Bind(
             HoldBreathSection,
             "Breath In Volume",
-            1.0f,
+            0.01f,
             new ConfigDescription("Volume of the breath_in audio.\n\nVolume do áudio de inspiração (breath_in).",
             new AcceptableValueRange<float>(0f, 2f),
             new ConfigurationManagerAttributes { Order = -12 }));
@@ -864,7 +864,7 @@ public class Plugin : BaseUnityPlugin
         _BreathOutVolume = Config.Bind(
             HoldBreathSection,
             "Breath Out Volume",
-            1.0f,
+            0.01f,
             new ConfigDescription("Volume of the breath_out audio.\n\nVolume do áudio de expiração (breath_out).",
             new AcceptableValueRange<float>(0f, 2f),
             new ConfigurationManagerAttributes { Order = -13 }));
@@ -872,7 +872,7 @@ public class Plugin : BaseUnityPlugin
         _HeartbeatVolume = Config.Bind(
             HoldBreathSection,
             "Heartbeat Volume",
-            1.0f,
+            0.01f,
             new ConfigDescription("Volume of the heartbeat loop audio.\n\nVolume do áudio em loop dos batimentos cardíacos.",
             new AcceptableValueRange<float>(0f, 2f),
             new ConfigurationManagerAttributes { Order = -14 }));
@@ -885,7 +885,7 @@ public class Plugin : BaseUnityPlugin
         _EnableOxygenUI = Config.Bind(
             OxygenUISection,
             "Enable Oxygen UI Bar",
-            true,
+            false,
             new ConfigDescription("Displays a white bar above the hands stamina that drains while holding breath.\n\nExibe uma barra branca acima da stamina de braço que esvazia enquanto segura a respiração.",
             null,
             new ConfigurationManagerAttributes { Order = -1 }));
@@ -937,7 +937,7 @@ public class Plugin : BaseUnityPlugin
         _InertiaMultiplier = Config.Bind(
             MovementSection,
             "Inertia Multiplier",
-            1.2f,
+            3.0f,
             new ConfigDescription("Global multiplier for character inertia (weight feeling). 1.0 is default.\n\nMultiplicador global da inércia do personagem (sensação de peso). 1.0 é o padrão.",
             new AcceptableValueRange<float>(0.1f, 3.0f),
             new ConfigurationManagerAttributes { Order = 3 }));
@@ -945,7 +945,7 @@ public class Plugin : BaseUnityPlugin
         _WalkSpeedMultiplier = Config.Bind(
             MovementSection,
             "Walk Speed Multiplier",
-            0.85f,
+            0.9f,
             new ConfigDescription("Multiplier for maximum walking speed. 1.0 is default.\n\nMultiplicador da velocidade máxima de caminhada. 1.0 é o padrão.",
             new AcceptableValueRange<float>(0.1f, 2.0f),
             new ConfigurationManagerAttributes { Order = 2 }));
@@ -953,7 +953,7 @@ public class Plugin : BaseUnityPlugin
         _SprintSpeedMultiplier = Config.Bind(
             MovementSection,
             "Sprint Speed Multiplier",
-            0.9f,
+            0.8f,
             new ConfigDescription("Multiplier for maximum sprinting speed. 1.0 is default.\n\nMultiplicador da velocidade máxima de corrida (sprint). 1.0 é o padrão.",
             new AcceptableValueRange<float>(0.1f, 2.0f),
             new ConfigurationManagerAttributes { Order = 1 }));
@@ -1459,7 +1459,7 @@ public class Plugin : BaseUnityPlugin
     }
     
     private StanceConfig BindStance(
-        (Stance Stance, string Section, float StaminaMultiplier, bool ModSpeed, int Multiplier, bool ApplyProne, bool SnapOnFire) d)
+        (Stance Stance, string Section, float StaminaMultiplier, bool ModSpeed, int Multiplier, bool ApplyProne, bool SnapOnFire, bool AdsWaypoint) d)
     {
         // Map Stance → label numérico para os nomes das ConfigEntry (Default=0, Stance1=1, ...)
         int n = (int)d.Stance;
@@ -1492,7 +1492,7 @@ public class Plugin : BaseUnityPlugin
             // as seções (pedido do usuário — pares experimentais/calibráveis no rodapé), consistente e sem empate.
             AdsWaypoint = (d.Stance == Stance.Default)
                 ? null
-                : Config.Bind(d.Section, $"Stance {n} ADS Waypoint", true,
+                : Config.Bind(d.Section, $"Stance {n} ADS Waypoint", d.AdsWaypoint,
                     new ConfigDescription(
                         "When aiming from this stance, briefly settle the weapon to neutral (Stance 0) and hold the sights before raising them — kills the vertical loop into ADS. Requires 'Reset Positions When Aiming'.\n\nAo mirar a partir desta postura, assenta a arma no neutro (Stance 0) e segura a mira por um instante antes de levantá-la — mata o loop vertical ao entrar em ADS. Requer 'Reset Positions When Aiming'.",
                         null,
@@ -1542,11 +1542,11 @@ public class Plugin : BaseUnityPlugin
         M[(int)StaminaScenario.StandStance1]      = BindMult(SEC, "Stance 1 Stamina Multiplier", _stanceDefaults[1].StaminaMultiplier, "Standing, no mount, Stance 1. <1 drains, 1 holds, >1 recovers.\n\nEm pé sem mount, Stance 1.", ref o);
         M[(int)StaminaScenario.StandStance2]      = BindMult(SEC, "Stance 2 Stamina Multiplier", _stanceDefaults[2].StaminaMultiplier, "Standing, no mount, Stance 2. <1 drains, 1 holds, >1 recovers.\n\nEm pé sem mount, Stance 2.", ref o);
         M[(int)StaminaScenario.StandStance3]      = BindMult(SEC, "Stance 3 Stamina Multiplier", _stanceDefaults[3].StaminaMultiplier, "Standing, no mount, Stance 3. <1 drains, 1 holds, >1 recovers.\n\nEm pé sem mount, Stance 3.", ref o);
-        M[(int)StaminaScenario.StandAds]          = BindMult(SEC, "ADS - Stand up Multiplier", 0.7f, "Standing, no mount, aiming (ADS). <1 drains, 1 holds, >1 recovers.\n\nEm pé sem mount, mirando (ADS).", ref o);
-        M[(int)StaminaScenario.StandHoldBreath]   = BindMult(SEC, "Hold Breath - Stand up Multiplier", 0.5f, "Standing, no mount, holding breath. <1 drains, 1 holds, >1 recovers.\n\nEm pé sem mount, segurando a respiração.", ref o);
-        M[(int)StaminaScenario.ProneHip]          = BindMult(SEC, "Prone Stamina Multiplier", 1.5f, "Prone, no mount, hipfire. <1 drains, 1 holds, >1 recovers.\n\nDeitado (prone) sem mount, hipfire.", ref o);
+        M[(int)StaminaScenario.StandAds]          = BindMult(SEC, "ADS - Stand up Multiplier", 0.1f, "Standing, no mount, aiming (ADS). <1 drains, 1 holds, >1 recovers.\n\nEm pé sem mount, mirando (ADS).", ref o);
+        M[(int)StaminaScenario.StandHoldBreath]   = BindMult(SEC, "Hold Breath - Stand up Multiplier", 0.6f, "Standing, no mount, holding breath. <1 drains, 1 holds, >1 recovers.\n\nEm pé sem mount, segurando a respiração.", ref o);
+        M[(int)StaminaScenario.ProneHip]          = BindMult(SEC, "Prone Stamina Multiplier", 2.0f, "Prone, no mount, hipfire. <1 drains, 1 holds, >1 recovers.\n\nDeitado (prone) sem mount, hipfire.", ref o);
         M[(int)StaminaScenario.ProneAds]          = BindMult(SEC, "ADS - Prone Multiplier", 0.9f, "Prone, aiming. <1 drains, 1 holds, >1 recovers.\n\nDeitado, mirando.", ref o);
-        M[(int)StaminaScenario.ProneHoldBreath]   = BindMult(SEC, "Hold Breath - Prone Multiplier", 0.7f, "Prone, holding breath. <1 drains, 1 holds, >1 recovers.\n\nDeitado, segurando a respiração.", ref o);
+        M[(int)StaminaScenario.ProneHoldBreath]   = BindMult(SEC, "Hold Breath - Prone Multiplier", 0.8f, "Prone, holding breath. <1 drains, 1 holds, >1 recovers.\n\nDeitado, segurando a respiração.", ref o);
         M[(int)StaminaScenario.PassiveStance0]    = BindMult(SEC, "Passive Mount Multiplier", 1.5f, "Passive mount (resting), Stance 0. <1 drains, 1 holds, >1 recovers.\n\nApoio passivo (encostado), Stance 0.", ref o);
         M[(int)StaminaScenario.PassiveAds]        = BindMult(SEC, "ADS - Passive Mount Multiplier", 1.0f, "Passive mount, aiming (holds, does not recover). <1 drains, 1 holds, >1 recovers.\n\nApoio passivo, mirando (segura, não recupera).", ref o);
         M[(int)StaminaScenario.PassiveHoldBreath] = BindMult(SEC, "Hold Breath - Passive Mount Multiplier", 0.9f, "Passive mount, holding breath. <1 drains, 1 holds, >1 recovers.\n\nApoio passivo, segurando a respiração.", ref o);

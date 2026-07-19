@@ -20,16 +20,17 @@
 | 014 | Corrigir sync visual de stances no Fika | Aplicação remota mexia no Spine3 (só torso) → arma ficava imóvel. Corrige para aplicar o offset no WeaponRootAnim (braço+arma juntos), de forma aditiva, coexistindo com lean/troca de ombro. Substitui a implementação do 006. | [014-sync-stances-fika/](./014-sync-stances-fika/) | 🟢 |
 | 015 | Bloquear mount ativo em Stance 1/2/3 | Impede o mount vanilla (apoiar a arma em superfícies) quando o jogador está em Stance 1/2/3 — só permite em Stance 0 ou ADS. Fase 2 do corner-case do 012, via patch em `TryMountWeapon`. | [015-bloquear-mount-ativo-stances/](./015-bloquear-mount-ativo-stances/) | 🟢 |
 | 016 | Fork realism: transições por curvas + gate de aim-speed | **CANCELADO na F0 (NO-GO).** O usuário testou o Fontaine-StanceOverhaul standalone e não achou a experiência melhor — portar a sensação dele herdaria o que foi rejeitado. Fork `modded-realism/` removido; Fontaine vendorizado mantido como referência. Os bugs que motivavam (overshoot Low Ready→ADS, braço deformado) **continuam abertos** e serão atacados por abordagem própria — ver [017](./017-transicao-ads-cirurgica/). | [016-transicao-realism-fork/](./016-transicao-realism-fork/) | 🔴 |
-| 017 | Transição Low/High Ready → ADS cirúrgica (waypoint Stance 0 + atenuar offset por comprimento) | Ataca os 2 bugs reais que o 016 mirava, sem curvas do Fontaine. **(A)** overshoot ao mirar (a arma sobe além da mira antes de descer, pior em armas leves; High Ready faz "onda" de cima p/ baixo): ideia = transição rápida e smooth para Stance 0 ANTES do ADS, em vez de ir direto. **(B)** braço esquerdo quebra em Low Ready → Stance 0 com armas longas (a arma desloca p/ frente e o braço hiperestende): ideia = atenuar o offset longitudinal em função do comprimento da arma / distância dos IK markers de mão. | [017-transicao-ads-cirurgica/](./017-transicao-ads-cirurgica/) | ⚪ |
+| 017 | Transição Low/High Ready → ADS cirúrgica (waypoint Stance 0 + atenuar offset por comprimento) | Ataca os 2 bugs reais que o 016 mirava, sem curvas do Fontaine. **(A)** overshoot ao mirar (a arma sobe além da mira antes de descer, pior em armas leves; High Ready faz "onda" de cima p/ baixo): ideia = transição rápida e smooth para Stance 0 ANTES do ADS, em vez de ir direto. **(B)** braço esquerdo quebra em Low Ready → Stance 0 com armas longas (a arma desloca p/ frente e o braço hiperestende): ideia = atenuar o offset longitudinal em função do comprimento da arma / distância dos IK markers de mão. | [017-transicao-ads-cirurgica/](./017-transicao-ads-cirurgica/) | 🟡 |
+| 018 | Rastejar rápido (crawl + run / high-crawl) | Enquanto prone, permitir um rastejar acelerado ("high-crawl") acionado por **andar-para-frente + agachado + correr** — mobilidade tática sem levantar. Ideia bruta; pendente investigação (o EFT tem high-crawl nativo? só velocidade ou animação?) e spec. | [018-rastejar-rapido/](./018-rastejar-rapido/) | ⚪ |
 
 ## Legenda
 
 - ⚪ Backlog · 🟡 Em progresso · 🟢 Entregue · 🔴 Cancelado
 
-## Estado (2026-07-11)
+## Estado (2026-07-19)
 
-**Backlog fechado** — 14 entregues, 1 cancelado, nada em aberto. Trabalho novo começa por um item novo
-(`/add-backlog-item`).
+**Em progresso:** 017 (transição ADS cirúrgica — F1 entregue e em releases 2.7–2.9; F2 fechado por outro caminho).
+**Em aberto:** 018 (rastejar rápido — ideia bruta, não investigada). Demais: 14 entregues, 2 cancelados (004, 016).
 
 ⚠️ **Os itens foram validados in-game sobre a build anterior à v2.0.0.** A reorganização do F12 (que removeu 23
 propriedades e 9 campos) só passou a rodar no jogo com a **v2.0.0** — a revalidação é a pendência **P-7.1**
