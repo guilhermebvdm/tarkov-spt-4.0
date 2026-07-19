@@ -682,3 +682,48 @@ as duas fases.
 da F2** — Low Ready → Stance 0 com arma longa, qual eixo (pitch/Up-Down/F-B) tem a maior excursão. Com os números,
 escrevo a tech-spec da F1 (amortecer) e da F2 (atenuar o eixo certo). Demais: P-11.1, P-11.2, P-10.x, subir 2.5.x
 ao servidor (agora 2.6.0).
+
+## 2026-07-18 ~ (GMT-3) — Sessão 11 (cont. 4): item 017 F1 implementada — waypoint Stance 0 + gate de aim-speed (v2.7.0)
+
+O usuário **definiu o mecanismo exato** e confirmou: ao mirar de High/Low Ready, chamar Stance 0, esperar **X ms
+(configurável no F12 — requisito, ele calibra)**, então liberar o ADS; ao sair, voltar à stance. Implementado.
+
+**Reconciliação técnica (a ideia dele = síntese do que a investigação achou):** o "super loop" vertical vem de
+DOIS movimentos simultâneos ao mirar — (1) o ADS nativo do EFT sobe a arma, (2) nossa mola tira a arma da pose de
+Ready. A solução: por X ms, o **alvo da mola vai a Stance 0** E o **ADS nativo é SEGURADO** por um gate de
+aim-speed (o mecanismo do Fontaine que estudamos no 016, redescoberto pelo usuário). Passado X ms, libera e a arma
+sobe limpa do neutro.
+
+**Fatos confirmados via ilspycmd (o decompilado do repo NÃO tem `ProceduralWeaponAnimation` — pasta EFT.Animations
+tem só 8 arquivos):**
+- Velocidade de ADS nativa = **peso** (faixa de tempo) + **ergonomia** (ponto na faixa, curva S) + skill
+  **AimDrills** (+50%, fixado ao sacar). Stance/Strength não afetam a subida bruta.
+- `ProceduralWeaponAnimation._aimingSpeed` (private float) é **lido ao vivo todo frame** (LerpCamera,
+  UpdateAimWeight) → multiplicar por ~0 **congela** a subida (não é atraso de 1 frame). Escrito **só** em eventos
+  de arma (UpdateWeaponVariables) → **salvar na borda e RESTAURAR** ao expirar, senão o aim quebra permanente.
+- ⚠️ **`×0.001`, não `0`** — o EFT faz `SwayFalloff / _aimingSpeed` (div-by-zero).
+- ⚠️⚠️ **O PWA é ÚNICO por jogador e SOBREVIVE à troca de arma** (não cria novo PWA) — descoberto no code-review,
+  derrubou minha premissa. A identidade do gate tem que ser o **FirearmController**, não o PWA.
+
+**Entregue (v2.7.0, commit `757aff0`, DLL `72a06c5` — instalada):**
+- `AdsWaypoint.cs` — helper por corpo (local + observado Fika): timer + borda de ADS + "alvo→Stance 0". Observado
+  recebe SÓ o waypoint de pose (sem gate — a subida dele é a animação nativa do modelo).
+- Gate de aim-speed no `ApplyComplexRotationPatch` (local): salva `_aimingSpeed` na borda, ×0.001 enquanto ativo,
+  restaura ao expirar. Kick de ADS-in pausado durante o waypoint. `ResetWaypoint` no raid end.
+- F12 (seção `Stance Transition & Kick`): `ADS Waypoint Via Stance 0` (bool, default true) + `ADS Waypoint Time
+  (ms)` (int, default 120, 0–400).
+- Code-review adversarial: 0 🔴, 2 🟡 + 1 🟢 corrigidos. Fix central: identidade = FirearmController + release
+  CEDO (antes dos early-returns) + NÃO restaurar na troca de arma (o equip da nova já recomputou o aim-speed dela
+  — restaurar o valor antigo = clobber).
+
+**Lições:**
+- **Não confiar em "troca de arma = novo objeto".** O PWA persiste por jogador — a identidade para save/restore de
+  um campo do EFT tem que ser a entidade que de fato muda (o FirearmController). O code-review pegou; a premissa
+  estava na spec.
+- **A ideia do usuário jogando bateu com a investigação técnica** — ele redescobriu o gate de aim-speed do
+  Fontaine pela intuição ("chamar Stance 0 e depois o ADS"). Ouvir a descrição do sintoma → o mecanismo certo.
+
+**Pendências:** **[P-11.5] (aberta 2026-07-18) 🟡 GATE F1:** calibrar `ADS Waypoint Time` in-game com a régua;
+testar troca de arma no meio do ADS-in, granada/med ao mirar, scope de alto zoom, paridade Fika 1ª/3ª pessoa. ·
+**P-11.4** (baseline/diagnóstico F2 — ainda útil para a F2). · F2 (atenuar o eixo) segue pendente. · P-11.1,
+P-11.2, P-10.x, subir 2.7.0 ao servidor.
