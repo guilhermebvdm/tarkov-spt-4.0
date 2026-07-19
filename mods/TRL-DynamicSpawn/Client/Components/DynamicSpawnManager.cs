@@ -478,13 +478,48 @@ namespace TRLDynamicSpawn.Components
             // First, inject Bosses in their designated zones
             foreach (var bq in bossQueue)
             {
-                if (_botsController.Bots.Count >= maxCap) break;
-                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Spawning BOSS gracefully in {bq.Item2.NameZone}...");
-                bq.Item1.BossZone = bq.Item2.NameZone;
-                IsGeneratingDynamicWave = true;
-                _botsController.ActivateBotsByWave(bq.Item1);
-                IsGeneratingDynamicWave = false;
+                if (_botsController.AliveAndLoadingBotsCount >= maxCap) break;
                 
+                BossLocationSpawn wave = bq.Item1;
+                BotZone zone = bq.Item2;
+
+                if (wave == null || zone == null) continue;
+
+                // Tenta resolver a role do Boss
+                if (!Enum.TryParse(wave.BossName, out WildSpawnType bossRole))
+                {
+                    // Fallback se o nome estiver ligeiramente diferente
+                    if (wave.BossName.ToLower() == "bossreshala" || wave.BossName.ToLower() == "bully")
+                        bossRole = WildSpawnType.bossBully;
+                    else if (wave.BossName.ToLower() == "shturman" || wave.BossName.ToLower() == "bosskojaniy")
+                        bossRole = WildSpawnType.bossKojaniy;
+                    else if (wave.BossName.ToLower() == "kaban")
+                        bossRole = WildSpawnType.bossBoar;
+                    else
+                        continue; // Ignora se não conseguir resolver
+                }
+
+                BotDifficulty bossDiff = BotDifficulty.normal;
+                Enum.TryParse(wave.BossDifficult, out bossDiff);
+
+                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Spawning BOSS ({bossRole}) directly in {zone.NameZone}...");
+                var bossSpawnTask = DirectSpawnBots(bossRole, bossDiff, 1, zone);
+                yield return new WaitUntil(() => bossSpawnTask.IsCompleted);
+
+                // Spawna os seguidores (escort) se houver
+                if (int.TryParse(wave.BossEscortAmount, out int escortCount) && escortCount > 0)
+                {
+                    if (Enum.TryParse(wave.BossEscortType, out WildSpawnType escortRole))
+                    {
+                        BotDifficulty escortDiff = BotDifficulty.normal;
+                        Enum.TryParse(wave.BossEscortDifficult, out escortDiff);
+
+                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Spawning boss followers ({escortRole}, Count: {escortCount}) directly in {zone.NameZone}...");
+                        var escortSpawnTask = DirectSpawnBots(escortRole, escortDiff, escortCount, zone);
+                        yield return new WaitUntil(() => escortSpawnTask.IsCompleted);
+                    }
+                }
+
                 if (TRLDynamicSpawn.Helpers.Settings.enableSmoothSpawning.Value)
                 {
                     yield return new WaitForSeconds(TRLDynamicSpawn.Helpers.Settings.smoothSpawningDelay.Value * 2f); // Wait a bit longer for bosses
