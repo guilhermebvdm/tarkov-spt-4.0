@@ -3421,7 +3421,7 @@ function openTraderEdit(row, focusField) {
       (hasOvr ? `<button class="tef-restore-price restore-link" type="button">↺ restore default price</button>` : '') +
     `</div>` +
     `<div class="tef-section tef-section--avail">` +
-      `<label class="tef-label">Availability <span class="tef-unit">restock cap</span></label>` +
+      `<label class="tef-label" data-tip="Stock = hard lifetime cap (does not restock per cycle). Buy/cycle = per-refresh allowance (resets each flea cycle). Both apply PER loyalty tier — if this trader sells the item at more than one tier, each tier gets this cap.">Availability <span class="tef-unit">per tier</span></label>` +
       `<div class="tef-grid">` +
         `<span class="tef-field">Stock</span>` +
         `<input class="tef-stock" type="number" min="0" step="1" value="${curOvrStock != null ? curOvrStock : ''}" placeholder="${escapeAttr(dfltStockTxt)}" aria-label="Total stock (default ${escapeAttr(dfltStockTxt)})">` +

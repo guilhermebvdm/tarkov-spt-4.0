@@ -1,4 +1,3 @@
-using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
@@ -37,10 +36,10 @@ public sealed class TraderPriceController(ModPathsService modPaths, WriteLockSer
     private string BuyConfigPath => Path.Combine(modPaths.ConfigDir, "buy-overrides.json");
 
     [HttpGet("trader-overrides")]
-    public IActionResult GetTraderOverrides() => Ok(new { ok = true, overrides = ReadRawOverridesForResponse(SellConfigPath) });
+    public IActionResult GetTraderOverrides() => Ok(new { ok = true, overrides = RawConfigStore.ReadForResponse(SellConfigPath) });
 
     [HttpGet("trader-buy-overrides")]
-    public IActionResult GetTraderBuyOverrides() => Ok(new { ok = true, overrides = ReadRawOverridesForResponse(BuyConfigPath) });
+    public IActionResult GetTraderBuyOverrides() => Ok(new { ok = true, overrides = RawConfigStore.ReadForResponse(BuyConfigPath) });
 
     [HttpPatch("trader-price")]
     public Task<IActionResult> PatchTraderPrice([FromBody] PatchTraderPriceRequest body) => PatchPrice(SellConfigPath, "trader-sell-price", body);
@@ -84,7 +83,7 @@ public sealed class TraderPriceController(ModPathsService modPaths, WriteLockSer
 
         return writeLock.RunAsync(() =>
         {
-            var overrides = ReadRawOverridesForWrite(configPath);
+            var overrides = RawConfigStore.ReadForWrite(configPath);
             if (overrides[traderId] is not JsonObject tplMap)
             {
                 tplMap = new JsonObject();
@@ -105,7 +104,7 @@ public sealed class TraderPriceController(ModPathsService modPaths, WriteLockSer
 
             tplMap[tpl] = new JsonObject { ["count"] = count, ["currency"] = currency };
 
-            WriteRawOverrides(configPath, overrides);
+            RawConfigStore.Write(configPath, overrides);
 
             auditLog.Append(
                 feature,
@@ -141,7 +140,7 @@ public sealed class TraderPriceController(ModPathsService modPaths, WriteLockSer
 
         return writeLock.RunAsync(() =>
         {
-            var overrides = ReadRawOverridesForWrite(configPath);
+            var overrides = RawConfigStore.ReadForWrite(configPath);
             var removed = false;
             double? previousCount = null;
             string? previousCurrency = null;
@@ -158,7 +157,7 @@ public sealed class TraderPriceController(ModPathsService modPaths, WriteLockSer
 
             if (removed)
             {
-                WriteRawOverrides(configPath, overrides);
+                RawConfigStore.Write(configPath, overrides);
                 auditLog.Append(feature, "delete", tpl, before: new { count = previousCount, currency = previousCurrency }, extra: new { traderId });
             }
 
@@ -170,8 +169,8 @@ public sealed class TraderPriceController(ModPathsService modPaths, WriteLockSer
     {
         return writeLock.RunAsync(() =>
         {
-            var before = ReadRawOverridesForWrite(configPath);
-            WriteRawOverrides(configPath, new JsonObject());
+            var before = RawConfigStore.ReadForWrite(configPath);
+            RawConfigStore.Write(configPath, new JsonObject());
             if (before.Count > 0)
             {
                 auditLog.Append(feature, "delete-all", null, before: before);
@@ -181,80 +180,6 @@ public sealed class TraderPriceController(ModPathsService modPaths, WriteLockSer
         });
     }
 
-    /// <summary>Same tolerate-missing / self-heal-corrupt behavior as the boot loader, for a plain response DTO.</summary>
-    private Dictionary<string, Dictionary<string, JsonElement>> ReadRawOverridesForResponse(string path)
-    {
-        var root = ReadRawOverridesForWrite(path);
-        var result = new Dictionary<string, Dictionary<string, JsonElement>>();
-        foreach (var (traderId, tplMapNode) in root)
-        {
-            if (tplMapNode is not JsonObject tplMap)
-            {
-                continue;
-            }
-
-            var inner = new Dictionary<string, JsonElement>();
-            foreach (var (tpl, ovr) in tplMap)
-            {
-                if (ovr is not null)
-                {
-                    inner[tpl] = JsonSerializer.Deserialize<JsonElement>(ovr.ToJsonString());
-                }
-            }
-
-            result[traderId] = inner;
-        }
-
-        return result;
-    }
-
-    /// <summary>
-    ///     Tolerates a missing file (returns an empty object, same as the boot loader). A corrupt
-    ///     (unparseable) file is backed up to a <c>.corrupt.bak</c> sibling and treated as empty so the
-    ///     viewer never 500s on a hand-edit gone wrong and the next write self-heals the config — mirrors
-    ///     <c>serve.js</c>'s <c>readTraderOverrides</c>/<c>readBuyOverrides</c>.
-    /// </summary>
-    private JsonObject ReadRawOverridesForWrite(string path)
-    {
-        if (!System.IO.File.Exists(path))
-        {
-            return new JsonObject();
-        }
-
-        try
-        {
-            return JsonNode.Parse(System.IO.File.ReadAllText(path)) as JsonObject ?? new JsonObject();
-        }
-        catch
-        {
-            try
-            {
-                var backup = path + ".corrupt.bak";
-                if (System.IO.File.Exists(backup))
-                {
-                    System.IO.File.Delete(backup);
-                }
-
-                System.IO.File.Move(path, backup);
-            }
-            catch
-            {
-                // Best-effort backup — even if it fails, still fall through and serve {} below
-                // rather than 500ing the viewer over a config file it can't read either way.
-            }
-
-            return new JsonObject();
-        }
-    }
-
-    /// <summary>Atomic (tmp+rename) write. This file is owned entirely by the mod (not shipped/copied),
-    /// so — unlike SPT_Data files — there's no "original style" to preserve; always 2-space + trailing \n.</summary>
-    private static void WriteRawOverrides(string path, JsonObject overrides)
-    {
-        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-        var serialized = overrides.ToJsonString(new JsonSerializerOptions { WriteIndented = true }) + "\n";
-        var tmp = path + ".tmp";
-        System.IO.File.WriteAllText(tmp, serialized);
-        System.IO.File.Move(tmp, path, overwrite: true);
-    }
+    // Raw config I/O (tolerate-missing / self-heal-corrupt / atomic write) is shared with
+    // StockController via RawConfigStore (code-review CR-03).
 }

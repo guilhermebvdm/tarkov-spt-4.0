@@ -32,8 +32,15 @@ internal static class FleaFloorOverrideStore
     /// <summary>
     ///     MongoId-keyed for O(1) lookup by the Harmony patch on the offer-generation path. Null until
     ///     <see cref="Load"/> runs; empty (not null) once loaded with no entries.
+    ///     <para>
+    ///     Treated as immutable once published: <see cref="Set"/>/<see cref="Remove"/> swap in a fresh
+    ///     copy under <see cref="Gate"/> rather than mutating in place, so <see cref="FleaFloorOverridePatch"/>
+    ///     — which reads this field WITHOUT the lock, on the parallel ragfair offer-generation threads
+    ///     (<c>RagfairOfferGenerator</c> spawns <c>Task.Factory.StartNew</c> per assort) — never observes a
+    ///     half-mutated dictionary. <c>volatile</c> so the reference swap is promptly visible cross-thread.
+    ///     </para>
     /// </summary>
-    internal static Dictionary<MongoId, double>? Map;
+    internal static volatile Dictionary<MongoId, double>? Map;
 
     private static readonly object Gate = new();
 
@@ -48,7 +55,7 @@ internal static class FleaFloorOverrideStore
         {
             foreach (var (tpl, floor) in raw)
             {
-                if (floor > 0 && IsHex24(tpl))
+                if (floor > 0 && TplValidation.IsHex24(tpl))
                 {
                     map[new MongoId(tpl)] = floor;
                 }
@@ -71,14 +78,19 @@ internal static class FleaFloorOverrideStore
     {
         lock (Gate)
         {
-            Map ??= new Dictionary<MongoId, double>();
             var key = new MongoId(tpl);
-            if (Map.TryGetValue(key, out var existing) && existing == floor)
+            // CR-04: tolerant compare — floor is always an integer rouble here, but exact double == is
+            // fragile if the source ever changes.
+            if (Map is { } cur && cur.TryGetValue(key, out var existing) && Math.Abs(existing - floor) < 0.5)
             {
                 return;
             }
 
-            Map[key] = floor;
+            // CR-01 copy-on-write: mutate a fresh copy and swap the reference, never edit Map in place —
+            // the lockless patch reader runs on parallel offer-gen threads (see Map's remarks).
+            var next = Map is null ? new Dictionary<MongoId, double>() : new Dictionary<MongoId, double>(Map);
+            next[key] = floor;
+            Map = next;
             Save(configDir, jsonUtil);
         }
     }
@@ -91,11 +103,16 @@ internal static class FleaFloorOverrideStore
     {
         lock (Gate)
         {
-            if (Map is null || !Map.Remove(new MongoId(tpl)))
+            var key = new MongoId(tpl);
+            if (Map is null || !Map.ContainsKey(key))
             {
                 return false;
             }
 
+            // CR-01 copy-on-write: same rationale as Set — swap a fresh copy, never mutate in place.
+            var next = new Dictionary<MongoId, double>(Map);
+            next.Remove(key);
+            Map = next;
             Save(configDir, jsonUtil);
             return true;
         }
@@ -114,23 +131,5 @@ internal static class FleaFloorOverrideStore
         var tmp = path + ".tmp";
         File.WriteAllText(tmp, json);
         File.Move(tmp, path, overwrite: true);
-    }
-
-    private static bool IsHex24(string? s)
-    {
-        if (s is null || s.Length != 24)
-        {
-            return false;
-        }
-
-        foreach (var c in s)
-        {
-            if (!Uri.IsHexDigit(c))
-            {
-                return false;
-            }
-        }
-
-        return true;
     }
 }

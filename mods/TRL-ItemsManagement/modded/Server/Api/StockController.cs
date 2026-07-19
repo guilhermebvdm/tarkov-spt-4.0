@@ -1,4 +1,3 @@
-using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +26,7 @@ public sealed class StockController(ModPathsService modPaths, WriteLockService w
     private string StockConfigPath => Path.Combine(modPaths.ConfigDir, "stock-overrides.json");
 
     [HttpGet("trader-stock-overrides")]
-    public IActionResult GetStockOverrides() => Ok(new { ok = true, overrides = ReadRawForResponse(StockConfigPath) });
+    public IActionResult GetStockOverrides() => Ok(new { ok = true, overrides = RawConfigStore.ReadForResponse(StockConfigPath) });
 
     [HttpPatch("trader-stock")]
     public Task<IActionResult> PatchStock([FromBody] PatchStockRequest body)
@@ -59,7 +58,7 @@ public sealed class StockController(ModPathsService modPaths, WriteLockService w
 
         return writeLock.RunAsync(() =>
         {
-            var overrides = ReadRawForWrite(StockConfigPath);
+            var overrides = RawConfigStore.ReadForWrite(StockConfigPath);
             if (overrides[traderId] is not JsonObject tplMap)
             {
                 tplMap = new JsonObject();
@@ -75,7 +74,7 @@ public sealed class StockController(ModPathsService modPaths, WriteLockService w
             if (body.BuyLimit is { } lim) entry["buyLimit"] = lim;
             tplMap[tpl] = entry;
 
-            WriteRaw(StockConfigPath, overrides);
+            RawConfigStore.Write(StockConfigPath, overrides);
 
             auditLog.Append(
                 "trader-stock", "set", tpl,
@@ -106,7 +105,7 @@ public sealed class StockController(ModPathsService modPaths, WriteLockService w
 
         return writeLock.RunAsync(() =>
         {
-            var overrides = ReadRawForWrite(StockConfigPath);
+            var overrides = RawConfigStore.ReadForWrite(StockConfigPath);
             var removed = false;
             double? prevStock = null;
             int? prevLimit = null;
@@ -127,7 +126,7 @@ public sealed class StockController(ModPathsService modPaths, WriteLockService w
 
             if (removed)
             {
-                WriteRaw(StockConfigPath, overrides);
+                RawConfigStore.Write(StockConfigPath, overrides);
                 auditLog.Append("trader-stock", "delete", tpl, before: new { stock = prevStock, buyLimit = prevLimit }, extra: new { traderId });
             }
 
@@ -140,11 +139,11 @@ public sealed class StockController(ModPathsService modPaths, WriteLockService w
     {
         return writeLock.RunAsync(() =>
         {
-            var before = ReadRawForWrite(StockConfigPath);
+            var before = RawConfigStore.ReadForWrite(StockConfigPath);
             var cleared = before.Count > 0;
             if (cleared)
             {
-                WriteRaw(StockConfigPath, new JsonObject());
+                RawConfigStore.Write(StockConfigPath, new JsonObject());
                 auditLog.Append("trader-stock", "delete-all", null, before: before);
             }
 
@@ -152,71 +151,5 @@ public sealed class StockController(ModPathsService modPaths, WriteLockService w
         });
     }
 
-    // ── raw config I/O (same shape/behaviour as TraderPriceController's helpers) ─────────────────
-    private Dictionary<string, Dictionary<string, JsonElement>> ReadRawForResponse(string path)
-    {
-        var root = ReadRawForWrite(path);
-        var result = new Dictionary<string, Dictionary<string, JsonElement>>();
-        foreach (var (traderId, tplMapNode) in root)
-        {
-            if (tplMapNode is not JsonObject tplMap)
-            {
-                continue;
-            }
-
-            var inner = new Dictionary<string, JsonElement>();
-            foreach (var (tpl, ovr) in tplMap)
-            {
-                if (ovr is not null)
-                {
-                    inner[tpl] = JsonSerializer.Deserialize<JsonElement>(ovr.ToJsonString());
-                }
-            }
-
-            result[traderId] = inner;
-        }
-
-        return result;
-    }
-
-    private JsonObject ReadRawForWrite(string path)
-    {
-        if (!System.IO.File.Exists(path))
-        {
-            return new JsonObject();
-        }
-
-        try
-        {
-            return JsonNode.Parse(System.IO.File.ReadAllText(path)) as JsonObject ?? new JsonObject();
-        }
-        catch
-        {
-            try
-            {
-                var backup = path + ".corrupt.bak";
-                if (System.IO.File.Exists(backup))
-                {
-                    System.IO.File.Delete(backup);
-                }
-
-                System.IO.File.Move(path, backup);
-            }
-            catch
-            {
-                // Best-effort backup — serve {} rather than 500 on an unreadable config.
-            }
-
-            return new JsonObject();
-        }
-    }
-
-    private static void WriteRaw(string path, JsonObject overrides)
-    {
-        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-        var serialized = overrides.ToJsonString(new JsonSerializerOptions { WriteIndented = true }) + "\n";
-        var tmp = path + ".tmp";
-        System.IO.File.WriteAllText(tmp, serialized);
-        System.IO.File.Move(tmp, path, overwrite: true);
-    }
+    // Raw config I/O is shared with TraderPriceController via RawConfigStore (code-review CR-03).
 }

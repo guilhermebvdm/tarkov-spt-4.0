@@ -48,7 +48,7 @@ internal static class StockApplier
 
         foreach (var (traderIdStr, tplMap) in raw)
         {
-            if (!IsHex24(traderIdStr))
+            if (!TplValidation.IsHex24(traderIdStr))
             {
                 badTrader++;
                 continue;
@@ -68,7 +68,7 @@ internal static class StockApplier
 
             foreach (var (tplStr, ovr) in tplMap)
             {
-                if (ovr is null || !IsHex24(tplStr))
+                if (ovr is null || !TplValidation.IsHex24(tplStr))
                 {
                     badTpl++;
                     continue;
@@ -114,23 +114,5 @@ internal static class StockApplier
 
         logger.Info(
             $"[TRLItemsManagement] stock: {stockApplied} stock + {limitApplied} buy-limit entr(ies) applied (badTrader {badTrader}, badTpl {badTpl}, tplNotSold {tplNotSold}).");
-    }
-
-    private static bool IsHex24(string? s)
-    {
-        if (s is null || s.Length != 24)
-        {
-            return false;
-        }
-
-        foreach (var c in s)
-        {
-            if (!Uri.IsHexDigit(c))
-            {
-                return false;
-            }
-        }
-
-        return true;
     }
 }

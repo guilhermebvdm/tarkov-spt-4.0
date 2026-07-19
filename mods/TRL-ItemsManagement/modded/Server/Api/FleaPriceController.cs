@@ -110,7 +110,7 @@ public sealed class FleaPriceController(
 
             if (!string.IsNullOrEmpty(modSource))
             {
-                return Task.FromResult(SetModItemPrice(tpl, price, item, sptBlock, ragfairRoot!, dynamicNode, itemsRoot!, itemsCatalogPath));
+                return Task.FromResult(SetModItemPrice(tpl, price, body.AllowBelowFloor == true, item, sptBlock, ragfairRoot!, dynamicNode, itemsRoot!, itemsCatalogPath));
             }
 
             return Task.FromResult(SetVanillaItemPrice(tpl, price, body.AllowBelowFloor == true, sptBlock, ragfairRoot!, dynamicNode, itemsRoot!, itemsCatalogPath));
@@ -399,7 +399,7 @@ public sealed class FleaPriceController(
     ///     see <c>Pricing/SellPriceApplier.cs</c>'s sibling notes and the plan's "Escritas fora da pasta
     ///     do mod" section for the full derivation (<c>multiplier = desiredPrice / fleaBaseRaw</c>).
     /// </summary>
-    private IActionResult SetModItemPrice(string tpl, double price, JsonObject item, JsonObject? sptBlock, JsonObject ragfairRoot, JsonObject dynamicNode, JsonObject itemsRoot, string itemsCatalogPath)
+    private IActionResult SetModItemPrice(string tpl, double price, bool allowBelowFloor, JsonObject item, JsonObject? sptBlock, JsonObject ragfairRoot, JsonObject dynamicNode, JsonObject itemsRoot, string itemsCatalogPath)
     {
         var baseVal = sptBlock?["fleaBaseRaw"]?.GetValue<double?>() ?? sptBlock?["effectiveFleaPrice"]?.GetValue<double?>();
         var floor = sptBlock?["fleaFloor"]?.GetValue<double?>() ?? 0;
@@ -430,7 +430,29 @@ public sealed class FleaPriceController(
         var eff = Math.Round(baseValNonNull * multiplier);
         if (eff < floor)
         {
-            eff = floor;
+            if (!allowBelowFloor)
+            {
+                // CR-02: same below-floor handshake as SetVanillaItemPrice — 422 so the viewer can
+                // offer "allow below the floor" and re-POST with AllowBelowFloor, instead of silently
+                // clamping the mod item to the floor.
+                return UnprocessableEntity(new
+                {
+                    error = $"price {price} is below the flea floor {floor} (= handbook × trader buyback). The flea cannot go below this for this item.",
+                    floor,
+                    belowFloor = true,
+                });
+            }
+
+            // B-5 for mod items: whitelist so FleaFloorOverridePatch lowers the SPT trader-price floor
+            // to eff (Math.Min — only ever LOWERS). Keep eff at the requested (post-multiplier) value
+            // instead of clamping it, mirroring the vanilla branch.
+            FleaFloorOverrideStore.Set(modPaths.ConfigDir, jsonUtil, tpl, eff);
+        }
+        else
+        {
+            // At/above the vanilla floor → drop any prior whitelist entry so the item snaps back to
+            // its real floor. Remove() writes nothing when absent.
+            FleaFloorOverrideStore.Remove(modPaths.ConfigDir, jsonUtil, tpl);
         }
 
         if (ceiling is { } ceilingClamp && eff > ceilingClamp)
