@@ -20,7 +20,7 @@ public enum ScrollMode
     Linear,
 }
 
-[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "2.9.0")]
+[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "2.10.0")]
 public class Plugin : BaseUnityPlugin
 {
     public static Plugin Instance { get; private set; }
@@ -226,6 +226,9 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<bool> _ManualChamberingOnRaidStart;
     public static ConfigEntry<bool> _ManualChamberingOnReload;
 
+    // Weapon Inspection (Item 019)
+    public static ConfigEntry<bool> _ShowChamberAmmoOnCheck;
+
     public void Awake()
     {
         Instance = this;
@@ -298,6 +301,18 @@ public class Plugin : BaseUnityPlugin
                 "When enabled, reloading with an empty chamber does NOT auto-load the first round after inserting the magazine — rack the bolt manually. Off = vanilla on reload. Real time.\n\nQuando ativado, recarregar com a câmara vazia NÃO carrega automaticamente a primeira bala após inserir o carregador — puxe o ferrolho manualmente. Desligado = vanilla no reload. Tempo real.",
                 null,
                 new ConfigurationManagerAttributes { Order = 68 }));
+
+        // ========================================
+        // WEAPON INSPECTION (Item 019)
+        // ========================================
+        _ShowChamberAmmoOnCheck = Config.Bind(
+            "Weapon Inspection",
+            "Show Chamber Ammo On Check",
+            true,
+            new ConfigDescription(
+                "When enabled, checking the chamber in-raid shows the same on-screen panel as the magazine check, telling you whether a round is chambered and which one. Vanilla shows nothing on the HUD when you check the chamber. Local only (not synced over Fika).\n\nQuando ativado, checar a câmara na raid mostra o mesmo painel do check de carregador, indicando se há bala na câmara e qual é. O vanilla não mostra nada no HUD ao checar a câmara. Só local (não sincroniza no Fika).",
+                null,
+                new ConfigurationManagerAttributes { Order = 67 }));
 
 
         // ========================================
@@ -1287,6 +1302,9 @@ public class Plugin : BaseUnityPlugin
         SafeEnable("SetAmmoOnMagPatch", () => new Patches.SetAmmoOnMagPatch());
         SafeEnable("PreChamberLoadPatch", () => new Patches.PreChamberLoadPatch());
         SafeEnable("ManualChamberingInputPatch", () => new Patches.ManualChamberingInputPatch());
+
+        // Item 019: Chamber Check Ammo UI
+        SafeEnable("ChamberCheckAmmoPatch", () => new Patches.ChamberCheckAmmoPatch());
 
         // Carrega sprites do ícone de mount (reusados pelo novo item de mount; carregamento mantido).
         LoadedSprites["mounting.png"] = LoadEmbeddedSprite("mounting.png");

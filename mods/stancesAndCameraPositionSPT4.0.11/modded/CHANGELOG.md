@@ -7,6 +7,20 @@ Versões mais recentes primeiro.
 
 ---
 
+## v2.10.0 (2026-07-19)
+
+### Nova feature — UI ao checar a câmara (item 019)
+
+Ao **checar a câmara** in-raid, agora aparece o **mesmo painel do check de carregador** mostrando se há bala e
+**qual é** (o tipo). O vanilla não mostrava nada no HUD ao checar a câmara. Com bala → "Full" + nome da munição;
+câmara vazia → "Empty" (útil junto do Manual Chambering, pra saber se precisa dar rack no ferrolho).
+
+- Toggle F12: seção **Weapon Inspection** → `Show Chamber Ammo On Check` (default on).
+- Reutiliza o evento nativo `Player.OnShowAmmoDetails` (mesma UI do check-carregador); só local (sem sync Fika).
+- Code review adversarial: 0 🔴; achados menores aplicados (log one-shot, paridade do painel).
+
+---
+
 ## v2.9.0 (2026-07-19)
 
 ### Defaults promovidos da config calibrada do servidor
