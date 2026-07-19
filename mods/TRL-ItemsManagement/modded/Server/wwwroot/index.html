@@ -753,12 +753,21 @@ function itemHasTraderConflict(it) {
   return !!(it.spt && it.spt.fleaBanned) && regularMoneySellers(it).length > 0;
 }
 
+// Memoized by _dataVersion (CR-T-02b): sell/buy resolution runs O(items) times (row render, filter,
+// filter build) and only needs recomputing when data changes — every edit bumps _dataVersion.
+const _sideRowsMemo = { v: -1, sell: new Map(), buy: new Map() };
+function _sideRowsFresh() {
+  if (_sideRowsMemo.v !== _dataVersion) { _sideRowsMemo.v = _dataVersion; _sideRowsMemo.sell.clear(); _sideRowsMemo.buy.clear(); }
+}
+
 // S side — traders that SELL the item to you (SPT assort). Money only (not barter), sell-override
 // applied, disabled sellers excluded, sorted cheapest-first (best = cheapest, the one you'd buy from).
 // Shared by the row's group-avatar, the trader popover and the Trader filter.
 function sellSideRows(it) {
-  if (!it.spt || !Array.isArray(it.spt.traders)) return [];
-  return it.spt.traders
+  _sideRowsFresh();
+  const memo = _sideRowsMemo.sell.get(it.id);
+  if (memo !== undefined) return memo;
+  const rows = (!it.spt || !Array.isArray(it.spt.traders)) ? [] : it.spt.traders
     .filter(t => t.currency !== 'BARTER' && t.priceRUB != null)
     .map(t => {
       const tid = t.traderId || (t.name && TRADERS[t.name] ? TRADERS[t.name].id : null);
@@ -772,12 +781,17 @@ function sellSideRows(it) {
     })
     .filter(Boolean)
     .sort((a, b) => a.effPriceRUB - b.effPriceRUB);
+  _sideRowsMemo.sell.set(it.id, rows);
+  return rows;
 }
 
 // B side — traders that BUY the item from you (tarkov.dev buyback). Buy-override applied, sorted
 // highest-first (best = pays the most).
 function buySideRows(it) {
-  return buildBuySourceRows(it)
+  _sideRowsFresh();
+  const memo = _sideRowsMemo.buy.get(it.id);
+  if (memo !== undefined) return memo;
+  const rows = buildBuySourceRows(it)
     .filter(s => s.priceRUB != null)
     .map(s => {
       const name = s.vendor && s.vendor.name;
@@ -789,6 +803,8 @@ function buySideRows(it) {
       return { name, traderId: tid, effPriceRUB, overridden: boCount != null };
     })
     .sort((a, b) => b.effPriceRUB - a.effPriceRUB);
+  _sideRowsMemo.buy.set(it.id, rows);
+  return rows;
 }
 
 const TRADER_AVATARS_MAX = 5; // avatars shown in a row's group before collapsing into "+N"
@@ -811,9 +827,6 @@ function traderLineMarkup(rows, side) {
   const hidden = others.length - shownOthers.length;
   const tag = side === 'sell' ? 'S' : 'B';
   const tagCls = side === 'sell' ? 'cell-trader__tag--sell' : 'cell-trader__tag--buy';
-  const tip = side === 'sell'
-    ? 'S = traders that SELL this to you (cheapest highlighted) — hover for all prices'
-    : 'B = traders that BUY this from you (pays most highlighted) — hover for all prices';
   // worst→best, left→right, so the best sits rightmost next to the value (no extra highlight needed —
   // its position + the adjacent value already make it obvious).
   const ordered = shownOthers.slice().reverse().concat([best]);
@@ -822,7 +835,9 @@ function traderLineMarkup(rows, side) {
   const ll = (side === 'sell' && best.loyaltyLevel != null)
     ? `<small class="cell-trader__ll">LL${best.loyaltyLevel}${best.questLocked ? ` <span class="trader-lock" data-tip="Quest-locked — an override applies only after you unlock the quest">🔒</span>` : ''}</small>`
     : '';
-  return `<div class="cell-trader__line cell-trader__line--${side}" data-tip="${escapeAttr(tip)}">` +
+  // No data-tip on the line — the hover popover (with S/B headers) is the full explanation, and a
+  // tooltip here would just double up with it (CR-T-01).
+  return `<div class="cell-trader__line cell-trader__line--${side}">` +
     `<span class="cell-trader__tag ${tagCls}">${tag}</span>` +
     `<span class="trader-avatars">${moreChip}${avatars}</span>` +
     `<span class="cell-trader__num${best.overridden ? ' is-overridden' : ''}">${fmtRub(best.effPriceRUB)}</span>` +
@@ -904,7 +919,7 @@ function refreshBanFilter() {
 // (a disabled seller drops out of both), and re-filter the list if a filter that depends on the
 // disable state is active.
 function refreshConflictFilter() {
-  _dataVersion++; // invalidate the filter cache — sellSideRows()/conflict now see the new disable state
+  _dataVersion++; // invalidate the filter cache AND the sell/buy memo so they see the new disable state (CR-T-03)
   refreshBanFilter();
   refreshTraderFilter();
   if (selectedBans.has('conflict') || selectedTraders.size) render();
@@ -1756,6 +1771,20 @@ function renderRow(it) {
 let _rewardOpenTimer  = null;
 let _rewardCloseTimer = null;
 
+// Shared: position a popover below `anchor`, flipping up / clamping in if it would leave the viewport.
+function positionPopover(pop, anchor) {
+  const rect = anchor.getBoundingClientRect();
+  const scrollY = window.scrollY || document.documentElement.scrollTop;
+  const scrollX = window.scrollX || document.documentElement.scrollLeft;
+  pop.style.top  = (rect.bottom + scrollY + 6) + 'px';
+  pop.style.left = (rect.left + scrollX) + 'px';
+  requestAnimationFrame(() => {
+    const pr = pop.getBoundingClientRect();
+    if (pr.bottom > window.innerHeight - 8) pop.style.top  = (rect.top + scrollY - pr.height - 6) + 'px';
+    if (pr.right  > window.innerWidth  - 8) pop.style.left = (window.innerWidth - pr.width - 8 + scrollX) + 'px';
+  });
+}
+
 function closeRewardPopover() {
   clearTimeout(_rewardCloseTimer);
   clearTimeout(_rewardOpenTimer);
@@ -1784,20 +1813,7 @@ function openRewardPopover(badge, rewards) {
     `<div class="reward-popover__header">🎁 ${rewards.length} mission${rewards.length > 1 ? 's' : ''}</div>` +
     `<ul class="reward-popover__list">${rows}</ul>`;
   document.body.appendChild(pop);
-
-  // Position below the badge, flip if near viewport edge
-  const rect = badge.getBoundingClientRect();
-  const scrollY = window.scrollY || document.documentElement.scrollTop;
-  const scrollX = window.scrollX || document.documentElement.scrollLeft;
-  pop.style.top  = (rect.bottom + scrollY + 6) + 'px';
-  pop.style.left = (rect.left  + scrollX) + 'px';
-  requestAnimationFrame(() => {
-    const pr = pop.getBoundingClientRect();
-    if (pr.bottom > window.innerHeight - 8)
-      pop.style.top  = (rect.top  + scrollY - pr.height - 6) + 'px';
-    if (pr.right  > window.innerWidth  - 8)
-      pop.style.left = (window.innerWidth - pr.width - 8 + scrollX) + 'px';
-  });
+  positionPopover(pop, badge);
 
   // Keep popover open while mouse is over it; close on leave
   pop.addEventListener('mouseenter', () => clearTimeout(_rewardCloseTimer));
@@ -1866,17 +1882,7 @@ function openTraderPopover(anchor, it) {
   pop.className = 'trader-popover';
   pop.innerHTML = html;
   document.body.appendChild(pop);
-
-  const rect = anchor.getBoundingClientRect();
-  const scrollY = window.scrollY || document.documentElement.scrollTop;
-  const scrollX = window.scrollX || document.documentElement.scrollLeft;
-  pop.style.top  = (rect.bottom + scrollY + 6) + 'px';
-  pop.style.left = (rect.left + scrollX) + 'px';
-  requestAnimationFrame(() => {
-    const pr = pop.getBoundingClientRect();
-    if (pr.bottom > window.innerHeight - 8) pop.style.top  = (rect.top + scrollY - pr.height - 6) + 'px';
-    if (pr.right  > window.innerWidth  - 8) pop.style.left = (window.innerWidth - pr.width - 8 + scrollX) + 'px';
-  });
+  positionPopover(pop, anchor);
   pop.addEventListener('mouseenter', () => clearTimeout(_traderCloseTimer));
   pop.addEventListener('mouseleave', () => { _traderCloseTimer = setTimeout(closeTraderPopover, 80); });
 }
@@ -1902,6 +1908,13 @@ function bindTraderHover(tableEl) {
     clearTimeout(_traderOpenTimer);
     _traderCloseTimer = setTimeout(closeTraderPopover, 80);
   });
+  // CR-T-05: both popovers are absolutely positioned and don't follow a wheel scroll — dismiss them so
+  // they never end up detached from their row. Bound once (bindTraderHover runs on every render).
+  if (!window._popScrollBound) {
+    window._popScrollBound = true;
+    const scroller = document.querySelector('main.main') || document.querySelector('.main') || document.querySelector('main');
+    (scroller || window).addEventListener('scroll', () => { closeTraderPopover(); closeRewardPopover(); }, { passive: true });
+  }
 }
 
 // CR-U-05: expand an item and open the trader editor on the first editable money seller, so the flea/
@@ -1945,6 +1958,7 @@ document.addEventListener('mouseover', clampTooltip, true);
 document.addEventListener('focusin', clampTooltip, true);
 
 function onTableClick(e) {
+  closeTraderPopover(); // CR-T-04: any click in the table dismisses the hover popover (incl. expanding a row)
   // CR-U-05: clicking the ⚠ conflict flag jumps straight to fixing it.
   const conflictFlag = e.target.closest('.conflict-flag');
   if (conflictFlag) {
