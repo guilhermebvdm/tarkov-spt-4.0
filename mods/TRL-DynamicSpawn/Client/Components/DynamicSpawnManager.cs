@@ -589,7 +589,7 @@ namespace TRLDynamicSpawn.Components
                         }
                     }
 
-                    if (selectedZone != null && IsValidSpawnZone(selectedZone, mapName))
+                    if (selectedZone != null && IsValidSpawnZone(selectedZone, mapName, gData.Role))
                     {
                         zoneValid = true;
                         break;
@@ -651,7 +651,7 @@ namespace TRLDynamicSpawn.Components
             return false;
         }
 
-        private bool IsValidSpawnZone(BotZone zone, string mapName, Vector3? overridePosition = null)
+        private bool IsValidSpawnZone(BotZone zone, string mapName, WildSpawnType? role = null, Vector3? overridePosition = null)
         {
             if (zone == null && overridePosition == null) return false;
 
@@ -664,6 +664,33 @@ namespace TRLDynamicSpawn.Components
 
             // Use the override custom position if provided, else the BotZone's center
             Vector3 zonePos = overridePosition ?? zone.transform.position;
+
+            // Se for bot comum (PMC ou Scav), ele deve estar dentro da bolha de spawn de 300m
+            if (role != null)
+            {
+                WildSpawnType rType = role.Value;
+                bool isCommonBot = rType == WildSpawnType.pmcUSEC || rType == WildSpawnType.pmcBEAR || rType == WildSpawnType.assault;
+                if (isCommonBot)
+                {
+                    bool closeEnoughToAnyPlayer = false;
+                    foreach (var player in players)
+                    {
+                        if (player == null || player.Profile == null || player.Profile.Info == null) continue;
+                        if (player.IsAI && !player.IsYourPlayer) continue;
+
+                        float dist = Vector3.Distance(player.Position, zonePos);
+                        if (dist <= 300f) // Bolha de 300m
+                        {
+                            closeEnoughToAnyPlayer = true;
+                            break;
+                        }
+                    }
+                    if (!closeEnoughToAnyPlayer)
+                    {
+                        return false; // Fora do raio da bolha, inválida
+                    }
+                }
+            }
 
             foreach (var player in players)
             {
@@ -784,7 +811,7 @@ namespace TRLDynamicSpawn.Components
                 while (retries > 0)
                 {
                     selectedZone = TRLDynamicSpawn.Helpers.Methods.GetRandomZone(_botsController.BotSpawner);
-                    if (selectedZone != null && IsValidSpawnZone(selectedZone, mapName))
+                    if (selectedZone != null && IsValidSpawnZone(selectedZone, mapName, role))
                     {
                         zoneValid = true;
                         break;

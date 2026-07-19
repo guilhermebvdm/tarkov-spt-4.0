@@ -529,6 +529,9 @@ namespace TRLDynamicSpawn.Patches
 
                 var players = gameWorld.AllAlivePlayersList;
 
+                WildSpawnType role = data?.Profiles?.FirstOrDefault()?.Info?.Settings?.Role ?? WildSpawnType.assault;
+                bool isCommonBot = role == WildSpawnType.pmcUSEC || role == WildSpawnType.pmcBEAR || role == WildSpawnType.assault;
+
                 foreach (var checkPoint in allPoints)
                 {
                     if (checkPoint == null) continue;
@@ -536,29 +539,54 @@ namespace TRLDynamicSpawn.Patches
                     bool isValid = true;
                     if (players != null)
                     {
-                        foreach (var player in players)
+                        // Se for bot comum (PMC ou Scav), ele deve estar a no máximo 300m de algum jogador real
+                        if (isCommonBot)
                         {
-                            if (player == null || player.Profile == null) continue;
-                            if (player.IsAI && !player.IsYourPlayer) continue;
+                            bool closeEnoughToAnyPlayer = false;
+                            foreach (var player in players)
+                            {
+                                if (player == null || player.Profile == null) continue;
+                                if (player.IsAI && !player.IsYourPlayer) continue;
 
-                            float dist = Vector3.Distance(player.Position, checkPoint.Position);
-                            if (dist < safeDist)
+                                float dist = Vector3.Distance(player.Position, checkPoint.Position);
+                                if (dist <= 300f) // Bolha de 300m
+                                {
+                                    closeEnoughToAnyPlayer = true;
+                                    break;
+                                }
+                            }
+                            if (!closeEnoughToAnyPlayer)
                             {
                                 isValid = false;
-                                break;
                             }
+                        }
 
-                            if (enableLos && dist <= losDist)
+                        if (isValid)
+                        {
+                            foreach (var player in players)
                             {
-                                Vector3 directionToPoint = (checkPoint.Position - player.Position).normalized;
-                                float dot = Vector3.Dot(player.LookDirection, directionToPoint);
-                                if (dot > 0.5f)
+                                if (player == null || player.Profile == null) continue;
+                                if (player.IsAI && !player.IsYourPlayer) continue;
+
+                                float dist = Vector3.Distance(player.Position, checkPoint.Position);
+                                if (dist < safeDist)
                                 {
-                                    Vector3 headPos = player.MainParts.ContainsKey(BodyPartType.head) ? player.MainParts[BodyPartType.head].Position : player.Position + Vector3.up * 1.5f;
-                                    if (!Physics.Linecast(headPos, checkPoint.Position + Vector3.up * 1f, LayerMaskClass.HighPolyWithTerrainMask))
+                                    isValid = false;
+                                    break;
+                                }
+
+                                if (enableLos && dist <= losDist)
+                                {
+                                    Vector3 directionToPoint = (checkPoint.Position - player.Position).normalized;
+                                    float dot = Vector3.Dot(player.LookDirection, directionToPoint);
+                                    if (dot > 0.5f)
                                     {
-                                        isValid = false;
-                                        break;
+                                        Vector3 headPos = player.MainParts.ContainsKey(BodyPartType.head) ? player.MainParts[BodyPartType.head].Position : player.Position + Vector3.up * 1.5f;
+                                        if (!Physics.Linecast(headPos, checkPoint.Position + Vector3.up * 1f, LayerMaskClass.HighPolyWithTerrainMask))
+                                        {
+                                            isValid = false;
+                                            break;
+                                        }
                                     }
                                 }
                             }
