@@ -35,19 +35,19 @@
 
                     <!-- Painel de Registro -->
                     <StackPanel Grid.Row="1" Spacing="15" VerticalAlignment="Center">
-                        <TextBlock Text="CRIE SUA CONTA" Classes="trl-h3"
+                        <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=register_heading}" Classes="trl-h3"
                                    LetterSpacing="{DynamicResource TrlTrackWider}"
                                    HorizontalAlignment="Center" Margin="0,0,0,20"/>
 
-                        <TextBlock Text="DEFINA SEU USUÁRIO" Classes="trl-label" Margin="0,0,0,-10"/>
-                        <TextBox Text="{Binding RegisterUsername, Mode=TwoWay}" Watermark="Escolha um nome de usuário"/>
+                        <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=register_username_label}" Classes="trl-label" Margin="0,0,0,-10"/>
+                        <TextBox Text="{Binding RegisterUsername, Mode=TwoWay}" Watermark="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=register_username_watermark}"/>
 
-                        <TextBlock Text="CRIE UMA SENHA" Classes="trl-label" Margin="0,0,0,-10"/>
+                        <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=register_password_label}" Classes="trl-label" Margin="0,0,0,-10"/>
                         <Grid>
-                            <TextBox Text="{Binding RegisterPassword, Mode=TwoWay}" PasswordChar="{Binding PasswordChar}" Watermark="Digite sua senha" Padding="8,5,32,5"/>
+                            <TextBox Text="{Binding RegisterPassword, Mode=TwoWay}" PasswordChar="{Binding PasswordChar}" Watermark="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=register_password_watermark}" Padding="8,5,32,5"/>
                             <Button Classes="icon" Command="{Binding TogglePasswordVisibilityCommand}"
                                     HorizontalAlignment="Right" VerticalAlignment="Center"
-                                    Margin="0,0,2,0" Cursor="Hand" ToolTip.Tip="Mostrar/ocultar senha">
+                                    Margin="0,0,2,0" Cursor="Hand" ToolTip.Tip="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=toggle_password_visibility_tooltip}">
                                 <Panel>
                                     <Path Data="{StaticResource TrlIconEye}" IsVisible="{Binding !IsPasswordVisible}"
                                           Stroke="{DynamicResource TrlFgMutedBrush}" StrokeThickness="1.75" Fill="{x:Null}"
@@ -59,12 +59,12 @@
                             </Button>
                         </Grid>
 
-                        <TextBlock Text="CONFIRME A SENHA" Classes="trl-label" Margin="0,0,0,-10"/>
+                        <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=register_confirm_password_label}" Classes="trl-label" Margin="0,0,0,-10"/>
                         <Grid>
-                            <TextBox Text="{Binding ConfirmPassword, Mode=TwoWay}" PasswordChar="{Binding ConfirmPasswordChar}" Watermark="Repita a senha" Padding="8,5,32,5"/>
+                            <TextBox Text="{Binding ConfirmPassword, Mode=TwoWay}" PasswordChar="{Binding ConfirmPasswordChar}" Watermark="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=register_confirm_password_watermark}" Padding="8,5,32,5"/>
                             <Button Classes="icon" Command="{Binding ToggleConfirmVisibilityCommand}"
                                     HorizontalAlignment="Right" VerticalAlignment="Center"
-                                    Margin="0,0,2,0" Cursor="Hand" ToolTip.Tip="Mostrar/ocultar senha">
+                                    Margin="0,0,2,0" Cursor="Hand" ToolTip.Tip="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=toggle_password_visibility_tooltip}">
                                 <Panel>
                                     <Path Data="{StaticResource TrlIconEye}" IsVisible="{Binding !IsConfirmVisible}"
                                           Stroke="{DynamicResource TrlFgMutedBrush}" StrokeThickness="1.75" Fill="{x:Null}"
@@ -78,10 +78,10 @@
 
                         <TextBlock Text="{Binding RegisterErrorMsg}" Classes="trl-danger" FontSize="{DynamicResource TrlTextSm}" FontWeight="Bold" TextWrapping="Wrap" IsVisible="{Binding RegisterErrorMsg, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
 
-                        <Button Content="CRIAR CONTA" Command="{Binding GoToClassSelectionCommand}" Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="0,8,0,0"/>
+                        <Button Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=register_submit_button}" Command="{Binding GoToClassSelectionCommand}" Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="0,8,0,0"/>
 
-                        <TextBlock Text="Já possui uma conta?" Classes="trl-muted" FontSize="{DynamicResource TrlTextSm}" HorizontalAlignment="Center" Margin="0,0,0,0"/>
-                        <Button Content="VOLTAR PARA LOGIN" Command="{Binding GoToLoginCommand}" Classes="ghost" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+                        <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=register_have_account_prompt}" Classes="trl-muted" FontSize="{DynamicResource TrlTextSm}" HorizontalAlignment="Center" Margin="0,0,0,0"/>
+                        <Button Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=register_back_to_login_button}" Command="{Binding GoToLoginCommand}" Classes="ghost" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
                     </StackPanel>
 
                     <!-- Footer (Versão) -->

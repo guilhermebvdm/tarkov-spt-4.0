@@ -9,7 +9,7 @@
              x:Class="SPT.Launcher.Views.Dialogs.ChangeEditionDialogView"
              MaxWidth="500">
 
-  <cc:TrlDialogChrome Title="MUDAR EDIÇÃO DO PERFIL">
+  <cc:TrlDialogChrome Title="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=change_edition_dialog_title}">
     <cc:TrlDialogChrome.HeaderContent>
       <!-- ✕ = cancelar (retorna null; caller só age com SPTEdition) -->
       <Button Classes="icon sm" Content="✕" Cursor="Hand"
@@ -23,7 +23,7 @@
       <!-- Item 023 (Frente B / RN-4 / CA-B2): mudar edição dispara wipe (Remove/Register no server).
            Aviso de coop porque o gate local não vê a sessão Fika Coop dos outros jogadores. -->
       <TextBlock Classes="trl-danger" TextWrapping="Wrap"
-                 Text="Atenção coop: se houver uma sessão Fika Coop PVE ativa, trocar a edição agora reseta o perfil e pode corromper a raid dos outros jogadores. Confirme que ninguém está em raid."/>
+                 Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=change_edition_coop_warning}"/>
 
       <ComboBox ItemsSource="{Binding editions.AvailableEditions}"
                 SelectedItem="{Binding editions.SelectedEdition}"

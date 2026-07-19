@@ -1501,11 +1501,14 @@ function renderRow(it) {
     ? `<span class="banned-icon" data-tip="Banned from flea: ${banReasons.join(', ')}" tabindex="0">${ICON_BANNED}</span> `
     : '';
   // Inconsistency flag: flea-banned but still sold by a trader for money (e.g. MAG5-60 @ Artem) —
-  // contradictory, since a flea ban usually implies "not freely tradeable". Advisory only.
-  const soldByTrader = it.spt && Array.isArray(it.spt.traders) && it.spt.traders.some(t => t.price != null || t.priceRUB != null);
+  // contradictory, since a flea ban usually implies "not freely tradeable". Advisory; click to fix.
+  const moneyTraders = (it.spt && Array.isArray(it.spt.traders))
+    ? it.spt.traders.filter(t => (t.price != null || t.priceRUB != null) && t.currency !== 'BARTER') : [];
+  const soldByTrader = moneyTraders.length > 0;
+  const allQuestLocked = soldByTrader && moneyTraders.every(t => t.questLocked); // CR-U-02
   const fleaTraderConflict = banned && soldByTrader;
   const conflictBadge = fleaTraderConflict
-    ? ` <span class="conflict-flag" data-tip="Inconsistent: flea-banned but still sold by a trader. Disable the trader sale, or lift the flea ban." tabindex="0">⚠</span>`
+    ? ` <span class="conflict-flag" data-tip="${escapeAttr('Inconsistent: flea-banned but still sold by a trader' + (allQuestLocked ? ' (quest-locked — only appears after the quest)' : '') + '. Click to fix: disable the trader sale, or lift the flea ban.')}" tabindex="0" role="button">⚠</span>`
     : '';
   // Trader cell — stacked SELL (player→trader, tarkov.dev) and BUY (trader→player, SPT assort)
   const traderSellValue = c.priceTraderSell ? c.priceTraderSell.value : null;
@@ -1692,7 +1695,49 @@ function bindRewardHover(tableEl) {
   });
 }
 
+// CR-U-05: expand an item and open the trader editor on the first editable money seller, so the flea/
+// trader conflict flag is one click from being resolved (toggle the sale off, then Save).
+function openConflictResolver(tpl) {
+  const sel = (window.CSS && CSS.escape) ? CSS.escape(tpl) : tpl;
+  const mainRow = document.querySelector('tr[data-id="' + sel + '"]');
+  if (!mainRow) return;
+  if (!mainRow.classList.contains('is-expanded')) mainRow.click(); // expand the detail panel
+  // detail renders synchronously on expand; give layout a tick, then focus the first seller row.
+  setTimeout(() => {
+    const editableRow = document.querySelector('tr.trader-row.is-editable[data-trader-tpl="' + sel + '"]');
+    if (editableRow) {
+      editableRow.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      openTraderEdit(editableRow, 'stock');
+    }
+  }, 120);
+}
+
+// CR-U-04: clamp wide tooltips horizontally so one anchored near a screen edge doesn't overflow the
+// viewport. The tooltip is a CSS ::after we can't measure, but we know its max column (~280px) and the
+// anchor's position, so we nudge it via the --tip-shift custom property when it would spill off an edge.
+function clampTooltip(e) {
+  const el = e.target && e.target.closest && e.target.closest('[data-tip]');
+  if (!el) return;
+  const r = el.getBoundingClientRect();
+  const center = r.left + r.width / 2;
+  const half = 142, pad = 8;
+  let shift = 0;
+  if (center - half < pad) shift = pad - (center - half);
+  else if (center + half > window.innerWidth - pad) shift = (window.innerWidth - pad) - (center + half);
+  el.style.setProperty('--tip-shift', Math.round(shift) + 'px');
+}
+document.addEventListener('mouseover', clampTooltip, true);
+document.addEventListener('focusin', clampTooltip, true);
+
 function onTableClick(e) {
+  // CR-U-05: clicking the ⚠ conflict flag jumps straight to fixing it.
+  const conflictFlag = e.target.closest('.conflict-flag');
+  if (conflictFlag) {
+    e.stopPropagation();
+    const tr = conflictFlag.closest('tr[data-id]');
+    if (tr) openConflictResolver(tr.dataset.id);
+    return;
+  }
   // Inline restore ↺ on an overridden trader row → delete the override directly.
   const traderRestoreBtn = e.target.closest('.trader-restore-btn');
   if (traderRestoreBtn) {
@@ -3294,7 +3339,9 @@ function renderTraderRow(it, t) {
   // OVR tooltip in NATIVE units; ₽ equivalent only appended for USD/EUR.
   const effRub = CURRENCY_RUB_HINT.has(t.currency) ? rubFromNative(eff, t.currency) : null;
   const effRubTxt = effRub != null ? ` ≈ ${effRub.toLocaleString('en-US')} ₽` : '';
-  const badge = hasOvr
+  // CR-U-03: an item that isn't for sale (disabled) shows neither OVR badge nor inline restore — the
+  // struck-through price already signals the state; a price override on a hidden offer is noise.
+  const badge = (hasOvr && !disabled)
     ? ` <span class="badge badge--override" data-tip="${escapeAttr('Override active — trader sell price pinned at ' + (eff!=null?eff.toLocaleString('en-US'):'?') + ' ' + sym + ' (base ' + (base!=null?base.toLocaleString('en-US'):'?') + ' ' + sym + ')' + effRubTxt + '. Edit / restore here.')}">OVR</span>`
     : '';
 
@@ -3309,7 +3356,7 @@ function renderTraderRow(it, t) {
     priceMarkup = `${nativeValueMarkup(eff, t.currency)}${rubHint}`;
   }
   // T7: inline restore ↺ for overridden rows (deletes the SELL-price override without opening the editor).
-  const restoreBtn = hasOvr
+  const restoreBtn = (hasOvr && !disabled)
     ? `<button class="trader-restore-btn" type="button" data-tip="Restore default sell price" aria-label="Restore default sell price">↺</button>`
     : '';
 

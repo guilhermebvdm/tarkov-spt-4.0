@@ -205,7 +205,7 @@ namespace SPT.Launcher.ViewModels
 
                     if (VaultKeyMatcher.CollidesWith(existingUsernames, _username))
                     {
-                        RegisterErrorMsg = "Já existe uma conta com esse nome (ou uma variação de maiúsculas/minúsculas). Escolha outro nome.";
+                        RegisterErrorMsg = LocalizationProvider.Instance.register_username_collision_error;
                         return;
                     }
                 }
@@ -213,7 +213,7 @@ namespace SPT.Launcher.ViewModels
                 {
                     // Fail-closed: sem conseguir listar os perfis, não arriscar criar uma colisão.
                     LogManager.Instance.Error($"[ClassSelection] Falha ao verificar colisão de username: {ex.Message}");
-                    RegisterErrorMsg = "Não foi possível verificar o nome de usuário no servidor. Tente novamente.";
+                    RegisterErrorMsg = LocalizationProvider.Instance.register_username_verify_failed;
                     return;
                 }
 
@@ -235,7 +235,7 @@ namespace SPT.Launcher.ViewModels
                         if (passwordResult != AccountStatus.OK)
                         {
                             LogManager.Instance.Warning($"[ClassSelection] Failed to set initial password ({passwordResult}) — user will be prompted on next login");
-                            SendNotification("Senha", "Não foi possível salvar sua senha agora — você poderá defini-la no próximo login.", NotificationType.Warning);
+                            SendNotification(LocalizationProvider.Instance.notification_password_title, LocalizationProvider.Instance.register_password_save_failed, NotificationType.Warning);
                         }
                     }
 
@@ -256,7 +256,7 @@ namespace SPT.Launcher.ViewModels
                 }
                 else
                 {
-                    RegisterErrorMsg = "Erro ao criar conta: " + registerResult.ToString();
+                    RegisterErrorMsg = LocalizationProvider.Instance.register_create_account_error + registerResult.ToString();
                 }
             });
         }
@@ -342,7 +342,7 @@ namespace SPT.Launcher.ViewModels
 
                     if (AvailableClasses.Count == 0)
                     {
-                        RegisterErrorMsg = "Nenhuma classe disponível. Verifique a conexão com o servidor e tente novamente.";
+                        RegisterErrorMsg = LocalizationProvider.Instance.class_selection_none_available;
                     }
                 });
             }

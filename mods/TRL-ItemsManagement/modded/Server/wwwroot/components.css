@@ -1546,8 +1546,9 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
 }
 
 /* Inconsistency flag on the main list: flea-banned yet still sold by a trader. */
-.conflict-flag { color: #d9a441; cursor: help; font-size: 12px; line-height: 1; }
+.conflict-flag { color: #d9a441; cursor: pointer; font-size: 12px; line-height: 1; }
 .conflict-flag:hover { filter: brightness(1.25); }
+.conflict-flag:focus-visible { outline: 1px solid var(--accent-bright); border-radius: 2px; }
 
 /* ── B-6 v2: inline availability + accordion editor + sale toggle ───────────────────────────── */
 /* Inline stock · buy-cycle (or "sale off") shown LEFT of the price in a trader row. */
@@ -1774,7 +1775,7 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
   position: absolute;
   bottom: calc(100% + 6px);
   left: 50%;
-  transform: translate(-50%, 4px);
+  transform: translate(calc(-50% + var(--tip-shift, 0px)),4px);
   background: var(--bg-elevated);
   color: var(--fg-primary);
   border: 1px solid var(--border-strong);
@@ -1800,15 +1801,15 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
 [data-tip]:hover::after, [data-tip]:focus-visible::after {
   opacity: 1;
   visibility: visible;
-  transform: translate(-50%, 0);
+  transform: translate(calc(-50% + var(--tip-shift, 0px)),0);
   transition-delay: 250ms;
 }
 [data-tip-pos="bottom"]::after {
   bottom: auto; top: calc(100% + 6px);
-  transform: translate(-50%, -4px);
+  transform: translate(calc(-50% + var(--tip-shift, 0px)),-4px);
 }
 [data-tip-pos="bottom"]:hover::after, [data-tip-pos="bottom"]:focus-visible::after {
-  transform: translate(-50%, 0);
+  transform: translate(calc(-50% + var(--tip-shift, 0px)),0);
 }
 
 /* ── Delta % filter widget ──────────────────────────────────────────────────── */

@@ -9,7 +9,7 @@
              x:Class="SPT.Launcher.Views.Dialogs.RegisterDialogView"
              MaxWidth="560">
 
-  <cc:TrlDialogChrome Title="CRIAR CONTA">
+  <cc:TrlDialogChrome Title="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=register_dialog_title}">
     <cc:TrlDialogChrome.HeaderContent>
       <!-- ✕ = cancelar (retorna null; caller só age com o VM como resultado) -->
       <Button Classes="icon sm" Content="✕" Cursor="Hand"

@@ -4,12 +4,13 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:dialogHost="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
              xmlns:cc="using:SPT.Launcher.CustomControls"
+             xmlns:helpers="using:SPT.Launcher.Helpers"
              xmlns:s="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" d:DesignWidth="420" d:DesignHeight="200"
              x:Class="SPT.Launcher.Views.Dialogs.ConfirmationDialogView"
              MaxWidth="460">
 
-  <cc:TrlDialogChrome Title="CONFIRMAÇÃO">
+  <cc:TrlDialogChrome Title="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=confirmation_dialog_title}">
     <cc:TrlDialogChrome.HeaderContent>
       <!-- ✕ = cancelar (False explícito — null seria lido como confirmado pelos callers) -->
       <Button Classes="icon sm" Content="✕" Cursor="Hand"

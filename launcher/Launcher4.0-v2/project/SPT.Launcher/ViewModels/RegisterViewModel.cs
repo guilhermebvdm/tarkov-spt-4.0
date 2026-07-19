@@ -103,12 +103,12 @@ namespace SPT.Launcher.ViewModels
                 RegisterErrorMsg = "";
                 if (string.IsNullOrWhiteSpace(RegisterUsername) || RegisterUsername.Length > 15)
                 {
-                    RegisterErrorMsg = "Usuário inválido (vazio ou maior que 15 caracteres).";
+                    RegisterErrorMsg = LocalizationProvider.Instance.register_invalid_username;
                     return;
                 }
                 if (string.IsNullOrWhiteSpace(RegisterPassword) || RegisterPassword != ConfirmPassword)
                 {
-                    RegisterErrorMsg = "Senhas não são idênticas!";
+                    RegisterErrorMsg = LocalizationProvider.Instance.register_passwords_mismatch;
                     return;
                 }
 

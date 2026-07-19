@@ -42,7 +42,7 @@
       <Button Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=retry}"
               Command="{Binding RetryCommand}"/>
       <!-- Acesso a Configurações no erro (ex.: trocar URL do servidor). Abre modo enxuto; ao voltar, reconecta. -->
-      <Button Content="CONFIGURAÇÕES" Classes="ghost" Cursor="Hand"
+      <Button Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=connect_settings_button}" Classes="ghost" Cursor="Hand"
               Command="{Binding OpenSettingsCommand}"/>
     </StackPanel>
 

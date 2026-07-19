@@ -4,11 +4,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:dialogHost="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
              xmlns:cc="using:SPT.Launcher.CustomControls"
+             xmlns:helpers="using:SPT.Launcher.Helpers"
              mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="200"
              x:Class="SPT.Launcher.Views.Dialogs.WarningDialogView"
              MaxWidth="520">
 
-  <cc:TrlDialogChrome Title="ATENÇÃO">
+  <cc:TrlDialogChrome Title="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=warning_dialog_title}">
     <cc:TrlDialogChrome.HeaderContent>
       <!-- ✕ equivale ao OK (dialog informativo; resultado é ignorado pelo caller) -->
       <Button Classes="icon sm" Content="✕" Cursor="Hand"

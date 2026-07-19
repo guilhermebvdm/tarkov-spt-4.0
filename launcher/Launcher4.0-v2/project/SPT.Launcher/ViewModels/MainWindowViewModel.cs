@@ -17,7 +17,7 @@ namespace SPT.Launcher.ViewModels
 {
     public class MainWindowViewModel : ReactiveObject, IActivatableViewModel, IScreen
     {
-        public string WindowTitle => $"Launcher Tarkov Red Line v{LauncherUpdateHelper.CurrentVersion}";
+        public string WindowTitle => string.Format(LocalizationProvider.Instance.window_title, LauncherUpdateHelper.CurrentVersion);
         
         public SPTVersion VersionInfo { get; set; } = new SPTVersion();
         public RoutingState Router { get; } = new RoutingState();

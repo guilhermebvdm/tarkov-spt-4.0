@@ -36,19 +36,19 @@
 
                     <!-- Painel de Login -->
                     <StackPanel Grid.Row="1" Spacing="15" VerticalAlignment="Center">
-                        <TextBlock Text="BEM-VINDO" Classes="trl-h3"
+                        <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=login_welcome_heading}" Classes="trl-h3"
                                    LetterSpacing="{DynamicResource TrlTrackWider}"
                                    HorizontalAlignment="Center" Margin="0,0,0,20"/>
 
-                        <TextBlock Text="USUÁRIO" Classes="trl-label" Margin="0,0,0,-10"/>
-                        <TextBox Text="{Binding Login.Username, Mode=TwoWay}" Watermark="Insira seu usuário"/>
+                        <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=login_username_label}" Classes="trl-label" Margin="0,0,0,-10"/>
+                        <TextBox Text="{Binding Login.Username, Mode=TwoWay}" Watermark="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=login_username_watermark}"/>
 
-                        <TextBlock Text="SENHA" Classes="trl-label" Margin="0,0,0,-10"/>
+                        <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=login_password_label}" Classes="trl-label" Margin="0,0,0,-10"/>
                         <Grid>
-                            <TextBox Text="{Binding Login.Password, Mode=TwoWay}" PasswordChar="{Binding PasswordChar}" Watermark="Insira sua senha" Padding="8,5,32,5"/>
+                            <TextBox Text="{Binding Login.Password, Mode=TwoWay}" PasswordChar="{Binding PasswordChar}" Watermark="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=login_password_watermark}" Padding="8,5,32,5"/>
                             <Button Classes="icon" Command="{Binding TogglePasswordVisibilityCommand}"
                                     HorizontalAlignment="Right" VerticalAlignment="Center"
-                                    Margin="0,0,2,0" Cursor="Hand" ToolTip.Tip="Mostrar/ocultar senha">
+                                    Margin="0,0,2,0" Cursor="Hand" ToolTip.Tip="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=toggle_password_visibility_tooltip}">
                                 <Panel>
                                     <Path Data="{StaticResource TrlIconEye}" IsVisible="{Binding !IsPasswordVisible}"
                                           Stroke="{DynamicResource TrlFgMutedBrush}" StrokeThickness="1.75" Fill="{x:Null}"
@@ -61,19 +61,19 @@
                         </Grid>
 
                         <StackPanel Orientation="Horizontal" Spacing="5" Margin="0,5,0,0">
-                            <TextBlock Text="Esqueceu a senha?" Classes="trl-muted" FontSize="{DynamicResource TrlTextSm}" VerticalAlignment="Center"/>
-                            <Button Content="Redefinir" Command="{Binding ResetPasswordCommand}" Classes="link" FontSize="{DynamicResource TrlTextSm}" Padding="0" Margin="0"/>
+                            <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=login_forgot_password_prompt}" Classes="trl-muted" FontSize="{DynamicResource TrlTextSm}" VerticalAlignment="Center"/>
+                            <Button Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=login_reset_password_button}" Command="{Binding ResetPasswordCommand}" Classes="link" FontSize="{DynamicResource TrlTextSm}" Padding="0" Margin="0"/>
                         </StackPanel>
 
                         <!-- item 015: lembrar usuário + auto-login no boot (reusa RememberUsername/UseAutoLogin/AutoLoginCreds) -->
-                        <CheckBox Content="Lembrar usuário e entrar automaticamente"
+                        <CheckBox Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=login_remember_autologin_checkbox}"
                                   IsChecked="{Binding RememberUsername, Source={x:Static helpers:LauncherSettingsProvider.Instance}, Mode=TwoWay}"
                                   Cursor="Hand" FontSize="{DynamicResource TrlTextSm}"/>
 
-                        <Button Content="ENTRAR" Command="{Binding LoginCommand}" Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="0,8,0,0"/>
+                        <Button Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=login_submit_button}" Command="{Binding LoginCommand}" Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="0,8,0,0"/>
 
-                        <TextBlock Text="Ainda não possui uma conta?" Classes="trl-muted" FontSize="{DynamicResource TrlTextSm}" HorizontalAlignment="Center" Margin="0,0,0,0"/>
-                        <Button Content="CADASTRAR" Command="{Binding GoToRegisterCommand}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+                        <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=login_no_account_prompt}" Classes="trl-muted" FontSize="{DynamicResource TrlTextSm}" HorizontalAlignment="Center" Margin="0,0,0,0"/>
+                        <Button Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=login_register_button}" Command="{Binding GoToRegisterCommand}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
                     </StackPanel>
 
                     <!-- Footer (Versão) -->

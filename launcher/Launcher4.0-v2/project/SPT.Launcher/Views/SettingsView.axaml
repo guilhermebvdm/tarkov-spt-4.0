@@ -42,13 +42,13 @@
                     <Button Classes="nav" Cursor="Hand" Command="{Binding GoBackCommand}">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <Path Data="{StaticResource TrlIconHome}" VerticalAlignment="Center"/>
-                            <TextBlock Text="LAUNCHER" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=nav_launcher}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                     <Button Classes="nav active" Cursor="Hand">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <Path Data="{StaticResource TrlIconSettings}" VerticalAlignment="Center"/>
-                            <TextBlock Text="CONFIGURAÇÕES" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=settings}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                     <Button Classes="nav" Cursor="Hand" Command="{Binding OpenKofiCommand}">
@@ -56,13 +56,13 @@
                         <DockPanel LastChildFill="True">
                             <Path DockPanel.Dock="Left" Data="{StaticResource TrlIconCoffee}" VerticalAlignment="Center" Margin="0,0,10,0"/>
                             <Path DockPanel.Dock="Right" Data="{StaticResource TrlIconExternalLink}" Width="12" Height="12" VerticalAlignment="Center" Margin="10,0,0,0"/>
-                            <TextBlock Text="APOIE UM CAFEZINHO" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=nav_support_kofi}" VerticalAlignment="Center"/>
                         </DockPanel>
                     </Button>
-                    <Button Classes="nav" Cursor="Hand" ToolTip.Tip="Em construção" IsEnabled="False" Opacity="0.5">
+                    <Button Classes="nav" Cursor="Hand" ToolTip.Tip="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=under_construction}" IsEnabled="False" Opacity="0.5">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <Path Data="{StaticResource TrlIconMenu2}" VerticalAlignment="Center"/>
-                            <TextBlock Text="LISTA DE MODS" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=nav_mod_list}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -83,34 +83,34 @@
 
                     <!-- Modo enxuto (sem sidebar): botão de voltar. GoBackCommand salva as configs e
                          volta pra tela anterior (ConnectServer re-ativa e reconecta). -->
-                    <Button Content="◀  SALVAR E VOLTAR" Classes="ghost" HorizontalAlignment="Left"
+                    <Button Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=save_and_go_back}" Classes="ghost" HorizontalAlignment="Left"
                             Cursor="Hand" IsVisible="{Binding SlimMode}"
                             Command="{Binding GoBackCommand}"/>
 
-                    <TextBlock Classes="trl-h1" Text="CONFIGURAÇÕES" Margin="0,0,0,10"/>
+                    <TextBlock Classes="trl-h1" Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=settings}" Margin="0,0,0,10"/>
 
                     <!-- Operações - Limpeza e Dados -->
-                    <cc:TrlPanel Title="LIMPEZA E DADOS">
+                    <cc:TrlPanel Title="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=settings_section_cleanup_data}">
                         <Grid ColumnDefinitions="*, *, *">
                             <Button Grid.Column="0" Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=clear_game_settings}"
                                     Command="{Binding ClearGameSettingsCommand}" Cursor="Hand" Margin="0,0,5,0"
                                     HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
-                                    ToolTip.Tip="Apaga as configurações do jogo (pasta SPT/user/sptsettings). Gráficos, áudio, controles e outras preferências voltam ao padrão. Não afeta seu perfil nem seu progresso."/>
+                                    ToolTip.Tip="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=clear_game_settings_tooltip}"/>
 
                             <Button Grid.Column="1" Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=clean_temp_files}"
                                     Command="{Binding CleanTempFilesCommand}" Cursor="Hand" Margin="5,0,5,0"
                                     HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
-                                    ToolTip.Tip="Remove os arquivos temporários gerados pelo jogo (cache). Libera espaço e ajuda a resolver travamentos ou telas de carregamento presas. Seguro: nada de progresso é apagado."/>
+                                    ToolTip.Tip="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=clean_temp_files_tooltip}"/>
 
                             <Button Grid.Column="2" Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=copy_logs_to_clipboard}"
                                     Command="{Binding CopyLogsToClipboard}" Cursor="Hand" Margin="5,0,0,0"
                                     HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
-                                    ToolTip.Tip="Copia os arquivos de log (launcher, servidor, BepInEx e seu perfil) para a área de transferência, prontos para colar ao pedir suporte."/>
+                                    ToolTip.Tip="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=copy_logs_tooltip}"/>
                         </Grid>
                     </cc:TrlPanel>
 
                     <!-- Opções Básicas -->
-                    <cc:TrlPanel Title="OPÇÕES BÁSICAS">
+                    <cc:TrlPanel Title="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=settings_section_basic_options}">
                         <StackPanel Spacing="15">
 
                             <StackPanel Spacing="4">
@@ -127,9 +127,9 @@
                             <!-- Item 008: configs de performance (overlay via motor de sync) -->
                             <StackPanel Spacing="4">
                                 <ToggleSwitch IsChecked="{Binding UsePerformanceConfigs, Mode=TwoWay}"
-                                              OnContent="Ativado" OffContent="Desativado" Cursor="Hand">
+                                              OnContent="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=enabled}" OffContent="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=disabled}" Cursor="Hand">
                                     <ToggleSwitch.Content>
-                                        <TextBlock Classes="trl-label" Text="USAR CONFIGS PERFORMANCE"/>
+                                        <TextBlock Classes="trl-label" Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=use_performance_configs}"/>
                                     </ToggleSwitch.Content>
                                 </ToggleSwitch>
                                 <!-- ref: CR-01-03 — texto reflete a semântica real do preserve-divergent:
@@ -138,13 +138,13 @@
                                      restauração incondicional. -->
                                 <TextBlock Classes="trl-muted" FontSize="{DynamicResource TrlTextXs}" TextWrapping="Wrap"
                                            MaxWidth="460" HorizontalAlignment="Left"
-                                           Text="Aplica o pacote de configurações de performance do servidor na próxima verificação de arquivos. Configs que você personalizou são preservadas. Ao desligar, a próxima verificação restaura as configs padrão do servidor que não foram modificadas desde a última sincronização — as demais permanecem como estão."/>
+                                           Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=use_performance_configs_description}"/>
                             </StackPanel>
 
                             <!-- Dev Mode — protegido por senha -->
                             <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                                 <Grid Width="300">
-                                    <TextBox Watermark="Senha admin"
+                                    <TextBox Watermark="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=admin_password_watermark}"
                                              PasswordChar="{Binding DevPasswordChar}"
                                              Text="{Binding DevPassword, Mode=TwoWay}"
                                              Padding="30,6,30,6"/>
@@ -155,7 +155,7 @@
                                           Width="16" Height="16" Stretch="Uniform" StrokeLineCap="Flat" StrokeJoin="Miter"/>
                                     <Button Classes="icon" Command="{Binding ToggleDevPasswordVisibilityCommand}"
                                             HorizontalAlignment="Right" VerticalAlignment="Center"
-                                            Margin="0,0,2,0" Cursor="Hand" ToolTip.Tip="Mostrar/ocultar senha">
+                                            Margin="0,0,2,0" Cursor="Hand" ToolTip.Tip="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=toggle_password_visibility}">
                                         <!-- ícones traçados do DS; olho fechado = senha oculta (clique p/ revelar) -->
                                         <Panel>
                                             <Path Data="{StaticResource TrlIconEye}" IsVisible="{Binding !IsDevPasswordVisible}"
@@ -168,12 +168,12 @@
                                     </Button>
                                 </Grid>
                                 <Button Command="{Binding ToggleDevModeCommand}" Cursor="Hand"
-                                        ToolTip.Tip="Ativar/Desativar modo desenvolvedor">
+                                        ToolTip.Tip="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=toggle_dev_mode_tooltip}">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <Path Data="{StaticResource TrlIconLockOpen}" VerticalAlignment="Center"
                                               Stroke="{DynamicResource TrlFgMutedBrush}" StrokeThickness="1.75" Fill="{x:Null}"
                                               Width="16" Height="16" Stretch="Uniform" StrokeLineCap="Flat" StrokeJoin="Miter"/>
-                                        <TextBlock Text="Dev Mode" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=dev_mode}" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
                                 <Border Classes="dev-dot"
@@ -187,48 +187,48 @@
                                  (não reverte) + pula a verificação automática no login. -->
                             <TextBlock Classes="trl-muted" FontSize="{DynamicResource TrlTextXs}" TextWrapping="Wrap"
                                        MaxWidth="460" HorizontalAlignment="Left"
-                                       Text="Modo desenvolvedor (pra quem cria mods): protege seus arquivos e builds locais do sync — não reverte — e pula a verificação automática de mods/configs ao entrar. Jogador comum não precisa ligar."/>
+                                       Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=dev_mode_description}"/>
                         </StackPanel>
                     </cc:TrlPanel>
 
                     <!-- Painel Dev Mode -->
-                    <cc:TrlPanel Title="FERRAMENTAS DEV" IsVisible="{Binding Source={x:Static helpers:LauncherSettingsProvider.Instance}, Path=IsDevMode}">
+                    <cc:TrlPanel Title="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=settings_section_dev_tools}" IsVisible="{Binding Source={x:Static helpers:LauncherSettingsProvider.Instance}, Path=IsDevMode}">
                         <StackPanel Spacing="15">
 
                             <!-- Edição de URL Local -->
                             <StackPanel Spacing="4">
-                                <TextBlock Classes="trl-label" Text="URL DO SERVIDOR (LOCAL/CUSTOM)"/>
-                                <TextBox Watermark="Ex: http://127.0.0.1:6969"
+                                <TextBlock Classes="trl-label" Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=server_url_label}"/>
+                                <TextBox Watermark="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=server_url_watermark}"
                                          Text="{Binding Source={x:Static helpers:LauncherSettingsProvider.Instance}, Path=Server.Url, Mode=TwoWay}"
                                          MaxWidth="300" HorizontalAlignment="Left"/>
                             </StackPanel>
 
                             <!-- Atalho: usar servidor local (guarda a URL atual, restaura ao desmarcar) -->
                             <StackPanel Spacing="2">
-                                <CheckBox Content="Usar servidor local (127.0.0.1)"
+                                <CheckBox Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=use_local_server_checkbox}"
                                           IsChecked="{Binding UseLocalServer}"
-                                          ToolTip.Tip="Aponta o launcher para o servidor LOCAL (127.0.0.1:6969) em vez da URL acima, guardando a URL anterior. Ao desmarcar, volta para a URL que estava. Requer reconectar."/>
+                                          ToolTip.Tip="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=use_local_server_tooltip}"/>
                                 <TextBlock Classes="trl-faint" FontSize="{DynamicResource TrlText2Xs}" TextWrapping="Wrap"
                                            MaxWidth="460" HorizontalAlignment="Left"
-                                           Text="Marca → usa 127.0.0.1 e guarda a URL atual. Desmarca → restaura a URL guardada."/>
+                                           Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=use_local_server_description}"/>
                             </StackPanel>
 
                             <StackPanel Spacing="2">
-                                <CheckBox Content="Bloquear atualização de launcher"
+                                <CheckBox Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=block_launcher_update_checkbox}"
                                           IsChecked="{Binding Source={x:Static helpers:LauncherSettingsProvider.Instance}, Path=DisableUpdates}"
-                                          ToolTip.Tip="Impede o launcher de baixar e instalar uma versão mais nova de SI MESMO (o TRL.Launcher.exe), mesmo que exista uma no servidor. NÃO afeta o sync de mods/configs. Ativo só enquanto o Dev Mode estiver ligado — ao desligar o Dev Mode, este bloqueio é resetado."/>
+                                          ToolTip.Tip="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=block_launcher_update_tooltip}"/>
                                 <TextBlock Classes="trl-faint" FontSize="{DynamicResource TrlText2Xs}" TextWrapping="Wrap"
                                            MaxWidth="460" HorizontalAlignment="Left"
-                                           Text="Bloqueia só o auto-update do próprio launcher (o .exe). Não mexe no sync de mods/configs. Resetado ao desligar o Dev Mode."/>
+                                           Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=block_launcher_update_description}"/>
                             </StackPanel>
 
                             <!-- Modo homolog: prefixa as rotas do mod com /homolog (bate no TarkovRedLine.Server.Homolog) -->
                             <StackPanel Spacing="2">
-                                <CheckBox Content="Modo homolog (rotas do mod → /homolog)"
+                                <CheckBox Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=homolog_mode_checkbox}"
                                           IsChecked="{Binding Source={x:Static helpers:LauncherSettingsProvider.Instance}, Path=HomologMode}"
-                                          ToolTip.Tip="Aponta as rotas do mod TarkovRedLine para o mod de homologação (TarkovRedLine.Server.Homolog) no mesmo server. Rotas do SPT core não mudam. Requer reconectar."/>
+                                          ToolTip.Tip="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=homolog_mode_tooltip}"/>
                                 <TextBlock Classes="trl-faint" FontSize="{DynamicResource TrlText2Xs}"
-                                           Text="Só para testar contra a homologação. Deixe DESLIGADO para produção."/>
+                                           Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=homolog_mode_description}"/>
                             </StackPanel>
 
                             <Button x:Name="ofb" Command="{Binding OpenGameFolderCommand}" Cursor="Hand" HorizontalAlignment="Left">

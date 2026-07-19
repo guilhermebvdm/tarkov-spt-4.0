@@ -50,7 +50,7 @@ namespace SPT.Launcher.ViewModels
 
         // Cor do dot de status migrou para o XAML (Border.dev-dot + class binding em
         // IsDevMode, tokens TrlSuccessBrush/TrlFgFaintBrush). A VM só expõe o texto do tooltip.
-        public string DevModeStatusText => LauncherSettingsProvider.Instance.IsDevMode ? "Dev Mode ATIVO" : "Dev Mode INATIVO";
+        public string DevModeStatusText => LauncherSettingsProvider.Instance.IsDevMode ? LocalizationProvider.Instance.dev_mode_status_active : LocalizationProvider.Instance.dev_mode_status_inactive;
 
         /// <summary>
         /// Item 008: toggle "USAR CONFIGS PERFORMANCE" — persiste imediatamente; o efeito
@@ -152,12 +152,12 @@ namespace SPT.Launcher.ViewModels
                 {
                     LauncherSettingsProvider.Instance.IsDevMode = true;
                     LauncherSettingsProvider.Instance.SaveSettings();
-                    SendNotification("", "🔓 Modo desenvolvedor ativado!", NotificationType.Success);
+                    SendNotification("", LocalizationProvider.Instance.dev_mode_enabled_notification, NotificationType.Success);
                     LogManager.Instance.Info("[Settings] Dev Mode ativado via senha");
                 }
                 else
                 {
-                    SendNotification("", "❌ Senha incorreta", NotificationType.Error);
+                    SendNotification("", LocalizationProvider.Instance.wrong_password_notification, NotificationType.Error);
                     LogManager.Instance.Warning("[Settings] Tentativa de ativar Dev Mode com senha incorreta");
                 }
             }
@@ -178,7 +178,7 @@ namespace SPT.Launcher.ViewModels
                 }
 
                 LauncherSettingsProvider.Instance.SaveSettings();
-                SendNotification("", "🔒 Modo desenvolvedor desativado", NotificationType.Information);
+                SendNotification("", LocalizationProvider.Instance.dev_mode_disabled_notification, NotificationType.Information);
                 LogManager.Instance.Info("[Settings] Dev Mode desativado");
             }
 
@@ -442,7 +442,7 @@ namespace SPT.Launcher.ViewModels
                 
                 var dir = await desktop.MainWindow.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions()
                 {
-                    Title = "Select your SPT folder",
+                    Title = LocalizationProvider.Instance.select_spt_folder,
                     SuggestedStartLocation = startPath
                 });
 

@@ -304,7 +304,7 @@ namespace SPT.Launcher.ViewModels
             catch (Exception ex)
             {
                 LogManager.Instance.Error($"[Profile] Erro ao aplicar mod opcional '{toggle.Id}': {ex.Message}");
-                Dispatcher.UIThread.Post(() => UpdateStatusText = $"Erro ao aplicar mod opcional: {ex.Message}");
+                Dispatcher.UIThread.Post(() => UpdateStatusText = string.Format(LocalizationProvider.Instance.optional_apply_error, ex.Message));
             }
             finally
             {
@@ -330,8 +330,8 @@ namespace SPT.Launcher.ViewModels
                 // D-021.A — reverter: estado persistido volta a false e o toggle desmarca sem re-disparar.
                 LauncherSettingsProvider.Instance.SetOptionalEnabled(toggle.Id, false);
                 string msg = result.GroupResolved
-                    ? $"Falha ao ativar '{toggle.Id}': {result.Failed} de {result.Total} arquivo(s) falharam. Não aplicado."
-                    : $"Falha ao ativar '{toggle.Id}': grupo indisponível no servidor. Não aplicado.";
+                    ? string.Format(LocalizationProvider.Instance.optional_enable_failed_partial, toggle.Id, result.Failed, result.Total)
+                    : string.Format(LocalizationProvider.Instance.optional_enable_failed_group_unavailable, toggle.Id);
                 LogManager.Instance.Error($"[Profile] {msg}");
                 Dispatcher.UIThread.Post(() =>
                 {
@@ -358,8 +358,8 @@ namespace SPT.Launcher.ViewModels
             {
                 // Sucesso parcial / disable com falhas — visível como erro, mantém o que aplicou (RN-2).
                 string msg = enabling
-                    ? $"'{toggle.Id}' ativado com falhas: {result.Failed} de {result.Total} arquivo(s) falharam."
-                    : $"'{toggle.Id}' desativado com falhas: {result.Failed} arquivo(s) não aplicado(s).";
+                    ? string.Format(LocalizationProvider.Instance.optional_enabled_with_errors, toggle.Id, result.Failed, result.Total)
+                    : string.Format(LocalizationProvider.Instance.optional_disabled_with_errors, toggle.Id, result.Failed);
                 LogManager.Instance.Warning($"[Profile] {msg}");
                 Dispatcher.UIThread.Post(() =>
                 {
@@ -634,7 +634,7 @@ namespace SPT.Launcher.ViewModels
 
                     // Servidor ainda gerando manifesto — aguardar e tentar novamente
                     LogManager.Instance.Info($"[Profile] Manifesto não disponível, tentativa {attempt}/5. Aguardando...");
-                    UpdateStatusText = "Servidor está gerando a lista de atualização, aguarde...";
+                    UpdateStatusText = LocalizationProvider.Instance.update_generating_list;
                     await Task.Delay(3000);
                     response = null;
                 }
@@ -647,7 +647,7 @@ namespace SPT.Launcher.ViewModels
                     // Countdown de 30 segundos com retry automático
                     for (int s = 30; s > 0; s--)
                     {
-                        UpdateStatusText = $"Servidor preparando a lista. Tentando novamente em {s}s...";
+                        UpdateStatusText = string.Format(LocalizationProvider.Instance.update_preparing_retry_countdown, s);
                         await Task.Delay(1000);
                     }
 
@@ -820,7 +820,7 @@ namespace SPT.Launcher.ViewModels
 
                 if (result.Cancelled)
                 {
-                    UpdateStatusText = $"Atualização cancelada — estado parcial gravado ({result.Pending} ações pendentes). Verifique novamente para completar.";
+                    UpdateStatusText = string.Format(LocalizationProvider.Instance.update_cancelled_partial_state, result.Pending);
                     LogManager.Instance.Warning($"[Profile] Atualização cancelada com {result.Pending} ações pendentes");
                 }
                 else if (result.Errors > 0)
@@ -830,13 +830,13 @@ namespace SPT.Launcher.ViewModels
                 }
                 else if (plan.IoActionCount > 0)
                 {
-                    UpdateStatusText = $"Atualização concluída com sucesso — {result.Summary}";
+                    UpdateStatusText = string.Format(LocalizationProvider.Instance.update_completed_success, result.Summary);
                     LogManager.Instance.Info($"[Profile] Atualização concluída: {result.Summary}");
                 }
                 else
                 {
                     UpdateStatusText = result.Preserved + result.PreservedDevMode > 0
-                        ? $"{LocalizationProvider.Instance.update_up_to_date} ({result.Preserved + result.PreservedDevMode} preservados)"
+                        ? $"{LocalizationProvider.Instance.update_up_to_date} {string.Format(LocalizationProvider.Instance.update_up_to_date_preserved_suffix, result.Preserved + result.PreservedDevMode)}"
                         : LocalizationProvider.Instance.update_up_to_date;
                     UpdateMaxProgress = 1;
                     UpdateProgress = 1;
@@ -861,7 +861,7 @@ namespace SPT.Launcher.ViewModels
             catch (OperationCanceledException)
             {
                 // Cancelado durante o planejamento (nada foi escrito)
-                UpdateStatusText = "Verificação cancelada pelo usuário.";
+                UpdateStatusText = LocalizationProvider.Instance.update_check_cancelled_by_user;
                 LogManager.Instance.Info("[Profile] Verificação cancelada pelo usuário");
             }
             catch (Exception ex)
@@ -946,9 +946,8 @@ namespace SPT.Launcher.ViewModels
             if (!CanCancelUpdate || _syncCts == null) return;
 
             var confirm = await ShowDialog(new ConfirmationDialogViewModel(null,
-                "Cancelar a sincronização agora pode deixar a instalação em estado parcial. " +
-                "Uma nova verificação completará o processo depois. Cancelar mesmo assim?",
-                "Sim, cancelar", "Continuar"));
+                LocalizationProvider.Instance.sync_cancel_confirm_question,
+                LocalizationProvider.Instance.sync_cancel_confirm_yes, LocalizationProvider.Instance.sync_cancel_confirm_no));
 
             if (confirm is not (bool and true)) return;
 
@@ -994,7 +993,7 @@ namespace SPT.Launcher.ViewModels
 
         private void SetLastUpdate(int updatedCount)
         {
-            LastUpdateText = $"{updatedCount} arquivo(s) foram atualizados — ver detalhes";
+            LastUpdateText = string.Format(LocalizationProvider.Instance.last_update_files_updated, updatedCount);
             HasLastUpdate = updatedCount > 0;
         }
 
@@ -1043,7 +1042,7 @@ namespace SPT.Launcher.ViewModels
             {
                 LogManager.Instance.Error($"[Profile] {context}: {ex.Message}\n{ex.StackTrace}");
                 onError?.Invoke();
-                SendNotification("", "Ocorreu um erro ao executar a ação. Tente novamente.",
+                SendNotification("", LocalizationProvider.Instance.action_generic_error,
                     Avalonia.Controls.Notifications.NotificationType.Error);
             }
         }
@@ -1136,7 +1135,7 @@ namespace SPT.Launcher.ViewModels
                 if (removeStatus == AccountStatus.NoConnection)
                     NavigateTo(new ConnectServerViewModel(HostScreen));
                 else
-                    SendNotification("", "Erro ao remover perfil antigo.");
+                    SendNotification("", LocalizationProvider.Instance.wipe_remove_old_profile_error);
                 return removeStatus;
             }
 
@@ -1163,7 +1162,7 @@ namespace SPT.Launcher.ViewModels
                 if (registerStatus == AccountStatus.NoConnection)
                     NavigateTo(new ConnectServerViewModel(HostScreen));
                 else
-                    SendNotification("", "Erro ao criar novo perfil. Tente registrar manualmente.");
+                    SendNotification("", LocalizationProvider.Instance.wipe_create_new_profile_error);
                 return registerStatus;
             }
 
@@ -1173,7 +1172,7 @@ namespace SPT.Launcher.ViewModels
             LogManager.Instance.Info("[Profile] Etapa 3/3: Atualizando interface...");
             CurrentEdition = AccountManager.SelectedAccount.edition;
             UpdateProfileInfo();
-            SendNotification("", $"Perfil resetado com sucesso! Edição: {edition}");
+            SendNotification("", string.Format(LocalizationProvider.Instance.wipe_success, edition));
 
             LogManager.Instance.Info($"[Profile] Wipe completo: {username} → {edition}");
             return AccountStatus.OK;
@@ -1196,11 +1195,10 @@ namespace SPT.Launcher.ViewModels
 
         private async Task WipeConfirmCore()
         {
+            // Item 023 (Frente B / RN-4 / CA-B2): aviso de coop — o gate local não prova que
+            // ninguém está em raid; wipe dispara Remove/Register no server.
             ConfirmationDialogViewModel confirmation = new ConfirmationDialogViewModel(null,
-                "Tem certeza que deseja resetar sua conta? Esta ação não pode ser revertida. Todo seu progresso será perdido."
-                // Item 023 (Frente B / RN-4 / CA-B2): aviso de coop — o gate local não prova que
-                // ninguém está em raid; wipe dispara Remove/Register no server.
-                + "\n\nAtenção coop: se houver uma sessão Fika Coop PVE ativa, resetar agora pode corromper a raid dos outros jogadores. Confirme que ninguém está em raid.",
+                LocalizationProvider.Instance.wipe_confirm_question,
                 isDestructive: true);
 
             var result = await ShowDialog(confirmation);
@@ -1263,7 +1261,7 @@ namespace SPT.Launcher.ViewModels
                         AccountManager.Logout(); // idempotente — Remove() já anulou a conta
 
                         LogManager.Instance.Info($"[Profile] Conta '{username}' excluída.");
-                        SendNotification("", $"Conta '{username}' excluída definitivamente.",
+                        SendNotification("", string.Format(LocalizationProvider.Instance.account_deleted_success, username),
                             Avalonia.Controls.Notifications.NotificationType.Success);
 
                         NavigateTo(new LoginViewModel(HostScreen, true));
@@ -1272,7 +1270,7 @@ namespace SPT.Launcher.ViewModels
                 case AccountStatus.NoConnection:
                     {
                         LogManager.Instance.Error($"[Profile] Falha ao excluir conta '{username}': sem conexão.");
-                        SendNotification("", "Sem conexão com o servidor — a conta não foi excluída.",
+                        SendNotification("", LocalizationProvider.Instance.account_delete_no_connection,
                             Avalonia.Controls.Notifications.NotificationType.Error);
 
                         NavigateTo(new ConnectServerViewModel(HostScreen));
@@ -1281,7 +1279,7 @@ namespace SPT.Launcher.ViewModels
                 default:
                     {
                         LogManager.Instance.Error($"[Profile] Falha ao excluir conta '{username}': {status}.");
-                        SendNotification("", "Falha ao excluir a conta no servidor. Tente novamente.",
+                        SendNotification("", LocalizationProvider.Instance.account_delete_failed,
                             Avalonia.Controls.Notifications.NotificationType.Error);
                         break;
                     }

@@ -43,7 +43,7 @@
 				VerticalAlignment="Stretch"
 				CornerRadius="0"
 				Width="38"
-				ToolTip.Tip="Configurações">
+				ToolTip.Tip="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=titlebar_settings_tooltip}">
 			<Viewbox Width="15" Height="15">
 				<Path Data="{StaticResource TrlIconSettings}"
 					  Stroke="{Binding $parent[Button].Foreground}"

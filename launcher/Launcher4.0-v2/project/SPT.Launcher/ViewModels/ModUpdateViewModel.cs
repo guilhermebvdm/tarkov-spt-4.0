@@ -278,7 +278,7 @@ namespace SPT.Launcher.ViewModels
             }
             catch (OperationCanceledException)
             {
-                StatusText = "Verificação cancelada pelo usuário.";
+                StatusText = LocalizationProvider.Instance.mod_update_check_canceled;
                 Controllers.LogManager.Instance.Info("[ModUpdateView] Verificação cancelada pelo usuário");
             }
             catch (Exception ex)
@@ -340,7 +340,7 @@ namespace SPT.Launcher.ViewModels
 
                 if (result.Cancelled)
                 {
-                    StatusText = $"Atualização cancelada — estado parcial gravado ({result.Pending} ações pendentes).";
+                    StatusText = string.Format(LocalizationProvider.Instance.mod_update_canceled_partial, result.Pending);
                     Controllers.LogManager.Instance.Warning($"[ModUpdateView] Atualização cancelada com {result.Pending} ações pendentes");
                 }
                 else if (result.Errors > 0)
@@ -380,9 +380,9 @@ namespace SPT.Launcher.ViewModels
             if (!CanCancel || _cts == null) return;
 
             var confirm = await ShowDialog(new ConfirmationDialogViewModel(null,
-                "Cancelar a sincronização agora pode deixar a instalação em estado parcial. " +
-                "Uma nova verificação completará o processo depois. Cancelar mesmo assim?",
-                "Sim, cancelar", "Continuar"));
+                LocalizationProvider.Instance.mod_update_cancel_confirm_question,
+                LocalizationProvider.Instance.mod_update_cancel_confirm_yes,
+                LocalizationProvider.Instance.mod_update_cancel_confirm_deny));
 
             if (confirm is not (bool and true)) return;
 
@@ -465,17 +465,17 @@ namespace SPT.Launcher.ViewModels
         {
             var parts = new List<string>
             {
-                $"{plan.DownloadCount} p/ atualizar",
-                $"{plan.PreserveCount} preservados",
+                string.Format(LocalizationProvider.Instance.plan_summary_to_update, plan.DownloadCount),
+                string.Format(LocalizationProvider.Instance.plan_summary_preserved, plan.PreserveCount),
             };
 
-            if (plan.SeedCount > 0) parts.Add($"{plan.SeedCount} p/ semear");
+            if (plan.SeedCount > 0) parts.Add(string.Format(LocalizationProvider.Instance.plan_summary_to_seed, plan.SeedCount));
             // config-force: a config do usuário é SUBSTITUÍDA — mas preservada em -disabled. O preview
             // tem que dizer as duas coisas (senão o backup existe e ninguém sabe).
-            if (plan.ForceCount > 0) parts.Add($"{plan.ForceCount} configs FORÇADAS (a sua vai p/ config-disabled)");
-            if (plan.MoveCount > 0) parts.Add($"{plan.MoveCount} p/ mover p/ disabled");
-            if (plan.DeleteCount > 0) parts.Add($"{plan.DeleteCount} p/ remover");
-            if (plan.Warnings.Count > 0) parts.Add($"{plan.Warnings.Count} avisos Dev Mode");
+            if (plan.ForceCount > 0) parts.Add(string.Format(LocalizationProvider.Instance.plan_summary_forced_configs, plan.ForceCount));
+            if (plan.MoveCount > 0) parts.Add(string.Format(LocalizationProvider.Instance.plan_summary_to_move, plan.MoveCount));
+            if (plan.DeleteCount > 0) parts.Add(string.Format(LocalizationProvider.Instance.plan_summary_to_remove, plan.DeleteCount));
+            if (plan.Warnings.Count > 0) parts.Add(string.Format(LocalizationProvider.Instance.plan_summary_dev_mode_warnings, plan.Warnings.Count));
 
             return string.Join(" · ", parts);
         }

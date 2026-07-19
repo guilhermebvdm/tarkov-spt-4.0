@@ -60,7 +60,7 @@ namespace SPT.Launcher.ViewModels
                 // UseLocalServer (checkbox dev) pula o Gist e mantém a URL local já setada em Server.Url.
                 if (!LauncherSettingsProvider.Instance.IsDevMode && !LauncherSettingsProvider.Instance.UseLocalServer)
                 {
-                    OnUi(() => connectModel.InfoText = "Obtendo URL do servidor...");
+                    OnUi(() => connectModel.InfoText = LocalizationProvider.Instance.connect_fetching_server_url);
                     try
                     {
                         using var client = new System.Net.Http.HttpClient();
@@ -86,14 +86,14 @@ namespace SPT.Launcher.ViewModels
                 // Automação do Tailscale: Verifica, instala, autentica e configura Fika (Apenas se o Path do jogo for válido)
                 if (!string.IsNullOrEmpty(LauncherSettingsProvider.Instance.GamePath))
                 {
-                    OnUi(() => connectModel.InfoText = "Conectando na rede P2P (Tailscale)...");
+                    OnUi(() => connectModel.InfoText = LocalizationProvider.Instance.connect_p2p_connecting);
                     LogManager.Instance.Info("[Connect] Verificando e conectando Tailscale...");
                     // Item 023 (Frente C / RN-7): resultado tipado para distinguir chave rejeitada de falha de rede.
                     TailscaleConnectResult tailscaleResult = await TailscaleHelper.EnsureTailscaleConnected();
 
                     if (tailscaleResult == TailscaleConnectResult.Connected)
                     {
-                        OnUi(() => connectModel.InfoText = "Atualizando configurações de rede (Fika)...");
+                        OnUi(() => connectModel.InfoText = LocalizationProvider.Instance.connect_updating_network_config);
                         LogManager.Instance.Info("[Connect] Configurando IP do Fika...");
                         await TailscaleHelper.ConfigureFikaAsync(LauncherSettingsProvider.Instance.GamePath);
                     }
@@ -114,8 +114,8 @@ namespace SPT.Launcher.ViewModels
                         {
                             connectModel.ConnectionFailed = true;
                             connectModel.InfoText = authKeyRejected
-                                ? "Falha na rede P2P (Tailscale): a chave de acesso à rede foi rejeitada ou esgotada. Isso NÃO é problema da sua internet — avise o host para gerar/renovar a chave compartilhada."
-                                : "Falha na rede P2P (Tailscale): não foi possível autenticar/conectar. Verifique sua internet e clique em tentar novamente.";
+                                ? LocalizationProvider.Instance.connect_p2p_authkey_rejected
+                                : LocalizationProvider.Instance.connect_p2p_auth_failed;
                             LauncherSettingsProvider.Instance.AllowSettings = true;
                         });
                         return;
@@ -124,7 +124,7 @@ namespace SPT.Launcher.ViewModels
 
                 if (!LauncherSettingsProvider.Instance.DisableUpdates)
                 {
-                    OnUi(() => connectModel.InfoText = "Verificando atualizações do launcher...");
+                    OnUi(() => connectModel.InfoText = LocalizationProvider.Instance.connect_checking_launcher_updates);
                     LogManager.Instance.Info("[Connect] Verificando versão do launcher no servidor...");
 
                     // CC-6/C3: o Progress<int> é construído dentro do Task.Run, capturando o
@@ -136,7 +136,7 @@ namespace SPT.Launcher.ViewModels
                         {
                             connectModel.IsDownloading = true;
                             connectModel.DownloadProgress = percent;
-                            connectModel.InfoText = $"Baixando atualização do launcher... {percent}%";
+                            connectModel.InfoText = string.Format(LocalizationProvider.Instance.connect_downloading_launcher_update, percent);
                         });
                     });
 
@@ -147,7 +147,7 @@ namespace SPT.Launcher.ViewModels
                     UpdateOutcome updateOutcome = await LauncherUpdateHelper.CheckAndUpdateAsync(LauncherSettingsProvider.Instance.Server.Url, progress);
                     if (updateOutcome == UpdateOutcome.Restarting)
                     {
-                        OnUi(() => connectModel.InfoText = "Atualizando o launcher! Reiniciando...");
+                        OnUi(() => connectModel.InfoText = LocalizationProvider.Instance.connect_updating_launcher_restart);
                         return;
                     }
                     if (updateOutcome == UpdateOutcome.VerificationFailed)
@@ -156,7 +156,7 @@ namespace SPT.Launcher.ViewModels
                         OnUi(() =>
                         {
                             connectModel.IsDownloading = false;
-                            connectModel.InfoText = "Atualização do launcher indisponível (verificação de segurança falhou). Seguindo na versão atual...";
+                            connectModel.InfoText = LocalizationProvider.Instance.connect_launcher_update_verification_failed;
                         });
                         // Pausa breve NÃO-bloqueante (rodamos na pool): sem ela a InfoText seria sobrescrita
                         // imediatamente pelo "server_connecting" abaixo e o aviso piscaria invisível. Só
@@ -178,7 +178,7 @@ namespace SPT.Launcher.ViewModels
                 if (!serverLoaded)
                 {
                     LogManager.Instance.Warning("[Connect] Primeira tentativa falhou. Aguardando 2s e tentando novamente...");
-                    OnUi(() => connectModel.InfoText = "Reconectando ao servidor...");
+                    OnUi(() => connectModel.InfoText = LocalizationProvider.Instance.connect_reconnecting);
                     await Task.Delay(2000);
                     serverLoaded = await ServerManager.LoadDefaultServerAsync(LauncherSettingsProvider.Instance.Server.Url);
                 }
@@ -229,7 +229,7 @@ namespace SPT.Launcher.ViewModels
                 LogManager.Instance.Error($"[FATAL ERROR IN CONNECT SERVER]: {ex.Message}\n{ex.StackTrace}");
                 OnUi(() =>
                 {
-                    connectModel.InfoText = "Erro Fatal Crítico: " + ex.Message;
+                    connectModel.InfoText = LocalizationProvider.Instance.connect_fatal_error + ex.Message;
                     connectModel.ConnectionFailed = true;
                 });
             }

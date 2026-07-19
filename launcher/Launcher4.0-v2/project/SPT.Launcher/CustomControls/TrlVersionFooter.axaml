@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:helpers="using:SPT.Launcher.Helpers"
              x:Class="SPT.Launcher.CustomControls.TrlVersionFooter">
 
 	<!-- Version footer. Defaults mirror the previously hardcoded values;
@@ -7,7 +8,7 @@
 	<!-- item 009: VerticalAlignment=Center em todos alinha a baseline dos valores
 	     (mono/bold, altura de linha diferente) com os labels -->
 	<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="5">
-		<TextBlock Text="Versão do launcher:"
+		<TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=version_footer_launcher_label}"
 		           FontSize="{DynamicResource TrlText2Xs}"
 		           VerticalAlignment="Center"
 		           Foreground="{DynamicResource TrlFgFaintBrush}"/>
@@ -21,7 +22,7 @@
 		           FontSize="{DynamicResource TrlText2Xs}"
 		           VerticalAlignment="Center"
 		           Foreground="{DynamicResource TrlFgGhostBrush}"/>
-		<TextBlock Text="Versão do servidor:"
+		<TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=version_footer_server_label}"
 		           FontSize="{DynamicResource TrlText2Xs}"
 		           VerticalAlignment="Center"
 		           Foreground="{DynamicResource TrlFgFaintBrush}"/>

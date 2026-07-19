@@ -57,13 +57,13 @@
                     <Button Classes="nav active" Cursor="Hand" Command="{Binding OpenSettingsCommand}">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <Path Data="{StaticResource TrlIconHome}" VerticalAlignment="Center"/>
-                            <TextBlock Text="LAUNCHER" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=nav_launcher}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                     <Button Classes="nav" Cursor="Hand" Command="{Binding OpenSettingsCommand}">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <Path Data="{StaticResource TrlIconSettings}" VerticalAlignment="Center"/>
-                            <TextBlock Text="CONFIGURAÇÕES" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=nav_settings}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                     <Button Classes="nav" Cursor="Hand" Command="{Binding OpenKofiCommand}">
@@ -71,13 +71,13 @@
                         <DockPanel LastChildFill="True">
                             <Path DockPanel.Dock="Left" Data="{StaticResource TrlIconCoffee}" VerticalAlignment="Center" Margin="0,0,10,0"/>
                             <Path DockPanel.Dock="Right" Data="{StaticResource TrlIconExternalLink}" Width="12" Height="12" VerticalAlignment="Center" Margin="10,0,0,0"/>
-                            <TextBlock Text="APOIE UM CAFEZINHO" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=nav_support_coffee}" VerticalAlignment="Center"/>
                         </DockPanel>
                     </Button>
-                    <Button Classes="nav" Cursor="Hand" ToolTip.Tip="Em construção" IsEnabled="False" Opacity="0.5">
+                    <Button Classes="nav" Cursor="Hand" ToolTip.Tip="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=nav_under_construction_tooltip}" IsEnabled="False" Opacity="0.5">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <Path Data="{StaticResource TrlIconMenu2}" VerticalAlignment="Center"/>
-                            <TextBlock Text="LISTA DE MODS" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=nav_mods_list}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -86,7 +86,7 @@
                 <Button Grid.Row="2" Cursor="Hand" Margin="16" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Command="{Binding LogoutCommand}">
                     <StackPanel Orientation="Horizontal" Spacing="10">
                         <Path Data="{StaticResource TrlIconArrowBackUp}" Stroke="{DynamicResource TrlAccentBrush}" StrokeThickness="1.75" Fill="{x:Null}" Width="18" Height="18" Stretch="Uniform" StrokeLineCap="Flat" StrokeJoin="Miter" VerticalAlignment="Center"/>
-                        <TextBlock Text="SAIR" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=sidebar_logout}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
             </Grid>
@@ -122,21 +122,21 @@
                 <StackPanel Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="20,50,20,0" Width="250" Spacing="8">
 
                     <!-- Box: VERSÃO -->
-                    <cc:TrlPanel Title="VERSÃO" Background="{DynamicResource TrlPanelOverPhotoBrush}">
+                    <cc:TrlPanel Title="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=version_panel_title}" Background="{DynamicResource TrlPanelOverPhotoBrush}">
                         <StackPanel Spacing="6">
                             <Grid ColumnDefinitions="*,Auto">
-                                <TextBlock Classes="trl-label" Text="SERVIDOR" VerticalAlignment="Center"/>
+                                <TextBlock Classes="trl-label" Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=version_server_label}" VerticalAlignment="Center"/>
                                 <TextBlock Grid.Column="1" Classes="trl-mono trl-accent" FontSize="{DynamicResource TrlTextXs}" FontWeight="Bold" Text="{Binding ServerVersion}" VerticalAlignment="Center"/>
                             </Grid>
                             <Grid ColumnDefinitions="*,Auto">
-                                <TextBlock Classes="trl-label" Text="LAUNCHER" VerticalAlignment="Center"/>
+                                <TextBlock Classes="trl-label" Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=version_launcher_label}" VerticalAlignment="Center"/>
                                 <TextBlock Grid.Column="1" Classes="trl-mono trl-accent" FontSize="{DynamicResource TrlTextXs}" FontWeight="Bold" Text="{Binding Source={x:Static helpers:LauncherUpdateHelper.CurrentVersion}}" VerticalAlignment="Center"/>
                             </Grid>
                         </StackPanel>
                     </cc:TrlPanel>
 
                     <!-- Box: MODS OPCIONAIS (item 009: descrição visível abaixo do nome) -->
-                    <cc:TrlPanel Title="MODS OPCIONAIS" Background="{DynamicResource TrlPanelOverPhotoBrush}">
+                    <cc:TrlPanel Title="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=optional_mods_panel_title}" Background="{DynamicResource TrlPanelOverPhotoBrush}">
                         <ItemsControl ItemsSource="{Binding OptionalMods}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
@@ -156,30 +156,30 @@
                     </cc:TrlPanel>
 
                     <!-- Box: CONTA -->
-                    <cc:TrlPanel Title="CONTA" Background="{DynamicResource TrlPanelOverPhotoBrush}">
+                    <cc:TrlPanel Title="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=account_panel_title}" Background="{DynamicResource TrlPanelOverPhotoBrush}">
                         <StackPanel Spacing="8">
                             <!-- ref: CR-01-03 — mesmo gate do EXCLUIR: mudar edição dispara wipe
                                  (Remove+Register) e não pode rodar com o jogo em execução -->
-                            <Button Content="MUDAR EDIÇÃO DO PERFIL" Classes="sm" Cursor="Hand"
+                            <Button Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=account_change_edition_button}" Classes="sm" Cursor="Hand"
                                     HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
                                     Command="{Binding ChangeEditionCommand}"
                                     IsEnabled="{Binding CanStartGame}"/>
 
                             <!-- ref: CR-01-03 — idem: wipe no meio da sessão é tão destrutivo quanto o delete -->
-                            <Button Content="RESETAR PROGRESSO (WIPE)" Classes="danger sm" Cursor="Hand"
+                            <Button Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=account_wipe_button}" Classes="danger sm" Cursor="Hand"
                                     HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
                                     Command="{Binding WipeConfirmCommand}"
                                     IsEnabled="{Binding CanStartGame}"
-                                    ToolTip.Tip="Zera o progresso do perfil — a conta continua existindo"/>
+                                    ToolTip.Tip="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=account_wipe_tooltip}"/>
 
-                            <Button Content="EXCLUIR CONTA" Classes="danger sm" Cursor="Hand"
+                            <Button Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=account_delete_button}" Classes="danger sm" Cursor="Hand"
                                     HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
                                     Command="{Binding DeleteAccountCommand}"
                                     IsEnabled="{Binding CanStartGame}"
-                                    ToolTip.Tip="Remove a conta e o perfil do servidor — definitivo"/>
+                                    ToolTip.Tip="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=account_delete_tooltip}"/>
 
                             <TextBlock Classes="trl-faint" FontSize="{DynamicResource TrlText2Xs}" TextWrapping="Wrap"
-                                       Text="Wipe reseta o progresso e mantém a conta. Excluir remove a conta do servidor em definitivo."/>
+                                       Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=account_wipe_delete_explainer}"/>
                         </StackPanel>
                     </cc:TrlPanel>
 
@@ -196,7 +196,7 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Button Classes="carousel-dot" Command="{Binding SelectCommand}" Cursor="Hand"
-                                    ToolTip.Tip="Trocar imagem de fundo">
+                                    ToolTip.Tip="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=carousel_change_background_tooltip}">
                                 <Border Classes="carousel-dot-fill" Classes.active="{Binding IsActive}"/>
                             </Button>
                         </DataTemplate>
@@ -209,15 +209,15 @@
                     <Grid ColumnDefinitions="*,Auto,Auto">
                         <ProgressBar Minimum="0" Maximum="{Binding UpdateMaxProgress}" Value="{Binding UpdateProgress}" VerticalAlignment="Center"/>
                         <!-- velocidade de download removida a pedido -->
-                        <Button Grid.Column="2" Content="CANCELAR" Classes="ghost sm" Cursor="Hand" Margin="8,0,0,0"
+                        <Button Grid.Column="2" Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=update_cancel_button}" Classes="ghost sm" Cursor="Hand" Margin="8,0,0,0"
                                 Command="{Binding CancelUpdateCommand}" IsVisible="{Binding CanCancelUpdate}"
-                                ToolTip.Tip="Cancelar a verificação/atualização (pede confirmação)"/>
+                                ToolTip.Tip="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=update_cancel_tooltip}"/>
                     </Grid>
                     <!-- 4.1.3: clicar abre a pasta do last-update.json -->
                     <Button Content="{Binding LastUpdateText}" Classes="link" Cursor="Hand" HorizontalAlignment="Left" Padding="0"
                             FontSize="{DynamicResource TrlTextXs}"
                             Command="{Binding OpenLastUpdateFolderCommand}" IsVisible="{Binding HasLastUpdate}"
-                            ToolTip.Tip="Abrir a pasta com o relatório da última atualização"/>
+                            ToolTip.Tip="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=last_update_report_tooltip}"/>
                 </StackPanel>
 
                 <!-- STATUS BAR INFERIOR (PERFIL E AÇÕES) -->
@@ -240,7 +240,7 @@
                             <TextBlock Text="{Binding CurrentEdition, StringFormat='Classe: {0}'}" Classes="trl-muted" FontSize="{DynamicResource TrlTextXs}"
                                        IsVisible="{Binding CurrentEdition, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
                             <TextBlock Text="{Binding CurrentId, StringFormat='Id: {0}'}" Classes="trl-faint" FontSize="{DynamicResource TrlText2Xs}" Cursor="Hand"
-                                       ToolTip.Tip="Clique para copiar"
+                                       ToolTip.Tip="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=profile_id_copy_tooltip}"
                                        PointerPressed="CopyIdToClipboard"
                                        TextDecorations="Underline"/>
                             <TextBlock Text="{Binding ProfileInfo.Side, StringFormat='Facção: {0}'}" Classes="trl-accent" FontSize="{DynamicResource TrlTextXs}"/>
@@ -254,12 +254,12 @@
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <Path Data="{StaticResource TrlIconSearch}" Stroke="{DynamicResource TrlFgMutedBrush}" StrokeThickness="1.75" Fill="{x:Null}"
                                           Width="13" Height="13" Stretch="Uniform" StrokeLineCap="Flat" StrokeJoin="Miter" VerticalAlignment="Center"/>
-                                    <TextBlock Text="VERIFICAR ARQUIVOS" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=verify_files_button}" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Button>
 
                             <!-- JOGAR (.primary — tan, R1) -->
-                            <Button Content="▶ JOGAR" Classes="primary" Cursor="Hand" Command="{Binding StartGameCommand}" IsEnabled="{Binding CanStartGame}"
+                            <Button Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=play_button}" Classes="primary" Cursor="Hand" Command="{Binding StartGameCommand}" IsEnabled="{Binding CanStartGame}"
                                     HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="15,10" FontWeight="Bold" FontSize="{DynamicResource TrlTextLg}"/>
                         </StackPanel>
 

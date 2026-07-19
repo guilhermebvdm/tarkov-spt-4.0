@@ -40,7 +40,7 @@ namespace SPT.Launcher.ViewModels.Dialogs
             CancelButtonText = LocalizationProvider.Instance.cancel;
 
             ComboBoxPlaceholderText = LocalizationProvider.Instance.select_edition;
-            PasswordPlaceholderText = LocalizationProvider.Instance.password ?? "Senha";
+            PasswordPlaceholderText = LocalizationProvider.Instance.password ?? LocalizationProvider.Instance.password_placeholder;
 
             Editions.PropertyChanged += (s, e) => 
             {

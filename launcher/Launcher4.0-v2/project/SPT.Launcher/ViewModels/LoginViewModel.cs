@@ -179,7 +179,7 @@ namespace SPT.Launcher.ViewModels
                             {
                                 LauncherSettingsProvider.Instance.UseAutoLogin = false;
                                 LauncherSettingsProvider.Instance.SaveSettings();
-                                SendNotification("", "Erro de conexão ao tentar fazer o Auto-Login. Auto-Login desativado.", NotificationType.Error);
+                                SendNotification("", LocalizationProvider.Instance.autologin_connection_error, NotificationType.Error);
                             }
                             else
                             {

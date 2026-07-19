@@ -41,7 +41,7 @@
                         <TextBlock Grid.Column="1" Text="{Binding Label}" TextWrapping="Wrap"
                                    Foreground="{DynamicResource TrlFgBrush}"/>
                     </Grid>
-                    <TextBlock Text="· em breve" FontStyle="Italic"
+                    <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=class_effect_coming_soon}" FontStyle="Italic"
                                FontSize="{DynamicResource TrlText2Xs}"
                                Foreground="{Binding AccentBrush}"
                                IsVisible="{Binding Pending}"/>
@@ -73,7 +73,7 @@
                 <!-- top 44: título desce abaixo da top bar (34px) + respiro -->
                 <Grid RowDefinitions="Auto, *, Auto, Auto" Margin="16,44,16,16">
 
-                    <TextBlock Grid.Row="0" Text="SELEÇÃO DE CLASSE" Classes="trl-label"
+                    <TextBlock Grid.Row="0" Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=class_selection_title}" Classes="trl-label"
                                LetterSpacing="{DynamicResource TrlTrackWider}"
                                Margin="0,8,0,16"/>
 
@@ -107,7 +107,7 @@
                             </ListBox.ItemTemplate>
                         </ListBox>
 
-                        <TextBlock Text="Carregando classes..." Classes="trl-muted"
+                        <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=class_selection_loading}" Classes="trl-muted"
                                    FontSize="{DynamicResource TrlTextSm}"
                                    HorizontalAlignment="Center" VerticalAlignment="Center"
                                    IsVisible="{Binding IsLoading}"/>
@@ -119,9 +119,9 @@
                                IsVisible="{Binding RegisterErrorMsg, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
 
                     <StackPanel Grid.Row="3" Spacing="10" Margin="0,16,0,0">
-                        <Button Content="ESCOLHER CLASSE" Command="{Binding FinalizeAccountCommand}"
+                        <Button Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=class_selection_choose_button}" Command="{Binding FinalizeAccountCommand}"
                                 Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
-                        <Button Content="VOLTAR" Command="{Binding GoToRegisterCommand}"
+                        <Button Content="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=common_back_button}" Command="{Binding GoToRegisterCommand}"
                                 Classes="ghost" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
 
                         <cc:TrlVersionFooter HorizontalAlignment="Center" Margin="0,10,0,0"
@@ -139,7 +139,7 @@
                 <DockPanel>
                     <cc:TrlScreenBar DockPanel.Dock="Top"
                                      Title="{Binding SelectedClass.NameUpper}"
-                                     Meta="CLASSE"/>
+                                     Meta="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=class_selection_meta_label}"/>
 
                     <!-- 2 zonas: arte da classe (esquerda, fundo removido, colada na base) + info (direita).
                          Sem arte (classe sem PNG) → coluna esquerda colapsa e a info ocupa tudo. -->
@@ -157,7 +157,7 @@
                     <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
                         <StackPanel Margin="20,16" Spacing="18">
                             <StackPanel Spacing="12">
-                                <TextBlock Text="DESCRIÇÃO DA CLASSE" Classes="trl-label"/>
+                                <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=class_selection_description_label}" Classes="trl-label"/>
                                 <TextBlock Text="{Binding SelectedClass.Description}"
                                            TextWrapping="Wrap"
                                            FontSize="{DynamicResource TrlTextMd}"
@@ -169,18 +169,18 @@
                                  Visível só quando a classe tem efeitos (server serve `effects`).
                                  Colunas independentes por HasPerks/HasDrawbacks. -->
                             <StackPanel Spacing="10" IsVisible="{Binding SelectedClass.HasAnyEffects}">
-                                <TextBlock Text="BUFFS E DEBUFFS" Classes="trl-label"/>
+                                <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=class_selection_buffs_debuffs_label}" Classes="trl-label"/>
                                 <Grid ColumnDefinitions="*,*">
                                     <StackPanel Grid.Column="0" Margin="0,0,10,0" Spacing="6"
                                                 IsVisible="{Binding SelectedClass.HasPerks}">
-                                        <TextBlock Text="BUFFS" Classes="trl-label"
+                                        <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=class_selection_buffs_label}" Classes="trl-label"
                                                    Foreground="#9ad27a" Opacity="0.9"/>
                                         <ItemsControl ItemsSource="{Binding SelectedClass.Perks}"
                                                       ItemTemplate="{StaticResource perkCardTemplate}"/>
                                     </StackPanel>
                                     <StackPanel Grid.Column="1" Margin="10,0,0,0" Spacing="6"
                                                 IsVisible="{Binding SelectedClass.HasDrawbacks}">
-                                        <TextBlock Text="DEBUFFS" Classes="trl-label"
+                                        <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=class_selection_debuffs_label}" Classes="trl-label"
                                                    Foreground="#d27a7a" Opacity="0.9"/>
                                         <ItemsControl ItemsSource="{Binding SelectedClass.Drawbacks}"
                                                       ItemTemplate="{StaticResource perkCardTemplate}"/>
@@ -190,7 +190,7 @@
 
                             <!-- Multiplicadores de XP — 2 colunas (column-major, ordem preservada). -->
                             <StackPanel Spacing="8" IsVisible="{Binding SelectedClass.HasMultipliers}">
-                                <TextBlock Text="MULTIPLICADORES DE XP" Classes="trl-label"/>
+                                <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=class_selection_xp_multipliers_label}" Classes="trl-label"/>
                                 <Grid ColumnDefinitions="*,*">
                                     <ItemsControl Grid.Column="0" Margin="0,0,12,0"
                                                   ItemsSource="{Binding SelectedClass.MultiplierRowsLeft}"

@@ -41,9 +41,11 @@ public sealed class StockController(ModPathsService modPaths, WriteLockService w
             return Task.FromResult<IActionResult>(BadRequest(new { error = "invalid traderId (expected 24-char hex MongoId)" }));
         }
 
-        if (body.Stock is null && body.BuyLimit is null && body.Disabled is null)
+        // disabled:false carries no state (use DELETE to clear an override) — only disabled:true, or a
+        // stock/buyLimit cap, is a meaningful write.
+        if (body.Disabled != true && body.Stock is null && body.BuyLimit is null)
         {
-            return Task.FromResult<IActionResult>(BadRequest(new { error = "provide stock, buyLimit and/or disabled" }));
+            return Task.FromResult<IActionResult>(BadRequest(new { error = "provide stock, buyLimit and/or disabled:true" }));
         }
 
         if (body.Stock is { } s && (s < 0 || s != Math.Floor(s)))
@@ -69,10 +71,18 @@ public sealed class StockController(ModPathsService modPaths, WriteLockService w
                 ? new { stock = prev["stock"]?.GetValue<double?>(), buyLimit = prev["buyLimit"]?.GetValue<int?>(), disabled = prev["disabled"]?.GetValue<bool?>() }
                 : null;
 
+            // Normalize (CR-U-01): a disabled offer has nothing to cap → store { disabled:true } alone;
+            // otherwise store the stock/buyLimit cap and never persist a disabled:false key (inert noise).
             var entry = new JsonObject();
-            if (body.Stock is { } st) entry["stock"] = st;
-            if (body.BuyLimit is { } lim) entry["buyLimit"] = lim;
-            if (body.Disabled is { } dis) entry["disabled"] = dis;
+            if (body.Disabled == true)
+            {
+                entry["disabled"] = true;
+            }
+            else
+            {
+                if (body.Stock is { } st) entry["stock"] = st;
+                if (body.BuyLimit is { } lim) entry["buyLimit"] = lim;
+            }
             tplMap[tpl] = entry;
 
             RawConfigStore.Write(StockConfigPath, overrides);
