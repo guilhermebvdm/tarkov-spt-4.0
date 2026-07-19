@@ -540,7 +540,7 @@ namespace TRLDynamicSpawn.Patches
                     if (players != null)
                     {
                         // Se for bot comum (PMC ou Scav), ele deve estar dentro da bolha de spawn em relação a algum jogador real
-                        if (isCommonBot)
+                        if (TRLDynamicSpawn.Helpers.Settings.enableSpawnBubble.Value && isCommonBot)
                         {
                             float maxDist = 300f;
                             if (TRLDynamicSpawn.Components.DynamicSpawnManager.Instance != null && TRLDynamicSpawn.Components.DynamicSpawnManager.Instance.ServerConfig != null)

@@ -666,7 +666,7 @@ namespace TRLDynamicSpawn.Components
             Vector3 zonePos = overridePosition ?? zone.transform.position;
 
             // Se for bot comum (PMC ou Scav), ele deve estar dentro da bolha de spawn
-            if (role != null)
+            if (TRLDynamicSpawn.Helpers.Settings.enableSpawnBubble.Value && role != null)
             {
                 WildSpawnType rType = role.Value;
                 bool isCommonBot = rType == WildSpawnType.pmcUSEC || rType == WildSpawnType.pmcBEAR || rType == WildSpawnType.assault;
