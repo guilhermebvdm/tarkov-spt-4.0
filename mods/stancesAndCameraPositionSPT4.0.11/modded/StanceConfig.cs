@@ -13,6 +13,11 @@ namespace CameraRotationMod
         public ConfigEntry<int> MovementSpeedMultiplier;
         public ConfigEntry<bool> ApplyWhenProne;
 
+        // Item 017 (F1) — waypoint por Stance 0 ao mirar, agora POR STANCE (cada uma calibra o seu).
+        // ⚠️ NULL em Stance.Default (mirar de Stance 0 não tem loop a suavizar). Leitores usam `?.Value`.
+        public ConfigEntry<bool> AdsWaypoint;
+        public ConfigEntry<int> AdsWaypointTime;
+
         /// <summary>
         /// F4 (backlog 002) — snap automático para Stance 0 ao atirar.
         ///

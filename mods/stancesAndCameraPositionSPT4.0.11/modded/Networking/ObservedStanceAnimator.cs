@@ -59,7 +59,7 @@ namespace CameraRotationMod.Networking
 
             // Item 017 (F1): durante o waypoint o alvo é Stance 0 (pose neutra) — a arma do observado assenta no
             // neutro antes de subir, igual à 1ª pessoa. (Gate de aim-speed é local; aqui só a pose.)
-            if (_waypoint.Update(_isAiming, inStance, dt))
+            if (_waypoint.Update(_isAiming, inStance, dt, (Stance)_stance))
             {
                 targetEuler = Vector3.zero;
                 targetPos = Vector3.zero;

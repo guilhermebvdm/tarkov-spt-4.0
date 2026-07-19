@@ -236,7 +236,7 @@ namespace CameraRotationMod.Patches
             // Enquanto ativo: o alvo da mola vai a Stance 0 (mais abaixo) E o ADS nativo é segurado (aqui).
             // Em prone o mod força Stance 0 (item 013) → isInStance já é false, mas passamos !prone explícito
             // para não manter um waypoint armado antes de deitar.
-            bool waypointActive = _waypoint.Update(isAiming, isInStance && !player.IsInPronePose, dt);
+            bool waypointActive = _waypoint.Update(isAiming, isInStance && !player.IsInPronePose, dt, currentStance);
             if (waypointActive && _aimingSpeedField != null)
             {
                 if (!_gated)

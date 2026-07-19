@@ -7,6 +7,18 @@ Versões mais recentes primeiro.
 
 ---
 
+## v2.7.1 (2026-07-19)
+
+### Ajustes
+
+- **`ADS Waypoint` agora é por postura.** As opções `ADS Waypoint` e `ADS Waypoint Time (ms)` saíram da seção
+  geral e viraram **uma por postura** (dentro de cada seção `Stance 1/2/3`) — cada postura liga/desliga e calibra
+  o próprio tempo. (As posturas se comportam diferente ao mirar; a Low Ready costuma pedir um tempo diferente da
+  High Ready.) As duas opções globais antigas foram removidas — as novas nascem ligadas, 120 ms.
+- **`Stance N Movement Speed Multiplier` saiu de "Advanced"** — aparece agora sem precisar ligar o modo avançado.
+
+---
+
 ## v2.7.0 (2026-07-18)
 
 ### Novidade — transição suave de High/Low Ready para a mira (fim do "loop" vertical)

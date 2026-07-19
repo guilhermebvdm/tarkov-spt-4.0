@@ -25,17 +25,19 @@ namespace CameraRotationMod
         public bool Active => _active;
 
         /// <summary>Chamar todo frame ANTES de calcular o alvo da mola. Detecta a borda de entrada em ADS
-        /// internamente e decrementa o timer. Retorna <see cref="Active"/>.</summary>
-        public bool Update(bool isAiming, bool isInStance, float dt)
+        /// internamente e decrementa o timer. Lê a config (enable + ms) da <paramref name="stance"/> de origem
+        /// — item 017 F1: cada stance calibra o seu waypoint. Retorna <see cref="Active"/>.</summary>
+        public bool Update(bool isAiming, bool isInStance, float dt, Stance stance)
         {
-            bool enabled = Plugin._AdsWaypoint?.Value ?? true;
             bool resetOnAds = Plugin._ResetOnADS?.Value ?? false;
 
             // Borda de entrada em ADS estando em stance (e com ResetOnADS — sem ele a pose já continua em ADS,
-            // então não há salto a suavizar). Sai de stance/ADS não arma.
-            if (isAiming && !_wasAiming && isInStance && enabled && resetOnAds)
+            // então não há salto a suavizar). Config por-stance: enable + ms da stance de origem.
+            if (isAiming && !_wasAiming && isInStance && resetOnAds
+                && Plugin._stanceConfigs.TryGetValue(stance, out var cfg)
+                && (cfg.AdsWaypoint?.Value ?? false))
             {
-                _msRemaining = Mathf.Max(0f, Plugin._AdsWaypointTime?.Value ?? 120);
+                _msRemaining = Mathf.Max(0f, cfg.AdsWaypointTime?.Value ?? 0);
                 _active = _msRemaining > 0f;
             }
             _wasAiming = isAiming;
