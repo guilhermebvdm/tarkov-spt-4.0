@@ -148,32 +148,12 @@ namespace TrueTrauma
                 {
                     if (!__instance.MovementContext.IsInPronePose)
                     {
-                        bool leftBroken = __instance.HealthController.IsBodyPartBroken(EBodyPart.LeftLeg);
-                        bool rightBroken = __instance.HealthController.IsBodyPartBroken(EBodyPart.RightLeg);
-                        
-                        bool randomFracture = UnityEngine.Random.Range(0, 100) < 30;
-                        bool appliedFracture = false;
-
-                        if (randomFracture && (!leftBroken || !rightBroken))
-                        {
-                            EBodyPart target = !leftBroken ? EBodyPart.LeftLeg : EBodyPart.RightLeg;
-                            __instance.ActiveHealthController?.DoFracture(target);
-                            appliedFracture = true;
-                        }
-
-                        if (!appliedFracture)
-                        {
-                            DamageInfoStruct dmg = default;
-                            dmg.Damage = 15f;
-                            dmg.DamageType = EDamageType.Fall;
-                            __instance.ActiveHealthController?.ApplyDamage(EBodyPart.LeftLeg, 15f, dmg);
-                        }
-
-                        if (!__instance.MovementContext.IsInPronePose)
-                        {
-                            __instance.MovementContext.SetPoseLevel(0f, true);
-                            __instance.MovementContext.IsInPronePose = true;
-                        }
+                        // ref: spec 002 §4 (decisão 21) — injeção legacy APOSENTADA: saíram o roll de 30%
+                        // de fratura (DoFracture) e os 15 de dano (ApplyDamage) ao tentar levantar com as
+                        // 2 pernas zeradas; o motor Trauma 2.0 é puramente reativo. Re-forçar prone + voz +
+                        // LegPenaltyTimers permanecem — o resto do sistema legado sai nos itens 003/004.
+                        __instance.MovementContext.SetPoseLevel(0f, true);
+                        __instance.MovementContext.IsInPronePose = true;
 
                         VoiceHelper.TriggerTraumaVoice(__instance, "Leg");
                         TraumaState.LegPenaltyTimers[id] = now;

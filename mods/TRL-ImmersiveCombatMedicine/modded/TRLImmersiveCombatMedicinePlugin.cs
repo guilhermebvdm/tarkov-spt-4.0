@@ -6,10 +6,11 @@ using UnityEngine;
 using Band_Aid;
 using TrueTrauma;
 using System.Reflection;
+using TRLImmersiveCombatMedicine.Trauma;
 
 namespace TRLImmersiveCombatMedicine
 {
-    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.1.1")]
+    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.2.0")]
     public class TRLImmersiveCombatMedicinePlugin : BaseUnityPlugin
     {
         public static TRLImmersiveCombatMedicinePlugin Instance;
@@ -31,11 +32,24 @@ namespace TRLImmersiveCombatMedicine
         public static ConfigEntry<EBandAidPressMode> EmergencyDropMode;
         public static ConfigEntry<float> MedicInteractDistance;
 
+        // --- Trauma 2.0 Configs (spec 002 §3) ---
+        public static ConfigEntry<bool> ConfigTrauma2Enabled;
+        public static ConfigEntry<bool> ConfigIncludeAdrenaline;
+        public static ConfigEntry<float> ConfigOneShotCooldown;
+        public static ConfigEntry<float> ConfigPollingHz;
+        public static ConfigEntry<bool> ConfigVerboseEngineLog;
+        public static ConfigEntry<bool> ConfigConsumerLegsEffects;
+        public static ConfigEntry<bool> ConfigConsumerFallCycle;
+        public static ConfigEntry<bool> ConfigConsumerArmsEffects;
+        public static ConfigEntry<bool> ConfigConsumerStomachEffects;
+        public static ConfigEntry<bool> ConfigConsumerBlackout2;
+        public static ConfigEntry<bool> ConfigDebugTestConsumer;
+
         private void Awake()
         {
             Instance = this;
             ModLogger = base.Logger;
-            ModLogger.LogInfo("TRL-ImmersiveCombatMedicine Plugin v1.1.1 carregado.");
+            ModLogger.LogInfo("TRL-ImmersiveCombatMedicine Plugin v1.2.0 carregado.");
 
             // Inicializações combinadas
             ItemDatabase.Initialize();
@@ -64,6 +78,37 @@ namespace TRLImmersiveCombatMedicine
                 new ConfigDescription("Distancia (m) do prompt E do acionamento do modo medico (mesma regra). Valor alto para testes; reduzir no pacote final.",
                     new AcceptableValueRange<float>(1f, 15f)));
 
+            // Configs Trauma 2.0 (spec 002 §3) — keys em EN (migração dos textos antigos é o item 010).
+            // Semântica dos toggles: motor publica com "Ativar Mod" E "Enable Trauma 2.0" on; consumidores
+            // auto-gateiam pelos toggles da seção 6 (nascem OFF até os itens 003+ entregarem).
+            var advanced = new ConfigurationManagerAttributes { IsAdvanced = true };
+            ConfigTrauma2Enabled = Config.Bind("5. Trauma 2.0 (Motor)", "Enable Trauma 2.0", true,
+                "Liga o motor de estados de trauma. Sem consumidores ligados não há NENHUM efeito de gameplay — só rastreamento e log. Desligar mid-raid publica a saída de todos os estados ativos.");
+            ConfigIncludeAdrenaline = Config.Bind("5. Trauma 2.0 (Motor)", "Include Adrenaline As Painkiller", true,
+                "Berserk/adrenalina conta como analgésico (paridade com o jogo — é o que o EFT considera em OnPainkillers).");
+            ConfigOneShotCooldown = Config.Bind("5. Trauma 2.0 (Motor)", "One-Shot Cooldown Seconds", 4f,
+                new ConfigDescription("Anti-thrash (decisão 19): o mesmo one-shot involuntário (agachar/cair) não re-dispara nesse intervalo, por jogador e por tipo. Ciclos internos dos consumidores são isentos.",
+                    new AcceptableValueRange<float>(3f, 5f)));
+            ConfigPollingHz = Config.Bind("5. Trauma 2.0 (Motor)", "Reconciliation Polling Hz", 2f,
+                new ConfigDescription("Frequência do polling de reconciliação (cobre só caminhos sem evento: cirurgia FullRestore, revive do Fika, transit heal). Teto 4 Hz (D19).",
+                    new AcceptableValueRange<float>(1f, 4f), advanced));
+            ConfigVerboseEngineLog = Config.Bind("5. Trauma 2.0 (Motor)", "Verbose Engine Log", false,
+                new ConfigDescription("Loga detalhes de avaliação/polling. Transições de estado e supressões são SEMPRE logadas, independente desta opção.",
+                    null, advanced));
+            ConfigConsumerLegsEffects = Config.Bind("6. Trauma 2.0 (Consumidores)", "Legs Effects (item 003)", false,
+                "Placeholder — efeitos de mancar N1/N2. Sem função até o item 003.");
+            ConfigConsumerFallCycle = Config.Bind("6. Trauma 2.0 (Consumidores)", "Fall Cycle (item 004)", false,
+                "Placeholder — cair + ciclo de levantar. Sem função até o item 004.");
+            ConfigConsumerArmsEffects = Config.Bind("6. Trauma 2.0 (Consumidores)", "Arms Effects (item 005)", false,
+                "Placeholder — tremor + cancela-ADS. Sem função até o item 005.");
+            ConfigConsumerStomachEffects = Config.Bind("6. Trauma 2.0 (Consumidores)", "Stomach Effects (item 006)", false,
+                "Placeholder — agachar involuntário do estômago. Sem função até o item 006.");
+            ConfigConsumerBlackout2 = Config.Bind("6. Trauma 2.0 (Consumidores)", "Blackout 2.0 (item 007)", false,
+                "Placeholder — desmaio percentual. Sem função até o item 007 (o desmaio ATUAL segue no toggle antigo \"Sistema de Desmaio\").");
+            ConfigDebugTestConsumer = Config.Bind("6. Trauma 2.0 (Consumidores)", "Debug Test Consumer", false,
+                new ConfigDescription("Consumidor de teste SEM efeito de gameplay: registra-se ATIVO para as TRÊS regiões (pernas/braços/estômago), destravando o toast/i18n para validação (AC5 da spec funcional).",
+                    null, advanced));
+
             // ref: CR-02 — o reparo de encoding (CR-01-06) corrigiu a KEY
             // 'Sistema de Braços' (era mojibake); BepInEx casa por bytes, então o
             // valor salvo do usuário virou órfão. Migração one-time do valor antigo.
@@ -83,6 +128,7 @@ namespace TRLImmersiveCombatMedicine
             // destruição explícita.
             gameObject.AddComponent<BandAidUI>();
             gameObject.AddComponent<BandAidController>();
+            gameObject.AddComponent<TraumaEngine>(); // motor Trauma 2.0 (spec 002) — inerte até OnRaidStarted()
 
             // [DEBUG-ICM] sondas de lifecycle — remover após diagnóstico do prompt F
             _debugHost = gameObject;
@@ -203,6 +249,9 @@ namespace TRLImmersiveCombatMedicine
             // esquecia IsFainted e LegPenaltyTimers → prone/wake fantasma na raid seguinte)
             TraumaState.ResetAll();
             AudioListener.volume = 1f; // ref: CR-01-13 — cinto-e-suspensório no início
+            // ref: spec 002 §2 — motor Trauma 2.0: reset idempotente + subscribe + avaliação
+            // inicial estabelecedora; dispara de novo na chegada de transit (novo GameWorld)
+            TraumaEngine.OnRaidStarted();
             TraumaState.Logger.LogInfo("TRL-ImmersiveCombatMedicine: Estado limpo para nova raid.");
         }
 
