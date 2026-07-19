@@ -197,6 +197,7 @@ namespace SPT.Launcher.Helpers
             locale.open_link = "Abrir Link";
             locale.dev_mode = "Modo Desenvolvedor";
             locale.failed_to_save_settings = "Falha ao salvar configurações";
+            locale.change_server_confirm = "Trocar de servidor vai te desconectar e voltar para a tela de login. Deseja continuar?";
             locale.register_failed_name_limit = "O nome não pode exceder 15 caracteres";
             locale.copy_failed = "Falha ao copiar para a área de transferência";
             locale.copy_logs_to_clipboard = "Copiar logs";
@@ -310,6 +311,13 @@ namespace SPT.Launcher.Helpers
         {
             get => _failed_to_save_settings;
             set => SetProperty(ref _failed_to_save_settings, value);
+        }
+
+        private string _change_server_confirm;
+        public string change_server_confirm
+        {
+            get => _change_server_confirm;
+            set => SetProperty(ref _change_server_confirm, value);
         }
         #endregion
         

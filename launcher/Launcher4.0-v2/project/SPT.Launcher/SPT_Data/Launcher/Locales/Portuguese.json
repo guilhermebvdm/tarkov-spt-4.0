@@ -96,6 +96,7 @@
   "open_link": "Abrir Link",
   "dev_mode": "Modo Desenvolvedor",
   "failed_to_save_settings": "Falha ao salvar configurações",
+  "change_server_confirm": "Trocar de servidor vai te desconectar e voltar para a tela de login. Deseja continuar?",
   "core_dll_file_version_mismatch": "A versão do arquivo BepinEx/plugins/spt/spt-core.dll não corresponde ao esperado e não é possível iniciar. Tente reinstalar o SPT",
   "register_failed_name_limit": "o nome não pode exceder 15 caracteres",
   "copy_failed": "Falha ao copiar dados para a área de transferência",

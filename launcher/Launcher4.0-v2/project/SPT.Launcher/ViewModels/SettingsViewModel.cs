@@ -118,9 +118,16 @@ namespace SPT.Launcher.ViewModels
         public bool SlimMode { get; }
         public bool ShowSidebar => !SlimMode;
 
+        // Estado do servidor ao ABRIR Configurações — para detectar (ao sair) se o usuário trocou o
+        // servidor (via campo de URL ou checkbox "usar servidor local") e então reconectar de verdade.
+        private readonly string _initialServerUrl;
+        private readonly bool _initialUseLocalServer;
+
         public SettingsViewModel(IScreen Host, bool slim = false) : base(Host)
         {
             SlimMode = slim;
+            _initialServerUrl = LauncherSettingsProvider.Instance.Server?.Url;
+            _initialUseLocalServer = LauncherSettingsProvider.Instance.UseLocalServer;
 
             if(Application.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
             {
@@ -283,6 +290,46 @@ namespace SPT.Launcher.ViewModels
                 SendNotification("", LocalizationProvider.Instance.failed_to_save_settings, NotificationType.Error);
             }
 
+            // Trocou de servidor (campo URL OU checkbox "usar servidor local")? Precisa RECONECTAR de
+            // verdade no novo IP — reexecutar o fluxo inicial (ConnectServer), não só NavigateBack (que
+            // voltaria pra tela anterior ainda no servidor antigo). Troca ida-e-volta pro mesmo valor = sem efeito.
+            bool serverChanged = !string.Equals(_initialServerUrl,
+                LauncherSettingsProvider.Instance.Server?.Url, StringComparison.OrdinalIgnoreCase);
+
+            if (serverChanged)
+            {
+                if (AccountManager.SelectedAccount != null)
+                {
+                    // Logado: confirma (avisando que desloga) antes de aplicar. i18n.
+                    var confirm = await ShowDialog(new Dialogs.ConfirmationDialogViewModel(
+                        null, LocalizationProvider.Instance.change_server_confirm));
+
+                    if (confirm is bool and true)
+                    {
+                        // Desloga e RESETA a stack pro fluxo inicial (não empilha — evita acúmulo de
+                        // ConnectServer/Login/Profile a cada troca). NoAutoLogin = cai no login, deslogado.
+                        AccountManager.Logout();
+                        HostScreen.Router.NavigateAndReset.Execute(new ConnectServerViewModel(HostScreen, NoAutoLogin: true));
+                    }
+                    else
+                    {
+                        // Cancelou: reverte a troca (URL + checkbox) e volta sem reconectar.
+                        LauncherSettingsProvider.Instance.Server.Url = _initialServerUrl;
+                        LauncherSettingsProvider.Instance.UseLocalServer = _initialUseLocalServer;
+                        LauncherSettingsProvider.Instance.SaveSettings();
+                        NavigateBack();
+                    }
+                }
+                else
+                {
+                    // Não logado: sem confirmação. Reseta pro fluxo inicial no novo IP (idêntico ao boot).
+                    HostScreen.Router.NavigateAndReset.Execute(new ConnectServerViewModel(HostScreen));
+                }
+
+                return;
+            }
+
+            // Sem troca de servidor → comportamento original.
             // Se tem opcionais pendentes, criar novo ProfileViewModel (roda InitializeAsync com progresso)
             bool hasPending = LauncherSettingsProvider.Instance.PendingOptionalChanges.Count > 0;
             if (hasPending)
