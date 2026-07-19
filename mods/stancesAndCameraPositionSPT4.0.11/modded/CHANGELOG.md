@@ -7,6 +7,26 @@ Versões mais recentes primeiro.
 
 ---
 
+## v2.8.0 (2026-07-19)
+
+### Novidade — compressão da velocidade de ADS (uniformizar leves × pesadas)
+
+Armas muito leves miram rápido demais, pesadas devagar demais. Duas opções novas (seção `Stance Transition &
+Kick`) puxam os dois extremos **em direção a um ponto central**, deixando a velocidade de mira mais uniforme entre
+armas:
+
+| Opção | O quê |
+|---|---|
+| `ADS Speed Compression (%)` | 0 = velocidade nativa do jogo (sem efeito). 100 = todas as armas na mesma velocidade (a do pivô). Valores no meio puxam leves e pesadas para o centro. |
+| `ADS Speed Pivot` | A velocidade que fica **inalterada** (o centro da compressão). Maior = mais rápido. Calibre pela sensação. |
+
+Funciona em **escala logarítmica** (natural para velocidade): com 50% e o pivô no centro, uma arma "2× mais
+rápida que o pivô" vira "1,4× mais rápida", e uma "2× mais lenta" vira "1,4× mais lenta". Mexer nos sliders
+reflete **na hora** (sem precisar re-sacar a arma). Só a velocidade de subida da mira — não afeta recuo, dano nem
+nada de coop.
+
+---
+
 ## v2.7.1 (2026-07-19)
 
 ### Ajustes

@@ -78,6 +78,14 @@ namespace CameraRotationMod.Patches
             _waypoint.Reset();
         }
 
+        /// <summary>Item 017 (F3) — a compressão de ADS-speed reescreveu o valor BASE do aim-speed deste PWA.
+        /// Se estamos segurando (gateando) o MESMO PWA, o valor a restaurar ao soltar o gate passa a ser o novo
+        /// base comprimido — senão o restore reporia o valor pré-compressão.</summary>
+        public static void OnBaseAimSpeedChanged(EFT.Animations.ProceduralWeaponAnimation pwa, float newBase)
+        {
+            if (_gated && ReferenceEquals(_gatedPwa, pwa)) _savedAimingSpeed = newBase;
+        }
+
         // O kick injeta velocidade na mola; amostras medidas com kick ativo saem marcadas "(kick)" no
         // [METRICS] (pico/settle contaminados pela perturbação; filtráveis no baseline).
         public static bool KickActive => _kickSustainTimer > 0f || _waitingForAdsKick;

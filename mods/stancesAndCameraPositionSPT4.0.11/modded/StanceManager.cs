@@ -850,6 +850,7 @@ namespace CameraRotationMod
             Patches.ApplyComplexRotationPatch.ResetSpeedTracker();
             Patches.ApplyComplexRotationPatch.ResetMetrics(); // item 017 (F0) — régua de transição
             Patches.ApplyComplexRotationPatch.ResetWaypoint(); // item 017 (F1) — waypoint + gate de aim-speed
+            Patches.AdsSpeedCompressionPatch.Reset(); // item 017 (F3) — compressão de ADS-speed
 
             _isTacSprintActive = false;
             _wasAiming = false;

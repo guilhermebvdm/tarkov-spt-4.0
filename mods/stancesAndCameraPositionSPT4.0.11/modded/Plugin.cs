@@ -20,7 +20,7 @@ public enum ScrollMode
     Linear,
 }
 
-[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "2.7.1")]
+[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "2.8.0")]
 public class Plugin : BaseUnityPlugin
 {
     public static Plugin Instance { get; private set; }
@@ -94,6 +94,8 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<float> _StanceKickIntensity;
     public static ConfigEntry<float> _ADSKickDelay;
     // Item 017 (F1): o waypoint virou POR STANCE (StanceConfig.AdsWaypoint/AdsWaypointTime) — sem globais.
+    public static ConfigEntry<int> _AdsSpeedCompression;  // item 017 (F3) — % de compressão
+    public static ConfigEntry<float> _AdsSpeedPivot;      // item 017 (F3) — centro da compressão
     public static ConfigEntry<float> _StanceOvershootDamping;
 
     // Hold Breath
@@ -460,6 +462,28 @@ public class Plugin : BaseUnityPlugin
             new ConfigurationManagerAttributes { Order = 95 }));
 
         // Item 017 (F1): o waypoint por Stance 0 ao mirar é POR STANCE — ver BindStance (seção de cada Stance).
+
+        // Item 017 (F3) — compressão da velocidade de ADS: puxa os extremos (armas muito leves/rápidas e
+        // pesadas/lentas) em direção a um pivô. Aplicada em UpdateWeaponVariables (AdsSpeedCompressionPatch).
+        _AdsSpeedCompression = Config.Bind(
+            GeneralSection,
+            "ADS Speed Compression (%)",
+            0,
+            new ConfigDescription("Pulls ADS raise speed toward a central pivot: light/fast guns get slower, heavy/slow guns get faster. 0 = native EFT speed, 100 = every gun at the pivot speed. Log-space, so it compresses the ratio evenly.\n\nPuxa a velocidade de subida da mira para um pivô central: armas leves/rápidas ficam mais lentas, pesadas/lentas ficam mais rápidas. 0 = velocidade nativa do EFT, 100 = toda arma na velocidade do pivô. Em escala logarítmica (comprime a razão de forma uniforme).",
+            new AcceptableValueRange<int>(0, 100),
+            new ConfigurationManagerAttributes { Order = 92 }));
+
+        _AdsSpeedPivot = Config.Bind(
+            GeneralSection,
+            "ADS Speed Pivot",
+            1.5f,
+            new ConfigDescription("The aim-speed value that stays unchanged by the compression (the center). Higher = faster. This is the EFT internal aim-speed (~0.4 slow .. ~2.9 fast); calibrate by feel. Only matters when Compression > 0.\n\nO valor de aim-speed que a compressão deixa inalterado (o centro). Maior = mais rápido. É o aim-speed interno do EFT (~0.4 lento .. ~2.9 rápido); calibre pela sensação. Só importa com Compressão > 0.",
+            new AcceptableValueRange<float>(0.3f, 4.0f),
+            new ConfigurationManagerAttributes { Order = 91 }));
+
+        // Reaplica a compressão ao vivo quando o usuário mexe nos sliders (sem re-sacar a arma).
+        _AdsSpeedCompression.SettingChanged += (_, __) => Patches.AdsSpeedCompressionPatch.Reapply();
+        _AdsSpeedPivot.SettingChanged += (_, __) => Patches.AdsSpeedCompressionPatch.Reapply();
 
         // ========================================
         // backlog 002 F3 — STANCE HOTKEYS DEDICADAS (Order 53 → 50)
@@ -1218,6 +1242,7 @@ public class Plugin : BaseUnityPlugin
         gameObject.AddComponent<UI.OxygenUI>();
 
         // Stamina de braço — item 012: StaminaController (Plugin.Update) + neutralização do vanilla
+        SafeEnable("AdsSpeedCompressionPatch", () => new Patches.AdsSpeedCompressionPatch()); // item 017 F3
         SafeEnable("HandsStaminaNeutralizePatch", () => new Patches.HandsStaminaNeutralizePatch());
         SafeEnable("HandsConsumeNeutralizePatch", () => new Patches.HandsConsumeNeutralizePatch());
         SafeEnable("GameWorldOnGameStartedPatch", () => new GameWorldOnGameStartedPatch());
