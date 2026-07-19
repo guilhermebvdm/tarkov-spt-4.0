@@ -51,7 +51,9 @@ namespace SPT.Launcher.ViewModels
         {
             try
             {
-                OnUi(() => LauncherSettingsProvider.Instance.AllowSettings = false);
+                // Gear de Configurações fica DISPONÍVEL durante a conexão (o usuário pode precisar trocar o
+                // IP se estiver preso reconectando). Só o jogo em andamento desliga o acesso a Settings.
+                OnUi(() => LauncherSettingsProvider.Instance.AllowSettings = true);
                 LogManager.Instance.Info("[Connect] Iniciando conexão ao servidor...");
 
                 // 1. Obtém a URL oficial do servidor via Pastebin (precisa ser antes da VPN para sabermos para onde mandar o registro)

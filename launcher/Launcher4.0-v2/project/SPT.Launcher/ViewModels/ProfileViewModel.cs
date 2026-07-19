@@ -473,8 +473,12 @@ namespace SPT.Launcher.ViewModels
         public void OpenModsInfoCommand() =>
             NavigateTo(new ModInfoViewModel(HostScreen, ModInfoCollection));
 
-        public void OpenSettingsCommand() =>
+        public void OpenSettingsCommand()
+        {
+            // Esconde o gear da topbar enquanto está em Configurações (senão abriria outra por cima).
+            LauncherSettingsProvider.Instance.AllowSettings = false;
             NavigateTo(new SettingsViewModel(HostScreen));
+        }
 
         public void OpenLinkCommand(string url)
         {

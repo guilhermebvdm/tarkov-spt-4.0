@@ -370,7 +370,7 @@ namespace SPT.Launcher.ViewModels
                     continue;
                 }
 
-                string description = FirstNonEmpty(info.Description?.Pt, info.Description?.En);
+                string description = Pick(info.Description?.En, info.Description?.Pt);
 
                 if (string.IsNullOrEmpty(description) && vanillaDescriptions != null && vanillaDescriptions.TryGetValue(info.EditionKey, out string vanillaDescription))
                 {
@@ -380,7 +380,7 @@ namespace SPT.Launcher.ViewModels
                 ClassProfile profile = new ClassProfile
                 {
                     EditionKey = info.EditionKey,
-                    Name = FirstNonEmpty(info.DisplayName?.Pt, info.DisplayName?.En) ?? info.EditionKey,
+                    Name = Pick(info.DisplayName?.En, info.DisplayName?.Pt) ?? info.EditionKey,
                     Description = description ?? string.Empty,
                     NameBrush = ParseNameColor(info.NameColor),
                     Skills = info.Skills,
@@ -575,8 +575,8 @@ namespace SPT.Launcher.ViewModels
 
             return new PerkEffectRow
             {
-                Title = FirstNonEmpty(effect.Title?.Pt, effect.Title?.En) ?? string.Empty,
-                Label = FirstNonEmpty(effect.Label?.Pt, effect.Label?.En) ?? string.Empty,
+                Title = Pick(effect.Title?.En, effect.Title?.Pt) ?? string.Empty,
+                Label = Pick(effect.Label?.En, effect.Label?.Pt) ?? string.Empty,
                 ValueToken = effect.ValueToken ?? string.Empty,
                 Pending = pending,
                 AccentBrush = accent,
@@ -607,6 +607,13 @@ namespace SPT.Launcher.ViewModels
 
             return null;
         }
+
+        /// <summary>Idioma atual da UI = inglês? (ietf_tag do locale). Só en/pt são suportados.</summary>
+        private static bool IsEnglish =>
+            string.Equals(LocalizationProvider.Instance?.ietf_tag, "en", StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>Escolhe en/pt do conteúdo servido pelo CustomClasses conforme o idioma da UI (com fallback).</summary>
+        private static string Pick(string en, string pt) => IsEnglish ? FirstNonEmpty(en, pt) : FirstNonEmpty(pt, en);
 
         // === Fallback de ícone bundlado (Assets/ClassIcons) por match de nome ===
 

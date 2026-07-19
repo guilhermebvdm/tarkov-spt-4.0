@@ -102,6 +102,14 @@ namespace SPT.Launcher.ViewModels
 
         public void GoToSettingsCommand()
         {
+            // Já em Configurações? Não empilhar outra por cima (o gear fica visível na tela de conexão,
+            // mas se o usuário já está em Settings o clique deve ser no-op).
+            int count = Router.NavigationStack.Count;
+            if (count > 0 && Router.NavigationStack[count - 1] is SettingsViewModel)
+            {
+                return;
+            }
+
             LauncherSettingsProvider.Instance.AllowSettings = false;
 
             Router.Navigate.Execute(new SettingsViewModel(this));
