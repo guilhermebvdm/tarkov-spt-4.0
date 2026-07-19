@@ -1,7 +1,7 @@
 # Graph Report - mods\CustomClasses\modded  (2026-07-19)
 
 ## Corpus Check
-- 115 files · ~111,013 words
+- 115 files · ~111,050 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f63e9657`
+- Built from commit: `47d30935`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -411,8 +411,8 @@ Cohesion: 0.20
 Nodes (9): CustomClasses.Web, DialogActions, DialogContent, ItemSpecEditor, MudButton, MudDialog, MudText, TitleContent (+1 more)
 
 ### Community 79 - "Community 79"
-Cohesion: 0.11
-Nodes (14): ActiveHealthController, DamageInfoStruct, FirearmController, float, MethodBase, PatchPostfix, PatchPrefix, ChangeEnergyPatch (+6 more)
+Cohesion: 0.16
+Nodes (9): ActiveHealthController, DamageInfoStruct, MethodBase, PatchPrefix, ChangeEnergyPatch, ChangeHydrationPatch, ExecutionMeleePatch, HeavyFrameMetabolism (+1 more)
 
 ### Community 80 - "Community 80"
 Cohesion: 0.21
@@ -451,8 +451,8 @@ Cohesion: 0.24
 Nodes (7): ClassColorEntry, Color, ConfigEntry, Dictionary, string, PerksConfig, ConfigFile
 
 ### Community 90 - "Community 90"
-Cohesion: 0.14
-Nodes (11): MethodBase, float, MethodBase, ForceEffector, ModulePatch, AdrenalineTriggerPatch, AimPunchPatch, HeavyWeaponErgoPatch (+3 more)
+Cohesion: 0.22
+Nodes (6): DamageInfoStruct, MethodBase, PatchPostfix, Player, ModulePatch, AdrenalineTriggerPatch
 
 ### Community 91 - "Community 91"
 Cohesion: 0.17
@@ -515,12 +515,12 @@ Cohesion: 0.25
 Nodes (5): ChatSpecialIcon, MethodBase, PatchPostfix, TextMeshProUGUI, PlayerModelWithStatsIdentityPatch
 
 ### Community 110 - "Community 110"
-Cohesion: 0.50
-Nodes (3): DamageInfoStruct, PatchPostfix, Player
+Cohesion: 0.33
+Nodes (5): FirearmController, float, PatchPostfix, IronLungsPatch, PlayerPhysicalClass
 
 ### Community 111 - "Community 111"
-Cohesion: 0.16
-Nodes (8): FirearmController, PatchPostfix, PatchPrefix, Player, ProceduralWeaponAnimation, Weapon, AdsSpeedPatch, HeavyWeapon
+Cohesion: 0.10
+Nodes (16): FirearmController, float, MethodBase, PatchPostfix, PatchPrefix, Player, ProceduralWeaponAnimation, Weapon (+8 more)
 
 ### Community 112 - "Community 112"
 Cohesion: 0.29

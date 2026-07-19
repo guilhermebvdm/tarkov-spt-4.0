@@ -2,7 +2,7 @@
 
 > **Data:** 2026-07-19<br>
 > **Autor da sessão:** Guilherme (+ agente)<br>
-> **Mods:** `mods/CustomClasses/` **v0.5.0** + `mods/TRL-ImmersiveCombatMedicine/` (ICM) **v1.2.3** — feature CROSS-MOD<br>
+> **Mods:** `mods/CustomClasses/` **v0.5.1** + `mods/TRL-ImmersiveCombatMedicine/` (ICM) **v1.2.3** — feature CROSS-MOD<br>
 > **Commits:** `946c7a74` (feature) · `9eaaae5b` (grafo ICM) · branch `main`, **NADA pushado**<br>
 
 ---
@@ -36,6 +36,7 @@ O perk faz a cirurgia do **Médico de Combate** (CMS/Surv12 restaurando um membr
 | **AC-8** | Slider `Max HP penalty mult` = 1.0 no F12 | comportamento **vanilla** (perk efetivamente off). 0.5 = metade da cicatriz. |
 | **AC-9** | CustomClasses instalado, ICM ausente | auto-cirurgia funciona; ally-surgery não existe (sem ICM). Sem crash. |
 | **AC-10** | ICM instalado, CustomClasses ausente | cirurgia **vanilla** em tudo (bridge fail-open). Sem crash. |
+| **AC-11 (UI)** | Abrir a aba CLASS como Médico | **Restorative Surgery** aparece na lista de perks (grupo Médico), no tooltip e na notificação de raid-start. *(v0.5.1: registrado no `PerksCatalog` como `Flag`; a v0.5.0 tinha o mecanismo mas NÃO exibia o perk.)* |
 
 ⚠️ **Como medir AC-1..AC-6 in-game:** operar um membro *blacked* e conferir o **HP máximo** daquele membro na tela de Health (a barra do membro). Cheio = perk funcionou. O `Perk Diagnostics` do F12 NÃO cobre cirurgia (não há linha), então é observação direta da barra de HP do membro.
 

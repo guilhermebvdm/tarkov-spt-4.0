@@ -580,7 +580,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "patches_adrenalinetriggerpatch_adrenalinetriggerpatch_postfix",
-      "community": 110,
+      "community": 90,
       "norm_label": ".postfix()"
     },
     {
@@ -590,7 +590,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "client_patches_adrenalinetriggerpatch_cs_player",
-      "community": 110,
+      "community": 90,
       "norm_label": "player"
     },
     {
@@ -600,7 +600,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "client_patches_adrenalinetriggerpatch_cs_damageinfostruct",
-      "community": 110,
+      "community": 90,
       "norm_label": "damageinfostruct"
     },
     {
@@ -610,7 +610,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "client_patches_adrenalinetriggerpatch_cs_patchpostfix",
-      "community": 110,
+      "community": 90,
       "norm_label": "patchpostfix"
     },
     {
@@ -1050,7 +1050,7 @@
       "source_location": "L134",
       "_origin": "ast",
       "id": "patches_classcombathealthpatches_ironlungspatch",
-      "community": 79,
+      "community": 110,
       "norm_label": "ironlungspatch"
     },
     {
@@ -1060,7 +1060,7 @@
       "source_location": "L136",
       "_origin": "ast",
       "id": "playerphysicalclass",
-      "community": 79,
+      "community": 110,
       "norm_label": "playerphysicalclass"
     },
     {
@@ -1070,7 +1070,7 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "client_patches_classcombathealthpatches_cs_float",
-      "community": 79,
+      "community": 110,
       "norm_label": "float"
     },
     {
@@ -1090,7 +1090,7 @@
       "source_location": "L144",
       "_origin": "ast",
       "id": "patches_classcombathealthpatches_ironlungspatch_postfix",
-      "community": 79,
+      "community": 110,
       "norm_label": ".postfix()"
     },
     {
@@ -1100,7 +1100,7 @@
       "source_location": "L144",
       "_origin": "ast",
       "id": "client_patches_classcombathealthpatches_cs_patchpostfix",
-      "community": 79,
+      "community": 110,
       "norm_label": "patchpostfix"
     },
     {
@@ -1130,7 +1130,7 @@
       "source_location": "L185",
       "_origin": "ast",
       "id": "patches_classcombathealthpatches_malfunctionchancepatch_postfix",
-      "community": 79,
+      "community": 110,
       "norm_label": ".postfix()"
     },
     {
@@ -1140,7 +1140,7 @@
       "source_location": "L185",
       "_origin": "ast",
       "id": "client_patches_classcombathealthpatches_cs_firearmcontroller",
-      "community": 79,
+      "community": 110,
       "norm_label": "firearmcontroller"
     },
     {
@@ -2360,7 +2360,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "patches_classweaponpatches",
-      "community": 90,
+      "community": 111,
       "norm_label": "classweaponpatches.cs"
     },
     {
@@ -2370,7 +2370,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "patches_classweaponpatches_shootrecoilpatch",
-      "community": 90,
+      "community": 111,
       "norm_label": "shootrecoilpatch"
     },
     {
@@ -2380,7 +2380,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "patches_classweaponpatches_shootrecoilpatch_gettargetmethod",
-      "community": 90,
+      "community": 111,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2390,7 +2390,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_methodbase",
-      "community": 90,
+      "community": 111,
       "norm_label": "methodbase"
     },
     {
@@ -2430,7 +2430,7 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "patches_classweaponpatches_reloadspeedpatch",
-      "community": 90,
+      "community": 111,
       "norm_label": "reloadspeedpatch"
     },
     {
@@ -2440,7 +2440,7 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "patches_classweaponpatches_reloadspeedpatch_gettargetmethod",
-      "community": 90,
+      "community": 111,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2510,7 +2510,7 @@
       "source_location": "L167",
       "_origin": "ast",
       "id": "patches_classweaponpatches_heavyweaponergopatch",
-      "community": 90,
+      "community": 111,
       "norm_label": "heavyweaponergopatch"
     },
     {
@@ -2520,7 +2520,7 @@
       "source_location": "L169",
       "_origin": "ast",
       "id": "patches_classweaponpatches_heavyweaponergopatch_gettargetmethod",
-      "community": 90,
+      "community": 111,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2590,7 +2590,7 @@
       "source_location": "L231",
       "_origin": "ast",
       "id": "patches_classweaponpatches_aimpunchpatch",
-      "community": 90,
+      "community": 111,
       "norm_label": "aimpunchpatch"
     },
     {
@@ -2600,7 +2600,7 @@
       "source_location": "L233",
       "_origin": "ast",
       "id": "patches_classweaponpatches_aimpunchpatch_gettargetmethod",
-      "community": 90,
+      "community": 111,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -2610,7 +2610,7 @@
       "source_location": "L240",
       "_origin": "ast",
       "id": "patches_classweaponpatches_aimpunchpatch_prefix",
-      "community": 90,
+      "community": 111,
       "norm_label": ".prefix()"
     },
     {
@@ -2620,7 +2620,7 @@
       "source_location": "L240",
       "_origin": "ast",
       "id": "forceeffector",
-      "community": 90,
+      "community": 111,
       "norm_label": "forceeffector"
     },
     {
@@ -2630,7 +2630,7 @@
       "source_location": "L289",
       "_origin": "ast",
       "id": "patches_classweaponpatches_localhittypepatch",
-      "community": 90,
+      "community": 111,
       "norm_label": "localhittypepatch"
     },
     {
@@ -2640,7 +2640,7 @@
       "source_location": "L294",
       "_origin": "ast",
       "id": "client_patches_classweaponpatches_cs_float",
-      "community": 90,
+      "community": 111,
       "norm_label": "float"
     },
     {
@@ -2650,7 +2650,7 @@
       "source_location": "L296",
       "_origin": "ast",
       "id": "patches_classweaponpatches_localhittypepatch_gettargetmethod",
-      "community": 90,
+      "community": 111,
       "norm_label": ".gettargetmethod()"
     },
     {
@@ -5237,7 +5237,7 @@
       "label": ".GroupsFor()",
       "file_type": "code",
       "source_file": "Client/PerksCatalog.cs",
-      "source_location": "L219",
+      "source_location": "L221",
       "_origin": "ast",
       "id": "client_perkscatalog_perkscatalog_groupsfor",
       "community": 84,
@@ -5247,7 +5247,7 @@
       "label": ".LocalGroups()",
       "file_type": "code",
       "source_file": "Client/PerksCatalog.cs",
-      "source_location": "L233",
+      "source_location": "L235",
       "_origin": "ast",
       "id": "client_perkscatalog_perkscatalog_localgroups",
       "community": 84,
@@ -5257,7 +5257,7 @@
       "label": ".IconSprite()",
       "file_type": "code",
       "source_file": "Client/PerksCatalog.cs",
-      "source_location": "L236",
+      "source_location": "L238",
       "_origin": "ast",
       "id": "client_perkscatalog_perkscatalog_iconsprite",
       "community": 84,
@@ -5267,7 +5267,7 @@
       "label": "Sprite",
       "file_type": "code",
       "source_file": "Client/PerksCatalog.cs",
-      "source_location": "L236",
+      "source_location": "L238",
       "_origin": "ast",
       "id": "client_perkscatalog_cs_sprite",
       "community": 84,
@@ -5277,7 +5277,7 @@
       "label": ".BuffSprite()",
       "file_type": "code",
       "source_file": "Client/PerksCatalog.cs",
-      "source_location": "L260",
+      "source_location": "L262",
       "_origin": "ast",
       "id": "client_perkscatalog_perkscatalog_buffsprite",
       "community": 84,
@@ -5287,7 +5287,7 @@
       "label": ".BuildNotificationText()",
       "file_type": "code",
       "source_file": "Client/PerksCatalog.cs",
-      "source_location": "L279",
+      "source_location": "L281",
       "_origin": "ast",
       "id": "client_perkscatalog_perkscatalog_buildnotificationtext",
       "community": 84,
@@ -5297,7 +5297,7 @@
       "label": ".ValidateOnce()",
       "file_type": "code",
       "source_file": "Client/PerksCatalog.cs",
-      "source_location": "L308",
+      "source_location": "L310",
       "_origin": "ast",
       "id": "client_perkscatalog_perkscatalog_validateonce",
       "community": 84,
@@ -17932,9 +17932,9 @@
       "source_file": "Client/CombatMedicSurgery.cs",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "client_combatmedicsurgery",
-      "target": "client_combatmedicsurgery_combatmedicsurgery",
-      "confidence_score": 1.0
+      "target": "client_combatmedicsurgery_combatmedicsurgery"
     },
     {
       "relation": "contains",
@@ -17942,9 +17942,9 @@
       "source_file": "Client/CombatMedicSurgery.cs",
       "source_location": "L91",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "client_combatmedicsurgery",
-      "target": "client_combatmedicsurgery_surgerypenaltypatch",
-      "confidence_score": 1.0
+      "target": "client_combatmedicsurgery_surgerypenaltypatch"
     },
     {
       "relation": "method",
@@ -17952,9 +17952,9 @@
       "source_file": "Client/CombatMedicSurgery.cs",
       "source_location": "L46",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "client_combatmedicsurgery_combatmedicsurgery",
-      "target": "client_combatmedicsurgery_combatmedicsurgery_adjust",
-      "confidence_score": 1.0
+      "target": "client_combatmedicsurgery_combatmedicsurgery_adjust"
     },
     {
       "relation": "method",
@@ -17962,9 +17962,9 @@
       "source_file": "Client/CombatMedicSurgery.cs",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "client_combatmedicsurgery_combatmedicsurgery",
-      "target": "client_combatmedicsurgery_combatmedicsurgery_setexternalhandling",
-      "confidence_score": 1.0
+      "target": "client_combatmedicsurgery_combatmedicsurgery_setexternalhandling"
     },
     {
       "relation": "references",
@@ -17973,9 +17973,9 @@
       "source_location": "L34",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "client_combatmedicsurgery_combatmedicsurgery",
-      "target": "client_combatmedicsurgery_cs_bool",
-      "confidence_score": 1.0
+      "target": "client_combatmedicsurgery_cs_bool"
     },
     {
       "relation": "references",
@@ -17984,9 +17984,9 @@
       "source_location": "L46",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "client_combatmedicsurgery_combatmedicsurgery_adjust",
-      "target": "client_combatmedicsurgery_cs_player",
-      "confidence_score": 1.0
+      "target": "client_combatmedicsurgery_cs_player"
     },
     {
       "relation": "calls",
@@ -17995,9 +17995,9 @@
       "source_file": "Client/CombatMedicSurgery.cs",
       "source_location": "L111",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "client_combatmedicsurgery_surgerypenaltypatch_prefix",
-      "target": "client_combatmedicsurgery_combatmedicsurgery_adjust",
-      "confidence_score": 1.0
+      "target": "client_combatmedicsurgery_combatmedicsurgery_adjust"
     },
     {
       "relation": "method",
@@ -18005,9 +18005,9 @@
       "source_file": "Client/CombatMedicSurgery.cs",
       "source_location": "L93",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "client_combatmedicsurgery_surgerypenaltypatch",
-      "target": "client_combatmedicsurgery_surgerypenaltypatch_gettargetmethod",
-      "confidence_score": 1.0
+      "target": "client_combatmedicsurgery_surgerypenaltypatch_gettargetmethod"
     },
     {
       "relation": "method",
@@ -18015,9 +18015,9 @@
       "source_file": "Client/CombatMedicSurgery.cs",
       "source_location": "L100",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "client_combatmedicsurgery_surgerypenaltypatch",
-      "target": "client_combatmedicsurgery_surgerypenaltypatch_prefix",
-      "confidence_score": 1.0
+      "target": "client_combatmedicsurgery_surgerypenaltypatch_prefix"
     },
     {
       "relation": "inherits",
@@ -18025,9 +18025,9 @@
       "source_file": "Client/CombatMedicSurgery.cs",
       "source_location": "L91",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "client_combatmedicsurgery_surgerypenaltypatch",
-      "target": "modulepatch",
-      "confidence_score": 1.0
+      "target": "modulepatch"
     },
     {
       "relation": "inherits",
@@ -18556,9 +18556,9 @@
       "source_location": "L93",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "client_combatmedicsurgery_surgerypenaltypatch_gettargetmethod",
-      "target": "client_combatmedicsurgery_cs_methodbase",
-      "confidence_score": 1.0
+      "target": "client_combatmedicsurgery_cs_methodbase"
     },
     {
       "relation": "references",
@@ -18567,9 +18567,9 @@
       "source_location": "L100",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "client_combatmedicsurgery_surgerypenaltypatch_prefix",
-      "target": "client_combatmedicsurgery_cs_activehealthcontroller",
-      "confidence_score": 1.0
+      "target": "client_combatmedicsurgery_cs_activehealthcontroller"
     },
     {
       "relation": "references",
@@ -18578,9 +18578,9 @@
       "source_location": "L100",
       "weight": 1.0,
       "context": "attribute",
+      "confidence_score": 1.0,
       "source": "client_combatmedicsurgery_surgerypenaltypatch_prefix",
-      "target": "client_combatmedicsurgery_cs_patchprefix",
-      "confidence_score": 1.0
+      "target": "client_combatmedicsurgery_cs_patchprefix"
     },
     {
       "relation": "references",
@@ -19346,9 +19346,9 @@
       "source_location": "L67",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_classcombathealthpatches_heavyframemetabolism_apply",
-      "target": "client_patches_classcombathealthpatches_cs_activehealthcontroller",
-      "confidence_score": 1.0
+      "target": "client_patches_classcombathealthpatches_cs_activehealthcontroller"
     },
     {
       "relation": "references",
@@ -19357,9 +19357,9 @@
       "source_location": "L104",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_classcombathealthpatches_changeenergypatch_prefix",
-      "target": "client_patches_classcombathealthpatches_cs_activehealthcontroller",
-      "confidence_score": 1.0
+      "target": "client_patches_classcombathealthpatches_cs_activehealthcontroller"
     },
     {
       "relation": "references",
@@ -19368,9 +19368,9 @@
       "source_location": "L118",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_classcombathealthpatches_changehydrationpatch_prefix",
-      "target": "client_patches_classcombathealthpatches_cs_activehealthcontroller",
-      "confidence_score": 1.0
+      "target": "client_patches_classcombathealthpatches_cs_activehealthcontroller"
     },
     {
       "relation": "method",
@@ -41069,5 +41069,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "f63e96579c22575f52329e1802854a104ccd81e7"
+  "built_at_commit": "47d309350fc5b0c5925b6b73da98a429e6ec4372"
 }

@@ -81,6 +81,8 @@ internal static class PerksCatalog
             P("Rapid Care", "Cuidado Rápido", "heal/stab use time", "tempo de cura/estabilização", ValueFormat.Percent, 0.7f, Polarity.LowerBetter, EBuffId.VitalityBuffRegeneration, live: () => PerksConfig.RapidCareUseTime?.Value ?? 0.7f),
             P("Swift Surgeon", "Cirurgião Ágil", "surgery time", "tempo de cirurgia", ValueFormat.Percent, 0.5f, Polarity.LowerBetter, EBuffId.SurgerySpeed, live: () => PerksConfig.SwiftSurgeonTime?.Value ?? 0.5f),
             Flag("Mobile Surgery", "Cirurgia em Movimento", "walk during surgery", "andar durante a cirurgia", isPerk: true, EBuffId.SurgeryReducePenalty),
+            // 076 (2026-07-19): a cirurgia não deixa a cicatriz permanente de HP máximo (auto + aliado via ICM).
+            Flag("Restorative Surgery", "Cirurgia Restauradora", "surgery keeps limb max HP", "cirurgia mantém o HP máx do membro", isPerk: true, EBuffId.SurgeryReducePenalty),
         }),
         ["efficient_metabolism"] = G("Efficient Metabolism", "Metabolismo Eficiente", ESkillId.Metabolism, new[]   // B17 (2026-07-10): 1º perk vivo do Médico
         {
