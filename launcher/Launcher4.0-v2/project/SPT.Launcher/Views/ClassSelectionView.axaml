@@ -80,7 +80,8 @@
                     <Grid Grid.Row="1">
                         <ListBox Classes="trl-nav"
                                  ItemsSource="{Binding AvailableClasses}"
-                                 SelectedItem="{Binding SelectedClass}">
+                                 SelectedItem="{Binding SelectedClass}"
+                                 SelectionChanged="OnClassSelectionChanged">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" Spacing="10">
@@ -154,7 +155,7 @@
                                    RenderOptions.BitmapInterpolationMode="HighQuality"/>
                         </Border>
 
-                    <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                    <ScrollViewer Grid.Column="1" x:Name="DetailScroll" VerticalScrollBarVisibility="Auto">
                         <StackPanel Margin="20,16" Spacing="18">
                             <StackPanel Spacing="12">
                                 <TextBlock Text="{Binding Source={x:Static helpers:LocalizationProvider.Instance}, Path=class_selection_description_label}" Classes="trl-label"/>

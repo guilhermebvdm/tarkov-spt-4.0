@@ -12,5 +12,14 @@ namespace SPT.Launcher.Views
             this.WhenActivated(disposables => { });
             AvaloniaXamlLoader.Load(this);
         }
+
+        // Ao trocar de classe, o painel de detalhe volta pro topo (senão herda o scroll da classe anterior).
+        private void OnClassSelectionChanged(object? sender, Avalonia.Controls.SelectionChangedEventArgs e)
+        {
+            if (DetailScroll != null)
+            {
+                DetailScroll.Offset = new Avalonia.Vector(0, 0);
+            }
+        }
     }
 }
