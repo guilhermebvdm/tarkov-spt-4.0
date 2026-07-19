@@ -25,42 +25,51 @@ no `modded/` canônico. Sem número, "sobe demais" e "+30% do baseline" não sã
       pico vertical (Z local) em **Stance2→ADS** e **Stance1→ADS**, arma leve (ex.: MP5/pistola) e arma longa;
       ≥5 amostras/rota. Os "~5 cm" viram número. É contra ESTE baseline que a F1 é medida.
 
-## F1 — Problema A: overshoot ao mirar (waypoint por Stance 0)
+## F1 — Problema A: overshoot ao mirar (waypoint Stance 0 + gate de aim-speed)
 
 **Sintoma:** Low Ready → ADS: a mira **sobe demais antes de descer** (pior em armas leves). High Ready → ADS:
-**"onda" de cima para baixo** até assentar.
-**Causa:** o alvo salta em 1 frame da pose de Ready para a de ADS na mesma mola sub-amortecida, com velocidade
-acumulada (ver investigação).
-**Solução:** ao entrar em ADS vindo de stance, **assentar a velocidade da mola** para o alvo de ADS ser
-alcançado sem overshoot. Implementado por corpo, **sem tocar `CurrentStance`**.
+**"super loop" de cima para baixo** até assentar.
+**Causa (confirmada):** ao mirar, DUAS coisas rodam no mesmo frame — (1) o **ADS nativo do EFT** levanta a arma
+para a ótica imediatamente, e (2) a **nossa mola** tira a arma da pose de Ready (High = pitch −34° / Low = pitch
++25° etc.). Os dois movimentos simultâneos se somam → o loop.
 
-> ⚠️ **DESCOBERTA do review + config real (2026-07-17):** com a config do usuário (e o default de fábrica), **todos
-> os offsets de ADS = 0** → o alvo de ADS é `Vector3.zero`, que é **o mesmo** alvo da Stance 0. Ou seja: "passar por
-> Stance 0 antes do ADS" e "ir direto ao ADS" têm o **mesmo alvo** — um waypoint de *alvo* seria no-op. O que de
-> fato mata o overshoot é **zerar/amortecer `_rotVelocity`/`_posVelocity` ao entrar em ADS** (a mola vem da pose de
-> Ready com velocidade acumulada e passa do zero). Então a ideia do usuário ("waypoint por Stance 0") traduz-se
-> tecnicamente em **amortecer a velocidade no início do ADS** — e isso é *melhor* do que um waypoint literal: não
-> adiciona latência nem uma 2ª perna de trajetória. **Só quando o usuário configurar offsets de ADS ≠ 0** é que a
-> distinção "Stance 0 vs ADS" volta a existir e um waypoint de alvo teria efeito próprio (tratar como caso extra).
+**Solução (design confirmado com o usuário, 2026-07-18):** ao apertar mirar estando em Stance 1/2/3:
+1. **Por `X ms` (configurável no F12 — requisito, o usuário calibra):**
+   - o **alvo visual da mola** vai para **Stance 0** (pose neutra) — a arma desce/assenta no neutro;
+   - o **ADS nativo é SEGURADO** por um **gate de aim-speed**: `_aimingSpeed` do PWA multiplicado por ~0 → a
+     câmera/mira **não sobe** enquanto a arma assenta no neutro (a investigação confirmou que `_aimingSpeed` é
+     lido ao vivo todo frame — multiplicar por 0 **congela** a subida, não é atraso de 1 frame).
+2. **Passado o `X ms`:** o gate libera (`_aimingSpeed` volta ao normal) e o ADS nativo sobe a arma **limpa** da
+   pose neutra para a mira. Sem loop.
+3. **Ao sair do ADS:** volta para a stance original — **de graça**, porque o `CurrentStance` **nunca muda** (ver
+   abaixo).
+
+> ⚠️ **"Chamar Stance 0" move só o ALVO VISUAL — NUNCA o `CurrentStance`.** Se o estado lógico virasse Default,
+> quebraria snap-on-fire, stamina, speed-caps, sync Fika e mount. Mantendo o estado, "voltar à stance ao sair do
+> ADS" é automático (o `_ResetOnADS=true` já faz a pose voltar) e todo o ecossistema fica intacto.
+
+> **Por que o gate é essencial (não só o waypoint de alvo):** com os offsets de ADS = 0 (config do usuário), o
+> alvo de ADS já é zero == alvo de Stance 0. Então mover só o alvo da mola seria no-op; o que **realmente** mata
+> o loop é **segurar o ADS nativo** por `X ms` enquanto a mola assenta. O waypoint de alvo é complementar (importa
+> se o usuário usar offsets de ADS ≠ 0).
+
+**A velocidade de ADS nativa varia por arma** (peso define a faixa de tempo; ergonomia escolhe o ponto; skill
+AimDrills até +50%). O `X ms` é **fixo/configurável** — o usuário calibra para o setup dele. (Escalar o `X ms`
+por ergo/peso fica como refino futuro, não F1.)
 
 **Critérios de aceite:**
-- [ ] **Amortecer a velocidade no início do ADS é REQUISITO, não opcional** (achado do review): funciona mesmo com
-      os offsets de ADS no default `0f`, medido pela régua no baseline default E com ADS custom.
-- [ ] Vindo de Stance 1/2/3, mirar produz **desvio máximo vertical em relação à pose final de ADS ao longo de TODA
-      a trajetória ≤ 0,5 cm** (baseline F0 ~5 cm) — não só "além do alvo"; **≤ 1 cruzamento de sinal** na trajetória
-      inteira; tempo de assentamento **≤ +30%** do baseline.
-- [ ] **Responsividade não piora**: tempo até a mira atingir ≥ 90% do deslocamento rumo ao alvo de ADS **não pode
-      aumentar** vs. o baseline sem amortecimento (matar o overshoot não pode trocar por uma mira "mole"/em 2 tempos).
-- [ ] Sem a "onda" perceptível na High Ready → ADS (validação visual).
-- [ ] **Não toca `CurrentStance`**: snap-on-fire, stamina, speed-caps, mount e o pacote Fika inalterados (o
-      waypoint é trajetória visual, no molde do timer de ADS-kick — nunca `SetStance`).
-- [ ] **Só ativo com `_ResetOnADS = true`** (com `false` a pose continua em ADS, sem salto — waypoint desligado) e
-      **fora de prone**.
-- [ ] **Paridade Fika:** o observado passa pelo mesmo waypoint (helper compartilhado, armado na borda de mira do
-      pacote) — 1ª e 3ª pessoa não divergem. Pacote de rede **inalterado**.
-- [ ] Coexiste com o kick de ADS-in (0,15s) sem que um anule o outro (coordenar T × delay do kick / zeramento de
-      velocidade — decisão na tech-spec).
-- [ ] Toggle F12 `ADS Waypoint` (bool, default true) + `ADS Waypoint Time` (o T, faixa a definir). Nomes sem `=`.
+- [ ] `ADS Waypoint Time` (o `X ms`) **configurável no F12** — requisito central (o usuário calibra).
+- [ ] Vindo de Stance 1/2/3, mirar **não faz o loop vertical** (validação visual) e a régua mostra desvio máximo
+      vertical em relação à pose final de ADS **≤ 0,5 cm** (baseline F0 ~5 cm) e **≤ 1 cruzamento de sinal**.
+- [ ] O gate segura o ADS nativo por `X ms` e libera limpo — sem "salto" no fim do gate (a subida retoma suave).
+- [ ] **Não toca `CurrentStance`**: snap-on-fire, stamina, speed-caps, mount e pacote Fika inalterados.
+- [ ] **Só ativo com `_ResetOnADS = true`** e **fora de prone**.
+- [ ] **Ao sair do ADS**, a arma volta para a stance em que estava (automático — `CurrentStance` preservado).
+- [ ] **Paridade Fika:** o observado passa pelo **waypoint de alvo** (arma → Stance 0 → stance) para a pose bater
+      1ª/3ª pessoa. O **gate de aim-speed é local** (é a câmera/mira do jogador local); a subida do observado é a
+      animação de ADS nativa do modelo, sincronizada pelo EFT — paridade de pose garantida, timing fino aproximado.
+- [ ] Coexiste com o kick de ADS-in (0,15s): coordenar o `X ms` do gate com o delay do kick (decisão na tech-spec).
+- [ ] Toggle F12 `ADS Waypoint` (bool, default true) + `ADS Waypoint Time` (X ms). Nomes sem `=`.
 
 ## F2 — Problema B: braço esquerdo quebra (atenuar offset por comprimento)
 

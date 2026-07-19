@@ -7,6 +7,29 @@ Versões mais recentes primeiro.
 
 ---
 
+## v2.7.0 (2026-07-18)
+
+### Novidade — transição suave de High/Low Ready para a mira (fim do "loop" vertical)
+
+Ao mirar a partir de uma postura (High Ready, Low Ready…), a arma fazia um **loop/salto vertical** antes de
+assentar na mira — pior em armas leves. Causa: ao apertar mirar, a arma subia para a ótica **ao mesmo tempo** em
+que saía da pose de postura, e os dois movimentos se somavam.
+
+Agora, ao mirar de uma postura, a arma primeiro **assenta na posição neutra** e a mira fica **segurada por um
+instante**; passado esse tempo, a mira sobe **limpa**, sem o loop. Ao sair da mira, você volta para a postura em
+que estava — automático.
+
+Duas opções novas no F12 (seção `Stance Transition & Kick`):
+
+| Opção | O quê |
+|---|---|
+| `ADS Waypoint Via Stance 0` | Liga/desliga o recurso (padrão: ligado). Requer `Reset Positions When Aiming` ligado. |
+| `ADS Waypoint Time (ms)` | **Calibrável** — quanto tempo (ms) a mira fica segurada antes de subir (padrão 120). Curto demais ainda dá loop; longo demais fica lento. |
+
+Não muda nada da postura em si nem afeta atirar/stamina/mount/coop — só o momento da subida da mira.
+
+---
+
 ## v2.6.0 (2026-07-17)
 
 ### Novidade (ferramenta de debug) — `Debug Transition Metrics`

@@ -20,7 +20,7 @@ public enum ScrollMode
     Linear,
 }
 
-[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "2.6.0")]
+[BepInPlugin("com.shwng.fpscamerastances", "shwngFpsCameraStances4", "2.7.0")]
 public class Plugin : BaseUnityPlugin
 {
     public static Plugin Instance { get; private set; }
@@ -93,6 +93,8 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<float> _ADSTransitionSpeed;
     public static ConfigEntry<float> _StanceKickIntensity;
     public static ConfigEntry<float> _ADSKickDelay;
+    public static ConfigEntry<bool> _AdsWaypoint;      // item 017 (F1)
+    public static ConfigEntry<int> _AdsWaypointTime;   // item 017 (F1) — X ms
     public static ConfigEntry<float> _StanceOvershootDamping;
 
     // Hold Breath
@@ -457,6 +459,23 @@ public class Plugin : BaseUnityPlugin
             new ConfigDescription("Damping for the spring physics. Lower values mean more overshoot/bounce. Default is 12.\n\nAmortecimento da física de mola. Valores menores geram mais overshoot/quicada. Padrão é 12.",
             new AcceptableValueRange<float>(1f, 30.0f),
             new ConfigurationManagerAttributes { Order = 95 }));
+
+        // Item 017 (F1) — waypoint por Stance 0 ao mirar: mata o "super loop" vertical de High/Low Ready → ADS.
+        _AdsWaypoint = Config.Bind(
+            GeneralSection,
+            "ADS Waypoint Via Stance 0",
+            true,
+            new ConfigDescription("When aiming from a stance, briefly settle the weapon to the neutral (Stance 0) pose and hold the sights before raising them — kills the vertical loop of High/Low Ready to ADS. Only active with 'Reset Positions When Aiming' on.\n\nAo mirar a partir de uma postura, assenta a arma na pose neutra (Stance 0) e segura a mira por um instante antes de levantá-la — mata o loop vertical de High/Low Ready para o ADS. Só funciona com 'Reset Positions When Aiming' ligado.",
+            null,
+            new ConfigurationManagerAttributes { Order = 94 }));
+
+        _AdsWaypointTime = Config.Bind(
+            GeneralSection,
+            "ADS Waypoint Time (ms)",
+            120,
+            new ConfigDescription("How long (ms) the sights are held while the weapon settles to neutral, before raising to ADS. Calibrate to taste: too short still loops, too long feels sluggish.\n\nPor quanto tempo (ms) a mira fica segurada enquanto a arma assenta no neutro, antes de subir para o ADS. Calibre ao seu gosto: curto demais ainda dá loop, longo demais fica lento.",
+            new AcceptableValueRange<int>(0, 400),
+            new ConfigurationManagerAttributes { Order = 93 }));
 
         // ========================================
         // backlog 002 F3 — STANCE HOTKEYS DEDICADAS (Order 53 → 50)

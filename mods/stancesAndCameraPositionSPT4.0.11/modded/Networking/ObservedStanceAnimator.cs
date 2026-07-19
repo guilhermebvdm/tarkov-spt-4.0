@@ -28,6 +28,10 @@ namespace CameraRotationMod.Networking
         // não em inicializador de campo: Init roda depois do AddComponent e só ali o ProfileId existe.
         private TransitionMetrics _metrics;
 
+        // Item 017 (F1) — waypoint de alvo do corpo OBSERVADO (paridade de pose 1ª/3ª pessoa). Sem gate de
+        // aim-speed: a subida da mira do observado é a animação de ADS nativa do modelo, não a nossa câmera.
+        private readonly AdsWaypoint _waypoint = new AdsWaypoint();
+
         public void Init(ObservedPlayer p)
         {
             _observedPlayer = p;
@@ -52,6 +56,14 @@ namespace CameraRotationMod.Networking
 
             float dt = Time.deltaTime;
             if (dt <= 0f) return; // paridade com o guard do caminho local
+
+            // Item 017 (F1): durante o waypoint o alvo é Stance 0 (pose neutra) — a arma do observado assenta no
+            // neutro antes de subir, igual à 1ª pessoa. (Gate de aim-speed é local; aqui só a pose.)
+            if (_waypoint.Update(_isAiming, inStance, dt))
+            {
+                targetEuler = Vector3.zero;
+                targetPos = Vector3.zero;
+            }
             // Mesma separação do jogador local: a velocidade de mira e a de postura são independentes.
             float speedMult = _speedTracker.SpeedMult(_isAiming, _stance);
             float stiffness = 150f * speedMult;

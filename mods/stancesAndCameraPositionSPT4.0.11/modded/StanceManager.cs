@@ -849,6 +849,7 @@ namespace CameraRotationMod
             // frame da raid nova compara com o estado da anterior e pode escolher a velocidade errada.
             Patches.ApplyComplexRotationPatch.ResetSpeedTracker();
             Patches.ApplyComplexRotationPatch.ResetMetrics(); // item 017 (F0) — régua de transição
+            Patches.ApplyComplexRotationPatch.ResetWaypoint(); // item 017 (F1) — waypoint + gate de aim-speed
 
             _isTacSprintActive = false;
             _wasAiming = false;

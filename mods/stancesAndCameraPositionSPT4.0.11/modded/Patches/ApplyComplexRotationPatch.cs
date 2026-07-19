@@ -50,6 +50,34 @@ namespace CameraRotationMod.Patches
         /// <summary>Reset de raid — mesmo motivo do ResetSpeedTracker acima.</summary>
         public static void ResetMetrics() => _metrics.Reset();
 
+        // Item 017 (F1) — waypoint Stance 0 ao mirar (corpo LOCAL) + gate de aim-speed que segura o ADS nativo.
+        private static readonly AdsWaypoint _waypoint = new AdsWaypoint();
+        private static System.Reflection.FieldInfo _aimingSpeedField;
+        private static bool _gated;                 // estamos segurando o _aimingSpeed agora?
+        private static float _savedAimingSpeed;      // valor real, salvo na borda para restaurar
+        private static EFT.Animations.ProceduralWeaponAnimation _gatedPwa; // PWA gateado (persiste na troca de arma)
+        private static object _gatedFc;              // FirearmController gateado — a IDENTIDADE que muda na troca de arma
+
+        /// <summary>Solta o gate de aim-speed. <paramref name="restore"/>=false quando a ARMA trocou: o equip da
+        /// nova arma já recomputou o _aimingSpeed dela, então restaurar o valor salvo (da arma antiga) seria um
+        /// clobber (code-review 017-F1 #1). O PWA é único por jogador e sobrevive à troca de arma — por isso a
+        /// identidade guardada é o FirearmController, não o PWA.</summary>
+        private static void ReleaseGate(bool restore)
+        {
+            if (restore && _gatedPwa != null && _aimingSpeedField != null)
+            {
+                try { _aimingSpeedField.SetValue(_gatedPwa, _savedAimingSpeed); } catch { }
+            }
+            _gated = false; _gatedPwa = null; _gatedFc = null;
+        }
+
+        /// <summary>Reset de raid — solta o gate (restaurando) e zera o waypoint.</summary>
+        public static void ResetWaypoint()
+        {
+            if (_gated) ReleaseGate(restore: true);
+            _waypoint.Reset();
+        }
+
         // O kick injeta velocidade na mola; amostras medidas com kick ativo saem marcadas "(kick)" no
         // [METRICS] (pico/settle contaminados pela perturbação; filtráveis no baseline).
         public static bool KickActive => _kickSustainTimer > 0f || _waitingForAdsKick;
@@ -148,6 +176,7 @@ namespace CameraRotationMod.Patches
             _isAimingField = AccessTools.Field(typeof(EFT.Animations.ProceduralWeaponAnimation), "_isAiming");
             _currentRotationField = AccessTools.Field(typeof(EFT.Animations.ProceduralWeaponAnimation), "_cameraIdenity");
             _firearmControllerField = AccessTools.Field(typeof(EFT.Animations.ProceduralWeaponAnimation), "_firearmController");
+            _aimingSpeedField = AccessTools.Field(typeof(EFT.Animations.ProceduralWeaponAnimation), "_aimingSpeed"); // item 017 F1 (gate)
 
             return typeof(EFT.Animations.ProceduralWeaponAnimation).GetMethod("ApplyComplexRotation", BindingFlags.Instance | BindingFlags.Public);
         }
@@ -156,6 +185,13 @@ namespace CameraRotationMod.Patches
         private static void Postfix(EFT.Animations.ProceduralWeaponAnimation __instance, float dt)
         {
             Player.FirearmController firearmController = (Player.FirearmController)_firearmControllerField.GetValue(__instance);
+
+            // Item 017 (F1) — release CEDO do gate, ANTES dos early-returns (code-review #2): se a arma sumiu
+            // (trocou p/ granada/med/melee → firearmController null) ou trocou de arma no meio do gate, solta o
+            // gate SEM restaurar — o valor salvo é da arma anterior e o equip da nova já recomputou o dela.
+            if (_gated && !ReferenceEquals(firearmController, _gatedFc))
+                ReleaseGate(restore: false);
+
             if (firearmController == null)
             {
                 return;
@@ -195,6 +231,32 @@ namespace CameraRotationMod.Patches
             Stance currentStance = StanceManager.CurrentStance;
             float kick = Plugin._StanceKickIntensity?.Value ?? -0.05f;
             float kickVelocity = kick * 30f; // Convert positional intensity to velocity impulse
+
+            // Item 017 (F1) — waypoint Stance 0 + gate de aim-speed.
+            // Enquanto ativo: o alvo da mola vai a Stance 0 (mais abaixo) E o ADS nativo é segurado (aqui).
+            // Em prone o mod força Stance 0 (item 013) → isInStance já é false, mas passamos !prone explícito
+            // para não manter um waypoint armado antes de deitar.
+            bool waypointActive = _waypoint.Update(isAiming, isInStance && !player.IsInPronePose, dt);
+            if (waypointActive && _aimingSpeedField != null)
+            {
+                if (!_gated)
+                {
+                    // Borda: salva o aim-speed real para restaurar. `_aimingSpeed` PERSISTE (só recomputado em
+                    // eventos de arma) — se não restaurarmos, o aim quebra permanentemente. A identidade é o
+                    // FirearmController (o PWA sobrevive à troca de arma; ver ReleaseGate).
+                    _savedAimingSpeed = (float)_aimingSpeedField.GetValue(__instance);
+                    _gatedPwa = __instance;
+                    _gatedFc = firearmController;
+                    _gated = true;
+                }
+                _aimingSpeedField.SetValue(__instance, _savedAimingSpeed * 0.001f); // ×0.001, não 0 (div-by-zero no EFT)
+            }
+            else if (_gated)
+            {
+                // Expirou / soltou o ADS com a MESMA arma (troca de arma já foi tratada no release cedo acima):
+                // restaura o valor real.
+                ReleaseGate(restore: true);
+            }
 
             // Hold Breath Arm Stamina & Oxygen Drain
             if (player.Physical != null && player.Physical.HoldingBreath)
@@ -243,7 +305,9 @@ namespace CameraRotationMod.Patches
                     _lastStance = currentStance;
                 }
 
-                if (_waitingForAdsKick)
+                // Item 017 (F1): durante o waypoint o ADS está segurado, então o kick de ADS-in espera —
+                // dispara quando a mira de fato sobe (fim do waypoint), não no meio do assentamento.
+                if (_waitingForAdsKick && !waypointActive)
                 {
                     _adsKickTimer -= dt;
                     if (_adsKickTimer <= 0f)
@@ -273,6 +337,14 @@ namespace CameraRotationMod.Patches
             // Targets (Nunca usar scopeRotation.eulerAngles diretamente, pois algumas miras possuem valores extremos fixup que viram a câmera)
             Vector3 targetEuler = isInStance ? StanceManager.GetTargetRotation(isAiming) : Vector3.zero;
             Vector3 targetPosition = isAiming && !isInStance ? Vector3.zero : isInStance ? StanceManager.GetTargetPosition(isAiming) : Vector3.zero;
+
+            // Item 017 (F1): durante o waypoint o alvo é Stance 0 (pose neutra) — a arma assenta no neutro
+            // enquanto o gate segura o ADS; ao expirar, o alvo volta ao de ADS e a arma sobe limpa.
+            if (waypointActive)
+            {
+                targetEuler = Vector3.zero;
+                targetPosition = Vector3.zero;
+            }
 
             // Spring Interpolation (Overshoot / Quicada)
             // A mola é uma só e serve às duas transições (postura e mira) — o tracker decide qual velocidade
