@@ -60,7 +60,7 @@
                         <MudText Typo="Typo.body2">@Localization.T("Max (only spawn below max):")</MudText>
                     </MudItem>
                     <MudItem xs="6" sm="8">
-                        <MudSwitch @bind-Value="Config.MapConfigs[map.Key].EnableSpawnBubble" Color="Color.Info">
+                        <MudSwitch @bind-Value="Config.MapConfigs[map.Key].EnableSpawnBubble" Color="Color.Info" @bind-Value:after="() => OnSpawnBubbleChanged(map.Key)">
                             @((Config.MapConfigs[map.Key].EnableSpawnBubble) ? "Enabled" : "Disabled")
                         </MudSwitch>
                     </MudItem>
@@ -87,7 +87,7 @@
                         <MudText Typo="Typo.body2">@Localization.T("Teleport bots?:")</MudText>
                     </MudItem>
                     <MudItem xs="6" sm="8">
-                        <MudSwitch @bind-Value="Config.MapConfigs[map.Key].EnableDespawn" Color="Color.Success">
+                        <MudSwitch @bind-Value="Config.MapConfigs[map.Key].EnableDespawn" Color="Color.Success" Disabled="!Config.MapConfigs[map.Key].EnableSpawnBubble">
                             @((Config.MapConfigs[map.Key].EnableDespawn) ? "Enabled" : "Disabled")
                         </MudSwitch>
                     </MudItem>
@@ -173,6 +173,14 @@
             {
                 Config.MapConfigs[mapId].TeleportMinDistance = 100f;
             }
+        }
+    }
+
+    private void OnSpawnBubbleChanged(string mapKey)
+    {
+        if (!Config.MapConfigs[mapKey].EnableSpawnBubble)
+        {
+            Config.MapConfigs[mapKey].EnableDespawn = false;
         }
     }
 }
