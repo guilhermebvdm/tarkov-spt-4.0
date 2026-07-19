@@ -372,15 +372,21 @@ namespace TRLDynamicSpawn.Components
                 string mapName = gameWorld.MainPlayer?.Location?.ToLower() ?? "";
                 var role = bot.Profile.Info.Settings.Role;
 
-                // 1. Encontra uma zona válida (perto de algum jogador, respeitando a bolha e LoS)
+                // 1. Encontra uma zona válida (perto de algum jogador, respeitando a bolha, LoS e distância mínima configurada)
                 BotZone selectedZone = null;
                 bool zoneValid = false;
-                int retries = 10;
+                int retries = 15;
+
+                double minTeleportDist = 100.0;
+                if (DynamicSpawnManager.Instance.ServerConfig?.MapConfigs?.TryGetValue(mapName, out var mapSettings) == true)
+                {
+                    minTeleportDist = mapSettings.TeleportMinDistance;
+                }
 
                 while (retries > 0)
                 {
                     selectedZone = TRLDynamicSpawn.Helpers.Methods.GetRandomZone(bot.BotsController.BotSpawner);
-                    if (selectedZone != null && DynamicSpawnManager.Instance.IsValidSpawnZone(selectedZone, mapName, role))
+                    if (selectedZone != null && DynamicSpawnManager.Instance.IsValidSpawnZone(selectedZone, mapName, role, null, minTeleportDist))
                     {
                         zoneValid = true;
                         break;

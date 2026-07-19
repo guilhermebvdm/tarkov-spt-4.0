@@ -206,6 +206,7 @@ public record MapSettings
     [JsonPropertyName("despawnInterval")] public float DespawnInterval { get; set; } = 20f;
     [JsonPropertyName("spawnBubbleDistance")] public float SpawnBubbleDistance { get; set; } = 300f;
     [JsonPropertyName("enableSpawnBubble")] public bool EnableSpawnBubble { get; set; } = true;
+    [JsonPropertyName("teleportMinDistance")] public float TeleportMinDistance { get; set; } = 100f;
 }
 
 

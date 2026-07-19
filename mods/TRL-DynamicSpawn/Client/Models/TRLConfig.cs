@@ -205,6 +205,7 @@ public class MapSettings
     [JsonProperty("despawnInterval")] public float DespawnInterval { get; set; } = 20f;
     [JsonProperty("spawnBubbleDistance")] public float SpawnBubbleDistance { get; set; } = 300f;
     [JsonProperty("enableSpawnBubble")] public bool EnableSpawnBubble { get; set; } = true;
+    [JsonProperty("teleportMinDistance")] public float TeleportMinDistance { get; set; } = 100f;
 }
 
 public class Vector3Model

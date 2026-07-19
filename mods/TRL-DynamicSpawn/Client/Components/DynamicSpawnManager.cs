@@ -605,11 +605,11 @@ namespace TRLDynamicSpawn.Components
             return false;
         }
 
-        public bool IsValidSpawnZone(BotZone zone, string mapName, WildSpawnType? role = null, Vector3? overridePosition = null)
+        public bool IsValidSpawnZone(BotZone zone, string mapName, WildSpawnType? role = null, Vector3? overridePosition = null, double? overrideSafeDistance = null)
         {
             if (zone == null && overridePosition == null) return false;
 
-            double safeDist = _serverConfig?.MapConfigs?.ContainsKey(mapName) == true ? _serverConfig.MapConfigs[mapName].SafeZoneDistance : (mapName == "factory4_day" || mapName == "factory4_night" || mapName == "sandbox" || mapName == "sandbox_high" ? 15.0 : 30.0);
+            double safeDist = overrideSafeDistance ?? (_serverConfig?.MapConfigs?.ContainsKey(mapName) == true ? (double)_serverConfig.MapConfigs[mapName].SafeZoneDistance : (mapName == "factory4_day" || mapName == "factory4_night" || mapName == "sandbox" || mapName == "sandbox_high" ? 15.0 : 30.0));
             bool enableLos = TRLDynamicSpawn.Helpers.Settings.enableLoSCulling.Value;
             float losDist = TRLDynamicSpawn.Helpers.Settings.losCullingDistance.Value;
 
