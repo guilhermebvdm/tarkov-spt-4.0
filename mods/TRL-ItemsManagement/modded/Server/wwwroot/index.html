@@ -3502,9 +3502,9 @@ function rubHintMarkup(native, cur) {
 // Shared help-tooltips for the trader availability fields — one source of truth for the inline row
 // markup and the editor's (?) popovers, so the operator sees the same explanation in both places.
 const TRADER_AVAIL_TIP = {
-  stock:   'Stock — total units the trader has to sell, in TOTAL (not per cycle). In SPT 4.0 it erodes as players buy and does NOT restock. ∞ = unlimited.',
-  limit:   'Buy / cycle — the most a SINGLE player can buy per trader refresh cycle. Resets every cycle. ∞ = no per-cycle cap (only Stock limits how many exist).',
-  sale:    'Whether this trader sells the item at all. Disabling removes it from the trader\'s assort entirely — it stops appearing in the shop. Restart SPT to apply.',
+  stock:   'Stock — the total pool that exists to sell, shared by all players. Every purchase eats into it, and a trader refresh does NOT restock — only a server restart refills it back to this cap. ∞ = unlimited.',
+  limit:   'Buy / cycle — how many ONE player can buy per trader refresh. The refresh is random per trader (~30 min–4 h), and each player\'s cap resets when it fires. ∞ = no per-cycle cap (only Stock limits the total).',
+  sale:    'Whether this trader sells the item at all. Disabling removes it from the shop entirely. Restart SPT to apply.',
   saleOff: 'Sale disabled — this trader no longer sells the item (removed from its assort). Restart SPT to apply.',
 };
 
