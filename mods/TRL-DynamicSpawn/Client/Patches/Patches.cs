@@ -540,34 +540,40 @@ namespace TRLDynamicSpawn.Patches
                     if (players != null)
                     {
                         // Se for bot comum (PMC ou Scav), ele deve estar dentro da bolha de spawn em relação a algum jogador real
-                        if (TRLDynamicSpawn.Helpers.Settings.enableSpawnBubble.Value && isCommonBot)
+                        if (isCommonBot)
                         {
                             float maxDist = 300f;
+                            bool isBubbleEnabled = TRLDynamicSpawn.Helpers.Settings.enableSpawnBubble.Value;
+
                             if (TRLDynamicSpawn.Components.DynamicSpawnManager.Instance != null && TRLDynamicSpawn.Components.DynamicSpawnManager.Instance.ServerConfig != null)
                             {
                                 var cfg = TRLDynamicSpawn.Components.DynamicSpawnManager.Instance.ServerConfig;
                                 if (cfg.MapConfigs?.TryGetValue(mapName, out var mapSettings) == true)
                                 {
+                                    isBubbleEnabled = isBubbleEnabled && mapSettings.EnableSpawnBubble;
                                     maxDist = mapSettings.SpawnBubbleDistance;
                                 }
                             }
 
-                            bool closeEnoughToAnyPlayer = false;
-                            foreach (var player in players)
+                            if (isBubbleEnabled)
                             {
-                                if (player == null || player.Profile == null) continue;
-                                if (player.IsAI && !player.IsYourPlayer) continue;
-
-                                float dist = Vector3.Distance(player.Position, checkPoint.Position);
-                                if (dist <= maxDist)
+                                bool closeEnoughToAnyPlayer = false;
+                                foreach (var player in players)
                                 {
-                                    closeEnoughToAnyPlayer = true;
-                                    break;
+                                    if (player == null || player.Profile == null) continue;
+                                    if (player.IsAI && !player.IsYourPlayer) continue;
+
+                                    float dist = Vector3.Distance(player.Position, checkPoint.Position);
+                                    if (dist <= maxDist)
+                                    {
+                                        closeEnoughToAnyPlayer = true;
+                                        break;
+                                    }
                                 }
-                            }
-                            if (!closeEnoughToAnyPlayer)
-                            {
-                                isValid = false;
+                                if (!closeEnoughToAnyPlayer)
+                                {
+                                    isValid = false;
+                                }
                             }
                         }
 

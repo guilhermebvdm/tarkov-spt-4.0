@@ -666,34 +666,40 @@ namespace TRLDynamicSpawn.Components
             Vector3 zonePos = overridePosition ?? zone.transform.position;
 
             // Se for bot comum (PMC ou Scav), ele deve estar dentro da bolha de spawn
-            if (TRLDynamicSpawn.Helpers.Settings.enableSpawnBubble.Value && role != null)
+            if (role != null)
             {
                 WildSpawnType rType = role.Value;
                 bool isCommonBot = rType == WildSpawnType.pmcUSEC || rType == WildSpawnType.pmcBEAR || rType == WildSpawnType.assault;
                 if (isCommonBot)
                 {
                     float maxDist = 300f;
+                    bool isBubbleEnabled = TRLDynamicSpawn.Helpers.Settings.enableSpawnBubble.Value;
+
                     if (_serverConfig?.MapConfigs?.TryGetValue(mapName, out var mapSettings) == true)
                     {
+                        isBubbleEnabled = isBubbleEnabled && mapSettings.EnableSpawnBubble;
                         maxDist = mapSettings.SpawnBubbleDistance;
                     }
 
-                    bool closeEnoughToAnyPlayer = false;
-                    foreach (var player in players)
+                    if (isBubbleEnabled)
                     {
-                        if (player == null || player.Profile == null || player.Profile.Info == null) continue;
-                        if (player.IsAI && !player.IsYourPlayer) continue;
-
-                        float dist = Vector3.Distance(player.Position, zonePos);
-                        if (dist <= maxDist)
+                        bool closeEnoughToAnyPlayer = false;
+                        foreach (var player in players)
                         {
-                            closeEnoughToAnyPlayer = true;
-                            break;
+                            if (player == null || player.Profile == null || player.Profile.Info == null) continue;
+                            if (player.IsAI && !player.IsYourPlayer) continue;
+
+                            float dist = Vector3.Distance(player.Position, zonePos);
+                            if (dist <= maxDist)
+                            {
+                                closeEnoughToAnyPlayer = true;
+                                break;
+                            }
                         }
-                    }
-                    if (!closeEnoughToAnyPlayer)
-                    {
-                        return false; // Fora do raio da bolha, inválida
+                        if (!closeEnoughToAnyPlayer)
+                        {
+                            return false; // Fora do raio da bolha, inválida
+                        }
                     }
                 }
             }
