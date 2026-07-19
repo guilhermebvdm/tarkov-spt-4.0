@@ -689,18 +689,20 @@ function buildDeltaFilter() {
 
 function buildBanFilter() {
   // Count items by ban state so user sees distribution at-a-glance
-  let okCount = 0, bsgCount = 0, customCount = 0;
+  let okCount = 0, bsgCount = 0, customCount = 0, conflictCount = 0;
   for (const it of ITEM_LIST) {
     const banned  = it.spt && it.spt.fleaBanned;
     const reasons = (it.spt && it.spt.fleaBanReasons) || [];
     if (!banned) okCount++;
     if (reasons.includes('bsg')) bsgCount++;
     if (reasons.includes('custom')) customCount++;
+    if (itemHasTraderConflict(it)) conflictCount++;
   }
   const options = [
     { value: 'ok',     label: 'Allowed',     iconHtml: '<span class="ban-ico ban-ico--ok">'+ICON_OK+'</span>',         count: okCount },
     { value: 'bsg',    label: 'Banned (BSG)',  iconHtml: '<span class="ban-ico ban-ico--banned">'+ICON_BANNED+'</span>', count: bsgCount },
     { value: 'custom', label: 'Banned (custom)', iconHtml: '<span class="ban-ico ban-ico--banned">'+ICON_BANNED+'</span>', count: customCount },
+    { value: 'conflict', label: 'Trader conflict', iconHtml: '<span class="conflict-flag" style="cursor:default">⚠</span>', count: conflictCount },
   ];
 
   urlListOverride('ban', BAN_STORAGE_KEY, selectedBans);
@@ -725,6 +727,25 @@ function buildBanFilter() {
 function itemIsFleaEdited(it) {
   const s = it.spt;
   return !!(s && (s.fleaOverride != null || s.fleaOfferMultiplier != null));
+}
+
+// Regular money sellers of an item: trades for money (not barter), not Fence (dynamic black market),
+// and not disabled by the operator. Basis for both the ⚠ conflict flag and the conflict filter, so the
+// flag/filter clear as soon as every regular seller is turned off.
+function regularMoneySellers(it) {
+  if (!it.spt || !Array.isArray(it.spt.traders)) return [];
+  return it.spt.traders.filter(t => {
+    if (t.currency === 'BARTER' || (t.price == null && t.priceRUB == null)) return false;
+    const tid = t.traderId || (t.name && TRADERS[t.name] ? TRADERS[t.name].id : null);
+    if (tid === FENCE_ID) return false;
+    const so = tid ? stockOverrideFor(tid, it.id) : null;
+    if (so && so.disabled) return false;
+    return true;
+  });
+}
+// Flea/trader inconsistency: flea-banned yet still sold by a regular trader.
+function itemHasTraderConflict(it) {
+  return !!(it.spt && it.spt.fleaBanned) && regularMoneySellers(it).length > 0;
 }
 
 // True if ANY editable money offer of this item has a trader-price override
@@ -787,6 +808,21 @@ function refreshEditedFilter() {
 
 // Back-compat alias: trader save/restore/clear paths call this name.
 function refreshTraderOverrideFilter() { refreshEditedFilter(); }
+
+// Rebuild the Banned filter in place — its "Trader conflict" count depends on disable-sale overrides,
+// which change at runtime. Preserves selection via selectedBans.
+function refreshBanFilter() {
+  const host = document.getElementById('ban-filter');
+  if (host) host.innerHTML = '';
+  banDropdown = null;
+  buildBanFilter();
+}
+// After a disable-sale change: refresh the conflict count, and re-filter the list if the conflict
+// filter is active (the item that just changed may need to enter/leave the view).
+function refreshConflictFilter() {
+  refreshBanFilter();
+  if (selectedBans.has('conflict')) render();
+}
 
 function buildModFilter() {
   // Custom items added by server mods (modSource set in load-spt from
@@ -1188,6 +1224,7 @@ function filterItems() {
       if (selectedBans.has('ok')     && !banned) match = true;
       if (selectedBans.has('bsg')    && reasons.includes('bsg')) match = true;
       if (selectedBans.has('custom') && reasons.includes('custom')) match = true;
+      if (selectedBans.has('conflict') && itemHasTraderConflict(it)) match = true;
       if (!match) continue;
     }
     if (selectedEdited.size > 0) {
@@ -1500,10 +1537,10 @@ function renderRow(it) {
   const banIcon = banned
     ? `<span class="banned-icon" data-tip="Banned from flea: ${banReasons.join(', ')}" tabindex="0">${ICON_BANNED}</span> `
     : '';
-  // Inconsistency flag: flea-banned but still sold by a trader for money (e.g. MAG5-60 @ Artem) —
-  // contradictory, since a flea ban usually implies "not freely tradeable". Advisory; click to fix.
-  const moneyTraders = (it.spt && Array.isArray(it.spt.traders))
-    ? it.spt.traders.filter(t => (t.price != null || t.priceRUB != null) && t.currency !== 'BARTER') : [];
+  // Inconsistency flag: flea-banned but still sold by a REGULAR trader for money (e.g. MAG5-60 @ Artem) —
+  // contradictory, since a flea ban usually implies "not freely tradeable". Advisory; click to fix. The
+  // seller set (barter/Fence/disabled excluded) is shared with the conflict filter via regularMoneySellers.
+  const moneyTraders = regularMoneySellers(it);
   const soldByTrader = moneyTraders.length > 0;
   const allQuestLocked = soldByTrader && moneyTraders.every(t => t.questLocked); // CR-U-02
   const fleaTraderConflict = banned && soldByTrader;
@@ -1719,12 +1756,18 @@ function clampTooltip(e) {
   const el = e.target && e.target.closest && e.target.closest('[data-tip]');
   if (!el) return;
   const r = el.getBoundingClientRect();
+  // Horizontal: nudge a wide tip in so it doesn't overflow either screen edge.
   const center = r.left + r.width / 2;
   const half = 142, pad = 8;
   let shift = 0;
   if (center - half < pad) shift = pad - (center - half);
   else if (center + half > window.innerWidth - pad) shift = (window.innerWidth - pad) - (center + half);
   el.style.setProperty('--tip-shift', Math.round(shift) + 'px');
+  // Vertical: a tip opening upward from a near-top row collides with the sticky header — flip it to
+  // open downward instead. Skip elements the author already pinned with data-tip-pos.
+  if (!el.dataset.tipPos) {
+    el.classList.toggle('tip-flip-down', r.top < 130);
+  }
 }
 document.addEventListener('mouseover', clampTooltip, true);
 document.addEventListener('focusin', clampTooltip, true);
@@ -2440,6 +2483,7 @@ function undoApplyStock(tpl, traderId, entry) {
   const row = document.querySelector(`tr.trader-row[data-trader-tpl="${esc(tpl)}"][data-trader-id="${esc(traderId)}"]`);
   if (row) rerenderTraderRowEl(row, false);
   rerenderMainRow(tpl);
+  refreshConflictFilter();
 }
 
 // Human-readable summary of a stock / buyLimit / disabled entry for the audit feed. Any field absent.
@@ -3596,7 +3640,7 @@ function openTraderEdit(row, focusField) {
     if (docClickHandler) document.removeEventListener('mousedown', docClickHandler, true);
   }
   function rerenderRow() { return rerenderTraderRowEl(row, true); }
-  function reflectAll() { closeForm(); rerenderRow(); rerenderMainRow(tpl); refreshTraderOverrideFilter(); updateTraderTopbar(); }
+  function reflectAll() { closeForm(); rerenderRow(); rerenderMainRow(tpl); refreshTraderOverrideFilter(); refreshConflictFilter(); updateTraderTopbar(); }
   function setBusy(v) {
     save.disabled = cancel.disabled = saleBtn.disabled = v;
     if (restorePrice) restorePrice.disabled = v;

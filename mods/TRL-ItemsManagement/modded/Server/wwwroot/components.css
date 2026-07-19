@@ -639,7 +639,8 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
  * the table. With table-layout flexible, ellipsis on overflow keeps rows tight. */
 .col-name {
   max-width: 280px;
-  overflow: hidden;
+  /* No overflow:hidden here — the .name/.short children each clip+ellipsis themselves, and hiding
+   * overflow on the cell would clip the ⚠ conflict tooltip (which lives inside this cell). */
 }
 .col-name .name-row { display: flex; align-items: center; gap: 6px; min-width: 0; }
 .col-name .name {
@@ -1810,6 +1811,15 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
 }
 [data-tip-pos="bottom"]:hover::after, [data-tip-pos="bottom"]:focus-visible::after {
   transform: translate(calc(-50% + var(--tip-shift, 0px)),0);
+}
+/* CR: near-top rows flip the tooltip downward (set by clampTooltip) so it doesn't hide behind the
+ * sticky table header. */
+[data-tip].tip-flip-down::after {
+  bottom: auto; top: calc(100% + 6px);
+  transform: translate(calc(-50% + var(--tip-shift, 0px)), -4px);
+}
+[data-tip].tip-flip-down:hover::after, [data-tip].tip-flip-down:focus-visible::after {
+  transform: translate(calc(-50% + var(--tip-shift, 0px)), 0);
 }
 
 /* ── Delta % filter widget ──────────────────────────────────────────────────── */
