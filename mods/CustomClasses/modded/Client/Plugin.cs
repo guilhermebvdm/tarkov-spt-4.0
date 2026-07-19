@@ -10,7 +10,7 @@ namespace CustomClasses.Client;
 ///     Busca os fatores do server (rota /customclasses/skill-multipliers) e faz Prefix em
 ///     AbstractSkillClass.OnTrigger. UI (linha+tooltip) vem na Fatia 2.
 /// </summary>
-[BepInPlugin("customclasses.mdj.client", "CustomClasses", "0.4.1")]
+[BepInPlugin("customclasses.mdj.client", "CustomClasses", "0.5.0")]
 [BepInDependency("com.SPT.core", "4.0.0")]
 [BepInDependency("me.sol.sain", BepInDependency.DependencyFlags.SoftDependency)]   // (050.4 SAIN) carrega após o SAIN se presente
 public class Plugin : BaseUnityPlugin
@@ -233,6 +233,7 @@ public class Plugin : BaseUnityPlugin
         {
             Log.LogError($"[CustomClasses] (072) Mobile Surgery não aplicado: {ex.Message}");
         }
+        new SurgeryPenaltyPatch().Enable();                 // (076) 🔧 Médico — cirurgia sem cortar HP máx (auto; ally via ICM)
         try
         {
             new ChangeEnergyPatch().Enable();               // (050.3) 🔻 Tanque — fome drena ×1.3 (Heavy Frame)

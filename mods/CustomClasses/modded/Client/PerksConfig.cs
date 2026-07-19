@@ -74,6 +74,8 @@ internal static class PerksConfig
     internal static ConfigEntry<bool>? SwiftSurgeonEnabled;       // 072
     internal static ConfigEntry<float>? SwiftSurgeonTime;         // 072
     internal static ConfigEntry<bool>? MobileSurgeryEnabled;      // 072
+    internal static ConfigEntry<bool>? RestorativeSurgeryEnabled;   // 076
+    internal static ConfigEntry<float>? RestorativeSurgeryPenalty;  // 076
     internal static ConfigEntry<bool>? ShakyHandsEnabled;
     internal static ConfigEntry<float>? ShakyHandsRecoil;
 
@@ -229,6 +231,16 @@ internal static class PerksConfig
         MobileSurgeryEnabled = config.Bind(
             SecMedic, "Mobile Surgery — Enabled", true,
             "Médico: pode ANDAR durante a cirurgia (continua sem correr/pular). / Combat Medic: can WALK during surgery (still no sprint/jump).");
+        // 076 — a cirurgia do Médico não deixa a "cicatriz" permanente de HP máximo. Vale p/ a própria cirurgia
+        // (caminho nativo) E p/ aliados operados via ICM (TRL-ImmersiveCombatMedicine), gateado pela classe do OPERADOR.
+        RestorativeSurgeryEnabled = config.Bind(
+            SecMedic, "Restorative Surgery — Enabled", true,
+            "Médico: a cirurgia NÃO reduz o HP MÁXIMO do membro curado (o vanilla deixa uma cicatriz permanente na raid). Vale para a cirurgia no próprio Médico e nos aliados que ele opera (via ICM). / Combat Medic: surgery does not reduce the healed limb's MAX HP (vanilla leaves a permanent scar). Applies to the medic's own surgery and to allies they operate on (via ICM).");
+        RestorativeSurgeryPenalty = config.Bind(
+            SecMedic, "Restorative Surgery — Max HP penalty mult", 0f,
+            new ConfigDescription(
+                "Multiplicador da penalidade de HP máximo da cirurgia do Médico (0 = sem penalidade; 1 = penalidade vanilla). / Multiplier for the Combat Medic surgery's max-HP penalty (0 = none; 1 = vanilla).",
+                new AcceptableValueRange<float>(0f, 1f)));
         // B1: default OFF até os perks do Médico existirem (hoje o Metabolismo já cobre — mas o recuo fica desligado por padrão).
         ShakyHandsEnabled = config.Bind(
             SecMedic, "Shaky Hands — Enabled", false,

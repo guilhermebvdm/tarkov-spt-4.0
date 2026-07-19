@@ -315,7 +315,13 @@ namespace Band_Aid
             if (stats.IsSurgery)
             {
                 EBodyPart surgeryPart = GetBlackedPart(hc);
-                ApplySurgeryFromNetwork(hc, surgeryPart, UnityEngine.Random.Range(stats.SurgeryPenaltyMin, stats.SurgeryPenaltyMax));
+                float surgeryPenalty = UnityEngine.Random.Range(stats.SurgeryPenaltyMin, stats.SurgeryPenaltyMax);
+                // 076: este path computa o penalty FRESCO (não vem do packet de cirurgia já ajustado) → ajusta pela
+                // classe do OPERADOR (doctor do packet). Resolve o doctor por ProfileId (reusa FindPatient).
+                var localPlayer076 = Singleton<GameWorld>.Instance?.MainPlayer;
+                var doctor076 = localPlayer076 != null ? FindPatient(packet.DoctorProfileId, localPlayer076) : null;
+                surgeryPenalty = CustomClassesBridge.AdjustSurgeryPenalty(doctor076, surgeryPenalty);
+                ApplySurgeryFromNetwork(hc, surgeryPart, surgeryPenalty);
                 Logger.LogInfo($"Cirurgia aplicada pelo paciente em {surgeryPart} (via rede).");
                 SendTreatmentReport(packet, surgeryPart, 0f, 1f); // cirurgia consome 1 uso
                 return;
@@ -537,6 +543,10 @@ namespace Band_Aid
 
         private static void ApplySurgeryFromNetwork(IHealthController hc, EBodyPart bodyPart, float penalty)
         {
+            // 076: o penalty que chega aqui JÁ foi ajustado pela classe do OPERADOR (no #2 ApplySurgery p/ o packet,
+            // ou no full-treatment). Marca p/ o patch nativo do CustomClasses PULAR — senão ele re-ajustaria pela
+            // classe do PACIENTE (que roda no ActiveHealthController do paciente aqui). Pareado no finally.
+            CustomClassesBridge.SetExternalHandling(true);
             try
             {
                 if (hc is ActiveHealthController activeHc)
@@ -558,6 +568,10 @@ namespace Band_Aid
             catch (Exception ex)
             {
                 Logger.LogError($"[Rede] Erro na cirurgia: {ex.Message}");
+            }
+            finally
+            {
+                CustomClassesBridge.SetExternalHandling(false);   // 076
             }
         }
 

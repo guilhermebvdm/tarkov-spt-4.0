@@ -1,16 +1,16 @@
-# Graph Report - mods\CustomClasses\modded  (2026-07-18)
+# Graph Report - mods\CustomClasses\modded  (2026-07-19)
 
 ## Corpus Check
-- 114 files · ~110,019 words
+- 115 files · ~111,013 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1740 nodes · 2262 edges · 113 communities (102 shown, 11 thin omitted)
+- 1752 nodes · 2275 edges · 114 communities (104 shown, 10 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `9cf10fbc`
+- Built from commit: `f63e9657`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -119,6 +119,7 @@
 - [[_COMMUNITY_Community 110|Community 110]]
 - [[_COMMUNITY_Community 111|Community 111]]
 - [[_COMMUNITY_Community 112|Community 112]]
+- [[_COMMUNITY_Community 113|Community 113]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `CatalogService` - 55 edges
@@ -133,21 +134,21 @@
 10. `Item` - 13 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `AdrenalineTriggerPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/AdrenalineTriggerPatch.cs →   _Bridges community 110 → community 90_
+- `SurgeryPenaltyPatch` --inherits--> `ModulePatch`  [EXTRACTED]
+  Client/CombatMedicSurgery.cs →   _Bridges community 113 → community 90_
 - `BulwarkPatch` --inherits--> `ModulePatch`  [EXTRACTED]
   Client/Patches/BulwarkPatch.cs →   _Bridges community 90 → community 80_
+- `CalmSightsPatch` --inherits--> `ModulePatch`  [EXTRACTED]
+  Client/Patches/CalmSightsPatch.cs →   _Bridges community 90 → community 108_
 - `ChatSpecialIconPatch` --inherits--> `ModulePatch`  [EXTRACTED]
   Client/Patches/ChatSpecialIconPatch.cs →   _Bridges community 90 → community 40_
 - `ChangeEnergyPatch` --inherits--> `ModulePatch`  [EXTRACTED]
   Client/Patches/ClassCombatHealthPatches.cs →   _Bridges community 90 → community 79_
-- `ClassDetailLoadingPatch` --inherits--> `ModulePatch`  [EXTRACTED]
-  Client/Patches/ClassDetailLoadingPatch.cs →   _Bridges community 90 → community 101_
 
 ## Import Cycles
 - None detected.
 
-## Communities (113 total, 11 thin omitted)
+## Communities (114 total, 10 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.09
@@ -450,8 +451,8 @@ Cohesion: 0.24
 Nodes (7): ClassColorEntry, Color, ConfigEntry, Dictionary, string, PerksConfig, ConfigFile
 
 ### Community 90 - "Community 90"
-Cohesion: 0.15
-Nodes (11): MethodBase, float, MethodBase, ModulePatch, CalmSightsPatch, AdsSpeedPatch, AimPunchPatch, HeavyWeaponErgoPatch (+3 more)
+Cohesion: 0.14
+Nodes (11): MethodBase, float, MethodBase, ForceEffector, ModulePatch, AdrenalineTriggerPatch, AimPunchPatch, HeavyWeaponErgoPatch (+3 more)
 
 ### Community 91 - "Community 91"
 Cohesion: 0.17
@@ -505,38 +506,46 @@ Nodes (4): SkillManager, Weapon, WeaponMastery, WeaponSkillClass
 Cohesion: 0.25
 Nodes (5): FieldInfo, MethodBase, PatchPostfix, PlayerNamePanelPatch, PlayerNamePanel
 
+### Community 108 - "Community 108"
+Cohesion: 0.29
+Nodes (4): MethodBase, PatchPostfix, ProceduralWeaponAnimation, CalmSightsPatch
+
 ### Community 109 - "Community 109"
 Cohesion: 0.25
 Nodes (5): ChatSpecialIcon, MethodBase, PatchPostfix, TextMeshProUGUI, PlayerModelWithStatsIdentityPatch
 
 ### Community 110 - "Community 110"
-Cohesion: 0.25
-Nodes (5): DamageInfoStruct, MethodBase, PatchPostfix, Player, AdrenalineTriggerPatch
+Cohesion: 0.50
+Nodes (3): DamageInfoStruct, PatchPostfix, Player
 
 ### Community 111 - "Community 111"
 Cohesion: 0.16
-Nodes (8): FirearmController, PatchPostfix, PatchPrefix, Player, ProceduralWeaponAnimation, Weapon, ForceEffector, HeavyWeapon
+Nodes (8): FirearmController, PatchPostfix, PatchPrefix, Player, ProceduralWeaponAnimation, Weapon, AdsSpeedPatch, HeavyWeapon
 
 ### Community 112 - "Community 112"
 Cohesion: 0.29
 Nodes (5): Fmt, Line, Pol, Dictionary, PerksCatalogData
 
+### Community 113 - "Community 113"
+Cohesion: 0.18
+Nodes (7): CombatMedicSurgery, ActiveHealthController, bool, MethodBase, PatchPrefix, Player, SurgeryPenaltyPatch
+
 ## Knowledge Gaps
-- **945 isolated node(s):** `float`, `string`, `bool`, `Player`, `Payload` (+940 more)
+- **950 isolated node(s):** `float`, `string`, `bool`, `Player`, `Payload` (+945 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **11 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **10 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `ClassDetailLoadingPatch` connect `Community 101` to `Community 90`?**
-  _High betweenness centrality (0.016) - this node is a cross-community bridge._
+  _High betweenness centrality (0.021) - this node is a cross-community bridge._
 - **Why does `LoadingClassHover` connect `Community 91` to `Community 101`, `Community 102`, `Community 103`?**
-  _High betweenness centrality (0.014) - this node is a cross-community bridge._
-- **Why does `SkillsClassTabPatch` connect `Community 49` to `Community 90`?**
-  _High betweenness centrality (0.010) - this node is a cross-community bridge._
+  _High betweenness centrality (0.019) - this node is a cross-community bridge._
+- **Why does `MedsOperationScopePatch` connect `Community 86` to `Community 90`?**
+  _High betweenness centrality (0.009) - this node is a cross-community bridge._
 - **What connects `float`, `string`, `bool` to the rest of the system?**
-  _945 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _950 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.09090909090909091 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**

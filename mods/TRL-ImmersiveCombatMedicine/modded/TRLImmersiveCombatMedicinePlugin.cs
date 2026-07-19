@@ -10,7 +10,7 @@ using TRLImmersiveCombatMedicine.Trauma;
 
 namespace TRLImmersiveCombatMedicine
 {
-    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.2.2")]
+    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.2.3")]
     public class TRLImmersiveCombatMedicinePlugin : BaseUnityPlugin
     {
         public static TRLImmersiveCombatMedicinePlugin Instance;

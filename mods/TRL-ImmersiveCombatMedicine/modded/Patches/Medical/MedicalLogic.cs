@@ -364,36 +364,50 @@ namespace Band_Aid
             if (blacked == EBodyPart.Common) return;
 
             float penalty = UnityEngine.Random.Range(stats.SurgeryPenaltyMin, stats.SurgeryPenaltyMax);
+            // 076 (CustomClasses): se o OPERADOR é Médico de Combate, o perk Restorative Surgery zera a penalidade
+            // de HP máximo. Ajustado AQUI (doctor conhecido) → o valor flui p/ a aplicação local E p/ o SendHealPacket
+            // (o cliente do paciente recebe o penalty já ajustado). No-op se o CustomClasses estiver ausente.
+            penalty = CustomClassesBridge.AdjustSurgeryPenalty(doctor, penalty);
 
-            if (hc is ActiveHealthController activeHc)
+            // 076: o penalty já está ajustado pela classe do OPERADOR → o patch nativo do CustomClasses (no ActiveHC
+            // do paciente) deve PULAR, senão re-ajustaria pela classe do PACIENTE. Pareado num try/finally.
+            CustomClassesBridge.SetExternalHandling(true);
+            try
             {
-                bool restored = activeHc.RestoreBodyPart(blacked, penalty);
-                if (restored)
+                if (hc is ActiveHealthController activeHc)
                 {
-                    ConsumeSafe(doctor, item, 1.0f);
-                    Logger.LogInfo($"Cirurgia em {blacked} (nativo RestoreBodyPart). Penalidade: {penalty:P0}");
-
-                    if (doctor.ProfileId != patient.ProfileId)
+                    bool restored = activeHc.RestoreBodyPart(blacked, penalty);
+                    if (restored)
                     {
-                        BandAidNetworkHandler.SendHealPacket(doctor, patient, item.TemplateId.ToString(), blacked, 0f, true, penalty);
+                        ConsumeSafe(doctor, item, 1.0f);
+                        Logger.LogInfo($"Cirurgia em {blacked} (nativo RestoreBodyPart). Penalidade: {penalty:P0}");
+
+                        if (doctor.ProfileId != patient.ProfileId)
+                        {
+                            BandAidNetworkHandler.SendHealPacket(doctor, patient, item.TemplateId.ToString(), blacked, 0f, true, penalty);
+                        }
+                    }
+                }
+                else
+                {
+                    var methods = hc.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                    var restore = methods.FirstOrDefault(m => m.Name == "RestoreBodyPart" && m.GetParameters().Length == 2);
+                    if (restore != null)
+                    {
+                        var result = restore.Invoke(hc, new object[] { blacked, penalty });
+                        if (result is bool ok && ok)
+                        {
+                            ConsumeSafe(doctor, item, 1.0f);
+                            Logger.LogInfo($"Cirurgia em {blacked} (reflection). Penalidade: {penalty:P0}");
+                            if (doctor.ProfileId != patient.ProfileId)
+                                BandAidNetworkHandler.SendHealPacket(doctor, patient, item.TemplateId.ToString(), blacked, 0f, true, penalty);
+                        }
                     }
                 }
             }
-            else
+            finally
             {
-                var methods = hc.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                var restore = methods.FirstOrDefault(m => m.Name == "RestoreBodyPart" && m.GetParameters().Length == 2);
-                if (restore != null)
-                {
-                    var result = restore.Invoke(hc, new object[] { blacked, penalty });
-                    if (result is bool ok && ok)
-                    {
-                        ConsumeSafe(doctor, item, 1.0f);
-                        Logger.LogInfo($"Cirurgia em {blacked} (reflection). Penalidade: {penalty:P0}");
-                        if (doctor.ProfileId != patient.ProfileId)
-                            BandAidNetworkHandler.SendHealPacket(doctor, patient, item.TemplateId.ToString(), blacked, 0f, true, penalty);
-                    }
-                }
+                CustomClassesBridge.SetExternalHandling(false);
             }
         }
 
