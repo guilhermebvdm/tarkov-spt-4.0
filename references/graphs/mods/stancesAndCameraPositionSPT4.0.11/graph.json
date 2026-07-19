@@ -3597,7 +3597,7 @@
       "label": "Stance",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L49",
+      "source_location": "L51",
       "_origin": "ast",
       "id": "plugin_cs_stance",
       "community": 1,
@@ -3922,6 +3922,16 @@
       "id": "snaponfire",
       "community": 1,
       "norm_label": "snaponfire"
+    },
+    {
+      "label": "AdsWaypoint",
+      "file_type": "code",
+      "source_file": "Plugin.cs",
+      "source_location": "L1461",
+      "_origin": "ast",
+      "id": "plugin_cs_adswaypoint",
+      "community": 1,
+      "norm_label": "adswaypoint"
     },
     {
       "label": "StanceConfig",
@@ -10945,6 +10955,17 @@
       "source_file": "Plugin.cs",
       "source_location": "L1461",
       "weight": 1.0,
+      "context": "parameter_type",
+      "source": "plugin_plugin_bindstance",
+      "target": "plugin_cs_adswaypoint",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Plugin.cs",
+      "source_location": "L1461",
+      "weight": 1.0,
       "context": "return_type",
       "confidence_score": 1.0,
       "source": "plugin_plugin_bindstance",
@@ -13596,5 +13617,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "316b6581ca6c5b2d4a920198e979611257b15d01"
+  "built_at_commit": "8c9ae6095406fc16faecc659688d07c15adc2f36"
 }
