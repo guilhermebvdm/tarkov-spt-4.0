@@ -33,6 +33,7 @@ namespace TRLDynamicSpawn.Components
         private GameWorld _gameWorld;
         private IBotCreator _botCreator;
         private BotsController _botsController;
+        private Coroutine _activeWaveCoroutine;
 
         public void Init(GameWorld gameWorld, IBotCreator botCreator, BotsController botsController)
         {
@@ -159,9 +160,24 @@ namespace TRLDynamicSpawn.Components
             bool isFirstWave = true;
             while (true)
             {
+                // Para a corrotina da wave anterior se ela ainda estiver rodando (e limpa a flag de spawn)
+                if (_activeWaveCoroutine != null)
+                {
+                    StopCoroutine(_activeWaveCoroutine);
+                    _activeWaveCoroutine = null;
+                    _isSpawningWave = false;
+                }
+
+                // Limpa a fila nativa de carregamento de perfis de bots do SPT
+                if (Singleton<BotEventHandler>.Instantiated)
+                {
+                    Plugin.LogSource.LogInfo("[TRL-DynamicSpawn] Clearing pending/stuck bot profile creation queue in SPT...");
+                    Singleton<BotEventHandler>.Instance.StopBotSpawn();
+                }
+
                 if (!_isSpawningWave)
                 {
-                    StartCoroutine(ProcessWave(isFirstWave));
+                    _activeWaveCoroutine = StartCoroutine(ProcessWave(isFirstWave));
                     isFirstWave = false;
                 }
                 
