@@ -1,7 +1,7 @@
 # 001 — Spike: primitivas vanilla de trauma
 
 **Mod:** TRL-ImmersiveCombatMedicine
-**Status:** Em progresso
+**Status:** Entregue
 **Criado:** 2026-07-18
 
 ## Visão geral

@@ -1,7 +1,7 @@
 # 001 — Spike: primitivas vanilla de trauma — Spec Técnica (plano de investigação)
 
 **Mod:** TRL-ImmersiveCombatMedicine
-**Status:** Em progresso
+**Status:** Entregue
 **Criado:** 2026-07-18
 **Spec funcional:** [001-spike-primitivas-01-spec.md](./001-spike-primitivas-01-spec.md)
 
