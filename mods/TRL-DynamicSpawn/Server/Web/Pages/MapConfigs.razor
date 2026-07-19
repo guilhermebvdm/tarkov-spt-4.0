@@ -52,11 +52,11 @@
                 
                 <MudDivider Class="my-4" />
                 
-                <MudText Typo="Typo.h6" Class="mb-2">@Localization.T("Bot Despawn")</MudText>
+                <MudText Typo="Typo.h6" Class="mb-2">@Localization.T("Bot Teleportation")</MudText>
                 
                 <MudGrid Class="align-center mb-2">
                     <MudItem xs="6" sm="4">
-                        <MudText Typo="Typo.body2">@Localization.T("Enable Despawn:")</MudText>
+                        <MudText Typo="Typo.body2">@Localization.T("Enable Teleportation (Despawn):")</MudText>
                     </MudItem>
                     <MudItem xs="6" sm="8">
                         <MudSwitch @bind-Value="Config.MapConfigs[map.Key].EnableDespawn" Color="Color.Success">
@@ -67,7 +67,7 @@
                 
                 <MudGrid Class="align-center mb-2">
                     <MudItem xs="6" sm="4">
-                        <MudText Typo="Typo.body2">@Localization.T("Include PMCs:")</MudText>
+                        <MudText Typo="Typo.body2">@Localization.T("Teleport PMCs:")</MudText>
                     </MudItem>
                     <MudItem xs="6" sm="8">
                         <MudSwitch @bind-Value="Config.MapConfigs[map.Key].DespawnPMCs" Color="Color.Warning" Disabled="!Config.MapConfigs[map.Key].EnableDespawn">
@@ -78,7 +78,7 @@
 
                 <MudGrid Class="align-center mb-4">
                     <MudItem xs="12" sm="12">
-                        <MudText Typo="Typo.body2" Class="mb-2 text-muted">@Localization.T("Despawn Distance (m) - Distance a bot must be from ALL players to despawn:")</MudText>
+                        <MudText Typo="Typo.body2" Class="mb-2 text-muted">@Localization.T("Teleport Trigger Distance (m) - Distance a bot must be from ALL players to be teleported:")</MudText>
                     </MudItem>
                     <MudItem xs="3" sm="1"><MudButton Variant="Variant.Filled" Color="Color.Dark" Size="Size.Small" Disabled="!Config.MapConfigs[map.Key].EnableDespawn">@Config.MapConfigs[map.Key].DespawnDistance</MudButton></MudItem>
                     <MudItem xs="9" sm="11"><MudSlider T="float" @bind-Value="Config.MapConfigs[map.Key].DespawnDistance" Min="50f" Max="1000f" Step="10f" Color="Color.Primary" Size="Size.Medium" Disabled="!Config.MapConfigs[map.Key].EnableDespawn" /></MudItem>
@@ -86,7 +86,7 @@
 
                 <MudGrid Class="align-center mb-4">
                     <MudItem xs="12" sm="12">
-                        <MudText Typo="Typo.body2" Class="mb-2 text-muted">@Localization.T("Despawn Check Interval (seconds) - How often to check bot distances:")</MudText>
+                        <MudText Typo="Typo.body2" Class="mb-2 text-muted">@Localization.T("Teleport Check Interval (seconds) - How often to check bot distances for teleportation:")</MudText>
                     </MudItem>
                     <MudItem xs="3" sm="1"><MudButton Variant="Variant.Filled" Color="Color.Dark" Size="Size.Small" Disabled="!Config.MapConfigs[map.Key].EnableDespawn">@Config.MapConfigs[map.Key].DespawnInterval</MudButton></MudItem>
                     <MudItem xs="9" sm="11"><MudSlider T="float" @bind-Value="Config.MapConfigs[map.Key].DespawnInterval" Min="5f" Max="300f" Step="5f" Color="Color.Secondary" Size="Size.Medium" Disabled="!Config.MapConfigs[map.Key].EnableDespawn" /></MudItem>
