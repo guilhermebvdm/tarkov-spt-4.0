@@ -1,16 +1,16 @@
 # Graph Report - mods\TRL-ImmersiveCombatMedicine\modded  (2026-07-18)
 
 ## Corpus Check
-- 34 files · ~31,731 words
+- 34 files · ~32,200 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 566 nodes · 908 edges · 34 communities (33 shown, 1 thin omitted)
+- 567 nodes · 913 edges · 34 communities (33 shown, 1 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `942e856b`
+- Built from commit: `a5206de5`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -52,7 +52,7 @@
 ## God Nodes (most connected - your core abstractions)
 1. `BandAidUI` - 58 edges
 2. `BandAidController` - 47 edges
-3. `TraumaEngine` - 40 edges
+3. `TraumaEngine` - 42 edges
 4. `BandAidNetworkHandler` - 26 edges
 5. `MedicalLogic` - 24 edges
 6. `MedicHealPatch` - 23 edges
@@ -215,7 +215,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `BandAidController` connect `Community 1` to `Community 0`, `Community 5`?**
   _High betweenness centrality (0.049) - this node is a cross-community bridge._
 - **Why does `TraumaEngine` connect `Community 15` to `Community 5`?**
-  _High betweenness centrality (0.047) - this node is a cross-community bridge._
+  _High betweenness centrality (0.048) - this node is a cross-community bridge._
 - **What connects `bool`, `TRLImmersiveCombatMedicine`, `ConfigEntry` to the rest of the system?**
   _176 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**

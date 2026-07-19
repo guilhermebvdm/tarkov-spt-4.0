@@ -169,7 +169,11 @@ namespace TRLImmersiveCombatMedicine.Trauma
             GameWorld gw = Singleton<GameWorld>.Instance;
             if (gw == null)
             {
-                if (_raidStarted || _trackedWorld != null || _records.Count > 0) ResetForNewRaidInternal();
+                // ref: code-review 2 (002) — SEM o termo _raidStarted aqui: um frame nulo
+                // entre o prefix e o singleton resetaria a flag e a adoção adiada (abaixo)
+                // ficaria morta — motor mudo a raid inteira. Fim de raid real já é coberto
+                // por _trackedWorld/_records; flag órfã é inócua (próximo prefix re-arma).
+                if (_trackedWorld != null || _records.Count > 0) ResetForNewRaidInternal();
                 return;
             }
             // Cinto-e-suspensório (review 1, achado 2): o hideout instancia HideoutGameWorld : ClientLocalGameWorld —
