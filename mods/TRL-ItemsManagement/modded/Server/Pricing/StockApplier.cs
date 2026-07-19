@@ -1,3 +1,4 @@
+using SPTarkov.Server.Core.Extensions;               // RemoveItemFromAssort (disable-sale)
 using SPTarkov.Server.Core.Models.Common;            // MongoId
 using SPTarkov.Server.Core.Models.Eft.Common.Tables; // Upd
 using SPTarkov.Server.Core.Models.Utils;             // ISptLogger
@@ -44,7 +45,7 @@ internal static class StockApplier
         }
 
         var traders = databaseService.GetTraders();
-        int stockApplied = 0, limitApplied = 0, tplNotSold = 0, badTrader = 0, badTpl = 0;
+        int stockApplied = 0, limitApplied = 0, disabledApplied = 0, tplNotSold = 0, badTrader = 0, badTpl = 0;
 
         foreach (var (traderIdStr, tplMap) in raw)
         {
@@ -75,6 +76,36 @@ internal static class StockApplier
                 }
 
                 var tpl = new MongoId(tplStr);
+
+                // Disable-sale: remove every ROOT offer of this tpl (+ its children, barter & loyalty
+                // entries) via SPT's own helper, so the trader stops listing it. Persists across refresh
+                // (ResetExpiredTrader clones the mutated live Items). A removed offer has no stock to set.
+                if (ovr.Disabled == true)
+                {
+                    var rootIds = new List<MongoId>();
+                    foreach (var item in trader.Assort.Items)
+                    {
+                        if (item.SlotId == "hideout" && item.Template == tpl)
+                        {
+                            rootIds.Add(item.Id);
+                        }
+                    }
+
+                    if (rootIds.Count == 0)
+                    {
+                        tplNotSold++;
+                        continue;
+                    }
+
+                    foreach (var id in rootIds)
+                    {
+                        trader.Assort.RemoveItemFromAssort(id);
+                    }
+
+                    disabledApplied++;
+                    continue;
+                }
+
                 var hit = false;
 
                 // Every ROOT sellable assort entry of this tpl (SlotId "hideout"; children are mods) —
@@ -113,6 +144,6 @@ internal static class StockApplier
         }
 
         logger.Info(
-            $"[TRLItemsManagement] stock: {stockApplied} stock + {limitApplied} buy-limit entr(ies) applied (badTrader {badTrader}, badTpl {badTpl}, tplNotSold {tplNotSold}).");
+            $"[TRLItemsManagement] stock: {stockApplied} stock + {limitApplied} buy-limit + {disabledApplied} disabled-sale entr(ies) applied (badTrader {badTrader}, badTpl {badTpl}, tplNotSold {tplNotSold}).");
     }
 }

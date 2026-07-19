@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace TRLItemsManagement.Api;
 
-public sealed record PatchStockRequest(string? Tpl, string? TraderId, double? Stock, int? BuyLimit);
+public sealed record PatchStockRequest(string? Tpl, string? TraderId, double? Stock, int? BuyLimit, bool? Disabled);
 
 public sealed record DeleteStockRequest(string? Tpl, string? TraderId);
 
@@ -41,9 +41,9 @@ public sealed class StockController(ModPathsService modPaths, WriteLockService w
             return Task.FromResult<IActionResult>(BadRequest(new { error = "invalid traderId (expected 24-char hex MongoId)" }));
         }
 
-        if (body.Stock is null && body.BuyLimit is null)
+        if (body.Stock is null && body.BuyLimit is null && body.Disabled is null)
         {
-            return Task.FromResult<IActionResult>(BadRequest(new { error = "provide stock and/or buyLimit" }));
+            return Task.FromResult<IActionResult>(BadRequest(new { error = "provide stock, buyLimit and/or disabled" }));
         }
 
         if (body.Stock is { } s && (s < 0 || s != Math.Floor(s)))
@@ -66,12 +66,13 @@ public sealed class StockController(ModPathsService modPaths, WriteLockService w
             }
 
             var previous = tplMap[tpl] is JsonObject prev
-                ? new { stock = prev["stock"]?.GetValue<double?>(), buyLimit = prev["buyLimit"]?.GetValue<int?>() }
+                ? new { stock = prev["stock"]?.GetValue<double?>(), buyLimit = prev["buyLimit"]?.GetValue<int?>(), disabled = prev["disabled"]?.GetValue<bool?>() }
                 : null;
 
             var entry = new JsonObject();
             if (body.Stock is { } st) entry["stock"] = st;
             if (body.BuyLimit is { } lim) entry["buyLimit"] = lim;
+            if (body.Disabled is { } dis) entry["disabled"] = dis;
             tplMap[tpl] = entry;
 
             RawConfigStore.Write(StockConfigPath, overrides);
@@ -79,12 +80,12 @@ public sealed class StockController(ModPathsService modPaths, WriteLockService w
             auditLog.Append(
                 "trader-stock", "set", tpl,
                 before: previous,
-                after: new { stock = body.Stock, buyLimit = body.BuyLimit },
+                after: new { stock = body.Stock, buyLimit = body.BuyLimit, disabled = body.Disabled },
                 extra: new { traderId });
 
             return Task.FromResult<IActionResult>(Ok(new
             {
-                ok = true, tpl, traderId, stock = body.Stock, buyLimit = body.BuyLimit,
+                ok = true, tpl, traderId, stock = body.Stock, buyLimit = body.BuyLimit, disabled = body.Disabled,
                 note = "Restart SPT to apply in-game.",
             }));
         });
@@ -109,12 +110,14 @@ public sealed class StockController(ModPathsService modPaths, WriteLockService w
             var removed = false;
             double? prevStock = null;
             int? prevLimit = null;
+            bool? prevDisabled = null;
             if (overrides[traderId] is JsonObject tplMap)
             {
                 if (tplMap[tpl] is JsonObject prev)
                 {
                     prevStock = prev["stock"]?.GetValue<double?>();
                     prevLimit = prev["buyLimit"]?.GetValue<int?>();
+                    prevDisabled = prev["disabled"]?.GetValue<bool?>();
                 }
 
                 removed = tplMap.Remove(tpl);
@@ -127,7 +130,7 @@ public sealed class StockController(ModPathsService modPaths, WriteLockService w
             if (removed)
             {
                 RawConfigStore.Write(StockConfigPath, overrides);
-                auditLog.Append("trader-stock", "delete", tpl, before: new { stock = prevStock, buyLimit = prevLimit }, extra: new { traderId });
+                auditLog.Append("trader-stock", "delete", tpl, before: new { stock = prevStock, buyLimit = prevLimit, disabled = prevDisabled }, extra: new { traderId });
             }
 
             return Task.FromResult<IActionResult>(Ok(new { ok = true, tpl, traderId, removed, note = "Restart SPT to apply in-game." }));

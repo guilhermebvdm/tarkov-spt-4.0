@@ -19,4 +19,11 @@ internal sealed record StockOverride
 {
     [JsonPropertyName("stock")]    public double? Stock { get; init; }
     [JsonPropertyName("buyLimit")] public int? BuyLimit { get; init; }
+
+    /// <summary>
+    ///     When true, the trader stops selling this tpl entirely — <see cref="StockApplier"/> removes every
+    ///     root offer of it (plus children, barter & loyalty entries) from the live assort. Takes precedence
+    ///     over <see cref="Stock"/>/<see cref="BuyLimit"/> (a removed offer has nothing to cap).
+    /// </summary>
+    [JsonPropertyName("disabled")] public bool? Disabled { get; init; }
 }

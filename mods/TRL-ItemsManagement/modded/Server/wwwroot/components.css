@@ -1545,6 +1545,83 @@ select.pill { -webkit-appearance: none; appearance: none; padding-right: var(--s
   color: var(--fg-on-accent); background: var(--accent); padding: 0 3px; border-radius: 6px; vertical-align: 1px;
 }
 
+/* Inconsistency flag on the main list: flea-banned yet still sold by a trader. */
+.conflict-flag { color: #d9a441; cursor: help; font-size: 12px; line-height: 1; }
+.conflict-flag:hover { filter: brightness(1.25); }
+
+/* ── B-6 v2: inline availability + accordion editor + sale toggle ───────────────────────────── */
+/* Inline stock · buy-cycle (or "sale off") shown LEFT of the price in a trader row. */
+.trader-avail { display: inline-flex; align-items: baseline; gap: 7px; margin-right: 8px; font-variant-numeric: tabular-nums; }
+.trader-avail .ta-field { display: inline-flex; align-items: baseline; gap: 2px; cursor: help; }
+.trader-avail .ta-num { font-size: var(--fs-sm); font-weight: 600; color: var(--fg-secondary); }
+.trader-avail .ta-field.is-capped .ta-num { color: var(--accent-bright); }
+.trader-avail .ta-lbl { font-size: 8px; text-transform: uppercase; letter-spacing: .3px; color: var(--fg-faint); }
+.trader-avail.is-off .ta-off { color: var(--color-danger-bright, #d98a7a); font-weight: 600; font-size: var(--fs-xs); cursor: help; }
+.trader-price-block { display: inline-flex; align-items: baseline; gap: 4px; }
+.trader-price-block.is-off { opacity: .5; text-decoration: line-through; }
+.trader-edit-table tr.trader-row.is-sale-off td.k { box-shadow: inset 2px 0 0 rgba(184, 85, 68, .55); }
+
+/* Accordion panel inserted full-width right below the edited row. The <tr> dissolves (display:contents)
+ * so its <td> becomes the grid item directly: a real <tr> grid item won't grow to its td's content
+ * height (it clips into the next section), but the td does. The td then spans the full grid width. */
+.detail-section--full .trader-edit-table tr.trader-edit-accordion { display: contents; }
+.trader-edit-accordion > .tea-panel {
+  grid-column: 1 / -1;
+  display: block; box-sizing: border-box; width: 100%; padding: 10px 12px; margin: 3px 0 7px;
+  background: var(--bg-input); border: 1px solid var(--accent); border-radius: var(--radius-sm);
+}
+.tea-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px 20px; }
+.tea-cell { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.tea-label { display: flex; align-items: baseline; gap: 5px; font-size: 9px; letter-spacing: .4px; text-transform: uppercase; color: var(--fg-secondary); font-weight: 700; }
+.tea-unit, .tea-dflt { margin-left: auto; font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--fg-faint); font-size: 9px; }
+.tea-panel input[type=number] {
+  width: 100%; padding: 4px 6px; background: var(--bg-base, #181712); color: var(--fg-primary);
+  border: 1px solid var(--accent); border-radius: var(--radius-sm); font: inherit; font-size: var(--fs-sm);
+  text-align: right; font-variant-numeric: tabular-nums;
+}
+.tea-panel input[type=number]:disabled { opacity: .4; cursor: not-allowed; }
+.tef-preview { font-size: 9px; color: var(--accent-bright); text-align: right; min-height: 11px; font-variant-numeric: tabular-nums; }
+.tef-preview:empty { display: none; }
+
+/* help (?) chips — shared with any field that wants a popover explanation. */
+.hint-q {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 13px; height: 13px; border-radius: 50%; padding: 0; cursor: help; flex: 0 0 auto;
+  border: 1px solid var(--fg-faint); background: transparent; color: var(--fg-secondary);
+  font-size: 9px; font-weight: 700; line-height: 1;
+}
+.hint-q:hover { border-color: var(--accent-bright); color: var(--accent-bright); }
+
+/* sale on/off toggle */
+.tea-sale {
+  align-self: flex-start; padding: 4px 10px; border-radius: var(--radius-sm); cursor: pointer;
+  border: 1px solid transparent; font: inherit; font-size: var(--fs-sm); font-weight: 600;
+}
+.tea-sale[data-state=on]  { background: rgba(90, 150, 90, .18); color: #7bbf7b; border-color: rgba(90, 150, 90, .42); }
+.tea-sale[data-state=off] { background: rgba(184, 85, 68, .18); color: var(--color-danger-bright, #d98a7a); border-color: rgba(184, 85, 68, .42); }
+.tea-sale:hover { filter: brightness(1.15); }
+.tea-off-note { font-size: 9px; color: var(--color-danger-bright, #d98a7a); display: none; }
+.trader-edit-accordion.is-sale-off .tea-off-note { display: block; }
+.trader-edit-accordion.is-sale-off .tea-cell--stock,
+.trader-edit-accordion.is-sale-off .tea-cell--limit,
+.trader-edit-accordion.is-sale-off .tea-cell--price { opacity: .45; }
+
+/* actions row */
+.tea-actions { display: flex; align-items: center; gap: 8px; margin-top: 9px; flex-wrap: wrap; }
+.tea-actions .save {
+  height: 22px; padding: 0 12px; border: none; cursor: pointer; border-radius: var(--radius-sm);
+  background: var(--accent); color: var(--fg-on-accent); font: inherit; font-size: 10px; font-weight: 700;
+  letter-spacing: .4px; text-transform: uppercase;
+}
+.tea-actions .save:hover { filter: brightness(1.15); }
+.tea-actions .cancel {
+  height: 22px; padding: 0 10px; border: 1px solid var(--accent); cursor: pointer; border-radius: var(--radius-sm);
+  background: transparent; color: var(--fg-secondary); font: inherit; font-size: 10px;
+}
+.tea-actions .cancel:hover { color: var(--color-danger-bright, #d98a7a); border-color: var(--color-danger-bright, #d98a7a); }
+.tea-actions button:disabled { opacity: .5; cursor: wait; }
+.tea-hint { margin-left: auto; font-size: 8px; color: var(--fg-faint); }
+
 /* ── Per-trader BUY-price (buyback) editing — B-3, mirrors the sell block above ──────────── */
 /* .trader-edit-form / .trader-price-val / .badge--override / .trader-rub-hint / .trader-price-base /
  * .trader-fence-tag / .trader-edit-note / .trader-mod-warn are REUSED as-is (same markup helpers). */

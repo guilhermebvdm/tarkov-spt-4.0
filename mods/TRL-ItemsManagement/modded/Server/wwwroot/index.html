@@ -1500,6 +1500,13 @@ function renderRow(it) {
   const banIcon = banned
     ? `<span class="banned-icon" data-tip="Banned from flea: ${banReasons.join(', ')}" tabindex="0">${ICON_BANNED}</span> `
     : '';
+  // Inconsistency flag: flea-banned but still sold by a trader for money (e.g. MAG5-60 @ Artem) —
+  // contradictory, since a flea ban usually implies "not freely tradeable". Advisory only.
+  const soldByTrader = it.spt && Array.isArray(it.spt.traders) && it.spt.traders.some(t => t.price != null || t.priceRUB != null);
+  const fleaTraderConflict = banned && soldByTrader;
+  const conflictBadge = fleaTraderConflict
+    ? ` <span class="conflict-flag" data-tip="Inconsistent: flea-banned but still sold by a trader. Disable the trader sale, or lift the flea ban." tabindex="0">⚠</span>`
+    : '';
   // Trader cell — stacked SELL (player→trader, tarkov.dev) and BUY (trader→player, SPT assort)
   const traderSellValue = c.priceTraderSell ? c.priceTraderSell.value : null;
   const traderSellName  = c.priceTraderSell ? c.priceTraderSell.vendor : null;
@@ -1591,7 +1598,7 @@ function renderRow(it) {
 
   return `<tr data-id="${it.id}" class="${banned?'is-banned':''}">
     <td class="col-img">${img}</td>
-    <td class="col-name"><div class="name-row"><div class="name">${escapeHtml(it.name || it.id)}</div>${modBadge}</div><div class="short">${escapeHtml(it.shortName || '')}</div></td>
+    <td class="col-name"><div class="name-row"><div class="name">${escapeHtml(it.name || it.id)}</div>${modBadge}${conflictBadge}</div><div class="short">${escapeHtml(it.shortName || '')}</div></td>
     <td class="col-group">${renderGroupCell(it, c.group)}</td>
     <td>${condBadge}</td>
     <td class="col-reward">${rewardCell}</td>
@@ -1694,14 +1701,14 @@ function onTableClick(e) {
     if (row) restoreTraderOverride(row);
     return;
   }
-  // Clicks inside an open trader-edit form: let the form's own handlers fire
+  // Clicks inside an open trader-edit form/accordion: let its own handlers fire
   // (don't let the click bubble up to toggle/close the detail row).
-  if (e.target.closest('.trader-edit-form')) { e.stopPropagation(); return; }
-  // B-6: the stock chip in the trader's name cell opens the same editor, focused on the stock field.
-  const stockChip = e.target.closest('.trader-stock');
-  if (stockChip) {
+  if (e.target.closest('.trader-edit-form') || e.target.closest('.trader-edit-accordion')) { e.stopPropagation(); return; }
+  // B-6: clicking the inline stock/buy-cycle figures opens the editor focused on the stock field.
+  const availClick = e.target.closest('.trader-avail');
+  if (availClick) {
     e.stopPropagation();
-    const row = stockChip.closest('tr.trader-row');
+    const row = availClick.closest('tr.trader-row');
     if (row && row.classList.contains('is-editable')) openTraderEdit(row, 'stock');
     return;
   }
@@ -2371,7 +2378,7 @@ function undoApplyTrader(isBuy, tpl, traderId, count, currency) {
 // B-6: optimistic STOCK_OVERRIDES update after an undo. entry = { stock?, buyLimit? } to restore, or
 // null to clear. Re-renders the trader row in the (possibly open) detail panel + the main row.
 function undoApplyStock(tpl, traderId, entry) {
-  if (entry == null || (entry.stock == null && entry.buyLimit == null)) {
+  if (entry == null || (entry.stock == null && entry.buyLimit == null && entry.disabled == null)) {
     if (STOCK_OVERRIDES[traderId]) {
       delete STOCK_OVERRIDES[traderId][tpl];
       if (Object.keys(STOCK_OVERRIDES[traderId]).length === 0) delete STOCK_OVERRIDES[traderId];
@@ -2381,6 +2388,7 @@ function undoApplyStock(tpl, traderId, entry) {
     const e2 = {};
     if (entry.stock != null) e2.stock = entry.stock;
     if (entry.buyLimit != null) e2.buyLimit = entry.buyLimit;
+    if (entry.disabled != null) e2.disabled = entry.disabled;
     STOCK_OVERRIDES[traderId][tpl] = e2;
   }
   const esc = (v) => (window.CSS && CSS.escape) ? CSS.escape(v) : v;
@@ -2389,8 +2397,9 @@ function undoApplyStock(tpl, traderId, entry) {
   rerenderMainRow(tpl);
 }
 
-// Human-readable summary of a stock/buyLimit pair for the audit feed. Either field may be absent.
+// Human-readable summary of a stock / buyLimit / disabled entry for the audit feed. Any field absent.
 function auditAvail(o) {
+  if (o && o.disabled) return 'sale disabled';
   const parts = [];
   if (o && o.stock != null) parts.push(`stock ${o.stock.toLocaleString('en-US')}`);
   if (o && o.buyLimit != null) parts.push(`buy ${o.buyLimit.toLocaleString('en-US')}/cyc`);
@@ -2492,7 +2501,7 @@ function describeAuditEntry(e) {
     }
     case 'trader-stock/set': {
       const traderName = escapeHtml(auditTraderName(x.traderId));
-      const hadPrev = b.stock != null || b.buyLimit != null; // was there an override to restore?
+      const hadPrev = b.stock != null || b.buyLimit != null || b.disabled != null; // override to restore?
       return {
         desc: `Availability for <b>${traderName}</b> changed: ${auditAvail(b)} → ${auditAvail(a)}`,
         undo: {
@@ -2505,8 +2514,9 @@ function describeAuditEntry(e) {
               const body = { tpl: e.tpl, traderId: x.traderId };
               if (b.stock != null) body.stock = b.stock;
               if (b.buyLimit != null) body.buyLimit = b.buyLimit;
+              if (b.disabled) body.disabled = true;
               data = await auditApiCall('PATCH', '/trader-stock', body);
-              undoApplyStock(e.tpl, x.traderId, { stock: b.stock ?? null, buyLimit: b.buyLimit ?? null });
+              undoApplyStock(e.tpl, x.traderId, { stock: b.stock ?? null, buyLimit: b.buyLimit ?? null, disabled: b.disabled ?? null });
             }
             return data;
           },
@@ -2515,7 +2525,7 @@ function describeAuditEntry(e) {
     }
     case 'trader-stock/delete': {
       const traderName = escapeHtml(auditTraderName(x.traderId));
-      const hadPrev = b.stock != null || b.buyLimit != null;
+      const hadPrev = b.stock != null || b.buyLimit != null || b.disabled != null;
       return {
         desc: `Availability for <b>${traderName}</b> reset to default`,
         undo: !hadPrev ? null : {
@@ -2523,8 +2533,9 @@ function describeAuditEntry(e) {
             const body = { tpl: e.tpl, traderId: x.traderId };
             if (b.stock != null) body.stock = b.stock;
             if (b.buyLimit != null) body.buyLimit = b.buyLimit;
+            if (b.disabled) body.disabled = true;
             const data = await auditApiCall('PATCH', '/trader-stock', body);
-            undoApplyStock(e.tpl, x.traderId, { stock: b.stock ?? null, buyLimit: b.buyLimit ?? null });
+            undoApplyStock(e.tpl, x.traderId, { stock: b.stock ?? null, buyLimit: b.buyLimit ?? null, disabled: b.disabled ?? null });
             return data;
           },
         },
@@ -3161,13 +3172,13 @@ function traderOverrideFor(traderId, tpl) {
   return byTrader[tpl];
 }
 
-// B-6: resolve the stock override for a (trader, tpl) as { stock?, buyLimit? }, or null. An entry with
-// neither field present is treated as no override (defensive — the backend never writes an empty one).
+// B-6: resolve the stock override for a (trader, tpl) as { stock?, buyLimit?, disabled? }, or null. An
+// entry with no meaningful field is treated as no override (defensive — the backend never writes empty).
 function stockOverrideFor(traderId, tpl) {
   if (!traderId) return null;
   const byTrader = STOCK_OVERRIDES[traderId];
   const ovr = byTrader && byTrader[tpl];
-  if (ovr == null || (ovr.stock == null && ovr.buyLimit == null)) return null;
+  if (ovr == null || (ovr.stock == null && ovr.buyLimit == null && ovr.disabled == null)) return null;
   return ovr;
 }
 
@@ -3213,8 +3224,18 @@ function rubHintMarkup(native, cur) {
   return ` <span class="trader-rub-hint" data-tip="${escapeAttr('rouble-equivalent (@ ' + CURRENCY_RATES[cur].toLocaleString('en-US') + ' ₽/' + (CURRENCY_SYMBOL[cur] || cur) + ')')}">≈ ${rub.toLocaleString('en-US')} ₽</span>`;
 }
 
-// Render one offer row. Editable rows (money & not Fence) get an inline edit
-// affordance + OVR badge when overridden; barter / Fence rows are read-only.
+// Shared help-tooltips for the trader availability fields — one source of truth for the inline row
+// markup and the editor's (?) popovers, so the operator sees the same explanation in both places.
+const TRADER_AVAIL_TIP = {
+  stock:   'Stock — total units the trader has to sell, in TOTAL (not per cycle). In SPT 4.0 it erodes as players buy and does NOT restock. ∞ = unlimited.',
+  limit:   'Buy / cycle — the most a SINGLE player can buy per trader refresh cycle. Resets every cycle. ∞ = no per-cycle cap (only Stock limits how many exist).',
+  sale:    'Whether this trader sells the item at all. Disabling removes it from the trader\'s assort entirely — it stops appearing in the shop. Restart SPT to apply.',
+  saleOff: 'Sale disabled — this trader no longer sells the item (removed from its assort). Restart SPT to apply.',
+};
+
+// Render one offer row. Editable rows (money & not Fence) get an inline edit affordance, the current
+// stock / buy-cycle / sale-status shown left of the price, and an OVR badge when overridden; barter /
+// Fence rows are read-only.
 function renderTraderRow(it, t) {
   const tpl = it.id;
   const traderId = t.traderId || (t.name ? (TRADERS[t.name] && TRADERS[t.name].id) : null);
@@ -3227,26 +3248,22 @@ function renderTraderRow(it, t) {
   const ovr = editable ? traderOverrideFor(traderId, tpl) : null;
   const hasOvr = ovr != null;
 
-  // B-6: stock / per-cycle buy-limit. Vanilla comes from the cache (t.stock finite, or ∞ when
-  // t.unlimited); a config override (applied at boot, pending until restart) supersedes it.
+  // B-6: stock / per-cycle buy-limit / disable-sale. Vanilla stock comes from the cache (t.stock
+  // finite, or ∞ when t.unlimited); a config override (applied at boot, pending until restart) wins.
   const stockOvr = editable ? stockOverrideFor(traderId, tpl) : null;
+  const disabled = !!(stockOvr && stockOvr.disabled === true);
   const vanillaStock = (t.stock != null) ? t.stock : (t.unlimited ? Infinity : null);
   const effStock = (stockOvr && stockOvr.stock != null) ? stockOvr.stock : vanillaStock;
   const effLimit = (stockOvr && stockOvr.buyLimit != null) ? stockOvr.buyLimit
                  : (t.buyLimit != null ? t.buyLimit : null);
-  const stockCapped = stockOvr != null;
-  const stockTxt = effStock == null ? null : (effStock === Infinity ? '∞' : effStock.toLocaleString('en-US'));
+  const stockCapped = !!(stockOvr && (stockOvr.stock != null || stockOvr.buyLimit != null));
+  const stockTxt = effStock == null ? '?' : (effStock === Infinity ? '∞' : effStock.toLocaleString('en-US'));
+  const limitTxt = effLimit == null ? '∞' : effLimit.toLocaleString('en-US');
   const dfltStockTxt = vanillaStock == null ? '?' : (vanillaStock === Infinity ? '∞' : vanillaStock.toLocaleString('en-US'));
-  const stockTip = stockCapped
-    ? escapeAttr(`Availability capped — stock ${stockTxt}${effLimit!=null?`, buy limit ${effLimit}/cycle`:''} (default ${dfltStockTxt}). Edit via the price cell.`)
-    : escapeAttr(`Stock ${stockTxt ?? '?'}${effLimit!=null?`, buy limit ${effLimit}/cycle`:''}. Edit via the price cell.`);
-  const stockChip = (editable && stockTxt != null)
-    ? ` · <span class="trader-stock${stockCapped?' is-capped':''}" data-tip="${stockTip}">${stockTxt}${stockCapped?`<span class="trader-stock-cap">cap</span>`:''}</span>`
-    : (!editable && t.unlimited ? ' · ∞' : '');
 
   // Quest-lock 🔒 gets its own tooltip so it isn't confused with Fence's marker.
   const lockGlyph = t.questLocked ? ` · <span class="trader-lock" data-tip="Quest-locked — an override here applies only after you unlock the quest (until then the item sits in the trader's quest assort, not the live one)">🔒</span>` : '';
-  const meta = `<small class="vendor">${escapeHtml(t.currency || '?')} · L${t.loyaltyLevel}${lockGlyph}${stockChip}</small>`;
+  const meta = `<small class="vendor">${escapeHtml(t.currency || '?')} · L${t.loyaltyLevel}${lockGlyph}</small>`;
   const nameCell = `<td class="k">${escapeHtml(t.name)} ${meta}</td>`;
 
   // Muted em-dash for a missing effective price.
@@ -3291,15 +3308,25 @@ function renderTraderRow(it, t) {
   } else {
     priceMarkup = `${nativeValueMarkup(eff, t.currency)}${rubHint}`;
   }
-  // T7: inline restore ↺ for overridden rows (deletes without opening the editor).
+  // T7: inline restore ↺ for overridden rows (deletes the SELL-price override without opening the editor).
   const restoreBtn = hasOvr
     ? `<button class="trader-restore-btn" type="button" data-tip="Restore default sell price" aria-label="Restore default sell price">↺</button>`
     : '';
-  return `<tr class="trader-row is-editable${hasOvr?' is-overridden':''}${stockCapped?' is-stock-capped':''}" data-trader-id="${escapeAttr(traderId||'')}" data-trader-tpl="${escapeAttr(tpl)}" data-trader-base="${base!=null?base:''}" data-trader-cur="${escapeAttr(t.currency||'')}" data-trader-stock="${t.stock!=null?t.stock:''}" data-trader-unlimited="${t.unlimited?'1':''}" data-trader-buylimit="${t.buyLimit!=null?t.buyLimit:''}">` +
+
+  // B-6: availability shown left of the price — "stock · N/cyc", or a "sale off" pill when disabled.
+  const availInline = disabled
+    ? `<span class="trader-avail is-off"><span class="ta-off" data-tip="${escapeAttr(TRADER_AVAIL_TIP.saleOff)}">⊘ sale off</span></span>`
+    : `<span class="trader-avail">` +
+        `<span class="ta-field${(stockOvr&&stockOvr.stock!=null)?' is-capped':''}" data-tip="${escapeAttr(TRADER_AVAIL_TIP.stock + ((stockOvr&&stockOvr.stock!=null)?` (default ${dfltStockTxt})`:''))}"><span class="ta-num">${stockTxt}</span><span class="ta-lbl">stock</span></span>` +
+        `<span class="ta-field${(stockOvr&&stockOvr.buyLimit!=null)?' is-capped':''}" data-tip="${escapeAttr(TRADER_AVAIL_TIP.limit)}"><span class="ta-num">${limitTxt}</span><span class="ta-lbl">/cyc</span></span>` +
+      `</span>`;
+  const priceBlock = `<span class="trader-price-block${disabled?' is-off':''}">${priceMarkup}${badge}</span>`;
+
+  return `<tr class="trader-row is-editable${hasOvr?' is-overridden':''}${stockCapped?' is-stock-capped':''}${disabled?' is-sale-off':''}" data-trader-id="${escapeAttr(traderId||'')}" data-trader-tpl="${escapeAttr(tpl)}" data-trader-base="${base!=null?base:''}" data-trader-cur="${escapeAttr(t.currency||'')}" data-trader-stock="${t.stock!=null?t.stock:''}" data-trader-unlimited="${t.unlimited?'1':''}" data-trader-buylimit="${t.buyLimit!=null?t.buyLimit:''}" data-trader-disabled="${disabled?'1':''}">` +
     nameCell +
-    `<td class="v trader-edit-cell" data-tip="Click to edit the trader's sell price" tabindex="0" role="button" aria-label="Edit trader sell price">` +
-      priceMarkup + badge + restoreBtn +
-      `<button class="trader-edit-btn" type="button" title="Edit trader sell price" tabindex="-1">${ICON_EDIT}</button>` +
+    `<td class="v trader-edit-cell" data-tip="Click to edit sell price, stock &amp; availability" tabindex="0" role="button" aria-label="Edit trader sell price and availability">` +
+      availInline + priceBlock + restoreBtn +
+      `<button class="trader-edit-btn" type="button" title="Edit sell price &amp; availability" tabindex="-1">${ICON_EDIT}</button>` +
     `</td>` +
   `</tr>`;
 }
@@ -3376,21 +3403,34 @@ async function restoreTraderOverride(row) {
 // /trader-price) and Availability (stock + per-cycle buy-limit → /trader-stock, B-6). One Save
 // persists only what actually changed; each section has its own contextual restore. Mirrors the flea
 // inline edit for the price half.
+// Close any open trader-edit accordion (single editor at a time).
+function closeAllTraderEditors() {
+  document.querySelectorAll('tr.trader-edit-accordion').forEach(acc => {
+    const owner = acc.previousElementSibling;
+    if (owner && owner.classList) owner.classList.remove('is-editing');
+    acc.remove();
+  });
+}
+
+// Open the inline editor for a trader row as an ACCORDION — a full-width panel inserted right below
+// the row (nothing floats, so it never clips off-screen or forces a scroll). Edits sell price, stock,
+// per-cycle buy-limit and sale on/off in one place. One Save persists only what changed.
 function openTraderEdit(row, focusField) {
-  if (row.querySelector('.trader-edit-form')) return; // already editing
+  const next = row.nextElementSibling;
+  if (next && next.classList && next.classList.contains('trader-edit-accordion')) return; // already open
+  closeAllTraderEditors();
+
   const tpl = row.dataset.traderTpl;
   const traderId = row.dataset.traderId;
   const cur = row.dataset.traderCur;
   const sym = CURRENCY_SYMBOL[cur] || cur || '';
   const base = row.dataset.traderBase !== '' ? Number(row.dataset.traderBase) : null;
   const ovrCount = traderOverrideCount(traderId, tpl);
-  // Input is the NATIVE amount; default to the current effective native value.
   const current = ovrCount != null ? ovrCount : (base != null ? base : '');
   const hasOvr = ovrCount != null;
 
-  // B-6: availability state. Vanilla stock/limit come from the row's data-attrs (cache); an override
-  // supersedes them. Inputs are prefilled with the override value so editing one field re-sends the
-  // other unchanged (the backend rewrites the whole entry).
+  // Availability state. Vanilla stock/limit from the row's data-attrs (cache); an override supersedes.
+  // Inputs prefilled with the override value so editing one field re-sends the other unchanged.
   const rawStock = row.dataset.traderStock;
   const unlimited = row.dataset.traderUnlimited === '1';
   const rawLimit = row.dataset.traderBuylimit;
@@ -3399,6 +3439,7 @@ function openTraderEdit(row, focusField) {
   const stockOvr = stockOverrideFor(traderId, tpl);
   const curOvrStock = (stockOvr && stockOvr.stock != null) ? stockOvr.stock : null;
   const curOvrLimit = (stockOvr && stockOvr.buyLimit != null) ? stockOvr.buyLimit : null;
+  const disabledBefore = !!(stockOvr && stockOvr.disabled === true);
   const hasStockOvr = stockOvr != null;
   const dfltStockTxt = vanillaStock == null ? 'n/a' : (vanillaStock === Infinity ? '∞' : vanillaStock.toLocaleString('en-US'));
   const dfltLimitTxt = vanillaLimit == null ? '∞' : vanillaLimit.toLocaleString('en-US');
@@ -3406,49 +3447,69 @@ function openTraderEdit(row, focusField) {
   const isRub = cur === 'RUB';
   const rate = CURRENCY_RATES[cur];
   const showRubPreview = CURRENCY_RUB_HINT.has(cur) && rate && rate > 0;
-
-  const cell = row.querySelector('.trader-edit-cell');
-  cell.classList.add('is-editing');
-  const form = document.createElement('form');
-  form.className = 'trader-edit-form trader-edit-form--full';
-  form.onsubmit = (e) => { e.preventDefault(); return false; };
-  form.innerHTML =
-    `<div class="tef-section">` +
-      `<label class="tef-label" for="tef-price-${tpl}">Sell price <span class="tef-unit">${escapeHtml(cur)}</span></label>` +
-      // NATIVE integer input — step 1, no rate snapping.
-      `<input id="tef-price-${tpl}" class="tef-price" type="number" min="1" step="1" value="${current}" aria-label="Trader sell price in ${escapeAttr(cur)}">` +
-      `<div class="trader-edit-form__preview" aria-live="polite"></div>` +
-      (hasOvr ? `<button class="tef-restore-price restore-link" type="button">↺ restore default price</button>` : '') +
-    `</div>` +
-    `<div class="tef-section tef-section--avail">` +
-      `<label class="tef-label" data-tip="Stock = hard lifetime cap (does not restock per cycle). Buy/cycle = per-refresh allowance (resets each flea cycle). Both apply PER loyalty tier — if this trader sells the item at more than one tier, each tier gets this cap.">Availability <span class="tef-unit">per tier</span></label>` +
-      `<div class="tef-grid">` +
-        `<span class="tef-field">Stock</span>` +
-        `<input class="tef-stock" type="number" min="0" step="1" value="${curOvrStock != null ? curOvrStock : ''}" placeholder="${escapeAttr(dfltStockTxt)}" aria-label="Total stock (default ${escapeAttr(dfltStockTxt)})">` +
-        `<span class="tef-field">Buy&nbsp;/&nbsp;cycle</span>` +
-        `<input class="tef-limit" type="number" min="0" step="1" value="${curOvrLimit != null ? curOvrLimit : ''}" placeholder="${escapeAttr(dfltLimitTxt)}" aria-label="Buy limit per refresh cycle (default ${escapeAttr(dfltLimitTxt)})">` +
-      `</div>` +
-      `<div class="tef-avail-note" aria-live="polite"></div>` +
-      (hasStockOvr ? `<button class="tef-restore-stock restore-link" type="button">↺ restore default availability</button>` : '') +
-    `</div>` +
-    `<div class="trader-edit-form__actions">` +
-      `<button class="save" type="button" title="Save (Enter)">Save</button>` +
-      `<button class="cancel" type="button" title="Cancel (Esc)">×</button>` +
-    `</div>` +
-    `<div class="trader-edit-form__hint">applies to all loyalty levels · restart SPT to apply</div>`;
-  cell.appendChild(form);
-
-  const input        = form.querySelector('.tef-price');
-  const stockInput   = form.querySelector('.tef-stock');
-  const limitInput   = form.querySelector('.tef-limit');
-  const preview      = form.querySelector('.trader-edit-form__preview');
-  const availNote    = form.querySelector('.tef-avail-note');
-  const save         = form.querySelector('button.save');
-  const cancel       = form.querySelector('button.cancel');
-  const restorePrice = form.querySelector('.tef-restore-price');
-  const restoreStock = form.querySelector('.tef-restore-stock');
   const item = ITEMS[tpl];
   const label = (item && (item.shortName || item.name)) || tpl;
+
+  const qMark = (tip) => `<button type="button" class="hint-q" tabindex="-1" data-tip="${escapeAttr(tip)}" aria-label="help">?</button>`;
+
+  row.classList.add('is-editing');
+  const acc = document.createElement('tr');
+  acc.className = 'trader-edit-accordion';
+  acc.innerHTML =
+    `<td class="tea-panel">` +
+      `<div class="tea-grid">` +
+        `<div class="tea-cell tea-cell--price">` +
+          `<label class="tea-label">Sell price ${qMark('The native amount the game charges for this item. Applies to all loyalty tiers.')}<span class="tea-unit">${escapeHtml(cur)}</span></label>` +
+          `<input class="tef-price" type="number" min="1" step="1" value="${current}" aria-label="Trader sell price in ${escapeAttr(cur)}">` +
+          `<div class="tef-preview" aria-live="polite"></div>` +
+          (hasOvr ? `<button class="tef-restore-price restore-link" type="button">↺ restore default price</button>` : '') +
+        `</div>` +
+        `<div class="tea-cell tea-cell--sale">` +
+          `<label class="tea-label">Sale ${qMark(TRADER_AVAIL_TIP.sale)}</label>` +
+          `<button type="button" class="tea-sale"></button>` +
+          `<div class="tea-off-note">Removed from this trader's shop.</div>` +
+        `</div>` +
+        `<div class="tea-cell tea-cell--stock">` +
+          `<label class="tea-label">Stock ${qMark(TRADER_AVAIL_TIP.stock)}<span class="tea-dflt">def ${escapeHtml(dfltStockTxt)}</span></label>` +
+          `<input class="tef-stock" type="number" min="0" step="1" value="${curOvrStock != null ? curOvrStock : ''}" placeholder="${escapeAttr(dfltStockTxt)}" aria-label="Total stock (default ${escapeAttr(dfltStockTxt)})">` +
+        `</div>` +
+        `<div class="tea-cell tea-cell--limit">` +
+          `<label class="tea-label">Buy / cycle ${qMark(TRADER_AVAIL_TIP.limit)}<span class="tea-dflt">def ${escapeHtml(dfltLimitTxt)}</span></label>` +
+          `<input class="tef-limit" type="number" min="0" step="1" value="${curOvrLimit != null ? curOvrLimit : ''}" placeholder="${escapeAttr(dfltLimitTxt)}" aria-label="Buy limit per refresh cycle (default ${escapeAttr(dfltLimitTxt)})">` +
+        `</div>` +
+      `</div>` +
+      `<div class="tef-avail-note" aria-live="polite"></div>` +
+      `<div class="tea-actions">` +
+        `<button class="save" type="button" title="Save (Enter)">Save</button>` +
+        `<button class="cancel" type="button" title="Cancel (Esc)">Cancel</button>` +
+        (hasStockOvr ? `<button class="tef-restore-stock restore-link" type="button">↺ restore availability</button>` : '') +
+        `<span class="tea-hint">applies to all loyalty tiers · restart SPT to apply</span>` +
+      `</div>` +
+    `</td>`;
+  row.after(acc);
+
+  const input        = acc.querySelector('.tef-price');
+  const stockInput   = acc.querySelector('.tef-stock');
+  const limitInput   = acc.querySelector('.tef-limit');
+  const preview      = acc.querySelector('.tef-preview');
+  const availNote    = acc.querySelector('.tef-avail-note');
+  const saleBtn      = acc.querySelector('.tea-sale');
+  const save         = acc.querySelector('button.save');
+  const cancel       = acc.querySelector('button.cancel');
+  const restorePrice = acc.querySelector('.tef-restore-price');
+  const restoreStock = acc.querySelector('.tef-restore-stock');
+
+  // Sale on/off toggle. When off, the money/stock inputs are disabled (a removed item has no price
+  // or stock to set) and the panel dims those fields.
+  let saleOn = !disabledBefore;
+  function renderSale() {
+    saleBtn.dataset.state = saleOn ? 'on' : 'off';
+    saleBtn.setAttribute('aria-pressed', saleOn ? 'true' : 'false');
+    saleBtn.innerHTML = saleOn ? '● Sale enabled' : '⊘ Sale disabled';
+    acc.classList.toggle('is-sale-off', !saleOn);
+    input.disabled = stockInput.disabled = limitInput.disabled = !saleOn;
+  }
+  saleBtn.onclick = () => { saleOn = !saleOn; renderSale(); if (saleOn) input.focus(); };
 
   // Live preview. USD/EUR → rouble-equivalent; GP → "= N GP"; RUB → "= N ₽".
   function updatePreview() {
@@ -3469,7 +3530,7 @@ function openTraderEdit(row, focusField) {
     const s = sRaw === '' ? null : parseInt(sRaw, 10);
     const l = lRaw === '' ? null : parseInt(lRaw, 10);
     let note = '';
-    if (s === 0) note = '⚠ stock 0 — item is out of stock';
+    if (s === 0) note = '⚠ stock 0 — item is out of stock (use Sale off to remove it entirely)';
     else if (s != null && l != null && l > s) note = '⚠ buy limit above stock — stock binds first';
     availNote.textContent = note;
     availNote.classList.toggle('is-warn', note !== '');
@@ -3477,19 +3538,20 @@ function openTraderEdit(row, focusField) {
   input.addEventListener('input', updatePreview);
   stockInput.addEventListener('input', updateAvailNote);
   limitInput.addEventListener('input', updateAvailNote);
+  renderSale();
   updatePreview();
   updateAvailNote();
 
   let docClickHandler = null;
   function closeForm() {
-    cell.classList.remove('is-editing');
-    form.remove();
+    row.classList.remove('is-editing');
+    acc.remove();
     if (docClickHandler) document.removeEventListener('mousedown', docClickHandler, true);
   }
   function rerenderRow() { return rerenderTraderRowEl(row, true); }
   function reflectAll() { closeForm(); rerenderRow(); rerenderMainRow(tpl); refreshTraderOverrideFilter(); updateTraderTopbar(); }
   function setBusy(v) {
-    save.disabled = cancel.disabled = v;
+    save.disabled = cancel.disabled = saleBtn.disabled = v;
     if (restorePrice) restorePrice.disabled = v;
     if (restoreStock) restoreStock.disabled = v;
   }
@@ -3500,38 +3562,47 @@ function openTraderEdit(row, focusField) {
     if (ev.key === 'Enter')  { ev.preventDefault(); save.click(); }
   };
   input.onkeydown = onKey; stockInput.onkeydown = onKey; limitInput.onkeydown = onKey;
-  docClickHandler = (ev) => { if (!row.contains(ev.target)) closeForm(); };
+  docClickHandler = (ev) => { if (!row.contains(ev.target) && !acc.contains(ev.target)) closeForm(); };
   setTimeout(() => document.addEventListener('mousedown', docClickHandler, true), 0);
 
-  // Focus the requested field (price by default; 'stock' when opened from the stock chip).
   const initial = focusField === 'stock' ? stockInput : input;
-  initial.focus(); if (initial.select) initial.select();
+  if (!initial.disabled) { initial.focus(); if (initial.select) initial.select(); } else { saleBtn.focus(); }
 
   save.onclick = async () => {
-    // ── validate ──────────────────────────────────────────────────────────────────
+    // ── validate (skip money/stock validation when the sale is being disabled) ────────
     const priceRaw = input.value.trim();
     const priceVal = priceRaw === '' ? null : parseInt(priceRaw, 10);
-    if (priceRaw !== '' && (!Number.isFinite(priceVal) || priceVal <= 0)) {
+    if (saleOn && priceRaw !== '' && (!Number.isFinite(priceVal) || priceVal <= 0)) {
       toast('Sell price must be a whole number greater than 0', 'err'); input.focus(); return;
     }
     const stockRaw = stockInput.value.trim(), limitRaw = limitInput.value.trim();
     const stockVal = stockRaw === '' ? null : parseInt(stockRaw, 10);
     const limitVal = limitRaw === '' ? null : parseInt(limitRaw, 10);
-    if (stockRaw !== '' && (!Number.isInteger(stockVal) || stockVal < 0)) {
+    if (saleOn && stockRaw !== '' && (!Number.isInteger(stockVal) || stockVal < 0)) {
       toast('Stock must be a whole number ≥ 0', 'err'); stockInput.focus(); return;
     }
-    if (limitRaw !== '' && (!Number.isInteger(limitVal) || limitVal < 0)) {
+    if (saleOn && limitRaw !== '' && (!Number.isInteger(limitVal) || limitVal < 0)) {
       toast('Buy limit must be a whole number ≥ 0', 'err'); limitInput.focus(); return;
     }
 
-    // ── diff: only touch endpoints whose values actually changed ─────────────────────
-    const priceChanged = priceVal != null && priceVal !== (ovrCount != null ? ovrCount : base);
-    let stockAction = 'none';
-    if (stockVal == null && limitVal == null) {
-      if (hasStockOvr) stockAction = 'delete'; // both fields cleared → drop the existing override
-    } else if ((stockVal ?? null) !== curOvrStock || (limitVal ?? null) !== curOvrLimit) {
-      stockAction = 'patch';
+    // ── desired stock-override state (null = no override) ─────────────────────────────
+    let desired = null;
+    if (!saleOn) {
+      desired = { disabled: true };
+    } else if (stockVal != null || limitVal != null) {
+      desired = {};
+      if (stockVal != null) desired.stock = stockVal;
+      if (limitVal != null) desired.buyLimit = limitVal;
     }
+    const sameOvr = (a, b) =>
+      (a == null && b == null) ||
+      (a != null && b != null && (a.stock ?? null) === (b.stock ?? null)
+        && (a.buyLimit ?? null) === (b.buyLimit ?? null) && (!!a.disabled) === (!!b.disabled));
+
+    // Price only changes when the sale is (staying) on.
+    const priceChanged = saleOn && priceVal != null && priceVal !== (ovrCount != null ? ovrCount : base);
+    let stockAction = 'none';
+    if (!sameOvr(desired, stockOvr)) stockAction = desired == null ? 'delete' : 'patch';
     if (!priceChanged && stockAction === 'none') { closeForm(); rerenderRow(); return; }
 
     // ── persist (price first; abort before stock if it fails) ────────────────────────
@@ -3564,23 +3635,25 @@ function openTraderEdit(row, focusField) {
     if (stockAction === 'patch') {
       try {
         const body = { tpl, traderId };
-        if (stockVal != null) body.stock = stockVal;
-        if (limitVal != null) body.buyLimit = limitVal;
+        if (desired.stock != null) body.stock = desired.stock;
+        if (desired.buyLimit != null) body.buyLimit = desired.buyLimit;
+        if (desired.disabled) body.disabled = true;
         const r = await fetch(API_BASE + '/trader-stock', {
           method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
         });
         const data = await r.json();
         if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
-        const entry = {};
-        if (stockVal != null) entry.stock = stockVal;
-        if (limitVal != null) entry.buyLimit = limitVal;
         if (!STOCK_OVERRIDES[traderId]) STOCK_OVERRIDES[traderId] = {};
-        STOCK_OVERRIDES[traderId][tpl] = entry;
-        const parts = [];
-        if (stockVal != null) parts.push(`stock ${stockVal.toLocaleString('en-US')}`);
-        if (limitVal != null) parts.push(`buy limit ${limitVal.toLocaleString('en-US')}/cycle`);
-        msgs.push(parts.join(' · '));
-        if (stockVal === 0) { anyWarn = true; msgs[msgs.length - 1] += ' (out of stock)'; }
+        STOCK_OVERRIDES[traderId][tpl] = desired;
+        if (desired.disabled) {
+          msgs.push('sale disabled');
+        } else {
+          const parts = [];
+          if (desired.stock != null) parts.push(`stock ${desired.stock.toLocaleString('en-US')}`);
+          if (desired.buyLimit != null) parts.push(`buy limit ${desired.buyLimit.toLocaleString('en-US')}/cycle`);
+          msgs.push(parts.join(' · '));
+          if (desired.stock === 0) { anyWarn = true; msgs[msgs.length - 1] += ' (out of stock)'; }
+        }
       } catch (err) { stockErr = err; }
     } else if (stockAction === 'delete') {
       try {
@@ -3593,13 +3666,12 @@ function openTraderEdit(row, focusField) {
           delete STOCK_OVERRIDES[traderId][tpl];
           if (Object.keys(STOCK_OVERRIDES[traderId]).length === 0) delete STOCK_OVERRIDES[traderId];
         }
-        msgs.push('availability → default');
+        msgs.push(disabledBefore ? 'sale enabled' : 'availability → default');
       } catch (err) { stockErr = err; }
     }
 
     reflectAll();
     if (stockErr) {
-      // Price may already be committed — report both outcomes truthfully rather than a bare failure.
       toast(`${label}: ${msgs.length ? msgs.join(' · ') + ' saved, but ' : ''}availability failed: ${stockErr.message}`, 'err');
     } else {
       toast(`${label}: ${msgs.join(' · ')} · restart SPT to apply`, anyWarn ? 'warn' : 'ok');
@@ -3914,6 +3986,28 @@ function renderDetail(it) {
     </div>
     <div class="detail-sections">
 
+      <div class="detail-section detail-section--full">
+        <h3>Trader sell (SPT assort) <span class="vendor" style="text-transform:none;font-weight:400" data-tip="The price the trader sells this for — what you pay. This is the editable price.">— what you pay</span>${TRADER_MOD_INSTALLED ? '' : ' <span class="trader-mod-warn" data-tip="Install TRLTraderPrices for edits to take effect in-game.">⚠ mod not installed</span>'}</h3>
+        <table class="trader-edit-table" data-trader-tpl="${escapeAttr(it.id)}">
+          ${sptTraders.length === 0 ? '<tr><td>—</td></tr>' :
+            sptTraders.map(t => renderTraderRow(it, t)).join('')}
+        </table>
+        <div class="trader-edit-note${TRADER_MOD_INSTALLED ? '' : ' is-warn'}">${TRADER_MOD_INSTALLED
+          ? 'Edit in the trader\'s native currency (the amount the game charges). Applies to all loyalty levels. Restart SPT to apply.'
+          : 'TRLTraderPrices not installed — edits are saved but inert. Install the mod, then restart SPT to apply.'}</div>
+      </div>
+
+      <div class="detail-section detail-section--full">
+        <h3>Trader buy (tarkov.dev ref) — best: <span class="price is-canonical" data-tip="What the trader pays you (buyback)">${c.priceTraderSell ? fmt(c.priceTraderSell.value)+' ₽ ('+escapeHtml(c.priceTraderSell.vendor)+')' : '—'}</span>${BUY_MOD_INSTALLED ? '' : ' <span class="trader-mod-warn" data-tip="Install TRLTraderPrices (client + server) for edits to take effect in-game.">⚠ mod not installed</span>'}</h3>
+        <table class="buy-edit-table" data-buy-tpl="${escapeAttr(it.id)}">
+          ${traderSell.length === 0 ? '<tr><td>—</td></tr>' :
+            traderSell.map(s => renderBuyRow(it, s)).join('')}
+        </table>
+        <div class="trader-edit-note${BUY_MOD_INSTALLED ? '' : ' is-warn'}">${BUY_MOD_INSTALLED
+          ? 'Edit in the trader\'s native currency — what the trader pays YOU (buyback). Requires the client-side patch too (Rota B); restart SPT to apply.'
+          : 'TRLTraderPrices not installed — edits are saved but inert. Install both mod halves (client + server), then restart SPT to apply.'}</div>
+      </div>
+
       <div class="detail-section">
         <h3>SPT base / handbook</h3>
         <table>
@@ -3952,28 +4046,6 @@ function renderDetail(it) {
           <tr><td class="k">price (last)</td><td class="v">${fmt(mkt && mkt.price)} ₽</td></tr>
           <tr><td class="k">trader (best)</td><td class="v">${mkt && mkt.traderName ? escapeHtml(mkt.traderName) + ' · ' + fmt(mkt.traderPrice) + ' ₽' : '—'}</td></tr>
         </table>
-      </div>
-
-      <div class="detail-section detail-section--full">
-        <h3>Trader buy (tarkov.dev ref) — best: <span class="price is-canonical" data-tip="What the trader pays you (buyback)">${c.priceTraderSell ? fmt(c.priceTraderSell.value)+' ₽ ('+escapeHtml(c.priceTraderSell.vendor)+')' : '—'}</span>${BUY_MOD_INSTALLED ? '' : ' <span class="trader-mod-warn" data-tip="Install TRLTraderPrices (client + server) for edits to take effect in-game.">⚠ mod not installed</span>'}</h3>
-        <table class="buy-edit-table" data-buy-tpl="${escapeAttr(it.id)}">
-          ${traderSell.length === 0 ? '<tr><td>—</td></tr>' :
-            traderSell.map(s => renderBuyRow(it, s)).join('')}
-        </table>
-        <div class="trader-edit-note${BUY_MOD_INSTALLED ? '' : ' is-warn'}">${BUY_MOD_INSTALLED
-          ? 'Edit in the trader\'s native currency — what the trader pays YOU (buyback). Requires the client-side patch too (Rota B); restart SPT to apply.'
-          : 'TRLTraderPrices not installed — edits are saved but inert. Install both mod halves (client + server), then restart SPT to apply.'}</div>
-      </div>
-
-      <div class="detail-section detail-section--full">
-        <h3>Trader sell (SPT assort) <span class="vendor" style="text-transform:none;font-weight:400" data-tip="The price the trader sells this for — what you pay. This is the editable price.">— what you pay</span>${TRADER_MOD_INSTALLED ? '' : ' <span class="trader-mod-warn" data-tip="Install TRLTraderPrices for edits to take effect in-game.">⚠ mod not installed</span>'}</h3>
-        <table class="trader-edit-table" data-trader-tpl="${escapeAttr(it.id)}">
-          ${sptTraders.length === 0 ? '<tr><td>—</td></tr>' :
-            sptTraders.map(t => renderTraderRow(it, t)).join('')}
-        </table>
-        <div class="trader-edit-note${TRADER_MOD_INSTALLED ? '' : ' is-warn'}">${TRADER_MOD_INSTALLED
-          ? 'Edit in the trader\'s native currency (the amount the game charges). Applies to all loyalty levels. Restart SPT to apply.'
-          : 'TRLTraderPrices not installed — edits are saved but inert. Install the mod, then restart SPT to apply.'}</div>
       </div>
 
     </div>
