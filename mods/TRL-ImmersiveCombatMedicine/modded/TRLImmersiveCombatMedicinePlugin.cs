@@ -10,7 +10,11 @@ using TRLImmersiveCombatMedicine.Trauma;
 
 namespace TRLImmersiveCombatMedicine
 {
-    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.4.1")]
+    // ref: spec 004 §1.9 (PA-02-05) — soft-dep garante BigBrain carregado ANTES do gate do Chainloader em
+    // TraumaBotFall.RegisterLayer (sem o atributo, a ordem de load do BepInEx 5 pode falso-negativar
+    // PluginInfos com BigBrain instalado). GUID confirmado: bigbrain_full/BigBrainPlugin.cs:10.
+    [BepInDependency("xyz.drakia.bigbrain", BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.5.0")]
     public class TRLImmersiveCombatMedicinePlugin : BaseUnityPlugin
     {
         public static TRLImmersiveCombatMedicinePlugin Instance;
@@ -51,11 +55,16 @@ namespace TRLImmersiveCombatMedicine
         public static ConfigEntry<bool> ConfigBlockSprintOnN2;
         public static ConfigEntry<float> ConfigBotCrouchDipSeconds;
 
+        // --- Trauma 2.0 — Queda (spec 004 §3) ---
+        public static ConfigEntry<float> ConfigFallWindowSeconds;
+        public static ConfigEntry<float> ConfigFallBlockSeconds;
+        public static ConfigEntry<float> ConfigBotFallHoldSeconds;
+
         private void Awake()
         {
             Instance = this;
             ModLogger = base.Logger;
-            ModLogger.LogInfo("TRL-ImmersiveCombatMedicine Plugin v1.4.1 carregado.");
+            ModLogger.LogInfo("TRL-ImmersiveCombatMedicine Plugin v1.5.0 carregado.");
 
             // Inicializações combinadas
             ItemDatabase.Initialize();
@@ -108,8 +117,10 @@ namespace TRLImmersiveCombatMedicine
             // placeholders 004/005/006/007 nas entregas deles.
             ConfigConsumerLegsEffects = Config.Bind("6. Trauma 2.0 (Consumidores)", "Legs Effects", true,
                 "Mancar N1/N2 + agachar involuntário (item 003). Governado pelo master Trauma 2.0; desligar mid-raid desfaz caps e cancela agachares pendentes.");
-            ConfigConsumerFallCycle = Config.Bind("6. Trauma 2.0 (Consumidores)", "Fall Cycle (item 004)", false,
-                "Placeholder — cair + ciclo de levantar. Sem função até o item 004.");
+            // ref: spec 004 §3 — RENAME-AT-DELIVERY: "Fall Cycle (item 004)" → "Fall Cycle", nasce ON
+            // (órfã do placeholder DELETADA sem copiar valor em MigrateOrphanedConfigKeys — padrão do 003).
+            ConfigConsumerFallCycle = Config.Bind("6. Trauma 2.0 (Consumidores)", "Fall Cycle", true,
+                "Cair + ciclo de levantar (item 004). Governado pelo master Trauma 2.0; desligar mid-raid destrava o levantar na hora, cancela quedas pendentes e libera bots (o mancar interim do 003 NÃO volta). OFF com Legs Effects ON: o aviso (toast) da 1ª ocorrência da linha Cair ainda aparece — registry de consumidores é por região (PA-01-14).");
             ConfigConsumerArmsEffects = Config.Bind("6. Trauma 2.0 (Consumidores)", "Arms Effects (item 005)", false,
                 "Placeholder — tremor + cancela-ADS. Sem função até o item 005.");
             ConfigConsumerStomachEffects = Config.Bind("6. Trauma 2.0 (Consumidores)", "Stomach Effects (item 006)", false,
@@ -133,6 +144,18 @@ namespace TRLImmersiveCombatMedicine
                 new ConfigDescription("Duração do dip de agachar de bot FORA de combate antes de devolver a pose (em combate o SAIN restaura sozinho).",
                     new AcceptableValueRange<float>(0.3f, 1.5f), advanced));
 
+            // Configs Trauma 2.0 — Queda (spec 004 §3). Timers lidos por .Value no INÍCIO de cada fase
+            // (deadline absoluto — contagem em andamento nunca re-baseada; AC1).
+            ConfigFallWindowSeconds = Config.Bind("8. Trauma 2.0 (Queda)", "Fall Window Seconds", 3f,
+                new ConfigDescription("JANELA: tempo DE PÉ antes de cair de novo com as duas pernas quebradas (linha Cair). Conta do fim do levantar; mudanças valem a partir da PRÓXIMA janela iniciada. Piso 1s intencional (0 degeneraria em prone permanente).",
+                    new AcceptableValueRange<float>(1f, 10f)));
+            ConfigFallBlockSeconds = Config.Bind("8. Trauma 2.0 (Queda)", "Fall Block Seconds", 15f,
+                new ConfigDescription("BLOQUEIO: tempo no chão sem poder levantar após cada queda (tentar dá som de dor e nada acontece; rastejar é livre). Mudanças valem a partir do PRÓXIMO bloqueio iniciado. Piso 5s intencional (0 anularia o ciclo, conflitando com o anti-thrash do motor).",
+                    new AcceptableValueRange<float>(5f, 60f)));
+            ConfigBotFallHoldSeconds = Config.Bind("8. Trauma 2.0 (Queda)", "Bot Fall Hold Seconds", 15f,
+                new ConfigDescription("Tempo MÍNIMO que um bot com linha Cair fica no chão SEM combater antes de a IA poder levantar (ao levantar, é re-derrubado enquanto a condição durar). Separado dos timers humanos.",
+                    new AcceptableValueRange<float>(5f, 120f)));
+
             // ref: CR-02 — o reparo de encoding (CR-01-06) corrigiu a KEY
             // 'Sistema de Braços' (era mojibake); BepInEx casa por bytes, então o
             // valor salvo do usuário virou órfão. Migração one-time do valor antigo.
@@ -154,6 +177,8 @@ namespace TRLImmersiveCombatMedicine
             gameObject.AddComponent<BandAidController>();
             gameObject.AddComponent<TraumaEngine>(); // motor Trauma 2.0 (spec 002) — inerte até OnRaidStarted()
             gameObject.AddComponent<TraumaLegsConsumer>(); // consumidor de pernas (spec 003) — efeitos gateados pelo toggle
+            gameObject.AddComponent<TraumaFallCycleConsumer>(); // ciclo de queda (spec 004) — DEPOIS do TraumaEngine (ordem do 003)
+            TraumaBotFall.RegisterLayer(); // camada BigBrain do hold de bot — gateada por Chainloader ("xyz.drakia.bigbrain")
 
             // [DEBUG-ICM] sondas de lifecycle — remover após diagnóstico do prompt F
             _debugHost = gameObject;
@@ -284,6 +309,28 @@ namespace TRLImmersiveCombatMedicine
                     orphans.Remove(legacyLegsDef);
                     Config.Save();
                     ModLogger.LogWarning("[Config] Key placeholder órfã DELETADA (rename-at-delivery, sem copiar valor): 'Legs Effects (item 003)' → 'Legs Effects'.");
+                }
+
+                // ref: spec 004 §3 — RENAME-AT-DELIVERY do placeholder do ciclo de queda: deletar a key órfã
+                // "Fall Cycle (item 004)" SEM copiar o valor (a key nova "Fall Cycle" nasce ON). Mesmo padrão
+                // do 003 (lição CR-03-01: sem o delete + Save, o BepInEx re-persiste a key morta a cada boot).
+                object legacyFallDef = null;
+                foreach (System.Collections.DictionaryEntry entry in orphans)
+                {
+                    var def = entry.Key;
+                    string section = AccessTools.Property(def.GetType(), "Section")?.GetValue(def) as string;
+                    string key = AccessTools.Property(def.GetType(), "Key")?.GetValue(def) as string;
+                    if (section == "6. Trauma 2.0 (Consumidores)" && key == "Fall Cycle (item 004)")
+                    {
+                        legacyFallDef = def;
+                        break;
+                    }
+                }
+                if (legacyFallDef != null)
+                {
+                    orphans.Remove(legacyFallDef);
+                    Config.Save();
+                    ModLogger.LogWarning("[Config] Key placeholder órfã DELETADA (rename-at-delivery, sem copiar valor): 'Fall Cycle (item 004)' → 'Fall Cycle'.");
                 }
             }
             catch (Exception ex)

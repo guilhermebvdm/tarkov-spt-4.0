@@ -293,6 +293,7 @@ resolve_references() {
     "UnityEngine.ImageConversionModule.dll|$spt/EscapeFromTarkov_Data/Managed/UnityEngine.ImageConversionModule.dll"
     "UnityEngine.IMGUIModule.dll|$spt/EscapeFromTarkov_Data/Managed/UnityEngine.IMGUIModule.dll"
     "Fika.Core.dll|$spt/BepInEx/plugins/Fika/Fika.Core.dll"
+    "DrakiaXYZ-BigBrain.dll|$spt/BepInEx/plugins/DrakiaXYZ-BigBrain.dll"
     "Comfort.Unity.dll|$spt/EscapeFromTarkov_Data/Managed/Comfort.Unity.dll"
     "UnityEngine.AssetBundleModule.dll|$spt/EscapeFromTarkov_Data/Managed/UnityEngine.AssetBundleModule.dll"
     "UnityEngine.UnityWebRequestModule.dll|$spt/EscapeFromTarkov_Data/Managed/UnityEngine.UnityWebRequestModule.dll"

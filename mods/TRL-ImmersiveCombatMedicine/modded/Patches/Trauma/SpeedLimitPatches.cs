@@ -18,13 +18,23 @@ namespace TRLImmersiveCombatMedicine.Trauma
         static void Postfix(MovementContext __instance, ref bool __result)
         {
             if (!__result) return; // já bloqueado — nada a fazer
-            if (!TRLImmersiveCombatMedicinePlugin.ConfigBlockSprintOnN2.Value) return;
-            if (!TraumaLegsConsumer.IsActive()) return;
             if (TraumaState.PlayerField == null) return;
             Player player;
             try { player = TraumaState.PlayerField.GetValue(__instance) as Player; } // padrão do CantStandUpPatch (campo _player)
             catch { return; }
-            if (player == null) return;
+            if (player == null) return; // player resolvido 1× e compartilhado pelos dois branches (spec 004 §4)
+            // Branch do 004 NO TOPO, ANTES dos early-returns de config/IsActive do 003 (PA-02-01): sprint da
+            // JANELA bloqueado com a linha Cair, INDEPENDENTE de Legs Effects/Block Sprint On N2 (contrato fixo
+            // do cap N2 do ciclo — quem CORTA o sprint em curso é o TraumaSpeedCap.Apply, PA-02-09).
+            if (TraumaFallCycleConsumer.IsActive()
+                && TraumaEngine.GetLine(player, TraumaRegion.Legs) == TraumaLine.LegsFallCycle)
+            {
+                __result = false;
+                return;
+            }
+            // Branch N1/N2 do 003 — gates originais valem SÓ aqui
+            if (!TRLImmersiveCombatMedicinePlugin.ConfigBlockSprintOnN2.Value) return;
+            if (!TraumaLegsConsumer.IsActive()) return;
             if (TraumaLegsConsumer.IsN2Tier(TraumaEngine.GetLine(player, TraumaRegion.Legs)))
                 __result = false; // N2 bloqueia sprint, inclusive sob analgésico
         }
@@ -38,6 +48,21 @@ namespace TRLImmersiveCombatMedicine.Trauma
     {
         static void Postfix(Player __instance)
         {
+            // Re-log RECOMPUTE do cap 1001 (JANELA do 004) — consulta o bookkeeping do 004 ANTES do gate
+            // IsActive do 003 (spec 004 §4): o cap da janela independe do toggle Legs Effects.
+            MovementContext mc004 = __instance.MovementContext;
+            if (mc004 != null && TraumaFallCycleConsumer.IsActive() && TraumaSpeedCap.IsApplied(__instance))
+            {
+                if (!mc004.SpeedLimits.TryGetValue(TraumaSpeedCap.FallCycleCause, out float fcap))
+                    fcap = Mathf.Clamp01(TraumaLegsConsumer.LineTargetPercent(TraumaLine.LegsFallCycle) / 100f) * mc004.MaxSpeed;
+                float fexpected = fcap;
+                foreach (KeyValuePair<Player.ESpeedLimit, float> kv in mc004.SpeedLimits)
+                    fexpected = Mathf.Min(fexpected, kv.Value);
+                bool fclamped = fexpected < fcap - 0.001f;
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo(
+                    $"[Trauma2] fall window cap RECOMPUTE {__instance.ProfileId} cap={fcap:0.###} expected={fexpected:0.###} clamped={(fclamped ? "true" : "false")}");
+            }
+
             if (!TraumaLegsConsumer.IsActive()) return;
             if (!TraumaLegsConsumer.TryGetApplied(__instance, out TraumaLine line)) return;
             MovementContext mc = __instance.MovementContext;

@@ -65,7 +65,7 @@ Toggle POR consumidor (comportamento 9 da spec funcional 002): cada consumidor s
 | Nome (key) | Tipo | Padrão | Faixa | Avançado | Tooltip |
 |---|---|---|---|---|---|
 | Legs Effects | bool | `true` | — | — | Mancar N1/N2 + agachar involuntário (item 003). Governado pelo master Trauma 2.0; desligar mid-raid desfaz caps e cancela agachares pendentes. (Key renomeada na entrega do 003 — ver tabela Renomeadas.) |
-| Fall Cycle (item 004) | bool | `false` | — | — | Placeholder — cair + ciclo de levantar. Sem função até o item 004. |
+| Fall Cycle | bool | `true` | — | — | Cair + ciclo de levantar (item 004). Governado pelo master Trauma 2.0; desligar mid-raid destrava o levantar na hora, cancela quedas pendentes e libera bots (o mancar interim do 003 NÃO volta). OFF com Legs Effects ON: o aviso (toast) da 1ª ocorrência da linha Cair ainda aparece — registry de consumidores é por região (PA-01-14). (Key renomeada na entrega do 004 — ver tabela Renomeadas.) |
 | Arms Effects (item 005) | bool | `false` | — | — | Placeholder — tremor + cancela-ADS. Sem função até o item 005. |
 | Stomach Effects (item 006) | bool | `false` | — | — | Placeholder — agachar involuntário do estômago. Sem função até o item 006. |
 | Blackout 2.0 (item 007) | bool | `false` | — | — | Placeholder — desmaio percentual. Sem função até o item 007 (o desmaio ATUAL segue no toggle antigo "Sistema de Desmaio"). |
@@ -82,11 +82,12 @@ Toggle POR consumidor (comportamento 9 da spec funcional 002): cada consumidor s
 | Key | Mudança | Migração |
 |---|---|---|
 | Sistema de Braços | 2026-07-12 (CR-02-04): a key gravada tinha bytes de encoding quebrado (`Sistema de BraÃ§os`) e foi corrigida — identidade mudou | `MigrateOrphanedConfigKeys()` no Awake copia o valor órfão 1× e REMOVE a key antiga do .cfg (CR-03-01: sem o remove, a migração re-rodava todo boot e clobberava mudanças do usuário) |
-| Legs Effects (item 003) → Legs Effects | 2026-07-19 (code-review 1 do 003): **rename-at-delivery** — a key nova nasce ON para todos; o `false` do placeholder das v1.2.x não era escolha do usuário | `MigrateOrphanedConfigKeys()` DELETA a entry órfã SEM copiar o valor + `Config.Save` (lição CR-03-01: sem o delete, o BepInEx re-persiste a key morta). **Padrão a repetir** nos placeholders `Fall Cycle (item 004)` / `Arms Effects (item 005)` / `Stomach Effects (item 006)` / `Blackout 2.0 (item 007)` na entrega de cada item. |
+| Legs Effects (item 003) → Legs Effects | 2026-07-19 (code-review 1 do 003): **rename-at-delivery** — a key nova nasce ON para todos; o `false` do placeholder das v1.2.x não era escolha do usuário | `MigrateOrphanedConfigKeys()` DELETA a entry órfã SEM copiar o valor + `Config.Save` (lição CR-03-01: sem o delete, o BepInEx re-persiste a key morta). **Padrão a repetir** nos placeholders `Arms Effects (item 005)` / `Stomach Effects (item 006)` / `Blackout 2.0 (item 007)` na entrega de cada item. |
+| Fall Cycle (item 004) → Fall Cycle | 2026-07-19 (item 004, v1.5.0): **rename-at-delivery** — a key nova nasce ON para todos; o `false` do placeholder não era escolha do usuário | `MigrateOrphanedConfigKeys()` DELETA a entry órfã SEM copiar o valor + `Config.Save` (mesmo padrão do 003). |
 
 ## Seção 7. Trauma 2.0 (Pernas)
 
-Consumidor de pernas (item 003). Alvos em % da velocidade **baseline composta** (Strength + classe/skill); se a penalidade vanilla for mais dura que o alvo, vale o vanilla (clamp logado — o mod nunca acelera). Efetivo do N2 = `min(N2, N1)` (warn 1× quando o clamp atua).
+Consumidor de pernas (item 003). Alvos em % da velocidade **baseline composta** (Strength + classe/skill); se a penalidade vanilla for mais dura que o alvo, vale o vanilla (clamp logado — o mod nunca acelera). Efetivo do N2 = `min(N2, N1)` (warn 1× quando o clamp atua). **Interim do FallCycle removido no 004**: a linha Cair não recebe mais o cap N2 deste consumidor — o mancar da JANELA do ciclo é do 004 (causa própria, independente do toggle `Legs Effects`); com o `Fall Cycle` OFF, a linha Cair fica **sem efeito** do mod (o interim não volta).
 
 | Nome (key) | Tipo | Padrão | Faixa | Avançado | Tooltip |
 |---|---|---|---|---|---|
@@ -94,6 +95,16 @@ Consumidor de pernas (item 003). Alvos em % da velocidade **baseline composta** 
 | N2 Target Total Speed Percent | float | `55` | 30–90 | — | Velocidade TOTAL experienciada no Mancar N2, em % do baseline. Mesma regra de clamp do N1. Se configurado ACIMA do N1, vale o efetivo min(N2, N1) — N2 nunca é mais leve que N1 (warn no log, 1x). |
 | Block Sprint On N2 | bool | `true` | — | — | Em Mancar N2 o sprint fica bloqueado, inclusive sob analgésico (o vanilla libera sprint com analgésico; este toggle mantém o bloqueio do mod). N1 segue a regra vanilla. |
 | Bot Crouch Dip Seconds | float | `0.7` | 0.3–1.5 | Sim | Duração do dip de agachar de bot FORA de combate antes de devolver a pose (em combate o SAIN restaura sozinho). |
+
+## Seção 8. Trauma 2.0 (Queda)
+
+Consumidor do ciclo de queda (item 004, spec 004 §3). Timers lidos por `.Value` no **início de cada fase** (deadline absoluto): mudanças no F12 valem a partir da PRÓXIMA fase iniciada — contagem em andamento nunca é re-baseada. O sprint da JANELA é sempre bloqueado (contrato do cap N2 do ciclo — **não** respeita `Block Sprint On N2` da seção 7). Pisos > 0 intencionais (documentados nos tooltips).
+
+| Nome (key) | Tipo | Padrão | Faixa | Avançado | Tooltip |
+|---|---|---|---|---|---|
+| Fall Window Seconds | float | `3` | 1–10 | — | JANELA: tempo DE PÉ antes de cair de novo com as duas pernas quebradas (linha Cair). Conta do fim do levantar; mudanças valem a partir da PRÓXIMA janela iniciada. Piso 1s intencional (0 degeneraria em prone permanente). |
+| Fall Block Seconds | float | `15` | 5–60 | — | BLOQUEIO: tempo no chão sem poder levantar após cada queda (tentar dá som de dor e nada acontece; rastejar é livre). Mudanças valem a partir do PRÓXIMO bloqueio iniciado. Piso 5s intencional (0 anularia o ciclo, conflitando com o anti-thrash do motor). |
+| Bot Fall Hold Seconds | float | `15` | 5–120 | — | Tempo MÍNIMO que um bot com linha Cair fica no chão SEM combater antes de a IA poder levantar (ao levantar, é re-derrubado enquanto a condição durar). Separado dos timers humanos. |
 
 ## Histórico de Alterações
 
@@ -105,3 +116,4 @@ Consumidor de pernas (item 003). Alvos em % da velocidade **baseline composta** 
 | 2026-07-18 | Guilherme | Item 002 (motor Trauma 2.0, v1.2.0): seções novas `5. Trauma 2.0 (Motor)` (5 entries) e `6. Trauma 2.0 (Consumidores)` (6 entries, todas OFF). Nota: a key de seção `5. Trauma 2.0 (Motor)` coexiste com `5. Debug` (strings distintas no .cfg; ordenação do F12 intercala). |
 | 2026-07-19 | Guilherme | Item 003 (pernas Trauma 2.0, v1.3.0): seção nova `7. Trauma 2.0 (Pernas)` (4 entries); `Legs Effects (item 003)` passa a default ON com tooltip real; `Sistema de Pernas` (seção 2) marcado INERTE — legado de pernas aposentado (D10), remoção da key no item 010. |
 | 2026-07-19 | Guilherme | Code-review 1 do 003 (v1.3.1): RENAME `Legs Effects (item 003)` → `Legs Effects` (default ON efetivo p/ todos; órfã deletada sem copiar valor) + padrão rename-at-delivery registrado p/ os placeholders 004/005/006/007. |
+| 2026-07-19 | Guilherme | Item 004 (ciclo de queda, v1.5.0): seção nova `8. Trauma 2.0 (Queda)` (3 entries); RENAME `Fall Cycle (item 004)` → `Fall Cycle` (default ON; órfã deletada sem copiar valor — tabela Renomeadas); nota do interim do 003 removido na seção 7 (linha Cair sem cap N2 do 003; `Fall Cycle` OFF = linha Cair sem efeito do mod). |

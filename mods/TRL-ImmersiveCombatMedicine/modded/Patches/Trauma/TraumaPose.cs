@@ -7,17 +7,28 @@ using UnityEngine;
 
 namespace TRLImmersiveCombatMedicine.Trauma
 {
-    /// <summary>Primitiva COMPARTILHADA de agachar involuntário (003; 006 reusa). One-shot SÓ-PARA-BAIXO,
-    /// sem lock (decisão 5): agacha via SetPoseLevel(0f) SEM force (animação vanilla) e o jogador levanta
-    /// livre em seguida. Guards D7 3 eixos com adiamento + re-validação + cancelamento (spec 003 §5).</summary>
+    /// <summary>Primitiva COMPARTILHADA de pose involuntária (003 agachar; 004 queda; 006 reusa). Agachar é
+    /// one-shot SÓ-PARA-BAIXO sem lock (decisão 5); queda é prone forçado com readback + fallback agachado
+    /// (P4 rec. (2) — spec 004 §1.4). Guards D7 3 eixos com adiamento + re-validação + cancelamento; fila
+    /// generalizada por kind com entradas internas sem refund (PA-01-03) e pump idempotente por frame (PA-01-12).</summary>
     internal static class TraumaPose
     {
         /// <summary>Fila de adiados com DEDUP por (player, kind). No HIT de dedup a entrada existente é ATUALIZADA
         /// (PublishDeadline + RequiredLine) — não é no-op: senão o cancel não devolve o cooldown do RE-publish
         /// (review 2 do 003, achado 2). O cancel só devolve cooldown se o stamp corrente ainda for o
-        /// PublishDeadline guardado (re-ancorado não é apagado — review 1, achado 6).</summary>
+        /// PublishDeadline guardado (re-ancorado não é apagado — review 1, achado 6). Enqueue INTERNO é RECUSADO
+        /// com entrada NÃO-interna pendente do mesmo (player, kind) — a pendente já entrega a queda; evita o
+        /// dedup sobrescrever Internal/refund (PA-01-03).</summary>
         private static readonly List<DeferredCrouch> _deferred = new List<DeferredCrouch>();
         private static readonly List<BotRestore> _botRestores = new List<BotRestore>();
+
+        /// <summary>PA-01-06: fallback agachado da queda com prone pendente — re-tentado SÓ com a FSM do 004 em
+        /// BLOQUEIO, cadência ≥0.5s (CanProne é SphereCast físico — MovementContext.cs:1181-1230); valor = próximo
+        /// instante permitido. Limpo via ClearPronePending na transição p/ Released e no Disengage.</summary>
+        private static readonly Dictionary<Player, float> _pronePending = new Dictionary<Player, float>();
+        private static readonly List<Player> _proneScratch = new List<Player>();
+
+        private static int _lastPumpFrame = -1; // PA-01-12: pump idempotente por FRAME, agnóstico ao chamador (003 e 004 chamam)
 
         private struct DeferredCrouch
         {
@@ -26,6 +37,8 @@ namespace TRLImmersiveCombatMedicine.Trauma
             internal TraumaRegion Region;
             internal TraumaLine RequiredLine;  // re-validação na execução: mudou → cancela
             internal float PublishDeadline;    // p/ ReportOneShotCanceled(player, kind, publishDeadline)
+            internal bool Internal;            // 004: re-queda da janela — SEM refund no cancel (não houve publish — PA-01-03)
+            internal Action<Player, bool> OnExecuted; // 004: callback de execução (fall) — bool = caiu prone (false = fallback agachado)
         }
 
         private struct BotRestore
@@ -44,6 +57,9 @@ namespace TRLImmersiveCombatMedicine.Trauma
         private static PropertyInfo _sainMoverProp;
         private static PropertyInfo _sainPoseProp;
         private static MethodInfo _sainSetTargetPose;
+
+        private static string KindWord(TraumaOneShotKind kind) =>
+            kind == TraumaOneShotKind.InvoluntaryFall ? "fall" : "crouch";
 
         /// <summary>Guards D7 (3 eixos, TODOS adiam — nunca executam em contexto inválido).</summary>
         internal static bool CanForcePose(Player p, out string blockedBy)
@@ -72,6 +88,18 @@ namespace TRLImmersiveCombatMedicine.Trauma
             return true;
         }
 
+        /// <summary>Absorção D2 (spec 004 §1.8(a)) — chamada NO TOPO de TryInvoluntaryCrouch e BotCrouchDip (cobre
+        /// 003 hoje e 006 depois): ciclo engajado (humano em qualquer fase OU bot em hold) → NÃO executa; refund
+        /// do publish + log ABSORB — nunca descarte silencioso (funcional §4).</summary>
+        private static bool AbsorbIfCycleEngaged(Player p, TraumaOneShotKind kind)
+        {
+            if (!TraumaFallCycleConsumer.IsCycleEngaged(p)) return false;
+            if (TraumaEngine.TryGetOneShotDeadline(p, kind, out float d))
+                TraumaEngine.ReportOneShotCanceled(p, kind, d);
+            TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] crouch ABSORB (fall-cycle) {p.ProfileId}");
+            return true;
+        }
+
         /// <summary>Agachar one-shot de HUMANO: pose já ≤ agachado/prone → NO-OP devolvendo o cooldown do publish
         /// (funcional §3 — "sem consumir cooldown"); guard falhou → ADIA; ok → SetPoseLevel(0f) sem force.</summary>
         internal static void TryInvoluntaryCrouch(Player p, TraumaRegion region, TraumaOneShotKind kind)
@@ -84,6 +112,7 @@ namespace TRLImmersiveCombatMedicine.Trauma
                     TraumaEngine.ReportOneShotCanceled(p, kind, dNull);
                 return;
             }
+            if (AbsorbIfCycleEngaged(p, kind)) return; // D2: ciclo de queda engajado absorve o agachar (spec 004 §1.8)
             var mc = p.MovementContext;
             if (mc.IsInPronePose || mc.PoseLevel <= 0.05f) // ref: MovementContext.cs:1016 — 0=agachado, 1=de pé
             {
@@ -94,46 +123,119 @@ namespace TRLImmersiveCombatMedicine.Trauma
             }
             if (!CanForcePose(p, out string blockedBy))
             {
-                Defer(p, region, kind, blockedBy);
+                Defer(p, region, kind, blockedBy, internalEntry: false, onExecuted: null);
                 return;
             }
             if (!mc.SetPoseLevel(0f)) // ref: MovementContext.cs:2139 — sem force: animação vanilla; guard interno pode recusar
             {
-                Defer(p, region, kind, "internal-guard");
+                Defer(p, region, kind, "internal-guard", internalEntry: false, onExecuted: null);
                 return;
             }
             TraumaEngine.ReportOneShotExecuted(p, kind); // D7 — cooldown conta da EXECUÇÃO
             TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] crouch EXECUTED {p.ProfileId}");
         }
 
-        private static void Defer(Player p, TraumaRegion region, TraumaOneShotKind kind, string reason)
+        /// <summary>Derrubar forçado do ciclo 004 (P4 rec. (2)): guards D7 → prone com readback → fallback agachado.
+        /// internalFall=true (re-queda da janela) NÃO refunda cooldown ao cancelar (não houve publish — PA-01-03).
+        /// onExecuted(p, caiuProne) é chamado na execução (imediata ou do pump); adiamento NÃO chama.</summary>
+        internal static void TryInvoluntaryFall(Player p, TraumaRegion region, TraumaOneShotKind kind,
+            bool internalFall, Action<Player, bool> onExecuted)
         {
-            TraumaEngine.TryGetOneShotDeadline(p, kind, out float deadline);
+            if (p == null || p.MovementContext == null)
+            {
+                // contexto morto = one-shot nunca executará — refund do publish (padrão code-review 1 do 003, achado 4)
+                if (!internalFall && !(p is null) && TraumaEngine.TryGetOneShotDeadline(p, kind, out float dNull))
+                    TraumaEngine.ReportOneShotCanceled(p, kind, dNull);
+                return;
+            }
+            if (!CanForcePose(p, out string blockedBy))
+            {
+                Defer(p, region, kind, blockedBy, internalFall, onExecuted); // D7 adia (fase FallPending no consumidor)
+                return;
+            }
+            ExecuteFall(p, kind, internalFall, onExecuted);
+        }
+
+        /// <summary>Passos 2-5 do stub (spec 004 §5): já prone → callback sem tocar pose; senão prone force +
+        /// readback obrigatório (setter recusa SILENCIOSO quando CanProne falha — MovementContext.cs:714-717,
+        /// :1181-1230) → fallback agachado + PronePending. Cooldown re-ancorado na EXECUÇÃO (D7) quando não-interno.</summary>
+        private static void ExecuteFall(Player p, TraumaOneShotKind kind, bool internalFall, Action<Player, bool> onExecuted)
+        {
+            var mc = p.MovementContext;
+            if (mc.IsInPronePose)
+            {
+                // já no chão — paridade "já prone → só BLOQUEIO" (funcional item 5): sem tocar pose
+                if (!internalFall) TraumaEngine.ReportOneShotExecuted(p, kind); // ref: TraumaEngine.cs:117
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] fall EXECUTED (already-prone) {p.ProfileId}");
+                onExecuted?.Invoke(p, true);
+                return;
+            }
+            mc.SetPoseLevel(0f, true);   // ref: MovementContext.cs:2139 (descer sempre passa no CanStandAt)
+            mc.IsInPronePose = true;     // ref: MovementContext.cs:676
+            if (!mc.IsInPronePose)       // READBACK: recusa silenciosa do CanProne (ladeira>30°/sem espaço/UsingMeds)
+            {
+                mc.SetPoseLevel(0f);     // fallback AGACHADO (funcional §1 — bloqueio vale p/ a pose corrente)
+                MarkPronePending(p);     // re-tentativa de prone no pump (PA-01-06)
+                if (!internalFall) TraumaEngine.ReportOneShotExecuted(p, kind);
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] fall FALLBACK-CROUCH {p.ProfileId}");
+                onExecuted?.Invoke(p, false);
+                return;
+            }
+            if (!internalFall) TraumaEngine.ReportOneShotExecuted(p, kind); // D7: cooldown conta da execução
+            TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] fall EXECUTED {p.ProfileId}");
+            onExecuted?.Invoke(p, true);
+        }
+
+        private static void Defer(Player p, TraumaRegion region, TraumaOneShotKind kind, string reason,
+            bool internalEntry, Action<Player, bool> onExecuted)
+        {
+            float deadline = 0f;
+            if (!internalEntry) TraumaEngine.TryGetOneShotDeadline(p, kind, out deadline);
             TraumaLine required = TraumaEngine.GetLine(p, region);
             for (int i = 0; i < _deferred.Count; i++)
             {
                 DeferredCrouch e = _deferred[i];
                 if (ReferenceEquals(e.Player, p) && e.Kind == kind)
                 {
+                    // PA-01-03: enqueue INTERNO recusado com entrada NÃO-interna pendente — a pendente já
+                    // entrega a queda; sobrescrever mataria o refund do publish original
+                    if (internalEntry && !e.Internal)
+                    {
+                        TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo(
+                            $"[Trauma2] {KindWord(kind)} DEFER-SKIP (non-internal pending) {p.ProfileId}");
+                        return;
+                    }
                     // review 2, achado 2: hit de dedup ATUALIZA a entrada (re-publish traz stamp/linha novos)
                     // code-review 2, achado 3: Region também — re-publish de OUTRA região (006 reusa o kind)
                     // com Region stale re-validaria a linha errada no pump
                     e.PublishDeadline = deadline;
                     e.Region = region;
                     e.RequiredLine = required;
+                    e.Internal = internalEntry;
+                    e.OnExecuted = onExecuted ?? e.OnExecuted;
                     _deferred[i] = e;
-                    TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] crouch DEFERRED ({reason}) {p.ProfileId}");
+                    TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] {KindWord(kind)} DEFERRED ({reason}) {p.ProfileId}");
                     return;
                 }
             }
-            _deferred.Add(new DeferredCrouch { Player = p, Kind = kind, Region = region, RequiredLine = required, PublishDeadline = deadline });
-            TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] crouch DEFERRED ({reason}) {p.ProfileId}");
+            _deferred.Add(new DeferredCrouch
+            {
+                Player = p, Kind = kind, Region = region, RequiredLine = required,
+                PublishDeadline = deadline, Internal = internalEntry, OnExecuted = onExecuted
+            });
+            TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] {KindWord(kind)} DEFERRED ({reason}) {p.ProfileId}");
         }
 
-        /// <summary>Pump 1×/frame (chamado pelo consumidor): re-checa guards; contexto válido → RE-VALIDA o snapshot
-        /// (GetLine == RequiredLine) — mudou (curado/analgésico) → CANCELA devolvendo cooldown do publish.</summary>
+        /// <summary>Pump 1×/frame — IDEMPOTENTE por frame e agnóstico ao chamador (003 e 004 chamam — PA-01-12).
+        /// Re-checa guards; contexto válido → RE-VALIDA o snapshot (GetLine == RequiredLine) — mudou (curado/
+        /// analgésico) → CANCELA devolvendo cooldown do publish SÓ se não-interna. Dispatch por kind: crouch =
+        /// SetPoseLevel(0f); fall = ExecuteFall (prone+readback+fallback). Também re-tenta o prone pendente do
+        /// fallback agachado (PA-01-06).</summary>
         internal static void PumpDeferred()
         {
+            if (Time.frameCount == _lastPumpFrame) return;
+            _lastPumpFrame = Time.frameCount;
+
             for (int i = _deferred.Count - 1; i >= 0; i--)
             {
                 DeferredCrouch e = _deferred[i];
@@ -141,12 +243,19 @@ namespace TRLImmersiveCombatMedicine.Trauma
                 if (p is null || p.MovementContext == null || TraumaEngine.GetLine(p, e.Region) != e.RequiredLine)
                 {
                     _deferred.RemoveAt(i);
-                    if (!(p is null)) TraumaEngine.ReportOneShotCanceled(p, e.Kind, e.PublishDeadline);
+                    if (!e.Internal && !(p is null)) TraumaEngine.ReportOneShotCanceled(p, e.Kind, e.PublishDeadline);
                     TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo(
-                        $"[Trauma2] crouch CANCELED (state-changed) {(p is null ? "?" : p.ProfileId)}");
+                        $"[Trauma2] {KindWord(e.Kind)} CANCELED (state-changed) {(p is null ? "?" : p.ProfileId)}");
                     continue;
                 }
                 var mc = p.MovementContext;
+                if (e.Kind == TraumaOneShotKind.InvoluntaryFall)
+                {
+                    if (!CanForcePose(p, out _)) continue;   // segue adiado (D7)
+                    _deferred.RemoveAt(i);
+                    ExecuteFall(p, e.Kind, e.Internal, e.OnExecuted); // já prone voluntário → executa como already-prone (BLOQUEIO)
+                    continue;
+                }
                 if (mc.IsInPronePose || mc.PoseLevel <= 0.05f)
                 {
                     // agachou/deitou por conta própria enquanto adiado — intent satisfeita sem forçar (só-para-baixo)
@@ -161,20 +270,101 @@ namespace TRLImmersiveCombatMedicine.Trauma
                 TraumaEngine.ReportOneShotExecuted(p, e.Kind); // cooldown conta da execução (D7)
                 TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] crouch EXECUTED {p.ProfileId}");
             }
+
+            PumpPronePending();
         }
 
-        /// <summary>Cancela todos os adiados (toggle-off / fim de raid) devolvendo o cooldown do publish.</summary>
+        // ---- Prone pendente do fallback agachado (PA-01-06) ----
+
+        internal static void MarkPronePending(Player p)
+        {
+            if (p is null) return;
+            _pronePending[p] = Time.time + 0.5f; // cadência ≥0.5s a partir da ENTRADA (CanProne é SphereCast físico)
+        }
+
+        internal static void ClearPronePending(Player p)
+        {
+            if (p is null) return;
+            _pronePending.Remove(p);
+        }
+
+        private static void PumpPronePending()
+        {
+            if (_pronePending.Count == 0) return;
+            _proneScratch.Clear();
+            foreach (KeyValuePair<Player, float> kv in _pronePending) _proneScratch.Add(kv.Key);
+            for (int i = 0; i < _proneScratch.Count; i++)
+            {
+                Player p = _proneScratch[i];
+                if (p is null || p == null || p.MovementContext == null) { _pronePending.Remove(p); continue; }
+                var mc = p.MovementContext;
+                if (mc.IsInPronePose) { _pronePending.Remove(p); continue; }             // prone alcançado por outro caminho
+                if (!TraumaFallCycleConsumer.IsBlockedPhase(p)) continue;                 // re-tenta SÓ em BLOQUEIO (limpeza é do consumidor)
+                if (Time.time < _pronePending[p]) continue;                               // cadência ≥0.5s
+                _pronePending[p] = Time.time + 0.5f;
+                // Reentry flag: os writes do próprio mod atravessam o prefix do CanStandAt durante o BLOQUEIO
+                TraumaFallCycleConsumer.StandReentryFlag = true;
+                try
+                {
+                    mc.SetPoseLevel(0f, true);
+                    mc.IsInPronePose = true; // readback: CanProne ainda pode recusar (silencioso)
+                }
+                finally { TraumaFallCycleConsumer.StandReentryFlag = false; }
+                if (mc.IsInPronePose)
+                {
+                    _pronePending.Remove(p);
+                    TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] fall prone RETRY ok {p.ProfileId}");
+                }
+            }
+            _proneScratch.Clear();
+        }
+
+        // ---- Cancelamentos ----
+
+        /// <summary>Cancela todos os adiados (fim de raid / world-swap) devolvendo o cooldown do publish das
+        /// entradas NÃO-internas. Dupla chamada 003+004 é idempotente (fila vazia na segunda).</summary>
         internal static void CancelAll(string reason)
         {
-            if (_deferred.Count == 0) return;
+            if (_deferred.Count == 0) { _pronePending.Clear(); return; }
             for (int i = 0; i < _deferred.Count; i++)
             {
                 DeferredCrouch e = _deferred[i];
-                if (!(e.Player is null)) TraumaEngine.ReportOneShotCanceled(e.Player, e.Kind, e.PublishDeadline);
+                if (!e.Internal && !(e.Player is null)) TraumaEngine.ReportOneShotCanceled(e.Player, e.Kind, e.PublishDeadline);
                 TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo(
-                    $"[Trauma2] crouch CANCELED ({reason}) {(e.Player is null ? "?" : e.Player.ProfileId)}");
+                    $"[Trauma2] {KindWord(e.Kind)} CANCELED ({reason}) {(e.Player is null ? "?" : e.Player.ProfileId)}");
             }
             _deferred.Clear();
+            _pronePending.Clear();
+        }
+
+        /// <summary>PA-01-04: cancela SÓ o kind — o toggle-off do 003 usa CancelKind(InvoluntaryCrouch) e NUNCA
+        /// varre quedas do 004 (e vice-versa). Refund só de entradas não-internas.</summary>
+        internal static void CancelKind(TraumaOneShotKind kind, string reason)
+        {
+            for (int i = _deferred.Count - 1; i >= 0; i--)
+            {
+                DeferredCrouch e = _deferred[i];
+                if (e.Kind != kind) continue;
+                _deferred.RemoveAt(i);
+                if (!e.Internal && !(e.Player is null)) TraumaEngine.ReportOneShotCanceled(e.Player, e.Kind, e.PublishDeadline);
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo(
+                    $"[Trauma2] {KindWord(e.Kind)} CANCELED ({reason}) {(e.Player is null ? "?" : e.Player.ProfileId)}");
+            }
+        }
+
+        /// <summary>Cancela as quedas adiadas DESTE jogador (toggle-off do 004 / cura / ENTRADA DA PAUSA — PA-02-03:
+        /// queda pendente nunca executa com a FSM em Paused). Refund só se não-interna.</summary>
+        internal static void CancelFallsFor(Player p, string reason)
+        {
+            if (p is null) return;
+            for (int i = _deferred.Count - 1; i >= 0; i--)
+            {
+                DeferredCrouch e = _deferred[i];
+                if (!ReferenceEquals(e.Player, p) || e.Kind != TraumaOneShotKind.InvoluntaryFall) continue;
+                _deferred.RemoveAt(i);
+                if (!e.Internal) TraumaEngine.ReportOneShotCanceled(p, e.Kind, e.PublishDeadline);
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] fall CANCELED ({reason}) {p.ProfileId}");
+            }
         }
 
         /// <summary>Dip de BOT (P6 rec. (7)) — FIRE-AND-FORGET, nunca entra na fila de adiados (review 1, achado 4):
@@ -189,6 +379,7 @@ namespace TRLImmersiveCombatMedicine.Trauma
                     TraumaEngine.ReportOneShotCanceled(botPlayer, TraumaOneShotKind.InvoluntaryCrouch, dNull);
                 return;
             }
+            if (AbsorbIfCycleEngaged(botPlayer, TraumaOneShotKind.InvoluntaryCrouch)) return; // D2: bot em hold do ciclo (spec 004 §1.8)
             BotOwner bo = botPlayer.AIData?.BotOwner;
             if (bo == null)
             {

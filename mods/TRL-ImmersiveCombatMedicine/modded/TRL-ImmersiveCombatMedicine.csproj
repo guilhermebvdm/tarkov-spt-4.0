@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>TRLImmersiveCombatMedicine</AssemblyName>
     <RootNamespace>TRLImmersiveCombatMedicine</RootNamespace>
-    <Version>1.4.1</Version>
+    <Version>1.5.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RestoreAdditionalProjectSources>
       https://api.nuget.org/v3/index.json;
@@ -40,6 +40,12 @@
     </Reference>
     <Reference Include="Fika.Core">
       <HintPath>References\Fika.Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <!-- ref: spec 004 §7 (PA-01-10) — herança CustomLayer exige referência compile-time (reflection inviável);
+         resolvida de D:\SPT\BepInEx\plugins pelo compile-mod.sh (entrada nova no mapa resolve_references) -->
+    <Reference Include="DrakiaXYZ-BigBrain">
+      <HintPath>References\DrakiaXYZ-BigBrain.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="DissonanceVoip">

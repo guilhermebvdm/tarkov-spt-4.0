@@ -7,8 +7,8 @@ namespace TRLImmersiveCombatMedicine.Trauma
 {
     /// <summary>Consumidor de PERNAS (spec 003): mancar N1/N2 contínuo + agachar involuntário one-shot.
     /// Primeiro consumidor real do motor 002 — evento-first, zero polling próprio. Dono-only herdado
-    /// (o motor só publica donos — D16). INTERIM (comportamento 6 da funcional): LegsFallCycle → efeito N2
-    /// e InvoluntaryFall IGNORADO até o item 004 entregar a queda real.</summary>
+    /// (o motor só publica donos — D16). INTERIM do FallCycle REMOVIDO na entrega do 004 (spec 004 §1.7 —
+    /// PA-01-02): a linha Cair é SAÍDA p/ efeitos do 003 (handoff explícito; o 004 assume com causa 1001).</summary>
     public sealed class TraumaLegsConsumer : MonoBehaviour
     {
         /// <summary>Causa PRÓPRIA no dicionário SpeedLimits — fora do enum (Player.cs:1584-1595 tem 9 valores);
@@ -55,12 +55,12 @@ namespace TRLImmersiveCombatMedicine.Trauma
             return inst != null && !(p is null) && inst._applied.TryGetValue(p, out line);
         }
 
-        /// <summary>Linhas que recebem o efeito N2 (interim inclui FallCycle — comportamento 6 da funcional).</summary>
+        /// <summary>Linhas que recebem o efeito N2. FallCycle FORA desde o 004 (interim removido — spec 004 §1.7):
+        /// o cap da JANELA é do TraumaSpeedCap (causa própria 1001), nunca deste consumidor.</summary>
         internal static bool IsN2Tier(TraumaLine line)
         {
             return line == TraumaLine.LegsLimpN2
-                || line == TraumaLine.LegsCrouchPlusLimpN2
-                || line == TraumaLine.LegsFallCycle;
+                || line == TraumaLine.LegsCrouchPlusLimpN2;
         }
 
         /// <summary>Alvo em % do baseline por linha. Efetivo do N2 = min(N2, N1) — configuração invertida não deixa
@@ -89,12 +89,15 @@ namespace TRLImmersiveCombatMedicine.Trauma
             if (!IsActive()) return; // toggle off = ignora (motor segue publicando — comportamento 9 do 002)
             Player p = t.Player;
             if (p is null) return;
-            if (t.To == TraumaLine.None)
+            if (t.To == TraumaLine.None || t.To == TraumaLine.LegsFallCycle)
             {
+                // Handoff explícito (PA-01-02): entrada na linha Cair é SAÍDA p/ efeitos do 003 — o 004 assume
+                // com a causa própria 1001; a coexistência no frame de handoff é arbitrada pela min-composição
+                // nativa do SpeedLimits (method_4 :1798), em qualquer ordem de handlers.
                 if (_applied.Remove(p)) RemoveCapGuarded(p);
                 return;
             }
-            // Mapa linha→efeito: LimpN1→cap N1 | LimpN2/CrouchPlusLimpN2/FallCycle→cap N2 (INTERIM).
+            // Mapa linha→efeito: LimpN1→cap N1 | LimpN2/CrouchPlusLimpN2→cap N2.
             // Establishing aplica cap SEM one-shot (o motor nem publica one-shot em establishing — 002).
             // N1↔N2/rebaixamento: sempre via ApplyCap (Remove+Add — Add é no-op com causa existente,
             // MovementContext.cs:1672-1679; recompute único no ProcessSpeedLimits :2553-2558 → sem flicker).
@@ -103,7 +106,7 @@ namespace TRLImmersiveCombatMedicine.Trauma
 
         private void OnOneShot(Player p, TraumaOneShotKind kind, TraumaLine line)
         {
-            if (!IsActive() || kind != TraumaOneShotKind.InvoluntaryCrouch) return; // InvoluntaryFall = item 004 (interim)
+            if (!IsActive() || kind != TraumaOneShotKind.InvoluntaryCrouch) return; // InvoluntaryFall = TraumaFallCycleConsumer (004)
             if (p is null) return;
             if (p.IsAI)
             {
@@ -184,7 +187,8 @@ namespace TRLImmersiveCombatMedicine.Trauma
                 _applied.Clear();
                 for (int i = 0; i < _sweepScratch.Count; i++) RemoveCapGuarded(_sweepScratch[i]);
                 _sweepScratch.Clear();
-                TraumaPose.CancelAll("toggle-off");
+                // PA-01-04: toggle-off do 003 cancela SÓ o próprio kind — nunca varre as quedas do 004
+                TraumaPose.CancelKind(TraumaOneShotKind.InvoluntaryCrouch, "toggle-off");
                 TraumaPose.FlushBotRestores();
                 TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("[Trauma2] legs consumer OFF — caps desfeitos");
             }
@@ -199,7 +203,7 @@ namespace TRLImmersiveCombatMedicine.Trauma
                     var p = players[i] as Player;
                     if (!TraumaEngine.IsOwnedHere(p)) continue;
                     TraumaLine line = TraumaEngine.GetLine(p, TraumaRegion.Legs);
-                    if (line == TraumaLine.None) continue;
+                    if (line == TraumaLine.None || line == TraumaLine.LegsFallCycle) continue; // FallCycle é do 004 (PA-01-02)
                     ApplyCap(p, line);
                     established++;
                 }
@@ -211,11 +215,13 @@ namespace TRLImmersiveCombatMedicine.Trauma
             if (active)
             {
                 // Poda oportunista (code-review 1, achado 2): entrada cujo motor já diz None é stale
-                // (ex.: saída publicada com o toggle off) — desfaz o cap vazado e limpa o bookkeeping
+                // (ex.: saída publicada com o toggle off) — desfaz o cap vazado e limpa o bookkeeping.
+                // FallCycle também é podada (spec 004 §1.7 — entrada na linha Cair perdida com o toggle off).
                 _sweepScratch.Clear();
                 foreach (KeyValuePair<Player, TraumaLine> kv in _applied)
                 {
-                    if (TraumaEngine.GetLine(kv.Key, TraumaRegion.Legs) == TraumaLine.None) _sweepScratch.Add(kv.Key);
+                    TraumaLine gl = TraumaEngine.GetLine(kv.Key, TraumaRegion.Legs);
+                    if (gl == TraumaLine.None || gl == TraumaLine.LegsFallCycle) _sweepScratch.Add(kv.Key);
                 }
                 for (int i = 0; i < _sweepScratch.Count; i++)
                 {

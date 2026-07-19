@@ -2,6 +2,7 @@ using HarmonyLib;
 using EFT;
 using UnityEngine;
 using TRLImmersiveCombatMedicine;
+using TRLImmersiveCombatMedicine.Trauma;
 
 namespace TrueTrauma
 {
@@ -102,9 +103,21 @@ namespace TrueTrauma
 
                 if (isValidStomachDmg && bodyPartType == EBodyPart.Stomach && damageInfo.Damage >= 35f && !__instance.MovementContext.IsInPronePose)
                 {
-                    if (__instance.Physical != null) __instance.Physical.Stamina.Current = 0f;
-                    __instance.MovementContext.SetPoseLevel(0f, true);
-                    VoiceHelper.TriggerTraumaVoice(__instance, "Gut");
+                    // ref: spec 004 §1.8(e) (PA-01-09) — o agachar LEGADO de estômago é escritor de pose FORA do
+                    // motor (nenhum one-shot de estômago existe antes do 006) e NÃO passa pela absorção D2 do
+                    // TraumaPose: guard próprio — ciclo de queda engajado suprime (sem ele, agacharia o jogador
+                    // na JANELA/Rising por fora do TraumaPose).
+                    if (TraumaFallCycleConsumer.IsCycleEngaged(__instance))
+                    {
+                        TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo(
+                            $"[Trauma2] stomach legacy suppressed (fall-cycle) {id}");
+                    }
+                    else
+                    {
+                        if (__instance.Physical != null) __instance.Physical.Stamina.Current = 0f;
+                        __instance.MovementContext.SetPoseLevel(0f, true);
+                        VoiceHelper.TriggerTraumaVoice(__instance, "Gut");
+                    }
                 }
             }
             // ref: spec 003 §4 (D10) — sub-bloco legado de PERNAS removido (seed de ImpactTimers/LegPenaltyTimers,
