@@ -116,7 +116,10 @@ namespace TRLImmersiveCombatMedicine.Trauma
                 if (ReferenceEquals(e.Player, p) && e.Kind == kind)
                 {
                     // review 2, achado 2: hit de dedup ATUALIZA a entrada (re-publish traz stamp/linha novos)
+                    // code-review 2, achado 3: Region também — re-publish de OUTRA região (006 reusa o kind)
+                    // com Region stale re-validaria a linha errada no pump
                     e.PublishDeadline = deadline;
+                    e.Region = region;
                     e.RequiredLine = required;
                     _deferred[i] = e;
                     TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] crouch DEFERRED ({reason}) {p.ProfileId}");
@@ -178,9 +181,21 @@ namespace TRLImmersiveCombatMedicine.Trauma
         /// devolução imediata de controle (decisão 16) com restauração própria fora de combate.</summary>
         internal static void BotCrouchDip(Player botPlayer)
         {
-            if (botPlayer == null || botPlayer.MovementContext == null) return;
+            if (botPlayer == null || botPlayer.MovementContext == null)
+            {
+                // code-review 2, achado 2: contexto morto = dip nunca executará — refundar o cooldown do
+                // publish (mesmo padrão do achado 4 da review 1 em TryInvoluntaryCrouch)
+                if (!(botPlayer is null) && TraumaEngine.TryGetOneShotDeadline(botPlayer, TraumaOneShotKind.InvoluntaryCrouch, out float dNull))
+                    TraumaEngine.ReportOneShotCanceled(botPlayer, TraumaOneShotKind.InvoluntaryCrouch, dNull);
+                return;
+            }
             BotOwner bo = botPlayer.AIData?.BotOwner;
-            if (bo == null) return;
+            if (bo == null)
+            {
+                if (TraumaEngine.TryGetOneShotDeadline(botPlayer, TraumaOneShotKind.InvoluntaryCrouch, out float dBo))
+                    TraumaEngine.ReportOneShotCanceled(botPlayer, TraumaOneShotKind.InvoluntaryCrouch, dBo);
+                return;
+            }
             var mcBot = botPlayer.MovementContext;
             if (mcBot.IsInPronePose || mcBot.PoseLevel <= 0.05f)
             {

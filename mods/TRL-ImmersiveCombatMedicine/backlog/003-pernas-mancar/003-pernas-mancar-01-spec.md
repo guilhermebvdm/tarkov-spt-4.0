@@ -1,7 +1,7 @@
 # 003 — Pernas: Mancar N1/N2 + agachar involuntário
 
 **Mod:** TRL-ImmersiveCombatMedicine
-**Status:** Backlog
+**Status:** Entregue
 **Criado:** 2026-07-18
 
 ## Visão geral

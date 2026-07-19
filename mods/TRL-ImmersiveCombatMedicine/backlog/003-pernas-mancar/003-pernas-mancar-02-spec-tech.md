@@ -1,7 +1,7 @@
 # 003 — Pernas: Mancar N1/N2 + agachar involuntário · Spec Técnica
 
 **Mod:** TRL-ImmersiveCombatMedicine
-**Status:** Em progresso (aguardando review)
+**Status:** Entregue
 **Spec funcional:** [003-pernas-mancar-01-spec.md](003-pernas-mancar-01-spec.md)
 **Criado:** 2026-07-19
 

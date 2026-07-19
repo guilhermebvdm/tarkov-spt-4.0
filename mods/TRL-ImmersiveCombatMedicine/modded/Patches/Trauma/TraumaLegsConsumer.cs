@@ -140,11 +140,13 @@ namespace TRLImmersiveCombatMedicine.Trauma
         private void RemoveCapGuarded(Player p)
         {
             // review 2, achado 3: Player.RemoveStateSpeedLimit NÃO null-propaga (:25835-25837) — guard obrigatório.
-            // code-review 1, achado 2: morto/destruído sai SÓ do bookkeeping (sem undo nem log "cap OFF" —
-            // o MovementContext morre com o Player; recompute em cadáver é ruído).
+            // code-review 2, achado 1: !IsAlive NÃO pode pular a remoção do cap — o DOWNED do Fika é IsAlive=false
+            // com o MESMO MovementContext revivendo depois (FikaPlayer re-seta IsAlive); cap não removido no
+            // toggle-off ficaria permanente pós-revive. Remoção do dict é inofensiva em cadáver; só o recompute
+            // e o log "cap OFF" ficam gateados em vivo (code-review 1, achado 2: recompute em cadáver é ruído).
             if (p == null || p.MovementContext == null) return;
-            if (p.HealthController == null || !p.HealthController.IsAlive) return;
             p.MovementContext.RemoveStateSpeedLimit(TraumaCause);
+            if (p.HealthController == null || !p.HealthController.IsAlive) return;
             p.UpdateSpeedLimitByHealth(); // AP-04: recompute oficial devolve sprint/caps ao estado canônico vanilla (Player.cs:29068)
             TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] legs cap OFF {p.ProfileId}");
         }
