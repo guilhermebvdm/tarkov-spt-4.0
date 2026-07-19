@@ -539,9 +539,19 @@ namespace TRLDynamicSpawn.Patches
                     bool isValid = true;
                     if (players != null)
                     {
-                        // Se for bot comum (PMC ou Scav), ele deve estar a no máximo 300m de algum jogador real
+                        // Se for bot comum (PMC ou Scav), ele deve estar dentro da bolha de spawn em relação a algum jogador real
                         if (isCommonBot)
                         {
+                            float maxDist = 300f;
+                            if (TRLDynamicSpawn.Components.DynamicSpawnManager.Instance != null && TRLDynamicSpawn.Components.DynamicSpawnManager.Instance.ServerConfig != null)
+                            {
+                                var cfg = TRLDynamicSpawn.Components.DynamicSpawnManager.Instance.ServerConfig;
+                                if (cfg.MapConfigs?.TryGetValue(mapName, out var mapSettings) == true)
+                                {
+                                    maxDist = mapSettings.DespawnDistance;
+                                }
+                            }
+
                             bool closeEnoughToAnyPlayer = false;
                             foreach (var player in players)
                             {
@@ -549,7 +559,7 @@ namespace TRLDynamicSpawn.Patches
                                 if (player.IsAI && !player.IsYourPlayer) continue;
 
                                 float dist = Vector3.Distance(player.Position, checkPoint.Position);
-                                if (dist <= 300f) // Bolha de 300m
+                                if (dist <= maxDist)
                                 {
                                     closeEnoughToAnyPlayer = true;
                                     break;

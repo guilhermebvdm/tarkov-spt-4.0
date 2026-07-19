@@ -665,13 +665,19 @@ namespace TRLDynamicSpawn.Components
             // Use the override custom position if provided, else the BotZone's center
             Vector3 zonePos = overridePosition ?? zone.transform.position;
 
-            // Se for bot comum (PMC ou Scav), ele deve estar dentro da bolha de spawn de 300m
+            // Se for bot comum (PMC ou Scav), ele deve estar dentro da bolha de spawn
             if (role != null)
             {
                 WildSpawnType rType = role.Value;
                 bool isCommonBot = rType == WildSpawnType.pmcUSEC || rType == WildSpawnType.pmcBEAR || rType == WildSpawnType.assault;
                 if (isCommonBot)
                 {
+                    float maxDist = 300f;
+                    if (_serverConfig?.MapConfigs?.TryGetValue(mapName, out var mapSettings) == true)
+                    {
+                        maxDist = mapSettings.DespawnDistance;
+                    }
+
                     bool closeEnoughToAnyPlayer = false;
                     foreach (var player in players)
                     {
@@ -679,7 +685,7 @@ namespace TRLDynamicSpawn.Components
                         if (player.IsAI && !player.IsYourPlayer) continue;
 
                         float dist = Vector3.Distance(player.Position, zonePos);
-                        if (dist <= 300f) // Bolha de 300m
+                        if (dist <= maxDist)
                         {
                             closeEnoughToAnyPlayer = true;
                             break;
