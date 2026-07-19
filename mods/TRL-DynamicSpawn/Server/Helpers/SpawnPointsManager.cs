@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
@@ -15,7 +15,7 @@ namespace TRLDynamicSpawnServer.Helpers
 
         public static void LoadSpawns()
         {
-            string basePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "user", "mods", "TRL-DynamicSpawn-Server", "config", "Spawns");
+            string basePath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? AppDomain.CurrentDomain.BaseDirectory, "config", "Spawns");
 
             if (!Directory.Exists(basePath)) return;
 
