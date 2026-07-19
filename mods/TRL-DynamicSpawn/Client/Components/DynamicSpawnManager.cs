@@ -658,18 +658,28 @@ namespace TRLDynamicSpawn.Components
                 }
             }
 
+            float heightLimit = (mapName == "factory4_day" || mapName == "factory4_night" || mapName == "sandbox" || mapName == "sandbox_high") ? 5.0f : 15.0f;
+
             foreach (var player in players)
             {
                 if (player == null || player.Profile == null || player.Profile.Info == null) continue;
                 if (player.IsAI && !player.IsYourPlayer) continue;
 
-                float dist = Vector3.Distance(player.Position, zonePos);
-                
-                // Safe Zone Distance Check
-                if (dist < safeDist) 
+                // Safe Zone Distance Check (Losango 3D / Bipirâmide Otimizado sem alocação de Heap)
+                float dx = player.Position.x - zonePos.x;
+                float dz = player.Position.z - zonePos.z;
+                float dh = (float)System.Math.Sqrt(dx * dx + dz * dz);
+                float dv = System.Math.Abs(player.Position.y - zonePos.y);
+
+                float limitW = System.Math.Max((float)safeDist, 5f);
+                float limitH = System.Math.Max(heightLimit, 3f);
+
+                if ((dh / limitW) + (dv / limitH) <= 1.0f)
                 {
                     return false;
                 }
+
+                float dist = Vector3.Distance(player.Position, zonePos);
 
                 // Line of Sight Culling Check
                 if (enableLos && dist <= losDist)

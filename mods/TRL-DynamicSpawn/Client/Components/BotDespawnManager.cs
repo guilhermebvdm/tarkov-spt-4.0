@@ -103,6 +103,10 @@ namespace TRLDynamicSpawn.Components
                     if (!IsHostOrSolo())
                         continue;
 
+                    // Se a otimização de bolha de spawn estiver desativada no cliente (F12), não fazemos o teletransporte/despawn
+                    if (!TRLDynamicSpawn.Helpers.Settings.enableSpawnBubble.Value)
+                        continue;
+
                     // Get all alive human players to check distance against
                     var alivePlayers = new List<Player>();
                     for (int i = 0; i < gameWorld.AllAlivePlayersList.Count; i++)
