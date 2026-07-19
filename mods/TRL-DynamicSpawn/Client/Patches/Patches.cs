@@ -474,7 +474,24 @@ namespace TRLDynamicSpawn.Patches
         [PatchPrefix]
         private static bool PatchPrefix(BossLocationSpawn wave)
         {
-            return true; // Let vanilla always handle boss waves!
+            if (wave == null || wave.BossName == null) return true;
+
+            string name = wave.BossName.ToLower();
+
+            // Bloqueia PMCs e Scavs normais do vanilla para que o nosso mod controle a proporção de horda exclusiva
+            if (name == "pmcbear" || name == "pmcusec" || 
+                name == "sptbear" || name == "sptusec" || 
+                name == "assault" || name == "savage")
+            {
+                if (TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value)
+                {
+                    Plugin.LogSource.LogInfo($"[TRLDynamicSpawn] Blocked Vanilla Horde Wave ({wave.BossName}) to give 100% control to DynamicSpawn.");
+                }
+                return false;
+            }
+
+            // Permite todos os outros bosses reais, elites, snipers, raiders, rogues e cultistas nativos
+            return true;
         }
     }
 
