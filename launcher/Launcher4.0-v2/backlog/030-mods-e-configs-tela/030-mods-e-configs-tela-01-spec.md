@@ -80,10 +80,13 @@ Um item agrupa 1+ arquivos: o player liga "Sombras reduzidas", não `com.sombras
 
 ### A. Canal config-performance
 
+> **Distinção que governa esta seção:** *ligar/desligar um item* é **ação explícita do player** (aplica na hora, sobrepondo o que estiver lá); *os syncs seguintes* respeitam a customização dele (`preserve-divergent`). Sem separar os dois momentos, "performance vence tudo" (D-1) e "edição do jogador prevalece" (RN-3) se contradizem no caso mais comum — o player que já tinha mexido no arquivo antes de ligar o item.
+
 - [ ] **CA-030.1** — Dado um arquivo em `config-performance/<rel>` e o item correspondente **ligado**, quando o sync roda, então ele é aplicado em `config/<rel>`, **vencendo** `config-force` e `config` (D-1).
-- [ ] **CA-030.2** — Dado o item **desligado**, quando o sync roda, então `config/<rel>` volta a ser governado pela cadeia normal (`config-force`, senão `config`).
-- [ ] **CA-030.3** — Dado que o player **editou** o arquivo aplicado, quando o sync roda, então a edição dele é **preservada** (mesma regra `preserve-divergent` do `config`).
-- [ ] **CA-030.4** — Dado que o servidor publica uma versão **nova** do arquivo e o player **não** o customizou, quando o sync roda, então ele recebe a versão nova.
+- [ ] **CA-030.2 (ligar sobre config já customizada)** — Dado que o player **já havia editado** `config/<rel>` **antes** de ligar o item, quando ele liga, então a versão de performance **é aplicada mesmo assim** — ligar é ação explícita; se não aplicasse, o toggle não teria efeito visível e pareceria quebrado — e o arquivo anterior dele é **preservado em `config-disabled/`** antes da sobrescrita. <!-- review: confirmar que sobrescrever a edição prévia ao LIGAR é o comportamento desejado. A alternativa (preservar e não aplicar) deixa o toggle sem efeito visível, o que é pior; mas o backup em config-disabled/ colide com o backup do config-force — ver CC-11. -->
+- [ ] **CA-030.2b (desligar)** — Dado o item **desligado**, quando o sync roda, então: se o arquivo **não** foi customizado desde a aplicação, `config/<rel>` volta a ser governado pela cadeia normal (`config-force`, senão `config`); se **foi** customizado, a edição é preservada (RN-3) e o relatório registra que a reversão foi pulada por customização.
+- [ ] **CA-030.3 (edição posterior)** — Dado que o item está ligado e o player edita o arquivo **depois** disso, quando o sync roda, então a edição é **preservada** (`preserve-divergent`, tendo a versão de performance como baseline).
+- [ ] **CA-030.4** — Dado que o servidor publica uma versão **nova** do arquivo e o player **não** o customizou desde a última aplicação, quando o sync roda, então ele recebe a versão nova.
 - [ ] **CA-030.5** — Dado um arquivo que existe **só** em `config-performance` (sem par em `config/`), quando o player desliga o item, então o arquivo é movido para `config-disabled/` (D-8), nunca apagado de forma irrecuperável.
 - [ ] **CA-030.6** — A pasta `config-performance` é espelhada no cliente como **biblioteca de referência** (`mirror-reference`): sempre a versão do servidor, extras não deletados, edição local ali é sobrescrita (D-10).
 - [ ] **CA-030.7** — Nem `plugins-optional.json`, nem `performance.json`, nem a pasta `config-performance/` são distribuídos como arquivos comuns de mod para o jogo do player (hoje seriam — ver §Defeito atual).
@@ -93,18 +96,22 @@ Um item agrupa 1+ arquivos: o player liga "Sombras reduzidas", não `com.sombras
 - [ ] **CA-030.8** — Dado um mod marcado como opcional e **desligado** pelo player, quando o sync roda, então **todos** os `paths` dele (plugin + config + bundles) são movidos para a quarentena `*-disabled` correspondente, e nada dele é baixado (D-2).
 - [ ] **CA-030.9** — Dado um mod opcional **ligado**, quando o sync roda, então todos os `paths` dele são instalados normalmente.
 - [ ] **CA-030.10** — Dado um mod que o player **remarca** e cujos arquivos estão em `*-disabled`, quando ele confirma, então o launcher **restaura da quarentena se o hash bater** com o servidor; se divergir, **baixa a versão do servidor** e descarta a antiga (D-7).
-- [ ] **CA-030.11** — Dado um mod opcional **novo** publicado pelo servidor e um player que **já configurou** a tela antes, quando ele loga, então o mod vem **desligado** e a tela + o item de menu exibem **marcador de novidade** até ele visitar a tela (D-6).
+- [ ] **CA-030.11** — Dado um mod opcional **novo** publicado pelo servidor e um player que **já configurou** a tela antes, quando ele loga, então o mod vem **desligado** e tanto o item de menu quanto a linha do mod exibem **marcador de novidade** (D-6). O marcador some quando o player **sai da tela** (mesma regra do modal, CA-030.20) — não ao simplesmente abri-la, para que abrir sem querer não descarte o aviso.
+- [ ] **CA-030.11b** — Dado um mod opcional que o servidor **removeu** do `plugins-optional.json`, quando o sync roda, então: se ele continua em `mods_repo`, vira mod **obrigatório** e é instalado para todos; se saiu também do `mods_repo`, o mirror o move para `*-disabled`. Em nenhum dos casos o player fica com um item fantasma na tela.
 
 ### C. Tela e navegação
 
 - [ ] **CA-030.12** — A tela "Mods e Configs" é acessível pelo **menu lateral** (abaixo de "Launcher") e por um **resumo clicável** na área superior direita da tela logada.
-- [ ] **CA-030.13** — O resumo mostra o estado atual de forma que convide o clique (ex.: *"5 de 7 mods opcionais ligados · Performance: 0 de 4"*) e destaca quando há novidade não vista (CA-030.11).
+- [ ] **CA-030.13** — O resumo exibe, de forma verificável: (a) contagem de mods opcionais ligados sobre o total, (b) contagem de configs de performance ligadas sobre o total, (c) marcador visual quando há item novo não visto (CA-030.11). Ex.: *"5 de 7 mods opcionais · Performance: 0 de 4"*.
 - [ ] **CA-030.14** — A tela tem **2 colunas** (Mods opcionais | Configs de performance), cada item com **nome + descrição** no idioma ativo, e cada coluna com um toggle **"todos"** (D-11).
-- [ ] **CA-030.15** — Toda string nova (tela, modal, resumo, descrições dos JSONs) existe em **pt e en** e segue o padrão i18n vigente.
+- [ ] **CA-030.15** — Toda string nova (tela, modal, resumo, descrições dos JSONs) existe em **pt e en**, com **paridade total de chaves** entre os dois locales — o loader é all-or-nothing: uma única chave ausente derruba o locale inteiro e o launcher cai no fallback pt.
+- [ ] **CA-030.15b (estado vazio)** — Dado um servidor **sem** mods opcionais e **sem** configs de performance, quando o player abre a tela, então cada coluna exibe estado vazio explicativo (não lista fantasma nem erro), e o resumo na tela logada não induz clique inútil.
 
 ### D. Onboarding (primeiro acesso)
 
-- [ ] **CA-030.16** — Dado um cliente **sem nenhum plugin instalado**, quando o player loga, então ele é levado direto à tela "Mods e Configs", **antes do primeiro sync** (D-4).
+- [ ] **CA-030.16** — Dado um cliente **sem nenhum plugin instalado** — definido como: `BepInEx/plugins` **inexistente ou sem nenhum `.dll` em qualquer profundidade** — quando o player loga, então ele é levado direto à tela "Mods e Configs", **antes do primeiro sync** (D-4). O Dev Mode **não** dispara o onboarding (CC-14).
+- [ ] **CA-030.16b** — Dado um player que já passou pelo onboarding mas cujo `BepInEx/plugins` ficou vazio depois (apagou à mão, antivírus removeu, instalação corrompida), quando ele loga, então o onboarding **não** se repete — o gatilho consulta a marca de "onboarding concluído" persistida, não só o estado do disco. <!-- review: se preferir que instalação corrompida REFAÇA o onboarding, inverter este critério. Como está, prioriza não reabrir a tela pra quem já escolheu. -->
+- [ ] **CA-030.16c** — Dado que o player é levado ao onboarding, quando ele tenta navegar para outra tela sem concluir, então ou é permitido (e vale CA-030.20, o fluxo se repete no próximo login) ou é bloqueado com aviso — o comportamento é explícito, nunca uma tela sem saída.
 - [ ] **CA-030.17** — A tela abre com **tudo ligado**: mods opcionais marcados, performance desmarcada (D-5).
 - [ ] **CA-030.18** — Um **modal** explica a escolha ("se a sua máquina não é high-end, remova os mods opcionais e ative as configs de performance"); ao clicar OK ele fecha e o player configura.
 - [ ] **CA-030.19** — Ao sair da tela, o player volta para a aba **Launcher** e a **primeira ingestão** roda já com as escolhas dele.
@@ -145,13 +152,22 @@ Um item agrupa 1+ arquivos: o player liga "Sombras reduzidas", não `com.sombras
 - **CC-8 — Cancelar no meio da aplicação.** Resultado parcial + relatório (CA-030.25); nunca deixar arquivo parcial (escrita atômica do motor).
 - **CC-9 — JSON de definição inválido/ausente.** Tela abre sem itens daquele eixo, com aviso — nunca crash nem lista fantasma.
 - **CC-10 — `id` renomeado no servidor.** Equivale a "item novo" (D-6) e o antigo some; documentar que `id` é chave estável.
+- **CC-11 — 🔴 `config-disabled/` passa a ter três significados.** Hoje a pasta guarda **um** tipo de coisa: "sua config foi substituída por uma forçada, aqui está a sua" (backup do `config-force`). Este item acrescenta mais dois: quarentena de config de mod opcional desligado (CA-030.8) e backup da edição sobrescrita ao ligar performance (CA-030.2). Três origens no mesmo diretório, **com risco de colisão de nome** — o backup do force pode ser silenciosamente sobrescrito pela quarentena de um opcional homônimo, destruindo a config original do player. <!-- review: decidir separação. Sugestão: subpastas por origem (config-disabled/force/, config-disabled/optional/, config-disabled/performance/) OU sufixo de origem no nome do arquivo. Sem isso, CC-6 ("sobrescrever é aceitável") vira perda de dado do usuário. -->
+- **CC-12 — 🔴 Mod opcional com parte server-side.** A quarentena `*-disabled` resolve **plugins de cliente** (BepInEx). Um mod que também tenha módulo de servidor em `user/mods/<mod>/` **não** é desabilitado renomeando/movendo dentro de `user/mods` — o SPT carrega a pasta mesmo assim; é preciso movê-la para **fora** de `user/mods`. Se algum item opcional incluir parte server, o `paths` precisa tratar esse destino de forma diferente. <!-- review: confirmar se mods opcionais serão SEMPRE client-only. Se sim, declarar isso em Fora de escopo e validar no servidor (recusar path sob user/mods). Se não, a quarentena de server mod precisa de destino próprio fora de user/mods. -->
+- **CC-13 — Mod opcional com bundles e o cache 3D.** Ligar/desligar mod que traz bundles interage com o pipeline de cache do SPT 4.0: o servidor calcula o hash de bundles no boot e o cliente só popula `user/cache/bundles` abrindo o jogo. Trocar bundles pelo launcher pode deixar cache obsoleto (asset velho carregado, ou download 3D na primeira raid). Definir se a troca invalida o cache local do bundle afetado.
+- **CC-14 — Dev Mode ligado.** O Dev Mode preserva arquivos/builds locais e pula a verificação automática. Um dev com build própria de um plugin que é opcional não pode ter essa build movida para quarentena por um toggle. Regra: com Dev Mode ligado, a aplicação de mods opcionais **não** move arquivos locais divergentes — registra no relatório e segue.
+- **CC-15 — Concorrência com o sync automático do login.** O player pode sair da tela (CA-030.21) enquanto a verificação automática ainda roda. As duas execuções não podem se sobrepor no mesmo arquivo: serializar (a segunda espera) ou bloquear a saída até a primeira terminar.
+- **CC-16 — Arquivo em uso / sem permissão.** DLL carregada por outro processo, config aberta em editor, pasta somente-leitura. Falha por arquivo, contada e reportada (CA-030.25), sem abortar os demais itens — distinto de "cancelado" (CC-8).
+- **CC-17 — Item de performance ligado cujo arquivo sumiu do servidor.** O que já foi aplicado em `config/` permanece (não há de onde reverter); o item some da tela e o relatório registra. Não pode virar erro recorrente a cada sync.
+- **CC-18 — Player liga e desliga o mesmo item várias vezes antes de sair da tela.** Só o **estado final** é aplicado; nada de aplicar e reverter em sequência (CA-030.21 opera sobre o diff entre estado inicial e final, não sobre o histórico de cliques).
 
 ## Fora de escopo
 
 - Detecção automática de hardware para sugerir preset (o modal orienta, o player decide).
 - Perfis nomeados de configuração salvos por player.
-- A feature de "configurações recomendadas de jogo" (teclas/gráficos/menu) — é [outro tema, parado](../../../CLAUDE.md), com fonte e fluxo próprios.
+- A feature de "configurações recomendadas de jogo" (teclas, gráficos, fundo do menu) — tema separado, parado a pedido do usuário até o conteúdo curado ser fechado; tem fonte e fluxo próprios.
 - Redesenho das outras áreas da tela logada além do resumo (CA-030.12/13).
+- Reversão automática de bundles no cache 3D do cliente (CC-13 define o comportamento esperado; a implementação do invalidador de cache, se necessária, é item próprio).
 
 ## Defeito atual que este item corrige
 
@@ -169,3 +185,14 @@ A pasta `config-performance` criada no servidor está em `mods_repo/BepInEx/conf
 - [ ] **G-4** — Editar um arquivo aplicado, rodar sync, confirmar que a edição sobreviveu (CA-030.3); publicar versão nova no servidor e confirmar que quem **não** editou recebeu (CA-030.4).
 - [ ] **G-5 — Coop (Fika PVE).** Host + ao menos 1 cliente com escolhas **diferentes**: confirmar que cada um recebe o seu e que nada de gameplay compartilhado diverge (CC-7). Solo não cobre.
 - [ ] **G-6** — Onboarding real em instalação limpa: gatilho dispara, modal aparece, escolhas valem no primeiro sync, aba volta pra Launcher.
+- [ ] **G-7 — Quarentena não destrói config do player (CC-11).** Ter um arquivo com backup de `config-force` em `config-disabled/` e então desligar um mod opcional/ligar performance que produza quarentena de **mesmo nome**; confirmar que o backup original continua recuperável.
+- [ ] **G-8 — Ligar sobre config customizada (CA-030.2).** Editar um arquivo à mão, ligar o item de performance correspondente, confirmar que a versão de performance entrou em vigor **e** que a edição anterior está recuperável.
+- [ ] **G-9 — Bundles e cache 3D (CC-13).** Ligar/desligar um mod opcional que traga bundles e entrar em raid: confirmar que o asset correto carrega (sem asset velho de cache nem download 3D inesperado no meio da partida).
+- [ ] **G-10 — Migração do modelo antigo (CA-030.28).** Cliente que já tinha estado salvo no modelo `Opcionais/`/`offFolders` atualiza sem ficar com mod órfão instalado nem preferência perdida em silêncio.
+
+## Histórico de Alterações
+
+| Data | Autor | Alteração |
+|---|---|---|
+| 2026-07-19 | Guilherme | Criação — 12 decisões travadas, 28 critérios de aceite, 10 corner cases (commit 6d212d2e) |
+| 2026-07-19 | Guilherme | Revisão `/review-spec` — resolvida contradição CA-030.1×CA-030.3 (ligar × preservar edição); 3 critérios vagos reescritos; +8 corner cases (CC-11 a CC-18) incluindo colisão do `config-disabled/`, mods server-side e cache de bundles; +4 gates humanos; 4 trechos marcados para decisão |
