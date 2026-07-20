@@ -366,7 +366,7 @@ if (rule == SyncFolderRule.PerformanceToConfig)
 }
 ```
 
-> **TODO confirmar:** `GroupIdOf(file)` depende do shape final do manifesto (S-7). Se o item de performance vier como lista de arquivos com o `id` do item em cada entrada, é leitura direta; se vier agrupado, o planner precisa do mapa `path → id` montado antes do loop.
+> **Fechado por PA-01-02 (§2.4):** `GroupIdOf(file)` é leitura direta de `file.performanceId` — o manifesto taggeia cada arquivo com o id do item, então o planner não precisa montar mapa `path → id` antes do loop.
 
 ### 5.5 Preferência persistida (LauncherSettingsProvider)
 
