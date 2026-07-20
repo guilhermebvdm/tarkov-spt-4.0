@@ -14,7 +14,7 @@ namespace TRLImmersiveCombatMedicine
     // TraumaBotFall.RegisterLayer (sem o atributo, a ordem de load do BepInEx 5 pode falso-negativar
     // PluginInfos com BigBrain instalado). GUID confirmado: bigbrain_full/BigBrainPlugin.cs:10.
     [BepInDependency("xyz.drakia.bigbrain", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.8.0")]
+    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.9.0")]
     public class TRLImmersiveCombatMedicinePlugin : BaseUnityPlugin
     {
         public static TRLImmersiveCombatMedicinePlugin Instance;
@@ -27,7 +27,11 @@ namespace TRLImmersiveCombatMedicine
         public static ConfigEntry<bool> ConfigArmsEnabled;
         public static ConfigEntry<bool> ConfigStomachEnabled;
         public static ConfigEntry<bool> ConfigBlackoutEnabled;
-        public static ConfigEntry<float> ConfigBlackoutDuration;
+        // ref: item 008 — ConfigBlackoutDuration (campo único fixo) REMOVIDO; substituído pelo
+        // par min/max abaixo. Migração do valor antigo por CÓPIA (não descarte) em
+        // MigrateOrphanedConfigKeys().
+        public static ConfigEntry<float> ConfigBlackoutDurationMin;
+        public static ConfigEntry<float> ConfigBlackoutDurationMax;
 
         // --- Band-Aid Configs ---
         public static ConfigEntry<KeyboardShortcut> MedicInteractKey;
@@ -80,7 +84,7 @@ namespace TRLImmersiveCombatMedicine
         {
             Instance = this;
             ModLogger = base.Logger;
-            ModLogger.LogInfo("TRL-ImmersiveCombatMedicine Plugin v1.8.0 carregado.");
+            ModLogger.LogInfo("TRL-ImmersiveCombatMedicine Plugin v1.9.0 carregado.");
 
             // Inicializações combinadas
             ItemDatabase.Initialize();
@@ -95,10 +99,18 @@ namespace TRLImmersiveCombatMedicine
             ConfigArmsEnabled = Config.Bind("2. Mecanicas (Trauma)", "Sistema de Braços", true, "(INERTE desde a v1.6.0 — substituído pelo Trauma 2.0 / Arms Effects. Remoção da key no item 010.)");
             // ref: spec 006 §1.9 — legado de estômago aposentado (D10); key mantida p/ não órfanar o .cfg (remoção no item 010)
             ConfigStomachEnabled = Config.Bind("2. Mecanicas (Trauma)", "Sistema de Estomago", true, "(INERTE desde a v1.7.0 — substituído pelo Trauma 2.0 / Stomach Effects. Remoção da key no item 010.)");
-            // ref: CR-04 — piso de 5s: duração baixa (~3-5s no teste) colapsava blackout+grace
+            // ref: CR-04 — piso de 5s herdado: duração baixa (~3-5s no teste) colapsava blackout+grace
             // num flap instantâneo (andar "desmaiado", timers sumindo antes do visual).
-            ConfigBlackoutDuration = Config.Bind("3. Balanceamento (Trauma)", "Duracao do Desmaio", 20f,
-                new ConfigDescription("Quanto tempo (segundos) o jogador fica desmaiado. ALINHAR ENTRE TODOS OS PEERS.", new AcceptableValueRange<float>(5f, 120f)));
+            // ref: item 008 — par min/max substitui o campo fixo único; default 20/20 preserva o
+            // comportamento antigo em instalação nova (identidade com o valor fixo anterior).
+            ConfigBlackoutDurationMin = Config.Bind("3. Balanceamento (Trauma)", "Duracao Minima do Desmaio", 20f,
+                new ConfigDescription(
+                    "Duração MÍNIMA (segundos) do desmaio — sorteada uniformemente até o máximo abaixo a cada novo desmaio (independente de sorteios anteriores). ALINHAR ENTRE TODOS OS PEERS. Se este valor for maior que o Máximo, os dois são trocados antes do sorteio (config sempre produz um resultado válido).",
+                    new AcceptableValueRange<float>(5f, 120f)));
+            ConfigBlackoutDurationMax = Config.Bind("3. Balanceamento (Trauma)", "Duracao Maxima do Desmaio", 20f,
+                new ConfigDescription(
+                    "Duração MÁXIMA (segundos) do desmaio — sorteada uniformemente a partir do Mínimo acima a cada novo desmaio. ALINHAR ENTRE TODOS OS PEERS. Com Mínimo == Máximo, o comportamento é idêntico a uma duração fixa (caso degenerado do sorteio, não um caso especial).",
+                    new AcceptableValueRange<float>(5f, 120f)));
 
             // Configs Band-Aid
             MedicInteractKey = Config.Bind("4. Keybinds (Medic)", "Medic Interact Key", new KeyboardShortcut(KeyCode.F), "Tecla para FECHAR o modo medico (a abertura e pelo painel nativo de interacao, tecla F do jogo).");
@@ -362,6 +374,42 @@ namespace TRLImmersiveCombatMedicine
                     ModLogger.LogWarning($"[Config] Valor órfão migrado (one-time): 'Sistema de Braços' = {oldValue}; key antiga removida do .cfg.");
                 }
 
+                // ref: item 008 — MIGRAÇÃO POR CÓPIA (não descarte, diferente do padrão rename-at-delivery
+                // dos placeholders 003-007): "Duracao do Desmaio" era um valor ATIVO e real (ajustado ao
+                // vivo por lição de UX documentada — P-2.13/P-2.15), não um placeholder inerte. Copiar o
+                // valor antigo para OS DOIS campos novos reproduz o comportamento fixo anterior
+                // exatamente (min==max==valorAntigo) — usuário não percebe mudança até abrir o F12.
+                // PA-01-01 (review técnica 01): parse com CultureInfo.InvariantCulture — BepInEx
+                // (TomlTypeConverter) sempre grava/lê floats em cultura invariante; sem isso, num
+                // processo com cultura pt-BR/de-DE (ponto decimal → separador de milhar), um valor
+                // legado como "47.5" seria lido como 475 → clampado a 120 pelo AcceptableValueRange,
+                // migrando Min=Max=120 (o OPOSTO do objetivo). Confirmado por decompile do
+                // BepInEx.dll real que nenhuma migração existente no mod hoje faz parse de float
+                // (só bool, insensível a isso) — risco genuinamente novo deste item.
+                object legacyDurationDef = null;
+                float legacyDurationValue = 20f;
+                foreach (System.Collections.DictionaryEntry entry in orphans)
+                {
+                    var def = entry.Key;
+                    string section = AccessTools.Property(def.GetType(), "Section")?.GetValue(def) as string;
+                    string key = AccessTools.Property(def.GetType(), "Key")?.GetValue(def) as string;
+                    if (section == "3. Balanceamento (Trauma)" && key == "Duracao do Desmaio" &&
+                        float.TryParse(entry.Value as string, System.Globalization.NumberStyles.Float,
+                            System.Globalization.CultureInfo.InvariantCulture, out legacyDurationValue))
+                    {
+                        legacyDurationDef = def;
+                        break;
+                    }
+                }
+                if (legacyDurationDef != null)
+                {
+                    ConfigBlackoutDurationMin.Value = legacyDurationValue;
+                    ConfigBlackoutDurationMax.Value = legacyDurationValue;
+                    orphans.Remove(legacyDurationDef);
+                    Config.Save();
+                    ModLogger.LogWarning($"[Config] 'Duracao do Desmaio' (valor real do usuário) migrado por CÓPIA para Min E Max = {legacyDurationValue:F0}s; key antiga removida do .cfg.");
+                }
+
                 // ref: code-review 1 do 003 — RENAME-AT-DELIVERY: deletar a key órfã do placeholder
                 // "Legs Effects (item 003)" SEM copiar o valor (o false de placeholder não é escolha do
                 // usuário — a key nova "Legs Effects" nasce ON). Lição CR-03-01: sem o delete + Save, o
@@ -536,14 +584,16 @@ namespace TRLImmersiveCombatMedicine
             string localId = gameWorld.MainPlayer.ProfileId;
             float targetIntensity = 0f;
 
-            // ref: CR-04 (auditoria do desmaio) — RELÓGIO ÚNICO: o wake é dirigido pelo
-            // deadline ABSOLUTO gravado na entrada (BlackoutTimers), o mesmo que o
-            // MainLoopPatch usa. StartTimes serve só à rampa visual. Antes, este bloco
-            // recalculava com ConfigBlackoutDuration AO VIVO — mudar a config no F12
-            // durante o desmaio deslocava o wake e divergia dos outros leitores.
+            // ref: CR-04 (auditoria do desmaio) — RELÓGIO ÚNICO: o wake é dirigido pelo deadline
+            // ABSOLUTO gravado na entrada (BlackoutTimers); StartTimes serve só à rampa visual.
+            // ref: item 008 — fallback (ramo só alcançado se BlackoutStartTimes não tiver entrada
+            // para localId, o que não ocorre em operação normal — HealthPatches.cs e
+            // BandAidNetworkHandler.cs sempre gravam os dois dicts juntos) usa o MÍNIMO configurado
+            // em vez do extinto ConfigBlackoutDuration — mesmo raciocínio conservador do
+            // FikaBridge: errar para uma duração mais curta é mais seguro.
             if (TraumaState.BlackoutTimers.TryGetValue(localId, out float wakeDeadline))
             {
-                float duration = ConfigBlackoutDuration.Value;
+                float duration = ConfigBlackoutDurationMin.Value;
                 if (TraumaState.BlackoutStartTimes.TryGetValue(localId, out float startTime))
                     duration = Mathf.Max(0.1f, wakeDeadline - startTime);
                 else

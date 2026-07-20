@@ -24,10 +24,14 @@ namespace TrueTrauma
 
             // ref: CR-01-02 — propaga aos peers (host espelha timers e controla o
             // aggro dos bots). A duração viaja no pacote.
-            // ref: RANGE-READY — a duração vem do DEADLINE gravado na entrada (não da
-            // config): quando a duração virar aleatória por desmaio (min-max futuro),
-            // o pacote carrega automaticamente o valor ROLADO daquele desmaio.
-            float duration = TRLImmersiveCombatMedicine.TRLImmersiveCombatMedicinePlugin.ConfigBlackoutDuration.Value;
+            // ref: item 008 (RANGE-READY concluído) — o pacote carrega o valor ROLADO daquele
+            // desmaio (via BlackoutTimers, linha abaixo) sempre que isFainted=true; o fallback só
+            // serve o caso defensivo em que BlackoutTimers ainda não tem entrada (não deveria
+            // ocorrer — HealthPatches.cs grava os dois juntos — mas evita duration<=0 no pacote).
+            // Fallback usa o MÍNIMO configurado (não o antigo ConfigBlackoutDuration, removido):
+            // errar para o lado de uma duração mais curta é mais seguro que travar o alvo mais
+            // tempo que o configurado.
+            float duration = TRLImmersiveCombatMedicine.TRLImmersiveCombatMedicinePlugin.ConfigBlackoutDurationMin.Value;
             if (isFainted && TraumaState.BlackoutTimers.TryGetValue(player.ProfileId, out float deadline))
                 duration = UnityEngine.Mathf.Max(1f, deadline - UnityEngine.Time.time);
             Band_Aid.BandAidNetworkHandler.SendTraumaFaintPacket(player.ProfileId, isFainted, duration, duration + 5f);

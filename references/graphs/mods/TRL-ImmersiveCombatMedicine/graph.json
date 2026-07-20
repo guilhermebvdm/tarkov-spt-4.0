@@ -207,7 +207,7 @@
       "label": ".UpdateFaintedList()",
       "file_type": "code",
       "source_file": "Fika/FikaBridge.cs",
-      "source_location": "L37",
+      "source_location": "L41",
       "_origin": "ast",
       "id": "fika_fikabridge_fikabridge_updatefaintedlist",
       "community": 18,
@@ -4307,7 +4307,7 @@
       "label": ".Postfix()",
       "file_type": "code",
       "source_file": "Patches/Trauma/HealthPatches.cs",
-      "source_location": "L48",
+      "source_location": "L50",
       "_origin": "ast",
       "id": "trauma_healthpatches_damagetriggerpatch_postfix",
       "community": 14,
@@ -8237,7 +8237,7 @@
       "label": ".Awake()",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L79",
+      "source_location": "L83",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_awake",
       "community": 9,
@@ -8247,7 +8247,7 @@
       "label": ".OnDestroy()",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L316",
+      "source_location": "L328",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_ondestroy",
       "community": 9,
@@ -8257,7 +8257,7 @@
       "label": ".OnHealCheckResponseHandler()",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L321",
+      "source_location": "L333",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_onhealcheckresponsehandler",
       "community": 9,
@@ -8267,7 +8267,7 @@
       "label": "BandAidHealCheckResponsePacket",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L321",
+      "source_location": "L333",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_cs_bandaidhealcheckresponsepacket",
       "community": 9,
@@ -8277,7 +8277,7 @@
       "label": ".MigrateOrphanedConfigKeys()",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L331",
+      "source_location": "L343",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_migrateorphanedconfigkeys",
       "community": 9,
@@ -8287,7 +8287,7 @@
       "label": ".OnRaidStartCleanup()",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L486",
+      "source_location": "L534",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_onraidstartcleanup",
       "community": 9,
@@ -8297,7 +8297,7 @@
       "label": "GameObject",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L499",
+      "source_location": "L547",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_cs_gameobject",
       "community": 9,
@@ -8307,7 +8307,7 @@
       "label": "BandAidController",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L500",
+      "source_location": "L548",
       "_origin": "ast",
       "id": "bandaidcontroller",
       "community": 9,
@@ -8317,7 +8317,7 @@
       "label": "float",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L501",
+      "source_location": "L549",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_cs_float",
       "community": 9,
@@ -8327,7 +8327,7 @@
       "label": ".Update()",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L503",
+      "source_location": "L551",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_update",
       "community": 9,
@@ -8337,7 +8337,7 @@
       "label": ".WakeLocalPlayer()",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L593",
+      "source_location": "L643",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_wakelocalplayer",
       "community": 9,
@@ -8347,7 +8347,7 @@
       "label": "GameWorld",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L593",
+      "source_location": "L643",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_cs_gameworld",
       "community": 9,
@@ -15895,9 +15895,9 @@
       "source_location": "L14",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "trauma_healthpatches_damagetriggerpatch_prefix",
-      "target": "patches_trauma_healthpatches_cs_ebodypart",
-      "confidence_score": 1.0
+      "target": "patches_trauma_healthpatches_cs_ebodypart"
     },
     {
       "relation": "references",
@@ -17074,9 +17074,9 @@
       "source_file": "Patches/Trauma/TraumaBlackoutTrigger.cs",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "trauma_traumablackouttrigger",
-      "target": "trauma_traumablackouttrigger_traumablackouttrigger",
-      "confidence_score": 1.0
+      "target": "trauma_traumablackouttrigger_traumablackouttrigger"
     },
     {
       "relation": "contains",
@@ -17084,9 +17084,9 @@
       "source_file": "Patches/Trauma/TraumaBlackoutTrigger.cs",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "trauma_traumablackouttrigger",
-      "target": "trauma_traumablackouttrigger_trlimmersivecombatmedicine_trauma",
-      "confidence_score": 1.0
+      "target": "trauma_traumablackouttrigger_trlimmersivecombatmedicine_trauma"
     },
     {
       "relation": "references",
@@ -17095,9 +17095,9 @@
       "source_location": "L15",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "trauma_traumablackouttrigger_traumablackouttrigger",
-      "target": "patches_trauma_traumablackouttrigger_cs_float",
-      "confidence_score": 1.0
+      "target": "patches_trauma_traumablackouttrigger_cs_float"
     },
     {
       "relation": "method",
@@ -17105,9 +17105,9 @@
       "source_file": "Patches/Trauma/TraumaBlackoutTrigger.cs",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "trauma_traumablackouttrigger_traumablackouttrigger",
-      "target": "trauma_traumablackouttrigger_traumablackouttrigger_evaluate",
-      "confidence_score": 1.0
+      "target": "trauma_traumablackouttrigger_traumablackouttrigger_evaluate"
     },
     {
       "relation": "method",
@@ -17115,9 +17115,9 @@
       "source_file": "Patches/Trauma/TraumaBlackoutTrigger.cs",
       "source_location": "L78",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "trauma_traumablackouttrigger_traumablackouttrigger",
-      "target": "trauma_traumablackouttrigger_traumablackouttrigger_logignored",
-      "confidence_score": 1.0
+      "target": "trauma_traumablackouttrigger_traumablackouttrigger_logignored"
     },
     {
       "relation": "references",
@@ -17126,9 +17126,9 @@
       "source_location": "L19",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "trauma_traumablackouttrigger_traumablackouttrigger_evaluate",
-      "target": "patches_trauma_traumablackouttrigger_cs_ebodypart",
-      "confidence_score": 1.0
+      "target": "patches_trauma_traumablackouttrigger_cs_ebodypart"
     },
     {
       "relation": "references",
@@ -17137,9 +17137,9 @@
       "source_location": "L19",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "trauma_traumablackouttrigger_traumablackouttrigger_evaluate",
-      "target": "patches_trauma_traumablackouttrigger_cs_player",
-      "confidence_score": 1.0
+      "target": "patches_trauma_traumablackouttrigger_cs_player"
     },
     {
       "relation": "calls",
@@ -17148,9 +17148,9 @@
       "source_file": "Patches/Trauma/TraumaBlackoutTrigger.cs",
       "source_location": "L59",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "trauma_traumablackouttrigger_traumablackouttrigger_evaluate",
-      "target": "trauma_traumablackouttrigger_traumablackouttrigger_logignored",
-      "confidence_score": 1.0
+      "target": "trauma_traumablackouttrigger_traumablackouttrigger_logignored"
     },
     {
       "relation": "references",
@@ -17159,9 +17159,9 @@
       "source_location": "L78",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "trauma_traumablackouttrigger_traumablackouttrigger_logignored",
-      "target": "patches_trauma_traumablackouttrigger_cs_player",
-      "confidence_score": 1.0
+      "target": "patches_trauma_traumablackouttrigger_cs_player"
     },
     {
       "relation": "references",
@@ -17170,9 +17170,9 @@
       "source_location": "L78",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "trauma_traumablackouttrigger_traumablackouttrigger_logignored",
-      "target": "patches_trauma_traumablackouttrigger_cs_ebodypart",
-      "confidence_score": 1.0
+      "target": "patches_trauma_traumablackouttrigger_cs_ebodypart"
     },
     {
       "relation": "contains",
@@ -23047,5 +23047,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "6d212d2e1d897da081ee4aeaf4b10a1e479aca19"
+  "built_at_commit": "8beefae07aba948b37b13c5678d15d143f5efba4"
 }

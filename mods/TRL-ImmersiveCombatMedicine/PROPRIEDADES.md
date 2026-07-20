@@ -28,7 +28,8 @@ Fonte única de verdade das `ConfigEntry` expostas no menu F12 (regra do repo: t
 
 | Nome (key) | Tipo | Padrão | Faixa | Tooltip |
 |---|---|---|---|---|
-| Duracao do Desmaio | float | `20` | 5–120 | Quanto tempo (segundos) o jogador fica desmaiado. ALINHAR ENTRE TODOS OS PEERS. |
+| Duracao Minima do Desmaio | float | `20` | 5–120 | Duração MÍNIMA (segundos) do desmaio — sorteada uniformemente até o máximo abaixo a cada novo desmaio (independente de sorteios anteriores). ALINHAR ENTRE TODOS OS PEERS. Se este valor for maior que o Máximo, os dois são trocados antes do sorteio (config sempre produz um resultado válido). |
+| Duracao Maxima do Desmaio | float | `20` | 5–120 | Duração MÁXIMA (segundos) do desmaio — sorteada uniformemente a partir do Mínimo acima a cada novo desmaio. ALINHAR ENTRE TODOS OS PEERS. Com Mínimo == Máximo, o comportamento é idêntico a uma duração fixa (caso degenerado do sorteio, não um caso especial). |
 
 ## Seção 4. Keybinds (Medic)
 
@@ -87,6 +88,7 @@ Toggle POR consumidor (comportamento 9 da spec funcional 002): cada consumidor s
 | Arms Effects (item 005) → Arms Effects | 2026-07-19 (item 005, v1.6.0): **rename-at-delivery** — a key nova nasce ON para todos; o `false` do placeholder não era escolha do usuário | `MigrateOrphanedConfigKeys()` DELETA a entry órfã SEM copiar o valor + `Config.Save` (mesmo padrão do 003/004). |
 | Stomach Effects (item 006) → Stomach Effects | 2026-07-19 (item 006, v1.7.0): **rename-at-delivery** — a key nova nasce ON para todos; o `false` do placeholder não era escolha do usuário | `MigrateOrphanedConfigKeys()` DELETA a entry órfã SEM copiar o valor + `Config.Save` (mesmo padrão do 003/004/005). |
 | Blackout 2.0 (item 007) → Blackout 2.0 | 2026-07-19 (item 007, v1.8.0): **rename-at-delivery** — a key nova nasce ON para todos; o `false` do placeholder não era escolha do usuário | `MigrateOrphanedConfigKeys()` DELETA a entry órfã SEM copiar o valor + `Config.Save` (mesmo padrão do 003/004/005/006). |
+| Duracao do Desmaio → Duracao Minima do Desmaio / Duracao Maxima do Desmaio | 2026-07-19 (item 008, v1.9.0): **migração por CÓPIA** (diferente do rename-at-delivery acima) — o valor antigo era uma escolha REAL do usuário (P-2.13/P-2.15), não um placeholder inerte; descartá-lo seria regressão de UX | `MigrateOrphanedConfigKeys()` copia o valor órfão para **AMBOS** os campos novos (`Min` e `Max` = valor antigo) + `Config.Save`, reproduzindo o comportamento fixo anterior exatamente (parse com `NumberStyles.Float`/`CultureInfo.InvariantCulture` — PA-01-01 da review técnica, evita corrupção do valor em culturas pt-BR/de-DE). |
 
 ## Seção 7. Trauma 2.0 (Pernas)
 
@@ -154,3 +156,4 @@ Gatilho percentual de desmaio (item 007, spec 007 §3) — substitui os limiares
 | 2026-07-19 | Guilherme | Item 005 (braços Trauma 2.0, v1.6.0): seção nova `9. Trauma 2.0 (Braços)` (4 entries — 3 timers de cancela-ADS + lockout); RENAME `Arms Effects (item 005)` → `Arms Effects` (default ON; órfã deletada sem copiar valor — tabela Renomeadas); `Sistema de Braços` (seção 2) marcado INERTE — legado de braços aposentado (D10: fadiga de mira + voz "Arm"), remoção da key no item 010. |
 | 2026-07-19 | Guilherme | Item 006 (estômago Trauma 2.0, v1.7.0): seção nova `10. Trauma 2.0 (Estômago)` (2 entries — chance de agachar sem/com analgésico, sliders independentes sem clamp); RENAME `Stomach Effects (item 006)` → `Stomach Effects` (default ON; órfã deletada sem copiar valor — tabela Renomeadas); `Sistema de Estomago` (seção 2) marcado INERTE — legado "sem ar" aposentado (D10), remoção da key no item 010. |
 | 2026-07-19 | Guilherme | Item 007 (desmaio percentual, v1.8.0): seção nova `11. Trauma 2.0 (Desmaio)` (4 entries — 2 percentuais + 2 pisos absolutos; probabilidades de roll são constantes fixas, não expostas); RENAME `Blackout 2.0 (item 007)` → `Blackout 2.0` (default ON; órfã deletada sem copiar valor — tabela Renomeadas); limiares fixos legados (tórax ≥35/cabeça ≥10, sem gate de analgésico) REMOVIDOS do caminho de gatilho ativo — `Sistema de Desmaio` (seção 2/3) segue como master do pipeline inteiro. |
+| 2026-07-19 | Guilherme | Item 008 (desmaio duração aleatória, v1.9.0): seção 3 — `Duracao do Desmaio` (campo fixo único) REMOVIDA, substituída por `Duracao Minima do Desmaio` / `Duracao Maxima do Desmaio` (mesma faixa 5–120, default 20/20); MIGRAÇÃO POR CÓPIA (não rename-at-delivery) do valor antigo para AMBOS os campos novos — tabela Renomeadas — porque o valor era escolha real do usuário, não placeholder inerte. |

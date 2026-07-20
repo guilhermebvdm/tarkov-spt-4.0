@@ -88,13 +88,32 @@ namespace TrueTrauma
                     // Configura Timers
                     // ref: CR-04 — GraceTimers NÃO nasce aqui: o grace de 5s é
                     // ancorado no WAKE (Plugin.WakeLocalPlayer / MainLoopPatch).
-                    // ref: RANGE-READY — PONTO ÚNICO do roll futuro de duração
-                    // aleatória (min-max): rolar AQUI e todo o resto (wake, rampa
-                    // visual, contusion, pacote de sync, espelhos) deriva do
-                    // deadline gravado em BlackoutTimers — nada mais lê a config.
-                    float duration = TRLImmersiveCombatMedicinePlugin.ConfigBlackoutDuration.Value;
+                    // ref: item 008 (RANGE-READY resolvido) — sorteio uniforme min-max no MESMO ponto que
+                    // antes lia o fixo. min>max (config inválida) normalizado via Mathf.Min/Max — SEM
+                    // warning/UI extra, mantendo o item simples (decisão da spec técnica §3). Com
+                    // min==max, Random.Range devolve o valor determinístico — caso degenerado, não
+                    // caso especial (nenhum branch dedicado). Todo o resto (wake, rampa visual,
+                    // contusion, pacote de sync, espelhos) segue derivando do deadline gravado em
+                    // BlackoutTimers — nada mais lê os configs de duração diretamente.
+                    float configuredMin = TRLImmersiveCombatMedicinePlugin.ConfigBlackoutDurationMin.Value;
+                    float configuredMax = TRLImmersiveCombatMedicinePlugin.ConfigBlackoutDurationMax.Value;
+                    float rollMin = Mathf.Min(configuredMin, configuredMax);
+                    float rollMax = Mathf.Max(configuredMin, configuredMax);
+                    // PA-01-02 (review técnica 01): Random.Range(float,float) é inclusivo em AMBOS os extremos
+                    // (assinatura distinta de Random.Range(int,int), exclusiva no max) — confirmado por decompile
+                    // de UnityEngine.CoreModule.dll. Com min==max, sempre devolve exatamente esse valor.
+                    float duration = UnityEngine.Random.Range(rollMin, rollMax); // ref: MedicalLogic.cs:366 — mesmo idioma (Range, não .value)
                     TraumaState.BlackoutTimers[id] = now + duration;
                     TraumaState.BlackoutStartTimes[id] = now;
+
+                    // ref: item 008 — log de verificação estatística (critério de aceite da spec funcional:
+                    // "verificável por log das durações sorteadas"). LogInfo one-time por desmaio (não por
+                    // frame) — não gateado por ConfigVerboseEngineLog, ao contrário do log de decisão do
+                    // TraumaBlackoutTrigger (007): aqui é lifecycle (1 evento por desmaio), não detalhe de
+                    // polling, mesmo critério de "LogInfo para evento único" já usado em
+                    // TRLImmersiveCombatMedicinePlugin.cs (log de "entrou em Coma/Desmaio").
+                    TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo(
+                        $"[Blackout] {id} duração sorteada: {duration:F1}s (min={rollMin:F0} max={rollMax:F0})");
 
                     // Efeitos Locais
                     // ref: CR-04-12 — SEM DoStun no entry: o ToggleDowned do frame

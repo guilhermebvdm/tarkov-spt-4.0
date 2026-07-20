@@ -1,7 +1,7 @@
 # Graph Report - mods\TRL-ImmersiveCombatMedicine\modded  (2026-07-19)
 
 ## Corpus Check
-- 47 files · ~51,480 words
+- 47 files · ~52,183 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `6d212d2e`
+- Built from commit: `8beefae0`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
