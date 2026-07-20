@@ -162,7 +162,7 @@ CC-14 na spec funcional trata de Dev Mode **para mods opcionais** ("não mover b
 
 **Sugestão:** inverter a ordem no stub §5.4 — avaliar `justEnabled` **antes** do guard de Dev Mode, com comentário explicando a assimetria: Dev Mode protege contra reversão **automática** (sync de rotina), não contra ação **explícita** do usuário. E registrar como corner case novo na spec funcional (CC-19), para o gate humano testar com Dev Mode ligado.
 
-**Decisão:** ✅ **Resolvido** — sugestão aceita e aplicada na spec técnica. (Dev Mode bloqueia tudo, inclusive explícito)
+**Decisão:** ✅ **Resolvido** — sugestão aceita: `justEnabled` é avaliado **antes** do Dev Mode (spec técnica §5.4) + CC-19 na spec funcional. Ou seja, **ação explícita do player vence o Dev Mode**; o Dev Mode segue protegendo apenas contra reversão automática do sync de rotina.
 
 ---
 
