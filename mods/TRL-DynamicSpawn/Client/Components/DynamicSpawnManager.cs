@@ -468,8 +468,24 @@ namespace TRLDynamicSpawn.Components
             bool enableLos = TRLDynamicSpawn.Helpers.Settings.enableLoSCulling.Value;
             float losDist = TRLDynamicSpawn.Helpers.Settings.losCullingDistance.Value;
 
-            var players = Singleton<GameWorld>.Instance.AllAlivePlayersList;
-            if (players == null || players.Count == 0) return true;
+            var playersList = Singleton<GameWorld>.Instance.AllAlivePlayersList;
+            if (playersList == null || playersList.Count == 0) return true;
+
+            var players = new List<Player>();
+            foreach (var p in playersList)
+            {
+                if (p == null || p.Profile == null || p.Profile.Info == null) continue;
+                if (p.IsAI && !p.IsYourPlayer) continue;
+
+                // Ignora o Headless Player no host dedicado para não bloquear o spawn de bots
+                if (UnityEngine.Application.isBatchMode && p.IsYourPlayer)
+                {
+                    continue;
+                }
+                players.Add(p);
+            }
+
+            if (players.Count == 0) return true;
 
             // Use the override custom position if provided, else the BotZone's center
             Vector3 zonePos = overridePosition ?? zone.transform.position;

@@ -531,7 +531,23 @@ namespace TRLDynamicSpawn.Patches
                 bool enableLos = TRLDynamicSpawn.Helpers.Settings.enableLoSCulling.Value;
                 float losDist = TRLDynamicSpawn.Helpers.Settings.losCullingDistance.Value;
 
-                var players = gameWorld.AllAlivePlayersList;
+                var playersList = gameWorld.AllAlivePlayersList;
+                var players = new List<Player>();
+                if (playersList != null)
+                {
+                    foreach (var p in playersList)
+                    {
+                        if (p == null || p.Profile == null) continue;
+                        if (p.IsAI && !p.IsYourPlayer) continue;
+
+                        // Ignora o Headless Player no host dedicado para não bloquear a SafeZone/bolha
+                        if (UnityEngine.Application.isBatchMode && p.IsYourPlayer)
+                        {
+                            continue;
+                        }
+                        players.Add(p);
+                    }
+                }
 
                 WildSpawnType role = data?.Profiles?.FirstOrDefault()?.Info?.Settings?.Role ?? WildSpawnType.assault;
                 bool isCommonBot = role == WildSpawnType.pmcUSEC || role == WildSpawnType.pmcBEAR || role == WildSpawnType.assault;
@@ -541,7 +557,7 @@ namespace TRLDynamicSpawn.Patches
                     if (checkPoint == null) continue;
 
                     bool isValid = true;
-                    if (players != null)
+                    if (players.Count > 0)
                     {
                         // Se for bot comum (PMC ou Scav), ele deve estar dentro da bolha de spawn em relação a algum jogador real
                         if (isCommonBot)
