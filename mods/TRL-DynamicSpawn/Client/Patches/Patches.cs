@@ -555,7 +555,7 @@ namespace TRLDynamicSpawn.Patches
                                 if (cfg.MapConfigs?.TryGetValue(mapName, out var mapSettings) == true)
                                 {
                                     isBubbleEnabled = isBubbleEnabled && mapSettings.EnableSpawnBubble;
-                                    maxDist = mapSettings.SpawnBubbleDistance;
+                                    maxDist = mapSettings.DespawnDistance;
                                 }
                             }
 
