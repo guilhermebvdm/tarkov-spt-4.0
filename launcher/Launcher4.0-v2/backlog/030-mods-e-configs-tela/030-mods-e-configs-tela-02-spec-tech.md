@@ -32,6 +32,16 @@ Clonar esse comportamento entregaria **"sempre sobrescreve"** — o que **contra
 
 Implementação: `SyncPlannerOptions` ganha `IReadOnlyCollection<string> ForceApplyGroups` — os itens **recém-alternados** pela tela. Paths pertencentes a esses grupos seguem o caminho force-like; todos os demais seguem preserve-divergent com baseline. É o mesmo motor, com o momento da ação como discriminador.
 
+### Decisões da review 01 (2026-07-19)
+
+| Ponto | Decisão |
+|---|---|
+| **PA-01-03** | **A tela não sincroniza.** Ela salva as preferências e devolve o player à aba Launcher; o `ProfileViewModel` detecta pendência e aplica, usando o `_syncGate` que já existe ([ProfileViewModel.cs:535](../../project/SPT.Launcher/ViewModels/ProfileViewModel.cs#L535)). O motor em produção **não é tocado** e CC-15 fica resolvido por construção — só existe um orquestrador. Alinhado com CA-030.19, que já descreve esse fluxo. A extração de um `SyncCoordinator` (que resolveria também a duplicação do `ModUpdateViewModel`, R-2) fica como **item futuro** |
+| **PA-01-01** | Mod opcional desligado ganha ação **`MoveToDisabled` explícita** no planner (§2.3) — não depender do `ScanExtras`, que hoje protege esses arquivos |
+| **PA-01-02** | Shape do manifesto **especificado** em §2.4, com `optionalId`/`performanceId` por arquivo |
+| **PA-01-05** | Intenção de aplicar vira **`PendingApply` persistido** (§5.5), não conjunto em memória |
+| **PA-01-06** | `justEnabled` é avaliado **antes** do Dev Mode: o Dev Mode protege contra reversão automática, não contra ação explícita do player (§5.4) |
+
 ## 2. Pontos de extensão (equivalente a "pontos de patch")
 
 ### 2.1 Motor de sync
@@ -48,7 +58,7 @@ Implementação: `SyncPlannerOptions` ganha `IReadOnlyCollection<string> ForceAp
 | E-8 | [SyncPlanner.cs:74](../../project/SPT.Launcher.Base/Sync/SyncPlanner.cs#L74) | `BuildForceTargets(filesToCheck)` | Somar `BuildPerformanceTargets` |
 | E-9 | [SyncPlanner.cs:161-235](../../project/SPT.Launcher.Base/Sync/SyncPlanner.cs#L161-L235) | Branch `ForceToConfig` (o irmão a espelhar) | Novo branch `PerformanceToConfig`, híbrido (§1) |
 | E-10 | [SyncPlanner.cs:352-362](../../project/SPT.Launcher.Base/Sync/SyncPlanner.cs#L352-L362) | Lista de regras puladas no `ScanExtras` | Adicionar `PerformanceToConfig` |
-| E-11 | [SyncPlanner.cs:66](../../project/SPT.Launcher.Base/Sync/SyncPlanner.cs#L66) | Filtro `!f.optional \|\| IsOptionalGroupEnabled(...)` | Repontar para o modelo novo (por `id` de mod, não `optionalGroup`) |
+| E-11 | [SyncPlanner.cs:66](../../project/SPT.Launcher.Base/Sync/SyncPlanner.cs#L66) | Filtro `!f.optional \|\| IsOptionalGroupEnabled(...)` | Repontar para `optionalId` (§2.4) **e** somar a quarentena explícita de §2.3 — o filtro sozinho não satisfaz CA-030.8 |
 | E-12 | [SyncPlan.cs:49](../../project/SPT.Launcher.Base/Sync/SyncPlan.cs#L49) | `IoActionCount` | 🔴 Somar o novo `ActionKind`, senão barra de progresso e `result.Pending` ficam errados |
 | E-13 | [SyncEngine.cs:112](../../project/SPT.Launcher.Base/Sync/SyncEngine.cs#L112) | `Rule == MirrorReference ? "reference-updated" : "updated"` | Padrão a copiar para os labels novos |
 | E-14 | [SyncReport.cs:24-36](../../project/SPT.Launcher.Base/Sync/SyncReport.cs#L24-L36) | `ActionPriority` (10 labels) | Somar labels novos com prioridade |
@@ -67,7 +77,43 @@ A precedência exigida é **performance > force > config** (D-1), então o guard
 
 O aviso de RN-2 é emitido aqui, no planner, onde as duas listas coexistem.
 
-### 2.3 Servidor C#
+### 2.3 🔴 PA-01-01 — quarentena de mod desligado precisa de ação explícita
+
+O motor **hoje faz o oposto** do que CA-030.8 pede. Em [SyncPlanner.cs:59-63](../../project/SPT.Launcher.Base/Sync/SyncPlanner.cs#L59-L63), `manifestPaths` inclui **todos** os arquivos do manifesto (opcionais ativos ou não), com o comentário explícito *"files of disabled optional groups are never treated as extras"* — proteção CC3 do item 007. O filtro de `filesToCheck` (`:65-67`) só remove o arquivo do download; como o path segue em `manifestPaths`, o `ScanExtras` não o toca e ele **fica onde está**.
+
+Essa proteção era correta no modelo antigo (mod opcional vinha de `Opcionais/`, fora do `mods_repo` — não podia contar como extra). Com D-3 o mod passa a viver em `mods_repo/plugins/` como qualquer outro, e a premissa deixa de valer **para ele**.
+
+**Desenho:** o planner emite ação explícita, em vez de delegar ao `ScanExtras`:
+
+- para cada arquivo com `optionalId` cujo item está **desligado** e que **existe no disco** → `SyncActionKind.MoveToDisabled`, com `MoveTargetRelative = BuildDisabledTarget(path, prefix, DisabledOrigin.Optional)` (E-6/D-14);
+- `manifestPaths` **continua** incluindo o path (a proteção CC3 segue válida — evita que o `ScanExtras` emita uma segunda ação para o mesmo arquivo);
+- o filtro de `filesToCheck` continua removendo o arquivo do download.
+
+Ganho colateral: a ação passa a aparecer no relatório (`moved-to-disabled`) e a contar em `IoActionCount` (E-12) — nada disso aconteceria pelo caminho do `ScanExtras`.
+
+### 2.4 🔴 PA-01-02 — contrato do manifesto
+
+Shape emitido por `GenerateManifestAsync` (S-7). Mantém o tagging por arquivo, que é o que o planner já sabe consumir, e soma as listas de metadados para a UI:
+
+```jsonc
+{
+  "files": [
+    { "path": "BepInEx/plugins/TarkovIRL.dll", "hash": "...", "size": 123,
+      "optional": true, "optionalId": "tarkov-irl" },
+    { "path": "BepInEx/config-performance/sombras.cfg", "hash": "...", "size": 45,
+      "performanceId": "shadows-low" }
+  ],
+  "optionalMods":     [ { "id": "tarkov-irl",  "name": "...", "description": { "pt": "...", "en": "..." } } ],
+  "performanceItems": [ { "id": "shadows-low", "name": "...", "description": { "pt": "...", "en": "..." } } ]
+}
+```
+
+- `optionalGroup` → **`optionalId`** (rename semântico; `SyncPlanner.cs:66` sobrevive com ajuste mínimo). `ManifestFile` ([:14-15](../../project/SPT.Launcher.Base/Models/Launcher/ManifestFile.cs#L14-L15)) ganha `optionalId` e `performanceId` no lugar de `optionalGroup`.
+- **`performanceId` resolve o `GroupIdOf(file)`** do stub §5.4 por leitura direta — o TODO da versão anterior está fechado.
+- As duas listas de metadados alimentam a tela e o resumo (PA-01-07) sem o launcher precisar cruzar paths.
+- Um arquivo sob `config-performance/` **sem** `performanceId` é erro de conteúdo: o servidor loga e **não** o emite (senão viraria config aplicada que o player não consegue desligar).
+
+### 2.5 Servidor C#
 
 | # | Arquivo:linha | Mudança |
 |---|---|---|
@@ -114,7 +160,7 @@ O aviso de RN-2 é emitido aqui, no planner, onde as duas listas coexistem.
 | `SyncReport.cs` / `SyncResult.cs` | E-14..E-16 |
 | `SyncPlannerOptions.cs` | `ForceApplyGroups` (§1); repontar `IsOptionalGroupEnabled` (`:35`) |
 | `LauncherSettingsProvider.cs` | Estado por-`id` dos dois eixos + marca de onboarding; **incrementar `EXPECTED_CONFIG_VERSION` (`:67`, hoje 4)** |
-| `ProfileViewModel.cs` | Remover o fluxo opcional (`:258-464`, `:667-693`, `:751-761`, `:891-901`); somar o resumo (CA-030.13) |
+| `ProfileViewModel.cs` | Remover o fluxo opcional (`:258-464`, `:667-693`, `:751-761`, `:891-901`); somar o resumo (CA-030.13, §4.1); gatilho do `PendingApply` na ativação (§5.7) |
 | `ModUpdateViewModel.cs` | 🔴 Espelha a lógica do ProfileViewModel (`:150`, `:201-226`, `:238-242`, `:416-423`) — **precisa do mesmo tratamento**; e os mapas `:496-506`, `:520-532`, `:570-588` precisam dos labels novos |
 | `ProfileView.axaml` | Remover painel `:139-158`; somar resumo clicável; item de menu novo no sidebar |
 | `SettingsView.axaml` | Remover o bloco `:127-142` (toggle de performance, D-12) |
@@ -134,6 +180,19 @@ O aviso de RN-2 é emitido aqui, no planner, onde as duas listas coexistem.
 | `RequestHandler`: `RequestOptionalsList` (`:249`), `RequestOptionalsManifest` (`:229`), `DownloadOptionalFile` (`:218`) | Só `OptionalModsHelper` |
 
 > 🔴 **`DownloadModFile` ([RequestHandler.cs:207](../../project/SPT.Launcher.Base/Controllers/RequestHandler.cs#L207)) NÃO sai.** Apesar de ser usado pelo fluxo opcional, é o **downloader base de todo o sync** (`ProfileViewModel:893`, `ModUpdateViewModel:416`). Remover derruba a sincronização inteira. Só o *uso* com timeout ampliado é do fluxo antigo.
+
+### 4.1 Fonte das contagens do resumo (PA-01-07)
+
+CA-030.13 exige contagens no resumo da tela logada, mas as definições (`optionalMods`/`performanceItems`, §2.4) chegam dentro do manifesto, lido só no fluxo de sync ([ProfileViewModel.cs:625](../../project/SPT.Launcher/ViewModels/ProfileViewModel.cs#L625)). Definição do comportamento:
+
+| Situação | O que o resumo mostra |
+|---|---|
+| Manifesto já lido nesta sessão | Contagens reais: ligados / total, por eixo |
+| Antes do primeiro sync, **com** preferências salvas | Conta a partir das preferências persistidas (`EnabledOptionals` / `EnabledPerformanceItems`) — o total é o número de ids conhecidos localmente |
+| Sem manifesto **e** sem preferências (instalação nova) | Resumo **oculto** — o onboarding (D-4) é quem conduz nesse estado |
+| Sync falhou (servidor offline) | Mantém a última contagem conhecida; nunca exibe `0 de 0` |
+
+A regra que fecha o critério: **nunca exibir "0 de 0"** por ausência de dado — isso comunicaria "não há nada aqui", o oposto do convite ao clique que CA-030.13 pede. Estado vazio real (servidor sem itens) é outra coisa, e já está coberto por CA-030.15b.
 
 ## 5. Stubs de código
 
@@ -255,7 +314,19 @@ if (rule == SyncFolderRule.PerformanceToConfig)
         continue; // já aplicado — no-op
     }
 
-    // ref: SyncPlanner.cs:199 — Dev Mode continua sendo o escape hatch (CC-14)
+    // ref: PA-01-06 — ORDEM IMPORTA: a ação explícita do player é avaliada ANTES do Dev Mode.
+    // O Dev Mode protege contra reversão AUTOMÁTICA (sync de rotina não pode desfazer a build
+    // local do dev); ele não deve anular um toggle que o próprio usuário acabou de clicar —
+    // senão a tela "não funciona" justamente na máquina de quem desenvolve o servidor.
+    if (justEnabled)
+    {
+        // AÇÃO EXPLÍCITA (D-16/CA-030.2): aplica mesmo divergente, com backup.
+        AddPerformanceAction(plan, file, perfTargetRel, perfBackupRel, rule,
+            "performance ligada (a sua config vai p/ config-disabled/performance e é substituída)");
+        continue;
+    }
+
+    // ref: SyncPlanner.cs:199 — Dev Mode é o escape hatch do sync de ROTINA (CC-14/CC-19)
     if (_options.DevMode)
     {
         plan.Actions.Add(new SyncAction
@@ -266,14 +337,6 @@ if (rule == SyncFolderRule.PerformanceToConfig)
             ServerHash = file.hash,
             Reason = "Dev Mode: config de performance preservada (difere do servidor)",
         });
-        continue;
-    }
-
-    if (justEnabled)
-    {
-        // AÇÃO EXPLÍCITA (D-16/CA-030.2): aplica mesmo divergente, com backup.
-        AddPerformanceAction(plan, file, perfTargetRel, perfBackupRel, rule,
-            "performance ligada (a sua config vai p/ config-disabled/performance e é substituída)");
         continue;
     }
 
@@ -289,8 +352,10 @@ if (rule == SyncFolderRule.PerformanceToConfig)
     {
         plan.Actions.Add(new SyncAction
         {
+            // ref: PA-01-04 — o enum NÃO tem 'Preserve'; o valor correto é PreserveCustomized
+            // (SyncAction.cs:9), que é o que SyncEngine.cs:66 e SyncPlan.cs:38 reconhecem.
             RelativePath = perfTargetRel,
-            Kind = SyncActionKind.Preserve,
+            Kind = SyncActionKind.PreserveCustomized,
             Rule = rule,
             ServerHash = file.hash,
             Reason = "você customizou — sua versão foi mantida",
@@ -322,6 +387,21 @@ public bool ModsConfigsOnboardingDone
 {
     get => _modsConfigsOnboardingDone;
     set => SetProperty(ref _modsConfigsOnboardingDone, value);
+}
+
+/// <summary>
+/// ref: PA-01-05 — ids alternados pelo player que ainda NÃO foram aplicados com sucesso.
+/// PERSISTIDO de propósito (sem [JsonIgnore], ao contrário de PendingOptionalChanges em :201):
+/// se o sync falhar, for cancelado ou o launcher fechar no meio, a intenção sobrevive e o próximo
+/// sync retenta sozinho. Sem isso o item ficaria "ligado" mas nunca aplicado — e, como já não
+/// estaria em ForceApplyGroups, o preserve-divergent poderia preservá-lo assim para sempre.
+/// Um id só sai daqui quando a ação dele conclui com sucesso no SyncResult.
+/// </summary>
+private List<string> _pendingApply = new();
+public List<string> PendingApply
+{
+    get => _pendingApply;
+    set => SetProperty(ref _pendingApply, value);
 }
 
 // ref: LauncherSettingsProvider.cs:263-275 — espelha IsOptionalEnabled/SetOptionalEnabled.
@@ -367,6 +447,72 @@ namespace SPT.Launcher.ViewModels
     }
 }
 ```
+
+### 5.7 Aplicação ao sair da tela (PA-01-03) — a tela **não** sincroniza
+
+A orquestração de sync permanece **exclusivamente** no `ProfileViewModel`, com o guard `_syncGate` ([ProfileViewModel.cs:535](../../project/SPT.Launcher/ViewModels/ProfileViewModel.cs#L535)) continuando a ser o único ponto de serialização — é isso que resolve CC-15 por construção, em vez de criar uma terceira cópia da lógica (a segunda, `ModUpdateViewModel`, já é a dívida R-2).
+
+```csharp
+// SPT.Launcher/ViewModels/ModsConfigsViewModel.cs
+
+/// <summary>
+/// Sair da tela NÃO sincroniza: grava as escolhas + a intenção pendente e devolve o player
+/// à aba Launcher, onde o ProfileViewModel aplica (CA-030.19/CA-030.21).
+/// Sem alteração pendente, nada é gravado e nenhum sync é disparado (CA-030.22).
+/// </summary>
+private void SaveAndReturn()
+{
+    var changed = CollectChangedItems();   // diff estado inicial × final (CC-18)
+    if (changed.Count == 0)
+    {
+        NavigateBack();                     // ref: ViewModelBase.cs:132
+        return;
+    }
+
+    var settings = LauncherSettingsProvider.Instance;
+    foreach (var item in changed)
+    {
+        if (item.IsPerformance) settings.SetPerformanceItemEnabled(item.Id, item.IsEnabled);
+        else                    settings.SetOptionalEnabled(item.Id, item.IsEnabled);
+
+        if (!settings.PendingApply.Contains(item.Id))
+            settings.PendingApply.Add(item.Id);   // ref: PA-01-05
+    }
+
+    settings.ModsConfigsOnboardingDone = true;    // CA-030.20 / D-17
+    settings.SaveSettings();
+
+    NavigateBack();   // ProfileViewModel detecta PendingApply não-vazio e chama CheckForUpdates
+}
+```
+
+No `ProfileViewModel`, o gatilho entra na ativação da tela (o mesmo ponto que já re-raise `CanStartGame`, [ProfileViewModel.cs:223-230](../../project/SPT.Launcher/ViewModels/ProfileViewModel.cs#L223-L230)): se `PendingApply` não estiver vazio e não houver sync em curso (`IsSyncRunning`), dispara `CheckForUpdates()`. O `_syncGate` cobre o caso de o sync automático do login ainda estar rodando — a chamada simplesmente não entra, e a pendência persiste para a próxima (PA-01-05).
+
+### 5.8 Chaves i18n previstas (PA-01-08)
+
+Lista fechada para conferência de paridade (o loader é all-or-nothing — uma chave faltando derruba o locale inteiro):
+
+| Chave | pt | en |
+|---|---|---|
+| `nav_mods_configs` | Mods e Configs | Mods and Configs |
+| `mods_configs_title` | Mods e Configs | Mods and Configs |
+| `mods_configs_intro` | *(texto introdutório da tela)* | *(idem)* |
+| `mods_configs_optional_column` | Mods opcionais | Optional mods |
+| `mods_configs_performance_column` | Configs de performance | Performance configs |
+| `mods_configs_toggle_all` | Ativar todos | Enable all |
+| `mods_configs_empty_optional` | Nenhum mod opcional disponível | No optional mods available |
+| `mods_configs_empty_performance` | Nenhuma config de performance disponível | No performance configs available |
+| `mods_configs_new_badge` | Novo | New |
+| `mods_configs_summary_format` | {0} de {1} mods · Performance: {2} de {3} | {0} of {1} mods · Performance: {2} of {3} |
+| `mods_configs_game_running` | Feche o jogo antes de aplicar | Close the game before applying |
+| `onboarding_title` | Configure para a sua máquina | Set up for your machine |
+| `onboarding_body` | *(texto do modal, D-4)* | *(idem)* |
+| `onboarding_ok` | Entendi | Got it |
+| `report_performance_applied` | config de performance aplicada | performance config applied |
+| `report_performance_suppressed` | performance sobrepôs uma config forçada | performance overrode a forced config |
+| `report_optional_disabled` | mod opcional desativado (movido para quarentena) | optional mod disabled (moved to quarantine) |
+
+> Os textos longos (`mods_configs_intro`, `onboarding_body`) ficam a definir na implementação — o conteúdo é do usuário, mas as **chaves** já estão fixadas aqui.
 
 ## 6. Fluxo de dados
 
@@ -418,13 +564,17 @@ LAUNCHER                                                    ▼
 | R-8 | Coop (Fika): escolhas divergentes entre clientes | CC-7 + G-5; validação de conteúdo marca o que não pode ser opcional |
 | R-9 | `EXPECTED_CONFIG_VERSION` não incrementado → campos novos não persistem para quem já tem config | 5.5, com teste de migração |
 | R-10 | Ordem de execução do onboarding (CC-2): gatilho **antes** do primeiro sync | Checagem no `MainWindowViewModel`, antes de `CheckForUpdates` |
+| R-11 | 🔴 **Quarentena de mod desligado**: o motor hoje faz o oposto (protege do `ScanExtras`, `SyncPlanner.cs:59-63`) | §2.3 — ação `MoveToDisabled` explícita; teste dedicado + G-1 |
+| R-12 | Concorrência tela × sync do login | §5.7 — a tela não sincroniza; `_syncGate` segue o único ponto de serialização |
+| R-13 | Intenção de aplicar perdida em falha/cancelamento | §5.5 — `PendingApply` persistido, com id saindo só no sucesso |
 
 ## 8. Checklist de implementação
 
 **Fase 1 — motor (isolado, testável sem UI)**
 1. E-1..E-4: enum, parser, resolver, sufixo. Teste: `config-performance/x.cfg` resolve para `PerformanceToConfig` e deriva `config/x.cfg`.
 2. E-5/E-6 + `DisabledOrigin`: namespace da quarentena. Teste: três origens homônimas coexistem (G-7).
-3. `SyncPlannerOptions.ForceApplyGroups` + branch E-9 (híbrido). Testes: ligar sobre customizada aplica com backup; sync de rotina preserva; servidor novo atualiza quem não customizou.
+3. `SyncPlannerOptions.ForceApplyGroups` + branch E-9 (híbrido). Testes: ligar sobre customizada aplica com backup; sync de rotina preserva; servidor novo atualiza quem não customizou; **Dev Mode ligado não anula a ação explícita** (PA-01-06/CC-19).
+3b. **§2.3 — quarentena explícita de mod desligado.** Teste: mod desligado com arquivos no disco → ação `MoveToDisabled` emitida para **todos** os `paths`, nenhum arquivo remanescente, e o `ScanExtras` **não** emite ação duplicada para os mesmos paths.
 4. E-7/E-8: precedência de 2 canais + aviso RN-2. Teste: arquivo nos 3 canais → performance vence, warning emitido.
 5. E-10, E-12: `ScanExtras` e `IoActionCount`.
 6. E-13..E-16: labels, prioridade, descrição PT, contadores.

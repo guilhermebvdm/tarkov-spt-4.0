@@ -1,7 +1,7 @@
 # 030 — Tela "Mods e Configs" · Review da spec técnica 01
 
 > **Data:** 2026-07-19<br>
-> **Status:** 🟡 Em revisão<br>
+> **Status:** ✅ Aprovado<br>
 > **Responsáveis:** Guilherme<br>
 > **Referências:** [02-spec-tech](./030-mods-e-configs-tela-02-spec-tech.md) · [01-spec funcional](./030-mods-e-configs-tela-01-spec.md)<br>
 
@@ -20,7 +20,7 @@
 | PA-01-07 | A | 🟡 | Resumo da tela logada precisa das contagens sem a tela ter sido aberta |
 | PA-01-08 | A | 🟢 | Chaves i18n não enumeradas |
 
-**Contadores:** 🔴 3 · 🟡 4 · 🟢 1
+**Contadores:** 🔴 3 · 🟡 4 · 🟢 1 — **todos os 8 resolvidos** na spec técnica (2026-07-19)
 
 **Memória consultada:** sem `memory/sessions.md` para o launcher (item de launcher, não de mod). Índice de memória do projeto consultado — nenhuma pendência 🔴 afeta este item.
 
@@ -56,7 +56,7 @@ Vale notar **por que** a proteção CC3 existe: no modelo antigo o mod opcional 
 
 Isso também torna a ação **visível no relatório** (`moved-to-disabled`) e contável no `IoActionCount` (E-12), o que o caminho via `ScanExtras` não daria.
 
-**Decisão:** `[ ]` Pendente · `[ ]` Aceitar sugestão · `[ ]` Caminho alternativo (descrever)
+**Decisão:** ✅ **Resolvido** — sugestão aceita e aplicada na spec técnica.
 
 ---
 
@@ -89,7 +89,7 @@ Isso também torna a ação **visível no relatório** (`moved-to-disabled`) e c
 
 Assim: `optionalGroup` vira `optionalId` (rename semântico, mesmo mecanismo — `SyncPlanner.cs:66` sobrevive com ajuste mínimo), `performanceId` resolve o `GroupIdOf(file)` por leitura direta, e as listas de metadados alimentam a UI sem o launcher precisar cruzar paths.
 
-**Decisão:** `[ ]` Pendente · `[ ]` Aceitar sugestão · `[ ]` Caminho alternativo (descrever)
+**Decisão:** ✅ **Resolvido** — sugestão aceita e aplicada na spec técnica.
 
 ---
 
@@ -111,7 +111,7 @@ Agrava que o `ModUpdateViewModel` **já duplica** essa lógica hoje (R-2 da pró
 
 Alternativa mais barata, se a extração for grande demais para este item: a tela **não** aplica; ela salva as preferências e navega de volta para o Launcher, e o `ProfileViewModel` dispara o sync ao receber foco. Menos elegante, mas usa o guard existente e não cria a terceira cópia. **Escolher explicitamente uma das duas** — o risco é a implementação improvisar a terceira.
 
-**Decisão:** `[ ]` Pendente · `[ ]` Aceitar sugestão (extrair serviço) · `[ ]` Alternativa (tela só salva, Profile aplica) · `[ ]` Outro caminho
+**Decisão:** ✅ **Resolvido** — escolhida a alternativa: **a tela só salva; o `ProfileViewModel` aplica** (spec técnica §5.7). O motor em produção não é tocado e o `_syncGate` segue como único ponto de serialização. A extração de um `SyncCoordinator` fica como item futuro.
 
 ---
 
@@ -125,7 +125,7 @@ Alternativa mais barata, se a extração for grande demais para este item: a tel
 
 **Sugestão:** trocar `SyncActionKind.Preserve` → `SyncActionKind.PreserveCustomized` no stub §5.4, e revisar os demais stubs contra o enum real.
 
-**Decisão:** `[ ]` Pendente · `[ ]` Aceitar sugestão · `[ ]` Caminho alternativo
+**Decisão:** ✅ **Resolvido** — sugestão aceita e aplicada na spec técnica.
 
 ---
 
@@ -146,7 +146,7 @@ A recuperação depende inteiramente do baseline: se o local ainda bate com o ba
 - um id só sai de `PendingApply` quando a ação daquele item **conclui com sucesso** no `SyncResult`;
 - falha/cancelamento preserva a intenção, e o próximo sync retenta sozinho.
 
-**Decisão:** `[ ]` Pendente · `[ ]` Aceitar sugestão · `[ ]` Caminho alternativo
+**Decisão:** ✅ **Resolvido** — sugestão aceita e aplicada na spec técnica.
 
 ---
 
@@ -162,7 +162,7 @@ CC-14 na spec funcional trata de Dev Mode **para mods opcionais** ("não mover b
 
 **Sugestão:** inverter a ordem no stub §5.4 — avaliar `justEnabled` **antes** do guard de Dev Mode, com comentário explicando a assimetria: Dev Mode protege contra reversão **automática** (sync de rotina), não contra ação **explícita** do usuário. E registrar como corner case novo na spec funcional (CC-19), para o gate humano testar com Dev Mode ligado.
 
-**Decisão:** `[ ]` Pendente · `[ ]` Aceitar sugestão · `[ ]` Caminho alternativo (Dev Mode bloqueia tudo, inclusive explícito)
+**Decisão:** ✅ **Resolvido** — sugestão aceita e aplicada na spec técnica. (Dev Mode bloqueia tudo, inclusive explícito)
 
 ---
 
@@ -176,7 +176,7 @@ CC-14 na spec funcional trata de Dev Mode **para mods opcionais** ("não mover b
 
 **Sugestão:** definir na spec que as definições são cacheadas junto com o manifesto e expostas por uma propriedade do `ProfileViewModel` alimentada ao fim do sync; e especificar o estado de fallback explicitamente: sem manifesto disponível, o resumo mostra as **preferências salvas** (que persistem localmente) ou fica oculto — nunca "0 de 0". Alinhar com CA-030.15b, que já trata do estado vazio real (servidor sem itens).
 
-**Decisão:** `[ ]` Pendente · `[ ]` Aceitar sugestão · `[ ]` Caminho alternativo
+**Decisão:** ✅ **Resolvido** — sugestão aceita e aplicada na spec técnica.
 
 ---
 
@@ -190,7 +190,7 @@ CC-14 na spec funcional trata de Dev Mode **para mods opcionais** ("não mover b
 
 **Sugestão:** acrescentar à spec técnica uma tabela das chaves previstas (nome + pt + en), agrupadas por área (tela, modal, resumo, relatório). Serve de checklist na implementação e de base para o teste de paridade.
 
-**Decisão:** `[ ]` Pendente · `[ ]` Aceitar sugestão · `[ ]` Caminho alternativo
+**Decisão:** ✅ **Resolvido** — sugestão aceita e aplicada na spec técnica.
 
 ---
 
@@ -209,3 +209,4 @@ Nenhum check ✅ sem evidência (que seria bloqueador por si).
 | Data | Autor | Alteração |
 |---|---|---|
 | 2026-07-19 | Guilherme | Criação — 8 pontos (3 🔴, 4 🟡, 1 🟢). Bloqueadores: quarentena de mod desligado contradiz o motor atual, contrato do manifesto indefinido, disparo do sync pela tela nova sem caminho |
+| 2026-07-19 | Guilherme | Todos os 8 pontos resolvidos na spec técnica. PA-01-03 decidido pela alternativa (tela só salva). Spec funcional ganhou CC-19 e CC-20 |

@@ -174,6 +174,8 @@ Um item agrupa 1+ arquivos: o player liga "Sombras reduzidas", não `com.sombras
 - **CC-16 — Arquivo em uso / sem permissão.** DLL carregada por outro processo, config aberta em editor, pasta somente-leitura. Falha por arquivo, contada e reportada (CA-030.25), sem abortar os demais itens — distinto de "cancelado" (CC-8).
 - **CC-17 — Item de performance ligado cujo arquivo sumiu do servidor.** O que já foi aplicado em `config/` permanece (não há de onde reverter); o item some da tela e o relatório registra. Não pode virar erro recorrente a cada sync.
 - **CC-18 — Player liga e desliga o mesmo item várias vezes antes de sair da tela.** Só o **estado final** é aplicado; nada de aplicar e reverter em sequência (CA-030.21 opera sobre o diff entre estado inicial e final, não sobre o histórico de cliques).
+- **CC-19 — Dev Mode ligado × ação explícita do player.** O Dev Mode protege contra reversão **automática** (o sync de rotina não pode desfazer a build/config local de quem desenvolve). Ele **não** deve anular um toggle que o próprio usuário acabou de clicar — senão a tela "não funciona" exatamente na máquina de quem administra o servidor, e o sintoma (funciona para os jogadores, não para você) é caro de diagnosticar. Regra: ação explícita vence o Dev Mode; sync de rotina, não. Distinto de CC-14, que trata da build local **não solicitada**.
+- **CC-20 — Aplicação interrompida (falha, cancelamento ou launcher fechado).** A intenção de aplicar é **persistida**, não vive só na sessão: um item alternado que não chegou a ser aplicado continua pendente e é retentado no próximo sync. Sem isso o item ficaria marcado como ligado e nunca aplicado, sem caminho óbvio de recuperação para o player.
 
 ## Fora de escopo
 
