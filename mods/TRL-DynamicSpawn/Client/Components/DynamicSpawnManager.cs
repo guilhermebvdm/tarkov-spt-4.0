@@ -912,6 +912,12 @@ namespace TRLDynamicSpawn.Components
 
         private bool IsFikaClient()
         {
+            // Se estiver em batchmode (Headless Host dedicado), ele DEVE atuar como servidor/host e rodar o loop de spawn
+            if (UnityEngine.Application.isBatchMode)
+            {
+                return false;
+            }
+
             try
             {
                 var assembly = System.AppDomain.CurrentDomain.GetAssemblies()

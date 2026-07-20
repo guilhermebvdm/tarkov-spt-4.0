@@ -17,29 +17,13 @@ namespace TRLDynamicSpawn.Patches
         [PatchPostfix]
         private static void PatchPostfix(GameWorld __instance)
         {
-            // Resolve real singletons for bot spawning
-            if (!Singleton<IBotGame>.Instantiated)
-            {
-                Plugin.LogSource.LogError("[TRL-DynamicSpawn] Cannot inject DynamicSpawnManager: IBotGame is not instantiated yet.");
-                return;
-            }
-
-            var botGame = Singleton<IBotGame>.Instance;
+            // Tenta resolver singletons de IA do servidor
+            var botGame = Singleton<IBotGame>.Instantiated ? Singleton<IBotGame>.Instance : null;
             var botsController = botGame?.BotsController;
-            if (botsController == null)
-            {
-                Plugin.LogSource.LogError("[TRL-DynamicSpawn] Cannot inject DynamicSpawnManager: BotsController is null.");
-                return;
-            }
+            var botCreator = botsController?.BotSpawner?.BotCreator;
 
-            var botCreator = botsController.BotSpawner?.BotCreator;
-            if (botCreator == null)
-            {
-                Plugin.LogSource.LogError("[TRL-DynamicSpawn] Cannot inject DynamicSpawnManager: BotCreator is null.");
-                return;
-            }
-
-            // Inject our Maestro into the GameWorld
+            // Injeta o spawn manager de qualquer forma para permitir o HUD em clientes convidados.
+            // Se botsController for nulo (cliente Fika convidado), o manager ativará apenas a UI visual.
             var spawnManager = __instance.gameObject.AddComponent<DynamicSpawnManager>();
             spawnManager.Init(__instance, botCreator, botsController);
 
