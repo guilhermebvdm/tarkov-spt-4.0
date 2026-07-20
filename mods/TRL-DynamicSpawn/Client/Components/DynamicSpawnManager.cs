@@ -198,11 +198,21 @@ namespace TRLDynamicSpawn.Components
         }
 
 
+        private string GetCurrentMapName()
+        {
+            if (_gameWorld.MainPlayer != null && !string.IsNullOrEmpty(_gameWorld.MainPlayer.Location))
+                return _gameWorld.MainPlayer.Location;
+            
+            var anyPlayer = _gameWorld.RegisteredPlayers.OfType<Player>().FirstOrDefault(p => p != null && !string.IsNullOrEmpty(p.Location));
+            return anyPlayer != null ? anyPlayer.Location : "factory4_day";
+        }
+
         private IEnumerator ProcessWave(bool isFirstWave)
         {
             _isSpawningWave = true;
 
-            int maxCap = Settings.GetMapCap(Singleton<GameWorld>.Instance.MainPlayer.Location);
+            string currentMap = GetCurrentMapName();
+            int maxCap = Settings.GetMapCap(currentMap);
             int aliveBots = _botsController.AliveAndLoadingBotsCount;
             int availableSlots = maxCap - aliveBots;
 
@@ -226,7 +236,7 @@ namespace TRLDynamicSpawn.Components
             // ======================================
             // PROCESS ELITES / BOSSES (Handled by vanilla now, skipping manual queue)
             // ======================================
-            var mapName = _gameWorld.MainPlayer.Location.ToLower();
+            var mapName = currentMap.ToLower();
             var eliteConfig = _serverConfig?.EliteConfig;
 
             // Group Splitting Local Function
@@ -669,7 +679,7 @@ namespace TRLDynamicSpawn.Components
             
             if (t.Result != null)
             {
-                string mapName = _gameWorld.MainPlayer.Location.ToLower();
+                string mapName = GetCurrentMapName().ToLower();
                 BotZone selectedZone = null;
                 int retries = 5;
                 bool zoneValid = false;
@@ -708,7 +718,7 @@ namespace TRLDynamicSpawn.Components
                     return;
                 }
 
-                string mapName = _gameWorld?.MainPlayer?.Location?.ToLower() ?? "";
+                string mapName = GetCurrentMapName().ToLower();
                 if (string.IsNullOrEmpty(mapName)) return;
 
                 var waves = game.BossSpawnScenario.BossSpawnWaves;
@@ -830,24 +840,28 @@ namespace TRLDynamicSpawn.Components
             
             foreach (var bot in allAlive)
             {
-                if (bot.Profile == null || bot.Profile.Info == null || bot.Profile.Info.Settings == null) continue;
+                if (bot.Profile == null || bot.Profile.Info == null) continue;
                 
-                var role = bot.Profile.Info.Settings.Role;
-                if (role == WildSpawnType.pmcBot || role == WildSpawnType.exUsec || bot.Profile.Side == EPlayerSide.Bear || bot.Profile.Side == EPlayerSide.Usec)
+                bool isPmc = bot.Profile.Side == EPlayerSide.Bear || bot.Profile.Side == EPlayerSide.Usec;
+                bool hasSettings = bot.Profile.Info.Settings != null;
+                var role = hasSettings ? bot.Profile.Info.Settings.Role : WildSpawnType.assault;
+                string roleName = hasSettings ? role.ToString().ToLower() : "";
+
+                if (isPmc || role == WildSpawnType.pmcBot || role == WildSpawnType.exUsec)
                 {
                     pmcCount++;
-                }
-                else if (role == WildSpawnType.assault)
-                {
-                    scavCount++;
                 }
                 else if (role == WildSpawnType.marksman)
                 {
                     sniperCount++;
                 }
-                else if (role.ToString().Contains("boss") || role.ToString().Contains("follower") || role.ToString().Contains("Boss") || role.ToString().Contains("Follower"))
+                else if (roleName.Contains("boss") || roleName.Contains("follower"))
                 {
                     bossCount++;
+                }
+                else if (bot.Profile.Side == EPlayerSide.Savage)
+                {
+                    scavCount++;
                 }
                 else
                 {
@@ -880,6 +894,7 @@ namespace TRLDynamicSpawn.Components
             }
 
             float nextSpawnDelay = Mathf.Max(0, _nextWaveTime - Time.time);
+            bool isClient = _cachedFikaStatus == "Fika Client";
 
             // Draw Texts
             GUILayout.BeginArea(new Rect(margin + 10, margin + 25, boxWidth - 20, boxHeight - 30));
@@ -888,8 +903,16 @@ namespace TRLDynamicSpawn.Components
             GUILayout.Label($"<b>Config Preset:</b> {_activePreset}");
             GUILayout.Space(10);
             
-            GUI.color = nextSpawnDelay < 10f ? Color.red : Color.white;
-            GUILayout.Label($"<b>Próxima Wave em:</b> {Mathf.CeilToInt(nextSpawnDelay)}s");
+            if (isClient)
+            {
+                GUI.color = Color.cyan;
+                GUILayout.Label($"<b>Próxima Wave em:</b> Controlado pelo Host");
+            }
+            else
+            {
+                GUI.color = nextSpawnDelay < 10f ? Color.red : Color.white;
+                GUILayout.Label($"<b>Próxima Wave em:</b> {Mathf.CeilToInt(nextSpawnDelay)}s");
+            }
             GUI.color = Color.white;
             
             GUILayout.Space(10);
