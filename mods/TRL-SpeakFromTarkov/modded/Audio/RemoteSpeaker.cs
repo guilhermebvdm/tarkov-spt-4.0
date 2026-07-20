@@ -1,0 +1,141 @@
+using System;
+using UnityEngine;
+using Concentus.Structs;
+using System.Collections.Concurrent;
+
+namespace TRL_SpeakFromTarkov.Audio
+{
+    public class RemoteSpeaker : MonoBehaviour
+    {
+        private OpusDecoder decoder;
+        private AudioSource audioSource;
+
+        private ConcurrentQueue<byte[]> packetQueue = new ConcurrentQueue<byte[]>();
+
+        private int sampleRate;
+        private int frameSize;
+        private float[] opusDecodeBuffer;
+
+        private float[] streamBuffer;
+        private volatile int streamWritePos = 0;
+        private volatile int streamReadPos  = 0;
+
+        private bool isBuffering = true;
+        
+        // Jitter settings: initial buffering requires 150ms, recovery requires 40ms
+        private int jitterInitialSamples;
+        private int jitterRecoverySamples;
+        private int currentJitterTarget;
+
+        public void Initialize(int sampleRate, int frameSize, float spatialBlend = 1f)
+        {
+            this.sampleRate = sampleRate;
+            this.frameSize  = frameSize;
+
+            jitterInitialSamples  = (int)(sampleRate * 0.15f); // 150ms
+            jitterRecoverySamples = (int)(sampleRate * 0.04f); // 40ms
+            currentJitterTarget   = jitterInitialSamples;
+
+            this.opusDecodeBuffer = new float[frameSize];
+            this.streamBuffer     = new float[sampleRate * 3]; // 3s de buffer
+
+            try
+            {
+#pragma warning disable CS0618
+                decoder = new OpusDecoder(sampleRate, 1);
+#pragma warning restore CS0618
+            }
+            catch (Exception ex)
+            {
+                VoIPPlugin.Log.LogError($"[SFT] RemoteSpeaker Opus erro: {ex.Message}");
+            }
+
+            audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.spatialBlend  = spatialBlend;
+            audioSource.spatialize    = spatialBlend > 0f;
+            audioSource.dopplerLevel  = 0f;
+            audioSource.minDistance   = 1f;
+            audioSource.maxDistance   = 30f;
+            audioSource.rolloffMode   = AudioRolloffMode.Linear;
+            audioSource.loop          = true;
+            audioSource.clip = AudioClip.Create("SftStream", sampleRate, 1, sampleRate, false);
+            audioSource.Play();
+        }
+
+        public void SetVolume(float volume)
+        {
+            if (audioSource != null)
+                audioSource.volume = volume;
+        }
+
+        public void EnqueuePacket(byte[] opusData)
+        {
+            packetQueue.Enqueue(opusData);
+        }
+
+        void Update()
+        {
+            if (decoder == null) return;
+
+            while (packetQueue.TryDequeue(out byte[] opusData))
+            {
+#pragma warning disable CS0618
+                int len = decoder.Decode(opusData, 0, opusData.Length, opusDecodeBuffer, 0, frameSize, false);
+#pragma warning restore CS0618
+
+                int currentWritePos = streamWritePos;
+                for (int i = 0; i < len; i++)
+                {
+                    streamBuffer[(currentWritePos + i) % streamBuffer.Length] = opusDecodeBuffer[i];
+                }
+                
+                streamWritePos = (currentWritePos + len) % streamBuffer.Length;
+            }
+        }
+
+        void OnAudioFilterRead(float[] data, int channels)
+        {
+            int wPos = streamWritePos;
+            int rPos = streamReadPos;
+            int available = (wPos - rPos + streamBuffer.Length) % streamBuffer.Length;
+
+            if (isBuffering)
+            {
+                if (available >= currentJitterTarget)
+                    isBuffering = false;
+            }
+            else
+            {
+                if (available == 0)
+                {
+                    isBuffering = true;
+                    // Switch to recovery target for future underruns to minimize gap
+                    currentJitterTarget = jitterRecoverySamples;
+                }
+            }
+
+            bool shouldPlay = !isBuffering;
+
+            for (int i = 0; i < data.Length; i += channels)
+            {
+                float sample = 0f;
+
+                if (shouldPlay && rPos != wPos)
+                {
+                    sample = streamBuffer[rPos];
+                    rPos = (rPos + 1) % streamBuffer.Length;
+                }
+
+                for (int c = 0; c < channels; c++)
+                    data[i + c] = sample;
+            }
+
+            streamReadPos = rPos;
+        }
+
+        void OnDestroy()
+        {
+            decoder = null;
+        }
+    }
+}

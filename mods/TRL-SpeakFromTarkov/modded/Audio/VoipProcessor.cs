@@ -1,0 +1,129 @@
+using System;
+using UnityEngine;
+using Concentus.Structs;
+using Concentus.Enums;
+
+namespace TRL_SpeakFromTarkov.Audio
+{
+    public class VoipProcessor : MonoBehaviour
+    {
+        public Action<byte[]> OnOpusDataEncoded;
+        
+        private OpusEncoder encoder;
+        private int frameSize;
+        
+        // VAD e Níveis
+        public float RawLevel { get; private set; }
+        public float DisplayLevel { get; private set; }
+        public float PeakLevel { get; private set; }
+        
+        private byte[] opusBuffer = new byte[1275]; // Alocação única
+        private float vadHoldTimer = 0f;
+        
+        public bool IsMuted { get; set; }
+        public bool IsPTTActive { get; set; }
+        public VoipMode CurrentMode { get; set; } = VoipMode.PTT;
+
+        public enum VoipMode { Open, PTT, VAD }
+        
+        public void Initialize(int sampleRate, int frameSize)
+        {
+            this.frameSize = frameSize;
+            try
+            {
+#pragma warning disable CS0618
+                encoder = new OpusEncoder(sampleRate, 1, OpusApplication.OPUS_APPLICATION_VOIP);
+#pragma warning restore CS0618
+                encoder.Bitrate = 12000;
+            }
+            catch (Exception ex)
+            {
+                VoIPPlugin.Log.LogError($"[SFT] Erro OpusEncoder: {ex.Message}");
+            }
+        }
+        
+        public void ProcessAudio(float[] pcmSamples)
+        {
+            float rms = GetRMS(pcmSamples);
+            RawLevel = rms * VoIPPlugin.MicGain.Value;
+            
+            if (IsMuted) RawLevel = 0f;
+            
+            // Decaimento suave do Peak (Corrige HUD travada)
+            if (rms > PeakLevel) PeakLevel = rms;
+            else PeakLevel = Mathf.Lerp(PeakLevel, 0f, 0.02f * 0.5f); // 0.02f em vez de Time.deltaTime (Thread Safe)
+            
+            // VU meter: ataque instantâneo, decaimento suave
+            if (RawLevel >= DisplayLevel)
+                DisplayLevel = RawLevel;                                    // sobe na hora
+            else
+                DisplayLevel = Mathf.Lerp(DisplayLevel, RawLevel, 0.15f);   // desce devagar
+            
+            if (ShouldTransmit())
+            {
+                Transmit(pcmSamples);
+            }
+        }
+        
+        private bool ShouldTransmit()
+        {
+            if (IsMuted) return false;
+            
+            switch (CurrentMode)
+            {
+                case VoipMode.PTT:
+                    return IsPTTActive;
+                case VoipMode.Open:
+                    return true;
+                case VoipMode.VAD:
+                    if (RawLevel > VoIPPlugin.VADThreshold.Value)
+                        vadHoldTimer = VoIPPlugin.VADDecayTime.Value;
+                        
+                    if (vadHoldTimer > 0f)
+                    {
+                        vadHoldTimer -= 0.02f; // Thread Safe
+                        return true;
+                    }
+                    return false;
+                default:
+                    return false;
+            }
+        }
+        
+        private void Transmit(float[] samples)
+        {
+            if (encoder == null) return;
+            
+            try
+            {
+#pragma warning disable CS0618
+                int len = encoder.Encode(samples, 0, frameSize, opusBuffer, 0, opusBuffer.Length);
+#pragma warning restore CS0618
+
+                if (len > 0)
+                {
+                    byte[] finalData = new byte[len];
+                    Array.Copy(opusBuffer, finalData, len);
+                    OnOpusDataEncoded?.Invoke(finalData);
+                }
+            }
+            catch (Exception ex)
+            {
+                VoIPPlugin.Log.LogError($"[SFT] Opus Encode falhou (frameSize={frameSize}, samples={samples.Length}): {ex.GetType().Name}");
+            }
+        }
+        
+        private float GetRMS(float[] samples)
+        {
+            float sum = 0f;
+            for (int i = 0; i < samples.Length; i++) 
+                sum += samples[i] * samples[i];
+            return Mathf.Sqrt(sum / samples.Length);
+        }
+        
+        void OnDestroy()
+        {
+            encoder = null;
+        }
+    }
+}
