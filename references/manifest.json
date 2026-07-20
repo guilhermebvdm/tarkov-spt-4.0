@@ -3,14 +3,20 @@
   "sources": [
     {
       "id": "eft-decompiled",
-      "path": "references/eft-decompiled",
+      "path": "references/eft-decompiled/Assembly-CSharp",
       "role": "client",
       "tier": 1,
       "fetch": false,
-      "tracked": true,
+      "tracked": false,
       "eftVersion": "0.16.x",
-      "license": "BSG IP — interno, não redistribuir",
-      "note": "Assembly C# do cliente EFT descompilado. Versionado no repo (vem junto, não é clonado). Build exato (SHA256 da DLL + data) em references/eft-decompiled/README.md."
+      "sptVersion": "4.0.13",
+      "license": "BSG IP — interno, NÃO redistribuir (host público violaria isto)",
+      "generate": "bash scripts/decompile-eft.sh",
+      "requires": "jogo instalado (a DLL vem de D:/SPT/EscapeFromTarkov_Data/Managed/) + .NET SDK",
+      "sizeApprox": "8.683 arquivos .cs",
+      "download": null,
+      "withoutIt": "Os .cs NÃO existem em disco: greps no dump voltam vazios e o MCP graphify-eft não sobe. NÃO conclua que um tipo não existe — references/eft-decompiled/types-index.json é VERSIONADO e lista todos os tipos do assembly.",
+      "note": "Assembly C# do cliente EFT descompilado, COMPLETO desde 2026-07-19 (8.683 tipos, 0 namespaces vazios; antes 4.561/102 vazios). O dump é gitignored e regenerado localmente pelo comando em 'generate' — NUNCA com 'ilspycmd -p', que aborta e engole namespaces. Versionados ao lado: types-index.json (índice de todos os tipos + alias SPT 4.1) e .provenance.json (SHA256 da DLL, buildGuid, sptVersion). 'download' fica null até um host PRIVADO ser definido — o dump é IP da BSG."
     },
     {
       "id": "spt-waypoints",

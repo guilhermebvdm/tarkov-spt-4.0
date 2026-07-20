@@ -11,7 +11,9 @@ Os grafos de código (graphify, AST/tree-sitter) vivem em `references/graphs/<es
 
 **O grafo APONTA, a leitura do `arquivo.cs:linha` PROVA.** Nenhum nó/aresta do grafo entra em spec, review ou código sem reconferir o arquivo real. A hierarquia de evidência de `.agents/resources.md` permanece intacta — o grafo é camada de **navegação**, não fonte.
 
-**A tabela de deofuscação tem o MESMO status.** [docs/files-from-4.1/consolidated-mappings.txt](../../../docs/files-from-4.1/consolidated-mappings.txt) traduz o nome ofuscado 4.0 → conceito/nome 4.1 (`GClass680 -> ABotProfileCreator`). O alias **aponta** o conceito; a assinatura/fórmula ainda se **prova** no `arquivo.cs:linha`. Regras: a **esquerda** (nome 4.0) é verificável no decompile/grafo hoje; a **direita** (nome 4.1) é rótulo — pode citar namespace ausente do dump (AP-09; confirmar via `ilspycmd -t <FQN>` na DLL real); **sem entrada ≠ não existe** (`GClass898`/`GClass3008` usados no repo não estão no mapa); cobre **tipos**, não membros (`method_5`, `_player`).
+**A tabela de deofuscação tem o MESMO status.** [docs/files-from-4.1/consolidated-mappings.txt](../../../docs/files-from-4.1/consolidated-mappings.txt) traduz o nome ofuscado 4.0 → conceito/nome 4.1 (`GClass680 -> ABotProfileCreator`). Desde 2026-07-19 esses aliases estão **injetados no dump** (comentário no topo de cada `.cs`) e no `types-index.json` — 4.763 tipos. O alias **aponta** o conceito; a assinatura/fórmula ainda se **prova** no `arquivo.cs:linha`. Regras: a **direita** (nome 4.1) é rótulo de fonte comunitária, não oficial; **sem entrada ≠ não existe** (`GClass898`/`GClass3008` usados no repo não estão no mapa); cobre **tipos**, não membros (`method_5`, `_player`).
+
+⚠️ **Busca por conceito não passa pelo grafo.** O graphify indexa **AST**, então os aliases (que vivem em comentário e no índice) **não são nós** — `query_graph "Localization"` não acha `GClass2348`. Quando você só sabe o conceito, o caminho é: **`references/eft-decompiled/types-index.json`** (ou `grep` do alias no dump) → obtém o FQN → **aí sim** grafo → `.cs`.
 
 ## 2. Quando usar grafo vs Grep
 
@@ -82,7 +84,7 @@ O grafo e o decompile rotulam nós com o nome ofuscado (`GClass680`, `GStruct80`
 grep '^GClass680 -> ' docs/files-from-4.1/consolidated-mappings.txt   # → ABotProfileCreator
 ```
 
-Regra: o alias **aponta** o conceito, a assinatura ainda se **prova** no `arquivo.cs:linha`. Cobre só **tipos** (não `method_5`/`_player`); **sem entrada ≠ não existe**; a direita (nome 4.1) é rótulo — confirmar via `ilspycmd -t <FQN>` na DLL real (AP-09).
+Regra: o alias **aponta** o conceito, a assinatura ainda se **prova** no `arquivo.cs:linha`. Cobre só **tipos** (não `method_5`/`_player`); **sem entrada ≠ não existe**; a direita (nome 4.1) é rótulo de fonte comunitária (AP-09). Atalho: o alias já vem no topo do `.cs` e no `types-index.json`, então `grep "<conceito>"` no dump costuma resolver sem consultar a tabela.
 
 ## 5. Manutenção
 

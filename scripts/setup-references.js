@@ -155,7 +155,11 @@ if (ONLY.length) {
 }
 
 const fetchable = sources.filter(s => s.fetch === true);
-const tracked   = sources.filter(s => s.fetch === false);
+// Três categorias, não duas: além de "vem no git" (tracked) e "clonavel" (fetch), agora existe
+// "local" — artefato grande demais para o git que NÃO é clonavel de um upstream; é gerado por um
+// comando local (campo `generate`) ou, no futuro, baixado de um host privado (`download`).
+const local     = sources.filter(s => s.fetch === false && s.tracked === false);
+const tracked   = sources.filter(s => s.fetch === false && s.tracked !== false);
 
 // ── modo --check (dry-run) ────────────────────────────────────────────────────
 if (CHECK) {
@@ -172,8 +176,30 @@ if (CHECK) {
     if (!ok) missing++;
     log(`  ${ok ? '✓ presente' : '✗ faltando'}  ${s.id} (${s.path})`);
   });
-  if (missing) {
-    log(`\n${missing} referencia(s) faltando — rode: node scripts/setup-references.js`);
+
+  // Artefatos locais: nao sao clonaveis nem vem no git. Quando faltam, o impacto NAO e obvio
+  // (um grep no dump ausente volta vazio e parece "o tipo nao existe"), por isso o relatorio
+  // imprime o COMO OBTER e o QUE QUEBRA SEM, em vez de so marcar como faltando.
+  let localMissing = 0;
+  if (local.length) {
+    log('\nArtefatos locais (nao vem no git, gerados/baixados na maquina):');
+    local.forEach(s => {
+      const ok = isPresent(path.join(ROOT, s.path));
+      if (!ok) localMissing++;
+      log(`  ${ok ? '✓ presente' : '✗ FALTANDO'}  ${s.id} (${s.path})`);
+      if (!ok) {
+        if (s.generate)      log(`      gerar:     ${s.generate}`);
+        if (s.requires)      log(`      requer:    ${s.requires}`);
+        if (s.download?.url) log(`      baixar:    ${s.download.url}`);
+        else if (s.download === null && !s.generate) log('      baixar:    (host ainda nao definido)');
+        if (s.withoutIt)     log(`      ⚠ sem ele: ${s.withoutIt}`);
+      }
+    });
+  }
+
+  if (missing || localMissing) {
+    if (missing)      log(`\n${missing} referencia(s) clonavel(is) faltando — rode: node scripts/setup-references.js`);
+    if (localMissing) log(`${localMissing} artefato(s) local(is) faltando — veja o comando de cada um acima.`);
     process.exit(1);
   }
   log('\nTudo presente ✓');

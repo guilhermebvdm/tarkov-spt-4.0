@@ -15,24 +15,25 @@ O script clona cada fonte conforme o `pin` do manifest, roda `git lfs pull` quan
 
 ## Fontes
 
-- **`eft-decompiled/`** — Assembly C# do cliente EFT descompilado (🥇 verdade do cliente). Versionado.
+- **`eft-decompiled/`** — Assembly C# do cliente EFT descompilado (🥇 verdade do cliente). **Índice versionado; o dump em si é gitignored** (regenerável).
 
-  > ## ⚠️ ARMADILHA: o dump está INCOMPLETO — **102 namespaces VAZIOS**
+  > ## 📖 Como consultar — e por que um `grep` vazio NÃO prova ausência
   >
-  > **NUNCA conclua "esse tipo/método não existe" a partir desta pasta.** Ela tem 4561 arquivos, mas **102 diretórios de namespace estão vazios** — entre eles `EFT.HealthSystem`, `EFT.Animations`, `EFT.InventoryLogic`, `EFT.CameraControl`. Tipos centrais como `ActiveHealthController`, `ProceduralWeaponAnimation` e `HealthEffectsComponent` **não estão aqui**, embora existam na DLL.
+  > O dump é **completo** desde 2026-07-19: **8.683 tipos, 0 pastas de namespace vazias** (antes: 4.561 arquivos e **102 pastas vazias**, que faziam tipos existentes serem dados como inexistentes). `EFT.HealthSystem`, `EFT.Animations`, `EFT.InventoryLogic`, `EFT.CameraControl` e `EFT.UI` estão preenchidos.
   >
-  > **Causa (diagnosticada em 2026-07-13):** o `ilspycmd` em **modo projeto (`-p`)** aborta ao topar num método que não consegue descompilar (`Error decompiling @060093AD BackendAbstractClass.GetTemplates` → `ArgumentNullException: Parameter 'annotation'`) e **deixa namespaces inteiros vazios**. Confirmado nas versões **10.0.1 e 10.1.0** — atualizar o tool **não** resolve.
+  > **Mas o dump não vem no git** (são milhares de arquivos) — só o `types-index.json`. Numa máquina onde ele não foi gerado, os `.cs` não existem em disco. Por isso:
   >
-  > **O custo real disso:** o item 050 do CustomClasses declarou dois perks "impossíveis" (`Rapid Care`/`Swift Surgeon` "precisam de transpiler"; `Mobile Surgery` "não localizável no estático") — **os dois eram perfeitamente alcançáveis**. O falso-negativo veio daqui.
+  > | `eft-decompiled/types-index.json` | `.cs` em disco | Significado | Ação |
+  > |---|---|---|---|
+  > | tem o tipo | presente | existe | ler o `.cs` (prova a assinatura) |
+  > | tem o tipo | **ausente** | existe — **não gerado nesta máquina** | `bash scripts/decompile-eft.sh` |
+  > | **não tem** | — | não existe no assembly | investigar / reportar |
   >
-  > **WORKAROUND (funciona sempre) — descompile o TIPO direto da DLL real:**
-  > ```bash
-  > export PATH="$PATH:$HOME/.dotnet/tools"
-  > ilspycmd "D:/SPT/EscapeFromTarkov_Data/Managed/Assembly-CSharp.dll" -t EFT.HealthSystem.ActiveHealthController
-  > ```
-  > O **nome totalmente qualificado é obrigatório** (`-t ActiveHealthController` sozinho falha com "Could not find type definition").
+  > **Busca por conceito** (não sei o nome, sei o que faz): o `types-index.json` traz o **alias 4.1** de 4.763 tipos, e o dump traz o alias em comentário no topo de cada arquivo — `grep "Localization"` encontra `GClass2348` (= `EFT.LocalizationExtensions`). O grafo indexa AST e **não** contém os aliases, então essa busca passa pelo índice/grep, não pelo `query_graph`.
   >
-  > Antes de escrever "NÃO CONFIRMADO" ou "não existe" sobre saúde, animação, inventário ou câmera: **rode o comando acima**.
+  > **`ilspycmd -t <FQN>`** continua legítimo em 3 casos: tipo marcado `// DECOMPILE-ERROR` (são **8**, ex.: `BackendAbstractClass`), tipo **fora** do índice, ou dump ausente. FQN é obrigatório.
+  >
+  > ⚠️ **Nunca regenere com `ilspycmd -p`** — o modo projeto aborta no primeiro método indecompilável (`BackendAbstractClass.GetTemplates`) e descarta namespaces inteiros em silêncio; foi assim que os 102 buracos surgiram, e custou dois perks do CustomClasses declarados "impossíveis" sendo alcançáveis. Use `scripts/decompile-eft.sh` (itera tipo a tipo com try/catch).
 - **`spt-source/`** — código-fonte do servidor SPT 4.0 (🥇 verdade do servidor: serviços, helpers, fórmulas, rotas). Gitignored (~856 MB), pinado no commit que corresponde ao SPT em `D:/SPT`. Ao atualizar o SPT, atualize o `pin` no manifest e re-rode o setup — senão a lógica diverge do runtime testado.
 - **`fika-{server,plugin,headless}/`** — código do FIKA (coop): servidor C#, plugin cliente C# (contém `Fika.Core`) e cliente headless TS. Gitignored, pinados por commit.
 - **`SPT-Waypoints-1.8.2/`** — mod DrakiaXYZ-Waypoints, referência de navegação/waypoints de bots. Versionado.

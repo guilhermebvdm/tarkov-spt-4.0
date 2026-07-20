@@ -16,7 +16,7 @@ Ordem ao **responder dúvidas** sobre SPT/EFT:
 
 **Fonte de verdade canônica** desta ordem — os demais arquivos (AGENTS.md, slash commands, skills) apontam para cá. Ao **citar evidência** numa spec técnica ou code review, toda assinatura, fórmula ou ponto de patch vem com `arquivo.cs:linha`.
 
-1. 🥇 **Assembly descompilado (cliente EFT)** — [references/eft-decompiled/Assembly-CSharp/](../references/eft-decompiled/Assembly-CSharp/). Fonte de verdade do **cliente**.
+1. 🥇 **Assembly descompilado (cliente EFT)** — [references/eft-decompiled/Assembly-CSharp/](../references/eft-decompiled/Assembly-CSharp/). Fonte de verdade do **cliente**. Completo (8.683 tipos, 0 namespaces vazios) mas **gitignored** — se os `.cs` não estiverem em disco, gere com `bash scripts/decompile-eft.sh`. **Existência de um tipo confere-se no [types-index.json](../references/eft-decompiled/types-index.json) (versionado), nunca num `grep` vazio** (AP-09).
 2. 🥇 **Código-fonte do servidor SPT** — [references/spt-source/](../references/spt-source/) (gitignored, ~856 MB — obter via [references/README.md](../references/README.md)). Fonte de verdade do **servidor** (serviços, helpers, fórmulas, rotas).
 3. 🥇 **Códigos do FIKA (coop)** — `references/fika-server/` (servidor), `references/fika-plugin/` (cliente, contém `Fika.Core`), `references/fika-headless/` (headless). Fonte de verdade da lógica cooperativa multiplayer.
 4. 🥈 **Código do mod** — `mods/<mod>/original/` (upstream intocado) e `mods/<mod>/modded/` (fork local).
@@ -25,12 +25,12 @@ Ordem ao **responder dúvidas** sobre SPT/EFT:
 
 > Distinta da **Hierarquia de consulta (geral)** acima: aquela é pra responder dúvidas; esta é pra **citar evidência** em specs/reviews.
 
-> ⚠️ **Erros recorrentes já cometidos neste repo:** [docs/technical/spt-antipatterns.md](../docs/technical/spt-antipatterns.md) (AP-01..AP-08) — leitura obrigatória antes de escrever ou revisar spec técnica.
+> ⚠️ **Erros recorrentes já cometidos neste repo:** [docs/technical/spt-antipatterns.md](../docs/technical/spt-antipatterns.md) (AP-01..AP-10) — leitura obrigatória antes de escrever ou revisar spec técnica.
 
 > 🧭 **Navegação estrutural:** os grafos de código do graphify ([references/graphs/](../references/graphs/), skill `graph-code-navigation`) aceleram achar callers, overrides e cadeias input→efeito — mas **NÃO são fonte de evidência**: todo achado do grafo é confirmado lendo o `arquivo.cs:linha`.
 
 > 🗺️ **Deofuscação de nomes (SPT 4.0→4.1):** [docs/files-from-4.1/consolidated-mappings.txt](../docs/files-from-4.1/consolidated-mappings.txt) traduz o nome ofuscado do decompile para o conceito legível — 1 linha por tipo, `LEFT -> RIGHT` (ex.: `grep '^GClass680 -> '` → `ABotProfileCreator`). É **aid de compreensão, não evidência** — mesmo status do grafo ("aponta, não prova"). Três regras ao usar:
-> 1. **Esquerda = nome 4.0** (verificável hoje no decompile/grafo, é o que decodifica) · **direita = nome 4.1** (rótulo; o namespace pode ser um dos vazios do dump — confirmar com `ilspycmd -t <FQN>` na DLL real antes de cravar).
+> 1. **Esquerda = nome 4.0** (verificável no decompile/grafo, é o que decodifica) · **direita = nome 4.1** (rótulo de fonte comunitária — aponta o conceito, não prova assinatura). Desde 2026-07-19 esses aliases já vêm **injetados no topo de cada `.cs`** e no `types-index.json` (4.763 tipos), então `grep "<conceito>"` no dump costuma resolver sem consultar a tabela. ⚠️ O grafo indexa AST e **não** contém os aliases — busca por conceito passa pelo índice/grep, não pelo `query_graph`.
 > 2. **Sem entrada ≠ não existe** (ex.: `GClass898`/`GClass3008`, usados no repo, não estão no mapa). Não concluir "não existe" a partir de uma ausência.
 > 3. Cobre **tipos**, não **membros** (`method_5`, `_player`, `float_3`) nem inner ofuscado. Contexto/proveniência/ressalvas: [spt4-vs-spt41-gclass-deobfuscation.md](../docs/technical/spt4-vs-spt41-gclass-deobfuscation.md).
 

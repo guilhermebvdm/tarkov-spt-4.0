@@ -16,7 +16,7 @@ Authoritative references (in this repo) — full evidence hierarchy in `.agents/
 - FIKA (coop): `references/fika-server/`, `references/fika-plugin/` (`Fika.Core`), `references/fika-headless/`
 - Wiki snapshot: `wiki/spt/` (read-only)
 - Mod conventions: `AGENTS.md`, `.agents/conventions.md`
-- **Erros recorrentes já cometidos neste repo:** `docs/technical/spt-antipatterns.md` (AP-01..AP-08) — ler antes de escrever ou revisar spec técnica.
+- **Erros recorrentes já cometidos neste repo:** `docs/technical/spt-antipatterns.md` (AP-01..AP-10) — ler antes de escrever ou revisar spec técnica.
 
 ## 1. Plugin lifecycle
 

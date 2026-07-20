@@ -42,6 +42,12 @@ cd tarkov-spt-4.0
 bash .agents/hooks/install-hooks.sh    # Instala git pre-commit hook
 node scripts/setup-references.js       # Clona as referências vendorizadas (spt-source, FIKA)
 cp .spt-path.example .spt-path         # Define o path local do SPT/EFT (ajuste se != D:/SPT)
+
+# Decompile do cliente EFT — gitignored, precisa do jogo instalado. Sem isto, os .cs de
+# references/eft-decompiled/Assembly-CSharp/ não existem em disco (o types-index.json,
+# versionado, continua respondendo quais tipos existem) e o MCP graphify-eft não sobe.
+bash scripts/decompile-eft.sh          # ~70s → 8.683 tipos
+bash scripts/update-graphs.sh eft-decompiled   # ~140s → grafo do MCP
 ```
 
 Dependência opcional (recomendada): `jq` para o hook do Claude Code funcionar.
@@ -95,5 +101,6 @@ Ordem canônica ao **citar evidência** (sempre com `arquivo.cs:linha`). **Paths
 
 ## ⚠️ Observações importantes
 
+- **EFT: consulte antes de descompilar — e `grep` vazio NÃO prova que o tipo não existe.** O decompile em `references/eft-decompiled/` é **completo** (8.683 tipos, 0 namespaces vazios), mas **o dump é gitignored** — numa máquina onde não foi gerado, os `.cs` não estão em disco. Confira a existência no **`references/eft-decompiled/types-index.json`** (versionado, lista todos os tipos), não no resultado de um grep. Para achar tipo obfuscado **por conceito**, o índice traz o alias 4.1 (`GClass2348` = `EFT.LocalizationExtensions`). Gerar/regenerar: `bash scripts/decompile-eft.sh` — **nunca** `ilspycmd -p` (aborta e engole namespaces). `ilspycmd -t <FQN>` só para: tipo `// DECOMPILE-ERROR`, fora do índice, ou dump ausente. Ver [AP-09](docs/technical/spt-antipatterns.md) e [references/eft-decompiled/README.md](references/eft-decompiled/README.md).
 - **Nunca copiar DLLs do jogo manualmente para `mods/<mod>/modded/.../References/`.** Para mods client C#/BepInEx, `/compile-mod` resolve essas referências automaticamente a partir do `.spt-path` (mesma regra de "nunca hardcode" acima). Ver `.claude/skills/csharp-mod-best-practices/SKILL.md` §9.
 - **Nunca editar `SPT_Data/database/` direto.** Esses arquivos fazem parte da distribuição do SPT — qualquer atualização do SPT os sobrescreve e a edição se perde. Além disso, alterar a database em disco invalida o `SPT_Data/checks.dat` (integridade) e gera arquivos pesados (`looseLoot.json` ~42 MB, `items.json` ~19 MB) difíceis de versionar/distribuir. O jeito correto é um **mod de servidor** que aplica os patches em memória no `postDBLoad` (modelo usado por SVM e pela maioria dos mods de servidor): sobrevive a updates, pesa quase nada e é diffável.

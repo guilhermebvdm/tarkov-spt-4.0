@@ -84,9 +84,17 @@ Catálogo dos erros que **já cometemos neste repo**, com o caso real, a causa r
 ## AP-09 — Recon/decompile curado tratado como verdade pinada
 
 - **Sintoma:** patch-point "confirmado" no recon não existe no assembly (nome/assinatura diferente ou inventado) → tempo perdido codando contra um alvo fantasma; o patch não aplica (ou compila e falha em runtime).
-- **Causa raiz:** o decompile curado (`references/eft-decompiled/`) é **PARCIAL** — tipos quentes ficam de fora (ex.: `ProceduralWeaponAnimation`, `ActiveHealthController`, `BreathEffector` não estão lá). E "confiança" de recon (humano ou subagente) é um **candidato**, não um fato — pode citar um membro plausível porém inexistente. Agravante: membros ofuscados (`method_##`, `GClass####`) variam entre builds.
-- **Exemplos reais:** item 005 do stances (Sessão 5/6) — "dump `eft-decompiled` é PARCIAL → validar membros via compilação contra `Assembly-CSharp.dll`". [CustomClasses Sessão 10](../../mods/CustomClasses/memory/sessions.md) — recon citou `WeaponRecoil.CalculateRecoil` (marcado ✅) que **não existe**; o ponto real era `ProceduralWeaponAnimation.Shoot(str)`, achado via `ilspycmd` sobre `D:/SPT/.../Assembly-CSharp.dll`.
-- **Prevenção:** tratar todo ponto de recon como **candidato até reconfirmar no assembly real** (`ilspycmd`/`dnSpy` sobre `Assembly-CSharp.dll`) ou pela compilação. O compile pega tipo/membro inexistente; **runtime** pega injeção de campo (`___field`) e método ofuscado errado → envolver `Enable()` em try/catch + gate de validação in-game. Nunca pinar um ponto fora do curado sem reconfirmação.
+- **Causa raiz:** "confiança" de recon (humano ou subagente) é um **candidato**, não um fato — pode citar um membro plausível porém inexistente. Agravante: membros ofuscados (`method_##`, `GClass####`) variam entre builds, e o mapping 4.1 é **rótulo** (aponta o conceito; não prova assinatura, e cobre tipos, não membros).
+- **Exemplos reais:** [CustomClasses Sessão 10](../../mods/CustomClasses/memory/sessions.md) — recon citou `WeaponRecoil.CalculateRecoil` (marcado ✅) que **não existe**; o ponto real era `ProceduralWeaponAnimation.Shoot(str)`. Item 005 do stances (Sessão 5/6) — validar membros via compilação. **Contexto histórico:** até 2026-07-19 havia uma segunda causa — o dump era **parcial** (102 namespaces vazios), e tipos existentes eram dados como inexistentes; isso foi **resolvido** (dump completo: 8.683 tipos, 0 pastas vazias — ver `references/eft-decompiled/README.md`).
+- **⚠️ Ausência não se infere de um grep vazio.** O dump é **gitignored** (só o índice é versionado), então "não achei" tem **três** significados distintos:
+
+  | `references/eft-decompiled/types-index.json` | `.cs` em disco | Significado | Ação |
+  |---|---|---|---|
+  | tem o tipo | presente | existe | ler o `.cs` e provar a assinatura |
+  | tem o tipo | **ausente** | existe — **o dump não está nesta máquina** | `bash scripts/decompile-eft.sh` (ou `ilspycmd -t` pontual) |
+  | **não tem** | — | não existe no assembly | investigar / reportar falha do harness |
+
+- **Prevenção:** tratar todo ponto de recon como **candidato até reconfirmar** — pelo `.cs` do dump, e definitivamente **pela compilação**. O compile pega tipo/membro inexistente; **runtime** pega injeção de campo (`___field`) e método ofuscado errado → envolver `Enable()` em try/catch + gate de validação in-game. Antes de concluir "não existe", **confira o `types-index.json`**. `ilspycmd -t` segue legítimo em três casos: tipo marcado `// DECOMPILE-ERROR` (são 8), fora do índice, ou dump ausente na máquina.
 - **Onde é checado:** skill `graph-code-navigation` ("grafo aponta, leitura prova"); `/create-technical-spec` e `/code-mod` (reconfirmar patch-point antes de codar); skill `spt-mod-best-practices`.
 
 ## AP-10 — Buffar/depender de skill EFT inerte
@@ -125,3 +133,4 @@ Catálogo dos erros que **já cometemos neste repo**, com o caso real, a causa r
 | 2026-06-13 | Guilherme | fix(harness): correct artifact-name and hook-target naming bugs |
 | 2026-06-23 | Guilherme | Adicionados AP-09 (recon/decompile curado tratado como verdade — item 005 + CustomClasses S10) e AP-10 (buffar skill EFT inerte — CustomClasses S8/S10), promovidos da memória do CustomClasses (memory-curation §15) |
 | 2026-06-23 | Guilherme | feat(CustomClasses): implement 050 signature perks/drawbacks (client) |
+| 2026-07-19 | Guilherme | docs(launcher): review 01 da spec tecnica do 030 — 3 bloqueadores |
