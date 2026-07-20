@@ -1,0 +1,10 @@
+{
+  "_readme": "Origem deste dump. O EFT nao recebe mais updates compativeis com o SPT, mas o SPT RE-PATCHEIA a Assembly-CSharp a cada update dele — por isso sptVersion importa.",
+  "dllSha256": "faef6f0b9f142f9d047495ec3dccfd5d6974ac048368dc7045955cf54b117982",
+  "buildGuid": "9c1bfdf078d74e26b2de13c18e539045",
+  "eftVersion": "0.16.x",
+  "sptVersion": "4.0.13",
+  "dumpVersion": 1,
+  "generatedAtUtc": "2026-07-20T01:33:34Z",
+  "generatedBy": "scripts/decompile-eft.sh + .agents/tools/decompile-eft (ICSharpCode.Decompiler 10.1.0.8386)"
+}

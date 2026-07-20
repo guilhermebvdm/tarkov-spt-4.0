@@ -69,6 +69,20 @@ references/spt-source/
 references/fika-server/
 references/fika-plugin/
 references/fika-headless/
+
+# EFT decompiled dump — ~14 mil arquivos (~50-90 MB), gerado por scripts/decompile-eft.sh a partir
+# da Assembly-CSharp.dll do jogo instalado. NÃO é re-fetchável sem o jogo (ver references/README.md).
+# O que fica VERSIONADO ao lado (não ignorar!): types-index.json, .provenance.json, README.md —
+# o índice responde "esse tipo existe?" mesmo sem o dump em disco.
+references/eft-decompiled/Assembly-CSharp/
+
+# Grafo do decompilado — DERIVADO do dump acima (~140 MB, acima do limite de 100 MB/arquivo do
+# GitHub). Regenerável: bash scripts/update-graphs.sh eft-decompiled
+references/graphs/eft-decompiled/
+
+# Saída de `scripts/decompile-eft.sh --dry-run` (inspeção antes de substituir o dump).
+/.decompile-dryrun/
+
 *.exe
 *.Backup.tmp
 

@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Harness de decompile do Assembly-CSharp do EFT.
+
+    POR QUE ISTO EXISTE: o `ilspycmd -p` (modo projeto) ABORTA no primeiro método que não
+    consegue descompilar e descarta namespaces inteiros em silêncio — foi o que produziu os
+    102 namespaces vazios do dump anterior (EFT.Animations, EFT.HealthSystem, EFT.InventoryLogic,
+    EFT.CameraControl, EFT.UI...). Aqui a iteração é POR TIPO com try/catch: um tipo que falha
+    vira um stub `// DECOMPILE-ERROR` visível, e o resto do namespace continua.
+
+    A versão do ICSharpCode.Decompiler é FIXADA na mesma do ilspycmd instalado (10.1.0.8386)
+    para que a saída seja equivalente à do `ilspycmd -t`, que é a referência do smoke test.
+  -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyName>DecompileEft</AssemblyName>
+    <RootNamespace>DecompileEft</RootNamespace>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ICSharpCode.Decompiler" Version="10.1.0.8386" />
+  </ItemGroup>
+
+</Project>
