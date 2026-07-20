@@ -99,6 +99,18 @@ namespace TRL_SpeakFromTarkov.Audio
             int rPos = streamReadPos;
             int available = (wPos - rPos + streamBuffer.Length) % streamBuffer.Length;
 
+            // FIX: Clock Drift (Overrun Prevention)
+            // Se o relógio do Sender for levemente mais rápido que o do Receiver,
+            // o buffer vai encher lentamente ao longo de minutos.
+            // Para evitar delay absurdo ou estouro de buffer, nós dropamos pacotes velhos.
+            int maxAllowedDelay = (int)(sampleRate * 0.3f); // Max 300ms de delay aceitável
+            if (available > maxAllowedDelay)
+            {
+                // Avança o ponteiro de leitura para manter apenas o equivalente ao Jitter Inicial
+                rPos = (wPos - jitterInitialSamples + streamBuffer.Length) % streamBuffer.Length;
+                available = jitterInitialSamples;
+            }
+
             if (isBuffering)
             {
                 if (available >= currentJitterTarget)

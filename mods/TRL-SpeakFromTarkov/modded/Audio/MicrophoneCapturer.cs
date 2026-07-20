@@ -144,7 +144,8 @@ namespace TRL_SpeakFromTarkov.Audio
             IsRecording = false;
             hasPlayed = false;
             dspConfirmed = 0;
-            audioFilter?.Reset();
+            audioFilter?.Dispose();
+            audioFilter = null;
         }
         
         // O loop de extração agora roda numa Thread própria (imune aos FPS do Tarkov)
@@ -312,6 +313,7 @@ namespace TRL_SpeakFromTarkov.Audio
         void OnDestroy()
         {
             StopCapture();
+            audioFilter?.Dispose();
         }
     }
 }

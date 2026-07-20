@@ -4,6 +4,7 @@ using TRL_SpeakFromTarkov.Audio;
 using TRL_SpeakFromTarkov.Network;
 using TRL_SpeakFromTarkov.UI;
 using System;
+using System.Collections.Concurrent;
 
 namespace TRL_SpeakFromTarkov.Core
 {
@@ -16,6 +17,7 @@ namespace TRL_SpeakFromTarkov.Core
         private SftNetwork network;
         private VoipHUD hud;
         private RemoteSpeaker echoSpeaker;
+        private ConcurrentQueue<Action> mainThreadActions = new ConcurrentQueue<Action>();
         
         public byte CurrentChannel { get; private set; } = 1;
         
@@ -54,12 +56,14 @@ namespace TRL_SpeakFromTarkov.Core
             // Wiring Events
             capturer.OnAudioDataCaptured += processor.ProcessAudio;
             processor.OnOpusDataEncoded += (opusData) => {
-                network.Broadcast(opusData, CurrentChannel);
-                
-                if (VoIPPlugin.EchoDelay.Value > 0f && !processor.IsMuted)
-                {
-                    StartCoroutine(DelayEcho(opusData, VoIPPlugin.EchoDelay.Value));
-                }
+                mainThreadActions.Enqueue(() => {
+                    network.Broadcast(opusData, CurrentChannel);
+                    
+                    if (VoIPPlugin.EchoDelay.Value > 0f && !processor.IsMuted)
+                    {
+                        StartCoroutine(DelayEcho(opusData, VoIPPlugin.EchoDelay.Value));
+                    }
+                });
             };
             
             // StartCapture NÃO é chamado aqui.
@@ -153,6 +157,11 @@ namespace TRL_SpeakFromTarkov.Core
         void Update()
         {
             if (capturer == null) return;
+            
+            while (mainThreadActions.TryDequeue(out Action action))
+            {
+                action?.Invoke();
+            }
             
             HandleKeys();
             hud.CurrentChannel = CurrentChannel;
