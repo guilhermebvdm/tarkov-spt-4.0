@@ -35,6 +35,16 @@ Código C# descompilado do cliente do Escape from Tarkov, usado como **referênc
 
 **Nunca conclua "esse tipo não existe" a partir de um `grep` vazio** — confirme no `types-index.json`.
 
+### Do FQN para o arquivo
+
+O índice guarda o FQN; o caminho do `.cs` é **derivado** dele (só aparece um campo `path` explícito quando há
+colisão de nome):
+
+- **pasta** = namespace literal, com os pontos (`EFT.HealthSystem/`); sem namespace = raiz do dump.
+- **arquivo** = nome do tipo, com backtick e caracteres inválidos em NTFS trocados por `_`, mais `-<aridade>` se
+  for genérico. Ex.: `GClass176`1` → **`GClass176-1.cs`**; `EFT.HealthSystem.ActiveHealthController` →
+  **`EFT.HealthSystem/ActiveHealthController.cs`**.
+
 ## Sobre os aliases do SPT 4.1
 
 Tipos obfuscados (`GClass1234`) trazem no topo do arquivo um comentário com o nome conceitual, vindo do mapping

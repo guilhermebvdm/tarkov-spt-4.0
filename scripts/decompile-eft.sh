@@ -52,7 +52,17 @@ case "${EFT_VERSION:-}" in
   0.*) : ;;                       # ok, formato esperado (ex.: 0.16.9.40087)
   *)   EFT_VERSION="0.16.x"; echo "  (aviso: não consegui ler a versão do EscapeFromTarkov.exe — usando '$EFT_VERSION')" ;;
 esac
-SPT_VERSION="${SPT_VERSION:-$(grep -oE '"sptVersion"\s*:\s*"[^"]+"' references/manifest.json 2>/dev/null | head -1 | sed -E 's/.*"([^"]+)"$/\1/' || true)}"
+# ⚠️ Ler o sptVersion da entrada **spt-source** do manifest, não com um grep solto: a entrada
+# `eft-decompiled` TAMBÉM tem um campo sptVersion (gravado por uma execução anterior deste script),
+# e um `grep | head -1` casava essa linha primeiro — ou seja, o script lia de volta o que ele mesmo
+# escreveu, e um update do SPT nunca apareceria na provenance.
+SPT_VERSION="${SPT_VERSION:-$(python -c "
+import json,sys
+try:
+    m=json.load(open('references/manifest.json',encoding='utf-8'))
+    print(next((s.get('sptVersion','') for s in m['sources'] if s.get('id')=='spt-source'),''))
+except Exception: print('')
+" 2>/dev/null | tr -d '\r\n' || true)}"
 [ -n "${SPT_VERSION:-}" ] || SPT_VERSION="unknown"
 echo "  sha256=${DLL_SHA:0:16}… buildGuid=${BUILD_GUID:-?} eft=$EFT_VERSION spt=$SPT_VERSION dumpVersion=$DUMP_VERSION"
 
@@ -112,6 +122,16 @@ if [ "$STUBS" -gt 100 ]; then
   [ "$DRY_RUN" = "1" ] || { echo "   Abortando. Rode com --dry-run para inspecionar."; exit 1; }
 fi
 
+# Piso de aliases. Sem isto, se o consolidated-mappings.txt for movido/renomeado o harness gera um
+# dump com ZERO aliases, TODOS os gates acima passam (contagem, canários, stubs) e o dump bom é
+# substituído em silêncio — quebrando a busca-por-conceito que o README, o hook e a skill prometem,
+# sem nenhum erro visível. São ~4.763 aliases nesta build.
+if [ "${ALIASES:-0}" -lt 4000 ]; then
+  echo "⚠ ALIASES 4.1 SUSPEITOS ($ALIASES < 4000 esperados ~4763) — o mapping sumiu ou mudou de formato?"
+  echo "   Confira: $MAPPINGS"
+  [ "$DRY_RUN" = "1" ] || { echo "   Abortando SEM substituir (a busca por conceito ficaria quebrada)."; exit 1; }
+fi
+
 if [ "$DRY_RUN" = "1" ]; then
   KEEP="$REPO_ROOT/.decompile-dryrun"
   rm -rf "$KEEP"; mkdir -p "$KEEP"; cp -r "$TMP/." "$KEEP/"
@@ -120,10 +140,31 @@ if [ "$DRY_RUN" = "1" ]; then
   exit 0
 fi
 
-# ── substituição atômica-ish ──────────────────────────────────────────────────
+# ── substituição com ROLLBACK ─────────────────────────────────────────────────
+# O dump antigo vai para um .bak ANTES de qualquer coisa e só é descartado no fim. Sem isso havia
+# uma janela real: um Ctrl-C entre o `rm -rf` do antigo e o `mv` do novo disparava o trap de
+# limpeza do temp e deixava a máquina SEM dump nenhum — exatamente o que o cabeçalho promete que
+# não acontece. O índice também entra na janela: novo dump + índice velho é um estado que o check
+# de consistência não enxerga (dumpVersion/buildGuid idênticos).
 echo "▶ substituindo o dump…"
 mkdir -p "$DEST"
-rm -rf "$DEST/Assembly-CSharp"
+BAK=""
+if [ -d "$DEST/Assembly-CSharp" ]; then
+  BAK="$DEST/.Assembly-CSharp.bak.$$"
+  rm -rf "$BAK"
+  mv "$DEST/Assembly-CSharp" "$BAK"
+fi
+
+restore_on_fail() {
+  if [ -n "$BAK" ] && [ -d "$BAK" ]; then
+    rm -rf "$DEST/Assembly-CSharp"
+    mv "$BAK" "$DEST/Assembly-CSharp"
+    echo "↩ interrompido — dump anterior RESTAURADO" >&2
+  fi
+  rm -rf "$TMP"
+}
+trap restore_on_fail EXIT
+
 mv "$TMP/Assembly-CSharp" "$DEST/Assembly-CSharp"
 mv "$TMP/types-index.json" "$DEST/types-index.json"
 
@@ -139,6 +180,11 @@ cat > "$DEST/.provenance.json" <<EOF
   "generatedBy": "scripts/decompile-eft.sh + .agents/tools/decompile-eft (ICSharpCode.Decompiler 10.1.0.8386)"
 }
 EOF
+
+# Sucesso: desarma o rollback e descarta o backup.
+trap - EXIT
+[ -n "$BAK" ] && rm -rf "$BAK"
+rm -rf "$TMP"
 
 echo
 echo "✓ dump completo em $DEST/Assembly-CSharp ($CS_COUNT arquivos)"

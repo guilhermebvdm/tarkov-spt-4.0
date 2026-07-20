@@ -205,9 +205,13 @@ if (CHECK) {
         // gerados e nunca lidos por ninguem.
         const stampP = path.join(ROOT, s.path, '.dump-stamp.json');
         const provP  = path.join(path.dirname(path.join(ROOT, s.path)), '.provenance.json');
-        const drift = readJsonSafe(stampP) && readJsonSafe(provP)
-          ? ['dumpVersion', 'buildGuid'].filter(k => {
-              const a = readJsonSafe(stampP)[k], b = readJsonSafe(provP)[k];
+        // dllSha256 entra na comparacao porque e o UNICO campo que muda quando o SPT re-patcheia a
+        // Assembly-CSharp — o cenario que a propria provenance diz ser o risco. buildGuid e do EFT
+        // (nao muda com re-patch) e dumpVersion e manual, entao os dois sozinhos nao detectam nada.
+        const stamp = readJsonSafe(stampP), prov = readJsonSafe(provP);
+        const drift = stamp && prov
+          ? ['dumpVersion', 'buildGuid', 'dllSha256'].filter(k => {
+              const a = stamp[k], b = prov[k];
               return a != null && b != null && String(a) !== String(b);
             })
           : [];
@@ -220,9 +224,12 @@ if (CHECK) {
     });
   }
 
-  if (missing || localMissing) {
+  // driftFound entra no exit: reportar "DIVERGENCIA" e ainda assim sair 0 (com um "Tudo presente ✓"
+  // logo abaixo) e autocontraditorio, e qualquer gate que leia o exit code passaria com dump velho.
+  if (missing || localMissing || driftFound) {
     if (missing)      log(`\n${missing} referencia(s) clonavel(is) faltando — rode: node scripts/setup-references.js`);
     if (localMissing) log(`${localMissing} artefato(s) local(is) faltando — veja o comando de cada um acima.`);
+    if (driftFound)   log(`\n${driftFound} artefato(s) local(is) DIVERGENTE(s) do registrado no repo — regere antes de confiar neles.`);
     process.exit(1);
   }
   log('\nTudo presente ✓');

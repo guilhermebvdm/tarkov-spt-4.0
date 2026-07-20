@@ -146,7 +146,7 @@ namespace DecompileEft
 
             sw.Stop();
             WriteIndex(outDir, entries, dumpVersion, sptVersion, eftVersion, buildGuid, dllSha, ok, failed, sw.Elapsed);
-            WriteScaffold(outDir, dumpVersion, buildGuid);
+            WriteScaffold(outDir, dumpVersion, buildGuid, dllSha);
 
             Console.WriteLine();
             Console.WriteLine($"[ok] {ok} ok | {failed} stub-error | {entries.Count} total | {sw.Elapsed.TotalSeconds:F0}s");
@@ -214,7 +214,12 @@ namespace DecompileEft
         {
             public string fqn { get; set; }
             public string status { get; set; }
+            // Omitidos quando null: na prática TODAS as 8.683 entradas têm path derivável, então
+            // gravá-lo seria 8.683 × "path":null de peso morto num arquivo versionado. A regra de
+            // derivação está documentada no _readme do índice.
+            [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
             public string alias41 { get; set; }
+            [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
             public string path { get; set; }
         }
 
@@ -226,10 +231,14 @@ namespace DecompileEft
             string dest = Path.Combine(Path.GetDirectoryName(outDir.TrimEnd('\\', '/')) ?? outDir, "types-index.json");
             var doc = new Dictionary<string, object>
             {
-                ["_readme"] = "Indice de TODOS os tipos do Assembly-CSharp. Ausencia AQUI = o tipo nao existe no assembly. " +
-                              "Ausencia do .cs em disco NAO significa isso (o dump e gitignored; pode nao estar baixado). " +
+                ["_readme"] = "Indice de TODOS os tipos top-level do Assembly-CSharp. Ausencia AQUI = o tipo nao existe no assembly. " +
+                              "Ausencia do .cs em disco NAO significa isso (o dump e gitignored; pode nao ter sido gerado nesta maquina). " +
                               "alias41 = rotulo do mapping comunitario SPT 4.1: aponta o conceito, NAO prova assinatura; " +
                               "cobre tipos, nao membros; ausencia de alias nao significa que o tipo nao exista.",
+                ["_pathRule"] = "Caminho do .cs (relativo a Assembly-CSharp/) e DERIVADO do fqn: pasta = namespace literal com pontos " +
+                                "(ex.: 'EFT.HealthSystem/'), vazio = raiz; arquivo = nome do tipo com backtick e caracteres invalidos em " +
+                                "NTFS trocados por '_', mais '-<aridade>' se generico (ex.: fqn 'GClass176`1' -> 'GClass176-1.cs'). " +
+                                "O campo 'path' so aparece na entrada quando o caminho real DIVERGE dessa regra (colisao de nome).",
                 ["dumpVersion"] = dumpVersion,
                 ["buildGuid"] = guid,
                 ["eftVersion"] = eft,
@@ -255,14 +264,18 @@ namespace DecompileEft
         }
 
         /// <summary>Re-cria os marcadores que o runner apaga junto com o dump antigo.</summary>
-        private static void WriteScaffold(string outDir, int dumpVersion, string guid)
+        private static void WriteScaffold(string outDir, int dumpVersion, string guid, string sha)
         {
             File.WriteAllText(Path.Combine(outDir, ".graphify_root"), "", new UTF8Encoding(false));
+            // dllSha256 vai no stamp porque é o único campo que muda quando o SPT re-patcheia a
+            // Assembly-CSharp; sem ele o check de consistência do setup-references não detecta
+            // justamente o cenário para o qual foi feito (buildGuid é do EFT e não muda no patch).
             File.WriteAllText(Path.Combine(outDir, ".dump-stamp.json"),
                 JsonSerializer.Serialize(new Dictionary<string, object>
                 {
                     ["dumpVersion"] = dumpVersion,
                     ["buildGuid"] = guid,
+                    ["dllSha256"] = sha,
                     ["generatedAtUtc"] = DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'", CultureInfo.InvariantCulture)
                 }), new UTF8Encoding(false));
             File.WriteAllText(Path.Combine(outDir, "Assembly-CSharp.csproj"),
