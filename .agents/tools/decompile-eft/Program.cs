@@ -97,7 +97,6 @@ namespace DecompileEft
 
                 // Layout do dump: pasta = namespace DOT-SEPARATED (ex.: "EFT.HealthSystem/"), sem
                 // namespace = raiz. Mantido igual ao dump anterior para não quebrar links/docs.
-                string dir = ns.Length == 0 ? outDir : Path.Combine(outDir, SanitizeSegment(ns));
                 string baseName = SanitizeSegment(type.Name);
                 if (type.TypeParameterCount > 0) baseName += "-" + type.TypeParameterCount.ToString(CultureInfo.InvariantCulture);
 

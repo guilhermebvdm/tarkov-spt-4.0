@@ -8,7 +8,7 @@
       "tier": 1,
       "fetch": false,
       "tracked": false,
-      "eftVersion": "0.16.x",
+      "eftVersion": "0.16.9.40087",
       "sptVersion": "4.0.13",
       "license": "BSG IP — interno, NÃO redistribuir (host público violaria isto)",
       "generate": "bash scripts/decompile-eft.sh",

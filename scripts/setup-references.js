@@ -88,6 +88,10 @@ function isPresent(absPath) {
   }
 }
 
+function readJsonSafe(absPath) {
+  try { return JSON.parse(fs.readFileSync(absPath, 'utf8')); } catch { return null; }
+}
+
 function git(args, cwd) {
   execFileSync('git', args, { cwd: cwd || ROOT, stdio: 'inherit' });
 }
@@ -180,7 +184,7 @@ if (CHECK) {
   // Artefatos locais: nao sao clonaveis nem vem no git. Quando faltam, o impacto NAO e obvio
   // (um grep no dump ausente volta vazio e parece "o tipo nao existe"), por isso o relatorio
   // imprime o COMO OBTER e o QUE QUEBRA SEM, em vez de so marcar como faltando.
-  let localMissing = 0;
+  let localMissing = 0, driftFound = 0;
   if (local.length) {
     log('\nArtefatos locais (nao vem no git, gerados/baixados na maquina):');
     local.forEach(s => {
@@ -193,6 +197,25 @@ if (CHECK) {
         if (s.download?.url) log(`      baixar:    ${s.download.url}`);
         else if (s.download === null && !s.generate) log('      baixar:    (host ainda nao definido)');
         if (s.withoutIt)     log(`      ⚠ sem ele: ${s.withoutIt}`);
+      } else {
+        // Check de consistencia: o artefato em disco carrega um .dump-stamp.json (escrito por quem
+        // GEROU o dump); ao lado dele fica o .provenance.json VERSIONADO. Se divergirem, o dump em
+        // disco veio de outra build/versao do harness que a registrada no repo — sintoma classico de
+        // "baixei um zip antigo" ou "esqueci de regerar". Sem esta checagem os dois arquivos seriam
+        // gerados e nunca lidos por ninguem.
+        const stampP = path.join(ROOT, s.path, '.dump-stamp.json');
+        const provP  = path.join(path.dirname(path.join(ROOT, s.path)), '.provenance.json');
+        const drift = readJsonSafe(stampP) && readJsonSafe(provP)
+          ? ['dumpVersion', 'buildGuid'].filter(k => {
+              const a = readJsonSafe(stampP)[k], b = readJsonSafe(provP)[k];
+              return a != null && b != null && String(a) !== String(b);
+            })
+          : [];
+        if (drift.length) {
+          log(`      ⚠ DIVERGENCIA com .provenance.json em: ${drift.join(', ')}`);
+          log(`        o dump em disco nao corresponde ao registrado no repo — regere: ${s.generate || '(ver manifest)'}`);
+          driftFound++;
+        }
       }
     });
   }

@@ -43,10 +43,15 @@ command -v dotnet >/dev/null 2>&1 || { echo "❌ dotnet SDK não encontrado no P
 echo "▶ coletando provenance…"
 DLL_SHA="$(sha256sum "$DLL" | cut -d' ' -f1)"
 BUILD_GUID="$(grep -a 'build-guid=' "$GAME_DIR/EscapeFromTarkov_Data/boot.config" 2>/dev/null | head -1 | cut -d= -f2 | tr -d '\r' || true)"
-# Versões: best-effort. O EFT não muda mais (SPT não sobe para a 1.0), mas o SPT RE-PATCHEIA a
-# DLL a cada update dele — por isso sptVersion entra na provenance.
-EFT_VERSION="${EFT_VERSION:-$(grep -aoE '0\.1[0-9]\.[0-9]+\.[0-9]+' "$GAME_DIR/EscapeFromTarkov_Data/boot.config" 2>/dev/null | head -1 || true)}"
-[ -n "${EFT_VERSION:-}" ] || EFT_VERSION="0.16.x"
+# Versões: o EFT não muda mais (SPT não sobe para a 1.0), mas o SPT RE-PATCHEIA a DLL a cada
+# update dele — por isso sptVersion entra na provenance.
+# A versão do EFT vem do FileVersion do executável: o boot.config só tem o build-guid, NÃO a
+# versão (uma tentativa de grep ali cai sempre no fallback e grava "0.16.x" em silêncio).
+EFT_VERSION="${EFT_VERSION:-$(powershell.exe -NoProfile -Command "(Get-Item '$GAME_DIR/EscapeFromTarkov.exe').VersionInfo.FileVersion" 2>/dev/null | tr -d '\r\n' || true)}"
+case "${EFT_VERSION:-}" in
+  0.*) : ;;                       # ok, formato esperado (ex.: 0.16.9.40087)
+  *)   EFT_VERSION="0.16.x"; echo "  (aviso: não consegui ler a versão do EscapeFromTarkov.exe — usando '$EFT_VERSION')" ;;
+esac
 SPT_VERSION="${SPT_VERSION:-$(grep -oE '"sptVersion"\s*:\s*"[^"]+"' references/manifest.json 2>/dev/null | head -1 | sed -E 's/.*"([^"]+)"$/\1/' || true)}"
 [ -n "${SPT_VERSION:-}" ] || SPT_VERSION="unknown"
 echo "  sha256=${DLL_SHA:0:16}… buildGuid=${BUILD_GUID:-?} eft=$EFT_VERSION spt=$SPT_VERSION dumpVersion=$DUMP_VERSION"

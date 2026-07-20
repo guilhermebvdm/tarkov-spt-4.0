@@ -35,6 +35,12 @@ fi
 # (2) escape explícito
 case "$CMD" in *"# allow-ilspy"*) exit 0 ;; esac
 
+# (3) só interessa o Assembly-CSharp do EFT. Descompilar OUTRAS DLLs (mods de terceiros,
+# 0Harmony, Fika, SPT...) é trabalho legítimo que o dump do EFT não substitui — bloquear ali
+# seria falso-positivo com mensagem enganosa. Casos reais já ocorridos neste repo:
+# MoreBotsServer.dll, 0Harmony.dll, BringBackConcussion.dll.
+case "$CMD" in *[Aa]ssembly-[Cc][Ss]harp*) ;; *) exit 0 ;; esac
+
 # Match ANCORADO em posição-de-comando: só dispara quando ilspycmd é EXECUTADO, não quando a
 # string aparece de passagem (ex.: `grep ilspycmd docs/`, um heredoc de commit citando a
 # ferramenta, ou `cat` de um .md que fala dela).

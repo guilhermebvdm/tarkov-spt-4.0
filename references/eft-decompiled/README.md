@@ -58,7 +58,7 @@ Tipos obfuscados (`GClass1234`) trazem no topo do arquivo um comentário com o n
 | Assembly | `D:/SPT/EscapeFromTarkov_Data/Managed/Assembly-CSharp.dll` |
 | SHA256 | `faef6f0b9f142f9d047495ec3dccfd5d6974ac048368dc7045955cf54b117982` |
 | build-guid | `9c1bfdf078d74e26b2de13c18e539045` |
-| EFT | 0.16.x · **SPT 4.0.13** |
+| EFT | **0.16.9.40087** · SPT **4.0.13** |
 | Gerado em | 2026-07-19 (`dumpVersion` 1) |
 
 > A DLL é **patcheada pelo SPT** (existe `Assembly-CSharp.dll.spt-bak`, o original). O EFT não recebe mais updates
