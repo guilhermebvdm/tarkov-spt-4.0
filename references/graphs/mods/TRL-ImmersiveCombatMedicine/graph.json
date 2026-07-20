@@ -4257,7 +4257,7 @@
       "label": ".Prefix()",
       "file_type": "code",
       "source_file": "Patches/Trauma/HealthPatches.cs",
-      "source_location": "L13",
+      "source_location": "L14",
       "_origin": "ast",
       "id": "trauma_healthpatches_damagetriggerpatch_prefix",
       "community": 14,
@@ -4267,7 +4267,7 @@
       "label": "Player",
       "file_type": "code",
       "source_file": "Patches/Trauma/HealthPatches.cs",
-      "source_location": "L13",
+      "source_location": "L14",
       "_origin": "ast",
       "id": "patches_trauma_healthpatches_cs_player",
       "community": 14,
@@ -4277,17 +4277,27 @@
       "label": "DamageInfoStruct",
       "file_type": "code",
       "source_file": "Patches/Trauma/HealthPatches.cs",
-      "source_location": "L13",
+      "source_location": "L14",
       "_origin": "ast",
       "id": "damageinfostruct",
       "community": 14,
       "norm_label": "damageinfostruct"
     },
     {
+      "label": "EBodyPart",
+      "file_type": "code",
+      "source_file": "Patches/Trauma/HealthPatches.cs",
+      "source_location": "L14",
+      "_origin": "ast",
+      "id": "patches_trauma_healthpatches_cs_ebodypart",
+      "community": 14,
+      "norm_label": "ebodypart"
+    },
+    {
       "label": "HarmonyPriority",
       "file_type": "code",
       "source_file": "Patches/Trauma/HealthPatches.cs",
-      "source_location": "L13",
+      "source_location": "L14",
       "_origin": "ast",
       "id": "harmonypriority",
       "community": 14,
@@ -4297,21 +4307,11 @@
       "label": ".Postfix()",
       "file_type": "code",
       "source_file": "Patches/Trauma/HealthPatches.cs",
-      "source_location": "L35",
+      "source_location": "L48",
       "_origin": "ast",
       "id": "trauma_healthpatches_damagetriggerpatch_postfix",
       "community": 14,
       "norm_label": ".postfix()"
-    },
-    {
-      "label": "EBodyPart",
-      "file_type": "code",
-      "source_file": "Patches/Trauma/HealthPatches.cs",
-      "source_location": "L35",
-      "_origin": "ast",
-      "id": "patches_trauma_healthpatches_cs_ebodypart",
-      "community": 14,
-      "norm_label": "ebodypart"
     },
     {
       "label": "InputPatches.cs",
@@ -4982,6 +4982,86 @@
       "id": "trauma_traumaarmsconsumer_traumaarmsconsumer_update",
       "community": 42,
       "norm_label": ".update()"
+    },
+    {
+      "label": "TraumaBlackoutTrigger.cs",
+      "file_type": "code",
+      "source_file": "Patches/Trauma/TraumaBlackoutTrigger.cs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "trauma_traumablackouttrigger",
+      "community": 46,
+      "norm_label": "traumablackouttrigger.cs"
+    },
+    {
+      "label": "TRLImmersiveCombatMedicine.Trauma",
+      "file_type": "code",
+      "source_file": "Patches/Trauma/TraumaBlackoutTrigger.cs",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "trauma_traumablackouttrigger_trlimmersivecombatmedicine_trauma",
+      "community": 46,
+      "norm_label": "trlimmersivecombatmedicine.trauma"
+    },
+    {
+      "label": "TraumaBlackoutTrigger",
+      "file_type": "code",
+      "source_file": "Patches/Trauma/TraumaBlackoutTrigger.cs",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "trauma_traumablackouttrigger_traumablackouttrigger",
+      "community": 46,
+      "norm_label": "traumablackouttrigger"
+    },
+    {
+      "label": "float",
+      "file_type": "code",
+      "source_file": "Patches/Trauma/TraumaBlackoutTrigger.cs",
+      "source_location": "L13",
+      "_origin": "ast",
+      "id": "patches_trauma_traumablackouttrigger_cs_float",
+      "community": 46,
+      "norm_label": "float"
+    },
+    {
+      "label": ".Evaluate()",
+      "file_type": "code",
+      "source_file": "Patches/Trauma/TraumaBlackoutTrigger.cs",
+      "source_location": "L19",
+      "_origin": "ast",
+      "id": "trauma_traumablackouttrigger_traumablackouttrigger_evaluate",
+      "community": 46,
+      "norm_label": ".evaluate()"
+    },
+    {
+      "label": "Player",
+      "file_type": "code",
+      "source_file": "Patches/Trauma/TraumaBlackoutTrigger.cs",
+      "source_location": "L19",
+      "_origin": "ast",
+      "id": "patches_trauma_traumablackouttrigger_cs_player",
+      "community": 46,
+      "norm_label": "player"
+    },
+    {
+      "label": "EBodyPart",
+      "file_type": "code",
+      "source_file": "Patches/Trauma/TraumaBlackoutTrigger.cs",
+      "source_location": "L19",
+      "_origin": "ast",
+      "id": "patches_trauma_traumablackouttrigger_cs_ebodypart",
+      "community": 46,
+      "norm_label": "ebodypart"
+    },
+    {
+      "label": ".LogIgnored()",
+      "file_type": "code",
+      "source_file": "Patches/Trauma/TraumaBlackoutTrigger.cs",
+      "source_location": "L78",
+      "_origin": "ast",
+      "id": "trauma_traumablackouttrigger_traumablackouttrigger_logignored",
+      "community": 46,
+      "norm_label": ".logignored()"
     },
     {
       "label": "TraumaBotFall.cs",
@@ -7767,7 +7847,7 @@
       "label": ".Update()",
       "file_type": "code",
       "source_file": "Patches/Trauma/TraumaStomachConsumer.cs",
-      "source_location": "L108",
+      "source_location": "L116",
       "_origin": "ast",
       "id": "trauma_traumastomachconsumer_traumastomachconsumer_update",
       "community": 45,
@@ -8157,7 +8237,7 @@
       "label": ".Awake()",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L73",
+      "source_location": "L79",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_awake",
       "community": 9,
@@ -8167,7 +8247,7 @@
       "label": ".OnDestroy()",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L289",
+      "source_location": "L316",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_ondestroy",
       "community": 9,
@@ -8177,7 +8257,7 @@
       "label": ".OnHealCheckResponseHandler()",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L294",
+      "source_location": "L321",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_onhealcheckresponsehandler",
       "community": 9,
@@ -8187,7 +8267,7 @@
       "label": "BandAidHealCheckResponsePacket",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L294",
+      "source_location": "L321",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_cs_bandaidhealcheckresponsepacket",
       "community": 9,
@@ -8197,7 +8277,7 @@
       "label": ".MigrateOrphanedConfigKeys()",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L304",
+      "source_location": "L331",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_migrateorphanedconfigkeys",
       "community": 9,
@@ -8207,7 +8287,7 @@
       "label": ".OnRaidStartCleanup()",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L436",
+      "source_location": "L486",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_onraidstartcleanup",
       "community": 9,
@@ -8217,7 +8297,7 @@
       "label": "GameObject",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L449",
+      "source_location": "L499",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_cs_gameobject",
       "community": 9,
@@ -8227,7 +8307,7 @@
       "label": "BandAidController",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L450",
+      "source_location": "L500",
       "_origin": "ast",
       "id": "bandaidcontroller",
       "community": 9,
@@ -8237,7 +8317,7 @@
       "label": "float",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L451",
+      "source_location": "L501",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_cs_float",
       "community": 9,
@@ -8247,7 +8327,7 @@
       "label": ".Update()",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L453",
+      "source_location": "L503",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_update",
       "community": 9,
@@ -8257,7 +8337,7 @@
       "label": ".WakeLocalPlayer()",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L543",
+      "source_location": "L593",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_trlimmersivecombatmedicineplugin_wakelocalplayer",
       "community": 9,
@@ -8267,7 +8347,7 @@
       "label": "GameWorld",
       "file_type": "code",
       "source_file": "TRLImmersiveCombatMedicinePlugin.cs",
-      "source_location": "L543",
+      "source_location": "L593",
       "_origin": "ast",
       "id": "trlimmersivecombatmedicineplugin_cs_gameworld",
       "community": 9,
@@ -9775,9 +9855,9 @@
       "source_file": "Patches/Trauma/TraumaStomachConsumer.cs",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "trauma_traumastomachconsumer_traumastomachconsumer",
-      "target": "monobehaviour",
-      "confidence_score": 1.0
+      "target": "monobehaviour"
     },
     {
       "relation": "references",
@@ -15812,6 +15892,17 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "Patches/Trauma/HealthPatches.cs",
+      "source_location": "L14",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "trauma_healthpatches_damagetriggerpatch_prefix",
+      "target": "patches_trauma_healthpatches_cs_ebodypart",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/HealthPatches.cs",
       "source_location": "L12",
       "weight": 1.0,
       "context": "parameter_type",
@@ -15847,10 +15938,10 @@
       "source_file": "Patches/Trauma/HealthPatches.cs",
       "source_location": "L34",
       "weight": 1.0,
-      "context": "attribute",
+      "context": "parameter_type",
       "confidence_score": 1.0,
       "source": "trauma_healthpatches_damagetriggerpatch_postfix",
-      "target": "harmonypriority"
+      "target": "patches_trauma_healthpatches_cs_ebodypart"
     },
     {
       "relation": "references",
@@ -15858,10 +15949,10 @@
       "source_file": "Patches/Trauma/HealthPatches.cs",
       "source_location": "L34",
       "weight": 1.0,
-      "context": "parameter_type",
+      "context": "attribute",
       "confidence_score": 1.0,
       "source": "trauma_healthpatches_damagetriggerpatch_postfix",
-      "target": "patches_trauma_healthpatches_cs_ebodypart"
+      "target": "harmonypriority"
     },
     {
       "relation": "contains",
@@ -16976,6 +17067,112 @@
       "confidence_score": 1.0,
       "source": "trauma_traumaarmsconsumer_traumaarmsconsumer_update",
       "target": "trauma_traumaarmsconsumer_traumaarmsconsumer_executecancel"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaBlackoutTrigger.cs",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "trauma_traumablackouttrigger",
+      "target": "trauma_traumablackouttrigger_traumablackouttrigger",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaBlackoutTrigger.cs",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "trauma_traumablackouttrigger",
+      "target": "trauma_traumablackouttrigger_trlimmersivecombatmedicine_trauma",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaBlackoutTrigger.cs",
+      "source_location": "L15",
+      "weight": 1.0,
+      "context": "field",
+      "source": "trauma_traumablackouttrigger_traumablackouttrigger",
+      "target": "patches_trauma_traumablackouttrigger_cs_float",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaBlackoutTrigger.cs",
+      "source_location": "L19",
+      "weight": 1.0,
+      "source": "trauma_traumablackouttrigger_traumablackouttrigger",
+      "target": "trauma_traumablackouttrigger_traumablackouttrigger_evaluate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaBlackoutTrigger.cs",
+      "source_location": "L78",
+      "weight": 1.0,
+      "source": "trauma_traumablackouttrigger_traumablackouttrigger",
+      "target": "trauma_traumablackouttrigger_traumablackouttrigger_logignored",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaBlackoutTrigger.cs",
+      "source_location": "L19",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "trauma_traumablackouttrigger_traumablackouttrigger_evaluate",
+      "target": "patches_trauma_traumablackouttrigger_cs_ebodypart",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaBlackoutTrigger.cs",
+      "source_location": "L19",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "trauma_traumablackouttrigger_traumablackouttrigger_evaluate",
+      "target": "patches_trauma_traumablackouttrigger_cs_player",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaBlackoutTrigger.cs",
+      "source_location": "L59",
+      "weight": 1.0,
+      "source": "trauma_traumablackouttrigger_traumablackouttrigger_evaluate",
+      "target": "trauma_traumablackouttrigger_traumablackouttrigger_logignored",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaBlackoutTrigger.cs",
+      "source_location": "L78",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "trauma_traumablackouttrigger_traumablackouttrigger_logignored",
+      "target": "patches_trauma_traumablackouttrigger_cs_player",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "Patches/Trauma/TraumaBlackoutTrigger.cs",
+      "source_location": "L78",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "trauma_traumablackouttrigger_traumablackouttrigger_logignored",
+      "target": "patches_trauma_traumablackouttrigger_cs_ebodypart",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -21299,9 +21496,9 @@
       "source_file": "Patches/Trauma/TraumaPose.cs",
       "source_location": "L103",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "trauma_traumapose_traumapose_absorbifcycleengaged",
-      "target": "trauma_traumapose_traumapose_kindword",
-      "confidence_score": 1.0
+      "target": "trauma_traumapose_traumapose_kindword"
     },
     {
       "relation": "calls",
@@ -21354,9 +21551,9 @@
       "source_location": "L64",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "trauma_traumapose_traumapose_kindword",
-      "target": "patches_trauma_traumapose_cs_traumaregion",
-      "confidence_score": 1.0
+      "target": "patches_trauma_traumapose_cs_traumaregion"
     },
     {
       "relation": "calls",
@@ -21376,9 +21573,9 @@
       "source_file": "Patches/Trauma/TraumaPose.cs",
       "source_location": "L125",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "trauma_traumapose_traumapose_tryinvoluntarycrouch",
-      "target": "trauma_traumapose_traumapose_kindword",
-      "confidence_score": 1.0
+      "target": "trauma_traumapose_traumapose_kindword"
     },
     {
       "relation": "references",
@@ -21453,9 +21650,9 @@
       "source_location": "L98",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "trauma_traumapose_traumapose_absorbifcycleengaged",
-      "target": "patches_trauma_traumapose_cs_traumaregion",
-      "confidence_score": 1.0
+      "target": "patches_trauma_traumapose_cs_traumaregion"
     },
     {
       "relation": "references",
@@ -21464,9 +21661,9 @@
       "source_location": "L383",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "trauma_traumapose_traumapose_botcrouchdip",
-      "target": "patches_trauma_traumapose_cs_traumaregion",
-      "confidence_score": 1.0
+      "target": "patches_trauma_traumapose_cs_traumaregion"
     },
     {
       "relation": "references",
@@ -21475,9 +21672,9 @@
       "source_location": "L351",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "trauma_traumapose_traumapose_cancelkind",
-      "target": "patches_trauma_traumapose_cs_traumaregion",
-      "confidence_score": 1.0
+      "target": "patches_trauma_traumapose_cs_traumaregion"
     },
     {
       "relation": "references",
@@ -22081,9 +22278,9 @@
       "source_file": "Patches/Trauma/TraumaStomachConsumer.cs",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "trauma_traumastomachconsumer",
-      "target": "trauma_traumastomachconsumer_traumastomachconsumer",
-      "confidence_score": 1.0
+      "target": "trauma_traumastomachconsumer_traumastomachconsumer"
     },
     {
       "relation": "contains",
@@ -22091,9 +22288,9 @@
       "source_file": "Patches/Trauma/TraumaStomachConsumer.cs",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "trauma_traumastomachconsumer",
-      "target": "trauma_traumastomachconsumer_trlimmersivecombatmedicine_trauma",
-      "confidence_score": 1.0
+      "target": "trauma_traumastomachconsumer_trlimmersivecombatmedicine_trauma"
     },
     {
       "relation": "references",
@@ -22102,9 +22299,9 @@
       "source_location": "L17",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "trauma_traumastomachconsumer_traumastomachconsumer",
-      "target": "patches_trauma_traumastomachconsumer_cs_bool",
-      "confidence_score": 1.0
+      "target": "patches_trauma_traumastomachconsumer_cs_bool"
     },
     {
       "relation": "references",
@@ -22113,9 +22310,9 @@
       "source_location": "L18",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "trauma_traumastomachconsumer_traumastomachconsumer",
-      "target": "patches_trauma_traumastomachconsumer_cs_gameworld",
-      "confidence_score": 1.0
+      "target": "patches_trauma_traumastomachconsumer_cs_gameworld"
     },
     {
       "relation": "references",
@@ -22124,9 +22321,9 @@
       "source_location": "L20",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "trauma_traumastomachconsumer_traumastomachconsumer",
-      "target": "patches_trauma_traumastomachconsumer_cs_traumaregion",
-      "confidence_score": 1.0
+      "target": "patches_trauma_traumastomachconsumer_cs_traumaregion"
     },
     {
       "relation": "references",
@@ -22145,9 +22342,9 @@
       "source_file": "Patches/Trauma/TraumaStomachConsumer.cs",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "trauma_traumastomachconsumer_traumastomachconsumer",
-      "target": "trauma_traumastomachconsumer_traumastomachconsumer_awake",
-      "confidence_score": 1.0
+      "target": "trauma_traumastomachconsumer_traumastomachconsumer_awake"
     },
     {
       "relation": "method",
@@ -22155,9 +22352,9 @@
       "source_file": "Patches/Trauma/TraumaStomachConsumer.cs",
       "source_location": "L35",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "trauma_traumastomachconsumer_traumastomachconsumer",
-      "target": "trauma_traumastomachconsumer_traumastomachconsumer_isactive",
-      "confidence_score": 1.0
+      "target": "trauma_traumastomachconsumer_traumastomachconsumer_isactive"
     },
     {
       "relation": "method",
@@ -22165,9 +22362,9 @@
       "source_file": "Patches/Trauma/TraumaStomachConsumer.cs",
       "source_location": "L42",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "trauma_traumastomachconsumer_traumastomachconsumer",
-      "target": "trauma_traumastomachconsumer_traumastomachconsumer_ontransition",
-      "confidence_score": 1.0
+      "target": "trauma_traumastomachconsumer_traumastomachconsumer_ontransition"
     },
     {
       "relation": "method",
@@ -22175,9 +22372,9 @@
       "source_file": "Patches/Trauma/TraumaStomachConsumer.cs",
       "source_location": "L52",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "trauma_traumastomachconsumer_traumastomachconsumer",
-      "target": "trauma_traumastomachconsumer_traumastomachconsumer_ontransitioncore",
-      "confidence_score": 1.0
+      "target": "trauma_traumastomachconsumer_traumastomachconsumer_ontransitioncore"
     },
     {
       "relation": "method",
@@ -22185,9 +22382,9 @@
       "source_file": "Patches/Trauma/TraumaStomachConsumer.cs",
       "source_location": "L108",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "trauma_traumastomachconsumer_traumastomachconsumer",
-      "target": "trauma_traumastomachconsumer_traumastomachconsumer_update",
-      "confidence_score": 1.0
+      "target": "trauma_traumastomachconsumer_traumastomachconsumer_update"
     },
     {
       "relation": "calls",
@@ -22196,9 +22393,9 @@
       "source_file": "Patches/Trauma/TraumaStomachConsumer.cs",
       "source_location": "L55",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "trauma_traumastomachconsumer_traumastomachconsumer_ontransitioncore",
-      "target": "trauma_traumastomachconsumer_traumastomachconsumer_isactive",
-      "confidence_score": 1.0
+      "target": "trauma_traumastomachconsumer_traumastomachconsumer_isactive"
     },
     {
       "relation": "calls",
@@ -22207,9 +22404,9 @@
       "source_file": "Patches/Trauma/TraumaStomachConsumer.cs",
       "source_location": "L116",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "trauma_traumastomachconsumer_traumastomachconsumer_update",
-      "target": "trauma_traumastomachconsumer_traumastomachconsumer_isactive",
-      "confidence_score": 1.0
+      "target": "trauma_traumastomachconsumer_traumastomachconsumer_isactive"
     },
     {
       "relation": "references",
@@ -22218,9 +22415,9 @@
       "source_location": "L42",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "trauma_traumastomachconsumer_traumastomachconsumer_ontransition",
-      "target": "patches_trauma_traumastomachconsumer_cs_traumatransition",
-      "confidence_score": 1.0
+      "target": "patches_trauma_traumastomachconsumer_cs_traumatransition"
     },
     {
       "relation": "calls",
@@ -22229,9 +22426,9 @@
       "source_file": "Patches/Trauma/TraumaStomachConsumer.cs",
       "source_location": "L45",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "trauma_traumastomachconsumer_traumastomachconsumer_ontransition",
-      "target": "trauma_traumastomachconsumer_traumastomachconsumer_ontransitioncore",
-      "confidence_score": 1.0
+      "target": "trauma_traumastomachconsumer_traumastomachconsumer_ontransitioncore"
     },
     {
       "relation": "references",
@@ -22240,9 +22437,9 @@
       "source_location": "L52",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "trauma_traumastomachconsumer_traumastomachconsumer_ontransitioncore",
-      "target": "patches_trauma_traumastomachconsumer_cs_traumatransition",
-      "confidence_score": 1.0
+      "target": "patches_trauma_traumastomachconsumer_cs_traumatransition"
     },
     {
       "relation": "contains",
@@ -22850,5 +23047,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "f4db7a9ce6eef1dd79f3beea8de9e992d97e9239"
+  "built_at_commit": "6d212d2e1d897da081ee4aeaf4b10a1e479aca19"
 }

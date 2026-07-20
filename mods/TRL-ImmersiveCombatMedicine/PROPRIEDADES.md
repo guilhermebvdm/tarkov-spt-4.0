@@ -68,7 +68,7 @@ Toggle POR consumidor (comportamento 9 da spec funcional 002): cada consumidor s
 | Fall Cycle | bool | `true` | — | — | Cair + ciclo de levantar (item 004). Governado pelo master Trauma 2.0; desligar mid-raid destrava o levantar na hora, cancela quedas pendentes e libera bots (o mancar interim do 003 NÃO volta). OFF com Legs Effects ON: o aviso (toast) da 1ª ocorrência da linha Cair ainda aparece — registry de consumidores é por região (PA-01-14). (Key renomeada na entrega do 004 — ver tabela Renomeadas.) |
 | Arms Effects | bool | `true` | — | — | Tremor contínuo + cancelamento de ADS escalonado (item 005). Governado pelo master Trauma 2.0; desligar mid-raid remove o tremor e cancela o lockout. (Key renomeada na entrega do 005 — ver tabela Renomeadas.) |
 | Stomach Effects | bool | `true` | — | — | Agachar involuntário probabilístico ao zerar o estômago (item 006). Governado pelo master Trauma 2.0; desligar mid-raid cancela agachares pendentes DO ESTÔMAGO (não toca os de pernas); o "sem ar" legado NÃO volta. (Key renomeada na entrega do 006 — ver tabela Renomeadas.) |
-| Blackout 2.0 (item 007) | bool | `false` | — | — | Placeholder — desmaio percentual. Sem função até o item 007 (o desmaio ATUAL segue no toggle antigo "Sistema de Desmaio"). |
+| Blackout 2.0 | bool | `true` | — | — | Gatilho percentual de desmaio (item 007): tórax ≥50% da vida atual (piso 25 de dano absoluto) rola p=50%, imune sob analgésico; cabeça ≥25% da vida atual (piso 10) rola p=50%, p=25% sob analgésico. Governado pelo master "Sistema de Desmaio" — este toggle decide SÓ a lógica de entrada (percentual ou nenhuma); o limiar fixo legado NÃO volta mesmo desligado. (Key renomeada na entrega do 007 — ver tabela Renomeadas.) |
 | Debug Test Consumer | bool | `false` | — | Sim | Consumidor de teste SEM efeito de gameplay: registra-se ATIVO para as TRÊS regiões (pernas/braços/estômago), destravando o toast/i18n para validação (AC5 da spec funcional). |
 
 ## Removidas
@@ -86,6 +86,7 @@ Toggle POR consumidor (comportamento 9 da spec funcional 002): cada consumidor s
 | Fall Cycle (item 004) → Fall Cycle | 2026-07-19 (item 004, v1.5.0): **rename-at-delivery** — a key nova nasce ON para todos; o `false` do placeholder não era escolha do usuário | `MigrateOrphanedConfigKeys()` DELETA a entry órfã SEM copiar o valor + `Config.Save` (mesmo padrão do 003). |
 | Arms Effects (item 005) → Arms Effects | 2026-07-19 (item 005, v1.6.0): **rename-at-delivery** — a key nova nasce ON para todos; o `false` do placeholder não era escolha do usuário | `MigrateOrphanedConfigKeys()` DELETA a entry órfã SEM copiar o valor + `Config.Save` (mesmo padrão do 003/004). |
 | Stomach Effects (item 006) → Stomach Effects | 2026-07-19 (item 006, v1.7.0): **rename-at-delivery** — a key nova nasce ON para todos; o `false` do placeholder não era escolha do usuário | `MigrateOrphanedConfigKeys()` DELETA a entry órfã SEM copiar o valor + `Config.Save` (mesmo padrão do 003/004/005). |
+| Blackout 2.0 (item 007) → Blackout 2.0 | 2026-07-19 (item 007, v1.8.0): **rename-at-delivery** — a key nova nasce ON para todos; o `false` do placeholder não era escolha do usuário | `MigrateOrphanedConfigKeys()` DELETA a entry órfã SEM copiar o valor + `Config.Save` (mesmo padrão do 003/004/005/006). |
 
 ## Seção 7. Trauma 2.0 (Pernas)
 
@@ -128,6 +129,17 @@ Consumidor de estômago (item 006, spec 006 §3). Roll p=75%/25% (sem/com analg�
 | Stomach Crouch Chance Percent | float | `75` | 0–100 | — | Chance (%) de agachar involuntário ao ZERAR o estômago SEM analgésico ativo. Rolada 1× por zerada (curar e zerar de novo rola de novo; estômago que permanece zerado não re-rola). 0 = nunca agacha (rolls seguem logados); 100 = sempre. |
 | Stomach Crouch Chance Under Painkiller Percent | float | `25` | 0–100 | — | Chance (%) com analgésico ativo NO INSTANTE da zerada (valor congelado nessa hora — tomar/expirar analgésico depois não muda nada até a próxima zerada). Independente do slider sem analgésico — sem trava entre eles; inverter é permitido. |
 
+## Seção 11. Trauma 2.0 (Desmaio)
+
+Gatilho percentual de desmaio (item 007, spec 007 §3) — substitui os limiares fixos absolutos legados (tórax ≥35 / cabeça ≥10, sem gate de analgésico). Compara o dano do hit contra a vida da parte IMEDIATAMENTE ANTES daquele hit (não a vida atual pós-dano, não a vida máxima). Cada hit (pellet/fragmento) é avaliado individualmente — sem agregação. As probabilidades de roll (50% tórax, 50%/25% cabeça) são **constantes fixas no código** (`TraumaBlackoutTrigger`), não configuráveis — só os 4 números abaixo são expostos. Governado pelo `Blackout 2.0` (seção 6, sub-toggle da lógica de entrada) e pelo master `Sistema de Desmaio` (seção 2, que segue controlando o pipeline inteiro).
+
+| Nome (key) | Tipo | Padrão | Faixa | Avançado | Tooltip |
+|---|---|---|---|---|---|
+| Chest Faint Percent Threshold | float | `50` | 0–100 | — | % da vida ATUAL do tórax (pré-tiro) que um hit precisa remover para rolar desmaio (p=50%; imune sob analgésico — decisão 9). Precisa TAMBÉM atingir o piso absoluto abaixo (decisão 15). |
+| Head Faint Percent Threshold | float | `25` | 0–100 | — | % da vida ATUAL da cabeça (pré-tiro) que um hit precisa remover para rolar desmaio (p=50% sem analgésico, p=25% sob analgésico — cabeça NÃO fica imune). Precisa TAMBÉM atingir o piso absoluto abaixo. |
+| Chest Faint Absolute Damage Floor | float | `25` | 0–100 | — | Piso de segurança (decisão 15): dano ABSOLUTO mínimo no hit do tórax, além do percentual acima — evita desmaio por hit percentualmente grande mas fisicamente insignificante (ex.: 5 de dano em tórax com 8 de vida = 62% mas só 5 de dano). |
+| Head Faint Absolute Damage Floor | float | `10` | 0–100 | — | Piso de segurança (decisão 15): dano ABSOLUTO mínimo no hit da cabeça, além do percentual acima. |
+
 ## Histórico de Alterações
 
 | Data | Autor | Alteração |
@@ -141,3 +153,4 @@ Consumidor de estômago (item 006, spec 006 §3). Roll p=75%/25% (sem/com analg�
 | 2026-07-19 | Guilherme | Item 004 (ciclo de queda, v1.5.0): seção nova `8. Trauma 2.0 (Queda)` (3 entries); RENAME `Fall Cycle (item 004)` → `Fall Cycle` (default ON; órfã deletada sem copiar valor — tabela Renomeadas); nota do interim do 003 removido na seção 7 (linha Cair sem cap N2 do 003; `Fall Cycle` OFF = linha Cair sem efeito do mod). |
 | 2026-07-19 | Guilherme | Item 005 (braços Trauma 2.0, v1.6.0): seção nova `9. Trauma 2.0 (Braços)` (4 entries — 3 timers de cancela-ADS + lockout); RENAME `Arms Effects (item 005)` → `Arms Effects` (default ON; órfã deletada sem copiar valor — tabela Renomeadas); `Sistema de Braços` (seção 2) marcado INERTE — legado de braços aposentado (D10: fadiga de mira + voz "Arm"), remoção da key no item 010. |
 | 2026-07-19 | Guilherme | Item 006 (estômago Trauma 2.0, v1.7.0): seção nova `10. Trauma 2.0 (Estômago)` (2 entries — chance de agachar sem/com analgésico, sliders independentes sem clamp); RENAME `Stomach Effects (item 006)` → `Stomach Effects` (default ON; órfã deletada sem copiar valor — tabela Renomeadas); `Sistema de Estomago` (seção 2) marcado INERTE — legado "sem ar" aposentado (D10), remoção da key no item 010. |
+| 2026-07-19 | Guilherme | Item 007 (desmaio percentual, v1.8.0): seção nova `11. Trauma 2.0 (Desmaio)` (4 entries — 2 percentuais + 2 pisos absolutos; probabilidades de roll são constantes fixas, não expostas); RENAME `Blackout 2.0 (item 007)` → `Blackout 2.0` (default ON; órfã deletada sem copiar valor — tabela Renomeadas); limiares fixos legados (tórax ≥35/cabeça ≥10, sem gate de analgésico) REMOVIDOS do caminho de gatilho ativo — `Sistema de Desmaio` (seção 2/3) segue como master do pipeline inteiro. |

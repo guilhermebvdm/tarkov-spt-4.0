@@ -14,7 +14,7 @@ namespace TRLImmersiveCombatMedicine
     // TraumaBotFall.RegisterLayer (sem o atributo, a ordem de load do BepInEx 5 pode falso-negativar
     // PluginInfos com BigBrain instalado). GUID confirmado: bigbrain_full/BigBrainPlugin.cs:10.
     [BepInDependency("xyz.drakia.bigbrain", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.7.0")]
+    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.8.0")]
     public class TRLImmersiveCombatMedicinePlugin : BaseUnityPlugin
     {
         public static TRLImmersiveCombatMedicinePlugin Instance;
@@ -70,11 +70,17 @@ namespace TRLImmersiveCombatMedicine
         public static ConfigEntry<float> ConfigStomachCrouchChancePercent;
         public static ConfigEntry<float> ConfigStomachCrouchChancePkPercent;
 
+        // --- Trauma 2.0 — Desmaio (spec 007 §3) ---
+        public static ConfigEntry<float> ConfigBlackoutChestPercent;
+        public static ConfigEntry<float> ConfigBlackoutHeadPercent;
+        public static ConfigEntry<float> ConfigBlackoutChestAbsoluteFloor;
+        public static ConfigEntry<float> ConfigBlackoutHeadAbsoluteFloor;
+
         private void Awake()
         {
             Instance = this;
             ModLogger = base.Logger;
-            ModLogger.LogInfo("TRL-ImmersiveCombatMedicine Plugin v1.7.0 carregado.");
+            ModLogger.LogInfo("TRL-ImmersiveCombatMedicine Plugin v1.8.0 carregado.");
 
             // Inicializações combinadas
             ItemDatabase.Initialize();
@@ -144,8 +150,14 @@ namespace TRLImmersiveCombatMedicine
             ConfigConsumerStomachEffects = Config.Bind("6. Trauma 2.0 (Consumidores)", "Stomach Effects", true,
                 "Agachar involuntário probabilístico ao zerar o estômago (item 006). Governado pelo master Trauma 2.0; " +
                 "desligar mid-raid cancela agachares pendentes DO ESTÔMAGO (não toca os de pernas); o \"sem ar\" legado NÃO volta.");
-            ConfigConsumerBlackout2 = Config.Bind("6. Trauma 2.0 (Consumidores)", "Blackout 2.0 (item 007)", false,
-                "Placeholder — desmaio percentual. Sem função até o item 007 (o desmaio ATUAL segue no toggle antigo \"Sistema de Desmaio\").");
+            // ref: spec 007 §3 — RENAME-AT-DELIVERY do placeholder de desmaio: deletar a key órfã
+            // "Blackout 2.0 (item 007)" SEM copiar o valor (a key nova "Blackout 2.0" nasce ON — o false de
+            // placeholder não é escolha do usuário). Mesmo padrão do 003/004/005/006 (lição CR-03-01: sem o
+            // delete + Save, o BepInEx re-persiste a key morta a cada boot). ConfigBlackoutEnabled ("Sistema
+            // de Desmaio") CONTINUA sendo o master de todo o pipeline; este toggle é só o sub-toggle da lógica
+            // de entrada percentual (decisão de design da spec funcional 007).
+            ConfigConsumerBlackout2 = Config.Bind("6. Trauma 2.0 (Consumidores)", "Blackout 2.0", true,
+                "Gatilho percentual de desmaio (item 007): tórax ≥50% da vida atual (piso 25 de dano absoluto) rola p=50%, imune sob analgésico; cabeça ≥25% da vida atual (piso 10) rola p=50%, p=25% sob analgésico. Governado pelo master \"Sistema de Desmaio\" — este toggle decide SÓ a lógica de entrada (percentual ou nenhuma); o limiar fixo legado NÃO volta mesmo desligado.");
             ConfigDebugTestConsumer = Config.Bind("6. Trauma 2.0 (Consumidores)", "Debug Test Consumer", false,
                 new ConfigDescription("Consumidor de teste SEM efeito de gameplay: registra-se ATIVO para as TRÊS regiões (pernas/braços/estômago), destravando o toast/i18n para validação (AC5 da spec funcional).",
                     null, advanced));
@@ -200,6 +212,21 @@ namespace TRLImmersiveCombatMedicine
             ConfigStomachCrouchChancePkPercent = Config.Bind("10. Trauma 2.0 (Estômago)", "Stomach Crouch Chance Under Painkiller Percent", 25f,
                 new ConfigDescription("Chance (%) com analgésico ativo NO INSTANTE da zerada (valor congelado nessa hora — tomar/expirar analgésico " +
                     "depois não muda nada até a próxima zerada). Independente do slider sem analgésico — sem trava entre eles; inverter é permitido.",
+                    new AcceptableValueRange<float>(0f, 100f)));
+
+            // Configs Trauma 2.0 — Desmaio (spec 007 §3). As probabilidades de roll (50%/50%/25%) são
+            // constantes fixas no código (TraumaBlackoutTrigger) — só os 4 números abaixo são configuráveis.
+            ConfigBlackoutChestPercent = Config.Bind("11. Trauma 2.0 (Desmaio)", "Chest Faint Percent Threshold", 50f,
+                new ConfigDescription("% da vida ATUAL do tórax (pré-tiro) que um hit precisa remover para rolar desmaio (p=50%; imune sob analgésico — decisão 9). Precisa TAMBÉM atingir o piso absoluto abaixo (decisão 15).",
+                    new AcceptableValueRange<float>(0f, 100f)));
+            ConfigBlackoutHeadPercent = Config.Bind("11. Trauma 2.0 (Desmaio)", "Head Faint Percent Threshold", 25f,
+                new ConfigDescription("% da vida ATUAL da cabeça (pré-tiro) que um hit precisa remover para rolar desmaio (p=50% sem analgésico, p=25% sob analgésico — cabeça NÃO fica imune). Precisa TAMBÉM atingir o piso absoluto abaixo.",
+                    new AcceptableValueRange<float>(0f, 100f)));
+            ConfigBlackoutChestAbsoluteFloor = Config.Bind("11. Trauma 2.0 (Desmaio)", "Chest Faint Absolute Damage Floor", 25f,
+                new ConfigDescription("Piso de segurança (decisão 15): dano ABSOLUTO mínimo no hit do tórax, além do percentual acima — evita desmaio por hit percentualmente grande mas fisicamente insignificante (ex.: 5 de dano em tórax com 8 de vida = 62% mas só 5 de dano).",
+                    new AcceptableValueRange<float>(0f, 100f)));
+            ConfigBlackoutHeadAbsoluteFloor = Config.Bind("11. Trauma 2.0 (Desmaio)", "Head Faint Absolute Damage Floor", 10f,
+                new ConfigDescription("Piso de segurança (decisão 15): dano ABSOLUTO mínimo no hit da cabeça, além do percentual acima.",
                     new AcceptableValueRange<float>(0f, 100f)));
 
             // ref: CR-02 — o reparo de encoding (CR-01-06) corrigiu a KEY
@@ -425,6 +452,29 @@ namespace TRLImmersiveCombatMedicine
                     orphans.Remove(legacyStomachDef);
                     Config.Save();
                     ModLogger.LogWarning("[Config] Key placeholder órfã DELETADA (rename-at-delivery, sem copiar valor): 'Stomach Effects (item 006)' → 'Stomach Effects'.");
+                }
+
+                // ref: spec 007 §3 — RENAME-AT-DELIVERY do placeholder de desmaio: deletar a key órfã
+                // "Blackout 2.0 (item 007)" SEM copiar o valor (a key nova "Blackout 2.0" nasce ON — o
+                // false de placeholder não é escolha do usuário). Mesmo padrão do 003/004/005/006 (lição
+                // CR-03-01: sem o delete + Save, o BepInEx re-persiste a key morta a cada boot).
+                object legacyBlackoutDef = null;
+                foreach (System.Collections.DictionaryEntry entry in orphans)
+                {
+                    var def = entry.Key;
+                    string section = AccessTools.Property(def.GetType(), "Section")?.GetValue(def) as string;
+                    string key = AccessTools.Property(def.GetType(), "Key")?.GetValue(def) as string;
+                    if (section == "6. Trauma 2.0 (Consumidores)" && key == "Blackout 2.0 (item 007)")
+                    {
+                        legacyBlackoutDef = def;
+                        break;
+                    }
+                }
+                if (legacyBlackoutDef != null)
+                {
+                    orphans.Remove(legacyBlackoutDef);
+                    Config.Save();
+                    ModLogger.LogWarning("[Config] Key placeholder órfã DELETADA (rename-at-delivery, sem copiar valor): 'Blackout 2.0 (item 007)' → 'Blackout 2.0'.");
                 }
             }
             catch (Exception ex)

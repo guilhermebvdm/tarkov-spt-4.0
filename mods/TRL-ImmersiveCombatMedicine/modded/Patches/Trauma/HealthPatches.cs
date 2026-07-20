@@ -10,11 +10,26 @@ namespace TrueTrauma
     public static class DamageTriggerPatch
     {
         // PREFIX: Escudo de Dano Opcional (Recomendado manter para evitar morte por lag)
+        // + captura de HP PRÉ-tiro p/ o gatilho percentual (item 007)
         [HarmonyPriority(Priority.High)]
-        static bool Prefix(Player __instance, DamageInfoStruct damageInfo)
+        static bool Prefix(Player __instance, DamageInfoStruct damageInfo, EBodyPart bodyPartType, out float __state)
         {
+            __state = -1f;
             if (!TRLImmersiveCombatMedicinePlugin.ConfigMasterEnabled.Value) return true;
             if (__instance == null || !__instance.HealthController.IsAlive) return true;
+
+            // ref: Player.cs:30475-30480 — ActiveHealthController.ApplyDamage MUTA o HP da parte dentro do
+            // corpo original; capturar AQUI (Prefix, antes do corpo rodar) é o único jeito de ver o valor
+            // PRÉ-tiro exato, sem a distorção de overkill que "postHp + damageInfo.Damage" teria.
+            // ref: docs/trauma-primitives.md §P7 (ilspycmd_assembly_real) — DidBodyDamage é delta de
+            // EBodyPart.Common com spill, NÃO o dano na parte; descartado como fonte.
+            // CR-01-02 (code-review 007 r1): captura só depois do gate de master/vida — evita o custo (trivial,
+            // mas desnecessário) de GetBodyPartHealth quando o mod inteiro está desligado.
+            if (bodyPartType == EBodyPart.Chest || bodyPartType == EBodyPart.Head)
+            {
+                var ahc = __instance.ActiveHealthController; // ref: Player.cs:25291 — __instance já não-null aqui
+                if (ahc != null) __state = ahc.GetBodyPartHealth(bodyPartType).Current; // ref: docs/trauma-primitives.md §P7 (ActiveHealthController.GetBodyPartHealth — protótipo compilado, PA-01-01)
+            }
 
             // Se o ID já estiver na lista de desmaiados, bloqueia dano de combate
             if (!__instance.IsAI && TraumaState.FaintedPlayerIds.Contains(__instance.ProfileId))
@@ -31,9 +46,9 @@ namespace TrueTrauma
             return true;
         }
 
-        // POSTFIX: Onde o Desmaio é calculado
+        // POSTFIX: Onde o Desmaio é calculado (limiar fixo legado REMOVIDO — item 007)
         [HarmonyPriority(Priority.Low)]
-        static void Postfix(Player __instance, DamageInfoStruct damageInfo, EBodyPart bodyPartType)
+        static void Postfix(Player __instance, DamageInfoStruct damageInfo, EBodyPart bodyPartType, float __state)
         {
             if (__instance == null || !__instance.HealthController.IsAlive) return;
             if (!TRLImmersiveCombatMedicinePlugin.ConfigMasterEnabled.Value) return;
@@ -57,40 +72,45 @@ namespace TrueTrauma
                 if (TraumaState.BlackoutTimers.ContainsKey(id) || TraumaState.FaintedPlayerIds.Contains(id)) return;
                 if (TraumaState.BotFaintCooldowns.TryGetValue(id, out float cdUntil) && now < cdUntil) return;
 
-                if (isValidTraumaType)
+                // ref: spec 007 — limiar fixo (>=35 tórax / >=10 cabeça, sem gate de analgésico) REMOVIDO;
+                // ConfigConsumerBlackout2 é o ÚNICO gatilho restante (sub-toggle da lógica de entrada).
+                // PA-02-05 (review 2): filtro de domínio (Chest/Head) explícito AQUI — sem isto, Evaluate
+                // seria chamado para QUALQUER bodyPartType e dependeria do sentinel __state=-1f (setado só
+                // p/ Chest/Head no Prefix) coincidir com o guard "preHitHp<=0f" para produzir o mesmo
+                // resultado; explícito aqui, o else de domínio dentro de Evaluate fica puramente defensivo.
+                bool shouldFaint = isValidTraumaType
+                    && (bodyPartType == EBodyPart.Chest || bodyPartType == EBodyPart.Head)
+                    && TRLImmersiveCombatMedicinePlugin.ConfigConsumerBlackout2.Value
+                    && TraumaBlackoutTrigger.Evaluate(__instance, bodyPartType, __state);
+
+                if (shouldFaint)
                 {
-                    bool isChestTrauma = (bodyPartType == EBodyPart.Chest && damageInfo.Damage >= 35f);
-                    bool isHeadTrauma = (bodyPartType == EBodyPart.Head && damageInfo.Damage >= 10f);
+                    // Configura Timers
+                    // ref: CR-04 — GraceTimers NÃO nasce aqui: o grace de 5s é
+                    // ancorado no WAKE (Plugin.WakeLocalPlayer / MainLoopPatch).
+                    // ref: RANGE-READY — PONTO ÚNICO do roll futuro de duração
+                    // aleatória (min-max): rolar AQUI e todo o resto (wake, rampa
+                    // visual, contusion, pacote de sync, espelhos) deriva do
+                    // deadline gravado em BlackoutTimers — nada mais lê a config.
+                    float duration = TRLImmersiveCombatMedicinePlugin.ConfigBlackoutDuration.Value;
+                    TraumaState.BlackoutTimers[id] = now + duration;
+                    TraumaState.BlackoutStartTimes[id] = now;
 
-                    if (isChestTrauma || isHeadTrauma)
-                    {
-                        // Configura Timers
-                        // ref: CR-04 — GraceTimers NÃO nasce aqui: o grace de 5s é
-                        // ancorado no WAKE (Plugin.WakeLocalPlayer / MainLoopPatch).
-                        // ref: RANGE-READY — PONTO ÚNICO do roll futuro de duração
-                        // aleatória (min-max): rolar AQUI e todo o resto (wake, rampa
-                        // visual, contusion, pacote de sync, espelhos) deriva do
-                        // deadline gravado em BlackoutTimers — nada mais lê a config.
-                        float duration = TRLImmersiveCombatMedicinePlugin.ConfigBlackoutDuration.Value;
-                        TraumaState.BlackoutTimers[id] = now + duration;
-                        TraumaState.BlackoutStartTimes[id] = now;
+                    // Efeitos Locais
+                    // ref: CR-04-12 — SEM DoStun no entry: o ToggleDowned do frame
+                    // seguinte pausava o efeito e o RETOMAVA no wake (~2-4s de
+                    // "tela suja" pós-consciência). O impacto visual do blackout
+                    // já vem do DeathFade/FastBlur do Fika.
+                    if (__instance.Physical != null) __instance.Physical.Stamina.Current = 0f;
+                    __instance.MovementContext.IsInPronePose = true;
+                    if (__instance.HandsController is IFirearmHandsController firearm) firearm.SetAim(false);
 
-                        // Efeitos Locais
-                        // ref: CR-04-12 — SEM DoStun no entry: o ToggleDowned do frame
-                        // seguinte pausava o efeito e o RETOMAVA no wake (~2-4s de
-                        // "tela suja" pós-consciência). O impacto visual do blackout
-                        // já vem do DeathFade/FastBlur do Fika.
-                        if (__instance.Physical != null) __instance.Physical.Stamina.Current = 0f;
-                        __instance.MovementContext.IsInPronePose = true;
-                        if (__instance.HandsController is IFirearmHandsController firearm) firearm.SetAim(false);
+                    // --- A MUDANÇA CRUCIAL ---
+                    // Sincroniza o status "Desmaiado" via Fika (ou localmente)
+                    // Isso vai colocar o ID na lista negra dos bots no Host
+                    FikaBridge.SyncFaintStatus(__instance, true);
 
-                        // --- A MUDANÇA CRUCIAL ---
-                        // Sincroniza o status "Desmaiado" via Fika (ou localmente)
-                        // Isso vai colocar o ID na lista negra dos bots no Host
-                        FikaBridge.SyncFaintStatus(__instance, true);
-
-                        return;
-                    }
+                    return;
                 }
             }
 
