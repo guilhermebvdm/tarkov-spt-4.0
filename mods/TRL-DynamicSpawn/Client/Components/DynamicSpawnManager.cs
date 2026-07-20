@@ -34,6 +34,7 @@ namespace TRLDynamicSpawn.Components
         private IBotCreator _botCreator;
         private BotsController _botsController;
         private Coroutine _activeWaveCoroutine;
+        private string _cachedFikaStatus;
 
         public void Init(GameWorld gameWorld, IBotCreator botCreator, BotsController botsController)
         {
@@ -854,33 +855,36 @@ namespace TRLDynamicSpawn.Components
                 }
             }
 
-            string fikaStatus = "Solo";
-            try
+            if (string.IsNullOrEmpty(_cachedFikaStatus))
             {
-                var type = System.Type.GetType("Fika.Core.Main.Utils.FikaBackendUtils, Fika.Core");
-                if (type != null)
+                _cachedFikaStatus = "Solo";
+                try
                 {
-                    var isServerProp = type.GetProperty("IsServer", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-                    var isSingleProp = type.GetProperty("IsSinglePlayer", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-                    
-                    if (isServerProp != null && isSingleProp != null)
+                    var type = System.Type.GetType("Fika.Core.Main.Utils.FikaBackendUtils, Fika.Core");
+                    if (type != null)
                     {
-                        bool isServer = (bool)isServerProp.GetValue(null);
-                        bool isSingle = (bool)isSingleProp.GetValue(null);
+                        var isServerProp = type.GetProperty("IsServer", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                        var isSingleProp = type.GetProperty("IsSinglePlayer", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                        
+                        if (isServerProp != null && isSingleProp != null)
+                        {
+                            bool isServer = (bool)isServerProp.GetValue(null);
+                            bool isSingle = (bool)isSingleProp.GetValue(null);
 
-                        if (!isSingle)
-                            fikaStatus = isServer ? "Fika Host" : "Fika Client";
+                            if (!isSingle)
+                                _cachedFikaStatus = isServer ? "Fika Host" : "Fika Client";
+                        }
                     }
                 }
+                catch { }
             }
-            catch { }
 
             float nextSpawnDelay = Mathf.Max(0, _nextWaveTime - Time.time);
 
             // Draw Texts
             GUILayout.BeginArea(new Rect(margin + 10, margin + 25, boxWidth - 20, boxHeight - 30));
             
-            GUILayout.Label($"<b>Status de Sessão:</b> {fikaStatus}");
+            GUILayout.Label($"<b>Status de Sessão:</b> {_cachedFikaStatus}");
             GUILayout.Label($"<b>Config Preset:</b> {_activePreset}");
             GUILayout.Space(10);
             
