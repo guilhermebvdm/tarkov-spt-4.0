@@ -53,6 +53,7 @@ Convenção de artefatos: `NNN-<slug>-MM-tipo[-NN].md` — ordem visual = ordem 
 | [/update-memory](.claude/commands/update-memory.md) | sessão com conteúdo | `sessions.md` (mod e/ou repo) | lições obrigatórias; GC >30d; propõe promoções e `/update-mod-graph` |
 | [/update-mod-graph](.claude/commands/update-mod-graph.md) | graphify instalado | `references/graphs/mods/<mod>/` | pós-grandes atualizações; commit junto com o código |
 | [/review-mod-properties](.claude/commands/review-mod-properties.md) | mod com `Config.Bind` | `PROPRIEDADES-review-NN.md` | **auxiliar** (fora do ciclo linear) — UX das opções F12: ordem/nomes de seções, alocação, nomes/tipos/tooltips, props mortas, `Advanced`. Aplicação no `Plugin.cs`; rename de seção/key = breaking |
+| [/analyze-memory-leak](.claude/commands/analyze-memory-leak.md) | mod com código em `modded/` | `MEMORY-LEAK-review-NN.md` | **auxiliar** (fora do ciclo linear) — auditoria estática de leak: mecanismo (LIFE/EVT/STAT/UNITY/DISP/THRD/HOT/SRV) × taxa de acúmulo (per-frame/raid/event/boot). Foco no OOM do Fika headless (acumula raid a raid); confirmação in-game obrigatória |
 
 ## Camadas transversais
 
@@ -65,6 +66,7 @@ Convenção de artefatos: `NNN-<slug>-MM-tipo[-NN].md` — ordem visual = ordem 
 | `repo-workflow-best-practices` | todo o ciclo — naming, rastreabilidade PA/CR, sandbox, status |
 | `memory-curation` | `/update-memory` (escrita) + passo "Contexto de memória" dos commands (consumo, §14) |
 | `graph-code-navigation` | spec técnica, reviews, code — grafo vs Grep, receitas de query, "grafo aponta, leitura prova" |
+| `spt-memory-leak-analysis` | `/analyze-memory-leak` + spec técnica/reviews que alocam estado de raid — taxonomia de leak (mecanismo × taxa de acúmulo), OOM do Fika headless, padrões preventivos de arquitetura |
 
 ### Memória
 

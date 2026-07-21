@@ -58,6 +58,7 @@ Ordem ao **responder dúvidas** sobre SPT/EFT:
 | **Código-fonte do servidor SPT** | **[references/spt-source/](../references/spt-source/)** (vendorizado, read-only) | deepwiki.com/sp-tarkov/server-csharp |
 | **Erros recorrentes deste repo (antipatterns)** | **[docs/technical/spt-antipatterns.md](../docs/technical/spt-antipatterns.md)** | — |
 | **Quem chama X / overrides de Y / cadeia A→B** | **MCP graphify + [references/graphs/](../references/graphs/)** (skill `graph-code-navigation`) | Grep manual com a mesma disciplina |
+| **Memory leak / OOM / headless reinicia / consumo de RAM** | **skill `spt-memory-leak-analysis`** + command `/analyze-memory-leak` · [wiki/spt/Performance_Tuning.md](../wiki/spt/Performance_Tuning.md) · `references/fika-headless/Fika.Headless/FikaHeadlessPlugin.cs` (GC/restart nativos) | deepwiki server-csharp · Fika gitbook (headless-client) |
 | **O que é este `GClassNNNN` / nome 4.1 de um tipo EFT** | **[docs/files-from-4.1/consolidated-mappings.txt](../docs/files-from-4.1/consolidated-mappings.txt)** (grep `^GClass680 -> `) — aid, não evidência | `ilspycmd -t <FQN>` na DLL real |
 | **Mods publicados / instalador** | — | **forge.sp-tarkov.com** |
 

@@ -1,0 +1,104 @@
+# {{MOD}} — Análise de Memory Leak · {{REVIEW_NN}}
+
+**Mod:** {{MOD}} · **Tipo:** {{MOD_KIND}} <!-- client / server / combo -->
+**Escopo analisado:** {{SCOPE}} <!-- modded/ inteiro, ou path/arquivo específico -->
+**Data:** {{CREATED_AT}}
+
+> Auditoria **estática** de vazamento de memória (retenção não liberada + pressão de GC) no código do mod. Cada achado recebe um ID `ML-{{REVIEW_NN}}-MM` **permanente**. Análise estática **levanta hipóteses priorizadas**; a confirmação é in-game (ver `## Plano de confirmação`). Skill de referência: `spt-memory-leak-analysis`.
+>
+> 🎯 **Por que isso importa aqui:** um mod client roda também no **Fika headless**, que hospeda raid após raid por horas sem reiniciar. Um leak imperceptível numa sessão solo de 40 min **se acumula entre raids** no headless até OOM (o Fika só mitiga com GC periódico + restart após N raids — não detecta leak). A **taxa de acúmulo** de cada achado é tão importante quanto o mecanismo.
+
+## Resumo
+
+> 🔴 Bloqueadores: 0 · 🟠 Fortes: 0 · 🟡 Médios: 0 · 🟢 Menores: 0 · Total: 0
+> Superfícies de risco varridas: 0 · Com release pareado (OK): 0 · Sem release (achado): 0
+
+## Mecanismos (categoria)
+
+| Cód | Mecanismo | Referência canônica (não duplicar) |
+|---|---|---|
+| **LIFE** | Estado de raid sem teardown / stop-hook ausente ou não-idempotente | `spt-mod-best-practices` §2 · AP-01 |
+| **EVT** | `+= handler` em publisher longevo sem `-=` pareado; closure captura `this` | `csharp-mod-best-practices` §1 · checklist 2 |
+| **STAT** | Coleção/cache `static` que retém `Player`/`Profile`/`GameObject` ou só cresce | `csharp-mod-best-practices` §1 · §6 |
+| **UNITY** | `GameObject`/`Component`/`Texture`/`Material`/`AudioClip`/`AssetBundle` não `Destroy`/`Unload` | `spt-mod-best-practices` §3 |
+| **DISP** | `IDisposable`/`CancellationTokenSource`/`Coroutine`/`Timer` sem dispose determinístico | `csharp-mod-best-practices` §1 · §2 |
+| **THRD** | `Task`/`Thread`/`Timer`/`async void` longevo retendo o grafo do raid | `csharp-mod-best-practices` §2 |
+| **HOT** | Alocação por frame/tick → pressão de GC (não retenção, mas piora hitch/RAM no headless) | `spt-mod-best-practices` §3 · `csharp` §1 |
+| **SRV** | Retenção server-side: cache em singleton crescendo por profile/raid; handler não removido | `spt-mod-best-practices` §3/§4 |
+
+## Taxa de acúmulo (o eixo que define severidade base)
+
+| Taxa | Significado | Impacto no headless | Severidade base |
+|---|---|---|---|
+| **per-frame/tick** | Vaza a cada `Update`/`FixedUpdate`/AI-tick | Mata o headless em **minutos** | 🔴 |
+| **per-raid** | Vaza 1× por raid (start sem release no end) | Acumula ao longo de **horas** (raid após raid) — causa clássica do OOM do headless | 🟠 |
+| **per-event** | Vaza por evento discreto (spawn de bot, tiro, item, hit) | Escala com a **atividade** da raid | 🟡 |
+| **per-boot/one-shot** | Vaza 1× no boot/Awake | Constante, não cresce — baixo risco (o headless reinicia) | 🟢 |
+
+> Severidade final = taxa **ajustada** pelo mecanismo e pela certeza. Ex.: um `STAT` per-raid que retém o `GameWorld` inteiro sobe para 🔴; um `HOT` per-frame que aloca um `int` boxed pode cair para 🟡.
+
+## Impacto
+
+- 🔴 **Bloqueador** — leak confirmável que derruba o headless (per-frame, ou per-raid retendo o grafo do raid). Fix obrigatório.
+- 🟠 **Forte** — leak per-raid/per-event provável; acumula em sessão longa. Fix recomendado.
+- 🟡 **Médio** — pressão de GC ou retenção pequena; anotar, decidir caso a caso.
+- 🟢 **Menor** — one-shot ou teórico; polimento.
+
+## Panorama (preencher)
+
+- **Tipo do mod / superfícies de vida analisadas:** [Awake, raid-start hook, raid-end hook, patches por frame/tick, server singletons…]
+- **Ponto de teardown identificado:** [`arquivo.cs:linha` do `GameWorld.OnDestroy`/`BaseLocalGame.Stop`/`DisposeResources`/`OnDestroy` — ou "AUSENTE" (achado LIFE)]
+- **Superfícies de risco → release pareado:** [tabela ou lista: cada `+=`/`new GameObject`/`static`/`CTS` → onde é liberado, ou "sem release"]
+- **Leaks já conhecidos na memória do mod:** [pendências/lições de `sessions.md` que tocam leak — ou "sem memória prévia"]
+
+## Índice
+
+| ID | Mec | Taxa | Impacto | Título | Status |
+|---|---|---|---|---|---|
+
+---
+
+## Achados
+
+### ML-{{REVIEW_NN}}-01 · Mec — Taxa · Impacto
+
+**[Título resumido]**
+
+**Local:** [`mods/{{MOD}}/modded/<arquivo>.cs:<linha-faixa>`](../modded/<arquivo>.cs#L<linha>)
+
+**Alocação (onde nasce):** [`arquivo.cs:linha` — o `+=`, `new`, `static`, `Instantiate`, `StartCoroutine`, `Config.Bind`…]
+
+**Release esperado (onde deveria morrer):** [teardown correto para esta taxa — `raid-end` hook / `-=` pareado / `Destroy` / `Dispose`. Se ausente, dizer "não existe".]
+
+**Problema:** [Descrição precisa, com snippet de 3–6 linhas quando aplicável. Provar a ausência do release com o grep negativo — ex.: "grep `-= OnPersonAdd` em modded/ → 0 hits".]
+
+**Por que importa:** [Consequência concreta — taxa de acúmulo × o que é retido. Ex.: "cada raid adiciona um handler em `GameWorld.OnPersonAdd`; após ~30 raids o headless retém 30 grafos de raid → OOM".]
+
+**Sugestão:** [Proposta acionável — diff ou descrição do que mudar. Onde adicionar o `-=`/`Destroy`/`Dispose`, ou tornar o teardown idempotente. Específica o suficiente para o usuário aceitar com um "ok".]
+
+**Decisão:**
+- `[ ]` Pendente
+- `[ ]` Aceitar sugestão
+- `[ ]` Aceitar com modificação: _________________
+- `[ ]` Rejeitar (deferir / aceitar como dívida): _________________
+
+<!-- Após corrigir (via /code-mod, /apply-code-review, ou fix manual): marcar a opção, trocar título para ✅ Aplicado em YYYY-MM-DD, e adicionar **Resolução:** + **Aplicação:** (arquivo.cs:linha) -->
+
+---
+
+## Plano de confirmação (in-game — a análise estática só levanta hipóteses)
+
+> A retenção só se prova medindo. Priorizar os achados 🔴/🟠 nesta ordem.
+
+- [ ] **Baseline:** medir RSS do processo (headless: `EscapeFromTarkov.exe` sem render; solo: idem) no menu, antes da 1ª raid.
+- [ ] **raid1 → exit → menu → raid2 → exit → menu:** medir RSS no menu após cada raid. **Crescimento monotônico entre menus** = leak per-raid (achados 🟠 LIFE/EVT/STAT).
+- [ ] **Raid longa (>20 min) com atividade (bots, tiros):** RSS subindo continuamente dentro da mesma raid = leak per-frame/per-event (achados 🔴 HOT/EVT).
+- [ ] **Teardown sujo:** encerrar raid por **alt-F4 / morte / MIA** (não só extract) e conferir `LogOutput.log` — exceção no stop-hook = teardown não-idempotente (achado LIFE).
+- [ ] **Headless real:** rodar N raids seguidas no headless com só este mod (+ deps) e observar RSS/pagefile entre raids. Confirma o cenário do OOM.
+- [ ] **(Opcional) Heap snapshot** via dnSpy/dotMemory anexado ao processo, comparando 2 snapshots em pontos equivalentes (menu pós-raid1 vs menu pós-raidN) — os tipos que crescem apontam o mecanismo.
+
+## Histórico
+
+| Data | Evento |
+|---|---|
+| {{CREATED_AT}} | Análise de memory leak {{REVIEW_NN}} criada via `/analyze-memory-leak` |
