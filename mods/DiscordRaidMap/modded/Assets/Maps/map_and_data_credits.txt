@@ -1,0 +1,14 @@
+Maps are made by Shebuka and can be found at https://github.com/the-hideout/tarkov-dev-svg-maps
+
+License is found in Shebuka-LICENSE.md.
+
+The maps were converted from SVG to PNG using Inkscape, some colors were changed namely for the stairs on Labs and the ramps on Interchange, not all layers are used, undergrounds are rendered with a hatch pattern.
+---
+
+Labyrinth map:
+
+Original source: https://github.com/acidphantasm/SPT-DynamicMaps/
+Author: Acidphantasm
+License: Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+License URL: https://creativecommons.org/licenses/by-nc-sa/4.0/
+Changes: Converted from SVG to PNG using GIMP.

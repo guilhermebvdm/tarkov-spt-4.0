@@ -1,0 +1,11 @@
+{
+  "name": "DiscordRaidMap",
+  "upstream_url": "https://github.com/Fiodorwellfme/DiscordRaidMap",
+  "upstream_sha": "8298e85b84defaabdbb61962c9bd874a73f38ba1",
+  "upstream_branch": "main",
+  "forge_url": "",
+  "license": "MIT",
+  "version_base": "unknown",
+  "spt_version": "",
+  "created_at": "2026-07-21T01:38:02Z"
+}

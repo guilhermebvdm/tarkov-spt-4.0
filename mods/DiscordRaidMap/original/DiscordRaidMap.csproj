@@ -1,0 +1,88 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <AssemblyName>DiscordRaidMap</AssemblyName>
+    <Description>Discord raid map broadcaster for SPT/Fika</Description>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <Deterministic>true</Deterministic>
+    <ModName>$(AssemblyName)</ModName>
+    <PackageStagingDir>$(ProjectDir)build\package</PackageStagingDir>
+    <PackagePluginDir>$(PackageStagingDir)\BepInEx\plugins\$(ModName)</PackagePluginDir>
+    <DeployPluginDir>$(ProjectDir)\..\..\BepInEx\plugins\$(ModName)</DeployPluginDir>
+    <ReleaseDir>$(ProjectDir)Releases</ReleaseDir>
+    <ReleaseZip>$(ReleaseDir)\$(ModName).zip</ReleaseZip>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="BepInEx">
+      <HintPath>..\..\BepInEx\core\BepInEx.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\BepInEx\core\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="spt-reflection">
+      <HintPath>..\..\BepInEx\plugins\spt\spt-reflection.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Comfort">
+      <HintPath>..\..\EscapeFromTarkov_Data\Managed\Comfort.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="DissonanceVoip">
+      <HintPath>..\..\EscapeFromTarkov_Data\Managed\DissonanceVoip.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Sirenix.Serialization">
+      <HintPath>..\..\EscapeFromTarkov_Data\Managed\Sirenix.Serialization.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\EscapeFromTarkov_Data\Managed\Newtonsoft.Json.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Assets\Maps\*.png" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Assets\Markers\*.png" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Assets\Fonts\*.ttf" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Assets\Fonts\*.otf" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+    <ItemGroup>
+      <PackageAssets Include="$(ProjectDir)Assets\**\*" />
+    </ItemGroup>
+
+    <MakeDir Directories="$(DeployPluginDir)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(DeployPluginDir)" />
+    <Copy SourceFiles="@(PackageAssets)" DestinationFiles="@(PackageAssets->'$(DeployPluginDir)\Assets\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <RemoveDir Directories="$(PackageStagingDir)" Condition="Exists('$(PackageStagingDir)')" />
+    <MakeDir Directories="$(PackagePluginDir)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PackagePluginDir)" />
+    <Copy SourceFiles="@(PackageAssets)" DestinationFiles="@(PackageAssets->'$(PackagePluginDir)\Assets\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <MakeDir Directories="$(ReleaseDir)" />
+    <Delete Files="$(ReleaseZip)" Condition="Exists('$(ReleaseZip)')" />
+
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;Compress-Archive -Path '$(PackageStagingDir)\*' -DestinationPath '$(ReleaseZip)' -Force&quot;" />
+  </Target>
+</Project>

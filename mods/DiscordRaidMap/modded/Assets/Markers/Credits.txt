@@ -1,0 +1,24 @@
+Marker Credits
+
+---
+
+CC BY 3.0 License: https://creativecommons.org/licenses/by/3.0/deed.en
+
+Exit door icon by Delapouite under CC BY 3.0
+https://game-icons.net/1x1/delapouite/exit-door.html
+
+Position marker icon by Delapouite under CC BY 3.0
+https://game-icons.net/1x1/delapouite/position-marker.html
+
+Parachute icon by Lorc under CC BY 3.0
+https://game-icons.net/1x1/lorc/parachute.html
+
+Death skull icon by sbed under CC BY 3.0
+https://game-icons.net/1x1/sbed/death-skull.html
+
+Above images were changed with the below changes
+  - Scaled up to 256x256
+  - Inside was colored in GIMP
+
+
+
