@@ -46,6 +46,21 @@ O restart preventivo do headless é **configurável** (`restartAfterAmountOfRaid
 
 > **Corolário:** crash na **1ª raid** aponta para mecanismos **per-frame/per-event** (§3: HOT, EVT dentro de patch por-tick, UNITY/STAT por spawn de bot × N bots) — **e exige descartar crash não-memória lendo o log primeiro**. Só um crash que piora **raid após raid** é o cenário per-raid.
 
+### 1.2 OOM com muitos mods: o "último no log" é a vítima, não o culpado
+
+Quando o `LogOutput.log` confirma falta de memória **e** há dezenas/centenas de mods rodando (setup grande é comum no headless), o consumo é **agregado**: baseline do EFT + soma de todos os mods. Nesse regime:
+
+- O **`bad_alloc`/OutOfMemory dispara em quem pediu a alocação que cruzou o teto** — quase sempre um mod **inocente** que só teve o azar de alocar por último (carregar uma cena, instanciar um bot, montar um buffer legítimo). O "mod rodando por último no log" é a **vítima**, não necessariamente o **retentor**. **Não conclua causa a partir do último frame do stack.**
+- Com o teto já perto, **qualquer** pico normal vira o estouro. O culpado real pode ser um mod que reteve memória minutos antes, sem aparecer no crash.
+- Logo, a pergunta certa não é "quem crashou?" e sim **"quem mais reteve/consumiu até ali?"** — e isso se responde **medindo o agregado** (§6), não lendo o stack final. Um mod "leve" pode ser o gatilho do pico final sem ser o retentor principal (embora ainda valha auditá-lo — leve ≠ sem falhas).
+
+**Prioridade de suspeita** (maior contribuição ao agregado, num ambiente grande):
+1. Mods **por-tick/por-bot** (IA/SAIN, spawn, ESP/HUD que varre entidades) — custo × N bots × frames.
+2. Mods que **carregam assets** (modelos, texturas, áudio, bundles) — footprint constante alto + leak de `Texture`/`Material`/`AssetBundle` se não descarregam.
+3. Mods com **estado de raid** (loot dinâmico, quests, dynamic spawn) — candidatos a leak per-raid/per-event.
+
+> Auditar **um** mod (via `/analyze-memory-leak`) é uma peça, não a resposta a um OOM agregado. A resposta é **medir o agregado + rankear retentores** (§6) e então auditar os top suspeitos — o mod isolado entra nessa lista, não a fecha.
+
 ---
 
 ## 2. O que o ambiente JÁ faz com memória (não sugira o que já existe)
@@ -156,7 +171,12 @@ Retenção **só se prova medindo**. Ordem, priorizando 🔴/🟠:
 - **RSS dentro de raid longa (>20 min, com bots/tiros):** subida contínua na mesma raid = **per-frame/per-event** (HOT/EVT/UNITY).
 - **Teardown sujo:** encerrar por **alt-F4 / morte / MIA** (não só extract) e ler `LogOutput.log`: exceção no stop-hook = teardown não-idempotente (AP-01/LIFE). É o caminho que o headless mais exercita.
 - **Headless real:** N raids seguidas no headless com só este mod (+ deps); observar RSS/pagefile entre raids — reproduz o OOM.
-- **Heap snapshot** (dnSpy / dotMemory anexado): comparar 2 snapshots em pontos equivalentes (menu pós-raid1 vs. menu pós-raidN). Os **tipos que crescem** apontam o mecanismo — `Player`/`GameObject`/handlers acumulando confirmam EVT/STAT.
+- **Heap snapshot** (dnSpy / dotMemory anexado): comparar 2 snapshots em pontos equivalentes (menu pós-raid1 vs. menu pós-raidN, ou início vs. 15 min da mesma raid). Os **tipos que crescem** apontam o mecanismo — `Player`/`GameObject`/handlers acumulando confirmam EVT/STAT.
+
+### Isolar o retentor num ambiente com muitos mods (§1.2 — culpado vs. vítima)
+- **Ranking por retenção (preferível):** no heap snapshot, **agrupar os objetos vivos por assembly/namespace de mod** — aponta o maior retentor direto, sem tentativa e erro. Snapshot início-da-raid vs. 15 min mostra quem **cresce**, não só quem é grande.
+- **Watermark de baseline:** medir RSS do headless **sem mods** vs. **com todos** (no menu) → o orçamento que os mods somam. Se já sobe perto do teto antes de entrar em raid, o problema é **agregado/consumo**, não um leak único — cortar mods ou assets é o caminho, não caçar um vazador.
+- **Bissecção 50/50** (`wiki/spt/Known_Mod_Issues_40.md`): desabilitar metade dos mods, reproduzir, estreitar até o(s) responsável(is). Cara, mas definitiva quando não há profiler. **Manter o mod set do headless idêntico ao dos peers a cada rodada** (senão a raid nem casa).
 
 Matriz mínima de repro (mesma do `fix.md.tmpl`): **raid1→exit→raid2** (per-raid) + **alt-F4/morte/MIA** (teardown).
 
