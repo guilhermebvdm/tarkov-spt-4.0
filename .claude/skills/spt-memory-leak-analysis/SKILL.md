@@ -28,6 +28,24 @@ Cadeia causal:
 
 **Regra de ouro da priorização:** a gravidade de um leak é dominada pela **taxa de acúmulo** (§4), não pelo tamanho de cada alocação. Um `int` vazado por frame é pior que um `Texture2D` vazado uma vez no boot.
 
+### 1.1 Leia o sintoma primeiro — em qual raid, e é mesmo memória?
+
+O restart preventivo do headless é **configurável** (`restartAfterAmountOfRaids`, vindo do server) — **não** é sempre "reinicia a cada 3 raids". Antes de assumir "leak", cruze **em qual raid** o incidente ocorreu com o `LogOutput.log`:
+
+| Sintoma | Hipótese principal | Onde olhar |
+|---|---|---|
+| Crash/restart **dentro de uma raid isolada** (ex.: a 1ª), com RAM ainda sobrando na máquina | **Leak/pressão agudos intra-raid** (per-frame/per-event) · OU **crash não-memória** (exceção, self-reentry/stack overflow — AP-07) · OU **spike de consumo** (carga de asset, spawn descontrolado) | `LogOutput.log`: `OutOfMemory`/`bad_alloc` ⇒ memória · `StackOverflow`/exceção repetida ⇒ não-memória · "no peers"/45s ⇒ watchdog de conexão |
+| RSS **cresce a cada raid**, crash só após N raids (com N < `restartAfterAmountOfRaids`) | **Leak per-raid** (LIFE/EVT/STAT não liberado no teardown) | medir RSS no menu entre raids (§6) |
+| Restart **exatamente** a cada N raids, sem crash/erro no log | Comportamento **normal** (restart preventivo) — não é bug | config `restartAfterAmountOfRaids` |
+
+**Distinção que muda o diagnóstico** (não confundir):
+- **Leak** = retenção que **cresce** sem liberar (o foco do §3). Some ao reiniciar o processo.
+- **Consumo alto constante** = footprint grande mas **estável** (asset pesado, buffer grande). Não é leak — reduz com menos assets, não com teardown.
+- **Spike** = pico momentâneo (carga de cena, GC forçado, alocação em rajada). Não é leak — suaviza com pooling/streaming/zero-alloc.
+- **Crash não-memória** = exceção/stack overflow que o watchdog reinicia. O `LogOutput.log` prova; caçar memória aqui é perder tempo (ver AP-07).
+
+> **Corolário:** crash na **1ª raid** aponta para mecanismos **per-frame/per-event** (§3: HOT, EVT dentro de patch por-tick, UNITY/STAT por spawn de bot × N bots) — **e exige descartar crash não-memória lendo o log primeiro**. Só um crash que piora **raid após raid** é o cenário per-raid.
+
 ---
 
 ## 2. O que o ambiente JÁ faz com memória (não sugira o que já existe)
@@ -198,6 +216,52 @@ Detectar é remediar tarde. Estes padrões **evitam** o leak na origem — cada 
 - Padrões acima reduzem risco; **só a medição prova**. Deixe o mod **fácil de medir**: um log opcional (gated por config) de "objetos vivos"/contagem do pool no raid-end torna a regressão de leak visível sem anexar profiler. Rode a matriz do §6 antes de considerar "sem leak". [fonte externa: illogika unity-best-practices; site24x7 ".NET memory leaks"]
 
 > Ao escrever a spec técnica de um mod que aloca estado de raid, **cite qual destes padrões o mod adota** — é a forma barata de o review confirmar que o leak foi desenhado para fora, não deixado para a auditoria achar.
+
+## 9. O que fazer / o que não fazer (referência rápida)
+
+Resumo acionável dos §2/§3/§7/§8. ✅ = adote · ❌ = não faça (com o porquê).
+
+### Ciclo de vida & teardown (LIFE)
+- ✅ **Um** teardown idempotente (guard `_ended`) que roda **igual** em extract/death/MIA/alt-F4, hookando `GameWorld.OnDestroy` **E** `BaseLocalGame.Stop`.
+- ✅ Registrar o release **na hora** de alocar (disposable bag, §8.1) — o par nunca fica órfão.
+- ❌ Assumir que extract é o único caminho de saída (os outros vazam sem teardown).
+- ❌ Registrar/desregistrar Harmony patches por raid — patches são globais; faça o corpo checar `Singleton<GameWorld>.Instantiated` e sair cedo.
+
+### Eventos (EVT)
+- ✅ `-=` pareado com todo `+=`, no mesmo escopo; **weak-event** para publisher estático longevo.
+- ✅ Em closure longeva, capturar o **campo** num local — não `this`.
+- ❌ `+= On…` em `GameWorld`/`Camera`/`GameUI`/evento estático sem `-=` → cada raid empilha um handler que segura o grafo inteiro.
+
+### Estado estático (STAT)
+- ✅ `.Clear()` no raid-end; cache com **chave de invalidação + limite**.
+- ❌ `static List<Player>` / `Dictionary<_, BotOwner>` populado em raid e nunca limpo (pina o raid inteiro).
+- ❌ Cache "por via das dúvidas", sem dono nem limite.
+
+### Objetos Unity (UNITY)
+- ✅ Parentear a `gameWorld.transform` / `mainPlayer.gameObject` (o EFT destrói por você); **pool** para objetos recorrentes; `Destroy` do material clonado por `.material`.
+- ❌ `Instantiate`/`Destroy` por frame; parentear escopo-de-raid a `null`/raiz persistente; esquecer que `.material` **clona** (vaza a instância).
+
+### Hot path (HOT)
+- ✅ Buffers de instância reusados (`.Clear()`, não `new`); `for` manual; `StringBuilder` cacheado; `struct readonly` por `in`; reflection em `static readonly`.
+- ❌ LINQ / `new List<T>()` / `string.Format` / `$"…"` / boxing / lambdas em `Update`/`FixedUpdate`/AI-tick (custo × N bots).
+
+### Async / threading / IDisposable (THRD/DISP)
+- ✅ `CancellationToken` amarrado à vida da raid, checado nos suspension points; `using var` para recurso de método; `HttpClient` **plugin-scope** reusado; CTS **fresh por raid**.
+- ❌ `async void` fora de event handler (exceção some); tocar Unity API fora da main thread; compartilhar um CTS entre raids; timer/thread órfão que sobrevive à raid.
+
+### Server (SRV)
+- ✅ `[Injectable(Singleton)]` só para stateless/imutável; cache mutável com eviction por profile-logout/raid-end.
+- ❌ Pendurar estado de profile/raid num singleton; `static Dictionary` server-side que só cresce.
+
+### Ambiente / mitigação (o mais esquecido)
+- ✅ Deixar o **RAM cleaner nativo do headless** trabalhar; como paliativo, ajustar `RAMCleanInterval` / `restartAfterAmountOfRaids` no server — **paliativo, não cura**.
+- ✅ Manter o mod set do headless **mínimo e idêntico** ao dos peers.
+- ❌ `GC.Collect()`, `Resources.UnloadUnusedAssets()` ou um "RAM cleaner" **no seu mod** (causa hitch **e** o headless **bane** cleaners de terceiros → recusa hospedar).
+- ❌ Instalar no headless mods que não batem com os peers, ou cleaners de RAM/VRAM de terceiros.
+
+### Diagnóstico (antes de "consertar")
+- ✅ Ler o `LogOutput.log` **primeiro** — desambigua OOM vs. exceção vs. watchdog; medir RSS entre raids e dentro da raid; heap snapshot comparativo (§6).
+- ❌ Concluir "leak" de um crash **sem medir**; jogar mais RAM (32→64 GB) como "fix" — mascara, não resolve, e não ajuda se o crash é não-memória.
 
 ## Checklist de auditoria (usar em `/analyze-memory-leak` e nos reviews)
 

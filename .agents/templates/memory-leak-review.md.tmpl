@@ -6,7 +6,11 @@
 
 > Auditoria **estática** de vazamento de memória (retenção não liberada + pressão de GC) no código do mod. Cada achado recebe um ID `ML-{{REVIEW_NN}}-MM` **permanente**. Análise estática **levanta hipóteses priorizadas**; a confirmação é in-game (ver `## Plano de confirmação`). Skill de referência: `spt-memory-leak-analysis`.
 >
-> 🎯 **Por que isso importa aqui:** um mod client roda também no **Fika headless**, que hospeda raid após raid por horas sem reiniciar. Um leak imperceptível numa sessão solo de 40 min **se acumula entre raids** no headless até OOM (o Fika só mitiga com GC periódico + restart após N raids — não detecta leak). A **taxa de acúmulo** de cada achado é tão importante quanto o mecanismo.
+> 🎯 **Por que isso importa aqui:** um mod client roda também no **Fika headless**. Dois perfis de sintoma, com diagnósticos diferentes (skill §1.1):
+> - **Crash dentro de uma raid isolada** (ex.: a 1ª) → leak/pressão **agudos intra-raid** (per-frame/per-event), **spike** de consumo, ou **crash não-memória** (exceção/stack overflow que o watchdog reinicia). **Ler o `LogOutput.log` primeiro** para descartar o que não é memória.
+> - **Crash só após N raids**, com RSS crescendo entre raids → leak **per-raid** acumulando no processo longevo.
+>
+> O Fika só mitiga com paliativos (GC periódico + restart após N raids configurável) — **não detecta** leak. A **taxa de acúmulo** de cada achado é tão importante quanto o mecanismo.
 
 ## Resumo
 
@@ -90,6 +94,7 @@
 
 > A retenção só se prova medindo. Priorizar os achados 🔴/🟠 nesta ordem.
 
+- [ ] **Ler o `LogOutput.log` primeiro (desambiguar):** `OutOfMemory`/`bad_alloc` ⇒ é memória (siga abaixo) · `StackOverflow`/exceção repetida no stop ⇒ crash não-memória (AP-07, não é leak) · "no peers"/45s ⇒ watchdog de conexão. Só seguir com a medição de RSS se for memória.
 - [ ] **Baseline:** medir RSS do processo (headless: `EscapeFromTarkov.exe` sem render; solo: idem) no menu, antes da 1ª raid.
 - [ ] **raid1 → exit → menu → raid2 → exit → menu:** medir RSS no menu após cada raid. **Crescimento monotônico entre menus** = leak per-raid (achados 🟠 LIFE/EVT/STAT).
 - [ ] **Raid longa (>20 min) com atividade (bots, tiros):** RSS subindo continuamente dentro da mesma raid = leak per-frame/per-event (achados 🔴 HOT/EVT).
