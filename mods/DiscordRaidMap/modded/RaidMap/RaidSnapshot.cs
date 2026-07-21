@@ -9,7 +9,6 @@ namespace DiscordRaidMap.RaidMap
         DeadPlayer,
         KilledEnemy,
         KilledBoss,
-        Airdrop,
         Extract,
         ExtractRequirements
     }

@@ -112,7 +112,6 @@ namespace DiscordRaidMap.RaidMap
             {
                 case RaidMarkerType.KilledEnemy:
                 case RaidMarkerType.KilledBoss:
-                case RaidMarkerType.Airdrop:
                 case RaidMarkerType.Extract:
                 case RaidMarkerType.ExtractRequirements:
                     DrawMarkerIcon(pixels, width, height, point, marker.Type);
@@ -194,7 +193,6 @@ namespace DiscordRaidMap.RaidMap
                 RaidMarkerType.DeadPlayer => "dead_player.png",
                 RaidMarkerType.KilledEnemy => "dead_enemy.png",
                 RaidMarkerType.KilledBoss => "dead_boss.png",
-                RaidMarkerType.Airdrop => "airdrop.png",
                 RaidMarkerType.Extract => "extract.png",
                 RaidMarkerType.ExtractRequirements => "extract_requirements.png",
                 _ => throw new ArgumentOutOfRangeException(nameof(markerType), markerType, null)

@@ -5,7 +5,6 @@ using System.Reflection;
 using Comfort.Common;
 using EFT;
 using EFT.Interactive;
-using EFT.SynchronizableObjects;
 using HarmonyLib;
 using UnityEngine;
 
@@ -77,7 +76,6 @@ namespace DiscordRaidMap.RaidMap
             AddKilled(snapshot, _deadPlayers, RaidMarkerType.DeadPlayer);
             AddKilled(snapshot, _killedEnemies, RaidMarkerType.KilledEnemy);
             AddKilled(snapshot, _killedBosses, RaidMarkerType.KilledBoss);
-            AddAirdrops(snapshot);
             AddExtracts(snapshot, referencePlayer, mainPlayer == null);
 
             return snapshot;
@@ -118,36 +116,6 @@ namespace DiscordRaidMap.RaidMap
                     Label = type == RaidMarkerType.DeadPlayer
                         ? player.Profile?.GetCorrectedNickname() ?? "Player"
                         : ""
-                });
-            }
-        }
-
-        private void AddAirdrops(RaidSnapshot snapshot)
-        {
-            // Pull active airdrops from the world at snapshot time instead of a per-tick Harmony patch.
-            var processor = _gameWorld?.SynchronizableObjectLogicProcessor;
-            if (processor == null)
-            {
-                return;
-            }
-
-            foreach (var syncObject in processor.GetSynchronizableObjects())
-            {
-                // GetSynchronizableObjects() yields all pooled objects unfiltered; only draw an
-                // airdrop that is actually initialized and active (CR-01-01) — pooled/uninited
-                // instances would render as phantom markers.
-                if (syncObject is not AirdropSynchronizableObject airdrop
-                    || airdrop == null
-                    || !airdrop.IsInited
-                    || !airdrop.IsActive)
-                {
-                    continue;
-                }
-
-                snapshot.Markers.Add(new RaidMarker
-                {
-                    Type = RaidMarkerType.Airdrop,
-                    MapPosition = ToMapPosition(airdrop.transform.position)
                 });
             }
         }

@@ -22,7 +22,7 @@
 
 | ID | Cat | Impacto | Título | Status |
 |---|---|---|---|---|
-| CR-02-01 | B | 🟡 | Filtro de airdrop por `IsActive` pode esconder airdrop **já pousado** | Pendente |
+| CR-02-01 | B | 🟡 | Filtro de airdrop por `IsActive` pode esconder airdrop **já pousado** | ✅ Resolvido (feature removida, v1.1.3) |
 | CR-02-02 | C | 🟡 | `PROPRIEDADES.md` desatualizado — faltam os 3 configs de *Image Output* | Pendente |
 | CR-02-03 | E | 🟢 | `README.md` provavelmente desatualizado (JPEG/downscale/coleta no intervalo) | Pendente |
 | CR-02-04 | F | 🟢 | `.csproj` sem `<Version>` (só o `BepInPlugin` versiona) | Pendente |
