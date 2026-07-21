@@ -32,6 +32,9 @@ namespace DiscordRaidMap.RaidMap
         private static readonly Color32 CornerTextShadow = new(0, 0, 0, 235);
         private const string DefaultFont = "DelaGothicOne-Regular.ttf";
 
+        // Resolved once (CR-01-04); ImageCodecInfo.GetImageEncoders() allocates, so don't call per render.
+        private static readonly ImageCodecInfo JpegEncoder = ResolveJpegEncoder();
+
         private readonly string _mapAssetPath;
         private readonly string _markerAssetPath;
         private readonly string _fontAssetPath;
@@ -49,6 +52,7 @@ namespace DiscordRaidMap.RaidMap
         // The map is fixed for the raid, so these buffers only reallocate when the map size changes.
         private Color32[] _canvas;
         private byte[] _encodeBuffer;
+        private Bitmap _encodeBitmap;
         private System.Drawing.Font _cachedFont;
         private Bitmap _measureBitmap;
         private System.Drawing.Graphics _measureGraphics;
@@ -144,7 +148,8 @@ namespace DiscordRaidMap.RaidMap
             }
 
             // Downscale the (large) background once at load; every render then works on the smaller buffer.
-            var image = LoadPng(path, _maxImageDimension);
+            // Force opaque so the JPEG path never flattens transparent map regions to black (CR-01-03).
+            var image = LoadPng(path, _maxImageDimension, forceOpaque: true);
             _backgroundCache[map.ImageFile] = image;
             return image;
         }
@@ -465,7 +470,7 @@ namespace DiscordRaidMap.RaidMap
                 255);
         }
 
-        private static CpuImage LoadPng(string path, int maxDimension = 0)
+        private static CpuImage LoadPng(string path, int maxDimension = 0, bool forceOpaque = false)
         {
             using var source = new Bitmap(path);
 
@@ -508,7 +513,7 @@ namespace DiscordRaidMap.RaidMap
                             bytes[offset + 2],
                             bytes[offset + 1],
                             bytes[offset],
-                            bytes[offset + 3]);
+                            forceOpaque ? (byte)255 : bytes[offset + 3]);
                     }
                 }
 
@@ -522,7 +527,14 @@ namespace DiscordRaidMap.RaidMap
 
         private byte[] EncodeImage(Color32[] pixels, int width, int height)
         {
-            using var bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+            // Reuse the encode Bitmap across renders (CR-01-05); recreated only if the map size changes.
+            if (_encodeBitmap == null || _encodeBitmap.Width != width || _encodeBitmap.Height != height)
+            {
+                _encodeBitmap?.Dispose();
+                _encodeBitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+            }
+
+            var bitmap = _encodeBitmap;
             var rect = new Rectangle(0, 0, width, height);
             var data = bitmap.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
 
@@ -562,25 +574,21 @@ namespace DiscordRaidMap.RaidMap
             {
                 bitmap.Save(stream, ImageFormat.Png);
             }
+            else if (JpegEncoder != null)
+            {
+                using var parameters = new EncoderParameters(1);
+                parameters.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, (long)_jpegQuality);
+                bitmap.Save(stream, JpegEncoder, parameters);
+            }
             else
             {
-                var encoder = GetJpegEncoder();
-                if (encoder != null)
-                {
-                    using var parameters = new EncoderParameters(1);
-                    parameters.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, (long)_jpegQuality);
-                    bitmap.Save(stream, encoder, parameters);
-                }
-                else
-                {
-                    bitmap.Save(stream, ImageFormat.Jpeg);
-                }
+                bitmap.Save(stream, ImageFormat.Jpeg);
             }
 
             return stream.ToArray();
         }
 
-        private static ImageCodecInfo GetJpegEncoder()
+        private static ImageCodecInfo ResolveJpegEncoder()
         {
             foreach (var codec in ImageCodecInfo.GetImageEncoders())
             {
@@ -599,6 +607,8 @@ namespace DiscordRaidMap.RaidMap
             _markerCache.Clear();
             _canvas = null;
             _encodeBuffer = null;
+            _encodeBitmap?.Dispose();
+            _encodeBitmap = null;
             _cachedFont?.Dispose();
             _cachedFont = null;
             _measureGraphics?.Dispose();

@@ -5,7 +5,7 @@ using DiscordRaidMap.Patches;
 
 namespace DiscordRaidMap
 {
-    [BepInPlugin("com.fiodor.discordraidmap", "Discord Raid Map", "1.1.1")]
+    [BepInPlugin("com.fiodor.discordraidmap", "Discord Raid Map", "1.1.2")]
     [BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {

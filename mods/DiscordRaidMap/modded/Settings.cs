@@ -76,19 +76,19 @@ namespace DiscordRaidMap
 
             ConfigEntries.Add(MaxImageDimension = config.Bind("Image Output", "Max Image Size", 1280,
                 new ConfigDescription(
-                    "Longest side (px) of the image sent to Discord; the map is downscaled to fit. Lower = far less RAM and upload size (the render buffer scales with pixel count). 1280 keeps players/bodies clearly readable.",
+                    "Longest side (px) of the image sent to Discord; the map is downscaled to fit. Lower = far less RAM and upload size. 1280 keeps players/bodies clearly readable.\n\nMaior lado (px) da imagem enviada ao Discord; o mapa é reduzido para caber. Menor = muito menos RAM e upload. 1280 mantém jogadores/corpos bem legíveis.",
                     new AcceptableValueRange<int>(480, 4000),
                     new ConfigurationManagerAttributes { IsAdvanced = false })));
 
             ConfigEntries.Add(ImageFormat = config.Bind("Image Output", "Image Format", MapImageFormat.Jpeg,
                 new ConfigDescription(
-                    "Jpeg = much smaller upload (recommended). Png = lossless but several times larger. Does not affect RAM use (that is Max Image Size).",
+                    "Jpeg = much smaller upload (recommended). Png = lossless but several times larger. Does not affect RAM use (that is Max Image Size).\n\nJpeg = upload muito menor (recomendado). Png = sem perda, mas várias vezes maior. Não afeta o uso de RAM (isso é o Max Image Size).",
                     null,
                     new ConfigurationManagerAttributes { IsAdvanced = false })));
 
             ConfigEntries.Add(JpegQuality = config.Bind("Image Output", "Jpeg Quality", 80,
                 new ConfigDescription(
-                    "JPEG quality (1-100). Only used when Image Format is Jpeg. 80 is a good size/clarity trade-off for a minimap.",
+                    "JPEG quality (1-100). Only used when Image Format is Jpeg. 80 is a good size/clarity trade-off for a minimap.\n\nQualidade do JPEG (1-100). Só usado quando o formato é Jpeg. 80 é um bom equilíbrio tamanho/nitidez para um minimapa.",
                     new AcceptableValueRange<int>(30, 100),
                     new ConfigurationManagerAttributes { IsAdvanced = false })));
 

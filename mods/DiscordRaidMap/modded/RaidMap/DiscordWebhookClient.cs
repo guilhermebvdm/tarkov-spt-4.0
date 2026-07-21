@@ -12,8 +12,11 @@ namespace DiscordRaidMap.Discord
     {
         private const int TimeoutSeconds = 15;
 
+        // Shared plugin-scope HttpClient reused across raids (CR-01-06); a per-raid `new HttpClient()`
+        // leaked its socket handler until GC. One instance is the recommended pattern.
+        private static readonly HttpClient Http = new();
+
         private readonly string _webhookUrl;
-        private readonly HttpClient _http = new();
         private string _messageId;
 
         public DiscordWebhookClient(string webhookUrl)
@@ -43,7 +46,7 @@ namespace DiscordRaidMap.Discord
             {
                 using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(TimeoutSeconds));
                 using var req = new HttpRequestMessage(HttpMethod.Delete, $"{_webhookUrl}/messages/{_messageId}");
-                using var resp = await _http.SendAsync(req, cts.Token);
+                using var resp = await Http.SendAsync(req, cts.Token);
                 _messageId = null;
             }
             catch (Exception ex)
@@ -61,7 +64,7 @@ namespace DiscordRaidMap.Discord
 
             try
             {
-                resp = await _http.PostAsync(url, form, cts.Token);
+                resp = await Http.PostAsync(url, form, cts.Token);
                 resp.EnsureSuccessStatusCode();
 
                 var json = await resp.Content.ReadAsStringAsync();
@@ -89,7 +92,7 @@ namespace DiscordRaidMap.Discord
                     Content = form
                 };
 
-                resp = await _http.SendAsync(req, cts.Token);
+                resp = await Http.SendAsync(req, cts.Token);
                 resp.EnsureSuccessStatusCode();
             }
             finally

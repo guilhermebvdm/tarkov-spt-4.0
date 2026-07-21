@@ -41,7 +41,9 @@ namespace DiscordRaidMap.RaidMap
 
         private readonly GameWorld _gameWorld;
 
-        // Reused buffers, rebuilt from the world scan on every snapshot (no per-tick/per-event tracking).
+        // Accumulated across the raid (deduped by Contains), cleared on Dispose. Fed only by the
+        // interval corpse scan (no per-tick/per-event tracking) — kept permanent so a despawned corpse
+        // does not drop its marker (CR-01-02).
         private readonly List<Player> _deadPlayers = [];
         private readonly List<Player> _killedEnemies = [];
         private readonly List<Player> _killedBosses = [];
@@ -69,9 +71,6 @@ namespace DiscordRaidMap.RaidMap
                 TimeRemaining = GetRaidTimeRemaining()
             };
 
-            _deadPlayers.Clear();
-            _killedEnemies.Clear();
-            _killedBosses.Clear();
             RefreshKilledPlayers(referencePlayer);
 
             AddPlayers(snapshot, referencePlayer);
@@ -134,7 +133,13 @@ namespace DiscordRaidMap.RaidMap
 
             foreach (var syncObject in processor.GetSynchronizableObjects())
             {
-                if (syncObject is not AirdropSynchronizableObject airdrop || airdrop == null)
+                // GetSynchronizableObjects() yields all pooled objects unfiltered; only draw an
+                // airdrop that is actually initialized and active (CR-01-01) — pooled/uninited
+                // instances would render as phantom markers.
+                if (syncObject is not AirdropSynchronizableObject airdrop
+                    || airdrop == null
+                    || !airdrop.IsInited
+                    || !airdrop.IsActive)
                 {
                     continue;
                 }
@@ -286,10 +291,16 @@ namespace DiscordRaidMap.RaidMap
                 return mainPlayer;
             }
 
-            if (_headlessReferencePlayer != null)
+            // Revalidate the cached reference: a disconnected/dead peer would give stale side/extract
+            // filtering, so drop it and re-resolve to a live candidate (CR-01-07).
+            if (_headlessReferencePlayer != null
+                && _headlessReferencePlayer.HealthController != null
+                && _headlessReferencePlayer.HealthController.IsAlive)
             {
                 return _headlessReferencePlayer;
             }
+
+            _headlessReferencePlayer = null;
 
             var fikaCandidates = (_gameWorld?.AllPlayersEverExisted ?? [])
                 .Where(player => player != null
