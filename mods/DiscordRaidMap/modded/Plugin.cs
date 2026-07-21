@@ -5,7 +5,7 @@ using DiscordRaidMap.Patches;
 
 namespace DiscordRaidMap
 {
-    [BepInPlugin("com.fiodor.discordraidmap", "Discord Raid Map", "1.1.0")]
+    [BepInPlugin("com.fiodor.discordraidmap", "Discord Raid Map", "1.1.1")]
     [BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
@@ -29,8 +29,6 @@ namespace DiscordRaidMap
 
             new GameStartedPatch().Enable();
             new GameWorldOnDestroyPatch().Enable();
-            new PlayerOnDeadPatch().Enable();
-            new AirdropLandedPatch().Enable();
 
             GameStartedPatch.OnGameStarted += _lifecycle.OnGameStarted;
             GameWorldOnDestroyPatch.OnRaidEnd += _lifecycle.OnRaidEnd;

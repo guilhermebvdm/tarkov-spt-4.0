@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Comfort.Common;
-using DiscordRaidMap.Patches;
 using EFT;
 using EFT.Interactive;
 using EFT.SynchronizableObjects;
@@ -41,22 +40,16 @@ namespace DiscordRaidMap.RaidMap
         ];
 
         private readonly GameWorld _gameWorld;
+
+        // Reused buffers, rebuilt from the world scan on every snapshot (no per-tick/per-event tracking).
         private readonly List<Player> _deadPlayers = [];
         private readonly List<Player> _killedEnemies = [];
         private readonly List<Player> _killedBosses = [];
-        private readonly List<AirdropSynchronizableObject> _airdrops = [];
         private Player _headlessReferencePlayer;
 
         public RaidStateCollector(GameWorld gameWorld)
         {
             _gameWorld = gameWorld;
-            PlayerOnDeadPatch.OnDead += OnPlayerDead;
-            AirdropLandedPatch.OnAirdropLanded += OnAirdropLanded;
-
-            foreach (var airdrop in AirdropLandedPatch.Airdrops)
-            {
-                OnAirdropLanded(airdrop);
-            }
         }
 
         public RaidSnapshot CollectSnapshot()
@@ -76,7 +69,11 @@ namespace DiscordRaidMap.RaidMap
                 TimeRemaining = GetRaidTimeRemaining()
             };
 
+            _deadPlayers.Clear();
+            _killedEnemies.Clear();
+            _killedBosses.Clear();
             RefreshKilledPlayers(referencePlayer);
+
             AddPlayers(snapshot, referencePlayer);
             AddKilled(snapshot, _deadPlayers, RaidMarkerType.DeadPlayer);
             AddKilled(snapshot, _killedEnemies, RaidMarkerType.KilledEnemy);
@@ -128,8 +125,20 @@ namespace DiscordRaidMap.RaidMap
 
         private void AddAirdrops(RaidSnapshot snapshot)
         {
-            foreach (var airdrop in _airdrops.Where(a => a != null))
+            // Pull active airdrops from the world at snapshot time instead of a per-tick Harmony patch.
+            var processor = _gameWorld?.SynchronizableObjectLogicProcessor;
+            if (processor == null)
             {
+                return;
+            }
+
+            foreach (var syncObject in processor.GetSynchronizableObjects())
+            {
+                if (syncObject is not AirdropSynchronizableObject airdrop || airdrop == null)
+                {
+                    continue;
+                }
+
                 snapshot.Markers.Add(new RaidMarker
                 {
                     Type = RaidMarkerType.Airdrop,
@@ -184,21 +193,6 @@ namespace DiscordRaidMap.RaidMap
                     Type = markerType.Value,
                     MapPosition = ToMapPosition(extract.transform.position)
                 });
-            }
-        }
-
-        private void OnPlayerDead(Player player)
-        {
-            var referencePlayer = GetReferencePlayer(_gameWorld?.MainPlayer);
-            TryTrackDeadPlayer(player, referencePlayer);
-            TryTrackKilledPlayer(player, referencePlayer);
-        }
-
-        private void OnAirdropLanded(AirdropSynchronizableObject airdrop)
-        {
-            if (airdrop != null && !_airdrops.Contains(airdrop))
-            {
-                _airdrops.Add(airdrop);
             }
         }
 
@@ -345,12 +339,10 @@ namespace DiscordRaidMap.RaidMap
 
         public void Dispose()
         {
-            PlayerOnDeadPatch.OnDead -= OnPlayerDead;
-            AirdropLandedPatch.OnAirdropLanded -= OnAirdropLanded;
             _deadPlayers.Clear();
             _killedEnemies.Clear();
             _killedBosses.Clear();
-            _airdrops.Clear();
+            _headlessReferencePlayer = null;
         }
     }
 }
