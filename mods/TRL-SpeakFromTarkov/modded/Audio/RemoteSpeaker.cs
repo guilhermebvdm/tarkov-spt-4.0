@@ -16,6 +16,9 @@ namespace TRL_SpeakFromTarkov.Audio
         private int frameSize;
         private float[] opusDecodeBuffer;
 
+        private float currentDistanceTarget = 30f;
+        private float smoothedDistance = 30f;
+
         private float[] streamBuffer;
         private volatile int streamWritePos = 0;
         private volatile int streamReadPos  = 0;
@@ -32,8 +35,12 @@ namespace TRL_SpeakFromTarkov.Audio
             this.sampleRate = sampleRate;
             this.frameSize  = frameSize;
 
-            jitterInitialSamples  = (int)(sampleRate * 0.15f); // 150ms
-            jitterRecoverySamples = (int)(sampleRate * 0.04f); // 40ms
+            int jitterMs = 150;
+            if (VoIPPlugin.NetworkJitterBufferMs != null)
+                jitterMs = (int)VoIPPlugin.NetworkJitterBufferMs.Value;
+
+            jitterInitialSamples = (int)(sampleRate * (jitterMs / 1000f));
+            jitterRecoverySamples = (int)(sampleRate * 0.040f); // 40ms
             currentJitterTarget   = jitterInitialSamples;
 
             this.opusDecodeBuffer = new float[frameSize];
@@ -51,12 +58,19 @@ namespace TRL_SpeakFromTarkov.Audio
             }
 
             audioSource = gameObject.AddComponent<AudioSource>();
-            audioSource.spatialBlend  = spatialBlend;
+            audioSource.spatialBlend = 1f;
             audioSource.spatialize    = spatialBlend > 0f;
             audioSource.dopplerLevel  = 0f;
-            audioSource.minDistance   = 1f;
-            audioSource.maxDistance   = 30f;
-            audioSource.rolloffMode   = AudioRolloffMode.Linear;
+            audioSource.rolloffMode = AudioRolloffMode.Logarithmic;
+            audioSource.minDistance = 2f;
+            
+            float maxDist = 30f;
+            if (VoIPPlugin.MaxHearingDistance != null)
+                maxDist = VoIPPlugin.MaxHearingDistance.Value;
+                
+            audioSource.maxDistance = maxDist;
+            currentDistanceTarget = maxDist;
+            smoothedDistance = maxDist;
             audioSource.loop          = true;
             audioSource.clip = AudioClip.Create("SftStream", sampleRate, 1, sampleRate, false);
             audioSource.Play();
@@ -68,19 +82,38 @@ namespace TRL_SpeakFromTarkov.Audio
                 audioSource.volume = volume;
         }
 
-        public void EnqueuePacket(byte[] opusData)
+        public void EnqueuePacket(byte[] opusData, float voiceLevel = 0f)
         {
             packetQueue.Enqueue(opusData);
+            
+            float maxBase = 30f;
+            if (VoIPPlugin.MaxHearingDistance != null)
+                maxBase = VoIPPlugin.MaxHearingDistance.Value;
+                
+            // Mapeia VoiceLevel (0 a 1) para um multiplicador de distância.
+            // Whisper (~0.01) -> 0.33x (10m). Normal (~0.1) -> 1.0x (30m). Grito (>0.3) -> 2.0x (60m).
+            float distanceMultiplier = Mathf.Clamp((voiceLevel * 10f), 0.33f, 2.0f);
+            currentDistanceTarget = maxBase * distanceMultiplier;
         }
 
         void Update()
         {
+            if (audioSource != null)
+            {
+                smoothedDistance = Mathf.Lerp(smoothedDistance, currentDistanceTarget, Time.deltaTime * 5f);
+                audioSource.maxDistance = smoothedDistance;
+            }
+
             if (decoder == null) return;
+            
+            bool useFec = false;
+            if (VoIPPlugin.OpusFEC != null)
+                useFec = VoIPPlugin.OpusFEC.Value;
 
             while (packetQueue.TryDequeue(out byte[] opusData))
             {
 #pragma warning disable CS0618
-                int len = decoder.Decode(opusData, 0, opusData.Length, opusDecodeBuffer, 0, frameSize, false);
+                int len = decoder.Decode(opusData, 0, opusData.Length, opusDecodeBuffer, 0, frameSize, useFec);
 #pragma warning restore CS0618
 
                 int currentWritePos = streamWritePos;
@@ -103,7 +136,7 @@ namespace TRL_SpeakFromTarkov.Audio
             // Se o relógio do Sender for levemente mais rápido que o do Receiver,
             // o buffer vai encher lentamente ao longo de minutos.
             // Para evitar delay absurdo ou estouro de buffer, nós dropamos pacotes velhos.
-            int maxAllowedDelay = (int)(sampleRate * 0.3f); // Max 300ms de delay aceitável
+            int maxAllowedDelay = jitterInitialSamples * 2; // Pelo menos 2x o Jitter inicial
             if (available > maxAllowedDelay)
             {
                 // Avança o ponteiro de leitura para manter apenas o equivalente ao Jitter Inicial

@@ -7,7 +7,7 @@ namespace TRL_SpeakFromTarkov.Audio
 {
     public class VoipProcessor : MonoBehaviour
     {
-        public Action<byte[]> OnOpusDataEncoded;
+        public Action<byte[], float> OnOpusDataEncoded;
         
         private OpusEncoder encoder;
         private int frameSize;
@@ -34,7 +34,13 @@ namespace TRL_SpeakFromTarkov.Audio
 #pragma warning disable CS0618
                 encoder = new OpusEncoder(sampleRate, 1, OpusApplication.OPUS_APPLICATION_VOIP);
 #pragma warning restore CS0618
-                encoder.Bitrate = 12000;
+                encoder.Bitrate = VoIPPlugin.OpusBitrate.Value;
+                encoder.Complexity = VoIPPlugin.OpusComplexity.Value;
+                
+                if (VoIPPlugin.OpusFEC.Value)
+                {
+                    encoder.UseInbandFEC = true;
+                }
             }
             catch (Exception ex)
             {
@@ -61,6 +67,15 @@ namespace TRL_SpeakFromTarkov.Audio
             
             if (ShouldTransmit())
             {
+                float outputVolume = VoIPPlugin.OutputVolume.Value;
+                if (outputVolume != 1.0f)
+                {
+                    // Altera o volume final diretamente nos samples antes de encodar
+                    for (int i = 0; i < pcmSamples.Length; i++)
+                    {
+                        pcmSamples[i] *= outputVolume;
+                    }
+                }
                 Transmit(pcmSamples);
             }
         }
@@ -104,7 +119,7 @@ namespace TRL_SpeakFromTarkov.Audio
                 {
                     byte[] finalData = new byte[len];
                     Array.Copy(opusBuffer, finalData, len);
-                    OnOpusDataEncoded?.Invoke(finalData);
+                    OnOpusDataEncoded?.Invoke(finalData, DisplayLevel);
                 }
             }
             catch (Exception ex)

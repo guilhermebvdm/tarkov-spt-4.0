@@ -34,9 +34,9 @@ namespace TRL_SpeakFromTarkov.Core
             network = gameObject.AddComponent<SftNetwork>();
             network.Initialize(sampleRate, frameSize);
             
-            if (isHeadless)
+            if (isHeadless || (VoIPPlugin.EnableMod != null && !VoIPPlugin.EnableMod.Value))
             {
-                VoIPPlugin.Log.LogInfo("[SFT] Servidor Headless detectado. Inicializando apenas a rede P2P (SftNetwork).");
+                VoIPPlugin.Log.LogInfo("[SFT] Headless/Mod Desativado. Inicializando apenas a rede P2P (SftNetwork) silenciosa.");
                 return;
             }
             
@@ -55,9 +55,9 @@ namespace TRL_SpeakFromTarkov.Core
             
             // Wiring Events
             capturer.OnAudioDataCaptured += processor.ProcessAudio;
-            processor.OnOpusDataEncoded += (opusData) => {
+            processor.OnOpusDataEncoded += (opusData, voiceLevel) => {
                 mainThreadActions.Enqueue(() => {
-                    network.Broadcast(opusData, CurrentChannel);
+                    network.Broadcast(opusData, CurrentChannel, voiceLevel);
                     
                     if (VoIPPlugin.EchoDelay.Value > 0f && !processor.IsMuted)
                     {

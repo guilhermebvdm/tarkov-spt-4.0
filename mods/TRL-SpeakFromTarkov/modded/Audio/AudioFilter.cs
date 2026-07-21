@@ -72,6 +72,24 @@ namespace TRL_SpeakFromTarkov.Audio
         public float RNNoiseVADThreshold { get; set; } = 0.85f;
         public float RNNoiseGateHold { get; set; } = 0.15f;
 
+        // ── Novos Filtros Avançados (Qualidade Estúdio) ────────
+        public bool EnableAGC { get; set; } = true;
+        public bool EnableLimiter { get; set; } = true;
+        
+        private float _lpfAlpha;
+        private float _lpfPrevOut = 0f;
+        public float LPFCutoffHz 
+        { 
+            set 
+            {
+                float dt = 1f / 48000f; // Sample rate padrão
+                float rc = 1f / (2f * Mathf.PI * value);
+                _lpfAlpha = dt / (rc + dt);
+            }
+        }
+        
+        private float _agcCurrentGain = 1f;
+
         // ── VAD signal do RNNoise (0-1, disponível para uso externo) ──────────
         public float LastVadProbability { get; private set; } = 0f;
 
@@ -119,15 +137,22 @@ namespace TRL_SpeakFromTarkov.Audio
         /// </summary>
         public void Apply(float[] buffer)
         {
+            // O AGC tenta equalizar o ganho de quem fala baixo vs quem grita ANTES do gate de ruído.
+            if (EnableAGC) ApplyAGC(buffer);
+
             if (_rnAvailable && UseRNNoise)
             {
                 ApplyHPF(buffer);
+                if (_lpfAlpha > 0) ApplyLPF(buffer);
                 ApplyRNNoise(buffer);
             }
             else
             {
                 ApplyFallback(buffer);
             }
+            
+            // O limiter é a última barreira de proteção de áudio
+            if (EnableLimiter) ApplyLimiter(buffer);
         }
 
         // ── RNNoise com Fila (Jitter-Free) ────────────────────────────────────
@@ -203,6 +228,48 @@ namespace TRL_SpeakFromTarkov.Audio
             }
         }
 
+        private void ApplyLPF(float[] buf)
+        {
+            for (int i = 0; i < buf.Length; i++)
+            {
+                float x = buf[i];
+                float y = _lpfPrevOut + _lpfAlpha * (x - _lpfPrevOut);
+                _lpfPrevOut = y;
+                buf[i] = y;
+            }
+        }
+
+        private void ApplyAGC(float[] buf)
+        {
+            float rms = GetRMS(buf);
+            float targetGain = 1f;
+            
+            // Se houver áudio útil, tentar equalizar para um RMS de 0.05
+            if (rms > 0.001f)
+            {
+                float targetRms = 0.05f;
+                targetGain = targetRms / rms;
+                targetGain = Mathf.Clamp(targetGain, 0.2f, 4.0f); // Boost máximo 4x, Redução máxima 5x
+            }
+            
+            // Transição absurdamente suave (0.001) para não parecer que o ganho está tremendo (pumping)
+            for (int i = 0; i < buf.Length; i++)
+            {
+                _agcCurrentGain = Mathf.Lerp(_agcCurrentGain, targetGain, 0.001f);
+                buf[i] *= _agcCurrentGain;
+            }
+        }
+
+        private void ApplyLimiter(float[] buf)
+        {
+            // Soft clipping simple & robusto (limite em 0.98f para evitar estouro total em 1.0f)
+            for (int i = 0; i < buf.Length; i++)
+            {
+                if (buf[i] > 0.98f) buf[i] = 0.98f;
+                else if (buf[i] < -0.98f) buf[i] = -0.98f;
+            }
+        }
+
         private void ApplyNoiseGate(float[] buf)
         {
             float rms = GetRMS(buf);
@@ -236,6 +303,8 @@ namespace TRL_SpeakFromTarkov.Audio
         public void Reset(int latency)
         {
             _hpfPrevIn = _hpfPrevOut = 0f;
+            _lpfPrevOut = 0f;
+            _agcCurrentGain = 1f;
             _gateGain  = 0f; _gateHoldTimer = 0f; _gateOpen = false;
             _rnGateGain = 0f; _rnGateHoldTimer = 0f; _rnGateOpen = false;
             _inputWrite = _inputRead = _inputCount = 0;

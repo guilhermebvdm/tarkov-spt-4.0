@@ -34,9 +34,10 @@ namespace TRL_SpeakFromTarkov.Network
             }
         }
 
-        public void Broadcast(byte[] opusData, byte channel)
+        public void Broadcast(byte[] opusData, byte channel, float voiceLevel = 0f)
         {
             if (!IsSessionActive || !Singleton<IFikaNetworkManager>.Instantiated) return;
+            if (VoIPPlugin.EnableMod != null && !VoIPPlugin.EnableMod.Value) return;
             
             string myProfileId = string.Empty;
             if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance.MainPlayer != null)
@@ -48,7 +49,8 @@ namespace TRL_SpeakFromTarkov.Network
             { 
                 ProfileId = myProfileId ?? string.Empty,
                 Channel = channel, 
-                AudioData = opusData 
+                AudioData = opusData,
+                VoiceLevel = voiceLevel
             };
             
             Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, Fika.Core.Networking.LiteNetLib.DeliveryMethod.Sequenced, broadcast: true);
@@ -57,6 +59,7 @@ namespace TRL_SpeakFromTarkov.Network
         private void OnReceiveVoipData(SftAudioPacket packet)
         {
             if (!IsSessionActive) return;
+            if (VoIPPlugin.EnableMod != null && !VoIPPlugin.EnableMod.Value) return;
             
             // Rejeita pacotes próprios (Eco loopback local)
             if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance.MainPlayer != null)
@@ -91,7 +94,7 @@ namespace TRL_SpeakFromTarkov.Network
                 }
             }
 
-            speaker.EnqueuePacket(packet.AudioData);
+            speaker.EnqueuePacket(packet.AudioData, packet.VoiceLevel);
         }
 
         private RemoteSpeaker CreateRemoteSpeaker(string profileId)

@@ -16,12 +16,24 @@ namespace TRL_SpeakFromTarkov
 
         public static ConfigEntry<string> MicrophoneDevice { get; private set; }
         public static string[] MicrophoneNames { get; private set; }
+        public static ConfigEntry<bool> EnableMod { get; private set; }
         public static ConfigEntry<bool> DisableFikaVOIP { get; private set; }
         public static ConfigEntry<float> VADThreshold { get; private set; }
         public static ConfigEntry<float> EchoDelay { get; private set; }
         public static ConfigEntry<float> EchoVolume { get; private set; }
         public static ConfigEntry<float> MicGain { get; private set; }
         public static ConfigEntry<int> SampleRate { get; private set; }
+        public static ConfigEntry<float> NetworkJitterBufferMs { get; private set; }
+        
+        // Studio Quality configs
+        public static ConfigEntry<int> OpusBitrate { get; private set; }
+        public static ConfigEntry<int> OpusComplexity { get; private set; }
+        public static ConfigEntry<bool> OpusFEC { get; private set; }
+        public static ConfigEntry<bool> EnableAGC { get; private set; }
+        public static ConfigEntry<bool> EnableLimiter { get; private set; }
+        public static ConfigEntry<float> LPFCutoff { get; private set; }
+        public static ConfigEntry<float> MaxHearingDistance { get; private set; }
+        public static ConfigEntry<float> OutputVolume { get; private set; }
 
         // CONFIGURAÇÃO IDEAL: KeyboardShortcut
         public static ConfigEntry<KeyboardShortcut> PushToTalkKey { get; private set; }
@@ -89,11 +101,16 @@ namespace TRL_SpeakFromTarkov
                 }
             };
 
+            EnableMod = Config.Bind("Geral", "Habilitar Mod de Voz", true, "Se desativado, desliga totalmente a captação e reprodução de voz (como se o mod não estivesse instalado).");
             DisableFikaVOIP = Config.Bind("VOIP", "Desativar VOIP do Fika", true);
             VADThreshold = Config.Bind("VOIP", "Limiar VAD", 0.01f);
             EchoDelay = Config.Bind("VOIP", "Delay do Eco", 0.3f);
             EchoVolume = Config.Bind("VOIP", "Volume do Eco", 1.0f);
-            MicGain = Config.Bind("VOIP", "Ganho do Microfone", 1.0f);
+            MicGain = Config.Bind("VOIP", "Ganho do Microfone", 1.0f,
+                new ConfigDescription("Aumenta a captação bruta ANTES dos filtros e do gate. Padrão: 1.0"));
+            OutputVolume = Config.Bind("VOIP", "Volume de Saída", 1.0f,
+                new ConfigDescription("Aumenta ou abaixa o volume FINAL que seus amigos vão ouvir (não afeta os filtros). Padrão: 1.0",
+                    new AcceptableValueRange<float>(0.1f, 5.0f)));
             SampleRate = Config.Bind("VOIP", "SampleRate", 48000);
 
             // KeyboardShortcut: clica → aperta combinação
@@ -107,6 +124,13 @@ namespace TRL_SpeakFromTarkov
             HPFCutoff          = Config.Bind("Filtros", "HPF Cutoff (Hz)", 80f,
                 new ConfigDescription("Frequência de corte do filtro passa-alta. Remove ruído de baixa frequência (teclado, mesa). Padrão: 80Hz",
                     new AcceptableValueRange<float>(20f, 500f)));
+            LPFCutoff          = Config.Bind("Filtros", "LPF Cutoff (Hz)", 8000f,
+                new ConfigDescription("Frequência de corte do filtro passa-baixa. Remove estática e sons extremamente agudos. Padrão: 8000Hz",
+                    new AcceptableValueRange<float>(3000f, 20000f)));
+            EnableAGC          = Config.Bind("Filtros", "Habilitar AGC (Controle Automático de Ganho)", true,
+                new ConfigDescription("Aumenta a voz se você sussurrar e abaixa se gritar, normalizando o volume de forma suave."));
+            EnableLimiter      = Config.Bind("Filtros", "Habilitar Limiter (Protetor de Ouvido)", true,
+                new ConfigDescription("Impede que a voz estoure, esmagando gritos extremamente altos para proteger a audição alheia."));
             NoiseGateThreshold = Config.Bind("Filtros", "Noise Gate Threshold", 0.008f,
                 new ConfigDescription("RMS mínimo para abrir o gate de ruído. Abaixo disso o áudio é silenciado. Padrão: 0.008",
                     new AcceptableValueRange<float>(0.001f, 0.1f)));
@@ -125,6 +149,21 @@ namespace TRL_SpeakFromTarkov
             RNNoiseLatency     = Config.Bind("Filtros (RNNoise)", "Latencia RNNoise (amostras)", 2048,
                 new ConfigDescription("Tamanho da latência inicial da fila em amostras. Aumente se a voz picotar. Padrão: 2048",
                     new AcceptableValueRange<int>(1, 4096)));
+                    
+            NetworkJitterBufferMs = Config.Bind("Rede", "Jitter Buffer Inicial (ms)", 150f,
+                new ConfigDescription("Tempo de áudio guardado antes de tocar (Network Jitter Buffer). Se a voz picotar ou der mal contato na raid, AUMENTE este valor (ex: 200, 300). Padrão: 150ms",
+                    new AcceptableValueRange<float>(50f, 1000f)));
+            MaxHearingDistance = Config.Bind("Rede", "Distância Máxima do VOIP (Metros)", 30f,
+                new ConfigDescription("Distância máxima (em metros) onde a voz ainda pode ser ouvida pelos outros jogadores num volume normal. Padrão: 30m",
+                    new AcceptableValueRange<float>(5f, 200f)));
+            OpusBitrate = Config.Bind("Rede (Opus)", "Bitrate (kbps)", 24000,
+                new ConfigDescription("Qualidade do áudio (taxa de compressão). 12000 = Básico, 24000 = Padrão/Discord, 64000 = Áudio Cristalino. Padrão: 24000",
+                    new AcceptableValueRange<int>(8000, 64000)));
+            OpusComplexity = Config.Bind("Rede (Opus)", "Complexidade", 5,
+                new ConfigDescription("Uso de CPU do codificador. 0 = Leve (pior qualidade), 10 = Pesado (melhor qualidade). Padrão: 5",
+                    new AcceptableValueRange<int>(0, 10)));
+            OpusFEC = Config.Bind("Rede (Opus)", "Correção de Erros (FEC)", true,
+                new ConfigDescription("Se ativado, envia redundância. Em internets ruins, reconstrói partes perdidas da voz magicamente."));
 
             RNNoiseLatency.SettingChanged += (sender, args) =>
             {

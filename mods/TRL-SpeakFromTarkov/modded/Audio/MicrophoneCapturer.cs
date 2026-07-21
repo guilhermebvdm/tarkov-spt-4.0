@@ -109,6 +109,9 @@ namespace TRL_SpeakFromTarkov.Audio
             audioFilter.UseRNNoise            = VoIPPlugin.UseRNNoise.Value;
             audioFilter.RNNoiseVADThreshold   = VoIPPlugin.RNNoiseVADThreshold.Value;
             audioFilter.RNNoiseGateHold       = VoIPPlugin.RNNoiseGateHoldMs.Value / 1000f;
+            audioFilter.EnableAGC             = VoIPPlugin.EnableAGC.Value;
+            audioFilter.EnableLimiter         = VoIPPlugin.EnableLimiter.Value;
+            audioFilter.LPFCutoffHz           = VoIPPlugin.LPFCutoff.Value;
             
             _audioSource.clip = micClip;
             _audioSource.loop = true;
@@ -236,6 +239,9 @@ namespace TRL_SpeakFromTarkov.Audio
                 audioFilter.UseRNNoise            = VoIPPlugin.UseRNNoise.Value;
                 audioFilter.RNNoiseVADThreshold   = VoIPPlugin.RNNoiseVADThreshold.Value;
                 audioFilter.RNNoiseGateHold       = VoIPPlugin.RNNoiseGateHoldMs.Value / 1000f;
+                audioFilter.EnableAGC             = VoIPPlugin.EnableAGC.Value;
+                audioFilter.EnableLimiter         = VoIPPlugin.EnableLimiter.Value;
+                audioFilter.LPFCutoffHz           = VoIPPlugin.LPFCutoff.Value;
             }
         }
         

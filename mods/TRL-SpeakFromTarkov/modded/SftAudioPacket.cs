@@ -8,12 +8,14 @@ namespace TRL_SpeakFromTarkov
         public string ProfileId;
         public byte Channel;
         public byte[] AudioData;
+        public float VoiceLevel;
 
         public void Serialize(NetDataWriter writer)
         {
             writer.Put(ProfileId ?? string.Empty);
             writer.Put(Channel);
             writer.PutBytesWithLength(AudioData);
+            writer.Put(VoiceLevel);
         }
 
         public void Deserialize(NetDataReader reader)
@@ -21,6 +23,7 @@ namespace TRL_SpeakFromTarkov
             ProfileId = reader.GetString();
             Channel = reader.GetByte();
             AudioData = reader.GetBytesWithLength();
+            VoiceLevel = reader.GetFloat();
         }
     }
 }
