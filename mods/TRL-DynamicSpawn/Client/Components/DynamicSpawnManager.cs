@@ -346,9 +346,35 @@ namespace TRLDynamicSpawn.Components
 
 
 
-            // Embaralha a lista de spawn para misturar grupos de forma balanceada (alternando Scavs/PMCs/Snipers)
+            // Embaralha as sublistas, mas intercala de forma balanceada PMCs e Scavs
             var rng = new System.Random();
-            spawnList = spawnList.OrderBy(x => rng.Next()).ToList();
+            var pmcs = spawnList.Where(t => t.Item1.Role == WildSpawnType.pmcUSEC || t.Item1.Role == WildSpawnType.pmcBEAR || t.Item1.Role == WildSpawnType.exUsec).OrderBy(x => rng.Next()).ToList();
+            var scavs = spawnList.Where(t => t.Item1.Role == WildSpawnType.assault || t.Item1.Role == WildSpawnType.marksman).OrderBy(x => rng.Next()).ToList();
+            var elites = spawnList.Except(pmcs).Except(scavs).OrderBy(x => rng.Next()).ToList();
+
+            var interleavedList = new List<Tuple<SpawnGroupData, BotZone>>();
+            interleavedList.AddRange(elites);
+
+            int pmcTarget = pmcs.Count;
+            int scavTarget = scavs.Count;
+            int totalInterleave = pmcTarget + scavTarget;
+            int pIdx = 0, sIdx = 0;
+
+            for (int i = 0; i < totalInterleave; i++)
+            {
+                float expectedPmc = pmcTarget > 0 ? (float)pmcTarget / totalInterleave * (i + 1) : 0;
+                
+                if (pIdx < pmcTarget && (pIdx < expectedPmc || sIdx >= scavTarget))
+                {
+                    interleavedList.Add(pmcs[pIdx++]);
+                }
+                else if (sIdx < scavTarget)
+                {
+                    interleavedList.Add(scavs[sIdx++]);
+                }
+            }
+
+            spawnList = interleavedList;
 
             // Then, inject regular horde
             foreach (var tuple in spawnList)
@@ -363,70 +389,57 @@ namespace TRLDynamicSpawn.Components
                 BotZone preferredZone = tuple.Item2;
                 
                 BotZone selectedZone = preferredZone;
-                int retries = 5;
-                bool zoneValid = false;
 
-                while (retries > 0)
+                if (selectedZone == null)
                 {
-                    if (selectedZone == null)
+                    if (gData.Role == WildSpawnType.marksman)
                     {
-                        if (gData.Role == WildSpawnType.marksman)
+                        var snipeZones = LocationScene.GetAllObjects<BotZone>().Where(z => z.SnipeZone).ToList();
+                        var validSnipeZones = snipeZones.Where(z => 
                         {
-                            var snipeZones = LocationScene.GetAllObjects<BotZone>()
-                                .Where(z => z.SnipeZone)
-                                .ToList();
+                            var botsInZone = _botsController.Bots.GetListByZone(z);
+                            bool isEmpty = botsInZone == null || !botsInZone.Any(b => b.Profile.Info.Settings.Role == WildSpawnType.marksman && b.HealthController.IsAlive);
+                            return isEmpty && IsValidSpawnZone(z, mapName, gData.Role);
+                        }).ToList();
 
-                            var emptySnipeZones = snipeZones.Where(z => 
-                            {
-                                var botsInZone = _botsController.Bots.GetListByZone(z);
-                                return botsInZone == null || !botsInZone.Any(b => b.Profile.Info.Settings.Role == WildSpawnType.marksman && b.HealthController.IsAlive);
-                            }).ToList();
-
-                            if (emptySnipeZones.Count > 0)
-                            {
-                                selectedZone = emptySnipeZones[UnityEngine.Random.Range(0, emptySnipeZones.Count)];
-                            }
-                            else
-                            {
-                                Plugin.LogSource.LogInfo("[TRL-DynamicSpawn] All sniper zones occupied. Skipping sniper.");
-                                break;
-                            }
+                        if (validSnipeZones.Count > 0)
+                        {
+                            selectedZone = validSnipeZones[UnityEngine.Random.Range(0, validSnipeZones.Count)];
+                        }
+                    }
+                    else
+                    {
+                        var nonSnipeZones = LocationScene.GetAllObjects<BotZone>().Where(z => !z.SnipeZone).ToList();
+                        var validZones = nonSnipeZones.Where(z => IsValidSpawnZone(z, mapName, gData.Role)).ToList();
+                        
+                        if (validZones.Count > 0)
+                        {
+                            selectedZone = validZones[UnityEngine.Random.Range(0, validZones.Count)];
                         }
                         else
                         {
-                            var nonSnipeZones = LocationScene.GetAllObjects<BotZone>()
-                                .Where(z => !z.SnipeZone)
-                                .ToList();
-
-                            if (nonSnipeZones.Count > 0)
+                            // Fallback caso todas falhem (se a bolha estiver muito restritiva)
+                            selectedZone = TRLDynamicSpawn.Helpers.Methods.GetRandomZone(_botsController.BotSpawner);
+                            if (!IsValidSpawnZone(selectedZone, mapName, gData.Role))
                             {
-                                selectedZone = nonSnipeZones[UnityEngine.Random.Range(0, nonSnipeZones.Count)];
-                            }
-                            else
-                            {
-                                selectedZone = TRLDynamicSpawn.Helpers.Methods.GetRandomZone(_botsController.BotSpawner);
+                                selectedZone = null;
                             }
                         }
                     }
-
-                    if (selectedZone != null && IsValidSpawnZone(selectedZone, mapName, gData.Role))
-                    {
-                        zoneValid = true;
-                        break;
-                    }
-                    
-                    selectedZone = null;
-                    retries--;
+                }
+                else if (!IsValidSpawnZone(selectedZone, mapName, gData.Role))
+                {
+                    selectedZone = null; // Zera a preferida se for inválida
                 }
 
-                if (zoneValid && selectedZone != null)
+                if (selectedZone != null)
                 {
                     var spawnTask = DirectSpawnBots(gData.Role, gData.Difficulty, gData.GroupSize, selectedZone);
                     yield return new UnityEngine.WaitUntil(() => spawnTask.IsCompleted || spawnTask.IsFaulted || spawnTask.IsCanceled);
                 }
                 else
                 {
-                    Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] FAILED: Could not find a safe/LoS-free zone for bot group after 5 tries. Dropping group to prevent infinite loop.");
+                    Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] FAILED: Could not find any safe/LoS-free zone in the map for this bot group. Dropping group.");
                 }
 
                 if (TRLDynamicSpawn.Helpers.Settings.enableSmoothSpawning.Value)
