@@ -1,7 +1,7 @@
 # 030 — Tela "Mods e Configs" · Review da spec técnica 02 (revisão completa)
 
 > **Data:** 2026-07-20<br>
-> **Status:** 🟡 Em revisão<br>
+> **Status:** ✅ Aprovado<br>
 > **Responsáveis:** Guilherme<br>
 > **Referências:** [02-spec-tech](./030-mods-e-configs-tela-02-spec-tech.md) · [01-spec funcional](./030-mods-e-configs-tela-01-spec.md) · [review 01](./030-mods-e-configs-tela-03-spec-tech-review-01.md)<br>
 
@@ -9,7 +9,7 @@
 
 ## Veredito
 
-**A spec técnica NÃO está pronta para código.** A review 01 achou 8 pontos pontuais e os fechou; esta revisão — feita com três lentes independentes (rastreabilidade CA↔técnica, adversarial no motor, consistência entre documentos) — encontrou **falhas estruturais** que remendo pontual não resolve.
+**[RESOLVIDO — ver spec técnica v2]** À época desta revisão: a spec técnica NÃO estava pronta para código. A review 01 achou 8 pontos pontuais e os fechou; esta revisão — feita com três lentes independentes (rastreabilidade CA↔técnica, adversarial no motor, consistência entre documentos) — encontrou **falhas estruturais** que remendo pontual não resolve.
 
 Os achados **convergem em cinco causas raiz**. Duas delas invalidam desenho já aprovado (D-10 é impossível como especificado; o canal híbrido não funciona sem um mecanismo que a spec não previu), e uma tem risco de **quebrar coop**.
 
@@ -33,7 +33,7 @@ Os achados **convergem em cinco causas raiz**. Duas delas invalidam desenho já 
 | PA-02-12 | C | 🟡 | Inventário de testes que quebram — 1 deles derruba a compilação de todo o assembly |
 | PA-02-13 | A | 🟢 | Inconsistências de nomenclatura, numeração e histórico |
 
-**Contadores:** 🔴 7 · 🟡 5 · 🟢 1
+**Contadores:** 🔴 7 · 🟡 5 · 🟢 1 — **todos os 13 resolvidos** na spec técnica v2 (2026-07-20)
 
 ✅ **Correção aplicada durante esta revisão:** a linha de decisão do **PA-01-06** na review 01 continha um parêntese órfão (*"Dev Mode bloqueia tudo, inclusive explícito"*) que registrava o **oposto** da decisão tomada — resíduo do script que marcou os pontos como resolvidos. Corrigido: ação explícita vence o Dev Mode.
 
@@ -56,7 +56,7 @@ Consequências em cadeia:
 
 **Sugestão:** adicionar `Func<string,bool> IsPerformanceItemEnabled` a `SyncPlannerOptions` (espelhando `IsOptionalGroupEnabled`) e escrever o branch de desligado no §5.4, com os três casos: alvo igual ao baseline → reverte para a cadeia normal; alvo customizado → `PreserveCustomized` + entrada de relatório; arquivo sem par em `config`/`config-force` → `MoveToDisabled` com origem `performance`.
 
-**Decisão:** `[ ]` Pendente · `[ ]` Aceitar sugestão · `[ ]` Caminho alternativo
+**Decisão:** ✅ **Resolvido** — `IsPerformanceItemEnabled` criado (§1.2/§5.2) e o branch de item **desligado** escrito (§5.3), cobrindo CA-030.2b, CA-030.5 e D-8.
 
 ---
 
@@ -75,7 +75,7 @@ A técnica atribui `BepInEx/config-performance` → `performance-to-config` (E-3
 2. **Abandonar o espelho** (reverter D-10) — a config de performance passa a ser inspecionável só pelo servidor.
 3. **Branch dedicado no planner** que emite as duas ações para o mesmo prefixo (mirror + apply), fora do mecanismo de `folderRules` — mais poderoso, mas quebra a premissa "uma regra por prefixo" que o resto do motor assume.
 
-**Decisão:** `[ ]` Pendente · `[ ]` Duas pastas · `[ ]` Abandonar o espelho · `[ ]` Branch dedicado
+**Decisão:** ✅ **Resolvido** — decidido **manter o espelho**, via **D-18**: uma pasta física publicada sob dois prefixos lógicos (`config-performance/` aplica, `config-performance-ref/` espelha). Sem conteúdo duplicado — o servidor já mapeia 2 caminhos lógicos p/ o mesmo arquivo (`ModUpdater.cs:428`).
 
 ---
 
@@ -101,7 +101,7 @@ Verificado no fonte que `performanceOverlay` é o campo do modelo antigo ([ModUp
 
 **Sugestão:** eliminar os resíduos do modelo antigo. Reescrever **S-3** (não há mais "pack": os arquivos entram pelo scan normal do `mods_repo`, com path relativo à raiz do jogo), **S-7** (campo `performanceItems`, nunca `performanceOverlay`) e o diagrama §6. Trocar **S-2** por: pular do manifesto apenas os **arquivos de metadados** (`plugins-optional.json`, `performance.json`); os arquivos de `config-performance/` **entram** no manifesto com `performanceId` e são governados pela `folderRule` — não por `Default`. E incluir na remoção (§4) a rota `performance-download` + `RequestHandler.DownloadPerformanceFile` + `_performanceFileMapCache`, que ficam órfãos com D-13.
 
-**Decisão:** `[ ]` Pendente · `[ ]` Aceitar sugestão · `[ ]` Caminho alternativo
+**Decisão:** ✅ **Resolvido** — resíduos do modelo antigo eliminados: S-3/S-7 reescritos, campo é `performanceItems` (nunca `performanceOverlay`), e o skip do S-2 passa a valer **só para os metadados** — os arquivos de performance entram no manifesto.
 
 ---
 
@@ -119,7 +119,7 @@ Isso é exatamente o wedge já documentado no teste `OverlayOn_WithoutBaseline_D
 
 **Sugestão:** o `SyncActionKind` novo (que a spec cita mas **nunca nomeia** — ver PA-02-13) precisa ser tratado no `SyncEngine` como "escreve **e grava baseline**", diferente do `ForceCopy`. Nomeá-lo explicitamente (ex.: `PerformanceCopy`), especificar que o engine chama `SetHash(seedTarget, appliedHash)` após aplicar, e somá-lo a `SyncPlan.IoActionCount`. Adicionar teste de convergência: aplicar → segundo sync sem I/O (o equivalente do `SteadyStateOn_SecondRunHasNoIoActions` que será deletado).
 
-**Decisão:** `[ ]` Pendente · `[ ]` Aceitar sugestão · `[ ]` Caminho alternativo
+**Decisão:** ✅ **Resolvido** — `SyncActionKind.PerformanceCopy` nomeado e o engine **grava baseline** ao aplicar (§5.4). Teste de convergência (2º sync sem I/O) entra no lugar do `SteadyStateOn_SecondRunHasNoIoActions`.
 
 ---
 
@@ -140,7 +140,7 @@ Isso é exatamente o wedge já documentado no teste `OverlayOn_WithoutBaseline_D
 
 **Sugestão:** o branch de quarentena explícita deve **reusar as mesmas guardas** antes de emitir a ação: pular se o path está em `ProtectedPaths`, se é ignorado/excluído de cleanup, se casa o guard coop-safe, e respeitar Dev Mode conforme CC-14 (que trata da build local não solicitada — distinto de CC-19, que é sobre o clique do player). Extrair essas checagens do `ScanExtras` para um método compartilhado, em vez de duplicar a lista.
 
-**Decisão:** `[ ]` Pendente · `[ ]` Aceitar sugestão · `[ ]` Caminho alternativo
+**Decisão:** ✅ **Resolvido** — §2.4: a quarentena explícita reusa as guardas do `ScanExtras` (`ProtectedPaths`, ignored/excluded, **coop-safe Fika**, Dev Mode), extraídas para método compartilhado.
 
 ---
 
@@ -156,7 +156,7 @@ Combinado com a quarentena explícita do PA-01-01, o mesmo arquivo ganha **`Down
 
 **Sugestão:** o filtro **permanece** (a spec técnica já diz "repontar para `optionalId`" em E-11 — é o plano de remoção que estava mais agressivo). Registrar explicitamente na spec que `IsOptionalGroupEnabled` é **renomeado**, não removido, e que a convergência depende dele. Adicionar teste: dois syncs consecutivos com um mod desligado → o segundo tem `IoActionCount == 0`.
 
-**Decisão:** `[ ]` Pendente · `[ ]` Aceitar sugestão · `[ ]` Caminho alternativo
+**Decisão:** ✅ **Resolvido** — E-11: o filtro **permanece**, só renomeado para `IsOptionalModEnabled`. Teste de convergência (2 syncs seguidos sem I/O) no checklist.
 
 ---
 
@@ -174,7 +174,7 @@ Combinado com a quarentena explícita do PA-01-01, o mesmo arquivo ganha **`Down
 
 **Sugestão:** separar as duas responsabilidades no stub: **sempre** gravar `ModsConfigsOnboardingDone` e persistir o estado corrente ao sair do fluxo de onboarding; o early-return passa a valer **apenas** para o disparo do sync (CA-030.22), não para a persistência. Isso também resolve o PA-02-08.
 
-**Decisão:** `[ ]` Pendente · `[ ]` Aceitar sugestão · `[ ]` Caminho alternativo
+**Decisão:** ✅ **Resolvido** — §5.6: a marca de onboarding e o estado inicial são gravados **sempre**, fora do early-return; o disparo do sync é que fica condicionado (CA-030.22 + D-21).
 
 ---
 
@@ -186,7 +186,7 @@ Combinado com a quarentena explícita do PA-01-01, o mesmo arquivo ganha **`Down
 
 **Sugestão:** qualificar CA-030.22 para o fluxo **normal** (fora do onboarding) e deixar CA-030.19 soberano no **primeiro acesso**: no onboarding, sair sempre dispara a ingestão inicial, porque não há estado anterior em disco a preservar.
 
-**Decisão:** `[ ]` Pendente · `[ ]` Aceitar sugestão · `[ ]` Caminho alternativo
+**Decisão:** ✅ **Resolvido** — CA-030.22 qualificado na spec funcional: vale fora do onboarding; no primeiro acesso CA-030.19 prevalece.
 
 ---
 
@@ -205,7 +205,7 @@ Ligar e depois desligar o mesmo item grava nos dois casos no mesmo path — a se
 
 **Sugestão:** separar por natureza, não só por canal: `config-disabled/performance/replaced/<rel>` (config do player sobrescrita ao ligar) e `config-disabled/performance/removed/<rel>` (config do servidor retirada ao desligar). Ajustar CC-6 (a sobrescrita só é aceitável quando origem **e natureza** coincidem) e estender G-7 para cobrir o par ligar→desligar.
 
-**Decisão:** `[ ]` Pendente · `[ ]` Aceitar sugestão · `[ ]` Caminho alternativo
+**Decisão:** ✅ **Resolvido** — **D-20**: subpasta por natureza (`performance/replaced/` p/ config do player, `performance/removed/` p/ config do servidor). CC-6 reescrito.
 
 ---
 
@@ -223,7 +223,7 @@ Ligar e depois desligar o mesmo item grava nos dois casos no mesmo path — a se
 
 **Sugestão:** tratar em três lotes. (a) Os que dependem de PA-02-01/02/03 saem de graça quando aqueles forem resolvidos. (b) CA-030.10, CA-030.11/11b, CA-030.25 precisam de mecanismo próprio na técnica (ação de restauração, conjunto de ids vistos, agregação de falha parcial). (c) CC-4/CC-5, migração (CA-030.26/28) e bundles (CC-13/G-9) precisam de **decisão sua** — ou entram com desenho próprio, ou vão para Fora de escopo com o gate correspondente removido. Um gate humano obrigatório sem base técnica é pior que nenhum: dá falsa sensação de cobertura.
 
-**Decisão:** `[ ]` Pendente · `[ ]` Aceitar os 3 lotes · `[ ]` Caminho alternativo
+**Decisão:** ✅ **Resolvido** — lote (a) sai junto dos bloqueadores; (b) ganhou mecanismo (`SeenItemIds` p/ CA-030.11, branch de desligado p/ CA-030.2b/5); (c) decidido: **D-19** (servidor recusa arquivo compartilhado) e **D-21** (sem migração; bundles pendente com G-9 condicional, não obrigatório).
 
 ---
 
@@ -237,7 +237,7 @@ Ligar e depois desligar o mesmo item grava nos dois casos no mesmo path — a se
 
 **Sugestão:** adicionar à spec uma **ordem de rollout** explícita: (1) publicar o launcher novo e confirmar adoção; (2) só então mover a pasta no servidor. Alternativa que remove a dependência de ordem: o servidor passa a emitir `folderRules` explícito com a entrada nova — clientes antigos que não conhecem `performance-to-config` caem no fallback do parser (`TryParse` falha → entrada ignorada), o que é seguro. Registrar como gate de deploy, não só como nota.
 
-**Decisão:** `[ ]` Pendente · `[ ]` Rollout ordenado · `[ ]` folderRules explícito do servidor · `[ ]` Ambos
+**Decisão:** ✅ **Resolvido** — R-11 com **duas travas**: servidor emite `folderRules` explícito (S-6) e ordem de rollout (launcher primeiro, pasta depois).
 
 ---
 
@@ -255,7 +255,7 @@ Ligar e depois desligar o mesmo item grava nos dois casos no mesmo path — a se
 
 **Sugestão:** substituir R-7 por este inventário explícito na spec, com a ordem de correção (fixture primeiro), marcar os 2 falso-positivos para serem endurecidos (assert no path completo, não `Contains`), e listar como obrigatória a recriação das 4 garantias do `SyncOverlayTests` no canal novo.
 
-**Decisão:** `[ ]` Pendente · `[ ]` Aceitar sugestão · `[ ]` Caminho alternativo
+**Decisão:** ✅ **Resolvido** — inventário no checklist (Fase 0: `SyncTestFixture.cs:81` primeiro, senão o assembly não compila) + os 2 falso-positivos a endurecer + as 4 garantias do `SyncOverlayTests` a recriar antes de removê-lo. **E a quebra encolheu**: D-14 revisado mantém force e extras na raiz, então os testes de `SyncForceConfigTests`/`SyncPlannerTests`/`SyncEngineTests` seguem verdes.
 
 ---
 
@@ -276,7 +276,7 @@ Ligar e depois desligar o mesmo item grava nos dois casos no mesmo path — a se
 
 **Sugestão:** varredura de nomenclatura ao aplicar os pontos maiores — nomear o `ActionKind`, definir `ForceApplyGroups` uma vez só, unificar o vocabulário em "item/id", corrigir as referências cruzadas e atualizar §9 e os históricos.
 
-**Decisão:** `[ ]` Pendente · `[ ]` Aceitar sugestão · `[ ]` Caminho alternativo
+**Decisão:** ✅ **Resolvido** — `PerformanceCopy` nomeado; `JustToggledIds` com definição única; `performanceItems` unificado; §9 atualizada; históricos preenchidos.
 
 ---
 
@@ -295,3 +295,4 @@ Os achados 🔴 foram **verificados no fonte** antes de entrar aqui: o dicionár
 | Data | Autor | Alteração |
 |---|---|---|
 | 2026-07-20 | Guilherme | Criação — revisão completa com 3 lentes independentes. 13 pontos (7 🔴, 5 🟡, 1 🟢) agrupados por causa raiz. Corrigido o registro invertido da decisão do PA-01-06 na review 01 |
+| 2026-07-20 | Guilherme | Todos os 13 pontos resolvidos na reescrita da spec técnica (v2). D-18..D-21 adicionadas à funcional; D-14 revisado (force e extras permanecem na raiz da quarentena) |
