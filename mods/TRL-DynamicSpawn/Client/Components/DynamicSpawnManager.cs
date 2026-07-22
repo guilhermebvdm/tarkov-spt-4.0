@@ -355,23 +355,34 @@ namespace TRLDynamicSpawn.Components
             var interleavedList = new List<Tuple<SpawnGroupData, BotZone>>();
             interleavedList.AddRange(elites);
 
-            int pmcTarget = pmcs.Count;
-            int scavTarget = scavs.Count;
-            int totalInterleave = pmcTarget + scavTarget;
             int pIdx = 0, sIdx = 0;
+            int diff = System.Math.Abs(pmcs.Count - scavs.Count);
 
-            for (int i = 0; i < totalInterleave; i++)
+            // 1. Otimização do Equilíbrio: Spawna as diferenças primeiro para nivelar o mapa rapidamente
+            if (pmcs.Count > scavs.Count)
             {
-                float expectedPmc = pmcTarget > 0 ? (float)pmcTarget / totalInterleave * (i + 1) : 0;
-                
-                if (pIdx < pmcTarget && (pIdx < expectedPmc || sIdx >= scavTarget))
+                for (int i = 0; i < diff; i++) interleavedList.Add(pmcs[pIdx++]);
+            }
+            else if (scavs.Count > pmcs.Count)
+            {
+                for (int i = 0; i < diff; i++) interleavedList.Add(scavs[sIdx++]);
+            }
+
+            // 2. Agora que o mapa está "nivelado", alterna 1:1 (começando aleatoriamente)
+            bool pmcTurn = rng.Next(2) == 0;
+            while (pIdx < pmcs.Count || sIdx < scavs.Count)
+            {
+                if (pmcTurn)
                 {
-                    interleavedList.Add(pmcs[pIdx++]);
+                    if (pIdx < pmcs.Count) interleavedList.Add(pmcs[pIdx++]);
+                    else if (sIdx < scavs.Count) interleavedList.Add(scavs[sIdx++]);
                 }
-                else if (sIdx < scavTarget)
+                else
                 {
-                    interleavedList.Add(scavs[sIdx++]);
+                    if (sIdx < scavs.Count) interleavedList.Add(scavs[sIdx++]);
+                    else if (pIdx < pmcs.Count) interleavedList.Add(pmcs[pIdx++]);
                 }
+                pmcTurn = !pmcTurn;
             }
 
             spawnList = interleavedList;
