@@ -20,10 +20,20 @@ namespace TRL_SpeakFromTarkov
 
         public void Deserialize(NetDataReader reader)
         {
-            ProfileId = reader.GetString();
-            Channel = reader.GetByte();
-            AudioData = reader.GetBytesWithLength();
-            VoiceLevel = reader.GetFloat();
+            try
+            {
+                ProfileId = reader.GetString();
+                Channel = reader.GetByte();
+                AudioData = reader.GetBytesWithLength();
+                VoiceLevel = reader.GetFloat();
+            }
+            catch
+            {
+                ProfileId = string.Empty;
+                Channel = 0;
+                AudioData = null;
+                VoiceLevel = 0f;
+            }
         }
     }
 }

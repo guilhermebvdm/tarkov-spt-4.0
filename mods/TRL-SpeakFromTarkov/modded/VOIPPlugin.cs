@@ -16,9 +16,11 @@ namespace TRL_SpeakFromTarkov
 
         public static ConfigEntry<string> MicrophoneDevice { get; private set; }
         public static string[] MicrophoneNames { get; private set; }
+        public static System.Collections.Generic.Dictionary<string, string> MicRealNames = new System.Collections.Generic.Dictionary<string, string>();
         public static ConfigEntry<bool> EnableMod { get; private set; }
-        public static ConfigEntry<bool> DisableFikaVOIP { get; private set; }
+        public static ConfigEntry<TRL_SpeakFromTarkov.Audio.VoipProcessor.VoipMode> TransmissionMode { get; private set; }
         public static ConfigEntry<float> VADThreshold { get; private set; }
+        public static ConfigEntry<bool> EnableEcho { get; private set; }
         public static ConfigEntry<float> EchoDelay { get; private set; }
         public static ConfigEntry<float> EchoVolume { get; private set; }
         public static ConfigEntry<float> MicGain { get; private set; }
@@ -39,6 +41,9 @@ namespace TRL_SpeakFromTarkov
         public static ConfigEntry<KeyboardShortcut> PushToTalkKey { get; private set; }
         public static ConfigEntry<KeyboardShortcut> ToggleModeKey { get; private set; }
         public static ConfigEntry<KeyboardShortcut> MuteKey { get; private set; }
+        public static ConfigEntry<KeyboardShortcut> DebugToggleKey { get; private set; }
+        public static ConfigEntry<bool> EnableDebugLogs { get; private set; }
+        public static bool IsAudioDebugActive { get; set; } = false;
 
         public static ConfigEntry<float> VADDecayTime { get; private set; }
         public static ConfigEntry<float> MaxAudioLevel { get; private set; }
@@ -89,7 +94,31 @@ namespace TRL_SpeakFromTarkov
             if (!Application.HasUserAuthorization(UserAuthorization.Microphone))
                 Application.RequestUserAuthorization(UserAuthorization.Microphone);
 
-            MicrophoneNames = Microphone.devices.Length > 0 ? Microphone.devices : new string[] { "Nenhum microfone detectado" };
+            var rawMics = Microphone.devices.Length > 0 ? Microphone.devices : new string[] { "Nenhum microfone detectado" };
+            MicrophoneNames = new string[rawMics.Length];
+            
+            for (int i = 0; i < rawMics.Length; i++)
+            {
+                string realName = rawMics[i];
+                string displayName = realName;
+                if (displayName.Length > 40)
+                {
+                    displayName = displayName.Substring(0, 37) + "...";
+                }
+                
+                // Em caso de colisão de nomes truncados
+                int suffix = 1;
+                string originalDisplay = displayName;
+                while (MicRealNames.ContainsKey(displayName))
+                {
+                    displayName = originalDisplay + " (" + suffix + ")";
+                    suffix++;
+                }
+
+                MicRealNames[displayName] = realName;
+                MicrophoneNames[i] = displayName;
+            }
+
             var micList = new AcceptableValueList<string>(MicrophoneNames);
 
             MicrophoneDevice = Config.Bind("VOIP", "Microfone", MicrophoneNames[0], new ConfigDescription("Selecione o microfone.", micList));
@@ -97,15 +126,31 @@ namespace TRL_SpeakFromTarkov
             {
                 if (TRL_SpeakFromTarkov.Core.VoipController.Instance != null)
                 {
-                    TRL_SpeakFromTarkov.Core.VoipController.Instance.OnMicrophoneChanged(MicrophoneDevice.Value);
+                    TRL_SpeakFromTarkov.Core.VoipController.Instance.OnMicrophoneChanged(GetSelectedMicrophone());
                 }
             };
 
             EnableMod = Config.Bind("Geral", "Habilitar Mod de Voz", true, "Se desativado, desliga totalmente a captação e reprodução de voz (como se o mod não estivesse instalado).");
-            DisableFikaVOIP = Config.Bind("VOIP", "Desativar VOIP do Fika", true);
-            VADThreshold = Config.Bind("VOIP", "Limiar VAD", 0.01f);
-            EchoDelay = Config.Bind("VOIP", "Delay do Eco", 0.3f);
-            EchoVolume = Config.Bind("VOIP", "Volume do Eco", 1.0f);
+            EnableMod.SettingChanged += (sender, args) =>
+            {
+                if (TRL_SpeakFromTarkov.Core.VoipController.Instance != null)
+                {
+                    TRL_SpeakFromTarkov.Core.VoipController.Instance.ToggleModState(EnableMod.Value);
+                }
+            };
+            
+            TransmissionMode = Config.Bind("VOIP", "Modo de Transmissao", TRL_SpeakFromTarkov.Audio.VoipProcessor.VoipMode.VAD, "Selecione o modo de voz: VAD (Ativação por Voz), PTT (Push To Talk) ou Open (Sempre Aberto).");
+            TransmissionMode.SettingChanged += (sender, args) =>
+            {
+                if (TRL_SpeakFromTarkov.Core.VoipController.Instance != null && TRL_SpeakFromTarkov.Core.VoipController.Instance.processor != null)
+                {
+                    TRL_SpeakFromTarkov.Core.VoipController.Instance.processor.CurrentMode = TransmissionMode.Value;
+                }
+            };
+            VADThreshold = Config.Bind("VOIP", "Limiar VAD", 0.005f, "Sensibilidade para voz em VAD.");
+            EnableEcho = Config.Bind("VOIP", "Habilitar Retorno de Eco", true, "Se ativado, reproduz sua própria voz no alto-falante local para teste de áudio.");
+            EchoDelay = Config.Bind("VOIP", "Delay do Eco", 0.0f, "Atraso do eco em segundos (0.0 = retorno instantâneo em tempo real).");
+            EchoVolume = Config.Bind("VOIP", "Volume do Eco", 1.0f, "Volume do retorno do eco (0.0 a 1.0 ou 0 a 100%).");
             MicGain = Config.Bind("VOIP", "Ganho do Microfone", 1.0f,
                 new ConfigDescription("Aumenta a captação bruta ANTES dos filtros e do gate. Padrão: 1.0"));
             OutputVolume = Config.Bind("VOIP", "Volume de Saída", 1.0f,
@@ -114,9 +159,11 @@ namespace TRL_SpeakFromTarkov
             SampleRate = Config.Bind("VOIP", "SampleRate", 48000);
 
             // KeyboardShortcut: clica → aperta combinação
-            PushToTalkKey = Config.Bind("VOIP", "PushToTalk", new KeyboardShortcut(KeyCode.V, KeyCode.LeftControl), "PTT (ex: Ctrl+V)");
+            PushToTalkKey = Config.Bind("VOIP", "PushToTalk", new KeyboardShortcut(KeyCode.V), "PTT (ex: V)");
             ToggleModeKey = Config.Bind("VOIP", "Toggle Mode", new KeyboardShortcut(KeyCode.P), "Alternar modo");
-            MuteKey = Config.Bind("VOIP", "Mute", new KeyboardShortcut(KeyCode.M), "Mutar");
+            MuteKey = Config.Bind("VOIP", "Mute", new KeyboardShortcut(KeyCode.M, KeyCode.LeftControl), "Mutar");
+            DebugToggleKey = Config.Bind("Diagnostico", "Teclar Debug Audio (Profiler)", new KeyboardShortcut(KeyCode.F9), "Pressione para iniciar/parar o profiler de áudio no console.");
+            EnableDebugLogs = Config.Bind("Diagnostico", "Habilitar Logs de Debug", false, "Se ativado, imprime mensagens detalhadas de enfileiramento no console. Padrão: false");
 
             VADDecayTime = Config.Bind("VOIP", "VAD Decay Time", 0.7f);
             MaxAudioLevel = Config.Bind("VOIP", "Max Audio Level", 0.015f);
@@ -146,8 +193,8 @@ namespace TRL_SpeakFromTarkov
             RNNoiseGateHoldMs  = Config.Bind("Filtros (RNNoise)", "Hold Time RNNoise (ms)", 150f,
                 new ConfigDescription("Tempo que o canal permanece aberto após o término da fala com RNNoise.",
                     new AcceptableValueRange<float>(50f, 500f)));
-            RNNoiseLatency     = Config.Bind("Filtros (RNNoise)", "Latencia RNNoise (amostras)", 2048,
-                new ConfigDescription("Tamanho da latência inicial da fila em amostras. Aumente se a voz picotar. Padrão: 2048",
+            RNNoiseLatency     = Config.Bind("Filtros (RNNoise)", "Latencia RNNoise (amostras)", 960,
+                new ConfigDescription("Tamanho da latência inicial da fila em amostras (960 = 20ms alinhado).",
                     new AcceptableValueRange<int>(1, 4096)));
                     
             NetworkJitterBufferMs = Config.Bind("Rede", "Jitter Buffer Inicial (ms)", 150f,
@@ -177,12 +224,9 @@ namespace TRL_SpeakFromTarkov
 
             this.gameObject.AddComponent<TRL_SpeakFromTarkov.Core.VoipController>();
 
-            if (DisableFikaVOIP.Value)
-            {
-                Log.LogInfo("[SFT] Desativando transmissões do Fika VOIP Client via ModulePatch...");
-                new GameSessionPatcher.FikaVoipSendPatch().Enable();
-                new GameSessionPatcher.FikaVoipReceivePatch().Enable();
-            }
+            Log.LogInfo("[SFT] Forçando a desativação do Fika VOIP Client nativo via ModulePatch...");
+            new GameSessionPatcher.FikaVoipSendPatch().Enable();
+            new GameSessionPatcher.FikaVoipReceivePatch().Enable();
 
             GameSessionPatcher.Init();
             SceneManager.sceneLoaded += OnSceneLoaded;
@@ -212,7 +256,13 @@ namespace TRL_SpeakFromTarkov
             }
         }
 
-        public static string GetSelectedMicrophone() => MicrophoneDevice.Value;
+        public static string GetSelectedMicrophone()
+        {
+            string display = MicrophoneDevice.Value;
+            if (display != null && MicRealNames.TryGetValue(display, out string realName))
+                return realName;
+            return display;
+        }
 
         void OnDestroy() {}
 

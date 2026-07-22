@@ -15,6 +15,7 @@ namespace TRL_SpeakFromTarkov.Network
         private Dictionary<string, RemoteSpeaker> remoteSpeakers = new Dictionary<string, RemoteSpeaker>();
         
         public bool IsSessionActive { get; private set; } = false;
+        public string LocalSessionId { get; private set; } = System.Guid.NewGuid().ToString();
         private int sampleRate;
         private int frameSize;
         
@@ -39,21 +40,21 @@ namespace TRL_SpeakFromTarkov.Network
             if (!IsSessionActive || !Singleton<IFikaNetworkManager>.Instantiated) return;
             if (VoIPPlugin.EnableMod != null && !VoIPPlugin.EnableMod.Value) return;
             
-            string myProfileId = string.Empty;
+            string myProfileId = LocalSessionId;
             if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance.MainPlayer != null)
             {
-                myProfileId = Singleton<GameWorld>.Instance.MainPlayer.ProfileId;
+                string pId = Singleton<GameWorld>.Instance.MainPlayer.ProfileId;
+                if (!string.IsNullOrEmpty(pId)) myProfileId = pId;
             }
 
             SftAudioPacket packet = new SftAudioPacket 
             { 
-                ProfileId = myProfileId ?? string.Empty,
+                ProfileId = myProfileId,
                 Channel = channel, 
                 AudioData = opusData,
                 VoiceLevel = voiceLevel
             };
-            
-            Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, Fika.Core.Networking.LiteNetLib.DeliveryMethod.Sequenced, broadcast: true);
+            Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, Fika.Core.Networking.LiteNetLib.DeliveryMethod.Unreliable, broadcast: true);
         }
 
         private void OnReceiveVoipData(SftAudioPacket packet)
@@ -62,6 +63,7 @@ namespace TRL_SpeakFromTarkov.Network
             if (VoIPPlugin.EnableMod != null && !VoIPPlugin.EnableMod.Value) return;
             
             // Rejeita pacotes próprios (Eco loopback local)
+            if (packet.ProfileId == LocalSessionId) return;
             if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance.MainPlayer != null)
             {
                 if (packet.ProfileId == Singleton<GameWorld>.Instance.MainPlayer.ProfileId)
@@ -80,16 +82,17 @@ namespace TRL_SpeakFromTarkov.Network
                 remoteSpeakers[packet.ProfileId] = speaker;
             }
             
-            // Atualiza posição do speaker no mundo
+            // Atualiza ancoragem do alto-falante 3D na cabeça/corpo do jogador
             if (Singleton<GameWorld>.Instantiated)
             {
                 var player = Singleton<GameWorld>.Instance.AllAlivePlayersList.FirstOrDefault(p => p.ProfileId == packet.ProfileId);
                 if (player != null)
                 {
-                    if (speaker.transform.parent == null)
+                    Transform targetBone = player.PlayerBones != null && player.PlayerBones.Head != null ? player.PlayerBones.Head.Original : player.Transform.Original;
+                    if (speaker.transform.parent != targetBone)
                     {
-                        speaker.transform.SetParent(player.Transform.Original, false);
-                        speaker.transform.localPosition = Vector3.up * 1.6f;
+                        speaker.transform.SetParent(targetBone, false);
+                        speaker.transform.localPosition = targetBone == player.Transform.Original ? Vector3.up * 1.6f : Vector3.zero;
                     }
                 }
             }

@@ -16,9 +16,6 @@ namespace TRL_SpeakFromTarkov
             new PlayerInitPatch().Enable();
             new PlayerOnDeadPatch().Enable();
             new GameWorldDisposePatch().Enable();
-            new RequestHandlerGetJsonPatch().Enable();
-            new RequestHandlerPostJsonPatch().Enable();
-            new RequestHandlerPutJsonPatch().Enable();
             Log.LogInfo("[SFT] Patches aplicados.");
         }
 
@@ -85,8 +82,7 @@ namespace TRL_SpeakFromTarkov
             [PatchPrefix]
             static bool Prefix()
             {
-                // Retorna false para impedir que o VOIP do Fika envie dados,
-                // já que usaremos o nosso NetworkManager com Opus.
+                if (VoIPPlugin.EnableMod != null && !VoIPPlugin.EnableMod.Value) return true; // Deixa o FIKA rodar
                 return false;
             }
         }
@@ -101,71 +97,12 @@ namespace TRL_SpeakFromTarkov
             [PatchPrefix]
             static bool Prefix()
             {
-                // Impede o recebimento de dados do VOIP nativo do Fika
+                if (VoIPPlugin.EnableMod != null && !VoIPPlugin.EnableMod.Value) return true; // Deixa o FIKA rodar
                 return false;
             }
         }
 
         // --- Patches para detectar o momento seguro de inicialização no menu ---
 
-        internal class RequestHandlerGetJsonPatch : ModulePatch
-        {
-            protected override MethodBase GetTargetMethod()
-            {
-                return AccessTools.Method(typeof(SPT.Common.Http.RequestHandler), "GetJson");
-            }
-
-            [PatchPostfix]
-            static void Postfix(string path)
-            {
-                if (path != null && path.IndexOf("/hip/load", System.StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    if (Core.VoipController.Instance != null)
-                    {
-                        Core.VoipController.Instance.OnHipLoadCompleted();
-                    }
-                }
-            }
-        }
-
-        internal class RequestHandlerPostJsonPatch : ModulePatch
-        {
-            protected override MethodBase GetTargetMethod()
-            {
-                return AccessTools.Method(typeof(SPT.Common.Http.RequestHandler), "PostJson");
-            }
-
-            [PatchPostfix]
-            static void Postfix(string path)
-            {
-                if (path != null && path.IndexOf("/hip/load", System.StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    if (Core.VoipController.Instance != null)
-                    {
-                        Core.VoipController.Instance.OnHipLoadCompleted();
-                    }
-                }
-            }
-        }
-
-        internal class RequestHandlerPutJsonPatch : ModulePatch
-        {
-            protected override MethodBase GetTargetMethod()
-            {
-                return AccessTools.Method(typeof(SPT.Common.Http.RequestHandler), "PutJson");
-            }
-
-            [PatchPostfix]
-            static void Postfix(string path)
-            {
-                if (path != null && path.IndexOf("/hip/load", System.StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    if (Core.VoipController.Instance != null)
-                    {
-                        Core.VoipController.Instance.OnHipLoadCompleted();
-                    }
-                }
-            }
-        }
     }
 }

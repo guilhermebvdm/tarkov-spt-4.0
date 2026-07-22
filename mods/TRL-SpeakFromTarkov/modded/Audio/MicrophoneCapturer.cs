@@ -35,6 +35,9 @@ namespace TRL_SpeakFromTarkov.Audio
         
         // Controle de estado
         public bool IsRecording { get; private set; }
+        public int ActualSampleRate => actualSampleRate;
+        public bool IsResampling => actualSampleRate != targetSampleRate;
+        public int ClipCount { get; private set; }
         private bool hasPlayed = false;
         private int dspConfirmed = 0;
         private float restartCooldown = 0f;
@@ -58,6 +61,11 @@ namespace TRL_SpeakFromTarkov.Audio
         
         public bool StartCapture(string device)
         {
+            if (IsRecording)
+            {
+                StopCapture();
+            }
+
             deviceName = device;
             actualSampleRate = AudioSettings.outputSampleRate;
             
@@ -253,6 +261,13 @@ namespace TRL_SpeakFromTarkov.Audio
                 Resample(frameData, outputBuffer);
             
             audioFilter?.Apply(outputBuffer);
+            
+            int clips = 0;
+            for (int i = 0; i < outputBuffer.Length; i++)
+            {
+                if (outputBuffer[i] > 0.90f || outputBuffer[i] < -0.90f) clips++;
+            }
+            ClipCount = clips;
             
             OnAudioDataCaptured?.Invoke(outputBuffer);
         }

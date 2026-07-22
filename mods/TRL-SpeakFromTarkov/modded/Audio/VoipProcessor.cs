@@ -16,13 +16,15 @@ namespace TRL_SpeakFromTarkov.Audio
         public float RawLevel { get; private set; }
         public float DisplayLevel { get; private set; }
         public float PeakLevel { get; private set; }
+        public int LastOpusBytes { get; private set; }
         
         private byte[] opusBuffer = new byte[1275]; // Alocação única
         private float vadHoldTimer = 0f;
         
         public bool IsMuted { get; set; }
         public bool IsPTTActive { get; set; }
-        public VoipMode CurrentMode { get; set; } = VoipMode.PTT;
+        public bool IsTransmitting { get; private set; }
+        public VoipMode CurrentMode { get; set; } = VoipMode.VAD;
 
         public enum VoipMode { Open, PTT, VAD }
         
@@ -65,12 +67,13 @@ namespace TRL_SpeakFromTarkov.Audio
             else
                 DisplayLevel = Mathf.Lerp(DisplayLevel, RawLevel, 0.15f);   // desce devagar
             
-            if (ShouldTransmit())
+            UpdateTransmittingState();
+            
+            if (IsTransmitting)
             {
                 float outputVolume = VoIPPlugin.OutputVolume.Value;
                 if (outputVolume != 1.0f)
                 {
-                    // Altera o volume final diretamente nos samples antes de encodar
                     for (int i = 0; i < pcmSamples.Length; i++)
                     {
                         pcmSamples[i] *= outputVolume;
@@ -79,35 +82,53 @@ namespace TRL_SpeakFromTarkov.Audio
                 Transmit(pcmSamples);
             }
         }
-        
-        private bool ShouldTransmit()
+
+        private void UpdateTransmittingState()
         {
-            if (IsMuted) return false;
-            
+            if (IsMuted)
+            {
+                IsTransmitting = false;
+                return;
+            }
+
             switch (CurrentMode)
             {
                 case VoipMode.PTT:
-                    return IsPTTActive;
+                    IsTransmitting = IsPTTActive;
+                    break;
                 case VoipMode.Open:
-                    return true;
+                    IsTransmitting = true;
+                    break;
                 case VoipMode.VAD:
                     if (RawLevel > VoIPPlugin.VADThreshold.Value)
                         vadHoldTimer = VoIPPlugin.VADDecayTime.Value;
                         
                     if (vadHoldTimer > 0f)
                     {
-                        vadHoldTimer -= 0.02f; // Thread Safe
-                        return true;
+                        vadHoldTimer -= 0.02f;
+                        IsTransmitting = true;
                     }
-                    return false;
+                    else
+                    {
+                        IsTransmitting = false;
+                    }
+                    break;
                 default:
-                    return false;
+                    IsTransmitting = false;
+                    break;
             }
         }
         
         private void Transmit(float[] samples)
         {
             if (encoder == null) return;
+            
+            // Grampo de proteção contra estouro de amplitude (evita chiado de clipping digital no Opus)
+            for (int i = 0; i < samples.Length; i++)
+            {
+                if (samples[i] > 0.95f) samples[i] = 0.95f;
+                else if (samples[i] < -0.95f) samples[i] = -0.95f;
+            }
             
             try
             {
@@ -117,6 +138,7 @@ namespace TRL_SpeakFromTarkov.Audio
 
                 if (len > 0)
                 {
+                    LastOpusBytes = len;
                     byte[] finalData = new byte[len];
                     Array.Copy(opusBuffer, finalData, len);
                     OnOpusDataEncoded?.Invoke(finalData, DisplayLevel);

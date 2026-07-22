@@ -12,11 +12,11 @@ namespace TRL_SpeakFromTarkov.Core
     {
         public static VoipController Instance { get; private set; }
         
-        private MicrophoneCapturer capturer;
-        private VoipProcessor processor;
+        public MicrophoneCapturer capturer { get; private set; }
+        public VoipProcessor processor { get; private set; }
+        public RemoteSpeaker echoSpeaker { get; private set; }
         private SftNetwork network;
         private VoipHUD hud;
-        private RemoteSpeaker echoSpeaker;
         private ConcurrentQueue<Action> mainThreadActions = new ConcurrentQueue<Action>();
         
         public byte CurrentChannel { get; private set; } = 1;
@@ -40,13 +40,17 @@ namespace TRL_SpeakFromTarkov.Core
                 return;
             }
             
-            capturer = gameObject.AddComponent<MicrophoneCapturer>();
+            var capturerGo = new GameObject("SftMicrophoneCapturer");
+            capturerGo.transform.SetParent(this.transform);
+            capturer = capturerGo.AddComponent<MicrophoneCapturer>();
             capturer.Initialize(sampleRate, frameSize);
             
             processor = gameObject.AddComponent<VoipProcessor>();
             processor.Initialize(sampleRate, frameSize);
             
-            echoSpeaker = gameObject.AddComponent<RemoteSpeaker>();
+            var echoGo = new GameObject("SftEchoSpeaker");
+            echoGo.transform.SetParent(this.transform);
+            echoSpeaker = echoGo.AddComponent<RemoteSpeaker>();
             echoSpeaker.Initialize(sampleRate, frameSize, 0f); // 2D Audio for Echo
             
             hud = gameObject.AddComponent<VoipHUD>();
@@ -56,14 +60,31 @@ namespace TRL_SpeakFromTarkov.Core
             // Wiring Events
             capturer.OnAudioDataCaptured += processor.ProcessAudio;
             processor.OnOpusDataEncoded += (opusData, voiceLevel) => {
-                mainThreadActions.Enqueue(() => {
-                    network.Broadcast(opusData, CurrentChannel, voiceLevel);
-                    
-                    if (VoIPPlugin.EchoDelay.Value > 0f && !processor.IsMuted)
-                    {
-                        StartCoroutine(DelayEcho(opusData, VoIPPlugin.EchoDelay.Value));
-                    }
-                });
+                // TRANSMISSÃO DIRETA THREAD-SAFE (Imune a quedas de FPS do jogo!)
+                network.Broadcast(opusData, CurrentChannel, voiceLevel);
+
+                if (VoIPPlugin.EnableEcho != null && VoIPPlugin.EnableEcho.Value && !processor.IsMuted)
+                {
+                    mainThreadActions.Enqueue(() => {
+                        float delay = VoIPPlugin.EchoDelay.Value;
+                        if (delay <= 0.02f)
+                        {
+                            if (echoSpeaker != null)
+                            {
+                                echoSpeaker.SetVolume(VoIPPlugin.EchoVolume.Value);
+                                echoSpeaker.EnqueuePacket(opusData);
+                            }
+                            else
+                            {
+                                VoIPPlugin.Log.LogError("[SFT-DEBUG] echoSpeaker é NULL!");
+                            }
+                        }
+                        else
+                        {
+                            StartCoroutine(DelayEcho(opusData, delay));
+                        }
+                    });
+                }
             };
             
             // StartCapture NÃO é chamado aqui.
@@ -74,16 +95,19 @@ namespace TRL_SpeakFromTarkov.Core
         
         private System.Collections.IEnumerator DelayEcho(byte[] data, float delay)
         {
-            yield return new WaitForSeconds(delay);
+            yield return new WaitForSecondsRealtime(delay);
             if (echoSpeaker != null)
             {
                 echoSpeaker.SetVolume(VoIPPlugin.EchoVolume.Value);
                 echoSpeaker.EnqueuePacket(data);
             }
+            else
+            {
+                VoIPPlugin.Log.LogError("[SFT-DEBUG] DelayEcho: echoSpeaker é NULL!");
+            }
         }
         
         private bool isMenuLoaded = false;
-        private Coroutine? fallbackStartCoroutine = null;
 
         // Chamado pelo VOIPPlugin quando a cena MenuUIScene carrega
         public void OnMenuSceneLoaded()
@@ -91,28 +115,14 @@ namespace TRL_SpeakFromTarkov.Core
             if (isMenuLoaded || capturer == null) return;
             isMenuLoaded = true;
             
-            VoIPPlugin.Log.LogInfo("[SFT] Menu carregado. Iniciando timer fallback de 12 segundos para a captura do microfone...");
-            fallbackStartCoroutine = StartCoroutine(FallbackStartVoipCo());
+            VoIPPlugin.Log.LogInfo("[SFT] MenuUIScene carregado com sucesso. Agendando abertura limpa do microfone em 1.0s (pós-Vivox)...");
+            StartCoroutine(DelayedStartVoipCaptureCo());
         }
 
-        private System.Collections.IEnumerator FallbackStartVoipCo()
+        private System.Collections.IEnumerator DelayedStartVoipCaptureCo()
         {
-            yield return new WaitForSeconds(12f);
-            VoIPPlugin.Log.LogInfo("[SFT] Tempo limite de fallback atingido (12s). Forçando inicialização da captura de microfone...");
-            fallbackStartCoroutine = null;
-            StartVoipCapture();
-        }
-
-        public void OnHipLoadCompleted()
-        {
-            if (capturer == null || capturer.IsRecording) return;
-
-            VoIPPlugin.Log.LogInfo("[SFT] Carregamento seguro detectado (/hip/load concluído). Inicializando captura de microfone...");
-            if (fallbackStartCoroutine != null)
-            {
-                StopCoroutine(fallbackStartCoroutine);
-                fallbackStartCoroutine = null;
-            }
+            yield return new WaitForSecondsRealtime(1.5f);
+            VoIPPlugin.Log.LogInfo("[SFT] Vivox e áudio do Tarkov prontos. Inicializando captura limpa do microfone...");
             StartVoipCapture();
         }
 
@@ -130,7 +140,6 @@ namespace TRL_SpeakFromTarkov.Core
                 var device = global::SoundSettingsControllerClass.DefaultMicrophone;
                 if (!string.IsNullOrEmpty(device)) 
                 {
-                    VoIPPlugin.Log.LogInfo($"[SFT] Usando microfone nativo do Tarkov: {device}");
                     return device;
                 }
             }
@@ -143,11 +152,36 @@ namespace TRL_SpeakFromTarkov.Core
         
         public void OnMicrophoneChanged(string newDevice)
         {
+            if (!isMenuLoaded) return;
+
             if (capturer != null)
             {
-                VoIPPlugin.Log.LogInfo($"[SFT] Mudança de microfone solicitada no F12 para: '{newDevice}'");
+                VoIPPlugin.Log.LogInfo($"[SFT] Mudança de microfone solicitada para: '{newDevice}'");
                 capturer.StopCapture();
                 capturer.StartCapture(newDevice);
+            }
+        }
+        
+        public void ToggleModState(bool isEnabled)
+        {
+            if (!isMenuLoaded) return;
+            if (isEnabled)
+            {
+                if (capturer != null && !capturer.IsRecording)
+                {
+                    VoIPPlugin.Log.LogInfo("[SFT] Mod reativado no F12: Iniciando captura de mic e exibindo HUD...");
+                    StartVoipCapture();
+                }
+                if (hud != null) hud.gameObject.SetActive(true);
+            }
+            else
+            {
+                if (capturer != null && capturer.IsRecording)
+                {
+                    VoIPPlugin.Log.LogInfo("[SFT] Mod desativado no F12: Parando captura de mic e ocultando HUD...");
+                    capturer.StopCapture();
+                }
+                if (hud != null) hud.gameObject.SetActive(false);
             }
         }
 
@@ -156,7 +190,7 @@ namespace TRL_SpeakFromTarkov.Core
         
         void Update()
         {
-            if (capturer == null) return;
+            if (capturer == null || !isMenuLoaded) return;
             
             while (mainThreadActions.TryDequeue(out Action action))
             {
@@ -182,6 +216,56 @@ namespace TRL_SpeakFromTarkov.Core
             {
                 micRetryTimer = 0f;
             }
+
+            RunAudioProfilerReport();
+        }
+
+        private float profilerLogTimer = 0f;
+        private void RunAudioProfilerReport()
+        {
+            if (!VoIPPlugin.IsAudioDebugActive) return;
+            
+            profilerLogTimer += Time.deltaTime;
+            if (profilerLogTimer >= 0.5f)
+            {
+                profilerLogTimer = 0f;
+                
+                string micName = GetEftMicrophone();
+                bool micRec = capturer != null && capturer.IsRecording;
+                int hwRate = capturer != null ? capturer.ActualSampleRate : 0;
+                bool isResampling = capturer != null && capturer.IsResampling;
+                int clips = capturer != null ? capturer.ClipCount : 0;
+                
+                float inRMS = processor != null ? processor.RawLevel : 0f;
+                float displayLvl = processor != null ? processor.DisplayLevel : 0f;
+                bool isTx = processor != null && processor.IsTransmitting;
+                string mode = processor != null ? processor.CurrentMode.ToString() : "N/A";
+                int opusBytes = processor != null ? processor.LastOpusBytes : 0;
+                
+                float outRMS = echoSpeaker != null ? echoSpeaker.CurrentOutputLevel : 0f;
+                bool echoPlaying = echoSpeaker != null && echoSpeaker.IsPlaying;
+                int echoPackets = echoSpeaker != null ? echoSpeaker.PacketsEnqueued : 0;
+                int echoFilterCalls = echoSpeaker != null ? echoSpeaker.FilterCalls : 0;
+                int echoAvail = echoSpeaker != null ? echoSpeaker.BufferAvailable : 0;
+                bool echoBuf = echoSpeaker != null && echoSpeaker.IsBuffering;
+                int totalUnderruns = echoSpeaker != null ? echoSpeaker.UnderrunCount : 0;
+                int recentUnderruns = echoSpeaker != null ? echoSpeaker.GetRecentUnderruns() : 0;
+
+                VoIPPlugin.Log.LogInfo($"[SFT-PROFILER] ── DIAGNÓSTICO PROFUNDO DE ÁUDIO ──");
+                VoIPPlugin.Log.LogInfo($"[SFT-PROFILER] 1. CAPTURA RAW : Mic='{micName}' | HwDSP={hwRate}Hz | Resampling={isResampling} | PeakClips={clips} | RawRMS={inRMS:F4}");
+                VoIPPlugin.Log.LogInfo($"[SFT-PROFILER] 2. PROCESSOR   : Modo={mode} | Transmitindo={isTx} | RNNoise={VoIPPlugin.UseRNNoise.Value} | AGC={VoIPPlugin.EnableAGC.Value} | OpusByte={opusBytes}B");
+                VoIPPlugin.Log.LogInfo($"[SFT-PROFILER] 3. REPRODUÇÃO  : Tocando={echoPlaying} | OutRMS={outRMS:F4} | Pacotes={echoPackets} | Calls={echoFilterCalls} | Avail={echoAvail} | Underruns (0.5s)={recentUnderruns} (Total: {totalUnderruns})");
+                
+                // Alertas de Vilões da Qualidade em tempo real (baseado no delta dos últimos 0.5s)
+                if (isResampling)
+                    VoIPPlugin.Log.LogWarning($"[SFT-PROFILER] ⚠️ ALERTA RESAMPLING: O Windows está entregando áudio em {hwRate}Hz em vez de 48000Hz nativo. Isso causa chiado por interpolação!");
+                if (clips > 0)
+                    VoIPPlugin.Log.LogWarning($"[SFT-PROFILER] ⚠️ ALERTA CLIPPING: {clips} amostras estouraram >0.90 no microfone. Reduza 'Ganho do Microfone' no F12!");
+                if (recentUnderruns > 0)
+                    VoIPPlugin.Log.LogWarning($"[SFT-PROFILER] ⚠️ ALERTA UNDERRUN RECENTE: Ocorreram {recentUnderruns} engasgos no alto-falante nos últimos 0.5s!");
+                
+                VoIPPlugin.Log.LogInfo($"[SFT-PROFILER] ──────────────────────────────────────────");
+            }
         }
         
         private void HandleKeys()
@@ -196,6 +280,12 @@ namespace TRL_SpeakFromTarkov.Core
             {
                 processor.IsMuted = !processor.IsMuted;
                 VoIPPlugin.Log.LogInfo($"[SFT] Mute: {(processor.IsMuted ? "ON" : "OFF")}");
+            }
+
+            if (IsShortcutDown(VoIPPlugin.DebugToggleKey.Value))
+            {
+                VoIPPlugin.IsAudioDebugActive = !VoIPPlugin.IsAudioDebugActive;
+                VoIPPlugin.Log.LogInfo($"[SFT-PROFILER] Sessão de Profiler de Áudio: {(VoIPPlugin.IsAudioDebugActive ? ">>> ATIVADA (F9) <<<" : "--- DESATIVADA ---")}");
             }
             
             processor.IsPTTActive = IsShortcutHeld(VoIPPlugin.PushToTalkKey.Value);
