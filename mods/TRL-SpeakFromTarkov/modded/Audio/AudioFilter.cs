@@ -73,7 +73,7 @@ namespace TRL_SpeakFromTarkov.Audio
         public float RNNoiseGateHold { get; set; } = 0.15f;
 
         // ── Novos Filtros Avançados (Qualidade Estúdio) ────────
-        public bool EnableAGC { get; set; } = true;
+        public bool EnableAGC { get; set; } = false;
         public bool EnableLimiter { get; set; } = true;
         
         private float _lpfAlpha;
@@ -148,9 +148,6 @@ namespace TRL_SpeakFromTarkov.Audio
                 ApplyFallback(buffer);
             }
 
-            // O AGC roda DEPOIS da supressão do RNNoise para não amplificar o ruído de fundo antes do filtro
-            if (EnableAGC) ApplyAGC(buffer);
-            
             // O limiter é a última barreira de proteção de áudio
             if (EnableLimiter) ApplyLimiter(buffer);
         }
@@ -207,6 +204,12 @@ namespace TRL_SpeakFromTarkov.Audio
                     buffer[i] = 0f;
                 }
             }
+
+            // Silenciamento VAD: Se o RNNoise indicar probabilidade de voz muito baixa (< 0.20f) e RMS for baixo, zerar o buffer
+            if (LastVadProbability < 0.20f && GetRMS(buffer) < 0.01f)
+            {
+                Array.Clear(buffer, 0, buffer.Length);
+            }
         }
 
         // ── Fallback: HPF + Noise Gate ────────────────────────────────────────
@@ -244,18 +247,22 @@ namespace TRL_SpeakFromTarkov.Audio
             float rms = GetRMS(buf);
             float targetGain = 1f;
             
-            // Se houver áudio útil, tentar equalizar para um RMS de 0.05
-            if (rms > 0.001f)
+            // Só aplica ganho AGC se houver sinal de voz de fato (RMS > 0.008f).
+            // NUNCA amplificar ruído de fundo ou silêncio!
+            if (rms > 0.008f)
             {
                 float targetRms = 0.05f;
                 targetGain = targetRms / rms;
-                targetGain = Mathf.Clamp(targetGain, 0.2f, 4.0f); // Boost máximo 4x, Redução máxima 5x
+                targetGain = Mathf.Clamp(targetGain, 0.2f, 3.0f); // Boost máximo 3x
+            }
+            else
+            {
+                targetGain = 1f;
             }
             
-            // Transição absurdamente suave (0.001) para não parecer que o ganho está tremendo (pumping)
             for (int i = 0; i < buf.Length; i++)
             {
-                _agcCurrentGain = Mathf.Lerp(_agcCurrentGain, targetGain, 0.001f);
+                _agcCurrentGain = Mathf.Lerp(_agcCurrentGain, targetGain, 0.01f);
                 buf[i] *= _agcCurrentGain;
             }
         }

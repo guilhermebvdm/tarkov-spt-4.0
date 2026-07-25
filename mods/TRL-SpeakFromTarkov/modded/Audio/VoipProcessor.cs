@@ -72,7 +72,9 @@ namespace TRL_SpeakFromTarkov.Audio
             
             UpdateTransmittingState();
             
-            if (IsTransmitting)
+            // Só transmite se estiver ativo E se o nível de áudio for perceptível (RMS > 0.003f).
+            // Isso impede o envio desnecessário de 50 pacotes mudos por segundo sobre o LiteNetLib do FIKA!
+            if (IsTransmitting && RawLevel > 0.003f)
             {
                 float outputVolume = VoIPPlugin.OutputVolume.Value;
                 if (outputVolume != 1.0f)

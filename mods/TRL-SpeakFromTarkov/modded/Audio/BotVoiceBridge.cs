@@ -13,7 +13,7 @@ namespace TRL_SpeakFromTarkov.Audio
 
         private bool isSampling = false;
         private float samplingTimer = 0f;
-        private const float SAMPLING_WINDOW = 0.25f; // Janela de 250ms (0.25s) para capturar o pico real da fala
+        private const float SAMPLING_WINDOW = 0.50f; // Janela de 500ms (0.50s) para capturar o pico real da fala
         private float accumulatedPeakLevel = 0f;
 
         public void ProcessVoiceFrame(Player player, float displayLevel, bool isTransmitting)

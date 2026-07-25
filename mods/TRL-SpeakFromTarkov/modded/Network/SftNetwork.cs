@@ -62,67 +62,84 @@ namespace TRL_SpeakFromTarkov.Network
 
         public void Broadcast(byte[] opusData, byte channel, float voiceLevel = 0f)
         {
-            if (!IsSessionActive || !Singleton<IFikaNetworkManager>.Instantiated) return;
-            if (VoIPPlugin.EnableMod != null && !VoIPPlugin.EnableMod.Value) return;
-            
-            string myProfileId = LocalSessionId;
-            if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance.MainPlayer != null)
+            try
             {
-                string pId = Singleton<GameWorld>.Instance.MainPlayer.ProfileId;
-                if (!string.IsNullOrEmpty(pId)) myProfileId = pId;
-            }
+                if (!IsSessionActive || !Singleton<IFikaNetworkManager>.Instantiated) return;
+                if (VoIPPlugin.EnableMod != null && !VoIPPlugin.EnableMod.Value) return;
+                
+                // Se o nível de áudio for desprezível (< 0.002f), ignora o envio (evita flood de silêncio no LiteNetLib)
+                if (voiceLevel < 0.002f) return;
 
-            SftAudioPacket packet = new SftAudioPacket 
-            { 
-                ProfileId = myProfileId,
-                Channel = channel, 
-                AudioData = opusData,
-                VoiceLevel = voiceLevel
-            };
-            Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, Fika.Core.Networking.LiteNetLib.DeliveryMethod.Unreliable, broadcast: true);
+                string myProfileId = LocalSessionId;
+                if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance.MainPlayer != null)
+                {
+                    string pId = Singleton<GameWorld>.Instance.MainPlayer.ProfileId;
+                    if (!string.IsNullOrEmpty(pId)) myProfileId = pId;
+                }
+
+                SftAudioPacket packet = new SftAudioPacket 
+                { 
+                    ProfileId = myProfileId,
+                    Channel = channel, 
+                    AudioData = opusData,
+                    VoiceLevel = voiceLevel
+                };
+                Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, Fika.Core.Networking.LiteNetLib.DeliveryMethod.Unreliable, broadcast: true);
+            }
+            catch (System.Exception ex)
+            {
+                Log?.LogError($"[SFT] Erro ao enviar Broadcast de áudio: {ex.Message}");
+            }
         }
 
         private void OnReceiveVoipData(SftAudioPacket packet)
         {
-            if (!IsSessionActive) return;
-            if (VoIPPlugin.EnableMod != null && !VoIPPlugin.EnableMod.Value) return;
-            
-            // Rejeita pacotes próprios (Eco loopback local)
-            if (packet.ProfileId == LocalSessionId) return;
-            if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance.MainPlayer != null)
+            try
             {
-                if (packet.ProfileId == Singleton<GameWorld>.Instance.MainPlayer.ProfileId)
-                    return;
-            }
-
-            // A validação de Canal deve ser feita pelo Controller no futuro, mas para MVP fica aqui
-            if (Core.VoipController.Instance != null && packet.Channel != Core.VoipController.Instance.CurrentChannel) 
-                return;
-
-            RemoteSpeaker speaker;
-            if (!remoteSpeakers.TryGetValue(packet.ProfileId, out speaker) || speaker == null)
-            {
-                speaker = CreateRemoteSpeaker(packet.ProfileId);
-                if (speaker == null) return;
-                remoteSpeakers[packet.ProfileId] = speaker;
-            }
-            
-            // Atualiza ancoragem do alto-falante 3D na cabeça/corpo do jogador
-            if (Singleton<GameWorld>.Instantiated)
-            {
-                var player = Singleton<GameWorld>.Instance.AllAlivePlayersList.FirstOrDefault(p => p.ProfileId == packet.ProfileId);
-                if (player != null)
+                if (!IsSessionActive) return;
+                if (VoIPPlugin.EnableMod != null && !VoIPPlugin.EnableMod.Value) return;
+                
+                // Rejeita pacotes próprios (Eco loopback local)
+                if (packet.ProfileId == LocalSessionId) return;
+                if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance.MainPlayer != null)
                 {
-                    Transform targetBone = player.PlayerBones != null && player.PlayerBones.Head != null ? player.PlayerBones.Head.Original : player.Transform.Original;
-                    if (speaker.transform.parent != targetBone)
+                    if (packet.ProfileId == Singleton<GameWorld>.Instance.MainPlayer.ProfileId)
+                        return;
+                }
+
+                // A validação de Canal deve ser feita pelo Controller no futuro, mas para MVP fica aqui
+                if (Core.VoipController.Instance != null && packet.Channel != Core.VoipController.Instance.CurrentChannel) 
+                    return;
+
+                RemoteSpeaker speaker;
+                if (!remoteSpeakers.TryGetValue(packet.ProfileId, out speaker) || speaker == null)
+                {
+                    speaker = CreateRemoteSpeaker(packet.ProfileId);
+                    if (speaker == null) return;
+                    remoteSpeakers[packet.ProfileId] = speaker;
+                }
+                
+                // Atualiza ancoragem do alto-falante 3D na cabeça/corpo do jogador
+                if (Singleton<GameWorld>.Instantiated)
+                {
+                    var player = Singleton<GameWorld>.Instance.AllAlivePlayersList?.FirstOrDefault(p => p != null && p.ProfileId == packet.ProfileId);
+                    if (player != null)
                     {
-                        speaker.transform.SetParent(targetBone, false);
-                        speaker.transform.localPosition = targetBone == player.Transform.Original ? Vector3.up * 1.6f : Vector3.zero;
+                        Transform targetBone = player.PlayerBones != null && player.PlayerBones.Head != null ? player.PlayerBones.Head.Original : player.Transform.Original;
+                        if (speaker.transform.parent != targetBone)
+                        {
+                            speaker.transform.SetParent(targetBone, false);
+                            speaker.transform.localPosition = targetBone == player.Transform.Original ? Vector3.up * 1.6f : Vector3.zero;
+                        }
                     }
                 }
-            }
 
-            speaker.EnqueuePacket(packet.AudioData, packet.VoiceLevel);
+                speaker.EnqueuePacket(packet.AudioData, packet.VoiceLevel);
+            }
+            catch (System.Exception ex)
+            {
+                Log?.LogError($"[SFT] Erro no callback OnReceiveVoipData: {ex.Message}");
+            }
         }
 
         private RemoteSpeaker CreateRemoteSpeaker(string profileId)
