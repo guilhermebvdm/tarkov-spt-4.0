@@ -1,14 +1,9 @@
-// Decompiled with JetBrains decompiler
-// Type: TarkovIRL.Patch_LerpCamera_ForceUpdateSway
-// Assembly: TarkovIRL, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MVID: C42939BD-7BF0-4586-ABE5-9D2EFC361A0B
-// Assembly location: D:\Drive\Google Drive\Users\Erick Saraiva\Downloads\TarkovIRL_WeaponsHandlingMod_1.0.0\BepInEx\plugins\TarkovIRL.dll
-
-using EFT;
+﻿using EFT;
 using EFT.Animations;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 #nullable disable
@@ -18,7 +13,7 @@ public class Patch_LerpCamera_ForceUpdateSway : ModulePatch
 {
   private static FieldInfo playerField;
   private static FieldInfo fcField;
-  private static System.Runtime.CompilerServices.ConditionalWeakTable<ProceduralWeaponAnimation, Player> _playerCache = new System.Runtime.CompilerServices.ConditionalWeakTable<ProceduralWeaponAnimation, Player>();
+  private static ConditionalWeakTable<ProceduralWeaponAnimation, Player> _playerCache = new ConditionalWeakTable<ProceduralWeaponAnimation, Player>();
 
   protected override MethodBase GetTargetMethod()
   {
@@ -30,20 +25,18 @@ public class Patch_LerpCamera_ForceUpdateSway : ModulePatch
   [SPT.Reflection.Patching.PatchPostfix]
   private static void PatchPostfix(ProceduralWeaponAnimation __instance, float dt)
   {
-    if (__instance == null)
+    if ((__instance == null))
       return;
     Player player;
-    if (!_playerCache.TryGetValue(__instance, out player))
+    if (!Patch_LerpCamera_ForceUpdateSway._playerCache.TryGetValue(__instance, out player))
     {
-        Player.FirearmController firearmController = (Player.FirearmController) Patch_LerpCamera_ForceUpdateSway.fcField.GetValue((object) __instance);
-        if (firearmController != null)
-            player = (Player) Patch_LerpCamera_ForceUpdateSway.playerField.GetValue((object) firearmController);
-        
-        if (player != null)
-            _playerCache.Add(__instance, player);
+      Player.FirearmController firearmController = (Player.FirearmController) Patch_LerpCamera_ForceUpdateSway.fcField.GetValue((object) __instance);
+      if ((firearmController != null))
+        player = (Player) Patch_LerpCamera_ForceUpdateSway.playerField.GetValue((object) firearmController);
+      if ((player != null))
+        Patch_LerpCamera_ForceUpdateSway._playerCache.Add(__instance, player);
     }
-
-    if (player == null || !player.IsYourPlayer)
+    if ((player == null) || !player.IsYourPlayer)
       return;
     AnimStateController.SetCurrentBodyAnimState(player.MovementContext.CurrentState.AnimatorStateHash);
     PlayerMotionController.UpdateMovementInformation(player);
@@ -51,5 +44,5 @@ public class Patch_LerpCamera_ForceUpdateSway : ModulePatch
       return;
     __instance.UpdateSwayFactors();
   }
-
 }
+

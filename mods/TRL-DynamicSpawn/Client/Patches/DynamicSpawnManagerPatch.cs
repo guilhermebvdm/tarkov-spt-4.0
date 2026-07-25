@@ -17,13 +17,31 @@ namespace TRLDynamicSpawn.Patches
         [PatchPostfix]
         private static void PatchPostfix(GameWorld __instance)
         {
+            // Resolve real singletons for bot spawning
+            if (!Singleton<IBotGame>.Instantiated)
+            {
+                Plugin.LogSource.LogError("[TRL-DynamicSpawn] Cannot inject DynamicSpawnManager: IBotGame is not instantiated yet.");
+                return;
+            }
+
+            var botGame = Singleton<IBotGame>.Instance;
+            var botsController = botGame?.BotsController;
+            if (botsController == null)
+            {
+                Plugin.LogSource.LogError("[TRL-DynamicSpawn] Cannot inject DynamicSpawnManager: BotsController is null.");
+                return;
+            }
+
+            var botCreator = botsController.BotSpawner?.BotCreator;
+            if (botCreator == null)
+            {
+                Plugin.LogSource.LogError("[TRL-DynamicSpawn] Cannot inject DynamicSpawnManager: BotCreator is null.");
+                return;
+            }
+
             // Inject our Maestro into the GameWorld
             var spawnManager = __instance.gameObject.AddComponent<DynamicSpawnManager>();
-            
-            // Note: In SPT, BotsController is usually attached to GameWorld or accessible via singleton
-            // IBotCreator is usually resolved via Dependency Injection or Singletons.
-            // For now, passing nulls, you must adapt this to grab the real Fika/SPT singletons.
-            spawnManager.Init(__instance, null, null);
+            spawnManager.Init(__instance, botCreator, botsController);
 
             Plugin.LogSource.LogInfo("[TRL-DynamicSpawn] Maestro injected into GameWorld successfully!");
         }

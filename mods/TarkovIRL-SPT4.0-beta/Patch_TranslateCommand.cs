@@ -1,12 +1,5 @@
-// Decompiled with JetBrains decompiler
-// Type: TarkovIRL.Patch_TranslateCommand
-// Assembly: TarkovIRL, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MVID: C42939BD-7BF0-4586-ABE5-9D2EFC361A0B
-// Assembly location: D:\Drive\Google Drive\Users\Erick Saraiva\Downloads\TarkovIRL_WeaponsHandlingMod_1.0.0\BepInEx\plugins\TarkovIRL.dll
-
-using EFT;
+﻿using EFT;
 using EFT.InputSystem;
-using HarmonyLib;
 using SPT.Reflection.Patching;
 using System.Reflection;
 using UnityEngine;
@@ -16,31 +9,28 @@ namespace TarkovIRL;
 
 internal class Patch_TranslateCommand : ModulePatch
 {
+  protected override MethodBase GetTargetMethod()
+  {
+    return (MethodBase) typeof (GamePlayerOwner).GetMethod("TranslateCommand", BindingFlags.Instance | BindingFlags.Public);
+  }
 
-    protected override MethodBase GetTargetMethod()
-    {
-        return typeof(GamePlayerOwner).GetMethod("TranslateCommand", BindingFlags.Instance | BindingFlags.Public);
-    }
-
-    [SPT.Reflection.Patching.PatchPostfix]
-    private static void PatchPostfix(GamePlayerOwner __instance, ECommand command)
-    {
-        Player player = __instance.Player;
-        if (player == null || !player.IsYourPlayer)
-            return;
-            
-
-        if (command == (ECommand)40 || command == (ECommand)41 || command == (ECommand)43 || command == (ECommand)42)
-            WeaponSelectionController.Process(command, player);
-        if (command == (ECommand)25)
-            PlayerMotionController.IsHoldingBreath = true;
-        if (command == (ECommand)26)
-            PlayerMotionController.IsHoldingBreath = false;
-        if (command == (ECommand)53)
-            WeaponController.ToggleFolded();
-            
-        // Cleaned up the weird bitwise condition from decompilation
-        if (command == (ECommand)133 || command == (ECommand)127 || command == (ECommand)128 || command == (ECommand)129 || command == (ECommand)130 || command == (ECommand)131 || command == (ECommand)132 || command == (ECommand)52 || command == (ECommand)46 || command == (ECommand)47 || command == (ECommand)48 || command == (ECommand)49 || command == (ECommand)50 || command == (ECommand)51)
-            WeaponSelectionController.Process(command, player);
-    }
+  [SPT.Reflection.Patching.PatchPostfix]
+  private static void PatchPostfix(GamePlayerOwner __instance, ECommand command)
+  {
+    Player player = ((PlayerOwner) __instance).Player;
+    if ((player == null) || !player.IsYourPlayer)
+      return;
+    if (((int)command == 40) || ((int)command == 41) || ((int)command == 43) || ((int)command == 42))
+      WeaponSelectionController.Process(command, player);
+    if (((int)command == 25))
+      PlayerMotionController.IsHoldingBreath = true;
+    if (((int)command == 26))
+      PlayerMotionController.IsHoldingBreath = false;
+    if (((int)command == 53))
+      WeaponController.ToggleFolded();
+    if (((int)command != 133) && ((int)command != (int)sbyte.MaxValue) && ((int)command != 128) /*0x80*/ && ((int)command != 129) && ((int)command != 130) && ((int)command != 131) && ((int)command != 132) && ((int)command != 52) && ((int)command != 46) && ((int)command != 47) && ((int)command != 48) /*0x30*/ && ((int)command != 49) && ((int)command != 50) && ((int)command != 51))
+      return;
+    WeaponSelectionController.Process(command, player);
+  }
 }
+

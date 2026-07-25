@@ -1,53 +1,69 @@
-using EFT;
+using CameraRotationMod;
 using Comfort.Common;
-using System.Reflection;
+using EFT;
+using UnityEngine;
 
-namespace TarkovIRL
+#nullable disable
+namespace TarkovIRL;
+
+public static class StanceController
 {
-    public enum EStance
+  private static bool? _isStanceModLoaded;
+
+  public static bool IsStanceModLoaded
+  {
+    get
     {
-        None,
-        HighReady,
-        LowReady,
-        ShortStock,
-        ActiveAiming,
-        Patrol
+      if (!_isStanceModLoaded.HasValue)
+      {
+        try
+        {
+          System.Type type = System.Type.GetType("CameraRotationMod.StanceManager, shwngFpsCameraStances4");
+          _isStanceModLoaded = type != null;
+        }
+        catch
+        {
+          _isStanceModLoaded = false;
+        }
+      }
+      return _isStanceModLoaded.Value;
     }
+  }
 
-    public static class StanceController
+  public static EStance CurrentStance
+  {
+    get
     {
-        public static EStance CurrentStance
-        {
-            get
-            {
-                var valString = CameraRotationMod.StanceManager.CurrentStance.ToString();
-                if (valString == "Stance1") return EStance.HighReady;
-                if (valString == "Stance2") return EStance.LowReady;
-                if (valString == "Stance3") return EStance.ShortStock;
-                return EStance.None;
-            }
-        }
-
-        public static bool IsLeftShoulder
-        {
-            get
-            {
-                if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance.MainPlayer != null)
-                {
-                    // Update to EFT 0.16.9 LeftStance property
-                    return Singleton<GameWorld>.Instance.MainPlayer.MovementContext.LeftStanceEnabled;
-                }
-                return false;
-            }
-        }
-
-        public static bool IsMounting
-        {
-            get
-            {
-                // In EFT 0.14+ we can check mounting state, but for now we default to false to avoid crash.
-                return false; 
-            }
-        }
+      if (!IsStanceModLoaded)
+        return EStance.None;
+      return GetCurrentStanceInternal();
     }
+  }
+
+  [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+  private static EStance GetCurrentStanceInternal()
+  {
+    switch (StanceManager.CurrentStance.ToString())
+    {
+      case "Stance1":
+        return EStance.HighReady;
+      case "Stance2":
+        return EStance.LowReady;
+      case "Stance3":
+        return EStance.ShortStock;
+      default:
+        return EStance.None;
+    }
+  }
+
+  public static bool IsLeftShoulder
+  {
+    get
+    {
+      return Singleton<GameWorld>.Instantiated && (Singleton<GameWorld>.Instance.MainPlayer != null) && Singleton<GameWorld>.Instance.MainPlayer.MovementContext.LeftStanceEnabled;
+    }
+  }
+
+  public static bool IsMounting => false;
 }
+

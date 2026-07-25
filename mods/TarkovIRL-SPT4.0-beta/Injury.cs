@@ -1,10 +1,4 @@
-// Decompiled with JetBrains decompiler
-// Type: TarkovIRL.Injury
-// Assembly: TarkovIRL, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MVID: C42939BD-7BF0-4586-ABE5-9D2EFC361A0B
-// Assembly location: D:\Drive\Google Drive\Users\Erick Saraiva\Downloads\TarkovIRL_WeaponsHandlingMod_1.0.0\BepInEx\plugins\TarkovIRL.dll
-
-#nullable disable
+﻿#nullable disable
 namespace TarkovIRL;
 
 internal class Injury
@@ -23,9 +17,7 @@ internal class Injury
   {
     get
     {
-      if (this.InjuryType == Injury.EInjury.LIGHT_BLEED)
-        return 60f;
-      return this.InjuryType == Injury.EInjury.HEAVY_BLEED ? 30f : 20f;
+      return this.InjuryType == Injury.EInjury.LIGHT_BLEED ? 60f : (this.InjuryType == Injury.EInjury.HEAVY_BLEED ? 30f : 20f);
     }
   }
 
@@ -33,9 +25,7 @@ internal class Injury
   {
     get
     {
-      if (this.InjuryType == Injury.EInjury.LIGHT_BLEED)
-        return 5f;
-      return this.InjuryType == Injury.EInjury.HEAVY_BLEED ? 20f : 20f;
+      return this.InjuryType == Injury.EInjury.LIGHT_BLEED ? 5f : (this.InjuryType == Injury.EInjury.HEAVY_BLEED ? 20f : 20f);
     }
   }
 
@@ -46,3 +36,4 @@ internal class Injury
     BONE_BREAK,
   }
 }
+

@@ -33,6 +33,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    
+    
     <Reference Include="UnityEngine">
       <HintPath>References\UnityEngine.dll</HintPath>
     </Reference>
@@ -71,13 +73,20 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="UnderFireSoftWrapper.cs" />
+    <Compile Include="NewDeadzoneController.cs" />
+    <Compile Include="EStance.cs" />
+    <Compile Include="FreeAimController.cs" />
+    <Compile Include="Patch_PlayerRotate.cs" />
+    
+    
     <Compile Include="StanceController.cs" />
     <Compile Include="Patch_LateUpdate_UpdateWpnStats.cs" />
     <Compile Include="DirectionalSwayController.cs" />
     <Compile Include="EfficiencyController.cs" />
     <Compile Include="FootstepController.cs" />
     <Compile Include="HeadRotController.cs" />
-    <Compile Include="NewDeadzoneController.cs" />
+    
     <Compile Include="NewSwayController.cs" />
     <Compile Include="ParallaxAdsController.cs" />
     <Compile Include="HandPoseController.cs" />
@@ -88,6 +97,7 @@
     <Compile Include="Patch_Look.cs" />
     <Compile Include="Patch_LerpCamera_ForceUpdateSway.cs" />
     <Compile Include="AnimStateController.cs" />
+    <Compile Include="Patch_GameWorldOnDestroy.cs" />
     <Compile Include="Patch_OnShot.cs" />
     <Compile Include="ParallaxController.cs" />
     <Compile Include="Patch_SetHeadRotation.cs" />
@@ -118,3 +128,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
+
+
+
+
+
+

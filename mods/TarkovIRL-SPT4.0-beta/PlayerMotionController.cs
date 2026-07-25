@@ -1,10 +1,4 @@
-// Decompiled with JetBrains decompiler
-// Type: TarkovIRL.PlayerMotionController
-// Assembly: TarkovIRL, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MVID: C42939BD-7BF0-4586-ABE5-9D2EFC361A0B
-// Assembly location: D:\Drive\Google Drive\Users\Erick Saraiva\Downloads\TarkovIRL_WeaponsHandlingMod_1.0.0\BepInEx\plugins\TarkovIRL.dll
-
-using EFT;
+﻿using EFT;
 using UnityEngine;
 
 #nullable disable
@@ -26,6 +20,7 @@ internal class PlayerMotionController
   private static float _playerSpeed = 0.0f;
   private static float _leanNormalized = 0.0f;
   private static float _armStam = 0.0f;
+  public static float RawHorizontalSpeed = 0.0f;
   public static bool IsAiming = false;
   public static bool IsSprinting = false;
   public static bool IsProne = false;
@@ -50,7 +45,7 @@ internal class PlayerMotionController
     PlayerMotionController._playerSpeed = player.Speed;
     PlayerMotionController._leanNormalized = player.MovementContext.Tilt / 5f;
     PlayerMotionController._armStam = player.Physical.HandsStamina.NormalValue;
-    PlayerMotionController.UpdateMovementDirection((Vector2)player.InputDirection);
+    PlayerMotionController.UpdateMovementDirection(((Vector2)player.InputDirection));
   }
 
   private static void UpdateIsMovingBool(Vector3 position)
@@ -63,10 +58,12 @@ internal class PlayerMotionController
   {
     PlayerMotionController._verticalAvg = (double) newRot.y > (double) PlayerMotionController._playerRotLastFrame.y ? 1f : -1f;
     float num1 = Vector2.Distance(newRot, PlayerMotionController._playerRotLastFrame) * dt;
-    float num2 = newRot.x - PlayerMotionController._playerRotLastFrame.x;
-    float num3 = newRot.y - PlayerMotionController._playerRotLastFrame.y;
+    float num2 = Mathf.DeltaAngle(PlayerMotionController._playerRotLastFrame.x, newRot.x);
+    float num3 = Mathf.DeltaAngle(PlayerMotionController._playerRotLastFrame.y, newRot.y);
     float num4 = num2 * dt;
     float num5 = num3 * dt;
+    if ((double) dt > 0.0)
+      PlayerMotionController.RawHorizontalSpeed = Mathf.Abs(num2 / dt);
     if ((double) num4 < -1.0)
       num4 = 0.0f;
     if ((double) num4 > 1.0)
@@ -143,3 +140,4 @@ internal class PlayerMotionController
     NONE,
   }
 }
+

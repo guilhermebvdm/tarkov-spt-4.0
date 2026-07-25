@@ -17,6 +17,7 @@ namespace TRLDynamicSpawn.Components
     public class DynamicSpawnManager : MonoBehaviour
     {
         public static DynamicSpawnManager Instance { get; private set; }
+        public static bool IsGeneratingDynamicWave = false;
         
         private bool _isSpawningWave = false;
         private int _delayBeforeFirstWave = 60;
@@ -25,6 +26,7 @@ namespace TRLDynamicSpawn.Components
         
         private string _activePreset = "Balanced";
         private TRLConfig _serverConfig;
+        public TRLConfig ServerConfig => _serverConfig;
         
         // Caching settings
         private GameWorld _gameWorld;
@@ -46,6 +48,12 @@ namespace TRLDynamicSpawn.Components
         
         private IEnumerator FetchServerConfigAndStart()
         {
+            if (IsFikaClient())
+            {
+                Plugin.LogSource.LogInfo("[TRL-DynamicSpawn] Client peer detected. Spawning is managed by the host. Disabling manager loop.");
+                yield break;
+            }
+
             try 
             {
                 string json = RequestHandler.GetJson("/trldynamicspawn/getConfig");
@@ -118,6 +126,14 @@ namespace TRLDynamicSpawn.Components
                         ScavSpawns = JsonConvert.DeserializeObject<Dictionary<string, List<Vector3Model>>>(scavJson);
                     }
                 }
+
+                // Pre-populate SPT Bot Creator Backup target for PMCs to resolve profile generation empty queues
+                if (_botCreator != null)
+                {
+                    Plugin.LogSource.LogInfo("[TRL-DynamicSpawn] Pre-populating SPT Bot Creator Backup target for PMCs...");
+                    _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.pmcUSEC, 30);
+                    _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.pmcBEAR, 30);
+                }
             }
             catch (Exception ex)
             {
@@ -134,11 +150,13 @@ namespace TRLDynamicSpawn.Components
             _nextWaveTime = Time.time + _delayBeforeFirstWave;
             yield return new WaitForSeconds(_delayBeforeFirstWave);
 
+            bool isFirstWave = true;
             while (true)
             {
                 if (!_isSpawningWave)
                 {
-                    yield return StartCoroutine(ProcessWave());
+                    StartCoroutine(ProcessWave(isFirstWave));
+                    isFirstWave = false;
                 }
                 
                 Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Wave completed. Next wave in {_secondsBetweenWaves}s...");
@@ -147,15 +165,31 @@ namespace TRLDynamicSpawn.Components
             }
         }
 
-        private IEnumerator ProcessWave()
+        private class DummyToken : GInterface22
+        {
+            private System.Threading.CancellationTokenSource _cts = new System.Threading.CancellationTokenSource();
+            public System.Threading.CancellationToken GetCancelToken()
+            {
+                return _cts.Token;
+            }
+        }
+
+
+        private IEnumerator ProcessWave(bool isFirstWave)
         {
             _isSpawningWave = true;
 
             int maxCap = Settings.GetMapCap(Singleton<GameWorld>.Instance.MainPlayer.Location);
-            int aliveBots = _gameWorld.RegisteredPlayers.Count(p => p.IsAI && p.HealthController != null && p.HealthController.IsAlive);
+            int aliveBots = _botsController.AliveAndLoadingBotsCount;
             int availableSlots = maxCap - aliveBots;
 
             Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Calculating Wave: MaxCap={maxCap}, Alive={aliveBots}, Available={availableSlots}");
+
+            if (_botCreator != null)
+            {
+                _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.pmcUSEC, 10);
+                _botCreator.AddToTargetBackup(BotDifficulty.normal, WildSpawnType.pmcBEAR, 10);
+            }
 
             if (availableSlots <= 0)
             {
@@ -164,27 +198,7 @@ namespace TRLDynamicSpawn.Components
                 yield break;
             }
 
-            Queue<Tuple<BotCreationDataClass, BotZone>> spawnQueue = new Queue<Tuple<BotCreationDataClass, BotZone>>();
-            
-            // Helper Task to generate bots
-            async Task<BotCreationDataClass> GenerateBotsAsync(EPlayerSide side, WildSpawnType spawnType, BotDifficulty difficulty, int count)
-            {
-                if (count <= 0) return null;
-                
-                BotSpawnParams spawnParams = new BotSpawnParams();
-                BotProfileDataClass profileData = new BotProfileDataClass(side, spawnType, difficulty, 0f, spawnParams);
-                
-                return await BotCreationDataClass.Create(profileData, _botCreator, count, _botsController.BotSpawner);
-            }
-            
-            // A more robust helper that returns the data directly
-            async Task<BotCreationDataClass> GenerateBossAsync(WildSpawnType spawnType, BotDifficulty difficulty, int count)
-            {
-                if (count <= 0) return null;
-                BotSpawnParams spawnParams = new BotSpawnParams();
-                BotProfileDataClass profileData = new BotProfileDataClass(EPlayerSide.Savage, spawnType, difficulty, 0f, spawnParams);
-                return await BotCreationDataClass.Create(profileData, _botCreator, count, _botsController.BotSpawner);
-            }
+            List<Tuple<SpawnGroupData, BotZone>> spawnList = new List<Tuple<SpawnGroupData, BotZone>>();
 
             // ======================================
             // PROCESS ELITES / BOSSES
@@ -192,9 +206,9 @@ namespace TRLDynamicSpawn.Components
             var mapName = _gameWorld.MainPlayer.Location.ToLower();
             var eliteConfig = _serverConfig?.EliteConfig;
             
-            List<Tuple<BotCreationDataClass, BotZone>> bossQueue = new List<Tuple<BotCreationDataClass, BotZone>>();
+            List<Tuple<BossLocationSpawn, BotZone>> bossQueue = new List<Tuple<BossLocationSpawn, BotZone>>();
 
-            if (eliteConfig != null)
+            if (isFirstWave && eliteConfig != null)
             {
                 var bossesToProcess = new Dictionary<WildSpawnType, EliteLocationInfo>
                 {
@@ -261,7 +275,7 @@ namespace TRLDynamicSpawn.Components
                     
                     bool isInvading = invadedBosses.Contains(bossType);
                     if (eliteConfig.DisableBosses && !IsNonBoss(bossType) && !isInvading) continue; // Skip if disabled unless invading
-
+ 
                     int spawnChance = isInvading ? 100 : GetChanceForMap(info, mapName);
                     if (spawnChance <= 0) continue;
 
@@ -295,25 +309,69 @@ namespace TRLDynamicSpawn.Components
                         {
                             Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Rolled SUCCESS ({roll} <= {spawnChance}) for {bossType} in {bz.NameZone} on {mapName}!");
                             
-                            int count = info.DisableFollowers ? 1 : 1; 
-                            
-                            var tBoss = GenerateBossAsync(bossType, BotDifficulty.normal, count);
-                            while (!tBoss.IsCompleted) yield return null;
-                            
-                            var bossData = tBoss.Result;
-                            
-                            if (bossData != null)
+                            BossLocationSpawn newBossWave = null;
+
+                            if (!info.DisableFollowers && Singleton<IBotGame>.Instantiated)
                             {
-                                bossQueue.Add(new Tuple<BotCreationDataClass, BotZone>(bossData, bz));
-                                availableSlots -= count;
+                                var game = Singleton<IBotGame>.Instance;
+                                if (game.BossSpawnScenario != null && game.BossSpawnScenario.BossSpawnWaves != null)
+                                {
+                                    var origWave = game.BossSpawnScenario.BossSpawnWaves.FirstOrDefault(w => w.BossName.ToLower() == bossType.ToString().ToLower());
+                                    if (origWave != null)
+                                    {
+                                        newBossWave = new BossLocationSpawn()
+                                        {
+                                            BossName = origWave.BossName,
+                                            BossChance = 100f,
+                                            BossZone = bz.NameZone,
+                                            BossPlayer = false,
+                                            BossDifficult = origWave.BossDifficult,
+                                            BossEscortType = origWave.BossEscortType,
+                                            BossEscortDifficult = origWave.BossEscortDifficult,
+                                            BossEscortAmount = origWave.BossEscortAmount,
+                                            Time = -1f,
+                                            Supports = origWave.Supports,
+                                            ForceSpawn = true,
+                                            Delay = 0f
+                                        };
+                                    }
+                                }
                             }
+
+                            if (newBossWave == null)
+                            {
+                                // Fallback for simple boss spawn if no origWave found or followers disabled
+                                newBossWave = new BossLocationSpawn()
+                                {
+                                    BossName = bossType.ToString(),
+                                    BossChance = 100f,
+                                    BossZone = bz.NameZone,
+                                    BossPlayer = false,
+                                    BossDifficult = BotDifficulty.normal.ToString(),
+                                    BossEscortType = bossType.ToString(),
+                                    BossEscortDifficult = BotDifficulty.normal.ToString(),
+                                    BossEscortAmount = "0",
+                                    Time = -1f,
+                                    ForceSpawn = true,
+                                    Delay = 0f
+                                };
+                            }
+
+                            bossQueue.Add(new Tuple<BossLocationSpawn, BotZone>(newBossWave, bz));
+                            
+                            int count = 1;
+                            if (int.TryParse(newBossWave.BossEscortAmount, out int escortCount) && escortCount > 0)
+                            {
+                                count += escortCount;
+                            }
+                            availableSlots -= count;
                         }
                     }
                 }
             }
 
             // Group Splitting Local Function
-            IEnumerator GenerateAndEnqueueGroups(EPlayerSide side, WildSpawnType role, BotDifficulty diff, int totalSlots, EliteLocationInfo info)
+            void GenerateAndEnqueueGroups(WildSpawnType role, BotDifficulty diff, int totalSlots, EliteLocationInfo info)
             {
                 int slotsRemaining = totalSlots;
                 while (slotsRemaining > 0)
@@ -326,32 +384,37 @@ namespace TRLDynamicSpawn.Components
                     }
                     if (groupSize > slotsRemaining) groupSize = slotsRemaining;
 
-                    var t = GenerateBotsAsync(side, role, diff, groupSize);
-                    while (!t.IsCompleted) yield return null;
-                    if (t.Result != null)
+                    var gData = new SpawnGroupData
                     {
-                        spawnQueue.Enqueue(new Tuple<BotCreationDataClass, BotZone>(t.Result, GetHotzone(info, mapName)));
-                    }
+                        Role = role,
+                        Difficulty = diff,
+                        GroupSize = groupSize,
+                        Info = info
+                    };
+
+                    spawnList.Add(new Tuple<SpawnGroupData, BotZone>(gData, GetHotzone(info, mapName)));
                     slotsRemaining -= groupSize;
                 }
-            }            // ======================================
+            }
+
+            // ======================================
             // PROCESS REGULAR HORDE (PMCs/Scavs)
             // ======================================
             if (availableSlots > 0)
             {
-                if (eliteConfig != null && eliteConfig.RandomRaiderGroup && UnityEngine.Random.Range(1, 101) <= eliteConfig.RandomRaiderGroupChance)
+                if (isFirstWave && eliteConfig != null && eliteConfig.RandomRaiderGroup && UnityEngine.Random.Range(1, 101) <= eliteConfig.RandomRaiderGroupChance)
                 {
                     int raiderSlots = Mathf.Min(availableSlots, UnityEngine.Random.Range(2, 5));
                     Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] RANDOM RAIDER GROUP INVASION! Spawning {raiderSlots} Raiders.");
-                    yield return StartCoroutine(GenerateAndEnqueueGroups(EPlayerSide.Savage, WildSpawnType.pmcBot, BotDifficulty.normal, raiderSlots, eliteConfig.Raiders));
+                    GenerateAndEnqueueGroups(WildSpawnType.pmcBot, BotDifficulty.normal, raiderSlots, eliteConfig.Raiders);
                     availableSlots -= raiderSlots;
                 }
 
-                if (eliteConfig != null && eliteConfig.RandomRogueGroup && availableSlots > 0 && UnityEngine.Random.Range(1, 101) <= eliteConfig.RandomRogueGroupChance)
+                if (isFirstWave && eliteConfig != null && eliteConfig.RandomRogueGroup && availableSlots > 0 && UnityEngine.Random.Range(1, 101) <= eliteConfig.RandomRogueGroupChance)
                 {
                     int rogueSlots = Mathf.Min(availableSlots, UnityEngine.Random.Range(2, 5));
                     Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] RANDOM ROGUE GROUP INVASION! Spawning {rogueSlots} Rogues.");
-                    yield return StartCoroutine(GenerateAndEnqueueGroups(EPlayerSide.Savage, WildSpawnType.exUsec, BotDifficulty.normal, rogueSlots, eliteConfig.Rogues));
+                    GenerateAndEnqueueGroups(WildSpawnType.exUsec, BotDifficulty.normal, rogueSlots, eliteConfig.Rogues);
                     availableSlots -= rogueSlots;
                 }
 
@@ -360,8 +423,22 @@ namespace TRLDynamicSpawn.Components
                 else if (_activePreset == "Scav Infestation") pmcRatio = 0.3f;
                 else if (_activePreset == "Warzone") pmcRatio = UnityEngine.Random.Range(0.2f, 0.8f);
 
-                int pmcSlots = Mathf.RoundToInt(availableSlots * pmcRatio);
-                int scavSlots = availableSlots - pmcSlots;
+                int alivePMCs = _gameWorld.RegisteredPlayers.Count(p => p.IsAI && p.HealthController != null && p.HealthController.IsAlive && (p.Profile.Side == EPlayerSide.Usec || p.Profile.Side == EPlayerSide.Bear));
+                int aliveScavs = _gameWorld.RegisteredPlayers.Count(p => p.IsAI && p.HealthController != null && p.HealthController.IsAlive && p.Profile.Side == EPlayerSide.Savage);
+
+                int idealPMCs = Mathf.RoundToInt(maxCap * pmcRatio);
+                int idealScavs = maxCap - idealPMCs;
+
+                int pmcSlots = Mathf.Max(0, idealPMCs - alivePMCs);
+                int scavSlots = Mathf.Max(0, idealScavs - aliveScavs);
+
+                int totalTarget = pmcSlots + scavSlots;
+                if (totalTarget > availableSlots && totalTarget > 0)
+                {
+                    float scale = (float)availableSlots / totalTarget;
+                    pmcSlots = Mathf.RoundToInt(pmcSlots * scale);
+                    scavSlots = availableSlots - pmcSlots;
+                }
 
                 int bearSlots = Mathf.RoundToInt(pmcSlots * 0.5f);
                 int usecSlots = pmcSlots - bearSlots;
@@ -373,22 +450,27 @@ namespace TRLDynamicSpawn.Components
                 Plugin.LogSource.LogInfo($"  PMCs: {pmcSlots} ({bearSlots} Bear, {usecSlots} Usec)");
                 Plugin.LogSource.LogInfo($"  Scavs: {scavSlots} ({normalScavSlots} Normal, {pScavSlots} pScav)");
 
-                yield return StartCoroutine(GenerateAndEnqueueGroups(EPlayerSide.Usec, WildSpawnType.pmcUSEC, BotDifficulty.normal, usecSlots, eliteConfig?.Usec));
-                yield return StartCoroutine(GenerateAndEnqueueGroups(EPlayerSide.Bear, WildSpawnType.pmcBEAR, BotDifficulty.normal, bearSlots, eliteConfig?.Bear));
+                GenerateAndEnqueueGroups(WildSpawnType.pmcUSEC, BotDifficulty.normal, usecSlots, eliteConfig?.Usec);
+                GenerateAndEnqueueGroups(WildSpawnType.pmcBEAR, BotDifficulty.normal, bearSlots, eliteConfig?.Bear);
                 
                 int sniperCount = 0;
                 int mapSniperChance = _serverConfig?.MapConfigs?.ContainsKey(mapName) == true ? _serverConfig.MapConfigs[mapName].SniperChance : 30;
-                if (UnityEngine.Random.Range(1, 101) <= mapSniperChance && normalScavSlots > 0)
+                if (isFirstWave && UnityEngine.Random.Range(1, 101) <= mapSniperChance && normalScavSlots > 0)
                 {
                     sniperCount = 1;
                     normalScavSlots -= 1;
-                    var tSniper = GenerateBotsAsync(EPlayerSide.Savage, WildSpawnType.marksman, BotDifficulty.normal, sniperCount);
-                    while (!tSniper.IsCompleted) yield return null;
-                    if (tSniper.Result != null) spawnQueue.Enqueue(new Tuple<BotCreationDataClass, BotZone>(tSniper.Result, null));
+                    var sniperGroup = new SpawnGroupData
+                    {
+                        Role = WildSpawnType.marksman,
+                        Difficulty = BotDifficulty.normal,
+                        GroupSize = sniperCount,
+                        Info = null
+                    };
+                    spawnList.Add(new Tuple<SpawnGroupData, BotZone>(sniperGroup, null));
                 }
 
-                yield return StartCoroutine(GenerateAndEnqueueGroups(EPlayerSide.Savage, WildSpawnType.assault, BotDifficulty.normal, normalScavSlots, eliteConfig?.Scav));
-                yield return StartCoroutine(GenerateAndEnqueueGroups(EPlayerSide.Savage, WildSpawnType.assault, BotDifficulty.normal, pScavSlots, eliteConfig?.Scav));
+                GenerateAndEnqueueGroups(WildSpawnType.assault, BotDifficulty.normal, normalScavSlots, eliteConfig?.Scav);
+                GenerateAndEnqueueGroups(WildSpawnType.assault, BotDifficulty.normal, pScavSlots, eliteConfig?.Scav);
             }
 
             Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Profiles generated. Starting smooth injection...");
@@ -398,7 +480,10 @@ namespace TRLDynamicSpawn.Components
             {
                 if (_botsController.Bots.Count >= maxCap) break;
                 Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Spawning BOSS gracefully in {bq.Item2.NameZone}...");
-                _botsController.BotSpawner.TryToSpawnInZoneAndDelay(bq.Item2, bq.Item1, true, true, null, true);
+                bq.Item1.BossZone = bq.Item2.NameZone;
+                IsGeneratingDynamicWave = true;
+                _botsController.ActivateBotsByWave(bq.Item1);
+                IsGeneratingDynamicWave = false;
                 
                 if (TRLDynamicSpawn.Helpers.Settings.enableSmoothSpawning.Value)
                 {
@@ -406,17 +491,20 @@ namespace TRLDynamicSpawn.Components
                 }
             }
 
+            // Embaralha a lista de spawn para misturar grupos de forma balanceada (alternando Scavs/PMCs/Snipers)
+            var rng = new System.Random();
+            spawnList = spawnList.OrderBy(x => rng.Next()).ToList();
+
             // Then, inject regular horde
-            while (spawnQueue.Count > 0)
+            foreach (var tuple in spawnList)
             {
-                if (_gameWorld.RegisteredPlayers.Count(p => p.IsAI && p.HealthController != null && p.HealthController.IsAlive) >= maxCap)
+                if (_botsController.AliveAndLoadingBotsCount >= maxCap)
                 {
                     Plugin.LogSource.LogInfo("[TRL-DynamicSpawn] Max cap reached during smooth spawn. Stopping wave.");
                     break;
                 }
 
-                var tuple = spawnQueue.Dequeue();
-                BotCreationDataClass data = tuple.Item1;
+                SpawnGroupData gData = tuple.Item1;
                 BotZone preferredZone = tuple.Item2;
                 
                 BotZone selectedZone = preferredZone;
@@ -427,7 +515,43 @@ namespace TRLDynamicSpawn.Components
                 {
                     if (selectedZone == null)
                     {
-                        selectedZone = TRLDynamicSpawn.Helpers.Methods.GetRandomZone(_botsController.BotSpawner);
+                        if (gData.Role == WildSpawnType.marksman)
+                        {
+                            var snipeZones = LocationScene.GetAllObjects<BotZone>()
+                                .Where(z => z.SnipeZone)
+                                .ToList();
+
+                            var emptySnipeZones = snipeZones.Where(z => 
+                            {
+                                var botsInZone = _botsController.Bots.GetListByZone(z);
+                                return botsInZone == null || !botsInZone.Any(b => b.Profile.Info.Settings.Role == WildSpawnType.marksman && b.HealthController.IsAlive);
+                            }).ToList();
+
+                            if (emptySnipeZones.Count > 0)
+                            {
+                                selectedZone = emptySnipeZones[UnityEngine.Random.Range(0, emptySnipeZones.Count)];
+                            }
+                            else
+                            {
+                                Plugin.LogSource.LogInfo("[TRL-DynamicSpawn] All sniper zones occupied. Skipping sniper.");
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            var nonSnipeZones = LocationScene.GetAllObjects<BotZone>()
+                                .Where(z => !z.SnipeZone)
+                                .ToList();
+
+                            if (nonSnipeZones.Count > 0)
+                            {
+                                selectedZone = nonSnipeZones[UnityEngine.Random.Range(0, nonSnipeZones.Count)];
+                            }
+                            else
+                            {
+                                selectedZone = TRLDynamicSpawn.Helpers.Methods.GetRandomZone(_botsController.BotSpawner);
+                            }
+                        }
                     }
 
                     if (selectedZone != null && IsValidSpawnZone(selectedZone, mapName))
@@ -442,13 +566,12 @@ namespace TRLDynamicSpawn.Components
 
                 if (zoneValid && selectedZone != null)
                 {
-                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] SUCCESS: Spawning bot group (Size: {data.Count}) gracefully in {selectedZone.NameZone}...");
-                    _botsController.BotSpawner.TryToSpawnInZoneAndDelay(selectedZone, data, true, true, null, true);
+                    var spawnTask = DirectSpawnBots(gData.Role, gData.Difficulty, gData.GroupSize, selectedZone);
+                    yield return new UnityEngine.WaitUntil(() => spawnTask.IsCompleted || spawnTask.IsFaulted || spawnTask.IsCanceled);
                 }
                 else
                 {
                     Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] FAILED: Could not find a safe/LoS-free zone for bot group after 5 tries. Dropping group to prevent infinite loop.");
-                    // DO NOT push back to queue, let it drop. The next wave will recreate them if slots are available.
                 }
 
                 if (TRLDynamicSpawn.Helpers.Settings.enableSmoothSpawning.Value)
@@ -459,9 +582,38 @@ namespace TRLDynamicSpawn.Components
                 {
                     yield return null; // Just wait 1 frame to not lock main thread
                 }
-            } // End while queue
+            } // End foreach
 
             _isSpawningWave = false;
+        }
+
+        public class SpawnGroupData
+        {
+            public WildSpawnType Role;
+            public BotDifficulty Difficulty;
+            public int GroupSize;
+            public EliteLocationInfo Info;
+        }
+
+        private async Task<bool> DirectSpawnBots(WildSpawnType role, BotDifficulty diff, int groupSize, BotZone zone)
+        {
+            if (zone == null || groupSize <= 0) return false;
+            try
+            {
+                var botProfile = new BotProfileDataClass(EPlayerSide.Savage, role, diff, 0f);
+                var creationData = await BotCreationDataClass.Create(botProfile, _botCreator, groupSize, _botsController.BotSpawner);
+                if (creationData != null)
+                {
+                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] DIRECT SPAWN SUCCESS: Spawning group (Size: {groupSize}, Type: {role}) in zone {zone.NameZone}...");
+                    _botsController.BotSpawner.TryToSpawnInZoneAndDelay(zone, creationData, false, true, null, false);
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.LogSource.LogError($"[TRL-DynamicSpawn] Direct spawn failed for {role}: {ex.Message}\n{ex.StackTrace}");
+            }
+            return false;
         }
 
         private bool IsValidSpawnZone(BotZone zone, string mapName, Vector3? overridePosition = null)
@@ -617,19 +769,144 @@ namespace TRLDynamicSpawn.Components
             }
         }
 
+        private bool _showDebugUI = true;
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.F12))
+            {
+                _showDebugUI = !_showDebugUI;
+            }
+        }
+
         private void OnGUI()
         {
-            if (!TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value || _gameWorld == null) return;
+            if (!_showDebugUI || _gameWorld == null) return;
             
-            GUIStyle style = new GUIStyle();
-            style.fontSize = 24;
-            style.normal.textColor = Color.green;
-            style.alignment = TextAnchor.UpperRight;
+            // Layout dimensions
+            float boxWidth = 320;
+            float boxHeight = 280;
+            float margin = 20;
 
-            float remaining = Mathf.Max(0, _nextWaveTime - Time.time);
-            string text = $"Next Wave: {Mathf.CeilToInt(remaining)}s\nLive Bots: {_gameWorld.RegisteredPlayers.Count(p => p.IsAI && p.HealthController != null && p.HealthController.IsAlive)}";
+            Rect rect = new Rect(margin, margin, boxWidth, boxHeight);
+            GUI.Box(rect, "TRL-DynamicSpawn - Developer HUD");
+
+            // Info Setup
+            int pmcCount = 0;
+            int scavCount = 0;
+            int sniperCount = 0;
+            int bossCount = 0;
+            int otherCount = 0;
             
-            GUI.Label(new Rect(Screen.width - 250, 10, 240, 100), text, style);
+            var allAlive = _gameWorld.RegisteredPlayers.Where(p => p.IsAI && p.HealthController != null && p.HealthController.IsAlive).ToList();
+            
+            foreach (var bot in allAlive)
+            {
+                if (bot.Profile == null || bot.Profile.Info == null || bot.Profile.Info.Settings == null) continue;
+                
+                var role = bot.Profile.Info.Settings.Role;
+                if (role == WildSpawnType.pmcBot || role == WildSpawnType.exUsec || bot.Profile.Side == EPlayerSide.Bear || bot.Profile.Side == EPlayerSide.Usec)
+                {
+                    pmcCount++;
+                }
+                else if (role == WildSpawnType.assault)
+                {
+                    scavCount++;
+                }
+                else if (role == WildSpawnType.marksman)
+                {
+                    sniperCount++;
+                }
+                else if (role.ToString().Contains("boss") || role.ToString().Contains("follower") || role.ToString().Contains("Boss") || role.ToString().Contains("Follower"))
+                {
+                    bossCount++;
+                }
+                else
+                {
+                    otherCount++;
+                }
+            }
+
+            string fikaStatus = "Solo";
+            try
+            {
+                var type = System.Type.GetType("Fika.Core.Main.Utils.FikaBackendUtils, Fika.Core");
+                if (type != null)
+                {
+                    var isServerProp = type.GetProperty("IsServer", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                    var isSingleProp = type.GetProperty("IsSinglePlayer", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                    
+                    if (isServerProp != null && isSingleProp != null)
+                    {
+                        bool isServer = (bool)isServerProp.GetValue(null);
+                        bool isSingle = (bool)isSingleProp.GetValue(null);
+
+                        if (!isSingle)
+                            fikaStatus = isServer ? "Fika Host" : "Fika Client";
+                    }
+                }
+            }
+            catch { }
+
+            float nextSpawnDelay = Mathf.Max(0, _nextWaveTime - Time.time);
+
+            // Draw Texts
+            GUILayout.BeginArea(new Rect(margin + 10, margin + 25, boxWidth - 20, boxHeight - 30));
+            
+            GUILayout.Label($"<b>Status de Sessão:</b> {fikaStatus}");
+            GUILayout.Label($"<b>Config Preset:</b> {_activePreset}");
+            GUILayout.Space(10);
+            
+            GUI.color = nextSpawnDelay < 10f ? Color.red : Color.white;
+            GUILayout.Label($"<b>Próxima Wave em:</b> {Mathf.CeilToInt(nextSpawnDelay)}s");
+            GUI.color = Color.white;
+            
+            GUILayout.Space(10);
+            GUILayout.Label($"<b>População Ativa (Total {allAlive.Count}):</b>");
+            
+            GUILayout.BeginHorizontal();
+            GUILayout.Label($"- PMCs: <color=yellow>{pmcCount}</color>");
+            GUILayout.Label($"- Scavs: <color=yellow>{scavCount}</color>");
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label($"- Bosses/Guards: <color=yellow>{bossCount}</color>");
+            GUILayout.Label($"- Snipers: <color=yellow>{sniperCount}</color>");
+            GUILayout.EndHorizontal();
+
+            if (otherCount > 0)
+                GUILayout.Label($"- Outros (Raiders, etc): <color=yellow>{otherCount}</color>");
+            
+            GUILayout.FlexibleSpace();
+            GUILayout.Label("<color=grey>[F12] Ocultar Painel</color>");
+            
+            GUILayout.EndArea();
+        }
+
+        private bool IsFikaClient()
+        {
+            try
+            {
+                var assembly = System.AppDomain.CurrentDomain.GetAssemblies()
+                    .FirstOrDefault(a => a.GetName().Name == "Fika.Core");
+                if (assembly != null)
+                {
+                    var type = assembly.GetType("Fika.Core.Main.Utils.FikaBackendUtils");
+                    if (type != null)
+                    {
+                        var prop = type.GetProperty("IsClient", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                        if (prop != null)
+                        {
+                            return (bool)prop.GetValue(null);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.LogSource.LogError($"[TRL-DynamicSpawn] Error checking Fika client status via reflection: {ex.Message}");
+            }
+            return false;
         }
     }
 }

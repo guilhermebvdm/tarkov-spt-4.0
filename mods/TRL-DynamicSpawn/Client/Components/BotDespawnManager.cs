@@ -170,7 +170,24 @@ namespace TRLDynamicSpawn.Components
 
         private bool IsHostOrSolo()
         {
-            return true;
+            try
+            {
+                // Verifica dinamicamente usando reflexão o estado da Fika sem forçar dependência dura de carregamento
+                var type = System.Type.GetType("Fika.Core.Main.Utils.FikaBackendUtils, Fika.Core");
+                if (type != null)
+                {
+                    var prop = type.GetProperty("IsServer", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                    if (prop != null)
+                    {
+                        return (bool)prop.GetValue(null);
+                    }
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] Failed to query Fika status: {ex.Message}");
+            }
+            return true; // Fallback para Solo clássico
         }
 
         private bool IsSpecialBot(BotOwner bot)
@@ -190,7 +207,7 @@ namespace TRLDynamicSpawn.Components
             if (player == null) return;
             try
             {
-                var field = typeof(Player).GetField("OnPlayerDead", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public);
+                var field = HarmonyLib.AccessTools.Field(typeof(Player), "OnPlayerDead");
                 if (field != null)
                 {
                     var evt = field.GetValue(player) as System.MulticastDelegate;

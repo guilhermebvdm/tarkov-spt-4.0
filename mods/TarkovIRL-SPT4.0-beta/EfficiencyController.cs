@@ -1,12 +1,6 @@
-// Decompiled with JetBrains decompiler
-// Type: TarkovIRL.EfficiencyController
-// Assembly: TarkovIRL, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MVID: C42939BD-7BF0-4586-ABE5-9D2EFC361A0B
-// Assembly location: D:\Drive\Google Drive\Users\Erick Saraiva\Downloads\TarkovIRL_WeaponsHandlingMod_1.0.0\BepInEx\plugins\TarkovIRL.dll
-
 using EFT;
 using EFT.HealthSystem;
-
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -49,18 +43,20 @@ internal static class EfficiencyController
   private static int _heavyBleedCountLastFrame = 0;
   private static int _lightBleedCountLastFrame = 0;
   private static int _boneBreakCountLastFrame = 0;
-  private static Dictionary<System.Type, int> _typeHashes = new Dictionary<System.Type, int>();
+  private static Dictionary<Type, int> _typeHashes = new Dictionary<Type, int>();
+  private static System.Reflection.PropertyInfo _hydrationProp = null;
+  private static System.Reflection.PropertyInfo _energyProp = null;
 
   private static int GetEffectHash(IEffect effect)
   {
-      System.Type t = effect.Type;
-      int hash;
-      if (!_typeHashes.TryGetValue(t, out hash))
-      {
-          hash = t.FullName.GetHashCode();
-          _typeHashes.Add(t, hash);
-      }
-      return hash;
+    Type type = effect.Type;
+    int hashCode;
+    if (!EfficiencyController._typeHashes.TryGetValue(type, out hashCode))
+    {
+      hashCode = type.FullName.GetHashCode();
+      EfficiencyController._typeHashes.Add(type, hashCode);
+    }
+    return hashCode;
   }
 
   public static void UpdateEfficiencyLerp(float dt)
@@ -116,8 +112,7 @@ internal static class EfficiencyController
       float num = Mathf.Clamp01((Time.time - injuryTime.Key.TimeInflicted) / injuryTime.Key.TimeUntilEffect);
       impactWeightPercent += injuryTime.Key.InjuryWeight * num;
     }
-    float injuryImpact = EfficiencyController.GetInjuryImpact(impactWeightPercent);
-    return injuryImpact;
+    return EfficiencyController.GetInjuryImpact(impactWeightPercent);
   }
 
   private static void AddInjuryToEffects(Injury injury)
@@ -142,10 +137,26 @@ internal static class EfficiencyController
 
   public static void UpdateEfficiency(Player player)
   {
-    ValueStruct hydration = player.HealthController.Hydration;
-    float normalized1 = hydration.Normalized;
-    ValueStruct energy = player.HealthController.Energy;
-    float normalized2 = energy.Normalized;
+    if (player.HealthController == null)
+      return;
+    if (_hydrationProp == null || _energyProp == null)
+    {
+      System.Type type = player.HealthController.GetType();
+      _hydrationProp = type.GetProperty("Hydration");
+      _energyProp = type.GetProperty("Energy");
+    }
+    float normalized1 = 1f;
+    float normalized2 = 1f;
+    if (_hydrationProp != null)
+    {
+      ValueStruct hydration = (ValueStruct) _hydrationProp.GetValue(player.HealthController);
+      normalized1 = hydration.Normalized;
+    }
+    if (_energyProp != null)
+    {
+      ValueStruct energy = (ValueStruct) _energyProp.GetValue(player.HealthController);
+      normalized2 = energy.Normalized;
+    }
     float num1 = 1f - Mathf.Clamp01(player.Physical.Overweight);
     int multipleInstances1 = 0;
     int heavyBleedCount = 0;
@@ -176,7 +187,7 @@ internal static class EfficiencyController
         ++multipleInstances5;
     }
     EfficiencyController.CheckInjuryChange(boneBreakCount, heavyBleedCount, lightBleedCount);
-    ValueStruct bodyPartHealth = player.HealthController.GetBodyPartHealth((EBodyPart) 7, false);
+    ValueStruct bodyPartHealth = ((GInterface381) player.HealthController).GetBodyPartHealth((EBodyPart) 7, false);
     float normalized3 = bodyPartHealth.Normalized;
     float normalValue1 = player.Physical.Stamina.NormalValue;
     float normalValue2 = player.Physical.HandsStamina.NormalValue;
@@ -218,7 +229,7 @@ internal static class EfficiencyController
 
   public static float EfficiencyModifier => EfficiencyController._efficiencyLerp;
 
-  public static float EfficiencyModifierInverse => 1f / EfficiencyController._efficiencyLerp;
+  public static float EfficiencyModifierInverse => 1f / Mathf.Max(EfficiencyController._efficiencyLerp, 0.0001f);
 
   private static float GetInjuryImpact(float value, float impactWeightPercent)
   {
@@ -228,22 +239,36 @@ internal static class EfficiencyController
 
   private static float GetInjuryImpact(float impactWeightPercent, int multipleInstances)
   {
-    return multipleInstances == 0 ? 1f : (1f + impactWeightPercent * 0.01f * PrimeMover.EfficiencyInjuryImpact.Value) * (float) multipleInstances;
+    return multipleInstances == 0 ? 1f : (float) (1.0 + (double) impactWeightPercent * 0.0099999997764825821 * (double) PrimeMover.EfficiencyInjuryImpact.Value) * (float) multipleInstances;
   }
 
   private static float GetInjuryImpact(float impactWeightPercent)
   {
-    return 1f + impactWeightPercent * 0.01f * PrimeMover.EfficiencyInjuryImpact.Value;
+    return (float) (1.0 + (double) impactWeightPercent * 0.0099999997764825821 * (double) PrimeMover.EfficiencyInjuryImpact.Value);
   }
 
   private static bool IsEffectKnown(IEffect effect, int[] effectsArray)
   {
-    int hash = EfficiencyController.GetEffectHash(effect);
+    int effectHash = EfficiencyController.GetEffectHash(effect);
     foreach (int effects in effectsArray)
     {
-      if (hash == effects)
+      if (effectHash == effects)
         return true;
     }
     return false;
   }
+
+  public static void Reset()
+  {
+    EfficiencyController._injuryTimes.Clear();
+    EfficiencyController._efficiencyLerpTarget = 0.0f;
+    EfficiencyController._efficiencyLerpTargetWithoutWeight = 0.0f;
+    EfficiencyController._efficiencyLerp = 0.0f;
+    EfficiencyController._efficiencyLastFrame = 0.0f;
+    EfficiencyController.debugTimer = 0.0f;
+    EfficiencyController._heavyBleedCountLastFrame = 0;
+    EfficiencyController._lightBleedCountLastFrame = 0;
+    EfficiencyController._boneBreakCountLastFrame = 0;
+  }
 }
+

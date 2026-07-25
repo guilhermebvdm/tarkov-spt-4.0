@@ -1,10 +1,4 @@
-// Decompiled with JetBrains decompiler
-// Type: TarkovIRL.StaminaRegenRatePatch
-// Assembly: TarkovIRL, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MVID: C42939BD-7BF0-4586-ABE5-9D2EFC361A0B
-// Assembly location: D:\Drive\Google Drive\Users\Erick Saraiva\Downloads\TarkovIRL_WeaponsHandlingMod_1.0.0\BepInEx\plugins\TarkovIRL.dll
-
-using SPT.Reflection.Patching;
+﻿using SPT.Reflection.Patching;
 using System.Reflection;
 
 #nullable disable
@@ -24,3 +18,4 @@ public class StaminaRegenRatePatch : ModulePatch
     __result += num;
   }
 }
+

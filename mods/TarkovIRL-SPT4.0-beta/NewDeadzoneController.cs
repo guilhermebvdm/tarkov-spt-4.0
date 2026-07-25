@@ -1,11 +1,4 @@
-// Decompiled with JetBrains decompiler
-// Type: TarkovIRL.NewDeadzoneController
-// Assembly: TarkovIRL, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MVID: C42939BD-7BF0-4586-ABE5-9D2EFC361A0B
-// Assembly location: D:\Drive\Google Drive\Users\Erick Saraiva\Downloads\TarkovIRL_WeaponsHandlingMod_1.0.0\BepInEx\plugins\TarkovIRL.dll
-
-
-using UnityEngine;
+﻿using UnityEngine;
 
 #nullable disable
 namespace TarkovIRL;
@@ -22,38 +15,37 @@ internal class NewDeadzoneController
     NewDeadzoneController._rotDeltaHistory += num1;
     NewDeadzoneController._rotDeltaHistory -= NewDeadzoneController._rotDeltaSmoothed;
     NewDeadzoneController._rotDeltaSmoothed = (float) ((double) NewDeadzoneController._rotDeltaHistory * (double) fdt * 9.0);
-    float fakeWeight = PrimeMover.Instance.WeightAttenuationCurve.Evaluate(PrimeMover.DeadzoneCustomWeight.Value);
-    float fakeErgo = PrimeMover.Instance.ErgoAttenuationCurve.Evaluate(PrimeMover.DeadzoneCustomErgo.Value);
-    float fixedWeaponMulti = fakeWeight * (1f - fakeErgo);
-    if (fixedWeaponMulti < PrimeMover.MinimumWeaponSway.Value) fixedWeaponMulti = PrimeMover.MinimumWeaponSway.Value;
-    float num2 = PrimeMover.WeaponDeadzoneMulti.Value * fixedWeaponMulti;
-    if (WeaponController.HasCheekWeld() && PlayerMotionController.IsAiming)
+    float num2 = PrimeMover.Instance.WeightAttenuationCurve.Evaluate(PrimeMover.DeadzoneCustomWeight.Value) * (1f - PrimeMover.Instance.ErgoAttenuationCurve.Evaluate(PrimeMover.DeadzoneCustomErgo.Value));
+    if ((double) num2 < (double) PrimeMover.MinimumWeaponSway.Value)
+      num2 = PrimeMover.MinimumWeaponSway.Value;
+    float num3 = PrimeMover.WeaponDeadzoneMulti.Value * num2;
+    if (PlayerMotionController.IsAiming)
     {
-      num2 *= PrimeMover.DeadzoneInADS.Value;
+      num3 *= PrimeMover.DeadzoneInADS.Value;
     }
     else
     {
       switch (StanceController.CurrentStance)
       {
         case EStance.None:
-          num2 *= PrimeMover.DeadzoneInVanilla.Value;
-          break;
-        case EStance.LowReady:
-          num2 *= PrimeMover.DeadzoneInLowReady.Value;
+          num3 *= PrimeMover.DeadzoneInVanilla.Value;
           break;
         case EStance.HighReady:
-          num2 *= PrimeMover.DeadzoneInHighReady.Value;
+          num3 *= PrimeMover.DeadzoneInHighReady.Value;
+          break;
+        case EStance.LowReady:
+          num3 *= PrimeMover.DeadzoneInLowReady.Value;
           break;
         case EStance.ShortStock:
-          num2 *= PrimeMover.DeadzoneInShortStock.Value;
+          num3 *= PrimeMover.DeadzoneInShortStock.Value;
           break;
         case EStance.ActiveAiming:
-          num2 *= PrimeMover.DeadzoneInActiveAim.Value;
+          num3 *= PrimeMover.DeadzoneInActiveAim.Value;
           break;
       }
     }
-    float num3 = PrimeMover.DeadzoneWeightForEfficiency.Value ? EfficiencyController.EfficiencyModifierInverse : 1f;
-    NewDeadzoneController._rotDeltaSmoothedInDeltaTime = Mathf.Lerp(NewDeadzoneController._rotDeltaSmoothedInDeltaTime, NewDeadzoneController._rotDeltaSmoothed * num2, fdt * PrimeMover.DeadzoneHeadFollowSpeedMulti.Value * num3);
+    float num4 = PrimeMover.DeadzoneWeightForEfficiency.Value ? EfficiencyController.EfficiencyModifierInverse : 1f;
+    NewDeadzoneController._rotDeltaSmoothedInDeltaTime = Mathf.Lerp(NewDeadzoneController._rotDeltaSmoothedInDeltaTime, NewDeadzoneController._rotDeltaSmoothed * num3, fdt * PrimeMover.DeadzoneHeadFollowSpeedMulti.Value * num4);
   }
 
   public static Vector3 GetHeadRotWithDeadzone(Vector3 headRotInitial)
@@ -63,3 +55,4 @@ internal class NewDeadzoneController
     return headRotWithDeadzone;
   }
 }
+

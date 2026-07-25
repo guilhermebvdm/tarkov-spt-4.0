@@ -445,8 +445,15 @@ namespace TRLDynamicSpawn.Patches
         }
 
         [PatchPrefix]
-        private static bool PatchPrefix(ref System.Threading.Tasks.Task __result)
+        private static bool PatchPrefix(BotWaveDataClass wave, ref System.Threading.Tasks.Task __result)
         {
+            if (TRLDynamicSpawn.Components.DynamicSpawnManager.IsGeneratingDynamicWave) return true; // Let our wave run!
+            
+            if (wave != null && (wave.WildSpawnType == WildSpawnType.pmcUSEC || wave.WildSpawnType == WildSpawnType.pmcBEAR))
+            {
+                return true; // Let any PMC wave pass!
+            }
+
             if (TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value)
             {
                 Plugin.LogSource.LogInfo("[TRLDynamicSpawn] Blocked Vanilla Normal Wave to give 100% control to DynamicSpawn.");
@@ -464,16 +471,121 @@ namespace TRLDynamicSpawn.Patches
         }
 
         [PatchPrefix]
-        private static bool PatchPrefix()
+        private static bool PatchPrefix(BossLocationSpawn wave)
         {
+            if (wave != null && wave.BossName != null)
+            {
+                string name = wave.BossName.ToLower();
+                if (name == "pmcbear" || name == "pmcusec" || name == "sptbear" || name == "sptusec")
+                {
+                    return true; // Let SPT PMCs spawn via Boss Location Waves!
+                }
+            }
+
             if (TRLDynamicSpawn.Helpers.Settings.enableDebugLogs.Value)
             {
-                Plugin.LogSource.LogInfo("[TRLDynamicSpawn] Blocked Vanilla Boss Wave to give 100% control to DynamicSpawn.");
+                Plugin.LogSource.LogInfo($"[TRLDynamicSpawn] Blocked Vanilla Boss Wave ({wave?.BossName}) to give 100% control to DynamicSpawn.");
             }
             return false;
         }
     }
 
+    public class TryToSpawnInZoneAndDelayPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(
+                typeof(BotSpawner),
+                nameof(BotSpawner.TryToSpawnInZoneAndDelay)
+            );
+        }
+
+        [PatchPrefix]
+        private static void PatchPrefix(BotSpawner __instance, BotZone botZone, BotCreationDataClass data, bool withCheckMinMax, bool newWave, ref List<ISpawnPoint> pointsToSpawn, bool forcedSpawn = false)
+        {
+            if (pointsToSpawn != null && pointsToSpawn.Count > 0) return;
+
+            try
+            {
+                var validPoints = new List<ISpawnPoint>();
+                var allPoints = botZone.SpawnPoints;
+
+                if (allPoints == null || allPoints.Length == 0) return;
+
+                var gameWorld = Singleton<GameWorld>.Instance;
+                if (gameWorld == null) return;
+                string mapName = gameWorld.MainPlayer?.Location?.ToLower() ?? "";
+
+                double safeDist = 30.0;
+                if (TRLDynamicSpawn.Components.DynamicSpawnManager.Instance != null && TRLDynamicSpawn.Components.DynamicSpawnManager.Instance.ServerConfig != null)
+                {
+                    var cfg = TRLDynamicSpawn.Components.DynamicSpawnManager.Instance.ServerConfig;
+                    safeDist = cfg.MapConfigs?.ContainsKey(mapName) == true ? cfg.MapConfigs[mapName].SafeZoneDistance : (mapName.Contains("factory") || mapName.Contains("sandbox") || mapName.Contains("laboratory") ? 15.0 : 30.0);
+                }
+
+                bool enableLos = TRLDynamicSpawn.Helpers.Settings.enableLoSCulling.Value;
+                float losDist = TRLDynamicSpawn.Helpers.Settings.losCullingDistance.Value;
+
+                var players = gameWorld.AllAlivePlayersList;
+
+                foreach (var checkPoint in allPoints)
+                {
+                    if (checkPoint == null) continue;
+
+                    bool isValid = true;
+                    if (players != null)
+                    {
+                        foreach (var player in players)
+                        {
+                            if (player == null || player.Profile == null) continue;
+                            if (player.IsAI && !player.IsYourPlayer) continue;
+
+                            float dist = Vector3.Distance(player.Position, checkPoint.Position);
+                            if (dist < safeDist)
+                            {
+                                isValid = false;
+                                break;
+                            }
+
+                            if (enableLos && dist <= losDist)
+                            {
+                                Vector3 directionToPoint = (checkPoint.Position - player.Position).normalized;
+                                float dot = Vector3.Dot(player.LookDirection, directionToPoint);
+                                if (dot > 0.5f)
+                                {
+                                    Vector3 headPos = player.MainParts.ContainsKey(BodyPartType.head) ? player.MainParts[BodyPartType.head].Position : player.Position + Vector3.up * 1.5f;
+                                    if (!Physics.Linecast(headPos, checkPoint.Position + Vector3.up * 1f, LayerMaskClass.HighPolyWithTerrainMask))
+                                    {
+                                        isValid = false;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (isValid)
+                    {
+                        validPoints.Add(checkPoint);
+                    }
+                }
+
+                if (validPoints.Count > 0)
+                {
+                    var selectedPoint = validPoints[UnityEngine.Random.Range(0, validPoints.Count)];
+                    pointsToSpawn = new List<ISpawnPoint> { selectedPoint };
+                }
+                else
+                {
+                    Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] No safe spawn points found in {botZone.NameZone}. Falling back to default.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.LogSource.LogError($"Error in TryToSpawnInZoneAndDelayPatch: {ex.Message}");
+            }
+        }
+    }
 }
 
 

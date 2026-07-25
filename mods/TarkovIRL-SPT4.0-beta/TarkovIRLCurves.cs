@@ -1,13 +1,14 @@
+﻿using System;
 using UnityEngine;
-using System;
 
-namespace TarkovIRL
+#nullable disable
+namespace TarkovIRL;
+
+public static class TarkovIRLCurves
 {
-    public static class TarkovIRLCurves
-    {
-        public static AnimationCurve GetBreathCurve()
-        {
-            return new AnimationCurve(new Keyframe[101]
+  public static AnimationCurve GetBreathCurve()
+  {
+    return new AnimationCurve(new Keyframe[101]
     {
       new Keyframe(0.0f, 0.001708984f),
       new Keyframe(0.01f, 0.07340872f),
@@ -75,7 +76,7 @@ namespace TarkovIRL
       new Keyframe(0.6299997f, -0.988526f),
       new Keyframe(0.6399997f, -0.9896744f),
       new Keyframe(0.6499997f, -0.9905687f),
-      new Keyframe(0.6599997f, -254f * (float) (float)Math.PI / 805f),
+      new Keyframe(0.6599997f, -254f * (float) Math.PI / 805f),
       new Keyframe(0.6699997f, -0.9918006f),
       new Keyframe(0.6799996f, -0.992241f),
       new Keyframe(0.6899996f, -0.9926327f),
@@ -111,11 +112,11 @@ namespace TarkovIRL
       new Keyframe(0.9899994f, -0.09255308f),
       new Keyframe(0.9999993f, -6.377697E-06f)
     });
-        }
+  }
 
-        public static AnimationCurve GetPoseChangeDownRadialCurve()
-        {
-            return new AnimationCurve(new Keyframe[101]
+  public static AnimationCurve GetPoseChangeDownRadialCurve()
+  {
+    return new AnimationCurve(new Keyframe[101]
     {
       new Keyframe(0.0f, 0.0f),
       new Keyframe(0.01f, 0.01179387f),
@@ -219,11 +220,11 @@ namespace TarkovIRL
       new Keyframe(0.9899994f, 0.002675295f),
       new Keyframe(0.9999993f, 8.940697E-08f)
     });
-        }
+  }
 
-        public static AnimationCurve GetPoseChangeCurve()
-        {
-            return new AnimationCurve(new Keyframe[101]
+  public static AnimationCurve GetPoseChangeCurve()
+  {
+    return new AnimationCurve(new Keyframe[101]
     {
       new Keyframe(0.0f, 0.0f),
       new Keyframe(0.01f, -0.01209296f),
@@ -327,11 +328,11 @@ namespace TarkovIRL
       new Keyframe(0.9899994f, -0.004046619f),
       new Keyframe(0.9999993f, -2.384186E-07f)
     });
-        }
+  }
 
-        public static AnimationCurve GetPoseChangeCurveUp()
-        {
-            return new AnimationCurve(new Keyframe[101]
+  public static AnimationCurve GetPoseChangeCurveUp()
+  {
+    return new AnimationCurve(new Keyframe[101]
     {
       new Keyframe(0.0f, 0.0f),
       new Keyframe(0.01f, -0.01209296f),
@@ -435,11 +436,11 @@ namespace TarkovIRL
       new Keyframe(0.9899994f, -0.004046619f),
       new Keyframe(0.9999993f, -2.384186E-07f)
     });
-        }
+  }
 
-        public static AnimationCurve GetHandsShakeCurve()
-        {
-            return new AnimationCurve(new Keyframe[101]
+  public static AnimationCurve GetHandsShakeCurve()
+  {
+    return new AnimationCurve(new Keyframe[101]
     {
       new Keyframe(0.0f, 0.003456681f),
       new Keyframe(0.01f, 0.01467377f),
@@ -543,11 +544,11 @@ namespace TarkovIRL
       new Keyframe(0.9899994f, -0.003794672f),
       new Keyframe(0.9999993f, 0.003456004f)
     });
-        }
+  }
 
-        public static AnimationCurve GetSmoothEdgesCurve()
-        {
-            return new AnimationCurve(new Keyframe[101]
+  public static AnimationCurve GetSmoothEdgesCurve()
+  {
+    return new AnimationCurve(new Keyframe[101]
     {
       new Keyframe(0.0f, 0.0f),
       new Keyframe(0.01f, 0.0001326637f),
@@ -651,11 +652,11 @@ namespace TarkovIRL
       new Keyframe(0.9899994f, 0.9999093f),
       new Keyframe(0.9999993f, 1f)
     });
-        }
+  }
 
-        public static AnimationCurve GetFootStepCurve()
-        {
-            return new AnimationCurve(new Keyframe[101]
+  public static AnimationCurve GetFootStepCurve()
+  {
+    return new AnimationCurve(new Keyframe[101]
     {
       new Keyframe(0.0f, 0.0f),
       new Keyframe(0.01f, -0.0007582751f),
@@ -759,11 +760,11 @@ namespace TarkovIRL
       new Keyframe(0.9899994f, -4.839152E-06f),
       new Keyframe(0.9999993f, 0.0f)
     });
-        }
+  }
 
-        public static AnimationCurve GetErgoAttenuationCurve()
-        {
-            return new AnimationCurve(new Keyframe[101]
+  public static AnimationCurve GetErgoAttenuationCurve()
+  {
+    return new AnimationCurve(new Keyframe[101]
     {
       new Keyframe(0.0f, 0.25f),
       new Keyframe(0.01f, 0.2506315f),
@@ -867,11 +868,11 @@ namespace TarkovIRL
       new Keyframe(0.9899994f, 0.848129f),
       new Keyframe(0.9999993f, 0.8499999f)
     });
-        }
+  }
 
-        public static AnimationCurve GetThrowVisualCurveX()
-        {
-            return new AnimationCurve(new Keyframe[101]
+  public static AnimationCurve GetThrowVisualCurveX()
+  {
+    return new AnimationCurve(new Keyframe[101]
     {
       new Keyframe(0.0f, 0.0f),
       new Keyframe(0.01f, 0.002978058f),
@@ -975,11 +976,11 @@ namespace TarkovIRL
       new Keyframe(0.9899994f, -0.002334483f),
       new Keyframe(0.9999993f, -1.937151E-07f)
     });
-        }
+  }
 
-        public static AnimationCurve GetThrowVisualCurveY()
-        {
-            return new AnimationCurve(new Keyframe[101]
+  public static AnimationCurve GetThrowVisualCurveY()
+  {
+    return new AnimationCurve(new Keyframe[101]
     {
       new Keyframe(0.0f, 0.0f),
       new Keyframe(0.01f, -0.002133129f),
@@ -1083,11 +1084,11 @@ namespace TarkovIRL
       new Keyframe(0.9899994f, -0.001416005f),
       new Keyframe(0.9999993f, -7.450581E-08f)
     });
-        }
+  }
 
-        public static AnimationCurve GetThrowVisualUnderhandCurveX()
-        {
-            return new AnimationCurve(new Keyframe[101]
+  public static AnimationCurve GetThrowVisualUnderhandCurveX()
+  {
+    return new AnimationCurve(new Keyframe[101]
     {
       new Keyframe(0.0f, 0.0f),
       new Keyframe(0.01f, 0.001810697f),
@@ -1191,11 +1192,11 @@ namespace TarkovIRL
       new Keyframe(0.9899994f, -0.0005562529f),
       new Keyframe(0.9999993f, -6.705523E-08f)
     });
-        }
+  }
 
-        public static AnimationCurve GetThrowVisualUnderhandCurveY()
-        {
-            return new AnimationCurve(new Keyframe[101]
+  public static AnimationCurve GetThrowVisualUnderhandCurveY()
+  {
+    return new AnimationCurve(new Keyframe[101]
     {
       new Keyframe(0.0f, 0.0f),
       new Keyframe(0.01f, 2.776347E-05f),
@@ -1241,7 +1242,7 @@ namespace TarkovIRL
       new Keyframe(0.4099999f, 0.099107f),
       new Keyframe(0.4199999f, 0.09855059f),
       new Keyframe(0.4299999f, 0.09769553f),
-      new Keyframe(0.4399998f, 28f * (float) (float)Math.PI / 911f),
+      new Keyframe(0.4399998f, 0.09655829f),
       new Keyframe(0.4499998f, 0.09515533f),
       new Keyframe(0.4599998f, 0.0935031f),
       new Keyframe(0.4699998f, 0.09161809f),
@@ -1299,11 +1300,11 @@ namespace TarkovIRL
       new Keyframe(0.9899994f, 0.0007507838f),
       new Keyframe(0.9999993f, 5.029142E-08f)
     });
-        }
+  }
 
-        public static AnimationCurve GetWeightAttenuationCurve()
-        {
-            return new AnimationCurve(new Keyframe[1000]
+  public static AnimationCurve GetWeightAttenuationCurve()
+  {
+    return new AnimationCurve(new Keyframe[1000]
     {
       new Keyframe(0.0f, 0.0f),
       new Keyframe(0.01f, 0.01004331f),
@@ -2188,7 +2189,7 @@ namespace TarkovIRL
       new Keyframe(8.800106f, 6.455522f),
       new Keyframe(8.810106f, 6.456147f),
       new Keyframe(8.820107f, 6.456765f),
-      new Keyframe(8.830107f, 7932f / (391f * (float)Math.PI)),
+      new Keyframe(8.830107f, 6.45737553f),
       new Keyframe(8.840107f, 6.457979f),
       new Keyframe(8.850107f, 6.458575f),
       new Keyframe(8.860107f, 6.459165f),
@@ -2306,22 +2307,22 @@ namespace TarkovIRL
       new Keyframe(9.980133f, 6.49942f),
       new Keyframe(1f, 6.499711f)
     });
-        }
+  }
 
-        public static AnimationCurve GetThrowAlphaCurve()
-        {
-            return new AnimationCurve(new Keyframe[4]
+  public static AnimationCurve GetThrowAlphaCurve()
+  {
+    return new AnimationCurve(new Keyframe[4]
     {
       new Keyframe(0.0f, 1f),
       new Keyframe(0.15f, 0.0f),
       new Keyframe(0.6f, 0.0f),
       new Keyframe(0.95f, 1f)
     });
-        }
+  }
 
-        public static AnimationCurve GetNewSwayCurve()
-        {
-            return new AnimationCurve(new Keyframe[101]
+  public static AnimationCurve GetNewSwayCurve()
+  {
+    return new AnimationCurve(new Keyframe[101]
     {
       new Keyframe(0.0f, 0.0f),
       new Keyframe(0.01f, 0.0005299348f),
@@ -2425,11 +2426,11 @@ namespace TarkovIRL
       new Keyframe(0.9899994f, 0.9900912f),
       new Keyframe(0.9999993f, 0.9999993f)
     });
-        }
+  }
 
-        public static AnimationCurve GetSideToSideCurve()
-        {
-            return new AnimationCurve(new Keyframe[101]
+  public static AnimationCurve GetSideToSideCurve()
+  {
+    return new AnimationCurve(new Keyframe[101]
     {
       new Keyframe(0.0f, 0.0f),
       new Keyframe(0.01f, 0.009280327f),
@@ -2470,7 +2471,7 @@ namespace TarkovIRL
       new Keyframe(0.3599999f, 0.3046415f),
       new Keyframe(0.3699999f, 0.2765021f),
       new Keyframe(0.3799999f, 0.2515396f),
-      new Keyframe(0.3899999f, 67f * (float) (float)Math.PI / 917f),
+      new Keyframe(0.3899999f, 67f * (float) Math.PI / 917f),
       new Keyframe(0.3999999f, 0.2102829f),
       new Keyframe(0.4099999f, 0.1935575f),
       new Keyframe(0.4199999f, 0.1791467f),
@@ -2533,11 +2534,11 @@ namespace TarkovIRL
       new Keyframe(0.9899994f, -2.329051E-05f),
       new Keyframe(0.9999993f, 0.0f)
     });
-        }
+  }
 
-        public static AnimationCurve GetSlowReloadCurve()
-        {
-            return new AnimationCurve(new Keyframe[101]
+  public static AnimationCurve GetSlowReloadCurve()
+  {
+    return new AnimationCurve(new Keyframe[101]
     {
       new Keyframe(0.0f, 1f),
       new Keyframe(0.01f, 1f),
@@ -2641,11 +2642,11 @@ namespace TarkovIRL
       new Keyframe(0.9899994f, 0.09987563f),
       new Keyframe(0.9999993f, 0.1f)
     });
-        }
+  }
 
-        public static AnimationCurve GetPresentShoulderCurve()
-        {
-            return new AnimationCurve(new Keyframe[101]
+  public static AnimationCurve GetPresentShoulderCurve()
+  {
+    return new AnimationCurve(new Keyframe[101]
     {
       new Keyframe(0.0f, 0.1f),
       new Keyframe(0.01f, 0.09987774f),
@@ -2749,11 +2750,11 @@ namespace TarkovIRL
       new Keyframe(0.9899994f, 1.000002f),
       new Keyframe(0.9999993f, 1f)
     });
-        }
+  }
 
-        public static AnimationCurve GetOrderShoulderCurve()
-        {
-            return new AnimationCurve(new Keyframe[101]
+  public static AnimationCurve GetOrderShoulderCurve()
+  {
+    return new AnimationCurve(new Keyframe[101]
     {
       new Keyframe(0.0f, 1f),
       new Keyframe(0.01f, 1f),
@@ -2857,7 +2858,6 @@ namespace TarkovIRL
       new Keyframe(0.9899994f, 0.09999596f),
       new Keyframe(0.9999993f, 0.1f)
     });
-        }
-
-    }
+  }
 }
+

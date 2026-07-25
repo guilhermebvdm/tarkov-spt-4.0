@@ -1,11 +1,4 @@
-// Decompiled with JetBrains decompiler
-// Type: TarkovIRL.ParallaxAdsController
-// Assembly: TarkovIRL, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MVID: C42939BD-7BF0-4586-ABE5-9D2EFC361A0B
-// Assembly location: D:\Drive\Google Drive\Users\Erick Saraiva\Downloads\TarkovIRL_WeaponsHandlingMod_1.0.0\BepInEx\plugins\TarkovIRL.dll
-
-using EFT.InventoryLogic;
-
+﻿using EFT.InventoryLogic;
 using UnityEngine;
 
 #nullable disable
@@ -63,7 +56,7 @@ public static class ParallaxAdsController
   public static void StartNewShot(Weapon weapon)
   {
     float num = ((Item) weapon).Weight * PrimeMover.ShotParallaxWeaponWeightMulti.Value;
-    ParallaxAdsController._shotWeight = weapon.CurrentAmmoTemplate.BulletMassGram / num;
+    ParallaxAdsController._shotWeight = Mathf.Clamp((weapon.CurrentAmmoTemplate != null ? weapon.CurrentAmmoTemplate.BulletMassGram : 4f) / num, 0.1f, 3f);
     ParallaxAdsController._shotSwitch = true;
     ParallaxAdsController._intoShot = true;
   }
@@ -90,3 +83,4 @@ public static class ParallaxAdsController
     }
   }
 }
+

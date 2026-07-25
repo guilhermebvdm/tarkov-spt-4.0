@@ -1,10 +1,4 @@
-// Decompiled with JetBrains decompiler
-// Type: TarkovIRL.FootstepController
-// Assembly: TarkovIRL, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MVID: C42939BD-7BF0-4586-ABE5-9D2EFC361A0B
-// Assembly location: D:\Drive\Google Drive\Users\Erick Saraiva\Downloads\TarkovIRL_WeaponsHandlingMod_1.0.0\BepInEx\plugins\TarkovIRL.dll
-
-using EFT;
+﻿using EFT;
 using UnityEngine;
 
 #nullable disable
@@ -47,8 +41,8 @@ label_5:
     FootstepController._stepLerp = Mathf.Lerp(FootstepController._stepLerp, 1f, dt * FootstepController._UpdateMulti * num3 * PrimeMover.FootstepLerpMulti.Value);
     FootstepController._sideToSideRotationLerp += dt * PrimeMover.SideToSideRotationDTMulti.Value * num3;
     FootstepController._sideToSidePositionLerp += dt * PrimeMover.SideToSidePositionDTMulti.Value * num3;
-    float num4 = PrimeMover.Instance.SideToSideCurve.Evaluate(FootstepController._sideToSideRotationLerp) * PrimeMover.SideToSideSwayMulti.Value * num1 * (FootstepController._currentStepLeft ? 1f : -1f);
-    float num5 = PrimeMover.Instance.FootStepCurve.Evaluate(FootstepController._sideToSidePositionLerp) * PrimeMover.SideToSideSwayMulti.Value * num1 * (FootstepController._currentStepLeft ? -1f : 1f);
+    float num4 = (float) ((double) PrimeMover.Instance.SideToSideCurve.Evaluate(FootstepController._sideToSideRotationLerp) * (double) PrimeMover.SideToSideSwayMulti.Value * (double) num1 * (FootstepController._currentStepLeft ? 1.0 : -1.0));
+    float num5 = (float) ((double) PrimeMover.Instance.FootStepCurve.Evaluate(FootstepController._sideToSidePositionLerp) * (double) PrimeMover.SideToSideSwayMulti.Value * (double) num1 * (FootstepController._currentStepLeft ? -1.0 : 1.0));
     FootstepController._stepLerpSmoothed = Mathf.Lerp(FootstepController._stepLerpSmoothed, FootstepController._stepLerp, dt * 13f);
     FootstepController._sideToSideRotationSmoothingLerp = Mathf.Lerp(FootstepController._sideToSideRotationSmoothingLerp, num4, dt * 7f);
     FootstepController._sideToSidePositionSmoothingLerp = Mathf.Lerp(FootstepController._sideToSidePositionSmoothingLerp, num5, dt * 7f);
@@ -75,7 +69,7 @@ label_5:
 
   public static Quaternion GetSideToSideRotation()
   {
-    return Quaternion.Euler(0f, 0f, FootstepController._sideToSideRotationSmoothingLerp * PlayerMotionController.GetNormalSpeed() * (PlayerMotionController.IsAiming ? 0.4f : 1f));
+    return Quaternion.Euler(0.0f, 0.0f, (float) ((double) FootstepController._sideToSideRotationSmoothingLerp * (double) PlayerMotionController.GetNormalSpeed() * (PlayerMotionController.IsAiming ? 0.40000000596046448 : 1.0)));
   }
 
   public static Vector3 GetSideToSidePosition()
@@ -86,3 +80,4 @@ label_5:
     return zero;
   }
 }
+

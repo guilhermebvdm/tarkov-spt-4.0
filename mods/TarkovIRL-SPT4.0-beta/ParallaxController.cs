@@ -1,11 +1,4 @@
-// Decompiled with JetBrains decompiler
-// Type: TarkovIRL.ParallaxController
-// Assembly: TarkovIRL, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MVID: C42939BD-7BF0-4586-ABE5-9D2EFC361A0B
-// Assembly location: D:\Drive\Google Drive\Users\Erick Saraiva\Downloads\TarkovIRL_WeaponsHandlingMod_1.0.0\BepInEx\plugins\TarkovIRL.dll
-
-using EFT;
-
+﻿using EFT;
 using UnityEngine;
 
 #nullable disable
@@ -33,7 +26,7 @@ public static class ParallaxController
 
   public static void Update(float dt)
   {
-    if (ParallaxController._player == null)
+    if ((ParallaxController._player == null))
       return;
     Vector2 vector2 = (ParallaxController._playerRotationLastFrame - ParallaxController._player.Rotation) * dt;
     ParallaxController._playerRotationLastFrame = ParallaxController._player.Rotation;
@@ -48,7 +41,7 @@ public static class ParallaxController
     ParallaxController._rotAvgX = ParallaxController._rotAvgXSet * dt;
     ParallaxController._rotAvgY = ParallaxController._rotAvgYSet * dt;
     ParallaxController._parallaxWeightADS = ParallaxAdsController.ParallaxWeight;
-    float num3 = WeaponController.IsPistol ? PrimeMover.PistolSpecificParallax.Value : 1f;
+    float num3 = 1f;
     float num4 = Mathf.Pow(1f - Mathf.Clamp01(PlayerMotionController.RotationDelta / 0.1f), 2f);
     float num5 = StanceController.CurrentStance == EStance.LowReady ? 0.0f : 1f;
     float num6 = StanceController.CurrentStance == EStance.HighReady ? 0.25f : 1f;
@@ -59,8 +52,8 @@ public static class ParallaxController
     ParallaxController._posLerpYTarget = Mathf.Lerp(ParallaxController._posLerpYTarget, ParallaxController._rotAvgY * num8, num9);
     ParallaxController._rotLerpXTarget = Mathf.Lerp(ParallaxController._rotLerpXTarget, ParallaxController._rotAvgX * num8, num9);
     ParallaxController._rotLerpYTarget = Mathf.Lerp(ParallaxController._rotLerpYTarget, ParallaxController._rotAvgY * num8, num9);
-    float num10 = WeaponController.IsPistol ? PrimeMover.ParallaxHardClampPistols.Value : PrimeMover.ParallaxHardClamp.Value;
-    float num11 = WeaponController.IsPistol ? PrimeMover.ParallaxHardClampPistols.Value * 0.5f : PrimeMover.ParallaxHardClamp.Value * 0.5f;
+    float num10 = PrimeMover.ParallaxHardClamp.Value;
+    float num11 = PrimeMover.ParallaxHardClamp.Value * 0.5f;
     ParallaxController._rotLerpXTarget = Mathf.Clamp(ParallaxController._rotLerpXTarget, -num10, num10);
     ParallaxController._rotLerpYTarget = Mathf.Clamp(ParallaxController._rotLerpYTarget, -num10, num10);
     ParallaxController._posLerpXTarget = Mathf.Clamp(ParallaxController._posLerpXTarget, -num11, num11);
@@ -76,9 +69,9 @@ public static class ParallaxController
     ref Vector3 position,
     ref Quaternion rotation)
   {
-    if (ParallaxController._player == null)
+    if ((ParallaxController._player == null))
       ParallaxController._player = player;
-    if (ParallaxController._player == null)
+    if ((ParallaxController._player == null))
       return;
     if (AnimStateController.IsBlindfire)
     {
@@ -105,7 +98,9 @@ public static class ParallaxController
           ParallaxAdsController.StartNewAds(false, wpnMulti);
       }
       rotation = Quaternion.Euler(0.0f, (float) (-(double) ParallaxController._rotLerpY * 100.0) * ParallaxController._parallaxWeightADS, (float) (-(double) ParallaxController._rotLerpX * 100.0) * ParallaxController._parallaxWeightADS);
-      position = new Vector3(ParallaxController._posLerpX * ParallaxController._parallaxWeightADS, -ParallaxController._posLerpY * ParallaxController._parallaxWeightADS, 0.0f);
+      position = new Vector3(ParallaxController._posLerpX * ParallaxController._parallaxWeightADS * PrimeMover.ParallaxPosXMulti.Value, -ParallaxController._posLerpY * ParallaxController._parallaxWeightADS, 0.0f);
     }
   }
 }
+
+

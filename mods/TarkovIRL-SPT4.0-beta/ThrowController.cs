@@ -1,9 +1,3 @@
-// Decompiled with JetBrains decompiler
-// Type: TarkovIRL.ThrowController
-// Assembly: TarkovIRL, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MVID: C42939BD-7BF0-4586-ABE5-9D2EFC361A0B
-// Assembly location: D:\Drive\Google Drive\Users\Erick Saraiva\Downloads\TarkovIRL_WeaponsHandlingMod_1.0.0\BepInEx\plugins\TarkovIRL.dll
-
 using UnityEngine;
 
 #nullable disable
@@ -50,4 +44,12 @@ internal static class ThrowController
   public static bool IsThrowing => ThrowController._isThrowing;
 
   public static float ThrowProgress => ThrowController._throwLerp;
+
+  public static void Reset()
+  {
+    ThrowController._throwLerp = 1f;
+    ThrowController._isThrowing = false;
+    ThrowController._isUnderhand = false;
+  }
 }
+
