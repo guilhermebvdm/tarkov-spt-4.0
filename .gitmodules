@@ -1,0 +1,3 @@
+[submodule "references/noise-suppression-for-voice"]
+	path = references/noise-suppression-for-voice
+	url = https://github.com/werman/noise-suppression-for-voice.git
