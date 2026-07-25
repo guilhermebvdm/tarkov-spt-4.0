@@ -1,16 +1,16 @@
-# Graph Report - mods\DiscordRaidMap\modded  (2026-07-20)
+# Graph Report - mods\DiscordRaidMap\modded  (2026-07-25)
 
 ## Corpus Check
-- 13 files · ~218,251 words
+- 13 files · ~218,840 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 198 nodes · 316 edges · 14 communities (12 shown, 2 thin omitted)
+- 192 nodes · 304 edges · 14 communities (12 shown, 2 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `73555378`
+- Built from commit: `56252cb4`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -31,14 +31,14 @@
 - [[_COMMUNITY_Community 13|Community 13]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `Renderer` - 32 edges
-2. `RaidStateCollector` - 26 edges
+1. `Renderer` - 40 edges
+2. `RaidStateCollector` - 23 edges
 3. `Color32` - 15 edges
 4. `RaidBroadcaster` - 13 edges
 5. `RaidMapLifecycle` - 11 edges
 6. `DiscordWebhookClient` - 10 edges
 7. `ConfigurationManagerAttributes` - 9 edges
-8. `Player` - 9 edges
+8. `Player` - 8 edges
 9. `Settings` - 8 edges
 10. `IPlayer` - 7 edges
 
@@ -56,16 +56,16 @@
 ## Communities (14 total, 2 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.12
-Nodes (16): Bitmap, Color32, CpuImage, Font, MapDefinition, PrivateFontCollection, Dictionary, int (+8 more)
+Cohesion: 0.10
+Nodes (21): Bitmap, byte, Color32, CpuImage, Font, Graphics, ImageCodecInfo, MapDefinition (+13 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.14
-Nodes (13): AirdropSynchronizableObject, FieldInfo, HashSet, IEnumerable, IPlayer, GameWorld, List, Player (+5 more)
+Cohesion: 0.16
+Nodes (12): FieldInfo, HashSet, IEnumerable, IPlayer, Player, GameWorld, List, RaidMarkerType (+4 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.13
-Nodes (13): AirdropLogicClass, MethodBase, ModulePatch, AirdropLandedPatch, GameWorld, List, Player, DiscordRaidMap.Patches (+5 more)
+Cohesion: 0.18
+Nodes (8): MethodBase, ModulePatch, GameWorld, DiscordRaidMap.Patches, GameStartedPatch, GameWorldOnDestroyPatch, PatchPostfix, PatchPrefix
 
 ### Community 3 - "Community 3"
 Cohesion: 0.13
@@ -104,7 +104,7 @@ Cohesion: 0.50
 Nodes (3): DiscordRaidMap.RaidMap, RaidMarker, RaidSnapshot
 
 ## Knowledge Gaps
-- **70 isolated node(s):** `bool`, `ConfigEntryBase>`, `CustomHotkeyDrawerFunc`, `string`, `object` (+65 more)
+- **68 isolated node(s):** `bool`, `ConfigEntryBase>`, `CustomHotkeyDrawerFunc`, `string`, `object` (+63 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **2 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -112,16 +112,14 @@ Nodes (3): DiscordRaidMap.RaidMap, RaidMarker, RaidSnapshot
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `IDisposable` connect `Community 4` to `Community 0`, `Community 1`, `Community 5`?**
-  _High betweenness centrality (0.207) - this node is a cross-community bridge._
+  _High betweenness centrality (0.226) - this node is a cross-community bridge._
 - **Why does `Renderer` connect `Community 0` to `Community 4`, `Community 13`?**
-  _High betweenness centrality (0.177) - this node is a cross-community bridge._
+  _High betweenness centrality (0.219) - this node is a cross-community bridge._
 - **Why does `RaidStateCollector` connect `Community 1` to `Community 4`?**
-  _High betweenness centrality (0.142) - this node is a cross-community bridge._
+  _High betweenness centrality (0.140) - this node is a cross-community bridge._
 - **What connects `bool`, `ConfigEntryBase>`, `CustomHotkeyDrawerFunc` to the rest of the system?**
-  _70 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _68 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.11585365853658537 - nodes in this community are weakly interconnected._
-- **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.14204545454545456 - nodes in this community are weakly interconnected._
-- **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.12554112554112554 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09663120567375887 - nodes in this community are weakly interconnected._
+- **Should `Community 3` be split into smaller, more focused modules?**
+  _Cohesion score 0.1323529411764706 - nodes in this community are weakly interconnected._

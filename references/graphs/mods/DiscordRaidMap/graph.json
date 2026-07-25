@@ -147,7 +147,7 @@
       "label": "DiscordRaidMap.Patches",
       "file_type": "code",
       "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L9",
+      "source_location": "L7",
       "_origin": "ast",
       "id": "patches_raidpatches_discordraidmap_patches",
       "community": 2,
@@ -157,7 +157,7 @@
       "label": "GameStartedPatch",
       "file_type": "code",
       "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L11",
+      "source_location": "L9",
       "_origin": "ast",
       "id": "patches_raidpatches_gamestartedpatch",
       "community": 2,
@@ -177,7 +177,7 @@
       "label": ".GetTargetMethod()",
       "file_type": "code",
       "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L15",
+      "source_location": "L13",
       "_origin": "ast",
       "id": "patches_raidpatches_gamestartedpatch_gettargetmethod",
       "community": 2,
@@ -187,7 +187,7 @@
       "label": "MethodBase",
       "file_type": "code",
       "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L15",
+      "source_location": "L13",
       "_origin": "ast",
       "id": "methodbase",
       "community": 2,
@@ -197,7 +197,7 @@
       "label": ".PatchPostfix()",
       "file_type": "code",
       "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L20",
+      "source_location": "L18",
       "_origin": "ast",
       "id": "patches_raidpatches_gamestartedpatch_patchpostfix",
       "community": 2,
@@ -207,7 +207,7 @@
       "label": "GameWorld",
       "file_type": "code",
       "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L20",
+      "source_location": "L18",
       "_origin": "ast",
       "id": "patches_raidpatches_cs_gameworld",
       "community": 2,
@@ -217,7 +217,7 @@
       "label": "PatchPostfix",
       "file_type": "code",
       "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L20",
+      "source_location": "L18",
       "_origin": "ast",
       "id": "patchpostfix",
       "community": 2,
@@ -227,7 +227,7 @@
       "label": "GameWorldOnDestroyPatch",
       "file_type": "code",
       "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L27",
+      "source_location": "L25",
       "_origin": "ast",
       "id": "patches_raidpatches_gameworldondestroypatch",
       "community": 2,
@@ -237,7 +237,7 @@
       "label": ".GetTargetMethod()",
       "file_type": "code",
       "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L31",
+      "source_location": "L29",
       "_origin": "ast",
       "id": "patches_raidpatches_gameworldondestroypatch_gettargetmethod",
       "community": 2,
@@ -247,7 +247,7 @@
       "label": ".PatchPrefix()",
       "file_type": "code",
       "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L36",
+      "source_location": "L34",
       "_origin": "ast",
       "id": "patches_raidpatches_gameworldondestroypatch_patchprefix",
       "community": 2,
@@ -257,101 +257,11 @@
       "label": "PatchPrefix",
       "file_type": "code",
       "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L36",
+      "source_location": "L34",
       "_origin": "ast",
       "id": "patchprefix",
       "community": 2,
       "norm_label": "patchprefix"
-    },
-    {
-      "label": "PlayerOnDeadPatch",
-      "file_type": "code",
-      "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L44",
-      "_origin": "ast",
-      "id": "patches_raidpatches_playerondeadpatch",
-      "community": 2,
-      "norm_label": "playerondeadpatch"
-    },
-    {
-      "label": ".GetTargetMethod()",
-      "file_type": "code",
-      "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L48",
-      "_origin": "ast",
-      "id": "patches_raidpatches_playerondeadpatch_gettargetmethod",
-      "community": 2,
-      "norm_label": ".gettargetmethod()"
-    },
-    {
-      "label": ".PatchPostfix()",
-      "file_type": "code",
-      "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L53",
-      "_origin": "ast",
-      "id": "patches_raidpatches_playerondeadpatch_patchpostfix",
-      "community": 2,
-      "norm_label": ".patchpostfix()"
-    },
-    {
-      "label": "Player",
-      "file_type": "code",
-      "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L53",
-      "_origin": "ast",
-      "id": "patches_raidpatches_cs_player",
-      "community": 2,
-      "norm_label": "player"
-    },
-    {
-      "label": "AirdropLandedPatch",
-      "file_type": "code",
-      "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L65",
-      "_origin": "ast",
-      "id": "patches_raidpatches_airdroplandedpatch",
-      "community": 2,
-      "norm_label": "airdroplandedpatch"
-    },
-    {
-      "label": "List",
-      "file_type": "code",
-      "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L68",
-      "_origin": "ast",
-      "id": "patches_raidpatches_cs_list",
-      "community": 2,
-      "norm_label": "list"
-    },
-    {
-      "label": ".GetTargetMethod()",
-      "file_type": "code",
-      "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L70",
-      "_origin": "ast",
-      "id": "patches_raidpatches_airdroplandedpatch_gettargetmethod",
-      "community": 2,
-      "norm_label": ".gettargetmethod()"
-    },
-    {
-      "label": ".PatchPostfix()",
-      "file_type": "code",
-      "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L75",
-      "_origin": "ast",
-      "id": "patches_raidpatches_airdroplandedpatch_patchpostfix",
-      "community": 2,
-      "norm_label": ".patchpostfix()"
-    },
-    {
-      "label": "AirdropLogicClass",
-      "file_type": "code",
-      "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L75",
-      "_origin": "ast",
-      "id": "airdroplogicclass",
-      "community": 2,
-      "norm_label": "airdroplogicclass"
     },
     {
       "label": "Plugin.cs",
@@ -417,7 +327,7 @@
       "label": ".Update()",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L38",
+      "source_location": "L39",
       "_origin": "ast",
       "id": "plugin_plugin_update",
       "community": 9,
@@ -427,7 +337,7 @@
       "label": ".OnDestroy()",
       "file_type": "code",
       "source_file": "Plugin.cs",
-      "source_location": "L43",
+      "source_location": "L44",
       "_origin": "ast",
       "id": "plugin_plugin_ondestroy",
       "community": 9,
@@ -474,30 +384,30 @@
       "norm_label": "int"
     },
     {
-      "label": "string",
-      "file_type": "code",
-      "source_file": "RaidMap/DiscordWebhookClient.cs",
-      "source_location": "L15",
-      "_origin": "ast",
-      "id": "raidmap_discordwebhookclient_cs_string",
-      "community": 5,
-      "norm_label": "string"
-    },
-    {
       "label": "HttpClient",
       "file_type": "code",
       "source_file": "RaidMap/DiscordWebhookClient.cs",
-      "source_location": "L16",
+      "source_location": "L17",
       "_origin": "ast",
       "id": "httpclient",
       "community": 5,
       "norm_label": "httpclient"
     },
     {
+      "label": "string",
+      "file_type": "code",
+      "source_file": "RaidMap/DiscordWebhookClient.cs",
+      "source_location": "L19",
+      "_origin": "ast",
+      "id": "raidmap_discordwebhookclient_cs_string",
+      "community": 5,
+      "norm_label": "string"
+    },
+    {
       "label": ".UpsertMessageAsync()",
       "file_type": "code",
       "source_file": "RaidMap/DiscordWebhookClient.cs",
-      "source_location": "L24",
+      "source_location": "L27",
       "_origin": "ast",
       "id": "raidmap_discordwebhookclient_discordwebhookclient_upsertmessageasync",
       "community": 5,
@@ -507,7 +417,7 @@
       "label": "Task",
       "file_type": "code",
       "source_file": "RaidMap/DiscordWebhookClient.cs",
-      "source_location": "L24",
+      "source_location": "L27",
       "_origin": "ast",
       "id": "raidmap_discordwebhookclient_cs_task",
       "community": 5,
@@ -517,7 +427,7 @@
       "label": ".DeleteMessageAsync()",
       "file_type": "code",
       "source_file": "RaidMap/DiscordWebhookClient.cs",
-      "source_location": "L35",
+      "source_location": "L38",
       "_origin": "ast",
       "id": "raidmap_discordwebhookclient_discordwebhookclient_deletemessageasync",
       "community": 5,
@@ -527,7 +437,7 @@
       "label": ".CreateMessageAsync()",
       "file_type": "code",
       "source_file": "RaidMap/DiscordWebhookClient.cs",
-      "source_location": "L55",
+      "source_location": "L58",
       "_origin": "ast",
       "id": "raidmap_discordwebhookclient_discordwebhookclient_createmessageasync",
       "community": 5,
@@ -537,7 +447,7 @@
       "label": ".EditMessageAsync()",
       "file_type": "code",
       "source_file": "RaidMap/DiscordWebhookClient.cs",
-      "source_location": "L78",
+      "source_location": "L81",
       "_origin": "ast",
       "id": "raidmap_discordwebhookclient_discordwebhookclient_editmessageasync",
       "community": 5,
@@ -547,7 +457,7 @@
       "label": ".CreateMultipartPayload()",
       "file_type": "code",
       "source_file": "RaidMap/DiscordWebhookClient.cs",
-      "source_location": "L103",
+      "source_location": "L106",
       "_origin": "ast",
       "id": "raidmap_discordwebhookclient_discordwebhookclient_createmultipartpayload",
       "community": 5,
@@ -557,7 +467,7 @@
       "label": "MultipartFormDataContent",
       "file_type": "code",
       "source_file": "RaidMap/DiscordWebhookClient.cs",
-      "source_location": "L103",
+      "source_location": "L106",
       "_origin": "ast",
       "id": "multipartformdatacontent",
       "community": 5,
@@ -567,7 +477,7 @@
       "label": ".DisposeQuietly()",
       "file_type": "code",
       "source_file": "RaidMap/DiscordWebhookClient.cs",
-      "source_location": "L124",
+      "source_location": "L127",
       "_origin": "ast",
       "id": "raidmap_discordwebhookclient_discordwebhookclient_disposequietly",
       "community": 5,
@@ -577,7 +487,7 @@
       "label": "IDisposable",
       "file_type": "code",
       "source_file": "RaidMap/DiscordWebhookClient.cs",
-      "source_location": "L124",
+      "source_location": "L127",
       "_origin": "ast",
       "id": "raidmap_discordwebhookclient_cs_idisposable",
       "community": 4,
@@ -587,7 +497,7 @@
       "label": "WebhookMessage",
       "file_type": "code",
       "source_file": "RaidMap/DiscordWebhookClient.cs",
-      "source_location": "L135",
+      "source_location": "L138",
       "_origin": "ast",
       "id": "raidmap_discordwebhookclient_webhookmessage",
       "community": 5,
@@ -1067,7 +977,7 @@
       "label": ".StopBroadcaster()",
       "file_type": "code",
       "source_file": "RaidMap/RaidMapLifecycle.cs",
-      "source_location": "L72",
+      "source_location": "L75",
       "_origin": "ast",
       "id": "raidmap_raidmaplifecycle_raidmaplifecycle_stopbroadcaster",
       "community": 4,
@@ -1097,7 +1007,7 @@
       "label": "RaidSnapshot",
       "file_type": "code",
       "source_file": "RaidMap/RaidSnapshot.cs",
-      "source_location": "L17",
+      "source_location": "L16",
       "_origin": "ast",
       "id": "raidmap_raidsnapshot_raidsnapshot",
       "community": 11,
@@ -1107,7 +1017,7 @@
       "label": "RaidMarker",
       "file_type": "code",
       "source_file": "RaidMap/RaidSnapshot.cs",
-      "source_location": "L24",
+      "source_location": "L23",
       "_origin": "ast",
       "id": "raidmap_raidsnapshot_raidmarker",
       "community": 11,
@@ -1127,7 +1037,7 @@
       "label": "DiscordRaidMap.RaidMap",
       "file_type": "code",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L13",
+      "source_location": "L11",
       "_origin": "ast",
       "id": "raidmap_raidstatecollector_discordraidmap_raidmap",
       "community": 1,
@@ -1137,7 +1047,7 @@
       "label": "RaidStateCollector",
       "file_type": "code",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L15",
+      "source_location": "L13",
       "_origin": "ast",
       "id": "raidmap_raidstatecollector_raidstatecollector",
       "community": 1,
@@ -1147,7 +1057,7 @@
       "label": "FieldInfo",
       "file_type": "code",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L17",
+      "source_location": "L15",
       "_origin": "ast",
       "id": "fieldinfo",
       "community": 1,
@@ -1157,7 +1067,7 @@
       "label": "HashSet",
       "file_type": "code",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L20",
+      "source_location": "L18",
       "_origin": "ast",
       "id": "hashset",
       "community": 1,
@@ -1167,7 +1077,7 @@
       "label": "GameWorld",
       "file_type": "code",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L43",
+      "source_location": "L41",
       "_origin": "ast",
       "id": "raidmap_raidstatecollector_cs_gameworld",
       "community": 1,
@@ -1177,7 +1087,7 @@
       "label": "List",
       "file_type": "code",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L44",
+      "source_location": "L46",
       "_origin": "ast",
       "id": "raidmap_raidstatecollector_cs_list",
       "community": 1,
@@ -1187,9 +1097,9 @@
       "label": "Player",
       "file_type": "code",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L48",
+      "source_location": "L49",
       "_origin": "ast",
-      "id": "raidmap_raidstatecollector_cs_player",
+      "id": "player",
       "community": 1,
       "norm_label": "player"
     },
@@ -1197,7 +1107,7 @@
       "label": ".CollectSnapshot()",
       "file_type": "code",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L62",
+      "source_location": "L56",
       "_origin": "ast",
       "id": "raidmap_raidstatecollector_raidstatecollector_collectsnapshot",
       "community": 1,
@@ -1207,7 +1117,7 @@
       "label": "RaidSnapshot",
       "file_type": "code",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L62",
+      "source_location": "L56",
       "_origin": "ast",
       "id": "raidmap_raidstatecollector_cs_raidsnapshot",
       "community": 1,
@@ -1217,7 +1127,7 @@
       "label": ".AddPlayers()",
       "file_type": "code",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L90",
+      "source_location": "L84",
       "_origin": "ast",
       "id": "raidmap_raidstatecollector_raidstatecollector_addplayers",
       "community": 1,
@@ -1227,7 +1137,7 @@
       "label": "IPlayer",
       "file_type": "code",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L90",
+      "source_location": "L84",
       "_origin": "ast",
       "id": "iplayer",
       "community": 1,
@@ -1237,7 +1147,7 @@
       "label": ".AddKilled()",
       "file_type": "code",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L114",
+      "source_location": "L108",
       "_origin": "ast",
       "id": "raidmap_raidstatecollector_raidstatecollector_addkilled",
       "community": 1,
@@ -1247,7 +1157,7 @@
       "label": "IEnumerable",
       "file_type": "code",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L114",
+      "source_location": "L108",
       "_origin": "ast",
       "id": "ienumerable",
       "community": 1,
@@ -1257,67 +1167,27 @@
       "label": "RaidMarkerType",
       "file_type": "code",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L114",
+      "source_location": "L108",
       "_origin": "ast",
       "id": "raidmap_raidstatecollector_cs_raidmarkertype",
       "community": 1,
       "norm_label": "raidmarkertype"
     },
     {
-      "label": ".AddAirdrops()",
-      "file_type": "code",
-      "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L129",
-      "_origin": "ast",
-      "id": "raidmap_raidstatecollector_raidstatecollector_addairdrops",
-      "community": 1,
-      "norm_label": ".addairdrops()"
-    },
-    {
       "label": ".AddExtracts()",
       "file_type": "code",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L141",
+      "source_location": "L123",
       "_origin": "ast",
       "id": "raidmap_raidstatecollector_raidstatecollector_addextracts",
       "community": 1,
       "norm_label": ".addextracts()"
     },
     {
-      "label": ".OnPlayerDead()",
-      "file_type": "code",
-      "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L190",
-      "_origin": "ast",
-      "id": "raidmap_raidstatecollector_raidstatecollector_onplayerdead",
-      "community": 1,
-      "norm_label": ".onplayerdead()"
-    },
-    {
-      "label": ".OnAirdropLanded()",
-      "file_type": "code",
-      "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L197",
-      "_origin": "ast",
-      "id": "raidmap_raidstatecollector_raidstatecollector_onairdroplanded",
-      "community": 1,
-      "norm_label": ".onairdroplanded()"
-    },
-    {
-      "label": "AirdropSynchronizableObject",
-      "file_type": "code",
-      "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L197",
-      "_origin": "ast",
-      "id": "airdropsynchronizableobject",
-      "community": 1,
-      "norm_label": "airdropsynchronizableobject"
-    },
-    {
       "label": ".IsBoss()",
       "file_type": "code",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L205",
+      "source_location": "L172",
       "_origin": "ast",
       "id": "raidmap_raidstatecollector_raidstatecollector_isboss",
       "community": 1,
@@ -1327,7 +1197,7 @@
       "label": ".RefreshKilledPlayers()",
       "file_type": "code",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L211",
+      "source_location": "L178",
       "_origin": "ast",
       "id": "raidmap_raidstatecollector_raidstatecollector_refreshkilledplayers",
       "community": 1,
@@ -1337,7 +1207,7 @@
       "label": ".TryTrackDeadPlayer()",
       "file_type": "code",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L225",
+      "source_location": "L192",
       "_origin": "ast",
       "id": "raidmap_raidstatecollector_raidstatecollector_trytrackdeadplayer",
       "community": 1,
@@ -1347,7 +1217,7 @@
       "label": ".TryTrackKilledPlayer()",
       "file_type": "code",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L233",
+      "source_location": "L200",
       "_origin": "ast",
       "id": "raidmap_raidstatecollector_raidstatecollector_trytrackkilledplayer",
       "community": 1,
@@ -1357,7 +1227,7 @@
       "label": ".HasCorpse()",
       "file_type": "code",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L253",
+      "source_location": "L220",
       "_origin": "ast",
       "id": "raidmap_raidstatecollector_raidstatecollector_hascorpse",
       "community": 1,
@@ -1367,7 +1237,7 @@
       "label": ".IsHeadlessClient()",
       "file_type": "code",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L258",
+      "source_location": "L225",
       "_origin": "ast",
       "id": "raidmap_raidstatecollector_raidstatecollector_isheadlessclient",
       "community": 1,
@@ -1377,7 +1247,7 @@
       "label": ".IsTrackedHumanPlayer()",
       "file_type": "code",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L263",
+      "source_location": "L230",
       "_origin": "ast",
       "id": "raidmap_raidstatecollector_raidstatecollector_istrackedhumanplayer",
       "community": 1,
@@ -1387,7 +1257,7 @@
       "label": ".GetMapLocation()",
       "file_type": "code",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L278",
+      "source_location": "L245",
       "_origin": "ast",
       "id": "raidmap_raidstatecollector_raidstatecollector_getmaplocation",
       "community": 1,
@@ -1397,7 +1267,7 @@
       "label": ".GetReferencePlayer()",
       "file_type": "code",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L288",
+      "source_location": "L255",
       "_origin": "ast",
       "id": "raidmap_raidstatecollector_raidstatecollector_getreferenceplayer",
       "community": 1,
@@ -1407,7 +1277,7 @@
       "label": ".ToMapPosition()",
       "file_type": "code",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L323",
+      "source_location": "L296",
       "_origin": "ast",
       "id": "raidmap_raidstatecollector_raidstatecollector_tomapposition",
       "community": 1,
@@ -1417,7 +1287,7 @@
       "label": "Vector3",
       "file_type": "code",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L323",
+      "source_location": "L296",
       "_origin": "ast",
       "id": "raidmap_raidstatecollector_cs_vector3",
       "community": 1,
@@ -1427,7 +1297,7 @@
       "label": ".GetRaidTimeRemaining()",
       "file_type": "code",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L328",
+      "source_location": "L301",
       "_origin": "ast",
       "id": "raidmap_raidstatecollector_raidstatecollector_getraidtimeremaining",
       "community": 1,
@@ -1437,7 +1307,7 @@
       "label": ".Dispose()",
       "file_type": "code",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L346",
+      "source_location": "L319",
       "_origin": "ast",
       "id": "raidmap_raidstatecollector_raidstatecollector_dispose",
       "community": 1,
@@ -1457,7 +1327,7 @@
       "label": "DiscordRaidMap.RaidMap",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L10",
+      "source_location": "L11",
       "_origin": "ast",
       "id": "raidmap_renderer_discordraidmap_raidmap",
       "community": 13,
@@ -1467,7 +1337,7 @@
       "label": "Renderer",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L12",
+      "source_location": "L27",
       "_origin": "ast",
       "id": "raidmap_renderer_renderer",
       "community": 0,
@@ -1477,7 +1347,7 @@
       "label": "Color32",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L14",
+      "source_location": "L29",
       "_origin": "ast",
       "id": "color32",
       "community": 0,
@@ -1487,27 +1357,47 @@
       "label": "string",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L18",
+      "source_location": "L33",
       "_origin": "ast",
       "id": "raidmap_renderer_cs_string",
       "community": 0,
       "norm_label": "string"
     },
     {
+      "label": "ImageCodecInfo",
+      "file_type": "code",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L36",
+      "_origin": "ast",
+      "id": "imagecodecinfo",
+      "community": 0,
+      "norm_label": "imagecodecinfo"
+    },
+    {
       "label": "int",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L24",
+      "source_location": "L42",
       "_origin": "ast",
       "id": "raidmap_renderer_cs_int",
       "community": 0,
       "norm_label": "int"
     },
     {
+      "label": "MapImageFormat",
+      "file_type": "code",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L45",
+      "_origin": "ast",
+      "id": "mapimageformat",
+      "community": 0,
+      "norm_label": "mapimageformat"
+    },
+    {
       "label": "Dictionary",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L26",
+      "source_location": "L47",
       "_origin": "ast",
       "id": "raidmap_renderer_cs_dictionary",
       "community": 0,
@@ -1517,17 +1407,57 @@
       "label": "PrivateFontCollection",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L28",
+      "source_location": "L49",
       "_origin": "ast",
       "id": "privatefontcollection",
       "community": 0,
       "norm_label": "privatefontcollection"
     },
     {
+      "label": "byte",
+      "file_type": "code",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L54",
+      "_origin": "ast",
+      "id": "byte",
+      "community": 0,
+      "norm_label": "byte"
+    },
+    {
+      "label": "Bitmap",
+      "file_type": "code",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L55",
+      "_origin": "ast",
+      "id": "bitmap",
+      "community": 0,
+      "norm_label": "bitmap"
+    },
+    {
+      "label": "Font",
+      "file_type": "code",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L56",
+      "_origin": "ast",
+      "id": "font",
+      "community": 0,
+      "norm_label": "font"
+    },
+    {
+      "label": "Graphics",
+      "file_type": "code",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L58",
+      "_origin": "ast",
+      "id": "graphics",
+      "community": 0,
+      "norm_label": "graphics"
+    },
+    {
       "label": ".Render()",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L40",
+      "source_location": "L76",
       "_origin": "ast",
       "id": "raidmap_renderer_renderer_render",
       "community": 0,
@@ -1537,17 +1467,27 @@
       "label": "RaidSnapshot",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L40",
+      "source_location": "L76",
       "_origin": "ast",
       "id": "raidmap_renderer_cs_raidsnapshot",
       "community": 0,
       "norm_label": "raidsnapshot"
     },
     {
+      "label": "RenderedImage",
+      "file_type": "code",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L76",
+      "_origin": "ast",
+      "id": "renderedimage",
+      "community": 0,
+      "norm_label": "renderedimage"
+    },
+    {
       "label": ".DrawRaidMarker()",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L71",
+      "source_location": "L107",
       "_origin": "ast",
       "id": "raidmap_renderer_renderer_drawraidmarker",
       "community": 0,
@@ -1557,7 +1497,7 @@
       "label": "RaidMarker",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L71",
+      "source_location": "L107",
       "_origin": "ast",
       "id": "raidmarker",
       "community": 0,
@@ -1567,7 +1507,7 @@
       "label": ".LoadBackground()",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L101",
+      "source_location": "L136",
       "_origin": "ast",
       "id": "raidmap_renderer_renderer_loadbackground",
       "community": 0,
@@ -1577,7 +1517,7 @@
       "label": "MapDefinition",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L101",
+      "source_location": "L136",
       "_origin": "ast",
       "id": "mapdefinition",
       "community": 0,
@@ -1587,27 +1527,27 @@
       "label": "CpuImage",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L101",
+      "source_location": "L136",
       "_origin": "ast",
       "id": "cpuimage",
       "community": 0,
       "norm_label": "cpuimage"
     },
     {
-      "label": ".CopyBackground()",
+      "label": ".GetCanvas()",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L119",
+      "source_location": "L156",
       "_origin": "ast",
-      "id": "raidmap_renderer_renderer_copybackground",
+      "id": "raidmap_renderer_renderer_getcanvas",
       "community": 0,
-      "norm_label": ".copybackground()"
+      "norm_label": ".getcanvas()"
     },
     {
       "label": ".LoadMarker()",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L126",
+      "source_location": "L168",
       "_origin": "ast",
       "id": "raidmap_renderer_renderer_loadmarker",
       "community": 0,
@@ -1617,7 +1557,7 @@
       "label": "RaidMarkerType",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L126",
+      "source_location": "L168",
       "_origin": "ast",
       "id": "raidmap_renderer_cs_raidmarkertype",
       "community": 0,
@@ -1627,7 +1567,7 @@
       "label": ".GetMarkerFileName()",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L145",
+      "source_location": "L188",
       "_origin": "ast",
       "id": "raidmap_renderer_renderer_getmarkerfilename",
       "community": 0,
@@ -1637,7 +1577,7 @@
       "label": ".Project()",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L160",
+      "source_location": "L202",
       "_origin": "ast",
       "id": "raidmap_renderer_renderer_project",
       "community": 0,
@@ -1647,7 +1587,7 @@
       "label": "Vector3",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L160",
+      "source_location": "L202",
       "_origin": "ast",
       "id": "raidmap_renderer_cs_vector3",
       "community": 0,
@@ -1657,7 +1597,7 @@
       "label": "Vector2Int",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L160",
+      "source_location": "L202",
       "_origin": "ast",
       "id": "vector2int",
       "community": 0,
@@ -1667,7 +1607,7 @@
       "label": ".Rotate()",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L191",
+      "source_location": "L233",
       "_origin": "ast",
       "id": "raidmap_renderer_renderer_rotate",
       "community": 0,
@@ -1677,7 +1617,7 @@
       "label": "Vector2",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L191",
+      "source_location": "L233",
       "_origin": "ast",
       "id": "vector2",
       "community": 0,
@@ -1687,7 +1627,7 @@
       "label": ".DrawPlayer()",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L199",
+      "source_location": "L241",
       "_origin": "ast",
       "id": "raidmap_renderer_renderer_drawplayer",
       "community": 0,
@@ -1697,7 +1637,7 @@
       "label": ".DrawDeadPlayer()",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L205",
+      "source_location": "L247",
       "_origin": "ast",
       "id": "raidmap_renderer_renderer_drawdeadplayer",
       "community": 0,
@@ -1707,7 +1647,7 @@
       "label": ".DrawMarkerIcon()",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L211",
+      "source_location": "L253",
       "_origin": "ast",
       "id": "raidmap_renderer_renderer_drawmarkericon",
       "community": 0,
@@ -1717,7 +1657,7 @@
       "label": ".SampleBilinear()",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L252",
+      "source_location": "L294",
       "_origin": "ast",
       "id": "raidmap_renderer_renderer_samplebilinear",
       "community": 0,
@@ -1727,7 +1667,7 @@
       "label": ".Lerp()",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L266",
+      "source_location": "L308",
       "_origin": "ast",
       "id": "raidmap_renderer_renderer_lerp",
       "community": 0,
@@ -1737,7 +1677,7 @@
       "label": ".DrawLabelCentered()",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L275",
+      "source_location": "L317",
       "_origin": "ast",
       "id": "raidmap_renderer_renderer_drawlabelcentered",
       "community": 0,
@@ -1747,7 +1687,7 @@
       "label": ".DrawLabel()",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L281",
+      "source_location": "L323",
       "_origin": "ast",
       "id": "raidmap_renderer_renderer_drawlabel",
       "community": 0,
@@ -1757,7 +1697,7 @@
       "label": ".FormatPlayerName()",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L287",
+      "source_location": "L329",
       "_origin": "ast",
       "id": "raidmap_renderer_renderer_formatplayername",
       "community": 0,
@@ -1767,7 +1707,7 @@
       "label": ".MeasureText()",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L292",
+      "source_location": "L334",
       "_origin": "ast",
       "id": "raidmap_renderer_renderer_measuretext",
       "community": 0,
@@ -1777,57 +1717,47 @@
       "label": ".DrawTrueTypeText()",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L300",
+      "source_location": "L341",
       "_origin": "ast",
       "id": "raidmap_renderer_renderer_drawtruetypetext",
       "community": 0,
       "norm_label": ".drawtruetypetext()"
     },
     {
-      "label": ".CreateConfiguredFont()",
+      "label": ".GetMeasureGraphics()",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L325",
+      "source_location": "L365",
       "_origin": "ast",
-      "id": "raidmap_renderer_renderer_createconfiguredfont",
+      "id": "raidmap_renderer_renderer_getmeasuregraphics",
       "community": 0,
-      "norm_label": ".createconfiguredfont()"
+      "norm_label": ".getmeasuregraphics()"
     },
     {
-      "label": "Font",
+      "label": ".GetFont()",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L325",
+      "source_location": "L377",
       "_origin": "ast",
-      "id": "font",
+      "id": "raidmap_renderer_renderer_getfont",
       "community": 0,
-      "norm_label": "font"
+      "norm_label": ".getfont()"
     },
     {
       "label": ".BlendTextBitmap()",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L342",
+      "source_location": "L400",
       "_origin": "ast",
       "id": "raidmap_renderer_renderer_blendtextbitmap",
       "community": 0,
       "norm_label": ".blendtextbitmap()"
     },
     {
-      "label": "Bitmap",
-      "file_type": "code",
-      "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L342",
-      "_origin": "ast",
-      "id": "bitmap",
-      "community": 0,
-      "norm_label": "bitmap"
-    },
-    {
       "label": ".SetPixel()",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L387",
+      "source_location": "L445",
       "_origin": "ast",
       "id": "raidmap_renderer_renderer_setpixel",
       "community": 0,
@@ -1837,7 +1767,7 @@
       "label": ".Blend()",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L398",
+      "source_location": "L456",
       "_origin": "ast",
       "id": "raidmap_renderer_renderer_blend",
       "community": 0,
@@ -1847,27 +1777,37 @@
       "label": ".LoadPng()",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L413",
+      "source_location": "L471",
       "_origin": "ast",
       "id": "raidmap_renderer_renderer_loadpng",
       "community": 0,
       "norm_label": ".loadpng()"
     },
     {
-      "label": ".EncodePng()",
+      "label": ".EncodeImage()",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L456",
+      "source_location": "L526",
       "_origin": "ast",
-      "id": "raidmap_renderer_renderer_encodepng",
+      "id": "raidmap_renderer_renderer_encodeimage",
       "community": 0,
-      "norm_label": ".encodepng()"
+      "norm_label": ".encodeimage()"
+    },
+    {
+      "label": ".ResolveJpegEncoder()",
+      "file_type": "code",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L589",
+      "_origin": "ast",
+      "id": "raidmap_renderer_renderer_resolvejpegencoder",
+      "community": 0,
+      "norm_label": ".resolvejpegencoder()"
     },
     {
       "label": ".Dispose()",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L492",
+      "source_location": "L602",
       "_origin": "ast",
       "id": "raidmap_renderer_renderer_dispose",
       "community": 0,
@@ -1877,7 +1817,7 @@
       "label": "CpuImage",
       "file_type": "code",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L500",
+      "source_location": "L620",
       "_origin": "ast",
       "id": "raidmap_renderer_cpuimage",
       "community": 13,
@@ -1907,7 +1847,7 @@
       "label": "Settings",
       "file_type": "code",
       "source_file": "Settings.cs",
-      "source_location": "L10",
+      "source_location": "L16",
       "_origin": "ast",
       "id": "settings_settings",
       "community": 7,
@@ -1917,7 +1857,7 @@
       "label": "ConfigFile",
       "file_type": "code",
       "source_file": "Settings.cs",
-      "source_location": "L12",
+      "source_location": "L18",
       "_origin": "ast",
       "id": "configfile",
       "community": 7,
@@ -1927,7 +1867,7 @@
       "label": "List",
       "file_type": "code",
       "source_file": "Settings.cs",
-      "source_location": "L13",
+      "source_location": "L19",
       "_origin": "ast",
       "id": "settings_cs_list",
       "community": 7,
@@ -1937,7 +1877,7 @@
       "label": "ConfigEntry",
       "file_type": "code",
       "source_file": "Settings.cs",
-      "source_location": "L15",
+      "source_location": "L21",
       "_origin": "ast",
       "id": "configentry",
       "community": 7,
@@ -1947,7 +1887,7 @@
       "label": "string",
       "file_type": "code",
       "source_file": "Settings.cs",
-      "source_location": "L21",
+      "source_location": "L30",
       "_origin": "ast",
       "id": "settings_cs_string",
       "community": 7,
@@ -1957,7 +1897,7 @@
       "label": ".Init()",
       "file_type": "code",
       "source_file": "Settings.cs",
-      "source_location": "L22",
+      "source_location": "L31",
       "_origin": "ast",
       "id": "settings_settings_init",
       "community": 7,
@@ -1967,7 +1907,7 @@
       "label": ".GetFontChoices()",
       "file_type": "code",
       "source_file": "Settings.cs",
-      "source_location": "L72",
+      "source_location": "L99",
       "_origin": "ast",
       "id": "settings_settings_getfontchoices",
       "community": 7,
@@ -1977,7 +1917,7 @@
       "label": ".RecalcOrder()",
       "file_type": "code",
       "source_file": "Settings.cs",
-      "source_location": "L84",
+      "source_location": "L111",
       "_origin": "ast",
       "id": "settings_settings_recalcorder",
       "community": 7,
@@ -1991,9 +1931,9 @@
       "source_file": "ConfigurationManagerAttributes.cs",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "configurationmanagerattributes",
-      "target": "configurationmanagerattributes_configurationmanagerattributes",
-      "confidence_score": 1.0
+      "target": "configurationmanagerattributes_configurationmanagerattributes"
     },
     {
       "relation": "references",
@@ -2002,9 +1942,9 @@
       "source_location": "L39",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "configurationmanagerattributes_configurationmanagerattributes",
-      "target": "configentrybase",
-      "confidence_score": 1.0
+      "target": "configentrybase"
     },
     {
       "relation": "references",
@@ -2013,9 +1953,9 @@
       "source_location": "L138",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "configurationmanagerattributes_configurationmanagerattributes",
-      "target": "configurationmanagerattributes_cs_bool",
-      "confidence_score": 1.0
+      "target": "configurationmanagerattributes_cs_bool"
     },
     {
       "relation": "references",
@@ -2024,9 +1964,9 @@
       "source_location": "L128",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "configurationmanagerattributes_configurationmanagerattributes",
-      "target": "configurationmanagerattributes_cs_int",
-      "confidence_score": 1.0
+      "target": "configurationmanagerattributes_cs_int"
     },
     {
       "relation": "references",
@@ -2035,9 +1975,9 @@
       "source_location": "L100",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "configurationmanagerattributes_configurationmanagerattributes",
-      "target": "configurationmanagerattributes_cs_object",
-      "confidence_score": 1.0
+      "target": "configurationmanagerattributes_cs_object"
     },
     {
       "relation": "references",
@@ -2046,9 +1986,9 @@
       "source_location": "L122",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "configurationmanagerattributes_configurationmanagerattributes",
-      "target": "configurationmanagerattributes_cs_string",
-      "confidence_score": 1.0
+      "target": "configurationmanagerattributes_cs_string"
     },
     {
       "relation": "references",
@@ -2057,9 +1997,9 @@
       "source_location": "L45",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "configurationmanagerattributes_configurationmanagerattributes",
-      "target": "customhotkeydrawerfunc",
-      "confidence_score": 1.0
+      "target": "customhotkeydrawerfunc"
     },
     {
       "relation": "references",
@@ -2068,9 +2008,9 @@
       "source_location": "L143",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "configurationmanagerattributes_configurationmanagerattributes",
-      "target": "func_object_string",
-      "confidence_score": 1.0
+      "target": "func_object_string"
     },
     {
       "relation": "references",
@@ -2079,37 +2019,27 @@
       "source_location": "L148",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "configurationmanagerattributes_configurationmanagerattributes",
-      "target": "func_string_object",
-      "confidence_score": 1.0
+      "target": "func_string_object"
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordRaidMap.csproj",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "discordraidmap",
-      "target": "framework_net472",
-      "confidence_score": 1.0
+      "target": "framework_net472"
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "DiscordRaidMap.csproj",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "discordraidmap",
-      "target": "sdk_microsoft_net_sdk",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L65",
-      "weight": 1.0,
-      "source": "patches_raidpatches",
-      "target": "patches_raidpatches_airdroplandedpatch",
-      "confidence_score": 1.0
+      "target": "sdk_microsoft_net_sdk"
     },
     {
       "relation": "contains",
@@ -2117,9 +2047,9 @@
       "source_file": "Patches/RaidPatches.cs",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_raidpatches",
-      "target": "patches_raidpatches_discordraidmap_patches",
-      "confidence_score": 1.0
+      "target": "patches_raidpatches_discordraidmap_patches"
     },
     {
       "relation": "contains",
@@ -2127,9 +2057,9 @@
       "source_file": "Patches/RaidPatches.cs",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_raidpatches",
-      "target": "patches_raidpatches_gamestartedpatch",
-      "confidence_score": 1.0
+      "target": "patches_raidpatches_gamestartedpatch"
     },
     {
       "relation": "contains",
@@ -2137,19 +2067,9 @@
       "source_file": "Patches/RaidPatches.cs",
       "source_location": "L27",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_raidpatches",
-      "target": "patches_raidpatches_gameworldondestroypatch",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L44",
-      "weight": 1.0,
-      "source": "patches_raidpatches",
-      "target": "patches_raidpatches_playerondeadpatch",
-      "confidence_score": 1.0
+      "target": "patches_raidpatches_gameworldondestroypatch"
     },
     {
       "relation": "inherits",
@@ -2157,9 +2077,9 @@
       "source_file": "Patches/RaidPatches.cs",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_raidpatches_gamestartedpatch",
-      "target": "modulepatch",
-      "confidence_score": 1.0
+      "target": "modulepatch"
     },
     {
       "relation": "method",
@@ -2167,9 +2087,9 @@
       "source_file": "Patches/RaidPatches.cs",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_raidpatches_gamestartedpatch",
-      "target": "patches_raidpatches_gamestartedpatch_gettargetmethod",
-      "confidence_score": 1.0
+      "target": "patches_raidpatches_gamestartedpatch_gettargetmethod"
     },
     {
       "relation": "method",
@@ -2177,19 +2097,9 @@
       "source_file": "Patches/RaidPatches.cs",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_raidpatches_gamestartedpatch",
-      "target": "patches_raidpatches_gamestartedpatch_patchpostfix",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L65",
-      "weight": 1.0,
-      "source": "patches_raidpatches_airdroplandedpatch",
-      "target": "modulepatch",
-      "confidence_score": 1.0
+      "target": "patches_raidpatches_gamestartedpatch_patchpostfix"
     },
     {
       "relation": "inherits",
@@ -2197,19 +2107,9 @@
       "source_file": "Patches/RaidPatches.cs",
       "source_location": "L27",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_raidpatches_gameworldondestroypatch",
-      "target": "modulepatch",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L44",
-      "weight": 1.0,
-      "source": "patches_raidpatches_playerondeadpatch",
-      "target": "modulepatch",
-      "confidence_score": 1.0
+      "target": "modulepatch"
     },
     {
       "relation": "references",
@@ -2218,20 +2118,9 @@
       "source_location": "L15",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "patches_raidpatches_gamestartedpatch_gettargetmethod",
-      "target": "methodbase",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L70",
-      "weight": 1.0,
-      "context": "return_type",
-      "source": "patches_raidpatches_airdroplandedpatch_gettargetmethod",
-      "target": "methodbase",
-      "confidence_score": 1.0
+      "target": "methodbase"
     },
     {
       "relation": "references",
@@ -2240,20 +2129,9 @@
       "source_location": "L31",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "patches_raidpatches_gameworldondestroypatch_gettargetmethod",
-      "target": "methodbase",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L48",
-      "weight": 1.0,
-      "context": "return_type",
-      "source": "patches_raidpatches_playerondeadpatch_gettargetmethod",
-      "target": "methodbase",
-      "confidence_score": 1.0
+      "target": "methodbase"
     },
     {
       "relation": "references",
@@ -2262,9 +2140,9 @@
       "source_location": "L20",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "patches_raidpatches_gamestartedpatch_patchpostfix",
-      "target": "patches_raidpatches_cs_gameworld",
-      "confidence_score": 1.0
+      "target": "patches_raidpatches_cs_gameworld"
     },
     {
       "relation": "references",
@@ -2273,31 +2151,9 @@
       "source_location": "L20",
       "weight": 1.0,
       "context": "attribute",
+      "confidence_score": 1.0,
       "source": "patches_raidpatches_gamestartedpatch_patchpostfix",
-      "target": "patchpostfix",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L75",
-      "weight": 1.0,
-      "context": "attribute",
-      "source": "patches_raidpatches_airdroplandedpatch_patchpostfix",
-      "target": "patchpostfix",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L53",
-      "weight": 1.0,
-      "context": "attribute",
-      "source": "patches_raidpatches_playerondeadpatch_patchpostfix",
-      "target": "patchpostfix",
-      "confidence_score": 1.0
+      "target": "patchpostfix"
     },
     {
       "relation": "method",
@@ -2305,9 +2161,9 @@
       "source_file": "Patches/RaidPatches.cs",
       "source_location": "L31",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_raidpatches_gameworldondestroypatch",
-      "target": "patches_raidpatches_gameworldondestroypatch_gettargetmethod",
-      "confidence_score": 1.0
+      "target": "patches_raidpatches_gameworldondestroypatch_gettargetmethod"
     },
     {
       "relation": "method",
@@ -2315,9 +2171,9 @@
       "source_file": "Patches/RaidPatches.cs",
       "source_location": "L36",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "patches_raidpatches_gameworldondestroypatch",
-      "target": "patches_raidpatches_gameworldondestroypatch_patchprefix",
-      "confidence_score": 1.0
+      "target": "patches_raidpatches_gameworldondestroypatch_patchprefix"
     },
     {
       "relation": "references",
@@ -2326,82 +2182,9 @@
       "source_location": "L36",
       "weight": 1.0,
       "context": "attribute",
+      "confidence_score": 1.0,
       "source": "patches_raidpatches_gameworldondestroypatch_patchprefix",
-      "target": "patchprefix",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L48",
-      "weight": 1.0,
-      "source": "patches_raidpatches_playerondeadpatch",
-      "target": "patches_raidpatches_playerondeadpatch_gettargetmethod",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L53",
-      "weight": 1.0,
-      "source": "patches_raidpatches_playerondeadpatch",
-      "target": "patches_raidpatches_playerondeadpatch_patchpostfix",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L53",
-      "weight": 1.0,
-      "context": "parameter_type",
-      "source": "patches_raidpatches_playerondeadpatch_patchpostfix",
-      "target": "patches_raidpatches_cs_player",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L70",
-      "weight": 1.0,
-      "source": "patches_raidpatches_airdroplandedpatch",
-      "target": "patches_raidpatches_airdroplandedpatch_gettargetmethod",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L75",
-      "weight": 1.0,
-      "source": "patches_raidpatches_airdroplandedpatch",
-      "target": "patches_raidpatches_airdroplandedpatch_patchpostfix",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L68",
-      "weight": 1.0,
-      "context": "field",
-      "source": "patches_raidpatches_airdroplandedpatch",
-      "target": "patches_raidpatches_cs_list",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "Patches/RaidPatches.cs",
-      "source_location": "L75",
-      "weight": 1.0,
-      "context": "parameter_type",
-      "source": "patches_raidpatches_airdroplandedpatch_patchpostfix",
-      "target": "airdroplogicclass",
-      "confidence_score": 1.0
+      "target": "patchprefix"
     },
     {
       "relation": "contains",
@@ -2409,9 +2192,9 @@
       "source_file": "Plugin.cs",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plugin",
-      "target": "plugin_discordraidmap",
-      "confidence_score": 1.0
+      "target": "plugin_discordraidmap"
     },
     {
       "relation": "contains",
@@ -2419,9 +2202,9 @@
       "source_file": "Plugin.cs",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plugin",
-      "target": "plugin_plugin",
-      "confidence_score": 1.0
+      "target": "plugin_plugin"
     },
     {
       "relation": "inherits",
@@ -2429,9 +2212,9 @@
       "source_file": "Plugin.cs",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plugin_plugin",
-      "target": "baseunityplugin",
-      "confidence_score": 1.0
+      "target": "baseunityplugin"
     },
     {
       "relation": "method",
@@ -2439,9 +2222,9 @@
       "source_file": "Plugin.cs",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plugin_plugin",
-      "target": "plugin_plugin_awake",
-      "confidence_score": 1.0
+      "target": "plugin_plugin_awake"
     },
     {
       "relation": "method",
@@ -2449,9 +2232,9 @@
       "source_file": "Plugin.cs",
       "source_location": "L43",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plugin_plugin",
-      "target": "plugin_plugin_ondestroy",
-      "confidence_score": 1.0
+      "target": "plugin_plugin_ondestroy"
     },
     {
       "relation": "method",
@@ -2459,9 +2242,9 @@
       "source_file": "Plugin.cs",
       "source_location": "L38",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plugin_plugin",
-      "target": "plugin_plugin_update",
-      "confidence_score": 1.0
+      "target": "plugin_plugin_update"
     },
     {
       "relation": "references",
@@ -2470,9 +2253,9 @@
       "source_location": "L13",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "plugin_plugin",
-      "target": "raidmaplifecycle",
-      "confidence_score": 1.0
+      "target": "raidmaplifecycle"
     },
     {
       "relation": "contains",
@@ -2480,9 +2263,9 @@
       "source_file": "RaidMap/DiscordWebhookClient.cs",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_discordwebhookclient",
-      "target": "raidmap_discordwebhookclient_discordraidmap_discord",
-      "confidence_score": 1.0
+      "target": "raidmap_discordwebhookclient_discordraidmap_discord"
     },
     {
       "relation": "contains",
@@ -2490,9 +2273,9 @@
       "source_file": "RaidMap/DiscordWebhookClient.cs",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_discordwebhookclient",
-      "target": "raidmap_discordwebhookclient_discordwebhookclient",
-      "confidence_score": 1.0
+      "target": "raidmap_discordwebhookclient_discordwebhookclient"
     },
     {
       "relation": "contains",
@@ -2500,9 +2283,9 @@
       "source_file": "RaidMap/DiscordWebhookClient.cs",
       "source_location": "L135",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_discordwebhookclient",
-      "target": "raidmap_discordwebhookclient_webhookmessage",
-      "confidence_score": 1.0
+      "target": "raidmap_discordwebhookclient_webhookmessage"
     },
     {
       "relation": "references",
@@ -2511,9 +2294,9 @@
       "source_location": "L16",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "raidmap_discordwebhookclient_discordwebhookclient",
-      "target": "httpclient",
-      "confidence_score": 1.0
+      "target": "httpclient"
     },
     {
       "relation": "references",
@@ -2522,9 +2305,9 @@
       "source_location": "L13",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "raidmap_discordwebhookclient_discordwebhookclient",
-      "target": "raidmap_discordwebhookclient_cs_int",
-      "confidence_score": 1.0
+      "target": "raidmap_discordwebhookclient_cs_int"
     },
     {
       "relation": "references",
@@ -2533,9 +2316,9 @@
       "source_location": "L17",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "raidmap_discordwebhookclient_discordwebhookclient",
-      "target": "raidmap_discordwebhookclient_cs_string",
-      "confidence_score": 1.0
+      "target": "raidmap_discordwebhookclient_cs_string"
     },
     {
       "relation": "method",
@@ -2543,9 +2326,9 @@
       "source_file": "RaidMap/DiscordWebhookClient.cs",
       "source_location": "L55",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_discordwebhookclient_discordwebhookclient",
-      "target": "raidmap_discordwebhookclient_discordwebhookclient_createmessageasync",
-      "confidence_score": 1.0
+      "target": "raidmap_discordwebhookclient_discordwebhookclient_createmessageasync"
     },
     {
       "relation": "method",
@@ -2553,9 +2336,9 @@
       "source_file": "RaidMap/DiscordWebhookClient.cs",
       "source_location": "L103",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_discordwebhookclient_discordwebhookclient",
-      "target": "raidmap_discordwebhookclient_discordwebhookclient_createmultipartpayload",
-      "confidence_score": 1.0
+      "target": "raidmap_discordwebhookclient_discordwebhookclient_createmultipartpayload"
     },
     {
       "relation": "method",
@@ -2563,9 +2346,9 @@
       "source_file": "RaidMap/DiscordWebhookClient.cs",
       "source_location": "L35",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_discordwebhookclient_discordwebhookclient",
-      "target": "raidmap_discordwebhookclient_discordwebhookclient_deletemessageasync",
-      "confidence_score": 1.0
+      "target": "raidmap_discordwebhookclient_discordwebhookclient_deletemessageasync"
     },
     {
       "relation": "method",
@@ -2573,9 +2356,9 @@
       "source_file": "RaidMap/DiscordWebhookClient.cs",
       "source_location": "L124",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_discordwebhookclient_discordwebhookclient",
-      "target": "raidmap_discordwebhookclient_discordwebhookclient_disposequietly",
-      "confidence_score": 1.0
+      "target": "raidmap_discordwebhookclient_discordwebhookclient_disposequietly"
     },
     {
       "relation": "method",
@@ -2583,9 +2366,9 @@
       "source_file": "RaidMap/DiscordWebhookClient.cs",
       "source_location": "L78",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_discordwebhookclient_discordwebhookclient",
-      "target": "raidmap_discordwebhookclient_discordwebhookclient_editmessageasync",
-      "confidence_score": 1.0
+      "target": "raidmap_discordwebhookclient_discordwebhookclient_editmessageasync"
     },
     {
       "relation": "method",
@@ -2593,9 +2376,9 @@
       "source_file": "RaidMap/DiscordWebhookClient.cs",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_discordwebhookclient_discordwebhookclient",
-      "target": "raidmap_discordwebhookclient_discordwebhookclient_upsertmessageasync",
-      "confidence_score": 1.0
+      "target": "raidmap_discordwebhookclient_discordwebhookclient_upsertmessageasync"
     },
     {
       "relation": "references",
@@ -2604,9 +2387,9 @@
       "source_location": "L24",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "raidmap_discordwebhookclient_discordwebhookclient_upsertmessageasync",
-      "target": "raidmap_discordwebhookclient_cs_task",
-      "confidence_score": 1.0
+      "target": "raidmap_discordwebhookclient_cs_task"
     },
     {
       "relation": "calls",
@@ -2615,9 +2398,9 @@
       "source_file": "RaidMap/DiscordWebhookClient.cs",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_discordwebhookclient_discordwebhookclient_upsertmessageasync",
-      "target": "raidmap_discordwebhookclient_discordwebhookclient_createmessageasync",
-      "confidence_score": 1.0
+      "target": "raidmap_discordwebhookclient_discordwebhookclient_createmessageasync"
     },
     {
       "relation": "calls",
@@ -2626,9 +2409,9 @@
       "source_file": "RaidMap/DiscordWebhookClient.cs",
       "source_location": "L32",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_discordwebhookclient_discordwebhookclient_upsertmessageasync",
-      "target": "raidmap_discordwebhookclient_discordwebhookclient_editmessageasync",
-      "confidence_score": 1.0
+      "target": "raidmap_discordwebhookclient_discordwebhookclient_editmessageasync"
     },
     {
       "relation": "references",
@@ -2637,9 +2420,9 @@
       "source_location": "L55",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "raidmap_discordwebhookclient_discordwebhookclient_createmessageasync",
-      "target": "raidmap_discordwebhookclient_cs_task",
-      "confidence_score": 1.0
+      "target": "raidmap_discordwebhookclient_cs_task"
     },
     {
       "relation": "references",
@@ -2648,9 +2431,9 @@
       "source_location": "L35",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "raidmap_discordwebhookclient_discordwebhookclient_deletemessageasync",
-      "target": "raidmap_discordwebhookclient_cs_task",
-      "confidence_score": 1.0
+      "target": "raidmap_discordwebhookclient_cs_task"
     },
     {
       "relation": "references",
@@ -2659,9 +2442,9 @@
       "source_location": "L78",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "raidmap_discordwebhookclient_discordwebhookclient_editmessageasync",
-      "target": "raidmap_discordwebhookclient_cs_task",
-      "confidence_score": 1.0
+      "target": "raidmap_discordwebhookclient_cs_task"
     },
     {
       "relation": "calls",
@@ -2670,9 +2453,9 @@
       "source_file": "RaidMap/DiscordWebhookClient.cs",
       "source_location": "L59",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_discordwebhookclient_discordwebhookclient_createmessageasync",
-      "target": "raidmap_discordwebhookclient_discordwebhookclient_createmultipartpayload",
-      "confidence_score": 1.0
+      "target": "raidmap_discordwebhookclient_discordwebhookclient_createmultipartpayload"
     },
     {
       "relation": "calls",
@@ -2681,9 +2464,9 @@
       "source_file": "RaidMap/DiscordWebhookClient.cs",
       "source_location": "L74",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_discordwebhookclient_discordwebhookclient_createmessageasync",
-      "target": "raidmap_discordwebhookclient_discordwebhookclient_disposequietly",
-      "confidence_score": 1.0
+      "target": "raidmap_discordwebhookclient_discordwebhookclient_disposequietly"
     },
     {
       "relation": "calls",
@@ -2692,9 +2475,9 @@
       "source_file": "RaidMap/DiscordWebhookClient.cs",
       "source_location": "L81",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_discordwebhookclient_discordwebhookclient_editmessageasync",
-      "target": "raidmap_discordwebhookclient_discordwebhookclient_createmultipartpayload",
-      "confidence_score": 1.0
+      "target": "raidmap_discordwebhookclient_discordwebhookclient_createmultipartpayload"
     },
     {
       "relation": "calls",
@@ -2703,9 +2486,9 @@
       "source_file": "RaidMap/DiscordWebhookClient.cs",
       "source_location": "L99",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_discordwebhookclient_discordwebhookclient_editmessageasync",
-      "target": "raidmap_discordwebhookclient_discordwebhookclient_disposequietly",
-      "confidence_score": 1.0
+      "target": "raidmap_discordwebhookclient_discordwebhookclient_disposequietly"
     },
     {
       "relation": "references",
@@ -2714,9 +2497,9 @@
       "source_location": "L103",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "raidmap_discordwebhookclient_discordwebhookclient_createmultipartpayload",
-      "target": "multipartformdatacontent",
-      "confidence_score": 1.0
+      "target": "multipartformdatacontent"
     },
     {
       "relation": "references",
@@ -2725,9 +2508,9 @@
       "source_location": "L124",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_discordwebhookclient_discordwebhookclient_disposequietly",
-      "target": "raidmap_discordwebhookclient_cs_idisposable",
-      "confidence_score": 1.0
+      "target": "raidmap_discordwebhookclient_cs_idisposable"
     },
     {
       "relation": "implements",
@@ -2735,9 +2518,9 @@
       "source_file": "RaidMap/RaidMapLifecycle.cs",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidmaplifecycle_raidmaplifecycle",
-      "target": "raidmap_discordwebhookclient_cs_idisposable",
-      "confidence_score": 1.0
+      "target": "raidmap_discordwebhookclient_cs_idisposable"
     },
     {
       "relation": "implements",
@@ -2745,9 +2528,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector",
-      "target": "raidmap_discordwebhookclient_cs_idisposable",
-      "confidence_score": 1.0
+      "target": "raidmap_discordwebhookclient_cs_idisposable"
     },
     {
       "relation": "implements",
@@ -2755,9 +2538,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "raidmap_discordwebhookclient_cs_idisposable",
-      "confidence_score": 1.0
+      "target": "raidmap_discordwebhookclient_cs_idisposable"
     },
     {
       "relation": "contains",
@@ -2765,9 +2548,9 @@
       "source_file": "RaidMap/HostCheck.cs",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_hostcheck",
-      "target": "raidmap_hostcheck_discordraidmap_raidmap",
-      "confidence_score": 1.0
+      "target": "raidmap_hostcheck_discordraidmap_raidmap"
     },
     {
       "relation": "contains",
@@ -2775,9 +2558,9 @@
       "source_file": "RaidMap/HostCheck.cs",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_hostcheck",
-      "target": "raidmap_hostcheck_hostcheck",
-      "confidence_score": 1.0
+      "target": "raidmap_hostcheck_hostcheck"
     },
     {
       "relation": "references",
@@ -2786,9 +2569,9 @@
       "source_location": "L11",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "raidmap_hostcheck_hostcheck",
-      "target": "lazy",
-      "confidence_score": 1.0
+      "target": "lazy"
     },
     {
       "relation": "references",
@@ -2797,9 +2580,9 @@
       "source_location": "L10",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "raidmap_hostcheck_hostcheck",
-      "target": "raidmap_hostcheck_cs_string",
-      "confidence_score": 1.0
+      "target": "raidmap_hostcheck_cs_string"
     },
     {
       "relation": "method",
@@ -2807,9 +2590,9 @@
       "source_file": "RaidMap/HostCheck.cs",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_hostcheck_hostcheck",
-      "target": "raidmap_hostcheck_hostcheck_canbroadcast",
-      "confidence_score": 1.0
+      "target": "raidmap_hostcheck_hostcheck_canbroadcast"
     },
     {
       "relation": "method",
@@ -2817,9 +2600,9 @@
       "source_file": "RaidMap/HostCheck.cs",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_hostcheck_hostcheck",
-      "target": "raidmap_hostcheck_hostcheck_findfikacoreassembly",
-      "confidence_score": 1.0
+      "target": "raidmap_hostcheck_hostcheck_findfikacoreassembly"
     },
     {
       "relation": "method",
@@ -2827,9 +2610,9 @@
       "source_file": "RaidMap/HostCheck.cs",
       "source_location": "L36",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_hostcheck_hostcheck",
-      "target": "raidmap_hostcheck_hostcheck_findfikaisserverproperty",
-      "confidence_score": 1.0
+      "target": "raidmap_hostcheck_hostcheck_findfikaisserverproperty"
     },
     {
       "relation": "references",
@@ -2838,9 +2621,9 @@
       "source_location": "L29",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "raidmap_hostcheck_hostcheck_findfikacoreassembly",
-      "target": "assembly",
-      "confidence_score": 1.0
+      "target": "assembly"
     },
     {
       "relation": "calls",
@@ -2849,9 +2632,9 @@
       "source_file": "RaidMap/HostCheck.cs",
       "source_location": "L38",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_hostcheck_hostcheck_findfikaisserverproperty",
-      "target": "raidmap_hostcheck_hostcheck_findfikacoreassembly",
-      "confidence_score": 1.0
+      "target": "raidmap_hostcheck_hostcheck_findfikacoreassembly"
     },
     {
       "relation": "references",
@@ -2860,9 +2643,9 @@
       "source_location": "L36",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "raidmap_hostcheck_hostcheck_findfikaisserverproperty",
-      "target": "propertyinfo",
-      "confidence_score": 1.0
+      "target": "propertyinfo"
     },
     {
       "relation": "contains",
@@ -2870,9 +2653,9 @@
       "source_file": "RaidMap/MapRegistry.cs",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_mapregistry",
-      "target": "raidmap_mapregistry_discordraidmap_raidmap",
-      "confidence_score": 1.0
+      "target": "raidmap_mapregistry_discordraidmap_raidmap"
     },
     {
       "relation": "contains",
@@ -2880,9 +2663,9 @@
       "source_file": "RaidMap/MapRegistry.cs",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_mapregistry",
-      "target": "raidmap_mapregistry_mapdefinition",
-      "confidence_score": 1.0
+      "target": "raidmap_mapregistry_mapdefinition"
     },
     {
       "relation": "contains",
@@ -2890,9 +2673,9 @@
       "source_file": "RaidMap/MapRegistry.cs",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_mapregistry",
-      "target": "raidmap_mapregistry_mapregistry",
-      "confidence_score": 1.0
+      "target": "raidmap_mapregistry_mapregistry"
     },
     {
       "relation": "references",
@@ -2901,9 +2684,9 @@
       "source_location": "L34",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_mapregistry_mapregistry_tryget",
-      "target": "raidmap_mapregistry_mapdefinition",
-      "confidence_score": 1.0
+      "target": "raidmap_mapregistry_mapdefinition"
     },
     {
       "relation": "references",
@@ -2912,9 +2695,9 @@
       "source_location": "L17",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "raidmap_mapregistry_mapregistry",
-      "target": "raidmap_mapregistry_cs_dictionary",
-      "confidence_score": 1.0
+      "target": "raidmap_mapregistry_cs_dictionary"
     },
     {
       "relation": "method",
@@ -2922,9 +2705,9 @@
       "source_file": "RaidMap/MapRegistry.cs",
       "source_location": "L34",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_mapregistry_mapregistry",
-      "target": "raidmap_mapregistry_mapregistry_tryget",
-      "confidence_score": 1.0
+      "target": "raidmap_mapregistry_mapregistry_tryget"
     },
     {
       "relation": "contains",
@@ -2932,9 +2715,9 @@
       "source_file": "RaidMap/RaidBroadcaster.cs",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidbroadcaster",
-      "target": "raidmap_raidbroadcaster_discordraidmap_raidmap",
-      "confidence_score": 1.0
+      "target": "raidmap_raidbroadcaster_discordraidmap_raidmap"
     },
     {
       "relation": "contains",
@@ -2942,9 +2725,9 @@
       "source_file": "RaidMap/RaidBroadcaster.cs",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidbroadcaster",
-      "target": "raidmap_raidbroadcaster_raidbroadcaster",
-      "confidence_score": 1.0
+      "target": "raidmap_raidbroadcaster_raidbroadcaster"
     },
     {
       "relation": "references",
@@ -2953,9 +2736,9 @@
       "source_location": "L11",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "raidmap_raidbroadcaster_raidbroadcaster",
-      "target": "discordwebhookclient",
-      "confidence_score": 1.0
+      "target": "discordwebhookclient"
     },
     {
       "relation": "references",
@@ -2964,9 +2747,9 @@
       "source_location": "L17",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "raidmap_raidbroadcaster_raidbroadcaster",
-      "target": "float",
-      "confidence_score": 1.0
+      "target": "float"
     },
     {
       "relation": "references",
@@ -2975,9 +2758,9 @@
       "source_location": "L19",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "raidmap_raidbroadcaster_raidbroadcaster",
-      "target": "raidmap_raidbroadcaster_cs_bool",
-      "confidence_score": 1.0
+      "target": "raidmap_raidbroadcaster_cs_bool"
     },
     {
       "relation": "references",
@@ -2986,9 +2769,9 @@
       "source_location": "L12",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "raidmap_raidbroadcaster_raidbroadcaster",
-      "target": "raidmap_raidbroadcaster_cs_object",
-      "confidence_score": 1.0
+      "target": "raidmap_raidbroadcaster_cs_object"
     },
     {
       "relation": "references",
@@ -2997,9 +2780,9 @@
       "source_location": "L14",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "raidmap_raidbroadcaster_raidbroadcaster",
-      "target": "raidmap_raidbroadcaster_cs_renderer",
-      "confidence_score": 1.0
+      "target": "raidmap_raidbroadcaster_cs_renderer"
     },
     {
       "relation": "method",
@@ -3007,9 +2790,9 @@
       "source_file": "RaidMap/RaidBroadcaster.cs",
       "source_location": "L62",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidbroadcaster_raidbroadcaster",
-      "target": "raidmap_raidbroadcaster_raidbroadcaster_renderanduploadasync",
-      "confidence_score": 1.0
+      "target": "raidmap_raidbroadcaster_raidbroadcaster_renderanduploadasync"
     },
     {
       "relation": "method",
@@ -3017,9 +2800,9 @@
       "source_file": "RaidMap/RaidBroadcaster.cs",
       "source_location": "L101",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidbroadcaster_raidbroadcaster",
-      "target": "raidmap_raidbroadcaster_raidbroadcaster_replacerenderer",
-      "confidence_score": 1.0
+      "target": "raidmap_raidbroadcaster_raidbroadcaster_replacerenderer"
     },
     {
       "relation": "method",
@@ -3027,9 +2810,9 @@
       "source_file": "RaidMap/RaidBroadcaster.cs",
       "source_location": "L95",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidbroadcaster_raidbroadcaster",
-      "target": "raidmap_raidbroadcaster_raidbroadcaster_setupdateinterval",
-      "confidence_score": 1.0
+      "target": "raidmap_raidbroadcaster_raidbroadcaster_setupdateinterval"
     },
     {
       "relation": "method",
@@ -3037,9 +2820,9 @@
       "source_file": "RaidMap/RaidBroadcaster.cs",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidbroadcaster_raidbroadcaster",
-      "target": "raidmap_raidbroadcaster_raidbroadcaster_start",
-      "confidence_score": 1.0
+      "target": "raidmap_raidbroadcaster_raidbroadcaster_start"
     },
     {
       "relation": "method",
@@ -3047,9 +2830,9 @@
       "source_file": "RaidMap/RaidBroadcaster.cs",
       "source_location": "L110",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidbroadcaster_raidbroadcaster",
-      "target": "raidmap_raidbroadcaster_raidbroadcaster_stop",
-      "confidence_score": 1.0
+      "target": "raidmap_raidbroadcaster_raidbroadcaster_stop"
     },
     {
       "relation": "method",
@@ -3057,9 +2840,9 @@
       "source_file": "RaidMap/RaidBroadcaster.cs",
       "source_location": "L35",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidbroadcaster_raidbroadcaster",
-      "target": "raidmap_raidbroadcaster_raidbroadcaster_update",
-      "confidence_score": 1.0
+      "target": "raidmap_raidbroadcaster_raidbroadcaster_update"
     },
     {
       "relation": "references",
@@ -3068,9 +2851,9 @@
       "source_location": "L10",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "raidmap_raidbroadcaster_raidbroadcaster",
-      "target": "raidstatecollector",
-      "confidence_score": 1.0
+      "target": "raidstatecollector"
     },
     {
       "relation": "references",
@@ -3079,9 +2862,9 @@
       "source_location": "L101",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_raidbroadcaster_raidbroadcaster_replacerenderer",
-      "target": "raidmap_raidbroadcaster_cs_renderer",
-      "confidence_score": 1.0
+      "target": "raidmap_raidbroadcaster_cs_renderer"
     },
     {
       "relation": "calls",
@@ -3090,9 +2873,9 @@
       "source_file": "RaidMap/RaidBroadcaster.cs",
       "source_location": "L53",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidbroadcaster_raidbroadcaster_update",
-      "target": "raidmap_raidbroadcaster_raidbroadcaster_renderanduploadasync",
-      "confidence_score": 1.0
+      "target": "raidmap_raidbroadcaster_raidbroadcaster_renderanduploadasync"
     },
     {
       "relation": "references",
@@ -3101,9 +2884,9 @@
       "source_location": "L62",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_raidbroadcaster_raidbroadcaster_renderanduploadasync",
-      "target": "raidmap_raidbroadcaster_cs_raidsnapshot",
-      "confidence_score": 1.0
+      "target": "raidmap_raidbroadcaster_cs_raidsnapshot"
     },
     {
       "relation": "references",
@@ -3112,9 +2895,9 @@
       "source_location": "L62",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "raidmap_raidbroadcaster_raidbroadcaster_renderanduploadasync",
-      "target": "raidmap_raidbroadcaster_cs_task",
-      "confidence_score": 1.0
+      "target": "raidmap_raidbroadcaster_cs_task"
     },
     {
       "relation": "contains",
@@ -3122,9 +2905,9 @@
       "source_file": "RaidMap/RaidMapLifecycle.cs",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidmaplifecycle",
-      "target": "raidmap_raidmaplifecycle_discordraidmap_discord",
-      "confidence_score": 1.0
+      "target": "raidmap_raidmaplifecycle_discordraidmap_discord"
     },
     {
       "relation": "contains",
@@ -3132,9 +2915,9 @@
       "source_file": "RaidMap/RaidMapLifecycle.cs",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidmaplifecycle",
-      "target": "raidmap_raidmaplifecycle_raidmaplifecycle",
-      "confidence_score": 1.0
+      "target": "raidmap_raidmaplifecycle_raidmaplifecycle"
     },
     {
       "relation": "references",
@@ -3143,9 +2926,9 @@
       "source_location": "L10",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "raidmap_raidmaplifecycle_raidmaplifecycle",
-      "target": "raidbroadcaster",
-      "confidence_score": 1.0
+      "target": "raidbroadcaster"
     },
     {
       "relation": "method",
@@ -3153,9 +2936,9 @@
       "source_file": "RaidMap/RaidMapLifecycle.cs",
       "source_location": "L61",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidmaplifecycle_raidmaplifecycle",
-      "target": "raidmap_raidmaplifecycle_raidmaplifecycle_createrenderer",
-      "confidence_score": 1.0
+      "target": "raidmap_raidmaplifecycle_raidmaplifecycle_createrenderer"
     },
     {
       "relation": "method",
@@ -3163,9 +2946,9 @@
       "source_file": "RaidMap/RaidMapLifecycle.cs",
       "source_location": "L56",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidmaplifecycle_raidmaplifecycle",
-      "target": "raidmap_raidmaplifecycle_raidmaplifecycle_dispose",
-      "confidence_score": 1.0
+      "target": "raidmap_raidmaplifecycle_raidmaplifecycle_dispose"
     },
     {
       "relation": "method",
@@ -3173,9 +2956,9 @@
       "source_file": "RaidMap/RaidMapLifecycle.cs",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidmaplifecycle_raidmaplifecycle",
-      "target": "raidmap_raidmaplifecycle_raidmaplifecycle_ongamestarted",
-      "confidence_score": 1.0
+      "target": "raidmap_raidmaplifecycle_raidmaplifecycle_ongamestarted"
     },
     {
       "relation": "method",
@@ -3183,9 +2966,9 @@
       "source_file": "RaidMap/RaidMapLifecycle.cs",
       "source_location": "L36",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidmaplifecycle_raidmaplifecycle",
-      "target": "raidmap_raidmaplifecycle_raidmaplifecycle_onraidend",
-      "confidence_score": 1.0
+      "target": "raidmap_raidmaplifecycle_raidmaplifecycle_onraidend"
     },
     {
       "relation": "method",
@@ -3193,9 +2976,9 @@
       "source_file": "RaidMap/RaidMapLifecycle.cs",
       "source_location": "L51",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidmaplifecycle_raidmaplifecycle",
-      "target": "raidmap_raidmaplifecycle_raidmaplifecycle_onrenderersettingschanged",
-      "confidence_score": 1.0
+      "target": "raidmap_raidmaplifecycle_raidmaplifecycle_onrenderersettingschanged"
     },
     {
       "relation": "method",
@@ -3203,9 +2986,9 @@
       "source_file": "RaidMap/RaidMapLifecycle.cs",
       "source_location": "L46",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidmaplifecycle_raidmaplifecycle",
-      "target": "raidmap_raidmaplifecycle_raidmaplifecycle_onupdateintervalchanged",
-      "confidence_score": 1.0
+      "target": "raidmap_raidmaplifecycle_raidmaplifecycle_onupdateintervalchanged"
     },
     {
       "relation": "method",
@@ -3213,9 +2996,9 @@
       "source_file": "RaidMap/RaidMapLifecycle.cs",
       "source_location": "L72",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidmaplifecycle_raidmaplifecycle",
-      "target": "raidmap_raidmaplifecycle_raidmaplifecycle_stopbroadcaster",
-      "confidence_score": 1.0
+      "target": "raidmap_raidmaplifecycle_raidmaplifecycle_stopbroadcaster"
     },
     {
       "relation": "method",
@@ -3223,9 +3006,9 @@
       "source_file": "RaidMap/RaidMapLifecycle.cs",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidmaplifecycle_raidmaplifecycle",
-      "target": "raidmap_raidmaplifecycle_raidmaplifecycle_update",
-      "confidence_score": 1.0
+      "target": "raidmap_raidmaplifecycle_raidmaplifecycle_update"
     },
     {
       "relation": "references",
@@ -3234,9 +3017,9 @@
       "source_location": "L12",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_raidmaplifecycle_raidmaplifecycle_ongamestarted",
-      "target": "raidmap_raidmaplifecycle_cs_gameworld",
-      "confidence_score": 1.0
+      "target": "raidmap_raidmaplifecycle_cs_gameworld"
     },
     {
       "relation": "calls",
@@ -3245,9 +3028,9 @@
       "source_file": "RaidMap/RaidMapLifecycle.cs",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidmaplifecycle_raidmaplifecycle_ongamestarted",
-      "target": "raidmap_raidmaplifecycle_raidmaplifecycle_createrenderer",
-      "confidence_score": 1.0
+      "target": "raidmap_raidmaplifecycle_raidmaplifecycle_createrenderer"
     },
     {
       "relation": "calls",
@@ -3256,9 +3039,9 @@
       "source_file": "RaidMap/RaidMapLifecycle.cs",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidmaplifecycle_raidmaplifecycle_ongamestarted",
-      "target": "raidmap_raidmaplifecycle_raidmaplifecycle_stopbroadcaster",
-      "confidence_score": 1.0
+      "target": "raidmap_raidmaplifecycle_raidmaplifecycle_stopbroadcaster"
     },
     {
       "relation": "calls",
@@ -3267,9 +3050,9 @@
       "source_file": "RaidMap/RaidMapLifecycle.cs",
       "source_location": "L38",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidmaplifecycle_raidmaplifecycle_onraidend",
-      "target": "raidmap_raidmaplifecycle_raidmaplifecycle_stopbroadcaster",
-      "confidence_score": 1.0
+      "target": "raidmap_raidmaplifecycle_raidmaplifecycle_stopbroadcaster"
     },
     {
       "relation": "references",
@@ -3278,9 +3061,9 @@
       "source_location": "L46",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_raidmaplifecycle_raidmaplifecycle_onupdateintervalchanged",
-      "target": "eventargs",
-      "confidence_score": 1.0
+      "target": "eventargs"
     },
     {
       "relation": "references",
@@ -3289,9 +3072,9 @@
       "source_location": "L51",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_raidmaplifecycle_raidmaplifecycle_onrenderersettingschanged",
-      "target": "eventargs",
-      "confidence_score": 1.0
+      "target": "eventargs"
     },
     {
       "relation": "calls",
@@ -3300,9 +3083,9 @@
       "source_file": "RaidMap/RaidMapLifecycle.cs",
       "source_location": "L53",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidmaplifecycle_raidmaplifecycle_onrenderersettingschanged",
-      "target": "raidmap_raidmaplifecycle_raidmaplifecycle_createrenderer",
-      "confidence_score": 1.0
+      "target": "raidmap_raidmaplifecycle_raidmaplifecycle_createrenderer"
     },
     {
       "relation": "calls",
@@ -3311,9 +3094,9 @@
       "source_file": "RaidMap/RaidMapLifecycle.cs",
       "source_location": "L58",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidmaplifecycle_raidmaplifecycle_dispose",
-      "target": "raidmap_raidmaplifecycle_raidmaplifecycle_stopbroadcaster",
-      "confidence_score": 1.0
+      "target": "raidmap_raidmaplifecycle_raidmaplifecycle_stopbroadcaster"
     },
     {
       "relation": "references",
@@ -3322,9 +3105,9 @@
       "source_location": "L61",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "raidmap_raidmaplifecycle_raidmaplifecycle_createrenderer",
-      "target": "raidmap_raidmaplifecycle_cs_renderer",
-      "confidence_score": 1.0
+      "target": "raidmap_raidmaplifecycle_cs_renderer"
     },
     {
       "relation": "contains",
@@ -3332,9 +3115,9 @@
       "source_file": "RaidMap/RaidSnapshot.cs",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidsnapshot",
-      "target": "raidmap_raidsnapshot_discordraidmap_raidmap",
-      "confidence_score": 1.0
+      "target": "raidmap_raidsnapshot_discordraidmap_raidmap"
     },
     {
       "relation": "contains",
@@ -3342,9 +3125,9 @@
       "source_file": "RaidMap/RaidSnapshot.cs",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidsnapshot",
-      "target": "raidmap_raidsnapshot_raidmarker",
-      "confidence_score": 1.0
+      "target": "raidmap_raidsnapshot_raidmarker"
     },
     {
       "relation": "contains",
@@ -3352,9 +3135,9 @@
       "source_file": "RaidMap/RaidSnapshot.cs",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidsnapshot",
-      "target": "raidmap_raidsnapshot_raidsnapshot",
-      "confidence_score": 1.0
+      "target": "raidmap_raidsnapshot_raidsnapshot"
     },
     {
       "relation": "contains",
@@ -3362,9 +3145,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector",
-      "target": "raidmap_raidstatecollector_discordraidmap_raidmap",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_discordraidmap_raidmap"
     },
     {
       "relation": "contains",
@@ -3372,9 +3155,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector",
-      "target": "raidmap_raidstatecollector_raidstatecollector",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector"
     },
     {
       "relation": "references",
@@ -3383,9 +3166,9 @@
       "source_location": "L18",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector",
-      "target": "fieldinfo",
-      "confidence_score": 1.0
+      "target": "fieldinfo"
     },
     {
       "relation": "references",
@@ -3394,8 +3177,19 @@
       "source_location": "L20",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector",
-      "target": "hashset",
+      "target": "hashset"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/RaidStateCollector.cs",
+      "source_location": "L49",
+      "weight": 1.0,
+      "context": "field",
+      "source": "raidmap_raidstatecollector_raidstatecollector",
+      "target": "player",
       "confidence_score": 1.0
     },
     {
@@ -3405,9 +3199,9 @@
       "source_location": "L43",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector",
-      "target": "raidmap_raidstatecollector_cs_gameworld",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_cs_gameworld"
     },
     {
       "relation": "references",
@@ -3416,30 +3210,9 @@
       "source_location": "L47",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector",
-      "target": "raidmap_raidstatecollector_cs_list",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L48",
-      "weight": 1.0,
-      "context": "field",
-      "source": "raidmap_raidstatecollector_raidstatecollector",
-      "target": "raidmap_raidstatecollector_cs_player",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L129",
-      "weight": 1.0,
-      "source": "raidmap_raidstatecollector_raidstatecollector",
-      "target": "raidmap_raidstatecollector_raidstatecollector_addairdrops",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_cs_list"
     },
     {
       "relation": "method",
@@ -3447,9 +3220,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L141",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector",
-      "target": "raidmap_raidstatecollector_raidstatecollector_addextracts",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_addextracts"
     },
     {
       "relation": "method",
@@ -3457,9 +3230,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L114",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector",
-      "target": "raidmap_raidstatecollector_raidstatecollector_addkilled",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_addkilled"
     },
     {
       "relation": "method",
@@ -3467,9 +3240,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L90",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector",
-      "target": "raidmap_raidstatecollector_raidstatecollector_addplayers",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_addplayers"
     },
     {
       "relation": "method",
@@ -3477,9 +3250,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L62",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector",
-      "target": "raidmap_raidstatecollector_raidstatecollector_collectsnapshot",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_collectsnapshot"
     },
     {
       "relation": "method",
@@ -3487,9 +3260,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L346",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector",
-      "target": "raidmap_raidstatecollector_raidstatecollector_dispose",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_dispose"
     },
     {
       "relation": "method",
@@ -3497,9 +3270,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L278",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector",
-      "target": "raidmap_raidstatecollector_raidstatecollector_getmaplocation",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_getmaplocation"
     },
     {
       "relation": "method",
@@ -3507,9 +3280,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L328",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector",
-      "target": "raidmap_raidstatecollector_raidstatecollector_getraidtimeremaining",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_getraidtimeremaining"
     },
     {
       "relation": "method",
@@ -3517,9 +3290,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L288",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector",
-      "target": "raidmap_raidstatecollector_raidstatecollector_getreferenceplayer",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_getreferenceplayer"
     },
     {
       "relation": "method",
@@ -3527,9 +3300,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L253",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector",
-      "target": "raidmap_raidstatecollector_raidstatecollector_hascorpse",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_hascorpse"
     },
     {
       "relation": "method",
@@ -3537,9 +3310,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L205",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector",
-      "target": "raidmap_raidstatecollector_raidstatecollector_isboss",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_isboss"
     },
     {
       "relation": "method",
@@ -3547,9 +3320,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L258",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector",
-      "target": "raidmap_raidstatecollector_raidstatecollector_isheadlessclient",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_isheadlessclient"
     },
     {
       "relation": "method",
@@ -3557,29 +3330,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L263",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector",
-      "target": "raidmap_raidstatecollector_raidstatecollector_istrackedhumanplayer",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L197",
-      "weight": 1.0,
-      "source": "raidmap_raidstatecollector_raidstatecollector",
-      "target": "raidmap_raidstatecollector_raidstatecollector_onairdroplanded",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L190",
-      "weight": 1.0,
-      "source": "raidmap_raidstatecollector_raidstatecollector",
-      "target": "raidmap_raidstatecollector_raidstatecollector_onplayerdead",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_istrackedhumanplayer"
     },
     {
       "relation": "method",
@@ -3587,9 +3340,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L211",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector",
-      "target": "raidmap_raidstatecollector_raidstatecollector_refreshkilledplayers",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_refreshkilledplayers"
     },
     {
       "relation": "method",
@@ -3597,9 +3350,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L323",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector",
-      "target": "raidmap_raidstatecollector_raidstatecollector_tomapposition",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_tomapposition"
     },
     {
       "relation": "method",
@@ -3607,9 +3360,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L225",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector",
-      "target": "raidmap_raidstatecollector_raidstatecollector_trytrackdeadplayer",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_trytrackdeadplayer"
     },
     {
       "relation": "method",
@@ -3617,96 +3370,85 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L233",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector",
-      "target": "raidmap_raidstatecollector_raidstatecollector_trytrackkilledplayer",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_trytrackkilledplayer"
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L141",
+      "source_location": "L123",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "raidmap_raidstatecollector_raidstatecollector_addextracts",
-      "target": "raidmap_raidstatecollector_cs_player",
+      "target": "player",
       "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L114",
+      "source_location": "L108",
       "weight": 1.0,
       "context": "generic_arg",
       "source": "raidmap_raidstatecollector_raidstatecollector_addkilled",
-      "target": "raidmap_raidstatecollector_cs_player",
+      "target": "player",
       "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L278",
+      "source_location": "L245",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "raidmap_raidstatecollector_raidstatecollector_getmaplocation",
-      "target": "raidmap_raidstatecollector_cs_player",
+      "target": "player",
       "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L288",
+      "source_location": "L255",
       "weight": 1.0,
       "context": "return_type",
       "source": "raidmap_raidstatecollector_raidstatecollector_getreferenceplayer",
-      "target": "raidmap_raidstatecollector_cs_player",
+      "target": "player",
       "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L253",
+      "source_location": "L220",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "raidmap_raidstatecollector_raidstatecollector_hascorpse",
-      "target": "raidmap_raidstatecollector_cs_player",
+      "target": "player",
       "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L190",
-      "weight": 1.0,
-      "context": "parameter_type",
-      "source": "raidmap_raidstatecollector_raidstatecollector_onplayerdead",
-      "target": "raidmap_raidstatecollector_cs_player",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L225",
+      "source_location": "L192",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "raidmap_raidstatecollector_raidstatecollector_trytrackdeadplayer",
-      "target": "raidmap_raidstatecollector_cs_player",
+      "target": "player",
       "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L233",
+      "source_location": "L200",
       "weight": 1.0,
       "context": "parameter_type",
       "source": "raidmap_raidstatecollector_raidstatecollector_trytrackkilledplayer",
-      "target": "raidmap_raidstatecollector_cs_player",
+      "target": "player",
       "confidence_score": 1.0
     },
     {
@@ -3716,20 +3458,9 @@
       "source_location": "L62",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_collectsnapshot",
-      "target": "raidmap_raidstatecollector_cs_raidsnapshot",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L84",
-      "weight": 1.0,
-      "source": "raidmap_raidstatecollector_raidstatecollector_collectsnapshot",
-      "target": "raidmap_raidstatecollector_raidstatecollector_addairdrops",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_cs_raidsnapshot"
     },
     {
       "relation": "calls",
@@ -3738,9 +3469,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L85",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_collectsnapshot",
-      "target": "raidmap_raidstatecollector_raidstatecollector_addextracts",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_addextracts"
     },
     {
       "relation": "calls",
@@ -3749,9 +3480,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L81",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_collectsnapshot",
-      "target": "raidmap_raidstatecollector_raidstatecollector_addkilled",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_addkilled"
     },
     {
       "relation": "calls",
@@ -3760,9 +3491,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L80",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_collectsnapshot",
-      "target": "raidmap_raidstatecollector_raidstatecollector_addplayers",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_addplayers"
     },
     {
       "relation": "calls",
@@ -3771,9 +3502,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L65",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_collectsnapshot",
-      "target": "raidmap_raidstatecollector_raidstatecollector_getmaplocation",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_getmaplocation"
     },
     {
       "relation": "calls",
@@ -3782,9 +3513,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L76",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_collectsnapshot",
-      "target": "raidmap_raidstatecollector_raidstatecollector_getraidtimeremaining",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_getraidtimeremaining"
     },
     {
       "relation": "calls",
@@ -3793,9 +3524,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L71",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_collectsnapshot",
-      "target": "raidmap_raidstatecollector_raidstatecollector_getreferenceplayer",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_getreferenceplayer"
     },
     {
       "relation": "calls",
@@ -3804,20 +3535,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L79",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_collectsnapshot",
-      "target": "raidmap_raidstatecollector_raidstatecollector_refreshkilledplayers",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L129",
-      "weight": 1.0,
-      "context": "parameter_type",
-      "source": "raidmap_raidstatecollector_raidstatecollector_addairdrops",
-      "target": "raidmap_raidstatecollector_cs_raidsnapshot",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_refreshkilledplayers"
     },
     {
       "relation": "references",
@@ -3826,9 +3546,9 @@
       "source_location": "L141",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_addextracts",
-      "target": "raidmap_raidstatecollector_cs_raidsnapshot",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_cs_raidsnapshot"
     },
     {
       "relation": "references",
@@ -3837,9 +3557,9 @@
       "source_location": "L114",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_addkilled",
-      "target": "raidmap_raidstatecollector_cs_raidsnapshot",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_cs_raidsnapshot"
     },
     {
       "relation": "references",
@@ -3848,9 +3568,9 @@
       "source_location": "L90",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_addplayers",
-      "target": "raidmap_raidstatecollector_cs_raidsnapshot",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_cs_raidsnapshot"
     },
     {
       "relation": "references",
@@ -3859,9 +3579,9 @@
       "source_location": "L90",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_addplayers",
-      "target": "iplayer",
-      "confidence_score": 1.0
+      "target": "iplayer"
     },
     {
       "relation": "calls",
@@ -3870,9 +3590,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L97",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_addplayers",
-      "target": "raidmap_raidstatecollector_raidstatecollector_isheadlessclient",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_isheadlessclient"
     },
     {
       "relation": "calls",
@@ -3881,9 +3601,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L99",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_addplayers",
-      "target": "raidmap_raidstatecollector_raidstatecollector_istrackedhumanplayer",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_istrackedhumanplayer"
     },
     {
       "relation": "calls",
@@ -3892,9 +3612,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L107",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_addplayers",
-      "target": "raidmap_raidstatecollector_raidstatecollector_tomapposition",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_tomapposition"
     },
     {
       "relation": "references",
@@ -3903,9 +3623,9 @@
       "source_location": "L205",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_isboss",
-      "target": "iplayer",
-      "confidence_score": 1.0
+      "target": "iplayer"
     },
     {
       "relation": "references",
@@ -3914,9 +3634,9 @@
       "source_location": "L258",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_isheadlessclient",
-      "target": "iplayer",
-      "confidence_score": 1.0
+      "target": "iplayer"
     },
     {
       "relation": "references",
@@ -3925,9 +3645,9 @@
       "source_location": "L263",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_istrackedhumanplayer",
-      "target": "iplayer",
-      "confidence_score": 1.0
+      "target": "iplayer"
     },
     {
       "relation": "references",
@@ -3936,9 +3656,9 @@
       "source_location": "L211",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_refreshkilledplayers",
-      "target": "iplayer",
-      "confidence_score": 1.0
+      "target": "iplayer"
     },
     {
       "relation": "references",
@@ -3947,9 +3667,9 @@
       "source_location": "L225",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_trytrackdeadplayer",
-      "target": "iplayer",
-      "confidence_score": 1.0
+      "target": "iplayer"
     },
     {
       "relation": "references",
@@ -3958,9 +3678,9 @@
       "source_location": "L233",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_trytrackkilledplayer",
-      "target": "iplayer",
-      "confidence_score": 1.0
+      "target": "iplayer"
     },
     {
       "relation": "references",
@@ -3969,9 +3689,9 @@
       "source_location": "L114",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_addkilled",
-      "target": "ienumerable",
-      "confidence_score": 1.0
+      "target": "ienumerable"
     },
     {
       "relation": "references",
@@ -3980,9 +3700,9 @@
       "source_location": "L114",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_addkilled",
-      "target": "raidmap_raidstatecollector_cs_raidmarkertype",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_cs_raidmarkertype"
     },
     {
       "relation": "calls",
@@ -3991,20 +3711,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L121",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_addkilled",
-      "target": "raidmap_raidstatecollector_raidstatecollector_tomapposition",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L136",
-      "weight": 1.0,
-      "source": "raidmap_raidstatecollector_raidstatecollector_addairdrops",
-      "target": "raidmap_raidstatecollector_raidstatecollector_tomapposition",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_tomapposition"
     },
     {
       "relation": "calls",
@@ -4013,53 +3722,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L185",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_addextracts",
-      "target": "raidmap_raidstatecollector_raidstatecollector_tomapposition",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L192",
-      "weight": 1.0,
-      "source": "raidmap_raidstatecollector_raidstatecollector_onplayerdead",
-      "target": "raidmap_raidstatecollector_raidstatecollector_getreferenceplayer",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L193",
-      "weight": 1.0,
-      "source": "raidmap_raidstatecollector_raidstatecollector_onplayerdead",
-      "target": "raidmap_raidstatecollector_raidstatecollector_trytrackdeadplayer",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L194",
-      "weight": 1.0,
-      "source": "raidmap_raidstatecollector_raidstatecollector_onplayerdead",
-      "target": "raidmap_raidstatecollector_raidstatecollector_trytrackkilledplayer",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "RaidMap/RaidStateCollector.cs",
-      "source_location": "L197",
-      "weight": 1.0,
-      "context": "parameter_type",
-      "source": "raidmap_raidstatecollector_raidstatecollector_onairdroplanded",
-      "target": "airdropsynchronizableobject",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_tomapposition"
     },
     {
       "relation": "calls",
@@ -4068,9 +3733,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L246",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_trytrackkilledplayer",
-      "target": "raidmap_raidstatecollector_raidstatecollector_isboss",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_isboss"
     },
     {
       "relation": "calls",
@@ -4079,9 +3744,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L215",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_refreshkilledplayers",
-      "target": "raidmap_raidstatecollector_raidstatecollector_hascorpse",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_hascorpse"
     },
     {
       "relation": "calls",
@@ -4090,9 +3755,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L220",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_refreshkilledplayers",
-      "target": "raidmap_raidstatecollector_raidstatecollector_trytrackdeadplayer",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_trytrackdeadplayer"
     },
     {
       "relation": "calls",
@@ -4101,9 +3766,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L221",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_refreshkilledplayers",
-      "target": "raidmap_raidstatecollector_raidstatecollector_trytrackkilledplayer",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_trytrackkilledplayer"
     },
     {
       "relation": "calls",
@@ -4112,9 +3777,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L227",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_trytrackdeadplayer",
-      "target": "raidmap_raidstatecollector_raidstatecollector_hascorpse",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_hascorpse"
     },
     {
       "relation": "calls",
@@ -4123,9 +3788,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L227",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_trytrackdeadplayer",
-      "target": "raidmap_raidstatecollector_raidstatecollector_istrackedhumanplayer",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_istrackedhumanplayer"
     },
     {
       "relation": "calls",
@@ -4134,9 +3799,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L235",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_trytrackkilledplayer",
-      "target": "raidmap_raidstatecollector_raidstatecollector_istrackedhumanplayer",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_istrackedhumanplayer"
     },
     {
       "relation": "calls",
@@ -4145,9 +3810,9 @@
       "source_file": "RaidMap/RaidStateCollector.cs",
       "source_location": "L290",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_getreferenceplayer",
-      "target": "raidmap_raidstatecollector_raidstatecollector_isheadlessclient",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_raidstatecollector_isheadlessclient"
     },
     {
       "relation": "references",
@@ -4156,9 +3821,9 @@
       "source_location": "L323",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "raidmap_raidstatecollector_raidstatecollector_tomapposition",
-      "target": "raidmap_raidstatecollector_cs_vector3",
-      "confidence_score": 1.0
+      "target": "raidmap_raidstatecollector_cs_vector3"
     },
     {
       "relation": "contains",
@@ -4166,9 +3831,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L500",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer",
-      "target": "raidmap_renderer_cpuimage",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_cpuimage"
     },
     {
       "relation": "contains",
@@ -4176,9 +3841,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer",
-      "target": "raidmap_renderer_discordraidmap_raidmap",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_discordraidmap_raidmap"
     },
     {
       "relation": "contains",
@@ -4186,8 +3851,30 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer",
-      "target": "raidmap_renderer_renderer",
+      "target": "raidmap_renderer_renderer"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L57",
+      "weight": 1.0,
+      "context": "field",
+      "source": "raidmap_renderer_renderer",
+      "target": "bitmap",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L54",
+      "weight": 1.0,
+      "context": "field",
+      "source": "raidmap_renderer_renderer",
+      "target": "byte",
       "confidence_score": 1.0
     },
     {
@@ -4197,8 +3884,52 @@
       "source_location": "L17",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "color32",
+      "target": "color32"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L56",
+      "weight": 1.0,
+      "context": "field",
+      "source": "raidmap_renderer_renderer",
+      "target": "font",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L58",
+      "weight": 1.0,
+      "context": "field",
+      "source": "raidmap_renderer_renderer",
+      "target": "graphics",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L36",
+      "weight": 1.0,
+      "context": "field",
+      "source": "raidmap_renderer_renderer",
+      "target": "imagecodecinfo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L45",
+      "weight": 1.0,
+      "context": "field",
+      "source": "raidmap_renderer_renderer",
+      "target": "mapimageformat",
       "confidence_score": 1.0
     },
     {
@@ -4208,9 +3939,9 @@
       "source_location": "L28",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "privatefontcollection",
-      "confidence_score": 1.0
+      "target": "privatefontcollection"
     },
     {
       "relation": "references",
@@ -4219,9 +3950,9 @@
       "source_location": "L27",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "raidmap_renderer_cs_dictionary",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_cs_dictionary"
     },
     {
       "relation": "references",
@@ -4230,9 +3961,9 @@
       "source_location": "L25",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "raidmap_renderer_cs_int",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_cs_int"
     },
     {
       "relation": "references",
@@ -4241,9 +3972,9 @@
       "source_location": "L23",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "raidmap_renderer_cs_string",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_cs_string"
     },
     {
       "relation": "method",
@@ -4251,9 +3982,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L398",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "raidmap_renderer_renderer_blend",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_blend"
     },
     {
       "relation": "method",
@@ -4261,29 +3992,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L342",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "raidmap_renderer_renderer_blendtextbitmap",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L119",
-      "weight": 1.0,
-      "source": "raidmap_renderer_renderer",
-      "target": "raidmap_renderer_renderer_copybackground",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L325",
-      "weight": 1.0,
-      "source": "raidmap_renderer_renderer",
-      "target": "raidmap_renderer_renderer_createconfiguredfont",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_blendtextbitmap"
     },
     {
       "relation": "method",
@@ -4291,9 +4002,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L492",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "raidmap_renderer_renderer_dispose",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_dispose"
     },
     {
       "relation": "method",
@@ -4301,9 +4012,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L205",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "raidmap_renderer_renderer_drawdeadplayer",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_drawdeadplayer"
     },
     {
       "relation": "method",
@@ -4311,9 +4022,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L281",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "raidmap_renderer_renderer_drawlabel",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_drawlabel"
     },
     {
       "relation": "method",
@@ -4321,9 +4032,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L275",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "raidmap_renderer_renderer_drawlabelcentered",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_drawlabelcentered"
     },
     {
       "relation": "method",
@@ -4331,9 +4042,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L211",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "raidmap_renderer_renderer_drawmarkericon",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_drawmarkericon"
     },
     {
       "relation": "method",
@@ -4341,9 +4052,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L199",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "raidmap_renderer_renderer_drawplayer",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_drawplayer"
     },
     {
       "relation": "method",
@@ -4351,9 +4062,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L71",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "raidmap_renderer_renderer_drawraidmarker",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_drawraidmarker"
     },
     {
       "relation": "method",
@@ -4361,18 +4072,18 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L300",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "raidmap_renderer_renderer_drawtruetypetext",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_drawtruetypetext"
     },
     {
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L456",
+      "source_location": "L526",
       "weight": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "raidmap_renderer_renderer_encodepng",
+      "target": "raidmap_renderer_renderer_encodeimage",
       "confidence_score": 1.0
     },
     {
@@ -4381,8 +4092,28 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L287",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "raidmap_renderer_renderer_formatplayername",
+      "target": "raidmap_renderer_renderer_formatplayername"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L156",
+      "weight": 1.0,
+      "source": "raidmap_renderer_renderer",
+      "target": "raidmap_renderer_renderer_getcanvas",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L377",
+      "weight": 1.0,
+      "source": "raidmap_renderer_renderer",
+      "target": "raidmap_renderer_renderer_getfont",
       "confidence_score": 1.0
     },
     {
@@ -4391,8 +4122,18 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L145",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "raidmap_renderer_renderer_getmarkerfilename",
+      "target": "raidmap_renderer_renderer_getmarkerfilename"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L365",
+      "weight": 1.0,
+      "source": "raidmap_renderer_renderer",
+      "target": "raidmap_renderer_renderer_getmeasuregraphics",
       "confidence_score": 1.0
     },
     {
@@ -4401,9 +4142,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L266",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "raidmap_renderer_renderer_lerp",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_lerp"
     },
     {
       "relation": "method",
@@ -4411,9 +4152,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L101",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "raidmap_renderer_renderer_loadbackground",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_loadbackground"
     },
     {
       "relation": "method",
@@ -4421,9 +4162,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L126",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "raidmap_renderer_renderer_loadmarker",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_loadmarker"
     },
     {
       "relation": "method",
@@ -4431,9 +4172,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L413",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "raidmap_renderer_renderer_loadpng",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_loadpng"
     },
     {
       "relation": "method",
@@ -4441,9 +4182,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L292",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "raidmap_renderer_renderer_measuretext",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_measuretext"
     },
     {
       "relation": "method",
@@ -4451,9 +4192,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L160",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "raidmap_renderer_renderer_project",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_project"
     },
     {
       "relation": "method",
@@ -4461,8 +4202,18 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L40",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "raidmap_renderer_renderer_render",
+      "target": "raidmap_renderer_renderer_render"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L589",
+      "weight": 1.0,
+      "source": "raidmap_renderer_renderer",
+      "target": "raidmap_renderer_renderer_resolvejpegencoder",
       "confidence_score": 1.0
     },
     {
@@ -4471,9 +4222,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L191",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "raidmap_renderer_renderer_rotate",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_rotate"
     },
     {
       "relation": "method",
@@ -4481,9 +4232,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L252",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "raidmap_renderer_renderer_samplebilinear",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_samplebilinear"
     },
     {
       "relation": "method",
@@ -4491,9 +4242,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L387",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer",
-      "target": "raidmap_renderer_renderer_setpixel",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_setpixel"
     },
     {
       "relation": "references",
@@ -4502,8 +4253,162 @@
       "source_location": "L398",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_blend",
+      "target": "color32"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L342",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "confidence_score": 1.0,
+      "source": "raidmap_renderer_renderer_blendtextbitmap",
+      "target": "color32"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L205",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "confidence_score": 1.0,
+      "source": "raidmap_renderer_renderer_drawdeadplayer",
+      "target": "color32"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L281",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "confidence_score": 1.0,
+      "source": "raidmap_renderer_renderer_drawlabel",
+      "target": "color32"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L275",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "confidence_score": 1.0,
+      "source": "raidmap_renderer_renderer_drawlabelcentered",
+      "target": "color32"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L211",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "confidence_score": 1.0,
+      "source": "raidmap_renderer_renderer_drawmarkericon",
+      "target": "color32"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L199",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "confidence_score": 1.0,
+      "source": "raidmap_renderer_renderer_drawplayer",
+      "target": "color32"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L71",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "confidence_score": 1.0,
+      "source": "raidmap_renderer_renderer_drawraidmarker",
+      "target": "color32"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L300",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "confidence_score": 1.0,
+      "source": "raidmap_renderer_renderer_drawtruetypetext",
+      "target": "color32"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L526",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "raidmap_renderer_renderer_encodeimage",
       "target": "color32",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L156",
+      "weight": 1.0,
+      "context": "return_type",
+      "source": "raidmap_renderer_renderer_getcanvas",
+      "target": "color32",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L266",
+      "weight": 1.0,
+      "context": "return_type",
+      "confidence_score": 1.0,
+      "source": "raidmap_renderer_renderer_lerp",
+      "target": "color32"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L252",
+      "weight": 1.0,
+      "context": "return_type",
+      "confidence_score": 1.0,
+      "source": "raidmap_renderer_renderer_samplebilinear",
+      "target": "color32"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L387",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "confidence_score": 1.0,
+      "source": "raidmap_renderer_renderer_setpixel",
+      "target": "color32"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L589",
+      "weight": 1.0,
+      "context": "return_type",
+      "source": "raidmap_renderer_renderer_resolvejpegencoder",
+      "target": "imagecodecinfo",
       "confidence_score": 1.0
     },
     {
@@ -4513,140 +4418,30 @@
       "source_location": "L342",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_blendtextbitmap",
-      "target": "color32",
-      "confidence_score": 1.0
+      "target": "bitmap"
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L119",
+      "source_location": "L377",
       "weight": 1.0,
       "context": "return_type",
-      "source": "raidmap_renderer_renderer_copybackground",
-      "target": "color32",
+      "source": "raidmap_renderer_renderer_getfont",
+      "target": "font",
       "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L205",
-      "weight": 1.0,
-      "context": "parameter_type",
-      "source": "raidmap_renderer_renderer_drawdeadplayer",
-      "target": "color32",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L281",
-      "weight": 1.0,
-      "context": "parameter_type",
-      "source": "raidmap_renderer_renderer_drawlabel",
-      "target": "color32",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L275",
-      "weight": 1.0,
-      "context": "parameter_type",
-      "source": "raidmap_renderer_renderer_drawlabelcentered",
-      "target": "color32",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L211",
-      "weight": 1.0,
-      "context": "parameter_type",
-      "source": "raidmap_renderer_renderer_drawmarkericon",
-      "target": "color32",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L199",
-      "weight": 1.0,
-      "context": "parameter_type",
-      "source": "raidmap_renderer_renderer_drawplayer",
-      "target": "color32",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L71",
-      "weight": 1.0,
-      "context": "parameter_type",
-      "source": "raidmap_renderer_renderer_drawraidmarker",
-      "target": "color32",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L300",
-      "weight": 1.0,
-      "context": "parameter_type",
-      "source": "raidmap_renderer_renderer_drawtruetypetext",
-      "target": "color32",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L456",
-      "weight": 1.0,
-      "context": "parameter_type",
-      "source": "raidmap_renderer_renderer_encodepng",
-      "target": "color32",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L266",
+      "source_location": "L365",
       "weight": 1.0,
       "context": "return_type",
-      "source": "raidmap_renderer_renderer_lerp",
-      "target": "color32",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L252",
-      "weight": 1.0,
-      "context": "return_type",
-      "source": "raidmap_renderer_renderer_samplebilinear",
-      "target": "color32",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L387",
-      "weight": 1.0,
-      "context": "parameter_type",
-      "source": "raidmap_renderer_renderer_setpixel",
-      "target": "color32",
+      "source": "raidmap_renderer_renderer_getmeasuregraphics",
+      "target": "graphics",
       "confidence_score": 1.0
     },
     {
@@ -4656,20 +4451,9 @@
       "source_location": "L40",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_render",
-      "target": "raidmap_renderer_cs_raidsnapshot",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L45",
-      "weight": 1.0,
-      "source": "raidmap_renderer_renderer_render",
-      "target": "raidmap_renderer_renderer_copybackground",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_cs_raidsnapshot"
     },
     {
       "relation": "calls",
@@ -4678,9 +4462,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L65",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_render",
-      "target": "raidmap_renderer_renderer_drawlabel",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_drawlabel"
     },
     {
       "relation": "calls",
@@ -4689,8 +4473,19 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L52",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_render",
-      "target": "raidmap_renderer_renderer_drawraidmarker",
+      "target": "raidmap_renderer_renderer_drawraidmarker"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L104",
+      "weight": 1.0,
+      "source": "raidmap_renderer_renderer_render",
+      "target": "raidmap_renderer_renderer_encodeimage",
       "confidence_score": 1.0
     },
     {
@@ -4698,10 +4493,10 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L68",
+      "source_location": "L81",
       "weight": 1.0,
       "source": "raidmap_renderer_renderer_render",
-      "target": "raidmap_renderer_renderer_encodepng",
+      "target": "raidmap_renderer_renderer_getcanvas",
       "confidence_score": 1.0
     },
     {
@@ -4711,8 +4506,19 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L42",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_render",
-      "target": "raidmap_renderer_renderer_loadbackground",
+      "target": "raidmap_renderer_renderer_loadbackground"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L76",
+      "weight": 1.0,
+      "context": "return_type",
+      "source": "raidmap_renderer_renderer_render",
+      "target": "renderedimage",
       "confidence_score": 1.0
     },
     {
@@ -4722,9 +4528,9 @@
       "source_location": "L71",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_drawraidmarker",
-      "target": "raidmap_renderer_cs_raidsnapshot",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_cs_raidsnapshot"
     },
     {
       "relation": "calls",
@@ -4733,9 +4539,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L86",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_drawraidmarker",
-      "target": "raidmap_renderer_renderer_drawdeadplayer",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_drawdeadplayer"
     },
     {
       "relation": "calls",
@@ -4744,9 +4550,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L82",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_drawraidmarker",
-      "target": "raidmap_renderer_renderer_drawmarkericon",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_drawmarkericon"
     },
     {
       "relation": "calls",
@@ -4755,9 +4561,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L90",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_drawraidmarker",
-      "target": "raidmap_renderer_renderer_drawplayer",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_drawplayer"
     },
     {
       "relation": "calls",
@@ -4766,9 +4572,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L73",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_drawraidmarker",
-      "target": "raidmap_renderer_renderer_project",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_project"
     },
     {
       "relation": "references",
@@ -4777,9 +4583,9 @@
       "source_location": "L71",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_drawraidmarker",
-      "target": "raidmarker",
-      "confidence_score": 1.0
+      "target": "raidmarker"
     },
     {
       "relation": "references",
@@ -4788,9 +4594,9 @@
       "source_location": "L101",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_loadbackground",
-      "target": "cpuimage",
-      "confidence_score": 1.0
+      "target": "cpuimage"
     },
     {
       "relation": "references",
@@ -4799,9 +4605,9 @@
       "source_location": "L101",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_loadbackground",
-      "target": "mapdefinition",
-      "confidence_score": 1.0
+      "target": "mapdefinition"
     },
     {
       "relation": "calls",
@@ -4810,9 +4616,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L114",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_loadbackground",
-      "target": "raidmap_renderer_renderer_loadpng",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_loadpng"
     },
     {
       "relation": "references",
@@ -4821,18 +4627,18 @@
       "source_location": "L160",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_project",
-      "target": "mapdefinition",
-      "confidence_score": 1.0
+      "target": "mapdefinition"
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L119",
+      "source_location": "L156",
       "weight": 1.0,
       "context": "parameter_type",
-      "source": "raidmap_renderer_renderer_copybackground",
+      "source": "raidmap_renderer_renderer_getcanvas",
       "target": "cpuimage",
       "confidence_score": 1.0
     },
@@ -4843,9 +4649,9 @@
       "source_location": "L126",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_loadmarker",
-      "target": "cpuimage",
-      "confidence_score": 1.0
+      "target": "cpuimage"
     },
     {
       "relation": "references",
@@ -4854,9 +4660,9 @@
       "source_location": "L413",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_loadpng",
-      "target": "cpuimage",
-      "confidence_score": 1.0
+      "target": "cpuimage"
     },
     {
       "relation": "calls",
@@ -4865,9 +4671,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L213",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_drawmarkericon",
-      "target": "raidmap_renderer_renderer_loadmarker",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_loadmarker"
     },
     {
       "relation": "references",
@@ -4876,9 +4682,9 @@
       "source_location": "L126",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_loadmarker",
-      "target": "raidmap_renderer_cs_raidmarkertype",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_cs_raidmarkertype"
     },
     {
       "relation": "calls",
@@ -4887,9 +4693,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L133",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_loadmarker",
-      "target": "raidmap_renderer_renderer_getmarkerfilename",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_getmarkerfilename"
     },
     {
       "relation": "calls",
@@ -4898,9 +4704,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L140",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_loadmarker",
-      "target": "raidmap_renderer_renderer_loadpng",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_loadpng"
     },
     {
       "relation": "references",
@@ -4909,9 +4715,9 @@
       "source_location": "L211",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_drawmarkericon",
-      "target": "raidmap_renderer_cs_raidmarkertype",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_cs_raidmarkertype"
     },
     {
       "relation": "references",
@@ -4920,9 +4726,9 @@
       "source_location": "L145",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_getmarkerfilename",
-      "target": "raidmap_renderer_cs_raidmarkertype",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_cs_raidmarkertype"
     },
     {
       "relation": "references",
@@ -4931,9 +4737,9 @@
       "source_location": "L160",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_project",
-      "target": "raidmap_renderer_cs_vector3",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_cs_vector3"
     },
     {
       "relation": "calls",
@@ -4942,9 +4748,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L164",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_project",
-      "target": "raidmap_renderer_renderer_rotate",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_rotate"
     },
     {
       "relation": "references",
@@ -4953,9 +4759,9 @@
       "source_location": "L160",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_project",
-      "target": "vector2int",
-      "confidence_score": 1.0
+      "target": "vector2int"
     },
     {
       "relation": "references",
@@ -4964,9 +4770,9 @@
       "source_location": "L205",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_drawdeadplayer",
-      "target": "vector2int",
-      "confidence_score": 1.0
+      "target": "vector2int"
     },
     {
       "relation": "references",
@@ -4975,9 +4781,9 @@
       "source_location": "L211",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_drawmarkericon",
-      "target": "vector2int",
-      "confidence_score": 1.0
+      "target": "vector2int"
     },
     {
       "relation": "references",
@@ -4986,9 +4792,9 @@
       "source_location": "L199",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_drawplayer",
-      "target": "vector2int",
-      "confidence_score": 1.0
+      "target": "vector2int"
     },
     {
       "relation": "references",
@@ -4997,9 +4803,9 @@
       "source_location": "L191",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_rotate",
-      "target": "vector2",
-      "confidence_score": 1.0
+      "target": "vector2"
     },
     {
       "relation": "calls",
@@ -5008,9 +4814,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L202",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_drawplayer",
-      "target": "raidmap_renderer_renderer_drawlabelcentered",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_drawlabelcentered"
     },
     {
       "relation": "calls",
@@ -5019,9 +4825,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L201",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_drawplayer",
-      "target": "raidmap_renderer_renderer_drawmarkericon",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_drawmarkericon"
     },
     {
       "relation": "calls",
@@ -5030,9 +4836,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L202",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_drawplayer",
-      "target": "raidmap_renderer_renderer_formatplayername",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_formatplayername"
     },
     {
       "relation": "calls",
@@ -5041,9 +4847,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L208",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_drawdeadplayer",
-      "target": "raidmap_renderer_renderer_drawlabelcentered",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_drawlabelcentered"
     },
     {
       "relation": "calls",
@@ -5052,9 +4858,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L207",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_drawdeadplayer",
-      "target": "raidmap_renderer_renderer_drawmarkericon",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_drawmarkericon"
     },
     {
       "relation": "calls",
@@ -5063,9 +4869,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L208",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_drawdeadplayer",
-      "target": "raidmap_renderer_renderer_formatplayername",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_formatplayername"
     },
     {
       "relation": "calls",
@@ -5074,9 +4880,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L241",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_drawmarkericon",
-      "target": "raidmap_renderer_renderer_samplebilinear",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_samplebilinear"
     },
     {
       "relation": "calls",
@@ -5085,9 +4891,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L247",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_drawmarkericon",
-      "target": "raidmap_renderer_renderer_setpixel",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_setpixel"
     },
     {
       "relation": "calls",
@@ -5096,9 +4902,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L261",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_samplebilinear",
-      "target": "raidmap_renderer_renderer_lerp",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_lerp"
     },
     {
       "relation": "calls",
@@ -5107,9 +4913,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L278",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_drawlabelcentered",
-      "target": "raidmap_renderer_renderer_drawlabel",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_drawlabel"
     },
     {
       "relation": "calls",
@@ -5118,9 +4924,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L277",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_drawlabelcentered",
-      "target": "raidmap_renderer_renderer_measuretext",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_measuretext"
     },
     {
       "relation": "calls",
@@ -5129,8 +4935,19 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L283",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_drawlabel",
-      "target": "raidmap_renderer_renderer_drawtruetypetext",
+      "target": "raidmap_renderer_renderer_drawtruetypetext"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L337",
+      "weight": 1.0,
+      "source": "raidmap_renderer_renderer_measuretext",
+      "target": "raidmap_renderer_renderer_getfont",
       "confidence_score": 1.0
     },
     {
@@ -5138,10 +4955,10 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L296",
+      "source_location": "L336",
       "weight": 1.0,
       "source": "raidmap_renderer_renderer_measuretext",
-      "target": "raidmap_renderer_renderer_createconfiguredfont",
+      "target": "raidmap_renderer_renderer_getmeasuregraphics",
       "confidence_score": 1.0
     },
     {
@@ -5151,8 +4968,19 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L322",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_drawtruetypetext",
-      "target": "raidmap_renderer_renderer_blendtextbitmap",
+      "target": "raidmap_renderer_renderer_blendtextbitmap"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L348",
+      "weight": 1.0,
+      "source": "raidmap_renderer_renderer_drawtruetypetext",
+      "target": "raidmap_renderer_renderer_getfont",
       "confidence_score": 1.0
     },
     {
@@ -5160,32 +4988,10 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L307",
+      "source_location": "L349",
       "weight": 1.0,
       "source": "raidmap_renderer_renderer_drawtruetypetext",
-      "target": "raidmap_renderer_renderer_createconfiguredfont",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L325",
-      "weight": 1.0,
-      "context": "return_type",
-      "source": "raidmap_renderer_renderer_createconfiguredfont",
-      "target": "font",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "RaidMap/Renderer.cs",
-      "source_location": "L342",
-      "weight": 1.0,
-      "context": "parameter_type",
-      "source": "raidmap_renderer_renderer_blendtextbitmap",
-      "target": "bitmap",
+      "target": "raidmap_renderer_renderer_getmeasuregraphics",
       "confidence_score": 1.0
     },
     {
@@ -5195,9 +5001,9 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L377",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_blendtextbitmap",
-      "target": "raidmap_renderer_renderer_setpixel",
-      "confidence_score": 1.0
+      "target": "raidmap_renderer_renderer_setpixel"
     },
     {
       "relation": "calls",
@@ -5206,8 +5012,19 @@
       "source_file": "RaidMap/Renderer.cs",
       "source_location": "L395",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "raidmap_renderer_renderer_setpixel",
-      "target": "raidmap_renderer_renderer_blend",
+      "target": "raidmap_renderer_renderer_blend"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "RaidMap/Renderer.cs",
+      "source_location": "L531",
+      "weight": 1.0,
+      "source": "raidmap_renderer_renderer_encodeimage",
+      "target": "raidmap_renderer_renderer_dispose",
       "confidence_score": 1.0
     },
     {
@@ -5216,9 +5033,9 @@
       "source_file": "Settings.cs",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "settings",
-      "target": "settings_discordraidmap",
-      "confidence_score": 1.0
+      "target": "settings_discordraidmap"
     },
     {
       "relation": "contains",
@@ -5226,9 +5043,9 @@
       "source_file": "Settings.cs",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "settings",
-      "target": "settings_settings",
-      "confidence_score": 1.0
+      "target": "settings_settings"
     },
     {
       "relation": "references",
@@ -5237,9 +5054,9 @@
       "source_location": "L20",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "settings_settings",
-      "target": "configentry",
-      "confidence_score": 1.0
+      "target": "configentry"
     },
     {
       "relation": "references",
@@ -5248,9 +5065,9 @@
       "source_location": "L12",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "settings_settings",
-      "target": "configfile",
-      "confidence_score": 1.0
+      "target": "configfile"
     },
     {
       "relation": "references",
@@ -5259,9 +5076,9 @@
       "source_location": "L13",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "settings_settings",
-      "target": "settings_cs_list",
-      "confidence_score": 1.0
+      "target": "settings_cs_list"
     },
     {
       "relation": "references",
@@ -5270,9 +5087,9 @@
       "source_location": "L21",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "settings_settings",
-      "target": "settings_cs_string",
-      "confidence_score": 1.0
+      "target": "settings_cs_string"
     },
     {
       "relation": "method",
@@ -5280,9 +5097,9 @@
       "source_file": "Settings.cs",
       "source_location": "L72",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "settings_settings",
-      "target": "settings_settings_getfontchoices",
-      "confidence_score": 1.0
+      "target": "settings_settings_getfontchoices"
     },
     {
       "relation": "method",
@@ -5290,9 +5107,9 @@
       "source_file": "Settings.cs",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "settings_settings",
-      "target": "settings_settings_init",
-      "confidence_score": 1.0
+      "target": "settings_settings_init"
     },
     {
       "relation": "method",
@@ -5300,9 +5117,9 @@
       "source_file": "Settings.cs",
       "source_location": "L84",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "settings_settings",
-      "target": "settings_settings_recalcorder",
-      "confidence_score": 1.0
+      "target": "settings_settings_recalcorder"
     },
     {
       "relation": "references",
@@ -5311,9 +5128,9 @@
       "source_location": "L22",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "settings_settings_init",
-      "target": "configfile",
-      "confidence_score": 1.0
+      "target": "configfile"
     },
     {
       "relation": "calls",
@@ -5322,9 +5139,9 @@
       "source_file": "Settings.cs",
       "source_location": "L53",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "settings_settings_init",
-      "target": "settings_settings_getfontchoices",
-      "confidence_score": 1.0
+      "target": "settings_settings_getfontchoices"
     },
     {
       "relation": "calls",
@@ -5333,11 +5150,11 @@
       "source_file": "Settings.cs",
       "source_location": "L68",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "settings_settings_init",
-      "target": "settings_settings_recalcorder",
-      "confidence_score": 1.0
+      "target": "settings_settings_recalcorder"
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "735553785474b8eb2e049377d14e144ff087d77d"
+  "built_at_commit": "56252cb43bbb481855804645d96fa27b6a795d3f"
 }
