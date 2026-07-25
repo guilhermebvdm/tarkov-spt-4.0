@@ -14,7 +14,13 @@ namespace TRLImmersiveCombatMedicine.Trauma
 
         /// <summary>FORTE (queda executada + tentativa negada): OnAgony com importance explícita — fura o Busy do
         /// Speaker em tiroteio (demand só fura OnDemandOnly+roll — correção P5).
-        /// ref: PhraseSpeakerClass.cs:175/206-227; EPhraseTrigger.cs:6.</summary>
+        /// ref: PhraseSpeakerClass.cs:175/206-227; EPhraseTrigger.cs:6.
+        /// DECISÃO A3 (009, 2026-07-20): compete pelo MESMO Speaker/importance:100 com TryPlayStrong (005/lockout
+        /// de re-ADS). Investigado e ACEITO sem arbitragem — precondição estreita (pernas em ciclo de queda E braços
+        /// em lockout no MESMO player, sobrepostos no tempo), sem sintoma documentado (memory/sessions.md P-3.6/P-4.1),
+        /// e o lado 005 já tolera a perda via retry 0,3s + log voice=skipped (ArmsConsumer.TryBlockReAds). O motor
+        /// vanilla (PhraseSpeakerClass.Play, Busy && importance<=Int_0 → :207-211) já arbitra "primeiro chega, leva" —
+        /// nenhuma camada adicional foi criada por cima dessa garantia (spec funcional 009 corner A3).</summary>
         internal static void PlayStrong(Player p)
         {
             if (!Allowed(p, strong: true)) return;

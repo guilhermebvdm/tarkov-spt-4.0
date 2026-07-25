@@ -80,7 +80,7 @@ Fonte de verdade do redesign do sistema de trauma (pernas/braços/estômago/desm
 - **D17. Revert por cura REMOTA**: estado reverte também quando o efeito é removido via rede (cura do médico coop), não só por cura própria.
 - **D18. Cair forçado sem dano de queda**; extração funciona prone; transit/fim de raid reseta o ciclo; a janela de 3 s andando com perna zerada TOMA o dano vanilla de andar (aceito como realismo).
 - **D19. Observabilidade/perf**: todo roll logado (dano, vida, p, resultado) p/ balanceamento; motor por evento + polling <=4 Hz.
-- **D20. Suíte de compat do 009**: SAIN, ORBIT, UNTAR, CustomClasses (Tank), SPTRecoilRework, Fontaine-FOVFix, BringBackConcussion, Visceral Combat.
+- **D20. Suíte de compat do 009**: SAIN, ORBIT, UNTAR, CustomClasses (Tank), SPTRecoilRework, Fontaine-FOVFix, BringBackConcussion, Visceral Combat, **tarkin-ladders** (escadas interativas reais na instalação — guard D7 de adiar agachar/cair em escada já implementado desde o item 004; formalizado na lista D20 pelo item 009, ver `docs/trauma-compat-suite.md`).
 - **D10. Substituição incremental**: cada item desliga o sistema antigo na SUA entrega; migração de configs do usuário no 010. Spike 001 entrega fallback (caps de velocidade) se não houver mancar vanilla por lado/nível.
 
 ## Substituições vs sistema atual
@@ -101,3 +101,4 @@ Fonte de verdade do redesign do sistema de trauma (pernas/braços/estômago/desm
 | 2026-07-18 | Guilherme | Validação de backlog: decisões 14–17 (analgésico reavalia na hora; pisos 25/10 no desmaio; bots cirúrgico+SAIN com X configurável; lockout de re-ADS) + defaults D1–D10. |
 | 2026-07-18 | Guilherme | Rodada A do item 001 corrigiu a redação do D12 (patches reais do CustomClasses verificados no fonte). |
 | 2026-07-18 | Guilherme | Validação FMEA (rodada 3): decisões 18–22 (N1/N2=total; anti-thrash; feedback diegético+toast; injeção legacy aposentada; i18n EN default + PT) + defaults D11–D20. |
+| 2026-07-20 | Guilherme (com Claude) | Item 009 formalizou `tarkin-ladders` na lista D20 — mod já coberto pelo guard D7 desde o item 004, mas nunca listado explicitamente na decisão. |

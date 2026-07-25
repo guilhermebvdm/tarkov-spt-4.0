@@ -33,6 +33,37 @@
 
 ---
 
+## 2026-07-25 (GMT-3) — Sessão 5: item 009 (hardening coop) entregue — P-4.1 fechada; iniciando item 010
+
+**Tema central:** Fechar o item 009 (hardening coop/bots do Trauma 2.0 — helper compartilhado `TraumaConsumerLifecycle` + decisão A3 de voz dupla-fonte), que já vinha com Bloco A implementado e 1ª rodada de code-review sem bloqueadores de uma sessão anterior; rodar a 2ª rodada de code-review (plano 2× dado o risco da refatoração A4 tocar 4 consumidores já entregues) e então avançar para o item 010.
+
+**Decisões-chave:**
+- Decisão A3 (item 009, documentação pura — sem mudança de código): colisão de voz dupla-fonte entre `TraumaVoice.PlayStrong` (item 004, queda/negação de levantar) e `TraumaVoice.TryPlayStrong` (item 005, lockout de re-ADS) — ambos competem pelo mesmo `Player.Speaker.Play(OnAgony, importance:100)`. ACEITA SEM ARBITRAGEM: o motor vanilla `PhraseSpeakerClass.Play` já arbitra "primeiro chega, leva"; a precondição de colisão (queda E lockout de ADS no mesmo frame) é estreita; o item 005 já tolera a perda com retry 0,3s + log. Registrada como comentário XML acima de `PlayStrong` em `TraumaVoice.cs` — zero mudança de assinatura/lógica, confirmado por 2 rodadas de code-review.
+- CR-01-01 (rodada 1, 🟢 opcional): campo `_onToggleOn` do `TraumaStomachConsumer` (sempre `null`, warning `CS0649`) removido — `null` literal passado direto no call site de `Tick()`. Aplicado e recompilado (0 erros, warning eliminado).
+- CR-02-01 (rodada 2, 🟢 opcional, categoria D): cada consumidor criava 2 delegates independentes para o mesmo `IsActive` (um dentro de `TraumaConsumerRegistry.Register`, outro em `_isActiveDelegate` para o helper A4). Aplicado com **modificação** (não a sugestão literal do achado, que propunha expor um getter `TryGetIsActive` no registry — rejeitada por trocar uma alocação desprezível por acoplamento novo motor↔helper): o delegate agora é criado 1× no início do `Awake()` e a MESMA referência de campo é passada tanto para `Register(...)` quanto usada pelo `Tick()` — zero acoplamento novo, mesma economia de alocação. Aplicado nos 4 consumidores, recompilado (0 erros).
+- Diretiva de processo confirmada nesta sessão: mesmo achados 🟢 puramente cosméticos, cuja própria review recomenda "não mudar nada", são aplicados por padrão (ver [[feedback-apply-all-review-findings]]) — a exceção é achado factualmente ERRADO, não achado de baixo valor. Quando a sugestão literal do achado tem um trade-off pior que uma alternativa óbvia, aplicar a alternativa e documentar como "aceito com modificação", não pular o achado.
+
+**Lições / hipóteses descartadas:**
+- Nenhuma lição nova de arquitetura — a rodada 2 confirmou independentemente (via `git diff HEAD` real, já que o working tree seguia não commitado) que não há regressão em nenhum dos 5 arquivos tocados por A4/A3. `graphify affected` teve granularidade insuficiente para provar ausência de callers (grafo "aponta", não "prova" — leitura direta do código foi a evidência real usada).
+
+**Atividade cronológica:**
+1. Retomada: CR-01-01 (rodada 1) aplicado no código (3 edições em `TraumaStomachConsumer.cs`), recompilado, marcado `✅ Aplicado` no artefato `009-coop-hardening-04-code-review-01.md`.
+2. Agent (code-review rodada 2) lançado em background — 0🔴/🟠/🟡, 1🟢 (CR-02-01). Item 009 confirmado pronto para fechar em ambas as rodadas.
+3. Em paralelo, Agent (Explore) mapeou o escopo real do item 010 (6 sub-itens: configs legados, sondas `[DEBUG-ICM]`, `PROPRIEDADES.md`, distância de interação final, i18n EN/PT dos textos legados, zip de release) — relatório completo com paths/linhas, sem escrever spec ainda.
+4. CR-02-01 aplicado com modificação nos 4 consumidores (`TraumaLegsConsumer`/`TraumaFallCycleConsumer`/`TraumaArmsConsumer`/`TraumaStomachConsumer`), recompilado, marcado `✅ Aplicado` no artefato `009-coop-hardening-04-code-review-02.md`.
+5. Asbuild (`009-coop-hardening-05-asbuild.md`) atualizado com a seção "Mudanças posteriores" (CR-01-01 + CR-02-01) e a nota sobre o Bloco B corrigida (o doc `docs/trauma-coop-test-protocol.md` já existe — a nota antiga dizia que não existia ainda, desatualizada).
+6. P-4.1 fechada nesta memória (resolvida pelo item 009/A4); P-4.5 atualizada (009 entregue, 010 em andamento).
+
+**Pendências abertas nesta sessão:**
+- Item 010 (migração de configs + release) iniciado logo em seguida — ver próxima entrada quando fechado.
+- P-4.4 (validação in-game do overhaul completo) segue aberta — nenhum item 002-011 foi validado em raid real ainda; item 009 também soma a essa pendência (bloco B do protocolo de teste coop é roteiro pronto, execução real pendente).
+
+**Cross-refs:**
+- Fecha [P-4.1] (aberta na Sessão 4, 2026-07-19).
+- Atualiza [P-4.5] (aberta na Sessão 4, 2026-07-19).
+
+---
+
 ## 2026-07-19 23:50 (GMT-3) — Sessão 4 (continuação): itens 008 e 011 entregues — overhaul 003-011 CONCLUÍDO
 
 **Tema central:** Fechar o overhaul Trauma 2.0 com o item 008 (duração aleatória do desmaio) e o item 011 (matriz de comportamento total), completando o ciclo 003→011 que o usuário pediu para levar "até o final".
@@ -60,7 +91,7 @@
 
 **Pendências abertas nesta sessão:**
 - [P-4.4] (aberta 2026-07-19) Nenhum item do overhaul completo (002-011) foi validado IN-GAME. Ver as notas "VALIDAR IN-GAME" específicas de cada item nas pendências P-3.2 a P-3.7. Candidato natural para consumir o plano de teste de `docs/trauma-behavior-matrix.md` §5.
-- [P-4.5] (aberta 2026-07-19) Itens 009 (hardening coop) e 010 (migração de configs + release) permanecem no backlog, não iniciados — são os próximos passos naturais do mod, mas fora do escopo desta retomada.
+- [P-4.5] (aberta 2026-07-19, ATUALIZADA 2026-07-25 — ver Sessão 5) Item 009 (hardening coop) ENTREGUE 🟢 v1.9.1 (ver Sessão 5). Item 010 (migração de configs + release) segue no backlog, em andamento nesta mesma sessão.
 
 **Cross-refs:**
 - Resolve [P-3.7] (aberta nesta mesma sessão, ver bloco de Pendências no topo — FECHADA).
@@ -118,7 +149,7 @@
 7. Agent (code-review r1 do 006) lançado — 0🔴, 2🟢; CR-01-01 aplicado, CR-01-02 deferido. Build final v1.7.0 recompilado.
 
 **Pendências abertas nesta sessão:**
-- [P-4.1] (aberta 2026-07-19) CR-01-02 do 006 deferido: extrair helper compartilhado para o boilerplate de `Update()` (world-swap/toggle) duplicado 4× entre `TraumaLegsConsumer`/`TraumaFallCycleConsumer`/`TraumaArmsConsumer`/`TraumaStomachConsumer`. Categoria: débito técnico 🟡. Candidato natural: item 009 (hardening coop, já varre os 4 consumidores) ou 011.
+- [P-4.1] (aberta 2026-07-19, FECHADA 2026-07-25 — ver Sessão 5) CR-01-02 do 006 deferido: extrair helper compartilhado para o boilerplate de `Update()` (world-swap/toggle) duplicado 4× entre `TraumaLegsConsumer`/`TraumaFallCycleConsumer`/`TraumaArmsConsumer`/`TraumaStomachConsumer`. Categoria: débito técnico 🟡. RESOLVIDA pelo item 009 (A4) — `TraumaConsumerLifecycle` extraído, 4 consumidores migrados, 2 rodadas de code-review sem regressão.
 - [P-4.2] (aberta 2026-07-19) Nenhum dos itens 005/006 foi validado IN-GAME ainda (mesma situação herdada de P-3.5/P-3.6 para 003/004) — 006 reusa a MESMA fila/primitiva/absorção de 003/004, então um bug estrutural na validação deles é retrabalho herdado aqui também.
 - [P-4.3] (aberta 2026-07-19) Nenhuma mudança desta sessão foi commitada ainda — working tree com 005+006 juntos (arquivos compartilhados como `csproj`/`Plugin.cs`/`graph.json` foram tocados por AMBOS em sequência, não dá pra separar em 2 commits sem reverter). Fazer commit único abrangendo só os arquivos do ICM tocados nesta sessão (excluir mudanças de outra sessão presentes no mesmo working tree: `TRL-ItemsManagement`, `launcher/`, `items.json`).
 

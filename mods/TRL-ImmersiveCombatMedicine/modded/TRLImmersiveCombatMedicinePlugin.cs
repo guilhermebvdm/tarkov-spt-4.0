@@ -14,7 +14,7 @@ namespace TRLImmersiveCombatMedicine
     // TraumaBotFall.RegisterLayer (sem o atributo, a ordem de load do BepInEx 5 pode falso-negativar
     // PluginInfos com BigBrain instalado). GUID confirmado: bigbrain_full/BigBrainPlugin.cs:10.
     [BepInDependency("xyz.drakia.bigbrain", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.9.0")]
+    [BepInPlugin("com.trl.immersivecombatmedicine", "TRL-ImmersiveCombatMedicine", "1.9.1")]
     public class TRLImmersiveCombatMedicinePlugin : BaseUnityPlugin
     {
         public static TRLImmersiveCombatMedicinePlugin Instance;
@@ -84,7 +84,7 @@ namespace TRLImmersiveCombatMedicine
         {
             Instance = this;
             ModLogger = base.Logger;
-            ModLogger.LogInfo("TRL-ImmersiveCombatMedicine Plugin v1.9.0 carregado.");
+            ModLogger.LogInfo("TRL-ImmersiveCombatMedicine Plugin v1.9.1 carregado.");
 
             // Inicializações combinadas
             ItemDatabase.Initialize();

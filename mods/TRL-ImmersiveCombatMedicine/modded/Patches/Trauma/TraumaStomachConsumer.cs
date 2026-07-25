@@ -1,3 +1,4 @@
+using System;
 using Comfort.Common;
 using EFT;
 using UnityEngine;
@@ -14,20 +15,35 @@ namespace TRLImmersiveCombatMedicine.Trauma
     {
         private static TraumaStomachConsumer _instance;
 
-        private bool _wasActive;
-        private GameWorld _trackedWorld; // padrão 003/004: world-swap/transit + null-detect
+        // ref: A4 (009) — helper de lifecycle compartilhado (TraumaConsumerLifecycle.cs); substitui os antigos
+        // campos soltos _wasActive/_trackedWorld (PA-01-01, removidos daqui).
+        private TraumaConsumerLifecycle _lifecycle; // PA-01-03: NUNCA marcar readonly (ver TraumaConsumerLifecycle.cs)
+        private Func<bool> _isActiveDelegate;
+        private Action _onWorldGone;
+        private Action _onWorldSwap;
+        private Action _onToggleOff;
+        // CR-01-01 (code-review 009 r1): sem campo _onToggleOn — Stomach nunca tem ação de religar (paridade
+        // com o original); `null` é passado literal no call site de Tick() em vez de um campo nunca atribuído.
 
         private static readonly TraumaRegion[] StomachRegions = { TraumaRegion.Stomach };
 
         private void Awake()
         {
             _instance = this;
+            // ref: CR-02-01 (code-review 009 r2) — delegate criado 1x aqui e reusado no Register abaixo,
+            // em vez de 2 objetos independentes apontando pro mesmo IsActive.
+            _isActiveDelegate = IsActive;
             // Registro destrava o toast de 1ª ocorrência da linha (decisão 20; texto TraumaLocale.cs:21/:32).
             // O toast é gate do MOTOR (TraumaObservability.cs:57-77) — dispara na ENTRADA da linha,
             // independente do resultado do roll (funcional §10).
-            TraumaConsumerRegistry.Register(TraumaConsumerId.StomachEffects, StomachRegions, IsActive);
-            TraumaEngine.SubscribeWithSnapshot(OnTransition); // replay establishing — ref: TraumaEngine.cs:72
+            TraumaConsumerRegistry.Register(TraumaConsumerId.StomachEffects, StomachRegions, _isActiveDelegate);
+            TraumaEngine.SubscribeWithSnapshot(OnTransition); // PA-02-01: pode invocar OnTransition sincronamente AQUI
+            // (replay do motor, TraumaEngine.cs:89) — seguro pois OnTransitionCore nunca toca _lifecycle/delegates.
             // SEM TraumaEngine.OneShotPublished += ...  — vazamento impossível por construção (spec 006 §1.4)
+
+            _onWorldGone = OnWorldGone;
+            _onWorldSwap = OnWorldSwap;
+            _onToggleOff = OnToggleOff;
         }
 
         /// <summary>Master legado + master Trauma 2.0 + toggle próprio (comportamento 9 do 002).
@@ -70,7 +86,7 @@ namespace TRLImmersiveCombatMedicine.Trauma
             // p=100 poderia falhar (value==1) e p=0 nunca deve suceder. ref: idioma Random.value em
             // VoiceAndHealthUtils.cs:51 (MedicalLogic.cs:366 usa Random.Range — mesmo gênero UnityEngine.Random,
             // não o idioma .value — PA-01-02).
-            bool success = chance >= 100f || (chance > 0f && Random.value * 100f < chance);
+            bool success = chance >= 100f || (chance > 0f && UnityEngine.Random.value * 100f < chance);
             TraumaObservability.LogRoll(p, TraumaRegion.Stomach,
                 t.PainkillerActive ? "zeroed-pk" : "zeroed", chance / 100f, success); // ref: TraumaObservability.cs:41
             if (!success) return; // falha → nenhum efeito físico (o toast é da LINHA, já tratado pelo motor)
@@ -113,34 +129,37 @@ namespace TRLImmersiveCombatMedicine.Trauma
             TraumaPose.TryInvoluntaryCrouch(p, TraumaRegion.Stomach, TraumaOneShotKind.InvoluntaryCrouch);
         }
 
+        // ref: corpo idêntico ao branch `gw == null` original (TraumaStomachConsumer.cs:122-123, exceto o
+        // bookkeeping _trackedWorld/_wasActive, agora do struct)
+        private void OnWorldGone()
+        {
+            // padrão N1/003: mundo morreu — cancela SÓ as próprias entradas (ownership explícito; o CancelAll
+            // do componente 003 no raid-end é redundância idempotente). Refund vira no-op (cooldowns já resetados).
+            TraumaPose.CancelKind(TraumaOneShotKind.InvoluntaryCrouch, TraumaRegion.Stomach, "raid-end");
+        }
+
+        // ref: corpo idêntico ao branch world-swap original (TraumaStomachConsumer.cs:128-129)
+        private void OnWorldSwap()
+        {
+            TraumaPose.CancelKind(TraumaOneShotKind.InvoluntaryCrouch, TraumaRegion.Stomach, "world-swap"); // transit
+        }
+
+        // ref: corpo idêntico ao branch toggle ON→OFF original (TraumaStomachConsumer.cs:137-138)
+        private void OnToggleOff()
+        {
+            // Toggle OFF mid-raid: rolls param (gate do OnTransitionCore); adiados DO ESTÔMAGO cancelados com
+            // refund SEM varrer os de pernas (chave por região — funcional corner do toggle). Legado NÃO volta.
+            TraumaPose.CancelKind(TraumaOneShotKind.InvoluntaryCrouch, TraumaRegion.Stomach, "toggle-off");
+        }
+
         private void Update()
         {
-            GameWorld gw = Singleton<GameWorld>.Instance;
-            if (gw == null)
-            {
-                // padrão N1/003: mundo morreu — cancela SÓ as próprias entradas (ownership explícito; o CancelAll
-                // do componente 003 no raid-end é redundância idempotente). Refund vira no-op (cooldowns já resetados).
-                TraumaPose.CancelKind(TraumaOneShotKind.InvoluntaryCrouch, TraumaRegion.Stomach, "raid-end");
-                _trackedWorld = null; _wasActive = IsActive();
-                return;
-            }
-            if (!ReferenceEquals(gw, _trackedWorld))
-            {
-                TraumaPose.CancelKind(TraumaOneShotKind.InvoluntaryCrouch, TraumaRegion.Stomach, "world-swap"); // transit
-                _trackedWorld = gw;
-            }
-
-            bool active = IsActive();
-            if (_wasActive && !active)
-            {
-                // Toggle OFF mid-raid: rolls param (gate do OnTransitionCore); adiados DO ESTÔMAGO cancelados com
-                // refund SEM varrer os de pernas (chave por região — funcional corner do toggle). Legado NÃO volta.
-                TraumaPose.CancelKind(TraumaOneShotKind.InvoluntaryCrouch, TraumaRegion.Stomach, "toggle-off");
-            }
-            // Religar mid-raid: NADA a estabelecer (one-shot puro) — estômago já zerado não rola (paridade establishing).
-            _wasActive = active;
+            // Religar mid-raid: NADA a estabelecer (one-shot puro) — estômago já zerado não rola (paridade
+            // establishing) — CR-01-01: null literal (sem campo), Tick() trata como no-op (idêntico ao original).
+            bool active = _lifecycle.Tick(_isActiveDelegate, _onWorldGone, _onWorldSwap, _onToggleOff, null);
             if (!active) return;
 
+            // ref: corpo idêntico ao original (TraumaStomachConsumer.cs:144-148) — INALTERADO
             // Independência bidirecional (funcional §7): com 003 E 004 OFF, o 006 é o único a pumpar o
             // adiado D7 do estômago e a devolução do dip de bot. Ambos idempotentes com múltiplos chamadores
             // (pump 1×/frame — TraumaPose.cs:246-247; restores por deadline — :422-431).

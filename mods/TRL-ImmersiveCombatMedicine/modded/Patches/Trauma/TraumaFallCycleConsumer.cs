@@ -1,3 +1,4 @@
+using System;
 using Comfort.Common;
 using EFT;
 using TrueTrauma; // TraumaState (blackout legado)
@@ -23,17 +24,32 @@ namespace TRLImmersiveCombatMedicine.Trauma
         internal const float SlowRiseSeconds = 1.5f; // const interna (decisão 13 cobre só os 3 timers — premissa p/ 011)
         internal static bool StandReentryFlag;  // deixa os SetPoseLevel do próprio mod passarem pelo CanStandAt
 
-        private bool _wasActive;
-        private GameWorld _trackedWorld;        // padrão 003: world-swap/transit + null-detect
+        // ref: A4 (009) — helper de lifecycle compartilhado (TraumaConsumerLifecycle.cs); substitui os antigos
+        // campos soltos _wasActive/_trackedWorld (PA-01-01, removidos daqui).
+        private TraumaConsumerLifecycle _lifecycle; // PA-01-03: NUNCA marcar readonly (ver TraumaConsumerLifecycle.cs)
+        private Func<bool> _isActiveDelegate;
+        private Action _onWorldGone;
+        private Action _onWorldSwap;
+        private Action _onToggleOff;
+        private Action _onToggleOn;
 
         private static readonly TraumaRegion[] LegsRegions = { TraumaRegion.Legs };
 
         private void Awake()
         {
             _instance = this;
-            TraumaConsumerRegistry.Register(TraumaConsumerId.FallCycle, LegsRegions, IsActive); // toast (decisão 20; texto LegsFall já existe — TraumaLocale.cs:18)
-            TraumaEngine.SubscribeWithSnapshot(OnTransition);   // replay establishing — ref: TraumaEngine.cs:72
+            // ref: CR-02-01 (code-review 009 r2) — delegate criado 1x aqui e reusado no Register abaixo,
+            // em vez de 2 objetos independentes apontando pro mesmo IsActive.
+            _isActiveDelegate = IsActive;
+            TraumaConsumerRegistry.Register(TraumaConsumerId.FallCycle, LegsRegions, _isActiveDelegate); // toast (decisão 20; texto LegsFall já existe — TraumaLocale.cs:18)
+            TraumaEngine.SubscribeWithSnapshot(OnTransition); // PA-02-01: pode invocar OnTransition sincronamente AQUI
+            // (replay do motor, TraumaEngine.cs:89) — seguro pois OnTransitionCore nunca toca _lifecycle/delegates.
             TraumaEngine.OneShotPublished += OnOneShot;         // ref: TraumaEngine.cs:22 (cooldown-gated)
+
+            _onWorldGone = OnWorldGone;
+            _onWorldSwap = OnWorldSwap;
+            _onToggleOff = OnToggleOff;
+            _onToggleOn = OnToggleOn;
         }
 
         /// <summary>Master legado + master Trauma 2.0 + toggle próprio (comportamento 9 do 002).</summary>
@@ -213,47 +229,52 @@ namespace TRLImmersiveCombatMedicine.Trauma
             // levantar destravado NA HORA (decisão 1) — IsBlockedPhase vira false com a fase
         }
 
+        // ref: corpo idêntico ao branch `gw == null` original (TraumaFallCycleConsumer.cs:220-227, exceto o
+        // bookkeeping _trackedWorld/_wasActive, agora do struct)
+        private void OnWorldGone()
+        {
+            // padrão N1/003: mundo morreu — só bookkeeping (pose/caps morrem com o mundo)
+            if (_phase != FallPhase.None) Disengage("raid-end");
+            TraumaBotFall.ClearAll();
+            TraumaVoice.Clear();     // PA-02-08: ponto de limpeza do anti-spam (ProfileIds da raid morta)
+            TraumaSpeedCap.Clear();  // cinto: bookkeeping estático não atravessa raids (skill csharp §2)
+        }
+
+        // ref: corpo idêntico ao branch world-swap original (TraumaFallCycleConsumer.cs:229-236)
+        private void OnWorldSwap()
+        {
+            if (_phase != FallPhase.None) Disengage("world-swap"); // transit — espelha detecção do motor/003
+            TraumaBotFall.ClearAll();
+            TraumaVoice.Clear(); // PA-02-08
+            TraumaSpeedCap.Clear();
+        }
+
+        // ref: corpo idêntico ao branch toggle ON→OFF original (TraumaFallCycleConsumer.cs:239-244)
+        private void OnToggleOff()
+        {
+            // Toggle OFF mid-ciclo: prone deixa de ser forçado NA HORA, agendamentos cancelados, bots liberados
+            if (_phase != FallPhase.None) Disengage("toggle-off");
+            TraumaBotFall.ReleaseAll("toggle-off");
+        }
+
+        // ref: corpo idêntico ao branch toggle OFF→ON original (TraumaFallCycleConsumer.cs:246-252)
+        private void OnToggleOn()
+        {
+            // Religar = avaliação estabelecedora (JANELA; prone → BLOQUEIO) a partir do snapshot do motor
+            GameWorld gw = Singleton<GameWorld>.Instance;
+            Player mp = gw.MainPlayer; // ref: Assembly-CSharp/EFT/GameWorld.cs:572
+            if (mp != null && TraumaEngine.IsOwnedHere(mp)
+                && TraumaEngine.GetLine(mp, TraumaRegion.Legs) == TraumaLine.LegsFallCycle)
+                Engage(mp, establishing: true);
+            TraumaBotFall.EstablishFromSnapshot(gw); // bots com linha Cair → hold estabelecedor
+        }
+
         private void Update()
         {
-            GameWorld gw = Singleton<GameWorld>.Instance;
-            if (gw == null)
-            {
-                // padrão N1/003: mundo morreu — só bookkeeping (pose/caps morrem com o mundo)
-                if (_phase != FallPhase.None) Disengage("raid-end");
-                TraumaBotFall.ClearAll();
-                TraumaVoice.Clear();     // PA-02-08: ponto de limpeza do anti-spam (ProfileIds da raid morta)
-                TraumaSpeedCap.Clear();  // cinto: bookkeeping estático não atravessa raids (skill csharp §2)
-                _trackedWorld = null; _wasActive = IsActive();
-                return;
-            }
-            if (!ReferenceEquals(gw, _trackedWorld))
-            {
-                if (_phase != FallPhase.None) Disengage("world-swap"); // transit — espelha detecção do motor/003
-                TraumaBotFall.ClearAll();
-                TraumaVoice.Clear(); // PA-02-08
-                TraumaSpeedCap.Clear();
-                _trackedWorld = gw;
-            }
-
-            bool active = IsActive();
-            if (_wasActive && !active)
-            {
-                // Toggle OFF mid-ciclo: prone deixa de ser forçado NA HORA, agendamentos cancelados, bots liberados
-                if (_phase != FallPhase.None) Disengage("toggle-off");
-                TraumaBotFall.ReleaseAll("toggle-off");
-            }
-            else if (!_wasActive && active)
-            {
-                // Religar = avaliação estabelecedora (JANELA; prone → BLOQUEIO) a partir do snapshot do motor
-                Player mp = gw.MainPlayer;
-                if (mp != null && TraumaEngine.IsOwnedHere(mp)
-                    && TraumaEngine.GetLine(mp, TraumaRegion.Legs) == TraumaLine.LegsFallCycle)
-                    Engage(mp, establishing: true);
-                TraumaBotFall.EstablishFromSnapshot(gw); // bots com linha Cair → hold estabelecedor
-            }
-            _wasActive = active;
+            bool active = _lifecycle.Tick(_isActiveDelegate, _onWorldGone, _onWorldSwap, _onToggleOff, _onToggleOn);
             if (!active) return;
 
+            // ref: corpo idêntico ao original (TraumaFallCycleConsumer.cs:257-259) — INALTERADO
             TickHumanCycle();
             TraumaPose.PumpDeferred();      // adiados D7 (crouch 003 + fall 004) + re-tentativa de prone do fallback
             TraumaBotFall.Pump();           // re-holds / releases / sweeps de bot

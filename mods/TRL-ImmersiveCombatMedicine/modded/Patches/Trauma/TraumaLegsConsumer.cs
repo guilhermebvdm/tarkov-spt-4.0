@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Comfort.Common;
 using EFT;
@@ -25,18 +26,36 @@ namespace TRLImmersiveCombatMedicine.Trauma
         /// GameWorld limpa tudo (code-review 1 do 003, achado 2).</summary>
         private readonly Dictionary<Player, TraumaLine> _applied = new Dictionary<Player, TraumaLine>();
         private readonly List<Player> _sweepScratch = new List<Player>(); // reusada — sem alocação no caminho quente
-        private bool _wasActive;
-        private GameWorld _trackedWorld; // espelha a detecção de world-swap do motor (transit — code-review 1, achado 2)
+
+        // ref: A4 (009) — helper de lifecycle compartilhado (TraumaConsumerLifecycle.cs); substitui os antigos
+        // campos soltos _wasActive/_trackedWorld (PA-01-01, removidos daqui).
+        private TraumaConsumerLifecycle _lifecycle; // PA-01-03: NUNCA marcar readonly (ver TraumaConsumerLifecycle.cs)
+        private Func<bool> _isActiveDelegate;
+        private Action _onWorldGone;
+        private Action _onWorldSwap;
+        private Action _onToggleOff;
+        private Action _onToggleOn;
 
         private static readonly TraumaRegion[] LegsRegions = { TraumaRegion.Legs };
 
         private void Awake()
         {
             _instance = this;
+            // ref: CR-02-01 (code-review 009 r2) — delegate criado 1x aqui e reusado no Register abaixo,
+            // em vez de 2 objetos independentes apontando pro mesmo IsActive (era: Register(..., IsActive)
+            // + _isActiveDelegate = IsActive separado). Zero acoplamento novo entre registry e helper A4.
+            _isActiveDelegate = IsActive;
             // Registro no registry destrava o toast de 1ª ocorrência das linhas de perna (decisão 20)
-            TraumaConsumerRegistry.Register(TraumaConsumerId.LegsEffects, LegsRegions, IsActive);
-            TraumaEngine.SubscribeWithSnapshot(OnTransition);   // replay establishing cobre assinatura tardia
+            TraumaConsumerRegistry.Register(TraumaConsumerId.LegsEffects, LegsRegions, _isActiveDelegate);
+            TraumaEngine.SubscribeWithSnapshot(OnTransition); // PA-02-01: pode invocar OnTransition sincronamente AQUI
+            // (replay do motor, TraumaEngine.cs:89) — seguro pois OnTransitionCore nunca toca _lifecycle/delegates.
             TraumaEngine.OneShotPublished += OnOneShot;         // já cooldown-gated pelo motor (decisão 19)
+
+            // ref: A4 (009) — cacheado 1x, nunca recriado no Update (csharp-mod-best-practices §1)
+            _onWorldGone = OnWorldGone;
+            _onWorldSwap = OnWorldSwap;
+            _onToggleOff = OnToggleOff;
+            _onToggleOn = OnToggleOn;
         }
 
         /// <summary>Master legado + master Trauma 2.0 + toggle próprio (comportamento 9 do 002).</summary>
@@ -175,86 +194,86 @@ namespace TRLImmersiveCombatMedicine.Trauma
             TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] legs cap OFF {p.ProfileId}");
         }
 
+        // ref: corpo idêntico ao branch `gw == null` original (TraumaLegsConsumer.cs:181-190, exceto as 2 linhas
+        // de bookkeeping _trackedWorld/_wasActive, que agora são do struct — TraumaConsumerLifecycle.Tick)
+        private void OnWorldGone()
+        {
+            // padrão N1: mundo morreu — caps morrem com os MovementContexts; só limpar bookkeeping
+            if (_applied.Count > 0) _applied.Clear();
+            TraumaPose.CancelAll("raid-end");
+            TraumaPose.ClearBotRestores();
+        }
+
+        // ref: corpo idêntico ao branch world-swap original (TraumaLegsConsumer.cs:191-199)
+        private void OnWorldSwap()
+        {
+            // World-swap sem passar por null (transit) — espelha a detecção do motor (code-review 1, achado 2):
+            // caps/players do mundo antigo morreram; só limpar bookkeeping e adotar o mundo novo
+            if (_applied.Count > 0) _applied.Clear();
+            TraumaPose.CancelAll("raid-end");
+            TraumaPose.ClearBotRestores();
+        }
+
+        // ref: corpo idêntico ao branch toggle ON→OFF original (TraumaLegsConsumer.cs:202-216)
+        private void OnToggleOff()
+        {
+            // Desligar mid-raid: desfaz os próprios efeitos NA HORA (corner da funcional).
+            // RemoveCapGuarded pula mortos/destruídos sem log (code-review 1, achado 2).
+            _sweepScratch.Clear();
+            foreach (KeyValuePair<Player, TraumaLine> kv in _applied) _sweepScratch.Add(kv.Key);
+            _applied.Clear();
+            for (int i = 0; i < _sweepScratch.Count; i++) RemoveCapGuarded(_sweepScratch[i]);
+            _sweepScratch.Clear();
+            // PA-01-04 (estendido no 006): toggle-off do 003 cancela SÓ (kind, região=Legs) — nunca varre
+            // as quedas do 004 nem os adiados de ESTÔMAGO do 006 (spec 006 §1.5, TraumaPose.cs:212).
+            TraumaPose.CancelKind(TraumaOneShotKind.InvoluntaryCrouch, TraumaRegion.Legs, "toggle-off");
+            TraumaPose.FlushBotRestores();
+            TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("[Trauma2] legs consumer OFF — caps desfeitos");
+        }
+
+        // ref: corpo idêntico ao branch toggle OFF→ON original (TraumaLegsConsumer.cs:219-233); re-obtém gw
+        // (seguro: só é chamado pelo Tick quando gw != null no MESMO frame)
+        private void OnToggleOn()
+        {
+            // Religar mid-raid: estabelecer do snapshot SEM one-shot e SEM toast (corner religar — paridade
+            // com avaliação inicial). Dependência internal registrada: TraumaEngine.IsOwnedHere (mesmo assembly).
+            GameWorld gw = Singleton<GameWorld>.Instance;
+            var players = gw.RegisteredPlayers;
+            int established = 0;
+            for (int i = 0; i < players.Count; i++)
+            {
+                var p = players[i] as Player;
+                if (!TraumaEngine.IsOwnedHere(p)) continue;
+                TraumaLine line = TraumaEngine.GetLine(p, TraumaRegion.Legs);
+                if (line == TraumaLine.None || line == TraumaLine.LegsFallCycle) continue; // FallCycle é do 004 (PA-01-02)
+                ApplyCap(p, line);
+                established++;
+            }
+            if (established > 0)
+                TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] legs consumer ON — {established} estado(s) estabelecido(s) do snapshot");
+        }
+
         private void Update()
         {
-            GameWorld gw = Singleton<GameWorld>.Instance;
-            if (gw == null)
-            {
-                // padrão N1: mundo morreu — caps morrem com os MovementContexts; só limpar bookkeeping
-                if (_applied.Count > 0) _applied.Clear();
-                TraumaPose.CancelAll("raid-end");
-                TraumaPose.ClearBotRestores();
-                _trackedWorld = null;
-                _wasActive = IsActive();
-                return;
-            }
-            if (!ReferenceEquals(gw, _trackedWorld))
-            {
-                // World-swap sem passar por null (transit) — espelha a detecção do motor (code-review 1, achado 2):
-                // caps/players do mundo antigo morreram; só limpar bookkeeping e adotar o mundo novo
-                if (_applied.Count > 0) _applied.Clear();
-                TraumaPose.CancelAll("raid-end");
-                TraumaPose.ClearBotRestores();
-                _trackedWorld = gw;
-            }
+            bool active = _lifecycle.Tick(_isActiveDelegate, _onWorldGone, _onWorldSwap, _onToggleOff, _onToggleOn);
+            if (!active) return;
 
-            bool active = IsActive();
-            if (_wasActive && !active)
+            // ref: corpo idêntico à poda oportunista + pumps original (TraumaLegsConsumer.cs:239-257) — INALTERADO
+            _sweepScratch.Clear();
+            foreach (KeyValuePair<Player, TraumaLine> kv in _applied)
             {
-                // Desligar mid-raid: desfaz os próprios efeitos NA HORA (corner da funcional).
-                // RemoveCapGuarded pula mortos/destruídos sem log (code-review 1, achado 2).
-                _sweepScratch.Clear();
-                foreach (KeyValuePair<Player, TraumaLine> kv in _applied) _sweepScratch.Add(kv.Key);
-                _applied.Clear();
-                for (int i = 0; i < _sweepScratch.Count; i++) RemoveCapGuarded(_sweepScratch[i]);
-                _sweepScratch.Clear();
-                // PA-01-04 (estendido no 006): toggle-off do 003 cancela SÓ (kind, região=Legs) — nunca varre
-                // as quedas do 004 nem os adiados de ESTÔMAGO do 006 (spec 006 §1.5, TraumaPose.cs:212).
-                TraumaPose.CancelKind(TraumaOneShotKind.InvoluntaryCrouch, TraumaRegion.Legs, "toggle-off");
-                TraumaPose.FlushBotRestores();
-                TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("[Trauma2] legs consumer OFF — caps desfeitos");
+                TraumaLine gl = TraumaEngine.GetLine(kv.Key, TraumaRegion.Legs);
+                if (gl == TraumaLine.None || gl == TraumaLine.LegsFallCycle) _sweepScratch.Add(kv.Key);
             }
-            else if (!_wasActive && active)
+            for (int i = 0; i < _sweepScratch.Count; i++)
             {
-                // Religar mid-raid: estabelecer do snapshot SEM one-shot e SEM toast (corner religar — paridade
-                // com avaliação inicial). Dependência internal registrada: TraumaEngine.IsOwnedHere (mesmo assembly).
-                var players = gw.RegisteredPlayers;
-                int established = 0;
-                for (int i = 0; i < players.Count; i++)
-                {
-                    var p = players[i] as Player;
-                    if (!TraumaEngine.IsOwnedHere(p)) continue;
-                    TraumaLine line = TraumaEngine.GetLine(p, TraumaRegion.Legs);
-                    if (line == TraumaLine.None || line == TraumaLine.LegsFallCycle) continue; // FallCycle é do 004 (PA-01-02)
-                    ApplyCap(p, line);
-                    established++;
-                }
-                if (established > 0)
-                    TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo($"[Trauma2] legs consumer ON — {established} estado(s) estabelecido(s) do snapshot");
+                _applied.Remove(_sweepScratch[i]);
+                RemoveCapGuarded(_sweepScratch[i]);
             }
-            _wasActive = active;
+            _sweepScratch.Clear();
 
-            if (active)
-            {
-                // Poda oportunista (code-review 1, achado 2): entrada cujo motor já diz None é stale
-                // (ex.: saída publicada com o toggle off) — desfaz o cap vazado e limpa o bookkeeping.
-                // FallCycle também é podada (spec 004 §1.7 — entrada na linha Cair perdida com o toggle off).
-                _sweepScratch.Clear();
-                foreach (KeyValuePair<Player, TraumaLine> kv in _applied)
-                {
-                    TraumaLine gl = TraumaEngine.GetLine(kv.Key, TraumaRegion.Legs);
-                    if (gl == TraumaLine.None || gl == TraumaLine.LegsFallCycle) _sweepScratch.Add(kv.Key);
-                }
-                for (int i = 0; i < _sweepScratch.Count; i++)
-                {
-                    _applied.Remove(_sweepScratch[i]);
-                    RemoveCapGuarded(_sweepScratch[i]);
-                }
-                _sweepScratch.Clear();
-
-                TraumaPose.PumpDeferred();   // adiados D7: re-checa guards, re-valida snapshot, executa/cancela
-                TraumaPose.PumpBotRestores(); // devolução do dip de bot fora de combate
-            }
+            TraumaPose.PumpDeferred();   // adiados D7: re-checa guards, re-valida snapshot, executa/cancela
+            TraumaPose.PumpBotRestores(); // devolução do dip de bot fora de combate
         }
     }
 }

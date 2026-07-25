@@ -35,16 +35,31 @@ namespace TRLImmersiveCombatMedicine.Trauma
         private float _nextVoiceTryAt;            // piso de 0,3s entre Plays engolidos (PA-02-06 — hold-por-frame sob Blocker)
         private bool _lockoutVoiceSkipLogged;     // log voice=skipped no máx 1x/janela (PA-02-06)
         private bool _lockoutIncapacitatedLogged; // log voice=suppressed(incapacitated) no máx 1x/janela (CR-01-02)
-        private bool _wasActive;
-        private GameWorld _trackedWorld;          // world-swap sem null (transit) — lição CR-02 do 003
+        // ref: A4 (009) — helper de lifecycle compartilhado (TraumaConsumerLifecycle.cs); substitui os antigos
+        // campos soltos _wasActive/_trackedWorld (PA-01-01, removidos daqui).
+        private TraumaConsumerLifecycle _lifecycle; // PA-01-03: NUNCA marcar readonly (ver TraumaConsumerLifecycle.cs)
+        private Func<bool> _isActiveDelegate;
+        private Action _onWorldGone;
+        private Action _onWorldSwap;
+        private Action _onToggleOff;
+        private Action _onToggleOn;
 
         private static readonly TraumaRegion[] ArmsRegions = { TraumaRegion.Arms };
 
         private void Awake()
         {
             _instance = this;
-            TraumaConsumerRegistry.Register(TraumaConsumerId.ArmsEffects, ArmsRegions, IsActive); // destrava toast (decisão 20)
-            TraumaEngine.SubscribeWithSnapshot(OnTransition); // replay establishing — ref: TraumaEngine.cs:72
+            // ref: CR-02-01 (code-review 009 r2) — delegate criado 1x aqui e reusado no Register abaixo,
+            // em vez de 2 objetos independentes apontando pro mesmo IsActive.
+            _isActiveDelegate = IsActive;
+            TraumaConsumerRegistry.Register(TraumaConsumerId.ArmsEffects, ArmsRegions, _isActiveDelegate); // destrava toast (decisão 20)
+            TraumaEngine.SubscribeWithSnapshot(OnTransition); // PA-02-01: pode invocar OnTransition sincronamente AQUI
+            // (replay do motor, TraumaEngine.cs:89) — seguro pois OnTransitionCore nunca toca _lifecycle/delegates.
+
+            _onWorldGone = OnWorldGone;
+            _onWorldSwap = OnWorldSwap;
+            _onToggleOff = OnToggleOff;
+            _onToggleOn = OnToggleOn;
         }
 
         /// <summary>Master legado + master Trauma 2.0 + toggle próprio (comportamento 9 do 002) + gate headless.</summary>
@@ -340,55 +355,61 @@ namespace TRLImmersiveCombatMedicine.Trauma
             return true; // prefix skipa o original: IsAiming não muda, AimingInterruptedByOverlap false → sem pacote (P9 corrigido)
         }
 
-        private void Update()
+        // ref: corpo idêntico às 2 chamadas do branch `gw == null` original (TraumaArmsConsumer.cs:350-351),
+        // EXCETO o bookkeeping _trackedWorld/_wasActive/return, agora do struct (PA-01-02) — NÃO copiado p/ cá.
+        private void OnWorldGone()
         {
-            GameWorld gw = Singleton<GameWorld>.Instance;
-            if (gw == null)
-            {
-                // padrão N1: mundo morreu — efeito/hooks morreram com o Player; só limpar bookkeeping (AC-10);
-                // worldDead=true → TraumaTremor.Discard, NUNCA ForceResidue em AHC morto (PA-01-01)
-                TearDownLocal("raid-end", worldDead: true);
-                ResetLockout();
-                _trackedWorld = null;
-                _wasActive = IsActive();
-                return;
-            }
-            if (!ReferenceEquals(gw, _trackedWorld))
-            {
-                // World-swap sem passar por null (transit) — espelha a detecção do motor/003
-                TearDownLocal("world-swap", worldDead: true);
-                ResetLockout();
-                _trackedWorld = gw;
-            }
+            // padrão N1: mundo morreu — efeito/hooks morreram com o Player; só limpar bookkeeping (AC-10);
+            // worldDead=true → TraumaTremor.Discard, NUNCA ForceResidue em AHC morto (PA-01-01)
+            TearDownLocal("raid-end", worldDead: true);
+            ResetLockout();
+        }
 
-            bool active = IsActive();
-            if (_wasActive && !active)
+        // ref: corpo idêntico às 2 chamadas do branch world-swap original (TraumaArmsConsumer.cs:359-360),
+        // EXCETO o bookkeeping _trackedWorld=gw, agora do struct (PA-01-02) — NÃO copiado p/ cá.
+        private void OnWorldSwap()
+        {
+            // World-swap sem passar por null (transit) — espelha a detecção do motor/003
+            TearDownLocal("world-swap", worldDead: true);
+            ResetLockout();
+        }
+
+        // ref: corpo idêntico ao branch toggle ON→OFF original (TraumaArmsConsumer.cs:369-371)
+        private void OnToggleOff()
+        {
+            // Desligar mid-raid: tremor removido (ForceResidue — inclusive downed, CR-02) + lockout
+            // cancelado + hooks off (corner da funcional)
+            TearDownLocal("toggle-off");
+            ResetLockout();
+            TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("[Trauma2] arms consumer OFF — tremor removido, lockout cancelado");
+        }
+
+        // ref: corpo idêntico ao branch toggle OFF→ON original (TraumaArmsConsumer.cs:378-387); re-obtém gw
+        // (seguro: só é chamado pelo Tick quando gw != null no MESMO frame)
+        private void OnToggleOn()
+        {
+            // Religar mid-raid: estabelecer do snapshot SEM toast/voz (paridade com establishing).
+            // Humano local = MainPlayer (padrão 004); linha AdsCancel-tier + já mirando → âncora = AGORA
+            // (ApplyLine re-ancora — sem cancelamento retroativo). Dependência internal: TraumaEngine.IsOwnedHere.
+            GameWorld gw = Singleton<GameWorld>.Instance;
+            Player mp = gw.MainPlayer;
+            if (mp != null && !mp.IsAI && TraumaEngine.IsOwnedHere(mp))
             {
-                // Desligar mid-raid: tremor removido (ForceResidue — inclusive downed, CR-02) + lockout
-                // cancelado + hooks off (corner da funcional)
-                TearDownLocal("toggle-off");
-                ResetLockout();
-                TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("[Trauma2] arms consumer OFF — tremor removido, lockout cancelado");
-            }
-            else if (!_wasActive && active)
-            {
-                // Religar mid-raid: estabelecer do snapshot SEM toast/voz (paridade com establishing).
-                // Humano local = MainPlayer (padrão 004); linha AdsCancel-tier + já mirando → âncora = AGORA
-                // (ApplyLine re-ancora — sem cancelamento retroativo). Dependência internal: TraumaEngine.IsOwnedHere.
-                Player mp = gw.MainPlayer;
-                if (mp != null && !mp.IsAI && TraumaEngine.IsOwnedHere(mp))
+                TraumaLine line = TraumaEngine.GetLine(mp, TraumaRegion.Arms);
+                if (line != TraumaLine.None)
                 {
-                    TraumaLine line = TraumaEngine.GetLine(mp, TraumaRegion.Arms);
-                    if (line != TraumaLine.None)
-                    {
-                        ApplyLine(mp, line);
-                        TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("[Trauma2] arms consumer ON — estado estabelecido do snapshot");
-                    }
+                    ApplyLine(mp, line);
+                    TRLImmersiveCombatMedicinePlugin.ModLogger.LogInfo("[Trauma2] arms consumer ON — estado estabelecido do snapshot");
                 }
             }
-            _wasActive = active;
+        }
+
+        private void Update()
+        {
+            bool active = _lifecycle.Tick(_isActiveDelegate, _onWorldGone, _onWorldSwap, _onToggleOff, _onToggleOn);
             if (!active) return;
 
+            // ref: corpo idêntico ao original (TraumaArmsConsumer.cs:392-429) — INALTERADO
             // Poda oportunista (padrão sweep 003/004): morte não publica transição (comportamento 1 do motor)
             // e saída publicada com o toggle off se perde — GetLine==None com efeito aplicado é stale.
             if (_localPlayer != null && TraumaEngine.GetLine(_localPlayer, TraumaRegion.Arms) == TraumaLine.None)
