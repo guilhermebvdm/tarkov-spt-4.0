@@ -98,6 +98,12 @@
 - **Depende de:** nada bloqueante tecnicamente, mas faz sentido esperar o DS amadurecer via outro mod primeiro (ex. CustomClasses, já citado como próximo na fila) pra não ser o primeiro consumidor descobrindo gaps do DS.
 - **A validar:** inventário completo do que o DS já oferece vs. o que esse viewer precisa; decidir se faz sentido portar em fases (tokens primeiro, componentes depois) ou tudo de uma vez.
 
+### B-9 · Filtrar apenas itens vanilla (sem mod nenhum)
+- **O quê:** hoje o filtro "Mod" (dropdown no topbar, `buildModFilter`/`selectedMods`) só filtra POR um mod específico (agrupa por `modSource`) — não há como fazer o inverso: mostrar **só os itens vanilla** (base do EFT/SPT, sem `modSource`). Útil pra revisar/editar preço/estoque só dos itens originais, sem o ruído dos itens adicionados por mods (WTT-Artem, WTT-PackNStrap etc.).
+- **Como (provável):** adicionar uma opção **"Vanilla"** (ou "sem mod") ao próprio dropdown "Mod" — selecionada, o filtro casa `it => !it.modSource`, com contagem própria. Reaproveita 100% a infra do filtro Mod atual (é literalmente o inverso do que ele já faz); um valor sentinela (ex. `__vanilla__`) em `selectedMods`, tratado no ramo de Mod do `filterItems`, evita um dropdown novo.
+- **Esforço:** pequeno — UI-only (`index.html`), sem backend. O dado (`it.modSource` presente/ausente) já está no cache e o badge "MOD" na listagem já distingue os dois grupos.
+- **Depende de:** nada — o filtro Mod já existe; esta feature é só o complemento "nenhum mod".
+
 ---
 
 ## Decisões travadas (2026-07-04)
