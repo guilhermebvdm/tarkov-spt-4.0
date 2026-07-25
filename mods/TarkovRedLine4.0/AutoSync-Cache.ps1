@@ -3,7 +3,7 @@
 #
 # What it does, in order:
 #   1. Scans server mods for bundle assets (user\mods\<mod>\bundles.json + bundles\*.bundle).
-#      Only mods with bundles matter here — logic/JSON-only mods never require opening the game.
+#      Only mods with bundles matter here - logic/JSON-only mods never require opening the game.
 #   2. Invalidates stale cache copies (changed bundles) and deletes orphans (removed mods)
 #      directly, WITHOUT opening the game.
 #   3. Opens server + Fika headless client ONLY if some bundle has no valid copy in
@@ -322,7 +322,7 @@ foreach ($k in $diff.Changed) {
 
 $orphans = @(Get-OrphanCacheFiles $expectedCache $CacheBundlesPath)
 
-# A gap that is in knownMissing already failed a warmup before — don't reopen the game for
+# A gap that is in knownMissing already failed a warmup before - don't reopen the game for
 # it every run. But if its source bundle changed, it deserves a fresh attempt.
 $retryRels = @()
 foreach ($k in ($diff.Added + $diff.Changed)) {
@@ -415,7 +415,8 @@ else {
     else {
         Write-Host "Cache 3D completo. Pulando abertura do jogo." -ForegroundColor Green
     }
-    Save-State $currentBundles $knownMissing
+    # Keep only entries that are still real gaps, so resolved ones stop being tracked
+    Save-State $currentBundles @($knownMissing | Where-Object { $gaps -contains $_ })
 }
 
 # =====================================================================
