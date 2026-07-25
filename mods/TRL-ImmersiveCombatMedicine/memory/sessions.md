@@ -33,6 +33,29 @@
 
 ---
 
+## 2026-07-25 (GMT-3) — Sessão 5 (continuação): plano de teste mestre criado + preparação do card Trello
+
+**Tema central:** Consolidar um plano de teste único e sequenciado para todo o overhaul Trauma 2.0 (002-010, v1.10.0), separando explicitamente SOLO/COOP, e preparar a criação de um card filho no Trello (tag "teste") para rastrear a execução.
+
+**Decisões-chave:**
+- Documento novo: `docs/master-test-plan.md` — substitui a necessidade de navegar entre `trauma-behavior-matrix.md` §5 (44 cenários) e `trauma-coop-test-protocol.md` (B1/B2) como 2 listas separadas; renumera tudo numa sequência única por fase (`S<fase>.<n>` solo, `C<fase>.<n>` coop).
+- **Padrão de processo estabelecido** (repetir para próximas versões/módulos): 1ª rodada do plano de teste sempre passa por uma revisão adversarial (agente cético relendo TODAS as specs funcionais + a matriz de comportamento, fontes primárias, não confiando no resumo do próprio plano) antes de considerar pronto. Achados desta rodada: 2 cenários da matriz original tinham sido dropados SILENCIOSAMENTE na consolidação (fila de adiados multi-região do 006; roll de estômago durante desmaio) + 1 cenário de risco real JÁ DOCUMENTADO EM MEMÓRIA (migração fracionária pt-BR do item 008, achado da review técnica de 2026-07-19) também tinha sumido — lição: consolidar documentos de teste sem comparar item-a-item com a fonte original perde cobertura silenciosamente, mesmo quando a intenção é só reorganizar.
+- Gaps estruturais fechados pela revisão: nenhum cenário testava "spawn ferido" (persistência de dano entre raids) em 5 sistemas simultaneamente (nova fase S1b); Braços (005) era o único dos 4 consumidores de estado contínuo sem teste de toggle-OFF dedicado (S3.7, relevante porque o item 009/A4 pediu explicitamente essa regressão); faltavam instruções de "curar antes de avançar de fase" (sem isso, testar o ciclo de queda antes do desmaio percentual contamina o setup, já que o personagem fica mancando/prone periodicamente); 4 cenários coop exigem 2 peers e nunca tinham sido escritos em nenhum documento (reconexão Fika, cura remota revertendo efeito visível a ambos, DOWNED durante o ciclo de queda, médico desconectando mid-cura).
+- **Trello:** usuário forneceu o card principal do mod — `https://trello.com/c/8dR5yd1s/27-trl-combatmedicine` (salvo em memória `reference_icm_trello_card.md`). Combinado: a cada versão substancial entregue, criar um card FILHO com a tag "teste" (já existente no board), linkado ao card principal, com o plano de teste daquela versão como checklist — vira prática recorrente para qualquer módulo/mod com card principal equivalente.
+- **Achado de infraestrutura:** existe um MCP Trello configurado globalmente em `~/.claude.json` (`@delorenj/mcp-server-trello`, API key+token já preenchidos) mas ele não estava ativo nesta sessão (ToolSearch não encontrou nenhuma ferramenta "trello") — precisa reiniciar a sessão do Claude Code para conectar. Card não foi criado ainda nesta sessão por esse motivo.
+
+**Lições / hipóteses descartadas:**
+- Confirmada a lição de custo já registrada: delegar a revisão adversarial a um agente que releia TUDO da fonte primária (não confiar no resumo do documento sendo revisado) pega gaps que uma releitura rápida do próprio autor não pegaria — a subagente achou 3 cenários dropados silenciosamente que eu não tinha notado ao escrever a 1ª versão.
+
+**Pendências abertas nesta sessão:**
+- Card do Trello ainda não criado — aguardando restart da sessão para o MCP Trello conectar. Conteúdo do card (título/descrição/checklist) deve ser gerado a partir de `docs/master-test-plan.md` quando a ferramenta estiver disponível.
+- `docs/master-test-plan.md` em si ainda não foi executado (mesma natureza de P-4.4 — é roteiro pronto, não validação).
+
+**Cross-refs:**
+- Consome [P-4.4] (validação in-game do overhaul) — este documento é o roteiro completo que a pendência pede para "consumir".
+
+---
+
 ## 2026-07-25 (GMT-3) — Sessão 5 (continuação): item 010 entregue — OVERHAUL TRAUMA 2.0 CONCLUÍDO (002→010)
 
 **Tema central:** Fechar o item 010 (migração de configs + release), o último do backlog formal do overhaul Trauma 2.0 — do zero (spec funcional) até entregue, incluindo uma mudança de wire format de rede Fika (o handshake de recusa de cura `DenyReason` string → `DenyReasonId` enum/byte).
