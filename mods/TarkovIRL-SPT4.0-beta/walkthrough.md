@@ -1,24 +1,31 @@
-# Walkthrough — Ajustes Finais de Auto-Center (ADS vs Hipfire) e Cooldown de 500ms no Sway
+# Walkthrough — Free Aim com Soma Geométrica Constante 1:1
 
-Finalizamos e implementamos com sucesso as mecânicas de física refinadas para o Free Aim e Weapon Sway.
+Implementamos com sucesso a simplificação do Free Aim no mod **TarkovIRL**, eliminando totalmente a dependência de DPI/sensibilidade através de uma soma geométrica linear.
 
 ## Mudanças Realizadas
 
-### [PrimeMover.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TarkovIRL-SPT4.0-beta/PrimeMover.cs)
-* **Novo Slider de Calibração ADS**: Adicionamos a configuração `Camera Auto-Center Sensitivity Compensation` (`FreeAimAutoCenterADSComp`), com padrão `0.35f` (configurável de `0.01f` a `2.0f`). Este slider permite compensar perfeitamente os multiplicadores de zoom e sensibilidade da mira telescópica do jogo.
-
 ### [FreeAimController.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TarkovIRL-SPT4.0-beta/FreeAimController.cs)
-* **Retorno da Rotação de Câmera no ADS**: A câmera volta a auto-centralizar na mira durante o ADS (trazendo a câmera até a mira).
-* **Calibração Estática**: A fórmula no ADS agora divide a rotação pelo novo slider: `deltaRotation = deltaRotation + (vector2_5 / PrimeMover.FreeAimAutoCenterADSComp.Value)`.
-  * **Como calibrar**: Se ao parar o mouse a mira "escorregar" para frente (mesmo sentido), aumente o slider. Se a mira "puxar de volta" (sentido oposto), diminua o slider. Ajuste até que a mira fique **100% fixa no mesmo spot do mundo** enquanto a câmera gira.
+* **Remoção de `currentSensitivity`**:
+  * Eliminamos a multiplicação do input do mouse (`deltaRotation`) e a divisão do delta de rotação residual por `currentSensitivity`.
+* **Soma Geométrica Constante com Velocidade de Deslocamento**:
+  * O deslocamento do offset da arma agora absorve a rotação com base no novo controle de velocidade: `Vector2 vector2_1 = deltaRotation * freeAimSpeed * (float)FreeAimController._attenFactorLerp;`
+  * O delta de rotação aplicado à câmera é exatamente o restante matemático: `deltaRotation = deltaRotation - vector2_4;` (onde `vector2_4` é a variação de offset da arma após o limite físico de borda).
+  * Isso garante que a sensibilidade do mouse permaneça perfeitamente constante para o jogador, independente se a arma está se movendo livremente ou se o limite foi atingido.
+* **Auto-Center Simplificado (1:1)**:
+  * O auto-center realiza uma transferência matemática direta de graus entre o offset da arma e a câmera:
+    ```csharp
+    deltaRotation = (deltaRotation + vector2_5);
+    FreeAimController.Offset = (FreeAimController.Offset - vector2_5);
+    ```
+    Isso faz com que o auto-center no ADS e no quadril funcione de maneira nativa e estável, sem necessitar de nenhum fator de compensação ou calibração.
 
-### [NewSwayController.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TarkovIRL-SPT4.0-beta/NewSwayController.cs)
-* **Timer do Sway ajustado para 500ms**: O tempo necessário de caminhada estritamente reta (W ou S) para liberar a centralização passiva do Sway foi estendido de 350ms para **500ms** (`0.5f` segundos), ideal para ziguezagues de diagonal.
+### [PrimeMover.cs](file:///d:/Projetos/GITHUB%20TARKOV/tarkov-spt-4.0/mods/TarkovIRL-SPT4.0-beta/PrimeMover.cs)
+* **Novo Slider: "Free Aim Movement Speed"**:
+  * Renomeamos os antigos controles de sensibilidade para `Free Aim Movement Speed` (padrão em `0.5f`, ajustável de `0.0` a `1.0`).
+  * Este slider controla a proporção de divisão geométrica do input: `0.0` trava a arma no centro da tela (mira instantânea na câmera), enquanto `1.0` faz a arma absorver 100% da rotação (câmera imóvel até a arma atingir o limite).
+  * Removida a configuração redundante `FreeAimAutoCenterADSComp` (compensador de sensibilidade do ADS).
 
 ---
 
 ## Verificação e Compilação
-
-Executamos uma nova build do mod:
-* **Comando**: `dotnet build` no diretório do mod.
-* **Resultado**: Compilado com sucesso!
+* Executamos `dotnet build` e o mod compilou com **sucesso**.

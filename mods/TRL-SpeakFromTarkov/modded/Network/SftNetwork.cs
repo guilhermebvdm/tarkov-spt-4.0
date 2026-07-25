@@ -25,14 +25,39 @@ namespace TRL_SpeakFromTarkov.Network
             this.frameSize = frameSize;
         }
 
-        public void InitFikaSession()
+        private IFikaNetworkManager registeredManagerInstance = null;
+
+        void Update()
+        {
+            EnsurePacketRegistered();
+        }
+
+        public void EnsurePacketRegistered()
         {
             if (Singleton<IFikaNetworkManager>.Instantiated)
             {
-                Singleton<IFikaNetworkManager>.Instance.RegisterPacket<SftAudioPacket>(OnReceiveVoipData);
-                IsSessionActive = true;
-                Log.LogInfo("[SFT] SftNetwork conectado ao FIKA.");
+                var currentManager = Singleton<IFikaNetworkManager>.Instance;
+                if (registeredManagerInstance != currentManager)
+                {
+                    try
+                    {
+                        currentManager.RegisterPacket<SftAudioPacket>(OnReceiveVoipData);
+                        registeredManagerInstance = currentManager;
+                        Log.LogInfo("[SFT] SftAudioPacket registrado com sucesso no NetPacketProcessor do FIKA.");
+                    }
+                    catch (System.Exception ex)
+                    {
+                        Log.LogWarning($"[SFT] Aviso ao registrar pacote no FIKA: {ex.Message}");
+                    }
+                }
             }
+        }
+
+        public void InitFikaSession()
+        {
+            EnsurePacketRegistered();
+            IsSessionActive = true;
+            Log.LogInfo("[SFT] SftNetwork sessão ativada no FIKA.");
         }
 
         public void Broadcast(byte[] opusData, byte channel, float voiceLevel = 0f)
@@ -112,11 +137,11 @@ namespace TRL_SpeakFromTarkov.Network
         {
             IsSessionActive = false;
             
-            if (Singleton<IFikaNetworkManager>.Instantiated)
-            {
-                Singleton<IFikaNetworkManager>.Instance.UnregisterPacket<SftAudioPacket>();
-            }
-            
+            // NUNCA chamamos UnregisterPacket<SftAudioPacket>() aqui!
+            // Desregistrar a classe de pacote do FIKA faz com que o NetPacketProcessor do FIKA lance
+            // 'ParseException: Undefined packet in NetDataReader: 20270', o que interrompe a leitura de rede
+            // do FIKA e causa desync total de movimento/posições dos jogadores no jogo!
+
             // Limpa todos os falantes remotos (evita memory leak)
             foreach (var kvp in remoteSpeakers)
             {

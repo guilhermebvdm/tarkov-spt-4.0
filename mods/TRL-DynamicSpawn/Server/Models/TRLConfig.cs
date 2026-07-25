@@ -197,6 +197,7 @@ public record ValidLocationString
 
 public record MapSettings
 {
+    [JsonPropertyName("secondsBetweenWaves")] public int SecondsBetweenWaves { get; set; } = 360;
     [JsonPropertyName("sniperChance")] public int SniperChance { get; set; } = 30;
     [JsonPropertyName("safeZoneDistance")] public double SafeZoneDistance { get; set; } = 30.0;
     

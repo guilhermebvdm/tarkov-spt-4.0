@@ -31,7 +31,7 @@
                         <MudItem xs="1" />
                         <MudItem xs="6">
                             <MudSwitch @bind-Value="CurrentBoss.Enable" Color="Color.Success" Size="Size.Medium">
-                                @((CurrentBoss.Enable) ? "True" : "False")
+                                @((CurrentBoss.Enable) ? Localization.T("Enabled") : Localization.T("Disabled"))
                             </MudSwitch>
                         </MudItem>
                     </MudGrid>                  </MudExpansionPanel>
@@ -49,7 +49,7 @@
                               <MudItem xs="1" />
                               <MudItem xs="6">
                                   <MudSwitch @bind-Value="CurrentBoss.DisableFollowers" Color="Color.Primary" Size="Size.Medium">
-                                      @((CurrentBoss.DisableFollowers) ? "True" : "False")
+                                      @((CurrentBoss.DisableFollowers) ? Localization.T("Enabled") : Localization.T("Disabled"))
                                   </MudSwitch>
                               </MudItem>
                           </MudGrid>

@@ -6,6 +6,7 @@ using UnityEngine;
 using Comfort.Common;
 using EFT;
 using EFT.AssetsManager;
+using EFT.Game.Spawning;
 using SPT.Common.Http;
 using Newtonsoft.Json;
 using TRLDynamicSpawn.Models;
@@ -366,6 +367,136 @@ namespace TRLDynamicSpawn.Components
             catch { }
         }
 
+        private ISpawnPoint GetValidTeleportPoint(BotOwner bot, string mapName, double minTeleportDist, double maxTeleportDist, out BotZone targetZone)
+        {
+            targetZone = null;
+            var allZones = LocationScene.GetAllObjects<BotZone>();
+            if (allZones == null || allZones.Count() == 0) return null;
+
+            var gameWorld = Singleton<GameWorld>.Instance;
+            var playersList = gameWorld.AllAlivePlayersList;
+            var players = new List<Player>();
+
+            if (playersList != null)
+            {
+                foreach (var p in playersList)
+                {
+                    if (p == null || p.Profile == null) continue;
+                    if (p.IsAI && !p.IsYourPlayer) continue;
+                    if (UnityEngine.Application.isBatchMode && p.IsYourPlayer) continue;
+                    players.Add(p);
+                }
+            }
+
+            bool enableLos = TRLDynamicSpawn.Helpers.Settings.enableLoSCulling.Value;
+            float losDist = TRLDynamicSpawn.Helpers.Settings.losCullingDistance.Value;
+            float heightLimit = (mapName == "factory4_day" || mapName == "factory4_night" || mapName == "sandbox" || mapName == "sandbox_high") ? 5.0f : 15.0f;
+
+            List<ISpawnPoint> validPoints = new List<ISpawnPoint>();
+            Dictionary<ISpawnPoint, BotZone> pointToZoneMap = new Dictionary<ISpawnPoint, BotZone>();
+
+            foreach (var z in allZones)
+            {
+                if (z.SnipeZone) continue;
+                if (z.SpawnPoints == null) continue;
+
+                foreach (var sp in z.SpawnPoints)
+                {
+                    if (sp == null) continue;
+
+                    bool insideBubble = false;
+                    bool outsideSafe = true;
+                    bool hasLoS = false;
+
+                    if (players.Count > 0)
+                    {
+                        // 1. Check Bubble (Max dist)
+                        foreach (var p in players)
+                        {
+                            if (Vector3.Distance(p.Position, sp.Position) <= maxTeleportDist)
+                            {
+                                insideBubble = true;
+                                break;
+                            }
+                        }
+
+                        if (!insideBubble) continue;
+
+                        // 2. Check Safe dist (Min dist)
+                        foreach (var p in players)
+                        {
+                            float dx = p.Position.x - sp.Position.x;
+                            float dz = p.Position.z - sp.Position.z;
+                            float dh = (float)System.Math.Sqrt(dx * dx + dz * dz);
+                            float dv = System.Math.Abs(p.Position.y - sp.Position.y);
+                            float limitW = System.Math.Max((float)minTeleportDist, 5f);
+                            float limitH = System.Math.Max(heightLimit, 3f);
+
+                            if ((dh / limitW) + (dv / limitH) <= 1.0f)
+                            {
+                                outsideSafe = false;
+                                break;
+                            }
+                        }
+
+                        if (!outsideSafe) continue;
+
+                        // 3. Check LoS
+                        if (enableLos)
+                        {
+                            foreach (var p in players)
+                            {
+                                float d = Vector3.Distance(p.Position, sp.Position);
+                                if (d <= losDist)
+                                {
+                                    bool isVis = false;
+                                    if (p.IsYourPlayer && Camera.main != null)
+                                    {
+                                        Vector3 screenPoint = Camera.main.WorldToViewportPoint(sp.Position + Vector3.up * 1f);
+                                        if (screenPoint.z > 0 && screenPoint.x >= 0 && screenPoint.x <= 1 && screenPoint.y >= 0 && screenPoint.y <= 1) isVis = true;
+                                    }
+                                    else
+                                    {
+                                        Vector3 dir = (sp.Position - p.Position).normalized;
+                                        if (Vector3.Dot(p.LookDirection, dir) > 0.5f) isVis = true;
+                                    }
+
+                                    if (isVis)
+                                    {
+                                        Vector3 headPos = p.MainParts.ContainsKey(BodyPartType.head) ? p.MainParts[BodyPartType.head].Position : p.Position + Vector3.up * 1.5f;
+                                        if (!Physics.Linecast(headPos, sp.Position + Vector3.up * 1f, LayerMaskClass.HighPolyWithTerrainMask))
+                                        {
+                                            hasLoS = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (hasLoS) continue;
+                    }
+                    else
+                    {
+                        // No players = valid anywhere
+                    }
+
+                    // If it passed all filters, it's valid
+                    validPoints.Add(sp);
+                    pointToZoneMap[sp] = z;
+                }
+            }
+
+            if (validPoints.Count > 0)
+            {
+                var chosen = validPoints[UnityEngine.Random.Range(0, validPoints.Count)];
+                targetZone = pointToZoneMap[chosen];
+                return chosen;
+            }
+
+            return null;
+        }
+
         private bool AttemptToTeleportBot(BotOwner bot)
         {
             try
@@ -376,38 +507,25 @@ namespace TRLDynamicSpawn.Components
                 string mapName = gameWorld.MainPlayer?.Location?.ToLower() ?? "";
                 var role = bot.Profile.Info.Settings.Role;
 
-                // 1. Encontra uma zona válida (perto de algum jogador, respeitando a bolha, LoS e distância mínima configurada)
-                BotZone selectedZone = null;
-                bool zoneValid = false;
-                int retries = 15;
-
                 double minTeleportDist = 100.0;
+                double maxTeleportDist = 300.0;
+
                 if (DynamicSpawnManager.Instance.ServerConfig?.MapConfigs?.TryGetValue(mapName, out var mapSettings) == true)
                 {
                     minTeleportDist = mapSettings.TeleportMinDistance;
+                    maxTeleportDist = mapSettings.SpawnBubbleDistance;
                 }
 
-                while (retries > 0)
-                {
-                    selectedZone = TRLDynamicSpawn.Helpers.Methods.GetRandomZone(bot.BotsController.BotSpawner);
-                    if (selectedZone != null && DynamicSpawnManager.Instance.IsValidSpawnZone(selectedZone, mapName, role, null, minTeleportDist))
-                    {
-                        zoneValid = true;
-                        break;
-                    }
-                    retries--;
-                }
+                BotZone selectedZone = null;
+                ISpawnPoint spawnPoint = GetValidTeleportPoint(bot, mapName, minTeleportDist, maxTeleportDist, out selectedZone);
 
-                if (!zoneValid || selectedZone == null || selectedZone.SpawnPoints == null || selectedZone.SpawnPoints.Length == 0)
+                if (spawnPoint == null || selectedZone == null)
                 {
-                    Plugin.LogSource.LogWarning($"[TRL] Teleport failed: could not find a valid target zone for {bot.GetPlayer.Profile.Nickname}.");
+                    Plugin.LogSource.LogWarning($"[TRL] Teleport failed: could not find a valid target spawn point for {bot.GetPlayer.Profile.Nickname} within Bubble({maxTeleportDist}m) / Safe({minTeleportDist}m).");
                     return false;
                 }
 
-                // Seleciona um ponto de spawn aleatório na zona
-                var spawnPoint = selectedZone.SpawnPoints[UnityEngine.Random.Range(0, selectedZone.SpawnPoints.Length)];
                 Vector3 targetPos = spawnPoint.Position;
-
                 Plugin.LogSource.LogInfo($"[TRL] Teleporting bot {bot.GetPlayer.Profile.Nickname} ({role}) from {bot.Position} to {selectedZone.NameZone} ({targetPos})...");
 
                 // 2. Limpar de forma ultra segura toda a memória de combate e aggro (ICM + SAIN)

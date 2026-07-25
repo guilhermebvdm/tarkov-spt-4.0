@@ -497,6 +497,9 @@ namespace TRLDynamicSpawn.Patches
 
     public class TryToSpawnInZoneAndDelayPatch : ModulePatch
     {
+        private static Queue<Vector3> _lastSpawnPositions = new Queue<Vector3>();
+        private static int _maxHistorySpawnPoint = 6;
+
         protected override MethodBase GetTargetMethod()
         {
             return AccessTools.Method(
@@ -506,19 +509,18 @@ namespace TRLDynamicSpawn.Patches
         }
 
         [PatchPrefix]
-        private static void PatchPrefix(BotSpawner __instance, BotZone botZone, BotCreationDataClass data, bool withCheckMinMax, bool newWave, ref List<ISpawnPoint> pointsToSpawn, bool forcedSpawn = false)
+        private static bool PatchPrefix(BotSpawner __instance, BotZone botZone, BotCreationDataClass data, bool withCheckMinMax, bool newWave, ref List<ISpawnPoint> pointsToSpawn, bool forcedSpawn = false)
         {
-            if (pointsToSpawn != null && pointsToSpawn.Count > 0) return;
+            if (pointsToSpawn != null && pointsToSpawn.Count > 0) return true;
 
             try
             {
-                var validPoints = new List<ISpawnPoint>();
                 var allPoints = botZone.SpawnPoints;
 
-                if (allPoints == null || allPoints.Length == 0) return;
+                if (allPoints == null || allPoints.Length == 0) return true;
 
                 var gameWorld = Singleton<GameWorld>.Instance;
-                if (gameWorld == null) return;
+                if (gameWorld == null) return true;
                 string mapName = gameWorld.MainPlayer?.Location?.ToLower() ?? "";
 
                 double safeDist = 30.0;
@@ -539,88 +541,106 @@ namespace TRLDynamicSpawn.Patches
                     {
                         if (p == null || p.Profile == null) continue;
                         if (p.IsAI && !p.IsYourPlayer) continue;
-
-                        // Ignora o Headless Player no host dedicado para não bloquear a SafeZone/bolha
-                        if (UnityEngine.Application.isBatchMode && p.IsYourPlayer)
-                        {
-                            continue;
-                        }
+                        if (UnityEngine.Application.isBatchMode && p.IsYourPlayer) continue;
                         players.Add(p);
                     }
                 }
 
-                WildSpawnType role = data?.Profiles?.FirstOrDefault()?.Info?.Settings?.Role ?? WildSpawnType.assault;
-                bool isCommonBot = role == WildSpawnType.pmcUSEC || role == WildSpawnType.pmcBEAR || role == WildSpawnType.assault;
+                var strictPoints = new List<ISpawnPoint>();
+                var noLosPoints = new List<ISpawnPoint>();
+                var noBubblePoints = new List<ISpawnPoint>();
+
+                var fallbackStrictPoints = new List<ISpawnPoint>();
+                var fallbackNoLosPoints = new List<ISpawnPoint>();
+                var fallbackNoBubblePoints = new List<ISpawnPoint>();
+
+                float maxDist = 300f;
+                bool isBubbleEnabled = TRLDynamicSpawn.Helpers.Settings.enableSpawnBubble.Value;
+
+                if (TRLDynamicSpawn.Components.DynamicSpawnManager.Instance != null && TRLDynamicSpawn.Components.DynamicSpawnManager.Instance.ServerConfig != null)
+                {
+                    var cfg = TRLDynamicSpawn.Components.DynamicSpawnManager.Instance.ServerConfig;
+                    if (cfg.MapConfigs?.TryGetValue(mapName, out var mapSettings) == true)
+                    {
+                        isBubbleEnabled = isBubbleEnabled && mapSettings.EnableSpawnBubble;
+                        maxDist = mapSettings.SpawnBubbleDistance;
+                    }
+                }
 
                 foreach (var checkPoint in allPoints)
                 {
                     if (checkPoint == null) continue;
 
-                    bool isValid = true;
+                    bool tooCloseToRecent = false;
+                    foreach (var recentPos in _lastSpawnPositions)
+                    {
+                        if (Vector3.Distance(checkPoint.Position, recentPos) < 50f)
+                        {
+                            tooCloseToRecent = true;
+                            break;
+                        }
+                    }
+
+                    bool insideBubble = true;
+                    bool outsideSafe = true;
+                    bool hasLoS = false;
+
                     if (players.Count > 0)
                     {
-                        // Se for bot comum (PMC ou Scav), ele deve estar dentro da bolha de spawn em relação a algum jogador real
-                        if (isCommonBot)
+                        if (isBubbleEnabled)
                         {
-                            float maxDist = 300f;
-                            bool isBubbleEnabled = TRLDynamicSpawn.Helpers.Settings.enableSpawnBubble.Value;
-
-                            if (TRLDynamicSpawn.Components.DynamicSpawnManager.Instance != null && TRLDynamicSpawn.Components.DynamicSpawnManager.Instance.ServerConfig != null)
+                            bool closeEnough = false;
+                            foreach (var p in players)
                             {
-                                var cfg = TRLDynamicSpawn.Components.DynamicSpawnManager.Instance.ServerConfig;
-                                if (cfg.MapConfigs?.TryGetValue(mapName, out var mapSettings) == true)
+                                if (Vector3.Distance(p.Position, checkPoint.Position) <= maxDist)
                                 {
-                                    isBubbleEnabled = isBubbleEnabled && mapSettings.EnableSpawnBubble;
-                                    maxDist = mapSettings.DespawnDistance;
+                                    closeEnough = true;
+                                    break;
                                 }
                             }
+                            if (!closeEnough) insideBubble = false;
+                        }
 
-                            if (isBubbleEnabled)
+                        float heightLimit = (mapName == "factory4_day" || mapName == "factory4_night" || mapName == "sandbox" || mapName == "sandbox_high") ? 5.0f : 15.0f;
+                        foreach (var p in players)
+                        {
+                            float dx = p.Position.x - checkPoint.Position.x;
+                            float dz = p.Position.z - checkPoint.Position.z;
+                            float dh = (float)System.Math.Sqrt(dx * dx + dz * dz);
+                            float dv = System.Math.Abs(p.Position.y - checkPoint.Position.y);
+                            float limitW = System.Math.Max((float)safeDist, 5f);
+                            float limitH = System.Math.Max(heightLimit, 3f);
+                            if ((dh / limitW) + (dv / limitH) <= 1.0f)
                             {
-                                bool closeEnoughToAnyPlayer = false;
-                                foreach (var player in players)
-                                {
-                                    if (player == null || player.Profile == null) continue;
-                                    if (player.IsAI && !player.IsYourPlayer) continue;
-
-                                    float dist = Vector3.Distance(player.Position, checkPoint.Position);
-                                    if (dist <= maxDist)
-                                    {
-                                        closeEnoughToAnyPlayer = true;
-                                        break;
-                                    }
-                                }
-                                if (!closeEnoughToAnyPlayer)
-                                {
-                                    isValid = false;
-                                }
+                                outsideSafe = false;
+                                break;
                             }
                         }
 
-                        if (isValid)
+                        if (outsideSafe && enableLos)
                         {
-                            foreach (var player in players)
+                            foreach (var p in players)
                             {
-                                if (player == null || player.Profile == null) continue;
-                                if (player.IsAI && !player.IsYourPlayer) continue;
-
-                                float dist = Vector3.Distance(player.Position, checkPoint.Position);
-                                if (dist < safeDist)
+                                float d = Vector3.Distance(p.Position, checkPoint.Position);
+                                if (d <= losDist)
                                 {
-                                    isValid = false;
-                                    break;
-                                }
-
-                                if (enableLos && dist <= losDist)
-                                {
-                                    Vector3 directionToPoint = (checkPoint.Position - player.Position).normalized;
-                                    float dot = Vector3.Dot(player.LookDirection, directionToPoint);
-                                    if (dot > 0.5f)
+                                    bool isVis = false;
+                                    if (p.IsYourPlayer && Camera.main != null)
                                     {
-                                        Vector3 headPos = player.MainParts.ContainsKey(BodyPartType.head) ? player.MainParts[BodyPartType.head].Position : player.Position + Vector3.up * 1.5f;
+                                        Vector3 screenPoint = Camera.main.WorldToViewportPoint(checkPoint.Position + Vector3.up * 1f);
+                                        if (screenPoint.z > 0 && screenPoint.x >= 0 && screenPoint.x <= 1 && screenPoint.y >= 0 && screenPoint.y <= 1) isVis = true;
+                                    }
+                                    else
+                                    {
+                                        Vector3 dir = (checkPoint.Position - p.Position).normalized;
+                                        if (Vector3.Dot(p.LookDirection, dir) > 0.5f) isVis = true;
+                                    }
+                                    if (isVis)
+                                    {
+                                        Vector3 headPos = p.MainParts.ContainsKey(BodyPartType.head) ? p.MainParts[BodyPartType.head].Position : p.Position + Vector3.up * 1.5f;
                                         if (!Physics.Linecast(headPos, checkPoint.Position + Vector3.up * 1f, LayerMaskClass.HighPolyWithTerrainMask))
                                         {
-                                            isValid = false;
+                                            hasLoS = true;
                                             break;
                                         }
                                     }
@@ -629,16 +649,44 @@ namespace TRLDynamicSpawn.Patches
                         }
                     }
 
-                    if (isValid)
+                    if (outsideSafe)
                     {
-                        validPoints.Add(checkPoint);
+                        if (tooCloseToRecent)
+                        {
+                            if (insideBubble && !hasLoS) fallbackStrictPoints.Add(checkPoint);
+                            if (insideBubble) fallbackNoLosPoints.Add(checkPoint);
+                            if (!hasLoS) fallbackNoBubblePoints.Add(checkPoint);
+                        }
+                        else
+                        {
+                            if (insideBubble && !hasLoS) strictPoints.Add(checkPoint);
+                            if (insideBubble) noLosPoints.Add(checkPoint);
+                            if (!hasLoS) noBubblePoints.Add(checkPoint);
+                        }
                     }
                 }
 
-                if (validPoints.Count > 0)
+                List<ISpawnPoint> chosenList = null;
+                if (strictPoints.Count > 0) chosenList = strictPoints;
+                else if (noLosPoints.Count > 0) chosenList = noLosPoints;
+                else if (noBubblePoints.Count > 0) chosenList = noBubblePoints;
+                else if (fallbackStrictPoints.Count > 0)
                 {
-                    var selectedPoint = validPoints[UnityEngine.Random.Range(0, validPoints.Count)];
+                    Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] Fallback: Ignored _maxHistorySpawnPoint rule in {botZone.NameZone} to find a safe point.");
+                    chosenList = fallbackStrictPoints;
+                }
+                else if (fallbackNoLosPoints.Count > 0) chosenList = fallbackNoLosPoints;
+                else chosenList = fallbackNoBubblePoints;
+
+                if (chosenList != null && chosenList.Count > 0)
+                {
+                    var selectedPoint = chosenList[UnityEngine.Random.Range(0, chosenList.Count)];
                     pointsToSpawn = new List<ISpawnPoint> { selectedPoint };
+                    _lastSpawnPositions.Enqueue(selectedPoint.Position);
+                    if (_lastSpawnPositions.Count > _maxHistorySpawnPoint)
+                    {
+                        _lastSpawnPositions.Dequeue();
+                    }
                 }
                 else
                 {
@@ -649,6 +697,36 @@ namespace TRLDynamicSpawn.Patches
             {
                 Plugin.LogSource.LogError($"Error in TryToSpawnInZoneAndDelayPatch: {ex.Message}");
             }
+            return true;
+        }
+    }
+
+    public class ChooseProfilePatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(BotProfileDataClass), nameof(BotProfileDataClass.ChooseProfile));
+        }
+
+        [PatchPrefix]
+        private static bool PatchPrefix(ref Profile __result, BotProfileDataClass __instance, List<Profile> profiles2Select, bool withDelete)
+        {
+            // Se for PMC, ignoramos a checagem rigorosa de Dificuldade e Side, garantindo que o bot não retorne nulo.
+            if (__instance.WildSpawnType_0 == WildSpawnType.pmcUSEC || __instance.WildSpawnType_0 == WildSpawnType.pmcBEAR)
+            {
+                var list = profiles2Select.Where(x => x.Info.Settings.Role == __instance.WildSpawnType_0).ToList();
+                if (list.Count > 0)
+                {
+                    Profile profile = list[UnityEngine.Random.Range(0, list.Count)];
+                    if (withDelete)
+                    {
+                        profiles2Select.Remove(profile);
+                    }
+                    __result = profile;
+                    return false; // Skips original method
+                }
+            }
+            return true;
         }
     }
 }

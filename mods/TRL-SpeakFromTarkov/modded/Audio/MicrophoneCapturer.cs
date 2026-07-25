@@ -41,6 +41,8 @@ namespace TRL_SpeakFromTarkov.Audio
         private bool hasPlayed = false;
         private int dspConfirmed = 0;
         private float restartCooldown = 0f;
+        private int lastMicPosition = 0;
+        private float[] micPollBuffer = new float[48000];
         
         // Filtros de áudio
         private AudioFilter audioFilter;
@@ -109,6 +111,7 @@ namespace TRL_SpeakFromTarkov.Audio
             availableSamples = 0;
             hasPlayed = false;
             dspConfirmed = 0;
+            lastMicPosition = 0;
             
             audioFilter = new AudioFilter(targetSampleRate, targetFrameSize, VoIPPlugin.HPFCutoff.Value);
             audioFilter.OpenThreshold  = VoIPPlugin.NoiseGateThreshold.Value;
@@ -203,7 +206,7 @@ namespace TRL_SpeakFromTarkov.Audio
                 return;
             }
             
-            if (hasPlayed && !Microphone.IsRecording(deviceName))
+            if (!Microphone.IsRecording(deviceName))
             {
                 restartCooldown += Time.deltaTime;
                 if (restartCooldown >= 2.0f)
@@ -220,24 +223,8 @@ namespace TRL_SpeakFromTarkov.Audio
                 restartCooldown = 0f;
             }
             
-            if (hasPlayed && !_audioSource.isPlaying && Microphone.IsRecording(deviceName))
-            {
-                VoIPPlugin.Log.LogWarning("[SFT] AudioSource parou. Relançando...");
-                hasPlayed = false;
-                dspConfirmed = 0;
-                lock (bufferLock) { availableSamples = 0; writePos = 0; readPos = 0; }
-            }
-            
-            if (!hasPlayed && Microphone.GetPosition(deviceName) > 0)
-            {
-                _audioSource.Play();
-                hasPlayed = true;
-            }
-            
-            if (dspConfirmed == 1)
-            {
-                dspConfirmed = 2;
-            }
+            // ── LEITURA DIRETA DO MICROFONE (SEM ATROPELAMENTO DE AUDIOSOURCE) ──
+            PollMicrophoneData();
             
             if (audioFilter != null)
             {
@@ -250,6 +237,77 @@ namespace TRL_SpeakFromTarkov.Audio
                 audioFilter.EnableAGC             = VoIPPlugin.EnableAGC.Value;
                 audioFilter.EnableLimiter         = VoIPPlugin.EnableLimiter.Value;
                 audioFilter.LPFCutoffHz           = VoIPPlugin.LPFCutoff.Value;
+            }
+        }
+
+        private void PollMicrophoneData()
+        {
+            if (micClip == null) return;
+
+            int currentPos = Microphone.GetPosition(deviceName);
+            if (currentPos < 0 || currentPos == lastMicPosition) return;
+
+            int clipSamples = micClip.samples;
+            
+            if (currentPos > lastMicPosition)
+            {
+                int count = currentPos - lastMicPosition;
+                if (count > micPollBuffer.Length) count = micPollBuffer.Length;
+                
+                micClip.GetData(micPollBuffer, lastMicPosition);
+                
+                lock (bufferLock)
+                {
+                    if (ringBuffer != null)
+                    {
+                        for (int i = 0; i < count; i++)
+                        {
+                            ringBuffer[writePos] = micPollBuffer[i];
+                            writePos = (writePos + 1) % ringBuffer.Length;
+                        }
+                        availableSamples += count;
+                    }
+                }
+                lastMicPosition = currentPos;
+            }
+            else if (currentPos < lastMicPosition)
+            {
+                int chunk1 = clipSamples - lastMicPosition;
+                if (chunk1 > 0)
+                {
+                    float[] buf1 = new float[chunk1];
+                    micClip.GetData(buf1, lastMicPosition);
+                    lock (bufferLock)
+                    {
+                        if (ringBuffer != null)
+                        {
+                            for (int i = 0; i < chunk1; i++)
+                            {
+                                ringBuffer[writePos] = buf1[i];
+                                writePos = (writePos + 1) % ringBuffer.Length;
+                            }
+                            availableSamples += chunk1;
+                        }
+                    }
+                }
+                if (currentPos > 0)
+                {
+                    float[] buf2 = new float[currentPos];
+                    micClip.GetData(buf2, 0);
+                    lock (bufferLock)
+                    {
+                        if (ringBuffer != null)
+                        {
+                            for (int i = 0; i < currentPos; i++)
+                            {
+                                ringBuffer[writePos] = buf2[i];
+                                writePos = (writePos + 1) % ringBuffer.Length;
+                            }
+                            availableSamples += currentPos;
+                        }
+                    }
+                }
+                lastMicPosition = currentPos;
             }
         }
         
@@ -301,33 +359,7 @@ namespace TRL_SpeakFromTarkov.Audio
 
         void OnAudioFilterRead(float[] data, int channels)
         {
-            if (!IsRecording || micClip == null || !hasPlayed) return;
-            if (dspConfirmed == 0) dspConfirmed = 1;
-            
-            lock (bufferLock)
-            {
-                if (ringBuffer == null) return;
-                
-                int len = data.Length / channels;
-                if (availableSamples + len > ringBuffer.Length)
-                {
-                    // Buffer overflow: ignora pacote
-                    return;
-                }
-                
-                for (int i = 0; i < data.Length; i += channels)
-                {
-                    float sample = 0f;
-                    for (int c = 0; c < channels; c++) sample += data[i + c];
-                    sample /= channels;
-                    
-                    ringBuffer[writePos] = sample;
-                    writePos = (writePos + 1) % ringBuffer.Length;
-                }
-                availableSamples += len;
-            }
-            
-            // Silencia a saída para não ouvir a própria voz
+            // Silencia o AudioSource (que é mantido mudo para não tocar localmente)
             Array.Clear(data, 0, data.Length);
         }
         

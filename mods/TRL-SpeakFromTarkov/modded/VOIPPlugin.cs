@@ -37,6 +37,10 @@ namespace TRL_SpeakFromTarkov
         public static ConfigEntry<float> MaxHearingDistance { get; private set; }
         public static ConfigEntry<float> OutputVolume { get; private set; }
 
+        // Bot Interaction
+        public static ConfigEntry<bool> EnableBotInteraction { get; private set; }
+        public static ConfigEntry<float> BotVoiceDebugVolume { get; private set; }
+
         // CONFIGURAÇÃO IDEAL: KeyboardShortcut
         public static ConfigEntry<KeyboardShortcut> PushToTalkKey { get; private set; }
         public static ConfigEntry<KeyboardShortcut> ToggleModeKey { get; private set; }
@@ -211,6 +215,12 @@ namespace TRL_SpeakFromTarkov
                     new AcceptableValueRange<int>(0, 10)));
             OpusFEC = Config.Bind("Rede (Opus)", "Correção de Erros (FEC)", true,
                 new ConfigDescription("Se ativado, envia redundância. Em internets ruins, reconstrói partes perdidas da voz magicamente."));
+
+            EnableBotInteraction = Config.Bind("Interacao IA (Bots)", "Habilitar Reatividade dos Bots", true,
+                new ConfigDescription("Se ativado, os bots escutam a sua voz no mundo 3D e reagem/respondem verbalmente."));
+            BotVoiceDebugVolume = Config.Bind("Interacao IA (Bots)", "Volume de Debug da Fala (EPhraseTrigger)", 0.5f,
+                new ConfigDescription("Volume local da fala do personagem durante o teste de debug (0.5 = 50%, 0.0 = Silencioso). Padrão: 0.5 (50%)",
+                    new AcceptableValueRange<float>(0.0f, 1.0f)));
 
             RNNoiseLatency.SettingChanged += (sender, args) =>
             {

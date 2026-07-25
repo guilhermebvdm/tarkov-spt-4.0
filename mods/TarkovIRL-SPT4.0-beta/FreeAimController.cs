@@ -7,7 +7,6 @@ public static class FreeAimController
 {
   public static Vector2 Offset = Vector2.zero;
   private static float _attenFactorLerp = 1f;
-  private static float _currentSensitivity = 1f;
   private static float _currentAutoCenterSpeed = 0.0f;
   private static float _currentBoundsX = 10f;
   private static float _currentBoundsY = 10f;
@@ -24,9 +23,7 @@ public static class FreeAimController
     }
     else
     {
-      float num1 = (isAiming ? PrimeMover.FreeAimSensitivityADS.Value : PrimeMover.FreeAimSensitivity.Value) * PrimeMover.MasterSensitivityMultiplier.Value;
-      FreeAimController._currentSensitivity = Mathf.Lerp(FreeAimController._currentSensitivity, num1, Time.deltaTime * 8f);
-      float currentSensitivity = Mathf.Max(FreeAimController._currentSensitivity, 0.0001f);
+      float freeAimSpeed = isAiming ? PrimeMover.FreeAimSensitivityADS.Value : PrimeMover.FreeAimSensitivity.Value;
       float num2 = isAiming ? PrimeMover.FreeAimBoundsXADS.Value : PrimeMover.FreeAimBoundsX.Value;
       float num3 = isAiming ? PrimeMover.FreeAimBoundsYADS.Value : PrimeMover.FreeAimBoundsY.Value;
       float num4 = isAiming ? 6f : 15f;
@@ -44,29 +41,23 @@ public static class FreeAimController
         FreeAimController.Offset = Vector2.Lerp(FreeAimController.Offset, Vector2.zero, Time.deltaTime * springForce);
       }
 
-      Vector2 vector2_1 = deltaRotation * currentSensitivity * (float)FreeAimController._attenFactorLerp;
+      Vector2 vector2_1 = deltaRotation * freeAimSpeed * (float)FreeAimController._attenFactorLerp;
       Vector2 vector2_2 = (FreeAimController.Offset + vector2_1);
       Vector2 vector2_3;
       vector2_3 = new Vector2(Mathf.Clamp(vector2_2.x, -FreeAimController._currentBoundsX, FreeAimController._currentBoundsX), Mathf.Clamp(vector2_2.y, -FreeAimController._currentBoundsY, FreeAimController._currentBoundsY));
       Vector2 vector2_4 = (vector2_3 - FreeAimController.Offset);
       FreeAimController.Offset = vector2_3;
-      deltaRotation = (deltaRotation - (vector2_4 / currentSensitivity));
+      deltaRotation = (deltaRotation - vector2_4);
+      
       if (!(isAiming ? PrimeMover.EnableCameraAutoCenterADS.Value : PrimeMover.EnableCameraAutoCenter.Value))
         return;
       float num6 = isAiming ? PrimeMover.CameraAutoCenterSpeedADS.Value : PrimeMover.CameraAutoCenterSpeed.Value;
       FreeAimController._currentAutoCenterSpeed = Mathf.Lerp(FreeAimController._currentAutoCenterSpeed, num6, Time.deltaTime * 6f);
       float currentAutoCenterSpeed = FreeAimController._currentAutoCenterSpeed;
       Vector2 vector2_5 = (FreeAimController.Offset * Time.deltaTime * currentAutoCenterSpeed);
-      if (isAiming)
-      {
-        deltaRotation = (deltaRotation + (vector2_5 / PrimeMover.FreeAimAutoCenterADSComp.Value));
-        FreeAimController.Offset = (FreeAimController.Offset - vector2_5);
-      }
-      else
-      {
-        deltaRotation = (deltaRotation + (vector2_5 / currentSensitivity));
-        FreeAimController.Offset = (FreeAimController.Offset - vector2_5);
-      }
+      
+      deltaRotation = (deltaRotation + vector2_5);
+      FreeAimController.Offset = (FreeAimController.Offset - vector2_5);
     }
   }
 
@@ -88,7 +79,6 @@ public static class FreeAimController
   {
     FreeAimController.Offset = Vector2.zero;
     FreeAimController._attenFactorLerp = 1f;
-    FreeAimController._currentSensitivity = 1f;
     FreeAimController._currentAutoCenterSpeed = 0.0f;
     FreeAimController._currentBoundsX = 10f;
     FreeAimController._currentBoundsY = 10f;

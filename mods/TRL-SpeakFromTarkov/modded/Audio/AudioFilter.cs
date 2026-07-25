@@ -137,9 +137,6 @@ namespace TRL_SpeakFromTarkov.Audio
         /// </summary>
         public void Apply(float[] buffer)
         {
-            // O AGC tenta equalizar o ganho de quem fala baixo vs quem grita ANTES do gate de ruído.
-            if (EnableAGC) ApplyAGC(buffer);
-
             if (_rnAvailable && UseRNNoise)
             {
                 ApplyHPF(buffer);
@@ -150,6 +147,9 @@ namespace TRL_SpeakFromTarkov.Audio
             {
                 ApplyFallback(buffer);
             }
+
+            // O AGC roda DEPOIS da supressão do RNNoise para não amplificar o ruído de fundo antes do filtro
+            if (EnableAGC) ApplyAGC(buffer);
             
             // O limiter é a última barreira de proteção de áudio
             if (EnableLimiter) ApplyLimiter(buffer);

@@ -25,6 +25,8 @@ namespace TRLDynamicSpawn.Components
         private int _secondsBetweenWaves = 360; 
         private float _nextWaveTime = 0f;
         
+        public static float NextWaveTime => Instance != null ? Instance._nextWaveTime : 0f;
+        
         private string _activePreset = "Balanced";
         private TRLConfig _serverConfig;
         public TRLConfig ServerConfig => _serverConfig;
@@ -35,6 +37,7 @@ namespace TRLDynamicSpawn.Components
         private BotsController _botsController;
         private Coroutine _activeWaveCoroutine;
         private string _cachedFikaStatus;
+        private BotZone _lastSelectedZone;
 
         public void Init(GameWorld gameWorld, IBotCreator botCreator, BotsController botsController)
         {
@@ -71,14 +74,16 @@ namespace TRLDynamicSpawn.Components
                     Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Aleatorio rolled preset: {_activePreset}");
                 }
 
-                _delayBeforeFirstWave = _serverConfig.MapTimers["global"].DelayBeforeFirstWave;
-                _secondsBetweenWaves = _serverConfig.MapTimers["global"].SecondsBetweenWaves;
+                if (_serverConfig.MapTimers != null && _serverConfig.MapTimers.ContainsKey("global"))
+                {
+                    _delayBeforeFirstWave = _serverConfig.MapTimers["global"].DelayBeforeFirstWave;
+                }
+                _secondsBetweenWaves = GetSecondsBetweenWavesForMap(GetCurrentMapName());
                 Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Connected to Server. Active Preset: {_activePreset}");
 
                 // Apply Preset Modifiers
                 if (_activePreset == "Quiet Raid")
                 {
-                    _secondsBetweenWaves = (int)(_secondsBetweenWaves * 1.5f);
                     if (_serverConfig.EliteConfig != null)
                     {
                         _serverConfig.EliteConfig.Usec.MaxGroupSize = Mathf.Min(_serverConfig.EliteConfig.Usec.MaxGroupSize, 2);
@@ -88,7 +93,6 @@ namespace TRLDynamicSpawn.Components
                 }
                 else if (_activePreset == "Warzone")
                 {
-                    _secondsBetweenWaves = (int)(_secondsBetweenWaves * 0.5f);
                     if (_serverConfig.EliteConfig != null)
                     {
                         _serverConfig.EliteConfig.RandomRaiderGroup = true;
@@ -150,41 +154,116 @@ namespace TRLDynamicSpawn.Components
             yield return StartCoroutine(SpawnHordeLoop());
         }
 
+        private void ClearSptQueue()
+        {
+            if (Singleton<BotEventHandler>.Instantiated)
+            {
+                Plugin.LogSource.LogInfo("[TRL-DynamicSpawn] Clearing pending/stuck bot profile creation queue in SPT...");
+                Singleton<BotEventHandler>.Instance.StopBotSpawn();
+            }
+        }
+
+        private int GetSecondsBetweenWavesForMap(string mapName)
+        {
+            int seconds = 360;
+            if (_serverConfig?.MapConfigs != null && _serverConfig.MapConfigs.ContainsKey(mapName) && _serverConfig.MapConfigs[mapName].SecondsBetweenWaves > 0)
+            {
+                seconds = _serverConfig.MapConfigs[mapName].SecondsBetweenWaves;
+            }
+            else if (_serverConfig?.MapTimers != null && _serverConfig.MapTimers.ContainsKey("global") && _serverConfig.MapTimers["global"].SecondsBetweenWaves > 0)
+            {
+                seconds = _serverConfig.MapTimers["global"].SecondsBetweenWaves;
+            }
+
+            if (_activePreset == "Quiet Raid")
+            {
+                seconds = (int)(seconds * 1.5f);
+            }
+            else if (_activePreset == "Warzone")
+            {
+                seconds = (int)(seconds * 0.5f);
+            }
+
+            return seconds;
+        }
+
         private IEnumerator SpawnHordeLoop()
         {
-            Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Waiting {_delayBeforeFirstWave}s for initial warmup...");
-            _nextWaveTime = Time.time + _delayBeforeFirstWave;
+            int attempt = 1;
             IsWarmupActive = true;
-            yield return new WaitForSeconds(_delayBeforeFirstWave);
-            IsWarmupActive = false;
 
-            bool isFirstWave = true;
             while (true)
             {
-                // Para a corrotina da wave anterior se ela ainda estiver rodando (e limpa a flag de spawn)
-                if (_activeWaveCoroutine != null)
-                {
-                    StopCoroutine(_activeWaveCoroutine);
-                    _activeWaveCoroutine = null;
-                    _isSpawningWave = false;
-                }
-
-                // Limpa a fila nativa de carregamento de perfis de bots do SPT
-                if (Singleton<BotEventHandler>.Instantiated)
-                {
-                    Plugin.LogSource.LogInfo("[TRL-DynamicSpawn] Clearing pending/stuck bot profile creation queue in SPT...");
-                    Singleton<BotEventHandler>.Instance.StopBotSpawn();
-                }
-
-                if (!_isSpawningWave)
-                {
-                    _activeWaveCoroutine = StartCoroutine(ProcessWave(isFirstWave));
-                    isFirstWave = false;
-                }
+                string currentMap = GetCurrentMapName();
+                int maxCap = Settings.GetMapCap(currentMap);
+                int aliveBots = _botsController.AliveAndLoadingBotsCount;
                 
-                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Wave completed. Next wave in {_secondsBetweenWaves}s...");
+                // Se não é a primeira tentativa e já batemos o limite, termina o warmup
+                if (attempt > 1 && aliveBots >= maxCap)
+                {
+                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Max cap reached ({aliveBots}/{maxCap}) after {attempt - 1} warmup attempts. Finishing warmup.");
+                    break;
+                }
+
+                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Waiting {_delayBeforeFirstWave}s for initial warmup (Attempt {attempt})...");
+                _nextWaveTime = Time.time + _delayBeforeFirstWave;
+                
+                float wait = Mathf.Max(1f, _delayBeforeFirstWave - 1f);
+                yield return new WaitForSeconds(wait);
+                ClearSptQueue();
+                yield return new WaitForSeconds(1f);
+
+                if (_activeWaveCoroutine != null) StopCoroutine(_activeWaveCoroutine);
+                _activeWaveCoroutine = StartCoroutine(ProcessWave(true));
+
+                attempt++;
+            }
+
+            IsWarmupActive = false;
+
+            while (true)
+            {
+                string currentMap = GetCurrentMapName();
+                _secondsBetweenWaves = GetSecondsBetweenWavesForMap(currentMap);
+
+                Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Next full wave interval for map '{currentMap}': {_secondsBetweenWaves}s...");
                 _nextWaveTime = Time.time + _secondsBetweenWaves;
-                yield return new WaitForSeconds(_secondsBetweenWaves);
+                
+                float waitNormal = Mathf.Max(1f, _secondsBetweenWaves - 1f);
+                yield return new WaitForSeconds(waitNormal);
+                ClearSptQueue();
+                yield return new WaitForSeconds(1f);
+
+                if (_activeWaveCoroutine != null) StopCoroutine(_activeWaveCoroutine);
+                _activeWaveCoroutine = StartCoroutine(ProcessWave(false));
+
+                // Loop para continuar batendo na porta de 60 em 60 seg até encher o mapa
+                int topOffAttempt = 1;
+                while (true)
+                {
+                    currentMap = GetCurrentMapName();
+                    int maxCap = Settings.GetMapCap(currentMap);
+                    int aliveBots = _botsController.AliveAndLoadingBotsCount;
+                    
+                    if (aliveBots >= maxCap)
+                    {
+                        Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Max cap reached ({aliveBots}/{maxCap}) after {topOffAttempt} top-off waves. Resuming long interval.");
+                        break;
+                    }
+
+                    Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Max cap not reached yet ({aliveBots}/{maxCap}). Topping off in {_delayBeforeFirstWave}s (Attempt {topOffAttempt})...");
+                    _nextWaveTime = Time.time + _delayBeforeFirstWave;
+                    
+                    float waitTopOff = Mathf.Max(1f, _delayBeforeFirstWave - 1f);
+                    yield return new WaitForSeconds(waitTopOff);
+                    ClearSptQueue();
+                    yield return new WaitForSeconds(1f);
+
+                    if (_activeWaveCoroutine != null) StopCoroutine(_activeWaveCoroutine);
+                    _activeWaveCoroutine = StartCoroutine(ProcessWave(false));
+
+                    topOffAttempt++;
+                }
             }
         }
 
@@ -292,8 +371,12 @@ namespace TRLDynamicSpawn.Components
                 else if (_activePreset == "Scav Infestation") pmcRatio = 0.3f;
                 else if (_activePreset == "Warzone") pmcRatio = UnityEngine.Random.Range(0.2f, 0.8f);
 
-                int alivePMCs = _gameWorld.RegisteredPlayers.Count(p => p.IsAI && p.HealthController != null && p.HealthController.IsAlive && (p.Profile.Side == EPlayerSide.Usec || p.Profile.Side == EPlayerSide.Bear));
-                int aliveScavs = _gameWorld.RegisteredPlayers.Count(p => p.IsAI && p.HealthController != null && p.HealthController.IsAlive && p.Profile.Side == EPlayerSide.Savage);
+                int aliveBears = _gameWorld.RegisteredPlayers.Count(p => p.IsAI && p.HealthController != null && p.HealthController.IsAlive && p.Profile.Side == EPlayerSide.Bear);
+                int aliveUsecs = _gameWorld.RegisteredPlayers.Count(p => p.IsAI && p.HealthController != null && p.HealthController.IsAlive && p.Profile.Side == EPlayerSide.Usec);
+                int alivePMCs = aliveBears + aliveUsecs;
+                
+                int aliveBotsTotal = _gameWorld.RegisteredPlayers.Count(p => p.IsAI && p.HealthController != null && p.HealthController.IsAlive);
+                int aliveScavs = aliveBotsTotal - alivePMCs; // O Resto do Mundo (Scavs, Raiders, Rogues, Bosses, Mods)
 
                 int idealPMCs = Mathf.RoundToInt(maxCap * pmcRatio);
                 int idealScavs = maxCap - idealPMCs;
@@ -309,15 +392,48 @@ namespace TRLDynamicSpawn.Components
                     scavSlots = availableSlots - pmcSlots;
                 }
 
-                int bearSlots = Mathf.RoundToInt(pmcSlots * 0.5f);
-                int usecSlots = pmcSlots - bearSlots;
+                // Balanceamento interno (BEAR vs USEC)
+                int idealBears = Mathf.RoundToInt(idealPMCs * 0.5f);
+                int idealUsecs = idealPMCs - idealBears;
+
+                int bearDeficit = Mathf.Max(0, idealBears - aliveBears);
+                int usecDeficit = Mathf.Max(0, idealUsecs - aliveUsecs);
+                int totalDeficit = bearDeficit + usecDeficit;
+
+                int bearSlots = 0;
+                int usecSlots = 0;
+
+                if (totalDeficit > 0 && pmcSlots > 0)
+                {
+                    if (totalDeficit <= pmcSlots)
+                    {
+                        bearSlots = bearDeficit;
+                        usecSlots = usecDeficit;
+                        int leftover = pmcSlots - totalDeficit;
+                        bearSlots += Mathf.RoundToInt(leftover * 0.5f);
+                        usecSlots += leftover - Mathf.RoundToInt(leftover * 0.5f);
+                    }
+                    else
+                    {
+                        // Se não tem vagas suficientes para sanar o déficit, distribui proporcionalmente
+                        float bearScale = (float)bearDeficit / totalDeficit;
+                        bearSlots = Mathf.RoundToInt(pmcSlots * bearScale);
+                        usecSlots = pmcSlots - bearSlots;
+                    }
+                }
+                else if (pmcSlots > 0)
+                {
+                    bearSlots = Mathf.RoundToInt(pmcSlots * 0.5f);
+                    usecSlots = pmcSlots - bearSlots;
+                }
 
                 int pScavSlots = Mathf.RoundToInt(scavSlots * 0.5f);
                 int normalScavSlots = scavSlots - pScavSlots;
 
                 Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] Horde Breakdown (Preset: {_activePreset}):");
-                Plugin.LogSource.LogInfo($"  PMCs: {pmcSlots} ({bearSlots} Bear, {usecSlots} Usec)");
-                Plugin.LogSource.LogInfo($"  Scavs: {scavSlots} ({normalScavSlots} Normal, {pScavSlots} pScav)");
+                Plugin.LogSource.LogInfo($"  Alive Bots: {aliveBotsTotal} | PMCs: {alivePMCs} ({aliveBears} BEAR, {aliveUsecs} USEC) | Rest of World: {aliveScavs}");
+                Plugin.LogSource.LogInfo($"  Spawning PMCs: {pmcSlots} ({bearSlots} BEAR, {usecSlots} USEC)");
+                Plugin.LogSource.LogInfo($"  Spawning Scavs: {scavSlots} ({normalScavSlots} Normal, {pScavSlots} pScav)");
 
                 GenerateAndEnqueueGroups(WildSpawnType.pmcUSEC, BotDifficulty.normal, usecSlots, eliteConfig?.Usec);
                 GenerateAndEnqueueGroups(WildSpawnType.pmcBEAR, BotDifficulty.normal, bearSlots, eliteConfig?.Bear);
@@ -409,8 +525,7 @@ namespace TRLDynamicSpawn.Components
                         var validSnipeZones = snipeZones.Where(z => 
                         {
                             var botsInZone = _botsController.Bots.GetListByZone(z);
-                            bool isEmpty = botsInZone == null || !botsInZone.Any(b => b.Profile.Info.Settings.Role == WildSpawnType.marksman && b.HealthController.IsAlive);
-                            return isEmpty && IsValidSpawnZone(z, mapName, gData.Role);
+                            return botsInZone == null || !botsInZone.Any(b => b.Profile.Info.Settings.Role == WildSpawnType.marksman && b.HealthController.IsAlive);
                         }).ToList();
 
                         if (validSnipeZones.Count > 0)
@@ -421,32 +536,56 @@ namespace TRLDynamicSpawn.Components
                     else
                     {
                         var nonSnipeZones = LocationScene.GetAllObjects<BotZone>().Where(z => !z.SnipeZone).ToList();
-                        var validZones = nonSnipeZones.Where(z => IsValidSpawnZone(z, mapName, gData.Role)).ToList();
-                        
-                        if (validZones.Count > 0)
+                        float maxDistBuffer = 300f + 50f; // Bubble default + margem (REDUZIDO de 250 para 50 para evitar zonas fora da bolha)
+                        if (_serverConfig?.MapConfigs?.TryGetValue(mapName, out var mapSettings) == true)
                         {
-                            selectedZone = validZones[UnityEngine.Random.Range(0, validZones.Count)];
+                            maxDistBuffer = mapSettings.SpawnBubbleDistance + 50f;
+                        }
+
+                        // Filtra zonas que o centro esteja minimamente próximo para a bolha não descartar todos os pontos. 
+                        // O LoS e a distância segura real serão checados ponto a ponto no Patch.
+                        var roughZones = nonSnipeZones.Where(z => 
+                        {
+                            var playersList = _gameWorld.AllAlivePlayersList;
+                            if (playersList == null || playersList.Count == 0) return true;
+                            foreach(var p in playersList)
+                            {
+                                if (p.IsAI && !p.IsYourPlayer) continue;
+                                if (UnityEngine.Application.isBatchMode && p.IsYourPlayer) continue;
+                                if (Vector3.Distance(p.Position, z.transform.position) <= maxDistBuffer) return true;
+                            }
+                            return false;
+                        }).ToList();
+                        
+                        if (roughZones.Count > 0)
+                        {
+                            var filteredZones = roughZones.Where(z => z != _lastSelectedZone).ToList();
+                            if (filteredZones.Count == 0)
+                            {
+                                // Fallback: Apenas 1 zona válida na bolha
+                                filteredZones = roughZones;
+                            }
+                            selectedZone = filteredZones[UnityEngine.Random.Range(0, filteredZones.Count)];
+                            _lastSelectedZone = selectedZone;
                         }
                         else
                         {
-                            // Fallback caso todas falhem (se a bolha estiver muito restritiva)
                             selectedZone = TRLDynamicSpawn.Helpers.Methods.GetRandomZone(_botsController.BotSpawner);
-                            if (!IsValidSpawnZone(selectedZone, mapName, gData.Role))
-                            {
-                                selectedZone = null;
-                            }
+                            _lastSelectedZone = selectedZone;
                         }
                     }
-                }
-                else if (!IsValidSpawnZone(selectedZone, mapName, gData.Role))
-                {
-                    selectedZone = null; // Zera a preferida se for inválida
                 }
 
                 if (selectedZone != null)
                 {
                     var spawnTask = DirectSpawnBots(gData.Role, gData.Difficulty, gData.GroupSize, selectedZone);
-                    yield return new UnityEngine.WaitUntil(() => spawnTask.IsCompleted || spawnTask.IsFaulted || spawnTask.IsCanceled);
+                    float timeout = Time.time + 15f; // Máximo de 15s esperando o SPT gerar o perfil do bot
+                    yield return new UnityEngine.WaitUntil(() => spawnTask.IsCompleted || spawnTask.IsFaulted || spawnTask.IsCanceled || Time.time > timeout);
+                    
+                    if (Time.time > timeout)
+                    {
+                        Plugin.LogSource.LogWarning($"[TRL-DynamicSpawn] Bot generation timed out! SPT took too long. Skipping to next bot...");
+                    }
                 }
                 else
                 {
@@ -479,12 +618,19 @@ namespace TRLDynamicSpawn.Components
             if (zone == null || groupSize <= 0) return false;
             try
             {
-                var botProfile = new BotProfileDataClass(EPlayerSide.Savage, role, diff, 0f);
+                EPlayerSide side = EPlayerSide.Savage;
+                if (role == WildSpawnType.pmcUSEC) side = EPlayerSide.Usec;
+                else if (role == WildSpawnType.pmcBEAR) side = EPlayerSide.Bear;
+
+                BotSpawnParams spawnParams = new BotSpawnParams();
+                var botProfile = new BotProfileDataClass(side, role, diff, 0f, spawnParams);
                 var creationData = await BotCreationDataClass.Create(botProfile, _botCreator, groupSize, _botsController.BotSpawner);
                 if (creationData != null)
                 {
                     Plugin.LogSource.LogInfo($"[TRL-DynamicSpawn] DIRECT SPAWN SUCCESS: Spawning group (Size: {groupSize}, Type: {role}) in zone {zone.NameZone}...");
-                    _botsController.BotSpawner.TryToSpawnInZoneAndDelay(zone, creationData, false, true, null, false);
+                    // forcedSpawn = true garante que o patch saiba que é a NOSSA wave e libere o Fallback 2 (nascer fora da bolha)
+                    // se for estritamente necessário para não perder o bot.
+                    _botsController.BotSpawner.TryToSpawnInZoneAndDelay(zone, creationData, false, true, null, true);
                     return true;
                 }
             }
@@ -538,7 +684,7 @@ namespace TRLDynamicSpawn.Components
                     if (_serverConfig?.MapConfigs?.TryGetValue(mapName, out var mapSettings) == true)
                     {
                         isBubbleEnabled = isBubbleEnabled && mapSettings.EnableSpawnBubble;
-                        maxDist = mapSettings.DespawnDistance;
+                        maxDist = mapSettings.SpawnBubbleDistance;
                     }
 
                     if (isBubbleEnabled)
@@ -845,53 +991,73 @@ namespace TRLDynamicSpawn.Components
         {
             if (!_showDebugUI || _gameWorld == null) return;
             
-            // Layout dimensions
-            float boxWidth = 320;
-            float boxHeight = 280;
-            float margin = 20;
-
-            Rect rect = new Rect(margin, margin, boxWidth, boxHeight);
-            GUI.Box(rect, "TRL-DynamicSpawn - Developer HUD");
-
             // Info Setup
-            int pmcCount = 0;
-            int scavCount = 0;
-            int sniperCount = 0;
-            int bossCount = 0;
-            int otherCount = 0;
-            
+            Dictionary<string, int> factionCounts = new Dictionary<string, int>();
             var allAlive = _gameWorld.RegisteredPlayers.Where(p => p.IsAI && p.HealthController != null && p.HealthController.IsAlive).ToList();
             
             foreach (var bot in allAlive)
             {
-                if (bot.Profile == null || bot.Profile.Info == null) continue;
+                if (bot.Profile == null) continue;
                 
-                bool isPmc = bot.Profile.Side == EPlayerSide.Bear || bot.Profile.Side == EPlayerSide.Usec;
-                bool hasSettings = bot.Profile.Info.Settings != null;
-                var role = hasSettings ? bot.Profile.Info.Settings.Role : WildSpawnType.assault;
-                string roleName = hasSettings ? role.ToString().ToLower() : "";
+                string roleName = "Outros";
+                if (bot.Profile.Side == EPlayerSide.Bear)
+                {
+                    roleName = "BEAR";
+                }
+                else if (bot.Profile.Side == EPlayerSide.Usec)
+                {
+                    roleName = "USEC";
+                }
+                else if (bot.Profile.Info != null && bot.Profile.Info.Settings != null)
+                {
+                    var role = bot.Profile.Info.Settings.Role;
+                    
+                    switch (role)
+                    {
+                        case WildSpawnType.assault: roleName = "Scav"; break;
+                        case WildSpawnType.marksman: roleName = "Sniper Scav"; break;
+                        case WildSpawnType.exUsec: roleName = "Rogue"; break;
+                        case WildSpawnType.pmcBot: roleName = "Raider"; break;
+                        case WildSpawnType.arenaFighterEvent: 
+                        case WildSpawnType.arenaFighter: roleName = "Bloodhound"; break;
+                        case WildSpawnType.sectantPriest:
+                        case WildSpawnType.sectantWarrior:
+                        case WildSpawnType.sectantOni:
+                        case WildSpawnType.sectantPredvestnik:
+                        case WildSpawnType.sectantPrizrak: roleName = "Cultist"; break;
+                        default:
+                            string rawName = role.ToString();
+                            if (rawName.StartsWith("boss", System.StringComparison.OrdinalIgnoreCase) || 
+                                rawName.StartsWith("follower", System.StringComparison.OrdinalIgnoreCase))
+                            {
+                                roleName = "Bosses/Guards";
+                            }
+                            else if (int.TryParse(rawName, out int numericVal))
+                            {
+                                roleName = $"Outros (Mod {numericVal})";
+                            }
+                            else
+                            {
+                                roleName = rawName;
+                            }
+                            break;
+                    }
+                }
 
-                if (isPmc || role == WildSpawnType.pmcBot || role == WildSpawnType.exUsec)
+                if (!factionCounts.ContainsKey(roleName))
                 {
-                    pmcCount++;
+                    factionCounts[roleName] = 0;
                 }
-                else if (role == WildSpawnType.marksman)
-                {
-                    sniperCount++;
-                }
-                else if (roleName.Contains("boss") || roleName.Contains("follower"))
-                {
-                    bossCount++;
-                }
-                else if (bot.Profile.Side == EPlayerSide.Savage)
-                {
-                    scavCount++;
-                }
-                else
-                {
-                    otherCount++;
-                }
+                factionCounts[roleName]++;
             }
+
+            // Layout dimensions
+            float boxWidth = 320;
+            float boxHeight = Mathf.Max(280, 180 + (factionCounts.Count * 22));
+            float margin = 20;
+
+            Rect rect = new Rect(margin, margin, boxWidth, boxHeight);
+            GUI.Box(rect, "TRL-DynamicSpawn - Developer HUD");
 
             if (string.IsNullOrEmpty(_cachedFikaStatus))
             {
@@ -942,18 +1108,10 @@ namespace TRLDynamicSpawn.Components
             GUILayout.Space(10);
             GUILayout.Label($"<b>População Ativa (Total {allAlive.Count}):</b>");
             
-            GUILayout.BeginHorizontal();
-            GUILayout.Label($"- PMCs: <color=yellow>{pmcCount}</color>");
-            GUILayout.Label($"- Scavs: <color=yellow>{scavCount}</color>");
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Label($"- Bosses/Guards: <color=yellow>{bossCount}</color>");
-            GUILayout.Label($"- Snipers: <color=yellow>{sniperCount}</color>");
-            GUILayout.EndHorizontal();
-
-            if (otherCount > 0)
-                GUILayout.Label($"- Outros (Raiders, etc): <color=yellow>{otherCount}</color>");
+            foreach (var kvp in factionCounts.OrderByDescending(k => k.Value))
+            {
+                GUILayout.Label($"- {kvp.Key}: <color=yellow>{kvp.Value}</color>");
+            }
             
             GUILayout.FlexibleSpace();
             GUILayout.Label("<color=grey>[F12] Ocultar Painel</color>");

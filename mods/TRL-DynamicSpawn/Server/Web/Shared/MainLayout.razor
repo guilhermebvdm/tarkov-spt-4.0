@@ -8,6 +8,7 @@
     <link href="@Assets["_content/MudBlazor/MudBlazor.min.css"]" rel="stylesheet" />
     <link href="/TRL-DynamicSpawn-Server/css/app.css" rel="stylesheet" />
     <meta name="robots" content="noindex, nofollow">
+    <meta name="google" content="notranslate">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&amp;family=Roboto:ital,wght@0,100..900;1,100..900&amp;display=swap" rel="stylesheet">
 </HeadContent>
 <script src="@Assets["_content/MudBlazor/MudBlazor.min.js"]"></script>
@@ -17,7 +18,7 @@
 <MudSnackbarProvider />
 <MudDialogProvider />
 
-<div class="no-highlight @(DisableAnimations ? "disable-animations" : "")">
+<div class="notranslate no-highlight @(DisableAnimations ? "disable-animations" : "")" translate="no">
     <MudLayout>
         <MudAppBar Dense Elevation="1">
             <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.MenuOpen" Color="Color.Inherit" OnClick="@((e) => DrawerToggle())">@Localization.T("Menu")</MudButton>
@@ -30,18 +31,18 @@
             </MudSelect>
             @if (ShowUndoButton)
             {
-                <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Undo" Color="Color.Warning" OnClick="@((e) => UndoChanges())" Disabled="pendingChanges.Count == 0 && !_unsavedChanges" Class="mr-2">Undo</MudButton>
+                <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Undo" Color="Color.Warning" OnClick="@((e) => UndoChanges())" Disabled="pendingChanges.Count == 0 && !_unsavedChanges" Class="mr-2">@Localization.T("Undo")</MudButton>
             }
             @if (ShowDefaultButton)
             {
-                <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.RestorePage" Color="Color.Error" OnClick="@((e) => ResetToDefaults())" Class="mr-2">Default</MudButton>
+                <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.RestorePage" Color="Color.Error" OnClick="@((e) => ResetToDefaults())" Class="mr-2">@Localization.T("Default")</MudButton>
             }
-            <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Refresh" Color="Color.Inherit" OnClick="@((e) => RefreshData())" Disabled="_isReloading" Class="mr-2">Reload Config</MudButton>
-            <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Inherit" OnClick="@((e) => SaveData())" Disabled="_isSaving">Save Config</MudButton>
+            <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Refresh" Color="Color.Inherit" OnClick="@((e) => RefreshData())" Disabled="_isReloading" Class="mr-2">@Localization.T("Reload Config")</MudButton>
+            <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Inherit" OnClick="@((e) => SaveData())" Disabled="_isSaving">@Localization.T("Save Config")</MudButton>
         </MudAppBar>
         <MudDrawer @bind-Open="_drawerOpen" Elevation="2" ClipMode="DrawerClipMode.Always" Variant="@DrawerVariant.Temporary" Breakpoint="Breakpoint.None">
             <MudDrawerHeader>
-                <MudText Typo="Typo.h5" Class="mt-1">SETTINGS</MudText>
+                <MudText Typo="Typo.h5" Class="mt-1">@Localization.T("SETTINGS")</MudText>
             </MudDrawerHeader>
             <NavMenu/>
         </MudDrawer>

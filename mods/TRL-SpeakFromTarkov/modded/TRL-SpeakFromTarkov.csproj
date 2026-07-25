@@ -64,6 +64,10 @@
       <HintPath>References/Fika.Core.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="DissonanceVoip">
+      <HintPath>References/DissonanceVoip.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
 
 </Project>

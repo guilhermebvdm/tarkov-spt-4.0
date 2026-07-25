@@ -38,6 +38,7 @@ namespace TRLDynamicSpawn
             new DisableVanillaBossWavesPatch().Enable();
             new DynamicSpawnManagerPatch().Enable();
             new TryToSpawnInZoneAndDelayPatch().Enable();
+            new ChooseProfilePatch().Enable();
 
             // Enable Despawn Manager Component
             TRLDynamicSpawn.Components.BotDespawnManager.Enable();

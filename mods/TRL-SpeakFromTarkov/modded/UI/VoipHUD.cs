@@ -105,7 +105,32 @@ namespace TRL_SpeakFromTarkov.UI
             if (Processor.IsMuted)
                 state = "MUDO";
             else if (Processor.IsTransmitting)
-                state = "TX (TRANSMITINDO)";
+            {
+                float lvl = Processor.DisplayLevel;
+                float power;
+                string modeText;
+
+                if (lvl < 0.025f)
+                {
+                    float t = Mathf.Clamp01(lvl / 0.025f);
+                    power = Mathf.Lerp(3.0f, 10.0f, t);
+                    modeText = $"SUSSURRO ({power:F0}m)";
+                }
+                else if (lvl < 0.150f)
+                {
+                    float t = Mathf.Clamp01((lvl - 0.025f) / (0.150f - 0.025f));
+                    power = Mathf.Lerp(10.0f, 30.0f, t);
+                    modeText = $"NORMAL ({power:F0}m)";
+                }
+                else
+                {
+                    float t = Mathf.Clamp01((lvl - 0.150f) / (0.400f - 0.150f));
+                    power = Mathf.Lerp(30.0f, 60.0f, t);
+                    modeText = $"GRITO ({power:F0}m)";
+                }
+
+                state = $"TX [{modeText}]";
+            }
             else if (Processor.CurrentMode == VoipProcessor.VoipMode.PTT)
                 state = "AGUARDANDO PTT";
             else if (Processor.CurrentMode == VoipProcessor.VoipMode.VAD)

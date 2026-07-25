@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using Concentus.Structs;
 using Concentus.Enums;
+using Comfort.Common;
 
 namespace TRL_SpeakFromTarkov.Audio
 {
@@ -20,6 +21,8 @@ namespace TRL_SpeakFromTarkov.Audio
         
         private byte[] opusBuffer = new byte[1275]; // Alocação única
         private float vadHoldTimer = 0f;
+        
+        public BotVoiceBridge botVoiceBridge { get; set; }
         
         public bool IsMuted { get; set; }
         public bool IsPTTActive { get; set; }

@@ -5,6 +5,8 @@ using TRL_SpeakFromTarkov.Network;
 using TRL_SpeakFromTarkov.UI;
 using System;
 using System.Collections.Concurrent;
+using Comfort.Common;
+using EFT.UI;
 
 namespace TRL_SpeakFromTarkov.Core
 {
@@ -15,6 +17,7 @@ namespace TRL_SpeakFromTarkov.Core
         public MicrophoneCapturer capturer { get; private set; }
         public VoipProcessor processor { get; private set; }
         public RemoteSpeaker echoSpeaker { get; private set; }
+        public BotVoiceBridge botVoiceBridge { get; private set; }
         private SftNetwork network;
         private VoipHUD hud;
         private ConcurrentQueue<Action> mainThreadActions = new ConcurrentQueue<Action>();
@@ -47,6 +50,9 @@ namespace TRL_SpeakFromTarkov.Core
             
             processor = gameObject.AddComponent<VoipProcessor>();
             processor.Initialize(sampleRate, frameSize);
+            
+            botVoiceBridge = gameObject.AddComponent<BotVoiceBridge>();
+            processor.botVoiceBridge = botVoiceBridge;
             
             var echoGo = new GameObject("SftEchoSpeaker");
             echoGo.transform.SetParent(this.transform);
@@ -121,8 +127,26 @@ namespace TRL_SpeakFromTarkov.Core
 
         private System.Collections.IEnumerator DelayedStartVoipCaptureCo()
         {
-            yield return new WaitForSecondsRealtime(1.5f);
-            VoIPPlugin.Log.LogInfo("[SFT] Vivox e áudio do Tarkov prontos. Inicializando captura limpa do microfone...");
+            // Aguarda o PreloaderUI estar 100% ativo e montado na hierarquia do jogo
+            float timeout = 25.0f;
+            float elapsed = 0f;
+
+            while (elapsed < timeout)
+            {
+                if (MonoBehaviourSingleton<PreloaderUI>.Instantiated &&
+                    MonoBehaviourSingleton<PreloaderUI>.Instance != null &&
+                    MonoBehaviourSingleton<PreloaderUI>.Instance.gameObject.activeInHierarchy)
+                {
+                    break;
+                }
+                elapsed += 0.5f;
+                yield return new WaitForSecondsRealtime(0.5f);
+            }
+
+            // Margem de segurança de 3.0s após a UI do menu carregar completamente (pós-Vivox)
+            yield return new WaitForSecondsRealtime(3.0f);
+
+            VoIPPlugin.Log.LogInfo("[SFT] Menu principal do Tarkov 100% carregado e pronto. Inicializando microfone...");
             StartVoipCapture();
         }
 
@@ -198,7 +222,20 @@ namespace TRL_SpeakFromTarkov.Core
             }
             
             HandleKeys();
-            hud.CurrentChannel = CurrentChannel;
+            if (hud != null) hud.CurrentChannel = CurrentChannel;
+            
+            // Interação de Voz com Bots (Main Thread Safe + Janela de Amostragem 250ms)
+            if (processor != null && botVoiceBridge != null)
+            {
+                if (Singleton<EFT.GameWorld>.Instantiated && Singleton<EFT.GameWorld>.Instance.MainPlayer != null)
+                {
+                    botVoiceBridge.ProcessVoiceFrame(
+                        Singleton<EFT.GameWorld>.Instance.MainPlayer, 
+                        processor.DisplayLevel, 
+                        processor.IsTransmitting
+                    );
+                }
+            }
             
             // Retry automático se a captura abortou por clip inválido (freq=0)
             if (!capturer.IsRecording)
