@@ -13,7 +13,6 @@ namespace Band_Aid
 {
     public static class BandAidNetworkHandler
     {
-        private static bool _initialized = false;
         private static ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("BandAid_Network");
 
         // Cache tipos — GInterfaces para LEITURA, nested types para REMOÇÃO
@@ -41,30 +40,41 @@ namespace Band_Aid
             _typesCached = true;
         }
 
-        public static void CheckInit()
+        private static IFikaNetworkManager _lastRegisteredNetworkManager = null;
+
+        public static void EnsurePacketsRegistered()
         {
-            // M1: Se o NetworkManager foi destruído (entre raids), resetar para re-registrar
-            if (_initialized && !Singleton<IFikaNetworkManager>.Instantiated)
+            if (!Singleton<IFikaNetworkManager>.Instantiated)
             {
-                _initialized = false;
-                Logger.LogInfo("NetworkManager destruído — reset de _initialized.");
+                _lastRegisteredNetworkManager = null;
+                return;
             }
 
-            if (_initialized) return;
+            var currentManager = Singleton<IFikaNetworkManager>.Instance;
+            if (currentManager == null) return;
 
-            if (Singleton<IFikaNetworkManager>.Instantiated)
+            if (_lastRegisteredNetworkManager != currentManager)
             {
-                var netManager = Singleton<IFikaNetworkManager>.Instance;
-                netManager.RegisterPacket<BandAidHealPacket>(OnBandAidHealPacketReceived);
-                netManager.RegisterPacket<BandAidShoulderTapPacket>(OnShoulderTapReceived);
-                netManager.RegisterPacket<BandAidHealCheckPacket>(OnHealCheckReceived);
-                netManager.RegisterPacket<BandAidHealCheckResponsePacket>(OnHealCheckResponseReceived);
-                netManager.RegisterPacket<TraumaFaintPacket>(OnTraumaFaintReceived); // ref: CR-01-02
-                netManager.RegisterPacket<BandAidTreatmentReportPacket>(OnTreatmentReportReceived); // feedback membro-alvo
-                _initialized = true;
-                Logger.LogInfo("Fika Network Packets registrados (Heal + ShoulderTap + HealCheck + TraumaFaint + TreatmentReport)!");
+                try
+                {
+                    currentManager.RegisterPacket<BandAidHealPacket>(OnBandAidHealPacketReceived);
+                    currentManager.RegisterPacket<BandAidShoulderTapPacket>(OnShoulderTapReceived);
+                    currentManager.RegisterPacket<BandAidHealCheckPacket>(OnHealCheckReceived);
+                    currentManager.RegisterPacket<BandAidHealCheckResponsePacket>(OnHealCheckResponseReceived);
+                    currentManager.RegisterPacket<TraumaFaintPacket>(OnTraumaFaintReceived); // ref: CR-01-02
+                    currentManager.RegisterPacket<BandAidTreatmentReportPacket>(OnTreatmentReportReceived); // feedback membro-alvo
+
+                    _lastRegisteredNetworkManager = currentManager;
+                    Logger.LogInfo($"[BandAidNetworkHandler] Registered FIKA network packets on instance: {currentManager.GetType().Name}");
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError($"[BandAidNetworkHandler] Error registering FIKA packets: {ex.Message}");
+                }
             }
         }
+
+        public static void CheckInit() => EnsurePacketsRegistered();
 
         // === Callback para quando médico recebe resposta do check ===
         public static event System.Action<BandAidHealCheckResponsePacket> OnHealCheckResponse;
@@ -76,7 +86,8 @@ namespace Band_Aid
         /// <summary>Envia o estado de desmaio de um player DESTE processo para os peers.</summary>
         public static void SendTraumaFaintPacket(string profileId, bool isFainted, float durationSeconds, float graceSeconds)
         {
-            if (!_initialized) return; // solo/sem Fika: estado local basta
+            EnsurePacketsRegistered();
+            if (_lastRegisteredNetworkManager == null) return; // solo/sem Fika: estado local basta
 
             var packet = new TraumaFaintPacket
             {
@@ -162,7 +173,8 @@ namespace Band_Aid
             bool removedHeavyBleed = false, bool removedLightBleed = false, bool removedFracture = false,
             bool applyFullTreatment = false)
         {
-            if (!_initialized) return;
+            EnsurePacketsRegistered();
+            if (_lastRegisteredNetworkManager == null) return;
 
             var packet = new BandAidHealPacket
             {
@@ -195,96 +207,103 @@ namespace Band_Aid
 
         private static void OnBandAidHealPacketReceived(BandAidHealPacket packet)
         {
-            if (Singleton<GameWorld>.Instance == null) return;
-
-            CacheTypes();
-
-            // === HEADLESS / HOST: Retransmitir para todos os clients ===
-            // O host SEMPRE retransmite pacotes que não são dele (relay Client→Client)
-            if (Singleton<FikaServer>.Instantiated)
+            try
             {
-                var mainPlayer = Singleton<GameWorld>.Instance.MainPlayer;
-                string myProfileId = mainPlayer?.ProfileId ?? "";
+                if (Singleton<GameWorld>.Instance == null) return;
 
-                // Retransmitir se EU não sou o médico (veio de um client)
-                if (packet.DoctorProfileId != myProfileId)
+                CacheTypes();
+
+                // === HEADLESS / HOST: Retransmitir para todos os clients ===
+                // O host SEMPRE retransmite pacotes que não são dele (relay Client→Client)
+                if (Singleton<FikaServer>.Instantiated)
                 {
-                    var retransmit = packet;
-                    Singleton<FikaServer>.Instance.SendData(ref retransmit, DeliveryMethod.ReliableOrdered, true);
-                    Logger.LogInfo("Host retransmitiu pacote de cura para clients.");
-                }
+                    var mainPlayer = Singleton<GameWorld>.Instance.MainPlayer;
+                    string myProfileId = mainPlayer?.ProfileId ?? "";
 
-                // Se headless (sem MainPlayer): retransmitir e, se o paciente for um
-                // BOT local (ref: CR-01-01 — headless é o dono dos bots), aplicar nele.
-                if (mainPlayer == null)
-                {
-                    if (packet.ApplyFullTreatment && TryApplyFullTreatmentOnLocalBot(packet)) return;
-                    Logger.LogInfo("Headless: pacote retransmitido, sem ação local.");
-                    return;
-                }
-            }
-
-            var localPlayer = Singleton<GameWorld>.Instance.MainPlayer;
-            if (localPlayer == null) return;
-
-            // Ignorar se EU sou o médico (já apliquei localmente)
-            if (packet.DoctorProfileId == localPlayer.ProfileId)
-            {
-                Logger.LogInfo("Eu sou o médico, ignorando pacote (já apliquei localmente).");
-                return;
-            }
-
-            Logger.LogInfo($"Pacote recebido! Alvo: {packet.PatientProfileId}, FullTreatment: {packet.ApplyFullTreatment}");
-
-            // === TRATAMENTO COMPLETO (paciente remoto → paciente aplica em si mesmo) ===
-            if (packet.ApplyFullTreatment && packet.PatientProfileId == localPlayer.ProfileId)
-            {
-                Logger.LogInfo("Eu sou o paciente. Aplicando tratamento completo em mim mesmo.");
-                ApplyFullTreatmentLocally(localPlayer, packet);
-                return;
-            }
-
-            // ref: CR-01-01 — paciente pode ser um BOT local deste processo (host-player
-            // é o dono dos bots): aplicar em nome dele.
-            if (packet.ApplyFullTreatment && TryApplyFullTreatmentOnLocalBot(packet)) return;
-
-            // ref: G-1 (coop-heal-matrix) — pacote FullTreatment é EXCLUSIVO do paciente.
-            // Receptor terceiro (host-player no C1→C2, ou 3º client no lobby) não pode
-            // cair no branch de tratamento específico abaixo: com IsSurgery=true ele
-            // tentaria cirurgia via reflection no boneco OBSERVADO do paciente.
-            if (packet.ApplyFullTreatment)
-            {
-                Logger.LogInfo("FullTreatment para outro paciente — nada a fazer localmente.");
-                return;
-            }
-
-            // === TRATAMENTO ESPECÍFICO (ações pontuais, com dados no pacote) ===
-            Player patient = FindPatient(packet.PatientProfileId, localPlayer);
-            if (patient == null) return;
-
-            var hc = patient.HealthController;
-
-            if (packet.IsSurgery)
-            {
-                ApplySurgeryFromNetwork(hc, packet.BodyPart, packet.SurgeryPenalty);
-            }
-            else
-            {
-                if (packet.RemovedHeavyBleed)
-                    RemoveEffectNative(hc, packet.BodyPart, _heavyBleedConcreteType, "HeavyBleeding");
-                if (packet.RemovedLightBleed)
-                    RemoveEffectNative(hc, packet.BodyPart, _lightBleedConcreteType, "LightBleeding");
-                if (packet.RemovedFracture)
-                    RemoveEffectNative(hc, packet.BodyPart, _fractureConcreteType, "Fracture");
-
-                if (packet.HealAmount > 0)
-                {
-                    if (hc is ActiveHealthController activeHc)
+                    // Retransmitir se EU não sou o médico (veio de um client)
+                    if (packet.DoctorProfileId != myProfileId)
                     {
-                        activeHc.ChangeHealth(packet.BodyPart, packet.HealAmount, default(DamageInfoStruct));
-                        Logger.LogInfo($"HP +{packet.HealAmount} em {packet.BodyPart}.");
+                        var retransmit = packet;
+                        Singleton<FikaServer>.Instance.SendData(ref retransmit, DeliveryMethod.ReliableOrdered, true);
+                        Logger.LogInfo("Host retransmitiu pacote de cura para clients.");
+                    }
+
+                    // Se headless (sem MainPlayer): retransmitir e, se o paciente for um
+                    // BOT local (ref: CR-01-01 — headless é o dono dos bots), aplicar nele.
+                    if (mainPlayer == null)
+                    {
+                        if (packet.ApplyFullTreatment && TryApplyFullTreatmentOnLocalBot(packet)) return;
+                        Logger.LogInfo("Headless: pacote retransmitido, sem ação local.");
+                        return;
                     }
                 }
+
+                var localPlayer = Singleton<GameWorld>.Instance.MainPlayer;
+                if (localPlayer == null) return;
+
+                // Ignorar se EU sou o médico (já apliquei localmente)
+                if (packet.DoctorProfileId == localPlayer.ProfileId)
+                {
+                    Logger.LogInfo("Eu sou o médico, ignorando pacote (já apliquei localmente).");
+                    return;
+                }
+
+                Logger.LogInfo($"Pacote recebido! Alvo: {packet.PatientProfileId}, FullTreatment: {packet.ApplyFullTreatment}");
+
+                // === TRATAMENTO COMPLETO (paciente remoto → paciente aplica em si mesmo) ===
+                if (packet.ApplyFullTreatment && packet.PatientProfileId == localPlayer.ProfileId)
+                {
+                    Logger.LogInfo("Eu sou o paciente. Aplicando tratamento completo em mim mesmo.");
+                    ApplyFullTreatmentLocally(localPlayer, packet);
+                    return;
+                }
+
+                // ref: CR-01-01 — paciente pode ser um BOT local deste processo (host-player
+                // é o dono dos bots): aplicar em nome dele.
+                if (packet.ApplyFullTreatment && TryApplyFullTreatmentOnLocalBot(packet)) return;
+
+                // ref: G-1 (coop-heal-matrix) — pacote FullTreatment é EXCLUSIVO do paciente.
+                // Receptor terceiro (host-player no C1→C2, ou 3º client no lobby) não pode
+                // cair no branch de tratamento específico abaixo: com IsSurgery=true ele
+                // tentaria cirurgia via reflection no boneco OBSERVADO do paciente.
+                if (packet.ApplyFullTreatment)
+                {
+                    Logger.LogInfo("FullTreatment para outro paciente — nada a fazer localmente.");
+                    return;
+                }
+
+                // === TRATAMENTO ESPECÍFICO (ações pontuais, com dados no pacote) ===
+                Player patient = FindPatient(packet.PatientProfileId, localPlayer);
+                if (patient == null) return;
+
+                var hc = patient.HealthController;
+
+                if (packet.IsSurgery)
+                {
+                    ApplySurgeryFromNetwork(hc, packet.BodyPart, packet.SurgeryPenalty);
+                }
+                else
+                {
+                    if (packet.RemovedHeavyBleed)
+                        RemoveEffectNative(hc, packet.BodyPart, _heavyBleedConcreteType, "HeavyBleeding");
+                    if (packet.RemovedLightBleed)
+                        RemoveEffectNative(hc, packet.BodyPart, _lightBleedConcreteType, "LightBleeding");
+                    if (packet.RemovedFracture)
+                        RemoveEffectNative(hc, packet.BodyPart, _fractureConcreteType, "Fracture");
+
+                    if (packet.HealAmount > 0)
+                    {
+                        if (hc is ActiveHealthController activeHc)
+                        {
+                            activeHc.ChangeHealth(packet.BodyPart, packet.HealAmount, default(DamageInfoStruct));
+                            Logger.LogInfo($"HP +{packet.HealAmount} em {packet.BodyPart}.");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"[BandAidNetworkHandler] Error in OnBandAidHealPacketReceived: {ex.Message}");
             }
         }
 
@@ -578,7 +597,8 @@ namespace Band_Aid
         // === SHOULDER TAP ===
         public static void SendShoulderTapPacket(Player target)
         {
-            if (!_initialized) return;
+            EnsurePacketsRegistered();
+            if (_lastRegisteredNetworkManager == null) return;
             var mainPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
             if (mainPlayer == null) return;
 
@@ -597,24 +617,31 @@ namespace Band_Aid
 
         private static void OnShoulderTapReceived(BandAidShoulderTapPacket packet)
         {
-            var mainPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
-
-            // Headless: apenas retransmitir
-            if (Singleton<FikaServer>.Instantiated && (mainPlayer == null || packet.SenderProfileId != mainPlayer?.ProfileId))
+            try
             {
-                var retransmit = packet;
-                Singleton<FikaServer>.Instance.SendData(ref retransmit, DeliveryMethod.ReliableOrdered, true);
+                var mainPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
+
+                // Headless: apenas retransmitir
+                if (Singleton<FikaServer>.Instantiated && (mainPlayer == null || packet.SenderProfileId != mainPlayer?.ProfileId))
+                {
+                    var retransmit = packet;
+                    Singleton<FikaServer>.Instance.SendData(ref retransmit, DeliveryMethod.ReliableOrdered, true);
+                }
+
+                if (mainPlayer == null) return;
+
+                // Só mostra se EU sou o alvo
+                if (packet.TargetProfileId == mainPlayer.ProfileId)
+                {
+                    NotificationManagerClass.DisplayMessageNotification(
+                        $"\u2708 Você recebeu um toque no ombro de {packet.SenderNickname}",
+                        ENotificationDurationType.Default, ENotificationIconType.Quest);
+                    Logger.LogInfo($"Toque no ombro recebido de {packet.SenderNickname}");
+                }
             }
-
-            if (mainPlayer == null) return;
-
-            // Só mostra se EU sou o alvo
-            if (packet.TargetProfileId == mainPlayer.ProfileId)
+            catch (Exception ex)
             {
-                NotificationManagerClass.DisplayMessageNotification(
-                    $"\u2708 Você recebeu um toque no ombro de {packet.SenderNickname}",
-                    ENotificationDurationType.Default, ENotificationIconType.Quest);
-                Logger.LogInfo($"Toque no ombro recebido de {packet.SenderNickname}");
+                Logger.LogError($"[BandAidNetworkHandler] Error in OnShoulderTapReceived: {ex.Message}");
             }
         }
 
@@ -625,7 +652,8 @@ namespace Band_Aid
         /// </summary>
         public static void SendHealCheck(Player doctor, Player patient, string itemTemplateId)
         {
-            if (!_initialized) return;
+            EnsurePacketsRegistered();
+            if (_lastRegisteredNetworkManager == null) return;
 
             var packet = new BandAidHealCheckPacket
             {
@@ -647,70 +675,77 @@ namespace Band_Aid
         /// </summary>
         private static void OnHealCheckReceived(BandAidHealCheckPacket packet)
         {
-            var mainPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
-
-            // Host/Headless retransmite
-            if (Singleton<FikaServer>.Instantiated)
+            try
             {
-                string myId = mainPlayer?.ProfileId ?? "";
-                if (packet.DoctorProfileId != myId)
+                var mainPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
+
+                // Host/Headless retransmite
+                if (Singleton<FikaServer>.Instantiated)
                 {
-                    var relay = packet;
-                    Singleton<FikaServer>.Instance.SendData(ref relay, DeliveryMethod.ReliableOrdered, true);
+                    string myId = mainPlayer?.ProfileId ?? "";
+                    if (packet.DoctorProfileId != myId)
+                    {
+                        var relay = packet;
+                        Singleton<FikaServer>.Instance.SendData(ref relay, DeliveryMethod.ReliableOrdered, true);
+                    }
+
+                    // ref: CR-01-01 — BOTS nunca são MainPlayer de ninguém: o DONO deles
+                    // (host/headless, onde têm ActiveHealthController) valida e responde
+                    // o handshake em nome do bot — sem isso, client mirando bot = timeout.
+                    if (mainPlayer == null || packet.PatientProfileId != mainPlayer.ProfileId)
+                    {
+                        if (TryAnswerForLocalBot(packet)) return;
+                    }
+
+                    if (mainPlayer == null) return;
                 }
 
-                // ref: CR-01-01 — BOTS nunca são MainPlayer de ninguém: o DONO deles
-                // (host/headless, onde têm ActiveHealthController) valida e responde
-                // o handshake em nome do bot — sem isso, client mirando bot = timeout.
-                if (mainPlayer == null || packet.PatientProfileId != mainPlayer.ProfileId)
+                // Só o paciente processa
+                if (mainPlayer == null || packet.PatientProfileId != mainPlayer.ProfileId) return;
+
+                CacheTypes();
+
+                // Validar localmente com ActiveHealthController
+                var stats = ItemDatabase.GetStats(packet.ItemTemplateId);
+                bool approved = false;
+                string denyReason = "Item desconhecido.";
+
+                if (stats != null)
                 {
-                    if (TryAnswerForLocalBot(packet)) return;
+                    approved = MedicalLogic.CanUseItem(mainPlayer, stats);
+                    denyReason = approved ? "" : $"{stats.Name}: Sem ferimento compatível.";
                 }
 
-                if (mainPlayer == null) return;
+                Logger.LogInfo($"HealCheck recebido | Item: {packet.ItemTemplateId} | Approved: {approved} | Reason: {denyReason}");
+
+                // Membro-alvo esperado (mesma lógica da aplicação) — médico vê ANTES da animação
+                EBodyPart expectedPart = EBodyPart.Common;
+                if (approved && stats != null && mainPlayer.HealthController is ActiveHealthController patientAhc)
+                {
+                    try { expectedPart = stats.IsSurgery ? GetBlackedPart(patientAhc) : FindSmartTarget(patientAhc, stats); }
+                    catch { }
+                }
+
+                // Enviar resposta
+                var response = new BandAidHealCheckResponsePacket
+                {
+                    DoctorProfileId = packet.DoctorProfileId,
+                    PatientProfileId = packet.PatientProfileId,
+                    ItemTemplateId = packet.ItemTemplateId,
+                    Approved = approved,
+                    DenyReason = denyReason,
+                    ExpectedBodyPart = (byte)expectedPart
+                };
+
+                if (Singleton<FikaServer>.Instantiated)
+                    Singleton<FikaServer>.Instance.SendData(ref response, DeliveryMethod.ReliableOrdered, true);
+                else if (Singleton<FikaClient>.Instantiated)
+                    Singleton<FikaClient>.Instance.SendData(ref response, DeliveryMethod.ReliableOrdered);
             }
-
-            // Só o paciente processa
-            if (mainPlayer == null || packet.PatientProfileId != mainPlayer.ProfileId) return;
-
-            CacheTypes();
-
-            // Validar localmente com ActiveHealthController
-            var stats = ItemDatabase.GetStats(packet.ItemTemplateId);
-            bool approved = false;
-            string denyReason = "Item desconhecido.";
-
-            if (stats != null)
+            catch (Exception ex)
             {
-                approved = MedicalLogic.CanUseItem(mainPlayer, stats);
-                denyReason = approved ? "" : $"{stats.Name}: Sem ferimento compatível.";
+                Logger.LogError($"[BandAidNetworkHandler] Error in OnHealCheckReceived: {ex.Message}");
             }
-
-            Logger.LogInfo($"HealCheck recebido | Item: {packet.ItemTemplateId} | Approved: {approved} | Reason: {denyReason}");
-
-            // Membro-alvo esperado (mesma lógica da aplicação) — médico vê ANTES da animação
-            EBodyPart expectedPart = EBodyPart.Common;
-            if (approved && stats != null && mainPlayer.HealthController is ActiveHealthController patientAhc)
-            {
-                try { expectedPart = stats.IsSurgery ? GetBlackedPart(patientAhc) : FindSmartTarget(patientAhc, stats); }
-                catch { }
-            }
-
-            // Enviar resposta
-            var response = new BandAidHealCheckResponsePacket
-            {
-                DoctorProfileId = packet.DoctorProfileId,
-                PatientProfileId = packet.PatientProfileId,
-                ItemTemplateId = packet.ItemTemplateId,
-                Approved = approved,
-                DenyReason = denyReason,
-                ExpectedBodyPart = (byte)expectedPart
-            };
-
-            if (Singleton<FikaServer>.Instantiated)
-                Singleton<FikaServer>.Instance.SendData(ref response, DeliveryMethod.ReliableOrdered, true);
-            else if (Singleton<FikaClient>.Instantiated)
-                Singleton<FikaClient>.Instance.SendData(ref response, DeliveryMethod.ReliableOrdered);
         }
 
         // ============================================================
@@ -720,7 +755,8 @@ namespace Band_Aid
         /// <summary>Paciente (ou dono do bot) reporta ao médico o membro tratado e o custo real.</summary>
         private static void SendTreatmentReport(BandAidHealPacket source, EBodyPart part, float healed, float cost)
         {
-            if (!_initialized) return;
+            EnsurePacketsRegistered();
+            if (_lastRegisteredNetworkManager == null) return;
             var report = new BandAidTreatmentReportPacket
             {
                 DoctorProfileId = source.DoctorProfileId,
@@ -738,41 +774,48 @@ namespace Band_Aid
 
         private static void OnTreatmentReportReceived(BandAidTreatmentReportPacket packet)
         {
-            // Host relayeia reports que não são para ele (mesmo padrão dos demais)
-            if (Singleton<FikaServer>.Instantiated)
+            try
             {
-                var hostPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
-                string myId = hostPlayer?.ProfileId ?? "";
-                if (packet.DoctorProfileId != myId)
+                // Host relayeia reports que não são para ele (mesmo padrão dos demais)
+                if (Singleton<FikaServer>.Instantiated)
                 {
-                    var relay = packet;
-                    Singleton<FikaServer>.Instance.SendData(ref relay, DeliveryMethod.ReliableOrdered, true);
+                    var hostPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
+                    string myId = hostPlayer?.ProfileId ?? "";
+                    if (packet.DoctorProfileId != myId)
+                    {
+                        var relay = packet;
+                        Singleton<FikaServer>.Instance.SendData(ref relay, DeliveryMethod.ReliableOrdered, true);
+                    }
                 }
+
+                var mainPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
+                if (mainPlayer == null || packet.DoctorProfileId != mainPlayer.ProfileId) return;
+
+                var part = (EBodyPart)packet.BodyPart;
+                Logger.LogInfo($"[Report] Tratamento remoto aplicado em {part} (+{packet.HealedAmount:F0} HP, custo {packet.CostAmount:F1}).");
+
+                // ref: CR-05 — CONSUMO AUTORITATIVO: debitar o item do médico com o custo
+                // real reportado pelo paciente. Roda ANTES do gate de HUD (o consumo vale
+                // mesmo com o examinador fechado).
+                MedicalLogic.ResolvePendingConsumeFromReport(packet.PatientProfileId, packet.ItemTemplateId, packet.CostAmount);
+
+                // ref: CR-03 — identidade do report (mesmo padrão do G-5): só pintar o HUD
+                // se o report é do PACIENTE atualmente examinado; report atrasado de outro
+                // paciente (ou pós-HideUI) não polui a UI da cura corrente.
+                string activePatient = TRLImmersiveCombatMedicine.BandAidController.Instance?.ActivePatientProfileId;
+                if (string.IsNullOrEmpty(activePatient) || activePatient != packet.PatientProfileId)
+                {
+                    Logger.LogInfo("[Report] descartado para a UI (paciente do report não é o examinado atual).");
+                    return;
+                }
+
+                // itemName null → preserva o nome exibido desde o início da cura (CR-03)
+                BandAidUI.Instance?.ShowTreatment(part, null);
             }
-
-            var mainPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
-            if (mainPlayer == null || packet.DoctorProfileId != mainPlayer.ProfileId) return;
-
-            var part = (EBodyPart)packet.BodyPart;
-            Logger.LogInfo($"[Report] Tratamento remoto aplicado em {part} (+{packet.HealedAmount:F0} HP, custo {packet.CostAmount:F1}).");
-
-            // ref: CR-05 — CONSUMO AUTORITATIVO: debitar o item do médico com o custo
-            // real reportado pelo paciente. Roda ANTES do gate de HUD (o consumo vale
-            // mesmo com o examinador fechado).
-            MedicalLogic.ResolvePendingConsumeFromReport(packet.PatientProfileId, packet.ItemTemplateId, packet.CostAmount);
-
-            // ref: CR-03 — identidade do report (mesmo padrão do G-5): só pintar o HUD
-            // se o report é do PACIENTE atualmente examinado; report atrasado de outro
-            // paciente (ou pós-HideUI) não polui a UI da cura corrente.
-            string activePatient = TRLImmersiveCombatMedicine.BandAidController.Instance?.ActivePatientProfileId;
-            if (string.IsNullOrEmpty(activePatient) || activePatient != packet.PatientProfileId)
+            catch (Exception ex)
             {
-                Logger.LogInfo("[Report] descartado para a UI (paciente do report não é o examinado atual).");
-                return;
+                Logger.LogError($"[BandAidNetworkHandler] Error in OnTreatmentReportReceived: {ex.Message}");
             }
-
-            // itemName null → preserva o nome exibido desde o início da cura (CR-03)
-            BandAidUI.Instance?.ShowTreatment(part, null);
         }
 
         /// <summary>
@@ -865,27 +908,34 @@ namespace Band_Aid
         /// </summary>
         private static void OnHealCheckResponseReceived(BandAidHealCheckResponsePacket packet)
         {
-            var mainPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
-
-            // Host/Headless retransmite
-            if (Singleton<FikaServer>.Instantiated)
+            try
             {
-                string myId = mainPlayer?.ProfileId ?? "";
-                if (packet.PatientProfileId != myId) // Veio do paciente, retransmitir
+                var mainPlayer = Singleton<GameWorld>.Instance?.MainPlayer;
+
+                // Host/Headless retransmite
+                if (Singleton<FikaServer>.Instantiated)
                 {
-                    var relay = packet;
-                    Singleton<FikaServer>.Instance.SendData(ref relay, DeliveryMethod.ReliableOrdered, true);
+                    string myId = mainPlayer?.ProfileId ?? "";
+                    if (packet.PatientProfileId != myId) // Veio do paciente, retransmitir
+                    {
+                        var relay = packet;
+                        Singleton<FikaServer>.Instance.SendData(ref relay, DeliveryMethod.ReliableOrdered, true);
+                    }
+                    if (mainPlayer == null) return;
                 }
-                if (mainPlayer == null) return;
+
+                // Só o médico processa
+                if (mainPlayer == null || packet.DoctorProfileId != mainPlayer.ProfileId) return;
+
+                Logger.LogInfo($"HealCheck Response recebido | Approved: {packet.Approved} | Reason: {packet.DenyReason}");
+
+                // Dispara evento para BandAidPlugin processar
+                OnHealCheckResponse?.Invoke(packet);
             }
-
-            // Só o médico processa
-            if (mainPlayer == null || packet.DoctorProfileId != mainPlayer.ProfileId) return;
-
-            Logger.LogInfo($"HealCheck Response recebido | Approved: {packet.Approved} | Reason: {packet.DenyReason}");
-
-            // Dispara evento para BandAidPlugin processar
-            OnHealCheckResponse?.Invoke(packet);
+            catch (Exception ex)
+            {
+                Logger.LogError($"[BandAidNetworkHandler] Error in OnHealCheckResponseReceived: {ex.Message}");
+            }
         }
     }
 }

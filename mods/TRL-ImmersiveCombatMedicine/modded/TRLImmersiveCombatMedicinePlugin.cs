@@ -550,6 +550,11 @@ namespace TRLImmersiveCombatMedicine
 
         private void Update()
         {
+            if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.fika.core"))
+            {
+                Band_Aid.BandAidNetworkHandler.EnsurePacketsRegistered();
+            }
+
             // [DEBUG-ICM] roda ANTES de qualquer early-return: Plugin.Update comprovadamente vive em raid
             if (Time.time >= _debugNextBeat)
             {

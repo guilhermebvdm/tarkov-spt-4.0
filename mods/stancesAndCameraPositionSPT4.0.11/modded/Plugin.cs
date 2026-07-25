@@ -1463,6 +1463,11 @@ public class Plugin : BaseUnityPlugin
     // Update is called every frame by Unity
     public void Update()
     {
+        if (Chainloader.PluginInfos.ContainsKey("com.fika.core"))
+        {
+            CameraRotationMod.Networking.FikaSyncManager.EnsurePacketsRegistered();
+        }
+
         // CR-01 — o Unity chama Update() mesmo se o Awake abortar. Sem este guard, StanceManager.Update
         // lê _stanceToggleKeyConfig.Value (null) e cospe NullReferenceException a cada frame, para sempre.
         if (!ConfigReady) return;
