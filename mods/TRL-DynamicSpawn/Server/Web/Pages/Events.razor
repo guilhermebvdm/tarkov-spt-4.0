@@ -7,7 +7,24 @@
 <MudMainContent Class="pt-4">
     <MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
         <MudText Typo="Typo.h4" Class="mb-4">@Localization.T("In-Raid Events & Invasions")</MudText>
-        
+
+        <MudPaper Class="pa-4 pa-sm-6 ma-4 ma-sm-6" Elevation="2">
+            <MudText Typo="Typo.h5" Class="mb-4">@Localization.T("Global Boss Controls")</MudText>
+            
+            <MudGrid>
+                <MudItem xs="12" sm="6">
+                    <MudTooltip Delay="500" Color="Color.Secondary" Text="@Localization.T("Completely disables all Boss spawns across all maps.")">
+                        <MudSwitch @bind-Value="Elite.DisableBosses" Color="Color.Primary" Label="@Localization.T("Disable All Bosses")" />
+                    </MudTooltip>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTooltip Delay="500" Color="Color.Secondary" Text="@Localization.T("Allows Bosses to spawn in ANY valid zone on the map, not just their native areas.")">
+                        <MudSwitch @bind-Value="Elite.BossOpenZones" Color="Color.Primary" Label="@Localization.T("Enable Boss Open Zones")" />
+                    </MudTooltip>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+
         <MudPaper Class="pa-4 pa-sm-6 ma-4 ma-sm-6" Elevation="2">
             <MudText Typo="Typo.h5" Class="mb-4">@Localization.T("Boss Invasion")</MudText>
             <MudText Typo="Typo.body2" Class="mb-4 text-muted">

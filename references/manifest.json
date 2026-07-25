@@ -94,6 +94,22 @@
       "stripGit": false,
       "vendoredAt": "2026-06-04",
       "note": "Cliente headless (TypeScript) para clientes/bots dedicados de coop. Pinado por commit para reprodutibilidade."
+    },
+    {
+      "id": "rnnoise-vst",
+      "path": "references/noise-suppression-for-voice",
+      "role": "audio-filter",
+      "tier": 1,
+      "fetch": true,
+      "tracked": false,
+      "upstream": "https://github.com/werman/noise-suppression-for-voice.git",
+      "pin": { "type": "commit", "ref": "v1.10" },
+      "branch": "master",
+      "lfs": false,
+      "stripGit": false,
+      "vendoredAt": "2026-07-20",
+      "license": "GPL-3.0",
+      "note": "Fonte original da rnnoise.dll usada pelo SpeakFromTarkov. Implementação baseada no Xiph RNNoise mas empacotada como VST/Standalone. Útil para verificar assinaturas de funções e comportamento de gate/VAD nativo."
     }
   ]
 }

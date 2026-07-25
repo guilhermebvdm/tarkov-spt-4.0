@@ -26,6 +26,7 @@ namespace TRLDynamicSpawn.Helpers
 
         public static ConfigEntry<bool> masterDespawnToggle;
         public static ConfigEntry<bool> replaceDespawnedBots;
+        public static ConfigEntry<bool> enableSpawnBubble;
 
         public static void Init(ConfigFile config)
         {
@@ -85,6 +86,10 @@ namespace TRLDynamicSpawn.Helpers
                 
             replaceDespawnedBots = config.Bind(despawnSection, "Replace Despawned Bots", true, 
                 new ConfigDescription("When a bot is despawned, immediately spawn a new bot of the same faction near the player."));
+
+            string bubbleSection = "Spawn Bubble Settings";
+            enableSpawnBubble = config.Bind(bubbleSection, "Enable Spawn Bubble", true, 
+                new ConfigDescription("Forces Scavs and PMCs to spawn only within the radius of Despawn Distance from players, improving performance."));
         }
 
         public static int GetMapCap(string mapId)

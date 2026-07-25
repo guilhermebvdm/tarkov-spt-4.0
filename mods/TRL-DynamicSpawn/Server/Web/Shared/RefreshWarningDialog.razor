@@ -3,7 +3,7 @@
         <MudText>@ContentText</MudText>
         @if (ChangeList != null)
         {
-            <MudText> Changes:</MudText>
+            <MudText>@Localization.T("Changes:")</MudText>
             <MudSpacer/>
             foreach (var item in ChangeList)
             {
@@ -14,7 +14,7 @@
     <DialogActions>
         @if (showCancel) 
         {
-            <MudButton OnClick="Cancel">Cancel</MudButton>
+            <MudButton OnClick="Cancel">@Localization.T("Cancel")</MudButton>
         }
         <MudButton Color="@Color" Variant="Variant.Filled" OnClick="Submit">@ButtonText</MudButton>
     </DialogActions>

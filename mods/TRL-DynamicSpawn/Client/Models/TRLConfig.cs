@@ -196,6 +196,7 @@ public record ValidLocationString
 
 public class MapSettings
 {
+    [JsonProperty("secondsBetweenWaves")] public int SecondsBetweenWaves { get; set; } = 360;
     [JsonProperty("sniperChance")] public int SniperChance { get; set; } = 30;
     [JsonProperty("safeZoneDistance")] public double SafeZoneDistance { get; set; } = 30.0;
     
@@ -203,6 +204,9 @@ public class MapSettings
     [JsonProperty("despawnPMCs")] public bool DespawnPMCs { get; set; } = false;
     [JsonProperty("despawnDistance")] public float DespawnDistance { get; set; } = 300f;
     [JsonProperty("despawnInterval")] public float DespawnInterval { get; set; } = 20f;
+    [JsonProperty("spawnBubbleDistance")] public float SpawnBubbleDistance { get; set; } = 300f;
+    [JsonProperty("enableSpawnBubble")] public bool EnableSpawnBubble { get; set; } = true;
+    [JsonProperty("teleportMinDistance")] public float TeleportMinDistance { get; set; } = 100f;
 }
 
 public class Vector3Model

@@ -1,4 +1,4 @@
-﻿@page "/trldynamicspawn/customspawns"
+@page "/trldynamicspawn/customspawns"
 @layout MainLayout
 
 @using TRLDynamicSpawnServer.Models
@@ -33,7 +33,7 @@
                     <MudItem xs="1" />
                     <MudItem xs="6">
                         <MudSwitch @bind-Value="Config.CustomSpawnsConfig.EnableCustomPmcSpawns" Color="Color.Success" Size="Size.Medium">
-                            @((Config.CustomSpawnsConfig.EnableCustomPmcSpawns) ? "True" : "False")
+                            @((Config.CustomSpawnsConfig.EnableCustomPmcSpawns) ? Localization.T("Enabled") : Localization.T("Disabled"))
                         </MudSwitch>
                     </MudItem>
 
@@ -49,7 +49,7 @@
                     <MudItem xs="1" />
                     <MudItem xs="6">
                         <MudSwitch @bind-Value="Config.CustomSpawnsConfig.EnableCustomScavSpawns" Color="Color.Success" Size="Size.Medium">
-                            @((Config.CustomSpawnsConfig.EnableCustomScavSpawns) ? "True" : "False")
+                            @((Config.CustomSpawnsConfig.EnableCustomScavSpawns) ? Localization.T("Enabled") : Localization.T("Disabled"))
                         </MudSwitch>
                     </MudItem>
 
@@ -65,7 +65,7 @@
                     <MudItem xs="1" />
                     <MudItem xs="6">
                         <MudSwitch @bind-Value="Config.CustomSpawnsConfig.EnableCustomSniperSpawns" Color="Color.Success" Size="Size.Medium">
-                            @((Config.CustomSpawnsConfig.EnableCustomSniperSpawns) ? "True" : "False")
+                            @((Config.CustomSpawnsConfig.EnableCustomSniperSpawns) ? Localization.T("Enabled") : Localization.T("Disabled"))
                         </MudSwitch>
                     </MudItem>
 
@@ -81,7 +81,7 @@
                     <MudItem xs="1" />
                     <MudItem xs="6">
                         <MudSwitch @bind-Value="Config.CustomSpawnsConfig.EnableCustomPlayerSpawns" Color="Color.Success" Size="Size.Medium">
-                            @((Config.CustomSpawnsConfig.EnableCustomPlayerSpawns) ? "True" : "False")
+                            @((Config.CustomSpawnsConfig.EnableCustomPlayerSpawns) ? Localization.T("Enabled") : Localization.T("Disabled"))
                         </MudSwitch>
                     </MudItem>
 

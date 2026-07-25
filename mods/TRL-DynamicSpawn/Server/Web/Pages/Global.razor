@@ -1,90 +1,11 @@
 @page "/trldynamicspawn/global"
 @layout MainLayout
-
-@using TRLDynamicSpawnServer.Models
-
-<MudMainContent>
-    <MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
-        <MudPaper Class="pa-4 pa-sm-6 ma-4 ma-sm-6" Elevation="2">
-            <MudText Typo="Typo.h5" Class="mb-4">@Localization.T("Global Presets (Faction Ratio)")</MudText>            <MudTooltip Delay="500" Color="Color.Primary" Text="@Localization.T("Choose the Faction Ratio preset for the raids. This decides how many PMCs vs Scavs spawn during waves.")">
-                <TRLSingleSelect Label="@Localization.T("Active Preset")" @bind-Value="Config.ActivePreset" Items="@(new List<string> { "Balanced", "PMC War", "Scav Infestation", "Quiet Raid", "Warzone", "Random" })" />
-            </MudTooltip>
-
-            <MudText Typo="Typo.body2" Class="mt-4 mb-2" Color="Color.Info">
-                <span translate="no">@Localization.T(GetPresetDescription(Config.ActivePreset))</span>
-            </MudText>
-
-            <MudText Typo="Typo.body2" Class="mt-2 text-muted">@Localization.T("Note: Elites (Bosses, Raiders, etc) always spawn first. The preset applies to the remaining slots.")</MudText>
-        </MudPaper>
-
-        <MudPaper Class="pa-4 pa-sm-6 ma-4 ma-sm-6" Elevation="2">
-            <MudText Typo="Typo.h5" Class="mb-4">@Localization.T("Global Timers")</MudText>
-            
-            <MudGrid>
-                <MudItem xs="12" sm="6">
-                    <MudTooltip Delay="500" Color="Color.Secondary" Text="@Localization.T("Initial delay in seconds before the first wave starts spawning. Gives time for players to load and move.")">
-                        <MudNumericField @bind-Value="MapTimers.DelayBeforeFirstWave" Label="@Localization.T("Delay Before First Wave (seconds)")" Variant="Variant.Text" Min="0" Max="1200" />
-                    </MudTooltip>
-                </MudItem>
-                <MudItem xs="12" sm="6">
-                    <MudTooltip Delay="500" Color="Color.Secondary" Text="@Localization.T("Interval in seconds between each dynamic horde wave.")">
-                        <MudNumericField @bind-Value="MapTimers.SecondsBetweenWaves" Label="@Localization.T("Seconds Between Waves (seconds)")" Variant="Variant.Text" Min="60" Max="3600" />
-                    </MudTooltip>
-                </MudItem>
-            </MudGrid>
-        </MudPaper>
-
-                <MudPaper Class="pa-4 pa-sm-6 ma-4 ma-sm-6" Elevation="2">
-            <MudText Typo="Typo.h5" Class="mb-4">@Localization.T("Advanced Settings")</MudText>
-            
-            <MudGrid>
-                <MudItem xs="12" sm="12">
-                    <MudTooltip Delay="500" Color="Color.Secondary" Text="@Localization.T("Enables the Map Overlap Culling system on map load, which deletes spawn points that are too close to each other based on GlobalAntiOverlapDistance.")">
-                        <MudSwitch @bind-Value="Config.EnableMapOverlapCulling" Color="Color.Primary" Label="@Localization.T("Enable Map Overlap Culling")" />
-                    </MudTooltip>
-                </MudItem>
-
-                <MudItem xs="12" sm="6">
-                    <MudTooltip Delay="500" Color="Color.Secondary" Text="@Localization.T("Completely disables all Boss spawns across all maps.")">
-                        <MudSwitch @bind-Value="Elite.DisableBosses" Color="Color.Primary" Label="@Localization.T("Disable All Bosses")" />
-                    </MudTooltip>
-                </MudItem>
-                                <MudItem xs="12" sm="6">
-                    <MudTooltip Delay="500" Color="Color.Secondary" Text="@Localization.T("Allows Bosses to spawn in ANY valid zone on the map, not just their native areas.")">
-                        <MudSwitch @bind-Value="Elite.BossOpenZones" Color="Color.Primary" Label="@Localization.T("Enable Boss Open Zones")" />
-                    </MudTooltip>
-                </MudItem>
-            </MudGrid>
-        </MudPaper>
-
-    </MudContainer>
-</MudMainContent>
+@inject NavigationManager NavigationManager
 
 @code {
-    public TRLConfig Config => TRLDynamicSpawnServer.Routers.TRLRouters.CurrentConfig;
-    public EliteConfig Elite => Config.EliteConfig;
-    public WaveTimerConfig MapTimers => Config.MapTimers.GetValueOrDefault("global") ?? new WaveTimerConfig();
-
     protected override void OnInitialized()
     {
-        if (!Config.MapTimers.ContainsKey("global"))
-        {
-            Config.MapTimers["global"] = new WaveTimerConfig();
-        }
-    }
-
-        private string GetPresetDescription(string preset)
-    {
-        return preset switch
-        {
-            "Balanced" => "50% PMCs / 50% Scavs. The classic SPT balance.",
-            "PMC War" => "70% PMCs / 30% Scavs. Prepare to fight for every inch.",
-            "Scav Infestation" => "30% PMCs / 70% Scavs. A true horde of scavs on the map.",
-            "Quiet Raid" => "Well-spaced spawn waves. Plenty of time to loot and explore without much pressure.",
-            "Warzone" => "Extremely fast waves, short respawns, and extra chance of surprise Rogue/Raider invasions. Pure chaos.",
-            "Random" => "Silently picks one of the 5 presets above at the start of each raid.",
-            _ => "Unknown preset."
-        };
+        NavigationManager.NavigateTo("/trldynamicspawn/mapconfigs", true);
     }
 }
 
